@@ -202,9 +202,12 @@ void Foam::lduMatrix::operator+=(const lduMatrix& A)
     }
     else
     {
-        FatalErrorIn("lduMatrix::operator+=(const lduMatrix& A)")
-            << "Unknown matrix type combination"
-            << abort(FatalError);
+        if (debug > 1)
+        {
+            WarningIn("lduMatrix::operator+=(const lduMatrix& A)")
+                << "Unknown matrix type combination"
+                << endl;
+        }
     }
 }
 
@@ -270,9 +273,12 @@ void Foam::lduMatrix::operator-=(const lduMatrix& A)
     }
     else
     {
-        FatalErrorIn("lduMatrix::operator-=(const lduMatrix& A)")
-            << "Unknown matrix type combination"
-            << abort(FatalError);
+        if (debug > 1)
+        {
+            WarningIn("lduMatrix::operator-=(const lduMatrix& A)")
+                << "Unknown matrix type combination"
+                << endl;
+        }
     }
 }
 

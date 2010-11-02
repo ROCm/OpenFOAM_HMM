@@ -51,6 +51,18 @@
         As          1.4792e-06;
         Ts          116;
     }
+*** Lagrangian intermediate library
+    Extensively updated
+    *Updated* input format
+    Extended to include steady cloud tracking
+    *New* collision modelling
+    *Coupled* to new surface film modelling library
+    *New* sub-models
+    + NonSphereDrag: drag model to account for non-spherical particles
+    + ParticleTracks: post-processing model to generate track data, typically
+      during steady calculations
+    *Updated* sub-models
+    + Devolatilisation models: now act on a per-specie basis
 
 *** DSMC
 *** Dynamic Mesh
@@ -106,6 +118,8 @@
 *** *New* Solvers
     + =reactingParcelFilmFoam=: Lagrangian cloud and film transport in a
       reacting gas phase system
+    + =steadyReactingParcelFoam=: Steady solution of cloud and reacting systems
+      using local time stepping methods
 *** Modifications to multiphase and buoyant solvers
     + ...
 *** Modifications to solvers for sensible enthalpy
@@ -149,6 +163,8 @@
     field data.
   + =singleCellMesh=: new utility to convert mesh and fields to a single cell
     mesh. Great for postprocessing.
+  + =steadyParticleTracks=: Generates VTK tracks from the output of the cloud
+    =ParticleTracks= post-processing sub-model
   + Function objects:
     + =residualControl=: new function object to allow users to terminate steady
     state calculations when the defined residual levels are achieved

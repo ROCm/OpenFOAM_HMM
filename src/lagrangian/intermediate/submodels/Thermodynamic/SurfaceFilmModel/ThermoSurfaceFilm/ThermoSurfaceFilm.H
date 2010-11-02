@@ -66,7 +66,7 @@ protected:
             scalarList TFilmPatch_;
 
             //- Film specific heat capacity / patch face
-            scalarList cpFilmPatch_;
+            scalarList CpFilmPatch_;
 
 
     // Protected functions
@@ -95,13 +95,25 @@ public:
 
     // Constructors
 
-        //- Construct from components
+         //- Construct from components
         ThermoSurfaceFilm
         (
             const dictionary& dict,
             CloudType& owner,
             const dimensionedVector& g
         );
+
+        //- Construct copy
+        ThermoSurfaceFilm(const ThermoSurfaceFilm<CloudType>& sfm);
+
+        //- Construct and return a clone using supplied owner cloud
+        virtual autoPtr<SurfaceFilmModel<CloudType> > clone()
+        {
+            return autoPtr<SurfaceFilmModel<CloudType> >
+            (
+                new ThermoSurfaceFilm<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -111,9 +123,6 @@ public:
     // Member Functions
 
         // Evaluation
-
-            //- Flag to indicate whether model activates surface film model
-            virtual bool active() const;
 
             //- Transfer parcel from cloud to surface film
             //  Returns true if parcel is to be transferred

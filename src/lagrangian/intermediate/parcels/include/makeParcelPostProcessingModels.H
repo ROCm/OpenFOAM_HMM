@@ -31,6 +31,7 @@ License
 #include "KinematicCloud.H"
 
 #include "NoPostProcessing.H"
+#include "ParticleTracks.H"
 #include "PatchPostProcessing.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -42,6 +43,12 @@ License
     makePostProcessingModelType                                               \
     (                                                                         \
         NoPostProcessing,                                                     \
+        KinematicCloud,                                                       \
+        ParcelType                                                            \
+    );                                                                        \
+    makePostProcessingModelType                                               \
+    (                                                                         \
+        ParticleTracks,                                                       \
         KinematicCloud,                                                       \
         ParcelType                                                            \
     );                                                                        \

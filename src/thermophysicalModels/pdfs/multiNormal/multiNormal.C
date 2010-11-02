@@ -39,7 +39,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pdfs::multiNormal::multiNormal(const dictionary& dict, Random& rndGen)
+Foam::pdfs::multiNormal::multiNormal
+(
+    const dictionary& dict,
+    cachedRandom& rndGen
+)
 :
     pdf(typeName, dict, rndGen),
     minValue_(readScalar(pdfDict_.lookup("minValue"))),
@@ -77,6 +81,18 @@ Foam::pdfs::multiNormal::multiNormal(const dictionary& dict, Random& rndGen)
 }
 
 
+Foam::pdfs::multiNormal::multiNormal(const multiNormal& p)
+:
+    pdf(p),
+    minValue_(p.minValue_),
+    maxValue_(p.maxValue_),
+    range_(p.range_),
+    expectation_(p.expectation_),
+    variance_(p.variance_),
+    strength_(p.strength_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::pdfs::multiNormal::~multiNormal()
@@ -94,8 +110,8 @@ Foam::scalar Foam::pdfs::multiNormal::sample() const
 
     while (!success)
     {
-        x = minValue_ + range_*rndGen_.scalar01();
-        y = rndGen_.scalar01();
+        x = minValue_ + range_*rndGen_.sample01<scalar>();
+        y = rndGen_.sample01<scalar>();
         scalar p = 0.0;
 
         for (label i=0; i<n; i++)

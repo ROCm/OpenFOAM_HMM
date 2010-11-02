@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 void Foam::PairSpringSliderDashpot<CloudType>::findMinMaxProperties
 (
     scalar& RMin,
@@ -79,7 +79,7 @@ void Foam::PairSpringSliderDashpot<CloudType>::findMinMaxProperties
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::PairSpringSliderDashpot<CloudType>::PairSpringSliderDashpot
 (
     const dictionary& dict,
@@ -89,9 +89,9 @@ Foam::PairSpringSliderDashpot<CloudType>::PairSpringSliderDashpot
     PairModel<CloudType>(dict, cloud, typeName),
     Estar_(),
     Gstar_(),
-    alpha_(dimensionedScalar(this->coeffDict().lookup("alpha")).value()),
-    b_(dimensionedScalar(this->coeffDict().lookup("b")).value()),
-    mu_(dimensionedScalar(this->coeffDict().lookup("mu")).value()),
+    alpha_(readScalar(this->coeffDict().lookup("alpha"))),
+    b_(readScalar(this->coeffDict().lookup("b"))),
+    mu_(readScalar(this->coeffDict().lookup("mu"))),
     collisionResolutionSteps_
     (
         readScalar
@@ -121,7 +121,7 @@ Foam::PairSpringSliderDashpot<CloudType>::PairSpringSliderDashpot
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::PairSpringSliderDashpot<CloudType>::~PairSpringSliderDashpot()
 {}
 

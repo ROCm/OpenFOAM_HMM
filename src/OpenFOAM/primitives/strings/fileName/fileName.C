@@ -54,6 +54,13 @@ Foam::fileName::Type Foam::fileName::type() const
 }
 
 
+bool Foam::fileName::isAbsolute() const
+{
+    fileName fName(*this);
+    return fName.size() && fName.operator[](0) == '/';
+}
+
+
 //
 // * remove repeated slashes
 //       /abc////def        -->   /abc/def

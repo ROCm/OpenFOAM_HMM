@@ -200,9 +200,12 @@ public:
         );
 
         //- Construct and return a clone
-        autoPtr<ParcelType> clone() const
+        virtual autoPtr<Particle<ParcelType> > clone() const
         {
-            return autoPtr<ParcelType>(new DsmcParcel<ParcelType>(*this));
+            return autoPtr<Particle<ParcelType> >
+            (
+                new DsmcParcel<ParcelType>(*this)
+            );
         }
 
 
@@ -234,7 +237,7 @@ public:
 
                 //- Move the parcel
                 template<class TrackData>
-                bool move(TrackData& td);
+                bool move(TrackData& td, const scalar trackTime);
 
 
         // Patch interactions

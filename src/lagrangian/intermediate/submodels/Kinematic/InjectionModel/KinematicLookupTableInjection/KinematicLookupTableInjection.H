@@ -96,18 +96,10 @@ protected:
     // Protected Member Functions
 
         //- Number of parcels to introduce over the time step relative to SOI
-        label parcelsToInject
-        (
-            const scalar time0,
-            const scalar time1
-        );
+        virtual label parcelsToInject(const scalar time0, const scalar time1);
 
         //- Volume of parcels to introduce over the time step relative to SOI
-        scalar volumeToInject
-        (
-            const scalar time0,
-            const scalar time1
-        );
+        virtual scalar volumeToInject(const scalar time0, const scalar time1);
 
 
 public:
@@ -119,11 +111,22 @@ public:
     // Constructors
 
         //- Construct from dictionary
+        KinematicLookupTableInjection(const dictionary& dict, CloudType& owner);
+
+        //- Construct copy
         KinematicLookupTableInjection
         (
-            const dictionary& dict,
-            CloudType& owner
+            const KinematicLookupTableInjection<CloudType>& im
         );
+
+        //- Construct and return a clone
+        virtual autoPtr<InjectionModel<CloudType> > clone() const
+        {
+            return autoPtr<InjectionModel<CloudType> >
+            (
+                new KinematicLookupTableInjection<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -131,9 +134,6 @@ public:
 
 
     // Member Functions
-
-        //- Flag to indicate whether model activates injection model
-        bool active() const;
 
         //- Return the end-of-injection time
         scalar timeEnd() const;

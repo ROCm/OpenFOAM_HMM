@@ -74,7 +74,7 @@ void Foam::surfaceFilmModels::thermoSingleLayer::correctThermoFields()
             rho_ == dimensionedScalar(coeffs_.lookup("rho0"));
             mu_ == dimensionedScalar(coeffs_.lookup("mu0"));
             sigma_ == dimensionedScalar(coeffs_.lookup("sigma0"));
-            cp_ == dimensionedScalar(coeffs_.lookup("cp0"));
+            Cp_ == dimensionedScalar(coeffs_.lookup("Cp0"));
             kappa_ == dimensionedScalar(coeffs_.lookup("kappa0"));
 
             break;
@@ -89,14 +89,14 @@ void Foam::surfaceFilmModels::thermoSingleLayer::correctThermoFields()
                 rho_[cellI] = liq.rho(p, T);
                 mu_[cellI] = liq.mu(p, T);
                 sigma_[cellI] = liq.sigma(p, T);
-                cp_[cellI] = liq.cp(p, T);
+                Cp_[cellI] = liq.Cp(p, T);
                 kappa_[cellI] = liq.K(p, T);
             }
 
             rho_.correctBoundaryConditions();
             mu_.correctBoundaryConditions();
             sigma_.correctBoundaryConditions();
-            cp_.correctBoundaryConditions();
+            Cp_.correctBoundaryConditions();
             kappa_.correctBoundaryConditions();
 
             break;
@@ -188,8 +188,8 @@ Foam::tmp<Foam::fvScalarMatrix> Foam::surfaceFilmModels::thermoSingleLayer::q
 
     return
     (
-      - fvm::Sp(htcs_->h()/cp_, hs) - htcs_->h()*(Tstd - TPrimary_)
-      - fvm::Sp(htcw_->h()/cp_, hs) - htcw_->h()*(Tstd - Tw_)
+      - fvm::Sp(htcs_->h()/Cp_, hs) - htcs_->h()*(Tstd - TPrimary_)
+      - fvm::Sp(htcw_->h()/Cp_, hs) - htcw_->h()*(Tstd - Tw_)
     );
 }
 
@@ -236,18 +236,18 @@ Foam::surfaceFilmModels::thermoSingleLayer::thermoSingleLayer
     kinematicSingleLayer(modelType, mesh, g),
     thermo_(mesh.lookupObject<SLGThermo>("SLGThermo")),
     liquidId_(thermo_.liquidId(coeffs_.lookup("liquid"))),
-    cp_
+    Cp_
     (
         IOobject
         (
-            "cp",
+            "Cp",
             time_.timeName(),
             filmRegion_,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
         filmRegion_,
-        dimensionedScalar("cp", dimEnergy/dimMass/dimTemperature, 0.0),
+        dimensionedScalar("Cp", dimEnergy/dimMass/dimTemperature, 0.0),
         zeroGradientFvPatchScalarField::typeName
     ),
     kappa_
@@ -526,9 +526,9 @@ void Foam::surfaceFilmModels::thermoSingleLayer::evolveFilm()
 
 
 const Foam::volScalarField&
-Foam::surfaceFilmModels::thermoSingleLayer::cp() const
+Foam::surfaceFilmModels::thermoSingleLayer::Cp() const
 {
-    return cp_;
+    return Cp_;
 }
 
 

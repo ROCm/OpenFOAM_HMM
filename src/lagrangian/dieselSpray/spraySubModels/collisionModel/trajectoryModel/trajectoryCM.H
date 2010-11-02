@@ -51,7 +51,7 @@ if (vAlign > 0)
                 pow(0.5*sumD/max(0.5*sumD, closestDist), cSpace_)
                *exp(-cTime_*mag(alpha-beta));
 
-            scalar xx = rndGen_.scalar01();
+            scalar xx = rndGen_.sample01<scalar>();
 
             spray::iterator pMin = p1;
             spray::iterator pMax = p2;
@@ -106,7 +106,7 @@ if (vAlign > 0)
 
                 scalar coalesceProb = min(1.0, 2.4*f/WeColl);
 
-                scalar prob = rndGen_.scalar01();
+                scalar prob = rndGen_.sample01<scalar>();
 
                 // Coalescence
                 if ( prob < coalesceProb && coalescence_)

@@ -385,8 +385,18 @@ void Foam::Cloud<ParticleType>::deleteParticle(ParticleType& p)
 
 
 template<class ParticleType>
+void Foam::Cloud<ParticleType>::cloudReset(const Cloud<ParticleType>& c)
+{
+    // Reset particle cound and particles only
+    // - not changing the cloud object registry or reference to the polyMesh
+    particleCount_ = 0;
+    IDLList<ParticleType>::operator=(c);
+}
+
+
+template<class ParticleType>
 template<class TrackingData>
-void Foam::Cloud<ParticleType>::move(TrackingData& td)
+void Foam::Cloud<ParticleType>::move(TrackingData& td, const scalar trackTime)
 {
     const polyBoundaryMesh& pbm = pMesh().boundaryMesh();
     const globalMeshData& pData = polyMesh_.globalData();
@@ -444,7 +454,7 @@ void Foam::Cloud<ParticleType>::move(TrackingData& td)
             ParticleType& p = pIter();
 
             // Move the particle
-            bool keepParticle = p.move(td);
+            bool keepParticle = p.move(td, trackTime);
 
             // If the particle is to be kept
             // (i.e. it hasn't passed through an inlet or outlet)

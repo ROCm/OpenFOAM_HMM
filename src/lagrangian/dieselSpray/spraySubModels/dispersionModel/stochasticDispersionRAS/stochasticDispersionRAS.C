@@ -96,7 +96,7 @@ void Foam::stochasticDispersionRAS::disperseParcels() const
                 elmnt().tTurb() = 0.0;
 
                 scalar sigma = sqrt(2.0*k[cellI]/3.0);
-                vector dir = 2.0*spray_.rndGen().vector01() - one;
+                vector dir = 2.0*spray_.rndGen().sample01<vector>() - one;
                 dir /= mag(dir) + SMALL;
 
                 // numerical recipes... Ch. 7. Random Numbers...
@@ -104,8 +104,8 @@ void Foam::stochasticDispersionRAS::disperseParcels() const
                 scalar rsq = 10.0;
                 while (rsq > 1.0 || rsq == 0.0)
                 {
-                    x1 = 2.0*spray_.rndGen().scalar01() - 1.0;
-                    x2 = 2.0*spray_.rndGen().scalar01() - 1.0;
+                    x1 = 2.0*spray_.rndGen().sample01<scalar>() - 1.0;
+                    x2 = 2.0*spray_.rndGen().sample01<scalar>() - 1.0;
                     rsq = x1*x1 + x2*x2;
                 }
 

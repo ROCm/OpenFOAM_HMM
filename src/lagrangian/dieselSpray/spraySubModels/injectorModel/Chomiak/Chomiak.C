@@ -123,7 +123,7 @@ Foam::vector Foam::ChomiakInjector::direction
     scalar alpha = sin(angle);
     scalar dcorr = cos(angle);
 
-    scalar beta = constant::mathematical::twoPi*rndGen_.scalar01();
+    scalar beta = constant::mathematical::twoPi*rndGen_.sample01<scalar>();
 
     // randomly distributed vector normal to the injection vector
     vector normal = vector::zero;

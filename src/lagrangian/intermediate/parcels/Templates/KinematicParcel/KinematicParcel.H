@@ -96,6 +96,10 @@ public:
             //- Constant properties dictionary
             const dictionary dict_;
 
+            //- Parcel type id - used for post-processing to flag the type
+            //  of parcels issued by this cloud
+            const label parcelTypeId_;
+
             //- Minimum density [kg/m3]
             const scalar rhoMin_;
 
@@ -114,13 +118,25 @@ public:
 
     public:
 
-        //- Constructor
-        constantProperties(const dictionary& parentDict);
+        // Constructors
+
+            //- Null constructor
+            constantProperties();
+
+            //- Copy constructor
+            constantProperties(const constantProperties& cp);
+
+            //- Constructor from dictionary
+            constantProperties(const dictionary& parentDict);
+
 
         // Member functions
 
             //- Return const access to the constant properties dictionary
             inline const dictionary& dict() const;
+
+            //- Return const access to the parcel type id
+            inline label parcelTypeId() const;
 
             //- Return const access to the minimum density
             inline scalar rhoMin() const;
@@ -161,20 +177,18 @@ public:
             //- Reference to the cloud containing this particle
             KinematicCloud<ParcelType>& cloud_;
 
-            //- Particle constant properties
-            const constantProperties& constProps_;
-
 
             // Interpolators for continuous phase fields
 
                 //- Density interpolator
-                const interpolation<scalar>& rhoInterp_;
+                autoPtr<interpolation<scalar> > rhoInterp_;
 
                 //- Velocity interpolator
-                const interpolation<vector>& UInterp_;
+                autoPtr<interpolation<vector> > UInterp_;
 
                 //- Dynamic viscosity interpolator
-                const interpolation<scalar>& muInterp_;
+                autoPtr<interpolation<scalar> > muInterp_;
+
 
             //- Local gravitational or other body-force acceleration
             const vector& g_;
@@ -192,11 +206,6 @@ public:
             inline trackData
             (
                 KinematicCloud<ParcelType>& cloud,
-                const constantProperties& constProps,
-                const interpolation<scalar>& rhoInterp,
-                const interpolation<vector>& UInterp,
-                const interpolation<scalar>& muInterp,
-                const vector& g,
                 trackPart part = tpLinearTrack
             );
 
@@ -205,9 +214,6 @@ public:
 
             //- Return access to the owner cloud
             inline KinematicCloud<ParcelType>& cloud();
-
-            //- Return const access to the constant properties
-            inline const constantProperties& constProps() const;
 
             //- Return conat access to the interpolator for continuous
             //  phase density field
@@ -270,6 +276,9 @@ protected:
             //- Density [kg/m3]
             scalar rho_;
 
+            //- Age [s]
+            scalar age_;
+
             //- Time spent in turbulent eddy [s]
             scalar tTurb_;
 
@@ -308,7 +317,8 @@ protected:
             const scalar rho,          // density
             const scalar mass,         // mass
             const vector& Su,          // explicit particle momentum source
-            vector& dUTrans            // momentum transfer to carrier
+            vector& dUTrans,           // momentum transfer to carrier
+            scalar& Cud                // linearised drag coefficient
         ) const;
 
 
@@ -369,10 +379,33 @@ public:
         //- Construct as a copy
         KinematicParcel(const KinematicParcel& p);
 
-        //- Construct and return a clone
-        autoPtr<KinematicParcel> clone() const
+        //- Construct as a copy
+        KinematicParcel
+        (
+            const KinematicParcel& p,
+            const KinematicCloud<ParcelType>& c
+        );
+
+        //- Construct and return a (basic particle) clone
+        virtual autoPtr<Particle<ParcelType> > clone() const
         {
-            return autoPtr<KinematicParcel>(new KinematicParcel(*this));
+            return autoPtr<Particle<ParcelType> >(new KinematicParcel(*this));
+        }
+
+        //- Construct and return a (basic particle) clone
+        virtual autoPtr<Particle<ParcelType> > clone
+        (
+            const Cloud<ParcelType>& c
+        ) const
+        {
+            return autoPtr<Particle<ParcelType> >
+            (
+                new KinematicParcel
+                (
+                    *this,
+                    static_cast<const KinematicCloud<ParcelType>&>(c)
+                )
+            );
         }
 
 
@@ -409,6 +442,9 @@ public:
 
             //- Return const access to density
             inline scalar rho() const;
+
+            //- Return const access to the age
+            inline scalar age() const;
 
             //- Return const access to time spent in turbulent eddy
             inline scalar tTurb() const;
@@ -451,6 +487,9 @@ public:
 
             //- Return access to density
             inline scalar& rho();
+
+            //- Return access to the age
+            inline scalar& age();
 
             //- Return access to time spent in turbulent eddy
             inline scalar& tTurb();
@@ -546,10 +585,18 @@ public:
 
             //- Move the parcel
             template<class TrackData>
-            bool move(TrackData& td);
+            bool move(TrackData& td, const scalar trackTime);
 
 
         // Patch interactions
+
+            //- Overridable function to handle the particle hitting a face
+            //  without trackData
+            void hitFace(int& td);
+
+            //- Overridable function to handle the particle hitting a face
+            template<class TrackData>
+            void hitFace(TrackData& td);
 
             //- Overridable function to handle the particle hitting a patch
             //  Executed before other patch-hitting functions

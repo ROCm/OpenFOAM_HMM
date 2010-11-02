@@ -111,6 +111,16 @@ Foam::coalParcel::coalParcel(const coalParcel& p)
 }
 
 
+Foam::coalParcel::coalParcel
+(
+    const coalParcel& p,
+    const ReactingMultiphaseCloud<coalParcel>& c
+)
+:
+    ReactingMultiphaseParcel<coalParcel>(p, c)
+{}
+
+
 // * * * * * * * * * * * * * * * *  Destructors  * * * * * * * * * * * * * * //
 
 Foam::coalParcel::~coalParcel()

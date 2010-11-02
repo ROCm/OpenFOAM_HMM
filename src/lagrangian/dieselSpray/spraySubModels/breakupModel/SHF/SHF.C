@@ -53,7 +53,6 @@ Foam::SHF::SHF
     breakupModel(dict, sm),
     coeffsDict_(dict.subDict(typeName + "Coeffs")),
     g_(sm.g()),
-    rndGen_(sm.rndGen()),
     weCorrCoeff_(readScalar(coeffsDict_.lookup("weCorrCoeff"))),
     weBuCrit_(readScalar(coeffsDict_.lookup("weBuCrit"))),
     weBuBag_(readScalar(coeffsDict_.lookup("weBuBag"))),
@@ -186,9 +185,9 @@ void Foam::SHF::breakupParcel
 
             do
             {
-                x = cDmaxBM_*rndGen_.scalar01();
+                x = cDmaxBM_*rndGen_.sample01<scalar>();
                 d = sqr(x)*d05;
-                y = rndGen_.scalar01();
+                y = rndGen_.sample01<scalar>();
 
                 px =
                     x
@@ -217,9 +216,9 @@ void Foam::SHF::breakupParcel
             do
             {
 
-                x = cDmaxS_*rndGen_.scalar01();
+                x = cDmaxS_*rndGen_.sample01<scalar>();
                 d = sqr(x)*d05;
-                y = rndGen_.scalar01();
+                y = rndGen_.sample01<scalar>();
 
                 px =
                     x

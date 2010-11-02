@@ -26,6 +26,31 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
+inline
+Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
+constantProperties()
+:
+    ReactingParcel<ParcelType>::constantProperties(),
+    LDevol_(0.0),
+    hRetentionCoeff_(0.0)
+{}
+
+
+template<class ParcelType>
+inline
+Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
+constantProperties
+(
+    const constantProperties& cp
+)
+:
+    ReactingParcel<ParcelType>::constantProperties(cp),
+    LDevol_(cp.LDevol_),
+    hRetentionCoeff_(cp.hRetentionCoeff_)
+{}
+
+
+template<class ParcelType>
 inline Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
 constantProperties
 (
@@ -33,11 +58,8 @@ constantProperties
 )
 :
     ReactingParcel<ParcelType>::constantProperties(parentDict),
-    LDevol_(dimensionedScalar(this->dict().lookup("LDevol")).value()),
-    hRetentionCoeff_
-    (
-        dimensionedScalar(this->dict().lookup("hRetentionCoeff")).value()
-    )
+    LDevol_(readScalar(this->dict().lookup("LDevol"))),
+    hRetentionCoeff_(readScalar(this->dict().lookup("hRetentionCoeff")))
 {
     if ((hRetentionCoeff_ < 0) || (hRetentionCoeff_ > 1))
     {
@@ -57,34 +79,15 @@ template<class ParcelType>
 inline Foam::ReactingMultiphaseParcel<ParcelType>::trackData::trackData
 (
     ReactingMultiphaseCloud<ParcelType>& cloud,
-    const constantProperties& constProps,
-    const interpolation<scalar>& rhoInterp,
-    const interpolation<vector>& UInterp,
-    const interpolation<scalar>& muInterp,
-    const interpolation<scalar>& TInterp,
-    const interpolation<scalar>& CpInterp,
-    const interpolation<scalar>& pInterp,
-    const vector& g
+    typename ReactingParcel<ParcelType>::trackData::trackPart part
 )
 :
-    ReactingParcel<ParcelType>::trackData
-    (
-        cloud,
-        constProps,
-        rhoInterp,
-        UInterp,
-        muInterp,
-        TInterp,
-        CpInterp,
-        pInterp,
-        g
-    ),
-    cloud_(cloud),
-    constProps_(constProps)
+    ReactingParcel<ParcelType>::trackData(cloud, part),
+    cloud_(cloud)
 {}
 
 
-template <class ParcelType>
+template<class ParcelType>
 inline Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
 (
     ReactingMultiphaseCloud<ParcelType>& owner,
@@ -176,15 +179,6 @@ inline Foam::ReactingMultiphaseCloud<ParcelType>&
 Foam::ReactingMultiphaseParcel<ParcelType>::trackData::cloud()
 {
     return cloud_;
-}
-
-
-template<class ParcelType>
-inline const typename Foam::ReactingMultiphaseParcel<ParcelType>::
-constantProperties&
-Foam::ReactingMultiphaseParcel<ParcelType>::trackData::constProps() const
-{
-    return constProps_;
 }
 
 

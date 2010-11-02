@@ -59,6 +59,18 @@ public:
         //- Construct from dictionary
         NoDevolatilisation(const dictionary&, CloudType& owner);
 
+        //- Construct copy
+        NoDevolatilisation(const NoDevolatilisation<CloudType>& dm);
+
+        //- Construct and return a clone
+        virtual autoPtr<DevolatilisationModel<CloudType> > clone() const
+        {
+            return autoPtr<DevolatilisationModel<CloudType> >
+            (
+                new NoDevolatilisation<CloudType>(*this)
+            );
+        }
+
 
     //- Destructor
     virtual ~NoDevolatilisation();
@@ -70,15 +82,15 @@ public:
         virtual bool active() const;
 
         //- Update model
-        virtual scalar calculate
+        virtual void calculate
         (
-            const scalar,
-            const scalar,
-            const scalar,
-            const scalar,
-            const scalar,
-            const scalar,
-            bool&
+            const scalar dt,
+            const scalar mass0,
+            const scalar mass,
+            const scalar T,
+            const scalarField& YGasEff,
+            bool& canCombust,
+            scalarField& dMassDV
         ) const;
 };
 

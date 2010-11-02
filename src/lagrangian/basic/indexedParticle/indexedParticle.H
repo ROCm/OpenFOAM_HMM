@@ -108,9 +108,12 @@ public:
         {}
 
         //- Construct and return a clone
-        autoPtr<indexedParticle> clone() const
+        virtual autoPtr<Particle<indexedParticle> > clone() const
         {
-            return autoPtr<indexedParticle>(new indexedParticle(*this));
+            return autoPtr<Particle<indexedParticle> >
+            (
+                new indexedParticle(*this)
+            );
         }
 
 

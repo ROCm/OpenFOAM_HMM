@@ -81,9 +81,9 @@ public:
         );
 
         //- Construct and return a clone
-        autoPtr<dsmcParcel> clone() const
+        autoPtr<Particle<dsmcParcel> > clone() const
         {
-            return autoPtr<dsmcParcel>(new dsmcParcel(*this));
+            return autoPtr<Particle<dsmcParcel> >(new dsmcParcel(*this));
         }
 
 

@@ -48,7 +48,7 @@ void Foam::ReactingParcel<ParcelType>::setCellValues
         this->currentTetIndices()
     );
 
-    if (pc_ < td.constProps().pMin())
+    if (pc_ < td.cloud().constProps().pMin())
     {
         WarningIn
         (
@@ -59,9 +59,9 @@ void Foam::ReactingParcel<ParcelType>::setCellValues
                 "const label"
             ")"
         )   << "Limiting observed pressure in cell " << cellI << " to "
-            << td.constProps().pMin() <<  nl << endl;
+            << td.cloud().constProps().pMin() <<  nl << endl;
 
-        pc_ = td.constProps().pMin();
+        pc_ = td.cloud().constProps().pMin();
     }
 }
 
@@ -88,19 +88,35 @@ void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection
     scalar massCellNew = massCell + addedMass;
     this->Uc_ += td.cloud().UTrans()[cellI]/massCellNew;
 
-    scalar cpEff = 0;
+    scalar CpEff = 0;
     if (addedMass > ROOTVSMALL)
     {
         forAll(td.cloud().rhoTrans(), i)
         {
             scalar Y = td.cloud().rhoTrans(i)[cellI]/addedMass;
-            cpEff += Y*td.cloud().composition().carrier().Cp(i, this->Tc_);
+            CpEff += Y*td.cloud().composition().carrier().Cp(i, this->Tc_);
         }
     }
-    const scalar cpc = td.cpInterp().psi()[cellI];
-    this->cpc_ = (massCell*cpc + addedMass*cpEff)/massCellNew;
+    const scalar Cpc = td.CpInterp().psi()[cellI];
+    this->Cpc_ = (massCell*Cpc + addedMass*CpEff)/massCellNew;
 
-    this->Tc_ += td.cloud().hsTrans()[cellI]/(this->cpc_*massCellNew);
+    this->Tc_ += td.cloud().hsTrans()[cellI]/(this->Cpc_*massCellNew);
+
+    if (this->Tc_ < td.cloud().constProps().TMin())
+    {
+        WarningIn
+        (
+            "void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection"
+            "("
+                "TrackData&, "
+                "const scalar, "
+                "const label"
+            ")"
+        )   << "Limiting observed temperature in cell " << cellI << " to "
+            << td.cloud().constProps().TMin() <<  nl << endl;
+
+        this->Tc_ = td.cloud().constProps().TMin();
+    }
 }
 
 
@@ -124,14 +140,14 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
         return;
     }
 
+    const SLGThermo& thermo = td.cloud().thermo();
+
     // Far field carrier  molar fractions
     scalarField Xinf(td.cloud().thermo().carrier().species().size());
 
     forAll(Xinf, i)
     {
-        Xinf[i] =
-            td.cloud().thermo().carrier().Y(i)[cellI]
-           /td.cloud().thermo().carrier().W(i);
+        Xinf[i] = thermo.carrier().Y(i)[cellI]/thermo.carrier().W(i);
     }
     Xinf /= sum(Xinf);
 
@@ -153,7 +169,7 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
         const scalar Csi = Cs[i] + Xsff*Xinf[i]*CsTot;
 
         Xs[i] = (2.0*Csi + Xinf[i]*CsTot)/3.0;
-        Ys[i] = Xs[i]*td.cloud().thermo().carrier().W(i);
+        Ys[i] = Xs[i]*thermo.carrier().W(i);
     }
     Xs /= sum(Xs);
     Ys /= sum(Ys);
@@ -162,19 +178,20 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
     rhos = 0;
     mus = 0;
     kappa = 0;
-    scalar cps = 0;
+    scalar Cps = 0;
     scalar sumYiSqrtW = 0;
     scalar sumYiCbrtW = 0;
 
     forAll(Ys, i)
     {
-        const scalar sqrtW = sqrt(td.cloud().thermo().carrier().W(i));
-        const scalar cbrtW = cbrt(td.cloud().thermo().carrier().W(i));
+        const scalar W = thermo.carrier().W(i);
+        const scalar sqrtW = sqrt(W);
+        const scalar cbrtW = cbrt(W);
 
-        rhos += Xs[i]*td.cloud().thermo().carrier().W(i);
-        mus += Ys[i]*sqrtW*td.cloud().thermo().carrier().mu(i, T);
-        kappa += Ys[i]*cbrtW*td.cloud().thermo().carrier().kappa(i, T);
-        cps += Xs[i]*td.cloud().thermo().carrier().Cp(i, T);
+        rhos += Xs[i]*W;
+        mus += Ys[i]*sqrtW*thermo.carrier().mu(i, T);
+        kappa += Ys[i]*cbrtW*thermo.carrier().kappa(i, T);
+        Cps += Xs[i]*thermo.carrier().Cp(i, T);
 
         sumYiSqrtW += Ys[i]*sqrtW;
         sumYiCbrtW += Ys[i]*cbrtW;
@@ -183,7 +200,7 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
     rhos *= pc_/(specie::RR*T);
     mus /= sumYiSqrtW;
     kappa /= sumYiCbrtW;
-    Pr = cps*mus/kappa;
+    Pr = Cps*mus/kappa;
 }
 
 
@@ -226,7 +243,7 @@ void Foam::ReactingParcel<ParcelType>::calc
     const vector& U0 = this->U_;
     const scalar rho0 = this->rho_;
     const scalar T0 = this->T_;
-    const scalar cp0 = this->cp_;
+    const scalar Cp0 = this->Cp_;
     const scalar mass0 = this->mass();
 
 
@@ -303,6 +320,7 @@ void Foam::ReactingParcel<ParcelType>::calc
     // ~~~~~~~~~~~~~
 
     // Calculate new particle temperature
+    scalar Cuh = 0.0;
     scalar T1 =
         calcHeatTransfer
         (
@@ -315,10 +333,11 @@ void Foam::ReactingParcel<ParcelType>::calc
             d0,
             rho0,
             T0,
-            cp0,
+            Cp0,
             NCpW,
             Sh,
-            dhsTrans
+            dhsTrans,
+            Cuh
         );
 
 
@@ -326,14 +345,29 @@ void Foam::ReactingParcel<ParcelType>::calc
     // ~~~~~~
 
     // Calculate new particle velocity
+    scalar Cud = 0.0;
     vector U1 =
-        calcVelocity(td, dt, cellI, Re, mus, d0, U0, rho0, mass0, Su, dUTrans);
+        calcVelocity
+        (
+            td,
+            dt,
+            cellI,
+            Re,
+            mus,
+            d0,
+            U0,
+            rho0,
+            mass0,
+            Su,
+            dUTrans,
+            Cud
+        );
 
     dUTrans += 0.5*(mass0 - mass1)*(U0 + U1);
 
     // Accumulate carrier phase source terms
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if (td.cloud().coupled())
+    if (td.cloud().solution().coupled())
     {
         // Transfer mass lost from particle to carrier mass source
         forAll(dMassPC, i)
@@ -345,18 +379,24 @@ void Foam::ReactingParcel<ParcelType>::calc
         // Update momentum transfer
         td.cloud().UTrans()[cellI] += np0*dUTrans;
 
+        // Update momentum transfer coefficient
+        td.cloud().UCoeff()[cellI] += np0*0.5*(mass0 + mass1)*Cud;
+
         // Update sensible enthalpy transfer
         td.cloud().hsTrans()[cellI] += np0*dhsTrans;
+
+        // Update sensible enthalpy coefficient
+        td.cloud().hsCoeff()[cellI] += np0*Cuh*this->areaS();
     }
 
 
     // Remove the particle when mass falls below minimum threshold
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if (mass1 < td.constProps().minParticleMass())
+    if (mass1 < td.cloud().constProps().minParticleMass())
     {
         td.keepParticle = false;
 
-        if (td.cloud().coupled())
+        if (td.cloud().solution().coupled())
         {
             // Absorb parcel into carrier phase
             forAll(Y_, i)
@@ -377,12 +417,12 @@ void Foam::ReactingParcel<ParcelType>::calc
 
     else
     {
-        this->cp_ = td.cloud().composition().cp(0, Y_, pc_, T1);
+        this->Cp_ = td.cloud().composition().Cp(0, Y_, pc_, T1);
         this->T_ = T1;
         this->U_ = U1;
 
         // Update particle density or diameter
-        if (td.constProps().constantVolume())
+        if (td.cloud().constProps().constantVolume())
         {
             this->rho_ = mass1/this->volume();
         }
@@ -425,7 +465,7 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     if
     (
         !td.cloud().phaseChange().active()
-     || T < td.constProps().Tvap()
+     || T < td.cloud().constProps().Tvap()
      || YPhase < SMALL
     )
     {
@@ -449,13 +489,13 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     // Limit phase change mass by availability of each specie
     dMassPC = min(mass*YPhase*YComponents, dMassPC);
 
-    scalar dMassTot = sum(dMassPC);
+    const scalar dMassTot = sum(dMassPC);
 
     // Add to cumulative phase change mass
     td.cloud().addToMassPhaseChange(this->nParticle_*dMassTot);
 
     // Average molecular weight of carrier mix - assumes perfect gas
-    scalar Wc = this->rhoc_*specie::RR*this->Tc_/this->pc_;
+    const scalar Wc = this->rhoc_*specie::RR*this->Tc_/this->pc_;
 
     forAll(YComponents, i)
     {
@@ -504,13 +544,27 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class ParcelType>
+template<class ParcelType>
 Foam::ReactingParcel<ParcelType>::ReactingParcel
 (
     const ReactingParcel<ParcelType>& p
 )
 :
     ThermoParcel<ParcelType>(p),
+    mass0_(p.mass0_),
+    Y_(p.Y_),
+    pc_(p.pc_)
+{}
+
+
+template<class ParcelType>
+Foam::ReactingParcel<ParcelType>::ReactingParcel
+(
+    const ReactingParcel<ParcelType>& p,
+    const ReactingCloud<ParcelType>& c
+)
+:
+    ThermoParcel<ParcelType>(p, c),
     mass0_(p.mass0_),
     Y_(p.Y_),
     pc_(p.pc_)

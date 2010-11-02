@@ -221,7 +221,7 @@ inline tmp<volScalarField> spray::heatTransferSource() const
 }
 
 
-inline Random& spray::rndGen()
+inline cachedRandom& spray::rndGen()
 {
     return rndGen_;
 }

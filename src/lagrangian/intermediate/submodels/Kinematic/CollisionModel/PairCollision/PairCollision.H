@@ -147,12 +147,20 @@ public:
 
     // Constructors
 
-        //- Construct from dictionary
-        PairCollision
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+        //- Construct from components
+        PairCollision(const dictionary& dict, CloudType& owner);
+
+        //- Construct copy
+        PairCollision(PairCollision<CloudType>& cm);
+
+        //- Construct and return a clone
+        virtual autoPtr<CollisionModel<CloudType> > clone()
+        {
+            return autoPtr<CollisionModel<CloudType> >
+            (
+                new PairCollision<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -164,9 +172,6 @@ public:
         //- Return the number of times to subcycle the current
         //  timestep to meet the criteria of the collision model.
         virtual label nSubCycles() const;
-
-        //- Flag to indicate whether model activates injection model
-        virtual bool active() const;
 
         //- Indicates whether model determines wall collisions or not,
         //  used to determine what value to use for wallImpactDistance

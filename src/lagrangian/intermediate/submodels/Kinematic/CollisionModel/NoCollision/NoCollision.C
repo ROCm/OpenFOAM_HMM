@@ -38,6 +38,16 @@ Foam::NoCollision<CloudType>::NoCollision
 {}
 
 
+template<class CloudType>
+Foam::NoCollision<CloudType>::NoCollision
+(
+    NoCollision<CloudType>& cm
+)
+:
+    CollisionModel<CloudType>(cm)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>

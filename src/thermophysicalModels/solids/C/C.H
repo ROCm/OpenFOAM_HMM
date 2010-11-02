@@ -46,8 +46,8 @@ class C;
 
 Ostream& operator<<
 (
-     Ostream&,
-     const C&
+    Ostream&,
+    const C&
 );
 
 
@@ -78,6 +78,15 @@ public:
 
         //- Construct from dictionary
         C(const dictionary& dict);
+
+        //- Construct copy
+        C(const C& s);
+
+        //- Construct and return clone
+        virtual autoPtr<solid> clone() const
+        {
+            return autoPtr<solid>(new C(*this));
+        }
 
 
     // I-O

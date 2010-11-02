@@ -90,7 +90,7 @@ Foam::scalar Foam::definedPressureSwirlInjector::d0
 {
     const injectorType& it = injectors_[n].properties();
 
-    scalar c = rndGen_.scalar01();
+    scalar c = rndGen_.sample01<scalar>();
     scalar coneAngle = it.getTableValue(coneAngle_, t);
     scalar coneInterval = it.getTableValue(coneInterval_, t);
     angle_ = coneAngle ;
@@ -212,7 +212,7 @@ Foam::vector Foam::definedPressureSwirlInjector::direction
 {
     scalar alpha = sin(angle_);
     scalar dcorr = cos(angle_);
-    scalar beta = constant::mathematical::twoPi*rndGen_.scalar01();
+    scalar beta = constant::mathematical::twoPi*rndGen_.sample01<scalar>();
 
     // randomly distributed vector normal to the injection vector
     vector normal = vector::zero;

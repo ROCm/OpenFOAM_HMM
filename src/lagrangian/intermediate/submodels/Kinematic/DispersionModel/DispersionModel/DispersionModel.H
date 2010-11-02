@@ -34,6 +34,7 @@ Description
 #include "IOdictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
+#include "SubModelBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,17 +47,9 @@ namespace Foam
 
 template<class CloudType>
 class DispersionModel
+:
+    public SubModelBase<CloudType>
 {
-
-    // Private data
-
-        //- Cloud dictionary
-        const dictionary& dict_;
-
-        //- Reference to the owner cloud class
-        CloudType& owner_;
-
-
 public:
 
     //- Runtime type information
@@ -87,8 +80,21 @@ public:
         DispersionModel
         (
             const dictionary& dict,
-            CloudType& owner
+            CloudType& owner,
+            const word& type
         );
+
+        //- Construct copy
+        DispersionModel(DispersionModel<CloudType>& dm);
+
+        //- Construct and return a clone
+        virtual autoPtr<DispersionModel<CloudType> > clone()
+        {
+            return autoPtr<DispersionModel<CloudType> >
+            (
+                new DispersionModel<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -103,25 +109,7 @@ public:
     );
 
 
-    // Access
-
-        //- Return the owner cloud object
-        const CloudType& owner() const;
-
-        //- Return the owner cloud object
-        CloudType& owner();
-
-        //- Return the dictionary
-        const dictionary& dict() const;
-
-
     // Member Functions
-
-        //- Flag to indicate whether model activates injection model
-        virtual bool active() const = 0;
-
-        //- Cache carrier fields
-        virtual void cacheFields(const bool store) = 0;
 
         //- Update (disperse particles)
         virtual vector update
@@ -132,7 +120,7 @@ public:
             const vector& Uc,
             vector& UTurb,
             scalar& tTurb
-        ) = 0;
+        );
 };
 
 

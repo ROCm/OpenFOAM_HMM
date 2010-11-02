@@ -64,9 +64,7 @@ bool Foam::IOobject::IOobject::fileNameComponents
         return false;
     }
 
-    string::size_type first = path.find('/');
-
-    if (first == 0)
+    if (path.isAbsolute())
     {
         // called with absolute path
         WarningIn("IOobject::fileNameComponents(const fileName&, ...)")

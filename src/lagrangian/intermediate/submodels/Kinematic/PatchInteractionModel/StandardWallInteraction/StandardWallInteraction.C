@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
 (
     const dictionary& dict,
@@ -76,9 +76,22 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
 }
 
 
+template<class CloudType>
+Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
+(
+    const StandardWallInteraction<CloudType>& pim
+)
+:
+    PatchInteractionModel<CloudType>(pim),
+    interactionType_(pim.interactionType_),
+    e_(pim.e_),
+    mu_(pim.mu_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::StandardWallInteraction<CloudType>::~StandardWallInteraction()
 {}
 
@@ -86,13 +99,6 @@ Foam::StandardWallInteraction<CloudType>::~StandardWallInteraction()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::StandardWallInteraction<CloudType>::active() const
-{
-    return true;
-}
-
-
-template <class CloudType>
 bool Foam::StandardWallInteraction<CloudType>::correct
 (
     typename CloudType::parcelType& p,

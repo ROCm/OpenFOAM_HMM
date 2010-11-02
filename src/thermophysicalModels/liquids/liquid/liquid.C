@@ -74,6 +74,10 @@ Foam::liquid::liquid(Istream& is)
     Tc_(readScalar(is)),
     Pc_(readScalar(is)),
     Vc_(readScalar(is)),
+    Zc_(readScalar(is)),
+    Tt_(readScalar(is)),
+    Pt_(readScalar(is)),
+    Tb_(readScalar(is)),
     dipm_(readScalar(is)),
     omega_(readScalar(is)),
     delta_(readScalar(is))
@@ -86,9 +90,29 @@ Foam::liquid::liquid(const dictionary& dict)
     Tc_(readScalar(dict.lookup("Tc"))),
     Pc_(readScalar(dict.lookup("Pc"))),
     Vc_(readScalar(dict.lookup("Vc"))),
+    Zc_(readScalar(dict.lookup("Zc"))),
+    Tt_(readScalar(dict.lookup("Tt"))),
+    Pt_(readScalar(dict.lookup("Pt"))),
+    Tb_(readScalar(dict.lookup("Tb"))),
     dipm_(readScalar(dict.lookup("dipm"))),
     omega_(readScalar(dict.lookup("omega"))),
     delta_(readScalar(dict.lookup("delta")))
+{}
+
+
+Foam::liquid::liquid(const liquid& liq)
+:
+    W_(liq.W_),
+    Tc_(liq.Tc_),
+    Pc_(liq.Pc_),
+    Vc_(liq.Vc_),
+    Zc_(liq.Zc_),
+    Tt_(liq.Tt_),
+    Pt_(liq.Pt_),
+    Tb_(liq.Tb_),
+    dipm_(liq.dipm_),
+    omega_(liq.omega_),
+    delta_(liq.delta_)
 {}
 
 
@@ -200,6 +224,116 @@ Foam::autoPtr<Foam::liquid> Foam::liquid::New(const dictionary& dict)
             cstrIter()(dict.subDict(liquidTypeName + "Coeffs"))
         );
     }
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::scalar Foam::liquid::rho(scalar p, scalar T) const
+{
+    notImplemented("Foam::scalar Foam::liquid::rho(scalar, scalar) const");
+    return 0.0;
+}
+
+
+Foam::scalar Foam::liquid::pv(scalar p, scalar T) const
+{
+    notImplemented("Foam::scalar Foam::liquid::pv(scalar, scalar) const");
+    return 0.0;
+}
+
+
+Foam::scalar Foam::liquid::hl(scalar p, scalar T) const
+{
+    notImplemented("Foam::scalar Foam::liquid::hl(scalar, scalar) const");
+    return 0.0;
+}
+
+
+Foam::scalar Foam::liquid::Cp(scalar p, scalar T) const
+{
+    notImplemented("Foam::scalar Foam::liquid::Cp(scalar, scalar) const");
+    return 0.0;
+}
+
+
+Foam::scalar Foam::liquid::h(scalar p, scalar T) const
+{
+    notImplemented("Foam::scalar Foam::liquid::h(scalar, scalar) const");
+    return 0.0;
+}
+
+
+Foam::scalar Foam::liquid::Cpg(scalar p, scalar T) const
+{
+    notImplemented("Foam::scalar Foam::liquid::Cpg(scalar, scalar) const");
+    return 0.0;
+}
+
+
+Foam::scalar Foam::liquid::mu(scalar p, scalar T) const
+{
+    notImplemented("Foam::scalar Foam::liquid::mu(scalar, scalar) const");
+    return 0.0;
+}
+
+
+Foam::scalar Foam::liquid::mug(scalar p, scalar T) const
+{
+    notImplemented("Foam::scalar Foam::liquid::mug(scalar, scalar) const");
+    return 0.0;
+}
+
+
+Foam::scalar Foam::liquid::K(scalar p, scalar T) const
+{
+    notImplemented("Foam::scalar Foam::liquid::K(scalar, scalar) const");
+    return 0.0;
+}
+
+
+Foam::scalar Foam::liquid::Kg(scalar p, scalar T) const
+{
+    notImplemented("Foam::scalar Foam::liquid::Kg(scalar, scalar) const");
+    return 0.0;
+}
+
+
+Foam::scalar Foam::liquid::sigma(scalar p, scalar T) const
+{
+    notImplemented("Foam::scalar Foam::liquid::sigms(scalar, scalar) const");
+    return 0.0;
+}
+
+
+Foam::scalar Foam::liquid::D(scalar p, scalar T) const
+{
+    notImplemented("Foam::scalar Foam::liquid::D(scalar, scalar) const");
+    return 0.0;
+}
+
+
+Foam::scalar Foam::liquid::D(scalar p, scalar T, scalar Wb) const
+{
+    notImplemented("Foam::scalar Foam::liquid::D(scalar, scalar) const");
+    return 0.0;
+}
+
+
+void Foam::liquid::writeData(Ostream& os) const
+{
+
+    os  << W_ << token::SPACE
+        << Tc_ << token::SPACE
+        << Pc_ << token::SPACE
+        << Vc_ << token::SPACE
+        << Zc_ << token::SPACE
+        << Tt_ << token::SPACE
+        << Pt_ << token::SPACE
+        << Tb_ << token::SPACE
+        << dipm_ << token::SPACE
+        << omega_<< token::SPACE
+        << delta_;
 }
 
 

@@ -28,37 +28,9 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-const Foam::dictionary& Foam::SurfaceFilmModel<CloudType>::dict() const
-{
-    return dict_;
-}
-
-
-template<class CloudType>
-const CloudType& Foam::SurfaceFilmModel<CloudType>::owner() const
-{
-    return owner_;
-}
-
-
-template<class CloudType>
-CloudType& Foam::SurfaceFilmModel<CloudType>::owner()
-{
-    return owner_;
-}
-
-
-template<class CloudType>
 const Foam::dimensionedVector& Foam::SurfaceFilmModel<CloudType>::g() const
 {
     return g_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::SurfaceFilmModel<CloudType>::coeffDict() const
-{
-    return coeffDict_;
 }
 
 

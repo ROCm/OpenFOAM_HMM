@@ -9,15 +9,50 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       vectorField;
-    location    "constant";
-    object      reactingCloud1Positions;
+    class       volScalarField;
+    location    "0";
+    object      mut;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-(
-(0.1 0.32 0.0)
-(0.1 0.44 0.0)
-(0.1 0.56 0.0)
-(0.1 0.68 0.0)
-)
+
+dimensions      [1 -1 -1 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
+{
+    back
+    {
+        type            symmetryPlane;
+    }
+    front
+    {
+        type            symmetryPlane;
+    }
+    inletCentral
+    {
+        type            calculated;
+        value           uniform 0;
+    }
+    inletSides
+    {
+        type            calculated;
+        value           uniform 0;
+    }
+    outlet
+    {
+        type            calculated;
+        value           uniform 0;
+    }
+    walls
+    {
+        type            mutkWallFunction;
+        Cmu             0.09;
+        kappa           0.41;
+        E               9.8;
+        value           uniform 0;
+    }
+}
+
+
 // ************************************************************************* //

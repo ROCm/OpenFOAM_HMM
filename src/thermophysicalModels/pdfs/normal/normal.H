@@ -85,11 +85,16 @@ public:
     // Constructors
 
         //- Construct from components
-        normal
-        (
-            const dictionary& dict,
-            Random& rndGen
-        );
+        normal(const dictionary& dict, cachedRandom& rndGen);
+
+        //- Construct copy
+        normal(const normal& p);
+
+        //- Construct and return a clone
+        virtual autoPtr<pdf> clone() const
+        {
+            return autoPtr<pdf>(new normal(*this));
+        }
 
 
     //- Destructor
@@ -107,7 +112,7 @@ public:
         //- Return the maximum value
         virtual scalar maxValue() const;
 
-        scalar erfInv(const scalar y) const;
+        virtual scalar erfInv(const scalar y) const;
 };
 
 

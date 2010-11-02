@@ -50,6 +50,24 @@ void Foam::particleForces::deleteFields()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::particleForces::particleForces(const fvMesh& mesh)
+:
+    mesh_(mesh),
+    dict_(dictionary::null),
+    g_(vector::zero),
+    gradUPtr_(NULL),
+    HdotGradHInterPtr_(NULL),
+    gravity_(false),
+    virtualMass_(false),
+    Cvm_(0.0),
+    pressureGradient_(false),
+    paramagnetic_(false),
+    magneticSusceptibility_(0.0),
+    UName_("undefined_UName"),
+    HdotGradHName_("undefined_HdotGradHName")
+{}
+
+
 Foam::particleForces::particleForces
 (
     const fvMesh& mesh,

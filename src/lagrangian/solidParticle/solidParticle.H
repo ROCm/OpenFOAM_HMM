@@ -143,9 +143,9 @@ public:
         );
 
         //- Construct and return a clone
-        autoPtr<solidParticle> clone() const
+        virtual autoPtr<Particle<solidParticle> > clone() const
         {
-            return autoPtr<solidParticle>(new solidParticle(*this));
+            return autoPtr<Particle<solidParticle> >(new solidParticle(*this));
         }
 
 
@@ -167,7 +167,7 @@ public:
         // Tracking
 
             //- Move
-            bool move(trackData&);
+            bool move(trackData&, const scalar);
 
 
         // Patch interactions

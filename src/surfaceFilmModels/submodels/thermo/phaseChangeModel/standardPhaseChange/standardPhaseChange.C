@@ -148,8 +148,8 @@ void Foam::surfaceFilmModels::standardPhaseChange::correct
                 const scalar qDotInf = hInf[cellI]*(TInf[cellI] - T[cellI]);
                 const scalar qDotFilm = hFilm[cellI]*(T[cellI] - Tw[cellI]);
 
-                const scalar cp = liq.cp(pc, Tloc);
-                const scalar qCorr = availableMass[cellI]*cp*(T[cellI] - Tb_);
+                const scalar Cp = liq.Cp(pc, Tloc);
+                const scalar qCorr = availableMass[cellI]*Cp*(T[cellI] - Tb_);
                 dMass[cellI] =
                     dt*magSf[cellI]/hVap*(qDotInf + qDotFilm)
                   + qCorr/hVap;

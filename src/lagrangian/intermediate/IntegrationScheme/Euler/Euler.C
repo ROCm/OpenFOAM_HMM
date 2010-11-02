@@ -39,6 +39,13 @@ Foam::Euler<Type>::Euler
 {}
 
 
+template<class Type>
+Foam::Euler<Type>::Euler(const Euler& is)
+:
+    IntegrationScheme<Type>(is)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class Type>

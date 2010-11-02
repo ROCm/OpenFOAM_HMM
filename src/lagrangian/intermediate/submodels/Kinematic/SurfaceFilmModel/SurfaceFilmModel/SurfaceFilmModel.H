@@ -39,6 +39,7 @@ SourceFiles
 #include "IOdictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
+#include "SubModelBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,6 +60,8 @@ class mapDistribute;
 
 template<class CloudType>
 class SurfaceFilmModel
+:
+    public SubModelBase<CloudType>
 {
 protected:
 
@@ -67,20 +70,8 @@ protected:
         //- Convenience typedef to the cloud's parcel type
         typedef typename CloudType::parcelType parcelType;
 
-        //- The cloud dictionary
-        const dictionary& dict_;
-
-        //- Reference to the owner cloud class
-        CloudType& owner_;
-
         //- Gravitational acceleration constant
         const dimensionedVector& g_;
-
-        //- The coefficients dictionary
-        const dictionary coeffDict_;
-
-        //- Active flag
-        bool active_;
 
 
         // Cached injector fields per film patch
@@ -150,7 +141,7 @@ public:
         //- Construct null from owner
         SurfaceFilmModel(CloudType& owner);
 
-        //- Construct from dictionary
+        //- Construct from components
         SurfaceFilmModel
         (
             const dictionary& dict,
@@ -158,6 +149,18 @@ public:
             const dimensionedVector& g,
             const word& type
         );
+
+        //- Construct copy
+        SurfaceFilmModel(const SurfaceFilmModel<CloudType>& sfm);
+
+        //- Construct and return a clone
+        virtual autoPtr<SurfaceFilmModel<CloudType> > clone() const
+        {
+            return autoPtr<SurfaceFilmModel<CloudType> >
+            (
+                new SurfaceFilmModel<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -177,20 +180,8 @@ public:
 
         // Access
 
-            //- Return the owner cloud dictionary
-            inline const dictionary& dict() const;
-
-            //- Return const access the owner cloud object
-            inline const CloudType& owner() const;
-
-            //- Return non-const access the owner cloud object for manipulation
-            inline CloudType& owner();
-
             //- Return gravitational acceleration constant
             inline const dimensionedVector& g() const;
-
-            //- Return the coefficients dictionary
-            inline const dictionary& coeffDict() const;
 
             //- Return const access to the number of parcels transferred to the
             //  film model
@@ -211,16 +202,13 @@ public:
 
         // Member Functions
 
-            //- Flag to indicate whether model activates the surface film model
-            virtual bool active() const = 0;
-
             //- Transfer parcel from cloud to surface film
             //  Returns true if parcel is to be transferred
             virtual bool transferParcel
             (
                 const parcelType& p,
                 const label patchI
-            ) = 0;
+            );
 
             //- Inject parcels into the cloud
             template<class TrackData>
@@ -230,7 +218,7 @@ public:
         // I-O
 
             //- Write surface film info to stream
-            virtual void info(Ostream& os) const = 0;
+            virtual void info(Ostream& os) const;
 };
 
 

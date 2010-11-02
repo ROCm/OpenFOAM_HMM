@@ -30,7 +30,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template <class ParcelType>
+template<class ParcelType>
 Foam::string Foam::KinematicParcel<ParcelType>::propHeader =
     Particle<ParcelType>::propHeader
   + " active"
@@ -43,6 +43,7 @@ Foam::string Foam::KinematicParcel<ParcelType>::propHeader =
   + " (angularMomentumx angularMomentumy angularMomentumz)"
   + " (torquex torquey torquez)"
   + " rho"
+  + " age"
   + " tTurb"
   + " (UTurbx UTurby UTurbz)"
   + " collisionRecordsPairAccessed"
@@ -56,7 +57,7 @@ Foam::string Foam::KinematicParcel<ParcelType>::propHeader =
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class ParcelType>
+template<class ParcelType>
 Foam::KinematicParcel<ParcelType>::KinematicParcel
 (
     const Cloud<ParcelType>& cloud,
@@ -75,6 +76,7 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     angularMomentum_(vector::zero),
     torque_(vector::zero),
     rho_(0.0),
+    age_(0.0),
     tTurb_(0.0),
     UTurb_(vector::zero),
     collisionRecords_(),
@@ -96,6 +98,7 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
             is >> angularMomentum_;
             is >> torque_;
             rho_ = readScalar(is);
+            age_ = readScalar(is);
             tTurb_ = readScalar(is);
             is >> UTurb_;
             is >> collisionRecords_;
@@ -115,6 +118,7 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
               + sizeof(angularMomentum_)
               + sizeof(torque_)
               + sizeof(rho_)
+              + sizeof(age_)
               + sizeof(tTurb_)
               + sizeof(UTurb_)
             );
@@ -174,6 +178,9 @@ void Foam::KinematicParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
 
     IOField<scalar> rho(c.fieldIOobject("rho", IOobject::MUST_READ));
     c.checkFieldIOobject(c, rho);
+
+    IOField<scalar> age(c.fieldIOobject("age", IOobject::MUST_READ));
+    c.checkFieldIOobject(c, age);
 
     IOField<scalar> tTurb(c.fieldIOobject("tTurb", IOobject::MUST_READ));
     c.checkFieldIOobject(c, tTurb);
@@ -246,6 +253,7 @@ void Foam::KinematicParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
         p.f_ = f[i];
         p.angularMomentum_ = angularMomentum[i];
         p.rho_ = rho[i];
+        p.age_ = age[i];
         p.tTurb_ = tTurb[i];
         p.UTurb_ = UTurb[i];
         p.collisionRecords_ = collisionRecordList
@@ -289,6 +297,7 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
     );
     IOField<vector> torque(c.fieldIOobject("torque", IOobject::NO_READ), np);
     IOField<scalar> rho(c.fieldIOobject("rho", IOobject::NO_READ), np);
+    IOField<scalar> age(c.fieldIOobject("age", IOobject::NO_READ), np);
     IOField<scalar> tTurb(c.fieldIOobject("tTurb", IOobject::NO_READ), np);
     IOField<vector> UTurb(c.fieldIOobject("UTurb", IOobject::NO_READ), np);
 
@@ -348,6 +357,7 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
         angularMomentum[i] = p.angularMomentum();
         torque[i] = p.torque();
         rho[i] = p.rho();
+        age[i] = p.age();
         tTurb[i] = p.tTurb();
         UTurb[i] = p.UTurb();
         collisionRecordsPairAccessed[i] = p.collisionRecords().pairAccessed();
@@ -373,6 +383,7 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
     angularMomentum.write();
     torque.write();
     rho.write();
+    age.write();
     tTurb.write();
     UTurb.write();
     collisionRecordsPairAccessed.write();
@@ -407,6 +418,7 @@ Foam::Ostream& Foam::operator<<
             << token::SPACE << p.angularMomentum()
             << token::SPACE << p.torque()
             << token::SPACE << p.rho()
+            << token::SPACE << p.age()
             << token::SPACE << p.tTurb()
             << token::SPACE << p.UTurb()
             << token::SPACE << p.collisionRecords();
@@ -427,6 +439,7 @@ Foam::Ostream& Foam::operator<<
           + sizeof(p.angularMomentum())
           + sizeof(p.torque())
           + sizeof(p.rho())
+          + sizeof(p.age())
           + sizeof(p.tTurb())
           + sizeof(p.UTurb())
         );

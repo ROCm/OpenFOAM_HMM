@@ -75,7 +75,7 @@ public:
         (
             const dictionary& dict,
             spray& sm,
-            Random& rndGen
+            cachedRandom& rndGen
         );
 
 

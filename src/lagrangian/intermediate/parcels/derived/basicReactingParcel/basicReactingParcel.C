@@ -107,6 +107,16 @@ Foam::basicReactingParcel::basicReactingParcel
 {}
 
 
+Foam::basicReactingParcel::basicReactingParcel
+(
+    const basicReactingParcel& p,
+    const ReactingCloud<basicReactingParcel>& c
+)
+:
+    ReactingParcel<basicReactingParcel>(p, c)
+{}
+
+
 // * * * * * * * * * * * * * * * *  Destructors  * * * * * * * * * * * * * * //
 
 Foam::basicReactingParcel::~basicReactingParcel()

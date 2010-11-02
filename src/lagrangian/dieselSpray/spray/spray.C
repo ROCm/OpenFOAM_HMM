@@ -68,7 +68,7 @@ Foam::spray::spray
     runTime_(U.time()),
     time0_(runTime_.value()),
     mesh_(U.mesh()),
-    rndGen_(label(0)),
+    rndGen_(label(0), -1),
     g_(g.value()),
 
     U_(U),

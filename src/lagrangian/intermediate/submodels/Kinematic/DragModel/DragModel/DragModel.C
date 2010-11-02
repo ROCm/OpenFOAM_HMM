@@ -28,14 +28,28 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
+Foam::DragModel<CloudType>::DragModel(CloudType& owner)
+:
+    SubModelBase<CloudType>(owner)
+{}
+
+
+template<class CloudType>
 Foam::DragModel<CloudType>::DragModel
 (
     const dictionary& dict,
-    CloudType& owner
+    CloudType& owner,
+    const word& type
 )
 :
-    dict_(dict),
-    owner_(owner)
+    SubModelBase<CloudType>(owner, dict, type)
+{}
+
+
+template<class CloudType>
+Foam::DragModel<CloudType>::DragModel(const DragModel<CloudType>& dm)
+:
+    SubModelBase<CloudType>(dm)
 {}
 
 
@@ -49,16 +63,13 @@ Foam::DragModel<CloudType>::~DragModel()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-const CloudType& Foam::DragModel<CloudType>::owner() const
+Foam::scalar Foam::DragModel<CloudType>::Cd(const scalar) const
 {
-    return owner_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::DragModel<CloudType>::dict() const
-{
-    return dict_;
+    notImplemented
+    (
+        "Foam::scalar Foam::DragModel<CloudType>::Cd(const scalar) const"
+    );
+    return 0.0;
 }
 
 

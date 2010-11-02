@@ -32,100 +32,14 @@ License
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
 template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::preEvolve()
+void Foam::ThermoCloud<ParcelType>::cloudReset(ThermoCloud<ParcelType>& c)
 {
-    KinematicCloud<ParcelType>::preEvolve();
-}
+    KinematicCloud<ParcelType>::cloudReset(c);
 
+    heatTransferModel_ = c.heatTransferModel_->clone();
+    TIntegrator_ = c.TIntegrator_->clone();
 
-template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::evolveCloud()
-{
-    const volScalarField& T = thermo_.thermo().T();
-    const volScalarField cp = thermo_.thermo().Cp();
-
-    autoPtr<interpolation<scalar> > rhoInterp = interpolation<scalar>::New
-    (
-        this->interpolationSchemes(),
-        this->rho()
-    );
-
-    autoPtr<interpolation<vector> > UInterp = interpolation<vector>::New
-    (
-        this->interpolationSchemes(),
-        this->U()
-    );
-
-    autoPtr<interpolation<scalar> > muInterp = interpolation<scalar>::New
-    (
-        this->interpolationSchemes(),
-        this->mu()
-    );
-
-    autoPtr<interpolation<scalar> > TInterp = interpolation<scalar>::New
-    (
-        this->interpolationSchemes(),
-        T
-    );
-
-    autoPtr<interpolation<scalar> > cpInterp = interpolation<scalar>::New
-    (
-        this->interpolationSchemes(),
-        cp
-    );
-
-    typename ParcelType::trackData td
-    (
-        *this,
-        constProps_,
-        rhoInterp(),
-        UInterp(),
-        muInterp(),
-        TInterp(),
-        cpInterp(),
-        this->g().value()
-    );
-
-    label preInjectionSize = this->size();
-
-    // Update the cellOccupancy if the size of the cloud has changed
-    // during the injection.
-    this->surfaceFilm().inject(td);
-
-    if (preInjectionSize != this->size())
-    {
-        this->updateCellOccupancy();
-
-        preInjectionSize = this->size();
-    }
-
-    this->injection().inject(td);
-
-    if (this->coupled())
-    {
-        resetSourceTerms();
-    }
-
-    // Assume that motion will update the cellOccupancy as necessary
-    // before it is required.
-    motion(td);
-}
-
-
-template<class ParcelType>
-void  Foam::ThermoCloud<ParcelType>::motion
-(
-    typename ParcelType::trackData& td
-)
-{
-    KinematicCloud<ParcelType>::motion(td);
-}
-
-
-template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::postEvolve()
-{
-    KinematicCloud<ParcelType>::postEvolve();
+    radiation_ = c.radiation_;
 }
 
 
@@ -152,13 +66,16 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
         false
     ),
     thermoCloud(),
+    cloudCopyPtr_(NULL),
     constProps_(this->particleProperties()),
     thermo_(thermo),
+    T_(thermo.thermo().T()),
+    p_(thermo.thermo().p()),
     heatTransferModel_
     (
         HeatTransferModel<ThermoCloud<ParcelType> >::New
         (
-            this->particleProperties(),
+            this->subModelProperties(),
             *this
         )
     ),
@@ -167,30 +84,129 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
         scalarIntegrationScheme::New
         (
             "T",
-            this->particleProperties().subDict("integrationSchemes")
+            this->solution().integrationSchemes()
         )
     ),
-    radiation_(this->particleProperties().lookup("radiation")),
+    radiation_(this->subModelProperties().lookup("radiation")),
     hsTrans_
     (
-        IOobject
+        new DimensionedField<scalar, volMesh>
         (
-            this->name() + "hsTrans",
-            this->db().time().timeName(),
-            this->db(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        this->mesh(),
-        dimensionedScalar("zero", dimEnergy, 0.0)
+            IOobject
+            (
+                this->name() + "hsTrans",
+                this->db().time().timeName(),
+                this->db(),
+                IOobject::READ_IF_PRESENT,
+                IOobject::AUTO_WRITE
+            ),
+            this->mesh(),
+            dimensionedScalar("zero", dimEnergy, 0.0)
+        )
+    ),
+    hsCoeff_
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                this->name() + "hsCoeff",
+                this->db().time().timeName(),
+                this->db(),
+                IOobject::READ_IF_PRESENT,
+                IOobject::AUTO_WRITE
+            ),
+            this->mesh(),
+            dimensionedScalar("zero", dimEnergy/dimTime/dimTemperature, 0.0)
+        )
     )
+
 {
     if (readFields)
     {
         ParcelType::readFields(*this);
     }
+
+    if (this->solution().resetSourcesOnStartup())
+    {
+        resetSourceTerms();
+    }
 }
+
+
+template<class ParcelType>
+Foam::ThermoCloud<ParcelType>::ThermoCloud
+(
+    ThermoCloud<ParcelType>& c,
+    const word& name
+)
+:
+    KinematicCloud<ParcelType>(c, name),
+    thermoCloud(),
+    cloudCopyPtr_(NULL),
+    constProps_(c.particleProperties_),
+    thermo_(c.thermo_),
+    T_(c.T()),
+    p_(c.p()),
+    heatTransferModel_(c.heatTransferModel_->clone()),
+    TIntegrator_(c.TIntegrator_->clone()),
+    radiation_(c.radiation_),
+    hsTrans_
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                this->name() + "hsTrans",
+                this->db().time().timeName(),
+                this->db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            c.hsTrans()
+        )
+    ),
+    hsCoeff_
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                this->name() + "hsCoeff",
+                this->db().time().timeName(),
+                this->db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            c.hsCoeff()
+        )
+    )
+{}
+
+
+template<class ParcelType>
+Foam::ThermoCloud<ParcelType>::ThermoCloud
+(
+    const fvMesh& mesh,
+    const word& name,
+    const ThermoCloud<ParcelType>& c
+)
+:
+    KinematicCloud<ParcelType>(mesh, name, c),
+    thermoCloud(),
+    cloudCopyPtr_(NULL),
+    constProps_(),
+    thermo_(c.thermo()),
+    T_(c.T()),
+    p_(c.p()),
+    heatTransferModel_(NULL),
+    TIntegrator_(NULL),
+    radiation_(false),
+    hsTrans_(NULL),
+    hsCoeff_(NULL)
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -220,8 +236,29 @@ void Foam::ThermoCloud<ParcelType>::checkParcelProperties
     if (!fullyDescribed)
     {
         parcel.T() = constProps_.T0();
-        parcel.cp() = constProps_.cp0();
+        parcel.Cp() = constProps_.Cp0();
     }
+}
+
+
+template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::storeState()
+{
+    cloudCopyPtr_.reset
+    (
+        static_cast<ThermoCloud<ParcelType>*>
+        (
+            clone(this->name() + "Copy").ptr()
+        )
+    );
+}
+
+
+template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::restoreState()
+{
+    cloudReset(cloudCopyPtr_());
+    cloudCopyPtr_.clear();
 }
 
 
@@ -229,23 +266,31 @@ template<class ParcelType>
 void Foam::ThermoCloud<ParcelType>::resetSourceTerms()
 {
     KinematicCloud<ParcelType>::resetSourceTerms();
-    hsTrans_.field() = 0.0;
+    hsTrans_->field() = 0.0;
+    hsCoeff_->field() = 0.0;
+}
+
+
+template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::relaxSources
+(
+    const ThermoCloud<ParcelType>& cloudOldTime
+)
+{
+    KinematicCloud<ParcelType>::relaxSources(cloudOldTime);
+
+    this->relax(hsTrans_(), cloudOldTime.hsTrans(), "hs");
 }
 
 
 template<class ParcelType>
 void Foam::ThermoCloud<ParcelType>::evolve()
 {
-    if (this->active())
+    if (this->solution().canEvolve())
     {
-        preEvolve();
+        typename ParcelType::trackData td(*this);
 
-        evolveCloud();
-
-        postEvolve();
-
-        info();
-        Info<< endl;
+        this->solve(td);
     }
 }
 

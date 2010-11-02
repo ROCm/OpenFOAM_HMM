@@ -33,9 +33,9 @@ inline Foam::scalar Foam::thermoParcelInjectionData::T() const
 }
 
 
-inline Foam::scalar Foam::thermoParcelInjectionData::cp() const
+inline Foam::scalar Foam::thermoParcelInjectionData::Cp() const
 {
-    return cp_;
+    return Cp_;
 }
 
 
@@ -45,9 +45,9 @@ inline Foam::scalar& Foam::thermoParcelInjectionData::T()
 }
 
 
-inline Foam::scalar& Foam::thermoParcelInjectionData::cp()
+inline Foam::scalar& Foam::thermoParcelInjectionData::Cp()
 {
-    return cp_;
+    return Cp_;
 }
 
 

@@ -94,6 +94,11 @@ private:
         dimensionSet dimensions_;
 
 
+    // Private Member Functions
+
+        void readIfPresent(const word& fieldDictEntry = "value");
+
+
 public:
 
     //- Runtime type information
@@ -122,7 +127,8 @@ public:
         (
             const IOobject&,
             const Mesh& mesh,
-            const dimensionSet&
+            const dimensionSet&,
+            const bool checkIOFlags = true
         );
 
         //- Construct from components
@@ -130,7 +136,8 @@ public:
         (
             const IOobject&,
             const Mesh& mesh,
-            const dimensioned<Type>&
+            const dimensioned<Type>&,
+            const bool checkIOFlags = true
         );
 
         //- Construct from Istream
@@ -138,12 +145,6 @@ public:
         (
             const IOobject&,
             const Mesh& mesh,
-            const word& fieldDictEntry="value"
-        );
-
-        void readField
-        (
-            const dictionary& fieldDict,
             const word& fieldDictEntry="value"
         );
 
@@ -221,6 +222,12 @@ public:
 
 
     // Member Functions
+
+        void readField
+        (
+            const dictionary& fieldDict,
+            const word& fieldDictEntry = "value"
+        );
 
         //- Return mesh
         inline const Mesh& mesh() const;

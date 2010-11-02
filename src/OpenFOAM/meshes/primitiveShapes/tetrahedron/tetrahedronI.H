@@ -237,7 +237,7 @@ scalar tetrahedron<Point, PointRef>::barycentric
                 "const point& pt"
             ") const"
         )
-            << "Degenerate triangle - returning 1/4 barycentric coordinates."
+            << "Degenerate tetrahedron - returning 1/4 barycentric coordinates."
             << endl;
 
         bary = List<scalar>(4, 0.25);

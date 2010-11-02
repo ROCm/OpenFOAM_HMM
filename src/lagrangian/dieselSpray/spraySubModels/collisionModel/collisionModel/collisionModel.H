@@ -34,7 +34,7 @@ Description
 
 #include "IOdictionary.H"
 #include "spray.H"
-#include "Random.H"
+#include "cachedRandom.H"
 #include "Switch.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
@@ -56,7 +56,7 @@ protected:
     // Protected data
         const dictionary& dict_;
         spray& spray_;
-        Random& rndGen_;
+        cachedRandom& rndGen_;
 
         //dictionary coeffsDict_;
 
@@ -76,7 +76,7 @@ public:
             (
                 const dictionary& dict,
                 spray& sm,
-                Random& rndGen
+                cachedRandom& rndGen
             ),
             (dict, sm, rndGen)
         );
@@ -89,7 +89,7 @@ public:
         (
             const dictionary& dict,
             spray& sm,
-            Random& rndGen
+            cachedRandom& rndGen
         );
 
 
@@ -103,7 +103,7 @@ public:
         (
             const dictionary& dict,
             spray& sm,
-            Random& rndGen
+            cachedRandom& rndGen
         );
 
 

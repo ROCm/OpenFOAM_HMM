@@ -51,11 +51,7 @@ template<class Type>
 class Constant;
 
 template<class Type>
-Ostream& operator<<
-(
-    Ostream&,
-    const Constant<Type>&
-);
+Ostream& operator<<(Ostream&, const Constant<Type>&);
 
 /*---------------------------------------------------------------------------*\
                            Class Constant Declaration
@@ -92,6 +88,12 @@ public:
         //- Copy constructor
         Constant(const Constant<Type>& cnst);
 
+        //- Construct and return a clone
+        virtual tmp<DataEntry<Type> > clone() const
+        {
+            return tmp<DataEntry<Type> >(new Constant<Type>(*this));
+        }
+
 
     //- Destructor
     virtual ~Constant();
@@ -107,22 +109,11 @@ public:
 
 
     //- Ostream Operator
-    friend Ostream& operator<< <Type>
-    (
-        Ostream&,
-        const Constant<Type>&
-    );
+    friend Ostream& operator<< <Type>(Ostream&, const Constant<Type>&);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<>
-Constant<label>::Constant(const word& entryName, Istream& is);
-
-template<>
-Constant<scalar>::Constant(const word& entryName, Istream& is);
-
 
 } // End namespace Foam
 
