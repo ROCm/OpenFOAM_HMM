@@ -37,6 +37,7 @@ SourceFiles
 #define DynamicField_H
 
 #include "Field.H"
+#include "StaticAssert.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -71,6 +72,9 @@ class DynamicField
 :
     public Field<T>
 {
+    //- Avoid invalid sizing parameters
+    StaticAssert((SizeInc || SizeMult) && SizeDiv);
+
     // Private data
 
         //- The capacity (allocated size) of the underlying field.

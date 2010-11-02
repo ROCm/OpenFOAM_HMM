@@ -44,6 +44,7 @@ SourceFiles
 #define DynamicList_H
 
 #include "List.H"
+#include "StaticAssert.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -78,6 +79,9 @@ class DynamicList
 :
     public List<T>
 {
+    //- Avoid invalid sizing parameters
+    StaticAssert((SizeInc || SizeMult) && SizeDiv);
+
     // Private data
 
         //- The capacity (allocated size) of the underlying list.
