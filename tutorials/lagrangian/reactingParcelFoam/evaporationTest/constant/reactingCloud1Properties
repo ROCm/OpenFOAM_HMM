@@ -19,7 +19,28 @@ solution
 {
     active          true;
     coupled         true;
+    transient       yes;
     cellValueSourceCorrection on;
+
+    sourceTerms
+    {
+        rho
+        {
+            semiImplicit    false;
+        }
+        U
+        {
+            semiImplicit    false;
+        }
+        Yi
+        {
+            semiImplicit    false;
+        }
+        hs
+        {
+            semiImplicit    false;
+        }
+    }
 
     interpolationSchemes
     {
@@ -49,7 +70,7 @@ constantProperties
 
     rho0            1000;
     T0              300;
-    cp0             4187;
+    Cp0             4187;
 
     youngsModulus   1e9;
     poissonsRatio   0.35;
@@ -97,7 +118,7 @@ subModels
 
     ManualInjectionCoeffs
     {
-        massTotal       massTotal [ 1 0 0 0 0 ] 1e-8;
+        massTotal       1e-8;
         parcelBasisType mass;
         SOI             0;
         positionsFile   "reactingCloud1Positions";
@@ -129,7 +150,7 @@ subModels
         (
             liquid
             {
-                H2O 1;
+                H2O          1;
             }
         );
     }
@@ -138,10 +159,7 @@ subModels
     {
         enthalpyTransfer enthalpyDifference;
 
-        activeLiquids
-        (
-            H2O
-        );
+        activeLiquids    ( H2O );
     }
 }
 

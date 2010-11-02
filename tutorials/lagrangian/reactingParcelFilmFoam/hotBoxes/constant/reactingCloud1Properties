@@ -19,12 +19,33 @@ solution
 {
     active          true;
     coupled         true;
+    transient       yes;
     cellValueSourceCorrection on;
+
+    sourceTerms
+    {
+        rho
+        {
+            semiImplicit    false;
+        }
+        U
+        {
+            semiImplicit    false;
+        }
+        Yi
+        {
+            semiImplicit    false;
+        }
+        hs
+        {
+            semiImplicit    false;
+        }
+    }
 
     interpolationSchemes
     {
         rho             cell;
-        U               cell; // cellPoint;
+        U               cellPoint;
         mu              cell;
         T               cell;
         Cp              cell;
@@ -49,7 +70,7 @@ constantProperties
 
     rho0            1000;
     T0              300;
-    cp0             4187;
+    Cp0             4187;
 
     youngsModulus   0;
     poissonsRatio   0;
@@ -83,11 +104,11 @@ subModels
 
     PatchInteractionModel StandardWallInteraction;
 
-    HeatTransferModel none; //RanzMarshall;
+    HeatTransferModel none;
 
     CompositionModel SinglePhaseMixture;
 
-    PhaseChangeModel none; // LiquidEvaporation;
+    PhaseChangeModel none;
 
     PostProcessingModel none;
 
@@ -95,40 +116,13 @@ subModels
 
     radiation       off;
 
-    ConeInjectionCoeffs
-    {
-        SOI             0.000;
-        duration        10.000;
-        position        (0.5 0.8 1.45);
-        direction       (0 -0.5 -1);
-        massTotal       massTotal [ 1 0 0 0 0 ] 0.025; // 1e-3;
-        parcelsPerSecond 500;
-        parcelBasisType mass;
-        flowRateProfile constant 0.01;
-        Umag            constant 5;
-        thetaInner      constant 0;
-        thetaOuter      constant 30;
-
-        parcelPDF
-        {
-            pdfType         RosinRammler;
-            RosinRammlerPDF
-            {
-                minValue        5e-04;
-                maxValue        0.0012;
-                d               7.5e-05;
-                n               0.5;
-            }
-        }
-    }
-
     ConeInjectionMPCoeffs
     {
         SOI             0.000;
         duration        20.000;
         positionsFile   "reactingCloud1Positions";
         axesFile        "reactingCloud1Axes";
-        massTotal       massTotal [ 1 0 0 0 0 ] 10;
+        massTotal       10;
         parcelsPerInjector 20000;
         parcelsPerSecond 500;
         parcelBasisType mass;
@@ -157,11 +151,6 @@ subModels
         type            rebound;
     }
 
-    RanzMarshallCoeffs
-    {
-        BirdCorrection  false;
-    }
-
     SinglePhaseMixtureCoeffs
     {
         phases
@@ -170,14 +159,6 @@ subModels
             {
                 H2O 1;
             }
-        );
-    }
-
-    LiquidEvaporationCoeffs
-    {
-        activeLiquids
-        (
-            H2O
         );
     }
 

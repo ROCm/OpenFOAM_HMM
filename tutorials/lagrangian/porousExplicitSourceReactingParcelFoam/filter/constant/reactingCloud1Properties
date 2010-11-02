@@ -19,7 +19,28 @@ solution
 {
     active          true;
     coupled         true;
+    transient       yes;
     cellValueSourceCorrection on;
+
+    sourceTerms
+    {
+        rho
+        {
+            semiImplicit    false;
+        }
+        U
+        {
+            semiImplicit    false;
+        }
+        Yi
+        {
+            semiImplicit    false;
+        }
+        hs
+        {
+            semiImplicit    false;
+        }
+    }
 
     interpolationSchemes
     {
@@ -49,7 +70,7 @@ constantProperties
 
     rho0            1000;
     T0              300;
-    cp0             4100;
+    Cp0             4100;
 
     youngsModulus   1e9;
     poissonsRatio   0.35;
@@ -68,10 +89,10 @@ constantProperties
 
 particleForces
 {
-    gravity             on;
-    virtualMass         off;
-    pressureGradient    off;
-    paramagnetic        off;
+    gravity         on;
+    virtualMass     off;
+    pressureGradient off;
+    paramagnetic    off;
 }
 
 subModels
@@ -98,23 +119,18 @@ subModels
 
     SurfaceFilmModel none;
 
-    CollisionModel none;
+    CollisionModel  none;
 
     radiation       off;
 
     ReactingMultiphaseLookupTableInjectionCoeffs
     {
-        massTotal       massTotal [ 1 0 0 0 0 ] 1e-2;
+        massTotal       1e-2;
         parcelBasisType mass;
         SOI             0.5;
         inputFile       "parcelInjectionProperties";
         duration        1.0;
         parcelsPerSecond 250;
-    }
-
-    StandardWallInteractionCoeffs
-    {
-        type            rebound;
     }
 
     LocalInteractionCoeffs
@@ -123,15 +139,15 @@ subModels
         (
             walls
             {
-                type    rebound;
+                type        rebound;
             }
             cycLeft_half0
             {
-                type    rebound;
+                type        rebound;
             }
             cycLeft_half1
             {
-                type    rebound;
+                type        rebound;
             }
         );
     }
@@ -150,7 +166,7 @@ subModels
             }
             liquid
             {
-                H2O 1;
+                H2O         1;
             }
             solid
             {
@@ -165,10 +181,7 @@ subModels
     {
         enthalpyTransfer enthalpyDifference;
 
-        activeLiquids
-        (
-            H2O
-        );
+        activeLiquids   ( H2O );
     }
 
     PatchPostProcessingCoeffs

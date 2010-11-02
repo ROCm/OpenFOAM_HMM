@@ -19,7 +19,28 @@ solution
 {
     active          true;
     coupled         true;
+    transient       yes;
     cellValueSourceCorrection on;
+
+    sourceTerms
+    {
+        rho
+        {
+            semiImplicit    false;
+        }
+        U
+        {
+            semiImplicit    false;
+        }
+        Yi
+        {
+            semiImplicit    false;
+        }
+        hs
+        {
+            semiImplicit    false;
+        }
+    }
 
     interpolationSchemes
     {
@@ -49,7 +70,7 @@ constantProperties
 
     rho0            1000;
     T0              350;
-    cp0             4100;
+    Cp0             4100;
 
     youngsModulus   1e9;
     poissonsRatio   0.35;
@@ -70,9 +91,7 @@ particleForces
 {
     gravity         on;
     virtualMass     off;
-    Cvm             0.5;
     pressureGradient off;
-    gradU           gradU;
     paramagnetic    off;
 }
 
@@ -107,7 +126,7 @@ subModels
     PatchInjectionCoeffs
     {
         SOI             0.01;
-        massTotal       massTotal [ 1 0 0 0 0 ] 8;
+        massTotal       8;
         parcelBasisType mass;
         patchName       inletCentral;
         duration        10000;
@@ -162,7 +181,7 @@ subModels
             }
             liquid
             {
-                H2O 1;
+                H2O         1;
             }
             solid
             {
@@ -177,20 +196,14 @@ subModels
     {
         enthalpyTransfer enthalpyDifference;
 
-        activeLiquids
-        (
-            H2O
-        );
+        activeLiquids   ( H2O );
     }
 
     PatchPostProcessingCoeffs
     {
         maxStoredParcels 100;
 
-        patches
-        (
-            outlet
-        );
+        patches          ( outlet );
     }
 }
 

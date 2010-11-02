@@ -19,7 +19,16 @@ solution
 {
     active          true;
     coupled         true;
+    transient       yes;
     cellValueSourceCorrection on;
+
+    sourceTerms
+    {
+        U
+        {
+            semiImplicit    false;
+        }
+    }
 
     interpolationSchemes
     {
@@ -73,7 +82,7 @@ subModels
 
     ManualInjectionCoeffs
     {
-        massTotal       massTotal [ 1 0 0 0 0 ] 0.0002;
+        massTotal       0.0002;
         parcelBasisType mass;
         SOI             0;
         positionsFile   "kinematicCloud1Positions";
@@ -87,31 +96,6 @@ subModels
                 maxValue        0.0001;
                 d               7.5e-05;
                 n               0.5;
-            }
-        }
-    }
-
-    ConeInjectionCoeffs
-    {
-        SOI             0.001;
-        duration        0.005;
-        position        ( 0.25 0.25 0.05 );
-        direction       ( 0 -1 0 );
-        parcelsPerSecond 10000;
-        flowRateProfile Constant 0.01;
-        Umag            Constant 50;
-        thetaInner      Constant 0;
-        thetaOuter      Constant 30;
-
-        parcelPDF
-        {
-            pdfType         RosinRammler;
-            RosinRammlerPDF
-            {
-                minValue        5e-05;
-                maxValue        0.0001;
-                d               ( 7.5e-05 );
-                n               ( 0.5 );
             }
         }
     }

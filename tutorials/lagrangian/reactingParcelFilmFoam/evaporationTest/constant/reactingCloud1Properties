@@ -17,19 +17,7 @@ FoamFile
 
 solution
 {
-    active          false; // true;
-    coupled         true;
-    cellValueSourceCorrection on;
-
-    interpolationSchemes
-    {
-        rho             cell;
-        U               cell; // cellPoint;
-        mu              cell;
-        T               cell;
-        Cp              cell;
-        p               cell;
-    }
+    active          false;
 
     integrationSchemes
     {
@@ -49,7 +37,7 @@ constantProperties
 
     rho0            1000;
     T0              300;
-    cp0             4187;
+    Cp0             4187;
 
     epsilon0        1;
     f0              0.5;
@@ -75,44 +63,25 @@ subModels
 {
     InjectionModel  none;
 
-    DragModel       SphereDrag;
+    DragModel       none;
 
     DispersionModel none;
 
-    PatchInteractionModel StandardWallInteraction;
+    PatchInteractionModel none;
 
     CollisionModel  none;
 
     HeatTransferModel none;
 
-    CompositionModel SinglePhaseMixture;
+    CompositionModel none;
 
     PhaseChangeModel none;
 
     PostProcessingModel none;
 
-    SurfaceFilmModel ThermoSurfaceFilm;
+    SurfaceFilmModel none;
 
     radiation       off;
-
-    StandardWallInteractionCoeffs
-    {
-        type            rebound;
-    }
-
-    SinglePhaseMixtureCoeffs
-    {
-        phases
-        (
-            liquid
-            {
-                H2O 1;
-            }
-        );
-    }
-
-    ThermoSurfaceFilmCoeffs
-    {}
 }
 
 

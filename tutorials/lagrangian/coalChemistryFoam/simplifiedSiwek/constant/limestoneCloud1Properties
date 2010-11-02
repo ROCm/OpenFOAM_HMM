@@ -15,13 +15,24 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-randomSampleSize    100000;
-
 solution
 {
     active          true;
     coupled         true;
+    transient       yes;
     cellValueSourceCorrection on;
+
+    sourceTerms
+    {
+        U
+        {
+            semiImplicit    false;
+        }
+        hs
+        {
+            semiImplicit    false;
+        }
+    }
 
     interpolationSchemes
     {
@@ -30,6 +41,7 @@ solution
         U               cellPoint;
         Cp              cell;
         T               cell;
+        G               cell;
     }
 
     integrationSchemes
