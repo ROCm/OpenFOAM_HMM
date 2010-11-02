@@ -138,10 +138,15 @@ public:
         //  eg, remove repeated slashes, etc.
         fileName clean() const;
 
-        // Interogation
 
-            //- Return the file type: FILE, DIRECTORY or UNDEFINED
-            Type type() const;
+        // Interrogation
+
+             //- Return the file type: FILE, DIRECTORY or UNDEFINED
+             Type type() const;
+
+             //- Return true if file name is absolute
+             bool isAbsolute() const;
+
 
         // Decomposition
 
@@ -162,6 +167,7 @@ public:
 
             //- Return a single component of the path
             word component(const size_type, const char delimiter='/') const;
+
 
     // Member operators
 

@@ -72,7 +72,7 @@ Foam::fileName Foam::functionEntries::includeEntry::includeFileName
     fName.expand();
 
     // relative name
-    if (fName.size() && fName[0] != '/')
+    if (fName.size() && !fName.isAbsolute())
     {
         fName = fileName(is.name()).path()/fName;
     }

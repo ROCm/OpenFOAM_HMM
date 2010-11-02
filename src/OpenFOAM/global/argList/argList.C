@@ -315,7 +315,7 @@ void Foam::argList::getRootCase()
             casePath = cwd();
             options_.erase("case");
         }
-        else if (casePath[0] != '/' && casePath.name() == "..")
+        else if (!casePath.isAbsolute() && casePath.name() == "..")
         {
             // avoid relative cases ending in '..' - makes for very ugly names
             casePath = cwd()/casePath;
@@ -334,7 +334,7 @@ void Foam::argList::getRootCase()
 
 
     // Set the case and case-name as an environment variable
-    if (rootPath_[0] == '/')
+    if (rootPath_.isAbsolute())
     {
         // absolute path - use as-is
         setEnv("FOAM_CASE", rootPath_/globalCase_, true);
