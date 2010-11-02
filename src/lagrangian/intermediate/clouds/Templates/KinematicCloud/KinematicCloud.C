@@ -451,7 +451,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     rndGen_
     (
         label(0),
-        readLabel(particleProperties_.lookup("randomSampleSize"))
+        particleProperties_.lookupOrDefault<label>("randomSampleSize", 100000)
     ),
     cellOccupancyPtr_(),
     rho_(rho),
