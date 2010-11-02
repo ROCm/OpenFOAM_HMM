@@ -32,11 +32,6 @@ solvers
     }
 }
 
-PISO
-{
-    nNonOrthogonalCorrectors 1;
-}
-
 PIMPLE
 {
     nNonOrthogonalCorrectors 1;

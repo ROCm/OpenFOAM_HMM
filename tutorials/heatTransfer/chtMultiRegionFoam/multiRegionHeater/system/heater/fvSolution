@@ -23,17 +23,13 @@ solvers
         tolerance        1E-06;
         relTol           0.1;
     }
+
     TFinal
     {
         $T;
         tolerance        1E-06;
         relTol           0;
     }
-}
-
-PISO
-{
-    nNonOrthogonalCorrectors 1;
 }
 
 PIMPLE

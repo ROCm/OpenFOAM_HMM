@@ -32,6 +32,7 @@ Description
 #include "makeBasicMixture.H"
 
 #include "perfectGas.H"
+#include "incompressible.H"
 
 #include "eConstThermo.H"
 
@@ -41,6 +42,10 @@ Description
 
 #include "constTransport.H"
 #include "sutherlandTransport.H"
+
+#include "icoPolynomial.H"
+#include "hPolynomialThermo.H"
+#include "polynomialTransport.H"
 
 #include "pureMixture.H"
 
@@ -92,6 +97,20 @@ makeBasicMixture
     sutherlandTransport,
     janafThermo,
     perfectGas
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    constTransport,
+    hConstThermo,
+    incompressible
+);
+
+makeBasicPolyMixture
+(
+    pureMixture,
+    3
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
