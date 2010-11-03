@@ -72,6 +72,8 @@ bool Foam::IOobject::IOobject::fileNameComponents
         return false;
     }
 
+    string::size_type first = path.find('/');
+
     if (first == string::npos)
     {
         // no '/' found - no instance or local
