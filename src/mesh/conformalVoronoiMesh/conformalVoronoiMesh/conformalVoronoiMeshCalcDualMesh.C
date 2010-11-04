@@ -1954,8 +1954,8 @@ void Foam::conformalVoronoiMesh::addPatches
 
     wordList allPatchNames = patchNames;
 
-    patchSizes.setSize(nTotalPatches);
-    patchStarts.setSize(nTotalPatches);
+    patchSizes.setSize(nTotalPatches, -1);
+    patchStarts.setSize(nTotalPatches, -1);
 
     label nBoundaryFaces = 0;
 
@@ -1974,7 +1974,7 @@ void Foam::conformalVoronoiMesh::addPatches
             patchSizes[nValidPatches] = patchFaces[p].size();
             patchStarts[nValidPatches] = nInternalFaces + nBoundaryFaces;
 
-            nBoundaryFaces += patchSizes[p];
+            nBoundaryFaces += patchSizes[nValidPatches];
 
             nValidPatches++;
 
@@ -1987,7 +1987,21 @@ void Foam::conformalVoronoiMesh::addPatches
 
             if (p != nTotalPatches - 1)
             {
-                WarningIn("void addPatches")
+                WarningIn
+                (
+                    "void Foam::conformalVoronoiMesh::addPatches"
+                    "("
+                        "const label nInternalFaces,"
+                        "faceList& faces,"
+                        "labelList& owner,"
+                        "wordList& patchNames,"
+                        "labelList& patchSizes,"
+                        "labelList& patchStarts,"
+                        "List<DynamicList<face> >& patchFaces,"
+                        "List<DynamicList<label> >& patchOwners,"
+                        "bool includeEmptyPatches"
+                    ") const"
+                )
                     << "Patch " << patchNames[p]
                     << " has no faces, not creating." << endl;
             }
