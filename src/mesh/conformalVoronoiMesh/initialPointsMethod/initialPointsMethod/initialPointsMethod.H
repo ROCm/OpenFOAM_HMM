@@ -38,6 +38,8 @@ SourceFiles
 #include "point.H"
 #include "conformalVoronoiMesh.H"
 #include "dictionary.H"
+#include "Random.H"
+#include "Switch.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
 

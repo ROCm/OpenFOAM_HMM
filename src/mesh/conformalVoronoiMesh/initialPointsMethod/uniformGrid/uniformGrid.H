@@ -36,8 +36,6 @@ SourceFiles
 #ifndef uniformGrid_H
 #define uniformGrid_H
 
-#include "Switch.H"
-#include "Random.H"
 #include "initialPointsMethod.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

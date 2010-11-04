@@ -122,10 +122,11 @@ void Foam::conformalVoronoiMesh::calcDualMesh
                 << "A mesh could not be produced to satisfy the specified "
                 << "quality criteria." << nl
                 << "The quality and the surface conformation controls "
-                << "can be altered and the internalDelaunayVertices read in "
-                << "to try again, or more cell size resolution and motion "
-                << "iterations can be applied in areas where problems are "
-                << "occurring."
+                << "can be altered and the " << nl
+                << "internalDelaunayVertices read in to try again, or more "
+                << "cell size resolution " << nl
+                << "and motion iterations can be applied in areas where "
+                << "problems are occurring."
                 << endl;
         }
 

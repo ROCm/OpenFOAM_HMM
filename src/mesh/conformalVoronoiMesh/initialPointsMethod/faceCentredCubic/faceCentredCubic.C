@@ -76,7 +76,8 @@ std::vector<Vb::Point> faceCentredCubic::initialPoints() const
 
     delta *= pow((1.0/4.0),-(1.0/3.0));
 
-    Random rndGen(1735621);
+    Random& rndGen = cvMesh_.rndGen();
+
     scalar pert = randomPerturbationCoeff_*cmptMin(delta);
 
     std::vector<Vb::Point> initialPoints;

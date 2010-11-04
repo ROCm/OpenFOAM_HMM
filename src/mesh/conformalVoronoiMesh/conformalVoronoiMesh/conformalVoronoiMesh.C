@@ -38,6 +38,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 :
     HTriangulation(),
     runTime_(runTime),
+    rndGen_(7864293),
     allGeometry_
     (
         IOobject
@@ -828,11 +829,9 @@ Foam::conformalVoronoiMesh::featurePointTree() const
 {
     if (featurePointTreePtr_.empty())
     {
-        Random rndGen(92561);
-
         treeBoundBox overallBb
         (
-            treeBoundBox(geometryToConformTo_.bounds()).extend(rndGen, 1E-4)
+            treeBoundBox(geometryToConformTo_.bounds()).extend(rndGen_, 1E-4)
         );
 
         overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);

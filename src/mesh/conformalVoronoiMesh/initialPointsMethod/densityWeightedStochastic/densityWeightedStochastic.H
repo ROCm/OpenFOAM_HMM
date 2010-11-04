@@ -36,8 +36,6 @@ SourceFiles
 #ifndef densityWeightedStochastic_H
 #define densityWeightedStochastic_H
 
-#include "Switch.H"
-#include "Random.H"
 #include "initialPointsMethod.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

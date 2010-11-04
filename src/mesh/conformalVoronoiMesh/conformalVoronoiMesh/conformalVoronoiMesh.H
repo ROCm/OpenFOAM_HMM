@@ -110,6 +110,9 @@ private:
         //- The time registry of the application
         const Time& runTime_;
 
+        //- Random number generator
+        mutable Random rndGen_;
+
         //- All geometry of the meshing process, including surfaces to be
         //  conformed to and those to be used for refinement
         searchableSurfaces allGeometry_;
@@ -700,6 +703,9 @@ public:
 
             //- Return the Time object
             inline const Time& time() const;
+
+            //- Return the random number generator
+            inline Random& rndGen() const;
 
             //- Return the conformationSurfaces object
             inline const conformationSurfaces& geometryToConformTo() const;

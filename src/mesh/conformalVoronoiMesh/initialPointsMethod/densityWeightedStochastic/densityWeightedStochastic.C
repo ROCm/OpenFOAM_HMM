@@ -68,7 +68,7 @@ std::vector<Vb::Point> densityWeightedStochastic::initialPoints() const
 {
     const boundBox& bb = cvMesh_.geometryToConformTo().bounds();
 
-    Random rndGen(5234986);
+    Random& rndGen = cvMesh_.rndGen();
 
     std::vector<Vb::Point> initialPoints;
 

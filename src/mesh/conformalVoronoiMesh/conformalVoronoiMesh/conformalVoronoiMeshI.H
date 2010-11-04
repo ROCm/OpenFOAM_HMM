@@ -444,6 +444,12 @@ inline const Foam::Time& Foam::conformalVoronoiMesh::time() const
 }
 
 
+inline Foam::Random& Foam::conformalVoronoiMesh::rndGen() const
+{
+    return rndGen_;
+}
+
+
 inline const Foam::conformationSurfaces&
 Foam::conformalVoronoiMesh::geometryToConformTo() const
 {

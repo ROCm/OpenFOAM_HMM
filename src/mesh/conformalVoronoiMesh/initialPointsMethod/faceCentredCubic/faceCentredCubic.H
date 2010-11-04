@@ -36,8 +36,6 @@ SourceFiles
 #ifndef faceCentredCubic_H
 #define faceCentredCubic_H
 
-#include "Switch.H"
-#include "Random.H"
 #include "initialPointsMethod.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

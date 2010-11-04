@@ -36,8 +36,6 @@ SourceFiles
 #ifndef bodyCentredCubic_H
 #define bodyCentredCubic_H
 
-#include "Switch.H"
-#include "Random.H"
 #include "initialPointsMethod.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
