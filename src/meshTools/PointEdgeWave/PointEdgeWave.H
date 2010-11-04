@@ -354,6 +354,7 @@ public:
             {
                 x[i].updatePoint(y[i], PointEdgeWave<Type>::propagationTol());
             }
+        }
     }
 };
 
