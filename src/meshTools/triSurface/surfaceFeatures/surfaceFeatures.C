@@ -620,12 +620,22 @@ void Foam::surfaceFeatures::trimFeatures
 
         if
         (
-            (leftPath.len_ + rightPath.len_ < minLen)
-         || (leftPath.n_ + rightPath.n_ < minElems)
+            (
+                leftPath.len_
+              + rightPath.len_
+              + startEdge.mag(surf_.localPoints())
+              < minLen
+            )
+         || (leftPath.n_ + rightPath.n_ + 1 < minElems)
         )
         {
             // Rewalk same route (recognizable by featLines == featI)
             // to reset featLines.
+
+            Info<< "In too small case:" << startEdgeI
+                << nl << leftPath.len_ << " " << rightPath.len_
+                << nl << leftPath.n_ << " " << rightPath.n_
+                << endl;
 
             featLines[startEdgeI] = -2;
 
