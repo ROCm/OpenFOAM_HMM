@@ -49,7 +49,7 @@ geometry
         type triSurfaceMesh;
         name terrain;
 
-        //tolerance   1E-5;   // optional:non-default tolerance on intersections
+        //tolerance   1e-5;   // optional:non-default tolerance on intersections
         //maxTreeDepth 10;    // optional:depth of octree. Decrease only in case
                               // of memory limitations.
 
@@ -429,7 +429,7 @@ debug 0;
 
 // Merge tolerance. Is fraction of overall bounding box of initial mesh.
 // Note: the write tolerance needs to be higher than this.
-mergeTolerance 1E-6;
+mergeTolerance 1e-6;
 
 
 // ************************************************************************* //
