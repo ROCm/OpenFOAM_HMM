@@ -20,4 +20,7 @@ streamLine/streamLineParticle.C
 streamLine/streamLineParticleCloud.C
 streamLine/streamLineFunctionObject.C
 
+surfaceInterpolateFields/surfaceInterpolateFields.C
+surfaceInterpolateFields/surfaceInterpolateFieldsFunctionObject.C
+
 LIB = $(FOAM_LIBBIN)/libfieldFunctionObjects
