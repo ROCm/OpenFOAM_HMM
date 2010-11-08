@@ -90,32 +90,22 @@ Foam::featureEdgeMesh::featureEdgeMesh(const IOobject& io)
                 << endl;
         }
 
-        dictionary edgeMeshDict(readStream(typeName));
+        Istream& is = readStream(typeName);
 
-        edgeMesh::operator=
-        (
-            edgeMesh
-            (
-                pointField(edgeMeshDict.lookup("points")),
-                edgeList(edgeMeshDict.lookup("edges"))
-            )
-        );
+        is  >> *this
+            >> concaveStart_
+            >> mixedStart_
+            >> nonFeatureStart_
+            >> internalStart_
+            >> flatStart_
+            >> openStart_
+            >> multipleStart_
+            >> normals_
+            >> edgeNormals_
+            >> featurePointNormals_
+            >> regionEdges_;
 
-        concaveStart_ = readLabel(edgeMeshDict.lookup("concaveStart"));
-
-        mixedStart_ = readLabel(edgeMeshDict.lookup("mixedStart"));
-
-        nonFeatureStart_ = readLabel(edgeMeshDict.lookup("nonFeatureStart"));
-
-        internalStart_ = readLabel(edgeMeshDict.lookup("internalStart"));
-
-        flatStart_ = readLabel(edgeMeshDict.lookup("flatStart"));
-
-        openStart_ = readLabel(edgeMeshDict.lookup("openStart"));
-
-        multipleStart_ = readLabel(edgeMeshDict.lookup("multipleStart"));
-
-        normals_ = vectorField(edgeMeshDict.lookup("normals"));
+        close();
 
         {
             // Calculate edgeDirections
@@ -133,17 +123,6 @@ Foam::featureEdgeMesh::featureEdgeMesh(const IOobject& io)
 
             edgeDirections_ /= mag(edgeDirections_);
         }
-
-        edgeNormals_ = labelListList(edgeMeshDict.lookup("edgeNormals"));
-
-        featurePointNormals_ = labelListList
-        (
-            edgeMeshDict.lookup("featurePointNormals")
-        );
-
-        regionEdges_ = labelList(edgeMeshDict.lookup("regionEdges"));
-
-        close();
     }
 
     if (debug)
@@ -1016,44 +995,25 @@ void Foam::featureEdgeMesh::writeObj
 
 bool Foam::featureEdgeMesh::writeData(Ostream& os) const
 {
-    os.writeKeyword("concaveStart") << concaveStart_ << token::END_STATEMENT
-        << nl << nl;
+    os  << "// points, edges, concaveStart, mixedStart, nonFeatureStart, " << nl
+        << "// internalStart, flatStart, openStart, multipleStart, " << nl
+        << "// normals, edgeNormals, featurePointNormals, regionEdges" << nl
+        << endl;
 
-    os.writeKeyword("mixedStart") << mixedStart_ << token::END_STATEMENT
-        << nl << nl;
-
-    os.writeKeyword("nonFeatureStart") << nonFeatureStart_
-        << token::END_STATEMENT << nl << nl;
-
-    os.writeKeyword("points") << points() << token::END_STATEMENT
-        << nl << nl;
-
-    os.writeKeyword("internalStart") << internalStart_ << token::END_STATEMENT
-        << nl << nl;
-
-    os.writeKeyword("flatStart") << flatStart_ << token::END_STATEMENT
-        << nl << nl;
-
-    os.writeKeyword("openStart") << openStart_ << token::END_STATEMENT
-        << nl << nl;
-
-    os.writeKeyword("multipleStart") << multipleStart_ << token::END_STATEMENT
-        << nl << nl;
-
-    os.writeKeyword("edges") << edges() << token::END_STATEMENT
-        << nl << nl;
-
-    os.writeKeyword("normals") << normals_ << token::END_STATEMENT
-        << nl << nl;
-
-    os.writeKeyword("edgeNormals") << edgeNormals_ << token::END_STATEMENT
-        << nl << nl;
-
-    os.writeKeyword("featurePointNormals") << featurePointNormals_
-        << token::END_STATEMENT << nl << nl;
-
-    os.writeKeyword("regionEdges") << regionEdges_ << token::END_STATEMENT
-        << nl << nl;
+    os  << points() << nl
+        << edges() << nl
+        << concaveStart_ << token::SPACE
+        << mixedStart_ << token::SPACE
+        << nonFeatureStart_ << token::SPACE
+        << internalStart_ << token::SPACE
+        << flatStart_ << token::SPACE
+        << openStart_ << token::SPACE
+        << multipleStart_ << nl
+        << normals_ << nl
+        << edgeNormals_ << nl
+        << featurePointNormals_ << nl
+        << regionEdges_
+        << endl;
 
     return os.good();
 }
