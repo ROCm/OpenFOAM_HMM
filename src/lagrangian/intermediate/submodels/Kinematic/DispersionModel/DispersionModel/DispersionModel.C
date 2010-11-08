@@ -30,8 +30,7 @@ License
 template<class CloudType>
 Foam::DispersionModel<CloudType>::DispersionModel(CloudType& owner)
 :
-    dict_(dictionary::null),
-    owner_(owner)
+    SubModelBase<CloudType>(owner)
 {}
 
 
@@ -39,11 +38,21 @@ template<class CloudType>
 Foam::DispersionModel<CloudType>::DispersionModel
 (
     const dictionary& dict,
-    CloudType& owner
+    CloudType& owner,
+    const word& type
 )
 :
-    dict_(dict),
-    owner_(owner)
+    SubModelBase<CloudType>(owner, dict, type)
+{}
+
+
+template<class CloudType>
+Foam::DispersionModel<CloudType>::DispersionModel
+(
+    DispersionModel<CloudType>& dm
+)
+:
+    SubModelBase<CloudType>(dm)
 {}
 
 
@@ -57,23 +66,30 @@ Foam::DispersionModel<CloudType>::~DispersionModel()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-const CloudType& Foam::DispersionModel<CloudType>::owner() const
+Foam::vector Foam::DispersionModel<CloudType>::update
+(
+    const scalar,
+    const label,
+    const vector&,
+    const vector& Uc,
+    vector&,
+    scalar&
+)
 {
-    return owner_;
-}
+    notImplemented
+    (
+        "Foam::vector Foam::DispersionModel<CloudType>::update"
+        "("
+            "const scalar, "
+            "const label, "
+            "const vector&, "
+            "const vector&, "
+            "vector&, "
+            "scalar&"
+        ")"
+    );
 
-
-template<class CloudType>
-CloudType& Foam::DispersionModel<CloudType>::owner()
-{
-    return owner_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::DispersionModel<CloudType>::dict() const
-{
-    return dict_;
+    return Uc;
 }
 
 

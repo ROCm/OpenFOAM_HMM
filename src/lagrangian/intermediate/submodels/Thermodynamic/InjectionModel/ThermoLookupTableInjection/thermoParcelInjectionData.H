@@ -75,7 +75,7 @@ protected:
         scalar T_;
 
         //- Specific heat capacity [J/kg/K]
-        scalar cp_;
+        scalar Cp_;
 
 
 public:
@@ -105,7 +105,7 @@ public:
         inline scalar T() const;
 
         //- Return const access to the specific heat capacity
-        inline scalar cp() const;
+        inline scalar Cp() const;
 
 
     // Edit
@@ -114,7 +114,7 @@ public:
         inline scalar& T();
 
         //- Return access to the specific heat capacity
-        inline scalar& cp();
+        inline scalar& Cp();
 
 
     // I-O

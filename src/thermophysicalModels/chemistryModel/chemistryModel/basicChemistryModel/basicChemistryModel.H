@@ -125,6 +125,9 @@ public:
 
             // Chemistry solution
 
+                //- Calculates the reaction rates
+                virtual void calculate() = 0;
+
                 //- Solve the reaction system for the given start time and
                 //  timestep and return the characteristic time
                 virtual scalar solve(const scalar t0, const scalar deltaT) = 0;

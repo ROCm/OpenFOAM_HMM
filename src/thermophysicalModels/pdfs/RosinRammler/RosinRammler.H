@@ -82,11 +82,16 @@ public:
     // Constructors
 
         //- Construct from components
-        RosinRammler
-        (
-            const dictionary& dict,
-            Random& rndGen
-        );
+        RosinRammler(const dictionary& dict, cachedRandom& rndGen);
+
+        //- Construct copy
+        RosinRammler(const RosinRammler& p);
+
+        //- Construct and return a clone
+        virtual autoPtr<pdf> clone() const
+        {
+            return autoPtr<pdf>(new RosinRammler(*this));
+        }
 
 
     //- Destructor

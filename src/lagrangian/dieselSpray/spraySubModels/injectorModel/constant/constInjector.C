@@ -130,11 +130,12 @@ Foam::vector Foam::constInjector::direction
     */
 
     scalar angle =
-        rndGen_.scalar01()*sprayAngle_[n]*constant::mathematical::pi/360.0;
+        rndGen_.sample01<scalar>()*sprayAngle_[n]
+       *constant::mathematical::pi/360.0;
     scalar alpha = sin(angle);
     scalar dcorr = cos(angle);
 
-    scalar beta = constant::mathematical::twoPi*rndGen_.scalar01();
+    scalar beta = constant::mathematical::twoPi*rndGen_.sample01<scalar>();
 
     // randomly distributed vector normal to the injection vector
     vector normal = vector::zero;

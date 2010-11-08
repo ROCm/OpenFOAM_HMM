@@ -350,7 +350,10 @@ public:
     {
         forAll(x, i)
         {
-            x[i].updatePoint(y[i], PointEdgeWave<Type>::propagationTol());
+            if (y[i].valid())
+            {
+                x[i].updatePoint(y[i], PointEdgeWave<Type>::propagationTol());
+            }
         }
     }
 };

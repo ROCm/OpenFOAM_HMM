@@ -30,7 +30,7 @@ License
 template<class CloudType>
 void Foam::NoPostProcessing<CloudType>::write()
 {
-// do nothing
+    // do nothing
 }
 
 
@@ -44,6 +44,16 @@ Foam::NoPostProcessing<CloudType>::NoPostProcessing
 )
 :
     PostProcessingModel<CloudType>(owner)
+{}
+
+
+template<class CloudType>
+Foam::NoPostProcessing<CloudType>::NoPostProcessing
+(
+    const NoPostProcessing<CloudType>& ppm
+)
+:
+    PostProcessingModel<CloudType>(ppm.owner_)
 {}
 
 
@@ -70,7 +80,17 @@ void Foam::NoPostProcessing<CloudType>::postPatch
     const label
 )
 {
-// do nothing
+    // do nothing
+}
+
+
+template<class CloudType>
+void Foam::NoPostProcessing<CloudType>::postFace
+(
+    const typename CloudType::parcelType&
+)
+{
+    // do nothing
 }
 
 

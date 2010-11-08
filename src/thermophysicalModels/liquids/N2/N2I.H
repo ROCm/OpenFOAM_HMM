@@ -41,9 +41,9 @@ inline Foam::scalar Foam::N2::hl(scalar p, scalar T) const
 }
 
 
-inline Foam::scalar Foam::N2::cp(scalar p, scalar T) const
+inline Foam::scalar Foam::N2::Cp(scalar p, scalar T) const
 {
-    return cp_.f(p, T);
+    return Cp_.f(p, T);
 }
 
 
@@ -53,9 +53,9 @@ inline Foam::scalar Foam::N2::h(scalar p, scalar T) const
 }
 
 
-inline Foam::scalar Foam::N2::cpg(scalar p, scalar T) const
+inline Foam::scalar Foam::N2::Cpg(scalar p, scalar T) const
 {
-    return cpg_.f(p, T);
+    return Cpg_.f(p, T);
 }
 
 

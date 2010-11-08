@@ -24,13 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-const Foam::polyMesh& Foam::PatchPostProcessing<CloudType>::mesh() const
-{
-    return mesh_;
-}
-
-
-template<class CloudType>
 Foam::label Foam::PatchPostProcessing<CloudType>::maxStoredParcels() const
 {
     return maxStoredParcels_;

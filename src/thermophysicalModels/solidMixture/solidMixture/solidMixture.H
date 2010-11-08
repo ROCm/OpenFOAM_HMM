@@ -59,7 +59,6 @@ namespace Foam
 
 class solidMixture
 {
-
     // Private data
 
         //- The names of the solids
@@ -75,6 +74,20 @@ public:
 
         //- Construct from dictionary
         solidMixture(const dictionary&);
+
+        //- Construct copy
+        solidMixture(const solidMixture& lm);
+
+        //- Construct and return a clone
+        virtual autoPtr<solidMixture> clone() const
+        {
+            return autoPtr<solidMixture>(new solidMixture(*this));
+        }
+
+
+    //- Destructor
+    virtual ~solidMixture()
+    {}
 
 
     // Selectors
@@ -116,7 +129,7 @@ public:
 
         //- Calculate the mixture heat capacity [J/(kg K)] as a function
         //  of mass fractions
-        scalar cp(const scalarField& Y) const;
+        scalar Cp(const scalarField& Y) const;
 };
 
 

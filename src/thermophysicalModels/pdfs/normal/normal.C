@@ -40,7 +40,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pdfs::normal::normal(const dictionary& dict, Random& rndGen)
+Foam::pdfs::normal::normal(const dictionary& dict, cachedRandom& rndGen)
 :
     pdf(typeName, dict, rndGen),
     minValue_(readScalar(pdfDict_.lookup("minValue"))),
@@ -67,6 +67,17 @@ Foam::pdfs::normal::normal(const dictionary& dict, Random& rndGen)
 }
 
 
+Foam::pdfs::normal::normal(const normal& p)
+:
+    pdf(p),
+    minValue_(p.minValue_),
+    maxValue_(p.maxValue_),
+    expectation_(p.expectation_),
+    variance_(p.variance_),
+    a_(p.a_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::pdfs::normal::~normal()
@@ -81,7 +92,7 @@ Foam::scalar Foam::pdfs::normal::sample() const
     scalar a = erf((minValue_ - expectation_)/variance_);
     scalar b = erf((maxValue_ - expectation_)/variance_);
 
-    scalar y = rndGen_.scalar01();
+    scalar y = rndGen_.sample01<scalar>();
     scalar x = erfInv(y*(b - a) + a)*variance_ + expectation_;
 
     // Note: numerical approximation of the inverse function yields slight

@@ -62,6 +62,8 @@ Ostream& operator<<
 
 template<class Type>
 class DataEntry
+:
+    public refCount
 {
     // Private Member Functions
 
@@ -104,6 +106,12 @@ public:
         //- Copy constructor
         DataEntry(const DataEntry<Type>& de);
 
+        //- Construct and return a clone
+        virtual tmp<DataEntry<Type> > clone() const
+        {
+            return tmp<DataEntry<Type> >(new DataEntry<Type>(*this));
+        }
+
 
     //- Selector
     static autoPtr<DataEntry<Type> > New
@@ -128,10 +136,10 @@ public:
         // Evaluation
 
             //- Return value as a function of (scalar) independent variable
-            virtual Type value(const scalar x) const = 0;
+            virtual Type value(const scalar x) const;
 
             //- Integrate between two (scalar) values
-            virtual Type integrate(const scalar x1, const scalar x2) const = 0;
+            virtual Type integrate(const scalar x1, const scalar x2) const;
 
 
     //- Ostream Operator

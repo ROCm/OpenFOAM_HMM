@@ -59,6 +59,18 @@ public:
         //- Construct from components
         Analytical(const word& phiName, const dictionary& dict);
 
+        //- Copy constructor
+        Analytical(const Analytical& is);
+
+        //- Construct and return clone
+        virtual autoPtr<IntegrationScheme<Type> > clone() const
+        {
+            return autoPtr<IntegrationScheme<Type> >
+            (
+                new Analytical<Type>(*this)
+            );
+        }
+
 
     //- Destructor
     virtual ~Analytical();

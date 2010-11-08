@@ -31,6 +31,7 @@ License
 #include "KinematicCloud.H"
 
 #include "NoDrag.H"
+#include "NonSphereDrag.H"
 #include "SphereDrag.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -40,6 +41,7 @@ License
     makeDragModel(KinematicCloud<ParcelType>);                               \
                                                                              \
     makeDragModelType(NoDrag, KinematicCloud, ParcelType);                   \
+    makeDragModelType(NonSphereDrag, KinematicCloud, ParcelType);            \
     makeDragModelType(SphereDrag, KinematicCloud, ParcelType);
 
 

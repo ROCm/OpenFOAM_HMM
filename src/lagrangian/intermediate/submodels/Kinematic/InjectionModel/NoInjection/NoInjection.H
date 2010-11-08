@@ -56,18 +56,10 @@ protected:
     // Protected Member Functions
 
         //- Number of parcels to introduce over the time step relative to SOI
-        label parcelsToInject
-        (
-            const scalar,
-            const scalar
-        );
+        virtual label parcelsToInject(const scalar time0, const scalar time1);
 
         //- Volume of parcels to introduce over the time step relative to SOI
-        scalar volumeToInject
-        (
-            const scalar,
-            const scalar
-        );
+        virtual scalar volumeToInject(const scalar time0, const scalar time1);
 
 
 public:
@@ -79,11 +71,19 @@ public:
     // Constructors
 
         //- Construct from components
-        NoInjection
-        (
-            const dictionary&,
-            CloudType&
-        );
+        NoInjection(const dictionary&, CloudType&);
+
+        //- Construct copy
+        NoInjection(const NoInjection<CloudType>& im);
+
+        //- Construct and return a clone
+        virtual autoPtr<InjectionModel<CloudType> > clone() const
+        {
+            return autoPtr<InjectionModel<CloudType> >
+            (
+                new NoInjection<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor

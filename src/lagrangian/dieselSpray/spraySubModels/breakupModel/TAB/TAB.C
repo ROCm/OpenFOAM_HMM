@@ -175,7 +175,7 @@ void Foam::TAB::breakupParcel
 
                 label n = 0;
                 bool found = false;
-                scalar random = rndGen_.scalar01();
+                scalar random = rndGen_.sample01<scalar>();
                 while (!found && (n<99))
                 {
                     if (rrd_[n] > random)

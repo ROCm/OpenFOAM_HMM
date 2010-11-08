@@ -161,7 +161,7 @@ for ((proc=0; proc<$nProcs; proc++))
 do
     procCmdFile="$PWD/processor${proc}.sh"
     procLog="processor${proc}.log"
-    geom="-geometry 120x20+$xpos+$ypos"
+    geom="-geometry 120x15+$xpos+$ypos"
 
     case "$WM_MPLIB" in
     *OPENMPI)
@@ -183,11 +183,11 @@ do
         echo "${node}xterm -font fixed -title 'processor'$proc $geom -e $procCmdFile" >> $PWD/mpirun.schema
         ;;
     2)
-        echo "$sourceFoam; cd $PWD; gdb -command $PWD/gdbCommands >& $procLog" >> $procCmdFile
+        echo "$sourceFoam; cd $PWD; gdb -command $PWD/gdbCommands $exec > $procLog 2>&1" >> $procCmdFile
         echo "${node}$procCmdFile" >> $PWD/mpirun.schema
         ;;
     3)
-        echo "$sourceFoam; cd $PWD; $exec $args >& $procLog" >> $procCmdFile
+        echo "$sourceFoam; cd $PWD; $exec $args > $procLog 2>&1" >> $procCmdFile
         echo "${node}$procCmdFile" >> $PWD/mpirun.schema
         ;;
     4)

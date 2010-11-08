@@ -515,13 +515,16 @@ void Foam::PointEdgeWave<Type>::handleProcPatches()
         label meshPointI = pd.sharedPointLabels()[i];
 
         // Retrieve my entries from the shared points
-        updatePoint
-        (
-            meshPointI,
-            sharedData[pd.sharedPointAddr()[i]],
-            propagationTol_,
-            allPointInfo_[meshPointI]
-        );
+        if (sharedData[pd.sharedPointAddr()[i]].valid())
+        {
+            updatePoint
+            (
+                meshPointI,
+                sharedData[pd.sharedPointAddr()[i]],
+                propagationTol_,
+                allPointInfo_[meshPointI]
+            );
+        }
     }
 }
 

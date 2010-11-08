@@ -69,6 +69,12 @@ Foam::CaCO3::CaCO3(const dictionary& dict)
 {}
 
 
+Foam::CaCO3::CaCO3(const CaCO3& s)
+:
+    solid(s)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::CaCO3::writeData(Ostream& os) const

@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::NoDevolatilisation<CloudType>::NoDevolatilisation
 (
     const dictionary&,
@@ -38,9 +38,19 @@ Foam::NoDevolatilisation<CloudType>::NoDevolatilisation
 {}
 
 
+template<class CloudType>
+Foam::NoDevolatilisation<CloudType>::NoDevolatilisation
+(
+    const NoDevolatilisation<CloudType>& dm
+)
+:
+    DevolatilisationModel<CloudType>(dm.owner_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::NoDevolatilisation<CloudType>::~NoDevolatilisation()
 {}
 
@@ -55,22 +65,19 @@ bool Foam::NoDevolatilisation<CloudType>::active() const
 
 
 template<class CloudType>
-Foam::scalar Foam::NoDevolatilisation<CloudType>::calculate
+void Foam::NoDevolatilisation<CloudType>::calculate
 (
     const scalar,
     const scalar,
     const scalar,
     const scalar,
-    const scalar,
-    const scalar,
-    bool& canCombust
+    const scalarField&,
+    bool& canCombust,
+    scalarField&
 ) const
 {
     // Model does not stop combustion taking place
     canCombust = true;
-
-    // Nothing more to do...
-    return 0.0;
 }
 
 

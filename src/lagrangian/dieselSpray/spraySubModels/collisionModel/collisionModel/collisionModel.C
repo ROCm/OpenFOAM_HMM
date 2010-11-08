@@ -41,7 +41,7 @@ Foam::collisionModel::collisionModel
 (
     const dictionary& dict,
     spray& sm,
-    Random& rndGen
+    cachedRandom& rndGen
 )
 :
     dict_(dict),

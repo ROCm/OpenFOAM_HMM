@@ -31,6 +31,7 @@ License
 #include "KinematicCloud.H"
 
 #include "LocalInteraction.H"
+#include "NoInteraction.H"
 #include "Rebound.H"
 #include "StandardWallInteraction.H"
 
@@ -43,6 +44,12 @@ License
     makePatchInteractionModelType                                             \
     (                                                                         \
         LocalInteraction,                                                     \
+        KinematicCloud,                                                       \
+        ParcelType                                                            \
+    );                                                                        \
+    makePatchInteractionModelType                                             \
+    (                                                                         \
+        NoInteraction,                                                        \
         KinematicCloud,                                                       \
         ParcelType                                                            \
     );                                                                        \

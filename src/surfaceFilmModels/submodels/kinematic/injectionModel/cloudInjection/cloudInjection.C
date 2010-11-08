@@ -28,7 +28,6 @@ License
 #include "fvMesh.H"
 #include "Time.H"
 #include "mathematicalConstants.H"
-#include "Random.H"
 #include "volFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -53,7 +52,7 @@ Foam::surfaceFilmModels::cloudInjection::cloudInjection
 :
     injectionModel(type(), owner, dict),
     particlesPerParcel_(readScalar(coeffs_.lookup("particlesPerParcel"))),
-    rndGen_(label(0)),
+    rndGen_(label(0), -1),
     parcelPDF_(pdfs::pdf::New(coeffs_.subDict("parcelPDF"), rndGen_)),
     diameter_(owner.film().nCells(), 0.0)
 {

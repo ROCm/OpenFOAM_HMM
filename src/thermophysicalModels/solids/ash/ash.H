@@ -46,8 +46,8 @@ class ash;
 
 Ostream& operator<<
 (
-     Ostream&,
-     const ash&
+    Ostream&,
+    const ash&
 );
 
 
@@ -79,6 +79,15 @@ public:
 
         //- Construct from dictionary
         ash(const dictionary& dict);
+
+        //- Construct copy
+        ash(const ash& s);
+
+        //- Construct and return clone
+        virtual autoPtr<solid> clone() const
+        {
+            return autoPtr<solid>(new ash(*this));
+        }
 
 
     // I-O

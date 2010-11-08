@@ -70,6 +70,18 @@ public:
         //- Construct from components
         NoPostProcessing(const dictionary&, CloudType&);
 
+        //- Construct copy
+        NoPostProcessing(const NoPostProcessing<CloudType>& ppm);
+
+        //- Construct and return a clone
+        virtual autoPtr<PostProcessingModel<CloudType> > clone() const
+        {
+            return autoPtr<PostProcessingModel<CloudType> >
+            (
+                new NoPostProcessing<CloudType>(*this)
+            );
+        }
+
 
     //- Destructor
     virtual ~NoPostProcessing();
@@ -88,6 +100,9 @@ public:
                 const typename CloudType::parcelType& p,
                 const label patchI
             );
+
+            //- Gather particle data when hit face
+            virtual void postFace(const typename CloudType::parcelType& p);
 };
 
 

@@ -56,11 +56,19 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        NoSurfaceReaction
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+        NoSurfaceReaction(const dictionary& dict, CloudType& owner);
+
+        //- Construct copy
+        NoSurfaceReaction(const NoSurfaceReaction<CloudType>& srm);
+
+        //- Construct and return a clone
+        virtual autoPtr<SurfaceReactionModel<CloudType> > clone() const
+        {
+            return autoPtr<SurfaceReactionModel<CloudType> >
+            (
+                new NoSurfaceReaction<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor

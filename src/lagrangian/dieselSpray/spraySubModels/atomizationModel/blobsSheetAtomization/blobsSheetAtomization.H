@@ -67,7 +67,6 @@ private:
         dictionary coeffsDict_;
         scalar B_;
         scalar angle_;
-        Random& rndGen_;
 
 
 public:

@@ -58,108 +58,14 @@ void Foam::ReactingCloud<ParcelType>::checkSuppliedComposition
 
 
 template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::preEvolve()
+void Foam::ReactingCloud<ParcelType>::cloudReset(ReactingCloud<ParcelType>& c)
 {
-    ThermoCloud<ParcelType>::preEvolve();
-}
+    ThermoCloud<ParcelType>::cloudReset(c);
 
+    compositionModel_ = c.compositionModel_->clone();
+    phaseChangeModel_ = c.phaseChangeModel_->clone();
 
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::evolveCloud()
-{
-    const volScalarField& T = this->thermo().thermo().T();
-    const volScalarField cp = this->thermo().thermo().Cp();
-    const volScalarField& p = this->thermo().thermo().p();
-
-    autoPtr<interpolation<scalar> > rhoInterp = interpolation<scalar>::New
-    (
-        this->interpolationSchemes(),
-        this->rho()
-    );
-
-    autoPtr<interpolation<vector> > UInterp = interpolation<vector>::New
-    (
-        this->interpolationSchemes(),
-        this->U()
-    );
-
-    autoPtr<interpolation<scalar> > muInterp = interpolation<scalar>::New
-    (
-        this->interpolationSchemes(),
-        this->mu()
-    );
-
-    autoPtr<interpolation<scalar> > TInterp = interpolation<scalar>::New
-    (
-        this->interpolationSchemes(),
-        T
-    );
-
-    autoPtr<interpolation<scalar> > cpInterp = interpolation<scalar>::New
-    (
-        this->interpolationSchemes(),
-        cp
-    );
-
-    autoPtr<interpolation<scalar> > pInterp = interpolation<scalar>::New
-    (
-        this->interpolationSchemes(),
-        p
-    );
-
-    typename ParcelType::trackData td
-    (
-        *this,
-        constProps_,
-        rhoInterp(),
-        UInterp(),
-        muInterp(),
-        TInterp(),
-        cpInterp(),
-        pInterp(),
-        this->g().value()
-    );
-
-    label preInjectionSize = this->size();
-
-    this->surfaceFilm().inject(td);
-
-    // Update the cellOccupancy if the size of the cloud has changed
-    // during the injection.
-    if (preInjectionSize != this->size())
-    {
-        this->updateCellOccupancy();
-
-        preInjectionSize = this->size();
-    }
-
-    this->injection().inject(td);
-
-    if (this->coupled())
-    {
-        resetSourceTerms();
-    }
-
-    // Assume that motion will update the cellOccupancy as necessary
-    // before it is required.
-    motion(td);
-}
-
-
-template<class ParcelType>
-void  Foam::ReactingCloud<ParcelType>::motion
-(
-    typename ParcelType::trackData& td
-)
-{
-    ThermoCloud<ParcelType>::motion(td);
-}
-
-
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::postEvolve()
-{
-    ThermoCloud<ParcelType>::postEvolve();
+    dMassPhaseChange_ = c.dMassPhaseChange_;
 }
 
 
@@ -178,12 +84,13 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
 :
     ThermoCloud<ParcelType>(cloudName, rho, U, g, thermo, false),
     reactingCloud(),
+    cloudCopyPtr_(NULL),
     constProps_(this->particleProperties()),
     compositionModel_
     (
         CompositionModel<ReactingCloud<ParcelType> >::New
         (
-            this->particleProperties(),
+            this->subModelProperties(),
             *this
         )
     ),
@@ -191,7 +98,7 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
     (
         PhaseChangeModel<ReactingCloud<ParcelType> >::New
         (
-            this->particleProperties(),
+            this->subModelProperties(),
             *this
         )
     ),
@@ -212,9 +119,8 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
                     this->name() + "rhoTrans_" + specieName,
                     this->db().time().timeName(),
                     this->db(),
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE,
-                    false
+                    IOobject::READ_IF_PRESENT,
+                    IOobject::AUTO_WRITE
                 ),
                 this->mesh(),
                 dimensionedScalar("zero", dimMass, 0.0)
@@ -226,7 +132,72 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
     {
         ParcelType::readFields(*this);
     }
+
+    if (this->solution().resetSourcesOnStartup())
+    {
+        resetSourceTerms();
+    }
 }
+
+
+template<class ParcelType>
+Foam::ReactingCloud<ParcelType>::ReactingCloud
+(
+    ReactingCloud<ParcelType>& c,
+    const word& name
+)
+:
+    ThermoCloud<ParcelType>(c, name),
+    reactingCloud(),
+    cloudCopyPtr_(NULL),
+    constProps_(c.constProps_),
+    compositionModel_(c.compositionModel_->clone()),
+    phaseChangeModel_(c.phaseChangeModel_->clone()),
+    rhoTrans_(c.rhoTrans_.size()),
+    dMassPhaseChange_(c.dMassPhaseChange_)
+{
+    forAll(c.rhoTrans_, i)
+    {
+        const word& specieName = this->thermo().carrier().species()[i];
+        rhoTrans_.set
+        (
+            i,
+            new DimensionedField<scalar, volMesh>
+            (
+                IOobject
+                (
+                    this->name() + "rhoTrans_" + specieName,
+                    this->db().time().timeName(),
+                    this->db(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                c.rhoTrans_[i]
+            )
+        );
+    }
+}
+
+
+template<class ParcelType>
+Foam::ReactingCloud<ParcelType>::ReactingCloud
+(
+    const fvMesh& mesh,
+    const word& name,
+    const ReactingCloud<ParcelType>& c
+)
+:
+    ThermoCloud<ParcelType>(mesh, name, c),
+    reactingCloud(),
+    cloudCopyPtr_(NULL),
+    constProps_(),
+    compositionModel_(c.compositionModel_->clone()),
+//    compositionModel_(NULL),
+    phaseChangeModel_(NULL),
+    rhoTrans_(0),
+    dMassPhaseChange_(0.0)
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -273,6 +244,27 @@ void Foam::ReactingCloud<ParcelType>::checkParcelProperties
 
 
 template<class ParcelType>
+void Foam::ReactingCloud<ParcelType>::storeState()
+{
+    cloudCopyPtr_.reset
+    (
+        static_cast<ReactingCloud<ParcelType>*>
+        (
+            clone(this->name() + "Copy").ptr()
+        )
+    );
+}
+
+
+template<class ParcelType>
+void Foam::ReactingCloud<ParcelType>::restoreState()
+{
+    cloudReset(cloudCopyPtr_());
+    cloudCopyPtr_.clear();
+}
+
+
+template<class ParcelType>
 void Foam::ReactingCloud<ParcelType>::resetSourceTerms()
 {
     ThermoCloud<ParcelType>::resetSourceTerms();
@@ -284,19 +276,40 @@ void Foam::ReactingCloud<ParcelType>::resetSourceTerms()
 
 
 template<class ParcelType>
+void Foam::ReactingCloud<ParcelType>::relaxSources
+(
+    const ReactingCloud<ParcelType>& cloudOldTime
+)
+{
+    typedef DimensionedField<scalar, volMesh> dsfType;
+
+    ThermoCloud<ParcelType>::relaxSources(cloudOldTime);
+
+    forAll(rhoTrans_, fieldI)
+    {
+        dsfType& rhoT = rhoTrans_[fieldI];
+        const dsfType& rhoT0 = cloudOldTime.rhoTrans()[fieldI];
+        this->relax(rhoT, rhoT0, "rho");
+    }
+}
+
+
+template<class ParcelType>
 void Foam::ReactingCloud<ParcelType>::evolve()
 {
-    if (this->active())
+    if (this->solution().canEvolve())
     {
-        preEvolve();
+        typename ParcelType::trackData td(*this);
 
-        evolveCloud();
-
-        postEvolve();
-
-        info();
-        Info<< endl;
+        this->solve(td);
     }
+}
+
+
+template<class ParcelType>
+void Foam::ReactingCloud<ParcelType>::addToMassPhaseChange(const scalar dMass)
+{
+    dMassPhaseChange_ += dMass;
 }
 
 
@@ -307,13 +320,6 @@ void Foam::ReactingCloud<ParcelType>::info() const
 
     Info<< "    Mass transfer phase change      = "
         << returnReduce(dMassPhaseChange_, sumOp<scalar>()) << nl;
-}
-
-
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::addToMassPhaseChange(const scalar dMass)
-{
-    dMassPhaseChange_ += dMass;
 }
 
 

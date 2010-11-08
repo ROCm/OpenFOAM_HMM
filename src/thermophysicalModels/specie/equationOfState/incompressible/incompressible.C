@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,33 +23,36 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "CollisionModel.H"
+#include "incompressible.H"
+#include "IOstreams.H"
 
-template<class CloudType>
-const Foam::dictionary& Foam::CollisionModel<CloudType>::dict() const
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::incompressible::incompressible(Istream& is)
+:
+    specie(is),
+    rho_(readScalar(is))
 {
-    return dict_;
+    is.check("incompressible::incompressible(Istream& is)");
 }
 
 
-template<class CloudType>
-const CloudType& Foam::CollisionModel<CloudType>::owner() const
+Foam::incompressible::incompressible(const dictionary& dict)
+:
+    specie(dict),
+    rho_(readScalar(dict.lookup("rho")))
+{}
+
+
+// * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
+
+Foam::Ostream& Foam::operator<<(Ostream& os, const incompressible& ico)
 {
-    return owner_;
-}
+    os  << static_cast<const specie&>(ico)
+        << token::SPACE << ico.rho_;
 
-
-template<class CloudType>
-CloudType& Foam::CollisionModel<CloudType>::owner()
-{
-    return owner_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::CollisionModel<CloudType>::coeffDict() const
-{
-    return coeffDict_;
+    os.check("Ostream& operator<<(Ostream& os, const incompressible& st)");
+    return os;
 }
 
 

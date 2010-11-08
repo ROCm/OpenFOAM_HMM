@@ -25,7 +25,7 @@ tmp<fv::convectionScheme<scalar> > mvConvection
               + mvConvection->fvmDiv(phi, Yi)
               - fvm::laplacian(turbulence->muEff(), Yi)
               ==
-                coalParcels.Srho(i)
+                coalParcels.SYi(i, Yi)
               + kappa*chemistry.RR(i)().dimensionedInternalField()
             );
 

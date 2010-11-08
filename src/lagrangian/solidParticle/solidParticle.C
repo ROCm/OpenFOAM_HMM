@@ -27,7 +27,11 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::solidParticle::move(solidParticle::trackData& td)
+bool Foam::solidParticle::move
+(
+    solidParticle::trackData& td,
+    const scalar trackTime
+)
 {
     td.switchProcessor = false;
     td.keepParticle = true;
@@ -35,8 +39,7 @@ bool Foam::solidParticle::move(solidParticle::trackData& td)
     const polyMesh& mesh = cloud().pMesh();
     const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
 
-    scalar deltaT = mesh.time().deltaTValue();
-    scalar tEnd = (1.0 - stepFraction())*deltaT;
+    scalar tEnd = (1.0 - stepFraction())*trackTime;
     scalar dtMax = tEnd;
 
     while (td.keepParticle && !td.switchProcessor && tEnd > SMALL)
@@ -44,7 +47,7 @@ bool Foam::solidParticle::move(solidParticle::trackData& td)
         if (debug)
         {
             Info<< "Time = " << mesh.time().timeName()
-                << " deltaT = " << deltaT
+                << " trackTime = " << trackTime
                 << " tEnd = " << tEnd
                 << " steptFraction() = " << stepFraction() << endl;
         }
@@ -59,7 +62,7 @@ bool Foam::solidParticle::move(solidParticle::trackData& td)
         dt *= trackToFace(position() + dt*U_, td);
 
         tEnd -= dt;
-        stepFraction() = 1.0 - tEnd/deltaT;
+        stepFraction() = 1.0 - tEnd/trackTime;
 
         cellPointWeight cpw(mesh, position(), cellI, face());
         scalar rhoc = td.rhoInterp().interpolate(cpw);

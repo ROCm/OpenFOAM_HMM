@@ -103,10 +103,33 @@ public:
         //- Construct as a copy
         coalParcel(const coalParcel& p);
 
-        //- Construct and return a clone
-        autoPtr<coalParcel> clone() const
+        //- Construct as a copy
+        coalParcel
+        (
+            const coalParcel& p,
+            const ReactingMultiphaseCloud<coalParcel>& c
+        );
+
+        //- Construct and return a (basic particle) clone
+        virtual autoPtr<Particle<coalParcel> > clone() const
         {
-            return autoPtr<coalParcel>(new coalParcel(*this));
+            return autoPtr<Particle<coalParcel> >(new coalParcel(*this));
+        }
+
+        //- Construct and return a (basic particle) clone
+        virtual autoPtr<Particle<coalParcel> > clone
+        (
+            const Cloud<coalParcel>& c
+        ) const
+        {
+            return autoPtr<Particle<coalParcel> >
+            (
+                new coalParcel
+                (
+                    *this,
+                    static_cast<const ReactingMultiphaseCloud<coalParcel>&>(c)
+                )
+            );
         }
 
 
