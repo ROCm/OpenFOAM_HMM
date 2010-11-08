@@ -159,7 +159,8 @@ void Foam::spray::inject()
                             (runTime_.deltaTValue() - dt)
                            /runTime_.deltaTValue();
 
-                        bool keepParcel = pPtr->move(*this);
+                        bool keepParcel =
+                            pPtr->move(*this, runTime_.deltaTValue());
 
                         if (keepParcel)
                         {

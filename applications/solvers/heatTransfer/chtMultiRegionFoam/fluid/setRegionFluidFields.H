@@ -1,6 +1,6 @@
     fvMesh& mesh = fluidRegions[i];
 
-    basicPsiThermo& thermo = thermoFluid[i];
+    basicRhoThermo& thermo = thermoFluid[i];
     volScalarField& rho = rhoFluid[i];
     volScalarField& K = KFluid[i];
     volVectorField& U = UFluid[i];

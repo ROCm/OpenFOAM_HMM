@@ -39,6 +39,7 @@ SourceFiles
 #include "IOdictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
+#include "SubModelBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,21 +52,9 @@ namespace Foam
 
 template<class CloudType>
 class CollisionModel
+:
+    public SubModelBase<CloudType>
 {
-    // Private data
-
-        //- The cloud dictionary
-        const dictionary& dict_;
-
-        //- Reference to the owner cloud class
-        CloudType& owner_;
-
-        //- The coefficients dictionary
-        const dictionary coeffDict_;
-
-
-protected:
-
     // Protected data
 
         //- Convenience typedef for parcel type
@@ -96,13 +85,25 @@ public:
         //- Construct null from owner
         CollisionModel(CloudType& owner);
 
-        //- Construct from dictionary
+        //- Construct from components
         CollisionModel
         (
             const dictionary& dict,
             CloudType& owner,
             const word& type
         );
+
+        //- Construct copy
+        CollisionModel(CollisionModel<CloudType>& cm);
+
+        //- Construct and return a clone
+        virtual autoPtr<CollisionModel<CloudType> > clone()
+        {
+            return autoPtr<CollisionModel<CloudType> >
+            (
+                new CollisionModel<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -117,36 +118,18 @@ public:
     );
 
 
-    // Access
-
-        //- Return the owner cloud dictionary
-        inline const dictionary& dict() const;
-
-        //- Return const access the owner cloud object
-        inline const CloudType& owner() const;
-
-        //- Return non-const access the owner cloud object for manipulation
-        inline CloudType& owner();
-
-        //- Return the coefficients dictionary
-        inline const dictionary& coeffDict() const;
-
-
     // Member Functions
 
         //- Return the number of times to subcycle the current
         //  timestep to meet the criteria of the collision model
-        virtual label nSubCycles() const = 0;
-
-        //- Flag to indicate whether model activates injection model
-        virtual bool active() const = 0;
+        virtual label nSubCycles() const;
 
         //- Indicates whether model determines wall collisions or not,
         //  used to determine what value to use for wallImpactDistance
-        virtual bool controlsWallInteraction() const = 0;
+        virtual bool controlsWallInteraction() const;
 
         // Collision function
-        virtual void collide() = 0;
+        virtual void collide();
 };
 
 
@@ -171,10 +154,6 @@ public:
         adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
             add##SS##CloudType##ParcelType##ConstructorToTable_;
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "CollisionModelI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

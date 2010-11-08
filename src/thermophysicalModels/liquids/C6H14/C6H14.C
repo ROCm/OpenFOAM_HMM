@@ -57,7 +57,7 @@ Foam::C6H14::C6H14()
     rho_(61.03399848, 0.26411, 507.6, 0.27537),
     pv_(104.65, -6995.5, -12.702, 1.2381e-05, 2.0),
     hl_(507.60, 527286.863084118, 0.39002, 0.0, 0.0, 0.0),
-    cp_
+    Cp_
     (
         1997.28465831951,
        -2.13258758137322,
@@ -75,7 +75,7 @@ Foam::C6H14::C6H14()
         0.0,
         0.0
     ),
-    cpg_(1211.4601343746, 4088.0977523005, 1694.6, 2748.99335089409, 761.6),
+    Cpg_(1211.4601343746, 4088.0977523005, 1694.6, 2748.99335089409, 761.6),
     B_
     (
         0.0022859927822969,
@@ -115,9 +115,9 @@ Foam::C6H14::C6H14
     rho_(density),
     pv_(vapourPressure),
     hl_(heatOfVapourisation),
-    cp_(heatCapacity),
+    Cp_(heatCapacity),
     h_(enthalpy),
-    cpg_(idealGasHeatCapacity),
+    Cpg_(idealGasHeatCapacity),
     B_(secondVirialCoeff),
     mu_(dynamicViscosity),
     mug_(vapourDynamicViscosity),
@@ -134,9 +134,9 @@ Foam::C6H14::C6H14(Istream& is)
     rho_(is),
     pv_(is),
     hl_(is),
-    cp_(is),
+    Cp_(is),
     h_(is),
-    cpg_(is),
+    Cpg_(is),
     B_(is),
     mu_(is),
     mug_(is),
@@ -153,9 +153,9 @@ Foam::C6H14::C6H14(const dictionary& dict)
     rho_(dict.subDict("rho")),
     pv_(dict.subDict("pv")),
     hl_(dict.subDict("hl")),
-    cp_(dict.subDict("cp")),
+    Cp_(dict.subDict("Cp")),
     h_(dict.subDict("h")),
-    cpg_(dict.subDict("cpg")),
+    Cpg_(dict.subDict("Cpg")),
     B_(dict.subDict("B")),
     mu_(dict.subDict("mu")),
     mug_(dict.subDict("mug")),
@@ -163,6 +163,25 @@ Foam::C6H14::C6H14(const dictionary& dict)
     Kg_(dict.subDict("Kg")),
     sigma_(dict.subDict("sigma")),
     D_(dict.subDict("D"))
+{}
+
+
+Foam::C6H14::C6H14(const C6H14& liq)
+:
+    liquid(liq),
+    rho_(liq.rho_),
+    pv_(liq.pv_),
+    hl_(liq.hl_),
+    Cp_(liq.Cp_),
+    h_(liq.h_),
+    Cpg_(liq.Cpg_),
+    B_(liq.B_),
+    mu_(liq.mu_),
+    mug_(liq.mug_),
+    K_(liq.K_),
+    Kg_(liq.Kg_),
+    sigma_(liq.sigma_),
+    D_(liq.D_)
 {}
 
 

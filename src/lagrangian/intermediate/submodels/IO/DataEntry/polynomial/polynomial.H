@@ -91,11 +91,16 @@ public:
 
     // Constructors
 
-        //- Construct from entry name and Istream
         polynomial(const word& entryName, Istream& is);
 
         //- Copy constructor
         polynomial(const polynomial& poly);
+
+        //- Construct and return a clone
+        virtual tmp<DataEntry<scalar> > clone() const
+        {
+            return tmp<DataEntry<scalar> >(new polynomial(*this));
+        }
 
 
     //- Destructor
@@ -112,11 +117,7 @@ public:
 
 
     //- Ostream Operator
-    friend Ostream& operator<<
-    (
-        Ostream&,
-        const polynomial&
-    );
+    friend Ostream& operator<<(Ostream&, const polynomial&);
 };
 
 

@@ -40,9 +40,9 @@ inline Foam::scalar Foam::C3H6O::hl(scalar p, scalar T) const
 }
 
 
-inline Foam::scalar Foam::C3H6O::cp(scalar p, scalar T) const
+inline Foam::scalar Foam::C3H6O::Cp(scalar p, scalar T) const
 {
-    return cp_.f(p, T);
+    return Cp_.f(p, T);
 }
 
 
@@ -52,9 +52,9 @@ inline Foam::scalar Foam::C3H6O::h(scalar p, scalar T) const
 }
 
 
-inline Foam::scalar Foam::C3H6O::cpg(scalar p, scalar T) const
+inline Foam::scalar Foam::C3H6O::Cpg(scalar p, scalar T) const
 {
-    return cpg_.f(p, T);
+    return Cpg_.f(p, T);
 }
 
 

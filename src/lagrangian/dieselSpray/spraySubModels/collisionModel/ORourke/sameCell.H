@@ -35,7 +35,7 @@ scalar mdMin = mMin/nMin;
 scalar nu0 = 0.25*constant::mathematical::pi*sqr(sumD)*magVRel*dt/vols_[cell1];
 scalar nu = nMin*nu0;
 scalar collProb = exp(-nu);
-scalar xx = rndGen_.scalar01();
+scalar xx = rndGen_.sample01<scalar>();
 
 if ((xx > collProb) && (mMin > VSMALL) && (mMax > VSMALL))
 {
@@ -62,7 +62,7 @@ if ((xx > collProb) && (mMin > VSMALL) && (mMax > VSMALL))
     scalar WeColl = max(1.0e-12, 0.5*rho*magVRel*magVRel*dMin/sigma);
 
     scalar coalesceProb = min(1.0, 2.4*f/WeColl);
-    scalar prob = rndGen_.scalar01();
+    scalar prob = rndGen_.sample01<scalar>();
 
     // Coalescence
     if (prob < coalesceProb && coalescence_)

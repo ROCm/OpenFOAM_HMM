@@ -67,7 +67,13 @@ class ReactingMultiphaseCloud
     public ReactingCloud<ParcelType>,
     public reactingMultiphaseCloud
 {
-    // Private Member Functions
+    // Private data
+
+        //- Cloud copy pointer
+        autoPtr<ReactingMultiphaseCloud<ParcelType> > cloudCopyPtr_;
+
+
+    // Private member functions
 
         //- Disallow default bitwise copy construct
         ReactingMultiphaseCloud(const ReactingMultiphaseCloud&);
@@ -115,17 +121,8 @@ protected:
 
         // Cloud evolution functions
 
-            //- Pre-evolve
-            void preEvolve();
-
-            //- Evolve the cloud
-            void evolveCloud();
-
-            //- Particle motion
-            void motion(typename ParcelType::trackData& td);
-
-            //- Post-evolve
-            void postEvolve();
+            //- Reset state of cloud
+            void cloudReset(ReactingMultiphaseCloud<ParcelType>& c);
 
 
 public:
@@ -144,6 +141,40 @@ public:
         );
 
 
+        //- Copy constructor with new name
+        ReactingMultiphaseCloud
+        (
+            ReactingMultiphaseCloud<ParcelType>& c,
+            const word& name
+        );
+
+        //- Copy constructor with new name - creates bare cloud
+        ReactingMultiphaseCloud
+        (
+            const fvMesh& mesh,
+            const word& name,
+            const ReactingMultiphaseCloud<ParcelType>& c
+        );
+
+        //- Construct and return clone based on (this) with new name
+        virtual autoPtr<Cloud<ParcelType> > clone(const word& name)
+        {
+            return autoPtr<Cloud<ParcelType> >
+            (
+                new ReactingMultiphaseCloud(*this, name)
+            );
+        }
+
+        //- Construct and return bare clone based on (this) with new name
+        virtual autoPtr<Cloud<ParcelType> > cloneBare(const word& name) const
+        {
+            return autoPtr<Cloud<ParcelType> >
+            (
+                new ReactingMultiphaseCloud(this->mesh(), name, *this)
+            );
+        }
+
+
     //- Destructor
     virtual ~ReactingMultiphaseCloud();
 
@@ -155,6 +186,9 @@ public:
     // Member Functions
 
         // Access
+
+            //- Return a reference to the cloud copy
+            inline const ReactingMultiphaseCloud& cloudCopy() const;
 
             //- Return the constant properties
             inline const typename ParcelType::constantProperties&
@@ -180,9 +214,6 @@ public:
 
         // Check
 
-            //- Print cloud information
-            void info() const;
-
             //- Add to cumulative volatilisation mass transfer
             void addToMassDevolatilisation(const scalar dMass);
 
@@ -200,11 +231,20 @@ public:
                 const bool fullyDescribed
             );
 
-            //- Reset the spray source terms
+            //- Store the current cloud state
+            void storeState();
+
+            //- Reset the current cloud to the previously stored state
+            void restoreState();
+
+            //- Reset the cloud source terms
             void resetSourceTerms();
 
-            //- Evolve the spray (inject, move)
+            //- Evolve the cloud
             void evolve();
+
+            //- Print cloud information
+            void info() const;
 };
 
 

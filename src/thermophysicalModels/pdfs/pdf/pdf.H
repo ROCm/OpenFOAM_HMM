@@ -54,7 +54,7 @@ SourceFiles
 
 #include "IOdictionary.H"
 #include "autoPtr.H"
-#include "Random.H"
+#include "cachedRandom.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -78,7 +78,7 @@ protected:
         const dictionary pdfDict_;
 
         //- Reference to the random number generator
-        Random& rndGen_;
+        cachedRandom& rndGen_;
 
 
     // Protected Member Functions
@@ -101,7 +101,7 @@ public:
         dictionary,
         (
             const dictionary& dict,
-            Random& rndGen
+            cachedRandom& rndGen
         ),
         (dict, rndGen)
     );
@@ -110,11 +110,20 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        pdf(const word& name, const dictionary& dict, Random& rndGen);
+        pdf(const word& name, const dictionary& dict, cachedRandom& rndGen);
+
+        //- Construct copy
+        pdf(const pdf& p);
+
+        //- Construct and return a clone
+        virtual autoPtr<pdf> clone() const
+        {
+            return autoPtr<pdf>(new pdf(*this));
+        }
 
 
     //- Selector
-    static autoPtr<pdf> New(const dictionary& dict, Random& rndGen);
+    static autoPtr<pdf> New(const dictionary& dict, cachedRandom& rndGen);
 
 
     //- Destructor
@@ -124,13 +133,13 @@ public:
     // Member Functions
 
         //- Sample the pdf
-        virtual scalar sample() const = 0;
+        virtual scalar sample() const;
 
         //- Return the minimum value
-        virtual scalar minValue() const = 0;
+        virtual scalar minValue() const;
 
         //- Return the maximum value
-        virtual scalar maxValue() const = 0;
+        virtual scalar maxValue() const;
 };
 
 

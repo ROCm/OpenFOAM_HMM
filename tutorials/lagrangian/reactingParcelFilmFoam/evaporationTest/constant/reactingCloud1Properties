@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -15,69 +15,40 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-active          false; // true;
+solution
+{
+    active          false;
 
-InjectionModel  none;
-
-DragModel       SphereDrag;
-
-DispersionModel none;
-
-PatchInteractionModel StandardWallInteraction;
-
-CollisionModel  none;
-
-HeatTransferModel none;
-
-CompositionModel SinglePhaseMixture;
-
-PhaseChangeModel none;
-
-PostProcessingModel none;
-
-SurfaceFilmModel ThermoSurfaceFilm;
-
-radiation       off;
-
-coupled         true;
-
-cellValueSourceCorrection on;
-
-parcelTypeId    1;
+    integrationSchemes
+    {
+        U               Euler;
+        T               Analytical;
+    }
+}
 
 constantProperties
 {
-    rhoMin          rhoMin [ 1 -3 0 0 0 ] 1e-15;
-    TMin            TMin [ 0 0 0 1 0 ] 200;
-    pMin            pMin [ 1 -1 2 0 0 ] 1000;
-    rho0            rho0 [ 1 -3 0 0 0 ] 1000;
-    minParticleMass minParticleMass [ 1 0 0 0 0 ] 1e-15;
-    T0              T0 [ 0 0 0 1 0 ] 300;
-    cp0             cp0 [ 0 2 -2 -1 0 ] 4187;
-    epsilon0        epsilon0 [ 0 0 0 0 0 ] 1;
-    f0              f0 [ 0 0 0 0 0 ] 0.5;
-    Pr              Pr [ 0 0 0 0 0 ] 0.7;
-    Tvap            Tvap [ 0 0 0 1 0 ] 273;
-    Tbp             Tvap [ 0 0 0 1 0 ] 373;
+    parcelTypeId    1;
+
+    rhoMin          1e-15;
+    TMin            200;
+    pMin            1000;
+    minParticleMass 1e-15;
+
+    rho0            1000;
+    T0              300;
+    Cp0             4187;
+
+    epsilon0        1;
+    f0              0.5;
+
+    Pr              0.7;
+    Tvap            273;
+    Tbp             373;
+    youngsModulus   0;
+    poissonsRatio   0;
+
     constantVolume  false;
-    youngsModulus   youngsModulus [ 0 0 0 0 0 ] 0;
-    poissonsRatio   poissonsRatio [ 0 0 0 0 0 ] 0;
-}
-
-interpolationSchemes
-{
-    rho             cell;
-    U               cell; // cellPoint;
-    mu              cell;
-    T               cell;
-    Cp              cell;
-    p               cell;
-}
-
-integrationSchemes
-{
-    U               Euler;
-    T               Analytical;
 }
 
 particleForces
@@ -88,24 +59,30 @@ particleForces
     paramagnetic    off;
 }
 
-StandardWallInteractionCoeffs
+subModels
 {
-    type            rebound;
-}
+    InjectionModel  none;
 
-SinglePhaseMixtureCoeffs
-{
-    phases
-    (
-        liquid
-        {
-            H2O 1;
-        }
-    );
-}
+    DragModel       none;
 
-ThermoSurfaceFilmCoeffs
-{}
+    DispersionModel none;
+
+    PatchInteractionModel none;
+
+    CollisionModel  none;
+
+    HeatTransferModel none;
+
+    CompositionModel none;
+
+    PhaseChangeModel none;
+
+    PostProcessingModel none;
+
+    SurfaceFilmModel none;
+
+    radiation       off;
+}
 
 
 // ************************************************************************* //

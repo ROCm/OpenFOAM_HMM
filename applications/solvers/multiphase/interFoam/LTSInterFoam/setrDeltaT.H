@@ -103,7 +103,7 @@
         fvc::sweep(rDeltaT, alpha1, nAlphaSweepIter, alphaSpreadDiff);
     }
 
-    Info<< "Flow time scale min/max = "
+    Info<< "Smoothed flow time scale min/max = "
         << gMin(1/rDeltaT.internalField())
         << ", " << gMax(1/rDeltaT.internalField()) << endl;
 
@@ -116,13 +116,12 @@
      && runTime.timeIndex() > runTime.startTimeIndex() + 1
     )
     {
-        Info<< "Damping rDeltaT" << endl;
         rDeltaT = rDeltaT0*max(rDeltaT/rDeltaT0, 1.0 - rDeltaTDampingCoeff);
-    }
 
-    Info<< "Flow time scale min/max = "
-        << gMin(1/rDeltaT.internalField())
-        << ", " << gMax(1/rDeltaT.internalField()) << endl;
+        Info<< "Damped flow time scale min/max = "
+            << gMin(1/rDeltaT.internalField())
+            << ", " << gMax(1/rDeltaT.internalField()) << endl;
+    }
 
     label nAlphaSubCycles
     (

@@ -67,13 +67,20 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        NoSurfaceFilm
-        (
-            const dictionary&,
-            CloudType&,
-            const dimensionedVector&
-        );
+        //- Construct from dictionary
+        NoSurfaceFilm(const dictionary&, CloudType&, const dimensionedVector&);
+
+        //- Construct copy
+        NoSurfaceFilm(const NoSurfaceFilm<CloudType>& dm);
+
+        //- Construct and return a clone
+        virtual autoPtr<SurfaceFilmModel<CloudType> > clone() const
+        {
+            return autoPtr<SurfaceFilmModel<CloudType> >
+            (
+                new NoSurfaceFilm<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor

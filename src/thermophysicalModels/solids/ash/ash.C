@@ -69,6 +69,12 @@ Foam::ash::ash(const dictionary& dict)
 {}
 
 
+Foam::ash::ash(const ash& s)
+:
+    solid(s)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::ash::writeData(Ostream& os) const

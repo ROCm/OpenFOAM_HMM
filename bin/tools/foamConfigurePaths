@@ -53,7 +53,8 @@ _inlineSed()
     backup=`tempfile`
     cp $1 $backup
     sed -i -e "$2" $1
-    cmp $1 $backup || usage "Failed : $3"
+    cmp --quiet $1 $backup && usage "Failed : $3"
+    return 0
 }
 
 
@@ -70,9 +71,7 @@ do
         ;;
     --foamInstall)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-    foamInstall="$2"
-        echo "** foamInstall:$foamInstall"
-
+        foamInstall="$2"
         _inlineSed \
             etc/bashrc \
             '/^[^#]/s@foamInstall=.*@foamInstall='"$foamInstall@" \
@@ -81,7 +80,7 @@ do
         ;;
    --projectName)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-    projectName="$2"
+        projectName="$2"
         _inlineSed \
             etc/bashrc \
             '/^[^#]/s@WM_PROJECT_DIR=.*@WM_PROJECT_DIR=$WM_PROJECT_INST_DIR/'"$projectName@" \
@@ -90,7 +89,7 @@ do
         ;;
     --archOption)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-    archOption="$2"
+        archOption="$2"
         _inlineSed \
             etc/bashrc \
             '/^[^#]/s@: ${WM_ARCH_OPTION:=64}@WM_ARCH_OPTION='"$archOption@" \
@@ -99,7 +98,7 @@ do
         ;;
     --paraviewInstall)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-    paraviewInstall="$2"
+        paraviewInstall="$2"
         _inlineSed \
             etc/apps/paraview3/bashrc \
             '/^[^#]/s@ParaView_DIR=.*@ParaView_DIR='"$paraviewInstall@" \

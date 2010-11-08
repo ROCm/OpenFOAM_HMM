@@ -67,7 +67,7 @@ class solid
         scalar rho_;
 
         //- Specific heat capacity [J/(kg.K)]
-        scalar cp_;
+        scalar Cp_;
 
         //- Thermal conductivity [W/(m.K)]
         scalar K_;
@@ -121,7 +121,7 @@ public:
         solid
         (
             scalar rho,
-            scalar cp,
+            scalar Cp,
             scalar K,
             scalar Hf,
             scalar emissivity
@@ -132,6 +132,18 @@ public:
 
         //- Construct from dictionary
         solid(const dictionary& dict);
+
+        //- Construct copy
+        solid(const solid& s);
+
+        //- Construct and return clone
+        virtual autoPtr<solid> clone() const
+        {
+            return autoPtr<solid>(new solid(*this));
+        }
+
+
+    // Selectors
 
         //- Return a pointer to a new solid created from input
         static autoPtr<solid> New(Istream& is);
@@ -153,13 +165,19 @@ public:
             inline scalar rho() const;
 
             //- Specific heat capacity [J/(kg.K)]
-            inline scalar cp() const;
+            inline scalar Cp() const;
 
             //- Thermal conductivity [W/(m.K)]
             inline scalar K() const;
 
             //- Heat of formation [J/kg]
             inline scalar Hf() const;
+
+            //- Total enthalpy - reference to Tstd [J/kg]
+            inline scalar H(const scalar T) const;
+
+            //- Sensible enthalpy - reference to Tstd [J/kg]
+            inline scalar Hs(const scalar T) const;
 
             //- Emissivity []
             inline scalar emissivity() const;
@@ -179,11 +197,11 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "solidI.H"
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+#include "solidI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

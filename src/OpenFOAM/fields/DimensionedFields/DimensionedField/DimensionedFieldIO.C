@@ -47,6 +47,21 @@ void DimensionedField<Type, GeoMesh>::readField
 }
 
 
+template<class Type, class GeoMesh>
+void DimensionedField<Type, GeoMesh>::readIfPresent(const word& fieldDictEntry)
+{
+    if
+    (
+        (this->headerOk() && this->readOpt() == IOobject::READ_IF_PRESENT)
+     || this->readOpt() == IOobject::MUST_READ
+     || this->readOpt() == IOobject::MUST_READ_IF_MODIFIED
+    )
+    {
+        readField(dictionary(readStream(typeName)), fieldDictEntry);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type, class GeoMesh>

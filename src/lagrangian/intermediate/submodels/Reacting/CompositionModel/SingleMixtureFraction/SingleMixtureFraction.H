@@ -89,6 +89,18 @@ public:
         //- Construct from dictionary
         SingleMixtureFraction(const dictionary& dict, CloudType& owner);
 
+        //- Construct copy
+        SingleMixtureFraction(const SingleMixtureFraction<CloudType>& cm);
+
+        //- Construct and return a clone
+        virtual autoPtr<CompositionModel<CloudType> > clone() const
+        {
+            return autoPtr<CompositionModel<CloudType> >
+            (
+                new SingleMixtureFraction<CloudType>(*this)
+            );
+        }
+
 
     //- Destructor
     virtual ~SingleMixtureFraction();

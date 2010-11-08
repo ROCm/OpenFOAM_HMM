@@ -34,16 +34,13 @@ Foam::scalar Foam::compressibleCourantNo
     const surfaceScalarField& phi
 )
 {
-    scalar CoNum = 0.0;
-    scalar meanCoNum = 0.0;
-
     scalarField sumPhi =
         fvc::surfaceSum(mag(phi))().internalField()
        /rho.internalField();
 
-    CoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();
+    scalar CoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();
 
-    meanCoNum =
+    scalar meanCoNum =
         0.5*(gSum(sumPhi)/gSum(mesh.V().field()))*runTime.deltaTValue();
 
     Info<< "Region: " << mesh.name() << " Courant Number mean: " << meanCoNum

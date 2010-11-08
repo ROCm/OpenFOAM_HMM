@@ -1,5 +1,4 @@
 {
-    // From buoyantSimpleFoam
     rho = thermo.rho();
     rho = max(rho, rhoMin[i]);
     rho = min(rho, rhoMax[i]);
@@ -13,6 +12,8 @@
 
     phi = fvc::interpolate(rho)*(fvc::interpolate(U) & mesh.Sf());
     bool closedVolume = adjustPhi(phi, U, p_rgh);
+    dimensionedScalar compressibility = fvc::domainIntegrate(psi);
+    bool compressible = (compressibility.value() > SMALL);
 
     surfaceScalarField buoyancyPhi = rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf();
     phi -= buoyancyPhi;
@@ -25,7 +26,11 @@
             fvm::laplacian(rhorAUf, p_rgh) == fvc::div(phi)
         );
 
-        p_rghEqn.setReference(pRefCell, getRefCellValue(p_rgh, pRefCell));
+        p_rghEqn.setReference
+        (
+            pRefCell,
+            compressible ? getRefCellValue(p_rgh, pRefCell) : pRefValue
+        );
 
         p_rghEqn.solve();
 
@@ -50,10 +55,10 @@
 
     // For closed-volume cases adjust the pressure level
     // to obey overall mass continuity
-    if (closedVolume)
+    if (closedVolume && compressible)
     {
-        p += (initialMass - fvc::domainIntegrate(psi*p))
-            /fvc::domainIntegrate(psi);
+        p += (initialMass - fvc::domainIntegrate(thermo.rho()))
+            /compressibility;
         p_rgh = p - rho*gh;
     }
 

@@ -34,8 +34,8 @@ Foam::thermoParcelInjectionData::thermoParcelInjectionData(Istream& is)
     is.check("reading T");
     is >> T_;
 
-    is.check("reading cp");
-    is >> cp_;
+    is.check("reading Cp");
+    is >> Cp_;
 
     is.check("thermoParcelInjectionData(Istream& is)");
 }
@@ -51,7 +51,7 @@ Foam::Ostream& Foam::operator<<
 {
     os << static_cast<const kinematicParcelInjectionData&>(data);
 
-    os << data.T_ << data.cp_;
+    os << data.T_ << data.Cp_;
 
     return os;
 }
@@ -64,8 +64,8 @@ Foam::Istream& Foam::operator>>(Istream& is, thermoParcelInjectionData& data)
     is.check("reading T");
     is >> data.T_;
 
-    is.check("reading cp");
-    is >> data.cp_;
+    is.check("reading Cp");
+    is >> data.Cp_;
 
     is.check("operator(Istream&, thermoParcelInjectionData&)");
 

@@ -1116,12 +1116,12 @@ Foam::surfaceFilmModels::kinematicSingleLayer::Tw() const
 
 
 const Foam::volScalarField&
-Foam::surfaceFilmModels::kinematicSingleLayer::cp() const
+Foam::surfaceFilmModels::kinematicSingleLayer::Cp() const
 {
     FatalErrorIn
     (
-        "const volScalarField& kinematicSingleLayer::cp() const"
-    )   << "cp field not available for " << type() << abort(FatalError);
+        "const volScalarField& kinematicSingleLayer::Cp() const"
+    )   << "Cp field not available for " << type() << abort(FatalError);
 
     return volScalarField::null();
 }

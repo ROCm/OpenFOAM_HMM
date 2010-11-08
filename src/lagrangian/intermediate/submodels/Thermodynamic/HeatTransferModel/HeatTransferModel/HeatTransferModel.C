@@ -30,9 +30,7 @@ License
 template<class CloudType>
 Foam::HeatTransferModel<CloudType>::HeatTransferModel(CloudType& owner)
 :
-    dict_(dictionary::null),
-    owner_(owner),
-    coeffDict_(dictionary::null),
+    SubModelBase<CloudType>(owner),
     BirdCorrection_(false)
 {}
 
@@ -45,11 +43,21 @@ Foam::HeatTransferModel<CloudType>::HeatTransferModel
     const word& type
 )
 :
-    dict_(dict),
-    owner_(owner),
-    coeffDict_(dict.subDict(type + "Coeffs")),
-    BirdCorrection_(coeffDict_.lookup("BirdCorrection"))
+    SubModelBase<CloudType>(owner, dict, type),
+    BirdCorrection_(this->coeffDict().lookup("BirdCorrection"))
 {}
+
+
+template<class CloudType>
+Foam::HeatTransferModel<CloudType>::HeatTransferModel
+(
+    const HeatTransferModel<CloudType>& htm
+)
+:
+    SubModelBase<CloudType>(htm),
+    BirdCorrection_(htm.BirdCorrection_)
+{}
+
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -62,30 +70,29 @@ Foam::HeatTransferModel<CloudType>::~HeatTransferModel()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-const CloudType& Foam::HeatTransferModel<CloudType>::owner() const
-{
-    return owner_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::HeatTransferModel<CloudType>::dict() const
-{
-    return dict_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::HeatTransferModel<CloudType>::coeffDict() const
-{
-    return coeffDict_;
-}
-
-
-template<class CloudType>
 const Foam::Switch& Foam::HeatTransferModel<CloudType>::BirdCorrection() const
 {
     return BirdCorrection_;
+}
+
+
+template<class CloudType>
+Foam::scalar Foam::HeatTransferModel<CloudType>::Nu
+(
+    const scalar Re,
+    const scalar Pr
+) const
+{
+    notImplemented
+    (
+        "Foam::scalar Foam::HeatTransferModel<CloudType>::Nu"
+        "("
+            "const scalar, "
+            "const scalar"
+        ") const"
+    );
+
+    return 0.0;
 }
 
 

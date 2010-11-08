@@ -36,6 +36,8 @@ SourceFiles
 #define general_H
 
 #include "pdf.H"
+#include "Vector.H"
+#include "VectorSpace.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -76,11 +78,16 @@ public:
     // Constructors
 
         //- Construct from components
-        general
-        (
-            const dictionary& dict,
-            Random& rndGen
-        );
+        general(const dictionary& dict, cachedRandom& rndGen);
+
+        //- Construct copy
+        general(const general& p);
+
+        //- Construct and return a clone
+        virtual autoPtr<pdf> clone() const
+        {
+            return autoPtr<pdf>(new general(*this));
+        }
 
 
     //- Destructor

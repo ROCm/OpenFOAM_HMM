@@ -60,12 +60,20 @@ public:
 
     // Constructors
 
-        //- Construct from dictionary
-        NoCollision
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+        //- Construct from components
+        NoCollision(const dictionary& dict, CloudType& owner);
+
+        //- Construct copy
+        NoCollision(NoCollision<CloudType>& cm);
+
+        //- Construct and return a clone
+        virtual autoPtr<CollisionModel<CloudType> > clone()
+        {
+            return autoPtr<CollisionModel<CloudType> >
+            (
+                new NoCollision<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor

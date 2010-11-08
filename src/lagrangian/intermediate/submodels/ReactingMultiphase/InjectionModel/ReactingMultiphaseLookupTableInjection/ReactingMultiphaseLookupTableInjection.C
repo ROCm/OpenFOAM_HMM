@@ -125,6 +125,24 @@ ReactingMultiphaseLookupTableInjection
 }
 
 
+template<class CloudType>
+Foam::ReactingMultiphaseLookupTableInjection<CloudType>::
+ReactingMultiphaseLookupTableInjection
+(
+    const ReactingMultiphaseLookupTableInjection<CloudType>& im
+)
+:
+    InjectionModel<CloudType>(im),
+    inputFileName_(im.inputFileName_),
+    duration_(im.duration_),
+    nParcelsPerSecond_(im.nParcelsPerSecond_),
+    injectors_(im.injectors_),
+    injectorCells_(im.injectorCells_),
+    injectorTetFaces_(im.injectorTetFaces_),
+    injectorTetPts_(im.injectorTetPts_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -134,13 +152,6 @@ Foam::ReactingMultiphaseLookupTableInjection<CloudType>::
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::ReactingMultiphaseLookupTableInjection<CloudType>::active() const
-{
-    return true;
-}
-
 
 template<class CloudType>
 Foam::scalar
@@ -195,7 +206,7 @@ void Foam::ReactingMultiphaseLookupTableInjection<CloudType>::setProperties
     parcel.T() = injectors_[injectorI].T();
 
     // set particle specific heat capacity
-    parcel.cp() = injectors_[injectorI].cp();
+    parcel.Cp() = injectors_[injectorI].Cp();
 
     // set particle component mass fractions
     parcel.Y() = injectors_[injectorI].Y();

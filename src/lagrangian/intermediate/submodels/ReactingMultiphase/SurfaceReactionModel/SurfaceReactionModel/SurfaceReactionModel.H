@@ -39,7 +39,7 @@ SourceFiles
 #include "IOdictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
-
+#include "SubModelBase.H"
 #include "scalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -53,19 +53,9 @@ namespace Foam
 
 template<class CloudType>
 class SurfaceReactionModel
+:
+    public SubModelBase<CloudType>
 {
-    // Private data
-
-        //- The cloud dictionary
-        const dictionary& dict_;
-
-        //- Reference to the owner cloud class
-        CloudType& owner_;
-
-        //- The coefficients dictionary
-        const dictionary coeffDict_;
-
-
 public:
 
     //-Runtime type information
@@ -99,6 +89,18 @@ public:
             const word& type
         );
 
+        //- Construct copy
+        SurfaceReactionModel(const SurfaceReactionModel<CloudType>& srm);
+
+        //- Construct and return a clone
+        virtual autoPtr<SurfaceReactionModel<CloudType> > clone() const
+        {
+            return autoPtr<SurfaceReactionModel<CloudType> >
+            (
+                new SurfaceReactionModel<CloudType>(*this)
+            );
+        }
+
 
     //- Destructor
     virtual ~SurfaceReactionModel();
@@ -112,22 +114,7 @@ public:
     );
 
 
-    // Access
-
-        //- Return the owner cloud object
-        const CloudType& owner() const;
-
-        //- Return the cloud dictionary
-        const dictionary& dict() const;
-
-        //- Return the coefficients dictionary
-        const dictionary& coeffDict() const;
-
-
     // Member Functions
-
-        //- Flag to indicate whether model activates surface reaction model
-        virtual bool active() const = 0;
 
         //- Update surface reactions
         //  Returns the heat of reaction
@@ -150,7 +137,7 @@ public:
             scalarField& dMassLiquid,
             scalarField& dMassSolid,
             scalarField& dMassSRCarrier
-        ) const = 0;
+        ) const;
 };
 
 

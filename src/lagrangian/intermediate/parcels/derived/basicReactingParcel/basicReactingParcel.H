@@ -101,14 +101,36 @@ public:
         //- Construct as a copy
         basicReactingParcel(const basicReactingParcel& p);
 
+        //- Construct as a copy
+        basicReactingParcel
+        (
+            const basicReactingParcel& p,
+            const ReactingCloud<basicReactingParcel>& c
+        );
+
         //- Construct and return a clone
-        autoPtr<basicReactingParcel> clone() const
+        virtual autoPtr<Particle<basicReactingParcel> > clone() const
         {
-            return
-                autoPtr<basicReactingParcel>
+            return autoPtr<Particle<basicReactingParcel> >
+            (
+                new basicReactingParcel(*this)
+            );
+        }
+
+        //- Construct and return a clone
+        virtual autoPtr<Particle<basicReactingParcel> > clone
+        (
+            const Cloud<basicReactingParcel>& c
+        ) const
+        {
+            return autoPtr<Particle<basicReactingParcel> >
+            (
+                new basicReactingParcel
                 (
-                    new basicReactingParcel(*this)
-                );
+                    *this,
+                    static_cast<const ReactingCloud<basicReactingParcel>&>(c)
+                )
+            );
         }
 
 

@@ -79,7 +79,7 @@ class ManualInjection
         //- List of tetPt labels corresponding to injector positions
         labelList injectorTetPts_;
 
-    //- Initial parcel velocity
+        //- Initial parcel velocity
         const vector U0_;
 
         //- Parcel size PDF model
@@ -91,18 +91,10 @@ protected:
     // Protected Member Functions
 
         //- Number of parcels to introduce over the time step relative to SOI
-        label parcelsToInject
-        (
-            const scalar time0,
-            const scalar time1
-        );
+        virtual label parcelsToInject(const scalar time0, const scalar time1);
 
         //- Volume of parcels to introduce over the time step relative to SOI
-        scalar volumeToInject
-        (
-            const scalar time0,
-            const scalar time1
-        );
+        virtual scalar volumeToInject(const scalar time0, const scalar time1);
 
 
 public:
@@ -114,11 +106,19 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        ManualInjection
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+        ManualInjection(const dictionary& dict, CloudType& owner);
+
+        //- Construct copy
+        ManualInjection(const ManualInjection<CloudType>& im);
+
+        //- Construct and return a clone
+        virtual autoPtr<InjectionModel<CloudType> > clone() const
+        {
+            return autoPtr<InjectionModel<CloudType> >
+            (
+                new ManualInjection<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -126,9 +126,6 @@ public:
 
 
     // Member Functions
-
-        //- Flag to indicate whether model activates injection model
-        bool active() const;
 
         //- Return the end-of-injection time
         scalar timeEnd() const;

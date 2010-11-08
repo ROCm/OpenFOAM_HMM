@@ -23,32 +23,37 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-template<class CloudType>
-const Foam::dictionary& Foam::PostProcessingModel<CloudType>::dict() const
-{
-    return dict_;
-}
+#include "NoComposition.H"
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-const CloudType& Foam::PostProcessingModel<CloudType>::owner() const
-{
-    return owner_;
-}
-
-
-template<class CloudType>
-CloudType& Foam::PostProcessingModel<CloudType>::owner()
-{
-    return owner_;
-}
+Foam::NoComposition<CloudType>::NoComposition
+(
+    const dictionary&,
+    CloudType& owner
+)
+:
+    CompositionModel<CloudType>(owner)
+{}
 
 
 template<class CloudType>
-const Foam::dictionary& Foam::PostProcessingModel<CloudType>::coeffDict() const
-{
-    return coeffDict_;
-}
+Foam::NoComposition<CloudType>::NoComposition
+(
+    const NoComposition<CloudType>& cm
+)
+:
+    CompositionModel<CloudType>(cm)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::NoComposition<CloudType>::~NoComposition()
+{}
 
 
 // ************************************************************************* //
+

@@ -20,7 +20,7 @@
     const fileName pdfPath = runTime.path()/"pdf";
     mkDir(pdfPath);
 
-    Random rndGen(label(0));
+    cachedRandom rndGen(label(0), -1);
 
     autoPtr<pdfs::pdf> p(pdfs::pdf::New(pdfDictionary, rndGen));
 

@@ -6,7 +6,7 @@
       - fvm::laplacian(turbulence->alphaEff(), hs)
      ==
         DpDt
-      + thermoCloud1.Sh()
+      + thermoCloud1.Sh(hs)
     );
 
     hsEqn.relax();

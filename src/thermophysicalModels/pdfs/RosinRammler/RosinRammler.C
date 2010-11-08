@@ -39,7 +39,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pdfs::RosinRammler::RosinRammler(const dictionary& dict, Random& rndGen)
+Foam::pdfs::RosinRammler::RosinRammler
+(
+    const dictionary& dict,
+    cachedRandom& rndGen
+)
 :
     pdf(typeName, dict, rndGen),
     minValue_(readScalar(pdfDict_.lookup("minValue"))),
@@ -49,6 +53,16 @@ Foam::pdfs::RosinRammler::RosinRammler(const dictionary& dict, Random& rndGen)
 {
     check();
 }
+
+
+Foam::pdfs::RosinRammler::RosinRammler(const RosinRammler& p)
+:
+    pdf(p),
+    minValue_(p.minValue_),
+    maxValue_(p.maxValue_),
+    d_(p.d_),
+    n_(p.n_)
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -61,9 +75,8 @@ Foam::pdfs::RosinRammler::~RosinRammler()
 
 Foam::scalar Foam::pdfs::RosinRammler::sample() const
 {
-
     scalar K = 1.0 - exp(-pow((maxValue_ - minValue_)/d_, n_));
-    scalar y = rndGen_.scalar01();
+    scalar y = rndGen_.sample01<scalar>();
     scalar x = minValue_ + d_*::pow(-log(1.0 - y*K), 1.0/n_);
     return x;
 }

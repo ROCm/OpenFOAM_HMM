@@ -100,14 +100,36 @@ public:
         //- Construct as a copy
         basicKinematicParcel(const basicKinematicParcel& p);
 
+        //- Construct as a copy
+        basicKinematicParcel
+        (
+            const basicKinematicParcel& p,
+            const KinematicCloud<basicKinematicParcel>& c
+        );
+
         //- Construct and return a clone
-        autoPtr<basicKinematicParcel> clone() const
+        virtual autoPtr<Particle<basicKinematicParcel> > clone() const
         {
-            return
-                autoPtr<basicKinematicParcel>
+            return autoPtr<Particle<basicKinematicParcel> >
+            (
+                new basicKinematicParcel(*this)
+            );
+        }
+
+        //- Construct and return a clone
+        virtual autoPtr<Particle<basicKinematicParcel> > clone
+        (
+            const Cloud<basicKinematicParcel>& c
+        ) const
+        {
+            return autoPtr<Particle<basicKinematicParcel> >
+            (
+                new basicKinematicParcel
                 (
-                    new basicKinematicParcel(*this)
-                );
+                    *this,
+                    static_cast<const KinematicCloud<basicKinematicParcel>&>(c)
+                )
+            );
         }
 
 

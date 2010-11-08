@@ -25,7 +25,7 @@ tmp<fv::convectionScheme<scalar> > mvConvection
               + mvConvection->fvmDiv(phi, Yi)
               - fvm::laplacian(turbulence->muEff(), Yi)
               ==
-                parcels.Srho(i)
+                parcels.SYi(i, Yi)
               + surfaceFilm.Srho(i)
               + kappa*chemistry.RR(i)().dimensionedInternalField(),
                 mesh.solver("Yi")

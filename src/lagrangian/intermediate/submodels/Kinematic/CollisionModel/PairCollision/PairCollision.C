@@ -564,6 +564,24 @@ Foam::PairCollision<CloudType>::PairCollision
 {}
 
 
+template<class CloudType>
+Foam::PairCollision<CloudType>::PairCollision(PairCollision<CloudType>& cm)
+:
+    CollisionModel<CloudType>(cm),
+    pairModel_(NULL),
+    wallModel_(NULL),
+    il_(cm.owner().mesh())
+{
+    notImplemented
+    (
+        "Foam::PairCollision<CloudType>::PairCollision"
+        "("
+            "PairCollision<CloudType>& cm"
+        ")"
+    );
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -599,13 +617,6 @@ Foam::label Foam::PairCollision<CloudType>::nSubCycles() const
     }
 
     return nSubCycles;
-}
-
-
-template<class CloudType>
-bool Foam::PairCollision<CloudType>::active() const
-{
-    return true;
 }
 
 

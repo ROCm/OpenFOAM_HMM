@@ -25,14 +25,21 @@ License
 
 #include "PostProcessingModel.H"
 
+// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
+
+template<class CloudType>
+void Foam::PostProcessingModel<CloudType>::write()
+{
+    notImplemented("void Foam::PostProcessingModel<CloudType>::write()");
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
 Foam::PostProcessingModel<CloudType>::PostProcessingModel(CloudType& owner)
 :
-    dict_(dictionary::null),
-    owner_(owner),
-    coeffDict_(dictionary::null)
+    SubModelBase<CloudType>(owner)
 {}
 
 
@@ -44,9 +51,17 @@ Foam::PostProcessingModel<CloudType>::PostProcessingModel
     const word& type
 )
 :
-    dict_(dict),
-    owner_(owner),
-    coeffDict_(dict.subDict(type + "Coeffs"))
+    SubModelBase<CloudType>(owner, dict, type)
+{}
+
+
+template<class CloudType>
+Foam::PostProcessingModel<CloudType>::PostProcessingModel
+(
+    const PostProcessingModel<CloudType>& ppm
+)
+:
+    SubModelBase<CloudType>(ppm)
 {}
 
 
@@ -62,10 +77,44 @@ Foam::PostProcessingModel<CloudType>::~PostProcessingModel()
 template<class CloudType>
 void Foam::PostProcessingModel<CloudType>::post()
 {
-    if (owner_.time().outputTime())
+    if (this->owner().time().outputTime())
     {
         this->write();
     }
+}
+
+
+template<class CloudType>
+void Foam::PostProcessingModel<CloudType>::postPatch
+(
+    const typename CloudType::parcelType&,
+    const label
+)
+{
+    notImplemented
+    (
+        "void Foam::PostProcessingModel<CloudType>::postPatch"
+        "("
+            "const typename CloudType::parcelType&,"
+            "const label"
+        ")"
+    );
+}
+
+
+template<class CloudType>
+void Foam::PostProcessingModel<CloudType>::postFace
+(
+    const typename CloudType::parcelType&
+)
+{
+    notImplemented
+    (
+        "void Foam::PostProcessingModel<CloudType>::postFace"
+        "("
+            "const typename CloudType::parcelType&"
+        ")"
+    );
 }
 
 

@@ -51,7 +51,7 @@ class LocalInteraction
     // Private data
 
         //- List of participating patches
-        const List<patchInteractionData> patchProperties_;
+        const List<patchInteractionData> patchData_;
 
         //- List of participating patch ids
         List<label> patchIds_;
@@ -73,7 +73,19 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        LocalInteraction(const dictionary& dict, CloudType& cloud);
+        LocalInteraction(const dictionary& dict, CloudType& owner);
+
+        //- Construct copy from owner cloud and patch interaction model
+        LocalInteraction(const LocalInteraction<CloudType>& pim);
+
+        //- Construct and return a clone using supplied owner cloud
+        virtual autoPtr<PatchInteractionModel<CloudType> > clone() const
+        {
+            return autoPtr<PatchInteractionModel<CloudType> >
+            (
+                new LocalInteraction<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -81,9 +93,6 @@ public:
 
 
     // Member Functions
-
-        //- Flag to indicate whether model activates patch interaction model
-        virtual bool active() const;
 
         //- Apply velocity correction
         //  Returns true if particle remains in same cell

@@ -94,14 +94,13 @@ Foam::parcel::parcel
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::parcel::move(spray& sDB)
+bool Foam::parcel::move(spray& sDB, const scalar trackTime)
 {
     const polyMesh& mesh = cloud().pMesh();
     const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
 
     const liquidMixture& fuels = sDB.fuels();
 
-    scalar deltaT = sDB.runTime().deltaTValue();
     label Nf = fuels.components().size();
     label Ns = sDB.composition().Y().size();
 
@@ -156,12 +155,12 @@ bool Foam::parcel::move(spray& sDB)
         pg,
         Yfg,
         m()*fuels.Y(X()),
-        deltaT
+        trackTime
     );
 
 
     // set the end-time for the track
-    scalar tEnd = (1.0 - stepFraction())*deltaT;
+    scalar tEnd = (1.0 - stepFraction())*trackTime;
 
     // set the maximum time step for this parcel
     scalar dtMax = min
@@ -215,7 +214,7 @@ bool Foam::parcel::move(spray& sDB)
             tEnd -= dt;
 
             // Set the current time-step fraction.
-            stepFraction() = 1.0 - tEnd/deltaT;
+            stepFraction() = 1.0 - tEnd/trackTime;
 
             if (onBoundary()) // hit face
             {
@@ -521,7 +520,7 @@ void Foam::parcel::updateParcelProperties
 
         scalar Taverage = TDroplet + (Tg - TDroplet)/3.0;
         // for a liquid Cl \approx Cp
-        scalar liquidcL = sDB.fuels().cp(pg, TDroplet, X());
+        scalar liquidcL = sDB.fuels().Cp(pg, TDroplet, X());
 
         cpMix = 0.0;
         for (label i=0; i<Ns; i++)

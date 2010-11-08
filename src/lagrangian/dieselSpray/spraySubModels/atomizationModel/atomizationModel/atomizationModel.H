@@ -55,7 +55,7 @@ protected:
 
         const dictionary& dict_;
         spray& spray_;
-        Random& rndGen_;
+        cachedRandom& rndGen_;
 
 
 public:

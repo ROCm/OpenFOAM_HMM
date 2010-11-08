@@ -51,6 +51,7 @@ SourceFiles
 #include "IOdictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
+#include "SubModelBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,6 +64,8 @@ namespace Foam
 
 template<class CloudType>
 class InjectionModel
+:
+    public SubModelBase<CloudType>
 {
 public:
 
@@ -79,18 +82,6 @@ public:
 
 
 private:
-
-    // Private data
-
-        //- The cloud dictionary
-        const dictionary& dict_;
-
-        //- Reference to the owner cloud class
-        CloudType& owner_;
-
-        //- The coefficients dictionary
-        const dictionary coeffDict_;
-
 
     // Private Member Functions
 
@@ -111,7 +102,7 @@ protected:
         // Global injection properties
 
             //- Start of injection [s]
-            const scalar SOI_;
+            scalar SOI_;
 
             //- Total volume of particles introduced by this injector [m^3]
             //  - scaled to ensure massTotal is achieved
@@ -152,22 +143,14 @@ protected:
     // Protected Member Functions
 
         //- Number of parcels to introduce over the time step relative to SOI
-        virtual label parcelsToInject
-        (
-            const scalar time0,
-            const scalar time1
-        ) = 0;
+        virtual label parcelsToInject(const scalar time0, const scalar time1);
 
         //- Volume of parcels to introduce over the time step relative to SOI
-        virtual scalar volumeToInject
-        (
-            const scalar time0,
-            const scalar time1
-        ) = 0;
+        virtual scalar volumeToInject(const scalar time0, const scalar time1);
 
         //- Additional flag to identify whether or not injection of parcelI is
         //  permitted
-        virtual bool validInjection(const label parcelI) = 0;
+        virtual bool validInjection(const label parcelI);
 
         //- Determine properties for next time step/injection interval
         virtual void prepareForNextTimeStep
@@ -238,6 +221,18 @@ public:
             const word& type
         );
 
+        //- Construct copy
+        InjectionModel(const InjectionModel<CloudType>& im);
+
+        //- Construct and return a clone
+        virtual autoPtr<InjectionModel<CloudType> > clone() const
+        {
+            return autoPtr<InjectionModel<CloudType> >
+            (
+                new InjectionModel<CloudType>(*this)
+            );
+        }
+
 
     //- Destructor
     virtual ~InjectionModel();
@@ -251,26 +246,7 @@ public:
     );
 
 
-    // Access
-
-        //- Return the owner cloud dictionary
-        inline const dictionary& dict() const;
-
-        //- Return const access the owner cloud object
-        inline const CloudType& owner() const;
-
-        //- Return non-const access the owner cloud object for manipulation
-        inline CloudType& owner();
-
-        //- Return the coefficients dictionary
-        inline const dictionary& coeffDict() const;
-
-
     // Member Functions
-
-        //- Flag to indicate whether model activates injection model
-        virtual bool active() const = 0;
-
 
         // Global information
 
@@ -287,7 +263,7 @@ public:
             inline scalar massInjected() const;
 
             //- Return the end-of-injection time
-            virtual scalar timeEnd() const = 0;
+            virtual scalar timeEnd() const;
 
             // Counters
 
@@ -304,6 +280,10 @@ public:
             template<class TrackData>
             void inject(TrackData& td);
 
+            //- Main injection loop - steady-state
+            template<class TrackData>
+            void injectSteadyState(TrackData& td, const scalar trackTime);
+
 
         // Injection geometry
 
@@ -317,7 +297,7 @@ public:
                 label& cellOwner,
                 label& tetFaceI,
                 label& tetPtI
-            ) = 0;
+            );
 
             //- Set the parcel properties
             virtual void setProperties
@@ -326,15 +306,15 @@ public:
                 const label nParcels,
                 const scalar time,
                 typename CloudType::parcelType& parcel
-            ) = 0;
+            );
 
             //- Flag to identify whether model fully describes the parcel
-            virtual bool fullyDescribed() const = 0;
+            virtual bool fullyDescribed() const;
 
 
         // I-O
 
-            //- Write surface film info to stream
+            //- Write injection info to stream
             virtual void info(Ostream& os) const;
 };
 

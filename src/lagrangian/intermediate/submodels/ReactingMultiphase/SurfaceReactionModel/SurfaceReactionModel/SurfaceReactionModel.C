@@ -33,9 +33,7 @@ Foam::SurfaceReactionModel<CloudType>::SurfaceReactionModel
     CloudType& owner
 )
 :
-    dict_(dictionary::null),
-    owner_(owner),
-    coeffDict_(dictionary::null)
+    SubModelBase<CloudType>(owner)
 {}
 
 
@@ -47,9 +45,17 @@ Foam::SurfaceReactionModel<CloudType>::SurfaceReactionModel
     const word& type
 )
 :
-    dict_(dict),
-    owner_(owner),
-    coeffDict_(dict.subDict(type + "Coeffs"))
+    SubModelBase<CloudType>(owner, dict, type)
+{}
+
+
+template<class CloudType>
+Foam::SurfaceReactionModel<CloudType>::SurfaceReactionModel
+(
+    const SurfaceReactionModel<CloudType>& srm
+)
+:
+    SubModelBase<CloudType>(srm)
 {}
 
 
@@ -63,23 +69,52 @@ Foam::SurfaceReactionModel<CloudType>::~SurfaceReactionModel()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-const CloudType& Foam::SurfaceReactionModel<CloudType>::owner() const
+Foam::scalar Foam::SurfaceReactionModel<CloudType>::calculate
+(
+    const scalar,
+    const label,
+    const scalar,
+    const scalar,
+    const scalar,
+    const scalar,
+    const scalar,
+    const scalar,
+    const scalarField&,
+    const scalarField&,
+    const scalarField&,
+    const scalarField&,
+    const scalar,
+    scalarField&,
+    scalarField&,
+    scalarField&,
+    scalarField&
+) const
 {
-    return owner_;
-}
+    notImplemented
+    (
+        "Foam::scalar Foam::SurfaceReactionModel<CloudType>::calculate"
+        "("
+            "const scalar, "
+            "const label, "
+            "const scalar, "
+            "const scalar, "
+            "const scalar, "
+            "const scalar, "
+            "const scalar, "
+            "const scalar, "
+            "const scalarField&, "
+            "const scalarField&, "
+            "const scalarField&, "
+            "const scalarField&, "
+            "const scalar, "
+            "scalarField&, "
+            "scalarField&, "
+            "scalarField&, "
+            "scalarField&"
+        ") const"
+    );
 
-
-template<class CloudType>
-const Foam::dictionary& Foam::SurfaceReactionModel<CloudType>::dict() const
-{
-    return dict_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::SurfaceReactionModel<CloudType>::coeffDict() const
-{
-    return coeffDict_;
+    return 0.0;
 }
 
 

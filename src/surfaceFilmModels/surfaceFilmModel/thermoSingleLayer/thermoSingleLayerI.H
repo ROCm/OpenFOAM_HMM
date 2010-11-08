@@ -61,7 +61,7 @@ Foam::surfaceFilmModels::thermoSingleLayer::hs
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            cp_*(T - Tstd),
+            Cp_*(T - Tstd),
             zeroGradientFvPatchScalarField::typeName
         )
     );
@@ -88,7 +88,7 @@ Foam::surfaceFilmModels::thermoSingleLayer::T
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            hs/cp_ + Tstd,
+            hs/Cp_ + Tstd,
             zeroGradientFvPatchScalarField::typeName
         )
     );

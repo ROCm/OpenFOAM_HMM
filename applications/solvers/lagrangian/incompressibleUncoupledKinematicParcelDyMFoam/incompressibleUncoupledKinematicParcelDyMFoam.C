@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
     #include "createTime.H"
-    #   include "createDynamicFvMesh.H"
+    #include "createDynamicFvMesh.H"
 
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"

@@ -24,17 +24,18 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "DispersionRASModel.H"
+#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
 Foam::DispersionRASModel<CloudType>::DispersionRASModel
 (
-    const dictionary& dict,
+    const dictionary&,
     CloudType& owner
 )
 :
-    DispersionModel<CloudType>(dict, owner),
+    DispersionModel<CloudType>(owner),
     turbulence_
     (
         owner.mesh().objectRegistry::lookupObject<compressible::RASModel>
@@ -47,6 +48,24 @@ Foam::DispersionRASModel<CloudType>::DispersionRASModel
     epsilonPtr_(NULL),
     ownEpsilon_(false)
 {}
+
+
+template<class CloudType>
+Foam::DispersionRASModel<CloudType>::DispersionRASModel
+(
+    DispersionRASModel<CloudType>& dm
+)
+:
+    DispersionModel<CloudType>(dm),
+    turbulence_(dm.turbulence_),
+    kPtr_(dm.kPtr_),
+    ownK_(dm.ownK_),
+    epsilonPtr_(dm.epsilonPtr_),
+    ownEpsilon_(dm.ownEpsilon_)
+{
+    dm.ownK_ = false;
+    dm.ownEpsilon_ = false;
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -93,17 +112,26 @@ void Foam::DispersionRASModel<CloudType>::cacheFields(const bool store)
     {
         if (ownK_ && kPtr_)
         {
-            delete kPtr_;
-            kPtr_ = NULL;
+            deleteDemandDrivenData(kPtr_);
             ownK_ = false;
         }
         if (ownEpsilon_ && epsilonPtr_)
         {
-            delete epsilonPtr_;
-            epsilonPtr_ = NULL;
+            deleteDemandDrivenData(epsilonPtr_);
             ownEpsilon_ = false;
         }
     }
+}
+
+
+template<class CloudType>
+void Foam::DispersionRASModel<CloudType>::write(Ostream& os) const
+{
+    DispersionModel<CloudType>::write(os);
+
+    os.writeKeyword("ownK") << ownK_ << token::END_STATEMENT << endl;
+    os.writeKeyword("ownEpsilon") << ownEpsilon_ << token::END_STATEMENT
+        << endl;
 }
 
 

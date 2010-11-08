@@ -85,11 +85,16 @@ public:
     // Constructors
 
         //- Construct from components
-        multiNormal
-        (
-            const dictionary& dict,
-            Random& rndGen
-        );
+        multiNormal(const dictionary& dict, cachedRandom& rndGen);
+
+        //- Construct copy
+        multiNormal(const multiNormal& p);
+
+        //- Construct and return a clone
+        virtual autoPtr<pdf> clone() const
+        {
+            return autoPtr<pdf>(new multiNormal(*this));
+        }
 
 
     //- Destructor

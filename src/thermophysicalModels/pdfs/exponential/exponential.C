@@ -39,7 +39,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pdfs::exponential::exponential(const dictionary& dict, Random& rndGen)
+Foam::pdfs::exponential::exponential
+(
+    const dictionary& dict,
+    cachedRandom& rndGen
+)
 :
     pdf(typeName, dict, rndGen),
     minValue_(readScalar(pdfDict_.lookup("minValue"))),
@@ -48,6 +52,15 @@ Foam::pdfs::exponential::exponential(const dictionary& dict, Random& rndGen)
 {
     check();
 }
+
+
+Foam::pdfs::exponential::exponential(const exponential& p)
+:
+    pdf(p),
+    minValue_(p.minValue_),
+    maxValue_(p.maxValue_),
+    lambda_(p.lambda_)
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -60,7 +73,7 @@ Foam::pdfs::exponential::~exponential()
 
 Foam::scalar Foam::pdfs::exponential::sample() const
 {
-    scalar y = rndGen_.scalar01();
+    scalar y = rndGen_.sample01<scalar>();
     scalar K = exp(-lambda_*maxValue_) - exp(-lambda_*minValue_);
     return -(1.0/lambda_)*log(exp(-lambda_*minValue_) + y*K);
 }
