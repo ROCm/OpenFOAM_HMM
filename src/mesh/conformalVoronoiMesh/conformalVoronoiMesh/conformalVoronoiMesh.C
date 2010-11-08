@@ -28,102 +28,6 @@ License
 #include "relaxationModel.H"
 #include "faceAreaWeightModel.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::conformalVoronoiMesh::conformalVoronoiMesh
-(
-    const Time& runTime,
-    const dictionary& cvMeshDict
-)
-:
-    HTriangulation(),
-    runTime_(runTime),
-    rndGen_(7864293),
-    allGeometry_
-    (
-        IOobject
-        (
-            "cvSearchableSurfaces",
-            runTime_.constant(),
-            "triSurface",
-            runTime_,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        ),
-        cvMeshDict.subDict("geometry")
-    ),
-    geometryToConformTo_
-    (
-        *this,
-        allGeometry_,
-        cvMeshDict.subDict("surfaceConformation")
-    ),
-    cellSizeControl_
-    (
-        *this,
-        allGeometry_,
-        cvMeshDict.subDict("motionControl")
-    ),
-    cvMeshControls_(*this, cvMeshDict),
-    startOfInternalPoints_(0),
-    startOfSurfacePointPairs_(0),
-    featureVertices_(),
-    featurePointLocations_(),
-    featurePointTreePtr_(),
-    sizeAndAlignmentLocations_(),
-    storedSizes_(),
-    storedAlignments_(),
-    sizeAndAlignmentTreePtr_(),
-    surfaceConformationVertices_(),
-    initialPointsMethod_
-    (
-        initialPointsMethod::New
-        (
-            cvMeshDict.subDict("initialPoints"),
-            *this
-        )
-    ),
-    relaxationModel_
-    (
-        relaxationModel::New
-        (
-            cvMeshDict.subDict("motionControl"),
-            *this
-        )
-    ),
-    faceAreaWeightModel_
-    (
-        faceAreaWeightModel::New
-        (
-            cvMeshDict.subDict("motionControl"),
-            *this
-        )
-    )
-{
-    createFeaturePoints();
-
-    if (cvMeshControls().objOutput())
-    {
-        geometryToConformTo_.writeFeatureObj("cvMesh");
-    }
-
-    insertInitialPoints();
-
-    buildSurfaceConformation(rmCoarse);
-
-    if(cvMeshControls().objOutput())
-    {
-        writePoints("allInitialPoints.obj", false);
-    }
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::conformalVoronoiMesh::~conformalVoronoiMesh()
-{}
-
-
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
@@ -1195,6 +1099,102 @@ bool Foam::conformalVoronoiMesh::ownerAndNeighbour
 
     return reverse;
 }
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::conformalVoronoiMesh::conformalVoronoiMesh
+(
+    const Time& runTime,
+    const dictionary& cvMeshDict
+)
+:
+    HTriangulation(),
+    runTime_(runTime),
+    rndGen_(7864293),
+    allGeometry_
+    (
+        IOobject
+        (
+            "cvSearchableSurfaces",
+            runTime_.constant(),
+            "triSurface",
+            runTime_,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        ),
+        cvMeshDict.subDict("geometry")
+    ),
+    geometryToConformTo_
+    (
+        *this,
+        allGeometry_,
+        cvMeshDict.subDict("surfaceConformation")
+    ),
+    cellSizeControl_
+    (
+        *this,
+        allGeometry_,
+        cvMeshDict.subDict("motionControl")
+    ),
+    cvMeshControls_(*this, cvMeshDict),
+    startOfInternalPoints_(0),
+    startOfSurfacePointPairs_(0),
+    featureVertices_(),
+    featurePointLocations_(),
+    featurePointTreePtr_(),
+    sizeAndAlignmentLocations_(),
+    storedSizes_(),
+    storedAlignments_(),
+    sizeAndAlignmentTreePtr_(),
+    surfaceConformationVertices_(),
+    initialPointsMethod_
+    (
+        initialPointsMethod::New
+        (
+            cvMeshDict.subDict("initialPoints"),
+            *this
+        )
+    ),
+    relaxationModel_
+    (
+        relaxationModel::New
+        (
+            cvMeshDict.subDict("motionControl"),
+            *this
+        )
+    ),
+    faceAreaWeightModel_
+    (
+        faceAreaWeightModel::New
+        (
+            cvMeshDict.subDict("motionControl"),
+            *this
+        )
+    )
+{
+    createFeaturePoints();
+
+    if (cvMeshControls().objOutput())
+    {
+        geometryToConformTo_.writeFeatureObj("cvMesh");
+    }
+
+    insertInitialPoints();
+
+    buildSurfaceConformation(rmCoarse);
+
+    if(cvMeshControls().objOutput())
+    {
+        writePoints("allInitialPoints.obj", false);
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::conformalVoronoiMesh::~conformalVoronoiMesh()
+{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

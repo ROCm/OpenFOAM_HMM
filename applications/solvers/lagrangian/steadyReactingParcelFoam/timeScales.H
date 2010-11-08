@@ -59,7 +59,8 @@ Info<< "Time scales min/max:" << endl;
 
         invTauFlow.max(1.0/maxDeltaT);
 
-        Info<< "    Flow        = " << gMin(1/invTauFlow.internalField()) << ", "
+        Info<< "    Flow        = "
+            << gMin(1/invTauFlow.internalField()) << ", "
             << gMax(1/invTauFlow.internalField()) << endl;
     }
 
