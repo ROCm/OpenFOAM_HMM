@@ -84,7 +84,18 @@ public:
         // Evolution
 
             //- Correct
-            virtual void correct();
+            virtual void correct
+            (
+                const scalar dt,
+                scalarField& dMass,
+                scalarField& dEnergy
+            );
+
+
+        // Input/output
+
+            //- Output model statistics
+            virtual void info() const;
 };
 
 

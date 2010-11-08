@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,6 +75,12 @@ tmp<volScalarField> SpalartAllmarasDDES::fd(const volScalarField& S) const
 }
 
 
+tmp<volScalarField> SpalartAllmarasDDES::S(const volTensorField& gradU) const
+{
+    return sqrt(2.0)*mag(symm(gradU));
+}
+
+
 tmp<volScalarField> SpalartAllmarasDDES::dTilda(const volScalarField& S) const
 {
     return max
@@ -93,10 +99,12 @@ SpalartAllmarasDDES::SpalartAllmarasDDES
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& transport
+    transportModel& transport,
+    const word& turbulenceModelName,
+    const word& modelName
 )
 :
-    SpalartAllmaras(U, phi, transport, typeName)
+    SpalartAllmaras(U, phi, transport, turbulenceModelName, modelName)
 {}
 
 

@@ -1,13 +1,12 @@
 atomicWeights = atomicWeights
 specie = specie
-speciesTable = speciesTable
 equationOfState = equationOfState
 reactions = reaction/reactions
 
 $(atomicWeights)/atomicWeights.C
 $(specie)/specie.C
-$(speciesTable)/speciesTable.C
 $(equationOfState)/perfectGas/perfectGas.C
+$(equationOfState)/incompressible/incompressible.C
 $(reactions)/makeChemkinReactions.C
 $(reactions)/makeReactionThermoReactions.C
 $(reactions)/makeLangmuirHinshelwoodReactions.C

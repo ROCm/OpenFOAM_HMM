@@ -41,8 +41,7 @@ namespace Foam
 
 Foam::surfaceFilmModels::phaseChangeModel::phaseChangeModel
 (
-    const surfaceFilmModel& owner,
-    const dictionary& dict
+    const surfaceFilmModel& owner
 )
 :
     owner_(owner),
@@ -59,17 +58,7 @@ Foam::surfaceFilmModels::phaseChangeModel::phaseChangeModel
 :
     owner_(owner),
     coeffs_(dict.subDict(type + "Coeffs"))
-{
-    WarningIn
-    (
-        "phaseChangeModel::phaseChangeModel"
-        "("
-            "const word&, "
-            "const surfaceFilmModel&, "
-            "const dictionary&"
-        ")"
-    )   << "Phase change models not implemented!" << endl;
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

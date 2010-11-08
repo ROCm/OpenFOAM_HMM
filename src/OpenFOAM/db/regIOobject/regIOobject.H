@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -67,8 +67,8 @@ private:
         //- Is this object owned by the registry
         bool ownedByRegistry_;
 
-        //- Time of last modification
-        mutable time_t lastModified_;
+        //- Modification watch index
+        mutable label watchIndex_;
 
         //- eventNo of last update
         label eventNo_;
@@ -209,10 +209,17 @@ public:
             //- Read object
             virtual bool read();
 
-            //- Return true if the object's file has been modified
+            //- Return file-monitoring handle
+            inline label watchIndex() const;
+
+            //- Return file-monitoring handle
+            inline label& watchIndex();
+
+            //- Return true if the object's file (or files for objectRegistry)
+            //  have been modified. (modified state is cached by Time)
             virtual bool modified() const;
 
-            //- Read object if modified
+            //- Read object if modified (as set by call to modified)
             virtual bool readIfModified();
 
 

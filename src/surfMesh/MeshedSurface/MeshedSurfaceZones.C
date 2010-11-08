@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -132,7 +132,7 @@ void Foam::MeshedSurface<Face>::addZones
 template<class Face>
 void Foam::MeshedSurface<Face>::addZones
 (
-    const UList<label>& sizes,
+    const labelUList& sizes,
     const UList<word>& names,
     const bool cullEmpty
 )
@@ -164,7 +164,7 @@ void Foam::MeshedSurface<Face>::addZones
 template<class Face>
 void Foam::MeshedSurface<Face>::addZones
 (
-    const UList<label>& sizes,
+    const labelUList& sizes,
     const bool cullEmpty
 )
 {

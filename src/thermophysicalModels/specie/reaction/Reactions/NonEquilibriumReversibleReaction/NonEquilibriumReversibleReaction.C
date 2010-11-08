@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,16 +25,10 @@ License
 
 #include "NonEquilibriumReversibleReaction.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 template<class ReactionThermo, class ReactionRate>
-NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::
+Foam::NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::
 NonEquilibriumReversibleReaction
 (
     const Reaction<ReactionThermo>& reaction,
@@ -48,9 +42,9 @@ NonEquilibriumReversibleReaction
 {}
 
 
-// Construct from components
+
 template<class ReactionThermo, class ReactionRate>
-NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::
+Foam::NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::
 NonEquilibriumReversibleReaction
 (
     const speciesTable& species,
@@ -63,9 +57,24 @@ NonEquilibriumReversibleReaction
     rk_(species, is)
 {}
 
-// Construct as copy given new speciesTable
+
 template<class ReactionThermo, class ReactionRate>
-NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::
+Foam::NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::
+NonEquilibriumReversibleReaction
+(
+    const speciesTable& species,
+    const HashPtrTable<ReactionThermo>& thermoDatabase,
+    const dictionary& dict
+)
+:
+    Reaction<ReactionThermo>(species, thermoDatabase, dict),
+    fk_(species, dict),
+    rk_(species, dict)
+{}
+
+
+template<class ReactionThermo, class ReactionRate>
+Foam::NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::
 NonEquilibriumReversibleReaction
 (
     const NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>& nerr,
@@ -81,7 +90,8 @@ NonEquilibriumReversibleReaction
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ReactionThermo, class ReactionRate>
-scalar NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::kf
+Foam::scalar
+Foam::NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::kf
 (
     const scalar T,
     const scalar p,
@@ -93,7 +103,8 @@ scalar NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::kf
 
 
 template<class ReactionThermo, class ReactionRate>
-scalar NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::kr
+Foam::scalar
+Foam::NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::kr
 (
     const scalar,
     const scalar T,
@@ -106,7 +117,8 @@ scalar NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::kr
 
 
 template<class ReactionThermo, class ReactionRate>
-scalar NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::kr
+Foam::scalar
+Foam::NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::kr
 (
     const scalar T,
     const scalar p,
@@ -118,18 +130,15 @@ scalar NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::kr
 
 
 template<class ReactionThermo, class ReactionRate>
-void NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::write
+void Foam::NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::write
 (
     Ostream& os
 ) const
 {
     Reaction<ReactionThermo>::write(os);
-    os  << token::SPACE << fk_ << token::SPACE << rk_;
+    fk_.write(os);
+    rk_.write(os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

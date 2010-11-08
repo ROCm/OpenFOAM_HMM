@@ -68,7 +68,7 @@ Foam::spray::spray
     runTime_(U.time()),
     time0_(runTime_.value()),
     mesh_(U.mesh()),
-    rndGen_(label(0)),
+    rndGen_(label(0), -1),
     g_(g.value()),
 
     U_(U),
@@ -83,7 +83,7 @@ Foam::spray::spray
             "sprayProperties",
             U.time().constant(),
             U.db(),
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     ),
@@ -98,7 +98,7 @@ Foam::spray::spray
             "injectorProperties",
             U.time().constant(),
             U.db(),
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         ),
         injector::iNew(U.time())
@@ -241,16 +241,16 @@ Foam::spray::spray
     label n=0;
 
     // check for the type of boundary condition
-    forAll(bMesh, patchi)
+    forAll(bMesh, patchI)
     {
-        if (isA<symmetryPolyPatch>(bMesh[patchi]))
+        if (isA<symmetryPolyPatch>(bMesh[patchI]))
         {
             symPlaneExist = true;
         }
-        else if (isA<wedgePolyPatch>(bMesh[patchi]))
+        else if (isA<wedgePolyPatch>(bMesh[patchI]))
         {
             wedgeExist = true;
-            patches[n++] = patchi;
+            patches[n++] = patchI;
         }
     }
 

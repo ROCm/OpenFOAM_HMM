@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -107,14 +107,15 @@ class hPolynomialThermo
         //  Note: input in [J/kg/K], but internally uses [J/kmol/K]
         scalar Sf_;
 
-        //- Specific heat at constant pressure [J/(kg.K)]
-        Polynomial<PolySize> cpPolynomial_;
+        //- Specific heat at constant pressure polynomial coeffs [J/(kg.K)]
+        Polynomial<PolySize> CpCoeffs_;
 
-        //- Enthalpy - derived from cp [J/kg] - relative to Tstd
-        typename Polynomial<PolySize>::intPolyType hPolynomial_;
+        //- Enthalpy polynomial coeffs - derived from cp [J/kg]
+        //  NOTE: relative to Tstd
+        typename Polynomial<PolySize>::intPolyType hCoeffs_;
 
-        //- Entropy - derived from cp [J/(kg.K)] - relative to Tstd
-        Polynomial<PolySize> sPolynomial_;
+        //- Entropy - derived from Cp [J/(kg.K)] - relative to Tstd
+        Polynomial<PolySize> sCoeffs_;
 
 
     // Private Member Functions
@@ -125,9 +126,9 @@ class hPolynomialThermo
             const EquationOfState& pt,
             const scalar Hf,
             const scalar Sf,
-            const Polynomial<PolySize>& cpPoly,
-            const typename Polynomial<PolySize>::intPolyType& hPoly,
-            const Polynomial<PolySize>& sPoly
+            const Polynomial<PolySize>& CpCoeffs,
+            const typename Polynomial<PolySize>::intPolyType& hCoeffs,
+            const Polynomial<PolySize>& sCoeffs
         );
 
 
@@ -135,8 +136,11 @@ public:
 
     // Constructors
 
-        //- Construct from dictionary
+        //- Construct from Istream
         hPolynomialThermo(Istream& is);
+
+        //- Construct from dictionary
+        hPolynomialThermo(const dictionary& dict);
 
         //- Construct as copy
         inline hPolynomialThermo(const hPolynomialThermo&);
@@ -147,20 +151,28 @@ public:
 
     // Member Functions
 
-        //- Heat capacity at constant pressure [J/(kmol K)]
-        inline scalar cp(const scalar T) const;
+        // Fundamental properties
 
-        //- Enthalpy [J/kmol]
-        inline scalar h(const scalar T) const;
+            //- Heat capacity at constant pressure [J/(kmol K)]
+            inline scalar cp(const scalar T) const;
 
-        //- Sensible enthalpy [J/kmol]
-        inline scalar hs(const scalar T) const;
+            //- Enthalpy [J/kmol]
+            inline scalar h(const scalar T) const;
 
-        //- Chemical enthalpy [J/kmol]
-        inline scalar hc() const;
+            //- Sensible enthalpy [J/kmol]
+            inline scalar hs(const scalar T) const;
 
-        //- Entropy [J/(kmol K)]
-        inline scalar s(const scalar T) const;
+            //- Chemical enthalpy [J/kmol]
+            inline scalar hc() const;
+
+            //- Entropy [J/(kmol K)]
+            inline scalar s(const scalar T) const;
+
+
+        // I-O
+
+            //- Write to Ostream
+            void write(Ostream& os) const;
 
 
     // Member operators

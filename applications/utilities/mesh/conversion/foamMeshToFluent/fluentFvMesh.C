@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -124,8 +124,8 @@ void Foam::fluentFvMesh::writeFluentMesh() const
     fluentMeshFile
         << "))" << std::endl << std::endl;
 
-    const unallocLabelList& own = owner();
-    const unallocLabelList& nei = neighbour();
+    const labelUList& own = owner();
+    const labelUList& nei = neighbour();
 
     const faceList& fcs = faces();
 

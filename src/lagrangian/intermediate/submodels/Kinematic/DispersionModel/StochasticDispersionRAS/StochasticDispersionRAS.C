@@ -38,6 +38,16 @@ Foam::StochasticDispersionRAS<CloudType>::StochasticDispersionRAS
 {}
 
 
+template<class CloudType>
+Foam::StochasticDispersionRAS<CloudType>::StochasticDispersionRAS
+(
+    StochasticDispersionRAS<CloudType>& dm
+)
+:
+    DispersionRASModel<CloudType>(dm)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -48,23 +58,18 @@ Foam::StochasticDispersionRAS<CloudType>::~StochasticDispersionRAS()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::StochasticDispersionRAS<CloudType>::active() const
-{
-    return true;
-}
-
-
-template<class CloudType>
 Foam::vector Foam::StochasticDispersionRAS<CloudType>::update
 (
     const scalar dt,
-    const label celli,
+    const label cellI,
     const vector& U,
     const vector& Uc,
     vector& UTurb,
     scalar& tTurb
 )
 {
+    cachedRandom& rnd = this->owner().rndGen();
+
     const scalar cps = 0.16432;
 
     const volScalarField& k = *this->kPtr_;
@@ -74,8 +79,8 @@ Foam::vector Foam::StochasticDispersionRAS<CloudType>::update
 
     const scalar tTurbLoc = min
     (
-        k[celli]/epsilon[celli],
-        cps*pow(k[celli], 1.5)/epsilon[celli]/(UrelMag + SMALL)
+        k[cellI]/epsilon[cellI],
+        cps*pow(k[cellI], 1.5)/epsilon[cellI]/(UrelMag + SMALL)
     );
 
     // Parcel is perturbed by the turbulence
@@ -87,8 +92,8 @@ Foam::vector Foam::StochasticDispersionRAS<CloudType>::update
         {
             tTurb = 0.0;
 
-            scalar sigma = sqrt(2.0*k[celli]/3.0);
-            vector dir = 2.0*this->owner().rndGen().vector01() - vector::one;
+            scalar sigma = sqrt(2.0*k[cellI]/3.0);
+            vector dir = 2.0*rnd.sample01<vector>() - vector::one;
             dir /= mag(dir) + SMALL;
 
             // Numerical Recipes... Ch. 7. Random Numbers...
@@ -97,8 +102,8 @@ Foam::vector Foam::StochasticDispersionRAS<CloudType>::update
             scalar rsq = 10.0;
             while ((rsq > 1.0) || (rsq == 0.0))
             {
-                x1 = 2.0*this->owner().rndGen().scalar01() - 1.0;
-                x2 = 2.0*this->owner().rndGen().scalar01() - 1.0;
+                x1 = 2.0*rnd.sample01<scalar>() - 1.0;
+                x2 = 2.0*rnd.sample01<scalar>() - 1.0;
                 rsq = x1*x1 + x2*x2;
             }
 

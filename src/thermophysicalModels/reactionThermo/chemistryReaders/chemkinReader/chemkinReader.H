@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,7 +40,7 @@ SourceFiles
 #include "fileName.H"
 #include "typeInfo.H"
 #include "HashPtrTable.H"
-#include "SLPtrList.H"
+#include "ReactionList.H"
 #include "DynamicList.H"
 #include "labelList.H"
 #include "speciesTable.H"
@@ -205,7 +205,7 @@ private:
         HashTable<List<specieElement> > specieComposition_;
 
         //- List of the reactions
-        SLPtrList<gasReaction> reactions_;
+        ReactionList<gasThermoPhysics> reactions_;
 
 
     // Private Member Functions
@@ -375,7 +375,7 @@ public:
         }
 
         //- List of the reactions
-        const SLPtrList<gasReaction>& reactions() const
+        const ReactionList<gasThermoPhysics>& reactions() const
         {
             return reactions_;
         }

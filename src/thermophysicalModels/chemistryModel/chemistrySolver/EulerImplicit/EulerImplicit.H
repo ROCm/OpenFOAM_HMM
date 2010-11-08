@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,12 +57,17 @@ class EulerImplicit
 {
     // Private data
 
+        //- Coefficients dictionary
         dictionary coeffsDict_;
+
 
         // Model constants
 
+            //- Chemistry timescale
             scalar cTauChem_;
-            Switch equil_;
+
+            //- Equilibrium rate limiter flag (on/off)
+            Switch eqRateLimiter_;
 
 
 public:

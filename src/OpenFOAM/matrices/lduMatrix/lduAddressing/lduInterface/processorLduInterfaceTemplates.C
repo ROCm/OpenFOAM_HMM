@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,7 +43,8 @@ void Foam::processorLduInterface::send
             commsType,
             neighbProcNo(),
             reinterpret_cast<const char*>(f.begin()),
-            f.byteSize()
+            f.byteSize(),
+            tag()
         );
     }
     else if (commsType == Pstream::nonBlocking)
@@ -55,7 +56,8 @@ void Foam::processorLduInterface::send
             commsType,
             neighbProcNo(),
             receiveBuf_.begin(),
-            receiveBuf_.size()
+            receiveBuf_.size(),
+            tag()
         );
 
         resizeBuf(sendBuf_, f.byteSize());
@@ -66,7 +68,8 @@ void Foam::processorLduInterface::send
             commsType,
             neighbProcNo(),
             sendBuf_.begin(),
-            f.byteSize()
+            f.byteSize(),
+            tag()
         );
     }
     else
@@ -92,7 +95,8 @@ void Foam::processorLduInterface::receive
             commsType,
             neighbProcNo(),
             reinterpret_cast<char*>(f.begin()),
-            f.byteSize()
+            f.byteSize(),
+            tag()
         );
     }
     else if (commsType == Pstream::nonBlocking)
@@ -155,7 +159,8 @@ void Foam::processorLduInterface::compressedSend
                 commsType,
                 neighbProcNo(),
                 sendBuf_.begin(),
-                nBytes
+                nBytes,
+                tag()
             );
         }
         else if (commsType == Pstream::nonBlocking)
@@ -167,7 +172,8 @@ void Foam::processorLduInterface::compressedSend
                 commsType,
                 neighbProcNo(),
                 receiveBuf_.begin(),
-                receiveBuf_.size()
+                receiveBuf_.size(),
+                tag()
             );
 
             OPstream::write
@@ -175,7 +181,8 @@ void Foam::processorLduInterface::compressedSend
                 commsType,
                 neighbProcNo(),
                 sendBuf_.begin(),
-                nBytes
+                nBytes,
+                tag()
             );
         }
         else
@@ -215,7 +222,8 @@ void Foam::processorLduInterface::compressedReceive
                 commsType,
                 neighbProcNo(),
                 receiveBuf_.begin(),
-                nBytes
+                nBytes,
+                tag()
             );
         }
         else if (commsType != Pstream::nonBlocking)

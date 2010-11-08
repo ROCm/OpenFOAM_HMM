@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,8 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
 #include "pureMixture.H"
 #include "fvMesh.H"
 
@@ -43,7 +41,7 @@ pureMixture<ThermoType>::pureMixture
 )
 :
     basicMixture(thermoDict, mesh),
-    mixture_(thermoDict.lookup("mixture"))
+    mixture_(thermoDict.subDict("mixture"))
 {}
 
 
@@ -59,7 +57,7 @@ pureMixture<ThermoType>::~pureMixture()
 template<class ThermoType>
 void pureMixture<ThermoType>::read(const dictionary& thermoDict)
 {
-    mixture_ = ThermoType(thermoDict.lookup("mixture"));
+    mixture_ = ThermoType(thermoDict.subDict("mixture"));
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,7 @@ Foam::regIOobject::regIOobject(const IOobject& io, const bool isTime)
     IOobject(io),
     registered_(false),
     ownedByRegistry_(false),
-    lastModified_(0),
+    watchIndex_(-1),
     eventNo_                // Do not get event for top level Time database
     (
         isTime
@@ -68,7 +68,7 @@ Foam::regIOobject::regIOobject(const regIOobject& rio)
     IOobject(rio),
     registered_(false),
     ownedByRegistry_(false),
-    lastModified_(rio.lastModified_),
+    watchIndex_(rio.watchIndex_),
     eventNo_(db().getEvent()),
     isPtr_(NULL)
 {
@@ -83,7 +83,7 @@ Foam::regIOobject::regIOobject(const regIOobject& rio, bool registerCopy)
     IOobject(rio),
     registered_(false),
     ownedByRegistry_(false),
-    lastModified_(rio.lastModified_),
+    watchIndex_(-1),
     eventNo_(db().getEvent()),
     isPtr_(NULL)
 {
@@ -133,6 +133,28 @@ bool Foam::regIOobject::checkIn()
         // any mapping
         registered_ = db().checkIn(*this);
 
+        if
+        (
+            registered_
+         && readOpt() == MUST_READ_IF_MODIFIED
+         && time().runTimeModifiable()
+        )
+        {
+            if (watchIndex_ != -1)
+            {
+                FatalErrorIn("regIOobject::checkIn()")
+                    << "Object " << objectPath()
+                    << " already watched with index " << watchIndex_
+                    << abort(FatalError);
+            }
+
+            fileName f = filePath();
+            if (f != fileName::null)
+            {
+                watchIndex_ = time().addWatch(f);
+            }
+        }
+
         // check-in on defaultRegion is allowed to fail, since subsetted meshes
         // are created with the same name as their originating mesh
         if (!registered_ && debug && name() != polyMesh::defaultRegion)
@@ -165,6 +187,12 @@ bool Foam::regIOobject::checkOut()
     if (registered_)
     {
         registered_ = false;
+
+        if (watchIndex_ != -1)
+        {
+            time().removeWatch(watchIndex_);
+            watchIndex_ = -1;
+        }
         return db().checkOut(*this);
     }
 

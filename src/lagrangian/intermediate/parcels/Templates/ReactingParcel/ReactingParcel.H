@@ -91,8 +91,17 @@ public:
 
     public:
 
-        //- Constructor
-        constantProperties(const dictionary& parentDict);
+        // Constructors
+
+            //- Null constructor
+            constantProperties();
+
+            //- Copy constructor
+            constantProperties(const constantProperties& cp);
+
+            //- Constructor from dictionary
+            constantProperties(const dictionary& parentDict);
+
 
         // Access
 
@@ -121,11 +130,8 @@ public:
             //- Reference to the cloud containing this particle
             ReactingCloud<ParcelType>& cloud_;
 
-            //- Particle constant properties
-            const constantProperties& constProps_;
-
             //- Interpolator for continuous phase pressure field
-            const interpolation<scalar>& pInterp_;
+            autoPtr<interpolation<scalar> > pInterp_;
 
 
     public:
@@ -139,14 +145,8 @@ public:
             inline trackData
             (
                 ReactingCloud<ParcelType>& cloud,
-                const constantProperties& constProps,
-                const interpolation<scalar>& rhoInterp,
-                const interpolation<vector>& UInterp,
-                const interpolation<scalar>& muInterp,
-                const interpolation<scalar>& TInterp,
-                const interpolation<scalar>& CpInterp,
-                const interpolation<scalar>& pInterp,
-                const vector& g
+                typename ThermoParcel<ParcelType>::trackData::trackPart
+                    part = ThermoParcel<ParcelType>::trackData::tpLinearTrack
             );
 
 
@@ -154,9 +154,6 @@ public:
 
             //- Return access to the owner cloud
             inline ReactingCloud<ParcelType>& cloud();
-
-            //- Return const access to the constant properties
-            inline const constantProperties& constProps() const;
 
             //- Return const access to the interpolator for continuous
             //  phase pressure field
@@ -239,7 +236,9 @@ public:
         (
             ReactingCloud<ParcelType>& owner,
             const vector& position,
-            const label cellI
+            const label cellI,
+            const label tetFaceI,
+            const label tetPtI
         );
 
         //- Construct from components
@@ -248,9 +247,12 @@ public:
             ReactingCloud<ParcelType>& owner,
             const vector& position,
             const label cellI,
+            const label tetFaceI,
+            const label tetPtI,
             const label typeId,
             const scalar nParticle0,
             const scalar d0,
+            const scalar dTarget0,
             const vector& U0,
             const vector& f0,
             const vector& angularMomentum0,
@@ -268,12 +270,38 @@ public:
         );
 
         //- Construct as a copy
+        ReactingParcel
+        (
+            const ReactingParcel& p,
+            const ReactingCloud<ParcelType>& c
+        );
+
+        //- Construct as a copy
         ReactingParcel(const ReactingParcel& p);
 
-        //- Construct and return a clone
-        autoPtr<ReactingParcel> clone() const
+        //- Construct and return a (basic particle) clone
+        virtual autoPtr<Particle<ParcelType> > clone() const
         {
-            return autoPtr<ReactingParcel>(new ReactingParcel(*this));
+            return autoPtr<Particle<ParcelType> >
+            (
+                new ReactingParcel<ParcelType>(*this)
+            );
+        }
+
+        //- Construct and return a (basic particle) clone
+        virtual autoPtr<Particle<ParcelType> > clone
+        (
+            const Cloud<ParcelType>& c
+        ) const
+        {
+            return autoPtr<Particle<ParcelType> >
+            (
+                new ReactingParcel<ParcelType>
+                (
+                    *this,
+                    static_cast<const ReactingCloud<ParcelType>&>(c)
+                )
+            );
         }
 
 

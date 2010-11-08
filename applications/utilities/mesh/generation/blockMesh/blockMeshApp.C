@@ -52,7 +52,6 @@ Usage
 
 #include "blockMesh.H"
 #include "attachPolyTopoChanger.H"
-#include "preservePatchTypes.H"
 #include "emptyPolyPatch.H"
 #include "cellSet.H"
 
@@ -121,7 +120,7 @@ int main(int argc, char *argv[])
                   : dictPath
                 ),
                 runTime,
-                IOobject::MUST_READ,
+                IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
                 false
             )
@@ -137,7 +136,7 @@ int main(int argc, char *argv[])
                 runTime.constant(),
                 polyMeshDir,
                 runTime,
-                IOobject::MUST_READ,
+                IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
                 false
             )
@@ -206,25 +205,8 @@ int main(int argc, char *argv[])
 
     Info<< nl << "Creating polyMesh from blockMesh" << endl;
 
-    wordList patchNames = blocks.patchNames();
-    wordList patchTypes = blocks.patchTypes();
     word defaultFacesName = "defaultFaces";
     word defaultFacesType = emptyPolyPatch::typeName;
-    wordList patchPhysicalTypes = blocks.patchPhysicalTypes();
-
-
-    preservePatchTypes
-    (
-        runTime,
-        runTime.constant(),
-        polyMeshDir,
-        patchNames,
-        patchTypes,
-        defaultFacesName,
-        defaultFacesType,
-        patchPhysicalTypes
-    );
-
     polyMesh mesh
     (
         IOobject
@@ -236,11 +218,10 @@ int main(int argc, char *argv[])
         xferCopy(blocks.points()),           // could we re-use space?
         blocks.cells(),
         blocks.patches(),
-        patchNames,
-        patchTypes,
+        blocks.patchNames(),
+        blocks.patchDicts(),
         defaultFacesName,
-        defaultFacesType,
-        patchPhysicalTypes
+        defaultFacesType
     );
 
 

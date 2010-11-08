@@ -121,9 +121,6 @@ private:
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        IntegrationScheme(const IntegrationScheme&);
-
         //- Disallow default bitwise assignment
         void operator=(const IntegrationScheme&);
 
@@ -154,6 +151,18 @@ public:
         //- Construct from components
         IntegrationScheme(const word& phiName, const dictionary& dict);
 
+        //- Copy constructor
+        IntegrationScheme(const IntegrationScheme& is);
+
+        //- Construct and return clone
+        virtual autoPtr<IntegrationScheme<Type> > clone() const
+        {
+            return autoPtr<IntegrationScheme<Type> >
+            (
+                new IntegrationScheme<Type>(*this)
+            );
+        }
+
 
     // Selectors
 
@@ -178,7 +187,7 @@ public:
             const scalar dt,
             const Type alpha,
             const scalar beta
-        ) const = 0;
+        ) const;
 };
 
 

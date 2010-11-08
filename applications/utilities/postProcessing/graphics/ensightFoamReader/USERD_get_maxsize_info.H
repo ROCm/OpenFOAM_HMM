@@ -19,7 +19,8 @@ int USERD_get_maxsize_info
     label nPyr05Max = 0;
     label nTet04Max = 0;
 
-    Info<< "Checking all time steps for EnSight memory allocation purpose. This can take some time." << endl;
+    Info<< "Checking all time steps for EnSight memory allocation purpose. "
+        << "This can take some time." << endl;
 
     for (label timeI=1; timeI < timeDirs.size(); ++timeI)
     {

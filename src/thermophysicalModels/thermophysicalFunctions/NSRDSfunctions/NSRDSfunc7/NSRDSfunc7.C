@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,14 +30,48 @@ License
 
 namespace Foam
 {
+    defineTypeNameAndDebug(NSRDSfunc7, 0);
+    addToRunTimeSelectionTable(thermophysicalFunction, NSRDSfunc7, Istream);
+    addToRunTimeSelectionTable(thermophysicalFunction, NSRDSfunc7, dictionary);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(NSRDSfunc7, 0);
-addToRunTimeSelectionTable(thermophysicalFunction, NSRDSfunc7, Istream);
+Foam::NSRDSfunc7::NSRDSfunc7
+(
+    const scalar a,
+    const scalar b,
+    const scalar c,
+    const scalar d,
+    const scalar e
+)
+:
+    a_(a),
+    b_(b),
+    c_(c),
+    d_(d),
+    e_(e)
+{}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+Foam::NSRDSfunc7::NSRDSfunc7(Istream& is)
+:
+    a_(readScalar(is)),
+    b_(readScalar(is)),
+    c_(readScalar(is)),
+    d_(readScalar(is)),
+    e_(readScalar(is))
+{}
+
+
+Foam::NSRDSfunc7::NSRDSfunc7(const dictionary& dict)
+:
+    a_(readScalar(dict.lookup("a"))),
+    b_(readScalar(dict.lookup("b"))),
+    c_(readScalar(dict.lookup("c"))),
+    d_(readScalar(dict.lookup("d"))),
+    e_(readScalar(dict.lookup("e")))
+{}
+
 
 // ************************************************************************* //

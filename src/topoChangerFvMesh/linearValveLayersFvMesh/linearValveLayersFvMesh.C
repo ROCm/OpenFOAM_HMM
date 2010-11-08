@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,12 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(linearValveLayersFvMesh, 0);
-    addToRunTimeSelectionTable(topoChangerFvMesh, linearValveLayersFvMesh, IOobject);
+    addToRunTimeSelectionTable
+    (
+        topoChangerFvMesh,
+        linearValveLayersFvMesh,
+        IOobject
+    );
 }
 
 
@@ -347,8 +352,9 @@ Foam::linearValveLayersFvMesh::linearValveLayersFvMesh(const IOobject& io)
                 "dynamicMeshDict",
                 time().constant(),
                 *this,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE,
+                false
             )
         ).subDict(typeName + "Coeffs")
     )

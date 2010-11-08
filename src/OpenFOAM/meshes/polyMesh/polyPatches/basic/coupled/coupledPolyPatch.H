@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,6 +38,7 @@ SourceFiles
 #define coupledPolyPatch_H
 
 #include "polyPatch.H"
+#include "diagTensorField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -133,33 +134,11 @@ protected:
             label& vertI
         );
 
-        //- Calculate face centres
-        static pointField calcFaceCentres
-        (
-            const UList<face>&,
-            const pointField&
-        );
-
         //- Get f[0] for all faces
         static pointField getAnchorPoints
         (
             const UList<face>&,
             const pointField&
-        );
-
-        //- Is face (in old face labels) in current patch?
-        bool inPatch
-        (
-            const labelList& oldToNew,
-            const label oldFaceI
-        ) const;
-
-        //- Given list of starts of patches and a face label determine
-        //  the patch.
-        static label whichPatch
-        (
-            const labelList& patchStarts,
-            const label faceI
         );
 
         //- Calculate typical tolerance per face. Is currently max distance
@@ -229,7 +208,7 @@ public:
             const coupledPolyPatch& pp,
             const polyBoundaryMesh& bm,
             const label index,
-            const unallocLabelList& mapAddressing,
+            const labelUList& mapAddressing,
             const label newStart
         );
 
@@ -248,44 +227,66 @@ public:
                 return true;
             }
 
+            //- Does this side own the patch ?
+            virtual bool owner() const = 0;
 
-            //- Are the coupled planes separated
-            bool separated() const
+            //- Does the coupled side own the patch ?
+            virtual bool neighbour() const
+            {
+                return !owner();
+            }
+
+            //- Transform a patch-based position from other side to this side
+            virtual void transformPosition(pointField& l) const = 0;
+
+            //- Are the planes separated.
+            virtual bool separated() const
             {
                 return separation_.size();
             }
 
-            //- Return the offset (distance) vector from one side of the couple
-            //  to the other
-            const vectorField& separation() const
+            //- If the planes are separated the separation vector.
+            virtual const vectorField& separation() const
             {
                 return separation_;
             }
 
-            //- Are the cyclic planes parallel
-            bool parallel() const
+            //- Are the cyclic planes parallel.
+            virtual bool parallel() const
             {
                 return forwardT_.empty();
             }
 
-            //- Return face transformation tensor
-            const tensorField& forwardT() const
+            //- Return face transformation tensor.
+            virtual const tensorField& forwardT() const
             {
                 return forwardT_;
             }
 
-            //- Return neighbour-cell transformation tensor
-            const tensorField& reverseT() const
+            //- Return neighbour-cell transformation tensor.
+            virtual const tensorField& reverseT() const
             {
                 return reverseT_;
             }
 
             //- Are faces collocated. Either size 0,1 or length of patch
-            const boolList& collocated() const
+            virtual const boolList& collocated() const
             {
                 return collocated_;
             }
 
+
+        //- Calculate the patch geometry
+        virtual void calcGeometry
+        (
+            const primitivePatch& referPatch,
+            const UList<point>& thisCtrs,
+            const UList<point>& thisAreas,
+            const UList<point>& thisCc,
+            const UList<point>& nbrCtrs,
+            const UList<point>& nbrAreas,
+            const UList<point>& nbrCc
+        ) = 0;
 
         //- Initialize ordering for primitivePatch. Does not
         //  refer to *this (except for name() and type() etc.)

@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -37,17 +37,18 @@ writeFormat     ascii;
 
 writePrecision  6;
 
-writeCompression off;
+writeCompression compressed;
 
 timeFormat      general;
 
 timePrecision   6;
 
-runTimeModifiable true;
+runTimeModifiable yes;
 
 adjustTimeStep  yes;
 
 maxCo           0.5;
+maxAlphaCo      0.5;
 
 maxDeltaT       1;
 
@@ -59,16 +60,14 @@ functions
         functionObjectLibs ("libsampling.so");
         outputControl   timeStep;
         outputInterval  1;
-
-        fields
-        (
-            p
-        );
-
         probeLocations
         (
             ( 0 9.95 19.77 )
             ( 0 -9.95 19.77 )
+        );
+        fields
+        (
+            p
         );
     }
 
@@ -79,7 +78,6 @@ functions
         outputControl   timeStep;
         outputInterval  10;
         surfaceFormat   raw;
-
         fields
         (
             p
@@ -96,5 +94,6 @@ functions
         );
     }
 }
+
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -72,8 +72,8 @@ Foam::fv::gaussGrad<Type>::gradf
     );
     GeometricField<GradType, fvPatchField, volMesh>& gGrad = tgGrad();
 
-    const unallocLabelList& owner = mesh.owner();
-    const unallocLabelList& neighbour = mesh.neighbour();
+    const labelUList& owner = mesh.owner();
+    const labelUList& neighbour = mesh.neighbour();
     const vectorField& Sf = mesh.Sf();
 
     Field<GradType>& igGrad = gGrad;
@@ -89,7 +89,7 @@ Foam::fv::gaussGrad<Type>::gradf
 
     forAll(mesh.boundary(), patchi)
     {
-        const unallocLabelList& pFaceCells =
+        const labelUList& pFaceCells =
             mesh.boundary()[patchi].faceCells();
 
         const vectorField& pSf = mesh.Sf().boundaryField()[patchi];

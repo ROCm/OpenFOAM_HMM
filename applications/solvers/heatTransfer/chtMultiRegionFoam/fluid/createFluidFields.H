@@ -1,11 +1,14 @@
     // Initialise fluid field pointer lists
-    PtrList<basicPsiThermo> thermoFluid(fluidRegions.size());
+    PtrList<basicRhoThermo> thermoFluid(fluidRegions.size());
     PtrList<volScalarField> rhoFluid(fluidRegions.size());
     PtrList<volScalarField> KFluid(fluidRegions.size());
     PtrList<volVectorField> UFluid(fluidRegions.size());
     PtrList<surfaceScalarField> phiFluid(fluidRegions.size());
     PtrList<uniformDimensionedVectorField> gFluid(fluidRegions.size());
     PtrList<compressible::turbulenceModel> turbulence(fluidRegions.size());
+    PtrList<volScalarField> p_rghFluid(fluidRegions.size());
+    PtrList<volScalarField> ghFluid(fluidRegions.size());
+    PtrList<surfaceScalarField> ghfFluid(fluidRegions.size());
     PtrList<volScalarField> DpDtFluid(fluidRegions.size());
 
     List<scalar> initialMassFluid(fluidRegions.size());
@@ -20,7 +23,7 @@
         thermoFluid.set
         (
             i,
-            basicPsiThermo::New(fluidRegions[i]).ptr()
+            basicRhoThermo::New(fluidRegions[i]).ptr()
         );
 
         Info<< "    Adding to rhoFluid\n" << endl;
@@ -129,6 +132,42 @@
             ).ptr()
         );
 
+        Info<< "    Adding to ghFluid\n" << endl;
+        ghFluid.set
+        (
+            i,
+            new volScalarField("gh", gFluid[i] & fluidRegions[i].C())
+        );
+
+        Info<< "    Adding to ghfFluid\n" << endl;
+        ghfFluid.set
+        (
+            i,
+            new surfaceScalarField("ghf", gFluid[i] & fluidRegions[i].Cf())
+        );
+
+        p_rghFluid.set
+        (
+            i,
+            new volScalarField
+            (
+                IOobject
+                (
+                    "p_rgh",
+                    runTime.timeName(),
+                    fluidRegions[i],
+                    IOobject::MUST_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                fluidRegions[i]
+            )
+        );
+
+        // Force p_rgh to be consistent with p
+        p_rghFluid[i] = thermoFluid[i].p() - rhoFluid[i]*ghFluid[i];
+
+        initialMassFluid[i] = fvc::domainIntegrate(rhoFluid[i]).value();
+
         Info<< "    Adding to DpDtFluid\n" << endl;
         DpDtFluid.set
         (
@@ -147,6 +186,4 @@
                 )
             )
         );
-
-        initialMassFluid[i] = fvc::domainIntegrate(rhoFluid[i]).value();
     }

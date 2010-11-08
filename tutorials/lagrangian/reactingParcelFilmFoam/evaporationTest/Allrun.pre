@@ -1,0 +1,15 @@
+#!/bin/sh
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+rm -fr log.*
+
+runApplication blockMesh
+
+runApplication setSet -batch wallFilmRegion.setSet
+mv log.setSet log.wallFilmRegion.setSet
+
+runApplication setsToZones -noFlipMap
+mv log.setsToZones log.setsToZones.primaryRegion
+
+runApplication extrudeToRegionMesh wallFilmRegion '(wallFilmFaces)' 0.01 -overwrite
+

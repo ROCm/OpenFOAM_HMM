@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
+#include "RASModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -173,20 +174,21 @@ void turbulentHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
     const scalarField& alphaEffp =
         patch().lookupPatchField<volScalarField, scalar>(alphaEffName_);
 
-    const scalarField& Cpp =
-        patch().lookupPatchField<volScalarField, scalar>(CpName_);
+    // retrieve (constant) specific heat capacity from transport dictionary
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const scalar Cp0(readScalar(rasModel.transport().lookup("Cp0")));
 
     switch (heatSource_)
     {
         case hsPower:
         {
             const scalar Ap = gSum(patch().magSf());
-            gradient() = q_/(Ap*Cpp*alphaEffp);
+            gradient() = q_/(Ap*Cp0*alphaEffp);
             break;
         }
         case hsFlux:
         {
-            gradient() = q_/(Cpp*alphaEffp);
+            gradient() = q_/(Cp0*alphaEffp);
             break;
         }
         default:
@@ -215,7 +217,6 @@ void turbulentHeatFluxTemperatureFvPatchScalarField::write(Ostream& os) const
         << token::END_STATEMENT << nl;
     q_.writeEntry("q", os);
     os.writeKeyword("alphaEff") << alphaEffName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("Cp") << CpName_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
 

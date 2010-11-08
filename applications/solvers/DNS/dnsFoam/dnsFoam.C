@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,15 +85,15 @@ int main(int argc, char *argv[])
 
         for (int corr=1; corr<=1; corr++)
         {
-            volScalarField rUA = 1.0/UEqn.A();
+            volScalarField rAU = 1.0/UEqn.A();
 
-            U = rUA*UEqn.H();
+            U = rAU*UEqn.H();
             phi = (fvc::interpolate(U) & mesh.Sf())
-                + fvc::ddtPhiCorr(rUA, U, phi);
+                + fvc::ddtPhiCorr(rAU, U, phi);
 
             fvScalarMatrix pEqn
             (
-                fvm::laplacian(rUA, p) == fvc::div(phi)
+                fvm::laplacian(rAU, p) == fvc::div(phi)
             );
 
             pEqn.solve();
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
 
             #include "continuityErrs.H"
 
-            U -= rUA*fvc::grad(p);
+            U -= rAU*fvc::grad(p);
             U.correctBoundaryConditions();
         }
 

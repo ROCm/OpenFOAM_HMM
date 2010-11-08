@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -115,7 +115,7 @@ public:
         List(List<T>&, bool reUse);
 
         //- Construct as subset.
-        List(const UList<T>&, const unallocLabelList& mapAddressing);
+        List(const UList<T>&, const labelUList& mapAddressing);
 
         //- Construct given start and end iterators.
         template<class InputIterator>
@@ -130,9 +130,6 @@ public:
 
         //- Construct as copy of SLList<T>
         explicit List(const SLList<T>&);
-
-        //- Construct as copy of IndirectList<T>
-        explicit List(const IndirectList<T>&);
 
         //- Construct as copy of UIndirectList<T>
         explicit List(const UIndirectList<T>&);
@@ -180,6 +177,9 @@ public:
             //- Clear the list, i.e. set size to zero.
             void clear();
 
+            //- Append an element at the end of the list
+            inline void append(const T&);
+
             //- Append a List at the end of this list
             inline void append(const UList<T>&);
 
@@ -215,9 +215,6 @@ public:
 
         //- Assignment from SLList operator. Takes linear time.
         void operator=(const SLList<T>&);
-
-        //- Assignment from IndirectList operator. Takes linear time.
-        void operator=(const IndirectList<T>&);
 
         //- Assignment from UIndirectList operator. Takes linear time.
         void operator=(const UIndirectList<T>&);

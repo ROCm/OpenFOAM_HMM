@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -100,11 +100,11 @@ void Foam::UPtrList<T>::transfer(UPtrList<T>& a)
 
 
 template<class T>
-void Foam::UPtrList<T>::reorder(const UList<label>& oldToNew)
+void Foam::UPtrList<T>::reorder(const labelUList& oldToNew)
 {
     if (oldToNew.size() != size())
     {
-        FatalErrorIn("UPtrList<T>::reorder(const UList<label>&)")
+        FatalErrorIn("UPtrList<T>::reorder(const labelUList&)")
             << "Size of map (" << oldToNew.size()
             << ") not equal to list size (" << size()
             << ")." << abort(FatalError);
@@ -118,7 +118,7 @@ void Foam::UPtrList<T>::reorder(const UList<label>& oldToNew)
 
         if (newI < 0 || newI >= size())
         {
-            FatalErrorIn("UPtrList<T>::reorder(const UList<label>&)")
+            FatalErrorIn("UPtrList<T>::reorder(const labelUList&)")
                 << "Illegal index " << newI << nl
                 << "Valid indices are 0.." << size()-1
                 << abort(FatalError);
@@ -126,7 +126,7 @@ void Foam::UPtrList<T>::reorder(const UList<label>& oldToNew)
 
         if (newPtrs_[newI])
         {
-            FatalErrorIn("UPtrList<T>::reorder(const UList<label>&)")
+            FatalErrorIn("UPtrList<T>::reorder(const labelUList&)")
                 << "reorder map is not unique; element " << newI
                 << " already set." << abort(FatalError);
         }
@@ -137,7 +137,7 @@ void Foam::UPtrList<T>::reorder(const UList<label>& oldToNew)
     {
         if (!newPtrs_[i])
         {
-            FatalErrorIn("UPtrList<T>::reorder(const UList<label>&)")
+            FatalErrorIn("UPtrList<T>::reorder(const labelUList&)")
                 << "Element " << i << " not set after reordering." << nl
                 << abort(FatalError);
         }

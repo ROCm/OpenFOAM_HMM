@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -94,7 +94,7 @@ tmp<scalarField> mutkRoughWallFunctionFvPatchScalarField::calcMut() const
         if (KsPlus > 2.25)
         {
             Edash /= fnRough(KsPlus, Cs_[faceI]);
-            yPlusLamNew = rasModel.yPlusLam(kappa_, Edash);
+            yPlusLamNew = calcYPlusLam(kappa_, Edash);
         }
 
         if (debug)

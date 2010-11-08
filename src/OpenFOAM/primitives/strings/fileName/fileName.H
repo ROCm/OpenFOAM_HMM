@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -93,6 +93,8 @@ public:
 
         static const char* const typeName;
         static int debug;
+
+        //- An empty fileName
         static const fileName null;
 
 
@@ -136,10 +138,15 @@ public:
         //  eg, remove repeated slashes, etc.
         fileName clean() const;
 
-        // Interogation
 
-            //- Return the file type: FILE, DIRECTORY or UNDEFINED
-            Type type() const;
+        // Interrogation
+
+             //- Return the file type: FILE, DIRECTORY or UNDEFINED
+             Type type() const;
+
+             //- Return true if file name is absolute
+             bool isAbsolute() const;
+
 
         // Decomposition
 
@@ -160,6 +167,7 @@ public:
 
             //- Return a single component of the path
             word component(const size_type, const char delimiter='/') const;
+
 
     // Member operators
 

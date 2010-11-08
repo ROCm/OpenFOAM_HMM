@@ -39,6 +39,13 @@ Foam::Analytical<Type>::Analytical
 {}
 
 
+template<class Type>
+Foam::Analytical<Type>::Analytical(const Analytical& is)
+:
+    IntegrationScheme<Type>(is)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -59,8 +66,12 @@ Foam::Analytical<Type>::integrate
 ) const
 {
     typename IntegrationScheme<Type>::integrationResult retValue;
-    retValue.average() = alpha + (phi - alpha)*(1 - exp(-beta*dt))/(beta*dt);
-    retValue.value() =  alpha + (phi - alpha)*exp(-beta*dt);
+
+    const scalar expTerm = exp(min(50, -beta*dt));
+
+    retValue.average() =
+        alpha + (phi - alpha)*(1 - expTerm)/(beta*dt + ROOTVSMALL);
+    retValue.value() =  alpha + (phi - alpha)*expTerm;
 
     return retValue;
 }

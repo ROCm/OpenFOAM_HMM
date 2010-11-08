@@ -43,10 +43,10 @@ namespace Foam
 Foam::surfaceFilmModels::noInjection::noInjection
 (
     const surfaceFilmModel& owner,
-    const dictionary& dict
+    const dictionary&
 )
 :
-    injectionModel(owner, dict)
+    injectionModel(owner)
 {}
 
 
@@ -58,7 +58,7 @@ Foam::surfaceFilmModels::noInjection::~noInjection()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::surfaceFilmModels::noInjection::correct
+void Foam::surfaceFilmModels::noInjection::inject
 (
     scalarField& massToInject,
     scalarField& diameterToInject
@@ -66,6 +66,7 @@ void Foam::surfaceFilmModels::noInjection::correct
 {
     // no mass injected
     massToInject = 0.0;
+    diameterToInject = -1.0;
 }
 
 

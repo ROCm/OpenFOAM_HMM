@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -188,7 +188,7 @@ void Foam::lduMatrix::sumA
     {
         if (interfaces.set(patchI))
         {
-            const unallocLabelList& pa = lduAddr().patchAddr(patchI);
+            const labelUList& pa = lduAddr().patchAddr(patchI);
             const scalarField& pCoeffs = interfaceBouCoeffs[patchI];
 
             forAll(pa, face)

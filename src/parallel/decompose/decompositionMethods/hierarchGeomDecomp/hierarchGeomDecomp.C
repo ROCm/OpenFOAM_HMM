@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,13 +39,6 @@ namespace Foam
         decompositionMethod,
         hierarchGeomDecomp,
         dictionary
-    );
-
-    addToRunTimeSelectionTable
-    (
-        decompositionMethod,
-        hierarchGeomDecomp,
-        dictionaryMesh
     );
 }
 
@@ -276,10 +269,10 @@ void Foam::hierarchGeomDecomp::findBinary
 
     while (true)
     {
-        label weightedSize = returnReduce
+        scalar weightedSize = returnReduce
         (
             sortedWeightedSizes[mid] - sortedWeightedSizes[minIndex],
-            sumOp<label>()
+            sumOp<scalar>()
         );
 
         if (debug)
@@ -685,35 +678,6 @@ void Foam::hierarchGeomDecomp::sortComponent
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::hierarchGeomDecomp::hierarchGeomDecomp
-(
-    const dictionary& decompositionDict
-)
-:
-    geomDecomp(decompositionDict, typeName),
-    decompOrder_()
-{
-    setDecompOrder();
-}
-
-
-Foam::hierarchGeomDecomp::hierarchGeomDecomp
-(
-    const dictionary& decompositionDict,
-    const polyMesh&
-)
-:
-    geomDecomp(decompositionDict, hierarchGeomDecomp::typeName),
-    decompOrder_()
-{
-    setDecompOrder();
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 Foam::labelList Foam::hierarchGeomDecomp::decompose
 (
     const pointField& points
@@ -796,5 +760,21 @@ Foam::labelList Foam::hierarchGeomDecomp::decompose
     return finalDecomp;
 }
 
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::hierarchGeomDecomp::hierarchGeomDecomp
+(
+    const dictionary& decompositionDict
+)
+:
+    geomDecomp(decompositionDict, typeName),
+    decompOrder_()
+{
+    setDecompOrder();
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // ************************************************************************* //

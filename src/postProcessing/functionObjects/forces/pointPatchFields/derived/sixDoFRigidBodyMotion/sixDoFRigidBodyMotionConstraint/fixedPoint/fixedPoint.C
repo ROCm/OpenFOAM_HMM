@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -116,7 +116,7 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::constrain
 
     bool converged(mag(error) < tolerance_);
 
-    if (motion.report())
+    if (sixDoFRigidBodyMotionConstraint::debug)
     {
         Info<< " error " << error
             << " force " << constraintForceIncrement

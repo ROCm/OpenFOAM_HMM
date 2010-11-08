@@ -75,11 +75,16 @@ public:
     // Constructors
 
         //- Construct from components
-        exponential
-        (
-            const dictionary& dict,
-            Random& rndGen
-        );
+        exponential(const dictionary& dict, cachedRandom& rndGen);
+
+        //- Construct copy
+        exponential(const exponential& p);
+
+        //- Construct and return a clone
+        virtual autoPtr<pdf> clone() const
+        {
+            return autoPtr<pdf>(new exponential(*this));
+        }
 
 
     //- Destructor

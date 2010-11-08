@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,9 +31,9 @@ Description
 #include "meshToMesh.H"
 #include "SubField.H"
 
-#include "octree.H"
-#include "octreeDataCell.H"
-#include "octreeDataFace.H"
+#include "indexedOctree.H"
+#include "treeDataCell.H"
+#include "treeDataFace.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -74,7 +74,7 @@ void Foam::meshToMesh::calcAddressing()
     forAll(patchesFrom, patchI)
     {
         // get reference to cells next to the boundary
-        const unallocLabelList& bCells = patchesFrom[patchI].faceCells();
+        const labelUList& bCells = patchesFrom[patchI].faceCells();
 
         forAll(bCells, faceI)
         {
@@ -100,21 +100,18 @@ void Foam::meshToMesh::calcAddressing()
         Info<< "   typical dimension      :" << shiftedBb.typDim() << endl;
     }
 
-    // Wrap indices and mesh information into helper object
-    octreeDataCell shapes(fromMesh_);
-
-    octree<octreeDataCell> oc
+    indexedOctree<treeDataCell> oc
     (
-        shiftedBb,  // overall bounding box
-        shapes,     // all information needed to do checks on cells
-        1,          // min. levels
-        10.0,       // max. size of leaves
-        10.0        // maximum ratio of cubes v.s. cells
+        treeDataCell(false, fromMesh_),
+        shiftedBb,      // overall bounding box
+        8,              // maxLevel
+        10,             // leafsize
+        3.0             // duplicity
     );
 
     if (debug)
     {
-        oc.printStats(Info);
+        oc.print(Pout, false, 0);
     }
 
     cellAddresses
@@ -174,38 +171,29 @@ void Foam::meshToMesh::calcAddressing()
                     wallBb.max() + vector(typDim, typDim, typDim)
                 );
 
-                // Wrap data for octree into container
-                octreeDataFace shapes(fromPatch);
-
-                octree<octreeDataFace> oc
+                indexedOctree<treeDataFace> oc
                 (
+                    treeDataFace(false, fromPatch),
                     shiftedBb,  // overall search domain
-                    shapes,     // all information needed to do checks on cells
-                    1,          // min levels
-                    20.0,       // maximum ratio of cubes v.s. cells
-                    2.0
+                    8,          // maxLevel
+                    10,         // leafsize
+                    3.0         // duplicity
                 );
-
 
                 const vectorField::subField centresToBoundary =
                     toPatch.faceCentres();
 
                 boundaryAddressing_[patchi].setSize(toPatch.size());
 
-                treeBoundBox tightest;
-                scalar tightestDist;
+                scalar distSqr = sqr(GREAT);
 
                 forAll(toPatch, toi)
                 {
-                    tightest = wallBb;                  // starting search bb
-                    tightestDist = Foam::GREAT;        // starting max distance
-
                     boundaryAddressing_[patchi][toi] = oc.findNearest
                     (
                         centresToBoundary[toi],
-                        tightest,
-                        tightestDist
-                    );
+                        distSqr
+                    ).index();
                 }
             }
         }
@@ -225,7 +213,7 @@ void Foam::meshToMesh::cellAddresses
     const pointField& points,
     const fvMesh& fromMesh,
     const List<bool>& boundaryCell,
-    const octree<octreeDataCell>& oc
+    const indexedOctree<treeDataCell>& oc
 ) const
 {
     // the implemented search method is a simple neighbour array search.
@@ -290,7 +278,7 @@ void Foam::meshToMesh::cellAddresses
             // the octree search to find it.
             if (boundaryCell[curCell])
             {
-                cellAddressing_[toI] = oc.find(p);
+                cellAddressing_[toI] = oc.findInside(p);
             }
             else
             {
@@ -342,7 +330,7 @@ void Foam::meshToMesh::cellAddresses
                 if (!found)
                 {
                     // Still not found so us the octree
-                    cellAddressing_[toI] = oc.find(p);
+                    cellAddressing_[toI] = oc.findInside(p);
                 }
             }
         }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -171,13 +171,13 @@ public:
         }
 
         //- Return lower addressing
-        virtual const unallocLabelList& lowerAddr() const = 0;
+        virtual const labelUList& lowerAddr() const = 0;
 
         //- Return upper addressing
-        virtual const unallocLabelList& upperAddr() const = 0;
+        virtual const labelUList& upperAddr() const = 0;
 
         //- Return patch to internal addressing given patch number
-        virtual const unallocLabelList& patchAddr
+        virtual const labelUList& patchAddr
         (
             const label patchNo
         ) const = 0;
@@ -186,13 +186,13 @@ public:
         virtual const lduSchedule& patchSchedule() const = 0;
 
         //- Return losort addressing
-        const unallocLabelList& losortAddr() const;
+        const labelUList& losortAddr() const;
 
         //- Return owner start addressing
-        const unallocLabelList& ownerStartAddr() const;
+        const labelUList& ownerStartAddr() const;
 
         //- Return losort start addressing
-        const unallocLabelList& losortStartAddr() const;
+        const labelUList& losortStartAddr() const;
 
         //- Return off-diagonal index given owner and neighbour label
         label triIndex(const label a, const label b) const;

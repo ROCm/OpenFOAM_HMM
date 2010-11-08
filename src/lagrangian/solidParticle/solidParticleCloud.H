@@ -94,6 +94,8 @@ public:
 
         // Access
 
+            inline bool hasWallImpactDistance() const;
+
             inline const fvMesh& mesh() const;
 
             inline scalar rhop() const;

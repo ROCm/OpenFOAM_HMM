@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -171,7 +171,7 @@ public:
             //- Reorders elements. Ordering does not have to be done in
             //  ascending or descending order. Reordering has to be unique.
             //  (is shuffle)
-            void reorder(const UList<label>&);
+            void reorder(const labelUList&);
 
 
     // Member operators

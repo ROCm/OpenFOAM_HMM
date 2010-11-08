@@ -28,6 +28,15 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
+Foam::WallInteractionModel<CloudType>::WallInteractionModel(CloudType& owner)
+:
+    dict_(dictionary::null),
+    owner_(owner),
+    coeffDict_(dictionary::null)
+{}
+
+
+template<class CloudType>
 Foam::WallInteractionModel<CloudType>::WallInteractionModel
 (
     const dictionary& dict,

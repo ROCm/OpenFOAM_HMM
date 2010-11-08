@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -132,154 +132,26 @@ Foam::labelList Foam::polyMesh::facePatchFaceCells
 }
 
 
-Foam::polyMesh::polyMesh
+//- Set faces_, calculate cells and patchStarts.
+void Foam::polyMesh::setTopology
 (
-    const IOobject& io,
-    const Xfer<pointField>& points,
     const cellShapeList& cellsAsShapes,
     const faceListList& boundaryFaces,
     const wordList& boundaryPatchNames,
-    const wordList& boundaryPatchTypes,
-    const word& defaultBoundaryPatchName,
-    const word& defaultBoundaryPatchType,
-    const wordList& boundaryPatchPhysicalTypes,
-    const bool syncPar
+    labelList& patchSizes,
+    labelList& patchStarts,
+    label& defaultPatchStart,
+    label& nFaces,
+    cellList& cells
 )
-:
-    objectRegistry(io),
-    primitiveMesh(),
-    points_
-    (
-        IOobject
-        (
-            "points",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        points
-    ),
-    faces_
-    (
-        IOobject
-        (
-            "faces",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        0
-    ),
-    owner_
-    (
-        IOobject
-        (
-            "owner",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        0
-    ),
-    neighbour_
-    (
-        IOobject
-        (
-            "neighbour",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        0
-    ),
-    clearedPrimitives_(false),
-    boundary_
-    (
-        IOobject
-        (
-            "boundary",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        *this,
-        boundaryFaces.size() + 1    // add room for a default patch
-    ),
-    bounds_(points_, syncPar),
-    geometricD_(Vector<label>::zero),
-    solutionD_(Vector<label>::zero),
-    pointZones_
-    (
-        IOobject
-        (
-            "pointZones",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        *this,
-        0
-    ),
-    faceZones_
-    (
-        IOobject
-        (
-            "faceZones",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        *this,
-        0
-    ),
-    cellZones_
-    (
-        IOobject
-        (
-            "cellZones",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        *this,
-        0
-    ),
-    globalMeshDataPtr_(NULL),
-    moving_(false),
-    curMotionTimeIndex_(time().timeIndex()),
-    oldPointsPtr_(NULL)
 {
-    if (debug)
-    {
-        Info<<"Constructing polyMesh from cell and boundary shapes." << endl;
-    }
-
-    // Remove all of the old mesh files if they exist
-    removeFiles(instance());
-
     // Calculate the faces of all cells
     // Initialise maximum possible numer of mesh faces to 0
     label maxFaces = 0;
 
     // Set up a list of face shapes for each cell
     faceListList cellsFaceShapes(cellsAsShapes.size());
-    cellList cells(cellsAsShapes.size());
+    cells.setSize(cellsAsShapes.size());
 
     forAll(cellsFaceShapes, cellI)
     {
@@ -298,7 +170,7 @@ Foam::polyMesh::polyMesh
     faces_.setSize(maxFaces);
 
     // Initialise number of faces to 0
-    label nFaces = 0;
+    nFaces = 0;
 
     // set reference to point-cell addressing
     labelListList PointCells = cellShapePointCells(cellsAsShapes);
@@ -412,15 +284,16 @@ Foam::polyMesh::polyMesh
             {
                 FatalErrorIn
                 (
-                    "polyMesh::polyMesh\n"
+                    "polyMesh::setTopology\n"
                     "(\n"
-                    "    const IOobject&,\n"
-                    "    const Xfer<pointField>&,\n"
                     "    const cellShapeList& cellsAsShapes,\n"
                     "    const faceListList& boundaryFaces,\n"
-                    "    const wordList& boundaryPatchTypes,\n"
                     "    const wordList& boundaryPatchNames,\n"
-                    "    const word& defaultBoundaryPatchType\n"
+                    "    labelList& patchSizes,\n"
+                    "    labelList& patchStarts,\n"
+                    "    label& defaultPatchStart,\n"
+                    "    label& nFaces,\n"
+                    "    cellList& cells\n"
                     ")"
                 )   << "Error in internal face insertion"
                     << abort(FatalError);
@@ -430,8 +303,8 @@ Foam::polyMesh::polyMesh
 
     // Do boundary faces
 
-    labelList patchSizes(boundaryFaces.size(), -1);
-    labelList patchStarts(boundaryFaces.size(), -1);
+    patchSizes.setSize(boundaryFaces.size(), -1);
+    patchStarts.setSize(boundaryFaces.size(), -1);
 
     forAll(boundaryFaces, patchI)
     {
@@ -470,15 +343,16 @@ Foam::polyMesh::polyMesh
                     {
                         FatalErrorIn
                         (
-                            "polyMesh::polyMesh\n"
+                            "polyMesh::setTopology\n"
                             "(\n"
-                            "    const IOobject&,\n"
-                            "    const Xfer<pointField>&,\n"
                             "    const cellShapeList& cellsAsShapes,\n"
                             "    const faceListList& boundaryFaces,\n"
-                            "    const wordList& boundaryPatchTypes,\n"
                             "    const wordList& boundaryPatchNames,\n"
-                            "    const word& defaultBoundaryPatchType\n"
+                            "    labelList& patchSizes,\n"
+                            "    labelList& patchStarts,\n"
+                            "    label& defaultPatchStart,\n"
+                            "    label& nFaces,\n"
+                            "    cellList& cells\n"
                             ")"
                         )   << "Trying to specify a boundary face " << curFace
                             << " on the face on cell " << cellInside
@@ -518,7 +392,7 @@ Foam::polyMesh::polyMesh
 
     // Grab "non-existing" faces and put them into a default patch
 
-    label defaultPatchStart = nFaces;
+    defaultPatchStart = nFaces;
 
     forAll(cells, cellI)
     {
@@ -538,6 +412,170 @@ Foam::polyMesh::polyMesh
 
     // Reset the size of the face list
     faces_.setSize(nFaces);
+
+    return ;
+}
+
+
+Foam::polyMesh::polyMesh
+(
+    const IOobject& io,
+    const Xfer<pointField>& points,
+    const cellShapeList& cellsAsShapes,
+    const faceListList& boundaryFaces,
+    const wordList& boundaryPatchNames,
+    const wordList& boundaryPatchTypes,
+    const word& defaultBoundaryPatchName,
+    const word& defaultBoundaryPatchType,
+    const wordList& boundaryPatchPhysicalTypes,
+    const bool syncPar
+)
+:
+    objectRegistry(io),
+    primitiveMesh(),
+    points_
+    (
+        IOobject
+        (
+            "points",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        points
+    ),
+    faces_
+    (
+        IOobject
+        (
+            "faces",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        0
+    ),
+    owner_
+    (
+        IOobject
+        (
+            "owner",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        0
+    ),
+    neighbour_
+    (
+        IOobject
+        (
+            "neighbour",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        0
+    ),
+    clearedPrimitives_(false),
+    boundary_
+    (
+        IOobject
+        (
+            "boundary",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        *this,
+        boundaryFaces.size() + 1    // add room for a default patch
+    ),
+    bounds_(points_, syncPar),
+    geometricD_(Vector<label>::zero),
+    solutionD_(Vector<label>::zero),
+    tetBasePtIsPtr_(NULL),
+    pointZones_
+    (
+        IOobject
+        (
+            "pointZones",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        *this,
+        0
+    ),
+    faceZones_
+    (
+        IOobject
+        (
+            "faceZones",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        *this,
+        0
+    ),
+    cellZones_
+    (
+        IOobject
+        (
+            "cellZones",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        *this,
+        0
+    ),
+    globalMeshDataPtr_(NULL),
+    moving_(false),
+    curMotionTimeIndex_(time().timeIndex()),
+    oldPointsPtr_(NULL)
+{
+    if (debug)
+    {
+        Info<<"Constructing polyMesh from cell and boundary shapes." << endl;
+    }
+
+    // Remove all of the old mesh files if they exist
+    removeFiles(instance());
+
+    // Calculate faces and cells
+    labelList patchSizes;
+    labelList patchStarts;
+    label defaultPatchStart;
+    label nFaces;
+    cellList cells;
+    setTopology
+    (
+        cellsAsShapes,
+        boundaryFaces,
+        boundaryPatchNames,
+        patchSizes,
+        patchStarts,
+        defaultPatchStart,
+        nFaces,
+        cells
+    );
 
     // Warning: Patches can only be added once the face list is
     // completed, as they hold a subList of the face list
@@ -649,6 +687,273 @@ Foam::polyMesh::polyMesh
         if (checkMesh())
         {
             Info<< "Mesh OK" << endl;
+        }
+    }
+}
+
+
+Foam::polyMesh::polyMesh
+(
+    const IOobject& io,
+    const Xfer<pointField>& points,
+    const cellShapeList& cellsAsShapes,
+    const faceListList& boundaryFaces,
+    const wordList& boundaryPatchNames,
+    const PtrList<dictionary>& boundaryDicts,
+    const word& defaultBoundaryPatchName,
+    const word& defaultBoundaryPatchType,
+    const bool syncPar
+)
+:
+    objectRegistry(io),
+    primitiveMesh(),
+    points_
+    (
+        IOobject
+        (
+            "points",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        points
+    ),
+    faces_
+    (
+        IOobject
+        (
+            "faces",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        0
+    ),
+    owner_
+    (
+        IOobject
+        (
+            "owner",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        0
+    ),
+    neighbour_
+    (
+        IOobject
+        (
+            "neighbour",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        0
+    ),
+    clearedPrimitives_(false),
+    boundary_
+    (
+        IOobject
+        (
+            "boundary",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        *this,
+        boundaryFaces.size() + 1    // add room for a default patch
+    ),
+    bounds_(points_, syncPar),
+    geometricD_(Vector<label>::zero),
+    solutionD_(Vector<label>::zero),
+    tetBasePtIsPtr_(NULL),
+    pointZones_
+    (
+        IOobject
+        (
+            "pointZones",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        *this,
+        0
+    ),
+    faceZones_
+    (
+        IOobject
+        (
+            "faceZones",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        *this,
+        0
+    ),
+    cellZones_
+    (
+        IOobject
+        (
+            "cellZones",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        *this,
+        0
+    ),
+    globalMeshDataPtr_(NULL),
+    moving_(false),
+    curMotionTimeIndex_(time().timeIndex()),
+    oldPointsPtr_(NULL)
+{
+    if (debug)
+    {
+        Info<<"Constructing polyMesh from cell and boundary shapes." << endl;
+    }
+
+    // Remove all of the old mesh files if they exist
+    removeFiles(instance());
+
+    // Calculate faces and cells
+    labelList patchSizes;
+    labelList patchStarts;
+    label defaultPatchStart;
+    label nFaces;
+    cellList cells;
+    setTopology
+    (
+        cellsAsShapes,
+        boundaryFaces,
+        boundaryPatchNames,
+        patchSizes,
+        patchStarts,
+        defaultPatchStart,
+        nFaces,
+        cells
+    );
+
+    // Warning: Patches can only be added once the face list is
+    // completed, as they hold a subList of the face list
+    forAll(boundaryDicts, patchI)
+    {
+        dictionary patchDict(boundaryDicts[patchI]);
+
+        patchDict.set("nFaces", patchSizes[patchI]);
+        patchDict.set("startFace", patchStarts[patchI]);
+
+        // add the patch to the list
+        boundary_.set
+        (
+            patchI,
+            polyPatch::New
+            (
+                boundaryPatchNames[patchI],
+                patchDict,
+                patchI,
+                boundary_
+            )
+        );
+    }
+
+    label nAllPatches = boundaryFaces.size();
+
+    if (nFaces > defaultPatchStart)
+    {
+        WarningIn("polyMesh::polyMesh(... construct from shapes...)")
+            << "Found " << nFaces - defaultPatchStart
+            << " undefined faces in mesh; adding to default patch." << endl;
+
+        // Check if there already exists a defaultFaces patch as last patch
+        // and reuse it.
+        label patchI = findIndex(boundaryPatchNames, defaultBoundaryPatchName);
+
+        if (patchI != -1)
+        {
+            if (patchI != boundaryFaces.size()-1 || boundary_[patchI].size())
+            {
+                FatalErrorIn("polyMesh::polyMesh(... construct from shapes...)")
+                    << "Default patch " << boundary_[patchI].name()
+                    << " already has faces in it or is not"
+                    << " last in list of patches." << exit(FatalError);
+            }
+
+            WarningIn("polyMesh::polyMesh(... construct from shapes...)")
+                << "Reusing existing patch " << patchI
+                << " for undefined faces." << endl;
+
+            boundary_.set
+            (
+                patchI,
+                polyPatch::New
+                (
+                    boundary_[patchI].type(),
+                    boundary_[patchI].name(),
+                    nFaces - defaultPatchStart,
+                    defaultPatchStart,
+                    patchI,
+                    boundary_
+                )
+            );
+        }
+        else
+        {
+            boundary_.set
+            (
+                nAllPatches,
+                polyPatch::New
+                (
+                    defaultBoundaryPatchType,
+                    defaultBoundaryPatchName,
+                    nFaces - defaultPatchStart,
+                    defaultPatchStart,
+                    boundary_.size() - 1,
+                    boundary_
+                )
+            );
+
+            nAllPatches++;
+        }
+    }
+
+    // Reset the size of the boundary
+    boundary_.setSize(nAllPatches);
+
+    // Set the primitive mesh
+    initMesh(cells);
+
+    if (syncPar)
+    {
+        // Calculate topology for the patches (processor-processor comms etc.)
+        boundary_.updateMesh();
+
+        // Calculate the geometry for the patches (transformation tensors etc.)
+        boundary_.calcGeometry();
+    }
+
+    if (debug)
+    {
+        if (checkMesh())
+        {
+            Info << "Mesh OK" << endl;
         }
     }
 }

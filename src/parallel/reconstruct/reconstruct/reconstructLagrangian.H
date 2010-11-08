@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,6 +38,7 @@ SourceFiles
 #include "cloud.H"
 #include "polyMesh.H"
 #include "IOobjectList.H"
+#include "CompactIOField.H"
 #include "fvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -68,7 +69,27 @@ tmp<IOField<Type> > reconstructLagrangianField
 
 
 template<class Type>
+tmp<CompactIOField<Field<Type>, Type> > reconstructLagrangianFieldField
+(
+    const word& cloudName,
+    const polyMesh& mesh,
+    const PtrList<fvMesh>& meshes,
+    const word& fieldName
+);
+
+
+template<class Type>
 void reconstructLagrangianFields
+(
+    const word& cloudName,
+    const polyMesh& mesh,
+    const PtrList<fvMesh>& meshes,
+    const IOobjectList& objects
+);
+
+
+template<class Type>
+void reconstructLagrangianFieldFields
 (
     const word& cloudName,
     const polyMesh& mesh,

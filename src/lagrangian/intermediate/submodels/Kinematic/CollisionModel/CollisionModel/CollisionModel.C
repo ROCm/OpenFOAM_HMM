@@ -30,9 +30,7 @@ License
 template<class CloudType>
 Foam::CollisionModel<CloudType>::CollisionModel(CloudType& owner)
 :
-    dict_(dictionary::null),
-    owner_(owner),
-    coeffDict_(dictionary::null)
+    SubModelBase<CloudType>(owner)
 {}
 
 
@@ -44,9 +42,14 @@ Foam::CollisionModel<CloudType>::CollisionModel
     const word& type
 )
 :
-    dict_(dict),
-    owner_(owner),
-    coeffDict_(dict.subDict(type + "Coeffs"))
+    SubModelBase<CloudType>(owner, dict, type)
+{}
+
+
+template<class CloudType>
+Foam::CollisionModel<CloudType>::CollisionModel(CollisionModel<CloudType>& cm)
+:
+    SubModelBase<CloudType>(cm)
 {}
 
 
@@ -57,8 +60,38 @@ Foam::CollisionModel<CloudType>::~CollisionModel()
 {}
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::label Foam::CollisionModel<CloudType>::nSubCycles() const
+{
+    notImplemented
+    (
+        "Foam::label Foam::CollisionModel<CloudType>::nSubCycles() const"
+    );
+    return 0;
+}
+
+
+template<class CloudType>
+bool Foam::CollisionModel<CloudType>::controlsWallInteraction() const
+{
+    notImplemented
+    (
+        "bool Foam::CollisionModel<CloudType>::controlsWallInteraction()"
+    );
+    return false;
+}
+
+template<class CloudType>
+void Foam::CollisionModel<CloudType>::collide()
+{
+    notImplemented("void Foam::CollisionModel<CloudType>::collide()");
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewCollisionModel.C"
+#include "CollisionModelNew.C"
 
 // ************************************************************************* //

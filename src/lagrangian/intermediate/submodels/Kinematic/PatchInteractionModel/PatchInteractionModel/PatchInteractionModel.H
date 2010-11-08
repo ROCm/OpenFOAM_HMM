@@ -40,6 +40,9 @@ SourceFiles
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
 #include "polyPatch.H"
+#include "wallPolyPatch.H"
+#include "tetIndices.H"
+#include "SubModelBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,6 +55,8 @@ namespace Foam
 
 template<class CloudType>
 class PatchInteractionModel
+:
+    public SubModelBase<CloudType>
 {
 public:
 
@@ -73,14 +78,8 @@ private:
 
     // Private data
 
-        //- The cloud dictionary
-        const dictionary& dict_;
-
-        //- Reference to the owner cloud class
-        CloudType& owner_;
-
-        //- The coefficients dictionary
-        const dictionary coeffDict_;
+        //- Name of velocity field - default = "U"
+        const word UName_;
 
 
 public:
@@ -104,6 +103,9 @@ public:
 
     // Constructors
 
+        //- Construct null from owner
+        PatchInteractionModel(CloudType& owner);
+
         //- Construct from components
         PatchInteractionModel
         (
@@ -111,6 +113,18 @@ public:
             CloudType& owner,
             const word& type
         );
+
+        //- Construct copy
+        PatchInteractionModel(const PatchInteractionModel<CloudType>& pim);
+
+        //- Construct and return a clone
+        virtual autoPtr<PatchInteractionModel<CloudType> > clone() const
+        {
+            return autoPtr<PatchInteractionModel<CloudType> >
+            (
+                new PatchInteractionModel<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -127,14 +141,8 @@ public:
 
     // Access
 
-        //- Return the owner cloud object
-        const CloudType& owner() const;
-
-        //- Return the dictionary
-        const dictionary& dict() const;
-
-        //- Return the coefficients dictionary
-        const dictionary& coeffDict() const;
+        //- Return name of velocity field
+        const word& UName() const;
 
 
     // Member Functions
@@ -145,19 +153,28 @@ public:
         //- Convert word to interaction result
         static interactionType wordToInteractionType(const word& itWord);
 
-        //- Flag to indicate whether model activates patch interaction model
-        virtual bool active() const = 0;
-
         //- Apply velocity correction
         //  Returns true if particle remains in same cell
         virtual bool correct
         (
+            typename CloudType::parcelType& p,
             const polyPatch& pp,
-            const label faceId,
             bool& keepParticle,
-            bool& active,
-            vector& U
-        ) const = 0;
+            const scalar trackFraction,
+            const tetIndices& tetIs
+        ) const;
+
+        //- Calculate the patch normal and velocity to interact with,
+        //  accounting for patch motion if required.
+        void patchData
+        (
+            typename CloudType::parcelType& p,
+            const polyPatch& pp,
+            const scalar trackFraction,
+            const tetIndices& tetIs,
+            vector& normal,
+            vector& Up
+        ) const;
 };
 
 
@@ -185,20 +202,6 @@ public:
     PatchInteractionModel<CloudType<ParcelType> >::                           \
         adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
             add##SS##CloudType##ParcelType##ConstructorToTable_;
-
-
-#define makePatchInteractionModelThermoType(SS, CloudType, ParcelType, ThermoType)\
-                                                                              \
-    defineNamedTemplateTypeNameAndDebug                                       \
-    (                                                                         \
-        SS<CloudType<ParcelType<ThermoType> > >,                              \
-        0                                                                     \
-    );                                                                        \
-                                                                              \
-    PatchInteractionModel<CloudType<ParcelType<ThermoType> > >::              \
-        adddictionaryConstructorToTable                                       \
-            <SS<CloudType<ParcelType<ThermoType> > > >                        \
-            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

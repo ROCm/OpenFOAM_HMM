@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -942,8 +942,8 @@ bool Foam::primitiveMeshGeometry::checkFaceAngles
 //        {
 //            const point& fc = faceCentres[faceI];
 //
-//            // Calculate the sum of magnitude of areas and compare to magnitude
-//            // of sum of areas.
+//            // Calculate the sum of magnitude of areas and compare to
+//            // magnitude of sum of areas.
 //
 //            scalar sumA = 0.0;
 //
@@ -1134,8 +1134,8 @@ bool Foam::primitiveMeshGeometry::checkFaceTwist
                 "(const bool, const scalar, const primitiveMesh&"
                 ", const pointField&, const labelList&, labelHashSet*)"
             )   << nWarped  << " faces with severe warpage "
-                << "(cosine of the angle between triangle normal and face normal"
-                << " < " << minTwist << ") found.\n"
+                << "(cosine of the angle between triangle normal and "
+                << "face normal < " << minTwist << ") found.\n"
                 << endl;
         }
 

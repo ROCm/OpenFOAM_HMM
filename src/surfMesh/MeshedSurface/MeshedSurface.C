@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -187,7 +187,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
 (
     const Xfer<pointField>& pointLst,
     const Xfer<List<Face> >& faceLst,
-    const UList<label>& zoneSizes,
+    const labelUList& zoneSizes,
     const UList<word>& zoneNames
 )
 :
@@ -374,7 +374,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
             "dummyName",
             t.timeName(),
             t,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
             false
         ),
@@ -430,7 +430,7 @@ Foam::MeshedSurface<Face>::~MeshedSurface()
 template<class Face>
 void Foam::MeshedSurface<Face>::remapFaces
 (
-    const UList<label>& faceMap
+    const labelUList& faceMap
 )
 {
     // recalculate the zone start/size
@@ -920,7 +920,7 @@ Foam::label Foam::MeshedSurface<Face>::triangulate
             {
                 newFaces[newFaceI] = Face
                 (
-                    static_cast<UList<label>&>(tmpTri[triI])
+                    static_cast<labelUList&>(tmpTri[triI])
                 );
                 faceMap[newFaceI] = faceI;
                 newFaceI++;

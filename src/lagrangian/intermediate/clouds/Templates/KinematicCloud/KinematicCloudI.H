@@ -25,12 +25,149 @@ License
 
 #include "fvmSup.H"
 
+// * * * * * * * * * * * cloudSolution Member Functions  * * * * * * * * * * //
+
+template<class ParcelType>
+inline const Foam::fvMesh&
+Foam::KinematicCloud<ParcelType>::cloudSolution::mesh() const
+{
+    return mesh_;
+}
+
+
+template<class ParcelType>
+inline const Foam::dictionary&
+Foam::KinematicCloud<ParcelType>::cloudSolution::dict() const
+{
+    return dict_;
+}
+
+
+template<class ParcelType>
+inline const Foam::Switch
+Foam::KinematicCloud<ParcelType>::cloudSolution::active() const
+{
+    return active_;
+}
+
+
+template<class ParcelType>
+inline const Foam::dictionary&
+Foam::KinematicCloud<ParcelType>::cloudSolution::sourceTermDict() const
+{
+    return dict_.subDict("sourceTerms");
+}
+
+
+template<class ParcelType>
+inline const Foam::dictionary&
+Foam::KinematicCloud<ParcelType>::cloudSolution::interpolationSchemes() const
+{
+    return dict_.subDict("interpolationSchemes");
+}
+
+
+template<class ParcelType>
+inline const Foam::dictionary&
+Foam::KinematicCloud<ParcelType>::cloudSolution::integrationSchemes() const
+{
+    return dict_.subDict("integrationSchemes");
+}
+
+
+template<class ParcelType>
+inline const Foam::Switch
+Foam::KinematicCloud<ParcelType>::cloudSolution::transient() const
+{
+    return transient_;
+}
+
+
+template<class ParcelType>
+inline const Foam::Switch
+Foam::KinematicCloud<ParcelType>::cloudSolution::steadyState() const
+{
+    return !transient_;
+}
+
+
+template<class ParcelType>
+inline Foam::label
+Foam::KinematicCloud<ParcelType>::cloudSolution::calcFrequency() const
+{
+    return calcFrequency_;
+}
+
+
+template<class ParcelType>
+inline Foam::label Foam::KinematicCloud<ParcelType>::cloudSolution::iter() const
+{
+    return iter_;
+}
+
+
+template<class ParcelType>
+inline Foam::label Foam::KinematicCloud<ParcelType>::cloudSolution::nextIter()
+{
+    return ++iter_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar
+Foam::KinematicCloud<ParcelType>::cloudSolution::deltaT() const
+{
+    return deltaT_;
+}
+
+
+template<class ParcelType>
+inline const Foam::Switch
+Foam::KinematicCloud<ParcelType>::cloudSolution::coupled() const
+{
+    return coupled_;
+}
+
+
+template<class ParcelType>
+inline const Foam::Switch
+Foam::KinematicCloud<ParcelType>::cloudSolution::cellValueSourceCorrection()
+const
+{
+    return cellValueSourceCorrection_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar
+Foam::KinematicCloud<ParcelType>::cloudSolution::maxTrackTime() const
+{
+    return maxTrackTime_;
+}
+
+
+template<class ParcelType>
+inline const Foam::Switch
+Foam::KinematicCloud<ParcelType>::cloudSolution::resetSourcesOnStartup() const
+{
+    return resetSourcesOnStartup_;
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
-inline Foam::label Foam::KinematicCloud<ParcelType>::parcelTypeId() const
+inline const Foam::KinematicCloud<ParcelType>&
+Foam::KinematicCloud<ParcelType>::cloudCopy() const
 {
-    return parcelTypeId_;
+    return cloudCopyPtr_();
+}
+
+
+template<class ParcelType>
+inline bool Foam::KinematicCloud<ParcelType>::hasWallImpactDistance() const
+{
+    return !collision().controlsWallInteraction();
 }
 
 
@@ -50,6 +187,22 @@ Foam::KinematicCloud<ParcelType>::particleProperties() const
 
 
 template<class ParcelType>
+inline const typename Foam::KinematicCloud<ParcelType>::cloudSolution&
+Foam::KinematicCloud<ParcelType>::solution() const
+{
+    return solution_;
+}
+
+
+template<class ParcelType>
+inline typename Foam::KinematicCloud<ParcelType>::cloudSolution&
+Foam::KinematicCloud<ParcelType>::solution()
+{
+    return solution_;
+}
+
+
+template<class ParcelType>
 inline const typename ParcelType::constantProperties&
 Foam::KinematicCloud<ParcelType>::constProps() const
 {
@@ -58,24 +211,10 @@ Foam::KinematicCloud<ParcelType>::constProps() const
 
 
 template<class ParcelType>
-inline const Foam::Switch Foam::KinematicCloud<ParcelType>::active() const
+inline const Foam::dictionary&
+Foam::KinematicCloud<ParcelType>::subModelProperties() const
 {
-    return active_;
-}
-
-
-template<class ParcelType>
-inline const Foam::Switch Foam::KinematicCloud<ParcelType>::coupled() const
-{
-    return coupled_;
-}
-
-
-template <class ParcelType>
-inline const Foam::Switch
-Foam::KinematicCloud<ParcelType>::cellValueSourceCorrection() const
-{
-    return cellValueSourceCorrection_;
+    return subModelProperties_;
 }
 
 
@@ -118,10 +257,18 @@ Foam::KinematicCloud<ParcelType>::forces() const
 
 
 template<class ParcelType>
-inline const Foam::dictionary&
-Foam::KinematicCloud<ParcelType>::interpolationSchemes() const
+inline const Foam::CollisionModel<Foam::KinematicCloud<ParcelType> >&
+Foam::KinematicCloud<ParcelType>::collision() const
 {
-    return interpolationSchemes_;
+    return collisionModel_();
+}
+
+
+template<class ParcelType>
+inline Foam::CollisionModel<Foam::KinematicCloud<ParcelType> >&
+Foam::KinematicCloud<ParcelType>::collision()
+{
+    return collisionModel_();
 }
 
 
@@ -170,22 +317,6 @@ inline Foam::InjectionModel<Foam::KinematicCloud<ParcelType> >&
 Foam::KinematicCloud<ParcelType>::injection()
 {
     return injectionModel_();
-}
-
-
-template<class ParcelType>
-inline const Foam::CollisionModel<Foam::KinematicCloud<ParcelType> >&
-Foam::KinematicCloud<ParcelType>::collision() const
-{
-    return collisionModel_();
-}
-
-
-template<class ParcelType>
-inline Foam::CollisionModel<Foam::KinematicCloud<ParcelType> >&
-Foam::KinematicCloud<ParcelType>::collision()
-{
-    return collisionModel_();
 }
 
 
@@ -289,9 +420,22 @@ rotationalKineticEnergyOfSystem() const
 
 
 template<class ParcelType>
-inline Foam::Random& Foam::KinematicCloud<ParcelType>::rndGen()
+inline Foam::cachedRandom& Foam::KinematicCloud<ParcelType>::rndGen()
 {
     return rndGen_;
+}
+
+
+template<class ParcelType>
+inline Foam::List<Foam::DynamicList<ParcelType*> >&
+Foam::KinematicCloud<ParcelType>::cellOccupancy()
+{
+    if (cellOccupancyPtr_.empty())
+    {
+        buildCellOccupancy();
+    }
+
+    return cellOccupancyPtr_();
 }
 
 
@@ -299,40 +443,67 @@ template<class ParcelType>
 inline Foam::DimensionedField<Foam::vector, Foam::volMesh>&
 Foam::KinematicCloud<ParcelType>::UTrans()
 {
-    return UTrans_;
+    return UTrans_();
 }
 
 
 template<class ParcelType>
-inline Foam::tmp<Foam::DimensionedField<Foam::vector, Foam::volMesh> >
-Foam::KinematicCloud<ParcelType>::SU() const
+inline const Foam::DimensionedField<Foam::vector, Foam::volMesh>&
+Foam::KinematicCloud<ParcelType>::UTrans() const
 {
-    tmp<DimensionedField<vector, volMesh> > tSU
-    (
-        new DimensionedField<vector, volMesh>
-        (
-            IOobject
-            (
-                this->name() + "SU",
-                this->db().time().timeName(),
-                this->mesh(),
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
-            this->mesh(),
-            dimensionedVector
-            (
-                 "zero",
-                 dimDensity*dimVelocity/dimTime,
-                 vector::zero
-            )
-        )
-    );
+    return UTrans_();
+}
 
-    vectorField& SU = tSU().field();
-    SU = UTrans_/(mesh_.V()*this->db().time().deltaT());
 
-    return tSU;
+template<class ParcelType>
+inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
+Foam::KinematicCloud<ParcelType>::UCoeff()
+{
+    return UCoeff_();
+}
+
+
+template<class ParcelType>
+inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
+Foam::KinematicCloud<ParcelType>::UCoeff() const
+{
+    return UCoeff_();
+}
+
+
+template<class ParcelType>
+inline Foam::tmp<Foam::fvVectorMatrix>
+Foam::KinematicCloud<ParcelType>::SU(volVectorField& U) const
+{
+    if (debug)
+    {
+        Info<< "UTrans min/max = " << min(UTrans()).value() << ", "
+            << max(UTrans()).value() << nl
+            << "UCoeff min/max = " << min(UCoeff()).value() << ", "
+            << max(UCoeff()).value() << endl;
+    }
+
+    if (solution_.coupled())
+    {
+        if (solution_.semiImplicit("U"))
+        {
+            return
+                UTrans()/(mesh_.V()*this->db().time().deltaT())
+              + fvm::SuSp(-UCoeff()/mesh_.V(), U)
+              + UCoeff()/mesh_.V()*U;
+        }
+        else
+        {
+            tmp<fvVectorMatrix> tfvm(new fvVectorMatrix(U, dimForce));
+            fvVectorMatrix& fvm = tfvm();
+
+            fvm.source() = -UTrans()/(this->db().time().deltaT());
+
+            return tfvm;
+        }
+    }
+
+    return tmp<fvVectorMatrix>(new fvVectorMatrix(U, dimForce));
 }
 
 

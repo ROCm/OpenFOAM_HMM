@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -110,12 +110,10 @@ class timeVaryingMappedFixedValueFvPatchField
             label& hi
         ) const;
 
+
         //- Read boundary points and determine interpolation weights to patch
         //  faceCentres
         void readSamplePoints();
-
-        //- Find boundary data inbetween current time and interpolate
-        void checkTable();
 
         //- Do actual interpolation using current weights
         tmp<Field<Type> > interpolate(const Field<Type>&) const;
@@ -199,6 +197,12 @@ public:
                 return referenceCS_;
             }
 
+            //- Return startSampledValues
+            const Field<Type> startSampledValues()
+            {
+                 return startSampledValues_;
+            }
+
 
         // Mapping functions
 
@@ -214,6 +218,12 @@ public:
                 const fvPatchField<Type>&,
                 const labelList&
             );
+
+
+        // Utility functions
+
+            //- Find boundary data inbetween current time and interpolate
+            void checkTable();
 
 
         // Evaluation functions

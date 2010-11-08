@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -83,9 +83,6 @@ class autoSnapDriver
 
         // Snapping
 
-            //- Get faces to repatch. Returns map from face to patch.
-            Map<label> getZoneBafflePatches(const bool allowBoundary) const;
-
             //- Calculates (geometric) shared points
             static label getCollocatedPoints
             (
@@ -154,10 +151,6 @@ public:
     // Member Functions
 
         // Snapping
-
-            //- Create baffles for faces straddling zoned surfaces. Return
-            //  baffles.
-            autoPtr<mapPolyMesh> createZoneBaffles(List<labelPair>&);
 
             //- Merge baffles.
             autoPtr<mapPolyMesh> mergeZoneBaffles(const List<labelPair>&);

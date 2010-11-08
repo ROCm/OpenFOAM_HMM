@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,7 @@ class primitiveMesh;
 template<class Type> class indexedOctree;
 
 /*---------------------------------------------------------------------------*\
-                           Class treeDataCell Declaration
+                        Class treeDataCell Declaration
 \*---------------------------------------------------------------------------*/
 
 class treeDataCell
@@ -72,6 +72,9 @@ class treeDataCell
         //- Calculate cell bounding box
         treeBoundBox calcCellBb(const label cellI) const;
 
+        //- Initialise all member data
+        void update();
+
 public:
 
     // Declare name of the class and its debug switch
@@ -85,7 +88,15 @@ public:
         (
             const bool cacheBb,
             const primitiveMesh&,
-            const labelList&
+            const labelUList&
+        );
+
+        //- Construct from mesh and subset of cells, transferring contents
+        treeDataCell
+        (
+            const bool cacheBb,
+            const primitiveMesh&,
+            const Xfer<labelList>&
         );
 
         //- Construct from mesh. Uses all cells in mesh.
@@ -96,18 +107,18 @@ public:
 
         // Access
 
-            const labelList& cellLabels() const
+            inline const labelList& cellLabels() const
             {
                 return cellLabels_;
             }
 
-            const primitiveMesh& mesh() const
+            inline const primitiveMesh& mesh() const
             {
                 return mesh_;
             }
 
 
-            label size() const
+            inline label size() const
             {
                 return cellLabels_.size();
             }
@@ -142,11 +153,18 @@ public:
                 const treeBoundBox& sampleBb
             ) const;
 
+            //- Does shape at index contain sample
+            bool contains
+            (
+                const label index,
+                const point& sample
+            ) const;
+
             //- Calculates nearest (to sample) point in shape.
             //  Returns actual point and distance (squared)
             void findNearest
             (
-                const labelList& indices,
+                const labelUList& indices,
                 const point& sample,
 
                 scalar& nearestDistSqr,
@@ -158,7 +176,7 @@ public:
             //  Returns point and distance (squared)
             void findNearest
             (
-                const labelList& indices,
+                const labelUList& indices,
                 const linePointRef& ln,
 
                 treeBoundBox& tightest,
@@ -170,7 +188,7 @@ public:
                 notImplemented
                 (
                     "treeDataCell::findNearest"
-                    "(const labelList&, const linePointRef&, ..)"
+                    "(const labelUList&, const linePointRef&, ..)"
                 );
             }
 

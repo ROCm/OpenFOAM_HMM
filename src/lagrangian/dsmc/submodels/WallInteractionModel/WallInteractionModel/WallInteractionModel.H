@@ -85,6 +85,9 @@ public:
 
     // Constructors
 
+        //- Construct null from owner
+        WallInteractionModel(CloudType& owner);
+
         //- Construct from components
         WallInteractionModel
         (
@@ -126,11 +129,8 @@ public:
         //- Apply wall correction
         virtual void correct
         (
-            const wallPolyPatch& wpp,
-            const label faceId,
-            vector& U,
-            scalar& Ei,
-            label typeId
+            typename CloudType::parcelType& p,
+            const wallPolyPatch& wpp
         ) = 0;
 };
 

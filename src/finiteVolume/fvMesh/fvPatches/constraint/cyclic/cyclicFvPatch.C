@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,7 @@ License
 #include "cyclicFvPatch.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvMesh.H"
+#include "transform.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,30 +44,31 @@ addToRunTimeSelectionTable(fvPatch, cyclicFvPatch, polyPatch);
 // Make patch weighting factors
 void cyclicFvPatch::makeWeights(scalarField& w) const
 {
+    const cyclicFvPatch& nbrPatch = neighbFvPatch();
+
     const scalarField& magFa = magSf();
+    const scalarField& nbrMagFa = nbrPatch.magSf();
 
     scalarField deltas = nf() & fvPatch::delta();
-    label sizeby2 = deltas.size()/2;
+    scalarField nbrDeltas = nbrPatch.nf() & nbrPatch.fvPatch::delta();
 
-    for (label facei = 0; facei < sizeby2; facei++)
+    forAll(magFa, facei)
     {
-        scalar avFa = (magFa[facei] + magFa[facei + sizeby2])/2.0;
+        scalar avFa = (magFa[facei] + nbrMagFa[facei])/2.0;
 
-        if (mag(magFa[facei] - magFa[facei + sizeby2])/avFa > 1e-4)
+        if (mag(magFa[facei] - nbrMagFa[facei])/avFa > 1e-4)
         {
             FatalErrorIn("cyclicFvPatch::makeWeights(scalarField& w) const")
-                << "face " << facei << " and " << facei + sizeby2
-                <<  " areas do not match by "
-                << 100*mag(magFa[facei] - magFa[facei + sizeby2])/avFa
+                << "face " << facei << " areas do not match by "
+                << 100*mag(magFa[facei] - nbrMagFa[facei])/avFa
                 << "% -- possible face ordering problem"
                 << abort(FatalError);
         }
 
         scalar di = deltas[facei];
-        scalar dni = deltas[facei + sizeby2];
+        scalar dni = nbrDeltas[facei];
 
         w[facei] = dni/(di + dni);
-        w[facei + sizeby2] = 1 - w[facei];
     }
 }
 
@@ -74,16 +76,18 @@ void cyclicFvPatch::makeWeights(scalarField& w) const
 // Make patch face - neighbour cell distances
 void cyclicFvPatch::makeDeltaCoeffs(scalarField& dc) const
 {
-    scalarField deltas = nf() & fvPatch::delta();
-    label sizeby2 = deltas.size()/2;
+    //const cyclicPolyPatch& nbrPatch = cyclicPolyPatch_.neighbPatch();
+    const cyclicFvPatch& nbrPatch = neighbFvPatch();
 
-    for (label facei = 0; facei < sizeby2; facei++)
+    scalarField deltas = nf() & fvPatch::delta();
+    scalarField nbrDeltas = nbrPatch.nf() & nbrPatch.fvPatch::delta();
+
+    forAll(deltas, facei)
     {
         scalar di = deltas[facei];
-        scalar dni = deltas[facei + sizeby2];
+        scalar dni = nbrDeltas[facei];
 
         dc[facei] = 1.0/(di + dni);
-        dc[facei + sizeby2] = dc[facei];
     }
 }
 
@@ -92,7 +96,7 @@ void cyclicFvPatch::makeDeltaCoeffs(scalarField& dc) const
 tmp<vectorField> cyclicFvPatch::delta() const
 {
     vectorField patchD = fvPatch::delta();
-    label sizeby2 = patchD.size()/2;
+    vectorField nbrPatchD = neighbFvPatch().fvPatch::delta();
 
     tmp<vectorField> tpdv(new vectorField(patchD.size()));
     vectorField& pdv = tpdv();
@@ -100,24 +104,22 @@ tmp<vectorField> cyclicFvPatch::delta() const
     // To the transformation if necessary
     if (parallel())
     {
-        for (label facei = 0; facei < sizeby2; facei++)
+        forAll(patchD, facei)
         {
             vector ddi = patchD[facei];
-            vector dni = patchD[facei + sizeby2];
+            vector dni = nbrPatchD[facei];
 
             pdv[facei] = ddi - dni;
-            pdv[facei + sizeby2] = -pdv[facei];
         }
     }
     else
     {
-        for (label facei = 0; facei < sizeby2; facei++)
+        forAll(patchD, facei)
         {
             vector ddi = patchD[facei];
-            vector dni = patchD[facei + sizeby2];
+            vector dni = nbrPatchD[facei];
 
             pdv[facei] = ddi - transform(forwardT()[0], dni);
-            pdv[facei + sizeby2] = -transform(reverseT()[0], pdv[facei]);
         }
     }
 
@@ -127,54 +129,20 @@ tmp<vectorField> cyclicFvPatch::delta() const
 
 tmp<labelField> cyclicFvPatch::interfaceInternalField
 (
-    const unallocLabelList& internalData
+    const labelUList& internalData
 ) const
 {
     return patchInternalField(internalData);
 }
 
 
-tmp<labelField> cyclicFvPatch::transfer
-(
-    const Pstream::commsTypes,
-    const unallocLabelList& interfaceData
-) const
-{
-    tmp<labelField> tpnf(new labelField(this->size()));
-    labelField& pnf = tpnf();
-
-    label sizeby2 = this->size()/2;
-
-    for (label facei=0; facei<sizeby2; facei++)
-    {
-        pnf[facei] = interfaceData[facei + sizeby2];
-        pnf[facei + sizeby2] = interfaceData[facei];
-    }
-
-    return tpnf;
-}
-
-
 tmp<labelField> cyclicFvPatch::internalFieldTransfer
 (
     const Pstream::commsTypes commsType,
-    const unallocLabelList& iF
+    const labelUList& iF
 ) const
 {
-    const unallocLabelList& faceCells = this->patch().faceCells();
-
-    tmp<labelField> tpnf(new labelField(this->size()));
-    labelField& pnf = tpnf();
-
-    label sizeby2 = this->size()/2;
-
-    for (label facei=0; facei<sizeby2; facei++)
-    {
-        pnf[facei] = iF[faceCells[facei + sizeby2]];
-        pnf[facei + sizeby2] = iF[faceCells[facei]];
-    }
-
-    return tpnf;
+    return neighbFvPatch().patchInternalField(iF);
 }
 
 

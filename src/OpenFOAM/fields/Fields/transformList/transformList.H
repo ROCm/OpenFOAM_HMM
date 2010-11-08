@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,7 +70,7 @@ void transformList(const tensorField&, EdgeMap<T>&);
 
 
 template<>
-inline void transformList(const tensorField&, UList<label>&)
+inline void transformList(const tensorField&, labelUList&)
 {}
 template<>
 inline void transformList(const tensorField&, Map<label>&)

@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     WallModel.C
-    NewWallModel.C
+    WallModelNew.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,6 +39,7 @@ SourceFiles
 #include "IOdictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
+#include "WallSiteData.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,7 +55,7 @@ class WallModel
 {
     // Private data
 
-        //- The cloud dictionary
+        //- The CollisionModel dictionary
         const dictionary& dict_;
 
         //- Reference to the owner cloud class
@@ -111,6 +112,9 @@ public:
         //- Return the owner cloud object
         const CloudType& owner() const;
 
+        //- Return non-const access to the owner cloud object
+        CloudType& owner();
+
         //- Return the dictionary
         const dictionary& dict() const;
 
@@ -119,6 +123,9 @@ public:
 
 
     // Member Functions
+
+        //- Return the effective radius for a particle for the model
+        virtual scalar pREff(const typename CloudType::parcelType& p) const = 0;
 
         //- Whether the WallModel has a timestep limit that will
         //  require subCycling
@@ -133,8 +140,10 @@ public:
         virtual void evaluateWall
         (
             typename CloudType::parcelType& p,
-            const List<point>& flatSites,
-            const List<point>& sharpSites
+            const List<point>& flatSitePoints,
+            const List<WallSiteData<vector> >& flatSiteData,
+            const List<point>& sharpSitePoints,
+            const List<WallSiteData<vector> >& sharpSiteData
         ) const = 0;
 };
 

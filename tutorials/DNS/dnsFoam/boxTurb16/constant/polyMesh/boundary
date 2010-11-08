@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -15,28 +15,49 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-3
+6
 (
-    patch0
+    patch0_half0
     {
         type            cyclic;
-        nFaces          512;
+        nFaces          256;
         startFace       11520;
-        featureCos      0.9;
+        neighbourPatch  patch0_half1;
     }
-    patch1
+    patch0_half1
     {
         type            cyclic;
-        nFaces          512;
+        nFaces          256;
+        startFace       11776;
+        neighbourPatch  patch0_half0;
+    }
+    patch1_half0
+    {
+        type            cyclic;
+        nFaces          256;
         startFace       12032;
-        featureCos      0.9;
+        neighbourPatch  patch1_half1;
     }
-    patch2
+    patch1_half1
     {
         type            cyclic;
-        nFaces          512;
+        nFaces          256;
+        startFace       12288;
+        neighbourPatch  patch1_half0;
+    }
+    patch2_half0
+    {
+        type            cyclic;
+        nFaces          256;
         startFace       12544;
-        featureCos      0.9;
+        neighbourPatch  patch2_half1;
+    }
+    patch2_half1
+    {
+        type            cyclic;
+        nFaces          256;
+        startFace       12800;
+        neighbourPatch  patch2_half0;
     }
 )
 

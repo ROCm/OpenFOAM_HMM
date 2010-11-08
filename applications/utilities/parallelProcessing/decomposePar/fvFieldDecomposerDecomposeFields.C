@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,8 @@ License
 #include "fvFieldDecomposer.H"
 #include "processorFvPatchField.H"
 #include "processorFvsPatchField.H"
+#include "processorCyclicFvPatchField.H"
+#include "processorCyclicFvsPatchField.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -44,7 +46,7 @@ Foam::fvFieldDecomposer::decomposeField
 
     forAll(boundaryAddressing_, patchi)
     {
-        if (boundaryAddressing_[patchi] >= 0)
+        if (patchFieldDecomposerPtrs_[patchi])
         {
             patchFields.set
             (
@@ -58,7 +60,24 @@ Foam::fvFieldDecomposer::decomposeField
                 )
             );
         }
-        else
+        else if (isA<processorCyclicFvPatch>(procMesh_.boundary()[patchi]))
+        {
+            patchFields.set
+            (
+                patchi,
+                new processorCyclicFvPatchField<Type>
+                (
+                    procMesh_.boundary()[patchi],
+                    DimensionedField<Type, volMesh>::null(),
+                    Field<Type>
+                    (
+                        field.internalField(),
+                        *processorVolPatchFieldDecomposerPtrs_[patchi]
+                    )
+                )
+            );
+        }
+        else if (isA<processorFvPatch>(procMesh_.boundary()[patchi]))
         {
             patchFields.set
             (
@@ -74,6 +93,11 @@ Foam::fvFieldDecomposer::decomposeField
                     )
                 )
             );
+        }
+        else
+        {
+            FatalErrorIn("fvFieldDecomposer::decomposeField()")
+                << "Unknown type." << abort(FatalError);
         }
     }
 
@@ -155,7 +179,7 @@ Foam::fvFieldDecomposer::decomposeField
 
     forAll(boundaryAddressing_, patchi)
     {
-        if (boundaryAddressing_[patchi] >= 0)
+        if (patchFieldDecomposerPtrs_[patchi])
         {
             patchFields.set
             (
@@ -169,7 +193,24 @@ Foam::fvFieldDecomposer::decomposeField
                 )
             );
         }
-        else
+        else if (isA<processorCyclicFvPatch>(procMesh_.boundary()[patchi]))
+        {
+            patchFields.set
+            (
+                patchi,
+                new processorCyclicFvsPatchField<Type>
+                (
+                    procMesh_.boundary()[patchi],
+                    DimensionedField<Type, surfaceMesh>::null(),
+                    Field<Type>
+                    (
+                        allFaceField,
+                        *processorSurfacePatchFieldDecomposerPtrs_[patchi]
+                    )
+                )
+            );
+        }
+        else if (isA<processorFvPatch>(procMesh_.boundary()[patchi]))
         {
             patchFields.set
             (
@@ -185,6 +226,11 @@ Foam::fvFieldDecomposer::decomposeField
                     )
                 )
             );
+        }
+        else
+        {
+            FatalErrorIn("fvFieldDecomposer::decomposeField()")
+                << "Unknown type." << abort(FatalError);
         }
     }
 

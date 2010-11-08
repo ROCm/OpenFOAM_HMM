@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -301,31 +301,61 @@ FoamFile
 
 actions
 (
+    // Example:pick up internal faces on outside of cellSet
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Load initial cellSet
     {
         name    c0;
         type    cellSet;
         action  new;
         source labelToCell;
-        sourceDict
+        sourceInfo
         {
             value (12 13 56);
         }
     }
 
+    // Get all faces in cellSet
     {
-        name    c0;
+        name    f0;
+        type    faceSet;
+        action  new;
+        source  cellToFace;
+        sourceInfo
+        {
+            set     c0;
+            option  all;
+        }
+    }
+
+    // Determine inverse cellSet
+    {
+        name    c1;
+        type    cellSet;
+        action  new;
+        source  cellToCell;
+        sourceInfo
+        {
+            set c0;
+        }
+    }
+    {
+        name    c1;
         type    cellSet;
         action  invert;
     }
 
+    // Keep in f0 all faces in c1
     {
-        name    c0;
-        type    cellSet;
-        action  delete;
-        source labelToCell;
-        sourceDict
+        name    f0;
+        type    faceSet;
+        action  subset;
+        source  cellToFace;
+        sourceInfo
         {
-            value (1 2 3);
+            set     c1;
+            option  all;
         }
     }
 );

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -167,7 +167,7 @@ updateCoeffs()
     radiativeIntensityRay& ray =
         const_cast<radiativeIntensityRay&>(dom.IRay(rayId));
 
-    ray.Qr().boundaryField()[patchI] += Iw*(-n & ray.dAve());
+    ray.Qr().boundaryField()[patchI] += Iw*(n & ray.dAve());
 
     const scalarField Eb =
         dom.blackBody().bLambda(lambdaId).boundaryField()[patchI];

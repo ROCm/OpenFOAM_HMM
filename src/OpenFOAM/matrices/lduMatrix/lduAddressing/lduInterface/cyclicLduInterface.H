@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,6 +64,14 @@ public:
     // Member Functions
 
         // Access
+
+            //- Return neighbour
+            virtual label neighbPatchID() const = 0;
+
+            virtual bool owner() const = 0;
+
+            //- Return processor number
+            virtual const cyclicLduInterface& neighbPatch() const = 0;
 
             //- Return face transformation tensor
             virtual const tensorField& forwardT() const = 0;

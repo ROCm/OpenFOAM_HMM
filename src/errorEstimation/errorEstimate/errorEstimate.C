@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -270,7 +270,10 @@ void Foam::errorEstimate<Type>::operator-=(const errorEstimate<Type>& eev)
 
 
 template<class Type>
-void Foam::errorEstimate<Type>::operator-=(const tmp<errorEstimate<Type> >& teev)
+void Foam::errorEstimate<Type>::operator-=
+(
+    const tmp<errorEstimate<Type> >& teev
+)
 {
     operator-=(teev());
     teev.clear();

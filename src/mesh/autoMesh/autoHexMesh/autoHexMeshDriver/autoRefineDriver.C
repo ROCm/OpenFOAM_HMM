@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -844,10 +844,10 @@ void Foam::autoRefineDriver::doRefine
             << "---------------------" << nl
             << endl;
 
-        if (debug)
-        {
-            const_cast<Time&>(mesh.time())++;
-        }
+        //if (debug)
+        //{
+        //    const_cast<Time&>(mesh.time())++;
+        //}
 
         // Do final balancing. Keep zoned faces on one processor since the
         // snap phase will convert them to baffles and this only works for

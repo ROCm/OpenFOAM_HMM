@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -18,7 +18,7 @@ dictionaryReplacement
 {
     U
     {
-        internalField   uniform (0.01 0 0);
+        internalField   uniform (0.1 0 0);
 
         boundaryField
         {
@@ -30,13 +30,13 @@ dictionaryReplacement
             minX
             {
                 type            fixedValue;
-                value           uniform ( 0.01 0 0 );
+                value           uniform ( 0.1 0 0 );
             }
             maxX
             {
                 type            inletOutlet;
                 inletValue      uniform ( 0 0 0 );
-                value           uniform ( 0 0 0 );
+                value           uniform ( 0.1 0 0 );
             }
         }
     }
@@ -66,9 +66,10 @@ dictionaryReplacement
 
             "topAir_to_.*"
             {
-                type            compressible::turbulentTemperatureCoupledBaffle;
+                type            compressible::turbulentTemperatureCoupledBaffleMixed;
                 neighbourFieldName T;
-                K               K;
+                K               basicThermo;
+                KName           none;
                 value           uniform 300;
             }
         }
@@ -126,25 +127,42 @@ dictionaryReplacement
         }
     }
 
-    p
+    p_rgh
     {
-        internalField   uniform 100000;
+        internalField   uniform 1e5;
 
         boundaryField
         {
             ".*"
             {
                 type            buoyantPressure;
-                value           1e5;
+                value           uniform 1e5;
             }
 
             maxX
             {
-                type            waveTransmissive;
-                gamma           1.4;
-                fieldInf        100000;
-                lInf            0.4;
-                value           uniform 100000;
+                type            fixedValue;
+                value           uniform 1e5;
+            }
+        }
+    }
+
+    p
+    {
+        internalField   uniform 1e5;
+
+        boundaryField
+        {
+            ".*"
+            {
+                type            calculated;
+                value           uniform 1e5;
+            }
+
+            maxX
+            {
+                type            calculated;
+                value           uniform 1e5;
             }
         }
     }

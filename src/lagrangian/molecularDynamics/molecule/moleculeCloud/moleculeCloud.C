@@ -56,7 +56,7 @@ void Foam::moleculeCloud::buildConstProps()
             "moleculeProperties",
             mesh_.time().constant(),
             mesh_,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
             false
         )
@@ -742,7 +742,17 @@ void Foam::moleculeCloud::initialiseMolecules
                                 globalPosition
                             );
 
-                            label cell = mesh_.findCell(globalPosition);
+                            label cell = -1;
+                            label tetFace = -1;
+                            label tetPt = -1;
+
+                            findCellFacePt
+                            (
+                                globalPosition,
+                                cell,
+                                tetFace,
+                                tetPt
+                            );
 
                             if (findIndex(zone, cell) != -1)
                             {
@@ -750,6 +760,8 @@ void Foam::moleculeCloud::initialiseMolecules
                                 (
                                     globalPosition,
                                     cell,
+                                    tetFace,
+                                    tetPt,
                                     id,
                                     tethered,
                                     temperature,
@@ -818,9 +830,16 @@ void Foam::moleculeCloud::initialiseMolecules
                                                 globalPosition
                                             );
 
-                                        label cell = mesh_.findCell
+                                        label cell = -1;
+                                        label tetFace = -1;
+                                        label tetPt = -1;
+
+                                        findCellFacePt
                                         (
-                                            globalPosition
+                                            globalPosition,
+                                            cell,
+                                            tetFace,
+                                            tetPt
                                         );
 
                                         if (findIndex(zone, cell) != -1)
@@ -829,6 +848,8 @@ void Foam::moleculeCloud::initialiseMolecules
                                             (
                                                 globalPosition,
                                                 cell,
+                                                tetFace,
+                                                tetPt,
                                                 id,
                                                 tethered,
                                                 temperature,
@@ -888,9 +909,16 @@ void Foam::moleculeCloud::initialiseMolecules
                                                 globalPosition
                                             );
 
-                                        label cell = mesh_.findCell
+                                        label cell = -1;
+                                        label tetFace = -1;
+                                        label tetPt = -1;
+
+                                        findCellFacePt
                                         (
-                                            globalPosition
+                                            globalPosition,
+                                            cell,
+                                            tetFace,
+                                            tetPt
                                         );
 
                                         if (findIndex(zone, cell) != -1)
@@ -899,6 +927,8 @@ void Foam::moleculeCloud::initialiseMolecules
                                             (
                                                 globalPosition,
                                                 cell,
+                                                tetFace,
+                                                tetPt,
                                                 id,
                                                 tethered,
                                                 temperature,
@@ -962,6 +992,8 @@ void Foam::moleculeCloud::createMolecule
 (
     const point& position,
     label cell,
+    label tetFace,
+    label tetPt,
     label id,
     bool tethered,
     scalar temperature,
@@ -972,7 +1004,7 @@ void Foam::moleculeCloud::createMolecule
 
     if (cell == -1)
     {
-        cell = mesh_.findCell(position);
+        findCellFacePt(position, cell, tetFace, tetPt);
     }
 
     if (cell == -1)
@@ -1034,6 +1066,8 @@ void Foam::moleculeCloud::createMolecule
             cloud,
             position,
             cell,
+            tetFace,
+            tetPt,
             Q,
             v,
             vector::zero,
@@ -1074,7 +1108,7 @@ Foam::moleculeCloud::moleculeCloud
     mesh_(mesh),
     pot_(pot),
     cellOccupancy_(mesh_.nCells()),
-    il_(mesh_, pot_.pairPotentials().rCutMax(), true),
+    il_(mesh_, pot_.pairPotentials().rCutMax(), false),
     constPropList_(),
     rndGen_(clock::getTime())
 {
@@ -1126,18 +1160,18 @@ Foam::moleculeCloud::moleculeCloud
 void Foam::moleculeCloud::evolve()
 {
     molecule::trackData td0(*this, 0);
-    Cloud<molecule>::move(td0);
+    Cloud<molecule>::move(td0, mesh_.time().deltaTValue());
 
     molecule::trackData td1(*this, 1);
-    Cloud<molecule>::move(td1);
+    Cloud<molecule>::move(td1, mesh_.time().deltaTValue());
 
     molecule::trackData td2(*this, 2);
-    Cloud<molecule>::move(td2);
+    Cloud<molecule>::move(td2, mesh_.time().deltaTValue());
 
     calculateForce();
 
     molecule::trackData td3(*this, 3);
-    Cloud<molecule>::move(td3);
+    Cloud<molecule>::move(td3, mesh_.time().deltaTValue());
 }
 
 

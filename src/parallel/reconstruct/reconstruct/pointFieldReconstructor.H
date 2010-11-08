@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,6 +68,9 @@ class pointFieldReconstructor
         //- Point patch addressing
         labelListListList patchPointAddressing_;
 
+        //- Number of fields reconstructed
+        label nReconstructed_;
+
 
     // Private Member Functions
 
@@ -109,7 +112,7 @@ public:
                     return true;
                 }
 
-                const unallocLabelList& directAddressing() const
+                const labelUList& directAddressing() const
                 {
                     return unallocLabelList::null();
                 }
@@ -129,6 +132,12 @@ public:
 
 
     // Member Functions
+
+        //- Return number of fields reconstructed
+        label nReconstructed() const
+        {
+            return nReconstructed_;
+        }
 
         //- Reconstruct field
         template<class Type>

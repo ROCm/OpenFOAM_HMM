@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -325,6 +325,13 @@ private:
 
         // Baffle handling
 
+            //- Get faces to repatch. Returns map from face to patch.
+            Map<label> getZoneBafflePatches
+            (
+                const bool allowBoundary,
+                const labelList& globalToPatch
+            ) const;
+
             //- Determine patches for baffles
             void getBafflePatches
             (
@@ -432,6 +439,16 @@ private:
             (
                 const labelList& closedNamedSurfaces,
                 labelList& namedSurfaceIndex,
+                const labelList& surfaceToCellZone,
+                labelList& cellToZone
+            ) const;
+
+            //- Finds zone per cell for cells inside named surfaces that have
+            //  an inside point specified.
+            void findCellZoneInsideWalk
+            (
+                const labelList& locationSurfaces,
+                const labelList& namedSurfaceIndex,
                 const labelList& surfaceToCellZone,
                 labelList& cellToZone
             ) const;
@@ -703,6 +720,14 @@ public:
                 const labelList& neiPatch
             );
 
+            //- Create baffles for faces straddling zoned surfaces. Return
+            //  baffles.
+            autoPtr<mapPolyMesh> createZoneBaffles
+            (
+                const labelList& globalToPatch,
+                List<labelPair>&
+            );
+
             //- Return a list of coupled face pairs, i.e. faces that
             //  use the same vertices.
             List<labelPair> getDuplicateFaces(const labelList& testFaces) const;
@@ -724,10 +749,10 @@ public:
 
             //- Helper:add patch to mesh. Update all registered fields.
             //  Use addMeshedPatch to add patches originating from surfaces.
-            static label addPatch(fvMesh&, const word& name, const word& type);
+            static label addPatch(fvMesh&, const word& name, const dictionary&);
 
             //- Add patch originating from meshing. Update meshedPatches_.
-            label addMeshedPatch(const word& name, const word& type);
+            label addMeshedPatch(const word& name, const dictionary&);
 
             //- Get patchIDs for patches added in addMeshedPatch.
             labelList meshedPatches() const;

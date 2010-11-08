@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ License
 
 Foam::fvFieldDecomposer::patchFieldDecomposer::patchFieldDecomposer
 (
-    const unallocLabelList& addressingSlice,
+    const labelUList& addressingSlice,
     const label addressingOffset
 )
 :
@@ -48,7 +48,7 @@ Foam::fvFieldDecomposer::processorVolPatchFieldDecomposer::
 processorVolPatchFieldDecomposer
 (
     const fvMesh& mesh,
-    const unallocLabelList& addressingSlice
+    const labelUList& addressingSlice
 )
 :
     directAddressing_(addressingSlice.size())
@@ -95,7 +95,7 @@ processorVolPatchFieldDecomposer
 Foam::fvFieldDecomposer::processorSurfacePatchFieldDecomposer::
 processorSurfacePatchFieldDecomposer
 (
-    const unallocLabelList& addressingSlice
+    const labelUList& addressingSlice
 )
 :
     addressing_(addressingSlice.size()),
@@ -144,7 +144,11 @@ Foam::fvFieldDecomposer::fvFieldDecomposer
 {
     forAll(boundaryAddressing_, patchi)
     {
-        if (boundaryAddressing_[patchi] >= 0)
+        if
+        (
+            boundaryAddressing_[patchi] >= 0
+        && !isA<processorLduInterface>(procMesh.boundary()[patchi])
+        )
         {
             patchFieldDecomposerPtrs_[patchi] = new patchFieldDecomposer
             (
@@ -167,7 +171,7 @@ Foam::fvFieldDecomposer::fvFieldDecomposer
             processorSurfacePatchFieldDecomposerPtrs_[patchi] =
                 new processorSurfacePatchFieldDecomposer
                 (
-                    static_cast<const unallocLabelList&>
+                    static_cast<const labelUList&>
                     (
                         procMesh_.boundary()[patchi].patchSlice
                         (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -77,7 +77,7 @@ inline Foam::triFace::triFace
 }
 
 
-inline Foam::triFace::triFace(const UList<label>& lst)
+inline Foam::triFace::triFace(const labelUList& lst)
 :
     FixedList<label, 3>(lst)
 {}

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -88,7 +88,7 @@ Foam::tmp<Foam::volScalarField> Foam::GidaspowErgunWenYu::K
     volScalarField& KWenYu = tKWenYu();
 
     // Ergun
-    forAll(beta, cellj)
+    forAll (beta, cellj)
     {
         if (beta[cellj] <= 0.8)
         {

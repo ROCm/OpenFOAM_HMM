@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,8 +46,8 @@ class CaCO3;
 
 Ostream& operator<<
 (
-     Ostream&,
-     const CaCO3&
+    Ostream&,
+    const CaCO3&
 );
 
 
@@ -76,6 +76,18 @@ public:
 
         //- Construct from Istream
         CaCO3(Istream& is);
+
+        //- Construct from dictionary
+        CaCO3(const dictionary& dict);
+
+        //- Construct copy
+        CaCO3(const CaCO3& s);
+
+        //- Construct and return clone
+        virtual autoPtr<solid> clone() const
+        {
+            return autoPtr<solid>(new CaCO3(*this));
+        }
 
 
     // I-O

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,7 +85,7 @@ void Foam::zone::calcLookupMap() const
 Foam::zone::zone
 (
     const word& name,
-    const labelList& addr,
+    const labelUList& addr,
     const label index
 )
 :
@@ -128,7 +128,7 @@ Foam::zone::zone
 Foam::zone::zone
 (
     const zone& z,
-    const labelList& addr,
+    const labelUList& addr,
     const label index
 )
 :

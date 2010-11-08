@@ -41,6 +41,13 @@ Foam::surfaceFilmModels::kinematicSingleLayer::magSf() const
 }
 
 
+inline const Foam::dictionary&
+Foam::surfaceFilmModels::kinematicSingleLayer::solution() const
+{
+    return filmRegion_.solutionDict().subDict("PISO");
+}
+
+
 inline const Foam::Switch&
 Foam::surfaceFilmModels::kinematicSingleLayer::momentumPredictor() const
 {
@@ -133,6 +140,55 @@ inline Foam::volScalarField&
 Foam::surfaceFilmModels::kinematicSingleLayer::rhoSp()
 {
     return rhoSp_;
+}
+
+
+inline const Foam::volVectorField&
+Foam::surfaceFilmModels::kinematicSingleLayer::USp() const
+{
+    return USp_;
+}
+
+
+inline const Foam::volScalarField&
+Foam::surfaceFilmModels::kinematicSingleLayer::pSp() const
+{
+    return pSp_;
+}
+
+
+inline const Foam::volScalarField&
+Foam::surfaceFilmModels::kinematicSingleLayer::rhoSp() const
+{
+    return rhoSp_;
+}
+
+
+inline const Foam::volVectorField&
+Foam::surfaceFilmModels::kinematicSingleLayer::UPrimary() const
+{
+    return UPrimary_;
+}
+
+
+inline const Foam::volScalarField&
+Foam::surfaceFilmModels::kinematicSingleLayer::pPrimary() const
+{
+    return pPrimary_;
+}
+
+
+inline const Foam::volScalarField&
+Foam::surfaceFilmModels::kinematicSingleLayer::rhoPrimary() const
+{
+    return rhoPrimary_;
+}
+
+
+inline const Foam::volScalarField&
+Foam::surfaceFilmModels::kinematicSingleLayer::muPrimary() const
+{
+    return muPrimary_;
 }
 
 

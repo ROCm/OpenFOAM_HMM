@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -171,7 +171,8 @@ void mixedFixedValueSlipFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 
 // Return defining fields
 template<class Type>
-tmp<Field<Type> > mixedFixedValueSlipFvPatchField<Type>::snGradTransformDiag() const
+tmp<Field<Type> >
+mixedFixedValueSlipFvPatchField<Type>::snGradTransformDiag() const
 {
     vectorField nHat = this->patch().nf();
     vectorField diag(nHat.size());
@@ -182,7 +183,8 @@ tmp<Field<Type> > mixedFixedValueSlipFvPatchField<Type>::snGradTransformDiag() c
 
     return
         valueFraction_*Type(pTraits<Type>::one)
-      + (1.0 - valueFraction_)*transformFieldMask<Type>(pow<vector, pTraits<Type>::rank>(diag));
+      + (1.0 - valueFraction_)
+       *transformFieldMask<Type>(pow<vector, pTraits<Type>::rank>(diag));
 }
 
 

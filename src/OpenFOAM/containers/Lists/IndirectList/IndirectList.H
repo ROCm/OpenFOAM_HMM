@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,11 @@ Class
     Foam::IndirectList
 
 Description
-    A List with indirect addressing
+    A List with indirect addressing.
+
+SeeAlso
+    Foam::UIndirectList for a version without any allocation for the
+    addressing.
 
 SourceFiles
     IndirectListI.H
@@ -35,7 +39,7 @@ SourceFiles
 #ifndef IndirectList_H
 #define IndirectList_H
 
-#include "List.H"
+#include "UIndirectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,16 +47,71 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
+                   Class IndirectListAddressing Declaration
+\*---------------------------------------------------------------------------*/
+
+//- A helper class for storing addresses.
+class IndirectListAddressing
+{
+    // Private data
+
+        //- Storage for the list addressing
+        List<label> addressing_;
+
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        IndirectListAddressing(const IndirectListAddressing&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const IndirectListAddressing&);
+
+
+protected:
+
+    // Constructors
+
+        //- Construct by copying the addressing array
+        explicit inline IndirectListAddressing(const labelUList& addr);
+
+        //- Construct by transferring addressing array
+        explicit inline IndirectListAddressing(const Xfer<List<label> >& addr);
+
+
+    // Member Functions
+
+        // Access
+
+            //- Return the list addressing
+            inline const List<label>& addressing() const;
+
+        // Edit
+
+            //- Reset addressing
+            inline void resetAddressing(const labelUList&);
+            inline void resetAddressing(const Xfer<List<label> >&);
+
+};
+
+
+/*---------------------------------------------------------------------------*\
                         Class IndirectList Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T>
 class IndirectList
+:
+    private IndirectListAddressing,
+    public  UIndirectList<T>
 {
-    // Private data
+    // Private Member Functions
 
-        UList<T>& completeList_;
-        List<label> addressing_;
+        //- Disable default assignment operator
+        void operator=(const IndirectList<T>&);
+
+        //- Disable assignment from UIndirectList
+        void operator=(const UIndirectList<T>&);
 
 
 public:
@@ -60,64 +119,37 @@ public:
     // Constructors
 
         //- Construct given the complete list and the addressing array
-        inline IndirectList(const UList<T>&, const UList<label>&);
+        inline IndirectList(const UList<T>&, const labelUList&);
 
         //- Construct given the complete list and by transferring addressing
         inline IndirectList(const UList<T>&, const Xfer<List<label> >&);
 
+        //- Copy constructor
+        inline IndirectList(const IndirectList<T>&);
+
+        //- Construct from UIndirectList
+        explicit inline IndirectList(const UIndirectList<T>&);
+
 
     // Member Functions
 
+
         // Access
 
-            //- Return the number of elements in the list
-            inline label size() const;
-
-            //- Return true if the list is empty (ie, size() is zero).
-            inline bool empty() const;
-
-            //- Return the first element of the list.
-            inline T& first();
-
-            //- Return first element of the list.
-            inline const T& first() const;
-
-            //- Return the last element of the list.
-            inline T& last();
-
-            //- Return the last element of the list.
-            inline const T& last() const;
-
-            //- Return the complete list
-            inline const UList<T>& completeList() const;
-
             //- Return the list addressing
-            inline const List<label>& addressing() const;
+            using UIndirectList<T>::addressing;
 
 
         // Edit
 
             //- Reset addressing
-            inline void resetAddressing(const UList<label>&);
-            inline void resetAddressing(const Xfer<List<label> >&);
+            using IndirectListAddressing::resetAddressing;
 
 
         // Member Operators
 
-            //- Return the addressed elements as a List
-            inline List<T> operator()() const;
-
-            //- Return non-const access to an element
-            inline T& operator[](const label);
-
-            //- Return const access to an element
-            inline const T& operator[](const label) const;
-
-            //- Assignment from UList of addressed elements
-            inline void operator=(const UList<T>&);
-
-            //- Assignment of all entries to the given value
-            inline void operator=(const T&);
+            //- Assignment operator
+            using UIndirectList<T>::operator=;
 };
 
 

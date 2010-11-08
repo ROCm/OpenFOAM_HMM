@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,6 +60,8 @@ void Foam::ODESolver::solve
 
     scalar x = xStart;
     scalar h = hEst;
+    scalar hNext = 0;
+    scalar hPrev = 0;
 
     for (label nStep=0; nStep<MAXSTP; nStep++)
     {
@@ -73,14 +75,24 @@ void Foam::ODESolver::solve
         if ((x + h - xEnd)*(x + h - xStart) > 0.0)
         {
             h = xEnd - x;
+            hPrev = hNext;
         }
 
-        scalar hNext, hDid;
+        hNext = 0;
+        scalar hDid;
         solve(ode, x, y, dydx_, eps, yScale_, h, hDid, hNext);
 
         if ((x - xEnd)*(xEnd - xStart) >= 0.0)
         {
-            hEst = hNext;
+            if (hPrev != 0)
+            {
+                hEst = hPrev;
+            }
+            else
+            {
+                hEst = hNext;
+            }
+
             return;
         }
 

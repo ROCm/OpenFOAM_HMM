@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,7 +56,7 @@ TemplateName(treeDataPrimitivePatch);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class treeDataPrimitivePatch Declaration
+                   Class treeDataPrimitivePatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template
@@ -151,7 +151,7 @@ public:
             //  Returns actual point and distance (squared)
             void findNearest
             (
-                const labelList& indices,
+                const labelUList& indices,
                 const point& sample,
 
                 scalar& nearestDistSqr,
@@ -163,7 +163,7 @@ public:
             //  Returns point and distance (squared)
             void findNearest
             (
-                const labelList& indices,
+                const labelUList& indices,
                 const linePointRef& ln,
 
                 treeBoundBox& tightest,
@@ -175,7 +175,7 @@ public:
                 notImplemented
                 (
                     "treeDataPrimitivePatch::findNearest"
-                    "(const labelList&, const linePointRef&, ..)"
+                    "(const labelUList&, const linePointRef&, ..)"
                 );
             }
 

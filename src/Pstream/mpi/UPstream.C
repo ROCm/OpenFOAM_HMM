@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -350,8 +350,8 @@ void Foam::reduce(scalar& Value, const sumOp<scalar>& bop)
                         << Foam::abort(FatalError);
                 }
 
-	            Value = bop(Value, value);
-	        }
+                Value = bop(Value, value);
+            }
 
             level++;
             thisLevelOffset <<= 1;

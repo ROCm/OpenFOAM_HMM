@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -39,7 +39,7 @@ solvers
         maxIter         100;
     }
 
-    p
+    p_rgh
     {
         solver          GAMG;
         tolerance       1e-07;
@@ -54,7 +54,7 @@ solvers
         mergeLevels     1;
     }
 
-    pFinal
+    p_rghFinal
     {
         solver          PCG;
         preconditioner
@@ -81,7 +81,7 @@ solvers
     {
         solver          smoothSolver;
         smoother        GaussSeidel;
-        tolerance       1e-08;
+        tolerance       1e-9;
         relTol          0;
         nSweeps         1;
     }
@@ -89,13 +89,18 @@ solvers
 
 PISO
 {
+    momentumPredictor no;
     nCorrectors     4;
     nNonOrthogonalCorrectors 0;
     nAlphaCorr      4;
     nAlphaSubCycles 4;
     cycleAlpha      yes;
-    cAlpha          4;
+    cAlpha          2;
 }
 
+relaxationFactors
+{
+    U 1;
+}
 
 // ************************************************************************* //

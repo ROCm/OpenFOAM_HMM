@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,7 @@ License
 #include "makeBasicRhoThermo.H"
 
 #include "perfectGas.H"
+#include "incompressible.H"
 
 #include "hConstThermo.H"
 #include "janafThermo.H"
@@ -33,6 +34,10 @@ License
 
 #include "constTransport.H"
 #include "sutherlandTransport.H"
+
+#include "icoPolynomial.H"
+#include "hPolynomialThermo.H"
+#include "polynomialTransport.H"
 
 #include "hRhoThermo.H"
 #include "pureMixture.H"
@@ -71,6 +76,21 @@ makeBasicRhoThermo
     perfectGas
 );
 
+makeBasicRhoThermo
+(
+    hRhoThermo,
+    pureMixture,
+    constTransport,
+    hConstThermo,
+    incompressible
+);
+
+makeBasicRhoPolyThermo
+(
+    hRhoThermo,
+    pureMixture,
+    3
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -50,10 +50,12 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    const basicThermo& thermophysicalModel
+    const basicThermo& thermophysicalModel,
+    const word& turbulenceModelName,
+    const word& modelName
 )
 :
-    RASModel(typeName, rho, U, phi, thermophysicalModel),
+    RASModel(modelName, rho, U, phi, thermophysicalModel, turbulenceModelName),
 
     Cmu_
     (
@@ -379,7 +381,7 @@ void LaunderGibsonRSTM::correct()
     volSymmTensorField P = -twoSymm(R_ & fvc::grad(U_));
     volScalarField G("RASModel::G", 0.5*mag(tr(P)));
 
-    // Update espsilon and G at the wall
+    // Update epsilon and G at the wall
     epsilon_.boundaryField().updateCoeffs();
 
     // Dissipation equation
@@ -415,8 +417,11 @@ void LaunderGibsonRSTM::correct()
             forAll(curPatch, facei)
             {
                 label faceCelli = curPatch.faceCells()[facei];
-                P[faceCelli] *=
-                    min(G[faceCelli]/(0.5*mag(tr(P[faceCelli])) + SMALL), 100.0);
+                P[faceCelli] *= min
+                (
+                    G[faceCelli]/(0.5*mag(tr(P[faceCelli])) + SMALL),
+                    100.0
+                );
             }
         }
     }

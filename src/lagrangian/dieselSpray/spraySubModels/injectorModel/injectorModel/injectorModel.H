@@ -62,7 +62,7 @@ protected:
         spray& sm_;
 
         const PtrList<injector>& injectors_;
-        Random& rndGen_;
+        cachedRandom& rndGen_;
 
 
 public:

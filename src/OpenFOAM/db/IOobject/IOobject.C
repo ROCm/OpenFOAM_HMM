@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,15 +64,15 @@ bool Foam::IOobject::IOobject::fileNameComponents
         return false;
     }
 
-    string::size_type first = path.find('/');
-
-    if (first == 0)
+    if (path.isAbsolute())
     {
         // called with absolute path
         WarningIn("IOobject::fileNameComponents(const fileName&, ...)")
             << "called with absolute path: " << path << "\n";
         return false;
     }
+
+    string::size_type first = path.find('/');
 
     if (first == string::npos)
     {
@@ -316,8 +316,12 @@ Foam::fileName Foam::IOobject::filePath() const
 
 Foam::Istream* Foam::IOobject::objectStream()
 {
-    fileName fName = filePath();
+    return objectStream(filePath());
+}
 
+
+Foam::Istream* Foam::IOobject::objectStream(const fileName& fName)
+{
     if (fName.size())
     {
         IFstream* isPtr = new IFstream(fName);

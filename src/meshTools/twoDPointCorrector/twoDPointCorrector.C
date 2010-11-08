@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,7 +66,7 @@ void twoDPointCorrector::calcAddressing() const
 
             if (polyMesh::debug)
             {
-                Pout << "Found normal from wedge patch " << patchI;
+                Pout<< "Found normal from wedge patch " << patchI;
             }
 
             break;
@@ -84,7 +84,7 @@ void twoDPointCorrector::calcAddressing() const
 
                 if (polyMesh::debug)
                 {
-                    Pout << "Found normal from empty patch " << patchI;
+                    Pout<< "Found normal from empty patch " << patchI;
                 }
 
                 break;
@@ -109,7 +109,7 @@ void twoDPointCorrector::calcAddressing() const
 
     if (polyMesh::debug)
     {
-        Pout << " twoDPointCorrector normal: " << pn << endl;
+        Pout<< " twoDPointCorrector normal: " << pn << endl;
     }
 
     // Select edges to be included in check.

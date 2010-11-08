@@ -82,6 +82,11 @@ class globalIndexAndTransform
         //  transform.
         List<vectorTensorTransform> transformPermutations_;
 
+        //- Mapping from patch index to which transform it matches (or
+        //  -1 for none) (.first()) and what sign to us for it,
+        //  i.e. +/- 1 (.second()).
+        List<Pair<label> > patchTransformSign_;
+
 
     // Private static data
 
@@ -97,13 +102,20 @@ class globalIndexAndTransform
         //- Generate all of the transformation permutations
         void determineTransformPermutations();
 
-        //- Test a list of reference transforms to see if the test transform
-        bool matchTransform
+        //- Determine which patch uses which transform (if any) and which
+        //- sign to use
+        void determinePatchTransformSign();
+
+        //- Test a list of reference transforms to see if the test
+        //  transform matches one.  Return +1 or -1 depending on the
+        //  sign of the match, or 0 if none matches.
+        label matchTransform
         (
             const List<vectorTensorTransform>& refTransforms,
+            label& matchedRefTransformI,
             const vectorTensorTransform& testTransform,
             scalar tolerance,
-            bool bothSigns
+            bool checkBothSigns
         ) const;
 
         //- Disallow default bitwise copy construct
@@ -171,12 +183,33 @@ public:
             inline const List<vectorTensorTransform>&
             transformPermutations() const;
 
+            //- Return access to the per-patch transform-sign pairs
+            inline const List<Pair<label> >& patchTransformSign() const;
+
             //- Access the overall (permuted) transform corresponding
             //  to the transformIndex
             inline const vectorTensorTransform& transform
             (
                 label transformIndex
             ) const;
+
+            //- Access the all of the indices of the transform
+            //  permutations corresponding the transforms of the
+            //  listed patch indices
+            inline labelList transformIndicesForPatches
+            (
+                const labelHashSet& patchIs
+            ) const;
+
+            //- Apply all of the transform permutations
+            //  corresponding the transforms of the listed patch
+            //  indices to the supplied point
+            inline pointField transformPatches
+            (
+                const labelHashSet& patchIs,
+                const point& pt
+            ) const;
+
 };
 
 

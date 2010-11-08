@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -77,24 +77,19 @@ Foam::MarshakRadiationFvPatchScalarField::MarshakRadiationFvPatchScalarField
 {
     if (dict.found("value"))
     {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-        refValue() = scalarField("refValue", dict, p.size());
-        refGrad() = scalarField("refGradient", dict, p.size());
-        valueFraction() = scalarField("valueFraction", dict, p.size());
+        refValue() = scalarField("value", dict, p.size());
     }
     else
     {
-        const scalarField& Tp =
-            patch().lookupPatchField<volScalarField, scalar>(TName_);
-
-        refValue() = 4.0*constant::physicoChemical::sigma.value()*pow4(Tp);
-        refGrad() = 0.0;
-
-        fvPatchScalarField::operator=(refValue());
+        refValue() = 0.0;
     }
+
+    // zero gradient
+    refGrad() = 0.0;
+
+    valueFraction() = 1.0;
+
+    fvPatchScalarField::operator=(refValue());
 }
 
 

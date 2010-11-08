@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,6 +38,7 @@ SourceFiles
 
 #include "word.H"
 #include "scalar.H"
+#include "dictionary.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,11 +69,7 @@ class specie
     // Private Member Functions
 
         //- Construct from components without name
-        inline specie
-        (
-            const scalar nMoles,
-            const scalar molWeight
-        );
+        inline specie(const scalar nMoles, const scalar molWeight);
 
 
 public:
@@ -110,10 +107,16 @@ public:
         //- Construct from Istream
         specie(Istream&);
 
+        //- Construct from dictionary
+        specie(const dictionary& dict);
+
 
     // Member Functions
 
         // Access
+
+            //- Name
+            inline const word& name() const;
 
             //- Molecular weight [kg/kmol]
             inline scalar W() const;
@@ -123,6 +126,12 @@ public:
 
             //- Gas constant [J/(kg K)]
             inline scalar R() const;
+
+
+        // I-O
+
+            //- Write to Ostream
+            void write(Ostream& os) const;
 
 
     // Member operators

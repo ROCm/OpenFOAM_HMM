@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,14 +30,60 @@ License
 
 namespace Foam
 {
+    defineTypeNameAndDebug(APIdiffCoefFunc, 0);
+    addToRunTimeSelectionTable
+    (
+        thermophysicalFunction,
+        APIdiffCoefFunc,
+        Istream
+    );
+    addToRunTimeSelectionTable
+    (
+        thermophysicalFunction,
+        APIdiffCoefFunc,
+        dictionary
+    );
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(APIdiffCoefFunc, 0);
-addToRunTimeSelectionTable(thermophysicalFunction, APIdiffCoefFunc, Istream);
+Foam::APIdiffCoefFunc::APIdiffCoefFunc
+(
+    const scalar a,
+    const scalar b,
+    const scalar wf,
+    const scalar wa
+)
+:
+    a_(a),
+    b_(b),
+    wf_(wf),
+    wa_(wa),
+    alpha_(sqrt(1/wf_ + 1/wa_)),
+    beta_(sqr(cbrt(a_) + cbrt(b_)))
+{}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+Foam::APIdiffCoefFunc::APIdiffCoefFunc(Istream& is)
+:
+    a_(readScalar(is)),
+    b_(readScalar(is)),
+    wf_(readScalar(is)),
+    wa_(readScalar(is)),
+    alpha_(sqrt(1/wf_ + 1/wa_)),
+    beta_(sqr((cbrt(a_) + cbrt(b_))))
+{}
+
+
+Foam::APIdiffCoefFunc::APIdiffCoefFunc(const dictionary& dict)
+:
+    a_(readScalar(dict.lookup("a"))),
+    b_(readScalar(dict.lookup("b"))),
+    wf_(readScalar(dict.lookup("wf"))),
+    wa_(readScalar(dict.lookup("wa"))),
+    alpha_(sqrt(1/wf_ + 1/wa_)),
+    beta_(sqr((cbrt(a_) + cbrt(b_))))
+{}
+
 
 // ************************************************************************* //

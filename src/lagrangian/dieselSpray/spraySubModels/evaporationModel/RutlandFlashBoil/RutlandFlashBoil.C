@@ -253,7 +253,9 @@ Foam::scalar Foam::RutlandFlashBoil::boilingTime
         }
 
         scalar Gf =
-            4.0*alfaS*dTLB*constant::mathematical::pi*sqr(diameter/2.0)/heatOfVapour;
+            4.0*alfaS*dTLB
+           *constant::mathematical::pi*sqr(diameter/2.0)
+           /heatOfVapour;
 
         // calculation of the heat transfer vapourization at superheated
         // conditions (temperature>tBoilingSurface)
@@ -265,7 +267,8 @@ Foam::scalar Foam::RutlandFlashBoil::boilingTime
                 mag((vapourFarEnthalpy-vapourSurfaceEnthalpy)/heatOfVapour);
 
             // 2.0? or 1.0? try 1!
-            scalar B = 1.0*constant::mathematical::pi*kappa/cpGas*diameter*NusseltCorr;
+            scalar B =
+                1.0*constant::mathematical::pi*kappa/cpGas*diameter*NusseltCorr;
             scalar nPos = B*log(1.0 + A)/Gf + 1.0;
             scalar nNeg = (1.0/A)*(exp(Gf/B) - 1.0 - A) + 1.0;
 
@@ -338,7 +341,10 @@ Foam::scalar Foam::RutlandFlashBoil::boilingTime
             }
         }
 
-        time = (constant::mathematical::pi*pow3(diameter)/6.0)*liquidDensity/(G + Gf);
+        time =
+            (constant::mathematical::pi*pow3(diameter)/6.0)
+           *liquidDensity
+           /(G + Gf);
 
         time = max(VSMALL, time);
     }

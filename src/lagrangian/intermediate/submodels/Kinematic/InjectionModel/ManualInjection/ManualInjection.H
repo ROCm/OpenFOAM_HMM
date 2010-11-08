@@ -70,14 +70,20 @@ class ManualInjection
         //- Field of parcel diameters
         scalarList diameters_;
 
+        //- List of cell labels corresponding to injector positions
+        labelList injectorCells_;
+
+        //- List of tetFace labels corresponding to injector positions
+        labelList injectorTetFaces_;
+
+        //- List of tetPt labels corresponding to injector positions
+        labelList injectorTetPts_;
+
         //- Initial parcel velocity
         const vector U0_;
 
         //- Parcel size PDF model
         const autoPtr<pdfs::pdf> parcelPDF_;
-
-        //- Number of particles represented by each parcel
-        scalar nParticlesPerParcel_;
 
 
 protected:
@@ -85,18 +91,10 @@ protected:
     // Protected Member Functions
 
         //- Number of parcels to introduce over the time step relative to SOI
-        label parcelsToInject
-        (
-            const scalar time0,
-            const scalar time1
-        ) const;
+        virtual label parcelsToInject(const scalar time0, const scalar time1);
 
         //- Volume of parcels to introduce over the time step relative to SOI
-        scalar volumeToInject
-        (
-            const scalar time0,
-            const scalar time1
-        ) const;
+        virtual scalar volumeToInject(const scalar time0, const scalar time1);
 
 
 public:
@@ -108,11 +106,19 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        ManualInjection
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+        ManualInjection(const dictionary& dict, CloudType& owner);
+
+        //- Construct copy
+        ManualInjection(const ManualInjection<CloudType>& im);
+
+        //- Construct and return a clone
+        virtual autoPtr<InjectionModel<CloudType> > clone() const
+        {
+            return autoPtr<InjectionModel<CloudType> >
+            (
+                new ManualInjection<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -121,23 +127,22 @@ public:
 
     // Member Functions
 
-        //- Flag to indicate whether model activates injection model
-        bool active() const;
-
         //- Return the end-of-injection time
         scalar timeEnd() const;
 
 
         // Injection geometry
 
-            //- Set the injection position and owner cell
+            //- Set the injection position and owner cell, tetFace and tetPt
             virtual void setPositionAndCell
             (
                 const label parcelI,
                 const label nParcels,
                 const scalar time,
                 vector& position,
-                label& cellOwner
+                label& cellOwner,
+                label& tetFaceI,
+                label& tetPtI
             );
 
             //- Set the parcel properties

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,6 +65,16 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
 
         // Map the list
         newMotionPoints.map(oldMotionPoints, mpm.pointMap());
+
+        // Any points created out-of-nothing get set to the current coordinate
+        // for lack of anything better.
+        forAll(mpm.pointMap(), newPointI)
+        {
+            if (mpm.pointMap()[newPointI] == -1)
+            {
+                newMotionPoints[newPointI] = points_[newPointI];
+            }
+        }
     }
 
     // Reset valid directions (could change by faces put into empty patches)

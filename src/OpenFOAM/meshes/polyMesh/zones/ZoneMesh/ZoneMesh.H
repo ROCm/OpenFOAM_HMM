@@ -25,7 +25,7 @@ Class
     Foam::ZoneMesh
 
 Description
-    List of mesh zones
+    A list of mesh zones.
 
 SourceFiles
     ZoneMesh.C
@@ -37,8 +37,9 @@ SourceFiles
 
 #include "List.H"
 #include "regIOobject.H"
-#include "HashSet.H"
 #include "pointFieldsFwd.H"
+#include "Map.H"
+#include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -121,8 +122,8 @@ public:
         //  Return -1 if the object is not in the zone
         const Map<label>& zoneMap() const;
 
-        //- Given a global object index, return the zone it is in.  If
-        //object does not belong to any zones, return -1
+        //- Given a global object index, return the zone it is in.
+        // If object does not belong to any zones, return -1
         label whichZone(const label objectIndex) const;
 
         //- Return a list of zone types
@@ -131,8 +132,17 @@ public:
         //- Return a list of zone names
         wordList names() const;
 
+        //- Return zone indices for all matches
+        labelList findIndices(const keyType&) const;
+
+        //- Return zone index for the first match, return -1 if not found
+        label findIndex(const keyType&) const;
+
         //- Find zone index given a name
         label findZoneID(const word& zoneName) const;
+
+        //- Mark cells that match the zone specification
+        PackedBoolList findMatching(const keyType&) const;
 
         //- Clear addressing
         void clearAddressing();
@@ -142,6 +152,10 @@ public:
 
         //- Check zone definition. Return true if in error.
         bool checkDefinition(const bool report = false) const;
+
+        //- Check whether all procs have all zones and in same order. Return
+        //  true if in error.
+        bool checkParallelSync(const bool report = false) const;
 
         //- Correct zone mesh after moving points
         void movePoints(const pointField&);

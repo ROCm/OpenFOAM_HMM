@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -51,5 +51,12 @@ maxCo           1.0;
 
 maxDeltaT       1;
 
+libs
+(
+    "libOpenFOAM.so"
+    "libcompressibleTurbulenceModel.so"
+    "libcompressibleRASModels.so"
+    "libradiation.so"
+);
 
 // ************************************************************************* //

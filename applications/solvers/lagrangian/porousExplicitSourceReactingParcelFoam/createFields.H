@@ -8,6 +8,8 @@
 
     hsReactionThermo& thermo = chemistry.thermo();
 
+    SLGThermo slgThermo(mesh, thermo);
+
     basicMultiComponentMixture& composition = thermo.composition();
     PtrList<volScalarField>& Y = composition.Y();
 

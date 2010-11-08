@@ -7,25 +7,20 @@ cd ${0%/*} || exit 1    # run from this directory
 # Get application name
 application=`getApplication`
 
-runRefineMesh()
+runRefineMesh ()
 {
     echo "Running refineMesh on $PWD"
     refineMesh -dict > log.refineMesh 2>&1
 }
 
-
 runApplication blockMesh
 
 i=1
-if [ -f log.topoSet ]
-then
-    i=3
+if [ -f log.topoSet ] ; then
+   i=3
 fi
-
-while [ "$i" -lt 3 ]
-do
-    if [ -f log.topoSet ]
-    then
+while [ "$i" -lt 3 ] ; do
+    if [ -f log.topoSet ] ; then
         mv log.topoSet log.topoSet.1
     fi
     cp system/topoSetDict.${i} system/topoSetDict

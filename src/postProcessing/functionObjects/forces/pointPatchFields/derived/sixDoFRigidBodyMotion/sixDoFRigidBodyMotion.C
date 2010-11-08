@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,7 +40,7 @@ void Foam::sixDoFRigidBodyMotion::applyRestraints()
         {
             if (report_)
             {
-                Info<< "Restraint " << restraintNames_[rI];
+                Info<< "Restraint " << restraintNames_[rI] << ": ";
             }
 
             // restraint position
@@ -89,9 +89,9 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
 
             forAll(constraints_, cI)
             {
-                if (report_)
+                if (sixDoFRigidBodyMotionConstraint::debug)
                 {
-                    Info<< "Constraint " << constraintNames_[cI];
+                    Info<< "Constraint " << constraintNames_[cI] << ": ";
                 }
 
                 // constraint position
@@ -374,7 +374,6 @@ void Foam::sixDoFRigidBodyMotion::updatePosition
         centreOfMass() += deltaT*v();
 
         // Leapfrog orientation adjustment
-
         rotate(Q(), pi(), deltaT);
     }
 
@@ -423,23 +422,21 @@ void Foam::sixDoFRigidBodyMotion::updateForce
     scalar deltaT
 )
 {
-    vector a = vector::zero;
+    vector fGlobal = vector::zero;
 
-    vector tau = vector::zero;
+    vector tauGlobal = vector::zero;
 
     if (Pstream::master())
     {
+        fGlobal = sum(forces);
+
         forAll(positions, i)
         {
-            const vector& f = forces[i];
-
-            a += f/mass_;
-
-            tau += Q().T() & ((positions[i] - centreOfMass()) ^ f);
+            tauGlobal += (positions[i] - centreOfMass()) ^ forces[i];
         }
     }
 
-    updateForce(a, tau, deltaT);
+    updateForce(fGlobal, tauGlobal, deltaT);
 }
 
 

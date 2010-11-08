@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,7 +59,7 @@ void Foam::enrichedPatch::calcMasterPointFaces() const
     forAll(masterPatch_, faceI)
     {
         const face& curFace = ef[faceI + slavePatch_.size()];
-//         Pout << "Cur face in pfAddr: " << curFace << endl;
+//         Pout<< "Cur face in pfAddr: " << curFace << endl;
         forAll(curFace, pointI)
         {
             Map<DynamicList<label> >::iterator mpfIter =

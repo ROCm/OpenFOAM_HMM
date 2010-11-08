@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,7 @@ SourceFiles
 #define lagrangianFieldDecomposer_H
 
 #include "Cloud.H"
+#include "CompactIOField.H"
 #include "indexedParticle.H"
 #include "passiveParticle.H"
 
@@ -83,6 +84,7 @@ public:
         (
             const polyMesh& mesh,
             const polyMesh& procMesh,
+            const labelList& faceProcAddressing,
             const labelList& cellProcAddressing,
             const word& cloudName,
             const Cloud<indexedParticle>& lagrangianPositions,
@@ -102,6 +104,19 @@ public:
 //            PtrList<IOField<Type> >& lagrangianFields
         );
 
+        template<class Type>
+        static void readFieldFields
+        (
+            const label cloudI,
+            const IOobjectList& lagrangianObjects,
+            PtrList
+            <
+                PtrList<CompactIOField<Field<Type>, Type> >
+            >& lagrangianFields
+//            PtrList<CompactIOField<Field<Type>, Type > >& lagrangianFields
+        );
+
+
         //- Decompose volume field
         template<class Type>
         tmp<IOField<Type> > decomposeField
@@ -110,8 +125,23 @@ public:
             const IOField<Type>& field
         ) const;
 
+        template<class Type>
+        tmp<CompactIOField<Field<Type>, Type> > decomposeFieldField
+        (
+            const word& cloudName,
+            const CompactIOField<Field<Type>, Type>& field
+        ) const;
+
+
         template<class GeoField>
         void decomposeFields
+        (
+            const word& cloudName,
+            const PtrList<GeoField>& fields
+        ) const;
+
+        template<class GeoField>
+        void decomposeFieldFields
         (
             const word& cloudName,
             const PtrList<GeoField>& fields

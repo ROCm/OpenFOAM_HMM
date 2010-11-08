@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,32 +28,48 @@ License
 
 /* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
 
-template<class thermo>
-const Foam::scalar Foam::specieThermo<thermo>::tol_ = 1.0e-4;
+template<class Thermo>
+const Foam::scalar Foam::specieThermo<Thermo>::tol_ = 1.0e-4;
 
-template<class thermo>
-const int Foam::specieThermo<thermo>::maxIter_ = 100;
+template<class Thermo>
+const int Foam::specieThermo<Thermo>::maxIter_ = 100;
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class thermo>
-Foam::specieThermo<thermo>::specieThermo(Istream& is)
+template<class Thermo>
+Foam::specieThermo<Thermo>::specieThermo(Istream& is)
 :
-    thermo(is)
+    Thermo(is)
 {
-    is.check("specieThermo::specieThermo(Istream& is)");
+    is.check("specieThermo<Thermo>::specieThermo(Istream&)");
+}
+
+
+template<class Thermo>
+Foam::specieThermo<Thermo>::specieThermo(const dictionary& dict)
+:
+    Thermo(dict)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Thermo>
+void Foam::specieThermo<Thermo>::write(Ostream& os) const
+{
+    Thermo::write(os);
 }
 
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-template<class thermo>
-Foam::Ostream& Foam::operator<<(Ostream& os, const specieThermo<thermo>& st)
+template<class Thermo>
+Foam::Ostream& Foam::operator<<(Ostream& os, const specieThermo<Thermo>& st)
 {
-    os  << static_cast<const thermo&>(st);
+    os  << static_cast<const Thermo&>(st);
 
-    os.check("Ostream& operator<<(Ostream& os, const specieThermo& st)");
+    os.check("Ostream& operator<<(Ostream&, const specieThermo&)");
     return os;
 }
 

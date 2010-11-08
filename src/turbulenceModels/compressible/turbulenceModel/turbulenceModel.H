@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,6 +68,8 @@ namespace compressible
 \*---------------------------------------------------------------------------*/
 
 class turbulenceModel
+:
+    public regIOobject
 {
 
 protected:
@@ -112,9 +114,10 @@ public:
                 const volScalarField& rho,
                 const volVectorField& U,
                 const surfaceScalarField& phi,
-                const basicThermo& thermoPhysicalModel
+                const basicThermo& thermoPhysicalModel,
+                const word& turbulenceModelName
             ),
-            (rho, U, phi, thermoPhysicalModel)
+            (rho, U, phi, thermoPhysicalModel, turbulenceModelName)
         );
 
 
@@ -126,7 +129,8 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            const basicThermo& thermoPhysicalModel
+            const basicThermo& thermoPhysicalModel,
+            const word& turbulenceModelName = typeName
         );
 
 
@@ -138,7 +142,8 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            const basicThermo& thermoPhysicalModel
+            const basicThermo& thermoPhysicalModel,
+            const word& turbulenceModelName = typeName
         );
 
 
@@ -206,6 +211,10 @@ public:
         //- Return the turbulence kinetic energy dissipation rate
         virtual tmp<volScalarField> epsilon() const = 0;
 
+        //- Return the laminar+turbulence kinetic energy dissipation rate
+        //  Used as the viscous contribution to the energy equations
+        virtual tmp<volScalarField> rhoEpsilonEff() const;
+
         //- Return the Reynolds stress tensor
         virtual tmp<volSymmTensorField> R() const = 0;
 
@@ -220,6 +229,13 @@ public:
 
         //- Read LESProperties or RASProperties dictionary
         virtual bool read() = 0;
+
+        //- Default dummy write function
+        virtual bool writeData(Ostream&) const
+        {
+            return true;
+        }
+
 };
 
 

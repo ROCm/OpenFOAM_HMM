@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -331,9 +331,21 @@ Foam::refinementHistory::refinementHistory(const IOobject& io)
 :
     regIOobject(io)
 {
+    // Temporary warning
+    if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
+    {
+        WarningIn
+        (
+            "refinementHistory::refinementHistory(const IOobject&)"
+        )   << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
+            << " does not support automatic rereading."
+            << endl;
+    }
+
     if
     (
         io.readOpt() == IOobject::MUST_READ
+     || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
      || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
     )
     {
@@ -365,9 +377,22 @@ Foam::refinementHistory::refinementHistory
     freeSplitCells_(0),
     visibleCells_(visibleCells)
 {
+    // Temporary warning
+    if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
+    {
+        WarningIn
+        (
+            "refinementHistory::refinementHistory"
+            "(const IOobject&, const List<splitCell8>&, const labelList&)"
+        )   << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
+            << " does not support automatic rereading."
+            << endl;
+    }
+
     if
     (
         io.readOpt() == IOobject::MUST_READ
+     || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
      || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
     )
     {
@@ -399,9 +424,22 @@ Foam::refinementHistory::refinementHistory
     regIOobject(io),
     freeSplitCells_(0)
 {
+    // Temporary warning
+    if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
+    {
+        WarningIn
+        (
+            "refinementHistory::refinementHistory"
+            "(const IOobject&, const label)"
+        )   << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
+            << " does not support automatic rereading."
+            << endl;
+    }
+
     if
     (
         io.readOpt() == IOobject::MUST_READ
+     || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
      || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
     )
     {

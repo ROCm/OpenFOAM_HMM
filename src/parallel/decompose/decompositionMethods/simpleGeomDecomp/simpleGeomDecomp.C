@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,13 +38,6 @@ namespace Foam
         decompositionMethod,
         simpleGeomDecomp,
         dictionary
-    );
-
-    addToRunTimeSelectionTable
-    (
-        decompositionMethod,
-        simpleGeomDecomp,
-        dictionaryMesh
     );
 }
 
@@ -132,26 +125,6 @@ void Foam::simpleGeomDecomp::assignToProcessorGroup
     }
 }
 
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::simpleGeomDecomp::simpleGeomDecomp(const dictionary& decompositionDict)
-:
-    geomDecomp(decompositionDict, typeName)
-{}
-
-
-Foam::simpleGeomDecomp::simpleGeomDecomp
-(
-    const dictionary& decompositionDict,
-    const polyMesh&
-)
-:
-    geomDecomp(decompositionDict, typeName)
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::labelList Foam::simpleGeomDecomp::decompose(const pointField& points)
 {
@@ -315,4 +288,16 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
 
     return finalDecomp;
 }
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::simpleGeomDecomp::simpleGeomDecomp(const dictionary& decompositionDict)
+:
+    geomDecomp(decompositionDict, typeName)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 // ************************************************************************* //

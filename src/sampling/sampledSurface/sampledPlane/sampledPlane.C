@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,21 +45,18 @@ Foam::sampledPlane::sampledPlane
     const word& name,
     const polyMesh& mesh,
     const plane& planeDesc,
-    const word& zoneName
+    const keyType& zoneKey
 )
 :
     sampledSurface(name, mesh),
     cuttingPlane(planeDesc),
-    zoneName_(zoneName),
+    zoneKey_(zoneKey),
     needsUpdate_(true)
 {
-    if (debug && zoneName_.size())
+    if (debug && zoneKey_.size() && mesh.cellZones().findIndex(zoneKey_) < 0)
     {
-        if (mesh.cellZones().findZoneID(zoneName_) < 0)
-        {
-            Info<< "cellZone \"" << zoneName_
-                << "\" not found - using entire mesh" << endl;
-        }
+        Info<< "cellZone " << zoneKey_
+            << " not found - using entire mesh" << endl;
     }
 }
 
@@ -73,7 +70,7 @@ Foam::sampledPlane::sampledPlane
 :
     sampledSurface(name, mesh, dict),
     cuttingPlane(plane(dict.lookup("basePoint"), dict.lookup("normalVector"))),
-    zoneName_(word::null),
+    zoneKey_(keyType::null),
     needsUpdate_(true)
 {
     // make plane relative to the coordinateSystem (Cartesian)
@@ -89,17 +86,13 @@ Foam::sampledPlane::sampledPlane
         static_cast<plane&>(*this) = plane(base, norm);
     }
 
-    dict.readIfPresent("zone", zoneName_);
+    dict.readIfPresent("zone", zoneKey_);
 
-    if (debug && zoneName_.size())
+    if (debug && zoneKey_.size() && mesh.cellZones().findIndex(zoneKey_) < 0)
     {
-        if (mesh.cellZones().findZoneID(zoneName_) < 0)
-        {
-            Info<< "cellZone \"" << zoneName_
-                << "\" not found - using entire mesh" << endl;
-        }
+        Info<< "cellZone " << zoneKey_
+            << " not found - using entire mesh" << endl;
     }
-
 }
 
 
@@ -141,25 +134,21 @@ bool Foam::sampledPlane::update()
 
     sampledSurface::clearGeom();
 
-    label zoneId = -1;
-    if (zoneName_.size())
-    {
-        zoneId = mesh().cellZones().findZoneID(zoneName_);
-    }
+    labelList selectedCells = mesh().cellZones().findMatching(zoneKey_).used();
 
-    if (zoneId < 0)
+    if (selectedCells.empty())
     {
         reCut(mesh(), true);    // always triangulate. Note:Make option?
     }
     else
     {
-        reCut(mesh(), true, mesh().cellZones()[zoneId]);
+        reCut(mesh(), true, selectedCells);
     }
 
     if (debug)
     {
         print(Pout);
-        Pout << endl;
+        Pout<< endl;
     }
 
     needsUpdate_ = false;

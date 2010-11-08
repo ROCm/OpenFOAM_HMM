@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -124,6 +124,9 @@ public:
 
 
             // Chemistry solution
+
+                //- Calculates the reaction rates
+                virtual void calculate() = 0;
 
                 //- Solve the reaction system for the given start time and
                 //  timestep and return the characteristic time

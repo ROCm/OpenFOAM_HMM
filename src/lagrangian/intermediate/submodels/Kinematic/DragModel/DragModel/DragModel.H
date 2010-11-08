@@ -51,16 +51,9 @@ namespace Foam
 
 template<class CloudType>
 class DragModel
+:
+    public SubModelBase<CloudType>
 {
-    // Private data
-
-        //- The cloud dictionary
-        const dictionary& dict_;
-
-        //- Reference to the owner cloud class
-        CloudType& owner_;
-
-
 public:
 
     //- Runtime type information
@@ -82,12 +75,28 @@ public:
 
     // Constructors
 
+        //- Construct null from owner
+        DragModel(CloudType& owner);
+
         //- Construct from components
         DragModel
         (
             const dictionary& dict,
-            CloudType& owner
+            CloudType& owner,
+            const word& type
         );
+
+        //- Construct copy
+        DragModel(const DragModel<CloudType>& dm);
+
+        //- Construct and return a clone
+        virtual autoPtr<DragModel<CloudType> > clone() const
+        {
+            return autoPtr<DragModel<CloudType> >
+            (
+                new DragModel<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -102,22 +111,10 @@ public:
     );
 
 
-    // Access
-
-        //- Return the owner cloud object
-        const CloudType& owner() const;
-
-        //- Return the dictionary
-        const dictionary& dict() const;
-
-
     // Member Functions
 
-        //- Flag to indicate whether model activates drag model
-        virtual bool active() const = 0;
-
         //- Return drag coefficient
-        virtual scalar Cd(const scalar Re) const = 0;
+        virtual scalar Cd(const scalar Re) const;
 
         //- Return momentum transfer coefficient
         //  Drag force per unit particle surface area = utc(U - Up)
@@ -145,20 +142,6 @@ public:
     DragModel<CloudType<ParcelType> >::                                       \
         adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
             add##SS##CloudType##ParcelType##ConstructorToTable_;
-
-
-#define makeDragModelThermoType(SS, CloudType, ParcelType, ThermoType)        \
-                                                                              \
-    defineNamedTemplateTypeNameAndDebug                                       \
-    (                                                                         \
-        SS<CloudType<ParcelType<ThermoType> > >,                              \
-        0                                                                     \
-    );                                                                        \
-                                                                              \
-    DragModel<CloudType<ParcelType<ThermoType> > >::                          \
-        adddictionaryConstructorToTable                                       \
-            <SS<CloudType<ParcelType<ThermoType> > > >                        \
-            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

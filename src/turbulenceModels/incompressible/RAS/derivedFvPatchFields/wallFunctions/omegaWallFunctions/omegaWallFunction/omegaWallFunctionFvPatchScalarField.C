@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -219,26 +219,17 @@ void omegaWallFunctionFvPatchScalarField::updateCoeffs()
     {
         label faceCellI = patch().faceCells()[faceI];
 
-        scalar yPlus = Cmu25*y[faceI]*sqrt(k[faceCellI])/nuw[faceI];
-
         scalar omegaVis = 6.0*nuw[faceI]/(beta1_*sqr(y[faceI]));
 
         scalar omegaLog = sqrt(k[faceCellI])/(Cmu25*kappa_*y[faceI]);
 
         omega[faceCellI] = sqrt(sqr(omegaVis) + sqr(omegaLog));
 
-        if (yPlus > yPlusLam_)
-        {
-            G[faceCellI] =
-                (nutw[faceI] + nuw[faceI])
-               *magGradUw[faceI]
-               *Cmu25*sqrt(k[faceCellI])
-               /(kappa_*y[faceI]);
-        }
-        else
-        {
-            G[faceCellI] = 0.0;
-        }
+        G[faceCellI] =
+            (nutw[faceI] + nuw[faceI])
+           *magGradUw[faceI]
+           *Cmu25*sqrt(k[faceCellI])
+           /(kappa_*y[faceI]);
     }
 
     fixedInternalValueFvPatchField<scalar>::updateCoeffs();

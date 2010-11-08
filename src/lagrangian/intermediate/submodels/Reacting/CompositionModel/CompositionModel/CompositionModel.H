@@ -43,10 +43,7 @@ SourceFiles
 #include "runTimeSelectionTables.H"
 
 #include "PtrList.H"
-#include "multiComponentMixture.H"
-
-#include "liquidMixture.H"
-#include "solidMixture.H"
+#include "SLGThermo.H"
 
 #include "phasePropertiesList.H"
 
@@ -61,26 +58,12 @@ namespace Foam
 
 template<class CloudType>
 class CompositionModel
+:
+    public SubModelBase<CloudType>
 {
     // Private data
-
-        //- The cloud dictionary
-        const dictionary& dict_;
-
-        //- Reference to the owner injection class
-        CloudType& owner_;
-
-        //- The coefficients dictionary
-        const dictionary& coeffDict_;
-
-        //- Reference to the multi-component carrier phase thermo
-        multiComponentMixture<typename CloudType::thermoType>& mcCarrierThermo_;
-
-        //- Global (additional) liquid properties data
-        autoPtr<liquidMixture> liquids_;
-
-        //- Global (additional) solid properties data
-        autoPtr<solidMixture> solids_;
+        //- Reference to the thermo database
+        const SLGThermo& thermo_;
 
         //- List of phase properties
         phasePropertiesList phaseProps_;
@@ -107,6 +90,9 @@ public:
 
     // Constructors
 
+        //- Construct null from owner
+        CompositionModel(CloudType& owner);
+
         //- Construct from dictionary
         CompositionModel
         (
@@ -114,6 +100,18 @@ public:
             CloudType& owner,
             const word& type
         );
+
+        //- Construct copy
+        CompositionModel(const CompositionModel<CloudType>& cm);
+
+        //- Construct and return a clone
+        virtual autoPtr<CompositionModel<CloudType> > clone() const
+        {
+            return autoPtr<CompositionModel<CloudType> >
+            (
+                new CompositionModel<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -132,21 +130,14 @@ public:
 
         // Access
 
-            //- Return the cloud object
-            const CloudType& owner() const;
-
-            //- Return the cloud dictionary
-            const dictionary& dict() const;
-
-            //- Return the coefficients dictionary
-            const dictionary& coeffDict() const;
-
-            //- Return the carrier phase thermo package
-            const multiComponentMixture<typename CloudType::thermoType>&
-                mcCarrierThermo() const;
+            //- Return the thermo database
+            const SLGThermo& thermo() const;
 
 
             // Composition lists
+
+                //- Return the carrier components (wrapper function)
+                const basicMultiComponentMixture& carrier() const;
 
                 //- Return the global (additional) liquids
                 const liquidMixture& liquids() const;
@@ -197,30 +188,26 @@ public:
 
                 //- Return the list of phase phaseI volume fractions fractions
                 //  based on supplied mass fractions Y
-                scalarField X
-                (
-                    const label phaseI,
-                    const scalarField& Y
-                ) const;
+                scalarField X(const label phaseI, const scalarField& Y) const;
 
 
             // Mixture properties
 
                 //- Return the list of mixture mass fractions
                 //  If only 1 phase, return component fractions of that phase
-                virtual const scalarField& YMixture0() const = 0;
+                virtual const scalarField& YMixture0() const;
 
                 // Indices of gas, liquid and solid phases in phase properties
                 // list - returns -1 if not applicable
 
                     //- Gas id
-                    virtual label idGas() const = 0;
+                    virtual label idGas() const;
 
                     //- Liquid id
-                    virtual label idLiquid() const = 0;
+                    virtual label idLiquid() const;
 
                     //- Solid id
-                    virtual label idSolid() const = 0;
+                    virtual label idSolid() const;
 
 
         // Evaluation
@@ -253,7 +240,7 @@ public:
             ) const;
 
             //- Return specific heat caoacity for the phase phaseI
-            virtual scalar cp
+            virtual scalar Cp
             (
                 const label phaseI,
                 const scalarField& Y,
@@ -293,18 +280,13 @@ public:
     );
 
 
-#define makeCompositionModelThermoType(SS, CloudType, ParcelType, ThermoType) \
+#define makeCompositionModelType(SS, CloudType, ParcelType)                   \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug                                       \
-    (                                                                         \
-        SS<CloudType<ParcelType<ThermoType> > >,                              \
-        0                                                                     \
-    );                                                                        \
+    defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
                                                                               \
-    CompositionModel<CloudType<ParcelType<ThermoType> > >::                   \
-        adddictionaryConstructorToTable                                       \
-            <SS<CloudType<ParcelType<ThermoType> > > >                        \
-            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
+    CompositionModel<CloudType<ParcelType> >::                                \
+        adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
+            add##SS##CloudType##ParcelType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

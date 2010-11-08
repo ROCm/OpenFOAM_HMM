@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -477,7 +477,7 @@ void
 Foam::treeDataPrimitivePatch<Face, FaceList, PointField, PointType>::
 findNearest
 (
-    const labelList& indices,
+    const labelUList& indices,
     const point& sample,
 
     scalar& nearestDistSqr,
@@ -489,7 +489,7 @@ findNearest
 
     forAll(indices, i)
     {
-        label index = indices[i];
+        const label index = indices[i];
 
         const face& f = patch_[index];
 

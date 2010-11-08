@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,6 +38,7 @@ SourceFiles
 #include "coupledFvPatch.H"
 #include "cyclicLduInterface.H"
 #include "cyclicPolyPatch.H"
+#include "fvBoundaryMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -89,21 +90,61 @@ public:
 
         // Access
 
-            //- Return face transformation tensor
-            const tensorField& forwardT() const
+            //- Return local reference cast into the cyclic patch
+            const cyclicPolyPatch& cyclicPatch() const
             {
-                return coupledFvPatch::forwardT();
+                return cyclicPolyPatch_;
+            }
+
+            //- Return neighbour
+            virtual label neighbPatchID() const
+            {
+                return cyclicPolyPatch_.neighbPatchID();
+            }
+
+            virtual bool owner() const
+            {
+                return cyclicPolyPatch_.owner();
+            }
+
+            //- Return processor number
+            virtual const cyclicFvPatch& neighbPatch() const
+            {
+                return refCast<const cyclicFvPatch>
+                (
+                    this->boundaryMesh()[cyclicPolyPatch_.neighbPatchID()]
+                );
+            }
+
+            //- Are the cyclic planes parallel
+            virtual bool parallel() const
+            {
+                return cyclicPolyPatch_.parallel();
+            }
+
+            //- Return face transformation tensor
+            virtual const tensorField& forwardT() const
+            {
+                return cyclicPolyPatch_.forwardT();
             }
 
             //- Return neighbour-cell transformation tensor
-            const tensorField& reverseT() const
+            virtual const tensorField& reverseT() const
             {
-                return coupledFvPatch::reverseT();
+                return cyclicPolyPatch_.reverseT();
+            }
+
+            const cyclicFvPatch& neighbFvPatch() const
+            {
+                return refCast<const cyclicFvPatch>
+                (
+                    this->boundaryMesh()[cyclicPolyPatch_.neighbPatchID()]
+                );
             }
 
 
             //- Return delta (P to N) vectors across coupled patch
-            tmp<vectorField> delta() const;
+            virtual tmp<vectorField> delta() const;
 
 
         // Interface transfer functions
@@ -112,21 +153,14 @@ public:
             //  the interface as a field
             virtual tmp<labelField> interfaceInternalField
             (
-                const unallocLabelList& internalData
-            ) const;
-
-            //- Transfer and return neighbour field
-            virtual tmp<labelField> transfer
-            (
-                const Pstream::commsTypes commsType,
-                const unallocLabelList& interfaceData
+                const labelUList& internalData
             ) const;
 
             //- Return neighbour field
             virtual tmp<labelField> internalFieldTransfer
             (
                 const Pstream::commsTypes commsType,
-                const unallocLabelList& internalData
+                const labelUList& internalData
             ) const;
 };
 

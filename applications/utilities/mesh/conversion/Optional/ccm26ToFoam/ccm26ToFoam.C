@@ -347,7 +347,8 @@ void ReadProblem
                 char* name = new char[size + 1];
                 CCMIOReadOptstr(NULL, boundary, "BoundaryName", &size, name);
                 name[size] = '\0';
-                foamPatchNames[foamPatchI] = string::validate<word>(string(name));
+                foamPatchNames[foamPatchI] =
+                    string::validate<word>(string(name));
                 delete [] name;
             }
             else if
@@ -359,7 +360,8 @@ void ReadProblem
                 char* name = new char[size + 1];
                 CCMIOReadOptstr(NULL, boundary, "Label", &size, name);
                 name[size] = '\0';
-                foamPatchNames[foamPatchI] = string::validate<word>(string(name));
+                foamPatchNames[foamPatchI] =
+                    string::validate<word>(string(name));
                 delete [] name;
             }
             else
@@ -579,12 +581,17 @@ void ReadCells
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "read CCM files as written by proSTAR/ccm\n"
+        " - does not handle 'interfaces' (couples), cyclics or data\n"
+        " - does not handle mesh regions (porosity, solids, ...)\n"
+    );
     argList::noParallel();
-    argList::validArgs.append("ccm26 file");
+    argList::validArgs.append("ccmFile");
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-
+    #include "setRootCase.H"
+    #include "createTime.H"
 
     // Foam mesh data
     // ~~~~~~~~~~~~~~
@@ -615,6 +622,7 @@ int main(int argc, char *argv[])
 
     {
         const fileName ccmFile = args[1];
+        const word ccmExt = ccmFile.ext();
 
         if (!isFile(ccmFile))
         {
@@ -622,8 +630,6 @@ int main(int argc, char *argv[])
                 << "Cannot read file " << ccmFile
                 << exit(FatalError);
         }
-
-        word ccmExt = ccmFile.ext();
 
         if (ccmExt != "ccm" && ccmExt != "ccmg")
         {
@@ -637,7 +643,13 @@ int main(int argc, char *argv[])
         // in NULL (which always means kCCMIONoErr) and then assign the return
         // value to 'err'.).
         CCMIOID root;
-        CCMIOError err = CCMIOOpenFile(NULL, ccmFile.c_str(), kCCMIORead, &root);
+        CCMIOError err = CCMIOOpenFile
+        (
+            NULL,
+            ccmFile.c_str(),
+            kCCMIORead,
+            &root
+        );
 
         // We are going to assume that we have a state with a known name.
         // We could instead use CCMIONextEntity() to walk through all the

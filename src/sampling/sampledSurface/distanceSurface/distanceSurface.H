@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,8 +70,8 @@ class distanceSurface
         //- Whether to recalculate cell values as average of point values
         const Switch average_;
 
-        //- zone name (if restricted to zones)
-        word zoneName_;
+        //- If restricted to zones, name of this zone or a regular expression
+        keyType zoneKey_;
 
         //- Track if the surface needs an update
         mutable bool needsUpdate_;

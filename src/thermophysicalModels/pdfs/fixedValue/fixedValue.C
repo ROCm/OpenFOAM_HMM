@@ -39,10 +39,17 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pdfs::fixedValue::fixedValue(const dictionary& dict, Random& rndGen)
+Foam::pdfs::fixedValue::fixedValue(const dictionary& dict, cachedRandom& rndGen)
 :
     pdf(typeName, dict, rndGen),
     value_(readScalar(pdfDict_.lookup("value")))
+{}
+
+
+Foam::pdfs::fixedValue::fixedValue(const fixedValue& p)
+:
+    pdf(p),
+    value_(p.value_)
 {}
 
 
@@ -62,13 +69,13 @@ Foam::scalar Foam::pdfs::fixedValue::fixedValue::sample() const
 
 Foam::scalar Foam::pdfs::fixedValue::fixedValue::minValue() const
 {
-    return -VGREAT;
+    return value_;
 }
 
 
 Foam::scalar Foam::pdfs::fixedValue::fixedValue::maxValue() const
 {
-    return VGREAT;
+    return value_;
 }
 
 

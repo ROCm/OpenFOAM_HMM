@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -174,6 +174,12 @@ inline String Foam::string::validate(const string& str)
     string ss = str;
     stripInvalid<String>(ss);
     return ss;
+}
+
+inline bool Foam::string::match(const std::string& str) const
+{
+    // check as string
+    return (str == *this);
 }
 
 

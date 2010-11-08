@@ -28,6 +28,15 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
+Foam::CompositionModel<CloudType>::CompositionModel(CloudType& owner)
+:
+    SubModelBase<CloudType>(owner),
+    thermo_(owner.thermo()),
+    phaseProps_()
+{}
+
+
+template<class CloudType>
 Foam::CompositionModel<CloudType>::CompositionModel
 (
     const dictionary& dict,
@@ -35,37 +44,27 @@ Foam::CompositionModel<CloudType>::CompositionModel
     const word& type
 )
 :
-    dict_(dict),
-    owner_(owner),
-    coeffDict_(dict.subDict(type + "Coeffs")),
-    mcCarrierThermo_(owner.mcCarrierThermo()),
-    liquids_
-    (
-        liquidMixture::New
-        (
-            owner.mesh().objectRegistry::lookupObject<dictionary>
-            (
-                owner.carrierThermo().name()
-            )
-        )
-    ),
-    solids_
-    (
-        solidMixture::New
-        (
-            owner.mesh().objectRegistry::lookupObject<dictionary>
-            (
-                owner.carrierThermo().name()
-            )
-        )
-    ),
+    SubModelBase<CloudType>(owner, dict, type),
+    thermo_(owner.thermo()),
     phaseProps_
     (
-        coeffDict_.lookup("phases"),
-        mcCarrierThermo_.species(),
-        liquids_().components(),
-        solids_().components()
+        this->coeffDict().lookup("phases"),
+        thermo_.carrier().species(),
+        thermo_.liquids().components(),
+        thermo_.solids().components()
     )
+{}
+
+
+template<class CloudType>
+Foam::CompositionModel<CloudType>::CompositionModel
+(
+    const CompositionModel<CloudType>& cm
+)
+:
+    SubModelBase<CloudType>(cm),
+    thermo_(cm.thermo_),
+    phaseProps_(cm.phaseProps_)
 {}
 
 
@@ -79,45 +78,31 @@ Foam::CompositionModel<CloudType>::~CompositionModel()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-const CloudType& Foam::CompositionModel<CloudType>::owner() const
+const Foam::SLGThermo& Foam::CompositionModel<CloudType>::thermo() const
 {
-    return owner_;
+    return thermo_;
 }
 
 
 template<class CloudType>
-const Foam::dictionary& Foam::CompositionModel<CloudType>::dict() const
+const Foam::basicMultiComponentMixture&
+Foam::CompositionModel<CloudType>::carrier() const
 {
-    return dict_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::CompositionModel<CloudType>::coeffDict() const
-{
-    return coeffDict_;
-}
-
-
-template<class CloudType>
-const Foam::multiComponentMixture<typename CloudType::thermoType>&
-Foam::CompositionModel<CloudType>::mcCarrierThermo() const
-{
-    return mcCarrierThermo_;
+    return thermo_.carrier();
 }
 
 
 template<class CloudType>
 const Foam::liquidMixture& Foam::CompositionModel<CloudType>::liquids() const
 {
-    return liquids_();
+    return thermo_.liquids();
 }
 
 
 template<class CloudType>
 const Foam::solidMixture& Foam::CompositionModel<CloudType>::solids() const
 {
-    return solids_();
+    return thermo_.solids();
 }
 
 
@@ -137,8 +122,7 @@ Foam::label Foam::CompositionModel<CloudType>::nPhase() const
 
 
 template<class CloudType>
-const Foam::wordList&
-Foam::CompositionModel<CloudType>::phaseTypes() const
+const Foam::wordList& Foam::CompositionModel<CloudType>::phaseTypes() const
 {
     // if only 1 phase, return the constituent component names
     if (phaseProps_.size() == 1)
@@ -153,8 +137,7 @@ Foam::CompositionModel<CloudType>::phaseTypes() const
 
 
 template<class CloudType>
-const Foam::wordList&
-Foam::CompositionModel<CloudType>::stateLabels() const
+const Foam::wordList& Foam::CompositionModel<CloudType>::stateLabels() const
 {
     return phaseProps_.stateLabels();
 }
@@ -174,24 +157,22 @@ Foam::label Foam::CompositionModel<CloudType>::globalCarrierId
     const word& cmptName
 ) const
 {
-    forAll(mcCarrierThermo_.species(), i)
+    label id = thermo_.carrierId(cmptName);
+
+    if (id < 0)
     {
-        if (cmptName == mcCarrierThermo_.species()[i])
-        {
-            return i;
-        }
+        FatalErrorIn
+        (
+            "Foam::label Foam::CompositionModel<CloudType>::globalCarrierId"
+            "("
+                "const word&"
+            ") const"
+        )   << "Unable to determine global id for requested component "
+            << cmptName << ". Available components are " << nl
+            << thermo_.carrier().species() << abort(FatalError);
     }
 
-    FatalErrorIn
-    (
-        "Foam::label Foam::CompositionModel<CloudType>::globalCarrierId"
-        "("
-            "const word&"
-        ") const"
-    )   << "Unable to determine global id for requested component "
-        << cmptName << nl << abort(FatalError);
-
-    return -1;
+    return id;
 }
 
 
@@ -214,7 +195,7 @@ Foam::label Foam::CompositionModel<CloudType>::globalId
                 "const word&"
             ") const"
         )   << "Unable to determine global id for requested component "
-            << cmptName << nl << abort(FatalError);
+            << cmptName << abort(FatalError);
     }
 
     return id;
@@ -250,7 +231,7 @@ Foam::label Foam::CompositionModel<CloudType>::localId
                 "const word&"
             ") const"
         )   << "Unable to determine local id for component " << cmptName
-            << nl << abort(FatalError);
+            << abort(FatalError);
     }
 
     return id;
@@ -278,7 +259,7 @@ Foam::label Foam::CompositionModel<CloudType>::localToGlobalCarrierId
             ") const"
         )   << "Unable to determine global carrier id for phase "
             << phaseI << " with local id " << id
-            << nl << abort(FatalError);
+            << abort(FatalError);
     }
 
     return gid;
@@ -312,8 +293,8 @@ Foam::scalarField Foam::CompositionModel<CloudType>::X
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                WInv += Y[i]/mcCarrierThermo_.speciesData()[gid].W();
-                X[i] = Y[i]/mcCarrierThermo_.speciesData()[gid].W();
+                WInv += Y[i]/thermo_.carrier().W(gid);
+                X[i] = Y[i]/thermo_.carrier().W(gid);
             }
             break;
         }
@@ -322,8 +303,8 @@ Foam::scalarField Foam::CompositionModel<CloudType>::X
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                WInv += Y[i]/this->liquids().properties()[gid].W();
-                X[i] += Y[i]/this->liquids().properties()[gid].W();
+                WInv += Y[i]/thermo_.liquids().properties()[gid].W();
+                X[i] += Y[i]/thermo_.liquids().properties()[gid].W();
             }
             break;
         }
@@ -337,11 +318,60 @@ Foam::scalarField Foam::CompositionModel<CloudType>::X
                     "const scalarField&"
                 ") const"
             )   << "Only possible to convert gas and liquid mass fractions"
-                << nl << abort(FatalError);
+                << abort(FatalError);
         }
     }
 
     return X/WInv;
+}
+
+
+template<class CloudType>
+const Foam::scalarField& Foam::CompositionModel<CloudType>::YMixture0() const
+{
+    notImplemented
+    (
+        "const scalarField& Foam::CompositionModel<CloudType>::YMixture0() "
+        "const"
+    );
+
+    return scalarField::null();
+}
+
+
+template<class CloudType>
+Foam::label Foam::CompositionModel<CloudType>::idGas() const
+{
+    notImplemented
+    (
+        "Foam::label Foam::CompositionModel<CloudType>::idGas() const"
+    );
+
+    return -1;
+}
+
+
+template<class CloudType>
+Foam::label Foam::CompositionModel<CloudType>::idLiquid() const
+{
+    notImplemented
+    (
+        "Foam::label Foam::CompositionModel<CloudType>::idLiquid() const"
+    );
+
+    return -1;
+}
+
+
+template<class CloudType>
+Foam::label Foam::CompositionModel<CloudType>::idSolid() const
+{
+    notImplemented
+    (
+        "Foam::label Foam::CompositionModel<CloudType>::idSolid() const"
+    );
+
+    return -1;
 }
 
 
@@ -363,7 +393,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::H
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                HMixture += Y[i]*mcCarrierThermo_.speciesData()[gid].H(T);
+                HMixture += Y[i]*thermo_.carrier().H(gid, T);
             }
             break;
         }
@@ -372,7 +402,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::H
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                HMixture += Y[i]*this->liquids().properties()[gid].h(p, T);
+                HMixture += Y[i]*thermo_.liquids().properties()[gid].h(p, T);
             }
             break;
         }
@@ -384,8 +414,8 @@ Foam::scalar Foam::CompositionModel<CloudType>::H
                 HMixture +=
                      Y[i]
                     *(
-                        this->solids().properties()[gid].Hf()
-                      + this->solids().properties()[gid].cp()*T
+                        thermo_.solids().properties()[gid].Hf()
+                      + thermo_.solids().properties()[gid].Cp()*T
                      );
             }
             break;
@@ -401,7 +431,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::H
                 "    const scalar, "
                 "    const scalar"
                 ") const"
-            )   << "Unknown phase enumeration" << nl << abort(FatalError);
+            )   << "Unknown phase enumeration" << abort(FatalError);
         }
     }
 
@@ -427,7 +457,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::Hs
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                HsMixture += Y[i]*mcCarrierThermo_.speciesData()[gid].Hs(T);
+                HsMixture += Y[i]*thermo_.carrier().Hs(gid, T);
             }
             break;
         }
@@ -439,8 +469,8 @@ Foam::scalar Foam::CompositionModel<CloudType>::Hs
                 HsMixture +=
                     Y[i]
                    *(
-                       this->liquids().properties()[gid].h(p, T)
-                     - this->liquids().properties()[gid].h(p, 298.25)
+                       thermo_.liquids().properties()[gid].h(p, T)
+                     - thermo_.liquids().properties()[gid].h(p, 298.15)
                     );
             }
             break;
@@ -450,7 +480,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::Hs
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                HsMixture += Y[i]*this->solids().properties()[gid].cp()*T;
+                HsMixture += Y[i]*thermo_.solids().properties()[gid].Cp()*T;
             }
             break;
         }
@@ -465,7 +495,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::Hs
                 "    const scalar, "
                 "    const scalar"
                 ") const"
-            )   << "Unknown phase enumeration" << nl << abort(FatalError);
+            )   << "Unknown phase enumeration" << abort(FatalError);
         }
     }
 
@@ -491,7 +521,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::Hc
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                HcMixture += Y[i]*mcCarrierThermo_.speciesData()[gid].Hc();
+                HcMixture += Y[i]*thermo_.carrier().Hc(gid);
             }
             break;
         }
@@ -501,7 +531,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::Hc
             {
                 label gid = props.globalIds()[i];
                 HcMixture +=
-                    Y[i]*this->liquids().properties()[gid].h(p, 298.15);
+                    Y[i]*thermo_.liquids().properties()[gid].h(p, 298.15);
             }
             break;
         }
@@ -510,7 +540,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::Hc
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                HcMixture += Y[i]*this->solids().properties()[gid].Hf();
+                HcMixture += Y[i]*thermo_.solids().properties()[gid].Hf();
             }
             break;
         }
@@ -525,7 +555,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::Hc
                 "    const scalar, "
                 "    const scalar"
                 ") const"
-            )   << "Unknown phase enumeration" << nl << abort(FatalError);
+            )   << "Unknown phase enumeration" << abort(FatalError);
         }
     }
 
@@ -534,7 +564,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::Hc
 
 
 template<class CloudType>
-Foam::scalar Foam::CompositionModel<CloudType>::cp
+Foam::scalar Foam::CompositionModel<CloudType>::Cp
 (
     const label phaseI,
     const scalarField& Y,
@@ -543,7 +573,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::cp
 ) const
 {
     const phaseProperties& props = phaseProps_[phaseI];
-    scalar cpMixture = 0.0;
+    scalar CpMixture = 0.0;
     switch (props.phase())
     {
         case phaseProperties::GAS:
@@ -551,7 +581,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::cp
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                cpMixture += Y[i]*mcCarrierThermo_.speciesData()[gid].Cp(T);
+                CpMixture += Y[i]*thermo_.carrier().Cp(gid, T);
             }
             break;
         }
@@ -560,7 +590,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::cp
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                cpMixture += Y[i]*this->liquids().properties()[gid].cp(p, T);
+                CpMixture += Y[i]*thermo_.liquids().properties()[gid].Cp(p, T);
             }
             break;
         }
@@ -569,7 +599,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::cp
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                cpMixture += Y[i]*this->solids().properties()[gid].cp();
+                CpMixture += Y[i]*thermo_.solids().properties()[gid].Cp();
             }
             break;
         }
@@ -577,18 +607,18 @@ Foam::scalar Foam::CompositionModel<CloudType>::cp
         {
             FatalErrorIn
             (
-                "Foam::scalar Foam::CompositionModel<CloudType>::cp"
+                "Foam::scalar Foam::CompositionModel<CloudType>::Cp"
                 "("
                     "const label, "
                     "const scalarField&, "
                     "const scalar, "
                     "const scalar"
                 ") const"
-            )   << "Unknown phase enumeration" << nl << abort(FatalError);
+            )   << "Unknown phase enumeration" << abort(FatalError);
         }
     }
 
-    return cpMixture;
+    return CpMixture;
 }
 
 
@@ -627,7 +657,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::L
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                LMixture += Y[i]*this->liquids().properties()[gid].hl(p, T);
+                LMixture += Y[i]*thermo_.liquids().properties()[gid].hl(p, T);
             }
             break;
         }
@@ -659,7 +689,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::L
                     "const scalar, "
                     "const scalar"
                 ") const"
-            )   << "Unknown phase enumeration" << nl << abort(FatalError);
+            )   << "Unknown phase enumeration" << abort(FatalError);
         }
     }
 

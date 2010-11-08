@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,7 +69,7 @@ namespace Foam
     (                                                                         \
         ReactionType::typeName_()                                             \
       + ReactionRate::type()                                                  \
-      + Reaction##Thermo::typeName_()                                 \
+      + Reaction##Thermo::typeName_()                                         \
     );                                                                        \
                                                                               \
     addToRunTimeSelectionTable                                                \
@@ -77,10 +77,24 @@ namespace Foam
         Reaction##Thermo,                                                     \
         ReactionType##Thermo##ReactionRate,                                   \
         Istream                                                               \
+    );                                                                        \
+                                                                              \
+    addToRunTimeSelectionTable                                                \
+    (                                                                         \
+        Reaction##Thermo,                                                     \
+        ReactionType##Thermo##ReactionRate,                                   \
+        dictionary                                                            \
     );
 
 
-#define makePressureDependentReaction(Thermo, Reaction, PressureDependentReactionRate, ReactionRate, FallOffFunction) \
+#define makePressureDependentReaction\
+(                                                                             \
+    Thermo,                                                                   \
+    Reaction,                                                                 \
+    PressureDependentReactionRate,                                            \
+    ReactionRate,                                                             \
+    FallOffFunction                                                           \
+)                                                                             \
                                                                               \
     typedef PressureDependentReactionRate<ReactionRate, FallOffFunction>      \
         PressureDependentReactionRate##ReactionRate##FallOffFunction;         \

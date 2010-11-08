@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -157,6 +157,60 @@ public:
 
         //- Read dictionary
         void read(const dictionary&);
+
+        //- Return thermo based on index
+        const ThermoType& getLocalThermo(const label specieI) const;
+
+
+        // Per specie properties
+
+            //- Number of moles []
+            virtual scalar nMoles(const label specieI) const;
+
+            //- Molecular weight [kg/kmol]
+            virtual scalar W(const label specieI) const;
+
+
+        // Per specie thermo properties
+
+            //- Heat capacity at constant pressure [J/(kg K)]
+            virtual scalar Cp(const label specieI, const scalar T) const;
+
+            //- Heat capacity at constant volume [J/(kg K)]
+            virtual scalar Cv(const label specieI, const scalar T) const;
+
+            //- Enthalpy [J/kg]
+            virtual scalar H(const label specieI, const scalar T) const;
+
+            //- Sensible enthalpy [J/kg]
+            virtual scalar Hs(const label specieI, const scalar T) const;
+
+            //- Chemical enthalpy [J/kg]
+            virtual scalar Hc(const label specieI) const;
+
+            //- Entropy [J/(kg K)]
+            virtual scalar S(const label specieI, const scalar T) const;
+
+            //- Internal energy [J/kg]
+            virtual scalar E(const label specieI, const scalar T) const;
+
+            //- Gibbs free energy [J/kg]
+            virtual scalar G(const label specieI, const scalar T) const;
+
+            //- Helmholtz free energy [J/kg]
+            virtual scalar A(const label specieI, const scalar T) const;
+
+
+        // Per specie transport properties
+
+            //- Dynamic viscosity [kg/m/s]
+            virtual scalar mu(const label specieI, const scalar T) const;
+
+            //- Thermal conductivity [W/m/K]
+            virtual scalar kappa(const label specieI, const scalar T) const;
+
+            //- Thermal diffusivity [kg/m/s]
+            virtual scalar alpha(const label specieI, const scalar T) const;
 };
 
 

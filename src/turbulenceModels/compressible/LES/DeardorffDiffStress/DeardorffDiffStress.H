@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,8 +32,11 @@ Description
     Thus,
     @verbatim
         d/dt(rho*B) + div(rho*U*B) - div(muSgs*grad(B))
-        =
-        P - c1*rho*epsilon/k*B - 0.667*(1 - c1)*rho*epsilon*I - c2*(P - 0.333*trP*I)
+          =
+            P
+          - c1*rho*epsilon/k*B
+          - 0.667*(1 - c1)*rho*epsilon*I
+          - c2*(P - 0.333*trP*I)
 
     where
 
@@ -101,7 +104,9 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            const basicThermo& thermoPhysicalModel
+            const basicThermo& thermoPhysicalModel,
+            const word& turbulenceModelName = turbulenceModel::typeName,
+            const word& modelName = typeName
         );
 
 

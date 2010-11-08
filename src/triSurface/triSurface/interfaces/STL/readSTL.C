@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,7 +55,7 @@ bool triSurface::readSTL(const fileName& STLfileName)
             firstWord[i] = std::toupper(firstWord[i]);
         }
 
-        if (firstWord == "SOLID")
+        if (firstWord == "SOLID" || firstWord(5) == "SOLID")
         {
             return readSTLASCII(STLfileName);
         }

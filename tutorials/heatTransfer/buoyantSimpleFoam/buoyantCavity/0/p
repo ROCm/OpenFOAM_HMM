@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -23,26 +23,26 @@ boundaryField
 {
     frontAndBack 
     {
-        type            buoyantPressure;
-        value           uniform 1e5;
+        type            calculated;
+        value           $internalField;
     }
 
     topAndBottom
     {
-        type            buoyantPressure;
-        value           uniform 1e5;
+        type            calculated;
+        value           $internalField;
     }
 
     hot
     {
-        type            buoyantPressure;
-        value           uniform 1e5;
+        type            calculated;
+        value           $internalField;
     }
 
     cold
     {
-        type            buoyantPressure;
-        value           uniform 1e5;
+        type            calculated;
+        value           $internalField;
     }
 }
 

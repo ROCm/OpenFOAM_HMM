@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,9 +25,9 @@ License
 
 #include "surfaceFeatures.H"
 #include "triSurface.H"
-#include "octree.H"
-#include "octreeDataEdges.H"
-#include "octreeDataPoint.H"
+#include "indexedOctree.H"
+#include "treeDataEdge.H"
+#include "treeDataPoint.H"
 #include "meshTools.H"
 #include "linePointRef.H"
 #include "OFstream.H"
@@ -752,21 +752,21 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
 (
     const labelList& pointLabels,
     const pointField& samples,
-    const scalarField& maxDist
+    const scalarField& maxDistSqr
 ) const
 {
     // Build tree out of all samples.
 
-    //Note: cannot be done one the fly - gcc4.4 compiler bug.
+    // Note: cannot be done one the fly - gcc4.4 compiler bug.
     treeBoundBox bb(samples);
 
-    octree<octreeDataPoint> ppTree
+    indexedOctree<treeDataPoint> ppTree
     (
-        bb,                         // overall search domain
-        octreeDataPoint(samples),   // all information needed to do checks
-        1,          // min levels
-        20.0,       // maximum ratio of cubes v.s. cells
-        100.0       // max. duplicity; n/a since no bounding boxes.
+        treeDataPoint(samples),   // all information needed to do checks
+        bb,                       // overall search domain
+        8,      // maxLevel
+        10,     // leafsize
+        3.0     // duplicity
     );
 
     // From patch point to surface point
@@ -780,31 +780,23 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
 
         const point& surfPt = surfPoints[surfPointI];
 
-        point maxDistPt(maxDist[i], maxDist[i], maxDist[i]);
-
-        treeBoundBox tightest(surfPt - maxDistPt, surfPt + maxDistPt);
-        scalar tightestDist = Foam::GREAT;
-
-        label sampleI = ppTree.findNearest
+        pointIndexHit info = ppTree.findNearest
         (
             surfPt,
-            tightest,
-            tightestDist
+            maxDistSqr[i]
         );
 
-        if (sampleI == -1)
+        if (!info.hit())
         {
             FatalErrorIn("surfaceFeatures::nearestSamples")
                 << "Problem for point "
-                << surfPointI << " in tree " << ppTree.octreeBb()
+                << surfPointI << " in tree " << ppTree.bb()
                 << abort(FatalError);
         }
 
-        if
-        (
-            magSqr(samples[sampleI] - surfPt)
-          < Foam::sqr(maxDist[sampleI])
-        )
+        label sampleI = info.index();
+
+        if (magSqr(samples[sampleI] - surfPt) < maxDistSqr[sampleI])
         {
             nearest.insert(sampleI, surfPointI);
         }
@@ -845,26 +837,25 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
     const labelList& selectedEdges,
     const pointField& samples,
     const scalarField& sampleDist,
-    const scalarField& maxDist,
+    const scalarField& maxDistSqr,
     const scalar minSampleDist
 ) const
 {
     const pointField& surfPoints = surf_.localPoints();
     const edgeList& surfEdges = surf_.edges();
 
-    scalar maxSearch = max(maxDist);
-    vector span(maxSearch, maxSearch, maxSearch);
+    scalar maxSearchSqr = max(maxDistSqr);
 
     //Note: cannot be done one the fly - gcc4.4 compiler bug.
     treeBoundBox bb(samples);
 
-    octree<octreeDataPoint> ppTree
+    indexedOctree<treeDataPoint> ppTree
     (
+        treeDataPoint(samples),   // all information needed to do checks
         bb,                         // overall search domain
-        octreeDataPoint(samples),   // all information needed to do checks
-        1,          // min levels
-        20.0,       // maximum ratio of cubes v.s. cells
-        100.0       // max. duplicity; n/a since no bounding boxes.
+        8,      // maxLevel
+        10,     // leafsize
+        3.0     // duplicity
     );
 
     // From patch point to surface edge.
@@ -902,22 +893,21 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
         {
             point edgePoint(surfPoints[e.start()] + s*eVec);
 
-            treeBoundBox tightest(edgePoint - span, edgePoint + span);
-            scalar tightestDist = Foam::GREAT;
-
-            label sampleI = ppTree.findNearest
+            pointIndexHit info = ppTree.findNearest
             (
                 edgePoint,
-                tightest,
-                tightestDist
+                maxSearchSqr
             );
 
-            if (sampleI == -1)
+            if (!info.hit())
             {
                 // No point close enough to surface edge.
                 break;
             }
-            if (tightestDist < maxDist[sampleI])
+
+            label sampleI = info.index();
+
+            if (magSqr(info.hitPoint() - edgePoint) < maxDistSqr[sampleI])
             {
                 nearest.insert(sampleI, surfEdgeI);
             }
@@ -985,31 +975,30 @@ Foam::Map<Foam::pointIndexHit> Foam::surfaceFeatures::nearestEdges
     const labelList& selectedSampleEdges,
     const pointField& samplePoints,
     const scalarField& sampleDist,
-    const scalarField& maxDist,
+    const scalarField& maxDistSqr,
     const scalar minSampleDist
 ) const
 {
     // Build tree out of selected sample edges.
-    octree<octreeDataEdges> ppTree
+    indexedOctree<treeDataEdge> ppTree
     (
-        treeBoundBox(samplePoints), // overall search domain
-        octreeDataEdges
+        treeDataEdge
         (
+            false,
             sampleEdges,
             samplePoints,
             selectedSampleEdges
         ),                          // geometric info container for edges
-        1,                          // min levels
-        20.0,                       // maximum ratio of cubes v.s. cells
-        10.0                        // max. duplicity
+        treeBoundBox(samplePoints), // overall search domain
+        8,      // maxLevel
+        10,     // leafsize
+        3.0     // duplicity
     );
 
     const pointField& surfPoints = surf_.localPoints();
     const edgeList& surfEdges = surf_.edges();
 
-    scalar maxSearch = max(maxDist);
-    vector span(maxSearch, maxSearch, maxSearch);
-
+    scalar maxSearchSqr = max(maxDistSqr);
 
     Map<pointIndexHit> nearest(2*sampleEdges.size());
 
@@ -1050,27 +1039,25 @@ Foam::Map<Foam::pointIndexHit> Foam::surfaceFeatures::nearestEdges
         {
             point edgePoint(surfPoints[e.start()] + s*eVec);
 
-            treeBoundBox tightest(edgePoint - span, edgePoint + span);
-            scalar tightestDist = Foam::GREAT;
-
-            label index = ppTree.findNearest
+            pointIndexHit info = ppTree.findNearest
             (
                 edgePoint,
-                tightest,
-                tightestDist
+                maxSearchSqr
             );
 
-            if (index == -1)
+            if (!info.hit())
             {
                 // No edge close enough to surface edge.
                 break;
             }
 
+            label index = info.index();
+
             label sampleEdgeI = ppTree.shapes().edgeLabels()[index];
 
             const edge& e = sampleEdges[sampleEdgeI];
 
-            if (tightestDist < maxDist[e.start()])
+            if (magSqr(info.hitPoint() - edgePoint) < maxDistSqr[e.start()])
             {
                 nearest.insert
                 (
@@ -1136,7 +1123,7 @@ void Foam::surfaceFeatures::nearestSurfEdge
 (
     const labelList& selectedEdges,
     const pointField& samples,
-    const vector& searchSpan,   // Search span
+    scalar searchSpanSqr,   // Search span
     labelList& edgeLabel,
     labelList& edgeEndPoint,
     pointField& edgePoint
@@ -1148,57 +1135,48 @@ void Foam::surfaceFeatures::nearestSurfEdge
 
     const pointField& localPoints = surf_.localPoints();
 
-    octree<octreeDataEdges> ppTree
+    indexedOctree<treeDataEdge> ppTree
     (
-        treeBoundBox(localPoints),  // overall search domain
-        octreeDataEdges
+        treeDataEdge
         (
+            false,
             surf_.edges(),
             localPoints,
             selectedEdges
         ),          // all information needed to do geometric checks
-        1,          // min levels
-        20.0,       // maximum ratio of cubes v.s. cells
-        10.0        // max. duplicity
+        treeBoundBox(localPoints),  // overall search domain
+        8,      // maxLevel
+        10,     // leafsize
+        3.0     // duplicity
     );
-
 
     forAll(samples, i)
     {
         const point& sample = samples[i];
 
-        treeBoundBox tightest(sample - searchSpan, sample + searchSpan);
+        pointIndexHit info = ppTree.findNearest
+        (
+            sample,
+            searchSpanSqr
+        );
 
-        scalar tightestDist = magSqr(searchSpan);
-
-        label index =
-            ppTree.findNearest
-            (
-                sample,
-                tightest,
-                tightestDist
-            );
-
-
-        if (index == -1)
+        if (!info.hit())
         {
             edgeLabel[i] = -1;
         }
         else
         {
-            edgeLabel[i] = selectedEdges[index];
+            edgeLabel[i] = selectedEdges[info.index()];
 
-            // Unfortunately findNearest does not return nearest point so
-            // recalculate
+            // Need to recalculate to classify edgeEndPoint
             const edge& e = surf_.edges()[edgeLabel[i]];
 
-            pointIndexHit pHit =
-                edgeNearest
-                (
-                    localPoints[e.start()],
-                    localPoints[e.end()],
-                    sample
-                );
+            pointIndexHit pHit = edgeNearest
+            (
+                localPoints[e.start()],
+                localPoints[e.end()],
+                sample
+            );
 
             edgePoint[i] = pHit.rawPoint();
             edgeEndPoint[i] = pHit.index();
@@ -1226,21 +1204,20 @@ void Foam::surfaceFeatures::nearestSurfEdge
     pointOnEdge.setSize(selectedSampleEdges.size());
     pointOnFeature.setSize(selectedSampleEdges.size());
 
-
-    octree<octreeDataEdges> ppTree
+    indexedOctree<treeDataEdge> ppTree
     (
-        treeBoundBox(surf_.localPoints()),  // overall search domain
-        octreeDataEdges
+        treeDataEdge
         (
+            false,
             surf_.edges(),
             surf_.localPoints(),
             selectedEdges
         ),          // all information needed to do geometric checks
-        1,          // min levels
-        10.0,       // maximum ratio of cubes v.s. cells
-        10.0        // max. duplicity
+        treeBoundBox(surf_.localPoints()),  // overall search domain
+        8,      // maxLevel
+        10,     // leafsize
+        3.0     // duplicity
     );
-
 
     forAll(selectedSampleEdges, i)
     {
@@ -1252,23 +1229,22 @@ void Foam::surfaceFeatures::nearestSurfEdge
 
         treeBoundBox tightest(eMid - searchSpan, eMid + searchSpan);
 
-        label index =
-            ppTree.findNearest
-            (
-                edgeLine,
-                tightest,
-                pointOnEdge[i],
-                pointOnFeature[i]
-            );
+        pointIndexHit info = ppTree.findNearest
+        (
+            edgeLine,
+            tightest,
+            pointOnEdge[i]
+        );
 
-
-        if (index == -1)
+        if (!info.hit())
         {
             edgeLabel[i] = -1;
         }
         else
         {
-            edgeLabel[i] = featureEdges_[index];
+            edgeLabel[i] = selectedEdges[info.index()];
+
+            pointOnFeature[i] = info.hitPoint();
         }
     }
 }

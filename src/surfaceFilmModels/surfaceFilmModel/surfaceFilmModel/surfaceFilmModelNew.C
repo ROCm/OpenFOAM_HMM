@@ -36,22 +36,24 @@ Foam::surfaceFilmModels::surfaceFilmModel::New
     const dimensionedVector& g
 )
 {
-    // get model name, but do not register the dictionary
-    const word modelType
-    (
-        IOdictionary
+    word modelType;
+
+    {
+        IOdictionary surfaceFilmPropertiesDict
         (
             IOobject
             (
                 "surfaceFilmProperties",
                 mesh.time().constant(),
                 mesh,
-                IOobject::MUST_READ,
+                IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
                 false
             )
-        ).lookup("surfaceFilmModel")
-    );
+        );
+
+        surfaceFilmPropertiesDict.lookup("surfaceFilmModel") >> modelType;
+    }
 
     Info<< "Selecting surfaceFilmModel " << modelType << endl;
 

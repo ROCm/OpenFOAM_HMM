@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -16,13 +16,6 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 application     boundaryFoam;
-
-libs
-(
-    "libOpenFOAM.so"
-    "libinterpolationTables_16x.so"
-    "libtabulatedWallFunctionFvPatchFields_16x.so"
-);
 
 startFrom       startTime;
 
@@ -54,5 +47,11 @@ runTimeModifiable true;
 
 graphFormat     raw;
 
+libs
+(
+    "libOpenFOAM.so"
+    "libinterpolationTables_16x.so"
+    "libtabulatedWallFunctionFvPatchFields_16x.so"
+);
 
 // ************************************************************************* //

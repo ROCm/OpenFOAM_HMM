@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open So
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,7 +54,7 @@ SourceFiles
 #include "surfaceInterpolation.H"
 #include "fvSchemes.H"
 #include "fvSolution.H"
-#include "fvData.H"
+#include "data.H"
 #include "DimensionedField.H"
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
@@ -83,7 +83,7 @@ class fvMesh
     public surfaceInterpolation,
     public fvSchemes,
     public fvSolution,
-    public fvData
+    public data
 {
     // Private data
 
@@ -253,13 +253,13 @@ public:
             }
 
             //- Internal face owner
-            const unallocLabelList& owner() const
+            const labelUList& owner() const
             {
                 return lduAddr().lowerAddr();
             }
 
             //- Internal face neighbour
-            const unallocLabelList& neighbour() const
+            const labelUList& neighbour() const
             {
                 return lduAddr().upperAddr();
             }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -99,7 +99,7 @@ bool Foam::meshSearch::findNearer
 // tree based searching
 Foam::label Foam::meshSearch::findNearestCellTree(const point& location) const
 {
-    const indexedOctree<treeDataPoint>& tree = cellCentreTree();
+    const indexedOctree<treeDataCell>& tree = cellTree();
 
     scalar span = tree.bb().mag();
 
@@ -176,7 +176,7 @@ Foam::label Foam::meshSearch::findNearestCellWalk
 Foam::label Foam::meshSearch::findNearestFaceTree(const point& location) const
 {
     // Search nearest cell centre.
-    const indexedOctree<treeDataPoint>& tree = cellCentreTree();
+    const indexedOctree<treeDataCell>& tree = cellTree();
 
     scalar span = tree.bb().mag();
 
@@ -320,6 +320,80 @@ Foam::label Foam::meshSearch::findCellLinear(const point& location) const
 }
 
 
+// walking from seed
+Foam::label Foam::meshSearch::findCellWalk
+(
+    const point& location,
+    const label seedCellI
+) const
+{
+    if (seedCellI < 0)
+    {
+        FatalErrorIn
+        (
+            "meshSearch::findCellWalk(const point&, const label)"
+        )   << "illegal seedCell:" << seedCellI << exit(FatalError);
+    }
+
+    if (pointInCell(location, seedCellI))
+    {
+        return seedCellI;
+    }
+
+    // Walk in direction of face that decreases distance
+    label curCellI = seedCellI;
+    scalar nearestDistSqr = magSqr(mesh_.cellCentres()[curCellI] - location);
+
+    while(true)
+    {
+        // Try neighbours of curCellI
+
+        const cell& cFaces = mesh_.cells()[curCellI];
+
+        label nearestCellI = -1;
+
+        forAll(cFaces, i)
+        {
+            label faceI = cFaces[i];
+
+            if (mesh_.isInternalFace(faceI))
+            {
+                label cellI = mesh_.faceOwner()[faceI];
+                if (cellI == curCellI)
+                {
+                    cellI = mesh_.faceNeighbour()[faceI];
+                }
+
+                // Check if this is the correct cell
+                if (pointInCell(location, cellI))
+                {
+                    return cellI;
+                }
+
+                // Also calculate the nearest cell
+                scalar distSqr = magSqr(mesh_.cellCentres()[cellI] - location);
+
+                if (distSqr < nearestDistSqr)
+                {
+                    nearestDistSqr = distSqr;
+                    nearestCellI = cellI;
+                }
+            }
+        }
+
+        if (nearestCellI == -1)
+        {
+            return -1;
+        }
+
+        // Continue with the nearest cell
+        curCellI = nearestCellI;
+    }
+
+    return -1;
+}
+
+
 Foam::label Foam::meshSearch::findNearestBoundaryFaceWalk
 (
     const point& location,
@@ -426,11 +500,7 @@ Foam::vector Foam::meshSearch::offset
 Foam::meshSearch::meshSearch(const polyMesh& mesh, const bool faceDecomp)
 :
     mesh_(mesh),
-    faceDecomp_(faceDecomp),
-    cloud_(mesh_, "meshSearchCloud", IDLList<passiveParticle>()),
-    boundaryTreePtr_(NULL),
-    cellTreePtr_(NULL),
-    cellCentreTreePtr_(NULL)
+    faceDecomp_(faceDecomp)
 {}
 
 
@@ -447,7 +517,7 @@ Foam::meshSearch::~meshSearch()
 const Foam::indexedOctree<Foam::treeDataFace>& Foam::meshSearch::boundaryTree()
  const
 {
-    if (!boundaryTreePtr_)
+    if (!boundaryTreePtr_.valid())
     {
         //
         // Construct tree
@@ -466,85 +536,59 @@ const Foam::indexedOctree<Foam::treeDataFace>& Foam::meshSearch::boundaryTree()
         overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
         overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
-        boundaryTreePtr_ = new indexedOctree<treeDataFace>
+        boundaryTreePtr_.reset
         (
-            treeDataFace    // all information needed to search faces
+            new indexedOctree<treeDataFace>
             (
-                false,                      // do not cache bb
-                mesh_,
-                bndFaces                    // boundary faces only
-            ),
-            overallBb,                      // overall search domain
-            8,                              // maxLevel
-            10,                             // leafsize
-            3.0                             // duplicity
+                treeDataFace    // all information needed to search faces
+                (
+                    false,                      // do not cache bb
+                    mesh_,
+                    bndFaces                    // boundary faces only
+                ),
+                overallBb,                      // overall search domain
+                8,                              // maxLevel
+                10,                             // leafsize
+                3.0                             // duplicity
+            )
         );
     }
 
-    return *boundaryTreePtr_;
+    return boundaryTreePtr_();
 }
 
 
 const Foam::indexedOctree<Foam::treeDataCell>& Foam::meshSearch::cellTree()
- const
+const
 {
-    if (!cellTreePtr_)
+    if (!cellTreePtr_.valid())
     {
-        //
-        // Construct tree
-        //
-
         treeBoundBox overallBb(mesh_.points());
-        Random rndGen(123456);
+
+        Random rndGen(261782);
+
         overallBb = overallBb.extend(rndGen, 1E-4);
         overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
         overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
-        cellTreePtr_ = new indexedOctree<treeDataCell>
+        cellTreePtr_.reset
         (
-            treeDataCell
+            new indexedOctree<treeDataCell>
             (
-                false,  // not cache bb
-                mesh_
-            ),
-            overallBb,  // overall search domain
-            8,      // maxLevel
-            10,     // leafsize
-            3.0     // duplicity
+                treeDataCell
+                (
+                    false,  // not cache bb
+                    mesh_
+                ),
+                overallBb,
+                8,              // maxLevel
+                10,             // leafsize
+                3.0             // duplicity
+            )
         );
     }
 
-    return *cellTreePtr_;
-
-}
-
-
-const Foam::indexedOctree<Foam::treeDataPoint>&
- Foam::meshSearch::cellCentreTree() const
-{
-    if (!cellCentreTreePtr_)
-    {
-        //
-        // Construct tree
-        //
-
-        treeBoundBox overallBb(mesh_.cellCentres());
-        Random rndGen(123456);
-        overallBb = overallBb.extend(rndGen, 1E-4);
-        overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-        overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-
-        cellCentreTreePtr_ = new indexedOctree<treeDataPoint>
-        (
-            treeDataPoint(mesh_.cellCentres()),
-            overallBb,  // overall search domain
-            10,         // max levels
-            10.0,       // maximum ratio of cubes v.s. cells
-            100.0       // max. duplicity; n/a since no bounding boxes.
-        );
-    }
-
-    return *cellCentreTreePtr_;
+    return cellTreePtr_();
 }
 
 
@@ -573,30 +617,25 @@ bool Foam::meshSearch::pointInCell(const point& p, label cellI) const
         {
             label faceI = cFaces[i];
 
-            const face& f = mesh_.faces()[faceI];
+            pointHit inter = mesh_.faces()[faceI].ray
+            (
+                ctr,
+                dir,
+                mesh_.points(),
+                intersection::HALF_RAY,
+                intersection::VECTOR
+            );
 
-            forAll(f, fp)
+            if (inter.hit())
             {
-                pointHit inter = f.ray
-                (
-                    ctr,
-                    dir,
-                    mesh_.points(),
-                    intersection::HALF_RAY,
-                    intersection::VECTOR
-                );
+                scalar dist = inter.distance();
 
-                if (inter.hit())
+                if (dist < magDir)
                 {
-                    scalar dist = inter.distance();
+                    // Valid hit. Hit face so point is not in cell.
+                    intersection::setPlanarTol(oldTol);
 
-                    if (dist < magDir)
-                    {
-                        // Valid hit. Hit face so point is not in cell.
-                        intersection::setPlanarTol(oldTol);
-
-                        return false;
-                    }
+                    return false;
                 }
             }
         }
@@ -697,107 +736,21 @@ Foam::label Foam::meshSearch::findCell
 ) const
 {
     // Find the nearest cell centre to this location
-    label nearCellI = findNearestCell(location, seedCellI, useTreeSearch);
-
-    if (debug)
-    {
-        Pout<< "findCell : nearCellI:" << nearCellI
-            << " ctr:" << mesh_.cellCentres()[nearCellI]
-            << endl;
-    }
-
-    if (pointInCell(location, nearCellI))
-    {
-        return nearCellI;
-    }
-    else
+    if (seedCellI == -1)
     {
         if (useTreeSearch)
         {
-            // Start searching from cell centre of nearCell
-            point curPoint = mesh_.cellCentres()[nearCellI];
-
-            vector edgeVec = location - curPoint;
-            edgeVec /= mag(edgeVec);
-
-            do
-            {
-                // Walk neighbours (using tracking) to get closer
-                passiveParticle tracker(cloud_, curPoint, nearCellI);
-
-                if (debug)
-                {
-                    Pout<< "findCell : tracked from curPoint:" << curPoint
-                        << " nearCellI:" << nearCellI;
-                }
-
-                tracker.track(location);
-
-                if (debug)
-                {
-                    Pout<< " to " << tracker.position()
-                        << " need:" << location
-                        << " onB:" << tracker.onBoundary()
-                        << " cell:" << tracker.cell()
-                        << " face:" << tracker.face() << endl;
-                }
-
-                if (!tracker.onBoundary())
-                {
-                    // stopped not on boundary -> reached location
-                    return tracker.cell();
-                }
-
-                // stopped on boundary face. Compare positions
-                scalar typDim = sqrt(mag(mesh_.faceAreas()[tracker.face()]));
-
-                if ((mag(tracker.position() - location)/typDim) < SMALL)
-                {
-                    return tracker.cell();
-                }
-
-                // tracking stopped at boundary. Find next boundary
-                // intersection from current point (shifted out a little bit)
-                // in the direction of the destination
-
-                curPoint =
-                    tracker.position()
-                  + offset(tracker.position(), tracker.face(), edgeVec);
-
-                if (debug)
-                {
-                    Pout<< "Searching for next boundary from curPoint:"
-                        << curPoint
-                        << " to location:" << location  << endl;
-                }
-                pointIndexHit curHit = intersection(curPoint, location);
-                if (debug)
-                {
-                    Pout<< "Returned from line search with ";
-                    curHit.write(Pout);
-                    Pout<< endl;
-                }
-
-                if (!curHit.hit())
-                {
-                    return -1;
-                }
-                else
-                {
-                    nearCellI = mesh_.faceOwner()[curHit.index()];
-                    curPoint =
-                        curHit.hitPoint()
-                      + offset(curHit.hitPoint(), curHit.index(), edgeVec);
-                }
-            }
-            while (true);
+            return cellTree().findInside(location);
         }
         else
         {
              return findCellLinear(location);
         }
     }
-    return -1;
+    else
+    {
+        return findCellWalk(location, seedCellI);
+    }
 }
 
 
@@ -947,9 +900,8 @@ bool Foam::meshSearch::isInside(const point& p) const
 // Delete all storage
 void Foam::meshSearch::clearOut()
 {
-    deleteDemandDrivenData(boundaryTreePtr_);
-    deleteDemandDrivenData(cellTreePtr_);
-    deleteDemandDrivenData(cellCentreTreePtr_);
+    boundaryTreePtr_.clear();
+    cellTreePtr_.clear();
 }
 
 

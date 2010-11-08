@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -106,13 +106,19 @@ public:
 
     // Member functions
 
-        //- Return the dictionary name
+        //- Return the local dictionary name (final part of scoped name)
+        const word dictName() const
+        {
+            return dictionary::dictName();
+        }
+
+        //- Return the dictionary name (scoped, e.g. dictA::dictB::dictC)
         const fileName& name() const
         {
             return dictionary::name();
         }
 
-        //- Return the dictionary name
+        //- Return the dictionary name (scoped, e.g. dictA::dictB::dictC)
         fileName& name()
         {
             return dictionary::name();

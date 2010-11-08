@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,7 +44,6 @@ Note
 
 SourceFiles
     wordRe.C
-    wordReIO.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -83,6 +82,12 @@ class wordRe
         mutable regExp re_;
 
 public:
+
+    // Static data members
+
+        //- An empty wordRe
+        static const wordRe null;
+
 
     // Public data types
 
@@ -168,7 +173,7 @@ public:
     //- Searching
 
         //- Smart match as regular expression or as a string
-        //  Optionally specify a literal match only
+        //  Optionally force a literal match only
         inline bool match(const std::string&, bool literalMatch=false) const;
 
     //- Miscellaneous

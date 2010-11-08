@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -180,7 +180,7 @@ void Foam::faceZone::checkAddressing() const
 Foam::faceZone::faceZone
 (
     const word& name,
-    const labelList& addr,
+    const labelUList& addr,
     const boolList& fm,
     const label index,
     const faceZoneMesh& zm
@@ -242,7 +242,7 @@ Foam::faceZone::faceZone
 Foam::faceZone::faceZone
 (
     const faceZone& fz,
-    const labelList& addr,
+    const labelUList& addr,
     const boolList& fm,
     const label index,
     const faceZoneMesh& zm
@@ -392,7 +392,7 @@ void Foam::faceZone::clearAddressing()
 
 void Foam::faceZone::resetAddressing
 (
-    const labelList& addr,
+    const labelUList& addr,
     const boolList& flipMap
 )
 {
@@ -414,7 +414,7 @@ void Foam::faceZone::updateMesh(const mapPolyMesh& mpm)
 
     forAll(*this, i)
     {
-        label faceI = operator[](i);
+        const label faceI = operator[](i);
 
         if (faceMap[faceI] >= 0)
         {
@@ -454,7 +454,7 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
         boolList neiZoneFlip(mesh.nFaces()-mesh.nInternalFaces(), false);
         forAll(*this, i)
         {
-            label faceI = operator[](i);
+            const label faceI = operator[](i);
 
             if (!mesh.isInternalFace(faceI))
             {
@@ -463,19 +463,18 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
             }
         }
         boolList myZoneFace(neiZoneFace);
-        syncTools::swapBoundaryFaceList(mesh, neiZoneFace, false);
+        syncTools::swapBoundaryFaceList(mesh, neiZoneFace);
         boolList myZoneFlip(neiZoneFlip);
-        syncTools::swapBoundaryFaceList(mesh, neiZoneFlip, false);
+        syncTools::swapBoundaryFaceList(mesh, neiZoneFlip);
 
         forAll(*this, i)
         {
-            label faceI = operator[](i);
-
-            label patchI = bm.whichPatch(faceI);
+            const label faceI = operator[](i);
+            const label patchI = bm.whichPatch(faceI);
 
             if (patchI != -1 && bm[patchI].coupled())
             {
-                label bFaceI = faceI-mesh.nInternalFaces();
+                const label bFaceI = faceI-mesh.nInternalFaces();
 
                 // Check face in zone on both sides
                 if (myZoneFace[bFaceI] != neiZoneFace[bFaceI])
@@ -498,10 +497,9 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
                         break;
                     }
                 }
-
-                // Flip state should be opposite.
-                if (myZoneFlip[bFaceI] == neiZoneFlip[bFaceI])
+                else if (myZoneFlip[bFaceI] == neiZoneFlip[bFaceI])
                 {
+                    // Flip state should be opposite.
                     hasError = true;
 
                     if (report)

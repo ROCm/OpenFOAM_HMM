@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,6 @@ Description
     A series of straight line segments, which can also be interpreted as
     a series of control points for splines, etc.
 
-ToDo
     A future implementation could also handle a closed polyLine.
 
 SourceFiles
@@ -62,6 +61,7 @@ class polyLine
         //- Disallow default bitwise assignment
         void operator=(const polyLine&);
 
+
 protected:
 
     // Protected data
@@ -75,16 +75,17 @@ protected:
         //- The rational (0-1) cumulative parameter value for each point
         scalarList param_;
 
+
     // Protected Member Functions
 
         //- Precalculate the rational cumulative parameter value
         //  and the line-length
         void calcParam();
 
-
         //- Return the line segment and the local parameter [0..1]
         //  corresponding to the global lambda [0..1]
         label localParameter(scalar& lambda) const;
+
 
 public:
 

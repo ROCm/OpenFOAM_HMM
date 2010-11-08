@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -81,14 +81,20 @@ DimensionedField<Type, GeoMesh>::DimensionedField
 (
     const IOobject& io,
     const Mesh& mesh,
-    const dimensionSet& dims
+    const dimensionSet& dims,
+    const bool checkIOFlags
 )
 :
     regIOobject(io),
     Field<Type>(GeoMesh::size(mesh)),
     mesh_(mesh),
     dimensions_(dims)
-{}
+{
+    if (checkIOFlags)
+    {
+        readIfPresent();
+    }
+}
 
 
 template<class Type, class GeoMesh>
@@ -96,14 +102,20 @@ DimensionedField<Type, GeoMesh>::DimensionedField
 (
     const IOobject& io,
     const Mesh& mesh,
-    const dimensioned<Type>& dt
+    const dimensioned<Type>& dt,
+    const bool checkIOFlags
 )
 :
     regIOobject(io),
     Field<Type>(GeoMesh::size(mesh), dt.value()),
     mesh_(mesh),
     dimensions_(dt.dimensions())
-{}
+{
+    if (checkIOFlags)
+    {
+        readIfPresent();
+    }
+}
 
 
 template<class Type, class GeoMesh>

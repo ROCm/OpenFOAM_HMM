@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -218,10 +218,7 @@ Foam::layerParameters::layerParameters
             << endl;
     }
 
-    if (dict.found("nRelaxedIter"))
-    {
-        dict.lookup("nRelaxedIter") >> nRelaxedIter_;
-    }
+    dict.readIfPresent("nRelaxedIter", nRelaxedIter_);
 
     if (nLayerIter_ < 0 || nRelaxedIter_ < 0)
     {
@@ -303,10 +300,8 @@ Foam::layerParameters::layerParameters
             << endl;
     }
 
-    if (dict.found("nRelaxedIter"))
-    {
-        dict.lookup("nRelaxedIter") >> nRelaxedIter_;
-    }
+    dict.readIfPresent("nRelaxedIter", nRelaxedIter_);
+
     if (nLayerIter_ < 0 || nRelaxedIter_ < 0)
     {
         FatalErrorIn("layerParameters::layerParameters(..)")
@@ -369,7 +364,8 @@ Foam::layerParameters::layerParameters
         {
             IOWarningIn("layerParameters::layerParameters(..)", layersDict)
                 << "Wildcard layer specification for " << wildCards[i]
-                << " does not match any patch." << endl;
+                << " does not match any patch." << endl
+                << "Valid patches are " << boundaryMesh.names() << endl;
         }
     }
 
@@ -381,7 +377,8 @@ Foam::layerParameters::layerParameters
         {
             IOWarningIn("layerParameters::layerParameters(..)", layersDict)
                 << "Layer specification for " << nonWildCards[i]
-                << " does not match any patch." << endl;
+                << " does not match any patch." << endl
+                << "Valid patches are " << boundaryMesh.names() << endl;
         }
     }
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,6 +62,7 @@ namespace Foam
 
 class globalMeshData;
 class mapPolyMesh;
+class polyMeshTetDecomposition;
 
 /*---------------------------------------------------------------------------*\
                           Class polyMesh Declaration
@@ -100,7 +101,7 @@ private:
             pointIOField points_;
 
             //- Faces
-            faceIOList faces_;
+            faceCompactIOList faces_;
 
             //- Face owner
             labelIOList owner_;
@@ -126,6 +127,9 @@ private:
             //- vector of valid directions in mesh
             //  defined according to the presence of empty patches
             mutable Vector<label> solutionD_;
+
+            //- Base point for face decomposition into tets
+            mutable labelList* tetBasePtIsPtr_;
 
 
         // Zoning information
@@ -193,6 +197,19 @@ private:
                 const label patchID
             ) const;
 
+            void setTopology
+            (
+                const cellShapeList& cellsAsShapes,
+                const faceListList& boundaryFaces,
+                const wordList& boundaryPatchNames,
+                labelList& patchSizes,
+                labelList& patchStarts,
+                label& defaultPatchStart,
+                label& nFaces,
+                cellList& cells
+            );
+
+
 
 public:
 
@@ -252,6 +269,21 @@ public:
             const word& defaultBoundaryPatchName,
             const word& defaultBoundaryPatchType,
             const wordList& boundaryPatchPhysicalTypes,
+            const bool syncPar = true
+        );
+
+        //- Construct from cell shapes with patch information in dictionary
+        //  format.
+        polyMesh
+        (
+            const IOobject& io,
+            const Xfer<pointField>& points,
+            const cellShapeList& shapes,
+            const faceListList& boundaryFaces,
+            const wordList& boundaryPatchNames,
+            const PtrList<dictionary>& boundaryDicts,
+            const word& defaultBoundaryPatchName,
+            const word& defaultBoundaryPatchType,
             const bool syncPar = true
         );
 
@@ -328,6 +360,9 @@ public:
 
             //- Return the number of valid solved-for dimensions in the mesh
             label nSolutionD() const;
+
+            //- Return the tetBasePtIs
+            const labelList& tetBasePtIs() const;
 
             //- Return point zone mesh
             const pointZoneMesh& pointZones() const
@@ -442,8 +477,6 @@ public:
             //- Reset mesh primitive data. Assumes all patch info correct
             //  (so does e.g. parallel communication). If not use
             //  validBoundary=false
-            //  (still assumes patchStarts[0] = nInternalFaces and last
-            //  patch ends at nActiveFaces) and change patches with addPatches.
             void resetPrimitives
             (
                 const Xfer<pointField>& points,

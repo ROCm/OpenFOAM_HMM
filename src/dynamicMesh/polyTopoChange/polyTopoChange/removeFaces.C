@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1084,8 +1084,7 @@ void Foam::removeFaces::setRefinement
             mesh_,
             nFacesPerEdge,
             maxEqOp<label>(),
-            labelMin,               // guaranteed to be overridden by maxEqOp
-            false                   // no separation
+            labelMin                // guaranteed to be overridden by maxEqOp
         );
 
         // Convert to labelHashSet
@@ -1187,8 +1186,7 @@ void Foam::removeFaces::setRefinement
         syncTools::swapFaceList
         (
             mesh_,
-            nbrFaceRegion,
-            false                   // no separation
+            nbrFaceRegion
         );
 
         labelList toNbrRegion(nRegions, -1);
@@ -1305,8 +1303,7 @@ void Foam::removeFaces::setRefinement
             mesh_,
             nEdgesPerPoint,
             maxEqOp<label>(),
-            labelMin,
-            false                   // no separation
+            labelMin 
         );
 
         forAll(nEdgesPerPoint, pointI)

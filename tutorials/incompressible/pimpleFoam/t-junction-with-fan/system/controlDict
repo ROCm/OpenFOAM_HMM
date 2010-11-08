@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -14,8 +14,6 @@ FoamFile
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-libs            ("libOpenFOAM.so" "libincompressibleTurbulenceModel.so" "libincompressibleRASModels.so");
 
 application     pimpleFoam;
 
@@ -30,7 +28,6 @@ endTime         1;
 deltaT          0.001;
 
 writeControl    adjustableRunTime;
-
 writeInterval   0.1;
 
 purgeWrite      0;
@@ -49,7 +46,14 @@ runTimeModifiable true;
 
 adjustTimeStep  yes;
 
-maxCo           5;
+maxCo           3;
+
+libs
+(
+    "libOpenFOAM.so"
+    "libincompressibleTurbulenceModel.so"
+    "libincompressibleRASModels.so"
+);
 
 functions
 {

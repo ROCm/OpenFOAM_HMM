@@ -69,11 +69,13 @@ inline Foam::DsmcParcel<ParcelType>::DsmcParcel
     const vector& position,
     const vector& U,
     const scalar Ei,
-    const label celli,
+    const label cellI,
+    const label tetFaceI,
+    const label tetPtI,
     const label typeId
 )
 :
-    Particle<ParcelType>(owner, position, celli),
+    Particle<ParcelType>(owner, position, cellI, tetFaceI, tetPtI),
     U_(U),
     Ei_(Ei),
     typeId_(typeId)

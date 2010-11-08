@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,8 +30,8 @@ License
 void Foam::primitiveMesh::calcCells
 (
     cellList& cellFaceAddr,
-    const unallocLabelList& own,
-    const unallocLabelList& nei,
+    const labelUList& own,
+    const labelUList& nei,
     const label inNCells
 )
 {

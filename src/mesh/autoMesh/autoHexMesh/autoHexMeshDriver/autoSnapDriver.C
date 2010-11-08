@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,74 +46,15 @@ Description
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::autoSnapDriver, 0);
+namespace Foam
+{
+
+defineTypeNameAndDebug(autoSnapDriver, 0);
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-// Get faces to repatch. Returns map from face to patch.
-Foam::Map<Foam::label> Foam::autoSnapDriver::getZoneBafflePatches
-(
-    const bool allowBoundary
-) const
-{
-    const fvMesh& mesh = meshRefiner_.mesh();
-    const refinementSurfaces& surfaces = meshRefiner_.surfaces();
-
-    Map<label> bafflePatch(mesh.nFaces()/1000);
-
-    const wordList& faceZoneNames = surfaces.faceZoneNames();
-    const faceZoneMesh& fZones = mesh.faceZones();
-
-    forAll(faceZoneNames, surfI)
-    {
-        if (faceZoneNames[surfI].size())
-        {
-            // Get zone
-            const faceZone& fZone = fZones[faceZoneNames[surfI]];
-
-            //// Get patch allocated for zone
-            //label patchI = surfaceToCyclicPatch_[surfI];
-            // Get patch of (first region) of surface
-            label patchI = globalToPatch_[surfaces.globalRegion(surfI, 0)];
-
-            Info<< "For surface "
-                << surfaces.names()[surfI]
-                << " found faceZone " << fZone.name()
-                << " and patch " << mesh.boundaryMesh()[patchI].name()
-                << endl;
-
-
-            forAll(fZone, i)
-            {
-                label faceI = fZone[i];
-
-                if (allowBoundary || mesh.isInternalFace(faceI))
-                {
-                    if (!bafflePatch.insert(faceI, patchI))
-                    {
-                        label oldPatchI = bafflePatch[faceI];
-
-                        if (oldPatchI != patchI)
-                        {
-                            FatalErrorIn("getZoneBafflePatches(const bool)")
-                                << "Face " << faceI
-                                << " fc:" << mesh.faceCentres()[faceI]
-                                << " in zone " << fZone.name()
-                                << " is in patch "
-                                << mesh.boundaryMesh()[oldPatchI].name()
-                                << " and in patch "
-                                << mesh.boundaryMesh()[patchI].name()
-                                << abort(FatalError);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return bafflePatch;
-}
-
 
 // Calculate geometrically collocated points, Requires PackedList to be
 // sized and initalised!
@@ -274,8 +215,7 @@ Foam::pointField Foam::autoSnapDriver::smoothPatchDisplacement
         pp.meshPoints(),
         avgBoundary,
         plusEqOp<point>(),  // combine op
-        vector::zero,       // null value
-        false               // no separation
+        vector::zero        // null value
     );
     syncTools::syncPointList
     (
@@ -283,8 +223,7 @@ Foam::pointField Foam::autoSnapDriver::smoothPatchDisplacement
         pp.meshPoints(),
         nBoundary,
         plusEqOp<label>(),  // combine op
-        0,                  // null value
-        false               // no separation
+        0                   // null value
     );
 
     forAll(avgBoundary, i)
@@ -322,36 +261,18 @@ Foam::pointField Foam::autoSnapDriver::smoothPatchDisplacement
 
         forAll(patches, patchI)
         {
-            if (Pstream::parRun() && isA<processorPolyPatch>(patches[patchI]))
+            if
+            (
+                patches[patchI].coupled()
+             && refCast<const coupledPolyPatch>(patches[patchI]).owner()
+            )
             {
-                const processorPolyPatch& pp =
-                    refCast<const processorPolyPatch>(patches[patchI]);
-
-                if (pp.myProcNo() < pp.neighbProcNo())
-                {
-                    const vectorField::subField faceCentres = pp.faceCentres();
-
-                    forAll(pp, i)
-                    {
-                        const face& f = pp[i];
-                        const point& fc = faceCentres[i];
-
-                        forAll(f, fp)
-                        {
-                            globalSum[f[fp]] += fc;
-                            globalNum[f[fp]]++;
-                        }
-                    }
-                }
-            }
-            else if (isA<cyclicPolyPatch>(patches[patchI]))
-            {
-                const cyclicPolyPatch& pp =
-                    refCast<const cyclicPolyPatch>(patches[patchI]);
+                const coupledPolyPatch& pp =
+                    refCast<const coupledPolyPatch>(patches[patchI]);
 
                 const vectorField::subField faceCentres = pp.faceCentres();
 
-                for (label i = 0; i < pp.size()/2; i++)
+                forAll(pp, i)
                 {
                     const face& f = pp[i];
                     const point& fc = faceCentres[i];
@@ -370,16 +291,14 @@ Foam::pointField Foam::autoSnapDriver::smoothPatchDisplacement
             mesh,
             globalSum,
             plusEqOp<vector>(), // combine op
-            vector::zero,       // null value
-            false               // no separation
+            vector::zero        // null value
         );
         syncTools::syncPointList
         (
             mesh,
             globalNum,
             plusEqOp<label>(),  // combine op
-            0,                  // null value
-            false               // no separation
+            0                   // null value
         );
 
         avgInternal.setSize(meshPoints.size());
@@ -669,91 +588,6 @@ Foam::autoSnapDriver::autoSnapDriver
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::createZoneBaffles
-(
-    List<labelPair>& baffles
-)
-{
-    labelList zonedSurfaces = meshRefiner_.surfaces().getNamedSurfaces();
-
-    autoPtr<mapPolyMesh> map;
-
-    // No need to sync; all processors will have all same zonedSurfaces.
-    if (zonedSurfaces.size())
-    {
-        fvMesh& mesh = meshRefiner_.mesh();
-
-        // Split internal faces on interface surfaces
-        Info<< "Converting zoned faces into baffles ..." << endl;
-
-        // Get faces (internal only) to be baffled. Map from face to patch
-        // label.
-        Map<label> faceToPatch(getZoneBafflePatches(false));
-
-        label nZoneFaces = returnReduce(faceToPatch.size(), sumOp<label>());
-        if (nZoneFaces > 0)
-        {
-            // Convert into labelLists
-            labelList ownPatch(mesh.nFaces(), -1);
-            forAllConstIter(Map<label>, faceToPatch, iter)
-            {
-                ownPatch[iter.key()] = iter();
-            }
-
-            // Create baffles. both sides same patch.
-            map = meshRefiner_.createBaffles(ownPatch, ownPatch);
-
-            // Get pairs of faces created.
-            // Just loop over faceMap and store baffle if we encounter a slave
-            // face.
-
-            baffles.setSize(faceToPatch.size());
-            label baffleI = 0;
-
-            const labelList& faceMap = map().faceMap();
-            const labelList& reverseFaceMap = map().reverseFaceMap();
-
-            forAll(faceMap, faceI)
-            {
-                label oldFaceI = faceMap[faceI];
-
-                // Does face originate from face-to-patch
-                Map<label>::const_iterator iter = faceToPatch.find(oldFaceI);
-
-                if (iter != faceToPatch.end())
-                {
-                    label masterFaceI = reverseFaceMap[oldFaceI];
-                    if (faceI != masterFaceI)
-                    {
-                        baffles[baffleI++] = labelPair(masterFaceI, faceI);
-                    }
-                }
-            }
-
-            if (baffleI != faceToPatch.size())
-            {
-                FatalErrorIn("autoSnapDriver::createZoneBaffles(..)")
-                    << "Had " << faceToPatch.size() << " patches to create "
-                    << " but encountered " << baffleI
-                    << " slave faces originating from patcheable faces."
-                    << abort(FatalError);
-            }
-
-            if (debug)
-            {
-                const_cast<Time&>(mesh.time())++;
-                Pout<< "Writing baffled mesh to time "
-                    << meshRefiner_.timeName() << endl;
-                mesh.write();
-            }
-        }
-        Info<< "Created " << nZoneFaces << " baffles in = "
-            << mesh.time().cpuTimeIncrement() << " s\n" << nl << endl;
-    }
-    return map;
-}
-
-
 Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::mergeZoneBaffles
 (
     const List<labelPair>& baffles
@@ -815,8 +649,7 @@ Foam::scalarField Foam::autoSnapDriver::calcSnapDistance
         pp.meshPoints(),
         maxEdgeLen,
         maxEqOp<scalar>(),  // combine op
-        -GREAT,             // null value
-        false               // no separation
+        -GREAT              // null value
     );
 
     return snapParams.snapTol()*maxEdgeLen;
@@ -1123,8 +956,7 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
         pp.meshPoints(),
         patchDisp,
         minMagEqOp(),                   // combine op
-        vector(GREAT, GREAT, GREAT),    // null value
-        false                           // no separation
+        vector(GREAT, GREAT, GREAT)     // null value
     );
 
 
@@ -1178,7 +1010,7 @@ void Foam::autoSnapDriver::smoothDisplacement
         }
         pointVectorField oldDisp(disp);
 
-        meshMover.smooth(oldDisp, edgeGamma, false, disp);
+        meshMover.smooth(oldDisp, edgeGamma, disp);
     }
     Info<< "Displacement smoothed in = "
         << mesh.time().cpuTimeIncrement() << " s\n" << nl << endl;
@@ -1443,7 +1275,7 @@ void Foam::autoSnapDriver::doSnap
     // Create baffles (pairs of faces that share the same points)
     // Baffles stored as owner and neighbour face that have been created.
     List<labelPair> baffles;
-    createZoneBaffles(baffles);
+    meshRefiner_.createZoneBaffles(globalToPatch_, baffles);
 
     {
         autoPtr<indirectPrimitivePatch> ppPtr

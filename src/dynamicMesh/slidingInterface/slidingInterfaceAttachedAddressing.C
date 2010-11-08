@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -111,7 +111,7 @@ void Foam::slidingInterface::calcAttachedAddressing() const
                 {
                     if (mfc[faceI] < 0)
                     {
-                        Pout << "No cell next to master patch face " << faceI
+                        Pout<< "No cell next to master patch face " << faceI
                             << ".  Global face no: " << mfc[faceI]
                             << " own: " << own[masterPatchFaces[faceI]]
                             << " nei: " << nei[masterPatchFaces[faceI]]
@@ -123,7 +123,7 @@ void Foam::slidingInterface::calcAttachedAddressing() const
                 {
                     if (sfc[faceI] < 0)
                     {
-                        Pout << "No cell next to slave patch face " << faceI
+                        Pout<< "No cell next to slave patch face " << faceI
                             << ".  Global face no: " << sfc[faceI]
                             << " own: " << own[slavePatchFaces[faceI]]
                             << " nei: " << nei[slavePatchFaces[faceI]]
@@ -334,7 +334,7 @@ void Foam::slidingInterface::renumberAttachedAddressing
             newMsof[faceI] = newFaceI;
         }
     }
-//     Pout << "newMsof: " << newMsof << endl;
+//     Pout<< "newMsof: " << newMsof << endl;
     // Slave side
     const labelList& ssof = slaveStickOutFaces();
 
@@ -350,7 +350,7 @@ void Foam::slidingInterface::renumberAttachedAddressing
             newSsof[faceI] = newFaceI;
         }
     }
-//     Pout << "newSsof: " << newSsof << endl;
+//     Pout<< "newSsof: " << newSsof << endl;
     if (debug)
     {
         // Check if all the mapped cells are live

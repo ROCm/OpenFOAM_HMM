@@ -59,6 +59,15 @@ public:
         //- Construct from components
         Euler(const word& phiName, const dictionary& dict);
 
+        //- Copy constructor
+        Euler(const Euler& is);
+
+        //- Construct and return clone
+        virtual autoPtr<IntegrationScheme<Type> > clone() const
+        {
+            return autoPtr<IntegrationScheme<Type> >(new Euler<Type>(*this));
+        }
+
 
     //- Destructor
     virtual ~Euler();

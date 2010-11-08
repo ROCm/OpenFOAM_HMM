@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,8 +36,8 @@ void Foam::lduMatrix::sumDiag()
     const scalarField& Upper = const_cast<const lduMatrix&>(*this).upper();
     scalarField& Diag = diag();
 
-    const unallocLabelList& l = lduAddr().lowerAddr();
-    const unallocLabelList& u = lduAddr().upperAddr();
+    const labelUList& l = lduAddr().lowerAddr();
+    const labelUList& u = lduAddr().upperAddr();
 
     for (register label face=0; face<l.size(); face++)
     {
@@ -53,8 +53,8 @@ void Foam::lduMatrix::negSumDiag()
     const scalarField& Upper = const_cast<const lduMatrix&>(*this).upper();
     scalarField& Diag = diag();
 
-    const unallocLabelList& l = lduAddr().lowerAddr();
-    const unallocLabelList& u = lduAddr().upperAddr();
+    const labelUList& l = lduAddr().lowerAddr();
+    const labelUList& u = lduAddr().upperAddr();
 
     for (register label face=0; face<l.size(); face++)
     {
@@ -72,8 +72,8 @@ void Foam::lduMatrix::sumMagOffDiag
     const scalarField& Lower = const_cast<const lduMatrix&>(*this).lower();
     const scalarField& Upper = const_cast<const lduMatrix&>(*this).upper();
 
-    const unallocLabelList& l = lduAddr().lowerAddr();
-    const unallocLabelList& u = lduAddr().upperAddr();
+    const labelUList& l = lduAddr().lowerAddr();
+    const labelUList& u = lduAddr().upperAddr();
 
     for (register label face = 0; face < l.size(); face++)
     {
@@ -202,9 +202,12 @@ void Foam::lduMatrix::operator+=(const lduMatrix& A)
     }
     else
     {
-        FatalErrorIn("lduMatrix::operator+=(const lduMatrix& A)")
-            << "Unknown matrix type combination"
-            << abort(FatalError);
+        if (debug > 1)
+        {
+            WarningIn("lduMatrix::operator+=(const lduMatrix& A)")
+                << "Unknown matrix type combination"
+                << endl;
+        }
     }
 }
 
@@ -270,9 +273,12 @@ void Foam::lduMatrix::operator-=(const lduMatrix& A)
     }
     else
     {
-        FatalErrorIn("lduMatrix::operator-=(const lduMatrix& A)")
-            << "Unknown matrix type combination"
-            << abort(FatalError);
+        if (debug > 1)
+        {
+            WarningIn("lduMatrix::operator-=(const lduMatrix& A)")
+                << "Unknown matrix type combination"
+                << endl;
+        }
     }
 }
 
@@ -288,7 +294,7 @@ void Foam::lduMatrix::operator*=(const scalarField& sf)
     {
         scalarField& upper = *upperPtr_;
 
-        const unallocLabelList& l = lduAddr().lowerAddr();
+        const labelUList& l = lduAddr().lowerAddr();
 
         for (register label face=0; face<upper.size(); face++)
         {
@@ -300,7 +306,7 @@ void Foam::lduMatrix::operator*=(const scalarField& sf)
     {
         scalarField& lower = *lowerPtr_;
 
-        const unallocLabelList& u = lduAddr().upperAddr();
+        const labelUList& u = lduAddr().upperAddr();
 
         for (register label face=0; face<lower.size(); face++)
         {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -143,7 +143,7 @@ void Foam::PorousZones<ZoneType>::addResistance
 ) const
 {
     // addResistance for each zone, delaying the correction of the
-    // precessor BCs of AU
+    // processor BCs of AU
     forAll(*this, i)
     {
         this->operator[](i).addResistance(UEqn, AU, false);

@@ -620,6 +620,11 @@ double* Foam::vtkPV3Foam::findTimes(int& nTimeSteps)
 
 void Foam::vtkPV3Foam::renderPatchNames(vtkRenderer* renderer, const bool show)
 {
+    if (!meshPtr_)
+    {
+        return;
+    }
+
     // always remove old actors first
 
     forAll(patchTextActorsPtrs_, patchI)
@@ -651,7 +656,7 @@ void Foam::vtkPV3Foam::renderPatchNames(vtkRenderer* renderer, const bool show)
         labelList nZones(pbMesh.size(), 0);
 
         // Per global zone number the average face centre position
-        DynamicList<point> zoneCentre(pbMesh.size());
+        List<DynamicList<point> > zoneCentre(pbMesh.size());
 
 
         // Loop through all patches to determine zones, and centre of each zone
@@ -693,31 +698,28 @@ void Foam::vtkPV3Foam::renderPatchNames(vtkRenderer* renderer, const bool show)
 
             labelList zoneNFaces(pZones.nZones(), 0);
 
-            // Save start of information for current patch
-            label patchStart = zoneCentre.size();
-
             // Create storage for additional zone centres
             forAll(zoneNFaces, zoneI)
             {
-                zoneCentre.append(vector::zero);
+                zoneCentre[patchI].append(vector::zero);
             }
 
             // Do averaging per individual zone
             forAll(pp, faceI)
             {
                 label zoneI = pZones[faceI];
-                zoneCentre[patchStart+zoneI] += pp[faceI].centre(pp.points());
+                zoneCentre[patchI][zoneI] += pp[faceI].centre(pp.points());
                 zoneNFaces[zoneI]++;
             }
 
-            for (label i=0; i<nZones[patchI]; i++)
+            forAll(zoneCentre[patchI], zoneI)
             {
-                zoneCentre[patchStart + i] /= zoneNFaces[i];
+                zoneCentre[patchI][zoneI] /= zoneNFaces[zoneI];
             }
         }
 
-        // Count number of zones we're actually going to display. This is truncated
-        // to a max per patch
+        // Count number of zones we're actually going to display.
+        // This is truncated to a max per patch
 
         const label MAXPATCHZONES = 20;
 
@@ -728,13 +730,9 @@ void Foam::vtkPV3Foam::renderPatchNames(vtkRenderer* renderer, const bool show)
             displayZoneI += min(MAXPATCHZONES, nZones[patchI]);
         }
 
-
-        zoneCentre.shrink();
-
         if (debug)
         {
-            Info<< "patch zone centres = " << zoneCentre << nl
-                << "displayed zone centres = " << displayZoneI << nl
+            Info<< "displayed zone centres = " << displayZoneI << nl
                 << "zones per patch = " << nZones << endl;
         }
 
@@ -749,12 +747,11 @@ void Foam::vtkPV3Foam::renderPatchNames(vtkRenderer* renderer, const bool show)
         // Actor index
         displayZoneI = 0;
 
-        // Index in zone centres
-        label globalZoneI = 0;
-
         forAll(pbMesh, patchI)
         {
             const polyPatch& pp = pbMesh[patchI];
+
+            label globalZoneI = 0;
 
             // Only selected patches will have a non-zero number of zones
             label nDisplayZones = min(MAXPATCHZONES, nZones[patchI]);
@@ -769,7 +766,7 @@ void Foam::vtkPV3Foam::renderPatchNames(vtkRenderer* renderer, const bool show)
                 if (debug)
                 {
                     Info<< "patch name = " << pp.name() << nl
-                        << "anchor = " << zoneCentre[globalZoneI] << nl
+                        << "anchor = " << zoneCentre[patchI][globalZoneI] << nl
                         << "globalZoneI = " << globalZoneI << endl;
                 }
 
@@ -792,9 +789,9 @@ void Foam::vtkPV3Foam::renderPatchNames(vtkRenderer* renderer, const bool show)
 
                 txt->GetPositionCoordinate()->SetValue
                 (
-                    zoneCentre[globalZoneI].x(),
-                    zoneCentre[globalZoneI].y(),
-                    zoneCentre[globalZoneI].z()
+                    zoneCentre[patchI][globalZoneI].x(),
+                    zoneCentre[patchI][globalZoneI].y(),
+                    zoneCentre[patchI][globalZoneI].z()
                 );
 
                 // Add text to each renderer

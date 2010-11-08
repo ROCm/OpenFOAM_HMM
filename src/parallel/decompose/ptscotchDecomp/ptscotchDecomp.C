@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,8 +22,8 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
     From scotch forum:
- 	
-    By: Francois PELLEGRINI RE: Graph mapping 'strategy' string [ reply ]  
+
+    By: Francois PELLEGRINI RE: Graph mapping 'strategy' string [ reply ]
     2008-08-22 10:09 Strategy handling in Scotch is a bit tricky. In order
     not to be confused, you must have a clear view of how they are built.
     Here are some rules:
@@ -141,12 +141,7 @@ namespace Foam
 {
     defineTypeNameAndDebug(ptscotchDecomp, 0);
 
-    addToRunTimeSelectionTable
-    (
-        decompositionMethod,
-        ptscotchDecomp,
-        dictionaryMesh
-    );
+    addToRunTimeSelectionTable(decompositionMethod, ptscotchDecomp, dictionary);
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -178,44 +173,52 @@ Foam::label Foam::ptscotchDecomp::decompose
 //        const dictionary& scotchCoeffs =
 //            decompositionDict_.subDict("ptscotchCoeffs");
 //
-//        if (scotchCoeffs.found("writeGraph"))
+//        if (scotchCoeffs.lookupOrDefault("writeGraph", false))
 //        {
-//            Switch writeGraph(scotchCoeffs.lookup("writeGraph"));
+//            OFstream str(mesh_.time().path() / mesh_.name() + ".grf");
 //
-//            if (writeGraph)
+//            Info<< "Dumping Scotch graph file to " << str.name() << endl
+//                << "Use this in combination with gpart." << endl;
+//
+//            // Distributed graph file (.grf)
+//            label version = 2;
+//            str << version << nl;
+//            // Number of files
+
+//            // Number of files (procglbnbr)
+//            str << Pstream::nProcs();
+//            // My file number (procloc)
+//            str << ' ' << Pstream::myProcNo() << nl;
+//
+//            // Total number of vertices (vertglbnbr)
+//            str << returnReduce(mesh.nCells(), sumOp<label>());
+//            // Total number of connections (edgeglbnbr)
+//            str << ' ' << returnReduce(xadj[mesh.nCells()], sumOp<label>())
+//                << nl;
+//            // Local number of vertices (vertlocnbr)
+//            str << mesh.nCells();
+//            // Local number of connections (edgelocnbr)
+//            str << ' ' << xadj[mesh.nCells()] << nl;
+//            // Numbering starts from 0
+//            label baseval = 0;
+//            // Start of my global vertices (procdsptab[proclocnum])
+//            str << ' ' << globalCells.toGlobal(0);
+//            100*hasVertlabels+10*hasEdgeWeights+1*hasVertWeighs
+//            str << ' ' << "0" << nl;
+//            for (label cellI = 0; cellI < xadj.size()-1; cellI++)
 //            {
-//                OFstream str(mesh_.time().path() / mesh_.name() + ".grf");
+//                label start = xadj[cellI];
+//                label end = xadj[cellI+1];
+//                str << end-start;
 //
-//                Info<< "Dumping Scotch graph file to " << str.name() << endl
-//                    << "Use this in combination with gpart." << endl;
-//
-//                label version = 0;
-//                str << version << nl;
-//                // Numer of vertices
-//                str << xadj.size()-1 << ' ' << adjncy.size() << nl;
-//                // Numbering starts from 0
-//                label baseval = 0;
-//                // Has weights?
-//                label hasEdgeWeights = 0;
-//                label hasVertexWeights = 0;
-//                label numericflag = 10*hasEdgeWeights+hasVertexWeights;
-//                str << baseval << ' ' << numericflag << nl;
-//                for (label cellI = 0; cellI < xadj.size()-1; cellI++)
+//                for (label i = start; i < end; i++)
 //                {
-//                    label start = xadj[cellI];
-//                    label end = xadj[cellI+1];
-//                    str << end-start;
-//
-//                    for (label i = start; i < end; i++)
-//                    {
-//                        str << ' ' << adjncy[i];
-//                    }
-//                    str << nl;
+//                    str << ' ' << adjncy[i];
 //                }
+//                str << nl;
 //            }
 //        }
 //    }
-
 
     // Strategy
     // ~~~~~~~~
@@ -296,7 +299,8 @@ Foam::label Foam::ptscotchDecomp::decompose
             0,                      // baseval, c-style numbering
             xadj.size()-1,          // vertlocnbr, nCells
             xadj.size()-1,          // vertlocmax
-            const_cast<SCOTCH_Num*>(xadj.begin()),  // vertloctab, start index per cell into
+            const_cast<SCOTCH_Num*>(xadj.begin()),
+                                    // vertloctab, start index per cell into
                                     // adjncy
             &xadj[1],               // vendloctab, end index  ,,
 
@@ -333,7 +337,8 @@ Foam::label Foam::ptscotchDecomp::decompose
     {
         if (debug)
         {
-            Info<< "ptscotchDecomp : Using procesor weights " << processorWeights
+            Info<< "ptscotchDecomp : Using procesor weights "
+                << processorWeights
                 << endl;
         }
         check
@@ -414,14 +419,9 @@ Foam::label Foam::ptscotchDecomp::decompose
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::ptscotchDecomp::ptscotchDecomp
-(
-    const dictionary& decompositionDict,
-    const polyMesh& mesh
-)
+Foam::ptscotchDecomp::ptscotchDecomp(const dictionary& decompositionDict)
 :
-    decompositionMethod(decompositionDict),
-    mesh_(mesh)
+    decompositionMethod(decompositionDict)
 {}
 
 
@@ -429,11 +429,12 @@ Foam::ptscotchDecomp::ptscotchDecomp
 
 Foam::labelList Foam::ptscotchDecomp::decompose
 (
+    const polyMesh& mesh,
     const pointField& points,
     const scalarField& pointWeights
 )
 {
-    if (points.size() != mesh_.nCells())
+    if (points.size() != mesh.nCells())
     {
         FatalErrorIn
         (
@@ -443,7 +444,7 @@ Foam::labelList Foam::ptscotchDecomp::decompose
             << endl
             << "and supply one coordinate (cellCentre) for every cell." << endl
             << "The number of coordinates " << points.size() << endl
-            << "The number of cells in the mesh " << mesh_.nCells()
+            << "The number of cells in the mesh " << mesh.nCells()
             << exit(FatalError);
     }
 
@@ -457,20 +458,14 @@ Foam::labelList Foam::ptscotchDecomp::decompose
     // Make Metis CSR (Compressed Storage Format) storage
     //   adjncy      : contains neighbours (= edges in graph)
     //   xadj(celli) : start of information in adjncy for celli
-    // Connections
-    Field<int> adjncy;
-    // Offsets into adjncy
-    Field<int> xadj;
-    calcDistributedCSR
-    (
-        mesh_,
-        adjncy,
-        xadj
-    );
+
+
+    CompactListList<label> cellCells;
+    calcCellCells(mesh, identity(mesh.nCells()), mesh.nCells(), cellCells);
 
     // Decompose using default weights
     List<int> finalDecomp;
-    decompose(adjncy, xadj, pointWeights, finalDecomp);
+    decompose(cellCells.m(), cellCells.offsets(), pointWeights, finalDecomp);
 
     // Copy back to labelList
     labelList decomp(finalDecomp.size());
@@ -484,52 +479,40 @@ Foam::labelList Foam::ptscotchDecomp::decompose
 
 Foam::labelList Foam::ptscotchDecomp::decompose
 (
+    const polyMesh& mesh,
     const labelList& agglom,
     const pointField& agglomPoints,
     const scalarField& pointWeights
 )
 {
-    if (agglom.size() != mesh_.nCells())
+    if (agglom.size() != mesh.nCells())
     {
         FatalErrorIn
         (
             "ptscotchDecomp::decompose(const labelList&, const pointField&)"
         )   << "Size of cell-to-coarse map " << agglom.size()
-            << " differs from number of cells in mesh " << mesh_.nCells()
+            << " differs from number of cells in mesh " << mesh.nCells()
             << exit(FatalError);
     }
 
 //    // For running sequential ...
 //    if (Pstream::nProcs() <= 1)
 //    {
-//        return scotchDecomp(decompositionDict_, mesh_)
+//        return scotchDecomp(decompositionDict_, mesh)
 //            .decompose(agglom, agglomPoints, pointWeights);
 //    }
 
     // Make Metis CSR (Compressed Storage Format) storage
     //   adjncy      : contains neighbours (= edges in graph)
     //   xadj(celli) : start of information in adjncy for celli
-    List<int> adjncy;
-    List<int> xadj;
-    {
-        // Get cellCells on coarse mesh.
-        labelListList cellCells;
-        calcCellCells
-        (
-            mesh_,
-            agglom,
-            agglomPoints.size(),
-            cellCells
-        );
-
-        calcCSR(cellCells, adjncy, xadj);
-    }
+    CompactListList<label> cellCells;
+    calcCellCells(mesh, agglom, agglomPoints.size(), cellCells);
 
     // Decompose using weights
     List<int> finalDecomp;
-    decompose(adjncy, xadj, pointWeights, finalDecomp);
+    decompose(cellCells.m(), cellCells.offsets(), pointWeights, finalDecomp);
 
-    // Rework back into decomposition for original mesh_
+    // Rework back into decomposition for original mesh
     labelList fineDistribution(agglom.size());
 
     forAll(fineDistribution, i)
@@ -561,7 +544,7 @@ Foam::labelList Foam::ptscotchDecomp::decompose
 //    // For running sequential ...
 //    if (Pstream::nProcs() <= 1)
 //    {
-//        return scotchDecomp(decompositionDict_, mesh_)
+//        return scotchDecomp(decompositionDict_, mesh)
 //            .decompose(globalCellCells, cellCentres, cWeights);
 //    }
 
@@ -570,13 +553,11 @@ Foam::labelList Foam::ptscotchDecomp::decompose
     //   adjncy      : contains neighbours (= edges in graph)
     //   xadj(celli) : start of information in adjncy for celli
 
-    List<int> adjncy;
-    List<int> xadj;
-    calcCSR(globalCellCells, adjncy, xadj);
+    CompactListList<label> cellCells(globalCellCells);
 
     // Decompose using weights
     List<int> finalDecomp;
-    decompose(adjncy, xadj, cWeights, finalDecomp);
+    decompose(cellCells.m(), cellCells.offsets(), cWeights, finalDecomp);
 
     // Copy back to labelList
     labelList decomp(finalDecomp.size());

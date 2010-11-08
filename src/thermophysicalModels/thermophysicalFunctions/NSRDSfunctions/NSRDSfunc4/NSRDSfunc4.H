@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,24 +84,20 @@ public:
     // Constructors
 
         //- Construct from components
-        NSRDSfunc4(scalar a, scalar b, scalar c, scalar d, scalar e)
-        :
-            a_(a),
-            b_(b),
-            c_(c),
-            d_(d),
-            e_(e)
-        {}
+        NSRDSfunc4
+        (
+            const scalar a,
+            const scalar b,
+            const scalar c,
+            const scalar d,
+            const scalar e
+        );
 
         //- Construct from Istream
-        NSRDSfunc4(Istream& is)
-        :
-            a_(readScalar(is)),
-            b_(readScalar(is)),
-            c_(readScalar(is)),
-            d_(readScalar(is)),
-            e_(readScalar(is))
-        {}
+        NSRDSfunc4(Istream& is);
+
+        //- Construct from dictionary
+        NSRDSfunc4(const dictionary& dict);
 
 
     // Member Functions
@@ -111,7 +107,6 @@ public:
         {
             return a_ + b_/T + c_/pow(T, 3) + d_/pow(T, 8) + e_/pow(T, 9);
         }
-
 
         //- Write the function coefficients
         void writeData(Ostream& os) const

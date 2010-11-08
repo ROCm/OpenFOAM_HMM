@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -141,9 +141,9 @@ void Foam::GAMGSolver::agglomerateMatrix(const label fineLevelIndex)
         const labelList& restrictAddr =
             agglomeration_.restrictAddressing(fineLevelIndex);
 
-        const unallocLabelList& l = fineMatrix.lduAddr().lowerAddr();
-        const unallocLabelList& cl = coarseMatrix.lduAddr().lowerAddr();
-        const unallocLabelList& cu = coarseMatrix.lduAddr().upperAddr();
+        const labelUList& l = fineMatrix.lduAddr().lowerAddr();
+        const labelUList& cl = coarseMatrix.lduAddr().lowerAddr();
+        const labelUList& cu = coarseMatrix.lduAddr().upperAddr();
 
         forAll(faceRestrictAddr, fineFacei)
         {

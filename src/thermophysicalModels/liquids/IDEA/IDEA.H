@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -87,9 +87,9 @@ class IDEA
         NSRDSfunc5 rho_;
         NSRDSfunc1 pv_;
         NSRDSfunc6 hl_;
-        NSRDSfunc0 cp_;
+        NSRDSfunc0 Cp_;
         NSRDSfunc0 h_;
-        NSRDSfunc7 cpg_;
+        NSRDSfunc7 Cpg_;
         NSRDSfunc4 B_;
         NSRDSfunc1 mu_;
         NSRDSfunc2 mug_;
@@ -132,6 +132,18 @@ public:
         //- Construct from Istream
         IDEA(Istream& is);
 
+        //- Construct from dictionary
+        IDEA(const dictionary& dict);
+
+        //- Construct copy
+        IDEA(const IDEA& liq);
+
+        //- Construct and return clone
+        virtual autoPtr<liquid> clone() const
+        {
+            return autoPtr<liquid>(new IDEA(*this));
+        }
+
 
     // Member Functions
 
@@ -145,13 +157,13 @@ public:
         inline scalar hl(scalar p, scalar T) const;
 
         //- Liquid heat capacity [J/(kg K)]
-        inline scalar cp(scalar p, scalar T) const;
+        inline scalar Cp(scalar p, scalar T) const;
 
         //- Liquid Enthalpy [J/(kg)]
         inline scalar h(scalar p, scalar T) const;
 
         //- Ideal gas heat capacity [J/(kg K)]
-        inline scalar cpg(scalar p, scalar T) const;
+        inline scalar Cpg(scalar p, scalar T) const;
 
         //- Second Virial Coefficient [m^3/kg]
         inline scalar B(scalar p, scalar T) const;
@@ -187,8 +199,8 @@ public:
             rho_.writeData(os); os << nl;
             pv_.writeData(os); os << nl;
             hl_.writeData(os); os << nl;
-            cp_.writeData(os); os << nl;
-            cpg_.writeData(os); os << nl;
+            Cp_.writeData(os); os << nl;
+            Cpg_.writeData(os); os << nl;
             mu_.writeData(os); os << nl;
             mug_.writeData(os); os << nl;
             K_.writeData(os); os << nl;

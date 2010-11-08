@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -204,8 +204,6 @@ void epsilonWallFunctionFvPatchScalarField::updateCoeffs()
     const tmp<volScalarField> tk = rasModel.k();
     const volScalarField& k = tk();
 
-    const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
-
     const scalarField& muw = rasModel.mu().boundaryField()[patchI];
 
     const tmp<volScalarField> tmut = rasModel.mut();
@@ -221,24 +219,13 @@ void epsilonWallFunctionFvPatchScalarField::updateCoeffs()
     {
         label faceCellI = patch().faceCells()[faceI];
 
-        scalar yPlus =
-            Cmu25*y[faceI]*sqrt(k[faceCellI])
-           /(muw[faceI]/rhow[faceI]);
-
         epsilon[faceCellI] = Cmu75*pow(k[faceCellI], 1.5)/(kappa_*y[faceI]);
 
-        if (yPlus > yPlusLam_)
-        {
-            G[faceCellI] =
-                (mutw[faceI] + muw[faceI])
-               *magGradUw[faceI]
-               *Cmu25*sqrt(k[faceCellI])
-               /(kappa_*y[faceI]);
-        }
-        else
-        {
-            G[faceCellI] = 0.0;
-        }
+        G[faceCellI] =
+            (mutw[faceI] + muw[faceI])
+           *magGradUw[faceI]
+           *Cmu25*sqrt(k[faceCellI])
+           /(kappa_*y[faceI]);
     }
 
     fixedInternalValueFvPatchField<scalar>::updateCoeffs();

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -124,8 +124,8 @@ laplacian
     const surfaceVectorField& Sf = mesh.Sf();
     const surfaceScalarField magSf = mesh.magSf();
     const fvPatchList& patches = mesh.boundary();
-    const unallocLabelList& owner = mesh.owner();
-    const unallocLabelList& neighbour = mesh.neighbour();
+    const labelUList& owner = mesh.owner();
+    const labelUList& neighbour = mesh.neighbour();
 
     const surfaceScalarField& delta =
         mesh.surfaceInterpolation::deltaCoeffs();

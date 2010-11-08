@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -113,13 +113,14 @@ class polyMeshGeometry
         (
             const polyMesh&,
             const bool report,
-            const scalar minTetVol,
+            const scalar minTetQuality,
             const pointField& p,
             const label faceI,
             const point& fc,    // face centre
             const point& cc,    // cell centre
             labelHashSet* setPtr
         );
+
 
 public:
 
@@ -350,7 +351,7 @@ public:
             bool checkFaceTets
             (
                 const bool report,
-                const scalar minTetVol,
+                const scalar minTetQuality,
                 const pointField& p,
                 const labelList& checkFaces,
                 const List<labelPair>& baffles,

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ License
 #include "lduMatrix.H"
 #include "procLduMatrix.H"
 #include "procLduInterface.H"
+#include "cyclicLduInterface.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -160,19 +161,27 @@ void Foam::LUscalarMatrix::convert
         {
             const lduInterface& interface = interfaces[inti].interface();
 
-            const label* __restrict__ ulPtr = interface.faceCells().begin();
-            const scalar* __restrict__ upperLowerPtr =
-                interfaceCoeffs[inti].begin();
+            // Assume any interfaces are cyclic ones
 
-            register label inFaces = interface.faceCells().size()/2;
+            const label* __restrict__ lPtr = interface.faceCells().begin();
+
+            const cyclicLduInterface& cycInterface =
+                refCast<const cyclicLduInterface>(interface);
+            label nbrInt = cycInterface.neighbPatchID();
+            const label* __restrict__ uPtr =
+                interfaces[nbrInt].interface().faceCells().begin();
+
+            const scalar* __restrict__ nbrUpperLowerPtr =
+                interfaceCoeffs[nbrInt].begin();
+
+            register label inFaces = interface.faceCells().size();
 
             for (register label face=0; face<inFaces; face++)
             {
-                label uCell = ulPtr[face];
-                label lCell = ulPtr[face + inFaces];
+                label uCell = lPtr[face];
+                label lCell = uPtr[face];
 
-                operator[](uCell)[lCell] -= upperLowerPtr[face + inFaces];
-                operator[](lCell)[uCell] -= upperLowerPtr[face];
+                operator[](uCell)[lCell] -= nbrUpperLowerPtr[face];
             }
         }
     }
@@ -278,10 +287,12 @@ void Foam::LUscalarMatrix::convert
                     neiInterfaces[neiInterfacei];
 
                 const label* __restrict__ uPtr = interface.faceCells_.begin();
-                const label* __restrict__ lPtr = neiInterface.faceCells_.begin();
+                const label* __restrict__ lPtr =
+                    neiInterface.faceCells_.begin();
 
                 const scalar* __restrict__ upperPtr = interface.coeffs_.begin();
-                const scalar* __restrict__ lowerPtr = neiInterface.coeffs_.begin();
+                const scalar* __restrict__ lowerPtr =
+                    neiInterface.coeffs_.begin();
 
                 register label inFaces = interface.faceCells_.size();
                 label neiOffset = procOffsets_[interface.neighbProcNo_];

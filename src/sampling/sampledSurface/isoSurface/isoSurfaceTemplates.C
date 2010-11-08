@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -102,7 +102,7 @@ Foam::isoSurface::adaptPatchFields
 
             // Note: cannot use patchInternalField since uses emptyFvPatch::size
             // Do our own internalField instead.
-            const unallocLabelList& faceCells =
+            const labelUList& faceCells =
                 mesh.boundary()[patchI].patch().faceCells();
 
             Field<Type>& pfld = sliceFld.boundaryField()[patchI];
@@ -116,7 +116,7 @@ Foam::isoSurface::adaptPatchFields
         {
             // Already has interpolate as value
         }
-        else if (isA<processorPolyPatch>(pp) && !collocatedPatch(pp))
+        else if (isA<processorPolyPatch>(pp))
         {
             fvPatchField<Type>& pfld = const_cast<fvPatchField<Type>&>
             (
@@ -568,8 +568,8 @@ void Foam::isoSurface::generateTriPoints
             }
         }
     }
-    syncTools::swapBoundaryFaceList(mesh_, neiSnapped, false);
-    syncTools::swapBoundaryFaceList(mesh_, neiSnappedPoint, false);
+    syncTools::swapBoundaryFaceList(mesh_, neiSnapped);
+    syncTools::swapBoundaryFaceList(mesh_, neiSnappedPoint);
 
 
 

@@ -574,12 +574,14 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-# INPUT                  = $(WM_PROJECT_DIR)/src \
+#INPUT                  = $(WM_PROJECT_DIR)/src \
 #                         $(WM_PROJECT_DIR)/applications/utilities \
 #                         $(WM_PROJECT_DIR)/applications/solvers
 
 # limit input for testing purposes
-INPUT                  = $(WM_PROJECT_DIR)/src/OpenFOAM/global
+INPUT                  = $(WM_PROJECT_DIR)/src/OpenFOAM/global \
+                         $(WM_PROJECT_DIR)/src/OpenFOAM/containers \
+                         $(WM_PROJECT_DIR)/src/OpenFOAM/primitives
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is
@@ -669,7 +671,7 @@ IMAGE_PATH             =
 # If FILTER_PATTERNS is specified, this tag will be
 # ignored.
 
-INPUT_FILTER           = doxyFilt
+INPUT_FILTER           = $(WM_PROJECT_DIR)/bin/tools/doxyFilter
 
 # The FILTER_PATTERNS tag can be used to specify filters on a per file pattern
 # basis.

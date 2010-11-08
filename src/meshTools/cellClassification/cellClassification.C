@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,6 +33,8 @@ License
 #include "MeshWave.H"
 #include "ListOps.H"
 #include "meshTools.H"
+#include "cpuTime.H"
+#include "globalMeshData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -320,7 +322,7 @@ void Foam::cellClassification::markCells
         changedFaces,                       // Labels of changed faces
         changedFacesInfo,                   // Information on changed faces
         cellInfoList,                       // Information on all cells
-        mesh_.globalData().nTotalCells()    // max iterations
+        mesh_.globalData().nTotalCells()+1  // max iterations
     );
 
     // Get information out of cellInfoList

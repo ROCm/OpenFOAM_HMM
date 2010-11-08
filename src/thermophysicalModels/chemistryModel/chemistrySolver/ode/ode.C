@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,8 +39,7 @@ Foam::ode<CompType, ThermoType>::ode
     coeffsDict_(model.subDict(modelName + "Coeffs")),
     solverName_(coeffsDict_.lookup("ODESolver")),
     odeSolver_(ODESolver::New(solverName_, model)),
-    eps_(readScalar(coeffsDict_.lookup("eps"))),
-    scale_(readScalar(coeffsDict_.lookup("scale")))
+    eps_(readScalar(coeffsDict_.lookup("eps")))
 {}
 
 
@@ -67,7 +66,7 @@ Foam::scalar Foam::ode<CompType, ThermoType>::solve
     scalarField c1(this->model_.nEqns(), 0.0);
 
     // copy the concentration, T and P to the total solve-vector
-    for (label i=0; i<nSpecie; i++)
+    for (label i = 0; i < nSpecie; i++)
     {
         c1[i] = c[i];
     }

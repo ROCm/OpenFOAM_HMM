@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -72,7 +72,7 @@ Foam::tmp<Foam::volScalarField> Foam::SyamlalOBrien::K
     volScalarField A = pow(beta, 4.14);
     volScalarField B = 0.8*pow(beta, 1.28);
 
-    forAll(beta, celli)
+    forAll (beta, celli)
     {
         if (beta[celli] > 0.85)
         {

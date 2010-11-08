@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,6 +33,7 @@ namespace Foam
     defineTypeNameAndDebug(C, 0);
     addToRunTimeSelectionTable(solid, C,);
     addToRunTimeSelectionTable(solid, C, Istream);
+    addToRunTimeSelectionTable(solid, C, dictionary);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -59,6 +60,18 @@ Foam::C::C(const solid& s)
 Foam::C::C(Istream& is)
 :
     solid(is)
+{}
+
+
+Foam::C::C(const dictionary& dict)
+:
+    solid(dict)
+{}
+
+
+Foam::C::C(const C& s)
+:
+    solid(s)
 {}
 
 

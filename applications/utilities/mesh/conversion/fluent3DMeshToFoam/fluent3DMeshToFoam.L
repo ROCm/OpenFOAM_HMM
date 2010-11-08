@@ -43,7 +43,7 @@ Description
 #include "polyMeshZipUpCells.H"
 #include "wallPolyPatch.H"
 #include "symmetryPolyPatch.H"
-#include "cyclicPolyPatch.H"
+#include "oldCyclicPolyPatch.H"
 #include "Swap.H"
 #include "IFstream.H"
 #include "readHexLabel.H"
@@ -321,7 +321,7 @@ endOfSection               {space}")"{space}
         pointGroupEndIndex.append(strtol(endPtr, &endPtr, 16) - 1);
 
         // point group type skipped
-        strtol(endPtr, &endPtr, 16);
+        (void)strtol(endPtr, &endPtr, 16);
 
         pointi = pointGroupStartIndex.last();
 
@@ -435,7 +435,7 @@ endOfSection               {space}")"{space}
         faceGroupEndIndex.append(strtol(endPtr, &endPtr, 16) - 1);
 
         // face group type
-        strtol(endPtr, &endPtr, 16);
+        (void)strtol(endPtr, &endPtr, 16);
 
         faceGroupElementType = strtol(endPtr, &endPtr, 16);
 
@@ -583,7 +583,7 @@ endOfSection               {space}")"{space}
         cellGroupType.append(strtol(endPtr, &endPtr, 16));
 
         // Note. Potentially skip cell set if type is zero.
-        strtol(endPtr, &endPtr, 16);
+        (void)strtol(endPtr, &endPtr, 16);
 
         Info<< "CellGroup: "
             << cellGroupZoneID.last()
@@ -900,7 +900,7 @@ int main(int argc, char *argv[])
     fluentToFoamType.insert("interface", polyPatch::typeName);
     fluentToFoamType.insert("internal", polyPatch::typeName);
     fluentToFoamType.insert("solid", polyPatch::typeName);
-    fluentToFoamType.insert("fan", cyclicPolyPatch::typeName);
+    fluentToFoamType.insert("fan", oldCyclicPolyPatch::typeName);
     fluentToFoamType.insert("radiator", polyPatch::typeName);
     fluentToFoamType.insert("porous-jump", polyPatch::typeName);
 

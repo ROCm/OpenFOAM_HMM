@@ -86,6 +86,9 @@ public:
 
     // Constructors
 
+        //- Construct null from owner
+        InflowBoundaryModel(CloudType& owner);
+
         //- Construct from dictionary
         InflowBoundaryModel
         (

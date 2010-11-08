@@ -65,6 +65,8 @@ public:
     // Member Operators
 
         inline scalar operator[](const label) const;
+
+        inline oneField field() const;
 };
 
 

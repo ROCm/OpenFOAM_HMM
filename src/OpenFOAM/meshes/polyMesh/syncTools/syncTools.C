@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,77 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+template<>
+void Foam::syncTools::transform::operator()
+(
+    const coupledPolyPatch&,
+    Field<label>&
+) const
+{}
+template<>
+void Foam::syncTools::transform::operator()
+(
+    const coupledPolyPatch&,
+    Map<label>&
+) const
+{}
+template<>
+void Foam::syncTools::transform::operator()
+(
+    const coupledPolyPatch&,
+    EdgeMap<label>&
+) const
+{}
+
+
+template<>
+void Foam::syncTools::transform::operator()
+(
+    const coupledPolyPatch&,
+    Field<scalar>&
+) const
+{}
+template<>
+void Foam::syncTools::transform::operator()
+(
+    const coupledPolyPatch&,
+    Map<scalar>&
+) const
+{}
+template<>
+void Foam::syncTools::transform::operator()
+(
+    const coupledPolyPatch&,
+    EdgeMap<scalar>&
+) const
+{}
+
+
+template<>
+void Foam::syncTools::transform::operator()
+(
+    const coupledPolyPatch&,
+    Field<bool>&
+) const
+{}
+template<>
+void Foam::syncTools::transform::operator()
+(
+    const coupledPolyPatch&,
+    Map<bool>&
+) const
+{}
+template<>
+void Foam::syncTools::transform::operator()
+(
+    const coupledPolyPatch&,
+    EdgeMap<bool>&
+) const
+{}
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
 // Does anyone have couples? Since meshes might have 0 cells and 0 proc
 // boundaries need to reduce this info.
 bool Foam::syncTools::hasCouples(const polyBoundaryMesh& patches)
@@ -43,31 +114,6 @@ bool Foam::syncTools::hasCouples(const polyBoundaryMesh& patches)
         }
     }
     return returnReduce(hasAnyCouples, orOp<bool>());
-}
-
-
-void Foam::syncTools::checkTransform
-(
-    const coupledPolyPatch& pp,
-    const bool applySeparation
-)
-{
-    if (!pp.parallel() && pp.forwardT().size() > 1)
-    {
-        FatalErrorIn("syncTools::checkTransform(const coupledPolyPatch&)")
-            << "Non-uniform transformation not supported for point or edge"
-            << " fields." << endl
-            << "Patch:" << pp.name()
-            << abort(FatalError);
-    }
-    if (applySeparation && pp.separated() && pp.separation().size() > 1)
-    {
-        FatalErrorIn("syncTools::checkTransform(const coupledPolyPatch&)")
-            << "Non-uniform separation vector not supported for point or edge"
-            << " fields." << endl
-            << "Patch:" << pp.name()
-            << abort(FatalError);
-    }
 }
 
 
@@ -154,136 +200,20 @@ Foam::PackedBoolList Foam::syncTools::getMasterFaces(const polyMesh& mesh)
     {
         if (patches[patchI].coupled())
         {
-            if (Pstream::parRun() && isA<processorPolyPatch>(patches[patchI]))
-            {
-                const processorPolyPatch& pp =
-                    refCast<const processorPolyPatch>(patches[patchI]);
+            const coupledPolyPatch& pp =
+                refCast<const coupledPolyPatch>(patches[patchI]);
 
-                if (!pp.owner())
-                {
-                    forAll(pp, i)
-                    {
-                        isMasterFace.unset(pp.start()+i);
-                    }
-                }
-            }
-            else if (isA<cyclicPolyPatch>(patches[patchI]))
+            if (!pp.owner())
             {
-                const cyclicPolyPatch& pp =
-                    refCast<const cyclicPolyPatch>(patches[patchI]);
-
-                for (label i = pp.size()/2; i < pp.size(); i++)
+                forAll(pp, i)
                 {
                     isMasterFace.unset(pp.start()+i);
                 }
-            }
-            else
-            {
-                FatalErrorIn("syncTools::getMasterFaces(const polyMesh&)")
-                    << "Cannot handle coupled patch " << patches[patchI].name()
-                    << " of type " <<  patches[patchI].type()
-                    << abort(FatalError);
             }
         }
     }
 
     return isMasterFace;
-}
-
-
-template <>
-void Foam::syncTools::separateList
-(
-    const vectorField& separation,
-    UList<vector>& field
-)
-{
-    if (separation.size() == 1)
-    {
-        // Single value for all.
-
-        forAll(field, i)
-        {
-            field[i] += separation[0];
-        }
-    }
-    else if (separation.size() == field.size())
-    {
-        forAll(field, i)
-        {
-            field[i] += separation[i];
-        }
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "syncTools::separateList(const vectorField&, UList<vector>&)"
-        )   << "Sizes of field and transformation not equal. field:"
-            << field.size() << " transformation:" << separation.size()
-            << abort(FatalError);
-    }
-}
-
-
-template <>
-void Foam::syncTools::separateList
-(
-    const vectorField& separation,
-    Map<vector>& field
-)
-{
-    if (separation.size() == 1)
-    {
-        // Single value for all.
-        forAllIter(Map<vector>, field, iter)
-        {
-            iter() += separation[0];
-        }
-    }
-    else if (separation.size() == field.size())
-    {
-        forAllIter(Map<vector>, field, iter)
-        {
-            iter() += separation[iter.key()];
-        }
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "syncTools::separateList(const vectorField&, Map<vector>&)"
-        )   << "Sizes of field and transformation not equal. field:"
-            << field.size() << " transformation:" << separation.size()
-            << abort(FatalError);
-    }
-}
-
-
-template <>
-void Foam::syncTools::separateList
-(
-    const vectorField& separation,
-    EdgeMap<vector>& field
-)
-{
-    if (separation.size() == 1)
-    {
-        // Single value for all.
-        forAllIter(EdgeMap<vector>, field, iter)
-        {
-            iter() += separation[0];
-        }
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "syncTools::separateList(const vectorField&, EdgeMap<vector>&)"
-        )   << "Multiple separation vectors not supported. field:"
-            << field.size() << " transformation:" << separation.size()
-            << abort(FatalError);
-    }
 }
 
 

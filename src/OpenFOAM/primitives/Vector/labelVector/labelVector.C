@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,17 +27,19 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<>
-const char* const Foam::labelVector::typeName = "labelVector";
+namespace Foam
+{
+    template<>
+    const char* const Foam::labelVector::typeName = "labelVector";
 
-template<>
-const char* Foam::labelVector::componentNames[] = {"x", "y", "z"};
+    template<>
+    const char* Foam::labelVector::componentNames[] = {"x", "y", "z"};
 
-template<>
-const Foam::labelVector Foam::labelVector::zero(0, 0, 0);
+    template<>
+    const Foam::labelVector Foam::labelVector::zero(0, 0, 0);
 
-template<>
-const Foam::labelVector Foam::labelVector::one(1, 1, 1);
-
+    template<>
+    const Foam::labelVector Foam::labelVector::one(1, 1, 1);
+}
 
 // ************************************************************************* //

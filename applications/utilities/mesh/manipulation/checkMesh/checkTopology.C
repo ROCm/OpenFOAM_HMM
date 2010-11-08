@@ -7,31 +7,6 @@
 #include "pointSet.H"
 #include "IOmanip.H"
 
-bool Foam::checkSync(const wordList& names)
-{
-    List<wordList> allNames(Pstream::nProcs());
-    allNames[Pstream::myProcNo()] = names;
-    Pstream::gatherList(allNames);
-
-    bool hasError = false;
-
-    for (label procI = 1; procI < allNames.size(); procI++)
-    {
-        if (allNames[procI] != allNames[0])
-        {
-            hasError = true;
-
-            Info<< " ***Inconsistent zones across processors, "
-                   "processor 0 has zones:" << allNames[0]
-                << ", processor " << procI << " has zones:"
-                << allNames[procI]
-                << endl;
-        }
-    }
-    return hasError;
-}
-
-
 Foam::label Foam::checkTopology
 (
     const polyMesh& mesh,
@@ -50,33 +25,20 @@ Foam::label Foam::checkTopology
     mesh.boundaryMesh().checkParallelSync(true);
 
     // Check names of zones are equal
-    if (checkSync(mesh.cellZones().names()))
+    mesh.cellZones().checkDefinition(true);
+    if (mesh.cellZones().checkParallelSync(true))
     {
         noFailedChecks++;
     }
-    if (checkSync(mesh.faceZones().names()))
+    mesh.faceZones().checkDefinition(true);
+    if (mesh.faceZones().checkParallelSync(true))
     {
         noFailedChecks++;
     }
-    if (checkSync(mesh.pointZones().names()))
+    mesh.pointZones().checkDefinition(true);
+    if (mesh.pointZones().checkParallelSync(true))
     {
         noFailedChecks++;
-    }
-
-    // Check contents of faceZones consistent
-    {
-        forAll(mesh.faceZones(), zoneI)
-        {
-            if (mesh.faceZones()[zoneI].checkParallelSync(false))
-            {
-                Info<< " ***FaceZone " << mesh.faceZones()[zoneI].name()
-                    << " is not correctly synchronised"
-                    << " across coupled boundaries."
-                    << " (coupled faces both"
-                    << " present in set but with opposite flipmap)" << endl;
-                noFailedChecks++;
-            }
-        }
     }
 
     {
@@ -176,7 +138,7 @@ Foam::label Foam::checkTopology
         {
             if (patches[patchI].coupled())
             {
-                const unallocLabelList& owners = patches[patchI].faceCells();
+                const labelUList& owners = patches[patchI].faceCells();
 
                 forAll(owners, i)
                 {
@@ -337,20 +299,18 @@ Foam::label Foam::checkTopology
                 const pointField& pts = pp.points();
                 const labelList& mp = pp.meshPoints();
 
-                boundBox bb;   // zero-sized
                 if (returnReduce(mp.size(), sumOp<label>()) > 0)
                 {
-                    bb.min() = pts[mp[0]];
-                    bb.max() = pts[mp[0]];
-                    for (label i = 1; i < mp.size(); i++)
+                    boundBox bb(point::max, point::min);
+                    forAll (mp, i)
                     {
                         bb.min() = min(bb.min(), pts[mp[i]]);
                         bb.max() = max(bb.max(), pts[mp[i]]);
                     }
                     reduce(bb.min(), minOp<vector>());
                     reduce(bb.max(), maxOp<vector>());
+                    Pout<< ' ' << bb;
                 }
-                Pout<< ' ' << bb;
             }
             Pout<< endl;
         }

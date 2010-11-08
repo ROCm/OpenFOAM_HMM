@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -23,7 +23,7 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         1000;
+endTime         2000;
 
 deltaT          1;
 
@@ -45,5 +45,25 @@ timePrecision   6;
 
 runTimeModifiable true;
 
+functions
+{
+    residualControl1
+    {
+        type            residualControl;
+        functionObjectLibs ( "libjobControl.so" );
+        outputControl   timeStep;
+        outputInterval  1;
+
+        maxResiduals
+        {
+            p_rgh   1e-2;
+            U       1e-4;
+            T       1e-3;
+
+            // possibly check turbulence fields
+            "(k|epsilon|omega)" 1e-3;
+        }
+    }
+}
 
 // ************************************************************************* //

@@ -66,7 +66,9 @@ public:
             const vector& position,
             const vector& U,
             const scalar Ei,
-            const label celli,
+            const label cellI,
+            const label tetFaceI,
+            const label tetPtI,
             const label typeId
         );
 
@@ -79,9 +81,9 @@ public:
         );
 
         //- Construct and return a clone
-        autoPtr<dsmcParcel> clone() const
+        autoPtr<Particle<dsmcParcel> > clone() const
         {
-            return autoPtr<dsmcParcel>(new dsmcParcel(*this));
+            return autoPtr<Particle<dsmcParcel> >(new dsmcParcel(*this));
         }
 
 

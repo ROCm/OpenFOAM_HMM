@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,10 +38,13 @@ SourceFiles
 #include "faceSets.H"
 #include "HashTable.H"
 #include "HashSet.H"
-#include "fvMesh.H"
-#include "OFstream.H"
-#include <fstream>
 #include "PackedBoolList.H"
+#include "wordReList.H"
+#include "scalarField.H"
+#include "cellShapeList.H"
+#include "cellList.H"
+
+#include <fstream>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,6 +54,7 @@ namespace Foam
 class fvMesh;
 class argList;
 class globalIndex;
+class ensightStream;
 
 /*---------------------------------------------------------------------------*\
                            Class ensightMesh Declaration
@@ -82,8 +86,19 @@ private:
         //- Reference to the OpenFOAM mesh
         const fvMesh& mesh_;
 
+        //- Suppress patches
+        const bool noPatches_;
+
+        //- Output selected patches only
+        const bool patches_;
+        const wordReList patchPatterns_;
+
+        //- Output selected faceZones
+        const bool faceZones_;
+        const wordReList faceZonePatterns_;
+
         //- Set binary file output
-        bool binary_;
+        const bool binary_;
 
         //- The ensight part id for the first patch
         label patchPartOffset_;
@@ -109,6 +124,19 @@ private:
         PackedBoolList boundaryFaceToBeIncluded_;
 
 
+        // Parallel merged points
+
+            //- Global numbering for merged points
+            autoPtr<globalIndex> globalPointsPtr_;
+
+            //- From mesh point to global merged point
+            labelList pointToGlobal_;
+
+            //- Local points that are unique
+            labelList uniquePointMap_;
+
+
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -120,7 +148,7 @@ private:
         void writePoints
         (
             const scalarField& pointsComponent,
-            OFstream& ensightGeometryFile
+            ensightStream& ensightGeometryFile
         ) const;
 
         cellShapeList map
@@ -141,14 +169,14 @@ private:
         void writePrims
         (
             const cellShapeList& cellShapes,
-            OFstream& ensightGeometryFile
+            ensightStream& ensightGeometryFile
         ) const;
 
         void writePolysNFaces
         (
             const labelList& polys,
             const cellList& cellFaces,
-            OFstream& ensightGeometryFile
+            ensightStream& ensightGeometryFile
         ) const;
 
         void writePolysNPointsPerFace
@@ -156,7 +184,7 @@ private:
             const labelList& polys,
             const cellList& cellFaces,
             const faceList& faces,
-            OFstream& ensightGeometryFile
+            ensightStream& ensightGeometryFile
         ) const;
 
         void writePolysPoints
@@ -164,13 +192,13 @@ private:
             const labelList& polys,
             const cellList& cellFaces,
             const faceList& faces,
-            OFstream& ensightGeometryFile
+            ensightStream& ensightGeometryFile
         ) const;
 
         void writeAllPolys
         (
             const labelList& pointToGlobal,
-            OFstream& ensightGeometryFile
+            ensightStream& ensightGeometryFile
         ) const;
 
         void writeAllPrims
@@ -178,13 +206,13 @@ private:
             const char* key,
             const label nPrims,
             const cellShapeList& cellShapes,
-            OFstream& ensightGeometryFile
+            ensightStream& ensightGeometryFile
         ) const;
 
         void writeFacePrims
         (
             const faceList& patchFaces,
-            OFstream& ensightGeometryFile
+            ensightStream& ensightGeometryFile
         ) const;
 
         void writeAllFacePrims
@@ -193,19 +221,19 @@ private:
             const labelList& prims,
             const label nPrims,
             const faceList& patchFaces,
-            OFstream& ensightGeometryFile
+            ensightStream& ensightGeometryFile
         ) const;
 
         void writeNSidedNPointsPerFace
         (
             const faceList& patchFaces,
-            OFstream& ensightGeometryFile
+            ensightStream& ensightGeometryFile
         ) const;
 
         void writeNSidedPoints
         (
             const faceList& patchFaces,
-            OFstream& ensightGeometryFile
+            ensightStream& ensightGeometryFile
         ) const;
 
         void writeAllNSided
@@ -213,14 +241,14 @@ private:
             const labelList& prims,
             const label nPrims,
             const faceList& patchFaces,
-            OFstream& ensightGeometryFile
+            ensightStream& ensightGeometryFile
         ) const;
 
         void writeAllInternalPoints
         (
             const pointField& uniquePoints,
             const label nPoints,
-            OFstream& ensightGeometryFile
+            ensightStream& ensightGeometryFile
         ) const;
 
         void writeAllPatchPoints
@@ -229,123 +257,7 @@ private:
             const word& patchName,
             const pointField& uniquePoints,
             const label nPoints,
-            OFstream& ensightGeometryFile
-        ) const;
-
-        void writeAllInternalPointsBinary
-        (
-            const pointField& uniquePoints,
-            const label nPoints,
-            std::ofstream& ensightGeometryFile
-        ) const;
-
-        void writeAllPatchPointsBinary
-        (
-            label ensightPatchI,
-            const word& patchName,
-            const pointField& uniquePoints,
-            const label nPoints,
-            std::ofstream& ensightGeometryFile
-        ) const;
-
-        void writeAscii
-        (
-            const fileName& postProcPath,
-            const word& prepend,
-            const label timeIndex,
-            Ostream& ensightCaseFile,
-            const labelList& pointToGlobal,
-            const pointField& uniquePoints,
-            const globalIndex& globalPoints
-        ) const;
-
-        void writeBinary
-        (
-            const fileName& postProcPath,
-            const word& prepend,
-            const label timeIndex,
-            Ostream& ensightCaseFile,
-            const labelList& pointToGlobal,
-            const pointField& uniquePoints,
-            const globalIndex& globalPoints
-        ) const;
-
-        void writePrimsBinary
-        (
-            const cellShapeList& cellShapes,
-            std::ofstream& ensightGeometryFile
-        ) const;
-
-        void writeAllPrimsBinary
-        (
-            const char* key,
-            const label nPrims,
-            const cellShapeList& cellShapes,
-            std::ofstream& ensightGeometryFile
-        ) const;
-
-        void writePolysNFacesBinary
-        (
-            const labelList& polys,
-            const cellList& cellFaces,
-            std::ofstream& ensightGeometryFile
-        ) const;
-
-        void writePolysNPointsPerFaceBinary
-        (
-            const labelList& polys,
-            const cellList& cellFaces,
-            const faceList& faces,
-            std::ofstream& ensightGeometryFile
-        ) const;
-
-        void writePolysPointsBinary
-        (
-            const labelList& polys,
-            const cellList& cellFaces,
-            const faceList& faces,
-            std::ofstream& ensightGeometryFile
-        ) const;
-
-        void writeAllPolysBinary
-        (
-            const labelList& pointToGlobal,
-            std::ofstream& ensightGeometryFile
-        ) const;
-
-        void writeAllFacePrimsBinary
-        (
-            const char* key,
-            const labelList& prims,
-            const label nPrims,
-            const faceList& patchFaces,
-            std::ofstream& ensightGeometryFile
-        ) const;
-
-        void writeFacePrimsBinary
-        (
-            const faceList& patchFaces,
-            std::ofstream& ensightGeometryFile
-        ) const;
-
-        void writeNSidedPointsBinary
-        (
-            const faceList& patchFaces,
-            std::ofstream& ensightGeometryFile
-        ) const;
-
-        void writeNSidedNPointsPerFaceBinary
-        (
-            const faceList& patchFaces,
-            std::ofstream& ensightGeometryFile
-        ) const;
-
-        void writeAllNSidedBinary
-        (
-            const labelList& prims,
-            const label nPrims,
-            const faceList& patchFaces,
-            std::ofstream& ensightGeometryFile
+            ensightStream& ensightGeometryFile
         ) const;
 
 public:
@@ -355,8 +267,12 @@ public:
         //- Construct from fvMesh
         ensightMesh
         (
-            const fvMesh&,
-            const argList& args,
+            const fvMesh& mesh,
+            const bool noPatches,
+            const bool patches,
+            const wordReList& patchPatterns,
+            const bool faceZones,
+            const wordReList& faceZonePatterns,
             const bool binary
         );
 
@@ -420,7 +336,34 @@ public:
                 return patchPartOffset_;
             }
 
+
+        // Parallel point merging
+
+            //- Global numbering for merged points
+            const globalIndex& globalPoints() const
+            {
+                return globalPointsPtr_();
+            }
+
+            //- From mesh point to global merged point
+            const labelList& pointToGlobal() const
+            {
+                return pointToGlobal_;
+            }
+
+            //- Local points that are unique
+            const labelList& uniquePointMap() const
+            {
+                return uniquePointMap_;
+            }
+
+
+
+
     // Other
+
+        //- Update for new mesh
+        void correct();
 
         //- When exporting faceZones, check if a given face has to be included
         //  or not (i.e. faces on processor boundaries)

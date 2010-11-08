@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -149,10 +149,11 @@ SpalartAllmaras::SpalartAllmaras
     const volVectorField& U,
     const surfaceScalarField& phi,
     transportModel& transport,
+    const word& turbulenceModelName,
     const word& modelName
 )
 :
-    LESModel(modelName, U, phi, transport),
+    LESModel(modelName, U, phi, transport, turbulenceModelName),
 
     sigmaNut_
     (

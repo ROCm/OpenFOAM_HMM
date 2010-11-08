@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -88,10 +88,11 @@ castellatedMeshControls
     // actually be a lot less.
     maxGlobalCells 2000000;
 
-    // The surface refinement loop might spend lots of iterations refining just a
-    // few cells. This setting will cause refinement to stop if <= minimumRefine
-    // are selected for refinement. Note: it will at least do one iteration
-    // (unless the number of cells to refine is 0)
+    // The surface refinement loop might spend lots of iterations
+    // refining just a few cells. This setting will cause refinement
+    // to stop if <= minimumRefine are selected for refinement. Note:
+    // it will at least do one iteration (unless the number of cells
+    // to refine is 0)
     minRefinementCells 10;
 
     // Number of buffer layers between different levels.
@@ -128,9 +129,9 @@ castellatedMeshControls
             // Surface-wise min and max refinement level
             level (1 1);
 
-	    faceZone bottomAir;
+            faceZone bottomAir;
             cellZone bottomAir;
-            zoneInside true;
+            cellZoneInside inside;
         }
 
         topAir
@@ -138,9 +139,9 @@ castellatedMeshControls
             // Surface-wise min and max refinement level
             level (1 1);
 
-	    faceZone topAir;
+            faceZone topAir;
             cellZone topAir;
-            zoneInside true;
+            cellZoneInside inside;
         }
 
         heater
@@ -148,9 +149,9 @@ castellatedMeshControls
             // Surface-wise min and max refinement level
             level (0 0);
 
-	    faceZone heater;
+            faceZone heater;
             cellZone heater;
-            zoneInside true;
+            cellZoneInside inside;
         }
 
         leftSolid
@@ -158,9 +159,9 @@ castellatedMeshControls
             // Surface-wise min and max refinement level
             level (1 1);
 
-	    faceZone leftSolid;
+            faceZone leftSolid;
             cellZone leftSolid;
-            zoneInside true;
+            cellZoneInside inside;
         }
 
         rightSolid
@@ -168,9 +169,9 @@ castellatedMeshControls
             // Surface-wise min and max refinement level
             level (1 1);
 
-	    faceZone rightSolid;
+            faceZone rightSolid;
             cellZone rightSolid;
-            zoneInside true;
+            cellZoneInside inside;
         }
     }
 
@@ -250,15 +251,15 @@ addLayersControls
     // Per final patch (so not geometry!) the layer information
     layers
     {
-	//flowAirDuctReagent_flowAirDuctReagent
+        //flowAirDuctReagent_flowAirDuctReagent
         //{
         //    nSurfaceLayers 1;
         //}
-	//flowAirDuctReagent_inlet1
+        //flowAirDuctReagent_inlet1
         //{
         //    nSurfaceLayers 1;
         //}
-	//flowAirDuctReagent_inlet2
+        //flowAirDuctReagent_inlet2
         //{
         //    nSurfaceLayers 1;
         //}
@@ -339,11 +340,14 @@ meshQualityControls
     //  Set to very negative number (e.g. -1E30) to disable.
     minVol 0;
 
-    //- Minimum tet volume. Is absolute volume of the tet formed by the
-    //  face-centre decomposition triangle and the cell centre.
-    //  Set to a sensible fraction of the smallest cell volume expected.
-    //  Set to very negative number (e.g. -1E30) to disable.
-    minTetVol 1e-20;
+    //- Minimum quality of the tet formed by the face-centre
+    //  and variable base point minimum decomposition triangles and
+    //  the cell centre.  Set to very negative number (e.g. -1E30) to
+    //  disable.
+    //     <0 = inside out tet,
+    //      0 = flat tet
+    //      1 = regular tet
+    minTetQuality 1e-9;
 
     //- Minimum face area. Set to <0 to disable.
     minArea -1;
@@ -387,7 +391,7 @@ debug 0;
 
 // Merge tolerance. Is fraction of overall bounding box of initial mesh.
 // Note: the write tolerance needs to be higher than this.
-mergeTolerance 1E-6;
+mergeTolerance 1e-6;
 
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ const ThermoType& Foam::multiComponentMixture<ThermoType>::constructSpeciesData
         speciesData_.set
         (
             i,
-            new ThermoType(thermoDict.lookup(species_[i]))
+            new ThermoType(thermoDict.subDict(species_[i]))
         );
     }
 
@@ -155,8 +155,159 @@ void Foam::multiComponentMixture<ThermoType>::read
 {
     forAll(species_, i)
     {
-        speciesData_[i] = ThermoType(thermoDict.lookup(species_[i]));
+        speciesData_[i] = ThermoType(thermoDict.subDict(species_[i]));
     }
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::multiComponentMixture<ThermoType>::nMoles
+(
+    const label specieI
+) const
+{
+    return speciesData_[specieI].nMoles();
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::multiComponentMixture<ThermoType>::W
+(
+    const label specieI
+) const
+{
+    return speciesData_[specieI].W();
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::multiComponentMixture<ThermoType>::Cp
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return speciesData_[specieI].Cp(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::multiComponentMixture<ThermoType>::Cv
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return speciesData_[specieI].Cv(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::multiComponentMixture<ThermoType>::H
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return speciesData_[specieI].H(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::multiComponentMixture<ThermoType>::Hs
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return speciesData_[specieI].Hs(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::multiComponentMixture<ThermoType>::Hc
+(
+    const label specieI
+) const
+{
+    return speciesData_[specieI].Hc();
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::multiComponentMixture<ThermoType>::S
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return speciesData_[specieI].S(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::multiComponentMixture<ThermoType>::E
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return speciesData_[specieI].E(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::multiComponentMixture<ThermoType>::G
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return speciesData_[specieI].G(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::multiComponentMixture<ThermoType>::A
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return speciesData_[specieI].A(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::multiComponentMixture<ThermoType>::mu
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return speciesData_[specieI].mu(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::multiComponentMixture<ThermoType>::kappa
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return speciesData_[specieI].kappa(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::multiComponentMixture<ThermoType>::alpha
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return speciesData_[specieI].alpha(T);
 }
 
 

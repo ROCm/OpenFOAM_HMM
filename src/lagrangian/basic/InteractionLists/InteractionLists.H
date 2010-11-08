@@ -216,6 +216,9 @@ public:
 
     // Constructors
 
+        //- Construct null from mesh
+        InteractionLists(const polyMesh& mesh);
+
         //- Construct and call function to create all information from
         //  the mesh
         InteractionLists
@@ -287,10 +290,13 @@ public:
             wallFaceIndexAndTransformToDistribute() const;
 
             //- Return access to the referred wall faces
-            const List<referredWallFace>& referredWallFaces() const;
+            inline const List<referredWallFace>& referredWallFaces() const;
+
+            //- Return the name of the velocity field
+            inline const word& UName() const;
 
             //- Return access to the referred wall data
-            const List<vector>& referredWallData() const;
+            inline const List<vector>& referredWallData() const;
 
             //- Return access to the referred particle container
             inline const List<IDLList<ParticleType> >&

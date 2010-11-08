@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,7 +56,7 @@ class MeshedSurfaceIOAllocator
         pointIOField points_;
 
         //- Faces
-        faceIOList faces_;
+        faceCompactIOList faces_;
 
         //- Surface zones
         surfZoneIOList zones_;
@@ -117,7 +117,7 @@ public:
             }
 
             //- Non-const access to the faces
-            faceIOList& storedIOFaces()
+            faceCompactIOList& storedIOFaces()
             {
                 return faces_;
             }
@@ -135,7 +135,7 @@ public:
             }
 
             //- Const access to the faces
-            const faceIOList& storedIOFaces() const
+            const faceCompactIOList& storedIOFaces() const
             {
                 return faces_;
             }

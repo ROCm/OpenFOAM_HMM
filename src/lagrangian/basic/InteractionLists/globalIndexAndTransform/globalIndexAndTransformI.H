@@ -180,12 +180,229 @@ Foam::globalIndexAndTransform::transformPermutations() const
 }
 
 
+const Foam::List<Foam::Pair<Foam::label> >&
+Foam::globalIndexAndTransform::patchTransformSign() const
+{
+    return patchTransformSign_;
+}
+
+
 const Foam::vectorTensorTransform& Foam::globalIndexAndTransform::transform
 (
     label transformIndex
 ) const
 {
     return transformPermutations_[transformIndex];
+}
+
+
+Foam::labelList Foam::globalIndexAndTransform::transformIndicesForPatches
+(
+    const labelHashSet& patchIs
+) const
+{
+    List<label> permutation(transforms_.size(), 0);
+
+    labelList selectedTransformIs(0);
+
+    if (patchIs.empty() || transforms_.empty())
+    {
+        return selectedTransformIs;
+    }
+
+    forAllConstIter(labelHashSet, patchIs, iter)
+    {
+        label patchI = iter.key();
+
+        const Pair<label>& transSign = patchTransformSign_[patchI];
+
+        label matchTransI = transSign.first();
+
+        if (matchTransI > -1)
+        {
+            label sign = transSign.second();
+
+            // If this transform been found already by a patch?
+            if (permutation[matchTransI] != 0)
+            {
+                // If so, if they have opposite signs, then this is
+                // considered an error.  They are allowed to be the
+                // same sign, but this only results in a single
+                // transform.
+                if (permutation[matchTransI] != sign)
+                {
+                    FatalErrorIn
+                    (
+                        "const Foam::List<Foam::vectorTensorTransform>& "
+                        "Foam::globalIndexAndTransform::transformsForPatches"
+                        "("
+                            "const labelList& patchIs"
+                        ") const"
+                    )
+                        << "More than one patch accessing the same transform "
+                        << "but not of the same sign."
+                        << exit(FatalError);
+                }
+            }
+            else
+            {
+                permutation[matchTransI] = sign;
+            }
+        }
+    }
+
+    label nUsedTrans = sum(mag(permutation));
+
+    if (nUsedTrans == 0)
+    {
+        return selectedTransformIs;
+    }
+
+    // Number of selected transformations
+    label nSelTrans = pow(2, nUsedTrans) - 1;
+
+    // Pout<< nl << permutation << nl << endl;
+
+    selectedTransformIs.setSize(nSelTrans);
+
+    switch (nUsedTrans)
+    {
+        case 1:
+        {
+            selectedTransformIs[0] = encodeTransformIndex(permutation);
+
+            break;
+        }
+        case 2:
+        {
+            List<label> tempPermutation = permutation;
+
+            label a = 0;
+            label b = 1;
+
+            // When there are two selected transforms out of three, we
+            // need to choose which of them are being permuted
+            if (transforms_.size() > nUsedTrans)
+            {
+                if (permutation[0] == 0)
+                {
+                    a = 1;
+                    b = 2;
+                }
+                else if (permutation[1] == 0)
+                {
+                    a = 0;
+                    b = 2;
+                }
+                else if (permutation[2] == 0)
+                {
+                    a = 0;
+                    b = 1;
+                }
+            }
+
+            tempPermutation[a] = a;
+            tempPermutation[b] = permutation[b];
+
+            selectedTransformIs[0] = encodeTransformIndex(tempPermutation);
+
+            tempPermutation[a] = permutation[a];
+            tempPermutation[b] = a;
+
+            selectedTransformIs[1] = encodeTransformIndex(tempPermutation);
+
+            tempPermutation[a] = permutation[a];
+            tempPermutation[b] = permutation[b];
+
+            selectedTransformIs[2] = encodeTransformIndex(tempPermutation);
+
+            break;
+        }
+        case 3:
+        {
+            List<label> tempPermutation = permutation;
+
+            tempPermutation[0] = 0;
+            tempPermutation[1] = 0;
+            tempPermutation[2] = permutation[2];
+
+            selectedTransformIs[0] = encodeTransformIndex(tempPermutation);
+
+            tempPermutation[0] = 0;
+            tempPermutation[1] = permutation[1];
+            tempPermutation[2] = 0;
+
+            selectedTransformIs[1] = encodeTransformIndex(tempPermutation);
+
+            tempPermutation[0] = 0;
+            tempPermutation[1] = permutation[1];
+            tempPermutation[2] = permutation[2];
+
+            selectedTransformIs[2] = encodeTransformIndex(tempPermutation);
+
+            tempPermutation[0] = permutation[0];
+            tempPermutation[1] = 0;
+            tempPermutation[2] = 0;
+
+            selectedTransformIs[3] = encodeTransformIndex(tempPermutation);
+
+            tempPermutation[0] = permutation[0];
+            tempPermutation[1] = 0;
+            tempPermutation[2] = permutation[2];
+
+            selectedTransformIs[4] = encodeTransformIndex(tempPermutation);
+
+            tempPermutation[0] = permutation[0];
+            tempPermutation[1] = permutation[1];
+            tempPermutation[2] = 0;
+
+            selectedTransformIs[5] = encodeTransformIndex(tempPermutation);
+
+            tempPermutation[0] = permutation[0];
+            tempPermutation[1] = permutation[1];
+            tempPermutation[2] = permutation[2];
+
+            selectedTransformIs[6] = encodeTransformIndex(tempPermutation);
+
+            break;
+        }
+        default:
+        {
+            FatalErrorIn
+            (
+                "const Foam::List<Foam::vectorTensorTransform>& "
+                "Foam::globalIndexAndTransform::transformsForPatches"
+                "("
+                    "const labelList& patchIs"
+                ") const"
+            )
+                << "Only 1-3 transforms are possible."
+                << exit(FatalError);
+        }
+    }
+
+    return selectedTransformIs;
+}
+
+
+Foam::pointField Foam::globalIndexAndTransform::transformPatches
+(
+    const labelHashSet& patchIs,
+    const point& pt
+) const
+{
+    labelList transIs = transformIndicesForPatches(patchIs);
+
+    // Pout<< patchIs << nl << transIs << endl;
+
+    pointField transPts(transIs.size());
+
+    forAll(transIs, tII)
+    {
+        transPts[tII] = transformPermutations_[transIs[tII]].transform(pt);
+    }
+
+    return transPts;
 }
 
 

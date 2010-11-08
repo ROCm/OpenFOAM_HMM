@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,11 +58,6 @@ class uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField
 
         //- Initial positions of points on the patch
         pointField initialPoints_;
-
-        //- Reference density required by the forces object for
-        //  incompressible calculations.  Retained here to give
-        //  dictionary compatibility with other sixDoF patches.
-        scalar rhoInf_;
 
 
 public:

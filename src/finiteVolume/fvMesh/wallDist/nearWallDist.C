@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,7 +57,7 @@ void Foam::nearWallDist::doAll()
         {
             const polyPatch& pPatch = patch.patch();
 
-            const unallocLabelList& faceCells = patch.faceCells();
+            const labelUList& faceCells = patch.faceCells();
 
             // Check cells with face on wall
             forAll(patch, patchFaceI)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -76,6 +76,13 @@ public:
             Istream& is
         );
 
+        //- Construct from dictionary
+        inline thirdBodyArrheniusReactionRate
+        (
+            const speciesTable& species,
+            const dictionary& dict
+        );
+
 
     // Member Functions
 
@@ -91,6 +98,9 @@ public:
             const scalar p,
             const scalarField& c
         ) const;
+
+        //- Write to stream
+        inline void write(Ostream& os) const;
 
 
     // Ostream Operator

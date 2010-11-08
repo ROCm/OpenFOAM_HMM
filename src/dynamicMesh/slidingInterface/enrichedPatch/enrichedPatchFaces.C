@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -130,7 +130,11 @@ void Foam::enrichedPatch::calcEnrichedFaces
 
             const labelList& slavePointsOnEdge =
                 pointsIntoSlaveEdges[curEdges[i]];
-//             Info<< "slavePointsOnEdge for " << curEdges[i] << ": " << slavePointsOnEdge << endl;
+
+            // Info<< "slavePointsOnEdge for "
+            //     << curEdges[i] << ": " << slavePointsOnEdge
+            //     << endl;
+
             // If there are no points on the edge, skip everything
             // If there is only one point, no need for sorting
             if (slavePointsOnEdge.size())

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,19 @@ Typedef
     Foam::labelList
 
 Description
-    Label container classes
+    A List of labels
+
+Typedef
+    Foam::labelListList
+
+Description
+    A List of labelList
+
+Typedef
+    Foam::labelListListList
+
+Description
+    A List of labelListList
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,11 +51,11 @@ Description
 
 namespace Foam
 {
+    // Note: frequently used UList version is located in container itself
+
     typedef List<label> labelList;
     typedef List<labelList> labelListList;
     typedef List<labelListList> labelListListList;
-
-    typedef UList<label> unallocLabelList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

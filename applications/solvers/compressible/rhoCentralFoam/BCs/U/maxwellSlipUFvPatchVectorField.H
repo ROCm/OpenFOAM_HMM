@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,14 +45,13 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                Class maxwellSlipUFvPatch Declaration
+                     Class maxwellSlipUFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class maxwellSlipUFvPatchVectorField
 :
     public mixedFixedValueSlipFvPatchVectorField
 {
-
     // Private data
 
         // Accommodation coefficient
@@ -66,6 +65,7 @@ class maxwellSlipUFvPatchVectorField
 
         // Include boundary curvature term (default on)
         Switch curvature_;
+
 
 public:
 
@@ -127,6 +127,7 @@ public:
                 new maxwellSlipUFvPatchVectorField(*this, iF)
             );
         }
+
 
     // Member functions
 

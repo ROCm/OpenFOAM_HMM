@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,19 +47,10 @@ void Foam::cyclicLduInterfaceField::transformCoupleField
 {
     if (doTransform())
     {
-        label sizeby2 = pnf.size()/2;
-
         scalar forwardScale =
             pow(diag(forwardT()[0]).component(cmpt), rank());
 
-        scalar reverseScale =
-            pow(diag(reverseT()[0]).component(cmpt), rank());
-
-        for (label facei=0; facei<sizeby2; facei++)
-        {
-            pnf[facei] *= forwardScale;
-            pnf[facei + sizeby2] *= reverseScale;
-        }
+        pnf *= forwardScale;
     }
 }
 

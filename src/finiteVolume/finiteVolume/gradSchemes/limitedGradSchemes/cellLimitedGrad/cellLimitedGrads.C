@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,8 +62,8 @@ Foam::fv::cellLimitedGrad<Foam::scalar>::calcGrad
 
     volVectorField& g = tGrad();
 
-    const unallocLabelList& owner = mesh.owner();
-    const unallocLabelList& neighbour = mesh.neighbour();
+    const labelUList& owner = mesh.owner();
+    const labelUList& neighbour = mesh.neighbour();
 
     const volVectorField& C = mesh.C();
     const surfaceVectorField& Cf = mesh.Cf();
@@ -93,7 +93,7 @@ Foam::fv::cellLimitedGrad<Foam::scalar>::calcGrad
     {
         const fvPatchScalarField& psf = bsf[patchi];
 
-        const unallocLabelList& pOwner = mesh.boundary()[patchi].faceCells();
+        const labelUList& pOwner = mesh.boundary()[patchi].faceCells();
 
         if (psf.coupled())
         {
@@ -164,7 +164,7 @@ Foam::fv::cellLimitedGrad<Foam::scalar>::calcGrad
 
     forAll(bsf, patchi)
     {
-        const unallocLabelList& pOwner = mesh.boundary()[patchi].faceCells();
+        const labelUList& pOwner = mesh.boundary()[patchi].faceCells();
         const vectorField& pCf = Cf.boundaryField()[patchi];
 
         forAll(pOwner, pFacei)
@@ -216,8 +216,8 @@ Foam::fv::cellLimitedGrad<Foam::vector>::calcGrad
 
     volTensorField& g = tGrad();
 
-    const unallocLabelList& owner = mesh.owner();
-    const unallocLabelList& neighbour = mesh.neighbour();
+    const labelUList& owner = mesh.owner();
+    const labelUList& neighbour = mesh.neighbour();
 
     const volVectorField& C = mesh.C();
     const surfaceVectorField& Cf = mesh.Cf();
@@ -246,7 +246,7 @@ Foam::fv::cellLimitedGrad<Foam::vector>::calcGrad
     forAll(bsf, patchi)
     {
         const fvPatchVectorField& psf = bsf[patchi];
-        const unallocLabelList& pOwner = mesh.boundary()[patchi].faceCells();
+        const labelUList& pOwner = mesh.boundary()[patchi].faceCells();
 
         if (psf.coupled())
         {
@@ -317,7 +317,7 @@ Foam::fv::cellLimitedGrad<Foam::vector>::calcGrad
 
     forAll(bsf, patchi)
     {
-        const unallocLabelList& pOwner = mesh.boundary()[patchi].faceCells();
+        const labelUList& pOwner = mesh.boundary()[patchi].faceCells();
         const vectorField& pCf = Cf.boundaryField()[patchi];
 
         forAll(pOwner, pFacei)
@@ -346,9 +346,12 @@ Foam::fv::cellLimitedGrad<Foam::vector>::calcGrad
 
     forAll(gIf, celli)
     {
-        gIf[celli].x() = cmptMultiply(limiter[celli], gIf[celli].x());
-        gIf[celli].y() = cmptMultiply(limiter[celli], gIf[celli].y());
-        gIf[celli].z() = cmptMultiply(limiter[celli], gIf[celli].z());
+        gIf[celli] = tensor
+        (
+            cmptMultiply(limiter[celli], gIf[celli].x()),
+            cmptMultiply(limiter[celli], gIf[celli].y()),
+            cmptMultiply(limiter[celli], gIf[celli].z())
+        );
     }
 
     g.correctBoundaryConditions();

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -20,6 +20,12 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+Namespace
+    Foam::porousMedia
+
+Description
+    Namespace for models related to porous media
 
 Class
     Foam::porousZone
@@ -50,6 +56,25 @@ Description
 
     The porousZones method porousZones::ddt() mirrors the normal fvm::ddt()
     method, but accounts for the effective volume of the cells.
+
+    An example dictionary entry:
+    @verbatim
+    cat1
+    {
+        note            "some catalyst";
+        coordinateSystem    system_10;
+        porosity        0.809;
+        intensity       0.001;      // optional
+        mixingLength    0.0001;     // optional
+        printCoeffs     yes;        // optional: feedback for the user
+
+        Darcy
+        {
+            d   d [0 -2 0 0 0]  (-1000 -1000 5.3756e+07);
+            f   f [0 -1 0 0 0]  (-1000 -1000 15.83);
+        }
+    }
+    @endverbatim
 
 See Also
     porousZones and coordinateSystems
@@ -91,8 +116,8 @@ class porousZone
 {
     // Private data
 
-        //- Name of this zone
-        word name_;
+        //- Name of this zone, or a regular expression
+        keyType key_;
 
         //- Reference to the finite volume mesh this zone is part of
         const fvMesh& mesh_;
@@ -100,8 +125,8 @@ class porousZone
         //- Dictionary containing the parameters
         dictionary dict_;
 
-        //- Cell zone ID
-        label cellZoneID_;
+        //- Cell zone Ids
+        labelList cellZoneIds_;
 
         //- Coordinate system used for the zone (Cartesian)
         coordinateSystem coordSys_;
@@ -110,6 +135,12 @@ class porousZone
         //  Placeholder for treatment of temporal terms.
         //  Currently unused.
         scalar porosity_;
+
+        //- Turbulent intensity as fraction of the velocity
+        scalar intensity_;
+
+        //- Turbulent length scale
+        scalar mixingLength_;
 
         //- powerLaw coefficient C0
         scalar C0_;
@@ -134,7 +165,6 @@ class porousZone
         void addPowerLawResistance
         (
             scalarField& Udiag,
-            const labelList& cells,
             const scalarField& V,
             const RhoFieldType& rho,
             const vectorField& U
@@ -146,7 +176,6 @@ class porousZone
         (
             scalarField& Udiag,
             vectorField& Usource,
-            const labelList& cells,
             const scalarField& V,
             const RhoFieldType& rho,
             const scalarField& mu,
@@ -159,7 +188,6 @@ class porousZone
         void addPowerLawResistance
         (
             tensorField& AU,
-            const labelList& cells,
             const RhoFieldType& rho,
             const vectorField& U
         ) const;
@@ -169,7 +197,6 @@ class porousZone
         void addViscousInertialResistance
         (
             tensorField& AU,
-            const labelList& cells,
             const RhoFieldType& rho,
             const scalarField& mu,
             const vectorField& U
@@ -188,7 +215,7 @@ public:
     // Constructors
 
         //- Construct from components
-        porousZone(const word& name, const fvMesh&, const dictionary&);
+        porousZone(const keyType& key, const fvMesh&, const dictionary&);
 
         //- Return clone
         autoPtr<porousZone> clone() const
@@ -212,10 +239,10 @@ public:
 
             autoPtr<porousZone> operator()(Istream& is) const
             {
-                word name(is);
+                keyType key(is);
                 dictionary dict(is);
 
-                return autoPtr<porousZone>(new porousZone(name, mesh_, dict));
+                return autoPtr<porousZone>(new porousZone(key, mesh_, dict));
             }
         };
 
@@ -230,9 +257,9 @@ public:
         // Access
 
             //- cellZone name
-            const word& zoneName() const
+            const keyType& zoneName() const
             {
-                return name_;
+                return key_;
             }
 
             //- Return mesh
@@ -241,10 +268,10 @@ public:
                 return mesh_;
             }
 
-            //- cellZone number
-            label zoneId() const
+            //- cellZone numbers
+            const labelList& zoneIds() const
             {
-                return cellZoneID_;
+                return cellZoneIds_;
             }
 
             //- dictionary values used for the porousZone
@@ -266,7 +293,7 @@ public:
             }
 
             //- Return axis
-            const vector& axis() const
+            vector axis() const
             {
                 return coordSys_.axis();
             }
@@ -281,6 +308,30 @@ public:
             scalar& porosity()
             {
                 return porosity_;
+            }
+
+            //- Return turbulent intensity
+            scalar intensity() const
+            {
+                return intensity_;
+            }
+
+            //- Edit access to turbulent intensity
+            scalar& intensity()
+            {
+                return intensity_;
+            }
+
+            //- Return turbulent length scale
+            scalar mixingLength() const
+            {
+                return mixingLength_;
+            }
+
+            //- Edit access to turbulent length scale
+            scalar& mixingLength()
+            {
+                return mixingLength_;
             }
 
 

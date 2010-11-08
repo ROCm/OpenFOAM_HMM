@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -21,55 +21,55 @@ FoamFile
     {
         type            empty;
         nFaces          0;
-        startFace       60456;
+        startFace       60336;
     }
     minX
     {
         type            empty;
         nFaces          0;
-        startFace       60456;
+        startFace       60336;
     }
     maxX
     {
         type            empty;
         nFaces          0;
-        startFace       60456;
+        startFace       60336;
     }
     minY
     {
         type            empty;
         nFaces          0;
-        startFace       60456;
+        startFace       60336;
     }
     ground
     {
         type            wall;
         nFaces          590;
-        startFace       60456;
+        startFace       60336;
     }
     maxZ
     {
         type            empty;
         nFaces          0;
-        startFace       61046;
+        startFace       60926;
     }
     igloo_region0
     {
         type            wall;
         nFaces          2260;
-        startFace       61046;
+        startFace       60926;
     }
     twoFridgeFreezers_seal_0
     {
         type            wall;
         nFaces          1344;
-        startFace       63306;
+        startFace       63186;
     }
     twoFridgeFreezers_herring_1
     {
         type            wall;
         nFaces          1116;
-        startFace       64650;
+        startFace       64530;
     }
 )
 

@@ -23,9 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "ensightMesh.H"
 #include "argList.H"
 #include "Time.H"
-#include "ensightMesh.H"
 #include "fvMesh.H"
 #include "globalMeshData.H"
 #include "PstreamCombineReduceOps.H"
@@ -33,38 +33,31 @@ License
 #include "cellModeller.H"
 #include "IOmanip.H"
 #include "itoa.H"
-#include "ensightWriteBinary.H"
 #include "globalIndex.H"
 #include "mapDistribute.H"
 #include "stringListOps.H"
+
+#include "ensightBinaryStream.H"
+#include "ensightAsciiStream.H"
 
 #include <fstream>
 
 // * * * * * * * * * * * * * Private Functions * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::ensightMesh::ensightMesh
-(
-    const fvMesh& mesh,
-    const argList& args,
-    const bool binary
-)
-:
-    mesh_(mesh),
-    binary_(binary),
-    patchPartOffset_(2),
-    meshCellSets_(mesh_.nCells()),
-    boundaryFaceSets_(mesh_.boundary().size()),
-    allPatchNames_(0),
-    patchNames_(0),
-    nPatchPrims_(0),
-    faceZoneFaceSets_(mesh_.faceZones().size()),
-    faceZoneNames_(0),
-    nFaceZonePrims_(0),
-    boundaryFaceToBeIncluded_(0)
+void Foam::ensightMesh::correct()
 {
-    const cellShapeList& cellShapes = mesh.cellShapes();
+    patchPartOffset_ = 2;
+    meshCellSets_ = mesh_.nCells();
+    boundaryFaceSets_.setSize(mesh_.boundary().size());
+    allPatchNames_.clear();
+    patchNames_.clear();
+    nPatchPrims_ = 0;
+    faceZoneFaceSets_.setSize(mesh_.faceZones().size());
+    faceZoneNames_.clear();
+    nFaceZonePrims_ = 0;
+    boundaryFaceToBeIncluded_.clear();
+
+    const cellShapeList& cellShapes = mesh_.cellShapes();
 
     const cellModel& tet = *(cellModeller::lookup("tet"));
     const cellModel& pyr = *(cellModeller::lookup("pyr"));
@@ -72,23 +65,24 @@ Foam::ensightMesh::ensightMesh
     const cellModel& wedge = *(cellModeller::lookup("wedge"));
     const cellModel& hex = *(cellModeller::lookup("hex"));
 
-    if (!args.optionFound("noPatches"))
+    if (!noPatches_)
     {
         // Patches are output. Check that they're synced.
         mesh_.boundaryMesh().checkParallelSync(true);
 
-        allPatchNames_ = wordList::subList
-        (
-            mesh_.boundaryMesh().names(),
-            mesh_.boundary().size()
-          - mesh_.globalData().processorPatches().size()
-        );
-
-        if (args.optionFound("patches"))
+        allPatchNames_ = mesh_.boundaryMesh().names();
+        if (Pstream::parRun())
         {
-            wordReList patterns(args.optionLookup("patches")());
+            allPatchNames_.setSize
+            (
+                mesh_.boundary().size()
+              - mesh_.globalData().processorPatches().size()
+            );
+        }
 
-            if (patterns.empty())
+        if (patches_)
+        {
+            if (patchPatterns_.empty())
             {
                 forAll(allPatchNames_, nameI)
                 {
@@ -101,7 +95,7 @@ Foam::ensightMesh::ensightMesh
                 forAll(allPatchNames_, nameI)
                 {
                     const word& patchName = allPatchNames_[nameI];
-                    if (findStrings(patterns, patchName))
+                    if (findStrings(patchPatterns_, patchName))
                     {
                         patchNames_.insert(patchName);
                     }
@@ -179,20 +173,28 @@ Foam::ensightMesh::ensightMesh
         meshCellSets_.nPrisms = nPrisms;
         reduce(meshCellSets_.nPrisms, sumOp<label>());
 
-        meshCellSets_.nHexesWedges = nHexes + nWedges;
+        meshCellSets_.nHexesWedges = nWedges+nHexes;
         reduce(meshCellSets_.nHexesWedges, sumOp<label>());
 
         meshCellSets_.nPolys = nPolys;
         reduce(meshCellSets_.nPolys, sumOp<label>());
+
+
+        // Determine parallel shared points
+        globalPointsPtr_ = mesh_.globalData().mergePoints
+        (
+            pointToGlobal_,
+            uniquePointMap_
+        );
     }
 
-    if (!args.optionFound("noPatches"))
+    if (!noPatches_)
     {
-        forAll(mesh.boundary(), patchi)
+        forAll(mesh_.boundary(), patchi)
         {
-            if (mesh.boundary()[patchi].size())
+            if (mesh_.boundary()[patchi].size())
             {
-                const polyPatch& p = mesh.boundaryMesh()[patchi];
+                const polyPatch& p = mesh_.boundaryMesh()[patchi];
 
                 labelList& tris = boundaryFaceSets_[patchi].tris;
                 labelList& quads = boundaryFaceSets_[patchi].quads;
@@ -238,7 +240,7 @@ Foam::ensightMesh::ensightMesh
 
         if (patchNames_.empty() || patchNames_.found(patchName))
         {
-            if (mesh.boundary()[patchi].size())
+            if (mesh_.boundary()[patchi].size())
             {
                 nfp.nTris   = boundaryFaceSets_[patchi].tris.size();
                 nfp.nQuads  = boundaryFaceSets_[patchi].quads.size();
@@ -254,17 +256,15 @@ Foam::ensightMesh::ensightMesh
     }
 
     // faceZones
-    if (args.optionFound("faceZones"))
+    if (faceZones_)
     {
-        wordReList patterns(args.optionLookup("faceZones")());
-
         const wordList faceZoneNamesAll = mesh_.faceZones().names();
 
         // Find faceZone names which match that requested at command-line
         forAll(faceZoneNamesAll, nameI)
         {
             const word& zoneName = faceZoneNamesAll[nameI];
-            if (findStrings(patterns, zoneName))
+            if (findStrings(faceZonePatterns_, zoneName))
             {
                 faceZoneNames_.insert(zoneName);
             }
@@ -300,7 +300,7 @@ Foam::ensightMesh::ensightMesh
         {
             //const word& zoneName = faceZoneNamesAll[zoneI];
 
-            const faceZone& fz = mesh.faceZones()[zoneI];
+            const faceZone& fz = mesh_.faceZones()[zoneI];
 
             if (fz.size())
             {
@@ -380,6 +380,35 @@ Foam::ensightMesh::ensightMesh
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::ensightMesh::ensightMesh
+(
+    const fvMesh& mesh,
+    const bool noPatches,
+
+    const bool patches,
+    const wordReList& patchPatterns,
+
+    const bool faceZones,
+    const wordReList& faceZonePatterns,
+
+    const bool binary
+)
+:
+    mesh_(mesh),
+    noPatches_(noPatches),
+    patches_(patches),
+    patchPatterns_(patchPatterns),
+    faceZones_(faceZones),
+    faceZonePatterns_(faceZonePatterns),
+    binary_(binary),
+    meshCellSets_(mesh.nCells())
+{
+    correct();
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::ensightMesh::~ensightMesh()
@@ -409,19 +438,6 @@ void Foam::ensightMesh::barrier()
 {
     label appI = 0;
     reduce(appI,maxOp<label>());
-}
-
-
-void Foam::ensightMesh::writePoints
-(
-    const scalarField& pointsComponent,
-    OFstream& ensightGeometryFile
-) const
-{
-    forAll(pointsComponent, pointI)
-    {
-        ensightGeometryFile<< setw(12) << float(pointsComponent[pointI]) << nl;
-    }
 }
 
 
@@ -489,59 +505,49 @@ Foam::cellShapeList Foam::ensightMesh::map
 void Foam::ensightMesh::writePrims
 (
     const cellShapeList& cellShapes,
-    OFstream& ensightGeometryFile
-) const
-{
-    forAll(cellShapes, i)
-    {
-        const cellShape& cellPoints = cellShapes[i];
-
-        forAll(cellPoints, pointI)
-        {
-            ensightGeometryFile
-                << setw(10)
-                << cellPoints[pointI] + 1;
-        }
-        ensightGeometryFile << nl;
-    }
-}
-
-
-void Foam::ensightMesh::writePrimsBinary
-(
-    const cellShapeList& cellShapes,
-    std::ofstream& ensightGeometryFile
+    ensightStream& ensightGeometryFile
 ) const
 {
     // Create a temp int array
-    int numElem;
-
-    numElem = cellShapes.size();
-
     if (cellShapes.size())
     {
-        // All the cellShapes have the same number of elements!
-        int numIntElem = cellShapes.size()*cellShapes[0].size();
-        List<int> temp(numIntElem);
-
-        int n = 0;
-
-        forAll(cellShapes, i)
+        if (ensightGeometryFile.ascii())
         {
-            const cellShape& cellPoints = cellShapes[i];
+            // Workaround for paraview issue : write one cell per line
 
-            forAll(cellPoints, pointI)
+            forAll(cellShapes, i)
             {
-                temp[n] = cellPoints[pointI] + 1;
-                n++;
+                const cellShape& cellPoints = cellShapes[i];
+
+                List<int> temp(cellPoints.size());
+
+                forAll(cellPoints, pointI)
+                {
+                    temp[pointI] = cellPoints[pointI] + 1;
+                }
+                ensightGeometryFile.write(temp);
             }
         }
+        else
+        {
+            // All the cellShapes have the same number of elements!
+            int numIntElem = cellShapes.size()*cellShapes[0].size();
+            List<int> temp(numIntElem);
 
-        ensightGeometryFile.write
-        (
-            reinterpret_cast<char*>(temp.begin()),
-            numIntElem*sizeof(int)
-        );
+            int n = 0;
+
+            forAll(cellShapes, i)
+            {
+                const cellShape& cellPoints = cellShapes[i];
+
+                forAll(cellPoints, pointI)
+                {
+                    temp[n] = cellPoints[pointI] + 1;
+                    n++;
+                }
+            }
+            ensightGeometryFile.write(temp);
+        }
     }
 }
 
@@ -550,13 +556,12 @@ void Foam::ensightMesh::writePolysNFaces
 (
     const labelList& polys,
     const cellList& cellFaces,
-    OFstream& ensightGeometryFile
+    ensightStream& ensightGeometryFile
 ) const
 {
     forAll(polys, i)
     {
-        ensightGeometryFile
-            << setw(10) << cellFaces[polys[i]].size() << nl;
+        ensightGeometryFile.write(cellFaces[polys[i]].size());
     }
 }
 
@@ -566,7 +571,7 @@ void Foam::ensightMesh::writePolysNPointsPerFace
     const labelList& polys,
     const cellList& cellFaces,
     const faceList& faces,
-    OFstream& ensightGeometryFile
+    ensightStream& ensightGeometryFile
 ) const
 {
     forAll(polys, i)
@@ -575,8 +580,7 @@ void Foam::ensightMesh::writePolysNPointsPerFace
 
         forAll(cf, faceI)
         {
-            ensightGeometryFile
-                << setw(10) << faces[cf[faceI]].size() << nl;
+            ensightGeometryFile.write(faces[cf[faceI]].size());
         }
     }
 }
@@ -587,7 +591,7 @@ void Foam::ensightMesh::writePolysPoints
     const labelList& polys,
     const cellList& cellFaces,
     const faceList& faces,
-    OFstream& ensightGeometryFile
+    ensightStream& ensightGeometryFile
 ) const
 {
     forAll(polys, i)
@@ -598,11 +602,12 @@ void Foam::ensightMesh::writePolysPoints
         {
             const face& f = faces[cf[faceI]];
 
+            List<int> temp(f.size());
             forAll(f, pointI)
             {
-                ensightGeometryFile << setw(10) << f[pointI] + 1;
+                temp[pointI] = f[pointI] + 1;
             }
-            ensightGeometryFile << nl;
+            ensightGeometryFile.write(temp);
         }
     }
 }
@@ -611,7 +616,7 @@ void Foam::ensightMesh::writePolysPoints
 void Foam::ensightMesh::writeAllPolys
 (
     const labelList& pointToGlobal,
-    OFstream& ensightGeometryFile
+    ensightStream& ensightGeometryFile
 ) const
 {
     if (meshCellSets_.nPolys)
@@ -626,8 +631,8 @@ void Foam::ensightMesh::writeAllPolys
 
         if (Pstream::master())
         {
-            ensightGeometryFile
-                << "nfaced" << nl << setw(10) << meshCellSets_.nPolys << nl;
+            ensightGeometryFile.write("nfaced");
+            ensightGeometryFile.write(meshCellSets_.nPolys);
         }
 
         // Number of faces for each poly cell
@@ -735,210 +740,20 @@ void Foam::ensightMesh::writeAllPolys
 }
 
 
-void Foam::ensightMesh::writePolysNFacesBinary
-(
-    const labelList& polys,
-    const cellList& cellFaces,
-    std::ofstream& ensightGeometryFile
-) const
-{
-    forAll(polys, i)
-    {
-        writeEnsDataBinary
-        (
-            cellFaces[polys[i]].size(),
-            ensightGeometryFile
-        );
-    }
-}
-
-
-void Foam::ensightMesh::writePolysNPointsPerFaceBinary
-(
-    const labelList& polys,
-    const cellList& cellFaces,
-    const faceList& faces,
-    std::ofstream& ensightGeometryFile
-) const
-{
-    forAll(polys, i)
-    {
-        const labelList& cf = cellFaces[polys[i]];
-
-        forAll(cf, faceI)
-        {
-            writeEnsDataBinary
-            (
-                faces[cf[faceI]].size(),
-                ensightGeometryFile
-            );
-        }
-    }
-}
-
-
-void Foam::ensightMesh::writePolysPointsBinary
-(
-    const labelList& polys,
-    const cellList& cellFaces,
-    const faceList& faces,
-    std::ofstream& ensightGeometryFile
-) const
-{
-    forAll(polys, i)
-    {
-        const labelList& cf = cellFaces[polys[i]];
-
-        forAll(cf, faceI)
-        {
-            const face& f = faces[cf[faceI]];
-
-            forAll(f, pointI)
-            {
-                writeEnsDataBinary(f[pointI] + 1,ensightGeometryFile);
-            }
-        }
-    }
-}
-
-
-void Foam::ensightMesh::writeAllPolysBinary
-(
-    const labelList& pointToGlobal,
-    std::ofstream& ensightGeometryFile
-) const
-{
-    if (meshCellSets_.nPolys)
-    {
-        const cellList& cellFaces = mesh_.cells();
-        // Renumber faces to use global point numbers
-        faceList faces(mesh_.faces());
-        forAll(faces, i)
-        {
-            inplaceRenumber(pointToGlobal, faces[i]);
-        }
-
-        if (Pstream::master())
-        {
-            writeEnsDataBinary("nfaced",ensightGeometryFile);
-            writeEnsDataBinary(meshCellSets_.nPolys,ensightGeometryFile);
-        }
-
-        // Number of faces for each poly cell
-        if (Pstream::master())
-        {
-            // Master
-            writePolysNFacesBinary
-            (
-                meshCellSets_.polys,
-                cellFaces,
-                ensightGeometryFile
-            );
-            // Slaves
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
-            {
-                IPstream fromSlave(Pstream::scheduled, slave);
-                labelList polys(fromSlave);
-                cellList cellFaces(fromSlave);
-
-                writePolysNFacesBinary
-                (
-                    polys,
-                    cellFaces,
-                    ensightGeometryFile
-                );
-            }
-        }
-        else
-        {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< meshCellSets_.polys << cellFaces;
-        }
-
-        // Number of points for each face of the above list
-        if (Pstream::master())
-        {
-            // Master
-            writePolysNPointsPerFaceBinary
-            (
-                meshCellSets_.polys,
-                cellFaces,
-                faces,
-                ensightGeometryFile
-            );
-            // Slaves
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
-            {
-                IPstream fromSlave(Pstream::scheduled, slave);
-                labelList polys(fromSlave);
-                cellList cellFaces(fromSlave);
-                faceList faces(fromSlave);
-
-                writePolysNPointsPerFaceBinary
-                (
-                    polys,
-                    cellFaces,
-                    faces,
-                    ensightGeometryFile
-                );
-            }
-        }
-        else
-        {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< meshCellSets_.polys << cellFaces << faces;
-        }
-
-        // List of points id for each face of the above list
-        if (Pstream::master())
-        {
-            // Master
-            writePolysPointsBinary
-            (
-                meshCellSets_.polys,
-                cellFaces,
-                faces,
-                ensightGeometryFile
-            );
-            // Slaves
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
-            {
-                IPstream fromSlave(Pstream::scheduled, slave);
-                labelList polys(fromSlave);
-                cellList cellFaces(fromSlave);
-                faceList faces(fromSlave);
-
-                writePolysPointsBinary
-                (
-                    polys,
-                    cellFaces,
-                    faces,
-                    ensightGeometryFile
-                );
-            }
-        }
-        else
-        {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< meshCellSets_.polys << cellFaces << faces;
-        }
-    }
-}
-
-
 void Foam::ensightMesh::writeAllPrims
 (
     const char* key,
     const label nPrims,
     const cellShapeList& cellShapes,
-    OFstream& ensightGeometryFile
+    ensightStream& ensightGeometryFile
 ) const
 {
     if (nPrims)
     {
         if (Pstream::master())
         {
-            ensightGeometryFile << key << nl << setw(10) << nPrims << nl;
+            ensightGeometryFile.write(key);
+            ensightGeometryFile.write(nPrims);
 
             writePrims(cellShapes, ensightGeometryFile);
 
@@ -959,73 +774,23 @@ void Foam::ensightMesh::writeAllPrims
 }
 
 
-void Foam::ensightMesh::writeAllPrimsBinary
-(
-    const char* key,
-    const label nPrims,
-    const cellShapeList& cellShapes,
-    std::ofstream& ensightGeometryFile
-) const
-{
-    if (nPrims)
-    {
-        if (Pstream::master())
-        {
-            writeEnsDataBinary(key,ensightGeometryFile);
-            writeEnsDataBinary(nPrims,ensightGeometryFile);
-
-            writePrimsBinary(cellShapes, ensightGeometryFile);
-
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
-            {
-                IPstream fromSlave(Pstream::scheduled, slave);
-                cellShapeList cellShapes(fromSlave);
-
-                writePrimsBinary(cellShapes, ensightGeometryFile);
-            }
-        }
-        else
-        {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< cellShapes;
-        }
-    }
-}
-
-
 void Foam::ensightMesh::writeFacePrims
 (
     const faceList& patchFaces,
-    OFstream& ensightGeometryFile
+    ensightStream& ensightGeometryFile
 ) const
 {
     forAll(patchFaces, i)
     {
         const face& patchFace = patchFaces[i];
 
+        List<int> temp(patchFace.size());
         forAll(patchFace, pointI)
         {
-            ensightGeometryFile << setw(10) << patchFace[pointI] + 1;
+            temp[pointI] = patchFace[pointI] + 1;
         }
-        ensightGeometryFile << nl;
-    }
-}
 
-
-void Foam::ensightMesh::writeFacePrimsBinary
-(
-    const faceList& patchFaces,
-    std::ofstream& ensightGeometryFile
-) const
-{
-    forAll(patchFaces, i)
-    {
-        const face& patchFace = patchFaces[i];
-
-        forAll(patchFace, pointI)
-        {
-            writeEnsDataBinary(patchFace[pointI] + 1, ensightGeometryFile);
-        }
+        ensightGeometryFile.write(temp);
     }
 }
 
@@ -1036,14 +801,15 @@ void Foam::ensightMesh::writeAllFacePrims
     const labelList& prims,
     const label nPrims,
     const faceList& patchFaces,
-    OFstream& ensightGeometryFile
+    ensightStream& ensightGeometryFile
 ) const
 {
     if (nPrims)
     {
         if (Pstream::master())
         {
-            ensightGeometryFile << key << nl << setw(10) << nPrims << nl;
+            ensightGeometryFile.write(key);
+            ensightGeometryFile.write(nPrims);
 
             writeFacePrims
             (
@@ -1071,12 +837,12 @@ void Foam::ensightMesh::writeAllFacePrims
 void Foam::ensightMesh::writeNSidedNPointsPerFace
 (
     const faceList& patchFaces,
-    OFstream& ensightGeometryFile
+    ensightStream& ensightGeometryFile
 ) const
 {
     forAll(patchFaces, i)
     {
-        ensightGeometryFile << setw(10) << patchFaces[i].size() << nl;
+        ensightGeometryFile.write(patchFaces[i].size());
     }
 }
 
@@ -1084,7 +850,7 @@ void Foam::ensightMesh::writeNSidedNPointsPerFace
 void Foam::ensightMesh::writeNSidedPoints
 (
     const faceList& patchFaces,
-    OFstream& ensightGeometryFile
+    ensightStream& ensightGeometryFile
 ) const
 {
     writeFacePrims(patchFaces, ensightGeometryFile);
@@ -1096,15 +862,15 @@ void Foam::ensightMesh::writeAllNSided
     const labelList& prims,
     const label nPrims,
     const faceList& patchFaces,
-    OFstream& ensightGeometryFile
+    ensightStream& ensightGeometryFile
 ) const
 {
     if (nPrims)
     {
         if (Pstream::master())
         {
-            ensightGeometryFile
-                << "nsided" << nl << setw(10) << nPrims << nl;
+            ensightGeometryFile.write("nsided");
+            ensightGeometryFile.write(nPrims);
         }
 
         // Number of points for each face
@@ -1160,132 +926,84 @@ void Foam::ensightMesh::writeAllNSided
 }
 
 
-void Foam::ensightMesh::writeNSidedPointsBinary
+void Foam::ensightMesh::writeAllInternalPoints
 (
-    const faceList& patchFaces,
-    std::ofstream& ensightGeometryFile
+    const pointField& uniquePoints,
+    const label nPoints,
+    ensightStream& ensightGeometryFile
 ) const
 {
-    writeFacePrimsBinary(patchFaces, ensightGeometryFile);
-}
+    barrier();
 
-
-void Foam::ensightMesh::writeNSidedNPointsPerFaceBinary
-(
-    const faceList& patchFaces,
-    std::ofstream& ensightGeometryFile
-) const
-{
-    forAll(patchFaces, i)
+    if (Pstream::master())
     {
-        writeEnsDataBinary(patchFaces[i].size(), ensightGeometryFile);
+        ensightGeometryFile.writePartHeader(1);
+        ensightGeometryFile.write("internalMesh");
+        ensightGeometryFile.write("coordinates");
+        ensightGeometryFile.write(nPoints);
+
+        for (direction d=0; d<vector::nComponents; d++)
+        {
+            ensightGeometryFile.write(uniquePoints.component(d));
+
+            for (int slave=1; slave<Pstream::nProcs(); slave++)
+            {
+                IPstream fromSlave(Pstream::scheduled, slave);
+                scalarField pointsComponent(fromSlave);
+                ensightGeometryFile.write(pointsComponent);
+            }
+        }
     }
-}
-
-
-void Foam::ensightMesh::writeAllNSidedBinary
-(
-    const labelList& prims,
-    const label nPrims,
-    const faceList& patchFaces,
-    std::ofstream& ensightGeometryFile
-) const
-{
-    if (nPrims)
+    else
     {
-        if (Pstream::master())
-        {
-            writeEnsDataBinary("nsided",ensightGeometryFile);
-            writeEnsDataBinary(nPrims,ensightGeometryFile);
-        }
-
-        // Number of points for each face
-        if (Pstream::master())
-        {
-            writeNSidedNPointsPerFaceBinary
-            (
-                UIndirectList<face>(patchFaces, prims)(),
-                ensightGeometryFile
-            );
-
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
-            {
-                IPstream fromSlave(Pstream::scheduled, slave);
-                faceList patchFaces(fromSlave);
-
-                writeNSidedNPointsPerFaceBinary
-                (
-                    patchFaces,
-                    ensightGeometryFile
-                );
-            }
-        }
-        else
+        for (direction d=0; d<vector::nComponents; d++)
         {
             OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< UIndirectList<face>(patchFaces, prims);
-        }
-
-        // List of points id for each face
-        if (Pstream::master())
-        {
-            writeNSidedPointsBinary
-            (
-                UIndirectList<face>(patchFaces, prims)(),
-                ensightGeometryFile
-            );
-
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
-            {
-                IPstream fromSlave(Pstream::scheduled, slave);
-                faceList patchFaces(fromSlave);
-
-                writeNSidedPointsBinary(patchFaces, ensightGeometryFile);
-            }
-        }
-        else
-        {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< UIndirectList<face>(patchFaces, prims);
+            toMaster<< uniquePoints.component(d);
         }
     }
 }
 
 
-void Foam::ensightMesh::writeAllFacePrimsBinary
+void Foam::ensightMesh::writeAllPatchPoints
 (
-    const char* key,
-    const labelList& prims,
-    const label nPrims,
-    const faceList& patchFaces,
-    std::ofstream& ensightGeometryFile
+    const label ensightPatchI,
+    const word& patchName,
+    const pointField& uniquePoints,
+    const label nPoints,
+    ensightStream& ensightGeometryFile
 ) const
 {
-    if (nPrims)
+    barrier();
+
+    if (Pstream::master())
     {
-        if (Pstream::master())
+        ensightGeometryFile.writePartHeader(ensightPatchI);
+        ensightGeometryFile.write(patchName.c_str());
+        ensightGeometryFile.write("coordinates");
+        ensightGeometryFile.write(nPoints);
+
+        for (direction d=0; d<vector::nComponents; d++)
         {
-            writeEnsDataBinary(key,ensightGeometryFile);
-            writeEnsDataBinary(nPrims,ensightGeometryFile);
-
-            writeFacePrimsBinary
-            (
-                UIndirectList<face>(patchFaces, prims)(),
-                ensightGeometryFile
-            );
-
+            ensightGeometryFile.write(uniquePoints.component(d));
             for (int slave=1; slave<Pstream::nProcs(); slave++)
             {
                 IPstream fromSlave(Pstream::scheduled, slave);
-                faceList patchFaces(fromSlave);
-
-                writeFacePrimsBinary(patchFaces, ensightGeometryFile);
+                scalarField patchPointsComponent(fromSlave);
+                ensightGeometryFile.write(patchPointsComponent);
             }
         }
-        else
+    }
+    else
+    {
+        for (direction d=0; d<vector::nComponents; d++)
         {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< UIndirectList<face>(patchFaces, prims);
+            OPstream toMaster
+            (
+                Pstream::scheduled,
+                Pstream::masterNo()
+            );
+            toMaster<< uniquePoints.component(d);
         }
     }
 }
@@ -1299,259 +1017,7 @@ void Foam::ensightMesh::write
     Ostream& ensightCaseFile
 ) const
 {
-    // Find global point numbering
-    labelList pointToGlobal;
-    labelList uniquePointMap;
-    autoPtr<globalIndex> globalPoints = mesh_.globalData().mergePoints
-    (
-        pointToGlobal,
-        uniquePointMap
-    );
-
-    const pointField uniquePoints(mesh_.points(), uniquePointMap);
-
-    if (binary_)
-    {
-        writeBinary
-        (
-            postProcPath,
-            prepend,
-            timeIndex,
-            ensightCaseFile,
-            pointToGlobal,
-            uniquePoints,
-            globalPoints()
-        );
-    }
-    else
-    {
-        writeAscii
-        (
-            postProcPath,
-            prepend,
-            timeIndex,
-            ensightCaseFile,
-            pointToGlobal,
-            uniquePoints,
-            globalPoints()
-        );
-    }
-}
-
-void Foam::ensightMesh::writeAllInternalPoints
-(
-    const pointField& uniquePoints,
-    const label nPoints,
-    OFstream& ensightGeometryFile
-) const
-{
-    barrier();
-
-    if (Pstream::master())
-    {
-        ensightGeometryFile
-            << "part" << nl
-            << setw(10) << 1 << nl
-            << "internalMesh" << nl
-            << "coordinates" << nl
-            << setw(10) << nPoints
-            << endl;
-
-        for (direction d=0; d<vector::nComponents; d++)
-        {
-            writePoints(uniquePoints.component(d), ensightGeometryFile);
-
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
-            {
-                IPstream fromSlave(Pstream::scheduled, slave);
-                scalarField pointsComponent(fromSlave);
-                writePoints(pointsComponent, ensightGeometryFile);
-            }
-        }
-    }
-    else
-    {
-        for (direction d=0; d<vector::nComponents; d++)
-        {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< uniquePoints.component(d);
-        }
-    }
-}
-
-void Foam::ensightMesh::writeAllInternalPointsBinary
-(
-    const pointField& uniquePoints,
-    const label nPoints,
-    std::ofstream& ensightGeometryFile
-) const
-{
-    barrier();
-
-    if (Pstream::master())
-    {
-        writeEnsDataBinary("part",ensightGeometryFile);
-        writeEnsDataBinary(1,ensightGeometryFile);
-        writeEnsDataBinary("internalMesh",ensightGeometryFile);
-        writeEnsDataBinary("coordinates",ensightGeometryFile);
-        writeEnsDataBinary(nPoints,ensightGeometryFile);
-
-        for (direction d=0; d<vector::nComponents; d++)
-        {
-            writeEnsDataBinary
-            (
-                uniquePoints.component(d),
-                ensightGeometryFile
-            );
-
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
-            {
-                IPstream fromSlave(Pstream::scheduled, slave);
-                scalarField pointsComponent(fromSlave);
-                writeEnsDataBinary(pointsComponent, ensightGeometryFile);
-            }
-        }
-    }
-    else
-    {
-        for (direction d=0; d<vector::nComponents; d++)
-        {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< uniquePoints.component(d);
-        }
-    }
-}
-
-void Foam::ensightMesh::writeAllPatchPoints
-(
-    const label ensightPatchI,
-    const word& patchName,
-    const pointField& uniquePoints,
-    const label nPoints,
-    OFstream& ensightGeometryFile
-) const
-{
-    barrier();
-
-    if (Pstream::master())
-    {
-        ensightGeometryFile
-            << "part" << nl
-            << setw(10) << ensightPatchI << nl
-            << patchName << nl
-            << "coordinates" << nl
-            << setw(10) << nPoints // globalPointsPtr().size()
-            << endl;
-
-        for (direction d=0; d<vector::nComponents; d++)
-        {
-            writePoints
-            (
-                uniquePoints.component(d),
-                ensightGeometryFile
-            );
-
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
-            {
-                IPstream fromSlave(Pstream::scheduled, slave);
-                scalarField patchPointsComponent(fromSlave);
-
-                writePoints
-                (
-                    patchPointsComponent,
-                    ensightGeometryFile
-                );
-            }
-        }
-    }
-    else
-    {
-        for (direction d=0; d<vector::nComponents; d++)
-        {
-            OPstream toMaster
-            (
-                Pstream::scheduled,
-                Pstream::masterNo()
-            );
-            toMaster<< uniquePoints.component(d);
-        }
-    }
-}
-
-void Foam::ensightMesh::writeAllPatchPointsBinary
-(
-    const label ensightPatchI,
-    const word& patchName,
-    const pointField& uniquePoints,
-    const label nPoints,
-    std::ofstream& ensightGeometryFile
-) const
-{
-    barrier();
-
-    if (Pstream::master())
-    {
-        writeEnsDataBinary("part",ensightGeometryFile);
-        writeEnsDataBinary(ensightPatchI,ensightGeometryFile);
-        //writeEnsDataBinary(patchName.c_str(),ensightGeometryFile);
-        writeEnsDataBinary(patchName.c_str(),ensightGeometryFile);
-        writeEnsDataBinary("coordinates",ensightGeometryFile);
-        writeEnsDataBinary
-        (
-            nPoints, //globalPointsPtr().size(),
-            ensightGeometryFile
-        );
-
-        for (direction d=0; d<vector::nComponents; d++)
-        {
-            //writePointsBinary
-            writeEnsDataBinary
-            (
-                uniquePoints.component(d),
-                ensightGeometryFile
-            );
-
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
-            {
-                IPstream fromSlave(Pstream::scheduled, slave);
-                scalarField patchPointsComponent(fromSlave);
-
-                //writePointsBinary
-                writeEnsDataBinary
-                (
-                    patchPointsComponent,
-                    ensightGeometryFile
-                );
-            }
-        }
-    }
-    else
-    {
-        for (direction d=0; d<vector::nComponents; d++)
-        {
-            OPstream toMaster
-            (
-                Pstream::scheduled,
-                Pstream::masterNo()
-            );
-            toMaster<< uniquePoints.component(d);
-        }
-    }
-}
-
-void Foam::ensightMesh::writeAscii
-(
-    const fileName& postProcPath,
-    const word& prepend,
-    const label timeIndex,
-    Ostream& ensightCaseFile,
-    const labelList& pointToGlobal,
-    const pointField& uniquePoints,
-    const globalIndex& globalPoints
-) const
-{
     const Time& runTime = mesh_.time();
-    //const pointField& points = mesh_.points();
     const cellShapeList& cellShapes = mesh_.cellShapes();
 
 
@@ -1569,40 +1035,45 @@ void Foam::ensightMesh::writeAscii
     // set the filename of the ensight file
     fileName ensightGeometryFileName = timeFile + "mesh";
 
-    OFstream *ensightGeometryFilePtr = NULL;
+    ensightStream* ensightGeometryFilePtr = NULL;
     if (Pstream::master())
     {
-        ensightGeometryFilePtr = new OFstream
-        (
-            postProcPath/ensightGeometryFileName,
-            runTime.writeFormat(),
-            runTime.writeVersion(),
-            IOstream::UNCOMPRESSED
-        );
+        if (binary_)
+        {
+            ensightGeometryFilePtr = new ensightBinaryStream
+            (
+                postProcPath/ensightGeometryFileName,
+                runTime
+            );
+            ensightGeometryFilePtr->write("C binary");
+        }
+        else
+        {
+            ensightGeometryFilePtr = new ensightAsciiStream
+            (
+                postProcPath/ensightGeometryFileName,
+                runTime
+            );
+        }
     }
 
-    OFstream& ensightGeometryFile = *ensightGeometryFilePtr;
+    ensightStream& ensightGeometryFile = *ensightGeometryFilePtr;
 
     if (Pstream::master())
     {
-        // Set Format
-        ensightGeometryFile.setf
-        (
-            ios_base::scientific,
-            ios_base::floatfield
-        );
-        ensightGeometryFile.precision(5);
+        string desc = string("written by OpenFOAM-") + Foam::FOAMversion;
 
-        ensightGeometryFile
-            << "EnSight Geometry File" << nl
-            << "written by OpenFOAM-" << Foam::FOAMversion << nl
-            << "node id assign" << nl
-            << "element id assign" << nl;
+        ensightGeometryFile.write("EnSight Geometry File");
+        ensightGeometryFile.write(desc.c_str());
+        ensightGeometryFile.write("node id assign");
+        ensightGeometryFile.write("element id assign");
     }
 
     if (patchNames_.empty())
     {
-        label nPoints = globalPoints.size();
+        label nPoints = globalPoints().size();
+
+        const pointField uniquePoints(mesh_.points(), uniquePointMap_);
 
         writeAllInternalPoints
         (
@@ -1620,7 +1091,7 @@ void Foam::ensightMesh::writeAscii
                 cellShapes,
                 meshCellSets_.hexes,
                 meshCellSets_.wedges,
-                pointToGlobal
+                pointToGlobal_
             ),
             ensightGeometryFile
         );
@@ -1629,7 +1100,7 @@ void Foam::ensightMesh::writeAscii
         (
             "penta6",
             meshCellSets_.nPrisms,
-            map(cellShapes, meshCellSets_.prisms, pointToGlobal),
+            map(cellShapes, meshCellSets_.prisms, pointToGlobal_),
             ensightGeometryFile
         );
 
@@ -1637,7 +1108,7 @@ void Foam::ensightMesh::writeAscii
         (
             "pyramid5",
             meshCellSets_.nPyrs,
-            map(cellShapes, meshCellSets_.pyrs, pointToGlobal),
+            map(cellShapes, meshCellSets_.pyrs, pointToGlobal_),
             ensightGeometryFile
         );
 
@@ -1645,13 +1116,13 @@ void Foam::ensightMesh::writeAscii
         (
             "tetra4",
             meshCellSets_.nTets,
-            map(cellShapes, meshCellSets_.tets, pointToGlobal),
+            map(cellShapes, meshCellSets_.tets, pointToGlobal_),
             ensightGeometryFile
         );
 
         writeAllPolys
         (
-            pointToGlobal,
+            pointToGlobal_,
             ensightGeometryFile
         );
     }
@@ -1835,304 +1306,6 @@ void Foam::ensightMesh::writeAscii
             );
         }
     }
-
-
-    if (Pstream::master())
-    {
-        delete ensightGeometryFilePtr;
-    }
-}
-
-
-void Foam::ensightMesh::writeBinary
-(
-    const fileName& postProcPath,
-    const word& prepend,
-    const label timeIndex,
-    Ostream& ensightCaseFile,
-    const labelList& pointToGlobal,
-    const pointField& uniquePoints,
-    const globalIndex& globalPoints
-) const
-{
-    const cellShapeList& cellShapes = mesh_.cellShapes();
-
-    word timeFile = prepend;
-
-    if (timeIndex == 0)
-    {
-        timeFile += "000.";
-    }
-    else if (mesh_.moving())
-    {
-        timeFile += itoa(timeIndex) + '.';
-    }
-
-    // set the filename of the ensight file
-    fileName ensightGeometryFileName = timeFile + "mesh";
-
-    std::ofstream *ensightGeometryFilePtr = NULL;
-
-    if (Pstream::master())
-    {
-        ensightGeometryFilePtr = new std::ofstream
-        (
-            (postProcPath/ensightGeometryFileName).c_str(),
-            ios_base::out | ios_base::binary | ios_base::trunc
-        );
-        // Check on file opened?
-    }
-
-    std::ofstream& ensightGeometryFile = *ensightGeometryFilePtr;
-
-    if (Pstream::master())
-    {
-        string description = string("written by OpenFOAM-") + Foam::FOAMversion;
-        writeEnsDataBinary("C binary", ensightGeometryFile);
-        writeEnsDataBinary("EnSight Geometry File", ensightGeometryFile);
-        writeEnsDataBinary(description.c_str(), ensightGeometryFile);
-        writeEnsDataBinary("node id assign", ensightGeometryFile);
-        writeEnsDataBinary("element id assign", ensightGeometryFile);
-    }
-
-
-    if (patchNames_.empty())
-    {
-        label nPoints = globalPoints.size();
-
-        writeAllInternalPointsBinary
-        (
-            uniquePoints,
-            nPoints,
-            ensightGeometryFile
-        );
-
-        writeAllPrimsBinary
-        (
-            "hexa8",
-            meshCellSets_.nHexesWedges,
-            map         // Rewrite cellShapes to global numbering
-            (
-                cellShapes,
-                meshCellSets_.hexes,
-                meshCellSets_.wedges,
-                pointToGlobal
-            ),
-            ensightGeometryFile
-        );
-
-        writeAllPrimsBinary
-        (
-            "penta6",
-            meshCellSets_.nPrisms,
-            map(cellShapes, meshCellSets_.prisms, pointToGlobal),
-            ensightGeometryFile
-        );
-
-        writeAllPrimsBinary
-        (
-            "pyramid5",
-            meshCellSets_.nPyrs,
-            map(cellShapes, meshCellSets_.pyrs, pointToGlobal),
-            ensightGeometryFile
-        );
-
-        writeAllPrimsBinary
-        (
-            "tetra4",
-            meshCellSets_.nTets,
-            map(cellShapes, meshCellSets_.tets, pointToGlobal),
-            ensightGeometryFile
-        );
-
-        writeAllPolysBinary
-        (
-            pointToGlobal,
-            ensightGeometryFile
-        );
-    }
-
-    label ensightPatchI = patchPartOffset_;
-    label iCount = 0;
-
-    forAll(allPatchNames_, patchi)
-    {
-        iCount ++;
-        const word& patchName = allPatchNames_[patchi];
-
-        if (patchNames_.empty() || patchNames_.found(patchName))
-        {
-            const nFacePrimitives& nfp = nPatchPrims_.find(patchName)();
-
-            if (nfp.nTris || nfp.nQuads || nfp.nPolys)
-            {
-                const polyPatch& p = mesh_.boundaryMesh()[patchi];
-                const labelList& tris = boundaryFaceSets_[patchi].tris;
-                const labelList& quads = boundaryFaceSets_[patchi].quads;
-                const labelList& polys = boundaryFaceSets_[patchi].polys;
-
-                // Renumber the patch points/faces into unique points
-                labelList pointToGlobal;
-                labelList uniqueMeshPointLabels;
-                autoPtr<globalIndex> globalPointsPtr =
-                mesh_.globalData().mergePoints
-                (
-                    p.meshPoints(),
-                    p.meshPointMap(),
-                    pointToGlobal,
-                    uniqueMeshPointLabels
-                );
-                pointField uniquePoints(mesh_.points(), uniqueMeshPointLabels);
-                // Renumber the patch faces
-                faceList patchFaces(p.localFaces());
-                forAll(patchFaces, i)
-                {
-                    inplaceRenumber(pointToGlobal, patchFaces[i]);
-                }
-
-                writeAllPatchPointsBinary
-                (
-                    ensightPatchI++,
-                    patchName,
-                    uniquePoints,
-                    globalPointsPtr().size(),
-                    ensightGeometryFile
-                );
-
-                writeAllFacePrimsBinary
-                (
-                    "tria3",
-                    tris,
-                    nfp.nTris,
-                    patchFaces,
-                    ensightGeometryFile
-                );
-
-                writeAllFacePrimsBinary
-                (
-                    "quad4",
-                    quads,
-                    nfp.nQuads,
-                    patchFaces,
-                    ensightGeometryFile
-                );
-
-                writeAllNSidedBinary
-                (
-                    polys,
-                    nfp.nPolys,
-                    patchFaces,
-                    ensightGeometryFile
-                );
-            }
-        }
-    }
-
-    // write faceZones, if requested
-    forAllConstIter(wordHashSet, faceZoneNames_, iter)
-    {
-        const word& faceZoneName = iter.key();
-
-        label faceID = mesh_.faceZones().findZoneID(faceZoneName);
-
-        const faceZone& fz = mesh_.faceZones()[faceID];
-
-        const nFacePrimitives& nfp = nFaceZonePrims_[faceZoneName];
-
-        if (nfp.nTris || nfp.nQuads || nfp.nPolys)
-        {
-            const labelList& tris = faceZoneFaceSets_[faceID].tris;
-            const labelList& quads = faceZoneFaceSets_[faceID].quads;
-            const labelList& polys = faceZoneFaceSets_[faceID].polys;
-
-            // Renumber the faceZone points/faces into unique points
-            labelList pointToGlobal;
-            labelList uniqueMeshPointLabels;
-            autoPtr<globalIndex> globalPointsPtr =
-            mesh_.globalData().mergePoints
-            (
-                fz().meshPoints(),
-                fz().meshPointMap(),
-                pointToGlobal,
-                uniqueMeshPointLabels
-            );
-
-            pointField uniquePoints(mesh_.points(), uniqueMeshPointLabels);
-
-            // Find the list of master faces belonging to the faceZone,
-            // in loacal numbering
-            faceList faceZoneFaces(fz().localFaces());
-
-            // Count how many master faces belong to the faceZone. Is there
-            // a better way of doing this?
-            label nMasterFaces = 0;
-
-            forAll(fz, faceI)
-            {
-                if (faceToBeIncluded(fz[faceI]))
-                {
-                    ++nMasterFaces;
-                }
-            }
-
-            // Create the faceList for the master faces only and fill it.
-            faceList faceZoneMasterFaces(nMasterFaces);
-
-            label currentFace = 0;
-
-            forAll(fz, faceI)
-            {
-                if (faceToBeIncluded(fz[faceI]))
-                {
-                    faceZoneMasterFaces[currentFace] = faceZoneFaces[faceI];
-                    ++currentFace;
-                }
-            }
-
-            // Renumber the faceZone master faces
-
-            forAll(faceZoneMasterFaces, i)
-            {
-                inplaceRenumber(pointToGlobal, faceZoneMasterFaces[i]);
-            }
-
-            writeAllPatchPointsBinary
-            (
-                ensightPatchI++,
-                faceZoneName,
-                uniquePoints,
-                globalPointsPtr().size(),
-                ensightGeometryFile
-            );
-
-            writeAllFacePrimsBinary
-            (
-                "tria3",
-                tris,
-                nfp.nTris,
-                faceZoneMasterFaces,
-                ensightGeometryFile
-            );
-
-            writeAllFacePrimsBinary
-            (
-                "quad4",
-                quads,
-                nfp.nQuads,
-                faceZoneMasterFaces,
-                ensightGeometryFile
-            );
-
-            writeAllNSidedBinary
-            (
-                polys,
-                nfp.nPolys,
-                faceZoneMasterFaces,
-                ensightGeometryFile
-            );
-        }
-    }
-
 
     if (Pstream::master())
     {

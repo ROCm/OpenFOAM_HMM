@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "IOField.H"
+#include "CompactIOField.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
@@ -88,6 +89,67 @@ Foam::tmp<Foam::IOField<Type> > Foam::reconstructLagrangianField
 
 
 template<class Type>
+Foam::tmp<Foam::CompactIOField<Foam::Field<Type>, Type> >
+Foam::reconstructLagrangianFieldField
+(
+    const word& cloudName,
+    const polyMesh& mesh,
+    const PtrList<fvMesh>& meshes,
+    const word& fieldName
+)
+{
+    // Construct empty field on mesh
+    tmp<CompactIOField<Field<Type>, Type > > tfield
+    (
+        new CompactIOField<Field<Type>, Type>
+        (
+            IOobject
+            (
+                fieldName,
+                mesh.time().timeName(),
+                cloud::prefix/cloudName,
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            Field<Field<Type> >(0)
+        )
+    );
+    Field<Field<Type> >& field = tfield();
+
+    forAll(meshes, i)
+    {
+        // Check object on local mesh
+        IOobject localIOobject
+        (
+            fieldName,
+            meshes[i].time().timeName(),
+            cloud::prefix/cloudName,
+            meshes[i],
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        );
+
+        if (localIOobject.headerOk())
+        {
+            CompactIOField<Field<Type>, Type> fieldi(localIOobject);
+
+            label offset = field.size();
+            field.setSize(offset + fieldi.size());
+
+            forAll(fieldi, j)
+            {
+                field[offset + j] = fieldi[j];
+            }
+        }
+    }
+
+    return tfield;
+}
+
+
+
+template<class Type>
 void Foam::reconstructLagrangianFields
 (
     const word& cloudName,
@@ -118,6 +180,69 @@ void Foam::reconstructLagrangianFields
         }
 
         Info<< endl;
+    }
+}
+
+
+template<class Type>
+void Foam::reconstructLagrangianFieldFields
+(
+    const word& cloudName,
+    const polyMesh& mesh,
+    const PtrList<fvMesh>& meshes,
+    const IOobjectList& objects
+)
+{
+    {
+        const word fieldClassName(CompactIOField<Field<Type>, Type>::typeName);
+
+        IOobjectList fields = objects.lookupClass(fieldClassName);
+
+        if (fields.size())
+        {
+            Info<< "    Reconstructing lagrangian "
+                << fieldClassName << "s\n" << endl;
+
+            forAllConstIter(IOobjectList, fields, fieldIter)
+            {
+                Info<< "        " << fieldIter()->name() << endl;
+                reconstructLagrangianFieldField<Type>
+                (
+                    cloudName,
+                    mesh,
+                    meshes,
+                    fieldIter()->name()
+                )().write();
+            }
+
+            Info<< endl;
+        }
+    }
+
+    {
+        const word fieldClassName(IOField<Field<Type> >::typeName);
+
+        IOobjectList fields = objects.lookupClass(fieldClassName);
+
+        if (fields.size())
+        {
+            Info<< "    Reconstructing lagrangian "
+                << fieldClassName << "s\n" << endl;
+
+            forAllConstIter(IOobjectList, fields, fieldIter)
+            {
+                Info<< "        " << fieldIter()->name() << endl;
+                reconstructLagrangianFieldField<Type>
+                (
+                    cloudName,
+                    mesh,
+                    meshes,
+                    fieldIter()->name()
+                )().write();
+            }
+
+            Info<< endl;
+        }
     }
 }
 

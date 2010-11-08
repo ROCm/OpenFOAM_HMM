@@ -705,17 +705,22 @@ static uint32_t crc_16_table[16] = {
 };
 
 /*
- *	This code was found at: http://wannabe.guru.org/alg/node191.html
+ *      This code was found at: http://wannabe.guru.org/alg/node191.html
  *  and still exists here: http://www.fearme.com/misc/alg/node191.html
  *
  *  this source code is based on Rex and Binstock which, in turn,
  *  acknowledges William James Hunt.
  *
- *	According to the site this CRC uses the polynomial x^16+x^5+x^2+1.
- *	Unfortunately, DOCSIS uses x^16+x^12+x^5+1.  D'oh!
+ *      According to the site this CRC uses the polynomial x^16+x^5+x^2+1.
+ *      Unfortunately, DOCSIS uses x^16+x^12+x^5+1.  D'oh!
  */
 
-static uint32_t GetCRC16Update (uint32_t start_crc, const char * data_stream, int length) {
+static uint32_t GetCRC16Update
+(
+    uint32_t start_crc,
+    const char * data_stream,
+    int length
+) {
 uint32_t crc = start_crc;
 uint32_t r;
 
@@ -740,7 +745,7 @@ uint32_t r;
 }
 
 uint32_t GetCRC16 (const char * data_stream, int length) {
-	return GetCRC16Update (0, data_stream, length);
+        return GetCRC16Update (0, data_stream, length);
 }
 
 /* ======================================================================== */
@@ -794,35 +799,40 @@ static void GenerateCRC32Table (void) {
 register int i, j;
 register uint32_t crc_accum;
 
-	for ( i = 0;  i < 256;  i++ ) {
-		crc_accum = ( (unsigned long) i << 24 );
+    for ( i = 0;  i < 256;  i++ ) {
+        crc_accum = ( (unsigned long) i << 24 );
         for ( j = 0;  j < 8;  j++ ) {
-			if ( crc_accum & 0x80000000L ) {
-				crc_accum = ( crc_accum << 1 ) ^ CRC32POLYNOMIAL;
-			} else {
-				crc_accum = ( crc_accum << 1 );
-			}
-		}
-		crc_table[i] = crc_accum;
-	}
-	return;
+            if ( crc_accum & 0x80000000L ) {
+                crc_accum = ( crc_accum << 1 ) ^ CRC32POLYNOMIAL;
+            } else {
+                crc_accum = ( crc_accum << 1 );
+            }
+        }
+        crc_table[i] = crc_accum;
+    }
+    return;
 }
 
 /* update the CRC on the data block one byte at a time */
 
-static uint32_t UpdateCRC32 (uint32_t crc_accum, const char *data_blk_ptr, int data_blk_size) {
+static uint32_t UpdateCRC32
+(
+    uint32_t crc_accum,
+    const char *data_blk_ptr,
+    int data_blk_size
+) {
 register int j;
 register uint8_t i;
 
-	for (j = 0; j < data_blk_size; j++) {
-		i = (crc_accum >> 24) ^ *data_blk_ptr++;
-		crc_accum = (crc_accum << 8) ^ crc_table[i];
-	}
-	return crc_accum;
+        for (j = 0; j < data_blk_size; j++) {
+                i = (crc_accum >> 24) ^ *data_blk_ptr++;
+                crc_accum = (crc_accum << 8) ^ crc_table[i];
+        }
+        return crc_accum;
 }
 
 uint32_t GetCRC32 (const char * data_stream, int length) {
-	return UpdateCRC32 (0, data_stream, length);
+        return UpdateCRC32 (0, data_stream, length);
 }
 
 /* ======================================================================== */
@@ -835,14 +845,14 @@ int j;
 uint8_t i0, i1;
 uint32_t crc_accum0 = 0, crc_accum1 = 0x23456789u;
 
-	if (data_blk_size & 1) crc_accum0 ^= *data_blk_ptr++;
-	for (j = 1; j < data_blk_size; j+=2) {
-		i0 = ((crc_accum0 >> 24) ^ *data_blk_ptr++);
-		i1 = ((crc_accum1 >> 24) ^ *data_blk_ptr++);
-		crc_accum0 = (crc_accum0 << 8) ^ crc_table[i0];
-		crc_accum1 = (crc_accum1 << 8) ^ crc_table[i1];
-	}
-	return crc_accum0 + crc_accum1;
+        if (data_blk_size & 1) crc_accum0 ^= *data_blk_ptr++;
+        for (j = 1; j < data_blk_size; j+=2) {
+                i0 = ((crc_accum0 >> 24) ^ *data_blk_ptr++);
+                i1 = ((crc_accum1 >> 24) ^ *data_blk_ptr++);
+                crc_accum0 = (crc_accum0 << 8) ^ crc_table[i0];
+                crc_accum1 = (crc_accum1 << 8) ^ crc_table[i1];
+        }
+        return crc_accum0 + crc_accum1;
 }
 
 /* ======================================================================== */
@@ -855,11 +865,11 @@ uint32_t FNVHash (const char * data, int len) {
 int i;
 uint32_t hash;
 
-	hash = 2166136261u;
-	for (i=0; i < len; i++) {
-		hash = (16777619u * hash) ^ data[i];
-	}
-	return hash;
+        hash = 2166136261u;
+        for (i=0; i < len; i++) {
+                hash = (16777619u * hash) ^ data[i];
+        }
+        return hash;
 }
 
 /* ======================================================================== */
@@ -872,15 +882,15 @@ uint32_t oneAtATimeHash (const char * s, int len) {
 int32_t hash;
 int i;
 
-	for (hash = 0, i = 0; i < len; i++) {
-		hash += s[i];
-		hash += (hash << 10);
-		hash ^= (hash >>  6);	/* Non-portable due to ANSI C */
-	}
-	hash += (hash <<  3);
-	hash ^= (hash >> 11);		/* Non-portable due to ANSI C */
-	hash += (hash << 15);
-	return (uint32_t) hash;
+        for (hash = 0, i = 0; i < len; i++) {
+                hash += s[i];
+                hash += (hash << 10);
+                hash ^= (hash >>  6);   /* Non-portable due to ANSI C */
+        }
+        hash += (hash <<  3);
+        hash ^= (hash >> 11);           /* Non-portable due to ANSI C */
+        hash += (hash << 15);
+        return (uint32_t) hash;
 }
 
 /* ======================================================================== */
@@ -889,23 +899,23 @@ uint32_t oneAtATimeHashPH (const char * s, int len) {
 int32_t hash0 = 0, hash1 = 0x23456789;
 int i;
 
-	if (len & 1) hash1 ^= *s++;
+        if (len & 1) hash1 ^= *s++;
 
-	for (i = 1; i < len; i+=2) {
-		hash0 += *s++;
-		hash1 += *s++;
-		hash0 += (hash0 << 10);
-		hash1 += (hash1 << 10);
-		hash0 ^= (hash0 >>  6);	/* Non-portable due to ANSI C */
-		hash1 ^= (hash1 >>  6);	/* Non-portable due to ANSI C */
-	}
+        for (i = 1; i < len; i+=2) {
+                hash0 += *s++;
+                hash1 += *s++;
+                hash0 += (hash0 << 10);
+                hash1 += (hash1 << 10);
+                hash0 ^= (hash0 >>  6); /* Non-portable due to ANSI C */
+                hash1 ^= (hash1 >>  6); /* Non-portable due to ANSI C */
+        }
 
-	hash0 += hash1;
+        hash0 += hash1;
 
-	hash0 += (hash0 <<  3);
-	hash0 ^= (hash0 >> 11);		/* Non-portable due to ANSI C */
-	hash0 += (hash0 << 15);
-	return (uint32_t) hash0;
+        hash0 += (hash0 <<  3);
+        hash0 ^= (hash0 >> 11);         /* Non-portable due to ANSI C */
+        hash0 += (hash0 << 15);
+        return (uint32_t) hash0;
 }
 
 /* ======================================================================== */
@@ -1029,42 +1039,42 @@ static char buff[BUFF_SZ];
 clock_t c0, c1;
 int32_t i;
 
-	for (buff[0]=0, i=1; i < BUFF_SZ; i++) buff[i] = (char) (i + buff[i-1]);
+        for (buff[0]=0, i=1; i < BUFF_SZ; i++) buff[i] = (char) (i + buff[i-1]);
 
-	c0 = clock ();
-	for (i=0; i < NTESTS; i++) hash (buff, BUFF_SZ);
-	c1 = clock ();
-	return (c1 - c0)*(1.0 / (double)CLOCKS_PER_SEC);
+        c0 = clock ();
+        for (i=0; i < NTESTS; i++) hash (buff, BUFF_SZ);
+        c1 = clock ();
+        return (c1 - c0)*(1.0 / (double)CLOCKS_PER_SEC);
 }
 
 struct tagtest {
-	double res;
-	char * name;
-	hashFn hash;
+        double res;
+        char * name;
+        hashFn hash;
 } tests[] = {
-//	{ 0.0, "CRC32\t\t", GetCRC32                  },
-//	{ 0.0, "oneAtATimeHash\t", oneAtATimeHash     },
-//	{ 0.0, "alphaNumHash\t",  alphaNumHash        },
-	{ 0.0, "FNVHash\t\t", FNVHash                 },
-	{ 0.0, "bernstein\t",  bernstein        },
-	{ 0.0, "stroustrup\t", stroustrup             },
-	{ 0.0, "hashLookup3\t", hashLookup3           },
-	{ 0.0, "hashLookup3Orig\t", hashLookup3Orig   },
-	{ 0.0, "SuperFastHash\t", SuperFastHash       },
-	{ 0.0, NULL, NULL                             }
+//      { 0.0, "CRC32\t\t", GetCRC32                  },
+//      { 0.0, "oneAtATimeHash\t", oneAtATimeHash     },
+//      { 0.0, "alphaNumHash\t",  alphaNumHash        },
+        { 0.0, "FNVHash\t\t", FNVHash                 },
+        { 0.0, "bernstein\t",  bernstein        },
+        { 0.0, "stroustrup\t", stroustrup             },
+        { 0.0, "hashLookup3\t", hashLookup3           },
+        { 0.0, "hashLookup3Orig\t", hashLookup3Orig   },
+        { 0.0, "SuperFastHash\t", SuperFastHash       },
+        { 0.0, NULL, NULL                             }
 };
 
 int main () {
 int i, j;
-	GenerateCRC32Table ();
+    GenerateCRC32Table ();
 
-	for (j=0; tests[j].name != NULL; j++) {
-		for (i=0; i < 3; i++) {
-			double res = test (tests[j].hash);
-			if (tests[j].res == 0.0 || tests[j].res > res) tests[j].res = res;
-		}
-		printf ("%s:%8.4fs\n", tests[j].name, tests[j].res);
-	}
+    for (j=0; tests[j].name != NULL; j++) {
+        for (i=0; i < 3; i++) {
+            double res = test (tests[j].hash);
+            if (tests[j].res == 0.0 || tests[j].res > res) tests[j].res = res;
+        }
+        printf ("%s:%8.4fs\n", tests[j].name, tests[j].res);
+    }
 
-	return 0;
+    return 0;
 }

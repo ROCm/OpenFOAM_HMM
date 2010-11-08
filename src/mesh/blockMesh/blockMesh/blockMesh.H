@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -109,6 +109,25 @@ class blockMesh
             const faceList& patchShapes
         ) const;
 
+        bool readPatches
+        (
+            const dictionary& meshDescription,
+            faceListList& tmpBlocksPatches,
+            wordList& patchNames,
+            wordList& patchTypes,
+            wordList& nbrPatchNames
+        );
+
+        bool readBoundary
+        (
+            const dictionary& meshDescription,
+            wordList& patchNames,
+            faceListList& tmpBlocksPatches,
+            PtrList<dictionary>& patchDicts
+        );
+
+        void createCellShapes(cellShapeList& tmpBlockCells);
+
         polyMesh* createTopology(IOdictionary&);
         void checkBlockMesh(const polyMesh&) const;
 
@@ -163,11 +182,15 @@ public:
 
             const faceListList& patches() const;
 
+
+            //- Get patch information from the topology mesh
+            PtrList<dictionary> patchDicts() const;
+
             wordList patchNames() const;
 
-            wordList patchTypes() const;
-
-            wordList patchPhysicalTypes() const;
+//            wordList patchTypes() const;
+//
+//            wordList patchPhysicalTypes() const;
 
             //- Number of blocks with specified zones
             label numZonedBlocks() const;

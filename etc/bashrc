@@ -32,7 +32,7 @@
 #------------------------------------------------------------------------------
 
 export WM_PROJECT=OpenFOAM
-[ -z "$WM_PROJECT_VERSION" ] && export WM_PROJECT_VERSION=1.6
+export WM_PROJECT_VERSION=dev
 
 ################################################################################
 # USER EDITABLE PART. Note changes made here may be lost with the next upgrade
@@ -87,8 +87,7 @@ _foamSource()
 
 
 # Add in preset user or site preferences:
-foamPrefs=`$WM_PROJECT_DIR/bin/foamEtcFile prefs.sh` && _foamSource $foamPrefs
-unset foamPrefs
+_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile prefs.sh`
 
 # Evaluate command-line parameters
 while [ $# -gt 0 ]
@@ -131,7 +130,8 @@ unset WM_COMPILER_ARCH WM_COMPILER_LIB_ARCH
 # WM_COMPILE_OPTION = Opt | Debug | Prof
 : ${WM_COMPILE_OPTION:=Opt}; export WM_COMPILE_OPTION
 
-# WM_MPLIB = | OPENMPI | MPICH | MPICH-GM | HPMPI | GAMMA | MPI | QSMPI
+# WM_MPLIB = SYSTEMOPENMPI | OPENMPI | MPICH | MPICH-GM | HPMPI | GAMMA
+#                          | MPI | QSMPI
 : ${WM_MPLIB:=OPENMPI}; export WM_MPLIB
 
 
@@ -226,7 +226,7 @@ SunOS)
     cat <<USAGE
 
     Your "$WM_ARCH" operating system is not supported by this release
-    of OpenFOAM. For further assistance, please contact www.OpenFOAM.org
+    of OpenFOAM. For further assistance, please contact www.OpenFOAM.com
 
 USAGE
     ;;
@@ -241,7 +241,8 @@ foamClean=$WM_PROJECT_DIR/bin/foamCleanPath
 cleaned=`$foamClean "$PATH" "$foamOldDirs"` && PATH="$cleaned"
 
 #- Clean LD_LIBRARY_PATH
-cleaned=`$foamClean "$LD_LIBRARY_PATH" "$foamOldDirs"` && LD_LIBRARY_PATH="$cleaned"
+cleaned=`$foamClean "$LD_LIBRARY_PATH" "$foamOldDirs"` \
+    && LD_LIBRARY_PATH="$cleaned"
 
 #- Clean MANPATH
 cleaned=`$foamClean "$MANPATH" "$foamOldDirs"` && MANPATH="$cleaned"
@@ -257,8 +258,8 @@ _foamSource $WM_PROJECT_DIR/etc/aliases.sh
 
 # Source user setup files for optional packages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamSource $WM_PROJECT_DIR/etc/apps/paraview3/bashrc
-_foamSource $WM_PROJECT_DIR/etc/apps/ensight/bashrc
+_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile apps/paraview3/bashrc`
+_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile apps/ensight/bashrc`
 
 
 # Clean environment paths again. Only remove duplicates

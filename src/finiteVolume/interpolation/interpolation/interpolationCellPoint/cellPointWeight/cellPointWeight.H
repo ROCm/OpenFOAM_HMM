@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,13 +55,13 @@ protected:
     // Protected data
 
        //- Cell index
-       const label cellIndex_;
+       const label cellI_;
 
        //- Weights applied to tet vertices
-       FixedList<scalar, 4> weights_;
+       List<scalar> weights_;
 
        //- Face vertex indices
-       FixedList<label, 3> faceVertices_;
+       List<label> faceVertices_;
 
 
     // Protected Member Functions
@@ -70,14 +70,14 @@ protected:
         (
             const polyMesh& mesh,
             const vector& position,
-            const label cellIndex
+            const label cellI
         );
 
         void findTriangle
         (
             const polyMesh& mesh,
             const vector& position,
-            const label faceIndex
+            const label faceI
         );
 
 
@@ -87,7 +87,7 @@ public:
     static int debug;
 
     //- Tolerance used in calculating barycentric co-ordinates
-    //  (applied to normailised values)
+    //  (applied to normalised values)
     static scalar tol;
 
 
@@ -98,8 +98,8 @@ public:
         (
             const polyMesh& mesh,
             const vector& position,
-            const label nCell,
-            const label facei = -1
+            const label cellI,
+            const label faceI = -1
         );
 
 
@@ -108,17 +108,17 @@ public:
         //- Cell index
         inline label cell() const
         {
-            return cellIndex_;
+            return cellI_;
         }
 
         //- interpolation weights
-        inline const FixedList<scalar, 4>& weights() const
+        inline const List<scalar>& weights() const
         {
             return weights_;
         }
 
         //- interpolation addressing for points on face
-        inline const FixedList<label, 3>& faceVertices() const
+        inline const List<label>& faceVertices() const
         {
             return faceVertices_;
         }

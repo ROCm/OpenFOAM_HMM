@@ -39,6 +39,7 @@ SourceFiles
 #include "IOdictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
+#include "SubModelBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,25 +52,13 @@ namespace Foam
 
 template<class CloudType>
 class PostProcessingModel
+:
+    public SubModelBase<CloudType>
 {
-    // Private data
-
-        //- The cloud dictionary
-        const dictionary& dict_;
-
-        //- Reference to the owner cloud class
-        CloudType& owner_;
-
-        //- The coefficients dictionary
-        const dictionary coeffDict_;
-
-
-protected:
-
     // Protected Member Functions
 
         //- Write post-processing info
-        virtual void write() = 0;
+        virtual void write();
 
 
 public:
@@ -104,6 +93,18 @@ public:
             const word& type
         );
 
+        //- Construct copy
+        PostProcessingModel(const PostProcessingModel<CloudType>& ppm);
+
+        //- Construct and return a clone
+        virtual autoPtr<PostProcessingModel<CloudType> > clone() const
+        {
+            return autoPtr<PostProcessingModel<CloudType> >
+            (
+                new PostProcessingModel<CloudType>(*this)
+            );
+        }
+
 
     //- Destructor
     virtual ~PostProcessingModel();
@@ -119,35 +120,20 @@ public:
 
     // Member Functions
 
-        // Access
-
-            //- Return the owner cloud dictionary
-            inline const dictionary& dict() const;
-
-            //- Return const access the owner cloud object
-            inline const CloudType& owner() const;
-
-            //- Return non-const access the owner cloud object for manipulation
-            inline CloudType& owner();
-
-            //- Return the coefficients dictionary
-            inline const dictionary& coeffDict() const;
-
-
         // Evaluation
 
             //- Main post-processing function
             virtual void post();
-
-            //- Flag to indicate whether model activates post-processing model
-            virtual bool active() const = 0;
 
             //- Gather post-processing info on patch
             virtual void postPatch
             (
                 const typename CloudType::parcelType& p,
                 const label patchI
-            ) = 0;
+            );
+
+            //- Gather post-processing info on a face
+            virtual void postFace(const typename CloudType::parcelType& p);
 };
 
 
@@ -176,24 +162,6 @@ public:
         adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
             add##SS##CloudType##ParcelType##ConstructorToTable_;
 
-
-#define makePostProcessingModelThermoType(SS, CloudType, ParcelType, ThermoType)\
-                                                                              \
-    defineNamedTemplateTypeNameAndDebug                                       \
-    (                                                                         \
-        SS<CloudType<ParcelType<ThermoType> > >,                              \
-        0                                                                     \
-    );                                                                        \
-                                                                              \
-    PostProcessingModel<CloudType<ParcelType<ThermoType> > >::                \
-        adddictionaryConstructorToTable                                       \
-            <SS<CloudType<ParcelType<ThermoType> > > >                        \
-            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "PostProcessingModelI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

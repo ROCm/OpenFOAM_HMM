@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -16,18 +16,18 @@ FoamFile
 
 solvers
 {
-    rho
+    "(rho|rhoFinal)"
     {
         solver          PCG
         preconditioner  DIC;
-        tolerance       1e-8;
+        tolerance       1e-7;
         relTol          0;
     }
 
-    p
+    p_rgh
     {
         solver           GAMG;
-        tolerance        1e-8;
+        tolerance        1e-7;
         relTol           0.01;
 
         smoother         GaussSeidel;
@@ -36,46 +36,32 @@ solvers
         nCellsInCoarsestLevel 10;
         agglomerator     faceAreaPair;
         mergeLevels      1;
+
+        maxIter          100;
     }
 
-    pFinal
+    p_rghFinal
     {
-        $p;
-        tolerance        1e-8;
+        $p_rgh;
+        tolerance        1e-7;
         relTol           0;
     }
 
-    U
+    "(U|h|k|epsilon|R)"
     {
         solver           PBiCG;
         preconditioner   DILU;
-        tolerance        1e-08;
-        relTol           0;
-    }
-
-    h
-    {
-        $U;
-        tolerance        1e-08;
+        tolerance        1e-7;
         relTol           0.1;
     }
 
-    "(hFinal|k|epsilon|R)"
+    "(U|h|k|epsilon|R)Final"
     {
         $U;
+        tolerance        1e-07;
+        relTol           0;
     }
 }
-
-PISO
-{
-    momentumPredictor   off;
-    nOuterCorrectors     1;
-    nCorrectors     2;
-    nNonOrthogonalCorrectors 1;
-    pRefPoint       (-0.081 -0.0257 8.01);
-    pRefValue       1e5;
-}
-
 
 PIMPLE
 {
@@ -84,11 +70,10 @@ PIMPLE
     nNonOrthogonalCorrectors 0;
 }
 
-
 relaxationFactors
 {
-//    h               0.9;
-//    U               0.9;
+    h               1;
+    U               1;
 }
 
 // ************************************************************************* //

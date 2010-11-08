@@ -53,7 +53,6 @@ Foam::SHF::SHF
     breakupModel(dict, sm),
     coeffsDict_(dict.subDict(typeName + "Coeffs")),
     g_(sm.g()),
-    rndGen_(sm.rndGen()),
     weCorrCoeff_(readScalar(coeffsDict_.lookup("weCorrCoeff"))),
     weBuCrit_(readScalar(coeffsDict_.lookup("weBuCrit"))),
     weBuBag_(readScalar(coeffsDict_.lookup("weBuBag"))),
@@ -102,14 +101,14 @@ void Foam::SHF::breakupParcel
     const liquidMixture& fuels
 ) const
 {
-    label celli = p.cell();
+    label cellI = p.cell();
     scalar T = p.T();
-    scalar pc = spray_.p()[celli];
+    scalar pc = spray_.p()[cellI];
 
     scalar sigma = fuels.sigma(pc, T, p.X());
     scalar rhoLiquid = fuels.rho(pc, T, p.X());
     scalar muLiquid = fuels.mu(pc, T, p.X());
-    scalar rhoGas = spray_.rho()[celli];
+    scalar rhoGas = spray_.rho()[cellI];
 
     scalar weGas = p.We(vel, rhoGas, sigma);
     scalar weLiquid = p.We(vel, rhoLiquid, sigma);
@@ -186,9 +185,9 @@ void Foam::SHF::breakupParcel
 
             do
             {
-                x = cDmaxBM_*rndGen_.scalar01();
+                x = cDmaxBM_*rndGen_.sample01<scalar>();
                 d = sqr(x)*d05;
-                y = rndGen_.scalar01();
+                y = rndGen_.sample01<scalar>();
 
                 px =
                     x
@@ -217,9 +216,9 @@ void Foam::SHF::breakupParcel
             do
             {
 
-                x = cDmaxS_*rndGen_.scalar01();
+                x = cDmaxS_*rndGen_.sample01<scalar>();
                 d = sqr(x)*d05;
-                y = rndGen_.scalar01();
+                y = rndGen_.sample01<scalar>();
 
                 px =
                     x
@@ -237,6 +236,8 @@ void Foam::SHF::breakupParcel
                     spray_,
                     p.position(),
                     p.cell(),
+                    p.tetFace(),
+                    p.tetPt(),
                     p.n(),
                     d,
                     p.T(),

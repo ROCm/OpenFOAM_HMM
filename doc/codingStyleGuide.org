@@ -2,7 +2,7 @@
 #
 #+TITLE:                 OpenFOAM C++ style guide
 #+AUTHOR:                      OpenCFD Ltd.
-#+DATE:                         April 2010
+#+DATE:                         June 2010
 #+LINK:                  http://www.opencfd.co.uk
 #+OPTIONS: author:nil ^:{}
 
@@ -13,9 +13,12 @@
     + The normal indentation is 4 spaces per logical level.
     + Use spaces for indentation, not tab characters.
     + Avoid trailing whitespace.
-    + The body of control statements (eg, if, else, while, etc).
+    + The body of control statements (eg, =if=, =else=, =while=, etc). is
       always delineated with brace brackets. A possible exception can be
-      made with 'break' or 'continue' as part of a control structure.
+      made in conjunction with =break= or =continue= as part of a control
+      structure.
+    + The body of =case= statements is usually delineated with brace brackets.
+    + A fall-through =case= should be commented as such.
 
     + stream output
       + =<<= is always four characters after the start of the stream,
@@ -72,16 +75,16 @@
     \*---------------------------------------------------------------------------*/
 #+END_EXAMPLE
 
-*** The =.H= Files
+*** The /.H/ Files
     + header file spacing
       + Leave two empty lines between sections
-        (as per functions in the =.C= file etc)
+        (as per functions in the /.C/ file etc)
 
-    + use "//- Comment" comments in header file
+    + use =//- Comment= comments in header file
       + add descriptions to class data and functions
     + destructor
       + If adding a comment to the destructor -
-        use //- and code as a normal function:
+        use =//-= and code as a normal function:
 
 #+BEGIN_EXAMPLE
     //- Destructor
@@ -89,11 +92,11 @@
 #+END_EXAMPLE
 
     + inline functions
-      + Use inline functions where appropriate in a separate classNameI.H file.
+      + Use inline functions where appropriate in a separate /classNameI.H/ file.
         Avoid cluttering the header file with function bodies.
 
-*** The =.C= Files
-    + Do not open/close namespaces in a =.C= file
+*** The /.C/ Files
+    + Do not open/close namespaces in a /.C/ file
       + Fully scope the function name, i.e.
 
 #+BEGIN_EXAMPLE
@@ -113,7 +116,7 @@
 
       EXCEPTION
 
-      When there are multiple levels of namespace, they may be used in the =.C=
+      When there are multiple levels of namespace, they may be used in the /.C/
       file, i.e.
 
 #+BEGIN_EXAMPLE
@@ -132,22 +135,25 @@
     + Use two empty lines between functions
 
 *** Coding Practice
-    + passing data as arguments or return
-      Pass bool, label and scalar as copy, anything larger by reference.
+    + passing data as arguments or return values.
+      + Pass bool, label and scalar as copy, anything larger by reference.
 
     + const
-      Use everywhere it is applicable.
+      + Use everywhere it is applicable.
 
-    + variable initialisation using "="
-
-    : const className& variableName = otherClass.data();
+    + variable initialisation using
+#+BEGIN_EXAMPLE
+    const className& variableName = otherClass.data();
+#+END_EXAMPLE
 
       NOT
 
-    : const className& variableName(otherClass.data());
+#+BEGIN_EXAMPLE
+    const className& variableName(otherClass.data());
+#+END_EXAMPLE
 
     + virtual functions
-      If a class is virtual - make all derived classes virtual.
+      + If a class is virtual, make all derived classes virtual.
 
 *** Conditional Statements
 #+BEGIN_EXAMPLE
@@ -169,7 +175,7 @@
     }
 #+END_EXAMPLE
 
-    NOT (no space between "if" and "(")
+    NOT (no space between =if= and =(= used)
 
 #+BEGIN_EXAMPLE
     if(condition)
@@ -201,7 +207,7 @@
     }
 #+END_EXAMPLE
 
-    NOT (no space between "for" and "(")
+    NOT this (no space between =for= and =(= used)
 
 #+BEGIN_EXAMPLE
     for(i = 0; i < maxI; i++)
@@ -245,7 +251,7 @@
 **** Splitting return type and function name
      + split initially after the function return type and left align
 
-     + do not put "const" onto its own line - use a split to keep it with
+     + do not put =const= onto its own line - use a split to keep it with
        the function name and arguments.
 
      so
@@ -277,7 +283,7 @@
 #+END_EXAMPLE
 
      + if it needs to be split again, split at the function name (leaving
-       behind the preceding scoping "::"s), and again, left align, i.e.
+       behind the preceding scoping =::=s), and again, left align, i.e.
 
      For example,
 
@@ -326,16 +332,19 @@
 
 *** Maths and Logic
     + operator spacing
-      + a + b, a - b
-      + a*b, a/b
-      + a & b, a ^ b
-      + a = b, a != b
-      + a < b, a > b, a >= b, a <= b
-      + a || b, a && b
+
+#+BEGIN_EXAMPLE
+      a + b, a - b
+      a*b, a/b
+      a & b, a ^ b
+      a = b, a != b
+      a < b, a > b, a >= b, a <= b
+      a || b, a && b
+#+END_EXAMPLE
 
     + splitting formulae over several lines
 
-      Split and indent as per "splitting long lines at an "=""
+      Split and indent as per "splitting long lines at an ="
       with the operator on the lower line.  Align operator so that first
       variable, function or bracket on the next line is 4 spaces indented i.e.
 
@@ -346,7 +355,7 @@
       * (k + t);
 #+END_EXAMPLE
 
-      This is sometime more legible when surrounded by extra parentheses:
+      This is sometimes more legible when surrounded by extra parentheses:
 
 #+BEGIN_EXAMPLE
     variableName =
@@ -434,15 +443,15 @@
 
 *** Doxygen Special Commands
 
-    Doxygen has a large number of special commands with a '\' prefix or a
-    (alternatively) an '@' prefix.
+    Doxygen has a large number of special commands with a =\= prefix or
+    (alternatively) an =@= prefix.
 
-    The '@' prefix form is recommended for most Doxygen specials, since it
+    The =@= prefix form is recommended for most Doxygen specials, since it
     has the advantage of standing out. It also happens to be what projects
     like gcc and VTK are using.
 
-    The '\' prefix form, however, looks a bit better for the '\n' newline
-    command and when escaping single characters - eg, '\@', '\<', '\>', etc.
+    The =\= prefix form, however, looks a bit better for the =\n= newline
+    command and when escaping single characters - eg, =\@=, =\<=, =\>=, etc.
 
     Since the filtering removes the leading 4 spaces within the blocks, the
     Doxygen commmands can be inserted within the block without problems.
@@ -511,7 +520,7 @@
 #+END_EXAMPLE
 
 
-*** Documenting Typedefs and classes defined via macros
+*** Documenting typedefs and classes defined via macros
 
     ... not yet properly resolved
 
@@ -525,9 +534,9 @@
     option.
 
     The documentation for a particular application is normally contained
-    within the first comment block in a =.C= source file. The solution is this
-    to invoke a special filter for the "applications/{solver,utilities}"
-    directories that only allows the initial comment block for the =.C= files
+    within the first comment block in a /.C/ source file. The solution is this
+    to invoke a special filter for the "/applications/{solver,utilities}/"
+    directories that only allows the initial comment block for the /.C/ files
     through.
 
     The layout of the application documentation has not yet been finalized,
@@ -551,10 +560,7 @@
     myClass.initialize()
 #+END_EXAMPLE
 
-
     The word "its" (possesive) vs. "it's" (colloquial for "it is" or "it has")
     seems to confuse non-native (and some native) English speakers.
     It is better to donate the extra keystrokes and write "it is" or "it has".
     Any remaining "it's" are likely an incorrect spelling of "its".
-
-

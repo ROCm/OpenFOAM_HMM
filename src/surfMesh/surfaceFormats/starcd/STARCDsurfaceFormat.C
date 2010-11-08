@@ -217,7 +217,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
                     (
                         triFace
                         (
-                            static_cast<UList<label>&>(triFaces[faceI])
+                            static_cast<labelUList&>(triFaces[faceI])
                         )
                     );
                     dynZones.append(zoneI);

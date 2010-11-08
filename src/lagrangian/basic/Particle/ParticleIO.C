@@ -31,7 +31,8 @@ License
 
 template<class ParticleType>
 Foam::string Foam::Particle<ParticleType>::propHeader =
-    "(Px Py Pz) cellI origProc origId";
+    "(Px Py Pz) cellI tetFaceI tetPtI origProc origId";
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -44,20 +45,24 @@ Foam::Particle<ParticleType>::Particle
 )
 :
     cloud_(cloud),
-    facei_(-1),
+    position_(),
+    cellI_(-1),
+    faceI_(-1),
     stepFraction_(0.0),
+    tetFaceI_(-1),
+    tetPtI_(-1),
     origProc_(Pstream::myProcNo()),
     origId_(-1)
 {
-
     // readFields : read additional data. Should be consistent with writeFields.
 
     if (is.format() == IOstream::ASCII)
     {
-        is >> position_ >> celli_;
+        is  >> position_ >> cellI_;
+
         if (readFields)
         {
-            is >> origProc_ >> origId_;
+            is  >> tetFaceI_ >> tetPtI_ >> origProc_ >> origId_;
         }
     }
     else
@@ -69,9 +74,11 @@ Foam::Particle<ParticleType>::Particle
             (
                 reinterpret_cast<char*>(&position_),
                 sizeof(position_)
-              + sizeof(celli_)
-              + sizeof(facei_)
+              + sizeof(cellI_)
+              + sizeof(faceI_)
               + sizeof(stepFraction_)
+              + sizeof(tetFaceI_)
+              + sizeof(tetPtI_)
               + sizeof(origProc_)
               + sizeof(origId_)
             );
@@ -82,16 +89,11 @@ Foam::Particle<ParticleType>::Particle
             (
                 reinterpret_cast<char*>(&position_),
                 sizeof(position_)
-              + sizeof(celli_)
-              + sizeof(facei_)
+              + sizeof(cellI_)
+              + sizeof(faceI_)
               + sizeof(stepFraction_)
             );
         }
-    }
-
-    if (celli_ == -1)
-    {
-        celli_ = cloud_.pMesh().findCell(position_);
     }
 
     // Check state of Istream
@@ -176,29 +178,33 @@ void Foam::Particle<ParticleType>::write(Ostream& os, bool writeFields) const
         if (writeFields)
         {
             // Write the additional entries
-            os << position_
-               << token::SPACE << celli_
-               << token::SPACE << origProc_
-               << token::SPACE << origId_;
+            os  << position_
+                << token::SPACE << cellI_
+                << token::SPACE << tetFaceI_
+                << token::SPACE << tetPtI_
+                << token::SPACE << origProc_
+                << token::SPACE << origId_;
         }
         else
         {
-            os << position_
-               << token::SPACE << celli_;
+            os  << position_
+                << token::SPACE << cellI_;
         }
     }
     else
     {
-        // In binary write both celli_ and facei_, needed for parallel transfer
+        // In binary write both cellI_ and faceI_, needed for parallel transfer
         if (writeFields)
         {
             os.write
             (
                 reinterpret_cast<const char*>(&position_),
                 sizeof(position_)
-              + sizeof(celli_)
-              + sizeof(facei_)
+              + sizeof(cellI_)
+              + sizeof(faceI_)
               + sizeof(stepFraction_)
+              + sizeof(tetFaceI_)
+              + sizeof(tetPtI_)
               + sizeof(origProc_)
               + sizeof(origId_)
             );
@@ -209,8 +215,8 @@ void Foam::Particle<ParticleType>::write(Ostream& os, bool writeFields) const
             (
                 reinterpret_cast<const char*>(&position_),
                 sizeof(position_)
-              + sizeof(celli_)
-              + sizeof(facei_)
+              + sizeof(cellI_)
+              + sizeof(faceI_)
               + sizeof(stepFraction_)
             );
         }

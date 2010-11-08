@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,7 @@ bool Foam::IOobject::readHeader(Istream& is)
     // Check Istream not already bad
     if (!is.good())
     {
-        if (rOpt_ == MUST_READ)
+        if (rOpt_ == MUST_READ || rOpt_ == MUST_READ_IF_MODIFIED)
         {
             FatalIOErrorIn("IOobject::readHeader(Istream&)", is)
                 << " stream not open for reading essential object from file "
@@ -102,7 +102,7 @@ bool Foam::IOobject::readHeader(Istream& is)
     }
     else
     {
-        if (rOpt_ == MUST_READ)
+        if (rOpt_ == MUST_READ || rOpt_ == MUST_READ_IF_MODIFIED)
         {
             FatalIOErrorIn("IOobject::readHeader(Istream&)", is)
                 << " stream failure while reading header"

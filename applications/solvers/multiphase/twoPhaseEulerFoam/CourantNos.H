@@ -1,11 +1,10 @@
 #   include "CourantNo.H"
 
 {
-    scalar UrCoNum = max
+    scalar UrCoNum = 0.5*gMax
     (
-        mesh.surfaceInterpolation::deltaCoeffs()*mag(phia - phib)
-       /mesh.magSf()
-    ).value()*runTime.deltaTValue();
+        fvc::surfaceSum(mag(phia - phib))().internalField()/mesh.V().field()
+    )*runTime.deltaTValue();
 
     Info<< "Max Ur Courant Number = " << UrCoNum << endl;
 

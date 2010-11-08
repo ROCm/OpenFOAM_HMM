@@ -32,7 +32,7 @@ License
 #include "makeParcelCollisionModels.H"
 #include "makeParcelPatchInteractionModels.H"
 #include "makeParcelPostProcessingModels.H"
-#include "makeKinematicParcelSurfaceFilmModels.H"
+#include "makeParcelSurfaceFilmModels.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,7 +45,7 @@ namespace Foam
     makeParcelCollisionModels(basicKinematicParcel);
     makeParcelPatchInteractionModels(basicKinematicParcel);
     makeParcelPostProcessingModels(basicKinematicParcel);
-    makeKinematicParcelSurfaceFilmModels(basicKinematicParcel);
+    makeParcelSurfaceFilmModels(basicKinematicParcel);
 };
 
 

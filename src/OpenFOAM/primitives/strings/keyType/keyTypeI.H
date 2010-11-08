@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,10 +22,6 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -50,7 +46,6 @@ inline Foam::keyType::keyType(const word& s)
 {}
 
 
-// Construct as copy of string. Expect it to be regular expression
 inline Foam::keyType::keyType(const string& s)
 :
     word(s, false),
@@ -58,7 +53,6 @@ inline Foam::keyType::keyType(const string& s)
 {}
 
 
-// Construct as copy of character array
 inline Foam::keyType::keyType(const char* s)
 :
     word(s, false),
@@ -66,7 +60,6 @@ inline Foam::keyType::keyType(const char* s)
 {}
 
 
-//- Construct as copy of std::string
 inline Foam::keyType::keyType
 (
     const std::string& s,

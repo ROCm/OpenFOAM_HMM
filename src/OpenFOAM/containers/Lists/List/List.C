@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -155,7 +155,7 @@ Foam::List<T>::List(List<T>& a, bool reUse)
 
 // Construct as subset
 template<class T>
-Foam::List<T>::List(const UList<T>& a, const unallocLabelList& map)
+Foam::List<T>::List(const UList<T>& a, const labelUList& map)
 :
     UList<T>(NULL, map.size())
 {
@@ -266,24 +266,6 @@ Foam::List<T>::List(const SLList<T>& lst)
 }
 
 
-// Construct as copy of IndirectList<T>
-template<class T>
-Foam::List<T>::List(const IndirectList<T>& lst)
-:
-    UList<T>(NULL, lst.size())
-{
-    if (this->size_)
-    {
-        this->v_ = new T[this->size_];
-
-        forAll(*this, i)
-        {
-            this->operator[](i) = lst[i];
-        }
-    }
-}
-
-
 // Construct as copy of UIndirectList<T>
 template<class T>
 Foam::List<T>::List(const UIndirectList<T>& lst)
@@ -381,7 +363,7 @@ void Foam::List<T>::setSize(const label newSize)
 template<class T>
 void Foam::List<T>::setSize(const label newSize, const T& a)
 {
-    label oldSize = this->size_;
+    label oldSize = label(this->size_);
     this->setSize(newSize);
 
     if (newSize > oldSize)
@@ -513,25 +495,6 @@ void Foam::List<T>::operator=(const SLList<T>& lst)
         {
             this->operator[](i++) = iter();
         }
-    }
-}
-
-
-// Assignment operator. Takes linear time.
-template<class T>
-void Foam::List<T>::operator=(const IndirectList<T>& lst)
-{
-    if (lst.size() != this->size_)
-    {
-        if (this->v_) delete[] this->v_;
-        this->v_ = 0;
-        this->size_ = lst.size();
-        if (this->size_) this->v_ = new T[this->size_];
-    }
-
-    forAll(*this, i)
-    {
-        this->operator[](i) = lst[i];
     }
 }
 

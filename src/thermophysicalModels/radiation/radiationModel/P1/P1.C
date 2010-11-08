@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -67,6 +67,19 @@ Foam::radiation::P1::P1(const volScalarField& T)
             IOobject::AUTO_WRITE
         ),
         mesh_
+    ),
+    Qr_
+    (
+        IOobject
+        (
+            "Qr",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("Qr", dimMass/pow3(dimTime), 0.0)
     ),
     a_
     (
@@ -162,6 +175,13 @@ void Foam::radiation::P1::calculate()
      ==
       - 4.0*(e_*physicoChemical::sigma*pow4(T_) + E_)
     );
+
+    // Calculate radiative heat flux on boundaries.
+    forAll(mesh_.boundaryMesh(), patchI)
+    {
+        Qr_.boundaryField()[patchI] =
+            -gamma.boundaryField()[patchI]*G_.boundaryField()[patchI].snGrad();
+    }
 }
 
 

@@ -1,40 +1,53 @@
-volScalarField rUA = 1.0/UEqn.A();
+volScalarField rAU = 1.0/UEqn.A();
 
-surfaceScalarField rUAf
+surfaceScalarField rAUf
 (
     "(rho*(1|A(U)))",
-    fvc::interpolate(rho)*fvc::interpolate(rUA)
+    fvc::interpolate(rho)*fvc::interpolate(rAU)
 );
 
-U = rUA*UEqn.H();
+U = rAU*UEqn.H();
 phi =
     fvc::interpolate(rho)
    *(
        (fvc::interpolate(U) & mesh.Sf())
-     + fvc::ddtPhiCorr(rUA, rho, U, phi)
+     + fvc::ddtPhiCorr(rAU, rho, U, phi)
     );
 
 surfaceScalarField phiU("phiU", phi);
-phi += fvc::interpolate(rho)*(g & mesh.Sf())*rUAf;
+phi -= ghf*fvc::snGrad(rho)*rAUf*mesh.magSf();
 
 for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 {
-    fvScalarMatrix pEqn
+    fvScalarMatrix p_rghEqn
     (
-        fvm::laplacian(rUAf, p) == fvc::ddt(rho) + fvc::div(phi)
+        fvm::laplacian(rAUf, p_rgh) == fvc::ddt(rho) + fvc::div(phi)
     );
 
-    pEqn.setReference(pRefCell, pRefValue);
-    pEqn.solve();
+    p_rghEqn.setReference(pRefCell, getRefCellValue(p_rgh, pRefCell));
+    p_rghEqn.solve();
 
     if (nonOrth == nNonOrthCorr)
     {
-        phi -= pEqn.flux();
+        phi -= p_rghEqn.flux();
     }
+}
+
+p == p_rgh + rho*gh;
+
+if (p_rgh.needReference())
+{
+    p += dimensionedScalar
+    (
+        "p",
+        p.dimensions(),
+        pRefValue - getRefCellValue(p, pRefCell)
+    );
+    p_rgh = p - rho*gh;
 }
 
 #include "rhoEqn.H"
 #include "compressibleContinuityErrs.H"
 
-U += rUA*fvc::reconstruct((phi - phiU)/rUAf);
+U += rAU*fvc::reconstruct((phi - phiU)/rAUf);
 U.correctBoundaryConditions();

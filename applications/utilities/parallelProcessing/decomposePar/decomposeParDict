@@ -1,10 +1,10 @@
-/*-------------------------------*- C++ -*---------------------------------*\
-|    =========                                                              |
-|    \\      /     OpenFOAM                                                 |
-|     \\    /                                                               |
-|      \\  /       The Open Source CFD Toolbox                              |
-|       \\/                                        http://www.OpenFOAM.org  |
-\*-------------------------------------------------------------------------*/
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.6                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
@@ -17,7 +17,8 @@ FoamFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-numberOfSubdomains  4;
+numberOfSubdomains  8;
+
 
 //- Keep owner and neighbour on same processor for faces in zones:
 // preserveFaceZones (heater solid1 solid3);
@@ -25,7 +26,7 @@ numberOfSubdomains  4;
 
 //- Keep owner and neighbour on same processor for faces in patches:
 //  (makes sense only for cyclic patches)
-//preservePatches (cyclic_left_right);
+//preservePatches (cyclic_half0 cyclic_half1);
 
 
 method          scotch;
@@ -33,10 +34,39 @@ method          scotch;
 // method          simple;
 // method          metis;
 // method          manual;
+// method          multiLevel;
+
+multiLevelCoeffs
+{
+    // Decomposition methods to apply in turn. This is like hierarchical but
+    // fully general - every method can be used at every level.
+
+    level0
+    {
+        numberOfSubdomains  2;
+        //method simple;
+        //simpleCoeffs
+        //{
+        //    n           (2 1 1);
+        //    delta       0.001;
+        //}
+        method scotch;
+    }
+    level1
+    {
+        numberOfSubdomains  4;
+        method scotch;
+    }
+}
+
+
+// Desired output
+
+
 
 simpleCoeffs
 {
-    n           (2 2 1);
+    n           (2 1 1);
     delta       0.001;
 }
 

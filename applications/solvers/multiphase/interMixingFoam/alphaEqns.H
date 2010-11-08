@@ -34,7 +34,8 @@
             ),
             mesh,
             dimless,
-            allLambda
+            allLambda,
+            false   // Use slices for the couples
         );
 
 
@@ -74,8 +75,8 @@
             alpha1,
             phiAlpha1BD,
             phiAlpha1,
-            zero(),
-            zero(),
+            zeroField(),
+            zeroField(),
             1,
             0,
             3
@@ -111,8 +112,8 @@
             alpha2,
             phiAlpha2BD,
             phiAlpha2,
-            zero(),
-            zero(),
+            zeroField(),
+            zeroField(),
             1,
             0,
             3

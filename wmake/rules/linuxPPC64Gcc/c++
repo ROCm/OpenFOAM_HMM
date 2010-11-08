@@ -1,6 +1,6 @@
 .SUFFIXES: .C .cxx .cc .cpp
 
-c++WARN     = -Wall -Wno-strict-aliasing -Wextra -Wno-unused-parameter -Wold-style-cast
+c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wold-style-cast
 
 CC          = g++ -m64 -mcpu=power5+
 
@@ -18,4 +18,4 @@ cpptoo      = $(Ctoo)
 LINK_LIBS   = $(c++DBUG)
 
 LINKLIBSO   = $(CC) $(c++FLAGS) -shared
-LINKEXE     = $(CC) $(c++FLAGS)
+LINKEXE     = $(CC) $(c++FLAGS) -Xlinker --add-needed

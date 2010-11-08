@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,7 @@ class primitiveMesh;
 class polyPatch;
 
 /*---------------------------------------------------------------------------*\
-                           Class treeDataFace Declaration
+                        Class treeDataFace Declaration
 \*---------------------------------------------------------------------------*/
 
 class treeDataFace
@@ -101,7 +101,15 @@ public:
         (
             const bool cacheBb,
             const primitiveMesh&,
-            const labelList&
+            const labelUList&
+        );
+
+        //- Construct from mesh and subset of faces, transferring contents
+        treeDataFace
+        (
+            const bool cacheBb,
+            const primitiveMesh&,
+            const Xfer<labelList>&
         );
 
         //- Construct from mesh. Uses all faces in mesh.
@@ -115,17 +123,17 @@ public:
 
         // Access
 
-            const labelList& faceLabels() const
+            inline const labelList& faceLabels() const
             {
                 return faceLabels_;
             }
 
-            const primitiveMesh& mesh() const
+            inline const primitiveMesh& mesh() const
             {
                 return mesh_;
             }
 
-            label size() const
+            inline label size() const
             {
                 return faceLabels_.size();
             }
@@ -156,7 +164,7 @@ public:
             //  Returns actual point and distance (squared)
             void findNearest
             (
-                const labelList& indices,
+                const labelUList& indices,
                 const point& sample,
 
                 scalar& nearestDistSqr,
@@ -168,7 +176,7 @@ public:
             //  Returns point and distance (squared)
             void findNearest
             (
-                const labelList& indices,
+                const labelUList& indices,
                 const linePointRef& ln,
 
                 treeBoundBox& tightest,
@@ -180,7 +188,7 @@ public:
                 notImplemented
                 (
                     "treeDataFace::findNearest"
-                    "(const labelList&, const linePointRef&, ..)"
+                    "(const labelUList&, const linePointRef&, ..)"
                 );
             }
 

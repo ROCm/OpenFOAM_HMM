@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,6 @@ License
 #include "sphericalCS.H"
 
 #include "one.H"
-#include "Switch.H"
 #include "mathematicalConstants.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -106,7 +105,7 @@ Foam::sphericalCS::sphericalCS
 )
 :
     coordinateSystem(name, dict),
-    inDegrees_(dict.lookupOrDefault<Switch>("degrees", true))
+    inDegrees_(dict.lookupOrDefault("degrees", true))
 {}
 
 

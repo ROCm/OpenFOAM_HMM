@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -130,8 +130,7 @@ Foam::labelList Foam::removeCells::getExposedFaces
         (
             mesh_,
             nCellsUsingFace,
-            plusEqOp<label>(),
-            false
+            plusEqOp<label>()
         );
     }
 
@@ -323,7 +322,9 @@ void Foam::removeCells::setRefinement
                 if (zoneID >= 0)
                 {
                     const faceZone& fZone = faceZones[zoneID];
-                    zoneFlip = fZone.flipMap()[fZone.whichFace(faceI)];
+                    // Note: we reverse the owner/neighbour of the face
+                    // so should also select the other side of the zone
+                    zoneFlip = !fZone.flipMap()[fZone.whichFace(faceI)];
                 }
 
                 //Pout<< "Putting exposed internal face " << faceI

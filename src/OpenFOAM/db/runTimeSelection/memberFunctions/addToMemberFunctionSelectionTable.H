@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,8 @@ Description
                                                                               \
     /* Add the thisType memberFunction to the table, find by lookup name */   \
     baseType::add##memberFunction##argNames##MemberFunctionToTable<thisType>  \
-    add_##lookup##_##thisType##memberFunction##argNames##MemberFunctionTo##baseType##Table_(#lookup)
+    add_##lookup##_##thisType##memberFunction##argNames##MemberFunctionTo##   \
+    baseType##Table_(#lookup)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -63,8 +64,10 @@ Description
 (baseType,thisType,Targ,memberFunction,argNames)                              \
                                                                               \
     /* Add the thisType memberFunction to the table */                        \
-    baseType::add##memberFunction##argNames##MemberFunctionToTable<thisType<Targ> > \
-    add##thisType##Targ##memberFunction##argNames##MemberFunctionTo##baseType##Table_
+    baseType::add##memberFunction##argNames##                                 \
+    MemberFunctionToTable<thisType<Targ> >                                    \
+    add##thisType##Targ##memberFunction##argNames##MemberFunctionTo##         \
+    baseType##Table_
 
 
 // add to hash-table of functions with 'lookup' as the key
@@ -73,24 +76,30 @@ Description
 (baseType,thisType,Targ,memberFunction,argNames,lookup)                       \
                                                                               \
     /* Add the thisType memberFunction to the table, find by lookup name */   \
-    baseType::add##memberFunction##argNames##MemberFunctionToTable<thisType<Targ> > \
-    add_##lookup##_##thisType##Targ##memberFunction##argNames##MemberFunctionTo##baseType##Table_(#lookup)
+    baseType::add##memberFunction##argNames##                                 \
+    MemberFunctionToTable<thisType<Targ> >                                    \
+    add_##lookup##_##thisType##Targ##memberFunction##argNames##               \
+    MemberFunctionTo##baseType##Table_(#lookup)
 
 // use when baseType requires the Targ template argument as well
 #define addTemplatedToMemberFunctionSelectionTable\
 (baseType,thisType,Targ,memberFunction,argNames)                              \
                                                                               \
     /* Add the thisType memberFunction to the table */                        \
-    baseType<Targ>::add##memberFunction##argNames##MemberFunctionToTable<thisType<Targ> > \
-    add##thisType##Targ##memberFunction##argNames##MemberFunctionTo##baseType##Targ##Table_
+    baseType<Targ>::add##memberFunction##argNames##                           \
+    MemberFunctionToTable<thisType<Targ> >                                    \
+    add##thisType##Targ##memberFunction##argNames##MemberFunctionTo##         \
+    baseType##Targ##Table_
 
 // use when baseType requires the Targ template argument as well
 #define addNamedTemplatedToMemberFunctionSelectionTable\
 (baseType,thisType,Targ,memberFunction,argNames,lookup)                       \
                                                                               \
     /* Add the thisType memberFunction to the table, find by lookup name */   \
-    baseType<Targ>::add##memberFunction##argNames##MemberFunctionToTable<thisType<Targ> > \
-    add_##lookup##_##thisType##Targ##memberFunction##argNames##MemberFunctionTo##baseType##Targ##Table_(#lookup)
+    baseType<Targ>::add##memberFunction##argNames##                           \
+    MemberFunctionToTable<thisType<Targ> >                                    \
+    add_##lookup##_##thisType##Targ##memberFunction##argNames##               \
+    MemberFunctionTo##baseType##Targ##Table_(#lookup)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -102,8 +111,10 @@ Description
 (baseType,thisType,Targ,memberFunction,argNames)                              \
                                                                               \
     /* Add the thisType memberFunction to the table */                        \
-    baseType<Targ>::add##memberFunction##argNames##MemberFunctionToTable<thisType<Targ> > \
-    add##thisType##Targ##memberFunction##argNames##MemberFunctionTo##baseType##Targ##Table_
+    baseType<Targ>::add##memberFunction##argNames##                           \
+    MemberFunctionToTable<thisType<Targ> >                                    \
+    add##thisType##Targ##memberFunction##argNames##MemberFunctionTo##         \
+    baseType##Targ##Table_
 
 
 // add to hash-table of functions with 'lookup' as the key
@@ -112,8 +123,10 @@ Description
 (baseType,thisType,Targ,memberFunction,argNames,lookup)                       \
                                                                               \
     /* Add the thisType memberFunction to the table, find by lookup name */   \
-    baseType<Targ>::add##memberFunction##argNames##MemberFunctionToTable<thisType<Targ> > \
-    add_##lookup##_##thisType##Targ##memberFunction##argNames##MemberFunctionTo##baseType##Targ##Table_(#lookup)
+    baseType<Targ>::add##memberFunction##argNames##                           \
+    MemberFunctionToTable<thisType<Targ> >                                    \
+    add_##lookup##_##thisType##Targ##memberFunction##argNames##               \
+    MemberFunctionTo##baseType##Targ##Table_(#lookup)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,11 +39,12 @@ Description
 #include "hCombustionThermo.H"
 #include "turbulenceModel.H"
 #include "basicThermoCloud.H"
-#include "CoalCloud.H"
+#include "coalCloud.H"
 #include "psiChemistryModel.H"
 #include "chemistrySolver.H"
 #include "timeActivatedExplicitSource.H"
 #include "radiationModel.H"
+#include "SLGThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -89,16 +90,27 @@ int main(int argc, char *argv[])
         #include "rhoEqn.H"
 
         // --- PIMPLE loop
-        for (int ocorr=1; ocorr<=nOuterCorr; ocorr++)
+        for (int oCorr=0; oCorr<nOuterCorr; oCorr++)
         {
+            bool finalIter = oCorr == nOuterCorr - 1;
+            if (finalIter)
+            {
+                mesh.data::add("finalIteration", true);
+            }
+
             #include "UEqn.H"
             #include "YEqn.H"
             #include "hsEqn.H"
 
             // --- PISO loop
-            for (int corr=1; corr<=nCorr; corr++)
+            for (int corr=0; corr<nCorr; corr++)
             {
                 #include "pEqn.H"
+            }
+
+            if (finalIter)
+            {
+                mesh.data::remove("finalIteration");
             }
         }
 

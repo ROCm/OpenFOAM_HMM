@@ -29,6 +29,8 @@ License
 #include "IStringStream.H"
 #include "octree.H"
 #include "octreeDataCell.H"
+#include "indexedOctree.H"
+#include "treeDataCell.H"
 #include "OFstream.H"
 
 using namespace Foam;
@@ -44,11 +46,13 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createMesh.H"
 
+    label nReps = 100000;
+
     const point sample = args.argRead<point>(1);
 
-    treeBoundBox meshBb(mesh.points());
+    treeBoundBox meshBb(mesh.bounds());
 
-    // Calculate typical cell releated size to shift bb by.
+    // Calculate typical cell related size to shift bb by.
     scalar typDim = meshBb.avgDim()/(2.0*Foam::cbrt(scalar(mesh.nCells())));
 
     treeBoundBox shiftedBb
@@ -57,16 +61,13 @@ int main(int argc, char *argv[])
         meshBb.max() + vector(typDim, typDim, typDim)
     );
 
-
     Info<< "Mesh" << endl;
     Info<< "   bounding box           : " << meshBb << endl;
     Info<< "   bounding box (shifted) : " << shiftedBb << endl;
     Info<< "   typical dimension      : " << shiftedBb.typDim() << endl;
 
-
-    /*
-     * Now we have allBb and shiftedBb
-     */
+    Info<< "Initialised mesh in "
+        << runTime.cpuTimeIncrement() << " s" << endl;
 
     // Wrap indices and mesh information into helper object
     octreeDataCell shapes(mesh);
@@ -80,14 +81,52 @@ int main(int argc, char *argv[])
         10.0        // maximum ratio of cubes v.s. cells
     );
 
-    Info<< "Point:" << sample << " is in shape "
-        << oc.find(sample) << nl
-        << "Point:" << sample << " is in cell  "
-        << mesh.findCell(sample) << endl;
+    for (label i = 0; i < nReps - 1 ; i++)
+    {
+        oc.find(sample);
+    }
 
+    Info<< "Point:" << sample << " is in shape "
+        << oc.find(sample) << endl;
 
     oc.printStats(Info);
 
+    Info<< "Found in octree " << nReps << " times in "
+        << runTime.cpuTimeIncrement() << " s" << endl;
+
+    indexedOctree<treeDataCell> ioc
+    (
+        treeDataCell(true, mesh),
+        shiftedBb,
+        8,      // maxLevel
+        10,     // leafsize
+        3.0     // duplicity
+    );
+
+    for (label i = 0; i < nReps - 1 ; i++)
+    {
+        ioc.findInside(sample);
+    }
+
+    Info<< "Point:" << sample << " is in shape "
+        << ioc.findInside(sample)
+        << ", where the possible cells were:" << nl
+        << ioc.findIndices(sample)
+        << endl;
+
+    Info<< "Found in indexedOctree " << nReps << " times in "
+        << runTime.cpuTimeIncrement() << " s" << endl;
+
+    for (label i = 0; i < nReps - 1 ; i++)
+    {
+        mesh.findCell(sample);
+    }
+
+    Info<< "Point:" << sample << " is in cell  "
+        << mesh.findCell(sample) << endl;
+
+    Info<< "Found in mesh.findCell " << nReps << " times in "
+        << runTime.cpuTimeIncrement() << " s" << endl;
 
     Info<< "End\n" << endl;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,6 +36,26 @@ Foam::hConstThermo<equationOfState>::hConstThermo(Istream& is)
     Hf_(readScalar(is))
 {
     is.check("hConstThermo::hConstThermo(Istream& is)");
+}
+
+
+template<class equationOfState>
+Foam::hConstThermo<equationOfState>::hConstThermo(const dictionary& dict)
+:
+    equationOfState(dict),
+    Cp_(readScalar(dict.lookup("Cp"))),
+    Hf_(readScalar(dict.lookup("Hf")))
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class equationOfState>
+void Foam::hConstThermo<equationOfState>::write(Ostream& os) const
+{
+    equationOfState::write(os);
+    os.writeKeyword("Cp") << Cp_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Hf") << Hf_ << token::END_STATEMENT << nl;
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
 #include "sammMesh.H"
 #include "Time.H"
 #include "wallPolyPatch.H"
-#include "cyclicPolyPatch.H"
+#include "oldCyclicPolyPatch.H"
 #include "symmetryPolyPatch.H"
 #include "preservePatchTypes.H"
 #include "IFstream.H"
@@ -208,7 +208,7 @@ void sammMesh::readBoundary()
             {
                 // incorrect. should be cyclicPatch but this
                 // requires info on connected faces.
-                patchTypes_[patchLabel] = cyclicPolyPatch::typeName;
+                patchTypes_[patchLabel] = oldCyclicPolyPatch::typeName;
             }
             else
             {
@@ -230,17 +230,28 @@ void sammMesh::readBoundary()
 
     patchPhysicalTypes_.setSize(patchTypes_.size());
 
+    PtrList<dictionary> patchDicts;
+
     preservePatchTypes
     (
         runTime_,
         runTime_.constant(),
-        polyMesh::defaultRegion,
+        polyMesh::meshSubDir,
         patchNames_,
-        patchTypes_,
+        patchDicts,
         defaultFacesName_,
-        defaultFacesType_,
-        patchPhysicalTypes_
+        defaultFacesType_
     );
+
+    forAll(patchDicts, patchI)
+    {
+        if (patchDicts.set(patchI))
+        {
+            const dictionary& dict = patchDicts[patchI];
+            dict.readIfPresent("type", patchTypes_[patchI]);
+            dict.readIfPresent("physicalType", patchPhysicalTypes_[patchI]);
+        }
+    }
 }
 
 

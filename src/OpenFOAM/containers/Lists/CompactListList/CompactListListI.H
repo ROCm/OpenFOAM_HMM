@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -207,7 +207,7 @@ inline void Foam::CompactListList<T, Container>::resize
 template<class T, class Container>
 inline void Foam::CompactListList<T, Container>::resize
 (
-    const UList<label>& rowSizes
+    const labelUList& rowSizes
 )
 {
     this->setSize(rowSizes);

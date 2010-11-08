@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,11 +49,11 @@ template<class Type>
 Type interpolationCell<Type>::interpolate
 (
     const vector&,
-    const label celli,
+    const label cellI,
     const label
 ) const
 {
-    return this->psi_[celli];
+    return this->psi_[cellI];
 }
 
 

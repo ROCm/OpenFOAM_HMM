@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,13 @@ Class
     Foam::directMappedFixedValueFvPatchField
 
 Description
-    Recycles the value at a set of internal faces back to *this.
+    Recycles the value at a set of cells or patch faces back to *this. Can not
+    sample internal faces (since volField not defined on faces).
+
+    mode = NEARESTCELL : sample nearest cell
+    mode = NEARESTPATCHFACE : sample nearest face on selected patch
+    mode = NEARESTFACE : sample nearest face on any patch. Note: does not
+                         warn if nearest actually is on internal face!
 
 SourceFiles
     directMappedFixedValueFvPatchField.C

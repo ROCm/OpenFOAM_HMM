@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,41 +45,41 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 
-template<class thermo> class constTransport;
+template<class Thermo> class constTransport;
 
-template<class thermo>
-inline constTransport<thermo> operator+
+template<class Thermo>
+inline constTransport<Thermo> operator+
 (
-    const constTransport<thermo>&,
-    const constTransport<thermo>&
+    const constTransport<Thermo>&,
+    const constTransport<Thermo>&
 );
 
-template<class thermo>
-inline constTransport<thermo> operator-
+template<class Thermo>
+inline constTransport<Thermo> operator-
 (
-    const constTransport<thermo>&,
-    const constTransport<thermo>&
+    const constTransport<Thermo>&,
+    const constTransport<Thermo>&
 );
 
-template<class thermo>
-inline constTransport<thermo> operator*
+template<class Thermo>
+inline constTransport<Thermo> operator*
 (
     const scalar,
-    const constTransport<thermo>&
+    const constTransport<Thermo>&
 );
 
-template<class thermo>
-inline constTransport<thermo> operator==
+template<class Thermo>
+inline constTransport<Thermo> operator==
 (
-    const constTransport<thermo>&,
-    const constTransport<thermo>&
+    const constTransport<Thermo>&,
+    const constTransport<Thermo>&
 );
 
-template<class thermo>
+template<class Thermo>
 Ostream& operator<<
 (
     Ostream&,
-    const constTransport<thermo>&
+    const constTransport<Thermo>&
 );
 
 
@@ -87,15 +87,18 @@ Ostream& operator<<
                            Class constTransport Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class thermo>
+template<class Thermo>
 class constTransport
 :
-    public thermo
+    public Thermo
 {
     // Private data
 
-        //- Constant viscosity and reciprocal Prandtl Number.
-        scalar Mu, rPr;
+        //- Constant dynamic viscosity [Pa.s]
+        scalar mu_;
+
+        //- Reciprocal Prandtl Number []
+        scalar rPr_;
 
 
     // Private Member Functions
@@ -103,8 +106,8 @@ class constTransport
         //- Construct from components
         inline constTransport
         (
-            const thermo& t,
-            const scalar nu,
+            const Thermo& t,
+            const scalar mu,
             const scalar Pr
         );
 
@@ -118,6 +121,9 @@ public:
 
         //- Construct from Istream
         constTransport(Istream&);
+
+        //- Construct from dictionary
+        constTransport(const dictionary& dict);
 
 
     // Member functions
@@ -134,6 +140,9 @@ public:
         // Species diffusivity
         //inline scalar D(const scalar T) const;
 
+        //- Write to Ostream
+        void write(Ostream& os) const;
+
 
     // Member operators
 
@@ -145,25 +154,25 @@ public:
 
     // Friend operators
 
-        friend constTransport operator+ <thermo>
+        friend constTransport operator+ <Thermo>
         (
             const constTransport&,
             const constTransport&
         );
 
-        friend constTransport operator- <thermo>
+        friend constTransport operator- <Thermo>
         (
             const constTransport&,
             const constTransport&
         );
 
-        friend constTransport operator* <thermo>
+        friend constTransport operator* <Thermo>
         (
             const scalar,
             const constTransport&
         );
 
-        friend constTransport operator== <thermo>
+        friend constTransport operator== <Thermo>
         (
             const constTransport&,
             const constTransport&
@@ -172,7 +181,7 @@ public:
 
     // Ostream Operator
 
-        friend Ostream& operator<< <thermo>
+        friend Ostream& operator<< <Thermo>
         (
             Ostream&,
             const constTransport&

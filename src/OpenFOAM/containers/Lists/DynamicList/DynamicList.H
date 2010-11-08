@@ -44,6 +44,7 @@ SourceFiles
 #define DynamicList_H
 
 #include "List.H"
+#include "StaticAssert.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -78,6 +79,9 @@ class DynamicList
 :
     public List<T>
 {
+    //- Avoid invalid sizing parameters
+    StaticAssert((SizeInc || SizeMult) && SizeDiv);
+
     // Private data
 
         //- The capacity (allocated size) of the underlying list.
@@ -180,13 +184,22 @@ public:
         // Member Operators
 
             //- Append an element at the end of the list
-            inline void append(const T&);
+            inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& append
+            (
+                const T&
+            );
 
             //- Append a List at the end of this list
-            inline void append(const UList<T>&);
+            inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& append
+            (
+                const UList<T>&
+            );
 
             //- Append a UIndirectList at the end of this list
-            inline void append(const UIndirectList<T>&);
+            inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& append
+            (
+                const UIndirectList<T>&
+            );
 
             //- Remove and return the top element
             inline T remove();
@@ -206,6 +219,10 @@ public:
 
             //- Assignment from UList
             inline void operator=(const UList<T>&);
+
+            //- Assignment from UIndirectList
+            inline void operator=(const UIndirectList<T>&);
+
 
 
         // IOstream operators

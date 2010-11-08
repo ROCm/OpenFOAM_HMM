@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -18,20 +18,20 @@ FoamFile
 actions
 (
     {
-        name c0;
-        type cellSet;
-        action new;
-        source boxToCell;
-        sourceDict
+        name    c0;
+        type    cellSet;
+        action  new;
+        source  boxToCell;
+        sourceInfo
         {
-           box   (0.35 0.35 0.44) (0.65 0.65 0.56);
+            box (0.35 0.35 0.44) (0.65 0.65 0.56);
         }
     }
 
     {
-        name c0;
-        type cellSet;
-        action invert;
+        name    c0;
+        type    cellSet;
+        action  invert;
     }
 );
 

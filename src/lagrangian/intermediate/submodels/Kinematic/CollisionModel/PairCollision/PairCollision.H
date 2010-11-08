@@ -36,6 +36,7 @@ SourceFiles
 
 #include "CollisionModel.H"
 #include "InteractionLists.H"
+#include "WallSiteData.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -74,9 +75,6 @@ class PairCollision
 
 
     // Private data
-
-        //- Cell occupancy information for each parcel
-        List<DynamicList<typename CloudType::parcelType*> > cellOccupancy_;
 
         //- PairModel to calculate the interaction between two parcels
         autoPtr<PairModel<CloudType> > pairModel_;
@@ -123,9 +121,6 @@ class PairCollision
         //- Post collision tasks
         void postInteraction();
 
-        //- Build the cell occupancy information for each parcel
-        void buildCellOccupancy();
-
         //- Calculate the pair force between parcels
         void evaluatePair
         (
@@ -137,8 +132,10 @@ class PairCollision
         void evaluateWall
         (
             typename CloudType::parcelType& p,
-            const List<point>& flatSites,
-            const List<point>& sharpSites
+            const List<point>& flatSitePoints,
+            const List<WallSiteData<vector> >& flatSiteData,
+            const List<point>& sharpSitePoints,
+            const List<WallSiteData<vector> >& sharpSiteData
         ) const;
 
 
@@ -150,12 +147,20 @@ public:
 
     // Constructors
 
-        //- Construct from dictionary
-        PairCollision
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+        //- Construct from components
+        PairCollision(const dictionary& dict, CloudType& owner);
+
+        //- Construct copy
+        PairCollision(PairCollision<CloudType>& cm);
+
+        //- Construct and return a clone
+        virtual autoPtr<CollisionModel<CloudType> > clone()
+        {
+            return autoPtr<CollisionModel<CloudType> >
+            (
+                new PairCollision<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -168,8 +173,9 @@ public:
         //  timestep to meet the criteria of the collision model.
         virtual label nSubCycles() const;
 
-        //- Flag to indicate whether model activates injection model
-        virtual bool active() const;
+        //- Indicates whether model determines wall collisions or not,
+        //  used to determine what value to use for wallImpactDistance
+        virtual bool controlsWallInteraction() const;
 
         // Collision function
         virtual void collide();

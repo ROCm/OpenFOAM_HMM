@@ -18,4 +18,10 @@ wmake libso radiation
 wmake libso barotropicCompressibilityModel
 wmake libso thermalPorousZone
 
+wmake libso SLGThermo
+
+# Should be combined with solids&solidMixture
+wmake libso basicSolidThermo
+
+
 # ----------------------------------------------------------------- end-of-file

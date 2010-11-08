@@ -11,16 +11,16 @@
 
     surfaceScalarField rhof = fvc::interpolate(rho, "rhof");
 
-    volScalarField rUA = 1.0/UEqn.A();
-    surfaceScalarField rUAf("rUAf", rhof*fvc::interpolate(rUA));
-    volVectorField HbyA = rUA*UEqn.H();
+    volScalarField rAU = 1.0/UEqn.A();
+    surfaceScalarField rAUf("rAUf", rhof*fvc::interpolate(rAU));
+    volVectorField HbyA = rAU*UEqn.H();
 
     phiv = (fvc::interpolate(HbyA) & mesh.Sf())
-         + fvc::ddtPhiCorr(rUA, rho, U, phiv);
+         + fvc::ddtPhiCorr(rAU, rho, U, phiv);
 
     p.boundaryField().updateCoeffs();
 
-    surfaceScalarField phiGradp = rUAf*mesh.magSf()*fvc::snGrad(p);
+    surfaceScalarField phiGradp = rAUf*mesh.magSf()*fvc::snGrad(p);
 
     phiv -= phiGradp/rhof;
 
@@ -34,7 +34,7 @@
           - (rhol0 + (psil - psiv)*pSat)*fvc::ddt(gamma) - pSat*fvc::ddt(psi)
           + fvc::div(phiv, rho)
           + fvc::div(phiGradp)
-          - fvm::laplacian(rUAf, p)
+          - fvm::laplacian(rAUf, p)
         );
 
         if (corr == nCorr-1 && nonOrth == nNonOrthCorr)
@@ -52,11 +52,34 @@
         }
     }
 
-    Info<< "max-min p: " << max(p).value()
+    Info<< "Predicted p max-min : " << max(p).value()
         << " " << min(p).value() << endl;
 
+    rho == max
+    (
+        psi*p
+      + (1.0 - gamma)*rhol0
+      + ((gamma*psiv + (1.0 - gamma)*psil) - psi)*pSat,
+        rhoMin
+    );
 
-    U = HbyA - rUA*fvc::grad(p);
+    #include "gammaPsi.H"
+
+    p =
+    (
+        rho
+      - (1.0 - gamma)*rhol0
+      - ((gamma*psiv + (1.0 - gamma)*psil) - psi)*pSat
+    )/psi;
+
+    p.correctBoundaryConditions();
+
+    Info<< "Phase-change corrected p max-min : " << max(p).value()
+        << " " << min(p).value() << endl;
+
+    // Correct velocity
+
+    U = HbyA - rAU*fvc::grad(p);
 
     // Remove the swirl component of velocity for "wedge" cases
     if (piso.found("removeSwirl"))
@@ -70,17 +93,4 @@
     U.correctBoundaryConditions();
 
     Info<< "max(U) " << max(mag(U)).value() << endl;
-
-    rho == max
-    (
-        psi*p
-      + (1.0 - gamma)*rhol0
-      + ((gamma*psiv + (1.0 - gamma)*psil) - psi)*pSat,
-        rhoMin
-    );
-
-    Info<< "max-min rho: " << max(rho).value()
-        << " " << min(rho).value() << endl;
-
-    #include "gammaPsi.H"
 }

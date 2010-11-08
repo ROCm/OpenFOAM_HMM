@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,34 +30,33 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Is the point in the cell bounding box
-bool Foam::primitiveMesh::pointInCellBB(const point& p, label celli) const
+bool Foam::primitiveMesh::pointInCellBB
+(
+    const point& p,
+    label celli,
+    scalar tol
+) const
 {
-    const pointField& points = this->points();
-    const faceList& f = faces();
-    const vectorField& centres = cellCentres();
-    const cellList& cf = cells();
+    boundBox bb
+    (
+        cells()[celli].points
+        (
+            faces(),
+            points()
+        ),
+        false
+    );
 
-    labelList cellVertices = cf[celli].labels(f);
-
-    vector bbmax = -GREAT*vector::one;
-    vector bbmin = GREAT*vector::one;
-
-    forAll(cellVertices, vertexI)
+    if (tol > SMALL)
     {
-        bbmax = max(bbmax, points[cellVertices[vertexI]]);
-        bbmin = min(bbmin, points[cellVertices[vertexI]]);
+        bb = boundBox
+        (
+            bb.min() - tol*bb.span(),
+            bb.max() + tol*bb.span()
+        );
     }
 
-    scalar distance = mag(centres[celli] - p);
-
-    if ((distance - mag(bbmax - bbmin)) < SMALL)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return bb.contains(p);
 }
 
 

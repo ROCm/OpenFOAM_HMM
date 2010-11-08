@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,7 @@ License
 \*----------------------------------------------------------------------------*/
 
 #include "streamLineParticle.H"
-#include "vectorIOFieldField.H"
-
+#include "vectorFieldIOField.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -36,6 +35,25 @@ namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+// Estimate dt to cross cell in a few steps
+Foam::scalar Foam::streamLineParticle::calcSubCycleDeltaT
+(
+    streamLineParticle::trackData& td,
+    const scalar dt,
+    const vector& U
+) const
+{
+    streamLineParticle testParticle(*this);
+    bool oldKeepParticle = td.keepParticle;
+    bool oldSwitchProcessor = td.switchProcessor;
+    scalar fraction = testParticle.trackToFace(position()+dt*U, td);
+    td.keepParticle = oldKeepParticle;
+    td.switchProcessor = oldSwitchProcessor;
+    // Adapt the dt to subdivide the trajectory into 4 substeps.
+    return dt*fraction/td.nSubCycle_;
+}
+
 
 Foam::vector Foam::streamLineParticle::interpolateFields
 (
@@ -89,11 +107,11 @@ Foam::streamLineParticle::streamLineParticle
 (
     const Cloud<streamLineParticle>& c,
     const vector& position,
-    const label celli,
+    const label cellI,
     const label lifeTime
 )
 :
-    Particle<streamLineParticle>(c, position, celli),
+    Particle<streamLineParticle>(c, position, cellI),
     lifeTime_(lifeTime)
 {}
 
@@ -153,13 +171,16 @@ Foam::streamLineParticle::streamLineParticle
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::streamLineParticle::move(streamLineParticle::trackData& td)
+bool Foam::streamLineParticle::move
+(
+    streamLineParticle::trackData& td,
+    const scalar trackTime
+)
 {
     td.switchProcessor = false;
     td.keepParticle = true;
 
-    scalar deltaT = GREAT;  //cloud().pMesh().time().deltaTValue();
-    scalar tEnd = (1.0 - stepFraction())*deltaT;
+    scalar tEnd = (1.0 - stepFraction())*trackTime;
     scalar dtMax = tEnd;
 
     while
@@ -167,27 +188,61 @@ bool Foam::streamLineParticle::move(streamLineParticle::trackData& td)
         td.keepParticle
     && !td.switchProcessor
     && lifeTime_ > 0
-    && tEnd > ROOTVSMALL
     )
     {
         // set the lagrangian time-step
         scalar dt = min(dtMax, tEnd);
 
-        // Store current position and sampled velocity.
-        --lifeTime_;
-        sampledPositions_.append(position());
-        vector U = interpolateFields(td, position(), cell());
-
-        if (!td.trackForward_)
+        // Cross cell in steps:
+        // - at subiter 0 calculate dt to cross cell in nSubCycle steps
+        // - at the last subiter do all of the remaining track
+        // - do a few more subiters than nSubCycle since velocity might
+        //   be decreasing
+        for (label subIter = 0; subIter < 2*td.nSubCycle_; subIter++)
         {
-            U = -U;
+            --lifeTime_;
+
+            // Store current position and sampled velocity.
+            sampledPositions_.append(position());
+            vector U = interpolateFields(td, position(), cell());
+
+            if (!td.trackForward_)
+            {
+                U = -U;
+            }
+
+
+            if (subIter == 0 && td.nSubCycle_ > 1)
+            {
+                // Adapt dt to cross cell in a few steps
+                dt = calcSubCycleDeltaT(td, dt, U);
+            }
+            else if (subIter == td.nSubCycle_-1)
+            {
+                // Do full step on last subcycle
+                dt = min(dtMax, tEnd);
+            }
+
+
+            scalar fraction = trackToFace(position()+dt*U, td);
+            dt *= fraction;
+
+            tEnd -= dt;
+            stepFraction() = 1.0 - tEnd/trackTime;
+
+            if (tEnd <= ROOTVSMALL)
+            {
+                // Force removal
+                lifeTime_ = 0;
+            }
+
+            if (!td.keepParticle || td.switchProcessor || lifeTime_ == 0)
+            {
+                break;
+            }
         }
-
-        dt *= trackToFace(position()+dt*U, td);
-
-        tEnd -= dt;
-        stepFraction() = 1.0 - tEnd/deltaT;
     }
+
 
     if (!td.keepParticle || lifeTime_ == 0)
     {
@@ -247,7 +302,9 @@ bool Foam::streamLineParticle::hitPatch
 (
     const polyPatch&,
     streamLineParticle::trackData& td,
-    const label patchI
+    const label patchI,
+    const scalar trackFraction,
+    const tetIndices& tetIs
 )
 {
     // Disable generic patch interaction
@@ -259,7 +316,9 @@ bool Foam::streamLineParticle::hitPatch
 (
     const polyPatch&,
     int&,
-    const label
+    const label,
+    const scalar,
+    const tetIndices&
 )
 {
     // Disable generic patch interaction
@@ -346,7 +405,8 @@ void Foam::streamLineParticle::hitProcessorPatch
 void Foam::streamLineParticle::hitWallPatch
 (
     const wallPolyPatch& wpp,
-    streamLineParticle::trackData& td
+    streamLineParticle::trackData& td,
+    const tetIndices&
 )
 {
     // Remove particle
@@ -357,7 +417,8 @@ void Foam::streamLineParticle::hitWallPatch
 void Foam::streamLineParticle::hitWallPatch
 (
     const wallPolyPatch& wpp,
-    int&
+    int&,
+    const tetIndices&
 )
 {}
 
@@ -394,13 +455,13 @@ void Foam::streamLineParticle::readFields(Cloud<streamLineParticle>& c)
     );
     c.checkFieldIOobject(c, lifeTime);
 
-    vectorIOFieldField sampledPositions
+    vectorFieldIOField sampledPositions
     (
         c.fieldIOobject("sampledPositions", IOobject::MUST_READ)
     );
     c.checkFieldIOobject(c, sampledPositions);
 
-//    vectorIOFieldField sampleVelocity
+//    vectorFieldIOField sampleVelocity
 //    (
 //        c.fieldIOobject("sampleVelocity", IOobject::MUST_READ)
 //    );
@@ -428,12 +489,12 @@ void Foam::streamLineParticle::writeFields(const Cloud<streamLineParticle>& c)
         c.fieldIOobject("lifeTime", IOobject::NO_READ),
         np
     );
-    vectorIOFieldField sampledPositions
+    vectorFieldIOField sampledPositions
     (
         c.fieldIOobject("sampledPositions", IOobject::NO_READ),
         np
     );
-//    vectorIOFieldField sampleVelocity
+//    vectorFieldIOField sampleVelocity
 //    (
 //        c.fieldIOobject("sampleVelocity", IOobject::NO_READ),
 //        np

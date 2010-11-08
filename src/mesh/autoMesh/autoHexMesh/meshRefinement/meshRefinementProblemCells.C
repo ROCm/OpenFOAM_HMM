@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -496,8 +496,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
         mesh_,
         isBoundaryPoint,
         orEqOp<bool>(),
-        false,              // null value
-        false               // no separation
+        false               // null value
     );
 
     syncTools::syncEdgeList
@@ -505,16 +504,14 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
         mesh_,
         isBoundaryEdge,
         orEqOp<bool>(),
-        false,              // null value
-        false               // no separation
+        false               // null value
     );
 
     syncTools::syncFaceList
     (
         mesh_,
         isBoundaryFace,
-        orEqOp<bool>(),
-        false               // no separation
+        orEqOp<bool>()
     );
 
 
@@ -522,11 +519,9 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Collapse checking parameters
-    scalar volFraction = -1;
-    if (motionDict.found("minVolCollapseRatio"))
-    {
-        volFraction = readScalar(motionDict.lookup("minVolCollapseRatio"));
-    }
+    const scalar volFraction =
+        motionDict.lookupOrDefault<scalar>("minVolCollapseRatio", -1);
+
     const bool checkCollapse = (volFraction > 0);
     scalar minArea = -1;
     scalar maxNonOrtho = -1;
@@ -807,8 +802,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
         mesh_,
         isBoundaryPoint,
         orEqOp<bool>(),
-        false,              // null value
-        false               // no separation
+        false               // null value
     );
 
     syncTools::syncEdgeList
@@ -816,16 +810,14 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
         mesh_,
         isBoundaryEdge,
         orEqOp<bool>(),
-        false,              // null value
-        false               // no separation
+        false               // null value
     );
 
     syncTools::syncFaceList
     (
         mesh_,
         isBoundaryFace,
-        orEqOp<bool>(),
-        false               // no separation
+        orEqOp<bool>()
     );
 
 
@@ -1109,8 +1101,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
 //    (
 //        mesh_,
 //        facePatch,
-//        maxEqOp<label>(),
-//        false               // no separation
+//        maxEqOp<label>()
 //    );
 //
 //    return facePatch;

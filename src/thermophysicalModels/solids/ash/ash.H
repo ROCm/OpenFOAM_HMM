@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,8 +46,8 @@ class ash;
 
 Ostream& operator<<
 (
-     Ostream&,
-     const ash&
+    Ostream&,
+    const ash&
 );
 
 
@@ -76,6 +76,18 @@ public:
 
         //- Construct from Istream
         ash(Istream& is);
+
+        //- Construct from dictionary
+        ash(const dictionary& dict);
+
+        //- Construct copy
+        ash(const ash& s);
+
+        //- Construct and return clone
+        virtual autoPtr<solid> clone() const
+        {
+            return autoPtr<solid>(new ash(*this));
+        }
 
 
     // I-O

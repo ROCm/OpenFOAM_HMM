@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -76,7 +76,11 @@ class surfaceSets
     // Static
 
         ////- Min length of connected mesh edges
-        //static scalar minEdgeLen(const primitiveMesh& mesh, const label pointI);
+        //static scalar minEdgeLen
+        //(
+        //    const primitiveMesh& mesh,
+        //    const label pointI
+        //);
         //
         ////- Returns true if cell uses at least one selected point
         //static bool usesPoint
@@ -97,10 +101,9 @@ class surfaceSets
         //    labelHashSet& internalCells
         //);
 
-        ////- Select all points out of pointSet where the distance to the surface
-        ////  is less
-        ////  than a factor times a local length scale (minimum length of
-        ////  connected edges)
+        ////- Select all points out of pointSet where the distance to
+        ////  the surface is less than a factor times a local length
+        ////  scale (minimum length of connected edges)
         //static void getNearPoints
         //(
         //    const primitiveMesh& mesh,

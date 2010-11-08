@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,10 +22,16 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
+    Foam::wordUList
+
+Description
+    A UList of words.
+
+Typedef
     Foam::wordList
 
 Description
-    List of words.
+    A List of words.
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,6 +45,8 @@ Description
 
 namespace Foam
 {
+    typedef UList<word> wordUList;
+
     typedef List<word> wordList;
 }
 

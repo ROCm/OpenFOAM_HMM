@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -164,8 +164,8 @@ private:
 
         // Construction
 
-            //- Split list of indices into 8 bins according to where they are in
-            //  relation to mid.
+            //- Split list of indices into 8 bins
+            //  according to where they are in relation to mid.
             void divide
             (
                 const labelList& indices,
@@ -173,8 +173,8 @@ private:
                 labelListList& result
             ) const;
 
-            //- Subdivide the contents node at position contentI. Appends to
-            //  contents.
+            //- Subdivide the contents node at position contentI.
+            //  Appends to contents.
             node divide
             (
                 const treeBoundBox& bb,
@@ -335,6 +335,22 @@ private:
                 const treeBoundBox& searchBox,
                 labelHashSet& elements
             ) const;
+
+
+            template <class CompareOp>
+            static void findNear
+            (
+                const scalar nearDist,
+                const bool okOrder,
+                const indexedOctree<Type>& tree1,
+                const labelBits index1,
+                const treeBoundBox& bb1,
+                const indexedOctree<Type>& tree2,
+                const labelBits index2,
+                const treeBoundBox& bb2,
+                CompareOp& cop
+            );
+
 
         // Other
 
@@ -549,8 +565,15 @@ public:
 
             //- Find deepest node (as parent+octant) containing point. Starts
             //  off from starting index in nodes_ (use 0 to start from top)
-            //  Use getNode, getOctant to extract info.
+            //  Use getNode and getOctant to extract info, or call findIndices.
             labelBits findNode(const label nodeI, const point&) const;
+
+            //- Find shape containing point. Only implemented for certain
+            //  shapes.
+            label findInside(const point&) const;
+
+            //- Find the shape indices that occupy the result of findNode
+            const labelList& findIndices(const point&) const;
 
             //- Determine type (inside/outside/mixed) for point. unknown if
             //  cannot be determined (e.g. non-manifold surface)
@@ -573,6 +596,16 @@ public:
                 const scalar nearestDistSqr,
                 const point& sample
             );
+
+            //- Find near pairs and apply CompareOp to them.
+            //  tree2 can be *this or different tree.
+            template <class CompareOp>
+            void findNear
+            (
+                const scalar nearDist,
+                const indexedOctree<Type>& tree2,
+                CompareOp& cop
+            ) const;
 
 
         // Write

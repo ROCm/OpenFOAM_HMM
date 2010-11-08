@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ Foam::sequential<CompType, ThermoType>::sequential
     chemistrySolver<CompType, ThermoType>(model, modelName),
     coeffsDict_(model.subDict(modelName + "Coeffs")),
     cTauChem_(readScalar(coeffsDict_.lookup("cTauChem"))),
-    equil_(coeffsDict_.lookup("equilibriumRateLimiter"))
+    eqRateLimiter_(coeffsDict_.lookup("equilibriumRateLimiter"))
 {}
 
 
@@ -70,45 +70,41 @@ Foam::scalar Foam::sequential<CompType, ThermoType>::solve
     {
         const Reaction<ThermoType>& R = this->model_.reactions()[i];
 
-        scalar om0 = this->model_.omega
+        scalar omega = this->model_.omega
         (
             R, c, T, p, pf, cf, lRef, pb, cb, rRef
         );
 
-        scalar omeg = 0.0;
-        if (!equil_)
+        if (eqRateLimiter_)
         {
-            omeg = om0;
-        }
-        else
-        {
-            if (om0<0.0)
+            if (omega < 0.0)
             {
-                omeg = om0/(1.0 + pb*dt);
+                omega /= 1.0 + pb*dt;
             }
             else
             {
-                omeg = om0/(1.0 + pf*dt);
+                omega /= 1.0 + pf*dt;
             }
         }
-        tChemInv = max(tChemInv, mag(omeg));
+
+        tChemInv = max(tChemInv, mag(omega));
 
 
         // update species
-        forAll(R.lhs(), s)
+        forAll(R.lhs(), specieI)
         {
-            label si = R.lhs()[s].index;
-            scalar sl = R.lhs()[s].stoichCoeff;
-            c[si] -= dt*sl*omeg;
-            c[si] = max(0.0, c[si]);
+            const label id = R.lhs()[specieI].index;
+            const scalar sc = R.lhs()[specieI].stoichCoeff;
+            c[id] -= dt*sc*omega;
+            c[id] = max(0.0, c[id]);
         }
 
-        forAll(R.rhs(), s)
+        forAll(R.rhs(), specieI)
         {
-            label si = R.rhs()[s].index;
-            scalar sr = R.rhs()[s].stoichCoeff;
-            c[si] += dt*sr*omeg;
-            c[si] = max(0.0, c[si]);
+            const label id = R.rhs()[specieI].index;
+            const scalar sc = R.rhs()[specieI].stoichCoeff;
+            c[id] += dt*sc*omega;
+            c[id] = max(0.0, c[id]);
         }
     }
 

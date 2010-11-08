@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -147,8 +147,8 @@ public:
                 vff.boundaryField()[patchi] = vf.boundaryField()[patchi];
             }
 
-            const unallocLabelList& own = mesh.owner();
-            const unallocLabelList& nei = mesh.neighbour();
+            const labelUList& own = mesh.owner();
+            const labelUList& nei = mesh.neighbour();
 
             forAll(vff, facei)
             {

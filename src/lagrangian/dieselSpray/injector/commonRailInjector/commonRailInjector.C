@@ -25,7 +25,6 @@ License
 
 #include "commonRailInjector.H"
 #include "addToRunTimeSelectionTable.H"
-#include "Random.H"
 #include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -175,13 +174,13 @@ Foam::commonRailInjector::~commonRailInjector()
 
 void Foam::commonRailInjector::setTangentialVectors()
 {
-    Random rndGen(label(0));
+    cachedRandom rndGen(label(0), -1);
     scalar magV = 0.0;
     vector tangent;
 
     while (magV < SMALL)
     {
-        vector testThis = rndGen.vector01();
+        vector testThis = rndGen.sample01<vector>();
 
         tangent = testThis - (testThis & direction_)*direction_;
         magV = mag(tangent);
@@ -223,7 +222,7 @@ Foam::vector Foam::commonRailInjector::position
     const vector& axisOfSymmetry,
     const vector& axisOfWedge,
     const vector& axisOfWedgeNormal,
-    Random& rndGen
+    cachedRandom& rndGen
 ) const
 {
     if (twoD)
@@ -241,8 +240,8 @@ Foam::vector Foam::commonRailInjector::position
     else
     {
         // otherwise, disc injection
-        scalar iRadius = d_*rndGen.scalar01();
-        scalar iAngle = constant::mathematical::twoPi*rndGen.scalar01();
+        scalar iRadius = d_*rndGen.sample01<scalar>();
+        scalar iAngle = constant::mathematical::twoPi*rndGen.sample01<scalar>();
 
         return
         (
@@ -381,7 +380,10 @@ Foam::scalar Foam::commonRailInjector::Cd
 }
 
 
-Foam::scalar Foam::commonRailInjector::fractionOfInjection(const scalar time) const
+Foam::scalar Foam::commonRailInjector::fractionOfInjection
+(
+    const scalar time
+) const
 {
     return integrateTable(massFlowRateProfile_, time)/mass_;
 }

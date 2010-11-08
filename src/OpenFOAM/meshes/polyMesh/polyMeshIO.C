@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -112,7 +112,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
             )
         );
 
-        faces_ = faceIOList
+        faces_ = faceCompactIOList
         (
             IOobject
             (
@@ -238,7 +238,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
         }
         else
         {
-            cellIOList cells
+            cellCompactIOList cells
             (
                 IOobject
                 (

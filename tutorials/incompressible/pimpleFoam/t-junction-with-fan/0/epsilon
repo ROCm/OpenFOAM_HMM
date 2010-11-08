@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [ 0 2 -3 0 0 0 0 ];
+dimensions      [0 2 -3 0 0 0 0];
 
 internalField   uniform 1;
 
@@ -24,7 +24,7 @@ boundaryField
     inlet
     {
         type            turbulentMixingLengthDissipationRateInlet;
-        mixingLength    0.01;       // 1cm - half channel height
+        mixingLength    0.01;
         value           uniform 1;
     }
     outlet1
@@ -33,7 +33,6 @@ boundaryField
         inletValue      uniform 1;
         value           uniform 1;
     }
-
     outlet2
     {
         type            inletOutlet;
@@ -43,16 +42,25 @@ boundaryField
     baffles
     {
         type            epsilonWallFunction;
-        value           uniform 1;
+        Cmu             0.09;
+        kappa           0.41;
+        E               9.8;
+        value           uniform 0;
     }
-    fan
+    fan_half0
     {
         type            cyclic;
-        value           uniform 1;
+    }
+    fan_half1
+    {
+        type            cyclic;
     }
     defaultFaces
     {
         type            epsilonWallFunction;
+        Cmu             0.09;
+        kappa           0.41;
+        E               9.8;
         value           uniform 1;
     }
 }

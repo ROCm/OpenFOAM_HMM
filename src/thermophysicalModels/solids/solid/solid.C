@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,6 +32,7 @@ namespace Foam
     defineTypeNameAndDebug(solid, 0);
     defineRunTimeSelectionTable(solid,);
     defineRunTimeSelectionTable(solid, Istream);
+    defineRunTimeSelectionTable(solid, dictionary);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -39,14 +40,14 @@ namespace Foam
 Foam::solid::solid
 (
     scalar rho,
-    scalar cp,
+    scalar Cp,
     scalar K,
     scalar Hf,
     scalar emissivity
 )
 :
     rho_(rho),
-    cp_(cp),
+    Cp_(Cp),
     K_(K),
     Hf_(Hf),
     emissivity_(emissivity)
@@ -56,10 +57,30 @@ Foam::solid::solid
 Foam::solid::solid(Istream& is)
 :
     rho_(readScalar(is)),
-    cp_(readScalar(is)),
+    Cp_(readScalar(is)),
     K_(readScalar(is)),
     Hf_(readScalar(is)),
     emissivity_(readScalar(is))
+{}
+
+
+Foam::solid::solid(const dictionary& dict)
+:
+    rho_(readScalar(dict.lookup("rho"))),
+    Cp_(readScalar(dict.lookup("Cp"))),
+    K_(readScalar(dict.lookup("K"))),
+    Hf_(readScalar(dict.lookup("Hf"))),
+    emissivity_(readScalar(dict.lookup("emissivity")))
+{}
+
+
+Foam::solid::solid(const solid& s)
+:
+    rho_(s.rho_),
+    Cp_(s.Cp_),
+    K_(s.K_),
+    Hf_(s.Hf_),
+    emissivity_(s.emissivity_)
 {}
 
 
@@ -68,7 +89,7 @@ Foam::solid::solid(Istream& is)
 void Foam::solid::writeData(Ostream& os) const
 {
     os  << rho_ << token::SPACE
-        << cp_ << token::SPACE
+        << Cp_ << token::SPACE
         << K_ << token::SPACE
         << Hf_ << token::SPACE
         << emissivity_;

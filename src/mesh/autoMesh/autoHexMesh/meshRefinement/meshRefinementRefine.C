@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -133,8 +133,7 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
         (
             mesh,
             refinedBoundaryFace,
-            orEqOp<bool>(),
-            false
+            orEqOp<bool>()
         );
 
 
@@ -176,8 +175,7 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
         (
             mesh,
             changedFace,
-            orEqOp<bool>(),
-            false
+            orEqOp<bool>()
         );
 
 
@@ -281,7 +279,11 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
     Cloud<trackedParticle> cloud(mesh_, IDLList<trackedParticle>());
 
     // Create particles on whichever processor holds the keepPoint.
-    label cellI = mesh_.findCell(keepPoint);
+    label cellI = -1;
+    label tetFaceI = -1;
+    label tetPtI = -1;
+
+    cloud.findCellFacePt(keepPoint, cellI, tetFaceI, tetPtI);
 
     if (cellI != -1)
     {
@@ -310,6 +312,8 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
                             cloud,
                             keepPoint,
                             cellI,
+                            tetFaceI,
+                            tetPtI,
                             featureMesh.points()[pointI],   // endpos
                             featureLevels[featI],           // level
                             featI,                          // featureMesh
@@ -329,7 +333,7 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
     trackedParticle::trackData td(cloud, maxFeatureLevel);
 
     // Track all particles to their end position (= starting feature point)
-    cloud.move(td);
+    cloud.move(td, mesh_.time().deltaTValue());
 
     // Reset level
     maxFeatureLevel = -1;
@@ -402,7 +406,7 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
         }
 
         // Track all particles to their end position.
-        cloud.move(td);
+        cloud.move(td, mesh_.time().deltaTValue());
     }
 
 
@@ -925,8 +929,8 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
         neiBndMaxLevel[bFaceI] = cellMaxLevel[own];
         neiBndMaxNormal[bFaceI] = cellMaxNormal[own];
     }
-    syncTools::swapBoundaryFaceList(mesh_, neiBndMaxLevel, false);
-    syncTools::swapBoundaryFaceList(mesh_, neiBndMaxNormal, false);
+    syncTools::swapBoundaryFaceList(mesh_, neiBndMaxLevel);
+    syncTools::swapBoundaryFaceList(mesh_, neiBndMaxNormal);
 
     // Loop over all faces. Could only be checkFaces.. except if they're coupled
 

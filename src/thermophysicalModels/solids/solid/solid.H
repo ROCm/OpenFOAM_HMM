@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,6 +38,7 @@ SourceFiles
 #include "typeInfo.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
+#include "dictionary.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,8 +49,8 @@ class solid;
 
 Ostream& operator<<
 (
-     Ostream&,
-     const solid&
+    Ostream&,
+    const solid&
 );
 
 
@@ -66,7 +67,7 @@ class solid
         scalar rho_;
 
         //- Specific heat capacity [J/(kg.K)]
-        scalar cp_;
+        scalar Cp_;
 
         //- Thermal conductivity [W/(m.K)]
         scalar K_;
@@ -104,6 +105,15 @@ public:
         (is)
     );
 
+    declareRunTimeSelectionTable
+    (
+        autoPtr,
+        solid,
+        dictionary,
+        (const dictionary& dict),
+        (dict)
+    );
+
 
     // Constructors
 
@@ -111,7 +121,7 @@ public:
         solid
         (
             scalar rho,
-            scalar cp,
+            scalar Cp,
             scalar K,
             scalar Hf,
             scalar emissivity
@@ -120,8 +130,26 @@ public:
         //- Construct from Istream
         solid(Istream& is);
 
+        //- Construct from dictionary
+        solid(const dictionary& dict);
+
+        //- Construct copy
+        solid(const solid& s);
+
+        //- Construct and return clone
+        virtual autoPtr<solid> clone() const
+        {
+            return autoPtr<solid>(new solid(*this));
+        }
+
+
+    // Selectors
+
         //- Return a pointer to a new solid created from input
         static autoPtr<solid> New(Istream& is);
+
+        //- Return a pointer to a new solid created from dictionary
+        static autoPtr<solid> New(const dictionary& dict);
 
 
     //- Destructor
@@ -131,19 +159,25 @@ public:
 
     // Member Functions
 
-        // Phisical constants which define the solid
+        // Physical constants which define the solid
 
             //- Density [kg/m3]
             inline scalar rho() const;
 
             //- Specific heat capacity [J/(kg.K)]
-            inline scalar cp() const;
+            inline scalar Cp() const;
 
             //- Thermal conductivity [W/(m.K)]
             inline scalar K() const;
 
             //- Heat of formation [J/kg]
             inline scalar Hf() const;
+
+            //- Total enthalpy - reference to Tstd [J/kg]
+            inline scalar H(const scalar T) const;
+
+            //- Sensible enthalpy - reference to Tstd [J/kg]
+            inline scalar Hs(const scalar T) const;
 
             //- Emissivity []
             inline scalar emissivity() const;
@@ -163,11 +197,11 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "solidI.H"
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+#include "solidI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

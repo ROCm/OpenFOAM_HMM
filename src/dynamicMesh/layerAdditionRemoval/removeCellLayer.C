@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ bool Foam::layerAdditionRemoval::validCollapse() const
 
     if (debug)
     {
-        Pout << "Checking layer collapse for object " << name() << endl;
+        Pout<< "Checking layer collapse for object " << name() << endl;
     }
 
     // Grab the face collapse mapping
@@ -102,7 +102,7 @@ void Foam::layerAdditionRemoval::removeCellLayer
     //     the equivalent point in the master face zone.
     if (debug)
     {
-        Pout << "Removing the cell layer for object " << name() << endl;
+        Pout<< "Removing the cell layer for object " << name() << endl;
     }
 
     const polyMesh& mesh = topoChanger().mesh();
@@ -195,7 +195,7 @@ void Foam::layerAdditionRemoval::removeCellLayer
 
     labelList ftm = facesToModify.toc();
 
-//Pout << "faces to modify: " << ftm << endl;
+//Pout<< "faces to modify: " << ftm << endl;
 
     forAll(ftm, faceI)
     {

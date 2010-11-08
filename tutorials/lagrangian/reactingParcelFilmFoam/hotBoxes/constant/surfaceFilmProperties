@@ -1,0 +1,84 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.6                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      SurfaceFilmProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+surfaceFilmModel thermoSingleLayer;
+
+filmRegionName  wallFilmRegion;
+
+active          true;
+
+
+thermoSingleLayerCoeffs
+{
+    thermoModel singleComponent; // constant
+    liquid      H2O;
+
+    Cf          0.005;
+
+    upperSurfaceModels
+    {
+//        heatTransferModel constant;
+//        constantCoeffs
+//        {
+//            c0              1e-8;
+//        }
+
+        heatTransferModel mappedConvectiveHeatTransfer;
+    }
+
+    lowerSurfaceModels
+    {
+        heatTransferModel constant;
+        constantCoeffs
+        {
+            c0              50;
+        }
+    }
+
+    injectionModel cloudInjection; // removeInjection; // none; // cloudInjection;
+
+    cloudInjectionCoeffs
+    {
+        cloudName    reactingCloud1;
+
+        deltaStable         0.0;
+
+        particlesPerParcel  100.0;
+
+        parcelPDF
+        {
+            pdfType         RosinRammler;
+            RosinRammlerPDF
+            {
+                minValue        5e-04;
+                maxValue        0.0012;
+                d               7.5e-05;
+                n               0.5;
+            }
+        }
+    }
+
+    phaseChangeModel standardPhaseChange;
+
+    standardPhaseChangeCoeffs
+    {
+        Tb              374.8;
+        deltaMin        1e-8;
+        L               1.0;
+    }
+}
+

@@ -60,10 +60,25 @@ public:
         (
             const Cloud<passiveParticle>& c,
             const vector& position,
-            const label celli
+            const label cellI,
+            const label tetFaceI,
+            const label tetPtI
         )
         :
-            Particle<passiveParticle>(c, position, celli)
+            Particle<passiveParticle>(c, position, cellI, tetFaceI, tetPtI)
+        {}
+
+        //- Construct from components, with searching for tetFace and
+        //  tetPt unless disabled by doCellFacePt = false.
+        passiveParticle
+        (
+            const Cloud<passiveParticle>& c,
+            const vector& position,
+            const label cellI,
+            bool doCellFacePt = true
+        )
+        :
+            Particle<passiveParticle>(c, position, cellI, doCellFacePt)
         {}
 
         //- Construct from Istream
@@ -84,9 +99,12 @@ public:
         {}
 
         //- Construct and return a clone
-        autoPtr<passiveParticle> clone() const
+        virtual autoPtr<Particle<passiveParticle> > clone() const
         {
-            return autoPtr<passiveParticle>(new passiveParticle(*this));
+            return autoPtr<Particle<passiveParticle> >
+            (
+                new passiveParticle(*this)
+            );
         }
 };
 

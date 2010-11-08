@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,6 +31,7 @@ License
 
 const Foam::scalar Foam::liquidMixture::TrMax = 0.999;
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::liquidMixture::liquidMixture
@@ -41,32 +42,34 @@ Foam::liquidMixture::liquidMixture
     components_(thermophysicalProperties.lookup("liquidComponents")),
     properties_(components_.size())
 {
-    // use sub-dictionary "liquidProperties" if possible to avoid
+    // can use sub-dictionary "liquidProperties" to avoid
     // collisions with identically named gas-phase entries
     // (eg, H2O liquid vs. gas)
+    const dictionary* subDictPtr = thermophysicalProperties.subDictPtr
+    (
+        "liquidProperties"
+    );
+
+    const dictionary& props =
+    (
+        subDictPtr ? *subDictPtr : thermophysicalProperties
+    );
+
     forAll(components_, i)
     {
-        const dictionary* subDictPtr = thermophysicalProperties.subDictPtr
-        (
-            "liquidProperties"
-        );
+        properties_.set(i, liquid::New(props.subDict(components_[i])));
+    }
+}
 
-        if (subDictPtr)
-        {
-            properties_.set
-            (
-                i,
-                liquid::New(subDictPtr->lookup(components_[i]))
-            );
-        }
-        else
-        {
-            properties_.set
-            (
-                i,
-                liquid::New(thermophysicalProperties.lookup(components_[i]))
-            );
-        }
+
+Foam::liquidMixture::liquidMixture(const liquidMixture& lm)
+:
+    components_(lm.components_),
+    properties_(lm.properties_.size())
+{
+    forAll(properties_, i)
+    {
+        properties_.set(i, lm.properties_(i)->clone());
     }
 }
 
@@ -84,12 +87,8 @@ Foam::autoPtr<Foam::liquidMixture> Foam::liquidMixture::New
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::liquidMixture::Tc
-(
-    const scalarField& x
-) const
+Foam::scalar Foam::liquidMixture::Tc(const scalarField& x) const
 {
-
     scalar vTc = 0.0;
     scalar vc = 0.0;
 
@@ -104,10 +103,7 @@ Foam::scalar Foam::liquidMixture::Tc
 }
 
 
-Foam::scalar Foam::liquidMixture::Tpc
-(
-    const scalarField& x
-) const
+Foam::scalar Foam::liquidMixture::Tpc(const scalarField& x) const
 {
     scalar Tpc = 0.0;
     forAll(properties_, i)
@@ -119,10 +115,7 @@ Foam::scalar Foam::liquidMixture::Tpc
 }
 
 
-Foam::scalar Foam::liquidMixture::Ppc
-(
-    const scalarField& x
-) const
+Foam::scalar Foam::liquidMixture::Ppc(const scalarField& x) const
 {
     scalar Vc = 0.0;
     scalar Zc = 0.0;
@@ -136,10 +129,7 @@ Foam::scalar Foam::liquidMixture::Ppc
 }
 
 
-Foam::scalar Foam::liquidMixture::omega
-(
-    const scalarField& x
-) const
+Foam::scalar Foam::liquidMixture::omega(const scalarField& x) const
 {
     scalar omega = 0.0;
     forAll(properties_, i)
@@ -172,10 +162,7 @@ Foam::scalarField Foam::liquidMixture::Xs
 }
 
 
-Foam::scalar Foam::liquidMixture::W
-(
-    const scalarField& x
-) const
+Foam::scalar Foam::liquidMixture::W(const scalarField& x) const
 {
     scalar W = 0.0;
     forAll(properties_, i)
@@ -187,10 +174,7 @@ Foam::scalar Foam::liquidMixture::W
 }
 
 
-Foam::scalarField Foam::liquidMixture::Y
-(
-    const scalarField& X
-) const
+Foam::scalarField Foam::liquidMixture::Y(const scalarField& X) const
 {
     scalarField Y(X/W(X));
 
@@ -203,10 +187,7 @@ Foam::scalarField Foam::liquidMixture::Y
 }
 
 
-Foam::scalarField Foam::liquidMixture::X
-(
-    const scalarField& Y
-) const
+Foam::scalarField Foam::liquidMixture::X(const scalarField& Y) const
 {
     scalarField X(Y.size());
     scalar Winv = 0.0;
@@ -287,25 +268,25 @@ Foam::scalar Foam::liquidMixture::hl
 }
 
 
-Foam::scalar Foam::liquidMixture::cp
+Foam::scalar Foam::liquidMixture::Cp
 (
     const scalar p,
     const scalar T,
     const scalarField& x
 ) const
 {
-    scalar cp = 0.0;
+    scalar Cp = 0.0;
 
     forAll(properties_, i)
     {
         if (x[i] > SMALL)
         {
             scalar Ti = min(TrMax*properties_[i].Tc(), T);
-            cp += x[i]*properties_[i].cp(p, Ti)*properties_[i].W();
+            Cp += x[i]*properties_[i].Cp(p, Ti)*properties_[i].W();
         }
     }
 
-    return cp/W(x);
+    return Cp/W(x);
 }
 
 

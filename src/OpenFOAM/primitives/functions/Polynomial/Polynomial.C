@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,7 +33,50 @@ Foam::Polynomial<PolySize>::Polynomial()
     VectorSpace<Polynomial<PolySize>, scalar, PolySize>(),
     logActive_(false),
     logCoeff_(0.0)
-{}
+{
+    for (int i = 0; i < PolySize; ++i)
+    {
+        this->v_[i] = 0.0;
+    }
+}
+
+
+template<int PolySize>
+Foam::Polynomial<PolySize>::Polynomial(const scalar coeffs[PolySize])
+:
+    VectorSpace<Polynomial<PolySize>, scalar, PolySize>(),
+    logActive_(false),
+    logCoeff_(0.0)
+{
+    for (int i=0; i<PolySize; i++)
+    {
+        this->v_[i] = coeffs[i];
+    }
+}
+
+
+template<int PolySize>
+Foam::Polynomial<PolySize>::Polynomial(const UList<scalar>& coeffs)
+:
+    VectorSpace<Polynomial<PolySize>, scalar, PolySize>(),
+    logActive_(false),
+    logCoeff_(0.0)
+{
+    if (coeffs.size() != PolySize)
+    {
+        FatalErrorIn
+        (
+            "Polynomial<PolySize>::Polynomial(const UList<scalar>&)"
+        )   << "Size mismatch: Needed " << PolySize
+            << " but got " << coeffs.size()
+            << nl << exit(FatalError);
+    }
+
+    for (int i = 0; i < PolySize; ++i)
+    {
+        this->v_[i] = coeffs[i];
+    }
+}
 
 
 template<int PolySize>
@@ -69,6 +112,15 @@ Foam::Polynomial<PolySize>::Polynomial(const word& name, Istream& is)
 
 
 template<int PolySize>
+Foam::Polynomial<PolySize>::Polynomial(Istream& is)
+:
+    VectorSpace<Polynomial<PolySize>, scalar, PolySize>(is),
+    logActive_(false),
+    logCoeff_(0.0)
+{}
+
+
+template<int PolySize>
 Foam::Polynomial<PolySize>::Polynomial
 (
     const Polynomial<PolySize>& poly
@@ -101,9 +153,12 @@ Foam::scalar Foam::Polynomial<PolySize>::evaluate(const scalar x) const
 {
     scalar y = this->v_[0];
 
-    for (label i=1; i<PolySize; i++)
+    // avoid costly pow() in calculation
+    scalar powX = x;
+    for (label i=1; i<PolySize; ++i)
     {
-        y += this->v_[i]*pow(x, i);
+        y += this->v_[i]*powX;
+        powX *= x;
     }
 
     if (logActive_)
@@ -170,13 +225,9 @@ Foam::Polynomial<PolySize>::integrateMinus1(const scalar intConstant)
     }
 
     newCoeffs[0] = intConstant;
-
-    if (PolySize > 0)
+    for (label i=1; i<PolySize; ++i)
     {
-        for (label i=1; i<PolySize; i++)
-        {
-            newCoeffs[i] = this->v_[i]/i;
-        }
+        newCoeffs[i] = this->v_[i]/i;
     }
 
     return newCoeffs;

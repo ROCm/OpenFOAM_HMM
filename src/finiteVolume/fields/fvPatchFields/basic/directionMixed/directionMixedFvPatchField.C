@@ -1,8 +1,8 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
-  \\      /  F ield         | OpenOAM: The Open Source CFD Toolbox
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,15 +26,10 @@ License
 #include "directionMixedFvPatchField.H"
 #include "symmTransformField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-directionMixedFvPatchField<Type>::directionMixedFvPatchField
+Foam::directionMixedFvPatchField<Type>::directionMixedFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
@@ -48,7 +43,7 @@ directionMixedFvPatchField<Type>::directionMixedFvPatchField
 
 
 template<class Type>
-directionMixedFvPatchField<Type>::directionMixedFvPatchField
+Foam::directionMixedFvPatchField<Type>::directionMixedFvPatchField
 (
     const directionMixedFvPatchField<Type>& ptf,
     const fvPatch& p,
@@ -64,7 +59,7 @@ directionMixedFvPatchField<Type>::directionMixedFvPatchField
 
 
 template<class Type>
-directionMixedFvPatchField<Type>::directionMixedFvPatchField
+Foam::directionMixedFvPatchField<Type>::directionMixedFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -81,7 +76,7 @@ directionMixedFvPatchField<Type>::directionMixedFvPatchField
 
 
 template<class Type>
-directionMixedFvPatchField<Type>::directionMixedFvPatchField
+Foam::directionMixedFvPatchField<Type>::directionMixedFvPatchField
 (
     const directionMixedFvPatchField<Type>& ptf,
     const DimensionedField<Type, volMesh>& iF
@@ -97,7 +92,7 @@ directionMixedFvPatchField<Type>::directionMixedFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void directionMixedFvPatchField<Type>::autoMap
+void Foam::directionMixedFvPatchField<Type>::autoMap
 (
     const fvPatchFieldMapper& m
 )
@@ -110,7 +105,7 @@ void directionMixedFvPatchField<Type>::autoMap
 
 
 template<class Type>
-void directionMixedFvPatchField<Type>::rmap
+void Foam::directionMixedFvPatchField<Type>::rmap
 (
     const fvPatchField<Type>& ptf,
     const labelList& addr
@@ -128,7 +123,8 @@ void directionMixedFvPatchField<Type>::rmap
 
 
 template<class Type>
-tmp<Field<Type> > directionMixedFvPatchField<Type>::snGrad() const
+Foam::tmp<Foam::Field<Type> >
+Foam::directionMixedFvPatchField<Type>::snGrad() const
 {
     Field<Type> pif = this->patchInternalField();
 
@@ -146,7 +142,7 @@ tmp<Field<Type> > directionMixedFvPatchField<Type>::snGrad() const
 
 
 template<class Type>
-void directionMixedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
+void Foam::directionMixedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     if (!this->updated())
     {
@@ -168,7 +164,8 @@ void directionMixedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 
 
 template<class Type>
-tmp<Field<Type> > directionMixedFvPatchField<Type>::snGradTransformDiag() const
+Foam::tmp<Foam::Field<Type> >
+Foam::directionMixedFvPatchField<Type>::snGradTransformDiag() const
 {
     vectorField diag(valueFraction_.size());
 
@@ -193,7 +190,7 @@ tmp<Field<Type> > directionMixedFvPatchField<Type>::snGradTransformDiag() const
 
 
 template<class Type>
-void directionMixedFvPatchField<Type>::write(Ostream& os) const
+void Foam::directionMixedFvPatchField<Type>::write(Ostream& os) const
 {
     transformFvPatchField<Type>::write(os);
     refValue_.writeEntry("refValue", os);
@@ -202,9 +199,5 @@ void directionMixedFvPatchField<Type>::write(Ostream& os) const
     this->writeEntry("value", os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

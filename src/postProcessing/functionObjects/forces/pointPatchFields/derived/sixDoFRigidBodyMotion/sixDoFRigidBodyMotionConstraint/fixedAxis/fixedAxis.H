@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,8 +25,8 @@ Class
     Foam::sixDoFRigidBodyMotionConstraints::fixedAxis
 
 Description
-    sixDoFRigidBodyMotionConstraint.  Axis of body fixed global
-    space.
+    sixDoFRigidBodyMotionConstraint.  Body may only rotate around
+    an axis fixed in global space.
 
 SourceFiles
     fixedAxis.C

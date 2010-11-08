@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -91,7 +91,7 @@ protected:
         //- Chemistry solver
         autoPtr<chemistrySolver<CompType, ThermoType> > solver_;
 
-        //- Chemical source term [kg/m3/s]
+        //- List of reaction rate per specie [kg/m3/s]
         PtrList<scalarField> RR_;
 
 
@@ -141,7 +141,7 @@ public:
         inline const chemistrySolver<CompType, ThermoType>& solver() const;
 
         //- dc/dt = omega, rate of change in concentration, for each species
-        virtual scalarField omega
+        virtual tmp<scalarField> omega
         (
             const scalarField& c,
             const scalar T,

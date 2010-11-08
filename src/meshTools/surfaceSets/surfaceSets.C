@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -167,8 +167,9 @@ License
 //}
 
 
-//// Select all points out of pointSet where the distance to the surface is less
-//// than a factor times a local length scale (minimum length of connected edges)
+//// Select all points out of pointSet where the distance to the surface
+//// is less than a factor times a local length scale (minimum length of
+//// connected edges)
 //void Foam::surfaceSets::getNearPoints
 //(
 //    const primitiveMesh& mesh,

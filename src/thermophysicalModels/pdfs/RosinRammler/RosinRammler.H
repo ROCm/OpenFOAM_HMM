@@ -28,7 +28,9 @@ Description
     Rosin-Rammler pdf
 
    @f[
-       cumulative pdf = (1.0 - exp( -((x - d0)/d)^n ) / (1.0 - exp( -((d1 - d0)/d)^n )
+       cumulative pdf =
+           (1.0 - exp( -(( x - d0)/d)^n )
+         / (1.0 - exp( -((d1 - d0)/d)^n )
    @f]
 
 
@@ -80,11 +82,16 @@ public:
     // Constructors
 
         //- Construct from components
-        RosinRammler
-        (
-            const dictionary& dict,
-            Random& rndGen
-        );
+        RosinRammler(const dictionary& dict, cachedRandom& rndGen);
+
+        //- Construct copy
+        RosinRammler(const RosinRammler& p);
+
+        //- Construct and return a clone
+        virtual autoPtr<pdf> clone() const
+        {
+            return autoPtr<pdf>(new RosinRammler(*this));
+        }
 
 
     //- Destructor

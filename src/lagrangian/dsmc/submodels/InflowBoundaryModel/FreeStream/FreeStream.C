@@ -25,6 +25,8 @@ License
 
 #include "FreeStream.H"
 #include "constants.H"
+#include "triPointRef.H"
+#include "tetIndices.H"
 
 using namespace Foam::constant::mathematical;
 
@@ -181,13 +183,13 @@ void Foam::FreeStream<CloudType>::inflow()
                 )
             );
 
-            // Dotting boundary velocity with the face unit normal (which points
-            // out of the domain, so it must be negated), dividing by the most
-            // probable speed to form molecularSpeedRatio * cosTheta
+            // Dotting boundary velocity with the face unit normal
+            // (which points out of the domain, so it must be
+            // negated), dividing by the most probable speed to form
+            // molecularSpeedRatio * cosTheta
 
             scalarField sCosTheta =
-                boundaryU[patchI]
-              & -patch.faceAreas()/mag(patch.faceAreas())
+                (boundaryU[patchI] & -patch.faceAreas()/mag(patch.faceAreas()))
                /mostProbableSpeed;
 
             // From Bird eqn 4.22
@@ -201,49 +203,56 @@ void Foam::FreeStream<CloudType>::inflow()
                /(2.0*sqrtPi);
         }
 
-        forAll(patch, f)
+        forAll(patch, pFI)
         {
             // Loop over all faces as the outer loop to avoid calculating
             // geometrical properties multiple times.
 
-            labelList faceVertices = patch[f];
+            const face& f = patch[pFI];
 
-            label nVertices = faceVertices.size();
+            label globalFaceIndex = pFI + patch.start();
 
-            label globalFaceIndex = f + patch.start();
+            label cellI = mesh.faceOwner()[globalFaceIndex];
 
-            label cell = mesh.faceOwner()[globalFaceIndex];
+            const vector& fC = patch.faceCentres()[pFI];
 
-            const vector& fC = patch.faceCentres()[f];
+            scalar fA = mag(patch.faceAreas()[pFI]);
 
-            scalar fA = mag(patch.faceAreas()[f]);
+            List<tetIndices> faceTets = polyMeshTetDecomposition::faceTetIndices
+            (
+                mesh,
+                globalFaceIndex,
+                cellI
+            );
 
             // Cumulative triangle area fractions
-            List<scalar> cTriAFracs(nVertices);
+            List<scalar> cTriAFracs(faceTets.size(), 0.0);
 
-            for (label v = 0; v < nVertices - 1; v++)
+            scalar previousCummulativeSum = 0.0;
+
+            forAll(faceTets, triI)
             {
-                const point& vA = mesh.points()[faceVertices[v]];
+                const tetIndices& faceTetIs = faceTets[triI];
 
-                const point& vB = mesh.points()[faceVertices[(v + 1)]];
+                cTriAFracs[triI] =
+                    faceTetIs.faceTri(mesh).mag()/fA
+                  + previousCummulativeSum;
 
-                cTriAFracs[v] =
-                    0.5*mag((vA - fC)^(vB - fC))/fA
-                  + cTriAFracs[max((v - 1), 0)];
+                previousCummulativeSum = cTriAFracs[triI];
             }
 
             // Force the last area fraction value to 1.0 to avoid any
             // rounding/non-flat face errors giving a value < 1.0
-            cTriAFracs[nVertices - 1] = 1.0;
+            cTriAFracs.last() = 1.0;
 
             // Normal unit vector *negative* so normal is pointing into the
             // domain
-            vector n = patch.faceAreas()[f];
+            vector n = patch.faceAreas()[pFI];
             n /= -mag(n);
 
             // Wall tangential unit vector. Use the direction between the
             // face centre and the first vertex in the list
-            vector t1 = fC - (mesh.points()[faceVertices[0]]);
+            vector t1 = fC - (mesh.points()[f[0]]);
             t1 /= mag(t1);
 
             // Other tangential unit vector.  Rescaling in case face is not
@@ -251,13 +260,13 @@ void Foam::FreeStream<CloudType>::inflow()
             vector t2 = n^t1;
             t2 /= mag(t2);
 
-            scalar faceTemperature = boundaryT[patchI][f];
+            scalar faceTemperature = boundaryT[patchI][pFI];
 
-            const vector& faceVelocity = boundaryU[patchI][f];
+            const vector& faceVelocity = boundaryU[patchI][pFI];
 
             forAll(pFA, i)
             {
-                scalar& faceAccumulator = pFA[i][f];
+                scalar& faceAccumulator = pFA[i][pFI];
 
                 // Number of whole particles to insert
                 label nI = max(label(faceAccumulator), 0);
@@ -283,34 +292,23 @@ void Foam::FreeStream<CloudType>::inflow()
                     scalar triSelection = rndGen.scalar01();
 
                     // Selected triangle
-                    label sTri = -1;
+                    label selectedTriI = -1;
 
-                    forAll(cTriAFracs, tri)
+                    forAll(cTriAFracs, triI)
                     {
-                        sTri = tri;
+                        selectedTriI = triI;
 
-                        if (cTriAFracs[tri] >= triSelection)
+                        if (cTriAFracs[triI] >= triSelection)
                         {
                             break;
                         }
                     }
 
-                    // Randomly distribute the points on the triangle, using the
-                    // method from:
-                    // Generating Random Points in Triangles
-                    // by Greg Turk
-                    // from "Graphics Gems", Academic Press, 1990
-                    // http://tog.acm.org/GraphicsGems/gems/TriPoints.c
+                    // Randomly distribute the points on the triangle.
 
-                    const point& A = fC;
-                    const point& B = mesh.points()[faceVertices[sTri]];
-                    const point& C =
-                    mesh.points()[faceVertices[(sTri + 1) % nVertices]];
+                    const tetIndices& faceTetIs = faceTets[selectedTriI];
 
-                    scalar s = rndGen.scalar01();
-                    scalar t = sqrt(rndGen.scalar01());
-
-                    point p = (1 - t)*A + (1 - s)*t*B + s*t*C;
+                    point p = faceTetIs.faceTri(mesh).randomPoint(rndGen);
 
                     // Velocity generation
 
@@ -392,7 +390,9 @@ void Foam::FreeStream<CloudType>::inflow()
                         p,
                         U,
                         Ei,
-                        cell,
+                        cellI,
+                        globalFaceIndex,
+                        faceTetIs.tetPt(),
                         typeId
                     );
 

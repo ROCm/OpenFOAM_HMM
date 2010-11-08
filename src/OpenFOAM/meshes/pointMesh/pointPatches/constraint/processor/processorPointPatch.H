@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,7 +65,6 @@ class processorPointPatch
 
         mutable labelList reverseMeshPoints_;
 
-        mutable labelList separatedPoints_;
 
     // Private Member Functions
 
@@ -129,6 +128,12 @@ public:
             }
         }
 
+        //- Return message tag to use for communication
+        virtual int tag() const
+        {
+            return procPolyPatch_.tag();
+        }
+
         //- Return the constraint type this pointPatch implements.
         virtual const word& constraintType() const
         {
@@ -167,9 +172,6 @@ public:
 
         //- Return mesh points in the correct order for the receiving side
         const labelList& reverseMeshPoints() const;
-
-        //- List of separated coupled points
-        virtual const labelList& separatedPoints() const;
 
 };
 

@@ -31,7 +31,7 @@
 #------------------------------------------------------------------------------
 
 setenv WM_PROJECT OpenFOAM
-if ( ! $?WM_PROJECT_VERSION ) setenv WM_PROJECT_VERSION 1.6
+setenv WM_PROJECT_VERSION dev
 
 ################################################################################
 # USER EDITABLE PART. Note changes made here may be lost with the next upgrade
@@ -119,7 +119,7 @@ if ( ! $?WM_PRECISION_OPTION ) setenv WM_PRECISION_OPTION DP
 # WM_COMPILE_OPTION = Opt | Debug | Prof
 if ( ! $?WM_COMPILE_OPTION ) setenv WM_COMPILE_OPTION Opt
 
-# WM_MPLIB = | OPENMPI | MPICH | MPICH-GM | HPMPI | GAMMA | MPI | QSMPI
+# WM_MPLIB = SYSTEMOPENMPI | OPENMPI | MPICH | MPICH-GM | HPMPI | GAMMA | MPI | QSMPI
 if ( ! $?WM_MPLIB ) setenv WM_MPLIB OPENMPI
 
 
@@ -216,7 +216,7 @@ case SunOS:
 default:
     echo
     echo "Your '$WM_ARCH' operating system is not supported by this release"
-    echo "of OpenFOAM. For further assistance, please contact www.OpenFOAM.org"
+    echo "of OpenFOAM. For further assistance, please contact www.OpenFOAM.com"
     echo
     breaksw
 
@@ -255,8 +255,17 @@ _foamSource $WM_PROJECT_DIR/etc/aliases.csh
 
 # Source user setup files for optional packages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamSource $WM_PROJECT_DIR/etc/apps/paraview3/cshrc
-# _foamSource $WM_PROJECT_DIR/etc/apps/ensight/cshrc
+set paraview3=`$WM_PROJECT_DIR/bin/foamEtcFile apps/paraview3/cshrc`
+if ( $status == 0 ) then
+    _foamSource $paraview3
+endif
+unset paraview3
+
+set ensight=`$WM_PROJECT_DIR/bin/foamEtcFile apps/ensight/cshrc`
+if ( $status == 0 ) then
+    _foamSource $ensight
+endif
+unset ensight
 
 
 # Clean environment paths again. Only remove duplicates

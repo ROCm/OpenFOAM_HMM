@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,6 +33,7 @@ namespace Foam
     defineTypeNameAndDebug(C14H30, 0);
     addToRunTimeSelectionTable(liquid, C14H30,);
     addToRunTimeSelectionTable(liquid, C14H30, Istream);
+    addToRunTimeSelectionTable(liquid, C14H30, dictionary);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -56,7 +57,7 @@ Foam::C14H30::C14H30()
     rho_(60.92023144, 0.2582, 692.4, 0.26628),
     pv_(249.21, -16915, -35.195, 0.028451, 1.0),
     hl_(692.40, 455764.345336506, 0.428, 0.0, 0.0, 0.0),
-    cp_
+    Cp_
     (
         2565.72845679261,
        -4.78114036856325,
@@ -74,7 +75,7 @@ Foam::C14H30::C14H30()
         0.0,
         0.0
     ),
-    cpg_(1134.11831122223, 3629.17859591113, -1440.3, 2275.29335860317, -682),
+    Cpg_(1134.11831122223, 3629.17859591113, -1440.3, 2275.29335860317, -682),
     B_
     (
         0.00247837614419936,
@@ -114,9 +115,9 @@ Foam::C14H30::C14H30
     rho_(density),
     pv_(vapourPressure),
     hl_(heatOfVapourisation),
-    cp_(heatCapacity),
+    Cp_(heatCapacity),
     h_(enthalpy),
-    cpg_(idealGasHeatCapacity),
+    Cpg_(idealGasHeatCapacity),
     B_(secondVirialCoeff),
     mu_(dynamicViscosity),
     mug_(vapourDynamicViscosity),
@@ -133,9 +134,9 @@ Foam::C14H30::C14H30(Istream& is)
     rho_(is),
     pv_(is),
     hl_(is),
-    cp_(is),
+    Cp_(is),
     h_(is),
-    cpg_(is),
+    Cpg_(is),
     B_(is),
     mu_(is),
     mug_(is),
@@ -143,6 +144,44 @@ Foam::C14H30::C14H30(Istream& is)
     Kg_(is),
     sigma_(is),
     D_(is)
+{}
+
+
+Foam::C14H30::C14H30(const dictionary& dict)
+:
+    liquid(dict),
+    rho_(dict.subDict("rho")),
+    pv_(dict.subDict("pv")),
+    hl_(dict.subDict("hl")),
+    Cp_(dict.subDict("Cp")),
+    h_(dict.subDict("h")),
+    Cpg_(dict.subDict("Cpg")),
+    B_(dict.subDict("B")),
+    mu_(dict.subDict("mu")),
+    mug_(dict.subDict("mug")),
+    K_(dict.subDict("K")),
+    Kg_(dict.subDict("Kg")),
+    sigma_(dict.subDict("sigma")),
+    D_(dict.subDict("D"))
+{}
+
+
+Foam::C14H30::C14H30(const C14H30& liq)
+:
+    liquid(liq),
+    rho_(liq.rho_),
+    pv_(liq.pv_),
+    hl_(liq.hl_),
+    Cp_(liq.Cp_),
+    h_(liq.h_),
+    Cpg_(liq.Cpg_),
+    B_(liq.B_),
+    mu_(liq.mu_),
+    mug_(liq.mug_),
+    K_(liq.K_),
+    Kg_(liq.Kg_),
+    sigma_(liq.sigma_),
+    D_(liq.D_)
 {}
 
 

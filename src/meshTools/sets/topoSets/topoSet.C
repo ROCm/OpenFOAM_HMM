@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -309,6 +309,7 @@ Foam::topoSet::topoSet(const IOobject& obj, const word& wantedType)
     if
     (
         readOpt() == IOobject::MUST_READ
+     || readOpt() == IOobject::MUST_READ_IF_MODIFIED
      || (
             readOpt() == IOobject::READ_IF_PRESENT
          && headerOk()
@@ -356,6 +357,7 @@ Foam::topoSet::topoSet
     if
     (
         readOpt() == IOobject::MUST_READ
+     || readOpt() == IOobject::MUST_READ_IF_MODIFIED
      || (
             readOpt() == IOobject::READ_IF_PRESENT
          && headerOk()

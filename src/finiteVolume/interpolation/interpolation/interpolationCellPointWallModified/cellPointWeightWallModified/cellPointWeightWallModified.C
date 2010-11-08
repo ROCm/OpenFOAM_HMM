@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,9 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cellPointWeightWallModified.H"
-#include "wallPolyPatch.H"
-#include "polyMesh.H"
-#include "polyBoundaryMesh.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -34,35 +31,29 @@ Foam::cellPointWeightWallModified::cellPointWeightWallModified
 (
     const polyMesh& mesh,
     const vector& position,
-    const label cellIndex,
-    const label faceIndex
+    const label cellI,
+    const label faceI
 )
 :
-    cellPointWeight(mesh, position, cellIndex, faceIndex)
+    cellPointWeight(mesh, position, cellI, faceI)
 {
-    if (faceIndex < 0)
-    {
-        findTetrahedron(mesh, position, cellIndex);
-    }
-    else
+    // findTetrahedron or findTriangle will already have been called
+    // by the cellPointWeight constructor
+
+    if (faceI >= 0)
     {
         const polyBoundaryMesh& bm = mesh.boundaryMesh();
-        label patchI = bm.whichPatch(faceIndex);
+        label patchI = bm.whichPatch(faceI);
         if (patchI != -1)
         {
             if (isA<wallPolyPatch>(bm[patchI]))
             {
                 // Apply cell centre value wall faces
-                weights_[0] = 0.0;
+                weights_[0] = 1.0;
                 weights_[1] = 0.0;
                 weights_[2] = 0.0;
-                weights_[3] = 1.0;
+                weights_[3] = 0.0;
             }
-        }
-        else
-        {
-            // Interpolate
-            findTriangle(mesh, position, faceIndex);
         }
     }
 }

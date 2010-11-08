@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,7 +84,7 @@ public:
         // Access
 
             //- Return faceCell addressing
-            virtual const unallocLabelList& faceCells() const = 0;
+            virtual const labelUList& faceCells() const = 0;
 
 
         // Interface transfer functions
@@ -93,29 +93,14 @@ public:
             //  the interface as a field
             virtual tmp<labelField> interfaceInternalField
             (
-                const unallocLabelList& internalData
-            ) const = 0;
-
-            //- Initialise interface data transfer
-            virtual void initTransfer
-            (
-                const Pstream::commsTypes commsType,
-                const unallocLabelList& interfaceData
-            ) const
-            {}
-
-            //- Transfer and return neighbour field
-            virtual tmp<labelField> transfer
-            (
-                const Pstream::commsTypes commsType,
-                const unallocLabelList& interfaceData
+                const labelUList& internalData
             ) const = 0;
 
             //- Initialise transfer of internal field adjacent to the interface
             virtual void initInternalFieldTransfer
             (
                 const Pstream::commsTypes commsType,
-                const unallocLabelList& iF
+                const labelUList& iF
             ) const
             {}
 
@@ -123,7 +108,7 @@ public:
             virtual tmp<labelField> internalFieldTransfer
             (
                 const Pstream::commsTypes commsType,
-                const unallocLabelList& iF
+                const labelUList& iF
             ) const = 0;
 };
 

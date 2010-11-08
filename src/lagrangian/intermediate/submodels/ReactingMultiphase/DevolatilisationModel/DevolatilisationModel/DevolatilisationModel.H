@@ -39,6 +39,7 @@ SourceFiles
 #include "IOdictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
+#include "SubModelBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,21 +52,9 @@ namespace Foam
 
 template<class CloudType>
 class DevolatilisationModel
+:
+    public SubModelBase<CloudType>
 {
-protected:
-
-    // Protected data
-
-        //- The cloud dictionary
-        const dictionary& dict_;
-
-        //- Reference to the owner cloud class
-        CloudType& owner_;
-
-        //- The coefficient dictionary
-        const dictionary coeffDict_;
-
-
 public:
 
     //- Runtime type information
@@ -98,6 +87,18 @@ public:
             const word& type
         );
 
+        //- Construct copy
+        DevolatilisationModel(const DevolatilisationModel<CloudType>& dm);
+
+        //- Construct and return a clone
+        virtual autoPtr<DevolatilisationModel<CloudType> > clone() const
+        {
+            return autoPtr<DevolatilisationModel<CloudType> >
+            (
+                new DevolatilisationModel<CloudType>(*this)
+            );
+        }
+
 
     //- Destructor
     virtual ~DevolatilisationModel();
@@ -111,34 +112,19 @@ public:
     );
 
 
-    // Access
-
-        //- Return the owner cloud object
-        const CloudType& owner() const;
-
-        //- Return the cloud dictionary
-        const dictionary& dict() const;
-
-        //- Return the coefficient dictionary
-        const dictionary& coeffDict() const;
-
-
     // Member Functions
 
-        //- Flag to indicate whether model activates devolatilisation model
-        virtual bool active() const = 0;
-
         //- Update model
-        virtual scalar calculate
+        virtual void calculate
         (
             const scalar dt,
             const scalar mass0,
             const scalar mass,
             const scalar T,
-            const scalar YVolatile0,
-            const scalar YVolatile,
-            bool& canCombust
-        ) const = 0;
+            const scalarField& YGasEff,
+            bool& canCombust,
+            scalarField& dMassDV
+        ) const;
 };
 
 
@@ -159,18 +145,13 @@ public:
     );
 
 
-#define makeDevolatilisationModelThermoType(SS, CloudType, ParcelType, ThermoType)\
+#define makeDevolatilisationModelType(SS, CloudType, ParcelType)              \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug                                       \
-    (                                                                         \
-        SS<CloudType<ParcelType<ThermoType> > >,                              \
-        0                                                                     \
-    );                                                                        \
+    defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
                                                                               \
-    DevolatilisationModel<CloudType<ParcelType<ThermoType> > >::              \
-        adddictionaryConstructorToTable                                       \
-            <SS<CloudType<ParcelType<ThermoType> > > >                        \
-            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
+    DevolatilisationModel<CloudType<ParcelType> >::                           \
+        adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
+            add##SS##CloudType##ParcelType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

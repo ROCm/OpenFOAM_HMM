@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -93,8 +93,8 @@ Foam::fv::fourthGrad<Type>::calcGrad
     const surfaceVectorField& neiLs = lsv.nVectors();
 
     // owner/neighbour addressing
-    const unallocLabelList& own = mesh.owner();
-    const unallocLabelList& nei = mesh.neighbour();
+    const labelUList& own = mesh.owner();
+    const labelUList& nei = mesh.neighbour();
 
     // Assemble the fourth-order gradient
 
@@ -135,7 +135,7 @@ Foam::fv::fourthGrad<Type>::calcGrad
                      /mesh.deltaCoeffs().boundaryField()[patchi];
             }
 
-            const unallocLabelList& faceCells =
+            const labelUList& faceCells =
                 fGrad.boundaryField()[patchi].patch().faceCells();
 
             Field<GradType> neighbourSecondfGrad =

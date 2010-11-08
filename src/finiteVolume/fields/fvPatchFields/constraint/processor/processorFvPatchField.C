@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -73,7 +73,7 @@ processorFvPatchField<Type>::processorFvPatchField
     coupledFvPatchField<Type>(ptf, p, iF, mapper),
     procPatch_(refCast<const processorFvPatch>(p))
 {
-    if (!isType<processorFvPatch>(this->patch()))
+    if (!isA<processorFvPatch>(this->patch()))
     {
         FatalErrorIn
         (
@@ -105,7 +105,7 @@ processorFvPatchField<Type>::processorFvPatchField
     coupledFvPatchField<Type>(p, iF, dict),
     procPatch_(refCast<const processorFvPatch>(p))
 {
-    if (!isType<processorFvPatch>(p))
+    if (!isA<processorFvPatch>(p))
     {
         FatalIOErrorIn
         (
@@ -244,7 +244,7 @@ void processorFvPatchField<Type>::updateInterfaceMatrix
 
     // Multiply the field by coefficients and add into the result
 
-    const unallocLabelList& faceCells = this->patch().faceCells();
+    const labelUList& faceCells = this->patch().faceCells();
 
     forAll(faceCells, elemI)
     {

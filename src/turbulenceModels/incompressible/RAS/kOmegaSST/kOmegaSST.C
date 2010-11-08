@@ -91,10 +91,12 @@ kOmegaSST::kOmegaSST
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& transport
+    transportModel& transport,
+    const word& turbulenceModelName,
+    const word& modelName
 )
 :
-    RASModel(typeName, U, phi, transport),
+    RASModel(modelName, U, phi, transport, turbulenceModelName),
 
     alphaK1_
     (
@@ -244,7 +246,7 @@ kOmegaSST::kOmegaSST
       / max
         (
             a1_*omega_,
-            F2()*mag(symm(fvc::grad(U_)))
+            F2()*sqrt(2.0)*mag(symm(fvc::grad(U_)))
         )
     );
     nut_.correctBoundaryConditions();
@@ -398,7 +400,7 @@ void kOmegaSST::correct()
 
 
     // Re-calculate viscosity
-    nut_ = a1_*k_/max(a1_*omega_, F2()*sqrt(S2));
+    nut_ = a1_*k_/max(a1_*omega_, F2()*sqrt(2*S2));
     nut_.correctBoundaryConditions();
 }
 

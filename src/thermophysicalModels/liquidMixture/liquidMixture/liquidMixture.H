@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,15 +57,19 @@ Description
         AIR
             AIR 1 28.96518      // specie: name/nMoles/MolWt
             200 6000 1000       // low/high/common temperature
-            3.0879272 0.0012459718 -4.2371895e-07 6.7477479e-11 -3.9707697e-15 -995.26275 5.9596093   // 7 upper Temp. coeffs
-            3.5683962 -0.00067872943 1.5537148e-06 -3.2993706e-12 -4.6639539e-13 -1062.3466 3.7158296 // 7 lower Temp. coeffs
+            3.0879272 0.0012459718 -4.2371895e-07 6.7477479e-11
+                -3.9707697e-15 -995.26275 5.9596093   // 7 upper Temp. coeffs
+            3.5683962 -0.00067872943 1.5537148e-06 -3.2993706e-12
+                -4.6639539e-13 -1062.3466 3.7158296 // 7 lower Temp. coeffs
             1.4792e-06 116      // sutherlandTransport for AIR (STAR-CD)
             ;
         H2O
             H2O 1 18.01528      // specie: name/nMoles/MolWt
             200 6000 1000       // low/high/common temperature
-            2.6770389 0.0029731816 -7.7376889e-07 9.4433514e-11 -4.2689991e-15 -29885.894 6.88255    // 7 upper Temp. coeffs
-            4.1986352 -0.0020364017 6.5203416e-06 -5.4879269e-09 1.771968e-12 -30293.726 -0.84900901 // 7 lower Temp. coeffs
+            2.6770389 0.0029731816 -7.7376889e-07 9.4433514e-11
+                -4.2689991e-15 -29885.894 6.88255    // 7 upper Temp. coeffs
+            4.1986352 -0.0020364017 6.5203416e-06 -5.4879269e-09
+                1.771968e-12 -30293.726 -0.84900901 // 7 lower Temp. coeffs
             1.4792e-06 116      // sutherlandTransport for AIR (STAR-CD)
             ;
 
@@ -99,7 +103,7 @@ class liquidMixture
 {
     // Private data
 
-        // maximum reduced temperature
+        //- Maximum reduced temperature
         static const scalar TrMax;
 
         //- The names of the liquids
@@ -115,7 +119,21 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        liquidMixture(const dictionary&);
+        liquidMixture(const dictionary& dict);
+
+        //- Construct copy
+        liquidMixture(const liquidMixture& lm);
+
+        //- Construct and return a clone
+        virtual autoPtr<liquidMixture> clone() const
+        {
+            return autoPtr<liquidMixture>(new liquidMixture(*this));
+        }
+
+
+    //- Destructor
+    virtual ~liquidMixture()
+    {}
 
 
     // Selectors
@@ -126,6 +144,7 @@ public:
 
     // Member Functions
 
+        //- Return the liquid names
         inline const List<word>& components() const
         {
             return components_;
@@ -136,6 +155,13 @@ public:
         {
             return properties_;
         }
+
+        //- Return the number of liquids in the mixture
+        inline label size() const
+        {
+            return components_.size();
+        }
+
 
         //- Calculate the critical temperature of mixture
         scalar Tc(const scalarField& x) const;
@@ -195,7 +221,7 @@ public:
         ) const;
 
         //- Calculate the mixture heat capacity [J/(kg K)]
-        scalar cp
+        scalar Cp
         (
             const scalar p,
             const scalar T,

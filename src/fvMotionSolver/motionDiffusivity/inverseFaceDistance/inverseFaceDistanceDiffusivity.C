@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -115,7 +115,7 @@ void Foam::inverseFaceDistanceDiffusivity::correct()
         mesh,
         changedFaces,
         faceDist,
-        mesh.globalData().nTotalCells() // max iterations
+        mesh.globalData().nTotalCells()+1 // max iterations
     );
 
     const List<wallPoint>& faceInfo = waveInfo.allFaceInfo();
@@ -132,7 +132,7 @@ void Foam::inverseFaceDistanceDiffusivity::correct()
     {
         fvsPatchScalarField& bfld = faceDiffusivity_.boundaryField()[patchI];
 
-        const unallocLabelList& faceCells = bfld.patch().faceCells();
+        const labelUList& faceCells = bfld.patch().faceCells();
 
         if (patchSet.found(patchI))
         {

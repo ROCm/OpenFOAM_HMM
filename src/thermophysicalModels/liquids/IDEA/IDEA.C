@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,6 +33,7 @@ namespace Foam
     defineTypeNameAndDebug(IDEA, 0);
     addToRunTimeSelectionTable(liquid, IDEA,);
     addToRunTimeSelectionTable(liquid, IDEA, Istream);
+    addToRunTimeSelectionTable(liquid, IDEA, dictionary);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -71,9 +72,9 @@ Foam::IDEA::IDEA()
        -1.1656446689e+01,
         4.3667661492
     ),
-    cp_(1.6604957e+3, -6.250871e-1, 6.1778552e-3, 0.0, 0.0, 0.0),
+    Cp_(1.6604957e+3, -6.250871e-1, 6.1778552e-3, 0.0, 0.0, 0.0),
     h_(0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
-    cpg_
+    Cpg_
     (
         1.0457515243e+03,
         3.4410492875e+03,
@@ -134,9 +135,9 @@ Foam::IDEA::IDEA
     rho_(density),
     pv_(vapourPressure),
     hl_(heatOfVapourisation),
-    cp_(heatCapacity),
+    Cp_(heatCapacity),
     h_(enthalpy),
-    cpg_(idealGasHeatCapacity),
+    Cpg_(idealGasHeatCapacity),
     B_(secondVirialCoeff),
     mu_(dynamicViscosity),
     mug_(vapourDynamicViscosity),
@@ -153,9 +154,9 @@ Foam::IDEA::IDEA(Istream& is)
     rho_(is),
     pv_(is),
     hl_(is),
-    cp_(is),
+    Cp_(is),
     h_(is),
-    cpg_(is),
+    Cpg_(is),
     B_(is),
     mu_(is),
     mug_(is),
@@ -163,6 +164,44 @@ Foam::IDEA::IDEA(Istream& is)
     Kg_(is),
     sigma_(is),
     D_(is)
+{}
+
+
+Foam::IDEA::IDEA(const dictionary& dict)
+:
+    liquid(dict),
+    rho_(dict.subDict("rho")),
+    pv_(dict.subDict("pv")),
+    hl_(dict.subDict("hl")),
+    Cp_(dict.subDict("Cp")),
+    h_(dict.subDict("h")),
+    Cpg_(dict.subDict("Cpg")),
+    B_(dict.subDict("B")),
+    mu_(dict.subDict("mu")),
+    mug_(dict.subDict("mug")),
+    K_(dict.subDict("K")),
+    Kg_(dict.subDict("Kg")),
+    sigma_(dict.subDict("sigma")),
+    D_(dict.subDict("D"))
+{}
+
+
+Foam::IDEA::IDEA(const IDEA& liq)
+:
+    liquid(liq),
+    rho_(liq.rho_),
+    pv_(liq.pv_),
+    hl_(liq.hl_),
+    Cp_(liq.Cp_),
+    h_(liq.h_),
+    Cpg_(liq.Cpg_),
+    B_(liq.B_),
+    mu_(liq.mu_),
+    mug_(liq.mug_),
+    K_(liq.K_),
+    Kg_(liq.Kg_),
+    sigma_(liq.sigma_),
+    D_(liq.D_)
 {}
 
 

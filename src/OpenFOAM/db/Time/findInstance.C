@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -126,7 +126,11 @@ Foam::word Foam::Time::findInstance
                     << endl;
             }
 
-            if (rOpt == IOobject::MUST_READ)
+            if
+            (
+                rOpt == IOobject::MUST_READ
+             || rOpt == IOobject::MUST_READ_IF_MODIFIED
+            )
             {
                 FatalErrorIn
                 (
@@ -174,7 +178,7 @@ Foam::word Foam::Time::findInstance
         return constant();
     }
 
-    if (rOpt == IOobject::MUST_READ)
+    if (rOpt == IOobject::MUST_READ || rOpt == IOobject::MUST_READ_IF_MODIFIED)
     {
         FatalErrorIn
         (

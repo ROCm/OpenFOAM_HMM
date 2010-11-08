@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -78,24 +78,15 @@ MarshakRadiationFixedTMixedFvPatchScalarField
     Trad_("Trad", dict, p.size()),
     emissivity_(readScalar(dict.lookup("emissivity")))
 {
-    if (dict.found("value"))
-    {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-        refValue() = scalarField("refValue", dict, p.size());
-        refGrad() = scalarField("refGradient", dict, p.size());
-        valueFraction() = scalarField("valueFraction", dict, p.size());
-    }
-    else
-    {
-        refValue() = 4.0*constant::physicoChemical::sigma.value()*pow4(Trad_);
-        refGrad() = 0.0;
-        valueFraction() = 1.0;
+    // refValue updated on each call to updateCoeffs()
+    refValue() = 4.0*constant::physicoChemical::sigma.value()*pow4(Trad_);
 
-        fvPatchScalarField::operator=(refValue());
-    }
+    // zero gradient
+    refGrad() = 0.0;
+
+    valueFraction() = 1.0;
+
+    fvPatchScalarField::operator=(refValue());
 }
 
 
@@ -174,7 +165,10 @@ void Foam::MarshakRadiationFixedTMixedFvPatchScalarField::updateCoeffs()
 }
 
 
-void Foam::MarshakRadiationFixedTMixedFvPatchScalarField::write(Ostream& os) const
+void Foam::MarshakRadiationFixedTMixedFvPatchScalarField::write
+(
+    Ostream& os
+) const
 {
     mixedFvPatchScalarField::write(os);
     Trad_.writeEntry("Trad", os);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,7 +58,6 @@ SourceFiles
 #include "labelField.H"
 #include "primitiveFields.H"
 #include "LUscalarMatrix.H"
-#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,7 +74,7 @@ class GAMGSolver
 {
     // Private data
 
-        Switch cacheAgglomeration_;
+        bool cacheAgglomeration_;
 
         //- Number of pre-smoothing sweeps
         label nPreSweeps_;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,6 +71,17 @@ public:
             const dictionary& decompositionDict,
             const word& derivedType
         );
+
+        //- Return for every coordinate the wanted processor number.
+        virtual labelList decompose
+        (
+            const pointField& points,
+            const scalarField& pointWeights
+        ) = 0;
+
+        //- Like decompose but with uniform weights on the points
+        virtual labelList decompose(const pointField&) = 0;
+
 };
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -80,19 +80,15 @@ void Foam::cyclicGAMGInterfaceField::updateInterfaceMatrix
     const Pstream::commsTypes
 ) const
 {
-    scalarField pnf(size());
-
-    label sizeby2 = size()/2;
-
-    const unallocLabelList& faceCells = cyclicInterface_.faceCells();
-
-    for (label facei=0; facei<sizeby2; facei++)
-    {
-        pnf[facei] = psiInternal[faceCells[facei + sizeby2]];
-        pnf[facei + sizeby2] = psiInternal[faceCells[facei]];
-    }
+    // Get neighbouring field
+    scalarField pnf
+    (
+        cyclicInterface_.neighbPatch().interfaceInternalField(psiInternal)
+    );
 
     transformCoupleField(pnf, cmpt);
+
+    const labelUList& faceCells = cyclicInterface_.faceCells();
 
     forAll(faceCells, elemI)
     {

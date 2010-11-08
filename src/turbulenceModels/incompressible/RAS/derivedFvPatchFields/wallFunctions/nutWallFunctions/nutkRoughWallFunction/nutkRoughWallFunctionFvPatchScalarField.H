@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -151,6 +151,21 @@ public:
 
 
     // Member functions
+
+        // Acces functions
+
+            // Return Ks
+             scalarField& Ks()
+            {
+                return Ks_;
+            }
+
+            // Return Cs
+            scalarField& Cs()
+            {
+                return Cs_;
+            }
+
 
         // Mapping functions
 

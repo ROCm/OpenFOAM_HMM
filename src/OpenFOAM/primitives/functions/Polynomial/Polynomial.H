@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
 
         poly = logCoeff*log(x) + sum(coeff_[i]*x^i)
 
-    where 0 <= i <= n
+    where 0 \<= i \<= n
 
     - integer powers, starting at zero
     - evaluate(x) to evaluate the poly for a given value
@@ -51,6 +51,7 @@ SourceFiles
 #include "scalar.H"
 #include "Ostream.H"
 #include "VectorSpace.H"
+#include "StaticAssert.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -79,6 +80,9 @@ class Polynomial
 :
     public VectorSpace<Polynomial<PolySize>, scalar, PolySize>
 {
+    //- Size must be positive (non-zero)
+    StaticAssert(PolySize > 0);
+
     // Private data
 
         //- Include the log term? - only activated using integrateMinus1()
@@ -97,8 +101,17 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Construct null, with all coefficients = 0.0
         Polynomial();
+
+        //- Construct from C-array of coefficients
+        explicit Polynomial(const scalar coeffs[PolySize]);
+
+        //- Construct from a list of coefficients
+        explicit Polynomial(const UList<scalar>& coeffs);
+
+        //- Construct from Istream
+        Polynomial(Istream& is);
 
         //- Construct from name and Istream
         Polynomial(const word& name, Istream& is);

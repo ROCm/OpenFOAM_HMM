@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,18 @@ Class
     Foam::solidMixture
 
 Description
-    Foam::solidMixture
+    A mixture of solids.
+
+Note
+    The dictionary constructor searches for the entry @c solidComponents,
+    which is a wordList. The solid properties of each component can either
+    be contained within a @c solidProperties sub-dictionary or (for legacy
+    purposes) can be found directly in the dictionary.
+    The @c solidProperties sub-dictionary entry should be used when possible
+    to avoid conflicts with identically named gas-phase entries.
+
+SeeAlso
+    Foam::liquidMixture
 
 \*---------------------------------------------------------------------------*/
 
@@ -48,7 +59,6 @@ namespace Foam
 
 class solidMixture
 {
-
     // Private data
 
         //- The names of the solids
@@ -65,6 +75,20 @@ public:
         //- Construct from dictionary
         solidMixture(const dictionary&);
 
+        //- Construct copy
+        solidMixture(const solidMixture& lm);
+
+        //- Construct and return a clone
+        virtual autoPtr<solidMixture> clone() const
+        {
+            return autoPtr<solidMixture>(new solidMixture(*this));
+        }
+
+
+    //- Destructor
+    virtual ~solidMixture()
+    {}
+
 
     // Selectors
 
@@ -74,7 +98,7 @@ public:
 
     // Member Functions
 
-        //- Return the sold names
+        //- Return the solid names
         inline const List<word>& components() const
         {
             return components_;
@@ -85,6 +109,13 @@ public:
         {
             return properties_;
         }
+
+        //- Return the number of solids in the mixture
+        inline label size() const
+        {
+            return components_.size();
+        }
+
 
         //- Returns the mass fractions, given mole fractions
         scalarField Y(const scalarField& X) const;
@@ -98,7 +129,7 @@ public:
 
         //- Calculate the mixture heat capacity [J/(kg K)] as a function
         //  of mass fractions
-        scalar cp(const scalarField& Y) const;
+        scalar Cp(const scalarField& Y) const;
 };
 
 

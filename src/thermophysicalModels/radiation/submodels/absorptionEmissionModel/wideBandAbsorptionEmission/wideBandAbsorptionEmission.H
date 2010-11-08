@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,53 +46,52 @@ Description
     The look Up table file should be in the constant directory.
 
     band dictionary:
-
-    band0
-    {
-        bandLimits (1.0e-6 2.63e-6);
-        EhrrCoeff       0.0;
-        species
+    @verbatim
+        band0
         {
-            CH4
+            bandLimits (1.0e-6 2.63e-6);
+            EhrrCoeff       0.0;
+            species
             {
-                Tcommon         300.;
-                Tlow            300.;
-                Thigh           2500.;
-                invTemp         false;
-                loTcoeffs (0 0 0 0 0 0) ;
-                hiTcoeffs (.1 0 0 0 0 0);
-            }
-            CO2
-            {
-                Tcommon         300.;
-                Tlow            300.;
-                Thigh           2500.;
-                invTemp         false;
-                loTcoeffs (0 0 0 0 0 0) ;
-                hiTcoeffs (.1 0 0 0 0 0);
-            }
-
-            H2O
-            {
-                Tcommon         300.;
-                Tlow            300.;
-                Thigh           2500.;
-                invTemp         false;
-                loTcoeffs (0 0 0 0 0 0) ;
-                hiTcoeffs (.1 0 0 0 0 0);
-            }
-
-            Ysoot
-            {
-                Tcommon         300.;
-                Tlow            300.;
-                Thigh           2500.;
-                invTemp         false;
-                loTcoeffs (0 0 0 0 0 0) ;
-                hiTcoeffs (.1 0 0 0 0 0);
+                CH4
+                {
+                    Tcommon         300.;
+                    Tlow            300.;
+                    Thigh           2500.;
+                    invTemp         false;
+                    loTcoeffs (0 0 0 0 0 0) ;
+                    hiTcoeffs (.1 0 0 0 0 0);
+                }
+                CO2
+                {
+                    Tcommon         300.;
+                    Tlow            300.;
+                    Thigh           2500.;
+                    invTemp         false;
+                    loTcoeffs (0 0 0 0 0 0) ;
+                    hiTcoeffs (.1 0 0 0 0 0);
+                }
+                H2O
+                {
+                    Tcommon         300.;
+                    Tlow            300.;
+                    Thigh           2500.;
+                    invTemp         false;
+                    loTcoeffs (0 0 0 0 0 0) ;
+                    hiTcoeffs (.1 0 0 0 0 0);
+                }
+                Ysoot
+                {
+                    Tcommon         300.;
+                    Tlow            300.;
+                    Thigh           2500.;
+                    invTemp         false;
+                    loTcoeffs (0 0 0 0 0 0) ;
+                    hiTcoeffs (.1 0 0 0 0 0);
+                }
             }
         }
-    }
+    @endverbatim
 
 
 SourceFiles

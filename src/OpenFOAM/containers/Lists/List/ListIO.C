@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -135,7 +135,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
                 << exit(FatalIOError);
         }
 
-        // Putback the openning bracket
+        // Putback the opening bracket
         is.putBack(firstToken);
 
         // Now read as a singly-linked list

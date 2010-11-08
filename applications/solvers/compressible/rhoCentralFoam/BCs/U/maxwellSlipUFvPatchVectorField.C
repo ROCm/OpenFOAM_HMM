@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,8 +28,7 @@ License
 #include "mathematicalConstants.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
-#include "surfaceFields.H"
-#include "fvCFD.H"
+#include "fvcGrad.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -129,7 +128,6 @@ maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Update the coefficients associated with the patch field
 void maxwellSlipUFvPatchVectorField::updateCoeffs()
 {
     if (updated())
@@ -177,7 +175,6 @@ void maxwellSlipUFvPatchVectorField::updateCoeffs()
 }
 
 
-// Write
 void maxwellSlipUFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);

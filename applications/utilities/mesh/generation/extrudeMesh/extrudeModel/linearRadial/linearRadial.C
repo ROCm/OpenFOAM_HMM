@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,7 +43,8 @@ addToRunTimeSelectionTable(extrudeModel, linearRadial, dictionary);
 linearRadial::linearRadial(const dictionary& dict)
 :
     extrudeModel(typeName, dict),
-    R_(readScalar(coeffDict_.lookup("R")))
+    R_(readScalar(coeffDict_.lookup("R"))),
+    Rsurface_(coeffDict_.lookupOrDefault<scalar>("Rsurface", -1))
 {}
 
 
@@ -65,6 +66,7 @@ point linearRadial::operator()
     // radius of the surface
     scalar rs = mag(surfacePoint);
     vector rsHat = surfacePoint/rs;
+    if (Rsurface_ >= 0) rs = Rsurface_;
 
     scalar r = rs + (R_ - rs)*sumThickness(layer);
     return r*rsHat;

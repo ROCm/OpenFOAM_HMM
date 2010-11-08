@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -115,37 +115,17 @@ tmp<vectorField> processorFvPatch::delta() const
 
 tmp<labelField> processorFvPatch::interfaceInternalField
 (
-    const unallocLabelList& internalData
+    const labelUList& internalData
 ) const
 {
     return patchInternalField(internalData);
 }
 
 
-void processorFvPatch::initTransfer
-(
-    const Pstream::commsTypes commsType,
-    const unallocLabelList& interfaceData
-) const
-{
-    send(commsType, interfaceData);
-}
-
-
-tmp<labelField> processorFvPatch::transfer
-(
-    const Pstream::commsTypes commsType,
-    const unallocLabelList&
-) const
-{
-    return receive<label>(commsType, this->size());
-}
-
-
 void processorFvPatch::initInternalFieldTransfer
 (
     const Pstream::commsTypes commsType,
-    const unallocLabelList& iF
+    const labelUList& iF
 ) const
 {
     send(commsType, patchInternalField(iF)());
@@ -155,7 +135,7 @@ void processorFvPatch::initInternalFieldTransfer
 tmp<labelField> processorFvPatch::internalFieldTransfer
 (
     const Pstream::commsTypes commsType,
-    const unallocLabelList&
+    const labelUList&
 ) const
 {
     return receive<label>(commsType, this->size());

@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -18,24 +18,24 @@ FoamFile
 defaultFieldValues
 (
     volScalarFieldValue alpha1 1
-    volScalarFieldValue p 100000
+    volScalarFieldValue p_rgh 1e5
 );
 
 regions
 (
     sphereToCell
     {
-        centre ( 0.5 0.5 0.5 );
+        centre (0.5 0.5 0.5);
         radius 0.1;
         fieldValues
         (
             volScalarFieldValue alpha1 0
-            volScalarFieldValue p 1000000
+            volScalarFieldValue p_rgh 1e6
         );
     }
     boxToCell
     {
-        box ( -10 1 -1 ) ( 10 10 1 );
+        box (-10 1 -1) (10 10 1);
         fieldValues
         (
             volScalarFieldValue alpha1 0

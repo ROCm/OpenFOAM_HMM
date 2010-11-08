@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -755,13 +755,12 @@ void Foam::isoSurfaceCell::calcSnappedPoint
         }
     }
 
-    syncTools::syncPointList
+    syncTools::syncPointPositions
     (
         mesh_,
         collapsedPoint,
         minEqOp<point>(),
-        point::max,
-        true                // are coordinates so separate
+        point::max
     );
 
     snappedPoint.setSize(mesh_.nPoints());

@@ -75,10 +75,19 @@ Foam::PhaseChangeModel<CloudType>::PhaseChangeModel
     CloudType& owner
 )
 :
-    dict_(dictionary::null),
-    owner_(owner),
-    coeffDict_(dictionary::null),
+    SubModelBase<CloudType>(owner),
     enthalpyTransfer_(etLatentHeat)
+{}
+
+
+template<class CloudType>
+Foam::PhaseChangeModel<CloudType>::PhaseChangeModel
+(
+    const PhaseChangeModel<CloudType>& pcm
+)
+:
+    SubModelBase<CloudType>(pcm),
+    enthalpyTransfer_(pcm.enthalpyTransfer_)
 {}
 
 
@@ -90,12 +99,10 @@ Foam::PhaseChangeModel<CloudType>::PhaseChangeModel
     const word& type
 )
 :
-    dict_(dict),
-    owner_(owner),
-    coeffDict_(dict.subDict(type + "Coeffs")),
+    SubModelBase<CloudType>(owner, dict, type),
     enthalpyTransfer_
     (
-        wordToEnthalpyTransfer(coeffDict_.lookup("enthalpyTransfer"))
+        wordToEnthalpyTransfer(this->coeffDict().lookup("enthalpyTransfer"))
     )
 {}
 
@@ -108,32 +115,44 @@ Foam::PhaseChangeModel<CloudType>::~PhaseChangeModel()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-template<class CloudType>
-const CloudType& Foam::PhaseChangeModel<CloudType>::owner() const
-{
-    return owner_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::PhaseChangeModel<CloudType>::dict() const
-{
-    return dict_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::PhaseChangeModel<CloudType>::coeffDict() const
-{
-    return coeffDict_;
-}
-
 
 template<class CloudType>
 const typename Foam::PhaseChangeModel<CloudType>::enthalpyTransferType&
 Foam::PhaseChangeModel<CloudType>::enthalpyTransfer() const
 {
     return enthalpyTransfer_;
+}
+
+
+template<class CloudType>
+void Foam::PhaseChangeModel<CloudType>::calculate
+(
+    const scalar,
+    const label,
+    const scalar,
+    const scalar,
+    const scalar,
+    const scalar,
+    const scalar,
+    const scalar,
+    scalarField&
+) const
+{
+    notImplemented
+    (
+        "void Foam::PhaseChangeModel<CloudType>::calculate"
+        "("
+            "const scalar, "
+            "const label, "
+            "const scalar, "
+            "const scalar, "
+            "const scalar, "
+            "const scalar, "
+            "const scalar, "
+            "const scalar, "
+            "scalarField&"
+        ") const"
+    );
 }
 
 

@@ -32,27 +32,30 @@ License
 
 defineTypeNameAndDebug(Foam::Time, 0);
 
-template<>
-const char* Foam::NamedEnum<Foam::Time::stopAtControls, 4>::names[] =
+namespace Foam
 {
-    "endTime",
-    "noWriteNow",
-    "writeNow",
-    "nextWrite"
-};
+    template<>
+    const char* Foam::NamedEnum<Foam::Time::stopAtControls, 4>::names[] =
+    {
+        "endTime",
+        "noWriteNow",
+        "writeNow",
+        "nextWrite"
+    };
+
+    template<>
+    const char* Foam::NamedEnum<Foam::Time::writeControls, 5>::names[] =
+    {
+        "timeStep",
+        "runTime",
+        "adjustableRunTime",
+        "clockTime",
+        "cpuTime"
+    };
+}
 
 const Foam::NamedEnum<Foam::Time::stopAtControls, 4>
     Foam::Time::stopAtControlNames_;
-
-template<>
-const char* Foam::NamedEnum<Foam::Time::writeControls, 5>::names[] =
-{
-    "timeStep",
-    "runTime",
-    "adjustableRunTime",
-    "clockTime",
-    "cpuTime"
-};
 
 const Foam::NamedEnum<Foam::Time::writeControls, 5>
     Foam::Time::writeControlNames_;
@@ -217,7 +220,7 @@ Foam::Time::Time
             controlDictName,
             system(),
             *this,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
             false
         )
@@ -243,6 +246,13 @@ Foam::Time::Time
     functionObjects_(*this)
 {
     setControls();
+
+    // Time objects not registered so do like objectRegistry::checkIn ourselves.
+    if (runTimeModifiable_)
+    {
+        monitorPtr_.reset(new fileMonitor());
+        controlDict_.watchIndex() = addWatch(controlDict_.filePath());
+    }
 }
 
 
@@ -299,6 +309,19 @@ Foam::Time::Time
     functionObjects_(*this)
 {
     setControls();
+
+    // Time objects not registered so do like objectRegistry::checkIn ourselves.
+    if (runTimeModifiable_)
+    {
+        monitorPtr_.reset(new fileMonitor());
+
+        // File might not exist yet.
+        fileName f(controlDict_.filePath());
+        if (f != fileName::null)
+        {
+            controlDict_.watchIndex() = addWatch(f);
+        }
+    }
 }
 
 
@@ -358,12 +381,49 @@ Foam::Time::Time
 
 Foam::Time::~Time()
 {
+    if (controlDict_.watchIndex() != -1)
+    {
+        removeWatch(controlDict_.watchIndex());
+    }
+
     // destroy function objects first
     functionObjects_.clear();
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::label Foam::Time::addWatch(const fileName& fName) const
+{
+    return monitorPtr_().addWatch(fName);
+}
+
+
+bool Foam::Time::removeWatch(const label watchIndex) const
+{
+    return monitorPtr_().removeWatch(watchIndex);
+}
+
+const Foam::fileName& Foam::Time::getFile(const label watchIndex) const
+{
+    return monitorPtr_().getFile(watchIndex);
+}
+
+
+Foam::fileMonitor::fileState Foam::Time::getState
+(
+    const label watchFd
+) const
+{
+    return monitorPtr_().getState(watchFd);
+}
+
+
+void Foam::Time::setUnmodified(const label watchFd) const
+{
+    monitorPtr_().setUnmodified(watchFd);
+}
+
 
 Foam::word Foam::Time::timeName(const scalar t)
 {
@@ -552,8 +612,9 @@ bool Foam::Time::end() const
 }
 
 
-void Foam::Time::stopAt(const stopAtControls sa) const
+bool Foam::Time::stopAt(const stopAtControls sa) const
 {
+    const bool changed = (stopAt_ != sa);
     stopAt_ = sa;
 
     // adjust endTime
@@ -565,6 +626,7 @@ void Foam::Time::stopAt(const stopAtControls sa) const
     {
         endTime_ = GREAT;
     }
+    return changed;
 }
 
 
@@ -752,7 +814,11 @@ Foam::Time& Foam::Time::operator++()
 
             case wcCpuTime:
             {
-                label outputIndex = label(elapsedCpuTime()/writeInterval_);
+                label outputIndex = label
+                (
+                    returnReduce(elapsedCpuTime(), maxOp<double>())
+                  / writeInterval_
+                );
                 if (outputIndex > outputTimeIndex_)
                 {
                     outputTime_ = true;
@@ -767,7 +833,11 @@ Foam::Time& Foam::Time::operator++()
 
             case wcClockTime:
             {
-                label outputIndex = label(elapsedClockTime()/writeInterval_);
+                label outputIndex = label
+                (
+                    returnReduce(label(elapsedClockTime()), maxOp<label>())
+                  / writeInterval_
+                );
                 if (outputIndex > outputTimeIndex_)
                 {
                     outputTime_ = true;

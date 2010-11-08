@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,20 +60,20 @@ class treeDataTriSurface
 
     // Private Member Functions
 
-        //- fast triangle nearest point calculation. Returns point in E0, E1
-        //  coordinate system:  base + s*E0 + t*E1
-        static scalar nearestCoords
-        (
-            const point& base,
-            const point& E0,
-            const point& E1,
-            const scalar a,
-            const scalar b,
-            const scalar c,
-            const point& P,
-            scalar& s,
-            scalar& t
-        );
+        // //- fast triangle nearest point calculation. Returns point in E0, E1
+        // //  coordinate system:  base + s*E0 + t*E1
+        // static scalar nearestCoords
+        // (
+        //     const point& base,
+        //     const point& E0,
+        //     const point& E1,
+        //     const scalar a,
+        //     const scalar b,
+        //     const scalar c,
+        //     const point& P,
+        //     scalar& s,
+        //     scalar& t
+        // );
 
 public:
 
@@ -91,12 +91,12 @@ public:
 
         // Access
 
-            const triSurface& surface() const
+            inline const triSurface& surface() const
             {
                 return surface_;
             }
 
-            label size() const
+            inline label size() const
             {
                 return surface_.size();
             }
@@ -127,7 +127,7 @@ public:
             //  Returns actual point and distance (squared)
             void findNearest
             (
-                const labelList& indices,
+                const labelUList& indices,
                 const point& sample,
 
                 scalar& nearestDistSqr,
@@ -139,7 +139,7 @@ public:
             //  Returns point and distance (squared)
             void findNearest
             (
-                const labelList& indices,
+                const labelUList& indices,
                 const linePointRef& ln,
 
                 treeBoundBox& tightest,

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,6 @@ License
 #include "domainDecomposition.H"
 #include "decompositionMethod.H"
 #include "cpuTime.H"
-#include "cyclicPolyPatch.H"
 #include "cellSet.H"
 #include "regionSplit.H"
 
@@ -110,13 +109,12 @@ void Foam::domainDecomposition::distributeCells()
 
     autoPtr<decompositionMethod> decomposePtr = decompositionMethod::New
     (
-        decompositionDict_,
-        *this
+        decompositionDict_
     );
 
     if (sameProcFaces.empty())
     {
-        cellToProc_ = decomposePtr().decompose(cellCentres());
+        cellToProc_ = decomposePtr().decompose(*this, cellCentres());
     }
     else
     {
@@ -175,7 +173,12 @@ void Foam::domainDecomposition::distributeCells()
 
         // Do decomposition on agglomeration
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        cellToProc_ = decomposePtr().decompose(globalRegion, regionCentres);
+        cellToProc_ = decomposePtr().decompose
+        (
+            *this,
+            globalRegion,
+            regionCentres
+        );
     }
 
     Info<< "\nFinished decomposition in "

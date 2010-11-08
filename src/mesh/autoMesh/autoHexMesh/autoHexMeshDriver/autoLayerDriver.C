@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -192,6 +192,7 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
                 motionDict,
                 errorFaces
             );
+
             //if (checkEdgeConnectivity)
             //{
             //    Info<< "Checking edge-face connectivity (duplicate faces"
@@ -208,7 +209,11 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
             //     || hasErrors;
             //
             //    Info<< "Detected additional "
-            //        << returnReduce(errorFaces.size()-nOldSize, sumOp<label>())
+            //        <<  returnReduce
+            //            (
+            //                errorFaces.size() - nOldSize,
+            //                sumOp<label>()
+            //            )
             //        << " faces with illegal face-face connectivity"
             //        << endl;
             //}
@@ -487,8 +492,7 @@ Foam::labelList Foam::autoLayerDriver::collectFaces
     (
         mesh,
         selected,
-        orEqOp<bool>(),     // combine operator
-        false               // separation
+        orEqOp<bool>()      // combine operator
     );
 
     labelList selectedFaces(findIndices(selected, true));
@@ -534,8 +538,7 @@ Foam::labelList Foam::autoLayerDriver::growFaceCellFace
     (
         mesh,
         selected,
-        orEqOp<bool>(),     // combine operator
-        false               // separation
+        orEqOp<bool>()      // combine operator
     );
     return findIndices(selected, true);
 }
@@ -1015,8 +1018,7 @@ void Foam::autoLayerDriver::handleFeatureAngle
             mesh,
             edgeNormal,
             nomalsCombine(),
-            point::max,  // null value
-            false                   // no separation
+            point::max          // null value
         );
 
         label vertI = 0;
@@ -1307,8 +1309,7 @@ void Foam::autoLayerDriver::setNumLayers
         pp.meshPoints(),
         maxLayers,
         maxEqOp<label>(),
-        labelMin,           // null value
-        false               // no separation
+        labelMin            // null value
     );
     syncTools::syncPointList
     (
@@ -1316,8 +1317,7 @@ void Foam::autoLayerDriver::setNumLayers
         pp.meshPoints(),
         minLayers,
         minEqOp<label>(),
-        labelMax,           // null value
-        false               // no separation
+        labelMax            // null value
     );
 
     // Unmark any point with different min and max
@@ -1434,8 +1434,7 @@ void Foam::autoLayerDriver::growNoExtrusion
             pp.meshPoints(),
             status,
             minEqOp<label>(),
-            labelMax,           // null value
-            false               // no separation
+            labelMax            // null value
         );
         forAll(status, i)
         {
@@ -1528,8 +1527,7 @@ void Foam::autoLayerDriver::calculateLayerThickness
         pp.meshPoints(),
         expansionRatio,
         minEqOp<scalar>(),
-        GREAT,              // null value
-        false               // no separation
+        GREAT               // null value
     );
     syncTools::syncPointList
     (
@@ -1537,8 +1535,7 @@ void Foam::autoLayerDriver::calculateLayerThickness
         pp.meshPoints(),
         thickness,
         minEqOp<scalar>(),
-        GREAT,              // null value
-        false               // no separation
+        GREAT               // null value
     );
     syncTools::syncPointList
     (
@@ -1546,8 +1543,7 @@ void Foam::autoLayerDriver::calculateLayerThickness
         pp.meshPoints(),
         minThickness,
         minEqOp<scalar>(),
-        GREAT,              // null value
-        false               // no separation
+        GREAT               // null value
     );
 
 
@@ -1594,8 +1590,7 @@ void Foam::autoLayerDriver::calculateLayerThickness
             pp.meshPoints(),
             maxPointLevel,
             maxEqOp<label>(),
-            labelMin,           // null value
-            false               // no separation
+            labelMin            // null value
         );
 
 
@@ -1664,8 +1659,7 @@ void Foam::autoLayerDriver::syncPatchDisplacement
             meshPoints,
             patchDisp,
             minEqOp<vector>(),
-            point::max,          // null value
-            false                           // no separation
+            point::max           // null value
         );
 
         // Unmark if displacement too small
@@ -1697,8 +1691,7 @@ void Foam::autoLayerDriver::syncPatchDisplacement
             meshPoints,
             syncPatchNLayers,
             minEqOp<label>(),
-            labelMax,           // null value
-            false               // no separation
+            labelMax            // null value
         );
 
         // Reset if differs
@@ -1728,8 +1721,7 @@ void Foam::autoLayerDriver::syncPatchDisplacement
             meshPoints,
             syncPatchNLayers,
             maxEqOp<label>(),
-            labelMin,           // null value
-            false               // no separation
+            labelMin            // null value
         );
 
         // Reset if differs
@@ -1815,8 +1807,7 @@ void Foam::autoLayerDriver::getPatchDisplacement
             meshPoints,
             pointNormals,
             plusEqOp<vector>(),
-            vector::zero,       // null value
-            false               // no separation
+            vector::zero        // null value
         );
 
         syncTools::syncPointList
@@ -1825,8 +1816,7 @@ void Foam::autoLayerDriver::getPatchDisplacement
             meshPoints,
             nPointFaces,
             plusEqOp<label>(),
-            0,                  // null value
-            false               // no separation
+            0                   // null value
         );
 
         forAll(pointNormals, i)
@@ -2258,8 +2248,7 @@ void Foam::autoLayerDriver::setupLayerInfoTruncation
                     pp.meshPoints(),
                     foundNeighbour,
                     orEqOp<bool>(),
-                    false,              // null value
-                    false               // no separation
+                    false               // null value
                 );
 
                 forAll(pp.meshPoints(), patchPointI)
@@ -2318,8 +2307,7 @@ void Foam::autoLayerDriver::setupLayerInfoTruncation
             pp.meshPoints(),
             nPatchPointLayers,
             maxEqOp<label>(),
-            0,                  // null value
-            false               // no separation
+            0                   // null value
         );
     }
 }
@@ -2356,6 +2344,7 @@ Foam::label Foam::autoLayerDriver::checkAndUnmark
 (
     const addPatchCellLayer& addLayer,
     const dictionary& meshQualityDict,
+    const List<labelPair>& baffles,
     const indirectPrimitivePatch& pp,
     const fvMesh& newMesh,
 
@@ -2367,7 +2356,15 @@ Foam::label Foam::autoLayerDriver::checkAndUnmark
     // Check the resulting mesh for errors
     Info<< nl << "Checking mesh with layer ..." << endl;
     faceSet wrongFaces(newMesh, "wrongFaces", newMesh.nFaces()/1000);
-    motionSmoother::checkMesh(false, newMesh, meshQualityDict, wrongFaces);
+    motionSmoother::checkMesh
+    (
+        false,
+        newMesh,
+        meshQualityDict,
+        identity(newMesh.nFaces()),
+        baffles,
+        wrongFaces
+    );
     Info<< "Detected " << returnReduce(wrongFaces.size(), sumOp<label>())
         << " illegal faces"
         << " (concave, zero area or negative cell pyramid volume)"
@@ -2496,9 +2493,14 @@ void Foam::autoLayerDriver::getLayerCellsFaces
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::autoLayerDriver::autoLayerDriver(meshRefinement& meshRefiner)
+Foam::autoLayerDriver::autoLayerDriver
+(
+    meshRefinement& meshRefiner,
+    const labelList& globalToPatch
+)
 :
-    meshRefiner_(meshRefiner)
+    meshRefiner_(meshRefiner),
+    globalToPatch_(globalToPatch)
 {}
 
 
@@ -2547,6 +2549,20 @@ void Foam::autoLayerDriver::addLayers
 )
 {
     fvMesh& mesh = meshRefiner_.mesh();
+
+    // Create baffles (pairs of faces that share the same points)
+    // Baffles stored as owner and neighbour face that have been created.
+    List<labelPair> baffles;
+    meshRefiner_.createZoneBaffles(globalToPatch_, baffles);
+
+
+    if (debug)
+    {
+        const_cast<Time&>(mesh.time())++;
+        Info<< "Writing baffled mesh to " << meshRefiner_.timeName() << endl;
+        mesh.write();
+    }
+
 
     autoPtr<indirectPrimitivePatch> pp
     (
@@ -2932,6 +2948,7 @@ void Foam::autoLayerDriver::addLayers
             (
                 meshMover(),
                 meshQualityDict,
+                baffles,
 
                 layerParams.nSmoothThickness(),
                 layerParams.maxThicknessToMedialRatio(),
@@ -3098,6 +3115,15 @@ void Foam::autoLayerDriver::addLayers
             identity(pp().nPoints())
         );
 
+        // Update numbering of baffles
+        List<labelPair> newMeshBaffles(baffles.size());
+        forAll(baffles, i)
+        {
+            const labelPair& p = baffles[i];
+            newMeshBaffles[i][0] = map().reverseFaceMap()[p[0]];
+            newMeshBaffles[i][1] = map().reverseFaceMap()[p[1]];
+        }
+
         // Collect layer faces and cells for outside loop.
         getLayerCellsFaces
         (
@@ -3142,6 +3168,7 @@ void Foam::autoLayerDriver::addLayers
         (
             addLayer,
             meshQualityDict,
+            newMeshBaffles,
             pp(),
             newMesh,
 
@@ -3208,6 +3235,34 @@ void Foam::autoLayerDriver::addLayers
     }
 
     meshRefiner_.updateMesh(map, labelList(0));
+
+
+    // Update numbering on baffles
+    forAll(baffles, i)
+    {
+        labelPair& p = baffles[i];
+        p[0] = map().reverseFaceMap()[p[0]];
+        p[1] = map().reverseFaceMap()[p[1]];
+    }
+
+
+    label nBaffles = returnReduce(baffles.size(), sumOp<label>());
+    if (nBaffles > 0)
+    {
+        // Merge any baffles
+        Info<< "Converting " << nBaffles
+            << " baffles back into zoned faces ..."
+            << endl;
+
+        autoPtr<mapPolyMesh> map = meshRefiner_.mergeBaffles(baffles);
+
+        inplaceReorder(map().reverseCellMap(), flaggedCells);
+        inplaceReorder(map().reverseFaceMap(), flaggedFaces);
+
+        Info<< "Converted baffles in = "
+            << meshRefiner_.mesh().time().cpuTimeIncrement()
+            << " s\n" << nl << endl;
+    }
 
 
     // Do final balancing
@@ -3292,8 +3347,19 @@ void Foam::autoLayerDriver::doLayers
     {
         if (numLayers[patchI] > 0)
         {
-            patchIDs.append(patchI);
-            nFacesWithLayers += mesh.boundaryMesh()[patchI].size();
+            const polyPatch& pp = mesh.boundaryMesh()[patchI];
+
+            if (!polyPatch::constraintType(pp.type()))
+            {
+                patchIDs.append(patchI);
+                nFacesWithLayers += mesh.boundaryMesh()[patchI].size();
+            }
+            else
+            {
+                WarningIn("autoLayerDriver::doLayers(..)")
+                    << "Ignoring layers on constraint patch " << pp.name()
+                    << endl;
+            }
         }
     }
     patchIDs.shrink();
@@ -3343,28 +3409,17 @@ void Foam::autoLayerDriver::doLayers
                 }
             }
 
-            // Balance mesh (and meshRefinement). No restriction on face zones
-            // and baffles.
+            // Balance mesh (and meshRefinement). Restrict faceZones to
+            // be on internal faces only since they will be converted into
+            // baffles.
             autoPtr<mapDistributePolyMesh> map = meshRefiner_.balance
             (
-                false,
+                true,   //false,    // keepZoneFaces
                 false,
                 cellWeights,
                 decomposer,
                 distributor
             );
-
-            //{
-            //    globalIndex globalCells(mesh.nCells());
-            //
-            //    Info<< "** Distribution after balancing:" << endl;
-            //    for (label procI = 0; procI < Pstream::nProcs(); procI++)
-            //    {
-            //        Info<< "    " << procI << '\t'
-            //            << globalCells.localSize(procI) << endl;
-            //    }
-            //    Info<< endl;
-            //}
         }
 
 

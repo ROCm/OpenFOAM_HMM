@@ -131,15 +131,27 @@ public:
             CloudType& owner
         );
 
+        //- Construct copy
+        COxidationMurphyShaddix
+        (
+            const COxidationMurphyShaddix<CloudType>& srm
+        );
+
+        //- Construct and return a clone
+        virtual autoPtr<SurfaceReactionModel<CloudType> > clone() const
+        {
+            return autoPtr<SurfaceReactionModel<CloudType> >
+            (
+                new COxidationMurphyShaddix<CloudType>(*this)
+            );
+        }
+
 
     //- Destructor
     virtual ~COxidationMurphyShaddix();
 
 
     // Member Functions
-
-        //- Flag to indicate whether model activates surface reaction model
-        virtual bool active() const;
 
         //- Update surface reactions
         virtual scalar calculate

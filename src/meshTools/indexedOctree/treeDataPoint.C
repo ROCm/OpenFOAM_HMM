@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,6 @@ defineTypeNameAndDebug(Foam::treeDataPoint, 0);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::treeDataPoint::treeDataPoint(const pointField& points)
 :
     points_(points)
@@ -78,7 +77,7 @@ bool Foam::treeDataPoint::overlaps
 // nearestPoint.
 void Foam::treeDataPoint::findNearest
 (
-    const labelList& indices,
+    const labelUList& indices,
     const point& sample,
 
     scalar& nearestDistSqr,
@@ -88,7 +87,7 @@ void Foam::treeDataPoint::findNearest
 {
     forAll(indices, i)
     {
-        label index = indices[i];
+        const label index = indices[i];
 
         const point& pt = points_[index];
 
@@ -108,7 +107,7 @@ void Foam::treeDataPoint::findNearest
 //  Returns point and distance (squared)
 void Foam::treeDataPoint::findNearest
 (
-    const labelList& indices,
+    const labelUList& indices,
     const linePointRef& ln,
 
     treeBoundBox& tightest,
@@ -122,7 +121,7 @@ void Foam::treeDataPoint::findNearest
 
     forAll(indices, i)
     {
-        label index = indices[i];
+        const label index = indices[i];
 
         const point& shapePt = points_[index];
 

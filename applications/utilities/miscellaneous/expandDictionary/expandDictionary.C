@@ -42,6 +42,12 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Read the specified dictionary file, expand the macros etc. and write\n"
+        "the resulting dictionary to standard output."
+    );
+
     argList::noBanner();
     argList::noParallel();
     argList::validArgs.append("inputDict");
@@ -49,9 +55,10 @@ int main(int argc, char *argv[])
 
     const string dictName = args[1];
 
-    Info<<"//\n// expansion of dictionary " << dictName << "\n//\n";
+    IOobject::writeBanner(Info)
+        <<"//\n// " << dictName << "\n//\n";
 
-    dictionary(IFstream(dictName)()).write(Info, false);
+    dictionary(IFstream(dictName)(), true).write(Info, false);
 
     IOobject::writeDivider(Info);
 

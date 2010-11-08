@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,7 +65,7 @@ public:
         (
             const UList<T>& posList,
             const UList<T>& negList,
-            const UList<label>&
+            const labelUList&
         );
 
         //- Construct given the complete list and by transferring addressing
@@ -100,7 +100,7 @@ public:
         // Edit
 
             //- Reset addressing
-            inline void resetAddressing(const UList<label>&);
+            inline void resetAddressing(const labelUList&);
             inline void resetAddressing(const Xfer<List<label> >&);
 
 

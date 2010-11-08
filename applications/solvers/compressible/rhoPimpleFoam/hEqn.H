@@ -8,16 +8,8 @@
         DpDt
     );
 
-    if (oCorr == nOuterCorr-1)
-    {
-        hEqn.relax();
-        hEqn.solve(mesh.solver("hFinal"));
-    }
-    else
-    {
-        hEqn.relax();
-        hEqn.solve();
-    }
+    hEqn.relax();
+    hEqn.solve();
 
     thermo.correct();
 }

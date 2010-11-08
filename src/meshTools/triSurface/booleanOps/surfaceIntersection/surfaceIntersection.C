@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,8 +30,6 @@ License
 #include "HashSet.H"
 #include "triSurface.H"
 #include "pointIndexHit.H"
-#include "octreeDataTriSurface.H"
-#include "octree.H"
 #include "mergePoints.H"
 #include "plane.H"
 #include "edgeIntersections.H"
@@ -317,7 +315,7 @@ void Foam::surfaceIntersection::classifyHit
         surf2Pts[f2[0]],
         surf2Pts[f2[1]],
         surf2Pts[f2[2]]
-    ).classify(pHit.hitPoint(), tolDim, nearType, nearLabel);
+    ).classify(pHit.hitPoint(), nearType, nearLabel);
 
     // Classify points on edge of surface1
     label edgeEnd =

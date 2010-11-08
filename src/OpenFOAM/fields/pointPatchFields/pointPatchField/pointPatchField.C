@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -141,15 +141,7 @@ tmp<Field<Type1> > pointPatchField<Type>::patchInternalField
             << abort(FatalError);
     }
 
-    tmp<Field<Type1> > tvalues(new Field<Type1>(meshPoints.size()));
-    Field<Type1>& values = tvalues();
-
-    forAll(meshPoints, pointI)
-    {
-        values[pointI] = iF[meshPoints[pointI]];
-    }
-
-    return tvalues;
+    return tmp<Field<Type1> >(new Field<Type1>(iF, meshPoints));
 }
 
 

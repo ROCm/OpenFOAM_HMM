@@ -38,6 +38,16 @@ Foam::NoCollision<CloudType>::NoCollision
 {}
 
 
+template<class CloudType>
+Foam::NoCollision<CloudType>::NoCollision
+(
+    NoCollision<CloudType>& cm
+)
+:
+    CollisionModel<CloudType>(cm)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -56,6 +66,13 @@ Foam::label Foam::NoCollision<CloudType>::nSubCycles() const
 
 template<class CloudType>
 bool Foam::NoCollision<CloudType>::active() const
+{
+    return false;
+}
+
+
+template<class CloudType>
+bool Foam::NoCollision<CloudType>::controlsWallInteraction() const
 {
     return false;
 }

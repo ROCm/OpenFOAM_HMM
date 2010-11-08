@@ -62,7 +62,7 @@ USERD_get_name_of_reader(char reader_name[Z_MAX_USERD_NAME],
                          int *two_fields);
 
 /*
- * This mechanism is used to mark the fact that a given 
+ * This mechanism is used to mark the fact that a given
  * reader cannot be unloaded.  We set this by default for
  * C++ based readers as there are known issues with unloading
  * a C++ DLL on certain platforms (Linux).
@@ -72,7 +72,7 @@ USERD_reader_unloadable(void);
 
 #ifdef __cplusplus
 /*
- * Define a macro that defines the cpp function as part of the 
+ * Define a macro that defines the cpp function as part of the
  * USERD_get_name_of_reader declaration
  */
 #ifndef NO_AUTO_UNLOADABLE_CODE
@@ -88,7 +88,7 @@ int USERD_get_name_of_reader
 #endif
 
 #endif
-     
+
 W32EXPORT int
 USERD_get_reader_descrip(char descrip[Z_MAXFILENP]);
 
@@ -97,13 +97,13 @@ USERD_set_filenames(char filename_1[],
                     char filename_2[],
                     char the_path[],
                     int swapbytes);
-     
+
 W32EXPORT int
 USERD_get_number_of_files_in_dataset( void );
 
 W32EXPORT int
 USERD_get_dataset_query_file_info(Z_QFILES *qfiles);
-     
+
 W32EXPORT int
 USERD_get_changing_geometry_status( void );
 
@@ -137,26 +137,26 @@ USERD_get_extra_data(int *target,
  *  Note: this API suite is entirely optional...
  * --------------------------- */
 W32EXPORT void USERD_get_extra_gui_numbers(
-	 int *num_Toggles,
-	 int *num_pulldowns,
-	 int *num_fields
+         int *num_Toggles,
+         int *num_pulldowns,
+         int *num_fields
 );
 
 W32EXPORT int USERD_get_extra_gui_defaults(
-	 char **toggle_Title,             /* [num_toggles][Z_LEN_GUI_TITLE_STR] */
-	 int *toggle_default_status,      /* [num_toggles] */
-	 char **pulldown_Title,           /* [num_pulldowns][Z_LEN_GUI_TITLE_STR] */
-	 int *pulldown_number_in_list,    /* [num_pulldowns] */
-	 int *pulldown_default_selection, /* [num_pulldowns] */
-	 char ***pulldown_item_strings,   /* [num_pulldowns][Z_MAX_NUM_GUI_PULL_ITEMS][Z_LEN_GUI_PULL_STR] */
-	 char **field_Title,              /* [num_fields][Z_LEN_GUI_TITLE_STR] */
-	 char **field_user_string         /* [num_fields][Z_LEN_GUI_FIELD_STR] */
+         char **toggle_Title,             /* [num_toggles][Z_LEN_GUI_TITLE_STR] */
+         int *toggle_default_status,      /* [num_toggles] */
+         char **pulldown_Title,           /* [num_pulldowns][Z_LEN_GUI_TITLE_STR] */
+         int *pulldown_number_in_list,    /* [num_pulldowns] */
+         int *pulldown_default_selection, /* [num_pulldowns] */
+         char ***pulldown_item_strings,   /* [num_pulldowns][Z_MAX_NUM_GUI_PULL_ITEMS][Z_LEN_GUI_PULL_STR] */
+         char **field_Title,              /* [num_fields][Z_LEN_GUI_TITLE_STR] */
+         char **field_user_string         /* [num_fields][Z_LEN_GUI_FIELD_STR] */
 );
 
-W32EXPORT void USERD_set_extra_gui_data( 
-		  int *toggle,            /* [num_toggle] */
+W32EXPORT void USERD_set_extra_gui_data(
+                  int *toggle,            /* [num_toggle] */
                   int *pulldown,          /* [num_pulldown] */
-                  char **field_text       /* [num_fields][Z_LEN_GUI_FIELD_STR] */ 
+                  char **field_text       /* [num_fields][Z_LEN_GUI_FIELD_STR] */
 );
 
 /* ----------------------------
@@ -164,24 +164,24 @@ W32EXPORT void USERD_set_extra_gui_data(
  *  Note: this API suite is entirely optional...
  * --------------------------- */
 W32EXPORT void USERD_get_var_extract_gui_numbers(
-	 int *num_Toggles,
-	 int *num_pulldowns,
-	 int *num_fields
+         int *num_Toggles,
+         int *num_pulldowns,
+         int *num_fields
 );
 
 W32EXPORT int USERD_get_var_extract_gui_defaults(
-	 char **toggle_Title,             /* [num_toggles][Z_LEN_GUI_TITLE_STR] */
-	 int *toggle_default_status,      /* [num_toggles] */
-	 char **pulldown_Title,           /* [num_pulldowns][Z_LEN_GUI_TITLE_STR] */
-	 int *pulldown_number_in_list,    /* [num_pulldowns] */
-	 int *pulldown_default_selection, /* [num_pulldowns] */
-	 char ***pulldown_item_strings,   /* [num_pulldowns][Z_MAX_NUM_GUI_PULL_ITEMS][Z_LEN_GUI_PULL_STR] */
-	 char **field_Title,              /* [num_fields][Z_LEN_GUI_TITLE_STR] */
-	 char **field_user_string         /* [num_fields][Z_LEN_GUI_FIELD_STR] */
+         char **toggle_Title,             /* [num_toggles][Z_LEN_GUI_TITLE_STR] */
+         int *toggle_default_status,      /* [num_toggles] */
+         char **pulldown_Title,           /* [num_pulldowns][Z_LEN_GUI_TITLE_STR] */
+         int *pulldown_number_in_list,    /* [num_pulldowns] */
+         int *pulldown_default_selection, /* [num_pulldowns] */
+         char ***pulldown_item_strings,   /* [num_pulldowns][Z_MAX_NUM_GUI_PULL_ITEMS][Z_LEN_GUI_PULL_STR] */
+         char **field_Title,              /* [num_fields][Z_LEN_GUI_TITLE_STR] */
+         char **field_user_string         /* [num_fields][Z_LEN_GUI_FIELD_STR] */
 );
 
-W32EXPORT void USERD_set_var_extract_gui_data( 
-		  int *toggle,            /* [num_toggle] */
+W32EXPORT void USERD_set_var_extract_gui_data(
+                  int *toggle,            /* [num_toggle] */
                   int *pulldown,          /* [num_pulldown] */
                   char **field_text       /* [num_fields][Z_LEN_GUI_FIELD_STR] */ );
 
@@ -191,17 +191,17 @@ W32EXPORT void USERD_set_var_extract_gui_data(
 W32EXPORT int USERD_get_num_xy_queries(void);
 
 W32EXPORT int USERD_get_xy_query_info(
-	int query_num,
-	char *query_name,
-	char *query_xtitle,
-	char *query_ytitle,
-	int *query_num_pairs);
+        int query_num,
+        char *query_name,
+        char *query_xtitle,
+        char *query_ytitle,
+        int *query_num_pairs);
 
 W32EXPORT int USERD_get_xy_query_data(
         int query_num,
-	int num_vals,
-	float *x_vals,
-	float *y_vals);
+        int num_vals,
+        float *x_vals,
+        float *y_vals);
 
 
 /* This routine added so the reader can know if we are at the "right" side of
@@ -297,13 +297,13 @@ USERD_get_nfaced_conn_in_buffers(int part_number,
 
 W32EXPORT int
 USERD_get_number_of_global_nodes( void );
-     
+
 W32EXPORT int
 USERD_get_global_coords(CRD *coord_array);
-     
+
 W32EXPORT int
 USERD_get_global_node_ids(int *nodeid_array);
-     
+
 W32EXPORT int
 USERD_get_element_connectivities_for_part(int part_number,
                                           int **conn_array[Z_MAXTYPE]);
@@ -317,7 +317,7 @@ USERD_get_vector_values(int which_vector,
                         int which_part,
                         int which_type,
                         float *vector_array);
-     
+
 W32EXPORT int
 USERD_get_part_build_info(int *part_id,
                           int *part_types,
@@ -378,7 +378,7 @@ USERD_get_part_coords(int part_number,
 W32EXPORT int
 USERD_get_part_node_ids(int part_number,
                         int *nodeid_array);
-     
+
 W32EXPORT int
 USERD_get_part_elements_by_type(int part_number,
                                 int element_type,
@@ -387,7 +387,7 @@ W32EXPORT int
 USERD_get_part_element_ids_by_type(int part_number,
                                    int element_type,
                                    int *elemid_array);
-     
+
 W32EXPORT int
 USERD_get_reader_version(char version_number[Z_MAX_USERD_NAME]);
 
@@ -498,7 +498,7 @@ USERD_get_block_ghost_flags(int block_number,
 /*--------------------------
  * Modified at Version 2.030
  *--------------------------*/
-#if defined USERD_API_200 || defined USERD_API_201 || defined USERD_API_202 
+#if defined USERD_API_200 || defined USERD_API_201 || defined USERD_API_202
 
 W32EXPORT int
 USERD_get_gold_part_build_info(int *part_id,
@@ -585,9 +585,9 @@ USERD_get_uns_failed_params(
                                             Z_EQUAL_TO */
                 int *threshold_operator2,   /* Z_GREATER_THAN, Z_LESS_THAN,
                                             Z_EQUAL_TO */
-		int *logic_criteria2
+                int *logic_criteria2
 
-		);
+                );
 
 #endif
 
@@ -643,7 +643,7 @@ USERD_set_block_range_and_stride(int file_pn,
                                  int minj, int maxj, int stepj,
                                  int mink, int maxk, int stepk);
 #endif
-     
+
 /*----------------------
 ** New For Version 2.070
 **----------------------*/
@@ -727,9 +727,8 @@ W32EXPORT int
 USERD_get_matf_set_type(int set_index);
 
 /* special, optional functions */
-W32EXPORT void 
+W32EXPORT void
 USERD_reset_routine(void);
 
 /*--------------------------------------------------------------------*/
 #endif /*GLOBAL_EXTERN_PROTO_H*/
-

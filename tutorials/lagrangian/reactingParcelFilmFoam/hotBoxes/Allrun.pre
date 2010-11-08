@@ -1,0 +1,41 @@
+#!/bin/sh
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+# create the underlying block mesh
+runApplication blockMesh
+
+# create the set for the obstacles
+runApplication setSet -batch createObstacle.setSet
+mv log.setSet log.setSet1
+
+# create the obstacles - add obstacle patches to wallFilm patch
+runApplication subsetMesh c0 -patch wallFilm -overwrite
+
+# split the obstacle patches into cube[1-6]_patch[1-6]
+echo "running patchifyObstacles"
+./patchifyObstacles >& log.patchifyObstacles
+
+# Create the wall film region via extrusion
+runApplication extrudeToRegionMesh \
+    wallFilmRegion \
+    '(
+        cube01_side1 cube01_side2 cube01_side3 cube01_side4 cube01_side5 cube01_side6
+        cube02_side1 cube02_side2 cube02_side3 cube02_side4 cube02_side5 cube02_side6
+        cube03_side1 cube03_side2 cube03_side3 cube03_side4 cube03_side5 cube03_side6
+        cube04_side1 cube04_side2 cube04_side3 cube04_side4 cube04_side5 cube04_side6
+        floor
+)' \
+    0.001 \
+    -overwrite
+
+# Copy the system settings over to the wall film region
+rm -rf system/wallFilmRegion
+cp -r system/wallFilmRegion.org system/wallFilmRegion
+
+# Convert the primary region to film patches to direct mapped
+# - primary region walls map values from the film surface
+runApplication changeDictionary
+
+find ./0 -maxdepth 1 -type f -exec \
+    sed -i "s/wallFilm/\"(region0_to.*)\"/g" {} \;

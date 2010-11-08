@@ -44,7 +44,6 @@ octree/octreeDataFace.C
 octree/treeBoundBox.C
 octree/treeNodeName.C
 octree/treeLeafName.C
-octree/pointIndexHitIOList.C
 
 indexedOctree/indexedOctreeName.C
 indexedOctree/treeDataCell.C
@@ -55,7 +54,6 @@ indexedOctree/treeDataPrimitivePatchName.C
 indexedOctree/treeDataTriSurface.C
 
 searchableSurface = searchableSurface
-$(searchableSurface)/distributedTriSurfaceMesh.C
 $(searchableSurface)/searchableBox.C
 $(searchableSurface)/searchableCylinder.C
 $(searchableSurface)/searchablePlane.C

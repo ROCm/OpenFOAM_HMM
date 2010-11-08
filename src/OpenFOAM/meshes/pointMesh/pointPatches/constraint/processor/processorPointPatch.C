@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -73,51 +73,7 @@ void Foam::processorPointPatch::initGeometry(PstreamBuffers& pBufs)
 
 
 void Foam::processorPointPatch::calcGeometry(PstreamBuffers& pBufs)
-{
-    if (Pstream::parRun())
-    {
-        const boolList& collocated = procPolyPatch_.collocated();
-
-        if (collocated.size() == 0)
-        {
-            separatedPoints_.setSize(0);
-        }
-        else if (collocated.size() == 1)
-        {
-            // Uniformly
-            if (collocated[0])
-            {
-                separatedPoints_.setSize(0);
-            }
-            else
-            {
-                separatedPoints_ = identity(size());
-            }
-        }
-        else
-        {
-            // Per face collocated or not.
-            const labelListList& pointFaces = procPolyPatch_.pointFaces();
-
-            DynamicList<label> separated;
-            forAll(pointFaces, pfi)
-            {
-                if (!collocated[pointFaces[pfi][0]])
-                {
-                    separated.append(pfi);
-                }
-            }
-            separatedPoints_.transfer(separated);
-        }
-    }
-
-    if (debug)
-    {
-        Pout<< "processor:" << name()
-            << " separated:" << separatedPoints_.size()
-            << " out of points:" << size() << endl;
-    }
-}
+{}
 
 
 void Foam::processorPointPatch::initMovePoints
@@ -170,12 +126,6 @@ Foam::processorPointPatch::~processorPointPatch()
 const Foam::labelList& Foam::processorPointPatch::reverseMeshPoints() const
 {
     return reverseMeshPoints_;
-}
-
-
-const Foam::labelList& Foam::processorPointPatch::separatedPoints() const
-{
-    return separatedPoints_;
 }
 
 

@@ -35,6 +35,7 @@ const volScalarField& psi = thermo.psi();
 volScalarField& ft = composition.Y("ft");
 volScalarField& fu = composition.Y("fu");
 
+
 Info<< "Reading field U\n" << endl;
 
 volVectorField U
@@ -65,7 +66,7 @@ IOdictionary combustionProperties
         "combustionProperties",
         runTime.constant(),
         mesh,
-        IOobject::MUST_READ,
+        IOobject::MUST_READ_IF_MODIFIED,
         IOobject::NO_WRITE
     )
 );
@@ -73,7 +74,7 @@ IOdictionary combustionProperties
 Info<< "Creating combustion model\n" << endl;
 autoPtr<combustionModel> combustion
 (
-    combustionModel::New
+    combustionModel::combustionModel::New
     (
         combustionProperties,
         thermo,
@@ -82,6 +83,29 @@ autoPtr<combustionModel> combustion
         rho
     )
 );
+
+
+Info<< "Calculating field g.h\n" << endl;
+volScalarField gh("gh", g & mesh.C());
+surfaceScalarField ghf("gh", g & mesh.Cf());
+
+Info<< "Reading field p_rgh\n" << endl;
+volScalarField p_rgh
+(
+    IOobject
+    (
+        "p_rgh",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    ),
+    mesh
+);
+
+// Force p_rgh to be consistent with p
+p_rgh = p - rho*gh;
+
 
 volScalarField dQ
 (
@@ -102,15 +126,6 @@ Info<< "Creating field DpDt\n" << endl;
 volScalarField DpDt =
     fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
 
-
-Info<< "Calculating field g.h\n" << endl;
-volScalarField gh("gh", g & mesh.C());
-
-surfaceScalarField ghf("gh", g & mesh.Cf());
-
-p += rho*gh;
-
-thermo.correct();
 
 dimensionedScalar initialMass = fvc::domainIntegrate(rho);
 

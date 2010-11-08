@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -430,10 +430,7 @@ bool Foam::edgeIntersections::offsetPerturb
 
         point ctr = tri.centre();
 
-        // Get measure for tolerance.
-        scalar tolDim = 0.001*mag(tri.a() - ctr);
-
-        tri.classify(pHit.hitPoint(), tolDim, nearType, nearLabel);
+        tri.classify(pHit.hitPoint(), nearType, nearLabel);
 
         if (nearType == triPointRef::POINT || nearType == triPointRef::EDGE)
         {

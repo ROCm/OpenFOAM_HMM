@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,38 +58,6 @@ class face;
 
 class removePoints
 {
-
-    // Private classes
-
-        //- Combine-reduce operator to combine data on faces. Takes care
-        //  of reverse orientation on coupled face.
-        template <class T, template<class> class CombineOp>
-        class faceEqOp
-        {
-
-        public:
-
-            void operator()(List<T>& x, const List<T>& y) const
-            {
-                if (y.size() > 0)
-                {
-                    if (x.empty())
-                    {
-                        x = y;
-                    }
-                    else
-                    {
-                        label j = 0;
-                        forAll(x, i)
-                        {
-                            CombineOp<T>()(x[i], y[j]);
-                            j = y.rcIndex(j);
-                        }
-                    }
-                }
-            }
-        };
-
 
     // Private data
 

@@ -157,11 +157,11 @@ Foam::vector Foam::definedHollowConeInjector::direction
     scalar angleOuter = it.getTableValue(outerConeAngle_, t);
 
     // use random number to generate angle between inner/outer cone angles
-    scalar angle = angleInner + rndGen_.scalar01()*(angleOuter - angleInner);
+    scalar angle = rndGen_.position<scalar>(angleInner, angleOuter);
 
     scalar alpha = sin(angle*constant::mathematical::pi/360.0);
     scalar dcorr = cos(angle*constant::mathematical::pi/360.0);
-    scalar beta = constant::mathematical::twoPi*rndGen_.scalar01();
+    scalar beta = constant::mathematical::twoPi*rndGen_.sample01<scalar>();
 
     // randomly distributed vector normal to the injection vector
     vector normal = vector::zero;
@@ -172,7 +172,10 @@ Foam::vector Foam::definedHollowConeInjector::direction
         // correct beta if this is a 2D run
         // map it onto the 'angleOfWedge'
 
-        beta *= (1.0 - 2.0*reduce)*sm_.angleOfWedge()/(constant::mathematical::twoPi);
+        beta *=
+            (1.0 - 2.0*reduce)
+           *sm_.angleOfWedge()
+          /(constant::mathematical::twoPi);
         beta += reduce*sm_.angleOfWedge();
         normal =
             alpha

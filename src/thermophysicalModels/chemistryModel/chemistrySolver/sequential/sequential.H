@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,12 +59,17 @@ class sequential
 {
     // Private data
 
+        //- Coefficients dictionary
         dictionary coeffsDict_;
+
 
         // Model constants
 
+            //- Chemistry time scale
             scalar cTauChem_;
-            Switch equil_;
+
+            //- Equilibrium rate limiter flag (on/off)
+            Switch eqRateLimiter_;
 
 
 public:
@@ -74,7 +79,6 @@ public:
 
 
     // Constructors
-
 
         //- Construct from components
         sequential

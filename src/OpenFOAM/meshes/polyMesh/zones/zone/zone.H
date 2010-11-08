@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -101,7 +101,7 @@ public:
         zone
         (
             const word& name,
-            const labelList& addr,
+            const labelUList& addr,
             const label index
         );
 
@@ -127,7 +127,7 @@ public:
         zone
         (
             const zone&,
-            const labelList& addr,
+            const labelUList& addr,
             const label index
         );
 

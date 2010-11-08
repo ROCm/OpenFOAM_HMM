@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,7 +52,10 @@ Foam::Istream& Foam::operator>>(Istream& is, Matrix<Form, Type>& M)
 
     token firstToken(is);
 
-    is.fatalCheck("operator>>(Istream&, Matrix<Form, Type>&) : reading first token");
+    is.fatalCheck
+    (
+        "operator>>(Istream&, Matrix<Form, Type>&) : reading first token"
+    );
 
     if (firstToken.isLabel())
     {

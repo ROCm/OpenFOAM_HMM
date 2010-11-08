@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,13 +33,18 @@ License
 
 namespace Foam
 {
+    defineTypeNameAndDebug(faceToCell, 0);
+    addToRunTimeSelectionTable(topoSetSource, faceToCell, word);
+    addToRunTimeSelectionTable(topoSetSource, faceToCell, istream);
 
-defineTypeNameAndDebug(faceToCell, 0);
-
-addToRunTimeSelectionTable(topoSetSource, faceToCell, word);
-
-addToRunTimeSelectionTable(topoSetSource, faceToCell, istream);
-
+    template<>
+    const char* Foam::NamedEnum<Foam::faceToCell::faceAction, 4>::names[] =
+    {
+        "neighbour",
+        "owner",
+        "any",
+        "all"
+    };
 }
 
 
@@ -50,15 +55,6 @@ Foam::topoSetSource::addToUsageTable Foam::faceToCell::usage_
     "    Select cells that are the owner|neighbour|any"
     " of the faces in the faceSet or where all faces are in the faceSet\n\n"
 );
-
-template<>
-const char* Foam::NamedEnum<Foam::faceToCell::faceAction, 4>::names[] =
-{
-    "neighbour",
-    "owner",
-    "any",
-    "all"
-};
 
 const Foam::NamedEnum<Foam::faceToCell::faceAction, 4>
     Foam::faceToCell::faceActionNames_;

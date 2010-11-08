@@ -8,6 +8,8 @@
 
     hsCombustionThermo& thermo = chemistry.thermo();
 
+    SLGThermo slgThermo(mesh, thermo);
+
     basicMultiComponentMixture& composition = thermo.composition();
     PtrList<volScalarField>& Y = composition.Y();
 
@@ -97,7 +99,7 @@
             "additionalControls",
             runTime.constant(),
             mesh,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     );

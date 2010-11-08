@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -15,28 +15,49 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-3
+6
 (
-    periodicX
+    periodicX_half0
     {
         type            cyclic;
-        nFaces          264;
+        nFaces          132;
         startFace       4344;
-        featureCos      0.9;
+        neighbourPatch  periodicX_half1;
     }
-    periodicY
+    periodicX_half1
     {
         type            cyclic;
-        nFaces          264;
+        nFaces          132;
+        startFace       4476;
+        neighbourPatch  periodicX_half0;
+    }
+    periodicY_half0
+    {
+        type            cyclic;
+        nFaces          132;
         startFace       4608;
-        featureCos      0.9;
+        neighbourPatch  periodicY_half1;
     }
-    periodicZ
+    periodicY_half1
     {
         type            cyclic;
-        nFaces          288;
+        nFaces          132;
+        startFace       4740;
+        neighbourPatch  periodicY_half0;
+    }
+    periodicZ_half0
+    {
+        type            cyclic;
+        nFaces          144;
         startFace       4872;
-        featureCos      0.9;
+        neighbourPatch  periodicZ_half1;
+    }
+    periodicZ_half1
+    {
+        type            cyclic;
+        nFaces          144;
+        startFace       5016;
+        neighbourPatch  periodicZ_half0;
     }
 )
 

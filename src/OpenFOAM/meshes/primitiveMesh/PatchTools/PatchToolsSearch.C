@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -90,7 +90,14 @@ Foam::PatchTools::markZone
                             FatalErrorIn
                             (
                                 "PatchTools::markZone"
-                                "(const boolList&, const label, const label, labelList&)"
+                                "("
+                                    "const PrimitivePatch<Face, FaceList, "
+                                        "PointField, PointType>& p,"
+                                    "const BoolListType& borderEdge,"
+                                    "const label faceI,"
+                                    "const label currentZone,"
+                                    "labelList&  faceZone"
+                                ")"
                             )
                                 << "Zones " << faceZone[nbrFaceI]
                                 << " at face " << nbrFaceI

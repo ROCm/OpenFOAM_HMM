@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,10 +48,6 @@ class metisDecomp
 :
     public decompositionMethod
 {
-    // Private data
-
-        const polyMesh& mesh_;
-
 
     // Private Member Functions
 
@@ -76,12 +72,8 @@ public:
 
     // Constructors
 
-        //- Construct given the decomposition dictionary and mesh
-        metisDecomp
-        (
-            const dictionary& decompositionDict,
-            const polyMesh& mesh
-        );
+        //- Construct given the decomposition dictionary
+        metisDecomp(const dictionary&);
 
 
     //- Destructor
@@ -104,6 +96,7 @@ public:
         //  value. The overall sum of weights might otherwise overflow.
         virtual labelList decompose
         (
+            const polyMesh& mesh,
             const pointField& points,
             const scalarField& pointWeights
         );
@@ -115,6 +108,7 @@ public:
         //  See note on weights above.
         virtual labelList decompose
         (
+            const polyMesh& mesh,
             const labelList& agglom,
             const pointField& regionPoints,
             const scalarField& regionWeights

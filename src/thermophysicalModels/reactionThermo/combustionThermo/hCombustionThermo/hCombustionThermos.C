@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,6 +53,8 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// constTransport, hConstThermo
+
 makeCombustionThermo
 (
     hCombustionThermo,
@@ -83,6 +85,42 @@ makeCombustionThermo
     perfectGas
 );
 
+
+// sutherlandTransport, hConstThermo
+
+makeCombustionThermo
+(
+    hCombustionThermo,
+    hPsiMixtureThermo,
+    homogeneousMixture,
+    sutherlandTransport,
+    hConstThermo,
+    perfectGas
+);
+
+makeCombustionThermo
+(
+    hCombustionThermo,
+    hPsiMixtureThermo,
+    inhomogeneousMixture,
+    sutherlandTransport,
+    hConstThermo,
+    perfectGas
+);
+
+makeCombustionThermo
+(
+    hCombustionThermo,
+    hPsiMixtureThermo,
+    veryInhomogeneousMixture,
+    sutherlandTransport,
+    hConstThermo,
+    perfectGas
+);
+
+
+// sutherlandTransport, janafThermo
+
 makeCombustionThermo
 (
     hCombustionThermo,
@@ -112,6 +150,7 @@ makeCombustionThermo
     janafThermo,
     perfectGas
 );
+
 
 makeCombustionThermo
 (

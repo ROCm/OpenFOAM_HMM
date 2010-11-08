@@ -35,7 +35,6 @@ Description
 #include "IOdictionary.H"
 #include "boundBox.H"
 #include "indexedOctree.H"
-#include "octree.H"
 #include "treeDataTriSurface.H"
 #include "Random.H"
 
@@ -102,7 +101,7 @@ int main(int argc, char *argv[])
     );
 
     const bool invertSelection =
-        meshSubsetDict.lookupOrDefault<bool>("invertSelection", false);
+        meshSubsetDict.lookupOrDefault("invertSelection", false);
 
     // Mark the cells for the subset
 

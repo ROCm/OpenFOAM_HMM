@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,19 +27,20 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct from components
 Foam::trackedParticle::trackedParticle
 (
     const Cloud<trackedParticle>& c,
     const vector& position,
-    const label celli,
+    const label cellI,
+    const label tetFaceI,
+    const label tetPtI,
     const point& end,
     const label level,
     const label i,
     const label j
 )
 :
-    ExactParticle<trackedParticle>(c, position, celli),
+    Particle<trackedParticle>(c, position, cellI, tetFaceI, tetPtI),
     end_(end),
     level_(level),
     i_(i),
@@ -47,7 +48,6 @@ Foam::trackedParticle::trackedParticle
 {}
 
 
-//- Construct from Istream
 Foam::trackedParticle::trackedParticle
 (
     const Cloud<trackedParticle>& c,
@@ -55,7 +55,7 @@ Foam::trackedParticle::trackedParticle
     bool readFields
 )
 :
-    ExactParticle<trackedParticle>(c, is, readFields)
+    Particle<trackedParticle>(c, is, readFields)
 {
     if (readFields)
     {
@@ -87,13 +87,16 @@ Foam::trackedParticle::trackedParticle
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::trackedParticle::move(trackedParticle::trackData& td)
+bool Foam::trackedParticle::move
+(
+    trackedParticle::trackData& td,
+    const scalar trackedParticle
+)
 {
     td.switchProcessor = false;
     td.keepParticle = true;
 
-    scalar deltaT = cloud().pMesh().time().deltaTValue();
-    scalar tEnd = (1.0 - stepFraction())*deltaT;
+    scalar tEnd = (1.0 - stepFraction())*trackedParticle;
     scalar dtMax = tEnd;
 
     while (td.keepParticle && !td.switchProcessor && tEnd > SMALL)
@@ -107,7 +110,7 @@ bool Foam::trackedParticle::move(trackedParticle::trackData& td)
         dt *= trackToFace(end_, td);
 
         tEnd -= dt;
-        stepFraction() = 1.0 - tEnd/deltaT;
+        stepFraction() = 1.0 - tEnd/trackedParticle;
     }
 
     return td.keepParticle;
@@ -118,7 +121,9 @@ bool Foam::trackedParticle::hitPatch
 (
     const polyPatch&,
     trackedParticle::trackData& td,
-    const label patchI
+    const label patchI,
+    const scalar trackFraction,
+    const tetIndices& tetIs
 )
 {
     return false;
@@ -129,7 +134,9 @@ bool Foam::trackedParticle::hitPatch
 (
     const polyPatch&,
     int&,
-    const label
+    const label,
+    const scalar trackFraction,
+    const tetIndices& tetIs
 )
 {
     return false;
@@ -215,7 +222,8 @@ void Foam::trackedParticle::hitProcessorPatch
 void Foam::trackedParticle::hitWallPatch
 (
     const wallPolyPatch& wpp,
-    trackedParticle::trackData& td
+    trackedParticle::trackData& td,
+    const tetIndices&
 )
 {
     // Remove particle
@@ -226,7 +234,8 @@ void Foam::trackedParticle::hitWallPatch
 void Foam::trackedParticle::hitWallPatch
 (
     const wallPolyPatch& wpp,
-    int&
+    int&,
+    const tetIndices&
 )
 {}
 
@@ -256,7 +265,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const trackedParticle& p)
 {
     if (os.format() == IOstream::ASCII)
     {
-        os  << static_cast<const ExactParticle<trackedParticle>&>(p)
+        os  << static_cast<const Particle<trackedParticle>&>(p)
             << token::SPACE << p.end_
             << token::SPACE << p.level_
             << token::SPACE << p.i_
@@ -264,7 +273,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const trackedParticle& p)
     }
     else
     {
-        os  << static_cast<const ExactParticle<trackedParticle>&>(p);
+        os  << static_cast<const Particle<trackedParticle>&>(p);
         os.write
         (
             reinterpret_cast<const char*>(&p.end_),

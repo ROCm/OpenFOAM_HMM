@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,12 +85,6 @@ class polyPatch
 
             //- Global edge addressing
             mutable labelList* mePtr_;
-
-
-    // Private Member Functions
-
-        //- Calculate labels of mesh edges
-        void calcMeshEdges() const;
 
 
 protected:
@@ -205,7 +199,7 @@ public:
             const polyPatch& pp,
             const polyBoundaryMesh& bm,
             const label index,
-            const unallocLabelList& mapAddressing,
+            const labelUList& mapAddressing,
             const label newStart
         );
 
@@ -240,7 +234,7 @@ public:
         (
             const polyBoundaryMesh& bm,
             const label index,
-            const unallocLabelList& mapAddressing,
+            const labelUList& mapAddressing,
             const label newStart
         ) const
         {
@@ -337,7 +331,7 @@ public:
         // Addressing into mesh
 
             //- Return face-cell addressing
-            const unallocLabelList& faceCells() const;
+            const labelUList& faceCells() const;
 
             //- Return global edge index for local edges
             const labelList& meshEdges() const;

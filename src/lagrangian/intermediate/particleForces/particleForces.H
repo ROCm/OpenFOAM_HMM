@@ -40,6 +40,8 @@ SourceFiles
 #include "Switch.H"
 #include "vector.H"
 #include "volFieldsFwd.H"
+#include "interpolation.H"
+#include "tetIndices.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,6 +70,9 @@ class particleForces
 
         //- Velocity gradient field
         const volTensorField* gradUPtr_;
+
+        //- HdotGradH interpolator
+        const interpolation<vector>* HdotGradHInterPtr_;
 
 
         // Forces to include in particle motion evaluation
@@ -101,9 +106,18 @@ class particleForces
             const word HdotGradHName_;
 
 
+    // Private Member Functions
+
+        //- Delete cached carrier fields
+        void deleteFields();
+
+
 public:
 
     // Constructors
+
+        //- Construct null from mesh reference
+        particleForces(const fvMesh& mesh);
 
         //- Construct from mesh, dictionary and gravity
         particleForces
@@ -159,12 +173,17 @@ public:
        // Evaluation
 
             //- Cache carrier fields
-            void cacheFields(const bool store);
+            void cacheFields
+            (
+                const bool store,
+                const dictionary& interpolationSchemes
+            );
 
             //- Calculate action/reaction forces between carrier and particles
             vector calcCoupled
             (
-                const label cellI,
+                const vector& position,
+                const tetIndices& tetIs,
                 const scalar dt,
                 const scalar rhoc,
                 const scalar rho,
@@ -176,7 +195,8 @@ public:
             //- Calculate external forces applied to the particles
             vector calcNonCoupled
             (
-                const label cellI,
+                const vector& position,
+                const tetIndices& tetIs,
                 const scalar dt,
                 const scalar rhoc,
                 const scalar rho,

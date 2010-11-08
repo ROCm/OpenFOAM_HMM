@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,8 +71,11 @@ class activeBaffleVelocityFvPatchVectorField
         //- Initial wall patch areas
         vectorField initWallSf_;
 
-        //- Initial cyclic patch areas
+        //- Initial this-side cyclic patch areas
         vectorField initCyclicSf_;
+
+        //- Initial neighbour-side cyclic patch areas
+        vectorField nbrCyclicSf_;
 
         //- Current fraction of the active baffle which is open
         scalar openFraction_;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,13 +33,15 @@ License
 
 namespace Foam
 {
+    defineTypeNameAndDebug(faceToPoint, 0);
+    addToRunTimeSelectionTable(topoSetSource, faceToPoint, word);
+    addToRunTimeSelectionTable(topoSetSource, faceToPoint, istream);
 
-defineTypeNameAndDebug(faceToPoint, 0);
-
-addToRunTimeSelectionTable(topoSetSource, faceToPoint, word);
-
-addToRunTimeSelectionTable(topoSetSource, faceToPoint, istream);
-
+    template<>
+    const char* Foam::NamedEnum<Foam::faceToPoint::faceAction, 1>::names[] =
+    {
+        "all"
+    };
 }
 
 
@@ -49,12 +51,6 @@ Foam::topoSetSource::addToUsageTable Foam::faceToPoint::usage_
     "\n    Usage: faceToPoint <faceSet> all\n\n"
     "    Select all points of faces in the faceSet\n\n"
 );
-
-template<>
-const char* Foam::NamedEnum<Foam::faceToPoint::faceAction, 1>::names[] =
-{
-    "all"
-};
 
 const Foam::NamedEnum<Foam::faceToPoint::faceAction, 1>
     Foam::faceToPoint::faceActionNames_;

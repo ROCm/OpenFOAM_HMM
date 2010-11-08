@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,26 +43,36 @@ SourceFiles
 namespace Foam
 {
 
+extern const labelList emptyLabelList;
+
+//- Return reference to zero-sized list. Compare to List::null() which returns
+//  null pointer cast as list reference.
+template<class Type>
+static const List<Type>& emptyList()
+{
+    return *reinterpret_cast<const List<Type>* >(&emptyLabelList);
+}
+
 //- Renumber the values (not the indices) of a list.
 //  Negative ListType elements are left as is.
 template<class ListType>
-ListType renumber(const UList<label>& oldToNew, const ListType&);
+ListType renumber(const labelUList& oldToNew, const ListType&);
 
 //- Inplace renumber the values of a list.
 //  Negative ListType elements are left as is.
 template<class ListType>
-void inplaceRenumber(const UList<label>& oldToNew, ListType&);
+void inplaceRenumber(const labelUList& oldToNew, ListType&);
 
 
 //- Reorder the elements (indices, not values) of a list.
 //  Negative ListType elements are left as is.
 template<class ListType>
-ListType reorder(const UList<label>& oldToNew, const ListType&);
+ListType reorder(const labelUList& oldToNew, const ListType&);
 
 //- Inplace reorder the elements of a list.
 //  Negative ListType elements are left as is.
 template<class ListType>
-void inplaceReorder(const UList<label>& oldToNew, ListType&);
+void inplaceReorder(const labelUList& oldToNew, ListType&);
 
 
 // Variants to work with iterators and sparse tables.
@@ -70,11 +80,11 @@ void inplaceReorder(const UList<label>& oldToNew, ListType&);
 
 //- Map values. Do not map negative values.
 template<class Container>
-void inplaceMapValue(const UList<label>& oldToNew, Container&);
+void inplaceMapValue(const labelUList& oldToNew, Container&);
 
 //- Recreate with mapped keys. Do not map elements with negative key.
 template<class Container>
-void inplaceMapKey(const UList<label>& oldToNew, Container&);
+void inplaceMapKey(const labelUList& oldToNew, Container&);
 
 
 //- Generate the (stable) sort order for the list
@@ -116,10 +126,10 @@ template<class BoolListType, class ListType>
 void inplaceSubset(const BoolListType& select, ListType&);
 
 //- Invert one-to-one map. Unmapped elements will be -1.
-labelList invert(const label len, const UList<label>&);
+labelList invert(const label len, const labelUList&);
 
 //- Invert one-to-many map. Unmapped elements will be size 0.
-labelListList invertOneToMany(const label len, const UList<label>&);
+labelListList invertOneToMany(const label len, const labelUList&);
 
 //- Invert many-to-many.
 //  Input and output types need to be inherited from List.
@@ -162,7 +172,7 @@ template<class ListType>
 void setValues
 (
     ListType&,
-    const UList<label>& indices,
+    const labelUList& indices,
     typename ListType::const_reference
 );
 
@@ -172,7 +182,7 @@ ListType createWithValues
 (
     const label sz,
     typename ListType::const_reference initValue,
-    const UList<label>& indices,
+    const labelUList& indices,
     typename ListType::const_reference setValue
 );
 

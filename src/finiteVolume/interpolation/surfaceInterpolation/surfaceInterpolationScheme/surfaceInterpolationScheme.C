@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -184,8 +184,8 @@ surfaceInterpolationScheme<Type>::interpolate
     const scalarField& y = ys.internalField();
 
     const fvMesh& mesh = vf.mesh();
-    const unallocLabelList& P = mesh.owner();
-    const unallocLabelList& N = mesh.neighbour();
+    const labelUList& P = mesh.owner();
+    const labelUList& N = mesh.neighbour();
 
     tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tsf
     (
@@ -263,8 +263,8 @@ surfaceInterpolationScheme<Type>::interpolate
     const scalarField& lambda = lambdas.internalField();
 
     const fvMesh& mesh = vf.mesh();
-    const unallocLabelList& P = mesh.owner();
-    const unallocLabelList& N = mesh.neighbour();
+    const labelUList& P = mesh.owner();
+    const labelUList& N = mesh.neighbour();
 
     tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tsf
     (

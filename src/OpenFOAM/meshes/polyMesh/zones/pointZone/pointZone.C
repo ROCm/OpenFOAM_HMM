@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,6 +29,7 @@ License
 #include "polyMesh.H"
 #include "primitiveMesh.H"
 #include "demandDrivenData.H"
+#include "syncTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -46,7 +47,7 @@ const char* const Foam::pointZone::labelsName = "pointLabels";
 Foam::pointZone::pointZone
 (
     const word& name,
-    const labelList& addr,
+    const labelUList& addr,
     const label index,
     const pointZoneMesh& zm
 )
@@ -85,7 +86,7 @@ Foam::pointZone::pointZone
 Foam::pointZone::pointZone
 (
     const pointZone& pz,
-    const labelList& addr,
+    const labelUList& addr,
     const label index,
     const pointZoneMesh& zm
 )
@@ -134,6 +135,49 @@ bool Foam::pointZone::checkDefinition(const bool report) const
 }
 
 
+bool Foam::pointZone::checkParallelSync(const bool report) const
+{
+    const polyMesh& mesh = zoneMesh().mesh();
+
+    labelList maxZone(mesh.nPoints(), -1);
+    labelList minZone(mesh.nPoints(), labelMax);
+    forAll(*this, i)
+    {
+        label pointI = operator[](i);
+        maxZone[pointI] = index();
+        minZone[pointI] = index();
+    }
+    syncTools::syncPointList(mesh, maxZone, maxEqOp<label>(), -1);
+    syncTools::syncPointList(mesh, minZone, minEqOp<label>(), labelMax);
+
+    bool error = false;
+
+    forAll(maxZone, pointI)
+    {
+        // Check point in zone on both sides
+        if (maxZone[pointI] != minZone[pointI])
+        {
+            if (report && !error)
+            {
+                Info<< " ***Problem with pointZone " << index()
+                    << " named " << name()
+                    << ". Point " << pointI
+                    << " at " << mesh.points()[pointI]
+                    << " is in zone "
+                    << (minZone[pointI] == labelMax ? -1 : minZone[pointI])
+                    << " on some processors and in zone "
+                    << maxZone[pointI]
+                    << " on some other processors."
+                    << endl;
+            }
+            error = true;
+        }
+    }
+
+    return error;
+}
+
+
 void Foam::pointZone::writeDict(Ostream& os) const
 {
     os  << nl << name_ << nl << token::BEGIN_BLOCK << nl
@@ -154,7 +198,14 @@ void Foam::pointZone::operator=(const pointZone& zn)
 }
 
 
-void Foam::pointZone::operator=(const labelList& addr)
+void Foam::pointZone::operator=(const labelUList& addr)
+{
+    clearAddressing();
+    labelList::operator=(addr);
+}
+
+
+void Foam::pointZone::operator=(const Xfer<labelList>& addr)
 {
     clearAddressing();
     labelList::operator=(addr);

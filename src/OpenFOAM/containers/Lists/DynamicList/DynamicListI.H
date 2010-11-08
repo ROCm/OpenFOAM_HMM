@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,8 +28,8 @@ License
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList()
 :
-    List<T>(SizeInc),
-    capacity_(SizeInc)
+    List<T>(0),
+    capacity_(0)
 {
     List<T>::size(0);
 }
@@ -305,20 +305,23 @@ Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::xfer()
 
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
+inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>&
+Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
 (
     const T& t
 )
 {
-    label elemI = List<T>::size();
+    const label elemI = List<T>::size();
     setSize(elemI + 1);
 
     this->operator[](elemI) = t;
+    return *this;
 }
 
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
+inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>&
+Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
 (
     const UList<T>& lst
 )
@@ -339,11 +342,13 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
     {
         this->operator[](nextFree++) = lst[elemI];
     }
+    return *this;
 }
 
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
+inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>&
+Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
 (
     const UIndirectList<T>& lst
 )
@@ -355,13 +360,14 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
     {
         this->operator[](nextFree++) = lst[elemI];
     }
+    return *this;
 }
 
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline T Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::remove()
 {
-    label elemI = List<T>::size() - 1;
+    const label elemI = List<T>::size() - 1;
 
     if (elemI < 0)
     {
@@ -409,29 +415,6 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
 (
-    const UList<T>& lst
-)
-{
-    if (capacity_ >= lst.size())
-    {
-        // can copy w/o reallocating, match initial size to avoid reallocation
-        List<T>::size(lst.size());
-        List<T>::operator=(lst);
-    }
-    else
-    {
-        // make everything available for the copy operation
-        List<T>::size(capacity_);
-
-        List<T>::operator=(lst);
-        capacity_ = List<T>::size();
-    }
-}
-
-
-template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
-(
     const DynamicList<T, SizeInc, SizeMult, SizeDiv>& lst
 )
 {
@@ -460,5 +443,50 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
     }
 }
 
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
+(
+    const UList<T>& lst
+)
+{
+    if (capacity_ >= lst.size())
+    {
+        // can copy w/o reallocating, match initial size to avoid reallocation
+        List<T>::size(lst.size());
+        List<T>::operator=(lst);
+    }
+    else
+    {
+        // make everything available for the copy operation
+        List<T>::size(capacity_);
+
+        List<T>::operator=(lst);
+        capacity_ = List<T>::size();
+    }
+}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
+(
+    const UIndirectList<T>& lst
+)
+{
+    if (capacity_ >= lst.size())
+    {
+        // can copy w/o reallocating, match initial size to avoid reallocation
+        List<T>::size(lst.size());
+        List<T>::operator=(lst);
+    }
+    else
+    {
+        // make everything available for the copy operation
+        List<T>::size(capacity_);
+
+        List<T>::operator=(lst);
+        capacity_ = List<T>::size();
+    }
+}
 
 // ************************************************************************* //

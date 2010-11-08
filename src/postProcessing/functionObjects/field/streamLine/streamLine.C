@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,15 +53,10 @@ void Foam::streamLine::track()
         initialParticles
     );
 
-    //Pout<< "Seeding particles." << endl;
-
     const sampledSet& seedPoints = sampledSetPtr_();
+
     forAll(seedPoints, i)
     {
-        //Pout<< "Seeded particle at " << seedPoints[i]
-        //    << " at cell:" << seedPoints.cells()[i]
-        //    << endl;
-
         particles.addParticle
         (
             new streamLineParticle
@@ -73,17 +68,16 @@ void Foam::streamLine::track()
             )
         );
     }
-    label nSeeds = returnReduce(particles.size(), sumOp<label>());
-    Info<< "Seeded " << nSeeds
-        << " particles." << endl;
 
+    label nSeeds = returnReduce(particles.size(), sumOp<label>());
+
+    Info<< "Seeded " << nSeeds << " particles." << endl;
 
     // Read or lookup fields
     PtrList<volScalarField> vsFlds;
     PtrList<interpolationCellPoint<scalar> > vsInterp;
     PtrList<volVectorField> vvFlds;
     PtrList<interpolationCellPoint<vector> > vvInterp;
-
 
     label UIndex = -1;
 
@@ -188,7 +182,6 @@ void Foam::streamLine::track()
         vectorNames_[i] = vvInterp[i].psi().name();
     }
 
-
     // Check that we know the index of U in the interpolators.
 
     if (UIndex == -1)
@@ -201,8 +194,6 @@ void Foam::streamLine::track()
             << " and in the objectRegistry." << endl
             << exit(FatalError);
     }
-
-
 
     // Sampled data
     // ~~~~~~~~~~~~
@@ -231,15 +222,19 @@ void Foam::streamLine::track()
         vvInterp,
         UIndex,         // index of U in vvInterp
         trackForward_,  // track in +u direction
+        nSubCycle_,     // step through cells in steps?
         allTracks_,
         allScalars_,
         allVectors_
     );
 
+
+    // Set very large dt. Note: cannot use GREAT since 1/GREAT is SMALL
+    // which is a trigger value for the tracking...
+    const scalar trackTime = Foam::sqrt(GREAT);
+
     // Track
-    //Pout<< "Tracking particles." << endl;
-    particles.move(td);
-    //Pout<< "Finished tracking particles." << endl;
+    particles.move(td, trackTime);
 }
 
 
@@ -299,6 +294,19 @@ void Foam::streamLine::read(const dictionary& dict)
         UName_ = dict.lookupOrDefault<word>("U", "U");
         dict.lookup("trackForward") >> trackForward_;
         dict.lookup("lifeTime") >> lifeTime_;
+        if (lifeTime_ < 1)
+        {
+            FatalErrorIn(":streamLine::read(const dictionary&)")
+                << "Illegal value " << lifeTime_ << " for lifeTime"
+                << exit(FatalError);
+        }
+
+        dict.lookup("nSubCycle") >> nSubCycle_;
+        if (nSubCycle_ < 1)
+        {
+            nSubCycle_ = 1;
+        }
+
         cloudName_ = dict.lookupOrDefault<word>("cloudName", "streamLine");
         dict.lookup("seedSampleSet") >> seedSet_;
 
@@ -326,7 +334,6 @@ void Foam::streamLine::execute()
 {
 //    const Time& runTime = const_cast<Time&>(obr_.time());
 //    Pout<< "**streamLine::execute : time:" << runTime.timeName() << endl;
-//    Pout<< "**streamLine::execute : time:" << runTime.timeIndex() << endl;
 //
 //    bool isOutputTime = false;
 //
@@ -490,7 +497,6 @@ void Foam::streamLine::write()
 
             mkDir(vtkPath);
 
-
             // Convert track positions
 
             PtrList<coordSet> tracks(allTracks_.size());
@@ -507,8 +513,6 @@ void Foam::streamLine::write()
                 );
                 tracks[trackI].transfer(allTracks_[trackI]);
             }
-
-
 
             // Convert scalar values
 

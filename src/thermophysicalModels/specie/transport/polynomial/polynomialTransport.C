@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,11 +32,42 @@ template<class Thermo, int PolySize>
 Foam::polynomialTransport<Thermo, PolySize>::polynomialTransport(Istream& is)
 :
     Thermo(is),
-    muPolynomial_("muPolynomial", is),
-    kappaPolynomial_("kappaPolynomial", is)
+    muCoeffs_("muCoeffs<" + Foam::name(PolySize) + '>', is),
+    kappaCoeffs_("kappaCoeffs<" + Foam::name(PolySize) + '>', is)
 {
-    muPolynomial_ *= this->W();
-    kappaPolynomial_ *= this->W();
+    muCoeffs_ *= this->W();
+    kappaCoeffs_ *= this->W();
+}
+
+
+template<class Thermo, int PolySize>
+Foam::polynomialTransport<Thermo, PolySize>::polynomialTransport
+(
+    const dictionary& dict
+)
+:
+    Thermo(dict),
+    muCoeffs_(dict.lookup("muCoeffs<" + Foam::name(PolySize) + '>')),
+    kappaCoeffs_(dict.lookup("kappaCoeffs<" + Foam::name(PolySize) + '>'))
+{
+    muCoeffs_ *= this->W();
+    kappaCoeffs_ *= this->W();
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Thermo, int PolySize>
+void Foam::polynomialTransport<Thermo, PolySize>::write(Ostream& os) const
+{
+    os  << this->name() << endl;
+    os  << token::BEGIN_BLOCK << incrIndent << nl;
+    Thermo::write(os);
+    os.writeKeyword(word("muCoeffs<" + Foam::name(PolySize) + '>'))
+        << muCoeffs_/this->W() << token::END_STATEMENT << nl;
+    os.writeKeyword(word("kappaCoeffs<" + Foam::name(PolySize) + '>'))
+        << kappaCoeffs_/this->W() << token::END_STATEMENT << nl;
+    os  << decrIndent << token::END_BLOCK << nl;
 }
 
 
@@ -50,8 +81,10 @@ Foam::Ostream& Foam::operator<<
 )
 {
     os  << static_cast<const Thermo&>(pt) << tab
-        << "muPolynomial" << tab << pt.muPolynomial_/pt.W() << tab
-        << "kappaPolynomial" << tab << pt.kappaPolynomial_/pt.W();
+        << "muCoeffs<" << Foam::name(PolySize) << '>' << tab
+        << pt.muCoeffs_/pt.W() << tab
+        << "kappaCoeffs<" << Foam::name(PolySize) << '>' << tab
+        << pt.kappaCoeffs_/pt.W();
 
     os.check
     (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,9 @@ Class
 Description
     A sampledSurface defined by a cuttingPlane. Always triangulated.
 
+Note
+    Does not actually cut until update() called.
+
 SourceFiles
     sampledPlane.C
 
@@ -44,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class sampledPlane Declaration
+                        Class sampledPlane Declaration
 \*---------------------------------------------------------------------------*/
 
 class sampledPlane
@@ -54,8 +57,8 @@ class sampledPlane
 {
     // Private data
 
-        //- zone name (if restricted to zones)
-        word zoneName_;
+        //- If restricted to zones, name of this zone or a regular expression
+        keyType zoneKey_;
 
         //- Track if the surface needs an update
         mutable bool needsUpdate_;
@@ -89,7 +92,7 @@ public:
             const word& name,
             const polyMesh& mesh,
             const plane& planeDesc,
-            const word& zoneName = word::null
+            const keyType& zoneKey = word::null
         );
 
         //- Construct from dictionary

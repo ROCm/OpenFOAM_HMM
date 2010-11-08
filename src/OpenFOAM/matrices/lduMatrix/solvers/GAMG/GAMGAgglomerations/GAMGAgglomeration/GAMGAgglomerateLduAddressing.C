@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,8 +36,8 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
     const lduMesh& fineMesh = meshLevel(fineLevelIndex);
     const lduAddressing& fineMeshAddr = fineMesh.lduAddr();
 
-    const unallocLabelList& upperAddr = fineMeshAddr.upperAddr();
-    const unallocLabelList& lowerAddr = fineMeshAddr.lowerAddr();
+    const labelUList& upperAddr = fineMeshAddr.upperAddr();
+    const labelUList& lowerAddr = fineMeshAddr.lowerAddr();
 
     label nFineFaces = upperAddr.size();
 
@@ -229,10 +229,15 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
         {
             fineInterfaces[inti].initInternalFieldTransfer
             (
-                Pstream::blocking,
+                Pstream::nonBlocking,
                 restrictMap
             );
         }
+    }
+
+    if (Pstream::parRun())
+    {
+        Pstream::waitRequests();
     }
 
     // Add the coarse level
@@ -245,11 +250,13 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
                 inti,
                 GAMGInterface::New
                 (
+                    inti,
+                    coarseInterfaces,
                     fineInterfaces[inti],
                     fineInterfaces[inti].interfaceInternalField(restrictMap),
                     fineInterfaces[inti].internalFieldTransfer
                     (
-                        Pstream::blocking,
+                        Pstream::nonBlocking,
                         restrictMap
                     )
                 ).ptr()

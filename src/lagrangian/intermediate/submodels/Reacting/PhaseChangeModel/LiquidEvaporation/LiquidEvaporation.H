@@ -54,7 +54,7 @@ protected:
     // Protected data
 
         //- Global liquid properties data
-        autoPtr<liquidMixture> liquids_;
+        const liquidMixture& liquids_;
 
         //- List of active liquid names
         List<word> activeLiquids_;
@@ -84,11 +84,19 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        LiquidEvaporation
-        (
-            const dictionary& dict,
-            CloudType& cloud
-        );
+        LiquidEvaporation(const dictionary& dict, CloudType& cloud);
+
+        //- Construct copy
+        LiquidEvaporation(const LiquidEvaporation<CloudType>& pcm);
+
+        //- Construct and return a clone
+        virtual autoPtr<PhaseChangeModel<CloudType> > clone() const
+        {
+            return autoPtr<PhaseChangeModel<CloudType> >
+            (
+                new LiquidEvaporation<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -96,9 +104,6 @@ public:
 
 
     // Member Functions
-
-        //- Flag to indicate whether model activates phase change model
-        virtual bool active() const;
 
         //- Update model
         virtual void calculate

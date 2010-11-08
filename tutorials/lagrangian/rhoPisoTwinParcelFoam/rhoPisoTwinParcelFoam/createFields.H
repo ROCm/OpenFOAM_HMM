@@ -6,6 +6,8 @@
     );
     basicPsiThermo& thermo = pThermo();
 
+    SLGThermo slgThermo(mesh, thermo);
+
     volScalarField& p = thermo.p();
     volScalarField& hs = thermo.hs();
     const volScalarField& psi = thermo.psi();

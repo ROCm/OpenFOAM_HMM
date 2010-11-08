@@ -60,7 +60,11 @@
                        *sqrt
                         (
                             4.0*Vk
-                           /(circleFraction*thickness*constant::mathematical::pi)
+                           /(
+                               circleFraction
+                              *thickness
+                              *constant::mathematical::pi
+                            )
                         );
                 }
                 break;

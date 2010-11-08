@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,7 @@ License
 #include "error.H"
 #include "Time.H"
 #include "OSspecific.H"
+#include "PstreamReduceOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -36,13 +37,21 @@ defineTypeNameAndDebug(Foam::abortCalculation, 0);
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<>
-const char* Foam::NamedEnum<Foam::abortCalculation::actionType, 3>::names[] =
+namespace Foam
 {
-    "noWriteNow",
-    "writeNow",
-    "nextWrite"
-};
+    template<>
+    const char* Foam::NamedEnum
+    <
+       Foam::abortCalculation::actionType,
+       3
+    >::names[] =
+    {
+        "noWriteNow",
+        "writeNow",
+        "nextWrite"
+    };
+}
+
 
 const Foam::NamedEnum<Foam::abortCalculation::actionType, 3>
     Foam::abortCalculation::actionTypeNames_;
@@ -52,8 +61,12 @@ const Foam::NamedEnum<Foam::abortCalculation::actionType, 3>
 
 void Foam::abortCalculation::removeFile() const
 {
-    if (isFile(abortFile_))
+    bool hasAbort = isFile(abortFile_);
+    reduce(hasAbort, orOp<bool>());
+
+    if (hasAbort && Pstream::master())
     {
+        // cleanup ABORT file (on master only)
         rm(abortFile_);
     }
 }
@@ -92,14 +105,9 @@ Foam::abortCalculation::~abortCalculation()
 
 void Foam::abortCalculation::read(const dictionary& dict)
 {
-    word actionName;
-
     if (dict.found("action"))
     {
-        action_ = actionTypeNames_.read
-        (
-            dict.lookup("action")
-        );
+        action_ = actionTypeNames_.read(dict.lookup("action"));
     }
     else
     {
@@ -115,27 +123,48 @@ void Foam::abortCalculation::read(const dictionary& dict)
 
 void Foam::abortCalculation::execute()
 {
-    if (isFile(abortFile_))
+    bool hasAbort = isFile(abortFile_);
+    reduce(hasAbort, orOp<bool>());
+
+    if (hasAbort)
     {
         switch (action_)
         {
             case noWriteNow :
-                obr_.time().stopAt(Time::saNoWriteNow);
-                Info<< "user requested abort - "
-                       "stop immediately without writing data" << endl;
+            {
+                if (obr_.time().stopAt(Time::saNoWriteNow))
+                {
+                    Info<< "USER REQUESTED ABORT (timeIndex="
+                        << obr_.time().timeIndex()
+                        << "): stop without writing data"
+                        << endl;
+                }
                 break;
+            }
 
             case writeNow :
-                obr_.time().stopAt(Time::saWriteNow);
-                Info<< "user requested abort - "
-                       "stop immediately with writing data" << endl;
+            {
+                if (obr_.time().stopAt(Time::saWriteNow))
+                {
+                    Info<< "USER REQUESTED ABORT (timeIndex="
+                        << obr_.time().timeIndex()
+                        << "): stop+write data"
+                        << endl;
+                }
                 break;
+            }
 
             case nextWrite :
-                obr_.time().stopAt(Time::saNextWrite);
-                Info<< "user requested abort - "
-                       "stop after next data write" << endl;
+            {
+                if (obr_.time().stopAt(Time::saNextWrite))
+                {
+                    Info<< "USER REQUESTED ABORT (timeIndex="
+                        << obr_.time().timeIndex()
+                        << "): stop after next data write"
+                        << endl;
+                }
                 break;
+            }
         }
     }
 }
@@ -149,7 +178,7 @@ void Foam::abortCalculation::end()
 
 void Foam::abortCalculation::write()
 {
-    execute();
+    // Do nothing - only valid on execute
 }
 
 

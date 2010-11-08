@@ -32,7 +32,7 @@ Foam::label Foam::ReactingLookupTableInjection<CloudType>::parcelsToInject
 (
     const scalar time0,
     const scalar time1
-) const
+)
 {
     if ((time0 >= 0.0) && (time0 < duration_))
     {
@@ -50,7 +50,7 @@ Foam::scalar Foam::ReactingLookupTableInjection<CloudType>::volumeToInject
 (
     const scalar time0,
     const scalar time1
-) const
+)
 {
     scalar volume = 0.0;
     if ((time0 >= 0.0) && (time0 < duration_))
@@ -92,13 +92,24 @@ Foam::ReactingLookupTableInjection<CloudType>::ReactingLookupTableInjection
             IOobject::NO_WRITE
         )
     ),
-    injectorCells_(0)
+    injectorCells_(0),
+    injectorTetFaces_(0),
+    injectorTetPts_(0)
 {
     // Set/cache the injector cells
     injectorCells_.setSize(injectors_.size());
+    injectorTetFaces_.setSize(injectors_.size());
+    injectorTetPts_.setSize(injectors_.size());
+
     forAll(injectors_, i)
     {
-        this->findCellAtPosition(injectorCells_[i], injectors_[i].x());
+        this->findCellAtPosition
+        (
+            injectorCells_[i],
+            injectorTetFaces_[i],
+            injectorTetPts_[i],
+            injectors_[i].x()
+        );
     }
 
     // Determine volume of particles to inject
@@ -111,6 +122,23 @@ Foam::ReactingLookupTableInjection<CloudType>::ReactingLookupTableInjection
 }
 
 
+template<class CloudType>
+Foam::ReactingLookupTableInjection<CloudType>::ReactingLookupTableInjection
+(
+    const ReactingLookupTableInjection<CloudType>& im
+)
+:
+    InjectionModel<CloudType>(im),
+    inputFileName_(im.inputFileName_),
+    duration_(im.duration_),
+    nParcelsPerSecond_(im.nParcelsPerSecond_),
+    injectors_(im.injectors_),
+    injectorCells_(im.injectorCells_),
+    injectorTetFaces_(im.injectorTetFaces_),
+    injectorTetPts_(im.injectorTetPts_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -119,13 +147,6 @@ Foam::ReactingLookupTableInjection<CloudType>::~ReactingLookupTableInjection()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::ReactingLookupTableInjection<CloudType>::active() const
-{
-    return true;
-}
-
 
 template<class CloudType>
 Foam::scalar Foam::ReactingLookupTableInjection<CloudType>::timeEnd() const
@@ -141,13 +162,17 @@ void Foam::ReactingLookupTableInjection<CloudType>::setPositionAndCell
     const label nParcels,
     const scalar time,
     vector& position,
-    label& cellOwner
+    label& cellOwner,
+    label& tetFaceI,
+    label& tetPtI
 )
 {
     label injectorI = parcelI*injectorCells_.size()/nParcels;
 
     position = injectors_[injectorI].x();
     cellOwner = injectorCells_[injectorI];
+    tetFaceI = injectorTetFaces_[injectorI];
+    tetPtI = injectorTetPts_[injectorI];
 }
 
 
@@ -175,7 +200,7 @@ void Foam::ReactingLookupTableInjection<CloudType>::setProperties
     parcel.T() = injectors_[injectorI].T();
 
     // set particle specific heat capacity
-    parcel.cp() = injectors_[injectorI].cp();
+    parcel.Cp() = injectors_[injectorI].Cp();
 
     // set particle component mass fractions
     parcel.Y() = injectors_[injectorI].Y();

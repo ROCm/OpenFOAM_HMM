@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,6 +66,7 @@ SourceFiles
 #include "HashSet.H"
 #include "Map.H"
 #include "EdgeMap.H"
+#include "boundBox.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -443,8 +444,8 @@ public:
                 static void calcCells
                 (
                     cellList&,
-                    const unallocLabelList& own,
-                    const unallocLabelList& nei,
+                    const labelUList& own,
+                    const labelUList& nei,
                     const label nCells = -1
                 );
 
@@ -544,7 +545,8 @@ public:
                 (
                     const bool report = false,
                     labelHashSet* setPtr = NULL,
-                    labelHashSet* highAspectSetPtr = NULL
+                    labelHashSet* highAspectSetPtr = NULL,
+                    const Vector<label>& solutionD = Vector<label>::one
                 ) const;
 
                 //- Check for negative face areas
@@ -573,14 +575,6 @@ public:
                 (
                     const bool report = false,
                     const scalar minPyrVol = -SMALL,
-                    labelHashSet* setPtr = NULL
-                ) const;
-
-                //- Check face-decomposition tet volume
-                bool checkFaceTets
-                (
-                    const bool report = false,
-                    const scalar minTetVol = 0,
                     labelHashSet* setPtr = NULL
                 ) const;
 
@@ -645,7 +639,8 @@ public:
                 bool checkCellDeterminant
                 (
                     const bool report = false,
-                    labelHashSet* setPtr = NULL
+                    labelHashSet* setPtr = NULL,
+                    const Vector<label>& solutionD = Vector<label>::one
                 ) const;
 
                 //- Check for concave cells by the planes of faces
@@ -691,8 +686,14 @@ public:
 
         // Useful derived info
 
-            //- Is the point in the cell bounding box
-            bool pointInCellBB(const point& p, label celli) const;
+            //- Is the point in the cell bounding box, option relative
+            //  tolerance to increase the effective size of the boundBox
+            bool pointInCellBB
+            (
+                const point& p,
+                label celli,
+                scalar tol = 0
+            ) const;
 
             //- Is the point in the cell
             bool pointInCell(const point& p, label celli) const;

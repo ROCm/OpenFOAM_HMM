@@ -32,7 +32,8 @@ template<class ParcelType>
 template<class TrackData>
 bool Foam::DsmcParcel<ParcelType>::move
 (
-    TrackData& td
+    TrackData& td,
+    const scalar trackTime
 )
 {
     ParcelType& p = static_cast<ParcelType&>(*this);
@@ -43,8 +44,7 @@ bool Foam::DsmcParcel<ParcelType>::move
     const polyMesh& mesh = td.cloud().pMesh();
     const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
 
-    const scalar deltaT = mesh.time().deltaTValue();
-    scalar tEnd = (1.0 - p.stepFraction())*deltaT;
+    scalar tEnd = (1.0 - p.stepFraction())*trackTime;
     const scalar dtMax = tEnd;
 
     // For reduced-D cases, the velocity used to track needs to be
@@ -71,7 +71,7 @@ bool Foam::DsmcParcel<ParcelType>::move
 
         tEnd -= dt;
 
-        p.stepFraction() = 1.0 - tEnd/deltaT;
+        p.stepFraction() = 1.0 - tEnd/trackTime;
 
         if (p.onBoundary() && td.keepParticle)
         {
@@ -92,7 +92,9 @@ bool Foam::DsmcParcel<ParcelType>::hitPatch
 (
     const polyPatch&,
     TrackData& td,
-    const label patchI
+    const label,
+    const scalar,
+    const tetIndices&
 )
 {
     return false;
@@ -125,7 +127,8 @@ template<class TrackData>
 void Foam::DsmcParcel<ParcelType>::hitWallPatch
 (
     const wallPolyPatch& wpp,
-    TrackData& td
+    TrackData& td,
+    const tetIndices& tetIs
 )
 {
     label wppIndex = wpp.index();
@@ -171,11 +174,8 @@ void Foam::DsmcParcel<ParcelType>::hitWallPatch
 
     td.cloud().wallInteraction().correct
     (
-        wpp,
-        this->face(),
-        U_,
-        Ei_,
-        typeId_
+        static_cast<ParcelType&>(*this),
+        wpp
     );
 
     U_dot_nw = U_ & nw;
@@ -219,7 +219,8 @@ template<class ParcelType>
 void Foam::DsmcParcel<ParcelType>::hitWallPatch
 (
     const wallPolyPatch&,
-    int&
+    int&,
+    const tetIndices&
 )
 {}
 

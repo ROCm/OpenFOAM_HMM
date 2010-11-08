@@ -60,6 +60,7 @@ _foamAddMan()
     done
 }
 
+#------------------------------------------------------------------------------
 
 # location of the jobControl directory
 export FOAM_JOB_DIR=$WM_PROJECT_INST_DIR/jobControl
@@ -105,7 +106,7 @@ unset MPFR_ARCH_PATH
 # Select compiler installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # compilerInstall = OpenFOAM | system
-: ${compilerInstall:=OpenFOAM}
+: ${compilerInstall:=system}
 
 case "${compilerInstall:-OpenFOAM}" in
 OpenFOAM)
@@ -130,6 +131,12 @@ OpenFOAM)
         gcc_version=gcc-4.3.3
         gmp_version=gmp-4.2.4
         mpfr_version=mpfr-2.4.1
+        ;;
+    Clang)
+        # using clang - not gcc
+        export WM_CC='clang'
+        export WM_CXX='clang++'
+        clang_version=llvm-2.8
         ;;
     *)
         echo
@@ -183,6 +190,25 @@ OpenFOAM)
     fi
     unset gcc_version gccDir
     unset gmp_version gmpDir  mpfr_version mpfrDir  mpc_version mpcDir
+
+    if [ -n "$clang_version" ]
+    then
+        clangDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$clang_version
+
+        # Check that the compiler directory can be found
+        [ -d "$clangDir" ] || {
+            echo
+            echo "Warning in $WM_PROJECT_DIR/etc/settings.sh:"
+            echo "    Cannot find $clangDir installation."
+            echo "    Please install this compiler version or if you wish to use the system compiler,"
+            echo "    change the 'compilerInstall' setting to 'system' in this file"
+            echo
+        }
+
+        _foamAddMan     $clangDir/share/man
+        _foamAddPath    $clangDir/bin
+    fi
+    unset clang_version clangDir
     ;;
 esac
 
@@ -237,13 +263,17 @@ OPENMPI)
 SYSTEMOPENMPI)
     # use the system installed openmpi, get library directory via mpicc
     mpi_version=openmpi-system
-    libDir=`mpicc --showme:link | sed -e 's/.*-L\([^ ]*\).*/\1/'`
+
+    # Set compilation flags here instead of in wmake/rules/../mplibSYSTEMOPENMPI
+    export PINC="`mpicc --showme:compile`"
+    export PLIBS="`mpicc --showme:link`"
+    libDir=`echo "$PLIBS" | sed -e 's/.*-L\([^ ]*\).*/\1/'`
 
     if [ "$FOAM_VERBOSE" -a "$PS1" ]
     then
-        echo "Using system installed OpenMPI:"
-        echo "    compile flags : `mpicc --showme:compile`"
-        echo "    link flags    : `mpicc --showme:link`"
+        echo "Using system installed MPI:"
+        echo "    compile flags : $PINC"
+        echo "    link flags    : $PLIBS"
         echo "    libmpi dir    : $libDir"
     fi
 

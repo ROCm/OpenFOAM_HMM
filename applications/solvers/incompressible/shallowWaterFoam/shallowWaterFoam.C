@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -89,22 +89,22 @@ int main(int argc, char *argv[])
             // --- PISO loop
             for (int corr=0; corr<nCorr; corr++)
             {
-                volScalarField rUA = 1.0/hUEqn.A();
-                surfaceScalarField ghrUAf = magg*fvc::interpolate(h*rUA);
+                volScalarField rAU = 1.0/hUEqn.A();
+                surfaceScalarField ghrAUf = magg*fvc::interpolate(h*rAU);
 
-                surfaceScalarField phih0 = ghrUAf*mesh.magSf()*fvc::snGrad(h0);
+                surfaceScalarField phih0 = ghrAUf*mesh.magSf()*fvc::snGrad(h0);
 
                 if (rotating)
                 {
-                    hU = rUA*(hUEqn.H() - (F ^ hU));
+                    hU = rAU*(hUEqn.H() - (F ^ hU));
                 }
                 else
                 {
-                    hU = rUA*hUEqn.H();
+                    hU = rAU*hUEqn.H();
                 }
 
                 phi = (fvc::interpolate(hU) & mesh.Sf())
-                    + fvc::ddtPhiCorr(rUA, h, hU, phi)
+                    + fvc::ddtPhiCorr(rAU, h, hU, phi)
                     - phih0;
 
                 for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
                     (
                         fvm::ddt(h)
                       + fvc::div(phi)
-                      - fvm::laplacian(ghrUAf, h)
+                      - fvm::laplacian(ghrAUf, h)
                     );
 
                     if (ucorr < nOuterCorr-1 || corr < nCorr-1)
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
                     }
                 }
 
-                hU -= rUA*h*magg*fvc::grad(h + h0);
+                hU -= rAU*h*magg*fvc::grad(h + h0);
 
                 // Constrain the momentum to be in the geometry if 3D geometry
                 if (mesh.nGeometricD() == 3)

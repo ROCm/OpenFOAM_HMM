@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -82,7 +82,11 @@ void Foam::chemkinReader::initReactionKeywordTable()
 {
     reactionKeywordTable_.insert("M", thirdBodyReactionType);
     reactionKeywordTable_.insert("LOW", unimolecularFallOffReactionType);
-    reactionKeywordTable_.insert("HIGH", chemicallyActivatedBimolecularReactionType);
+    reactionKeywordTable_.insert
+    (
+        "HIGH",
+        chemicallyActivatedBimolecularReactionType
+    );
     reactionKeywordTable_.insert("TROE", TroeReactionType);
     reactionKeywordTable_.insert("SRI", SRIReactionType);
     reactionKeywordTable_.insert("LT", LandauTellerReactionType);
@@ -712,7 +716,7 @@ void Foam::chemkinReader::addReaction
                     Afactor*ArrheniusCoeffs[0],
                     ArrheniusCoeffs[1],
                     ArrheniusCoeffs[2]/RR,
-                    JanevCoeffs.begin()
+                    FixedList<scalar, 9>(JanevCoeffs)
                 )
             );
         }
@@ -734,7 +738,7 @@ void Foam::chemkinReader::addReaction
                     Afactor*ArrheniusCoeffs[0],
                     ArrheniusCoeffs[1],
                     ArrheniusCoeffs[2]/RR,
-                    powerSeriesCoeffs.begin()
+                    FixedList<scalar, 4>(powerSeriesCoeffs)
                 )
             );
         }
@@ -846,7 +850,6 @@ void Foam::chemkinReader::read
 
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::chemkinReader::chemkinReader
 (
     const fileName& CHEMKINFileName,
@@ -855,18 +858,19 @@ Foam::chemkinReader::chemkinReader
 :
     lineNo_(1),
     specieNames_(10),
-    speciesTable_(static_cast<const wordList&>(wordList()))
+    speciesTable_(),
+    reactions_(speciesTable_, speciesThermo_)
 {
     read(CHEMKINFileName, thermoFileName);
 }
 
 
-// Construct from components
 Foam::chemkinReader::chemkinReader(const dictionary& thermoDict)
 :
     lineNo_(1),
     specieNames_(10),
-    speciesTable_(static_cast<const wordList&>(wordList()))
+    speciesTable_(),
+    reactions_(speciesTable_, speciesThermo_)
 {
     fileName chemkinFile
     (
@@ -897,5 +901,6 @@ Foam::chemkinReader::chemkinReader(const dictionary& thermoDict)
 
     read(chemkinFile, thermoFile);
 }
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

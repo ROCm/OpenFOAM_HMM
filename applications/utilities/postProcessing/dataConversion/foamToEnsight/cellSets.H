@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,21 +44,12 @@ namespace Foam
 
 class cellSets
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        cellSets(const cellSets&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const cellSets&);
-
-
 public:
 
-        label nHexesWedges;
-        label nPrisms;
-        label nPyrs;
         label nTets;
+        label nPyrs;
+        label nPrisms;
+        label nHexesWedges;
         label nPolys;
 
         labelList tets;
@@ -74,10 +65,10 @@ public:
         //- Construct given the number ov cells
         cellSets(const label nCells)
         :
-            nHexesWedges(0),
-            nPrisms(0),
-            nPyrs(0),
             nTets(0),
+            nPyrs(0),
+            nPrisms(0),
+            nHexesWedges(0),
             nPolys(0),
 
             tets(nCells),

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,9 +68,9 @@ bool Foam::motionSmoother::checkMesh
     (
         readScalar(dict.lookup("minVol", true))
     );
-    const scalar minTetVol
+    const scalar minTetQuality
     (
-        readScalar(dict.lookup("minTetVol", true))
+        readScalar(dict.lookup("minTetQuality", true))
     );
     const scalar maxConcave
     (
@@ -160,12 +160,12 @@ bool Foam::motionSmoother::checkMesh
         nWrongFaces = nNewWrongFaces;
     }
 
-    if (minTetVol > -GREAT)
+    if (minTetQuality > -GREAT)
     {
         polyMeshGeometry::checkFaceTets
         (
             report,
-            minTetVol,
+            minTetQuality,
             mesh,
             mesh.cellCentres(),
             mesh.faceCentres(),
@@ -177,8 +177,8 @@ bool Foam::motionSmoother::checkMesh
 
         label nNewWrongFaces = returnReduce(wrongFaces.size(), sumOp<label>());
 
-        Info<< "    faces with face-decomposition tet volume < "
-            << setw(5) << minTetVol << "        : "
+        Info<< "    faces with face-decomposition tet quality < "
+            << setw(5) << minTetQuality << "      : "
             << nNewWrongFaces-nWrongFaces << endl;
 
         nWrongFaces = nNewWrongFaces;
@@ -443,9 +443,9 @@ bool Foam::motionSmoother::checkMesh
     (
         readScalar(dict.lookup("minVol", true))
     );
-    const scalar minTetVol
+    const scalar minTetQuality
     (
-        readScalar(dict.lookup("minTetVol", true))
+        readScalar(dict.lookup("minTetQuality", true))
     );
     const scalar maxConcave
     (
@@ -531,12 +531,12 @@ bool Foam::motionSmoother::checkMesh
         nWrongFaces = nNewWrongFaces;
     }
 
-    if (minTetVol > -GREAT)
+    if (minTetQuality > -GREAT)
     {
         meshGeom.checkFaceTets
         (
             report,
-            minTetVol,
+            minTetQuality,
             meshGeom.mesh().points(),
             checkFaces,
             baffles,
@@ -545,8 +545,8 @@ bool Foam::motionSmoother::checkMesh
 
         label nNewWrongFaces = returnReduce(wrongFaces.size(), sumOp<label>());
 
-        Info<< "    faces with face-decomposition tet volume < "
-            << setw(5) << minTetVol << "                 : "
+        Info<< "    faces with face-decomposition tet quality < "
+            << setw(5) << minTetQuality << "                : "
             << nNewWrongFaces-nWrongFaces << endl;
 
         nWrongFaces = nNewWrongFaces;

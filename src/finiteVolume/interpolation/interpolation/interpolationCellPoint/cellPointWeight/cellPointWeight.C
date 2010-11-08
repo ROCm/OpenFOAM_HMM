@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,10 +25,13 @@ License
 
 #include "cellPointWeight.H"
 #include "polyMesh.H"
+#include "tetPointRef.H"
+#include "polyMeshTetDecomposition.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 int Foam::cellPointWeight::debug(debug::debugSwitch("cellPointWeight", 0));
+
 Foam::scalar Foam::cellPointWeight::tol(SMALL);
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -37,148 +40,101 @@ void Foam::cellPointWeight::findTetrahedron
 (
     const polyMesh& mesh,
     const vector& position,
-    const label cellIndex
+    const label cellI
 )
 {
     if (debug)
     {
-        Pout<< "\nFoam::cellPointWeight::findTetrahedron" << nl
+        Pout<< nl << "Foam::cellPointWeight::findTetrahedron" << nl
             << "position = " << position << nl
-            << "cellIndex = " << cellIndex << endl;
+            << "cellI = " << cellI << endl;
     }
 
-    // Initialise closest triangle variables
-    scalar minUVWClose = VGREAT;
-    label pointIClose = 0;
-    label faceClose = 0;
+    List<tetIndices> cellTets = polyMeshTetDecomposition::cellTetIndices
+    (
+        mesh,
+        cellI
+    );
 
-    const vector& P0 = mesh.cellCentres()[cellIndex];
-    const labelList& cellFaces = mesh.cells()[cellIndex];
-    const scalar cellVolume = mesh.cellVolumes()[cellIndex];
+    const faceList& pFaces = mesh.faces();
+    const scalar cellVolume = mesh.cellVolumes()[cellI];
 
-    // Find the tet that the point occupies
-    forAll(cellFaces, faceI)
+    forAll(cellTets, tetI)
     {
-        // Decompose each face into triangles, making a tet when
-        // augmented by the cell centre
-        const labelList& facePoints = mesh.faces()[cellFaces[faceI]];
+        const tetIndices& tetIs = cellTets[tetI];
 
-        label pointI = 1;
-        while ((pointI + 1) < facePoints.size())
+        const face& f = pFaces[tetIs.face()];
+
+        // Barycentric coordinates of the position
+        scalar det = tetIs.tet(mesh).barycentric(position, weights_);
+
+        if (mag(det/cellVolume) > tol)
         {
-            // Cartesian co-ordinates of the triangle vertices
-            const vector& P1 = mesh.points()[facePoints[0]];
-            const vector& P2 = mesh.points()[facePoints[pointI]];
-            const vector& P3 = mesh.points()[facePoints[pointI + 1]];
+            const scalar& u = weights_[0];
+            const scalar& v = weights_[1];
+            const scalar& w = weights_[2];
 
-            // Edge vectors
-            const vector e1 = P1 - P0;
-            const vector e2 = P2 - P0;
-            const vector e3 = P3 - P0;
-
-            // Solve for interpolation weighting factors
-
-            // Source term
-            const vector rhs = position - P0;
-
-            // Determinant of coefficients matrix
-            // Note: if det(A) = 0 the tet is degenerate
-            const scalar detA =
-                e1.x()*e2.y()*e3.z() + e2.x()*e3.y()*e1.z()
-              + e3.x()*e1.y()*e2.z() - e1.x()*e3.y()*e2.z()
-              - e2.x()*e1.y()*e3.z() - e3.x()*e2.y()*e1.z();
-
-            if (mag(detA/cellVolume) > tol)
+            if
+            (
+                (u + tol > 0)
+             && (v + tol > 0)
+             && (w + tol > 0)
+             && (u + v + w < 1 + tol)
+            )
             {
-                // Solve using Cramers' rule
-                const scalar u =
-                (
-                   rhs.x()*e2.y()*e3.z() + e2.x()*e3.y()*rhs.z()
-                  + e3.x()*rhs.y()*e2.z() - rhs.x()*e3.y()*e2.z()
-                  - e2.x()*rhs.y()*e3.z() - e3.x()*e2.y()*rhs.z()
-                )/detA;
+                faceVertices_[0] = f[tetIs.faceBasePt()];
+                faceVertices_[1] = f[tetIs.facePtA()];;
+                faceVertices_[2] = f[tetIs.facePtB()];;
 
-                const scalar v =
-                (
-                    e1.x()*rhs.y()*e3.z() + rhs.x()*e3.y()*e1.z()
-                  + e3.x()*e1.y()*rhs.z() - e1.x()*e3.y()*rhs.z()
-                  - rhs.x()*e1.y()*e3.z() - e3.x()*rhs.y()*e1.z()
-                )/detA;
-
-                const scalar w =
-                (
-                    e1.x()*e2.y()*rhs.z() + e2.x()*rhs.y()*e1.z()
-                  + rhs.x()*e1.y()*e2.z() - e1.x()*rhs.y()*e2.z()
-                  - e2.x()*e1.y()*rhs.z() - rhs.x()*e2.y()*e1.z()
-                )/detA;
-
-                // Check if point is in tet
-                // value = 0 indicates position lies on a tet face
-                if
-                (
-                   (u + tol > 0) && (v + tol > 0) && (w + tol > 0)
-                && (u + v + w < 1 + tol)
-                )
-                {
-                    faceVertices_[0] = facePoints[0];
-                    faceVertices_[1] = facePoints[pointI];
-                    faceVertices_[2] = facePoints[pointI + 1];
-
-                    weights_[0] = u;
-                    weights_[1] = v;
-                    weights_[2] = w;
-                    weights_[3] = 1.0 - (u + v + w);
-
-                    return;
-                }
-                else
-                {
-                    scalar minU = mag(u);
-                    scalar minV = mag(v);
-                    scalar minW = mag(w);
-                    if (minU > 1.0)
-                    {
-                        minU -= 1.0;
-                    }
-                    if (minV > 1.0)
-                    {
-                        minV -= 1.0;
-                    }
-                    if (minW > 1.0)
-                    {
-                        minW -= 1.0;
-                    }
-                    const scalar minUVW = mag(minU + minV + minW);
-
-                    if (minUVW < minUVWClose)
-                    {
-                        minUVWClose = minUVW;
-                        pointIClose = pointI;
-                        faceClose = faceI;
-                    }
-                }
+                return;
             }
+        }
+    }
 
-            pointI++;
+    // A suitable point in a tetrahedron was not found, find the
+    // nearest.
+
+    scalar minNearDist = VGREAT;
+
+    label nearestTetI = -1;
+
+    forAll(cellTets, tetI)
+    {
+        const tetIndices& tetIs = cellTets[tetI];
+
+        scalar nearDist = tetIs.tet(mesh).nearestPoint(position).distance();
+
+        if (nearDist < minNearDist)
+        {
+            minNearDist = nearDist;
+
+            nearestTetI = tetI;
         }
     }
 
     if (debug)
     {
         Pout<< "cellPointWeight::findTetrahedron" << nl
-            << "    Tetrahedron search failed; using closest tet values to "
-            << "point " << nl << "    cell: " << cellIndex << nl << endl;
+            << "    Tetrahedron search failed; using closest tet to point "
+            << position << nl
+            << "    cell: "
+            << cellI << nl
+            << endl;
     }
 
-    const labelList& facePointsClose = mesh.faces()[cellFaces[faceClose]];
-    faceVertices_[0] = facePointsClose[0];
-    faceVertices_[1] = facePointsClose[pointIClose];
-    faceVertices_[2] = facePointsClose[pointIClose + 1];
 
-    weights_[0] = 0.25;
-    weights_[1] = 0.25;
-    weights_[2] = 0.25;
-    weights_[3] = 0.25;
+    const tetIndices& tetIs = cellTets[nearestTetI];
+
+    const face& f = pFaces[tetIs.face()];
+
+    // Barycentric coordinates of the position, ignoring if the
+    // determinant is suitable.  If not, the return from barycentric
+    // to weights_ is safe.
+    tetIs.tet(mesh).barycentric(position, weights_);
+
+    faceVertices_[0] = f[tetIs.faceBasePt()];
+    faceVertices_[1] = f[tetIs.facePtA()];
+    faceVertices_[2] = f[tetIs.facePtB()];
 }
 
 
@@ -186,119 +142,112 @@ void Foam::cellPointWeight::findTriangle
 (
     const polyMesh& mesh,
     const vector& position,
-    const label faceIndex
+    const label faceI
 )
 {
     if (debug)
     {
         Pout<< "\nbool Foam::cellPointWeight::findTriangle" << nl
             << "position = " << position << nl
-            << "faceIndex = " << faceIndex << endl;
+            << "faceI = " << faceI << endl;
     }
 
-    // Initialise closest triangle variables
-    scalar minUVClose = VGREAT;
-    label pointIClose = 0;
+    List<tetIndices> faceTets = polyMeshTetDecomposition::faceTetIndices
+    (
+        mesh,
+        mesh.faceOwner()[faceI],
+        faceI
+    );
 
-    // Decompose each face into triangles, making a tet when
-    // augmented by the cell centre
-    const labelList& facePoints = mesh.faces()[faceIndex];
+    const scalar faceAreaSqr = magSqr(mesh.faceAreas()[faceI]);
 
-    const scalar faceArea2 = magSqr(mesh.faceAreas()[faceIndex]);
+    const face& f =  mesh.faces()[faceI];
 
-    label pointI = 1;
-    while ((pointI + 1) < facePoints.size())
+    forAll(faceTets, tetI)
     {
-        // Cartesian co-ordinates of the triangle vertices
-        const vector& P1 = mesh.points()[facePoints[0]];
-        const vector& P2 = mesh.points()[facePoints[pointI]];
-        const vector& P3 = mesh.points()[facePoints[pointI + 1]];
+        const tetIndices& tetIs = faceTets[tetI];
 
-        // Direction vectors
-        vector v1 = position - P1;
-        const vector v2 = P2 - P1;
-        const vector v3 = P3 - P1;
+        List<scalar> triWeights(3);
 
-        // Plane normal
-        vector n = v2 ^ v3;
-        n /= mag(n);
+        // Barycentric coordinates of the position
+        scalar det = tetIs.faceTri(mesh).barycentric(position, triWeights);
 
-        // Remove any offset to plane
-        v1 -= (n & v1)*v1;
-
-        // Helper variables
-        const scalar d12 = v1 & v2;
-        const scalar d13 = v1 & v3;
-        const scalar d22 = v2 & v2;
-        const scalar d23 = v2 & v3;
-        const scalar d33 = v3 & v3;
-
-        // Determinant of coefficients matrix
-        // Note: if det(A) = 0 the triangle is degenerate
-        const scalar detA = d22*d33 - d23*d23;
-
-        if (0.25*detA/faceArea2 > tol)
+        if (0.25*mag(det)/faceAreaSqr > tol)
         {
-            // Solve using Cramers' rule
-            const scalar u = (d12*d33 - d23*d13)/detA;
-            const scalar v = (d22*d13 - d12*d23)/detA;
+            const scalar& u = triWeights[0];
+            const scalar& v = triWeights[1];
 
-            // Check if point is in triangle
-            if ((u + tol > 0) && (v + tol > 0) && (u + v < 1 + tol))
+            if
+            (
+                (u + tol > 0)
+             && (v + tol > 0)
+             && (u + v < 1 + tol)
+            )
             {
-                // Indices of the cell vertices making up the triangle
-                faceVertices_[0] = facePoints[0];
-                faceVertices_[1] = facePoints[pointI];
-                faceVertices_[2] = facePoints[pointI + 1];
+                // Weight[0] is for the cell centre.
+                weights_[0] = 0;
+                weights_[1] = triWeights[0];
+                weights_[2] = triWeights[1];
+                weights_[3] = triWeights[2];
 
-                weights_[0] = u;
-                weights_[1] = v;
-                weights_[2] = 1.0 - (u + v);
-                weights_[3] = 0.0;
+                faceVertices_[0] = f[tetIs.faceBasePt()];
+                faceVertices_[1] = f[tetIs.facePtA()];;
+                faceVertices_[2] = f[tetIs.facePtB()];;
 
                 return;
             }
-            else
-            {
-                scalar minU = mag(u);
-                scalar minV = mag(v);
-                if (minU > 1.0)
-                {
-                    minU -= 1.0;
-                }
-                if (minV > 1.0)
-                {
-                    minV -= 1.0;
-                }
-                const scalar minUV = mag(minU + minV);
-
-                if (minUV < minUVClose)
-                {
-                    minUVClose = minUV;
-                    pointIClose = pointI;
-                }
-            }
         }
+    }
 
-        pointI++;
+    // A suitable point in a triangle was not found, find the nearest.
+
+    scalar minNearDist = VGREAT;
+
+    label nearestTetI = -1;
+
+    forAll(faceTets, tetI)
+    {
+        const tetIndices& tetIs = faceTets[tetI];
+
+        scalar nearDist = tetIs.faceTri(mesh).nearestPoint(position).distance();
+
+        if (nearDist < minNearDist)
+        {
+            minNearDist = nearDist;
+
+            nearestTetI = tetI;
+        }
     }
 
     if (debug)
     {
-        Pout<< "Foam::cellPointWeight::findTriangle"
-            << "Triangle search failed; using closest triangle to point" << nl
-            << "    cell face: " << faceIndex << nl << endl;
+        Pout<< "cellPointWeight::findTriangle" << nl
+            << "    Triangle search failed; using closest tri to point "
+            << position << nl
+            << "    face: "
+            << faceI << nl
+            << endl;
     }
 
-    // Indices of the cell vertices making up the triangle
-    faceVertices_[0] = facePoints[0];
-    faceVertices_[1] = facePoints[pointIClose];
-    faceVertices_[2] = facePoints[pointIClose + 1];
+    const tetIndices& tetIs = faceTets[nearestTetI];
 
-    weights_[0] = 1.0/3.0;
-    weights_[1] = 1.0/3.0;
-    weights_[2] = 1.0/3.0;
-    weights_[3] = 0.0;
+    // Barycentric coordinates of the position, ignoring if the
+    // determinant is suitable.  If not, the return from barycentric
+    // to triWeights is safe.
+
+    List<scalar> triWeights(3);
+
+    tetIs.faceTri(mesh).barycentric(position, triWeights);
+
+    // Weight[0] is for the cell centre.
+    weights_[0] = 0;
+    weights_[1] = triWeights[0];
+    weights_[2] = triWeights[1];
+    weights_[3] = triWeights[2];
+
+    faceVertices_[0] = f[tetIs.faceBasePt()];
+    faceVertices_[1] = f[tetIs.facePtA()];
+    faceVertices_[2] = f[tetIs.facePtB()];
 }
 
 
@@ -308,21 +257,23 @@ Foam::cellPointWeight::cellPointWeight
 (
     const polyMesh& mesh,
     const vector& position,
-    const label cellIndex,
-    const label faceIndex
+    const label cellI,
+    const label faceI
 )
 :
-    cellIndex_(cellIndex)
+    cellI_(cellI),
+    weights_(4),
+    faceVertices_(3)
 {
-    if (faceIndex < 0)
+    if (faceI < 0)
     {
         // Face data not supplied
-        findTetrahedron(mesh, position, cellIndex);
+        findTetrahedron(mesh, position, cellI);
     }
     else
     {
         // Face data supplied
-        findTriangle(mesh, position, faceIndex);
+        findTriangle(mesh, position, faceI);
     }
 }
 

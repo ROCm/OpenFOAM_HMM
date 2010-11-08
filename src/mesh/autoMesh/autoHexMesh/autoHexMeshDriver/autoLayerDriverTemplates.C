@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,8 +64,7 @@ void Foam::autoLayerDriver::averageNeighbours
         meshPoints,
         average,
         plusEqOp<Type>(),
-        pTraits<Type>::zero,    // null value
-        false                   // no separation
+        pTraits<Type>::zero     // null value
     );
 
     average *= invSumWeight;

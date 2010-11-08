@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -17,7 +17,15 @@ FoamFile
 
 thermoType      ePsiThermo<pureMixture<constTransport<specieThermo<eConstThermo<perfectGas>>>>>;
 
-mixture         air 1 28.9 717.5 0 0 0.7;
+mixture
+{
+    nMoles          1;
+    molWeight       28.9;
+    Cv              717.5;
+    Hf              0;
+    mu              0;
+    Pr              0.7;
+}
 
 
 // ************************************************************************* //

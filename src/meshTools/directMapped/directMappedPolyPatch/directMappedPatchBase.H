@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,9 +66,9 @@ public:
         //- Mesh items to sample
         enum sampleMode
         {
-            NEARESTCELL,
-            NEARESTPATCHFACE,
-            NEARESTFACE
+            NEARESTCELL,        // nearest cell
+            NEARESTPATCHFACE,   // faces on selected patch
+            NEARESTFACE         // nearest face
         };
 
 private:
@@ -177,7 +177,7 @@ public:
         (
             const polyPatch&,
             const directMappedPatchBase&,
-            const unallocLabelList& mapAddressing
+            const labelUList& mapAddressing
         );
 
 
@@ -201,7 +201,7 @@ public:
             return sampleRegion_;
         }
 
-        //- Patch (only if NEARESTBOUNDARY)
+        //- Patch (only if NEARESTPATCHFACE)
         const word& samplePatch() const
         {
             return samplePatch_;

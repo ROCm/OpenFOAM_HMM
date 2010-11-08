@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -148,19 +148,6 @@ class isoSurface
 
             //- Per face whether is collocated
             PackedBoolList collocatedFaces(const coupledPolyPatch&) const;
-
-            //- Take value at local point patchPointI and assign it to its
-            //  correct place in patchValues (for transferral) and sharedValues
-            //  (for reduction)
-            void insertPointData
-            (
-                const processorPolyPatch& pp,
-                const Map<label>& meshToShared,
-                const pointField& pointValues,
-                const label patchPointI,
-                pointField& patchValues,
-                pointField& sharedValues
-            ) const;
 
             //- Synchonise points on all non-separated coupled patches
             void syncUnseparatedPoints

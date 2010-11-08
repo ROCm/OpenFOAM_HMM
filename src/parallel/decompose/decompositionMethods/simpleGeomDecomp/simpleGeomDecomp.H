@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -76,13 +76,6 @@ public:
         //- Construct given the decomposition dictionary
         simpleGeomDecomp(const dictionary& decompositionDict);
 
-        //- Construct given the decomposition dictionary and mesh
-        simpleGeomDecomp
-        (
-            const dictionary& decompositionDict,
-            const polyMesh& mesh
-        );
-
 
     //- Destructor
     virtual ~simpleGeomDecomp()
@@ -98,16 +91,24 @@ public:
             return false;
         }
 
-        virtual labelList decompose
-        (
-            const pointField& points
-        );
+        virtual labelList decompose(const pointField&);
+
+        virtual labelList decompose(const pointField&, const scalarField&);
+
+        virtual labelList decompose(const polyMesh&, const pointField& points)
+        {
+            return decompose(points);
+        }
 
         virtual labelList decompose
         (
+            const polyMesh&,
             const pointField& points,
             const scalarField& pointWeights
-        );
+        )
+        {
+            return decompose(points, pointWeights);
+        }
 
         //- Explicitly provided connectivity
         virtual labelList decompose

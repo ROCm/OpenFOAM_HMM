@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,14 +29,9 @@ License
 #include "speciesTransport.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-speciesTransport::speciesTransport(Istream& is)
+Foam::speciesTransport::speciesTransport(Istream& is)
 :
     janafThermo(is)
 {
@@ -44,20 +39,33 @@ speciesTransport::speciesTransport(Istream& is)
 }
 
 
+Foam::speciesTransport::speciesTransport(const dictionary& dict)
+:
+    janafThermo(dict)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::speciesTransport::write(Ostream& os) const
+{
+    os  << this->name() << endl;
+    os  << token::BEGIN_BLOCK << incrIndent << nl;
+    janafThermo::write(os);
+    os  << decrIndent << token::END_BLOCK << nl;
+}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Ostream& operator<<(Ostream& os, const speciesTransport& sTranport)
+Foam::Ostream& Foam::operator<<(Ostream& os, const speciesTransport& sTranport)
 {
     os << (const janafThermo&)sTranport;
 
-    os.check("Ostream& operator<<(Ostream& os, const speciesTransport& st)");
+    os.check("Ostream& operator<<(Ostream&, const speciesTransport)");
 
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

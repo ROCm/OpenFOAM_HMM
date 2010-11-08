@@ -49,10 +49,12 @@ LRR::LRR
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& transport
+    transportModel& transport,
+    const word& turbulenceModelName,
+    const word& modelName
 )
 :
-    RASModel(typeName, U, phi, transport),
+    RASModel(modelName, U, phi, transport, turbulenceModelName),
 
     Cmu_
     (
@@ -301,7 +303,7 @@ void LRR::correct()
     volSymmTensorField P = -twoSymm(R_ & fvc::grad(U_));
     volScalarField G("RASModel::G", 0.5*mag(tr(P)));
 
-    // Update espsilon and G at the wall
+    // Update epsilon and G at the wall
     epsilon_.boundaryField().updateCoeffs();
 
     // Dissipation equation
@@ -338,8 +340,11 @@ void LRR::correct()
             forAll(curPatch, facei)
             {
                 label faceCelli = curPatch.faceCells()[facei];
-                P[faceCelli]
-                    *= min(G[faceCelli]/(0.5*mag(tr(P[faceCelli])) + SMALL), 1.0);
+                P[faceCelli] *= min
+                (
+                    G[faceCelli]/(0.5*mag(tr(P[faceCelli])) + SMALL),
+                    1.0
+                );
             }
         }
     }

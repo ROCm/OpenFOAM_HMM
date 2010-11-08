@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "solid.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -31,9 +32,7 @@ Foam::autoPtr<Foam::solid> Foam::solid::New(Istream& is)
 {
     if (debug)
     {
-        Info<< "solid::New(Istream&): "
-            << "constructing solid"
-            << endl;
+        Info<< "solid::New(Istream&): constructing solid" << endl;
     }
 
     const word solidType(is);
@@ -80,6 +79,51 @@ Foam::autoPtr<Foam::solid> Foam::solid::New(Istream& is)
             << exit(FatalError);
 
         return autoPtr<solid>(NULL);
+    }
+}
+
+
+Foam::autoPtr<Foam::solid> Foam::solid::New(const dictionary& dict)
+{
+    if (debug)
+    {
+        Info<< "solid::New(const dictionary&): constructing solid" << endl;
+    }
+
+    const word solidType(dict.dictName());
+    const Switch defaultCoeffs(dict.lookup("defaultCoeffs"));
+
+    if (defaultCoeffs)
+    {
+        ConstructorTable::iterator cstrIter =
+            ConstructorTablePtr_->find(solidType);
+
+        if (cstrIter == ConstructorTablePtr_->end())
+        {
+            FatalErrorIn("solid::New(const dictionary&)")
+                << "Unknown solid type " << solidType << nl << nl
+                << "Valid solid types are :" << endl
+                << ConstructorTablePtr_->sortedToc()
+                << exit(FatalError);
+        }
+
+        return autoPtr<solid>(cstrIter()());
+    }
+    else
+    {
+        dictionaryConstructorTable::iterator cstrIter =
+            dictionaryConstructorTablePtr_->find(solidType);
+
+        if (cstrIter == dictionaryConstructorTablePtr_->end())
+        {
+            FatalErrorIn("solid::New(const dictionary&)")
+                << "Unknown solid type " << solidType << nl << nl
+                << "Valid solid types are :" << endl
+                << dictionaryConstructorTablePtr_->sortedToc()
+                << exit(FatalError);
+        }
+
+        return autoPtr<solid>(cstrIter()(dict));
     }
 }
 

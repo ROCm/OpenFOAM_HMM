@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -111,10 +111,13 @@ void Foam::lduMatrix::updateMatrixInterfaces
     )
     {
         // Block until all sends/receives have been finished
-        if (Pstream::defaultCommsType == Pstream::nonBlocking)
+        if
+        (
+            Pstream::parRun()
+         && Pstream::defaultCommsType == Pstream::nonBlocking
+        )
         {
-            IPstream::waitRequests();
-            OPstream::waitRequests();
+            UPstream::waitRequests();
         }
 
         forAll(interfaces, interfaceI)

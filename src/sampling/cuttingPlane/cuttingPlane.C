@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,7 +44,7 @@ void Foam::cuttingPlane::calcCutCells
 (
     const primitiveMesh& mesh,
     const scalarField& dotProducts,
-    const UList<label>& cellIdLabels
+    const labelUList& cellIdLabels
 )
 {
     const labelListList& cellEdges = mesh.cellEdges();
@@ -165,7 +165,7 @@ void Foam::cuttingPlane::intersectEdges
 bool Foam::cuttingPlane::walkCell
 (
     const primitiveMesh& mesh,
-    const UList<label>& edgePoint,
+    const labelUList& edgePoint,
     const label cellI,
     const label startEdgeI,
     DynamicList<label>& faceVerts
@@ -258,7 +258,7 @@ void Foam::cuttingPlane::walkCellCuts
 (
     const primitiveMesh& mesh,
     const bool triangulate,
-    const UList<label>& edgePoint
+    const labelUList& edgePoint
 )
 {
     const pointField& cutPoints = this->points();
@@ -313,7 +313,7 @@ void Foam::cuttingPlane::walkCellCuts
             face f(faceVerts);
 
             // Orient face to point in the same direction as the plane normal
-            if ((f.normal(cutPoints) && normal()) < 0)
+            if ((f.normal(cutPoints) & normal()) < 0)
             {
                 f = f.reverseFace();
             }
@@ -355,7 +355,7 @@ Foam::cuttingPlane::cuttingPlane
     const plane& pln,
     const primitiveMesh& mesh,
     const bool triangulate,
-    const UList<label>& cellIdLabels
+    const labelUList& cellIdLabels
 )
 :
     plane(pln)
@@ -372,7 +372,7 @@ void Foam::cuttingPlane::reCut
 (
     const primitiveMesh& mesh,
     const bool triangulate,
-    const UList<label>& cellIdLabels
+    const labelUList& cellIdLabels
 )
 {
     MeshStorage::clear();
@@ -396,7 +396,7 @@ void Foam::cuttingPlane::reCut
 // remap action on triangulation
 void Foam::cuttingPlane::remapFaces
 (
-    const UList<label>& faceMap
+    const labelUList& faceMap
 )
 {
     // recalculate the cells cut

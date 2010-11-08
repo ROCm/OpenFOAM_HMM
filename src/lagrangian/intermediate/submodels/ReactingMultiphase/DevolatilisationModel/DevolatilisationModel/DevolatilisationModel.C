@@ -33,9 +33,7 @@ Foam::DevolatilisationModel<CloudType>::DevolatilisationModel
     CloudType& owner
 )
 :
-    dict_(dictionary::null),
-    owner_(owner),
-    coeffDict_(dictionary::null)
+    SubModelBase<CloudType>(owner)
 {}
 
 
@@ -47,9 +45,17 @@ Foam::DevolatilisationModel<CloudType>::DevolatilisationModel
     const word& type
 )
 :
-    dict_(dict),
-    owner_(owner),
-    coeffDict_(dict.subDict(type + "Coeffs"))
+    SubModelBase<CloudType>(owner, dict, type)
+{}
+
+
+template<class CloudType>
+Foam::DevolatilisationModel<CloudType>::DevolatilisationModel
+(
+    const DevolatilisationModel<CloudType>& dm
+)
+:
+    SubModelBase<CloudType>(dm)
 {}
 
 
@@ -61,24 +67,32 @@ Foam::DevolatilisationModel<CloudType>::~DevolatilisationModel()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-template<class CloudType>
-const CloudType& Foam::DevolatilisationModel<CloudType>::owner() const
-{
-    return owner_;
-}
-
 
 template<class CloudType>
-const Foam::dictionary& Foam::DevolatilisationModel<CloudType>::dict() const
+void Foam::DevolatilisationModel<CloudType>::calculate
+(
+    const scalar,
+    const scalar,
+    const scalar,
+    const scalar,
+    const scalarField&,
+    bool&,
+    scalarField&
+) const
 {
-    return dict_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::DevolatilisationModel<CloudType>::coeffDict() const
-{
-    return coeffDict_;
+    notImplemented
+    (
+        "void Foam::DevolatilisationModel<CloudType>::calculate"
+        "("
+            "const scalar, "
+            "const scalar, "
+            "const scalar, "
+            "const scalar, "
+            "const scalarField&, "
+            "bool&, "
+            "scalarField&"
+        ") const"
+    );
 }
 
 
@@ -87,4 +101,3 @@ const Foam::dictionary& Foam::DevolatilisationModel<CloudType>::coeffDict() cons
 #include "DevolatilisationModelNew.C"
 
 // ************************************************************************* //
-

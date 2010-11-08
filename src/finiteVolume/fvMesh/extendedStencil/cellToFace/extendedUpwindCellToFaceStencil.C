@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ License
 #include "cellToFaceStencil.H"
 #include "syncTools.H"
 #include "SortableList.H"
+#include "dummyTransform.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -315,7 +316,15 @@ void Foam::extendedUpwindCellToFaceStencil::transportStencils
     {
         neiBndStencil[faceI-mesh_.nInternalFaces()] = ownStencil[faceI];
     }
-    syncTools::swapBoundaryFaceList(mesh_, neiBndStencil, false);
+    //syncTools::swapBoundaryFaceList(mesh_, neiBndStencil);
+    syncTools::syncBoundaryFaceList
+    (
+        mesh_,
+        neiBndStencil,
+        eqOp<labelList>(),
+        dummyTransform()
+    );
+
 
 
     // Do the neighbour side

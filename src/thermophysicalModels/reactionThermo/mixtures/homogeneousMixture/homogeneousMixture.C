@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,8 +48,8 @@ Foam::homogeneousMixture<ThermoType>::homogeneousMixture
         mesh
     ),
 
-    reactants_(thermoDict.lookup("reactants")),
-    products_(thermoDict.lookup("products")),
+    reactants_(thermoDict.subDict("reactants")),
+    products_(thermoDict.subDict("products")),
     mixture_("mixture", reactants_),
     b_(Y("b"))
 {}
@@ -84,8 +84,190 @@ const ThermoType& Foam::homogeneousMixture<ThermoType>::mixture
 template<class ThermoType>
 void Foam::homogeneousMixture<ThermoType>::read(const dictionary& thermoDict)
 {
-    reactants_ = ThermoType(thermoDict.lookup("reactants"));
-    products_ = ThermoType(thermoDict.lookup("products"));
+    reactants_ = ThermoType(thermoDict.subDict("reactants"));
+    products_ = ThermoType(thermoDict.subDict("products"));
+}
+
+
+template<class ThermoType>
+const ThermoType& Foam::homogeneousMixture<ThermoType>::getLocalThermo
+(
+    const label specieI
+) const
+{
+    if (specieI == 0)
+    {
+        return reactants_;
+    }
+    else if (specieI == 1)
+    {
+        return products_;
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "const ThermoType& Foam::homogeneousMixture<ThermoType>::"
+            "getLocalThermo"
+            "("
+                "const label "
+            ") const"
+        )   << "Unknown specie index " << specieI << ". Valid indices are 0..1"
+            << abort(FatalError);
+
+        return reactants_;
+    }
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::homogeneousMixture<ThermoType>::nMoles
+(
+    const label specieI
+) const
+{
+    return getLocalThermo(specieI).nMoles();
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::homogeneousMixture<ThermoType>::W
+(
+    const label specieI
+) const
+{
+    return getLocalThermo(specieI).W();
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::homogeneousMixture<ThermoType>::Cp
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return getLocalThermo(specieI).Cp(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::homogeneousMixture<ThermoType>::Cv
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return getLocalThermo(specieI).Cv(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::homogeneousMixture<ThermoType>::H
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return getLocalThermo(specieI).H(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::homogeneousMixture<ThermoType>::Hs
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return getLocalThermo(specieI).Hs(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::homogeneousMixture<ThermoType>::Hc
+(
+    const label specieI
+) const
+{
+    return getLocalThermo(specieI).Hc();
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::homogeneousMixture<ThermoType>::S
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return getLocalThermo(specieI).S(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::homogeneousMixture<ThermoType>::E
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return getLocalThermo(specieI).E(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::homogeneousMixture<ThermoType>::G
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return getLocalThermo(specieI).G(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::homogeneousMixture<ThermoType>::A
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return getLocalThermo(specieI).A(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::homogeneousMixture<ThermoType>::mu
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return getLocalThermo(specieI).mu(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::homogeneousMixture<ThermoType>::kappa
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return getLocalThermo(specieI).kappa(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::homogeneousMixture<ThermoType>::alpha
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return getLocalThermo(specieI).alpha(T);
 }
 
 

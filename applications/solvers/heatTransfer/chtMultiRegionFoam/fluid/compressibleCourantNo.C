@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,23 +34,14 @@ Foam::scalar Foam::compressibleCourantNo
     const surfaceScalarField& phi
 )
 {
-    scalar CoNum = 0.0;
-    scalar meanCoNum = 0.0;
+    scalarField sumPhi =
+        fvc::surfaceSum(mag(phi))().internalField()
+       /rho.internalField();
 
-    //- Can have fluid domains with 0 cells so do not test.
-    //if (mesh.nInternalFaces())
-    {
-        surfaceScalarField SfUfbyDelta =
-            mesh.surfaceInterpolation::deltaCoeffs()
-          * mag(phi)
-          / fvc::interpolate(rho);
+    scalar CoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();
 
-        CoNum = max(SfUfbyDelta/mesh.magSf())
-            .value()*runTime.deltaT().value();
-
-        meanCoNum = (sum(SfUfbyDelta)/sum(mesh.magSf()))
-            .value()*runTime.deltaT().value();
-    }
+    scalar meanCoNum =
+        0.5*(gSum(sumPhi)/gSum(mesh.V().field()))*runTime.deltaTValue();
 
     Info<< "Region: " << mesh.name() << " Courant Number mean: " << meanCoNum
         << " max: " << CoNum << endl;

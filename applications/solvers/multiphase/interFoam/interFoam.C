@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,6 +43,7 @@ Description
 #include "interfaceProperties.H"
 #include "twoPhaseMixture.H"
 #include "turbulenceModel.H"
+#include "interpolationTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,7 +52,6 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
-    #include "readGravitationalAcceleration.H"
     #include "readPISOControls.H"
     #include "initContinuityErrs.H"
     #include "createFields.H"
@@ -69,6 +69,7 @@ int main(int argc, char *argv[])
         #include "readPISOControls.H"
         #include "readTimeControls.H"
         #include "CourantNo.H"
+        #include "alphaCourantNo.H"
         #include "setDeltaT.H"
 
         runTime++;
@@ -86,8 +87,6 @@ int main(int argc, char *argv[])
         {
             #include "pEqn.H"
         }
-
-        #include "continuityErrs.H"
 
         turbulence->correct();
 

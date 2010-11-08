@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,10 +33,11 @@ Description
 #include "fvCFD.H"
 #include "hCombustionThermo.H"
 #include "turbulenceModel.H"
-#include "BasicReactingCloud.H"
+#include "basicReactingCloud.H"
 #include "psiChemistryModel.H"
 #include "chemistrySolver.H"
 #include "radiationModel.H"
+#include "SLGThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

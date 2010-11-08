@@ -92,10 +92,12 @@ kOmegaSST::kOmegaSST
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    const basicThermo& thermophysicalModel
+    const basicThermo& thermophysicalModel,
+    const word& turbulenceModelName,
+    const word& modelName
 )
 :
-    RASModel(typeName, rho, U, phi, thermophysicalModel),
+    RASModel(modelName, rho, U, phi, thermophysicalModel, turbulenceModelName),
 
     alphaK1_
     (
@@ -266,7 +268,7 @@ kOmegaSST::kOmegaSST
       / max
         (
             a1_*omega_,
-            F2()*sqrt(magSqr(symm(fvc::grad(U_))))
+            F2()*sqrt(2.0*magSqr(symm(fvc::grad(U_))))
         )
     );
     mut_.correctBoundaryConditions();
@@ -363,7 +365,7 @@ void kOmegaSST::correct()
         // Re-calculate viscosity
         mut_ =
             a1_*rho_*k_
-           /max(a1_*omega_, F2()*sqrt(magSqr(symm(fvc::grad(U_)))));
+           /max(a1_*omega_, F2()*sqrt(2.0*magSqr(symm(fvc::grad(U_)))));
         mut_.correctBoundaryConditions();
 
         // Re-calculate thermal diffusivity
@@ -444,7 +446,7 @@ void kOmegaSST::correct()
 
 
     // Re-calculate viscosity
-    mut_ = a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(S2));
+    mut_ = a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(2.0*S2));
     mut_.correctBoundaryConditions();
 
     // Re-calculate thermal diffusivity

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,10 +33,14 @@ Description
 
 namespace Foam
 {
-    defineCompoundTypeName(List<edge>, edgeList);
-    addCompoundToRunTimeSelectionTable(List<edge>, edgeList);
 
-    defineTemplateTypeNameAndDebugWithName(edgeIOList, "edgeList", 0);
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineCompoundTypeName(List<edge>, edgeList);
+addCompoundToRunTimeSelectionTable(List<edge>, edgeList);
+
+defineTemplateTypeNameAndDebugWithName(edgeIOList, "edgeList", 0);
+defineTemplateTypeNameAndDebugWithName(edgeCompactIOList, "edgeCompactList", 0);
 }
 
 // ************************************************************************* //

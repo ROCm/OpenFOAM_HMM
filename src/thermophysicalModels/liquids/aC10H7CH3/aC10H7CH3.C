@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,6 +33,7 @@ namespace Foam
     defineTypeNameAndDebug(aC10H7CH3, 0);
     addToRunTimeSelectionTable(liquid, aC10H7CH3,);
     addToRunTimeSelectionTable(liquid, aC10H7CH3, Istream);
+    addToRunTimeSelectionTable(liquid, aC10H7CH3, dictionary);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -56,7 +57,7 @@ Foam::aC10H7CH3::aC10H7CH3()
     rho_(60.92559, 0.22408, 772.04, 0.25709),
     pv_(73.716, -9103.2, -7.2253, 2.062e-06, 2),
     hl_(772.04, 511744.022503516, 0.4164, 0, 0, 0),
-    cp_(965.893108298172, 1.16216596343179, 0.00298523206751055, 0, 0, 0),
+    Cp_(965.893108298172, 1.16216596343179, 0.00298523206751055, 0, 0, 0),
     h_
     (
         38161.6838138517,
@@ -66,7 +67,7 @@ Foam::aC10H7CH3::aC10H7CH3()
         0,
         0
     ),
-    cpg_(743.389592123769, 2703.5864978903, 1548.5, 2031.64556962025, 722.06),
+    Cpg_(743.389592123769, 2703.5864978903, 1548.5, 2031.64556962025, 722.06),
     B_
     (
         0.00205555555555556,
@@ -106,9 +107,9 @@ Foam::aC10H7CH3::aC10H7CH3
     rho_(density),
     pv_(vapourPressure),
     hl_(heatOfVapourisation),
-    cp_(heatCapacity),
+    Cp_(heatCapacity),
     h_(enthalpy),
-    cpg_(idealGasHeatCapacity),
+    Cpg_(idealGasHeatCapacity),
     B_(secondVirialCoeff),
     mu_(dynamicViscosity),
     mug_(vapourDynamicViscosity),
@@ -125,9 +126,9 @@ Foam::aC10H7CH3::aC10H7CH3(Istream& is)
     rho_(is),
     pv_(is),
     hl_(is),
-    cp_(is),
+    Cp_(is),
     h_(is),
-    cpg_(is),
+    Cpg_(is),
     B_(is),
     mu_(is),
     mug_(is),
@@ -135,6 +136,44 @@ Foam::aC10H7CH3::aC10H7CH3(Istream& is)
     Kg_(is),
     sigma_(is),
     D_(is)
+{}
+
+
+Foam::aC10H7CH3::aC10H7CH3(const dictionary& dict)
+:
+    liquid(dict),
+    rho_(dict.subDict("rho")),
+    pv_(dict.subDict("pv")),
+    hl_(dict.subDict("hl")),
+    Cp_(dict.subDict("Cp")),
+    h_(dict.subDict("h")),
+    Cpg_(dict.subDict("Cpg")),
+    B_(dict.subDict("B")),
+    mu_(dict.subDict("mu")),
+    mug_(dict.subDict("mug")),
+    K_(dict.subDict("K")),
+    Kg_(dict.subDict("Kg")),
+    sigma_(dict.subDict("sigma")),
+    D_(dict.subDict("D"))
+{}
+
+
+Foam::aC10H7CH3::aC10H7CH3(const aC10H7CH3& liq)
+:
+    liquid(liq),
+    rho_(liq.rho_),
+    pv_(liq.pv_),
+    hl_(liq.hl_),
+    Cp_(liq.Cp_),
+    h_(liq.h_),
+    Cpg_(liq.Cpg_),
+    B_(liq.B_),
+    mu_(liq.mu_),
+    mug_(liq.mug_),
+    K_(liq.K_),
+    Kg_(liq.Kg_),
+    sigma_(liq.sigma_),
+    D_(liq.D_)
 {}
 
 

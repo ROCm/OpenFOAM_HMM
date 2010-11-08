@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -125,7 +125,7 @@ class PointEdgeWave
         label nChangedEdges_;
 
         //- Number of cyclic patches
-        bool nCyclicPatches_;
+        label nCyclicPatches_;
 
         //- For every cyclic patch two primitivePatches
         PtrList<primitivePatch> cycHalves_;
@@ -230,9 +230,6 @@ class PointEdgeWave
             //- Merge data from across processor boundaries
             void handleProcPatches();
 
-            //- Calculate cyclic halves addressing.
-            void calcCyclicAddressing();
-
             //- Merge data from across cyclic boundaries
             void handleCyclicPatches();
 
@@ -276,6 +273,15 @@ public:
             List<Type>& allPointInfo,
             List<Type>& allEdgeInfo,
             const label maxIter
+        );
+
+        //- Construct from mesh. Use setPointInfo and iterate() to do
+        //  actual calculation
+        PointEdgeWave
+        (
+            const polyMesh& mesh,
+            List<Type>& allPointInfo,
+            List<Type>& allEdgeInfo
         );
 
 
@@ -344,7 +350,10 @@ public:
     {
         forAll(x, i)
         {
-            x[i].updatePoint(y[i], PointEdgeWave<Type>::propagationTol());
+            if (y[i].valid())
+            {
+                x[i].updatePoint(y[i], PointEdgeWave<Type>::propagationTol());
+            }
         }
     }
 };

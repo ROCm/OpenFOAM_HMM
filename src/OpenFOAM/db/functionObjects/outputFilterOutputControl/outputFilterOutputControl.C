@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,16 +27,19 @@ License
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
-template<>
-const char* Foam::NamedEnum
-<
-    Foam::outputFilterOutputControl::outputControls,
-    2
->::names[] =
+namespace Foam
 {
-    "timeStep",
-    "outputTime"
-};
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::outputFilterOutputControl::outputControls,
+        2
+    >::names[] =
+    {
+        "timeStep",
+        "outputTime"
+    };
+}
 
 const Foam::NamedEnum<Foam::outputFilterOutputControl::outputControls, 2>
     Foam::outputFilterOutputControl::outputControlNames_;
@@ -68,17 +71,27 @@ Foam::outputFilterOutputControl::~outputFilterOutputControl()
 
 void Foam::outputFilterOutputControl::read(const dictionary& dict)
 {
-    outputControl_ = outputControlNames_.read(dict.lookup("outputControl"));
+    if (dict.found("outputControl"))
+    {
+        outputControl_ = outputControlNames_.read(dict.lookup("outputControl"));
+    }
+    else
+    {
+        outputControl_ = ocTimeStep;
+    }
 
     switch (outputControl_)
     {
         case ocTimeStep:
         {
-            dict.lookup("outputInterval") >> outputInterval_;
+            outputInterval_ = dict.lookupOrDefault<label>("outputInterval", 0);
+            break;
         }
+
         default:
         {
             // do nothing
+            break;
         }
     }
 }
@@ -97,17 +110,21 @@ bool Foam::outputFilterOutputControl::output() const
             );
             break;
         }
+
         case ocOutputTime:
         {
             return time_.outputTime();
             break;
         }
+
         default:
         {
+            // this error should not actually be possible
             FatalErrorIn("bool Foam::outputFilterOutputControl::output()")
-                << "Unknown output control: "
+                << "Undefined output control: "
                 << outputControlNames_[outputControl_] << nl
                 << abort(FatalError);
+            break;
         }
     }
 

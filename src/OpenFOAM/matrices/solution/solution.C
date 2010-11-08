@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,7 +54,7 @@ Foam::solution::solution(const objectRegistry& obr, const fileName& dictName)
             dictName,
             obr.time().system(),
             obr,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     ),
@@ -255,7 +255,7 @@ bool Foam::solution::read()
         if (dict.found("cache"))
         {
             cache_ = dict.subDict("cache");
-            caching_ = cache_.lookupOrDefault<Switch>("active", true);
+            caching_ = cache_.lookupOrDefault("active", true);
         }
 
         if (dict.found("relaxationFactors"))

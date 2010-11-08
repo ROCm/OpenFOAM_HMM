@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cyclicSlipPointPatchField.H"
-#include "pointConstraint.H"
 #include "transformField.H"
 #include "symmTransformField.H"
 
@@ -101,17 +100,6 @@ void cyclicSlipPointPatchField<Type>::evaluate(const Pstream::commsTypes)
     Field<Type>& iF = const_cast<Field<Type>&>(this->internalField());
 
     setInInternalField(iF, tvalues());
-}
-
-
-template<class Type>
-void cyclicSlipPointPatchField<Type>::applyConstraint
-(
-    const label pointi,
-    pointConstraint& pc
-) const
-{
-    pc.applyConstraint(this->patch().pointNormals()[pointi]);
 }
 
 

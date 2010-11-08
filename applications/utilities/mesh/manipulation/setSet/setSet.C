@@ -49,7 +49,7 @@ Description
 #include <stdio.h>
 
 
-#if READLINE != 0
+#ifdef HAS_READLINE
 # include <readline/readline.h>
 # include <readline/history.h>
 #endif
@@ -59,28 +59,9 @@ using namespace Foam;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
-#if READLINE != 0
+#ifdef HAS_READLINE
 static const char* historyFile = ".setSet";
 #endif
-
-Istream& selectStream(Istream* is0Ptr, Istream* is1Ptr)
-{
-    if (is0Ptr)
-    {
-        return *is0Ptr;
-    }
-    else if (is1Ptr)
-    {
-        return *is1Ptr;
-    }
-    else
-    {
-        FatalErrorIn("selectStream(Istream*, Istream*)")
-            << "No valid stream opened" << abort(FatalError);
-
-        return *is0Ptr;
-    }
-}
 
 
 // Write set to VTK readable files
@@ -439,6 +420,7 @@ bool doCommand
     const word& actionName,
     const bool writeVTKFile,
     const bool writeCurrentTime,
+    const bool noSync,
     Istream& is
 )
 {
@@ -581,7 +563,7 @@ bool doCommand
                 // Set will have been modified.
 
                 // Synchronize for coupled patches.
-                currentSet.sync(mesh);
+                if (!noSync) currentSet.sync(mesh);
 
                 // Write
                 if (writeVTKFile)
@@ -834,6 +816,11 @@ int main(int argc, char *argv[])
         "file",
         "process in batch mode, using input from specified file"
     );
+    argList::addBoolOption
+    (
+        "noSync",
+        "do not synchronise selection across coupled patches"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -842,6 +829,7 @@ int main(int argc, char *argv[])
     const bool writeVTK = !args.optionFound("noVTK");
     const bool loop = args.optionFound("loop");
     const bool batch = args.optionFound("batch");
+    const bool noSync = args.optionFound("noSync");
 
     if (loop && !batch)
     {
@@ -860,7 +848,7 @@ int main(int argc, char *argv[])
     printAllSets(mesh, Info);
 
     // Read history if interactive
-#   if READLINE != 0
+#   ifdef HAS_READLINE
     if (!batch && !read_history(historyFile))
     {
         Info<< "Successfully read history from " << historyFile << endl;
@@ -942,22 +930,35 @@ int main(int argc, char *argv[])
             }
             else
             {
-#               if READLINE != 0
+#               ifdef HAS_READLINE
                 {
                     char* linePtr = readline("readline>");
 
-                    rawLine = string(linePtr);
-
-                    if (*linePtr)
+                    if (linePtr)
                     {
-                        add_history(linePtr);
-                        write_history(historyFile);
-                    }
+                        rawLine = string(linePtr);
 
-                    free(linePtr);   // readline uses malloc, not new.
+                        if (*linePtr)
+                        {
+                            add_history(linePtr);
+                            write_history(historyFile);
+                        }
+
+                        free(linePtr);   // readline uses malloc, not new.
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
 #               else
                 {
+                    if (!std::cin.good())
+                    {
+                        Info<< "End of cin" << endl;
+                        // No error.
+                        break;
+                    }
                     Info<< "Command>" << flush;
                     std::getline(std::cin, rawLine);
                 }
@@ -1008,7 +1009,8 @@ int main(int argc, char *argv[])
                     setName,
                     actionName,
                     writeVTK,
-                    loop,       // if in looping mode dump sets to time directory
+                    loop,   // if in looping mode dump sets to time directory
+                    noSync,
                     is
                 );
 

@@ -25,6 +25,8 @@ License
 
 #include "ManualInjection.H"
 #include "mathematicalConstants.H"
+#include "PackedBoolList.H"
+#include "Switch.H"
 
 using namespace Foam::constant::mathematical;
 
@@ -35,7 +37,7 @@ Foam::label Foam::ManualInjection<CloudType>::parcelsToInject
 (
     const scalar time0,
     const scalar time1
-) const
+)
 {
     if ((0.0 >= time0) && (0.0 < time1))
     {
@@ -53,7 +55,7 @@ Foam::scalar Foam::ManualInjection<CloudType>::volumeToInject
 (
     const scalar time0,
     const scalar time1
-) const
+)
 {
     // All parcels introduced at SOI
     if ((0.0 >= time0) && (0.0 < time1))
@@ -90,6 +92,9 @@ Foam::ManualInjection<CloudType>::ManualInjection
         )
     ),
     diameters_(positions_.size()),
+    injectorCells_(positions_.size(), -1),
+    injectorTetFaces_(positions_.size(), -1),
+    injectorTetPts_(positions_.size(), -1),
     U0_(this->coeffDict().lookup("U0")),
     parcelPDF_
     (
@@ -100,6 +105,47 @@ Foam::ManualInjection<CloudType>::ManualInjection
         )
     )
 {
+    Switch ignoreOutOfBounds
+    (
+        this->coeffDict().lookupOrDefault("ignoreOutOfBounds", false)
+    );
+
+    label nRejected = 0;
+
+    PackedBoolList keep(positions_.size(), true);
+
+    forAll(positions_, pI)
+    {
+        if
+        (
+            !this->findCellAtPosition
+            (
+                injectorCells_[pI],
+                injectorTetFaces_[pI],
+                injectorTetPts_[pI],
+                positions_[pI],
+                !ignoreOutOfBounds
+            )
+        )
+        {
+            keep[pI] = false;
+
+            nRejected++;
+        }
+    }
+
+    if (nRejected > 0)
+    {
+        inplaceSubset(keep, positions_);
+        inplaceSubset(keep, diameters_);
+        inplaceSubset(keep, injectorCells_);
+        inplaceSubset(keep, injectorTetFaces_);
+        inplaceSubset(keep, injectorTetPts_);
+
+        Info<< "    " << nRejected
+            << " particles ignored, out of bounds." << endl;
+    }
+
     // Construct parcel diameters
     forAll(diameters_, i)
     {
@@ -111,6 +157,24 @@ Foam::ManualInjection<CloudType>::ManualInjection
 }
 
 
+template<class CloudType>
+Foam::ManualInjection<CloudType>::ManualInjection
+(
+    const ManualInjection<CloudType>& im
+)
+:
+    InjectionModel<CloudType>(im),
+    positionsFile_(im.positionsFile_),
+    positions_(im.positions_),
+    diameters_(im.diameters_),
+    injectorCells_(im.injectorCells_),
+    injectorTetFaces_(im.injectorTetFaces_),
+    injectorTetPts_(im.injectorTetPts_),
+    U0_(im.U0_),
+    parcelPDF_(im.parcelPDF_().clone().ptr())
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -119,13 +183,6 @@ Foam::ManualInjection<CloudType>::~ManualInjection()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::ManualInjection<CloudType>::active() const
-{
-    return true;
-}
-
 
 template<class CloudType>
 Foam::scalar Foam::ManualInjection<CloudType>::timeEnd() const
@@ -142,11 +199,15 @@ void Foam::ManualInjection<CloudType>::setPositionAndCell
     const label,
     const scalar,
     vector& position,
-    label& cellOwner
+    label& cellOwner,
+    label& tetFaceI,
+    label& tetPtI
 )
 {
     position = positions_[parcelI];
-    this->findCellAtPosition(cellOwner, position);
+    cellOwner = injectorCells_[parcelI];
+    tetFaceI = injectorTetFaces_[parcelI];
+    tetPtI = injectorTetPts_[parcelI];
 }
 
 

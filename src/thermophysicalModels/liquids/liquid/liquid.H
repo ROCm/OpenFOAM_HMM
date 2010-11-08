@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,6 +40,7 @@ SourceFiles
 #include "typeInfo.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
+#include "dictionary.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -113,6 +114,15 @@ public:
             (is)
         );
 
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            liquid,
+            dictionary,
+            (const dictionary& dict),
+            (dict)
+        );
+
 
     // Constructors
 
@@ -130,35 +140,31 @@ public:
             scalar dipm,
             scalar omega,
             scalar delta
-        )
-        :
-            W_(W),
-            Tc_(Tc),
-            Pc_(Pc),
-            Vc_(Vc),
-            Zc_(Zc),
-            Tt_(Tt),
-            Pt_(Pt),
-            Tb_(Tb),
-            dipm_(dipm),
-            omega_(omega),
-            delta_(delta)
-        {}
+        );
 
         //- Construct from Istream
-        liquid(Istream& is)
-        :
-            W_(readScalar(is)),
-            Tc_(readScalar(is)),
-            Pc_(readScalar(is)),
-            Vc_(readScalar(is)),
-            dipm_(readScalar(is)),
-            omega_(readScalar(is)),
-            delta_(readScalar(is))
-        {}
+        liquid(Istream& is);
+
+        //- Construct from dictionary
+        liquid(const dictionary& dict);
+
+        //- Construct copy
+        liquid(const liquid& liq);
+
+        //- Construct and return clone
+        virtual autoPtr<liquid> clone() const
+        {
+            return autoPtr<liquid>(new liquid(*this));
+        }
+
+
+    // Selectors
 
         //- Return a pointer to a new liquid created from input
         static autoPtr<liquid> New(Istream& is);
+
+        //- Return a pointer to a new liquid created from dictionary
+        static autoPtr<liquid> New(const dictionary& dict);
 
 
     //- Destructor
@@ -207,58 +213,49 @@ public:
         // Physical property pure virtual functions
 
             //- Liquid rho [kg/m^3]
-            virtual scalar rho(scalar p, scalar T) const = 0;
+            virtual scalar rho(scalar p, scalar T) const;
 
             //- Vapour pressure [Pa]
-            virtual scalar pv(scalar p, scalar T) const = 0;
+            virtual scalar pv(scalar p, scalar T) const;
 
             //- Heat of vapourisation [J/kg]
-            virtual scalar hl(scalar p, scalar T) const = 0;
+            virtual scalar hl(scalar p, scalar T) const;
 
             //- Liquid heat capacity [J/(kg K)]
-            virtual scalar cp(scalar p, scalar T) const = 0;
+            virtual scalar Cp(scalar p, scalar T) const;
 
             //- Liquid enthalpy [J/kg] - reference to 298.15 K
-            virtual scalar h(scalar p, scalar T) const = 0;
+            virtual scalar h(scalar p, scalar T) const;
 
             //- Ideal gas heat capacity [J/(kg K)]
-            virtual scalar cpg(scalar p, scalar T) const = 0;
+            virtual scalar Cpg(scalar p, scalar T) const;
 
             //- Liquid viscosity [Pa s]
-            virtual scalar mu(scalar p, scalar T) const = 0;
+            virtual scalar mu(scalar p, scalar T) const;
 
             //- Vapour viscosity [Pa s]
-            virtual scalar mug(scalar p, scalar T) const = 0;
+            virtual scalar mug(scalar p, scalar T) const;
 
             //- Liquid thermal conductivity  [W/(m K)]
-            virtual scalar K(scalar p, scalar T) const = 0;
+            virtual scalar K(scalar p, scalar T) const;
 
             //- Vapour thermal conductivity  [W/(m K)]
-            virtual scalar Kg(scalar p, scalar T) const = 0;
+            virtual scalar Kg(scalar p, scalar T) const;
 
             //- Surface tension [N/m]
-            virtual scalar sigma(scalar p, scalar T) const = 0;
+            virtual scalar sigma(scalar p, scalar T) const;
 
             //- Vapour diffussivity [m2/s]
-            virtual scalar D(scalar p, scalar T) const = 0;
+            virtual scalar D(scalar p, scalar T) const;
 
             //- Vapour diffussivity [m2/s] with specified binary pair
-            virtual scalar D(scalar p, scalar T, scalar Wb) const = 0;
+            virtual scalar D(scalar p, scalar T, scalar Wb) const;
 
 
     // I-O
 
         //- Write the function coefficients
-        virtual void writeData(Ostream& os) const
-        {
-            os  << W_ << token::SPACE
-                << Tc_ << token::SPACE
-                << Pc_ << token::SPACE
-                << Vc_ << token::SPACE
-                << dipm_ << token::SPACE
-                << omega_<< token::SPACE
-                << delta_;
-        }
+        virtual void writeData(Ostream& os) const;
 
         //- Ostream Operator
         friend Ostream& operator<<(Ostream& os, const liquid& l)

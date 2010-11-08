@@ -36,7 +36,7 @@ Foam::label Foam::FieldActivatedInjection<CloudType>::parcelsToInject
 (
     const scalar time0,
     const scalar time1
-) const
+)
 {
     if (sum(nParcelsInjected_) < nParcelsPerInjector_*positions_.size())
     {
@@ -54,7 +54,7 @@ Foam::scalar Foam::FieldActivatedInjection<CloudType>::volumeToInject
 (
     const scalar time0,
     const scalar time1
-) const
+)
 {
     if (sum(nParcelsInjected_) < nParcelsPerInjector_*positions_.size())
     {
@@ -105,6 +105,8 @@ Foam::FieldActivatedInjection<CloudType>::FieldActivatedInjection
         )
     ),
     injectorCells_(positions_.size()),
+    injectorTetFaces_(positions_.size()),
+    injectorTetPts_(positions_.size()),
     nParcelsPerInjector_
     (
         readLabel(this->coeffDict().lookup("parcelsPerInjector"))
@@ -137,10 +139,35 @@ Foam::FieldActivatedInjection<CloudType>::FieldActivatedInjection
         this->findCellAtPosition
         (
             injectorCells_[i],
+            injectorTetFaces_[i],
+            injectorTetPts_[i],
             positions_[i]
         );
     }
 }
+
+
+template<class CloudType>
+Foam::FieldActivatedInjection<CloudType>::FieldActivatedInjection
+(
+    const FieldActivatedInjection<CloudType>& im
+)
+:
+    InjectionModel<CloudType>(im),
+    factor_(im.factor_),
+    referenceField_(im.referenceField_),
+    thresholdField_(im.thresholdField_),
+    positionsFile_(im.positionsFile_),
+    positions_(im.positions_),
+    injectorCells_(im.injectorCells_),
+    injectorTetFaces_(im.injectorTetFaces_),
+    injectorTetPts_(im.injectorTetPts_),
+    nParcelsPerInjector_(im.nParcelsPerInjector_),
+    nParcelsInjected_(im.nParcelsInjected_),
+    U0_(im.U0_),
+    diameters_(im.diameters_),
+    parcelPDF_(im.parcelPDF_().clone().ptr())
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -173,11 +200,15 @@ void Foam::FieldActivatedInjection<CloudType>::setPositionAndCell
     const label,
     const scalar,
     vector& position,
-    label& cellOwner
+    label& cellOwner,
+    label& tetFaceI,
+    label& tetPtI
 )
 {
     position = positions_[parcelI];
     cellOwner = injectorCells_[parcelI];
+    tetFaceI = injectorTetFaces_[parcelI];
+    tetPtI = injectorTetPts_[parcelI];
 }
 
 

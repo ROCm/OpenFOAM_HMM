@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,8 +74,10 @@ void Foam::DICSmoother::smooth
 {
     const scalar* const __restrict__ rDPtr = rD_.begin();
     const scalar* const __restrict__ upperPtr = matrix_.upper().begin();
-    const label* const __restrict__ uPtr = matrix_.lduAddr().upperAddr().begin();
-    const label* const __restrict__ lPtr = matrix_.lduAddr().lowerAddr().begin();
+    const label* const __restrict__ uPtr =
+        matrix_.lduAddr().upperAddr().begin();
+    const label* const __restrict__ lPtr =
+        matrix_.lduAddr().lowerAddr().begin();
 
     // Temporary storage for the residual
     scalarField rA(rD_.size());

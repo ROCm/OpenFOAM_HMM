@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,32 +28,35 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<>
-const char* const Foam::labelTensor::typeName = "labelTensor";
-
-template<>
-const char* Foam::labelTensor::componentNames[] =
+namespace Foam
 {
-    "xx", "xy", "xz",
-    "yx", "yy", "yz",
-    "zx", "zy", "zz"
-};
+    template<>
+    const char* const Foam::labelTensor::typeName = "labelTensor";
 
-template<>
-const Foam::labelTensor Foam::labelTensor::zero
-(
-    0, 0, 0,
-    0, 0, 0,
-    0, 0, 0
-);
+    template<>
+    const char* Foam::labelTensor::componentNames[] =
+    {
+        "xx", "xy", "xz",
+        "yx", "yy", "yz",
+        "zx", "zy", "zz"
+    };
 
-template<>
-const Foam::labelTensor Foam::labelTensor::one
-(
-    1, 1, 1,
-    1, 1, 1,
-    1, 1, 1
-);
+    template<>
+    const Foam::labelTensor Foam::labelTensor::zero
+    (
+        0, 0, 0,
+        0, 0, 0,
+        0, 0, 0
+    );
+
+    template<>
+    const Foam::labelTensor Foam::labelTensor::one
+    (
+        1, 1, 1,
+        1, 1, 1,
+        1, 1, 1
+    );
+}
 
 
 // ************************************************************************* //

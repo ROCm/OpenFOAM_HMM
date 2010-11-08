@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -166,10 +166,10 @@ int main(int argc, char *argv[])
         Info<< "Time = " << runTime.timeName() << endl;
 
         // Convert all the standard mesh files
-        writeMeshObject<cellIOList>("cells", meshDir, runTime);
+        writeMeshObject<cellCompactIOList>("cells", meshDir, runTime);
         writeMeshObject<labelIOList>("owner", meshDir, runTime);
         writeMeshObject<labelIOList>("neighbour", meshDir, runTime);
-        writeMeshObject<faceIOList>("faces", meshDir, runTime);
+        writeMeshObject<faceCompactIOList>("faces", meshDir, runTime);
         writeMeshObject<pointIOField>("points", meshDir, runTime);
         writeMeshObject<labelIOList>("pointProcAddressing", meshDir, runTime);
         writeMeshObject<labelIOList>("faceProcAddressing", meshDir, runTime);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -228,7 +228,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
         else if (cmd == "CQUAD4")
         {
             face fQuad(4);
-            UList<label>& f = static_cast<UList<label>&>(fQuad);
+            labelUList& f = static_cast<labelUList&>(fQuad);
 
             label groupId = readLabel(IStringStream(line.substr(16,8))());
             fQuad[0] = readLabel(IStringStream(line.substr(24,8))());

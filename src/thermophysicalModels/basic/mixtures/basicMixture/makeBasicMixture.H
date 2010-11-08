@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,6 +43,30 @@ typedef Mixture<Transport<specieThermo<Thermo<EqnOfState> > > >               \
 defineTemplateTypeNameAndDebugWithName                                        \
     (Mixture##Transport##Thermo##EqnOfState,                                  \
     #Mixture"<"#Transport"<specieThermo<"#Thermo"<"#EqnOfState">>>>", 0)
+
+
+#define makeBasicPolyMixture(Mixture,Order)                                   \
+                                                                              \
+typedef polynomialTransport                                                   \
+<                                                                             \
+    specieThermo                                                              \
+    <                                                                         \
+        hPolynomialThermo                                                     \
+        <                                                                     \
+            icoPolynomial<Order>,                                             \
+            Order                                                             \
+            >                                                                 \
+    >,                                                                        \
+    Order                                                                     \
+> icoPoly##Order##ThermoPhysics;                                              \
+                                                                              \
+typedef Mixture<icoPoly##Order##ThermoPhysics>                                \
+    Mixture##icoPoly##Order##ThermoPhysics;                                   \
+                                                                              \
+defineTemplateTypeNameAndDebugWithName                                        \
+    (Mixture##icoPoly##Order##ThermoPhysics,                                  \
+    #Mixture"<icoPoly"#Order"ThermoPhysics>", 0)
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

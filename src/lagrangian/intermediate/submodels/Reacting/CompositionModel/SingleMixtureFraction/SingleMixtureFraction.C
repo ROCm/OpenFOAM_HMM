@@ -64,19 +64,19 @@ void Foam::SingleMixtureFraction<CloudType>::constructIds()
     {
         FatalErrorIn("Foam::SingleMixtureFraction<CloudType>::constructIds()")
             << "No gas phase found in phase list:" << nl
-            << this->phaseTypes() << nl << endl;
+            << this->phaseTypes() << exit(FatalError);
     }
     if (idLiquid_ < 0)
     {
         FatalErrorIn("Foam::SingleMixtureFraction<CloudType>::constructIds()")
             << "No liquid phase found in phase list:" << nl
-            << this->phaseTypes() << nl << endl;
+            << this->phaseTypes() << exit(FatalError);
     }
     if (idSolid_ < 0)
     {
         FatalErrorIn("Foam::SingleMixtureFraction<CloudType>::constructIds()")
             << "No solid phase found in phase list:" << nl
-            << this->phaseTypes() << nl << endl;
+            << this->phaseTypes() << exit(FatalError);
     }
 }
 
@@ -111,7 +111,7 @@ Foam::SingleMixtureFraction<CloudType>::SingleMixtureFraction
                 "CloudType&"
             ")"
         )   << "Incorrect numebr of phases: " << nl
-            << "    Please specify 1 gas, 1 liquid and 1 solid" << nl
+            << "    Please specify 1 gas, 1 liquid and 1 solid"
             << exit(FatalError);
     }
 
@@ -130,9 +130,23 @@ Foam::SingleMixtureFraction<CloudType>::SingleMixtureFraction
                 "CloudType&"
             ")"
         )   << "Sum of phases should be 1. Phase fractions:" << nl
-            << YMixture0_ << nl << exit(FatalError);
+            << YMixture0_ << exit(FatalError);
     }
 }
+
+
+template<class CloudType>
+Foam::SingleMixtureFraction<CloudType>::SingleMixtureFraction
+(
+    const SingleMixtureFraction<CloudType>& cm
+)
+:
+    CompositionModel<CloudType>(cm),
+    idGas_(cm.idGas_),
+    idLiquid_(cm.idLiquid_),
+    idSolid_(cm.idSolid_),
+    YMixture0_(cm.YMixture0_)
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

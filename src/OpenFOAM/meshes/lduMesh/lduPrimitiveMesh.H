@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -86,8 +86,8 @@ public:
         lduPrimitiveMesh
         (
             const label nCells,
-            const unallocLabelList& l,
-            const unallocLabelList& u,
+            const labelUList& l,
+            const labelUList& u,
             const labelListList& pa,
             lduInterfacePtrsList interfaces,
             const lduSchedule& ps
@@ -146,19 +146,19 @@ public:
             }
 
             //- Return Lower addressing
-            virtual const unallocLabelList& lowerAddr() const
+            virtual const labelUList& lowerAddr() const
             {
                 return lowerAddr_;
             }
 
             //- Return Upper addressing
-            virtual const unallocLabelList& upperAddr() const
+            virtual const labelUList& upperAddr() const
             {
                 return upperAddr_;
             }
 
             //- Return patch addressing
-            virtual const unallocLabelList& patchAddr(const label i) const
+            virtual const labelUList& patchAddr(const label i) const
             {
                 return patchAddr_[i];
             }

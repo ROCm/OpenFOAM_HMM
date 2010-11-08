@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,7 @@ SourceFiles
 
 #include "scalarField.H"
 #include "typeInfo.H"
+#include "FixedList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class powerSeriesReactionRate Declaration
+                   Class powerSeriesReactionRate Declaration
 \*---------------------------------------------------------------------------*/
 
 class powerSeriesReactionRate
@@ -55,8 +56,8 @@ class powerSeriesReactionRate
         scalar beta_;
         scalar Ta_;
 
-        static const label nb_ = 4;
-        scalar b_[nb_];
+        static const label nCoeff_ = 4;
+        FixedList<scalar, nCoeff_> coeffs_;
 
 
 public:
@@ -69,7 +70,7 @@ public:
             const scalar A,
             const scalar beta,
             const scalar Ta,
-            const scalar b[]
+            const FixedList<scalar, nCoeff_> coeffs
         );
 
         //- Construct from Istream
@@ -77,6 +78,13 @@ public:
         (
             const speciesTable& species,
             Istream& is
+        );
+
+        //- Construct from dictionary
+        inline powerSeriesReactionRate
+        (
+            const speciesTable& species,
+            const dictionary& dict
         );
 
 
@@ -94,6 +102,9 @@ public:
             const scalar p,
             const scalarField& c
         ) const;
+
+        //- Write to stream
+        inline void write(Ostream& os) const;
 
 
     // Ostream Operator

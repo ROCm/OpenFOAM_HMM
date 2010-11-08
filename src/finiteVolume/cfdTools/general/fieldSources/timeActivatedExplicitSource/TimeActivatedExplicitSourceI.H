@@ -103,18 +103,17 @@ Foam::TimeActivatedExplicitSource<Type>::cellSetName() const
 
 
 template<class Type>
-inline const Foam::scalarList&
-Foam::TimeActivatedExplicitSource<Type>::V() const
+inline Foam::scalar Foam::TimeActivatedExplicitSource<Type>::V() const
 {
     return V_;
 }
 
 
 template<class Type>
-inline const Foam::cellSet&
+inline const Foam::labelList&
 Foam::TimeActivatedExplicitSource<Type>::cells() const
 {
-    return cellsPtr_();
+    return cells_;
 }
 
 
@@ -195,21 +194,24 @@ inline Foam::word& Foam::TimeActivatedExplicitSource<Type>::cellSetName()
 
 
 template<class Type>
-inline Foam::scalarList& Foam::TimeActivatedExplicitSource<Type>::V()
+inline Foam::scalar& Foam::TimeActivatedExplicitSource<Type>::V()
 {
     return V_;
 }
 
 
 template<class Type>
-inline Foam::cellSet& Foam::TimeActivatedExplicitSource<Type>::cells()
+inline Foam::labelList& Foam::TimeActivatedExplicitSource<Type>::cells()
 {
-    return cellsPtr_();
+    return cells_;
 }
 
 
 template<class Type>
-inline Foam::List<typename Foam::TimeActivatedExplicitSource<Type>::fieldNameValuePair>&
+inline Foam::List
+<
+    typename Foam::TimeActivatedExplicitSource<Type>::fieldNameValuePair
+>&
 Foam::TimeActivatedExplicitSource<Type>::fieldData()
 {
     return fieldData_;

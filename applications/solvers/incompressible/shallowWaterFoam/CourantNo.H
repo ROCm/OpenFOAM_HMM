@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,23 +36,23 @@ scalar waveCoNum = 0.0;
 
 if (mesh.nInternalFaces())
 {
-    surfaceScalarField SfUfbyDelta =
-        mesh.surfaceInterpolation::deltaCoeffs()
-       *mag(phi)/fvc::interpolate(h);
+    scalarField sumPhi =
+        fvc::surfaceSum(mag(phi))().internalField()
+       /h.internalField();
 
-    CoNum = max(SfUfbyDelta/mesh.magSf())
-        .value()*runTime.deltaTValue();
+    CoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();
 
-    meanCoNum = (sum(SfUfbyDelta)/sum(mesh.magSf()))
-        .value()*runTime.deltaTValue();
+    meanCoNum =
+        0.5*(gSum(sumPhi)/gSum(mesh.V().field()))*runTime.deltaTValue();
 
     // Gravity wave Courant number
-    waveCoNum =
-        0.5*max
+    waveCoNum = 0.25*gMax
+    (
+        fvc::surfaceSum
         (
-            mesh.surfaceInterpolation::deltaCoeffs()
-           *sqrt(fvc::interpolate(h))
-        ).value()*sqrt(magg).value()*runTime.deltaTValue();
+            fvc::interpolate(sqrt(h))*mesh.magSf()
+        )().internalField()/mesh.V().field()
+    )*sqrt(magg).value()*runTime.deltaTValue();
 }
 
 Info<< "Courant number mean: " << meanCoNum

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -273,7 +273,7 @@ void Foam::objectRegistry::rename(const word& newName)
 
 bool Foam::objectRegistry::modified() const
 {
-    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
+    forAllConstIter(HashTable<regIOobject*>, *this, iter)
     {
         if (iter()->modified())
         {
@@ -317,7 +317,7 @@ bool Foam::objectRegistry::writeObject
 {
     bool ok = true;
 
-    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
+    forAllConstIter(HashTable<regIOobject*>, *this, iter)
     {
         if (objectRegistry::debug)
         {

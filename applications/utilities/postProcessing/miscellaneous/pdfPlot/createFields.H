@@ -5,7 +5,7 @@
             "pdfDict",
             runTime.constant(),
             runTime,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     );
@@ -20,7 +20,7 @@
     const fileName pdfPath = runTime.path()/"pdf";
     mkDir(pdfPath);
 
-    Random rndGen(label(0));
+    cachedRandom rndGen(label(0), -1);
 
     autoPtr<pdfs::pdf> p(pdfs::pdf::New(pdfDictionary, rndGen));
 

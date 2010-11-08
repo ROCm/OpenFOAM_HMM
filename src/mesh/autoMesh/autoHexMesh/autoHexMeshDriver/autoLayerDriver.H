@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -97,6 +97,9 @@ class autoLayerDriver
 
         //- Mesh+surface
         meshRefinement& meshRefiner_;
+
+        //- From surface region to patch
+        const labelList globalToPatch_;
 
 
 
@@ -333,6 +336,7 @@ class autoLayerDriver
                 (
                     const addPatchCellLayer& addLayer,
                     const dictionary& motionDict,
+                    const List<labelPair>& baffles,
                     const indirectPrimitivePatch& pp,
                     const fvMesh&,
 
@@ -468,6 +472,7 @@ class autoLayerDriver
                 (
                     motionSmoother& meshMover,
                     const dictionary& meshQualityDict,
+                    const List<labelPair>& baffles,
                     const label nSmoothThickness,
                     const scalar maxThicknessToMedialRatio,
                     const label nAllowableErrors,
@@ -503,7 +508,11 @@ public:
     // Constructors
 
         //- Construct from components
-        autoLayerDriver(meshRefinement& meshRefiner);
+        autoLayerDriver
+        (
+            meshRefinement& meshRefiner,
+            const labelList& globalToPatch
+        );
 
 
     // Member Functions

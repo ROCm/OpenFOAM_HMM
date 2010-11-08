@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cyclicFvPatchField.H"
+#include "transformField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,18 +57,18 @@ cyclicFvPatchField<Type>::cyclicFvPatchField
     coupledFvPatchField<Type>(ptf, p, iF, mapper),
     cyclicPatch_(refCast<const cyclicFvPatch>(p))
 {
-    if (!isType<cyclicFvPatch>(this->patch()))
+    if (!isA<cyclicFvPatch>(this->patch()))
     {
         FatalErrorIn
         (
-            "cyclicFvPatchField<Type>::cyclicFvPatchField\n"
-            "(\n"
-            "    const cyclicFvPatchField<Type>& ptf,\n"
-            "    const fvPatch& p,\n"
-            "    const DimensionedField<Type, volMesh>& iF,\n"
-            "    const fvPatchFieldMapper& mapper\n"
-            ")\n"
-        )   << "\n    patch type '" << p.type()
+            "cyclicFvPatchField<Type>::cyclicFvPatchField"
+            "("
+                "const cyclicFvPatchField<Type>& ,"
+                "const fvPatch&, "
+                "const DimensionedField<Type, volMesh>&, "
+                "const fvPatchFieldMapper&"
+            ")"
+        )   << "    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->dimensionedInternalField().name()
@@ -88,18 +89,18 @@ cyclicFvPatchField<Type>::cyclicFvPatchField
     coupledFvPatchField<Type>(p, iF, dict),
     cyclicPatch_(refCast<const cyclicFvPatch>(p))
 {
-    if (!isType<cyclicFvPatch>(p))
+    if (!isA<cyclicFvPatch>(p))
     {
         FatalIOErrorIn
         (
-            "cyclicFvPatchField<Type>::cyclicFvPatchField\n"
-            "(\n"
-            "    const fvPatch& p,\n"
-            "    const Field<Type>& field,\n"
-            "    const dictionary& dict\n"
-            ")\n",
+            "cyclicFvPatchField<Type>::cyclicFvPatchField"
+            "("
+                "const fvPatch&, "
+                "const Field<Type>&, "
+                "const dictionary&"
+            ")",
             dict
-        )   << "\n    patch type '" << p.type()
+        )   << "    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->dimensionedInternalField().name()
@@ -141,38 +142,49 @@ template<class Type>
 tmp<Field<Type> > cyclicFvPatchField<Type>::patchNeighbourField() const
 {
     const Field<Type>& iField = this->internalField();
-    const unallocLabelList& faceCells = cyclicPatch_.faceCells();
+    const labelUList& nbrFaceCells =
+        cyclicPatch().cyclicPatch().neighbPatch().faceCells();
 
     tmp<Field<Type> > tpnf(new Field<Type>(this->size()));
     Field<Type>& pnf = tpnf();
 
-    label sizeby2 = this->size()/2;
 
     if (doTransform())
     {
-        for (label facei=0; facei<sizeby2; facei++)
+        forAll(pnf, facei)
         {
             pnf[facei] = transform
             (
-                forwardT()[0], iField[faceCells[facei + sizeby2]]
-            );
-
-            pnf[facei + sizeby2] = transform
-            (
-                reverseT()[0], iField[faceCells[facei]]
+                forwardT()[0], iField[nbrFaceCells[facei]]
             );
         }
     }
     else
     {
-        for (label facei=0; facei<sizeby2; facei++)
+        forAll(pnf, facei)
         {
-            pnf[facei] = iField[faceCells[facei + sizeby2]];
-            pnf[facei + sizeby2] = iField[faceCells[facei]];
+            pnf[facei] = iField[nbrFaceCells[facei]];
         }
     }
 
     return tpnf;
+}
+
+
+template<class Type>
+const cyclicFvPatchField<Type>& cyclicFvPatchField<Type>::neighbourPatchField()
+const
+{
+    const GeometricField<Type, fvPatchField, volMesh>& fld =
+    static_cast<const GeometricField<Type, fvPatchField, volMesh>&>
+    (
+        this->internalField()
+    );
+
+    return refCast<const cyclicFvPatchField<Type> >
+    (
+        fld.boundaryField()[this->cyclicPatch().neighbPatchID()]
+    );
 }
 
 
@@ -189,23 +201,31 @@ void cyclicFvPatchField<Type>::updateInterfaceMatrix
 {
     scalarField pnf(this->size());
 
-    label sizeby2 = this->size()/2;
-    const unallocLabelList& faceCells = cyclicPatch_.faceCells();
+    const labelUList& nbrFaceCells =
+        cyclicPatch().cyclicPatch().neighbPatch().faceCells();
 
-    for (label facei=0; facei<sizeby2; facei++)
+    forAll(pnf, facei)
     {
-        pnf[facei] = psiInternal[faceCells[facei + sizeby2]];
-        pnf[facei + sizeby2] = psiInternal[faceCells[facei]];
+        pnf[facei] = psiInternal[nbrFaceCells[facei]];
     }
 
     // Transform according to the transformation tensors
     transformCoupleField(pnf, cmpt);
 
     // Multiply the field by coefficients and add into the result
+    const labelUList& faceCells = cyclicPatch_.faceCells();
+
     forAll(faceCells, elemI)
     {
         result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
     }
+}
+
+
+template<class Type>
+void cyclicFvPatchField<Type>::write(Ostream& os) const
+{
+    fvPatchField<Type>::write(os);
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -149,7 +149,7 @@ public:
 
         //- Return coefficients for the
         //  plane equation: ax + by + cz + d = 0
-        scalarList planeCoeffs() const;
+        FixedList<scalar, 4> planeCoeffs() const;
 
         //- Return nearest point in the plane for the given point
         point nearestPoint(const point& p) const;
@@ -181,6 +181,9 @@ public:
 
         //- Return the cutting point between this plane and two other planes
         point planePlaneIntersect(const plane&, const plane&) const;
+
+        //- Write to dictionary
+        void writeDict(Ostream&) const;
 
 
     // friend Operators

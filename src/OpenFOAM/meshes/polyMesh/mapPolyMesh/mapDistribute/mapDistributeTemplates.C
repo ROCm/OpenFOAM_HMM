@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,6 +41,30 @@ void Foam::mapDistribute::distribute
     List<T>& field
 )
 {
+    if (!Pstream::parRun())
+    {
+        // Do only me to me.
+
+        const labelList& mySubMap = subMap[Pstream::myProcNo()];
+
+        List<T> subField(mySubMap.size());
+        forAll(mySubMap, i)
+        {
+            subField[i] = field[mySubMap[i]];
+        }
+        
+        // Receive sub field from myself (subField)
+        const labelList& map = constructMap[Pstream::myProcNo()];
+
+        field.setSize(constructSize);
+
+        forAll(map, i)
+        {
+            field[map[i]] = subField[i];
+        }
+        return;
+    }
+
     if (commsType == Pstream::blocking)
     {
         // Since buffered sending can reuse the field to collect the
@@ -406,6 +430,30 @@ void Foam::mapDistribute::distribute
     const T& nullValue
 )
 {
+    if (!Pstream::parRun())
+    {
+        // Do only me to me.
+
+        const labelList& mySubMap = subMap[Pstream::myProcNo()];
+
+        List<T> subField(mySubMap.size());
+        forAll(mySubMap, i)
+        {
+            subField[i] = field[mySubMap[i]];
+        }
+        
+        // Receive sub field from myself (subField)
+        const labelList& map = constructMap[Pstream::myProcNo()];
+
+        field.setSize(constructSize);
+
+        forAll(map, i)
+        {
+            field[map[i]] = subField[i];
+        }
+        return;
+    }
+
     if (commsType == Pstream::blocking)
     {
         // Since buffered sending can reuse the field to collect the

@@ -60,12 +60,20 @@ public:
 
     // Constructors
 
-        //- Construct from dictionary
-        NoCollision
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+        //- Construct from components
+        NoCollision(const dictionary& dict, CloudType& owner);
+
+        //- Construct copy
+        NoCollision(NoCollision<CloudType>& cm);
+
+        //- Construct and return a clone
+        virtual autoPtr<CollisionModel<CloudType> > clone()
+        {
+            return autoPtr<CollisionModel<CloudType> >
+            (
+                new NoCollision<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -81,6 +89,10 @@ public:
 
         //- Flag to indicate whether model activates injection model
         virtual bool active() const;
+
+        //- Indicates whether model determines wall collisions or not,
+        //  used to determine what value to use for wallImpactDistance
+        virtual bool controlsWallInteraction() const;
 
         // Collision function
         virtual void collide();

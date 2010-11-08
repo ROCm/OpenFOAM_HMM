@@ -45,9 +45,14 @@
     scalar pRefValue = 0.0;
     setRefCell(p, mesh.solutionDict().subDict("SIMPLE"), pRefCell, pRefValue);
 
-    dimensionedScalar pMin
+    dimensionedScalar rhoMax
     (
-        mesh.solutionDict().subDict("SIMPLE").lookup("pMin")
+        mesh.solutionDict().subDict("SIMPLE").lookup("rhoMax")
+    );
+
+    dimensionedScalar rhoMin
+    (
+        mesh.solutionDict().subDict("SIMPLE").lookup("rhoMin")
     );
 
     Info<< "Creating turbulence model\n" << endl;
@@ -67,6 +72,7 @@
     thermalPorousZones pZones(mesh);
     Switch pressureImplicitPorosity(false);
 
+    // nUCorrectors used for pressureImplicitPorosity
     int nUCorr = 0;
     if (pZones.size())
     {
@@ -82,5 +88,11 @@
         if (nUCorr > 0)
         {
             pressureImplicitPorosity = true;
+            Info<< "Using pressure implicit porosity" << endl;
+        }
+        else
+        {
+            Info<< "Using pressure explicit porosity" << endl;
         }
     }
+

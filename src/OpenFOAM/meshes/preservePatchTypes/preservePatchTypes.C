@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,6 @@ License
 
 #include "preservePatchTypes.H"
 #include "polyBoundaryMeshEntries.H"
-#include "dictionary.H"
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
@@ -35,14 +34,16 @@ void Foam::preservePatchTypes
     const word& meshInstance,
     const fileName& meshDir,
     const wordList& patchNames,
-    wordList& patchTypes,
+    PtrList<dictionary>& patchDicts,
     const word& defaultFacesName,
-    word& defaultFacesType,
-    wordList& patchPhysicalTypes
+    word& defaultFacesType
 )
 {
+    patchDicts.setSize(patchNames.size());
+
     dictionary patchDictionary;
 
+    // Read boundary file as single dictionary
     {
         IOobject patchEntriesHeader
         (
@@ -67,33 +68,25 @@ void Foam::preservePatchTypes
         }
     }
 
-    if (patchDictionary.size())
+    forAll(patchNames, patchi)
     {
-        forAll(patchNames, patchi)
-        {
-            if (patchDictionary.found(patchNames[patchi]))
-            {
-                const dictionary& patchDict =
-                    patchDictionary.subDict(patchNames[patchi]);
-
-                patchDict.lookup("type") >> patchTypes[patchi];
-
-                patchDict.readIfPresent("geometricType", patchTypes[patchi]);
-                patchDict.readIfPresent
-                (
-                    "physicalType",
-                    patchPhysicalTypes[patchi]
-                );
-            }
-        }
-
-        if (patchDictionary.found(defaultFacesName))
+        if (patchDictionary.found(patchNames[patchi]))
         {
             const dictionary& patchDict =
-                patchDictionary.subDict(defaultFacesName);
+                patchDictionary.subDict(patchNames[patchi]);
 
-            patchDict.readIfPresent("geometricType", defaultFacesType);
+            patchDicts.set(patchi, patchDict.clone());
+            patchDicts[patchi].remove("nFaces");
+            patchDicts[patchi].remove("startFace");
         }
+    }
+
+    if (patchDictionary.found(defaultFacesName))
+    {
+        const dictionary& patchDict =
+            patchDictionary.subDict(defaultFacesName);
+
+        patchDict.readIfPresent("geometricType", defaultFacesType);
     }
 
     Info<< nl << "Default patch type set to " << defaultFacesType << endl;

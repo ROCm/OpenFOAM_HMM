@@ -41,4 +41,11 @@ Foam::surfaceFilmModels::injectionModel::coeffs() const
 }
 
 
+inline Foam::scalar Foam::surfaceFilmModels::injectionModel::injectedMass()
+const
+{
+    return injectedMass_;
+}
+
+
 // ************************************************************************* //

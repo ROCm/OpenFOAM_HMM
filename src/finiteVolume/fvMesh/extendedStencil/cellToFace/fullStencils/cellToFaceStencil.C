@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,9 +24,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cellToFaceStencil.H"
-#include "syncTools.H"
 #include "SortableList.H"
 #include "emptyPolyPatch.H"
+#include "syncTools.H"
+#include "dummyTransform.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -370,7 +371,14 @@ void Foam::cellToFaceStencil::calcFaceStencil
             }
         }
     }
-    syncTools::swapBoundaryFaceList(mesh_, neiGlobalCellCells, false);
+    //syncTools::swapBoundaryFaceList(mesh_, neiGlobalCellCells);
+    syncTools::syncBoundaryFaceList
+    (
+        mesh_,
+        neiGlobalCellCells,
+        eqOp<labelList>(),
+        dummyTransform()
+    );
 
 
 

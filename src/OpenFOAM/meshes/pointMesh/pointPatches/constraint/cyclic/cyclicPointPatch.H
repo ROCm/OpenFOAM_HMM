@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,7 @@ SourceFiles
 
 #include "coupledFacePointPatch.H"
 #include "cyclicPolyPatch.H"
+#include "pointBoundaryMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,8 +57,6 @@ class cyclicPointPatch
         //- Local reference cast into the cyclic patch
         const cyclicPolyPatch& cyclicPolyPatch_;
 
-        //- List of local points that are not collocated
-        mutable labelList separatedPoints_;
 
     // Private Member Functions
 
@@ -125,6 +124,14 @@ public:
                 return cyclicPolyPatch_;
             }
 
+            //- Return neighbour point patch
+            const cyclicPointPatch& neighbPatch() const
+            {
+                label patchI = cyclicPolyPatch_.neighbPatchID();
+                const pointPatch& pp = this->boundaryMesh()[patchI];
+                return refCast<const cyclicPointPatch>(pp);
+            }
+
             //- Are the cyclic planes parallel
             bool parallel() const
             {
@@ -147,11 +154,10 @@ public:
         // Access functions for demand driven data
 
             //- Return the set of pairs of points that require transformation
-            //  and/or mapping
+            //  and/or mapping. First index is on this patch, second on the
+            //  neighbour patch.
             virtual const edgeList& transformPairs() const;
 
-            //- List of separated coupled points
-            virtual const labelList& separatedPoints() const;
 };
 
 

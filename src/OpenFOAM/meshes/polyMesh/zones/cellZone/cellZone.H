@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -113,7 +113,7 @@ public:
         cellZone
         (
             const word& name,
-            const labelList& addr,
+            const labelUList& addr,
             const label index,
             const cellZoneMesh&
         );
@@ -141,7 +141,7 @@ public:
         cellZone
         (
             const cellZone&,
-            const labelList& addr,
+            const labelUList& addr,
             const label index,
             const cellZoneMesh&
         );
@@ -169,7 +169,7 @@ public:
         //  and zone mesh
         virtual autoPtr<cellZone> clone
         (
-            const labelList& addr,
+            const labelUList& addr,
             const label index,
             const cellZoneMesh& zm
         ) const
@@ -209,17 +209,27 @@ public:
         //- Check zone definition. Return true if in error.
         virtual bool checkDefinition(const bool report = false) const;
 
+        //- Check whether zone is synchronised across coupled boundaries. Return
+        //  true if in error.
+        virtual bool checkParallelSync(const bool report = false) const
+        {
+            return false;
+        }
+
         //- Write dictionary
         virtual void writeDict(Ostream&) const;
 
 
     // Member Operators
 
-        //- Assign to zone clearing demand-driven data
+        //- Assign to zone, clearing demand-driven data
         void operator=(const cellZone&);
 
-        //- Assign addressing clearing demand-driven data
-        void operator=(const labelList&);
+        //- Assign addressing, clearing demand-driven data
+        void operator=(const labelUList&);
+
+        //- Assign addressing, clearing demand-driven data
+        void operator=(const Xfer<labelList>&);
 
 
     // I-O

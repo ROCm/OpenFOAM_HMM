@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -192,8 +192,7 @@ class FaceCellWave
                 const polyPatch& patch,
                 const label nFaces,
                 const labelList&,
-                const List<Type>&,
-                const bool isParallel
+                const List<Type>&
             );
 
             //- Extract info for single patch only

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -182,11 +182,30 @@ Foam::pointHit Foam::face::nearestPoint
     const pointField& meshPoints
 ) const
 {
+    // Dummy labels
+    label nearType = -1;
+    label nearLabel = -1;
+
+    return nearestPointClassify(p, meshPoints, nearType, nearLabel);
+}
+
+
+Foam::pointHit Foam::face::nearestPointClassify
+(
+    const point& p,
+    const pointField& meshPoints,
+    label& nearType,
+    label& nearLabel
+) const
+{
     const face& f = *this;
     point ctr = centre(meshPoints);
 
     // Initialize to miss, distance=GREAT
     pointHit nearest(p);
+
+    nearType = -1;
+    nearLabel = -1;
 
     label nPoints = f.size();
 
@@ -196,8 +215,10 @@ Foam::pointHit Foam::face::nearestPoint
     {
         nextPoint = meshPoints[f[fcIndex(pI)]];
 
+        label tmpNearType = -1;
+        label tmpNearLabel = -1;
+
         // Note: for best accuracy, centre point always comes last
-        //
         triPointRef tri
         (
             meshPoints[f[pI]],
@@ -205,11 +226,41 @@ Foam::pointHit Foam::face::nearestPoint
             ctr
         );
 
-        pointHit curHit = tri.nearestPoint(p);
+        pointHit curHit = tri.nearestPointClassify
+        (
+            p,
+            tmpNearType,
+            tmpNearLabel
+        );
 
         if (Foam::mag(curHit.distance()) < Foam::mag(nearest.distance()))
         {
             nearest.setDistance(curHit.distance());
+
+            // Assume at first that the near type is NONE on the
+            // triangle (i.e. on the face of the triangle) then it is
+            // therefore also for the face.
+
+            nearType = NONE;
+
+            if (tmpNearType == triPointRef::EDGE && tmpNearLabel == 0)
+            {
+                // If the triangle edge label is 0, then this is also
+                // an edge of the face, if not, it is on the face
+
+                nearType = EDGE;
+
+                nearLabel = pI;
+            }
+            else if (tmpNearType == triPointRef::POINT && tmpNearLabel < 2)
+            {
+                // If the triangle point label is 0 or 1, then this is
+                // also a point of the face, if not, it is on the face
+
+                nearType = POINT;
+
+                nearLabel = pI + tmpNearLabel;
+            }
 
             if (curHit.hit())
             {

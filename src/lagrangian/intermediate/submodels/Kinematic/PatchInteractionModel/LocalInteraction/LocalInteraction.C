@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::label Foam::LocalInteraction<CloudType>::applyToPatch
 (
     const label globalPatchI
@@ -47,7 +47,7 @@ Foam::label Foam::LocalInteraction<CloudType>::applyToPatch
 
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::LocalInteraction<CloudType>::LocalInteraction
 (
     const dictionary& dict,
@@ -118,9 +118,21 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
 }
 
 
+template<class CloudType>
+Foam::LocalInteraction<CloudType>::LocalInteraction
+(
+    const LocalInteraction<CloudType>& pim
+)
+:
+    PatchInteractionModel<CloudType>(pim),
+    patchData_(pim.patchData_),
+    patchIds_(pim.patchIds_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::LocalInteraction<CloudType>::~LocalInteraction()
 {}
 
@@ -128,22 +140,19 @@ Foam::LocalInteraction<CloudType>::~LocalInteraction()
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::LocalInteraction<CloudType>::active() const
-{
-    return true;
-}
-
-
-template <class CloudType>
 bool Foam::LocalInteraction<CloudType>::correct
 (
+    typename CloudType::parcelType& p,
     const polyPatch& pp,
-    const label faceId,
     bool& keepParticle,
-    bool& active,
-    vector& U
+    const scalar trackFraction,
+    const tetIndices& tetIs
 ) const
 {
+    vector& U = p.U();
+
+    bool& active = p.active();
+
     label patchI = applyToPatch(pp.index());
 
     if (patchI >= 0)
@@ -175,8 +184,13 @@ bool Foam::LocalInteraction<CloudType>::correct
                 keepParticle = true;
                 active = true;
 
-                vector nw = pp.faceAreas()[pp.whichFace(faceId)];
-                nw /= mag(nw);
+                vector nw;
+                vector Up;
+
+                this->patchData(p, pp, trackFraction, tetIs, nw, Up);
+
+                // Calculate motion relative to patch velocity
+                U -= Up;
 
                 scalar Un = U & nw;
                 vector Ut = U - Un*nw;
@@ -188,6 +202,9 @@ bool Foam::LocalInteraction<CloudType>::correct
 
                 U -= patchData_[patchI].mu()*Ut;
 
+                // Return velocity to global space
+                U += Up;
+
                 break;
             }
             default:
@@ -196,10 +213,11 @@ bool Foam::LocalInteraction<CloudType>::correct
                 (
                     "bool LocalInteraction<CloudType>::correct"
                     "("
+                        "typename CloudType::parcelType&, "
                         "const polyPatch&, "
-                        "const label, "
                         "bool&, "
-                        "vector&"
+                        "scalar&, "
+                        "const tetIndices&"
                     ") const"
                 )   << "Unknown interaction type "
                     << patchData_[patchI].interactionTypeName()

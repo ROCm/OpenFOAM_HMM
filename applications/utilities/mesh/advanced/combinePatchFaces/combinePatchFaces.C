@@ -74,7 +74,7 @@ void checkSnapMesh
             "snapMeshDict",
             runTime.system(),
             mesh,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     );
@@ -295,8 +295,7 @@ label mergePatchFaces
                     const faceZone& fZone = mesh.faceZones()[zoneID];
                     zoneFlip = fZone.flipMap()[fZone.whichFace(newMasterI)];
                 }
-                label patchI = mesh.boundaryMesh().whichPatch(newMasterI);
-
+                label patchID = mesh.boundaryMesh().whichPatch(newMasterI);
 
                 Pout<< "Restoring new master face " << newMasterI
                     << " to vertices " << setFaceVerts[0] << endl;
@@ -311,7 +310,7 @@ label mergePatchFaces
                         own,                            // owner
                         -1,                             // neighbour
                         false,                          // face flip
-                        patchI,                         // patch for face
+                        patchID,                        // patch for face
                         false,                          // remove from zone
                         zoneID,                         // zone for face
                         zoneFlip                        // face flip in zone
@@ -336,7 +335,7 @@ label mergePatchFaces
                             -1,                     // masterEdgeID,
                             newMasterI,             // masterFaceID,
                             false,                  // flipFaceFlux,
-                            patchI,                 // patchID,
+                            patchID,                // patchID,
                             zoneID,                 // zoneID,
                             zoneFlip                // zoneFlip
                         )

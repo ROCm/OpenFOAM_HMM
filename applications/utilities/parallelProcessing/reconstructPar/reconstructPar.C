@@ -179,23 +179,8 @@ int main(int argc, char *argv[])
         // Get list of objects from processor0 database
         IOobjectList objects(procMeshes.meshes()[0], databases[0].timeName());
 
-
-        // If there are any FV fields, reconstruct them
-
-        if
-        (
-            objects.lookupClass(volScalarField::typeName).size()
-         || objects.lookupClass(volVectorField::typeName).size()
-         || objects.lookupClass(volSphericalTensorField::typeName).size()
-         || objects.lookupClass(volSymmTensorField::typeName).size()
-         || objects.lookupClass(volTensorField::typeName).size()
-         || objects.lookupClass(surfaceScalarField::typeName).size()
-         || objects.lookupClass(surfaceVectorField::typeName).size()
-         || objects.lookupClass(surfaceSphericalTensorField::typeName).size()
-         || objects.lookupClass(surfaceSymmTensorField::typeName).size()
-         || objects.lookupClass(surfaceTensorField::typeName).size()
-        )
         {
+            // If there are any FV fields, reconstruct them
             Info<< "Reconstructing FV fields" << nl << endl;
 
             fvFieldReconstructor fvReconstructor
@@ -205,6 +190,32 @@ int main(int argc, char *argv[])
                 procMeshes.faceProcAddressing(),
                 procMeshes.cellProcAddressing(),
                 procMeshes.boundaryProcAddressing()
+            );
+
+            fvReconstructor.reconstructFvVolumeInternalFields<scalar>
+            (
+                objects,
+                selectedFields
+            );
+            fvReconstructor.reconstructFvVolumeInternalFields<vector>
+            (
+                objects,
+                selectedFields
+            );
+            fvReconstructor.reconstructFvVolumeInternalFields<sphericalTensor>
+            (
+                objects,
+                selectedFields
+            );
+            fvReconstructor.reconstructFvVolumeInternalFields<symmTensor>
+            (
+                objects,
+                selectedFields
+            );
+            fvReconstructor.reconstructFvVolumeInternalFields<tensor>
+            (
+                objects,
+                selectedFields
             );
 
             fvReconstructor.reconstructFvVolumeFields<scalar>
@@ -258,22 +269,13 @@ int main(int argc, char *argv[])
                 objects,
                 selectedFields
             );
-        }
-        else
-        {
-            Info<< "No FV fields" << nl << endl;
+
+            if (fvReconstructor.nReconstructed() == 0)
+            {
+                Info<< "No FV fields" << nl << endl;
+            }
         }
 
-
-        // If there are any point fields, reconstruct them
-        if
-        (
-            objects.lookupClass(pointScalarField::typeName).size()
-         || objects.lookupClass(pointVectorField::typeName).size()
-         || objects.lookupClass(pointSphericalTensorField::typeName).size()
-         || objects.lookupClass(pointSymmTensorField::typeName).size()
-         || objects.lookupClass(pointTensorField::typeName).size()
-        )
         {
             Info<< "Reconstructing point fields" << nl << endl;
 
@@ -318,10 +320,11 @@ int main(int argc, char *argv[])
                 objects,
                 selectedFields
             );
-        }
-        else
-        {
-            Info<< "No point fields" << nl << endl;
+
+            if (pointReconstructor.nReconstructed() == 0)
+            {
+                Info<< "No point fields" << nl << endl;
+            }
         }
 
 
@@ -402,7 +405,21 @@ int main(int argc, char *argv[])
                         procMeshes.meshes(),
                         sprayObjs
                     );
+                    reconstructLagrangianFieldFields<label>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
                     reconstructLagrangianFields<scalar>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
+                    reconstructLagrangianFieldFields<scalar>
                     (
                         cloudName,
                         mesh,
@@ -416,7 +433,21 @@ int main(int argc, char *argv[])
                         procMeshes.meshes(),
                         sprayObjs
                     );
+                    reconstructLagrangianFieldFields<vector>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
                     reconstructLagrangianFields<sphericalTensor>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
+                    reconstructLagrangianFieldFields<sphericalTensor>
                     (
                         cloudName,
                         mesh,
@@ -430,7 +461,21 @@ int main(int argc, char *argv[])
                         procMeshes.meshes(),
                         sprayObjs
                     );
+                    reconstructLagrangianFieldFields<symmTensor>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
                     reconstructLagrangianFields<tensor>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
+                    reconstructLagrangianFieldFields<tensor>
                     (
                         cloudName,
                         mesh,

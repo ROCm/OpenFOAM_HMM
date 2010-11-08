@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -708,8 +708,7 @@ void Foam::combineFaces::setRefinement
         mesh_,
         nPointFaces,
         plusEqOp<label>(),
-        0,                  // null value
-        false               // no separation
+        0                   // null value
     );
 
     // Remove all unused points. Store position if undoable.

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,28 +51,7 @@ void Foam::cyclicPointPatch::initGeometry(PstreamBuffers&)
 
 
 void Foam::cyclicPointPatch::calcGeometry(PstreamBuffers&)
-{
-    const edgeList& cp = cyclicPolyPatch_.coupledPoints();
-    const labelList& mp = cyclicPolyPatch_.meshPoints();
-
-    DynamicList<label> separated;
-    forAll(cp, i)
-    {
-        const edge& coupledSet = cp[i];
-
-        // Assume all points are separated.
-        separated.append(coupledSet[0]);
-        separated.append(coupledSet[1]);
-    }
-    separatedPoints_.transfer(separated);
-
-    if (debug)
-    {
-        Pout<< "cyclic:" << cyclicPolyPatch_.name()
-            << " separated:" << separatedPoints_.size()
-            << " out of points:" << mp.size() << endl;
-    }
-}
+{}
 
 
 void Foam::cyclicPointPatch::initMovePoints(PstreamBuffers&, const pointField&)
@@ -121,12 +100,6 @@ Foam::cyclicPointPatch::~cyclicPointPatch()
 const Foam::edgeList& Foam::cyclicPointPatch::transformPairs() const
 {
     return cyclicPolyPatch_.coupledPoints();
-}
-
-
-const Foam::labelList& Foam::cyclicPointPatch::separatedPoints() const
-{
-    return separatedPoints_;
 }
 
 

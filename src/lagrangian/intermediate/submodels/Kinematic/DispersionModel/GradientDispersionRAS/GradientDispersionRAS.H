@@ -52,10 +52,15 @@ class GradientDispersionRAS
 {
 protected:
 
-    // Locally cached turbulence fields
+    // Protected data
 
-        //- Gradient of k
-        const volVectorField* gradkPtr_;
+        // Locally cached turbulence fields
+
+            //- Gradient of k
+            const volVectorField* gradkPtr_;
+
+            //- Take ownership of the grad(k)
+            bool ownGradK_;
 
 
 public:
@@ -67,11 +72,19 @@ public:
     // Constructors
 
         //- Construct from components
-        GradientDispersionRAS
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+        GradientDispersionRAS(const dictionary& dict, CloudType& owner);
+
+        //- Construct copy
+        GradientDispersionRAS(GradientDispersionRAS<CloudType>& dm);
+
+        //- Construct and return a clone
+        virtual autoPtr<DispersionModel<CloudType> > clone()
+        {
+            return autoPtr<DispersionModel<CloudType> >
+            (
+                new GradientDispersionRAS<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -80,9 +93,6 @@ public:
 
     // Member Functions
 
-        //- Flag to indicate whether model activates injection model
-        bool active() const;
-
         //- Cache carrier fields
         virtual void cacheFields(const bool store);
 
@@ -90,7 +100,7 @@ public:
         virtual vector update
         (
             const scalar dt,
-            const label celli,
+            const label cellI,
             const vector& U,
             const vector& Uc,
             vector& UTurb,

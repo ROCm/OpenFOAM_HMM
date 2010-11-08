@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -103,7 +103,7 @@ void Foam::writeRegisteredObject::write()
                 (
                     "Foam::writeRegisteredObject::read(const dictionary&)"
                 )   << "Object " << objectNames_[i] << " not found in "
-                    << "database. Available objects are:" << nl << obr_.toc()
+                    << "database. Available objects:" << nl << obr_.sortedToc()
                     << endl;
             }
 

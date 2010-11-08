@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,8 +63,8 @@ tmp<volScalarField> CoEulerDdtScheme<Type>::CorDeltaT() const
 
     volScalarField& corDeltaT = tcorDeltaT();
 
-    const unallocLabelList& owner = mesh().owner();
-    const unallocLabelList& neighbour = mesh().neighbour();
+    const labelUList& owner = mesh().owner();
+    const labelUList& neighbour = mesh().neighbour();
 
     forAll(owner, faceI)
     {
@@ -81,7 +81,7 @@ tmp<volScalarField> CoEulerDdtScheme<Type>::CorDeltaT() const
             cofrDeltaT.boundaryField()[patchi];
 
         const fvPatch& p = pcofrDeltaT.patch();
-        const unallocLabelList& faceCells = p.patch().faceCells();
+        const labelUList& faceCells = p.patch().faceCells();
 
         forAll(pcofrDeltaT, patchFacei)
         {

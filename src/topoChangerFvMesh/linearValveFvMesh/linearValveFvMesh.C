@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -237,7 +237,8 @@ bool Foam::linearValveFvMesh::attached() const
             )
             {
                 FatalErrorIn("bool linearValveFvMesh::attached() const")
-                    << "Slider " << modI << " named " << topoChanges[modI].name()
+                    << "Slider " << modI
+                    << " named " << topoChanges[modI].name()
                     << " out of sync: Should be" << result
                     << abort(FatalError);
             }
@@ -272,8 +273,9 @@ Foam::linearValveFvMesh::linearValveFvMesh(const IOobject& io)
                 "dynamicMeshDict",
                 time().constant(),
                 *this,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE,
+                false
             )
         ).subDict(typeName + "Coeffs")
     ),

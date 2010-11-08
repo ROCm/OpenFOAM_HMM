@@ -73,7 +73,19 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        LocalInteraction(const dictionary& dict, CloudType& cloud);
+        LocalInteraction(const dictionary& dict, CloudType& owner);
+
+        //- Construct copy from owner cloud and patch interaction model
+        LocalInteraction(const LocalInteraction<CloudType>& pim);
+
+        //- Construct and return a clone using supplied owner cloud
+        virtual autoPtr<PatchInteractionModel<CloudType> > clone() const
+        {
+            return autoPtr<PatchInteractionModel<CloudType> >
+            (
+                new LocalInteraction<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -82,18 +94,15 @@ public:
 
     // Member Functions
 
-        //- Flag to indicate whether model activates patch interaction model
-        virtual bool active() const;
-
         //- Apply velocity correction
         //  Returns true if particle remains in same cell
         virtual bool correct
         (
+            typename CloudType::parcelType& p,
             const polyPatch& pp,
-            const label faceId,
             bool& keepParticle,
-            bool& active,
-            vector& U
+            const scalar trackFraction,
+            const tetIndices& tetIs
         ) const;
 };
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -146,7 +146,7 @@ void Foam::attachDetach::detachInterface
             addedPoints[e.end()] = mp[e.end()];
         }
     }
-// Pout << "addedPoints before point creation: " << addedPoints << endl;
+// Pout<< "addedPoints before point creation: " << addedPoints << endl;
 
     // Create new points for face zone
     forAll(addedPoints, pointI)
@@ -440,7 +440,13 @@ void Foam::attachDetach::detachInterface
                         false                       // face zone flip
                     )
                 );
-// Pout << "modifying stick-out face. Internal Old face: " << oldFace << " new face: " << newFace << " own: " << own[curFaceID] << " nei: " << nei[curFaceID] << endl;
+
+                // Pout<< "modifying stick-out face. Internal Old face: "
+                //     << oldFace
+                //     << " new face: " << newFace
+                //     << " own: " << own[curFaceID]
+                //     << " nei: " << nei[curFaceID]
+                //     << endl;
             }
             else
             {
@@ -459,7 +465,14 @@ void Foam::attachDetach::detachInterface
                         false                         // face zone flip
                     )
                 );
-// Pout << "modifying stick-out face. Boundary Old face: " << oldFace << " new face: " << newFace << " own: " << own[curFaceID] << " patch: " << mesh.boundaryMesh().whichPatch(curFaceID) << endl;
+
+                // Pout<< "modifying stick-out face. Boundary Old face: "
+                //     << oldFace
+                //     << " new face: " << newFace
+                //     << " own: " << own[curFaceID]
+                //     << " patch: "
+                //     << mesh.boundaryMesh().whichPatch(curFaceID)
+                //     << endl;
             }
         }
     }

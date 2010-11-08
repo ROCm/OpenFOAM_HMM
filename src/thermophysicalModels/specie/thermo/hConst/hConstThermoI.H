@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -72,6 +72,17 @@ Foam::hConstThermo<equationOfState>::New(Istream& is)
     return autoPtr<hConstThermo<equationOfState> >
     (
         new hConstThermo<equationOfState>(is)
+    );
+}
+
+
+template<class equationOfState>
+inline Foam::autoPtr<Foam::hConstThermo<equationOfState> >
+Foam::hConstThermo<equationOfState>::New(const dictionary& dict)
+{
+    return autoPtr<hConstThermo<equationOfState> >
+    (
+        new hConstThermo<equationOfState>(dict)
     );
 }
 

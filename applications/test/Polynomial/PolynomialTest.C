@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,24 +29,30 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "IFstream.H"
+#include "IStringStream.H"
 #include "Polynomial.H"
 #include "Random.H"
+#include "cpuTime.H"
 
 using namespace Foam;
+
+const int PolySize = 8;
+const scalar coeff[] = { 0.11, 0.45, -0.94, 1.58, -2.58, 0.08, 3.15, -4.78 };
+const char* polyDef = "testPoly (0.11 0.45 -0.94 1.58 -2.58 0.08 3.15 -4.78)";
+
 
 scalar polyValue(const scalar x)
 {
     // Hard-coded polynomial 8 coeff (7th order)
     return
-        0.11
-      + 0.45*x
-      - 0.94*sqr(x)
-      + 1.58*pow3(x)
-      - 2.58*pow4(x)
-      + 0.08*pow5(x)
-      + 3.15*pow6(x)
-      - 4.78*x*pow6(x);
+        coeff[0]
+      + coeff[1]*x
+      + coeff[2]*sqr(x)
+      + coeff[3]*pow3(x)
+      + coeff[4]*pow4(x)
+      + coeff[5]*pow5(x)
+      + coeff[6]*pow6(x)
+      + coeff[7]*x*pow6(x);
 }
 
 
@@ -54,14 +60,44 @@ scalar intPolyValue(const scalar x)
 {
     // Hard-coded integrated form of above polynomial
     return
-        0.11*x
-      + 0.45/2.0*sqr(x)
-      - 0.94/3.0*pow3(x)
-      + 1.58/4.0*pow4(x)
-      - 2.58/5.0*pow5(x)
-      + 0.08/6.0*pow6(x)
-      + 3.15/7.0*x*pow6(x)
-      - 4.78/8.0*x*x*pow6(x);
+        coeff[0]*x
+      + coeff[1]/2.0*sqr(x)
+      + coeff[2]/3.0*pow3(x)
+      + coeff[3]/4.0*pow4(x)
+      + coeff[4]/5.0*pow5(x)
+      + coeff[5]/6.0*pow6(x)
+      + coeff[6]/7.0*x*pow6(x)
+      + coeff[7]/8.0*x*x*pow6(x);
+}
+
+
+scalar polyValue1(const scalar x)
+{
+    // "normal" evaluation using pow()
+    scalar value = coeff[0];
+
+    for (int i=1; i < PolySize; ++i)
+    {
+        value += coeff[i]*pow(x, i);
+    }
+
+    return value;
+}
+
+
+scalar polyValue2(const scalar x)
+{
+    // calculation avoiding pow()
+    scalar value = coeff[0];
+
+    scalar powX = x;
+    for (int i=1; i < PolySize; ++i)
+    {
+        value += coeff[i] * powX;
+        powX *= x;
+    }
+
+    return value;
 }
 
 
@@ -69,9 +105,14 @@ scalar intPolyValue(const scalar x)
 
 int main(int argc, char *argv[])
 {
-    IFstream is("polyTestInput");
+    const label n = 10000;
+    const label nIters = 1000;
+    scalar sum = 0.0;
 
-    Polynomial<8> poly("testPoly", is);
+    Info<< "null poly = " << (Polynomial<8>()) << nl << endl;
+
+    // Polynomial<8> poly("testPoly", IStringStream(polyDef)());
+    Polynomial<8> poly(coeff);
     Polynomial<9> intPoly(poly.integrate(0.0));
 
     Info<< "poly = " << poly << endl;
@@ -117,6 +158,62 @@ int main(int argc, char *argv[])
 
         Info<< endl;
     }
+
+
+    //
+    // test speed of Polynomial:
+    //
+    Info<< "start timing loops" << nl
+        << "~~~~~~~~~~~~~~~~~~" << endl;
+
+    cpuTime timer;
+
+    for (int loop = 0; loop < n; ++loop)
+    {
+        sum = 0.0;
+        for (label iter = 0; iter < nIters; ++iter)
+        {
+            sum += poly.evaluate(loop+iter);
+        }
+    }
+    Info<< "evaluate:     " << sum
+        << " in " << timer.cpuTimeIncrement() << " s\n";
+
+
+    for (int loop = 0; loop < n; ++loop)
+    {
+        sum = 0.0;
+        for (label iter = 0; iter < nIters; ++iter)
+        {
+            sum += polyValue(loop+iter);
+        }
+    }
+    Info<< "hard-coded 0: " << sum
+        << " in " << timer.cpuTimeIncrement() << " s\n";
+
+
+    for (int loop = 0; loop < n; ++loop)
+    {
+        sum = 0.0;
+        for (label iter = 0; iter < nIters; ++iter)
+        {
+            sum += polyValue1(loop+iter);
+        }
+    }
+    Info<< "hard-coded 1: " << sum
+        << " in " << timer.cpuTimeIncrement() << " s\n";
+
+    for (int loop = 0; loop < n; ++loop)
+    {
+        sum = 0.0;
+        for (label iter = 0; iter < nIters; ++iter)
+        {
+            sum += polyValue2(loop+iter);
+        }
+    }
+    Info<< "hard-coded 2: " << sum
+        << " in " << timer.cpuTimeIncrement() << " s\n";
+
 
     Info<< nl << "Done." << endl;
 

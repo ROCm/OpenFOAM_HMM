@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,6 +38,7 @@ SourceFiles
 #include "polyPatchList.H"
 #include "regIOobject.H"
 #include "labelPair.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -151,6 +152,12 @@ public:
         //- Return a list of physical types
         wordList physicalTypes() const;
 
+        //- Return patch indices for all matches
+        labelList findIndices(const keyType&) const;
+
+        //- Return patch index for the first match, return -1 if not found
+        label findIndex(const keyType&) const;
+
         //- Find patch index given a name
         label findPatchID(const word& patchName) const;
 
@@ -181,7 +188,7 @@ public:
         //  ascending or descending order. Reordering has to be unique.
         //  (is shuffle) Calls updateMesh() after reordering to recalculate
         //  data.
-        void reorder(const UList<label>&);
+        void reorder(const labelUList&);
 
         //- writeData member function required by regIOobject
         bool writeData(Ostream&) const;

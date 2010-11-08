@@ -5,7 +5,7 @@
             "RASProperties",
             runTime.constant(),
             mesh,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     );
@@ -55,7 +55,7 @@
     (
         dimensionedScalar::lookupOrAddToDict
         (
-            "alphaEps",
+            "alphak",
             kEpsilonDict,
             1.0
         )
@@ -96,7 +96,7 @@
         )
     );
 
-    if (RASProperties.lookupOrDefault<Switch>("printCoeffs", false))
+    if (RASProperties.lookupOrDefault("printCoeffs", false))
     {
         Info<< "kEpsilonCoeffs" << kEpsilonDict << nl
             << "wallFunctionCoeffs" << wallFunctionDict << endl;

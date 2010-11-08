@@ -30,25 +30,34 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template <class ParcelType>
+template<class ParcelType>
 Foam::string Foam::KinematicParcel<ParcelType>::propHeader =
     Particle<ParcelType>::propHeader
   + " active"
   + " typeId"
   + " nParticle"
   + " d"
+  + " dTarget "
   + " (Ux Uy Uz)"
   + " (fx fy fz)"
   + " (angularMomentumx angularMomentumy angularMomentumz)"
   + " (torquex torquey torquez)"
   + " rho"
+  + " age"
   + " tTurb"
-  + " (UTurbx UTurby UTurbz)";
+  + " (UTurbx UTurby UTurbz)"
+  + " collisionRecordsPairAccessed"
+  + " collisionRecordsPairOrigProcOfOther"
+  + " collisionRecordsPairOrigIdOfOther"
+  + " (collisionRecordsPairData)"
+  + " collisionRecordsWallAccessed"
+  + " collisionRecordsWallPRel"
+  + " (collisionRecordsWallData)";
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class ParcelType>
+template<class ParcelType>
 Foam::KinematicParcel<ParcelType>::KinematicParcel
 (
     const Cloud<ParcelType>& cloud,
@@ -61,11 +70,13 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     typeId_(0),
     nParticle_(0.0),
     d_(0.0),
+    dTarget_(0.0),
     U_(vector::zero),
     f_(vector::zero),
     angularMomentum_(vector::zero),
     torque_(vector::zero),
     rho_(0.0),
+    age_(0.0),
     tTurb_(0.0),
     UTurb_(vector::zero),
     collisionRecords_(),
@@ -81,11 +92,13 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
             typeId_ = readLabel(is);
             nParticle_ = readScalar(is);
             d_ = readScalar(is);
+            dTarget_ = readScalar(is);
             is >> U_;
             is >> f_;
             is >> angularMomentum_;
             is >> torque_;
             rho_ = readScalar(is);
+            age_ = readScalar(is);
             tTurb_ = readScalar(is);
             is >> UTurb_;
             is >> collisionRecords_;
@@ -99,11 +112,13 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
               + sizeof(typeId_)
               + sizeof(nParticle_)
               + sizeof(d_)
+              + sizeof(dTarget_)
               + sizeof(U_)
               + sizeof(f_)
               + sizeof(angularMomentum_)
               + sizeof(torque_)
               + sizeof(rho_)
+              + sizeof(age_)
               + sizeof(tTurb_)
               + sizeof(UTurb_)
             );
@@ -143,6 +158,9 @@ void Foam::KinematicParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
     IOField<scalar> d(c.fieldIOobject("d", IOobject::MUST_READ));
     c.checkFieldIOobject(c, d);
 
+    IOField<scalar> dTarget(c.fieldIOobject("dTarget", IOobject::MUST_READ));
+    c.checkFieldIOobject(c, dTarget);
+
     IOField<vector> U(c.fieldIOobject("U", IOobject::MUST_READ));
     c.checkFieldIOobject(c, U);
 
@@ -161,13 +179,67 @@ void Foam::KinematicParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
     IOField<scalar> rho(c.fieldIOobject("rho", IOobject::MUST_READ));
     c.checkFieldIOobject(c, rho);
 
+    IOField<scalar> age(c.fieldIOobject("age", IOobject::MUST_READ));
+    c.checkFieldIOobject(c, age);
+
     IOField<scalar> tTurb(c.fieldIOobject("tTurb", IOobject::MUST_READ));
     c.checkFieldIOobject(c, tTurb);
 
     IOField<vector> UTurb(c.fieldIOobject("UTurb", IOobject::MUST_READ));
     c.checkFieldIOobject(c, UTurb);
 
+    labelFieldCompactIOField collisionRecordsPairAccessed
+    (
+        c.fieldIOobject("collisionRecordsPairAccessed", IOobject::MUST_READ)
+    );
+    c.checkFieldFieldIOobject(c, collisionRecordsPairAccessed);
+
+    labelFieldCompactIOField collisionRecordsPairOrigProcOfOther
+    (
+        c.fieldIOobject
+        (
+            "collisionRecordsPairOrigProcOfOther",
+            IOobject::MUST_READ
+        )
+    );
+    c.checkFieldFieldIOobject(c, collisionRecordsPairOrigProcOfOther);
+
+    labelFieldCompactIOField collisionRecordsPairOrigIdOfOther
+    (
+        c.fieldIOobject
+        (
+            "collisionRecordsPairOrigIdOfOther",
+            IOobject::MUST_READ
+        )
+    );
+    c.checkFieldFieldIOobject(c, collisionRecordsPairOrigProcOfOther);
+
+    pairDataFieldCompactIOField collisionRecordsPairData
+    (
+        c.fieldIOobject("collisionRecordsPairData", IOobject::MUST_READ)
+    );
+    c.checkFieldFieldIOobject(c, collisionRecordsPairData);
+
+    labelFieldCompactIOField collisionRecordsWallAccessed
+    (
+        c.fieldIOobject("collisionRecordsWallAccessed", IOobject::MUST_READ)
+    );
+    c.checkFieldFieldIOobject(c, collisionRecordsWallAccessed);
+
+    vectorFieldCompactIOField collisionRecordsWallPRel
+    (
+        c.fieldIOobject("collisionRecordsWallPRel", IOobject::MUST_READ)
+    );
+    c.checkFieldFieldIOobject(c, collisionRecordsWallPRel);
+
+    wallDataFieldCompactIOField collisionRecordsWallData
+    (
+        c.fieldIOobject("collisionRecordsWallData", IOobject::MUST_READ)
+    );
+    c.checkFieldFieldIOobject(c, collisionRecordsWallData);
+
     label i = 0;
+
     forAllIter(typename Cloud<ParcelType>, c, iter)
     {
         ParcelType& p = iter();
@@ -176,12 +248,25 @@ void Foam::KinematicParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
         p.typeId_ = typeId[i];
         p.nParticle_ = nParticle[i];
         p.d_ = d[i];
+        p.dTarget_ = dTarget[i];
         p.U_ = U[i];
         p.f_ = f[i];
         p.angularMomentum_ = angularMomentum[i];
         p.rho_ = rho[i];
+        p.age_ = age[i];
         p.tTurb_ = tTurb[i];
         p.UTurb_ = UTurb[i];
+        p.collisionRecords_ = collisionRecordList
+        (
+            collisionRecordsPairAccessed[i],
+            collisionRecordsPairOrigProcOfOther[i],
+            collisionRecordsPairOrigIdOfOther[i],
+            collisionRecordsPairData[i],
+            collisionRecordsWallAccessed[i],
+            collisionRecordsWallPRel[i],
+            collisionRecordsWallData[i]
+        );
+
         i++;
     }
 }
@@ -202,18 +287,62 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
         np
     );
     IOField<scalar> d(c.fieldIOobject("d", IOobject::NO_READ), np);
+    IOField<scalar> dTarget(c.fieldIOobject("dTarget", IOobject::NO_READ), np);
     IOField<vector> U(c.fieldIOobject("U", IOobject::NO_READ), np);
     IOField<vector> f(c.fieldIOobject("f", IOobject::NO_READ), np);
     IOField<vector> angularMomentum
     (
-        c.fieldIOobject("angularMomentum", IOobject::NO_READ), np
+        c.fieldIOobject("angularMomentum", IOobject::NO_READ),
+        np
     );
     IOField<vector> torque(c.fieldIOobject("torque", IOobject::NO_READ), np);
     IOField<scalar> rho(c.fieldIOobject("rho", IOobject::NO_READ), np);
+    IOField<scalar> age(c.fieldIOobject("age", IOobject::NO_READ), np);
     IOField<scalar> tTurb(c.fieldIOobject("tTurb", IOobject::NO_READ), np);
     IOField<vector> UTurb(c.fieldIOobject("UTurb", IOobject::NO_READ), np);
 
+    labelFieldCompactIOField collisionRecordsPairAccessed
+    (
+        c.fieldIOobject("collisionRecordsPairAccessed", IOobject::NO_READ),
+        np
+    );
+    labelFieldCompactIOField collisionRecordsPairOrigProcOfOther
+    (
+        c.fieldIOobject
+        (
+            "collisionRecordsPairOrigProcOfOther",
+            IOobject::NO_READ
+        ),
+        np
+    );
+    labelFieldCompactIOField collisionRecordsPairOrigIdOfOther
+    (
+        c.fieldIOobject("collisionRecordsPairOrigIdOfOther", IOobject::NO_READ),
+        np
+    );
+    pairDataFieldCompactIOField collisionRecordsPairData
+    (
+        c.fieldIOobject("collisionRecordsPairData", IOobject::NO_READ),
+        np
+    );
+    labelFieldCompactIOField collisionRecordsWallAccessed
+    (
+        c.fieldIOobject("collisionRecordsWallAccessed", IOobject::NO_READ),
+        np
+    );
+    vectorFieldCompactIOField collisionRecordsWallPRel
+    (
+        c.fieldIOobject("collisionRecordsWallPRel", IOobject::NO_READ),
+        np
+    );
+    wallDataFieldCompactIOField collisionRecordsWallData
+    (
+        c.fieldIOobject("collisionRecordsWallData", IOobject::NO_READ),
+        np
+    );
+
     label i = 0;
+
     forAllConstIter(typename Cloud<ParcelType>, c, iter)
     {
         const KinematicParcel<ParcelType>& p = iter();
@@ -222,13 +351,25 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
         typeId[i] = p.typeId();
         nParticle[i] = p.nParticle();
         d[i] = p.d();
+        dTarget[i] = p.dTarget();
         U[i] = p.U();
         f[i] = p.f();
         angularMomentum[i] = p.angularMomentum();
         torque[i] = p.torque();
         rho[i] = p.rho();
+        age[i] = p.age();
         tTurb[i] = p.tTurb();
         UTurb[i] = p.UTurb();
+        collisionRecordsPairAccessed[i] = p.collisionRecords().pairAccessed();
+        collisionRecordsPairOrigProcOfOther[i] =
+            p.collisionRecords().pairOrigProcOfOther();
+        collisionRecordsPairOrigIdOfOther[i] =
+            p.collisionRecords().pairOrigIdOfOther();
+        collisionRecordsPairData[i] = p.collisionRecords().pairData();
+        collisionRecordsWallAccessed[i] = p.collisionRecords().wallAccessed();
+        collisionRecordsWallPRel[i] = p.collisionRecords().wallPRel();
+        collisionRecordsWallData[i] = p.collisionRecords().wallData();
+
         i++;
     }
 
@@ -236,13 +377,22 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
     typeId.write();
     nParticle.write();
     d.write();
+    dTarget.write();
     U.write();
     f.write();
     angularMomentum.write();
     torque.write();
     rho.write();
+    age.write();
     tTurb.write();
     UTurb.write();
+    collisionRecordsPairAccessed.write();
+    collisionRecordsPairOrigProcOfOther.write();
+    collisionRecordsPairOrigIdOfOther.write();
+    collisionRecordsPairData.write();
+    collisionRecordsWallAccessed.write();
+    collisionRecordsWallPRel.write();
+    collisionRecordsWallData.write();
 }
 
 
@@ -262,11 +412,13 @@ Foam::Ostream& Foam::operator<<
             << token::SPACE << p.typeId()
             << token::SPACE << p.nParticle()
             << token::SPACE << p.d()
+            << token::SPACE << p.dTarget()
             << token::SPACE << p.U()
             << token::SPACE << p.f()
             << token::SPACE << p.angularMomentum()
             << token::SPACE << p.torque()
             << token::SPACE << p.rho()
+            << token::SPACE << p.age()
             << token::SPACE << p.tTurb()
             << token::SPACE << p.UTurb()
             << token::SPACE << p.collisionRecords();
@@ -281,11 +433,13 @@ Foam::Ostream& Foam::operator<<
           + sizeof(p.typeId())
           + sizeof(p.nParticle())
           + sizeof(p.d())
+          + sizeof(p.dTarget())
           + sizeof(p.U())
           + sizeof(p.f())
           + sizeof(p.angularMomentum())
           + sizeof(p.torque())
           + sizeof(p.rho())
+          + sizeof(p.age())
           + sizeof(p.tTurb())
           + sizeof(p.UTurb())
         );

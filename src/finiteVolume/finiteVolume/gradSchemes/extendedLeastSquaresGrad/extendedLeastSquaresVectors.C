@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -107,8 +107,8 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
     surfaceVectorField& lsN = *nVectorsPtr_;
 
     // Set local references to mesh data
-    const unallocLabelList& owner = mesh_.owner();
-    const unallocLabelList& neighbour = mesh_.neighbour();
+    const labelUList& owner = mesh_.owner();
+    const labelUList& neighbour = mesh_.neighbour();
 
     // Build the d-vectors
     surfaceVectorField d = mesh_.Sf()/(mesh_.magSf()*mesh_.deltaCoeffs());
@@ -137,7 +137,7 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
         const fvsPatchVectorField& pd = d.boundaryField()[patchI];
 
         const fvPatch& p = pd.patch();
-        const unallocLabelList& faceCells = p.faceCells();
+        const labelUList& faceCells = p.faceCells();
 
         forAll(pd, patchFaceI)
         {
@@ -245,7 +245,7 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
         fvsPatchVectorField& patchLsP = lsP.boundaryField()[patchI];
 
         const fvPatch& p = patchLsP.patch();
-        const unallocLabelList& faceCells = p.faceCells();
+        const labelUList& faceCells = p.faceCells();
 
         forAll(p, patchFaceI)
         {

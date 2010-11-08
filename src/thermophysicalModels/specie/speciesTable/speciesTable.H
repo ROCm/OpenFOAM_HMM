@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,89 +21,25 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
+Typedef
     Foam::speciesTable
 
 Description
-    A table of species
-
-SourceFiles
-    speciesTableI.H
-    speciesTable.C
+    A table of species as a hashedWordList
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef speciesTable_H
 #define speciesTable_H
 
-#include "wordList.H"
-#include "HashTable.H"
+#include "hashedWordList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-/*---------------------------------------------------------------------------*\
-                           Class speciesTable Declaration
-\*---------------------------------------------------------------------------*/
-
-class speciesTable
-:
-    public wordList
-{
-    // Private data
-
-        HashTable<label> specieIndices_;
-
-
-    // Private Member Functions
-
-        void setIndices();
-
-
-public:
-
-    // Constructors
-
-        //- Construct from list of specie names
-        speciesTable(const wordList& specieNames);
-
-        //- Construct from number of species and list of specie names
-        speciesTable(const label nSpecies, const char** specieNames);
-
-        //- Construct from Istream
-        speciesTable(Istream&);
-
-
-    // Member Functions
-
-        //- Does the table contain the given specie
-        inline bool contains(const word& specieName) const;
-
-
-    // Member Operators
-
-        //- Return a specie's name
-        inline const word& operator[](const label) const;
-
-        //- Lookup a specie's name and return its index
-        inline label operator[](const word&) const;
-
-
-    // Istream operators
-
-        friend Istream& operator>>(Istream&, speciesTable&);
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "speciesTableI.H"
+    typedef hashedWordList speciesTable;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

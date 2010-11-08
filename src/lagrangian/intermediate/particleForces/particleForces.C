@@ -30,7 +30,43 @@ License
 #include "mathematicalConstants.H"
 #include "electromagneticConstants.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::particleForces::deleteFields()
+{
+    if (gradUPtr_)
+    {
+        delete gradUPtr_;
+        gradUPtr_ = NULL;
+    }
+
+    if (HdotGradHInterPtr_)
+    {
+        delete HdotGradHInterPtr_;
+        HdotGradHInterPtr_ = NULL;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::particleForces::particleForces(const fvMesh& mesh)
+:
+    mesh_(mesh),
+    dict_(dictionary::null),
+    g_(vector::zero),
+    gradUPtr_(NULL),
+    HdotGradHInterPtr_(NULL),
+    gravity_(false),
+    virtualMass_(false),
+    Cvm_(0.0),
+    pressureGradient_(false),
+    paramagnetic_(false),
+    magneticSusceptibility_(0.0),
+    UName_("undefined_UName"),
+    HdotGradHName_("undefined_HdotGradHName")
+{}
+
 
 Foam::particleForces::particleForces
 (
@@ -43,14 +79,15 @@ Foam::particleForces::particleForces
     dict_(dict.subDict("particleForces")),
     g_(g),
     gradUPtr_(NULL),
+    HdotGradHInterPtr_(NULL),
     gravity_(dict_.lookup("gravity")),
     virtualMass_(dict_.lookup("virtualMass")),
     Cvm_(0.0),
     pressureGradient_(dict_.lookup("pressureGradient")),
     paramagnetic_(dict_.lookup("paramagnetic")),
     magneticSusceptibility_(0.0),
-    UName_(dict_.lookupOrDefault<word>("U", "U")),
-    HdotGradHName_(dict_.lookupOrDefault<word>("HdotGradH", "HdotGradH"))
+    UName_(dict_.lookupOrDefault<word>("UName", "U")),
+    HdotGradHName_(dict_.lookupOrDefault<word>("HdotGradHName", "HdotGradH"))
 {
     if (virtualMass_)
     {
@@ -70,6 +107,7 @@ Foam::particleForces::particleForces(const particleForces& f)
     dict_(f.dict_),
     g_(f.g_),
     gradUPtr_(f.gradUPtr_),
+    HdotGradHInterPtr_(f.HdotGradHInterPtr_),
     gravity_(f.gravity_),
     virtualMass_(f.virtualMass_),
     Cvm_(f.Cvm_),
@@ -85,7 +123,7 @@ Foam::particleForces::particleForces(const particleForces& f)
 
 Foam::particleForces::~particleForces()
 {
-    cacheFields(false);
+    deleteFields();
 }
 
 
@@ -151,27 +189,47 @@ const Foam::word& Foam::particleForces::HdotGradHName() const
 }
 
 
-void Foam::particleForces::cacheFields(const bool store)
+void Foam::particleForces::cacheFields
+(
+    const bool store,
+    const dictionary& interpolationSchemes
+)
 {
-    if (store && pressureGradient_)
+    if (store)
     {
-        const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
-        gradUPtr_ = fvc::grad(U).ptr();
+        if (pressureGradient_)
+        {
+            const volVectorField& U =
+                mesh_.lookupObject<volVectorField>(UName_);
+
+            gradUPtr_ = fvc::grad(U).ptr();
+        }
+
+        if (paramagnetic_)
+        {
+            const volVectorField& HdotGradH = mesh_.lookupObject<volVectorField>
+            (
+                HdotGradHName_
+            );
+
+            HdotGradHInterPtr_ = interpolation<vector>::New
+            (
+                interpolationSchemes,
+                HdotGradH
+            ).ptr();
+        }
     }
     else
     {
-        if (gradUPtr_)
-        {
-            delete gradUPtr_;
-            gradUPtr_ = NULL;
-        }
+        deleteFields();
     }
 }
 
 
 Foam::vector Foam::particleForces::calcCoupled
 (
-    const label cellI,
+    const vector& position,
+    const tetIndices& tetIs,
     const scalar dt,
     const scalar rhoc,
     const scalar rho,
@@ -196,7 +254,7 @@ Foam::vector Foam::particleForces::calcCoupled
     if (pressureGradient_)
     {
         const volTensorField& gradU = *gradUPtr_;
-        accelTot += rhoc/rho*(U & gradU[cellI]);
+        accelTot += rhoc/rho*(U & gradU[tetIs.cell()]);
     }
 
     return accelTot;
@@ -205,7 +263,8 @@ Foam::vector Foam::particleForces::calcCoupled
 
 Foam::vector Foam::particleForces::calcNonCoupled
 (
-    const label cellI,
+    const vector& position,
+    const tetIndices& tetIs,
     const scalar dt,
     const scalar rhoc,
     const scalar rho,
@@ -226,15 +285,12 @@ Foam::vector Foam::particleForces::calcNonCoupled
 
     if (paramagnetic_)
     {
-        const volVectorField& HdotGradH = mesh_.lookupObject<volVectorField>
-        (
-            HdotGradHName_
-        );
+        const interpolation<vector>& HdotGradHInter = *HdotGradHInterPtr_;
 
         accelTot +=
             3.0*constant::electromagnetic::mu0.value()/rho
            *magneticSusceptibility_/(magneticSusceptibility_ + 3)
-           *HdotGradH[cellI];
+           *HdotGradHInter.interpolate(position, tetIs);
 
         // force is:
 

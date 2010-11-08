@@ -66,11 +66,16 @@ public:
     // Constructors
 
         //- Construct from components
-        fixedValue
-        (
-            const dictionary& dict,
-            Random& rndGen
-        );
+        fixedValue(const dictionary& dict, cachedRandom& rndGen);
+
+        //- Construct copy
+        fixedValue(const fixedValue& p);
+
+        //- Construct and return a clone
+        virtual autoPtr<pdf> clone() const
+        {
+            return autoPtr<pdf>(new fixedValue(*this));
+        }
 
 
     //- Destructor

@@ -25,7 +25,6 @@ License
 
 #include "multiHoleInjector.H"
 #include "addToRunTimeSelectionTable.H"
-#include "Random.H"
 #include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -194,7 +193,7 @@ void Foam::multiHoleInjector::setTangentialVectors()
         position_[i] = centerPosition_ + 0.5*nozzleTipDiameter_*dp;
     }
 
-    Random rndGen(label(0));
+    cachedRandom rndGen(label(0), -1);
 
     for (label i=0; i<nHoles_; i++)
     {
@@ -202,7 +201,7 @@ void Foam::multiHoleInjector::setTangentialVectors()
         scalar magV = 0;
         while (magV < SMALL)
         {
-            vector testThis = rndGen.vector01();
+            vector testThis = rndGen.sample01<vector>();
 
             tangent = testThis - (testThis & direction_[i])*direction_[i];
             magV = mag(tangent);
@@ -244,7 +243,7 @@ Foam::vector Foam::multiHoleInjector::position
     const vector& axisOfSymmetry,
     const vector& axisOfWedge,
     const vector& axisOfWedgeNormal,
-    Random& rndGen
+    cachedRandom& rndGen
 ) const
 {
     if (twoD)
@@ -262,8 +261,8 @@ Foam::vector Foam::multiHoleInjector::position
     else
     {
         // otherwise, disc injection
-        scalar iRadius = d_*rndGen.scalar01();
-        scalar iAngle = constant::mathematical::twoPi*rndGen.scalar01();
+        scalar iRadius = d_*rndGen.sample01<scalar>();
+        scalar iAngle = constant::mathematical::twoPi*rndGen.sample01<scalar>();
 
         return
         (

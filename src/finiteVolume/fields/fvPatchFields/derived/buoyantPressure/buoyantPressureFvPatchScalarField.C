@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -116,12 +116,13 @@ void buoyantPressureFvPatchScalarField::updateCoeffs()
     const fvPatchField<scalar>& rho =
         patch().lookupPatchField<volScalarField, scalar>(rhoName_);
 
-    // If the variable name is "pmh" or "pd" assume it is p - rho*g.h
-    // and set the gradient appropriately.
+    // If the variable name is "p_rgh", "ph_rgh" or "pd"
+    // assume it is p? - rho*g.h and set the gradient appropriately.
     // Otherwise assume the variable is the static pressure.
     if
     (
-        dimensionedInternalField().name() == "pmh"
+        dimensionedInternalField().name() == "p_rgh"
+     || dimensionedInternalField().name() == "ph_rgh"
      || dimensionedInternalField().name() == "pd"
     )
     {

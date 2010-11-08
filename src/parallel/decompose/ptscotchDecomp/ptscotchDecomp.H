@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,11 +48,6 @@ class ptscotchDecomp
 :
     public decompositionMethod
 {
-    // Private data
-
-        const polyMesh& mesh_;
-
-
     // Private Member Functions
 
         //- Check and print error message
@@ -80,11 +75,7 @@ public:
     // Constructors
 
         //- Construct given the decomposition dictionary and mesh
-        ptscotchDecomp
-        (
-            const dictionary& decompositionDict,
-            const polyMesh& mesh
-        );
+        ptscotchDecomp(const dictionary& decompositionDict);
 
 
     //- Destructor
@@ -104,6 +95,7 @@ public:
         //  mesh connectivity (if needed)
         virtual labelList decompose
         (
+            const polyMesh& mesh,
             const pointField& points,
             const scalarField& pointWeights
         );
@@ -114,6 +106,7 @@ public:
         //  functionality natively.
         virtual labelList decompose
         (
+            const polyMesh& mesh,
             const labelList& agglom,
             const pointField& regionPoints,
             const scalarField& regionWeights

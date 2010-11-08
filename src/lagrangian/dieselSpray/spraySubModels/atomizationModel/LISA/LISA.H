@@ -68,7 +68,6 @@ private:
     // Private data
 
         dictionary coeffsDict_;
-        Random& rndGen_;
         scalar Cl_;
         scalar cTau_;
         scalar Q_;

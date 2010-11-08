@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -141,7 +141,8 @@ public:
                 )
             );
 
-            GeometricField<Type, fvsPatchField, surfaceMesh>& sfCorr = tsfCorr();
+            GeometricField<Type, fvsPatchField, surfaceMesh>& sfCorr =
+                tsfCorr();
 
             for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
             {

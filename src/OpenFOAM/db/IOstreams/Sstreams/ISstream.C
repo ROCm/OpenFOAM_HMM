@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -252,7 +252,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
                 }
                 else
                 {
-                    char *endptr;
+                    char *endptr = NULL;
 
                     if (asLabel)
                     {
@@ -260,7 +260,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
                         t = label(longVal);
 
                         // return as a scalar if doesn't fit in a label
-                        if (t.labelToken() != longVal)
+                        if (*endptr || t.labelToken() != longVal)
                         {
                             t = scalar(strtod(buf, &endptr));
                         }

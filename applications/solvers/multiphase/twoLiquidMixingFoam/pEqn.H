@@ -1,46 +1,62 @@
 {
-    volScalarField rUA = 1.0/UEqn.A();
-    surfaceScalarField rUAf = fvc::interpolate(rUA);
+    volScalarField rAU = 1.0/UEqn.A();
+    surfaceScalarField rAUf = fvc::interpolate(rAU);
 
-    U = rUA*UEqn.H();
-
+    U = rAU*UEqn.H();
     surfaceScalarField phiU
     (
         "phiU",
         (fvc::interpolate(U) & mesh.Sf())
-      + fvc::ddtPhiCorr(rUA, rho, U, phi)
+      + fvc::ddtPhiCorr(rAU, rho, U, phi)
     );
 
-    phi = phiU + fvc::interpolate(rho)*(g & mesh.Sf())*rUAf;
+    adjustPhi(phiU, U, p_rgh);
+
+    phi = phiU - ghf*fvc::snGrad(rho)*rAUf*mesh.magSf();
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
-        fvScalarMatrix pEqn
+        fvScalarMatrix p_rghEqn
         (
-            fvm::laplacian(rUAf, p) == fvc::div(phi)
+            fvm::laplacian(rAUf, p_rgh) == fvc::div(phi)
         );
 
-        pEqn.setReference(pRefCell, pRefValue);
+        p_rghEqn.setReference(pRefCell, getRefCellValue(p_rgh, pRefCell));
 
-        if
+        p_rghEqn.solve
         (
-            corr == nCorr-1
-         && nonOrth == nNonOrthCorr
-        )
-        {
-            pEqn.solve(mesh.solver(p.name() + "Final"));
-        }
-        else
-        {
-            pEqn.solve(mesh.solver(p.name()));
-        }
+            mesh.solver
+            (
+                p_rgh.select
+                (
+                    finalIter
+                 && corr == nCorr-1
+                 && nonOrth == nNonOrthCorr
+                )
+            )
+        );
 
         if (nonOrth == nNonOrthCorr)
         {
-            phi -= pEqn.flux();
+            phi -= p_rghEqn.flux();
         }
     }
 
-    U += rUA*fvc::reconstruct((phi - phiU)/rUAf);
+    U += rAU*fvc::reconstruct((phi - phiU)/rAUf);
     U.correctBoundaryConditions();
+
+    #include "continuityErrs.H"
+
+    p == p_rgh + rho*gh;
+
+    if (p_rgh.needReference())
+    {
+        p += dimensionedScalar
+        (
+            "p",
+            p.dimensions(),
+            pRefValue - getRefCellValue(p, pRefCell)
+        );
+        p_rgh = p - rho*gh;
+    }
 }

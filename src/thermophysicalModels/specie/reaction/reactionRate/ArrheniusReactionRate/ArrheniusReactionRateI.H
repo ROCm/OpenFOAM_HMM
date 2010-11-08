@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,15 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-inline ArrheniusReactionRate::ArrheniusReactionRate
+inline Foam::ArrheniusReactionRate::ArrheniusReactionRate
 (
     const scalar A,
     const scalar beta,
@@ -44,8 +38,7 @@ inline ArrheniusReactionRate::ArrheniusReactionRate
 {}
 
 
-//- Construct from Istream
-inline ArrheniusReactionRate::ArrheniusReactionRate
+inline Foam::ArrheniusReactionRate::ArrheniusReactionRate
 (
     const speciesTable&,
     Istream& is
@@ -59,9 +52,21 @@ inline ArrheniusReactionRate::ArrheniusReactionRate
 }
 
 
+inline Foam::ArrheniusReactionRate::ArrheniusReactionRate
+(
+    const speciesTable&,
+    const dictionary& dict
+)
+:
+    A_(readScalar(dict.lookup("A"))),
+    beta_(readScalar(dict.lookup("beta"))),
+    Ta_(readScalar(dict.lookup("Ta")))
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline scalar ArrheniusReactionRate::operator()
+inline Foam::scalar Foam::ArrheniusReactionRate::operator()
 (
     const scalar T,
     const scalar,
@@ -84,7 +89,19 @@ inline scalar ArrheniusReactionRate::operator()
 }
 
 
-inline Ostream& operator<<(Ostream& os, const ArrheniusReactionRate& arr)
+inline void Foam::ArrheniusReactionRate::write(Ostream& os) const
+{
+    os.writeKeyword("A") << A_ << token::END_STATEMENT << nl;
+    os.writeKeyword("beta") << beta_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Ta") << Ta_ << token::END_STATEMENT << nl;
+}
+
+
+inline Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const ArrheniusReactionRate& arr
+)
 {
     os  << token::BEGIN_LIST
         << arr.A_ << token::SPACE << arr.beta_ << token::SPACE << arr.Ta_
@@ -92,9 +109,5 @@ inline Ostream& operator<<(Ostream& os, const ArrheniusReactionRate& arr)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

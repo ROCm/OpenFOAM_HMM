@@ -66,7 +66,7 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("remove");
+    TypeName("removeInjection");
 
 
     // Constructors
@@ -83,8 +83,8 @@ public:
 
         // Evolution
 
-            //- Correct
-            virtual void correct
+            //- Inject
+            virtual void inject
             (
                 scalarField& massToInject,
                 scalarField& diameterToInject

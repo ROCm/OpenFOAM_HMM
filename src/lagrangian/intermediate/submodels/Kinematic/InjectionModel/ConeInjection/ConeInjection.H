@@ -77,6 +77,12 @@ class ConeInjection
         //- Cell containing injector position []
         label injectorCell_;
 
+        //- tetFace of tet containing injector position []
+        label injectorTetFace_;
+
+        //- tetPt of tet containing injector position []
+        label injectorTetPt_;
+
         //- Injector direction []
         vector direction_;
 
@@ -113,18 +119,10 @@ protected:
     // Protected Member Functions
 
         //- Number of parcels to introduce over the time step relative to SOI
-        label parcelsToInject
-        (
-            const scalar time0,
-            const scalar time1
-        ) const;
+        virtual label parcelsToInject(const scalar time0, const scalar time1);
 
-        //- Number of parcels to introduce over the time step relative to SOI
-        scalar volumeToInject
-        (
-            const scalar time0,
-            const scalar time1
-        ) const;
+        //- Volume of parcels to introduce over the time step relative to SOI
+        virtual scalar volumeToInject(const scalar time0, const scalar time1);
 
 
 public:
@@ -136,11 +134,19 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        ConeInjection
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+        ConeInjection(const dictionary& dict, CloudType& owner);
+
+        //- Construct copy
+        ConeInjection(const ConeInjection<CloudType>& im);
+
+        //- Construct and return a clone
+        virtual autoPtr<InjectionModel<CloudType> > clone() const
+        {
+            return autoPtr<InjectionModel<CloudType> >
+            (
+                new ConeInjection<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -149,23 +155,22 @@ public:
 
     // Member Functions
 
-        //- Flag to indicate whether model activates injection model
-        bool active() const;
-
         //- Return the end-of-injection time
         scalar timeEnd() const;
 
 
         // Injection geometry
 
-            //- Set the injection position and owner cell
+            //- Set the injection position and owner cell, tetFace and tetPt
             virtual void setPositionAndCell
             (
                 const label parcelI,
                 const label nParcels,
                 const scalar time,
                 vector& position,
-                label& cellOwner
+                label& cellOwner,
+                label& tetFaceI,
+                label& tetPtI
             );
 
             //- Set the parcel properties

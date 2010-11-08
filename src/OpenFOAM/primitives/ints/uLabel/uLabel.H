@@ -149,6 +149,9 @@ public:
 
     // Constructors
 
+        //- Construct from primitive
+        explicit pTraits(const uLabel&);
+
         //- Construct from Istream
         pTraits(Istream&);
 

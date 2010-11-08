@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,6 +32,7 @@ Description
 #include "makeBasicMixture.H"
 
 #include "perfectGas.H"
+#include "incompressible.H"
 
 #include "eConstThermo.H"
 
@@ -41,6 +42,10 @@ Description
 
 #include "constTransport.H"
 #include "sutherlandTransport.H"
+
+#include "icoPolynomial.H"
+#include "hPolynomialThermo.H"
+#include "polynomialTransport.H"
 
 #include "pureMixture.H"
 
@@ -57,7 +62,7 @@ makeBasicMixture
 (
     pureMixture,
     constTransport,
-    hConstThermo,
+    eConstThermo,
     perfectGas
 );
 
@@ -65,15 +70,16 @@ makeBasicMixture
 (
     pureMixture,
     sutherlandTransport,
-    hConstThermo,
+    eConstThermo,
     perfectGas
 );
+
 
 makeBasicMixture
 (
     pureMixture,
     constTransport,
-    eConstThermo,
+    hConstThermo,
     perfectGas
 );
 
@@ -81,7 +87,7 @@ makeBasicMixture
 (
     pureMixture,
     sutherlandTransport,
-    eConstThermo,
+    hConstThermo,
     perfectGas
 );
 
@@ -91,6 +97,20 @@ makeBasicMixture
     sutherlandTransport,
     janafThermo,
     perfectGas
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    constTransport,
+    hConstThermo,
+    incompressible
+);
+
+makeBasicPolyMixture
+(
+    pureMixture,
+    3
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

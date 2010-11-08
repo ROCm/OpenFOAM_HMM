@@ -43,10 +43,10 @@ namespace Foam
 Foam::surfaceFilmModels::removeInjection::removeInjection
 (
     const surfaceFilmModel& owner,
-    const dictionary& dict
+    const dictionary&
 )
 :
-    injectionModel(owner, dict)
+    injectionModel(owner)
 {}
 
 
@@ -58,13 +58,15 @@ Foam::surfaceFilmModels::removeInjection::~removeInjection()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::surfaceFilmModels::removeInjection::correct
+void Foam::surfaceFilmModels::removeInjection::inject
 (
-    scalarField&,
-    scalarField&
+    scalarField& massToInject,
+    scalarField& diameterToInject
 )
 {
-    // do nothing - all mass available to be removed
+    // all mass available to be removed
+    correctDetachedFilm(massToInject);
+    diameterToInject = -1;
 }
 
 

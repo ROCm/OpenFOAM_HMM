@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,8 @@ Foam::pointFieldReconstructor::pointFieldReconstructor
     procMeshes_(procMeshes),
     pointProcAddressing_(pointProcAddressing),
     boundaryProcAddressing_(boundaryProcAddressing),
-    patchPointAddressing_(procMeshes.size())
+    patchPointAddressing_(procMeshes.size()),
+    nReconstructed_(0)
 {
     // Inverse-addressing of the patch point labels.
     labelList pointMap(mesh_.size(), -1);

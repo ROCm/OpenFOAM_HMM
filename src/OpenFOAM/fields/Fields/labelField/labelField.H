@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,12 +61,12 @@ template<>
 void component
 (
     labelField& lf,
-    const UList<label>& f,
+    const labelUList& f,
     const direction
 );
 
 template<>
-void labelField::replace(const direction, const UList<label>& lf);
+void labelField::replace(const direction, const labelUList& lf);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

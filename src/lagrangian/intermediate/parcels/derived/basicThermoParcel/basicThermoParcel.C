@@ -25,26 +25,18 @@ License
 
 #include "basicThermoParcel.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    defineTypeNameAndDebug(basicThermoParcel, 0);
-    defineParticleTypeNameAndDebug(basicThermoParcel, 0);
-    defineParcelTypeNameAndDebug(basicThermoParcel, 0);
-};
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::basicThermoParcel::basicThermoParcel
 (
     ThermoCloud<basicThermoParcel>& owner,
     const vector position,
-    const label cellI
+    const label cellI,
+    const label tetFaceI,
+    const label tetPtI
 )
 :
-    ThermoParcel<basicThermoParcel>(owner, position, cellI)
+    ThermoParcel<basicThermoParcel>(owner, position, cellI, tetFaceI, tetPtI)
 {}
 
 
@@ -53,9 +45,12 @@ Foam::basicThermoParcel::basicThermoParcel
     ThermoCloud<basicThermoParcel>& owner,
     const vector position,
     const label cellI,
+    const label tetFaceI,
+    const label tetPtI,
     const label typeId,
     const scalar nParticle0,
     const scalar d0,
+    const scalar dTarget0,
     const vector U0,
     const vector& f0,
     const vector& angularMomentum0,
@@ -68,9 +63,12 @@ Foam::basicThermoParcel::basicThermoParcel
         owner,
         position,
         cellI,
+        tetFaceI,
+        tetPtI,
         typeId,
         nParticle0,
         d0,
+        dTarget0,
         U0,
         f0,
         angularMomentum0,
@@ -97,6 +95,16 @@ Foam::basicThermoParcel::basicThermoParcel
 )
 :
     ThermoParcel<basicThermoParcel>(p)
+{}
+
+
+Foam::basicThermoParcel::basicThermoParcel
+(
+    const basicThermoParcel& p,
+    const ThermoCloud<basicThermoParcel>& c
+)
+:
+    ThermoParcel<basicThermoParcel>(p, c)
 {}
 
 

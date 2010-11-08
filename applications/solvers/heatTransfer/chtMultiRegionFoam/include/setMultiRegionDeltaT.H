@@ -25,9 +25,9 @@ Global
     setMultiRegionDeltaT
 
 Description
-    Reset the timestep to maintain a constant maximum courant and diffusion
-    Numbers. Reduction of time-step is immediate, but increase is damped to avoid
-    unstable oscillations.
+    Reset the timestep to maintain a constant maximum courant and
+    diffusion Numbers. Reduction of time-step is immediate, but
+    increase is damped to avoid unstable oscillations.
 
 \*---------------------------------------------------------------------------*/
 

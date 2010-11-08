@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,7 +56,7 @@ cyclicFvsPatchField<Type>::cyclicFvsPatchField
     coupledFvsPatchField<Type>(ptf, p, iF, mapper),
     cyclicPatch_(refCast<const cyclicFvPatch>(p))
 {
-    if (!isType<cyclicFvPatch>(this->patch()))
+    if (!isA<cyclicFvPatch>(this->patch()))
     {
         FatalErrorIn
         (
@@ -87,7 +87,7 @@ cyclicFvsPatchField<Type>::cyclicFvsPatchField
     coupledFvsPatchField<Type>(p, iF, dict),
     cyclicPatch_(refCast<const cyclicFvPatch>(p))
 {
-    if (!isType<cyclicFvPatch>(p))
+    if (!isA<cyclicFvPatch>(p))
     {
         FatalIOErrorIn
         (

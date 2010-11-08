@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,11 @@ Class
 
 Description
     Recycles the velocity and flux at a patch to this patch
+
+    mode = NEARESTCELL : sample nearest cell
+    mode = NEARESTPATCHFACE : sample nearest face on selected patch
+    mode = NEARESTFACE : sample nearest face on any patch. Note: does not
+                         warn if nearest actually is on internal face!
 
 SourceFiles
     directMappedVelocityFluxFixedValueFvPatchField.C

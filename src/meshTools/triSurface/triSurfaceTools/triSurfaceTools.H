@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -458,9 +458,7 @@ public:
         (
             const triSurface& surf,
             const point& sample,
-            const label nearestFaceI,   // nearest face
-            const point& nearestPt,     // nearest point on nearest face
-            const scalar tol            // tolerance for nearness test.
+            const label nearestFaceI
         );
 
     // Triangulation of faces

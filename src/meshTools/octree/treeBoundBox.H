@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -177,7 +177,7 @@ public:
 
         //- Construct as subset of points
         //  Local processor domain only (no reduce as in boundBox)
-        treeBoundBox(const UList<point>&, const UList<label>& meshPoints);
+        treeBoundBox(const UList<point>&, const labelUList& meshPoints);
 
         //- Construct from Istream
         treeBoundBox(Istream&);

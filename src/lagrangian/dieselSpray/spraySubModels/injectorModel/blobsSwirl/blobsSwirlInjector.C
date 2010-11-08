@@ -105,7 +105,7 @@ Foam::scalar Foam::blobsSwirlInjector::d0
 {
     const injectorType& it = injectors_[n].properties();
 
-    scalar c = rndGen_.scalar01();
+    scalar c = rndGen_.sample01<scalar>();
 
     angle_ = degToRad(coneAngle_[n]/2.0 + c*coneInterval_[n]);
 
@@ -139,7 +139,7 @@ Foam::vector Foam::blobsSwirlInjector::direction
 {
     scalar alpha = sin(angle_);
     scalar dcorr = cos(angle_);
-    scalar beta = constant::mathematical::twoPi*rndGen_.scalar01();
+    scalar beta = constant::mathematical::twoPi*rndGen_.sample01<scalar>();
 
     // randomly distributed vector normal to the injection vector
     vector normal = vector::zero;
@@ -150,7 +150,10 @@ Foam::vector Foam::blobsSwirlInjector::direction
         // correct beta if this is a 2D run
         // map it onto the 'angleOfWedge'
 
-        beta *= (1.0 - 2.0*reduce)*sm_.angleOfWedge()/(constant::mathematical::twoPi);
+        beta *=
+            (1.0 - 2.0*reduce)
+           *sm_.angleOfWedge()
+           /(constant::mathematical::twoPi);
         beta += reduce*sm_.angleOfWedge();
         normal =
             alpha

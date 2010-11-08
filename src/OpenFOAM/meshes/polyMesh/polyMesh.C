@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,6 +33,7 @@ License
 #include "processorPolyPatch.H"
 #include "OSspecific.H"
 #include "demandDrivenData.H"
+#include "polyMeshTetDecomposition.H"
 
 #include "pointMesh.H"
 
@@ -84,6 +85,9 @@ void Foam::polyMesh::calcDirections() const
             }
         }
     }
+
+    reduce(nEmptyPatches, maxOp<label>());
+    reduce(nWedgePatches, maxOp<label>());
 
     if (nEmptyPatches)
     {
@@ -201,6 +205,7 @@ Foam::polyMesh::polyMesh(const IOobject& io)
     bounds_(points_),
     geometricD_(Vector<label>::zero),
     solutionD_(Vector<label>::zero),
+    tetBasePtIsPtr_(NULL),
     pointZones_
     (
         IOobject
@@ -267,7 +272,7 @@ Foam::polyMesh::polyMesh(const IOobject& io)
     }
     else
     {
-        cellIOList cLst
+        cellCompactIOList cLst
         (
             IOobject
             (
@@ -389,6 +394,7 @@ Foam::polyMesh::polyMesh
     bounds_(points_, syncPar),
     geometricD_(Vector<label>::zero),
     solutionD_(Vector<label>::zero),
+    tetBasePtIsPtr_(NULL),
     pointZones_
     (
         IOobject
@@ -545,6 +551,7 @@ Foam::polyMesh::polyMesh
     bounds_(points_, syncPar),
     geometricD_(Vector<label>::zero),
     solutionD_(Vector<label>::zero),
+    tetBasePtIsPtr_(NULL),
     pointZones_
     (
         IOobject
@@ -717,6 +724,7 @@ void Foam::polyMesh::resetPrimitives
                 "    const Xfer<labelList>& neighbour,\n"
                 "    const labelList& patchSizes,\n"
                 "    const labelList& patchStarts\n"
+                "    const bool validBoundary\n"
                 ")\n"
             )   << "Face " << faceI << " contains vertex labels out of range: "
                 << curFace << " Max point index = " << points_.size()
@@ -759,9 +767,9 @@ void Foam::polyMesh::resetPrimitives
                 "    const Xfer<labelList>& neighbour,\n"
                 "    const labelList& patchSizes,\n"
                 "    const labelList& patchStarts\n"
+                "    const bool validBoundary\n"
                 ")\n"
-            )
-                << "no points or no cells in mesh" << endl;
+            )   << "no points or no cells in mesh" << endl;
         }
     }
 }
@@ -840,6 +848,28 @@ const Foam::Vector<Foam::label>& Foam::polyMesh::solutionD() const
 Foam::label Foam::polyMesh::nSolutionD() const
 {
     return cmptSum(solutionD() + Vector<label>::one)/2;
+}
+
+
+const Foam::labelList& Foam::polyMesh::tetBasePtIs() const
+{
+    if (!tetBasePtIsPtr_)
+    {
+        if (debug)
+        {
+            WarningIn("const labelList& polyMesh::tetBasePtIs() const")
+                << "Tet base point indices not available.  "
+                << "Forcing storage of base points."
+                << endl;
+        }
+
+        tetBasePtIsPtr_ = new labelList
+        (
+            polyMeshTetDecomposition::findFaceBasePts(*this)
+        );
+    }
+
+    return *tetBasePtIsPtr_;
 }
 
 

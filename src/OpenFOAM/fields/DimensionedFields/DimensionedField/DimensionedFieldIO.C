@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,6 +44,21 @@ void DimensionedField<Type, GeoMesh>::readField
 
     Field<Type> f(fieldDictEntry, fieldDict, GeoMesh::size(mesh_));
     transfer(f);
+}
+
+
+template<class Type, class GeoMesh>
+void DimensionedField<Type, GeoMesh>::readIfPresent(const word& fieldDictEntry)
+{
+    if
+    (
+        (this->headerOk() && this->readOpt() == IOobject::READ_IF_PRESENT)
+     || this->readOpt() == IOobject::MUST_READ
+     || this->readOpt() == IOobject::MUST_READ_IF_MODIFIED
+    )
+    {
+        readField(dictionary(readStream(typeName)), fieldDictEntry);
+    }
 }
 
 

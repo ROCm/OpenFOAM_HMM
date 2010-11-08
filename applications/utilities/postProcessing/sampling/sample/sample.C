@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -96,18 +96,27 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     timeSelector::addOptions();
-#   include "addRegionOption.H"
-#   include "setRootCase.H"
-#   include "createTime.H"
+    #include "addRegionOption.H"
+    argList::addOption
+    (
+        "dict",
+        "word",
+        "name of dictionary to provide sample information"
+    );
+
+    #include "setRootCase.H"
+    #include "createTime.H"
     instantList timeDirs = timeSelector::select0(runTime, args);
-#   include "createNamedMesh.H"
+    #include "createNamedMesh.H"
+
+    word sampleDict(args.optionLookupOrDefault<word>("dict", "sampleDict"));
 
     IOsampledSets sSets
     (
         sampledSets::typeName,
         mesh,
-        "sampleDict",
-        IOobject::MUST_READ,
+        sampleDict,
+        IOobject::MUST_READ_IF_MODIFIED,
         true
     );
 
@@ -115,8 +124,8 @@ int main(int argc, char *argv[])
     (
         sampledSurfaces::typeName,
         mesh,
-        "sampleDict",
-        IOobject::MUST_READ,
+        sampleDict,
+        IOobject::MUST_READ_IF_MODIFIED,
         true
     );
 

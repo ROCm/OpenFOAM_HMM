@@ -26,6 +26,8 @@ License
 #include "ZoneMesh.H"
 #include "entry.H"
 #include "demandDrivenData.H"
+#include "stringListOps.H"
+#include "Pstream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -86,9 +88,24 @@ Foam::ZoneMesh<ZoneType, MeshType>::ZoneMesh
     if
     (
         readOpt() == IOobject::MUST_READ
+     || readOpt() == IOobject::MUST_READ_IF_MODIFIED
      || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
     )
     {
+        if (readOpt() == IOobject::MUST_READ_IF_MODIFIED)
+        {
+            WarningIn
+            (
+                "ZoneMesh::ZoneMesh\n"
+                "(\n"
+                "    const IOobject&,\n"
+                "    const MeshType&\n"
+                ")"
+            )   << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
+                << " does not support automatic rereading."
+                << endl;
+        }
+
         PtrList<ZoneType>& zones = *this;
 
         // Read zones
@@ -227,6 +244,74 @@ Foam::wordList Foam::ZoneMesh<ZoneType, MeshType>::names() const
 
 
 template<class ZoneType, class MeshType>
+Foam::labelList Foam::ZoneMesh<ZoneType, MeshType>::findIndices
+(
+    const keyType& key
+) const
+{
+    labelList indices;
+
+    if (!key.empty())
+    {
+        if (key.isPattern())
+        {
+            indices = findStrings(key, this->names());
+        }
+        else
+        {
+            indices.setSize(this->size());
+            label nFound = 0;
+            forAll(*this, i)
+            {
+                if (key == operator[](i).name())
+                {
+                    indices[nFound++] = i;
+                }
+            }
+            indices.setSize(nFound);
+        }
+    }
+
+    return indices;
+}
+
+
+template<class ZoneType, class MeshType>
+Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findIndex
+(
+    const keyType& key
+) const
+{
+    if (!key.empty())
+    {
+        if (key.isPattern())
+        {
+            labelList indices = this->findIndices(key);
+
+            // return first element
+            if (!indices.empty())
+            {
+                return indices[0];
+            }
+        }
+        else
+        {
+            forAll(*this, i)
+            {
+                if (key == operator[](i).name())
+                {
+                    return i;
+                }
+            }
+        }
+    }
+
+    // not found
+    return -1;
+}
+
+
+template<class ZoneType, class MeshType>
 Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findZoneID
 (
     const word& zoneName
@@ -250,8 +335,26 @@ Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findZoneID
             << "List of available zone names: " << names() << endl;
     }
 
-    // A dummy return to keep the compiler happy
+    // not found
     return -1;
+}
+
+
+template<class ZoneType, class MeshType>
+Foam::PackedBoolList Foam::ZoneMesh<ZoneType, MeshType>::findMatching
+(
+    const keyType& key
+) const
+{
+    PackedBoolList lst;
+
+    const labelList indices = this->findIndices(key);
+    forAll(indices, i)
+    {
+        lst |= static_cast<const labelList&>(this->operator[](indices[i]));
+    }
+
+    return lst;
 }
 
 
@@ -293,6 +396,84 @@ bool Foam::ZoneMesh<ZoneType, MeshType>::checkDefinition
         inError |= zones[zoneI].checkDefinition(report);
     }
     return inError;
+}
+
+
+template<class ZoneType, class MeshType>
+bool Foam::ZoneMesh<ZoneType, MeshType>::checkParallelSync
+(
+    const bool report
+) const
+{
+    if (!Pstream::parRun())
+    {
+        return false;
+    }
+
+
+    const PtrList<ZoneType>& zones = *this;
+
+    bool hasError = false;
+
+    // Collect all names
+    List<wordList> allNames(Pstream::nProcs());
+    allNames[Pstream::myProcNo()] = this->names();
+    Pstream::gatherList(allNames);
+    Pstream::scatterList(allNames);
+
+    List<wordList> allTypes(Pstream::nProcs());
+    allTypes[Pstream::myProcNo()] = this->types();
+    Pstream::gatherList(allTypes);
+    Pstream::scatterList(allTypes);
+
+    // Have every processor check but only master print error.
+
+    for (label procI = 1; procI < allNames.size(); procI++)
+    {
+        if
+        (
+            (allNames[procI] != allNames[0])
+         || (allTypes[procI] != allTypes[0])
+        )
+        {
+            hasError = true;
+
+            if (debug || (report && Pstream::master()))
+            {
+                Info<< " ***Inconsistent zones across processors, "
+                       "processor 0 has zone names:" << allNames[0]
+                    << " zone types:" << allTypes[0]
+                    << " processor " << procI << " has zone names:"
+                    << allNames[procI]
+                    << " zone types:" << allTypes[procI]
+                    << endl;
+            }
+        }
+    }
+
+    // Check contents
+    if (!hasError)
+    {
+        forAll(zones, zoneI)
+        {
+            if (zones[zoneI].checkParallelSync(false))
+            {
+                hasError = true;
+
+                if (debug || (report && Pstream::master()))
+                {
+                    Info<< " ***Zone " << zones[zoneI].name()
+                        << " of type " << zones[zoneI].type()
+                        << " is not correctly synchronised"
+                        << " across coupled boundaries."
+                        << " (coupled faces are either not both "
+                        << " present in set or have same flipmap)" << endl;
+                }
+            }
+        }
+    }
+
+    return hasError;
 }
 
 

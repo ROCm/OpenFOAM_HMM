@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,40 +26,54 @@ License
 #include "constTransport.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class thermo>
-constTransport<thermo>::constTransport(Istream& is)
+template<class Thermo>
+Foam::constTransport<Thermo>::constTransport(Istream& is)
 :
-    thermo(is),
-    Mu(readScalar(is)),
-    rPr(1.0/readScalar(is))
+    Thermo(is),
+    mu_(readScalar(is)),
+    rPr_(1.0/readScalar(is))
 {
     is.check("constTransport::constTransport(Istream& is)");
 }
 
 
+template<class Thermo>
+Foam::constTransport<Thermo>::constTransport(const dictionary& dict)
+:
+    Thermo(dict),
+    mu_(readScalar(dict.lookup("mu"))),
+    rPr_(1.0/readScalar(dict.lookup("Pr")))
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Thermo>
+void Foam::constTransport<Thermo>::constTransport::write(Ostream& os) const
+{
+    os  << this->name() << endl;
+    os  << token::BEGIN_BLOCK  << incrIndent << nl;
+    Thermo::write(os);
+    os.writeKeyword("mu") << mu_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Pr") << 1.0/rPr_ << token::END_STATEMENT << nl;
+    os  << decrIndent << token::END_BLOCK << nl;
+}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-template<class thermo>
-Ostream& operator<<(Ostream& os, const constTransport<thermo>& ct)
+template<class Thermo>
+Foam::Ostream& Foam::operator<<(Ostream& os, const constTransport<Thermo>& ct)
 {
-    operator<<(os, static_cast<const thermo&>(ct));
-    os << tab << ct.Mu << tab << 1.0/ct.rPr;
+    operator<<(os, static_cast<const Thermo&>(ct));
+    os << tab << ct.mu_ << tab << 1.0/ct.rPr_;
 
-    os.check("Ostream& operator<<(Ostream& os, const constTransport& ct)");
+    os.check("Ostream& operator<<(Ostream&, const constTransport&)");
 
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

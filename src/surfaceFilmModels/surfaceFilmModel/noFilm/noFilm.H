@@ -132,11 +132,26 @@ public:
            //- Return the film density [kg/m3]
            virtual const volScalarField& rho() const;
 
-           //- Return the film temperature [K]
+           //- Return the film surface velocity [m/s]
+           virtual const volVectorField& Us() const;
+
+           //- Return the film wall velocity [m/s]
+           virtual const volVectorField& Uw() const;
+
+           //- Return the film mean temperature [K]
            virtual const volScalarField& T() const;
 
+           //- Return the film surface temperature [K]
+           virtual const volScalarField& Ts() const;
+
+           //- Return the film wall temperature [K]
+           virtual const volScalarField& Tw() const;
+
            //- Return the film specific heat capacity [J/kg/K]
-           virtual const volScalarField& cp() const;
+           virtual const volScalarField& Cp() const;
+
+           //- Return the film thermal conductivity [W/m/K]
+           virtual const volScalarField& kappa() const;
 
 
            // Transfer fields - to the primary region
@@ -147,11 +162,34 @@ public:
                //- Return the parcel diameters originating from film
                virtual const volScalarField& diametersForPrimary() const;
 
+               //- Return the film mass evolved via phase change
+               virtual const volScalarField& massPhaseChangeForPrimary() const;
 
-       // Evolution
+
+        // Evolution
+
+            //- Pre-evolve film hook
+            virtual void preEvolveFilm();
 
             //- Evolve the film equations
             virtual void evolveFilm();
+
+
+        // Source fields
+
+            // Mapped into primary region
+
+                //- Return total mass source - Eulerian phase only
+                virtual tmp<DimensionedField<scalar, volMesh> > Srho() const;
+
+                //- Return mass source for specie i - Eulerian phase only
+                virtual tmp<DimensionedField<scalar, volMesh> > Srho
+                (
+                    const label i
+                ) const;
+
+                //- Return enthalpy source - Eulerian phase only
+                virtual tmp<DimensionedField<scalar, volMesh> > Sh() const;
 
 
        // I-O

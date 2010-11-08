@@ -1,15 +1,17 @@
     scalar DiNum = -GREAT;
 
-    forAll(solidRegions, regionI)
+    forAll(solidRegions, i)
     {
+#       include "setRegionSolidFields.H"
+
         DiNum = max
         (
             solidRegionDiffNo
             (
-                solidRegions[regionI],
+                solidRegions[i],
                 runTime,
-                rhosCps[regionI],
-                Ks[regionI]
+                rho*cp,
+                K
             ),
             DiNum
         );

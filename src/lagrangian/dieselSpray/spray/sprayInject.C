@@ -107,7 +107,17 @@ void Foam::spray::inject()
                     scalar deviation = breakup().y0();
                     scalar ddev = breakup().yDot0();
 
-                    label injectorCell = mesh_.findCell(injectionPosition);
+                    label injectorCell = -1;
+                    label injectorTetFaceI = -1;
+                    label injectorTetPtI = -1;
+
+                    findCellFacePt
+                    (
+                        injectionPosition,
+                        injectorCell,
+                        injectorTetFaceI,
+                        injectorTetPtI
+                    );
 
 #                   include "findInjectorCell.H"
 
@@ -122,6 +132,8 @@ void Foam::spray::inject()
                             *this,
                             injectionPosition,
                             injectorCell,
+                            injectorTetFaceI,
+                            injectorTetPtI,
                             normal,
                             diameter,
                             it->T(toi),
@@ -147,7 +159,8 @@ void Foam::spray::inject()
                             (runTime_.deltaTValue() - dt)
                            /runTime_.deltaTValue();
 
-                        bool keepParcel = pPtr->move(*this);
+                        bool keepParcel =
+                            pPtr->move(*this, runTime_.deltaTValue());
 
                         if (keepParcel)
                         {

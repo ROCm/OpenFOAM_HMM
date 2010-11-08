@@ -35,14 +35,14 @@ void Foam::SinglePhaseMixture<CloudType>::constructIds()
         FatalErrorIn
         (
             "void Foam::SinglePhaseMixture<CloudType>::constructIds()"
-        )   << "Phase list is empty" << nl << exit(FatalError);
+        )   << "Phase list is empty" << exit(FatalError);
     }
     else if (this->phaseProps().size() > 1)
     {
         FatalErrorIn
         (
             "void Foam::SinglePhaseMixture<CloudType>::constructIds()"
-        )   << "Only one phase permitted" << nl << exit(FatalError);
+        )   << "Only one phase permitted" << exit(FatalError);
     }
 
     switch (this->phaseProps()[0].phase())
@@ -67,7 +67,7 @@ void Foam::SinglePhaseMixture<CloudType>::constructIds()
             FatalErrorIn
             (
                 "void Foam::SinglePhaseMixture<CloudType>::constructIds()"
-            )   << "Unknown phase enumeration" << nl << abort(FatalError);
+            )   << "Unknown phase enumeration" << abort(FatalError);
         }
     }
 }
@@ -89,6 +89,19 @@ Foam::SinglePhaseMixture<CloudType>::SinglePhaseMixture
 {
     constructIds();
 }
+
+
+template<class CloudType>
+Foam::SinglePhaseMixture<CloudType>::SinglePhaseMixture
+(
+    const SinglePhaseMixture<CloudType>& cm
+)
+:
+    CompositionModel<CloudType>(cm),
+    idGas_(cm.idGas_),
+    idLiquid_(cm.idLiquid_),
+    idSolid_(cm.idSolid_)
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

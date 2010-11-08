@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,7 @@ Foam::hCombustionThermo::hCombustionThermo(const fvMesh& mesh)
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionSet(0, 2, -2, 0, 0),
+        dimEnergy/dimMass,
         this->hBoundaryTypes()
     )
 {}

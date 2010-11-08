@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
 (
     const dictionary& dict,
@@ -76,9 +76,22 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
 }
 
 
+template<class CloudType>
+Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
+(
+    const StandardWallInteraction<CloudType>& pim
+)
+:
+    PatchInteractionModel<CloudType>(pim),
+    interactionType_(pim.interactionType_),
+    e_(pim.e_),
+    mu_(pim.mu_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::StandardWallInteraction<CloudType>::~StandardWallInteraction()
 {}
 
@@ -86,22 +99,19 @@ Foam::StandardWallInteraction<CloudType>::~StandardWallInteraction()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::StandardWallInteraction<CloudType>::active() const
-{
-    return true;
-}
-
-
-template <class CloudType>
 bool Foam::StandardWallInteraction<CloudType>::correct
 (
+    typename CloudType::parcelType& p,
     const polyPatch& pp,
-    const label faceId,
     bool& keepParticle,
-    bool& active,
-    vector& U
+    const scalar trackFraction,
+    const tetIndices& tetIs
 ) const
 {
+    vector& U = p.U();
+
+    bool& active = p.active();
+
     if (isA<wallPolyPatch>(pp))
     {
         switch (interactionType_)
@@ -125,8 +135,13 @@ bool Foam::StandardWallInteraction<CloudType>::correct
                 keepParticle = true;
                 active = true;
 
-                vector nw = pp.faceAreas()[pp.whichFace(faceId)];
-                nw /= mag(nw);
+                vector nw;
+                vector Up;
+
+                this->patchData(p, pp, trackFraction, tetIs, nw, Up);
+
+                // Calculate motion relative to patch velocity
+                U -= Up;
 
                 scalar Un = U & nw;
                 vector Ut = U - Un*nw;
@@ -137,6 +152,9 @@ bool Foam::StandardWallInteraction<CloudType>::correct
                 }
 
                 U -= mu_*Ut;
+
+                // Return velocity to global space
+                U += Up;
 
                 break;
             }

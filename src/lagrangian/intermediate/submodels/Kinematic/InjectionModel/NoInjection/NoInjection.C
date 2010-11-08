@@ -33,7 +33,7 @@ Foam::label Foam::NoInjection<CloudType>::parcelsToInject
 (
     const scalar,
     const scalar
-) const
+)
 {
     return 0;
 }
@@ -44,7 +44,7 @@ Foam::scalar Foam::NoInjection<CloudType>::volumeToInject
 (
     const scalar,
     const scalar
-) const
+)
 {
     return 0.0;
 }
@@ -53,13 +53,16 @@ Foam::scalar Foam::NoInjection<CloudType>::volumeToInject
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::NoInjection<CloudType>::NoInjection
-(
-    const dictionary&,
-    CloudType& owner
-)
+Foam::NoInjection<CloudType>::NoInjection(const dictionary&, CloudType& owner)
 :
     InjectionModel<CloudType>(owner)
+{}
+
+
+template<class CloudType>
+Foam::NoInjection<CloudType>::NoInjection(const NoInjection<CloudType>& im)
+:
+    InjectionModel<CloudType>(im.owner_)
 {}
 
 
@@ -93,6 +96,8 @@ void Foam::NoInjection<CloudType>::setPositionAndCell
     const label,
     const scalar,
     vector&,
+    label&,
+    label&,
     label&
 )
 {}

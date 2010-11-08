@@ -28,11 +28,11 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template <class ParcelType>
+template<class ParcelType>
 Foam::string Foam::ThermoParcel<ParcelType>::propHeader =
     KinematicParcel<ParcelType>::propHeader
   + " T"
-  + " cp";
+  + " Cp";
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -47,16 +47,16 @@ Foam::ThermoParcel<ParcelType>::ThermoParcel
 :
     KinematicParcel<ParcelType>(cloud, is, readFields),
     T_(0.0),
-    cp_(0.0),
+    Cp_(0.0),
     Tc_(0.0),
-    cpc_(0.0)
+    Cpc_(0.0)
 {
     if (readFields)
     {
         if (is.format() == IOstream::ASCII)
         {
             T_ = readScalar(is);
-            cp_ = readScalar(is);
+            Cp_ = readScalar(is);
         }
         else
         {
@@ -64,7 +64,7 @@ Foam::ThermoParcel<ParcelType>::ThermoParcel
             (
                 reinterpret_cast<char*>(&T_),
               + sizeof(T_)
-              + sizeof(cp_)
+              + sizeof(Cp_)
             );
         }
     }
@@ -90,8 +90,8 @@ void Foam::ThermoParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
     IOField<scalar> T(c.fieldIOobject("T", IOobject::MUST_READ));
     c.checkFieldIOobject(c, T);
 
-    IOField<scalar> cp(c.fieldIOobject("cp", IOobject::MUST_READ));
-    c.checkFieldIOobject(c, cp);
+    IOField<scalar> Cp(c.fieldIOobject("Cp", IOobject::MUST_READ));
+    c.checkFieldIOobject(c, Cp);
 
 
     label i = 0;
@@ -100,7 +100,7 @@ void Foam::ThermoParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
         ThermoParcel<ParcelType>& p = iter();
 
         p.T_ = T[i];
-        p.cp_ = cp[i];
+        p.Cp_ = Cp[i];
         i++;
     }
 }
@@ -114,7 +114,7 @@ void Foam::ThermoParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
     label np =  c.size();
 
     IOField<scalar> T(c.fieldIOobject("T", IOobject::NO_READ), np);
-    IOField<scalar> cp(c.fieldIOobject("cp", IOobject::NO_READ), np);
+    IOField<scalar> Cp(c.fieldIOobject("Cp", IOobject::NO_READ), np);
 
     label i = 0;
     forAllConstIter(typename Cloud<ParcelType>, c, iter)
@@ -122,12 +122,12 @@ void Foam::ThermoParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
         const ThermoParcel<ParcelType>& p = iter();
 
         T[i] = p.T_;
-        cp[i] = p.cp_;
+        Cp[i] = p.Cp_;
         i++;
     }
 
     T.write();
-    cp.write();
+    Cp.write();
 }
 
 
@@ -144,7 +144,7 @@ Foam::Ostream& Foam::operator<<
     {
         os  << static_cast<const KinematicParcel<ParcelType>&>(p)
             << token::SPACE << p.T()
-            << token::SPACE << p.cp();
+            << token::SPACE << p.Cp();
     }
     else
     {
@@ -152,7 +152,7 @@ Foam::Ostream& Foam::operator<<
         os.write
         (
             reinterpret_cast<const char*>(&p.T_),
-            sizeof(p.T()) + sizeof(p.cp())
+            sizeof(p.T()) + sizeof(p.Cp())
         );
     }
 

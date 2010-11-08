@@ -51,8 +51,6 @@ void Foam::PairCollision<CloudType>::preInteraction()
 
         p.torque() = vector::zero;
     }
-
-    buildCellOccupancy();
 }
 
 
@@ -61,7 +59,7 @@ void Foam::PairCollision<CloudType>::parcelInteraction()
 {
     PstreamBuffers pBufs(Pstream::nonBlocking);
 
-    il_.sendReferredData(cellOccupancy_, pBufs);
+    il_.sendReferredData(this->owner().cellOccupancy(), pBufs);
 
     realRealInteraction();
 
@@ -80,17 +78,20 @@ void Foam::PairCollision<CloudType>::realRealInteraction()
     typename CloudType::parcelType* pA_ptr = NULL;
     typename CloudType::parcelType* pB_ptr = NULL;
 
+    List<DynamicList<typename CloudType::parcelType*> >& cellOccupancy =
+        this->owner().cellOccupancy();
+
     forAll(dil, realCellI)
     {
         // Loop over all Parcels in cell A (a)
-        forAll(cellOccupancy_[realCellI], a)
+        forAll(cellOccupancy[realCellI], a)
         {
-            pA_ptr = cellOccupancy_[realCellI][a];
+            pA_ptr = cellOccupancy[realCellI][a];
 
             forAll(dil[realCellI], interactingCells)
             {
                 List<typename CloudType::parcelType*> cellBParcels =
-                    cellOccupancy_[dil[realCellI][interactingCells]];
+                    cellOccupancy[dil[realCellI][interactingCells]];
 
                 // Loop over all Parcels in cell B (b)
                 forAll(cellBParcels, b)
@@ -102,9 +103,9 @@ void Foam::PairCollision<CloudType>::realRealInteraction()
             }
 
             // Loop over the other Parcels in cell A (aO)
-            forAll(cellOccupancy_[realCellI], aO)
+            forAll(cellOccupancy[realCellI], aO)
             {
-                pB_ptr = cellOccupancy_[realCellI][aO];
+                pB_ptr = cellOccupancy[realCellI][aO];
 
                 // Do not double-evaluate, compare pointers, arbitrary
                 // order
@@ -126,6 +127,9 @@ void Foam::PairCollision<CloudType>::realReferredInteraction()
 
     List<IDLList<typename CloudType::parcelType> >& referredParticles =
     il_.referredParticles();
+
+    List<DynamicList<typename CloudType::parcelType*> >& cellOccupancy =
+        this->owner().cellOccupancy();
 
     // Loop over all referred cells
     forAll(ril, refCellI)
@@ -150,7 +154,7 @@ void Foam::PairCollision<CloudType>::realReferredInteraction()
             forAll(realCells, realCellI)
             {
                 List<typename CloudType::parcelType*> realCellParcels =
-                    cellOccupancy_[realCells[realCellI]];
+                    cellOccupancy[realCells[realCellI]];
 
                 forAll(realCellParcels, realParcelI)
                 {
@@ -175,13 +179,23 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
     const labelListList directWallFaces = il_.dwfil();
 
+    const labelList& patchID = mesh.boundaryMesh().patchID();
+
+    const volVectorField& U = mesh.lookupObject<volVectorField>(il_.UName());
+
+    List<DynamicList<typename CloudType::parcelType*> >& cellOccupancy =
+        this->owner().cellOccupancy();
+
     // Storage for the wall interaction sites
-    DynamicList<point> flatSites;
+    DynamicList<point> flatSitePoints;
     DynamicList<scalar> flatSiteExclusionDistancesSqr;
-    DynamicList<point> otherSites;
+    DynamicList<WallSiteData<vector> > flatSiteData;
+    DynamicList<point> otherSitePoints;
     DynamicList<scalar> otherSiteDistances;
-    DynamicList<point> sharpSites;
+    DynamicList<WallSiteData<vector> > otherSiteData;
+    DynamicList<point> sharpSitePoints;
     DynamicList<scalar> sharpSiteExclusionDistancesSqr;
+    DynamicList<WallSiteData<vector> > sharpSiteData;
 
     forAll(dil, realCellI)
     {
@@ -189,21 +203,24 @@ void Foam::PairCollision<CloudType>::wallInteraction()
         const labelList& realWallFaces = directWallFaces[realCellI];
 
         // Loop over all Parcels in cell
-        forAll(cellOccupancy_[realCellI], cellParticleI)
+        forAll(cellOccupancy[realCellI], cellParticleI)
         {
-            flatSites.clear();
+            flatSitePoints.clear();
             flatSiteExclusionDistancesSqr.clear();
-            otherSites.clear();
+            flatSiteData.clear();
+            otherSitePoints.clear();
             otherSiteDistances.clear();
-            sharpSites.clear();
+            otherSiteData.clear();
+            sharpSitePoints.clear();
             sharpSiteExclusionDistancesSqr.clear();
+            sharpSiteData.clear();
 
             typename CloudType::parcelType& p =
-            *cellOccupancy_[realCellI][cellParticleI];
+                *cellOccupancy[realCellI][cellParticleI];
 
             const point& pos = p.position();
 
-            scalar r = p.d()/2;
+            scalar r = wallModel_->pREff(p);
 
             // real wallFace interactions
 
@@ -229,6 +246,18 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
                     scalar normalAlignment = normal & pW/mag(pW);
 
+                    // Find the patchIndex and wallData for WallSiteData object
+                    label patchI = patchID[realFaceI - mesh.nInternalFaces()];
+
+                    label patchFaceI =
+                        realFaceI - mesh.boundaryMesh()[patchI].start();
+
+                    WallSiteData<vector> wSD
+                    (
+                        patchI,
+                        U.boundaryField()[patchI][patchFaceI]
+                    );
+
                     if (normalAlignment > cosPhiMinFlatWall)
                     {
                         // Guard against a flat interaction being
@@ -239,25 +268,29 @@ void Foam::PairCollision<CloudType>::wallInteraction()
                         (
                             !duplicatePointInList
                             (
-                                flatSites,
+                                flatSitePoints,
                                 nearPt,
                                 sqr(r*flatWallDuplicateExclusion)
                             )
                         )
                         {
-                            flatSites.append(nearPt);
+                            flatSitePoints.append(nearPt);
 
                             flatSiteExclusionDistancesSqr.append
                             (
                                 sqr(r) - sqr(nearest.distance())
                             );
+
+                            flatSiteData.append(wSD);
                         }
                     }
                     else
                     {
-                        otherSites.append(nearPt);
+                        otherSitePoints.append(nearPt);
 
                         otherSiteDistances.append(nearest.distance());
+
+                        otherSiteData.append(wSD);
                     }
                 }
             }
@@ -269,8 +302,10 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
             forAll(cellRefWallFaces, rWFI)
             {
+                label refWallFaceI = cellRefWallFaces[rWFI];
+
                 const referredWallFace& rwf =
-                il_.referredWallFaces()[cellRefWallFaces[rWFI]];
+                    il_.referredWallFaces()[refWallFaceI];
 
                 const pointField& pts = rwf.points();
 
@@ -288,6 +323,14 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
                     scalar normalAlignment = normal & pW/mag(pW);
 
+                    // Find the patchIndex and wallData for WallSiteData object
+
+                    WallSiteData<vector> wSD
+                    (
+                        rwf.patchIndex(),
+                        il_.referredWallData()[refWallFaceI]
+                    );
+
                     if (normalAlignment > cosPhiMinFlatWall)
                     {
                         // Guard against a flat interaction being
@@ -298,25 +341,29 @@ void Foam::PairCollision<CloudType>::wallInteraction()
                         (
                             !duplicatePointInList
                             (
-                                flatSites,
+                                flatSitePoints,
                                 nearPt,
                                 sqr(r*flatWallDuplicateExclusion)
                             )
                         )
                         {
-                            flatSites.append(nearPt);
+                            flatSitePoints.append(nearPt);
 
                             flatSiteExclusionDistancesSqr.append
                             (
                                 sqr(r) - sqr(nearest.distance())
                             );
+
+                            flatSiteData.append(wSD);
                         }
                     }
                     else
                     {
-                        otherSites.append(nearPt);
+                        otherSitePoints.append(nearPt);
 
                         otherSiteDistances.append(nearest.distance());
+
+                        otherSiteData.append(wSD);
                     }
                 }
             }
@@ -338,13 +385,13 @@ void Foam::PairCollision<CloudType>::wallInteraction()
             {
                 label orderedIndex = sortedOtherSiteIndices[siteI];
 
-                const point& otherPt = otherSites[orderedIndex];
+                const point& otherPt = otherSitePoints[orderedIndex];
 
                 if
                 (
                     !duplicatePointInList
                     (
-                        flatSites,
+                        flatSitePoints,
                         otherPt,
                         flatSiteExclusionDistancesSqr
                     )
@@ -357,23 +404,32 @@ void Foam::PairCollision<CloudType>::wallInteraction()
                     (
                         !duplicatePointInList
                         (
-                            sharpSites,
+                            sharpSitePoints,
                             otherPt,
                             sharpSiteExclusionDistancesSqr
                         )
                     )
                     {
-                        sharpSites.append(otherPt);
+                        sharpSitePoints.append(otherPt);
 
                         sharpSiteExclusionDistancesSqr.append
                         (
                             sqr(r) - sqr(otherSiteDistances[orderedIndex])
                         );
+
+                        sharpSiteData.append(otherSiteData[orderedIndex]);
                     }
                 }
             }
 
-            evaluateWall(p, flatSites, sharpSites);
+            evaluateWall
+            (
+                p,
+                flatSitePoints,
+                flatSiteData,
+                sharpSitePoints,
+                sharpSiteData
+            );
         }
     }
 }
@@ -434,21 +490,6 @@ void Foam::PairCollision<CloudType>::postInteraction()
 
 
 template<class CloudType>
-void Foam::PairCollision<CloudType>::buildCellOccupancy()
-{
-    forAll(cellOccupancy_, cO)
-    {
-        cellOccupancy_[cO].clear();
-    }
-
-    forAllIter(typename CloudType, this->owner(), iter)
-    {
-        cellOccupancy_[iter().cell()].append(&iter());
-    }
-}
-
-
-template<class CloudType>
 void Foam::PairCollision<CloudType>::evaluatePair
 (
     typename CloudType::parcelType& pA,
@@ -463,11 +504,20 @@ template<class CloudType>
 void Foam::PairCollision<CloudType>::evaluateWall
 (
     typename CloudType::parcelType& p,
-    const List<point>& flatSites,
-    const List<point>& sharpSites
+    const List<point>& flatSitePoints,
+    const List<WallSiteData<vector> >& flatSiteData,
+    const List<point>& sharpSitePoints,
+    const List<WallSiteData<vector> >& sharpSiteData
 ) const
 {
-    wallModel_->evaluateWall(p, flatSites, sharpSites);
+    wallModel_->evaluateWall
+    (
+        p,
+        flatSitePoints,
+        flatSiteData,
+        sharpSitePoints,
+        sharpSiteData
+    );
 }
 
 
@@ -481,7 +531,6 @@ Foam::PairCollision<CloudType>::PairCollision
 )
 :
     CollisionModel<CloudType>(dict, owner, typeName),
-    cellOccupancy_(owner.mesh().nCells()),
     pairModel_
     (
         PairModel<CloudType>::New
@@ -502,9 +551,35 @@ Foam::PairCollision<CloudType>::PairCollision
     (
         owner.mesh(),
         readScalar(this->coeffDict().lookup("maxInteractionDistance")),
-        Switch(this->coeffDict().lookup("writeReferredParticleCloud"))
+        Switch
+        (
+            this->coeffDict().lookupOrDefault
+            (
+                "writeReferredParticleCloud",
+                false
+            )
+        ),
+        this->coeffDict().lookupOrDefault("UName", word("U"))
     )
 {}
+
+
+template<class CloudType>
+Foam::PairCollision<CloudType>::PairCollision(PairCollision<CloudType>& cm)
+:
+    CollisionModel<CloudType>(cm),
+    pairModel_(NULL),
+    wallModel_(NULL),
+    il_(cm.owner().mesh())
+{
+    notImplemented
+    (
+        "Foam::PairCollision<CloudType>::PairCollision"
+        "("
+            "PairCollision<CloudType>& cm"
+        ")"
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -546,7 +621,7 @@ Foam::label Foam::PairCollision<CloudType>::nSubCycles() const
 
 
 template<class CloudType>
-bool Foam::PairCollision<CloudType>::active() const
+bool Foam::PairCollision<CloudType>::controlsWallInteraction() const
 {
     return true;
 }

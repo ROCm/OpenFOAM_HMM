@@ -33,7 +33,7 @@ Description
 #define PairSpringSliderDashpot_H
 
 #include "PairModel.H"
-#include "CollisionRecord.H"
+#include "CollisionRecordList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,9 +58,6 @@ class PairSpringSliderDashpot
         //  the same Poisson's ratio and Young's modulus
         scalar Gstar_;
 
-        //- Poisson's ratio of both particles
-        scalar sigma_;
-
         //- alpha-coefficient, related to coefficient of restitution
         scalar alpha_;
 
@@ -73,6 +70,28 @@ class PairSpringSliderDashpot
         //- The number of steps over which to resolve the minimum
         //  harmonic approximation of the collision period
         scalar collisionResolutionSteps_;
+
+        //- Volume factor for determining the equivalent size of a
+        //  parcel where nParticles is not 1.  The equivalent size of
+        //  the parcel is
+        //      parcelEquivVolume = volumeFactor*nParticles*p.volume()
+        //  so
+        //      parcelEquivD = cbrt(volumeFactor*nParticles)*p.d()
+        //  + When volumeFactor = 1, the particles are compressed
+        //    together so that the equivalent volume of the parcel is
+        //    the sum of the constituent particles
+        //  + When volumeFactor = 3*sqrt(2)/pi, the particles are
+        //    close packed, but uncompressed.
+        //  + When volumeFactor > 3*sqrt(2)/pi, the particles loosely
+        //    grouped.
+        // 3*sqrt(2)/pi = 1.350474 is the volume factor for close
+        // packing, i.e pi/(3*sqrt(2)) is the maximum close packing
+        // factor
+        scalar volumeFactor_;
+
+        //- Switch to control use of equivalent size particles.  Used
+        //  because the calculation can be very expensive.
+        bool useEquivalentSize_;
 
 
     // Private Member Functions
@@ -103,6 +122,12 @@ public:
 
 
     // Member Functions
+
+        //- Return the volumeFactor
+        inline scalar volumeFactor() const
+        {
+            return volumeFactor_;
+        }
 
         //- Whether the PairModel has a timestep limit that will
         //  require subCycling

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,7 +56,7 @@ emptyFvPatch::emptyFvPatch(const polyPatch& patch, const fvBoundaryMesh& bm)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const unallocLabelList& emptyFvPatch::faceCells() const
+const labelUList& emptyFvPatch::faceCells() const
 {
     return faceCells_;
 }

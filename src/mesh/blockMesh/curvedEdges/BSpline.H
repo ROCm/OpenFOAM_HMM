@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,11 +47,10 @@ Description
     segments. In rare cases (sections with very high curvatures), the
     resulting distribution may be sub-optimal.
 
+    A future implementation could also handle closed splines.
+
 SeeAlso
     CatmullRomSpline
-
-ToDo
-    A future implementation could also handle closed splines.
 
 SourceFiles
     BSpline.C

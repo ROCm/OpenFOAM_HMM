@@ -92,7 +92,8 @@ Foam::scalar Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::energyRatio
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class CloudType>
-Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::LarsenBorgnakkeVariableHardSphere
+Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::
+LarsenBorgnakkeVariableHardSphere
 (
     const dictionary& dict,
     CloudType& cloud
@@ -117,17 +118,24 @@ Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+template<class CloudType>
+bool Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::active() const
+{
+    return true;
+}
+
 
 template <class CloudType>
 Foam::scalar Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::sigmaTcR
 (
-    label typeIdP,
-    label typeIdQ,
-    const vector& UP,
-    const vector& UQ
+    const typename CloudType::parcelType& pP,
+    const typename CloudType::parcelType& pQ
 ) const
 {
     const CloudType& cloud(this->owner());
+
+    label typeIdP = pP.typeId();
+    label typeIdQ = pQ.typeId();
 
     scalar dPQ =
         0.5
@@ -143,7 +151,7 @@ Foam::scalar Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::sigmaTcR
           + cloud.constProps(typeIdQ).omega()
         );
 
-    scalar cR = mag(UP - UQ);
+    scalar cR = mag(pP.U() - pQ.U());
 
     if (cR < VSMALL)
     {
@@ -169,15 +177,18 @@ Foam::scalar Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::sigmaTcR
 template <class CloudType>
 void Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::collide
 (
-    label typeIdP,
-    label typeIdQ,
-    vector& UP,
-    vector& UQ,
-    scalar& EiP,
-    scalar& EiQ
+    typename CloudType::parcelType& pP,
+    typename CloudType::parcelType& pQ
 )
 {
     CloudType& cloud(this->owner());
+
+    label typeIdP = pP.typeId();
+    label typeIdQ = pQ.typeId();
+    vector& UP = pP.U();
+    vector& UQ = pQ.U();
+    scalar& EiP = pP.Ei();
+    scalar& EiQ = pQ.Ei();
 
     Random& rndGen(cloud.rndGen());
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -158,9 +158,11 @@ tensor2D eigenVectors(const tensor2D& t)
 {
     vector2D evals(eigenValues(t));
 
-    tensor2D evs;
-    evs.x() = eigenVector(t, evals.x());
-    evs.y() = eigenVector(t, evals.y());
+    tensor2D evs
+    (
+        eigenVector(t, evals.x()),
+        eigenVector(t, evals.y())
+    );
 
     return evs;
 }

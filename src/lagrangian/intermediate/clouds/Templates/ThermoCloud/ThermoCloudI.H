@@ -30,6 +30,14 @@ using namespace Foam::constant;
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
+inline const Foam::ThermoCloud<ParcelType>&
+Foam::ThermoCloud<ParcelType>::cloudCopy() const
+{
+    return cloudCopyPtr_();
+}
+
+
+template<class ParcelType>
 inline const typename ParcelType::constantProperties&
 Foam::ThermoCloud<ParcelType>::constProps() const
 {
@@ -38,18 +46,23 @@ Foam::ThermoCloud<ParcelType>::constProps() const
 
 
 template<class ParcelType>
-inline const Foam::basicThermo&
-Foam::ThermoCloud<ParcelType>::carrierThermo() const
+inline const Foam::SLGThermo& Foam::ThermoCloud<ParcelType>::thermo() const
 {
-    return carrierThermo_;
+    return thermo_;
 }
 
 
 template<class ParcelType>
-inline Foam::basicThermo&
-Foam::ThermoCloud<ParcelType>::carrierThermo()
+inline const Foam::volScalarField& Foam::ThermoCloud<ParcelType>::T() const
 {
-    return carrierThermo_;
+    return T_;
+}
+
+
+template<class ParcelType>
+inline const Foam::volScalarField& Foam::ThermoCloud<ParcelType>::p() const
+{
+    return p_;
 }
 
 
@@ -80,32 +93,69 @@ template<class ParcelType>
 inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
 Foam::ThermoCloud<ParcelType>::hsTrans()
 {
-    return hsTrans_;
+    return hsTrans_();
 }
 
 
 template<class ParcelType>
-inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
-Foam::ThermoCloud<ParcelType>::Sh() const
+inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
+Foam::ThermoCloud<ParcelType>::hsTrans() const
 {
-    tmp<DimensionedField<scalar, volMesh> > tSh
-    (
-        new DimensionedField<scalar, volMesh>
-        (
-            IOobject
-            (
-                this->name() + "Sh",
-                this->db().time().timeName(),
-                this->mesh(),
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
-            ),
-            hsTrans_/(this->mesh().V()*this->db().time().deltaT())
-        )
-    );
+    return hsTrans_();
+}
 
-    return tSh;
+
+template<class ParcelType>
+inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
+Foam::ThermoCloud<ParcelType>::hsCoeff()
+{
+    return hsCoeff_();
+}
+
+
+template<class ParcelType>
+inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
+Foam::ThermoCloud<ParcelType>::hsCoeff() const
+{
+    return hsCoeff_();
+}
+
+
+template<class ParcelType>
+inline Foam::tmp<Foam::fvScalarMatrix>
+Foam::ThermoCloud<ParcelType>::Sh(volScalarField& hs) const
+{
+    if (debug)
+    {
+        Info<< "hsTrans min/max = " << min(hsTrans()).value() << ", "
+            << max(hsTrans()).value() << nl
+            << "hsCoeff min/max = " << min(hsCoeff()).value() << ", "
+            << max(hsCoeff()).value() << endl;
+    }
+
+    if (this->solution().coupled())
+    {
+        if (this->solution().semiImplicit("hs"))
+        {
+            const volScalarField Cp = thermo_.thermo().Cp();
+
+            return
+                hsTrans()/(this->mesh().V()*this->db().time().deltaT())
+              + fvm::SuSp(-hsCoeff()/(Cp*this->mesh().V()), hs)
+              + hsCoeff()/(Cp*this->mesh().V())*hs;
+        }
+        else
+        {
+            tmp<fvScalarMatrix> tfvm(new fvScalarMatrix(hs, dimEnergy/dimTime));
+            fvScalarMatrix& fvm = tfvm();
+
+            fvm.source() = -hsTrans()/(this->db().time().deltaT());
+
+            return tfvm;
+        }
+    }
+
+    return tmp<fvScalarMatrix>(new fvScalarMatrix(hs, dimEnergy/dimTime));
 }
 
 
@@ -132,7 +182,7 @@ Foam::ThermoCloud<ParcelType>::Ep() const
     );
 
     // Need to check if coupled as field is created on-the-fly
-    if (radiation_ && this->coupled())
+    if (radiation_ && this->solution().coupled())
     {
         scalarField& Ep = tEp().internalField();
         const scalarField& V = this->mesh().V();
@@ -175,7 +225,7 @@ Foam::ThermoCloud<ParcelType>::ap() const
     );
 
     // Need to check if coupled as field is created on-the-fly
-    if (radiation_ && this->coupled())
+    if (radiation_ && this->solution().coupled())
     {
         scalarField& ap = tap().internalField();
         const scalarField& V = this->mesh().V();
@@ -218,7 +268,7 @@ Foam::ThermoCloud<ParcelType>::sigmap() const
     );
 
     // Need to check if coupled as field is created on-the-fly
-    if (radiation_ && this->coupled())
+    if (radiation_ && this->solution().coupled())
     {
         scalarField& sigmap = tsigmap().internalField();
 

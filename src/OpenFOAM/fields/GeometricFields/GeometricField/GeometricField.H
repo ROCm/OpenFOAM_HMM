@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -475,6 +475,11 @@ public:
         //- Relax field (for steady-state solution).
         //  alpha is read from controlDict
         void relax();
+
+        //- Select the final iteration parameters if `final' is true
+        //  by returning the field name + "Final"
+        //  otherwise the standard parameters by returning the field name
+        word select(bool final) const;
 
 
     // Member function *this operators

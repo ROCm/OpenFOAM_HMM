@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -80,8 +80,8 @@ public:
             const label c
         );
 
-        //- Construct from a UList<label>
-        explicit inline triFace(const UList<label>&);
+        //- Construct from a list of labels
+        explicit inline triFace(const labelUList&);
 
         //- Construct from Istream
         inline triFace(Istream&);

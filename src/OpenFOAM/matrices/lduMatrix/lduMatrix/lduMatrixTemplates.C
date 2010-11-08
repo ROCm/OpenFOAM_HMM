@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -83,15 +83,17 @@ Foam::lduMatrix::faceH(const Field<Type>& psi) const
         const scalarField& Lower = const_cast<const lduMatrix&>(*this).lower();
         const scalarField& Upper = const_cast<const lduMatrix&>(*this).upper();
 
-        const unallocLabelList& l = lduAddr().lowerAddr();
-        const unallocLabelList& u = lduAddr().upperAddr();
+        const labelUList& l = lduAddr().lowerAddr();
+        const labelUList& u = lduAddr().upperAddr();
 
         tmp<Field<Type> > tfaceHpsi(new Field<Type> (Lower.size()));
         Field<Type> & faceHpsi = tfaceHpsi();
 
         for (register label face=0; face<l.size(); face++)
         {
-            faceHpsi[face] = Upper[face]*psi[u[face]] - Lower[face]*psi[l[face]];
+            faceHpsi[face] =
+                Upper[face]*psi[u[face]]
+              - Lower[face]*psi[l[face]];
         }
 
         return tfaceHpsi;

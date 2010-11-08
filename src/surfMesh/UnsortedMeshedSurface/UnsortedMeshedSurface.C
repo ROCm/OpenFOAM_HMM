@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -175,7 +175,7 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 (
     const Xfer<pointField>& pointLst,
     const Xfer<List<Face> >& faceLst,
-    const UList<label>& zoneSizes,
+    const labelUList& zoneSizes,
     const UList<word>& zoneNames
 )
 :
@@ -346,7 +346,7 @@ void Foam::UnsortedMeshedSurface<Face>::setZones
 template<class Face>
 void Foam::UnsortedMeshedSurface<Face>::setZones
 (
-    const UList<label>& sizes,
+    const labelUList& sizes,
     const UList<word>& names
 )
 {
@@ -370,7 +370,7 @@ void Foam::UnsortedMeshedSurface<Face>::setZones
 template<class Face>
 void Foam::UnsortedMeshedSurface<Face>::setZones
 (
-    const UList<label>& sizes
+    const labelUList& sizes
 )
 {
     zoneIds_.setSize(size());
@@ -397,7 +397,7 @@ void Foam::UnsortedMeshedSurface<Face>::setZones
 template<class Face>
 void Foam::UnsortedMeshedSurface<Face>::remapFaces
 (
-    const UList<label>& faceMap
+    const labelUList& faceMap
 )
 {
     // re-assign the zone Ids

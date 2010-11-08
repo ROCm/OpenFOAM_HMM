@@ -1,0 +1,184 @@
+#                            -*- mode: org; -*-
+#
+#+TITLE:  OpenFOAM release notes for version dev
+#+AUTHOR:                      OpenCFD Ltd.
+#+DATE:                            TBA
+#+LINK:                  http://www.openfoam.com
+#+OPTIONS: author:nil ^:{}
+# Copyright (c) 2010 OpenCFD Ltd.
+
+* Overview
+  OpenFOAM-dev is the latest major release of OpenFOAM including many new
+  developments a number of bug-fixes.  This release passes our standard tests
+  and the tutorials have been broadly checked.  Please report any bugs by
+  following the link: http://www.openfoam.com/bugs.
+
+* GNU/Linux version
+  This release of OpenFOAM is distributed primarily in 2 ways: (1) as a Debian
+  pack containing binaries and source; (2) from the SourceForge source code
+  repository (see [[./README.org][README]]).
+
+  The Ubuntu/Debian pack is available for 32 and 64 bit versions of the 10.04
+  LTS operating system using the system compiler and libraries that will be
+  installed automatically from standard Debian packs.
+
+  To use the source version from the SourceForge repository, we provide a source
+  pack of third-party packages that can be compiled on the user's system.  This
+  does not include =gcc=, since the system installed version is typically
+  sufficient, but includes =paraview-3.8.0=, =openmpi-1.4.1=, =scotch_5.1=,
+  =metis-5.0pre2=, =ParMetis-3.1= and =ParMGridGen-1.0=.
+
+* Library developments
+
+  There have been a number of developments to the libraries to support the
+  extension of functionality in solver and utility applications.
+*** Core library
+    + Large number of code refinements and consistency improvements to support
+      other developments.
+*** Turbulence modelling
+*** *Updated* thermophysical libraries
+    + Now use the more descriptive dictionary input format, e.g. for a single
+      component mixture:
+
+    thermoType      hPsiThermo<pureMixture<sutherlandTransport<specieThermo<hConstThermo<perfectGas>>>>>;
+
+    mixture
+    {
+        nMoles      1;
+        molWeight   28.9;
+        Cp          1007;
+        Hf          0;
+        As          1.4792e-06;
+        Ts          116;
+    }
+*** Lagrangian intermediate library
+    Extensively updated
+    *Updated* input format
+    Extended to include steady cloud tracking
+    *New* collision modelling
+    *Coupled* to new surface film modelling library
+    *New* sub-models
+    + NonSphereDrag: drag model to account for non-spherical particles
+    + ParticleTracks: post-processing model to generate track data, typically
+      during steady calculations
+    *Updated* sub-models
+    + Devolatilisation models: now act on a per-specie basis
+
+*** DSMC
+*** Dynamic Mesh
+*** Numerics
+*** *Updated* command line help, e.g. `snappyHexMesh -help' now gives:
+
+    Usage: snappyHexMesh [OPTIONS]
+    options:
+      -case <dir>       specify alternate case directory, default is the cwd
+      -overwrite        overwrite existing mesh/results files
+      -parallel         run in parallel
+      -srcDoc           display source code in browser
+      -doc              display application documentation in browser
+      -help             print the usage
+
+*** *New* basicSolidThermo solids thermophysical library
+    + Used in all conjugate heat transfer solvers
+      + constant properties
+      + temperature dependent properties
+      + temperature and direction (in local coordinate system) dependent properties
+*** *New* Surface film library
+    + Creation of films by particle addition, or initial film distribution
+    + Coupled with the lagrangian/intermediate cloud hierarchy library
+    + Hierarchical design, consisting of
+      + kinematic film: mass, momentum
+        + constant thermodynamic properties
+      + thermodynamic film: mass, momentum and enthalpy
+        + constant, or temperature dependant thermodynamic properties
+    + Sub-models:
+      + detachment/dripping whereby particles (re)enter the originating cloud
+        + particle sizes set according to PDF
+        + other properties set to ensure mass, momentum and energy conservation
+      + heat transfer to/from walls and film surface
+      + film evaporation and boiling
+    + Additional wall functions for primary region momentum and temperature
+      taking film into account
+    + Parallel aware
+*** *New* ptscotch decomposition method
+*** *Updated* particle tracking algorithm
+*** *Updated* split cyclics into two separate patches. See doc/changed/splitCyclics.txt
+  * *Updated* interpolation (volPointInterpolation) now works without the
+    globalPointPatch. Moving mesh cases can now be run non-parallel and
+    continued in parallel and reconstructed without any limitation.
+*** *New* compact binary I/O for faces and cells. This speeds up reading/writing meshes in binary.
+*** *Updated* runTimeModifiable
+    + on linux uses inotify instead of time stamps - more efficient for large
+      numbers of monitored files. No more fileModificationSkew needed.
+    + single integer reduction instead of one reduction per monitored file.
+* Solvers
+  A number of new solvers have been developed for a range of engineering
+  applications.  There has been a set of improvements to certain classes of
+  solver that are introduced in this release.
+*** *New* Solvers
+    + =reactingParcelFilmFoam=: Lagrangian cloud and film transport in a
+      reacting gas phase system
+    + =steadyReactingParcelFoam=: Steady solution of cloud and reacting systems
+      using local time stepping methods
+*** Modifications to multiphase and buoyant solvers
+    + ...
+*** Modifications to solvers for sensible enthalpy
+    + ...
+*** Modifications to steady-state compressible solvers
+    + ...
+*** Other modifications
+    + ...
+
+* Boundary conditions
+  New boundary conditions have been introduced to support new applications in
+  OpenFOAM.
+  + *New* wall functions:
+    + kappatJayatillekeWallFunction: incompressible RAS thermal wall function
+
+* Utilities
+  There have been some utilities added and updated in this release.
+*** *New* utilities
+    + =extrudeToRegionMesh=: Extrude faceZones into separate mesh (as a
+      different region)
+      + used to e.g. extrude baffles (extrude internal faces) or create
+        liquid film regions
+      + if extruding internal faces:
+         + create baffles in original mesh with directMappedWall patches
+      + if extruding boundary faces:
+        + convert boundary faces to directMappedWall patches
+      + extrude edges of faceZone as a <zone>_sidePatch
+      + extrude edges inbetween different faceZones as a
+        (nonuniformTransform)cyclic <zoneA>_<zoneB>
+      + extrudes into master direction (i.e. away from the owner cell
+        if flipMap is false)
+    + =topoSet=: replacement of cellSet,faceSet,pointSet utilities.
+      Comparable to a dictionary driven =setSet= utility.
+*** Updated utilities
+    + =setFields=: optionally use faceSets to set patch values (see e.g. hotRoom tutorial).
+    + =blockMesh=: specify patches via dictionary instead of type only. This
+      makes rereading the boundary superfluous. see
+      e.g. pitzDailyDirectMapped tutorial.
+* Post-processing
+  + =foamToEnsight=: parallel continuous data. new =-nodeValues= option to generate and output nodal
+    field data.
+  + =singleCellMesh=: new utility to convert mesh and fields to a single cell
+    mesh. Great for postprocessing.
+  + =steadyParticleTracks=: Generates VTK tracks from the output of the cloud
+    =ParticleTracks= post-processing sub-model
+  + Function objects:
+    + =residualControl=: new function object to allow users to terminate steady
+    state calculations when the defined residual levels are achieved
+    + =abortCalculation=: watches for presence of the named file in the
+    $FOAM_CASE directory and aborts the calculation if it is present
+    + =timeActivatedFileUpdate=: performs a file copy/replacement once a
+    specified time has been reached, e.g. to automagically change fvSchemes and
+    fvSolution during a calculation
+    + =streamLine=: generate streamlines; ouputs both trajectory and field data
+
+* New tutorials
+  There is a large number of new tutorials for existing and new solvers in the
+  release.
+  + =reactingParcelFilmFoam= tutorials:
+    + multipleBoxes, hotBoxes, panel, evaporationTest
+  + =interDyMFoam= tutorials:
+    + testTubeMixer: showcases =solidBodyMotionFunction=

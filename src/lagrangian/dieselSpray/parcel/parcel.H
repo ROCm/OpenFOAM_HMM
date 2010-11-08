@@ -113,7 +113,7 @@ class parcel
         //- Set the relaxation times
         void setRelaxationTimes
         (
-            label celli,
+            label cellI,
             scalar& tauMomentum,
             scalarField& tauEvaporation,
             scalar& tauHeatTransfer,
@@ -133,8 +133,8 @@ class parcel
         (
             const scalar dt,
             spray& sprayData,
-            const label celli,
-            const label facei
+            const label cellI,
+            const label faceI
         );
 
 
@@ -150,7 +150,9 @@ public:
         (
             const Cloud<parcel>& cloud,
             const vector& position,
-            const label celli,
+            const label cellI,
+            const label tetFaceI,
+            const label tetPtI,
             const vector& n,
             const scalar d,
             const scalar T,
@@ -347,7 +349,7 @@ public:
 
         // Parcel operations
 
-            bool move(spray& sprayData);
+            bool move(spray& sprayData, const scalar trackTime);
 
             //- Transform the position and physical properties of the particle
             //  according to the given transformation tensor

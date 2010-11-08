@@ -1,56 +1,75 @@
 {
-    bool closedVolume = p.needReference();
+    bool closedVolume = p_rgh.needReference();
+    dimensionedScalar compressibility = fvc::domainIntegrate(psi);
+    bool compressible = (compressibility.value() > SMALL);
 
     rho = thermo.rho();
 
-    volScalarField rUA = 1.0/UEqn().A();
-    surfaceScalarField rhorUAf("(rho*(1|A(U)))", fvc::interpolate(rho*rUA));
+    volScalarField rAU = 1.0/UEqn().A();
+    surfaceScalarField rhorAUf("(rho*(1|A(U)))", fvc::interpolate(rho*rAU));
 
-    U = rUA*UEqn().H();
+    U = rAU*UEqn().H();
 
     surfaceScalarField phiU
     (
         fvc::interpolate(rho)
        *(
             (fvc::interpolate(U) & mesh.Sf())
-          + fvc::ddtPhiCorr(rUA, rho, U, phi)
+          + fvc::ddtPhiCorr(rAU, rho, U, phi)
         )
     );
 
-    phi = phiU + fvc::interpolate(rho)*(g & mesh.Sf())*rhorUAf;
+    phi = phiU - rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf();
 
-    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
-        fvScalarMatrix pEqn
+        fvScalarMatrix p_rghDDtEqn
         (
-            fvm::ddt(psi, p)
+            fvc::ddt(rho) + psi*correction(fvm::ddt(p_rgh))
           + fvc::div(phi)
-          - fvm::laplacian(rhorUAf, p)
         );
 
-        if
-        (
-            oCorr == nOuterCorr-1
-         && corr == nCorr-1
-         && nonOrth == nNonOrthCorr
-        )
+        // Thermodynamic density needs to be updated by psi*d(p) after the
+        // pressure solution - done in 2 parts. Part 1:
+        thermo.rho() -= psi*p_rgh;
+
+        for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
         {
-            pEqn.solve(mesh.solver(p.name() + "Final"));
-        }
-        else
-        {
-            pEqn.solve(mesh.solver(p.name()));
+            fvScalarMatrix p_rghEqn
+            (
+                p_rghDDtEqn
+              - fvm::laplacian(rhorAUf, p_rgh)
+            );
+
+            p_rghEqn.solve
+            (
+                mesh.solver
+                (
+                    p_rgh.select
+                    (
+                        (
+                           oCorr == nOuterCorr-1
+                        && corr == nCorr-1
+                        && nonOrth == nNonOrthCorr
+                        )
+                    )
+                )
+            );
+
+            if (nonOrth == nNonOrthCorr)
+            {
+                phi += p_rghEqn.flux();
+            }
         }
 
-        if (nonOrth == nNonOrthCorr)
-        {
-            phi += pEqn.flux();
-        }
+        // Second part of thermodynamic density update
+        thermo.rho() += psi*p_rgh;
     }
 
     // Correct velocity field
-    U += rUA*fvc::reconstruct((phi - phiU)/rhorUAf);
+    U += rAU*fvc::reconstruct((phi - phiU)/rhorAUf);
     U.correctBoundaryConditions();
+
+    p = p_rgh + rho*gh;
 
     // Update pressure substantive derivative
     DpDt = fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
@@ -63,11 +82,12 @@
 
     // For closed-volume cases adjust the pressure and density levels
     // to obey overall mass continuity
-    if (closedVolume)
+    if (closedVolume && compressible)
     {
-        p += (massIni - fvc::domainIntegrate(psi*p))
-            /fvc::domainIntegrate(psi);
+        p += (initialMass - fvc::domainIntegrate(thermo.rho()))
+            /compressibility;
         rho = thermo.rho();
+        p_rgh = p - rho*gh;
     }
 
     // Update thermal conductivity

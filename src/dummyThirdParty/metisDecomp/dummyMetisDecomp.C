@@ -46,7 +46,7 @@ namespace Foam
     (
         decompositionMethod,
         metisDecomp,
-        dictionaryMesh
+        dictionary
     );
 }
 
@@ -80,12 +80,10 @@ Foam::label Foam::metisDecomp::decompose
 
 Foam::metisDecomp::metisDecomp
 (
-    const dictionary& decompositionDict,
-    const polyMesh& mesh
+    const dictionary& decompositionDict
 )
 :
-    decompositionMethod(decompositionDict),
-    mesh_(mesh)
+    decompositionMethod(decompositionDict)
 {}
 
 
@@ -93,6 +91,7 @@ Foam::metisDecomp::metisDecomp
 
 Foam::labelList Foam::metisDecomp::decompose
 (
+    const polyMesh& mesh,
     const pointField& points,
     const scalarField& pointWeights
 )
@@ -112,6 +111,7 @@ Foam::labelList Foam::metisDecomp::decompose
 
 Foam::labelList Foam::metisDecomp::decompose
 (
+    const polyMesh& mesh,
     const labelList& agglom,
     const pointField& agglomPoints,
     const scalarField& agglomWeights

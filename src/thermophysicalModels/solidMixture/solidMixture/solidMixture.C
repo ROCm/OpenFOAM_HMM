@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,14 +35,33 @@ Foam::solidMixture::solidMixture
     components_(thermophysicalProperties.lookup("solidComponents")),
     properties_(components_.size())
 {
+    // can use sub-dictionary "solidProperties" to avoid
+    // collisions with identically named gas-phase entries
+    const dictionary* subDictPtr = thermophysicalProperties.subDictPtr
+    (
+        "solidProperties"
+    );
+
+    const dictionary& props =
+    (
+        subDictPtr ? *subDictPtr : thermophysicalProperties
+    );
 
     forAll(components_, i)
     {
-        properties_.set
-        (
-            i,
-            solid::New(thermophysicalProperties.lookup(components_[i]))
-        );
+        properties_.set(i, solid::New(props.subDict(components_[i])));
+    }
+}
+
+
+Foam::solidMixture::solidMixture(const solidMixture& s)
+:
+    components_(s.components_),
+    properties_(s.properties_.size())
+{
+    forAll(properties_, i)
+    {
+        properties_.set(i, s.properties_(i)->clone());
     }
 }
 
@@ -82,26 +101,26 @@ Foam::scalar Foam::solidMixture::rho
     const scalarField& X
 ) const
 {
-    scalar tmp = 0.0;
+    scalar val = 0.0;
     forAll(properties_, i)
     {
-        tmp += properties_[i].rho()*X[i];
+        val += properties_[i].rho()*X[i];
     }
-    return tmp;
+    return val;
 }
 
 
-Foam::scalar Foam::solidMixture::cp
+Foam::scalar Foam::solidMixture::Cp
 (
     const scalarField& Y
 ) const
 {
-    scalar tmp = 0.0;
+    scalar val = 0.0;
     forAll(properties_, i)
     {
-        tmp += properties_[i].cp()*Y[i];
+        val += properties_[i].Cp()*Y[i];
     }
-    return tmp;
+    return val;
 }
 
 

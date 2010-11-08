@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,8 +56,8 @@ template<class Type>
 Type interpolationCellPointFace<Type>::interpolate
 (
     const vector& position,
-    const label nCell,
-    const label facei
+    const label cellI,
+    const label faceI
 ) const
 {
     Type ts[4];
@@ -68,10 +68,10 @@ Type interpolationCellPointFace<Type>::interpolate
     Type t = pTraits<Type>::zero;
 
     // only use face information when the position is on a face
-    if (facei < 0)
+    if (faceI < 0)
     {
-        const vector& cellCentre = this->pMesh_.cellCentres()[nCell];
-        const labelList& cellFaces = this->pMesh_.cells()[nCell];
+        const vector& cellCentre = this->pMesh_.cellCentres()[cellI];
+        const labelList& cellFaces = this->pMesh_.cells()[cellI];
 
         vector projection = position - cellCentre;
         tetPoints[3] = cellCentre;
@@ -85,9 +85,9 @@ Type interpolationCellPointFace<Type>::interpolate
         label closestFace = -1;
         scalar minDistance = GREAT;
 
-        forAll(cellFaces, facei)
+        forAll(cellFaces, faceI)
         {
-            label nFace = cellFaces[facei];
+            label nFace = cellFaces[faceI];
 
             vector normal = this->pMeshFaceAreas_[nFace];
             normal /= mag(normal);
@@ -97,7 +97,8 @@ Type interpolationCellPointFace<Type>::interpolate
             scalar multiplierNumerator = (faceCentreTmp - cellCentre) & normal;
             scalar multiplierDenominator = projection & normal;
 
-            // if normal and projection are not orthogonal this could be the one...
+            // if normal and projection are not orthogonal this could
+            // be the one...
             if (mag(multiplierDenominator) > SMALL)
             {
                 scalar multiplier = multiplierNumerator/multiplierDenominator;
@@ -159,10 +160,10 @@ Type interpolationCellPointFace<Type>::interpolate
         {
             minDistance = GREAT;
 
-            label facei = 0;
-            while (facei < cellFaces.size() && !foundTet)
+            label faceI = 0;
+            while (faceI < cellFaces.size() && !foundTet)
             {
-                label nFace = cellFaces[facei];
+                label nFace = cellFaces[faceI];
                 if (nFace < this->pMeshFaceAreas_.size())
                 {
                     foundTet = findTet
@@ -178,7 +179,7 @@ Type interpolationCellPointFace<Type>::interpolate
                         minDistance
                     );
                 }
-                facei++;
+                faceI++;
             }
         }
 
@@ -216,22 +217,28 @@ Type interpolationCellPointFace<Type>::interpolate
             }
             else
             {
-                label patchi = this->pMesh_.boundaryMesh().whichPatch(closestFace);
+                label patchI =
+                    this->pMesh_.boundaryMesh().whichPatch(closestFace);
 
                 // If the boundary patch is not empty use the face value
                 // else use the cell value
-                if (this->psi_.boundaryField()[patchi].size())
+                if (this->psi_.boundaryField()[patchI].size())
                 {
-                    ts[2] = this->psi_.boundaryField()[patchi]
-                        [this->pMesh_.boundaryMesh()[patchi].whichFace(closestFace)];
+                    ts[2] = this->psi_.boundaryField()[patchI]
+                    [
+                        this->pMesh_.boundaryMesh()[patchI].whichFace
+                        (
+                            closestFace
+                        )
+                    ];
                 }
                 else
                 {
-                    ts[2] = this->psi_[nCell];
+                    ts[2] = this->psi_[cellI];
                 }
             }
 
-            ts[3] = this->psi_[nCell];
+            ts[3] = this->psi_[cellI];
 
             for (label n=0; n<4; n++)
             {
@@ -244,9 +251,9 @@ Type interpolationCellPointFace<Type>::interpolate
         else
         {
             Info<< "interpolationCellPointFace<Type>::interpolate"
-                << "(const vector&, const label nCell) const : "
+                << "(const vector&, const label cellI) const : "
                 << "search failed; using closest cellFace value" << endl
-                << "cell number " << nCell << tab
+                << "cell number " << cellI << tab
                 << "position " << position << endl;
 
             if (closestFace < psis_.size())
@@ -255,18 +262,24 @@ Type interpolationCellPointFace<Type>::interpolate
             }
             else
             {
-                label patchi = this->pMesh_.boundaryMesh().whichPatch(closestFace);
+                label patchI =
+                    this->pMesh_.boundaryMesh().whichPatch(closestFace);
 
                 // If the boundary patch is not empty use the face value
                 // else use the cell value
-                if (this->psi_.boundaryField()[patchi].size())
+                if (this->psi_.boundaryField()[patchI].size())
                 {
-                    t = this->psi_.boundaryField()[patchi]
-                        [this->pMesh_.boundaryMesh()[patchi].whichFace(closestFace)];
+                    t = this->psi_.boundaryField()[patchI]
+                    [
+                        this->pMesh_.boundaryMesh()[patchI].whichFace
+                        (
+                            closestFace
+                        )
+                    ];
                 }
                 else
                 {
-                    t = this->psi_[nCell];
+                    t = this->psi_[cellI];
                 }
             }
         }
@@ -276,7 +289,7 @@ Type interpolationCellPointFace<Type>::interpolate
         bool foundTriangle = findTriangle
         (
             position,
-            facei,
+            faceI,
             tetPointLabels,
             phi
         );
@@ -291,48 +304,48 @@ Type interpolationCellPointFace<Type>::interpolate
             }
 
             // ... and the face value
-            if (facei < psis_.size())
+            if (faceI < psis_.size())
             {
-                t += phi[2]*psis_[facei];
+                t += phi[2]*psis_[faceI];
             }
             else
             {
-                label patchi = this->pMesh_.boundaryMesh().whichPatch(facei);
+                label patchI = this->pMesh_.boundaryMesh().whichPatch(faceI);
 
                 // If the boundary patch is not empty use the face value
                 // else use the cell value
-                if (this->psi_.boundaryField()[patchi].size())
+                if (this->psi_.boundaryField()[patchI].size())
                 {
-                    t += phi[2]*this->psi_.boundaryField()[patchi]
-                        [this->pMesh_.boundaryMesh()[patchi].whichFace(facei)];
+                    t += phi[2]*this->psi_.boundaryField()[patchI]
+                        [this->pMesh_.boundaryMesh()[patchI].whichFace(faceI)];
                 }
                 else
                 {
-                    t += phi[2]*this->psi_[nCell];
+                    t += phi[2]*this->psi_[cellI];
                 }
             }
         }
         else
         {
             // use face value only
-            if (facei < psis_.size())
+            if (faceI < psis_.size())
             {
-                t = psis_[facei];
+                t = psis_[faceI];
             }
             else
             {
-                label patchi = this->pMesh_.boundaryMesh().whichPatch(facei);
+                label patchI = this->pMesh_.boundaryMesh().whichPatch(faceI);
 
                 // If the boundary patch is not empty use the face value
                 // else use the cell value
-                if (this->psi_.boundaryField()[patchi].size())
+                if (this->psi_.boundaryField()[patchI].size())
                 {
-                    t = this->psi_.boundaryField()[patchi]
-                        [this->pMesh_.boundaryMesh()[patchi].whichFace(facei)];
+                    t = this->psi_.boundaryField()[patchI]
+                        [this->pMesh_.boundaryMesh()[patchI].whichFace(faceI)];
                 }
                 else
                 {
-                    t = this->psi_[nCell];
+                    t = this->psi_[cellI];
                 }
             }
         }

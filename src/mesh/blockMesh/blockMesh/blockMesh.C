@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -77,6 +77,23 @@ const Foam::polyMesh& Foam::blockMesh::topology() const
 }
 
 
+Foam::PtrList<Foam::dictionary> Foam::blockMesh::patchDicts() const
+{
+    const polyPatchList& patchTopologies = topology().boundaryMesh();
+
+    PtrList<dictionary> patchDicts(patchTopologies.size());
+
+    forAll(patchTopologies, patchI)
+    {
+        OStringStream os;
+        patchTopologies[patchI].write(os);
+        IStringStream is(os.str());
+        patchDicts.set(patchI, new dictionary(is));
+    }
+    return patchDicts;
+}
+
+
 Foam::scalar Foam::blockMesh::scaleFactor() const
 {
     return scaleFactor_;
@@ -122,16 +139,16 @@ Foam::wordList Foam::blockMesh::patchNames() const
 }
 
 
-Foam::wordList Foam::blockMesh::patchTypes() const
-{
-    return topology().boundaryMesh().types();
-}
-
-
-Foam::wordList Foam::blockMesh::patchPhysicalTypes() const
-{
-    return topology().boundaryMesh().physicalTypes();
-}
+//Foam::wordList Foam::blockMesh::patchTypes() const
+//{
+//    return topology().boundaryMesh().types();
+//}
+//
+//
+//Foam::wordList Foam::blockMesh::patchPhysicalTypes() const
+//{
+//    return topology().boundaryMesh().physicalTypes();
+//}
 
 
 Foam::label Foam::blockMesh::numZonedBlocks() const

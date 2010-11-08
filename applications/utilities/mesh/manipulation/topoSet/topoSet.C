@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,10 +49,17 @@ int main(int argc, char *argv[])
         "specify an alternative dictionary for the topoSet dictionary"
     );
 #   include "addRegionOption.H"
+    argList::addBoolOption
+    (
+        "noSync",
+        "do not synchronise selection across coupled patches"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createNamedPolyMesh.H"
+
+    const bool noSync = args.optionFound("noSync");
 
     const word dictName("topoSetDict");
 
@@ -76,7 +83,7 @@ int main(int argc, char *argv[])
             (
                 dictPath,
                 mesh,
-                IOobject::MUST_READ,
+                IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE
             )
           : IOobject
@@ -84,7 +91,7 @@ int main(int argc, char *argv[])
                 dictName,
                 runTime.system(),
                 mesh,
-                IOobject::MUST_READ,
+                IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE
             )
         ) 
@@ -140,6 +147,23 @@ int main(int argc, char *argv[])
             case topoSetSource::NEW:
             case topoSetSource::ADD:
             case topoSetSource::DELETE:
+            {
+                Info<< "    Applying source " << word(dict.lookup("source"))
+                    << endl;
+                autoPtr<topoSetSource> source = topoSetSource::New
+                (
+                    dict.lookup("source"),
+                    mesh,
+                    dict.subDict("sourceInfo")
+                );
+
+                source().applyToSet(action, currentSet());
+                // Synchronize for coupled patches.
+                if (!noSync) currentSet().sync(mesh);
+                currentSet().write();
+            }
+            break;
+
             case topoSetSource::SUBSET:
             {
                 Info<< "    Applying source " << word(dict.lookup("source"))
@@ -148,12 +172,28 @@ int main(int argc, char *argv[])
                 (
                     dict.lookup("source"),
                     mesh,
-                    dict.subDict("sourceDict")
+                    dict.subDict("sourceInfo")
                 );
 
-                source().applyToSet(action, currentSet());
+                // Backup current set.
+                autoPtr<topoSet> oldSet
+                (
+                    topoSet::New
+                    (
+                        setType,
+                        mesh,
+                        currentSet().name() + "_old2",
+                        currentSet()
+                    )
+                );
+
+                currentSet().clear();
+                source().applyToSet(topoSetSource::NEW, currentSet());
+
+                // Combine new value of currentSet with old one.
+                currentSet().subset(oldSet());
                 // Synchronize for coupled patches.
-                currentSet().sync(mesh);
+                if (!noSync) currentSet().sync(mesh);
                 currentSet().write();
             }
             break;

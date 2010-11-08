@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -89,7 +89,7 @@ void Foam::meshRefinement::calcNeighbourData
     {
         const polyPatch& pp = patches[patchI];
 
-        const unallocLabelList& faceCells = pp.faceCells();
+        const labelUList& faceCells = pp.faceCells();
         const vectorField::subField faceCentres = pp.faceCentres();
         const vectorField::subField faceAreas = pp.faceAreas();
 
@@ -146,8 +146,8 @@ void Foam::meshRefinement::calcNeighbourData
     }
 
     // Swap coupled boundaries. Apply separation to cc since is coordinate.
-    syncTools::swapBoundaryFaceList(mesh_, neiCc, true);
-    syncTools::swapBoundaryFaceList(mesh_, neiLevel, false);
+    syncTools::swapBoundaryFacePositions(mesh_, neiCc);
+    syncTools::swapBoundaryFaceList(mesh_, neiLevel);
 }
 
 
@@ -235,7 +235,7 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
 
     // Make sure both sides have same information. This should be
     // case in general since same vectors but just to make sure.
-    syncTools::syncFaceList(mesh_, surfaceIndex_, maxEqOp<label>(), false);
+    syncTools::syncFaceList(mesh_, surfaceIndex_, maxEqOp<label>());
 
     label nHits = countHits();
     label nTotHits = returnReduce(nHits, sumOp<label>());
@@ -258,6 +258,8 @@ void Foam::meshRefinement::checkData()
     meshCutter_.checkRefinementLevels(1, labelList(0));
 
 
+    label nBnd = mesh_.nFaces()-mesh_.nInternalFaces();
+
     Pout<< "meshRefinement::checkData() : Checking synchronization."
         << endl;
 
@@ -267,17 +269,17 @@ void Foam::meshRefinement::checkData()
         pointField::subList boundaryFc
         (
             mesh_.faceCentres(),
-            mesh_.nFaces()-mesh_.nInternalFaces(),
+            nBnd,
             mesh_.nInternalFaces()
         );
 
         // Get neighbouring face centres
         pointField neiBoundaryFc(boundaryFc);
-        syncTools::swapBoundaryFaceList
+        syncTools::syncBoundaryFacePositions
         (
             mesh_,
             neiBoundaryFc,
-            true
+            eqOp<point>()
         );
 
         // Compare
@@ -292,8 +294,8 @@ void Foam::meshRefinement::checkData()
     // Check meshRefinement
     {
         // Get boundary face centre and level. Coupled aware.
-        labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-        pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
+        labelList neiLevel(nBnd);
+        pointField neiCc(nBnd);
         calcNeighbourData(neiLevel, neiCc);
 
         // Collect segments we want to test for
@@ -327,11 +329,22 @@ void Foam::meshRefinement::checkData()
                 surfaceLevel
             );
         }
+        // Get the coupled hit
+        labelList neiHit
+        (
+            SubList<label>
+            (
+                surfaceHit,
+                nBnd,
+                mesh_.nInternalFaces()
+            )
+        );
+        syncTools::swapBoundaryFaceList(mesh_, neiHit);
 
         // Check
         forAll(surfaceHit, faceI)
         {
-            if (surfaceHit[faceI] != surfaceIndex_[faceI])
+            if (surfaceIndex_[faceI] != surfaceHit[faceI])
             {
                 if (mesh_.isInternalFace(faceI))
                 {
@@ -346,7 +359,11 @@ void Foam::meshRefinement::checkData()
                         << mesh_.cellCentres()[mesh_.faceNeighbour()[faceI]]
                         << endl;
                 }
-                else
+                else if
+                (
+                    surfaceIndex_[faceI]
+                 != neiHit[faceI-mesh_.nInternalFaces()]
+                )
                 {
                     WarningIn("meshRefinement::checkData()")
                         << "Boundary face:" << faceI
@@ -355,6 +372,7 @@ void Foam::meshRefinement::checkData()
                         << " current:" << surfaceHit[faceI]
                         << " ownCc:"
                         << mesh_.cellCentres()[mesh_.faceOwner()[faceI]]
+                        << " end:" << end[faceI]
                         << endl;
                 }
             }
@@ -372,8 +390,7 @@ void Foam::meshRefinement::checkData()
         syncTools::swapBoundaryFaceList
         (
             mesh_,
-            neiBoundarySurface,
-            false
+            neiBoundarySurface
         );
 
         // Compare
@@ -1110,6 +1127,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
 
                 const wordList& fzNames = surfaces().faceZoneNames();
                 const faceZoneMesh& fZones = mesh_.faceZones();
+                const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
 
                 // Get faces whose owner and neighbour should stay together,
                 // i.e. they are not 'blocked'.
@@ -1123,10 +1141,18 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
 
                         forAll(fZone, i)
                         {
-                            if (blockedFace[fZone[i]])
+                            label faceI = fZone[i];
+                            if (blockedFace[faceI])
                             {
-                                blockedFace[fZone[i]] = false;
-                                nUnblocked++;
+                                if
+                                (
+                                    mesh_.isInternalFace(faceI)
+                                 || pbm[pbm.whichPatch(faceI)].coupled()
+                                )
+                                {
+                                    blockedFace[faceI] = false;
+                                    nUnblocked++;
+                                }
                             }
                         }
                     }
@@ -1140,8 +1166,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
                 (
                     mesh_,
                     blockedFace,
-                    andEqOp<bool>(),    // combine operator
-                    false               // separation
+                    andEqOp<bool>()     // combine operator
                 );
             }
             reduce(nUnblocked, sumOp<label>());
@@ -1198,6 +1223,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
                 // Normal decomposition
                 distribution = decomposer.decompose
                 (
+                    mesh_,
                     mesh_.cellCentres(),
                     cellWeights
                 );
@@ -1208,6 +1234,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
             // Normal decomposition
             distribution = decomposer.decompose
             (
+                mesh_,
                 mesh_.cellCentres(),
                 cellWeights
             );
@@ -1509,7 +1536,7 @@ void Foam::meshRefinement::checkCoupledFaceZones(const polyMesh& mesh)
     }
 
     labelList neiFaceToZone(faceToZone);
-    syncTools::swapBoundaryFaceList(mesh, neiFaceToZone, false);
+    syncTools::swapBoundaryFaceList(mesh, neiFaceToZone);
 
     forAll(faceToZone, i)
     {
@@ -1532,7 +1559,7 @@ Foam::label Foam::meshRefinement::addPatch
 (
     fvMesh& mesh,
     const word& patchName,
-    const word& patchType
+    const dictionary& patchInfo
 )
 {
     polyBoundaryMesh& polyPatches =
@@ -1541,21 +1568,8 @@ Foam::label Foam::meshRefinement::addPatch
     const label patchI = polyPatches.findPatchID(patchName);
     if (patchI != -1)
     {
-        if (polyPatches[patchI].type() == patchType)
-        {
-            // Already there
-            return patchI;
-        }
-        //else
-        //{
-        //    FatalErrorIn
-        //    (
-        //        "meshRefinement::addPatch(fvMesh&, const word&, const word&)"
-        //    )   << "Patch " << patchName << " already exists but with type "
-        //        << patchType << nl
-        //        << "Current patch names:" << polyPatches.names()
-        //        << exit(FatalError);
-        //}
+        // Already there
+        return patchI;
     }
 
 
@@ -1585,6 +1599,10 @@ Foam::label Foam::meshRefinement::addPatch
 
     fvBoundaryMesh& fvPatches = const_cast<fvBoundaryMesh&>(mesh.boundary());
 
+    dictionary patchDict(patchInfo);
+    patchDict.set("nFaces", 0);
+    patchDict.set("startFace", startFaceI);
+
     // Add polyPatch at the end
     polyPatches.setSize(sz+1);
     polyPatches.set
@@ -1592,10 +1610,8 @@ Foam::label Foam::meshRefinement::addPatch
         sz,
         polyPatch::New
         (
-            patchType,
             patchName,
-            0,              // size
-            startFaceI,
+            patchDict,
             insertPatchI,
             polyPatches
         )
@@ -1702,7 +1718,7 @@ Foam::label Foam::meshRefinement::addPatch
 Foam::label Foam::meshRefinement::addMeshedPatch
 (
     const word& name,
-    const word& type
+    const dictionary& patchInfo
 )
 {
     label meshedI = findIndex(meshedPatches_, name);
@@ -1715,7 +1731,7 @@ Foam::label Foam::meshRefinement::addMeshedPatch
     else
     {
         // Add patch
-        label patchI = addPatch(mesh_, name, type);
+        label patchI = addPatch(mesh_, name, patchInfo);
 
         // Store
         label sz = meshedPatches_.size();
@@ -1729,16 +1745,23 @@ Foam::label Foam::meshRefinement::addMeshedPatch
 
 Foam::labelList Foam::meshRefinement::meshedPatches() const
 {
-    labelList patchIDs(meshedPatches_.size());
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    DynamicList<label> patchIDs(meshedPatches_.size());
     forAll(meshedPatches_, i)
     {
-        patchIDs[i] = mesh_.boundaryMesh().findPatchID(meshedPatches_[i]);
+        label patchI = patches.findPatchID(meshedPatches_[i]);
 
-        if (patchIDs[i] == -1)
+        if (patchI == -1)
         {
             FatalErrorIn("meshRefinement::meshedPatches() const")
                 << "Problem : did not find patch " << meshedPatches_[i]
+                << endl << "Valid patches are " << patches.names()
                 << abort(FatalError);
+        }
+        if (!polyPatch::constraintType(patches[patchI].type()))
+        {
+            patchIDs.append(patchI);
         }
     }
 

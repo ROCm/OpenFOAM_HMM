@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,6 +42,9 @@ Usage
     @param -copyUniform \n
     Copy any @a uniform directories too.
 
+    @param -constant \n
+    Override controlDict settings and use constant directory.
+
     @param -fields \n
     Use existing geometry decomposition and convert fields only.
 
@@ -62,14 +65,19 @@ Usage
 #include "OSspecific.H"
 #include "fvCFD.H"
 #include "IOobjectList.H"
-#include "processorFvPatchFields.H"
 #include "domainDecomposition.H"
 #include "labelIOField.H"
+#include "labelFieldIOField.H"
 #include "scalarIOField.H"
+#include "scalarFieldIOField.H"
 #include "vectorIOField.H"
+#include "vectorFieldIOField.H"
 #include "sphericalTensorIOField.H"
+#include "sphericalTensorFieldIOField.H"
 #include "symmTensorIOField.H"
+#include "symmTensorFieldIOField.H"
 #include "tensorIOField.H"
+#include "tensorFieldIOField.H"
 #include "pointFields.H"
 
 #include "readFields.H"
@@ -114,6 +122,11 @@ int main(int argc, char *argv[])
         "ifRequired",
         "only decompose geometry if the number of domains has changed"
     );
+    argList::addBoolOption
+    (
+        "constant",
+        "include the 'constant/' dir in the times list"
+    );
 
     #include "setRootCase.H"
 
@@ -133,6 +146,20 @@ int main(int argc, char *argv[])
     bool ifRequiredDecomposition = args.optionFound("ifRequired");
 
     #include "createTime.H"
+
+    // Allow -constant to override controlDict settings.
+    if (args.optionFound("constant"))
+    {
+        instantList timeDirs = timeSelector::select0(runTime, args);
+        if (runTime.timeName() != runTime.constant())
+        {
+            FatalErrorIn(args.executable())
+                << "No '" << runTime.constant() << "' time present." << endl
+                << "Valid times are " << runTime.times()
+                << exit(FatalError);
+        }
+    }
+
 
     Info<< "Time = " << runTime.timeName() << endl;
 
@@ -164,7 +191,7 @@ int main(int argc, char *argv[])
                 runTime.time().system(),
                 regionDir,          // use region if non-standard
                 runTime,
-                IOobject::MUST_READ,
+                IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
                 false
             )
@@ -375,17 +402,40 @@ int main(int argc, char *argv[])
     PtrList< List<SLList<indexedParticle*>*> > cellParticles(cloudDirs.size());
 
     PtrList<PtrList<labelIOField> > lagrangianLabelFields(cloudDirs.size());
+    PtrList<PtrList<labelFieldCompactIOField> > lagrangianLabelFieldFields
+    (
+        cloudDirs.size()
+    );
     PtrList<PtrList<scalarIOField> > lagrangianScalarFields(cloudDirs.size());
+    PtrList<PtrList<scalarFieldCompactIOField> > lagrangianScalarFieldFields
+    (
+        cloudDirs.size()
+    );
     PtrList<PtrList<vectorIOField> > lagrangianVectorFields(cloudDirs.size());
+    PtrList<PtrList<vectorFieldCompactIOField> > lagrangianVectorFieldFields
+    (
+        cloudDirs.size()
+    );
     PtrList<PtrList<sphericalTensorIOField> > lagrangianSphericalTensorFields
     (
         cloudDirs.size()
     );
+    PtrList<PtrList<sphericalTensorFieldCompactIOField> >
+        lagrangianSphericalTensorFieldFields(cloudDirs.size());
     PtrList<PtrList<symmTensorIOField> > lagrangianSymmTensorFields
     (
         cloudDirs.size()
     );
+    PtrList<PtrList<symmTensorFieldCompactIOField> >
+    lagrangianSymmTensorFieldFields
+    (
+        cloudDirs.size()
+    );
     PtrList<PtrList<tensorIOField> > lagrangianTensorFields
+    (
+        cloudDirs.size()
+    );
+    PtrList<PtrList<tensorFieldCompactIOField> > lagrangianTensorFieldFields
     (
         cloudDirs.size()
     );
@@ -488,11 +538,25 @@ int main(int argc, char *argv[])
                 lagrangianLabelFields
             );
 
+            lagrangianFieldDecomposer::readFieldFields
+            (
+                cloudI,
+                lagrangianObjects,
+                lagrangianLabelFieldFields
+            );
+
             lagrangianFieldDecomposer::readFields
             (
                 cloudI,
                 lagrangianObjects,
                 lagrangianScalarFields
+            );
+
+            lagrangianFieldDecomposer::readFieldFields
+            (
+                cloudI,
+                lagrangianObjects,
+                lagrangianScalarFieldFields
             );
 
             lagrangianFieldDecomposer::readFields
@@ -502,11 +566,25 @@ int main(int argc, char *argv[])
                 lagrangianVectorFields
             );
 
+            lagrangianFieldDecomposer::readFieldFields
+            (
+                cloudI,
+                lagrangianObjects,
+                lagrangianVectorFieldFields
+            );
+
             lagrangianFieldDecomposer::readFields
             (
                 cloudI,
                 lagrangianObjects,
                 lagrangianSphericalTensorFields
+            );
+
+            lagrangianFieldDecomposer::readFieldFields
+            (
+                cloudI,
+                lagrangianObjects,
+                lagrangianSphericalTensorFieldFields
             );
 
             lagrangianFieldDecomposer::readFields
@@ -516,11 +594,25 @@ int main(int argc, char *argv[])
                 lagrangianSymmTensorFields
             );
 
+            lagrangianFieldDecomposer::readFieldFields
+            (
+                cloudI,
+                lagrangianObjects,
+                lagrangianSymmTensorFieldFields
+            );
+
             lagrangianFieldDecomposer::readFields
             (
                 cloudI,
                 lagrangianObjects,
                 lagrangianTensorFields
+            );
+
+            lagrangianFieldDecomposer::readFieldFields
+            (
+                cloudI,
+                lagrangianObjects,
+                lagrangianTensorFieldFields
             );
 
             cloudI++;
@@ -530,11 +622,17 @@ int main(int argc, char *argv[])
     lagrangianPositions.setSize(cloudI);
     cellParticles.setSize(cloudI);
     lagrangianLabelFields.setSize(cloudI);
+    lagrangianLabelFieldFields.setSize(cloudI);
     lagrangianScalarFields.setSize(cloudI);
+    lagrangianScalarFieldFields.setSize(cloudI);
     lagrangianVectorFields.setSize(cloudI);
+    lagrangianVectorFieldFields.setSize(cloudI);
     lagrangianSphericalTensorFields.setSize(cloudI);
+    lagrangianSphericalTensorFieldFields.setSize(cloudI);
     lagrangianSymmTensorFields.setSize(cloudI);
+    lagrangianSymmTensorFieldFields.setSize(cloudI);
     lagrangianTensorFields.setSize(cloudI);
+    lagrangianTensorFieldFields.setSize(cloudI);
 
 
     // Any uniform data to copy/link?
@@ -589,6 +687,19 @@ int main(int argc, char *argv[])
             )
         );
 
+        labelIOList faceProcAddressing
+        (
+            IOobject
+            (
+                "faceProcAddressing",
+                procMesh.facesInstance(),
+                procMesh.meshSubDir,
+                procMesh,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        );
+
         labelIOList cellProcAddressing
         (
             IOobject
@@ -630,19 +741,6 @@ int main(int argc, char *argv[])
          || surfaceTensorFields.size()
         )
         {
-            labelIOList faceProcAddressing
-            (
-                IOobject
-                (
-                    "faceProcAddressing",
-                    procMesh.facesInstance(),
-                    procMesh.meshSubDir,
-                    procMesh,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                )
-            );
-
             fvFieldDecomposer fieldDecomposer
             (
                 mesh,
@@ -716,6 +814,7 @@ int main(int argc, char *argv[])
                 (
                     mesh,
                     procMesh,
+                    faceProcAddressing,
                     cellProcAddressing,
                     cloudDirs[cloudI],
                     lagrangianPositions[cloudI],
@@ -726,11 +825,17 @@ int main(int argc, char *argv[])
                 if
                 (
                     lagrangianLabelFields[cloudI].size()
+                 || lagrangianLabelFieldFields[cloudI].size()
                  || lagrangianScalarFields[cloudI].size()
+                 || lagrangianScalarFieldFields[cloudI].size()
                  || lagrangianVectorFields[cloudI].size()
+                 || lagrangianVectorFieldFields[cloudI].size()
                  || lagrangianSphericalTensorFields[cloudI].size()
+                 || lagrangianSphericalTensorFieldFields[cloudI].size()
                  || lagrangianSymmTensorFields[cloudI].size()
+                 || lagrangianSymmTensorFieldFields[cloudI].size()
                  || lagrangianTensorFields[cloudI].size()
+                 || lagrangianTensorFieldFields[cloudI].size()
                 )
                 {
                     fieldDecomposer.decomposeFields
@@ -738,30 +843,60 @@ int main(int argc, char *argv[])
                         cloudDirs[cloudI],
                         lagrangianLabelFields[cloudI]
                     );
+                    fieldDecomposer.decomposeFieldFields
+                    (
+                        cloudDirs[cloudI],
+                        lagrangianLabelFieldFields[cloudI]
+                    );
                     fieldDecomposer.decomposeFields
                     (
                         cloudDirs[cloudI],
                         lagrangianScalarFields[cloudI]
+                    );
+                    fieldDecomposer.decomposeFieldFields
+                    (
+                        cloudDirs[cloudI],
+                        lagrangianScalarFieldFields[cloudI]
                     );
                     fieldDecomposer.decomposeFields
                     (
                         cloudDirs[cloudI],
                         lagrangianVectorFields[cloudI]
                     );
+                    fieldDecomposer.decomposeFieldFields
+                    (
+                        cloudDirs[cloudI],
+                        lagrangianVectorFieldFields[cloudI]
+                    );
                     fieldDecomposer.decomposeFields
                     (
                         cloudDirs[cloudI],
                         lagrangianSphericalTensorFields[cloudI]
+                    );
+                    fieldDecomposer.decomposeFieldFields
+                    (
+                        cloudDirs[cloudI],
+                        lagrangianSphericalTensorFieldFields[cloudI]
                     );
                     fieldDecomposer.decomposeFields
                     (
                         cloudDirs[cloudI],
                         lagrangianSymmTensorFields[cloudI]
                     );
+                    fieldDecomposer.decomposeFieldFields
+                    (
+                        cloudDirs[cloudI],
+                        lagrangianSymmTensorFieldFields[cloudI]
+                    );
                     fieldDecomposer.decomposeFields
                     (
                         cloudDirs[cloudI],
                         lagrangianTensorFields[cloudI]
+                    );
+                    fieldDecomposer.decomposeFieldFields
+                    (
+                        cloudDirs[cloudI],
+                        lagrangianTensorFieldFields[cloudI]
                     );
                 }
             }

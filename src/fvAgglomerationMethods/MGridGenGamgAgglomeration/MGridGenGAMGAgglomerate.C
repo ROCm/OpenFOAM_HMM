@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,8 +50,8 @@ makeCompactCellFaceAddressingAndFaceWeights
     const label nFineCells = fineAddressing.size();
     const label nFineFaces = fineAddressing.upperAddr().size();
 
-    const unallocLabelList& upperAddr = fineAddressing.upperAddr();
-    const unallocLabelList& lowerAddr = fineAddressing.lowerAddr();
+    const labelUList& upperAddr = fineAddressing.upperAddr();
+    const labelUList& lowerAddr = fineAddressing.lowerAddr();
 
     // Number of neighbours for each cell
     labelList nNbrs(nFineCells, 0);

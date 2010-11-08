@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -234,9 +234,7 @@ void Foam::orientedSurface::propagateOrientation
     (
         s,
         samplePoint,
-        nearestFaceI,
-        nearestPt,
-        10*SMALL
+        nearestFaceI
     );
 
     if (side == triSurfaceTools::UNKNOWN)

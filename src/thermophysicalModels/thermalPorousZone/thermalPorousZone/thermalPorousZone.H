@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,11 +29,11 @@ Description
     equations.
 
 See Also
-    porousZone, thermalPorousZones and coordinateSystems
+    porousZone, thermalPorousZones and coordinateSystems with run-time
+    selectable thermal model
 
 SourceFiles
     thermalPorousZone.C
-    thermalPorousZoneTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -41,6 +41,7 @@ SourceFiles
 #define thermalPorousZone_H
 
 #include "porousZone.H"
+#include "thermalModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,7 +52,7 @@ class fvMesh;
 class basicThermo;
 
 /*---------------------------------------------------------------------------*\
-                        Class thermalPorousZone Declaration
+                       Class thermalPorousZone Declaration
 \*---------------------------------------------------------------------------*/
 
 class thermalPorousZone
@@ -60,15 +61,14 @@ class thermalPorousZone
 {
     // Private data
 
-        //- Temperature in the porous-zone
-        dimensionedScalar T_;
-
-
         //- Disallow default bitwise copy construct
         thermalPorousZone(const thermalPorousZone&);
 
         //- Disallow default bitwise assignment
         void operator=(const thermalPorousZone&);
+
+        //- Thermal model
+        autoPtr<porousMedia::thermalModel> model_;
 
 
 public:
@@ -76,7 +76,12 @@ public:
     // Constructors
 
         //- Construct from components
-        thermalPorousZone(const word& name, const fvMesh&, const dictionary&);
+        thermalPorousZone
+        (
+            const keyType& key,
+            const fvMesh& mesh,
+            const dictionary& dict
+        );
 
         //- Return clone
         autoPtr<thermalPorousZone> clone() const
@@ -101,12 +106,12 @@ public:
 
             autoPtr<thermalPorousZone> operator()(Istream& is) const
             {
-                word name(is);
+                keyType key(is);
                 dictionary dict(is);
 
                 return autoPtr<thermalPorousZone>
                 (
-                    new thermalPorousZone(name, mesh_, dict)
+                    new thermalPorousZone(key, mesh_, dict)
                 );
             }
         };
@@ -118,20 +123,6 @@ public:
 
 
     // Member Functions
-
-        // Access
-
-            //- Return the temperature in the porous-zone
-            const dimensionedScalar& T() const
-            {
-                return T_;
-            }
-
-            //- Edit access to the temperature in the porous-zone
-            dimensionedScalar& T()
-            {
-                return T_;
-            }
 
         //- Add the thermal source to the enthalpy equation
         void addEnthalpySource
@@ -146,12 +137,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-//#   include "thermalPorousZoneTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

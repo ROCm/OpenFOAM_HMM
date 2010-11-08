@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,8 +26,6 @@ License
 #include "faceZoneSet.H"
 #include "mapPolyMesh.H"
 #include "polyMesh.H"
-#include "processorPolyPatch.H"
-#include "cyclicPolyPatch.H"
 
 #include "addToRunTimeSelectionTable.H"
 
@@ -84,6 +82,7 @@ faceZoneSet::faceZoneSet
     if
     (
         (r == IOobject::MUST_READ)
+     || (r == IOobject::MUST_READ_IF_MODIFIED)
      || (r == IOobject::READ_IF_PRESENT && zoneID != -1)
     )
     {

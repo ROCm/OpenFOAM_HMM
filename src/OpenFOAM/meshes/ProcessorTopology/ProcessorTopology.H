@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,6 +29,9 @@ Description
     on all processors the processor-processor connection table.
 
     *this[procI] gives the list of neighbouring processors.
+
+    TODO: This does not currently correctly support multiple processor
+    patches connecting two processors.
 
 SourceFiles
     ProcessorTopology.C

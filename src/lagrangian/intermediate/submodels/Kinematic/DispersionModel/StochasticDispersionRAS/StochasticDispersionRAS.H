@@ -59,11 +59,19 @@ public:
     // Constructors
 
         //- Construct from components
-        StochasticDispersionRAS
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+        StochasticDispersionRAS(const dictionary& dict, CloudType& owner);
+
+        //- Construct copy
+        StochasticDispersionRAS(StochasticDispersionRAS<CloudType>& dm);
+
+        //- Construct and return a clone
+        virtual autoPtr<DispersionModel<CloudType> > clone()
+        {
+            return autoPtr<DispersionModel<CloudType> >
+            (
+                new StochasticDispersionRAS<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -72,14 +80,11 @@ public:
 
     // Member Functions
 
-        //- Flag to indicate whether model activates injection model
-        virtual bool active() const;
-
         //- Update (disperse particles)
         virtual vector update
         (
             const scalar dt,
-            const label celli,
+            const label cellI,
             const vector& U,
             const vector& Uc,
             vector& UTurb,

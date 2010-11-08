@@ -52,13 +52,19 @@ class ConstantRateDevolatilisation
 
         // Model constants
 
-            //- Rate constant (suggested default = 12) [1/s]
-            const scalar A0_;
+            //- List of volatile data - (name A0)
+            List<Tuple2<word, scalar> > volatileData_;
+
+            //- List of initial volatile mass fractions
+            List<scalar> YVolatile0_;
+
+            //- Mapping between local and cloud gaseous species
+            List<label> volatileToGasMap_;
 
             //- Volatile residual coefficient (0-1)
             //  When the fraction of volatiles are depleted below this
             //  threshold, combustion can occur
-            const scalar volatileResidualCoeff_;
+            const scalar residualCoeff_;
 
 
 public:
@@ -70,11 +76,22 @@ public:
     // Constructors
 
         //- Construct from dictionary
+        ConstantRateDevolatilisation(const dictionary& dict, CloudType& owner);
+
+        //- Construct copy
         ConstantRateDevolatilisation
         (
-            const dictionary& dict,
-            CloudType& owner
+            const ConstantRateDevolatilisation<CloudType>& dm
         );
+
+        //- Construct and return a clone
+        virtual autoPtr<DevolatilisationModel<CloudType> > clone() const
+        {
+            return autoPtr<DevolatilisationModel<CloudType> >
+            (
+                new ConstantRateDevolatilisation<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -83,19 +100,16 @@ public:
 
     // Member Functions
 
-        //- Flag to indicate whether model activates devolatilisation model
-        virtual bool active() const;
-
         //- Update model
-        virtual scalar calculate
+        virtual void calculate
         (
             const scalar dt,
             const scalar mass0,
             const scalar mass,
             const scalar T,
-            const scalar YVolatile0,
-            const scalar YVolatile,
-            bool& canCombust
+            const scalarField& YGasEff,
+            bool& canCombust,
+            scalarField& dMassDV
         ) const;
 };
 

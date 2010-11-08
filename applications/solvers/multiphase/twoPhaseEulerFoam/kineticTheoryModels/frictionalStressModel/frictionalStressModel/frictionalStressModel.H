@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,7 @@ namespace Foam
 
 class frictionalStressModel
 {
-    // Private Member Functions
+    // Private member functions
 
         //- Disallow default bitwise copy construct
         frictionalStressModel(const frictionalStressModel&);
@@ -127,7 +127,7 @@ public:
             const volScalarField& alpha,
             const dimensionedScalar& alphaMax,
             const volScalarField& pf,
-            const volTensorField& D,
+            const volSymmTensorField& D,
             const dimensionedScalar& phi
         ) const = 0;
 };

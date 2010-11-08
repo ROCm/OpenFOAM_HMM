@@ -41,7 +41,7 @@ Description
 #include "wallPolyPatch.H"
 #include "symmetryPolyPatch.H"
 #include "wedgePolyPatch.H"
-#include "cyclicPolyPatch.H"
+#include "oldCyclicPolyPatch.H"
 #include "unitConversion.H"
 
 using namespace Foam;

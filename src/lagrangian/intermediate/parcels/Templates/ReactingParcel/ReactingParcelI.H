@@ -26,16 +26,42 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
+inline
+Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties()
+:
+    ThermoParcel<ParcelType>::constantProperties(),
+    pMin_(0.0),
+    constantVolume_(false),
+    Tvap_(0.0),
+    Tbp_(0.0)
+{}
+
+
+template<class ParcelType>
+inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
+(
+    const constantProperties& cp
+)
+:
+    ThermoParcel<ParcelType>::constantProperties(cp),
+    pMin_(cp.pMin_),
+    constantVolume_(cp.constantVolume_),
+    Tvap_(cp.Tvap_),
+    Tbp_(cp.Tbp_)
+{}
+
+
+template<class ParcelType>
 inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
 (
     const dictionary& parentDict
 )
 :
     ThermoParcel<ParcelType>::constantProperties(parentDict),
-    pMin_(dimensionedScalar(this->dict().lookup("pMin")).value()),
+    pMin_(readScalar(this->dict().lookup("pMin"))),
     constantVolume_(this->dict().lookup("constantVolume")),
-    Tvap_(dimensionedScalar(this->dict().lookup("Tvap")).value()),
-    Tbp_(dimensionedScalar(this->dict().lookup("Tbp")).value())
+    Tvap_(readScalar(this->dict().lookup("Tvap"))),
+    Tbp_(readScalar(this->dict().lookup("Tbp")))
 {}
 
 
@@ -43,30 +69,19 @@ template<class ParcelType>
 inline Foam::ReactingParcel<ParcelType>::trackData::trackData
 (
     ReactingCloud<ParcelType>& cloud,
-    const constantProperties& constProps,
-    const interpolation<scalar>& rhoInterp,
-    const interpolation<vector>& UInterp,
-    const interpolation<scalar>& muInterp,
-    const interpolation<scalar>& TInterp,
-    const interpolation<scalar>& CpInterp,
-    const interpolation<scalar>& pInterp,
-    const vector& g
+    typename ThermoParcel<ParcelType>::trackData::trackPart part
 )
 :
-    ThermoParcel<ParcelType>::trackData
-    (
-        cloud,
-        constProps,
-        rhoInterp,
-        UInterp,
-        muInterp,
-        TInterp,
-        CpInterp,
-        g
-    ),
+    ThermoParcel<ParcelType>::trackData(cloud, part),
     cloud_(cloud),
-    constProps_(constProps),
-    pInterp_(pInterp)
+    pInterp_
+    (
+        interpolation<scalar>::New
+        (
+            cloud.solution().interpolationSchemes(),
+            cloud.p()
+        )
+    )
 {}
 
 
@@ -75,10 +90,12 @@ inline Foam::ReactingParcel<ParcelType>::ReactingParcel
 (
     ReactingCloud<ParcelType>& owner,
     const vector& position,
-    const label cellI
+    const label cellI,
+    const label tetFaceI,
+    const label tetPtI
 )
 :
-    ThermoParcel<ParcelType>(owner, position, cellI),
+    ThermoParcel<ParcelType>(owner, position, cellI, tetFaceI, tetPtI),
     mass0_(0.0),
     Y_(0),
     pc_(0.0)
@@ -91,9 +108,12 @@ inline Foam::ReactingParcel<ParcelType>::ReactingParcel
     ReactingCloud<ParcelType>& owner,
     const vector& position,
     const label cellI,
+    const label tetFaceI,
+    const label tetPtI,
     const label typeId,
     const scalar nParticle0,
     const scalar d0,
+    const scalar dTarget0,
     const vector& U0,
     const vector& f0,
     const vector& angularMomentum0,
@@ -107,9 +127,12 @@ inline Foam::ReactingParcel<ParcelType>::ReactingParcel
         owner,
         position,
         cellI,
+        tetFaceI,
+        tetPtI,
         typeId,
         nParticle0,
         d0,
+        dTarget0,
         U0,
         f0,
         angularMomentum0,
@@ -170,18 +193,10 @@ Foam::ReactingParcel<ParcelType>::trackData::cloud()
 
 
 template<class ParcelType>
-inline const typename Foam::ReactingParcel<ParcelType>::constantProperties&
-Foam::ReactingParcel<ParcelType>::trackData::constProps() const
-{
-    return constProps_;
-}
-
-
-template<class ParcelType>
 inline const Foam::interpolation<Foam::scalar>&
 Foam::ReactingParcel<ParcelType>::trackData::pInterp() const
 {
-    return pInterp_;
+    return pInterp_();
 }
 
 

@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -11,7 +11,7 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "system";
-    object      topoSetDict.2;
+    object      topoSetDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -22,12 +22,11 @@ actions
         type    cellSet;
         action  new;
         source  boxToCell;
-        sourceDict
+        sourceInfo
         {
-            box ( 0 0 -2e-05 ) ( 0.0036 0.0003 2e-05 );
+            box (0 0 -2e-05) (0.0036 0.0003 2e-05);
         }
     }
 );
-
 
 // ************************************************************************* //

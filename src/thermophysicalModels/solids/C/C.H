@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,8 +46,8 @@ class C;
 
 Ostream& operator<<
 (
-     Ostream&,
-     const C&
+    Ostream&,
+    const C&
 );
 
 
@@ -75,6 +75,18 @@ public:
 
         //- Construct from Istream
         C(Istream& is);
+
+        //- Construct from dictionary
+        C(const dictionary& dict);
+
+        //- Construct copy
+        C(const C& s);
+
+        //- Construct and return clone
+        virtual autoPtr<solid> clone() const
+        {
+            return autoPtr<solid>(new C(*this));
+        }
 
 
     // I-O

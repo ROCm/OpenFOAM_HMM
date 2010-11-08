@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,6 +40,7 @@ SourceFiles
 
 #include "fvPatchFieldMapper.H"
 #include "fvMesh.H"
+#include "labelListIOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -93,12 +94,12 @@ public:
         {
             // Private data
 
-                const unallocLabelList& directAddressing_;
+                const labelUList& directAddressing_;
 
         public:
 
                 //- Construct given addressing
-                directPatchFieldMapper(const unallocLabelList& directAddressing)
+                directPatchFieldMapper(const labelUList& directAddressing)
                 :
                     directAddressing_(directAddressing)
                 {}
@@ -113,7 +114,7 @@ public:
                     return true;
                 }
 
-                virtual const unallocLabelList& directAddressing() const
+                virtual const labelUList& directAddressing() const
                 {
                     return directAddressing_;
                 }

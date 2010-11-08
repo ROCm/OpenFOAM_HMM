@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,244 +32,27 @@ License
 #include "searchableSurfacesQueries.H"
 #include "UPtrList.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-// Construct from components
-Foam::refinementSurfaces::refinementSurfaces
-(
-    const searchableSurfaces& allGeometry,
-    const PtrList<dictionary>& surfaceDicts
-)
-:
-    allGeometry_(allGeometry),
-    surfaces_(surfaceDicts.size()),
-    names_(surfaceDicts.size()),
-    faceZoneNames_(surfaceDicts.size()),
-    cellZoneNames_(surfaceDicts.size()),
-    zoneInside_(surfaceDicts.size()),
-    regionOffset_(surfaceDicts.size())
+namespace Foam
 {
-    labelList globalMinLevel(surfaceDicts.size(), 0);
-    labelList globalMaxLevel(surfaceDicts.size(), 0);
-    scalarField globalAngle(surfaceDicts.size(), -GREAT);
-    List<Map<label> > regionMinLevel(surfaceDicts.size());
-    List<Map<label> > regionMaxLevel(surfaceDicts.size());
-    List<Map<scalar> > regionAngle(surfaceDicts.size());
-
-    //wordList globalPatchType(surfaceDicts.size());
-    //List<HashTable<word> > regionPatchType(surfaceDicts.size());
-    //List<HashTable<word> > regionPatchName(surfaceDicts.size());
-
-    forAll(surfaceDicts, surfI)
+    template<>
+    const char*
+    Foam::NamedEnum<Foam::refinementSurfaces::areaSelectionAlgo, 4>::names[] =
     {
-        const dictionary& dict = surfaceDicts[surfI];
-
-        dict.lookup("name") >> names_[surfI];
-
-        surfaces_[surfI] = allGeometry_.findSurfaceID(names_[surfI]);
-
-        // Global refinement level
-        globalMinLevel[surfI] = readLabel(dict.lookup("minRefinementLevel"));
-        globalMaxLevel[surfI] = readLabel(dict.lookup("maxRefinementLevel"));
-
-        // Global zone names per surface
-        if (dict.found("faceZone"))
-        {
-            dict.lookup("faceZone") >> faceZoneNames_[surfI];
-            bool hasSide = dict.readIfPresent("zoneInside", zoneInside_[surfI]);
-            if (dict.readIfPresent("cellZone", cellZoneNames_[surfI]))
-            {
-                if (hasSide && !allGeometry_[surfaces_[surfI]].hasVolumeType())
-                {
-                    IOWarningIn
-                    (
-                        "refinementSurfaces::refinementSurfaces(..)",
-                        dict
-                    )   << "Unused entry zoneInside for faceZone "
-                        << faceZoneNames_[surfI]
-                        << " since surface " << names_[surfI]
-                        << " is not closed." << endl;
-                }
-            }
-            else if (hasSide)
-            {
-                IOWarningIn("refinementSurfaces::refinementSurfaces(..)", dict)
-                    << "Unused entry zoneInside for faceZone "
-                    << faceZoneNames_[surfI]
-                    << " since no cellZone specified."
-                    << endl;
-            }
-        }
-
-        // Global perpendicular angle
-        if (dict.found("perpendicularAngle"))
-        {
-            globalAngle[surfI] = readScalar(dict.lookup("perpendicularAngle"));
-        }
-
-        //// Global patch name per surface
-        //if (dict.found("patchType"))
-        //{
-        //    dict.lookup("patchType") >> globalPatchType[surfI];
-        //}
-
-
-        if (dict.found("regions"))
-        {
-            PtrList<dictionary> regionDicts(dict.lookup("regions"));
-
-            const wordList& regionNames =
-                allGeometry_[surfaces_[surfI]].regions();
-
-            forAll(regionDicts, dictI)
-            {
-                const dictionary& regionDict = regionDicts[dictI];
-
-                const word regionName(regionDict.lookup("name"));
-
-                label regionI = findIndex(regionNames, regionName);
-
-                if (regionI == -1)
-                {
-                    FatalErrorIn
-                    (
-                        "refinementSurfaces::refinementSurfaces"
-                        "(const IOobject&, const PtrList<dictionary>&)"
-                    )   << "No region called " << regionName << " on surface "
-                        << allGeometry_[surfaces_[surfI]].name() << endl
-                        << "Valid regions are " << regionNames
-                        << exit(FatalError);
-                }
-
-
-                label min = readLabel(regionDict.lookup("minRefinementLevel"));
-                label max = readLabel(regionDict.lookup("maxRefinementLevel"));
-
-                bool hasInserted = regionMinLevel[surfI].insert(regionI, min);
-                if (!hasInserted)
-                {
-                    FatalErrorIn
-                    (
-                        "refinementSurfaces::refinementSurfaces"
-                        "(const IOobject&, const PtrList<dictionary>&)"
-                    )   << "Duplicate region name " << regionName
-                        << " on surface " << names_[surfI]
-                        << exit(FatalError);
-                }
-                regionMaxLevel[surfI].insert(regionI, max);
-
-                if (regionDict.found("perpendicularAngle"))
-                {
-                    regionAngle[surfI].insert
-                    (
-                        regionI,
-                        readScalar(regionDict.lookup("perpendicularAngle"))
-                    );
-                }
-            }
-        }
-    }
-
-
-    // Check for duplicate surface names
-    {
-        HashTable<label> surfaceNames(names_.size());
-
-        forAll(names_, surfI)
-        {
-            if (!surfaceNames.insert(names_[surfI], surfI))
-            {
-                FatalErrorIn
-                (
-                    "refinementSurfaces::refinementSurfaces"
-                    "(const IOobject&, const PtrList<dictionary>&)"
-                )   << "Duplicate surface name " << names_[surfI] << endl
-                    << "Previous occurrence of name at surface "
-                    << surfaceNames[names_[surfI]]
-                    << exit(FatalError);
-            }
-        }
-    }
-
-    // Calculate local to global region offset
-    label nRegions = 0;
-
-    forAll(surfaceDicts, surfI)
-    {
-        regionOffset_[surfI] = nRegions;
-
-        nRegions += allGeometry_[surfaces_[surfI]].regions().size();
-    }
-
-    // Rework surface specific information into information per global region
-    minLevel_.setSize(nRegions);
-    minLevel_ = 0;
-    maxLevel_.setSize(nRegions);
-    maxLevel_ = 0;
-    perpendicularAngle_.setSize(nRegions);
-    perpendicularAngle_ = -GREAT;
-    //patchName_.setSize(nRegions);
-    //patchType_.setSize(nRegions);
-
-    forAll(surfaceDicts, surfI)
-    {
-        label nRegions = allGeometry_[surfaces_[surfI]].regions().size();
-
-        // Initialise to global (i.e. per surface)
-        for (label i = 0; i < nRegions; i++)
-        {
-            minLevel_[regionOffset_[surfI] + i] = globalMinLevel[surfI];
-            maxLevel_[regionOffset_[surfI] + i] = globalMaxLevel[surfI];
-            perpendicularAngle_[regionOffset_[surfI] + i] = globalAngle[surfI];
-        }
-
-        // Overwrite with region specific information
-        forAllConstIter(Map<label>, regionMinLevel[surfI], iter)
-        {
-            label globalRegionI = regionOffset_[surfI] + iter.key();
-
-            minLevel_[globalRegionI] = iter();
-            maxLevel_[globalRegionI] = regionMaxLevel[surfI][iter.key()];
-
-            // Check validity
-            if
-            (
-                minLevel_[globalRegionI] < 0
-             || maxLevel_[globalRegionI] < minLevel_[globalRegionI]
-            )
-            {
-                FatalErrorIn
-                (
-                    "refinementSurfaces::refinementSurfaces"
-                    "(const IOobject&, const PtrList<dictionary>&)"
-                )   << "Illegal level or layer specification for surface "
-                    << names_[surfI]
-                    << " : minLevel:" << minLevel_[globalRegionI]
-                    << " maxLevel:" << maxLevel_[globalRegionI]
-                    << exit(FatalError);
-            }
-        }
-        forAllConstIter(Map<scalar>, regionAngle[surfI], iter)
-        {
-            label globalRegionI = regionOffset_[surfI] + iter.key();
-
-            perpendicularAngle_[globalRegionI] = regionAngle[surfI][iter.key()];
-        }
-
-
-        //// Optional patch names and patch types
-        //forAllConstIter(HashTable<word>, regionPatchName[surfI], iter)
-        //{
-        //    label regionI = findIndex(regionNames, iter.key());
-        //    label globalRegionI = regionOffset_[surfI] + regionI;
-        //
-        //    patchName_[globalRegionI] = iter();
-        //    patchType_[globalRegionI] = regionPatchType[surfI][iter.key()];
-        //}
-    }
+        "inside",
+        "outside",
+        "insidePoint",
+        "none"
+    };
 }
 
+
+const Foam::NamedEnum<Foam::refinementSurfaces::areaSelectionAlgo, 4>
+    Foam::refinementSurfaces::areaSelectionAlgoNames;
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::refinementSurfaces::refinementSurfaces
 (
@@ -282,7 +65,8 @@ Foam::refinementSurfaces::refinementSurfaces
     names_(surfacesDict.size()),
     faceZoneNames_(surfacesDict.size()),
     cellZoneNames_(surfacesDict.size()),
-    zoneInside_(surfacesDict.size()),
+    zoneInside_(surfacesDict.size(), NONE),
+    zoneInsidePoints_(surfacesDict.size()),
     regionOffset_(surfacesDict.size())
 {
     // Wilcard specification : loop over all surface, all regions
@@ -305,15 +89,17 @@ Foam::refinementSurfaces::refinementSurfaces
     names_.setSize(surfI);
     faceZoneNames_.setSize(surfI);
     cellZoneNames_.setSize(surfI);
-    zoneInside_.setSize(surfI);
+    zoneInside_.setSize(surfI, NONE);
     regionOffset_.setSize(surfI);
 
     labelList globalMinLevel(surfI, 0);
     labelList globalMaxLevel(surfI, 0);
     scalarField globalAngle(surfI, -GREAT);
+    PtrList<dictionary> globalPatchInfo(surfI);
     List<Map<label> > regionMinLevel(surfI);
     List<Map<label> > regionMaxLevel(surfI);
     List<Map<scalar> > regionAngle(surfI);
+    List<Map<autoPtr<dictionary> > > regionPatchInfo(surfI);
 
     surfI = 0;
     forAll(allGeometry.names(), geomI)
@@ -332,19 +118,42 @@ Foam::refinementSurfaces::refinementSurfaces
             globalMaxLevel[surfI] = refLevel[1];
 
             // Global zone names per surface
-            if (dict.found("faceZone"))
+            if (dict.readIfPresent("faceZone", faceZoneNames_[surfI]))
             {
-                dict.lookup("faceZone") >> faceZoneNames_[surfI];
-                bool hasSide = dict.readIfPresent
-                (
-                    "zoneInside",
-                    zoneInside_[surfI]
-                );
+                // Read optional entry to determine inside of faceZone
+
+                word method;
+                bool hasSide = dict.readIfPresent("cellZoneInside", method);
+                if (hasSide)
+                {
+                    zoneInside_[surfI] = areaSelectionAlgoNames[method];
+                    if (zoneInside_[surfI] == INSIDEPOINT)
+                    {
+                        dict.lookup("insidePoint") >> zoneInsidePoints_[surfI];
+                    }
+
+                }
+                else
+                {
+                    // Check old syntax
+                    bool inside;
+                    if (dict.readIfPresent("zoneInside", inside))
+                    {
+                        hasSide = true;
+                        zoneInside_[surfI] = (inside ? INSIDE : OUTSIDE);
+                    }
+                }
+
+                // Read optional cellZone name
+
                 if (dict.readIfPresent("cellZone", cellZoneNames_[surfI]))
                 {
                     if
                     (
-                        hasSide
+                        (
+                            zoneInside_[surfI] == INSIDE
+                         || zoneInside_[surfI] == OUTSIDE
+                        )
                     && !allGeometry_[surfaces_[surfI]].hasVolumeType()
                     )
                     {
@@ -352,7 +161,9 @@ Foam::refinementSurfaces::refinementSurfaces
                         (
                             "refinementSurfaces::refinementSurfaces(..)",
                             dict
-                        )   << "Unused entry zoneInside for faceZone "
+                        )   << "Illegal entry zoneInside "
+                            << areaSelectionAlgoNames[zoneInside_[surfI]]
+                            << " for faceZone "
                             << faceZoneNames_[surfI]
                             << " since surface " << names_[surfI]
                             << " is not closed." << endl;
@@ -372,13 +183,15 @@ Foam::refinementSurfaces::refinementSurfaces
             }
 
             // Global perpendicular angle
-            if (dict.found("perpendicularAngle"))
+            if (dict.found("patchInfo"))
             {
-                globalAngle[surfI] = readScalar
+                globalPatchInfo.set
                 (
-                    dict.lookup("perpendicularAngle")
+                    surfI,
+                    dict.subDict("patchInfo").clone()
                 );
             }
+            dict.readIfPresent("perpendicularAngle", globalAngle[surfI]);
 
             if (dict.found("regions"))
             {
@@ -412,6 +225,15 @@ Foam::refinementSurfaces::refinementSurfaces
                                 )
                             );
                         }
+
+                        if (regionDict.found("patchInfo"))
+                        {
+                            regionPatchInfo[surfI].insert
+                            (
+                                regionI,
+                                regionDict.subDict("patchInfo").clone()
+                            );
+                        }
                     }
                 }
             }
@@ -435,6 +257,7 @@ Foam::refinementSurfaces::refinementSurfaces
     maxLevel_ = 0;
     perpendicularAngle_.setSize(nRegions);
     perpendicularAngle_ = -GREAT;
+    patchInfo_.setSize(nRegions);
 
 
     forAll(globalMinLevel, surfI)
@@ -444,9 +267,18 @@ Foam::refinementSurfaces::refinementSurfaces
         // Initialise to global (i.e. per surface)
         for (label i = 0; i < nRegions; i++)
         {
-            minLevel_[regionOffset_[surfI] + i] = globalMinLevel[surfI];
-            maxLevel_[regionOffset_[surfI] + i] = globalMaxLevel[surfI];
-            perpendicularAngle_[regionOffset_[surfI] + i] = globalAngle[surfI];
+            label globalRegionI = regionOffset_[surfI] + i;
+            minLevel_[globalRegionI] = globalMinLevel[surfI];
+            maxLevel_[globalRegionI] = globalMaxLevel[surfI];
+            perpendicularAngle_[globalRegionI] = globalAngle[surfI];
+            if (globalPatchInfo.set(surfI))
+            {
+                patchInfo_.set
+                (
+                    globalRegionI,
+                    globalPatchInfo[surfI].clone()
+                );
+            }
         }
 
         // Overwrite with region specific information
@@ -480,6 +312,14 @@ Foam::refinementSurfaces::refinementSurfaces
             label globalRegionI = regionOffset_[surfI] + iter.key();
 
             perpendicularAngle_[globalRegionI] = regionAngle[surfI][iter.key()];
+        }
+
+        const Map<autoPtr<dictionary> >& localInfo = regionPatchInfo[surfI];
+        forAllConstIter(Map<autoPtr<dictionary> >, localInfo, iter)
+        {
+            label globalRegionI = regionOffset_[surfI] + iter.key();
+
+            patchInfo_.set(globalRegionI, iter()().clone());
         }
     }
 }
@@ -533,12 +373,36 @@ Foam::labelList Foam::refinementSurfaces::getClosedNamedSurfaces() const
     label closedI = 0;
     forAll(cellZoneNames_, surfI)
     {
-        if (cellZoneNames_[surfI].size())
+        if
+        (
+            cellZoneNames_[surfI].size()
+         && (
+                zoneInside_[surfI] == INSIDE
+             || zoneInside_[surfI] == OUTSIDE
+            )
+         && allGeometry_[surfaces_[surfI]].hasVolumeType()
+        )
         {
-            if (allGeometry_[surfaces_[surfI]].hasVolumeType())
-            {
-                closed[closedI++] = surfI;
-            }
+            closed[closedI++] = surfI;
+        }
+    }
+    closed.setSize(closedI);
+
+    return closed;
+}
+
+
+// Get indices of named surfaces with a
+Foam::labelList Foam::refinementSurfaces::getInsidePointNamedSurfaces() const
+{
+    labelList closed(cellZoneNames_.size());
+
+    label closedI = 0;
+    forAll(cellZoneNames_, surfI)
+    {
+        if (cellZoneNames_[surfI].size() && zoneInside_[surfI] == INSIDEPOINT)
+        {
+            closed[closedI++] = surfI;
         }
     }
     closed.setSize(closedI);
@@ -551,9 +415,9 @@ Foam::labelList Foam::refinementSurfaces::getClosedNamedSurfaces() const
 // Foam::labelList Foam::refinementSurfaces::countRegions(const triSurface& s)
 // {
 //     const geometricSurfacePatchList& regions = s.patches();
-// 
+//
 //     labelList nTris(regions.size(), 0);
-// 
+//
 //     forAll(s, triI)
 //     {
 //         nTris[s[triI].region()]++;
@@ -573,15 +437,15 @@ Foam::labelList Foam::refinementSurfaces::getClosedNamedSurfaces() const
 // ) const
 // {
 //     const searchableSurface& geom = allGeometry_[surfaces_[surfI]];
-// 
+//
 //     // Get per element the region
 //     labelList region;
 //     geom.getRegion(info, region);
-// 
+//
 //     // Initialise fields to region wise minLevel
 //     minLevelField.setSize(ctrs.size());
 //     minLevelField = -1;
-// 
+//
 //     forAll(minLevelField, i)
 //     {
 //         if (info[i].hit())
@@ -589,12 +453,12 @@ Foam::labelList Foam::refinementSurfaces::getClosedNamedSurfaces() const
 //             minLevelField[i] = minLevel(surfI, region[i]);
 //         }
 //     }
-// 
+//
 //     // Find out if triangle inside shell with higher level
 //     // What level does shell want to refine fc to?
 //     labelList shellLevel;
 //     shells.findHigherLevel(ctrs, minLevelField, shellLevel);
-// 
+//
 //     forAll(minLevelField, i)
 //     {
 //         minLevelField[i] = max(minLevelField[i], shellLevel[i]);
@@ -1081,7 +945,7 @@ void Foam::refinementSurfaces::findNearestRegion
 (
     const labelList& surfacesToTest,
     const pointField& samples,
-    const  scalarField& nearestDistSqr,
+    const scalarField& nearestDistSqr,
     labelList& hitSurface,
     labelList& hitRegion
 ) const
@@ -1199,6 +1063,16 @@ void Foam::refinementSurfaces::findInside
     {
         label surfI = testSurfaces[i];
 
+        if (zoneInside_[surfI] != INSIDE && zoneInside_[surfI] != OUTSIDE)
+        {
+            FatalErrorIn("refinementSurfaces::findInside(..)")
+                << "Trying to use surface "
+                << allGeometry_[surfaces_[surfI]].name()
+                << " which has non-geometric inside selection method "
+                << areaSelectionAlgoNames[zoneInside_[surfI]]
+                << exit(FatalError);
+        }
+
         if (allGeometry_[surfaces_[surfI]].hasVolumeType())
         {
             List<searchableSurface::volumeType> volType;
@@ -1212,11 +1086,11 @@ void Foam::refinementSurfaces::findInside
                     (
                         (
                             volType[pointI] == triSurfaceMesh::INSIDE
-                         && zoneInside_[surfI]
+                         && zoneInside_[surfI] == INSIDE
                         )
                      || (
                             volType[pointI] == triSurfaceMesh::OUTSIDE
-                         && !zoneInside_[surfI]
+                         && zoneInside_[surfI] == OUTSIDE
                         )
                     )
                     {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -117,7 +117,7 @@ Foam::hRhoThermo<MixtureType>::hRhoThermo(const fvMesh& mesh)
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionSet(0, 2, -2, 0, 0),
+        dimEnergy/dimMass,
         this->hBoundaryTypes()
     )
 {
@@ -242,7 +242,7 @@ Foam::tmp<Foam::volScalarField> Foam::hRhoThermo<MixtureType>::Cp() const
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimensionSet(0, 2, -2, -1, 0)
+            dimEnergy/dimMass/dimTemperature
         )
     );
 
@@ -305,7 +305,7 @@ Foam::tmp<Foam::volScalarField> Foam::hRhoThermo<MixtureType>::Cv() const
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimensionSet(0, 2, -2, -1, 0)
+            dimEnergy/dimMass/dimTemperature
         )
     );
 

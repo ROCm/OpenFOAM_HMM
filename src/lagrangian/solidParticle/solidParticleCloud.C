@@ -54,7 +54,7 @@ Foam::solidParticleCloud::solidParticleCloud
             "particleProperties",
             mesh_.time().constant(),
             mesh_,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     ),
@@ -83,7 +83,7 @@ void Foam::solidParticleCloud::move(const dimensionedVector& g)
 
     solidParticle::trackData td(*this, rhoInterp, UInterp, nuInterp, g.value());
 
-    Cloud<solidParticle>::move(td);
+    Cloud<solidParticle>::move(td, mesh_.time().deltaTValue());
 }
 
 

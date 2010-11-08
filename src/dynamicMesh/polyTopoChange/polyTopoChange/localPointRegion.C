@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,6 +29,7 @@ License
 #include "mapPolyMesh.H"
 #include "globalIndex.H"
 #include "indirectPrimitivePatch.H"
+#include "dummyTransform.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -56,15 +57,6 @@ public:
         }
     };
 };
-
-
-// Dummy transform for faces. Used in synchronisation
-void transformList
-(
-    const tensorField& rotTensor,
-    UList<face>& field
-)
-{};
 
 }
 
@@ -263,8 +255,7 @@ void Foam::localPointRegion::calcPointRegions
         mesh,
         candidatePoint,
         orEqOp<bool>(),
-        false,              // nullValue
-        false               // applySeparation
+        false               // nullValue
     );
 
 
@@ -419,12 +410,18 @@ void Foam::localPointRegion::calcPointRegions
         // Transport minimum across coupled faces
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        syncTools::syncFaceList
+        SubList<face> l
+        (
+            minRegion,
+            mesh.nFaces()-mesh.nInternalFaces(),
+            mesh.nInternalFaces()
+        );
+        syncTools::syncBoundaryFaceList
         (
             mesh,
-            minRegion,
+            l,
             minEqOpFace(),
-            false               // applySeparation
+            Foam::dummyTransform()  // dummy transformation
         );
     }
 

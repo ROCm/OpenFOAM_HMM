@@ -55,11 +55,13 @@ public:
 
     // Constructors
 
+        //- Construct from primitive
         pTraits(const PrimitiveType& p)
         :
             PrimitiveType(p)
         {}
 
+        //- Construct from Istream
         pTraits(Istream& is)
         :
             PrimitiveType(is)
@@ -68,11 +70,13 @@ public:
 
     // Member operators
 
+        //- Access to the primitive
         operator PrimitiveType() const
         {
             return *this;
         }
 
+        //- Access to the primitive
         operator PrimitiveType&()
         {
             return *this;

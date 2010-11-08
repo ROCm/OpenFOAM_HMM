@@ -161,13 +161,15 @@ for ((proc=0; proc<$nProcs; proc++))
 do
     procCmdFile="$PWD/processor${proc}.sh"
     procLog="processor${proc}.log"
-    geom="-geometry 120x20+$xpos+$ypos"
-    node=""
+    geom="-geometry 120x15+$xpos+$ypos"
 
-    if [ "$WM_MPLIB" = OPENMPI ]
-    then
+    case "$WM_MPLIB" in
+    *OPENMPI)
         node="-np 1 "
-    fi
+        ;;
+    *)
+        node=""
+    esac
 
     echo "#!/bin/sh" > $procCmdFile
     case "$method" in
@@ -181,11 +183,11 @@ do
         echo "${node}xterm -font fixed -title 'processor'$proc $geom -e $procCmdFile" >> $PWD/mpirun.schema
         ;;
     2)
-        echo "$sourceFoam; cd $PWD; gdb -command $PWD/gdbCommands >& $procLog" >> $procCmdFile
+        echo "$sourceFoam; cd $PWD; gdb -command $PWD/gdbCommands $exec > $procLog 2>&1" >> $procCmdFile
         echo "${node}$procCmdFile" >> $PWD/mpirun.schema
         ;;
     3)
-        echo "$sourceFoam; cd $PWD; $exec $args >& $procLog" >> $procCmdFile
+        echo "$sourceFoam; cd $PWD; $exec $args > $procLog 2>&1" >> $procCmdFile
         echo "${node}$procCmdFile" >> $PWD/mpirun.schema
         ;;
     4)
@@ -239,6 +241,11 @@ MPICH)
         cmd="${cmd} -n 1 ${procXtermCmdFile}"
     done < $PWD/mpirun.schema
     ;;
+*)
+    echo
+    echo "Unsupported WM_MPLIB setting : $WM_MPLIB"
+    printUsage
+    exit 1
 esac
 
 echo "Constructed $PWD/mpirun.schema file."

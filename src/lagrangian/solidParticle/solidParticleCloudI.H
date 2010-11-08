@@ -25,6 +25,12 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+inline bool Foam::solidParticleCloud::hasWallImpactDistance() const
+{
+    return true;
+}
+
+
 inline const Foam::fvMesh& Foam::solidParticleCloud::mesh() const
 {
     return mesh_;

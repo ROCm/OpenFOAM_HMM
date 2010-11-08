@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -83,17 +83,21 @@ public:
             const word& functionName
         );
 
-//        //- Return the local file name (within time directory)
-//        //  NEEDS FIXING
-//        static fileName localMeshFileName(const word& edgeName="");
-//
-//        //- Find instance with edgeName
-//        //  NEEDS FIXING
-//        static fileName findMeshInstance(const Time&, const word& edgeName="");
-//
-//        //- Find mesh file with edgeName
-//        //  NEEDS FIXING
-//        static fileName findMeshFile(const Time&, const word& edgeName="");
+       // //- Return the local file name (within time directory)
+       // //  NEEDS FIXING
+       // static fileName localMeshFileName(const word& edgeName="");
+
+       // //- Find instance with edgeName
+       // //  NEEDS FIXING
+       // static fileName findMeshInstance
+       // (
+       //     const Time&,
+       //     const word& edgeName=""
+       // );
+
+       // //- Find mesh file with edgeName
+       // //  NEEDS FIXING
+       // static fileName findMeshFile(const Time&, const word& edgeName="");
 
 
     // Constructors

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -150,8 +150,11 @@ public:
 
         // Evaluation functions
 
-            //- Return neighbour coupled given internal cell data
+            //- Return neighbour coupled internal cell data
             tmp<Field<Type> > patchNeighbourField() const;
+
+            //- Return reference to neighbour patchField
+            const cyclicFvPatchField<Type>& neighbourPatchField() const;
 
             //- Update result field based on interface functionality
             virtual void updateInterfaceMatrix
@@ -165,7 +168,7 @@ public:
             ) const;
 
 
-        //- Cyclic coupled interface functions
+        // Cyclic coupled interface functions
 
             //- Does the patch field perform the transfromation
             virtual bool doTransform() const
@@ -190,6 +193,12 @@ public:
             {
                 return pTraits<Type>::rank;
             }
+
+
+        // I-O
+
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -154,7 +154,7 @@ Foam::sampledThresholdCellFaces::sampledThresholdCellFaces
     fieldName_(dict.lookup("field")),
     lowerThreshold_(dict.lookupOrDefault<scalar>("lowerLimit", -VGREAT)),
     upperThreshold_(dict.lookupOrDefault<scalar>("upperLimit", VGREAT)),
-    zoneName_(word::null),
+    zoneKey_(keyType::null),
     triangulate_(dict.lookupOrDefault("triangulate", false)),
     prevTimeIndex_(-1),
     meshCells_(0)
@@ -169,16 +169,12 @@ Foam::sampledThresholdCellFaces::sampledThresholdCellFaces
             << abort(FatalError);
     }
 
-
-//    dict.readIfPresent("zone", zoneName_);
+//    dict.readIfPresent("zone", zoneKey_);
 //
-//    if (debug && zoneName_.size())
+//    if (debug && zoneKey_.size() && mesh.cellZones().findZoneID(zoneKey_) < 0)
 //    {
-//        if (mesh.cellZones().findZoneID(zoneName_) < 0)
-//        {
-//            Info<< "cellZone \"" << zoneName_
-//                << "\" not found - using entire mesh" << endl;
-//        }
+//        Info<< "cellZone " << zoneKey_
+//            << " not found - using entire mesh" << endl;
 //    }
 }
 

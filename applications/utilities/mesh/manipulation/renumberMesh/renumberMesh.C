@@ -305,6 +305,7 @@ autoPtr<mapPolyMesh> reorderMesh
     labelList patchStarts(patches.size());
     labelList oldPatchNMeshPoints(patches.size());
     labelListList patchPointMap(patches.size());
+
     forAll(patches, patchI)
     {
         patchSizes[patchI] = patches[patchI].size();
@@ -320,7 +321,8 @@ autoPtr<mapPolyMesh> reorderMesh
         xferMove(newOwner),
         xferMove(newNeighbour),
         patchSizes,
-        patchStarts
+        patchStarts,
+        true
     );
 
     return autoPtr<mapPolyMesh>
@@ -379,6 +381,7 @@ int main(int argc, char *argv[])
         "write cellMap, faceMap, pointMap in polyMesh/"
     );
 
+#   include "addRegionOption.H"
 #   include "addOverwriteOption.H"
 #   include "addTimeOptions.H"
 
@@ -394,7 +397,7 @@ int main(int argc, char *argv[])
 
     runTime.setTime(Times[startTime], startTime);
 
-#   include "createMesh.H"
+#   include "createNamedMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
     const bool blockOrder = args.optionFound("blockOrder");
@@ -427,6 +430,59 @@ int main(int argc, char *argv[])
     Info<< "Mesh size: " << returnReduce(mesh.nCells(), sumOp<label>()) << nl
         << "Band before renumbering: "
         << returnReduce(band, maxOp<label>()) << nl << endl;
+
+
+    // Read parallel reconstruct maps
+    labelIOList cellProcAddressing
+    (
+        IOobject
+        (
+            "cellProcAddressing",
+            mesh.facesInstance(),
+            polyMesh::meshSubDir,
+            mesh,
+            IOobject::READ_IF_PRESENT
+        ),
+        labelList(0)
+    );
+
+    labelIOList faceProcAddressing
+    (
+        IOobject
+        (
+            "faceProcAddressing",
+            mesh.facesInstance(),
+            polyMesh::meshSubDir,
+            mesh,
+            IOobject::READ_IF_PRESENT
+        ),
+        labelList(0)
+    );
+    labelIOList pointProcAddressing
+    (
+        IOobject
+        (
+            "pointProcAddressing",
+            mesh.pointsInstance(),
+            polyMesh::meshSubDir,
+            mesh,
+            IOobject::READ_IF_PRESENT
+        ),
+        labelList(0)
+    );
+    labelIOList boundaryProcAddressing
+    (
+        IOobject
+        (
+            "boundaryProcAddressing",
+            mesh.pointsInstance(),
+            polyMesh::meshSubDir,
+            mesh,
+            IOobject::READ_IF_PRESENT
+        ),
+        labelList(0)
+    );
+
 
     // Read objects in time directory
     IOobjectList objects(mesh, runTime.timeName());
@@ -481,17 +537,23 @@ int main(int argc, char *argv[])
                 "decomposeParDict",
                 runTime.system(),
                 mesh,
-                IOobject::MUST_READ,
+                IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE
             )
         );
         autoPtr<decompositionMethod> decomposePtr = decompositionMethod::New
         (
-            decomposeDict,
-            mesh
+            decomposeDict
         );
 
-        labelList cellToRegion(decomposePtr().decompose(mesh.cellCentres()));
+        labelList cellToRegion
+        (
+            decomposePtr().decompose
+            (
+                mesh,
+                mesh.cellCentres()
+            )
+        );
 
         // For debugging: write out region
         {
@@ -571,6 +633,39 @@ int main(int argc, char *argv[])
     // Update fields
     mesh.updateMesh(map);
 
+    // Update proc maps
+    if (cellProcAddressing.headerOk())
+    {
+        Info<< "Renumbering processor cell decomposition map "
+            << cellProcAddressing.name() << endl;
+
+        cellProcAddressing = labelList
+        (
+            UIndirectList<label>(cellProcAddressing, map().cellMap())
+        );
+    }
+    if (faceProcAddressing.headerOk())
+    {
+        Info<< "Renumbering processor face decomposition map "
+            << faceProcAddressing.name() << endl;
+
+        faceProcAddressing = labelList
+        (
+            UIndirectList<label>(faceProcAddressing, map().faceMap())
+        );
+    }
+    if (pointProcAddressing.headerOk())
+    {
+        Info<< "Renumbering processor point decomposition map "
+            << pointProcAddressing.name() << endl;
+
+        pointProcAddressing = labelList
+        (
+            UIndirectList<label>(pointProcAddressing, map().pointMap())
+        );
+    }
+
+
     // Move mesh (since morphing might not do this)
     if (map().hasMotionPoints())
     {
@@ -644,9 +739,31 @@ int main(int argc, char *argv[])
     {
         mesh.setInstance(oldInstance);
     }
-    Info<< "Writing mesh to " << runTime.timeName() << endl;
+
+    Info<< "Writing mesh to " << mesh.facesInstance() << endl;
 
     mesh.write();
+    if (cellProcAddressing.headerOk())
+    {
+        cellProcAddressing.instance() = mesh.facesInstance();
+        cellProcAddressing.write();
+    }
+    if (faceProcAddressing.headerOk())
+    {
+        faceProcAddressing.instance() = mesh.facesInstance();
+        faceProcAddressing.write();
+    }
+    if (pointProcAddressing.headerOk())
+    {
+        pointProcAddressing.instance() = mesh.facesInstance();
+        pointProcAddressing.write();
+    }
+    if (boundaryProcAddressing.headerOk())
+    {
+        boundaryProcAddressing.instance() = mesh.facesInstance();
+        boundaryProcAddressing.write();
+    }
+
 
     if (writeMaps)
     {

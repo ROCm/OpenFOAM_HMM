@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -164,7 +164,7 @@ private:
         multivariateSurfaceInterpolationScheme<scalar>::fieldTable alphaTable_;
 
 
-    // Private Member Functions
+    // Private member functions
 
         void calcAlphas();
 
@@ -210,7 +210,7 @@ public:
 
 
     //- Destructor
-    ~multiphaseMixture()
+    virtual ~multiphaseMixture()
     {}
 
 
@@ -255,6 +255,13 @@ public:
         tmp<surfaceScalarField> nuf() const;
 
         tmp<surfaceScalarField> surfaceTensionForce() const;
+
+        //- Indicator of the proximity of the interface
+        //  Field values are 1 near and 0 away for the interface.
+        tmp<volScalarField> nearInterface() const;
+
+        //- Solve for the mixture phase-fractions
+        void solve();
 
         //- Correct the mixture properties
         void correct();

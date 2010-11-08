@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,22 +37,66 @@ Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
     EquationOfState(is),
     Hf_(readScalar(is)),
     Sf_(readScalar(is)),
-    cpPolynomial_("cpPolynomial", is),
-    hPolynomial_(),
-    sPolynomial_()
+    CpCoeffs_("CpCoeffs<" + Foam::name(PolySize) + '>', is),
+    hCoeffs_(),
+    sCoeffs_()
 {
     Hf_ *= this->W();
     Sf_ *= this->W();
-    cpPolynomial_ *= this->W();
+    CpCoeffs_ *= this->W();
 
-    hPolynomial_ = cpPolynomial_.integrate();
-    sPolynomial_ = cpPolynomial_.integrateMinus1();
+    hCoeffs_ = CpCoeffs_.integrate();
+    sCoeffs_ = CpCoeffs_.integrateMinus1();
 
     // Offset h poly so that it is relative to the enthalpy at Tstd
-    hPolynomial_[0] += Hf_ - hPolynomial_.evaluate(specie::Tstd);
+    hCoeffs_[0] += Hf_ - hCoeffs_.evaluate(specie::Tstd);
 
     // Offset s poly so that it is relative to the entropy at Tstd
-    sPolynomial_[0] += Sf_ - sPolynomial_.evaluate(specie::Tstd);
+    sCoeffs_[0] += Sf_ - sCoeffs_.evaluate(specie::Tstd);
+}
+
+
+template<class EquationOfState, int PolySize>
+Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
+(
+    const dictionary& dict
+)
+:
+    EquationOfState(dict),
+    Hf_(readScalar(dict.lookup("Hf"))),
+    Sf_(readScalar(dict.lookup("Sf"))),
+    CpCoeffs_(dict.lookup("CpCoeffs<" + Foam::name(PolySize) + '>')),
+    hCoeffs_(),
+    sCoeffs_()
+{
+    Hf_ *= this->W();
+    Sf_ *= this->W();
+    CpCoeffs_ *= this->W();
+
+    hCoeffs_ = CpCoeffs_.integrate();
+    sCoeffs_ = CpCoeffs_.integrateMinus1();
+
+    // Offset h poly so that it is relative to the enthalpy at Tstd
+    hCoeffs_[0] += Hf_ - hCoeffs_.evaluate(specie::Tstd);
+
+    // Offset s poly so that it is relative to the entropy at Tstd
+    sCoeffs_[0] += Sf_ - sCoeffs_.evaluate(specie::Tstd);
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class EquationOfState, int PolySize>
+void Foam::hPolynomialThermo<EquationOfState, PolySize>::write
+(
+    Ostream& os
+) const
+{
+    EquationOfState::write(os);
+    os.writeKeyword("Hf") << Hf_/this->W() << token::END_STATEMENT << nl;
+    os.writeKeyword("Sf") << Sf_/this->W() << token::END_STATEMENT << nl;
+    os.writeKeyword(word("CpCoeffs<" + Foam::name(PolySize) + '>'))
+        << CpCoeffs_/this->W() << token::END_STATEMENT << nl;
 }
 
 
@@ -67,8 +111,9 @@ Foam::Ostream& Foam::operator<<
 {
     os  << static_cast<const EquationOfState&>(pt) << tab
         << pt.Hf_/pt.W() << tab
-        << pt.Sf_ << tab
-        << "cpPolynomial" << tab << pt.cpPolynomial_/pt.W();
+        << pt.Sf_/pt.W() << tab
+        << "CpCoeffs<" << Foam::name(PolySize) << '>' << tab
+        << pt.CpCoeffs_/pt.W();
 
     os.check
     (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -151,7 +151,7 @@ protected:
         );
 
         //- Set new zones from faceMap
-        virtual void remapFaces(const UList<label>& faceMap);
+        virtual void remapFaces(const labelUList& faceMap);
 
 
 public:
@@ -197,7 +197,7 @@ public:
         (
             const Xfer<pointField>&,
             const Xfer<List<Face> >&,
-            const UList<label>& zoneSizes = UList<label>(),
+            const labelUList& zoneSizes = labelUList(),
             const UList<word>& zoneNames = UList<word>()
         );
 
@@ -317,7 +317,7 @@ public:
             //- Add surface zones
             virtual void addZones
             (
-                const UList<label>& sizes,
+                const labelUList& sizes,
                 const UList<word>& names,
                 const bool cullEmpty=false
             );
@@ -325,7 +325,7 @@ public:
             //- Add surface zones
             virtual void addZones
             (
-                const UList<label>& sizes,
+                const labelUList& sizes,
                 const bool cullEmpty=false
             );
 

@@ -44,7 +44,7 @@ Foam::autoPtr<Foam::hsReactionThermo> Foam::hsReactionThermo::New
                 "thermophysicalProperties",
                 mesh.time().constant(),
                 mesh,
-                IOobject::MUST_READ,
+                IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
                 false
             )
@@ -87,14 +87,12 @@ Foam::autoPtr<Foam::hsReactionThermo> Foam::hsReactionThermo::NewType
                 "thermophysicalProperties",
                 mesh.time().constant(),
                 mesh,
-                IOobject::MUST_READ,
+                IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
                 false
             )
         ).lookup("thermoType")
     );
-
-    Info<< "Selecting thermodynamics package " << modelType << endl;
 
     if (modelType.find(thermoType) == string::npos)
     {
@@ -112,8 +110,8 @@ Foam::autoPtr<Foam::hsReactionThermo> Foam::hsReactionThermo::NewType
         (
             "autoPtr<hsReactionThermo> hsReactionThermo::NewType"
             "("
-            "const fvMesh&, "
-            "const word&"
+                "const fvMesh&, "
+                "const word&"
             ")"
         )   << "Inconsistent thermo package selected:" << nl << nl
             << modelType << nl << nl << "Please select a "

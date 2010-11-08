@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -102,6 +102,8 @@ void Foam::fvMeshSubset::doCoupledPatches
 
     if (syncPar && Pstream::parRun())
     {
+        PstreamBuffers pBufs(Pstream::nonBlocking);
+
         // Send face usage across processor patches
         forAll(oldPatches, oldPatchI)
         {
@@ -112,17 +114,14 @@ void Foam::fvMeshSubset::doCoupledPatches
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(pp);
 
-                OPstream toNeighbour
-                (
-                    Pstream::blocking,
-                    procPatch.neighbProcNo()
-                );
+                UOPstream toNeighbour(procPatch.neighbProcNo(), pBufs);
 
                 toNeighbour
                     << SubList<label>(nCellsUsingFace, pp.size(), pp.start());
             }
         }
 
+        pBufs.finishedSends();
 
         // Receive face usage count and check for faces that become uncoupled.
         forAll(oldPatches, oldPatchI)
@@ -134,11 +133,7 @@ void Foam::fvMeshSubset::doCoupledPatches
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(pp);
 
-                IPstream fromNeighbour
-                (
-                    Pstream::blocking,
-                    procPatch.neighbProcNo()
-                );
+                UIPstream fromNeighbour(procPatch.neighbProcNo(), pBufs);
 
                 labelList nbrCellsUsingFace(fromNeighbour);
 
@@ -281,28 +276,50 @@ void Foam::fvMeshSubset::subsetZones()
     {
         const faceZone& fz = faceZones[i];
 
-        // Create list of mesh faces part of the new zone
-        labelList subAddressing
-        (
-            subset
-            (
-                baseMesh().nFaces(),
-                fz,
-                faceMap()
-            )
-        );
-
-        // Flipmap for all mesh faces
-        boolList fullFlipStatus(baseMesh().nFaces(), false);
+        // Expand faceZone to full mesh
+        // +1 : part of faceZone, flipped
+        // -1 :    ,,           , unflipped
+        //  0 : not part of faceZone
+        labelList zone(baseMesh().nFaces(), 0);
         forAll(fz, j)
         {
-            fullFlipStatus[fz[j]] = fz.flipMap()[j];
+            if (fz.flipMap()[j])
+            {
+                zone[fz[j]] = 1;
+            }
+            else
+            {
+                zone[fz[j]] = -1;
+            }
         }
-        // Extract sub part
-        boolList subFlipStatus(subAddressing.size(), false);
-        forAll(subAddressing, j)
+
+        // Select faces
+        label nSub = 0;
+        forAll(faceMap(), j)
         {
-            subFlipStatus[j] = fullFlipStatus[faceMap()[subAddressing[j]]];
+            if (zone[faceMap()[j]] != 0)
+            {
+                nSub++;
+            }
+        }
+        labelList subAddressing(nSub);
+        boolList subFlipStatus(nSub);
+        nSub = 0;
+        forAll(faceMap(), subFaceI)
+        {
+            label meshFaceI = faceMap()[subFaceI];
+            if (zone[meshFaceI] != 0)
+            {
+                subAddressing[nSub] = subFaceI;
+                label subOwner = subMesh().faceOwner()[subFaceI];
+                label baseOwner = baseMesh().faceOwner()[meshFaceI];
+                // If subowner is the same cell as the base keep the flip status
+                bool sameOwner = (cellMap()[subOwner] == baseOwner);
+                bool flip = (zone[meshFaceI] == 1);
+                subFlipStatus[nSub] = (sameOwner == flip);
+
+                nSub++;
+            }
         }
 
         fZonePtrs[i] = new faceZone
@@ -533,9 +550,9 @@ void Foam::fvMeshSubset::setCellSubset
         globalPointMap[pointMap_[pointI]] = pointI;
     }
 
-    Pout << "Number of cells in new mesh: " << nCellsInSet << endl;
-    Pout << "Number of faces in new mesh: " << globalFaceMap.size() << endl;
-    Pout << "Number of points in new mesh: " << globalPointMap.size() << endl;
+    Pout<< "Number of cells in new mesh: " << nCellsInSet << endl;
+    Pout<< "Number of faces in new mesh: " << globalFaceMap.size() << endl;
+    Pout<< "Number of points in new mesh: " << globalPointMap.size() << endl;
 
     // Make a new mesh
     pointField newPoints(globalPointMap.size());
@@ -658,6 +675,8 @@ void Foam::fvMeshSubset::setCellSubset
     }
 
 
+    // Delete any old mesh
+    fvMeshSubsetPtr_.clear();
     // Make a new mesh
     fvMeshSubsetPtr_.reset
     (
@@ -1152,11 +1171,15 @@ void Foam::fvMeshSubset::setLargeCellSubset
     }
 
 
+    // Delete any old one
+    fvMeshSubsetPtr_.clear();
+
     // Make a new mesh
     // Note that mesh gets registered with same name as original mesh. This is
     // not proper but cannot be avoided since otherwise surfaceInterpolation
     // cannot find its fvSchemes (it will try to read e.g.
     // system/region0SubSet/fvSchemes)
+    // Make a new mesh
     fvMeshSubsetPtr_.reset
     (
         new fvMesh

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -89,11 +89,12 @@ public:
         //- Source type enumeration
         enum sourceType
         {
-            stCellZone
+            stCellZone,
+            stAll
         };
 
         //- Source type names
-        static const NamedEnum<sourceType, 1> sourceTypeNames_;
+        static const NamedEnum<sourceType, 2> sourceTypeNames_;
 
 
         //- Operation type enumeration

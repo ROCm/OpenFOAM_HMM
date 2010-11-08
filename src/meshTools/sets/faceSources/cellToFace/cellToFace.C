@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,13 +34,16 @@ License
 
 namespace Foam
 {
+    defineTypeNameAndDebug(cellToFace, 0);
+    addToRunTimeSelectionTable(topoSetSource, cellToFace, word);
+    addToRunTimeSelectionTable(topoSetSource, cellToFace, istream);
 
-defineTypeNameAndDebug(cellToFace, 0);
-
-addToRunTimeSelectionTable(topoSetSource, cellToFace, word);
-
-addToRunTimeSelectionTable(topoSetSource, cellToFace, istream);
-
+    template<>
+    const char* Foam::NamedEnum<Foam::cellToFace::cellAction, 2>::names[] =
+    {
+        "all",
+        "both"
+    };
 }
 
 
@@ -51,13 +54,6 @@ Foam::topoSetSource::addToUsageTable Foam::cellToFace::usage_
     "    Select -all : all faces of cells in the cellSet\n"
     "           -both: faces where both neighbours are in the cellSet\n\n"
 );
-
-template<>
-const char* Foam::NamedEnum<Foam::cellToFace::cellAction, 2>::names[] =
-{
-    "all",
-    "both"
-};
 
 const Foam::NamedEnum<Foam::cellToFace::cellAction, 2>
     Foam::cellToFace::cellActionNames_;
@@ -127,7 +123,7 @@ void Foam::cellToFace::combine(topoSet& set, const bool add) const
                 }
             }
         }
-        syncTools::swapBoundaryFaceList(mesh_, neiInSet, false);
+        syncTools::swapBoundaryFaceList(mesh_, neiInSet);
 
 
         // Check all boundary faces

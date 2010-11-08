@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "Tuple2.H"
 #include "IFstream.H"
-#include "interpolateXY.H"
+#include "interpolateSplineXY.H"
 #include "mathematicalConstants.H"
 
 using namespace Foam::constant::mathematical;
@@ -98,7 +98,7 @@ Foam::solidBodyMotionFunctions::tabulated6DoFMotion::transformation() const
             << exit(FatalError);
     }
 
-    translationRotationVectors TRV = interpolateXY
+    translationRotationVectors TRV = interpolateSplineXY
     (
         t,
         times_,
@@ -127,7 +127,10 @@ bool Foam::solidBodyMotionFunctions::tabulated6DoFMotion::read
 
     // If the timeDataFileName has changed read the file
 
-    fileName newTimeDataFileName(SBMFCoeffs_.lookup("timeDataFileName"));
+    fileName newTimeDataFileName
+    (
+        fileName(SBMFCoeffs_.lookup("timeDataFileName")).expand()
+    );
 
     if (newTimeDataFileName != timeDataFileName_)
     {

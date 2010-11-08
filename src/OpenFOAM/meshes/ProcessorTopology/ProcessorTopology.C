@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ License
 #include "ListOps.H"
 #include "Pstream.H"
 #include "commSchedule.H"
+#include "boolList.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -42,6 +43,8 @@ Foam::labelList Foam::ProcessorTopology<Patch, ProcPatch>::procNeighbours
 
     label maxNb = 0;
 
+    boolList isNeighbourProc(Pstream::nProcs(), false);
+
     forAll(patches, patchi)
     {
         const Patch& patch = patches[patchi];
@@ -51,19 +54,34 @@ Foam::labelList Foam::ProcessorTopology<Patch, ProcPatch>::procNeighbours
             const ProcPatch& procPatch =
                 refCast<const ProcPatch>(patch);
 
-            nNeighbours++;
+            label pNeighbProcNo = procPatch.neighbProcNo();
 
-            maxNb = max(maxNb, procPatch.neighbProcNo());
+            if (!isNeighbourProc[pNeighbProcNo])
+            {
+                nNeighbours++;
+
+                maxNb = max(maxNb, procPatch.neighbProcNo());
+
+                isNeighbourProc[pNeighbProcNo] = true;
+            }
         }
     }
 
-    labelList neighbours(nNeighbours);
+    labelList neighbours(nNeighbours, -1);
+
+    nNeighbours = 0;
+
+    forAll(isNeighbourProc, procI)
+    {
+        if (isNeighbourProc[procI])
+        {
+            neighbours[nNeighbours++] = procI;
+        }
+    }
 
     procPatchMap_.setSize(maxNb + 1);
     procPatchMap_ = -1;
 
-    nNeighbours = 0;
-
     forAll(patches, patchi)
     {
         const Patch& patch = patches[patchi];
@@ -72,8 +90,6 @@ Foam::labelList Foam::ProcessorTopology<Patch, ProcPatch>::procNeighbours
         {
             const ProcPatch& procPatch =
                 refCast<const ProcPatch>(patch);
-
-            neighbours[nNeighbours++] = procPatch.neighbProcNo();
 
             // Construct reverse map
             procPatchMap_[procPatch.neighbProcNo()] = patchi;

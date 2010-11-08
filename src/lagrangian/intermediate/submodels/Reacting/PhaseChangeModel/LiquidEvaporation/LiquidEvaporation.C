@@ -37,20 +37,20 @@ Foam::scalarField Foam::LiquidEvaporation<CloudType>::calcXc
     const label cellI
 ) const
 {
-    scalarField Xc(this->owner().mcCarrierThermo().Y().size());
+    scalarField Xc(this->owner().thermo().carrier().Y().size());
 
     forAll(Xc, i)
     {
         Xc[i] =
-            this->owner().mcCarrierThermo().Y()[i][cellI]
-           /this->owner().mcCarrierThermo().speciesData()[i].W();
+            this->owner().thermo().carrier().Y()[i][cellI]
+           /this->owner().thermo().carrier().W(i);
     }
 
     return Xc/sum(Xc);
 }
 
 
-template <class CloudType>
+template<class CloudType>
 Foam::scalar Foam::LiquidEvaporation<CloudType>::Sh
 (
     const scalar Re,
@@ -63,7 +63,7 @@ Foam::scalar Foam::LiquidEvaporation<CloudType>::Sh
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::LiquidEvaporation<CloudType>::LiquidEvaporation
 (
     const dictionary& dict,
@@ -71,16 +71,7 @@ Foam::LiquidEvaporation<CloudType>::LiquidEvaporation
 )
 :
     PhaseChangeModel<CloudType>(dict, owner, typeName),
-    liquids_
-    (
-        liquidMixture::New
-        (
-            owner.mesh().objectRegistry::lookupObject<dictionary>
-            (
-                owner.carrierThermo().name()
-            )
-        )
-    ),
+    liquids_(owner.thermo().liquids()),
     activeLiquids_(this->coeffDict().lookup("activeLiquids")),
     liqToCarrierMap_(activeLiquids_.size(), -1),
     liqToLiqMap_(activeLiquids_.size(), -1)
@@ -97,39 +88,51 @@ Foam::LiquidEvaporation<CloudType>::LiquidEvaporation
         )   << "Evaporation model selected, but no active liquids defined"
             << nl << endl;
     }
-
-    // Determine mapping between liquid and carrier phase species
-    forAll(activeLiquids_, i)
+    else
     {
-        liqToCarrierMap_[i] =
-            owner.composition().globalCarrierId(activeLiquids_[i]);
-    }
+        Info<< "Participating liquid species:" << endl;
 
-    // Determine mapping between model active liquids and global liquids
-    label idLiquid = owner.composition().idLiquid();
-    forAll(activeLiquids_, i)
-    {
-        liqToLiqMap_[i] =
-            owner.composition().localId(idLiquid, activeLiquids_[i]);
+        // Determine mapping between liquid and carrier phase species
+        forAll(activeLiquids_, i)
+        {
+            Info<< "    " << activeLiquids_[i] << endl;
+            liqToCarrierMap_[i] =
+                owner.composition().globalCarrierId(activeLiquids_[i]);
+        }
+
+        // Determine mapping between model active liquids and global liquids
+        const label idLiquid = owner.composition().idLiquid();
+        forAll(activeLiquids_, i)
+        {
+            liqToLiqMap_[i] =
+                owner.composition().localId(idLiquid, activeLiquids_[i]);
+        }
     }
 }
 
 
+template<class CloudType>
+Foam::LiquidEvaporation<CloudType>::LiquidEvaporation
+(
+    const LiquidEvaporation<CloudType>& pcm
+)
+:
+    PhaseChangeModel<CloudType>(pcm),
+    liquids_(pcm.owner().thermo().liquids()),
+    activeLiquids_(pcm.activeLiquids_),
+    liqToCarrierMap_(pcm.liqToCarrierMap_),
+    liqToLiqMap_(pcm.liqToLiqMap_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::LiquidEvaporation<CloudType>::~LiquidEvaporation()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::LiquidEvaporation<CloudType>::active() const
-{
-    return true;
-}
-
 
 template<class CloudType>
 void Foam::LiquidEvaporation<CloudType>::calculate
@@ -146,19 +149,19 @@ void Foam::LiquidEvaporation<CloudType>::calculate
 ) const
 {
     // construct carrier phase species volume fractions for cell, cellI
-    scalarField Xc = calcXc(cellI);
+    const scalarField Xc = calcXc(cellI);
 
     // droplet surface area
-    scalar A = pi*sqr(d);
+    const scalar A = pi*sqr(d);
 
     // calculate mass transfer of each specie in liquid
     forAll(activeLiquids_, i)
     {
-        label gid = liqToCarrierMap_[i];
-        label lid = liqToLiqMap_[i];
+        const label gid = liqToCarrierMap_[i];
+        const label lid = liqToLiqMap_[i];
 
         // vapour diffusivity [m2/s]
-        scalar Dab = liquids_->properties()[lid].D(pc, Ts);
+        const scalar Dab = liquids_.properties()[lid].D(pc, Ts);
 
         // saturation pressure for species i [pa]
         // - carrier phase pressure assumed equal to the liquid vapour pressure
@@ -166,28 +169,28 @@ void Foam::LiquidEvaporation<CloudType>::calculate
         // NOTE: if pSat > pc then particle is superheated
         // calculated evaporation rate will be greater than that of a particle
         // at boiling point, but this is not a boiling model
-        scalar pSat = liquids_->properties()[lid].pv(pc, T);
+        const scalar pSat = liquids_.properties()[lid].pv(pc, T);
 
         // Schmidt number
-        scalar Sc = nu/(Dab + ROOTVSMALL);
+        const scalar Sc = nu/(Dab + ROOTVSMALL);
 
         // Sherwood number
-        scalar Sh = this->Sh(Re, Sc);
+        const scalar Sh = this->Sh(Re, Sc);
 
         // mass transfer coefficient [m/s]
-        scalar kc = Sh*Dab/(d + ROOTVSMALL);
+        const scalar kc = Sh*Dab/(d + ROOTVSMALL);
 
         // vapour concentration at droplet surface [kmol/m3] at film temperature
-        scalar Cs = pSat/(specie::RR*Ts);
+        const scalar Cs = pSat/(specie::RR*Ts);
 
         // vapour concentration in bulk gas [kmol/m3] at film temperature
-        scalar Cinf = Xc[gid]*pc/(specie::RR*Ts);
+        const scalar Cinf = Xc[gid]*pc/(specie::RR*Ts);
 
         // molar flux of vapour [kmol/m2/s]
-        scalar Ni = max(kc*(Cs - Cinf), 0.0);
+        const scalar Ni = max(kc*(Cs - Cinf), 0.0);
 
         // mass transfer [kg]
-        dMassPC[lid] += Ni*A*liquids_->properties()[lid].W()*dt;
+        dMassPC[lid] += Ni*A*liquids_.properties()[lid].W()*dt;
     }
 }
 

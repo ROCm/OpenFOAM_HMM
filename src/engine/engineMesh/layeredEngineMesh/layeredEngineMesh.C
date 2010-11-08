@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,10 +44,7 @@ Foam::layeredEngineMesh::layeredEngineMesh(const IOobject& io)
     engineMesh(io),
     pistonLayers_("pistonLayers", dimLength, 0.0)
 {
-    if (engineDB_.engineDict().found("pistonLayers"))
-    {
-        engineDB_.engineDict().lookup("pistonLayers") >> pistonLayers_;
-    }
+    engineDB_.engineDict().readIfPresent("pistonLayers", pistonLayers_);
 }
 
 

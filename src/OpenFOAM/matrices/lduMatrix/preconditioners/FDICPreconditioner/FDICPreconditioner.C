@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,7 +58,8 @@ Foam::FDICPreconditioner::FDICPreconditioner
         solver_.matrix().lduAddr().upperAddr().begin();
     const label* const __restrict__ lPtr =
         solver_.matrix().lduAddr().lowerAddr().begin();
-    const scalar* const __restrict__ upperPtr = solver_.matrix().upper().begin();
+    const scalar* const __restrict__ upperPtr =
+        solver_.matrix().upper().begin();
 
     register label nCells = rD_.size();
     register label nFaces = solver_.matrix().upper().size();

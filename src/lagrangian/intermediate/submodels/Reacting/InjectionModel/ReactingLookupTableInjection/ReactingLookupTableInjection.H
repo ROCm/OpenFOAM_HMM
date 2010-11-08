@@ -84,8 +84,14 @@ class ReactingLookupTableInjection
         //- List of injectors
         reactingParcelInjectionDataIOList injectors_;
 
-        //- List of injector cells per injector
-        List<label> injectorCells_;
+        //- List of cell labels corresoponding to injector positions
+        labelList injectorCells_;
+
+        //- List of tetFace labels corresoponding to injector positions
+        labelList injectorTetFaces_;
+
+        //- List of tetPt labels corresoponding to injector positions
+        labelList injectorTetPts_;
 
 
 protected:
@@ -93,18 +99,10 @@ protected:
     // Protected Member Functions
 
         //- Number of parcels to introduce over the time step relative to SOI
-        label parcelsToInject
-        (
-            const scalar time0,
-            const scalar time1
-        ) const;
+        virtual label parcelsToInject(const scalar time0, const scalar time1);
 
         //- Volume of parcels to introduce over the time step relative to SOI
-        scalar volumeToInject
-        (
-            const scalar time0,
-            const scalar time1
-        ) const;
+        virtual scalar volumeToInject(const scalar time0, const scalar time1);
 
 
 public:
@@ -122,6 +120,21 @@ public:
             CloudType& owner
         );
 
+        //- Construct copy
+        ReactingLookupTableInjection
+        (
+            const ReactingLookupTableInjection<CloudType>& im
+        );
+
+        //- Construct and return a clone
+        virtual autoPtr<InjectionModel<CloudType> > clone() const
+        {
+            return autoPtr<InjectionModel<CloudType> >
+            (
+                new ReactingLookupTableInjection<CloudType>(*this)
+            );
+        }
+
 
     //- Destructor
     virtual ~ReactingLookupTableInjection();
@@ -129,23 +142,22 @@ public:
 
     // Member Functions
 
-        //- Flag to indicate whether model activates injection model
-        bool active() const;
-
         //- Return the end-of-injection time
         scalar timeEnd() const;
 
 
         // Injection geometry
 
-            //- Set the injection position and owner cell
+            //- Set the injection position and owner cell, tetFace and tetPt
             virtual void setPositionAndCell
             (
                 const label parcelI,
                 const label nParcels,
                 const scalar time,
                 vector& position,
-                label& cellOwner
+                label& cellOwner,
+                label& tetFaceI,
+                label& tetPtI
             );
 
             //- Set the parcel properties

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -80,10 +80,7 @@ freestreamFvPatchField<Type>::freestreamFvPatchField
         fvPatchField<Type>::operator=(freestreamValue());
     }
 
-    if (dict.found("phi"))
-    {
-        dict.lookup("phi") >> this->phiName_;
-    }
+    dict.readIfPresent("phi", this->phiName_);
 }
 
 

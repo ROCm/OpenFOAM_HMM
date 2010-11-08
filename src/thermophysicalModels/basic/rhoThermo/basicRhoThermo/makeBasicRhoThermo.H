@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,6 +54,39 @@ addToRunTimeSelectionTable                                                    \
 (                                                                             \
     basicRhoThermo,                                                           \
     Cthermo##Mixture##Transport##Thermo##EqnOfState,                          \
+    fvMesh                                                                    \
+)
+
+
+#define makeBasicRhoPolyThermo(Cthermo,Mixture,Order)                         \
+                                                                              \
+typedef polynomialTransport                                                   \
+<                                                                             \
+    specieThermo                                                              \
+    <                                                                         \
+        hPolynomialThermo                                                     \
+        <                                                                     \
+            icoPolynomial<Order>,                                             \
+            Order                                                             \
+            >                                                                 \
+    >,                                                                        \
+    Order                                                                     \
+> icoPoly##Order##ThermoPhysics;                                              \
+                                                                              \
+typedef Cthermo<Mixture<icoPoly##Order##ThermoPhysics> >                      \
+    Cthermo##Mixture##icoPoly##Order##ThermoPhysics;                          \
+                                                                              \
+defineTemplateTypeNameAndDebugWithName                                        \
+(                                                                             \
+    Cthermo##Mixture##icoPoly##Order##ThermoPhysics,                          \
+    #Cthermo"<"#Mixture"<icoPoly"#Order"ThermoPhysics>>",                     \
+    0                                                                         \
+);                                                                            \
+                                                                              \
+addToRunTimeSelectionTable                                                    \
+(                                                                             \
+    basicRhoThermo,                                                           \
+    Cthermo##Mixture##icoPoly##Order##ThermoPhysics,                          \
     fvMesh                                                                    \
 )
 

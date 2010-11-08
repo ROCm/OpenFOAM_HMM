@@ -91,8 +91,17 @@ public:
 
     public:
 
-        //- Constructor
-        constantProperties(const dictionary& parentDict);
+        // Constructors
+
+            //- Null constructor
+            constantProperties();
+
+            //- Copy constructor
+            constantProperties(const constantProperties& cp);
+
+            //- Constructor from dictionary
+            constantProperties(const dictionary& parentDict);
+
 
         // Access
 
@@ -115,9 +124,6 @@ public:
             //- Reference to the cloud containing this particle
             ReactingMultiphaseCloud<ParcelType>& cloud_;
 
-            //- Particle constant properties
-            const constantProperties& constProps_;
-
 
     public:
 
@@ -127,24 +133,15 @@ public:
             inline trackData
             (
                 ReactingMultiphaseCloud<ParcelType>& cloud,
-                const constantProperties& constProps,
-                const interpolation<scalar>& rhoInterp,
-                const interpolation<vector>& UInterp,
-                const interpolation<scalar>& muInterp,
-                const interpolation<scalar>& TInterp,
-                const interpolation<scalar>& CpInterp,
-                const interpolation<scalar>& pInterp,
-                const vector& g
-            );
+                typename ReactingParcel<ParcelType>::trackData::trackPart
+                    part = ReactingParcel<ParcelType>::trackData::tpLinearTrack
+             );
 
 
         // Member functions
 
             //- Return access to the owner cloud
             inline ReactingMultiphaseCloud<ParcelType>& cloud();
-
-            //- Return const access to the constant properties
-            inline const constantProperties& constProps() const;
     };
 
 
@@ -154,7 +151,7 @@ private:
 
         //- Return the mixture effective specific heat capacity
         template<class TrackData>
-        scalar cpEff
+        scalar CpEff
         (
             TrackData& td,
             const scalar p,
@@ -231,9 +228,7 @@ protected:
             const scalar T,            // temperature
             const scalar mass,         // mass
             const scalar mass0,        // mass (initial on injection)
-            const label idVolatile,    // id of volatile phase
-            const scalar YVolatileTot, // total volatile mass fraction
-            const scalarField& YVolatile, // volatile component mass fractions
+            const scalarField& YGasEff,// Gas component mass fractions
             bool& canCombust,          // 'can combust' flag
             scalarField& dMassDV,      // mass transfer - local to particle
             scalar& Sh,                // explicit particle enthalpy source
@@ -289,7 +284,9 @@ public:
         (
             ReactingMultiphaseCloud<ParcelType>& owner,
             const vector& position,
-            const label cellI
+            const label cellI,
+            const label tetFaceI,
+            const label tetPtI
         );
 
 
@@ -299,9 +296,12 @@ public:
             ReactingMultiphaseCloud<ParcelType>& owner,
             const vector& position,
             const label cellI,
+            const label tetFaceI,
+            const label tetPtI,
             const label typeId,
             const scalar nParticle0,
             const scalar d0,
+            const scalar dTarget0,
             const vector& U0,
             const vector& f0,
             const vector& angularMomentum0,
@@ -324,14 +324,36 @@ public:
         //- Construct as a copy
         ReactingMultiphaseParcel(const ReactingMultiphaseParcel& p);
 
-        //- Construct and return a clone
-        autoPtr<ReactingMultiphaseParcel> clone() const
+        //- Construct as a copy
+        ReactingMultiphaseParcel
+        (
+            const ReactingMultiphaseParcel& p,
+            const ReactingMultiphaseCloud<ParcelType>& c
+        );
+
+        //- Construct and return a (basic particle) clone
+        virtual autoPtr<Particle<ParcelType> > clone() const
         {
-            return
-                autoPtr<ReactingMultiphaseParcel>
+            return autoPtr<Particle<ParcelType> >
+            (
+                new ReactingMultiphaseParcel(*this)
+            );
+        }
+
+        //- Construct and return a (basic particle) clone
+        virtual autoPtr<Particle<ParcelType> > clone
+        (
+            const Cloud<ParcelType>& c
+        ) const
+        {
+            return autoPtr<Particle<ParcelType> >
+            (
+                new ReactingMultiphaseParcel
                 (
-                    new ReactingMultiphaseParcel(*this)
-                );
+                    *this,
+                    static_cast<const ReactingMultiphaseCloud<ParcelType>&>(c)
+                )
+            );
         }
 
 

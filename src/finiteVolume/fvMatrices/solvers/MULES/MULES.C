@@ -53,7 +53,7 @@ void Foam::MULES::explicitSolve
         psi,
         phi,
         phiPsi,
-        zero(), zero(),
+        zeroField(), zeroField(),
         psiMax, psiMin
     );
 }
@@ -74,7 +74,7 @@ void Foam::MULES::implicitSolve
         psi,
         phi,
         phiPsi,
-        zero(), zero(),
+        zeroField(), zeroField(),
         psiMax, psiMin
     );
 }

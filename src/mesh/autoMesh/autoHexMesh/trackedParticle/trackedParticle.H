@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,8 +26,7 @@ Class
 
 Description
     Particle class that marks cells it passes through. Used to mark cells
-    visited by feature edges. Uses ExactParticle tracking class so
-    will work on concave cells.
+    visited by feature edges.
 
 SourceFiles
     trackedParticle.C
@@ -37,7 +36,7 @@ SourceFiles
 #ifndef trackedParticle_H
 #define trackedParticle_H
 
-#include "ExactParticle.H"
+#include "Particle.H"
 #include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -48,12 +47,12 @@ namespace Foam
 class trackedParticleCloud;
 
 /*---------------------------------------------------------------------------*\
-                           Class trackedParticle Declaration
+                     Class trackedParticle Declaration
 \*---------------------------------------------------------------------------*/
 
 class trackedParticle
 :
-    public ExactParticle<trackedParticle>
+    public Particle<trackedParticle>
 {
     // Private data
 
@@ -68,6 +67,7 @@ class trackedParticle
 
         //- passive label
         label j_;
+
 
 public:
 
@@ -118,7 +118,9 @@ public:
         (
             const Cloud<trackedParticle>& c,
             const vector& position,
-            const label celli,
+            const label cellI,
+            const label tetFaceI,
+            const label tetPtI,
             const point& end,
             const label level,
             const label i,
@@ -134,9 +136,12 @@ public:
         );
 
         //- Construct and return a clone
-        autoPtr<trackedParticle> clone() const
+        autoPtr<Particle<trackedParticle> > clone() const
         {
-            return autoPtr<trackedParticle>(new trackedParticle(*this));
+            return autoPtr<Particle<trackedParticle> >
+            (
+                new trackedParticle(*this)
+            );
         }
 
 
@@ -165,7 +170,7 @@ public:
         // Tracking
 
             //- Track all particles to their end point
-            bool move(trackData&);
+            bool move(trackData&, const scalar);
 
 
             //- Overridable function to handle the particle hitting a patch
@@ -174,13 +179,17 @@ public:
             (
                 const polyPatch&,
                 trackedParticle::trackData& td,
-                const label patchI
+                const label patchI,
+                const scalar trackFraction,
+                const tetIndices& tetIs
             );
             bool hitPatch
             (
                 const polyPatch&,
                 int&,
-                const label patchI
+                const label patchI,
+                const scalar trackFraction,
+                const tetIndices& tetIs
            );
 
             //- Overridable function to handle the particle hitting a wedge
@@ -237,12 +246,14 @@ public:
             void hitWallPatch
             (
                 const wallPolyPatch&,
-                trackedParticle::trackData& td
+                trackedParticle::trackData& td,
+                const tetIndices&
             );
             void hitWallPatch
             (
                 const wallPolyPatch&,
-                int&
+                int&,
+                const tetIndices&
             );
 
             //- Overridable function to handle the particle hitting a polyPatch

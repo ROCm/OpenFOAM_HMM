@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -153,7 +153,7 @@ Foam::fvMesh::fvMesh(const IOobject& io)
     surfaceInterpolation(*this),
     fvSchemes(static_cast<const objectRegistry&>(*this)),
     fvSolution(static_cast<const objectRegistry&>(*this)),
-    fvData(static_cast<const objectRegistry&>(*this)),
+    data(static_cast<const objectRegistry&>(*this)),
     boundary_(*this, boundaryMesh()),
     lduPtr_(NULL),
     curTimeIndex_(time().timeIndex()),
@@ -248,7 +248,7 @@ Foam::fvMesh::fvMesh
     surfaceInterpolation(*this),
     fvSchemes(static_cast<const objectRegistry&>(*this)),
     fvSolution(static_cast<const objectRegistry&>(*this)),
-    fvData(static_cast<const objectRegistry&>(*this)),
+    data(static_cast<const objectRegistry&>(*this)),
     boundary_(*this),
     lduPtr_(NULL),
     curTimeIndex_(time().timeIndex()),
@@ -281,7 +281,7 @@ Foam::fvMesh::fvMesh
     surfaceInterpolation(*this),
     fvSchemes(static_cast<const objectRegistry&>(*this)),
     fvSolution(static_cast<const objectRegistry&>(*this)),
-    fvData(static_cast<const objectRegistry&>(*this)),
+    data(static_cast<const objectRegistry&>(*this)),
     boundary_(*this),
     lduPtr_(NULL),
     curTimeIndex_(time().timeIndex()),

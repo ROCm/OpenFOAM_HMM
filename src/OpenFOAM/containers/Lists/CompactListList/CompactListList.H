@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -114,10 +114,10 @@ public:
         inline CompactListList(const label nRows, const label nData, const T&);
 
         //- Construct given list of row-sizes.
-        explicit CompactListList(const UList<label>& rowSizes);
+        explicit CompactListList(const labelUList& rowSizes);
 
         //- Construct given list of row-sizes
-        CompactListList(const UList<label>& rowSizes, const T&);
+        CompactListList(const labelUList& rowSizes, const T&);
 
         //- Construct by transferring the parameter contents
         explicit CompactListList(const Xfer<CompactListList<T, Container> >&);
@@ -168,7 +168,7 @@ public:
             void setSize(const label nRows, const label nData, const T&);
 
             //- Reset size of CompactListList.
-            void setSize(const UList<label>& rowSizes);
+            void setSize(const labelUList& rowSizes);
 
             //- Reset size of CompactListList.
             //  This form only allows contraction of the CompactListList.
@@ -181,7 +181,7 @@ public:
             inline void resize(const label nRows, const label nData, const T&);
 
             //- Reset size of CompactListList.
-            inline void resize(const UList<label>& rowSizes);
+            inline void resize(const labelUList& rowSizes);
 
             //- Clear the CompactListList, i.e. set sizes to zero.
             void clear();

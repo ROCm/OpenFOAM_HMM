@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -82,6 +82,8 @@ public:
 
         static const char* const typeName;
         static int debug;
+
+        //- An empty string
         static const string null;
 
 
@@ -143,6 +145,9 @@ public:
         template<class String>
         static inline string quotemeta(const string&, const char quote='\\');
 
+        //- True when strings match literally
+        inline bool match(const std::string&) const;
+
         //- Avoid masking the normal std::string replace
         using std::string::replace;
 
@@ -167,13 +172,13 @@ public:
         //- Expand initial tildes and all occurences of environment variables
         //  Expansion includes:
         //  -# environment variables
-        //     - "$VAR", "${VAR}"
+        //    - "$VAR", "${VAR}"
         //  -# current directory
-        //     - leading "./" : the current directory
+        //    - leading "./" : the current directory
         //  -# tilde expansion
-        //     - leading "~/" : home directory
-        //     - leading "~user" : home directory for specified user
-        //     - leading "~OpenFOAM" : site/user OpenFOAM configuration directory
+        //    - leading "~/" : home directory
+        //    - leading "~user" : home directory for specified user
+        //    - leading "~OpenFOAM" : site/user OpenFOAM configuration directory
         //
         //  @sa
         //  Foam::findEtcFile
