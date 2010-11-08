@@ -32,12 +32,12 @@ License
 template<class Type>
 Foam::tmp<Foam::Field<Type> > Foam::fieldValue::combineFields
 (
-    const tmp<Field<Type> >& field
+    const Field<Type>& field
 ) const
 {
     List<Field<Type> > allValues(Pstream::nProcs());
 
-    allValues[Pstream::myProcNo()] = field();
+    allValues[Pstream::myProcNo()] = field;
 
     Pstream::gatherList(allValues);
 
@@ -57,8 +57,18 @@ Foam::tmp<Foam::Field<Type> > Foam::fieldValue::combineFields
     }
     else
     {
-        return field();
+        return field;
     }
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type> > Foam::fieldValue::combineFields
+(
+    const tmp<Field<Type> >& field
+) const
+{
+    return combineFields(field());
 }
 
 
