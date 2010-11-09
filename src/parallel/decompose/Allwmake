@@ -1,10 +1,18 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
-set -x
 
-SCOTCH_VERSION=scotch_5.1.10b
-SCOTCH_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$SCOTCH_VERSION
-export SCOTCH_ARCH_PATH
+# get SCOTCH_VERSION, SCOTCH_ARCH_PATH
+settings=`$WM_PROJECT_DIR/bin/foamEtcFile apps/scotch/bashrc`
+if [ -f "$settings" ]
+then
+    . $settings
+    echo "using SCOTCH_ARCH_PATH=$SCOTCH_ARCH_PATH"
+else
+    echo
+    echo "Error: no apps/scotch/bashrc settings"
+    echo
+fi
+set -x
 
 wmakeLnInclude decompositionMethods
 
