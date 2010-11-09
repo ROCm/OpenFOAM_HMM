@@ -69,6 +69,11 @@ Description
     faces.
     - all fields get oriented according to the faceZone (so you might e.g. see
     negative pressure)
+    - using sampledSurfaces:
+            - they do not do surface fields
+            - they use cell values - they do not do any interpolation.
+            - take care when using isoSurfaces - these might have duplicate
+              triangles so integration might be wrong
 
 SourceFiles
     faceSource.C

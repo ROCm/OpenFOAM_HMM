@@ -68,6 +68,8 @@ functions
         sourceName      movingWall;
 
         //// if sampledSurface: dictionary with a sampledSurface
+        //// Note: the sampledSurfaces will have cell-values, i.e.
+        //// non-interpolated. Also will not sample surface fields.
         //sampledSurfaceDict
         //{
         //    type            cuttingPlane;
