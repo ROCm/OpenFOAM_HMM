@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,41 +23,22 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "nullSurfaceWriter.H"
+#include "ensightSurfaceWriter.H"
+#include "surfaceWriters.H"
+#include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+namespace Foam
+{
 
-template<class Type>
-Foam::nullSurfaceWriter<Type>::nullSurfaceWriter()
-:
-    surfaceWriter<Type>()
-{}
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+makeSurfaceWriterType(ensightSurfaceWriter, bool);
+makeSurfaceWriters(ensightSurfaceWriter);
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::nullSurfaceWriter<Type>::~nullSurfaceWriter()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-void Foam::nullSurfaceWriter<Type>::write
-(
-    const fileName& outputDir,
-    const fileName& surfaceName,
-    const pointField& points,
-    const faceList& faces,
-    const word& fieldName,
-    const Field<Type>& values,
-    const bool isNodeValues,
-    const bool verbose
-) const
-{}
-
+} // End namespace Foam
 
 // ************************************************************************* //

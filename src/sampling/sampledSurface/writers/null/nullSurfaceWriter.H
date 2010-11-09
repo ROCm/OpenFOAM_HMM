@@ -80,6 +80,7 @@ public:
             const faceList& faces,
             const word& fieldName,
             const Field<Type>& values,
+            const bool isNodeValues,
             const bool verbose = false
         ) const;
 };
