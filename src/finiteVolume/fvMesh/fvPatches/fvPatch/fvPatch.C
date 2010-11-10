@@ -89,7 +89,7 @@ Foam::wordList Foam::fvPatch::constraintTypes()
 }
 
 
-const Foam::unallocLabelList& Foam::fvPatch::faceCells() const
+const Foam::labelUList& Foam::fvPatch::faceCells() const
 {
     return polyPatch_.faceCells();
 }
@@ -106,7 +106,7 @@ Foam::tmp<Foam::vectorField> Foam::fvPatch::Cn() const
     tmp<vectorField> tcc(new vectorField(size()));
     vectorField& cc = tcc();
 
-    const unallocLabelList& faceCells = this->faceCells();
+    const labelUList& faceCells = this->faceCells();
 
     // get reference to global cell centres
     const vectorField& gcc = boundaryMesh().mesh().cellCentres();

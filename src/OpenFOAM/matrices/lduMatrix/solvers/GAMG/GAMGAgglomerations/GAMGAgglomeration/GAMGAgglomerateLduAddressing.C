@@ -36,8 +36,8 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
     const lduMesh& fineMesh = meshLevel(fineLevelIndex);
     const lduAddressing& fineMeshAddr = fineMesh.lduAddr();
 
-    const unallocLabelList& upperAddr = fineMeshAddr.upperAddr();
-    const unallocLabelList& lowerAddr = fineMeshAddr.lowerAddr();
+    const labelUList& upperAddr = fineMeshAddr.upperAddr();
+    const labelUList& lowerAddr = fineMeshAddr.lowerAddr();
 
     label nFineFaces = upperAddr.size();
 

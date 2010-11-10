@@ -127,7 +127,7 @@ public:
             //  Returns actual point and distance (squared)
             void findNearest
             (
-                const unallocLabelList& indices,
+                const labelUList& indices,
                 const point& sample,
 
                 scalar& nearestDistSqr,
@@ -139,7 +139,7 @@ public:
             //  Returns point and distance (squared)
             void findNearest
             (
-                const unallocLabelList& indices,
+                const labelUList& indices,
                 const linePointRef& ln,
 
                 treeBoundBox& tightest,

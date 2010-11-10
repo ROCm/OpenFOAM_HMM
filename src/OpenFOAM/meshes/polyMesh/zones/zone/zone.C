@@ -85,7 +85,7 @@ void Foam::zone::calcLookupMap() const
 Foam::zone::zone
 (
     const word& name,
-    const unallocLabelList& addr,
+    const labelUList& addr,
     const label index
 )
 :
@@ -128,7 +128,7 @@ Foam::zone::zone
 Foam::zone::zone
 (
     const zone& z,
-    const unallocLabelList& addr,
+    const labelUList& addr,
     const label index
 )
 :

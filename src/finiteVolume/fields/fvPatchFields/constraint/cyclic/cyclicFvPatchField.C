@@ -142,7 +142,7 @@ template<class Type>
 tmp<Field<Type> > cyclicFvPatchField<Type>::patchNeighbourField() const
 {
     const Field<Type>& iField = this->internalField();
-    const unallocLabelList& nbrFaceCells =
+    const labelUList& nbrFaceCells =
         cyclicPatch().cyclicPatch().neighbPatch().faceCells();
 
     tmp<Field<Type> > tpnf(new Field<Type>(this->size()));
@@ -201,7 +201,7 @@ void cyclicFvPatchField<Type>::updateInterfaceMatrix
 {
     scalarField pnf(this->size());
 
-    const unallocLabelList& nbrFaceCells =
+    const labelUList& nbrFaceCells =
         cyclicPatch().cyclicPatch().neighbPatch().faceCells();
 
     forAll(pnf, facei)
@@ -213,7 +213,7 @@ void cyclicFvPatchField<Type>::updateInterfaceMatrix
     transformCoupleField(pnf, cmpt);
 
     // Multiply the field by coefficients and add into the result
-    const unallocLabelList& faceCells = cyclicPatch_.faceCells();
+    const labelUList& faceCells = cyclicPatch_.faceCells();
 
     forAll(faceCells, elemI)
     {

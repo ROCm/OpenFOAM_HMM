@@ -73,7 +73,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::nonOrthogonality() const
 
     forAll(mesh_.boundaryMesh(), patchI)
     {
-        const unallocLabelList& faceCells =
+        const labelUList& faceCells =
             mesh_.boundaryMesh()[patchI].faceCells();
 
         const vectorField::subField faceCentres =
@@ -146,7 +146,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::skewness() const
 
     forAll(mesh_.boundaryMesh(), patchI)
     {
-        const unallocLabelList& faceCells =
+        const labelUList& faceCells =
             mesh_.boundaryMesh()[patchI].faceCells();
 
         const vectorField::subField faceCentres =
@@ -212,7 +212,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::faceNonOrthogonality() const
 
     forAll(mesh_.boundaryMesh(), patchI)
     {
-        const unallocLabelList& faceCells =
+        const labelUList& faceCells =
             mesh_.boundaryMesh()[patchI].faceCells();
 
         const vectorField::subField faceCentres =
@@ -283,7 +283,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::faceSkewness() const
 
     forAll(mesh_.boundaryMesh(), patchI)
     {
-        const unallocLabelList& faceCells =
+        const labelUList& faceCells =
             mesh_.boundaryMesh()[patchI].faceCells();
 
         const vectorField::subField faceCentres =

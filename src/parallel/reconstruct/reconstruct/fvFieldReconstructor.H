@@ -115,7 +115,7 @@ public:
                     return true;
                 }
 
-                const unallocLabelList& directAddressing() const
+                const labelUList& directAddressing() const
                 {
                     return unallocLabelList::null();
                 }

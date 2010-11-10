@@ -170,13 +170,13 @@ Foam::fvSurfaceMapper::~fvSurfaceMapper()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::unallocLabelList& Foam::fvSurfaceMapper::directAddressing() const
+const Foam::labelUList& Foam::fvSurfaceMapper::directAddressing() const
 {
     if (!direct())
     {
         FatalErrorIn
         (
-            "const unallocLabelList& fvSurfaceMapper::"
+            "const labelUList& fvSurfaceMapper::"
             "directAddressing() const"
         )   << "Requested direct addressing for an interpolative mapper."
             << abort(FatalError);

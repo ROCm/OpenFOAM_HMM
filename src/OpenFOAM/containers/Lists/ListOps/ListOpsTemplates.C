@@ -30,7 +30,7 @@ License
 template<class ListType>
 ListType Foam::renumber
 (
-    const UList<label>& oldToNew,
+    const labelUList& oldToNew,
     const ListType& lst
 )
 {
@@ -55,7 +55,7 @@ ListType Foam::renumber
 template<class ListType>
 void Foam::inplaceRenumber
 (
-    const UList<label>& oldToNew,
+    const labelUList& oldToNew,
     ListType& lst
 )
 {
@@ -72,7 +72,7 @@ void Foam::inplaceRenumber
 template<class ListType>
 ListType Foam::reorder
 (
-    const UList<label>& oldToNew,
+    const labelUList& oldToNew,
     const ListType& lst
 )
 {
@@ -100,7 +100,7 @@ ListType Foam::reorder
 template<class ListType>
 void Foam::inplaceReorder
 (
-    const UList<label>& oldToNew,
+    const labelUList& oldToNew,
     ListType& lst
 )
 {
@@ -129,7 +129,7 @@ void Foam::inplaceReorder
 template<class Container>
 void Foam::inplaceMapValue
 (
-    const UList<label>& oldToNew,
+    const labelUList& oldToNew,
     Container& lst
 )
 {
@@ -151,7 +151,7 @@ void Foam::inplaceMapValue
 template<class Container>
 void Foam::inplaceMapKey
 (
-    const UList<label>& oldToNew,
+    const labelUList& oldToNew,
     Container& lst
 )
 {
@@ -483,7 +483,7 @@ template<class ListType>
 void Foam::setValues
 (
     ListType& l,
-    const UList<label>& indices,
+    const labelUList& indices,
     typename ListType::const_reference t
 )
 {
@@ -499,7 +499,7 @@ ListType Foam::createWithValues
 (
     const label sz,
     const typename ListType::const_reference initValue,
-    const UList<label>& indices,
+    const labelUList& indices,
     typename ListType::const_reference setValue
 )
 {

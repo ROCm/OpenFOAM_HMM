@@ -703,7 +703,7 @@ Foam::directMappedPatchBase::directMappedPatchBase
 (
     const polyPatch& pp,
     const directMappedPatchBase& dmp,
-    const unallocLabelList& mapAddressing
+    const labelUList& mapAddressing
 )
 :
     patch_(pp),

@@ -29,7 +29,7 @@ template<class T>
 inline Foam::UIndirectList<T>::UIndirectList
 (
     const UList<T>& completeList,
-    const UList<label>& addr
+    const labelUList& addr
 )
 :
     completeList_(const_cast<UList<T>&>(completeList)),

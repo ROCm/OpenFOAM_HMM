@@ -311,7 +311,7 @@ bool Foam::treeDataTriSurface::overlaps
 // nearestPoint.
 void Foam::treeDataTriSurface::findNearest
 (
-    const unallocLabelList& indices,
+    const labelUList& indices,
     const point& sample,
 
     scalar& nearestDistSqr,
@@ -398,7 +398,7 @@ void Foam::treeDataTriSurface::findNearest
 // nearestPoint.
 void Foam::treeDataTriSurface::findNearest
 (
-    const unallocLabelList& indices,
+    const labelUList& indices,
     const linePointRef& ln,
 
     treeBoundBox& tightest,
@@ -409,7 +409,7 @@ void Foam::treeDataTriSurface::findNearest
 {
     notImplemented
     (
-        "treeDataTriSurface::findNearest(const unallocLabelList&"
+        "treeDataTriSurface::findNearest(const labelUList&"
         ", const linePointRef&, treeBoundBox&, label&, point&, point&) const"
     );
 }

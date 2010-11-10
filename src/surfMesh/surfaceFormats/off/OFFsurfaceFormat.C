@@ -120,7 +120,7 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
                 lineStream >> verts[vertI];
             }
 
-            UList<label>& f = static_cast<UList<label>&>(verts);
+            labelUList& f = static_cast<labelUList&>(verts);
 
             if (mustTriangulate && f.size() > 3)
             {

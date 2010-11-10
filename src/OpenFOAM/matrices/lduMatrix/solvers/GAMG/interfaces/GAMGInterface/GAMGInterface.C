@@ -51,7 +51,7 @@ void Foam::GAMGInterface::combine(const GAMGInterface& coarseGi)
 
 Foam::tmp<Foam::labelField> Foam::GAMGInterface::interfaceInternalField
 (
-    const unallocLabelList& internalData
+    const labelUList& internalData
 ) const
 {
     return interfaceInternalField<label>(internalData);

@@ -623,7 +623,7 @@ Foam::surfaceFilmModels::thermoSingleLayer::Srho() const
 
         distMap.distribute(patchMass);
 
-        const unallocLabelList& cells = wpp.faceCells();
+        const labelUList& cells = wpp.faceCells();
 
         forAll(patchMass, j)
         {
@@ -683,7 +683,7 @@ Foam::surfaceFilmModels::thermoSingleLayer::Srho(const label i) const
 
             distMap.distribute(patchMass);
 
-            const unallocLabelList& cells = wpp.faceCells();
+            const labelUList& cells = wpp.faceCells();
 
             forAll(patchMass, j)
             {
@@ -741,7 +741,7 @@ Foam::surfaceFilmModels::thermoSingleLayer::Sh() const
             energyPhaseChangeForPrimary_.boundaryField()[filmPatchI];
         distMap.distribute(patchEnergy);
 
-        const unallocLabelList& cells = wpp.faceCells();
+        const labelUList& cells = wpp.faceCells();
 
         forAll(patchMass, j)
         {

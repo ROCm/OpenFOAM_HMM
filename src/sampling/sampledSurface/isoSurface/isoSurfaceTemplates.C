@@ -102,7 +102,7 @@ Foam::isoSurface::adaptPatchFields
 
             // Note: cannot use patchInternalField since uses emptyFvPatch::size
             // Do our own internalField instead.
-            const unallocLabelList& faceCells =
+            const labelUList& faceCells =
                 mesh.boundary()[patchI].patch().faceCells();
 
             Field<Type>& pfld = sliceFld.boundaryField()[patchI];

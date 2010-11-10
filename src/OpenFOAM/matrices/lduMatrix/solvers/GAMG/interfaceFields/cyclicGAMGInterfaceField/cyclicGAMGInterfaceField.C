@@ -88,7 +88,7 @@ void Foam::cyclicGAMGInterfaceField::updateInterfaceMatrix
 
     transformCoupleField(pnf, cmpt);
 
-    const unallocLabelList& faceCells = cyclicInterface_.faceCells();
+    const labelUList& faceCells = cyclicInterface_.faceCells();
 
     forAll(faceCells, elemI)
     {

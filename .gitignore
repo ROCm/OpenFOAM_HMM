@@ -35,6 +35,7 @@ core
 lnInclude
 
 # build folders - anywhere
+linux*Clang*/
 linux*Gcc*/
 linux*Icc*/
 linuxming*/

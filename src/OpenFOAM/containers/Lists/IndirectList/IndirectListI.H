@@ -28,7 +28,7 @@ License
 
 inline Foam::IndirectListAddressing::IndirectListAddressing
 (
-    const UList<label>& addr
+    const labelUList& addr
 )
 :
     addressing_(addr)
@@ -48,7 +48,7 @@ template<class T>
 inline Foam::IndirectList<T>::IndirectList
 (
     const UList<T>& completeList,
-    const UList<label>& addr
+    const labelUList& addr
 )
 :
     IndirectListAddressing(addr),
@@ -117,7 +117,7 @@ Foam::IndirectListAddressing::addressing() const
 
 inline void Foam::IndirectListAddressing::resetAddressing
 (
-    const UList<label>& addr
+    const labelUList& addr
 )
 {
     addressing_ = addr;

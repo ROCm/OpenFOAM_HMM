@@ -101,7 +101,7 @@ public:
         zone
         (
             const word& name,
-            const unallocLabelList& addr,
+            const labelUList& addr,
             const label index
         );
 
@@ -127,7 +127,7 @@ public:
         zone
         (
             const zone&,
-            const unallocLabelList& addr,
+            const labelUList& addr,
             const label index
         );
 

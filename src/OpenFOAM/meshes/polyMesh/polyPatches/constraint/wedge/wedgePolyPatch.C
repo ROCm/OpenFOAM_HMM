@@ -164,7 +164,7 @@ Foam::wedgePolyPatch::wedgePolyPatch
     const wedgePolyPatch& pp,
     const polyBoundaryMesh& bm,
     const label index,
-    const unallocLabelList& mapAddressing,
+    const labelUList& mapAddressing,
     const label newStart
 )
 :

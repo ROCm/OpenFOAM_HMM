@@ -48,8 +48,8 @@ void surfaceIntegrate
 {
     const fvMesh& mesh = ssf.mesh();
 
-    const unallocLabelList& owner = mesh.owner();
-    const unallocLabelList& neighbour = mesh.neighbour();
+    const labelUList& owner = mesh.owner();
+    const labelUList& neighbour = mesh.neighbour();
 
     const Field<Type>& issf = ssf;
 
@@ -61,7 +61,7 @@ void surfaceIntegrate
 
     forAll(mesh.boundary(), patchi)
     {
-        const unallocLabelList& pFaceCells =
+        const labelUList& pFaceCells =
             mesh.boundary()[patchi].faceCells();
 
         const fvsPatchField<Type>& pssf = ssf.boundaryField()[patchi];
@@ -160,8 +160,8 @@ surfaceSum
     );
     GeometricField<Type, fvPatchField, volMesh>& vf = tvf();
 
-    const unallocLabelList& owner = mesh.owner();
-    const unallocLabelList& neighbour = mesh.neighbour();
+    const labelUList& owner = mesh.owner();
+    const labelUList& neighbour = mesh.neighbour();
 
     forAll(owner, facei)
     {
@@ -171,7 +171,7 @@ surfaceSum
 
     forAll(mesh.boundary(), patchi)
     {
-        const unallocLabelList& pFaceCells =
+        const labelUList& pFaceCells =
             mesh.boundary()[patchi].faceCells();
 
         const fvsPatchField<Type>& pssf = ssf.boundaryField()[patchi];

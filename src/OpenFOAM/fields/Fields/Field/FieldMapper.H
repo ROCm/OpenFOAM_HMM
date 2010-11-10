@@ -64,13 +64,13 @@ public:
 
         virtual bool direct() const = 0;
 
-        virtual const unallocLabelList& directAddressing() const
+        virtual const labelUList& directAddressing() const
         {
             FatalErrorIn("FieldMapper::directAddressing() const")
                 << "attempt to access null direct addressing"
                 << abort(FatalError);
 
-            return unallocLabelList::null();
+            return labelUList::null();
         }
 
         virtual const labelListList& addressing() const

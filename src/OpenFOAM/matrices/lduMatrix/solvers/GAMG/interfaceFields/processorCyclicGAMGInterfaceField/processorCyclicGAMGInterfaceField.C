@@ -95,7 +95,7 @@ Foam::processorCyclicGAMGInterfaceField::~processorCyclicGAMGInterfaceField()
 //    );
 //    transformCoupleField(pnf, cmpt);
 //
-//    const unallocLabelList& faceCells = procInterface_.faceCells();
+//    const labelUList& faceCells = procInterface_.faceCells();
 //
 //    forAll(faceCells, elemI)
 //    {

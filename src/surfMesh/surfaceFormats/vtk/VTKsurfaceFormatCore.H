@@ -67,7 +67,7 @@ protected:
         static void writeTail(Ostream&, const UList<surfZone>&);
 
         //- Write trailing information with zone Ids
-        static void writeTail(Ostream&, const UList<label>& zoneIds);
+        static void writeTail(Ostream&, const labelUList& zoneIds);
 };
 
 

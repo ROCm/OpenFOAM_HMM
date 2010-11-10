@@ -233,13 +233,13 @@ Foam::label Foam::pointMapper::sizeBeforeMapping() const
 }
 
 
-const Foam::unallocLabelList& Foam::pointMapper::directAddressing() const
+const Foam::labelUList& Foam::pointMapper::directAddressing() const
 {
     if (!direct())
     {
         FatalErrorIn
         (
-            "const unallocLabelList& pointMapper::directAddressing() const"
+            "const labelUList& pointMapper::directAddressing() const"
         )   << "Requested direct addressing for an interpolative mapper."
             << abort(FatalError);
     }
