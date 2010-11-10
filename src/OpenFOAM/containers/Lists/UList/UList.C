@@ -145,6 +145,13 @@ void Foam::stableSort(UList<T>& a, const Cmp& cmp)
 }
 
 
+template<class T>
+void Foam::shuffle(UList<T>& a)
+{
+    std::random_shuffle(a.begin(), a.end());
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
