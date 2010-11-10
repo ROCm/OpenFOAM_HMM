@@ -54,6 +54,7 @@ void Foam::nullSurfaceWriter<Type>::write
     const faceList& faces,
     const word& fieldName,
     const Field<Type>& values,
+    const bool isNodeValues,
     const bool verbose
 ) const
 {}

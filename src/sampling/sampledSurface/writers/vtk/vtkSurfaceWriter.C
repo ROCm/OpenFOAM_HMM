@@ -267,6 +267,7 @@ void Foam::vtkSurfaceWriter<Type>::write
     const faceList& faces,
     const word& fieldName,
     const Field<Type>& values,
+    const bool isNodeValues,
     const bool verbose
 ) const
 {
@@ -288,7 +289,7 @@ void Foam::vtkSurfaceWriter<Type>::write
     writeGeometry(os, points, faces);
 
     // start writing data
-    if (values.size() == points.size())
+    if (isNodeValues)
     {
         os  << "POINT_DATA ";
     }

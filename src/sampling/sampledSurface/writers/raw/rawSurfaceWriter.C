@@ -68,6 +68,7 @@ void Foam::rawSurfaceWriter<Type>::writeData
     const pointField& points,
     const faceList& faces,
     const scalarField& values,
+    const bool isNodeValues,
     Ostream& os
 )
 {
@@ -75,7 +76,7 @@ void Foam::rawSurfaceWriter<Type>::writeData
     os  << "#  x  y  z  " << fieldName << endl;
 
     // Write data
-    if (values.size() == points.size())
+    if (isNodeValues)
     {
         forAll(values, elemI)
         {
@@ -104,6 +105,7 @@ void Foam::rawSurfaceWriter<Type>::writeData
     const pointField& points,
     const faceList& faces,
     const vectorField& values,
+    const bool isNodeValues,
     Ostream& os
 )
 {
@@ -115,7 +117,7 @@ void Foam::rawSurfaceWriter<Type>::writeData
         << endl;
 
     // Write data
-    if (values.size() == points.size())
+    if (isNodeValues)
     {
         forAll(values, elemI)
         {
@@ -147,6 +149,7 @@ void Foam::rawSurfaceWriter<Type>::writeData
     const pointField& points,
     const faceList& faces,
     const sphericalTensorField& values,
+    const bool isNodeValues,
     Ostream& os
 )
 {
@@ -155,7 +158,7 @@ void Foam::rawSurfaceWriter<Type>::writeData
     os << fieldName << "_ii" << endl;
 
     // Write data
-    if (values.size() == points.size())
+    if (isNodeValues)
     {
         forAll(values, elemI)
         {
@@ -186,6 +189,7 @@ void Foam::rawSurfaceWriter<Type>::writeData
     const pointField& points,
     const faceList& faces,
     const symmTensorField& values,
+    const bool isNodeValues,
     Ostream& os
 )
 {
@@ -198,7 +202,7 @@ void Foam::rawSurfaceWriter<Type>::writeData
     os << endl;
 
     // Write data
-    if (values.size() == points.size())
+    if (isNodeValues)
     {
         forAll(values, elemI)
         {
@@ -233,6 +237,7 @@ void Foam::rawSurfaceWriter<Type>::writeData
     const pointField& points,
     const faceList& faces,
     const tensorField& values,
+    const bool isNodeValues,
     Ostream& os
 )
 {
@@ -245,7 +250,7 @@ void Foam::rawSurfaceWriter<Type>::writeData
     os << endl;
 
     // Write data
-    if (values.size() == points.size())
+    if (isNodeValues)
     {
         forAll(values, elemI)
         {
@@ -343,6 +348,7 @@ namespace Foam
         const faceList& faces,
         const word& fieldName,
         const Field<bool>& values,
+        const bool isNodeValues,
         const bool verbose
     ) const
     {}
@@ -358,6 +364,7 @@ void Foam::rawSurfaceWriter<Type>::write
     const faceList& faces,
     const word& fieldName,
     const Field<Type>& values,
+    const bool isNodeValues,
     const bool verbose
 ) const
 {
@@ -379,7 +386,7 @@ void Foam::rawSurfaceWriter<Type>::write
 
     // header
     os  << "# " << fieldName;
-    if (values.size() == points.size())
+    if (isNodeValues)
     {
         os  << "  POINT_DATA ";
     }
@@ -390,7 +397,7 @@ void Foam::rawSurfaceWriter<Type>::write
 
     os  << values.size() << nl;
 
-    writeData(fieldName, points, faces, values, os);
+    writeData(fieldName, points, faces, values, isNodeValues, os);
 }
 
 

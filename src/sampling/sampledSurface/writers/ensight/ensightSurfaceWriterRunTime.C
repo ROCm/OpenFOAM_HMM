@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,53 +23,22 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fieldValue.H"
-#include "ListListOps.H"
-#include "Pstream.H"
+#include "ensightSurfaceWriter.H"
+#include "surfaceWriters.H"
+#include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::fieldValue::combineFields
-(
-    const Field<Type>& field
-) const
+namespace Foam
 {
-    List<Field<Type> > allValues(Pstream::nProcs());
 
-    allValues[Pstream::myProcNo()] = field;
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-    Pstream::gatherList(allValues);
+makeSurfaceWriterType(ensightSurfaceWriter, bool);
+makeSurfaceWriters(ensightSurfaceWriter);
 
-    if (Pstream::master())
-    {
-        return tmp<Field<Type> >
-        (
-            new Field<Type>
-            (
-                ListListOps::combine<Field<Type> >
-                (
-                    allValues,
-                    accessOp<Field<Type> >()
-                )
-            )
-        );
-    }
-    else
-    {
-        return field;
-    }
-}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::fieldValue::combineFields
-(
-    const tmp<Field<Type> >& field
-) const
-{
-    return combineFields(field());
-}
-
+} // End namespace Foam
 
 // ************************************************************************* //

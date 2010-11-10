@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,17 +22,17 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::vtkSurfaceWriter
+    Foam::ensightSurfaceWriter
 
 Description
 
 SourceFiles
-    vtkSurfaceWriter.C
+    ensightSurfaceWriter.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef vtkSurfaceWriter_H
-#define vtkSurfaceWriter_H
+#ifndef ensightSurfaceWriter_H
+#define ensightSurfaceWriter_H
 
 #include "surfaceWriter.H"
 
@@ -42,17 +42,35 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class vtkSurfaceWriter Declaration
+                     Class ensightSurfaceWriter Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class vtkSurfaceWriter
+class ensightSurfaceWriter
 :
     public surfaceWriter<Type>
 {
     // Private Member Functions
 
-        static void writeGeometry(Ostream&, const pointField&, const faceList&);
+        static void binShapes
+        (
+            const pointField& points,
+            const faceList& faces,
+            DynamicList<label>& tris,
+            DynamicList<label>& quads,
+            DynamicList<label>& polys
+        );
+
+        static void writeGeometry
+        (
+            const fileName&,
+            Ostream&,
+            const pointField&,
+            const faceList&,
+            const DynamicList<label>&,
+            const DynamicList<label>&,
+            const DynamicList<label>&
+        );
 
         static void writeData(Ostream&, const Field<Type>& values);
 
@@ -60,17 +78,17 @@ class vtkSurfaceWriter
 public:
 
     //- Runtime type information
-    TypeName("vtk");
+    TypeName("ensight");
 
 
     // Constructors
 
         //- Construct null
-        vtkSurfaceWriter();
+        ensightSurfaceWriter();
 
 
     //- Destructor
-    virtual ~vtkSurfaceWriter();
+    virtual ~ensightSurfaceWriter();
 
 
     // Member Functions
@@ -110,7 +128,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "vtkSurfaceWriter.C"
+#   include "ensightSurfaceWriter.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

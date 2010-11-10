@@ -103,7 +103,8 @@ void Foam::sampledSurfaces::sampleAndWrite
                         mergeList_[surfI].points,
                         mergeList_[surfI].faces,
                         fieldName,
-                        allValues
+                        allValues,
+                        s.interpolate()
                     );
                 }
             }
@@ -121,7 +122,8 @@ void Foam::sampledSurfaces::sampleAndWrite
                     s.points(),
                     s.faces(),
                     fieldName,
-                    values
+                    values,
+                    s.interpolate()
                 );
             }
         }
