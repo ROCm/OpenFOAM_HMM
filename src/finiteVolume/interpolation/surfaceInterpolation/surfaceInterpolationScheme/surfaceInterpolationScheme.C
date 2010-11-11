@@ -184,8 +184,8 @@ surfaceInterpolationScheme<Type>::interpolate
     const scalarField& y = ys.internalField();
 
     const fvMesh& mesh = vf.mesh();
-    const unallocLabelList& P = mesh.owner();
-    const unallocLabelList& N = mesh.neighbour();
+    const labelUList& P = mesh.owner();
+    const labelUList& N = mesh.neighbour();
 
     tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tsf
     (
@@ -263,8 +263,8 @@ surfaceInterpolationScheme<Type>::interpolate
     const scalarField& lambda = lambdas.internalField();
 
     const fvMesh& mesh = vf.mesh();
-    const unallocLabelList& P = mesh.owner();
-    const unallocLabelList& N = mesh.neighbour();
+    const labelUList& P = mesh.owner();
+    const labelUList& N = mesh.neighbour();
 
     tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tsf
     (

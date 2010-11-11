@@ -199,7 +199,7 @@ public:
             const polyPatch& pp,
             const polyBoundaryMesh& bm,
             const label index,
-            const unallocLabelList& mapAddressing,
+            const labelUList& mapAddressing,
             const label newStart
         );
 
@@ -234,7 +234,7 @@ public:
         (
             const polyBoundaryMesh& bm,
             const label index,
-            const unallocLabelList& mapAddressing,
+            const labelUList& mapAddressing,
             const label newStart
         ) const
         {
@@ -331,7 +331,7 @@ public:
         // Addressing into mesh
 
             //- Return face-cell addressing
-            const unallocLabelList& faceCells() const;
+            const labelUList& faceCells() const;
 
             //- Return global edge index for local edges
             const labelList& meshEdges() const;

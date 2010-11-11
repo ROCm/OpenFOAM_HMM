@@ -444,8 +444,8 @@ public:
                 static void calcCells
                 (
                     cellList&,
-                    const unallocLabelList& own,
-                    const unallocLabelList& nei,
+                    const labelUList& own,
+                    const labelUList& nei,
                     const label nCells = -1
                 );
 

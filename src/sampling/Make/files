@@ -46,6 +46,7 @@ surfWriters = sampledSurface/writers
 
 $(surfWriters)/surfaceWriters.C
 $(surfWriters)/dx/dxSurfaceWriterRunTime.C
+$(surfWriters)/ensight/ensightSurfaceWriterRunTime.C
 $(surfWriters)/foamFile/foamFileSurfaceWriterRunTime.C
 $(surfWriters)/null/nullSurfaceWriterRunTime.C
 $(surfWriters)/proxy/proxySurfaceWriterRunTime.C

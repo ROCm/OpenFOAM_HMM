@@ -46,7 +46,7 @@ namespace Foam
         {
             newFaces[faceI] = triFace
             (
-                static_cast<const UList<label>&>(origFaces[faceI])
+                static_cast<const labelUList&>(origFaces[faceI])
             );
         }
         surf.clear();

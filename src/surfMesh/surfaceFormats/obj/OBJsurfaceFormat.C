@@ -174,7 +174,7 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
             }
             dynVertices.shrink();
 
-            UList<label>& f = static_cast<UList<label>&>(dynVertices);
+            labelUList& f = static_cast<labelUList&>(dynVertices);
 
             if (mustTriangulate && f.size() > 3)
             {

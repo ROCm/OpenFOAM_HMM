@@ -155,7 +155,7 @@ Foam::List<T>::List(List<T>& a, bool reUse)
 
 // Construct as subset
 template<class T>
-Foam::List<T>::List(const UList<T>& a, const unallocLabelList& map)
+Foam::List<T>::List(const UList<T>& a, const labelUList& map)
 :
     UList<T>(NULL, map.size())
 {

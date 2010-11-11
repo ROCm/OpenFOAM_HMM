@@ -187,7 +187,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
 (
     const Xfer<pointField>& pointLst,
     const Xfer<List<Face> >& faceLst,
-    const UList<label>& zoneSizes,
+    const labelUList& zoneSizes,
     const UList<word>& zoneNames
 )
 :
@@ -430,7 +430,7 @@ Foam::MeshedSurface<Face>::~MeshedSurface()
 template<class Face>
 void Foam::MeshedSurface<Face>::remapFaces
 (
-    const UList<label>& faceMap
+    const labelUList& faceMap
 )
 {
     // recalculate the zone start/size
@@ -920,7 +920,7 @@ Foam::label Foam::MeshedSurface<Face>::triangulate
             {
                 newFaces[newFaceI] = Face
                 (
-                    static_cast<UList<label>&>(tmpTri[triI])
+                    static_cast<labelUList&>(tmpTri[triI])
                 );
                 faceMap[newFaceI] = faceI;
                 newFaceI++;

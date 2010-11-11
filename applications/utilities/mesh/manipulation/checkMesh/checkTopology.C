@@ -138,7 +138,7 @@ Foam::label Foam::checkTopology
         {
             if (patches[patchI].coupled())
             {
-                const unallocLabelList& owners = patches[patchI].faceCells();
+                const labelUList& owners = patches[patchI].faceCells();
 
                 forAll(owners, i)
                 {

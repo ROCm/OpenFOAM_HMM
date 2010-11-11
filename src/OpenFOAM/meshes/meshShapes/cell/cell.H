@@ -75,7 +75,7 @@ public:
         explicit inline cell(label);
 
         //- Construct from list of labels
-        explicit inline cell(const UList<label>&);
+        explicit inline cell(const labelUList&);
 
         //- Construct by transferring the parameter contents
         explicit inline cell(const Xfer<labelList>&);

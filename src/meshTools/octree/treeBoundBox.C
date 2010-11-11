@@ -155,7 +155,7 @@ Foam::treeBoundBox::treeBoundBox(const UList<point>& points)
 Foam::treeBoundBox::treeBoundBox
 (
     const UList<point>& points,
-    const UList<label>& meshPoints
+    const labelUList& meshPoints
 )
 :
     boundBox()
@@ -165,7 +165,7 @@ Foam::treeBoundBox::treeBoundBox
         WarningIn
         (
             "treeBoundBox::treeBoundBox"
-            "(const UList<point>&, const UList<label>&)"
+            "(const UList<point>&, const labelUList&)"
         )   << "cannot find bounding box for zero-sized pointField"
             << "returning zero" << endl;
 

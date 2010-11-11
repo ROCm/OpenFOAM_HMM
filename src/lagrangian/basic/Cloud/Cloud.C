@@ -84,6 +84,11 @@ Foam::Cloud<ParticleType>::Cloud
     nTrackingRescues_(),
     cellWallFacesPtr_()
 {
+    // Ask for the tetBasePtIs to trigger all processors to build
+    // them, otherwise, if some processors have no particles then
+    // there is a comms mismatch.
+    polyMesh_.tetBasePtIs();
+
     IDLList<ParticleType>::operator=(particles);
 }
 
@@ -105,6 +110,11 @@ Foam::Cloud<ParticleType>::Cloud
     nTrackingRescues_(),
     cellWallFacesPtr_()
 {
+    // Ask for the tetBasePtIs to trigger all processors to build
+    // them, otherwise, if some processors have no particles then
+    // there is a comms mismatch.
+    polyMesh_.tetBasePtIs();
+
     IDLList<ParticleType>::operator=(particles);
 }
 

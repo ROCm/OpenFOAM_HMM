@@ -77,7 +77,7 @@ bool Foam::treeDataPoint::overlaps
 // nearestPoint.
 void Foam::treeDataPoint::findNearest
 (
-    const unallocLabelList& indices,
+    const labelUList& indices,
     const point& sample,
 
     scalar& nearestDistSqr,
@@ -107,7 +107,7 @@ void Foam::treeDataPoint::findNearest
 //  Returns point and distance (squared)
 void Foam::treeDataPoint::findNearest
 (
-    const unallocLabelList& indices,
+    const labelUList& indices,
     const linePointRef& ln,
 
     treeBoundBox& tightest,

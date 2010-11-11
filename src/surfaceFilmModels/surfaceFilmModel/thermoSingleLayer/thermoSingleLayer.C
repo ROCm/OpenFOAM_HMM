@@ -209,12 +209,14 @@ void Foam::surfaceFilmModels::thermoSingleLayer::solveEnergy()
         massForPrimary_/magSf_/time_.deltaT()
     );
 
+//    dimensionedScalar hs0("SMALL", hs_.dimensions(), SMALL);
+
     solve
     (
         fvm::ddt(deltaRho_, hs_)
       + fvm::div(phi_, hs_)
      ==
-//        fvm::Sp(hsSp_/hs_, hs_)
+//        fvm::Sp(hsSp_/(hs_ + hs0), hs_)
         hsSp_
       + q(hs_)
       - fvm::Sp(mLossCoeff, hs_)
@@ -621,7 +623,7 @@ Foam::surfaceFilmModels::thermoSingleLayer::Srho() const
 
         distMap.distribute(patchMass);
 
-        const unallocLabelList& cells = wpp.faceCells();
+        const labelUList& cells = wpp.faceCells();
 
         forAll(patchMass, j)
         {
@@ -681,7 +683,7 @@ Foam::surfaceFilmModels::thermoSingleLayer::Srho(const label i) const
 
             distMap.distribute(patchMass);
 
-            const unallocLabelList& cells = wpp.faceCells();
+            const labelUList& cells = wpp.faceCells();
 
             forAll(patchMass, j)
             {
@@ -739,7 +741,7 @@ Foam::surfaceFilmModels::thermoSingleLayer::Sh() const
             energyPhaseChangeForPrimary_.boundaryField()[filmPatchI];
         distMap.distribute(patchEnergy);
 
-        const unallocLabelList& cells = wpp.faceCells();
+        const labelUList& cells = wpp.faceCells();
 
         forAll(patchMass, j)
         {

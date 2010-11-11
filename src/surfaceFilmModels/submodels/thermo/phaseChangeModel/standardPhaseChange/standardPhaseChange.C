@@ -77,6 +77,7 @@ Foam::surfaceFilmModels::standardPhaseChange::standardPhaseChange
     Tb_(readScalar(coeffs_.lookup("Tb"))),
     deltaMin_(readScalar(coeffs_.lookup("deltaMin"))),
     L_(readScalar(coeffs_.lookup("L"))),
+    TbFactor_(coeffs_.lookupOrDefault<scalar>("TbFactor", 1.1)),
     totalMass_(0.0),
     vapourRate_(0.0)
 {}
@@ -133,7 +134,7 @@ void Foam::surfaceFilmModels::standardPhaseChange::correct
             const scalar pc = pInf[cellI];
 
             // local temperature - impose lower limit of 200 K for stability
-            const scalar Tloc = min(liq.Tc(), max(200.0, T[cellI]));
+            const scalar Tloc = min(TbFactor_*Tb_, max(200.0, T[cellI]));
 
             // saturation pressure [Pa]
             const scalar pSat = liq.pv(pc, Tloc);
@@ -149,7 +150,9 @@ void Foam::surfaceFilmModels::standardPhaseChange::correct
                 const scalar qDotFilm = hFilm[cellI]*(T[cellI] - Tw[cellI]);
 
                 const scalar Cp = liq.Cp(pc, Tloc);
-                const scalar qCorr = availableMass[cellI]*Cp*(T[cellI] - Tb_);
+                const scalar Tcorr = max(0.0, T[cellI] - Tb_);
+                const scalar qCorr = availableMass[cellI]*Cp*(Tcorr);
+
                 dMass[cellI] =
                     dt*magSf[cellI]/hVap*(qDotInf + qDotFilm)
                   + qCorr/hVap;
@@ -185,7 +188,7 @@ void Foam::surfaceFilmModels::standardPhaseChange::correct
                 const scalar Sh = this->Sh(Re, Sc);
 
                 // mass transfer coefficient [m/s]
-                const scalar hm = Sh*Dab/L_;
+                const scalar hm = Sh*Dab/(L_ + ROOTVSMALL);
 
                 // add mass contribution to source
                 dMass[cellI] =

@@ -95,7 +95,7 @@ Foam::labelList Foam::structuredDecomp::decompose
     labelHashSet patchCells(2*nFaces);
     forAll(patchIDs, i)
     {
-        const unallocLabelList& fc = pbm[patchIDs[i]].faceCells();
+        const labelUList& fc = pbm[patchIDs[i]].faceCells();
         forAll(fc, i)
         {
             patchCells.insert(fc[i]);
@@ -131,7 +131,7 @@ Foam::labelList Foam::structuredDecomp::decompose
     forAll(patchIDs, i)
     {
         const polyPatch& pp = pbm[patchIDs[i]];
-        const unallocLabelList& fc = pp.faceCells();
+        const labelUList& fc = pp.faceCells();
         forAll(fc, i)
         {
             patchFaces[nFaces] = pp.start()+i;

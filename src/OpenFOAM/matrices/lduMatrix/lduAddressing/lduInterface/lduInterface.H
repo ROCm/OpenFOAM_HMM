@@ -84,7 +84,7 @@ public:
         // Access
 
             //- Return faceCell addressing
-            virtual const unallocLabelList& faceCells() const = 0;
+            virtual const labelUList& faceCells() const = 0;
 
 
         // Interface transfer functions
@@ -93,14 +93,14 @@ public:
             //  the interface as a field
             virtual tmp<labelField> interfaceInternalField
             (
-                const unallocLabelList& internalData
+                const labelUList& internalData
             ) const = 0;
 
             //- Initialise transfer of internal field adjacent to the interface
             virtual void initInternalFieldTransfer
             (
                 const Pstream::commsTypes commsType,
-                const unallocLabelList& iF
+                const labelUList& iF
             ) const
             {}
 
@@ -108,7 +108,7 @@ public:
             virtual tmp<labelField> internalFieldTransfer
             (
                 const Pstream::commsTypes commsType,
-                const unallocLabelList& iF
+                const labelUList& iF
             ) const = 0;
 };
 

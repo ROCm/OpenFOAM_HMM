@@ -36,7 +36,7 @@ Foam::tmp<Foam::Field<Type> > Foam::fvPatch::patchInternalField
     tmp<Field<Type> > tpif(new Field<Type>(size()));
     Field<Type>& pif = tpif();
 
-    const unallocLabelList& faceCells = this->faceCells();
+    const labelUList& faceCells = this->faceCells();
 
     forAll(pif, facei)
     {

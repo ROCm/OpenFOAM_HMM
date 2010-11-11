@@ -250,6 +250,7 @@ void Foam::dxSurfaceWriter<Type>::write
     const faceList& faces,
     const word& fieldName,
     const Field<Type>& values,
+    const bool isNodeValues,
     const bool verbose
 ) const
 {
@@ -272,7 +273,7 @@ void Foam::dxSurfaceWriter<Type>::write
 
     writeData(os, values);
 
-    if (values.size() == points.size())
+    if (isNodeValues)
     {
         os  << nl << "attribute \"dep\" string \"positions\""
             << nl << nl;

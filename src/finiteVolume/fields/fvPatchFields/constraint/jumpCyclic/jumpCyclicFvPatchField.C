@@ -99,7 +99,7 @@ template<class Type>
 tmp<Field<Type> > jumpCyclicFvPatchField<Type>::patchNeighbourField() const
 {
     const Field<Type>& iField = this->internalField();
-    const unallocLabelList& nbrFaceCells =
+    const labelUList& nbrFaceCells =
         this->cyclicPatch().neighbFvPatch().faceCells();
 
     tmp<Field<Type> > tpnf(new Field<Type>(this->size()));
@@ -147,7 +147,7 @@ void jumpCyclicFvPatchField<Type>::updateInterfaceMatrix
 {
     scalarField pnf(this->size());
 
-    const unallocLabelList& nbrFaceCells =
+    const labelUList& nbrFaceCells =
         this->cyclicPatch().neighbFvPatch().faceCells();
 
     if (&psiInternal == &this->internalField())
@@ -176,7 +176,7 @@ void jumpCyclicFvPatchField<Type>::updateInterfaceMatrix
     this->transformCoupleField(pnf, cmpt);
 
     // Multiply the field by coefficients and add into the result
-    const unallocLabelList& faceCells = this->cyclicPatch().faceCells();
+    const labelUList& faceCells = this->cyclicPatch().faceCells();
     forAll(faceCells, elemI)
     {
         result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];

@@ -70,7 +70,7 @@ void transformList(const tensorField&, EdgeMap<T>&);
 
 
 template<>
-inline void transformList(const tensorField&, UList<label>&)
+inline void transformList(const tensorField&, labelUList&)
 {}
 template<>
 inline void transformList(const tensorField&, Map<label>&)

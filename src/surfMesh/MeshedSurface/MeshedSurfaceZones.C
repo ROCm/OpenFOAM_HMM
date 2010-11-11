@@ -132,7 +132,7 @@ void Foam::MeshedSurface<Face>::addZones
 template<class Face>
 void Foam::MeshedSurface<Face>::addZones
 (
-    const UList<label>& sizes,
+    const labelUList& sizes,
     const UList<word>& names,
     const bool cullEmpty
 )
@@ -164,7 +164,7 @@ void Foam::MeshedSurface<Face>::addZones
 template<class Face>
 void Foam::MeshedSurface<Face>::addZones
 (
-    const UList<label>& sizes,
+    const labelUList& sizes,
     const bool cullEmpty
 )
 {

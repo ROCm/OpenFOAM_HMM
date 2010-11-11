@@ -140,13 +140,13 @@ Foam::pointPatchMapper::~pointPatchMapper()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::unallocLabelList& Foam::pointPatchMapper::directAddressing() const
+const Foam::labelUList& Foam::pointPatchMapper::directAddressing() const
 {
     if (!direct())
     {
         FatalErrorIn
         (
-            "const unallocLabelList& pointPatchMapper::directAddressing() const"
+            "const labelUList& pointPatchMapper::directAddressing() const"
         )   << "Requested direct addressing for an interpolative mapper."
             << abort(FatalError);
     }

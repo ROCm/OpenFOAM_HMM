@@ -238,8 +238,8 @@ Foam::label Foam::decompositionMethod::masterFace
 //                pbm[patchI]
 //            );
 //
-//            const unallocLabelList& faceCells = cycPatch.faceCells();
-//            const unallocLabelList& nbrCells =
+//            const labelUList& faceCells = cycPatch.faceCells();
+//            const labelUList& nbrCells =
 //                cycPatch.neighbPatch().faceCells();
 //
 //            forAll(faceCells, facei)
@@ -308,8 +308,8 @@ Foam::label Foam::decompositionMethod::masterFace
 //                pbm[patchI]
 //            );
 //
-//            const unallocLabelList& faceCells = cycPatch.faceCells();
-//            const unallocLabelList& nbrCells =
+//            const labelUList& faceCells = cycPatch.faceCells();
+//            const labelUList& nbrCells =
 //                cycPatch.neighbPatch().faceCells();
 //
 //            forAll(faceCells, facei)

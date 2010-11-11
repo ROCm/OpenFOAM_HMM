@@ -198,11 +198,10 @@ void Foam::fieldValues::cellSource::write()
 
     if (active_)
     {
+        scalar totalVolume = gSum(filterField(mesh().V()));
         if (Pstream::master())
         {
-            outputFilePtr_()
-                << obr_.time().value() << tab
-                << sum(filterField(mesh().V()));
+            outputFilePtr_() << obr_.time().value() << tab << totalVolume;
         }
 
         forAll(fields_, i)

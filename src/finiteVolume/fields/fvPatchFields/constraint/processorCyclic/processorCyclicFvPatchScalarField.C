@@ -67,7 +67,7 @@ namespace Foam
 //        procPatch_.compressedReceive<scalar>(commsType, this->size())()
 //    );
 //
-//    const unallocLabelList& faceCells = patch().faceCells();
+//    const labelUList& faceCells = patch().faceCells();
 //
 //    forAll(faceCells, facei)
 //    {

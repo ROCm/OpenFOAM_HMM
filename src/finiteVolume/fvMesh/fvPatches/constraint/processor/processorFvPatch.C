@@ -115,7 +115,7 @@ tmp<vectorField> processorFvPatch::delta() const
 
 tmp<labelField> processorFvPatch::interfaceInternalField
 (
-    const unallocLabelList& internalData
+    const labelUList& internalData
 ) const
 {
     return patchInternalField(internalData);
@@ -125,7 +125,7 @@ tmp<labelField> processorFvPatch::interfaceInternalField
 void processorFvPatch::initInternalFieldTransfer
 (
     const Pstream::commsTypes commsType,
-    const unallocLabelList& iF
+    const labelUList& iF
 ) const
 {
     send(commsType, patchInternalField(iF)());
@@ -135,7 +135,7 @@ void processorFvPatch::initInternalFieldTransfer
 tmp<labelField> processorFvPatch::internalFieldTransfer
 (
     const Pstream::commsTypes commsType,
-    const unallocLabelList&
+    const labelUList&
 ) const
 {
     return receive<label>(commsType, this->size());

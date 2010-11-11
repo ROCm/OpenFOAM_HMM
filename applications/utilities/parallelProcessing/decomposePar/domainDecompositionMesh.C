@@ -164,7 +164,7 @@ void Foam::domainDecomposition::decomposeMesh()
             // Normal patch. Add faces to processor where the cell
             // next to the face lives
 
-            const unallocLabelList& patchFaceCells =
+            const labelUList& patchFaceCells =
                 patches[patchi].faceCells();
 
             forAll(patchFaceCells, facei)
@@ -185,9 +185,9 @@ void Foam::domainDecomposition::decomposeMesh()
                 patches[patchi]
             );
             // cyclic: check opposite side on this processor
-            const unallocLabelList& patchFaceCells = pp.faceCells();
+            const labelUList& patchFaceCells = pp.faceCells();
 
-            const unallocLabelList& nbrPatchFaceCells =
+            const labelUList& nbrPatchFaceCells =
                 pp.neighbPatch().faceCells();
 
             forAll(patchFaceCells, facei)
@@ -259,8 +259,8 @@ void Foam::domainDecomposition::decomposeMesh()
             );
 
             // cyclic: check opposite side on this processor
-            const unallocLabelList& patchFaceCells = pp.faceCells();
-            const unallocLabelList& nbrPatchFaceCells =
+            const labelUList& patchFaceCells = pp.faceCells();
+            const labelUList& nbrPatchFaceCells =
                 pp.neighbPatch().faceCells();
 
             // Store old sizes. Used to detect which inter-proc patches

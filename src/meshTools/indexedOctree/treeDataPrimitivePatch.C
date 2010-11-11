@@ -477,7 +477,7 @@ void
 Foam::treeDataPrimitivePatch<Face, FaceList, PointField, PointType>::
 findNearest
 (
-    const unallocLabelList& indices,
+    const labelUList& indices,
     const point& sample,
 
     scalar& nearestDistSqr,

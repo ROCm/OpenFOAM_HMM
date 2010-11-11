@@ -119,7 +119,7 @@ public:
 
 
         //- Writes single surface to file. Either one value per vertex or
-        //  one value per face (detected by values.size()==faces.size())
+        //  one value per face (isNodeValues = false)
         virtual void write
         (
             const fileName& outputDir,      // <root>/<case>/surface/TIME
@@ -128,6 +128,7 @@ public:
             const faceList& faces,
             const word& fieldName,          // name of field
             const Field<Type>& values,
+            const bool isNodeValues,
             const bool verbose = false
         ) const = 0;
 };

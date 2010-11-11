@@ -110,19 +110,19 @@ public:
     // Member Functions
 
         //- Return lower addressing (i.e. lower label = upper triangle)
-        const unallocLabelList& lowerAddr() const
+        const labelUList& lowerAddr() const
         {
             return lowerAddr_;
         }
 
         //- Return upper addressing (i.e. upper label)
-        const unallocLabelList& upperAddr() const
+        const labelUList& upperAddr() const
         {
             return upperAddr_;
         }
 
         //- Return patch addressing
-        const unallocLabelList& patchAddr(const label i) const
+        const labelUList& patchAddr(const label i) const
         {
             return *patchAddr_[i];
         }

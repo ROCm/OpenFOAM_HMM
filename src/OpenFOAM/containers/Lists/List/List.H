@@ -115,7 +115,7 @@ public:
         List(List<T>&, bool reUse);
 
         //- Construct as subset.
-        List(const UList<T>&, const unallocLabelList& mapAddressing);
+        List(const UList<T>&, const labelUList& mapAddressing);
 
         //- Construct given start and end iterators.
         template<class InputIterator>

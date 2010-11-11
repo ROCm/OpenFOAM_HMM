@@ -188,7 +188,7 @@ void Foam::lduMatrix::sumA
     {
         if (interfaces.set(patchI))
         {
-            const unallocLabelList& pa = lduAddr().patchAddr(patchI);
+            const labelUList& pa = lduAddr().patchAddr(patchI);
             const scalarField& pCoeffs = interfaceBouCoeffs[patchI];
 
             forAll(pa, face)

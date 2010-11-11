@@ -45,8 +45,8 @@ void Foam::fvc::smooth
     DynamicList<label> changedFaces(mesh.nFaces()/100 + 100);
     DynamicList<smoothData> changedFacesInfo(changedFaces.size());
 
-    const unallocLabelList& owner = mesh.owner();
-    const unallocLabelList& neighbour = mesh.neighbour();
+    const labelUList& owner = mesh.owner();
+    const labelUList& neighbour = mesh.neighbour();
 
     forAll(owner, facei)
     {
@@ -146,8 +146,8 @@ void Foam::fvc::spread
     // Set initial field on faces
     List<smoothData> faceData(mesh.nFaces());
 
-    const unallocLabelList& owner = mesh.owner();
-    const unallocLabelList& neighbour = mesh.neighbour();
+    const labelUList& owner = mesh.owner();
+    const labelUList& neighbour = mesh.neighbour();
 
     forAll(owner, facei)
     {
@@ -248,8 +248,8 @@ void Foam::fvc::sweep
     // Set initial field on faces
     List<sweepData> faceData(mesh.nFaces());
 
-    const unallocLabelList& owner = mesh.owner();
-    const unallocLabelList& neighbour = mesh.neighbour();
+    const labelUList& owner = mesh.owner();
+    const labelUList& neighbour = mesh.neighbour();
     const vectorField& Cf = mesh.faceCentres();
 
     forAll(owner, facei)

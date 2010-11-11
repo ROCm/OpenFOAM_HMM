@@ -96,7 +96,7 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeTail
 void Foam::fileFormats::VTKsurfaceFormatCore::writeTail
 (
     Ostream& os,
-    const UList<label>& zoneIds
+    const labelUList& zoneIds
 )
 {
     // Print zone numbers

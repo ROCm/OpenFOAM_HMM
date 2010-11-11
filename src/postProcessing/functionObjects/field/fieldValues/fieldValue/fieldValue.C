@@ -130,7 +130,7 @@ Foam::fieldValue::fieldValue
     obr_(obr),
     active_(true),
     log_(false),
-    sourceName_(dict.lookup("sourceName")),
+    sourceName_(dict.lookupOrDefault<word>("sourceName", "sampledSurface")),
     fields_(dict.lookup("fields")),
     valueOutput_(dict.lookup("valueOutput")),
     outputFilePtr_(NULL)

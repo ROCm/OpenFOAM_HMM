@@ -177,7 +177,7 @@ public:
         (
             const polyPatch&,
             const directMappedPatchBase&,
-            const unallocLabelList& mapAddressing
+            const labelUList& mapAddressing
         );
 
 

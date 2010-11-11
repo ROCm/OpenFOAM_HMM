@@ -231,13 +231,13 @@ Foam::fvPatchMapper::~fvPatchMapper()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::unallocLabelList& Foam::fvPatchMapper::directAddressing() const
+const Foam::labelUList& Foam::fvPatchMapper::directAddressing() const
 {
     if (!direct())
     {
         FatalErrorIn
         (
-            "const unallocLabelList& fvPatchMapper::directAddressing() const"
+            "const labelUList& fvPatchMapper::directAddressing() const"
         )   << "Requested direct addressing for an interpolative mapper."
             << abort(FatalError);
     }

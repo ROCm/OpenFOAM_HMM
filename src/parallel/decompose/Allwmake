@@ -1,5 +1,17 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
+
+# get SCOTCH_VERSION, SCOTCH_ARCH_PATH
+settings=`$WM_PROJECT_DIR/bin/foamEtcFile apps/scotch/bashrc`
+if [ -f "$settings" ]
+then
+    . $settings
+    echo "using SCOTCH_ARCH_PATH=$SCOTCH_ARCH_PATH"
+else
+    echo
+    echo "Error: no apps/scotch/bashrc settings"
+    echo
+fi
 set -x
 
 wmakeLnInclude decompositionMethods
@@ -9,7 +21,10 @@ wmake libso metisDecomp
 
 if [ -d "$FOAM_MPI_LIBBIN" ]
 then
-    ( WM_OPTIONS=${WM_OPTIONS}$WM_MPLIB; wmake libso ptscotchDecomp )
+(
+    WM_OPTIONS=${WM_OPTIONS}$WM_MPLIB
+    wmake libso ptscotchDecomp
+)
 fi
 
 wmake libso decompositionMethods

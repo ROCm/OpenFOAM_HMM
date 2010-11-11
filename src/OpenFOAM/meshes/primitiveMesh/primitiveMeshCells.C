@@ -30,8 +30,8 @@ License
 void Foam::primitiveMesh::calcCells
 (
     cellList& cellFaceAddr,
-    const unallocLabelList& own,
-    const unallocLabelList& nei,
+    const labelUList& own,
+    const labelUList& nei,
     const label inNCells
 )
 {

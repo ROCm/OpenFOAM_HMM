@@ -89,7 +89,7 @@ void Foam::meshRefinement::calcNeighbourData
     {
         const polyPatch& pp = patches[patchI];
 
-        const unallocLabelList& faceCells = pp.faceCells();
+        const labelUList& faceCells = pp.faceCells();
         const vectorField::subField faceCentres = pp.faceCentres();
         const vectorField::subField faceAreas = pp.faceAreas();
 

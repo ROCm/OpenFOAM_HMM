@@ -97,8 +97,8 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
     surfaceVectorField& lsN = *nVectorsPtr_;
 
     // Set local references to mesh data
-    const unallocLabelList& owner = mesh_.owner();
-    const unallocLabelList& neighbour = mesh_.neighbour();
+    const labelUList& owner = mesh_.owner();
+    const labelUList& neighbour = mesh_.neighbour();
 
     const volVectorField& C = mesh.C();
     const surfaceScalarField& w = mesh.weights();
@@ -127,7 +127,7 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
         const fvsPatchScalarField& pMagSf = magSf.boundaryField()[patchi];
 
         const fvPatch& p = pw.patch();
-        const unallocLabelList& faceCells = p.patch().faceCells();
+        const labelUList& faceCells = p.patch().faceCells();
 
         // Build the d-vectors
         vectorField pd =
@@ -191,7 +191,7 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
         const fvsPatchScalarField& pMagSf = magSf.boundaryField()[patchi];
 
         const fvPatch& p = pw.patch();
-        const unallocLabelList& faceCells = p.faceCells();
+        const labelUList& faceCells = p.faceCells();
 
         // Build the d-vectors
         vectorField pd =
