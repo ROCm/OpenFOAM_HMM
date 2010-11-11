@@ -1118,7 +1118,21 @@ inline Foam::label Foam::Particle<ParticleType>::origProc() const
 
 
 template<class ParticleType>
+inline Foam::label& Foam::Particle<ParticleType>::origProc()
+{
+    return origProc_;
+}
+
+
+template<class ParticleType>
 inline Foam::label Foam::Particle<ParticleType>::origId() const
+{
+    return origId_;
+}
+
+
+template<class ParticleType>
+inline Foam::label& Foam::Particle<ParticleType>::origId()
 {
     return origId_;
 }
