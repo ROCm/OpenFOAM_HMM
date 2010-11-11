@@ -215,8 +215,7 @@ bool Foam::sampledThresholdCellFaces::update()
 }
 
 
-Foam::tmp<Foam::scalarField>
-Foam::sampledThresholdCellFaces::sample
+Foam::tmp<Foam::scalarField> Foam::sampledThresholdCellFaces::sample
 (
     const volScalarField& vField
 ) const
@@ -225,8 +224,7 @@ Foam::sampledThresholdCellFaces::sample
 }
 
 
-Foam::tmp<Foam::vectorField>
-Foam::sampledThresholdCellFaces::sample
+Foam::tmp<Foam::vectorField> Foam::sampledThresholdCellFaces::sample
 (
     const volVectorField& vField
 ) const
@@ -235,8 +233,7 @@ Foam::sampledThresholdCellFaces::sample
 }
 
 
-Foam::tmp<Foam::sphericalTensorField>
-Foam::sampledThresholdCellFaces::sample
+Foam::tmp<Foam::sphericalTensorField> Foam::sampledThresholdCellFaces::sample
 (
     const volSphericalTensorField& vField
 ) const
@@ -245,8 +242,7 @@ Foam::sampledThresholdCellFaces::sample
 }
 
 
-Foam::tmp<Foam::symmTensorField>
-Foam::sampledThresholdCellFaces::sample
+Foam::tmp<Foam::symmTensorField> Foam::sampledThresholdCellFaces::sample
 (
     const volSymmTensorField& vField
 ) const
@@ -255,8 +251,7 @@ Foam::sampledThresholdCellFaces::sample
 }
 
 
-Foam::tmp<Foam::tensorField>
-Foam::sampledThresholdCellFaces::sample
+Foam::tmp<Foam::tensorField> Foam::sampledThresholdCellFaces::sample
 (
     const volTensorField& vField
 ) const
@@ -265,8 +260,7 @@ Foam::sampledThresholdCellFaces::sample
 }
 
 
-Foam::tmp<Foam::scalarField>
-Foam::sampledThresholdCellFaces::interpolate
+Foam::tmp<Foam::scalarField> Foam::sampledThresholdCellFaces::interpolate
 (
     const interpolation<scalar>& interpolator
 ) const
@@ -275,8 +269,7 @@ Foam::sampledThresholdCellFaces::interpolate
 }
 
 
-Foam::tmp<Foam::vectorField>
-Foam::sampledThresholdCellFaces::interpolate
+Foam::tmp<Foam::vectorField> Foam::sampledThresholdCellFaces::interpolate
 (
     const interpolation<vector>& interpolator
 ) const
@@ -294,8 +287,7 @@ Foam::sampledThresholdCellFaces::interpolate
 }
 
 
-Foam::tmp<Foam::symmTensorField>
-Foam::sampledThresholdCellFaces::interpolate
+Foam::tmp<Foam::symmTensorField> Foam::sampledThresholdCellFaces::interpolate
 (
     const interpolation<symmTensor>& interpolator
 ) const
@@ -304,8 +296,7 @@ Foam::sampledThresholdCellFaces::interpolate
 }
 
 
-Foam::tmp<Foam::tensorField>
-Foam::sampledThresholdCellFaces::interpolate
+Foam::tmp<Foam::tensorField> Foam::sampledThresholdCellFaces::interpolate
 (
     const interpolation<tensor>& interpolator
 ) const

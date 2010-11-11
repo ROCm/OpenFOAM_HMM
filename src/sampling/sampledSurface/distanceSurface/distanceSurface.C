@@ -393,8 +393,7 @@ bool Foam::distanceSurface::update()
 }
 
 
-Foam::tmp<Foam::scalarField>
-Foam::distanceSurface::sample
+Foam::tmp<Foam::scalarField> Foam::distanceSurface::sample
 (
     const volScalarField& vField
 ) const
@@ -403,8 +402,7 @@ Foam::distanceSurface::sample
 }
 
 
-Foam::tmp<Foam::vectorField>
-Foam::distanceSurface::sample
+Foam::tmp<Foam::vectorField> Foam::distanceSurface::sample
 (
     const volVectorField& vField
 ) const
@@ -413,8 +411,7 @@ Foam::distanceSurface::sample
 }
 
 
-Foam::tmp<Foam::sphericalTensorField>
-Foam::distanceSurface::sample
+Foam::tmp<Foam::sphericalTensorField> Foam::distanceSurface::sample
 (
     const volSphericalTensorField& vField
 ) const
@@ -423,8 +420,7 @@ Foam::distanceSurface::sample
 }
 
 
-Foam::tmp<Foam::symmTensorField>
-Foam::distanceSurface::sample
+Foam::tmp<Foam::symmTensorField> Foam::distanceSurface::sample
 (
     const volSymmTensorField& vField
 ) const
@@ -433,8 +429,7 @@ Foam::distanceSurface::sample
 }
 
 
-Foam::tmp<Foam::tensorField>
-Foam::distanceSurface::sample
+Foam::tmp<Foam::tensorField> Foam::distanceSurface::sample
 (
     const volTensorField& vField
 ) const
@@ -443,8 +438,7 @@ Foam::distanceSurface::sample
 }
 
 
-Foam::tmp<Foam::scalarField>
-Foam::distanceSurface::interpolate
+Foam::tmp<Foam::scalarField> Foam::distanceSurface::interpolate
 (
     const interpolation<scalar>& interpolator
 ) const
@@ -453,8 +447,7 @@ Foam::distanceSurface::interpolate
 }
 
 
-Foam::tmp<Foam::vectorField>
-Foam::distanceSurface::interpolate
+Foam::tmp<Foam::vectorField> Foam::distanceSurface::interpolate
 (
     const interpolation<vector>& interpolator
 ) const
@@ -462,8 +455,7 @@ Foam::distanceSurface::interpolate
     return interpolateField(interpolator);
 }
 
-Foam::tmp<Foam::sphericalTensorField>
-Foam::distanceSurface::interpolate
+Foam::tmp<Foam::sphericalTensorField> Foam::distanceSurface::interpolate
 (
     const interpolation<sphericalTensor>& interpolator
 ) const
@@ -472,8 +464,7 @@ Foam::distanceSurface::interpolate
 }
 
 
-Foam::tmp<Foam::symmTensorField>
-Foam::distanceSurface::interpolate
+Foam::tmp<Foam::symmTensorField> Foam::distanceSurface::interpolate
 (
     const interpolation<symmTensor>& interpolator
 ) const
@@ -482,8 +473,7 @@ Foam::distanceSurface::interpolate
 }
 
 
-Foam::tmp<Foam::tensorField>
-Foam::distanceSurface::interpolate
+Foam::tmp<Foam::tensorField> Foam::distanceSurface::interpolate
 (
     const interpolation<tensor>& interpolator
 ) const

@@ -191,6 +191,7 @@ Foam::sampledSurface::~sampledSurface()
     clearGeom();
 }
 
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::vectorField& Foam::sampledSurface::Sf() const
@@ -238,7 +239,6 @@ Foam::scalar Foam::sampledSurface::area() const
 }
 
 
-// do not project scalar - just copy values
 Foam::tmp<Foam::Field<Foam::scalar> >
 Foam::sampledSurface::project(const Field<scalar>& field) const
 {
@@ -295,6 +295,7 @@ void Foam::sampledSurface::print(Ostream& os) const
     os << type();
 }
 
+
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<(Ostream &os, const sampledSurface& s)
@@ -303,5 +304,6 @@ Foam::Ostream& Foam::operator<<(Ostream &os, const sampledSurface& s)
     os.check("Ostream& operator<<(Ostream&, const sampledSurface&");
     return os;
 }
+
 
 // ************************************************************************* //

@@ -56,7 +56,7 @@ Type Foam::sampledSurface::integrate(const Field<Type>& field) const
 
     if (checkFieldSize(field))
     {
-        value = sum(field * magSf());
+        value = sum(field*magSf());
     }
 
     reduce(value, sumOp<Type>());
@@ -80,7 +80,7 @@ Type Foam::sampledSurface::average(const Field<Type>& field) const
 
     if (checkFieldSize(field))
     {
-        value = sum(field * magSf());
+        value = sum(field*magSf());
     }
 
     reduce(value, sumOp<Type>());
@@ -88,7 +88,7 @@ Type Foam::sampledSurface::average(const Field<Type>& field) const
     // avoid divide-by-zero
     if (area())
     {
-        return value / area();
+        return value/area();
     }
     else
     {
@@ -119,7 +119,7 @@ void Foam::sampledSurface::project
 
         forAll(norm, faceI)
         {
-            res[faceI] = field[faceI] & (norm[faceI] / mag(norm[faceI]));
+            res[faceI] = field[faceI] & (norm[faceI]/mag(norm[faceI]));
         }
     }
     else
@@ -206,7 +206,6 @@ Foam::sampledSurface::pointAverage
 
     return tcellAvg;
 }
-
 
 
 // ************************************************************************* //

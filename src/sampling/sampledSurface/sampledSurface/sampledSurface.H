@@ -98,6 +98,7 @@ class sampledSurface
         //- Total surface area
         mutable scalar area_;
 
+
     // Make geometric data
 
         //- Make Sf
@@ -108,6 +109,7 @@ class sampledSurface
 
         //- Make Cf
         void makeCf() const;
+
 
     // Service methods
 
@@ -135,33 +137,36 @@ class sampledSurface
         template<class ReturnType, class Type>
         tmp<Field<ReturnType> > project(const tmp<Field<Type> >&) const;
 
+
 protected:
 
     // Protected Member functions
 
         virtual void clearGeom() const;
 
+
 public:
 
     //- Runtime type information
-      TypeName("sampledSurface");
+    TypeName("sampledSurface");
 
 
-    // Declare run-time constructor selection table
-
-        declareRunTimeSelectionTable
+    //- Declare run-time constructor selection table
+    declareRunTimeSelectionTable
+    (
+        autoPtr,
+        sampledSurface,
+        word,
         (
-            autoPtr,
-            sampledSurface,
-            word,
-            (
-                const word& name,
-                const polyMesh& mesh,
-                const dictionary& dict
-            ),
-            (name, mesh, dict)
-        );
+            const word& name,
+            const polyMesh& mesh,
+            const dictionary& dict
+        ),
+        (name, mesh, dict)
+    );
 
+
+    // iNew helper class
 
         //- Class used for the PtrLists read-construction
         class iNew
@@ -259,7 +264,6 @@ public:
         //- Update the surface as required.
         //  Do nothing (and return false) if no update was required
         virtual bool update() = 0;
-
 
         //- Points of surface
         virtual const pointField& points() const = 0;
@@ -394,9 +398,7 @@ public:
         //- Write
         virtual void print(Ostream&) const;
 
-
-       // IOstream operators
-
+        //- Ostream operator
         friend Ostream& operator<<(Ostream&, const sampledSurface&);
 };
 
