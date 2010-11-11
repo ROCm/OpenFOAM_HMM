@@ -1,5 +1,5 @@
 EXE_INC = \
-    -I$(WM_THIRD_PARTY_DIR)/scotch_5.1.10b/include \
+    -I$(SCOTCH_ARCH_PATH)/include \
     -I/usr/include/scotch \
     -I../decompositionMethods/lnInclude
 

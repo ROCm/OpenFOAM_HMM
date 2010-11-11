@@ -406,6 +406,17 @@ inline Cmpt cmptAv
     return cmptSum(vs)/nCmpt;
 }
 
+template<class Form, class Cmpt, int nCmpt>
+inline Cmpt cmptProduct
+(
+    const VectorSpace<Form, Cmpt, nCmpt>& vs
+)
+{
+    Cmpt product = vs.v_[0];
+    VectorSpaceOps<nCmpt,1>::SeqOp(product, vs, multiplyEqOp<Cmpt>());
+    return product;
+}
+
 
 template<class Form, class Cmpt, int nCmpt>
 inline Form cmptMag

@@ -152,6 +152,12 @@ public:
                 return ::Foam::mag(max_ - min_);
             }
 
+            //- The volume of the bound box
+            scalar volume() const
+            {
+                return cmptProduct(span());
+            }
+
             //- Smallest length/height/width dimension
             scalar minDim() const
             {

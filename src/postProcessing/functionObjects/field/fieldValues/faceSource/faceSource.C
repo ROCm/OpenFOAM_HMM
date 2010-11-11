@@ -28,21 +28,20 @@ License
 #include "cyclicPolyPatch.H"
 #include "emptyPolyPatch.H"
 #include "coupledPolyPatch.H"
-#include "surfaceFields.H"
-#include "volFields.H"
+#include "sampledSurface.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(Foam::fieldValues::faceSource, 0);
 
 template<>
-const char* Foam::NamedEnum<Foam::fieldValues::faceSource::sourceType, 2>::
+const char* Foam::NamedEnum<Foam::fieldValues::faceSource::sourceType, 3>::
 names[] =
 {
-    "faceZone", "patch"
+    "faceZone", "patch", "sampledSurface"
 };
 
-const Foam::NamedEnum<Foam::fieldValues::faceSource::sourceType, 2>
+const Foam::NamedEnum<Foam::fieldValues::faceSource::sourceType, 3>
     Foam::fieldValues::faceSource::sourceTypeNames_;
 
 
@@ -188,6 +187,19 @@ void Foam::fieldValues::faceSource::setPatchFaces()
 }
 
 
+void Foam::fieldValues::faceSource::sampledSurfaceFaces(const dictionary& dict)
+{
+    surfacePtr_ = sampledSurface::New
+    (
+        name_,
+        mesh(),
+        dict.subDict("sampledSurfaceDict")
+    );
+    surfacePtr_().update();
+    nFaces_ = returnReduce(surfacePtr_().faces().size(), sumOp<label>());
+}
+
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::fieldValues::faceSource::initialise(const dictionary& dict)
@@ -204,20 +216,37 @@ void Foam::fieldValues::faceSource::initialise(const dictionary& dict)
             setPatchFaces();
             break;
         }
+        case stSampledSurface:
+        {
+            sampledSurfaceFaces(dict);
+            break;
+        }
         default:
         {
             FatalErrorIn("faceSource::initialise()")
                 << type() << " " << name_ << ": "
                 << sourceTypeNames_[source_] << "(" << sourceName_ << "):"
                 << nl << "    Unknown source type. Valid source types are:"
-                << sourceTypeNames_ << nl << exit(FatalError);
+                << sourceTypeNames_.sortedToc() << nl << exit(FatalError);
         }
+    }
+
+    scalar totalArea;
+
+    if (surfacePtr_.valid())
+    {
+        surfacePtr_().update();
+        totalArea = gSum(surfacePtr_().magSf());
+    }
+    else
+    {
+        totalArea = gSum(filterField(mesh().magSf(), false));
     }
 
     Info<< type() << " " << name_ << ":" << nl
         << "    total faces  = " << nFaces_
         << nl
-        << "    total area   = " << gSum(filterField(mesh().magSf(), false))
+        << "    total area   = " << totalArea
         << nl;
 
     if (operation_ == opWeightedAverage)
@@ -280,11 +309,11 @@ Foam::fieldValues::faceSource::faceSource
     fieldValue(name, obr, dict, loadFromFiles),
     source_(sourceTypeNames_.read(dict.lookup("source"))),
     operation_(operationTypeNames_.read(dict.lookup("operation"))),
+    weightFieldName_("undefinedWeightedFieldName"),
     nFaces_(0),
     faceId_(),
     facePatchId_(),
-    faceSign_(),
-    weightFieldName_("undefinedWeightedFieldName")
+    faceSign_()
 {
     read(dict);
 }
@@ -315,11 +344,22 @@ void Foam::fieldValues::faceSource::write()
 
     if (active_)
     {
+        scalar totalArea;
+
+        if (surfacePtr_.valid())
+        {
+            surfacePtr_().update();
+            totalArea = gSum(surfacePtr_().magSf());
+        }
+        else
+        {
+            totalArea = gSum(filterField(mesh().magSf(), false));
+        }
+
+
         if (Pstream::master())
         {
-            outputFilePtr_()
-                << obr_.time().value() << tab
-                << sum(filterField(mesh().magSf(), false));
+            outputFilePtr_() << obr_.time().value() << tab << totalArea;
         }
 
         forAll(fields_, i)

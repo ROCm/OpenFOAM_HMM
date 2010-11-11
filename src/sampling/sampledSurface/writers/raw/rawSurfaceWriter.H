@@ -73,6 +73,7 @@ class rawSurfaceWriter
             const pointField& points,
             const faceList& faces,
             const scalarField& values,
+            const bool isNodeValues,
             Ostream& os
         );
 
@@ -82,6 +83,7 @@ class rawSurfaceWriter
             const pointField& points,
             const faceList& faces,
             const vectorField& values,
+            const bool isNodeValues,
             Ostream& os
         );
 
@@ -91,6 +93,7 @@ class rawSurfaceWriter
             const pointField& points,
             const faceList& faces,
             const sphericalTensorField& values,
+            const bool isNodeValues,
             Ostream& os
         );
 
@@ -100,6 +103,7 @@ class rawSurfaceWriter
             const pointField& points,
             const faceList& faces,
             const symmTensorField& values,
+            const bool isNodeValues,
             Ostream& os
         );
 
@@ -109,6 +113,7 @@ class rawSurfaceWriter
             const pointField& points,
             const faceList& faces,
             const tensorField& values,
+            const bool isNodeValues,
             Ostream& os
         );
 
@@ -152,6 +157,7 @@ public:
             const faceList& faces,
             const word& fieldName,
             const Field<Type>& values,
+            const bool isNodeValues,
             const bool verbose = false
         ) const;
 };

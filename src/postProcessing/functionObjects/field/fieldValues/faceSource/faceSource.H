@@ -36,8 +36,9 @@ Description
         outputControl   outputTime;
         log             true;       // log to screen?
         valueOutput     true;       // Write values at run-time output times?
-        source          faceZone;   // Type of face source: faceZone, patch
-        sourceName      f0;
+        source          faceZone;   // Type of face source:
+                                    // faceZone,patch,sampledSurface
+        sourceName      f0;         // faceZone name, see below
         operation       sum;
         fields
         (
@@ -47,7 +48,13 @@ Description
         );
     }
 
-    where operation is one of:
+    source:
+    - faceZone       : requires a 'sourceName' entry to specify the faceZone
+    - patch          :                    ""                        patch
+    - sampledSurface : requires a 'sampledSurfaceDict' subdictionary. See e.g.
+                       sampleDict.
+
+    operation is one of:
       - none
       - sum
       - areaAverage
@@ -62,6 +69,11 @@ Description
     faces.
     - all fields get oriented according to the faceZone (so you might e.g. see
     negative pressure)
+    - using sampledSurfaces:
+            - they do not do surface fields
+            - they use cell values - they do not do any interpolation.
+            - take care when using isoSurfaces - these might have duplicate
+              triangles so integration might be wrong
 
 SourceFiles
     faceSource.C
@@ -80,6 +92,9 @@ SourceFiles
 
 namespace Foam
 {
+
+class sampledSurface;
+
 namespace fieldValues
 {
 
@@ -100,11 +115,12 @@ public:
         enum sourceType
         {
             stFaceZone,
-            stPatch
+            stPatch,
+            stSampledSurface
         };
 
         //- Source type names
-        static const NamedEnum<sourceType, 2> sourceTypeNames_;
+        static const NamedEnum<sourceType, 3> sourceTypeNames_;
 
 
         //- Operation type enumeration
@@ -133,6 +149,9 @@ private:
         //- Set faces to evaluate based on a patch
         void setPatchFaces();
 
+        //- Set faces according to sampledSurface
+        void sampledSurfaceFaces(const dictionary&);
+
 
 protected:
 
@@ -144,20 +163,30 @@ protected:
         //- Operation to apply to values
         operationType operation_;
 
+        //- Weight field name - only used for opWeightedAverage mode
+        word weightFieldName_;
+
         //- Global number of faces
         label nFaces_;
 
-        //- Local list of face IDs
-        labelList faceId_;
 
-        //- Local list of patch ID per face
-        labelList facePatchId_;
+        // If operating on mesh faces (faceZone,patch)
 
-        //- List of +1/-1 representing face flip map (1 use as is, -1 negate)
-        labelList faceSign_;
+            //- Local list of face IDs
+            labelList faceId_;
 
-        //- Weight field name - only used for opWeightedAverage mode
-        word weightFieldName_;
+            //- Local list of patch ID per face
+            labelList facePatchId_;
+
+            //- List of +1/-1 representing face flip map
+            //  (1 use as is, -1 negate)
+            labelList faceSign_;
+
+        // If operating on sampledSurface
+
+            //- underlying sampledSurface
+            autoPtr<sampledSurface> surfacePtr_;
+
 
 
     // Protected Member Functions
@@ -171,7 +200,7 @@ protected:
 
         //- Return field values by looking up field name
         template<class Type>
-        tmp<Field<Type> > setFieldValues(const word& fieldName) const;
+        tmp<Field<Type> > getFieldValues(const word& fieldName) const;
 
         //- Apply the 'operation' to the values
         template<class Type>
