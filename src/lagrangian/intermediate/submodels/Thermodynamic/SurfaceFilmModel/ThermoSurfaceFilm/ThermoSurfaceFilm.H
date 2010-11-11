@@ -75,6 +75,7 @@ protected:
         virtual void cacheFilmFields
         (
             const label filmPatchI,
+            const label primaryPatchI,
             const mapDistribute& distMap,
             const surfaceFilmModels::surfaceFilmModel& filmModel
         );

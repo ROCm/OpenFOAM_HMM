@@ -88,6 +88,9 @@ protected:
             //- Film density / patch face
             scalarList rhoFilmPatch_;
 
+            //- Film height of all film patches / patch face
+            scalarListList deltaFilmPatch_;
+
 
         // Counters
 
@@ -104,6 +107,7 @@ protected:
         virtual void cacheFilmFields
         (
             const label filmPatchI,
+            const label primaryPatchI,
             const mapDistribute& distMap,
             const surfaceFilmModels::surfaceFilmModel& filmModel
         );

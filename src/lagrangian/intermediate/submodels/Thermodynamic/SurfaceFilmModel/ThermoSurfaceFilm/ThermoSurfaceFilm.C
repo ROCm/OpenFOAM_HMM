@@ -131,6 +131,7 @@ template<class CloudType>
 void Foam::ThermoSurfaceFilm<CloudType>::cacheFilmFields
 (
     const label filmPatchI,
+    const label primaryPatchI,
     const mapDistribute& distMap,
     const surfaceFilmModels::surfaceFilmModel& filmModel
 )
@@ -138,6 +139,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::cacheFilmFields
     SurfaceFilmModel<CloudType>::cacheFilmFields
     (
         filmPatchI,
+        primaryPatchI,
         distMap,
         filmModel
     );

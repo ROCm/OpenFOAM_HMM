@@ -41,6 +41,7 @@ Foam::SurfaceFilmModel<CloudType>::SurfaceFilmModel(CloudType& owner)
     diameterParcelPatch_(0),
     UFilmPatch_(0),
     rhoFilmPatch_(0),
+    deltaFilmPatch_(0),
     nParcelsTransferred_(0),
     nParcelsInjected_(0)
 {}
@@ -61,6 +62,7 @@ Foam::SurfaceFilmModel<CloudType>::SurfaceFilmModel
     diameterParcelPatch_(0),
     UFilmPatch_(0),
     rhoFilmPatch_(0),
+    deltaFilmPatch_(owner.mesh().boundary().size()),
     nParcelsTransferred_(0),
     nParcelsInjected_(0)
 {}
@@ -78,6 +80,7 @@ Foam::SurfaceFilmModel<CloudType>::SurfaceFilmModel
     diameterParcelPatch_(sfm.diameterParcelPatch_),
     UFilmPatch_(sfm.UFilmPatch_),
     rhoFilmPatch_(sfm.rhoFilmPatch_),
+    deltaFilmPatch_(sfm.deltaFilmPatch_),
     nParcelsTransferred_(sfm.nParcelsTransferred_),
     nParcelsInjected_(sfm.nParcelsInjected_)
 {}
@@ -145,7 +148,7 @@ void Foam::SurfaceFilmModel<CloudType>::inject(TrackData& td)
 
         const label filmPatchI = filmPatches[i];
         const mapDistribute& distMap = wpp.map();
-        cacheFilmFields(filmPatchI, distMap, filmModel);
+        cacheFilmFields(filmPatchI, primaryPatchI, distMap, filmModel);
 
         forAll(injectorCellsPatch, j)
         {
@@ -196,6 +199,7 @@ template<class CloudType>
 void Foam::SurfaceFilmModel<CloudType>::cacheFilmFields
 (
     const label filmPatchI,
+    const label primaryPatchI,
     const mapDistribute& distMap,
     const surfaceFilmModels::surfaceFilmModel& filmModel
 )
@@ -212,6 +216,10 @@ void Foam::SurfaceFilmModel<CloudType>::cacheFilmFields
 
     rhoFilmPatch_ = filmModel.rho().boundaryField()[filmPatchI];
     distMap.distribute(rhoFilmPatch_);
+
+    deltaFilmPatch_[primaryPatchI] =
+        filmModel.delta().boundaryField()[filmPatchI];
+    distMap.distribute(deltaFilmPatch_[primaryPatchI]);
 }
 
 
