@@ -37,6 +37,7 @@ Foam::SurfaceFilmModel<CloudType>::SurfaceFilmModel(CloudType& owner)
 :
     SubModelBase<CloudType>(owner),
     g_(dimensionedVector("zero", dimAcceleration, vector::zero)),
+    ejectedParcelType_(0),
     massParcelPatch_(0),
     diameterParcelPatch_(0),
     UFilmPatch_(0),
@@ -58,6 +59,10 @@ Foam::SurfaceFilmModel<CloudType>::SurfaceFilmModel
 :
     SubModelBase<CloudType>(owner, dict, type),
     g_(g),
+    ejectedParcelType_
+    (
+        this->coeffDict().lookupOrDefault("ejectedParcelType", -1)
+    ),
     massParcelPatch_(0),
     diameterParcelPatch_(0),
     UFilmPatch_(0),
@@ -76,6 +81,7 @@ Foam::SurfaceFilmModel<CloudType>::SurfaceFilmModel
 :
     SubModelBase<CloudType>(sfm),
     g_(sfm.g_),
+    ejectedParcelType_(sfm.ejectedParcelType_),
     massParcelPatch_(sfm.massParcelPatch_),
     diameterParcelPatch_(sfm.diameterParcelPatch_),
     UFilmPatch_(sfm.UFilmPatch_),
@@ -98,16 +104,18 @@ Foam::SurfaceFilmModel<CloudType>::~SurfaceFilmModel()
 template<class CloudType>
 bool Foam::SurfaceFilmModel<CloudType>::transferParcel
 (
-    const parcelType& p,
-    const label patchI
+    parcelType& p,
+    const polyPatch& pp,
+    bool& keepParticle
 )
 {
     notImplemented
     (
         "bool Foam::SurfaceFilmModel<CloudType>::transferParcel"
         "("
-            "const parcelType&, "
-            "const label"
+            "parcelType&, "
+            "const label, "
+            "const bool&"
         ")"
     );
 
@@ -237,6 +245,11 @@ void Foam::SurfaceFilmModel<CloudType>::setParcelProperties
     p.rho() = rhoFilmPatch_[filmFaceI];
 
     p.nParticle() = massParcelPatch_[filmFaceI]/p.rho()/vol;
+
+    if (ejectedParcelType_ >= 0)
+    {
+        p.typeId() = ejectedParcelType_;
+    }
 }
 
 

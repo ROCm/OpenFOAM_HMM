@@ -73,6 +73,11 @@ protected:
         //- Gravitational acceleration constant
         const dimensionedVector& g_;
 
+        //- Ejected parcel type label - id assigned to identify parcel for
+        //  post-processing. If not specified, defaults to originating cloud
+        //  type
+        label ejectedParcelType_;
+
 
         // Cached injector fields per film patch
 
@@ -210,8 +215,9 @@ public:
             //  Returns true if parcel is to be transferred
             virtual bool transferParcel
             (
-                const parcelType& p,
-                const label patchI
+                parcelType& p,
+                const polyPatch& pp,
+                bool& keepParticle
             );
 
             //- Inject parcels into the cloud

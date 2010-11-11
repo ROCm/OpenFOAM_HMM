@@ -426,11 +426,8 @@ bool Foam::KinematicParcel<ParcelType>::hitPatch
     td.cloud().postProcessing().postPatch(p, patchI);
 
     // Invoke surface film model
-    if (td.cloud().surfaceFilm().transferParcel(p, patchI))
+    if (td.cloud().surfaceFilm().transferParcel(p, pp, td.keepParticle))
     {
-        // Parcel transferred to the surface film
-        td.keepParticle = false;
-
         // All interactions done
         return true;
     }
