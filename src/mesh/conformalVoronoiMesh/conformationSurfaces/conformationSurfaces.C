@@ -212,6 +212,20 @@ Foam::conformationSurfaces::~conformationSurfaces()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
+bool Foam::conformationSurfaces::overlaps(const boundBox& bb) const
+{
+    forAll(surfaces_, s)
+    {
+        if (allGeometry_[surfaces_[s]].overlaps(bb))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
 Foam::Field<bool> Foam::conformationSurfaces::inside
 (
     const pointField& samplePts
@@ -221,12 +235,30 @@ Foam::Field<bool> Foam::conformationSurfaces::inside
 }
 
 
+bool Foam::conformationSurfaces::inside
+(
+    const point& samplePt
+) const
+{
+    return wellInside(pointField(1, samplePt), scalarField(1, 0))[0];
+}
+
+
 Foam::Field<bool> Foam::conformationSurfaces::outside
 (
     const pointField& samplePts
 ) const
 {
     return wellOutside(samplePts, scalarField(samplePts.size(), 0.0));
+}
+
+
+bool Foam::conformationSurfaces::outside
+(
+    const point& samplePt
+) const
+{
+    return wellOutside(pointField(1, samplePt), scalarField(1, 0))[0];
 }
 
 

@@ -128,10 +128,12 @@ std::vector<Vb::Point> densityWeightedStochastic::initialPoints() const
         }
     }
 
-    Info<< nl << "    " << typeName << " - "
-        << trialPoints << " locations queried ("
-        << scalar(initialPoints.size())/scalar(trialPoints)
-        << " success rate).  minCellSize " << minCellSize_
+    Info<< nl << "    " << typeName << nl
+        << "        " << initialPoints.size() << " points placed" << nl
+        << "        " << trialPoints << " locations queried" << nl
+        << "        " << scalar(initialPoints.size())/scalar(trialPoints)
+        << " success rate" << nl
+        << "        minCellSize " << minCellSize_
         << endl;
 
     return initialPoints;

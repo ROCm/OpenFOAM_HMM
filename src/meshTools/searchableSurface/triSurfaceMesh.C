@@ -488,6 +488,16 @@ Foam::pointField Foam::triSurfaceMesh::coordinates() const
 }
 
 
+bool Foam::triSurfaceMesh::overlaps(const boundBox& bb) const
+{
+     const indexedOctree<treeDataTriSurface>& octree = tree();
+
+     labelList indices = octree.findBox(treeBoundBox(bb));
+
+     return !indices.empty();
+}
+
+
 void Foam::triSurfaceMesh::movePoints(const pointField& newPoints)
 {
     tree_.clear();

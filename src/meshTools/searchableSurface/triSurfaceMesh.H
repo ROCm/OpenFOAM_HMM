@@ -195,6 +195,9 @@ public:
             //  Usually the element centres (should be of length size()).
             virtual pointField coordinates() const;
 
+            // Does any part of the surface overlap the supplied bound box?
+            virtual bool overlaps(const boundBox& bb) const;
+
             virtual void findNearest
             (
                 const pointField& sample,

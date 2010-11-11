@@ -206,6 +206,17 @@ public:
         //  Usually the element centres (should be of length size()).
         virtual pointField coordinates() const = 0;
 
+        // Does any part of the surface overlap the supplied bound box?
+        virtual bool overlaps(const boundBox& bb) const
+        {
+            notImplemented
+            (
+                "searchableSurface::overlaps(const boundBox& bb) const"
+            );
+
+            return false;
+        }
+
 
         // Single point queries.
 

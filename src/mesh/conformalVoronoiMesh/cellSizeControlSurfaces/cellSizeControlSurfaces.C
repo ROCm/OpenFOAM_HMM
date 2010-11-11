@@ -163,7 +163,7 @@ Foam::scalar Foam::cellSizeControlSurfaces::cellSize
 ) const
 {
 
-    // Regions requesting with the same priority take the average
+    // // Regions requesting with the same priority take the average
 
     // scalar sizeAccumulator = 0;
     // scalar numberOfFunctions = 0;

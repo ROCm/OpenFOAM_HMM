@@ -62,15 +62,15 @@ std::vector<Vb::Point> bodyCentredCubic::initialPoints() const
 
     scalar x0 = bb.min().x();
     scalar xR = bb.max().x() - x0;
-    int ni = int(xR/initialCellSize_) + 1;
+    label ni = label(xR/initialCellSize_) + 1;
 
     scalar y0 = bb.min().y();
     scalar yR = bb.max().y() - y0;
-    int nj = int(yR/initialCellSize_) + 1;
+    label nj = label(yR/initialCellSize_) + 1;
 
     scalar z0 = bb.min().z();
     scalar zR = bb.max().z() - z0;
-    int nk = int(zR/initialCellSize_) + 1;
+    label nk = label(zR/initialCellSize_) + 1;
 
     vector delta(xR/ni, yR/nj, zR/nk);
 
@@ -84,9 +84,9 @@ std::vector<Vb::Point> bodyCentredCubic::initialPoints() const
 
     List<bool> isSurfacePoint(2*nk, false);
 
-    for (int i = 0; i < ni; i++)
+    for (label i = 0; i < ni; i++)
     {
-        for (int j = 0; j < nj; j++)
+        for (label j = 0; j < nj; j++)
         {
             // Generating, testing and adding points one line at a time to
             // reduce the memory requirement for cases with bounding boxes that
@@ -96,7 +96,7 @@ std::vector<Vb::Point> bodyCentredCubic::initialPoints() const
 
             pointField points(2*nk);
 
-            for (int k = 0; k < nk; k++)
+            for (label k = 0; k < nk; k++)
             {
                 point pA
                 (

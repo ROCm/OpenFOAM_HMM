@@ -160,11 +160,21 @@ public:
 
         // Query
 
-            //- Check if point is inside surfaces to conform to
+            //- Check if the supplied bound box overlaps any part of any of
+            //  the surfaces
+            bool overlaps(const boundBox& bb) const;
+
+            //- Check if points are inside surfaces to conform to
             Field<bool> inside(const pointField& samplePts) const;
 
-            //- Check if point is outside surfaces to conform to
+            //- Check if point is inside surfaces to conform to
+            bool inside(const point& samplePt) const;
+
+            //- Check if points are outside surfaces to conform to
             Field<bool> outside(const pointField& samplePts) const;
+
+            //- Check if point is outside surfaces to conform to
+            bool outside(const point& samplePt) const;
 
             //- Check if point is inside surfaces to conform to by at least
             //  testDistSqr
