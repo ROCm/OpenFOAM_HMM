@@ -204,11 +204,11 @@ void Foam::PtrList<T>::transfer(PtrList<T>& a)
 
 
 template<class T>
-void Foam::PtrList<T>::reorder(const UList<label>& oldToNew)
+void Foam::PtrList<T>::reorder(const labelUList& oldToNew)
 {
     if (oldToNew.size() != size())
     {
-        FatalErrorIn("PtrList<T>::reorder(const UList<label>&)")
+        FatalErrorIn("PtrList<T>::reorder(const labelUList&)")
             << "Size of map (" << oldToNew.size()
             << ") not equal to list size (" << size()
             << ")." << abort(FatalError);
@@ -222,7 +222,7 @@ void Foam::PtrList<T>::reorder(const UList<label>& oldToNew)
 
         if (newI < 0 || newI >= size())
         {
-            FatalErrorIn("PtrList<T>::reorder(const UList<label>&)")
+            FatalErrorIn("PtrList<T>::reorder(const labelUList&)")
                 << "Illegal index " << newI << nl
                 << "Valid indices are 0.." << size()-1
                 << abort(FatalError);
@@ -230,7 +230,7 @@ void Foam::PtrList<T>::reorder(const UList<label>& oldToNew)
 
         if (newPtrs_[newI])
         {
-            FatalErrorIn("PtrList<T>::reorder(const UList<label>&)")
+            FatalErrorIn("PtrList<T>::reorder(const labelUList&)")
                 << "reorder map is not unique; element " << newI
                 << " already set." << abort(FatalError);
         }
@@ -241,7 +241,7 @@ void Foam::PtrList<T>::reorder(const UList<label>& oldToNew)
     {
         if (!newPtrs_[i])
         {
-            FatalErrorIn("PtrList<T>::reorder(const UList<label>&)")
+            FatalErrorIn("PtrList<T>::reorder(const labelUList&)")
                 << "Element " << i << " not set after reordering." << nl
                 << abort(FatalError);
         }

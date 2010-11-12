@@ -133,8 +133,8 @@ snGradScheme<Type>::snGrad
     const scalarField& deltaCoeffs = tdeltaCoeffs().internalField();
 
     // owner/neighbour addressing
-    const unallocLabelList& owner = mesh.owner();
-    const unallocLabelList& neighbour = mesh.neighbour();
+    const labelUList& owner = mesh.owner();
+    const labelUList& neighbour = mesh.neighbour();
 
     forAll(owner, faceI)
     {

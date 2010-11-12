@@ -107,7 +107,7 @@ Foam::linearUpwind<Type>::correction
 
         if (pSfCorr.coupled())
         {
-            const unallocLabelList& pOwner =
+            const labelUList& pOwner =
                 mesh.boundary()[patchi].faceCells();
 
             const vectorField& pCf = Cf.boundaryField()[patchi];

@@ -129,7 +129,7 @@ tmp<vectorField> cyclicFvPatch::delta() const
 
 tmp<labelField> cyclicFvPatch::interfaceInternalField
 (
-    const unallocLabelList& internalData
+    const labelUList& internalData
 ) const
 {
     return patchInternalField(internalData);
@@ -139,7 +139,7 @@ tmp<labelField> cyclicFvPatch::interfaceInternalField
 tmp<labelField> cyclicFvPatch::internalFieldTransfer
 (
     const Pstream::commsTypes commsType,
-    const unallocLabelList& iF
+    const labelUList& iF
 ) const
 {
     return neighbFvPatch().patchInternalField(iF);

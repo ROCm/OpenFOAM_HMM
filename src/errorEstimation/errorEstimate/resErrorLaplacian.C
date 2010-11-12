@@ -124,8 +124,8 @@ laplacian
     const surfaceVectorField& Sf = mesh.Sf();
     const surfaceScalarField magSf = mesh.magSf();
     const fvPatchList& patches = mesh.boundary();
-    const unallocLabelList& owner = mesh.owner();
-    const unallocLabelList& neighbour = mesh.neighbour();
+    const labelUList& owner = mesh.owner();
+    const labelUList& neighbour = mesh.neighbour();
 
     const surfaceScalarField& delta =
         mesh.surfaceInterpolation::deltaCoeffs();

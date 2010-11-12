@@ -177,7 +177,7 @@ public:
 
         //- Construct as subset of points
         //  Local processor domain only (no reduce as in boundBox)
-        treeBoundBox(const UList<point>&, const UList<label>& meshPoints);
+        treeBoundBox(const UList<point>&, const labelUList& meshPoints);
 
         //- Construct from Istream
         treeBoundBox(Istream&);

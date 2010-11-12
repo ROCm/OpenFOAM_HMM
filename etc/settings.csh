@@ -37,6 +37,8 @@ alias _foamAddLib 'setenv LD_LIBRARY_PATH \!*\:${LD_LIBRARY_PATH}'
 # prefix to MANPATH
 alias _foamAddMan 'setenv MANPATH \!*\:${MANPATH}'
 
+#------------------------------------------------------------------------------
+
 # location of the jobControl directory
 setenv FOAM_JOB_DIR $WM_PROJECT_INST_DIR/jobControl
 

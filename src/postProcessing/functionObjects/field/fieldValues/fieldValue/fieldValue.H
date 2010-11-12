@@ -164,12 +164,14 @@ public:
             //- Execute the at the final time-loop, currently does nothing
             virtual void end();
 
-            //- Comnbine fields from all processor domains into single field
+            //- Combine fields from all processor domains into single field
             template<class Type>
-            tmp<Field<Type> > combineFields
-            (
-                const tmp<Field<Type> >& field
-            ) const;
+            tmp<Field<Type> > combineFields(const Field<Type>& field) const;
+
+            //- Combine fields from all processor domains into single field
+            template<class Type>
+            tmp<Field<Type> > combineFields(const tmp<Field<Type> >&) const;
+
 };
 
 

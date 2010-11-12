@@ -148,7 +148,7 @@ public:
         explicit inline face(label);
 
         //- Construct from list of labels
-        explicit inline face(const UList<label>&);
+        explicit inline face(const labelUList&);
 
         //- Construct from list of labels
         explicit inline face(const labelList&);

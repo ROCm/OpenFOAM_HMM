@@ -30,7 +30,7 @@ License
 
 Foam::fvFieldDecomposer::patchFieldDecomposer::patchFieldDecomposer
 (
-    const unallocLabelList& addressingSlice,
+    const labelUList& addressingSlice,
     const label addressingOffset
 )
 :
@@ -48,7 +48,7 @@ Foam::fvFieldDecomposer::processorVolPatchFieldDecomposer::
 processorVolPatchFieldDecomposer
 (
     const fvMesh& mesh,
-    const unallocLabelList& addressingSlice
+    const labelUList& addressingSlice
 )
 :
     directAddressing_(addressingSlice.size())
@@ -95,7 +95,7 @@ processorVolPatchFieldDecomposer
 Foam::fvFieldDecomposer::processorSurfacePatchFieldDecomposer::
 processorSurfacePatchFieldDecomposer
 (
-    const unallocLabelList& addressingSlice
+    const labelUList& addressingSlice
 )
 :
     addressing_(addressingSlice.size()),
@@ -171,7 +171,7 @@ Foam::fvFieldDecomposer::fvFieldDecomposer
             processorSurfacePatchFieldDecomposerPtrs_[patchi] =
                 new processorSurfacePatchFieldDecomposer
                 (
-                    static_cast<const unallocLabelList&>
+                    static_cast<const labelUList&>
                     (
                         procMesh_.boundary()[patchi].patchSlice
                         (

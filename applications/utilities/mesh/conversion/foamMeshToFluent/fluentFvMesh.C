@@ -124,8 +124,8 @@ void Foam::fluentFvMesh::writeFluentMesh() const
     fluentMeshFile
         << "))" << std::endl << std::endl;
 
-    const unallocLabelList& own = owner();
-    const unallocLabelList& nei = neighbour();
+    const labelUList& own = owner();
+    const labelUList& nei = neighbour();
 
     const faceList& fcs = faces();
 

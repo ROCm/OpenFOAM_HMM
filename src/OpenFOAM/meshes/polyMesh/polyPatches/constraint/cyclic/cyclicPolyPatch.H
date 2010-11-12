@@ -243,7 +243,7 @@ public:
             const cyclicPolyPatch& pp,
             const polyBoundaryMesh& bm,
             const label index,
-            const unallocLabelList& mapAddressing,
+            const labelUList& mapAddressing,
             const label newStart
         );
 
@@ -283,7 +283,7 @@ public:
         (
             const polyBoundaryMesh& bm,
             const label index,
-            const unallocLabelList& mapAddressing,
+            const labelUList& mapAddressing,
             const label newStart
         ) const
         {

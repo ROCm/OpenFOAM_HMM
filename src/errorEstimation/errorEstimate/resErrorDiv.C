@@ -50,8 +50,8 @@ div
     const surfaceVectorField& faceCentres = mesh.Cf();
     const volVectorField& cellCentres = mesh.C();
     const fvPatchList& patches = mesh.boundary();
-    const unallocLabelList& owner = mesh.owner();
-    const unallocLabelList& neighbour = mesh.neighbour();
+    const labelUList& owner = mesh.owner();
+    const labelUList& neighbour = mesh.neighbour();
 
     Field<Type> res(vols.size(), pTraits<Type>::zero);
     scalarField aNorm(vols.size(), 0.0);

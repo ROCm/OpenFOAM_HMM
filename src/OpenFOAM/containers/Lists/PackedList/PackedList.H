@@ -229,7 +229,7 @@ public:
         inline PackedList(const Xfer<PackedList<nBits> >&);
 
         //- Construct from a list of labels
-        explicit inline PackedList(const UList<label>&);
+        explicit inline PackedList(const labelUList&);
 
         //- Construct from an indirect list of labels
         explicit inline PackedList(const UIndirectList<label>&);
@@ -404,7 +404,7 @@ public:
             PackedList<nBits>& operator=(const PackedList<nBits>&);
 
             //- Assignment operator.
-            PackedList<nBits>& operator=(const UList<label>&);
+            PackedList<nBits>& operator=(const labelUList&);
 
             //- Assignment operator.
             PackedList<nBits>& operator=(const UIndirectList<label>&);

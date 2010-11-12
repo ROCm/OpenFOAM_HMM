@@ -110,7 +110,7 @@ public:
                 return true;
             }
 
-            const unallocLabelList& directAddressing() const
+            const labelUList& directAddressing() const
             {
                 return directAddressing_;
             }
@@ -151,7 +151,7 @@ public:
                 return true;
             }
 
-            const unallocLabelList& directAddressing() const
+            const labelUList& directAddressing() const
             {
                 return directAddressing_;
             }

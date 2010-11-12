@@ -128,7 +128,7 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
     // Distribute internal faces
     labelListList newCellFaces(oldCells.size());
 
-    const unallocLabelList& oldOwnerStart = lduAddr().ownerStartAddr();
+    const labelUList& oldOwnerStart = lduAddr().ownerStartAddr();
 
     forAll(newCellFaces, cellI)
     {
@@ -168,7 +168,7 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
         curInsBouFace = false;
 
         // Get faceCells for face insertion
-        const unallocLabelList& curFaceCells = curPatch.faceCells();
+        const labelUList& curFaceCells = curPatch.faceCells();
         const label curStart = curPatch.start();
 
         forAll(curPatch, faceI)

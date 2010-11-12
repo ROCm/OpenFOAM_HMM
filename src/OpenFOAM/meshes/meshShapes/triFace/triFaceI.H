@@ -77,7 +77,7 @@ inline Foam::triFace::triFace
 }
 
 
-inline Foam::triFace::triFace(const UList<label>& lst)
+inline Foam::triFace::triFace(const labelUList& lst)
 :
     FixedList<label, 3>(lst)
 {}

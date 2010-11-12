@@ -46,8 +46,8 @@ void SLTSDdtScheme<Type>::relaxedDiag
     const surfaceScalarField& phi
 ) const
 {
-    const unallocLabelList& owner = mesh().owner();
-    const unallocLabelList& neighbour = mesh().neighbour();
+    const labelUList& owner = mesh().owner();
+    const labelUList& neighbour = mesh().neighbour();
     scalarField diag(rD.size(), 0.0);
 
     forAll(owner, faceI)
@@ -67,7 +67,7 @@ void SLTSDdtScheme<Type>::relaxedDiag
     forAll(phi.boundaryField(), patchi)
     {
         const fvsPatchScalarField& pphi = phi.boundaryField()[patchi];
-        const unallocLabelList& faceCells = pphi.patch().patch().faceCells();
+        const labelUList& faceCells = pphi.patch().patch().faceCells();
 
         forAll(pphi, patchFacei)
         {

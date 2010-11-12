@@ -188,7 +188,7 @@ public:
         //  ascending or descending order. Reordering has to be unique.
         //  (is shuffle) Calls updateMesh() after reordering to recalculate
         //  data.
-        void reorder(const UList<label>&);
+        void reorder(const labelUList&);
 
         //- writeData member function required by regIOobject
         bool writeData(Ostream&) const;

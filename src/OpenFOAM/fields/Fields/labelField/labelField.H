@@ -61,12 +61,12 @@ template<>
 void component
 (
     labelField& lf,
-    const UList<label>& f,
+    const labelUList& f,
     const direction
 );
 
 template<>
-void labelField::replace(const direction, const UList<label>& lf);
+void labelField::replace(const direction, const labelUList& lf);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

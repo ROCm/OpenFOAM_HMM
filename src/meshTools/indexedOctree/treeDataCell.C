@@ -84,7 +84,7 @@ Foam::treeDataCell::treeDataCell
 (
     const bool cacheBb,
     const primitiveMesh& mesh,
-    const unallocLabelList& cellLabels
+    const labelUList& cellLabels
 )
 :
     mesh_(mesh),
@@ -171,7 +171,7 @@ bool Foam::treeDataCell::contains
 // nearestPoint.
 void Foam::treeDataCell::findNearest
 (
-    const unallocLabelList& indices,
+    const labelUList& indices,
     const point& sample,
 
     scalar& nearestDistSqr,

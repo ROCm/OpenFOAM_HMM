@@ -83,8 +83,8 @@ Foam::lduMatrix::faceH(const Field<Type>& psi) const
         const scalarField& Lower = const_cast<const lduMatrix&>(*this).lower();
         const scalarField& Upper = const_cast<const lduMatrix&>(*this).upper();
 
-        const unallocLabelList& l = lduAddr().lowerAddr();
-        const unallocLabelList& u = lduAddr().upperAddr();
+        const labelUList& l = lduAddr().lowerAddr();
+        const labelUList& u = lduAddr().upperAddr();
 
         tmp<Field<Type> > tfaceHpsi(new Field<Type> (Lower.size()));
         Field<Type> & faceHpsi = tfaceHpsi();

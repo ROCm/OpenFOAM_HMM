@@ -64,7 +64,7 @@ Foam::treeDataEdge::treeDataEdge
     const bool cacheBb,
     const edgeList& edges,
     const pointField& points,
-    const unallocLabelList& edgeLabels
+    const labelUList& edgeLabels
 )
 :
     edges_(edges),
@@ -143,7 +143,7 @@ bool Foam::treeDataEdge::overlaps
 // nearestPoint.
 void Foam::treeDataEdge::findNearest
 (
-    const unallocLabelList& indices,
+    const labelUList& indices,
     const point& sample,
 
     scalar& nearestDistSqr,
@@ -175,7 +175,7 @@ void Foam::treeDataEdge::findNearest
 //  Returns point and distance (squared)
 void Foam::treeDataEdge::findNearest
 (
-    const unallocLabelList& indices,
+    const labelUList& indices,
     const linePointRef& ln,
 
     treeBoundBox& tightest,

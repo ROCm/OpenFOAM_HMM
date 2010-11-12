@@ -57,7 +57,7 @@ void Foam::nearWallDist::doAll()
         {
             const polyPatch& pPatch = patch.patch();
 
-            const unallocLabelList& faceCells = patch.faceCells();
+            const labelUList& faceCells = patch.faceCells();
 
             // Check cells with face on wall
             forAll(patch, patchFaceI)

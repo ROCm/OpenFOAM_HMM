@@ -127,7 +127,7 @@ protected:
         }
 
         //- Set new zones from faceMap
-        virtual void remapFaces(const UList<label>& faceMap);
+        virtual void remapFaces(const labelUList& faceMap);
 
 
 public:
@@ -172,7 +172,7 @@ public:
         (
             const Xfer<pointField>&,
             const Xfer<List<Face> >&,
-            const UList<label>& zoneSizes = UList<label>(),
+            const labelUList& zoneSizes = labelUList(),
             const UList<word>& zoneNames = UList<word>()
         );
 
@@ -284,10 +284,10 @@ public:
             void setZones(const surfZoneList&);
 
             //- Set zone ids and zones
-            void setZones(const UList<label>& sizes, const UList<word>& names);
+            void setZones(const labelUList& sizes, const UList<word>& names);
 
             //- Set zone ids and zones with default names
-            void setZones(const UList<label>& sizes);
+            void setZones(const labelUList& sizes);
 
 
         // Edit

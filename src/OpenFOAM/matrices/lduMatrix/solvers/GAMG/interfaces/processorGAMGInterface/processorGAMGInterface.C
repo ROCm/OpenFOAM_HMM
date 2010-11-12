@@ -241,7 +241,7 @@ Foam::processorGAMGInterface::~processorGAMGInterface()
 void Foam::processorGAMGInterface::initInternalFieldTransfer
 (
     const Pstream::commsTypes commsType,
-    const unallocLabelList& iF
+    const labelUList& iF
 ) const
 {
     send(commsType, interfaceInternalField(iF)());
@@ -251,7 +251,7 @@ void Foam::processorGAMGInterface::initInternalFieldTransfer
 Foam::tmp<Foam::labelField> Foam::processorGAMGInterface::internalFieldTransfer
 (
     const Pstream::commsTypes commsType,
-    const unallocLabelList& iF
+    const labelUList& iF
 ) const
 {
     return receive<label>(commsType, this->size());

@@ -51,7 +51,7 @@ inline Foam::face::face(label s)
 {}
 
 
-inline Foam::face::face(const UList<label>& lst)
+inline Foam::face::face(const labelUList& lst)
 :
     labelList(lst)
 {}

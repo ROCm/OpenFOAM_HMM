@@ -113,7 +113,7 @@ public:
         cellZone
         (
             const word& name,
-            const unallocLabelList& addr,
+            const labelUList& addr,
             const label index,
             const cellZoneMesh&
         );
@@ -141,7 +141,7 @@ public:
         cellZone
         (
             const cellZone&,
-            const unallocLabelList& addr,
+            const labelUList& addr,
             const label index,
             const cellZoneMesh&
         );
@@ -169,7 +169,7 @@ public:
         //  and zone mesh
         virtual autoPtr<cellZone> clone
         (
-            const unallocLabelList& addr,
+            const labelUList& addr,
             const label index,
             const cellZoneMesh& zm
         ) const
@@ -226,7 +226,7 @@ public:
         void operator=(const cellZone&);
 
         //- Assign addressing, clearing demand-driven data
-        void operator=(const unallocLabelList&);
+        void operator=(const labelUList&);
 
         //- Assign addressing, clearing demand-driven data
         void operator=(const Xfer<labelList>&);

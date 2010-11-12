@@ -49,9 +49,10 @@
 #     test the specified files/directories for standards conformance.
 #
 #------------------------------------------------------------------------------
+hookName="pre-commit"
 die()
 {
-    echo 'pre-commit hook failure' 1>&2
+    echo '$hookName hook failure' 1>&2
     echo '-----------------------' 1>&2
     echo '' 1>&2
     echo "$@" 1>&2
@@ -104,7 +105,7 @@ dieOnBadFiles()
 {
     if [ -n "$badFiles" ]
     then
-        echo 'pre-commit hook failure' 1>&2
+        echo '$hookName hook failure' 1>&2
         echo '-----------------------' 1>&2
         echo "$@" 1>&2
         echo '' 1>&2
@@ -117,21 +118,37 @@ dieOnBadFiles()
 
 
 #
+# qualify 'git grep' to check cached value or from a specific commit
+#
+gitScope()
+{
+    if [ "$#" -gt 0 ]
+    then
+        echo "$1:"
+    else
+        echo "--cached -- "
+    fi
+}
+
+
+#
 # check for bad strings, characters, etc
 #
 checkIllegalCode()
 {
-    echo "pre-commit: check bad strings/characters etc ..." 1>&2
+    echo "$hookName: check bad strings/characters etc ..." 1>&2
 
     reBad="(N""abla|"$'\t'")"
     msgBad="N""abla or <TAB>"
+
+    scope=$(gitScope $@)
 
     badFiles=$(
     for f in $fileList
     do
         # parse line numbers from grep output:
         #        <lineNr>:   contents
-        lines=$(git grep --cached -E -hn -e "$reBad" -- "$f" |
+        lines=$(git grep -E -hn -e "$reBad" $scope"$f" |
             sed -e 's@:.*@@' |
             tr '\n' ' '
         )
@@ -149,7 +166,9 @@ checkIllegalCode()
 checkCopyright()
 {
     year=$(date +%Y)
-    echo "pre-commit: check copyright ..." 1>&2
+    echo "$hookName: check copyright ..." 1>&2
+
+    scope=$(gitScope $@)
 
     badFiles=$(
     for f in $fileList
@@ -160,10 +179,10 @@ checkCopyright()
         # parse line numbers from grep output:
         #        <lineNr>:   contents
         #
-        lines=$(git grep --cached -F -hn -e Copyright \
+        lines=$(git grep -F -hn -e Copyright \
             --and -e OpenCFD \
             --and --not -e "$year" \
-            -- "$f" |
+            $scope"$f" |
             sed -e 's@:.*@@' |
             tr '\n' ' '
         )
@@ -180,7 +199,9 @@ checkCopyright()
 #
 checkLineLength()
 {
-    echo "pre-commit: check line lengths ..." 1>&2
+    echo "$hookName: check line lengths ..." 1>&2
+
+    scope=$(gitScope $@)
 
     badFiles=$(
     for f in $fileList
@@ -190,7 +211,7 @@ checkLineLength()
         (*.[CH])
             # parse line numbers from grep output:
             #        <lineNr>:   contents
-            lines=$(git grep --cached -hn -e '^.\{81,\}' -- "$f" |
+            lines=$(git grep -hn -e '^.\{81,\}' $scope"$f" |
                 sed -e 's@:.*@@' |
                 tr '\n' ' '
             )
@@ -209,7 +230,9 @@ checkLineLength()
 #
 checkLineLengthNonComments()
 {
-    echo "pre-commit: check line lengths ..." 1>&2
+    echo "$hookName: check line lengths ..." 1>&2
+
+    scope=$(gitScope $@)
 
     badFiles=$(
     for f in $fileList
@@ -219,9 +242,9 @@ checkLineLengthNonComments()
         (*.[CH])
             # parse line numbers from grep output:
             #        <lineNr>:   contents
-            lines=$(git grep --cached -hn -e '^.\{81,\}' \
+            lines=$(git grep -hn -e '^.\{81,\}' \
                 --and --not -e "^ *//" \
-                -- "$f" |
+                $scope"$f" |
                 sed -e 's@:.*@@' |
                 tr '\n' ' '
             )
@@ -233,13 +256,16 @@ checkLineLengthNonComments()
 
     dieOnBadFiles "Limit code to 80 columns before pushing"
 }
+
 
 #
 # limit line length to 80-columns, except #directive lines
 #
 checkLineLengthNonDirective()
 {
-    echo "pre-commit: check line lengths ..." 1>&2
+    echo "$hookName: check line lengths ..." 1>&2
+
+    scope=$(gitScope $@)
 
     badFiles=$(
     for f in $fileList
@@ -249,9 +275,9 @@ checkLineLengthNonDirective()
         (*.[CH])
             # parse line numbers from grep output:
             #        <lineNr>:   contents
-            lines=$(git grep --cached -hn -e '^.\{81,\}' \
+            lines=$(git grep -hn -e '^.\{81,\}' \
                 --and --not -e "^ *#" \
-                -- "$f" |
+                $scope"$f" |
                 sed -e 's@:.*@@' |
                 tr '\n' ' '
             )
@@ -265,9 +291,9 @@ checkLineLengthNonDirective()
 }
 
 
-
-# do all checks
-# ~~~~~~~~~~~~~
+#------------------------------------------------------------------------------
+# Main code : do all checks
+#
 
 # builtin whitespace check to avoid trailing space, including CR-LF endings
 bad=$(git diff-index --cached --check $against --) || die "$bad"

@@ -213,7 +213,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
                         verts[vertI] = parse<int>(line) + vertexOffset;
                     }
 
-                    UList<label>& f = static_cast<UList<label>&>(verts);
+                    labelUList& f = static_cast<labelUList&>(verts);
 
                     if (mustTriangulate && f.size() > 3)
                     {

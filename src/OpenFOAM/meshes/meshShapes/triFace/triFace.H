@@ -80,8 +80,8 @@ public:
             const label c
         );
 
-        //- Construct from a UList<label>
-        explicit inline triFace(const UList<label>&);
+        //- Construct from a list of labels
+        explicit inline triFace(const labelUList&);
 
         //- Construct from Istream
         inline triFace(Istream&);

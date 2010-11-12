@@ -132,7 +132,7 @@ void Foam::inverseFaceDistanceDiffusivity::correct()
     {
         fvsPatchScalarField& bfld = faceDiffusivity_.boundaryField()[patchI];
 
-        const unallocLabelList& faceCells = bfld.patch().faceCells();
+        const labelUList& faceCells = bfld.patch().faceCells();
 
         if (patchSet.found(patchI))
         {

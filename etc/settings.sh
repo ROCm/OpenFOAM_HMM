@@ -60,6 +60,7 @@ _foamAddMan()
     done
 }
 
+#------------------------------------------------------------------------------
 
 # location of the jobControl directory
 export FOAM_JOB_DIR=$WM_PROJECT_INST_DIR/jobControl

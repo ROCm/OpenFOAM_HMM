@@ -78,7 +78,7 @@ class cuttingPlane
         (
             const primitiveMesh&,
             const scalarField& dotProducts,
-            const UList<label>& cellIdLabels = UList<label>::null()
+            const labelUList& cellIdLabels = labelUList::null()
         );
 
         //- Determine intersection points (cutPoints).
@@ -94,7 +94,7 @@ class cuttingPlane
         static bool walkCell
         (
             const primitiveMesh&,
-            const UList<label>& edgePoint,
+            const labelUList& edgePoint,
             const label cellI,
             const label startEdgeI,
             DynamicList<label>& faceVerts
@@ -105,7 +105,7 @@ class cuttingPlane
         (
             const primitiveMesh& mesh,
             const bool triangulate,
-            const UList<label>& edgePoint
+            const labelUList& edgePoint
         );
 
 
@@ -123,11 +123,11 @@ protected:
         (
             const primitiveMesh&,
             const bool triangulate,
-            const UList<label>& cellIdLabels = UList<label>::null()
+            const labelUList& cellIdLabels = labelUList::null()
         );
 
         //- remap action on triangulation or cleanup
-        virtual void remapFaces(const UList<label>& faceMap);
+        virtual void remapFaces(const labelUList& faceMap);
 
 public:
 
@@ -140,7 +140,7 @@ public:
             const plane&,
             const primitiveMesh&,
             const bool triangulate,
-            const UList<label>& cellIdLabels = UList<label>::null()
+            const labelUList& cellIdLabels = labelUList::null()
         );
 
 

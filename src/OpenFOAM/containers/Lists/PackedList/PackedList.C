@@ -536,7 +536,7 @@ Foam::PackedList<nBits>::operator=(const PackedList<nBits>& lst)
 
 template<unsigned nBits>
 Foam::PackedList<nBits>&
-Foam::PackedList<nBits>::operator=(const UList<label>& lst)
+Foam::PackedList<nBits>::operator=(const labelUList& lst)
 {
     setCapacity(lst.size());
     size_ = lst.size();

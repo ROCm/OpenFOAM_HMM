@@ -76,6 +76,10 @@ protected:
         //- Length scale / [m]
         const scalar L_;
 
+        //- Boiling temperature factor / []
+        //  Used to set max limit on temperature to Tb*TbFactor
+        const scalar TbFactor_;
+
         //- Total mass evolved / [kg]
         scalar totalMass_;
 
