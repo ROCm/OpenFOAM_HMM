@@ -333,7 +333,7 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
     trackedParticle::trackData td(cloud, maxFeatureLevel);
 
     // Track all particles to their end position (= starting feature point)
-    cloud.move(td, mesh_.time().deltaTValue());
+    cloud.move(td, GREAT);
 
     // Reset level
     maxFeatureLevel = -1;
@@ -406,7 +406,7 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
         }
 
         // Track all particles to their end position.
-        cloud.move(td, mesh_.time().deltaTValue());
+        cloud.move(td, GREAT);
     }
 
 
