@@ -567,6 +567,10 @@ Foam::argList::argList
             {
                 fileNameList roots;
                 decompDict.lookup("roots") >> roots;
+                forAll(roots, i)
+                {
+                    roots[i] = roots[i].expand();
+                }
 
                 if (roots.size() != Pstream::nProcs()-1)
                 {
