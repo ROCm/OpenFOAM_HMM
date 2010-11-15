@@ -134,7 +134,7 @@ Foam::treeBoundBox::treeBoundBox(const UList<point>& points)
         WarningIn
         (
             "treeBoundBox::treeBoundBox(const UList<point>&)"
-        )   << "cannot find bounding box for zero-sized pointField"
+        )   << "cannot find bounding box for zero-sized pointField, "
             << "returning zero" << endl;
 
         return;
