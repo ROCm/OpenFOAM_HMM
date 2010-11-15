@@ -25,16 +25,6 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-inline void Foam::conformalVoronoiMesh::timeCheck() const
-{
-    if (cvMeshControls().timeChecks())
-    {
-        Info<< nl << "--- [ " << runTime_.elapsedCpuTime() << "s, delta "
-            << runTime_.cpuTimeIncrement()<< "s ] --- " << endl;
-    }
-}
-
-
 inline Foam::scalar Foam::conformalVoronoiMesh::targetCellSize
 (
     const point& pt,
@@ -468,6 +458,16 @@ inline const Foam::cvControls&
 Foam::conformalVoronoiMesh::cvMeshControls() const
 {
     return cvMeshControls_;
+}
+
+
+inline void Foam::conformalVoronoiMesh::timeCheck() const
+{
+    if (cvMeshControls().timeChecks())
+    {
+        Info<< nl << "--- [ " << runTime_.elapsedCpuTime() << "s, delta "
+            << runTime_.cpuTimeIncrement()<< "s ] --- " << endl;
+    }
 }
 
 

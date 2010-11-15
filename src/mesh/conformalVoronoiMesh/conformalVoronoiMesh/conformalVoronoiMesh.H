@@ -172,9 +172,6 @@ private:
 
     // Private Member Functions
 
-        //- Write the elapsedCpuTime
-        inline void timeCheck() const;
-
         //- Return the local target cell size at the given location.  Takes
         //  boolean argument to allow speed-up of queries if the point is going
         //  to be on a surface.
@@ -718,6 +715,9 @@ public:
 
 
         // Write
+
+            //- Write the elapsedCpuTime
+            inline void timeCheck() const;
 
             //- Write Delaunay points to .obj file
             void writePoints(const fileName& fName, bool internalOnly) const;

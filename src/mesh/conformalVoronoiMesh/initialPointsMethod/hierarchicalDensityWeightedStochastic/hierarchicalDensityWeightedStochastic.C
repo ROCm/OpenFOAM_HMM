@@ -92,6 +92,8 @@ void Foam::hierarchicalDensityWeightedStochastic::recurseAndFill
 
         word newName = recursionName + "_" + Foam::name(i);
 
+        // cvMesh_.timeCheck();
+
         if (geometry.overlaps(subBB))
         {
             if (levelLimit > 0)
@@ -112,6 +114,8 @@ void Foam::hierarchicalDensityWeightedStochastic::recurseAndFill
                 //     word(newName + "_overlap")
                 // );
 
+                // Info<< newName + "_overlap " << subBB << endl;
+
                 if (!fillBox(initialPoints, subBB, true))
                 {
                     recurseAndFill
@@ -131,6 +135,8 @@ void Foam::hierarchicalDensityWeightedStochastic::recurseAndFill
             //     subBB,
             //     newName + "_inside"
             // );
+
+            // Info<< newName + "_inside " << subBB << endl;
 
             if (!fillBox(initialPoints, subBB, false))
             {
@@ -221,21 +227,19 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
 
         pointField corners(bb.points());
 
-        scalarField cornerSizes(8, 0.0);
-
-        Field<bool> insideCorners(8, true);
-
-        cornerSizes = cvMesh_.cellSizeControl().cellSize
+        scalarField cornerSizes = cvMesh_.cellSizeControl().cellSize
         (
             corners,
             List<bool>(8, false)
         );
 
-        insideCorners = geometry.wellInside
+        Field<bool> insideCorners = geometry.wellInside
         (
             corners,
             minimumSurfaceDistanceCoeffSqr_*sqr(cornerSizes)
         );
+
+        // Info<< corners << nl << cornerSizes << nl << insideCorners << endl;
 
         forAll(insideCorners, i)
         {
@@ -254,8 +258,11 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
 
             if (maxCellSize/minCellSize > maxSizeRatio_)
             {
-                // Info<< "Abort fill at corner sample stage, maxSizeRatio = "
-                //     << maxCellSize/minCellSize << endl;
+                // Info<< "Abort fill at corner sample stage,"
+                //     << " minCellSize " << minCellSize
+                //     << " maxCellSize " << maxCellSize
+                //     << " maxSizeRatio " << maxCellSize/minCellSize
+                //     << endl;
 
                 return false;
             }
@@ -363,8 +370,10 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
                     if (maxCellSize/minCellSize > maxSizeRatio_)
                     {
                         // Info<< "Abort fill at surface sample stage, "
-                        //     << "maxSizeRatio = "
-                        //     << maxCellSize/minCellSize << endl;
+                        //     << " minCellSize " << minCellSize
+                        //     << " maxCellSize " << maxCellSize
+                        //     << " maxSizeRatio " << maxCellSize/minCellSize
+                        //     << endl;
 
                         return false;
                     }
@@ -462,8 +471,11 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
 
                 if (maxCellSize/minCellSize > maxSizeRatio_)
                 {
-                    // Info<< "Abort fill at sample stage, maxSizeRatio = "
-                    //     << maxCellSize/minCellSize << endl;
+                    // Info<< "Abort fill at sample stage,"
+                    //     << " minCellSize " << minCellSize
+                    //     << " maxCellSize " << maxCellSize
+                    //     << " maxSizeRatio " << maxCellSize/minCellSize
+                    //     << endl;
 
                     return false;
                 }
@@ -535,7 +547,7 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
 
                         if (addProbability > r)
                         {
-                            // Do not place this volume, finished filling this
+                            // Place this volume before finishing filling this
                             // box
 
                             // Info<< "Final volume probability break accept"
@@ -572,68 +584,64 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
         {
             trialPoints++;
 
-            point p =
-            min
-            + vector
-            (
-                span.x()*rnd.scalar01(),
-                span.y()*rnd.scalar01(),
-                span.z()*rnd.scalar01()
-            );
+            point p = min + cmptMultiply(span, rnd.vector01());
 
             scalar localSize = cvMesh_.cellSizeControl().cellSize(p);
 
-            if (localSize > maxCellSize)
+            bool insidePoint = false;
+
+            if (!overlapping)
             {
-                maxCellSize = localSize;
+                insidePoint = true;
+            }
+            else
+            {
+                // Determine if the point is "wellInside" the domain
+                insidePoint = geometry.wellInside
+                (
+                    p,
+                    minimumSurfaceDistanceCoeffSqr_*sqr(localSize)
+                );
             }
 
-            if (localSize < minCellSize)
+            if (insidePoint)
             {
-                minCellSize = max(localSize, minCellSizeLimit_);
+                if (localSize > maxCellSize)
+                {
+                    maxCellSize = localSize;
+                }
 
-                localSize = minCellSize;
+                if (localSize < minCellSize)
+                {
+                    minCellSize = max(localSize, minCellSizeLimit_);
 
-                // 1/(minimum cell size)^3, gives the maximum permissible point
+                    localSize = minCellSize;
+
+                    // 1/(minimum cell size)^3, gives the maximum permissible
+                    // point density
+                    maxDensity = 1/pow3(max(minCellSize, SMALL));
+                }
+
+                if (maxCellSize/minCellSize > maxSizeRatio_)
+                {
+                    // Info<< "Abort fill at random fill stage,"
+                    //     << " minCellSize " << minCellSize
+                    //     << " maxCellSize " << maxCellSize
+                    //     << " maxSizeRatio " << maxCellSize/minCellSize
+                    //     << endl;
+
+                    // Discard any points already filled into this box by
+                    // setting size of initialPoints back to its starting value
+                    initialPoints.resize(initialSize);
+
+                    return false;
+                }
+
+                scalar localDensity = 1/pow3(max(localSize, SMALL));
+
+                // Accept possible placements proportional to the relative local
                 // density
-                maxDensity = 1/pow3(max(minCellSize, SMALL));
-            }
-
-            if (maxCellSize/minCellSize > maxSizeRatio_)
-            {
-                // Info<< "Abort fill at random fill stage, maxSizeRatio = "
-                //     << maxCellSize/minCellSize << endl;
-
-                // Discard any points already filled into this box by setting
-                // size of initialPoints back to its starting value
-                initialPoints.resize(initialSize);
-
-                return false;
-            }
-
-            scalar localDensity = 1/pow3(max(localSize, SMALL));
-
-            // Accept possible placements proportional to the relative local
-            // density
-            if (localDensity/maxDensity > rnd.scalar01())
-            {
-                bool insidePoint = false;
-
-                if (!overlapping)
-                {
-                    insidePoint = true;
-                }
-                else
-                {
-                    // Determine if the point is "wellInside" the domain
-                    insidePoint = geometry.wellInside
-                    (
-                        p,
-                        minimumSurfaceDistanceCoeffSqr_*sqr(localSize)
-                    );
-                }
-
-                if (insidePoint)
+                if (localDensity/maxDensity > rnd.scalar01())
                 {
                     scalar localVolume = 1/localDensity;
 
@@ -657,7 +665,7 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
 
                         if (addProbability > r)
                         {
-                            // Do not place this volume, finished filling this
+                            // Place this volume before finishing filling this
                             // box
 
                             // Info<< "Final volume probability break accept"
@@ -687,7 +695,8 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
     // Info<< trialPoints
     //     << " locations queried, " << initialPoints.size() - initialSize
     //     << " points placed, ("
-    //     << scalar(initialPoints.size() - initialSize)/scalar(trialPoints)
+    //     << scalar(initialPoints.size() - initialSize)
+    //       /scalar(max(trialPoints, 1))
     //     << " success rate)." << nl
     //     << "minCellSize " << minCellSize
     //     << ", maxCellSize " << maxCellSize
@@ -755,18 +764,22 @@ hierarchicalDensityWeightedStochastic::initialPoints() const
 
     std::vector<Vb::Point> initialPoints;
 
+    // Info<< "Filling box " << hierBB << endl;
+
+    Info<< nl << "    " << typeName << endl;
+
     recurseAndFill
     (
         initialPoints,
         hierBB,
-        maxLevels_,
+        maxLevels_ - 1,
         "recursionBox"
     );
 
-    Info<< nl << "    " << typeName << nl
-        << "        " << initialPoints.size() << " points placed" << nl
+    Info<< "        " << initialPoints.size() << " points placed" << nl
         << "        " << globalTrialPoints_ << " locations queried" << nl
-        << "        " << scalar(initialPoints.size())/scalar(globalTrialPoints_)
+        << "        "
+        << scalar(initialPoints.size())/scalar(max(globalTrialPoints_, 1))
         << " success rate"
         << endl;
 
