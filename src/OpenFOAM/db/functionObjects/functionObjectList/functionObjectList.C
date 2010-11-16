@@ -198,7 +198,13 @@ bool Foam::functionObjectList::read()
     }
 
     // Update existing and add new functionObjects
-    const entry* entryPtr = parentDict_.lookupEntryPtr("functions",false,false);
+    const entry* entryPtr = parentDict_.lookupEntryPtr
+    (
+        "functions",
+        false,
+        false
+    );
+
     if (entryPtr)
     {
         PtrList<functionObject> newPtrs;
