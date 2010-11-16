@@ -316,6 +316,7 @@ DebugSwitches
     cellPointFace       0;
     cellPointWeight     0;
     cellSet             0;
+    cellSizeControlSurfaces 0;
     cellToCell          0;
     cellToFace          0;
     cellToPoint         0;
@@ -498,6 +499,7 @@ DebugSwitches
     hhuMixtureThermo<veryInhomogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
     hhuMixtureThermo<veryInhomogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
     hierarchical        0;
+    hierarchicalDensityWeightedStochastic 1;
     hollowConeInjector  0;
     iC3H8O              0;
     indexedOctree       0;

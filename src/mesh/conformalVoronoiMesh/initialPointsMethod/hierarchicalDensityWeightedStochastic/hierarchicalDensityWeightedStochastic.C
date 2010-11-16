@@ -92,7 +92,10 @@ void Foam::hierarchicalDensityWeightedStochastic::recurseAndFill
 
         word newName = recursionName + "_" + Foam::name(i);
 
-        // cvMesh_.timeCheck();
+        if (debug)
+        {
+            cvMesh_.timeCheck();
+        }
 
         if (geometry.overlaps(subBB))
         {
@@ -114,7 +117,10 @@ void Foam::hierarchicalDensityWeightedStochastic::recurseAndFill
                 //     word(newName + "_overlap")
                 // );
 
-                // Info<< newName + "_overlap " << subBB << endl;
+                if (debug)
+                {
+                    Info<< newName + "_overlap " << subBB << endl;
+                }
 
                 if (!fillBox(initialPoints, subBB, true))
                 {
@@ -136,7 +142,10 @@ void Foam::hierarchicalDensityWeightedStochastic::recurseAndFill
             //     newName + "_inside"
             // );
 
-            // Info<< newName + "_inside " << subBB << endl;
+            if (debug)
+            {
+                Info<< newName + "_inside " << subBB << endl;
+            }
 
             if (!fillBox(initialPoints, subBB, false))
             {
@@ -764,9 +773,12 @@ hierarchicalDensityWeightedStochastic::initialPoints() const
 
     std::vector<Vb::Point> initialPoints;
 
-    // Info<< "Filling box " << hierBB << endl;
-
     Info<< nl << "    " << typeName << endl;
+
+    if (debug)
+    {
+        Info<< "    Filling box " << hierBB << endl;
+    }
 
     recurseAndFill
     (

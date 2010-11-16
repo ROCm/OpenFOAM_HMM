@@ -89,6 +89,10 @@ class cellSizeControlSurfaces
 
 public:
 
+    //- Runtime type information
+    ClassName("cellSizeControlSurfaces");
+
+
     // Constructors
 
         //- Construct from dictionary and references to conformalVoronoiMesh and

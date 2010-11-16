@@ -27,6 +27,16 @@ License
 #include "conformalVoronoiMesh.H"
 #include "cellSizeFunction.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+defineTypeNameAndDebug(cellSizeControlSurfaces, 0);
+
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::cellSizeControlSurfaces::cellSizeControlSurfaces
@@ -218,6 +228,14 @@ Foam::scalar Foam::cellSizeControlSurfaces::cellSize
         {
             const cellSizeFunction& cSF = cellSizeFunctions_[i];
 
+            if (debug)
+            {
+                Info<< "size function "
+                    << allGeometry_.names()[surfaces_[i]]
+                    << " priority " << cSF.priority()
+                    << endl;
+            }
+
             if (cSF.priority() < previousPriority)
             {
                 return minSize;
@@ -237,6 +255,11 @@ Foam::scalar Foam::cellSizeControlSurfaces::cellSize
                 else
                 {
                     minSize = sizeI;
+                }
+
+                if (debug)
+                {
+                    Info<< "sizeI " << sizeI << " minSize " << minSize << endl;
                 }
 
                 previousPriority = cSF.priority();
