@@ -31,10 +31,59 @@ Description
 
 #include "IOdictionary.H"
 #include "objectRegistry.H"
+#include "Pstream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(Foam::IOdictionary, 0);
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+// Parallel aware reading, using non-virtual type information (typeName instead
+// of type()) because of use in constructor.
+void Foam::IOdictionary::readFile(const bool masterOnly)
+{
+    if (Pstream::master() || !masterOnly)
+    {
+        if (debug)
+        {
+            Pout<< "IOdictionary : Reading " << objectPath()
+                << " from file " << endl;
+        }
+        readStream(typeName) >> *this;
+        close();
+    }
+
+    if (masterOnly)
+    {
+        // Scatter master data
+        if (Pstream::master())
+        {
+            for
+            (
+                int slave=Pstream::firstSlave();
+                slave<=Pstream::lastSlave();
+                slave++
+            )
+            {
+
+                OPstream toSlave(Pstream::scheduled, slave);
+                IOdictionary::writeData(toSlave);
+            }
+        }
+        else
+        {
+            if (debug)
+            {
+                Pout<< "IOdictionary : Reading " << objectPath()
+                    << " from master processor " << Pstream::masterNo() << endl;
+            }
+            IPstream fromMaster(Pstream::scheduled, Pstream::masterNo());
+            IOdictionary::readData(fromMaster);
+        }
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -56,17 +105,41 @@ Foam::IOdictionary::IOdictionary(const IOobject& io)
             //<< abort(FatalError);
     }
 
+    // Everyone check or just master
+    bool masterOnly = 
+        regIOobject::fileModificationChecking == timeStampMaster
+     || regIOobject::fileModificationChecking == inotifyMaster;
+
+
+    // Check if header is ok for READ_IF_PRESENT
+    bool isHeaderOk = false;
+    if (io.readOpt() == IOobject::READ_IF_PRESENT)
+    {
+        if (masterOnly)
+        {
+            if (Pstream::master())
+            {
+                isHeaderOk = headerOk();
+            }
+            Pstream::scatter(isHeaderOk);
+        }
+        else
+        {
+            isHeaderOk = headerOk();
+        }
+    }
+
+
     if
     (
         (
             io.readOpt() == IOobject::MUST_READ
          || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
         )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+     || isHeaderOk
     )
     {
-        readStream(typeName) >> *this;
-        close();
+        readFile(masterOnly);
     }
 
     dictionary::name() = IOobject::objectPath();
@@ -90,17 +163,41 @@ Foam::IOdictionary::IOdictionary(const IOobject& io, const dictionary& dict)
             << endl;
     }
 
+    // Everyone check or just master
+    bool masterOnly = 
+        regIOobject::fileModificationChecking == timeStampMaster
+     || regIOobject::fileModificationChecking == inotifyMaster;
+
+
+    // Check if header is ok for READ_IF_PRESENT
+    bool isHeaderOk = false;
+    if (io.readOpt() == IOobject::READ_IF_PRESENT)
+    {
+        if (masterOnly)
+        {
+            if (Pstream::master())
+            {
+                isHeaderOk = headerOk();
+            }
+            Pstream::scatter(isHeaderOk);
+        }
+        else
+        {
+            isHeaderOk = headerOk();
+        }
+    }
+
+
     if
     (
         (
             io.readOpt() == IOobject::MUST_READ
          || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
         )
-     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+     || isHeaderOk
     )
     {
-        readStream(typeName) >> *this;
-        close();
+        readFile(masterOnly);
     }
     else
     {
