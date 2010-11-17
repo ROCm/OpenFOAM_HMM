@@ -57,6 +57,11 @@ class IOdictionary
     public dictionary
 {
 
+    // Private Member Functions
+
+        //- read dictionary from file
+        void readFile(const bool);
+
 public:
 
     TypeName("dictionary");

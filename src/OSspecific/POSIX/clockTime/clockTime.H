@@ -44,43 +44,45 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class clockTime Declaration
+                          Class clockTime Declaration
 \*---------------------------------------------------------------------------*/
 
 class clockTime
 {
     // Private data
 
-        struct timeval startTime_;
-        mutable struct timeval lastTime_;
-        mutable struct timeval newTime_;
+        //- Time structure used
+        typedef struct timeval timeType;
 
-        static void getTime(struct timeval& t);
+        timeType startTime_;
 
-        static double timeDifference
-        (
-            const struct timeval& start,
-            const struct timeval& end
-        );
+        mutable timeType lastTime_;
+        mutable timeType newTime_;
+
+    // Private Member Functions
+
+        //- Retrieve the current time values from the system
+        static void getTime(timeType&);
+
+        //- Difference between two times
+        static double timeDifference(const timeType& beg, const timeType& end);
 
 
 public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct with the current clock time
         clockTime();
 
 
     // Member Functions
 
-        // Access
+        //- Return time (in seconds) from the start
+        double elapsedTime() const;
 
-            //- Returns CPU time from start of run
-            double elapsedTime() const;
-
-            //- Returns CPU time from last call of clockTimeIncrement()
-            double timeIncrement() const;
+        //- Return time (in seconds) since last call to timeIncrement()
+        double timeIncrement() const;
 };
 
 

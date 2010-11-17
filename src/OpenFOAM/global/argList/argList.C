@@ -55,6 +55,12 @@ Foam::argList::initValidTables::initValidTables()
     );
     argList::addBoolOption("parallel", "run in parallel");
     validParOptions.set("parallel", "");
+    argList::addOption
+    (
+        "roots", "(dir1 .. dirn)",
+        "slave root directories for distributed running"
+    );
+    validParOptions.set("roots", "(dir1 .. dirn)");
 
     Pstream::addValidParOptions(validParOptions);
 }
@@ -511,6 +517,10 @@ Foam::argList::argList
     // Case is a single processor run unless it is running parallel
     int nProcs = 1;
 
+    // Roots if running distributed
+    fileNameList roots;
+
+
     // If this actually is a parallel run
     if (parRunControl_.parRun())
     {
@@ -520,28 +530,42 @@ Foam::argList::argList
             // establish rootPath_/globalCase_/case_ for master
             getRootCase();
 
-            IFstream decompDictStream
-            (
-                rootPath_/globalCase_/"system/decomposeParDict"
-            );
+            // See if running distributed (different roots for different procs)
+            label dictNProcs = -1;
+            fileName source;
 
-            if (!decompDictStream.good())
+            if (options_.found("roots"))
             {
-                FatalError
-                    << "Cannot read "
-                    << decompDictStream.name()
-                    << exit(FatalError);
+                IStringStream str(options_["roots"]);
+                str >> roots;
+                dictNProcs = roots.size()+1;
+                source = "roots-command-line";
             }
+            else
+            {
+                source = rootPath_/globalCase_/"system/decomposeParDict";
+                IFstream decompDictStream(source);
 
-            dictionary decompDict(decompDictStream);
+                if (!decompDictStream.good())
+                {
+                    FatalError
+                        << "Cannot read "
+                        << decompDictStream.name()
+                        << exit(FatalError);
+                }
 
-            label dictNProcs
-            (
-                readLabel
+                dictionary decompDict(decompDictStream);
+
+                dictNProcs = readLabel
                 (
                     decompDict.lookup("numberOfSubdomains")
-                )
-            );
+                );
+
+                if (decompDict.lookupOrDefault("distributed", false))
+                {
+                    decompDict.lookup("roots") >> roots;
+                }
+            }
 
             // Check number of processors.
             // nProcs     => number of actual procs
@@ -555,23 +579,27 @@ Foam::argList::argList
             if (dictNProcs > Pstream::nProcs())
             {
                 FatalError
-                    << decompDictStream.name()
+                    << source
                     << " specifies " << dictNProcs
                     << " processors but job was started with "
                     << Pstream::nProcs() << " processors."
                     << exit(FatalError);
             }
 
+
             // distributed data
-            if (decompDict.lookupOrDefault("distributed", false))
+            if (roots.size())
             {
-                fileNameList roots;
-                decompDict.lookup("roots") >> roots;
+                forAll(roots, i)
+                {
+                    roots[i] = roots[i].expand();
+                }
 
                 if (roots.size() != Pstream::nProcs()-1)
                 {
                     FatalError
-                        << "number of entries in decompositionDict::roots"
+                        << "number of entries in roots "
+                        << roots.size()
                         << " is not equal to the number of slaves "
                         << Pstream::nProcs()-1
                         << exit(FatalError);
@@ -705,8 +733,12 @@ Foam::argList::argList
 
         if (parRunControl_.parRun())
         {
-            Info<< "Slaves : " << slaveProcs << nl
-                << "Pstream initialized with:" << nl
+            Info<< "Slaves : " << slaveProcs << nl;
+            if (roots.size())
+            {                
+                Info<< "Roots  : " << roots << nl;
+            }
+            Info<< "Pstream initialized with:" << nl
                 << "    floatTransfer     : " << Pstream::floatTransfer << nl
                 << "    nProcsSimpleSum   : " << Pstream::nProcsSimpleSum << nl
                 << "    commsType         : "
@@ -721,6 +753,10 @@ Foam::argList::argList
     if (slaveProcs.size())
     {
         jobInfo.add("slaves", slaveProcs);
+    }
+    if (roots.size())
+    {
+        jobInfo.add("roots", roots);
     }
     jobInfo.write();
 

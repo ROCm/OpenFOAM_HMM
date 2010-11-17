@@ -250,8 +250,27 @@ Foam::Time::Time
     // Time objects not registered so do like objectRegistry::checkIn ourselves.
     if (runTimeModifiable_)
     {
-        monitorPtr_.reset(new fileMonitor());
-        controlDict_.watchIndex() = addWatch(controlDict_.filePath());
+        monitorPtr_.reset
+        (
+            new fileMonitor
+            (
+                regIOobject::fileModificationChecking == inotify
+             || regIOobject::fileModificationChecking == inotifyMaster
+            )
+        );
+
+        // File might not exist yet.
+        fileName f(controlDict_.filePath());
+
+        if (!f.size())
+        {
+            // We don't have this file but would like to re-read it.
+            // Possibly if in master-only reading mode. Use a non-existing
+            // file to keep fileMonitor synced.
+            f = controlDict_.objectPath();
+        }
+
+        controlDict_.watchIndex() = addWatch(f);
     }
 }
 
@@ -308,19 +327,36 @@ Foam::Time::Time
     readLibs_(controlDict_, "libs"),
     functionObjects_(*this)
 {
+    // Since could not construct regIOobject with setting:
+    controlDict_.readOpt() = IOobject::MUST_READ_IF_MODIFIED;
+
+
     setControls();
 
     // Time objects not registered so do like objectRegistry::checkIn ourselves.
     if (runTimeModifiable_)
     {
-        monitorPtr_.reset(new fileMonitor());
+        monitorPtr_.reset
+        (
+            new fileMonitor
+            (
+                regIOobject::fileModificationChecking == inotify
+             || regIOobject::fileModificationChecking == inotifyMaster
+            )
+        );
 
         // File might not exist yet.
         fileName f(controlDict_.filePath());
-        if (f != fileName::null)
+
+        if (!f.size())
         {
-            controlDict_.watchIndex() = addWatch(f);
+            // We don't have this file but would like to re-read it.
+            // Possibly if in master-only reading mode. Use a non-existing
+            // file to keep fileMonitor synced.
+            f = controlDict_.objectPath();
         }
+
+        controlDict_.watchIndex() = addWatch(f);
     }
 }
 

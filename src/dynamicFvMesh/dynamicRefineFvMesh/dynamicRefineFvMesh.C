@@ -620,24 +620,23 @@ Foam::dynamicRefineFvMesh::cellToPoint(const scalarField& vFld) const
 }
 
 
-// Calculate error. Is < 0 or distance from inbetween levels
-Foam::scalarField
-Foam::dynamicRefineFvMesh::error
+// Calculate error. Is < 0 or distance to minLevel, maxLevel
+Foam::scalarField Foam::dynamicRefineFvMesh::error
 (
     const scalarField& fld,
     const scalar minLevel,
     const scalar maxLevel
 ) const
 {
-    const scalar halfLevel = 0.5*(minLevel + maxLevel);
-
     scalarField c(fld.size(), -1);
 
     forAll(fld, i)
     {
-        if (fld[i] >= minLevel && fld[i] < maxLevel)
+        scalar err = min(fld[i]-minLevel, maxLevel-fld[i]);
+
+        if (err >= 0)
         {
-            c[i] = mag(fld[i] - halfLevel);
+            c[i] = err;
         }
     }
     return c;
@@ -877,6 +876,10 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
     nRefinementIterations_(0),
     protectedCell_(nCells(), 0)
 {
+    // Read static part of dictionary
+    readDict();
+
+
     const labelList& cellLevel = meshCutter_.cellLevel();
     const labelList& pointLevel = meshCutter_.pointLevel();
 

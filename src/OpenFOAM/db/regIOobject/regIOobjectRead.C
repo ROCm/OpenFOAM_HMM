@@ -26,7 +26,7 @@ License
 #include "regIOobject.H"
 #include "IFstream.H"
 #include "Time.H"
-//#include "PstreamReduceOps.H"
+#include "Pstream.H"
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -170,8 +170,50 @@ bool Foam::regIOobject::readData(Istream&)
 
 bool Foam::regIOobject::read()
 {
-    bool ok = readData(readStream(type()));
-    close();
+    // Note: cannot do anything in readStream itself since this is used by
+    // e.g. GeometricField.
+
+    bool masterOnly = 
+        regIOobject::fileModificationChecking == timeStampMaster
+     || regIOobject::fileModificationChecking == inotifyMaster;
+
+    bool ok;
+    if (Pstream::master() || !masterOnly)
+    {
+        ok = readData(readStream(type()));
+        close();
+    }
+
+    if (masterOnly)
+    {
+        // Scatter master data
+        if (Pstream::master())
+        {
+            for
+            (
+                int slave=Pstream::firstSlave();
+                slave<=Pstream::lastSlave();
+                slave++
+            )
+            {
+
+                OPstream toSlave(Pstream::scheduled, slave);
+                writeData(toSlave);
+            }
+        }
+        else
+        {
+            if (IFstream::debug)
+            {
+                Pout<< "regIOobject::read() : "
+                    << "reading object " << name()
+                    << " from master processor " << Pstream::masterNo()
+                    << endl;
+            }
+            IPstream fromMaster(Pstream::scheduled, Pstream::masterNo());
+            ok = readData(fromMaster);
+        }
+    }
     return ok;
 }
 
