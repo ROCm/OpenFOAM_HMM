@@ -250,7 +250,7 @@ checkLineLengthNonComments()
             # parse line numbers from grep output:
             #        <lineNr>:   contents
             lines=$(git grep -hn -e '^.\{81,\}' \
-                --and --not -e "^ *//" \
+                --and --not -e '^ *//' \
                 $scope"$f" |
                 sed -e 's@:.*@@' |
                 tr '\n' ' '
@@ -283,7 +283,7 @@ checkLineLengthNonDirective()
             # parse line numbers from grep output:
             #        <lineNr>:   contents
             lines=$(git grep -hn -e '^.\{81,\}' \
-                --and --not -e "^ *#" \
+                --and --not -e '^ *#' \
                 $scope"$f" |
                 sed -e 's@:.*@@' |
                 tr '\n' ' '
