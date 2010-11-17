@@ -261,11 +261,8 @@ OPENMPI)
     ;;
 
 SYSTEMOPENMPI)
-    # use the system installed openmpi, get library directory via mpicc
+    # Use the system installed openmpi, get library directory via mpicc
     mpi_version=openmpi-system
-
-    # Set to dummy (but existing directory). Used in Thirdparty Allwmake.
-    export MPI_ARCH_PATH=/
 
     # Set compilation flags here instead of in wmake/rules/../mplibSYSTEMOPENMPI
     export PINC="`mpicc --showme:compile`"
