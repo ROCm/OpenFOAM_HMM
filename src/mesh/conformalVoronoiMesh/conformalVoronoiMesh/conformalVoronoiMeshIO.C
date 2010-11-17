@@ -33,6 +33,37 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::conformalVoronoiMesh::timeCheck
+(
+    const string& description
+) const
+{
+    if (cvMeshControls().timeChecks())
+    {
+        Info<< nl << "--- [ cpuTime "
+            << runTime_.elapsedCpuTime() << " s, "
+            << "delta " << runTime_.cpuTimeIncrement()<< " s";
+
+        if (description != word::null)
+        {
+            Info<< ", " << description << " ";
+        }
+        else
+        {
+            Info<< " ";
+        }
+
+        Info<< "] --- " << endl;
+
+        Pout<< "--- [ "
+            << runTime_.elapsedCpuTime() << " s, "
+            << "memSize " << memSize() << " kB, "
+            << "memPeakSize " << memPeakSize() << " kB"
+            << " ] --- " << endl;
+    }
+}
+
+
 void Foam::conformalVoronoiMesh::writePoints
 (
     const fileName& fName,

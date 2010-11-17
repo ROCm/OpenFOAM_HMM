@@ -716,8 +716,12 @@ public:
 
         // Write
 
-            //- Write the elapsedCpuTime
-            inline void timeCheck() const;
+            //- Write the elapsedCpuTime and memory usage, with an optional
+            //  description
+            void timeCheck
+            (
+                const string& description = string::null
+            ) const;
 
             //- Write Delaunay points to .obj file
             void writePoints(const fileName& fName, bool internalOnly) const;

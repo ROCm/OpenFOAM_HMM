@@ -499,7 +499,7 @@ DebugSwitches
     hhuMixtureThermo<veryInhomogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
     hhuMixtureThermo<veryInhomogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
     hierarchical        0;
-    hierarchicalDensityWeightedStochastic 1;
+    hierarchicalDensityWeightedStochastic 0;
     hollowConeInjector  0;
     iC3H8O              0;
     indexedOctree       0;

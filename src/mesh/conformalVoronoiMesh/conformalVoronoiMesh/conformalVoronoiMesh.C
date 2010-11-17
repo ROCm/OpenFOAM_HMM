@@ -776,7 +776,7 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
 
     Info<< nl << "Inserting initial points" << endl;
 
-    timeCheck();
+    timeCheck("Before initial points call");
 
     std::vector<Point> initPts = initialPointsMethod_->initialPoints();
 

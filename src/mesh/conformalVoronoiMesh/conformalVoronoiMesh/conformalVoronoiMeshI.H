@@ -461,14 +461,4 @@ Foam::conformalVoronoiMesh::cvMeshControls() const
 }
 
 
-inline void Foam::conformalVoronoiMesh::timeCheck() const
-{
-    if (cvMeshControls().timeChecks())
-    {
-        Info<< nl << "--- [ " << runTime_.elapsedCpuTime() << "s, delta "
-            << runTime_.cpuTimeIncrement()<< "s ] --- " << endl;
-    }
-}
-
-
 // ************************************************************************* //
