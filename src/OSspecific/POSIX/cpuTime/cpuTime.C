@@ -21,45 +21,32 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Starts timing CPU usage and return elapsed time from start.
-
 \*---------------------------------------------------------------------------*/
 
 #include "cpuTime.H"
-
 #include <unistd.h>
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * Static Members  * * * * * * * * * * * * * * //
 
-long cpuTime::Hz_(sysconf(_SC_CLK_TCK));
+const long Foam::cpuTime::Hz_(sysconf(_SC_CLK_TCK));
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void cpuTime::getTime(struct tms& t)
+void Foam::cpuTime::getTime(timeType& t)
 {
     times(&t);
 }
 
 
-double cpuTime::timeDifference
-(
-    const struct tms& start,
-    const struct tms& end
-)
+double Foam::cpuTime::timeDifference(const timeType& beg, const timeType& end)
 {
     return
     (
         double
         (
             (end.tms_utime + end.tms_stime)
-          - (start.tms_utime + start.tms_stime)
+          - (beg.tms_utime + beg.tms_stime)
         )/Hz_
     );
 }
@@ -67,7 +54,7 @@ double cpuTime::timeDifference
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-cpuTime::cpuTime()
+Foam::cpuTime::cpuTime()
 {
     getTime(startTime_);
     lastTime_ = startTime_;
@@ -77,23 +64,19 @@ cpuTime::cpuTime()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-double cpuTime::elapsedCpuTime() const
+double Foam::cpuTime::elapsedCpuTime() const
 {
     getTime(newTime_);
     return timeDifference(startTime_, newTime_);
 }
 
 
-double cpuTime::cpuTimeIncrement() const
+double Foam::cpuTime::cpuTimeIncrement() const
 {
     lastTime_ = newTime_;
     getTime(newTime_);
     return timeDifference(lastTime_, newTime_);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
