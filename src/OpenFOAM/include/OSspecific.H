@@ -176,6 +176,12 @@ bool ping(const word&, const label timeOut=10);
 //- Execute the specified command
 int system(const string& command);
 
+//- Return the size in memory of the current process
+int memSize();
+
+//- Return the peak size in memory of the current process
+int memPeakSize();
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
