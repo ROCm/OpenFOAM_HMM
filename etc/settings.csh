@@ -236,10 +236,11 @@ case OPENMPI:
     breaksw
 
 case SYSTEMOPENMPI:
-
-    # This uses the installed openmpi. It needs mpicc installed!
-
+    # use the system installed openmpi, get library directory via mpicc
     set mpi_version=openmpi-system
+
+    # Set to dummy value (but existing directory)
+    setenv MPI_ARCH_PATH /
 
     # Set compilation flags here instead of in wmake/rules/../mplibSYSTEMOPENMPI
     setenv PINC "`mpicc --showme:compile`"

@@ -57,6 +57,7 @@ int main(int argc, char *argv[])
         #include "readSIMPLEControls.H"
 
         p.storePrevIter();
+        rho.storePrevIter();
 
         if (!transonic)
         {

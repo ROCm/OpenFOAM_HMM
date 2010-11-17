@@ -221,7 +221,7 @@ done
 unset cmd
 
 case "$WM_MPLIB" in
-OPENMPI)
+*OPENMPI)
     cmd="mpirun -app $PWD/mpirun.schema </dev/null"
     ;;
 MPICH)
