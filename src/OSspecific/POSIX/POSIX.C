@@ -36,6 +36,7 @@ Description
 #include "fileName.H"
 #include "fileStat.H"
 #include "timer.H"
+#include "IFstream.H"
 
 #include <fstream>
 #include <cstdlib>
@@ -1034,6 +1035,60 @@ bool Foam::ping(const word& hostname, const label timeOut)
 int Foam::system(const string& command)
 {
     return ::system(command.c_str());
+}
+
+
+int Foam::memSize()
+{
+    IFstream is("/proc/" + name(pid()) + "/status");
+
+    int VmSize = 0;
+
+    while (is.good())
+    {
+        string line;
+        is.getLine(line);
+        char tag[32];
+        int value;
+
+        if (sscanf(line.c_str(), "%30s %d", tag, &value) == 2)
+        {
+            if (!strcmp(tag, "VmSize:"))
+            {
+                VmSize = value;
+                break;
+            }
+        }
+    }
+
+    return VmSize;
+}
+
+
+int Foam::memPeakSize()
+{
+    IFstream is("/proc/" + name(pid()) + "/status");
+
+    int VmPeak = 0;
+
+    while (is.good())
+    {
+        string line;
+        is.getLine(line);
+        char tag[32];
+        int value;
+
+        if (sscanf(line.c_str(), "%30s %d", tag, &value) == 2)
+        {
+            if (!strcmp(tag, "VmPeak:"))
+            {
+                VmPeak = value;
+                break;
+            }
+        }
+    }
+
+    return VmPeak;
 }
 
 
