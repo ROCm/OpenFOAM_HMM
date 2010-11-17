@@ -111,18 +111,18 @@ unset MPFR_ARCH_PATH
 case "${compilerInstall:-OpenFOAM}" in
 OpenFOAM)
     case "$WM_COMPILER" in
-    Gcc)
+    Gcc | Gcc++0x)
         gcc_version=gcc-4.4.3
         gmp_version=gmp-5.0.1
         mpfr_version=mpfr-2.4.2
         ;;
-    Gcc45)
+    Gcc45 | Gcc45++0x)
         gcc_version=gcc-4.5.0
         gmp_version=gmp-5.0.1
         mpfr_version=mpfr-2.4.2
         mpc_version=mpc-0.8.1
         ;;
-    Gcc44)
+    Gcc44 | Gcc44++0x)
         gcc_version=gcc-4.4.3
         gmp_version=gmp-5.0.1
         mpfr_version=mpfr-2.4.2
@@ -211,6 +211,19 @@ OpenFOAM)
     unset clang_version clangDir
     ;;
 esac
+
+
+#
+# add c++0x flags for external programs
+#
+if [ -n "$WM_CXXFLAGS" ]
+then
+    case "$WM_COMPILER" in
+    Gcc*++0x)
+        WM_CXXFLAGS="$WM_CXXFLAGS -std=c++0x"
+        ;;
+    esac
+fi
 
 
 # boost and CGAL
