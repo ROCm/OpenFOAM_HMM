@@ -56,6 +56,14 @@ int main(int argc, char *argv[])
         "specify a list of fields to be reconstructed. Eg, '(U T p)' - "
         "regular expressions not currently supported"
     );
+    argList::addOption
+    (
+        "lagrangianFields",
+        "list",
+        "specify a list of lagrangian fields to be reconstructed. Eg, '(U d)' -"
+        "regular expressions not currently supported, "
+        "positions always included."
+    );
     argList::addBoolOption
     (
         "noLagrangian",
@@ -72,6 +80,20 @@ int main(int argc, char *argv[])
     }
 
     const bool noLagrangian = args.optionFound("noLagrangian");
+
+    HashSet<word> selectedLagrangianFields;
+    if (args.optionFound("lagrangianFields"))
+    {
+        if (noLagrangian)
+        {
+            FatalErrorIn(args.executable())
+                << "Cannot specify noLagrangian and lagrangianFields "
+                << "options together."
+                << exit(FatalError);
+        }
+
+        args.optionLookup("lagrangianFields")() >> selectedLagrangianFields;
+    }
 
     // determine the processor count directly
     label nProcs = 0;
@@ -403,84 +425,96 @@ int main(int argc, char *argv[])
                         cloudName,
                         mesh,
                         procMeshes.meshes(),
-                        sprayObjs
+                        sprayObjs,
+                        selectedLagrangianFields
                     );
                     reconstructLagrangianFieldFields<label>
                     (
                         cloudName,
                         mesh,
                         procMeshes.meshes(),
-                        sprayObjs
+                        sprayObjs,
+                        selectedLagrangianFields
                     );
                     reconstructLagrangianFields<scalar>
                     (
                         cloudName,
                         mesh,
                         procMeshes.meshes(),
-                        sprayObjs
+                        sprayObjs,
+                        selectedLagrangianFields
                     );
                     reconstructLagrangianFieldFields<scalar>
                     (
                         cloudName,
                         mesh,
                         procMeshes.meshes(),
-                        sprayObjs
+                        sprayObjs,
+                        selectedLagrangianFields
                     );
                     reconstructLagrangianFields<vector>
                     (
                         cloudName,
                         mesh,
                         procMeshes.meshes(),
-                        sprayObjs
+                        sprayObjs,
+                        selectedLagrangianFields
                     );
                     reconstructLagrangianFieldFields<vector>
                     (
                         cloudName,
                         mesh,
                         procMeshes.meshes(),
-                        sprayObjs
+                        sprayObjs,
+                        selectedLagrangianFields
                     );
                     reconstructLagrangianFields<sphericalTensor>
                     (
                         cloudName,
                         mesh,
                         procMeshes.meshes(),
-                        sprayObjs
+                        sprayObjs,
+                        selectedLagrangianFields
                     );
                     reconstructLagrangianFieldFields<sphericalTensor>
                     (
                         cloudName,
                         mesh,
                         procMeshes.meshes(),
-                        sprayObjs
+                        sprayObjs,
+                        selectedLagrangianFields
                     );
                     reconstructLagrangianFields<symmTensor>
                     (
                         cloudName,
                         mesh,
                         procMeshes.meshes(),
-                        sprayObjs
+                        sprayObjs,
+                        selectedLagrangianFields
                     );
                     reconstructLagrangianFieldFields<symmTensor>
                     (
                         cloudName,
                         mesh,
                         procMeshes.meshes(),
-                        sprayObjs
+                        sprayObjs,
+                        selectedLagrangianFields
                     );
                     reconstructLagrangianFields<tensor>
                     (
                         cloudName,
                         mesh,
                         procMeshes.meshes(),
-                        sprayObjs
+                        sprayObjs,
+                        selectedLagrangianFields
                     );
                     reconstructLagrangianFieldFields<tensor>
                     (
                         cloudName,
                         mesh,
                         procMeshes.meshes(),
-                        sprayObjs
+                        sprayObjs,
+                        selectedLagrangianFields
                     );
                 }
             }
