@@ -317,7 +317,7 @@ private:
         void createFeaturePoints();
 
         //- Insert point groups at convex feature points
-        void insertConvexFeaturesPoints();
+        void insertConvexFeaturePoints();
 
         //- Insert point groups at concave feature points
         void insertConcaveFeaturePoints();

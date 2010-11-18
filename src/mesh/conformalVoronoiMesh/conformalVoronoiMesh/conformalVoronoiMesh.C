@@ -492,7 +492,7 @@ void Foam::conformalVoronoiMesh::createFeaturePoints()
 
     Info<< nl << "Conforming to feature points" << endl;
 
-    insertConvexFeaturesPoints();
+    insertConvexFeaturePoints();
 
     insertConcaveFeaturePoints();
 
@@ -529,7 +529,7 @@ void Foam::conformalVoronoiMesh::createFeaturePoints()
 }
 
 
-void Foam::conformalVoronoiMesh::insertConvexFeaturesPoints()
+void Foam::conformalVoronoiMesh::insertConvexFeaturePoints()
 {
     const PtrList<featureEdgeMesh>& feMeshes(geometryToConformTo_.features());
 
