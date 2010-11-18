@@ -55,10 +55,13 @@ void Foam::conformalVoronoiMesh::timeCheck
 
         Info<< "] --- " << endl;
 
+        memInfo m;
+
         Pout<< "--- [ "
             << runTime_.elapsedCpuTime() << " s, "
-            << "memSize " << memSize() << " kB, "
-            << "memPeakSize " << memPeakSize() << " kB"
+            << "mem size " << m.size() << " kB, "
+            << "mem peak " << m.peak() << " kB, "
+            << "mem rss " << m.rss() << " kB"
             << " ] --- " << endl;
     }
 }

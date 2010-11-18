@@ -63,6 +63,7 @@ SourceFiles
 #include "Histogram.H"
 #include "labelPair.H"
 #include "HashSet.H"
+#include "memInfo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
