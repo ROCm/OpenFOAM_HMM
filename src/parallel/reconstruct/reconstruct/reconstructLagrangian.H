@@ -84,7 +84,8 @@ void reconstructLagrangianFields
     const word& cloudName,
     const polyMesh& mesh,
     const PtrList<fvMesh>& meshes,
-    const IOobjectList& objects
+    const IOobjectList& objects,
+    const HashSet<word>& selectedFields
 );
 
 
@@ -94,7 +95,8 @@ void reconstructLagrangianFieldFields
     const word& cloudName,
     const polyMesh& mesh,
     const PtrList<fvMesh>& meshes,
-    const IOobjectList& objects
+    const IOobjectList& objects,
+    const HashSet<word>& selectedFields
 );
 
 
