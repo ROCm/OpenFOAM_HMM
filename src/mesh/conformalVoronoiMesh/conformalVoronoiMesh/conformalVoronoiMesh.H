@@ -325,6 +325,14 @@ private:
         //- Insert point groups at mixed feature points
         void insertMixedFeaturePoints();
 
+        //- Insert feature point groups if a specialisation exists for the
+        //  structure
+        bool insertSpecialisedFeaturePoint
+        (
+            const featureEdgeMesh& feMesh,
+            label ptI
+        );
+
         //- Store the locations of all of the features to be conformed to
         void constructFeaturePointLocations();
 

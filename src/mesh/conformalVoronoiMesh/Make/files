@@ -4,6 +4,7 @@ conformalVoronoiMesh/conformalVoronoiMesh.C
 conformalVoronoiMesh/conformalVoronoiMeshCalcDualMesh.C
 conformalVoronoiMesh/conformalVoronoiMeshConformToSurface.C
 conformalVoronoiMesh/conformalVoronoiMeshIO.C
+conformalVoronoiMesh/conformalVoronoiMeshFeaturePointSpecialisations.C
 
 cvControls/cvControls.C
 

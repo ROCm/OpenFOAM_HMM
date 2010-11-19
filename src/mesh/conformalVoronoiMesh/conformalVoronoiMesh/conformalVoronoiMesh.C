@@ -175,7 +175,7 @@ Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
     if (mag(ns) <  SMALL)
     {
         FatalErrorIn("conformalVoronoiMesh::requiredAlignment")
-        << "Parallel normals detected in spoke search." << nl
+            << "Parallel normals detected in spoke search." << nl
             << "point: " << pt << nl
             << "closest surface point: " << surfHit.hitPoint() << nl
             << "closest spoke hit: " << closestSpokeHit.hitPoint() << nl
@@ -294,25 +294,37 @@ void Foam::conformalVoronoiMesh::insertEdgePointGroup
 
     featureEdgeMesh::edgeStatus edStatus = feMesh.getEdgeStatus(edgeI);
 
-    if (edStatus == featureEdgeMesh::EXTERNAL)
+    switch (edStatus)
     {
-        insertExternalEdgePointGroup(feMesh, edHit);
-    }
-    else if (edStatus == featureEdgeMesh::INTERNAL)
-    {
-        insertInternalEdgePointGroup(feMesh, edHit);
-    }
-    else if (edStatus == featureEdgeMesh::FLAT)
-    {
-        insertFlatEdgePointGroup(feMesh, edHit);
-    }
-    else if (edStatus == featureEdgeMesh::OPEN)
-    {
-        insertOpenEdgePointGroup(feMesh, edHit);
-    }
-    else if (edStatus == featureEdgeMesh::MULTIPLE)
-    {
-        insertMultipleEdgePointGroup(feMesh, edHit);
+        case featureEdgeMesh::EXTERNAL:
+        {
+            insertExternalEdgePointGroup(feMesh, edHit);
+            break;
+        }
+        case featureEdgeMesh::INTERNAL:
+        {
+            insertInternalEdgePointGroup(feMesh, edHit);
+            break;
+        }
+        case featureEdgeMesh::FLAT:
+        {
+            insertFlatEdgePointGroup(feMesh, edHit);
+            break;
+        }
+        case featureEdgeMesh::OPEN:
+        {
+            insertOpenEdgePointGroup(feMesh, edHit);
+            break;
+        }
+        case featureEdgeMesh::MULTIPLE:
+        {
+            insertMultipleEdgePointGroup(feMesh, edHit);
+            break;
+        }
+        case featureEdgeMesh::NONE:
+        {
+            break;
+        }
     }
 }
 
@@ -633,58 +645,62 @@ void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
             ptI++
         )
         {
-            labelList pEds(feMesh.pointEdges()[ptI]);
-
-            // Skipping unsupported mixed feature point types
-
-            bool skipEdge = false;
-
-            forAll(pEds, e)
+            if (!insertSpecialisedFeaturePoint(feMesh, ptI))
             {
-                label edgeI = pEds[e];
+                // Specialisations available for some mixed feature points.  For
+                // non-specialised feature points, inserting mixed internal and
+                // external edge groups at feature point.
 
-                featureEdgeMesh::edgeStatus edStatus =
-                    feMesh.getEdgeStatus(edgeI);
+                labelList pEds(feMesh.pointEdges()[ptI]);
 
-                if
-                (
-                    edStatus == featureEdgeMesh::OPEN
-                 || edStatus == featureEdgeMesh::MULTIPLE
-                )
+                // Skipping unsupported mixed feature point types
+
+                bool skipEdge = false;
+
+                forAll(pEds, e)
                 {
-                    Info<< "Edge type " << edStatus
-                        << " found for mixed feature point " << ptI
-                        << ". Not supported."
-                        << endl;
+                    label edgeI = pEds[e];
 
-                    skipEdge = true;
+                    featureEdgeMesh::edgeStatus edStatus =
+                        feMesh.getEdgeStatus(edgeI);
+
+                    if
+                    (
+                        edStatus == featureEdgeMesh::OPEN
+                     || edStatus == featureEdgeMesh::MULTIPLE
+                    )
+                    {
+                        Info<< "Edge type " << edStatus
+                            << " found for mixed feature point " << ptI
+                            << ". Not supported."
+                            << endl;
+
+                        skipEdge = true;
+                    }
                 }
 
-            }
+                if(skipEdge)
+                {
+                    Info<< "Skipping point " << ptI << nl << endl;
 
-            if(skipEdge)
-            {
-                Info<< "Skipping point " << ptI << nl << endl;
+                    continue;
+                }
 
-                continue;
-            }
+                const point& pt(feMesh.points()[ptI]);
 
-            // Inserting mixed internal and external feature points
+                scalar edgeGroupDistance = mixedFeaturePointDistance(pt);
 
-            const point& pt(feMesh.points()[ptI]);
+                forAll(pEds, e)
+                {
+                    label edgeI = pEds[e];
 
-            scalar edgeGroupDistance = mixedFeaturePointDistance(pt);
-
-            forAll(pEds, e)
-            {
-                label edgeI = pEds[e];
-
-                point edgePt =
+                    point edgePt =
                     pt + edgeGroupDistance*feMesh.edgeDirection(edgeI, ptI);
 
-                pointIndexHit edgeHit(true, edgePt, edgeI);
+                    pointIndexHit edgeHit(true, edgePt, edgeI);
 
-                insertEdgePointGroup(feMesh, edgeHit);
+                    insertEdgePointGroup(feMesh, edgeHit);
+                }
             }
         }
     }
