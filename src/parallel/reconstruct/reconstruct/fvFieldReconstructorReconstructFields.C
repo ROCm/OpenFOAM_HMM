@@ -539,7 +539,7 @@ void Foam::fvFieldReconstructor::reconstructFvVolumeInternalFields
         {
             if
             (
-                !selectedFields.size()
+                selectedFields.empty()
              || selectedFields.found(fieldIter()->name())
             )
             {
@@ -575,7 +575,7 @@ void Foam::fvFieldReconstructor::reconstructFvVolumeFields
         {
             if
             (
-                !selectedFields.size()
+                selectedFields.empty()
              || selectedFields.found(fieldIter()->name())
             )
             {
@@ -611,7 +611,7 @@ void Foam::fvFieldReconstructor::reconstructFvSurfaceFields
         {
             if
             (
-                !selectedFields.size()
+                selectedFields.empty()
              || selectedFields.found(fieldIter()->name())
             )
             {

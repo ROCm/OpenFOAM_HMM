@@ -54,38 +54,41 @@ class cpuTime
 {
     // Private data
 
-        static long Hz_;
+        //- Time structure used
+        typedef struct tms timeType;
 
-        struct tms startTime_;
-        mutable struct tms lastTime_;
-        mutable struct tms newTime_;
+        //- Clock-ticks per second
+        static const long Hz_;
 
-        static void getTime(struct tms& t);
+        //- The start time
+        timeType startTime_;
+        mutable timeType lastTime_;
+        mutable timeType newTime_;
 
-        static double timeDifference
-        (
-            const struct tms& start,
-            const struct tms& end
-        );
+    // Private Member Functions
+
+        //- Retrieve the current time values from the system
+        static void getTime(timeType&);
+
+        //- Difference between two times
+        static double timeDifference(const timeType& beg, const timeType& end);
 
 
 public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct with the current clock time
         cpuTime();
 
 
     // Member Functions
 
-        // Access
+        //- Return CPU time (in seconds) from the start
+        double elapsedCpuTime() const;
 
-            //- Returns CPU time from start of run
-            double elapsedCpuTime() const;
-
-            //- Returns CPU time from last call of cpuTimeIncrement()
-            double cpuTimeIncrement() const;
+        //- Return CPU time (in seconds) since last call to cpuTimeIncrement()
+        double cpuTimeIncrement() const;
 };
 
 

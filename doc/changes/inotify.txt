@@ -24,20 +24,62 @@ be quite a gain on large numbers of processors.
 
 
 - all file monitoring is done by an instance of 'fileMonitor' in the Time
-class. The fileMonitor class can be found in OSspecific. Default is
-to use the (linux-specific) 'inotify' system calls.
-If compiled with -DFOAM_USE_STAT it will revert to the current 'stat' system
-calls.
+class. The fileMonitor class can be found in OSspecific. It uses either
+timestamps as before or the (linux-specific) 'inotify' system framework
+(available only if compiled with -DFOAM_USE_INOTIFY).
 
 
-- inotify does not need timestamps. There is no need for fileModificationSkew
+- the monitoring can be done in one of four modes as set by
+    OptimisationSwitches::fileModificationChecking
+
+    - timeStamp : old behaviour : all nodes check the timestamp
+    - inotify   : using inotify instead of timestamps
+    - timeStampMaster,inotifyMaster : only the master node checks the file
+                and only the master node reads it and distribute it to the
+                slaves. This makes runTimeModifiable possible on distributed
+                running (see below).
+
+- distributed running:
+    - set fileModificationChecking to e.g. timeStampMaster
+    - decompose a case, e.g. cavity
+    - copy system and constant to processor0/
+    - put the all the processor* directories on the wanted nodes inside
+      the case directory. E.g.
+        - on master have /tmp/cavity/processor0
+        - on slaveN have /tmp/cavity/processorN
+    - so to reiterate:
+        - there is no need for cavity/constant or cavity/system, all the
+          dictionaries are only in processor0/constant or processor0/system
+        - the slave processor directories have no system directory and the
+          constant directory only contains the mesh.
+    - start the job in distributed mode by specifying the slave roots
+      (so one less than the number of processors) with
+      the -roots command line option:
+
+        mpirun -np 2 icoFoam -roots '("/tmp")' -parallel
+
+    - the alternative to the -roots option is to have a
+      cavity/system/decomposeParDict on the master with
+            distributed     yes;
+            roots           ("/tmp");
+
+
+Details:
+- timeStampMaster, inotifyMaster : this works only for IOdictionaries that
+are READ_IF_MODIFIED. It means that slaves read exactly the same dictionary
+as the master so cannot be used for dictionaries that contain e.g. mesh
+specific information.
+
+- inotify is a monitoring framework used to monitor changes in
+lots of files (e.g. used in desktop searched like beagle). You specify
+files to monitor and then get warned for any changes to these files.
+It does not need timestamps. There is no need for fileModificationSkew
 to allow for time differences. (there can still temporarily be a difference
-in modified status between different processors due to nfs lagging)
-
+in modified status between different processors due to nfs lagging). The big
+problem is that it does not work over nfs3 (not sure about nfs4).
 
 - fileMonitor stores two hashtables per file so there is a small overhead
 adding and removing files from monitoring.
-
 
 - if runTimeModifiable is false at start of run no files will get monitored,
 however if runTimeModified gets set to false during the run the files
@@ -45,7 +87,6 @@ will still get monitored (though never reloaded). This is only a hypothetical
 problem in that the kernel still stores events for the monitored files. However
 inotify is very efficient - e.g. it gets used to track changes on file systems
 for desktop search engines.
-
 
 - in the old system one could call modified() on any object and get
 and uptodate state. In the new system it will return the state from

@@ -1,3 +1,8 @@
+rho = thermo.rho();
+rho = max(rho, rhoMin);
+rho = min(rho, rhoMax);
+rho.relax();
+
 volScalarField p0 = p;
 
 volScalarField AU = UEqn().A();
@@ -24,8 +29,8 @@ if (transonic)
           + phid*(fvc::interpolate(p) - fvc::interpolate(p, "UD"))
         );
 
-        refCast<mixedFvPatchScalarField>(p.boundaryField()[1]).refValue()
-            = p.boundaryField()[1];
+        //refCast<mixedFvPatchScalarField>(p.boundaryField()[1]).refValue()
+        //    = p.boundaryField()[1];
 
         fvScalarMatrix pEqn
         (
@@ -35,6 +40,7 @@ if (transonic)
           + fvc::div(phid)*p
           - fvm::laplacian(rho/AtU, p)
         );
+        //pEqn.relax();
 
         pEqn.setReference(pRefCell, pRefValue);
 

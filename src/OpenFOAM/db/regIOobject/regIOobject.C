@@ -36,6 +36,35 @@ int Foam::regIOobject::fileModificationSkew
     Foam::debug::optimisationSwitch("fileModificationSkew", 30)
 );
 
+namespace Foam
+{
+    template<>
+    const char* Foam::NamedEnum<Foam::regIOobject::fileCheckTypes, 4>::names[] =
+    {
+        "timeStamp",
+        "timeStampMaster",
+        "inotify",
+        "inotifyMaster"
+    };
+}
+
+
+const Foam::NamedEnum<Foam::regIOobject::fileCheckTypes, 4>
+    Foam::regIOobject::fileCheckTypesNames;
+
+// Default fileCheck type
+Foam::regIOobject::fileCheckTypes Foam::regIOobject::fileModificationChecking
+(
+    fileCheckTypesNames.read
+    (
+        debug::optimisationSwitches().lookup
+        (
+            "fileModificationChecking"
+            //Foam::regIOobject::timeStamp
+        )
+    )
+);
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -149,10 +178,13 @@ bool Foam::regIOobject::checkIn()
             }
 
             fileName f = filePath();
-            if (f != fileName::null)
+            if (!f.size())
             {
-                watchIndex_ = time().addWatch(f);
+                // We don't have this file but would like to re-read it.
+                // Possibly if master-only reading mode.
+                f = objectPath();
             }
+            watchIndex_ = time().addWatch(f);
         }
 
         // check-in on defaultRegion is allowed to fail, since subsetted meshes

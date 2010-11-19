@@ -211,7 +211,8 @@ void Foam::singleCellFvMesh::agglomerateMesh
                             "singleCellFvMesh::agglomerateMesh(..)"
                         )   << "agglomeration does not create a"
                             << " single, non-manifold"
-                            << " face for agglomeration " << coarseI
+                            << " face for agglomeration " << myAgglom
+                            << " on patch " <<  patchI
                             << exit(FatalError);
                     }
 

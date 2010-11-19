@@ -28,10 +28,11 @@ Description
     Checking for changes to files.
 
 Note
-    The default is to use inotify (Linux specific, since 2.6.13)
+    The default is to use stat to get the timestamp.
 
-    Compiling with FOAM_USE_STAT (or if /usr/include/sys/inotify.h
-    does not exist) uses the stat function call.
+    Compile with FOAM_USE_INOTIFY to use the inotify
+    (Linux specific, since 2.6.13) framework. The problem is that inotify does
+    not work on nfs3 mounted directories!!
 
 SourceFiles
     fileMonitor.C
@@ -78,6 +79,9 @@ public:
 private:
     // Private data
 
+        //- Whether to use inotify (requires -DFOAM_USE_INOTIFY, see above)
+        const bool useInotify_;
+
         //- State for all watchFds
         mutable DynamicList<fileState> state_;
 
@@ -111,7 +115,7 @@ public:
     // Constructors
 
         //- Construct null
-        fileMonitor();
+        fileMonitor(const bool useInotify);
 
 
     //- Destructor
@@ -133,7 +137,11 @@ public:
         fileState getState(const label watchFd) const;
 
         //- Check state of all files. Updates state_.
-        void updateStates(const bool syncPar) const;
+        void updateStates
+        (
+            const bool masterOnly,
+            const bool syncPar
+        ) const;
 
         //- Reset state (e.g. after having read it) using handle
         void setUnmodified(const label watchFd);

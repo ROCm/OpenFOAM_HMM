@@ -188,12 +188,12 @@ then
     fi
     mpiopts="-np $NPROCS"
 
-    # 
+    #
     # is the machine ready to run parallel?
     #
     echo "Parallel processing using $WM_MPLIB with $NPROCS processors"
     case "$WM_MPLIB" in
-    OPENMPI)
+    *OPENMPI)
         # add hostfile info
         for hostfile in \
             hostfile \

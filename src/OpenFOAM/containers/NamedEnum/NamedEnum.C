@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "NamedEnum.H"
-#include "stringList.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -82,6 +81,44 @@ template<class Enum, int nEnum>
 void Foam::NamedEnum<Enum, nEnum>::write(const Enum e, Ostream& os) const
 {
     os  << operator[](e);
+}
+
+
+template<class Enum, int nEnum>
+Foam::stringList Foam::NamedEnum<Enum, nEnum>::strings()
+{
+    stringList lst(nEnum);
+
+    label nElem = 0;
+    for (int enumI = 0; enumI < nEnum; ++enumI)
+    {
+        if (names[enumI] && names[enumI][0])
+        {
+            lst[nElem++] = names[enumI];
+        }
+    }
+
+    lst.setSize(nElem);
+    return lst;
+}
+
+
+template<class Enum, int nEnum>
+Foam::wordList Foam::NamedEnum<Enum, nEnum>::words()
+{
+    wordList lst(nEnum);
+
+    label nElem = 0;
+    for (int enumI = 0; enumI < nEnum; ++enumI)
+    {
+        if (names[enumI] && names[enumI][0])
+        {
+            lst[nElem++] = names[enumI];
+        }
+    }
+
+    lst.setSize(nElem);
+    return lst;
 }
 
 
