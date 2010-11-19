@@ -136,9 +136,17 @@ void Foam::surfaceFilmModels::noFilm::addSources
 }
 
 
+const Foam::volScalarField& Foam::surfaceFilmModels::noFilm::delta() const
+{
+    FatalErrorIn("const volScalarField& noFilm::delta() const")
+        << "delta field not available for " << type() << abort(FatalError);
+
+    return volScalarField::null();
+}
+
 const Foam::volVectorField& Foam::surfaceFilmModels::noFilm::U() const
 {
-    FatalErrorIn("const volScalarField& noFilm::U() const")
+    FatalErrorIn("const volVectorField& noFilm::U() const")
         << "U field not available for " << type() << abort(FatalError);
 
     return volVectorField::null();
@@ -147,7 +155,7 @@ const Foam::volVectorField& Foam::surfaceFilmModels::noFilm::U() const
 
 const Foam::volVectorField& Foam::surfaceFilmModels::noFilm::Us() const
 {
-    FatalErrorIn("const volScalarField& noFilm::Us() const")
+    FatalErrorIn("const volVectorField& noFilm::Us() const")
         << "Us field not available for " << type() << abort(FatalError);
 
     return volVectorField::null();
@@ -156,7 +164,7 @@ const Foam::volVectorField& Foam::surfaceFilmModels::noFilm::Us() const
 
 const Foam::volVectorField& Foam::surfaceFilmModels::noFilm::Uw() const
 {
-    FatalErrorIn("const volScalarField& noFilm::Uw() const")
+    FatalErrorIn("const volVectorField& noFilm::Uw() const")
         << "Uw field not available for " << type() << abort(FatalError);
 
     return volVectorField::null();
