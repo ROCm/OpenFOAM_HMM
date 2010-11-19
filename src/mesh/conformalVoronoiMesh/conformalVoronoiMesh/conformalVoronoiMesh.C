@@ -648,8 +648,7 @@ void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
 
                 if
                 (
-                    edStatus == featureEdgeMesh::FLAT
-                 || edStatus == featureEdgeMesh::OPEN
+                    edStatus == featureEdgeMesh::OPEN
                  || edStatus == featureEdgeMesh::MULTIPLE
                 )
                 {
