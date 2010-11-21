@@ -155,28 +155,36 @@ void Foam::reconstructLagrangianFields
     const word& cloudName,
     const polyMesh& mesh,
     const PtrList<fvMesh>& meshes,
-    const IOobjectList& objects
+    const IOobjectList& objects,
+    const HashSet<word>& selectedFields
 )
 {
     const word fieldClassName(IOField<Type>::typeName);
 
     IOobjectList fields = objects.lookupClass(fieldClassName);
 
-    if (fields.size())
+    if(fields.size())
     {
         Info<< "    Reconstructing lagrangian "
             << fieldClassName << "s\n" << endl;
 
         forAllConstIter(IOobjectList, fields, fieldIter)
         {
-            Info<< "        " << fieldIter()->name() << endl;
-            reconstructLagrangianField<Type>
+            if
             (
-                cloudName,
-                mesh,
-                meshes,
-                fieldIter()->name()
-            )().write();
+                selectedFields.empty()
+             || selectedFields.found(fieldIter()->name())
+            )
+            {
+                Info<< "        " << fieldIter()->name() << endl;
+                reconstructLagrangianField<Type>
+                (
+                    cloudName,
+                    mesh,
+                    meshes,
+                    fieldIter()->name()
+                )().write();
+            }
         }
 
         Info<< endl;
@@ -190,7 +198,8 @@ void Foam::reconstructLagrangianFieldFields
     const word& cloudName,
     const polyMesh& mesh,
     const PtrList<fvMesh>& meshes,
-    const IOobjectList& objects
+    const IOobjectList& objects,
+    const HashSet<word>& selectedFields
 )
 {
     {
@@ -205,14 +214,21 @@ void Foam::reconstructLagrangianFieldFields
 
             forAllConstIter(IOobjectList, fields, fieldIter)
             {
-                Info<< "        " << fieldIter()->name() << endl;
-                reconstructLagrangianFieldField<Type>
+                if
                 (
-                    cloudName,
-                    mesh,
-                    meshes,
-                    fieldIter()->name()
-                )().write();
+                    selectedFields.empty()
+                 || selectedFields.found(fieldIter()->name())
+                )
+                {
+                    Info<< "        " << fieldIter()->name() << endl;
+                    reconstructLagrangianFieldField<Type>
+                    (
+                        cloudName,
+                        mesh,
+                        meshes,
+                        fieldIter()->name()
+                    )().write();
+                }
             }
 
             Info<< endl;
@@ -231,14 +247,21 @@ void Foam::reconstructLagrangianFieldFields
 
             forAllConstIter(IOobjectList, fields, fieldIter)
             {
-                Info<< "        " << fieldIter()->name() << endl;
-                reconstructLagrangianFieldField<Type>
+                if
                 (
-                    cloudName,
-                    mesh,
-                    meshes,
-                    fieldIter()->name()
-                )().write();
+                    selectedFields.empty()
+                 || selectedFields.found(fieldIter()->name())
+                )
+                {
+                    Info<< "        " << fieldIter()->name() << endl;
+                    reconstructLagrangianFieldField<Type>
+                    (
+                        cloudName,
+                        mesh,
+                        meshes,
+                        fieldIter()->name()
+                    )().write();
+                }
             }
 
             Info<< endl;

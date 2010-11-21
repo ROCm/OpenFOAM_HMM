@@ -876,8 +876,8 @@ OptimisationSwitches
     //- Modification checking:
     //  - timeStamp         : use modification time on file
     //  - inotify           : use inotify framework
-    //  - timeStampMaster   : do time stamp (and file reading) only on master. 
-    //  - inotifyMaster     : do inotify (and file reading) only on master. 
+    //  - timeStampMaster   : do time stamp (and file reading) only on master.
+    //  - inotifyMaster     : do inotify (and file reading) only on master.
     fileModificationChecking timeStampMaster;//inotify;timeStamp;inotifyMaster;
 
     commsType       nonBlocking; //scheduled; //blocking;

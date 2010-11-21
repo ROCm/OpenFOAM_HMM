@@ -90,17 +90,20 @@ switch ("$compilerInstall")
 case OpenFOAM:
     switch ("$WM_COMPILER")
     case Gcc:
+    case Gcc++0x:
         set gcc_version=gcc-4.4.3
         set gmp_version=gmp-5.0.1
         set mpfr_version=mpfr-2.4.2
         breaksw
     case Gcc45:
+    case Gcc45++0x:
         set gcc_version=gcc-4.5.0
         set gmp_version=gmp-5.0.1
         set mpfr_version=mpfr-2.4.2
         set mpc_version=mpc-0.8.1
         breaksw
     case Gcc44:
+    case Gcc44++0x:
         set gcc_version=gcc-4.4.3
         set gmp_version=gmp-5.0.1
         set mpfr_version=mpfr-2.4.2
@@ -190,6 +193,18 @@ case OpenFOAM:
 endsw
 
 
+#
+# add c++0x flags for external programs
+#
+if ( $?WM_CXXFLAGS ) then
+    switch ("$WM_COMPILER")
+    case Gcc*++0x:
+        setenv WM_CXXFLAGS "$WM_CXXFLAGS -std=c++0x"
+        breaksw
+    endsw
+endif
+
+
 # boost and CGAL
 # ~~~~~~~~~~~~~~
 
@@ -236,11 +251,8 @@ case OPENMPI:
     breaksw
 
 case SYSTEMOPENMPI:
-    # use the system installed openmpi, get library directory via mpicc
+    # Use the system installed openmpi, get library directory via mpicc
     set mpi_version=openmpi-system
-
-    # Set to dummy value (but existing directory)
-    setenv MPI_ARCH_PATH /
 
     # Set compilation flags here instead of in wmake/rules/../mplibSYSTEMOPENMPI
     setenv PINC "`mpicc --showme:compile`"

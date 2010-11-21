@@ -146,13 +146,20 @@ checkIllegalCode()
     badFiles=$(
     for f in $fileList
     do
-        # parse line numbers from grep output:
-        #        <lineNr>:   contents
-        lines=$(git grep -E -hn -e "$reBad" $scope"$f" |
-            sed -e 's@:.*@@' |
-            tr '\n' ' '
-        )
-        [ -n "$lines" ] && echo "$Indent$f -- lines: $lines"
+        case "$f" in
+        # exclude potential makefiles
+        (wmake/[Mm]akefile* | wmake/rules/*)
+        ;;
+        (*)
+            # parse line numbers from grep output:
+            #        <lineNr>:   contents
+            lines=$(git grep -E -hn -e "$reBad" $scope"$f" |
+                sed -e 's@:.*@@' |
+                tr '\n' ' '
+            )
+            [ -n "$lines" ] && echo "$Indent$f -- lines: $lines"
+        ;;
+        esac
     done
     )
 
@@ -243,7 +250,7 @@ checkLineLengthNonComments()
             # parse line numbers from grep output:
             #        <lineNr>:   contents
             lines=$(git grep -hn -e '^.\{81,\}' \
-                --and --not -e "^ *//" \
+                --and --not -e '^ *//' \
                 $scope"$f" |
                 sed -e 's@:.*@@' |
                 tr '\n' ' '
@@ -276,7 +283,7 @@ checkLineLengthNonDirective()
             # parse line numbers from grep output:
             #        <lineNr>:   contents
             lines=$(git grep -hn -e '^.\{81,\}' \
-                --and --not -e "^ *#" \
+                --and --not -e '^ *#' \
                 $scope"$f" |
                 sed -e 's@:.*@@' |
                 tr '\n' ' '

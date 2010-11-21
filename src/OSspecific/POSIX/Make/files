@@ -8,6 +8,7 @@ fileStat.C
 POSIX.C
 cpuTime/cpuTime.C
 clockTime/clockTime.C
+memInfo/memInfo.C
 
 /*
  * Note: fileMonitor assumes inotify by default. Compile with -DFOAM_USE_STAT

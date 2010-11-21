@@ -162,8 +162,7 @@ void Foam::sampledPatch::remapFaces
 
 
 
-Foam::tmp<Foam::scalarField>
-Foam::sampledPatch::sample
+Foam::tmp<Foam::scalarField> Foam::sampledPatch::sample
 (
     const volScalarField& vField
 ) const
@@ -172,8 +171,7 @@ Foam::sampledPatch::sample
 }
 
 
-Foam::tmp<Foam::vectorField>
-Foam::sampledPatch::sample
+Foam::tmp<Foam::vectorField> Foam::sampledPatch::sample
 (
     const volVectorField& vField
 ) const
@@ -181,8 +179,7 @@ Foam::sampledPatch::sample
     return sampleField(vField);
 }
 
-Foam::tmp<Foam::sphericalTensorField>
-Foam::sampledPatch::sample
+Foam::tmp<Foam::sphericalTensorField> Foam::sampledPatch::sample
 (
     const volSphericalTensorField& vField
 ) const
@@ -191,8 +188,7 @@ Foam::sampledPatch::sample
 }
 
 
-Foam::tmp<Foam::symmTensorField>
-Foam::sampledPatch::sample
+Foam::tmp<Foam::symmTensorField> Foam::sampledPatch::sample
 (
     const volSymmTensorField& vField
 ) const
@@ -201,8 +197,7 @@ Foam::sampledPatch::sample
 }
 
 
-Foam::tmp<Foam::tensorField>
-Foam::sampledPatch::sample
+Foam::tmp<Foam::tensorField> Foam::sampledPatch::sample
 (
     const volTensorField& vField
 ) const
@@ -211,8 +206,7 @@ Foam::sampledPatch::sample
 }
 
 
-Foam::tmp<Foam::scalarField>
-Foam::sampledPatch::interpolate
+Foam::tmp<Foam::scalarField> Foam::sampledPatch::interpolate
 (
     const interpolation<scalar>& interpolator
 ) const
@@ -221,8 +215,7 @@ Foam::sampledPatch::interpolate
 }
 
 
-Foam::tmp<Foam::vectorField>
-Foam::sampledPatch::interpolate
+Foam::tmp<Foam::vectorField> Foam::sampledPatch::interpolate
 (
     const interpolation<vector>& interpolator
 ) const
@@ -230,8 +223,7 @@ Foam::sampledPatch::interpolate
     return interpolateField(interpolator);
 }
 
-Foam::tmp<Foam::sphericalTensorField>
-Foam::sampledPatch::interpolate
+Foam::tmp<Foam::sphericalTensorField> Foam::sampledPatch::interpolate
 (
     const interpolation<sphericalTensor>& interpolator
 ) const
@@ -240,8 +232,7 @@ Foam::sampledPatch::interpolate
 }
 
 
-Foam::tmp<Foam::symmTensorField>
-Foam::sampledPatch::interpolate
+Foam::tmp<Foam::symmTensorField> Foam::sampledPatch::interpolate
 (
     const interpolation<symmTensor>& interpolator
 ) const
@@ -250,8 +241,7 @@ Foam::sampledPatch::interpolate
 }
 
 
-Foam::tmp<Foam::tensorField>
-Foam::sampledPatch::interpolate
+Foam::tmp<Foam::tensorField> Foam::sampledPatch::interpolate
 (
     const interpolation<tensor>& interpolator
 ) const

@@ -36,6 +36,7 @@ Description
 #include "fileName.H"
 #include "fileStat.H"
 #include "timer.H"
+#include "IFstream.H"
 
 #include <fstream>
 #include <cstdlib>

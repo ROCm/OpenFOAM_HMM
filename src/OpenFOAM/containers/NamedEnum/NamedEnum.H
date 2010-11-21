@@ -37,6 +37,8 @@ SourceFiles
 
 #include "HashTable.H"
 #include "StaticAssert.H"
+#include "stringList.H"
+#include "wordList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -86,6 +88,12 @@ public:
 
         //- Write the name representation of the enumeration to an Ostream
         void write(const Enum e, Ostream&) const;
+
+        //- The set of names as a list of strings
+        static stringList strings();
+
+        //- The set of names as a list of words
+        static wordList words();
 
 
     // Member Operators
