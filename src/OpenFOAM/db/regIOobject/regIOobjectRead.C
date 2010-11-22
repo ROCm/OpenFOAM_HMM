@@ -196,8 +196,16 @@ bool Foam::regIOobject::read()
                 slave++
             )
             {
-
-                OPstream toSlave(Pstream::scheduled, slave);
+                // Note: use ASCII for now - binary IO of dictionaries is
+                // not currently supported
+                OPstream toSlave
+                (
+                    Pstream::scheduled,
+                    slave,
+                    0,
+                    UPstream::msgType(),
+                    IOstream::ASCII
+                );
                 writeData(toSlave);
             }
         }
@@ -210,7 +218,13 @@ bool Foam::regIOobject::read()
                     << " from master processor " << Pstream::masterNo()
                     << endl;
             }
-            IPstream fromMaster(Pstream::scheduled, Pstream::masterNo());
+            IPstream fromMaster
+            (
+                Pstream::scheduled,
+                Pstream::masterNo(),
+                0,
+                IOstream::ASCII
+            );
             ok = readData(fromMaster);
         }
     }
