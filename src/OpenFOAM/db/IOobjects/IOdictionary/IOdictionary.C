@@ -67,8 +67,16 @@ void Foam::IOdictionary::readFile(const bool masterOnly)
                 slave++
             )
             {
-
-                OPstream toSlave(Pstream::scheduled, slave);
+                // Note: use ASCII for now - binary IO of dictionaries is
+                // not currently supported
+                OPstream toSlave
+                (
+                    Pstream::scheduled,
+                    slave,
+                    0,
+                    UPstream::msgType(),
+                    IOstream::ASCII
+                );
                 IOdictionary::writeData(toSlave);
             }
         }
@@ -79,7 +87,13 @@ void Foam::IOdictionary::readFile(const bool masterOnly)
                 Pout<< "IOdictionary : Reading " << objectPath()
                     << " from master processor " << Pstream::masterNo() << endl;
             }
-            IPstream fromMaster(Pstream::scheduled, Pstream::masterNo());
+            IPstream fromMaster
+            (
+                Pstream::scheduled,
+                Pstream::masterNo(),
+                0,
+                IOstream::ASCII
+            );
             IOdictionary::readData(fromMaster);
         }
     }

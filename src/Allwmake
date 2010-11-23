@@ -38,6 +38,8 @@ wmake libso genericPatchFields
 # Build the proper scotchDecomp, metisDecomp etc.
 parallel/Allwmake
 
+wmake libso conversion
+
 wmake libso sampling
 
 wmake libso dynamicMesh
@@ -53,7 +55,6 @@ turbulenceModels/Allwmake
 wmake libso surfaceFilmModels
 lagrangian/Allwmake
 postProcessing/Allwmake
-conversion/Allwmake
 mesh/Allwmake
 
 wmake libso errorEstimation

@@ -301,8 +301,7 @@ bool Foam::sampledTriSurfaceMesh::update()
 }
 
 
-Foam::tmp<Foam::scalarField>
-Foam::sampledTriSurfaceMesh::sample
+Foam::tmp<Foam::scalarField> Foam::sampledTriSurfaceMesh::sample
 (
     const volScalarField& vField
 ) const
@@ -311,8 +310,7 @@ Foam::sampledTriSurfaceMesh::sample
 }
 
 
-Foam::tmp<Foam::vectorField>
-Foam::sampledTriSurfaceMesh::sample
+Foam::tmp<Foam::vectorField> Foam::sampledTriSurfaceMesh::sample
 (
     const volVectorField& vField
 ) const
@@ -320,8 +318,7 @@ Foam::sampledTriSurfaceMesh::sample
     return sampleField(vField);
 }
 
-Foam::tmp<Foam::sphericalTensorField>
-Foam::sampledTriSurfaceMesh::sample
+Foam::tmp<Foam::sphericalTensorField> Foam::sampledTriSurfaceMesh::sample
 (
     const volSphericalTensorField& vField
 ) const
@@ -330,8 +327,7 @@ Foam::sampledTriSurfaceMesh::sample
 }
 
 
-Foam::tmp<Foam::symmTensorField>
-Foam::sampledTriSurfaceMesh::sample
+Foam::tmp<Foam::symmTensorField> Foam::sampledTriSurfaceMesh::sample
 (
     const volSymmTensorField& vField
 ) const
@@ -340,8 +336,7 @@ Foam::sampledTriSurfaceMesh::sample
 }
 
 
-Foam::tmp<Foam::tensorField>
-Foam::sampledTriSurfaceMesh::sample
+Foam::tmp<Foam::tensorField> Foam::sampledTriSurfaceMesh::sample
 (
     const volTensorField& vField
 ) const
@@ -350,8 +345,7 @@ Foam::sampledTriSurfaceMesh::sample
 }
 
 
-Foam::tmp<Foam::scalarField>
-Foam::sampledTriSurfaceMesh::interpolate
+Foam::tmp<Foam::scalarField> Foam::sampledTriSurfaceMesh::interpolate
 (
     const interpolation<scalar>& interpolator
 ) const
@@ -360,8 +354,7 @@ Foam::sampledTriSurfaceMesh::interpolate
 }
 
 
-Foam::tmp<Foam::vectorField>
-Foam::sampledTriSurfaceMesh::interpolate
+Foam::tmp<Foam::vectorField> Foam::sampledTriSurfaceMesh::interpolate
 (
     const interpolation<vector>& interpolator
 ) const
@@ -369,8 +362,7 @@ Foam::sampledTriSurfaceMesh::interpolate
     return interpolateField(interpolator);
 }
 
-Foam::tmp<Foam::sphericalTensorField>
-Foam::sampledTriSurfaceMesh::interpolate
+Foam::tmp<Foam::sphericalTensorField> Foam::sampledTriSurfaceMesh::interpolate
 (
     const interpolation<sphericalTensor>& interpolator
 ) const
@@ -379,8 +371,7 @@ Foam::sampledTriSurfaceMesh::interpolate
 }
 
 
-Foam::tmp<Foam::symmTensorField>
-Foam::sampledTriSurfaceMesh::interpolate
+Foam::tmp<Foam::symmTensorField> Foam::sampledTriSurfaceMesh::interpolate
 (
     const interpolation<symmTensor>& interpolator
 ) const
@@ -389,8 +380,7 @@ Foam::sampledTriSurfaceMesh::interpolate
 }
 
 
-Foam::tmp<Foam::tensorField>
-Foam::sampledTriSurfaceMesh::interpolate
+Foam::tmp<Foam::tensorField> Foam::sampledTriSurfaceMesh::interpolate
 (
     const interpolation<tensor>& interpolator
 ) const

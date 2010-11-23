@@ -136,7 +136,6 @@ public:
         //  Do nothing (and return false) if no update was needed
         virtual bool update();
 
-
         //- Points of surface
         virtual const pointField& points() const
         {
@@ -150,16 +149,10 @@ public:
         }
 
         //- sample field on surface
-        virtual tmp<scalarField> sample
-        (
-            const volScalarField&
-        ) const;
+        virtual tmp<scalarField> sample(const volScalarField&) const;
 
         //- sample field on surface
-        virtual tmp<vectorField> sample
-        (
-            const volVectorField&
-        ) const;
+        virtual tmp<vectorField> sample( const volVectorField&) const;
 
         //- sample field on surface
         virtual tmp<sphericalTensorField> sample
@@ -168,17 +161,13 @@ public:
         ) const;
 
         //- sample field on surface
-        virtual tmp<symmTensorField> sample
-        (
-            const volSymmTensorField&
-        ) const;
+        virtual tmp<symmTensorField> sample(const volSymmTensorField&) const;
 
         //- sample field on surface
         virtual tmp<tensorField> sample
         (
             const volTensorField&
         ) const;
-
 
         //- interpolate field on surface
         virtual tmp<scalarField> interpolate

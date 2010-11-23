@@ -427,4 +427,11 @@ void Foam::ensightPartCells::writeConnectivity
 }
 
 
+void Foam::ensightPartCells::writeGeometry(ensightGeoFile& os) const
+{
+    const polyMesh& mesh = *meshPtr_;
+    ensightPart::writeGeometry(os, mesh.points());
+}
+
+
 // ************************************************************************* //

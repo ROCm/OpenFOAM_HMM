@@ -37,10 +37,12 @@ Foam::SurfaceFilmModel<CloudType>::SurfaceFilmModel(CloudType& owner)
 :
     SubModelBase<CloudType>(owner),
     g_(dimensionedVector("zero", dimAcceleration, vector::zero)),
+    ejectedParcelType_(0),
     massParcelPatch_(0),
     diameterParcelPatch_(0),
     UFilmPatch_(0),
     rhoFilmPatch_(0),
+    deltaFilmPatch_(0),
     nParcelsTransferred_(0),
     nParcelsInjected_(0)
 {}
@@ -57,10 +59,15 @@ Foam::SurfaceFilmModel<CloudType>::SurfaceFilmModel
 :
     SubModelBase<CloudType>(owner, dict, type),
     g_(g),
+    ejectedParcelType_
+    (
+        this->coeffDict().lookupOrDefault("ejectedParcelType", -1)
+    ),
     massParcelPatch_(0),
     diameterParcelPatch_(0),
     UFilmPatch_(0),
     rhoFilmPatch_(0),
+    deltaFilmPatch_(owner.mesh().boundary().size()),
     nParcelsTransferred_(0),
     nParcelsInjected_(0)
 {}
@@ -74,10 +81,12 @@ Foam::SurfaceFilmModel<CloudType>::SurfaceFilmModel
 :
     SubModelBase<CloudType>(sfm),
     g_(sfm.g_),
+    ejectedParcelType_(sfm.ejectedParcelType_),
     massParcelPatch_(sfm.massParcelPatch_),
     diameterParcelPatch_(sfm.diameterParcelPatch_),
     UFilmPatch_(sfm.UFilmPatch_),
     rhoFilmPatch_(sfm.rhoFilmPatch_),
+    deltaFilmPatch_(sfm.deltaFilmPatch_),
     nParcelsTransferred_(sfm.nParcelsTransferred_),
     nParcelsInjected_(sfm.nParcelsInjected_)
 {}
@@ -95,16 +104,18 @@ Foam::SurfaceFilmModel<CloudType>::~SurfaceFilmModel()
 template<class CloudType>
 bool Foam::SurfaceFilmModel<CloudType>::transferParcel
 (
-    const parcelType& p,
-    const label patchI
+    parcelType& p,
+    const polyPatch& pp,
+    bool& keepParticle
 )
 {
     notImplemented
     (
         "bool Foam::SurfaceFilmModel<CloudType>::transferParcel"
         "("
-            "const parcelType&, "
-            "const label"
+            "parcelType&, "
+            "const label, "
+            "const bool&"
         ")"
     );
 
@@ -145,7 +156,7 @@ void Foam::SurfaceFilmModel<CloudType>::inject(TrackData& td)
 
         const label filmPatchI = filmPatches[i];
         const mapDistribute& distMap = wpp.map();
-        cacheFilmFields(filmPatchI, distMap, filmModel);
+        cacheFilmFields(filmPatchI, primaryPatchI, distMap, filmModel);
 
         forAll(injectorCellsPatch, j)
         {
@@ -196,6 +207,7 @@ template<class CloudType>
 void Foam::SurfaceFilmModel<CloudType>::cacheFilmFields
 (
     const label filmPatchI,
+    const label primaryPatchI,
     const mapDistribute& distMap,
     const surfaceFilmModels::surfaceFilmModel& filmModel
 )
@@ -212,6 +224,10 @@ void Foam::SurfaceFilmModel<CloudType>::cacheFilmFields
 
     rhoFilmPatch_ = filmModel.rho().boundaryField()[filmPatchI];
     distMap.distribute(rhoFilmPatch_);
+
+    deltaFilmPatch_[primaryPatchI] =
+        filmModel.delta().boundaryField()[filmPatchI];
+    distMap.distribute(deltaFilmPatch_[primaryPatchI]);
 }
 
 
@@ -229,6 +245,11 @@ void Foam::SurfaceFilmModel<CloudType>::setParcelProperties
     p.rho() = rhoFilmPatch_[filmFaceI];
 
     p.nParticle() = massParcelPatch_[filmFaceI]/p.rho()/vol;
+
+    if (ejectedParcelType_ >= 0)
+    {
+        p.typeId() = ejectedParcelType_;
+    }
 }
 
 

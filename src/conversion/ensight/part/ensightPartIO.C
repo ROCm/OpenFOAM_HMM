@@ -118,15 +118,16 @@ bool Foam::ensightPart::writeData(Ostream& os) const
 }
 
 
-void Foam::ensightPart::writeGeometry(ensightGeoFile& os) const
+void Foam::ensightPart::writeGeometry
+(
+    ensightGeoFile& os,
+    const pointField& points
+) const
 {
-    if (size() && meshPtr_)
+    if (size())
     {
-        const polyMesh& mesh = *meshPtr_;
-        const pointField& meshPoints = mesh.points();
-
-        localPoints ptList = calcLocalPoints();
-        labelList& pointMap = ptList.list;
+        const localPoints ptList = calcLocalPoints();
+        const labelList& pointMap = ptList.list;
 
         writeHeader(os, true);
 
@@ -141,7 +142,7 @@ void Foam::ensightPart::writeGeometry(ensightGeoFile& os) const
             {
                 if (pointMap[ptI] > -1)
                 {
-                    os.write( meshPoints[ptI].component(cmpt) );
+                    os.write( points[ptI].component(cmpt) );
                     os.newline();
                 }
             }
