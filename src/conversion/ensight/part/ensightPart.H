@@ -267,6 +267,12 @@ public:
             matId_ = value;
         }
 
+        //- simple labelList with a name
+        const labelListList& elemLists() const
+        {
+            return elemLists_;
+        }
+
         //- offset for element ids
         label offset() const
         {
@@ -285,8 +291,12 @@ public:
         //- write reconstruction information for the object
         bool writeData(Ostream&) const;
 
-        //- write geometry
-        void writeGeometry(ensightGeoFile&) const;
+        //- Write geometry
+        virtual void writeGeometry(ensightGeoFile&) const
+        {}
+
+        //- Helper: write geometry given the pointField
+        void writeGeometry(ensightGeoFile&, const pointField& points) const;
 
         //- write scalar field
         void writeScalarField

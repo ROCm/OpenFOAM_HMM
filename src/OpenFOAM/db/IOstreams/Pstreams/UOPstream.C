@@ -213,9 +213,20 @@ Foam::Ostream& Foam::UOPstream::write(const string& str)
 }
 
 
-Foam::Ostream& Foam::UOPstream::writeQuoted(const std::string& str, const bool)
+Foam::Ostream& Foam::UOPstream::writeQuoted
+(
+    const std::string& str,
+    const bool quoted
+)
 {
-    write(char(token::STRING));
+    if (quoted)
+    {
+        write(char(token::STRING));
+    }
+    else
+    {
+        write(char(token::WORD));
+    }
 
     size_t len = str.size();
     writeToBuffer(len);

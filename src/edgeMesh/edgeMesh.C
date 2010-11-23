@@ -387,14 +387,4 @@ void Foam::edgeMesh::mergePoints(const scalar mergeDist)
 }
 
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-void Foam::edgeMesh::operator=(const edgeMesh& rhs)
-{
-    points_ = rhs.points_;
-    edges_ = rhs.edges_;
-    pointEdgesPtr_.clear();
-}
-
-
 // ************************************************************************* //

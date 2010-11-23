@@ -59,6 +59,13 @@ class particleForces
 {
     // Private data
 
+        //- Reference frame type
+        enum refFrame
+        {
+            rfInertial,
+            rfSRF
+        };
+
         //- Reference to the mesh database
         const fvMesh& mesh_;
 
@@ -94,6 +101,9 @@ class particleForces
 
             //- Magnetic susceptibility of particle
             scalar magneticSusceptibility_;
+
+            //- Reference frame accelerations
+            refFrame refFrame_;
 
 
         // Additional info

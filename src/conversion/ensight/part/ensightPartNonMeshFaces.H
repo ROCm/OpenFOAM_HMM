@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,105 +22,107 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::ensightSurfaceWriter
+    Foam::ensightPartNonMeshFaces
 
 Description
+    An implementation of ensightPart to work on self-contained faces and points
+    (without a mesh).
 
 SourceFiles
-    ensightSurfaceWriter.C
+    ensightPartNonMeshFaces.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightSurfaceWriter_H
-#define ensightSurfaceWriter_H
+#ifndef ensightPartNonMeshFaces_H
+#define ensightPartNonMeshFaces_H
 
-#include "surfaceWriter.H"
+#include "ensightPartFaces.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class ensightGeoFile;
-
 /*---------------------------------------------------------------------------*\
-                     Class ensightSurfaceWriter Declaration
+                     Class ensightPartNonMeshFaces Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type>
-class ensightSurfaceWriter
+class ensightPartNonMeshFaces
 :
-    public surfaceWriter<Type>
+    public ensightPartFaces
 {
     // Private data
 
-        fileName caseFileName_;
-        fileName surfaceName_;
-        fileName geomName_;
-        DynamicList<word> varNames_;
-        DynamicList<fileName> varFileNames_;
+        //- faces (reference)
+        const faceList& faces_;
+
+        //- points (reference)
+        const pointField& points_;
 
 
     // Private Member Functions
 
-        static void writeData(Ostream&, const Field<Type>& values);
+        //- Disallow default bitwise assignment
+        void operator=(const ensightPartNonMeshFaces&);
 
+        //- track points used
+        virtual localPoints calcLocalPoints() const;
 
 public:
 
     //- Runtime type information
-    TypeName("ensight");
-
+    TypeName("ensightNonMeshFaces");
 
     // Constructors
 
-        //- Construct null
-        ensightSurfaceWriter();
+        //- Construct from faces and points
+        ensightPartNonMeshFaces
+        (
+            label partNumber,
+            const string& partDescription,
+            const faceList& faces,
+            const pointField& points
+        );
+
+        //- Construct as copy
+        ensightPartNonMeshFaces(const ensightPartNonMeshFaces& part);
+
+        //- Construct from Istream
+        ensightPartNonMeshFaces(Istream& is);
+
+        //- Construct on freestore from Istream
+        static autoPtr<ensightPartNonMeshFaces> New(Istream& is)
+        {
+            return autoPtr<ensightPartNonMeshFaces>
+            (
+                new ensightPartNonMeshFaces(is)
+            );
+        }
 
 
     //- Destructor
-    virtual ~ensightSurfaceWriter();
+    virtual ~ensightPartNonMeshFaces();
 
 
     // Member Functions
 
-        // Write
-
-        //- Write geometry to file.
-        virtual void write
+        //- element connectivity
+        virtual void writeConnectivity
         (
-            const fileName& outputDir,
-            const fileName& surfaceName,
-            const pointField& points,
-            const faceList& faces,
-            const bool verbose = false
+            ensightGeoFile& os,
+            const word& key,
+            const labelList& idList,
+            const labelList& pointMap
         ) const;
 
+        virtual void writeGeometry(ensightGeoFile& os) const;
 
-        //- Writes single surface to file.
-        virtual void write
-        (
-            const fileName& outputDir,
-            const fileName& surfaceName,
-            const pointField& points,
-            const faceList& faces,
-            const word& fieldName,
-            const Field<Type>& values,
-            const bool isNodeValues,
-            const bool verbose = false
-        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "ensightSurfaceWriter.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

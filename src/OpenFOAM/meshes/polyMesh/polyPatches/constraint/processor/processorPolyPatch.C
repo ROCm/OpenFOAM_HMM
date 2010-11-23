@@ -63,8 +63,6 @@ Foam::processorPolyPatch::processorPolyPatch
     neighbFaceCentres_(),
     neighbFaceAreas_(),
     neighbFaceCellCentres_()
-//    neighbPointsPtr_(NULL),
-//    neighbEdgesPtr_(NULL)
 {}
 
 
@@ -82,8 +80,6 @@ Foam::processorPolyPatch::processorPolyPatch
     neighbFaceCentres_(),
     neighbFaceAreas_(),
     neighbFaceCellCentres_()
-//    neighbPointsPtr_(NULL),
-//    neighbEdgesPtr_(NULL)
 {}
 
 
@@ -99,8 +95,6 @@ Foam::processorPolyPatch::processorPolyPatch
     neighbFaceCentres_(),
     neighbFaceAreas_(),
     neighbFaceCellCentres_()
-//    neighbPointsPtr_(NULL),
-//    neighbEdgesPtr_(NULL)
 {}
 
 
@@ -119,8 +113,6 @@ Foam::processorPolyPatch::processorPolyPatch
     neighbFaceCentres_(),
     neighbFaceAreas_(),
     neighbFaceCellCentres_()
-//    neighbPointsPtr_(NULL),
-//    neighbEdgesPtr_(NULL)
 {}
 
 
@@ -139,8 +131,6 @@ Foam::processorPolyPatch::processorPolyPatch
     neighbFaceCentres_(),
     neighbFaceAreas_(),
     neighbFaceCellCentres_()
-//    neighbPointsPtr_(NULL),
-//    neighbEdgesPtr_(NULL)
 {}
 
 
@@ -157,7 +147,6 @@ Foam::processorPolyPatch::~processorPolyPatch()
 
 void Foam::processorPolyPatch::initGeometry(PstreamBuffers& pBufs)
 {
-//Pout<< "**processorPolyPatch::initGeometry()" << endl;
     if (Pstream::parRun())
     {
         UOPstream toNeighbProc(neighbProcNo(), pBufs);
@@ -172,7 +161,6 @@ void Foam::processorPolyPatch::initGeometry(PstreamBuffers& pBufs)
 
 void Foam::processorPolyPatch::calcGeometry(PstreamBuffers& pBufs)
 {
-//Pout<< "processorPolyPatch::calcGeometry() for " << name() << endl;
     if (Pstream::parRun())
     {
         {
@@ -184,8 +172,6 @@ void Foam::processorPolyPatch::calcGeometry(PstreamBuffers& pBufs)
                 >> neighbFaceCellCentres_;
         }
 
-//Pout<< "processorPolyPatch::calcGeometry() : received data for "
-//    << neighbFaceCentres_.size() << " faces." << endl;
 
         // My normals
         vectorField faceNormals(size());
@@ -252,9 +238,6 @@ void Foam::processorPolyPatch::calcGeometry(PstreamBuffers& pBufs)
             nbrFaceNormals,
             calcFaceTol(*this, points(), faceCentres())
         );
-//Pout<< "**neighbFaceCentres_:" << neighbFaceCentres_ << endl;
-//Pout<< "**neighbFaceAreas_:" << neighbFaceAreas_ << endl;
-//Pout<< "**neighbFaceCellCentres_:" << neighbFaceCellCentres_ << endl;
     }
 }
 
