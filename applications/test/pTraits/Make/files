@@ -1,2 +1,2 @@
-pTraitsTest.C
+Test-pTraits.C
 EXE = $(FOAM_USER_APPBIN)/pTraits

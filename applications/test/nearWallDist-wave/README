@@ -1,5 +1,7 @@
-testWallDist.C: calculate distance to wall and reflection vectors.
+Test-WallDist.C:
+    calculate distance to wall and reflection vectors.
 
-testWallDist2.C: for debugging: same but do explicit iterations and dump every
-timestep.
+Test-WallDist2.C:
+    for debugging: same but do explicit iterations and dump every
+    timestep.
 
