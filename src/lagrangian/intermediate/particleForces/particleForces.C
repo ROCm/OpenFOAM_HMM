@@ -29,6 +29,7 @@ License
 #include "fvcGrad.H"
 #include "mathematicalConstants.H"
 #include "electromagneticConstants.H"
+#include "SRFModel.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -63,6 +64,7 @@ Foam::particleForces::particleForces(const fvMesh& mesh)
     pressureGradient_(false),
     paramagnetic_(false),
     magneticSusceptibility_(0.0),
+    refFrame_(rfInertial),
     UName_("undefined_UName"),
     HdotGradHName_("undefined_HdotGradHName")
 {}
@@ -86,6 +88,7 @@ Foam::particleForces::particleForces
     pressureGradient_(dict_.lookup("pressureGradient")),
     paramagnetic_(dict_.lookup("paramagnetic")),
     magneticSusceptibility_(0.0),
+    refFrame_(rfInertial),
     UName_(dict_.lookupOrDefault<word>("UName", "U")),
     HdotGradHName_(dict_.lookupOrDefault<word>("HdotGradHName", "HdotGradH"))
 {
@@ -97,6 +100,30 @@ Foam::particleForces::particleForces
     if (paramagnetic_)
     {
         dict_.lookup("magneticSusceptibility") >> magneticSusceptibility_;
+    }
+
+    if (dict_.found("referenceFrame"))
+    {
+        word rf(dict_.lookup("referenceFrame"));
+
+        if (rf == "SRF")
+        {
+            refFrame_ = rfSRF;
+        }
+        else if (rf != "inertial")
+        {
+            FatalErrorIn
+            (
+                "Foam::particleForces::particleForces"
+                "("
+                    "const fvMesh& mesh,"
+                    "const dictionary& dict,"
+                    "const vector& g"
+                ")"
+            )
+                << "Unknown referenceFrame, options are inertial and SRF."
+                << abort(FatalError);
+        }
     }
 }
 
@@ -114,6 +141,7 @@ Foam::particleForces::particleForces(const particleForces& f)
     pressureGradient_(f.pressureGradient_),
     paramagnetic_(f.paramagnetic_),
     magneticSusceptibility_(f.magneticSusceptibility_),
+    refFrame_(f.refFrame_),
     UName_(f.UName_),
     HdotGradHName_(f.HdotGradHName_)
 {}
@@ -303,6 +331,20 @@ Foam::vector Foam::particleForces::calcNonCoupled
 
         // which is divided by mass ((4/3)*pi*r^3*rho) to produce
         // acceleration
+    }
+
+    if (refFrame_ == rfSRF)
+    {
+        const SRF::SRFModel& srf =
+            mesh_.lookupObject<SRF::SRFModel>("SRFProperties");
+
+        const vector& omega = srf.omega().value();
+        const vector& axis = srf.axis();
+
+        vector r = position - axis*(axis & position);
+
+        // Coriolis and centrifugal acceleration terms
+        accelTot += 2*(U ^ omega) + (omega ^ (r ^ omega));
     }
 
     return accelTot;
