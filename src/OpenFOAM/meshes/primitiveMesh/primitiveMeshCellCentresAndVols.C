@@ -183,8 +183,8 @@ void Foam::primitiveMesh::overrideCellCentres
                 "const vectorField& newCellCtrs"
             ") const"
         )
-            << "Size of new cell centres for override not equal to the "
-            << "number of cells in the mesh."
+            << "Size of new cell centres for override " << newCellCtrs.size()
+            << " not equal to the number of cells in the mesh " << nCells()
             << abort(FatalError);
     }
 
