@@ -62,7 +62,7 @@ void testPackedList(const polyMesh& mesh, Random& rndGen)
         labelList maxEdgeValues(edgeValues);
 
         syncTools::syncEdgeList(mesh, bits, minEqOp<unsigned int>(), 0);
-        syncTools::syncEdgeList(mesh, edgeValues, minEqOp<label>(), 0, false);
+        syncTools::syncEdgeList(mesh, edgeValues, minEqOp<label>(), 0);
 
         syncTools::syncEdgeList(mesh, maxBits, maxEqOp<unsigned int>(), 0);
         syncTools::syncEdgeList
@@ -70,8 +70,7 @@ void testPackedList(const polyMesh& mesh, Random& rndGen)
             mesh,
             maxEdgeValues,
             maxEqOp<label>(),
-            0,
-            false
+            0
         );
 
         forAll(bits, i)
@@ -110,7 +109,7 @@ void testPackedList(const polyMesh& mesh, Random& rndGen)
         labelList maxPointValues(pointValues);
 
         syncTools::syncPointList(mesh, bits, minEqOp<unsigned int>(), 0);
-        syncTools::syncPointList(mesh, pointValues, minEqOp<label>(), 0, false);
+        syncTools::syncPointList(mesh, pointValues, minEqOp<label>(), 0);
 
         syncTools::syncPointList(mesh, maxBits, maxEqOp<unsigned int>(), 0);
         syncTools::syncPointList
@@ -118,8 +117,7 @@ void testPackedList(const polyMesh& mesh, Random& rndGen)
             mesh,
             maxPointValues,
             maxEqOp<label>(),
-            0,
-            false
+            0
         );
 
         forAll(bits, i)
@@ -158,10 +156,10 @@ void testPackedList(const polyMesh& mesh, Random& rndGen)
         labelList maxFaceValues(faceValues);
 
         syncTools::syncFaceList(mesh, bits, minEqOp<unsigned int>());
-        syncTools::syncFaceList(mesh, faceValues, minEqOp<label>(), false);
+        syncTools::syncFaceList(mesh, faceValues, minEqOp<label>());
 
         syncTools::syncFaceList(mesh, maxBits, maxEqOp<unsigned int>());
-        syncTools::syncFaceList(mesh, maxFaceValues, maxEqOp<label>(), false);
+        syncTools::syncFaceList(mesh, maxFaceValues, maxEqOp<label>());
 
         forAll(bits, faceI)
         {
@@ -225,16 +223,16 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
         (
             mesh,
             sparseData,
-            minEqOp<vector>(),
-            true                    // apply separation
+            minEqOp<vector>()
+            // true                    // apply separation
         );
         syncTools::syncPointList
         (
             mesh,
             fullData,
             minEqOp<vector>(),
-            point::max,
-            true                    // apply separation
+            point::max
+            // true                    // apply separation
         );
 
         // Compare.
@@ -310,16 +308,14 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
         (
             mesh,
             sparseData,
-            minEqOp<vector>(),
-            true
+            minEqOp<vector>()
         );
         syncTools::syncEdgeList
         (
             mesh,
             fullData,
             minEqOp<vector>(),
-            point::max,
-            true
+            point::max
         );
 
         // Compare.
@@ -388,8 +384,7 @@ void testPointSync(const polyMesh& mesh, Random& rndGen)
             mesh,
             syncedPoints,
             minEqOp<point>(),
-            point::max,
-            true
+            point::max
         );
 
         forAll(syncedPoints, pointI)
@@ -425,8 +420,7 @@ void testPointSync(const polyMesh& mesh, Random& rndGen)
             mesh,
             nMasters,
             plusEqOp<label>(),
-            0,
-            false
+            0
         );
 
         forAll(nMasters, pointI)
@@ -470,8 +464,7 @@ void testEdgeSync(const polyMesh& mesh, Random& rndGen)
             mesh,
             syncedMids,
             minEqOp<point>(),
-            point::max,
-            true
+            point::max
         );
 
         forAll(syncedMids, edgeI)
@@ -509,8 +502,7 @@ void testEdgeSync(const polyMesh& mesh, Random& rndGen)
             mesh,
             nMasters,
             plusEqOp<label>(),
-            0,
-            false
+            0
         );
 
         forAll(nMasters, edgeI)
@@ -544,8 +536,7 @@ void testFaceSync(const polyMesh& mesh, Random& rndGen)
         (
             mesh,
             syncedFc,
-            maxEqOp<point>(),
-            true
+            maxEqOp<point>()
         );
 
         forAll(syncedFc, faceI)
@@ -580,8 +571,7 @@ void testFaceSync(const polyMesh& mesh, Random& rndGen)
         (
             mesh,
             nMasters,
-            plusEqOp<label>(),
-            false
+            plusEqOp<label>()
         );
 
         forAll(nMasters, faceI)
