@@ -164,7 +164,7 @@ Field<Type>::Field(const Xfer<List<Type> >& f)
 template<class Type>
 Field<Type>::Field(const Xfer<Field<Type> >& f)
 :
-    List<Type>(f)
+    List<Type>(f().xferList())
 {}
 
 
@@ -582,6 +582,13 @@ template<class Type>
 Xfer<Field<Type> > Field<Type>::xfer()
 {
     return xferMove(*this);
+}
+
+
+template<class Type>
+Xfer<List<Type> > Field<Type>::xferList()
+{
+    return List<Type>::xfer();
 }
 
 

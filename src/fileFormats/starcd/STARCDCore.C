@@ -117,7 +117,7 @@ bool Foam::fileFormats::STARCDCore::readPoints
 
 
     // reuse memory if possible
-    DynamicList<point> dynPoints(points.xfer());
+    DynamicList<point> dynPoints(points.xferList());
     DynamicList<label> dynPointId(ids.xfer());    // STAR-CD index of points
 
     dynPoints.clear();

@@ -305,6 +305,9 @@ public:
         //- Transfer contents to the Xfer container
         Xfer<Field<Type> > xfer();
 
+        //- Transfer contents to a List Xfer container
+        Xfer<List<Type> > xferList();
+
         //- Write the field as a dictionary entry
         void writeEntry(const word& keyword, Ostream& os) const;
 
