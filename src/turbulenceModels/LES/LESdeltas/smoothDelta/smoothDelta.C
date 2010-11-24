@@ -37,9 +37,6 @@ namespace Foam
 defineTypeNameAndDebug(smoothDelta, 0);
 addToRunTimeSelectionTable(LESdelta, smoothDelta, dictionary);
 
-scalar smoothDelta::deltaData::maxDeltaRatio = 1.2;
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Fill changedFaces (with face labels) and changedFacesInfo (with delta)
@@ -69,12 +66,12 @@ void smoothDelta::setChangedFaces
 
         // Check if owner delta much larger than neighbour delta or vice versa
 
-        if (ownDelta > deltaData::maxDeltaRatio * neiDelta)
+        if (ownDelta > maxDeltaRatio_ * neiDelta)
         {
             changedFaces.append(faceI);
             changedFacesInfo.append(deltaData(ownDelta));
         }
-        else if (neiDelta > deltaData::maxDeltaRatio * ownDelta)
+        else if (neiDelta > maxDeltaRatio_ * ownDelta)
         {
             changedFaces.append(faceI);
             changedFacesInfo.append(deltaData(neiDelta));
@@ -108,7 +105,6 @@ void smoothDelta::setChangedFaces
 
 void smoothDelta::calcDelta()
 {
-    deltaData::maxDeltaRatio = maxDeltaRatio_;
     const volScalarField& geometricDelta = geometricDelta_();
 
     // Fill changed faces with info
@@ -130,14 +126,15 @@ void smoothDelta::calcDelta()
 
 
     // Propagate information over whole domain.
-    FaceCellWave<deltaData> deltaCalc
+    FaceCellWave<deltaData, scalar> deltaCalc
     (
         mesh_,
         changedFaces,
         changedFacesInfo,
         faceDeltaData,
         cellDeltaData,
-        mesh_.globalData().nTotalCells()+1   // max iterations
+        mesh_.globalData().nTotalCells()+1,  // max iterations
+        maxDeltaRatio_
     );
 
     forAll(delta_, cellI)

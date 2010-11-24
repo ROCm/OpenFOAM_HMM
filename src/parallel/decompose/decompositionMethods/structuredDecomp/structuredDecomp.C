@@ -155,7 +155,7 @@ Foam::labelList Foam::structuredDecomp::decompose
     bool haveWarned = false;
     forAll(finalDecomp, cellI)
     {
-        if (!cellData[cellI].valid())
+        if (!cellData[cellI].valid(deltaCalc.data()))
         {
             if (!haveWarned)
             {
