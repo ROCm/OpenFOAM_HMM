@@ -118,9 +118,8 @@ void writeVTKFields
     forAll(values, fieldI)
     {
         Info<< "        writing field " << fieldNames[fieldI] << endl;
-        os  << nl << fieldNames[fieldI] << ' '
-            << pTraits<Type>::nComponents << ' '
-            << values[fieldI].size() << " float" << nl;
+        os  << nl << fieldNames[fieldI] << ' ' << pTraits<Type>::nComponents
+            << ' ' << values[fieldI].size() << " float" << nl;
         label offset = 0;
         forAll(agePerTrack, trackI)
         {
