@@ -21,16 +21,16 @@ OSspecific/$WM_OSTYPE/Allwmake
 wmake libso OpenFOAM
 
 wmake libso fileFormats
-wmake libso surfMesh
 wmake libso triSurface
+wmake libso meshTools
+wmake libso edgeMesh
+wmake libso surfMesh
 
 # Decomposition methods needed by dummyThirdParty
 parallel/decompose/AllwmakeLnInclude
 # dummyThirdParty (dummy metisDecomp, scotchDecomp etc) needed by e.g. meshTools
 dummyThirdParty/Allwmake
 
-wmake libso meshTools
-wmake libso edgeMesh
 wmake libso lagrangian/basic
 wmake libso finiteVolume
 wmake libso genericPatchFields
