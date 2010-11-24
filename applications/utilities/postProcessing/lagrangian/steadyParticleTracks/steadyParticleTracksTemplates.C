@@ -83,7 +83,7 @@ PtrList<List<Type> > readFields
             {
                 Info<< "        reading field " << obj.name() << endl;
                 IOField<Type> newField(obj);
-                values.set(fieldI++, new List<Type>(newField.xferList()));
+                values.set(fieldI++, new List<Type>(newField.xfer()));
                 break;
             }
         }
