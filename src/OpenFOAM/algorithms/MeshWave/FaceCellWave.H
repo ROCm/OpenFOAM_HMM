@@ -71,7 +71,7 @@ TemplateName(FaceCellWave);
                            Class FaceCellWave Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class Type>
+template<class Type, class TrackingData = int>
 class FaceCellWave
 :
     public FaceCellWaveName
@@ -86,6 +86,9 @@ class FaceCellWave
 
         //- Information for all cells
         UList<Type>& allCellInfo_;
+
+        //- Additional data to be passed into container
+        TrackingData& td_;
 
         //- Has face changed
         boolList changedFace_;
@@ -113,27 +116,6 @@ class FaceCellWave
 
         //- Iteration counter
         label iter_;
-
-
-    // Static Functions
-
-        //- Write faces info
-        static Ostream& writeFaces
-        (
-            const label nFaces,
-            const labelList& faceLabels,
-            const List<Type>& faceInfo,
-            Ostream& os
-        );
-
-        //- Read faces info
-        static Istream& readFaces
-        (
-            label& nFaces,
-            labelList& faceLabels,
-            List<Type>& faceInfo,
-            Istream& is
-        );
 
 
     // Private Member Functions
@@ -250,7 +232,12 @@ class FaceCellWave
       // Private static data
 
             static const scalar geomTol_;
-            static scalar propagationTol_;
+            static const scalar propagationTol_;
+
+            //- Used as default trackdata value to satisfy default template
+            //  argument.
+            static label dummyTrackData_;
+
 
 public:
 
@@ -277,7 +264,8 @@ public:
         (
             const polyMesh&,
             UList<Type>& allFaceInfo,
-            UList<Type>& allCellInfo
+            UList<Type>& allCellInfo,
+            TrackingData& td = dummyTrackData_
         );
 
         //- Construct from mesh and list of changed faces with the Type
@@ -290,7 +278,8 @@ public:
             const List<Type>& changedFacesInfo,
             UList<Type>& allFaceInfo,
             UList<Type>& allCellInfo,
-            const label maxIter
+            const label maxIter,
+            TrackingData& td = dummyTrackData_
         );
 
 
@@ -308,6 +297,12 @@ public:
             UList<Type>& allCellInfo()
             {
                 return allCellInfo_;
+            }
+
+            //- Additional data to be passed into container
+            const TrackingData& data() const
+            {
+                return td_;
             }
 
             //- Access mesh

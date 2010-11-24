@@ -57,16 +57,18 @@ inline Foam::label Foam::refinementDistanceData::wantedLevel(const point& pt)
 }
 
 
+template<class TrackingData>
 inline bool Foam::refinementDistanceData::update
 (
     const point& pos,
     const refinementDistanceData& neighbourInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
-    if (!valid())
+    if (!valid(td))
     {
-        if (!neighbourInfo.valid())
+        if (!neighbourInfo.valid(td))
         {
             FatalErrorIn("refinementDistanceData::update(..)")
                 << "problem" << abort(FatalError);
@@ -142,40 +144,47 @@ inline Foam::refinementDistanceData::refinementDistanceData
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::refinementDistanceData::valid() const
+template<class TrackingData>
+inline bool Foam::refinementDistanceData::valid(TrackingData& td) const
 {
     return level0Size_ != -1;
 }
 
 
 // No geometric data so never any problem on cyclics
+template<class TrackingData>
 inline bool Foam::refinementDistanceData::sameGeometry
 (
     const polyMesh&,
     const refinementDistanceData&,
-    const scalar
+    const scalar,
+    TrackingData& td
 ) const
 {
     return true;
 }
 
 
+template<class TrackingData>
 inline void Foam::refinementDistanceData::leaveDomain
 (
     const polyMesh&,
     const polyPatch& patch,
     const label patchFaceI,
-    const point& faceCentre
+    const point& faceCentre,
+    TrackingData& td
 )
 {
     origin_ -= faceCentre;
 }
 
 
+template<class TrackingData>
 inline void Foam::refinementDistanceData::transform
 (
     const polyMesh&,
-    const tensor& rotTensor
+    const tensor& rotTensor,
+    TrackingData& td
 )
 {
     origin_ = Foam::transform(rotTensor, origin_);
@@ -183,12 +192,14 @@ inline void Foam::refinementDistanceData::transform
 
 
 // Update absolute geometric quantities.
+template<class TrackingData>
 inline void Foam::refinementDistanceData::enterDomain
 (
     const polyMesh&,
     const polyPatch& patch,
     const label patchFaceI,
-    const point& faceCentre
+    const point& faceCentre,
+    TrackingData& td
 )
 {
     // back to absolute form
@@ -197,49 +208,80 @@ inline void Foam::refinementDistanceData::enterDomain
 
 
 // Update cell with neighbouring face information
+template<class TrackingData>
 inline bool Foam::refinementDistanceData::updateCell
 (
     const polyMesh& mesh,
     const label thisCellI,
     const label neighbourFaceI,
     const refinementDistanceData& neighbourInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
     const point& pos = mesh.cellCentres()[thisCellI];
 
-    return update(pos, neighbourInfo, tol);
+    return update(pos, neighbourInfo, tol, td);
 }
 
 
 // Update face with neighbouring cell information
+template<class TrackingData>
 inline bool Foam::refinementDistanceData::updateFace
 (
     const polyMesh& mesh,
     const label thisFaceI,
     const label neighbourCellI,
     const refinementDistanceData& neighbourInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
     const point& pos = mesh.faceCentres()[thisFaceI];
 
-    return update(pos, neighbourInfo, tol);
+    return update(pos, neighbourInfo, tol, td);
 }
 
 
 // Update face with coupled face information
+template<class TrackingData>
 inline bool Foam::refinementDistanceData::updateFace
 (
     const polyMesh& mesh,
     const label thisFaceI,
     const refinementDistanceData& neighbourInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
     const point& pos = mesh.faceCentres()[thisFaceI];
 
-    return update(pos, neighbourInfo, tol);
+    return update(pos, neighbourInfo, tol, td);
+}
+
+
+template <class TrackingData>
+inline bool Foam::refinementDistanceData::equal
+(
+    const refinementDistanceData& rhs,
+    TrackingData& td
+) const
+{
+    if (!valid(td))
+    {
+        if (!rhs.valid(td))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        return operator==(rhs);
+    }
 }
 
 
@@ -251,24 +293,10 @@ inline bool Foam::refinementDistanceData::operator==
 )
  const
 {
-    if (!valid())
-    {
-        if (!rhs.valid())
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else
-    {
-        return
-            level0Size_ == rhs.level0Size_
-         && origin_ == rhs.origin_
-         && originLevel_ == rhs.originLevel_;
-    }
+    return
+        level0Size_ == rhs.level0Size_
+     && origin_ == rhs.origin_
+     && originLevel_ == rhs.originLevel_;
 }
 
 

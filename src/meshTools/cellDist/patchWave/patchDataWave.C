@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "patchDataWave.H"
-#include "MeshWave.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -93,7 +92,7 @@ Foam::label Foam::patchDataWave<TransferType>::getValues
 
         scalar dist = wpn.distSqr();
 
-        if (cellInfo[cellI].valid())
+        if (cellInfo[cellI].valid(waveInfo.data()))
         {
             distance_[cellI] = Foam::sqrt(dist);
 
@@ -138,7 +137,7 @@ Foam::label Foam::patchDataWave<TransferType>::getValues
 
             scalar dist = faceInfo[meshFaceI].distSqr();
 
-            if (faceInfo[meshFaceI].valid())
+            if (faceInfo[meshFaceI].valid(waveInfo.data()))
             {
                 // Adding SMALL to avoid problems with /0 in the turbulence
                 // models

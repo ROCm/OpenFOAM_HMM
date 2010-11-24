@@ -24,9 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "wallPointData.H"
-#include "point.H"
-#include "scalar.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,6 +44,7 @@ Ostream& operator<<
     return os << wDist.data();
 }
 
+
 template <class Type>
 Istream& operator>>
 (
@@ -58,6 +56,7 @@ Istream& operator>>
 
     return is >> wDist.data_;
 }
+
 
 // ************************************************************************* //
 

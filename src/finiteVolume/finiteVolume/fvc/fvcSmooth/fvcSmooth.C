@@ -31,8 +31,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::scalar Foam::smoothData::maxRatio = 1.0;
-
 void Foam::fvc::smooth
 (
     volScalarField& field,
@@ -40,7 +38,7 @@ void Foam::fvc::smooth
 )
 {
     const fvMesh& mesh = field.mesh();
-    smoothData::maxRatio = 1 + coeff;
+    scalar maxRatio = 1 + coeff;
 
     DynamicList<label> changedFaces(mesh.nFaces()/100 + 100);
     DynamicList<smoothData> changedFacesInfo(changedFaces.size());
@@ -54,12 +52,12 @@ void Foam::fvc::smooth
         const label nbr = neighbour[facei];
 
         // Check if owner value much larger than neighbour value or vice versa
-        if (field[own] > smoothData::maxRatio*field[nbr])
+        if (field[own] > maxRatio*field[nbr])
         {
             changedFaces.append(facei);
             changedFacesInfo.append(smoothData(field[own]));
         }
-        else if (field[nbr] > smoothData::maxRatio*field[own])
+        else if (field[nbr] > maxRatio*field[own])
         {
             changedFaces.append(facei);
             changedFacesInfo.append(smoothData(field[nbr]));
@@ -98,16 +96,19 @@ void Foam::fvc::smooth
     // Set initial field on faces
     List<smoothData> faceData(mesh.nFaces());
 
+    smoothData::trackData td;
+    td.maxRatio = maxRatio;
 
     // Propagate information over whole domain
-    FaceCellWave<smoothData > smoothData
+    FaceCellWave<smoothData, smoothData::trackData> smoothData
     (
         mesh,
         changedFaces,
         changedFacesInfo,
         faceData,
         cellData,
-        mesh.globalData().nTotalCells()    // max iterations
+        mesh.globalData().nTotalCells(),   // max iterations
+        td
     );
 
     forAll(field, celli)
@@ -130,7 +131,6 @@ void Foam::fvc::spread
 )
 {
     const fvMesh& mesh = field.mesh();
-    smoothData::maxRatio = 1;
 
     DynamicList<label> changedFaces(mesh.nFaces()/100 + 100);
     DynamicList<smoothData> changedFacesInfo(changedFaces.size());
@@ -208,12 +208,16 @@ void Foam::fvc::spread
     changedFaces.shrink();
     changedFacesInfo.shrink();
 
+    smoothData::trackData td;
+    td.maxRatio = 1.0;
+
     // Propagate information over whole domain
-    FaceCellWave<smoothData> smoothData
+    FaceCellWave<smoothData, smoothData::trackData> smoothData
     (
         mesh,
         faceData,
-        cellData
+        cellData,
+        td
     );
 
     smoothData.setFaceInfo(changedFaces, changedFacesInfo);
@@ -311,7 +315,7 @@ void Foam::fvc::sweep
 
     forAll(field, celli)
     {
-        if (cellData[celli].valid())
+        if (cellData[celli].valid(sweepData.data()))
         {
             field[celli] = max(field[celli], cellData[celli].value());
         }

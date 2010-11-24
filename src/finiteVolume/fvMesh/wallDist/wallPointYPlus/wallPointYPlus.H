@@ -32,6 +32,9 @@ Description
     the damping function becomes 1, since y gets initialized to GREAT and
     yStar to 1.
 
+    Note: should feed the additional argument (yPlusCutoff) through as a
+    template argument into FaceCellWave
+
 SourceFiles
     wallPointYPlusI.H
     wallPointYPlus.C
@@ -58,16 +61,20 @@ class wallPointYPlus
     public wallPointData<scalar>
 {
 
+private:
+
     // Private Member Functions
 
         //- Evaluate distance to point. Update distSqr, origin from whomever
         //  is nearer pt. Return true if w2 is closer to point,
         //  false otherwise.
+        template<class TrackingData>
         inline bool update
         (
             const point&,
             const wallPointYPlus& w2,
-            const scalar tol
+            const scalar tol,
+            TrackingData& td
         );
 
 public:
@@ -94,39 +101,45 @@ public:
 
     // Member Functions
 
-        // Needed by meshWave
+        // Needed by FaceCellWave
 
             //- Influence of neighbouring face.
             //  Calls update(...) with cellCentre of cellI
+            template<class TrackingData>
             inline bool updateCell
             (
                 const polyMesh& mesh,
                 const label thisCellI,
                 const label neighbourFaceI,
                 const wallPointYPlus& neighbourWallInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
 
             //- Influence of neighbouring cell.
             //  Calls update(...) with faceCentre of faceI
+            template<class TrackingData>
             inline bool updateFace
             (
                 const polyMesh& mesh,
                 const label thisFaceI,
                 const label neighbourCellI,
                 const wallPointYPlus& neighbourWallInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
 
             //- Influence of different value on same face.
             //  Merge new and old info.
             //  Calls update(...) with faceCentre of faceI
+            template<class TrackingData>
             inline bool updateFace
             (
                 const polyMesh& mesh,
                 const label thisFaceI,
                 const wallPointYPlus& neighbourWallInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
 };
 

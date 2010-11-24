@@ -115,7 +115,7 @@ void Foam::inverseFaceDistanceDiffusivity::correct()
         mesh,
         changedFaces,
         faceDist,
-        mesh.globalData().nTotalCells()+1 // max iterations
+        mesh.globalData().nTotalCells()+1   // max iterations
     );
 
     const List<wallPoint>& faceInfo = waveInfo.allFaceInfo();

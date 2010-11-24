@@ -27,14 +27,16 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+template<class TrackingData>
 inline bool Foam::sweepData::update
 (
     const sweepData& svf,
     const point& position,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
-    if (!valid())
+    if (!valid(td))
     {
         operator=(svf);
         return true;
@@ -85,51 +87,60 @@ inline Foam::sweepData::sweepData(const scalar value, const point& origin)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::sweepData::valid() const
+template<class TrackingData>
+inline bool Foam::sweepData::valid(TrackingData& td) const
 {
     return value_ > -SMALL;
 }
 
 
+template<class TrackingData>
 inline bool Foam::sweepData::sameGeometry
 (
     const polyMesh&,
     const sweepData&,
-    const scalar
+    const scalar,
+    TrackingData& td
 ) const
 {
     return true;
 }
 
 
+template<class TrackingData>
 inline void Foam::sweepData::leaveDomain
 (
     const polyMesh&,
     const polyPatch&,
     const label,
-    const point& faceCentre
+    const point& faceCentre,
+    TrackingData& td
 )
 {
     origin_ -= faceCentre;
 }
 
 
+template<class TrackingData>
 inline void Foam::sweepData::transform
 (
     const polyMesh&,
-    const tensor& rotTensor
+    const tensor& rotTensor,
+    TrackingData& td
 )
 {
     origin_ = Foam::transform(rotTensor, origin_);
 }
 
 
+template<class TrackingData>
 inline void Foam::sweepData::enterDomain
 (
     const polyMesh&,
     const polyPatch&,
     const label,
-    const point& faceCentre
+    const point& faceCentre,
+    TrackingData& td
 )
 {
     // back to absolute form
@@ -137,42 +148,59 @@ inline void Foam::sweepData::enterDomain
 }
 
 
+template<class TrackingData>
 inline bool Foam::sweepData::updateCell
 (
     const polyMesh& mesh,
     const label thisCellI,
     const label,
     const sweepData& svf,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
-    return update(svf, mesh.cellCentres()[thisCellI], tol);
+    return update(svf, mesh.cellCentres()[thisCellI], tol, td);
 }
 
 
+template<class TrackingData>
 inline bool Foam::sweepData::updateFace
 (
     const polyMesh& mesh,
     const label thisFaceI,
     const label,
     const sweepData& svf,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
-    return update(svf, mesh.faceCentres()[thisFaceI], tol);
+    return update(svf, mesh.faceCentres()[thisFaceI], tol, td);
 }
 
 
 // Update this (face) with coupled face information.
+template<class TrackingData>
 inline bool Foam::sweepData::updateFace
 (
     const polyMesh& mesh,
     const label thisFaceI,
     const sweepData& svf,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
-    return update(svf, mesh.faceCentres()[thisFaceI], tol);
+    return update(svf, mesh.faceCentres()[thisFaceI], tol, td);
+}
+
+
+template <class TrackingData>
+inline bool Foam::sweepData::equal
+(
+    const sweepData& rhs,
+    TrackingData& td
+) const
+{
+    return operator==(rhs);
 }
 
 

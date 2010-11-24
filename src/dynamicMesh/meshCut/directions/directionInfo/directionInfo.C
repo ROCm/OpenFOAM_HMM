@@ -25,34 +25,12 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "directionInfo.H"
-#include "hexMatcher.H"
-#include "meshTools.H"
+//#include "hexMatcher.H"
+//#include "meshTools.H"
 #include "polyMesh.H"
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-bool Foam::directionInfo::equal(const edge& e, const label v0, const label v1)
-{
-    return
-        (e.start() == v0 && e.end() == v1)
-     || (e.start() == v1 && e.end() == v0);
-}
-
-
-Foam::point Foam::directionInfo::eMid
-(
-    const primitiveMesh& mesh,
-    const label edgeI
-)
-{
-    const edge& e = mesh.edges()[edgeI];
-
-    return
-        0.5
-      * (mesh.points()[e.start()] + mesh.points()[e.end()]);
-}
-
 
 // Find edge among edgeLabels that uses v0 and v1
 Foam::label Foam::directionInfo::findEdge
@@ -67,9 +45,7 @@ Foam::label Foam::directionInfo::findEdge
     {
         label edgeI = edgeLabels[edgeLabelI];
 
-        const edge& e = mesh.edges()[edgeI];
-
-        if (equal(e, v0, v1))
+        if (mesh.edges()[edgeI] == edge(v0, v1))
         {
             return edgeI;
         }
@@ -221,159 +197,6 @@ Foam::label Foam::directionInfo::edgeToFaceIndex
 
             return -1;
         }
-    }
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-// Update this cell with neighbouring face information
-bool Foam::directionInfo::updateCell
-(
-    const polyMesh& mesh,
-    const label thisCellI,
-    const label neighbourFaceI,
-    const directionInfo& neighbourInfo,
-    const scalar        // tol
-)
-{
-    if (index_ >= -2)
-    {
-        // Already determined.
-        return false;
-    }
-
-    if (hexMatcher().isA(mesh, thisCellI))
-    {
-        const face& f = mesh.faces()[neighbourFaceI];
-
-        if (neighbourInfo.index() == -2)
-        {
-            // Geometric information from neighbour
-            index_ = -2;
-        }
-        else if (neighbourInfo.index() == -1)
-        {
-            // Cut tangential to face. Take any edge connected to face
-            // but not used in face.
-
-            // Get first edge on face.
-            label edgeI = mesh.faceEdges()[neighbourFaceI][0];
-
-            const edge& e = mesh.edges()[edgeI];
-
-            // Find face connected to face through edgeI and on same cell.
-            label faceI =
-                meshTools::otherFace
-                (
-                    mesh,
-                    thisCellI,
-                    neighbourFaceI,
-                    edgeI
-                );
-
-            // Find edge on faceI which is connected to e.start() but not edgeI.
-            index_ =
-                meshTools::otherEdge
-                (
-                    mesh,
-                    mesh.faceEdges()[faceI],
-                    edgeI,
-                    e.start()
-                );
-        }
-        else
-        {
-            // Index is a vertex on the face. Convert to mesh edge.
-
-            // Get mesh edge between f[index_] and f[index_+1]
-            label v0 = f[neighbourInfo.index()];
-            label v1 = f[(neighbourInfo.index() + 1) % f.size()];
-
-            index_ = findEdge(mesh, mesh.faceEdges()[neighbourFaceI], v0, v1);
-        }
-    }
-    else
-    {
-        // Not a hex so mark this as geometric.
-        index_ = -2;
-    }
-
-
-    n_ = neighbourInfo.n();
-
-    return true;
-}
-
-
-// Update this face with neighbouring cell information
-bool Foam::directionInfo::updateFace
-(
-    const polyMesh& mesh,
-    const label thisFaceI,
-    const label neighbourCellI,
-    const directionInfo& neighbourInfo,
-    const scalar    // tol
-)
-{
-    // Handle special cases first
-
-    if (index_ >= -2)
-    {
-        // Already determined
-        return false;
-    }
-
-    // Handle normal cases where topological or geometrical info comes from
-    // neighbouring cell
-
-    if (neighbourInfo.index() >= 0)
-    {
-        // Neighbour has topological direction (and hence is hex). Find cut
-        // edge on face.
-        index_ =
-            edgeToFaceIndex
-            (
-                mesh,
-                neighbourCellI,
-                thisFaceI,
-                neighbourInfo.index()
-            );
-    }
-    else
-    {
-        // Neighbour has geometric information. Use.
-        index_ = -2;
-    }
-
-
-    n_ = neighbourInfo.n();
-
-    return true;
-}
-
-
-// Merge this with information on same face
-bool Foam::directionInfo::updateFace
-(
-    const polyMesh& mesh,
-    const label,    // thisFaceI
-    const directionInfo& neighbourInfo,
-    const scalar    // tol
-)
-{
-    if (index_ >= -2)
-    {
-        // Already visited.
-        return false;
-    }
-    else
-    {
-        index_ = neighbourInfo.index();
-
-        n_ = neighbourInfo.n();
-
-        return true;
     }
 }
 

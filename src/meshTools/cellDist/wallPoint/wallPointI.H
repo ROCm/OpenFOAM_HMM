@@ -29,11 +29,13 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Update this with w2 if w2 nearer to pt.
+template<class TrackingData>
 inline bool Foam::wallPoint::update
 (
     const point& pt,
     const wallPoint& w2,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
     //Already done in calling algorithm
@@ -45,7 +47,7 @@ inline bool Foam::wallPoint::update
 
     scalar dist2 = magSqr(pt - w2.origin());
 
-    if (!valid())
+    if (!valid(td))
     {
         // current not yet set so use any value
         distSqr_ = dist2;
@@ -128,18 +130,21 @@ inline Foam::scalar& Foam::wallPoint::distSqr()
 }
 
 
-inline bool Foam::wallPoint::valid() const
+template<class TrackingData>
+inline bool Foam::wallPoint::valid(TrackingData& td) const
 {
     return origin_ != point::max;
 }
 
 
 // Checks for cyclic faces
+template<class TrackingData>
 inline bool Foam::wallPoint::sameGeometry
 (
     const polyMesh&,
     const wallPoint& w2,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
  const
 {
@@ -163,22 +168,26 @@ inline bool Foam::wallPoint::sameGeometry
 }
 
 
+template<class TrackingData>
 inline void Foam::wallPoint::leaveDomain
 (
     const polyMesh&,
     const polyPatch&,
     const label,
-    const point& faceCentre
+    const point& faceCentre,
+    TrackingData& td
 )
 {
     origin_ -= faceCentre;
 }
 
 
+template<class TrackingData>
 inline void Foam::wallPoint::transform
 (
     const polyMesh&,
-    const tensor& rotTensor
+    const tensor& rotTensor,
+    TrackingData& td
 )
 {
     origin_ = Foam::transform(rotTensor, origin_);
@@ -187,12 +196,14 @@ inline void Foam::wallPoint::transform
 
 // Update absolute geometric quantities. Note that distance (distSqr_)
 // is not affected by leaving/entering domain.
+template<class TrackingData>
 inline void Foam::wallPoint::enterDomain
 (
     const polyMesh&,
     const polyPatch&,
     const label,
-    const point& faceCentre
+    const point& faceCentre,
+    TrackingData& td
 )
 {
     // back to absolute form
@@ -201,13 +212,15 @@ inline void Foam::wallPoint::enterDomain
 
 
 // Update this with w2 if w2 nearer to pt.
+template<class TrackingData>
 inline bool Foam::wallPoint::updateCell
 (
     const polyMesh& mesh,
     const label thisCellI,
     const label neighbourFaceI,
     const wallPoint& neighbourWallInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
     return
@@ -215,19 +228,22 @@ inline bool Foam::wallPoint::updateCell
         (
             mesh.cellCentres()[thisCellI],
             neighbourWallInfo,
-            tol
+            tol,
+            td
         );
     }
 
 
 // Update this with w2 if w2 nearer to pt.
+template<class TrackingData>
 inline bool Foam::wallPoint::updateFace
 (
     const polyMesh& mesh,
     const label thisFaceI,
     const label neighbourCellI,
     const wallPoint& neighbourWallInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
     return
@@ -235,17 +251,20 @@ inline bool Foam::wallPoint::updateFace
         (
             mesh.faceCentres()[thisFaceI],
             neighbourWallInfo,
-            tol
+            tol,
+            td
         );
 }
 
 // Update this with w2 if w2 nearer to pt.
+template<class TrackingData>
 inline bool Foam::wallPoint::updateFace
 (
     const polyMesh& mesh,
     const label thisFaceI,
     const wallPoint& neighbourWallInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
     return
@@ -253,8 +272,20 @@ inline bool Foam::wallPoint::updateFace
         (
             mesh.faceCentres()[thisFaceI],
             neighbourWallInfo,
-            tol
+            tol,
+            td
         );
+}
+
+
+template <class TrackingData>
+inline bool Foam::wallPoint::equal
+(
+    const wallPoint& rhs,
+    TrackingData& td
+) const
+{
+    return operator==(rhs);
 }
 
 

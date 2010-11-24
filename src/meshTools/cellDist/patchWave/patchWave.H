@@ -39,7 +39,7 @@ SourceFiles
 
 #include "cellDistFuncs.H"
 #include "FieldField.H"
-
+#include "MeshWave.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +49,6 @@ namespace Foam
 // Forward declaration of classes
 class polyMesh;
 class wallPoint;
-template<class Type> class MeshWave;
 
 /*---------------------------------------------------------------------------*\
                            Class patchWave Declaration

@@ -25,11 +25,6 @@ License
 
 #include "wallNormalInfo.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-Foam::point Foam::wallNormalInfo::greatVector(GREAT, GREAT, GREAT);
-
-
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<

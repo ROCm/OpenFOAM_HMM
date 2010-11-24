@@ -29,13 +29,15 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Update this with w2 information
+template<class TrackingData>
 inline bool Foam::cellInfo::update
 (
     const cellInfo& w2,
     const label thisFaceI,
     const label thisCellI,
     const label neighbourFaceI,
-    const label neighbourCellI
+    const label neighbourCellI,
+    TrackingData& td
 )
 {
     if
@@ -113,18 +115,21 @@ inline Foam::cellInfo::cellInfo(const cellInfo& w2)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::cellInfo::valid() const
+template<class TrackingData>
+inline bool Foam::cellInfo::valid(TrackingData& td) const
 {
     return type_ != cellClassification::NOTSET;
 }
 
 
 // No geometric data so never any problem on cyclics
+template<class TrackingData>
 inline bool Foam::cellInfo::sameGeometry
 (
     const polyMesh&,
     const cellInfo& w2,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
  const
 {
@@ -133,44 +138,52 @@ inline bool Foam::cellInfo::sameGeometry
 
 
 // No geometric data.
+template<class TrackingData>
 inline void Foam::cellInfo::leaveDomain
 (
     const polyMesh&,
     const polyPatch& patch,
     const label patchFaceI,
-    const point& faceCentre
+    const point& faceCentre,
+    TrackingData& td
 )
 {}
 
 
 // No geometric data.
+template<class TrackingData>
 inline void Foam::cellInfo::transform
 (
     const polyMesh&,
-    const tensor& rotTensor
+    const tensor& rotTensor,
+    TrackingData& td
 )
 {}
 
 
 // No geometric data.
+template<class TrackingData>
 inline void Foam::cellInfo::enterDomain
 (
     const polyMesh&,
     const polyPatch& patch,
     const label patchFaceI,
-    const point& faceCentre
+    const point& faceCentre,
+    TrackingData& td
 )
 {}
 
 
 // Update this with neighbour information
+template<class TrackingData>
 inline bool Foam::cellInfo::updateCell
 (
     const polyMesh&,
     const label thisCellI,
     const label neighbourFaceI,
     const cellInfo& neighbourInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
     return update
@@ -179,19 +192,22 @@ inline bool Foam::cellInfo::updateCell
         -1,
         thisCellI,
         neighbourFaceI,
-        -1
+        -1,
+        td
     );
 }
 
 
 // Update this with neighbour information
+template<class TrackingData>
 inline bool Foam::cellInfo::updateFace
 (
     const polyMesh&,
     const label thisFaceI,
     const label neighbourCellI,
     const cellInfo& neighbourInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
     return update
@@ -200,17 +216,20 @@ inline bool Foam::cellInfo::updateFace
         thisFaceI,
         -1,
         -1,
-        neighbourCellI
+        neighbourCellI,
+        td
     );
 }
 
 // Update this with neighbour information
+template<class TrackingData>
 inline bool Foam::cellInfo::updateFace
 (
     const polyMesh&,
     const label thisFaceI,
     const cellInfo& neighbourInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
     return update
@@ -219,8 +238,20 @@ inline bool Foam::cellInfo::updateFace
         thisFaceI,
         -1,
         -1,
-        -1
+        -1,
+        td
     );
+}
+
+
+template <class TrackingData>
+inline bool Foam::cellInfo::equal
+(
+    const cellInfo& rhs,
+    TrackingData& td
+) const
+{
+    return operator==(rhs);
 }
 
 
