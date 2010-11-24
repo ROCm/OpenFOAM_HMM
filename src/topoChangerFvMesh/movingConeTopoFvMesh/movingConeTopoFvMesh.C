@@ -272,16 +272,7 @@ Foam::movingConeTopoFvMesh::movingConeTopoFvMesh(const IOobject& io)
     ),
     leftEdge_(readScalar(motionDict_.lookup("leftEdge"))),
     curLeft_(readScalar(motionDict_.lookup("leftObstacleEdge"))),
-    curRight_(readScalar(motionDict_.lookup("rightObstacleEdge"))),
-    motionMask_
-    (
-        vertexMarkup
-        (
-            points(),
-            curLeft_,
-            curRight_
-        )
-    )
+    curRight_(readScalar(motionDict_.lookup("rightObstacleEdge")))
 {
     Pout<< "Initial time:" << time().value()
         << " Initial curMotionVel_:" << curMotionVel_
@@ -291,13 +282,26 @@ Foam::movingConeTopoFvMesh::movingConeTopoFvMesh(const IOobject& io)
 
     curLeft_ = average
     (
-        faceZones()["leftExtrusionFaces"]().localPoints()
+        faceZones()
+        [
+            faceZones().findZoneID("leftExtrusionFaces")
+        ]().localPoints()
     ).x() - SMALL;
 
     curRight_ = average
     (
-        faceZones()["rightExtrusionFaces"]().localPoints()
+        faceZones()
+        [
+            faceZones().findZoneID("rightExtrusionFaces")
+        ]().localPoints()
     ).x() + SMALL;
+
+    motionMask_ = vertexMarkup
+    (
+        points(),
+        curLeft_,
+        curRight_
+    );
 }
 
 
@@ -336,42 +340,44 @@ bool Foam::movingConeTopoFvMesh::update()
             //Info<< "preMotionPoints:" << topoChangeMap().preMotionPoints()
             //    << endl;
 
-            {
-                OFstream str(time().timePath()/"meshPoints.obj");
-                Pout<< "Writing mesh with meshPoints to " << str.name()
-                    << endl;
-
-                const pointField& currentPoints = points();
-                label vertI = 0;
-                forAll(currentPoints, pointI)
-                {
-                    meshTools::writeOBJ(str, currentPoints[pointI]);
-                    vertI++;
-                }
-                forAll(edges(), edgeI)
-                {
-                    const edge& e = edges()[edgeI];
-                    str << "l " << e[0]+1 << ' ' << e[1]+1 << nl;
-                }
-            }
-            {
-                OFstream str(time().timePath()/"preMotionPoints.obj");
-                Pout<< "Writing mesh with preMotionPoints to " << str.name()
-                    << endl;
-
-                const pointField& newPoints = topoChangeMap().preMotionPoints();
-                label vertI = 0;
-                forAll(newPoints, pointI)
-                {
-                    meshTools::writeOBJ(str, newPoints[pointI]);
-                    vertI++;
-                }
-                forAll(edges(), edgeI)
-                {
-                    const edge& e = edges()[edgeI];
-                    str << "l " << e[0]+1 << ' ' << e[1]+1 << nl;
-                }
-            }
+            //mkDir(time().timePath());
+            //{
+            //    OFstream str(time().timePath()/"meshPoints.obj");
+            //    Pout<< "Writing mesh with meshPoints to " << str.name()
+            //        << endl;
+            //
+            //    const pointField& currentPoints = points();
+            //    label vertI = 0;
+            //    forAll(currentPoints, pointI)
+            //    {
+            //        meshTools::writeOBJ(str, currentPoints[pointI]);
+            //        vertI++;
+            //    }
+            //    forAll(edges(), edgeI)
+            //    {
+            //        const edge& e = edges()[edgeI];
+            //        str << "l " << e[0]+1 << ' ' << e[1]+1 << nl;
+            //    }
+            //}
+            //{
+            //    OFstream str(time().timePath()/"preMotionPoints.obj");
+            //    Pout<< "Writing mesh with preMotionPoints to " << str.name()
+            //        << endl;
+            //
+            //    const pointField& newPoints =
+            //        topoChangeMap().preMotionPoints();
+            //    label vertI = 0;
+            //    forAll(newPoints, pointI)
+            //    {
+            //        meshTools::writeOBJ(str, newPoints[pointI]);
+            //        vertI++;
+            //    }
+            //    forAll(edges(), edgeI)
+            //    {
+            //        const edge& e = edges()[edgeI];
+            //        str << "l " << e[0]+1 << ' ' << e[1]+1 << nl;
+            //    }
+            //}
 
 
             motionMask_ =
@@ -381,6 +387,13 @@ bool Foam::movingConeTopoFvMesh::update()
                     curLeft_,
                     curRight_
                 );
+
+            // Move points inside the motionMask
+            newPoints =
+                topoChangeMap().preMotionPoints()
+              + (
+                    pos(0.5 - mag(motionMask_)) // cells above the body
+                )*curMotionVel_*time().deltaT().value();
         }
         else
         {
@@ -393,28 +406,14 @@ bool Foam::movingConeTopoFvMesh::update()
                     curLeft_,
                     curRight_
                 );
-        }
 
-        // Create new points by moving old points but using the
-        // pre-motion points at the motion selector for the moving
-        // region
-        newPoints =
-            points()
-          + (
-                pos(0.5 - mag(motionMask_)) // cells above the body
-//               + pos(motionMask_ - 0.5)*      // cells in front of the body
-//                 (
-//                     points().component(vector::X)/curRight
-//                 )
-//               + pos(-motionMask_ - 0.5)*      // cells behind the body
-//                 (
-//                     (
-//                         points().component(vector::X)
-//                       - leftEdge
-//                     )/
-//                     (curLeft_ - leftEdge_)
-//                 )
-            )*curMotionVel_*time().deltaTValue();
+            // Move points inside the motionMask
+            newPoints =
+                points()
+              + (
+                    pos(0.5 - mag(motionMask_)) // cells above the body
+                )*curMotionVel_*time().deltaT().value();
+        }
     }
     else
     {
@@ -424,40 +423,30 @@ bool Foam::movingConeTopoFvMesh::update()
             points()
           + (
                 pos(0.5 - mag(motionMask_)) // cells above the body
-//               + pos(motionMask_ - 0.5)*  // cells in front of the body
-//                 (
-//                     points().component(vector::X)/curRight
-//                 )
-//               + pos(-motionMask_ - 0.5)*  // cells behind the body
-//                 (
-//                     (
-//                         points().component(vector::X)
-//                       - leftEdge
-//                     )/
-//                     (curLeft_ - leftEdge_)
-//                 )
-            )*curMotionVel_*time().deltaTValue();
+           )*curMotionVel_*time().deltaT().value();
     }
 
-//    curLeft_ += curMotionVel_.x()*time().deltaTValue();
-//    curRight_ += curMotionVel_.x()*time().deltaTValue();
+    // The mesh now contains the cells with zero volume
+    Info << "Executing mesh motion" << endl;
+    movePoints(newPoints);
+    //  The mesh now has got non-zero volume cells
+
     curLeft_ = average
     (
-        faceZones()["leftExtrusionFaces"]().localPoints()
+        faceZones()
+        [
+            faceZones().findZoneID("leftExtrusionFaces")
+        ]().localPoints()
     ).x() - SMALL;
 
     curRight_ = average
     (
-        faceZones()["rightExtrusionFaces"]().localPoints()
+        faceZones()
+        [
+            faceZones().findZoneID("rightExtrusionFaces")
+        ]().localPoints()
     ).x() + SMALL;
 
-
-    // The mesh now contains the cells with zero volume
-
-    Info<< "Executing mesh motion" << endl;
-    movePoints(newPoints);
-
-    //  The mesh now has got non-zero volume cells
 
     return true;
 }

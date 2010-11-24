@@ -517,11 +517,17 @@ public:
             //-  Return the fraction of time-step completed
             inline scalar stepFraction() const;
 
-            //- Return the originating processor id
+            //- Return const access to the originating processor id
             inline label origProc() const;
 
-            //- Return the particle id on originating processor
+            //- Return the originating processor id for manipulation
+            inline label& origProc();
+
+            //- Return const access to  the particle id on originating processor
             inline label origId() const;
+
+            //- Return the particle id on originating processor for manipulation
+            inline label& origId();
 
 
         // Track

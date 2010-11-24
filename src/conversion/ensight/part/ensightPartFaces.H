@@ -67,6 +67,9 @@ class ensightPartFaces
             const labelList& pointMap
         ) const;
 
+        //- write geometry
+        virtual void writeGeometry(ensightGeoFile& os) const;
+
 
 protected:
 
@@ -80,6 +83,19 @@ protected:
 
     // Static data members
     static List<word> elemTypes_;
+
+    //- Divide the shapes, set elemLists.
+    void binShapes(const faceList& faces);
+
+    //- Helper: write connectivity
+    void writeConnectivity
+    (
+        ensightGeoFile& os,
+        const word& key,
+        const faceList& faces,
+        const labelList& idList,
+        const labelList& pointMap
+    ) const;
 
 
 public:

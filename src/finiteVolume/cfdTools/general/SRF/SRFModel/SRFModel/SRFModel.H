@@ -75,7 +75,7 @@ protected:
         //- Reference to the mesh
         const fvMesh& mesh_;
 
-        //- Axis of rotation
+        //- Axis of rotation, a direction vector which passes through the origin
         vector axis_;
 
         //- SRF model coeficients dictionary
@@ -185,4 +185,3 @@ public:
 #endif
 
 // ************************************************************************* //
-

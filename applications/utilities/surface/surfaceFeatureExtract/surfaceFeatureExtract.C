@@ -29,10 +29,13 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+
 #include "triangle.H"
 #include "triSurface.H"
 #include "argList.H"
+#include "Time.H"
 #include "surfaceFeatures.H"
+#include "featureEdgeMesh.H"
 #include "treeBoundBox.H"
 #include "meshTools.H"
 #include "OFstream.H"
@@ -135,7 +138,8 @@ int main(int argc, char *argv[])
         "remove edges within specified bounding box"
     );
 
-    argList args(argc, argv);
+#   include "setRootCase.H"
+#   include "createTime.H"
 
     Info<< "Feature line extraction is only valid on closed manifold surfaces."
         << endl;
@@ -282,7 +286,6 @@ int main(int argc, char *argv[])
     Info<< endl << "Writing edge objs." << endl;
     newSet.writeObj("final");
 
-
     Info<< nl
         << "Final feature set:" << nl
         << "    feature points : " << newSet.featurePoints().size() << nl
@@ -292,6 +295,22 @@ int main(int argc, char *argv[])
         << "        external edges : " << newSet.nExternalEdges() << nl
         << "        internal edges : " << newSet.nInternalEdges() << nl
         << endl;
+
+    // Extracting and writing a featureEdgeMesh
+
+    Pout<< nl << "Writing featureEdgeMesh to constant/featureEdgeMesh."
+        << endl;
+
+    featureEdgeMesh feMesh
+    (
+        newSet,
+        runTime,
+        surfFileName.lessExt().name() + ".featureEdgeMesh"
+    );
+
+    feMesh.writeObj(surfFileName.lessExt().name());
+
+    feMesh.write();
 
     Info<< "End\n" << endl;
 

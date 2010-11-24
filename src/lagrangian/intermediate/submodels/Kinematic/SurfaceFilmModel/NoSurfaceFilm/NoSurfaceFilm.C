@@ -69,8 +69,9 @@ bool Foam::NoSurfaceFilm<CloudType>::active() const
 template<class CloudType>
 bool Foam::NoSurfaceFilm<CloudType>::transferParcel
 (
-    const parcelType&,
-    const label
+    parcelType&,
+    const polyPatch&,
+    bool&
 )
 {
     return false;

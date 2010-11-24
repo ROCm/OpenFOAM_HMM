@@ -220,6 +220,9 @@ public:
 
        // Fields
 
+           //- Return the film thickness [m]
+           virtual const volScalarField& delta() const = 0;
+
            //- Return the film velocity [m/s]
            virtual const volVectorField& U() const = 0;
 

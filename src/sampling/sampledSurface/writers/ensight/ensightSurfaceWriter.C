@@ -28,118 +28,10 @@ License
 #include "OFstream.H"
 #include "OSspecific.H"
 #include "IOmanip.H"
+#include "ensightGeoFile.H"
+#include "ensightPartNonMeshFaces.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-template<class Type>
-void Foam::ensightSurfaceWriter<Type>::binShapes
-(
-    const pointField& points,
-    const faceList& faces,
-    DynamicList<label>& tris,
-    DynamicList<label>& quads,
-    DynamicList<label>& polys
-)
-{
-    tris.setCapacity(faces.size());
-    quads.setCapacity(faces.size());
-    polys.setCapacity(faces.size());
-
-    forAll(faces, i)
-    {
-        const face& f = faces[i];
-        if (f.size() == 3)
-        {
-            tris.append(i);
-        }
-        else if (f.size() == 4)
-        {
-            quads.append(i);
-        }
-        else
-        {
-            polys.append(i);
-        }
-    }
-}
-
-
-template<class Type>
-void Foam::ensightSurfaceWriter<Type>::writeGeometry
-(
-    const fileName& surfaceName,
-    Ostream& os,
-    const pointField& points,
-    const faceList& faces,
-    const DynamicList<label>& tris,
-    const DynamicList<label>& quads,
-    const DynamicList<label>& polys
-)
-{
-    os  << "EnSight Geometry File" << nl
-        << (string("written by OpenFOAM-") + Foam::FOAMversion).c_str() << nl
-        << "node id assign" << nl
-        << "element id assign" << nl
-        << "part" << nl
-        << setw(10) << 1 << nl
-        << surfaceName.c_str() << nl;
-
-    os  << "coordinates" << nl
-        << setw(10) << points.size() << nl;
-    for (direction cmpt = 0; cmpt < vector::nComponents; cmpt++)
-    {
-        scalarField v = points.component(cmpt);
-        forAll(v, i)
-        {
-            os  << v[i] << nl;
-        }
-    }
-
-
-    if (tris.size())
-    {
-        os  << "tria3" << nl
-            << setw(10) << tris.size() << nl;
-        forAll(tris, i)
-        {
-            const face& f = faces[tris[i]];
-            forAll(f, fp)
-            {
-                os  << setw(10) << f[fp]+1;
-            }
-            os  << nl;
-        }
-    }
-    if (quads.size())
-    {
-        os  << "quad4" << nl
-            << setw(10) << quads.size() << nl;
-        forAll(quads, i)
-        {
-            const face& f = faces[quads[i]];
-            forAll(f, fp)
-            {
-                os  << setw(10) << f[fp]+1;
-            }
-            os  << nl;
-        }
-    }
-    if (polys.size())
-    {
-        os  << "nsided" << nl
-            << setw(10) << polys.size() << nl;
-        forAll(polys, i)
-        {
-            const face& f = faces[polys[i]];
-            forAll(f, fp)
-            {
-                os  << setw(10) << f[fp]+1;
-            }
-            os  << nl;
-        }
-    }
-}
-
 
 namespace Foam
 {
@@ -233,7 +125,11 @@ void Foam::ensightSurfaceWriter<Type>::write
 
 
     OFstream caseStr(outputDir/surfaceName + ".case");
-    OFstream geomStr(outputDir/surfaceName + ".***.mesh");
+    ensightGeoFile geomStr
+    (
+        outputDir/surfaceName + ".000.mesh",
+        IOstream::ASCII
+    );
 
     if (verbose)
     {
@@ -256,12 +152,8 @@ void Foam::ensightSurfaceWriter<Type>::write
         << timeValue << nl
         << nl;
 
-    DynamicList<label> tris;
-    DynamicList<label> quads;
-    DynamicList<label> polys;
-    binShapes(points, faces, tris, quads, polys);
-
-    writeGeometry(surfaceName, geomStr, points, faces, tris, quads, polys);
+    ensightPartNonMeshFaces faceWriter(0, geomStr.name().name(), faces, points);
+    faceWriter.writeGeometry(geomStr);
 }
 
 
@@ -288,8 +180,16 @@ void Foam::ensightSurfaceWriter<Type>::write
 
 
     OFstream caseStr(outputDir/fieldName/surfaceName + ".case");
-    OFstream geomStr(outputDir/fieldName/surfaceName + ".000.mesh");
-    OFstream fieldStr(outputDir/fieldName/surfaceName + ".000." + fieldName);
+    ensightGeoFile geomStr
+    (
+        outputDir/fieldName/surfaceName + ".000.mesh",
+        IOstream::ASCII
+    );
+    ensightFile fieldStr
+    (
+        outputDir/fieldName/surfaceName + ".000." + fieldName,
+        IOstream::ASCII
+    );
 
     if (verbose)
     {
@@ -308,15 +208,15 @@ void Foam::ensightSurfaceWriter<Type>::write
     {
         caseStr
             << pTraits<Type>::typeName << " per node:" << setw(10) << 1
-        << "       " << fieldName
-        << "       " << surfaceName.c_str() << ".***." << fieldName << nl;
+            << "       " << fieldName
+            << "       " << surfaceName.c_str() << ".***." << fieldName << nl;
     }
     else
     {
         caseStr
             << pTraits<Type>::typeName << " per element:" << setw(10) << 1
-        << "       " << fieldName
-        << "       " << surfaceName.c_str() << ".***." << fieldName << nl;
+            << "       " << fieldName
+            << "       " << surfaceName.c_str() << ".***." << fieldName << nl;
     }
 
     caseStr
@@ -330,12 +230,8 @@ void Foam::ensightSurfaceWriter<Type>::write
         << timeValue << nl
         << nl;
 
-    DynamicList<label> tris;
-    DynamicList<label> quads;
-    DynamicList<label> polys;
-    binShapes(points, faces, tris, quads, polys);
-
-    writeGeometry(surfaceName, geomStr, points, faces, tris, quads, polys);
+    ensightPartNonMeshFaces faceWriter(0, geomStr.name().name(), faces, points);
+    faceWriter.writeGeometry(geomStr);
 
     // Write field
     fieldStr
@@ -350,20 +246,22 @@ void Foam::ensightSurfaceWriter<Type>::write
     }
     else
     {
-        if (tris.size())
+        //faceWriter.writeField(fieldStr, values);
+        forAll(faceWriter.elementTypes(), elemI)
         {
-            fieldStr << "tria3" << nl;
-            writeData(fieldStr, Field<Type>(values, tris));
-        }
-        if (quads.size())
-        {
-            fieldStr << "quad4" << nl;
-            writeData(fieldStr, Field<Type>(values, quads));
-        }
-        if (polys.size())
-        {
-            fieldStr << "nsided" << nl;
-            writeData(fieldStr, Field<Type>(values, polys));
+            if (faceWriter.elemLists()[elemI].size())
+            {
+                fieldStr.writeKeyword(faceWriter.elementTypes()[elemI]);
+                writeData
+                (
+                    fieldStr,
+                    Field<Type>
+                    (
+                        values,
+                        faceWriter.elemLists()[elemI]
+                    )
+                );
+            }
         }
     }
 }

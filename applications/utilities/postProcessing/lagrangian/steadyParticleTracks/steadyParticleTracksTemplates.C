@@ -83,7 +83,7 @@ PtrList<List<Type> > readFields
             {
                 Info<< "        reading field " << obj.name() << endl;
                 IOField<Type> newField(obj);
-                values.set(fieldI++, new List<Type>(newField.xfer()));
+                values.set(fieldI++, new List<Type>(newField.xferList()));
                 break;
             }
         }
@@ -118,8 +118,8 @@ void writeVTKFields
     forAll(values, fieldI)
     {
         Info<< "        writing field " << fieldNames[fieldI] << endl;
-        os  << nl << fieldNames[fieldI] << ' ' << pTraits<Type>::nComponents << ' '
-            << values[fieldI].size() << " float" << nl;
+        os  << nl << fieldNames[fieldI] << ' ' << pTraits<Type>::nComponents
+            << ' ' << values[fieldI].size() << " float" << nl;
         label offset = 0;
         forAll(agePerTrack, trackI)
         {

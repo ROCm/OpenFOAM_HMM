@@ -74,6 +74,9 @@ class ensightPartCells
             const labelList& pointMap
         ) const;
 
+        //- write geometry
+        virtual void writeGeometry(ensightGeoFile& os) const;
+
 
 protected:
 
