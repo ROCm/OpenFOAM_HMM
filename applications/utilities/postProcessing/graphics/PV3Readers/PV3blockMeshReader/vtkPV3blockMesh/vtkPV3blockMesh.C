@@ -321,7 +321,7 @@ void Foam::vtkPV3blockMesh::updateFoamMesh()
             )
         );
 
-        meshPtr_ = new blockMesh(meshDict);
+        meshPtr_ = new blockMesh(meshDict, polyMesh::defaultRegion);
     }
 
 

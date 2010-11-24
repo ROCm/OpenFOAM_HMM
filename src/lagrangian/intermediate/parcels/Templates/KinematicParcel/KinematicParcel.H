@@ -48,7 +48,7 @@ SourceFiles
 #include "Particle.H"
 #include "IOstream.H"
 #include "autoPtr.H"
-#include "interpolationCellPoint.H"
+#include "interpolation.H"
 #include "contiguous.H"
 
 #include "KinematicCloud.H"

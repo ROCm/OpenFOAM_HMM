@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
     blockMesh::verbose(true);
 
     IOdictionary meshDict(meshDictIoPtr());
-    blockMesh blocks(meshDict);
+    blockMesh blocks(meshDict, regionName);
 
 
     if (args.optionFound("blockTopology"))
