@@ -328,7 +328,7 @@ kOmegaSSTSAS::kOmegaSSTSAS
     bound(k_, kMin_);
     bound(omega_, omegaMin_);
 
-    updateSubGridScaleFields(magSqr(symm(fvc::grad(U))));
+    updateSubGridScaleFields(magSqr(2.0*symm(fvc::grad(U))));
 
     printCoeffs();
 }
@@ -345,7 +345,7 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
         y_.correct();
     }
 
-    volScalarField S2 = magSqr(symm(gradU()));
+    volScalarField S2 = magSqr(2.0*symm(gradU()));
     gradU.clear();
 
     volVectorField gradK = fvc::grad(k_);
@@ -353,7 +353,7 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
     volScalarField L = sqrt(k_)/(pow025(Cmu_)*omega_);
     volScalarField CDkOmega = (2.0*alphaOmega2_)*(gradK & gradOmega)/omega_;
     volScalarField F1 = this->F1(CDkOmega);
-    volScalarField G = nuSgs_*2.0*S2;
+    volScalarField G = nuSgs_*0.5*S2;
 
     // Turbulent kinetic energy equation
     {
@@ -388,7 +388,7 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
           - fvm::Sp(fvc::div(phi()), omega_)
           - fvm::laplacian(DomegaEff(F1), omega_)
         ==
-            gamma(F1)*2.0*S2
+            gamma(F1)*0.5*S2
           - fvm::Sp(beta(F1)*omega_, omega_)
           - fvm::SuSp       // cross diffusion term
             (
