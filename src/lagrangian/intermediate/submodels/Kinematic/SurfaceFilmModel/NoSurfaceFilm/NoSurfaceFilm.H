@@ -98,8 +98,9 @@ public:
             //  Returns true if parcel is to be transferred
             virtual bool transferParcel
             (
-                const parcelType& p,
-                const label patchI
+                parcelType& p,
+                const polyPatch& pp,
+                bool& keepParticle
             );
 
             //- Set parcel properties
