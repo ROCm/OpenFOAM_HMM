@@ -53,7 +53,7 @@ TemplateName(MeshWave);
                            Class MeshWave Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class Type>
+template <class Type, class TrackingData = int>
 class MeshWave
 :
     public MeshWaveName
@@ -67,7 +67,7 @@ class MeshWave
         List<Type> allCellInfo_;
 
         //- Wave calculation engine.
-        FaceCellWave<Type> calc_;
+        FaceCellWave<Type, TrackingData> calc_;
 
     // Private Member Functions
 
@@ -76,6 +76,12 @@ class MeshWave
 
         //- Disallow default bitwise assignment
         void operator=(const MeshWave&);
+
+      // Private static data
+
+            //- Used as default trackdata value to satisfy default template
+            //  argument.
+            static label dummyTrackData_;
 
 public:
 
@@ -89,7 +95,8 @@ public:
             const polyMesh& mesh,
             const labelList& initialChangedFaces,
             const List<Type>& changedFacesInfo,
-            const label maxIter
+            const label maxIter,
+            TrackingData& td = dummyTrackData_
         );
 
         //- Construct from mesh, list of changed faces with the Type
@@ -102,7 +109,8 @@ public:
             const labelList& initialChangedFaces,
             const List<Type>& changedFacesInfo,
             const List<Type>& allCellInfo,
-            const label maxIter
+            const label maxIter,
+            TrackingData& td = dummyTrackData_
         );
 
 
@@ -120,6 +128,11 @@ public:
             return allCellInfo_;
         }
 
+        //- Additional data to be passed into container
+        const TrackingData& data() const
+        {
+            return calc_.data();
+        }
 
         //- Iterate until no changes or maxIter reached. Returns number of
         //  unset cells (see getUnsetCells)

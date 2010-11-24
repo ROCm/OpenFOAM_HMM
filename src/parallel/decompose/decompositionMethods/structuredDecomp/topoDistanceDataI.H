@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -53,18 +52,21 @@ inline Foam::topoDistanceData::topoDistanceData
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::topoDistanceData::valid() const
+template <class TrackingData>
+inline bool Foam::topoDistanceData::valid(TrackingData& td) const
 {
     return distance_ != -1;
 }
 
 
 // No geometric data so never any problem on cyclics
+template <class TrackingData>
 inline bool Foam::topoDistanceData::sameGeometry
 (
     const polyMesh&,
     const topoDistanceData&,
-    const scalar
+    const scalar,
+    TrackingData&
 ) const
 {
     return true;
@@ -72,44 +74,52 @@ inline bool Foam::topoDistanceData::sameGeometry
 
 
 // No geometric data.
+template <class TrackingData>
 inline void Foam::topoDistanceData::leaveDomain
 (
     const polyMesh&,
     const polyPatch& patch,
     const label patchFaceI,
-    const point& faceCentre
+    const point& faceCentre,
+    TrackingData&
 )
 {}
 
 
 // No geometric data.
+template <class TrackingData>
 inline void Foam::topoDistanceData::transform
 (
     const polyMesh&,
-    const tensor& rotTensor
+    const tensor& rotTensor,
+    TrackingData&
 )
 {}
 
 
 // No geometric data.
+template <class TrackingData>
 inline void Foam::topoDistanceData::enterDomain
 (
     const polyMesh&,
     const polyPatch& patch,
     const label patchFaceI,
-    const point& faceCentre
+    const point& faceCentre,
+    TrackingData&
 )
 {}
 
 
 // Update cell with neighbouring face information
+template <class TrackingData>
 inline bool Foam::topoDistanceData::updateCell
 (
     const polyMesh&,
     const label thisCellI,
     const label neighbourFaceI,
     const topoDistanceData& neighbourInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData&
 )
 {
     if (distance_ == -1)
@@ -126,13 +136,15 @@ inline bool Foam::topoDistanceData::updateCell
 
 
 // Update face with neighbouring cell information
+template <class TrackingData>
 inline bool Foam::topoDistanceData::updateFace
 (
     const polyMesh& mesh,
     const label thisFaceI,
     const label neighbourCellI,
     const topoDistanceData& neighbourInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData&
 )
 {
     // From cell to its faces.
@@ -150,12 +162,14 @@ inline bool Foam::topoDistanceData::updateFace
 
 
 // Update face with coupled face information
+template <class TrackingData>
 inline bool Foam::topoDistanceData::updateFace
 (
     const polyMesh&,
     const label thisFaceI,
     const topoDistanceData& neighbourInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData&
 )
 {
     // From face to face (e.g. coupled faces)
@@ -168,6 +182,17 @@ inline bool Foam::topoDistanceData::updateFace
     {
         return false;
     }
+}
+
+
+template <class TrackingData>
+inline bool Foam::topoDistanceData::equal
+(
+    const topoDistanceData& rhs,
+    TrackingData& td
+) const
+{
+    return operator==(rhs);
 }
 
 

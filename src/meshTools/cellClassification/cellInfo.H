@@ -63,13 +63,15 @@ class cellInfo
         //- Update current cell/face type with neighbouring
         //  type. Return true if information needs to propagate,
         //  false otherwise.
+        template<class TrackingData>
         inline bool update
         (
             const cellInfo& w2,
             const label thisFaceI,
             const label thisCellI,
             const label neighbourFaceI,
-            const label neighbourCellI
+            const label neighbourCellI,
+            TrackingData& td
         );
 
 public:
@@ -100,70 +102,89 @@ public:
 
             //- Check whether origin has been changed at all or
             //  still contains original (invalid) value.
-            inline bool valid() const;
+            template<class TrackingData>
+            inline bool valid(TrackingData& td) const;
 
             //- Check for identical geometrical data. Used for cyclics checking.
+            template<class TrackingData>
             inline bool sameGeometry
             (
                 const polyMesh&,
                 const cellInfo&,
-                const scalar
+                const scalar,
+                TrackingData& td
             ) const;
 
             //- Convert any absolute coordinates into relative to (patch)face
             //  centre
+            template<class TrackingData>
             inline void leaveDomain
             (
                 const polyMesh&,
                 const polyPatch& patch,
                 const label patchFaceI,
-                const point& faceCentre
+                const point& faceCentre,
+                TrackingData& td
             );
 
             //- Reverse of leaveDomain
+            template<class TrackingData>
             inline void enterDomain
             (
                 const polyMesh&,
                 const polyPatch& patch,
                 const label patchFaceI,
-                const point& faceCentre
+                const point& faceCentre,
+                TrackingData& td
             );
 
             //- Apply rotation matrix to any coordinates
+            template<class TrackingData>
             inline void transform
             (
                 const polyMesh&,
-                const tensor& rotTensor
+                const tensor& rotTensor,
+                TrackingData& td
             );
 
             //- Influence of neighbouring face.
+            template<class TrackingData>
             inline bool updateCell
             (
                 const polyMesh&,
                 const label thisCellI,
                 const label neighbourFaceI,
                 const cellInfo& neighbourInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
 
             //- Influence of neighbouring cell.
+            template<class TrackingData>
             inline bool updateFace
             (
                 const polyMesh&,
                 const label thisFaceI,
                 const label neighbourCellI,
                 const cellInfo& neighbourInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
 
             //- Influence of different value on same face.
+            template<class TrackingData>
             inline bool updateFace
             (
                 const polyMesh&,
                 const label thisFaceI,
                 const cellInfo& neighbourInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
+
+            //- Same (like operator==)
+            template<class TrackingData>
+            inline bool equal(const cellInfo&, TrackingData& td) const;
 
     // Member Operators
 

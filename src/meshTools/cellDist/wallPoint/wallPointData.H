@@ -74,11 +74,13 @@ class wallPointData
         //- Evaluate distance to point. Update distSqr, origin from whomever
         //  is nearer pt. Return true if w2 is closer to point,
         //  false otherwise.
+        template<class TrackingData>
         inline bool update
         (
             const point&,
             const wallPointData<Type>& w2,
-            const scalar tol
+            const scalar tol,
+            TrackingData& td
         );
 
 
@@ -112,35 +114,41 @@ public:
 
             //- Influence of neighbouring face.
             //  Calls update(...) with cellCentre of cellI
+            template<class TrackingData>
             inline bool updateCell
             (
                 const polyMesh& mesh,
                 const label thisCellI,
                 const label neighbourFaceI,
                 const wallPointData<Type>& neighbourWallInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
 
             //- Influence of neighbouring cell.
             //  Calls update(...) with faceCentre of faceI
+            template<class TrackingData>
             inline bool updateFace
             (
                 const polyMesh& mesh,
                 const label thisFaceI,
                 const label neighbourCellI,
                 const wallPointData<Type>& neighbourWallInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
 
             //- Influence of different value on same face.
             //  Merge new and old info.
             //  Calls update(...) with faceCentre of faceI
+            template<class TrackingData>
             inline bool updateFace
             (
                 const polyMesh& mesh,
                 const label thisFaceI,
                 const wallPointData<Type>& neighbourWallInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
 
     // Member Operators

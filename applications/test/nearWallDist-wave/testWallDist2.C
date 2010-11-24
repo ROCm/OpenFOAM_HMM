@@ -29,7 +29,7 @@ Description
 
 #include "fvCFD.H"
 #include "wallFvPatch.H"
-#include "MeshWave.H"
+#include "FaceCellWave.H"
 #include "wallPoint.H"
 
 
@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
         forAll(allCellInfo, cellI)
         {
             scalar dist = allCellInfo[cellI].distSqr();
-            if (allCellInfo[cellI].valid())
+            if (allCellInfo[cellI].valid(wallDistCalc.data()))
             {
                 wallDistUncorrected[cellI] = Foam::sqrt(dist);
             }
@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
                 const label meshFaceI = patchField.patch().start() + patchFaceI;
 
                 scalar dist = allFaceInfo[meshFaceI].distSqr();
-                if (allFaceInfo[meshFaceI].valid())
+                if (allFaceInfo[meshFaceI].valid(wallDistCalc.data()))
                 {
                     patchField[patchFaceI] = Foam::sqrt(dist);
                 }

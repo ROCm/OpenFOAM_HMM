@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
     Foam::topoDistanceData
@@ -97,70 +96,89 @@ public:
 
             //- Check whether origin has been changed at all or
             //  still contains original (invalid) value.
-            inline bool valid() const;
+            template<class TrackingData>
+            inline bool valid(TrackingData& td) const;
 
             //- Check for identical geometrical data. Used for cyclics checking.
+            template<class TrackingData>
             inline bool sameGeometry
             (
                 const polyMesh&,
                 const topoDistanceData&,
-                const scalar
+                const scalar,
+                TrackingData& td
             ) const;
 
             //- Convert any absolute coordinates into relative to (patch)face
             //  centre
+            template<class TrackingData>
             inline void leaveDomain
             (
                 const polyMesh&,
                 const polyPatch&,
                 const label patchFaceI,
-                const point& faceCentre
+                const point& faceCentre,
+                TrackingData& td
             );
 
             //- Reverse of leaveDomain
+            template<class TrackingData>
             inline void enterDomain
             (
                 const polyMesh&,
                 const polyPatch&,
                 const label patchFaceI,
-                const point& faceCentre
+                const point& faceCentre,
+                TrackingData& td
             );
 
             //- Apply rotation matrix to any coordinates
+            template<class TrackingData>
             inline void transform
             (
                 const polyMesh&,
-                const tensor&
+                const tensor&,
+                TrackingData& td
             );
 
             //- Influence of neighbouring face.
+            template<class TrackingData>
             inline bool updateCell
             (
                 const polyMesh&,
                 const label thisCellI,
                 const label neighbourFaceI,
                 const topoDistanceData& neighbourInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
 
             //- Influence of neighbouring cell.
+            template<class TrackingData>
             inline bool updateFace
             (
                 const polyMesh&,
                 const label thisFaceI,
                 const label neighbourCellI,
                 const topoDistanceData& neighbourInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
 
             //- Influence of different value on same face.
+            template<class TrackingData>
             inline bool updateFace
             (
                 const polyMesh&,
                 const label thisFaceI,
                 const topoDistanceData& neighbourInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
+
+            //- Same (like operator==)
+            template<class TrackingData>
+            inline bool equal(const topoDistanceData&, TrackingData& td) const;
 
     // Member Operators
 

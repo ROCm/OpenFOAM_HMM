@@ -31,11 +31,13 @@ namespace Foam
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Update this with w2 if w2 nearer to pt.
+template<class TrackingData>
 inline bool wallPointYPlus::update
 (
     const point& pt,
     const wallPointYPlus& w2,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
     scalar dist2 = magSqr(pt - w2.origin());
@@ -103,13 +105,15 @@ inline wallPointYPlus::wallPointYPlus
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Update this with w2 if w2 nearer to pt.
+template<class TrackingData>
 inline bool wallPointYPlus::updateCell
 (
     const polyMesh& mesh,
     const label thisCellI,
     const label neighbourFaceI,
     const wallPointYPlus& neighbourWallInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
     const vectorField& cellCentres = mesh.primitiveMesh::cellCentres();
@@ -118,19 +122,22 @@ inline bool wallPointYPlus::updateCell
     (
         cellCentres[thisCellI],
         neighbourWallInfo,
-        tol
+        tol,
+        td
     );
 }
 
 
 // Update this with w2 if w2 nearer to pt.
+template<class TrackingData>
 inline bool wallPointYPlus::updateFace
 (
     const polyMesh& mesh,
     const label thisFaceI,
     const label neighbourCellI,
     const wallPointYPlus& neighbourWallInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
     const vectorField& faceCentres = mesh.faceCentres();
@@ -139,18 +146,21 @@ inline bool wallPointYPlus::updateFace
     (
         faceCentres[thisFaceI],
         neighbourWallInfo,
-        tol
+        tol,
+        td
     );
 }
 
 
 // Update this with w2 if w2 nearer to pt.
+template<class TrackingData>
 inline bool wallPointYPlus::updateFace
 (
     const polyMesh& mesh,
     const label thisFaceI,
     const wallPointYPlus& neighbourWallInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
     const vectorField& faceCentres = mesh.faceCentres();
@@ -159,7 +169,8 @@ inline bool wallPointYPlus::updateFace
     (
         faceCentres[thisFaceI],
         neighbourWallInfo,
-        tol
+        tol,
+        td
     );
 }
 

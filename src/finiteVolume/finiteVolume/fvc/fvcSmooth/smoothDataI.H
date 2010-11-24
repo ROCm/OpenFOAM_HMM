@@ -25,14 +25,16 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+template<class TrackingData>
 inline bool Foam::smoothData::update
 (
     const smoothData& svf,
     const scalar scale,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
-    if (!valid() || (value_ < VSMALL))
+    if (!valid(td) || (value_ < VSMALL))
     {
         // My value not set - take over neighbour
         value_ = svf.value()/scale;
@@ -73,90 +75,116 @@ inline Foam::smoothData::smoothData(const scalar value)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::smoothData::valid() const
+template<class TrackingData>
+inline bool Foam::smoothData::valid(TrackingData& td) const
 {
     return value_ > -SMALL;
 }
 
 
+template<class TrackingData>
 inline bool Foam::smoothData::sameGeometry
 (
     const polyMesh&,
     const smoothData&,
-    const scalar
+    const scalar,
+    TrackingData& td
 ) const
 {
     return true;
 }
 
 
+template<class TrackingData>
 inline void Foam::smoothData::leaveDomain
 (
     const polyMesh&,
     const polyPatch&,
     const label,
-    const point&
+    const point&,
+    TrackingData& td
 )
 {}
 
 
+template<class TrackingData>
 inline void Foam::smoothData::transform
 (
     const polyMesh&,
-    const tensor&
+    const tensor&,
+    TrackingData& td
 )
 {}
 
 
+template<class TrackingData>
 inline void Foam::smoothData::enterDomain
 (
     const polyMesh&,
     const polyPatch&,
     const label,
-    const point&
+    const point&,
+    TrackingData& td
 )
 {}
 
 
+template<class TrackingData>
 inline bool Foam::smoothData::updateCell
 (
     const polyMesh&,
     const label,
     const label,
     const smoothData& svf,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
     // Take over info from face if more than deltaRatio larger
-    return update(svf, maxRatio, tol);
+    return update(svf, td.maxRatio, tol, td);
 }
 
 
+template<class TrackingData>
 inline bool Foam::smoothData::updateFace
 (
     const polyMesh&,
     const label,
     const label,
     const smoothData& svf,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
     // Take over information from cell without any scaling (scale = 1.0)
-    return update(svf, 1.0, tol);
+    return update(svf, 1.0, tol, td);
 }
 
 
 // Update this (face) with coupled face information.
+template<class TrackingData>
 inline bool Foam::smoothData::updateFace
 (
     const polyMesh&,
     const label,
     const smoothData& svf,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
     // Take over information from coupled face without any scaling (scale = 1.0)
-    return update(svf, 1.0, tol);
+    return update(svf, 1.0, tol, td);
+}
+
+
+template <class TrackingData>
+inline bool Foam::smoothData::equal
+(
+    const smoothData& rhs,
+    TrackingData& td
+) const
+{
+    return operator==(rhs);
 }
 
 
