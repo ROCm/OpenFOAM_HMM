@@ -28,7 +28,7 @@ License
 #include "breakupModel.H"
 #include "collisionModel.H"
 #include "dispersionModel.H"
-#include "interpolationCellPoint.H"
+#include "interpolation.H"
 #include "processorPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
