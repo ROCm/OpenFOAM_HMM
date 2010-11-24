@@ -852,8 +852,8 @@ Foam::label Foam::FaceCellWave<Type, TrackingData>::cellToFace()
         label cellI = changedCells_[changedCellI];
         if (!changedCell_[cellI])
         {
-            FatalErrorIn("FaceCellWave<Type, TrackingData>::cellToFace()") << "Cell " << cellI
-                << " not marked as having been changed"
+            FatalErrorIn("FaceCellWave<Type, TrackingData>::cellToFace()")
+                << "Cell " << cellI << " not marked as having been changed"
                 << abort(FatalError);
         }
 
