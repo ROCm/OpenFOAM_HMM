@@ -261,7 +261,11 @@ void Foam::blockMesh::createCellShapes
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
+Foam::polyMesh* Foam::blockMesh::createTopology
+(
+    const IOdictionary& meshDescription,
+    const word& regionName
+)
 {
     bool topologyOK = true;
 
@@ -514,7 +518,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
         (
             IOobject
             (
-                "blockMesh",
+                regionName,
                 meshDescription.time().constant(),
                 meshDescription.time(),
                 IOobject::NO_READ,
@@ -563,7 +567,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
         (
             IOobject
             (
-                "blockMesh",
+                regionName,
                 meshDescription.time().constant(),
                 meshDescription.time(),
                 IOobject::NO_READ,
