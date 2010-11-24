@@ -579,13 +579,6 @@ tmp<Field<Type> > Field<Type>::T() const
 
 
 template<class Type>
-Xfer<Field<Type> > Field<Type>::xfer()
-{
-    return xferMove(*this);
-}
-
-
-template<class Type>
 void Field<Type>::writeEntry(const word& keyword, Ostream& os) const
 {
     os.writeKeyword(keyword);
