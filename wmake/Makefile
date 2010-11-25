@@ -164,6 +164,8 @@ $(SEXE): $(OBJECTS)
 # define link statements for libraries
 #------------------------------------------------------------------------------
 
+objects: $(OBJECTS)
+
 libso:   $(LIB).$(SO)
 	     @echo \'$(LIB).$(SO)\' is up to date.
 
