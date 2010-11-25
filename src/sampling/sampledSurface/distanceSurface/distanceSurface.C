@@ -50,6 +50,9 @@ void Foam::distanceSurface::createGeometry()
     // Clear any stored topologies
     facesPtr_.clear();
 
+    // Clear derived data
+    clearGeom();
+
     const fvMesh& fvm = static_cast<const fvMesh&>(mesh());
 
     // Distance to cell centres
@@ -360,6 +363,9 @@ bool Foam::distanceSurface::expire()
 
     // Clear any stored topologies
     facesPtr_.clear();
+
+    // Clear derived data
+    clearGeom();
 
     // already marked as expired
     if (needsUpdate_)

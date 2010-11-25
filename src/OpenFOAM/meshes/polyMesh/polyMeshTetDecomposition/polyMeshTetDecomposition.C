@@ -29,8 +29,9 @@ License
 
 // Note: the use of this tolerance is ad-hoc, there may be extreme
 // cases where the resulting tetrahedra still have particle tracking
-// problems.
-const Foam::scalar Foam::polyMeshTetDecomposition::minTetQuality = SMALL;
+// problems, or tets with lower quality may track OK.
+// const Foam::scalar Foam::polyMeshTetDecomposition::minTetQuality = SMALL;
+const Foam::scalar Foam::polyMeshTetDecomposition::minTetQuality = ROOTVSMALL;
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -104,11 +105,10 @@ Foam::label Foam::polyMeshTetDecomposition::findSharedBasePoint
         {
             return faceBasePtI;
         }
-
     }
 
     // If a base point hasn't triggered a return by now, then there is
-    // non that can produce a good decomposition
+    // none that can produce a good decomposition
     return -1;
 }
 
@@ -554,15 +554,17 @@ Foam::List<Foam::tetIndices> Foam::polyMeshTetDecomposition::faceTetIndices
 
     if (tetBasePtI == -1)
     {
-        FatalErrorIn
+        WarningIn
         (
             "Foam::List<Foam::FixedList<Foam::label, 4> >"
             "Foam::Cloud<ParticleType>::"
             "faceTetIndices(label fI, label cI) const"
         )
-        << "No base point for face " << fI << ", " << f
+            << "No base point for face " << fI << ", " << f
             << ", produces a valid tet decomposition."
-            << abort(FatalError);
+            << endl;
+
+        tetBasePtI = 0;
     }
 
     for (label tetPtI = 1; tetPtI < f.size() - 1; tetPtI++)

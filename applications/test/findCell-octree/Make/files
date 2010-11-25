@@ -1,3 +1,3 @@
-findCell-octree.C
+Test-findCell-octree.C
 
-EXE = $(FOAM_USER_APPBIN)/findCell-octree
+EXE = $(FOAM_USER_APPBIN)/Test-findCell-octree

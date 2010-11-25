@@ -33,6 +33,17 @@ Description
     mode = NEARESTFACE : sample nearest face on any patch. Note: does not
                          warn if nearest actually is on internal face!
 
+    For NEARESTCELL you have to provide an 'interpolationScheme' entry
+    which can be any one of the interpolation schemes (cell, cellPoint, etc.)
+    In case of interpolation (so scheme != cell) the limitation is that
+    there is only one value per cell. So e.g. if you have a cell with two
+    boundary faces and both faces sample into the cell both faces will get
+    the same value.
+
+    See directMappedPatchBase for options on sampling.
+
+    Optional 'fieldName' entry to supply a different filename
+
 SourceFiles
     directMappedFixedValueFvPatchField.C
 
@@ -43,6 +54,7 @@ SourceFiles
 
 #include "fixedValueFvPatchFields.H"
 #include "directMappedFvPatch.H"
+#include "interpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,12 +72,29 @@ class directMappedFixedValueFvPatchField
 {
     // Private data
 
+        //- Name of field to sample - defaults to field associated with this
+        //  patchField if not specified
+        word fieldName_;
+
         //- If true adjust the mapped field to maintain average value average_
-        bool setAverage_;
+        const bool setAverage_;
 
         //- Average value the mapped field is adjusted to maintain if
         //  setAverage_ is set true
-        Type average_;
+        const Type average_;
+
+        //- Interpolation scheme to use for nearestcell mode
+        word interpolationScheme_;
+
+        mutable autoPtr<interpolation<Type> > interpolator_;
+
+    // Private Member Functions
+
+        //- Field to sample. Either on my or nbr mesh
+        const GeometricField<Type, fvPatchField, volMesh>& sampleField() const;
+
+        //- Access the interpolation method
+        const interpolation<Type>& interpolator() const;
 
 public:
 

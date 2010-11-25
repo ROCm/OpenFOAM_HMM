@@ -54,6 +54,18 @@ namespace Foam
         directMappedPatchBase::sampleModeNames_;
 
 
+    template<>
+    const char* NamedEnum<directMappedPatchBase::offsetMode, 3>::names[] =
+    {
+        "uniform",
+        "nonuniform",
+        "normal"
+    };
+
+    const NamedEnum<directMappedPatchBase::offsetMode, 3>
+        directMappedPatchBase::offsetModeNames_;
+
+
     //- Private class for finding nearest
     //  - point+local index
     //  - sqr(distance)
@@ -100,7 +112,7 @@ void Foam::directMappedPatchBase::collectSamples
     labelListList globalFaces(Pstream::nProcs());
 
     globalFc[Pstream::myProcNo()] = patch_.faceCentres();
-    globalSamples[Pstream::myProcNo()] = globalFc[Pstream::myProcNo()]+offsets_;
+    globalSamples[Pstream::myProcNo()] = samplePoints();
     globalFaces[Pstream::myProcNo()] = identity(patch_.size());
 
     // Distribute to all processors
@@ -393,19 +405,34 @@ void Foam::directMappedPatchBase::calcMapping() const
             << "Mapping already calculated" << exit(FatalError);
     }
 
-    if
+    // Do a sanity check
+    // Am I sampling my own patch? This only makes sense for a non-zero
+    // offset.
+    bool sampleMyself =
     (
-        gAverage(mag(offsets_)) <= ROOTVSMALL
-     && mode_ == NEARESTPATCHFACE
+        mode_ == NEARESTPATCHFACE
      && sampleRegion_ == patch_.boundaryMesh().mesh().name()
      && samplePatch_ == patch_.name()
-    )
+    );
+
+    // Check offset
+    vectorField d(samplePoints()-patch_.faceCentres());
+    if (sampleMyself && gAverage(mag(d)) <= ROOTVSMALL)
     {
-        WarningIn("directMappedPatchBase::calcMapping() const")
-            << "Invalid offset " << offsets_ << endl
+        WarningIn
+        (
+            "directMappedPatchBase::directMappedPatchBase\n"
+            "(\n"
+            "    const polyPatch& pp,\n"
+            "    const word& sampleRegion,\n"
+            "    const sampleMode mode,\n"
+            "    const word& samplePatch,\n"
+            "    const vector& offset\n"
+            ")\n"
+        )   << "Invalid offset " << d << endl
             << "Offset is the vector added to the patch face centres to"
             << " find the patch face supplying the data." << endl
-            << "Setting it to " << offsets_
+            << "Setting it to " << d
             << " on the same patch, on the same region"
             << " will find the faces themselves which does not make sense"
             << " for anything but testing." << endl
@@ -413,8 +440,9 @@ void Foam::directMappedPatchBase::calcMapping() const
             << "sampleRegion_:" << sampleRegion_ << endl
             << "mode_:" << sampleModeNames_[mode_] << endl
             << "samplePatch_:" << samplePatch_ << endl
-            << "offsets_:" << offsets_ << endl;
+            << "offsetMode_:" << offsetModeNames_[offsetMode_] << endl;
     }
+
 
 
     // Get global list of all samples and the processor and face they come from.
@@ -475,40 +503,6 @@ void Foam::directMappedPatchBase::calcMapping() const
             str << "l " << vertI-1 << ' ' << vertI << nl;
         }
     }
-
-
-    //// Check that actual offset vector (sampleLocations - patchFc) is more or
-    //// less constant.
-    //if (Pstream::master())
-    //{
-    //    const scalarField magOffset(mag(sampleLocations - patchFc));
-    //    const scalar avgOffset(average(magOffset));
-    //
-    //    forAll(magOffset, sampleI)
-    //    {
-    //        if
-    //        (
-    //            mag(magOffset[sampleI]-avgOffset)
-    //          > max(SMALL, 0.001*avgOffset)
-    //        )
-    //        {
-    //            WarningIn("directMappedPatchBase::calcMapping() const")
-    //                << "The actual cell/face centres picked up using offset "
-    //                << offsets_ << " are not" << endl
-    //                << "    on a single plane."
-    //                << " This might give numerical problems." << endl
-    //                << "    At patchface " << patchFc[sampleI]
-    //                << " the sampled cell/face " << sampleLocations[sampleI]
-    //                << endl
-    //                << "    is not on a plane " << avgOffset
-    //                << " offset from the patch." << endl
-    //                << "    You might want to shift your plane offset."
-    //                << " Set the debug flag to get a dump of sampled cells."
-    //                << endl;
-    //            break;
-    //        }
-    //    }
-    //}
 
 
     // Determine schedule.
@@ -597,9 +591,10 @@ Foam::directMappedPatchBase::directMappedPatchBase
     sampleRegion_(patch_.boundaryMesh().mesh().name()),
     mode_(NEARESTPATCHFACE),
     samplePatch_("none"),
-    uniformOffset_(true),
+    offsetMode_(UNIFORM),
     offset_(vector::zero),
     offsets_(pp.size(), offset_),
+    distance_(0),
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(NULL)
 {}
@@ -618,8 +613,10 @@ Foam::directMappedPatchBase::directMappedPatchBase
     sampleRegion_(sampleRegion),
     mode_(mode),
     samplePatch_(samplePatch),
-    uniformOffset_(false),
+    offsetMode_(NONUNIFORM),
+    offset_(vector::zero),
     offsets_(offsets),
+    distance_(0),
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(NULL)
 {}
@@ -638,9 +635,10 @@ Foam::directMappedPatchBase::directMappedPatchBase
     sampleRegion_(sampleRegion),
     mode_(mode),
     samplePatch_(samplePatch),
-    uniformOffset_(true),
+    offsetMode_(UNIFORM),
     offset_(offset),
-    offsets_(pp.size(), offset_),
+    offsets_(0),
+    distance_(0),
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(NULL)
 {}
@@ -663,22 +661,62 @@ Foam::directMappedPatchBase::directMappedPatchBase
     ),
     mode_(sampleModeNames_.read(dict.lookup("sampleMode"))),
     samplePatch_(dict.lookup("samplePatch")),
-    uniformOffset_(dict.found("offset")),
-    offset_
-    (
-        uniformOffset_
-      ? point(dict.lookup("offset"))
-      : vector::zero
-    ),
-    offsets_
-    (
-        uniformOffset_
-      ? pointField(pp.size(), offset_)
-      : dict.lookup("offsets")
-    ),
+    offsetMode_(UNIFORM),
+    offset_(vector::zero),
+    offsets_(0),
+    distance_(0.0),
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(NULL)
-{}
+{
+    if (dict.found("offsetMode"))
+    {
+        offsetMode_ = offsetModeNames_.read(dict.lookup("offsetMode"));
+
+        switch(offsetMode_)
+        {
+            case UNIFORM:
+            {
+                offset_ = point(dict.lookup("offset"));
+            }
+            break;
+
+            case NONUNIFORM:
+            {
+                offsets_ = pointField(dict.lookup("offsets"));
+            }
+            break;
+
+            case NORMAL:
+            {
+                distance_ = readScalar(dict.lookup("distance"));
+            }
+            break;
+        }
+    }
+    else if (dict.found("offset"))
+    {
+        offsetMode_ = UNIFORM;
+        offset_ = point(dict.lookup("offset"));
+    }
+    else if (dict.found("offsets"))
+    {
+        offsetMode_ = NONUNIFORM;
+        offsets_ = pointField(dict.lookup("offsets"));
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "directMappedPatchBase::directMappedPatchBase\n"
+            "(\n"
+            "    const polyPatch& pp,\n"
+            "    const dictionary& dict\n"
+            ")\n"
+        )   << "Please supply the offsetMode as one of "
+            << NamedEnum<offsetMode, 3>::words()
+            << exit(FatalError);
+    }
+}
 
 
 Foam::directMappedPatchBase::directMappedPatchBase
@@ -691,9 +729,10 @@ Foam::directMappedPatchBase::directMappedPatchBase
     sampleRegion_(dmp.sampleRegion_),
     mode_(dmp.mode_),
     samplePatch_(dmp.samplePatch_),
-    uniformOffset_(dmp.uniformOffset_),
+    offsetMode_(dmp.offsetMode_),
     offset_(dmp.offset_),
     offsets_(dmp.offsets_),
+    distance_(dmp.distance_),
     sameRegion_(dmp.sameRegion_),
     mapPtr_(NULL)
 {}
@@ -710,9 +749,10 @@ Foam::directMappedPatchBase::directMappedPatchBase
     sampleRegion_(dmp.sampleRegion_),
     mode_(dmp.mode_),
     samplePatch_(dmp.samplePatch_),
-    uniformOffset_(dmp.uniformOffset_),
+    offsetMode_(dmp.offsetMode_),
     offset_(dmp.offset_),
     offsets_(dmp.offsets_, mapAddressing),
+    distance_(dmp.distance_),
     sameRegion_(dmp.sameRegion_),
     mapPtr_(NULL)
 {}
@@ -762,6 +802,40 @@ const Foam::polyPatch& Foam::directMappedPatchBase::samplePolyPatch() const
 }
 
 
+Foam::tmp<Foam::pointField> Foam::directMappedPatchBase::samplePoints() const
+{
+    tmp<pointField> tfld(new pointField(patch_.faceCentres()));
+    pointField& fld = tfld();
+
+    switch(offsetMode_)
+    {
+        case UNIFORM:
+        {
+            fld += offset_;
+        }
+        break;
+
+        case NONUNIFORM:
+        {
+            fld += offsets_;
+        }
+        break;
+
+        case NORMAL:
+        {
+            // Get outwards pointing normal
+            vectorField n(patch_.faceAreas());
+            n /= mag(n);
+
+            fld += distance_*n;
+        }
+        break;
+    }
+
+    return tfld;
+}
+
+
 void Foam::directMappedPatchBase::write(Ostream& os) const
 {
     os.writeKeyword("sampleMode") << sampleModeNames_[mode_]
@@ -770,13 +844,31 @@ void Foam::directMappedPatchBase::write(Ostream& os) const
         << token::END_STATEMENT << nl;
     os.writeKeyword("samplePatch") << samplePatch_
         << token::END_STATEMENT << nl;
-    if (uniformOffset_)
+
+    os.writeKeyword("offsetMode") << offsetModeNames_[offsetMode_]
+        << token::END_STATEMENT << nl;
+
+    switch(offsetMode_)
     {
-        os.writeKeyword("offset") << offset_ << token::END_STATEMENT << nl;
-    }
-    else
-    {
-        os.writeKeyword("offsets") << offsets_ << token::END_STATEMENT << nl;
+        case UNIFORM:
+        {
+            os.writeKeyword("offset") << offset_ << token::END_STATEMENT << nl;
+        }
+        break;
+
+        case NONUNIFORM:
+        {
+            os.writeKeyword("offsets") << offsets_ << token::END_STATEMENT
+                << nl;
+        }
+        break;
+
+        case NORMAL:
+        {
+            os.writeKeyword("distance") << distance_ << token::END_STATEMENT
+                << nl;
+        }
+        break;
     }
 }
 

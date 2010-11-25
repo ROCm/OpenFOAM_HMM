@@ -446,10 +446,11 @@ void Foam::mapDistribute::distribute
         const labelList& map = constructMap[Pstream::myProcNo()];
 
         field.setSize(constructSize);
+        field = nullValue;
 
         forAll(map, i)
         {
-            field[map[i]] = subField[i];
+            cop(field[map[i]], subField[i]);
         }
         return;
     }

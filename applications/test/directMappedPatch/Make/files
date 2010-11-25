@@ -1,4 +1,3 @@
+Test-DirectMappedPatch.C
 
-testDirectMappedPatch.C
-
-EXE = $(FOAM_USER_APPBIN)/testDirectMappedPatch
+EXE = $(FOAM_USER_APPBIN)/Test-DirectMappedPatch

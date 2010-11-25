@@ -14,7 +14,7 @@ runApplication subsetMesh c0 -patch wallFilm -overwrite
 
 # split the obstacle patches into cube[1-6]_patch[1-6]
 echo "running patchifyObstacles"
-./patchifyObstacles >& log.patchifyObstacles
+./patchifyObstacles > log.patchifyObstacles 2>&1
 
 # Create the wall film region via extrusion
 runApplication extrudeToRegionMesh \

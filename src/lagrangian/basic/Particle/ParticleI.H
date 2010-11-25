@@ -343,9 +343,6 @@ inline void Foam::Particle<ParticleType>::tetNeighbour(label triI)
 
     label tetBasePtI = mesh.tetBasePtIs()[tetFaceI_];
 
-    label facePtI = (tetPtI_ + tetBasePtI) % f.size();
-    label otherFacePtI = f.fcIndex(facePtI);
-
     if (tetBasePtI == -1)
     {
         FatalErrorIn
@@ -356,6 +353,9 @@ inline void Foam::Particle<ParticleType>::tetNeighbour(label triI)
             << ", produces a valid tet decomposition."
             << abort(FatalError);
     }
+
+    label facePtI = (tetPtI_ + tetBasePtI) % f.size();
+    label otherFacePtI = f.fcIndex(facePtI);
 
     switch (triI)
     {
