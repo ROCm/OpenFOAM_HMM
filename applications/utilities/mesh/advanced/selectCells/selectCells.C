@@ -299,7 +299,7 @@ label selectOutsideCells
         mesh,
         outsideFaces.shrink(),
         outsideFacesInfo.shrink(),
-        mesh.globalData().nTotalCells()+1  // max iterations
+        mesh.globalData().nTotalCells()+1   // max iterations
     );
 
     // Now regionCalc should hold info on cells that are reachable from

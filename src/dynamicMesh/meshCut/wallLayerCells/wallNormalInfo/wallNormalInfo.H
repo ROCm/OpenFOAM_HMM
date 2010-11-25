@@ -65,14 +65,10 @@ class wallNormalInfo
     // Private Member Functions
 
         //- Evaluate distance to point. Update normal_
-        inline bool update(const wallNormalInfo& w2);
+        template<class TrackingData>
+        inline bool update(const wallNormalInfo& w2, TrackingData& td);
 
 public:
-
-    // Static data members
-
-        //- initial point far away.
-        static point greatVector;
 
     // Constructors
 
@@ -96,70 +92,89 @@ public:
 
             //- Check whether origin has been changed at all or
             //  still contains original (invalid) value.
-            inline bool valid() const;
+            template<class TrackingData>
+            inline bool valid(TrackingData& td) const;
 
             //- Check for identical geometrical data. Used for cyclics checking.
+            template<class TrackingData>
             inline bool sameGeometry
             (
                 const polyMesh&,
                 const wallNormalInfo&,
-                const scalar
+                const scalar,
+                TrackingData& td
             ) const;
 
             //- Convert any absolute coordinates into relative to (patch)face
             //  centre
+            template<class TrackingData>
             inline void leaveDomain
             (
                 const polyMesh&,
                 const polyPatch&,
                 const label patchFaceI,
-                const point& faceCentre
+                const point& faceCentre,
+                TrackingData& td
             );
 
             //- Reverse of leaveDomain
+            template<class TrackingData>
             inline void enterDomain
             (
                 const polyMesh&,
                 const polyPatch&,
                 const label patchFaceI,
-                const point& faceCentre
+                const point& faceCentre,
+                TrackingData& td
             );
 
             //- Apply rotation matrix to any coordinates
+            template<class TrackingData>
             inline void transform
             (
                 const polyMesh&,
-                const tensor&
+                const tensor&,
+                TrackingData& td
             );
 
             //- Influence of neighbouring face.
+            template<class TrackingData>
             inline bool updateCell
             (
                 const polyMesh&,
                 const label thisCellI,
                 const label neighbourFaceI,
                 const wallNormalInfo& neighbourInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
 
             //- Influence of neighbouring cell.
+            template<class TrackingData>
             inline bool updateFace
             (
                 const polyMesh&,
                 const label thisFaceI,
                 const label neighbourCellI,
                 const wallNormalInfo& neighbourInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
 
             //- Influence of different value on same face.
+            template<class TrackingData>
             inline bool updateFace
             (
                 const polyMesh&,
                 const label thisFaceI,
                 const wallNormalInfo& neighbourInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
+
+            //- Same (like operator==)
+            template<class TrackingData>
+            inline bool equal(const wallNormalInfo&, TrackingData& td) const;
 
     // Member Operators
 

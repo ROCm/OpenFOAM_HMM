@@ -2165,6 +2165,9 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
     // refinementLevel data on seed faces
     DynamicList<refinementData> seedFacesInfo(mesh_.nFaces()/100);
 
+    // Dummy additional info for FaceCellWave
+    int dummyTrackData = 0;
+
 
     // Additional buffer layer thickness by changing initial count. Usually
     // this happens on boundary faces. Bit tricky. Use allFaceInfo to mark
@@ -2173,7 +2176,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
     {
         label faceI = facesToCheck[i];
 
-        if (allFaceInfo[faceI].valid())
+        if (allFaceInfo[faceI].valid(dummyTrackData))
         {
             // Can only occur if face has already gone through loop below.
             FatalErrorIn
@@ -2247,7 +2250,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
     forAll(faceNeighbour, faceI)
     {
         // Check if face already handled in loop above
-        if (!allFaceInfo[faceI].valid())
+        if (!allFaceInfo[faceI].valid(dummyTrackData))
         {
             label own = faceOwner[faceI];
             label nei = faceNeighbour[faceI];
@@ -2262,7 +2265,8 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
                     faceI,
                     own,
                     allCellInfo[own],
-                    FaceCellWave<refinementData>::propagationTol()
+                    FaceCellWave<refinementData, int>::propagationTol(),
+                    dummyTrackData
                 );
                 seedFaces.append(faceI);
                 seedFacesInfo.append(allFaceInfo[faceI]);
@@ -2275,7 +2279,8 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
                     faceI,
                     nei,
                     allCellInfo[nei],
-                    FaceCellWave<refinementData>::propagationTol()
+                    FaceCellWave<refinementData, int>::propagationTol(),
+                    dummyTrackData
                 );
                 seedFaces.append(faceI);
                 seedFacesInfo.append(allFaceInfo[faceI]);
@@ -2289,7 +2294,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
     for (label faceI = mesh_.nInternalFaces(); faceI < mesh_.nFaces(); faceI++)
     {
         // Check if face already handled in loop above
-        if (!allFaceInfo[faceI].valid())
+        if (!allFaceInfo[faceI].valid(dummyTrackData))
         {
             label own = faceOwner[faceI];
 
@@ -2301,7 +2306,8 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
                 faceI,
                 own,
                 allCellInfo[own],
-                FaceCellWave<refinementData>::propagationTol()
+                FaceCellWave<refinementData, int>::propagationTol(),
+                dummyTrackData
             );
             seedFaces.append(faceI);
             seedFacesInfo.append(faceData);
@@ -2310,11 +2316,12 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
 
 
     // face-cell-face transport engine
-    FaceCellWave<refinementData> levelCalc
+    FaceCellWave<refinementData, int> levelCalc
     (
         mesh_,
         allFaceInfo,
-        allCellInfo
+        allCellInfo,
+        dummyTrackData
     );
 
     while (true)
@@ -2418,7 +2425,8 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
                             faceI,
                             cellI,
                             cellInfo,
-                            FaceCellWave<refinementData>::propagationTol()
+                            FaceCellWave<refinementData, int>::propagationTol(),
+                            dummyTrackData
                         );
 
                         if (faceData.count() > allFaceInfo[faceI].count())
@@ -2627,6 +2635,9 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
     // Initial information about (distance to) cellLevel on all faces
     List<refinementDistanceData> allFaceInfo(mesh_.nFaces());
 
+    // Dummy additional info for FaceCellWave
+    int dummyTrackData = 0;
+
 
     // Mark cells with wanted refinement level
     forAll(cellsToRefine, i)
@@ -2643,7 +2654,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
     // Mark all others with existing refinement level
     forAll(allCellInfo, cellI)
     {
-        if (!allCellInfo[cellI].valid())
+        if (!allCellInfo[cellI].valid(dummyTrackData))
         {
             allCellInfo[cellI] = refinementDistanceData
             (
@@ -2660,14 +2671,13 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
     // refinementLevel data on seed faces
     DynamicList<refinementDistanceData> seedFacesInfo(mesh_.nFaces()/100);
 
-
     const pointField& cc = mesh_.cellCentres();
 
     forAll(facesToCheck, i)
     {
         label faceI = facesToCheck[i];
 
-        if (allFaceInfo[faceI].valid())
+        if (allFaceInfo[faceI].valid(dummyTrackData))
         {
             // Can only occur if face has already gone through loop below.
             FatalErrorIn
@@ -2685,7 +2695,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
 
         label ownLevel =
         (
-            allCellInfo[own].valid()
+            allCellInfo[own].valid(dummyTrackData)
           ? allCellInfo[own].originLevel()
           : cellLevel_[own]
         );
@@ -2709,7 +2719,8 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
                 faceI,
                 own,        // not used (should be nei)
                 neiData,
-                FaceCellWave<refinementDistanceData>::propagationTol()
+                FaceCellWave<refinementDistanceData, int>::propagationTol(),
+                dummyTrackData
             );
         }
         else
@@ -2718,7 +2729,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
 
             label neiLevel =
             (
-                allCellInfo[nei].valid()
+                allCellInfo[nei].valid(dummyTrackData)
               ? allCellInfo[nei].originLevel()
               : cellLevel_[nei]
             );
@@ -2732,7 +2743,8 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
                     faceI,
                     nei,
                     refinementDistanceData(level0Size, cc[nei], neiLevel+1),
-                    FaceCellWave<refinementDistanceData>::propagationTol()
+                    FaceCellWave<refinementDistanceData, int>::propagationTol(),
+                    dummyTrackData
                 );
                 allFaceInfo[faceI].updateFace
                 (
@@ -2740,7 +2752,8 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
                     faceI,
                     own,
                     refinementDistanceData(level0Size, cc[own], ownLevel+1),
-                    FaceCellWave<refinementDistanceData>::propagationTol()
+                    FaceCellWave<refinementDistanceData, int>::propagationTol(),
+                    dummyTrackData
                 );
             }
             else
@@ -2752,7 +2765,8 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
                     faceI,
                     nei,
                     refinementDistanceData(level0Size, cc[nei], neiLevel),
-                    FaceCellWave<refinementDistanceData>::propagationTol()
+                    FaceCellWave<refinementDistanceData, int>::propagationTol(),
+                    dummyTrackData
                 );
                 allFaceInfo[faceI].updateFace
                 (
@@ -2760,7 +2774,8 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
                     faceI,
                     own,
                     refinementDistanceData(level0Size, cc[own], ownLevel),
-                    FaceCellWave<refinementDistanceData>::propagationTol()
+                    FaceCellWave<refinementDistanceData, int>::propagationTol(),
+                    dummyTrackData
                 );
             }
         }
@@ -2775,13 +2790,13 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
     forAll(faceNeighbour, faceI)
     {
         // Check if face already handled in loop above
-        if (!allFaceInfo[faceI].valid())
+        if (!allFaceInfo[faceI].valid(dummyTrackData))
         {
             label own = faceOwner[faceI];
 
             label ownLevel =
             (
-                allCellInfo[own].valid()
+                allCellInfo[own].valid(dummyTrackData)
               ? allCellInfo[own].originLevel()
               : cellLevel_[own]
             );
@@ -2790,7 +2805,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
 
             label neiLevel =
             (
-                allCellInfo[nei].valid()
+                allCellInfo[nei].valid(dummyTrackData)
               ? allCellInfo[nei].originLevel()
               : cellLevel_[nei]
             );
@@ -2805,7 +2820,8 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
                     faceI,
                     own,
                     refinementDistanceData(level0Size, cc[own], ownLevel),
-                    FaceCellWave<refinementDistanceData>::propagationTol()
+                    FaceCellWave<refinementDistanceData, int>::propagationTol(),
+                    dummyTrackData
                 );
                 seedFacesInfo.append(allFaceInfo[faceI]);
             }
@@ -2818,7 +2834,8 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
                     faceI,
                     nei,
                     refinementDistanceData(level0Size, cc[nei], neiLevel),
-                    FaceCellWave<refinementDistanceData>::propagationTol()
+                    FaceCellWave<refinementDistanceData, int>::propagationTol(),
+                    dummyTrackData
                 );
                 seedFacesInfo.append(allFaceInfo[faceI]);
             }
@@ -2829,14 +2846,15 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
     seedFacesInfo.shrink();
 
     // face-cell-face transport engine
-    FaceCellWave<refinementDistanceData> levelCalc
+    FaceCellWave<refinementDistanceData, int> levelCalc
     (
         mesh_,
         seedFaces,
         seedFacesInfo,
         allFaceInfo,
         allCellInfo,
-        mesh_.globalData().nTotalCells()+1
+        mesh_.globalData().nTotalCells()+1,
+        dummyTrackData
     );
 
 

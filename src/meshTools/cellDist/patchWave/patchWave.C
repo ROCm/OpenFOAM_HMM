@@ -26,7 +26,6 @@ License
 #include "patchWave.H"
 #include "polyMesh.H"
 #include "wallPoint.H"
-#include "MeshWave.H"
 #include "globalMeshData.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -82,7 +81,7 @@ Foam::label Foam::patchWave::getValues(const MeshWave<wallPoint>& waveInfo)
     {
         scalar dist = cellInfo[cellI].distSqr();
 
-        if (cellInfo[cellI].valid())
+        if (cellInfo[cellI].valid(waveInfo.data()))
         {
             distance_[cellI] = Foam::sqrt(dist);
         }
@@ -112,7 +111,7 @@ Foam::label Foam::patchWave::getValues(const MeshWave<wallPoint>& waveInfo)
 
             scalar dist = faceInfo[meshFaceI].distSqr();
 
-            if (faceInfo[meshFaceI].valid())
+            if (faceInfo[meshFaceI].valid(waveInfo.data()))
             {
                 // Adding SMALL to avoid problems with /0 in the turbulence
                 // models

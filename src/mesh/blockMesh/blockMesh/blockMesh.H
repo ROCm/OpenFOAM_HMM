@@ -128,7 +128,7 @@ class blockMesh
 
         void createCellShapes(cellShapeList& tmpBlockCells);
 
-        polyMesh* createTopology(IOdictionary&);
+        polyMesh* createTopology(const IOdictionary&, const word& regionName);
         void checkBlockMesh(const polyMesh&) const;
 
         //- Determine the merge info and the final number of cells/points
@@ -149,7 +149,7 @@ public:
     // Constructors
 
         //- Construct from IOdictionary
-        blockMesh(IOdictionary&);
+        blockMesh(const IOdictionary&, const word& regionName);
 
 
     //- Destructor

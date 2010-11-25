@@ -302,12 +302,6 @@ public:
         //- Return the field transpose (only defined for second rank tensors)
         tmp<Field<Type> > T() const;
 
-        //- Transfer contents to the Xfer container
-        Xfer<Field<Type> > xfer();
-
-        //- Transfer contents to a List Xfer container
-        Xfer<List<Type> > xferList();
-
         //- Write the field as a dictionary entry
         void writeEntry(const word& keyword, Ostream& os) const;
 

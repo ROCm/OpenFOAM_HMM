@@ -28,9 +28,14 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Update this with w2 if not yet set.
-inline bool Foam::wallNormalInfo::update(const wallNormalInfo& w2)
+template<class TrackingData>
+inline bool Foam::wallNormalInfo::update
+(
+    const wallNormalInfo& w2,
+    TrackingData& td
+)
 {
-    if (!w2.valid())
+    if (!w2.valid(td))
     {
         FatalErrorIn
         (
@@ -39,7 +44,7 @@ inline bool Foam::wallNormalInfo::update(const wallNormalInfo& w2)
 
         return false;
     }
-    else if (valid())
+    else if (valid(td))
     {
         // our already set. Stop any transfer
         return false;
@@ -58,7 +63,7 @@ inline bool Foam::wallNormalInfo::update(const wallNormalInfo& w2)
 // Null constructor
 inline Foam::wallNormalInfo::wallNormalInfo()
 :
-    normal_(greatVector)
+    normal_(point::max)
 {}
 
 
@@ -84,18 +89,21 @@ inline const Foam::vector& Foam::wallNormalInfo::normal() const
 }
 
 
-inline bool Foam::wallNormalInfo::valid() const
+template<class TrackingData>
+inline bool Foam::wallNormalInfo::valid(TrackingData& td) const
 {
-    return normal_ != greatVector;
+    return normal_ != point::max;
 }
 
 
 // No geometric data so never any problem on cyclics
+template<class TrackingData>
 inline bool Foam::wallNormalInfo::sameGeometry
 (
     const polyMesh&,
     const wallNormalInfo& w2,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 ) const
 {
     return true;
@@ -103,74 +111,97 @@ inline bool Foam::wallNormalInfo::sameGeometry
 
 
 // No geometric data.
+template<class TrackingData>
 inline void Foam::wallNormalInfo::leaveDomain
 (
     const polyMesh&,
     const polyPatch& patch,
     const label patchFaceI,
-    const point& faceCentre
+    const point& faceCentre,
+    TrackingData& td
 )
 {}
 
 
 // No geometric data.
+template<class TrackingData>
 inline void Foam::wallNormalInfo::transform
 (
     const polyMesh&,
-    const tensor& rotTensor
+    const tensor& rotTensor,
+    TrackingData& td
 )
 {}
 
 
 // No geometric data.
+template<class TrackingData>
 inline void Foam::wallNormalInfo::enterDomain
 (
     const polyMesh&,
     const polyPatch& patch,
     const label patchFaceI,
-    const point& faceCentre
+    const point& faceCentre,
+    TrackingData& td
 )
 {}
 
 
 // Update this with w2 if w2 nearer to pt.
+template<class TrackingData>
 inline bool Foam::wallNormalInfo::updateCell
 (
     const polyMesh&,
     const label thisCellI,
     const label neighbourFaceI,
     const wallNormalInfo& neighbourWallInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
-    return update(neighbourWallInfo);
+    return update(neighbourWallInfo, td);
 }
 
 
 // Update this with w2 if w2 nearer to pt.
+template<class TrackingData>
 inline bool Foam::wallNormalInfo::updateFace
 (
     const polyMesh&,
     const label thisFaceI,
     const label neighbourCellI,
     const wallNormalInfo& neighbourWallInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
-    return update(neighbourWallInfo);
+    return update(neighbourWallInfo, td);
 }
 
 
 // Update this with w2 if w2 nearer to pt.
+template<class TrackingData>
 inline bool Foam::wallNormalInfo::updateFace
 (
     const polyMesh&,
     const label thisFaceI,
     const wallNormalInfo& neighbourWallInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
-    return update(neighbourWallInfo);
+    return update(neighbourWallInfo, td);
+}
+
+
+template <class TrackingData>
+inline bool Foam::wallNormalInfo::equal
+(
+    const wallNormalInfo& rhs,
+    TrackingData& td
+) const
+{
+    return operator==(rhs);
 }
 
 

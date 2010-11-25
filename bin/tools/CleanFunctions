@@ -67,13 +67,15 @@ cleanCase()
     rm -rf forces* > /dev/null 2>&1
     rm -rf sets > /dev/null 2>&1
     rm -rf system/machines > /dev/null 2>&1
-    (cd constant/polyMesh && \
-        rm -rf \
-        allOwner* cell* face* meshModifiers* \
-        owner* neighbour* point* edge* \
-        cellLevel* pointLevel* refinementHistory* surfaceIndex* sets \
-        > /dev/null 2>&1 \
-    )
+    if [ -d "constant/polyMesh" ]; then 
+        (cd constant/polyMesh && \
+            rm -rf \
+            allOwner* cell* face* meshModifiers* \
+            owner* neighbour* point* edge* \
+            cellLevel* pointLevel* refinementHistory* surfaceIndex* sets \
+            > /dev/null 2>&1 \
+        )
+    fi
     (cd constant && \
         rm -rf \
         cellToRegion cellLevel* pointLevel* \

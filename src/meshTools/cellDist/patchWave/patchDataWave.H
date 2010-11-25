@@ -45,6 +45,7 @@ SourceFiles
 #include "cellDistFuncs.H"
 #include "FieldField.H"
 #include "UPtrList.H"
+#include "MeshWave.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,7 +55,7 @@ namespace Foam
 // Forward declaration of classes
 class polyMesh;
 class wallPoint;
-template<class Type> class MeshWave;
+//template<class Type, class TrackingData> class MeshWave;
 
 /*---------------------------------------------------------------------------*\
                            Class patchDataWave Declaration

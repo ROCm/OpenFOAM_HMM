@@ -164,7 +164,7 @@ Field<Type>::Field(const Xfer<List<Type> >& f)
 template<class Type>
 Field<Type>::Field(const Xfer<Field<Type> >& f)
 :
-    List<Type>(f().xferList())
+    List<Type>(f)
 {}
 
 
@@ -575,20 +575,6 @@ tmp<Field<Type> > Field<Type>::T() const
     tmp<Field<Type> > transpose(new Field<Type>(this->size()));
     ::Foam::T(transpose(), *this);
     return transpose;
-}
-
-
-template<class Type>
-Xfer<Field<Type> > Field<Type>::xfer()
-{
-    return xferMove(*this);
-}
-
-
-template<class Type>
-Xfer<List<Type> > Field<Type>::xferList()
-{
-    return List<Type>::xfer();
 }
 
 
