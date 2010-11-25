@@ -47,6 +47,8 @@ Foam::memInfo::~memInfo()
 
 const Foam::memInfo& Foam::memInfo::update()
 {
+    // reset to invalid values first
+    peak_ = size_ = rss_ = -1;
     IFstream is("/proc/" + name(pid()) + "/status");
 
     while (is.good())

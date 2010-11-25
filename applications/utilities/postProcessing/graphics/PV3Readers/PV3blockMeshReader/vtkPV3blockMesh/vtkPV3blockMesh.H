@@ -173,6 +173,12 @@ class vtkPV3blockMesh
         //- OpenFOAM mesh
         blockMesh* meshPtr_;
 
+        //- The mesh region
+        word meshRegion_;
+
+        //- The mesh directory for the region
+        fileName meshDir_;
+
         //- Selected geometrical parts
         boolList blockStatus_;
 

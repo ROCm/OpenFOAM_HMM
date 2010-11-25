@@ -319,6 +319,62 @@ public:
                 }
             }
 
+            //- Reverse distribute data using default commsType.
+            //  Since constructSize might be larger than supplied size supply
+            //  a nullValue
+            template<class T>
+            void reverseDistribute
+            (
+                const label constructSize,
+                const T& nullValue,
+                List<T>& fld
+            )
+            const
+            {
+                if (Pstream::defaultCommsType == Pstream::nonBlocking)
+                {
+                    distribute
+                    (
+                        Pstream::nonBlocking,
+                        List<labelPair>(),
+                        constructSize,
+                        constructMap_,
+                        subMap_,
+                        fld,
+                        eqOp<T>(),
+                        nullValue
+                    );
+                }
+                else if (Pstream::defaultCommsType == Pstream::scheduled)
+                {
+                    distribute
+                    (
+                        Pstream::scheduled,
+                        schedule(),
+                        constructSize,
+                        constructMap_,
+                        subMap_,
+                        fld,
+                        eqOp<T>(),
+                        nullValue
+                    );
+                }
+                else
+                {
+                    distribute
+                    (
+                        Pstream::blocking,
+                        List<labelPair>(),
+                        constructSize,
+                        constructMap_,
+                        subMap_,
+                        fld,
+                        eqOp<T>(),
+                        nullValue
+                    );
+                }
+            }
+
             //- Do all sends using PstreamBuffers
             template<class T>
             void send(PstreamBuffers&, const List<T>&) const;

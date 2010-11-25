@@ -7,11 +7,11 @@ cd ${0%/*} || exit 1    # run from this directory
 
 ./Allrun.pre
 
-decomposePar -region wallFilmRegion >& log.decomposePar.wallFilmRegion
-decomposePar >& log.decomposePar.primaryRegion
+decomposePar -region wallFilmRegion > log.decomposePar.wallFilmRegion 2>&1
+decomposePar > log.decomposePar.primaryRegion 2>&1
 
 runParallel reactingParcelFilmFoam 4
 
-reconstructPar -region wallFilmRegion >& log.reconstructPar.wallFilmRegion
-reconstructPar >& log.reconstructPar.primaryRegion
+reconstructPar -region wallFilmRegion > log.reconstructPar.wallFilmRegion 2>&1
+reconstructPar > log.reconstructPar.primaryRegion 2>&1
 

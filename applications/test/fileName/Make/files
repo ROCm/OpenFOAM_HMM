@@ -1,3 +1,3 @@
-fileNameTest.C
+Test-fileName.C
 
-EXE = $(FOAM_USER_APPBIN)/fileNameTest
+EXE = $(FOAM_USER_APPBIN)/Test-fileName

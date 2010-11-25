@@ -28,7 +28,7 @@ boundaryField
     }
     region0_to_wallFilmRegion_wallFilmFaces
     {
-        type            directMappedNamedFixedValue;
+        type            directMapped;
         fieldName       Tsf;
         average         300;
         setAverage      no;

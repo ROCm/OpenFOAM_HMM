@@ -28,7 +28,7 @@
 # Description
 #     Link all the source files in the <dir> directory into <dir>/lnInclude
 #
-#     Usage: wmakeLnInclude [-f] <dir> [-lnOption]
+#     Usage: wmakeLnInclude [-f] <dir>
 #
 #     The desired source files:
 #         *.C *.H *.h *.cpp *.cxx *.hpp *.hxx
@@ -43,13 +43,13 @@ usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
-usage: $Script [-f] <dir> [-lnOption]
+usage: $Script [-f] <dir>
 
     Link all the source files in the <dir> into <dir>/lnInclude
 
 Note
     The '-f' option forces an update when the lnInclude directory already exists
-    and also changes the default linking from 'ln -s' to 'ln -sf'.
+    and changes the default linking from 'ln -s' to 'ln -sf'.
 
 USAGE
     exit 1
@@ -89,10 +89,6 @@ done
 if [ $# -eq 1 ]
 then
     baseDir=$1
-elif [ $# -eq 2 ]
-then
-    baseDir=$1
-    lnOpt="$2"
 else
     usage "ERROR: incorrect number of arguments"
 fi
