@@ -29,7 +29,7 @@ boundaryField
     wallFilm
     {
         type            zeroGradient;
-//        type            directMappedNamedFixedValue;
+//        type            directMapped;
 //        fieldName       Tsf;
 //        average         300;
 //        setAverage      no;
