@@ -28,6 +28,7 @@ License
 #include "cellSet.H"
 #include "Time.H"
 #include "IFstream.H"
+#include "fieldDictionary.H"
 
 #include "addToRunTimeSelectionTable.H"
 
@@ -207,7 +208,7 @@ void Foam::fieldToCell::applyToSet
         IFstream str(fieldObject.filePath());
 
         // Read dictionary
-        dictionary fieldDict(str);
+        fieldDictionary fieldDict(fieldObject, fieldObject.headerClassName());
 
         scalarField internalVals("internalField", fieldDict, mesh().nCells());
 
@@ -218,7 +219,7 @@ void Foam::fieldToCell::applyToSet
         IFstream str(fieldObject.filePath());
 
         // Read dictionary
-        dictionary fieldDict(str);
+        fieldDictionary fieldDict(fieldObject, fieldObject.headerClassName());
 
         vectorField internalVals("internalField", fieldDict, mesh().nCells());
 
