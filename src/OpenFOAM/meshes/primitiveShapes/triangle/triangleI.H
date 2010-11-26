@@ -27,15 +27,10 @@ License
 #include "pointHit.H"
 #include "mathematicalConstants.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
 
 template<class Point, class PointRef>
-inline triangle<Point, PointRef>::triangle
+inline Foam::triangle<Point, PointRef>::triangle
 (
     const Point& a,
     const Point& b,
@@ -49,7 +44,7 @@ inline triangle<Point, PointRef>::triangle
 
 
 template<class Point, class PointRef>
-inline triangle<Point, PointRef>::triangle(Istream& is)
+inline Foam::triangle<Point, PointRef>::triangle(Istream& is)
 {
     // Read beginning of triangle point pair
     is.readBegin("triangle");
@@ -67,47 +62,47 @@ inline triangle<Point, PointRef>::triangle(Istream& is)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Point, class PointRef>
-inline const Point& triangle<Point, PointRef>::a() const
+inline const Point& Foam::triangle<Point, PointRef>::a() const
 {
     return a_;
 }
 
 template<class Point, class PointRef>
-inline const Point& triangle<Point, PointRef>::b() const
+inline const Point& Foam::triangle<Point, PointRef>::b() const
 {
     return b_;
 }
 
 template<class Point, class PointRef>
-inline const Point& triangle<Point, PointRef>::c() const
+inline const Point& Foam::triangle<Point, PointRef>::c() const
 {
     return c_;
 }
 
 
 template<class Point, class PointRef>
-inline Point triangle<Point, PointRef>::centre() const
+inline Point Foam::triangle<Point, PointRef>::centre() const
 {
     return (1.0/3.0)*(a_ + b_ + c_);
 }
 
 
 template<class Point, class PointRef>
-inline scalar triangle<Point, PointRef>::mag() const
+inline Foam::scalar Foam::triangle<Point, PointRef>::mag() const
 {
     return Foam::mag(normal());
 }
 
 
 template<class Point, class PointRef>
-inline vector triangle<Point, PointRef>::normal() const
+inline Foam::vector Foam::triangle<Point, PointRef>::normal() const
 {
     return 0.5*((b_ - a_)^(c_ - a_));
 }
 
 
 template<class Point, class PointRef>
-inline Point triangle<Point, PointRef>::circumCentre() const
+inline Point Foam::triangle<Point, PointRef>::circumCentre() const
 {
     scalar d1 = (c_ - a_)&(b_ - a_);
     scalar d2 = -(c_ - b_)&(b_ - a_);
@@ -127,7 +122,7 @@ inline Point triangle<Point, PointRef>::circumCentre() const
 
 
 template<class Point, class PointRef>
-inline scalar triangle<Point, PointRef>::circumRadius() const
+inline Foam::scalar Foam::triangle<Point, PointRef>::circumRadius() const
 {
     scalar d1 = (c_ - a_) & (b_ - a_);
     scalar d2 = - (c_ - b_) & (b_ - a_);
@@ -149,7 +144,7 @@ inline scalar triangle<Point, PointRef>::circumRadius() const
 
 
 template<class Point, class PointRef>
-inline scalar triangle<Point, PointRef>::quality() const
+inline Foam::scalar Foam::triangle<Point, PointRef>::quality() const
 {
     // Note: 3*sqr(3)/(4*pi) = 0.4134966716
 
@@ -165,7 +160,10 @@ inline scalar triangle<Point, PointRef>::quality() const
 
 
 template<class Point, class PointRef>
-inline scalar triangle<Point, PointRef>::sweptVol(const triangle& t) const
+inline Foam::scalar Foam::triangle<Point, PointRef>::sweptVol
+(
+    const triangle& t
+) const
 {
     return (1.0/12.0)*
     (
@@ -181,7 +179,7 @@ inline scalar triangle<Point, PointRef>::sweptVol(const triangle& t) const
 
 
 template<class Point, class PointRef>
-inline tensor triangle<Point, PointRef>::inertia
+inline Foam::tensor Foam::triangle<Point, PointRef>::inertia
 (
     PointRef refPt,
     scalar density
@@ -218,7 +216,7 @@ inline tensor triangle<Point, PointRef>::inertia
 
 
 template<class Point, class PointRef>
-inline Point triangle<Point, PointRef>::randomPoint(Random& rndGen) const
+inline Point Foam::triangle<Point, PointRef>::randomPoint(Random& rndGen) const
 {
     // Generating Random Points in Triangles
     // by Greg Turk
@@ -234,7 +232,7 @@ inline Point triangle<Point, PointRef>::randomPoint(Random& rndGen) const
 
 
 template<class Point, class PointRef>
-scalar triangle<Point, PointRef>::barycentric
+Foam::scalar Foam::triangle<Point, PointRef>::barycentric
 (
     const point& pt,
     List<scalar>& bary
@@ -283,7 +281,7 @@ scalar triangle<Point, PointRef>::barycentric
 
 
 template<class Point, class PointRef>
-inline pointHit triangle<Point, PointRef>::ray
+inline Foam::pointHit Foam::triangle<Point, PointRef>::ray
 (
     const point& p,
     const vector& q,
@@ -399,7 +397,7 @@ inline pointHit triangle<Point, PointRef>::ray
 // From "Fast, Minimum Storage Ray/Triangle Intersection"
 // Moeller/Trumbore.
 template<class Point, class PointRef>
-inline pointHit triangle<Point, PointRef>::intersection
+inline Foam::pointHit Foam::triangle<Point, PointRef>::intersection
 (
     const point& orig,
     const vector& dir,
@@ -482,7 +480,7 @@ inline pointHit triangle<Point, PointRef>::intersection
 
 
 template<class Point, class PointRef>
-pointHit triangle<Point, PointRef>::nearestPointClassify
+Foam::pointHit Foam::triangle<Point, PointRef>::nearestPointClassify
 (
     const point& p,
     label& nearType,
@@ -595,7 +593,7 @@ pointHit triangle<Point, PointRef>::nearestPointClassify
 
 
 template<class Point, class PointRef>
-inline pointHit triangle<Point, PointRef>::nearestPoint
+inline Foam::pointHit Foam::triangle<Point, PointRef>::nearestPoint
 (
     const point& p
 ) const
@@ -609,7 +607,7 @@ inline pointHit triangle<Point, PointRef>::nearestPoint
 
 
 template<class Point, class PointRef>
-inline bool triangle<Point, PointRef>::classify
+inline bool Foam::triangle<Point, PointRef>::classify
 (
     const point& p,
     label& nearType,
@@ -623,7 +621,10 @@ inline bool triangle<Point, PointRef>::classify
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 template<class point, class pointRef>
-inline Istream& operator>>(Istream& is, triangle<point, pointRef>& t)
+inline Foam::Istream& Foam::operator>>
+(
+    Istream& is, triangle<point, pointRef>& t
+)
 {
     // Read beginning of triangle point pair
     is.readBegin("triangle");
@@ -641,7 +642,11 @@ inline Istream& operator>>(Istream& is, triangle<point, pointRef>& t)
 
 
 template<class Point, class PointRef>
-inline Ostream& operator<<(Ostream& os, const triangle<Point, PointRef>& t)
+inline Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const triangle<Point, PointRef>& t
+)
 {
     os  << nl
         << token::BEGIN_LIST
@@ -651,9 +656,5 @@ inline Ostream& operator<<(Ostream& os, const triangle<Point, PointRef>& t)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

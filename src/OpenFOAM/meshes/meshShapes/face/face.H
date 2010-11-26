@@ -27,12 +27,16 @@ Class
 Description
     A face is a list of labels corresponding to mesh vertices.
 
+SeeAlso
+    Foam::triFace
+
 SourceFiles
     faceI.H
     face.C
     faceIntersection.C
     faceContactSphere.C
     faceAreaInContact.C
+    faceTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -191,6 +195,7 @@ public:
         //- Navigation through face vertices
 
             //- Which vertex on face (face index given a global index)
+            //  returns -1 if not found
             label which(const label globalIndex) const;
 
             //- Next vertex on face
@@ -289,8 +294,8 @@ public:
         //- Return number of edges
         inline label nEdges() const;
 
-        //- Return edges in face point ordering, i.e. edges()[0] is edge
-        //  between [0] and [1]
+        //- Return edges in face point ordering,
+        //  i.e. edges()[0] is edge between [0] and [1]
         edgeList edges() const;
 
         //- Return n-th face edge

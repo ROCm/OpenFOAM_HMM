@@ -25,10 +25,15 @@ Class
     Foam::triFace
 
 Description
-    A triangle face primitive using a FixedList.
+    A triangular face using a FixedList of labels corresponding to mesh
+    vertices.
+
+SeeAlso
+    Foam::face, Foam::triangle
 
 SourceFiles
     triFaceI.H
+    triFaceTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,17 +52,17 @@ SourceFiles
 namespace Foam
 {
 
-class face;
-
 // Forward declaration of friend functions and operators
 
+class face;
 class triFace;
+
 inline bool operator==(const triFace&, const triFace&);
 inline bool operator!=(const triFace&, const triFace&);
 
 
 /*---------------------------------------------------------------------------*\
-                          class triFace Declaration
+                          Class triFace Declaration
 \*---------------------------------------------------------------------------*/
 
 class triFace
@@ -93,62 +98,108 @@ public:
         //  return the collapsed size, set collapsed point labels to -1
         inline label collapse();
 
+        //- Return the points corresponding to this face
+        inline pointField points(const pointField& meshPoints) const;
+
+        //- Return triangle as a face
+        inline face triFaceFace() const;
+
+        //- Return the triangle
+        inline triPointRef tri(const pointField&) const;
+
+        //- Return centre (centroid)
+        inline point centre(const pointField&) const;
+
+        //- Calculate average value at centroid of face
+        template<class Type>
+        Type average(const pointField&, const Field<Type>&) const;
+
+        //- Return scalar magnitude
+        inline scalar mag(const pointField&) const;
+
+        //- Return vector normal
+        inline vector normal(const pointField&) const;
+
+        //- Number of triangles after splitting
+        inline label nTriangles() const;
+
+        //- Return face with reverse direction
+        inline triFace reverseFace() const;
+
+        //- Return swept-volume
+        inline scalar sweptVol
+        (
+            const pointField& oldPoints,
+            const pointField& newPoints
+        ) const;
+
+        //- Return the inertia tensor, with optional reference
+        //  point and density specification
+        inline tensor inertia
+        (
+            const pointField&,
+            const point& refPt = vector::zero,
+            scalar density = 1.0
+        ) const;
+
+        //- Return point intersection with a ray starting at p,
+        //  with direction q.
+        inline pointHit ray
+        (
+            const point& p,
+            const vector& q,
+            const pointField& points,
+            const intersection::algorithm = intersection::FULL_RAY,
+            const intersection::direction dir = intersection::VECTOR
+        ) const;
+
+        //- Fast intersection with a ray.
+        inline pointHit intersection
+        (
+            const point& p,
+            const vector& q,
+            const pointField& points,
+            const intersection::algorithm alg,
+            const scalar tol = 0.0
+        ) const;
+
+        //- Return nearest point to face
+        inline pointHit nearestPoint
+        (
+            const point& p,
+            const pointField& points
+        ) const;
+
+
+        //- Return nearest point to face and classify it:
+        //  + near point (nearType=POINT, nearLabel=0, 1, 2)
+        //  + near edge (nearType=EDGE, nearLabel=0, 1, 2)
+        //    Note: edges are counted from starting vertex so
+        //    e.g. edge n is from f[n] to f[0], where the face has n + 1
+        //    points
+        inline pointHit nearestPointClassify
+        (
+            const point& p,
+            const pointField& points,
+            label& nearType,
+            label& nearLabel
+        ) const;
+
+        //- Return number of edges
+        inline label nEdges() const;
+
+        //- Return edges in face point ordering,
+        //  i.e. edges()[0] is edge between [0] and [1]
+        inline edgeList edges() const;
+
+        //- Return n-th face edge
+        inline edge faceEdge(const label n) const;
+
         //- Return the edge direction on the face
         //  - +1: forward (counter-clockwise) on the face
         //  - -1: reverse (clockwise) on the face
         //  -  0: edge not found on the face
         inline int edgeDirection(const edge&) const;
-
-
-        // Properties
-
-            //- Return the points corresponding to this face
-            inline pointField points(const pointField& points) const;
-
-            //- Return triangle as a face
-            inline face triFaceFace() const;
-
-            //- Return number of edges
-            inline label nEdges() const;
-
-            //- Return edges
-            inline edgeList edges() const;
-
-            //- Return centre (centroid)
-            inline point centre(const pointField&) const;
-
-            //- Return scalar magnitude
-            inline scalar mag(const pointField&) const;
-
-            //- Return vector normal
-            inline vector normal(const pointField&) const;
-
-            //- Number of triangles after splitting
-            inline label nTriangles() const;
-
-            //- Return face with reverse direction
-            inline triFace reverseFace() const;
-
-            //- Return swept-volume
-            inline scalar sweptVol
-            (
-                const pointField& oldPoints,
-                const pointField& newPoints
-            ) const;
-
-            //- Return point intersection with a ray starting at p, with
-            //  direction n.
-            inline pointHit ray
-            (
-                const point& p,
-                const vector& q,
-                const pointField& points,
-                const intersection::algorithm = intersection::FULL_RAY,
-                const intersection::direction dir = intersection::VECTOR
-            ) const;
-
-            //- Return the triangle
-            inline triPointRef tri(const pointField&) const;
 
         //- compare triFaces
         //  -  0: different
@@ -198,6 +249,10 @@ inline bool contiguous<triFace>()  {return true;}
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "triFaceI.H"
+
+#ifdef NoRepository
+#   include "triFaceTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

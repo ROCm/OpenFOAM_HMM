@@ -618,19 +618,17 @@ Foam::face Foam::face::reverseFace() const
 
 Foam::label Foam::face::which(const label globalIndex) const
 {
-    label pointInFace = -1;
     const labelList& f = *this;
 
-    forAll(f, i)
+    forAll(f, localIdx)
     {
-        if (f[i] == globalIndex)
+        if (f[localIdx] == globalIndex)
         {
-            pointInFace = i;
-            break;
+            return localIdx;
         }
     }
 
-    return pointInFace;
+    return -1;
 }
 
 
@@ -654,9 +652,7 @@ Foam::scalar Foam::face::sweptVol
     point nextOldPoint = centreOldPoint;
     point nextNewPoint = centreNewPoint;
 
-    register label pI;
-
-    for (pI = 0; pI < nPoints; pI++)
+    for (register label pI = 0; pI < nPoints; ++pI)
     {
         if (pI < nPoints - 1)
         {
@@ -708,20 +704,18 @@ Foam::tensor Foam::face::inertia
         ).inertia(refPt, density);
     }
 
-    point c = centre(p);
+    const point ctr = centre(p);
 
     tensor J = tensor::zero;
 
     forAll(*this, i)
     {
-        triPointRef t
+        J += triPointRef
         (
             p[operator[](i)],
             p[operator[](fcIndex(i))],
-            c
-        );
-
-        J += t.inertia(refPt, density);
+            ctr
+        ).inertia(refPt, density);
     }
 
     return J;
@@ -734,9 +728,7 @@ Foam::edgeList Foam::face::edges() const
 
     edgeList e(points.size());
 
-    label pointI;
-
-    for (pointI = 0; pointI < points.size() - 1; pointI++)
+    for (label pointI = 0; pointI < points.size() - 1; ++pointI)
     {
         e[pointI] = edge(points[pointI], points[pointI + 1]);
     }
@@ -838,10 +830,5 @@ Foam::label Foam::face::trianglesQuads
     return split(SPLITQUAD, points, triI, quadI, triFaces, quadFaces);
 }
 
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

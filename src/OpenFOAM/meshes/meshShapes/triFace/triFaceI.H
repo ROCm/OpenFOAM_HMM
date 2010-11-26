@@ -142,57 +142,14 @@ inline Foam::face Foam::triFace::triFaceFace() const
 }
 
 
-inline Foam::label Foam::triFace::nEdges() const
+inline Foam::triPointRef Foam::triFace::tri(const pointField& points) const
 {
-    return 3;
-}
-
-
-inline Foam::edgeList Foam::triFace::edges() const
-{
-    edgeList e(3);
-
-    e[0].start() = operator[](0);
-    e[0].end()   = operator[](1);
-
-    e[1].start() = operator[](1);
-    e[1].end()   = operator[](2);
-
-    e[2].start() = operator[](2);
-    e[2].end()   = operator[](0);
-
-    return e;
-}
-
-
-// return
-//  - +1: forward (counter-clockwise) on the face
-//  - -1: reverse (clockwise) on the face
-//  -  0: edge not found on the face
-inline int Foam::triFace::edgeDirection(const edge& e) const
-{
-    if
+    return triPointRef
     (
-        (operator[](0) == e.start() && operator[](1) == e.end())
-     || (operator[](1) == e.start() && operator[](2) == e.end())
-     || (operator[](2) == e.start() && operator[](0) == e.end())
-    )
-    {
-        return 1;
-    }
-    else if
-    (
-        (operator[](0) == e.end() && operator[](1) == e.start())
-     || (operator[](1) == e.end() && operator[](2) == e.start())
-     || (operator[](2) == e.end() && operator[](0) == e.start())
-    )
-    {
-        return -1;
-    }
-    else
-    {
-        return 0;
-    }
+        points[operator[](0)],
+        points[operator[](1)],
+        points[operator[](2)]
+    );
 }
 
 
@@ -269,6 +226,18 @@ inline Foam::scalar Foam::triFace::sweptVol
 }
 
 
+Foam::tensor Foam::triFace::inertia
+(
+    const pointField& points,
+    const point& refPt,
+    scalar density
+) const
+{
+    // a triangle, do a direct calculation
+    return this->tri(points).inertia(refPt, density);
+}
+
+
 inline Foam::pointHit Foam::triFace::ray
 (
     const point& p,
@@ -278,23 +247,103 @@ inline Foam::pointHit Foam::triFace::ray
     const intersection::direction dir
 ) const
 {
-    return triPointRef
-    (
-        points[operator[](0)],
-        points[operator[](1)],
-        points[operator[](2)]
-    ).ray(p, q, alg, dir);
+    return this->tri(points).ray(p, q, alg, dir);
 }
 
 
-inline Foam::triPointRef Foam::triFace::tri(const pointField& points) const
+
+inline Foam::pointHit Foam::triFace::intersection
+(
+    const point& p,
+    const vector& q,
+    const pointField& points,
+    const intersection::algorithm alg,
+    const scalar tol
+) const
 {
-    return triPointRef
+    return this->tri(points).intersection(p, q, alg, tol);
+}
+
+
+inline Foam::pointHit Foam::triFace::nearestPoint
+(
+    const point& p,
+    const pointField& points
+) const
+{
+    return this->tri(points).nearestPoint(p);
+}
+
+
+inline Foam::pointHit Foam::triFace::nearestPointClassify
+(
+    const point& p,
+    const pointField& points,
+    label& nearType,
+    label& nearLabel
+) const
+{
+    return this->tri(points).nearestPointClassify(p, nearType, nearLabel);
+}
+
+
+inline Foam::label Foam::triFace::nEdges() const
+{
+    return 3;
+}
+
+
+inline Foam::edgeList Foam::triFace::edges() const
+{
+    edgeList e(3);
+
+    e[0].start() = operator[](0);
+    e[0].end()   = operator[](1);
+
+    e[1].start() = operator[](1);
+    e[1].end()   = operator[](2);
+
+    e[2].start() = operator[](2);
+    e[2].end()   = operator[](0);
+
+    return e;
+}
+
+
+inline Foam::edge Foam::triFace::faceEdge(const label n) const
+{
+    return edge(operator[](n), operator[](fcIndex(n)));
+}
+
+
+// return
+//  - +1: forward (counter-clockwise) on the face
+//  - -1: reverse (clockwise) on the face
+//  -  0: edge not found on the face
+inline int Foam::triFace::edgeDirection(const edge& e) const
+{
+    if
     (
-        points[operator[](0)],
-        points[operator[](1)],
-        points[operator[](2)]
-    );
+        (operator[](0) == e.start() && operator[](1) == e.end())
+     || (operator[](1) == e.start() && operator[](2) == e.end())
+     || (operator[](2) == e.start() && operator[](0) == e.end())
+    )
+    {
+        return 1;
+    }
+    else if
+    (
+        (operator[](0) == e.end() && operator[](1) == e.start())
+     || (operator[](1) == e.end() && operator[](2) == e.start())
+     || (operator[](2) == e.end() && operator[](0) == e.start())
+    )
+    {
+        return -1;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 

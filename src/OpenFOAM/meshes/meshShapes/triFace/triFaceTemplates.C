@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,12 +23,28 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef MeshedSurfaces_H
-#define MeshedSurfaces_H
+#include "triFace.H"
 
-#include "MeshedSurface.H"
-#include "MeshedSurfacesFwd.H"
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-#endif
+template<class Type>
+Type Foam::triFace::average
+(
+    const pointField& meshPoints,
+    const Field<Type>& fld
+) const
+{
+    // a triangle, do a direct calculation
+    return
+    (
+        (1.0/3.0)
+      *
+        (
+            fld[operator[](0)]
+          + fld[operator[](1)]
+          + fld[operator[](2)]
+        )
+    );
+}
 
 // ************************************************************************* //

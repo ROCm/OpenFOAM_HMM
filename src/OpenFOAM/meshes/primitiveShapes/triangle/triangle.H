@@ -69,7 +69,7 @@ inline Ostream& operator<<
 
 
 /*---------------------------------------------------------------------------*\
-                           class triangle Declaration
+                          Class triangle Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Point, class PointRef>
