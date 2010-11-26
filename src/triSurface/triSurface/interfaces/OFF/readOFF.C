@@ -30,14 +30,9 @@ Description
 #include "IFstream.H"
 #include "IStringStream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool triSurface::readOFF(const fileName& OFFfileName)
+bool Foam::triSurface::readOFF(const fileName& OFFfileName)
 {
     IFstream OFFfile(OFFfileName);
 
@@ -135,9 +130,5 @@ bool triSurface::readOFF(const fileName& OFFfileName)
     return true;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -162,7 +162,7 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
         facesPerEdge.clear();
         forAll(pFaces, i)
         {
-            const labelledTri& f = triSurface::operator[](pFaces[i]);
+            const triSurface::FaceType& f = triSurface::operator[](pFaces[i]);
             label fp = findIndex(f, pointI);
 
             // Something weird: if I expand the code of addFaceToEdge in both
@@ -293,9 +293,9 @@ void Foam::triSurfaceMesh::calcBounds(boundBox& bb, label& nPoints) const
     nPoints = 0;
     bb = boundBox::invertedBox;
 
-    forAll(s, triI)
+    forAll(s, faceI)
     {
-        const labelledTri& f = s[triI];
+        const triSurface::FaceType& f = s[faceI];
 
         forAll(f, fp)
         {
@@ -475,9 +475,9 @@ void Foam::triSurfaceMesh::clearOut()
 Foam::pointField Foam::triSurfaceMesh::coordinates() const
 {
     // Use copy to calculate face centres so they don't get stored
-    return PrimitivePatch<labelledTri, SubList, const pointField&>
+    return PrimitivePatch<triSurface::FaceType, SubList, const pointField&>
     (
-        SubList<labelledTri>(*this, triSurface::size()),
+        SubList<triSurface::FaceType>(*this, triSurface::size()),
         triSurface::points()
     ).faceCentres();
 }
@@ -804,12 +804,12 @@ void Foam::triSurfaceMesh::getNormal
     {
         if (info[i].hit())
         {
-            label triI = info[i].index();
+            label faceI = info[i].index();
             //- Cached:
-            //normal[i] = faceNormals()[triI];
+            //normal[i] = faceNormals()[faceI];
 
             //- Uncached
-            normal[i] = triSurface::operator[](triI).normal(points());
+            normal[i] = triSurface::operator[](faceI).normal(points());
             normal[i] /= mag(normal[i]) + VSMALL;
         }
         else

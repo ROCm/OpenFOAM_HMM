@@ -324,13 +324,7 @@ void Foam::treeDataTriSurface::findNearest
     forAll(indices, i)
     {
         label index = indices[i];
-        const labelledTri& f = surface_[index];
-
-        // Triangle points
-        const point& p0 = points[f[0]];
-        const point& p1 = points[f[1]];
-        const point& p2 = points[f[2]];
-
+        const triSurface::FaceType& f = surface_[index];
 
         ////- Possible optimization: do quick rejection of triangle if bounding
         ////  sphere does not intersect triangle bounding box. From simplistic
@@ -379,7 +373,7 @@ void Foam::treeDataTriSurface::findNearest
             //     t
             // );
 
-            pointHit pHit = triPointRef(p0, p1, p2).nearestPoint(sample);
+            pointHit pHit = f.nearestPoint(sample, points);
 
             scalar distSqr = sqr(pHit.distance());
 
@@ -425,14 +419,16 @@ bool Foam::treeDataTriSurface::intersects
 {
     const pointField& points = surface_.points();
 
-    const labelledTri& f = surface_[index];
+    const triSurface::FaceType& f = surface_[index];
 
     // Do quick rejection test
     treeBoundBox triBb(points[f[0]], points[f[0]]);
-    triBb.min() = min(triBb.min(), points[f[1]]);
-    triBb.max() = max(triBb.max(), points[f[1]]);
-    triBb.min() = min(triBb.min(), points[f[2]]);
-    triBb.max() = max(triBb.max(), points[f[2]]);
+
+    for (label ptI=1; ptI < f.size(); ++ptI)
+    {
+        triBb.min() = ::Foam::min(triBb.min(), points[f[ptI]]);
+        triBb.max() = ::Foam::max(triBb.max(), points[f[ptI]]);
+    }
 
     const direction startBits(triBb.posBits(start));
     const direction endBits(triBb.posBits(end));
@@ -443,16 +439,14 @@ bool Foam::treeDataTriSurface::intersects
         return false;
     }
 
-    const triPointRef tri(points[f[0]], points[f[1]], points[f[2]]);
-
     const vector dir(end - start);
 
     // Use relative tolerance (from octree) to determine intersection.
-
-    pointHit inter = tri.intersection
+    pointHit inter = f.intersection
     (
         start,
         dir,
+        points,
         intersection::HALF_RAY,
         indexedOctree<treeDataTriSurface>::perturbTol()
     );

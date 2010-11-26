@@ -90,9 +90,7 @@ Foam::label Foam::surfaceIntersection::getEdge
     const label fp
 )
 {
-    const labelledTri& f = surf.localFaces()[faceI];
-
-    edge faceEdge(f[fp], f[(fp+1) % 3]);
+    const edge faceEdge = surf.localFaces()[faceI].faceEdge(fp);
 
     const labelList& eLabels = surf.faceEdges()[faceI];
 

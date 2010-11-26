@@ -47,19 +47,16 @@ bool validTri
 
     const labelledTri& f = surf[faceI];
 
-    if
-    (
-        (f[0] < 0) || (f[0] >= surf.points().size())
-     || (f[1] < 0) || (f[1] >= surf.points().size())
-     || (f[2] < 0) || (f[2] >= surf.points().size())
-    )
+    forAll(f, fp)
     {
-        WarningIn("validTri(const triSurface&, const label)")
-            << "triangle " << faceI << " vertices " << f
-            << " uses point indices outside point range 0.."
-            << surf.points().size()-1 << endl;
-
-        return false;
+        if (f[fp] < 0 || f[fp] >= surf.points().size())
+        {
+            WarningIn("validTri(const triSurface&, const label)")
+                << "triangle " << faceI << " vertices " << f
+                << " uses point indices outside point range 0.."
+                << surf.points().size()-1 << endl;
+            return false;
+        }
     }
 
     if ((f[0] == f[1]) || (f[0] == f[2]) || (f[1] == f[2]))
