@@ -256,6 +256,17 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
 
     faceI_ = -1;
 
+    // Pout<< "Particle " << origId_ << " " << origProc_
+    //     << " Tracking from " << position_
+    //     << " to " << endPosition
+    //     << endl;
+
+    // Pout<< "stepFraction " << stepFraction_ << nl
+    //     << "cellI " << cellI_ << nl
+    //     << "tetFaceI " << tetFaceI_ << nl
+    //     << "tetPtI " << tetPtI_
+    //     << endl;
+
     scalar trackFraction = 0.0;
 
     // Minimum tetrahedron decomposition of each cell of the mesh into
@@ -397,6 +408,8 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
         triI = -1;
         lambdaMin = VGREAT;
 
+        // Pout<< "tris " << tris << endl;
+
         // Sets a value for lambdaMin and faceI_ if a wall face is hit
         // by the track.
         hitWallFaces(position_, endPosition, lambdaMin, faceHitTetIs);
@@ -460,6 +473,35 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
             // A tri was found to be crossed before a wall face was hit (if any)
             faceI_ = -1;
         }
+
+        // Pout<< "track loop " << position_ << " " << endPosition << nl
+        //     << "    " << cellI_
+        //     << "    " << faceI_
+        //     << " " << tetFaceI_
+        //     << " " << tetPtI_
+        //     << " " << triI
+        //     << " " << lambdaMin
+        //     << " " << trackFraction
+        //     << endl;
+
+        // Pout<< "# Tracking loop tet "
+        //     << origId_ << " " << origProc_<< nl
+        //     << "# face: " << tetFaceI_ << nl
+        //     << "# tetPtI: " << tetPtI_ << nl
+        //     << "# tetBasePtI: " << mesh.tetBasePtIs()[tetFaceI_] << nl
+        //     << "# tet.mag(): " << tet.mag() << nl
+        //     << "# tet.quality(): " << tet.quality()
+        //     << endl;
+
+        // meshTools::writeOBJ(Pout, tet.a());
+        // meshTools::writeOBJ(Pout, tet.b());
+        // meshTools::writeOBJ(Pout, tet.c());
+        // meshTools::writeOBJ(Pout, tet.d());
+
+        // Pout<< "f 1 3 2" << nl
+        //     << "f 2 3 4" << nl
+        //     << "f 1 4 3" << nl
+        //     << "f 1 2 4" << endl;
 
         // The particle can be 'outside' the tet.  This will yield a
         // lambda larger than 1, or smaller than 0.  For values < 0,
