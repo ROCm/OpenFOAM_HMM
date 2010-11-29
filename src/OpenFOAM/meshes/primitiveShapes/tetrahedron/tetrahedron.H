@@ -43,6 +43,8 @@ SourceFiles
 #include "primitiveFieldsFwd.H"
 #include "pointHit.H"
 #include "Random.H"
+#include "FixedList.H"
+#include "UList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -103,6 +105,13 @@ public:
             const Point& b,
             const Point& c,
             const Point& d
+        );
+
+        //- Construct from four points in the list of points
+        inline tetrahedron
+        (
+            const UList<Point>&,
+            const FixedList<label, 4>& indices
         );
 
         //- Construct from Istream

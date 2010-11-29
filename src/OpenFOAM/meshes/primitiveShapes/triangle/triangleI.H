@@ -44,18 +44,23 @@ inline Foam::triangle<Point, PointRef>::triangle
 
 
 template<class Point, class PointRef>
+inline Foam::triangle<Point, PointRef>::triangle
+(
+    const UList<Point>& points,
+    const FixedList<label, 3>& indices
+)
+:
+    a_(points[indices[0]]),
+    b_(points[indices[1]]),
+    c_(points[indices[2]])
+{}
+
+
+
+template<class Point, class PointRef>
 inline Foam::triangle<Point, PointRef>::triangle(Istream& is)
 {
-    // Read beginning of triangle point pair
-    is.readBegin("triangle");
-
-    is >> a_ >> b_ >> c_;
-
-    // Read end of triangle point pair
-    is.readEnd("triangle");
-
-    // Check state of Istream
-    is.check("triangle::triangle(Istream& is)");
+    is  >> *this;
 }
 
 
@@ -620,23 +625,18 @@ inline bool Foam::triangle<Point, PointRef>::classify
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-template<class point, class pointRef>
+template<class Point, class PointRef>
 inline Foam::Istream& Foam::operator>>
 (
-    Istream& is, triangle<point, pointRef>& t
+    Istream& is,
+    triangle<Point, PointRef>& t
 )
 {
-    // Read beginning of triangle point pair
     is.readBegin("triangle");
-
-    is >> t.a_ >> t.b_ >> t.c_;
-
-    // Read end of triangle point pair
+    is  >> t.a_ >> t.b_ >> t.c_;
     is.readEnd("triangle");
 
-    // Check state of Ostream
     is.check("Istream& operator>>(Istream&, triangle&)");
-
     return is;
 }
 
@@ -650,7 +650,9 @@ inline Foam::Ostream& Foam::operator<<
 {
     os  << nl
         << token::BEGIN_LIST
-        << t.a_ << token::SPACE << t.b_ << token::SPACE << t.c_
+        << t.a_ << token::SPACE
+        << t.b_ << token::SPACE
+        << t.c_
         << token::END_LIST;
 
     return os;
