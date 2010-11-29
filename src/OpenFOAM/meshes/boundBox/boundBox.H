@@ -44,7 +44,8 @@ namespace Foam
 class boundBox;
 template<class T> class tmp;
 
-Ostream& operator<<(Ostream& os, const boundBox& b);
+Istream& operator>>(Istream&, boundBox&);
+Ostream& operator<<(Ostream&, const boundBox&);
 
 
 /*---------------------------------------------------------------------------*\
@@ -60,9 +61,9 @@ class boundBox
 
     // Private Member Functions
 
-        //- Calculate the bounding box from the given pointField.
+        //- Calculate the bounding box from the given points.
         //  Does parallel communication (doReduce = true)
-        void calculate(const pointField&, const bool doReduce = true);
+        void calculate(const UList<point>&, const bool doReduce = true);
 
 public:
 
@@ -81,29 +82,42 @@ public:
     // Constructors
 
         //- Construct null, setting points to zero
-        boundBox()
-        :
-            min_(point::zero),
-            max_(point::zero)
-        {}
+        inline boundBox();
 
         //- Construct from components
-        boundBox(const point& min, const point& max)
-        :
-            min_(min),
-            max_(max)
-        {}
+        inline boundBox(const point& min, const point& max);
 
-        //- Construct as the bounding box of the given pointField.
+        //- Construct as the bounding box of the given points
         //  Does parallel communication (doReduce = true)
-        boundBox(const pointField&, const bool doReduce = true);
+        boundBox(const UList<point>&, const bool doReduce = true);
 
         //- Construct as the bounding box of the given temporary pointField.
         //  Does parallel communication (doReduce = true)
         boundBox(const tmp<pointField>&, const bool doReduce = true);
 
+        //- Construct bounding box as subset of the pointField.
+        //  The indices could be from cell/face etc.
+        //  Does parallel communication (doReduce = true)
+        boundBox
+        (
+            const UList<point>&,
+            const labelUList& indices,
+            const bool doReduce = true
+        );
+
+        //- Construct bounding box as subset of the pointField.
+        //  The indices could be from edge/triFace etc.
+        //  Does parallel communication (doReduce = true)
+        template<unsigned Size>
+        boundBox
+        (
+            const UList<point>&,
+            const FixedList<label, Size>& indices,
+            const bool doReduce = true
+        );
+
         //- Construct from Istream
-        boundBox(Istream&);
+        inline boundBox(Istream&);
 
 
     // Member functions
@@ -111,70 +125,37 @@ public:
         // Access
 
             //- Minimum describing the bounding box
-            const point& min() const
-            {
-                return min_;
-            }
+            inline const point& min() const;
 
             //- Maximum describing the bounding box
-            const point& max() const
-            {
-                return max_;
-            }
+            inline const point& max() const;
 
             //- Minimum describing the bounding box, non-const access
-            point& min()
-            {
-                return min_;
-            }
+            inline point& min();
 
             //- Maximum describing the bounding box, non-const access
-            point& max()
-            {
-                return max_;
-            }
+            inline point& max();
 
             //- The midpoint of the bounding box
-            point midpoint() const
-            {
-                return 0.5 * (max_ + min_);
-            }
+            inline point midpoint() const;
 
             //- The bounding box span (from minimum to maximum)
-            vector span() const
-            {
-                return (max_ - min_);
-            }
+            inline vector span() const;
 
             //- The magnitude of the bounding box span
-            scalar mag() const
-            {
-                return ::Foam::mag(max_ - min_);
-            }
+            inline scalar mag() const;
 
             //- The volume of the bound box
-            scalar volume() const
-            {
-                return cmptProduct(span());
-            }
+            inline scalar volume() const;
 
             //- Smallest length/height/width dimension
-            scalar minDim() const
-            {
-                return cmptMin(span());
-            }
+            inline scalar minDim() const;
 
             //- Largest length/height/width dimension
-            scalar maxDim() const
-            {
-                return cmptMax(span());
-            }
+            inline scalar maxDim() const;
 
             //- Average length/height/width dimension
-            scalar avgDim() const
-            {
-                return cmptAv(span());
-            }
+            inline scalar avgDim() const;
 
             //- Return corner points in an order corresponding to a 'hex' cell
             tmp<pointField> corners() const;
@@ -182,56 +163,28 @@ public:
         // Query
 
             //- Overlaps/touches boundingBox?
-            bool overlaps(const boundBox& bb) const
-            {
-                return
-                (
-                    bb.max_.x() >= min_.x() && bb.min_.x() <= max_.x()
-                 && bb.max_.y() >= min_.y() && bb.min_.y() <= max_.y()
-                 && bb.max_.z() >= min_.z() && bb.min_.z() <= max_.z()
-                );
-            }
+            inline bool overlaps(const boundBox&) const;
 
             //- Contains point? (inside or on edge)
-            bool contains(const point& pt) const
-            {
-                return
-                (
-                    pt.x() >= min_.x() && pt.x() <= max_.x()
-                 && pt.y() >= min_.y() && pt.y() <= max_.y()
-                 && pt.z() >= min_.z() && pt.z() <= max_.z()
-                );
-            }
+            inline bool contains(const point&) const;
+
+            //- Fully contains other boundingBox?
+            inline bool contains(const boundBox&) const;
 
             //- Contains point? (inside only)
-            bool containsInside(const point& pt) const
-            {
-                return
-                (
-                    pt.x() > min_.x() && pt.x() < max_.x()
-                 && pt.y() > min_.y() && pt.y() < max_.y()
-                 && pt.z() > min_.z() && pt.z() < max_.z()
-                );
-            }
+            inline bool containsInside(const point&) const;
 
 
     // Friend Operators
 
-        friend bool operator==(const boundBox& a, const boundBox& b)
-        {
-            return (a.min_ == b.min_) && (a.max_ == b.max_);
-        }
-
-        friend bool operator!=(const boundBox& a, const boundBox& b)
-        {
-            return !(a == b);
-        }
+        inline friend bool operator==(const boundBox&, const boundBox&);
+        inline friend bool operator!=(const boundBox&, const boundBox&);
 
 
     // IOstream operator
 
-        friend Istream& operator>>(Istream& is, boundBox&);
-        friend Ostream& operator<<(Ostream& os, const boundBox&);
+        friend Istream& operator>>(Istream&, boundBox&);
+        friend Ostream& operator<<(Ostream&, const boundBox&);
 };
 
 
@@ -244,7 +197,11 @@ inline bool contiguous<boundBox>() {return contiguous<point>();}
 
 } // End namespace Foam
 
-// #include "boundBoxI.H"
+#include "boundBoxI.H"
+
+#ifdef NoRepository
+#   include "boundBoxTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

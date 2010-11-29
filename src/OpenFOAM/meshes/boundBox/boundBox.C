@@ -47,7 +47,7 @@ const Foam::boundBox Foam::boundBox::invertedBox
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::boundBox::calculate(const pointField& points, const bool doReduce)
+void Foam::boundBox::calculate(const UList<point>& points, const bool doReduce)
 {
     if (points.empty())
     {
@@ -84,7 +84,7 @@ void Foam::boundBox::calculate(const pointField& points, const bool doReduce)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::boundBox::boundBox(const pointField& points, const bool doReduce)
+Foam::boundBox::boundBox(const UList<point>& points, const bool doReduce)
 :
     min_(point::zero),
     max_(point::zero)
@@ -103,9 +103,43 @@ Foam::boundBox::boundBox(const tmp<pointField>& points, const bool doReduce)
 }
 
 
-Foam::boundBox::boundBox(Istream& is)
+Foam::boundBox::boundBox
+(
+    const UList<point>& points,
+    const labelUList& indices,
+    const bool doReduce
+)
+:
+    min_(point::zero),
+    max_(point::zero)
 {
-    operator>>(is, *this);
+    if (points.empty() || indices.empty())
+    {
+        if (doReduce && Pstream::parRun())
+        {
+            // Use values that get overwritten by reduce minOp, maxOp below
+            min_ = point(VGREAT, VGREAT, VGREAT);
+            max_ = point(-VGREAT, -VGREAT, -VGREAT);
+        }
+    }
+    else
+    {
+        min_ = points[indices[0]];
+        max_ = points[indices[0]];
+
+        for (label i=1; i < indices.size(); ++i)
+        {
+            min_ = ::Foam::min(min_, points[indices[i]]);
+            max_ = ::Foam::max(max_, points[indices[i]]);
+        }
+    }
+
+    // Reduce parallel information
+    if (doReduce)
+    {
+        reduce(min_, minOp<point>());
+        reduce(max_, maxOp<point>());
+    }
 }
 
 
@@ -171,5 +205,6 @@ Foam::Istream& Foam::operator>>(Istream& is, boundBox& bb)
     is.check("Istream& operator>>(Istream&, boundBox&)");
     return is;
 }
+
 
 // ************************************************************************* //

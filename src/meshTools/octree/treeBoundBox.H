@@ -50,6 +50,7 @@ Description
 SourceFiles
     treeBoundBoxI.H
     treeBoundBox.C
+    treeBoundBoxTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -69,7 +70,7 @@ namespace Foam
 class Random;
 
 /*---------------------------------------------------------------------------*\
-                           Class treeBoundBox Declaration
+                        Class treeBoundBox Declaration
 \*---------------------------------------------------------------------------*/
 
 class treeBoundBox
@@ -165,11 +166,11 @@ public:
         //- Construct null setting points to zero
         inline treeBoundBox();
 
-        //- Construct from components
-        inline treeBoundBox(const point& min, const point& max);
+        //- Construct from a boundBox
+        explicit inline treeBoundBox(const boundBox& bb);
 
         //- Construct from components
-        explicit inline treeBoundBox(const boundBox& bb);
+        inline treeBoundBox(const point& min, const point& max);
 
         //- Construct as the bounding box of the given pointField.
         //  Local processor domain only (no reduce as in boundBox)
@@ -177,10 +178,21 @@ public:
 
         //- Construct as subset of points
         //  Local processor domain only (no reduce as in boundBox)
-        treeBoundBox(const UList<point>&, const labelUList& meshPoints);
+        treeBoundBox(const UList<point>&, const labelUList& indices);
+
+        //- Construct as subset of points
+        //  The indices could be from edge/triFace etc.
+        //  Local processor domain only (no reduce as in boundBox)
+        template<unsigned Size>
+        treeBoundBox
+        (
+            const UList<point>&,
+            const FixedList<label, Size>& indices
+        );
+
 
         //- Construct from Istream
-        treeBoundBox(Istream&);
+        inline treeBoundBox(Istream&);
 
 
     // Member functions
@@ -257,8 +269,8 @@ public:
                  FixedList<direction, 8>& octantOrder
             ) const;
 
-            //- Overlaps other boundingbox?
-            inline bool overlaps(const treeBoundBox&) const;
+            //- Overlaps other bounding box?
+            using boundBox::overlaps;
 
             //- Overlaps boundingSphere (centre + sqr(radius))?
             bool overlaps(const point&, const scalar radiusSqr) const;
@@ -289,18 +301,15 @@ public:
                 point& pt
             ) const;
 
-            //- fully contains other boundingBox?
-            inline bool contains(const treeBoundBox&) const;
-
-            //- Contains point? (inside or on edge)
-            inline bool contains(const point&) const;
+            //- Contains point or other bounding box?
+            using boundBox::contains;
 
             //- Contains point (inside or on edge) and moving in direction
             //  dir would cause it to go inside.
             bool contains(const vector& dir, const point&) const;
 
-            //- Code position of pt on bounding box faces
-            direction faceBits(const point& pt) const;
+            //- Code position of point on bounding box faces
+            direction faceBits(const point&) const;
 
             //- Position of point relative to bounding box
             direction posBits(const point&) const;
@@ -354,6 +363,10 @@ inline bool contiguous<treeBoundBox>() {return contiguous<boundBox>();}
 } // End namespace Foam
 
 #include "treeBoundBoxI.H"
+
+#ifdef NoRepository
+#   include "treeBoundBoxTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

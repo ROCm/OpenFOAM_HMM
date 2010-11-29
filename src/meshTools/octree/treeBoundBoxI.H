@@ -46,6 +46,12 @@ inline Foam::treeBoundBox::treeBoundBox(const boundBox& bb)
 {}
 
 
+inline Foam::treeBoundBox::treeBoundBox(Istream& is)
+:
+    boundBox(is)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline Foam::scalar Foam::treeBoundBox::typDim() const
@@ -306,20 +312,6 @@ inline void Foam::treeBoundBox::searchOrder
 }
 
 
-// true if bb's intersect or overlap.
-// Note: <= to make sure we catch all.
-inline bool Foam::treeBoundBox::overlaps(const treeBoundBox& bb) const
-{
-    return boundBox::overlaps(bb);
-}
-
-
-inline bool Foam::treeBoundBox::contains(const point& pt) const
-{
-    return boundBox::contains(pt);
-}
-
-
 //- Return slightly wider bounding box
 inline Foam::treeBoundBox Foam::treeBoundBox::extend
 (
@@ -345,7 +337,5 @@ inline Foam::treeBoundBox Foam::treeBoundBox::extend
     return bb;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

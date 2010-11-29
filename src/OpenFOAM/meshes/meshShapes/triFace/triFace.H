@@ -209,8 +209,8 @@ public:
 
     // Friend Operators
 
-        friend bool operator==(const triFace&, const triFace&);
-        friend bool operator!=(const triFace&, const triFace&);
+        inline friend bool operator==(const triFace&, const triFace&);
+        inline friend bool operator!=(const triFace&, const triFace&);
 };
 
 
