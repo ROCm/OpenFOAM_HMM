@@ -319,7 +319,7 @@ void Foam::fileMonitor::checkFiles() const
 
             if (ready < 0)
             {
-                FatalErrorIn("fileMonitor::updateStates()")
+                FatalErrorIn("fileMonitor::checkFiles()")
                     << "Problem in issuing select."
                     << abort(FatalError);
             }
@@ -335,7 +335,7 @@ void Foam::fileMonitor::checkFiles() const
 
                 if (nBytes < 0)
                 {
-                    FatalErrorIn("fileMonitor::updateStates(const fileName&)")
+                    FatalErrorIn("fileMonitor::checkFiles()")
                         << "read of " << watcher_->inotifyFd_
                         << " failed with " << label(nBytes)
                         << abort(FatalError);
@@ -374,7 +374,7 @@ void Foam::fileMonitor::checkFiles() const
                             )
                             {
                                 // Correct directory and name
-                                state_[i] = MODIFIED;
+                                localState_[i] = MODIFIED;
                             }
                         }
                     }
@@ -403,18 +403,17 @@ void Foam::fileMonitor::checkFiles() const
 
                 if (newTime == 0)
                 {
-                    state_[watchFd] = DELETED;
+                    localState_[watchFd] = DELETED;
                 }
                 else
                 {
                     if (newTime > (oldTime + regIOobject::fileModificationSkew))
                     {
-                        watcher_->lastMod_[watchFd] = newTime;
-                        state_[watchFd] = MODIFIED;
+                        localState_[watchFd] = MODIFIED;
                     }
                     else
                     {
-                        state_[watchFd] = UNMODIFIED;
+                        localState_[watchFd] = UNMODIFIED;
                     }
                 }
             }
@@ -422,12 +421,14 @@ void Foam::fileMonitor::checkFiles() const
     }
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 
 Foam::fileMonitor::fileMonitor(const bool useInotify)
 :
     useInotify_(useInotify),
+    localState_(20),
     state_(20),
     watchFile_(20),
     freeWatchFds_(2),
@@ -476,6 +477,7 @@ Foam::label Foam::fileMonitor::addWatch(const fileName& fName)
     }
     else
     {
+        localState_(watchFd) = UNMODIFIED;
         state_(watchFd) = UNMODIFIED;
         watchFile_(watchFd) = fName;
     }
@@ -517,27 +519,23 @@ void Foam::fileMonitor::updateStates
 {
     if (Pstream::master() || !masterOnly)
     {
+        // Update the localState_
         checkFiles();
     }
 
     if (syncPar)
     {
-        // Pack current state (might be on master only)
+        // Pack local state (might be on master only)
         PackedList<2> stats(state_.size(), MODIFIED);
         if (Pstream::master() || !masterOnly)
         {
             forAll(state_, watchFd)
             {
-                stats[watchFd] = static_cast<unsigned int>(state_[watchFd]);
+                stats[watchFd] = static_cast<unsigned int>
+                (
+                    localState_[watchFd]
+                );
             }
-        }
-
-
-        // Save local state for warning message below
-        PackedList<2> thisProcStats;
-        if (!masterOnly)
-        {
-            thisProcStats = stats;
         }
 
 
@@ -573,33 +571,34 @@ void Foam::fileMonitor::updateStates
         }
 
 
-        // Update local state
+        // Update synchronised state
         forAll(state_, watchFd)
         {
-            if (masterOnly)
+            // Assign synchronised state
+            unsigned int stat = stats[watchFd];
+            state_[watchFd] = fileState(stat);
+
+            if (!masterOnly)
             {
-                // No need to check for inconsistent state. Just assign.
-                unsigned int stat = stats[watchFd];
-                state_[watchFd] = fileState(stat);
-            }
-            else
-            {
-                // Check for inconsistent state before assigning.
-                if (thisProcStats[watchFd] != UNMODIFIED)
+                // Give warning for inconsistent state
+                if (state_[watchFd] != localState_[watchFd])
                 {
-                    if (stats[watchFd] == UNMODIFIED)
+                    if (debug)
                     {
-                        WarningIn("fileMonitor::updateStates(const bool) const")
-                            << "Delaying reading " << watchFile_[watchFd]
+                        Pout<< "fileMonitor : Delaying reading "
+                            << watchFile_[watchFd]
                             << " due to inconsistent "
                                "file time-stamps between processors"
                             << endl;
                     }
-                    else
-                    {
-                        unsigned int stat = stats[watchFd];
-                        state_[watchFd] = fileState(stat);
-                    }
+
+                    WarningIn
+                    (
+                        "fileMonitor::updateStates"
+                        "(const bool, const bool) const"
+                    )   << "Delaying reading " << watchFile_[watchFd]
+                        << " due to inconsistent "
+                           "file time-stamps between processors" << endl;
                 }
             }
         }
@@ -610,6 +609,7 @@ void Foam::fileMonitor::updateStates
 void Foam::fileMonitor::setUnmodified(const label watchFd)
 {
     state_[watchFd] = UNMODIFIED;
+    localState_[watchFd] = UNMODIFIED;
 
     if (!useInotify_)
     {

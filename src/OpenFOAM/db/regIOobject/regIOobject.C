@@ -60,7 +60,6 @@ Foam::regIOobject::fileCheckTypes Foam::regIOobject::fileModificationChecking
         debug::optimisationSwitches().lookup
         (
             "fileModificationChecking"
-            //Foam::regIOobject::timeStamp
         )
     )
 );
