@@ -73,4 +73,57 @@ Foam::boundBox::boundBox
 }
 
 
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+
+template<unsigned Size>
+bool Foam::boundBox::contains
+(
+    const UList<point>& points,
+    const FixedList<label, Size>& indices
+) const
+{
+    // a FixedList is never empty
+    if (points.empty())
+    {
+        return false;
+    }
+
+    forAll(indices, i)
+    {
+        if (!contains(points[indices[i]]))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+template<unsigned Size>
+bool Foam::boundBox::containsAny
+(
+    const UList<point>& points,
+    const FixedList<label, Size>& indices
+) const
+{
+    // a FixedList is never empty
+    if (points.empty())
+    {
+        return false;
+    }
+
+    forAll(indices, i)
+    {
+        if (contains(points[indices[i]]))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
 // ************************************************************************* //

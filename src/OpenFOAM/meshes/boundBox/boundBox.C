@@ -163,6 +163,90 @@ Foam::tmp<Foam::pointField> Foam::boundBox::corners() const
 }
 
 
+bool Foam::boundBox::contains(const UList<point>& points) const
+{
+    if (points.empty())
+    {
+        return true;
+    }
+
+    forAll(points, i)
+    {
+        if (!contains(points[i]))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+bool Foam::boundBox::contains
+(
+    const UList<point>& points,
+    const labelUList& indices
+) const
+{
+    if (points.empty() || indices.empty())
+    {
+        return true;
+    }
+
+    forAll(indices, i)
+    {
+        if (!contains(points[indices[i]]))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+bool Foam::boundBox::containsAny(const UList<point>& points) const
+{
+    if (points.empty())
+    {
+        return true;
+    }
+
+    forAll(points, i)
+    {
+        if (contains(points[i]))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+bool Foam::boundBox::containsAny
+(
+    const UList<point>& points,
+    const labelUList& indices
+) const
+{
+    if (points.empty() || indices.empty())
+    {
+        return true;
+    }
+
+    forAll(indices, i)
+    {
+        if (contains(points[indices[i]]))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const boundBox& bb)

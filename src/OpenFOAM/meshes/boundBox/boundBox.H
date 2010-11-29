@@ -174,6 +174,43 @@ public:
             //- Contains point? (inside only)
             inline bool containsInside(const point&) const;
 
+            //- Contains all of the points? (inside or on edge)
+            bool contains(const UList<point>&) const;
+
+            //- Contains all of the points? (inside or on edge)
+            bool contains
+            (
+                const UList<point>&,
+                const labelUList& indices
+            ) const;
+
+            //- Contains all of the points? (inside or on edge)
+            template<unsigned Size>
+            bool contains
+            (
+                const UList<point>&,
+                const FixedList<label, Size>& indices
+            ) const;
+
+
+            //- Contains any of the points? (inside or on edge)
+            bool containsAny(const UList<point>&) const;
+
+            //- Contains any of the points? (inside or on edge)
+            bool containsAny
+            (
+                const UList<point>&,
+                const labelUList& indices
+            ) const;
+
+            //- Contains any of the points? (inside or on edge)
+            template<unsigned Size>
+            bool containsAny
+            (
+                const UList<point>&,
+                const FixedList<label, Size>& indices
+            ) const;
+
 
     // Friend Operators
 
