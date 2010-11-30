@@ -71,7 +71,7 @@ public:
         {
             UNMODIFIED = 0,
             MODIFIED = 1,
-            DELETED = 2,
+            DELETED = 2
         };
 
         static const NamedEnum<fileState, 3> fileStateNames_;
@@ -82,7 +82,10 @@ private:
         //- Whether to use inotify (requires -DFOAM_USE_INOTIFY, see above)
         const bool useInotify_;
 
-        //- State for all watchFds
+        //- State for all watchFds based on local files
+        mutable DynamicList<fileState> localState_;
+
+        //- State for all watchFds - synchronised
         mutable DynamicList<fileState> state_;
 
         //- Filename for all watchFds
@@ -97,7 +100,7 @@ private:
 
     // Private Member Functions
 
-        //- Update state_ from any events.
+        //- Update localState_ from any events.
         void checkFiles() const;
 
         //- Disallow default bitwise copy construct
