@@ -58,13 +58,35 @@ void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 {}
 
 
+Foam::label Foam::ptscotchDecomp::decomposeZeroDomains
+(
+    const List<int>& initxadj,
+    const List<int>& initadjncy,
+    const scalarField& initcWeights,
+
+    List<int>& finalDecomp
+) const
+{
+    FatalErrorIn
+    (
+        "label ptscotchDecomp::decompose"
+        "("
+            "const List<int>&, "
+            "const List<int>&, "
+            "const scalarField&, "
+            "List<int>&"
+        ")"
+    )   << notImplementedMessage << exit(FatalError);
+
+    return -1;
+}
 Foam::label Foam::ptscotchDecomp::decompose
 (
-    List<int>& adjncy,
-    List<int>& xadj,
+    const List<int>& adjncy,
+    const List<int>& xadj,
     const scalarField& cWeights,
     List<int>& finalDecomp
-)
+) const
 {
     FatalErrorIn
     (
