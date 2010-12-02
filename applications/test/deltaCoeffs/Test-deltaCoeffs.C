@@ -44,9 +44,9 @@ int main(int argc, char *argv[])
 
     if (minInternalFaceI >= 0 && maxInternalFaceI >= 0)
     {
-        Info<< "Internal field" << endl;
+        Pout<< "Internal field" << endl;
 
-        Info<< "    min deltaCoeff "
+        Pout<< "    min deltaCoeff "
             << d.internalField()[minInternalFaceI]
             << " on face " << minInternalFaceI  << nl
             << "    max deltaCoeff "
@@ -60,12 +60,12 @@ int main(int argc, char *argv[])
         label minPatchFaceI = findMin(d.boundaryField()[patchI]);
         label maxPatchFaceI = findMax(d.boundaryField()[patchI]);
 
-        Info<< "Patch " << mesh.boundaryMesh()[patchI].name() << nl
+        Pout<< "Patch " << mesh.boundaryMesh()[patchI].name() << nl
             << "    type " << mesh.boundaryMesh()[patchI].type() << endl;
 
         if (minPatchFaceI >= 0 && maxPatchFaceI >= 0)
         {
-            Info<< "    min deltaCoeff "
+            Pout<< "    min deltaCoeff "
                 << d.boundaryField()[patchI][minPatchFaceI]
                 << " on face "
                 << minPatchFaceI + mesh.boundaryMesh()[patchI].start() << nl
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            Info<< endl;
+            Pout<< endl;
         }
     }
 
