@@ -194,6 +194,9 @@ void Foam::cyclicPolyPatch::calcTransforms
         vectorField half0Normals(half0Areas.size());
         vectorField half1Normals(half1Areas.size());
 
+        scalar maxCos = -GREAT;
+        label maxFacei = -1;
+
         forAll(half0, facei)
         {
             scalar magSf = mag(half0Areas[facei]);
@@ -233,7 +236,32 @@ void Foam::cyclicPolyPatch::calcTransforms
             {
                 half0Normals[facei] = half0Areas[facei] / magSf;
                 half1Normals[facei] = half1Areas[facei] / nbrMagSf;
+
+                if (transform_ == ROTATIONAL)
+                {
+                    scalar cos = mag(half0Normals[facei] & rotationAxis_);
+                    if (cos > maxCos)
+                    {
+                        maxCos = cos;
+                        maxFacei = facei;
+                    }
+                }
             }
+        }
+
+        if (maxCos > sqrt(SMALL))
+        {
+            WarningIn
+            (
+                "cyclicPolyPatch::calcTransforms()"
+            )   << "on patch " << name()
+                << " face:" << maxFacei << " fc:" << half0Ctrs[maxFacei]
+                << " is not perpendicular to the rotationAxis."  << endl
+                << "This might cause conservation problems"
+                << " or problems with geometry or topology changes." << endl
+                << "rotation axis   : " << rotationAxis_ << endl
+                << "face normal     : " << half0Normals[maxFacei] << endl
+                << "cosine of angle : " << maxCos << endl;
         }
 
         // Calculate transformation tensors
@@ -442,6 +470,35 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     rotationAxis_(vector::zero),
     rotationCentre_(point::zero),
     separationVector_(vector::zero),
+    coupledPointsPtr_(NULL),
+    coupledEdgesPtr_(NULL)
+{
+    // Neighbour patch might not be valid yet so no transformation
+    // calculation possible.
+}
+
+
+Foam::cyclicPolyPatch::cyclicPolyPatch
+(
+    const word& name,
+    const label size,
+    const label start,
+    const label index,
+    const polyBoundaryMesh& bm,
+    const word& neighbPatchName,
+    const transformType transform,
+    const vector& rotationAxis,
+    const point& rotationCentre,
+    const vector& separationVector
+)
+:
+    coupledPolyPatch(name, size, start, index, bm),
+    neighbPatchName_(neighbPatchName),
+    neighbPatchID_(-1),
+    transform_(transform),
+    rotationAxis_(rotationAxis),
+    rotationCentre_(rotationCentre),
+    separationVector_(separationVector),
     coupledPointsPtr_(NULL),
     coupledEdgesPtr_(NULL)
 {
