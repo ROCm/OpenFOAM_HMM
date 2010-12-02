@@ -27,15 +27,30 @@ Application
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "Distribution.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
+    argList::addOption
+    (
+        "deltaCoeffResolution",
+        "scalar",
+        "deltaCoeff distribution resolution - default is 1"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createMesh.H"
+
+    const scalar dCRes = args.optionLookupOrDefault
+    (
+        "deltaCoeffResolution",
+        1
+    );
+
+    Distribution<scalar> dCDist(dCRes);
 
     const surfaceScalarField& d = mesh.deltaCoeffs();
 
@@ -53,6 +68,11 @@ int main(int argc, char *argv[])
             << d.internalField()[maxInternalFaceI]
             << " on face " << maxInternalFaceI << nl
             << endl;
+
+        forAll(d.internalField(), fI)
+        {
+            dCDist.add(d.internalField()[fI]);
+        }
     }
 
     forAll(mesh.boundaryMesh(), patchI)
@@ -74,12 +94,24 @@ int main(int argc, char *argv[])
                 << " on face "
                 << maxPatchFaceI + mesh.boundaryMesh()[patchI].start() << nl
                 << endl;
+
+            forAll(d.boundaryField()[patchI], fI)
+            {
+                dCDist.add(d.boundaryField()[patchI][fI]);
+            }
         }
         else
         {
             Pout<< endl;
         }
     }
+
+    reduce(dCDist, sumOp< Distribution<scalar> >());
+
+    dCDist.write
+    (
+        "deltaCoeffDistribuition_time_" + mesh.time().timeName()
+    );
 
     Info<< nl << "End" << nl << endl;
 
