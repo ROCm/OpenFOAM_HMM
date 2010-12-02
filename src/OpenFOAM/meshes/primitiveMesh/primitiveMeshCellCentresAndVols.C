@@ -203,6 +203,31 @@ void Foam::primitiveMesh::overrideCellCentres
     calcCellCentresAndVols();
 
     *cellCentresPtr_ = newCellCtrs;
+
+    // Set internal face centres to the midpoint of the cell-centre delta vector
+
+    if (debug)
+    {
+        Pout<< "void Foam::primitiveMesh::overrideCellCentres"
+            << "(const vectorField& newCellCtrs) const : "
+            << "overriding internal face centres." << endl;
+    }
+
+    deleteDemandDrivenData(faceCentresPtr_);
+    deleteDemandDrivenData(faceAreasPtr_);
+
+    calcFaceCentresAndAreas();
+
+    vectorField& fCtrs = *faceCentresPtr_;
+
+    const vectorField& C = cellCentres();
+    const labelUList& owner = faceOwner();
+    const labelUList& neighbour = faceNeighbour();
+
+    forAll(neighbour, faceI)
+    {
+        fCtrs[faceI] = 0.5*(C[neighbour[faceI]] + C[owner[faceI]]);
+    }
 }
 
 
