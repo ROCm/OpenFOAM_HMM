@@ -181,6 +181,8 @@
     + =blockMesh=: specify patches via dictionary instead of type only. This
       makes rereading the boundary file superfluous. see
       e.g. pitzDailyDirectMapped tutorial.
+    + =setSet=: allows time range (e.g. 0:100) in combination with -batch argument
+    to execute the commands for multiple times.
 * Post-processing
   + =foamToEnsight=: parallel continuous data. new =-nodeValues= option to generate and output nodal
     field data.

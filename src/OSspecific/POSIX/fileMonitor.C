@@ -603,6 +603,10 @@ void Foam::fileMonitor::updateStates
             }
         }
     }
+    else
+    {
+        state_ = localState_;
+    }
 }
 
 
