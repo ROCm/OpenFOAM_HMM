@@ -1526,6 +1526,20 @@ void Foam::conformalVoronoiMesh::move()
     // Relax the calculated displacement
     displacementAccumulator *= relaxation;
 
+    // scalar phi(degToRad(2.0));
+    // point ref(vector::zero);
+    // vector axis(0, 1, 0);
+    // scalar radSqr(sqr(0.45));
+
+    // tensor R
+    // (
+    //     Foam::cos(phi), 0, Foam::sin(phi),
+    //     0, 1, 0,
+    //     -Foam::sin(phi), 0, Foam::cos(phi)
+    // );
+
+    // Info<< "Hacked in rotation around y axis of: " << R << endl;
+
     for
     (
         Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
@@ -1537,6 +1551,27 @@ void Foam::conformalVoronoiMesh::move()
         {
             if (pointToBeRetained[vit->index()] == true)
             {
+                // point p = topoint
+                // (
+                //     vit->point()
+                //   + toCGALVector(displacementAccumulator[vit->index()])
+                // );
+
+                // if (magSqr((p - ref) - ((p - ref) & axis)*axis) < radSqr)
+                // {
+                //     pointsToInsert.push_back
+                //     (
+                //         toPoint(R & p)
+                //     );
+                // }
+                // else
+                // {
+                //     pointsToInsert.push_back
+                //     (
+                //         toPoint(p)
+                //     );
+                // }
+
                 pointsToInsert.push_back
                 (
                     vit->point()
