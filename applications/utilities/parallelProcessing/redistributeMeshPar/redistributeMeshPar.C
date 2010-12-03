@@ -86,33 +86,55 @@ autoPtr<fvMesh> createMesh
     if (!haveMesh)
     {
         // Create dummy mesh. Only used on procs that don't have mesh.
-        // WIP: how to avoid parallel comms when loading IOdictionaries?
-        // For now just give error message.
-        if
-        (
-            regIOobject::fileModificationChecking
-         == regIOobject::timeStampMaster
-         || regIOobject::fileModificationChecking
-         == regIOobject::inotifyMaster
-        )
+
+        // Switch timeStamp checking to one which does not do any
+        // parallel sync
+        regIOobject::fileCheckTypes oldCheckType =
+            regIOobject::fileModificationChecking;
+        regIOobject::fileModificationChecking = regIOobject::timeStamp;
+
         {
-            FatalErrorIn("createMesh(..)")
-                << "Cannot use 'fileModificationChecking' mode "
-                <<  regIOobject::fileCheckTypesNames
-                    [
-                        regIOobject::fileModificationChecking
-                    ]
-                << " since this uses parallel communication."
-                << exit(FatalError);
+            IOdictionary fvSolution
+            (
+                IOobject
+                (
+                    "fvSolution",
+                    runTime.system(),
+                    runTime,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                )
+            );
+            Pout<< "Writing dummy " << fvSolution.objectPath() << endl;
+            fvSolution.regIOobject::write();
+        }
+        {
+            IOdictionary fvSchemes
+            (
+                IOobject
+                (
+                    "fvSchemes",
+                    runTime.system(),
+                    runTime,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                )
+            );
+            fvSchemes.add("divSchemes", dictionary());
+            fvSchemes.add("gradSchemes", dictionary());
+            fvSchemes.add("laplacianSchemes", dictionary());
+            Pout<< "Writing dummy " << fvSchemes.objectPath() << endl;
+            fvSchemes.regIOobject::write();
         }
 
+        Pout<< "Creating dummy mesh from " << io.objectPath() << endl;
         fvMesh dummyMesh
         (
             IOobject
             (
-                regionName,
-                instDir,
-                runTime,
+                io.name(),
+                io.instance(),
+                io.db(),
                 IOobject::NO_READ
             ),
             xferCopy(pointField()),
@@ -124,6 +146,8 @@ autoPtr<fvMesh> createMesh
         Pout<< "Writing dummy mesh to " << dummyMesh.polyMesh::objectPath()
             << endl;
         dummyMesh.write();
+
+        regIOobject::fileModificationChecking = oldCheckType;
     }
 
     Pout<< "Reading mesh from " << io.objectPath() << endl;
