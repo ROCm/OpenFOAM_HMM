@@ -247,7 +247,7 @@ void Foam::fvSchemes::read(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fvSchemes::fvSchemes(const objectRegistry& obr, const bool syncPar)
+Foam::fvSchemes::fvSchemes(const objectRegistry& obr)
 :
     IOdictionary
     (
@@ -258,8 +258,7 @@ Foam::fvSchemes::fvSchemes(const objectRegistry& obr, const bool syncPar)
             obr,
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
-        ),
-        syncPar
+        )
     ),
     ddtSchemes_
     (

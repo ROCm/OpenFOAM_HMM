@@ -74,8 +74,7 @@ void Foam::solution::read(const dictionary& dict)
 Foam::solution::solution
 (
     const objectRegistry& obr,
-    const fileName& dictName,
-    const bool syncPar
+    const fileName& dictName
 )
 :
     IOdictionary
@@ -87,8 +86,7 @@ Foam::solution::solution
             obr,
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
-        ),
-        syncPar
+        )
     ),
     cache_(ITstream("cache", tokenList())()),
     caching_(false),

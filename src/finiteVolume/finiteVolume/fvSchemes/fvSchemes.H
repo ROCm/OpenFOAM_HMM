@@ -103,7 +103,7 @@ public:
     // Constructors
 
         //- Construct for objectRegistry
-        fvSchemes(const objectRegistry& obr, const bool syncPar = true);
+        fvSchemes(const objectRegistry& obr);
 
 
     // Member Functions

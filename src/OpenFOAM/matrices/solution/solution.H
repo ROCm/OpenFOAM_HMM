@@ -95,8 +95,7 @@ public:
         solution
         (
             const objectRegistry& obr,
-            const fileName& dictName,
-            const bool syncPar=true
+            const fileName& dictName
         );
 
 
