@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
                 )
             );
 
-            Info<< "Read " << overrideCCs.size() << " cell centres" << endl;
+            Pout<< "Read " << overrideCCs.size() << " cell centres" << endl;
 
             pointField centroids = mesh.cellCentres();
 
@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
                 dC_readCentre.internalField()
                /dC_centroids.internalField();
 
-            Info<< "deltaCoeffRatio min " << min(deltaCoeffRatio) << nl
+            Pout<< "deltaCoeffRatio min " << min(deltaCoeffRatio) << nl
                 << "deltaCoeffRatio max " << max(deltaCoeffRatio)
                 << endl;
 
@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
 
                     if (dCRatioMax > dCRatio || dCRatioMin < rdCRatio)
                     {
-                        Info<< "cell " << cI << " has min/max dCRatios: "
+                        Pout<< "cell " << cI << " has min/max dCRatios: "
                             << dCRatioMin << " " << dCRatioMax << endl;
 
                         newCCs[cI] +=
@@ -279,7 +279,7 @@ int main(int argc, char *argv[])
                     }
                 }
 
-                Info<< "Writing " << newCCs.objectPath() << endl;
+                Pout<< "Writing " << newCCs.objectPath() << endl;
 
                 newCCs.write();
             }
