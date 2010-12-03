@@ -84,6 +84,9 @@ class fvSchemes
         //- Clear the dictionaries and streams before reading
         void clear();
 
+        //- Read settings from the dictionary
+        void read(const dictionary&);
+
         //- Disallow default bitwise copy construct
         fvSchemes(const fvSchemes&);
 
@@ -100,7 +103,7 @@ public:
     // Constructors
 
         //- Construct for objectRegistry
-        fvSchemes(const objectRegistry& obr);
+        fvSchemes(const objectRegistry& obr, const bool syncPar = true);
 
 
     // Member Functions

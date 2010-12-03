@@ -70,6 +70,9 @@ class solution
 
     // Private Member Functions
 
+        //- Read settings from the dictionary
+        void read(const dictionary&);
+
         //- Disallow default bitwise copy construct and assignment
         solution(const solution&);
         void operator=(const solution&);
@@ -89,7 +92,12 @@ public:
     // Constructors
 
         //- Construct for given objectRegistry and dictionary
-        solution(const objectRegistry& obr, const fileName& dictName);
+        solution
+        (
+            const objectRegistry& obr,
+            const fileName& dictName,
+            const bool syncPar=true
+        );
 
 
     // Member Functions
