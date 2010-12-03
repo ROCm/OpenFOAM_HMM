@@ -31,28 +31,15 @@ Application
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+void assessDeltaCoeffs
+(
+    const fvMesh& mesh,
+    const surfaceScalarField& d,
+    scalar dCRes,
+    fileName prefix
+)
 {
-    argList::addOption
-    (
-        "deltaCoeffResolution",
-        "scalar",
-        "deltaCoeff distribution resolution - default is 1"
-    );
-
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createMesh.H"
-
-    const scalar dCRes = args.optionLookupOrDefault
-    (
-        "deltaCoeffResolution",
-        1
-    );
-
     Distribution<scalar> dCDist(dCRes);
-
-    const surfaceScalarField& d = mesh.deltaCoeffs();
 
     label minInternalFaceI = findMin(d.internalField());
     label maxInternalFaceI = findMax(d.internalField());
@@ -110,8 +97,194 @@ int main(int argc, char *argv[])
 
     dCDist.write
     (
-        "deltaCoeffDistribuition_time_" + mesh.time().timeName()
+        prefix + "_time_" + mesh.time().timeName()
     );
+
+}
+
+int main(int argc, char *argv[])
+{
+    timeSelector::addOptions();
+    argList::addOption
+    (
+        "deltaCoeffResolution",
+        "scalar",
+        "deltaCoeff distribution resolution - default is 1"
+    );
+    argList::addBoolOption
+    (
+        "readCellCentres",
+        "read and override the cell centres"
+    );
+    argList::addOption
+    (
+        "deltaCoeffRatio",
+        "scalar",
+        "max deltaCoeff ratio, will write new cellCentres if violated."
+    );
+    argList::addOption
+    (
+        "ccMotionCoeff",
+        "scalar",
+        "fraction of distance to move read cell centre towards centroid"
+        "is deltaCoeffRatio is violated, default to 0.1."
+    );
+
+#   include "setRootCase.H"
+#   include "createTime.H"
+#   include "createMesh.H"
+
+    const scalar dCRes = args.optionLookupOrDefault
+    (
+        "deltaCoeffResolution",
+        1
+    );
+
+    const bool readCellCentres = args.optionFound("readCellCentres");
+
+    instantList timeDirs = timeSelector::select0(runTime, args);
+
+    forAll(timeDirs, timeI)
+    {
+        runTime.setTime(timeDirs[timeI], timeI);
+
+        Info<< "Time = " << runTime.timeName() << nl << endl;
+
+        mesh.readUpdate();
+        mesh.clearOut();
+        mesh.globalData();
+
+        surfaceScalarField dC_centroids = mesh.deltaCoeffs();
+
+        Info<< "Assessing centroid delta coeffs" << endl;
+
+        assessDeltaCoeffs
+        (
+            mesh,
+            dC_centroids,
+            dCRes,
+            "controid_deltaCoeffDistribuition"
+        );
+
+        if (readCellCentres)
+        {
+            pointIOField overrideCCs
+            (
+                IOobject
+                (
+                    "cellCentres",
+                    mesh.pointsInstance(),
+                    polyMesh::meshSubDir,
+                    runTime,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                )
+            );
+
+            Info<< "Read " << overrideCCs.size() << " cell centres" << endl;
+
+            pointField centroids = mesh.cellCentres();
+
+            mesh.clearOut();
+
+            mesh.overrideCellCentres(overrideCCs);
+
+            surfaceScalarField dC_readCentre = mesh.deltaCoeffs();
+
+            Info<< "Assessing read cell centre delta coeffs" << endl;
+
+            assessDeltaCoeffs
+            (
+                mesh,
+                dC_readCentre,
+                dCRes,
+                "readCentre_deltaCoeffDistribuition"
+            );
+
+            scalarField deltaCoeffRatio =
+                dC_readCentre.internalField()
+               /dC_centroids.internalField();
+
+            Info<< "deltaCoeffRatio min " << min(deltaCoeffRatio) << nl
+                << "deltaCoeffRatio max " << max(deltaCoeffRatio)
+                << endl;
+
+            scalar dCRatio = -GREAT;
+
+            if (args.optionReadIfPresent("deltaCoeffRatio", dCRatio))
+            {
+                scalar ccMotionCoeff = args.optionLookupOrDefault
+                (
+                    "ccMotionCoeff",
+                    0.1
+                );
+
+                if (dCRatio <= 1.0)
+                {
+                    FatalErrorIn(args.executable())
+                        << "deltaCoeffRatio must be > 1.0"
+                        << exit(FatalError);
+                }
+
+                scalar rdCRatio = 1/dCRatio;
+
+                pointIOField newCCs
+                (
+                    IOobject
+                    (
+                        "cellCentres_deltaCoeffMoved",
+                        mesh.pointsInstance(),
+                        polyMesh::meshSubDir,
+                        runTime,
+                        IOobject::NO_READ,
+                        IOobject::NO_WRITE
+                    ),
+                    overrideCCs
+                );
+
+                forAll(mesh.cells(), cI)
+                {
+                    cell cFaces = mesh.cells()[cI];
+
+                    scalar dCRatioMin = 1;
+                    scalar dCRatioMax = 1;
+
+                    forAll(cFaces, cFI)
+                    {
+                        label fI = cFaces[cFI];
+
+                        if (mesh.isInternalFace(fI))
+                        {
+                            dCRatioMin = min
+                            (
+                                dCRatioMin,
+                                deltaCoeffRatio[fI]
+                            );
+
+                            dCRatioMax = max
+                            (
+                                dCRatioMax,
+                                deltaCoeffRatio[fI]
+                            );
+                        }
+                    }
+
+                    if (dCRatioMax > dCRatio || dCRatioMin < rdCRatio)
+                    {
+                        Info<< "cell " << cI << " has min/max dCRatios: "
+                            << dCRatioMin << " " << dCRatioMax << endl;
+
+                        newCCs[cI] +=
+                            ccMotionCoeff*(centroids[cI] - overrideCCs[cI]);
+                    }
+                }
+
+                Info<< "Writing " << newCCs.objectPath() << endl;
+
+                newCCs.write();
+            }
+        }
+    }
 
     Info<< nl << "End" << nl << endl;
 
