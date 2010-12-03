@@ -87,12 +87,6 @@ autoPtr<fvMesh> createMesh
     {
         // Create dummy mesh. Only used on procs that don't have mesh.
 
-        // Switch timeStamp checking to one which does not do any
-        // parallel sync
-        regIOobject::fileCheckTypes oldCheckType =
-            regIOobject::fileModificationChecking;
-        regIOobject::fileModificationChecking = regIOobject::timeStamp;
-
         {
             IOdictionary fvSolution
             (
@@ -146,8 +140,6 @@ autoPtr<fvMesh> createMesh
         Pout<< "Writing dummy mesh to " << dummyMesh.polyMesh::objectPath()
             << endl;
         dummyMesh.write();
-
-        regIOobject::fileModificationChecking = oldCheckType;
     }
 
     Pout<< "Reading mesh from " << io.objectPath() << endl;
@@ -569,7 +561,12 @@ int main(int argc, char *argv[])
         mkDir(args.path());
     }
 
+    // Switch timeStamp checking to one which does not do any
+    // parallel sync for same reason
+    regIOobject::fileModificationChecking = regIOobject::timeStamp;
+
 #   include "createTime.H"
+
 
     word regionName = polyMesh::defaultRegion;
     fileName meshSubDir;
