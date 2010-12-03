@@ -194,8 +194,9 @@ void Foam::cyclicPolyPatch::calcTransforms
         vectorField half0Normals(half0Areas.size());
         vectorField half1Normals(half1Areas.size());
 
-        scalar maxCos = -GREAT;
-        label maxFacei = -1;
+        //- Additional warning about faces non-aligned with rotation axis
+        //scalar maxCos = -GREAT;
+        //label maxFacei = -1;
 
         forAll(half0, facei)
         {
@@ -237,32 +238,31 @@ void Foam::cyclicPolyPatch::calcTransforms
                 half0Normals[facei] = half0Areas[facei] / magSf;
                 half1Normals[facei] = half1Areas[facei] / nbrMagSf;
 
-                if (transform_ == ROTATIONAL)
-                {
-                    scalar cos = mag(half0Normals[facei] & rotationAxis_);
-                    if (cos > maxCos)
-                    {
-                        maxCos = cos;
-                        maxFacei = facei;
-                    }
-                }
+                //if (transform_ == ROTATIONAL)
+                //{
+                //    scalar cos = mag(half0Normals[facei] & rotationAxis_);
+                //    if (cos > maxCos)
+                //    {
+                //        maxCos = cos;
+                //        maxFacei = facei;
+                //    }
+                //}
             }
         }
 
-        if (maxCos > sqrt(SMALL))
-        {
-            WarningIn
-            (
-                "cyclicPolyPatch::calcTransforms()"
-            )   << "on patch " << name()
-                << " face:" << maxFacei << " fc:" << half0Ctrs[maxFacei]
-                << " is not perpendicular to the rotationAxis."  << endl
-                << "This might cause conservation problems"
-                << " or problems with geometry or topology changes." << endl
-                << "rotation axis   : " << rotationAxis_ << endl
-                << "face normal     : " << half0Normals[maxFacei] << endl
-                << "cosine of angle : " << maxCos << endl;
-        }
+        //if (maxCos > sqrt(SMALL))
+        //{
+        //    WarningIn
+        //    (
+        //        "cyclicPolyPatch::calcTransforms()"
+        //    )   << "on patch " << name()
+        //        << " face:" << maxFacei << " fc:" << half0Ctrs[maxFacei]
+        //        << " is not perpendicular to the rotationAxis."  << endl
+        //        << "This will cause problems with topology changes." << endl
+        //        << "rotation axis   : " << rotationAxis_ << endl
+        //        << "face normal     : " << half0Normals[maxFacei] << endl
+        //        << "cosine of angle : " << maxCos << endl;
+        //}
 
         // Calculate transformation tensors
         calcTransformTensors
