@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
             mesh,
             dC_centroids,
             dCRes,
-            "controid_deltaCoeffDistribuition"
+            "centroid_deltaCoeffDistribuition"
         );
 
         if (readCellCentres)
