@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
     const scalar dCRes = args.optionLookupOrDefault
     (
         "deltaCoeffResolution",
-        1
+        1.0
     );
 
     const bool readCellCentres = args.optionFound("readCellCentres");
