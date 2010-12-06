@@ -124,6 +124,7 @@ public:
         inline label nTriangles() const;
 
         //- Return face with reverse direction
+        //  The starting points of the original and reverse face are identical.
         inline triFace reverseFace() const;
 
         //- Return swept-volume

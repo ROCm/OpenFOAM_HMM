@@ -268,17 +268,7 @@ bool Foam::treeDataTriSurface::overlaps
     const pointField& points = surface_.points();
     const labelledTri& f = surface_[index];
 
-    // Triangle points
-    const point& p0 = points[f[0]];
-    const point& p1 = points[f[1]];
-    const point& p2 = points[f[2]];
-
-    treeBoundBox triBb(p0, p0);
-    triBb.min() = min(triBb.min(), p1);
-    triBb.min() = min(triBb.min(), p2);
-
-    triBb.max() = max(triBb.max(), p1);
-    triBb.max() = max(triBb.max(), p2);
+    treeBoundBox triBb(points, surface_[index]);
 
     //- For testing: robust one
     //return cubeBb.overlaps(triBb);
@@ -293,11 +283,16 @@ bool Foam::treeDataTriSurface::overlaps
     }
 
     // Check if one or more triangle point inside
-    if (cubeBb.contains(p0) || cubeBb.contains(p1) || cubeBb.contains(p2))
+    if (cubeBb.containsAny(points, f))
     {
-        // One or more points inside
         return true;
     }
+
+    // Triangle points
+    const point& p0 = points[f[0]];
+    const point& p1 = points[f[1]];
+    const point& p2 = points[f[2]];
+
 
     // Now we have the difficult case: all points are outside but connecting
     // edges might go through cube. Use fast intersection of bounding box.
@@ -422,13 +417,7 @@ bool Foam::treeDataTriSurface::intersects
     const triSurface::FaceType& f = surface_[index];
 
     // Do quick rejection test
-    treeBoundBox triBb(points[f[0]], points[f[0]]);
-
-    for (label ptI=1; ptI < f.size(); ++ptI)
-    {
-        triBb.min() = ::Foam::min(triBb.min(), points[f[ptI]]);
-        triBb.max() = ::Foam::max(triBb.max(), points[f[ptI]]);
-    }
+    treeBoundBox triBb(points, f);
 
     const direction startBits(triBb.posBits(start));
     const direction endBits(triBb.posBits(end));

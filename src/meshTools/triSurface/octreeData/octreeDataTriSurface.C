@@ -379,17 +379,16 @@ bool Foam::octreeDataTriSurface::overlaps
     // Triangle points
     const pointField& points = surface_.points();
     const labelledTri& f = surface_[index];
-    const point& p0 = points[f[0]];
-    const point& p1 = points[f[1]];
-    const point& p2 = points[f[2]];
 
     // Check if one or more triangle point inside
-    if (cubeBb.contains(p0) || cubeBb.contains(p1) || cubeBb.contains(p2))
+    if (cubeBb.containsAny(points, f))
     {
-        // One or more points inside
         return true;
     }
 
+    const point& p0 = points[f[0]];
+    const point& p1 = points[f[1]];
+    const point& p2 = points[f[2]];
     // Now we have the difficult case: all points are outside but connecting
     // edges might go through cube. Use fast intersection of bounding box.
 

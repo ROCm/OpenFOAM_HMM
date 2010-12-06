@@ -190,6 +190,7 @@ public:
         vector normal(const pointField&) const;
 
         //- Return face with reverse direction
+        //  The starting points of the original and reverse face are identical.
         face reverseFace() const;
 
         //- Navigation through face vertices
