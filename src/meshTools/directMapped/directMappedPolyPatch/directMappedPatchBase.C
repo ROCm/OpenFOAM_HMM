@@ -527,13 +527,14 @@ void Foam::directMappedPatchBase::calcMapping() const
             constructMap[procI]
         );
 
-        if (debug)
-        {
-            Pout<< "To proc:" << procI << " sending values of cells/faces:"
-                << subMap[procI] << endl;
-            Pout<< "From proc:" << procI << " receiving values of patch faces:"
-                << constructMap[procI] << endl;
-        }
+        //if (debug)
+        //{
+        //    Pout<< "To proc:" << procI << " sending values of cells/faces:"
+        //        << subMap[procI] << endl;
+        //    Pout<< "From proc:" << procI
+        //        << " receiving values of patch faces:"
+        //        << constructMap[procI] << endl;
+        //}
     }
 
     // Redo constructSize
@@ -639,6 +640,28 @@ Foam::directMappedPatchBase::directMappedPatchBase
     offset_(offset),
     offsets_(0),
     distance_(0),
+    sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
+    mapPtr_(NULL)
+{}
+
+
+Foam::directMappedPatchBase::directMappedPatchBase
+(
+    const polyPatch& pp,
+    const word& sampleRegion,
+    const sampleMode mode,
+    const word& samplePatch,
+    const scalar distance
+)
+:
+    patch_(pp),
+    sampleRegion_(sampleRegion),
+    mode_(mode),
+    samplePatch_(samplePatch),
+    offsetMode_(NORMAL),
+    offset_(vector::zero),
+    offsets_(0),
+    distance_(distance),
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(NULL)
 {}
