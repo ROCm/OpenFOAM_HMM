@@ -19,15 +19,17 @@ FoamFile
 
 numberOfSubdomains  8;
 
-
 //- Keep owner and neighbour on same processor for faces in zones:
 // preserveFaceZones (heater solid1 solid3);
-
 
 //- Keep owner and neighbour on same processor for faces in patches:
 //  (makes sense only for cyclic patches)
 //preservePatches (cyclic_half0 cyclic_half1);
 
+//- Use the volScalarField named here as a weight for each cell in the
+//  decomposition.  For example, use a particle population field to decompose
+//  for a balanced number of particles in a lagrangian simulation.
+// weightField dsmcRhoNMean;
 
 method          scotch;
 // method          hierarchical;
@@ -59,10 +61,7 @@ multiLevelCoeffs
     }
 }
 
-
 // Desired output
-
-
 
 simpleCoeffs
 {

@@ -86,9 +86,35 @@ autoPtr<fvMesh> createMesh
     if (!haveMesh)
     {
         // Create dummy mesh. Only used on procs that don't have mesh.
+        // WIP: how to avoid parallel comms when loading IOdictionaries?
+        // For now just give error message.
+        if
+        (
+            regIOobject::fileModificationChecking
+         == regIOobject::timeStampMaster
+         || regIOobject::fileModificationChecking
+         == regIOobject::inotifyMaster
+        )
+        {
+            FatalErrorIn("createMesh(..)")
+                << "Cannot use 'fileModificationChecking' mode "
+                <<  regIOobject::fileCheckTypesNames
+                    [
+                        regIOobject::fileModificationChecking
+                    ]
+                << " since this uses parallel communication."
+                << exit(FatalError);
+        }
+
         fvMesh dummyMesh
         (
-            io,
+            IOobject
+            (
+                regionName,
+                instDir,
+                runTime,
+                IOobject::NO_READ
+            ),
             xferCopy(pointField()),
             xferCopy(faceList()),
             xferCopy(labelList()),
@@ -510,16 +536,14 @@ int main(int argc, char *argv[])
         "specify the merge distance relative to the bounding box size "
         "(default 1E-6)"
     );
-    // Create argList. This will check for non-existing processor dirs.
 #   include "setRootCase.H"
 
-    //- Not useful anymore. See above.
-    //// Create processor directory if non-existing
-    //if (!Pstream::master() && !isDir(args.path()))
-    //{
-    //    Pout<< "Creating case directory " << args.path() << endl;
-    //    mkDir(args.path());
-    //}
+    // Create processor directory if non-existing
+    if (!Pstream::master() && !isDir(args.path()))
+    {
+        Pout<< "Creating case directory " << args.path() << endl;
+        mkDir(args.path());
+    }
 
 #   include "createTime.H"
 

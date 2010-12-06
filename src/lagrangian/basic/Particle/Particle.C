@@ -62,37 +62,29 @@ void Foam::Particle<ParticleType>::correctAfterParallelTransfer
 
     if (!ppp.parallel())
     {
-        if (ppp.forwardT().size() == 1)
-        {
-            const tensor& T = ppp.forwardT()[0];
-            transformPosition(T);
-            static_cast<ParticleType&>(*this).transformProperties(T);
-        }
-        else
-        {
-            const tensor& T = ppp.forwardT()[faceI_];
-            transformPosition(T);
-            static_cast<ParticleType&>(*this).transformProperties(T);
-        }
+        const tensor& T =
+        (
+            ppp.forwardT().size() == 1
+          ? ppp.forwardT()[0]
+          : ppp.forwardT()[faceI_]
+        );
+
+        transformPosition(T);
+        static_cast<ParticleType&>(*this).transformProperties(T);
     }
     else if (ppp.separated())
     {
-        if (ppp.separation().size() == 1)
-        {
-            position_ -= ppp.separation()[0];
-            static_cast<ParticleType&>(*this).transformProperties
-            (
-                -ppp.separation()[0]
-            );
-        }
-        else
-        {
-            position_ -= ppp.separation()[faceI_];
-            static_cast<ParticleType&>(*this).transformProperties
-            (
-                -ppp.separation()[faceI_]
-            );
-        }
+        const vector& s =
+        (
+            (ppp.separation().size() == 1)
+          ? ppp.separation()[0]
+          : ppp.separation()[faceI_]
+        );
+        position_ -= s;
+        static_cast<ParticleType&>(*this).transformProperties
+        (
+            -s
+        );
     }
 
     tetFaceI_ = faceI_ + ppp.start();
@@ -815,21 +807,34 @@ void Foam::Particle<ParticleType>::hitCyclicPatch
     // See note in correctAfterParallelTransfer for tetPtI_ addressing.
     tetPtI_ = cloud_.polyMesh_.faces()[tetFaceI_].size() - 1 - tetPtI_;
 
+    const cyclicPolyPatch& receiveCpp = cpp.neighbPatch();
+
     // Now the particle is on the receiving side
 
-    if (!cpp.parallel())
+    if (!receiveCpp.parallel())
     {
-        const tensor& T = cpp.reverseT()[0];
+        const tensor& T =
+        (
+            receiveCpp.forwardT().size() == 1
+          ? receiveCpp.forwardT()[0]
+          : receiveCpp.forwardT()[receiveCpp.whichFace(faceI_)]
+        );
 
         transformPosition(T);
         static_cast<ParticleType&>(*this).transformProperties(T);
     }
-    else if (cpp.separated())
+    else if (receiveCpp.separated())
     {
-        position_ += cpp.separation()[0];
+        const vector& s =
+        (
+            (receiveCpp.separation().size() == 1)
+          ? receiveCpp.separation()[0]
+          : receiveCpp.separation()[receiveCpp.whichFace(faceI_)]
+        );
+        position_ -= s;
         static_cast<ParticleType&>(*this).transformProperties
         (
-            cpp.separation()[0]
+            -s
         );
     }
 }

@@ -104,6 +104,8 @@
       taking film into account
     + Parallel aware
 *** *New* ptscotch decomposition method
+*** *Updated* decomposePar maps polyPatches instead of recreating them so
+    polyPatches holding data can map the data.
 *** *Updated* particle tracking algorithm
     + uses non-blocking parallel transfers
     + does 'minimum-tet' decomposition of face to work with warped faces (snappyHexMesh!)
@@ -150,7 +152,12 @@
   OpenFOAM.
   + *New* wall functions:
     + kappatJayatillekeWallFunction: incompressible RAS thermal wall function
-
+  + directMappedFixedValue:
+    + takes interpolationScheme so can interpolate instead of always getting
+      cell value
+    + takes optional fieldName to sample
+    + directMapped patch added 'normal' method to calculate sample points
+      to e.g. sample fields just above wall (e.g. for streaklines)
 * Utilities
   There have been some utilities added and updated in this release.
 *** *New* utilities
@@ -172,8 +179,10 @@
 *** Updated utilities
     + =setFields=: optionally use faceSets to set patch values (see e.g. hotRoom tutorial).
     + =blockMesh=: specify patches via dictionary instead of type only. This
-      makes rereading the boundary superfluous. see
+      makes rereading the boundary file superfluous. see
       e.g. pitzDailyDirectMapped tutorial.
+    + =setSet=: allows time range (e.g. 0:100) in combination with -batch argument
+    to execute the commands for multiple times.
 * Post-processing
   + =foamToEnsight=: parallel continuous data. new =-nodeValues= option to generate and output nodal
     field data.
@@ -190,6 +199,12 @@
     specified time has been reached, e.g. to automagically change fvSchemes and
     fvSolution during a calculation
     + =streamLine=: generate streamlines; ouputs both trajectory and field data
+    + =surfaceInterpolateFields=: constructs face interpolate of registered
+       volFields for any future functionObjects that need surfaceFields.
+    + =readFields=: reads field if not yet registered. Makes functionObjects
+      useable through standalone execFlowFunctionObjects.
+    + =faceSource=: can now calculate on a sampledSurface (e.g. flow through a
+       triSurfaceMesh)
 
 * New tutorials
   There is a large number of new tutorials for existing and new solvers in the
