@@ -114,7 +114,35 @@ void Foam::domainDecomposition::distributeCells()
 
     if (sameProcFaces.empty())
     {
-        cellToProc_ = decomposePtr().decompose(*this, cellCentres());
+        if (decompositionDict_.found("weightField"))
+        {
+            word weightName = decompositionDict_.lookup("weightField");
+
+            volScalarField weights
+            (
+                IOobject
+                (
+                    weightName,
+                    time().timeName(),
+                    *this,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                ),
+                *this
+            );
+
+            cellToProc_ = decomposePtr().decompose
+            (
+                *this,
+                cellCentres(),
+                weights.internalField()
+            );
+        }
+        else
+        {
+            cellToProc_ = decomposePtr().decompose(*this, cellCentres());
+        }
+
     }
     else
     {
@@ -173,12 +201,49 @@ void Foam::domainDecomposition::distributeCells()
 
         // Do decomposition on agglomeration
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        cellToProc_ = decomposePtr().decompose
-        (
-            *this,
-            globalRegion,
-            regionCentres
-        );
+        if (decompositionDict_.found("weightField"))
+        {
+            scalarField regionWeights(globalRegion.nRegions(), 0);
+
+            word weightName = decompositionDict_.lookup("weightField");
+
+            volScalarField weights
+            (
+                IOobject
+                (
+                    weightName,
+                    time().timeName(),
+                    *this,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                ),
+                *this
+            );
+
+            forAll(globalRegion, cellI)
+            {
+                label regionI = globalRegion[cellI];
+
+                regionWeights[regionI] += weights.internalField()[cellI];
+            }
+
+            cellToProc_ = decomposePtr().decompose
+            (
+                *this,
+                globalRegion,
+                regionCentres,
+                regionWeights
+            );
+        }
+        else
+        {
+            cellToProc_ = decomposePtr().decompose
+            (
+                *this,
+                globalRegion,
+                regionCentres
+            );
+        }
     }
 
     Info<< "\nFinished decomposition in "
