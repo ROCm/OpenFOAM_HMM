@@ -27,6 +27,7 @@ $(setWriters)/xmgrace/xmgraceSetWriterRunTime.C
 cuttingPlane/cuttingPlane.C
 
 sampledSurface/sampledPatch/sampledPatch.C
+sampledSurface/sampledPatchInternalField/sampledPatchInternalField.C
 sampledSurface/sampledPlane/sampledPlane.C
 sampledSurface/isoSurface/isoSurface.C
 sampledSurface/isoSurface/sampledIsoSurface.C

@@ -440,15 +440,7 @@ void Foam::distributedTriSurfaceMesh::findLine
         // Exchange the segments
         // ~~~~~~~~~~~~~~~~~~~~~
 
-        map.distribute
-        (
-            Pstream::nonBlocking,   //Pstream::scheduled,
-            List<labelPair>(0),     //map.schedule(),
-            map.constructSize(),
-            map.subMap(),           // what to send
-            map.constructMap(),     // what to receive
-            allSegments
-        );
+        map.distribute(allSegments);
 
 
         // Do tests I need to do
@@ -490,21 +482,7 @@ void Foam::distributedTriSurfaceMesh::findLine
         // Exchange the intersections (opposite to segments)
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        map.distribute
-        (
-            //Pstream::scheduled,
-            //map.schedule            // Note reverse schedule
-            //(
-            //    map.constructMap(),
-            //    map.subMap()
-            //),
-            Pstream::nonBlocking,
-            List<labelPair>(0),
-            nOldAllSegments,
-            map.constructMap(),     // what to send
-            map.subMap(),           // what to receive
-            intersections
-        );
+        map.reverseDistribute(nOldAllSegments, intersections);
 
 
         // Extract the hits
@@ -657,17 +635,7 @@ Foam::distributedTriSurfaceMesh::calcLocalQueries
     // Send over queries
     // ~~~~~~~~~~~~~~~~~
 
-    map.distribute
-    (
-        //Pstream::scheduled,
-        //map.schedule(),
-        Pstream::nonBlocking,
-        List<labelPair>(0),
-        map.constructSize(),
-        map.subMap(),           // what to send
-        map.constructMap(),     // what to receive
-        triangleIndex
-    );
+    map.distribute(triangleIndex);
 
 
     return mapPtr;
@@ -1589,28 +1557,8 @@ void Foam::distributedTriSurfaceMesh::findNearest
         // swap samples to local processor
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        map.distribute
-        (
-            //Pstream::scheduled,
-            //map.schedule(),
-            Pstream::nonBlocking,
-            List<labelPair>(0),
-            map.constructSize(),
-            map.subMap(),           // what to send
-            map.constructMap(),     // what to receive
-            allCentres
-        );
-        map.distribute
-        (
-            //Pstream::scheduled,
-            //map.schedule(),
-            Pstream::nonBlocking,
-            List<labelPair>(0),
-            map.constructSize(),
-            map.subMap(),           // what to send
-            map.constructMap(),     // what to receive
-            allRadiusSqr
-        );
+        map.distribute(allCentres);
+        map.distribute(allRadiusSqr);
 
 
         // Do my tests
@@ -1634,21 +1582,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
         // Send back results
         // ~~~~~~~~~~~~~~~~~
 
-        map.distribute
-        (
-            //Pstream::scheduled,
-            //map.schedule            // note reverse schedule
-            //(
-            //    map.constructMap(),
-            //    map.subMap()
-            //),
-            Pstream::nonBlocking,
-            List<labelPair>(0),
-            allSegmentMap.size(),
-            map.constructMap(),     // what to send
-            map.subMap(),           // what to receive
-            allInfo
-        );
+        map.reverseDistribute(allSegmentMap.size(), allInfo);
 
 
         // Extract information
@@ -1887,21 +1821,7 @@ void Foam::distributedTriSurfaceMesh::getRegion
     // Send back results
     // ~~~~~~~~~~~~~~~~~
 
-    map.distribute
-    (
-        //Pstream::scheduled,
-        //map.schedule            // note reverse schedule
-        //(
-        //    map.constructMap(),
-        //    map.subMap()
-        //),
-        Pstream::nonBlocking,
-        List<labelPair>(0),
-        info.size(),
-        map.constructMap(),     // what to send
-        map.subMap(),           // what to receive
-        region
-    );
+    map.reverseDistribute(info.size(), region);
 }
 
 
@@ -1951,21 +1871,7 @@ void Foam::distributedTriSurfaceMesh::getNormal
     // Send back results
     // ~~~~~~~~~~~~~~~~~
 
-    map.distribute
-    (
-        //Pstream::scheduled,
-        //map.schedule            // note reverse schedule
-        //(
-        //    map.constructMap(),
-        //    map.subMap()
-        //),
-        Pstream::nonBlocking,
-        List<labelPair>(0),
-        info.size(),
-        map.constructMap(),     // what to send
-        map.subMap(),           // what to receive
-        normal
-    );
+    map.reverseDistribute(info.size(), normal);
 }
 
 
@@ -2019,15 +1925,7 @@ void Foam::distributedTriSurfaceMesh::getField
         // Send back results
         // ~~~~~~~~~~~~~~~~~
 
-        map.distribute
-        (
-            Pstream::nonBlocking,
-            List<labelPair>(0),
-            info.size(),
-            map.constructMap(),     // what to send
-            map.subMap(),           // what to receive
-            values
-        );
+        map.reverseDistribute(info.size(), values);
     }
 }
 

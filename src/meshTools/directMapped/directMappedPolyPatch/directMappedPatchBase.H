@@ -206,15 +206,15 @@ public:
             const vector& offset
         );
 
-        ////- Construct from normal and distance
-        //directMappedPatchBase
-        //(
-        //    const polyPatch& pp,
-        //    const word& sampleRegion,
-        //    const word& samplePatch,
-        //    const sampleMode sampleMode,
-        //    const vector& offset
-        //);
+        //- Construct from offsetMode=normal and distance
+        directMappedPatchBase
+        (
+            const polyPatch& pp,
+            const word& sampleRegion,
+            const sampleMode sampleMode,
+            const word& samplePatch,
+            const scalar distance
+        );
 
         //- Construct from dictionary
         directMappedPatchBase(const polyPatch&, const dictionary&);

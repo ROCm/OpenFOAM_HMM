@@ -12,6 +12,9 @@ fieldValues/faceSource/faceSourceFunctionObject.C
 fieldValues/cellSource/cellSource.C
 fieldValues/cellSource/cellSourceFunctionObject.C
 
+nearWallFields/nearWallFields.C
+nearWallFields/nearWallFieldsFunctionObject.C
+
 readFields/readFields.C
 readFields/readFieldsFunctionObject.C
 

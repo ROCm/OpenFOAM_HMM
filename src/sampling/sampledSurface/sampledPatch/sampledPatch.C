@@ -157,6 +157,10 @@ void Foam::sampledPatch::remapFaces
     if (&faceMap && faceMap.size())
     {
         MeshStorage::remapFaces(faceMap);
+        patchFaceLabels_ = labelList
+        (
+            UIndirectList<label>(patchFaceLabels_, faceMap)
+        );
     }
 }
 

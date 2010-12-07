@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "surfaceInterpolateFields.H"
-//#include "dictionary.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -89,20 +88,21 @@ void Foam::surfaceInterpolateFields::read(const dictionary& dict)
 
 void Foam::surfaceInterpolateFields::execute()
 {
-    //Info<< type() << " " << name_ << ":" << nl;
+    if (active_)
+    {
+        // Clear out any previously loaded fields 
+        ssf_.clear();
+        svf_.clear();
+        sSpheretf_.clear();
+        sSymmtf_.clear();
+        stf_.clear();
 
-    // Clear out any previously loaded fields 
-    ssf_.clear();
-    svf_.clear();
-    sSpheretf_.clear();
-    sSymmtf_.clear();
-    stf_.clear();
-
-    interpolateFields<scalar>(ssf_);
-    interpolateFields<vector>(svf_);
-    interpolateFields<sphericalTensor>(sSpheretf_);
-    interpolateFields<symmTensor>(sSymmtf_);
-    interpolateFields<tensor>(stf_);
+        interpolateFields<scalar>(ssf_);
+        interpolateFields<vector>(svf_);
+        interpolateFields<sphericalTensor>(sSpheretf_);
+        interpolateFields<symmTensor>(sSymmtf_);
+        interpolateFields<tensor>(stf_);
+    }
 }
 
 
@@ -114,7 +114,32 @@ void Foam::surfaceInterpolateFields::end()
 
 void Foam::surfaceInterpolateFields::write()
 {
-    // Do nothing
+    if (active_)
+    {
+        Info<< "Writing interpolated surface fields to "
+            << obr_.time().timeName() << endl;
+
+        forAll(ssf_, i)
+        {
+            ssf_[i].write();
+        }
+        forAll(svf_, i)
+        {
+            svf_[i].write();
+        }
+        forAll(sSpheretf_, i)
+        {
+            sSpheretf_[i].write();
+        }
+        forAll(sSymmtf_, i)
+        {
+            sSymmtf_[i].write();
+        }
+        forAll(stf_, i)
+        {
+            stf_[i].write();
+        }
+    }
 }
 
 

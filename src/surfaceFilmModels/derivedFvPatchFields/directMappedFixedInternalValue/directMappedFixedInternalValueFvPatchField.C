@@ -132,15 +132,7 @@ void directMappedFixedInternalValueFvPatchField<Type>::updateCoeffs()
 
     // Retrieve the neighbour patch internal field
     Field<Type> nbrIntFld = nbrField.patchInternalField();
-    mapDistribute::distribute
-    (
-        Pstream::defaultCommsType,
-        distMap.schedule(),
-        distMap.constructSize(),
-        distMap.subMap(),           // what to send
-        distMap.constructMap(),     // what to receive
-        nbrIntFld
-    );
+    distMap.distribute(nbrIntFld);
 
     // Assign (this) patch internal field to its neighbour values
     Field<Type>& intFld = const_cast<Field<Type>&>(this->internalField());

@@ -70,8 +70,12 @@ are READ_IF_MODIFIED. It means that slaves read exactly the same dictionary
 as the master so cannot be used for dictionaries that contain e.g. mesh
 specific information.
 
+- note: even if the file does not exist (e.g. when timeStampMaster) it
+will still register a local file with the fileMonitor. This is so fileMonitor
+stays synchronised. So take care when reading/creating non-parallel dictionary.
+
 - inotify is a monitoring framework used to monitor changes in
-lots of files (e.g. used in desktop searched like beagle). You specify
+lots of files (e.g. used in desktop search engines like beagle). You specify
 files to monitor and then get warned for any changes to these files.
 It does not need timestamps. There is no need for fileModificationSkew
 to allow for time differences. (there can still temporarily be a difference

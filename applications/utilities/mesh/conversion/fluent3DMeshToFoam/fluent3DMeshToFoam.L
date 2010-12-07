@@ -36,6 +36,7 @@ Description
    ------ local definitions
  \* ------------------------------------------------------------------------ */
 
+#include "cyclicPolyPatch.H"
 #include "argList.H"
 #include "Time.H"
 #include "polyMesh.H"
@@ -904,6 +905,13 @@ int main(int argc, char *argv[])
     fluentToFoamType.insert("radiator", polyPatch::typeName);
     fluentToFoamType.insert("porous-jump", polyPatch::typeName);
 
+    //- Periodic halves map directly into split cyclics. The problem is the
+    //  initial matching since we require knowledge of the transformation.
+    //  It is ok if the periodics are already ordered. We should read the
+    //  periodic shadow faces section (section 18) to give use the ordering
+    //  For now just disable.
+    //fluentToFoamType.insert("periodic", cyclicPolyPatch::typeName);
+
 
     // Foam patch type for Fluent zone type
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1039,15 +1047,59 @@ int main(int argc, char *argv[])
 
         if (iter != fluentToFoamType.end())
         {
-            newPatches[patchi] = polyPatch::New
-            (
-                iter(),
-                name,
-                0,
-                0,
-                patchi,
-                mesh.boundaryMesh()
-            ).ptr();
+            // See if we have a periodic and can derive the other side.
+            word neighbPatchName;
+            if (iter() == cyclicPolyPatch::typeName)
+            {
+                // Periodic
+                size_t n = name.rfind("-SIDE-1");
+
+                if (n != string::npos)
+                {
+                    neighbPatchName = name.substr(0, n) + "-SIDE-2";
+                }
+                else
+                {
+                    n = name.rfind("-SIDE-2");
+                    if (n != string::npos)
+                    {
+                        neighbPatchName = name.substr(0, n) + "-SIDE-1";
+                    }
+                }
+            }
+
+            if (neighbPatchName.size())
+            {
+                Info<< "Adding cyclicPolyPatch for Fluent zone " << name
+                    << " with neighbour patch " << neighbPatchName
+                    << endl;
+
+                newPatches[patchi] = new cyclicPolyPatch
+                (
+                    name,
+                    0,
+                    0,
+                    patchi,
+                    mesh.boundaryMesh(),
+                    neighbPatchName,
+                    cyclicPolyPatch::NOORDERING,
+                    vector::zero,
+                    vector::zero,
+                    vector::zero
+                );
+            }
+            else
+            {
+                newPatches[patchi] = polyPatch::New
+                (
+                    iter(),
+                    name,
+                    0,
+                    0,
+                    patchi,
+                    mesh.boundaryMesh()
+                ).ptr();
+            }
         }
         else
         {

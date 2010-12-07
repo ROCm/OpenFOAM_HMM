@@ -129,15 +129,7 @@ int main(int argc, char *argv[])
         mapDistribute map(constructSize, sendMap.xfer(), recvMap.xfer());
 
         // Distribute complexData
-        mapDistribute::distribute
-        (
-            Pstream::nonBlocking,
-            List<labelPair>(),
-            map.constructSize(),
-            map.subMap(),
-            map.constructMap(),
-            complexData
-        );
+        mapDistribute::distribute(complexData);
 
         Pout<< "complexData:" << complexData << endl;
     }

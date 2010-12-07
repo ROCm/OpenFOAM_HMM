@@ -222,27 +222,11 @@ void Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::updateCoeffs()
 
         // Swap to obtain full local values of neighbour internal field
         scalarField nbrIntFld = nbrField.patchInternalField();
-        mapDistribute::distribute
-        (
-            Pstream::defaultCommsType,
-            distMap.schedule(),
-            distMap.constructSize(),
-            distMap.subMap(),           // what to send
-            distMap.constructMap(),     // what to receive
-            nbrIntFld
-        );
+        distMap.distribute(nbrIntFld);
 
         // Swap to obtain full local values of neighbour K*delta
         scalarField nbrKDelta = nbrField.K(nbrField)*nbrPatch.deltaCoeffs();
-        mapDistribute::distribute
-        (
-            Pstream::defaultCommsType,
-            distMap.schedule(),
-            distMap.constructSize(),
-            distMap.subMap(),           // what to send
-            distMap.constructMap(),     // what to receive
-            nbrKDelta
-        );
+        distMap.distribute(nbrKDelta);
 
         tmp<scalarField> myKDelta = K(*this)*patch().deltaCoeffs();
 
@@ -255,15 +239,7 @@ void Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::updateCoeffs()
         // Assign to me
         fvPatchScalarField::operator=(Twall);
         // Distribute back and assign to neighbour
-        mapDistribute::distribute
-        (
-            Pstream::defaultCommsType,
-            distMap.schedule(),
-            nbrField.size(),
-            distMap.constructMap(),     // reverse : what to send
-            distMap.subMap(),
-            Twall
-        );
+        distMap.reverseDistribute(nbrField.size(), Twall);
         const_cast<turbulentTemperatureCoupledBaffleFvPatchScalarField&>
         (
             nbrField

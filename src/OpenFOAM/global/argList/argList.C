@@ -31,6 +31,7 @@ License
 #include "IOobject.H"
 #include "JobInfo.H"
 #include "labelList.H"
+#include "regIOobject.H"
 
 #include <cctype>
 
@@ -766,6 +767,16 @@ Foam::argList::argList
     sigInt_.set(bannerEnabled);
     sigQuit_.set(bannerEnabled);
     sigSegv_.set(bannerEnabled);
+
+    if (bannerEnabled)
+    {
+        Info<< "Monitoring run-time modified files using "
+            << regIOobject::fileCheckTypesNames
+                [
+                    regIOobject::fileModificationChecking
+                ]
+            << endl;
+    }
 
     if (Pstream::master() && bannerEnabled)
     {

@@ -213,6 +213,21 @@ public:
             const polyBoundaryMesh& bm
         );
 
+        //- Construct from components
+        cyclicPolyPatch
+        (
+            const word& name,
+            const label size,
+            const label start,
+            const label index,
+            const polyBoundaryMesh& bm,
+            const word& neighbPatchName,
+            const transformType transform,  // transformation type
+            const vector& rotationAxis,     // for rotation only
+            const point& rotationCentre,    // for rotation only
+            const vector& separationVector  // for translation only
+        );
+
         //- Construct from dictionary
         cyclicPolyPatch
         (

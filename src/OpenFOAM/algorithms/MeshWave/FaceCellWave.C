@@ -537,7 +537,7 @@ void Foam::FaceCellWave<Type, TrackingData>::handleProcPatches()
             {
                 transform
                 (
-                    procPatch.reverseT(),
+                    procPatch.forwardT(),
                     receiveFaces.size(),
                     receiveFacesInfo
                 );
