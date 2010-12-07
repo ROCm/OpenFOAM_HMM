@@ -190,6 +190,10 @@
     mesh. Great for postprocessing.
   + =steadyParticleTracks=: Generates VTK tracks from the output of the cloud
     =ParticleTracks= post-processing sub-model
+  + Sampling:
+    + =patchInternalField=: new sampledSurface - like 'patch' but samples
+    internal field instead of boundary field.
+    + =ensight=: new output format for all sampledSurfaces.
   + Function objects:
     + =residualControl=: new function object to allow users to terminate steady
     state calculations when the defined residual levels are achieved
@@ -204,7 +208,9 @@
     + =readFields=: reads field if not yet registered. Makes functionObjects
       useable through standalone execFlowFunctionObjects.
     + =faceSource=: can now calculate on a sampledSurface (e.g. flow through a
-       triSurfaceMesh)
+       triSurfaceMesh).
+    + =nearWallFields=: constructs field with on selected patches interpolated
+       internal field for further postprocessing.
 
 * New tutorials
   There is a large number of new tutorials for existing and new solvers in the
