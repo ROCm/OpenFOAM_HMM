@@ -150,7 +150,7 @@ void Foam::processorLduInterface::compressedSend
             fArray[i] = sArray[i] - slast[i%nCmpts];
         }
 
-        reinterpret_cast<Type&>(fArray[nm1]) = f[f.size() - 1];
+        reinterpret_cast<Type&>(fArray[nm1]) = f.last();
 
         if (commsType == Pstream::blocking || commsType == Pstream::scheduled)
         {
@@ -235,7 +235,7 @@ void Foam::processorLduInterface::compressedReceive
 
         const float *fArray =
             reinterpret_cast<const float*>(receiveBuf_.begin());
-        f[f.size() - 1] = reinterpret_cast<const Type&>(fArray[nm1]);
+        f.last() = reinterpret_cast<const Type&>(fArray[nm1]);
         scalar *sArray = reinterpret_cast<scalar*>(f.begin());
         const scalar *slast = &sArray[nm1];
 

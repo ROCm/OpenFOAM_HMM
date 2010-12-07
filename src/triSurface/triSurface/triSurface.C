@@ -514,7 +514,7 @@ Foam::surfacePatchList Foam::triSurface::calcPatches(labelList& faceMap) const
         maxRegion = max
         (
             maxRegion,
-            operator[](faceMap[faceMap.size() - 1]).region()
+            operator[](faceMap.last()).region()
         );
     }
 

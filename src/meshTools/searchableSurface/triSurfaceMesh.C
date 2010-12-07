@@ -238,7 +238,7 @@ void Foam::triSurfaceMesh::getNextIntersections
     while (true)
     {
         // Start tracking from last hit.
-        point pt = hits[hits.size()-1].hitPoint() + perturbVec;
+        point pt = hits.last().hitPoint() + perturbVec;
 
         if (((pt-start)&dirVec) > magSqrDirVec)
         {

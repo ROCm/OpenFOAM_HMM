@@ -750,7 +750,7 @@ Foam::edgeList Foam::face::edges() const
     }
 
     // add last edge
-    e[points.size() - 1] = edge(points[points.size() - 1], points[0]);
+    e.last() = edge(points.last(), points[0]);
 
     return e;
 }

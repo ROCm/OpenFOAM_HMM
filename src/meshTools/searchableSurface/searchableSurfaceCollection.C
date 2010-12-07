@@ -292,7 +292,7 @@ const Foam::wordList& Foam::searchableSurfaceCollection::regions() const
 
 Foam::label Foam::searchableSurfaceCollection::size() const
 {
-    return indexOffset_[indexOffset_.size()-1];
+    return indexOffset_.last();
 }
 
 
