@@ -126,7 +126,8 @@ public:
             const word& interpolationScheme
         );
 
-        //- Construct by mapping given selfContainedDirectMappedFixedValueFvPatchField
+        //- Construct by mapping given
+        //  selfContainedDirectMappedFixedValueFvPatchField
         //  onto a new patch
         selfContainedDirectMappedFixedValueFvPatchField
         (
@@ -147,7 +148,10 @@ public:
         {
             return tmp<fvPatchField<Type> >
             (
-                new selfContainedDirectMappedFixedValueFvPatchField<Type>(*this)
+                new selfContainedDirectMappedFixedValueFvPatchField<Type>
+                (
+                    *this
+                )
             );
         }
 
@@ -166,7 +170,11 @@ public:
         {
             return tmp<fvPatchField<Type> >
             (
-                new selfContainedDirectMappedFixedValueFvPatchField<Type>(*this, iF)
+                new selfContainedDirectMappedFixedValueFvPatchField<Type>
+                (
+                    *this,
+                    iF
+                )
             );
         }
 

@@ -35,7 +35,8 @@ namespace Foam
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-selfContainedDirectMappedFixedValueFvPatchField<Type>::selfContainedDirectMappedFixedValueFvPatchField
+selfContainedDirectMappedFixedValueFvPatchField<Type>::
+selfContainedDirectMappedFixedValueFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
@@ -51,7 +52,8 @@ selfContainedDirectMappedFixedValueFvPatchField<Type>::selfContainedDirectMapped
 
 
 template<class Type>
-selfContainedDirectMappedFixedValueFvPatchField<Type>::selfContainedDirectMappedFixedValueFvPatchField
+selfContainedDirectMappedFixedValueFvPatchField<Type>::
+selfContainedDirectMappedFixedValueFvPatchField
 (
     const selfContainedDirectMappedFixedValueFvPatchField<Type>& ptf,
     const fvPatch& p,
@@ -129,7 +131,8 @@ selfContainedDirectMappedFixedValueFvPatchField
 
 
 template<class Type>
-selfContainedDirectMappedFixedValueFvPatchField<Type>::selfContainedDirectMappedFixedValueFvPatchField
+selfContainedDirectMappedFixedValueFvPatchField<Type>::
+selfContainedDirectMappedFixedValueFvPatchField
 (
     const selfContainedDirectMappedFixedValueFvPatchField<Type>& ptf
 )
@@ -144,7 +147,8 @@ selfContainedDirectMappedFixedValueFvPatchField<Type>::selfContainedDirectMapped
 
 
 template<class Type>
-selfContainedDirectMappedFixedValueFvPatchField<Type>::selfContainedDirectMappedFixedValueFvPatchField
+selfContainedDirectMappedFixedValueFvPatchField<Type>::
+selfContainedDirectMappedFixedValueFvPatchField
 (
     const selfContainedDirectMappedFixedValueFvPatchField<Type>& ptf,
     const DimensionedField<Type, volMesh>& iF
@@ -277,7 +281,8 @@ void selfContainedDirectMappedFixedValueFvPatchField<Type>::updateCoeffs()
             {
                 FatalErrorIn
                 (
-                    "void selfContainedDirectMappedFixedValueFvPatchField<Type>::"
+                    "void "
+                    "selfContainedDirectMappedFixedValueFvPatchField<Type>::"
                     "updateCoeffs()"
                 )<< "Unable to find sample patch " << samplePatch()
                  << " in region " << sampleRegion()
@@ -320,9 +325,10 @@ void selfContainedDirectMappedFixedValueFvPatchField<Type>::updateCoeffs()
         {
             FatalErrorIn
             (
-                "selfContainedDirectMappedFixedValueFvPatchField<Type>::updateCoeffs()"
-            )<< "Unknown sampling mode: " << mode()
-             << nl << abort(FatalError);
+                "selfContainedDirectMappedFixedValueFvPatchField<Type>::"
+                "updateCoeffs()"
+            )   << "Unknown sampling mode: " << mode()
+                << nl << abort(FatalError);
         }
     }
 
@@ -360,7 +366,8 @@ void selfContainedDirectMappedFixedValueFvPatchField<Type>::updateCoeffs()
 
 
 template<class Type>
-void selfContainedDirectMappedFixedValueFvPatchField<Type>::write(Ostream& os) const
+void selfContainedDirectMappedFixedValueFvPatchField<Type>::write(Ostream& os)
+const
 {
     fvPatchField<Type>::write(os);
     directMappedPatchBase::write(os);
