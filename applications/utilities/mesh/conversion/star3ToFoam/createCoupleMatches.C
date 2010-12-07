@@ -1035,7 +1035,7 @@ void starMesh::createCoupleMatches()
 #                   ifdef DEBUG_RIGHT_HAND_WALK
                     Info<< "Turning edge for right-hand turn rule" << endl;
 #                   endif
-                    startEdge = startEdge.reverseEdge();
+                    startEdge.flip();
                 }
 
                 // prepare the loop for the right-hand walk
@@ -1348,7 +1348,7 @@ void starMesh::createCoupleMatches()
                 ) < VSMALL
             )
             {
-                intersectedFace = intersectedFace.reverseFace();
+                intersectedFace.flip();
             }
 
             // Add the new face to both master and slave

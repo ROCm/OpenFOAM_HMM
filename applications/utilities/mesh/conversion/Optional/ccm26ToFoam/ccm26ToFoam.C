@@ -853,7 +853,7 @@ int main(int argc, char *argv[])
             {
                 foamOwner[faceI] = foamNeighbour[faceI];
                 foamNeighbour[faceI] = own;
-                foamFaces[faceI] = foamFaces[faceI].reverseFace();
+                foamFaces[faceI].flip();
             }
         }
 

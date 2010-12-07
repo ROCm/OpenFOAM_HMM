@@ -295,7 +295,7 @@ autoPtr<mapPolyMesh> reorderMesh
 
         if (nei < own)
         {
-            newFaces[faceI] = newFaces[faceI].reverseFace();
+            newFaces[faceI].flip();
             Swap(newOwner[faceI], newNeighbour[faceI]);
         }
     }

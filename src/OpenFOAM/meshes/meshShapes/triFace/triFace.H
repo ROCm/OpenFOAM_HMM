@@ -98,6 +98,10 @@ public:
         //  return the collapsed size, set collapsed point labels to -1
         inline label collapse();
 
+        //- Flip the face in-place.
+        //  The starting points of the original and flipped face are identical.
+        inline void flip();
+
         //- Return the points corresponding to this face
         inline pointField points(const pointField& meshPoints) const;
 

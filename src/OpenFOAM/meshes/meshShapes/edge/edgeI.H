@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "IOstreams.H"
+#include "Swap.H"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -132,6 +133,12 @@ inline Foam::label Foam::edge::commonVertex(const edge& a) const
         // No shared vertex.
         return -1;
     }
+}
+
+
+inline void Foam::edge::flip()
+{
+    Swap(operator[](0), operator[](1));
 }
 
 

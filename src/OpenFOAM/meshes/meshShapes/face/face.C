@@ -27,10 +27,12 @@ License
 #include "triFace.H"
 #include "triPointRef.H"
 #include "mathematicalConstants.H"
+#include "Swap.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* const Foam::face::typeName = "face";
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -472,6 +474,20 @@ Foam::label Foam::face::collapse()
     }
 
     return size();
+}
+
+
+void Foam::face::flip()
+{
+    const label n = size();
+
+    if (n > 2)
+    {
+        for (label i=1; i < (n+1)/2; ++i)
+        {
+            Swap(operator[](i), operator[](n-i));
+        }
+    }
 }
 
 

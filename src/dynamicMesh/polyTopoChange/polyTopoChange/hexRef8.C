@@ -1125,7 +1125,7 @@ Foam::label Foam::hexRef8::storeMidPointInfo
         {
             own = anchorCell1;
             nei = anchorCell0;
-            newFace = newFace.reverseFace();
+            newFace.flip();
 
             ownPt = mesh_.points()[anchors.otherVertex(anchorPointI)];
             neiPt = mesh_.points()[anchorPointI];

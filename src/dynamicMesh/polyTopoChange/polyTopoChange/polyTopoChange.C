@@ -1078,7 +1078,7 @@ void Foam::polyTopoChange::compact
                          && faceNeighbour_[faceI] < faceOwner_[faceI]
                         )
                         {
-                            faces_[faceI] = faces_[faceI].reverseFace();
+                            faces_[faceI].flip();
                             Swap(faceOwner_[faceI], faceNeighbour_[faceI]);
                             flipFaceFlux_[faceI] =
                             (

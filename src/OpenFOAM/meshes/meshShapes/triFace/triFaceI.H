@@ -26,6 +26,7 @@ License
 #include "IOstreams.H"
 #include "face.H"
 #include "triPointRef.H"
+#include "Swap.H"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -115,6 +116,12 @@ inline Foam::label Foam::triFace::collapse()
     }
 
     return n;
+}
+
+
+inline void Foam::triFace::flip()
+{
+    Swap(operator[](1), operator[](2));
 }
 
 

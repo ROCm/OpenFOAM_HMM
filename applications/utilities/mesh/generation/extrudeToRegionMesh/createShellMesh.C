@@ -414,7 +414,7 @@ void Foam::createShellMesh::setRefinement
             {
                 // Swap
                 Swap(minCellI, maxCellI);
-                newF = newF.reverseFace();
+                newF.flip();
             }
 
             //Pout<< "for internal edge:" << e

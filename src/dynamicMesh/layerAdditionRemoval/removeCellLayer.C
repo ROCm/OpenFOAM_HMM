@@ -360,7 +360,7 @@ void Foam::layerAdditionRemoval::removeCellLayer
 
         if (flipFace)
         {
-            newFace = newFace.reverseFace();
+            newFace.flip();
             zoneFlip = !zoneFlip;
         }
 
