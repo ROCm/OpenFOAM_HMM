@@ -30,11 +30,18 @@ License
 namespace Foam
 {
     defineNamedTemplateTypeNameAndDebug(probesFunctionObject, 0);
+    defineNamedTemplateTypeNameAndDebug(patchProbesFunctionObject, 0);
 
     addToRunTimeSelectionTable
     (
         functionObject,
         probesFunctionObject,
+        dictionary
+    );
+    addToRunTimeSelectionTable
+    (
+        functionObject,
+        patchProbesFunctionObject,
         dictionary
     );
 }

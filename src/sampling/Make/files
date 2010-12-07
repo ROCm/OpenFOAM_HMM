@@ -1,4 +1,5 @@
 probes/probes.C
+probes/patchProbes.C
 probes/probesGrouping.C
 probes/probesFunctionObject/probesFunctionObject.C
 
