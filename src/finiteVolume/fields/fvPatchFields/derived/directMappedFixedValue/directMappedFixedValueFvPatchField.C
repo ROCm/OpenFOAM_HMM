@@ -272,15 +272,7 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
                 newValues = sampleField();
             }
 
-            mapDistribute::distribute
-            (
-                Pstream::defaultCommsType,
-                distMap.schedule(),
-                distMap.constructSize(),
-                distMap.subMap(),
-                distMap.constructMap(),
-                newValues
-            );
+            distMap.distribute(newValues);
 
             break;
         }
@@ -305,15 +297,7 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
             const fieldType& nbrField = sampleField();
 
             newValues = nbrField.boundaryField()[nbrPatchID];
-            mapDistribute::distribute
-            (
-                Pstream::defaultCommsType,
-                distMap.schedule(),
-                distMap.constructSize(),
-                distMap.subMap(),
-                distMap.constructMap(),
-                newValues
-            );
+            distMap.distribute(newValues);
 
             break;
         }
@@ -335,16 +319,7 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
                 }
             }
 
-            mapDistribute::distribute
-            (
-                Pstream::defaultCommsType,
-                distMap.schedule(),
-                distMap.constructSize(),
-                distMap.subMap(),
-                distMap.constructMap(),
-                allValues
-            );
-
+            distMap.distribute(allValues);
             newValues.transfer(allValues);
 
             break;

@@ -22,32 +22,33 @@ boundaryField
 {
     inlet           
     {
-        type            directMapped;
-        value           uniform (0 0 0 0 0 0 0 0 0);
-        setAverage      false;
-        average         (0 0 0 0 0 0 0 0 0);
+        type                directMapped;
+        value               uniform (0 0 0 0 0 0 0 0 0);
+        interpolationScheme cell;
+        setAverage          false;
+        average             (0 0 0 0 0 0 0 0 0);
     }
 
     outlet          
     {
-        type            inletOutlet;
-        inletValue      uniform (0 0 0 0 0 0 0 0 0);
-        value           uniform (0 0 0 0 0 0 0 0 0);
+        type                inletOutlet;
+        inletValue          uniform (0 0 0 0 0 0 0 0 0);
+        value               uniform (0 0 0 0 0 0 0 0 0);
     }
 
     upperWall       
     {
-        type            zeroGradient;
+        type                zeroGradient;
     }
 
     lowerWall       
     {
-        type            zeroGradient;
+        type                zeroGradient;
     }
 
     frontAndBack    
     {
-        type            empty;
+        type                empty;
     }
 }
 

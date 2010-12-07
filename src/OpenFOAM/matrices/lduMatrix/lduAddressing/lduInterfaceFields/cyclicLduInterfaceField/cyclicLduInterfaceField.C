@@ -41,16 +41,20 @@ Foam::cyclicLduInterfaceField::~cyclicLduInterfaceField()
 
 void Foam::cyclicLduInterfaceField::transformCoupleField
 (
-    scalarField& pnf,
+    scalarField& f,
     const direction cmpt
 ) const
 {
     if (doTransform())
     {
-        scalar forwardScale =
-            pow(diag(forwardT()[0]).component(cmpt), rank());
-
-        pnf *= forwardScale;
+        if (forwardT().size() == 1)
+        {
+            f *= pow(diag(forwardT()[0]).component(cmpt), rank());
+        }
+        else
+        {
+            f *= pow(diag(forwardT())().component(cmpt), rank());
+        }
     }
 }
 

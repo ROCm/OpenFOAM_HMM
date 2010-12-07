@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "domainDecomposition.H"
-#include "Time.H"
 #include "dictionary.H"
 #include "labelIOList.H"
 #include "processorPolyPatch.H"
@@ -341,10 +340,10 @@ bool Foam::domainDecomposition::writeDecomposition()
         const labelList& curProcessorPatchStarts =
             procProcessorPatchStartIndex_[procI];
 
-        const labelListList& curSubPatchIDs = 
+        const labelListList& curSubPatchIDs =
             procProcessorPatchSubPatchIDs_[procI];
 
-        const labelListList& curSubStarts = 
+        const labelListList& curSubStarts =
             procProcessorPatchSubPatchStarts_[procI];
 
         const polyPatchList& meshPatches = boundaryMesh();

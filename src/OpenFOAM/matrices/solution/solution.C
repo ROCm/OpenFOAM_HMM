@@ -43,9 +43,39 @@ static const Foam::List<Foam::word> subDictNames
 );
 //! @endcond
 
+
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+void Foam::solution::read(const dictionary& dict)
+{
+    if (dict.found("cache"))
+    {
+        cache_ = dict.subDict("cache");
+        caching_ = cache_.lookupOrDefault("active", true);
+    }
+
+    if (dict.found("relaxationFactors"))
+    {
+        relaxationFactors_ = dict.subDict("relaxationFactors");
+    }
+
+    relaxationFactors_.readIfPresent("default", defaultRelaxationFactor_);
+
+    if (dict.found("solvers"))
+    {
+        solvers_ = dict.subDict("solvers");
+        upgradeSolverDict(solvers_);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::solution::solution(const objectRegistry& obr, const fileName& dictName)
+Foam::solution::solution
+(
+    const objectRegistry& obr,
+    const fileName& dictName
+)
 :
     IOdictionary
     (
@@ -64,7 +94,7 @@ Foam::solution::solution(const objectRegistry& obr, const fileName& dictName)
     defaultRelaxationFactor_(0),
     solvers_(ITstream("solvers", tokenList())())
 {
-    read();
+    read(solutionDict());
 }
 
 
@@ -250,26 +280,7 @@ bool Foam::solution::read()
 {
     if (regIOobject::read())
     {
-        const dictionary& dict = solutionDict();
-
-        if (dict.found("cache"))
-        {
-            cache_ = dict.subDict("cache");
-            caching_ = cache_.lookupOrDefault("active", true);
-        }
-
-        if (dict.found("relaxationFactors"))
-        {
-            relaxationFactors_ = dict.subDict("relaxationFactors");
-        }
-
-        relaxationFactors_.readIfPresent("default", defaultRelaxationFactor_);
-
-        if (dict.found("solvers"))
-        {
-            solvers_ = dict.subDict("solvers");
-            upgradeSolverDict(solvers_);
-        }
+        read(solutionDict());
 
         return true;
     }

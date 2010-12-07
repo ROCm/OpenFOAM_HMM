@@ -504,7 +504,22 @@ Foam::polyMesh* Foam::blockMesh::createTopology
             dictionary& dict = patchDicts[patchI];
 
             // Add but not override type
-            dict.add("type", patchTypes[patchI], false);
+            if (!dict.found("type"))
+            {
+                dict.add("type", patchTypes[patchI], false);
+            }
+            else if (word(dict.lookup("type")) != patchTypes[patchI])
+            {
+                IOWarningIn
+                (
+                    "blockMesh::createTopology(IOdictionary&)",
+                    meshDescription
+                )   << "For patch " << patchNames[patchI]
+                    << " overriding type '" << patchTypes[patchI]
+                    << "' with '" << word(dict.lookup("type"))
+                    << "' (read from boundary file)"
+                    << endl;
+            }
 
             // Override neighbourpatch name
             if (nbrPatchNames[patchI] != word::null)
