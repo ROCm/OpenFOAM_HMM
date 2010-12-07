@@ -166,6 +166,18 @@ surfaces
         // triangulate     false;
     }
 
+    movingNearWall_interpolated
+    {
+        // Sample cell values off patch. Does not need to be the near-wall
+        // cell, can be arbitrarily far away.
+        type            patchInternalField;
+        patchName       movingWall;
+        distance        0.0001;
+        interpolate     true;
+        // Optional: whether to leave as faces (=default) or triangulate
+        // triangulate     false;
+    }
+
     interpolatedIso
     {
         // Iso surface for interpolated values only
