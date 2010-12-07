@@ -36,30 +36,30 @@ defineTypeNameAndDebug(Foam::probes, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::probes::findCells(const fvMesh& mesh)
+void Foam::probes::findElements(const fvMesh& mesh)
 {
-    cellList_.clear();
-    cellList_.setSize(size());
+    elementList_.clear();
+    elementList_.setSize(size());
 
     forAll(*this, probeI)
     {
         const vector& location = operator[](probeI);
 
-        cellList_[probeI] = mesh.findCell(location);
+        elementList_[probeI] = mesh.findCell(location);
 
-        if (debug && cellList_[probeI] != -1)
+        if (debug && elementList_[probeI] != -1)
         {
             Pout<< "probes : found point " << location
-                << " in cell " << cellList_[probeI] << endl;
+                << " in cell " << elementList_[probeI] << endl;
         }
     }
 
 
     // Check if all probes have been found.
-    forAll(cellList_, probeI)
+    forAll(elementList_, probeI)
     {
         const vector& location = operator[](probeI);
-        label cellI = cellList_[probeI];
+        label cellI = elementList_[probeI];
 
         // Check at least one processor with cell.
         reduce(cellI, maxOp<label>());
@@ -76,12 +76,12 @@ void Foam::probes::findCells(const fvMesh& mesh)
         else
         {
             // Make sure location not on two domains.
-            if (cellList_[probeI] != -1 && cellList_[probeI] != cellI)
+            if (elementList_[probeI] != -1 && elementList_[probeI] != cellI)
             {
                 WarningIn("probes::read()")
                     << "Location " << location
                     << " seems to be on multiple domains:"
-                    << " cell " << cellList_[probeI]
+                    << " cell " << elementList_[probeI]
                     << " on my domain " << Pstream::myProcNo()
                         << " and cell " << cellI << " on some other domain."
                     << endl
@@ -249,7 +249,7 @@ void Foam::probes::read(const dictionary& dict)
     dict.lookup("fields") >> fieldSelection_;
 
     // redetermined all cell locations
-    findCells(mesh_);
+    findElements(mesh_);
     prepare();
 }
 

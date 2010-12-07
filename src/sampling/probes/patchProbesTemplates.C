@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,47 +23,15 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "probes.H"
+#include "patchProbes.H"
 #include "volFields.H"
 #include "IOmanip.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-//- comparison operator for probes class
-template<class T>
-class isNotEqOp
-{
-public:
-
-    void operator()(T& x, const T& y) const
-    {
-        const T unsetVal(-VGREAT*pTraits<T>::one);
-
-        if (x != unsetVal)
-        {
-            // Keep x.
-
-            // Note:chould check for y != unsetVal but multiple sample cells
-            // already handled in read().
-        }
-        else
-        {
-            // x is not set. y might be.
-            x = y;
-        }
-    }
-};
-
-}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-void Foam::probes::sampleAndWrite
+void Foam::patchProbes::sampleAndWrite
 (
     const GeometricField<Type, fvPatchField, volMesh>& vField
 )
@@ -73,21 +41,21 @@ void Foam::probes::sampleAndWrite
     if (Pstream::master())
     {
         unsigned int w = IOstream::defaultPrecision() + 7;
-        OFstream& os = *probeFilePtrs_[vField.name()];
+        OFstream& probeStream = *probeFilePtrs_[vField.name()];
 
-        os  << setw(w) << vField.time().value();
+        probeStream << setw(w) << vField.time().value();
 
         forAll(values, probeI)
         {
-            os  << ' ' << setw(w) << values[probeI];
+            probeStream << ' ' << setw(w) << values[probeI];
         }
-        os  << endl;
+        probeStream << endl;
     }
 }
 
 
 template <class Type>
-void Foam::probes::sampleAndWrite
+void Foam::patchProbes::sampleAndWrite
 (
     const fieldGroup<Type>& fields
 )
@@ -142,7 +110,7 @@ void Foam::probes::sampleAndWrite
 
 template<class Type>
 Foam::tmp<Foam::Field<Type> >
-Foam::probes::sample
+Foam::patchProbes::sample
 (
     const GeometricField<Type, fvPatchField, volMesh>& vField
 ) const
@@ -156,11 +124,17 @@ Foam::probes::sample
 
     Field<Type>& values = tValues();
 
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
     forAll(*this, probeI)
     {
-        if (elementList_[probeI] >= 0)
+        label faceI = elementList_[probeI];
+
+        if (faceI >= 0)
         {
-            values[probeI] = vField[elementList_[probeI]];
+            label patchI = patches.whichPatch(faceI);
+            label localFaceI = patches[patchI].whichFace(faceI);
+            values[probeI] = vField.boundaryField()[patchI][localFaceI];
         }
     }
 
@@ -173,7 +147,7 @@ Foam::probes::sample
 
 template<class Type>
 Foam::tmp<Foam::Field<Type> >
-Foam::probes::sample(const word& fieldName) const
+Foam::patchProbes::sample(const word& fieldName) const
 {
     return sample
     (
