@@ -101,6 +101,15 @@ do
         # name=value  -> export name=value
         eval "export $1"
         ;;
+    *)
+        # filename: source it
+        if [ -f "$1" ]
+        then
+            _foamSource "$1"
+        else
+            _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile "$1"`
+        fi
+        ;;
     esac
     shift
 done

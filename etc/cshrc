@@ -85,6 +85,14 @@ while ( $#argv > 0 )
         # name=value  -> setenv name value
         eval "setenv $argv[1]:s/=/ /"
         breaksw
+    default:
+        # filename: source it
+        if ( -f "$1" ) then
+            _foamSource "$1"
+        else
+            _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile "$1"`
+        endif
+        breaksw
     endsw
     shift
 end
