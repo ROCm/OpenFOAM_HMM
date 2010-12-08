@@ -4,7 +4,7 @@
     tmp<volScalarField> trho = thermo.rho();
     const volScalarField& rho = trho();
 
-    tmp<volScalarField> tcp = thermo.cp();
+    tmp<volScalarField> tcp = thermo.Cp();
     const volScalarField& cp = tcp();
 
     tmp<volScalarField> tK = thermo.K();

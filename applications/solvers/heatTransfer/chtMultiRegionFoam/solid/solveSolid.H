@@ -18,6 +18,8 @@ if (finalIter)
     Info<< "Min/max T:" << min(T) << ' ' << max(T) << endl;
 }
 
+thermo.correct();
+
 if (finalIter)
 {
     mesh.data::remove("finalIteration");

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Class
     Foam::interpolatedSolidThermo
 
 Description
-    Table interpolated solid thermo.
+    Table interpolated solid thermo
 
 SourceFiles
     interpolatedSolidThermo.C
@@ -36,6 +36,7 @@ SourceFiles
 #define interpolatedSolidThermo_H
 
 #include "basicSolidThermo.H"
+#include "interpolateSolid.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,67 +44,47 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                            Class interpolatedSolidThermo Declaration
+                          Class interpolatedSolidThermo Declaration
 \*---------------------------------------------------------------------------*/
 
 class interpolatedSolidThermo
 :
-    public basicSolidThermo
+    public basicSolidThermo,
+    public interpolateSolid
 {
+private:
+
     // Private data
 
-        //- Temperature samples
-        Field<scalar> TValues_;
+        //- Dictionary
+        const dictionary dict_;
 
-        //- Density at given temperatures
-        Field<scalar> rhoValues_;
-
-        Field<scalar> cpValues_;
-
-        Field<scalar> KValues_;
-
-        Field<scalar> HfValues_;
-
-        Field<scalar> emissivityValues_;
 
 public:
-
-    //- Runtime type information
-    TypeName("interpolatedSolidThermo");
-
 
     // Constructors
 
         //- Construct from mesh
-        interpolatedSolidThermo(const fvMesh& mesh);
+        interpolatedSolidThermo(const fvMesh& mesh, const word);
 
-    // Destructor
 
-        virtual ~interpolatedSolidThermo();
+    //- Destructor
+    virtual ~interpolatedSolidThermo();
 
 
     // Member Functions
 
-        //- Update properties
-        virtual void correct();
+        //- Calculate properties
+        void calculate();
 
-        //- Density [kg/m3]
-        virtual tmp<volScalarField> rho() const;
 
-        //- Specific heat capacity [J/(kg.K)]
-        virtual tmp<volScalarField> cp() const;
+        // Derived properties
 
-        //- Thermal conductivity [W/(m.K)]
-        virtual tmp<volScalarField> K() const;
+            //- Specific heat capacity [J/(kg.K)]
+            virtual tmp<volScalarField> Cp() const;
 
-        //- Thermal conductivity [W/(m.K)]
-        virtual tmp<volSymmTensorField> directionalK() const;
-
-        //- Heat of formation [J/kg]
-        virtual tmp<volScalarField> Hf() const;
-
-        //- Emissivity []
-        virtual tmp<volScalarField> emissivity() const;
+            //- Heat of formation [J/kg]
+            virtual tmp<volScalarField> Hf() const;
 
 
         // Per patch calculation
@@ -111,20 +92,19 @@ public:
             //- Density [kg/m3]
             virtual tmp<scalarField> rho(const label patchI) const;
 
-            //- Specific heat capacity [J/(kg.K)]
-            virtual tmp<scalarField> cp(const label patchI) const;
-
-            //- Thermal conductivity [W/(m.K)]
-            //  Note: needs Kvalues to be isotropic
-            virtual tmp<scalarField> K(const label patchI) const;
-
-            //- Thermal conductivity [W/(m.K)]
-            virtual tmp<symmTensorField> directionalK(const label patchI) const;
+            //- Specific heat capacity [J/kg/K)]
+            virtual tmp<scalarField> Cp(const label patchI) const;
 
             //- Heat of formation [J/kg]
             virtual tmp<scalarField> Hf(const label patchI) const;
 
-            //- Emissivity []
+            //- Scatter coefficient [1/m]
+            virtual tmp<scalarField> sigmaS(const label) const;
+
+            //- Absorption coefficient [1/m]
+            virtual tmp<scalarField> kappa(const label) const;
+
+             //- Emissivity []
             virtual tmp<scalarField> emissivity(const label) const;
 
 

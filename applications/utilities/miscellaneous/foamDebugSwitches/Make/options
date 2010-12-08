@@ -47,9 +47,9 @@ EXE_LIBS = \
     -lrandomProcesses \
     -lreactionThermophysicalModels \
     -lsampling \
-    -lsolidMixture \
+    -lpointSolidMixture \
     -lsolidParticle \
-    -lsolids \
+    -lpointSolids \
     -lspecie \
     -lsurfMesh \
     -lsystemCall \
