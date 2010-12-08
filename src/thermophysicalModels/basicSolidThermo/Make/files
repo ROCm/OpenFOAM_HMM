@@ -1,5 +1,5 @@
 basicSolidThermo/basicSolidThermo.C
-basicSolidThermo/newBasicSolidThermo.C
+basicSolidThermo/basicSolidThermoNew.C
 
 constSolidThermo/constSolidThermo.C
 directionalKSolidThermo/directionalKSolidThermo.C
