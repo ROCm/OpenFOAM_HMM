@@ -8,8 +8,8 @@ EXE_INC = \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/liquids/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/liquidMixture/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/solids/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/solidMixture/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/pointSolids/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/pointSolidMixture/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/reactionThermo/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/SLGThermo/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/radiation/lnInclude \
@@ -30,8 +30,8 @@ LIB_LIBS = \
     -lbasicThermophysicalModels \
     -lliquids \
     -lliquidMixture \
-    -lsolids \
-    -lsolidMixture \
+    -lpointSolids \
+    -lpointSolidMixture \
     -lreactionThermophysicalModels \
     -lSLGThermo \
     -lcompressibleRASModels \

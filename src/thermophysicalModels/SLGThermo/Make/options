@@ -4,8 +4,8 @@ EXE_INC = \
     -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/liquids/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/liquidMixture/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/solids/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/solidMixture/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/pointSolids/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/pointSolidMixture/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/reactionThermo/lnInclude
 
 LIB_LIBS = \

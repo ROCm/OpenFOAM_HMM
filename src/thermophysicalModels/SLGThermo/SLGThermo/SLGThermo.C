@@ -72,7 +72,7 @@ Foam::SLGThermo::SLGThermo(const fvMesh& mesh, basicThermo& thermo)
 
     if (thermo.found("solids"))
     {
-        solids_  = solidMixture::New(thermo.subDict("solids"));
+        solids_  = pointSolidMixture::New(thermo.subDict("solids"));
         Info<< "    solids - " << solids_->components().size()
             << " components" << endl;
     }
@@ -128,13 +128,13 @@ const Foam::liquidMixture& Foam::SLGThermo::liquids() const
 }
 
 
-const Foam::solidMixture& Foam::SLGThermo::solids() const
+const Foam::pointSolidMixture& Foam::SLGThermo::solids() const
 {
     if (!solids_.valid())
     {
         FatalErrorIn
         (
-            "const Foam::solidMixture& Foam::SLGThermo::solids() const"
+            "const Foam::pointSolidtMixture& Foam::SLGThermo::solids() const"
         )   << "solids requested, but object is not allocated"
             << abort(FatalError);
     }

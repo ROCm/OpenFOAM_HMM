@@ -49,7 +49,7 @@ SourceFiles
 #include "basicThermo.H"
 #include "basicMultiComponentMixture.H"
 #include "liquidMixture.H"
-#include "solidMixture.H"
+#include "pointSolidMixture.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -76,7 +76,7 @@ class SLGThermo
         autoPtr<liquidMixture> liquids_;
 
         //- Additional solid properties data
-        autoPtr<solidMixture> solids_;
+        autoPtr<pointSolidMixture> solids_;
 
 
 public:
@@ -108,7 +108,7 @@ public:
             const liquidMixture& liquids() const;
 
             //- Return reference to the global (additional) solids
-            const solidMixture& solids() const;
+            const pointSolidMixture& solids() const;
 
 
             // Index retrieval

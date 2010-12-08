@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,14 +40,39 @@ namespace Foam
 Foam::constSolidThermo::constSolidThermo(const fvMesh& mesh)
 :
     basicSolidThermo(mesh),
-    constRho_("zero", dimDensity, 0.0),
-    constCp_("zero", dimEnergy/(dimMass*dimTemperature), 0.0),
-    constK_("zero", dimEnergy/dimTime/(dimLength*dimTemperature), 0.0),
-    constHf_("zero", dimEnergy/dimMass, 0.0),
-    constEmissivity_("zero", dimless, 0.0)
+    dict_(subDict(typeName + "Coeffs")),
+    constK_(dimensionedScalar(dict_.lookup("K"))),
+    K_
+    (
+        IOobject
+        (
+            "K",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        constK_
+    ),
+    constRho_(dimensionedScalar(dict_.lookup("rho"))),
+    constCp_(dimensionedScalar(dict_.lookup("Cp"))),
+    constHf_(dimensionedScalar(dict_.lookup("Hf"))),
+    constEmissivity_(dimensionedScalar(dict_.lookup("emissivity"))),
+    constKappa_(dimensionedScalar(dict_.lookup("kappa"))),
+    constSigmaS_(dimensionedScalar(dict_.lookup("sigmaS")))
 {
     read();
-    correct();
+
+    K_ = constK_;
+
+    rho_ = constRho_;
+
+    emissivity_ = constEmissivity_;
+
+    kappa_ = constKappa_;
+
+    sigmaS_ = constSigmaS_;
 }
 
 
@@ -63,7 +88,7 @@ void Foam::constSolidThermo::correct()
 {}
 
 
-Foam::tmp<Foam::volScalarField> Foam::constSolidThermo::rho() const
+Foam::tmp<Foam::volScalarField> Foam::constSolidThermo::Cp() const
 {
     return tmp<volScalarField>
     (
@@ -71,28 +96,7 @@ Foam::tmp<Foam::volScalarField> Foam::constSolidThermo::rho() const
         (
             IOobject
             (
-                "rho",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh_,
-            constRho_
-        )
-    );
-}
-
-
-Foam::tmp<Foam::volScalarField> Foam::constSolidThermo::cp() const
-{
-    return tmp<volScalarField>
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "cp",
+                "Cp",
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
@@ -105,79 +109,13 @@ Foam::tmp<Foam::volScalarField> Foam::constSolidThermo::cp() const
 }
 
 
-//Foam::tmp<Foam::volScalarField> Foam::constSolidThermo::K() const
-//{
-//    vector v(eigenValues(constK_.value()));
-//
-//    if (mag(v.x() - v.z()) > SMALL)
-//    {
-//        FatalErrorIn("directionalSolidThermo::K() const")
-//            << "Supplied K " << constK_
-//            << " are not isotropic. Eigenvalues are "
-//            << v << exit(FatalError);
-//    }
-//
-//    return tmp<volScalarField>
-//    (
-//        new volScalarField
-//        (
-//            IOobject
-//            (
-//                "K",
-//                mesh_.time().timeName(),
-//                mesh_,
-//                IOobject::NO_READ,
-//                IOobject::NO_WRITE
-//            ),
-//            mesh_,
-//            v.x()
-//        )
-//    );
-//}
-
-
-Foam::tmp<Foam::volScalarField> Foam::constSolidThermo::K() const
+const Foam::volScalarField& Foam::constSolidThermo::K() const
 {
-    return tmp<volScalarField>
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "K",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh_,
-            constK_
-        )
-    );
+    return K_;
 }
 
 
-//Foam::tmp<Foam::volSymmTensorField> Foam::constSolidThermo::directionalK()
-//const
-//{
-//    return tmp<volSymmTensorField>
-//    (
-//        new volSymmTensorField
-//        (
-//            IOobject
-//            (
-//                "K",
-//                mesh_.time().timeName(),
-//                mesh_,
-//                IOobject::NO_READ,
-//                IOobject::NO_WRITE
-//            ),
-//            mesh_,
-//            constK_
-//        )
-//    );
-//}
-Foam::tmp<Foam::volSymmTensorField> Foam::constSolidThermo::directionalK() const
+const Foam::volSymmTensorField& Foam::constSolidThermo::directionalK() const
 {
     dimensionedSymmTensor t
     (
@@ -233,27 +171,6 @@ Foam::tmp<Foam::volScalarField> Foam::constSolidThermo::Hf() const
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::constSolidThermo::emissivity() const
-{
-    return tmp<volScalarField>
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "emissivity",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh_,
-            constEmissivity_
-        )
-    );
-}
-
-
 Foam::tmp<Foam::scalarField> Foam::constSolidThermo::rho
 (
     const label patchI
@@ -270,7 +187,7 @@ Foam::tmp<Foam::scalarField> Foam::constSolidThermo::rho
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::constSolidThermo::cp
+Foam::tmp<Foam::scalarField> Foam::constSolidThermo::Cp
 (
     const label patchI
 ) const
@@ -359,6 +276,38 @@ Foam::tmp<Foam::scalarField> Foam::constSolidThermo::emissivity
 }
 
 
+Foam::tmp<Foam::scalarField> Foam::constSolidThermo::kappa
+(
+    const label patchI
+) const
+{
+    return tmp<scalarField>
+    (
+        new scalarField
+        (
+            T_.boundaryField()[patchI].size(),
+            constKappa_.value()
+        )
+    );
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::constSolidThermo::sigmaS
+(
+    const label patchI
+) const
+{
+    return tmp<scalarField>
+    (
+        new scalarField
+        (
+            T_.boundaryField()[patchI].size(),
+            constSigmaS_.value()
+        )
+    );
+}
+
+
 bool Foam::constSolidThermo::read()
 {
     return read(subDict(typeName + "Coeffs"));
@@ -368,17 +317,21 @@ bool Foam::constSolidThermo::read()
 bool Foam::constSolidThermo::read(const dictionary& dict)
 {
     constRho_ = dimensionedScalar(dict.lookup("rho"));
-    constCp_ = dimensionedScalar(dict.lookup("cp"));
+    constCp_ = dimensionedScalar(dict.lookup("Cp"));
     constK_ = dimensionedScalar(dict.lookup("K"));
     constHf_ = dimensionedScalar(dict.lookup("Hf"));
     constEmissivity_ = dimensionedScalar(dict.lookup("emissivity"));
+    constKappa_ = dimensionedScalar(dict_.lookup("kappa"));
+    constSigmaS_ = dimensionedScalar(dict_.lookup("sigmaS"));
 
     Info<< "Constructed constSolidThermo with" << nl
         << "    rho        : " << constRho_ << nl
-        << "    cp         : " << constCp_ << nl
+        << "    Cp         : " << constCp_ << nl
         << "    K          : " << constK_ << nl
         << "    Hf         : " << constHf_ << nl
         << "    emissivity : " << constEmissivity_ << nl
+        << "    kappa      : " << constKappa_ << nl
+        << "    sigmaS     : " << constSigmaS_ << nl
         << endl;
 
     return true;
@@ -389,9 +342,11 @@ bool Foam::constSolidThermo::writeData(Ostream& os) const
 {
     bool ok = basicSolidThermo::writeData(os);
     os.writeKeyword("rho") << constRho_ << token::END_STATEMENT << nl;
-    os.writeKeyword("cp") << constCp_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Cp") << constCp_ << token::END_STATEMENT << nl;
     os.writeKeyword("K") << constK_ << token::END_STATEMENT << nl;
     os.writeKeyword("Hf") << constHf_ << token::END_STATEMENT << nl;
+    os.writeKeyword("kappa") << constKappa_ << token::END_STATEMENT << nl;
+    os.writeKeyword("sigmaS") << constSigmaS_ << token::END_STATEMENT << nl;
     os.writeKeyword("emissivity") << constEmissivity_ << token::END_STATEMENT
         << nl;
     return ok && os.good();
