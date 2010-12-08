@@ -25,8 +25,8 @@ Application
     PDRFoam
 
 Description
-    Compressible premixed/partially-premixed combustion solver with turbulence
-    modelling.
+    Solver for compressible premixed/partially-premixed combustion with
+    turbulence modelling.
 
     Combusting RANS code using the b-Xi two-equation model.
     Xi may be obtained by either the solution of the Xi transport
@@ -35,7 +35,7 @@ Description
     to be appropriate by comparison with the results from the
     spectral model.
 
-    Strain effects are encorporated directly into the Xi equation
+    Strain effects are incorporated directly into the Xi equation
     but not in the algebraic approximation.  Further work need to be
     done on this issue, particularly regarding the enhanced removal rate
     caused by flame compression.  Analysis using results of the spectral
@@ -78,9 +78,9 @@ int main(int argc, char *argv[])
     #include "readCombustionProperties.H"
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"
-    #include "readPISOControls.H"
     #include "initContinuityErrs.H"
     #include "readTimeControls.H"
+    #include "CourantNo.H"
     #include "setInitialDeltaT.H"
 
     scalar StCoNum = 0.0;
@@ -94,7 +94,6 @@ int main(int argc, char *argv[])
         #include "readTimeControls.H"
         #include "readPISOControls.H"
         #include "CourantNo.H"
-
         #include "setDeltaT.H"
 
         runTime++;
