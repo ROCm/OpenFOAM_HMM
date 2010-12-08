@@ -232,7 +232,7 @@ class FaceCellWave
       // Private static data
 
             static const scalar geomTol_;
-            static const scalar propagationTol_;
+            static scalar propagationTol_;
 
             //- Used as default trackdata value to satisfy default template
             //  argument.

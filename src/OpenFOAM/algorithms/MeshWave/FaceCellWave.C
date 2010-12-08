@@ -36,12 +36,10 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template <class Type, class TrackingData>
-const Foam::scalar
-Foam::FaceCellWave<Type, TrackingData>::geomTol_ = 1e-6;
+const Foam::scalar Foam::FaceCellWave<Type, TrackingData>::geomTol_ = 1e-6;
 
 template <class Type, class TrackingData>
-const Foam::scalar
-Foam::FaceCellWave<Type, TrackingData>::propagationTol_ = 0.01;
+Foam::scalar Foam::FaceCellWave<Type, TrackingData>::propagationTol_ = 0.01;
 
 template <class Type, class TrackingData>
 Foam::label Foam::FaceCellWave<Type, TrackingData>::dummyTrackData_ = 12345;
@@ -968,5 +966,6 @@ Foam::label Foam::FaceCellWave<Type, TrackingData>::iterate(const label maxIter)
 
     return nUnvisitedCells_;
 }
+
 
 // ************************************************************************* //
