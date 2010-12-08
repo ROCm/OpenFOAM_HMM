@@ -234,17 +234,8 @@ void Foam::sampledSets::read(const dictionary& dict)
     dict_.lookup("fields") >> fieldSelection_;
     clearFieldGroups();
 
-    interpolationScheme_ = dict.lookupOrDefault<word>
-    (
-        "interpolationScheme",
-        "cell"
-    );
-    writeFormat_ = dict.lookupOrDefault<word>
-    (
-        "setFormat",
-        "null"
-    );
-
+    dict.lookup("interpolationScheme") >> interpolationScheme_;
+    dict.lookup("setFormat") >> writeFormat_;
 
     PtrList<sampledSet> newList
     (
