@@ -112,6 +112,29 @@ directMappedVelocityFluxFixedValueFvPatchField
             << " in file " << dimensionedInternalField().objectPath()
             << exit(FatalError);
     }
+
+    const directMappedPatchBase& mpp = refCast<const directMappedPatchBase>
+    (
+        this->patch().patch()
+    );
+    if (mpp.mode() == directMappedPolyPatch::NEARESTCELL)
+    {
+        FatalErrorIn
+        (
+            "directMappedVelocityFluxFixedValueFvPatchField::"
+            "directMappedVelocityFluxFixedValueFvPatchField"
+            "("
+                "const fvPatch&, "
+                "const DimensionedField<vector, volMesh>&, "
+                "const dictionary&"
+            ")"
+        )   << "Patch " << p.name()
+            << " of type '" << p.type()
+            << "' can not be used in 'nearestCell' mode"
+            << " of field " << dimensionedInternalField().name()
+            << " in file " << dimensionedInternalField().objectPath()
+            << exit(FatalError);
+    }
 }
 
 
@@ -189,26 +212,10 @@ void directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
                 }
             }
 
-            mapDistribute::distribute
-            (
-                Pstream::defaultCommsType,
-                distMap.schedule(),
-                distMap.constructSize(),
-                distMap.subMap(),
-                distMap.constructMap(),
-                allUValues
-            );
+            distMap.distribute(allUValues);
             newUValues.transfer(allUValues);
 
-            mapDistribute::distribute
-            (
-                Pstream::defaultCommsType,
-                distMap.schedule(),
-                distMap.constructSize(),
-                distMap.subMap(),
-                distMap.constructMap(),
-                allPhiValues
-            );
+            distMap.distribute(allPhiValues);
             newPhiValues.transfer(allPhiValues);
 
             break;
@@ -221,28 +228,10 @@ void directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
             );
 
             newUValues = UField.boundaryField()[nbrPatchID];
-
-            mapDistribute::distribute
-            (
-                Pstream::defaultCommsType,
-                distMap.schedule(),
-                distMap.constructSize(),
-                distMap.subMap(),
-                distMap.constructMap(),
-                newUValues
-            );
+            distMap.distribute(newUValues);
 
             newPhiValues = phiField.boundaryField()[nbrPatchID];
-
-            mapDistribute::distribute
-            (
-                Pstream::defaultCommsType,
-                distMap.schedule(),
-                distMap.constructSize(),
-                distMap.subMap(),
-                distMap.constructMap(),
-                newPhiValues
-            );
+            distMap.distribute(newPhiValues);
 
             break;
         }

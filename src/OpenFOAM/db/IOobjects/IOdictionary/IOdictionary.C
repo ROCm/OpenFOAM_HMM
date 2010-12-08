@@ -55,46 +55,59 @@ void Foam::IOdictionary::readFile(const bool masterOnly)
         close();
     }
 
-    if (masterOnly)
+    if (masterOnly && Pstream::parRun())
     {
-        // Scatter master data
-        if (Pstream::master())
-        {
-            for
-            (
-                int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave();
-                slave++
-            )
-            {
-                // Note: use ASCII for now - binary IO of dictionaries is
-                // not currently supported
-                OPstream toSlave
-                (
-                    Pstream::scheduled,
-                    slave,
-                    0,
-                    UPstream::msgType(),
-                    IOstream::ASCII
-                );
-                IOdictionary::writeData(toSlave);
-            }
-        }
-        else
+        // Scatter master data using communication scheme
+
+        const List<Pstream::commsStruct>& comms =
+        (
+            (Pstream::nProcs() < Pstream::nProcsSimpleSum)
+          ? Pstream::linearCommunication()
+          : Pstream::treeCommunication()
+        );
+
+
+        // Get my communication order
+        const Pstream::commsStruct& myComm = comms[Pstream::myProcNo()];
+
+        // Reveive from up
+        if (myComm.above() != -1)
         {
             if (debug)
             {
                 Pout<< "IOdictionary : Reading " << objectPath()
-                    << " from master processor " << Pstream::masterNo() << endl;
+                    << " from processor " << myComm.above() << endl;
             }
-            IPstream fromMaster
+
+            // Note: use ASCII for now - binary IO of dictionaries is
+            // not currently supported
+            IPstream fromAbove
             (
                 Pstream::scheduled,
-                Pstream::masterNo(),
+                myComm.above(),
                 0,
                 IOstream::ASCII
             );
-            IOdictionary::readData(fromMaster);
+            IOdictionary::readData(fromAbove);
+        }
+
+        // Send to my downstairs neighbours
+        forAll(myComm.below(), belowI)
+        {
+            if (debug)
+            {
+                Pout<< "IOdictionary : Sending " << objectPath()
+                    << " to processor " << myComm.below()[belowI] << endl;
+            }
+            OPstream toBelow
+            (
+                Pstream::scheduled,
+                myComm.below()[belowI],
+                0,
+                Pstream::msgType(),
+                IOstream::ASCII
+            );
+            IOdictionary::writeData(toBelow);
         }
     }
 }

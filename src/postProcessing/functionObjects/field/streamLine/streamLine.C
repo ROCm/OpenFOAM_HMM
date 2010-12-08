@@ -426,7 +426,8 @@ void Foam::streamLine::write()
             );
 
 
-            // Distribute the track positions
+            // Distribute the track positions. Note: use scheduled comms
+            // to prevent buffering.
             mapDistribute::distribute
             (
                 Pstream::scheduled,

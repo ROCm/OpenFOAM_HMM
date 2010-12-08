@@ -111,25 +111,7 @@ void Foam::mapDistribute::distribute
                 IPstream fromNbr(Pstream::blocking, domain);
                 List<T> subField(fromNbr);
 
-                if (subField.size() != map.size())
-                {
-                    FatalErrorIn
-                    (
-                        "template<class T>\n"
-                        "void mapDistribute::distribute\n"
-                        "(\n"
-                        "    const Pstream::commsTypes commsType,\n"
-                        "    const List<labelPair>& schedule,\n"
-                        "    const label constructSize,\n"
-                        "    const labelListList& subMap,\n"
-                        "    const labelListList& constructMap,\n"
-                        "    List<T>& field\n"
-                        ")\n"
-                    )   << "Expected from processor " << domain
-                        << " " << map.size() << " but received "
-                        << subField.size() << " elements."
-                        << abort(FatalError);
-                }
+                checkReceivedSize(domain, map.size(), subField.size());
 
                 forAll(map, i)
                 {
@@ -160,46 +142,52 @@ void Foam::mapDistribute::distribute
         forAll(schedule, i)
         {
             const labelPair& twoProcs = schedule[i];
+            // twoProcs is a swap pair of processors. The first one is the
+            // one that needs to send first and then receive.
+
             label sendProc = twoProcs[0];
             label recvProc = twoProcs[1];
 
             if (Pstream::myProcNo() == sendProc)
             {
-                // I am sender. Send to recvProc.
-                OPstream toNbr(Pstream::scheduled, recvProc);
-                toNbr << UIndirectList<T>(field, subMap[recvProc]);
+                // I am send first, receive next
+                {
+                    OPstream toNbr(Pstream::scheduled, recvProc);
+                    toNbr << UIndirectList<T>(field, subMap[recvProc]);
+                }
+                {
+                    IPstream fromNbr(Pstream::scheduled, recvProc);
+                    List<T> subField(fromNbr);
+
+                    const labelList& map = constructMap[recvProc];
+
+                    checkReceivedSize(recvProc, map.size(), subField.size());
+
+                    forAll(map, i)
+                    {
+                        newField[map[i]] = subField[i];
+                    }
+                }
             }
             else
             {
-                // I am receiver. Receive from sendProc.
-                IPstream fromNbr(Pstream::scheduled, sendProc);
-                List<T> subField(fromNbr);
-
-                const labelList& map = constructMap[sendProc];
-
-                if (subField.size() != map.size())
+                // I am receive first, send next
                 {
-                    FatalErrorIn
-                    (
-                        "template<class T>\n"
-                        "void mapDistribute::distribute\n"
-                        "(\n"
-                        "    const Pstream::commsTypes commsType,\n"
-                        "    const List<labelPair>& schedule,\n"
-                        "    const label constructSize,\n"
-                        "    const labelListList& subMap,\n"
-                        "    const labelListList& constructMap,\n"
-                        "    List<T>& field\n"
-                        ")\n"
-                    )   << "Expected from processor " << sendProc
-                        << " " << map.size() << " but received "
-                        << subField.size() << " elements."
-                        << abort(FatalError);
+                    IPstream fromNbr(Pstream::scheduled, sendProc);
+                    List<T> subField(fromNbr);
+
+                    const labelList& map = constructMap[sendProc];
+
+                    checkReceivedSize(sendProc, map.size(), subField.size());
+
+                    forAll(map, i)
+                    {
+                        newField[map[i]] = subField[i];
+                    }
                 }
-
-                forAll(map, i)
                 {
-                    newField[map[i]] = subField[i];
+                    OPstream toNbr(Pstream::scheduled, sendProc);
+                    toNbr << UIndirectList<T>(field, subMap[sendProc]);
                 }
             }
         }
@@ -258,25 +246,7 @@ void Foam::mapDistribute::distribute
                     UIPstream str(domain, pBufs);
                     List<T> recvField(str);
 
-                    if (recvField.size() != map.size())
-                    {
-                        FatalErrorIn
-                        (
-                            "template<class T>\n"
-                            "void mapDistribute::distribute\n"
-                            "(\n"
-                            "    const Pstream::commsTypes commsType,\n"
-                            "    const List<labelPair>& schedule,\n"
-                            "    const label constructSize,\n"
-                            "    const labelListList& subMap,\n"
-                            "    const labelListList& constructMap,\n"
-                            "    List<T>& field\n"
-                            ")\n"
-                        )   << "Expected from processor " << domain
-                            << " " << map.size() << " but received "
-                            << recvField.size() << " elements."
-                            << abort(FatalError);
-                    }
+                    checkReceivedSize(domain, map.size(), recvField.size());
 
                     forAll(map, i)
                     {
@@ -379,29 +349,13 @@ void Foam::mapDistribute::distribute
 
                 if (domain != Pstream::myProcNo() && map.size())
                 {
-                    if (recvFields[domain].size() != map.size())
-                    {
-                        FatalErrorIn
-                        (
-                            "template<class T>\n"
-                            "void mapDistribute::distribute\n"
-                            "(\n"
-                            "    const Pstream::commsTypes commsType,\n"
-                            "    const List<labelPair>& schedule,\n"
-                            "    const label constructSize,\n"
-                            "    const labelListList& subMap,\n"
-                            "    const labelListList& constructMap,\n"
-                            "    List<T>& field\n"
-                            ")\n"
-                        )   << "Expected from processor " << domain
-                            << " " << map.size() << " but received "
-                            << recvFields[domain].size() << " elements."
-                            << abort(FatalError);
-                    }
+                    const List<T>& subField = recvFields[domain];
+
+                    checkReceivedSize(domain, map.size(), subField.size());
 
                     forAll(map, i)
                     {
-                        field[map[i]] = recvFields[domain][i];
+                        field[map[i]] = subField[i];
                     }
                 }
             }
@@ -446,10 +400,11 @@ void Foam::mapDistribute::distribute
         const labelList& map = constructMap[Pstream::myProcNo()];
 
         field.setSize(constructSize);
+        field = nullValue;
 
         forAll(map, i)
         {
-            field[map[i]] = subField[i];
+            cop(field[map[i]], subField[i]);
         }
         return;
     }
@@ -501,25 +456,7 @@ void Foam::mapDistribute::distribute
                 IPstream fromNbr(Pstream::blocking, domain);
                 List<T> subField(fromNbr);
 
-                if (subField.size() != map.size())
-                {
-                    FatalErrorIn
-                    (
-                        "template<class T>\n"
-                        "void mapDistribute::distribute\n"
-                        "(\n"
-                        "    const Pstream::commsTypes commsType,\n"
-                        "    const List<labelPair>& schedule,\n"
-                        "    const label constructSize,\n"
-                        "    const labelListList& subMap,\n"
-                        "    const labelListList& constructMap,\n"
-                        "    List<T>& field\n"
-                        ")\n"
-                    )   << "Expected from processor " << domain
-                        << " " << map.size() << " but received "
-                        << subField.size() << " elements."
-                        << abort(FatalError);
-                }
+                checkReceivedSize(domain, map.size(), subField.size());
 
                 forAll(map, i)
                 {
@@ -550,46 +487,50 @@ void Foam::mapDistribute::distribute
         forAll(schedule, i)
         {
             const labelPair& twoProcs = schedule[i];
+            // twoProcs is a swap pair of processors. The first one is the
+            // one that needs to send first and then receive.
+
             label sendProc = twoProcs[0];
             label recvProc = twoProcs[1];
 
             if (Pstream::myProcNo() == sendProc)
             {
-                // I am sender. Send to recvProc.
-                OPstream toNbr(Pstream::scheduled, recvProc);
-                toNbr << UIndirectList<T>(field, subMap[recvProc]);
+                // I am send first, receive next
+                {
+                    OPstream toNbr(Pstream::scheduled, recvProc);
+                    toNbr << UIndirectList<T>(field, subMap[recvProc]);
+                }
+                {
+                    IPstream fromNbr(Pstream::scheduled, recvProc);
+                    List<T> subField(fromNbr);
+                    const labelList& map = constructMap[recvProc];
+
+                    checkReceivedSize(recvProc, map.size(), subField.size());
+
+                    forAll(map, i)
+                    {
+                        cop(newField[map[i]], subField[i]);
+                    }
+                }
             }
             else
             {
-                // I am receiver. Receive from sendProc.
-                IPstream fromNbr(Pstream::scheduled, sendProc);
-                List<T> subField(fromNbr);
-
-                const labelList& map = constructMap[sendProc];
-
-                if (subField.size() != map.size())
+                // I am receive first, send next
                 {
-                    FatalErrorIn
-                    (
-                        "template<class T>\n"
-                        "void mapDistribute::distribute\n"
-                        "(\n"
-                        "    const Pstream::commsTypes commsType,\n"
-                        "    const List<labelPair>& schedule,\n"
-                        "    const label constructSize,\n"
-                        "    const labelListList& subMap,\n"
-                        "    const labelListList& constructMap,\n"
-                        "    List<T>& field\n"
-                        ")\n"
-                    )   << "Expected from processor " << sendProc
-                        << " " << map.size() << " but received "
-                        << subField.size() << " elements."
-                        << abort(FatalError);
+                    IPstream fromNbr(Pstream::scheduled, sendProc);
+                    List<T> subField(fromNbr);
+                    const labelList& map = constructMap[sendProc];
+
+                    checkReceivedSize(sendProc, map.size(), subField.size());
+
+                    forAll(map, i)
+                    {
+                        cop(newField[map[i]], subField[i]);
+                    }
                 }
-
-                forAll(map, i)
                 {
-                    cop(newField[map[i]], subField[i]);
+                    OPstream toNbr(Pstream::scheduled, sendProc);
+                    toNbr << UIndirectList<T>(field, subMap[sendProc]);
                 }
             }
         }
@@ -648,25 +589,7 @@ void Foam::mapDistribute::distribute
                     UIPstream str(domain, pBufs);
                     List<T> recvField(str);
 
-                    if (recvField.size() != map.size())
-                    {
-                        FatalErrorIn
-                        (
-                            "template<class T>\n"
-                            "void mapDistribute::distribute\n"
-                            "(\n"
-                            "    const Pstream::commsTypes commsType,\n"
-                            "    const List<labelPair>& schedule,\n"
-                            "    const label constructSize,\n"
-                            "    const labelListList& subMap,\n"
-                            "    const labelListList& constructMap,\n"
-                            "    List<T>& field\n"
-                            ")\n"
-                        )   << "Expected from processor " << domain
-                            << " " << map.size() << " but received "
-                            << recvField.size() << " elements."
-                            << abort(FatalError);
-                    }
+                    checkReceivedSize(domain, map.size(), recvField.size());
 
                     forAll(map, i)
                     {
@@ -768,29 +691,13 @@ void Foam::mapDistribute::distribute
 
                 if (domain != Pstream::myProcNo() && map.size())
                 {
-                    if (recvFields[domain].size() != map.size())
-                    {
-                        FatalErrorIn
-                        (
-                            "template<class T>\n"
-                            "void mapDistribute::distribute\n"
-                            "(\n"
-                            "    const Pstream::commsTypes commsType,\n"
-                            "    const List<labelPair>& schedule,\n"
-                            "    const label constructSize,\n"
-                            "    const labelListList& subMap,\n"
-                            "    const labelListList& constructMap,\n"
-                            "    List<T>& field\n"
-                            ")\n"
-                        )   << "Expected from processor " << domain
-                            << " " << map.size() << " but received "
-                            << recvFields[domain].size() << " elements."
-                            << abort(FatalError);
-                    }
+                    const List<T>& subField = recvFields[domain];
+
+                    checkReceivedSize(domain, map.size(), subField.size());
 
                     forAll(map, i)
                     {
-                        cop(field[map[i]], recvFields[domain][i]);
+                        cop(field[map[i]], subField[i]);
                     }
                 }
             }

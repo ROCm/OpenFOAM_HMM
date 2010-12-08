@@ -28,6 +28,33 @@ Description
     Determines a mapping between patch face centres and mesh cell or face
     centres and processors they're on.
 
+    If constructed from dictionary:
+        // Region to sample (default is region0)
+        sampleRegion region0;
+
+        // What to sample:
+        // - nearestCell : sample nearest cell
+        // - nearestPatchFace : nearest face on selected patch
+        // - nearestFace : nearest boundary face on any patch
+        sampleMode nearestCell;
+
+        // If sampleMod is nearestPatchFace : patch to find faces of
+        samplePatch movingWall;
+
+        // How to supply offset (w.r.t. my patch face centres):
+        // - uniform : single offset vector
+        // - nonuniform : per-face offset vector
+        // - normal : using supplied distance and face normal
+        offsetMode uniform;
+
+        // According to offsetMode (see above) supply one of
+        // offset, offsets or distance
+        offset  (1 0 0);
+
+    Note: if offsetMode is 'normal' it uses outwards pointing normals. So
+    supply a negative distance if sampling inside the domain.
+
+
 Note
     Storage is not optimal. It temporary collects all (patch)face centres
     on all processors to keep the addressing calculation simple.
@@ -43,8 +70,6 @@ SourceFiles
 #include "pointField.H"
 #include "Tuple2.H"
 #include "pointIndexHit.H"
-#include "mapDistribute.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,6 +78,7 @@ namespace Foam
 
 class polyPatch;
 class polyMesh;
+class mapDistribute;
 
 /*---------------------------------------------------------------------------*\
                       Class directMappedPatchBase Declaration
@@ -71,11 +97,49 @@ public:
             NEARESTFACE         // nearest face
         };
 
+        //- How to project face centres
+        enum offsetMode
+        {
+            UNIFORM,            // single offset vector
+            NONUNIFORM,         // per-face offset vector
+            NORMAL              // use face normal + distance
+        };
+
+
+    //- Helper class for finding nearest
+    //  - point+local index
+    //  - sqr(distance)
+    //  - processor
+    typedef Tuple2<pointIndexHit, Tuple2<scalar, label> > nearInfo;
+
+    class nearestEqOp
+    {
+
+    public:
+
+        void operator()(nearInfo& x, const nearInfo& y) const
+        {
+            if (y.first().hit())
+            {
+                if (!x.first().hit())
+                {
+                    x = y;
+                }
+                else if (y.second().first() < x.second().first())
+                {
+                    x = y;
+                }
+            }
+        }
+    };
+
 private:
 
     // Private data
 
         static const NamedEnum<sampleMode, 3> sampleModeNames_;
+
+        static const NamedEnum<offsetMode, 3> offsetModeNames_;
 
         //- Patch to sample
         const polyPatch& patch_;
@@ -89,14 +153,17 @@ private:
         //- Patch (only if NEARESTPATCHFACE)
         const word samplePatch_;
 
-        //- For backwards compatibility : reading/writing of uniform offset.
-        const bool uniformOffset_;
+        //- How to obtain samples
+        offsetMode offsetMode_;
 
         //- Offset vector (uniform)
-        const vector offset_;
+        vector offset_;
 
-        //- Offset vector
-        const vectorField offsets_;
+        //- Offset vector (nonuniform)
+        vectorField offsets_;
+
+        //- Offset distance (normal)
+        scalar distance_;
 
         //- Same region
         const bool sameRegion_;
@@ -146,17 +213,17 @@ public:
         //- Construct from patch
         directMappedPatchBase(const polyPatch&);
 
-        //- Construct from components
+        //- Construct with offsetMode=non-uniform
         directMappedPatchBase
         (
             const polyPatch& pp,
             const word& sampleRegion,
             const sampleMode sampleMode,
             const word& samplePatch,
-            const vectorField& offset
+            const vectorField& offsets
         );
 
-        //- Construct from components
+        //- Construct from offsetMode=uniform
         directMappedPatchBase
         (
             const polyPatch& pp,
@@ -164,6 +231,16 @@ public:
             const sampleMode sampleMode,
             const word& samplePatch,
             const vector& offset
+        );
+
+        //- Construct from offsetMode=normal and distance
+        directMappedPatchBase
+        (
+            const polyPatch& pp,
+            const word& sampleRegion,
+            const sampleMode sampleMode,
+            const word& samplePatch,
+            const scalar distance
         );
 
         //- Construct from dictionary
@@ -240,6 +317,9 @@ public:
 
         //- Get the patch on the region
         const polyPatch& samplePolyPatch() const;
+
+        //- Get the sample points
+        tmp<pointField> samplePoints() const;
 
         //- Write as a dictionary
         virtual void write(Ostream&) const;

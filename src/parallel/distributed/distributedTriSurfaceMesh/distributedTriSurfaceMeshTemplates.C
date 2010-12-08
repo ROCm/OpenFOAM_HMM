@@ -76,15 +76,7 @@ License
 //    // Send back results
 //    // ~~~~~~~~~~~~~~~~~
 //
-//    map.distribute
-//    (
-//        Pstream::nonBlocking,
-//        List<labelPair>(0),
-//        info.size(),
-//        map.constructMap(),     // what to send
-//        map.subMap(),           // what to receive
-//        values
-//    );
+//    map.reverseDistribute(info.size(), values);
 //}
 
 
@@ -115,15 +107,7 @@ void Foam::distributedTriSurfaceMesh::distributeFields
 
         label oldSize = field.size();
 
-        map.distribute
-        (
-            Pstream::nonBlocking,
-            List<labelPair>(0),
-            map.constructSize(),
-            map.subMap(),
-            map.constructMap(),
-            field
-        );
+        map.distribute(field);
 
         if (debug)
         {

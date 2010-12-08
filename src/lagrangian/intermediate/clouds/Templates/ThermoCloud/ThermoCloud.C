@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ThermoCloud.H"
-#include "interpolationCellPoint.H"
 #include "ThermoParcel.H"
 
 #include "HeatTransferModel.H"

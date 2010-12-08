@@ -47,11 +47,5 @@ runTimeModifiable true;
 
 graphFormat     raw;
 
-libs
-(
-    "libOpenFOAM.so"
-    "libinterpolationTables_16x.so"
-    "libtabulatedWallFunctionFvPatchFields_16x.so"
-);
 
 // ************************************************************************* //

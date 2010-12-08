@@ -86,9 +86,51 @@ autoPtr<fvMesh> createMesh
     if (!haveMesh)
     {
         // Create dummy mesh. Only used on procs that don't have mesh.
+
+        {
+            IOdictionary fvSolution
+            (
+                IOobject
+                (
+                    "fvSolution",
+                    runTime.system(),
+                    runTime,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                )
+            );
+            Pout<< "Writing dummy " << fvSolution.objectPath() << endl;
+            fvSolution.regIOobject::write();
+        }
+        {
+            IOdictionary fvSchemes
+            (
+                IOobject
+                (
+                    "fvSchemes",
+                    runTime.system(),
+                    runTime,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                )
+            );
+            fvSchemes.add("divSchemes", dictionary());
+            fvSchemes.add("gradSchemes", dictionary());
+            fvSchemes.add("laplacianSchemes", dictionary());
+            Pout<< "Writing dummy " << fvSchemes.objectPath() << endl;
+            fvSchemes.regIOobject::write();
+        }
+
+        Pout<< "Creating dummy mesh from " << io.objectPath() << endl;
         fvMesh dummyMesh
         (
-            io,
+            IOobject
+            (
+                io.name(),
+                io.instance(),
+                io.db(),
+                IOobject::NO_READ
+            ),
             xferCopy(pointField()),
             xferCopy(faceList()),
             xferCopy(labelList()),
@@ -510,18 +552,21 @@ int main(int argc, char *argv[])
         "specify the merge distance relative to the bounding box size "
         "(default 1E-6)"
     );
-    // Create argList. This will check for non-existing processor dirs.
 #   include "setRootCase.H"
 
-    //- Not useful anymore. See above.
-    //// Create processor directory if non-existing
-    //if (!Pstream::master() && !isDir(args.path()))
-    //{
-    //    Pout<< "Creating case directory " << args.path() << endl;
-    //    mkDir(args.path());
-    //}
+    // Create processor directory if non-existing
+    if (!Pstream::master() && !isDir(args.path()))
+    {
+        Pout<< "Creating case directory " << args.path() << endl;
+        mkDir(args.path());
+    }
+
+    // Switch timeStamp checking to one which does not do any
+    // parallel sync for same reason
+    regIOobject::fileModificationChecking = regIOobject::timeStamp;
 
 #   include "createTime.H"
+
 
     word regionName = polyMesh::defaultRegion;
     fileName meshSubDir;

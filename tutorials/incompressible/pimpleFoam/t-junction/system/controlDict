@@ -49,13 +49,6 @@ adjustTimeStep  yes;
 
 maxCo           5;
 
-libs
-(
-    "libOpenFOAM.so"
-    "libinterpolationTables_16x.so"
-    "libtabulatedWallFunctionFvPatchFields_16x.so"
-);
-
 functions
 {
     probes

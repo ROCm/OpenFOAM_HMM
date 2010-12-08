@@ -32,11 +32,11 @@ bool Foam::blockMesh::blockMesh::verboseOutput(false);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::blockMesh::blockMesh(IOdictionary& dict)
+Foam::blockMesh::blockMesh(const IOdictionary& dict, const word& regionName)
 :
     blockPointField_(dict.lookup("vertices")),
     scaleFactor_(1.0),
-    topologyPtr_(createTopology(dict))
+    topologyPtr_(createTopology(dict, regionName))
 {
     calcMergeInfo();
 }

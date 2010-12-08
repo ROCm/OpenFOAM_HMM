@@ -1,3 +1,3 @@
-fileNameCleanTest.C
+Test-fileNameClean.C
 
-EXE = $(FOAM_USER_APPBIN)/fileNameCleanTest
+EXE = $(FOAM_USER_APPBIN)/Test-fileNameClean

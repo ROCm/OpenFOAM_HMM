@@ -1220,7 +1220,17 @@ void Foam::globalPoints::calculateSharedPoints
 
     // Do one exchange iteration to get neighbour points.
     {
-        PstreamBuffers pBufs(Pstream::defaultCommsType);
+        // Note: to use 'scheduled' would have to intersperse send and receive.
+        // So for now just use nonBlocking. Also globalPoints itself gets
+        // constructed by mesh.globalData().patchSchedule() so creates a loop.
+        PstreamBuffers pBufs
+        (
+            (
+                Pstream::defaultCommsType == Pstream::scheduled
+              ? Pstream::nonBlocking
+              : Pstream::defaultCommsType
+            )
+        );
         sendPatchPoints
         (
             mergeSeparated,
@@ -1251,7 +1261,14 @@ void Foam::globalPoints::calculateSharedPoints
 
     do
     {
-        PstreamBuffers pBufs(Pstream::defaultCommsType);
+        PstreamBuffers pBufs
+        (
+            (
+                Pstream::defaultCommsType == Pstream::scheduled
+              ? Pstream::nonBlocking
+              : Pstream::defaultCommsType
+            )
+        );
         sendPatchPoints
         (
             mergeSeparated,
@@ -1400,7 +1417,15 @@ void Foam::globalPoints::calculateSharedPoints
             Pout<< "Determined " << changedIndices.size() << " shared points."
                 << " Exchanging them" << endl;
         }
-        PstreamBuffers pBufs(Pstream::defaultCommsType);
+        PstreamBuffers pBufs
+        (
+            (
+                Pstream::defaultCommsType == Pstream::scheduled
+              ? Pstream::nonBlocking
+              : Pstream::defaultCommsType
+            )
+        );
+
         sendSharedPoints(mergeSeparated, pBufs, changedIndices);
         pBufs.finishedSends();
         receiveSharedPoints

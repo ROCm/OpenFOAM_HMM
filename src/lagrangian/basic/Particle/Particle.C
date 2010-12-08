@@ -62,37 +62,29 @@ void Foam::Particle<ParticleType>::correctAfterParallelTransfer
 
     if (!ppp.parallel())
     {
-        if (ppp.forwardT().size() == 1)
-        {
-            const tensor& T = ppp.forwardT()[0];
-            transformPosition(T);
-            static_cast<ParticleType&>(*this).transformProperties(T);
-        }
-        else
-        {
-            const tensor& T = ppp.forwardT()[faceI_];
-            transformPosition(T);
-            static_cast<ParticleType&>(*this).transformProperties(T);
-        }
+        const tensor& T =
+        (
+            ppp.forwardT().size() == 1
+          ? ppp.forwardT()[0]
+          : ppp.forwardT()[faceI_]
+        );
+
+        transformPosition(T);
+        static_cast<ParticleType&>(*this).transformProperties(T);
     }
     else if (ppp.separated())
     {
-        if (ppp.separation().size() == 1)
-        {
-            position_ -= ppp.separation()[0];
-            static_cast<ParticleType&>(*this).transformProperties
-            (
-                -ppp.separation()[0]
-            );
-        }
-        else
-        {
-            position_ -= ppp.separation()[faceI_];
-            static_cast<ParticleType&>(*this).transformProperties
-            (
-                -ppp.separation()[faceI_]
-            );
-        }
+        const vector& s =
+        (
+            (ppp.separation().size() == 1)
+          ? ppp.separation()[0]
+          : ppp.separation()[faceI_]
+        );
+        position_ -= s;
+        static_cast<ParticleType&>(*this).transformProperties
+        (
+            -s
+        );
     }
 
     tetFaceI_ = faceI_ + ppp.start();
@@ -264,6 +256,17 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
 
     faceI_ = -1;
 
+    // Pout<< "Particle " << origId_ << " " << origProc_
+    //     << " Tracking from " << position_
+    //     << " to " << endPosition
+    //     << endl;
+
+    // Pout<< "stepFraction " << stepFraction_ << nl
+    //     << "cellI " << cellI_ << nl
+    //     << "tetFaceI " << tetFaceI_ << nl
+    //     << "tetPtI " << tetPtI_
+    //     << endl;
+
     scalar trackFraction = 0.0;
 
     // Minimum tetrahedron decomposition of each cell of the mesh into
@@ -405,6 +408,8 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
         triI = -1;
         lambdaMin = VGREAT;
 
+        // Pout<< "tris " << tris << endl;
+
         // Sets a value for lambdaMin and faceI_ if a wall face is hit
         // by the track.
         hitWallFaces(position_, endPosition, lambdaMin, faceHitTetIs);
@@ -468,6 +473,35 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
             // A tri was found to be crossed before a wall face was hit (if any)
             faceI_ = -1;
         }
+
+        // Pout<< "track loop " << position_ << " " << endPosition << nl
+        //     << "    " << cellI_
+        //     << "    " << faceI_
+        //     << " " << tetFaceI_
+        //     << " " << tetPtI_
+        //     << " " << triI
+        //     << " " << lambdaMin
+        //     << " " << trackFraction
+        //     << endl;
+
+        // Pout<< "# Tracking loop tet "
+        //     << origId_ << " " << origProc_<< nl
+        //     << "# face: " << tetFaceI_ << nl
+        //     << "# tetPtI: " << tetPtI_ << nl
+        //     << "# tetBasePtI: " << mesh.tetBasePtIs()[tetFaceI_] << nl
+        //     << "# tet.mag(): " << tet.mag() << nl
+        //     << "# tet.quality(): " << tet.quality()
+        //     << endl;
+
+        // meshTools::writeOBJ(Pout, tet.a());
+        // meshTools::writeOBJ(Pout, tet.b());
+        // meshTools::writeOBJ(Pout, tet.c());
+        // meshTools::writeOBJ(Pout, tet.d());
+
+        // Pout<< "f 1 3 2" << nl
+        //     << "f 2 3 4" << nl
+        //     << "f 1 4 3" << nl
+        //     << "f 1 2 4" << endl;
 
         // The particle can be 'outside' the tet.  This will yield a
         // lambda larger than 1, or smaller than 0.  For values < 0,
@@ -773,21 +807,34 @@ void Foam::Particle<ParticleType>::hitCyclicPatch
     // See note in correctAfterParallelTransfer for tetPtI_ addressing.
     tetPtI_ = cloud_.polyMesh_.faces()[tetFaceI_].size() - 1 - tetPtI_;
 
+    const cyclicPolyPatch& receiveCpp = cpp.neighbPatch();
+
     // Now the particle is on the receiving side
 
-    if (!cpp.parallel())
+    if (!receiveCpp.parallel())
     {
-        const tensor& T = cpp.reverseT()[0];
+        const tensor& T =
+        (
+            receiveCpp.forwardT().size() == 1
+          ? receiveCpp.forwardT()[0]
+          : receiveCpp.forwardT()[receiveCpp.whichFace(faceI_)]
+        );
 
         transformPosition(T);
         static_cast<ParticleType&>(*this).transformProperties(T);
     }
-    else if (cpp.separated())
+    else if (receiveCpp.separated())
     {
-        position_ += cpp.separation()[0];
+        const vector& s =
+        (
+            (receiveCpp.separation().size() == 1)
+          ? receiveCpp.separation()[0]
+          : receiveCpp.separation()[receiveCpp.whichFace(faceI_)]
+        );
+        position_ -= s;
         static_cast<ParticleType&>(*this).transformProperties
         (
-            cpp.separation()[0]
+            -s
         );
     }
 }

@@ -253,7 +253,11 @@ public:
             //- Increment the nTrackingRescues counter
             void trackingRescue() const
             {
-                nTrackingRescues_++;
+                if (++nTrackingRescues_ % size() == 0)
+                {
+                    Info<< "    " << nTrackingRescues_
+                        << " tracking rescues " << endl;
+                }
             }
 
             //- Whether each cell has any wall faces (demand driven data)

@@ -26,6 +26,7 @@ License
 #include "directMappedFixedValueFvPatchField.H"
 #include "directMappedPatchBase.H"
 #include "volFields.H"
+#include "interpolationCell.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,8 +43,10 @@ directMappedFixedValueFvPatchField<Type>::directMappedFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF),
+    fieldName_(iF.name()),
     setAverage_(false),
-    average_(pTraits<Type>::zero)
+    average_(pTraits<Type>::zero),
+    interpolationScheme_(interpolationCell<Type>::typeName)
 {}
 
 
@@ -57,8 +60,10 @@ directMappedFixedValueFvPatchField<Type>::directMappedFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf, p, iF, mapper),
+    fieldName_(ptf.fieldName_),
     setAverage_(ptf.setAverage_),
-    average_(ptf.average_)
+    average_(ptf.average_),
+    interpolationScheme_(ptf.interpolationScheme_)
 {
     if (!isA<directMappedPatchBase>(this->patch().patch()))
     {
@@ -91,8 +96,10 @@ directMappedFixedValueFvPatchField<Type>::directMappedFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF, dict),
+    fieldName_(dict.lookupOrDefault<word>("fieldName", iF.name())),
     setAverage_(readBool(dict.lookup("setAverage"))),
-    average_(pTraits<Type>(dict.lookup("average")))
+    average_(pTraits<Type>(dict.lookup("average"))),
+    interpolationScheme_(interpolationCell<Type>::typeName)
 {
     if (!isA<directMappedPatchBase>(this->patch().patch()))
     {
@@ -112,6 +119,15 @@ directMappedFixedValueFvPatchField<Type>::directMappedFixedValueFvPatchField
             << " in file " << this->dimensionedInternalField().objectPath()
             << exit(FatalError);
     }
+
+    const directMappedPatchBase& mpp = refCast<const directMappedPatchBase>
+    (
+        directMappedFixedValueFvPatchField<Type>::patch().patch()
+    );
+    if (mpp.mode() == directMappedPatchBase::NEARESTCELL)
+    {
+        dict.lookup("interpolationScheme") >> interpolationScheme_;
+    }
 }
 
 
@@ -122,8 +138,10 @@ directMappedFixedValueFvPatchField<Type>::directMappedFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf),
+    fieldName_(ptf.fieldName_),
     setAverage_(ptf.setAverage_),
-    average_(ptf.average_)
+    average_(ptf.average_),
+    interpolationScheme_(ptf.interpolationScheme_)
 {}
 
 
@@ -135,12 +153,66 @@ directMappedFixedValueFvPatchField<Type>::directMappedFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf, iF),
+    fieldName_(ptf.fieldName_),
     setAverage_(ptf.setAverage_),
-    average_(ptf.average_)
+    average_(ptf.average_),
+    interpolationScheme_(ptf.interpolationScheme_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+const GeometricField<Type, fvPatchField, volMesh>&
+directMappedFixedValueFvPatchField<Type>::sampleField() const
+{
+    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+
+    const directMappedPatchBase& mpp = refCast<const directMappedPatchBase>
+    (
+        directMappedFixedValueFvPatchField<Type>::patch().patch()
+    );
+    const fvMesh& nbrMesh = refCast<const fvMesh>(mpp.sampleMesh());
+
+    if (mpp.sameRegion())
+    {
+        if (fieldName_ == this->dimensionedInternalField().name())
+        {
+            // Optimisation: bypass field lookup
+            return
+                dynamic_cast<const fieldType&>
+                (
+                    this->dimensionedInternalField()
+                );
+        }
+        else
+        {
+            const fvMesh& thisMesh = this->patch().boundaryMesh().mesh();
+            return thisMesh.lookupObject<fieldType>(fieldName_);
+        }
+    }
+    else
+    {
+        return nbrMesh.lookupObject<fieldType>(fieldName_);
+    }
+}
+
+
+template<class Type>
+const interpolation<Type>&
+directMappedFixedValueFvPatchField<Type>::interpolator() const
+{
+    if (!interpolator_.valid())
+    {
+        interpolator_ = interpolation<Type>::New
+        (
+            interpolationScheme_,
+            sampleField()
+        );
+    }
+    return interpolator_();
+}
+
 
 template<class Type>
 void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
@@ -159,11 +231,8 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
     );
     const mapDistribute& distMap = mpp.map();
 
-    // Force recalculation of schedule
-    (void)distMap.schedule();
-
+    const fvMesh& thisMesh = this->patch().boundaryMesh().mesh();
     const fvMesh& nbrMesh = refCast<const fvMesh>(mpp.sampleMesh());
-    const word& fldName = this->dimensionedInternalField().name();
 
     // Result of obtaining remote values
     Field<Type> newValues;
@@ -172,26 +241,38 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
     {
         case directMappedPatchBase::NEARESTCELL:
         {
-            if (mpp.sameRegion())
+            if (interpolationScheme_ != interpolationCell<Type>::typeName)
             {
-                newValues = this->internalField();
+                // Send back sample points to the processor that holds the cell
+                vectorField samples(mpp.samplePoints());
+                distMap.reverseDistribute
+                (
+                    (mpp.sameRegion() ? thisMesh.nCells() : nbrMesh.nCells()),
+                    point::max,
+                    samples
+                );
+
+                const interpolation<Type>& interp = interpolator();
+
+                newValues.setSize(samples.size(), pTraits<Type>::max);
+                forAll(samples, cellI)
+                {
+                    if (samples[cellI] != point::max)
+                    {
+                        newValues[cellI] = interp.interpolate
+                        (
+                            samples[cellI],
+                            cellI
+                        );
+                    }
+                }
             }
             else
             {
-                newValues = nbrMesh.lookupObject<fieldType>
-                (
-                    fldName
-                ).internalField();
+                newValues = sampleField();
             }
-            mapDistribute::distribute
-            (
-                Pstream::defaultCommsType,
-                distMap.schedule(),
-                distMap.constructSize(),
-                distMap.subMap(),
-                distMap.constructMap(),
-                newValues
-            );
+
+            distMap.distribute(newValues);
 
             break;
         }
@@ -213,20 +294,10 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
                  << abort(FatalError);
             }
 
-            const fieldType& nbrField = nbrMesh.lookupObject<fieldType>
-            (
-                fldName
-            );
+            const fieldType& nbrField = sampleField();
+
             newValues = nbrField.boundaryField()[nbrPatchID];
-            mapDistribute::distribute
-            (
-                Pstream::defaultCommsType,
-                distMap.schedule(),
-                distMap.constructSize(),
-                distMap.subMap(),
-                distMap.constructMap(),
-                newValues
-            );
+            distMap.distribute(newValues);
 
             break;
         }
@@ -234,10 +305,8 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
         {
             Field<Type> allValues(nbrMesh.nFaces(), pTraits<Type>::zero);
 
-            const fieldType& nbrField = nbrMesh.lookupObject<fieldType>
-            (
-                fldName
-            );
+            const fieldType& nbrField = sampleField();
+
             forAll(nbrField.boundaryField(), patchI)
             {
                 const fvPatchField<Type>& pf =
@@ -250,16 +319,7 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
                 }
             }
 
-            mapDistribute::distribute
-            (
-                Pstream::defaultCommsType,
-                distMap.schedule(),
-                distMap.constructSize(),
-                distMap.subMap(),
-                distMap.constructMap(),
-                allValues
-            );
-
+            distMap.distribute(allValues);
             newValues.transfer(allValues);
 
             break;
@@ -294,7 +354,8 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
 
     if (debug)
     {
-        Info<< "directMapped on field:" << fldName
+        Info<< "directMapped on field:"
+            << this->dimensionedInternalField().name()
             << " patch:" << this->patch().name()
             << "  avg:" << gAverage(*this)
             << "  min:" << gMin(*this)
@@ -310,8 +371,11 @@ template<class Type>
 void directMappedFixedValueFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
+    os.writeKeyword("fieldName") << fieldName_ << token::END_STATEMENT << nl;
     os.writeKeyword("setAverage") << setAverage_ << token::END_STATEMENT << nl;
     os.writeKeyword("average") << average_ << token::END_STATEMENT << nl;
+    os.writeKeyword("interpolationScheme") << interpolationScheme_
+        << token::END_STATEMENT << nl;
     this->writeEntry("value", os);
 }
 

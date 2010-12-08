@@ -50,16 +50,33 @@ class ptscotchDecomp
 {
     // Private Member Functions
 
+        //- Insert list in front of list.
+        template<class Type>
+        static void prepend(const UList<Type>&, List<Type>&);
+        //- Insert list at end of list.
+        template<class Type>
+        static void append(const UList<Type>&, List<Type>&);
+
         //- Check and print error message
         static void check(const int, const char*);
 
+        //- Decompose with optionally zero sized domains
+        label decomposeZeroDomains
+        (
+            const List<int>& initadjncy,
+            const List<int>& initxadj,
+            const scalarField& initcWeights,
+            List<int>& finalDecomp
+        ) const;
+
+        //- Decompose
         label decompose
         (
-            List<int>& adjncy,
-            List<int>& xadj,
+            const List<int>& adjncy,
+            const List<int>& xadj,
             const scalarField& cWeights,
             List<int>& finalDecomp
-        );
+        ) const;
 
         //- Disallow default bitwise copy construct and assignment
         void operator=(const ptscotchDecomp&);
@@ -132,6 +149,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "ptscotchDecompTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

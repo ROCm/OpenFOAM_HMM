@@ -93,6 +93,15 @@ class mapDistribute
         mutable autoPtr<List<labelPair> > schedulePtr_;
 
 
+   // Private Member Functions
+
+        static void checkReceivedSize
+        (
+            const label procI,
+            const label expectedSize,
+            const label receivedSize
+        );
+
 public:
 
     // Constructors
@@ -315,6 +324,62 @@ public:
                         constructMap_,
                         subMap_,
                         fld
+                    );
+                }
+            }
+
+            //- Reverse distribute data using default commsType.
+            //  Since constructSize might be larger than supplied size supply
+            //  a nullValue
+            template<class T>
+            void reverseDistribute
+            (
+                const label constructSize,
+                const T& nullValue,
+                List<T>& fld
+            )
+            const
+            {
+                if (Pstream::defaultCommsType == Pstream::nonBlocking)
+                {
+                    distribute
+                    (
+                        Pstream::nonBlocking,
+                        List<labelPair>(),
+                        constructSize,
+                        constructMap_,
+                        subMap_,
+                        fld,
+                        eqOp<T>(),
+                        nullValue
+                    );
+                }
+                else if (Pstream::defaultCommsType == Pstream::scheduled)
+                {
+                    distribute
+                    (
+                        Pstream::scheduled,
+                        schedule(),
+                        constructSize,
+                        constructMap_,
+                        subMap_,
+                        fld,
+                        eqOp<T>(),
+                        nullValue
+                    );
+                }
+                else
+                {
+                    distribute
+                    (
+                        Pstream::blocking,
+                        List<labelPair>(),
+                        constructSize,
+                        constructMap_,
+                        subMap_,
+                        fld,
+                        eqOp<T>(),
+                        nullValue
                     );
                 }
             }

@@ -59,6 +59,36 @@ dictionaryReplacement
         }
     }
 
+    Ypmma
+    {
+        internalField   uniform 0.5;
+
+
+        boundaryField
+        {
+            ".*"
+            {
+                type            calculated;
+                value           uniform 0.5;
+            }
+        }
+
+    }
+
+    Ychar
+    {
+        internalField   uniform 0.5;
+
+        boundaryField
+        {
+            ".*"
+            {
+                type            calculated;
+                value           uniform 0.5;
+            }
+        }
+    }
+
 }
 
 // ************************************************************************* //

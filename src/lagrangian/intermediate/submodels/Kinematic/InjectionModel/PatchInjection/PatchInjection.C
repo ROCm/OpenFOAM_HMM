@@ -38,7 +38,24 @@ Foam::label Foam::PatchInjection<CloudType>::parcelsToInject
 {
     if ((time0 >= 0.0) && (time0 < duration_))
     {
-        return round(fraction_*(time1 - time0)*parcelsPerSecond_);
+        scalar nParcels =fraction_*(time1 - time0)*parcelsPerSecond_;
+
+        cachedRandom& rnd = this->owner().rndGen();
+
+        label nParcelsToInject = floor(nParcels);
+
+        // Inject an additional parcel with a probability based on the
+        // remainder after the floor function
+        if
+        (
+            nParcelsToInject > 0
+         && (nParcels - scalar(nParcelsToInject) > rnd.position(0.0, 1.0))
+        )
+        {
+            ++nParcelsToInject;
+        }
+
+        return nParcelsToInject;
     }
     else
     {
@@ -173,6 +190,7 @@ void Foam::PatchInjection<CloudType>::setPositionAndCell
     if (cellOwners_.size() > 0)
     {
         cachedRandom& rnd = this->owner().rndGen();
+
         label cellI = rnd.position<label>(0, cellOwners_.size() - 1);
 
         cellOwner = cellOwners_[cellI];

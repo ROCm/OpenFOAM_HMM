@@ -148,6 +148,8 @@ Foam::vtkPV3blockMesh::vtkPV3blockMesh
     reader_(reader),
     dbPtr_(NULL),
     meshPtr_(NULL),
+    meshRegion_(polyMesh::defaultRegion),
+    meshDir_(polyMesh::meshSubDir),
     arrayRangeBlocks_("block"),
     arrayRangeEdges_("edges"),
     arrayRangeCorners_("corners")
@@ -188,6 +190,28 @@ Foam::vtkPV3blockMesh::vtkPV3blockMesh
     // could be stringent and insist the prefix match the directory name...
     // Note: cannot use fileName::name() due to the embedded '{}'
     string caseName(fileName(FileName).lessExt());
+    string::size_type beg = caseName.find_last_of("/{");
+    string::size_type end = caseName.find('}', beg);
+
+    if
+    (
+        beg != string::npos && caseName[beg] == '{'
+     && end != string::npos && end == caseName.size()-1
+    )
+    {
+        meshRegion_ = caseName.substr(beg+1, end-beg-1);
+
+        // some safety
+        if (meshRegion_.empty())
+        {
+            meshRegion_ = polyMesh::defaultRegion;
+        }
+
+        if (meshRegion_ != polyMesh::defaultRegion)
+        {
+            meshDir_ = meshRegion_/polyMesh::meshSubDir;
+        }
+    }
 
     if (debug)
     {
@@ -313,7 +337,7 @@ void Foam::vtkPV3blockMesh::updateFoamMesh()
             (
                 "blockMeshDict",
                 dbPtr_().constant(),
-                polyMesh::meshSubDir,
+                meshDir_,
                 dbPtr_(),
                 IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
@@ -321,7 +345,7 @@ void Foam::vtkPV3blockMesh::updateFoamMesh()
             )
         );
 
-        meshPtr_ = new blockMesh(meshDict);
+        meshPtr_ = new blockMesh(meshDict, meshRegion_);
     }
 
 

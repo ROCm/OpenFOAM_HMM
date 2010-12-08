@@ -261,7 +261,11 @@ void Foam::blockMesh::createCellShapes
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
+Foam::polyMesh* Foam::blockMesh::createTopology
+(
+    const IOdictionary& meshDescription,
+    const word& regionName
+)
 {
     bool topologyOK = true;
 
@@ -500,7 +504,22 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
             dictionary& dict = patchDicts[patchI];
 
             // Add but not override type
-            dict.add("type", patchTypes[patchI], false);
+            if (!dict.found("type"))
+            {
+                dict.add("type", patchTypes[patchI], false);
+            }
+            else if (word(dict.lookup("type")) != patchTypes[patchI])
+            {
+                IOWarningIn
+                (
+                    "blockMesh::createTopology(IOdictionary&)",
+                    meshDescription
+                )   << "For patch " << patchNames[patchI]
+                    << " overriding type '" << patchTypes[patchI]
+                    << "' with '" << word(dict.lookup("type"))
+                    << "' (read from boundary file)"
+                    << endl;
+            }
 
             // Override neighbourpatch name
             if (nbrPatchNames[patchI] != word::null)
@@ -514,7 +533,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
         (
             IOobject
             (
-                "blockMesh",
+                regionName,
                 meshDescription.time().constant(),
                 meshDescription.time(),
                 IOobject::NO_READ,
@@ -563,7 +582,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
         (
             IOobject
             (
-                "blockMesh",
+                regionName,
                 meshDescription.time().constant(),
                 meshDescription.time(),
                 IOobject::NO_READ,
