@@ -87,10 +87,10 @@ public:
 
     // Constructors
 
-        //- Construct Null
+        //- Construct an empty range
         scalarRange();
 
-        //- Construct a Range
+        //- Construct a range from lower to upper
         scalarRange(const scalar lower, const scalar upper);
 
         //- Construct from Istream.
@@ -101,8 +101,11 @@ public:
 
     // Member Functions
 
+        //- Is the range empty?
+        bool empty() const;
+
         //- Is the range non-empty?
-        bool isDefined() const;
+        bool valid() const;
 
         //- Is the range 'EXACT'?
         bool isExact() const;

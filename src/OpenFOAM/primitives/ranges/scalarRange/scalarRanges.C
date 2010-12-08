@@ -44,7 +44,7 @@ Foam::scalarRanges::scalarRanges(Istream& is)
     while (is.good())
     {
         scalarRange sr(is);
-        if (sr.isDefined())
+        if (sr.valid())
         {
             lst.append(sr);
         }
