@@ -73,17 +73,16 @@ Foam::autoPtr<Foam::pointSolidMixture> Foam::pointSolidMixture::New
     const dictionary& thermophysicalProperties
 )
 {
-    return autoPtr<pointSolidMixture>(new
-pointSolidMixture(thermophysicalProperties));
+    return autoPtr<pointSolidMixture>
+    (
+        new pointSolidMixture(thermophysicalProperties)
+    );
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalarField Foam::pointSolidMixture::X
-(
-    const scalarField& Y
-) const
+Foam::scalarField Foam::pointSolidMixture::X(const scalarField& Y) const
 {
     scalarField X(Y.size());
     scalar rhoInv = 0.0;
@@ -97,10 +96,7 @@ Foam::scalarField Foam::pointSolidMixture::X
 }
 
 
-Foam::scalar Foam::pointSolidMixture::rho
-(
-    const scalarField& X
-) const
+Foam::scalar Foam::pointSolidMixture::rho(const scalarField& X) const
 {
     scalar val = 0.0;
     forAll(properties_, i)
@@ -111,10 +107,7 @@ Foam::scalar Foam::pointSolidMixture::rho
 }
 
 
-Foam::scalar Foam::pointSolidMixture::Cp
-(
-    const scalarField& Y
-) const
+Foam::scalar Foam::pointSolidMixture::Cp(const scalarField& Y) const
 {
     scalar val = 0.0;
     forAll(properties_, i)

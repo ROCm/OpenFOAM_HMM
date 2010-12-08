@@ -309,8 +309,8 @@ void Foam::directionalKSolidThermo::correct()
 }
 
 
-const Foam::volSymmTensorField& Foam::directionalKSolidThermo::
-directionalK() const
+const Foam::volSymmTensorField&
+Foam::directionalKSolidThermo::directionalK() const
 {
     return directionalK_;
 }

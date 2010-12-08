@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                            Class interpolateSolid Declaration
+                     Class interpolateSolid Declaration
 \*---------------------------------------------------------------------------*/
 
 class interpolateSolid
@@ -77,8 +77,7 @@ public:
 
 
     //- Destructor
-
-        virtual ~interpolateSolid();
+    virtual ~interpolateSolid();
 
 
     // Member Functions

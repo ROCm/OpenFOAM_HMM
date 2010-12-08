@@ -55,7 +55,7 @@ Ostream& operator<<
 
 
 /*---------------------------------------------------------------------------*\
-                            Class pointSolid Declaration
+                       Class pointSolid Declaration
 \*---------------------------------------------------------------------------*/
 
 class pointSolid

@@ -43,7 +43,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class solidMixtureThermo Declaration
+                    Class solidMixtureThermo Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class MixtureType>
@@ -81,8 +81,7 @@ public:
 
 
     //- Destructor
-
-        virtual ~solidMixtureThermo();
+    virtual ~solidMixtureThermo();
 
 
     // Member functions
@@ -122,8 +121,8 @@ public:
 
         // Patches variables
 
-       
-            //- Density [kg/m3]     
+
+            //- Density [kg/m3]
             virtual tmp<scalarField> rho(const label patchI) const;
 
             //- Specific heat capacity [J/(kg.K)]
@@ -148,13 +147,11 @@ public:
             virtual tmp<scalarField> emissivity(const label patchI) const;
 
 
-
         //- Read thermophysicalProperties dictionary
         virtual bool read();
 
         //- Write the basicSolidThermo properties
         virtual bool writeData(Ostream& os) const;
-
 };
 
 

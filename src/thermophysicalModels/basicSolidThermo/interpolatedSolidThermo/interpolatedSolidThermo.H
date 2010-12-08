@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class interpolatedSolidThermo Declaration
+                  Class interpolatedSolidThermo Declaration
 \*---------------------------------------------------------------------------*/
 
 class interpolatedSolidThermo
@@ -119,14 +119,12 @@ public:
             //- Read the interpolatedSolidThermo properties
             bool read(const dictionary& dict);
 
-
-        // Ostream Operator
-
-        friend Ostream& operator<<
-        (
-            Ostream& os,
-            const interpolatedSolidThermo& s
-        );
+            //- Ostream Operator
+            friend Ostream& operator<<
+            (
+                Ostream& os,
+                const interpolatedSolidThermo& s
+            );
 };
 
 

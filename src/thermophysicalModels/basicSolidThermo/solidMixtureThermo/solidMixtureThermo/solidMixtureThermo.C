@@ -104,8 +104,7 @@ void Foam::solidMixtureThermo<MixtureType>::correct()
 
 
 template<class MixtureType>
-const Foam::volScalarField&
-Foam::solidMixtureThermo<MixtureType>::K() const
+const Foam::volScalarField& Foam::solidMixtureThermo<MixtureType>::K() const
 {
     return K_;
 }
@@ -220,8 +219,7 @@ Foam::solidMixtureThermo<MixtureType>::Hf() const
 
 
 template<class MixtureType>
-Foam::tmp<Foam::scalarField>
-Foam::solidMixtureThermo<MixtureType>::rho
+Foam::tmp<Foam::scalarField> Foam::solidMixtureThermo<MixtureType>::rho
 (
     const label patchI
 ) const
@@ -243,8 +241,7 @@ Foam::solidMixtureThermo<MixtureType>::rho
 
 
 template<class MixtureType>
-Foam::tmp<Foam::scalarField>
-Foam::solidMixtureThermo<MixtureType>::Cp
+Foam::tmp<Foam::scalarField> Foam::solidMixtureThermo<MixtureType>::Cp
 (
     const label patchI
 ) const
@@ -266,8 +263,7 @@ Foam::solidMixtureThermo<MixtureType>::Cp
 
 
 template<class MixtureType>
-Foam::tmp<Foam::scalarField>
-Foam::solidMixtureThermo<MixtureType>::hs
+Foam::tmp<Foam::scalarField> Foam::solidMixtureThermo<MixtureType>::hs
 (
     const label patchI
 ) const
@@ -289,8 +285,7 @@ Foam::solidMixtureThermo<MixtureType>::hs
 
 
 template<class MixtureType>
-Foam::tmp<Foam::scalarField>
-Foam::solidMixtureThermo<MixtureType>::K
+Foam::tmp<Foam::scalarField> Foam::solidMixtureThermo<MixtureType>::K
 (
     const label patchI
 ) const
@@ -312,8 +307,7 @@ Foam::solidMixtureThermo<MixtureType>::K
 
 
 template<class MixtureType>
-Foam::tmp<Foam::scalarField>
-Foam::solidMixtureThermo<MixtureType>::Hf
+Foam::tmp<Foam::scalarField> Foam::solidMixtureThermo<MixtureType>::Hf
 (
     const label patchI
 ) const
@@ -335,8 +329,7 @@ Foam::solidMixtureThermo<MixtureType>::Hf
 
 
 template<class MixtureType>
-Foam::tmp<Foam::scalarField>
-Foam::solidMixtureThermo<MixtureType>::sigmaS
+Foam::tmp<Foam::scalarField> Foam::solidMixtureThermo<MixtureType>::sigmaS
 (
     const label patchI
 ) const
@@ -359,8 +352,7 @@ Foam::solidMixtureThermo<MixtureType>::sigmaS
 
 
 template<class MixtureType>
-Foam::tmp<Foam::scalarField>
-Foam::solidMixtureThermo<MixtureType>::kappa
+Foam::tmp<Foam::scalarField> Foam::solidMixtureThermo<MixtureType>::kappa
 (
     const label patchI
 ) const
@@ -383,8 +375,7 @@ Foam::solidMixtureThermo<MixtureType>::kappa
 
 
 template<class MixtureType>
-Foam::tmp<Foam::scalarField>
-Foam::solidMixtureThermo<MixtureType>::emissivity
+Foam::tmp<Foam::scalarField> Foam::solidMixtureThermo<MixtureType>::emissivity
 (
     const label patchI
 ) const

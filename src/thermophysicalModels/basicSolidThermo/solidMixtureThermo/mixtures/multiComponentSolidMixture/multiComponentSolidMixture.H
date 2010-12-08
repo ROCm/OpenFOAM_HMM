@@ -43,8 +43,9 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class multiComponentSolidMixture Declaration
+                 Class multiComponentSolidMixture Declaration
 \*---------------------------------------------------------------------------*/
+
 template<class ThermoSolidType>
 class multiComponentSolidMixture
 :
@@ -65,6 +66,7 @@ class multiComponentSolidMixture
         //- Return molar fraction for component i in celli and at T
         scalar X(label i, label celli, scalar T) const;
 
+
 public:
 
 
@@ -75,9 +77,8 @@ public:
 
 
     //- Destructor
-
-        virtual ~multiComponentSolidMixture()
-        {}
+    virtual ~multiComponentSolidMixture()
+    {}
 
 
     // Member Functions
@@ -92,7 +93,7 @@ public:
         void read(const dictionary&);
 
 
-        // Cell based properties.
+        // Cell-based properties
 
             //- Density
             virtual scalar rho(scalar T, label celli) const;
@@ -118,9 +119,8 @@ public:
             //- Total enthalpy
             virtual scalar h(scalar T, label celli) const;
 
-            //- Cp
+            //- Specific heat capacity
             virtual scalar Cp(scalar T, label celli) const;
-
 };
 
 

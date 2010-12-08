@@ -31,7 +31,6 @@ License
 
 Foam::interpolateSolid::interpolateSolid(const dictionary& dict)
 {
-
     read(dict);
 
     Info<< "Constructed directionalKSolidThermo with samples" << nl
@@ -108,4 +107,6 @@ bool Foam::interpolateSolid::read(const dictionary& dict)
     sigmaSValues_ = Field<scalar>(dict.lookup("sigmaSValues"));
     return true;
 }
+
+
 // ************************************************************************* //
