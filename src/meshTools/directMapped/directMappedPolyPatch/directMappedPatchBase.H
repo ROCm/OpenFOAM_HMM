@@ -70,8 +70,6 @@ SourceFiles
 #include "pointField.H"
 #include "Tuple2.H"
 #include "pointIndexHit.H"
-#include "mapDistribute.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,6 +78,7 @@ namespace Foam
 
 class polyPatch;
 class polyMesh;
+class mapDistribute;
 
 /*---------------------------------------------------------------------------*\
                       Class directMappedPatchBase Declaration
@@ -105,6 +104,34 @@ public:
             NONUNIFORM,         // per-face offset vector
             NORMAL              // use face normal + distance
         };
+
+
+    //- Helper class for finding nearest
+    //  - point+local index
+    //  - sqr(distance)
+    //  - processor
+    typedef Tuple2<pointIndexHit, Tuple2<scalar, label> > nearInfo;
+
+    class nearestEqOp
+    {
+
+    public:
+
+        void operator()(nearInfo& x, const nearInfo& y) const
+        {
+            if (y.first().hit())
+            {
+                if (!x.first().hit())
+                {
+                    x = y;
+                }
+                else if (y.second().first() < x.second().first())
+                {
+                    x = y;
+                }
+            }
+        }
+    };
 
 private:
 

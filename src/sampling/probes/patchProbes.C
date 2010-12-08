@@ -25,10 +25,10 @@ License
 
 #include "patchProbes.H"
 #include "volFields.H"
-#include "dictionary.H"
-#include "Time.H"
 #include "IOmanip.H"
-#include "directMappedPatchBase.C"
+// For 'nearInfo' helper class only
+#include "directMappedPatchBase.H"
+#include "meshSearch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -41,11 +41,10 @@ namespace Foam
 
 void Foam::patchProbes::findElements(const fvMesh& mesh)
 {
-
     elementList_.clear();
     elementList_.setSize(size());
      // All the info for nearest. Construct to miss
-    List<nearInfo> nearest(this->size());
+    List<directMappedPatchBase::nearInfo> nearest(this->size());
 
     // Octree based search engine
     meshSearch meshSearchEngine(mesh, false);
@@ -75,7 +74,7 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
 
 
     // Find nearest.
-    Pstream::listCombineGather(nearest, nearestEqOp());
+    Pstream::listCombineGather(nearest, directMappedPatchBase::nearestEqOp());
     Pstream::listCombineScatter(nearest);
 
     if (debug)
@@ -116,7 +115,6 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
         }
     }
 }
-
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
