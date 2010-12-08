@@ -30,7 +30,8 @@ inline Foam::PtrList<Foam::volScalarField>& Foam::basicSolidMixture::Y()
 }
 
 
-inline const Foam::PtrList<Foam::volScalarField>& Foam::basicSolidMixture::Y() const
+inline const Foam::PtrList<Foam::volScalarField>& Foam::basicSolidMixture::Y()
+const
 {
     return Y_;
 }

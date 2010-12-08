@@ -57,7 +57,10 @@ Foam::reactingSolidMixture<ThermoSolidType>::reactingSolidMixture
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ThermoSolidType>
-void Foam::reactingSolidMixture<ThermoSolidType>::read(const dictionary& thermoDict)
+void Foam::reactingSolidMixture<ThermoSolidType>::read
+(
+  const dictionary& thermoDict
+)
 {}
 
 
