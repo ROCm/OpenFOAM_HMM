@@ -86,7 +86,8 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
     // referred cells that they interact with.
     PackedBoolList cellInRangeOfCoupledPatch(mesh_.nCells(), false);
 
-    // IAndT: index and transform
+    // IAndT: index (=local cell index) and transform (from
+    // globalIndexAndTransform)
     DynamicList<labelPair> cellIAndTToExchange;
 
     DynamicList<treeBoundBox> cellBbsToExchange;
