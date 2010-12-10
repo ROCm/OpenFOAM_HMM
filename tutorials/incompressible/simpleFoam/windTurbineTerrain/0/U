@@ -46,13 +46,15 @@ boundaryField
 
     "terrain_.*"
     {
-        type            fixedValue;
+        type            uniformFixedValue;
+        uniformValue    (0 0 0);
         value           uniform (0 0 0);
     }
 
     ground
     {
-        type            fixedValue;
+        type            uniformFixedValue;
+        uniformValue    (0 0 0);
         value           uniform (0 0 0);
     }
 
