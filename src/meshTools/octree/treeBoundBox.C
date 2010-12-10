@@ -192,15 +192,19 @@ Foam::treeBoundBox::treeBoundBox(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::pointField Foam::treeBoundBox::points() const
+Foam::tmp<Foam::pointField> Foam::treeBoundBox::points() const
 {
-    pointField points(8);
+    tmp<pointField> tPts = tmp<pointField>(new pointField(8));
+
+    pointField& points = tPts();
+
     forAll(points, octant)
     {
         points[octant] = corner(octant);
 
     }
-    return points;
+
+    return tPts;
 }
 
 

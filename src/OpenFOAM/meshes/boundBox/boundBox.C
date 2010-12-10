@@ -111,7 +111,7 @@ Foam::boundBox::boundBox(Istream& is)
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::pointField> Foam::boundBox::corners() const
+Foam::tmp<Foam::pointField> Foam::boundBox::points() const
 {
     tmp<pointField> tPts = tmp<pointField>(new pointField(8));
     pointField& pt = tPts();
