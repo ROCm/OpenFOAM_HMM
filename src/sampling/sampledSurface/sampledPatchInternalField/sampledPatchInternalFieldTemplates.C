@@ -76,7 +76,7 @@ Foam::sampledPatchInternalField::interpolateField
         // Send back sample points to processor that holds the cell.
         // Mark cells with point::max so we know which ones we need
         // to interpolate (since expensive).
-        vectorField samples(pp.faceCentres());
+        vectorField samples(samplePoints());
         distMap.reverseDistribute(mesh().nCells(), point::max, samples);
 
         Field<Type> patchVals(mesh().nCells());

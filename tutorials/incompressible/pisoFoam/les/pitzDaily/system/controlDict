@@ -97,6 +97,40 @@ functions
             }
         );
     }
+
+    surfaceSampling
+    {
+        // Sample near-wall velocity
+
+        type surfaces;
+
+        // Where to load it from (if not already in solver)
+        functionObjectLibs ("libsampling.so");
+        enabled         true;
+        outputControl   outputTime;
+
+        interpolationScheme cellPoint;
+
+        surfaceFormat vtk;
+
+        // Fields to be sampled
+        fields
+        (
+            U
+        );
+
+        surfaces
+        (
+            nearWall
+            {
+                type            patchInternalField;
+                patchName       lowerWall;
+                distance        1E-6;
+                interpolate     true;
+                triangulate     false;
+            }
+        );
+    }
 }
 
 // ************************************************************************* //

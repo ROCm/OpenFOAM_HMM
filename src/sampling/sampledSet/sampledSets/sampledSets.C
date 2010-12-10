@@ -96,6 +96,14 @@ void Foam::sampledSets::combineSampledSets
             )
         );
 
+
+        if (Pstream::master() && allCurveDist.size() == 0)
+        {
+            WarningIn("sampledSets::combineSampledSets(..)")
+                << "Sample set " << samplePts.name()
+                << " has zero points." << endl;
+        }
+
         // Sort curveDist and use to fill masterSamplePts
         SortableList<scalar> sortedDist(allCurveDist);
         indexSets[setI] = sortedDist.indices();
@@ -226,17 +234,8 @@ void Foam::sampledSets::read(const dictionary& dict)
     dict_.lookup("fields") >> fieldSelection_;
     clearFieldGroups();
 
-    interpolationScheme_ = dict.lookupOrDefault<word>
-    (
-        "interpolationScheme",
-        "cell"
-    );
-    writeFormat_ = dict.lookupOrDefault<word>
-    (
-        "setFormat",
-        "null"
-    );
-
+    dict.lookup("interpolationScheme") >> interpolationScheme_;
+    dict.lookup("setFormat") >> writeFormat_;
 
     PtrList<sampledSet> newList
     (
