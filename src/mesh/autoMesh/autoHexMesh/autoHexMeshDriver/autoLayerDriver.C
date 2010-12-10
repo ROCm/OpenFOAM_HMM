@@ -159,11 +159,6 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
             mesh.clearOut();
         }
 
-        if (meshRefiner_.overwrite())
-        {
-            mesh.setInstance(meshRefiner_.oldInstance());
-        }
-
         faceCombiner.updateMesh(map);
 
         meshRefiner_.updateMesh(map, labelList(0));
@@ -324,11 +319,6 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
                 mesh.clearOut();
             }
 
-            if (meshRefiner_.overwrite())
-            {
-                mesh.setInstance(meshRefiner_.oldInstance());
-            }
-
             faceCombiner.updateMesh(map);
 
             // Renumber restore maps
@@ -396,11 +386,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoLayerDriver::doRemovePoints
         mesh.clearOut();
     }
 
-    if (meshRefiner_.overwrite())
-    {
-        mesh.setInstance(meshRefiner_.oldInstance());
-    }
-
     pointRemover.updateMesh(map);
     meshRefiner_.updateMesh(map, labelList(0));
 
@@ -452,11 +437,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoLayerDriver::doRestorePoints
     {
         // Delete mesh volumes.
         mesh.clearOut();
-    }
-
-    if (meshRefiner_.overwrite())
-    {
-        mesh.setInstance(meshRefiner_.oldInstance());
     }
 
     pointRemover.updateMesh(map);
@@ -3100,10 +3080,7 @@ void Foam::autoLayerDriver::addLayers
         //?neccesary? Update fields
         newMesh.updateMesh(map);
 
-        if (meshRefiner_.overwrite())
-        {
-            newMesh.setInstance(meshRefiner_.oldInstance());
-        }
+        newMesh.setInstance(meshRefiner_.timeName());
 
         // Update numbering on addLayer:
         // - cell/point labels to be newMesh.
@@ -3227,11 +3204,6 @@ void Foam::autoLayerDriver::addLayers
     {
         // Delete mesh volumes.
         mesh.clearOut();
-    }
-
-    if (meshRefiner_.overwrite())
-    {
-        mesh.setInstance(meshRefiner_.oldInstance());
     }
 
     meshRefiner_.updateMesh(map, labelList(0));
