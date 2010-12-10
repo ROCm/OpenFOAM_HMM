@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class reactingSolidMixture Declaration
+                    Class reactingSolidMixture Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class ThermoSolidType>

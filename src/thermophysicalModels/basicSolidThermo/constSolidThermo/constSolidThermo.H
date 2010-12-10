@@ -43,7 +43,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                            Class constSolidThermo Declaration
+                      Class constSolidThermo Declaration
 \*---------------------------------------------------------------------------*/
 
 class constSolidThermo
@@ -159,11 +159,8 @@ public:
             //- Read solidThermophysicalProperties dictionary
             bool read(const dictionary&);
 
-
-
-        // Ostream Operator
-
-        friend Ostream& operator<<(Ostream& os, const constSolidThermo& s);
+            //- Ostream Operator
+            friend Ostream& operator<<(Ostream& os, const constSolidThermo& s);
 };
 
 

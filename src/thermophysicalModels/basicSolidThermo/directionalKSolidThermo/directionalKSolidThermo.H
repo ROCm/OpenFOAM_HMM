@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class directionalKSolidThermo Declaration
+                  Class directionalKSolidThermo Declaration
 \*---------------------------------------------------------------------------*/
 
 class directionalKSolidThermo
@@ -99,8 +99,8 @@ public:
         directionalKSolidThermo(const fvMesh& mesh);
 
 
-    // Destructor
-        virtual ~directionalKSolidThermo();
+    //- Destructor
+    virtual ~directionalKSolidThermo();
 
 
     // Member Functions
@@ -136,14 +136,12 @@ public:
             //- Read the directionalKSolidThermo properties
             bool read(const dictionary& dict);
 
-
-        // Ostream Operator
-
-        friend Ostream& operator<<
-        (
-            Ostream& os,
-            const directionalKSolidThermo& s
-        );
+            //- Ostream Operator
+            friend Ostream& operator<<
+            (
+                Ostream& os,
+                const directionalKSolidThermo& s
+            );
 };
 
 

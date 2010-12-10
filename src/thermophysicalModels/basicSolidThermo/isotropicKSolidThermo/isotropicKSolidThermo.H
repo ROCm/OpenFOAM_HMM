@@ -43,7 +43,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class isotropicKSolidThermo Declaration
+                  Class isotropicKSolidThermo Declaration
 \*---------------------------------------------------------------------------*/
 
 class isotropicKSolidThermo
@@ -71,8 +71,9 @@ public:
         isotropicKSolidThermo(const fvMesh& mesh);
 
 
-    // Destructor
+    //- Destructor
     virtual ~isotropicKSolidThermo();
+
 
     // Member functions
 
@@ -102,9 +103,7 @@ public:
         //- Write properties
         virtual bool writeData(Ostream& os) const;
 
-
-    // Ostream Operator
-
+        //- Ostream Operator
         friend Ostream& operator<<
         (
             Ostream& os,

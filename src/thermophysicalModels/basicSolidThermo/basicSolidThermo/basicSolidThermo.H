@@ -50,7 +50,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class basicSolidThermo Declaration
+                      Class basicSolidThermo Declaration
 \*---------------------------------------------------------------------------*/
 
 class basicSolidThermo
@@ -109,8 +109,7 @@ public:
 
 
     //- Destructor
-
-        virtual ~basicSolidThermo();
+    virtual ~basicSolidThermo();
 
 
     // Member functions
@@ -204,7 +203,7 @@ public:
         //- Read thermophysicalProperties dictionary
         virtual bool read() = 0;
 
-        // Ostream Operator
+        //- Ostream Operator
         friend Ostream& operator<<(Ostream& os, const basicSolidThermo& s);
 };
 
