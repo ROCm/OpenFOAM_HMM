@@ -51,7 +51,7 @@ using namespace Foam;
 void massPropertiesSolid
 (
     const pointField& pts,
-    const triFaceList triFaces,
+    const triFaceList& triFaces,
     scalar density,
     scalar& mass,
     vector& cM,
@@ -208,7 +208,7 @@ void massPropertiesSolid
 void massPropertiesShell
 (
     const pointField& pts,
-    const triFaceList triFaces,
+    const triFaceList& triFaces,
     scalar density,
     scalar& mass,
     vector& cM,
