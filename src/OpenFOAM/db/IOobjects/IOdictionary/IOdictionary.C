@@ -66,6 +66,11 @@ void Foam::IOdictionary::readFile(const bool masterOnly)
           : Pstream::treeCommunication()
         );
 
+        // Master reads headerclassname from file. Make sure this gets
+        // transfered as well as contents.
+        word masterClassName = headerClassName();
+        Pstream::scatter(comms, masterClassName);
+
 
         // Get my communication order
         const Pstream::commsStruct& myComm = comms[Pstream::myProcNo()];
@@ -89,6 +94,7 @@ void Foam::IOdictionary::readFile(const bool masterOnly)
                 IOstream::ASCII
             );
             IOdictionary::readData(fromAbove);
+            const_cast<word&>(headerClassName()) = masterClassName;
         }
 
         // Send to my downstairs neighbours

@@ -561,10 +561,6 @@ int main(int argc, char *argv[])
         mkDir(args.path());
     }
 
-    // Switch timeStamp checking to one which does not do any
-    // parallel sync for same reason
-    regIOobject::fileModificationChecking = regIOobject::timeStamp;
-
 #   include "createTime.H"
 
 
