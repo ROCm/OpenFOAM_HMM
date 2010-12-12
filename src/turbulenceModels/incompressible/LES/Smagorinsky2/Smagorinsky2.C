@@ -96,7 +96,7 @@ tmp<fvVectorMatrix> Smagorinsky2::divDevBeff
 
     return
     (
-      - fvm::laplacian(aniNuEff, U) - fvc::div(nuEff()*dev(fvc::grad(U)().T()))
+      - fvm::laplacian(aniNuEff, U) - fvc::div(nuEff()*dev(T(fvc::grad(U))))
     );
 }
 

@@ -244,7 +244,7 @@ tmp<fvVectorMatrix> LienLeschzinerLowRe::divDevReff(volVectorField& U) const
     (
       - fvm::laplacian(nuEff(), U)
     //- (fvc::grad(U) & fvc::grad(nuEff()))
-      - fvc::div(nuEff()*fvc::grad(U)().T())
+      - fvc::div(nuEff()*T(fvc::grad(U)))
     );
 }
 
