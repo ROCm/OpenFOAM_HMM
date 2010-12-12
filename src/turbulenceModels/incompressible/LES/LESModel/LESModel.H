@@ -182,7 +182,7 @@ public:
             }
 
             //- Access function to filter width
-            inline const volScalarField& delta() const
+            virtual const volScalarField& delta() const
             {
                 return delta_();
             }

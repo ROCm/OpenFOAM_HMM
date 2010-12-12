@@ -58,6 +58,8 @@ class SpalartAllmarasIDDES
 
         // Model constants
 
+            autoPtr<LESdelta> hmax_;
+            autoPtr<LESdelta> IDDESDelta_;
             dimensionedScalar fwStar_;
             dimensionedScalar cl_;
             dimensionedScalar ct_;
@@ -116,6 +118,12 @@ public:
 
 
     // Member Functions
+
+        //- Access function to filter width
+        virtual const volScalarField& delta() const
+        {
+            return IDDESDelta_();
+        }
 
         //- Read LESProperties dictionary
         virtual bool read();
