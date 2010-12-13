@@ -191,7 +191,7 @@ public:
             inline scalar typDim() const;
 
             //- vertex coordinates. In octant coding.
-            pointField points() const;
+            tmp<pointField> points() const;
 
 
         // Check
