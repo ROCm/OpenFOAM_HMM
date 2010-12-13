@@ -486,7 +486,7 @@ void Foam::conformalVoronoiMesh::createFeaturePoints()
 {
     Info<< nl << "Creating bounding points" << endl;
 
-    pointField farPts = geometryToConformTo_.bounds().corners();
+    pointField farPts = geometryToConformTo_.bounds().points();
 
     // Shift corners of bounds relative to origin
     farPts -= geometryToConformTo_.bounds().midpoint();

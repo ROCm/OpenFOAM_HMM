@@ -165,6 +165,35 @@ const Foam::List<Foam::labelPair>& Foam::mapDistribute::schedule() const
 }
 
 
+void Foam::mapDistribute::checkReceivedSize
+(
+    const label procI,
+    const label expectedSize,
+    const label receivedSize
+)
+{
+    if (receivedSize != expectedSize)
+    {
+        FatalErrorIn
+        (
+            "template<class T>\n"
+            "void mapDistribute::distribute\n"
+            "(\n"
+            "    const Pstream::commsTypes commsType,\n"
+            "    const List<labelPair>& schedule,\n"
+            "    const label constructSize,\n"
+            "    const labelListList& subMap,\n"
+            "    const labelListList& constructMap,\n"
+            "    List<T>& field\n"
+            ")\n"
+        )   << "Expected from processor " << procI
+            << " " << expectedSize << " but received "
+            << receivedSize << " elements."
+            << abort(FatalError);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 //- Construct from components

@@ -93,6 +93,15 @@ class mapDistribute
         mutable autoPtr<List<labelPair> > schedulePtr_;
 
 
+   // Private Member Functions
+
+        static void checkReceivedSize
+        (
+            const label procI,
+            const label expectedSize,
+            const label receivedSize
+        );
+
 public:
 
     // Constructors

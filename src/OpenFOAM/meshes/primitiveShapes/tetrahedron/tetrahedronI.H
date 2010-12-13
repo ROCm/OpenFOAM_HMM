@@ -21,12 +21,11 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "triangle.H"
 #include "IOstreams.H"
+#include "triPointRef.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -152,7 +151,37 @@ inline Point tetrahedron<Point, PointRef>::circumCentre() const
     vector ba = b ^ a;
     vector ca = c ^ a;
 
-    return a_ + 0.5*(a + (lambda*ba - mu*ca)/((c & ba) + ROOTVSMALL));
+    vector num = lambda*ba - mu*ca;
+    scalar denom = (c & ba);
+
+    if (Foam::mag(denom) < ROOTVSMALL)
+    {
+        // Degenerate tet. Use test of the individual triangles.
+        {
+            point triCentre = triPointRef(a_, b_, c_).circumCentre();
+            if (magSqr(d_ - triCentre) < magSqr(a_ - triCentre))
+            {
+                return triCentre;
+            }
+        }
+        {
+            point triCentre = triPointRef(a_, b_, d_).circumCentre();
+            if (magSqr(c_ - triCentre) < magSqr(a_ - triCentre))
+            {
+                return triCentre;
+            }
+        }
+        {
+            point triCentre = triPointRef(a_, c_, d_).circumCentre();
+            if (magSqr(b_ - triCentre) < magSqr(a_ - triCentre))
+            {
+                return triCentre;
+            }
+        }
+        return triPointRef(b_, c_, d_).circumCentre();
+    }
+
+    return a_ + 0.5*(a + num/denom);
 }
 
 

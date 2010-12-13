@@ -36,6 +36,7 @@ dictionaryReplacement
     {
         internalField   uniform 300;
 
+        
         boundaryField
         {
             ".*"
@@ -55,6 +56,36 @@ dictionaryReplacement
             {
                 type            fixedValue;
                 value           uniform 500;
+            }
+        }
+    }
+
+    Ypmma
+    {
+        internalField   uniform 0.5;
+        
+        
+        boundaryField
+        {
+            ".*"
+            {
+                type            calculated;
+                value           uniform 0.5;
+            }
+        }
+        
+    }
+
+    Ychar
+    {
+        internalField   uniform 0.5;
+        
+        boundaryField
+        {
+            ".*"
+            {
+                type            calculated;
+                value           uniform 0.5;
             }
         }
     }

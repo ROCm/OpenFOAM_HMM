@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,16 +23,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-
 #include "basicSolidThermo.H"
+#include "fvMesh.H"
+#include "HashTable.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
 
 namespace Foam
 {
     defineTypeNameAndDebug(basicSolidThermo, 0);
     defineRunTimeSelectionTable(basicSolidThermo, mesh);
 }
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -45,7 +47,7 @@ Foam::basicSolidThermo::basicSolidThermo(const fvMesh& mesh)
             "solidThermophysicalProperties",
             mesh.time().constant(),
             mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
     ),
@@ -61,7 +63,60 @@ Foam::basicSolidThermo::basicSolidThermo(const fvMesh& mesh)
             IOobject::AUTO_WRITE
         ),
         mesh
+    ),
+    rho_
+    (
+        IOobject
+        (
+            "rho",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimMass/dimVolume
+    ),
+    kappa_
+    (
+        IOobject
+        (
+            "kappa",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimless/dimLength
+    ),
+    sigmaS_
+    (
+        IOobject
+        (
+            "sigmaS",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimless/dimLength
+    ),
+    emissivity_
+    (
+        IOobject
+        (
+            "emissivity",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimless
     )
+
 {}
 
 
@@ -72,6 +127,117 @@ Foam::basicSolidThermo::~basicSolidThermo()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::volScalarField& Foam::basicSolidThermo::T()
+{
+    return T_;
+}
+
+
+const Foam::volScalarField& Foam::basicSolidThermo::T() const
+{
+    return T_;
+}
+
+
+const Foam::volScalarField& Foam::basicSolidThermo::rho() const
+{
+    return rho_;
+}
+
+
+Foam::volScalarField& Foam::basicSolidThermo::rho()
+{
+    return rho_;
+}
+
+
+const Foam::volScalarField& Foam::basicSolidThermo::kappa() const
+{
+    return kappa_;
+}
+
+
+const Foam::volScalarField& Foam::basicSolidThermo::sigmaS() const
+{
+    return sigmaS_;
+}
+
+
+const Foam::volScalarField& Foam::basicSolidThermo::emissivity() const
+{
+    return emissivity_;
+}
+
+
+const Foam::volScalarField&  Foam::basicSolidThermo::K() const
+{
+    notImplemented("basicSolidThermo::K()");
+    return volScalarField::null();
+}
+
+
+const Foam::volSymmTensorField& Foam::basicSolidThermo::directionalK() const
+{
+    notImplemented("basicSolidThermo::directionalK()");
+    return const_cast<volSymmTensorField&>(volSymmTensorField::null());
+}
+
+
+Foam::basicSolidMixture& Foam::basicSolidThermo::composition()
+{
+    notImplemented("basicSolidThermo::composition()");
+    return *reinterpret_cast<basicSolidMixture*>(0);
+}
+
+
+const Foam::basicSolidMixture& Foam::basicSolidThermo::composition() const
+{
+    notImplemented("basicSolidThermo::composition() const");
+    return *reinterpret_cast<const basicSolidMixture*>(0);
+}
+
+
+Foam::tmp<Foam::volScalarField> Foam::basicSolidThermo::hs() const
+{
+    notImplemented("basicSolidThermo::hs()");
+    return volScalarField::null();
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::basicSolidThermo::hs(const label patchI)
+const
+{
+    notImplemented("basicSolidThermo::hs(const label)");
+    return scalarField::null();
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::basicSolidThermo::K
+(
+    const label patchI
+)const
+{
+    notImplemented("basicSolidThermo::K(const label)");
+    return scalarField::null();
+}
+
+
+Foam::tmp<Foam::symmTensorField> Foam::basicSolidThermo::directionalK
+(
+    const label
+)const
+{
+    notImplemented("basicSolidThermo::directionalK(const label)");
+    return symmTensorField::null();
+}
+
+
+bool Foam::basicSolidThermo::read()
+{
+    return regIOobject::read();
+}
+
 
 bool Foam::basicSolidThermo::writeData(Ostream& os) const
 {

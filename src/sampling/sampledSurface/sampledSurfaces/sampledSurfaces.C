@@ -220,17 +220,8 @@ void Foam::sampledSurfaces::read(const dictionary& dict)
     dict.lookup("fields") >> fieldSelection_;
     clearFieldGroups();
 
-    interpolationScheme_ = dict.lookupOrDefault<word>
-    (
-        "interpolationScheme",
-        "cell"
-    );
-    writeFormat_ = dict.lookupOrDefault<word>
-    (
-        "surfaceFormat",
-        "null"
-    );
-
+    dict.lookup("interpolationScheme") >> interpolationScheme_;
+    dict.lookup("surfaceFormat") >> writeFormat_;
 
     // define the generic (geometry) writer
     genericFormatter_ = surfaceWriter<bool>::New(writeFormat_);

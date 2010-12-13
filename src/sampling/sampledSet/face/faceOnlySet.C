@@ -118,6 +118,8 @@ void Foam::faceOnlySet::calcSamples
     const vector smallVec = tol*offset;
     const scalar smallDist = mag(smallVec);
 
+    // Force calculation of minimum-tet decomposition.
+    (void) mesh().tetBasePtIs();
 
     // Get all boundary intersections
     List<pointIndexHit> bHits = searchEngine().intersections

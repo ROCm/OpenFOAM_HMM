@@ -143,7 +143,7 @@ public:
                 const liquidMixture& liquids() const;
 
                 //- Return the global (additional) solids
-                const solidMixture& solids() const;
+                const pointSolidMixture& solids() const;
 
                 //- Return the list of phase properties
                 const phasePropertiesList& phaseProps() const;

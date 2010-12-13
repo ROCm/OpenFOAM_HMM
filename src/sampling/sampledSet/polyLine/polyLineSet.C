@@ -159,6 +159,9 @@ void Foam::polyLineSet::calcSamples
         oldPoint = sampleCoords_[sampleI];
     }
 
+    // Force calculation of minimum-tet decomposition.
+    (void) mesh().tetBasePtIs();
+
     // current segment number
     label segmentI = 0;
 
