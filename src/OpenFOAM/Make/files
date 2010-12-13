@@ -65,6 +65,8 @@ primitives/random/Random/Random.C
 primitives/random/cachedRandom/cachedRandom.H
 
 ranges = primitives/ranges
+$(ranges)/labelRange/labelRange.C
+$(ranges)/labelRange/labelRanges.C
 $(ranges)/scalarRange/scalarRange.C
 $(ranges)/scalarRange/scalarRanges.C
 
