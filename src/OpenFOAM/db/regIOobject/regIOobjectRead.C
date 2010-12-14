@@ -203,8 +203,8 @@ bool Foam::regIOobject::read()
 
         // Master reads headerclassname from file. Make sure this gets
         // transfered as well as contents.
-        word masterClassName = headerClassName();
-        Pstream::scatter(comms, masterClassName);
+        Pstream::scatter(comms, const_cast<word&>(headerClassName()));
+        Pstream::scatter(comms, note());
 
 
         // Get my communication order
@@ -231,7 +231,6 @@ bool Foam::regIOobject::read()
                 IOstream::ASCII
             );
             ok = readData(fromAbove);
-            const_cast<word&>(headerClassName()) = masterClassName;
         }
 
         // Send to my downstairs neighbours
