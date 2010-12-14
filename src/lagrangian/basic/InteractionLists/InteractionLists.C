@@ -180,7 +180,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
 
         treeBoundBox tempTransformedBb
         (
-            transform.invTransform(cellBbsToExchange[bbI].corners())
+            transform.invTransform(cellBbsToExchange[bbI].points())
         );
 
         treeBoundBox extendedBb
@@ -397,7 +397,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
 
         treeBoundBox tempTransformedBb
         (
-            transform.invTransform(wallFaceBbsToExchange[bbI].corners())
+            transform.invTransform(wallFaceBbsToExchange[bbI].points())
         );
 
         treeBoundBox extendedBb
@@ -702,7 +702,7 @@ void Foam::InteractionLists<ParticleType>::findExtendedProcBbsInRange
                         (
                             transform.transform
                             (
-                                allExtendedProcBbs[procI].corners()
+                                allExtendedProcBbs[procI].points()
                             )
                         );
 
@@ -749,7 +749,7 @@ void Foam::InteractionLists<ParticleType>::findExtendedProcBbsInRange
                     (
                         transform.transform
                         (
-                            allExtendedProcBbs[procI].corners()
+                            allExtendedProcBbs[procI].points()
                         )
                     );
 
@@ -792,7 +792,7 @@ void Foam::InteractionLists<ParticleType>::findExtendedProcBbsInRange
                 (
                     transform.transform
                     (
-                        allExtendedProcBbs[procI].corners()
+                        allExtendedProcBbs[procI].points()
                     )
                 );
 
