@@ -290,9 +290,11 @@ void Foam::cyclicPolyPatch::calcTransforms
                 "        const UList<point>&,\n"
                 "        const UList<point>&\n"
                 "    )"
-            )   << "For transform " << transformTypeNames[transform_]
-                << " found non-uniform transform."
-                << " Setting the transformation to be a uniform rotation."
+            )   << "For patch " << name()
+                << " calculated non-uniform transform tensor even though"
+                << " the transform type is " << transformTypeNames[transform_]
+                << ". Setting the transformation tensor to be a uniform"
+                << " rotation."
                 << endl;
         }
     }
