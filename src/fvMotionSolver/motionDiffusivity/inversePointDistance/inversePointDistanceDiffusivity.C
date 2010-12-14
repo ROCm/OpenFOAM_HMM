@@ -91,6 +91,9 @@ void Foam::inversePointDistanceDiffusivity::correct()
     List<pointEdgePoint> pointWallDist(mesh.nPoints());
     List<pointEdgePoint> edgeWallDist(mesh.nEdges());
 
+    int dummyTrackData = 0;
+
+
     {
         // Seeds
         List<pointEdgePoint> seedInfo(nPatchEdges);
@@ -108,7 +111,7 @@ void Foam::inversePointDistanceDiffusivity::correct()
             {
                 label pointI = meshPoints[i];
 
-                if (!pointWallDist[pointI].valid())
+                if (!pointWallDist[pointI].valid(dummyTrackData))
                 {
                     // Not yet seeded
                     seedInfo[nPatchEdges] = pointEdgePoint
@@ -135,7 +138,8 @@ void Foam::inversePointDistanceDiffusivity::correct()
 
             pointWallDist,
             edgeWallDist,
-            mesh.globalData().nTotalPoints() // max iterations
+            mesh.globalData().nTotalPoints(),// max iterations
+            dummyTrackData
         );
     }
 

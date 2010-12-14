@@ -517,11 +517,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createBaffles
         mesh_.clearOut();
     }
 
-    if (overwrite())
-    {
-        mesh_.setInstance(oldInstance());
-    }
-
     //- Redo the intersections on the newly create baffle faces. Note that
     //  this changes also the cell centre positions.
     faceSet baffledFacesSet(mesh_, "baffledFacesSet", 2*nBaffles);
@@ -963,11 +958,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
     {
         // Delete mesh volumes.
         mesh_.clearOut();
-    }
-
-    if (overwrite())
-    {
-        mesh_.setInstance(oldInstance());
     }
 
     // Update intersections. Recalculate intersections on merged faces since
@@ -2249,11 +2239,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::dupNonManifoldPoints()
         mesh_.clearOut();
     }
 
-    if (overwrite())
-    {
-        mesh_.setInstance(oldInstance());
-    }
-
     // Update intersections. Is mapping only (no faces created, positions stay
     // same) so no need to recalculate intersections.
     updateMesh(map, labelList(0));
@@ -2781,11 +2766,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     {
         // Delete mesh volumes.
         mesh_.clearOut();
-    }
-
-    if (overwrite())
-    {
-        mesh_.setInstance(oldInstance());
     }
 
     // Print some stats (note: zones are synchronised)

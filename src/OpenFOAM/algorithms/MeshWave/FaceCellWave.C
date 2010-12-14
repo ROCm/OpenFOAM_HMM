@@ -40,8 +40,7 @@ const Foam::scalar
 Foam::FaceCellWave<Type, TrackingData>::geomTol_ = 1e-6;
 
 template <class Type, class TrackingData>
-const Foam::scalar
-Foam::FaceCellWave<Type, TrackingData>::propagationTol_ = 0.01;
+Foam::scalar Foam::FaceCellWave<Type, TrackingData>::propagationTol_ = 0.01;
 
 template <class Type, class TrackingData>
 Foam::label Foam::FaceCellWave<Type, TrackingData>::dummyTrackData_ = 12345;
@@ -516,8 +515,8 @@ void Foam::FaceCellWave<Type, TrackingData>::handleProcPatches()
                 refCast<const processorPolyPatch>(patch);
 
             // Allocate buffers
-            labelList receiveFaces(patch.size());
-            List<Type> receiveFacesInfo(patch.size());
+            labelList receiveFaces;
+            List<Type> receiveFacesInfo;
 
             {
                 UIPstream fromNeighbour(procPatch.neighbProcNo(), pBufs);
@@ -675,8 +674,7 @@ Foam::FaceCellWave<Type, TrackingData>::FaceCellWave
     hasCyclicPatches_(hasCyclicPatch()),
     nEvals_(0),
     nUnvisitedCells_(mesh_.nCells()),
-    nUnvisitedFaces_(mesh_.nFaces()),
-    iter_(0)
+    nUnvisitedFaces_(mesh_.nFaces())
 {}
 
 
@@ -707,16 +705,15 @@ Foam::FaceCellWave<Type, TrackingData>::FaceCellWave
     hasCyclicPatches_(hasCyclicPatch()),
     nEvals_(0),
     nUnvisitedCells_(mesh_.nCells()),
-    nUnvisitedFaces_(mesh_.nFaces()),
-    iter_(0)
+    nUnvisitedFaces_(mesh_.nFaces())
 {
     // Copy initial changed faces data
     setFaceInfo(changedFaces, changedFacesInfo);
 
     // Iterate until nothing changes
-    iterate(maxIter);
+    label iter = iterate(maxIter);
 
-    if ((maxIter > 0) && (iter_ >= maxIter))
+    if ((maxIter > 0) && (iter >= maxIter))
     {
         FatalErrorIn
         (
@@ -796,7 +793,7 @@ Foam::label Foam::FaceCellWave<Type, TrackingData>::faceToCell()
             );
         }
 
-        // Neighbour. Hack for check if face has neighbour.
+        // Neighbour.
         if (faceI < nInternalFaces)
         {
             cellI = neighbour[faceI];
@@ -927,11 +924,13 @@ Foam::label Foam::FaceCellWave<Type, TrackingData>::iterate(const label maxIter)
         handleProcPatches();
     }
 
-    while (iter_ < maxIter)
+    label iter = 0;
+
+    while (iter < maxIter)
     {
         if (debug)
         {
-            Pout<< " Iteration " << iter_ << endl;
+            Pout<< " Iteration " << iter << endl;
         }
 
         nEvals_ = 0;
@@ -963,10 +962,11 @@ Foam::label Foam::FaceCellWave<Type, TrackingData>::iterate(const label maxIter)
             break;
         }
 
-        ++iter_;
+        ++iter;
     }
 
-    return nUnvisitedCells_;
+    return iter;
 }
+
 
 // ************************************************************************* //

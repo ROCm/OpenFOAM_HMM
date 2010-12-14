@@ -736,7 +736,7 @@ Foam::argList::argList
         {
             Info<< "Slaves : " << slaveProcs << nl;
             if (roots.size())
-            {                
+            {
                 Info<< "Roots  : " << roots << nl;
             }
             Info<< "Pstream initialized with:" << nl
@@ -770,7 +770,8 @@ Foam::argList::argList
 
     if (bannerEnabled)
     {
-        Info<< "Monitoring run-time modified files using "
+        Info<< "fileModificationChecking : "
+            << "Monitoring run-time modified files using "
             << regIOobject::fileCheckTypesNames
                 [
                     regIOobject::fileModificationChecking

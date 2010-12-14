@@ -114,9 +114,6 @@ class FaceCellWave
         label nUnvisitedCells_;
         label nUnvisitedFaces_;
 
-        //- Iteration counter
-        label iter_;
-
 
     // Private Member Functions
 
@@ -232,7 +229,7 @@ class FaceCellWave
       // Private static data
 
             static const scalar geomTol_;
-            static const scalar propagationTol_;
+            static scalar propagationTol_;
 
             //- Used as default trackdata value to satisfy default template
             //  argument.
@@ -340,8 +337,8 @@ public:
             //  counted double)
             label cellToFace();
 
-            //- Iterate until no changes or maxIter reached. Returns number of
-            //  unset cells (see getUnsetCells)
+            //- Iterate until no changes or maxIter reached.  Returns actual
+            //  number of iterations.
             label iterate(const label maxIter);
 
 };

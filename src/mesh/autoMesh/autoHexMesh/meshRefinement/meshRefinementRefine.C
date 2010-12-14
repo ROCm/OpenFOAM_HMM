@@ -1236,11 +1236,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::refine
         mesh_.clearOut();
     }
 
-    if (overwrite())
-    {
-        mesh_.setInstance(oldInstance());
-    }
-
     // Update intersection info
     updateMesh(map, getChangedFaces(map, cellsToRefine));
 

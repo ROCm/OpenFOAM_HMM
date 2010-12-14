@@ -273,6 +273,30 @@ void Foam::cyclicPolyPatch::calcTransforms
             half1Normals,
             half0Tols
         );
+
+        if (transform_ == ROTATIONAL && !parallel() && forwardT().size() > 1)
+        {
+            const_cast<tensorField&>(forwardT()).setSize(1);
+            const_cast<tensorField&>(reverseT()).setSize(1);
+            const_cast<boolList&>(collocated()).setSize(1);
+
+            WarningIn
+            (
+                "cyclicPolyPatch::calcTransforms\n"
+                "    (\n"
+                "        const primitivePatch&,\n"
+                "        const UList<point>&,\n"
+                "        const UList<point>&,\n"
+                "        const UList<point>&,\n"
+                "        const UList<point>&\n"
+                "    )"
+            )   << "For patch " << name()
+                << " calculated non-uniform transform tensor even though"
+                << " the transform type is " << transformTypeNames[transform_]
+                << ". Setting the transformation tensor to be a uniform"
+                << " rotation."
+                << endl;
+        }
     }
 }
 
@@ -851,22 +875,6 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledPoints() const
                 str<< "l " << vertI-1 << ' ' << vertI << nl;
             }
         }
-
-        // Remove any addressing calculated for the coupled edges calculation
-        const_cast<primitivePatch&>
-        (
-            static_cast<const primitivePatch&>
-            (
-                *this
-            )
-        ).clearOut();
-        const_cast<primitivePatch&>
-        (
-            static_cast<const primitivePatch&>
-            (
-                neighbPatch()
-            )
-        ).clearOut();
     }
     return *coupledPointsPtr_;
 }
@@ -1006,22 +1014,6 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
                 str<< "l " << vertI-1 << ' ' << vertI << nl;
             }
         }
-
-        // Remove any addressing calculated for the coupled edges calculation
-        const_cast<primitivePatch&>
-        (
-            static_cast<const primitivePatch&>
-            (
-                *this
-            )
-        ).clearOut();
-        const_cast<primitivePatch&>
-        (
-            static_cast<const primitivePatch&>
-            (
-                neighbPatch
-            )
-        ).clearOut();
     }
     return *coupledEdgesPtr_;
 }

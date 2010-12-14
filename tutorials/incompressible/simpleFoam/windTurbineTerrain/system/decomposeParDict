@@ -15,35 +15,15 @@ FoamFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-numberOfSubdomains 1;
+numberOfSubdomains 2;
 
 method          hierarchical;
-// method          metis;
-// method          ptscotch;
-
-simpleCoeffs
-{
-    n               (4 1 1);
-    delta           0.001;
-}
 
 hierarchicalCoeffs
 {
-    n               (1 1 1);
-    delta           0.001;
-    order           xyz;
+    n           (2 1 1);
+    delta       0.001;
+    order       xyz;
 }
-
-manualCoeffs
-{
-    dataFile        "cellDecomposition";
-}
-
-metisCoeffs
-{
-    //n                   (5 1 1);
-    //cellWeightsFile     "constant/cellWeightsFile";
-}
-
 
 // ************************************************************************* //

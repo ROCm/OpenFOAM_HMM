@@ -201,6 +201,11 @@ bool Foam::regIOobject::read()
           : Pstream::treeCommunication()
         );
 
+        // Master reads headerclassname from file. Make sure this gets
+        // transfered as well as contents.
+        Pstream::scatter(comms, const_cast<word&>(headerClassName()));
+        Pstream::scatter(comms, note());
+
 
         // Get my communication order
         const Pstream::commsStruct& myComm = comms[Pstream::myProcNo()];

@@ -84,7 +84,11 @@ Foam::solution::solution
             dictName,
             obr.time().system(),
             obr,
-            IOobject::MUST_READ_IF_MODIFIED,
+            (
+                obr.readOpt() == IOobject::MUST_READ
+              ? IOobject::MUST_READ_IF_MODIFIED
+              : obr.readOpt()
+            ),
             IOobject::NO_WRITE
         )
     ),
@@ -94,7 +98,14 @@ Foam::solution::solution
     defaultRelaxationFactor_(0),
     solvers_(ITstream("solvers", tokenList())())
 {
-    read(solutionDict());
+    if
+    (
+        readOpt() == IOobject::MUST_READ
+     || readOpt() == IOobject::MUST_READ_IF_MODIFIED
+    )
+    {
+        read(solutionDict());
+    }
 }
 
 

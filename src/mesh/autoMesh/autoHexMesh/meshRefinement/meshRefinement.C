@@ -481,11 +481,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRemoveCells
         mesh_.clearOut();
     }
 
-    if (overwrite_)
-    {
-        mesh_.setInstance(oldInstance_);
-    }
-
     // Update local mesh data
     cellRemover.updateMesh(map);
 
@@ -1903,9 +1898,14 @@ void Foam::meshRefinement::distribute(const mapDistributePolyMesh& map)
             pointMap.clear();
         }
     }
+
+    // If necessary reset the instance
+    mesh_.setInstance(timeName());
+    setInstance(mesh_.facesInstance());
 }
 
 
+// Update local data for a mesh change
 void Foam::meshRefinement::updateMesh
 (
     const mapPolyMesh& map,
@@ -2027,6 +2027,10 @@ void Foam::meshRefinement::updateMesh
             data.transfer(newFaceData);
         }
     }
+
+    // If necessary reset the instance
+    mesh_.setInstance(timeName());
+    setInstance(mesh_.facesInstance());
 }
 
 
@@ -2137,7 +2141,7 @@ void Foam::meshRefinement::dumpRefinementLevel() const
         IOobject
         (
             "cellLevel",
-            timeName(),
+            mesh_.time().timeName(),// Dump to current time, not to mesh inst
             mesh_,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE,
@@ -2165,7 +2169,7 @@ void Foam::meshRefinement::dumpRefinementLevel() const
         IOobject
         (
             "pointLevel",
-            timeName(),
+            mesh_.time().timeName(),// Dump to current time, not to mesh inst
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
