@@ -76,6 +76,8 @@ EqOp(eqMag, x = mag(y))
 EqOp(plusEqMagSqr, x += magSqr(y))
 EqOp(maxEq, x = max(x, y))
 EqOp(minEq, x = min(x, y))
+EqOp(minMagSqrEq, x = (magSqr(x)<=magSqr(y) ? x : y))
+EqOp(maxMagSqrEq, x = (magSqr(x)>=magSqr(y) ? x : y))
 EqOp(andEq, x = (x && y))
 EqOp(orEq, x  = (x || y))
 
