@@ -309,7 +309,11 @@ void Foam::kineticTheoryModel::solve(const volTensorField& gradUat)
         volScalarField t1 = K1*alpha_ + rhoa_;
         volScalarField l1 = -t1*trD;
         volScalarField l2 = sqr(t1)*tr2D;
-        volScalarField l3 = 4.0*K4*max(alpha_, scalar(1e-6))*(2.0*K3*trD2 + K2*tr2D);
+        volScalarField l3 =
+            4.0
+           *K4
+           *max(alpha_, scalar(1e-6))
+           *(2.0*K3*trD2 + K2*tr2D);
 
         Theta_ = sqr((l1 + sqrt(l2 + l3))/(2.0*(alpha_ + 1.0e-4)*K4));
     }
