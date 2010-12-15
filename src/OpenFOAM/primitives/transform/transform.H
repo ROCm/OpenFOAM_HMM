@@ -48,9 +48,11 @@ inline tensor rotationTensor
     const vector& n2
 )
 {
+    const scalar s = n1 & n2;
+    const vector n3 = n1 ^ n2;
     return
-        (n1 & n2)*I
-      + (1 - (n1 & n2))*sqr(n1 ^ n2)/(magSqr(n1 ^ n2) + VSMALL)
+        s*I
+      + (1 - s)*sqr(n3)/(magSqr(n3) + VSMALL)
       + (n2*n1 - n1*n2);
 }
 
