@@ -48,12 +48,10 @@ Foam::scalar Foam::streamLineParticle::calcSubCycleDeltaT
 
     bool oldKeepParticle = td.keepParticle;
     bool oldSwitchProcessor = td.switchProcessor;
-    scalar fraction = testParticle.trackToFace(position() + dt*U, td);
-
+    scalar fraction = testParticle.trackToFace(position()+dt*U, td);
     td.keepParticle = oldKeepParticle;
     td.switchProcessor = oldSwitchProcessor;
-
-    // Adapt the dt to subdivide the trajectory into substeps.
+    // Adapt the dt to subdivide the trajectory into 4 substeps.
     return dt*fraction/td.nSubCycle_;
 }
 
@@ -222,9 +220,6 @@ bool Foam::streamLineParticle::move
             {
                 // Do full step on last subcycle
                 dt = min(dtMax, tEnd);
-
-                // Force subCycling to restart
-                subIter = td.nSubCycle_;
             }
 
 
