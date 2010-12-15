@@ -623,7 +623,8 @@ void Foam::fvMatrix<Type>::relax()
 {
     word name = psi_.select
     (
-        psi_.mesh().data::lookupOrDefault<bool>("finalIteration", false)
+        psi_.mesh().data::template lookupOrDefault<bool>
+        ("finalIteration", false)
     );
 
     if (psi_.mesh().relax(name))

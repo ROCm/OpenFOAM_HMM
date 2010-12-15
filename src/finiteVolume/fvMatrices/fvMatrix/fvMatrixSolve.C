@@ -95,7 +95,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
 
         // copy field and source
 
-        scalarField psiCmpt = psi.internalField().component(cmpt);
+        scalarField psiCmpt(psi.internalField().component(cmpt));
         addBoundaryDiag(diag(), cmpt);
 
         scalarField sourceCmpt = source.component(cmpt);
@@ -174,7 +174,8 @@ Foam::fvMatrix<Type>::solver()
         (
             psi_.select
             (
-                psi_.mesh().data::lookupOrDefault<bool>("finalIteration", false)
+                psi_.mesh().data::template lookupOrDefault<bool>
+                ("finalIteration", false)
             )
         )
     );
@@ -186,11 +187,12 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::fvSolver::solve()
 {
     return solve
     (
-        psi_.mesh().solverDict
+        fvMat_.psi_.mesh().solverDict
         (
-            psi_.select
+            fvMat_.psi_.select
             (
-                psi_.mesh().data::lookupOrDefault<bool>("finalIteration", false)
+                fvMat_.psi_.mesh().data::template lookupOrDefault<bool>
+                ("finalIteration", false)
             )
         )
     );
@@ -206,7 +208,8 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve()
         (
             psi_.select
             (
-                psi_.mesh().data::lookupOrDefault<bool>("finalIteration", false)
+                psi_.mesh().data::template lookupOrDefault<bool>
+                ("finalIteration", false)
             )
         )
     );
