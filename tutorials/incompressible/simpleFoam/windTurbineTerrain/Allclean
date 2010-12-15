@@ -19,4 +19,7 @@ rm -rf constant/polyMesh/sets
 #rm -rf constant/refinementHistory
 #rm -rf constant/surfaceIndex
 
+# Reset decomposeParDict
+cp system/decomposeParDict-nonPar system/decomposeParDict
+
 # ----------------------------------------------------------------- end-of-file
