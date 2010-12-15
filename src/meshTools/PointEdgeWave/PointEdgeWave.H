@@ -58,13 +58,9 @@ SourceFiles
 #ifndef PointEdgeWave_H
 #define PointEdgeWave_H
 
-#include "label.H"
 #include "boolList.H"
 #include "scalarField.H"
-#include "pointFields.H"
-#include "tensor.H"
-#include "primitivePatch.H"
-#include "PtrList.H"
+#include "tensorField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,7 +69,7 @@ namespace Foam
 
 // Forward declaration of classes
 class polyMesh;
-
+class polyPatch;
 
 /*---------------------------------------------------------------------------*\
                         Class PointEdgeWaveName Declaration
@@ -86,7 +82,7 @@ TemplateName(PointEdgeWave);
                            Class PointEdgeWave Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class Type>
+template <class Type, class TrackingData = int>
 class PointEdgeWave
 :
     public PointEdgeWaveName
@@ -98,6 +94,10 @@ class PointEdgeWave
         //  up to Type implementation)
         static scalar propagationTol_;
 
+        //- Used as default trackdata value to satisfy default template
+        //  argument.
+        static label dummyTrackData_;
+
 
     // Private data
 
@@ -105,10 +105,13 @@ class PointEdgeWave
         const polyMesh& mesh_;
 
         //- Wall information for all points
-        List<Type>& allPointInfo_;
+        UList<Type>& allPointInfo_;
 
         //- Information on all mesh edges
-        List<Type>& allEdgeInfo_;
+        UList<Type>& allEdgeInfo_;
+
+        //- Additional data to be passed into container
+        TrackingData& td_;
 
         //- Has point changed
         boolList changedPoint_;
@@ -127,9 +130,6 @@ class PointEdgeWave
         //- Number of cyclic patches
         label nCyclicPatches_;
 
-        //- For every cyclic patch two primitivePatches
-        PtrList<primitivePatch> cycHalves_;
-
         //- Number of evaluations
         label nEvals_;
 
@@ -140,15 +140,10 @@ class PointEdgeWave
 
     // Private Member Functions
 
-        //- Add value to all elements of labelList
-        static void offset(const label val, labelList& elems);
-
-
         //- Adapt pointInfo for leaving domain
         void leaveDomain
         (
-            const polyPatch& meshPatch,
-            const primitivePatch& patch,
+            const polyPatch&,
             const List<label>& patchPointLabels,
             List<Type>& pointInfo
         ) const;
@@ -156,8 +151,7 @@ class PointEdgeWave
         //- Adapt pointInfo for entering domain
         void enterDomain
         (
-            const polyPatch& meshPatch,
-            const primitivePatch& patch,
+            const polyPatch&,
             const List<label>& patchPointLabels,
             List<Type>& pointInfo
         ) const;
@@ -165,6 +159,7 @@ class PointEdgeWave
         //- Transform. Implementation referred to Type
         void transform
         (
+            const polyPatch& patch,
             const tensorField& rotTensor,
             List<Type>& pointInfo
         ) const;
@@ -176,7 +171,6 @@ class PointEdgeWave
             const label pointI,
             const label neighbourEdgeI,
             const Type& neighbourInfo,
-            const scalar tol,
             Type& pointInfo
         );
 
@@ -186,7 +180,6 @@ class PointEdgeWave
         (
             const label pointI,
             const Type& neighbourInfo,
-            const scalar tol,
             Type& pointInfo
         );
 
@@ -197,7 +190,6 @@ class PointEdgeWave
             const label edgeI,
             const label neighbourPointI,
             const Type& neighbourInfo,
-            const scalar tol,
             Type& edgeInfo
         );
 
@@ -206,26 +198,6 @@ class PointEdgeWave
             //- Has patches of certain type?
             template <class PatchType>
             label countPatchType() const;
-
-            //- Get info on patch points
-            void getChangedPatchPoints
-            (
-                const primitivePatch& patch,
-                DynamicList<Type>& patchInfo,
-                DynamicList<label>& patchPoints,
-                DynamicList<label>& owner,
-                DynamicList<label>& ownerIndex
-            ) const;
-
-            //- Merge data from patch into overall data
-            void updateFromPatchInfo
-            (
-                const polyPatch& meshPatch,
-                const primitivePatch& patch,
-                const labelList& owner,
-                const labelList& ownerIndex,
-                List<Type>& patchInfo
-            );
 
             //- Merge data from across processor boundaries
             void handleProcPatches();
@@ -270,9 +242,10 @@ public:
             const polyMesh& mesh,
             const labelList& initialPoints,
             const List<Type>& initialPointsInfo,
-            List<Type>& allPointInfo,
-            List<Type>& allEdgeInfo,
-            const label maxIter
+            UList<Type>& allPointInfo,
+            UList<Type>& allEdgeInfo,
+            const label maxIter,
+            TrackingData& td = dummyTrackData_
         );
 
         //- Construct from mesh. Use setPointInfo and iterate() to do
@@ -280,8 +253,9 @@ public:
         PointEdgeWave
         (
             const polyMesh& mesh,
-            List<Type>& allPointInfo,
-            List<Type>& allEdgeInfo
+            UList<Type>& allPointInfo,
+            UList<Type>& allEdgeInfo,
+            TrackingData& td = dummyTrackData_
         );
 
 
@@ -291,16 +265,22 @@ public:
 
     // Member Functions
 
-        //- Get allPointInfo
-        const List<Type>& allPointInfo() const
+        //- Access allPointInfo
+        UList<Type>& allPointInfo() const
         {
             return allPointInfo_;
         }
 
-        //- Get allEdgeInfo
-        const List<Type>& allEdgeInfo() const
+        //- Access allEdgeInfo
+        UList<Type>& allEdgeInfo() const
         {
             return allEdgeInfo_;
+        }
+
+        //- Additional data to be passed into container
+        const TrackingData& data() const
+        {
+            return td_;
         }
 
         //- Get number of unvisited edges, i.e. edges that were not (yet)
@@ -340,19 +320,29 @@ public:
 \*---------------------------------------------------------------------------*/
 
 //- List update operation
-template <class Type>
+template <class Type, class TrackingData = int>
 class listUpdateOp
 {
+    //- Additional data to be passed into container
+
+    const scalar tol_;
+
+    TrackingData& td_;
 
 public:
+    listUpdateOp(const scalar tol, TrackingData& td)
+    :
+        tol_(tol),
+        td_(td)
+    {}
 
     void operator()(List<Type>& x, const List<Type>& y) const
     {
         forAll(x, i)
         {
-            if (y[i].valid())
+            if (y[i].valid(td_))
             {
-                x[i].updatePoint(y[i], PointEdgeWave<Type>::propagationTol());
+                x[i].updatePoint(y[i], tol_, td_);
             }
         }
     }

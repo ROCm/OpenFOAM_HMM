@@ -25,15 +25,10 @@ License
 
 #include "inletOutletFvPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-inletOutletFvPatchField<Type>::inletOutletFvPatchField
+Foam::inletOutletFvPatchField<Type>::inletOutletFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
@@ -49,7 +44,7 @@ inletOutletFvPatchField<Type>::inletOutletFvPatchField
 
 
 template<class Type>
-inletOutletFvPatchField<Type>::inletOutletFvPatchField
+Foam::inletOutletFvPatchField<Type>::inletOutletFvPatchField
 (
     const inletOutletFvPatchField<Type>& ptf,
     const fvPatch& p,
@@ -63,7 +58,7 @@ inletOutletFvPatchField<Type>::inletOutletFvPatchField
 
 
 template<class Type>
-inletOutletFvPatchField<Type>::inletOutletFvPatchField
+Foam::inletOutletFvPatchField<Type>::inletOutletFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -93,7 +88,7 @@ inletOutletFvPatchField<Type>::inletOutletFvPatchField
 
 
 template<class Type>
-inletOutletFvPatchField<Type>::inletOutletFvPatchField
+Foam::inletOutletFvPatchField<Type>::inletOutletFvPatchField
 (
     const inletOutletFvPatchField<Type>& ptf
 )
@@ -104,7 +99,7 @@ inletOutletFvPatchField<Type>::inletOutletFvPatchField
 
 
 template<class Type>
-inletOutletFvPatchField<Type>::inletOutletFvPatchField
+Foam::inletOutletFvPatchField<Type>::inletOutletFvPatchField
 (
     const inletOutletFvPatchField<Type>& ptf,
     const DimensionedField<Type, volMesh>& iF
@@ -118,19 +113,18 @@ inletOutletFvPatchField<Type>::inletOutletFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void inletOutletFvPatchField<Type>::updateCoeffs()
+void Foam::inletOutletFvPatchField<Type>::updateCoeffs()
 {
     if (this->updated())
     {
         return;
     }
 
-    const Field<scalar>& phip = this->patch().lookupPatchField
-    (
-        phiName_,
-        reinterpret_cast<const surfaceScalarField*>(0),
-        reinterpret_cast<const scalar*>(0)
-    );
+    const Field<scalar>& phip =
+        this->patch().template lookupPatchField<surfaceScalarField, scalar>
+        (
+            phiName_
+        );
 
     this->valueFraction() = 1.0 - pos(phip);
 
@@ -139,7 +133,7 @@ void inletOutletFvPatchField<Type>::updateCoeffs()
 
 
 template<class Type>
-void inletOutletFvPatchField<Type>::write(Ostream& os) const
+void Foam::inletOutletFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
     if (phiName_ != "phi")
@@ -154,7 +148,7 @@ void inletOutletFvPatchField<Type>::write(Ostream& os) const
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Type>
-void inletOutletFvPatchField<Type>::operator=
+void Foam::inletOutletFvPatchField<Type>::operator=
 (
     const fvPatchField<Type>& ptf
 )
@@ -166,9 +160,5 @@ void inletOutletFvPatchField<Type>::operator=
     );
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

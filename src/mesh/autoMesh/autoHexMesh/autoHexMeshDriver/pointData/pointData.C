@@ -32,19 +32,20 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const pointData& wDist)
     if (os.format() == IOstream::ASCII)
     {
         return os
-            << wDist.origin() << token::SPACE << wDist.distSqr()
+            << static_cast<const pointEdgePoint&>(wDist)
             << token::SPACE << wDist.s() << token::SPACE << wDist.v();
     }
     else
     {
         return os
-            << wDist.origin() << wDist.distSqr() << wDist.s() << wDist.v();
+            << static_cast<const pointEdgePoint&>(wDist)
+            << wDist.s() << wDist.v();
     }
 }
 
 Foam::Istream& Foam::operator>>(Istream& is, pointData& wDist)
 {
-    return is >> wDist.origin_ >> wDist.distSqr_ >> wDist.s_ >> wDist.v_;
+    return is >> static_cast<pointEdgePoint&>(wDist) >> wDist.s_ >> wDist.v_;
 }
 
 // ************************************************************************* //

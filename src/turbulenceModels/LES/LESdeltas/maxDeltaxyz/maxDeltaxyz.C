@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "maxhxhyhzDelta.H"
+#include "maxDeltaxyz.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -33,12 +33,12 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(maxhxhyhzDelta, 0);
-addToRunTimeSelectionTable(LESdelta, maxhxhyhzDelta, dictionary);
+defineTypeNameAndDebug(maxDeltaxyz, 0);
+addToRunTimeSelectionTable(LESdelta, maxDeltaxyz, dictionary);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void maxhxhyhzDelta::calcDelta()
+void maxDeltaxyz::calcDelta()
 {
     label nD = mesh().nGeometricD();
 
@@ -86,7 +86,7 @@ void maxhxhyhzDelta::calcDelta()
     }
     else if (nD == 2)
     {
-        WarningIn("maxhxhyhzDelta::calcDelta()")
+        WarningIn("maxDeltaxyz::calcDelta()")
             << "Case is 2D, LES is not strictly applicable\n"
             << endl;
 
@@ -94,7 +94,7 @@ void maxhxhyhzDelta::calcDelta()
     }
     else
     {
-        FatalErrorIn("maxhxhyhzDelta::calcDelta()")
+        FatalErrorIn("maxDeltaxyz::calcDelta()")
             << "Case is not 3D or 2D, LES is not applicable"
             << exit(FatalError);
     }
@@ -103,7 +103,7 @@ void maxhxhyhzDelta::calcDelta()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-maxhxhyhzDelta::maxhxhyhzDelta
+maxDeltaxyz::maxDeltaxyz
 (
     const word& name,
     const fvMesh& mesh,
@@ -119,14 +119,14 @@ maxhxhyhzDelta::maxhxhyhzDelta
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void maxhxhyhzDelta::read(const dictionary& dd)
+void maxDeltaxyz::read(const dictionary& dd)
 {
     dd.subDict(type() + "Coeffs").lookup("deltaCoeff") >> deltaCoeff_;
     calcDelta();
 }
 
 
-void maxhxhyhzDelta::correct()
+void maxDeltaxyz::correct()
 {
     if (mesh_.changing())
     {

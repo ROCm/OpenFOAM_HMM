@@ -134,8 +134,8 @@ public:
             return calc_.data();
         }
 
-        //- Iterate until no changes or maxIter reached. Returns number of
-        //  unset cells (see getUnsetCells)
+        //- Iterate until no changes or maxIter reached. Returns actual
+        //  number of iterations.
         label iterate(const label maxIter)
         {
             return calc_.iterate(maxIter);

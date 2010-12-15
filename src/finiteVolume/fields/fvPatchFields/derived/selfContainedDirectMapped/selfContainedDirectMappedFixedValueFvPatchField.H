@@ -48,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-              Class selfContainedDirectMappedFixedValueFvPatch Declaration
+        Class selfContainedDirectMappedFixedValueFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -75,6 +75,7 @@ class selfContainedDirectMappedFixedValueFvPatchField
 
         mutable autoPtr<interpolation<Type> > interpolator_;
 
+
     // Private Member Functions
 
         //- Field to sample. Either on my or nbr mesh
@@ -82,6 +83,7 @@ class selfContainedDirectMappedFixedValueFvPatchField
 
         //- Access the interpolation method
         const interpolation<Type>& interpolator() const;
+
 
 public:
 

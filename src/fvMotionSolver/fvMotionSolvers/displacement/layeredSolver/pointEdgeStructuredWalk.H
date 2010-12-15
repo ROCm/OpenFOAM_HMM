@@ -37,11 +37,7 @@ SourceFiles
 #define pointEdgeStructuredWalk_H
 
 #include "point.H"
-#include "label.H"
-#include "scalar.H"
 #include "tensor.H"
-#include "pTraits.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,10 +71,12 @@ class pointEdgeStructuredWalk
     // Private Member Functions
 
         //- Evaluate distance to point.
+        template<class TrackingData>
         inline bool update
         (
             const pointEdgeStructuredWalk& w2,
-            const scalar tol
+            const scalar tol,
+            TrackingData& td
         );
 
 public:
@@ -111,80 +109,105 @@ public:
 
         // Needed by meshWave
 
-            //- Check whether still contains original (invalid) value.
-            inline bool valid() const;
+            //- Check whether origin has been changed at all or
+            //  still contains original (invalid) value.
+            template<class TrackingData>
+            inline bool valid(TrackingData& td) const;
 
             //- Check for identical geometrical data. Used for cyclics checking.
+            template<class TrackingData>
             inline bool sameGeometry
             (
                 const pointEdgeStructuredWalk&,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             ) const;
 
             //- Convert origin to relative vector to leaving point
             //  (= point coordinate)
+            template<class TrackingData>
             inline void leaveDomain
             (
                 const polyPatch& patch,
                 const label patchPointI,
-                const point& pos
+                const point& pos,
+                TrackingData& td
             );
 
             //- Convert relative origin to absolute by adding entering point
+            template<class TrackingData>
             inline void enterDomain
             (
                 const polyPatch& patch,
                 const label patchPointI,
-                const point& pos
+                const point& pos,
+                TrackingData& td
             );
 
             //- Apply rotation matrix to origin
-            inline void transform(const tensor& rotTensor);
+            template<class TrackingData>
+            inline void transform
+            (
+                const tensor& rotTensor,
+                TrackingData& td
+            );
 
             //- Influence of edge on point
+            template<class TrackingData>
             inline bool updatePoint
             (
                 const polyMesh& mesh,
                 const label pointI,
                 const label edgeI,
                 const pointEdgeStructuredWalk& edgeInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
 
             //- Influence of different value on same point.
             //  Merge new and old info.
+            template<class TrackingData>
             inline bool updatePoint
             (
                 const polyMesh& mesh,
                 const label pointI,
                 const pointEdgeStructuredWalk& newPointInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
 
             //- Influence of different value on same point.
             //  No information about current position whatsoever.
+            template<class TrackingData>
             inline bool updatePoint
             (
                 const pointEdgeStructuredWalk& newPointInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
 
             //- Influence of point on edge.
+            template<class TrackingData>
             inline bool updateEdge
             (
                 const polyMesh& mesh,
                 const label edgeI,
                 const label pointI,
                 const pointEdgeStructuredWalk& pointInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
+
+            //- Same (like operator==)
+            template<class TrackingData>
+            inline bool equal(const pointEdgeStructuredWalk&, TrackingData&)
+            const;
 
 
     // Member Operators
 
         //Note: Used to determine whether to call update.
         inline bool operator==(const pointEdgeStructuredWalk&) const;
-
         inline bool operator!=(const pointEdgeStructuredWalk&) const;
 
 

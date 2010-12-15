@@ -240,7 +240,13 @@ bool Foam::streamLineParticle::move
                 lifeTime_ = 0;
             }
 
-            if (!td.keepParticle || td.switchProcessor || lifeTime_ == 0)
+            if
+            (
+                face() != -1
+            || !td.keepParticle
+            ||  td.switchProcessor
+            ||  lifeTime_ == 0
+            )
             {
                 break;
             }

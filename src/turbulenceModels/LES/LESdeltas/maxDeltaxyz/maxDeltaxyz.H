@@ -22,20 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::maxhxhyhzDelta
+    Foam::maxDeltaxyz
 
 Description
-    maxhxhyhzDelta takes the maximum of the three dimensions per cell:
+    maxDeltaxyz takes the maximum of the three dimensions per cell:
     max(hx, hy, hz). Valid for structures hexahedral cells only.
 
 
 SourceFiles
-    maxhxhyhzDelta.C
+    maxDeltaxyz.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef maxhxhyhzDeltaDelta_H
-#define maxhxhyhzDeltaDelta_H
+#ifndef maxDeltaxyzDelta_H
+#define maxDeltaxyzDelta_H
 
 #include "LESdelta.H"
 
@@ -45,10 +45,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class maxhxhyhzDelta Declaration
+                           Class maxDeltaxyz Declaration
 \*---------------------------------------------------------------------------*/
 
-class maxhxhyhzDelta
+class maxDeltaxyz
 :
     public LESdelta
 {
@@ -60,8 +60,8 @@ class maxhxhyhzDelta
     // Private Member Functions
 
         //- Disallow default bitwise copy construct and assignment
-        maxhxhyhzDelta(const maxhxhyhzDelta&);
-        void operator=(const maxhxhyhzDelta&);
+        maxDeltaxyz(const maxDeltaxyz&);
+        void operator=(const maxDeltaxyz&);
 
         // Calculate the delta values
         void calcDelta();
@@ -70,13 +70,13 @@ class maxhxhyhzDelta
 public:
 
     //- Runtime type information
-    TypeName("maxhxhyhzDelta");
+    TypeName("maxDeltaxyz");
 
 
     // Constructors
 
         //- Construct from name, mesh and IOdictionary
-        maxhxhyhzDelta
+        maxDeltaxyz
         (
             const word& name,
             const fvMesh& mesh,
@@ -85,7 +85,7 @@ public:
 
 
     //- Destructor
-    virtual ~maxhxhyhzDelta()
+    virtual ~maxDeltaxyz()
     {}
 
 
