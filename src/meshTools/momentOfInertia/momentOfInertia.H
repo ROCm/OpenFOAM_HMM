@@ -25,6 +25,9 @@ Class
     momentOfInertia
 
 Description
+    Calculates the inertia tensor and principal axes and moments of a
+    polyhedra/cells/triSurfaces.  Inertia can either be of the solid body or
+    of a thin shell.
 
 SourceFiles
     momentOfInertia.H
@@ -34,34 +37,86 @@ SourceFiles
 #ifndef momentOfInertia_H
 #define momentOfInertia_H
 
-#include "tensor.H"
-#include "primitiveMesh.H"
+#include "tetPointRef.H"
+#include "triFaceList.H"
+#include "triSurface.H"
+#include "polyMesh.H"
+#include "polyMeshTetDecomposition.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-////- Moment of inertia around cell centre for single cell.
-//tensor momentOfInertia
-//(
-//    const pointField&,
-//    const faceList&,
-//    const cell&,
-//    const point& cc
-//);
+/*---------------------------------------------------------------------------*\
+                     Class momentOfInertia Declaration
+\*---------------------------------------------------------------------------*/
 
-// Calculate
-// - centre of mass
-// - inertia tensor around (0,0,0)
-void momentOfIntertia
-(
-    const pointField&,
-    const faceList&,
-    const cell&,
-    point& r,
-    tensor& Jorigin
-);
+class momentOfInertia
+{
+
+public:
+
+    static void massPropertiesSolid
+    (
+        const pointField& pts,
+        const triFaceList& triFaces,
+        scalar density,
+        scalar& mass,
+        vector& cM,
+        tensor& J
+    );
+
+    static void massPropertiesShell
+    (
+        const pointField& pts,
+        const triFaceList& triFaces,
+        scalar density,
+        scalar& mass,
+        vector& cM,
+        tensor& J
+    );
+
+    static void massPropertiesSolid
+    (
+        const triSurface& surf,
+        scalar density,
+        scalar& mass,
+        vector& cM,
+        tensor& J
+    );
+
+    static void massPropertiesShell
+    (
+        const triSurface& surf,
+        scalar density,
+        scalar& mass,
+        vector& cM,
+        tensor& J
+    );
+
+    static tensor applyParallelAxisTheorem
+    (
+        scalar mass,
+        const vector& cM,
+        const tensor& J,
+        const vector& refPt
+    );
+
+    // Calculate the inertia tensor for all cells in the mesh
+    static tmp<tensorField> meshInertia
+    (
+        const polyMesh& mesh
+    );
+
+    // Calculate the inertia tensor the given cell
+    static tensor meshInertia
+    (
+        const polyMesh& mesh,
+        label cellI
+    );
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
