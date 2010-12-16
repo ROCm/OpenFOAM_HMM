@@ -105,11 +105,11 @@ void writeField
 template<class Type>
 bool writePatchField
 (
-    const Foam::Field<Type>& pf,
-    const Foam::label patchi,
-    const Foam::label ensightPatchI,
-    const Foam::faceSets& boundaryFaceSet,
-    const Foam::ensightMesh::nFacePrimitives& nfp,
+    const Field<Type>& pf,
+    const label patchi,
+    const label ensightPatchI,
+    const faceSets& boundaryFaceSet,
+    const ensightMesh::nFacePrimitives& nfp,
     ensightStream& ensightFile
 )
 {
@@ -153,15 +153,15 @@ bool writePatchField
 template<class Type>
 void writePatchField
 (
-    const Foam::word& fieldName,
-    const Foam::Field<Type>& pf,
-    const Foam::word& patchName,
-    const Foam::ensightMesh& eMesh,
-    const Foam::fileName& postProcPath,
-    const Foam::word& prepend,
-    const Foam::label timeIndex,
+    const word& fieldName,
+    const Field<Type>& pf,
+    const word& patchName,
+    const ensightMesh& eMesh,
+    const fileName& postProcPath,
+    const word& prepend,
+    const label timeIndex,
     const bool binary,
-    Foam::Ostream& ensightCaseFile
+    Ostream& ensightCaseFile
 )
 {
     const Time& runTime = eMesh.mesh().time();
@@ -271,12 +271,12 @@ template<class Type>
 void ensightField
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf,
-    const Foam::ensightMesh& eMesh,
-    const Foam::fileName& postProcPath,
-    const Foam::word& prepend,
-    const Foam::label timeIndex,
+    const ensightMesh& eMesh,
+    const fileName& postProcPath,
+    const word& prepend,
+    const label timeIndex,
     const bool binary,
-    Foam::Ostream& ensightCaseFile
+    Ostream& ensightCaseFile
 )
 {
     Info<< "Converting field " << vf.name() << endl;
@@ -500,12 +500,12 @@ template<class Type>
 void ensightPointField
 (
     const GeometricField<Type, pointPatchField, pointMesh>& pf,
-    const Foam::ensightMesh& eMesh,
-    const Foam::fileName& postProcPath,
-    const Foam::word& prepend,
-    const Foam::label timeIndex,
+    const ensightMesh& eMesh,
+    const fileName& postProcPath,
+    const word& prepend,
+    const label timeIndex,
     const bool binary,
-    Foam::Ostream& ensightCaseFile
+    Ostream& ensightCaseFile
 )
 {
     Info<< "Converting field " << pf.name() << endl;
@@ -679,14 +679,14 @@ void ensightPointField
 template<class Type>
 void ensightField
 (
-    const Foam::IOobject& fieldObject,
-    const Foam::ensightMesh& eMesh,
-    const Foam::fileName& postProcPath,
-    const Foam::word& prepend,
-    const Foam::label timeIndex,
+    const IOobject& fieldObject,
+    const ensightMesh& eMesh,
+    const fileName& postProcPath,
+    const word& prepend,
+    const label timeIndex,
     const bool binary,
     const bool nodeValues,
-    Foam::Ostream& ensightCaseFile
+    Ostream& ensightCaseFile
 )
 {
     // Read field
