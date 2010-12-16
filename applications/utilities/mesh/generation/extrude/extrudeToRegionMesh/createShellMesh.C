@@ -93,7 +93,7 @@ void Foam::createShellMesh::calcPointRegions
                         label fp2 = findIndex(f2, pointI);
                         label& region = pointRegions[face2][fp2];
                         if (region != -1)
-                        {   
+                        {
                             FatalErrorIn
                             (
                                 "createShellMesh::calcPointRegions(..)"
@@ -185,18 +185,20 @@ Foam::createShellMesh::createShellMesh
 
 void Foam::createShellMesh::setRefinement
 (
-    const pointField& thickness,
+    const pointField& firstLayerDisp,
+    const scalar expansionRatio,
+    const label nLayers,
     const labelList& topPatchID,
     const labelList& bottomPatchID,
     const labelListList& extrudeEdgePatches,
     polyTopoChange& meshMod
 )
 {
-    if (thickness.size() != regionPoints_.size())
+    if (firstLayerDisp.size() != regionPoints_.size())
     {
         FatalErrorIn("createShellMesh::setRefinement(..)")
             << "nRegions:" << regionPoints_.size()
-            << " thickness:" << thickness.size()
+            << " firstLayerDisp:" << firstLayerDisp.size()
             << exit(FatalError);
     }
 
@@ -224,30 +226,36 @@ void Foam::createShellMesh::setRefinement
 
 
     // From cell to patch (trivial)
-    DynamicList<label> cellToFaceMap(patch_.size());
+    DynamicList<label> cellToFaceMap(nLayers*patch_.size());
     // From face to patch+turning index
-    DynamicList<label> faceToFaceMap(2*patch_.size()+patch_.nEdges());
+    DynamicList<label> faceToFaceMap
+    (
+        (nLayers+1)*(patch_.size()+patch_.nEdges())
+    );
     // From face to patch edge index
-    DynamicList<label> faceToEdgeMap(patch_.nEdges()+patch_.nEdges());
+    DynamicList<label> faceToEdgeMap(nLayers*(patch_.nEdges()+patch_.nEdges()));
     // From point to patch point index
-    DynamicList<label> pointToPointMap(2*patch_.nPoints());
+    DynamicList<label> pointToPointMap((nLayers+1)*patch_.nPoints());
 
 
     // Introduce new cell for every face
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    labelList addedCells(patch_.size());
+    labelList addedCells(nLayers*patch_.size());
     forAll(patch_, faceI)
     {
-        addedCells[faceI] = meshMod.addCell
-        (
-            -1,                     // masterPointID
-            -1,                     // masterEdgeID
-            -1,                     // masterFaceID
-            cellToFaceMap.size(),   // masterCellID
-            -1                      // zoneID
-        );
-        cellToFaceMap.append(faceI);
+        for (label layerI = 0; layerI < nLayers; layerI++)
+        {
+            addedCells[nLayers*faceI+layerI] = meshMod.addCell
+            (
+                -1,                     // masterPointID
+                -1,                     // masterEdgeID
+                -1,                     // masterFaceID
+                cellToFaceMap.size(),   // masterCellID
+                -1                      // zoneID
+            );
+            cellToFaceMap.append(faceI);
+        }
     }
 
 
@@ -261,7 +269,7 @@ void Foam::createShellMesh::setRefinement
         meshMod.addPoint
         (
             patch_.localPoints()[pointI],   // point
-            pointToPointMap.size(),         // masterPointID 
+            pointToPointMap.size(),         // masterPointID
             -1,                             // zoneID
             true                            // inCell
         );
@@ -277,25 +285,28 @@ void Foam::createShellMesh::setRefinement
     // Introduce new points (one for every region)
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    labelList addedPoints(regionPoints_.size());
+    labelList addedPoints(nLayers*regionPoints_.size());
     forAll(regionPoints_, regionI)
     {
         label pointI = regionPoints_[regionI];
-        point extrudedPt = patch_.localPoints()[pointI] + thickness[regionI];
 
-        addedPoints[regionI] = meshMod.addPoint
-        (
-            extrudedPt,             // point
-            pointToPointMap.size(), // masterPointID - used only addressing
-            -1,                     // zoneID
-            true                    // inCell
-        );
-        pointToPointMap.append(pointI);
+        point pt = patch_.localPoints()[pointI];
+        point disp = firstLayerDisp[regionI];
+        for (label layerI = 0; layerI < nLayers; layerI++)
+        {
+            pt += disp;
 
-        //Pout<< "Added top point " << addedPoints[regionI]
-        //    << " at " << extrudedPt
-        //    << "  from point " << pointI
-        //    << endl;
+            addedPoints[nLayers*regionI+layerI] = meshMod.addPoint
+            (
+                pt,                     // point
+                pointToPointMap.size(), // masterPointID - used only addressing
+                -1,                     // zoneID
+                true                    // inCell
+            );
+            pointToPointMap.append(pointI);
+
+            disp *= expansionRatio;
+        }
     }
 
 
@@ -305,61 +316,84 @@ void Foam::createShellMesh::setRefinement
         meshMod.addFace
         (
             patch_.localFaces()[faceI].reverseFace(),// vertices
-            addedCells[faceI],          // own
+            addedCells[nLayers*faceI],  // own
             -1,                         // nei
             -1,                         // masterPointID
             -1,                         // masterEdgeID
             faceToFaceMap.size(),       // masterFaceID : current faceI
             true,                       // flipFaceFlux
-            bottomPatchID[faceI],// patchID
+            bottomPatchID[faceI],       // patchID
             -1,                         // zoneID
             false                       // zoneFlip
         );
         faceToFaceMap.append(-faceI-1); // points to flipped original face
         faceToEdgeMap.append(-1);
 
+        //const face newF(patch_.localFaces()[faceI].reverseFace());
         //Pout<< "Added bottom face "
-        //    << patch_.localFaces()[faceI].reverseFace()
+        //    << newF
+        //    << " coords:" << UIndirectList<point>(meshMod.points(), newF)
         //    << " own " << addedCells[faceI]
+        //    << " patch:" << bottomPatchID[faceI]
         //    << "  at " << patch_.faceCentres()[faceI]
         //    << endl;
-
     }
 
-    // Add face on top
+    // Add inbetween faces and face on top
     forAll(patch_.localFaces(), faceI)
     {
         // Get face in original ordering
         const face& f = patch_.localFaces()[faceI];
 
-        // Pick up point based on region
         face newF(f.size());
-        forAll(f, fp)
+
+        for (label layerI = 0; layerI < nLayers; layerI++)
         {
-            label region = pointRegions_[faceI][fp];
-            newF[fp] = addedPoints[region];
+            // Pick up point based on region and layer
+            forAll(f, fp)
+            {
+                label region = pointRegions_[faceI][fp];
+                newF[fp] = addedPoints[region*nLayers+layerI];
+            }
+
+            label own = addedCells[faceI*nLayers+layerI];
+            label nei;
+            label patchI;
+            if (layerI == nLayers-1)
+            {
+                nei = -1;
+                patchI = topPatchID[faceI];
+            }
+            else
+            {
+                nei = addedCells[faceI*nLayers+layerI+1];
+                patchI = -1;
+            }
+
+            meshMod.addFace
+            (
+                newF,                       // vertices
+                own,                        // own
+                nei,                        // nei
+                -1,                         // masterPointID
+                -1,                         // masterEdgeID
+                faceToFaceMap.size(),       // masterFaceID : current faceI
+                false,                      // flipFaceFlux
+                patchI,                     // patchID
+                -1,                         // zoneID
+                false                       // zoneFlip
+            );
+            faceToFaceMap.append(faceI+1);  // unflipped
+            faceToEdgeMap.append(-1);
+
+            //Pout<< "Added inbetween face " << newF
+            //    << " coords:" << UIndirectList<point>(meshMod.points(), newF)
+            //    << " at layer " << layerI
+            //    << " own " << own
+            //    << " nei " << nei
+            //    << "  at " << patch_.faceCentres()[faceI]
+            //    << endl;
         }
-
-        meshMod.addFace
-        (
-            newF,                       // vertices
-            addedCells[faceI],          // own
-            -1,                         // nei
-            -1,                         // masterPointID
-            -1,                         // masterEdgeID
-            faceToFaceMap.size(),       // masterFaceID : current faceI
-            false,                      // flipFaceFlux
-            topPatchID[faceI],          // patchID
-            -1,                         // zoneID
-            false                       // zoneFlip
-        );
-        faceToFaceMap.append(faceI+1);  // unflipped
-        faceToEdgeMap.append(-1);
-
-        //Pout<< "Added top face " << newF
-        //    << " own " << addedCells[faceI]
-        //    << "  at " << patch_.faceCentres()[faceI]
-        //    << endl;
     }
 
 
@@ -376,8 +410,7 @@ void Foam::createShellMesh::setRefinement
 
         if (ePatches.size() == 0)
         {
-            // internal face.
-
+            // Internal face
             if (eFaces.size() != 2)
             {
                 FatalErrorIn("createShellMesh::setRefinement(..)")
@@ -385,61 +418,6 @@ void Foam::createShellMesh::setRefinement
                     << " not internal but does not have side-patches defined."
                     << exit(FatalError);
             }
-
-            // Extrude
-
-            // Make face pointing in to eFaces[0] so out of new master face
-            const face& f = patch_.localFaces()[eFaces[0]];
-            const edge& e = patch_.edges()[edgeI];
-
-            label fp0 = findIndex(f, e[0]);
-            label fp1 = f.fcIndex(fp0);
-
-            if (f[fp1] != e[1])
-            {
-                fp1 = fp0;
-                fp0 = f.rcIndex(fp1);
-            }
-
-            face newF(4);
-            newF[0] = f[fp0];
-            newF[1] = f[fp1];
-            newF[2] = addedPoints[pointRegions_[eFaces[0]][fp1]];
-            newF[3] = addedPoints[pointRegions_[eFaces[0]][fp0]];
-
-            label minCellI = addedCells[eFaces[0]];
-            label maxCellI = addedCells[eFaces[1]];
-
-            if (minCellI > maxCellI)
-            {
-                // Swap
-                Swap(minCellI, maxCellI);
-                newF = newF.reverseFace();
-            }
-
-            //Pout<< "for internal edge:" << e
-            //    << " at:" << patch_.localPoints()[e[0]]
-            //    << patch_.localPoints()[e[1]]
-            //    << " adding face:" << newF
-            //    << " from f:" << f
-            //    << " inbetween " << minCellI << " and " << maxCellI << endl;
-
-            // newF already outwards pointing.
-            meshMod.addFace
-            (
-                newF,       // vertices
-                minCellI,   // own
-                maxCellI,   // nei
-                -1,         // masterPointID
-                -1,         // masterEdgeID
-                faceToFaceMap.size(),   // masterFaceID
-                false,      // flipFaceFlux
-                -1,         // patchID
-                -1,         // zoneID
-                false       // zoneFlip
-            );
-            faceToFaceMap.append(0);
-            faceToEdgeMap.append(edgeI);
         }
         else
         {
@@ -451,52 +429,91 @@ void Foam::createShellMesh::setRefinement
                     << " but only " << ePatches.size()
                     << " boundary faces defined." << exit(FatalError);
             }
+        }
 
 
-            // Extrude eFaces[0]
-            label minFaceI = eFaces[0];
 
-            // Make face pointing in to eFaces[0] so out of new master face
-            const face& f = patch_.localFaces()[minFaceI];
+        // Make face pointing in to eFaces[0] so out of new master face
+        const face& f = patch_.localFaces()[eFaces[0]];
+        const edge& e = patch_.edges()[edgeI];
 
-            const edge& e = patch_.edges()[edgeI];
-            label fp0 = findIndex(f, e[0]);
-            label fp1 = f.fcIndex(fp0);
+        label fp0 = findIndex(f, e[0]);
+        label fp1 = f.fcIndex(fp0);
 
-            if (f[fp1] != e[1])
+        if (f[fp1] != e[1])
+        {
+            fp1 = fp0;
+            fp0 = f.rcIndex(fp1);
+        }
+
+        face newF(4);
+
+        for (label layerI = 0; layerI < nLayers; layerI++)
+        {
+            label region0 = pointRegions_[eFaces[0]][fp0];
+            label region1 = pointRegions_[eFaces[0]][fp1];
+
+            if (layerI == 0)
             {
-                fp1 = fp0;
-                fp0 = f.rcIndex(fp1);
+                newF[0] = f[fp0];
+                newF[1] = f[fp1];
+                newF[2] = addedPoints[nLayers*region1+layerI];
+                newF[3] = addedPoints[nLayers*region0+layerI];
+            }
+            else
+            {
+                newF[0] = addedPoints[nLayers*region0+layerI-1];
+                newF[1] = addedPoints[nLayers*region1+layerI-1];
+                newF[2] = addedPoints[nLayers*region1+layerI];
+                newF[3] = addedPoints[nLayers*region0+layerI];
             }
 
-            face newF(4);
-            newF[0] = f[fp0];
-            newF[1] = f[fp1];
-            newF[2] = addedPoints[pointRegions_[minFaceI][fp1]];
-            newF[3] = addedPoints[pointRegions_[minFaceI][fp0]];
+            label minCellI = addedCells[nLayers*eFaces[0]+layerI];
+            label maxCellI;
+            label patchI;
+            if (ePatches.size() == 0)
+            {
+                maxCellI = addedCells[nLayers*eFaces[1]+layerI];
+                if (minCellI > maxCellI)
+                {
+                    // Swap
+                    Swap(minCellI, maxCellI);
+                    newF = newF.reverseFace();
+                }
+                patchI = -1;
+            }
+            else
+            {
+                maxCellI = -1;
+                patchI = ePatches[0];
+            }
 
-
-            //Pout<< "for external edge:" << e
-            //    << " at:" << patch_.localPoints()[e[0]]
-            //    << patch_.localPoints()[e[1]]
-            //    << " adding first patch face:" << newF
-            //    << " from:" << f
-            //    << " into patch:" << ePatches[0]
-            //    << " own:" << addedCells[minFaceI]
-            //    << endl;
+            //{
+            //    Pout<< "Adding from face:" << patch_.faceCentres()[eFaces[0]]
+            //        << " from edge:"
+            //        << patch_.localPoints()[f[fp0]]
+            //        << patch_.localPoints()[f[fp1]]
+            //        << " at layer:" << layerI
+            //        << " with new points:" << newF
+            //        << " locations:"
+            //        << UIndirectList<point>(meshMod.points(), newF)
+            //        << " own:" << minCellI
+            //        << " nei:" << maxCellI
+            //        << endl;
+            //}
 
 
             // newF already outwards pointing.
             meshMod.addFace
             (
                 newF,                   // vertices
-                addedCells[minFaceI],   // own
-                -1,                     // nei
+                minCellI,               // own
+                maxCellI,               // nei
                 -1,                     // masterPointID
                 -1,                     // masterEdgeID
                 faceToFaceMap.size(),   // masterFaceID
                 false,                  // flipFaceFlux
-                ePatches[0],            // patchID
+                patchI,                 // patchID
                 -1,                     // zoneID
                 false                   // zoneFlip
             );
@@ -532,35 +549,57 @@ void Foam::createShellMesh::setRefinement
                 }
 
                 face newF(4);
-                newF[0] = f[fp0];
-                newF[1] = f[fp1];
-                newF[2] = addedPoints[pointRegions_[minFaceI][fp1]];
-                newF[3] = addedPoints[pointRegions_[minFaceI][fp0]];
+                for (label layerI = 0; layerI < nLayers; layerI++)
+                {
+                    label region0 = pointRegions_[minFaceI][fp0];
+                    label region1 = pointRegions_[minFaceI][fp1];
 
-                //Pout<< "for external edge:" << e
-                //    << " at:" << patch_.localPoints()[e[0]]
-                //    << patch_.localPoints()[e[1]]
-                //    << " adding patch face:" << newF
-                //    << " from:" << f
-                //    << " into patch:" << ePatches[i]
-                //    << endl;
+                    if (layerI == 0)
+                    {
+                        newF[0] = f[fp0];
+                        newF[1] = f[fp1];
+                        newF[2] = addedPoints[nLayers*region1+layerI];
+                        newF[3] = addedPoints[nLayers*region0+layerI];
+                    }
+                    else
+                    {
+                        newF[0] = addedPoints[nLayers*region0+layerI-1];
+                        newF[1] = addedPoints[nLayers*region1+layerI-1];
+                        newF[2] = addedPoints[nLayers*region1+layerI];
+                        newF[3] = addedPoints[nLayers*region0+layerI];
+                    }
 
-                // newF already outwards pointing.
-                meshMod.addFace
-                (
-                    newF,                   // vertices
-                    addedCells[minFaceI],   // own
-                    -1,                     // nei
-                    -1,                     // masterPointID
-                    -1,                     // masterEdgeID
-                    faceToFaceMap.size(),   // masterFaceID
-                    false,                  // flipFaceFlux
-                    ePatches[i],            // patchID
-                    -1,                     // zoneID
-                    false                   // zoneFlip
-                );
-                faceToFaceMap.append(0);
-                faceToEdgeMap.append(edgeI);
+                    ////if (ePatches.size() == 0)
+                    //{
+                    //    Pout<< "Adding from MULTI face:"
+                    //        << patch_.faceCentres()[minFaceI]
+                    //        << " from edge:"
+                    //        << patch_.localPoints()[f[fp0]]
+                    //        << patch_.localPoints()[f[fp1]]
+                    //        << " at layer:" << layerI
+                    //        << " with new points:" << newF
+                    //        << " locations:"
+                    //        << UIndirectList<point>(meshMod.points(), newF)
+                    //        << endl;
+                    //}
+
+                    // newF already outwards pointing.
+                    meshMod.addFace
+                    (
+                        newF,                   // vertices
+                        addedCells[nLayers*minFaceI+layerI],   // own
+                        -1,                     // nei
+                        -1,                     // masterPointID
+                        -1,                     // masterEdgeID
+                        faceToFaceMap.size(),   // masterFaceID
+                        false,                  // flipFaceFlux
+                        ePatches[i],            // patchID
+                        -1,                     // zoneID
+                        false                   // zoneFlip
+                    );
+                    faceToFaceMap.append(0);
+                    faceToEdgeMap.append(edgeI);
+                }
             }
         }
     }
