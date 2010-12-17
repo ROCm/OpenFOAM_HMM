@@ -538,11 +538,19 @@ Foam::label Foam::oldCyclicPolyPatch::getConsistentRotationFace
     const pointField& faceCentres
 ) const
 {
-    const scalarField magRadSqr =
-        magSqr((faceCentres - rotationCentre_) ^ rotationAxis_);
-    scalarField axisLen = (faceCentres - rotationCentre_) & rotationAxis_;
+    const scalarField magRadSqr
+    (
+        magSqr((faceCentres - rotationCentre_) ^ rotationAxis_)
+    );
+    scalarField axisLen
+    (
+        (faceCentres - rotationCentre_) & rotationAxis_
+    );
     axisLen = axisLen - min(axisLen);
-    const scalarField magLenSqr = magRadSqr + axisLen*axisLen;
+    const scalarField magLenSqr
+    (
+        magRadSqr + axisLen*axisLen
+    );
 
     label rotFace = -1;
     scalar maxMagLenSqr = -GREAT;
