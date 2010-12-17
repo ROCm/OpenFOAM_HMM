@@ -439,14 +439,14 @@ void surfaceDisplacementPointPatchVectorField::updateCoeffs()
 
     const polyMesh& mesh = patch().boundaryMesh().mesh()();
 
-    vectorField currentDisplacement = this->patchInternalField();
+    vectorField currentDisplacement(this->patchInternalField());
 
     // Calculate intersections with surface w.r.t points0.
     vectorField displacement(currentDisplacement);
     calcProjection(displacement);
 
     // offset wrt current displacement
-    vectorField offset = displacement-currentDisplacement;
+    vectorField offset(displacement-currentDisplacement);
 
     // Clip offset to maximum displacement possible: velocity*timestep
 
