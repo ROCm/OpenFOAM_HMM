@@ -65,7 +65,7 @@ void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inewt)
                 {
                     Key key;
                     is >> key;
-                    insert(key, inewt(key, is).ptr());
+                    this->insert(key, inewt(key, is).ptr());
 
                     is.fatalCheck
                     (
@@ -112,7 +112,7 @@ void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inewt)
             is.putBack(lastToken);
             Key key;
             is >> key;
-            insert(key, inewt(key, is).ptr());
+            this->insert(key, inewt(key, is).ptr());
 
             is.fatalCheck
             (
@@ -148,7 +148,11 @@ void Foam::HashPtrTable<T, Key, Hash>::read
 {
     forAllConstIter(dictionary, dict, iter)
     {
-        insert(iter().keyword(), inewt(dict.subDict(iter().keyword())).ptr());
+        this->insert
+        (
+            iter().keyword(),
+            inewt(dict.subDict(iter().keyword())).ptr()
+        );
     }
 }
 
@@ -177,21 +181,21 @@ template<class T, class Key, class Hash>
 template<class INew>
 Foam::HashPtrTable<T, Key, Hash>::HashPtrTable(Istream& is, const INew& inewt)
 {
-    read(is, inewt);
+    this->read(is, inewt);
 }
 
 
 template<class T, class Key, class Hash>
 Foam::HashPtrTable<T, Key, Hash>::HashPtrTable(Istream& is)
 {
-    read(is, INew<T>());
+    this->read(is, INew<T>());
 }
 
 
 template<class T, class Key, class Hash>
 Foam::HashPtrTable<T, Key, Hash>::HashPtrTable(const dictionary& dict)
 {
-    read(dict, INew<T>());
+    this->read(dict, INew<T>());
 }
 
 

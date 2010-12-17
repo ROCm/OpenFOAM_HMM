@@ -401,10 +401,7 @@ Foam::directions::directions
 
             if (wantNormal)
             {
-                operator[](nDirs++) = normalDirs;
-
-                //// Dump to file.
-                //writeOBJ("normal.obj", mesh, normalDirs);
+                this->operator[](nDirs++) = normalDirs;
             }
         }
 
@@ -423,20 +420,14 @@ Foam::directions::directions
 
             if (wantTan1)
             {
-                operator[](nDirs++) = tan1Dirs;
-
-                //// Dump to file.
-                //writeOBJ("tan1.obj", mesh, tan1Dirs);
+                this->operator[](nDirs++) = tan1Dirs;
             }
         }
         if (wantTan2)
         {
             vectorField tan2Dirs = normalDirs ^ tan1Dirs;
 
-            operator[](nDirs++) = tan2Dirs;
-
-            //// Dump to file.
-            //writeOBJ("tan2.obj", mesh, tan2Dirs);
+            this->operator[](nDirs++) = tan2Dirs;
         }
     }
     else

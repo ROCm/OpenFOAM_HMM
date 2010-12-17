@@ -151,7 +151,7 @@ void Foam::processorCyclicPointPatchField<Type>::swapAddSeparated
         }
 
         // All points are separated
-        addToInternalField(pField, pnf);
+        this->addToInternalField(pField, pnf);
     }
 }
 

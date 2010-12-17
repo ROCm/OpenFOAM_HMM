@@ -31,7 +31,7 @@ License
 template<class Type>
 void Foam::valuePointPatchField<Type>::checkFieldSize() const
 {
-    if (size() != this->patch().size())
+    if (this->size() != this->patch().size())
     {
         FatalErrorIn
         (
@@ -166,7 +166,7 @@ void Foam::valuePointPatchField<Type>::updateCoeffs()
     // Get internal field to insert values into
     Field<Type>& iF = const_cast<Field<Type>&>(this->internalField());
 
-    setInInternalField(iF, *this);
+    this->setInInternalField(iF, *this);
 
     pointPatchField<Type>::updateCoeffs();
 }
@@ -178,7 +178,7 @@ void Foam::valuePointPatchField<Type>::evaluate(const Pstream::commsTypes)
     // Get internal field to insert values into
     Field<Type>& iF = const_cast<Field<Type>&>(this->internalField());
 
-    setInInternalField(iF, *this);
+    this->setInInternalField(iF, *this);
 
     pointPatchField<Type>::evaluate();
 }

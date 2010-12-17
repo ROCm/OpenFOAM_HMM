@@ -946,7 +946,7 @@ CrankNicholsonDdtScheme<Type>::fvcDdtPhiCorr
             new fluxFieldType
             (
                 ddtIOobject,
-                fvcDdtPhiCoeff(U.oldTime(), phi.oldTime())
+                this->fvcDdtPhiCoeff(U.oldTime(), phi.oldTime())
                *fvc::interpolate(rA)
                *(
                     (rDtCoef*phi.oldTime() + offCentre_(dphidt0()))
@@ -1045,7 +1045,7 @@ CrankNicholsonDdtScheme<Type>::fvcDdtPhiCorr
                 new fluxFieldType
                 (
                     ddtIOobject,
-                    fvcDdtPhiCoeff(U.oldTime(), phi.oldTime())*
+                    this->fvcDdtPhiCoeff(U.oldTime(), phi.oldTime())*
                     (
                         fvc::interpolate(rA*rho.oldTime())
                        *(rDtCoef*phi.oldTime() + offCentre_(dphidt0()))
@@ -1090,7 +1090,7 @@ CrankNicholsonDdtScheme<Type>::fvcDdtPhiCorr
                 new fluxFieldType
                 (
                     ddtIOobject,
-                    fvcDdtPhiCoeff
+                    this->fvcDdtPhiCoeff
                     (
                         U.oldTime(),
                         phi.oldTime()/fvc::interpolate(rho.oldTime())
@@ -1139,8 +1139,9 @@ CrankNicholsonDdtScheme<Type>::fvcDdtPhiCorr
                 new fluxFieldType
                 (
                     ddtIOobject,
-                    fvcDdtPhiCoeff(rho.oldTime(), U.oldTime(), phi.oldTime())*
-                    (
+                    this->fvcDdtPhiCoeff
+                    (rho.oldTime(), U.oldTime(), phi.oldTime())
+                  * (
                         fvc::interpolate(rA)
                        *(rDtCoef*phi.oldTime() + offCentre_(dphidt0()))
                       - (

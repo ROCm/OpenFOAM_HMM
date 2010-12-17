@@ -74,7 +74,7 @@ void Foam::rawSetWriter<Type>::write
         columns[i] = valueSets[i];
     }
 
-    writeTable(points, columns, os);
+    this->writeTable(points, columns, os);
 }
 
 
@@ -106,7 +106,7 @@ void Foam::rawSetWriter<Type>::write
             columns[i] = &valueSets[i][trackI];
         }
 
-        writeTable(points[trackI], columns, os);
+        this->writeTable(points[trackI], columns, os);
         os  << nl << nl;
     }
 }
