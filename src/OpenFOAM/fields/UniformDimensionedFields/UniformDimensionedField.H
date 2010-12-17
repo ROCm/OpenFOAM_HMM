@@ -64,9 +64,6 @@ public:
 
     // Constructors
 
-        //- Construct null
-        UniformDimensionedField();
-
         //- Construct from components
         UniformDimensionedField(const IOobject&, const dimensioned<Type>&);
 
