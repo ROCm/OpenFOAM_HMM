@@ -63,6 +63,7 @@ namespace Foam
     };
 }
 
+
 const Foam::NamedEnum<Foam::distributedTriSurfaceMesh::distributionType, 3>
     Foam::distributedTriSurfaceMesh::distributionTypeNames_;
 
