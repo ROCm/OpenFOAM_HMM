@@ -189,7 +189,7 @@ void Foam::swirlFlowRateInletVelocityFvPatchVectorField::write
 
 namespace Foam
 {
-   makePatchTypeField
+   makeNonTemplatedPatchTypeField
    (
        fvPatchVectorField,
        swirlFlowRateInletVelocityFvPatchVectorField

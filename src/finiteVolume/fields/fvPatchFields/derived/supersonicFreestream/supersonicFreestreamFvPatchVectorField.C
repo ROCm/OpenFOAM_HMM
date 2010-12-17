@@ -305,7 +305,7 @@ void Foam::supersonicFreestreamFvPatchVectorField::write(Ostream& os) const
 
 namespace Foam
 {
-    makePatchTypeField
+    makeNonTemplatedPatchTypeField
     (
         fvPatchVectorField,
         supersonicFreestreamFvPatchVectorField

@@ -124,7 +124,7 @@ void Foam::rotatingTotalPressureFvPatchScalarField::write(Ostream& os) const
 
 namespace Foam
 {
-    makePatchTypeField
+    makeNonTemplatedPatchTypeField
     (
         fvPatchScalarField,
         rotatingTotalPressureFvPatchScalarField

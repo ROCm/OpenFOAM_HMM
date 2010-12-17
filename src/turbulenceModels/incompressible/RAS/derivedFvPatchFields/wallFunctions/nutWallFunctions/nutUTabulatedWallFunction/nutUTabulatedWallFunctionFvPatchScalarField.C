@@ -200,7 +200,7 @@ void nutUTabulatedWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
+makeNonTemplatedPatchTypeField
 (
     fvPatchScalarField,
     nutUTabulatedWallFunctionFvPatchScalarField

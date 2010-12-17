@@ -201,7 +201,7 @@ void angularOscillatingVelocityPointPatchVectorField::write
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePointPatchTypeField
+makeNonTemplatedPointPatchTypeField
 (
     pointPatchVectorField,
     angularOscillatingVelocityPointPatchVectorField

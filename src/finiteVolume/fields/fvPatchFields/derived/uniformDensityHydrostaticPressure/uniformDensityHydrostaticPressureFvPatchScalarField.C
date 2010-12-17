@@ -155,7 +155,7 @@ void Foam::uniformDensityHydrostaticPressureFvPatchScalarField::write
 
 namespace Foam
 {
-    makePatchTypeField
+    makeNonTemplatedPatchTypeField
     (
         fvPatchScalarField,
         uniformDensityHydrostaticPressureFvPatchScalarField

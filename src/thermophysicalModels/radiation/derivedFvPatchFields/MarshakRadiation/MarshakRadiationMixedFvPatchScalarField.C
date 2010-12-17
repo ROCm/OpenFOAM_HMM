@@ -176,7 +176,7 @@ void Foam::MarshakRadiationFvPatchScalarField::write(Ostream& os) const
 
 namespace Foam
 {
-    makePatchTypeField
+    makeNonTemplatedPatchTypeField
     (
         fvPatchScalarField,
         MarshakRadiationFvPatchScalarField

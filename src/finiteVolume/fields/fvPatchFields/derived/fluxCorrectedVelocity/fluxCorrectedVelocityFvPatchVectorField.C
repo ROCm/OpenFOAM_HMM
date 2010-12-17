@@ -152,7 +152,7 @@ void Foam::fluxCorrectedVelocityFvPatchVectorField::write(Ostream& os) const
 
 namespace Foam
 {
-    makePatchTypeField
+    makeNonTemplatedPatchTypeField
     (
         fvPatchVectorField,
         fluxCorrectedVelocityFvPatchVectorField

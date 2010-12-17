@@ -235,7 +235,11 @@ void mutFilmWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchScalarField, mutFilmWallFunctionFvPatchScalarField);
+makeNonTemplatedPatchTypeField
+(
+    fvPatchScalarField,
+    mutFilmWallFunctionFvPatchScalarField
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

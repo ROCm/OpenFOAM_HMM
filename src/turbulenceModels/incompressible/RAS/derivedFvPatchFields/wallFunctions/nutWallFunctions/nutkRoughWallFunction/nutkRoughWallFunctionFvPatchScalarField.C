@@ -230,7 +230,7 @@ void nutkRoughWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
+makeNonTemplatedPatchTypeField
 (
     fvPatchScalarField,
     nutkRoughWallFunctionFvPatchScalarField

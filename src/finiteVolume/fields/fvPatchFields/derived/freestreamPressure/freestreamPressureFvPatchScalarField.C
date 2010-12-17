@@ -144,7 +144,7 @@ void Foam::freestreamPressureFvPatchScalarField::updateCoeffs()
 
 namespace Foam
 {
-    makePatchTypeField
+    makeNonTemplatedPatchTypeField
     (
         fvPatchScalarField,
         freestreamPressureFvPatchScalarField

@@ -184,7 +184,11 @@ void Foam::wallHeatTransferFvPatchScalarField::write(Ostream& os) const
 
 namespace Foam
 {
-    makePatchTypeField(fvPatchScalarField, wallHeatTransferFvPatchScalarField);
+    makeNonTemplatedPatchTypeField
+    (
+        fvPatchScalarField,
+        wallHeatTransferFvPatchScalarField
+    );
 }
 
 // ************************************************************************* //

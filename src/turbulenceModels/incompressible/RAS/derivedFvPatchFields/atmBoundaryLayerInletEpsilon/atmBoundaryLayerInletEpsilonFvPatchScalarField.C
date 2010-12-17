@@ -154,7 +154,7 @@ void atmBoundaryLayerInletEpsilonFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
+makeNonTemplatedPatchTypeField
 (
     fvPatchScalarField,
     atmBoundaryLayerInletEpsilonFvPatchScalarField

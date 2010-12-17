@@ -236,7 +236,11 @@ void nutkWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchScalarField, nutkWallFunctionFvPatchScalarField);
+makeNonTemplatedPatchTypeField
+(
+    fvPatchScalarField,
+    nutkWallFunctionFvPatchScalarField
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

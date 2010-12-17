@@ -230,7 +230,7 @@ void turbulentHeatFluxTemperatureFvPatchScalarField::write
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
+makeNonTemplatedPatchTypeField
 (
     fvPatchScalarField,
     turbulentHeatFluxTemperatureFvPatchScalarField

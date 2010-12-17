@@ -146,7 +146,7 @@ void fixedShearStressFvPatchVectorField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
+makeNonTemplatedPatchTypeField
 (
     fvPatchVectorField,
     fixedShearStressFvPatchVectorField

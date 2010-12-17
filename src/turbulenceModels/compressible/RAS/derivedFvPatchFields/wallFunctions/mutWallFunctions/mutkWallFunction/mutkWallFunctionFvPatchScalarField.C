@@ -228,7 +228,11 @@ void mutkWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchScalarField, mutkWallFunctionFvPatchScalarField);
+makeNonTemplatedPatchTypeField
+(
+    fvPatchScalarField,
+    mutkWallFunctionFvPatchScalarField
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

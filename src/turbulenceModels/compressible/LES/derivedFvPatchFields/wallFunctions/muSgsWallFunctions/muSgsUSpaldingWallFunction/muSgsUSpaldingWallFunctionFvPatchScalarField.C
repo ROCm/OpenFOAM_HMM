@@ -208,7 +208,7 @@ void muSgsUSpaldingWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
+makeNonTemplatedPatchTypeField
 (
     fvPatchScalarField,
     muSgsUSpaldingWallFunctionFvPatchScalarField

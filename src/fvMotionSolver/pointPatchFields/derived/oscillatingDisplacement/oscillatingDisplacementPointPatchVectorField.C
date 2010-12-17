@@ -127,7 +127,7 @@ void oscillatingDisplacementPointPatchVectorField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePointPatchTypeField
+makeNonTemplatedPointPatchTypeField
 (
     pointPatchVectorField,
     oscillatingDisplacementPointPatchVectorField

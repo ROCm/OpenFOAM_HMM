@@ -190,7 +190,7 @@ void Foam::totalTemperatureFvPatchScalarField::write(Ostream& os) const
 
 namespace Foam
 {
-    makePatchTypeField
+    makeNonTemplatedPatchTypeField
     (
         fvPatchScalarField,
         totalTemperatureFvPatchScalarField

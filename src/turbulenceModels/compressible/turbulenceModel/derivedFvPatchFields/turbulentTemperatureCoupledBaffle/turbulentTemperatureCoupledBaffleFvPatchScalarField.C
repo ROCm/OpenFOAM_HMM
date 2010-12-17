@@ -289,7 +289,7 @@ void Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::write
 namespace Foam
 {
 
-makePatchTypeField
+makeNonTemplatedPatchTypeField
 (
     fvPatchScalarField,
     turbulentTemperatureCoupledBaffleFvPatchScalarField

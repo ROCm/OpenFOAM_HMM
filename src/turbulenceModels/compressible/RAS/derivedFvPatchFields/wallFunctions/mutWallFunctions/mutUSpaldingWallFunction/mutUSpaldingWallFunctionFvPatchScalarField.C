@@ -205,7 +205,7 @@ void mutUSpaldingWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
+makeNonTemplatedPatchTypeField
 (
     fvPatchScalarField,
     mutUSpaldingWallFunctionFvPatchScalarField

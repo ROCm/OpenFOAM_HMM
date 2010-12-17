@@ -195,7 +195,7 @@ void nuSgsUSpaldingWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
+makeNonTemplatedPatchTypeField
 (
     fvPatchScalarField,
     nuSgsUSpaldingWallFunctionFvPatchScalarField

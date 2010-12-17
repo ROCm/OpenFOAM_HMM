@@ -121,7 +121,7 @@ write(Ostream& os) const
 
 namespace Foam
 {
-   makePatchTypeField
+   makeNonTemplatedPatchTypeField
    (
        fvPatchVectorField,
        timeVaryingFlowRateInletVelocityFvPatchVectorField

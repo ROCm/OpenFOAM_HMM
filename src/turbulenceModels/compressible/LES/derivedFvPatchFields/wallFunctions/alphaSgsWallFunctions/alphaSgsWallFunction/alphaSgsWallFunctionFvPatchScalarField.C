@@ -147,7 +147,7 @@ void alphaSgsWallFunctionFvPatchScalarField::evaluate
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
+makeNonTemplatedPatchTypeField
 (
     fvPatchScalarField,
     alphaSgsWallFunctionFvPatchScalarField

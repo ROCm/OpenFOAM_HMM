@@ -203,7 +203,7 @@ const
 
 namespace Foam
 {
-    makePatchTypeField
+    makeNonTemplatedPatchTypeField
     (
         fvPatchScalarField,
         inletOutletTotalTemperatureFvPatchScalarField

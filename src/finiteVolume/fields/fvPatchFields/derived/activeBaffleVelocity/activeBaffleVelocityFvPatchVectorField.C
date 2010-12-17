@@ -310,11 +310,12 @@ void Foam::activeBaffleVelocityFvPatchVectorField::write(Ostream& os) const
 
 namespace Foam
 {
-    makePatchTypeField
+    makeNonTemplatedPatchTypeField
     (
         fvPatchVectorField,
         activeBaffleVelocityFvPatchVectorField
     );
 }
+
 
 // ************************************************************************* //
