@@ -37,7 +37,7 @@ void Foam::twoPhaseMixture::calcNu()
     nuModel1_->correct();
     nuModel2_->correct();
 
-    volScalarField limitedAlpha1
+    const volScalarField limitedAlpha1
     (
         "limitedAlpha1",
         min(max(alpha1_, scalar(0)), scalar(1))
@@ -112,7 +112,10 @@ Foam::twoPhaseMixture::twoPhaseMixture
 
 Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixture::mu() const
 {
-    volScalarField limitedAlpha1 = min(max(alpha1_, scalar(0)), scalar(1));
+    const volScalarField limitedAlpha1
+    (
+        min(max(alpha1_, scalar(0)), scalar(1))
+    );
 
     return tmp<volScalarField>
     (
@@ -128,8 +131,10 @@ Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixture::mu() const
 
 Foam::tmp<Foam::surfaceScalarField> Foam::twoPhaseMixture::muf() const
 {
-    surfaceScalarField alpha1f =
-        min(max(fvc::interpolate(alpha1_), scalar(0)), scalar(1));
+    const surfaceScalarField alpha1f
+    (
+        min(max(fvc::interpolate(alpha1_), scalar(0)), scalar(1))
+    );
 
     return tmp<surfaceScalarField>
     (
@@ -145,8 +150,10 @@ Foam::tmp<Foam::surfaceScalarField> Foam::twoPhaseMixture::muf() const
 
 Foam::tmp<Foam::surfaceScalarField> Foam::twoPhaseMixture::nuf() const
 {
-    surfaceScalarField alpha1f =
-        min(max(fvc::interpolate(alpha1_), scalar(0)), scalar(1));
+    const surfaceScalarField alpha1f
+    (
+        min(max(fvc::interpolate(alpha1_), scalar(0)), scalar(1))
+    );
 
     return tmp<surfaceScalarField>
     (
