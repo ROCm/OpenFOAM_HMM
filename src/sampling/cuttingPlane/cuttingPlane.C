@@ -378,7 +378,7 @@ void Foam::cuttingPlane::reCut
     MeshStorage::clear();
     cutCells_.clear();
 
-    scalarField dotProducts = (mesh.points() - refPoint()) & normal();
+    const scalarField dotProducts((mesh.points() - refPoint()) & normal());
 
     // Determine cells that are (probably) cut.
     calcCutCells(mesh, dotProducts, cellIdLabels);
