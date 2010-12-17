@@ -124,24 +124,27 @@ tmp<volScalarField> SpalartAllmarasIDDES::fd(const volScalarField& S) const
 
 tmp<volScalarField> SpalartAllmarasIDDES::dTilda(const volScalarField& S) const
 {
-    volScalarField alpha = this->alpha();
-    volScalarField expTerm = exp(sqr(alpha));
+    const volScalarField alpha(this->alpha());
+    const volScalarField expTerm(exp(sqr(alpha)));
 
-    volScalarField fHill =
+    tmp<volScalarField> fHill =
         2*(pos(alpha)*pow(expTerm, -11.09) + neg(alpha)*pow(expTerm, -9.0));
 
-    volScalarField fStep = min(2*pow(expTerm, -9.0), scalar(1));
-    volScalarField fHyb = max(1 - fd(S), fStep);
-    volScalarField fAmp = 1 - max(ft(S), fl(S));
-    volScalarField fRestore = max(fHill - 1, scalar(0))*fAmp;
+    tmp<volScalarField> fStep = min(2*pow(expTerm, -9.0), scalar(1));
+    const volScalarField fHyb(max(1 - fd(S), fStep));
+    tmp<volScalarField> fAmp = 1 - max(ft(S), fl(S));
+    tmp<volScalarField> fRestore = max(fHill - 1, scalar(0))*fAmp;
 
     // IGNORING ft2 terms
-    volScalarField Psi = sqrt
+    const volScalarField Psi
     (
-        min
+        sqrt
         (
-            scalar(100),
-            (1 - Cb1_/(Cw1_*sqr(kappa_)*fwStar_)*fv2())/max(SMALL, fv1())
+            min
+            (
+                scalar(100),
+                (1 - Cb1_/(Cw1_*sqr(kappa_)*fwStar_)*fv2())/max(SMALL, fv1())
+            )
         )
     );
 

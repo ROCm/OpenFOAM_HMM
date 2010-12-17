@@ -96,12 +96,12 @@ void DeardorffDiffStress::correct(const tmp<volTensorField>& tgradU)
 
     GenSGSStress::correct(gradU);
 
-    volSymmTensorField D = symm(gradU);
+    const volSymmTensorField D(symm(gradU));
 
-    volSymmTensorField P = -twoSymm(B_ & gradU);
+    const volSymmTensorField P(-twoSymm(B_ & gradU));
 
-    volScalarField K = 0.5*tr(B_);
-    volScalarField Epsilon = 2*nuEff()*magSqr(D);
+    volScalarField K(0.5*tr(B_));
+    volScalarField Epsilon(2*nuEff()*magSqr(D));
 
     tmp<fvSymmTensorMatrix> BEqn
     (
