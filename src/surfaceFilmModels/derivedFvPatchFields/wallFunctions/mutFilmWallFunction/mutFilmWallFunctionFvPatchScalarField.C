@@ -80,8 +80,10 @@ tmp<scalarField> mutFilmWallFunctionFvPatchScalarField::calcUTau
         }
     }
 
-    scalarField mDotFilm =
-        filmModel.massPhaseChangeForPrimary().boundaryField()[filmPatchI];
+    scalarField mDotFilm
+    (
+        filmModel.massPhaseChangeForPrimary().boundaryField()[filmPatchI]
+    );
     distMap.distribute(mDotFilm);
 
 
@@ -131,7 +133,7 @@ tmp<scalarField> mutFilmWallFunctionFvPatchScalarField::calcMut() const
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-    const scalarField magGradU = mag(Uw.snGrad());
+    const scalarField magGradU(mag(Uw.snGrad()));
     const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
     const scalarField& muw = rasModel.mu().boundaryField()[patchI];
 

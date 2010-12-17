@@ -131,7 +131,7 @@ void directMappedFixedInternalValueFvPatchField<Type>::updateCoeffs()
         );
 
     // Retrieve the neighbour patch internal field
-    Field<Type> nbrIntFld = nbrField.patchInternalField();
+    Field<Type> nbrIntFld(nbrField.patchInternalField());
     distMap.distribute(nbrIntFld);
 
     // Assign (this) patch internal field to its neighbour values
