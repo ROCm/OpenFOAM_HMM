@@ -112,8 +112,10 @@ Foam::fv::extendedLeastSquaresGrad<Type>::calcGrad
 
         if (vsf.boundaryField()[patchi].coupled())
         {
-            Field<Type> neiVsf =
-                vsf.boundaryField()[patchi].patchNeighbourField();
+            const Field<Type> neiVsf
+            (
+                vsf.boundaryField()[patchi].patchNeighbourField()
+            );
 
             forAll(neiVsf, patchFaceI)
             {
