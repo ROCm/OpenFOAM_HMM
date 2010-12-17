@@ -106,9 +106,9 @@ int main(int argc, char *argv[])
 
 #           include "createPhi.H"
 
-            volVectorField gradT = fvc::grad(T);
+            volVectorField gradT(fvc::grad(T));
 
-            volScalarField TE = 0.5*sqr(T);
+            volScalarField TE(0.5*sqr(T));
 
             volScalarField L
             (
