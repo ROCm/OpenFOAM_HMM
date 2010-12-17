@@ -198,14 +198,14 @@ void alphaSgsJayatillekeWallFunctionFvPatchScalarField::evaluate
     const label patchI = patch().index();
 
     const scalarField& muw = lesModel.mu().boundaryField()[patchI];
-    const scalarField muSgsw = lesModel.muSgs()().boundaryField()[patchI];
+    const scalarField muSgsw(lesModel.muSgs()().boundaryField()[patchI]);
 
     const scalarField& alphaw = lesModel.alpha().boundaryField()[patchI];
     scalarField& alphaSgsw = *this;
 
     const fvPatchVectorField& Uw = lesModel.U().boundaryField()[patchI];
-    const scalarField magUp = mag(Uw.patchInternalField() - Uw);
-    const scalarField magGradUw = mag(Uw.snGrad());
+    const scalarField magUp(mag(Uw.patchInternalField() - Uw));
+    const scalarField magGradUw(mag(Uw.snGrad()));
 
     const scalarField& rhow = lesModel.rho().boundaryField()[patchI];
     const fvPatchScalarField& hw =
@@ -214,7 +214,7 @@ void alphaSgsJayatillekeWallFunctionFvPatchScalarField::evaluate
     const scalarField& ry = patch().deltaCoeffs();
 
     // Heat flux [W/m2] - lagging alphaSgsw
-    const scalarField qDot = (alphaw + alphaSgsw)*hw.snGrad();
+    const scalarField qDot((alphaw + alphaSgsw)*hw.snGrad());
 
     // Populate boundary values
     forAll(alphaSgsw, faceI)

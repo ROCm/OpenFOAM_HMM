@@ -56,7 +56,7 @@ void SpalartAllmaras::updateSubGridScaleFields()
 
 tmp<volScalarField> SpalartAllmaras::fv1() const
 {
-    volScalarField chi3 = pow3(rho()*nuTilda_/mu());
+    volScalarField chi3(pow3(rho()*nuTilda_/mu()));
     return chi3/(chi3 + pow3(Cv1_));
 }
 
@@ -69,8 +69,8 @@ tmp<volScalarField> SpalartAllmaras::fv2() const
 
 tmp<volScalarField> SpalartAllmaras::fv3() const
 {
-    volScalarField chi = rho()*nuTilda_/mu();
-    volScalarField chiByCv2 = (1/Cv2_)*chi;
+    volScalarField chi(rho()*nuTilda_/mu());
+    volScalarField chiByCv2((1/Cv2_)*chi);
 
     return
         (scalar(1) + chi*fv1())
@@ -82,18 +82,25 @@ tmp<volScalarField> SpalartAllmaras::fv3() const
 
 tmp<volScalarField> SpalartAllmaras::fw(const volScalarField& Stilda) const
 {
-    volScalarField r = min
+    volScalarField r
     (
-        nuTilda_
-       /(
-           max(Stilda, dimensionedScalar("SMALL", Stilda.dimensions(), SMALL))
-          *sqr(kappa_*dTilda_)
-        ),
-        scalar(10.0)
+        min
+        (
+            nuTilda_
+           /(
+               max
+               (
+                   Stilda,
+                   dimensionedScalar("SMALL", Stilda.dimensions(), SMALL)
+               )
+              *sqr(kappa_*dTilda_)
+            ),
+            scalar(10.0)
+        )
     );
     r.boundaryField() == 0.0;
 
-    volScalarField g = r + Cw2_*(pow6(r) - r);
+    volScalarField g(r + Cw2_*(pow6(r) - r));
 
     return g*pow((1.0 + pow6(Cw3_))/(pow6(g) + pow6(Cw3_)), 1.0/6.0);
 }
@@ -300,8 +307,10 @@ void SpalartAllmaras::correct(const tmp<volTensorField>& tgradU)
         dTilda_ = min(CDES_*delta(), wallDist(mesh_).y());
     }
 
-    volScalarField Stilda =
-        fv3()*::sqrt(2.0)*mag(skew(gradU)) + fv2()*nuTilda_/sqr(kappa_*dTilda_);
+    volScalarField Stilda
+    (
+        fv3()*::sqrt(2.0)*mag(skew(gradU)) + fv2()*nuTilda_/sqr(kappa_*dTilda_)
+    );
 
     tmp<fvScalarMatrix> nuTildaEqn
     (

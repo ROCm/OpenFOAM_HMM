@@ -138,8 +138,10 @@ void alphaSgsWallFunctionFvPatchScalarField::evaluate
 {
     const LESModel& lesModel = db().lookupObject<LESModel>("LESProperties");
 
-    const scalarField muSgsw =
-        lesModel.muSgs()().boundaryField()[patch().index()];
+    const scalarField muSgsw
+    (
+        lesModel.muSgs()().boundaryField()[patch().index()]
+    );
 
     operator==(muSgsw/Prt_);
 }
