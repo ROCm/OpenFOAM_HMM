@@ -50,7 +50,7 @@ CrankNicholsonDdtScheme<Type>::DDt0Field<GeoField>::DDt0Field
 :
     GeoField(io, mesh),
     startTimeIndex_(-2) // This field is for a restart and thus correct so set
-                        // the start time-index to corespond to a previous run
+                        // the start time-index to correspond to a previous run
 {
     // Set the time-index to the beginning of the run to ensure the field
     // is updated during the first time-step
@@ -108,7 +108,7 @@ CrankNicholsonDdtScheme<Type>::ddt0_
     const dimensionSet& dims
 )
 {
-    if (!mesh().objectRegistry::foundObject<GeoField>(name))
+    if (!mesh().objectRegistry::template foundObject<GeoField>(name))
     {
         const Time& runTime = mesh().time();
         word startTimeName = runTime.timeName(runTime.startTime().value());
@@ -173,7 +173,7 @@ CrankNicholsonDdtScheme<Type>::ddt0_
     (
         const_cast<GeoField&>
         (
-            mesh().objectRegistry::lookupObject<GeoField>(name)
+            mesh().objectRegistry::template lookupObject<GeoField>(name)
         )
     );
 

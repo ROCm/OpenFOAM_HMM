@@ -42,7 +42,8 @@ namespace fv
 template<class Type>
 const volScalarField& localEulerDdtScheme<Type>::localRDeltaT() const
 {
-    return mesh().objectRegistry::lookupObject<volScalarField>(rDeltaTName_);
+    return mesh().objectRegistry::template lookupObject<volScalarField>
+        (rDeltaTName_);
 }
 
 

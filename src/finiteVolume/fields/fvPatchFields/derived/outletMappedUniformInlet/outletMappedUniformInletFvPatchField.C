@@ -139,7 +139,9 @@ void Foam::outletMappedUniformInletFvPatchField<Type>::updateCoeffs()
         f.boundaryField()[outletPatchID];
 
     const surfaceScalarField& phi =
-        this->db().objectRegistry::lookupObject<surfaceScalarField>(phiName_);
+        this->db().objectRegistry::template lookupObject<surfaceScalarField>
+        (phiName_);
+
     const scalarField& outletPatchPhi = phi.boundaryField()[outletPatchID];
     scalar sumOutletPatchPhi = gSum(outletPatchPhi);
 

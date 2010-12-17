@@ -158,23 +158,23 @@ Foam::tmp<Foam::scalarField>
 Foam::advectiveFvPatchField<Type>::advectionSpeed() const
 {
     const surfaceScalarField& phi =
-        this->db().objectRegistry::lookupObject<surfaceScalarField>(phiName_);
+        this->db().objectRegistry::template lookupObject<surfaceScalarField>
+        (phiName_);
 
-    fvsPatchField<scalar> phip = this->patch().lookupPatchField
-    (
-        phiName_,
-        reinterpret_cast<const surfaceScalarField*>(0),
-        reinterpret_cast<const scalar*>(0)
-    );
+    fvsPatchField<scalar> phip =
+        this->patch().template lookupPatchField<surfaceScalarField, scalar>
+        (
+            phiName_
+        );
+
 
     if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
     {
-        const fvPatchScalarField& rhop = this->patch().lookupPatchField
-        (
-            rhoName_,
-            reinterpret_cast<const volScalarField*>(0),
-            reinterpret_cast<const scalar*>(0)
-        );
+        const fvPatchScalarField& rhop =
+            this->patch().template lookupPatchField<volScalarField, scalar>
+            (
+                rhoName_
+            );
 
         return phip/(rhop*this->patch().magSf());
     }
@@ -201,7 +201,7 @@ void Foam::advectiveFvPatchField<Type>::updateCoeffs()
     scalar deltaT = this->db().time().deltaTValue();
 
     const GeometricField<Type, fvPatchField, volMesh>& field =
-        this->db().objectRegistry::
+        this->db().objectRegistry::template
         lookupObject<GeometricField<Type, fvPatchField, volMesh> >
         (
             this->dimensionedInternalField().name()

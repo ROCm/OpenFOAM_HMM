@@ -109,11 +109,9 @@ void Foam::cellMotionFvPatchField<Type>::updateCoeffs()
     pfName.replace("cell", "point");
 
     const GeometricField<Type, pointPatchField, pointMesh>& pointMotion =
-        this->db().objectRegistry::
-        lookupObject<GeometricField<Type, pointPatchField, pointMesh> >
-        (
-            pfName
-        );
+        this->db().objectRegistry::template
+            lookupObject<GeometricField<Type, pointPatchField, pointMesh> >
+            (pfName);
 
     forAll(p, i)
     {
