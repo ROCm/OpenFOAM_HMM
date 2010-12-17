@@ -68,7 +68,7 @@ public:
 
 
     //- Destructor
-    ~linearNormal();
+    virtual ~linearNormal();
 
 
     // Member Operators
