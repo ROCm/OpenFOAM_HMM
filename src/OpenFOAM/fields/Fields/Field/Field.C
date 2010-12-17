@@ -166,8 +166,7 @@ Foam::Field<Type>::Field(const Xfer<Field<Type> >& f)
 {}
 
 
-#ifndef __GNUC__
-// Not needed for clang/gcc
+#ifdef __INTEL_COMPILER
 template<class Type>
 Foam::Field<Type>::Field(const typename Field<Type>::subField& sf)
 :
