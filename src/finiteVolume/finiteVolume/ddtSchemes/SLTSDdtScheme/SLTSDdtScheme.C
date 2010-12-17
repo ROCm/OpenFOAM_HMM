@@ -157,7 +157,7 @@ SLTSDdtScheme<Type>::fvcDdt
     const dimensioned<Type>& dt
 )
 {
-    volScalarField rDeltaT = SLrDeltaT();
+    const volScalarField rDeltaT(SLrDeltaT());
 
     IOobject ddtIOobject
     (
@@ -216,7 +216,7 @@ SLTSDdtScheme<Type>::fvcDdt
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    volScalarField rDeltaT = SLrDeltaT();
+    const volScalarField rDeltaT(SLrDeltaT());
 
     IOobject ddtIOobject
     (
@@ -268,7 +268,7 @@ SLTSDdtScheme<Type>::fvcDdt
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    volScalarField rDeltaT = SLrDeltaT();
+    const volScalarField rDeltaT(SLrDeltaT());
 
     IOobject ddtIOobject
     (
@@ -320,7 +320,7 @@ SLTSDdtScheme<Type>::fvcDdt
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    volScalarField rDeltaT = SLrDeltaT();
+    const volScalarField rDeltaT(SLrDeltaT());
 
     IOobject ddtIOobject
     (
@@ -515,7 +515,7 @@ SLTSDdtScheme<Type>::fvcDdtPhiCorr
     }
     else
     {
-        volScalarField rDeltaT = SLrDeltaT();
+        const volScalarField rDeltaT(SLrDeltaT());
 
         return tmp<fluxFieldType>
         (
@@ -570,7 +570,7 @@ SLTSDdtScheme<Type>::fvcDdtPhiCorr
     }
     else
     {
-        volScalarField rDeltaT = SLrDeltaT();
+        const volScalarField rDeltaT(SLrDeltaT());
 
         if
         (

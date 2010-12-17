@@ -43,7 +43,7 @@ namespace fv
 template<class Type>
 tmp<volScalarField> CoEulerDdtScheme<Type>::CorDeltaT() const
 {
-    surfaceScalarField cofrDeltaT = CofrDeltaT();
+    const surfaceScalarField cofrDeltaT(CofrDeltaT());
 
     tmp<volScalarField> tcorDeltaT
     (
@@ -154,7 +154,7 @@ CoEulerDdtScheme<Type>::fvcDdt
     const dimensioned<Type>& dt
 )
 {
-    volScalarField rDeltaT = CorDeltaT();
+    const volScalarField rDeltaT(CorDeltaT());
 
     IOobject ddtIOobject
     (
@@ -213,7 +213,7 @@ CoEulerDdtScheme<Type>::fvcDdt
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    volScalarField rDeltaT = CorDeltaT();
+    const volScalarField rDeltaT(CorDeltaT());
 
     IOobject ddtIOobject
     (
@@ -265,7 +265,7 @@ CoEulerDdtScheme<Type>::fvcDdt
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    volScalarField rDeltaT = CorDeltaT();
+    const volScalarField rDeltaT(CorDeltaT());
 
     IOobject ddtIOobject
     (
@@ -317,7 +317,7 @@ CoEulerDdtScheme<Type>::fvcDdt
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    volScalarField rDeltaT = CorDeltaT();
+    const volScalarField rDeltaT(CorDeltaT());
 
     IOobject ddtIOobject
     (
@@ -510,7 +510,7 @@ CoEulerDdtScheme<Type>::fvcDdtPhiCorr
     }
     else
     {
-        volScalarField rDeltaT = CorDeltaT();
+        const volScalarField rDeltaT(CorDeltaT());
 
         return tmp<fluxFieldType>
         (
@@ -565,7 +565,7 @@ CoEulerDdtScheme<Type>::fvcDdtPhiCorr
     }
     else
     {
-        volScalarField rDeltaT = CorDeltaT();
+        const volScalarField rDeltaT(CorDeltaT());
 
         if
         (
