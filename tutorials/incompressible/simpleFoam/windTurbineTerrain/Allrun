@@ -7,6 +7,7 @@ cd ${0%/*} || exit 1    # run from this directory
 compileApplication windSimpleFoam
 
 runApplication blockMesh
+cp system/decomposeParDict-nonPar system/decomposeParDict
 runApplication decomposePar
 
 #runApplication snappyHexMesh -overwrite
@@ -14,6 +15,7 @@ runApplication decomposePar
 #runApplication setsToZones -noFlipMap
 #runApplication windSimpleFoam
 
+cp system/decomposeParDict-par system/decomposeParDict
 runParallel snappyHexMesh 2 -overwrite
 
 # Add wildcard entries for meshes patches since not preserved

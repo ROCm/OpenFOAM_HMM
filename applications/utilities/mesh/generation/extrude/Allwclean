@@ -2,7 +2,8 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-wmake libso extrudeModel
-wmake
+wclean libso extrudeModel
+wclean extrudeMesh
+wclean extrudeToRegionMesh
 
 # ----------------------------------------------------------------- end-of-file

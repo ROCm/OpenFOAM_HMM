@@ -48,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-         Class selfContainedDirectMappedFixedValueFvPatch Declaration
+      Class selfContainedDirectMappedFixedValueFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

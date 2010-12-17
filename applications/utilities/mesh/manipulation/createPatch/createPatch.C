@@ -55,23 +55,6 @@ namespace Foam
     defineTemplateTypeNameAndDebug(IOPtrList<dictionary>, 0);
 }
 
-// Combine operator to synchronise points. We choose point nearest to origin so
-// we can use e.g. great,great,great as null value.
-class nearestEqOp
-{
-
-public:
-
-    void operator()(vector& x, const vector& y) const
-    {
-        if (magSqr(y) < magSqr(x))
-        {
-            x = y;
-        }
-    }
-};
-
-
 void changePatchID
 (
     const polyMesh& mesh,
@@ -854,7 +837,7 @@ int main(int argc, char *argv[])
         (
             mesh,
             newPoints,
-            nearestEqOp(),
+            minMagSqrEqOp<vector>(),
             point(GREAT, GREAT, GREAT)
         );
 

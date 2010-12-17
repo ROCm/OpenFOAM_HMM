@@ -184,6 +184,8 @@
     + =setSet=: allows time range (e.g. 0:100) in combination with -batch argument
     to execute the commands for multiple times.
 * Post-processing
+  + =paraFoam=, =foamToVTK=: full support for polyhedral cell type in recent
+     Paraview versions.
   + =foamToEnsight=: parallel continuous data. new =-nodeValues= option to generate and output nodal
     field data.
   + =singleCellMesh=: new utility to convert mesh and fields to a single cell
