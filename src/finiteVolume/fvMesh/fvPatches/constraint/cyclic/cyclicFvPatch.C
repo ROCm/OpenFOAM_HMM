@@ -47,8 +47,8 @@ void Foam::cyclicFvPatch::makeWeights(scalarField& w) const
     const scalarField& magFa = magSf();
     const scalarField& nbrMagFa = nbrPatch.magSf();
 
-    scalarField deltas = nf() & fvPatch::delta();
-    scalarField nbrDeltas = nbrPatch.nf() & nbrPatch.fvPatch::delta();
+    const scalarField deltas(nf() & fvPatch::delta());
+    const scalarField nbrDeltas(nbrPatch.nf() & nbrPatch.fvPatch::delta());
 
     forAll(magFa, facei)
     {
@@ -77,8 +77,8 @@ void Foam::cyclicFvPatch::makeDeltaCoeffs(scalarField& dc) const
     //const cyclicPolyPatch& nbrPatch = cyclicPolyPatch_.neighbPatch();
     const cyclicFvPatch& nbrPatch = neighbFvPatch();
 
-    scalarField deltas = nf() & fvPatch::delta();
-    scalarField nbrDeltas = nbrPatch.nf() & nbrPatch.fvPatch::delta();
+    const scalarField deltas(nf() & fvPatch::delta());
+    const scalarField nbrDeltas(nbrPatch.nf() & nbrPatch.fvPatch::delta());
 
     forAll(deltas, facei)
     {
@@ -93,8 +93,8 @@ void Foam::cyclicFvPatch::makeDeltaCoeffs(scalarField& dc) const
 // Return delta (P to N) vectors across coupled patch
 Foam::tmp<Foam::vectorField> Foam::cyclicFvPatch::delta() const
 {
-    vectorField patchD = fvPatch::delta();
-    vectorField nbrPatchD = neighbFvPatch().fvPatch::delta();
+    const vectorField patchD(fvPatch::delta());
+    const vectorField nbrPatchD(neighbFvPatch().fvPatch::delta());
 
     tmp<vectorField> tpdv(new vectorField(patchD.size()));
     vectorField& pdv = tpdv();

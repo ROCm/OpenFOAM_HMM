@@ -98,7 +98,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
         scalarField psiCmpt(psi.internalField().component(cmpt));
         addBoundaryDiag(diag(), cmpt);
 
-        scalarField sourceCmpt = source.component(cmpt);
+        scalarField sourceCmpt(source.component(cmpt));
 
         FieldField<Field, scalar> bouCoeffsCmpt
         (

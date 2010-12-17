@@ -735,7 +735,7 @@ Foam::fvMatrix<Type>::H() const
     // Loop over field components
     for (direction cmpt=0; cmpt<Type::nComponents; cmpt++)
     {
-        scalarField psiCmpt = psi_.internalField().component(cmpt);
+        scalarField psiCmpt(psi_.internalField().component(cmpt));
 
         scalarField boundaryDiagCmpt(psi_.size(), 0.0);
         addBoundaryDiag(boundaryDiagCmpt, cmpt);
@@ -802,7 +802,7 @@ Foam::tmp<Foam::volScalarField> Foam::fvMatrix<Type>::H1() const
     /*
     for (direction cmpt=0; cmpt<Type::nComponents; cmpt++)
     {
-        scalarField psiCmpt = psi_.internalField().component(cmpt);
+        scalarField psiCmpt(psi_.internalField().component(cmpt));
 
         scalarField boundaryDiagCmpt(psi_.size(), 0.0);
         addBoundaryDiag(boundaryDiagCmpt, cmpt);
@@ -2259,7 +2259,7 @@ Foam::operator&
     // Loop over field components
     for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
     {
-        scalarField psiCmpt = psi.field().component(cmpt);
+        scalarField psiCmpt(psi.field().component(cmpt));
         scalarField boundaryDiagCmpt(M.diag());
         M.addBoundaryDiag(boundaryDiagCmpt, cmpt);
         Mphi.internalField().replace(cmpt, -boundaryDiagCmpt*psiCmpt);
