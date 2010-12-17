@@ -103,11 +103,14 @@ void Foam::rotatingTotalPressureFvPatchScalarField::updateCoeffs()
     }
 
     vector axisHat = omega_/mag(omega_);
-    vectorField rotationVelocity =
+    tmp<vectorField> rotationVelocity =
         omega_ ^ (patch().Cf() - axisHat*(axisHat & patch().Cf()));
 
-    vectorField Up = patch().lookupPatchField<volVectorField, vector>(UName())
-        + rotationVelocity;
+    const vectorField Up
+    (
+        patch().lookupPatchField<volVectorField, vector>(UName())
+      + rotationVelocity
+    );
 
     totalPressureFvPatchScalarField::updateCoeffs(Up);
 }

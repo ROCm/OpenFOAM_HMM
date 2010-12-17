@@ -105,7 +105,7 @@ void Foam::translatingWallVelocityFvPatchVectorField::updateCoeffs()
     }
 
     // Remove the component of U normal to the wall in case the wall is not flat
-    vectorField n = patch().nf();
+    const vectorField n(patch().nf());
     vectorField::operator=(U_ - n*(n & U_));
 
     fixedValueFvPatchVectorField::updateCoeffs();

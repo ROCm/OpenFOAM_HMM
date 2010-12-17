@@ -126,8 +126,8 @@ template<class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::fixedNormalSlipFvPatchField<Type>::snGrad() const
 {
-    vectorField nHat = this->patch().nf();
-    Field<Type> pif = this->patchInternalField();
+    const vectorField nHat(this->patch().nf());
+    const Field<Type> pif(this->patchInternalField());
 
     return
     (
@@ -147,7 +147,7 @@ void Foam::fixedNormalSlipFvPatchField<Type>::evaluate
         this->updateCoeffs();
     }
 
-    vectorField nHat = this->patch().nf();
+    const vectorField nHat(this->patch().nf());
 
     Field<Type>::operator=
     (
@@ -163,7 +163,7 @@ template<class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::fixedNormalSlipFvPatchField<Type>::snGradTransformDiag() const
 {
-    vectorField nHat = this->patch().nf();
+    const vectorField nHat(this->patch().nf());
     vectorField diag(nHat.size());
 
     diag.replace(vector::X, mag(nHat.component(vector::X)));

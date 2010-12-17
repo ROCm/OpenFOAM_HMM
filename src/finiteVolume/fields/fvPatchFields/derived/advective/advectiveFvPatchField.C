@@ -209,10 +209,10 @@ void Foam::advectiveFvPatchField<Type>::updateCoeffs()
 
     // Calculate the advection speed of the field wave
     // If the wave is incoming set the speed to 0.
-    scalarField w = Foam::max(advectionSpeed(), scalar(0));
+    const scalarField w(Foam::max(advectionSpeed(), scalar(0)));
 
     // Calculate the field wave coefficient alpha (See notes)
-    scalarField alpha = w*deltaT*this->patch().deltaCoeffs();
+    const scalarField alpha(w*deltaT*this->patch().deltaCoeffs());
 
     label patchi = this->patch().index();
 
@@ -221,7 +221,7 @@ void Foam::advectiveFvPatchField<Type>::updateCoeffs()
     if (lInf_ > SMALL)
     {
         // Calculate the field relaxation coefficient k (See notes)
-        scalarField k = w*deltaT/lInf_;
+        const scalarField k(w*deltaT/lInf_);
 
         if
         (

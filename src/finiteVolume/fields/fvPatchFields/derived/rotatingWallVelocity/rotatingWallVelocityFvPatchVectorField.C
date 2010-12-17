@@ -115,11 +115,14 @@ void Foam::rotatingWallVelocityFvPatchVectorField::updateCoeffs()
     }
 
     // Calculate the rotating wall velocity from the specification of the motion
-    vectorField Up = (-omega_)*((patch().Cf() - origin_) ^ (axis_/mag(axis_)));
+    const vectorField Up
+    (
+        (-omega_)*((patch().Cf() - origin_) ^ (axis_/mag(axis_)))
+    );
 
     // Remove the component of Up normal to the wall
     // just in case it is not exactly circular
-    vectorField n = patch().nf();
+    const vectorField n(patch().nf());
     vectorField::operator=(Up - n*(n & Up));
 
     fixedValueFvPatchVectorField::updateCoeffs();

@@ -127,7 +127,7 @@ void Foam::pressureInletOutletVelocityFvPatchVectorField::
 setTangentialVelocity(const vectorField& tangentialVelocity)
 {
     tangentialVelocity_ = tangentialVelocity;
-    vectorField n = patch().nf();
+    const vectorField n(patch().nf());
     refValue() = tangentialVelocity_ - n*(n & tangentialVelocity_);
 }
 
@@ -203,8 +203,8 @@ void Foam::pressureInletOutletVelocityFvPatchVectorField::operator=
     const fvPatchField<vector>& pvf
 )
 {
-    vectorField normalValue = transform(valueFraction(), refValue());
-    vectorField transformGradValue = transform(I - valueFraction(), pvf);
+    tmp<vectorField> normalValue = transform(valueFraction(), refValue());
+    tmp<vectorField> transformGradValue = transform(I - valueFraction(), pvf);
     fvPatchField<vector>::operator=(normalValue + transformGradValue);
 }
 
