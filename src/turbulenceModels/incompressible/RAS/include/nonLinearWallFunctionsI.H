@@ -67,7 +67,10 @@ Description
             const scalarField& nuw = nu().boundaryField()[patchi];
             const scalarField& nutw = nut_.boundaryField()[patchi];
 
-            scalarField magFaceGradU = mag(U_.boundaryField()[patchi].snGrad());
+            const scalarField magFaceGradU
+            (
+                mag(U_.boundaryField()[patchi].snGrad())
+            );
 
             forAll(curPatch, facei)
             {

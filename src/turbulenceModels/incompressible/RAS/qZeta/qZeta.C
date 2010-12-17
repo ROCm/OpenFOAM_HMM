@@ -46,7 +46,7 @@ addToRunTimeSelectionTable(RASModel, qZeta, dictionary);
 
 tmp<volScalarField> qZeta::fMu() const
 {
-    volScalarField Rt = q_*k_/(2.0*nu()*zeta_);
+    const volScalarField Rt(q_*k_/(2.0*nu()*zeta_));
 
     if (anisotropic_)
     {
@@ -63,7 +63,7 @@ tmp<volScalarField> qZeta::fMu() const
 
 tmp<volScalarField> qZeta::f2() const
 {
-    volScalarField Rt = q_*k_/(2.0*nu()*zeta_);
+    tmp<volScalarField> Rt = q_*k_/(2.0*nu()*zeta_);
     return scalar(1) - 0.3*exp(-sqr(Rt));
 }
 
@@ -293,10 +293,10 @@ void qZeta::correct()
         return;
     }
 
-    volScalarField S2 = 2*magSqr(symm(fvc::grad(U_)));
+    tmp<volScalarField> S2 = 2*magSqr(symm(fvc::grad(U_)));
 
     volScalarField G("RASModel::G", nut_/(2.0*q_)*S2);
-    volScalarField E = nu()*nut_/q_*fvc::magSqrGradGrad(U_);
+    const volScalarField E(nu()*nut_/q_*fvc::magSqrGradGrad(U_));
 
 
     // Zeta equation

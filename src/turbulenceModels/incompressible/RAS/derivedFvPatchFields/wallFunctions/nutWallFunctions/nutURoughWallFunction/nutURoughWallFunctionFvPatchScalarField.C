@@ -50,7 +50,7 @@ tmp<scalarField> nutURoughWallFunctionFvPatchScalarField::calcNut() const
     const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
 
     // The flow velocity at the adjacent cell centre
-    const scalarField magUp = mag(Uw.patchInternalField() - Uw);
+    const scalarField magUp(mag(Uw.patchInternalField() - Uw));
 
     tmp<scalarField> tyPlus = calcYPlus(magUp);
     scalarField& yPlus = tyPlus();
@@ -272,9 +272,9 @@ tmp<scalarField> nutURoughWallFunctionFvPatchScalarField::yPlus() const
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-    const scalarField magUp = mag(Uw.patchInternalField() - Uw);
+    tmp<scalarField> magUp = mag(Uw.patchInternalField() - Uw);
 
-    return calcYPlus(magUp);
+    return calcYPlus(magUp());
 }
 
 

@@ -46,7 +46,7 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcNut() const
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-    const scalarField magGradU = mag(Uw.snGrad());
+    const scalarField magGradU(mag(Uw.snGrad()));
     const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
 
     return max
@@ -67,7 +67,7 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
 
     const fvPatchVectorField& Uw =
         rasModel.U().boundaryField()[patch().index()];
-    const scalarField magUp = mag(Uw.patchInternalField() - Uw);
+    const scalarField magUp(mag(Uw.patchInternalField() - Uw));
 
     const scalarField& nuw = rasModel.nu().boundaryField()[patch().index()];
     const scalarField& nutw = *this;

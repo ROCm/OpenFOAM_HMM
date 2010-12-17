@@ -50,7 +50,7 @@ tmp<volScalarField> SpalartAllmaras::chi() const
 
 tmp<volScalarField> SpalartAllmaras::fv1(const volScalarField& chi) const
 {
-    volScalarField chi3 = pow3(chi);
+    const volScalarField chi3(pow3(chi));
     return chi3/(chi3 + pow3(Cv1_));
 }
 
@@ -71,7 +71,7 @@ tmp<volScalarField> SpalartAllmaras::fv3
     const volScalarField& fv1
 ) const
 {
-    volScalarField chiByCv2 = (1/Cv2_)*chi;
+    const volScalarField chiByCv2((1/Cv2_)*chi);
 
     return
         (scalar(1) + chi*fv1)
@@ -83,18 +83,25 @@ tmp<volScalarField> SpalartAllmaras::fv3
 
 tmp<volScalarField> SpalartAllmaras::fw(const volScalarField& Stilda) const
 {
-    volScalarField r = min
+    volScalarField r
     (
-        nuTilda_
-       /(
-           max(Stilda, dimensionedScalar("SMALL", Stilda.dimensions(), SMALL))
-          *sqr(kappa_*d_)
-        ),
-        scalar(10.0)
+        min
+        (
+            nuTilda_
+           /(
+               max
+               (
+                   Stilda,
+                   dimensionedScalar("SMALL", Stilda.dimensions(), SMALL)
+               )
+              *sqr(kappa_*d_)
+            ),
+            scalar(10.0)
+        )
     );
     r.boundaryField() == 0.0;
 
-    volScalarField g = r + Cw2_*(pow6(r) - r);
+    const volScalarField g(r + Cw2_*(pow6(r) - r));
 
     return g*pow((1.0 + pow6(Cw3_))/(pow6(g) + pow6(Cw3_)), 1.0/6.0);
 }
@@ -320,7 +327,7 @@ tmp<volSymmTensorField> SpalartAllmaras::devReff() const
 
 tmp<fvVectorMatrix> SpalartAllmaras::divDevReff(volVectorField& U) const
 {
-    volScalarField nuEff_ = nuEff();
+    const volScalarField nuEff_(nuEff());
 
     return
     (
@@ -368,12 +375,14 @@ void SpalartAllmaras::correct()
         d_.correct();
     }
 
-    volScalarField chi = this->chi();
-    volScalarField fv1 = this->fv1(chi);
+    const volScalarField chi(this->chi());
+    const volScalarField fv1(this->fv1(chi));
 
-    volScalarField Stilda =
+    const volScalarField Stilda
+    (
         fv3(chi, fv1)*::sqrt(2.0)*mag(skew(fvc::grad(U_)))
-      + fv2(chi, fv1)*nuTilda_/sqr(kappa_*d_);
+      + fv2(chi, fv1)*nuTilda_/sqr(kappa_*d_)
+    );
 
     tmp<fvScalarMatrix> nuTildaEqn
     (

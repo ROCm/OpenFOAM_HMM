@@ -212,7 +212,7 @@ void omegaWallFunctionFvPatchScalarField::updateCoeffs()
 
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
 
-    const scalarField magGradUw = mag(Uw.snGrad());
+    const scalarField magGradUw(mag(Uw.snGrad()));
 
     // Set omega and G
     forAll(nutw, faceI)
