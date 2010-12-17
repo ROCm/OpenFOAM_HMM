@@ -52,7 +52,7 @@ void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
     const List<surfZone>& zones =
     (
         surf.surfZones().empty()
-      ? oneZone(faceLst)
+      ? surfaceFormatsCore::oneZone(faceLst)
       : surf.surfZones()
     );
 

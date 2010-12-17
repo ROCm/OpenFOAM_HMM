@@ -55,7 +55,7 @@ bool Foam::UnsortedMeshedSurface<Face>::canReadType
     const bool verbose
 )
 {
-   return checkSupport
+   return fileFormats::surfaceFormatsCore::checkSupport
    (
        readTypes() | ParentType::readTypes(),
        ext,
@@ -72,7 +72,7 @@ bool Foam::UnsortedMeshedSurface<Face>::canWriteType
     const bool verbose
 )
 {
-    return checkSupport
+    return fileFormats::surfaceFormatsCore::checkSupport
     (
         writeTypes(),
         ext,

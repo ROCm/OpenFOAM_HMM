@@ -46,7 +46,10 @@ bool Foam::MeshedSurfaceProxy<Face>::canWriteType
     const bool verbose
 )
 {
-    return checkSupport(writeTypes(), ext, verbose, "writing");
+    return fileFormats::surfaceFormatsCore::checkSupport
+    (
+        writeTypes(), ext, verbose, "writing"
+    );
 }
 
 

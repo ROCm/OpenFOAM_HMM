@@ -67,7 +67,7 @@ bool Foam::MeshedSurface<Face>::canReadType
     const bool verbose
 )
 {
-    return checkSupport
+    return fileFormats::surfaceFormatsCore::checkSupport
     (
         readTypes() | FriendType::readTypes(),
         ext,
@@ -84,7 +84,7 @@ bool Foam::MeshedSurface<Face>::canWriteType
     const bool verbose
 )
 {
-    return checkSupport
+    return fileFormats::surfaceFormatsCore::checkSupport
     (
         writeTypes() | ProxyType::writeTypes(),
         ext,
