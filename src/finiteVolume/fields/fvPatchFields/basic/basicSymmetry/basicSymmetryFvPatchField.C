@@ -94,7 +94,7 @@ template<class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::basicSymmetryFvPatchField<Type>::snGrad() const
 {
-    vectorField nHat = this->patch().nf();
+    tmp<vectorField> nHat = this->patch().nf();
 
     return
     (
@@ -112,7 +112,7 @@ void Foam::basicSymmetryFvPatchField<Type>::evaluate(const Pstream::commsTypes)
         this->updateCoeffs();
     }
 
-    vectorField nHat = this->patch().nf();
+    tmp<vectorField> nHat = this->patch().nf();
 
     Field<Type>::operator=
     (
@@ -130,7 +130,7 @@ template<class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::basicSymmetryFvPatchField<Type>::snGradTransformDiag() const
 {
-    vectorField nHat = this->patch().nf();
+    const vectorField nHat(this->patch().nf());
 
     vectorField diag(nHat.size());
 

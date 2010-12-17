@@ -134,7 +134,8 @@ Foam::wedgeFvPatchField<Type>::wedgeFvPatchField
 template<class Type>
 Foam::tmp<Foam::Field<Type> > Foam::wedgeFvPatchField<Type>::snGrad() const
 {
-    Field<Type> pif = this->patchInternalField();
+    const Field<Type> pif(this->patchInternalField());
+
     return
     (
         transform(refCast<const wedgeFvPatch>(this->patch()).cellT(), pif) - pif
