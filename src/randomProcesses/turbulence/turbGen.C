@@ -60,13 +60,15 @@ Foam::vectorField Foam::turbGen::U()
 
     s = Ek(Ea, k0, mag(K))*s;
 
-    complexVectorField up =
+    complexVectorField up
+    (
         fft::reverseTransform
         (
             ComplexField(cos(constant::mathematical::twoPi*rndPhases)*s,
             sin(constant::mathematical::twoPi*rndPhases)*s),
             K.nn()
-        );
+        )
+    );
 
     return ReImSum(up);
 }
