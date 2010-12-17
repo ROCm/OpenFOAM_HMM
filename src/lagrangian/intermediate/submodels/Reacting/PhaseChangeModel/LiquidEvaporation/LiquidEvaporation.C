@@ -32,7 +32,7 @@ using namespace Foam::constant::mathematical;
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::scalarField Foam::LiquidEvaporation<CloudType>::calcXc
+Foam::tmp<Foam::scalarField> Foam::LiquidEvaporation<CloudType>::calcXc
 (
     const label cellI
 ) const

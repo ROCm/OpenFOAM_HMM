@@ -28,21 +28,19 @@ License
 #include "fvMesh.H"
 #include "transform.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(cyclicFvPatch, 0);
-addToRunTimeSelectionTable(fvPatch, cyclicFvPatch, polyPatch);
+    defineTypeNameAndDebug(cyclicFvPatch, 0);
+    addToRunTimeSelectionTable(fvPatch, cyclicFvPatch, polyPatch);
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Make patch weighting factors
-void cyclicFvPatch::makeWeights(scalarField& w) const
+void Foam::cyclicFvPatch::makeWeights(scalarField& w) const
 {
     const cyclicFvPatch& nbrPatch = neighbFvPatch();
 
@@ -58,7 +56,7 @@ void cyclicFvPatch::makeWeights(scalarField& w) const
 
         if (mag(magFa[facei] - nbrMagFa[facei])/avFa > 1e-4)
         {
-            FatalErrorIn("cyclicFvPatch::makeWeights(scalarField& w) const")
+            FatalErrorIn("cyclicFvPatch::makeWeights(scalarField&) const")
                 << "face " << facei << " areas do not match by "
                 << 100*mag(magFa[facei] - nbrMagFa[facei])/avFa
                 << "% -- possible face ordering problem"
@@ -74,7 +72,7 @@ void cyclicFvPatch::makeWeights(scalarField& w) const
 
 
 // Make patch face - neighbour cell distances
-void cyclicFvPatch::makeDeltaCoeffs(scalarField& dc) const
+void Foam::cyclicFvPatch::makeDeltaCoeffs(scalarField& dc) const
 {
     //const cyclicPolyPatch& nbrPatch = cyclicPolyPatch_.neighbPatch();
     const cyclicFvPatch& nbrPatch = neighbFvPatch();
@@ -93,7 +91,7 @@ void cyclicFvPatch::makeDeltaCoeffs(scalarField& dc) const
 
 
 // Return delta (P to N) vectors across coupled patch
-tmp<vectorField> cyclicFvPatch::delta() const
+Foam::tmp<Foam::vectorField> Foam::cyclicFvPatch::delta() const
 {
     vectorField patchD = fvPatch::delta();
     vectorField nbrPatchD = neighbFvPatch().fvPatch::delta();
@@ -127,7 +125,7 @@ tmp<vectorField> cyclicFvPatch::delta() const
 }
 
 
-tmp<labelField> cyclicFvPatch::interfaceInternalField
+Foam::tmp<Foam::labelField> Foam::cyclicFvPatch::interfaceInternalField
 (
     const labelUList& internalData
 ) const
@@ -136,7 +134,7 @@ tmp<labelField> cyclicFvPatch::interfaceInternalField
 }
 
 
-tmp<labelField> cyclicFvPatch::internalFieldTransfer
+Foam::tmp<Foam::labelField> Foam::cyclicFvPatch::internalFieldTransfer
 (
     const Pstream::commsTypes commsType,
     const labelUList& iF
@@ -145,9 +143,5 @@ tmp<labelField> cyclicFvPatch::internalFieldTransfer
     return neighbFvPatch().patchInternalField(iF);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

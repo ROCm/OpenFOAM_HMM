@@ -26,15 +26,11 @@ License
 #include "basicSymmetryFvPatchField.H"
 #include "symmTransformField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-basicSymmetryFvPatchField<Type>::basicSymmetryFvPatchField
+Foam::basicSymmetryFvPatchField<Type>::basicSymmetryFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
@@ -45,7 +41,7 @@ basicSymmetryFvPatchField<Type>::basicSymmetryFvPatchField
 
 
 template<class Type>
-basicSymmetryFvPatchField<Type>::basicSymmetryFvPatchField
+Foam::basicSymmetryFvPatchField<Type>::basicSymmetryFvPatchField
 (
     const basicSymmetryFvPatchField<Type>& ptf,
     const fvPatch& p,
@@ -58,7 +54,7 @@ basicSymmetryFvPatchField<Type>::basicSymmetryFvPatchField
 
 
 template<class Type>
-basicSymmetryFvPatchField<Type>::basicSymmetryFvPatchField
+Foam::basicSymmetryFvPatchField<Type>::basicSymmetryFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -72,7 +68,7 @@ basicSymmetryFvPatchField<Type>::basicSymmetryFvPatchField
 
 
 template<class Type>
-basicSymmetryFvPatchField<Type>::basicSymmetryFvPatchField
+Foam::basicSymmetryFvPatchField<Type>::basicSymmetryFvPatchField
 (
     const basicSymmetryFvPatchField<Type>& ptf
 )
@@ -82,7 +78,7 @@ basicSymmetryFvPatchField<Type>::basicSymmetryFvPatchField
 
 
 template<class Type>
-basicSymmetryFvPatchField<Type>::basicSymmetryFvPatchField
+Foam::basicSymmetryFvPatchField<Type>::basicSymmetryFvPatchField
 (
     const basicSymmetryFvPatchField<Type>& ptf,
     const DimensionedField<Type, volMesh>& iF
@@ -95,7 +91,8 @@ basicSymmetryFvPatchField<Type>::basicSymmetryFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<Field<Type> > basicSymmetryFvPatchField<Type>::snGrad() const
+Foam::tmp<Foam::Field<Type> >
+Foam::basicSymmetryFvPatchField<Type>::snGrad() const
 {
     vectorField nHat = this->patch().nf();
 
@@ -108,7 +105,7 @@ tmp<Field<Type> > basicSymmetryFvPatchField<Type>::snGrad() const
 
 
 template<class Type>
-void basicSymmetryFvPatchField<Type>::evaluate(const Pstream::commsTypes)
+void Foam::basicSymmetryFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     if (!this->updated())
     {
@@ -130,7 +127,8 @@ void basicSymmetryFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 
 
 template<class Type>
-tmp<Field<Type> > basicSymmetryFvPatchField<Type>::snGradTransformDiag() const
+Foam::tmp<Foam::Field<Type> >
+Foam::basicSymmetryFvPatchField<Type>::snGradTransformDiag() const
 {
     vectorField nHat = this->patch().nf();
 
@@ -143,9 +141,5 @@ tmp<Field<Type> > basicSymmetryFvPatchField<Type>::snGradTransformDiag() const
     return transformFieldMask<Type>(pow<vector, pTraits<Type>::rank>(diag));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

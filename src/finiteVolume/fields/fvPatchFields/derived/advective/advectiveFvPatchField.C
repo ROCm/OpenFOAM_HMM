@@ -31,15 +31,11 @@ License
 #include "CrankNicholsonDdtScheme.H"
 #include "backwardDdtScheme.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-advectiveFvPatchField<Type>::advectiveFvPatchField
+Foam::advectiveFvPatchField<Type>::advectiveFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
@@ -58,7 +54,7 @@ advectiveFvPatchField<Type>::advectiveFvPatchField
 
 
 template<class Type>
-advectiveFvPatchField<Type>::advectiveFvPatchField
+Foam::advectiveFvPatchField<Type>::advectiveFvPatchField
 (
     const advectiveFvPatchField& ptf,
     const fvPatch& p,
@@ -75,7 +71,7 @@ advectiveFvPatchField<Type>::advectiveFvPatchField
 
 
 template<class Type>
-advectiveFvPatchField<Type>::advectiveFvPatchField
+Foam::advectiveFvPatchField<Type>::advectiveFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -127,7 +123,7 @@ advectiveFvPatchField<Type>::advectiveFvPatchField
 
 
 template<class Type>
-advectiveFvPatchField<Type>::advectiveFvPatchField
+Foam::advectiveFvPatchField<Type>::advectiveFvPatchField
 (
     const advectiveFvPatchField& ptpsf
 )
@@ -141,7 +137,7 @@ advectiveFvPatchField<Type>::advectiveFvPatchField
 
 
 template<class Type>
-advectiveFvPatchField<Type>::advectiveFvPatchField
+Foam::advectiveFvPatchField<Type>::advectiveFvPatchField
 (
     const advectiveFvPatchField& ptpsf,
     const DimensionedField<Type, volMesh>& iF
@@ -158,7 +154,8 @@ advectiveFvPatchField<Type>::advectiveFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<scalarField> advectiveFvPatchField<Type>::advectionSpeed() const
+Foam::tmp<Foam::scalarField>
+Foam::advectiveFvPatchField<Type>::advectionSpeed() const
 {
     const surfaceScalarField& phi =
         this->db().objectRegistry::lookupObject<surfaceScalarField>(phiName_);
@@ -189,7 +186,7 @@ tmp<scalarField> advectiveFvPatchField<Type>::advectionSpeed() const
 
 
 template<class Type>
-void advectiveFvPatchField<Type>::updateCoeffs()
+void Foam::advectiveFvPatchField<Type>::updateCoeffs()
 {
     if (this->updated())
     {
@@ -304,7 +301,7 @@ void advectiveFvPatchField<Type>::updateCoeffs()
 
 
 template<class Type>
-void advectiveFvPatchField<Type>::write(Ostream& os) const
+void Foam::advectiveFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
 
@@ -328,9 +325,5 @@ void advectiveFvPatchField<Type>::write(Ostream& os) const
     this->writeEntry("value", os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

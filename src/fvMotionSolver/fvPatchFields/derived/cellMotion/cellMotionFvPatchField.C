@@ -28,15 +28,11 @@ License
 #include "volMesh.H"
 #include "pointFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-cellMotionFvPatchField<Type>::cellMotionFvPatchField
+Foam::cellMotionFvPatchField<Type>::cellMotionFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
@@ -47,7 +43,7 @@ cellMotionFvPatchField<Type>::cellMotionFvPatchField
 
 
 template<class Type>
-cellMotionFvPatchField<Type>::cellMotionFvPatchField
+Foam::cellMotionFvPatchField<Type>::cellMotionFvPatchField
 (
     const cellMotionFvPatchField<Type>& ptf,
     const fvPatch& p,
@@ -60,7 +56,7 @@ cellMotionFvPatchField<Type>::cellMotionFvPatchField
 
 
 template<class Type>
-cellMotionFvPatchField<Type>::cellMotionFvPatchField
+Foam::cellMotionFvPatchField<Type>::cellMotionFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -74,7 +70,7 @@ cellMotionFvPatchField<Type>::cellMotionFvPatchField
 
 
 template<class Type>
-cellMotionFvPatchField<Type>::cellMotionFvPatchField
+Foam::cellMotionFvPatchField<Type>::cellMotionFvPatchField
 (
     const cellMotionFvPatchField<Type>& ptf
 )
@@ -84,7 +80,7 @@ cellMotionFvPatchField<Type>::cellMotionFvPatchField
 
 
 template<class Type>
-cellMotionFvPatchField<Type>::cellMotionFvPatchField
+Foam::cellMotionFvPatchField<Type>::cellMotionFvPatchField
 (
     const cellMotionFvPatchField<Type>& ptf,
     const DimensionedField<Type, volMesh>& iF
@@ -97,7 +93,7 @@ cellMotionFvPatchField<Type>::cellMotionFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void cellMotionFvPatchField<Type>::updateCoeffs()
+void Foam::cellMotionFvPatchField<Type>::updateCoeffs()
 {
     if (this->updated())
     {
@@ -129,15 +125,10 @@ void cellMotionFvPatchField<Type>::updateCoeffs()
 
 
 template<class Type>
-void cellMotionFvPatchField<Type>::write(Ostream& os) const
+void Foam::cellMotionFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
     this->writeEntry("value", os);
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -29,14 +29,10 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-pressureNormalInletOutletVelocityFvPatchVectorField::
+Foam::pressureNormalInletOutletVelocityFvPatchVectorField::
 pressureNormalInletOutletVelocityFvPatchVectorField
 (
     const fvPatch& p,
@@ -53,7 +49,7 @@ pressureNormalInletOutletVelocityFvPatchVectorField
 }
 
 
-pressureNormalInletOutletVelocityFvPatchVectorField::
+Foam::pressureNormalInletOutletVelocityFvPatchVectorField::
 pressureNormalInletOutletVelocityFvPatchVectorField
 (
     const pressureNormalInletOutletVelocityFvPatchVectorField& ptf,
@@ -68,7 +64,7 @@ pressureNormalInletOutletVelocityFvPatchVectorField
 {}
 
 
-pressureNormalInletOutletVelocityFvPatchVectorField::
+Foam::pressureNormalInletOutletVelocityFvPatchVectorField::
 pressureNormalInletOutletVelocityFvPatchVectorField
 (
     const fvPatch& p,
@@ -87,7 +83,7 @@ pressureNormalInletOutletVelocityFvPatchVectorField
 }
 
 
-pressureNormalInletOutletVelocityFvPatchVectorField::
+Foam::pressureNormalInletOutletVelocityFvPatchVectorField::
 pressureNormalInletOutletVelocityFvPatchVectorField
 (
     const pressureNormalInletOutletVelocityFvPatchVectorField& pivpvf
@@ -99,7 +95,7 @@ pressureNormalInletOutletVelocityFvPatchVectorField
 {}
 
 
-pressureNormalInletOutletVelocityFvPatchVectorField::
+Foam::pressureNormalInletOutletVelocityFvPatchVectorField::
 pressureNormalInletOutletVelocityFvPatchVectorField
 (
     const pressureNormalInletOutletVelocityFvPatchVectorField& pivpvf,
@@ -114,7 +110,7 @@ pressureNormalInletOutletVelocityFvPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void pressureNormalInletOutletVelocityFvPatchVectorField::updateCoeffs()
+void Foam::pressureNormalInletOutletVelocityFvPatchVectorField::updateCoeffs()
 {
     if (updated())
     {
@@ -160,8 +156,10 @@ void pressureNormalInletOutletVelocityFvPatchVectorField::updateCoeffs()
 }
 
 
-void pressureNormalInletOutletVelocityFvPatchVectorField::
-write(Ostream& os) const
+void Foam::pressureNormalInletOutletVelocityFvPatchVectorField::write
+(
+    Ostream& os
+) const
 {
     fvPatchVectorField::write(os);
     os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
@@ -172,7 +170,7 @@ write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void pressureNormalInletOutletVelocityFvPatchVectorField::operator=
+void Foam::pressureNormalInletOutletVelocityFvPatchVectorField::operator=
 (
     const fvPatchField<vector>& pvf
 )
@@ -187,14 +185,13 @@ void pressureNormalInletOutletVelocityFvPatchVectorField::operator=
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchVectorField,
-    pressureNormalInletOutletVelocityFvPatchVectorField
-);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchVectorField,
+        pressureNormalInletOutletVelocityFvPatchVectorField
+    );
+}
 
 // ************************************************************************* //

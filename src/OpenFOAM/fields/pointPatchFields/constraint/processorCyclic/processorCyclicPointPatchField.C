@@ -27,15 +27,11 @@ License
 #include "transformField.H"
 #include "processorPolyPatch.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
 
 template<class Type>
-processorCyclicPointPatchField<Type>::processorCyclicPointPatchField
+Foam::processorCyclicPointPatchField<Type>::processorCyclicPointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF
@@ -47,7 +43,7 @@ processorCyclicPointPatchField<Type>::processorCyclicPointPatchField
 
 
 template<class Type>
-processorCyclicPointPatchField<Type>::processorCyclicPointPatchField
+Foam::processorCyclicPointPatchField<Type>::processorCyclicPointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
@@ -60,7 +56,7 @@ processorCyclicPointPatchField<Type>::processorCyclicPointPatchField
 
 
 template<class Type>
-processorCyclicPointPatchField<Type>::processorCyclicPointPatchField
+Foam::processorCyclicPointPatchField<Type>::processorCyclicPointPatchField
 (
     const processorCyclicPointPatchField<Type>& ptf,
     const pointPatch& p,
@@ -74,7 +70,7 @@ processorCyclicPointPatchField<Type>::processorCyclicPointPatchField
 
 
 template<class Type>
-processorCyclicPointPatchField<Type>::processorCyclicPointPatchField
+Foam::processorCyclicPointPatchField<Type>::processorCyclicPointPatchField
 (
     const processorCyclicPointPatchField<Type>& ptf,
     const DimensionedField<Type, pointMesh>& iF
@@ -88,14 +84,14 @@ processorCyclicPointPatchField<Type>::processorCyclicPointPatchField
 // * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
 
 template<class Type>
-processorCyclicPointPatchField<Type>::~processorCyclicPointPatchField()
+Foam::processorCyclicPointPatchField<Type>::~processorCyclicPointPatchField()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void processorCyclicPointPatchField<Type>::initSwapAddSeparated
+void Foam::processorCyclicPointPatchField<Type>::initSwapAddSeparated
 (
     const Pstream::commsTypes commsType,
     Field<Type>& pField
@@ -126,7 +122,7 @@ void processorCyclicPointPatchField<Type>::initSwapAddSeparated
 
 
 template<class Type>
-void processorCyclicPointPatchField<Type>::swapAddSeparated
+void Foam::processorCyclicPointPatchField<Type>::swapAddSeparated
 (
     const Pstream::commsTypes commsType,
     Field<Type>& pField
@@ -159,9 +155,5 @@ void processorCyclicPointPatchField<Type>::swapAddSeparated
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -26,15 +26,10 @@ License
 #include "partialSlipFvPatchField.H"
 #include "symmTransformField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-partialSlipFvPatchField<Type>::partialSlipFvPatchField
+Foam::partialSlipFvPatchField<Type>::partialSlipFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
@@ -46,7 +41,7 @@ partialSlipFvPatchField<Type>::partialSlipFvPatchField
 
 
 template<class Type>
-partialSlipFvPatchField<Type>::partialSlipFvPatchField
+Foam::partialSlipFvPatchField<Type>::partialSlipFvPatchField
 (
     const partialSlipFvPatchField<Type>& ptf,
     const fvPatch& p,
@@ -60,7 +55,7 @@ partialSlipFvPatchField<Type>::partialSlipFvPatchField
 
 
 template<class Type>
-partialSlipFvPatchField<Type>::partialSlipFvPatchField
+Foam::partialSlipFvPatchField<Type>::partialSlipFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -75,7 +70,7 @@ partialSlipFvPatchField<Type>::partialSlipFvPatchField
 
 
 template<class Type>
-partialSlipFvPatchField<Type>::partialSlipFvPatchField
+Foam::partialSlipFvPatchField<Type>::partialSlipFvPatchField
 (
     const partialSlipFvPatchField<Type>& ptf
 )
@@ -86,7 +81,7 @@ partialSlipFvPatchField<Type>::partialSlipFvPatchField
 
 
 template<class Type>
-partialSlipFvPatchField<Type>::partialSlipFvPatchField
+Foam::partialSlipFvPatchField<Type>::partialSlipFvPatchField
 (
     const partialSlipFvPatchField<Type>& ptf,
     const DimensionedField<Type, volMesh>& iF
@@ -100,7 +95,7 @@ partialSlipFvPatchField<Type>::partialSlipFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void partialSlipFvPatchField<Type>::autoMap
+void Foam::partialSlipFvPatchField<Type>::autoMap
 (
     const fvPatchFieldMapper& m
 )
@@ -111,7 +106,7 @@ void partialSlipFvPatchField<Type>::autoMap
 
 
 template<class Type>
-void partialSlipFvPatchField<Type>::rmap
+void Foam::partialSlipFvPatchField<Type>::rmap
 (
     const fvPatchField<Type>& ptf,
     const labelList& addr
@@ -127,7 +122,8 @@ void partialSlipFvPatchField<Type>::rmap
 
 
 template<class Type>
-tmp<Field<Type> > partialSlipFvPatchField<Type>::snGrad() const
+Foam::tmp<Foam::Field<Type> >
+Foam::partialSlipFvPatchField<Type>::snGrad() const
 {
     vectorField nHat = this->patch().nf();
     Field<Type> pif = this->patchInternalField();
@@ -140,7 +136,10 @@ tmp<Field<Type> > partialSlipFvPatchField<Type>::snGrad() const
 
 
 template<class Type>
-void partialSlipFvPatchField<Type>::evaluate(const Pstream::commsTypes)
+void Foam::partialSlipFvPatchField<Type>::evaluate
+(
+    const Pstream::commsTypes
+)
 {
     if (!this->updated())
     {
@@ -160,7 +159,8 @@ void partialSlipFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 
 
 template<class Type>
-tmp<Field<Type> > partialSlipFvPatchField<Type>::snGradTransformDiag() const
+Foam::tmp<Foam::Field<Type> >
+Foam::partialSlipFvPatchField<Type>::snGradTransformDiag() const
 {
     vectorField nHat = this->patch().nf();
     vectorField diag(nHat.size());
@@ -177,15 +177,11 @@ tmp<Field<Type> > partialSlipFvPatchField<Type>::snGradTransformDiag() const
 
 
 template<class Type>
-void partialSlipFvPatchField<Type>::write(Ostream& os) const
+void Foam::partialSlipFvPatchField<Type>::write(Ostream& os) const
 {
     transformFvPatchField<Type>::write(os);
     valueFraction_.writeEntry("valueFraction", os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

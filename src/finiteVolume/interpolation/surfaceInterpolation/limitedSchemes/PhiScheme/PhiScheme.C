@@ -31,13 +31,9 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 template<class Type, class PhiLimiter>
-tmp<surfaceScalarField> PhiScheme<Type, PhiLimiter>::limiter
+Foam::tmp<Foam::surfaceScalarField>
+Foam::PhiScheme<Type, PhiLimiter>::limiter
 (
     const GeometricField<Type, fvPatchField, volMesh>& phi
 ) const
@@ -144,9 +140,5 @@ tmp<surfaceScalarField> PhiScheme<Type, PhiLimiter>::limiter
     return tLimiter;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

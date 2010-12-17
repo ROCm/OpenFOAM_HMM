@@ -28,14 +28,10 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-rotatingWallVelocityFvPatchVectorField::rotatingWallVelocityFvPatchVectorField
+Foam::rotatingWallVelocityFvPatchVectorField::
+rotatingWallVelocityFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF
@@ -48,7 +44,8 @@ rotatingWallVelocityFvPatchVectorField::rotatingWallVelocityFvPatchVectorField
 {}
 
 
-rotatingWallVelocityFvPatchVectorField::rotatingWallVelocityFvPatchVectorField
+Foam::rotatingWallVelocityFvPatchVectorField::
+rotatingWallVelocityFvPatchVectorField
 (
     const rotatingWallVelocityFvPatchVectorField& ptf,
     const fvPatch& p,
@@ -63,7 +60,8 @@ rotatingWallVelocityFvPatchVectorField::rotatingWallVelocityFvPatchVectorField
 {}
 
 
-rotatingWallVelocityFvPatchVectorField::rotatingWallVelocityFvPatchVectorField
+Foam::rotatingWallVelocityFvPatchVectorField::
+rotatingWallVelocityFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
@@ -80,7 +78,8 @@ rotatingWallVelocityFvPatchVectorField::rotatingWallVelocityFvPatchVectorField
 }
 
 
-rotatingWallVelocityFvPatchVectorField::rotatingWallVelocityFvPatchVectorField
+Foam::rotatingWallVelocityFvPatchVectorField::
+rotatingWallVelocityFvPatchVectorField
 (
     const rotatingWallVelocityFvPatchVectorField& pivpvf
 )
@@ -92,7 +91,8 @@ rotatingWallVelocityFvPatchVectorField::rotatingWallVelocityFvPatchVectorField
 {}
 
 
-rotatingWallVelocityFvPatchVectorField::rotatingWallVelocityFvPatchVectorField
+Foam::rotatingWallVelocityFvPatchVectorField::
+rotatingWallVelocityFvPatchVectorField
 (
     const rotatingWallVelocityFvPatchVectorField& pivpvf,
     const DimensionedField<vector, volMesh>& iF
@@ -107,7 +107,7 @@ rotatingWallVelocityFvPatchVectorField::rotatingWallVelocityFvPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void rotatingWallVelocityFvPatchVectorField::updateCoeffs()
+void Foam::rotatingWallVelocityFvPatchVectorField::updateCoeffs()
 {
     if (updated())
     {
@@ -126,7 +126,7 @@ void rotatingWallVelocityFvPatchVectorField::updateCoeffs()
 }
 
 
-void rotatingWallVelocityFvPatchVectorField::write(Ostream& os) const
+void Foam::rotatingWallVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
     os.writeKeyword("origin") << origin_ << token::END_STATEMENT << nl;
@@ -138,15 +138,13 @@ void rotatingWallVelocityFvPatchVectorField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchVectorField,
-    rotatingWallVelocityFvPatchVectorField
-);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchVectorField,
+        rotatingWallVelocityFvPatchVectorField
+    );
+}
 
 // ************************************************************************* //

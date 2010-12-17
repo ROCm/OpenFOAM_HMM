@@ -42,8 +42,8 @@ namespace Foam
     template<>
     const char* Foam::NamedEnum
     <
-       Foam::abortCalculation::actionType,
-       3
+        Foam::abortCalculation::actionType,
+        3
     >::names[] =
     {
         "noWriteNow",

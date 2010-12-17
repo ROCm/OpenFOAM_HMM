@@ -28,15 +28,10 @@ License
 #include "transformField.H"
 #include "pointFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-cyclicPointPatchField<Type>::cyclicPointPatchField
+Foam::cyclicPointPatchField<Type>::cyclicPointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF
@@ -48,7 +43,7 @@ cyclicPointPatchField<Type>::cyclicPointPatchField
 
 
 template<class Type>
-cyclicPointPatchField<Type>::cyclicPointPatchField
+Foam::cyclicPointPatchField<Type>::cyclicPointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
@@ -77,7 +72,7 @@ cyclicPointPatchField<Type>::cyclicPointPatchField
 
 
 template<class Type>
-cyclicPointPatchField<Type>::cyclicPointPatchField
+Foam::cyclicPointPatchField<Type>::cyclicPointPatchField
 (
     const cyclicPointPatchField<Type>& ptf,
     const pointPatch& p,
@@ -109,7 +104,7 @@ cyclicPointPatchField<Type>::cyclicPointPatchField
 
 
 template<class Type>
-cyclicPointPatchField<Type>::cyclicPointPatchField
+Foam::cyclicPointPatchField<Type>::cyclicPointPatchField
 (
     const cyclicPointPatchField<Type>& ptf,
     const DimensionedField<Type, pointMesh>& iF
@@ -123,7 +118,7 @@ cyclicPointPatchField<Type>::cyclicPointPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void cyclicPointPatchField<Type>::swapAddSeparated
+void Foam::cyclicPointPatchField<Type>::swapAddSeparated
 (
     const Pstream::commsTypes,
     Field<Type>& pField
@@ -182,9 +177,5 @@ void cyclicPointPatchField<Type>::swapAddSeparated
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

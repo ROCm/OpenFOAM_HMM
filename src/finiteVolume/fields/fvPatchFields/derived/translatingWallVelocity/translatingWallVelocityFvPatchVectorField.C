@@ -28,14 +28,9 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-translatingWallVelocityFvPatchVectorField::
+Foam::translatingWallVelocityFvPatchVectorField::
 translatingWallVelocityFvPatchVectorField
 (
     const fvPatch& p,
@@ -47,7 +42,7 @@ translatingWallVelocityFvPatchVectorField
 {}
 
 
-translatingWallVelocityFvPatchVectorField::
+Foam::translatingWallVelocityFvPatchVectorField::
 translatingWallVelocityFvPatchVectorField
 (
     const translatingWallVelocityFvPatchVectorField& ptf,
@@ -61,7 +56,7 @@ translatingWallVelocityFvPatchVectorField
 {}
 
 
-translatingWallVelocityFvPatchVectorField::
+Foam::translatingWallVelocityFvPatchVectorField::
 translatingWallVelocityFvPatchVectorField
 (
     const fvPatch& p,
@@ -77,7 +72,7 @@ translatingWallVelocityFvPatchVectorField
 }
 
 
-translatingWallVelocityFvPatchVectorField::
+Foam::translatingWallVelocityFvPatchVectorField::
 translatingWallVelocityFvPatchVectorField
 (
     const translatingWallVelocityFvPatchVectorField& twvpvf
@@ -88,7 +83,7 @@ translatingWallVelocityFvPatchVectorField
 {}
 
 
-translatingWallVelocityFvPatchVectorField::
+Foam::translatingWallVelocityFvPatchVectorField::
 translatingWallVelocityFvPatchVectorField
 (
     const translatingWallVelocityFvPatchVectorField& twvpvf,
@@ -102,7 +97,7 @@ translatingWallVelocityFvPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void translatingWallVelocityFvPatchVectorField::updateCoeffs()
+void Foam::translatingWallVelocityFvPatchVectorField::updateCoeffs()
 {
     if (updated())
     {
@@ -117,7 +112,7 @@ void translatingWallVelocityFvPatchVectorField::updateCoeffs()
 }
 
 
-void translatingWallVelocityFvPatchVectorField::write(Ostream& os) const
+void Foam::translatingWallVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
     os.writeKeyword("U") << U_ << token::END_STATEMENT << nl;
@@ -127,15 +122,13 @@ void translatingWallVelocityFvPatchVectorField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchVectorField,
-    translatingWallVelocityFvPatchVectorField
-);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchVectorField,
+        translatingWallVelocityFvPatchVectorField
+    );
+}
 
 // ************************************************************************* //

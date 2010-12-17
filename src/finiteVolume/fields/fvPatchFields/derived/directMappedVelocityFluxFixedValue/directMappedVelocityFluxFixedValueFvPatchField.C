@@ -30,14 +30,10 @@ License
 #include "surfaceFields.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-directMappedVelocityFluxFixedValueFvPatchField::
+Foam::directMappedVelocityFluxFixedValueFvPatchField::
 directMappedVelocityFluxFixedValueFvPatchField
 (
     const fvPatch& p,
@@ -49,7 +45,7 @@ directMappedVelocityFluxFixedValueFvPatchField
 {}
 
 
-directMappedVelocityFluxFixedValueFvPatchField::
+Foam::directMappedVelocityFluxFixedValueFvPatchField::
 directMappedVelocityFluxFixedValueFvPatchField
 (
     const directMappedVelocityFluxFixedValueFvPatchField& ptf,
@@ -83,7 +79,7 @@ directMappedVelocityFluxFixedValueFvPatchField
 }
 
 
-directMappedVelocityFluxFixedValueFvPatchField::
+Foam::directMappedVelocityFluxFixedValueFvPatchField::
 directMappedVelocityFluxFixedValueFvPatchField
 (
     const fvPatch& p,
@@ -138,7 +134,7 @@ directMappedVelocityFluxFixedValueFvPatchField
 }
 
 
-directMappedVelocityFluxFixedValueFvPatchField::
+Foam::directMappedVelocityFluxFixedValueFvPatchField::
 directMappedVelocityFluxFixedValueFvPatchField
 (
     const directMappedVelocityFluxFixedValueFvPatchField& ptf
@@ -149,7 +145,7 @@ directMappedVelocityFluxFixedValueFvPatchField
 {}
 
 
-directMappedVelocityFluxFixedValueFvPatchField::
+Foam::directMappedVelocityFluxFixedValueFvPatchField::
 directMappedVelocityFluxFixedValueFvPatchField
 (
     const directMappedVelocityFluxFixedValueFvPatchField& ptf,
@@ -163,7 +159,7 @@ directMappedVelocityFluxFixedValueFvPatchField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
+void Foam::directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
 {
     if (updated())
     {
@@ -253,23 +249,27 @@ void directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
 }
 
 
-void directMappedVelocityFluxFixedValueFvPatchField::write(Ostream& os) const
+void Foam::directMappedVelocityFluxFixedValueFvPatchField::write
+(
+    Ostream& os
+) const
 {
     fvPatchVectorField::write(os);
     writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
     this->writeEntry("value", os);
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-makePatchTypeField
-(
-    fvPatchVectorField,
-    directMappedVelocityFluxFixedValueFvPatchField
-);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchVectorField,
+        directMappedVelocityFluxFixedValueFvPatchField
+    );
+}
+
 
 // ************************************************************************* //

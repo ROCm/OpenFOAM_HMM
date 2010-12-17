@@ -29,15 +29,11 @@ License
 #include "surfaceFields.H"
 #include "upwind.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-multivariateSelectionScheme<Type>::multivariateSelectionScheme
+Foam::multivariateSelectionScheme<Type>::multivariateSelectionScheme
 (
     const fvMesh& mesh,
     const typename multivariateSurfaceInterpolationScheme<Type>::
@@ -99,9 +95,5 @@ multivariateSelectionScheme<Type>::multivariateSelectionScheme
       + (scalar(1) - limiter)*upwind<Type>(mesh, faceFlux_).weights();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

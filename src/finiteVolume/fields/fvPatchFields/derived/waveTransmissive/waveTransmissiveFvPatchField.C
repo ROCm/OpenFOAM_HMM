@@ -31,15 +31,10 @@ License
 #include "CrankNicholsonDdtScheme.H"
 #include "backwardDdtScheme.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
+Foam::waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
@@ -52,7 +47,7 @@ waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
 
 
 template<class Type>
-waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
+Foam::waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
 (
     const waveTransmissiveFvPatchField& ptf,
     const fvPatch& p,
@@ -67,7 +62,7 @@ waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
 
 
 template<class Type>
-waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
+Foam::waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -81,7 +76,7 @@ waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
 
 
 template<class Type>
-waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
+Foam::waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
 (
     const waveTransmissiveFvPatchField& ptpsf
 )
@@ -93,7 +88,7 @@ waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
 
 
 template<class Type>
-waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
+Foam::waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
 (
     const waveTransmissiveFvPatchField& ptpsf,
     const DimensionedField<Type, volMesh>& iF
@@ -108,7 +103,8 @@ waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<scalarField> waveTransmissiveFvPatchField<Type>::advectionSpeed() const
+Foam::tmp<Foam::scalarField>
+Foam::waveTransmissiveFvPatchField<Type>::advectionSpeed() const
 {
     // Lookup the velocity and compressibility of the patch
     const fvPatchField<scalar>& psip = this->patch().lookupPatchField
@@ -149,7 +145,7 @@ tmp<scalarField> waveTransmissiveFvPatchField<Type>::advectionSpeed() const
 
 
 template<class Type>
-void waveTransmissiveFvPatchField<Type>::write(Ostream& os) const
+void Foam::waveTransmissiveFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
 
@@ -178,9 +174,5 @@ void waveTransmissiveFvPatchField<Type>::write(Ostream& os) const
     this->writeEntry("value", os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -27,15 +27,11 @@ License
 #include "transformField.H"
 #include "symmTransformField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-nonuniformTransformCyclicPointPatchField<Type>::
+Foam::nonuniformTransformCyclicPointPatchField<Type>::
 nonuniformTransformCyclicPointPatchField
 (
     const pointPatch& p,
@@ -47,7 +43,7 @@ nonuniformTransformCyclicPointPatchField
 
 
 template<class Type>
-nonuniformTransformCyclicPointPatchField<Type>::
+Foam::nonuniformTransformCyclicPointPatchField<Type>::
 nonuniformTransformCyclicPointPatchField
 (
     const pointPatch& p,
@@ -60,7 +56,7 @@ nonuniformTransformCyclicPointPatchField
 
 
 template<class Type>
-nonuniformTransformCyclicPointPatchField<Type>::
+Foam::nonuniformTransformCyclicPointPatchField<Type>::
 nonuniformTransformCyclicPointPatchField
 (
     const nonuniformTransformCyclicPointPatchField<Type>& ptf,
@@ -74,7 +70,7 @@ nonuniformTransformCyclicPointPatchField
 
 
 template<class Type>
-nonuniformTransformCyclicPointPatchField<Type>::
+Foam::nonuniformTransformCyclicPointPatchField<Type>::
 nonuniformTransformCyclicPointPatchField
 (
     const nonuniformTransformCyclicPointPatchField<Type>& ptf,
@@ -88,7 +84,7 @@ nonuniformTransformCyclicPointPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void nonuniformTransformCyclicPointPatchField<Type>::evaluate
+void Foam::nonuniformTransformCyclicPointPatchField<Type>::evaluate
 (
     const Pstream::commsTypes
 )
@@ -109,9 +105,5 @@ void nonuniformTransformCyclicPointPatchField<Type>::evaluate
     setInInternalField(iF, tvalues());
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

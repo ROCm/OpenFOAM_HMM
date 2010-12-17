@@ -27,15 +27,11 @@ License
 #include "transformField.H"
 #include "symmTransformField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-basicSymmetryPointPatchField<Type>::basicSymmetryPointPatchField
+Foam::basicSymmetryPointPatchField<Type>::basicSymmetryPointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF
@@ -46,7 +42,7 @@ basicSymmetryPointPatchField<Type>::basicSymmetryPointPatchField
 
 
 template<class Type>
-basicSymmetryPointPatchField<Type>::basicSymmetryPointPatchField
+Foam::basicSymmetryPointPatchField<Type>::basicSymmetryPointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
@@ -58,7 +54,7 @@ basicSymmetryPointPatchField<Type>::basicSymmetryPointPatchField
 
 
 template<class Type>
-basicSymmetryPointPatchField<Type>::basicSymmetryPointPatchField
+Foam::basicSymmetryPointPatchField<Type>::basicSymmetryPointPatchField
 (
     const basicSymmetryPointPatchField<Type>& ptf,
     const pointPatch& p,
@@ -71,7 +67,7 @@ basicSymmetryPointPatchField<Type>::basicSymmetryPointPatchField
 
 
 template<class Type>
-basicSymmetryPointPatchField<Type>::basicSymmetryPointPatchField
+Foam::basicSymmetryPointPatchField<Type>::basicSymmetryPointPatchField
 (
     const basicSymmetryPointPatchField<Type>& ptf,
     const DimensionedField<Type, pointMesh>& iF
@@ -84,7 +80,10 @@ basicSymmetryPointPatchField<Type>::basicSymmetryPointPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void basicSymmetryPointPatchField<Type>::evaluate(const Pstream::commsTypes)
+void Foam::basicSymmetryPointPatchField<Type>::evaluate
+(
+    const Pstream::commsTypes
+)
 {
     const vectorField& nHat = this->patch().pointNormals();
 
@@ -102,9 +101,5 @@ void basicSymmetryPointPatchField<Type>::evaluate(const Pstream::commsTypes)
     setInInternalField(iF, tvalues());
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

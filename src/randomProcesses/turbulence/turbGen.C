@@ -30,15 +30,10 @@ License
 #include "Ek.H"
 #include "mathematicalConstants.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// from components
-turbGen::turbGen(const Kmesh& k, const scalar EA, const scalar K0)
+Foam::turbGen::turbGen(const Kmesh& k, const scalar EA, const scalar K0)
 :
     K(k),
     Ea(EA),
@@ -49,8 +44,7 @@ turbGen::turbGen(const Kmesh& k, const scalar EA, const scalar K0)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// generate and return a velocity field
-vectorField turbGen::U()
+Foam::vectorField Foam::turbGen::U()
 {
     vectorField s(K.size());
     scalarField rndPhases(K.size());
@@ -78,9 +72,4 @@ vectorField turbGen::U()
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
 // ************************************************************************* //
-

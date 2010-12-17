@@ -30,13 +30,9 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 template<class Type, class Limiter, template<class> class LimitFunc>
-tmp<surfaceScalarField> LimitedScheme<Type, Limiter, LimitFunc>::limiter
+Foam::tmp<Foam::surfaceScalarField>
+Foam::LimitedScheme<Type, Limiter, LimitFunc>::limiter
 (
     const GeometricField<Type, fvPatchField, volMesh>& phi
 ) const
@@ -153,9 +149,5 @@ tmp<surfaceScalarField> LimitedScheme<Type, Limiter, LimitFunc>::limiter
     return tLimiter;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
