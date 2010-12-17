@@ -66,7 +66,7 @@ Foam::multivariateSelectionScheme<Type>::multivariateSelectionScheme
     typename multivariateSurfaceInterpolationScheme<Type>::
         fieldTable::const_iterator iter = this->fields().begin();
 
-    surfaceScalarField limiter =
+    surfaceScalarField limiter
     (
         limitedSurfaceInterpolationScheme<Type>::New
         (

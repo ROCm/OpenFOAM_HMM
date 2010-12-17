@@ -103,22 +103,33 @@ Foam::LimitedScheme<Type, Limiter, LimitFunc>::limiter
             const scalarField& pCDweights = CDweights.boundaryField()[patchi];
             const scalarField& pFaceFlux =
                 this->faceFlux_.boundaryField()[patchi];
-            Field<typename Limiter::phiType> plPhiP =
-                lPhi.boundaryField()[patchi].patchInternalField();
-            Field<typename Limiter::phiType> plPhiN =
-                lPhi.boundaryField()[patchi].patchNeighbourField();
-            Field<typename Limiter::gradPhiType> pGradcP =
-                gradc.boundaryField()[patchi].patchInternalField();
-            Field<typename Limiter::gradPhiType> pGradcN =
-                gradc.boundaryField()[patchi].patchNeighbourField();
+
+            const Field<typename Limiter::phiType> plPhiP
+            (
+                lPhi.boundaryField()[patchi].patchInternalField()
+            );
+            const Field<typename Limiter::phiType> plPhiN
+            (
+                lPhi.boundaryField()[patchi].patchNeighbourField()
+            );
+            const Field<typename Limiter::gradPhiType> pGradcP
+            (
+                gradc.boundaryField()[patchi].patchInternalField()
+            );
+            const Field<typename Limiter::gradPhiType> pGradcN
+            (
+                gradc.boundaryField()[patchi].patchNeighbourField()
+            );
 
             // Build the d-vectors
-            vectorField pd =
+            vectorField pd
+            (
                 mesh.Sf().boundaryField()[patchi]
-               /(
-                   mesh.magSf().boundaryField()[patchi]
-                  *mesh.deltaCoeffs().boundaryField()[patchi]
-                );
+              / (
+                    mesh.magSf().boundaryField()[patchi]
+                  * mesh.deltaCoeffs().boundaryField()[patchi]
+                )
+            );
 
             if (!mesh.orthogonal())
             {

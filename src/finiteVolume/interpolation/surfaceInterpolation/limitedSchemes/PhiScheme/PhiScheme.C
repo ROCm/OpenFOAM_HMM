@@ -115,10 +115,15 @@ Foam::PhiScheme<Type, PhiLimiter>::limiter
             const vectorField& pSf = Sf.boundaryField()[patchI];
             const scalarField& pmagSf = magSf.boundaryField()[patchI];
             const scalarField& pFaceFlux = Uflux.boundaryField()[patchI];
-            Field<Type> pphiP =
-                phi.boundaryField()[patchI].patchInternalField();
-            Field<Type> pphiN =
-                phi.boundaryField()[patchI].patchNeighbourField();
+
+            const Field<Type> pphiP
+            (
+                phi.boundaryField()[patchI].patchInternalField()
+            );
+            const Field<Type> pphiN
+            (
+                phi.boundaryField()[patchI].patchNeighbourField()
+            );
 
             forAll(pLimiter, face)
             {

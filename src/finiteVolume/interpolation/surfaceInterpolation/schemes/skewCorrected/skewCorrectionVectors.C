@@ -84,7 +84,7 @@ void Foam::skewCorrectionVectors::makeSkewCorrectionVectors() const
     const labelUList& owner = mesh_.owner();
 
     // Build the d-vectors
-    surfaceVectorField d = Sf/(mesh_.magSf()*mesh_.deltaCoeffs());
+    surfaceVectorField d(Sf/(mesh_.magSf()*mesh_.deltaCoeffs()));
 
     if (!mesh_.orthogonal())
     {

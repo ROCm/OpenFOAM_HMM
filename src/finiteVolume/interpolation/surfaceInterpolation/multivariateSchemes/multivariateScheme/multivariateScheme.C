@@ -63,8 +63,10 @@ Foam::multivariateScheme<Type, Scheme>::multivariateScheme
     typename multivariateSurfaceInterpolationScheme<Type>::
         fieldTable::const_iterator iter = this->fields().begin();
 
-    surfaceScalarField limiter =
-        Scheme(mesh, faceFlux_, *this).limiter(*iter());
+    surfaceScalarField limiter
+    (
+        Scheme(mesh, faceFlux_, *this).limiter(*iter())
+    );
 
     for (++iter; iter != this->fields().end(); ++iter)
     {
