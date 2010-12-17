@@ -85,7 +85,7 @@ tmp<scalarField> mutUWallFunctionFvPatchScalarField::calcMut() const
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-    const scalarField magUp = mag(Uw.patchInternalField() - Uw);
+    const scalarField magUp(mag(Uw.patchInternalField() - Uw));
     const fvPatchScalarField& muw = rasModel.mu().boundaryField()[patchI];
 
     tmp<scalarField> tyPlus = calcYPlus(magUp);
@@ -168,7 +168,7 @@ tmp<scalarField> mutUWallFunctionFvPatchScalarField::yPlus() const
     const label patchI = patch().index();
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-    const scalarField magUp = mag(Uw.patchInternalField() - Uw);
+    const scalarField magUp(mag(Uw.patchInternalField() - Uw));
 
     return calcYPlus(magUp);
 }

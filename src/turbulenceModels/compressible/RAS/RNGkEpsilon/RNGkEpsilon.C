@@ -292,7 +292,7 @@ void RNGkEpsilon::correct()
 
     RASModel::correct();
 
-    volScalarField divU = fvc::div(phi_/fvc::interpolate(rho_));
+    volScalarField divU(fvc::div(phi_/fvc::interpolate(rho_)));
 
     if (mesh_.moving())
     {
@@ -300,16 +300,18 @@ void RNGkEpsilon::correct()
     }
 
     tmp<volTensorField> tgradU = fvc::grad(U_);
-    volScalarField S2 = (tgradU() && dev(twoSymm(tgradU())));
+    volScalarField S2((tgradU() && dev(twoSymm(tgradU()))));
     tgradU.clear();
 
     volScalarField G("RASModel::G", mut_*S2);
 
-    volScalarField eta = sqrt(mag(S2))*k_/epsilon_;
-    volScalarField eta3 = eta*sqr(eta);
+    volScalarField eta(sqrt(mag(S2))*k_/epsilon_);
+    volScalarField eta3(eta*sqr(eta));
 
-    volScalarField R =
-        ((eta*(-eta/eta0_ + scalar(1)))/(beta_*eta3 + scalar(1)));
+    volScalarField R
+    (
+        ((eta*(-eta/eta0_ + scalar(1)))/(beta_*eta3 + scalar(1)))
+    );
 
     // Update epsilon and G at the wall
     epsilon_.boundaryField().updateCoeffs();
