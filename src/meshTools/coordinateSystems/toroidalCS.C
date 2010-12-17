@@ -97,15 +97,25 @@ Foam::tmp<Foam::vectorField> Foam::toroidalCS::localToGlobal
     bool translate
 ) const
 {
-    const scalarField r = local.component(vector::X);
+    const scalarField r
+    (
+        local.component(vector::X)
+    );
 
-    const scalarField theta =
-        local.component(vector::Y)*constant::mathematical::pi/180.0;
+    const scalarField theta
+    (
+        local.component(vector::Y)*constant::mathematical::pi/180.0
+    );
 
-    const scalarField phi =
-        local.component(vector::Z)*constant::mathematical::pi/180.0;
+    const scalarField phi
+    (
+        local.component(vector::Z)*constant::mathematical::pi/180.0
+    );
 
-    const scalarField rprime = radius_ + r*sin(phi);
+    const scalarField rprime
+    (
+        radius_ + r*sin(phi)
+    );
 
     vectorField lc(local.size());
     lc.replace(vector::X, rprime*cos(theta));

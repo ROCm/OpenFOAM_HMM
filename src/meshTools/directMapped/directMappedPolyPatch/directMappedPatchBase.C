@@ -54,10 +54,6 @@ namespace Foam
         "nearestFace"
     };
 
-    const NamedEnum<directMappedPatchBase::sampleMode, 3>
-        directMappedPatchBase::sampleModeNames_;
-
-
     template<>
     const char* Foam::NamedEnum
     <
@@ -69,10 +65,6 @@ namespace Foam
         "nonuniform",
         "normal"
     };
-
-    const NamedEnum<directMappedPatchBase::offsetMode, 3>
-        directMappedPatchBase::offsetModeNames_;
-
 
     //- Private class for finding nearest
     //  - point+local index
