@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-              Class selfContainedDirectMappedFixedValueFvPatch Declaration
+         Class selfContainedDirectMappedFixedValueFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -75,6 +75,7 @@ class selfContainedDirectMappedFixedValueFvPatchField
 
         mutable autoPtr<interpolation<Type> > interpolator_;
 
+
     // Private Member Functions
 
         //- Field to sample. Either on my or nbr mesh
@@ -82,6 +83,7 @@ class selfContainedDirectMappedFixedValueFvPatchField
 
         //- Access the interpolation method
         const interpolation<Type>& interpolator() const;
+
 
 public:
 
@@ -185,6 +187,7 @@ public:
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
+
 
         //- Write
         virtual void write(Ostream&) const;
