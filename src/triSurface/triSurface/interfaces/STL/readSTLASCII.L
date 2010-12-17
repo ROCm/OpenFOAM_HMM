@@ -200,7 +200,7 @@ endsolid              {space}("endsolid"|"ENDSOLID")({some_space}{word})*
 
 %{
     // End of read character pointer returned by strtof
-    char* endPtr;
+    // char* endPtr;
 
     STLpoint normal;
     STLpoint vertex;
