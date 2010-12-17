@@ -37,7 +37,7 @@ namespace Foam
 
 template<class Type> class cellMotionFvPatchField;
 
-makePatchTypeFieldTypedefs(cellMotion)
+makePatchTypeFieldTypedefs(cellMotion);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

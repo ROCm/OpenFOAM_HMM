@@ -37,7 +37,7 @@ namespace Foam
 
 template<class Type> class wedgeFvsPatchField;
 
-makeFvsPatchTypeFieldTypedefs(wedge)
+makeFvsPatchTypeFieldTypedefs(wedge);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

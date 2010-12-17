@@ -37,7 +37,7 @@ namespace Foam
 
 template<class Type> class nonuniformTransformCyclicFvPatchField;
 
-makePatchTypeFieldTypedefs(nonuniformTransformCyclic)
+makePatchTypeFieldTypedefs(nonuniformTransformCyclic);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

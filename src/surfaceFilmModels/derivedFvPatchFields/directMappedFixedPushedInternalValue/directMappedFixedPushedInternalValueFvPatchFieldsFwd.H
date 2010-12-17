@@ -37,7 +37,7 @@ namespace Foam
 
 template<class Type> class directMappedFixedPushedInternalValueFvPatchField;
 
-makePatchTypeFieldTypedefs(directMappedFixedInternalValue)
+makePatchTypeFieldTypedefs(directMappedFixedInternalValue);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

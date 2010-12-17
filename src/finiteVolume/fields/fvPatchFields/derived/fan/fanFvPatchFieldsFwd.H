@@ -37,7 +37,7 @@ namespace Foam
 
 template<class Type> class fanFvPatchField;
 
-makePatchTypeFieldTypedefs(fan)
+makePatchTypeFieldTypedefs(fan);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

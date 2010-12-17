@@ -37,7 +37,7 @@ namespace Foam
 
 template<class Type> class waveTransmissiveFvPatchField;
 
-makePatchTypeFieldTypedefs(waveTransmissive)
+makePatchTypeFieldTypedefs(waveTransmissive);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
