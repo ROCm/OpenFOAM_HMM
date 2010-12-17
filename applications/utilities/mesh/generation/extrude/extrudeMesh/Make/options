@@ -1,6 +1,6 @@
 EXE_INC = \
     -IextrudedMesh \
-    -IextrudeModel/lnInclude \
+    -I../extrudeModel/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/surfMesh/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \

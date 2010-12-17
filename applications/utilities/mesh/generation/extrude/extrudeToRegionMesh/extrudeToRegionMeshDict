@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -10,42 +10,29 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      extrudeProperties;
+    object      extrudeToRegionMeshDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// What to extrude:
-//      patch   : from patch of another case ('sourceCase')
-//      mesh    : as above but with original case included
-//      surface : from externally read surface
+// Name of region to create
+region  liquidFilm;
 
-//constructFrom mesh;
-constructFrom patch;
-//constructFrom surface;
+// faceZones to extrude
+faceZones (f0);
 
-// If construct from patch/mesh:
-sourceCase "../cavity";
-sourcePatches (movingWall);
-// If construct from patch: patch to use for back (can be same as sourcePatch)
-exposedPatchName movingWall;
-// If construct from surface:
-surface "movingWall.stl";
+// Extrude 1D-columns of cells?
+oneD false;
 
+//- Extrusion model to use. The only logical choice is linearNormal?
 
-
-// Flip surface normals before usage.
-flipNormals false;
-
-
-
-//- Linear extrusion in point-normal direction
-//extrudeModel        linearNormal;
+//- Linear extrusion in normal direction
+extrudeModel        linearNormal;
 
 //- Linear extrusion in specified direction
 //extrudeModel        linearDirection;
 
 //- Wedge extrusion. If nLayers is 1 assumes symmetry around plane.
-extrudeModel        wedge;
+// extrudeModel        wedge;
 
 //- Extrudes into sphere around (0 0 0)
 //extrudeModel        linearRadial;
@@ -55,18 +42,18 @@ extrudeModel        wedge;
 
 nLayers             10;
 
-expansionRatio      1.0;    //0.9;
+expansionRatio      0.9;
+
+linearNormalCoeffs
+{
+    thickness       0.05;
+}
 
 wedgeCoeffs
 {
     axisPt      (0 0.1 -0.05);
     axis        (-1 0 0);
     angle       360;  // For nLayers=1 assume symmetry so angle/2 on each side
-}
-
-linearNormalCoeffs
-{
-    thickness       0.05;
 }
 
 linearDirectionCoeffs
@@ -88,10 +75,4 @@ sigmaRadialCoeffs
 }
 
 
-// Do front and back need to be merged? Usually only makes sense for 360
-// degree wedges.
-mergeFaces false;   //true;
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
