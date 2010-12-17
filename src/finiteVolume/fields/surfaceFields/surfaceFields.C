@@ -30,21 +30,34 @@ License
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTemplateTypeNameAndDebug(surfaceScalarField::DimensionedInternalField, 0);
-defineTemplateTypeNameAndDebug(surfaceVectorField::DimensionedInternalField, 0);
-defineTemplateTypeNameAndDebug
+defineTemplate2TypeNameAndDebug
+(
+    surfaceScalarField::DimensionedInternalField,
+    0
+);
+defineTemplate2TypeNameAndDebug
+(
+    surfaceVectorField::DimensionedInternalField,
+    0
+);
+defineTemplate2TypeNameAndDebug
 (
     surfaceSphericalTensorField::DimensionedInternalField,
     0
 );
-defineTemplateTypeNameAndDebug
+defineTemplate2TypeNameAndDebug
 (
     surfaceSymmTensorField::DimensionedInternalField,
     0
 );
-defineTemplateTypeNameAndDebug(surfaceTensorField::DimensionedInternalField, 0);
+defineTemplate2TypeNameAndDebug
+(
+    surfaceTensorField::DimensionedInternalField,
+    0
+);
+
 
 defineTemplateTypeNameAndDebug(surfaceScalarField, 0);
 defineTemplateTypeNameAndDebug(surfaceVectorField, 0);
