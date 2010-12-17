@@ -43,7 +43,11 @@ namespace Foam
     defineTypeNameAndDebug(directMappedPatchBase, 0);
 
     template<>
-    const char* NamedEnum<directMappedPatchBase::sampleMode, 3>::names[] =
+    const char* Foam::NamedEnum
+    <
+        Foam::directMappedPatchBase::sampleMode,
+        3
+    >::names[] =
     {
         "nearestCell",
         "nearestPatchFace",
@@ -55,7 +59,11 @@ namespace Foam
 
 
     template<>
-    const char* NamedEnum<directMappedPatchBase::offsetMode, 3>::names[] =
+    const char* Foam::NamedEnum
+    <
+        Foam::directMappedPatchBase::offsetMode,
+        3
+    >::names[] =
     {
         "uniform",
         "nonuniform",
@@ -74,7 +82,6 @@ namespace Foam
 
     class nearestEqOp
     {
-
     public:
 
         void operator()(nearInfo& x, const nearInfo& y) const
@@ -93,6 +100,13 @@ namespace Foam
         }
     };
 }
+
+
+const Foam::NamedEnum<Foam::directMappedPatchBase::sampleMode, 3>
+    Foam::directMappedPatchBase::sampleModeNames_;
+
+const Foam::NamedEnum<Foam::directMappedPatchBase::offsetMode, 3>
+    Foam::directMappedPatchBase::offsetModeNames_;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

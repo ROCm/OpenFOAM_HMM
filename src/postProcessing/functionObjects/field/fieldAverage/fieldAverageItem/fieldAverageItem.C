@@ -30,7 +30,11 @@ License
 namespace Foam
 {
     template<>
-    const char* Foam::NamedEnum<Foam::fieldAverageItem::baseType, 2>::names[] =
+    const char* Foam::NamedEnum
+    <
+        Foam::fieldAverageItem::baseType,
+        2
+    >::names[] =
     {
         "iteration",
         "time"

@@ -39,7 +39,11 @@ License
 namespace Foam
 {
     template<>
-    const char* Foam::NamedEnum<Foam::directions::directionType, 3>::names[] =
+    const char* Foam::NamedEnum
+    <
+        Foam::directions::directionType,
+        3
+    >::names[] =
     {
         "tan1",
         "tan2",
@@ -269,7 +273,6 @@ Foam::vectorField Foam::directions::propagateDirection
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from dictionary
 Foam::directions::directions
 (
     const polyMesh& mesh,
@@ -353,7 +356,7 @@ Foam::directions::directions
             FatalErrorIn
             (
                 "directions::directions(const polyMesh&, const dictionary&,"
-                "const twoDPointCorrector*"
+                "const twoDPointCorrector*)"
             )   << "Cannot find patch "
                 << patchName
                 << exit(FatalError);
@@ -373,7 +376,7 @@ Foam::directions::directions
             WarningIn
             (
                 "directions::directions(const polyMesh&, const dictionary&,"
-                "const twoDPointCorrector*"
+                "const twoDPointCorrector*)"
             )   << "Discarding user specified tan1 since 2D case." << endl
                 << "Recalculated tan1 from face normal and planeNormal as "
                 << tan1 << endl << endl;
@@ -441,7 +444,7 @@ Foam::directions::directions
         FatalErrorIn
         (
             "directions::directions(const polyMesh&, const dictionary&,"
-            "const twoDPointCorrector*"
+            "const twoDPointCorrector*)"
         )   << "Unknown coordinate system "
             << coordSystem << endl
             << "Known types are global and patchLocal"

@@ -31,18 +31,24 @@ License
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
-template<>
-const char* Foam::NamedEnum<Foam::temperatureCoupledBase::KMethodType, 4>::
-names[] =
+namespace Foam
 {
-    "basicThermo",
-    "solidThermo",
-    "directionalSolidThermo",
-    "lookup"
-};
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::temperatureCoupledBase::KMethodType,
+        4
+    >::names[] =
+    {
+        "basicThermo",
+        "solidThermo",
+        "directionalSolidThermo",
+        "lookup"
+    };
+}
 
 
-const Foam::NamedEnum<Foam::temperatureCoupledBase::KMethodType, 4> 
+const Foam::NamedEnum<Foam::temperatureCoupledBase::KMethodType, 4>
     Foam::temperatureCoupledBase::KMethodTypeNames_;
 
 

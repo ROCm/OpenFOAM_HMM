@@ -36,7 +36,11 @@ namespace Foam
     defineRunTimeSelectionTable(topoSetSource, istream);
 
     template<>
-    const char* Foam::NamedEnum<Foam::topoSetSource::setAction, 8>::names[] =
+    const char* Foam::NamedEnum
+    <
+        Foam::topoSetSource::setAction,
+        8
+    >::names[] =
     {
         "clear",
         "new",

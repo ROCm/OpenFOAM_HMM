@@ -35,7 +35,11 @@ defineTypeNameAndDebug(Foam::Time, 0);
 namespace Foam
 {
     template<>
-    const char* Foam::NamedEnum<Foam::Time::stopAtControls, 4>::names[] =
+    const char* Foam::NamedEnum
+    <
+        Foam::Time::stopAtControls,
+        4
+    >::names[] =
     {
         "endTime",
         "noWriteNow",
@@ -44,7 +48,11 @@ namespace Foam
     };
 
     template<>
-    const char* Foam::NamedEnum<Foam::Time::writeControls, 5>::names[] =
+    const char* Foam::NamedEnum
+    <
+        Foam::Time::writeControls,
+        5
+    >::names[] =
     {
         "timeStep",
         "runTime",
