@@ -425,7 +425,7 @@ Foam::directions::directions
         }
         if (wantTan2)
         {
-            vectorField tan2Dirs = normalDirs ^ tan1Dirs;
+            tmp<vectorField> tan2Dirs = normalDirs ^ tan1Dirs;
 
             this->operator[](nDirs++) = tan2Dirs;
         }
