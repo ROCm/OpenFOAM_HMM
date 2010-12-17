@@ -149,7 +149,7 @@ void Foam::LiquidEvaporation<CloudType>::calculate
 ) const
 {
     // construct carrier phase species volume fractions for cell, cellI
-    const scalarField Xc = calcXc(cellI);
+    const scalarField Xc(calcXc(cellI));
 
     // droplet surface area
     const scalar A = pi*sqr(d);

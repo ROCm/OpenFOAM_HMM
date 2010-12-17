@@ -357,9 +357,9 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     // Update component mass fractions
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    scalarField dMassGas = dMassDV + dMassSRGas;
-    scalarField dMassLiquid = dMassPC + dMassSRLiquid;
-    scalarField dMassSolid = dMassSRSolid;
+    scalarField dMassGas(dMassDV + dMassSRGas);
+    scalarField dMassLiquid(dMassPC + dMassSRLiquid);
+    scalarField dMassSolid(dMassSRSolid);
 
     scalar mass1 =
         updateMassFractions(mass0, dMassGas, dMassLiquid, dMassSolid);

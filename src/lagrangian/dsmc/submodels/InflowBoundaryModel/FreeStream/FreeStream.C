@@ -188,9 +188,11 @@ void Foam::FreeStream<CloudType>::inflow()
             // negated), dividing by the most probable speed to form
             // molecularSpeedRatio * cosTheta
 
-            scalarField sCosTheta =
+            scalarField sCosTheta
+            (
                 (boundaryU[patchI] & -patch.faceAreas()/mag(patch.faceAreas()))
-               /mostProbableSpeed;
+              / mostProbableSpeed
+            );
 
             // From Bird eqn 4.22
 
