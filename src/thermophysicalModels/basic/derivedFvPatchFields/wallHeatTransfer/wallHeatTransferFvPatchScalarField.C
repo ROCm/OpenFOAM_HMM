@@ -157,7 +157,7 @@ void Foam::wallHeatTransferFvPatchScalarField::updateCoeffs()
     const label patchi = patch().index();
 
     const scalarField& Tw = thermo.T().boundaryField()[patchi];
-    scalarField Cpw = thermo.Cp(Tw, patchi);
+    const scalarField Cpw(thermo.Cp(Tw, patchi));
 
     valueFraction() =
         1.0/

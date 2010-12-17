@@ -162,7 +162,7 @@ updateCoeffs()
     }
 
     scalarField& Iw = *this;
-    vectorField n = patch().Sf()/patch().magSf();
+    const vectorField n(patch().Sf()/patch().magSf());
 
     radiativeIntensityRay& ray =
         const_cast<radiativeIntensityRay&>(dom.IRay(rayId));

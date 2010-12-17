@@ -151,7 +151,7 @@ void Foam::radiation::P1::calculate()
     a_ = absorptionEmission_->a();
     e_ = absorptionEmission_->e();
     E_ = absorptionEmission_->E();
-    const volScalarField sigmaEff = scatter_->sigmaEff();
+    const volScalarField sigmaEff(scatter_->sigmaEff());
 
     // Construct diffusion
     const volScalarField gamma
