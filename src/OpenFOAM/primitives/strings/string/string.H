@@ -182,7 +182,7 @@ public:
         //
         //  @sa
         //  Foam::findEtcFile
-        string& expand();
+        string& expand(const bool recurse=false);
 
         //- Remove repeated characters returning true if string changed
         bool removeRepeated(const char);
