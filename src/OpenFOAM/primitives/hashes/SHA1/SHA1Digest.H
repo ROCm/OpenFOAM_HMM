@@ -45,11 +45,13 @@ namespace Foam
 
 // Forward declaration of classes
 class Ostream;
+class Istream;
 
 // Forward declaration of friend functions and operators
 class SHA1;
 class SHA1Digest;
 Ostream& operator<<(Ostream&, const SHA1Digest&);
+Istream& operator>>(Istream&, SHA1Digest&);
 
 
 /*---------------------------------------------------------------------------*\
@@ -67,6 +69,9 @@ public:
     //- Construct a zero digest
     SHA1Digest();
 
+    //- Construct read a digest
+    SHA1Digest(Istream&);
+
     //- Reset the digest to zero
     void clear();
 
@@ -77,11 +82,14 @@ public:
     bool operator!=(const SHA1Digest&) const;
 
     friend Ostream& operator<<(Ostream&, const SHA1Digest&);
+    friend Istream& operator>>(Istream&, SHA1Digest&);
 
 private:
 
     //- The digest contents
     unsigned char v_[length];
+
+    static unsigned char readHexDigit(Istream&);
 };
 
 
