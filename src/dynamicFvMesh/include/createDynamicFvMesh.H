@@ -9,7 +9,8 @@
             (
                 dynamicFvMesh::defaultRegion,
                 runTime.timeName(),
-                runTime
+                runTime,
+                IOobject::MUST_READ
             )
         )
     );
