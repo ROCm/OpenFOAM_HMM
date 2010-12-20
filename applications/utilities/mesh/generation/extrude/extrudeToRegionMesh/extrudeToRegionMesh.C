@@ -1884,7 +1884,6 @@ int main(int argc, char *argv[])
         }
         mesh.removeFvBoundary();
         mesh.addFvPatches(newPatches, true);
-    }
 
         // Remove any unused patches
         deleteEmptyPatches(mesh);
