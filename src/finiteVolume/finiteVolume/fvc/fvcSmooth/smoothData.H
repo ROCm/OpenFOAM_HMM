@@ -219,6 +219,14 @@ public:
 };
 
 
+//- Data associated with smoothData type are contiguous
+template<>
+inline bool contiguous<smoothData>()
+{
+    return true;
+}
+
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

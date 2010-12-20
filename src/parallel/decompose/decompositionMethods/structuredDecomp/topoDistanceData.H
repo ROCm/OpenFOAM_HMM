@@ -195,6 +195,14 @@ public:
 };
 
 
+//- Data associated with topoDistanceData type are contiguous
+template<>
+inline bool contiguous<topoDistanceData>()
+{
+    return true;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

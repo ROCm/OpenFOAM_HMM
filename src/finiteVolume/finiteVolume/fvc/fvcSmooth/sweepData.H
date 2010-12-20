@@ -210,6 +210,14 @@ public:
 };
 
 
+//- Data associated with sweepData type are contiguous
+template<>
+inline bool contiguous<sweepData>()
+{
+    return true;
+}
+
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

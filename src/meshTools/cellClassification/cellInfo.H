@@ -201,6 +201,14 @@ public:
 };
 
 
+//- Data associated with cellInfo type are contiguous
+template<>
+inline bool contiguous<cellInfo>()
+{
+    return true;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
