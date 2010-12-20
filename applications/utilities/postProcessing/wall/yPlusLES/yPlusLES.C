@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
         );
 
         volScalarField::GeometricBoundaryField d = nearWallDist(mesh).y();
-        volScalarField nuEff = sgsModel->nuEff();
+        volScalarField nuEff(sgsModel->nuEff());
 
         const fvPatchList& patches = mesh.boundary();
 
