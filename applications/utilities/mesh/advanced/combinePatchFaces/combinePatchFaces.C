@@ -130,7 +130,7 @@ void checkSnapMesh
 
         label nOldSize = wrongFaces.size();
 
-        const scalarField magFaceAreas = mag(mesh.faceAreas());
+        const scalarField magFaceAreas(mag(mesh.faceAreas()));
 
         forAll(magFaceAreas, faceI)
         {
