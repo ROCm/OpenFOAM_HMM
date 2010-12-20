@@ -86,51 +86,11 @@ autoPtr<fvMesh> createMesh
     if (!haveMesh)
     {
         // Create dummy mesh. Only used on procs that don't have mesh.
-
-        {
-            IOdictionary fvSolution
-            (
-                IOobject
-                (
-                    "fvSolution",
-                    runTime.system(),
-                    runTime,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                )
-            );
-            Pout<< "Writing dummy " << fvSolution.objectPath() << endl;
-            fvSolution.regIOobject::write();
-        }
-        {
-            IOdictionary fvSchemes
-            (
-                IOobject
-                (
-                    "fvSchemes",
-                    runTime.system(),
-                    runTime,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                )
-            );
-            fvSchemes.add("divSchemes", dictionary());
-            fvSchemes.add("gradSchemes", dictionary());
-            fvSchemes.add("laplacianSchemes", dictionary());
-            Pout<< "Writing dummy " << fvSchemes.objectPath() << endl;
-            fvSchemes.regIOobject::write();
-        }
-
-        Pout<< "Creating dummy mesh from " << io.objectPath() << endl;
+        IOobject noReadIO(io);  
+        noReadIO.readOpt() = IOobject::NO_READ;
         fvMesh dummyMesh
         (
-            IOobject
-            (
-                io.name(),
-                io.instance(),
-                io.db(),
-                IOobject::NO_READ
-            ),
+            noReadIO,
             xferCopy(pointField()),
             xferCopy(faceList()),
             xferCopy(labelList()),
@@ -521,7 +481,7 @@ void compareFields
             {
                 if (mag(aBoundary[i] - bBoundary[i]) > tolDim)
                 {
-                    FatalErrorIn
+                    WarningIn
                     (
                         "compareFields"
                         "(const scalar, const volVectorField&"
@@ -532,7 +492,9 @@ void compareFields
                         << " cc:" << endl
                         << "    real    :" << aBoundary[i] << endl
                         << "    mapped  :" << bBoundary[i] << endl
-                        << abort(FatalError);
+                        << "This might be just a precision entry"
+                        << " on writing the mesh." << endl;
+                        //<< abort(FatalError);
                 }
             }
         }
@@ -554,15 +516,15 @@ int main(int argc, char *argv[])
     );
 #   include "setRootCase.H"
 
-    // Create processor directory if non-existing
-    if (!Pstream::master() && !isDir(args.path()))
-    {
-        Pout<< "Creating case directory " << args.path() << endl;
-        mkDir(args.path());
-    }
+    //- Not useful anymore. See above.
+    //// Create processor directory if non-existing
+    //if (!Pstream::master() && !isDir(args.path()))
+    //{
+    //    Pout<< "Creating case directory " << args.path() << endl;
+    //    mkDir(args.path());
+    //}
 
 #   include "createTime.H"
-
 
     word regionName = polyMesh::defaultRegion;
     fileName meshSubDir;

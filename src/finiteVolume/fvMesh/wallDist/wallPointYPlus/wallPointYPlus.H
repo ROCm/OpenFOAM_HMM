@@ -144,6 +144,14 @@ public:
 };
 
 
+//- Data associated with pointEdgePoint type as contiguous as underlying type
+template<>
+inline bool contiguous<wallPointYPlus>()
+{
+    return contiguous<wallPointData<scalar> >();
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 

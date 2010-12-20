@@ -191,6 +191,14 @@ public:
 };
 
 
+//- Data associated with wallNormalInfo type are contiguous
+template<>
+inline bool contiguous<wallNormalInfo>()
+{
+    return true;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

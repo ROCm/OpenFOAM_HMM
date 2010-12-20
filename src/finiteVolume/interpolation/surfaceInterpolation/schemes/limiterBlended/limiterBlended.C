@@ -23,54 +23,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "refinementData.H"
+#include "fvMesh.H"
+#include "limiterBlended.H"
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<
-(
-    Foam::Ostream& os,
-    const Foam::refinementData& wDist
-)
+namespace Foam
 {
-    if (os.format() == IOstream::ASCII)
-    {
-        os << wDist.refinementCount_ << token::SPACE << wDist.count_;
-    }
-    else
-    {
-        os.write
-        (
-            reinterpret_cast<const char*>(&wDist.refinementCount_),
-            sizeof(refinementData)
-        );
-    }
-
-    // Check state of Ostream
-    os.check("Ostream& operator<<(Ostream&, const refinementData&)");
-    return os;
+    makeSurfaceInterpolationScheme(limiterBlended)
 }
-
-
-Foam::Istream& Foam::operator>>(Foam::Istream& is, Foam::refinementData& wDist)
-{
-    if (is.format() == IOstream::ASCII)
-    {
-        is >> wDist.refinementCount_ >> wDist.count_;
-    }
-    else
-    {
-        is.read
-        (
-            reinterpret_cast<char*>(&wDist.refinementCount_),
-            sizeof(refinementData)
-        );
-    }
-
-    // Check state of Istream
-    is.check("Istream& operator>>(Istream&, refinementData&)");
-    return is;
-}
-
 
 // ************************************************************************* //

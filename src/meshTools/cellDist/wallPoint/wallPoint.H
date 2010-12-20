@@ -223,6 +223,14 @@ public:
 };
 
 
+//- Data associated with wallPoint type are contiguous
+template<>
+inline bool contiguous<wallPoint>()
+{
+    return true;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

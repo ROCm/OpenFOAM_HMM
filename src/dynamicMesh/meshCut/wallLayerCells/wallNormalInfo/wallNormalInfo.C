@@ -33,12 +33,42 @@ Foam::Ostream& Foam::operator<<
     const Foam::wallNormalInfo& wDist
 )
 {
-    return os << wDist.normal();
+    if (os.format() == IOstream::ASCII)
+    {
+        os << wDist.normal();
+    }
+    else
+    {
+        os.write
+        (
+            reinterpret_cast<const char*>(&wDist.normal_),
+            sizeof(vector)
+        );
+    }
+
+    // Check state of Ostream
+    os.check("Ostream& operator<<(Ostream&, const wallNormalInfo&)");
+    return os;
 }
 
 Foam::Istream& Foam::operator>>(Foam::Istream& is, Foam::wallNormalInfo& wDist)
 {
-    return is >> wDist.normal_;
+    if (is.format() == IOstream::ASCII)
+    {
+        is >> wDist.normal_;
+    }
+    else
+    {
+        is.read
+        (
+            reinterpret_cast<char*>(&wDist.normal_),
+            sizeof(vector)
+        );
+    }
+
+    // Check state of Istream
+    is.check("Istream& operator>>(Istream&, wallNormalInfo&)");
+    return is;
 }
 
 // ************************************************************************* //

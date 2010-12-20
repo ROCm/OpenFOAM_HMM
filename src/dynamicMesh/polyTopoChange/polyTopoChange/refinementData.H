@@ -208,6 +208,14 @@ public:
 };
 
 
+//- Data associated with refinementData type are contiguous
+template<>
+inline bool contiguous<refinementData>()
+{
+    return true;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
