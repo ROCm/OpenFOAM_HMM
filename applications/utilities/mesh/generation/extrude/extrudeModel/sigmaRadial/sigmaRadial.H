@@ -67,7 +67,7 @@ public:
 
 
     //-Destructor
-    ~sigmaRadial();
+    virtual ~sigmaRadial();
 
 
     // Member Operators

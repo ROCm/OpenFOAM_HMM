@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-        Class selfContainedDirectMappedFixedValueFvPatch Declaration
+      Class selfContainedDirectMappedFixedValueFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -187,6 +187,7 @@ public:
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
+
 
         //- Write
         virtual void write(Ostream&) const;

@@ -80,8 +80,8 @@ public:
         wedge(const dictionary& dict);
 
 
-    //- Destrcuctor
-    ~wedge();
+    //- Destructor
+    virtual ~wedge();
 
 
     // Member Operators
