@@ -206,28 +206,28 @@ void Foam::primitiveMesh::overrideCellCentres
 
     // Set internal face centres to the midpoint of the cell-centre delta vector
 
-    if (debug)
-    {
-        Pout<< "void Foam::primitiveMesh::overrideCellCentres"
-            << "(const vectorField& newCellCtrs) const : "
-            << "overriding internal face centres." << endl;
-    }
+    // if (debug)
+    // {
+    //     Pout<< "void Foam::primitiveMesh::overrideCellCentres"
+    //         << "(const vectorField& newCellCtrs) const : "
+    //         << "overriding internal face centres." << endl;
+    // }
 
-    deleteDemandDrivenData(faceCentresPtr_);
-    deleteDemandDrivenData(faceAreasPtr_);
+    // deleteDemandDrivenData(faceCentresPtr_);
+    // deleteDemandDrivenData(faceAreasPtr_);
 
-    calcFaceCentresAndAreas();
+    // calcFaceCentresAndAreas();
 
-    vectorField& fCtrs = *faceCentresPtr_;
+    // vectorField& fCtrs = *faceCentresPtr_;
 
-    const vectorField& C = cellCentres();
-    const labelUList& owner = faceOwner();
-    const labelUList& neighbour = faceNeighbour();
+    // const vectorField& C = cellCentres();
+    // const labelUList& owner = faceOwner();
+    // const labelUList& neighbour = faceNeighbour();
 
-    forAll(neighbour, faceI)
-    {
-        fCtrs[faceI] = 0.5*(C[neighbour[faceI]] + C[owner[faceI]]);
-    }
+    // forAll(neighbour, faceI)
+    // {
+    //     fCtrs[faceI] = 0.5*(C[neighbour[faceI]] + C[owner[faceI]]);
+    // }
 }
 
 
