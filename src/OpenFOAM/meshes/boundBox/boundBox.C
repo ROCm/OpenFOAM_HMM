@@ -156,7 +156,7 @@ Foam::Istream& Foam::operator>>(Istream& is, boundBox& bb)
 {
     if (is.format() == IOstream::ASCII)
     {
-        return is >> bb.min_ >> bb.max_;
+        is >> bb.min_ >> bb.max_;
     }
     else
     {
