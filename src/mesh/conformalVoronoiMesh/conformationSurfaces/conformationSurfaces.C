@@ -54,17 +54,25 @@ Foam::conformationSurfaces::conformationSurfaces
         surfaceConformationDict.subDict("geometryToConformTo")
     );
 
+    const dictionary& additionalFeaturesDict
+    (
+        surfaceConformationDict.subDict("additionalFeatures")
+    );
+
     Info<< nl << "Reading geometryToConformTo" << endl;
 
-    surfaces_.setSize(surfacesDict.size());
+    surfaces_.setSize(surfacesDict.size(), -1);
 
     allGeometryToSurfaces_.setSize(allGeometry_.size(), -1);
 
-    baffleSurfaces_.setSize(surfacesDict.size());
+    baffleSurfaces_.setSize(surfacesDict.size(), false);
 
-    features_.setSize(surfacesDict.size());
+    // Features may be attached to host surfaces or independent
+    features_.setSize(surfacesDict.size() + additionalFeaturesDict.size());
 
-    patchOffsets_.setSize(surfacesDict.size());
+    label featureI = 0;
+
+    patchOffsets_.setSize(surfacesDict.size(), -1);
 
     label surfI = 0;
 
@@ -83,6 +91,8 @@ Foam::conformationSurfaces::conformationSurfaces
                 << "Valid geometry is " << nl << allGeometry_.names()
                 << exit(FatalError);
         }
+
+        Info<< nl << "    " << iter().keyword() << endl;
 
         patchOffsets_[surfI] = patchNames_.size();
 
@@ -105,9 +115,11 @@ Foam::conformationSurfaces::conformationSurfaces
         {
             fileName feMeshName(surfaceSubDict.lookup("featureEdgeMesh"));
 
+            Info<< "    features: " << feMeshName<< endl;
+
             features_.set
             (
-                surfI,
+                featureI++,
                 new featureEdgeMesh
                 (
                     IOobject
@@ -115,7 +127,8 @@ Foam::conformationSurfaces::conformationSurfaces
                         feMeshName,
                         cvMesh_.time().findInstance
                         (
-                            "featureEdgeMesh", feMeshName
+                            "featureEdgeMesh",
+                            feMeshName
                         ),
                         "featureEdgeMesh",
                         cvMesh_.time(),
@@ -135,25 +148,25 @@ Foam::conformationSurfaces::conformationSurfaces
         }
         else if (featureMethod == "none")
         {
-            fileName feMeshName(surfaceName + "_noFeatures");
+            // fileName feMeshName(surfaceName + "_noFeatures");
 
-            features_.set
-            (
-                surfI,
-                new featureEdgeMesh
-                (
-                    IOobject
-                    (
-                        feMeshName,
-                        cvMesh_.time().constant(),
-                        "featureEdgeMesh",
-                        cvMesh_.time(),
-                        IOobject::NO_READ,
-                        IOobject::NO_WRITE,
-                        false
-                    )
-                )
-            );
+            // features_.set
+            // (
+            //     featureI++,
+            //     new featureEdgeMesh
+            //     (
+            //         IOobject
+            //         (
+            //             feMeshName,
+            //             cvMesh_.time().constant(),
+            //             "featureEdgeMesh",
+            //             cvMesh_.time(),
+            //             IOobject::NO_READ,
+            //             IOobject::NO_WRITE,
+            //             false
+            //         )
+            //     )
+            // );
         }
         else
         {
@@ -165,6 +178,60 @@ Foam::conformationSurfaces::conformationSurfaces
 
         surfI++;
     }
+
+    if (!additionalFeaturesDict.empty())
+    {
+        Info<< nl << "Reading additionalFeatures" << endl;
+    }
+
+    forAllConstIter(dictionary, additionalFeaturesDict, iter)
+    {
+        word featureName = iter().keyword();
+
+        Info<< nl << "    " << iter().keyword() << endl;
+
+        const dictionary& featureSubDict
+        (
+            additionalFeaturesDict.subDict(featureName)
+        );
+
+        word featureMethod = featureSubDict.lookupOrDefault
+        (
+            "featureMethod",
+            word("none")
+        );
+
+        if (featureMethod == "featureEdgeMesh")
+        {
+            fileName feMeshName(featureSubDict.lookup("featureEdgeMesh"));
+
+            Info<< "    features: " << feMeshName << endl;
+
+            features_.set
+            (
+                featureI++,
+                new featureEdgeMesh
+                (
+                    IOobject
+                    (
+                        feMeshName,
+                        cvMesh_.time().findInstance
+                        (
+                            "featureEdgeMesh",
+                            feMeshName
+                        ),
+                        "featureEdgeMesh",
+                        cvMesh_.time(),
+                        IOobject::MUST_READ,
+                        IOobject::NO_WRITE
+                    )
+                )
+            );
+        }
+    }
+
+    // Remove unnecessary space from the features list
+    features_.setSize(featureI);
 
     bounds_ = searchableSurfacesQueries::bounds(allGeometry_, surfaces_);
 

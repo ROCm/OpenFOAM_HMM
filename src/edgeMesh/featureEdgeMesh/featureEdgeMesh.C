@@ -54,6 +54,97 @@ Foam::label Foam::featureEdgeMesh::nPointTypes = 4;
 Foam::label Foam::featureEdgeMesh::nEdgeTypes = 5;
 
 
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+Foam::featureEdgeMesh::pointStatus Foam::featureEdgeMesh::classifyFeaturePoint
+(
+    label ptI
+) const
+{
+    labelList ptEds(pointEdges()[ptI]);
+
+    label nPtEds = ptEds.size();
+    label nExternal = 0;
+    label nInternal = 0;
+
+    if (nPtEds == 0)
+    {
+        // There are no edges attached to the point, this is a problem
+        return NONFEATURE;
+    }
+
+    forAll(ptEds, i)
+    {
+        edgeStatus edStat = getEdgeStatus(ptEds[i]);
+
+        if (edStat == EXTERNAL)
+        {
+            nExternal++;
+        }
+        else if (edStat == INTERNAL)
+        {
+            nInternal++;
+        }
+    }
+
+    if (nExternal == nPtEds)
+    {
+        return CONVEX;
+    }
+    else if (nInternal == nPtEds)
+    {
+        return CONCAVE;
+    }
+    else
+    {
+        return MIXED;
+    }
+}
+
+
+Foam::featureEdgeMesh::edgeStatus Foam::featureEdgeMesh::classifyEdge
+(
+    const List<vector>& norms,
+    const labelList& edNorms,
+    const vector& fC0tofC1
+) const
+{
+    label nEdNorms = edNorms.size();
+
+    if (nEdNorms == 1)
+    {
+        return OPEN;
+    }
+    else if (nEdNorms == 2)
+    {
+        const vector n0(norms[edNorms[0]]);
+        const vector n1(norms[edNorms[1]]);
+
+        if ((n0 & n1) > cosNormalAngleTol_)
+        {
+            return FLAT;
+        }
+        else if ((fC0tofC1 & n0) > 0.0)
+        {
+            return INTERNAL;
+        }
+        else
+        {
+            return EXTERNAL;
+        }
+    }
+    else if (nEdNorms > 2)
+    {
+        return MULTIPLE;
+    }
+    else
+    {
+        // There is a problem - the edge has no normals
+        return NONE;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::featureEdgeMesh::featureEdgeMesh(const IOobject& io)
@@ -189,23 +280,11 @@ Foam::featureEdgeMesh::featureEdgeMesh
 
 Foam::featureEdgeMesh::featureEdgeMesh
 (
-    const surfaceFeatures& sFeat,
-    const objectRegistry& obr,
-    const fileName& sFeatFileName
+    const IOobject& io,
+    const surfaceFeatures& sFeat
 )
 :
-    regIOobject
-    (
-        IOobject
-        (
-            sFeatFileName,
-            obr.time().constant(),
-            "featureEdgeMesh",
-            obr,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        )
-    ),
+    regIOobject(io),
     edgeMesh(pointField(0), edgeList(0)),
     concaveStart_(-1),
     mixedStart_(-1),
@@ -367,9 +446,8 @@ Foam::featureEdgeMesh::featureEdgeMesh
             (
                 "Foam::featureEdgeMesh::featureEdgeMesh"
                 "("
-                "    const surfaceFeatures& sFeat,"
-                "    const objectRegistry& obr,"
-                "    const fileName& sFeatFileName"
+                    "const IOobject& io, "
+                    "const surfaceFeatures& sFeat"
                 ")"
             )
                 << nl << "classifyEdge returned NONE on edge "
@@ -444,9 +522,8 @@ Foam::featureEdgeMesh::featureEdgeMesh
             (
                 "Foam::featureEdgeMesh::featureEdgeMesh"
                 "("
-                "    const surfaceFeatures& sFeat,"
-                "    const objectRegistry& obr,"
-                "    const fileName& sFeatFileName"
+                    "const IOobject& io, "
+                    "const surfaceFeatures& sFeat"
                 ")"
             )
                 << nl << "classifyFeaturePoint returned NONFEATURE on point at "
@@ -584,97 +661,6 @@ Foam::featureEdgeMesh::featureEdgeMesh
 
 Foam::featureEdgeMesh::~featureEdgeMesh()
 {}
-
-
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
-Foam::featureEdgeMesh::pointStatus Foam::featureEdgeMesh::classifyFeaturePoint
-(
-    label ptI
-) const
-{
-    labelList ptEds(pointEdges()[ptI]);
-
-    label nPtEds = ptEds.size();
-    label nExternal = 0;
-    label nInternal = 0;
-
-    if (nPtEds == 0)
-    {
-        // There are no edges attached to the point, this is a problem
-        return NONFEATURE;
-    }
-
-    forAll(ptEds, i)
-    {
-        edgeStatus edStat = getEdgeStatus(ptEds[i]);
-
-        if (edStat == EXTERNAL)
-        {
-            nExternal++;
-        }
-        else if (edStat == INTERNAL)
-        {
-            nInternal++;
-        }
-    }
-
-    if (nExternal == nPtEds)
-    {
-        return CONVEX;
-    }
-    else if (nInternal == nPtEds)
-    {
-        return CONCAVE;
-    }
-    else
-    {
-        return MIXED;
-    }
-}
-
-
-Foam::featureEdgeMesh::edgeStatus Foam::featureEdgeMesh::classifyEdge
-(
-    const List<vector>& norms,
-    const labelList& edNorms,
-    const vector& fC0tofC1
-) const
-{
-    label nEdNorms = edNorms.size();
-
-    if (nEdNorms == 1)
-    {
-        return OPEN;
-    }
-    else if (nEdNorms == 2)
-    {
-        const vector n0(norms[edNorms[0]]);
-        const vector n1(norms[edNorms[1]]);
-
-        if ((n0 & n1) > cosNormalAngleTol_)
-        {
-            return FLAT;
-        }
-        else if ((fC0tofC1 & n0) > 0.0)
-        {
-            return INTERNAL;
-        }
-        else
-        {
-            return EXTERNAL;
-        }
-    }
-    else if (nEdNorms > 2)
-    {
-        return MULTIPLE;
-    }
-    else
-    {
-        // There is a problem - the edge has no normals
-        return NONE;
-    }
-}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

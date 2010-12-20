@@ -27,10 +27,10 @@ Class
 Description
 
     Feature points are a sorted subset at the start of the overall points list:
-        0 .. concaveStart_-1                : convex points (w.r.t normals)
-        concaveStart_-1 .. mixedStart_-1    : concave points
-        mixedStart_ .. nonFeatureStart_     : mixed internal/external points
-        nonFeatureStart_ .. size-1          : non-feature points
+        0 .. concaveStart_-1            : convex points (w.r.t normals)
+        concaveStart_ .. mixedStart_-1  : concave points
+        mixedStart_ .. nonFeatureStart_ : mixed internal/external points
+        nonFeatureStart_ .. size-1      : non-feature points
 
     Feature edges are the edgeList of the edgeMesh and are sorted:
         0 .. internalStart_-1           : external edges (convex w.r.t normals)
@@ -55,11 +55,9 @@ SourceFiles
 
 #include "edgeMesh.H"
 #include "surfaceFeatures.H"
-#include "objectRegistry.H"
 #include "IOdictionary.H"
 #include "indexedOctree.H"
 #include "treeDataEdge.H"
-#include "pointIndexHit.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -202,14 +200,12 @@ public:
             const Xfer<edgeList>&
         );
 
-        //- Construct (read) given surfaceFeatures, an objectRegistry and a
-        //  fileName to write to.  Extracts, classifies and reorders the data
-        //  from surfaceFeatures.
+        //- Construct given surfaceFeatures, extracts, classifies and reorders
+        //  the data.
         featureEdgeMesh
         (
-            const surfaceFeatures& sFeat,
-            const objectRegistry& obr,
-            const fileName& sFeatFileName
+            const IOobject& io,
+            const surfaceFeatures& sFeat
         );
 
         //- Construct from all components

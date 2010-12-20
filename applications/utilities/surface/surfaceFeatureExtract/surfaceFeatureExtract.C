@@ -301,16 +301,25 @@ int main(int argc, char *argv[])
     Pout<< nl << "Writing featureEdgeMesh to constant/featureEdgeMesh."
         << endl;
 
+    fileName sFeatFileName = surfFileName.lessExt().name();
+
     featureEdgeMesh feMesh
     (
-        newSet,
-        runTime,
-        surfFileName.lessExt().name() + ".featureEdgeMesh"
+        IOobject
+        (
+            sFeatFileName + ".featureEdgeMesh",
+            runTime.constant(),
+            "featureEdgeMesh",
+            runTime,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        newSet
     );
 
-    feMesh.writeObj(surfFileName.lessExt().name());
-
     feMesh.write();
+
+    feMesh.writeObj(sFeatFileName);
 
     Info<< "End\n" << endl;
 
