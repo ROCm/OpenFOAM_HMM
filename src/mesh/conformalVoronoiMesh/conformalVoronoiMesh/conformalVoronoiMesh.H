@@ -59,7 +59,6 @@ SourceFiles
 #include "unitConversion.H"
 #include "transform.H"
 #include "volFields.H"
-#include "surfaceFields.H"
 #include "fvMesh.H"
 #include "Histogram.H"
 #include "labelPair.H"

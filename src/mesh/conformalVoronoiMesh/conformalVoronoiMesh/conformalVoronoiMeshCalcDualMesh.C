@@ -1405,11 +1405,11 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     removeUnusedCells(owner, neighbour, cellCentres);
 
-    fvMesh mesh
+    polyMesh pMesh
     (
         IOobject
         (
-            Foam::polyMesh::defaultRegion,
+            "cvMesh_temporary",
             runTime_.timeName(),
             runTime_,
             IOobject::NO_READ,
@@ -1431,33 +1431,23 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
             patchSizes[p],
             patchStarts[p],
             p,
-            mesh.boundaryMesh()
+            pMesh.boundaryMesh()
         );
     }
 
-    mesh.addPatches(patches);
+    pMesh.addPatches(patches);
 
-    surfaceScalarField preCellCentreShiftDeltaCoeffs = mesh.deltaCoeffs();
-
-    mesh.clearOut();
-
-    surfaceScalarField postCellCentreShiftDeltaCoeffs = mesh.deltaCoeffs();
-
-    surfaceScalarField deltaCoeffRatio =
-        postCellCentreShiftDeltaCoeffs/preCellCentreShiftDeltaCoeffs;
-
-    Info<< "deltaCoeffRatio min " << min(deltaCoeffRatio) << nl
-        << "deltaCoeffRatio max " << max(deltaCoeffRatio) << endl;
+    pMesh.overrideCellCentres(cellCentres);
 
     timeCheck();
 
-    labelHashSet wrongFaces(mesh.nFaces()/100);
+    labelHashSet wrongFaces(pMesh.nFaces()/100);
 
     Info << endl;
 
-    DynamicList<label> checkFaces(mesh.nFaces());
+    DynamicList<label> checkFaces(pMesh.nFaces());
 
-    const vectorField& fAreas = mesh.faceAreas();
+    const vectorField& fAreas = pMesh.faceAreas();
 
     scalar faceAreaLimit = SMALL;
 
@@ -1478,7 +1468,7 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
     motionSmoother::checkMesh
     (
         false,
-        mesh,
+        pMesh,
         cvMeshControls().cvMeshDict().subDict("meshQualityControls"),
         checkFaces,
         wrongFaces
@@ -1486,7 +1476,7 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     label nInvalidPolyhedra = 0;
 
-    const cellList& cells = mesh.cells();
+    const cellList& cells = pMesh.cells();
 
     forAll(cells, cI)
     {
@@ -1512,7 +1502,7 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     forAllConstIter(labelHashSet, wrongFaces, iter)
     {
-        const face f = mesh.faces()[iter.key()];
+        const face f = pMesh.faces()[iter.key()];
 
         forAll(f, fPtI)
         {
@@ -1522,13 +1512,13 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     // // Limit connected cells
 
-    // labelHashSet limitCells(mesh.nCells()/100);
+    // labelHashSet limitCells(pMesh.nCells()/100);
 
-    // const labelListList& ptCells = mesh.pointCells();
+    // const labelListList& ptCells = pMesh.pointCells();
 
     // forAllConstIter(labelHashSet, wrongFaces, iter)
     // {
-    //     const face f = mesh.faces()[iter.key()];
+    //     const face f = pMesh.faces()[iter.key()];
 
     //     forAll(f, fPtI)
     //     {
@@ -1543,7 +1533,7 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
     //     }
     // }
 
-    // const labelListList& cellPts = mesh.cellPoints();
+    // const labelListList& cellPts = pMesh.cellPoints();
 
     // forAllConstIter(labelHashSet, limitCells, iter)
     // {
