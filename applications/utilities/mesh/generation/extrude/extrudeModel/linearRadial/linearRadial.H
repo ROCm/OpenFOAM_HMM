@@ -66,7 +66,7 @@ public:
 
 
     //- Destructor
-    ~linearRadial();
+    virtual ~linearRadial();
 
 
     // Member Operators

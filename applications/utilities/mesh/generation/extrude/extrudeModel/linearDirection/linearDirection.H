@@ -71,7 +71,7 @@ public:
 
 
     //- Destructor
-    ~linearDirection();
+    virtual ~linearDirection();
 
 
     // Member Operators

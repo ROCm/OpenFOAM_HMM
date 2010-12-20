@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,28 +23,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef selfContainedDirectMappedFixedValueFvPatchFieldsFwd_H
-#define selfContainedDirectMappedFixedValueFvPatchFieldsFwd_H
-
-#include "fieldTypes.H"
+#include "fvMesh.H"
+#include "limiterBlended.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class Type> class selfContainedDirectMappedFixedValueFvPatchField;
-
-makePatchTypeFieldTypedefs(selfContainedDirectMappedFixedValue)
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
+    makeSurfaceInterpolationScheme(limiterBlended)
+}
 
 // ************************************************************************* //
