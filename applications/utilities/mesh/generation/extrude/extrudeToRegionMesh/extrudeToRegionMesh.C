@@ -133,6 +133,7 @@ Usage
 #include "syncTools.H"
 #include "cyclicPolyPatch.H"
 #include "nonuniformTransformCyclicPolyPatch.H"
+#include "extrudeModel.H"
 
 using namespace Foam;
 
@@ -689,39 +690,6 @@ void countExtrudePatches
 }
 
 
-// Lexical ordering for vectors.
-bool lessThan(const point& x, const point& y)
-{
-    for (direction dir = 0; dir < point::nComponents; dir++)
-    {
-        if (x[dir] < y[dir]) return true;
-        if (x[dir] > y[dir]) return false;
-    }
-    return false;
-}
-
-
-// Combine vectors
-class minEqVectorOp
-{
-    public:
-    void operator()(vector& x, const vector& y) const
-    {
-        if (y != vector::zero)
-        {
-            if (x == vector::zero)
-            {
-                x = y;
-            }
-            else if (lessThan(y, x))
-            {
-                x = y;
-            }
-        }
-    }
-};
-
-
 // Constrain&sync normals on points that are on coupled patches to make sure
 // the face extruded from the edge has a valid normal with its coupled
 // equivalent.
@@ -846,14 +814,14 @@ void constrainCoupledNormals
     (
         mesh,
         edgeNormals0,
-        minEqVectorOp(),
+        maxMagSqrEqOp<vector>(),
         vector::zero            // nullValue
     );
     syncTools::syncEdgeList
     (
         mesh,
         edgeNormals1,
-        minEqVectorOp(),
+        maxMagSqrEqOp<vector>(),
         vector::zero            // nullValue
     );
 
@@ -951,14 +919,9 @@ tmp<pointField> calcOffset
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("shellRegion");
-    argList::validArgs.append("faceZones");
-    argList::validArgs.append("thickness");
-
-    Foam::argList::addBoolOption
+    argList::addNote
     (
-        "oneD",
-        "generate columns of 1D cells"
+        "Create region mesh by extruding a faceZone"
     );
 
     #include "addRegionOption.H"
@@ -966,19 +929,34 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedMesh.H"
-    const word oldInstance = mesh.pointsInstance();
 
-    word shellRegionName = args.additionalArgs()[0];
-    const wordList zoneNames(IStringStream(args.additionalArgs()[1])());
-    scalar thickness = readScalar(IStringStream(args.additionalArgs()[2])());
+    const word oldInstance = mesh.pointsInstance();
     bool overwrite = args.optionFound("overwrite");
-    bool oneD = args.optionFound("oneD");
+
+    IOdictionary dict
+    (
+        IOobject
+        (
+            "extrudeToRegionMeshDict",
+            runTime.system(),
+            runTime,
+            IOobject::MUST_READ_IF_MODIFIED
+        )
+    );
+
+    // Point generator
+    autoPtr<extrudeModel> model(extrudeModel::New(dict));
+
+
+    // Region
+    const word shellRegionName(dict.lookup("region"));
+    const wordList zoneNames(dict.lookup("faceZones"));
+    const Switch oneD(dict.lookup("oneD"));
 
 
     Info<< "Extruding zones " << zoneNames
         << " on mesh " << regionName
         << " into shell mesh " << shellRegionName
-        << " of thickness " << thickness << nl
         << endl;
 
     if (shellRegionName == regionName)
@@ -1079,7 +1057,6 @@ int main(int argc, char *argv[])
             mesh.pointEdges()
         )
     );
-
 
 
     // Check whether the zone is internal or external faces to determine
@@ -1437,6 +1414,8 @@ int main(int argc, char *argv[])
     // Calculate a normal per region
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     vectorField regionNormals(regionPoints.size(), vector::zero);
+    vectorField regionCentres(regionPoints.size(), vector::zero);
+    labelList nRegionFaces(regionPoints.size(), 0);
 
     forAll(pointRegions, faceI)
     {
@@ -1446,9 +1425,15 @@ int main(int argc, char *argv[])
         {
             label region = pointRegions[faceI][fp];
             regionNormals[region] += extrudePatch.faceNormals()[faceI];
+            regionCentres[region] += extrudePatch.faceCentres()[faceI];
+            nRegionFaces[region]++;
         }
     }
     regionNormals /= mag(regionNormals);
+    forAll(regionCentres, regionI)
+    {
+        regionCentres[regionI] /= nRegionFaces[regionI];
+    }
 
 
     // Constrain&sync normals on points that are on coupled patches.
@@ -1463,9 +1448,12 @@ int main(int argc, char *argv[])
     );
 
     // For debugging: dump hedgehog plot of normals
+    if (false)
     {
         OFstream str(runTime.path()/"regionNormals.obj");
         label vertI = 0;
+
+        scalar thickness = model().sumThickness(1);
 
         forAll(pointRegions, faceI)
         {
@@ -1486,6 +1474,16 @@ int main(int argc, char *argv[])
     }
 
 
+    // Use model to create displacements of first layer
+    vectorField firstDisp(regionNormals.size());
+    forAll(firstDisp, regionI)
+    {
+        const point& regionPt = regionCentres[regionI];
+        const vector& n = regionNormals[regionI];
+        firstDisp[regionI] = model()(regionPt, n, 1) - regionPt;
+    }
+
+
 
     // Create a new mesh
     // ~~~~~~~~~~~~~~~~~
@@ -1500,7 +1498,9 @@ int main(int argc, char *argv[])
 
         extruder.setRefinement
         (
-            thickness*regionNormals,
+            firstDisp,                              // first displacement
+            model().expansionRatio(),
+            model().nLayers(),                      // nLayers
             extrudeTopPatchID,
             extrudeBottomPatchID,
             extrudeEdgePatches,

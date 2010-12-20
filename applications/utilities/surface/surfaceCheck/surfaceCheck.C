@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
     // write bounding box corners
     if (args.optionFound("blockMesh"))
     {
-        pointField cornerPts = boundBox(surf.points()).corners();
+        pointField cornerPts = boundBox(surf.points()).points();
 
         Info<<"// blockMeshDict info" << nl;
 

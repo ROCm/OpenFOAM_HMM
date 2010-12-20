@@ -22,14 +22,23 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::extrudeModels::sigmaRadial
+    Foam::extrudeModels::wedge
 
 Description
+    Extrudes by rotating a surface around an axis
+    - extrusion is opposite the surface/patch normal so inwards the source
+      mesh
+    - axis direction has to be consistent with this.
+    - use -mergeFaces option if doing full 360 and want to merge front and back
+    - note direction of axis. This should be consistent with rotating against
+      the patch normal direction. If you get it wrong you'll see all cells
+      with extreme aspect ratio and internal faces wrong way around in
+      checkMesh
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sigmaRadial_H
-#define sigmaRadial_H
+#ifndef wedge_H
+#define wedge_H
 
 #include "extrudeModel.H"
 
@@ -41,33 +50,38 @@ namespace extrudeModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class sigmaRadial Declaration
+                         Class wedge Declaration
 \*---------------------------------------------------------------------------*/
 
-class sigmaRadial
+class wedge
 :
     public extrudeModel
 {
     // Private data
 
-        scalar RTbyg_;
-        scalar pRef_;
-        scalar pStrat_;
+        //- Point on axis
+        const point axisPt_;
+
+        //- Normalized direction of axis
+        const vector axis_;
+
+        //- Overall angle (radians)
+        const scalar angle_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("sigmaRadial");
+    TypeName("wedge");
 
     // Constructors
 
         //- Construct from dictionary
-        sigmaRadial(const dictionary& dict);
+        wedge(const dictionary& dict);
 
 
-    //-Destructor
-    ~sigmaRadial();
+    //- Destructor
+    virtual ~wedge();
 
 
     // Member Operators
@@ -91,4 +105,3 @@ public:
 #endif
 
 // ************************************************************************* //
-

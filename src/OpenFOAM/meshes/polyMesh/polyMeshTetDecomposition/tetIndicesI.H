@@ -122,6 +122,21 @@ Foam::triPointRef Foam::tetIndices::faceTri(const polyMesh& mesh) const
 }
 
 
+Foam::triFace Foam::tetIndices::faceTriIs(const polyMesh& mesh) const
+{
+    const faceList& pFaces = mesh.faces();
+
+    const Foam::face& f = pFaces[faceI_];
+
+    return triFace
+    (
+        f[faceBasePtI_],
+        f[facePtAI_],
+        f[facePtBI_]
+    );
+}
+
+
 Foam::triPointRef Foam::tetIndices::oldFaceTri(const polyMesh& mesh) const
 {
     const pointField& oldPPts = mesh.oldPoints();

@@ -177,7 +177,7 @@ public:
             }
 
             //- Return corner points in an order corresponding to a 'hex' cell
-            tmp<pointField> corners() const;
+            tmp<pointField> points() const;
 
         // Query
 

@@ -52,6 +52,14 @@ class outletInletFvPatchField
     public mixedFvPatchField<Type>
 {
 
+protected:
+
+    // Protected data
+
+        //- Name of flux field
+        word phiName_;
+
+
 public:
 
     //- Runtime type information

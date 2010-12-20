@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,74 +22,90 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::extrudeModels::linearNormal
+    Foam::maxDeltaxyz
 
 Description
-    Extrudes by transforming points normal to the surface by a given distance
+    maxDeltaxyz takes the maximum of the three dimensions per cell:
+    max(hx, hy, hz). Valid for structures hexahedral cells only.
+
+
+SourceFiles
+    maxDeltaxyz.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef linearNormal_H
-#define linearNormal_H
+#ifndef maxDeltaxyzDelta_H
+#define maxDeltaxyzDelta_H
 
-#include "point.H"
-#include "extrudeModel.H"
+#include "LESdelta.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace extrudeModels
-{
 
 /*---------------------------------------------------------------------------*\
-                    Class linearNormal Declaration
+                           Class maxDeltaxyz Declaration
 \*---------------------------------------------------------------------------*/
 
-class linearNormal
+class maxDeltaxyz
 :
-    public extrudeModel
+    public LESdelta
 {
     // Private data
 
-        //- layer thickness
-        scalar thickness_;
+        scalar deltaCoeff_; //
+
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct and assignment
+        maxDeltaxyz(const maxDeltaxyz&);
+        void operator=(const maxDeltaxyz&);
+
+        // Calculate the delta values
+        void calcDelta();
 
 
 public:
 
     //- Runtime type information
-    TypeName("linearNormal");
+    TypeName("maxDeltaxyz");
+
 
     // Constructors
 
-        //- Construct from dictionary
-        linearNormal(const dictionary& dict);
+        //- Construct from name, mesh and IOdictionary
+        maxDeltaxyz
+        (
+            const word& name,
+            const fvMesh& mesh,
+            const dictionary&
+        );
 
 
     //- Destructor
-    ~linearNormal();
+    virtual ~maxDeltaxyz()
+    {}
 
 
-    // Member Operators
+    // Member Functions
 
-        point operator()
-        (
-            const point& surfacePoint,
-            const vector& surfaceNormal,
-            const label layer
-        ) const;
+        //- Read the LESdelta dictionary
+        virtual void read(const dictionary&);
+
+        // Correct values
+        virtual void correct();
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace extrudeModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+
 #endif
 
 // ************************************************************************* //
-

@@ -127,6 +127,7 @@ $(cellZoneSources)/setToCellZone/setToCellZone.C
 pointZoneSources = sets/pointZoneSources
 $(pointZoneSources)/setToPointZone/setToPointZone.C
 
+momentOfInertia/momentOfInertia.C
 
 surfaceSets/surfaceSets.C
 

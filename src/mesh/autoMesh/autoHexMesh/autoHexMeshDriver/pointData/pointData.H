@@ -25,10 +25,10 @@ Class
     Foam::pointData
 
 Description
-    Holds information regarding nearest wall point. Used in pointEdgeWave.
-    (so not standard meshWave)
-
-    To be used in wall distance calculation.
+    Variant of pointEdgePoint with some transported additional data. 
+    WIP - should be templated on data like wallDistData.
+    Passive vector v_ is not a coordinate (so no enterDomain/leaveDomain
+    transformation needed)
 
 SourceFiles
     pointDataI.H
@@ -39,9 +39,10 @@ SourceFiles
 #ifndef pointData_H
 #define pointData_H
 
-#include "point.H"
-#include "label.H"
-#include "tensor.H"
+#include "pointEdgePoint.H"
+//#include "point.H"
+//#include "label.H"
+//#include "tensor.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -49,50 +50,21 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
-class polyPatch;
-class polyMesh;
-
 /*---------------------------------------------------------------------------*\
                            Class pointData Declaration
 \*---------------------------------------------------------------------------*/
 
 class pointData
+:
+    public pointEdgePoint
 {
     // Private data
-
-        //- position of nearest wall center
-        point origin_;
-
-        //- normal distance (squared) from point to origin
-        scalar distSqr_;
 
         //- additional information.
         scalar s_;
 
         //- additional information.
         vector v_;
-
-
-    // Private Member Functions
-
-        //- Evaluate distance to point. Update distSqr, origin from whomever
-        //  is nearer pt. Return true if w2 is closer to point,
-        //  false otherwise.
-        inline bool update
-        (
-            const point&,
-            const pointData& w2,
-            const scalar tol
-        );
-
-        //- Combine current with w2. Update distSqr, origin if w2 has smaller
-        //  quantities and returns true.
-        inline bool update
-        (
-            const pointData& w2,
-            const scalar tol
-        );
 
 public:
 
@@ -118,10 +90,6 @@ public:
 
         // Access
 
-            inline const point& origin() const;
-
-            inline scalar distSqr() const;
-
             inline scalar s() const;
 
             inline const vector& v() const;
@@ -129,80 +97,59 @@ public:
 
         // Needed by meshWave
 
-            //- Check whether origin has been changed at all or
-            //  still contains original (invalid) value.
-            inline bool valid() const;
-
-            //- Check for identical geometrical data. Used for cyclics checking.
-            inline bool sameGeometry(const pointData&, const scalar tol)
-             const;
-
-            //- Convert origin to relative vector to leaving point
-            //  (= point coordinate)
-            inline void leaveDomain
-            (
-                const polyPatch& patch,
-                const label patchPointI,
-                const point& pos
-            );
-
-            //- Convert relative origin to absolute by adding entering point
-            inline void enterDomain
-            (
-                const polyPatch& patch,
-                const label patchPointI,
-                const point& pos
-            );
-
             //- Apply rotation matrix to origin
-            inline void transform(const tensor& rotTensor);
+            template<class TrackingData>
+            inline void transform
+            (
+                const tensor& rotTensor,
+                TrackingData& td
+            );
 
             //- Influence of edge on point
+            template<class TrackingData>
             inline bool updatePoint
             (
                 const polyMesh& mesh,
                 const label pointI,
                 const label edgeI,
                 const pointData& edgeInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
 
             //- Influence of different value on same point.
             //  Merge new and old info.
+            template<class TrackingData>
             inline bool updatePoint
             (
                 const polyMesh& mesh,
                 const label pointI,
                 const pointData& newPointInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
 
             //- Influence of different value on same point.
             //  No information about current position whatsoever.
+            template<class TrackingData>
             inline bool updatePoint
             (
                 const pointData& newPointInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
 
             //- Influence of point on edge.
+            template<class TrackingData>
             inline bool updateEdge
             (
                 const polyMesh& mesh,
                 const label edgeI,
                 const label pointI,
                 const pointData& pointInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
-
-
-    // Member Operators
-
-        //Note: Used to determine whether to call update.
-        inline bool operator==(const pointData&) const;
-
-        inline bool operator!=(const pointData&) const;
-
 
     // IOstream Operators
 

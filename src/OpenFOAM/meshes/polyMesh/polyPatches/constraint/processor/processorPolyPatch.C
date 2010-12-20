@@ -409,6 +409,7 @@ void Foam::processorPolyPatch::updateMesh(PstreamBuffers& pBufs)
         }
 
         // Remove any addressing used for shared points/edges calculation
+        // since mostly not needed.
         primitivePatch::clearOut();
     }
 }

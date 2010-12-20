@@ -371,9 +371,20 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
         {
             // Apply tracking correction towards tet centre
 
+            if (debug)
+            {
+                Pout<< "tracking rescue using tetCentre from " << position();
+            }
+
             position_ +=
                 Cloud<ParticleType>::trackingCorrectionTol
                *(tet.centre() - position_);
+
+            if (debug)
+            {
+                Pout<< " to " << position() << " due to "
+                    << (tet.centre() - position_) << endl;
+            }
 
             cloud_.trackingRescue();
 
@@ -639,6 +650,12 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
 
         tetPointRef tet = currentTet();
 
+        if (debug)
+        {
+            Pout<< "tracking rescue for lambdaMin:" << lambdaMin
+                << "from " << position();
+        }
+
         position_ +=
             Cloud<ParticleType>::trackingCorrectionTol
            *(tet.centre() - position_);
@@ -690,6 +707,11 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
                       - (nHat & (tet.centre() - position_))*nHat
                     );
             }
+        }
+
+        if (debug)
+        {
+            Pout<< " to " << position() << endl;
         }
 
         cloud_.trackingRescue();

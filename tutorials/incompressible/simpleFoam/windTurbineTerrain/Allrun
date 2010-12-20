@@ -4,10 +4,29 @@ cd ${0%/*} || exit 1    # run from this directory
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
+compileApplication windSimpleFoam
+
 runApplication blockMesh
-runApplication snappyHexMesh -overwrite
-runApplication setSet -batch makeZones
-runApplication setsToZones -noFlipMap
-runApplication windSimpleFoam
+cp system/decomposeParDict-nonPar system/decomposeParDict
+runApplication decomposePar
+
+#runApplication snappyHexMesh -overwrite
+#runApplication setSet -batch makeZones
+#runApplication setsToZones -noFlipMap
+#runApplication windSimpleFoam
+
+cp system/decomposeParDict-par system/decomposeParDict
+runParallel snappyHexMesh 2 -overwrite
+
+# Add wildcard entries for meshes patches since not preserved
+# by decomposePar. Notice -literalRE option to add wildcard itself
+# without evaluation.
+runParallel changeDictionary 2 -literalRE
+
+runParallel setSet 2 -batch makeZones
+runParallel windSimpleFoam 2
+
+runApplication reconstructParMesh -constant
+runApplication reconstructPar
 
 # ----------------------------------------------------------------- end-of-file

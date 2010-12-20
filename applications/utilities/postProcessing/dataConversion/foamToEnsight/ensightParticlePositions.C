@@ -37,10 +37,10 @@ using namespace Foam;
 
 void ensightParticlePositions
 (
-    const Foam::fvMesh& mesh,
-    const Foam::fileName& postProcPath,
-    const Foam::word& timeFile,
-    const Foam::word& cloudName,
+    const fvMesh& mesh,
+    const fileName& postProcPath,
+    const word& timeFile,
+    const word& cloudName,
     const bool dataExists
 )
 {

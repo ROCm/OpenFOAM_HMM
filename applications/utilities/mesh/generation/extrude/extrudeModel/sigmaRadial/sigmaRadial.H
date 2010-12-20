@@ -22,14 +22,14 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::extrudeModels::linearRadial
+    Foam::extrudeModels::sigmaRadial
 
 Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef linearRadial_H
-#define linearRadial_H
+#ifndef sigmaRadial_H
+#define sigmaRadial_H
 
 #include "extrudeModel.H"
 
@@ -41,32 +41,33 @@ namespace extrudeModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class linearRadial Declaration
+                           Class sigmaRadial Declaration
 \*---------------------------------------------------------------------------*/
 
-class linearRadial
+class sigmaRadial
 :
     public extrudeModel
 {
     // Private data
 
-        scalar R_;
-        scalar Rsurface_;
+        scalar RTbyg_;
+        scalar pRef_;
+        scalar pStrat_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("linearRadial");
+    TypeName("sigmaRadial");
 
     // Constructors
 
         //- Construct from dictionary
-        linearRadial(const dictionary& dict);
+        sigmaRadial(const dictionary& dict);
 
 
-    //- Destructor
-    ~linearRadial();
+    //-Destructor
+    virtual ~sigmaRadial();
 
 
     // Member Operators

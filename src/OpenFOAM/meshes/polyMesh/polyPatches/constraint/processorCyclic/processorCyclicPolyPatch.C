@@ -174,8 +174,6 @@ void Foam::processorCyclicPolyPatch::calcGeometry(PstreamBuffers& pBufs)
         // Update underlying cyclic
         coupledPolyPatch& pp = const_cast<coupledPolyPatch&>(referPatch());
 
-        Pout<< "updating geometry on refered patch:" << pp.name() << endl;
-
         pp.calcGeometry
         (
             *this,

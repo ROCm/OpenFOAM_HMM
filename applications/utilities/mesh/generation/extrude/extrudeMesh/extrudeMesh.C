@@ -214,9 +214,8 @@ int main(int argc, char *argv[])
     (
         IOobject
         (
-            "extrudeProperties",
-            runTimeExtruded.constant(),
-            regionDir,
+            "extrudeMeshDict",
+            runTimeExtruded.system(),
             runTimeExtruded,
             IOobject::MUST_READ_IF_MODIFIED
         )

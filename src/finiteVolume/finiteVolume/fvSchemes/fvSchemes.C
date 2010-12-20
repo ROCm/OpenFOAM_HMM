@@ -256,7 +256,11 @@ Foam::fvSchemes::fvSchemes(const objectRegistry& obr)
             "fvSchemes",
             obr.time().system(),
             obr,
-            IOobject::MUST_READ_IF_MODIFIED,
+            (
+                obr.readOpt() == IOobject::MUST_READ
+              ? IOobject::MUST_READ_IF_MODIFIED
+              : obr.readOpt()
+            ),
             IOobject::NO_WRITE
         )
     ),
@@ -364,7 +368,14 @@ Foam::fvSchemes::fvSchemes(const objectRegistry& obr)
     // persistent settings across reads is incorrect
     clear();
 
-    read(schemesDict());
+    if
+    (
+        readOpt() == IOobject::MUST_READ
+     || readOpt() == IOobject::MUST_READ_IF_MODIFIED
+    )
+    {
+        read(schemesDict());
+    }
 }
 
 

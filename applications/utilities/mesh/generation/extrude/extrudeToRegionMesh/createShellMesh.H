@@ -109,7 +109,8 @@ public:
 
         // Access
 
-            //- From region cell to patch face
+            //- From region cell to patch face. Consecutively added so
+            //  cell at layerI is at patchFaceI*nLayers+layerI
             const labelList& cellToFaceMap() const
             {
                 return cellToFaceMap_;
@@ -120,7 +121,7 @@ public:
             //            be in top patch
             //      < 0 : face in opposite orientation as patch face. face will
             //            be in bottom patch
-            //      = 0 : for all side faces
+            //      = 0 : for all side and internal faces
             const labelList& faceToFaceMap() const
             {
                 return faceToFaceMap_;
@@ -153,7 +154,9 @@ public:
             //- Play commands into polyTopoChange to create layer mesh.
             void setRefinement
             (
-                const pointField& thickness,
+                const pointField& firstLayerThickness,
+                const scalar expansionRatio,
+                const label nLayers,
                 const labelList& topPatchID,
                 const labelList& bottomPatchID,
                 const labelListList& extrudeEdgePatches,

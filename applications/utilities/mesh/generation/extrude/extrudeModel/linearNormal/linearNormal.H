@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,90 +22,74 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::maxhxhyhzDelta
+    Foam::extrudeModels::linearNormal
 
 Description
-    maxhxhyhzDelta takes the maximum of the three dimensions per cell:
-    max(hx, hy, hz). Valid for structures hexahedral cells only.
-
-
-SourceFiles
-    maxhxhyhzDelta.C
+    Extrudes by transforming points normal to the surface by a given distance
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef maxhxhyhzDeltaDelta_H
-#define maxhxhyhzDeltaDelta_H
+#ifndef linearNormal_H
+#define linearNormal_H
 
-#include "LESdelta.H"
+#include "point.H"
+#include "extrudeModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace extrudeModels
+{
 
 /*---------------------------------------------------------------------------*\
-                           Class maxhxhyhzDelta Declaration
+                    Class linearNormal Declaration
 \*---------------------------------------------------------------------------*/
 
-class maxhxhyhzDelta
+class linearNormal
 :
-    public LESdelta
+    public extrudeModel
 {
     // Private data
 
-        scalar deltaCoeff_; //
-
-
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct and assignment
-        maxhxhyhzDelta(const maxhxhyhzDelta&);
-        void operator=(const maxhxhyhzDelta&);
-
-        // Calculate the delta values
-        void calcDelta();
+        //- layer thickness
+        scalar thickness_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("maxhxhyhzDelta");
-
+    TypeName("linearNormal");
 
     // Constructors
 
-        //- Construct from name, mesh and IOdictionary
-        maxhxhyhzDelta
-        (
-            const word& name,
-            const fvMesh& mesh,
-            const dictionary&
-        );
+        //- Construct from dictionary
+        linearNormal(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~maxhxhyhzDelta()
-    {}
+    virtual ~linearNormal();
 
 
-    // Member Functions
+    // Member Operators
 
-        //- Read the LESdelta dictionary
-        virtual void read(const dictionary&);
-
-        // Correct values
-        virtual void correct();
+        point operator()
+        (
+            const point& surfacePoint,
+            const vector& surfaceNormal,
+            const label layer
+        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace extrudeModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
 #endif
 
 // ************************************************************************* //
+

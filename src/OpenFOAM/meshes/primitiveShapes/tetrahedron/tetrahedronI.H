@@ -156,29 +156,12 @@ inline Point tetrahedron<Point, PointRef>::circumCentre() const
 
     if (Foam::mag(denom) < ROOTVSMALL)
     {
-        // Degenerate tet. Use test of the individual triangles.
-        {
-            point triCentre = triPointRef(a_, b_, c_).circumCentre();
-            if (magSqr(d_ - triCentre) < magSqr(a_ - triCentre))
-            {
-                return triCentre;
-            }
-        }
-        {
-            point triCentre = triPointRef(a_, b_, d_).circumCentre();
-            if (magSqr(c_ - triCentre) < magSqr(a_ - triCentre))
-            {
-                return triCentre;
-            }
-        }
-        {
-            point triCentre = triPointRef(a_, c_, d_).circumCentre();
-            if (magSqr(b_ - triCentre) < magSqr(a_ - triCentre))
-            {
-                return triCentre;
-            }
-        }
-        return triPointRef(b_, c_, d_).circumCentre();
+        WarningIn("Point tetrahedron<Point, PointRef>::circumCentre() const")
+            << "Degenerate tetrahedron:" << nl << *this << nl
+            <<"Returning centre instead of circumCentre."
+            << endl;
+
+        return centre();
     }
 
     return a_ + 0.5*(a + num/denom);
@@ -188,16 +171,43 @@ inline Point tetrahedron<Point, PointRef>::circumCentre() const
 template<class Point, class PointRef>
 inline scalar tetrahedron<Point, PointRef>::circumRadius() const
 {
-    return Foam::mag(a_ - circumCentre());
+    vector a = b_ - a_;
+    vector b = c_ - a_;
+    vector c = d_ - a_;
+
+    scalar lambda = magSqr(c) - (a & c);
+    scalar mu = magSqr(b) - (a & b);
+
+    vector ba = b ^ a;
+    vector ca = c ^ a;
+
+    vector num = lambda*ba - mu*ca;
+    scalar denom = (c & ba);
+
+    if (Foam::mag(denom) < ROOTVSMALL)
+    {
+        WarningIn("Point tetrahedron<Point, PointRef>::circumCentre() const")
+            << "Degenerate tetrahedron:" << nl << *this << nl
+            << "Returning GREAT for circumRadius."
+            << endl;
+
+        return GREAT;
+    }
+
+    return Foam::mag(0.5*(a + num/denom));
 }
 
 
 template<class Point, class PointRef>
 inline scalar tetrahedron<Point, PointRef>::quality() const
 {
-    // Note: 8/(9*sqrt(3)) = 0.5132002393
-
-    return mag()/(0.5132002393*pow3(min(circumRadius(), GREAT)) + ROOTVSMALL);
+    return
+        mag()
+       /(
+            8.0/(9.0*sqrt(3.0))
+           *pow3(min(circumRadius(), GREAT))
+          + ROOTVSMALL
+        );
 }
 
 
@@ -266,7 +276,8 @@ scalar tetrahedron<Point, PointRef>::barycentric
                 "const point& pt"
             ") const"
         )
-            << "Degenerate tetrahedron - returning 1/4 barycentric coordinates."
+            << "Degenerate tetrahedron:" << nl << *this << nl
+            << "Returning 1/4 barycentric coordinates."
             << endl;
 
         bary = List<scalar>(4, 0.25);
