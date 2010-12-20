@@ -997,9 +997,9 @@ Foam::booleanSurface::booleanSurface
 
 
     // Depending on operation include certain faces.
-    //  AND: faces on inside of 1 and of 2
-    //  OR: faces on outside of 1 and of 2
-    //  XOR: faces on outside of 1 and inside of 2
+    //  INTERSECTION: faces on inside of 1 and of 2
+    //  UNION: faces on outside of 1 and of 2
+    //  DIFFERENCE: faces on outside of 1 and inside of 2
 
     boolList include(combinedSurf.size(), false);
 
@@ -1018,30 +1018,30 @@ Foam::booleanSurface::booleanSurface
         }
         else if (side[faceI] == OUTSIDE)
         {
-            if (booleanOp == booleanSurface::OR)
+            if (booleanOp == booleanSurface::UNION)
             {
                 include[faceI] = true;
             }
-            else if (booleanOp == booleanSurface::AND)
+            else if (booleanOp == booleanSurface::INTERSECTION)
             {
                 include[faceI] = false;
             }
-            else    // xor
+            else    // difference
             {
                 include[faceI] = (faceI < cutSurf1.size()); // face from surf1
             }
         }
         else    // inside
         {
-            if (booleanOp == booleanSurface::OR)
+            if (booleanOp == booleanSurface::UNION)
             {
                 include[faceI] = false;
             }
-            else if (booleanOp == booleanSurface::AND)
+            else if (booleanOp == booleanSurface::INTERSECTION)
             {
                 include[faceI] = true;
             }
-            else    // xor
+            else    // difference
             {
                 include[faceI] = (faceI >= cutSurf1.size()); // face from surf2
             }
