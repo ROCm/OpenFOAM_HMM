@@ -304,26 +304,28 @@ void Foam::conformalVoronoiMesh::writeMesh
             << exit(FatalError);
     }
 
-    pointIOField cellCs
-    (
-        IOobject
-        (
-            "cellCentres",
-            mesh.pointsInstance(),
-            fvMesh::meshSubDir,
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        cellCentres
-    );
+    Info<< "Not writing cell centres" << endl;
 
-    Info<< nl
-        << "Writing " << cellCs.name()
-        << " to " << cellCs.instance()
-        << endl;
+    // pointIOField cellCs
+    // (
+    //     IOobject
+    //     (
+    //         "cellCentres",
+    //         mesh.pointsInstance(),
+    //         fvMesh::meshSubDir,
+    //         mesh,
+    //         IOobject::NO_READ,
+    //         IOobject::AUTO_WRITE
+    //     ),
+    //     cellCentres
+    // );
 
-    cellCs.write();
+    // Info<< nl
+    //     << "Writing " << cellCs.name()
+    //     << " to " << cellCs.instance()
+    //     << endl;
+
+    // cellCs.write();
 
     writeCellSizes(mesh);
 }

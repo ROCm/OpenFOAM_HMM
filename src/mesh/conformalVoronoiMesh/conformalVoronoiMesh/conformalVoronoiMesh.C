@@ -563,7 +563,7 @@ void Foam::conformalVoronoiMesh::insertConvexFeaturePoints()
             vector cornerNormal = sum(featPtNormals);
             cornerNormal /= mag(cornerNormal);
 
-            point internalPt =  featPt - pointPairDistance(featPt)*cornerNormal;
+            point internalPt = featPt - pointPairDistance(featPt)*cornerNormal;
 
             label internalPtIndex =
                 insertPoint(internalPt, number_of_vertices() + 1);
@@ -651,7 +651,7 @@ void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
                 // non-specialised feature points, inserting mixed internal and
                 // external edge groups at feature point.
 
-                labelList pEds(feMesh.pointEdges()[ptI]);
+                const labelList& pEds(feMesh.pointEdges()[ptI]);
 
                 // Skipping unsupported mixed feature point types
 
@@ -695,7 +695,7 @@ void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
                     label edgeI = pEds[e];
 
                     point edgePt =
-                    pt + edgeGroupDistance*feMesh.edgeDirection(edgeI, ptI);
+                        pt + edgeGroupDistance*feMesh.edgeDirection(edgeI, ptI);
 
                     pointIndexHit edgeHit(true, edgePt, edgeI);
 

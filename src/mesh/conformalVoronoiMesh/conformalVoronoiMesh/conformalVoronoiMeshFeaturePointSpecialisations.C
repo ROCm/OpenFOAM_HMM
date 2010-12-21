@@ -33,7 +33,7 @@ bool Foam::conformalVoronoiMesh::insertSpecialisedFeaturePoint
     label ptI
 )
 {
-    labelList pEds(feMesh.pointEdges()[ptI]);
+    const labelList& pEds(feMesh.pointEdges()[ptI]);
 
     if (pEds.size() != 3)
     {
@@ -48,13 +48,17 @@ bool Foam::conformalVoronoiMesh::insertSpecialisedFeaturePoint
     label nOpen = 0;
     label nMultiple = 0;
 
-    forAll(pEds, e)
+    List<featureEdgeMesh::edgeStatus> allEdStat(pEds.size());
+
+    forAll(pEds, i)
     {
-        label edgeI = pEds[e];
+        label edgeI = pEds[i];
 
-        featureEdgeMesh::edgeStatus edStatus = feMesh.getEdgeStatus(edgeI);
+        featureEdgeMesh::edgeStatus& eS = allEdStat[i];
 
-        switch (edStatus)
+        eS = feMesh.getEdgeStatus(edgeI);
+
+        switch (eS)
         {
             case featureEdgeMesh::EXTERNAL:
             {

@@ -325,7 +325,7 @@ bool Foam::conformationSurfaces::outside
     const point& samplePt
 ) const
 {
-    return wellOutside(pointField(1, samplePt), scalarField(1, 0))[0];
+    return !inside(samplePt);
 }
 
 
