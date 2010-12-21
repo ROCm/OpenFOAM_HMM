@@ -8,7 +8,7 @@
     phi = fvc::interpolate(U) & mesh.Sf();
     adjustPhi(phi, U, p_rgh);
 
-    surfaceScalarField buoyancyPhi = rAUf*ghf*fvc::snGrad(rhok)*mesh.magSf();
+    surfaceScalarField buoyancyPhi(rAUf*ghf*fvc::snGrad(rhok)*mesh.magSf());
     phi -= buoyancyPhi;
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)

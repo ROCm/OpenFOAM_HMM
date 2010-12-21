@@ -39,10 +39,12 @@ Foam::scalar Foam::solidRegionDiffNo
 
     //- Take care: can have fluid domains with 0 cells so do not test for
     //  zero internal faces.
-    surfaceScalarField KrhoCpbyDelta =
+    surfaceScalarField KrhoCpbyDelta
+    (
         mesh.surfaceInterpolation::deltaCoeffs()
       * fvc::interpolate(K)
-      / fvc::interpolate(Cprho);
+      / fvc::interpolate(Cprho)
+    );
 
     DiNum = gMax(KrhoCpbyDelta.internalField())*runTime.deltaT().value();
 
