@@ -260,7 +260,7 @@ unset MPI_ARCH_PATH MPI_HOME
 case "$WM_MPLIB" in
 OPENMPI)
     #mpi_version=openmpi-1.4.1
-    mpi_version=openmpi-1.5
+    mpi_version=openmpi-1.5.1
     export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$mpi_version
 
     # Tell OpenMPI where to find its install directory
