@@ -219,7 +219,6 @@ int main(int argc, char *argv[])
     argList::validArgs.append("action");
     argList::validArgs.append("surface file");
     argList::validArgs.append("surface file");
-    argList::validArgs.append("output file");
 
     argList::addBoolOption
     (
@@ -252,26 +251,21 @@ int main(int argc, char *argv[])
             << "Supported actions:" << validActions.toc() << exit(FatalError);
     }
 
-    Info<< "Reading surface 1 .." << endl;
     fileName surf1Name(args[2]);
+    Info<< "Reading surface " << surf1Name << endl;
     triSurface surf1(surf1Name);
 
-    Info<< "Surface 1 statistics:" << endl;
+    Info<< surf1Name << " statistics:" << endl;
     surf1.writeStats(Info);
     Info<< endl;
 
-    Info<< "Reading surface 2 .." << endl;
     fileName surf2Name(args[3]);
+    Info<< "Reading surface " << surf2Name << endl;
     triSurface surf2(surf2Name);
 
-    Info<< "Surface 2 statistics:" << endl;
+    Info<< surf2Name << " statistics:" << endl;
     surf2.writeStats(Info);
     Info<< endl;
-
-    fileName outFileName(args[4]);
-    Info<< "Output file name " << outFileName << endl;
-
-    Info<< "Intersecting surface 1 and 2" << endl;
 
     edgeIntersections edge1Cuts;
     edgeIntersections edge2Cuts;
@@ -325,8 +319,6 @@ int main(int argc, char *argv[])
     // Determine intersection edges
     surfaceIntersection inter(surf1, edge1Cuts, surf2, edge2Cuts);
 
-    OFstream intFile(outFileName);
-
     fileName sFeatFileName =
         surf1Name.lessExt().name()
       + "_"
@@ -344,6 +336,12 @@ int main(int argc, char *argv[])
     triSurfaceSearch querySurf2(surf2);
 
     OFstream normalFile(sFeatFileName + "_normals.obj");
+
+    scalar scale = 0.05*min
+    (
+        querySurf1.tree().bb().mag(),
+        querySurf2.tree().bb().mag()
+    );
 
     forAll(inter.cutEdges(), i)
     {
@@ -363,8 +361,6 @@ int main(int argc, char *argv[])
         edgeDirections[i] = fE.vec(inter.cutPoints());
 
         {
-            scalar scale = 3*fE.mag(inter.cutPoints());
-
             meshTools::writeOBJ(normalFile, inter.cutPoints()[fE.start()]);
             meshTools::writeOBJ(normalFile, inter.cutPoints()[fE.end()]);
 
