@@ -36,7 +36,7 @@ void Foam::patchProbes::sampleAndWrite
     const GeometricField<Type, fvPatchField, volMesh>& vField
 )
 {
-    Field<Type> values = sample(vField);
+    Field<Type> values(sample(vField));
 
     if (Pstream::master())
     {
