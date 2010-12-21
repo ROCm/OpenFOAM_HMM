@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
 
             label nInternalFaces = mesh.nInternalFaces();
 
-            vectorField unitAreas = mesh.faceAreas();
+            vectorField unitAreas(mesh.faceAreas());
             unitAreas /= mag(unitAreas);
 
             const polyPatchList& patches = mesh.boundaryMesh();

@@ -1,9 +1,9 @@
         /*
-        volTensorField gradU = fvc::grad(U);
-        volSymmTensorField D = symm(fvc::grad(U));
-        volTensorField Dprim = symm(fvc::grad(U - UMean));
+        volTensorField gradU(fvc::grad(U));
+        volSymmTensorField D(symm(fvc::grad(U)));
+        volTensorField Dprim(symm(fvc::grad(U - UMean)));
 
-        volScalarField prod = -((U - UMean)*(U - UMean)) && D;
+        volScalarField prod(-((U - UMean)*(U - UMean)) && D);
         */
 
         /*
