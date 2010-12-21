@@ -82,7 +82,7 @@ void Foam::LPtrList<LListBase, T>::read(Istream& is, const INew& iNew)
 
                 for (label i=1; i<s; ++i)
                 {
-                    append(tPtr->clone().ptr());
+                    this->append(tPtr->clone().ptr());
                 }
             }
         }
