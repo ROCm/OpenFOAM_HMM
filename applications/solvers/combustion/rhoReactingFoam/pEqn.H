@@ -5,14 +5,16 @@
     // pressure solution - done in 2 parts. Part 1:
     thermo.rho() -= psi*p;
 
-    volScalarField rAU = 1.0/UEqn.A();
+    volScalarField rAU(1.0/UEqn.A());
     U = rAU*UEqn.H();
 
     if (transonic)
     {
-        surfaceScalarField phiv =
+        surfaceScalarField phiv
+        (
             (fvc::interpolate(U) & mesh.Sf())
-          + fvc::ddtPhiCorr(rAU, rho, U, phi);
+          + fvc::ddtPhiCorr(rAU, rho, U, phi)
+        );
 
         phi = fvc::interpolate(rho)*phiv;
 

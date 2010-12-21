@@ -25,20 +25,20 @@ if (ign.ignited())
 
     // Unburnt gas density
     // ~~~~~~~~~~~~~~~~~~~
-    volScalarField rhou = thermo.rhou();
+    volScalarField rhou(thermo.rhou());
 
     // Calculate flame normal etc.
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    //volVectorField n = fvc::grad(b);
-    volVectorField n = fvc::reconstruct(fvc::snGrad(b)*mesh.magSf());
+    // volVectorField n(fvc::grad(b));
+    volVectorField n(fvc::reconstruct(fvc::snGrad(b)*mesh.magSf()));
 
     volScalarField mgb("mgb", mag(n));
 
     dimensionedScalar dMgb("dMgb", mgb.dimensions(), SMALL);
 
     {
-        volScalarField bc = b*c;
+        volScalarField bc(b*c);
 
         dMgb += 1.0e-3*
             (bc*mgb)().weightedAverage(mesh.V())
@@ -47,8 +47,8 @@ if (ign.ignited())
 
     mgb += dMgb;
 
-    surfaceVectorField Sfhat = mesh.Sf()/mesh.magSf();
-    surfaceVectorField nfVec = fvc::interpolate(n);
+    surfaceVectorField Sfhat(mesh.Sf()/mesh.magSf());
+    surfaceVectorField nfVec(fvc::interpolate(n));
     nfVec += Sfhat*(fvc::snGrad(b) - (Sfhat & nfVec));
     nfVec /= (mag(nfVec) + dMgb);
     surfaceScalarField nf("nf", mesh.Sf() & nfVec);
