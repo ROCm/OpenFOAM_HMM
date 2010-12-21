@@ -36,12 +36,12 @@ using namespace Foam;
 template<class Type>
 void ensightCloudField
 (
-    const Foam::IOobject& fieldObject,
-    const Foam::fileName& postProcPath,
-    const Foam::word& prepend,
-    const Foam::label timeIndex,
-    const Foam::word& cloudName,
-    Foam::Ostream& ensightCaseFile,
+    const IOobject& fieldObject,
+    const fileName& postProcPath,
+    const word& prepend,
+    const label timeIndex,
+    const word& cloudName,
+    Ostream& ensightCaseFile,
     const bool dataExists
 )
 {

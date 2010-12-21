@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,28 +27,20 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "interpolateXY.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    defineTypeNameAndDebug(interpolatedSolidThermo, 0);
-    addToRunTimeSelectionTable
-    (
-        basicSolidThermo,
-        interpolatedSolidThermo,
-        mesh
-    );
-}
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::interpolatedSolidThermo::interpolatedSolidThermo(const fvMesh& mesh)
+Foam::interpolatedSolidThermo::interpolatedSolidThermo
+(
+    const fvMesh& mesh,
+    const word dictName
+ )
 :
-    basicSolidThermo(mesh)
+    basicSolidThermo(mesh),
+    interpolateSolid(subDict(dictName)),
+    dict_(subDict(dictName))
 {
-    read();
-    correct();
+    calculate();
 }
 
 
@@ -60,55 +52,73 @@ Foam::interpolatedSolidThermo::~interpolatedSolidThermo()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::interpolatedSolidThermo::correct()
-{}
-
-
-Foam::tmp<Foam::volScalarField> Foam::interpolatedSolidThermo::rho() const
+void Foam::interpolatedSolidThermo::calculate()
 {
-    tmp<volScalarField> trho
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "rho",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh_,
-            dimDensity
-        )
-    );
-    volScalarField& rho = trho();
-
-    rho.internalField() = interpolateXY
+    // Correct rho
+    rho_.internalField() = interpolateXY
     (
         T_.internalField(),
         TValues_,
         rhoValues_
     );
 
-    forAll(rho.boundaryField(), patchI)
+    forAll(rho_.boundaryField(), patchI)
     {
-        rho.boundaryField()[patchI] == this->rho(patchI)();
+        rho_.boundaryField()[patchI] == this->rho(patchI)();
     }
 
-    return trho;
+    // Correct emissivity
+    emissivity_.internalField() = interpolateXY
+    (
+        T_.internalField(),
+        TValues_,
+        emissivityValues_
+    );
+
+    forAll(emissivity_.boundaryField(), patchI)
+    {
+        emissivity_.boundaryField()[patchI] == this->emissivity(patchI)();
+    }
+
+
+    // Correct absorptivity
+    kappa_.internalField() = interpolateXY
+    (
+        T_.internalField(),
+        TValues_,
+        kappaValues_
+    );
+
+    forAll(kappa_.boundaryField(), patchI)
+    {
+        kappa_.boundaryField()[patchI] == this->kappa(patchI)();
+    }
+
+
+    // Correct scatter
+    sigmaS_.internalField() = interpolateXY
+    (
+        T_.internalField(),
+        TValues_,
+        sigmaSValues_
+    );
+
+    forAll(sigmaS_.boundaryField(), patchI)
+    {
+        sigmaS_.boundaryField()[patchI] == this->sigmaS(patchI)();
+    }
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::interpolatedSolidThermo::cp() const
+Foam::tmp<Foam::volScalarField> Foam::interpolatedSolidThermo::Cp() const
 {
-    tmp<volScalarField> tcp
+    tmp<volScalarField> tCp
     (
         new volScalarField
         (
             IOobject
             (
-                "cp",
+                "Cp",
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
@@ -118,107 +128,21 @@ Foam::tmp<Foam::volScalarField> Foam::interpolatedSolidThermo::cp() const
             dimEnergy/(dimMass*dimTemperature)
         )
     );
-    volScalarField& cp = tcp();
+    volScalarField& Cp = tCp();
 
-    cp.internalField() = interpolateXY
+    Cp.internalField() = interpolateXY
     (
         T_.internalField(),
         TValues_,
         cpValues_
     );
 
-    forAll(cp.boundaryField(), patchI)
+    forAll(Cp.boundaryField(), patchI)
     {
-        cp.boundaryField()[patchI] == this->cp(patchI)();
+        Cp.boundaryField()[patchI] == this->Cp(patchI)();
     }
 
-    return tcp;
-}
-
-
-Foam::tmp<Foam::volScalarField> Foam::interpolatedSolidThermo::K() const
-{
-    tmp<volScalarField> tK
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "K",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh_,
-            dimEnergy/dimTime/(dimLength*dimTemperature)
-        )
-    );
-    volScalarField& K = tK();
-
-    K.internalField() = interpolateXY
-    (
-        T_.internalField(),
-        TValues_,
-        KValues_
-    );
-
-    forAll(K.boundaryField(), patchI)
-    {
-        K.boundaryField()[patchI] == this->K(patchI)();
-    }
-
-    return tK;
-}
-
-
-Foam::tmp<Foam::volSymmTensorField>
-Foam::interpolatedSolidThermo::directionalK()
-const
-{
-    tmp<volSymmTensorField> tK
-    (
-        new volSymmTensorField
-        (
-            IOobject
-            (
-                "K",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh_,
-            dimensionedSymmTensor
-            (
-                "zero",
-                dimEnergy/dimTime/(dimLength*dimTemperature),
-                symmTensor::zero
-            )
-        )
-    );
-    volSymmTensorField& K = tK();
-
-    Field<scalar> scalarK
-    (
-        interpolateXY
-        (
-            T_.internalField(),
-            TValues_,
-            KValues_
-        )
-    );
-
-    K.internalField().replace(symmTensor::XX, scalarK);
-    K.internalField().replace(symmTensor::YY, scalarK);
-    K.internalField().replace(symmTensor::ZZ, scalarK);
-
-    forAll(K.boundaryField(), patchI)
-    {
-        K.boundaryField()[patchI] == this->directionalK(patchI)();
-    }
-
-    return tK;
+    return tCp;
 }
 
 
@@ -258,43 +182,6 @@ Foam::tmp<Foam::volScalarField> Foam::interpolatedSolidThermo::Hf() const
 }
 
 
-Foam::tmp<Foam::volScalarField>
-Foam::interpolatedSolidThermo::emissivity() const
-{
-    tmp<volScalarField> temissivity
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "emissivity",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh_,
-            dimless
-        )
-    );
-    volScalarField& emissivity = temissivity();
-
-    emissivity.internalField() = interpolateXY
-    (
-        T_.internalField(),
-        TValues_,
-        emissivityValues_
-    );
-
-    forAll(emissivity.boundaryField(), patchI)
-    {
-        emissivity.boundaryField()[patchI] == this->emissivity(patchI)();
-    }
-
-    return temissivity;
-}
-
-
 Foam::tmp<Foam::scalarField> Foam::interpolatedSolidThermo::rho
 (
     const label patchI
@@ -315,7 +202,7 @@ Foam::tmp<Foam::scalarField> Foam::interpolatedSolidThermo::rho
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::interpolatedSolidThermo::cp
+Foam::tmp<Foam::scalarField> Foam::interpolatedSolidThermo::Cp
 (
     const label patchI
 ) const
@@ -332,53 +219,6 @@ Foam::tmp<Foam::scalarField> Foam::interpolatedSolidThermo::cp
             )
         )
     );
-}
-
-
-Foam::tmp<Foam::scalarField> Foam::interpolatedSolidThermo::K
-(
-    const label patchI
-) const
-{
-    return tmp<scalarField>
-    (
-        new scalarField
-        (
-            interpolateXY
-            (
-                T_.boundaryField()[patchI],
-                TValues_,
-                KValues_
-            )
-        )
-    );
-}
-
-
-Foam::tmp<Foam::symmTensorField> Foam::interpolatedSolidThermo::directionalK
-(
-    const label patchI
-) const
-{
-    const fvPatchScalarField& patchT = T_.boundaryField()[patchI];
-
-    Field<scalar> scalarK(interpolateXY(patchT, TValues_, KValues_));
-
-    tmp<symmTensorField> tfld
-    (
-        new symmTensorField
-        (
-            scalarK.size(),
-            symmTensor::zero
-        )
-    );
-    symmTensorField& fld = tfld();
-
-    fld.replace(symmTensor::XX, scalarK);
-    fld.replace(symmTensor::YY, scalarK);
-    fld.replace(symmTensor::ZZ, scalarK);
-
-    return tfld;
 }
 
 
@@ -422,69 +262,63 @@ Foam::tmp<Foam::scalarField> Foam::interpolatedSolidThermo::emissivity
 }
 
 
+Foam::tmp<Foam::scalarField> Foam::interpolatedSolidThermo::kappa
+(
+    const label patchI
+) const
+{
+    return tmp<scalarField>
+    (
+        new scalarField
+        (
+            interpolateXY
+            (
+                T_.boundaryField()[patchI],
+                TValues_,
+                kappaValues_
+            )
+        )
+    );
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::interpolatedSolidThermo::sigmaS
+(
+    const label patchI
+) const
+{
+    return tmp<scalarField>
+    (
+        new scalarField
+        (
+            interpolateXY
+            (
+                T_.boundaryField()[patchI],
+                TValues_,
+                sigmaSValues_
+            )
+        )
+    );
+}
+
+
 bool Foam::interpolatedSolidThermo::read()
 {
-    return read(subDict(typeName + "Coeffs"));
+    return read(dict_);
 }
 
 
 bool Foam::interpolatedSolidThermo::read(const dictionary& dict)
 {
-    TValues_ = Field<scalar>(dict.lookup("TValues"));
-    rhoValues_ = Field<scalar>(dict.lookup("rhoValues"));
-    cpValues_ = Field<scalar>(dict.lookup("cpValues"));
-    KValues_ = Field<scalar>(dict.lookup("KValues"));
-    HfValues_ = Field<scalar>(dict.lookup("HfValues"));
-    emissivityValues_ = Field<scalar>(dict.lookup("emissivityValues"));
-
-    Info<< "Constructed interpolatedSolidThermo with samples" << nl
-        << "    T          : " << TValues_ << nl
-        << "    rho        : " << rhoValues_ << nl
-        << "    cp         : " << cpValues_ << nl
-        << "    K          : " << KValues_ << nl
-        << "    Hf         : " << HfValues_ << nl
-        << "    emissivity : " << emissivityValues_ << nl
-        << endl;
-
-    if
-    (
-        (TValues_.size() != rhoValues_.size())
-     && (TValues_.size() != cpValues_.size())
-     && (TValues_.size() != rhoValues_.size())
-     && (TValues_.size() != KValues_.size())
-     && (TValues_.size() != HfValues_.size())
-     && (TValues_.size() != emissivityValues_.size())
-    )
-    {
-        FatalIOErrorIn("interpolatedSolidThermo::read()", dict)
-            << "Size of property tables should be equal to size of Temperature"
-            << " values " << TValues_.size()
-            << exit(FatalIOError);
-    }
-
-    for (label i = 1; i < TValues_.size(); i++)
-    {
-        if (TValues_[i] <= TValues_[i-1])
-        {
-            FatalIOErrorIn("interpolatedSolidThermo::read()", dict)
-                << "Temperature values are not in increasing order "
-                << TValues_ << exit(FatalIOError);
-        }
-    }
-    return true;
+    bool ok = interpolateSolid::read(dict);
+    return ok;
 }
 
 
 bool Foam::interpolatedSolidThermo::writeData(Ostream& os) const
 {
     bool ok = basicSolidThermo::writeData(os);
-    os.writeKeyword("TValues") << TValues_ << token::END_STATEMENT << nl;
-    os.writeKeyword("rhoValues") << rhoValues_ << token::END_STATEMENT << nl;
-    os.writeKeyword("cpValues") << cpValues_ << token::END_STATEMENT << nl;
-    os.writeKeyword("KValues") << KValues_ << token::END_STATEMENT << nl;
-    os.writeKeyword("HfValues") << HfValues_ << token::END_STATEMENT << nl;
-    os.writeKeyword("emissivityValues") << emissivityValues_
-        << token::END_STATEMENT << nl;
+    ok = interpolateSolid::writeData(os);
 
     return ok && os.good();
 }

@@ -756,6 +756,9 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
     // Distance to wall
     List<pointData> pointWallDist(mesh.nPoints());
 
+    // Dummy additional info for PointEdgeWave
+    int dummyTrackData = 0;
+
 
     // 1. Calculate distance to points where displacement is specified.
     {
@@ -783,7 +786,8 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
             wallInfo,
             pointWallDist,
             edgeWallDist,
-            mesh.globalData().nTotalPoints()    // max iterations
+            mesh.globalData().nTotalPoints(),   // max iterations
+            dummyTrackData
         );
     }
 
@@ -813,7 +817,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
                 {
                     label pointI = e[ep];
 
-                    if (!pointMedialDist[pointI].valid())
+                    if (!pointMedialDist[pointI].valid(dummyTrackData))
                     {
                         maxPoints.append(pointI);
                         maxInfo.append
@@ -857,7 +861,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
                 {
                     label pointI = meshPoints[i];
 
-                    if (!pointMedialDist[pointI].valid())
+                    if (!pointMedialDist[pointI].valid(dummyTrackData))
                     {
                         maxPoints.append(pointI);
                         maxInfo.append
@@ -888,7 +892,8 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
 
             pointMedialDist,
             edgeMedialDist,
-            mesh.globalData().nTotalPoints()    // max iterations
+            mesh.globalData().nTotalPoints(),   // max iterations
+            dummyTrackData
         );
 
         // Extract medial axis distance as pointScalarField

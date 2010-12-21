@@ -145,7 +145,7 @@ Foam::boundBox::boundBox
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::pointField> Foam::boundBox::corners() const
+Foam::tmp<Foam::pointField> Foam::boundBox::points() const
 {
     tmp<pointField> tPts = tmp<pointField>(new pointField(8));
     pointField& pt = tPts();
@@ -274,7 +274,7 @@ Foam::Istream& Foam::operator>>(Istream& is, boundBox& bb)
 {
     if (is.format() == IOstream::ASCII)
     {
-        return is >> bb.min_ >> bb.max_;
+        is >> bb.min_ >> bb.max_;
     }
     else
     {

@@ -100,7 +100,7 @@ const Foam::liquidMixture& Foam::CompositionModel<CloudType>::liquids() const
 
 
 template<class CloudType>
-const Foam::solidMixture& Foam::CompositionModel<CloudType>::solids() const
+const Foam::pointSolidMixture& Foam::CompositionModel<CloudType>::solids() const
 {
     return thermo_.solids();
 }

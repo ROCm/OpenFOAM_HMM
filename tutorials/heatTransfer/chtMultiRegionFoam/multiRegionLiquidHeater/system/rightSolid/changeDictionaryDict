@@ -41,11 +41,39 @@ dictionaryReplacement
             }
             "rightSolid_to_.*"
             {
-                type            compressible::turbulentTemperatureCoupledBaffleMixed;
+                type       compressible::turbulentTemperatureCoupledBaffleMixed;
                 neighbourFieldName T;
                 K               solidThermo;
                 KName           none;
                 value           uniform 300;
+            }
+        }
+    }
+
+    Ypmma
+    {
+        internalField   uniform 0.5;
+
+        boundaryField
+        {
+            ".*"
+            {
+                type            calculated;
+                value           uniform 0.5;
+            }
+        }
+    }
+
+    Ychar
+    {
+        internalField   uniform 0.5;
+
+        boundaryField
+        {
+            ".*"
+            {
+                type            calculated;
+                value           uniform 0.5;
             }
         }
     }

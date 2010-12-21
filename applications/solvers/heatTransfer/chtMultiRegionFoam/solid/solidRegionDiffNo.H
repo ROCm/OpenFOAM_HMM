@@ -41,6 +41,15 @@ namespace Foam
         const volScalarField& Cprho,
         const volScalarField& K
     );
+
+    scalar solidRegionDiffNo
+    (
+        const fvMesh& mesh,
+        const Time& runTime,
+        const volScalarField& Cprho,
+        const volSymmTensorField& K
+    );
+
 }
 
 #endif

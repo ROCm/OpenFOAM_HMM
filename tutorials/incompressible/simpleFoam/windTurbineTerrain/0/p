@@ -29,8 +29,9 @@ boundaryField
 
     outlet
     {
-        type            fixedValue;
-        value           $internalField;
+        type            uniformFixedValue;
+        value           uniform $pressure;
+        uniformValue    $pressure;
     }
 
     "terrain_.*"

@@ -54,6 +54,7 @@ class IDDESDelta
 {
     // Private data
 
+        autoPtr<LESdelta> hmax_;
         scalar deltaCoeff_;
         scalar cw_;
 
@@ -85,9 +86,10 @@ public:
         );
 
 
-    //- Destructor
-    ~IDDESDelta()
-    {}
+    // Destructor
+
+        ~IDDESDelta()
+        {}
 
 
     // Member Functions

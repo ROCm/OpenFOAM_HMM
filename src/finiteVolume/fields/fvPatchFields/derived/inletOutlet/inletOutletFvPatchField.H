@@ -56,6 +56,7 @@ protected:
 
     // Protected data
 
+        //- Name of flux field
         word phiName_;
 
 

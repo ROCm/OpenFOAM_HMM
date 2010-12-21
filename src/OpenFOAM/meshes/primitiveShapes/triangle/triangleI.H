@@ -109,15 +109,25 @@ inline Foam::vector Foam::triangle<Point, PointRef>::normal() const
 template<class Point, class PointRef>
 inline Point Foam::triangle<Point, PointRef>::circumCentre() const
 {
-    scalar d1 = (c_ - a_)&(b_ - a_);
-    scalar d2 = -(c_ - b_)&(b_ - a_);
-    scalar d3 = (c_ - a_)&(c_ - b_);
+    scalar d1 =  (c_ - a_) & (b_ - a_);
+    scalar d2 = -(c_ - b_) & (b_ - a_);
+    scalar d3 =  (c_ - a_) & (c_ - b_);
 
     scalar c1 = d2*d3;
     scalar c2 = d3*d1;
     scalar c3 = d1*d2;
 
     scalar c = c1 + c2 + c3;
+
+    if (Foam::mag(c) < ROOTVSMALL)
+    {
+        WarningIn("Point triangle<Point, PointRef>::circumCentre() const")
+            << "Degenerate triangle:" << nl << *this << nl
+            << "Returning centre instead of circumCentre."
+            << endl;
+
+        return centre();
+    }
 
     return
     (
@@ -129,14 +139,19 @@ inline Point Foam::triangle<Point, PointRef>::circumCentre() const
 template<class Point, class PointRef>
 inline Foam::scalar Foam::triangle<Point, PointRef>::circumRadius() const
 {
-    scalar d1 = (c_ - a_) & (b_ - a_);
-    scalar d2 = - (c_ - b_) & (b_ - a_);
-    scalar d3 = (c_ - a_) & (c_ - b_);
+    scalar d1 =  (c_ - a_) & (b_ - a_);
+    scalar d2 = -(c_ - b_) & (b_ - a_);
+    scalar d3 =  (c_ - a_) & (c_ - b_);
 
     scalar denom = d2*d3 + d3*d1 + d1*d2;
 
     if (Foam::mag(denom) < VSMALL)
     {
+        WarningIn("scalar triangle<Point, PointRef>::circumRadius() const")
+            << "Degenerate triangle:" << nl << *this << nl
+            << "Returning GREAT for circumRadius."
+            << endl;
+
         return GREAT;
     }
     else
@@ -151,16 +166,7 @@ inline Foam::scalar Foam::triangle<Point, PointRef>::circumRadius() const
 template<class Point, class PointRef>
 inline Foam::scalar Foam::triangle<Point, PointRef>::quality() const
 {
-    // Note: 3*sqr(3)/(4*pi) = 0.4134966716
-
-    return
-        mag()
-      / (
-            constant::mathematical::pi
-           *Foam::sqr(circumRadius())
-           *0.4134966716
-          + VSMALL
-        );
+    return mag()/(Foam::sqr(circumRadius())*3.0*sqrt(3.0)/4.0 + VSMALL);
 }
 
 
@@ -267,7 +273,8 @@ Foam::scalar Foam::triangle<Point, PointRef>::barycentric
                 "const point& pt"
             ") const"
         )
-            << "Degenerate triangle - returning 1/3 barycentric coordinates."
+            << "Degenerate triangle:" << nl << *this << nl
+            << "Returning 1/3 barycentric coordinates."
             << endl;
 
         bary = List<scalar>(3, 1.0/3.0);
@@ -493,7 +500,7 @@ Foam::pointHit Foam::triangle<Point, PointRef>::nearestPointClassify
 ) const
 {
     // Adapted from:
-    // Real-time collision detection, Christer Ericson, 2005, 136-142
+    // Real-time collision detection, Christer Ericson, 2005, p136-142
 
     // Check if P in vertex region outside A
     vector ab = b_ - a_;
@@ -531,6 +538,27 @@ Foam::pointHit Foam::triangle<Point, PointRef>::nearestPointClassify
 
     if (vc <= 0.0 && d1 >= 0.0 && d3 <= 0.0)
     {
+        if ((d1 - d3) < ROOTVSMALL)
+        {
+            WarningIn
+            (
+                "pointHit triangle<Point, PointRef>::nearestPointClassify"
+                "("
+                    "const point& p,"
+                    "label& nearType,"
+                    "label& nearLabel"
+                ") const"
+            )
+                << "Degenerate triangle:" << nl << *this << nl
+                << "d1, d3: " << d1 << ", " << d3 << endl;
+
+            // For d1 = d3, a_ and b_ are likely coincident.
+
+            nearType = POINT;
+            nearLabel = 0;
+            return pointHit(false, a_, Foam::mag(a_ - p), true);
+        }
+
         // barycentric coordinates (1-v, v, 0)
         scalar v = d1/(d1 - d3);
 
@@ -559,6 +587,27 @@ Foam::pointHit Foam::triangle<Point, PointRef>::nearestPointClassify
 
     if (vb <= 0.0 && d2 >= 0.0 && d6 <= 0.0)
     {
+        if ((d2 - d6) < ROOTVSMALL)
+        {
+            WarningIn
+            (
+                "pointHit triangle<Point, PointRef>::nearestPointClassify"
+                "("
+                    "const point& p,"
+                    "label& nearType,"
+                    "label& nearLabel"
+                ") const"
+            )
+                << "Degenerate triangle:" << nl << *this << nl
+                << "d2, d6: " << d2 << ", " << d6 << endl;
+
+            // For d2 = d6, a_ and c_ are likely coincident.
+
+            nearType = POINT;
+            nearLabel = 0;
+            return pointHit(false, a_, Foam::mag(a_ - p), true);
+        }
+
         // barycentric coordinates (1-w, 0, w)
         scalar w = d2/(d2 - d6);
 
@@ -573,6 +622,28 @@ Foam::pointHit Foam::triangle<Point, PointRef>::nearestPointClassify
 
     if (va <= 0.0 && (d4 - d3) >= 0.0 && (d5 - d6) >= 0.0)
     {
+        if (((d4 - d3) + (d5 - d6)) < ROOTVSMALL)
+        {
+            WarningIn
+            (
+                "pointHit triangle<Point, PointRef>::nearestPointClassify"
+                "("
+                    "const point& p,"
+                    "label& nearType,"
+                    "label& nearLabel"
+                ") const"
+            )
+                << "Degenerate triangle:" << nl << *this << nl
+                << "(d4 - d3), (d6 - d5): " << (d4 - d3) << ", " << (d6 - d5)
+                << endl;
+
+            // For (d4 - d3) = (d6 - d5), b_ and c_ are likely coincident.
+
+            nearType = POINT;
+            nearLabel = 1;
+            return pointHit(false, b_, Foam::mag(b_ - p), true);
+        }
+
         // barycentric coordinates (0, 1-w, w)
         scalar w = (d4 - d3)/((d4 - d3) + (d5 - d6));
 
@@ -584,6 +655,28 @@ Foam::pointHit Foam::triangle<Point, PointRef>::nearestPointClassify
 
     // P inside face region. Compute Q through its barycentric
     // coordinates (u, v, w)
+
+    if ((va + vb + vc) < ROOTVSMALL)
+    {
+        WarningIn
+        (
+            "pointHit triangle<Point, PointRef>::nearestPointClassify"
+            "("
+                "const point& p,"
+                "label& nearType,"
+                "label& nearLabel"
+            ") const"
+        )
+            << "Degenerate triangle:" << nl << *this << nl
+            << "va, vb, vc: " << va << ", " << vb << ", " << vc
+            << endl;
+
+        point nearPt = centre();
+        nearType = NONE,
+        nearLabel = -1;
+        return pointHit(true, nearPt, Foam::mag(nearPt - p), false);
+    }
+
     scalar denom = 1.0/(va + vb + vc);
     scalar v = vb * denom;
     scalar w = vc * denom;

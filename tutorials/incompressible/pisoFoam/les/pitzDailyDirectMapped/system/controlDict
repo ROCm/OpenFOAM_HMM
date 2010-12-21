@@ -47,10 +47,10 @@ runTimeModifiable true;
 
 functions
 {
-    probes1
+    probes
     {
         type            probes;
-        functionObjectLibs ( "libsampling.so" );
+        functionObjectLibs ("libsampling.so");
         enabled         true;
         outputControl   timeStep;
         outputInterval  1;
@@ -70,12 +70,13 @@ functions
             ( 0.1524 0.0253 0 )
             ( 0.1778 0.0253 0 )
         );
+
     }
 
     fieldAverage1
     {
         type            fieldAverage;
-        functionObjectLibs ( "libfieldFunctionObjects.so" );
+        functionObjectLibs ("libfieldFunctionObjects.so");
         enabled         true;
         outputControl   outputTime;
 
@@ -96,7 +97,40 @@ functions
             }
         );
     }
-}
 
+    surfaceSampling
+    {
+        // Sample near-wall velocity
+
+        type surfaces;
+
+        // Where to load it from (if not already in solver)
+        functionObjectLibs ("libsampling.so");
+        enabled         true;
+        outputControl   outputTime;
+
+        interpolationScheme cellPoint;
+
+        surfaceFormat vtk;
+
+        // Fields to be sampled
+        fields
+        (
+            U
+        );
+
+        surfaces
+        (
+            nearWall
+            {
+                type            patchInternalField;
+                patchName       lowerWall;
+                distance        1E-6;
+                interpolate     true;
+                triangulate     false;
+            }
+        );
+    }
+}
 
 // ************************************************************************* //

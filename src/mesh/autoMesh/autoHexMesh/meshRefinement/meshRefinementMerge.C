@@ -103,11 +103,6 @@ Foam::label Foam::meshRefinement::mergePatchFaces
             mesh_.clearOut();
         }
 
-        if (overwrite())
-        {
-            mesh_.setInstance(oldInstance());
-        }
-
         faceCombiner.updateMesh(map);
 
         // Get the kept faces that need to be recalculated.
@@ -201,11 +196,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeEdges
         {
             // Delete mesh volumes. No other way to do this?
             mesh_.clearOut();
-        }
-
-        if (overwrite())
-        {
-            mesh_.setInstance(oldInstance());
         }
 
         pointRemover.updateMesh(map);

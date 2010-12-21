@@ -25,6 +25,7 @@ License
 
 #include "IDDESDelta.H"
 #include "addToRunTimeSelectionTable.H"
+#include "wallDistReflection.H"
 #include "wallDist.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -42,25 +43,50 @@ void Foam::IDDESDelta::calcDelta()
 {
     label nD = mesh().nGeometricD();
 
-    volScalarField delta
+    const volScalarField& hmax = hmax_();
+
+    // initialise wallNorm
+    wallDistReflection wallNorm(mesh());
+
+    const volVectorField& n = wallNorm.n();
+
+    tmp<volScalarField> faceToFacenMax
     (
-        IOobject
+        new volScalarField
         (
-            "delta",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar("zero", dimLength, SMALL),
-        calculatedFvPatchScalarField::typeName
+            IOobject
+            (
+                "faceToFaceMax",
+                mesh().time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh(),
+            dimensionedScalar("zrero", dimLength, 0.0)
+        )
     );
 
-    delta.internalField() = pow(mesh_.V(), 1.0/3.0);
+    const cellList& cells = mesh().cells();
 
-    // initialise hwn as wall distance
-    volScalarField hwn = wallDist(mesh()).y();
+    forAll(cells,cellI)
+    {
+        scalar deltaMaxTmp = 0.0;
+        const labelList& cFaces = mesh().cells()[cellI];
+        const point& faceCentre = mesh().faceCentres()[cFaces[0]];
+        const vector nCell = n[cellI];
+        forAll(cFaces, cFaceI)
+        {
+            label faceI = cFaces[cFaceI];
+            const point& faceCentreTwo = mesh().faceCentres()[faceI];
+            scalar tmp = (faceCentre - faceCentreTwo) & nCell;
+            if (tmp > deltaMaxTmp)
+            {
+                deltaMaxTmp = tmp;
+            }
+        }
+        faceToFacenMax()[cellI] = deltaMaxTmp;
+    }
 
     if (nD == 3)
     {
@@ -68,8 +94,12 @@ void Foam::IDDESDelta::calcDelta()
             deltaCoeff_
            *min
             (
-                max(max(cw_*wallDist(mesh()).y(), cw_*delta), hwn),
-                delta
+                max
+                (
+                    max(cw_*wallDist(mesh()).y(), cw_*hmax),
+                    faceToFacenMax()
+                ),
+                hmax
             );
     }
     else if (nD == 2)
@@ -82,8 +112,8 @@ void Foam::IDDESDelta::calcDelta()
             deltaCoeff_
            *min
             (
-                max(max(cw_*wallDist(mesh()).y(), cw_*delta), hwn),
-                delta
+                max(max(cw_*wallDist(mesh()).y(), cw_*hmax), faceToFacenMax()),
+                hmax
             );
     }
     else
@@ -105,8 +135,12 @@ Foam::IDDESDelta::IDDESDelta
 )
 :
     LESdelta(name, mesh),
-    deltaCoeff_(readScalar(dd.subDict(type() + "Coeffs").lookup("deltaCoeff"))),
-    cw_(0)
+    hmax_(LESdelta::New("hmax", mesh, dd.parent())),
+    deltaCoeff_
+    (
+        readScalar(dd.subDict(type()+"Coeffs").lookup("deltaCoeff"))
+    ),
+    cw_(0.15)
 {
     dd.subDict(type() + "Coeffs").readIfPresent("cw", cw_);
     calcDelta();
@@ -127,6 +161,7 @@ void Foam::IDDESDelta::correct()
     if (mesh_.changing())
     {
         calcDelta();
+        hmax_().correct();
     }
 }
 

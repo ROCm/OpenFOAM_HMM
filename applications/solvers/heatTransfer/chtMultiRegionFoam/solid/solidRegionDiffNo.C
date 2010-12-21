@@ -57,4 +57,35 @@ Foam::scalar Foam::solidRegionDiffNo
 }
 
 
+Foam::scalar Foam::solidRegionDiffNo
+(
+    const fvMesh& mesh,
+    const Time& runTime,
+    const volScalarField& Cprho,
+    const volSymmTensorField& Kdirectional
+)
+{
+    scalar DiNum = 0.0;
+    scalar meanDiNum = 0.0;
+
+    volScalarField K = mag(Kdirectional);
+
+    //- Take care: can have fluid domains with 0 cells so do not test for
+    //  zero internal faces.
+    surfaceScalarField KrhoCpbyDelta =
+        mesh.surfaceInterpolation::deltaCoeffs()
+      * fvc::interpolate(K)
+      / fvc::interpolate(Cprho);
+
+    DiNum = gMax(KrhoCpbyDelta.internalField())*runTime.deltaT().value();
+
+    meanDiNum = (average(KrhoCpbyDelta)).value()*runTime.deltaT().value();
+
+    Info<< "Region: " << mesh.name() << " Diffusion Number mean: " << meanDiNum
+        << " max: " << DiNum << endl;
+
+    return DiNum;
+}
+
+
 // ************************************************************************* //

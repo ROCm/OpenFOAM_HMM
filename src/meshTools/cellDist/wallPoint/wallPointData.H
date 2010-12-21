@@ -160,6 +160,46 @@ public:
 };
 
 
+//- Data associated with wallPointData type are contiguous. List the usual
+//  ones.
+
+template <>
+inline bool contiguous<wallPointData<bool> >()
+{
+    return contiguous<wallPoint>();
+}
+template <>
+inline bool contiguous<wallPointData<label> >()
+{
+    return contiguous<wallPoint>();
+}
+template <>
+inline bool contiguous<wallPointData<scalar> >()
+{
+    return contiguous<wallPoint>();
+}
+template <>
+inline bool contiguous<wallPointData<vector> >()
+{
+    return contiguous<wallPoint>();
+}
+template <>
+inline bool contiguous<wallPointData<sphericalTensor> >()
+{
+    return contiguous<wallPoint>();
+}
+template <>
+inline bool contiguous<wallPointData<symmTensor> >()
+{
+    return contiguous<wallPoint>();
+}
+template <>
+inline bool contiguous<wallPointData<tensor> >()
+{
+    return contiguous<wallPoint>();
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 

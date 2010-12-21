@@ -107,32 +107,28 @@ Foam::tmp<Foam::scalarField>
 Foam::waveTransmissiveFvPatchField<Type>::advectionSpeed() const
 {
     // Lookup the velocity and compressibility of the patch
-    const fvPatchField<scalar>& psip = this->patch().lookupPatchField
-    (
-        psiName_,
-        reinterpret_cast<const volScalarField*>(0),
-        reinterpret_cast<const scalar*>(0)
-    );
+    const fvPatchField<scalar>& psip =
+        this->patch().template lookupPatchField<volScalarField, scalar>
+        (
+            psiName_
+        );
 
     const surfaceScalarField& phi =
-        this->db().objectRegistry::template lookupObject<surfaceScalarField>
-        (this->phiName_);
+        this->db().template lookupObject<surfaceScalarField>(this->phiName_);
 
-    fvsPatchField<scalar> phip = this->patch().lookupPatchField
-    (
-        this->phiName_,
-        reinterpret_cast<const surfaceScalarField*>(0),
-        reinterpret_cast<const scalar*>(0)
-    );
+    fvsPatchField<scalar> phip =
+        this->patch().template lookupPatchField<surfaceScalarField, scalar>
+        (
+            this->phiName_
+        );
 
     if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
     {
-        const fvPatchScalarField& rhop = this->patch().lookupPatchField
-        (
-            this->rhoName_,
-            reinterpret_cast<const volScalarField*>(0),
-            reinterpret_cast<const scalar*>(0)
-        );
+        const fvPatchScalarField& rhop =
+            this->patch().template lookupPatchField<volScalarField, scalar>
+            (
+                this->rhoName_
+            );
 
         phip /= rhop;
     }
@@ -161,6 +157,7 @@ void Foam::waveTransmissiveFvPatchField<Type>::write(Ostream& os) const
     {
         os.writeKeyword("psi") << psiName_ << token::END_STATEMENT << nl;
     }
+
     os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << nl;
 
     if (this->lInf_ > SMALL)

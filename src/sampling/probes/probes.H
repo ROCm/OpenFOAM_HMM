@@ -64,7 +64,9 @@ class probes
 :
     public pointField
 {
-    // Private classes
+protected:
+
+    // Protected classes
 
         //- Class used for grouping field types
         template<class Type>
@@ -110,7 +112,7 @@ class probes
             fieldGroup<tensor> tensorFields_;
 
             // Cells to be probed (obtained from the locations)
-            labelList cellList_;
+            labelList elementList_;
 
             //- Current open files
             HashPtrTable<OFstream> probeFilePtrs_;
@@ -128,11 +130,13 @@ class probes
         label classifyFields();
 
         //- Find cells containing probes
-        void findCells(const fvMesh&);
+        virtual void findElements(const fvMesh&);
 
         //- Classify field type and Open/close file streams,
         //  returns number of fields
         label prepare();
+
+private:
 
         //- Sample and write a particular volume field
         template<class Type>
@@ -202,9 +206,9 @@ public:
         }
 
         //- Cells to be probed (obtained from the locations)
-        const labelList& cells() const
+        const labelList& elemets() const
         {
-            return cellList_;
+            return elementList_;
         }
 
         //- Execute, currently does nothing

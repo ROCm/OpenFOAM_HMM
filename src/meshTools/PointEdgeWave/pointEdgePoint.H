@@ -73,19 +73,23 @@ class pointEdgePoint
         //- Evaluate distance to point. Update distSqr, origin from whomever
         //  is nearer pt. Return true if w2 is closer to point,
         //  false otherwise.
+        template<class TrackingData>
         inline bool update
         (
             const point&,
             const pointEdgePoint& w2,
-            const scalar tol
+            const scalar tol,
+            TrackingData& td
         );
 
         //- Combine current with w2. Update distSqr, origin if w2 has smaller
         //  quantities and returns true.
+        template<class TrackingData>
         inline bool update
         (
             const pointEdgePoint& w2,
-            const scalar tol
+            const scalar tol,
+            TrackingData& td
         );
 
 
@@ -97,7 +101,7 @@ public:
         inline pointEdgePoint();
 
         //- Construct from origin, distance
-        inline pointEdgePoint(const point& origin, const scalar distSqr);
+        inline pointEdgePoint(const point&, const scalar);
 
         //- Construct as copy
         inline pointEdgePoint(const pointEdgePoint&);
@@ -116,76 +120,102 @@ public:
 
             //- Check whether origin has been changed at all or
             //  still contains original (invalid) value.
-            inline bool valid() const;
+            template<class TrackingData>
+            inline bool valid(TrackingData& td) const;
 
             //- Check for identical geometrical data. Used for cyclics checking.
-            inline bool sameGeometry(const pointEdgePoint&, const scalar tol)
-             const;
+            template<class TrackingData>
+            inline bool sameGeometry
+            (
+                const pointEdgePoint&,
+                const scalar tol,
+                TrackingData& td
+            ) const;
 
             //- Convert origin to relative vector to leaving point
             //  (= point coordinate)
+            template<class TrackingData>
             inline void leaveDomain
             (
                 const polyPatch& patch,
                 const label patchPointI,
-                const point& pos
+                const point& pos,
+                TrackingData& td
             );
 
             //- Convert relative origin to absolute by adding entering point
+            template<class TrackingData>
             inline void enterDomain
             (
                 const polyPatch& patch,
                 const label patchPointI,
-                const point& pos
+                const point& pos,
+                TrackingData& td
             );
 
             //- Apply rotation matrix to origin
-            inline void transform(const tensor& rotTensor);
+            template<class TrackingData>
+            inline void transform
+            (
+                const tensor& rotTensor,
+                TrackingData& td
+            );
 
             //- Influence of edge on point
+            template<class TrackingData>
             inline bool updatePoint
             (
                 const polyMesh& mesh,
                 const label pointI,
                 const label edgeI,
                 const pointEdgePoint& edgeInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
 
             //- Influence of different value on same point.
             //  Merge new and old info.
+            template<class TrackingData>
             inline bool updatePoint
             (
                 const polyMesh& mesh,
                 const label pointI,
                 const pointEdgePoint& newPointInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
 
             //- Influence of different value on same point.
             //  No information about current position whatsoever.
+            template<class TrackingData>
             inline bool updatePoint
             (
                 const pointEdgePoint& newPointInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
 
             //- Influence of point on edge.
+            template<class TrackingData>
             inline bool updateEdge
             (
                 const polyMesh& mesh,
                 const label edgeI,
                 const label pointI,
                 const pointEdgePoint& pointInfo,
-                const scalar tol
+                const scalar tol,
+                TrackingData& td
             );
+
+            //- Same (like operator==)
+            template<class TrackingData>
+            inline bool equal(const pointEdgePoint&, TrackingData& td) const;
 
 
     // Member Operators
 
-        //Note: Used to determine whether to call update.
+        // Needed for List IO
         inline bool operator==(const pointEdgePoint&) const;
-
         inline bool operator!=(const pointEdgePoint&) const;
 
 
@@ -194,6 +224,14 @@ public:
         friend Ostream& operator<<(Ostream&, const pointEdgePoint&);
         friend Istream& operator>>(Istream&, pointEdgePoint&);
 };
+
+
+//- Data associated with pointEdgePoint type are contiguous
+template<>
+inline bool contiguous<pointEdgePoint>()
+{
+    return true;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

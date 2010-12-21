@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,28 +43,44 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                            Class constSolidThermo Declaration
+                      Class constSolidThermo Declaration
 \*---------------------------------------------------------------------------*/
 
 class constSolidThermo
 :
     public basicSolidThermo
 {
+private:
+
+    // Private data
+
+        //- Dictionary
+        dictionary dict_;
+
+        //- Constant thermal conductivity [W/(m.K)]
+        dimensionedScalar constK_;
+
+        //- Thermal conductivity field[W/(m.K)]
+        volScalarField K_;
+
         //- Density [kg/m3]
         dimensionedScalar constRho_;
 
         //- Specific heat capacity [J/(kg.K)]
         dimensionedScalar constCp_;
 
-        //- Thermal conductivity [W/(m.K)]
-        //dimensionedSymmTensor constK_;
-        dimensionedScalar constK_;
-
         //- Heat of formation [J/kg]
         dimensionedScalar constHf_;
 
         //- Emissivity
         dimensionedScalar constEmissivity_;
+
+        //- Absorptivity [1/m]
+        dimensionedScalar constKappa_;
+
+        //- Scatter [1/m]
+        dimensionedScalar constSigmaS_;
+
 
 public:
 
@@ -77,9 +93,8 @@ public:
         //- Construct from mesh
         constSolidThermo(const fvMesh& mesh);
 
-    // Destructor
-
-        virtual ~constSolidThermo();
+    //- Destructor
+    virtual ~constSolidThermo();
 
 
     // Member Functions
@@ -87,24 +102,23 @@ public:
         //- Update properties
         virtual void correct();
 
-        //- Density [kg/m3]
-        virtual tmp<volScalarField> rho() const;
 
-        //- Specific heat capacity [J/(kg.K)]
-        virtual tmp<volScalarField> cp() const;
+    // Acces functions
 
-        //- Thermal conductivity [W/(m.K)]
-        //  Note: needs supplied K to be isotropic
-        virtual tmp<volScalarField> K() const;
+        //- Constant access to K
+        virtual const volScalarField& K() const;
 
         //- Thermal conductivity [W/(m.K)]
-        virtual tmp<volSymmTensorField> directionalK() const;
+        virtual const volSymmTensorField& directionalK() const;
 
-        //- Heat of formation [J/kg]
-        virtual tmp<volScalarField> Hf() const;
 
-        //- Emissivity []
-        virtual tmp<volScalarField> emissivity() const;
+        // Derived properties
+
+            //- Specific heat capacity [J/(kg.K)]
+            virtual tmp<volScalarField> Cp() const;
+
+            //- Heat of formation [J/kg]
+            virtual tmp<volScalarField> Hf() const;
 
 
         // Per patch calculation
@@ -112,19 +126,25 @@ public:
             //- Density [kg/m3]
             virtual tmp<scalarField> rho(const label patchI) const;
 
-            //- Specific heat capacity [J/(kg.K)]
-            virtual tmp<scalarField> cp(const label patchI) const;
+            //- Specific heat capacity [J/kg/K)]
+            virtual tmp<scalarField> Cp(const label patchI) const;
 
-            //- Thermal conductivity [W/(m.K)]
+            //- Thermal conductivity [W//m/K]
             virtual tmp<scalarField> K(const label patchI) const;
 
-            //- Thermal conductivity [W/(m.K)]
-            virtual tmp<symmTensorField> directionalK(const label patchI) const;
+            //- Thermal conductivity [W//m/K]
+            virtual tmp<symmTensorField>directionalK(const label) const;
 
             //- Heat of formation [J/kg]
             virtual tmp<scalarField> Hf(const label patchI) const;
 
-            //- Emissivity []
+            //- Scatter coefficient [1/m]
+            virtual tmp<scalarField> sigmaS(const label) const;
+
+            //- Absorption coefficient [1/m]
+            virtual tmp<scalarField> kappa(const label) const;
+
+             //- Emissivity []
             virtual tmp<scalarField> emissivity(const label) const;
 
 
@@ -139,11 +159,8 @@ public:
             //- Read solidThermophysicalProperties dictionary
             bool read(const dictionary&);
 
-
-
-        // Ostream Operator
-
-        friend Ostream& operator<<(Ostream& os, const constSolidThermo& s);
+            //- Ostream Operator
+            friend Ostream& operator<<(Ostream& os, const constSolidThermo& s);
 };
 
 

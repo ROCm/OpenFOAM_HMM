@@ -29,13 +29,15 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Update this with w2.
+template<class TrackingData>
 inline bool Foam::pointEdgeStructuredWalk::update
 (
     const pointEdgeStructuredWalk& w2,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
-    if (!valid())
+    if (!valid(td))
     {
         // current not yet set. Walked from w2 to here (=point0)
         dist_ = w2.dist_ + mag(point0_-w2.previousPoint_);
@@ -105,17 +107,20 @@ inline const Foam::vector& Foam::pointEdgeStructuredWalk::data() const
 }
 
 
-inline bool Foam::pointEdgeStructuredWalk::valid() const
+template<class TrackingData>
+inline bool Foam::pointEdgeStructuredWalk::valid(TrackingData& td) const
 {
     return previousPoint_ != vector::max;
 }
 
 
 // Checks for cyclic points
+template<class TrackingData>
 inline bool Foam::pointEdgeStructuredWalk::sameGeometry
 (
     const pointEdgeStructuredWalk& w2,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 ) const
 {
     scalar diff = Foam::mag(dist() - w2.dist());
@@ -138,18 +143,25 @@ inline bool Foam::pointEdgeStructuredWalk::sameGeometry
 }
 
 
+template<class TrackingData>
 inline void Foam::pointEdgeStructuredWalk::leaveDomain
 (
     const polyPatch& patch,
     const label patchPointI,
-    const point& coord
+    const point& coord,
+    TrackingData& td
 )
 {
     previousPoint_ -= coord;
 }
 
 
-inline void Foam::pointEdgeStructuredWalk::transform(const tensor& rotTensor)
+template<class TrackingData>
+inline void Foam::pointEdgeStructuredWalk::transform
+(
+    const tensor& rotTensor,
+    TrackingData& td
+)
 {
     previousPoint_ = Foam::transform(rotTensor, previousPoint_);
 }
@@ -157,11 +169,13 @@ inline void Foam::pointEdgeStructuredWalk::transform(const tensor& rotTensor)
 
 // Update absolute geometric quantities. Note that distance (dist_)
 // is not affected by leaving/entering domain.
+template<class TrackingData>
 inline void Foam::pointEdgeStructuredWalk::enterDomain
 (
     const polyPatch& patch,
     const label patchPointI,
-    const point& coord
+    const point& coord,
+    TrackingData& td
 )
 {
     // back to absolute form
@@ -170,18 +184,20 @@ inline void Foam::pointEdgeStructuredWalk::enterDomain
 
 
 // Update this with information from connected edge
+template<class TrackingData>
 inline bool Foam::pointEdgeStructuredWalk::updatePoint
 (
     const polyMesh& mesh,
     const label pointI,
     const label edgeI,
     const pointEdgeStructuredWalk& edgeInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
     if (inZone())
     {
-        return update(edgeInfo, tol);
+        return update(edgeInfo, tol, td);
     }
     else
     {
@@ -191,17 +207,19 @@ inline bool Foam::pointEdgeStructuredWalk::updatePoint
 
 
 // Update this with new information on same point
+template<class TrackingData>
 inline bool Foam::pointEdgeStructuredWalk::updatePoint
 (
     const polyMesh& mesh,
     const label pointI,
     const pointEdgeStructuredWalk& newPointInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
     if (inZone())
     {
-        return update(newPointInfo, tol);
+        return update(newPointInfo, tol, td);
     }
     else
     {
@@ -211,34 +229,49 @@ inline bool Foam::pointEdgeStructuredWalk::updatePoint
 
 
 // Update this with new information on same point. No extra information.
+template<class TrackingData>
 inline bool Foam::pointEdgeStructuredWalk::updatePoint
 (
     const pointEdgeStructuredWalk& newPointInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
-    return update(newPointInfo, tol);
+    return update(newPointInfo, tol, td);
 }
 
 
 // Update this with information from connected point
+template<class TrackingData>
 inline bool Foam::pointEdgeStructuredWalk::updateEdge
 (
     const polyMesh& mesh,
     const label edgeI,
     const label pointI,
     const pointEdgeStructuredWalk& pointInfo,
-    const scalar tol
+    const scalar tol,
+    TrackingData& td
 )
 {
     if (inZone())
     {
-        return update(pointInfo, tol);
+        return update(pointInfo, tol, td);
     }
     else
     {
         return false;
     }
+}
+
+
+template <class TrackingData>
+inline bool Foam::pointEdgeStructuredWalk::equal
+(
+    const pointEdgeStructuredWalk& rhs,
+    TrackingData& td
+) const
+{
+    return operator==(rhs);
 }
 
 

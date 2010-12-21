@@ -45,6 +45,7 @@ Foam::scalar Foam::streamLineParticle::calcSubCycleDeltaT
 ) const
 {
     streamLineParticle testParticle(*this);
+
     bool oldKeepParticle = td.keepParticle;
     bool oldSwitchProcessor = td.switchProcessor;
     scalar fraction = testParticle.trackToFace(position()+dt*U, td);
@@ -196,9 +197,7 @@ bool Foam::streamLineParticle::move
         // Cross cell in steps:
         // - at subiter 0 calculate dt to cross cell in nSubCycle steps
         // - at the last subiter do all of the remaining track
-        // - do a few more subiters than nSubCycle since velocity might
-        //   be decreasing
-        for (label subIter = 0; subIter < 2*td.nSubCycle_; subIter++)
+        for (label subIter = 0; subIter < td.nSubCycle_; subIter++)
         {
             --lifeTime_;
 
@@ -217,14 +216,14 @@ bool Foam::streamLineParticle::move
                 // Adapt dt to cross cell in a few steps
                 dt = calcSubCycleDeltaT(td, dt, U);
             }
-            else if (subIter == td.nSubCycle_-1)
+            else if (subIter == td.nSubCycle_ - 1)
             {
                 // Do full step on last subcycle
                 dt = min(dtMax, tEnd);
             }
 
 
-            scalar fraction = trackToFace(position()+dt*U, td);
+            scalar fraction = trackToFace(position() + dt*U, td);
             dt *= fraction;
 
             tEnd -= dt;
@@ -236,7 +235,13 @@ bool Foam::streamLineParticle::move
                 lifeTime_ = 0;
             }
 
-            if (!td.keepParticle || td.switchProcessor || lifeTime_ == 0)
+            if
+            (
+                face() != -1
+            || !td.keepParticle
+            ||  td.switchProcessor
+            ||  lifeTime_ == 0
+            )
             {
                 break;
             }

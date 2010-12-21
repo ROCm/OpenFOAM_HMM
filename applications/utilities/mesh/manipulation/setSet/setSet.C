@@ -482,7 +482,7 @@ bool doCommand
             topoSet& currentSet = currentSetPtr();
 
             Info<< "    Set:" << currentSet.name()
-                << "  Size:" << currentSet.size()
+                << "  Size:" << returnReduce(currentSet.size(), sumOp<label>())
                 << "  Action:" << actionName
                 << endl;
 
@@ -579,7 +579,9 @@ bool doCommand
                     );
 
                     Info<< "    Writing " << currentSet.name()
-                        << " (size " << currentSet.size() << ") to "
+                        << " (size "
+                        << returnReduce(currentSet.size(), sumOp<label>())
+                        << ") to "
                         << currentSet.instance()/currentSet.local()
                            /currentSet.name()
                         << " and to vtk file " << vtkName << endl << endl;
@@ -589,7 +591,9 @@ bool doCommand
                 else
                 {
                     Info<< "    Writing " << currentSet.name()
-                        << " (size " << currentSet.size() << ") to "
+                        << " (size "
+                        << returnReduce(currentSet.size(), sumOp<label>())
+                        << ") to "
                         << currentSet.instance()/currentSet.local()
                            /currentSet.name() << endl << endl;
                 }
@@ -642,9 +646,9 @@ enum commandStatus
 void printMesh(const Time& runTime, const polyMesh& mesh)
 {
     Info<< "Time:" << runTime.timeName()
-        << "  cells:" << mesh.nCells()
-        << "  faces:" << mesh.nFaces()
-        << "  points:" << mesh.nPoints()
+        << "  cells:" << mesh.globalData().nTotalCells()
+        << "  faces:" << mesh.globalData().nTotalFaces()
+        << "  points:" << mesh.globalData().nTotalPoints()
         << "  patches:" << mesh.boundaryMesh().size()
         << "  bb:" << mesh.bounds() << nl;
 }

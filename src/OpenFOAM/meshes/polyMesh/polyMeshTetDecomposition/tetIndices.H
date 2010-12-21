@@ -41,6 +41,7 @@ SourceFiles
 #include "tetPointRef.H"
 #include "triPointRef.H"
 #include "polyMesh.H"
+#include "triFace.H"
 #include "face.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -145,6 +146,10 @@ public:
             //- Return the geometry corresponding to the tri on the
             //  mesh face for this tet from the supplied mesh
             inline triPointRef faceTri(const polyMesh& mesh) const;
+
+            //- Return the point indices corresponding to the tri on the mesh
+            //  face for this tet from the supplied mesh
+            inline triFace faceTriIs(const polyMesh& mesh) const;
 
             //- Return the geometry corresponding to the tri on the
             //  mesh face for this tet from the supplied mesh using
