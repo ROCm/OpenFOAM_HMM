@@ -120,8 +120,10 @@ void Foam::movingWallVelocityFvPatchVectorField::updateCoeffs()
     const vectorField Up((pp.faceCentres() - oldFc)/mesh.time().deltaTValue());
 
     const volVectorField& U = db().lookupObject<volVectorField>(UName_);
-    scalarField phip =
-        p.patchField<surfaceScalarField, scalar>(fvc::meshPhi(U));
+    scalarField phip
+    (
+        p.patchField<surfaceScalarField, scalar>(fvc::meshPhi(U))
+    );
 
     const vectorField n(p.nf());
     const scalarField& magSf = p.magSf();

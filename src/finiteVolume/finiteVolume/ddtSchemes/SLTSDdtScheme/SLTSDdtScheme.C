@@ -385,7 +385,7 @@ SLTSDdtScheme<Type>::fvmDdt
 
     fvMatrix<Type>& fvm = tfvm();
 
-    scalarField rDeltaT = SLrDeltaT()().internalField();
+    scalarField rDeltaT(SLrDeltaT()().internalField());
 
     Info<< "max/min rDeltaT " << max(rDeltaT) << " " << min(rDeltaT) << endl;
 
@@ -422,7 +422,7 @@ SLTSDdtScheme<Type>::fvmDdt
     );
     fvMatrix<Type>& fvm = tfvm();
 
-    scalarField rDeltaT = SLrDeltaT()().internalField();
+    scalarField rDeltaT(SLrDeltaT()().internalField());
 
     fvm.diag() = rDeltaT*rho.value()*mesh().V();
 
@@ -459,7 +459,7 @@ SLTSDdtScheme<Type>::fvmDdt
     );
     fvMatrix<Type>& fvm = tfvm();
 
-    scalarField rDeltaT = SLrDeltaT()().internalField();
+    scalarField rDeltaT(SLrDeltaT()().internalField());
 
     fvm.diag() = rDeltaT*rho.internalField()*mesh().V();
 

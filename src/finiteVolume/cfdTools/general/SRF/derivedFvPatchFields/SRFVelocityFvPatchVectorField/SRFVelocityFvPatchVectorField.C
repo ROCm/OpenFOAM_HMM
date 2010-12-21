@@ -137,7 +137,7 @@ void Foam::SRFVelocityFvPatchVectorField::updateCoeffs()
             db().lookupObject<SRF::SRFModel>("SRFProperties");
 
         // Determine patch velocity due to SRF
-        const vectorField SRFVelocity = srf.velocity(patch().Cf());
+        const vectorField SRFVelocity(srf.velocity(patch().Cf()));
 
         operator==(-SRFVelocity + inletValue_);
     }

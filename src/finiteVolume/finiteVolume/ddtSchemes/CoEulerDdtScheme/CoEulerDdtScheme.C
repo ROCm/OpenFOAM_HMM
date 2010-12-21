@@ -382,7 +382,7 @@ CoEulerDdtScheme<Type>::fvmDdt
 
     fvMatrix<Type>& fvm = tfvm();
 
-    scalarField rDeltaT = CorDeltaT()().internalField();
+    scalarField rDeltaT(CorDeltaT()().internalField());
 
     fvm.diag() = rDeltaT*mesh().V();
 
@@ -417,7 +417,7 @@ CoEulerDdtScheme<Type>::fvmDdt
     );
     fvMatrix<Type>& fvm = tfvm();
 
-    scalarField rDeltaT = CorDeltaT()().internalField();
+    scalarField rDeltaT(CorDeltaT()().internalField());
 
     fvm.diag() = rDeltaT*rho.value()*mesh().V();
 
@@ -454,7 +454,7 @@ CoEulerDdtScheme<Type>::fvmDdt
     );
     fvMatrix<Type>& fvm = tfvm();
 
-    scalarField rDeltaT = CorDeltaT()().internalField();
+    scalarField rDeltaT(CorDeltaT()().internalField());
 
     fvm.diag() = rDeltaT*rho.internalField()*mesh().V();
 

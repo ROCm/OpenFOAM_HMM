@@ -169,8 +169,10 @@ updateCoeffs()
 
     ray.Qr().boundaryField()[patchI] += Iw*(n & ray.dAve());
 
-    const scalarField Eb =
-        dom.blackBody().bLambda(lambdaId).boundaryField()[patchI];
+    const scalarField Eb
+    (
+        dom.blackBody().bLambda(lambdaId).boundaryField()[patchI]
+    );
 
     forAll(Iw, faceI)
     {

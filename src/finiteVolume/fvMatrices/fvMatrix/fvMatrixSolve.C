@@ -71,9 +71,9 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
         psi.name()
     );
 
-    scalarField saveDiag = diag();
+    scalarField saveDiag(diag());
 
-    Field<Type> source = source_;
+    Field<Type> source(source_);
 
     // At this point include the boundary source from the coupled boundaries.
     // This is corrected for the implict part by updateMatrixInterfaces within
@@ -227,7 +227,7 @@ Foam::tmp<Foam::Field<Type> > Foam::fvMatrix<Type>::residual() const
     // Loop over field components
     for (direction cmpt=0; cmpt<Type::nComponents; cmpt++)
     {
-        scalarField psiCmpt = psi_.internalField().component(cmpt);
+        scalarField psiCmpt(psi_.internalField().component(cmpt));
 
         scalarField boundaryDiagCmpt(psi_.size(), 0.0);
         addBoundaryDiag(boundaryDiagCmpt, cmpt);
