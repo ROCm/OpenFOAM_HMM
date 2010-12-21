@@ -6,7 +6,7 @@ if (turbulence)
     }
 
     tmp<volTensorField> tgradUb = fvc::grad(Ub);
-    volScalarField G = 2*nutb*(tgradUb() && dev(symm(tgradUb())));
+    volScalarField G(2*nutb*(tgradUb() && dev(symm(tgradUb()))));
     tgradUb.clear();
 
     #include "wallFunctions.H"

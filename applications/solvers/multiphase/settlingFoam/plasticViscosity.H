@@ -5,11 +5,13 @@ volScalarField plasticViscosity
     const volScalarField& alpha
 )
 {
-    return
+    tmp<volScalarField> tfld
     (
          plasticViscosityCoeff*
          (
              pow(10.0, plasticViscosityExponent*alpha + SMALL) - scalar(1)
          )
     );
+
+    return tfld();
 }

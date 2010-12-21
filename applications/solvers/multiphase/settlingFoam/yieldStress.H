@@ -6,7 +6,7 @@ volScalarField yieldStress
     const volScalarField& alpha
 )
 {
-    return
+    tmp<volScalarField> tfld
     (
         yieldStressCoeff*
         (
@@ -14,4 +14,6 @@ volScalarField yieldStress
           - pow(10.0, yieldStressExponent*yieldStressOffset)
         )
     );
+
+    return tfld();
 }

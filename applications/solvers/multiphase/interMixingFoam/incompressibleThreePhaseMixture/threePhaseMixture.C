@@ -133,9 +133,9 @@ Foam::tmp<Foam::volScalarField> Foam::threePhaseMixture::mu() const
 
 Foam::tmp<Foam::surfaceScalarField> Foam::threePhaseMixture::muf() const
 {
-    surfaceScalarField alpha1f = fvc::interpolate(alpha1_);
-    surfaceScalarField alpha2f = fvc::interpolate(alpha2_);
-    surfaceScalarField alpha3f = fvc::interpolate(alpha3_);
+    surfaceScalarField alpha1f(fvc::interpolate(alpha1_));
+    surfaceScalarField alpha2f(fvc::interpolate(alpha2_));
+    surfaceScalarField alpha3f(fvc::interpolate(alpha3_));
 
     return tmp<surfaceScalarField>
     (
@@ -152,9 +152,9 @@ Foam::tmp<Foam::surfaceScalarField> Foam::threePhaseMixture::muf() const
 
 Foam::tmp<Foam::surfaceScalarField> Foam::threePhaseMixture::nuf() const
 {
-    surfaceScalarField alpha1f = fvc::interpolate(alpha1_);
-    surfaceScalarField alpha2f = fvc::interpolate(alpha2_);
-    surfaceScalarField alpha3f = fvc::interpolate(alpha3_);
+    surfaceScalarField alpha1f(fvc::interpolate(alpha1_));
+    surfaceScalarField alpha2f(fvc::interpolate(alpha2_));
+    surfaceScalarField alpha3f(fvc::interpolate(alpha3_));
 
     return tmp<surfaceScalarField>
     (
