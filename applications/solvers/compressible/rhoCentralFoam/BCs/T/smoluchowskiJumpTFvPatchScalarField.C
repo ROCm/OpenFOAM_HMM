@@ -181,13 +181,16 @@ void Foam::smoluchowskiJumpTFvPatchScalarField::updateCoeffs()
         )
     );
 
-    Field<scalar> C2 = pmu/prho
+    Field<scalar> C2
+    (
+        pmu/prho
         *sqrt(ppsi*constant::mathematical::piByTwo)
         *2.0*gamma_/Pr.value()/(gamma_ + 1.0)
-        *(2.0 - accommodationCoeff_)/accommodationCoeff_;
+        *(2.0 - accommodationCoeff_)/accommodationCoeff_
+    );
 
-    Field<scalar> aCoeff = prho.snGrad() - prho/C2;
-    Field<scalar> KEbyRho = 0.5*magSqr(pU);
+    Field<scalar> aCoeff(prho.snGrad() - prho/C2);
+    Field<scalar> KEbyRho(0.5*magSqr(pU));
 
     valueFraction() = (1.0/(1.0 + patch().deltaCoeffs()*C2));
     refValue() = Twall_;
@@ -214,9 +217,11 @@ void Foam::smoluchowskiJumpTFvPatchScalarField::write(Ostream& os) const
 
 namespace Foam
 {
-
-makePatchTypeField(fvPatchScalarField, smoluchowskiJumpTFvPatchScalarField);
-
+    makeNonTemplatedPatchTypeField
+    (
+        fvPatchScalarField,
+        smoluchowskiJumpTFvPatchScalarField
+    );
 }
 
 
