@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
         D += accFac*Dcorr;
 
         {
-            volTensorField gradDcorr = fvc::grad(Dcorr);
+            volTensorField gradDcorr(fvc::grad(Dcorr));
 
             sigmaExp =
                 (lambda - mu)*gradDcorr + mu*gradDcorr.T()
