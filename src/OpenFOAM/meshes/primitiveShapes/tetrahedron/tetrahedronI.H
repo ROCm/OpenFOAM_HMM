@@ -186,10 +186,10 @@ inline scalar tetrahedron<Point, PointRef>::circumRadius() const
 
     if (Foam::mag(denom) < ROOTVSMALL)
     {
-        WarningIn("Point tetrahedron<Point, PointRef>::circumCentre() const")
-            << "Degenerate tetrahedron:" << nl << *this << nl
-            << "Returning GREAT for circumRadius."
-            << endl;
+        //WarningIn("Point tetrahedron<Point, PointRef>::circumCentre() const")
+        //    << "Degenerate tetrahedron:" << nl << *this << nl
+        //    << "Returning GREAT for circumRadius."
+        //    << endl;
 
         return GREAT;
     }
