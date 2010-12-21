@@ -109,12 +109,22 @@ bool Foam::setEnv
 }
 
 
-Foam::word Foam::hostName()
+Foam::word Foam::hostName(bool full)
 {
-    char buffer[256];
-    gethostname(buffer, 256);
+    char buf[256];
+    gethostname(buf, 256);
 
-    return buffer;
+    if (full)
+    {
+        struct hostent *hptr = gethostbyname(buf);
+
+        if (hptr)
+        {
+            return hptr->h_name;
+        }
+    }
+
+    return buf;
 }
 
 
