@@ -43,9 +43,9 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 class objectHit;
-inline bool operator==(const objectHit& a, const objectHit& b);
-inline bool operator!=(const objectHit& a, const objectHit& b);
-inline Ostream& operator<<(Ostream& os, const objectHit& b);
+inline bool operator==(const objectHit&, const objectHit&);
+inline bool operator!=(const objectHit&, const objectHit&);
+inline Ostream& operator<<(Ostream&, const objectHit&);
 
 
 /*---------------------------------------------------------------------------*\

@@ -57,6 +57,7 @@ SourceFiles
 #include "point.H"
 #include "intersection.H"
 #include "HashSet.H"
+#include "objectHit.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,7 +65,6 @@ namespace Foam
 {
 
 class face;
-class objectHit;
 template<class T> class Map;
 
 /*---------------------------------------------------------------------------*\
