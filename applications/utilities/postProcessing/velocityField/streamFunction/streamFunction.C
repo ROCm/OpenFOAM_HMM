@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
             label nVisited = 0;
             label nVisitedOld = 0;
 
-            const unallocFaceList& faces = mesh.faces();
+            const faceUList& faces = mesh.faces();
             const pointField& points = mesh.points();
 
             label nInternalFaces = mesh.nInternalFaces();

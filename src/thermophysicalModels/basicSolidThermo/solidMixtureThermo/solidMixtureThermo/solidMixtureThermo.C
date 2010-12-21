@@ -226,7 +226,7 @@ Foam::tmp<Foam::scalarField> Foam::solidMixtureThermo<MixtureType>::rho
 {
     const scalarField& patchT = T_.boundaryField()[patchI];
     const polyPatch& pp = mesh_.boundaryMesh()[patchI];
-    const unallocLabelList& cells = pp.faceCells();
+    const labelUList& cells = pp.faceCells();
 
     tmp<scalarField> tRho(new scalarField(patchT.size()));
     scalarField& Rho = tRho();
@@ -248,7 +248,7 @@ Foam::tmp<Foam::scalarField> Foam::solidMixtureThermo<MixtureType>::Cp
 {
     const scalarField& patchT = T_.boundaryField()[patchI];
     const polyPatch& pp = mesh_.boundaryMesh()[patchI];
-    const unallocLabelList& cells = pp.faceCells();
+    const labelUList& cells = pp.faceCells();
 
     tmp<scalarField> tCp(new scalarField(patchT.size()));
     scalarField& Cp = tCp();
@@ -270,7 +270,7 @@ Foam::tmp<Foam::scalarField> Foam::solidMixtureThermo<MixtureType>::hs
 {
     const scalarField& patchT = T_.boundaryField()[patchI];
     const polyPatch& pp = mesh_.boundaryMesh()[patchI];
-    const unallocLabelList& cells = pp.faceCells();
+    const labelUList& cells = pp.faceCells();
 
     tmp<scalarField> ths(new scalarField(patchT.size()));
     scalarField& hs = ths();
@@ -292,7 +292,7 @@ Foam::tmp<Foam::scalarField> Foam::solidMixtureThermo<MixtureType>::K
 {
     const scalarField& patchT = T_.boundaryField()[patchI];
     const polyPatch& pp = mesh_.boundaryMesh()[patchI];
-    const unallocLabelList& cells = pp.faceCells();
+    const labelUList& cells = pp.faceCells();
 
     tmp<scalarField> tK(new scalarField(patchT.size()));
     scalarField& K = tK();
@@ -314,7 +314,7 @@ Foam::tmp<Foam::scalarField> Foam::solidMixtureThermo<MixtureType>::Hf
 {
     const scalarField& patchT = T_.boundaryField()[patchI];
     const polyPatch& pp = mesh_.boundaryMesh()[patchI];
-    const unallocLabelList& cells = pp.faceCells();
+    const labelUList& cells = pp.faceCells();
 
     tmp<scalarField> tHf(new scalarField(patchT.size()));
     scalarField& Hf = tHf();
@@ -336,7 +336,7 @@ Foam::tmp<Foam::scalarField> Foam::solidMixtureThermo<MixtureType>::sigmaS
 {
     const scalarField& patchT = T_.boundaryField()[patchI];
     const polyPatch& pp = mesh_.boundaryMesh()[patchI];
-    const unallocLabelList& cells = pp.faceCells();
+    const labelUList& cells = pp.faceCells();
 
     tmp<scalarField> tsigmaS(new scalarField(patchT.size()));
     scalarField& sigmaS = tsigmaS();
@@ -359,7 +359,7 @@ Foam::tmp<Foam::scalarField> Foam::solidMixtureThermo<MixtureType>::kappa
 {
     const scalarField& patchT = T_.boundaryField()[patchI];
    const polyPatch& pp = mesh_.boundaryMesh()[patchI];
-    const unallocLabelList& cells = pp.faceCells();
+    const labelUList& cells = pp.faceCells();
 
     tmp<scalarField> tKappa(new scalarField(patchT.size()));
     scalarField& kappa = tKappa();
@@ -382,7 +382,7 @@ Foam::tmp<Foam::scalarField> Foam::solidMixtureThermo<MixtureType>::emissivity
 {
     const scalarField& patchT = T_.boundaryField()[patchI];
     const polyPatch& pp = mesh_.boundaryMesh()[patchI];
-    const unallocLabelList& cells = pp.faceCells();
+    const labelUList& cells = pp.faceCells();
 
     tmp<scalarField> te(new scalarField(patchT.size()));
     scalarField& e = te();
