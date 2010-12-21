@@ -1,6 +1,6 @@
 if (!(runTime.timeIndex() % 5))
 {
-    volScalarField kineticEnergy(magSqr(Dcorr);
+    volScalarField kineticEnergy(magSqr(Dcorr));
     dimensionedScalar intKineticEnergy = fvc::domainIntegrate(kineticEnergy);
     Info<< "kineticEnergy = " << intKineticEnergy.value() << endl;
 
