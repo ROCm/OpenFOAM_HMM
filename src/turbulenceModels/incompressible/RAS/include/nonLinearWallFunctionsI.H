@@ -54,6 +54,8 @@ Description
         }
     }
 
+    const volScalarField nuLam(this->nu());
+
     //- Accumulate the wall face contributions to epsilon and G
     //  Increment cellBoundaryFaceCount for each face for averaging
     forAll(patches, patchi)
@@ -64,7 +66,7 @@ Description
         {
             #include "checkPatchFieldTypes.H"
 
-            const scalarField& nuw = nu().boundaryField()[patchi];
+            const scalarField& nuw = nuLam.boundaryField()[patchi];
             const scalarField& nutw = nut_.boundaryField()[patchi];
 
             const scalarField magFaceGradU

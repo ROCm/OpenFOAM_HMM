@@ -49,7 +49,7 @@ tmp<scalarField> nutUTabulatedWallFunctionFvPatchScalarField::calcNut() const
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
     const scalarField magUp(mag(Uw.patchInternalField() - Uw));
     const scalarField magGradU(mag(Uw.snGrad()));
-    const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
+    const scalarField& nuw = rasModel.nu()().boundaryField()[patchI];
 
     return
         max
@@ -182,7 +182,7 @@ tmp<scalarField> nutUTabulatedWallFunctionFvPatchScalarField::yPlus() const
     const scalarField& y = rasModel.y()[patchI];
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
     const scalarField magUp(mag(Uw.patchInternalField() - Uw));
-    const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
+    const scalarField& nuw = rasModel.nu()().boundaryField()[patchI];
     const scalarField Rey(magUp*y/nuw);
 
     return Rey/(calcUPlus(Rey) + ROOTVSMALL);
