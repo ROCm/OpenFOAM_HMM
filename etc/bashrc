@@ -89,7 +89,8 @@ _foamSource()
 # Add in preset user or site preferences:
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile prefs.sh`
 
-# Evaluate command-line parameters
+# Evaluate command-line parameters and record settings for later
+export FOAM_SETTINGS="$@"
 while [ $# -gt 0 ]
 do
     case "$1" in
