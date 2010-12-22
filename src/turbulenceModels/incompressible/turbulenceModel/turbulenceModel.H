@@ -168,7 +168,7 @@ public:
         }
 
         //- Return the laminar viscosity
-        const volScalarField& nu() const
+        inline tmp<volScalarField> nu() const
         {
             return transportModel_.nu();
         }
