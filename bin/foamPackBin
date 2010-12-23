@@ -60,14 +60,22 @@ then
 fi
 
 # check for essential directories
-for dir in $packDir $packDir/lib/$arch $packDir/applications/bin/$arch
+for dir in $packDir $packDir/lib/$arch
 do
-    if [ ! -d $dir ]
-    then
+    [ -d $dir ] || {
         echo "Error: directory $dir does not exist"
         exit 1
-    fi
+    }
 done
+
+# this changed - check for either
+[ -d $packDir/bin/$arch -o -d $packDir/applications/bin/$arch ] || {
+    echo "Error: one of these directories must exist:"
+    echo "    $packDir/bin/$archdir"
+    echo "    $packDir/applications/bin/$archdir"
+    exit 1
+}
+
 
 # get list of directories
 dirList=`foamBinDirs $packDir $arch`

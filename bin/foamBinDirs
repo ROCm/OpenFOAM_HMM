@@ -47,8 +47,9 @@ baseArch=$(echo "$arch" | sed -e 's@[DS]P.*$@@')
 # get list of directories
 (
     for dir in \
-        $packDir/lib/$arch \
         $packDir/applications/bin/$arch \
+        $packDir/bin/$arch \
+        $packDir/lib/$arch \
         $packDir/wmake/rules \
         $packDir/wmake/bin/$baseArch \
         ;
