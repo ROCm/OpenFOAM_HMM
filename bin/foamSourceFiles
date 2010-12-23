@@ -49,6 +49,12 @@ then
     exit 1
 fi
 
+#
+# special handling for the bin/ directory:
+# allow through bin/tools sub-directory, but filter out others
+# which are likely architecture-specific binaries
+#
+
 find -H $packDir               \
     ! -type d                  \
    \( -type f -o -type l \)    \
@@ -70,7 +76,8 @@ find -H $packDir               \
  -e '\@/\.tags/@d'             \
  -e '\@/\README\.org@d'        \
  -e '\@applications/bin/@d'    \
- -e '\@wmake/bin/@d'           \
+ -e '\@bin/.*/@{\@bin/tools@!d}' \
+ -e '\@wmake/bin/.*/@{\@wmake/bin/tools@!d}' \
  -e '\@/t/@d'                  \
  -e '\@/Make[.A-Za-z]*/[^/]*/@d'\
  -e '\@/platforms/@d'          \
