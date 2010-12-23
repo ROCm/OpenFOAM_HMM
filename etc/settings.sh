@@ -105,10 +105,14 @@ _foamAddLib  $FOAM_USER_LIBBIN:$FOAM_SITE_LIBBIN:$FOAM_LIBBIN:$FOAM_LIBBIN/dummy
 unset gcc_version gmp_version mpfr_version mpc_version
 unset MPFR_ARCH_PATH
 
-# Select compiler installation
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# foamCompiler = system | ThirdParty (OpenFOAM)
-: ${foamCompiler:=system}
+# Location of compiler installation
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if [ -z "$foamCompiler" ]
+then
+    foamCompiler=system
+    echo "Warning in $WM_PROJECT_DIR/etc/settings.sh:" 1>&2
+    echo "    foamCompiler not set, using '$foamCompiler'" 1>&2
+fi
 
 case "${foamCompiler}" in
 OpenFOAM | ThirdParty)
@@ -163,7 +167,7 @@ OpenFOAM | ThirdParty)
             echo "Warning in $WM_PROJECT_DIR/etc/settings.sh:"
             echo "    Cannot find $gccDir installation."
             echo "    Please install this compiler version or if you wish to use the system compiler,"
-            echo "    change the 'foamCompiler' setting to 'system' in this file"
+            echo "    change the 'foamCompiler' setting to 'system'"
             echo
         }
 
@@ -204,7 +208,7 @@ OpenFOAM | ThirdParty)
             echo "Warning in $WM_PROJECT_DIR/etc/settings.sh:"
             echo "    Cannot find $clangDir installation."
             echo "    Please install this compiler version or if you wish to use the system compiler,"
-            echo "    change the 'foamCompiler' setting to 'system' in this file"
+            echo "    change the 'foamCompiler' setting to 'system'"
             echo
         }
 
@@ -212,6 +216,13 @@ OpenFOAM | ThirdParty)
         _foamAddPath    $clangDir/bin
     fi
     unset clang_version clangDir
+    ;;
+system)
+    # okay, use system compiler
+    ;;
+*)
+    echo "Warn: foamCompiler='$foamCompiler' is unsupported" 1>&2
+    echo "   treating as 'system' instead" 1>&2
     ;;
 esac
 

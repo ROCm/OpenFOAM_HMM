@@ -83,10 +83,14 @@ unset gcc_version gmp_version mpfr_version mpc_version
 unsetenv MPFR_ARCH_PATH
 
 
-# Select compiler installation
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# foamCompiler = system | ThirdParty (OpenFOAM)
-if ( ! $?foamCompiler ) set foamCompiler=system
+# Location of compiler installation
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if ( ! $?foamCompiler ) then
+then
+    foamCompiler=system
+    echo "Warning in $WM_PROJECT_DIR/etc/settings.csh:"
+    echo "    foamCompiler not set, using '$foamCompiler'"
+fi
 
 switch ("$foamCompiler")
 case OpenFOAM:
@@ -146,7 +150,7 @@ case ThirdParty:
             echo "Warning in $WM_PROJECT_DIR/etc/settings.csh:"
             echo "    Cannot find $gccDir installation."
             echo "    Please install this compiler version or if you wish to use the system compiler,"
-            echo "    change the 'foamCompiler' setting to 'system' in this file"
+            echo "    change the 'foamCompiler' setting to 'system'"
             echo
         endif
 
@@ -184,7 +188,7 @@ case ThirdParty:
             echo "Warning in $WM_PROJECT_DIR/etc/settings.csh:"
             echo "    Cannot find $clangDir installation."
             echo "    Please install this compiler version or if you wish to use the system compiler,"
-            echo "    change the 'foamCompiler' setting to 'system' in this file"
+            echo "    change the 'foamCompiler' setting to 'system'"
             echo
         endif
 
@@ -193,6 +197,15 @@ case ThirdParty:
     endif
     unset clang_version clangDir
 
+    breaksw
+
+case system:
+    # okay, use system compiler
+    breaksw
+
+default:
+    echo "Warn: foamCompiler='$foamCompiler' is unsupported"
+    echo "   treating as 'system' instead"
     breaksw
 endsw
 

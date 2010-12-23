@@ -26,7 +26,7 @@
 #
 # Description
 #     Setup file for paraview-3.x
-#     Sourced from OpenFOAM-*/etc/cshrc or from foamPV alias
+#     Sourced from OpenFOAM-<VERSION>/etc/cshrc or from foamPV alias
 #
 # Note
 #     The env. variables 'ParaView_DIR' and 'ParaView_MAJOR'
@@ -49,8 +49,14 @@ foreach cmake ( cmake-2.8.3 cmake-2.8.1 cmake-2.8.0 cmake-2.6.4 )
 end
 
 # set VERSION and MAJOR (version) variables
-setenv ParaView_VERSION 3.8.0
-setenv ParaView_MAJOR unknown
+if ( ! $?ParaView_VERSION )
+then
+    setenv ParaView_VERSION 3.8.0
+    setenv ParaView_MAJOR unknown
+    echo "Warning in app/paraview3/cshrc:"
+    echo "    ParaView_VERSION not set, using '$ParaView_VERSION'"
+fi
+if ( ! $?ParaView_MAJOR ) setenv ParaView_MAJOR unknown
 
 # if needed, set MAJOR version to correspond to VERSION
 # ParaView_MAJOR is "<digits>.<digits>" from ParaView_VERSION
