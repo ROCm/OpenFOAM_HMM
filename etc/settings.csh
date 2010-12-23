@@ -48,21 +48,21 @@ setenv WM_LINK_LANGUAGE c++
 setenv WM_OPTIONS $WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_COMPILE_OPTION
 
 # base configuration
-setenv FOAM_APP $WM_PROJECT_DIR/applications
-setenv FOAM_APPBIN $WM_PROJECT_DIR/applications/bin/$WM_OPTIONS
-setenv FOAM_LIB $WM_PROJECT_DIR/lib
+setenv FOAM_APPBIN $WM_PROJECT_DIR/bin/$WM_OPTIONS
 setenv FOAM_LIBBIN $WM_PROJECT_DIR/lib/$WM_OPTIONS
-setenv FOAM_SRC $WM_PROJECT_DIR/src
 
 # shared site configuration - similar naming convention as ~OpenFOAM expansion
 setenv FOAM_SITE_APPBIN $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/bin/$WM_OPTIONS
 setenv FOAM_SITE_LIBBIN $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/lib/$WM_OPTIONS
 
 # user configuration
-setenv FOAM_USER_APPBIN $WM_PROJECT_USER_DIR/applications/bin/$WM_OPTIONS
+setenv FOAM_USER_APPBIN $WM_PROJECT_USER_DIR/bin/$WM_OPTIONS
 setenv FOAM_USER_LIBBIN $WM_PROJECT_USER_DIR/lib/$WM_OPTIONS
 
 # convenience
+setenv FOAM_APP $WM_PROJECT_DIR/applications
+setenv FOAM_LIB $WM_PROJECT_DIR/lib
+setenv FOAM_SRC $WM_PROJECT_DIR/src
 setenv FOAM_TUTORIALS $WM_PROJECT_DIR/tutorials
 setenv FOAM_UTILITIES $FOAM_APP/utilities
 setenv FOAM_SOLVERS $FOAM_APP/solvers
