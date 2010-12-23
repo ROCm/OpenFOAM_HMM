@@ -26,7 +26,7 @@
 #
 # Description
 #     Startup file for OpenFOAM
-#     Sourced from OpenFOAM-??/etc/bashrc
+#     Sourced from OpenFOAM-<VERSION>/etc/bashrc
 #
 #------------------------------------------------------------------------------
 
@@ -91,8 +91,10 @@ export FOAM_UTILITIES=$FOAM_APP/utilities
 export FOAM_SOLVERS=$FOAM_APP/solvers
 export FOAM_RUN=$WM_PROJECT_USER_DIR/run
 
-# add OpenFOAM scripts and wmake to the path
-export PATH=$WM_DIR:$WM_PROJECT_DIR/bin:$PATH
+# add wmake to the path - not required for runtime only environment
+[ -d "$WM_DIR" ] && PATH=$WM_DIR:$PATH
+# add OpenFOAM scripts to the path
+export PATH=$WM_PROJECT_DIR/bin:$PATH
 
 _foamAddPath $FOAM_USER_APPBIN:$FOAM_SITE_APPBIN:$FOAM_APPBIN
  # Make sure to pick up dummy versions of external libraries last
@@ -105,11 +107,11 @@ unset MPFR_ARCH_PATH
 
 # Select compiler installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# compilerInstall = OpenFOAM | system
-: ${compilerInstall:=system}
+# foamCompiler = system | ThirdParty (OpenFOAM)
+: ${foamCompiler:=system}
 
-case "${compilerInstall:-OpenFOAM}" in
-OpenFOAM)
+case "${foamCompiler}" in
+OpenFOAM | ThirdParty)
     case "$WM_COMPILER" in
     Gcc | Gcc++0x)
         gcc_version=gcc-4.4.3
@@ -161,7 +163,7 @@ OpenFOAM)
             echo "Warning in $WM_PROJECT_DIR/etc/settings.sh:"
             echo "    Cannot find $gccDir installation."
             echo "    Please install this compiler version or if you wish to use the system compiler,"
-            echo "    change the 'compilerInstall' setting to 'system' in this file"
+            echo "    change the 'foamCompiler' setting to 'system' in this file"
             echo
         }
 
@@ -202,7 +204,7 @@ OpenFOAM)
             echo "Warning in $WM_PROJECT_DIR/etc/settings.sh:"
             echo "    Cannot find $clangDir installation."
             echo "    Please install this compiler version or if you wish to use the system compiler,"
-            echo "    change the 'compilerInstall' setting to 'system' in this file"
+            echo "    change the 'foamCompiler' setting to 'system' in this file"
             echo
         }
 
@@ -406,6 +408,6 @@ export MPI_BUFFER_SIZE
 
 # cleanup environment:
 # ~~~~~~~~~~~~~~~~~~~~
-unset _foamAddPath _foamAddLib _foamAddMan compilerInstall minBufferSize
+unset _foamAddPath _foamAddLib _foamAddMan foamCompiler minBufferSize
 
 # ----------------------------------------------------------------- end-of-file

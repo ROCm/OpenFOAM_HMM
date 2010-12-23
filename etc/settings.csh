@@ -26,7 +26,7 @@
 #
 # Description
 #     Startup file for OpenFOAM
-#     Sourced from OpenFOAM-??/etc/cshrc
+#     Sourced from OpenFOAM-<VERSION>/etc/cshrc
 #
 #------------------------------------------------------------------------------
 
@@ -68,8 +68,10 @@ setenv FOAM_UTILITIES $FOAM_APP/utilities
 setenv FOAM_SOLVERS $FOAM_APP/solvers
 setenv FOAM_RUN $WM_PROJECT_USER_DIR/run
 
-# add OpenFOAM scripts and wmake to the path
-setenv PATH ${WM_DIR}:${WM_PROJECT_DIR}/bin:${PATH}
+# add wmake to the path - not required for runtime only environment
+if ( -d "${WM_DIR}" ) setenv PATH ${WM_DIR}:${PATH}
+# add OpenFOAM scripts to the path
+setenv PATH ${WM_PROJECT_DIR}/bin:${PATH}
 
 _foamAddPath ${FOAM_USER_APPBIN}:${FOAM_SITE_APPBIN}:${FOAM_APPBIN}
  # Make sure to pick up dummy versions of external libraries last
@@ -83,11 +85,12 @@ unsetenv MPFR_ARCH_PATH
 
 # Select compiler installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# compilerInstall = OpenFOAM | system
-if ( ! $?compilerInstall ) set compilerInstall=system
+# foamCompiler = system | ThirdParty (OpenFOAM)
+if ( ! $?foamCompiler ) set foamCompiler=system
 
-switch ("$compilerInstall")
+switch ("$foamCompiler")
 case OpenFOAM:
+case ThirdParty:
     switch ("$WM_COMPILER")
     case Gcc:
     case Gcc++0x:
@@ -143,7 +146,7 @@ case OpenFOAM:
             echo "Warning in $WM_PROJECT_DIR/etc/settings.csh:"
             echo "    Cannot find $gccDir installation."
             echo "    Please install this compiler version or if you wish to use the system compiler,"
-            echo "    change the 'compilerInstall' setting to 'system' in this file"
+            echo "    change the 'foamCompiler' setting to 'system' in this file"
             echo
         endif
 
@@ -181,7 +184,7 @@ case OpenFOAM:
             echo "Warning in $WM_PROJECT_DIR/etc/settings.csh:"
             echo "    Cannot find $clangDir installation."
             echo "    Please install this compiler version or if you wish to use the system compiler,"
-            echo "    change the 'compilerInstall' setting to 'system' in this file"
+            echo "    change the 'foamCompiler' setting to 'system' in this file"
             echo
         endif
 
@@ -382,6 +385,6 @@ endif
 # cleanup environment:
 # ~~~~~~~~~~~~~~~~~~~~
 unalias _foamAddPath _foamAddLib _foamAddMan
-unset compilerInstall minBufferSize
+unset foamCompiler minBufferSize
 
 # ----------------------------------------------------------------- end-of-file

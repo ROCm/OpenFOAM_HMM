@@ -38,7 +38,7 @@
 
 ## Specify system compiler
 ## ~~~~~~~~~~~~~~~~~~~~~~~
-#set compilerInstall=system
+#set foamCompiler=system
 
 ## Specify system openmpi
 ## ~~~~~~~~~~~~~~~~~~~~~~
