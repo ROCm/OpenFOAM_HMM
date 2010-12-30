@@ -156,10 +156,7 @@ inline Point tetrahedron<Point, PointRef>::circumCentre() const
 
     if (Foam::mag(denom) < ROOTVSMALL)
     {
-        WarningIn("Point tetrahedron<Point, PointRef>::circumCentre() const")
-            << "Degenerate tetrahedron:" << nl << *this << nl
-            <<"Returning centre instead of circumCentre."
-            << endl;
+        // Degenerate tetrahedron, returning centre instead of circumCentre.
 
         return centre();
     }
@@ -186,11 +183,7 @@ inline scalar tetrahedron<Point, PointRef>::circumRadius() const
 
     if (Foam::mag(denom) < ROOTVSMALL)
     {
-        //WarningIn("Point tetrahedron<Point, PointRef>::circumCentre() const")
-        //    << "Degenerate tetrahedron:" << nl << *this << nl
-        //    << "Returning GREAT for circumRadius."
-        //    << endl;
-
+        // Degenerate tetrahedron, returning GREAT for circumRadius.
         return GREAT;
     }
 
@@ -269,16 +262,7 @@ scalar tetrahedron<Point, PointRef>::barycentric
 
     if (Foam::mag(detT) < SMALL)
     {
-        WarningIn
-        (
-            "List<scalar> tetrahedron<Point, PointRef>::barycentric"
-            "("
-                "const point& pt"
-            ") const"
-        )
-            << "Degenerate tetrahedron:" << nl << *this << nl
-            << "Returning 1/4 barycentric coordinates."
-            << endl;
+        // Degenerate tetrahedron, returning 1/4 barycentric coordinates.
 
         bary = List<scalar>(4, 0.25);
 

@@ -121,10 +121,7 @@ inline Point triangle<Point, PointRef>::circumCentre() const
 
     if (Foam::mag(c) < ROOTVSMALL)
     {
-        WarningIn("Point triangle<Point, PointRef>::circumCentre() const")
-            << "Degenerate triangle:" << nl << *this << nl
-            << "Returning centre instead of circumCentre."
-            << endl;
+        // Degenerate triangle, returning centre instead of circumCentre.
 
         return centre();
     }
@@ -147,10 +144,7 @@ inline scalar triangle<Point, PointRef>::circumRadius() const
 
     if (Foam::mag(denom) < VSMALL)
     {
-        WarningIn("scalar triangle<Point, PointRef>::circumRadius() const")
-            << "Degenerate triangle:" << nl << *this << nl
-            << "Returning GREAT for circumRadius."
-            << endl;
+        // Degenerate triangle, returning GREAT for circumRadius.
 
         return GREAT;
     }
@@ -263,16 +257,7 @@ scalar triangle<Point, PointRef>::barycentric
 
     if (Foam::mag(denom) < SMALL)
     {
-        WarningIn
-        (
-            "List<scalar> triangle<Point, PointRef>::barycentric"
-            "("
-                "const point& pt"
-            ") const"
-        )
-            << "Degenerate triangle:" << nl << *this << nl
-            << "Returning 1/3 barycentric coordinates."
-            << endl;
+        // Degenerate triangle, returning 1/3 barycentric coordinates.
 
         bary = List<scalar>(3, 1.0/3.0);
 
@@ -537,20 +522,7 @@ pointHit triangle<Point, PointRef>::nearestPointClassify
     {
         if ((d1 - d3) < ROOTVSMALL)
         {
-            WarningIn
-            (
-                "pointHit triangle<Point, PointRef>::nearestPointClassify"
-                "("
-                    "const point& p,"
-                    "label& nearType,"
-                    "label& nearLabel"
-                ") const"
-            )
-                << "Degenerate triangle:" << nl << *this << nl
-                << "d1, d3: " << d1 << ", " << d3 << endl;
-
-            // For d1 = d3, a_ and b_ are likely coincident.
-
+            // Degenerate triangle, for d1 = d3, a_ and b_ are likely coincident
             nearType = POINT;
             nearLabel = 0;
             return pointHit(false, a_, Foam::mag(a_ - p), true);
@@ -586,20 +558,7 @@ pointHit triangle<Point, PointRef>::nearestPointClassify
     {
         if ((d2 - d6) < ROOTVSMALL)
         {
-            WarningIn
-            (
-                "pointHit triangle<Point, PointRef>::nearestPointClassify"
-                "("
-                    "const point& p,"
-                    "label& nearType,"
-                    "label& nearLabel"
-                ") const"
-            )
-                << "Degenerate triangle:" << nl << *this << nl
-                << "d2, d6: " << d2 << ", " << d6 << endl;
-
-            // For d2 = d6, a_ and c_ are likely coincident.
-
+            // Degenerate triangle, for d2 = d6, a_ and c_ are likely coincident
             nearType = POINT;
             nearLabel = 0;
             return pointHit(false, a_, Foam::mag(a_ - p), true);
@@ -621,21 +580,8 @@ pointHit triangle<Point, PointRef>::nearestPointClassify
     {
         if (((d4 - d3) + (d5 - d6)) < ROOTVSMALL)
         {
-            WarningIn
-            (
-                "pointHit triangle<Point, PointRef>::nearestPointClassify"
-                "("
-                    "const point& p,"
-                    "label& nearType,"
-                    "label& nearLabel"
-                ") const"
-            )
-                << "Degenerate triangle:" << nl << *this << nl
-                << "(d4 - d3), (d6 - d5): " << (d4 - d3) << ", " << (d6 - d5)
-                << endl;
-
-            // For (d4 - d3) = (d6 - d5), b_ and c_ are likely coincident.
-
+            // Degenerate triangle, for (d4 - d3) = (d6 - d5), b_ and c_ are
+            // likely coincident
             nearType = POINT;
             nearLabel = 1;
             return pointHit(false, b_, Foam::mag(b_ - p), true);
@@ -655,19 +601,8 @@ pointHit triangle<Point, PointRef>::nearestPointClassify
 
     if ((va + vb + vc) < ROOTVSMALL)
     {
-        WarningIn
-        (
-            "pointHit triangle<Point, PointRef>::nearestPointClassify"
-            "("
-                "const point& p,"
-                "label& nearType,"
-                "label& nearLabel"
-            ") const"
-        )
-            << "Degenerate triangle:" << nl << *this << nl
-            << "va, vb, vc: " << va << ", " << vb << ", " << vc
-            << endl;
-
+        // Degenerate triangle, return the centre because no edge or points are
+        // closest
         point nearPt = centre();
         nearType = NONE,
         nearLabel = -1;
