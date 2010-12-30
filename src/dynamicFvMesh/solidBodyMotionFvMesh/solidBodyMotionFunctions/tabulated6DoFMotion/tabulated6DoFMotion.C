@@ -45,8 +45,8 @@ namespace solidBodyMotionFunctions
         tabulated6DoFMotion,
         dictionary
     );
-};
-};
+}
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

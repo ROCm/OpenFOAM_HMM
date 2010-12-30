@@ -39,8 +39,8 @@ namespace solidBodyMotionFunctions
         oscillatingLinearMotion,
         dictionary
     );
-};
-};
+}
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

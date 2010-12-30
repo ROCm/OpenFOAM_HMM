@@ -31,7 +31,7 @@ defineTypeNameAndDebug(Foam::ODESolver, 0);
 namespace Foam
 {
     defineRunTimeSelectionTable(ODESolver, ODE);
-};
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

@@ -31,7 +31,7 @@ License
 namespace Foam
 {
     createThermoParcelTypes(basicThermoParcel);
-};
+}
 
 
 // ************************************************************************* //

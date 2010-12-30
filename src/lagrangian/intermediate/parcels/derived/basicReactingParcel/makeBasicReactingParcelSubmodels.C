@@ -60,7 +60,7 @@ namespace Foam
     makeReactingParcelCompositionModels(basicReactingParcel);
     makeReactingParcelPhaseChangeModels(basicReactingParcel);
     makeReactingParcelSurfaceFilmModels(basicReactingParcel);
-};
+}
 
 
 // ************************************************************************* //

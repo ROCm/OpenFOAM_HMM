@@ -102,7 +102,7 @@ void Foam::blockMesh::calcMergeInfo()
             FatalErrorIn("blockMesh::calcMergeInfo()")
                 << "Cannot find merge face for block " << blockPlabel
                 << exit(FatalError);
-        };
+        }
 
         const labelListList& blockPfaceFaces =
             blocks[blockPlabel].boundaryPatches()[blockPfaceLabel];
@@ -211,7 +211,7 @@ void Foam::blockMesh::calcMergeInfo()
             FatalErrorIn("blockMesh::calcMergeInfo()")
                 << "Cannot find merge face for block " << blockNlabel
                 << exit(FatalError);
-        };
+        }
 
         const labelListList& blockNfaceFaces =
             blocks[blockNlabel].boundaryPatches()[blockNfaceLabel];
@@ -471,7 +471,7 @@ void Foam::blockMesh::calcMergeInfo()
             FatalErrorIn("blockMesh::calcMergeInfo()")
                 << "Cannot find merge face for block " << blockPlabel
                 << exit(FatalError);
-        };
+        }
 
         foundFace = false;
         label blockNfaceLabel;
@@ -498,7 +498,7 @@ void Foam::blockMesh::calcMergeInfo()
             FatalErrorIn("blockMesh::calcMergeInfo()")
                 << "Cannot find merge face for block " << blockNlabel
                 << exit(FatalError);
-        };
+        }
 
         const labelListList& blockPfaceFaces =
             blocks[blockPlabel].boundaryPatches()[blockPfaceLabel];

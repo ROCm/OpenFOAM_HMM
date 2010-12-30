@@ -52,7 +52,7 @@ namespace Foam
     // Thermo sub-models
     makeParcelHeatTransferModels(basicThermoParcel);
     makeParcelSurfaceFilmModels(basicThermoParcel);
-};
+}
 
 
 // ************************************************************************* //

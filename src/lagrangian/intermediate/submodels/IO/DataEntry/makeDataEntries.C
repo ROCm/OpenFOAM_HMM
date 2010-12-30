@@ -44,7 +44,7 @@ namespace Foam
     makeDataEntry(vector);
     makeDataEntryType(Constant, vector);
     makeDataEntryType(Table, vector);
-};
+}
 
 
 // ************************************************************************* //

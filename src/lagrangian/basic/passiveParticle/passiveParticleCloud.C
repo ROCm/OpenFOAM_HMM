@@ -25,17 +25,13 @@ License
 
 #include "passiveParticleCloud.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineParticleTypeNameAndDebug(passiveParticle, 0);
-defineTemplateTypeNameAndDebug(Cloud<passiveParticle>, 0);
-
-};
+    defineParticleTypeNameAndDebug(passiveParticle, 0);
+    defineTemplateTypeNameAndDebug(Cloud<passiveParticle>, 0);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

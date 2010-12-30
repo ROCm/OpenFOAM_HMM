@@ -32,7 +32,7 @@ namespace Foam
     defineTypeNameAndDebug(dsmcParcel, 0);
     defineParticleTypeNameAndDebug(dsmcParcel, 0);
     defineParcelTypeNameAndDebug(dsmcParcel, 0);
-};
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

@@ -46,7 +46,7 @@ namespace Foam
     makeParcelPatchInteractionModels(basicKinematicParcel);
     makeParcelPostProcessingModels(basicKinematicParcel);
     makeParcelSurfaceFilmModels(basicKinematicParcel);
-};
+}
 
 
 // ************************************************************************* //
