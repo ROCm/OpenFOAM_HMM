@@ -294,7 +294,7 @@ void nutURoughWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeNonTemplatedPatchTypeField
+makePatchTypeField
 (
     fvPatchScalarField,
     nutURoughWallFunctionFvPatchScalarField

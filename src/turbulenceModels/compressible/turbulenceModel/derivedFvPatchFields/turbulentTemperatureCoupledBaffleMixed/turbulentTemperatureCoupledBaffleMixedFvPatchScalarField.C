@@ -247,7 +247,7 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::write
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeNonTemplatedPatchTypeField
+makePatchTypeField
 (
     fvPatchScalarField,
     turbulentTemperatureCoupledBaffleMixedFvPatchScalarField

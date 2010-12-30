@@ -158,7 +158,7 @@ void Foam::dynamicAlphaContactAngleFvPatchScalarField::write(Ostream& os) const
 
 namespace Foam
 {
-    makeNonTemplatedPatchTypeField
+    makePatchTypeField
     (
         fvPatchScalarField,
         dynamicAlphaContactAngleFvPatchScalarField

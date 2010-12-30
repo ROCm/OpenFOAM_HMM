@@ -495,18 +495,6 @@ public:
 #endif
 
 
-#define makePatchTypeFieldTypeName(type)                                      \
-    defineNamedTemplateTypeNameAndDebug(type, 0)
-
-
-#define makePatchFieldsTypeName(type)                                         \
-    defineNamedTemplateTypeNameAndDebug(type##FvPatchScalarField, 0);         \
-    defineNamedTemplateTypeNameAndDebug(type##FvPatchVectorField, 0);         \
-    defineNamedTemplateTypeNameAndDebug(type##FvPatchSphericalTensorField, 0);\
-    defineNamedTemplateTypeNameAndDebug(type##FvPatchSymmTensorField, 0);     \
-    defineNamedTemplateTypeNameAndDebug(type##FvPatchTensorField, 0);
-
-
 #define addToPatchFieldRunTimeSelection(PatchTypeField, typePatchTypeField)   \
     addToRunTimeSelectionTable                                                \
     (                                                                         \
@@ -529,43 +517,51 @@ public:
 
 
 // for non-templated patch fields
-#define makeNonTemplatedPatchTypeField(PatchTypeField, typePatchTypeField)    \
+#define makePatchTypeField(PatchTypeField, typePatchTypeField)                \
     defineTypeNameAndDebug(typePatchTypeField, 0);                            \
     addToPatchFieldRunTimeSelection(PatchTypeField, typePatchTypeField)
 
 
 // for templated patch fields
-#define makePatchTypeField(PatchTypeField, typePatchTypeField)                \
+#define makeTemplatePatchTypeField(PatchTypeField, typePatchTypeField)        \
     defineNamedTemplateTypeNameAndDebug(typePatchTypeField, 0);               \
     addToPatchFieldRunTimeSelection(PatchTypeField, typePatchTypeField)
 
 
 #define makePatchFields(type)                                                 \
-    makePatchTypeField                                                        \
+    makeTemplatePatchTypeField                                                \
     (                                                                         \
         fvPatchScalarField,                                                   \
         type##FvPatchScalarField                                              \
     );                                                                        \
-    makePatchTypeField                                                        \
+    makeTemplatePatchTypeField                                                \
     (                                                                         \
         fvPatchVectorField,                                                   \
         type##FvPatchVectorField                                              \
     );                                                                        \
-    makePatchTypeField                                                        \
+    makeTemplatePatchTypeField                                                \
     (                                                                         \
         fvPatchSphericalTensorField,                                          \
         type##FvPatchSphericalTensorField                                     \
     );                                                                        \
-    makePatchTypeField                                                        \
+    makeTemplatePatchTypeField                                                \
     (                                                                         \
         fvPatchSymmTensorField,                                               \
         type##FvPatchSymmTensorField                                          \
     );                                                                        \
-    makePatchTypeField                                                        \
+    makeTemplatePatchTypeField                                                \
     (                                                                         \
         fvPatchTensorField,                                                   \
         type##FvPatchTensorField                                              \
     );
+
+
+#define makePatchFieldsTypeName(type)                                         \
+    defineNamedTemplateTypeNameAndDebug(type##FvPatchScalarField, 0);         \
+    defineNamedTemplateTypeNameAndDebug(type##FvPatchVectorField, 0);         \
+    defineNamedTemplateTypeNameAndDebug(type##FvPatchSphericalTensorField, 0);\
+    defineNamedTemplateTypeNameAndDebug(type##FvPatchSymmTensorField, 0);     \
+    defineNamedTemplateTypeNameAndDebug(type##FvPatchTensorField, 0)
 
 
 #define makePatchTypeFieldTypedefs(type)                                      \

@@ -180,7 +180,7 @@ void Foam::MarshakRadiationFixedTMixedFvPatchScalarField::write
 
 namespace Foam
 {
-    makeNonTemplatedPatchTypeField
+    makePatchTypeField
     (
         fvPatchScalarField,
         MarshakRadiationFixedTMixedFvPatchScalarField

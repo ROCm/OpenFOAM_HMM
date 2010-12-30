@@ -249,7 +249,7 @@ void epsilonWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeNonTemplatedPatchTypeField
+makePatchTypeField
 (
     fvPatchScalarField,
     epsilonWallFunctionFvPatchScalarField

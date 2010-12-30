@@ -122,7 +122,7 @@ void Foam::constantAlphaContactAngleFvPatchScalarField::write
 
 namespace Foam
 {
-    makeNonTemplatedPatchTypeField
+    makePatchTypeField
     (
         fvPatchScalarField,
         constantAlphaContactAngleFvPatchScalarField

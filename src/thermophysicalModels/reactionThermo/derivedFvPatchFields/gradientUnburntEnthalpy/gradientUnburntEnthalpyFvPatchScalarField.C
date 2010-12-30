@@ -124,7 +124,7 @@ void Foam::gradientUnburntEnthalpyFvPatchScalarField::updateCoeffs()
 
 namespace Foam
 {
-    makeNonTemplatedPatchTypeField
+    makePatchTypeField
     (
         fvPatchScalarField,
         gradientUnburntEnthalpyFvPatchScalarField

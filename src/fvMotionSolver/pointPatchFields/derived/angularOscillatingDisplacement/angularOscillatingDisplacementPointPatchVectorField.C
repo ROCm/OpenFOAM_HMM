@@ -196,7 +196,7 @@ void angularOscillatingDisplacementPointPatchVectorField::write
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeNonTemplatedPointPatchTypeField
+makePointPatchTypeField
 (
     pointPatchVectorField,
     angularOscillatingDisplacementPointPatchVectorField
