@@ -82,7 +82,7 @@ if [ -r $ParaView_DIR -o -r $paraviewInstDir ]
 then
     export PATH=$ParaView_DIR/bin:$PATH
     export LD_LIBRARY_PATH=$ParaView_DIR/lib/paraview-$ParaView_MAJOR:$LD_LIBRARY_PATH
-    export PV_PLUGIN_PATH=$FOAM_LIBBIN/paraview-$ParaView_MAJOR
+    export PV_PLUGIN_PATH=$FOAM_EXT_LIBBIN/paraview-$ParaView_MAJOR
 
     # add in python libraries if required
     paraviewPython=$ParaView_DIR/Utilities/VTKPythonWrapping
