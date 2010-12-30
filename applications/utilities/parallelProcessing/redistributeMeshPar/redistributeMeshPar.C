@@ -53,6 +53,7 @@ Description
 #include "fvMeshDistribute.H"
 #include "mapDistributePolyMesh.H"
 #include "IOobjectList.H"
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -107,7 +108,9 @@ autoPtr<fvMesh> createMesh
     fvMesh& mesh = meshPtr();
 
 
-    // Determine patches.
+    // Sync patches
+    // ~~~~~~~~~~~~
+
     if (Pstream::master())
     {
         // Send patches
@@ -118,14 +121,14 @@ autoPtr<fvMesh> createMesh
             slave++
         )
         {
-            OPstream toSlave(Pstream::blocking, slave);
+            OPstream toSlave(Pstream::scheduled, slave);
             toSlave << mesh.boundaryMesh();
         }
     }
     else
     {
         // Receive patches
-        IPstream fromMaster(Pstream::blocking, Pstream::masterNo());
+        IPstream fromMaster(Pstream::scheduled, Pstream::masterNo());
         PtrList<entry> patchEntries(fromMaster);
 
         if (haveMesh)
@@ -224,6 +227,58 @@ autoPtr<fvMesh> createMesh
         }
     }
 
+
+    // Determine zones
+    // ~~~~~~~~~~~~~~~
+
+    wordList pointZoneNames(mesh.pointZones().names());
+    Pstream::scatter(pointZoneNames);
+    wordList faceZoneNames(mesh.faceZones().names());
+    Pstream::scatter(faceZoneNames);
+    wordList cellZoneNames(mesh.cellZones().names());
+    Pstream::scatter(cellZoneNames);
+
+    if (!haveMesh)
+    {
+        // Add the zones
+        List<pointZone*> pz(pointZoneNames.size());
+        forAll(pointZoneNames, i)
+        {
+            pz[i] = new pointZone
+            (
+                pointZoneNames[i],
+                labelList(0),
+                i,
+                mesh.pointZones()
+            );
+        }
+        List<faceZone*> fz(faceZoneNames.size());
+        forAll(faceZoneNames, i)
+        {
+            fz[i] = new faceZone
+            (
+                faceZoneNames[i],
+                labelList(0),
+                boolList(0),
+                i,
+                mesh.faceZones()
+            );
+        }
+        List<cellZone*> cz(cellZoneNames.size());
+        forAll(cellZoneNames, i)
+        {
+            cz[i] = new cellZone
+            (
+                cellZoneNames[i],
+                labelList(0),
+                i,
+                mesh.cellZones()
+            );
+        }
+        mesh.addZones(pz, fz, cz);        
+    }
+
+
     if (!haveMesh)
     {
         // We created a dummy mesh file above. Delete it.
@@ -235,6 +290,21 @@ autoPtr<fvMesh> createMesh
     // Force recreation of globalMeshData.
     mesh.clearOut();
     mesh.globalData();
+
+
+    // Do some checks.
+
+    // Check if the boundary definition is unique
+    mesh.boundaryMesh().checkDefinition(true);
+    // Check if the boundary processor patches are correct
+    mesh.boundaryMesh().checkParallelSync(true);
+    // Check names of zones are equal
+    mesh.cellZones().checkDefinition(true);
+    mesh.cellZones().checkParallelSync(true);
+    mesh.faceZones().checkDefinition(true);
+    mesh.faceZones().checkParallelSync(true);
+    mesh.pointZones().checkDefinition(true);
+    mesh.pointZones().checkParallelSync(true);
 
     return meshPtr;
 }
@@ -291,6 +361,59 @@ void printMeshData(Ostream& os, const polyMesh& mesh)
         << "          point zones:      " << mesh.pointZones().size() << nl
         << "          face zones:       " << mesh.faceZones().size() << nl
         << "          cell zones:       " << mesh.cellZones().size() << nl;
+}
+void printMeshData(const polyMesh& mesh)
+{
+    // Collect all data on master
+
+    globalIndex globalCells(mesh.nCells());
+    labelListList patchNeiProcNo(Pstream::nProcs());
+    labelListList patchSize(Pstream::nProcs());
+    const labelList& pPatches = mesh.globalData().processorPatches();
+    patchNeiProcNo[Pstream::myProcNo()].setSize(pPatches.size());
+    patchSize[Pstream::myProcNo()].setSize(pPatches.size());
+    forAll(pPatches, i)
+    {
+        const processorPolyPatch& ppp = refCast<const processorPolyPatch>
+        (
+            mesh.boundaryMesh()[pPatches[i]]
+        );
+        patchNeiProcNo[Pstream::myProcNo()][i] = ppp.neighbProcNo();
+        patchSize[Pstream::myProcNo()][i] = ppp.size();
+    }
+    Pstream::gatherList(patchNeiProcNo);
+    Pstream::gatherList(patchSize);
+
+
+    // Print stats
+
+    globalIndex globalBoundaryFaces(mesh.nFaces()-mesh.nInternalFaces());
+
+    for (label procI = 0; procI < Pstream::nProcs(); procI++)
+    {
+        Info<< endl
+            << "Processor " << procI << nl
+            << "    Number of cells = " << globalCells.localSize(procI)
+            << endl;
+
+        label nProcFaces = 0;
+
+        const labelList& nei = patchNeiProcNo[procI];
+        
+        forAll(patchNeiProcNo[procI], i)
+        {
+            Info<< "    Number of faces shared with processor "
+                << patchNeiProcNo[procI][i] << " = " << patchSize[procI][i]
+                << endl;
+
+            nProcFaces += patchSize[procI][i];
+        }
+
+        Info<< "    Number of processor patches = " << nei.size() << nl
+            << "    Number of processor faces = " << nProcFaces << nl
+            << "    Number of boundary faces = "
+            << globalBoundaryFaces.localSize(procI) << endl;
+    }
 }
 
 
@@ -507,6 +630,7 @@ void compareFields
 int main(int argc, char *argv[])
 {
 #   include "addRegionOption.H"
+#   include "addOverwriteOption.H"
     argList::addOption
     (
         "mergeTol",
@@ -538,6 +662,8 @@ int main(int argc, char *argv[])
         meshSubDir = polyMesh::meshSubDir;
     }
     Info<< "Using mesh subdirectory " << meshSubDir << nl << endl;
+
+    const bool overwrite = args.optionFound("overwrite");
 
 
     // Get time instance directory. Since not all processors have meshes
@@ -573,9 +699,11 @@ int main(int argc, char *argv[])
     );
     fvMesh& mesh = meshPtr();
 
-    Pout<< "Read mesh:" << endl;
-    printMeshData(Pout, mesh);
-    Pout<< endl;
+    //Pout<< "Read mesh:" << endl;
+    //printMeshData(Pout, mesh);
+    //Pout<< endl;
+
+
 
     IOdictionary decompositionDict
     (
@@ -618,7 +746,10 @@ int main(int argc, char *argv[])
     }
 
     // Dump decomposition to volScalarField
-    writeDecomposition("decomposition", mesh, finalDecomp);
+    if (!overwrite)
+    {
+        writeDecomposition("decomposition", mesh, finalDecomp);
+    }
 
 
     // Create 0 sized mesh to do all the generation of zero sized
@@ -796,12 +927,20 @@ int main(int argc, char *argv[])
 
 
     // Print a bit
-    Pout<< "After distribution mesh:" << endl;
-    printMeshData(Pout, mesh);
-    Pout<< endl;
+    // Print some statistics
+    Info<< "After distribution:" << endl;
+    printMeshData(mesh);
 
-    runTime++;
-    Pout<< "Writing redistributed mesh to " << runTime.timeName() << nl << endl;
+
+    if (!overwrite)
+    {
+        runTime++;
+    }
+    else
+    {
+        mesh.setInstance(masterInstDir);
+    }
+    Info<< "Writing redistributed mesh to " << runTime.timeName() << nl << endl;
     mesh.write();
 
 
