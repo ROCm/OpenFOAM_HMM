@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -25,23 +25,23 @@
 #     RunFunctions
 #
 # Description
-#
+#     Miscellaneous functions for running tutorial cases
 #------------------------------------------------------------------------------
 
 getApplication()
 {
-    grep application system/controlDict | sed "s/application *\([a-zA-Z]*\);/\1/"
+    sed -ne 's/^ *application *\([a-zA-Z]*\) *;.*$/\1/p' system/controlDict
 }
 
 runApplication()
 {
     APP_RUN=$1
+    APP_NAME=${1##*/}
     shift
-    APP_NAME=${APP_RUN##*/}
 
     if [ -f log.$APP_NAME ]
     then
-        echo "$APP_NAME already run on $PWD: remove log file to run"
+        echo "$APP_NAME already run on $PWD: remove log file to re-run"
     else
         echo "Running $APP_RUN on $PWD"
         $APP_RUN $* > log.$APP_NAME 2>&1
@@ -51,14 +51,15 @@ runApplication()
 runParallel()
 {
     APP_RUN=$1
+    APP_NAME=${1##*/}
     shift
 
-    if [ -f $log.$APP_RUN ]
+    if [ -f log.$APP_NAME ]
     then
-        echo "$APP_RUN already run on $PWD: remove log file to run"
+        echo "$APP_NAME already run on $PWD: remove log file to re-run"
     else
         echo "Running $APP_RUN in parallel on $PWD using $1 processes"
-        ( mpirun -np $1 $APP_RUN -parallel < /dev/null > log.$APP_RUN 2>&1 )
+        ( mpirun -np $1 $APP_RUN -parallel < /dev/null > log.$APP_NAME 2>&1 )
     fi
 }
 
