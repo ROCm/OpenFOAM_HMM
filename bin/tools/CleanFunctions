@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -25,7 +25,7 @@
 #     CleanFunctions
 #
 # Description
-#
+#     Miscellaneous cleanup functions for tutorial cases
 #------------------------------------------------------------------------------
 
 #cleanTimeDirectories()
@@ -46,15 +46,12 @@
 cleanTimeDirectories()
 {
     echo "Cleaning $PWD case"
-    nZeros=0
     zeros=""
-    while [ $nZeros -lt 8 ]
+    while [ ${#zeros} -lt 8 ]
     do
         timeDir="0.${zeros}[1-9]*"
-        rm -rf ${timeDir} > /dev/null 2>&1
-        rm -rf ./-${timeDir} > /dev/null 2>&1
-        zeros=`printf %0${nZeros}d 0`
-        nZeros=$(($nZeros + 1))
+        rm -rf ./${timeDir} ./-${timeDir} > /dev/null 2>&1
+        zeros="0$zeros"
     done
     rm -rf ./[1-9]* ./-[1-9]* ./log ./log.* ./log-* ./logSummary.* ./.fxLock ./*.xml ./ParaView* ./paraFoam* ./*.OpenFOAM > /dev/null 2>&1
 }
