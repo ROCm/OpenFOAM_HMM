@@ -36,4 +36,10 @@
 export SCOTCH_VERSION=scotch_5.1.11
 export SCOTCH_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$SCOTCH_VERSION
 
+# mpi-qualified include directory
+export SCOTCH_MPI_INCLUDE=$SCOTCH_ARCH_PATH/include/${FOAM_MPI_LIBBIN##*/}
+
+# mpi-qualified lib directory
+export SCOTCH_MPI_LIBBIN=$SCOTCH_ARCH_PATH/lib/${FOAM_MPI_LIBBIN##*/}
+
 # -----------------------------------------------------------------------------
