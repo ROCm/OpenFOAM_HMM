@@ -1,9 +1,9 @@
 #!/bin/sh
-#---------------------------------*- sh -*-------------------------------------
+#------------------------------------------------------------------------------
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -23,47 +23,102 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
-#     foamPack [outputDir]
+#     foamPack [OPTION]
 #
 # Description
-#     Packs and compresses the OpenFOAM directory for release
+#     Pack and compress the OpenFOAM directory for release
 #
 #------------------------------------------------------------------------------
-
-timeStamp=$(date +%Y-%m-%d)
 packDir=$WM_PROJECT-$WM_PROJECT_VERSION
-packFile=${packDir}_${timeStamp}.gtgz
+toolsDir="${0%/*}/tools"  # this script is located in the tools/ parent dir
 
-if [ ! -d $packDir ]
-then
-    echo "Error: directory $packDir does not exist"
+usage() {
+    while [ $# -gt 0 ]; do echo "$1" 1>&2; shift; done
+cat <<USAGE 1>&2
+Usage: ${0##*/} [OPTION]
+options:
+  -o <dir>          specify alternative output directory
+  -nogit            bypass using 'git archive'
+
+* Pack and compress OpenFOAM directory for release
+
+USAGE
     exit 1
-fi
+}
+
+unset prefix outputDir nogit
+# parse options
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help)
+        usage
+        ;;
+    -nogit)
+        nogit=true
+        shift
+        ;;
+    -o | -output)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        outputDir=${2%%/}
+        shift 2
+        ;;
+    -*)
+        usage "unknown option: '$*'"
+        ;;
+    *)
+        break
+        ;;
+    esac
+done
+
+# check for essential directories
+for dir in $packDir
+do
+    [ -d $dir ] || {
+        echo "Error: directory $dir does not exist" 1>&2
+        exit 1
+    }
+done
+
+
+#------------------------------------------------------------------------------
+timeStamp=$(date +%Y-%m-%d)
+packExt=tgz
+packBase=${packDir}_${timeStamp}
 
 # add optional output directory
-if [ -d "$1" ]
-then
-    packFile="$1/$packFile"
-fi
+[ -d "$outputDir" ] && packBase="$outputDir/$packBase"
+packFile=$packBase.$packExt
 
+# avoid overwriting old pack file
 if [ -f $packFile ]
 then
-    echo "Error: $packFile already exists"
+    echo "Error: $packFile already exists" 1>&2
     exit 1
 fi
 
-# Create time stamp file
-# ~~~~~~~~~~~~~~~~~~~~~~
-
+# add time-stamp file before packing
 echo $timeStamp 2>/dev/null > $packDir/.timeStamp
 
-# Pack and compress the packFile
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# check for git (program and .git directory)
+(cd $packDir && git branch) > /dev/null 2>&1 || nogit=true
 
-echo
-echo "Packing $packDir source files into $packFile"
-echo
+if [ "$nogit" = true ]
+then
+    echo "pack manually" 1>&2
+    $toolsDir/foamPackSource $packDir $packFile
+else
+    echo "pack with git-archive" 1>&2
+    ( cd $packDir && git archive --format=tar --prefix=$packDir/ HEAD) > $packBase.tar
 
-foamPackSource $packDir $packFile
+    echo "add in time-stamp and lnInclude directories" 1>&2
+    tar cf $packBase.tar2 $packDir/.timeStamp $packDir/.build `find -H $packDir -type d -name lnInclude`
+    tar Af $packBase.tar $packBase.tar2
+
+    echo "gzip tar file" 1>&2
+    gzip -c9 $packBase.tar > $packFile
+    rm -f $packBase.tar $packBase.tar2 2>/dev/null
+fi
 
 #------------------------------------------------------------------------------
