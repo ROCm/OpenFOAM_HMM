@@ -307,7 +307,7 @@ Foam::mapDistribute::mapDistribute
         {
             label globalIndex = elements[i];
 
-            if (!globalNumbering.isLocal(globalIndex))
+            if (globalIndex != -1 && !globalNumbering.isLocal(globalIndex))
             {
                 label procI = globalNumbering.whichProcID(globalIndex);
                 nNonLocal[procI]++;
@@ -329,7 +329,7 @@ Foam::mapDistribute::mapDistribute
         {
             label globalIndex = elements[i];
 
-            if (!globalNumbering.isLocal(globalIndex))
+            if (globalIndex != -1 && !globalNumbering.isLocal(globalIndex))
             {
                 label procI = globalNumbering.whichProcID(globalIndex);
                 label index = globalNumbering.toLocal(procI, globalIndex);
@@ -452,7 +452,7 @@ Foam::mapDistribute::mapDistribute
             {
                 label globalIndex = cCells[i];
 
-                if (!globalNumbering.isLocal(globalIndex))
+                if (globalIndex != -1 && !globalNumbering.isLocal(globalIndex))
                 {
                     label procI = globalNumbering.whichProcID(globalIndex);
                     nNonLocal[procI]++;
@@ -482,7 +482,7 @@ Foam::mapDistribute::mapDistribute
             {
                 label globalIndex = cCells[i];
 
-                if (!globalNumbering.isLocal(globalIndex))
+                if (globalIndex != -1 && !globalNumbering.isLocal(globalIndex))
                 {
                     label procI = globalNumbering.whichProcID(globalIndex);
                     label index = globalNumbering.toLocal(procI, globalIndex);
@@ -603,6 +603,10 @@ Foam::label Foam::mapDistribute::renumber
     const label globalI
 )
 {
+    if (globalI == -1)
+    {
+        return globalI;
+    }
     if (globalNumbering.isLocal(globalI))
     {
         return globalNumbering.toLocal(globalI);

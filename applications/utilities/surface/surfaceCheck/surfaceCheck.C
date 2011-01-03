@@ -392,13 +392,17 @@ int main(int argc, char *argv[])
                     problemFaces.append(faceI);
                 }
             }
-            OFstream str("badFaces");
 
-            Info<< "Dumping bad quality faces to " << str.name() << endl
-                << "Paste this into the input for surfaceSubset" << nl
-                << nl << endl;
+            if (!problemFaces.empty())
+            {
+                OFstream str("badFaces");
 
-            str << problemFaces;
+                Info<< "Dumping bad quality faces to " << str.name() << endl
+                    << "Paste this into the input for surfaceSubset" << nl
+                    << nl << endl;
+
+                str << problemFaces;
+            }
         }
     }
 
