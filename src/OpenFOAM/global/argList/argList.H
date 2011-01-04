@@ -83,6 +83,7 @@ SourceFiles
 #include "fileName.H"
 #include "parRun.H"
 #include "IStringStream.H"
+#include "OSspecific.H"
 
 #include "sigFpe.H"
 #include "sigInt.H"
