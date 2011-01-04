@@ -446,13 +446,9 @@ bool Foam::treeDataFace::overlaps
     label faceI = faceLabels_[index];
 
     const face& f = mesh_.faces()[faceI];
-
-    forAll(f, fp)
+    if (cubeBb.containsAny(points, f))
     {
-        if (cubeBb.contains(points[f[fp]]))
-        {
-            return true;
-        }
+        return true;
     }
 
     // 3. Difficult case: all points are outside but connecting edges might

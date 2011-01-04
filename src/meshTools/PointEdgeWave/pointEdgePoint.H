@@ -226,6 +226,14 @@ public:
 };
 
 
+//- Data associated with pointEdgePoint type are contiguous
+template<>
+inline bool contiguous<pointEdgePoint>()
+{
+    return true;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

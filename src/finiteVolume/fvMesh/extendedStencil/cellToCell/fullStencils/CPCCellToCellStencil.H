@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class CPCCellToCellStencil Declaration
+                    Class CPCCellToCellStencil Declaration
 \*---------------------------------------------------------------------------*/
 
 class CPCCellToCellStencil
@@ -63,13 +63,6 @@ class CPCCellToCellStencil
         ) const;
 
         void calcCellStencil(labelListList& globalCellCells) const;
-
-
-        //- Disallow default bitwise copy construct
-        CPCCellToCellStencil(const CPCCellToCellStencil&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const CPCCellToCellStencil&);
 
 
 public:

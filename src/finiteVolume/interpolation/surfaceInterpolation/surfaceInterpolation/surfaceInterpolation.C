@@ -321,7 +321,7 @@ void surfaceInterpolation::makeCorrectionVectors() const
 
             const fvPatch& p = patchcorrVecs.patch();
 
-            vectorField patchDeltas = mesh_.boundary()[patchi].delta();
+            const vectorField patchDeltas(mesh_.boundary()[patchi].delta());
 
             forAll(p, patchFacei)
             {

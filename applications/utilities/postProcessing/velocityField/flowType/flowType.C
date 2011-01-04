@@ -62,9 +62,9 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
         Info<< "    Reading U" << endl;
         volVectorField U(Uheader, mesh);
 
-        volTensorField gradU = fvc::grad(U);
-        volScalarField magD = mag(symm(gradU));
-        volScalarField magOmega = mag(skew(gradU));
+        volTensorField gradU(fvc::grad(U));
+        volScalarField magD(mag(symm(gradU)));
+        volScalarField magOmega (mag(skew(gradU)));
         dimensionedScalar smallMagD("smallMagD", magD.dimensions(), SMALL);
 
         Info<< "    Calculating flowType" << endl;

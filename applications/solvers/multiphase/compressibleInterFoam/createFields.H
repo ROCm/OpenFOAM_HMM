@@ -105,8 +105,8 @@
         )
     );
 
-    volScalarField rho1 = rho10 + psi1*p;
-    volScalarField rho2 = rho20 + psi2*p;
+    volScalarField rho1(rho10 + psi1*p);
+    volScalarField rho2(rho20 + psi2*p);
 
     volScalarField rho
     (
@@ -138,8 +138,10 @@
         fvc::interpolate(rho)*phi
     );
 
-    volScalarField dgdt =
-        pos(alpha2)*fvc::div(phi)/max(alpha2, scalar(0.0001));
+    volScalarField dgdt
+    (
+        pos(alpha2)*fvc::div(phi)/max(alpha2, scalar(0.0001))
+    );
 
     // Construct interface from alpha1 distribution
     interfaceProperties interface(alpha1, U, twoPhaseProperties);

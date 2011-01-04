@@ -94,7 +94,7 @@ Foam::string& Foam::string::replaceAll
 
 
 // Expand all occurences of environment variables and initial tilde sequences
-Foam::string& Foam::string::expand()
+Foam::string& Foam::string::expand(const bool recurse)
 {
     size_type startEnvar = 0;
 
@@ -140,6 +140,10 @@ Foam::string& Foam::string::expand()
 
                 if (enVarString.size())
                 {
+                    if (recurse)
+                    {
+                        enVarString.expand();
+                    }
                     std::string::replace
                     (
                         startEnvar,

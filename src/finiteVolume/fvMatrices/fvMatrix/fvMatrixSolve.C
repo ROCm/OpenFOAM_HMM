@@ -71,9 +71,9 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
         psi.name()
     );
 
-    scalarField saveDiag = diag();
+    scalarField saveDiag(diag());
 
-    Field<Type> source = source_;
+    Field<Type> source(source_);
 
     // At this point include the boundary source from the coupled boundaries.
     // This is corrected for the implict part by updateMatrixInterfaces within
@@ -95,10 +95,10 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
 
         // copy field and source
 
-        scalarField psiCmpt = psi.internalField().component(cmpt);
+        scalarField psiCmpt(psi.internalField().component(cmpt));
         addBoundaryDiag(diag(), cmpt);
 
-        scalarField sourceCmpt = source.component(cmpt);
+        scalarField sourceCmpt(source.component(cmpt));
 
         FieldField<Field, scalar> bouCoeffsCmpt
         (
@@ -174,7 +174,8 @@ Foam::fvMatrix<Type>::solver()
         (
             psi_.select
             (
-                psi_.mesh().data::lookupOrDefault<bool>("finalIteration", false)
+                psi_.mesh().data::template lookupOrDefault<bool>
+                ("finalIteration", false)
             )
         )
     );
@@ -186,11 +187,12 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::fvSolver::solve()
 {
     return solve
     (
-        psi_.mesh().solverDict
+        fvMat_.psi_.mesh().solverDict
         (
-            psi_.select
+            fvMat_.psi_.select
             (
-                psi_.mesh().data::lookupOrDefault<bool>("finalIteration", false)
+                fvMat_.psi_.mesh().data::template lookupOrDefault<bool>
+                ("finalIteration", false)
             )
         )
     );
@@ -206,7 +208,8 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve()
         (
             psi_.select
             (
-                psi_.mesh().data::lookupOrDefault<bool>("finalIteration", false)
+                psi_.mesh().data::template lookupOrDefault<bool>
+                ("finalIteration", false)
             )
         )
     );
@@ -224,7 +227,7 @@ Foam::tmp<Foam::Field<Type> > Foam::fvMatrix<Type>::residual() const
     // Loop over field components
     for (direction cmpt=0; cmpt<Type::nComponents; cmpt++)
     {
-        scalarField psiCmpt = psi_.internalField().component(cmpt);
+        scalarField psiCmpt(psi_.internalField().component(cmpt));
 
         scalarField boundaryDiagCmpt(psi_.size(), 0.0);
         addBoundaryDiag(boundaryDiagCmpt, cmpt);

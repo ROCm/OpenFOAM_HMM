@@ -154,9 +154,11 @@ void Foam::fv::gaussGrad<Type>::correctBoundaryConditions
     {
         if (!vsf.boundaryField()[patchi].coupled())
         {
-            vectorField n =
+            const vectorField n
+            (
                 vsf.mesh().Sf().boundaryField()[patchi]
-               /vsf.mesh().magSf().boundaryField()[patchi];
+              / vsf.mesh().magSf().boundaryField()[patchi]
+            );
 
             gGrad.boundaryField()[patchi] += n *
             (

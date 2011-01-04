@@ -30,7 +30,11 @@ License
 namespace Foam
 {
     template<>
-    const char* Foam::NamedEnum<Foam::coordSet::coordFormat, 5>::names[] =
+    const char* Foam::NamedEnum
+    <
+        Foam::coordSet::coordFormat,
+        5
+    >::names[] =
     {
         "xyz",
         "x",

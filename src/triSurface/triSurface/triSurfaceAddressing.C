@@ -32,14 +32,10 @@ Description
 #include "SortableList.H"
 #include "transform.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void triSurface::calcSortedEdgeFaces() const
+void Foam::triSurface::calcSortedEdgeFaces() const
 {
     if (sortedEdgeFacesPtr_)
     {
@@ -126,7 +122,7 @@ void triSurface::calcSortedEdgeFaces() const
 }
 
 
-void triSurface::calcEdgeOwner() const
+void Foam::triSurface::calcEdgeOwner() const
 {
     if (edgeOwnerPtr_)
     {
@@ -186,9 +182,5 @@ void triSurface::calcEdgeOwner() const
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

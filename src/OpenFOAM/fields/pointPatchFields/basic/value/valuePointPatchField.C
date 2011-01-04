@@ -26,17 +26,12 @@ License
 #include "valuePointPatchField.H"
 #include "pointPatchFieldMapper.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-void valuePointPatchField<Type>::checkFieldSize() const
+void Foam::valuePointPatchField<Type>::checkFieldSize() const
 {
-    if (size() != this->patch().size())
+    if (this->size() != this->patch().size())
     {
         FatalErrorIn
         (
@@ -52,7 +47,7 @@ void valuePointPatchField<Type>::checkFieldSize() const
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * * //
 
 template<class Type>
-valuePointPatchField<Type>::valuePointPatchField
+Foam::valuePointPatchField<Type>::valuePointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF
@@ -64,7 +59,7 @@ valuePointPatchField<Type>::valuePointPatchField
 
 
 template<class Type>
-valuePointPatchField<Type>::valuePointPatchField
+Foam::valuePointPatchField<Type>::valuePointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
@@ -105,7 +100,7 @@ valuePointPatchField<Type>::valuePointPatchField
 
 
 template<class Type>
-valuePointPatchField<Type>::valuePointPatchField
+Foam::valuePointPatchField<Type>::valuePointPatchField
 (
     const valuePointPatchField<Type>& ptf,
     const pointPatch& p,
@@ -119,7 +114,7 @@ valuePointPatchField<Type>::valuePointPatchField
 
 
 template<class Type>
-valuePointPatchField<Type>::valuePointPatchField
+Foam::valuePointPatchField<Type>::valuePointPatchField
 (
     const valuePointPatchField<Type>& ptf,
     const DimensionedField<Type, pointMesh>& iF
@@ -133,7 +128,7 @@ valuePointPatchField<Type>::valuePointPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void valuePointPatchField<Type>::autoMap
+void Foam::valuePointPatchField<Type>::autoMap
 (
     const pointPatchFieldMapper& m
 )
@@ -143,7 +138,7 @@ void valuePointPatchField<Type>::autoMap
 
 
 template<class Type>
-void valuePointPatchField<Type>::rmap
+void Foam::valuePointPatchField<Type>::rmap
 (
     const pointPatchField<Type>& ptf,
     const labelList& addr
@@ -161,7 +156,7 @@ void valuePointPatchField<Type>::rmap
 
 
 template<class Type>
-void valuePointPatchField<Type>::updateCoeffs()
+void Foam::valuePointPatchField<Type>::updateCoeffs()
 {
     if (this->updated())
     {
@@ -171,26 +166,26 @@ void valuePointPatchField<Type>::updateCoeffs()
     // Get internal field to insert values into
     Field<Type>& iF = const_cast<Field<Type>&>(this->internalField());
 
-    setInInternalField(iF, *this);
+    this->setInInternalField(iF, *this);
 
     pointPatchField<Type>::updateCoeffs();
 }
 
 
 template<class Type>
-void valuePointPatchField<Type>::evaluate(const Pstream::commsTypes)
+void Foam::valuePointPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     // Get internal field to insert values into
     Field<Type>& iF = const_cast<Field<Type>&>(this->internalField());
 
-    setInInternalField(iF, *this);
+    this->setInInternalField(iF, *this);
 
     pointPatchField<Type>::evaluate();
 }
 
 
 template<class Type>
-void valuePointPatchField<Type>::write(Ostream& os) const
+void Foam::valuePointPatchField<Type>::write(Ostream& os) const
 {
     pointPatchField<Type>::write(os);
     this->writeEntry("value", os);
@@ -200,7 +195,7 @@ void valuePointPatchField<Type>::write(Ostream& os) const
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Type>
-void valuePointPatchField<Type>::operator=
+void Foam::valuePointPatchField<Type>::operator=
 (
     const valuePointPatchField<Type>& ptf
 )
@@ -210,7 +205,7 @@ void valuePointPatchField<Type>::operator=
 
 
 template<class Type>
-void valuePointPatchField<Type>::operator=
+void Foam::valuePointPatchField<Type>::operator=
 (
     const pointPatchField<Type>& ptf
 )
@@ -220,7 +215,7 @@ void valuePointPatchField<Type>::operator=
 
 
 template<class Type>
-void valuePointPatchField<Type>::operator=
+void Foam::valuePointPatchField<Type>::operator=
 (
     const Field<Type>& tf
 )
@@ -230,7 +225,7 @@ void valuePointPatchField<Type>::operator=
 
 
 template<class Type>
-void valuePointPatchField<Type>::operator=
+void Foam::valuePointPatchField<Type>::operator=
 (
     const Type& t
 )
@@ -241,7 +236,7 @@ void valuePointPatchField<Type>::operator=
 
 // Force an assignment
 template<class Type>
-void valuePointPatchField<Type>::operator==
+void Foam::valuePointPatchField<Type>::operator==
 (
     const valuePointPatchField<Type>& ptf
 )
@@ -251,7 +246,7 @@ void valuePointPatchField<Type>::operator==
 
 
 template<class Type>
-void valuePointPatchField<Type>::operator==
+void Foam::valuePointPatchField<Type>::operator==
 (
     const pointPatchField<Type>& ptf
 )
@@ -261,7 +256,7 @@ void valuePointPatchField<Type>::operator==
 
 
 template<class Type>
-void valuePointPatchField<Type>::operator==
+void Foam::valuePointPatchField<Type>::operator==
 (
     const Field<Type>& tf
 )
@@ -271,7 +266,7 @@ void valuePointPatchField<Type>::operator==
 
 
 template<class Type>
-void valuePointPatchField<Type>::operator==
+void Foam::valuePointPatchField<Type>::operator==
 (
     const Type& t
 )
@@ -279,9 +274,5 @@ void valuePointPatchField<Type>::operator==
     Field<Type>::operator=(t);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,7 +32,37 @@ License
 
 //! @cond fileScope
 const char hexChars[] = "0123456789abcdef";
-//! @endcond
+//! @endcond fileScope
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+unsigned char Foam::SHA1Digest::readHexDigit(Istream& is)
+{
+    // Takes into account that 'a' (or 'A') is 10
+    static const label alphaOffset = toupper('A') - 10;
+    // Takes into account that '0' is 0
+    static const label zeroOffset = int('0');
+
+    char c = 0;
+    is.read(c);
+
+    if (!isxdigit(c))
+    {
+        FatalIOErrorIn("SHA1Digest::readHexDigit(Istream&)", is)
+            << "Illegal hex digit: '" << c << "'"
+            << exit(FatalIOError);
+    }
+
+    if (isdigit(c))
+    {
+        return int(c) - zeroOffset;
+    }
+    else
+    {
+        return toupper(c) - alphaOffset;
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -40,6 +70,12 @@ const char hexChars[] = "0123456789abcdef";
 Foam::SHA1Digest::SHA1Digest()
 {
     clear();
+}
+
+
+Foam::SHA1Digest::SHA1Digest(Istream& is)
+{
+    is  >> *this;
 }
 
 
@@ -69,11 +105,28 @@ bool Foam::SHA1Digest::operator==(const SHA1Digest& rhs) const
 
 bool Foam::SHA1Digest::operator!=(const SHA1Digest& rhs) const
 {
-    return !operator==(rhs);
+    return !this->operator==(rhs);
 }
 
 
 // * * * * * * * * * * * * * * Friend Operators * * * * * * * * * * * * * * //
+
+Foam::Istream& Foam::operator>>(Istream& is, SHA1Digest& dig)
+{
+    unsigned char *v = dig.v_;
+
+    for (unsigned i = 0; i < dig.length; ++i)
+    {
+        unsigned char c1 = SHA1Digest::readHexDigit(is);
+        unsigned char c2 = SHA1Digest::readHexDigit(is);
+
+        v[i] = (c1 << 4) + c2;
+    }
+
+    is.check("Istream& operator>>(Istream&, SHA1Digest&)");
+    return is;
+}
+
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const SHA1Digest& dig)
 {

@@ -37,7 +37,8 @@ const typename GeometricField::PatchFieldType& Foam::fvPatch::lookupPatchField
 {
     return patchField<GeometricField, Type>
     (
-        boundaryMesh().mesh().objectRegistry::lookupObject<GeometricField>(name)
+        boundaryMesh().mesh().objectRegistry::template
+            lookupObject<GeometricField>(name)
     );
 }
 

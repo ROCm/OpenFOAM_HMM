@@ -39,7 +39,11 @@ int Foam::regIOobject::fileModificationSkew
 namespace Foam
 {
     template<>
-    const char* Foam::NamedEnum<Foam::regIOobject::fileCheckTypes, 4>::names[] =
+    const char* Foam::NamedEnum
+    <
+        Foam::regIOobject::fileCheckTypes,
+        4
+    >::names[] =
     {
         "timeStamp",
         "timeStampMaster",

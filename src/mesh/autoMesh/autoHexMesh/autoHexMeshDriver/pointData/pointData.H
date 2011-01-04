@@ -25,7 +25,7 @@ Class
     Foam::pointData
 
 Description
-    Variant of pointEdgePoint with some transported additional data. 
+    Variant of pointEdgePoint with some transported additional data.
     WIP - should be templated on data like wallDistData.
     Passive vector v_ is not a coordinate (so no enterDomain/leaveDomain
     transformation needed)
@@ -40,9 +40,6 @@ SourceFiles
 #define pointData_H
 
 #include "pointEdgePoint.H"
-//#include "point.H"
-//#include "label.H"
-//#include "tensor.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -156,6 +153,14 @@ public:
         friend Ostream& operator<<(Ostream&, const pointData&);
         friend Istream& operator>>(Istream&, pointData&);
 };
+
+
+//- Data associated with pointData as contiguous as pointEdgePoint
+template<>
+inline bool contiguous<pointData>()
+{
+    return contiguous<pointEdgePoint>();
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

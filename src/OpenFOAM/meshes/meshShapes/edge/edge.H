@@ -103,6 +103,9 @@ public:
         //- Return common vertex
         inline label commonVertex(const edge& a) const;
 
+        //- Flip the edge in-place.
+        inline void flip();
+
         //- Return reverse edge
         inline edge reverseEdge() const;
 

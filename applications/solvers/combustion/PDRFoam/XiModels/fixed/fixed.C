@@ -34,8 +34,8 @@ namespace XiModels
 {
     defineTypeNameAndDebug(fixed, 0);
     addToRunTimeSelectionTable(XiModel, fixed, dictionary);
-};
-};
+}
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

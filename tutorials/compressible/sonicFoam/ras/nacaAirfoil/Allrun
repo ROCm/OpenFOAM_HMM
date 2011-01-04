@@ -11,7 +11,7 @@ runStarToFoam()
 {
     if [ -f log.star3ToFoam -o -f log.starToFoam ]
     then
-        echo "star3ToFoam already run on $PWD: remove log file to run"
+        echo "star3ToFoam already run on $PWD: remove log file to re-run"
     else
         echo "star3ToFoam: converting mesh $1"
         star3ToFoam $1 > log.star3ToFoam 2>&1

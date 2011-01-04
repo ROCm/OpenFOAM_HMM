@@ -221,11 +221,11 @@ void Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::updateCoeffs()
         );
 
         // Swap to obtain full local values of neighbour internal field
-        scalarField nbrIntFld = nbrField.patchInternalField();
+        scalarField nbrIntFld(nbrField.patchInternalField());
         distMap.distribute(nbrIntFld);
 
         // Swap to obtain full local values of neighbour K*delta
-        scalarField nbrKDelta = nbrField.K(nbrField)*nbrPatch.deltaCoeffs();
+        scalarField nbrKDelta(nbrField.K(nbrField)*nbrPatch.deltaCoeffs());
         distMap.distribute(nbrKDelta);
 
         tmp<scalarField> myKDelta = K(*this)*patch().deltaCoeffs();

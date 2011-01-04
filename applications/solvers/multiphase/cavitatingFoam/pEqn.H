@@ -9,18 +9,18 @@
         )/psi;
     }
 
-    surfaceScalarField rhof = fvc::interpolate(rho, "rhof");
+    surfaceScalarField rhof(fvc::interpolate(rho, "rhof"));
 
-    volScalarField rAU = 1.0/UEqn.A();
+    volScalarField rAU(1.0/UEqn.A());
     surfaceScalarField rAUf("rAUf", rhof*fvc::interpolate(rAU));
-    volVectorField HbyA = rAU*UEqn.H();
+    volVectorField HbyA(rAU*UEqn.H());
 
     phiv = (fvc::interpolate(HbyA) & mesh.Sf())
          + fvc::ddtPhiCorr(rAU, rho, U, phiv);
 
     p.boundaryField().updateCoeffs();
 
-    surfaceScalarField phiGradp = rAUf*mesh.magSf()*fvc::snGrad(p);
+    surfaceScalarField phiGradp(rAUf*mesh.magSf()*fvc::snGrad(p));
 
     phiv -= phiGradp/rhof;
 

@@ -97,7 +97,7 @@ Foam::fv::cellLimitedGrad<Foam::scalar>::calcGrad
 
         if (psf.coupled())
         {
-            scalarField psfNei = psf.patchNeighbourField();
+            const scalarField psfNei(psf.patchNeighbourField());
 
             forAll(pOwner, pFacei)
             {
@@ -126,7 +126,7 @@ Foam::fv::cellLimitedGrad<Foam::scalar>::calcGrad
 
     if (k_ < 1.0)
     {
-        scalarField maxMinVsf = (1.0/k_ - 1.0)*(maxVsf - minVsf);
+        const scalarField maxMinVsf((1.0/k_ - 1.0)*(maxVsf - minVsf));
         maxVsf += maxMinVsf;
         minVsf -= maxMinVsf;
 
@@ -250,7 +250,7 @@ Foam::fv::cellLimitedGrad<Foam::vector>::calcGrad
 
         if (psf.coupled())
         {
-            vectorField psfNei = psf.patchNeighbourField();
+            const vectorField psfNei(psf.patchNeighbourField());
 
             forAll(pOwner, pFacei)
             {
@@ -279,7 +279,7 @@ Foam::fv::cellLimitedGrad<Foam::vector>::calcGrad
 
     if (k_ < 1.0)
     {
-        vectorField maxMinVsf = (1.0/k_ - 1.0)*(maxVsf - minVsf);
+        const vectorField maxMinVsf((1.0/k_ - 1.0)*(maxVsf - minVsf));
         maxVsf += maxMinVsf;
         minVsf -= maxMinVsf;
 

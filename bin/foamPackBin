@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -23,66 +23,119 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
-#     foamPackBin <arch> [outputDir]
+#     foamPackBin [OPTION] <archOptions>
 #
 # Description
-#     Packs and compresses binary version of OpenFOAM for release
+#     Pack and compress binary version of OpenFOAM for release
+#
+# Script
+#     foamPackThirdPartyBin [OPTION] <archOptions>
+#
+# Description
+#     Pack and compress binary version of OpenFOAM ThirdParty for release
 #
 #------------------------------------------------------------------------------
+toolsDir="${0%/*}/tools"  # this script is located in the tools/ parent dir
 
-if [ $# -eq 0 ]
-then
-    echo "Error: architecture type expected, exiting"
-    echo
-    echo "Usage : ${0##*/} <arch> [outputDir]"
-    echo
+case "${0##*/}" in
+*ThirdParty*)
+    # for ThirdParty
+    codeBase="OpenFOAM ThirdParty"
+    packDir=ThirdParty-$WM_PROJECT_VERSION
+    listBinDirs=$toolsDir/foamListThirdPartyBinDirs
+    ;;
+*)
+    # regular
+    codeBase="OpenFOAM ThirdParty"
+    packDir=$WM_PROJECT-$WM_PROJECT_VERSION
+    listBinDirs=$toolsDir/foamListBinDirs
+    ;;
+esac
+
+
+usage() {
+    while [ $# -gt 0 ]; do echo "$1" 1>&2; shift; done
+cat <<USAGE 1>&2
+Usage: ${0##*/} [OPTION] <archOptions>
+options:
+  -o <dir>          specify alternative output directory
+
+* Pack and compress binary version of $codeBase for release
+
+    The value of 'archOptions' normally corresponds to \$WM_OPTIONS
+    The current value of \$WM_OPTIONS = $WM_OPTIONS
+
+USAGE
     exit 1
-fi
-arch=$1
+}
 
-# base arch (w/o precision, optimization, etc)
-baseArch=$(echo "$arch" | sed -e 's@[DS]P.*$@@')
 
-timeStamp=$(date +%Y-%m-%d)
-packDir=$WM_PROJECT-$WM_PROJECT_VERSION
-packFile=${packDir}.${arch}_${timeStamp}.gtgz
-
-# add optional output directory
-if [ -d "$2" ]
-then
-    packFile="$2/$packFile"
-fi
-
-if [ -f $packFile ]
-then
-    echo "Error: $packFile already exists"
-    exit 1
-fi
-
-# check for essential directories
-for dir in $packDir $packDir/lib/$arch $packDir/applications/bin/$arch
+unset prefix outputDir
+# parse options
+while [ "$#" -gt 0 ]
 do
-    if [ ! -d $dir ]
-    then
-        echo "Error: directory $dir does not exist"
-        exit 1
-    fi
+    case "$1" in
+    -h | -help)
+        usage
+        ;;
+    -o | -output)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        outputDir=${2%%/}
+        shift 2
+        ;;
+    -*)
+        usage "unknown option: '$*'"
+        ;;
+    *)
+        break
+        ;;
+    esac
 done
 
+[ $# -eq 1 ] || usage "Error: specify architecture"
+
+# same as $WM_OPTIONS - eg, 'linux64GccDPOpt'
+archOptions="$1"
+
+#------------------------------------------------------------------------------
+timeStamp=$(date +%Y-%m-%d)
+packExt=tgz
+packBase=${packDir}.${archOptions}_${timeStamp}
+
+# add optional output directory
+[ -d "$outputDir" ] && packBase="$outputDir/$packBase"
+packFile=$packBase.$packExt
+
+# avoid overwriting old pack file
+if [ -f $packFile ]
+then
+    echo "Error: $packFile already exists" 1>&2
+    exit 1
+fi
+
+
+#------------------------------------------------------------------------------
+
 # get list of directories
-dirList=`foamBinDirs $packDir $arch`
+dirList=$( $listBinDirs $packDir $archOptions )
+if [ $? -eq 0 -a -n "$dirList" ]
+then
+    echo "Pack into $packFile" 1>&2
+    echo 1>&2
+else
+    exit 1
+fi
 
-echo
-echo "Packing $arch ($baseArch) port of $packDir into $packFile"
-echo
 
-tar czpf $packFile $dirList
+# Clean up on Ctrl-C
+trap 'rm -f $packFile 2>/dev/null' INT
 
+tar cpzf $packFile $dirList
 if [ $? -eq 0 ]
 then
-    echo "Finished packing and compressing file $packFile"
+    echo "Finished packing file $packFile" 1>&2
 else
-    echo "Error: failure packing $packFile"
+    echo "Error: failure packing $packFile" 1>&2
     rm -f $packFile 2>/dev/null
 fi
 

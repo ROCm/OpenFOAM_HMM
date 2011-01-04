@@ -39,7 +39,7 @@ namespace Foam
     makeIntegrationScheme(vector);
     makeIntegrationSchemeType(Euler, vector);
     makeIntegrationSchemeType(Analytical, vector);
-};
+}
 
 
 // ************************************************************************* //

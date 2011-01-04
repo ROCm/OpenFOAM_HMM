@@ -40,7 +40,7 @@ namespace RASModels
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeFieldTypedefs(kqRWallFunction)
+makePatchTypeFieldTypedefs(kqRWallFunction);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

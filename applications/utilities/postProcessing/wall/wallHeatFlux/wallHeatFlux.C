@@ -54,8 +54,10 @@ int main(int argc, char *argv[])
 
         #include "createFields.H"
 
-        surfaceScalarField heatFlux =
-            fvc::interpolate(RASModel->alphaEff())*fvc::snGrad(h);
+        surfaceScalarField heatFlux
+        (
+            fvc::interpolate(RASModel->alphaEff())*fvc::snGrad(h)
+        );
 
         const surfaceScalarField::GeometricBoundaryField& patchHeatFlux =
             heatFlux.boundaryField();

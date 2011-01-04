@@ -32,15 +32,19 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTemplateTypeNameAndDebug(volScalarField::DimensionedInternalField, 0);
-defineTemplateTypeNameAndDebug(volVectorField::DimensionedInternalField, 0);
-defineTemplateTypeNameAndDebug
+defineTemplate2TypeNameAndDebug(volScalarField::DimensionedInternalField, 0);
+defineTemplate2TypeNameAndDebug(volVectorField::DimensionedInternalField, 0);
+defineTemplate2TypeNameAndDebug
 (
     volSphericalTensorField::DimensionedInternalField,
     0
 );
-defineTemplateTypeNameAndDebug(volSymmTensorField::DimensionedInternalField, 0);
-defineTemplateTypeNameAndDebug(volTensorField::DimensionedInternalField, 0);
+defineTemplate2TypeNameAndDebug
+(
+    volSymmTensorField::DimensionedInternalField,
+    0
+);
+defineTemplate2TypeNameAndDebug(volTensorField::DimensionedInternalField, 0);
 
 defineTemplateTypeNameAndDebug(volScalarField, 0);
 defineTemplateTypeNameAndDebug(volVectorField, 0);
@@ -48,6 +52,10 @@ defineTemplateTypeNameAndDebug(volSphericalTensorField, 0);
 defineTemplateTypeNameAndDebug(volSymmTensorField, 0);
 defineTemplateTypeNameAndDebug(volTensorField, 0);
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// specialization for scalar fields
 template<>
 tmp<GeometricField<scalar, fvPatchField, volMesh> >
 GeometricField<scalar, fvPatchField, volMesh>::component
@@ -58,6 +66,8 @@ GeometricField<scalar, fvPatchField, volMesh>::component
     return *this;
 }
 
+
+// specialization for scalar fields
 template<>
 void GeometricField<scalar, fvPatchField, volMesh>::replace
 (

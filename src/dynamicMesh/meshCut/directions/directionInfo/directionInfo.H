@@ -251,6 +251,14 @@ public:
 };
 
 
+//- Data associated with directionInfo type are contiguous
+template<>
+inline bool contiguous<directionInfo>()
+{
+    return true;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

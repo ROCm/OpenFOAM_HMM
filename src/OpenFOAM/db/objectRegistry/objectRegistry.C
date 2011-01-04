@@ -31,6 +31,14 @@ License
 defineTypeNameAndDebug(Foam::objectRegistry, 0);
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+bool Foam::objectRegistry::parentNotTime() const
+{
+    return (&parent_ != dynamic_cast<const objectRegistry*>(&time_));
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors *  * * * * * * * * * * * * * //
 
 Foam::objectRegistry::objectRegistry

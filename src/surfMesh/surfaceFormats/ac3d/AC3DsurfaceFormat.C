@@ -286,7 +286,7 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
     (
         surf.surfZones().size()
       ? surf.surfZones()
-      : oneZone(faceLst)
+      : surfaceFormatsCore::oneZone(faceLst)
     );
 
     const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);

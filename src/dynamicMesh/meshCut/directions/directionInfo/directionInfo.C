@@ -25,10 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "directionInfo.H"
-//#include "hexMatcher.H"
-//#include "meshTools.H"
 #include "polyMesh.H"
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -209,13 +206,44 @@ Foam::Ostream& Foam::operator<<
     const Foam::directionInfo& wDist
 )
 {
-    return os << wDist.index_ << wDist.n_;
+    if (os.format() == IOstream::ASCII)
+    {
+        os << wDist.index_ << wDist.n_;
+    }
+    else
+    {
+        os.write
+        (
+            reinterpret_cast<const char*>(&wDist.index_),
+            sizeof(directionInfo)
+        );
+    }
+
+    // Check state of Ostream
+    os.check("Ostream& operator<<(Ostream&, const directionInfo&)");
+    return os;
+
 }
 
 
 Foam::Istream& Foam::operator>>(Foam::Istream& is, Foam::directionInfo& wDist)
 {
-    return is >> wDist.index_ >> wDist.n_;
+    if (is.format() == IOstream::ASCII)
+    {
+        is >> wDist.index_ >> wDist.n_;
+    }
+    else
+    {
+        is.read
+        (
+            reinterpret_cast<char*>(&wDist.index_),
+            sizeof(directionInfo)
+        );
+    }
+
+    // Check state of Istream
+    is.check("Istream& operator>>(Istream&, directionInfo&)");
+    return is;
 }
 
 // ************************************************************************* //

@@ -868,7 +868,7 @@ int main(int argc, char *argv[])
             fm[facei] = true;
             if (!cubitFile)
             {
-                faces[facei] = faces[facei].reverseFace();
+                faces[facei].flip();
             }
             Swap(owner[facei], neighbour[facei]);
         }

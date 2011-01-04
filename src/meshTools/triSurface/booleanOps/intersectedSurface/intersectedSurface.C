@@ -219,12 +219,12 @@ bool Foam::intersectedSurface::sameEdgeOrder
         if (fpB != -1)
         {
             // Get prev/next vertex on fA
-            label vA1 = fA[(fpA + 1) % 3];
-            label vAMin1 = fA[fpA ? fpA-1 : 2];
+            label vA1 = fA[fA.fcIndex(fpA)];
+            label vAMin1 = fA[fA.rcIndex(fpA)];
 
             // Get prev/next vertex on fB
-            label vB1 = fB[(fpB + 1) % 3];
-            label vBMin1 = fB[fpB ? fpB-1 : 2];
+            label vB1 = fB[fB.fcIndex(fpB)];
+            label vBMin1 = fB[fB.rcIndex(fpB)];
 
             if (vA1 == vB1 || vAMin1 == vBMin1)
             {

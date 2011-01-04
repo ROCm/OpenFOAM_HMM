@@ -273,7 +273,7 @@ void kEpsilon::correct()
 
     RASModel::correct();
 
-    volScalarField divU = fvc::div(phi_/fvc::interpolate(rho_));
+    volScalarField divU(fvc::div(phi_/fvc::interpolate(rho_)));
 
     if (mesh_.moving())
     {

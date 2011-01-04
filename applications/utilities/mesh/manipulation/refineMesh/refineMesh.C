@@ -271,7 +271,7 @@ label twoDNess(const polyMesh& mesh)
         {
             const vectorField& n = patch.faceAreas();
 
-            scalarField cosAngle = mag(n/mag(n) & cellPlane.normal());
+            const scalarField cosAngle(mag(n/mag(n) & cellPlane.normal()));
 
             if (mag(min(cosAngle) - max(cosAngle)) > 1E-6)
             {

@@ -98,7 +98,7 @@ public:
 
         //- Construct from dictionary using default dictionary constructor
         //  class
-        HashPtrTable(const dictionary& dict);
+        HashPtrTable(const dictionary&);
 
         //- Construct as copy
         HashPtrTable(const HashPtrTable<T, Key, Hash>&);

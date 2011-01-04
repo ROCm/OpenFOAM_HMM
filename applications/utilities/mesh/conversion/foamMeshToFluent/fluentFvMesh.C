@@ -158,7 +158,7 @@ void Foam::fluentFvMesh::writeFluentMesh() const
     // Writing boundary faces
     forAll(boundary(), patchI)
     {
-        const unallocFaceList& patchFaces = boundaryMesh()[patchI];
+        const faceUList& patchFaces = boundaryMesh()[patchI];
 
         const labelList& patchFaceCells =
             boundaryMesh()[patchI].faceCells();

@@ -153,11 +153,14 @@ gaussLaplacianScheme<Type, GType>::fvmLaplacian
 {
     const fvMesh& mesh = this->mesh();
 
-    surfaceVectorField Sn = mesh.Sf()/mesh.magSf();
+    const surfaceVectorField Sn(mesh.Sf()/mesh.magSf());
 
-    surfaceVectorField SfGamma = mesh.Sf() & gamma;
-    GeometricField<scalar, fvsPatchField, surfaceMesh> SfGammaSn = SfGamma & Sn;
-    surfaceVectorField SfGammaCorr = SfGamma - SfGammaSn*Sn;
+    const surfaceVectorField SfGamma(mesh.Sf() & gamma);
+    const GeometricField<scalar, fvsPatchField, surfaceMesh> SfGammaSn
+    (
+        SfGamma & Sn
+    );
+    const surfaceVectorField SfGammaCorr(SfGamma - SfGammaSn*Sn);
 
     tmp<fvMatrix<Type> > tfvm = fvmLaplacianUncorrected(SfGammaSn, vf);
     fvMatrix<Type>& fvm = tfvm();
@@ -192,11 +195,13 @@ gaussLaplacianScheme<Type, GType>::fvcLaplacian
 {
     const fvMesh& mesh = this->mesh();
 
-    surfaceVectorField Sn = mesh.Sf()/mesh.magSf();
-
-    surfaceVectorField SfGamma = mesh.Sf() & gamma;
-    GeometricField<scalar, fvsPatchField, surfaceMesh> SfGammaSn = SfGamma & Sn;
-    surfaceVectorField SfGammaCorr = SfGamma - SfGammaSn*Sn;
+    const surfaceVectorField Sn(mesh.Sf()/mesh.magSf());
+    const surfaceVectorField SfGamma(mesh.Sf() & gamma);
+    const GeometricField<scalar, fvsPatchField, surfaceMesh> SfGammaSn
+    (
+        SfGamma & Sn
+    );
+    const surfaceVectorField SfGammaCorr(SfGamma - SfGammaSn*Sn);
 
     tmp<GeometricField<Type, fvPatchField, volMesh> > tLaplacian
     (

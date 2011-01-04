@@ -133,7 +133,11 @@ void alphaContactAngleFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchScalarField, alphaContactAngleFvPatchScalarField);
+makePatchTypeField
+(
+    fvPatchScalarField,
+    alphaContactAngleFvPatchScalarField
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

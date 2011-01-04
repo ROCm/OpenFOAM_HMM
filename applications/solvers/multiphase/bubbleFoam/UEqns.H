@@ -2,12 +2,14 @@ fvVectorMatrix UaEqn(Ua, Ua.dimensions()*dimVol/dimTime);
 fvVectorMatrix UbEqn(Ub, Ub.dimensions()*dimVol/dimTime);
 
 {
-    volTensorField Rca = -nuEffa*(fvc::grad(Ua)().T());
+    volTensorField Rca(-nuEffa*(fvc::grad(Ua)().T()));
     Rca = Rca + (2.0/3.0)*sqr(Ct)*I*k - (2.0/3.0)*I*tr(Rca);
 
-    surfaceScalarField phiRa =
+    surfaceScalarField phiRa
+    (
       - fvc::interpolate(nuEffa)
-       *mesh.magSf()*fvc::snGrad(alpha)/fvc::interpolate(alpha + scalar(0.001));
+       *mesh.magSf()*fvc::snGrad(alpha)/fvc::interpolate(alpha + scalar(0.001))
+    );
 
     UaEqn =
     (
@@ -34,12 +36,14 @@ fvVectorMatrix UbEqn(Ub, Ub.dimensions()*dimVol/dimTime);
     UaEqn.relax();
 
 
-    volTensorField Rcb = -nuEffb*fvc::grad(Ub)().T();
+    volTensorField Rcb(-nuEffb*fvc::grad(Ub)().T());
     Rcb = Rcb + (2.0/3.0)*I*k - (2.0/3.0)*I*tr(Rcb);
 
-    surfaceScalarField phiRb =
+    surfaceScalarField phiRb
+    (
        - fvc::interpolate(nuEffb)
-        *mesh.magSf()*fvc::snGrad(beta)/fvc::interpolate(beta + scalar(0.001));
+        *mesh.magSf()*fvc::snGrad(beta)/fvc::interpolate(beta + scalar(0.001))
+    );
 
     UbEqn =
     (

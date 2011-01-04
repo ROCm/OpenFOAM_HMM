@@ -67,7 +67,7 @@ tmp<volScalarField> scaleSimilarity::k() const
 
 tmp<volScalarField> scaleSimilarity::epsilon() const
 {
-    volSymmTensorField D = symm(fvc::grad(U()));
+    tmp<volSymmTensorField> D = symm(fvc::grad(U()));
 
     return((filter_(sqr(U())) - sqr(filter_(U()))) && D);
 }

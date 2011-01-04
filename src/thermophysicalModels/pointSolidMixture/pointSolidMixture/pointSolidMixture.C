@@ -92,7 +92,8 @@ Foam::scalarField Foam::pointSolidMixture::X(const scalarField& Y) const
         X[i] = Y[i]/properties_[i].rho();
     }
 
-    return X/rhoInv;
+    tmp<scalarField> tfld = X/rhoInv;
+    return tfld();
 }
 
 

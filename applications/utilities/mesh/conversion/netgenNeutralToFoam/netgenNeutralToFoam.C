@@ -226,7 +226,7 @@ int main(int argc, char *argv[])
                 if (((fc - cc) & fn) < 0)
                 {
                     // Boundary face points inwards. Flip.
-                    boundaryFaces[faceI] = boundaryFaces[faceI].reverseFace();
+                    boundaryFaces[faceI].flip();
                 }
 
                 // Done this face so erase from hash

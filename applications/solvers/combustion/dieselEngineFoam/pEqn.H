@@ -1,6 +1,6 @@
 rho = thermo.rho();
 
-volScalarField A = UEqn.A();
+volScalarField A(UEqn.A());
 U = UEqn.H()/A;
 
 if (transonic)

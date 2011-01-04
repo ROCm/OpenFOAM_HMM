@@ -37,7 +37,7 @@ namespace Foam
 
 template<class Type> class emptyFvsPatchField;
 
-makeFvsPatchTypeFieldTypedefs(empty)
+makeFvsPatchTypeFieldTypedefs(empty);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

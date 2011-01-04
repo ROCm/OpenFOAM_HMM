@@ -54,19 +54,23 @@ tmp<volScalarField> realizableKE::rCmu
     tmp<volSymmTensorField> tS = dev(symm(gradU));
     const volSymmTensorField& S = tS();
 
-    volScalarField W =
+    volScalarField W
+    (
         (2*sqrt(2.0))*((S&S)&&S)
        /(
             magS*S2
           + dimensionedScalar("small", dimensionSet(0, 0, -3, 0, 0), SMALL)
-        );
+        )
+    );
 
     tS.clear();
 
-    volScalarField phis =
-        (1.0/3.0)*acos(min(max(sqrt(6.0)*W, -scalar(1)), scalar(1)));
-    volScalarField As = sqrt(6.0)*cos(phis);
-    volScalarField Us = sqrt(S2/2.0 + magSqr(skew(gradU)));
+    volScalarField phis
+    (
+        (1.0/3.0)*acos(min(max(sqrt(6.0)*W, -scalar(1)), scalar(1)))
+    );
+    volScalarField As(sqrt(6.0)*cos(phis));
+    volScalarField Us(sqrt(S2/2.0 + magSqr(skew(gradU))));
 
     return 1.0/(A0_ + As*Us*k_/epsilon_);
 }
@@ -77,8 +81,8 @@ tmp<volScalarField> realizableKE::rCmu
     const volTensorField& gradU
 )
 {
-    volScalarField S2 = 2*magSqr(dev(symm(gradU)));
-    volScalarField magS = sqrt(S2);
+    volScalarField S2(2*magSqr(dev(symm(gradU))));
+    volScalarField magS(sqrt(S2));
     return rCmu(gradU, S2, magS);
 }
 
@@ -303,19 +307,19 @@ void realizableKE::correct()
 
     RASModel::correct();
 
-    volScalarField divU = fvc::div(phi_/fvc::interpolate(rho_));
+    volScalarField divU(fvc::div(phi_/fvc::interpolate(rho_)));
 
     if (mesh_.moving())
     {
         divU += fvc::div(mesh_.phi());
     }
 
-    volTensorField gradU = fvc::grad(U_);
-    volScalarField S2 = 2*magSqr(dev(symm(gradU)));
-    volScalarField magS = sqrt(S2);
+    volTensorField gradU(fvc::grad(U_));
+    volScalarField S2(2*magSqr(dev(symm(gradU))));
+    volScalarField magS(sqrt(S2));
 
-    volScalarField eta = magS*k_/epsilon_;
-    volScalarField C1 = max(eta/(scalar(5) + eta), scalar(0.43));
+    volScalarField eta(magS*k_/epsilon_);
+    volScalarField C1(max(eta/(scalar(5) + eta), scalar(0.43)));
 
     volScalarField G("RASModel::G", mut_*(gradU && dev(twoSymm(gradU))));
 

@@ -293,10 +293,10 @@ void LaunderSharmaKE::correct()
     // Calculate parameters and coefficients for Launder-Sharma low-Reynolds
     // number model
 
-    volScalarField E = 2.0*mu()*mut_*fvc::magSqrGradGrad(U_)/rho_;
-    volScalarField D = 2.0*mu()*magSqr(fvc::grad(sqrt(k_)))/rho_;
+    volScalarField E(2.0*mu()*mut_*fvc::magSqrGradGrad(U_)/rho_);
+    volScalarField D(2.0*mu()*magSqr(fvc::grad(sqrt(k_)))/rho_);
 
-    volScalarField divU = fvc::div(phi_/fvc::interpolate(rho_));
+    volScalarField divU(fvc::div(phi_/fvc::interpolate(rho_)));
 
     if (mesh_.moving())
     {

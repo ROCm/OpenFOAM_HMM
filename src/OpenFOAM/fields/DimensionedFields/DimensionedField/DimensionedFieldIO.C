@@ -26,15 +26,11 @@ License
 #include "DimensionedField.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type, class GeoMesh>
-void DimensionedField<Type, GeoMesh>::readField
+void Foam::DimensionedField<Type, GeoMesh>::readField
 (
     const dictionary& fieldDict,
     const word& fieldDictEntry
@@ -43,12 +39,15 @@ void DimensionedField<Type, GeoMesh>::readField
     dimensions_.reset(dimensionSet(fieldDict.lookup("dimensions")));
 
     Field<Type> f(fieldDictEntry, fieldDict, GeoMesh::size(mesh_));
-    transfer(f);
+    this->transfer(f);
 }
 
 
 template<class Type, class GeoMesh>
-void DimensionedField<Type, GeoMesh>::readIfPresent(const word& fieldDictEntry)
+void Foam::DimensionedField<Type, GeoMesh>::readIfPresent
+(
+    const word& fieldDictEntry
+)
 {
     if
     (
@@ -65,7 +64,7 @@ void DimensionedField<Type, GeoMesh>::readIfPresent(const word& fieldDictEntry)
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type, class GeoMesh>
-DimensionedField<Type, GeoMesh>::DimensionedField
+Foam::DimensionedField<Type, GeoMesh>::DimensionedField
 (
     const IOobject& io,
     const Mesh& mesh,
@@ -84,7 +83,7 @@ DimensionedField<Type, GeoMesh>::DimensionedField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type, class GeoMesh>
-bool DimensionedField<Type, GeoMesh>::writeData
+bool Foam::DimensionedField<Type, GeoMesh>::writeData
 (
     Ostream& os,
     const word& fieldDictEntry
@@ -107,7 +106,7 @@ bool DimensionedField<Type, GeoMesh>::writeData
 
 
 template<class Type, class GeoMesh>
-bool DimensionedField<Type, GeoMesh>::writeData(Ostream& os) const
+bool Foam::DimensionedField<Type, GeoMesh>::writeData(Ostream& os) const
 {
     return writeData(os, "value");
 }
@@ -116,7 +115,11 @@ bool DimensionedField<Type, GeoMesh>::writeData(Ostream& os) const
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class Type, class GeoMesh>
-Ostream& operator<<(Ostream& os, const DimensionedField<Type, GeoMesh>& df)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const DimensionedField<Type, GeoMesh>& df
+)
 {
     df.writeData(os);
 
@@ -125,7 +128,7 @@ Ostream& operator<<(Ostream& os, const DimensionedField<Type, GeoMesh>& df)
 
 
 template<class Type, class GeoMesh>
-Ostream& operator<<
+Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
     const tmp<DimensionedField<Type, GeoMesh> >& tdf
@@ -137,9 +140,5 @@ Ostream& operator<<
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

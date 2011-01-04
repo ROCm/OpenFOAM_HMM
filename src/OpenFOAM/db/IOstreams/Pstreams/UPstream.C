@@ -35,7 +35,11 @@ defineTypeNameAndDebug(Foam::UPstream, 0);
 namespace Foam
 {
     template<>
-    const char* Foam::NamedEnum<Foam::UPstream::commsTypes, 3>::names[] =
+    const char* Foam::NamedEnum
+    <
+        Foam::UPstream::commsTypes,
+        3
+    >::names[] =
     {
         "blocking",
         "scheduled",

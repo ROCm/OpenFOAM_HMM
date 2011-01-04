@@ -36,15 +36,15 @@ solvers
     {
         solver          GAMG;
         tolerance       1e-06;
-        relTol          0.01;    
+        relTol          0.01;
         smoother        GaussSeidel;
-        nPreSweeps      0;             
-        nPostSweeps     2;             
-        nFinestSweeps   2;             
-        cacheAgglomeration false;      
-        nCellsInCoarsestLevel 10;      
-        agglomerator    faceAreaPair;  
-        mergeLevels     1;             
+        nPreSweeps      0;
+        nPostSweeps     2;
+        nFinestSweeps   2;
+        cacheAgglomeration false;
+        nCellsInCoarsestLevel 10;
+        agglomerator    faceAreaPair;
+        mergeLevels     1;
     }
 
     pFinal

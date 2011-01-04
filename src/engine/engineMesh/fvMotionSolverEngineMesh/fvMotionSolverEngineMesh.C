@@ -68,9 +68,11 @@ void Foam::fvMotionSolverEngineMesh::move()
     motionSolver_.cellMotionU().boundaryField()[pistonIndex_] == deltaZ;
 
     {
-        scalarField linerPoints =
+        scalarField linerPoints
+        (
             motionSolver_.cellMotionU()
-           .boundaryField()[linerIndex_].patch().Cf().component(vector::Z);
+           .boundaryField()[linerIndex_].patch().Cf().component(vector::Z)
+        );
 
         motionSolver_.cellMotionU().boundaryField()[linerIndex_] ==
             deltaZ*pos(deckHeight_.value() - linerPoints)

@@ -1195,7 +1195,7 @@ void Foam::InteractionLists<ParticleType>::sendReferredData
     // buffer but not block, i.e. it is calling
     //     pBufs.finishedSends(false);
     wallFaceMap().send(pBufs, referredWallData_);
-};
+}
 
 
 template<class ParticleType>

@@ -39,8 +39,8 @@ namespace combustionModels
         infinitelyFastChemistry,
         dictionary
     );
-};
-};
+}
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

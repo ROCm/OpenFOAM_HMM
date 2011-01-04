@@ -242,6 +242,14 @@ public:
 };
 
 
+//- Data associated with refinementDistanceData type are contiguous
+template<>
+inline bool contiguous<refinementDistanceData>()
+{
+    return true;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

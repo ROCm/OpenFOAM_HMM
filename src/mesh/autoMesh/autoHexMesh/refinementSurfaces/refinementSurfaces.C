@@ -37,8 +37,11 @@ License
 namespace Foam
 {
     template<>
-    const char*
-    Foam::NamedEnum<Foam::refinementSurfaces::areaSelectionAlgo, 4>::names[] =
+    const char* Foam::NamedEnum
+    <
+        Foam::refinementSurfaces::areaSelectionAlgo,
+        4
+    >::names[] =
     {
         "inside",
         "outside",

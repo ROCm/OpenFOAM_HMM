@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,7 +55,7 @@ void Foam::fileFormats::X3DsurfaceFormat<Face>::write
     const List<surfZone>& zones =
     (
         surf.surfZones().empty()
-      ? oneZone(faceLst, "")
+      ? surfaceFormatsCore::oneZone(faceLst, "")
       : surf.surfZones()
     );
 

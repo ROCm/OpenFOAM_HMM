@@ -39,8 +39,8 @@ namespace combustionModels
         noCombustion,
         dictionary
     );
-};
-};
+}
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

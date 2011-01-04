@@ -138,8 +138,8 @@ bool Foam::fieldValues::faceSource::writeValues(const word& fieldName)
 
     if (ok)
     {
-        Field<Type> values = getFieldValues<Type>(fieldName);
-        scalarField weightField = getFieldValues<scalar>(weightFieldName_);
+        Field<Type> values(getFieldValues<Type>(fieldName));
+        scalarField weightField(getFieldValues<scalar>(weightFieldName_));
         scalarField magSf;
 
         if (surfacePtr_.valid())

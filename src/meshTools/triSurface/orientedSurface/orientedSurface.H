@@ -66,15 +66,12 @@ class orientedSurface
 
     // Private Member Functions
 
-        //- Return true if face uses edge from start to end.
-        static bool edgeOrder(const labelledTri&, const edge&);
-
         //- Return true if edge is used in opposite order in faces
         static bool consistentEdge
         (
             const edge& e,
-            const labelledTri& f0,
-            const labelledTri& f1
+            const triSurface::FaceType& f0,
+            const triSurface::FaceType& f1
         );
 
         //- From changed faces get the changed edges

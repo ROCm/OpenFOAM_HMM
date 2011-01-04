@@ -33,7 +33,7 @@ License
 
 #define createKinematicParcelTypes(ParcelType)                                \
                                                                               \
-    defineTemplateTypeNameAndDebug(ParcelType, 0);                            \
+    defineTypeNameAndDebug(ParcelType, 0);                                    \
     defineTemplateTypeNameAndDebug(Particle<ParcelType>, 0);                  \
     defineTemplateTypeNameAndDebug(Cloud<ParcelType>, 0);                     \
                                                                               \

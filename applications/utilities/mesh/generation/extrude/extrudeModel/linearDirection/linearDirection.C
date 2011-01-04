@@ -86,4 +86,3 @@ point linearDirection::operator()
 } // End namespace Foam
 
 // ************************************************************************* //
-

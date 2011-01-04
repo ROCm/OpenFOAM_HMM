@@ -25,15 +25,10 @@ License
 
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Point, class PointRef>
-inline line<Point, PointRef>::line(const Point& start, const Point& end)
+inline Foam::line<Point, PointRef>::line(const Point& start, const Point& end)
 :
     a_(start),
     b_(end)
@@ -41,59 +36,65 @@ inline line<Point, PointRef>::line(const Point& start, const Point& end)
 
 
 template<class Point, class PointRef>
-inline line<Point, PointRef>::line(Istream& is)
+inline Foam::line<Point, PointRef>::line
+(
+    const UList<Point>& points,
+    const FixedList<label, 2>& indices
+)
+:
+    a_(points[indices[0]]),
+    b_(points[indices[1]])
+{}
+
+
+template<class Point, class PointRef>
+inline Foam::line<Point, PointRef>::line(Istream& is)
 {
-    // Read beginning of line point pair
-    is.readBegin("line");
-
-    is >> a_ >> b_;
-
-    // Read end of line point pair
-    is.readEnd("line");
-
-    // Check state of Istream
-    is.check("line::line(Istream& is)");
+    is  >> *this;
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Point, class PointRef>
-inline PointRef line<Point, PointRef>::start() const
+inline PointRef Foam::line<Point, PointRef>::start() const
 {
     return a_;
 }
 
 template<class Point, class PointRef>
-inline PointRef line<Point, PointRef>::end() const
+inline PointRef Foam::line<Point, PointRef>::end() const
 {
     return b_;
 }
 
 
 template<class Point, class PointRef>
-inline Point line<Point, PointRef>::centre() const
+inline Point Foam::line<Point, PointRef>::centre() const
 {
     return 0.5*(a_ + b_);
 }
 
 
 template<class Point, class PointRef>
-inline scalar line<Point, PointRef>::mag() const
+inline Foam::scalar Foam::line<Point, PointRef>::mag() const
 {
     return ::Foam::mag(vec());
 }
 
 
 template<class Point, class PointRef>
-inline Point line<Point, PointRef>::vec() const
+inline Point Foam::line<Point, PointRef>::vec() const
 {
     return b_ - a_;
 }
 
 
 template<class Point, class PointRef>
-PointHit<Point> line<Point, PointRef>::nearestDist(const Point& p) const
+Foam::PointHit<Point> Foam::line<Point, PointRef>::nearestDist
+(
+    const Point& p
+) const
 {
     Point v = vec();
 
@@ -122,7 +123,7 @@ PointHit<Point> line<Point, PointRef>::nearestDist(const Point& p) const
 
 
 template<class Point, class PointRef>
-scalar line<Point, PointRef>::nearestDist
+Foam::scalar Foam::line<Point, PointRef>::nearestDist
 (
     const line<Point, const Point&>& edge,
     Point& thisPt,
@@ -259,33 +260,34 @@ scalar line<Point, PointRef>::nearestDist
 // * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * * //
 
 template<class Point, class PointRef>
-inline Istream& operator>>(Istream& is, line<Point, PointRef>& l)
+inline Foam::Istream& Foam::operator>>
+(
+    Istream& is,
+    line<Point, PointRef>& l
+)
 {
-    // Read beginning of line point pair
     is.readBegin("line");
-
-    is >> l.a_ >> l.b_;
-
-    // Read end of line point pair
+    is  >> l.a_ >> l.b_;
     is.readEnd("line");
 
-    // Check state of Ostream
     is.check("Istream& operator>>(Istream&, line&)");
-
     return is;
 }
 
 
 template<class Point, class PointRef>
-inline Ostream& operator<<(Ostream& os, const line<Point, PointRef>& l)
+inline Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const line<Point, PointRef>& l
+)
 {
-    os << token::BEGIN_LIST << l.a_ << token::SPACE << l.b_ << token::END_LIST;
+    os  << token::BEGIN_LIST
+        << l.a_ << token::SPACE
+        << l.b_
+        << token::END_LIST;
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

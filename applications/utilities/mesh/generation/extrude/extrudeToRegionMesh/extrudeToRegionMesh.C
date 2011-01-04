@@ -952,7 +952,7 @@ int main(int argc, char *argv[])
     const word shellRegionName(dict.lookup("region"));
     const wordList zoneNames(dict.lookup("faceZones"));
     const Switch oneD(dict.lookup("oneD"));
-
+    const Switch adaptMesh(dict.lookup("adaptMesh"));
 
     Info<< "Extruding zones " << zoneNames
         << " on mesh " << regionName
@@ -1096,6 +1096,9 @@ int main(int argc, char *argv[])
 
     // Add interface patches
     // ~~~~~~~~~~~~~~~~~~~~~
+    // Note that these actually get added to the original mesh
+    // so the shell mesh creation copies them. They then get removed
+    // from the original mesh.
 
     Info<< "Adding coupling patches:" << nl << nl
         << "patchID\tpatch\ttype" << nl
@@ -1707,6 +1710,8 @@ int main(int argc, char *argv[])
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     autoPtr<mapPolyMesh> addBafflesMap;
+
+    if (adaptMesh)
     {
         polyTopoChange meshMod(mesh);
 
@@ -1817,6 +1822,7 @@ int main(int argc, char *argv[])
     // Change master and slave boundary conditions on originating mesh
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    if (adaptMesh)
     {
         const polyBoundaryMesh& patches = mesh.boundaryMesh();
         List<polyPatch*> newPatches(patches.size());
@@ -1878,22 +1884,26 @@ int main(int argc, char *argv[])
         }
         mesh.removeFvBoundary();
         mesh.addFvPatches(newPatches, true);
+
+        // Remove any unused patches
         deleteEmptyPatches(mesh);
     }
 
 
-    Info<< "Writing mesh " << mesh.name()
-        << " to " << mesh.facesInstance() << nl
-        << endl;
-
-    if (!mesh.write())
+    if (adaptMesh)
     {
-        FatalErrorIn(args.executable())
-            << "Failed writing mesh " << mesh.name()
-            << " at location " << mesh.facesInstance()
-            << exit(FatalError);
-    }
+        Info<< "Writing mesh " << mesh.name()
+            << " to " << mesh.facesInstance() << nl
+            << endl;
 
+        if (!mesh.write())
+        {
+            FatalErrorIn(args.executable())
+                << "Failed writing mesh " << mesh.name()
+                << " at location " << mesh.facesInstance()
+                << exit(FatalError);
+        }
+    }
 
     Info << "End\n" << endl;
 

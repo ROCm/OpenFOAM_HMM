@@ -37,7 +37,7 @@ namespace Foam
 
 template<class Type> class zeroGradientFvPatchField;
 
-makePatchTypeFieldTypedefs(zeroGradient)
+makePatchTypeFieldTypedefs(zeroGradient);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

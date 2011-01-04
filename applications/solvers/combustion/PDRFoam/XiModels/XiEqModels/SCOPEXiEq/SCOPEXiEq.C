@@ -34,8 +34,8 @@ namespace XiEqModels
 {
     defineTypeNameAndDebug(SCOPEXiEq, 0);
     addToRunTimeSelectionTable(XiEqModel, SCOPEXiEq, dictionary);
-};
-};
+}
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -83,13 +83,13 @@ Foam::tmp<Foam::volScalarField> Foam::XiEqModels::SCOPEXiEq::XiEq() const
     const volScalarField& k = turbulence_.k();
     const volScalarField& epsilon = turbulence_.epsilon();
 
-    volScalarField up = sqrt((2.0/3.0)*k);
-    volScalarField l = (lCoef*sqrt(3.0/2.0))*up*k/epsilon;
-    volScalarField Rl = up*l*thermo_.rhou()/thermo_.muu();
+    volScalarField up(sqrt((2.0/3.0)*k));
+    volScalarField l((lCoef*sqrt(3.0/2.0))*up*k/epsilon);
+    volScalarField Rl(up*l*thermo_.rhou()/thermo_.muu());
 
-    volScalarField upBySu = up/(Su_ + SuMin);
-    volScalarField K = 0.157*upBySu/sqrt(Rl);
-    volScalarField Ma = MaModel.Ma();
+    volScalarField upBySu(up/(Su_ + SuMin));
+    volScalarField K(0.157*upBySu/sqrt(Rl));
+    volScalarField Ma(MaModel.Ma());
 
     tmp<volScalarField> tXiEq
     (

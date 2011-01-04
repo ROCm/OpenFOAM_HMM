@@ -44,7 +44,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeFvsPatchTypeFieldTypedefs(sliced)
+makeFvsPatchTypeFieldTypedefs(sliced);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

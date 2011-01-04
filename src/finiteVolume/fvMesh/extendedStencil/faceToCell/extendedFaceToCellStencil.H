@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,7 +49,7 @@ namespace Foam
 class globalIndex;
 
 /*---------------------------------------------------------------------------*\
-                           Class extendedFaceToCellStencil Declaration
+                  Class extendedFaceToCellStencil Declaration
 \*---------------------------------------------------------------------------*/
 
 class extendedFaceToCellStencil
@@ -59,17 +59,6 @@ protected:
     // Protected data
 
         const polyMesh& mesh_;
-
-private:
-
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        extendedFaceToCellStencil(const extendedFaceToCellStencil&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const extendedFaceToCellStencil&);
-
 
 public:
 

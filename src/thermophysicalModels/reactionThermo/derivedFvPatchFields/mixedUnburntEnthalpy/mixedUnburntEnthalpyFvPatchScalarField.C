@@ -29,14 +29,10 @@ License
 #include "volFields.H"
 #include "hhuCombustionThermo.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-mixedUnburntEnthalpyFvPatchScalarField::mixedUnburntEnthalpyFvPatchScalarField
+Foam::mixedUnburntEnthalpyFvPatchScalarField::
+mixedUnburntEnthalpyFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -50,7 +46,8 @@ mixedUnburntEnthalpyFvPatchScalarField::mixedUnburntEnthalpyFvPatchScalarField
 }
 
 
-mixedUnburntEnthalpyFvPatchScalarField::mixedUnburntEnthalpyFvPatchScalarField
+Foam::mixedUnburntEnthalpyFvPatchScalarField::
+mixedUnburntEnthalpyFvPatchScalarField
 (
     const mixedUnburntEnthalpyFvPatchScalarField& ptf,
     const fvPatch& p,
@@ -62,7 +59,8 @@ mixedUnburntEnthalpyFvPatchScalarField::mixedUnburntEnthalpyFvPatchScalarField
 {}
 
 
-mixedUnburntEnthalpyFvPatchScalarField::mixedUnburntEnthalpyFvPatchScalarField
+Foam::mixedUnburntEnthalpyFvPatchScalarField::
+mixedUnburntEnthalpyFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -73,7 +71,8 @@ mixedUnburntEnthalpyFvPatchScalarField::mixedUnburntEnthalpyFvPatchScalarField
 {}
 
 
-mixedUnburntEnthalpyFvPatchScalarField::mixedUnburntEnthalpyFvPatchScalarField
+Foam::mixedUnburntEnthalpyFvPatchScalarField::
+mixedUnburntEnthalpyFvPatchScalarField
 (
     const mixedUnburntEnthalpyFvPatchScalarField& tppsf
 )
@@ -82,7 +81,8 @@ mixedUnburntEnthalpyFvPatchScalarField::mixedUnburntEnthalpyFvPatchScalarField
 {}
 
 
-mixedUnburntEnthalpyFvPatchScalarField::mixedUnburntEnthalpyFvPatchScalarField
+Foam::mixedUnburntEnthalpyFvPatchScalarField::
+mixedUnburntEnthalpyFvPatchScalarField
 (
     const mixedUnburntEnthalpyFvPatchScalarField& tppsf,
     const DimensionedField<scalar, volMesh>& iF
@@ -94,7 +94,7 @@ mixedUnburntEnthalpyFvPatchScalarField::mixedUnburntEnthalpyFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void mixedUnburntEnthalpyFvPatchScalarField::updateCoeffs()
+void Foam::mixedUnburntEnthalpyFvPatchScalarField::updateCoeffs()
 {
     if (updated())
     {
@@ -130,10 +130,13 @@ void mixedUnburntEnthalpyFvPatchScalarField::updateCoeffs()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchScalarField, mixedUnburntEnthalpyFvPatchScalarField);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchScalarField,
+        mixedUnburntEnthalpyFvPatchScalarField
+    );
+}
 
 // ************************************************************************* //

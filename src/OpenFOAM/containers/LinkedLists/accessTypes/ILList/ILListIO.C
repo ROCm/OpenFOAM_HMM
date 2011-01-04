@@ -53,9 +53,9 @@ void Foam::ILList<LListBase, T>::read(Istream& is, const INew& iNew)
         {
             if (delimiter == token::BEGIN_LIST)
             {
-                for (label i=0; i<s; i++)
+                for (label i=0; i<s; ++i)
                 {
-                    append(iNew(is).ptr());
+                    this->append(iNew(is).ptr());
 
                     is.fatalCheck
                     (
@@ -67,7 +67,7 @@ void Foam::ILList<LListBase, T>::read(Istream& is, const INew& iNew)
             else
             {
                 T* tPtr = iNew(is).ptr();
-                append(tPtr);
+                this->append(tPtr);
 
                 is.fatalCheck
                 (
@@ -75,9 +75,9 @@ void Foam::ILList<LListBase, T>::read(Istream& is, const INew& iNew)
                     "reading entry"
                 );
 
-                for (label i=1; i<s; i++)
+                for (label i=1; i<s; ++i)
                 {
-                    append(new T(*tPtr));
+                    this->append(new T(*tPtr));
                 }
             }
         }
@@ -109,7 +109,7 @@ void Foam::ILList<LListBase, T>::read(Istream& is, const INew& iNew)
         )
         {
             is.putBack(lastToken);
-            append(iNew(is).ptr());
+            this->append(iNew(is).ptr());
 
             is >> lastToken;
             is.fatalCheck("operator>>(Istream&, ILList<LListBase, T>&)");
@@ -131,14 +131,14 @@ template<class LListBase, class T>
 template<class INew>
 Foam::ILList<LListBase, T>::ILList(Istream& is, const INew& iNew)
 {
-    read(is, iNew);
+    this->read(is, iNew);
 }
 
 
 template<class LListBase, class T>
 Foam::ILList<LListBase, T>::ILList(Istream& is)
 {
-    read(is, INew<T>());
+    this->read(is, INew<T>());
 }
 
 
@@ -153,7 +153,5 @@ Foam::Istream& Foam::operator>>(Istream& is, ILList<LListBase, T>& L)
     return is;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

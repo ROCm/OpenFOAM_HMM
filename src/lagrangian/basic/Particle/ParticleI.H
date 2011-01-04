@@ -104,7 +104,7 @@ inline Foam::scalar Foam::Particle<ParticleType>::tetLambda
         if (mag(lambdaNumerator) < SMALL)
         {
             // Track starts on the face, and is potentially
-            // parallel to it.  +-SMALL)/+-SMALL is not a good
+            // parallel to it.  +-SMALL/+-SMALL is not a good
             // comparison, return 0.0, in anticipation of tet
             // centre correction.
 

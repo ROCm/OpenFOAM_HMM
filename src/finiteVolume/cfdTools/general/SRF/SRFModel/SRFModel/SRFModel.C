@@ -162,7 +162,10 @@ Foam::vectorField Foam::SRF::SRFModel::velocity
     const vectorField& positions
 ) const
 {
-    return omega_.value() ^ (positions - axis_*(axis_ & positions));
+    tmp<vectorField> tfld =
+        omega_.value() ^ (positions - axis_*(axis_ & positions));
+
+    return tfld();
 }
 
 
@@ -188,7 +191,7 @@ Foam::tmp<Foam::volVectorField> Foam::SRF::SRFModel::U() const
 
 Foam::tmp<Foam::volVectorField> Foam::SRF::SRFModel::Uabs() const
 {
-    const volVectorField Usrf = U();
+    tmp<volVectorField> Usrf = U();
 
     tmp<volVectorField> tUabs
     (

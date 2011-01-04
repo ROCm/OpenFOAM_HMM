@@ -50,15 +50,30 @@ USAGE
 # inlineSed <file> <sedCommand> <description>
 _inlineSed()
 {
-    backup=`tempfile`
+    [ -f "$1" ] || {
+        echo "Missing file: $1"
+        exit 1
+    }
+
+    backup="temp.$$"
     cp $1 $backup
     sed -i -e "$2" $1
-    cmp --quiet $1 $backup && usage "Failed : $3"
+
+    if cmp $1 $backup > /dev/null 2>&1
+    then
+        echo "Failed: $3 in $1"
+        rm $backup 2>/dev/null
+        exit 1
+    else
+        echo "Okay: $3 in $1"
+        rm $backup 2>/dev/null
+    fi
+
     return 0
 }
 
 
-[ -f etc/bashrc -a -f etc/settings.sh ] || usage "Please run from top-level directory of installation"
+[ -f etc/bashrc ] || usage "Please run from top-level directory of installation"
 
 unset foamInstall projectName archOption paraviewInstall
 
@@ -66,43 +81,47 @@ unset foamInstall projectName archOption paraviewInstall
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-    -h | --help)
+    -h | -help | --help)
         usage
         ;;
-    --foamInstall)
+    -foamInstall | --foamInstall)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         foamInstall="$2"
+        # replace foamInstall=...
         _inlineSed \
             etc/bashrc \
             '/^[^#]/s@foamInstall=.*@foamInstall='"$foamInstall@" \
-            "Replacing foamInstall setting by $foamInstall"
+            "Replacing foamInstall setting by '$foamInstall'"
         shift 2
         ;;
-   --projectName)
+   -projectName | --projectName)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         projectName="$2"
+        # replace WM_PROJECT_DIR=...
         _inlineSed \
             etc/bashrc \
             '/^[^#]/s@WM_PROJECT_DIR=.*@WM_PROJECT_DIR=$WM_PROJECT_INST_DIR/'"$projectName@" \
-            "Replacing WM_PROJECT_DIR setting by $projectName"
+            "Replacing WM_PROJECT_DIR setting by '$projectName'"
         shift 2
         ;;
-    --archOption)
+    -archOption | --archOption)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         archOption="$2"
+        # replace WM_ARCH_OPTION=...
         _inlineSed \
             etc/bashrc \
-            '/^[^#]/s@: ${WM_ARCH_OPTION:=64}@WM_ARCH_OPTION='"$archOption@" \
-             "Replacing WM_ARCH_OPTION setting by $archOption"
+            '/^[^#]/s@WM_ARCH_OPTION=.*@WM_ARCH_OPTION='"$archOption@" \
+             "Replacing WM_ARCH_OPTION setting by '$archOption'"
         shift 2
         ;;
-    --paraviewInstall)
+    -paraviewInstall | --paraviewInstall)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         paraviewInstall="$2"
+        # replace ParaView_DIR=...
         _inlineSed \
             etc/apps/paraview3/bashrc \
             '/^[^#]/s@ParaView_DIR=.*@ParaView_DIR='"$paraviewInstall@" \
-             "Replacing ParaView_DIR setting by $paraviewInstall"
+             "Replacing ParaView_DIR setting by '$paraviewInstall'"
         shift 2
         ;;
     *)
@@ -113,18 +132,19 @@ done
 
 [ -n "$foamInstall" -o -n "$projectName" -o -n "$archOption"  -o -n "$paraviewInstall" ] || usage "Please specify at least one configure option"
 
-#echo "Replacing WM_PROJECT setting by $projectName"
+#echo "Replacing WM_PROJECT setting by '$projectName'"
 #sed -i -e 's@WM_PROJECT=.*@WM_PROJECT='"$projectName@" etc/bashrc
 
-# Replace the WM_MPLIB always
+# Set WM_MPLIB=SYSTEMOPENMPI always
 _inlineSed \
     etc/bashrc \
-    '/^[^#]/s@: ${WM_MPLIB:=.*}@WM_MPLIB=SYSTEMOPENMPI@' \
-    "Replacing WM_MPLIB setting by SYSTEMOPENMPI"
-# Replace the compilerInstall always
+    '/^[^#]/s@export WM_MPLIB=.*@export WM_MPLIB=SYSTEMOPENMPI@' \
+    "Replacing WM_MPLIB setting by 'SYSTEMOPENMPI'"
+
+# set foamCompiler=system always
 _inlineSed \
-    etc/settings.sh \
-    '/^[^#]/s@: ${compilerInstall:=.*}@compilerInstall=system@' \
-    "Replacing compilerInstall setting by system"
+    etc/bashrc \
+    '/^[^#]/s@foamCompiler=.*@foamCompiler=system@' \
+    "Replacing foamCompiler setting by 'system'"
 
 #------------------------------------------------------------------------------

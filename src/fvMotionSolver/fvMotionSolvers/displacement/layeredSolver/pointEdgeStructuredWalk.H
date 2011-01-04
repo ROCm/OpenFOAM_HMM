@@ -218,6 +218,14 @@ public:
 };
 
 
+//- Data associated with pointEdgeStructuredWalk type are contiguous
+template<>
+inline bool contiguous<pointEdgeStructuredWalk>()
+{
+    return true;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

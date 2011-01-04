@@ -196,8 +196,7 @@ int main(int argc, char *argv[])
 
         forAll(surf1, faceI)
         {
-            const labelledTri& f = surf1[faceI];
-            const point centre = f.centre(surf1.points());
+            const point centre = surf1[faceI].centre(surf1.points());
 
             if
             (

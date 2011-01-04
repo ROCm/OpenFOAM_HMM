@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -26,38 +26,43 @@
 #     foamPackDoxygen [-prefix DIR] [-o outputDir]
 #
 # Description
-#     Packs and compresses the OpenFOAM doxygen html for release
+#     Pack and compress the OpenFOAM doxygen html for release
 #
 #------------------------------------------------------------------------------
 packDir=$WM_PROJECT-$WM_PROJECT_VERSION
-packTag=_Doxygen.gtgz
+htmlDir=doc/Doxygen/html
 
 usage() {
     while [ $# -gt 0 ]; do echo "$1" 1>&2; shift; done
 cat <<USAGE 1>&2
-Usage: ${0##*/} [-prefix DIR] [-o outputDir]
+Usage: ${0##*/} [OPTION]
+options:
+  -prefix <dir>     use alternative prefix
+  -o <dir>          specify alternative output directory
 
-    Packs and compresses the OpenFOAM doxygen html for release
+* Pack and compress the OpenFOAM doxygen html for release
 
 USAGE
     exit 1
 }
 
 unset prefix outputDir
-
+# parse options
 while [ "$#" -gt 0 ]
 do
     case $1 in
-    -prefix | --prefix )
+    -h | -help)
+        usage
+        ;;
+    -prefix | --prefix)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         prefix=${2%%/}
         shift 2
         ;;
-    -o | -output )
+    -o | -output)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         outputDir=${2%%/}
         shift 2
-        ;;
-    -h | -help )
-        usage
         ;;
     -*)
         usage "unknown option: '$*'"
@@ -81,41 +86,44 @@ then
     exit 1
 fi
 
-#
+#------------------------------------------------------------------------------
+packExt=tgz
+packName=${packDir}_Doxygen
+
 # add optional output directory
-#
-if [ -d "$outputDir" ]
-then
-    packFile="$outputDir/$packDir$packTag"
-else
-    packFile="$packDir$packTag"
-fi
+[ -d "$outputDir" ] && packName="$outputDir/$packName"
+packFile=$packName.$packExt
 
 
 if [ -f $packFile ]
 then
-    echo "Error: $packFile already exists"
+    echo "Error: $packFile already exists" 1>&2
     exit 1
 fi
 
-# Pack and compress the packFile using GNU tar
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-echo
-echo "Packing doxygen html into $packFile"
-echo
+cat <<INFO 1>&2
+-------------------------------------------------------------------------------
+Packing doxygen html into $packFile
+
+INFO
+
+# Clean up on Ctrl-C
+trap 'rm -f $packFile 2>/dev/null' INT
 
 if [ -n "$prefix" ]
 then
-    tar czpf $packFile --transform="s@^@$prefix/@" doc/Doxygen/html
+    # requires GNU tar
+    tar cpzf $packFile --transform="s@^@$prefix/@" $htmlDir
 else
-    tar czpf $packFile $packDir/doc/Doxygen/html
+    tar cpzf $packFile $packDir/$htmlDir
 fi
 
 if [ $? -eq 0 ]
 then
-    echo "Finished packing doxygen html into file $packFile"
+    echo "Finished packing doxygen html into file $packFile" 1>&2
 else
-    echo "Error: failure packing doxygen html file $packFile"
+    echo "Error: failure packing doxygen html file $packFile" 1>&2
+    rm -f $packFile 2>/dev/null
 fi
 
 #------------------------------------------------------------------------------

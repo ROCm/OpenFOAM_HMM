@@ -5,7 +5,7 @@
     // pressure solution - done in 2 parts. Part 1:
     thermo.rho() -= psi*p_rgh;
 
-    volScalarField rAU = 1.0/UEqn.A();
+    volScalarField rAU(1.0/UEqn.A());
     surfaceScalarField rhorAUf("(rho*(1|A(U)))", fvc::interpolate(rho*rAU));
 
     U = rAU*UEqn.H();
@@ -16,7 +16,7 @@
       + fvc::ddtPhiCorr(rAU, rho, U, phi)
     );
 
-    surfaceScalarField buoyancyPhi = -rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf();
+    surfaceScalarField buoyancyPhi(-rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf());
     phi += buoyancyPhi;
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)

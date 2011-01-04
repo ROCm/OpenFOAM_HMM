@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -23,24 +23,44 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
-#     foamPackBinAll [outputDir]
+#     foamPackBinAll [OPTION]
 #
 # Description
-#     Packs and compresses all binary versions of foam for release
+#     Pack and compress all binary versions of OpenFOAM for release
+#
+# Script
+#     foamPackThirdPartyBinAll [OPTION]
+#
+# Description
+#     Pack and compress all binary versions of OpenFOAM ThirdParty for release
 #
 #------------------------------------------------------------------------------
-packDir=$WM_PROJECT-$WM_PROJECT_VERSION
+binDir="${0%/*}"  # this script is located in the bin/ dir
 
-if [ ! -d $packDir ]
-then
-    echo "Error: directory $packDir does not exist"
+case "${0##*/}" in
+*ThirdParty*)
+    # for ThirdParty
+    packDir=ThirdParty-$WM_PROJECT_VERSION
+    packBin=foamPackThirdPartyBin
+    ;;
+*)
+    # regular
+    packDir=$WM_PROJECT-$WM_PROJECT_VERSION
+    packBin=foamPackBin
+    ;;
+esac
+
+
+[ -d $packDir ] || {
+    echo "Error: directory $packDir does not exist" 1>&2
     exit 1
-fi
+}
 
-# obtain arch types from lib/
-for bin in $packDir/lib/*
+
+# obtain archOptions types from lib/
+for archOptions in $packDir/lib/*
 do
-    foamPackBin ${bin##*/} $@
+    $binDir/$packBin $@ ${archOptions##*/}
 done
 
 #------------------------------------------------------------------------------

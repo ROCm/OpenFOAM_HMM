@@ -38,7 +38,7 @@
 
 # Specify system compiler
 # ~~~~~~~~~~~~~~~~~~~~~~~
-compilerInstall=system
+foamCompiler=system
 
 # Specify system openmpi
 # ~~~~~~~~~~~~~~~~~~~~~~

@@ -335,7 +335,7 @@ void LienCubicKE::correct()
     gradU_ = fvc::grad(U_);
 
     // generation term
-    volScalarField S2 = symm(gradU_) && gradU_;
+    tmp<volScalarField> S2 = symm(gradU_) && gradU_;
 
     volScalarField G
     (

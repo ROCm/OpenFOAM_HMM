@@ -58,14 +58,12 @@ SourceFiles
 #include "ZoneIDs.H"
 #include "intersection.H"
 #include "Pair.H"
+#include "objectHit.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward declaration of classes
-class objectHit;
 
 /*---------------------------------------------------------------------------*\
                       Class slidingInterface Declaration

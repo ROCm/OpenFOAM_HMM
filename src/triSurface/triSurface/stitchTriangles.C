@@ -27,14 +27,9 @@ License
 #include "mergePoints.H"
 #include "PackedBoolList.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool triSurface::stitchTriangles
+bool Foam::triSurface::stitchTriangles
 (
     const pointField& rawPoints,
     const scalar tol,
@@ -114,11 +109,11 @@ bool triSurface::stitchTriangles
 
             forAll(*this, i)
             {
-                const labelledTri& tri = operator[](i);
+                const triSurface::FaceType& f = operator[](i);
 
-                forAll(tri, fp)
+                forAll(f, fp)
                 {
-                    label pointI = tri[fp];
+                    label pointI = f[fp];
                     if (pointIsUsed.set(pointI, 1))
                     {
                         nPoints++;
@@ -160,9 +155,5 @@ bool triSurface::stitchTriangles
     return hasMerged;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -37,7 +37,7 @@ namespace Foam
 
 template<class Type> class oscillatingFixedValueFvPatchField;
 
-makePatchTypeFieldTypedefs(oscillatingFixedValue)
+makePatchTypeFieldTypedefs(oscillatingFixedValue);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

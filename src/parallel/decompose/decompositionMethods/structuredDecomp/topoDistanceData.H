@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -193,6 +193,14 @@ public:
         friend Ostream& operator<<(Ostream&, const topoDistanceData&);
         friend Istream& operator>>(Istream&, topoDistanceData&);
 };
+
+
+//- Data associated with topoDistanceData type are contiguous
+template<>
+inline bool contiguous<topoDistanceData>()
+{
+    return true;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

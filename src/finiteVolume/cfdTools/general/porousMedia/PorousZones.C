@@ -175,7 +175,7 @@ bool Foam::PorousZones<ZoneType>::readData(Istream& is)
         typename ZoneType::iNew(mesh_)
     );
 
-    transfer(newLst);
+    this->transfer(newLst);
 
     return is.good();
 }

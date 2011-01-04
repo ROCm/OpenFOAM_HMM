@@ -1,6 +1,6 @@
 {
-    volScalarField rAU = 1.0/UEqn.A();
-    surfaceScalarField rAUf = fvc::interpolate(rAU);
+    volScalarField rAU(1.0/UEqn.A());
+    surfaceScalarField rAUf(fvc::interpolate(rAU));
 
     tmp<fvScalarMatrix> p_rghEqnComp;
 

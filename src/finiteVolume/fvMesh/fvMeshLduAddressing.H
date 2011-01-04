@@ -60,7 +60,7 @@ class fvMeshLduAddressing
         const labelList& upperAddr_;
 
         //- Patch addressing as a list of sublists
-        List<const unallocLabelList*> patchAddr_;
+        List<const labelUList*> patchAddr_;
 
         //- Patch field evaluation schedule
         const lduSchedule& patchSchedule_;

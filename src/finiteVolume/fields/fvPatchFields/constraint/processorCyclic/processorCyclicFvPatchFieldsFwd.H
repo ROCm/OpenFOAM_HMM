@@ -37,7 +37,7 @@ namespace Foam
 
 template<class Type> class processorCyclicFvPatchField;
 
-makePatchTypeFieldTypedefs(processor)
+makePatchTypeFieldTypedefs(processor);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -49,7 +49,7 @@ void Foam::actuationDiskSource::addActuationDiskAxialInertialResistance
     E.xx() = uniDiskDir.x();
     E.yy() = uniDiskDir.y();
     E.zz() = uniDiskDir.z();
-    vectorField U1 = (1.0 - a)*U;
+    const vectorField U1((1.0 - a)*U);
     forAll(cells, i)
     {
         totVol += V[cells[i]];

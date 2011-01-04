@@ -67,8 +67,12 @@ string getEnv(const word&);
 //- Set an environment variable
 bool setEnv(const word& name, const string& value, const bool overwrite);
 
-//- Return the system's host name
-word hostName();
+//- Return the system's host name, as per hostname(1)
+//  Optionally with the full name (as per the '-f' option)
+word hostName(const bool full=false);
+
+//- Return the system's domain name, as per hostname(1) with the '-d' option
+word domainName();
 
 //- Return the user's login name
 word userName();

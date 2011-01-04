@@ -35,7 +35,7 @@ namespace Foam
 {
     typedef graph::writer graphWriter;
     addToRunTimeSelectionTable(graphWriter, gnuplotGraph, word);
-};
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

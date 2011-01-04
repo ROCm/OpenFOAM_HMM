@@ -29,14 +29,10 @@ License
 #include "OSspecific.H"
 #include "gzstream.h"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool triSurface::readSTLBINARY(const fileName& STLfileName)
+bool Foam::triSurface::readSTLBINARY(const fileName& STLfileName)
 {
     bool compressed = false;
 
@@ -132,9 +128,5 @@ bool triSurface::readSTLBINARY(const fileName& STLfileName)
     return true;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
             );
 
             ee.residual()().write();
-            volScalarField e = ee.error();
+            volScalarField e(ee.error());
             e.write();
             mag(e)().write();
         }

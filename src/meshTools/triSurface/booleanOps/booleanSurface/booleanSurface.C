@@ -489,7 +489,7 @@ Foam::booleanSurface::booleanSurface
     }
 
     labelList faceZone1;
-    (void)cutSurf1.markZones(isIntersectionEdge1, faceZone1);
+    cutSurf1.markZones(isIntersectionEdge1, faceZone1);
 
 
     // Check whether at least one of sides of intersection has been marked.
@@ -537,7 +537,7 @@ Foam::booleanSurface::booleanSurface
     }
 
     labelList faceZone2;
-    (void)cutSurf2.markZones(isIntersectionEdge2, faceZone2);
+    cutSurf2.markZones(isIntersectionEdge2, faceZone2);
 
 
     // Check whether at least one of sides of intersection has been marked.
@@ -960,20 +960,11 @@ Foam::booleanSurface::booleanSurface
 
     forAll(combinedSurf, faceI)
     {
-        const labelledTri& f = combinedSurf[faceI];
-
-        pointHit curHit =
-            triPointRef
-            (
-                pts[f[0]],
-                pts[f[1]],
-                pts[f[2]]
-            ).nearestPoint(outsidePoint);
+        pointHit curHit = combinedSurf[faceI].nearestPoint(outsidePoint, pts);
 
         if (curHit.distance() < minHit.distance())
         {
             minHit = curHit;
-
             minFaceI = faceI;
         }
     }

@@ -286,9 +286,9 @@ Foam::Ostream& Foam::operator<<
     const ReactingMultiphaseParcel<ParcelType>& p
 )
 {
-    scalarField YGasLoc = p.YGas()*p.Y()[0];
-    scalarField YLiquidLoc = p.YLiquid()*p.Y()[1];
-    scalarField YSolidLoc = p.YSolid()*p.Y()[2];
+    scalarField YGasLoc(p.YGas()*p.Y()[0]);
+    scalarField YLiquidLoc(p.YLiquid()*p.Y()[1]);
+    scalarField YSolidLoc(p.YSolid()*p.Y()[2]);
     if (os.format() == IOstream::ASCII)
     {
         os  << static_cast<const ReactingParcel<ParcelType>&>(p)

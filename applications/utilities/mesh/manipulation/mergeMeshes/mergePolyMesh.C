@@ -80,7 +80,7 @@ Foam::label Foam::mergePolyMesh::patchIndex(const polyPatch& p)
             << pName << " in mesh " << caseName
             << " already exists, but patch types "
             << " do not match.\nCreating a composite name as "
-            << patchNames_[patchNames_.size() - 1] << endl;
+            << patchNames_.last() << endl;
     }
     else
     {

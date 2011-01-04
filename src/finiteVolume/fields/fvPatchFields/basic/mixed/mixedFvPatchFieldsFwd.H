@@ -37,7 +37,7 @@ namespace Foam
 
 template<class Type> class mixedFvPatchField;
 
-makePatchTypeFieldTypedefs(mixed)
+makePatchTypeFieldTypedefs(mixed);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

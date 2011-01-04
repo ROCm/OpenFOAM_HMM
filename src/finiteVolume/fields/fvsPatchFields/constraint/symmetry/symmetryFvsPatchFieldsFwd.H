@@ -37,7 +37,7 @@ namespace Foam
 
 template<class Type> class symmetryFvsPatchField;
 
-makeFvsPatchTypeFieldTypedefs(symmetry)
+makeFvsPatchTypeFieldTypedefs(symmetry);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

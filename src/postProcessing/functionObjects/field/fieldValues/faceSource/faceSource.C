@@ -34,24 +34,42 @@ License
 
 defineTypeNameAndDebug(Foam::fieldValues::faceSource, 0);
 
-template<>
-const char* Foam::NamedEnum<Foam::fieldValues::faceSource::sourceType, 3>::
-names[] =
+namespace Foam
 {
-    "faceZone", "patch", "sampledSurface"
-};
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::fieldValues::faceSource::sourceType,
+        3
+    >::names[] =
+    {
+        "faceZone",
+        "patch",
+        "sampledSurface"
+    };
+
+
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::fieldValues::faceSource::operationType,
+        7
+    >::names[] =
+    {
+        "none",
+        "sum",
+        "areaAverage",
+        "areaIntegrate",
+        "weightedAverage",
+        "min",
+        "max"
+    };
+
+}
+
 
 const Foam::NamedEnum<Foam::fieldValues::faceSource::sourceType, 3>
     Foam::fieldValues::faceSource::sourceTypeNames_;
-
-
-template<>
-const char* Foam::NamedEnum<Foam::fieldValues::faceSource::operationType, 7>::
-names[] =
-{
-    "none", "sum", "areaAverage",
-    "areaIntegrate", "weightedAverage", "min", "max"
-};
 
 const Foam::NamedEnum<Foam::fieldValues::faceSource::operationType, 7>
     Foam::fieldValues::faceSource::operationTypeNames_;

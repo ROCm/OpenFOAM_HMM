@@ -51,15 +51,18 @@ void dynSmagorinsky::updateSubGridScaleFields(const volSymmTensorField& D)
 
 dimensionedScalar dynSmagorinsky::cD(const volSymmTensorField& D) const
 {
-    volSymmTensorField LL = dev(filter_(sqr(U())) - (sqr(filter_(U()))));
-
-    volSymmTensorField MM =
-        sqr(delta())*(filter_(mag(D)*(D)) - 4*mag(filter_(D))*filter_(D));
+    const volSymmTensorField MM
+    (
+        sqr(delta())*(filter_(mag(D)*(D)) - 4*mag(filter_(D))*filter_(D))
+    );
 
     dimensionedScalar MMMM = average(magSqr(MM));
 
     if (MMMM.value() > VSMALL)
     {
+        tmp<volSymmTensorField> LL =
+            dev(filter_(sqr(U())) - (sqr(filter_(U()))));
+
         return average(LL && MM)/MMMM;
     }
     else
@@ -71,15 +74,18 @@ dimensionedScalar dynSmagorinsky::cD(const volSymmTensorField& D) const
 
 dimensionedScalar dynSmagorinsky::cI(const volSymmTensorField& D) const
 {
-    volScalarField KK = 0.5*(filter_(magSqr(U())) - magSqr(filter_(U())));
-
-    volScalarField mm =
-        sqr(delta())*(4*sqr(mag(filter_(D))) - filter_(sqr(mag(D))));
+    const volScalarField mm
+    (
+        sqr(delta())*(4*sqr(mag(filter_(D))) - filter_(sqr(mag(D))))
+    );
 
     dimensionedScalar mmmm = average(magSqr(mm));
 
     if (mmmm.value() > VSMALL)
     {
+        tmp<volScalarField> KK =
+            0.5*(filter_(magSqr(U())) - magSqr(filter_(U())));
+
         return average(KK*mm)/mmmm;
     }
     else
@@ -133,7 +139,7 @@ void dynSmagorinsky::correct(const tmp<volTensorField>& gradU)
 {
     LESModel::correct(gradU);
 
-    volSymmTensorField D = dev(symm(gradU));
+    const volSymmTensorField D(dev(symm(gradU)));
 
     k_ = cI(D)*sqr(delta())*magSqr(D);
     bound(k_,  kMin_);

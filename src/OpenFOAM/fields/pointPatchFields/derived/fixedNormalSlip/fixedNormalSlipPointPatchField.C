@@ -25,15 +25,10 @@ License
 
 #include "fixedNormalSlipPointPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-fixedNormalSlipPointPatchField<Type>::fixedNormalSlipPointPatchField
+Foam::fixedNormalSlipPointPatchField<Type>::fixedNormalSlipPointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF
@@ -45,7 +40,7 @@ fixedNormalSlipPointPatchField<Type>::fixedNormalSlipPointPatchField
 
 
 template<class Type>
-fixedNormalSlipPointPatchField<Type>::fixedNormalSlipPointPatchField
+Foam::fixedNormalSlipPointPatchField<Type>::fixedNormalSlipPointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
@@ -58,7 +53,7 @@ fixedNormalSlipPointPatchField<Type>::fixedNormalSlipPointPatchField
 
 
 template<class Type>
-fixedNormalSlipPointPatchField<Type>::fixedNormalSlipPointPatchField
+Foam::fixedNormalSlipPointPatchField<Type>::fixedNormalSlipPointPatchField
 (
     const fixedNormalSlipPointPatchField<Type>& ptf,
     const pointPatch& p,
@@ -72,7 +67,7 @@ fixedNormalSlipPointPatchField<Type>::fixedNormalSlipPointPatchField
 
 
 template<class Type>
-fixedNormalSlipPointPatchField<Type>::fixedNormalSlipPointPatchField
+Foam::fixedNormalSlipPointPatchField<Type>::fixedNormalSlipPointPatchField
 (
     const fixedNormalSlipPointPatchField<Type>& ptf,
     const DimensionedField<Type, pointMesh>& iF
@@ -86,7 +81,10 @@ fixedNormalSlipPointPatchField<Type>::fixedNormalSlipPointPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void fixedNormalSlipPointPatchField<Type>::evaluate(const Pstream::commsTypes)
+void Foam::fixedNormalSlipPointPatchField<Type>::evaluate
+(
+    const Pstream::commsTypes
+)
 {
     tmp<Field<Type> > tvalues =
         transform(I - n_*n_, this->patchInternalField());
@@ -94,21 +92,17 @@ void fixedNormalSlipPointPatchField<Type>::evaluate(const Pstream::commsTypes)
     // Get internal field to insert values into
     Field<Type>& iF = const_cast<Field<Type>&>(this->internalField());
 
-    setInInternalField(iF, tvalues());
+    this->setInInternalField(iF, tvalues());
 }
 
 
 template<class Type>
-void fixedNormalSlipPointPatchField<Type>::write(Ostream& os) const
+void Foam::fixedNormalSlipPointPatchField<Type>::write(Ostream& os) const
 {
     slipPointPatchField<Type>::write(os);
     os.writeKeyword("n")
         << n_ << token::END_STATEMENT << nl;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

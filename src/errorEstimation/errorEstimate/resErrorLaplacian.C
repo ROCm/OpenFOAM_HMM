@@ -122,7 +122,7 @@ laplacian
 
     const scalarField& vols = mesh.V();
     const surfaceVectorField& Sf = mesh.Sf();
-    const surfaceScalarField magSf = mesh.magSf();
+    const surfaceScalarField magSf(mesh.magSf());
     const fvPatchList& patches = mesh.boundary();
     const labelUList& owner = mesh.owner();
     const labelUList& neighbour = mesh.neighbour();
@@ -137,7 +137,8 @@ laplacian
     GeometricField
     <
         typename outerProduct<vector, Type>::type, fvPatchField, volMesh
-    > gradVf = fvc::grad(vf);
+    >
+    gradVf(fvc::grad(vf));
 
     // Internal faces
     forAll(owner, faceI)

@@ -30,7 +30,11 @@ License
 namespace Foam
 {
     template<>
-    const char* Foam::NamedEnum<Foam::phaseProperties::phaseType, 4>::names[] =
+    const char* Foam::NamedEnum
+    <
+        Foam::phaseProperties::phaseType,
+        4
+    >::names[] =
     {
         "gas",
         "liquid",

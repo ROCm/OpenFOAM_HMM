@@ -29,14 +29,9 @@ License
 #include "surfaceFields.H"
 #include "volFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-fixedPressureCompressibleDensityFvPatchScalarField::
+Foam::fixedPressureCompressibleDensityFvPatchScalarField::
 fixedPressureCompressibleDensityFvPatchScalarField
 (
     const fvPatch& p,
@@ -48,7 +43,7 @@ fixedPressureCompressibleDensityFvPatchScalarField
 {}
 
 
-fixedPressureCompressibleDensityFvPatchScalarField::
+Foam::fixedPressureCompressibleDensityFvPatchScalarField::
 fixedPressureCompressibleDensityFvPatchScalarField
 (
     const fixedPressureCompressibleDensityFvPatchScalarField& ptf,
@@ -62,7 +57,7 @@ fixedPressureCompressibleDensityFvPatchScalarField
 {}
 
 
-fixedPressureCompressibleDensityFvPatchScalarField::
+Foam::fixedPressureCompressibleDensityFvPatchScalarField::
 fixedPressureCompressibleDensityFvPatchScalarField
 (
     const fvPatch& p,
@@ -75,7 +70,7 @@ fixedPressureCompressibleDensityFvPatchScalarField
 {}
 
 
-fixedPressureCompressibleDensityFvPatchScalarField::
+Foam::fixedPressureCompressibleDensityFvPatchScalarField::
 fixedPressureCompressibleDensityFvPatchScalarField
 (
     const fixedPressureCompressibleDensityFvPatchScalarField& ptf
@@ -86,7 +81,7 @@ fixedPressureCompressibleDensityFvPatchScalarField
 {}
 
 
-fixedPressureCompressibleDensityFvPatchScalarField::
+Foam::fixedPressureCompressibleDensityFvPatchScalarField::
 fixedPressureCompressibleDensityFvPatchScalarField
 (
     const fixedPressureCompressibleDensityFvPatchScalarField& ptf,
@@ -100,7 +95,7 @@ fixedPressureCompressibleDensityFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void fixedPressureCompressibleDensityFvPatchScalarField::updateCoeffs()
+void Foam::fixedPressureCompressibleDensityFvPatchScalarField::updateCoeffs()
 {
     if (updated())
     {
@@ -127,7 +122,7 @@ void fixedPressureCompressibleDensityFvPatchScalarField::updateCoeffs()
 }
 
 
-void fixedPressureCompressibleDensityFvPatchScalarField::write
+void Foam::fixedPressureCompressibleDensityFvPatchScalarField::write
 (
     Ostream& os
 ) const
@@ -140,15 +135,13 @@ void fixedPressureCompressibleDensityFvPatchScalarField::write
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchScalarField,
-    fixedPressureCompressibleDensityFvPatchScalarField
-);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchScalarField,
+        fixedPressureCompressibleDensityFvPatchScalarField
+    );
+}
 
 // ************************************************************************* //

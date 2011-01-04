@@ -39,8 +39,8 @@ namespace solidBodyMotionFunctions
         linearMotion,
         dictionary
     );
-};
-};
+}
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

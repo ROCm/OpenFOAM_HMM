@@ -191,7 +191,7 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
     {
         const volScalarField& k = dom_.aLambda(lambdaI);
 
-        surfaceScalarField Ji = dAve_ & mesh_.Sf();
+        const surfaceScalarField Ji(dAve_ & mesh_.Sf());
 
         fvScalarMatrix IiEq
         (

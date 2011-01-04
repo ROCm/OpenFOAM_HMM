@@ -34,7 +34,7 @@ Foam::globalIndex::globalIndex(const label localSize)
     labelList localSizes(Pstream::nProcs());
     localSizes[Pstream::myProcNo()] = localSize;
     Pstream::gatherList(localSizes);
-    Pstream::scatterList(localSizes);   // just to balance out comms
+    Pstream::scatterList(localSizes);
 
     label offset = 0;
     offsets_[0] = 0;

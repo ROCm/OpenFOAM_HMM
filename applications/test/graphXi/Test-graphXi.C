@@ -47,10 +47,10 @@ int main()
         x[i] = -3 + 0.06*i;
     }
 
-    scalarField b = 0.5*(1.0 + erf(x));
-    scalarField c = 1.0 - b;
-    scalarField gradb = (1/::sqrt(constant::mathematical::pi))*exp(-sqr(x));
-    scalarField lapb = -2*x*gradb;
+    scalarField b(0.5*(1.0 + erf(x)));
+    scalarField c(1.0 - b);
+    scalarField gradb((1/::sqrt(constant::mathematical::pi))*exp(-sqr(x)));
+    scalarField lapb(-2*x*gradb);
 
     r = lapb*b*c/(gradb*gradb);
 

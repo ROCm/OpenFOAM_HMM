@@ -41,15 +41,18 @@ namespace Foam
             dictionary
         );
     }
-}
 
-template<>
-const char*
-Foam::NamedEnum<Foam::tabulatedWallFunctions::general::interpolationType, 1>::
-    names[] =
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::tabulatedWallFunctions::general::interpolationType,
+        1
+    >::names[] =
     {
         "linear"
     };
+
+}
 
 const
 Foam::NamedEnum<Foam::tabulatedWallFunctions::general::interpolationType, 1>

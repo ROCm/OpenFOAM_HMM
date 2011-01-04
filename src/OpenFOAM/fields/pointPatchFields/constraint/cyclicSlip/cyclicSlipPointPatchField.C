@@ -27,15 +27,11 @@ License
 #include "transformField.H"
 #include "symmTransformField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-cyclicSlipPointPatchField<Type>::cyclicSlipPointPatchField
+Foam::cyclicSlipPointPatchField<Type>::cyclicSlipPointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF
@@ -46,7 +42,7 @@ cyclicSlipPointPatchField<Type>::cyclicSlipPointPatchField
 
 
 template<class Type>
-cyclicSlipPointPatchField<Type>::cyclicSlipPointPatchField
+Foam::cyclicSlipPointPatchField<Type>::cyclicSlipPointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
@@ -58,7 +54,7 @@ cyclicSlipPointPatchField<Type>::cyclicSlipPointPatchField
 
 
 template<class Type>
-cyclicSlipPointPatchField<Type>::cyclicSlipPointPatchField
+Foam::cyclicSlipPointPatchField<Type>::cyclicSlipPointPatchField
 (
     const cyclicSlipPointPatchField<Type>& ptf,
     const pointPatch& p,
@@ -71,7 +67,7 @@ cyclicSlipPointPatchField<Type>::cyclicSlipPointPatchField
 
 
 template<class Type>
-cyclicSlipPointPatchField<Type>::cyclicSlipPointPatchField
+Foam::cyclicSlipPointPatchField<Type>::cyclicSlipPointPatchField
 (
     const cyclicSlipPointPatchField<Type>& ptf,
     const DimensionedField<Type, pointMesh>& iF
@@ -84,7 +80,7 @@ cyclicSlipPointPatchField<Type>::cyclicSlipPointPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void cyclicSlipPointPatchField<Type>::evaluate(const Pstream::commsTypes)
+void Foam::cyclicSlipPointPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     const vectorField& nHat = this->patch().pointNormals();
 
@@ -99,12 +95,8 @@ void cyclicSlipPointPatchField<Type>::evaluate(const Pstream::commsTypes)
     // Get internal field to insert values into
     Field<Type>& iF = const_cast<Field<Type>&>(this->internalField());
 
-    setInInternalField(iF, tvalues());
+    this->setInInternalField(iF, tvalues());
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

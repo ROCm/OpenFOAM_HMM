@@ -83,8 +83,7 @@ maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
     if
     (
         mag(accommodationCoeff_) < SMALL
-        ||
-        mag(accommodationCoeff_) > 2.0
+     || mag(accommodationCoeff_) > 2.0
     )
     {
         FatalIOErrorIn
@@ -142,10 +141,13 @@ void maxwellSlipUFvPatchVectorField::updateCoeffs()
     const fvPatchField<scalar>& ppsi =
         patch().lookupPatchField<volScalarField, scalar>("psi");
 
-    Field<scalar> C1 = sqrt(ppsi*constant::mathematical::piByTwo)
-        *(2.0 - accommodationCoeff_)/accommodationCoeff_;
+    Field<scalar> C1
+    (
+        sqrt(ppsi*constant::mathematical::piByTwo)
+      * (2.0 - accommodationCoeff_)/accommodationCoeff_
+    );
 
-    Field<scalar> pnu = pmu/prho;
+    Field<scalar> pnu(pmu/prho);
     valueFraction() = (1.0/(1.0 + patch().deltaCoeffs()*C1*pnu));
 
     refValue() = Uwall_;
@@ -156,8 +158,8 @@ void maxwellSlipUFvPatchVectorField::updateCoeffs()
             this->db().objectRegistry::lookupObject<volScalarField>("T");
         label patchi = this->patch().index();
         const fvPatchScalarField& pT = vsfT.boundaryField()[patchi];
-        Field<vector> gradpT = fvc::grad(vsfT)().boundaryField()[patchi];
-        vectorField n = patch().nf();
+        Field<vector> gradpT(fvc::grad(vsfT)().boundaryField()[patchi]);
+        vectorField n(patch().nf());
 
         refValue() -= 3.0*pnu/(4.0*pT)*transform(I - n*n, gradpT);
     }
@@ -166,7 +168,7 @@ void maxwellSlipUFvPatchVectorField::updateCoeffs()
     {
         const fvPatchTensorField& ptauMC =
             patch().lookupPatchField<volTensorField, tensor>("tauMC");
-        vectorField n = patch().nf();
+        vectorField n(patch().nf());
 
         refValue() -= C1/prho*transform(I - n*n, (n & ptauMC));
     }
@@ -196,7 +198,11 @@ void maxwellSlipUFvPatchVectorField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchVectorField, maxwellSlipUFvPatchVectorField);
+makePatchTypeField
+(
+    fvPatchVectorField,
+    maxwellSlipUFvPatchVectorField
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
