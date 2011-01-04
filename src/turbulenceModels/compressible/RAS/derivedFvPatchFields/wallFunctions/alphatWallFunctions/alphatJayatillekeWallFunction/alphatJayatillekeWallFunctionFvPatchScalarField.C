@@ -300,7 +300,7 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeNonTemplatedPatchTypeField
+makePatchTypeField
 (
     fvPatchScalarField,
     alphatJayatillekeWallFunctionFvPatchScalarField

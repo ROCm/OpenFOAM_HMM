@@ -4,4 +4,4 @@ EXE_INC = \
     -I../decompositionMethods/lnInclude
 
 LIB_LIBS = \
-    -lscotch -lscotcherrexit -lrt
+    -L$(FOAM_EXT_LIBBIN) -lscotch -lscotcherrexit -lrt

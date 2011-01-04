@@ -264,7 +264,7 @@ void Foam::directMappedVelocityFluxFixedValueFvPatchField::write
 
 namespace Foam
 {
-    makeNonTemplatedPatchTypeField
+    makePatchTypeField
     (
         fvPatchVectorField,
         directMappedVelocityFluxFixedValueFvPatchField

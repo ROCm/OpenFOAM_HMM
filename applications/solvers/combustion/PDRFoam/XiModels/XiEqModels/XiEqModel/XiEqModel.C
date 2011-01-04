@@ -31,7 +31,7 @@ namespace Foam
 {
     defineTypeNameAndDebug(XiEqModel, 0);
     defineRunTimeSelectionTable(XiEqModel, dictionary);
-};
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

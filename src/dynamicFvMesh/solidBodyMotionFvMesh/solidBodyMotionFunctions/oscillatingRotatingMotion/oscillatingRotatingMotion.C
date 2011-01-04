@@ -42,8 +42,8 @@ namespace solidBodyMotionFunctions
         oscillatingRotatingMotion,
         dictionary
     );
-};
-};
+}
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

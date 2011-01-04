@@ -218,7 +218,7 @@ void Foam::pressureDirectedInletOutletVelocityFvPatchVectorField::operator=
 
 namespace Foam
 {
-    makeNonTemplatedPatchTypeField
+    makePatchTypeField
     (
         fvPatchVectorField,
         pressureDirectedInletOutletVelocityFvPatchVectorField

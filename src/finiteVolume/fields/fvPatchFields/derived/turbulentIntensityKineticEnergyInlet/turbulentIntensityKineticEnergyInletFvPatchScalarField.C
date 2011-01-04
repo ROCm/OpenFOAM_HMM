@@ -147,7 +147,7 @@ void Foam::turbulentIntensityKineticEnergyInletFvPatchScalarField::write
 
 namespace Foam
 {
-    makeNonTemplatedPatchTypeField
+    makePatchTypeField
     (
         fvPatchScalarField,
         turbulentIntensityKineticEnergyInletFvPatchScalarField

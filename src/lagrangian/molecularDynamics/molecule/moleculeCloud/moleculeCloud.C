@@ -35,7 +35,7 @@ namespace Foam
 {
     defineParticleTypeNameAndDebug(molecule, 0);
     defineTemplateTypeNameAndDebug(Cloud<molecule>, 0);
-};
+}
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

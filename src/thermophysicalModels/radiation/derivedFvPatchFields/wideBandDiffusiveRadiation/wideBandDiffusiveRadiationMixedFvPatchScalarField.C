@@ -234,7 +234,7 @@ namespace Foam
 {
 namespace radiation
 {
-    makeNonTemplatedPatchTypeField
+    makePatchTypeField
     (
         fvPatchScalarField,
         wideBandDiffusiveRadiationMixedFvPatchScalarField

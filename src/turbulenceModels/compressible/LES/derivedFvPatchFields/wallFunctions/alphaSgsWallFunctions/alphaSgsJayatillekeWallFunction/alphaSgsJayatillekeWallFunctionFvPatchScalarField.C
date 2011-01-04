@@ -326,7 +326,7 @@ void alphaSgsJayatillekeWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeNonTemplatedPatchTypeField
+makePatchTypeField
 (
     fvPatchScalarField,
     alphaSgsJayatillekeWallFunctionFvPatchScalarField

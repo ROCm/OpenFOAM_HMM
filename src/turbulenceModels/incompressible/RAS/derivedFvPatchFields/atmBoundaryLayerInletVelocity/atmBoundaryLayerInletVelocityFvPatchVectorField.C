@@ -189,7 +189,7 @@ void atmBoundaryLayerInletVelocityFvPatchVectorField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeNonTemplatedPatchTypeField
+makePatchTypeField
 (
     fvPatchVectorField,
     atmBoundaryLayerInletVelocityFvPatchVectorField

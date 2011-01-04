@@ -217,7 +217,7 @@ void Foam::smoluchowskiJumpTFvPatchScalarField::write(Ostream& os) const
 
 namespace Foam
 {
-    makeNonTemplatedPatchTypeField
+    makePatchTypeField
     (
         fvPatchScalarField,
         smoluchowskiJumpTFvPatchScalarField

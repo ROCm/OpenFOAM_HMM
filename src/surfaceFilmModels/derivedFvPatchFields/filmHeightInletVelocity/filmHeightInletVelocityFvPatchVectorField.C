@@ -156,7 +156,7 @@ void Foam::filmHeightInletVelocityFvPatchVectorField::operator=
 
 namespace Foam
 {
-    makeNonTemplatedPatchTypeField
+    makePatchTypeField
     (
         fvPatchVectorField,
         filmHeightInletVelocityFvPatchVectorField

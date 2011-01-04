@@ -111,20 +111,41 @@ bool Foam::setEnv
 
 Foam::word Foam::hostName(bool full)
 {
-    char buf[256];
-    gethostname(buf, 256);
+    char buf[128];
+    gethostname(buf, sizeof(buf));
 
+    // implementation as per hostname from net-tools
     if (full)
     {
-        struct hostent *hptr = gethostbyname(buf);
-
-        if (hptr)
+        struct hostent *hp = gethostbyname(buf);
+        if (hp)
         {
-            return hptr->h_name;
+            return hp->h_name;
         }
     }
 
     return buf;
+}
+
+
+Foam::word Foam::domainName()
+{
+    char buf[128];
+    gethostname(buf, sizeof(buf));
+
+    // implementation as per hostname from net-tools
+    struct hostent *hp = gethostbyname(buf);
+    if (hp)
+    {
+        char *p = strchr(hp->h_name, '.');
+        if (p)
+        {
+            ++p;
+            return p;
+        }
+    }
+
+    return word::null;
 }
 
 
@@ -201,8 +222,8 @@ Foam::fileName Foam::home(const word& userName)
 
 Foam::fileName Foam::cwd()
 {
-    char buf[255];
-    if (getcwd(buf, 255))
+    char buf[256];
+    if (getcwd(buf, sizeof(buf)))
     {
         return buf;
     }
@@ -957,8 +978,6 @@ bool Foam::ping
     const label timeOut
 )
 {
-    char *serverAddress;
-    struct in_addr *ptr;
     struct hostent *hostPtr;
     volatile int sockfd;
     struct sockaddr_in destAddr;      // will hold the destination addr
@@ -968,15 +987,13 @@ bool Foam::ping
     {
         FatalErrorIn
         (
-            "Foam::ping(const word&, const label)"
+            "Foam::ping(const word&, ...)"
         )   << "gethostbyname error " << h_errno << " for host " << destName
             << abort(FatalError);
     }
 
     // Get first of the SLL of addresses
-    serverAddress = *(hostPtr->h_addr_list);
-    ptr = reinterpret_cast<struct in_addr*>(serverAddress);
-    addr = ptr->s_addr;
+    addr = (reinterpret_cast<struct in_addr*>(*(hostPtr->h_addr_list)))->s_addr;
 
     // Allocate socket
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -990,7 +1007,7 @@ bool Foam::ping
     }
 
     // Fill sockaddr_in structure with dest address and port
-    memset (reinterpret_cast<char *>(&destAddr), '\0', sizeof(destAddr));
+    memset(reinterpret_cast<char *>(&destAddr), '\0', sizeof(destAddr));
     destAddr.sin_family = AF_INET;
     destAddr.sin_port = htons(ushort(destPort));
     destAddr.sin_addr.s_addr = addr;

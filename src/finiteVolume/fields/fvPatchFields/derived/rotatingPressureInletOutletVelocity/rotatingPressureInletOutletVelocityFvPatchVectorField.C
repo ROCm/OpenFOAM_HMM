@@ -134,7 +134,7 @@ void Foam::rotatingPressureInletOutletVelocityFvPatchVectorField::write
 
 namespace Foam
 {
-    makeNonTemplatedPatchTypeField
+    makePatchTypeField
     (
         fvPatchVectorField,
         rotatingPressureInletOutletVelocityFvPatchVectorField

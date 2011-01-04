@@ -137,7 +137,7 @@ void Foam::fixedPressureCompressibleDensityFvPatchScalarField::write
 
 namespace Foam
 {
-    makeNonTemplatedPatchTypeField
+    makePatchTypeField
     (
         fvPatchScalarField,
         fixedPressureCompressibleDensityFvPatchScalarField

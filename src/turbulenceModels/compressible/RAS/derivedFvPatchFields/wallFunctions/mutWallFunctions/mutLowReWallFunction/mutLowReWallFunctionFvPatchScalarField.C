@@ -102,7 +102,7 @@ mutLowReWallFunctionFvPatchScalarField::mutLowReWallFunctionFvPatchScalarField
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeNonTemplatedPatchTypeField
+makePatchTypeField
 (
     fvPatchScalarField,
     mutLowReWallFunctionFvPatchScalarField

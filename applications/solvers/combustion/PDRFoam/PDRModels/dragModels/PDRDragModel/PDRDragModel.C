@@ -31,7 +31,7 @@ namespace Foam
 {
     defineTypeNameAndDebug(PDRDragModel, 0);
     defineRunTimeSelectionTable(PDRDragModel, dictionary);
-};
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

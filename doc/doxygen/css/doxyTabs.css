@@ -11,7 +11,8 @@ div.navigation
 }
 
 
-div.tabs
+div.tabs,
+div.tabs2
 {
     width           : 100%;
     padding-top     : 5px;
@@ -20,7 +21,8 @@ div.tabs
     border-bottom: 1px solid rgb(175,175,175);
 }
 
-div.tabs ul
+div.tabs ul,
+div.tabs2 ul
 {
     margin: 0px;
     padding-left: 10px;
@@ -30,26 +32,30 @@ div.tabs ul
 }
 
 
-div.tabs li, div.tabs form
+div.tabs li, div.tabs form,
+div.tabs2 li, div.tabs2 form
 {
     display         : inline;
     margin          : 0px;
     padding         : 0px;
 }
 
-div.tabs ul li
+div.tabs ul li,
+div.tabs2 ul li
 {
     padding-top: 10px;
     padding-bottom: 10px;
     height: 100%;
 }
 
-div.tabs form
+div.tabs form,
+div.tabs2 form
 {
     padding         : 0px 9px;
 }
 
-div.tabs a
+div.tabs a,
+div.tabs2 a
 {
     font-size       : 12px;
     font-weight     : normal;
@@ -58,7 +64,8 @@ div.tabs a
 }
 
 /* not needed - no image */
-div.tabs a:hover
+div.tabs a:hover,
+div.tabs2 a:hover
 {
     background-position: 100% -150px;
 }
@@ -66,13 +73,18 @@ div.tabs a:hover
 div.tabs a:link,
 div.tabs a:visited,
 div.tabs a:active,
-div.tabs a:hover
+div.tabs a:hover,
+div.tabs2 a:link,
+div.tabs2 a:visited,
+div.tabs2 a:active,
+div.tabs2 a:hover
 {
     color           : #000000;
     color:#555;
 }
 
-div.tabs span
+div.tabs span,
+div.tabs2 span
 {
     display         : inline;
     padding         : 0px 9px;
@@ -80,7 +92,8 @@ div.tabs span
 }
 
 /* client-side search */
-div.tabs #MSearchBox
+div.tabs #MSearchBox,
+div.tabs2 #MSearchBox
 {
    float            : right;
    background       : white;
@@ -88,7 +101,8 @@ div.tabs #MSearchBox
    font-size        : 1em;
 }
 
-div.tabs #MSearchSelect
+div.tabs #MSearchSelect,
+div.tabs2 #MSearchSelect
 {
    float            : left;
    display          : inline;
@@ -96,14 +110,16 @@ div.tabs #MSearchSelect
 }
 
 /* old name? */
-div.tabs input
+div.tabs input,
+div.tabs2 input
 {
     float           : right;
     display         : inline;
     font-size       : 1em;
 }
 
-div.tabs td
+div.tabs td,
+div.tabs2 td
 {
     font-size       : 80%;
     font-weight     : bold;
@@ -120,14 +136,16 @@ div.tabs a:hover span
     background-position: 0% -150px;
 }
 
-div.tabs li.current a
+div.tabs li.current a,
+div.tabs2 li.current a
 {
     border-width    : 0px;
     border-right: 1px solid rgb(175,175,175);
     color           : #555;
 }
 
-div.tabs li.current span
+div.tabs li.current span,
+div.tabs2 li.current span
 {
     padding-bottom: 0px;
     white-space: nowrap;

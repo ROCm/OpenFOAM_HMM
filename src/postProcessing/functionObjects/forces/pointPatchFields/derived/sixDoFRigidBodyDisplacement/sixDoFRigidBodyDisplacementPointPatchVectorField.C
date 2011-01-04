@@ -268,7 +268,7 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeNonTemplatedPointPatchTypeField
+makePointPatchTypeField
 (
     pointPatchVectorField,
     sixDoFRigidBodyDisplacementPointPatchVectorField

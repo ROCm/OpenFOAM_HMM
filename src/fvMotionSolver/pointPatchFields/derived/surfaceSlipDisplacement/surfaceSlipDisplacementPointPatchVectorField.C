@@ -448,7 +448,7 @@ void surfaceSlipDisplacementPointPatchVectorField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeNonTemplatedPointPatchTypeField
+makePointPatchTypeField
 (
     pointPatchVectorField,
     surfaceSlipDisplacementPointPatchVectorField

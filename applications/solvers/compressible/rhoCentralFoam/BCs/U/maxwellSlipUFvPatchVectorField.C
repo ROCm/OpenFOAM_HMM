@@ -198,7 +198,7 @@ void maxwellSlipUFvPatchVectorField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeNonTemplatedPatchTypeField
+makePatchTypeField
 (
     fvPatchVectorField,
     maxwellSlipUFvPatchVectorField

@@ -34,8 +34,8 @@ namespace XiGModels
 {
     defineTypeNameAndDebug(basicSubGrid, 0);
     addToRunTimeSelectionTable(XiGModel, basicSubGrid, dictionary);
-};
-};
+}
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

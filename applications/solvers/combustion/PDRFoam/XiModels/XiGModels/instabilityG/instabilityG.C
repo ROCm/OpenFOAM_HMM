@@ -34,8 +34,8 @@ namespace XiGModels
 {
     defineTypeNameAndDebug(instabilityG, 0);
     addToRunTimeSelectionTable(XiGModel, instabilityG, dictionary);
-};
-};
+}
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

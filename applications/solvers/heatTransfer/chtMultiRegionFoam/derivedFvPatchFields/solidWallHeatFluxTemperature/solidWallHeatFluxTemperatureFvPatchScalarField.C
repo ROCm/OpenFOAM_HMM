@@ -203,7 +203,7 @@ void Foam::solidWallHeatFluxTemperatureFvPatchScalarField::write
 
 namespace Foam
 {
-    makeNonTemplatedPatchTypeField
+    makePatchTypeField
     (
         fvPatchScalarField,
         solidWallHeatFluxTemperatureFvPatchScalarField
