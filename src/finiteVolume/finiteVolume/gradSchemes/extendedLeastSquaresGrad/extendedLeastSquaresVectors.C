@@ -111,7 +111,10 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
     const labelUList& neighbour = mesh_.neighbour();
 
     // Build the d-vectors
-    surfaceVectorField d = mesh_.Sf()/(mesh_.magSf()*mesh_.deltaCoeffs());
+    surfaceVectorField d
+    (
+        mesh_.Sf()/(mesh_.magSf()*mesh_.deltaCoeffs())
+    );
 
     if (!mesh_.orthogonal())
     {
@@ -124,7 +127,7 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
 
     forAll(owner, faceI)
     {
-        symmTensor wdd = 1.0/magSqr(d[faceI])*sqr(d[faceI]);
+        const symmTensor wdd(1.0/magSqr(d[faceI])*sqr(d[faceI]));
 
         dd[owner[faceI]] += wdd;
         dd[neighbour[faceI]] += wdd;
@@ -146,11 +149,11 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
         }
     }
 
-    scalarField detdd = det(dd);
+    scalarField detdd(det(dd));
 
-    Info<< "max(detdd) = " << max(detdd) << endl;
-    Info<< "min(detdd) = " << min(detdd) << endl;
-    Info<< "average(detdd) = " << average(detdd) << endl;
+    Info<< "max(detdd) = " << max(detdd) << nl
+        << "min(detdd) = " << min(detdd) << nl
+        << "average(detdd) = " << average(detdd) << endl;
 
     label nAddCells = 0;
     label maxNaddCells = 4*detdd.size();
@@ -219,13 +222,13 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
 
     additionalCells_.setSize(nAddCells);
 
-    Info<< "max(detdd) = " << max(detdd) << endl;
-    Info<< "min(detdd) = " << min(detdd) << endl;
-    Info<< "average(detdd) = " << average(detdd) << endl;
-    Info<< "nAddCells/nCells = " << scalar(nAddCells)/mesh.nCells() << endl;
+    Info<< "max(detdd) = " << max(detdd) << nl
+        << "min(detdd) = " << min(detdd) << nl
+        << "average(detdd) = " << average(detdd) << nl
+        << "nAddCells/nCells = " << scalar(nAddCells)/mesh.nCells() << endl;
 
     // Invert the dd tensor
-    symmTensorField invDd = inv(dd);
+    const symmTensorField invDd(inv(dd));
 
 
     // Revisit all faces and calculate the lsP and lsN vectors

@@ -101,8 +101,8 @@ int main(int argc, char *argv[])
 
 #           include "createPhi.H"
 
-            volScalarField ek = 0.5*magSqr(U);
-            volTensorField gradU = fvc::grad(U);
+            volScalarField ek(0.5*magSqr(U));
+            volTensorField gradU(fvc::grad(U));
 
             // Divergence of the error in U squared
 

@@ -52,5 +52,7 @@
     );
 
     Info<< "Creating field DpDt\n" << endl;
-    volScalarField DpDt =
-        fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
+    volScalarField DpDt
+    (
+        fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p)
+    );

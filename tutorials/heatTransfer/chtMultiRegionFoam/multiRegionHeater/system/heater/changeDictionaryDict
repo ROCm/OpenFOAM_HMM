@@ -62,8 +62,8 @@ dictionaryReplacement
     Ypmma
     {
         internalField   uniform 0.5;
-        
-        
+
+
         boundaryField
         {
             ".*"
@@ -72,13 +72,13 @@ dictionaryReplacement
                 value           uniform 0.5;
             }
         }
-        
+
     }
 
     Ychar
     {
         internalField   uniform 0.5;
-        
+
         boundaryField
         {
             ".*"

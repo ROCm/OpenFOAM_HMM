@@ -1,4 +1,4 @@
-volScalarField rAU = 1.0/UEqn.A();
+volScalarField rAU(1.0/UEqn.A());
 
 surfaceScalarField rAUf
 (

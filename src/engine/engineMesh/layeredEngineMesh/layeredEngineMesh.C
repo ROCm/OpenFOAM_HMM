@@ -64,7 +64,7 @@ void Foam::layeredEngineMesh::move()
     // Position of the top of the static mesh layers above the piston
     scalar pistonPlusLayers = pistonPosition_.value() + pistonLayers_.value();
 
-    pointField newPoints = points();
+    pointField newPoints(points());
 
     forAll(newPoints, pointi)
     {

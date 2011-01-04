@@ -31,7 +31,7 @@ namespace Foam
 {
     defineTypeNameAndDebug(XiGModel, 0);
     defineRunTimeSelectionTable(XiGModel, dictionary);
-};
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

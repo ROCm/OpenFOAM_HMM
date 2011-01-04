@@ -56,7 +56,7 @@ void Foam::MULES::explicitLTSSolve
     const fvMesh& mesh = psi.mesh();
     psi.correctBoundaryConditions();
 
-    surfaceScalarField phiBD = upwind<scalar>(psi.mesh(), phi).flux(psi);
+    surfaceScalarField phiBD(upwind<scalar>(psi.mesh(), phi).flux(psi));
 
     surfaceScalarField& phiCorr = phiPsi;
     phiCorr -= phiBD;
@@ -168,9 +168,11 @@ void Foam::MULES::implicitSolve
     scalarField allCoLambda(mesh.nFaces());
 
     {
-        surfaceScalarField Cof =
+        surfaceScalarField Cof
+        (
             mesh.time().deltaT()*mesh.surfaceInterpolation::deltaCoeffs()
-           *mag(phi)/mesh.magSf();
+           *mag(phi)/mesh.magSf()
+        );
 
         slicedSurfaceScalarField CoLambda
         (
@@ -226,7 +228,7 @@ void Foam::MULES::implicitSolve
       - Su
     );
 
-    surfaceScalarField phiBD = psiConvectionDiffusion.flux();
+    surfaceScalarField phiBD(psiConvectionDiffusion.flux());
 
     surfaceScalarField& phiCorr = phiPsi;
     phiCorr -= phiBD;
@@ -408,7 +410,7 @@ void Foam::MULES::limiter
 
         if (psiPf.coupled())
         {
-            scalarField psiPNf = psiPf.patchNeighbourField();
+            scalarField psiPNf(psiPf.patchNeighbourField());
 
             forAll(phiCorrPf, pFacei)
             {

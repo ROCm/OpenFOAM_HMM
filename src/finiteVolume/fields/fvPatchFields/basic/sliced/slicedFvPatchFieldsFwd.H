@@ -37,7 +37,7 @@ namespace Foam
 
 template<class Type> class slicedFvPatchField;
 
-makePatchTypeFieldTypedefs(sliced)
+makePatchTypeFieldTypedefs(sliced);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -1,7 +1,7 @@
 {
     word scheme("div(phi,alpha)");
 
-    surfaceScalarField phir = phia - phib;
+    surfaceScalarField phir(phia - phib);
 
     Info<< "Max Ur Courant Number = "
         << (

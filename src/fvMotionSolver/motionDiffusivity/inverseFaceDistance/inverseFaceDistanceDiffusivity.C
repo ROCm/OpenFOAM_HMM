@@ -96,7 +96,7 @@ void Foam::inverseFaceDistanceDiffusivity::correct()
     {
         const polyPatch& patch = bdry[iter.key()];
 
-        const vectorField::subField fc = patch.faceCentres();
+        const vectorField::subField fc(patch.faceCentres());
 
         forAll(fc, patchFaceI)
         {

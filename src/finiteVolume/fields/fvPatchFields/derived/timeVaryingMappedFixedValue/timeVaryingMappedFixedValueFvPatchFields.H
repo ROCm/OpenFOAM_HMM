@@ -36,7 +36,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeFieldTypedefs(timeVaryingMappedFixedValue)
+makePatchTypeFieldTypedefs(timeVaryingMappedFixedValue);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -28,14 +28,10 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-pressureInletVelocityFvPatchVectorField::pressureInletVelocityFvPatchVectorField
+Foam::pressureInletVelocityFvPatchVectorField::
+pressureInletVelocityFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF
@@ -47,7 +43,8 @@ pressureInletVelocityFvPatchVectorField::pressureInletVelocityFvPatchVectorField
 {}
 
 
-pressureInletVelocityFvPatchVectorField::pressureInletVelocityFvPatchVectorField
+Foam::pressureInletVelocityFvPatchVectorField::
+pressureInletVelocityFvPatchVectorField
 (
     const pressureInletVelocityFvPatchVectorField& ptf,
     const fvPatch& p,
@@ -61,7 +58,8 @@ pressureInletVelocityFvPatchVectorField::pressureInletVelocityFvPatchVectorField
 {}
 
 
-pressureInletVelocityFvPatchVectorField::pressureInletVelocityFvPatchVectorField
+Foam::pressureInletVelocityFvPatchVectorField::
+pressureInletVelocityFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
@@ -76,7 +74,8 @@ pressureInletVelocityFvPatchVectorField::pressureInletVelocityFvPatchVectorField
 }
 
 
-pressureInletVelocityFvPatchVectorField::pressureInletVelocityFvPatchVectorField
+Foam::pressureInletVelocityFvPatchVectorField::
+pressureInletVelocityFvPatchVectorField
 (
     const pressureInletVelocityFvPatchVectorField& pivpvf
 )
@@ -87,7 +86,8 @@ pressureInletVelocityFvPatchVectorField::pressureInletVelocityFvPatchVectorField
 {}
 
 
-pressureInletVelocityFvPatchVectorField::pressureInletVelocityFvPatchVectorField
+Foam::pressureInletVelocityFvPatchVectorField::
+pressureInletVelocityFvPatchVectorField
 (
     const pressureInletVelocityFvPatchVectorField& pivpvf,
     const DimensionedField<vector, volMesh>& iF
@@ -101,7 +101,7 @@ pressureInletVelocityFvPatchVectorField::pressureInletVelocityFvPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void pressureInletVelocityFvPatchVectorField::updateCoeffs()
+void Foam::pressureInletVelocityFvPatchVectorField::updateCoeffs()
 {
     if (updated())
     {
@@ -114,7 +114,7 @@ void pressureInletVelocityFvPatchVectorField::updateCoeffs()
     const fvsPatchField<scalar>& phip =
         patch().patchField<surfaceScalarField, scalar>(phi);
 
-    vectorField n = patch().nf();
+    tmp<vectorField> n = patch().nf();
     const Field<scalar>& magS = patch().magSf();
 
     if (phi.dimensions() == dimVelocity*dimArea)
@@ -142,7 +142,7 @@ void pressureInletVelocityFvPatchVectorField::updateCoeffs()
 }
 
 
-void pressureInletVelocityFvPatchVectorField::write(Ostream& os) const
+void Foam::pressureInletVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
     writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
@@ -153,7 +153,7 @@ void pressureInletVelocityFvPatchVectorField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void pressureInletVelocityFvPatchVectorField::operator=
+void Foam::pressureInletVelocityFvPatchVectorField::operator=
 (
     const fvPatchField<vector>& pvf
 )
@@ -164,14 +164,13 @@ void pressureInletVelocityFvPatchVectorField::operator=
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchVectorField,
-    pressureInletVelocityFvPatchVectorField
-);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchVectorField,
+        pressureInletVelocityFvPatchVectorField
+    );
+}
 
 // ************************************************************************* //

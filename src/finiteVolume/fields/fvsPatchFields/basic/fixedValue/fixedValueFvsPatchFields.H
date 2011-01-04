@@ -36,7 +36,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeFvsPatchTypeFieldTypedefs(fixedValue)
+makeFvsPatchTypeFieldTypedefs(fixedValue);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

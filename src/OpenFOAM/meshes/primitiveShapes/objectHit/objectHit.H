@@ -40,14 +40,6 @@ Description
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
-class objectHit;
-inline bool operator==(const objectHit& a, const objectHit& b);
-inline bool operator!=(const objectHit& a, const objectHit& b);
-inline Ostream& operator<<(Ostream& os, const objectHit& b);
-
-
 /*---------------------------------------------------------------------------*\
                            Class objectHit Declaration
 \*---------------------------------------------------------------------------*/
@@ -106,22 +98,22 @@ public:
 
     // Friend Operators
 
-        friend bool operator==(const objectHit& a, const objectHit& b)
+        inline friend bool operator==(const objectHit& a, const objectHit& b)
         {
-            return ((a.hit_ == b.hit_) && (a.hitObject_ == b.hitObject_));
+            return (a.hit_ == b.hit_) && (a.hitObject_ == b.hitObject_);
         }
 
-        friend bool operator!=(const objectHit& a, const objectHit& b)
+        inline friend bool operator!=(const objectHit& a, const objectHit& b)
         {
-            return (!(a == b));
+            return !(a == b);
         }
 
 
     // Ostream operator
 
-        friend Ostream& operator<<(Ostream& os, const objectHit& b)
+        inline friend Ostream& operator<<(Ostream& os, const objectHit& obj)
         {
-             return os << b.hit() << token::SPACE << b.hitObject();
+             return os << obj.hit() << token::SPACE << obj.hitObject();
         }
 };
 

@@ -70,7 +70,7 @@ namespace Foam
     makeReactingMultiphaseParcelDevolatilisationModels(coalParcel);
     makeReactingParcelSurfaceFilmModels(coalParcel);
     makeCoalParcelSurfaceReactionModels(coalParcel);
-};
+}
 
 
 // ************************************************************************* //

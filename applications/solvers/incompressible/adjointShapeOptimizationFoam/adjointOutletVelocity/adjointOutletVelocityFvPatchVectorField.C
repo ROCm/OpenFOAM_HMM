@@ -96,10 +96,10 @@ void Foam::adjointOutletVelocityFvPatchVectorField::updateCoeffs()
     const fvPatchField<vector>& Up =
         patch().lookupPatchField<volVectorField, vector>("U");
 
-    scalarField Un = mag(patch().nf() & Up);
-    vectorField UtHat = (Up - patch().nf()*Un)/(Un + SMALL);
+    scalarField Un(mag(patch().nf() & Up));
+    vectorField UtHat((Up - patch().nf()*Un)/(Un + SMALL));
 
-    vectorField Uan = patch().nf()*(patch().nf() & patchInternalField());
+    vectorField Uan(patch().nf()*(patch().nf() & patchInternalField()));
 
     vectorField::operator=(phiap*patch().Sf()/sqr(patch().magSf()) + UtHat);
     //vectorField::operator=(Uan + UtHat);

@@ -86,4 +86,3 @@ Foam::scalar Foam::extrudeModel::sumThickness(const label layer) const
 
 
 // ************************************************************************* //
-

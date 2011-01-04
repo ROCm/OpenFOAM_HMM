@@ -22,7 +22,7 @@
         trTU = inv(tTU());
         trTU().rename("rAU");
 
-        volVectorField gradp = fvc::grad(p);
+        volVectorField gradp(fvc::grad(p));
 
         for (int UCorr=0; UCorr<nUCorr; UCorr++)
         {

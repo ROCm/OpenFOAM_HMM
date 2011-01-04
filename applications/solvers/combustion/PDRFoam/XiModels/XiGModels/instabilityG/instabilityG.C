@@ -34,8 +34,8 @@ namespace XiGModels
 {
     defineTypeNameAndDebug(instabilityG, 0);
     addToRunTimeSelectionTable(XiGModel, instabilityG, dictionary);
-};
-};
+}
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -65,7 +65,7 @@ Foam::XiGModels::instabilityG::~instabilityG()
 
 Foam::tmp<Foam::volScalarField> Foam::XiGModels::instabilityG::G() const
 {
-    volScalarField turbXiG = XiGModel_->G();
+    volScalarField turbXiG(XiGModel_->G());
     return GIn*GIn/(GIn + turbXiG) + turbXiG;
 }
 

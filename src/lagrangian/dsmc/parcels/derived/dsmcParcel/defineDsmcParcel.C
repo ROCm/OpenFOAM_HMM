@@ -31,7 +31,7 @@ namespace Foam
     defineTemplateTypeNameAndDebug(Cloud<dsmcParcel>, 0);
 
     defineParcelTypeNameAndDebug(DsmcCloud<dsmcParcel>, 0);
-};
+}
 
 
 // ************************************************************************* //

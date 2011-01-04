@@ -128,9 +128,7 @@ void dumpFaces
 
     forAllConstIter(Map<label>, connectedFaces, iter)
     {
-        const labelledTri& f = surf.localFaces()[iter.key()];
-
-        point ctr(f.centre(surf.localPoints()));
+        point ctr = surf.localFaces()[iter.key()].centre(surf.localPoints());
 
         os  << "v " << ctr.x() << ' ' << ctr.y() << ' ' << ctr.z() << endl;
     }
@@ -453,7 +451,7 @@ label sharedFace
 
     const edge& e = surf.edges()[sharedEdgeI];
 
-    const labelledTri& f = surf.localFaces()[firstFaceI];
+    const triSurface::FaceType& f = surf.localFaces()[firstFaceI];
 
     label startIndex = findIndex(f, e.start());
 
@@ -597,13 +595,13 @@ void renumberFaces
     const triSurface& surf,
     const labelList& pointMap,
     const Map<label>& faceToEdge,
-    List<labelledTri>& newTris
+    List<triSurface::FaceType>& newTris
 )
 {
     forAllConstIter(Map<label>, faceToEdge, iter)
     {
         const label faceI = iter.key();
-        const labelledTri& f = surf.localFaces()[faceI];
+        const triSurface::FaceType& f = surf.localFaces()[faceI];
 
         forAll(f, fp)
         {
@@ -911,7 +909,6 @@ int main(int argc, char *argv[])
         forAll(surf, faceI)
         {
             newTris[faceI] = surf.localFaces()[faceI];
-
             newTris[faceI].region() = surf[faceI].region();
         }
 
@@ -924,7 +921,7 @@ int main(int argc, char *argv[])
         // Check if faces use unmoved points.
         forAll(newTris, faceI)
         {
-            const labelledTri& f = newTris[faceI];
+            const triSurface::FaceType& f = newTris[faceI];
 
             forAll(f, fp)
             {

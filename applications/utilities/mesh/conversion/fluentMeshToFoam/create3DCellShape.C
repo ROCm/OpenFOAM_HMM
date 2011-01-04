@@ -260,7 +260,7 @@ cellShape create3DCellShape
                             meshFaceLabels[i - 1] = meshFaceLabels[i];
                         }
 
-                        meshFaceLabels[meshFaceLabels.size() - 1] = firstLabel;
+                        meshFaceLabels.last() = firstLabel;
                     }
                 }
 

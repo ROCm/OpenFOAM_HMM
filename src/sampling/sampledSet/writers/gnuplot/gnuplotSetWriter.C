@@ -86,7 +86,7 @@ void Foam::gnuplotSetWriter<Type>::write
 
     forAll(valueSets, i)
     {
-        writeTable(points, *valueSets[i], os);
+        this->writeTable(points, *valueSets[i], os);
         os  << "e" << nl;
     }
 }
@@ -131,7 +131,7 @@ void Foam::gnuplotSetWriter<Type>::write
 
             forAll(valueSets, i)
             {
-                writeTable(trackPoints[trackI], valueSets[i][trackI], os);
+                this->writeTable(trackPoints[trackI], valueSets[i][trackI], os);
                 os  << "e" << nl;
             }
         }

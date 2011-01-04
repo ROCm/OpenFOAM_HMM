@@ -55,7 +55,11 @@ const Foam::NamedEnum<Foam::fileMonitor::fileState, 3>
 namespace Foam
 {
     template<>
-    const char* Foam::NamedEnum<Foam::fileMonitor::fileState, 3>::names[] =
+    const char* Foam::NamedEnum
+    <
+        Foam::fileMonitor::fileState,
+        3
+    >::names[] =
     {
         "unmodified",
         "modified",

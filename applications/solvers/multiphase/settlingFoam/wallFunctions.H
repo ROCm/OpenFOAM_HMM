@@ -34,11 +34,13 @@
         {
             const scalarField& rhow = rho.boundaryField()[patchi];
 
-            const scalarField muw = mul.boundaryField()[patchi];
+            const scalarField muw(mul.boundaryField()[patchi]);
             const scalarField& mutw = mut.boundaryField()[patchi];
 
-            scalarField magFaceGradU =
-                mag(U.boundaryField()[patchi].snGrad());
+            scalarField magFaceGradU
+            (
+                mag(U.boundaryField()[patchi].snGrad())
+            );
 
             forAll(curPatch, facei)
             {

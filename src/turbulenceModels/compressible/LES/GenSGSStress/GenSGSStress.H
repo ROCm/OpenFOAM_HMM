@@ -115,7 +115,7 @@ public:
         //- Return the SGS turbulent dissipation
         virtual tmp<volScalarField> epsilon() const
         {
-            volScalarField K = k();
+            const volScalarField K(k());
             return ce_*K*sqrt(K)/delta();
         }
 

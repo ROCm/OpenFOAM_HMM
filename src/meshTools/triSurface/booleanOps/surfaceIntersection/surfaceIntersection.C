@@ -53,22 +53,18 @@ bool Foam::surfaceIntersection::excludeEdgeHit
     const scalar
 )
 {
-    const labelledTri& f = surf.localFaces()[faceI];
-
+    const triSurface::FaceType& f = surf.localFaces()[faceI];
     const edge& e = surf.edges()[edgeI];
 
-    if
-    (
-        (f[0] == e.start())
-     || (f[0] == e.end())
-     || (f[1] == e.start())
-     || (f[1] == e.end())
-     || (f[2] == e.start())
-     || (f[2] == e.end())
-    )
+    forAll(f, fp)
     {
-        return true;
+        if (f[0] == e.start() || f[0] == e.end())
+        {
+            return true;
+        }
+    }
 
+// {
 //        // Get edge vector
 //        vector eVec = e.vec(surf.localPoints());
 //        eVec /= mag(eVec) + VSMALL;
@@ -112,11 +108,9 @@ bool Foam::surfaceIntersection::excludeEdgeHit
 //        {
 //            return false;
 //        }
-    }
-    else
-    {
-        return false;
-    }
+// }
+
+    return false;
 }
 
 
@@ -137,14 +131,14 @@ bool Foam::surfaceIntersection::excludeEdgeHit
 //
 //    const pointField& points = surf.points();
 //
-//    const labelledTri& f = surf.localFaces()[hitFaceI];
+//    const triSurface::FaceType& f = surf.localFaces()[hitFaceI];
 //
 //    // Plane for intersect test.
 //    plane pl(eStart, n);
 //
 //    forAll(f, fp)
 //    {
-//        label fp1 = (fp + 1) % 3;
+//        label fp1 = f.fcIndex(fp);
 //
 //        const point& start = points[f[fp]];
 //        const point& end = points[f[fp1]];
@@ -303,19 +297,12 @@ void Foam::surfaceIntersection::classifyHit
 
     // Classify point on surface2
 
-    const labelledTri& f2 = surf2.localFaces()[surf2FaceI];
-
+    const triSurface::FaceType& f2 = surf2.localFaces()[surf2FaceI];
     const pointField& surf2Pts = surf2.localPoints();
 
-    label nearType;
-    label nearLabel;
+    label nearType, nearLabel;
 
-    (void)triPointRef
-    (
-        surf2Pts[f2[0]],
-        surf2Pts[f2[1]],
-        surf2Pts[f2[2]]
-    ).classify(pHit.hitPoint(), nearType, nearLabel);
+    f2.nearestPointClassify(pHit.hitPoint(), surf2Pts, nearType, nearLabel);
 
     // Classify points on edge of surface1
     label edgeEnd =
@@ -333,7 +320,7 @@ void Foam::surfaceIntersection::classifyHit
         if (edgeEnd >= 0)
         {
             // 1. Point hits point. Do nothing.
-            if (debug&2)
+            if (debug & 2)
             {
                 Pout<< pHit.hitPoint() << " is surf1:"
                     << " end point of edge " << e
@@ -344,7 +331,7 @@ void Foam::surfaceIntersection::classifyHit
         else
         {
             // 2. Edge hits point. Cut edge with new point.
-            if (debug&2)
+            if (debug & 2)
             {
                 Pout<< pHit.hitPoint() << " is surf1:"
                     << " somewhere on edge " << e

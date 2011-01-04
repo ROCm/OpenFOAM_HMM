@@ -1,6 +1,6 @@
 rho = thermo.rho();
 
-volScalarField rAU = 1.0/UEqn.A();
+volScalarField rAU(1.0/UEqn.A());
 surfaceScalarField rhorAUf("(rho*(1|A(U)))", fvc::interpolate(rho*rAU));
 U = rAU*UEqn.H();
 
@@ -17,7 +17,7 @@ phi = phiU - rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf();
 
 for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 {
-    surfaceScalarField rhorAUf = fvc::interpolate(rho*rAU);
+    surfaceScalarField rhorAUf(fvc::interpolate(rho*rAU));
 
     fvScalarMatrix p_rghEqn
     (

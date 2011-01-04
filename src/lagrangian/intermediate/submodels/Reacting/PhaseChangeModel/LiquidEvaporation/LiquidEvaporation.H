@@ -72,7 +72,7 @@ protected:
         scalar Sh(const scalar Re, const scalar Sc) const;
 
         //- Calculate the carrier phase component volume fractions at cellI
-        scalarField calcXc(const label cellI) const;
+        tmp<scalarField> calcXc(const label cellI) const;
 
 
 public:

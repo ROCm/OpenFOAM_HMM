@@ -61,13 +61,13 @@ int main(int argc, char *argv[])
         // Cache the turbulence fields
 
         Info<< "\nRetrieving field k from turbulence model" << endl;
-        const volScalarField k = RASModel->k();
+        const volScalarField k(RASModel->k());
 
         Info<< "\nRetrieving field epsilon from turbulence model" << endl;
-        const volScalarField epsilon = RASModel->epsilon();
+        const volScalarField epsilon(RASModel->epsilon());
 
         Info<< "\nRetrieving field R from turbulence model" << endl;
-        const volSymmTensorField R = RASModel->R();
+        const volSymmTensorField R(RASModel->R());
 
         // Check availability of tubulence fields
 

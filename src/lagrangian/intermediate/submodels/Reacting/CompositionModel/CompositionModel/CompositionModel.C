@@ -322,7 +322,8 @@ Foam::scalarField Foam::CompositionModel<CloudType>::X
         }
     }
 
-    return X/WInv;
+    tmp<scalarField> tfld = X/WInv;
+    return tfld();
 }
 
 

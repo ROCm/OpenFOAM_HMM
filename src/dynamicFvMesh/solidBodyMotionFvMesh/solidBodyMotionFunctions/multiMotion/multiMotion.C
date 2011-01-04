@@ -39,8 +39,8 @@ namespace solidBodyMotionFunctions
         multiMotion,
         dictionary
     );
-};
-};
+}
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

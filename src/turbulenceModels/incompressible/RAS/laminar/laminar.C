@@ -72,7 +72,7 @@ tmp<volScalarField> laminar::nut() const
                 IOobject::NO_WRITE
             ),
             mesh_,
-            dimensionedScalar("nut", nu().dimensions(), 0.0)
+            dimensionedScalar("nut", nu()().dimensions(), 0.0)
         )
     );
 }

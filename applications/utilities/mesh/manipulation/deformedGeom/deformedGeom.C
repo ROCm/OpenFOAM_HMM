@@ -79,12 +79,13 @@ int main(int argc, char *argv[])
             Info<< "    Reading U" << endl;
             volVectorField U(Uheader, mesh);
 
-            pointField newPoints =
+            pointField newPoints
+            (
                 zeroPoints
-              + scaleFactor*pInterp.interpolate(U)().internalField();
+              + scaleFactor*pInterp.interpolate(U)().internalField()
+            );
 
             mesh.polyMesh::movePoints(newPoints);
-
             mesh.write();
         }
         else

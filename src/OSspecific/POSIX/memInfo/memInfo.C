@@ -79,6 +79,12 @@ const Foam::memInfo& Foam::memInfo::update()
 }
 
 
+bool Foam::memInfo::valid() const
+{
+    return peak_ != -1;
+}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Istream& Foam::operator>>(Istream& is, memInfo& m)

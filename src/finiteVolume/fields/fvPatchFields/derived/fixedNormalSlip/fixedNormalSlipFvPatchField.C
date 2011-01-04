@@ -26,15 +26,11 @@ License
 #include "fixedNormalSlipFvPatchField.H"
 #include "symmTransformField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-fixedNormalSlipFvPatchField<Type>::fixedNormalSlipFvPatchField
+Foam::fixedNormalSlipFvPatchField<Type>::fixedNormalSlipFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
@@ -46,7 +42,7 @@ fixedNormalSlipFvPatchField<Type>::fixedNormalSlipFvPatchField
 
 
 template<class Type>
-fixedNormalSlipFvPatchField<Type>::fixedNormalSlipFvPatchField
+Foam::fixedNormalSlipFvPatchField<Type>::fixedNormalSlipFvPatchField
 (
     const fixedNormalSlipFvPatchField<Type>& ptf,
     const fvPatch& p,
@@ -60,7 +56,7 @@ fixedNormalSlipFvPatchField<Type>::fixedNormalSlipFvPatchField
 
 
 template<class Type>
-fixedNormalSlipFvPatchField<Type>::fixedNormalSlipFvPatchField
+Foam::fixedNormalSlipFvPatchField<Type>::fixedNormalSlipFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -75,7 +71,7 @@ fixedNormalSlipFvPatchField<Type>::fixedNormalSlipFvPatchField
 
 
 template<class Type>
-fixedNormalSlipFvPatchField<Type>::fixedNormalSlipFvPatchField
+Foam::fixedNormalSlipFvPatchField<Type>::fixedNormalSlipFvPatchField
 (
     const fixedNormalSlipFvPatchField<Type>& ptf
 )
@@ -86,7 +82,7 @@ fixedNormalSlipFvPatchField<Type>::fixedNormalSlipFvPatchField
 
 
 template<class Type>
-fixedNormalSlipFvPatchField<Type>::fixedNormalSlipFvPatchField
+Foam::fixedNormalSlipFvPatchField<Type>::fixedNormalSlipFvPatchField
 (
     const fixedNormalSlipFvPatchField<Type>& ptf,
     const DimensionedField<Type, volMesh>& iF
@@ -100,7 +96,7 @@ fixedNormalSlipFvPatchField<Type>::fixedNormalSlipFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void fixedNormalSlipFvPatchField<Type>::autoMap
+void Foam::fixedNormalSlipFvPatchField<Type>::autoMap
 (
     const fvPatchFieldMapper& m
 )
@@ -111,7 +107,7 @@ void fixedNormalSlipFvPatchField<Type>::autoMap
 
 
 template<class Type>
-void fixedNormalSlipFvPatchField<Type>::rmap
+void Foam::fixedNormalSlipFvPatchField<Type>::rmap
 (
     const fvPatchField<Type>& ptf,
     const labelList& addr
@@ -127,10 +123,11 @@ void fixedNormalSlipFvPatchField<Type>::rmap
 
 
 template<class Type>
-tmp<Field<Type> > fixedNormalSlipFvPatchField<Type>::snGrad() const
+Foam::tmp<Foam::Field<Type> >
+Foam::fixedNormalSlipFvPatchField<Type>::snGrad() const
 {
-    vectorField nHat = this->patch().nf();
-    Field<Type> pif = this->patchInternalField();
+    const vectorField nHat(this->patch().nf());
+    const Field<Type> pif(this->patchInternalField());
 
     return
     (
@@ -140,14 +137,17 @@ tmp<Field<Type> > fixedNormalSlipFvPatchField<Type>::snGrad() const
 
 
 template<class Type>
-void fixedNormalSlipFvPatchField<Type>::evaluate(const Pstream::commsTypes)
+void Foam::fixedNormalSlipFvPatchField<Type>::evaluate
+(
+    const Pstream::commsTypes
+)
 {
     if (!this->updated())
     {
         this->updateCoeffs();
     }
 
-    vectorField nHat = this->patch().nf();
+    const vectorField nHat(this->patch().nf());
 
     Field<Type>::operator=
     (
@@ -160,9 +160,10 @@ void fixedNormalSlipFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 
 
 template<class Type>
-tmp<Field<Type> > fixedNormalSlipFvPatchField<Type>::snGradTransformDiag() const
+Foam::tmp<Foam::Field<Type> >
+Foam::fixedNormalSlipFvPatchField<Type>::snGradTransformDiag() const
 {
-    vectorField nHat = this->patch().nf();
+    const vectorField nHat(this->patch().nf());
     vectorField diag(nHat.size());
 
     diag.replace(vector::X, mag(nHat.component(vector::X)));
@@ -174,15 +175,11 @@ tmp<Field<Type> > fixedNormalSlipFvPatchField<Type>::snGradTransformDiag() const
 
 
 template<class Type>
-void fixedNormalSlipFvPatchField<Type>::write(Ostream& os) const
+void Foam::fixedNormalSlipFvPatchField<Type>::write(Ostream& os) const
 {
     transformFvPatchField<Type>::write(os);
     fixedValue_.writeEntry("fixedValue", os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

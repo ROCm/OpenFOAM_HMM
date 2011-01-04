@@ -44,28 +44,36 @@ namespace Foam
     defineTypeNameAndDebug(directMappedPatchBase, 0);
 
     template<>
-    const char* NamedEnum<directMappedPatchBase::sampleMode, 3>::names[] =
+    const char* Foam::NamedEnum
+    <
+        Foam::directMappedPatchBase::sampleMode,
+        3
+    >::names[] =
     {
         "nearestCell",
         "nearestPatchFace",
         "nearestFace"
     };
 
-    const NamedEnum<directMappedPatchBase::sampleMode, 3>
-        directMappedPatchBase::sampleModeNames_;
-
-
     template<>
-    const char* NamedEnum<directMappedPatchBase::offsetMode, 3>::names[] =
+    const char* Foam::NamedEnum
+    <
+        Foam::directMappedPatchBase::offsetMode,
+        3
+    >::names[] =
     {
         "uniform",
         "nonuniform",
         "normal"
     };
-
-    const NamedEnum<directMappedPatchBase::offsetMode, 3>
-        directMappedPatchBase::offsetModeNames_;
 }
+
+
+const Foam::NamedEnum<Foam::directMappedPatchBase::sampleMode, 3>
+    Foam::directMappedPatchBase::sampleModeNames_;
+
+const Foam::NamedEnum<Foam::directMappedPatchBase::offsetMode, 3>
+    Foam::directMappedPatchBase::offsetModeNames_;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

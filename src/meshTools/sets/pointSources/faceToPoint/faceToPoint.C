@@ -38,7 +38,11 @@ namespace Foam
     addToRunTimeSelectionTable(topoSetSource, faceToPoint, istream);
 
     template<>
-    const char* Foam::NamedEnum<Foam::faceToPoint::faceAction, 1>::names[] =
+    const char* Foam::NamedEnum
+    <
+        Foam::faceToPoint::faceAction,
+        1
+    >::names[] =
     {
         "all"
     };

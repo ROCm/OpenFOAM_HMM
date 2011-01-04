@@ -28,14 +28,10 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-pressureInletOutletVelocityFvPatchVectorField::
+Foam::pressureInletOutletVelocityFvPatchVectorField::
 pressureInletOutletVelocityFvPatchVectorField
 (
     const fvPatch& p,
@@ -51,7 +47,7 @@ pressureInletOutletVelocityFvPatchVectorField
 }
 
 
-pressureInletOutletVelocityFvPatchVectorField::
+Foam::pressureInletOutletVelocityFvPatchVectorField::
 pressureInletOutletVelocityFvPatchVectorField
 (
     const pressureInletOutletVelocityFvPatchVectorField& ptf,
@@ -70,7 +66,7 @@ pressureInletOutletVelocityFvPatchVectorField
 }
 
 
-pressureInletOutletVelocityFvPatchVectorField::
+Foam::pressureInletOutletVelocityFvPatchVectorField::
 pressureInletOutletVelocityFvPatchVectorField
 (
     const fvPatch& p,
@@ -100,7 +96,7 @@ pressureInletOutletVelocityFvPatchVectorField
 }
 
 
-pressureInletOutletVelocityFvPatchVectorField::
+Foam::pressureInletOutletVelocityFvPatchVectorField::
 pressureInletOutletVelocityFvPatchVectorField
 (
     const pressureInletOutletVelocityFvPatchVectorField& pivpvf
@@ -112,7 +108,7 @@ pressureInletOutletVelocityFvPatchVectorField
 {}
 
 
-pressureInletOutletVelocityFvPatchVectorField::
+Foam::pressureInletOutletVelocityFvPatchVectorField::
 pressureInletOutletVelocityFvPatchVectorField
 (
     const pressureInletOutletVelocityFvPatchVectorField& pivpvf,
@@ -127,16 +123,16 @@ pressureInletOutletVelocityFvPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void pressureInletOutletVelocityFvPatchVectorField::
+void Foam::pressureInletOutletVelocityFvPatchVectorField::
 setTangentialVelocity(const vectorField& tangentialVelocity)
 {
     tangentialVelocity_ = tangentialVelocity;
-    vectorField n = patch().nf();
+    const vectorField n(patch().nf());
     refValue() = tangentialVelocity_ - n*(n & tangentialVelocity_);
 }
 
 
-void pressureInletOutletVelocityFvPatchVectorField::autoMap
+void Foam::pressureInletOutletVelocityFvPatchVectorField::autoMap
 (
     const fvPatchFieldMapper& m
 )
@@ -149,7 +145,7 @@ void pressureInletOutletVelocityFvPatchVectorField::autoMap
 }
 
 
-void pressureInletOutletVelocityFvPatchVectorField::rmap
+void Foam::pressureInletOutletVelocityFvPatchVectorField::rmap
 (
     const fvPatchVectorField& ptf,
     const labelList& addr
@@ -167,7 +163,7 @@ void pressureInletOutletVelocityFvPatchVectorField::rmap
 }
 
 
-void pressureInletOutletVelocityFvPatchVectorField::updateCoeffs()
+void Foam::pressureInletOutletVelocityFvPatchVectorField::updateCoeffs()
 {
     if (updated())
     {
@@ -184,7 +180,11 @@ void pressureInletOutletVelocityFvPatchVectorField::updateCoeffs()
 }
 
 
-void pressureInletOutletVelocityFvPatchVectorField::write(Ostream& os) const
+void Foam::pressureInletOutletVelocityFvPatchVectorField::write
+(
+    Ostream& os
+)
+const
 {
     fvPatchVectorField::write(os);
     writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
@@ -198,27 +198,26 @@ void pressureInletOutletVelocityFvPatchVectorField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void pressureInletOutletVelocityFvPatchVectorField::operator=
+void Foam::pressureInletOutletVelocityFvPatchVectorField::operator=
 (
     const fvPatchField<vector>& pvf
 )
 {
-    vectorField normalValue = transform(valueFraction(), refValue());
-    vectorField transformGradValue = transform(I - valueFraction(), pvf);
+    tmp<vectorField> normalValue = transform(valueFraction(), refValue());
+    tmp<vectorField> transformGradValue = transform(I - valueFraction(), pvf);
     fvPatchField<vector>::operator=(normalValue + transformGradValue);
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchVectorField,
-    pressureInletOutletVelocityFvPatchVectorField
-);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchVectorField,
+        pressureInletOutletVelocityFvPatchVectorField
+    );
+}
 
 // ************************************************************************* //

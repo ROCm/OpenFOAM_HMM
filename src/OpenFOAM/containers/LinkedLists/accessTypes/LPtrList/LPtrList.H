@@ -63,7 +63,7 @@ Ostream& operator<<
 
 
 /*---------------------------------------------------------------------------*\
-                           Class LPtrList Declaration
+                          Class LPtrList Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class LListBase, class T>
@@ -75,7 +75,7 @@ class LPtrList
 
         //- Read from Istream using given Istream constructor class
         template<class INew>
-        void read(Istream&, const INew& inewt);
+        void read(Istream&, const INew&);
 
 
 public:
@@ -188,10 +188,7 @@ public:
         public:
 
             //- Construct from base iterator
-            iterator
-            (
-                LListBase_iterator baseIter
-            )
+            iterator(LListBase_iterator baseIter)
             :
                 LList<LListBase, T*>::iterator(baseIter)
             {}
@@ -224,19 +221,13 @@ public:
         public:
 
             //- Construct from base const_iterator
-            const_iterator
-            (
-                LListBase_const_iterator baseIter
-            )
+            const_iterator(LListBase_const_iterator baseIter)
             :
                 LList<LListBase, T*>::const_iterator(baseIter)
             {}
 
             //- Construct from base iterator
-            const_iterator
-            (
-                LListBase_iterator baseIter
-            )
+            const_iterator(LListBase_iterator baseIter)
             :
                 LList<LListBase, T*>::const_iterator(baseIter)
             {}

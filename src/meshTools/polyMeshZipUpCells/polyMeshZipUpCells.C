@@ -447,9 +447,7 @@ bool Foam::polyMeshZipUpCells(polyMesh& mesh)
                 point startPoint = Points[unorderedEdge[0]];
                 dist[0] = 0;
 
-                vector dir =
-                    Points[unorderedEdge[unorderedEdge.size() - 1]]
-                  - startPoint;
+                vector dir = Points[unorderedEdge.last()] - startPoint;
 
                 for (label i = 1; i < dist.size(); i++)
                 {
@@ -509,7 +507,7 @@ bool Foam::polyMeshZipUpCells(polyMesh& mesh)
                 edge testEdge
                 (
                     orderedEdge[0],
-                    orderedEdge[orderedEdge.size() - 1]
+                    orderedEdge.last()
                 );
 
                 // In order to avoid edge-to-edge comparison, get faces using

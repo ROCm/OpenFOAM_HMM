@@ -31,18 +31,24 @@ License
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
-template<>
-const char* Foam::NamedEnum<Foam::temperatureCoupledBase::KMethodType, 4>::
-names[] =
+namespace Foam
 {
-    "basicThermo",
-    "solidThermo",
-    "directionalSolidThermo",
-    "lookup"
-};
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::temperatureCoupledBase::KMethodType,
+        4
+    >::names[] =
+    {
+        "basicThermo",
+        "solidThermo",
+        "directionalSolidThermo",
+        "lookup"
+    };
+}
 
 
-const Foam::NamedEnum<Foam::temperatureCoupledBase::KMethodType, 4> 
+const Foam::NamedEnum<Foam::temperatureCoupledBase::KMethodType, 4>
     Foam::temperatureCoupledBase::KMethodTypeNames_;
 
 
@@ -111,7 +117,7 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::K
 
         case DIRECTIONALSOLIDTHERMO:
         {
-            vectorField n = patch_.nf();
+            const vectorField n(patch_.nf());
 
             const basicSolidThermo& thermo =
                 mesh.lookupObject<basicSolidThermo>
@@ -136,7 +142,7 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::K
                 const symmTensorField& KWall =
                     patch_.lookupPatchField<volSymmTensorField, scalar>(KName_);
 
-                vectorField n = patch_.nf();
+                const vectorField n(patch_.nf());
 
                 return n & KWall & n;
             }
@@ -162,7 +168,7 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::K
                 << "Please set 'K' to one of " << KMethodTypeNames_.toc()
                 << " and 'KName' to the name of the volScalar"
                 << " or volSymmTensor field (if K=lookup)"
-                << exit(FatalError);            
+                << exit(FatalError);
         }
         break;
     }

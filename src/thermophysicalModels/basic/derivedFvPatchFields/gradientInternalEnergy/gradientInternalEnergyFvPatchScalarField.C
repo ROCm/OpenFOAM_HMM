@@ -29,14 +29,9 @@ License
 #include "volFields.H"
 #include "basicThermo.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-gradientInternalEnergyFvPatchScalarField::
+Foam::gradientInternalEnergyFvPatchScalarField::
 gradientInternalEnergyFvPatchScalarField
 (
     const fvPatch& p,
@@ -47,7 +42,7 @@ gradientInternalEnergyFvPatchScalarField
 {}
 
 
-gradientInternalEnergyFvPatchScalarField::
+Foam::gradientInternalEnergyFvPatchScalarField::
 gradientInternalEnergyFvPatchScalarField
 (
     const gradientInternalEnergyFvPatchScalarField& ptf,
@@ -60,7 +55,7 @@ gradientInternalEnergyFvPatchScalarField
 {}
 
 
-gradientInternalEnergyFvPatchScalarField::
+Foam::gradientInternalEnergyFvPatchScalarField::
 gradientInternalEnergyFvPatchScalarField
 (
     const fvPatch& p,
@@ -72,7 +67,7 @@ gradientInternalEnergyFvPatchScalarField
 {}
 
 
-gradientInternalEnergyFvPatchScalarField::
+Foam::gradientInternalEnergyFvPatchScalarField::
 gradientInternalEnergyFvPatchScalarField
 (
     const gradientInternalEnergyFvPatchScalarField& tppsf
@@ -82,7 +77,7 @@ gradientInternalEnergyFvPatchScalarField
 {}
 
 
-gradientInternalEnergyFvPatchScalarField::
+Foam::gradientInternalEnergyFvPatchScalarField::
 gradientInternalEnergyFvPatchScalarField
 (
     const gradientInternalEnergyFvPatchScalarField& tppsf,
@@ -95,7 +90,7 @@ gradientInternalEnergyFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void gradientInternalEnergyFvPatchScalarField::updateCoeffs()
+void Foam::gradientInternalEnergyFvPatchScalarField::updateCoeffs()
 {
     if (updated())
     {
@@ -127,14 +122,13 @@ void gradientInternalEnergyFvPatchScalarField::updateCoeffs()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchScalarField,
-    gradientInternalEnergyFvPatchScalarField
-);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchScalarField,
+        gradientInternalEnergyFvPatchScalarField
+    );
+}
 
 // ************************************************************************* //

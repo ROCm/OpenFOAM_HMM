@@ -120,14 +120,17 @@ inline Foam::pointField Foam::vectorTensorTransform::transform
     const pointField& pts
 ) const
 {
+    tmp<pointField> tfld;
+
     if (hasR_)
     {
-        return t() + (R() & pts);
+        tfld = t() + (R() & pts);
     }
     else
     {
-        return t() + pts;
+        tfld = t() + pts;
     }
+    return tfld();
 }
 
 
@@ -152,14 +155,17 @@ inline Foam::pointField Foam::vectorTensorTransform::invTransform
     const pointField& pts
 ) const
 {
+    tmp<pointField> tfld;
+
     if (hasR_)
     {
-        return (R().T() & (pts - t()));
+        tfld = (R().T() & (pts - t()));
     }
     else
     {
-        return pts - t();
+        tfld = pts - t();
     }
+    return tfld();
 }
 
 

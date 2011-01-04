@@ -34,8 +34,10 @@ scalar meanCoNum = 0.0;
 
 if (mesh.nInternalFaces())
 {
-    surfaceScalarField amaxSfbyDelta =
-        mesh.surfaceInterpolation::deltaCoeffs()*amaxSf;
+    surfaceScalarField amaxSfbyDelta
+    (
+        mesh.surfaceInterpolation::deltaCoeffs()*amaxSf
+    );
 
     CoNum = max(amaxSfbyDelta/mesh.magSf()).value()*runTime.deltaTValue();
 

@@ -1111,7 +1111,7 @@ void Foam::triSurfaceTools::snapToEnd
         if (current.elementType() == triPointRef::NONE)
         {
             // endpoint on point; current on triangle
-            const labelledTri& f = s.localFaces()[current.index()];
+            const triSurface::FaceType& f = s.localFaces()[current.index()];
 
             if (findIndex(f, end.index()) != -1)
             {
@@ -1566,8 +1566,7 @@ Foam::label Foam::triSurfaceTools::oppositeVertex
     const label edgeI
 )
 {
-    const labelledTri& f = surf.localFaces()[faceI];
-
+    const triSurface::FaceType& f = surf.localFaces()[faceI];
     const edge& e = surf.edges()[edgeI];
 
     forAll(f, fp)
@@ -1601,7 +1600,6 @@ Foam::label Foam::triSurfaceTools::getEdge
     forAll(v1Edges, v1EdgeI)
     {
         label edgeI = v1Edges[v1EdgeI];
-
         const edge& e = surf.edges()[edgeI];
 
         if ((e.start() == v2) || (e.end() == v2))
@@ -2116,18 +2114,12 @@ Foam::vector Foam::triSurfaceTools::surfaceNormal
     const point& nearestPt
 )
 {
-    const labelledTri& f = surf[nearestFaceI];
+    const triSurface::FaceType& f = surf[nearestFaceI];
     const pointField& points = surf.points();
 
-    label nearType;
-    label nearLabel;
+    label nearType, nearLabel;
 
-    triPointRef
-    (
-        points[f[0]],
-        points[f[1]],
-        points[f[2]]
-    ).classify(nearestPt, nearType, nearLabel);
+    f.nearestPointClassify(nearestPt, points, nearType, nearLabel);
 
     if (nearType == triPointRef::NONE)
     {
@@ -2153,7 +2145,7 @@ Foam::vector Foam::triSurfaceTools::surfaceNormal
     else
     {
         // Nearest to point
-        const labelledTri& localF = surf.localFaces()[nearestFaceI];
+        const triSurface::FaceType& localF = surf.localFaces()[nearestFaceI];
         return surf.pointNormals()[localF[nearLabel]];
     }
 }
@@ -2203,18 +2195,13 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
     const label nearestFaceI
 )
 {
-    const labelledTri& f = surf[nearestFaceI];
+    const triSurface::FaceType& f = surf[nearestFaceI];
     const pointField& points = surf.points();
 
-    // Find where point is on triangle.
+    // Find where point is on face
     label nearType, nearLabel;
 
-    pointHit pHit = triPointRef
-    (
-        points[f[0]],
-        points[f[1]],
-        points[f[2]]
-    ).nearestPointClassify(sample, nearType, nearLabel);
+    pointHit pHit = f.nearestPointClassify(sample, points, nearType, nearLabel);
 
     const point& nearestPoint(pHit.rawPoint());
 
@@ -2304,7 +2291,7 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
         // above (nearType == triPointRef::EDGE).
 
 
-        const labelledTri& localF = surf.localFaces()[nearestFaceI];
+        const triSurface::FaceType& localF = surf.localFaces()[nearestFaceI];
         label nearPointI = localF[nearLabel];
 
         const edgeList& edges = surf.edges();
@@ -2497,7 +2484,7 @@ Foam::triSurface Foam::triSurfaceTools::triangulateFaceCentre
 
             forAll(f, fp)
             {
-                label fp1 = (fp + 1) % f.size();
+                label fp1 = f.fcIndex(fp);
 
                 triangles.append(labelledTri(f[fp], f[fp1], fc, newPatchI));
 

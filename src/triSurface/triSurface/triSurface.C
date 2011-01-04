@@ -187,20 +187,18 @@ void Foam::triSurface::checkTriangles(const bool verbose)
 
     forAll(*this, faceI)
     {
-        const labelledTri& f = (*this)[faceI];
+        const triSurface::FaceType& f = (*this)[faceI];
 
-        if
-        (
-            (f[0] < 0) || (f[0] > maxPointI)
-         || (f[1] < 0) || (f[1] > maxPointI)
-         || (f[2] < 0) || (f[2] > maxPointI)
-        )
+        forAll(f, fp)
         {
-            FatalErrorIn("triSurface::checkTriangles(bool)")
-                << "triangle " << f
-                << " uses point indices outside point range 0.."
-                << maxPointI
-                << exit(FatalError);
+            if (f[fp] < 0 || f[fp] > maxPointI)
+            {
+                FatalErrorIn("triSurface::checkTriangles(bool)")
+                    << "triangle " << f
+                    << " uses point indices outside point range 0.."
+                    << maxPointI
+                    << exit(FatalError);
+            }
         }
     }
 
@@ -516,7 +514,7 @@ Foam::surfacePatchList Foam::triSurface::calcPatches(labelList& faceMap) const
         maxRegion = max
         (
             maxRegion,
-            operator[](faceMap[faceMap.size() - 1]).region()
+            operator[](faceMap.last()).region()
         );
     }
 
@@ -960,42 +958,30 @@ void Foam::triSurface::subsetMeshMap
 
     boolList pointHad(nPoints(), false);
 
-    forAll(include, oldFacei)
+    forAll(include, oldFaceI)
     {
-        if (include[oldFacei])
+        if (include[oldFaceI])
         {
             // Store new faces compact
-            faceMap[faceI++] = oldFacei;
+            faceMap[faceI++] = oldFaceI;
 
-            // Renumber labels for triangle
-            const labelledTri& tri = locFaces[oldFacei];
+            // Renumber labels for face
+            const triSurface::FaceType& f = locFaces[oldFaceI];
 
-            label a = tri[0];
-            if (!pointHad[a])
+            forAll(f, fp)
             {
-                pointHad[a] = true;
-                pointMap[pointI++] = a;
-            }
-
-            label b = tri[1];
-            if (!pointHad[b])
-            {
-                pointHad[b] = true;
-                pointMap[pointI++] = b;
-            }
-
-            label c = tri[2];
-            if (!pointHad[c])
-            {
-                pointHad[c] = true;
-                pointMap[pointI++] = c;
+                label labI = f[fp];
+                if (!pointHad[labI])
+                {
+                    pointHad[labI] = true;
+                    pointMap[pointI++] = labI;
+                }
             }
         }
     }
 
     // Trim
     faceMap.setSize(faceI);
-
     pointMap.setSize(pointI);
 }
 
@@ -1086,9 +1072,9 @@ void Foam::triSurface::writeStats(Ostream& os) const
     label nPoints = 0;
     boundBox bb = boundBox::invertedBox;
 
-    forAll(*this, triI)
+    forAll(*this, faceI)
     {
-        const labelledTri& f = operator[](triI);
+        const triSurface::FaceType& f = operator[](faceI);
 
         forAll(f, fp)
         {

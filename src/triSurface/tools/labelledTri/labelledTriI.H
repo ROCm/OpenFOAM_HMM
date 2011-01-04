@@ -21,41 +21,43 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct null
-inline labelledTri::labelledTri()
+inline Foam::labelledTri::labelledTri()
 :
     region_(-1)
 {}
 
 
-//- Construct from components
-inline labelledTri::labelledTri
+inline Foam::labelledTri::labelledTri
 (
-    const label A,
-    const label B,
-    const label C,
+    const triFace& tri,
     const label region
 )
 :
-    triFace(A, B, C),
+    triFace(tri),
     region_(region)
 {}
 
 
-inline labelledTri::labelledTri(Istream& is)
+inline Foam::labelledTri::labelledTri
+(
+    const label a,
+    const label b,
+    const label c,
+    const label region
+)
+:
+    triFace(a, b, c),
+    region_(region)
+{}
+
+
+inline Foam::labelledTri::labelledTri(Istream& is)
 {
     operator>>(is, *this);
 }
@@ -63,12 +65,12 @@ inline labelledTri::labelledTri(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline label labelledTri::region() const
+inline Foam::label Foam::labelledTri::region() const
 {
     return region_;
 }
 
-inline label& labelledTri::region()
+inline Foam::label& Foam::labelledTri::region()
 {
     return region_;
 }
@@ -76,7 +78,7 @@ inline label& labelledTri::region()
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-inline Istream& operator>>(Istream& is, labelledTri& t)
+inline Foam::Istream& Foam::operator>>(Istream& is, labelledTri& t)
 {
     if (is.format() == IOstream::ASCII)
     {
@@ -100,7 +102,7 @@ inline Istream& operator>>(Istream& is, labelledTri& t)
 }
 
 
-inline Ostream& operator<<(Ostream& os, const labelledTri& t)
+inline Foam::Ostream& Foam::operator<<(Ostream& os, const labelledTri& t)
 {
     if (os.format() == IOstream::ASCII)
     {
@@ -124,9 +126,5 @@ inline Ostream& operator<<(Ostream& os, const labelledTri& t)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

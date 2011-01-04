@@ -5,7 +5,7 @@
 
     rho = thermo.rho();
 
-    volScalarField rAU = 1.0/UEqn().A();
+    volScalarField rAU(1.0/UEqn().A());
     surfaceScalarField rhorAUf("(rho*(1|A(U)))", fvc::interpolate(rho*rAU));
 
     U = rAU*UEqn().H();

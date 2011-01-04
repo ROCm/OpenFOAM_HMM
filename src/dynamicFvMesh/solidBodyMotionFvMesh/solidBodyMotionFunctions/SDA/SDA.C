@@ -37,8 +37,8 @@ namespace solidBodyMotionFunctions
 {
     defineTypeNameAndDebug(SDA, 0);
     addToRunTimeSelectionTable(solidBodyMotionFunction, SDA, dictionary);
-};
-};
+}
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

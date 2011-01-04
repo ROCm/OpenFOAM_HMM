@@ -100,9 +100,11 @@ int main(int argc, char *argv[])
         );
 
         volScalarField::GeometricBoundaryField d = nearWallDist(mesh).y();
-        volScalarField nuEff = sgsModel->nuEff();
+        volScalarField nuEff(sgsModel->nuEff());
 
         const fvPatchList& patches = mesh.boundary();
+
+        const volScalarField nuLam(sgsModel->nu());
 
         forAll(patches, patchi)
         {
@@ -117,7 +119,7 @@ int main(int argc, char *argv[])
                         nuEff.boundaryField()[patchi]
                        *mag(U.boundaryField()[patchi].snGrad())
                     )
-                   /sgsModel->nu().boundaryField()[patchi];
+                   /nuLam.boundaryField()[patchi];
                 const scalarField& Yp = yPlus.boundaryField()[patchi];
 
                 Info<< "Patch " << patchi

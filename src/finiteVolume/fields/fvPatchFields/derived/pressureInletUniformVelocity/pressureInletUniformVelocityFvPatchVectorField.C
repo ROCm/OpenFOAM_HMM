@@ -28,14 +28,9 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-pressureInletUniformVelocityFvPatchVectorField::
+Foam::pressureInletUniformVelocityFvPatchVectorField::
 pressureInletUniformVelocityFvPatchVectorField
 (
     const fvPatch& p,
@@ -46,7 +41,7 @@ pressureInletUniformVelocityFvPatchVectorField
 {}
 
 
-pressureInletUniformVelocityFvPatchVectorField::
+Foam::pressureInletUniformVelocityFvPatchVectorField::
 pressureInletUniformVelocityFvPatchVectorField
 (
     const pressureInletUniformVelocityFvPatchVectorField& ptf,
@@ -59,7 +54,7 @@ pressureInletUniformVelocityFvPatchVectorField
 {}
 
 
-pressureInletUniformVelocityFvPatchVectorField::
+Foam::pressureInletUniformVelocityFvPatchVectorField::
 pressureInletUniformVelocityFvPatchVectorField
 (
     const fvPatch& p,
@@ -71,7 +66,7 @@ pressureInletUniformVelocityFvPatchVectorField
 {}
 
 
-pressureInletUniformVelocityFvPatchVectorField::
+Foam::pressureInletUniformVelocityFvPatchVectorField::
 pressureInletUniformVelocityFvPatchVectorField
 (
     const pressureInletUniformVelocityFvPatchVectorField& pivpvf
@@ -81,7 +76,7 @@ pressureInletUniformVelocityFvPatchVectorField
 {}
 
 
-pressureInletUniformVelocityFvPatchVectorField::
+Foam::pressureInletUniformVelocityFvPatchVectorField::
 pressureInletUniformVelocityFvPatchVectorField
 (
     const pressureInletUniformVelocityFvPatchVectorField& pivpvf,
@@ -94,7 +89,7 @@ pressureInletUniformVelocityFvPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void pressureInletUniformVelocityFvPatchVectorField::updateCoeffs()
+void Foam::pressureInletUniformVelocityFvPatchVectorField::updateCoeffs()
 {
     if (updated())
     {
@@ -109,7 +104,7 @@ void pressureInletUniformVelocityFvPatchVectorField::updateCoeffs()
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void pressureInletUniformVelocityFvPatchVectorField::operator=
+void Foam::pressureInletUniformVelocityFvPatchVectorField::operator=
 (
     const fvPatchField<vector>& pvf
 )
@@ -120,14 +115,13 @@ void pressureInletUniformVelocityFvPatchVectorField::operator=
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchVectorField,
-    pressureInletUniformVelocityFvPatchVectorField
-);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchVectorField,
+        pressureInletUniformVelocityFvPatchVectorField
+    );
+}
 
 // ************************************************************************* //

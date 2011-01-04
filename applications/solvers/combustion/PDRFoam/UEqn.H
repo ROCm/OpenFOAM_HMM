@@ -7,7 +7,7 @@
         betav*rho*g
     );
 
-    volSymmTensorField invA = inv(I*UEqn.A() + drag->Dcu());
+    volSymmTensorField invA(inv(I*UEqn.A() + drag->Dcu()));
 
     if (momentumPredictor)
     {

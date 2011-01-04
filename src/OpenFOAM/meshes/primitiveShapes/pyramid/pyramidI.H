@@ -27,15 +27,10 @@ Description
 
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Point, class PointRef, class polygonRef>
-inline pyramid<Point, PointRef, polygonRef>::pyramid
+inline Foam::pyramid<Point, PointRef, polygonRef>::pyramid
 (
     polygonRef base,
     const Point& apex
@@ -47,30 +42,30 @@ inline pyramid<Point, PointRef, polygonRef>::pyramid
 
 
 template<class Point, class PointRef, class polygonRef>
-inline pyramid<Point, PointRef, polygonRef>::pyramid(Istream& is)
+inline Foam::pyramid<Point, PointRef, polygonRef>::pyramid(Istream& is)
 {
     is >> base_ >> apex_;
-    is.check("pyramid::pyramid(Istream& is)");
+    is.check("pyramid::pyramid(Istream&)");
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Point, class PointRef, class polygonRef>
-inline const Point& pyramid<Point, PointRef, polygonRef>::apex() const
+inline const Point& Foam::pyramid<Point, PointRef, polygonRef>::apex() const
 {
     return apex_;
 }
 
 template<class Point, class PointRef, class polygonRef>
-inline polygonRef pyramid<Point, PointRef, polygonRef>::base() const
+inline polygonRef Foam::pyramid<Point, PointRef, polygonRef>::base() const
 {
     return base_;
 }
 
 
 template<class Point, class PointRef, class polygonRef>
-inline Point pyramid<Point, PointRef, polygonRef>::centre
+inline Point Foam::pyramid<Point, PointRef, polygonRef>::centre
 (
     const pointField& points
 ) const
@@ -80,7 +75,7 @@ inline Point pyramid<Point, PointRef, polygonRef>::centre
 
 
 template<class Point, class PointRef, class polygonRef>
-inline vector pyramid<Point, PointRef, polygonRef>::height
+inline Foam::vector Foam::pyramid<Point, PointRef, polygonRef>::height
 (
     const pointField& points
 ) const
@@ -91,7 +86,7 @@ inline vector pyramid<Point, PointRef, polygonRef>::height
 
 
 template<class Point, class PointRef, class polygonRef>
-inline scalar pyramid<Point, PointRef, polygonRef>::mag
+inline Foam::scalar Foam::pyramid<Point, PointRef, polygonRef>::mag
 (
     const pointField& points
 ) const
@@ -103,32 +98,28 @@ inline scalar pyramid<Point, PointRef, polygonRef>::mag
 // * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * * //
 
 template<class Point, class PointRef, class polygonRef>
-inline Istream& operator>>
+inline Foam::Istream& Foam::operator>>
 (
     Istream& is,
     pyramid<Point, PointRef, polygonRef>& p
 )
 {
-    is >> p.base_ >> p.apex_;
+    is  >> p.base_ >> p.apex_;
     is.check("Istream& operator>>(Istream&, pyramid&)");
     return is;
 }
 
 
 template<class Point, class PointRef, class polygonRef>
-inline Ostream& operator<<
+inline Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
     const pyramid<Point, PointRef, polygonRef>& p
 )
 {
-    os << p.base_ << tab << p.apex_ << nl;
+    os  << p.base_ << tab << p.apex_ << nl;
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

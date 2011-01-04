@@ -192,7 +192,7 @@ template<class Type>
 void Foam::interpolationLookUpTable<Type>::readTable
 (
     const word& instance,
-    const fvMesh& mesh
+    const objectRegistry& obr
 )
 {
     IOdictionary control
@@ -201,7 +201,7 @@ void Foam::interpolationLookUpTable<Type>::readTable
         (
             fileName_,
             instance,
-            mesh,
+            obr,
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
@@ -240,7 +240,7 @@ Foam::interpolationLookUpTable<Type>::interpolationLookUpTable
 (
     const fileName& fn,
     const word& instance,
-    const fvMesh& mesh
+    const objectRegistry& obr
 )
 :
     List<scalarField>(),
@@ -255,7 +255,7 @@ Foam::interpolationLookUpTable<Type>::interpolationLookUpTable
     outputIndices_(0),
     interpOutput_(0)
 {
-    readTable(instance, mesh);
+    readTable(instance, obr);
 }
 
 
@@ -341,7 +341,7 @@ void Foam::interpolationLookUpTable<Type>::write
     Ostream& os,
     const fileName& fn,
     const word& instance,
-    const fvMesh& mesh
+    const objectRegistry& obr
 ) const
 {
     IOdictionary control
@@ -350,7 +350,7 @@ void Foam::interpolationLookUpTable<Type>::write
         (
             fn,
             instance,
-            mesh,
+            obr,
             IOobject::NO_READ,
             IOobject::NO_WRITE
         )

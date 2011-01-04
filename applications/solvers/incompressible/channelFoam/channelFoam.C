@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 
         // --- PISO loop
 
-        volScalarField rAU = 1.0/UEqn.A();
+        volScalarField rAU(1.0/UEqn.A());
 
         for (int corr=0; corr<nCorr; corr++)
         {

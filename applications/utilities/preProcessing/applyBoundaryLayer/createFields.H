@@ -47,7 +47,7 @@ License
     );
 
     Info<< "Calculating wall distance field" << endl;
-    volScalarField y = wallDist(mesh).y();
+    volScalarField y(wallDist(mesh).y());
 
     // Set the mean boundary-layer thickness
     dimensionedScalar ybl("ybl", dimLength, 0);

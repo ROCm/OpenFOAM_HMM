@@ -101,8 +101,8 @@ Foam::swirlInjector::swirlInjector
     (
         mag
         (
-            massFlowRateProfile_[massFlowRateProfile_.size() - 1][0]
-          - injectionPressureProfile_[injectionPressureProfile_.size() - 1][0]
+            massFlowRateProfile_.last()[0]
+          - injectionPressureProfile_.last()[0]
         ) > SMALL
     )
     {

@@ -27,14 +27,10 @@ License
 #include "IFstream.H"
 #include "IStringStream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool triSurface::readGTS(const fileName& GTSfileName)
+bool Foam::triSurface::readGTS(const fileName& GTSfileName)
 {
     IFstream GTSfile(GTSfileName);
 
@@ -161,9 +157,5 @@ bool triSurface::readGTS(const fileName& GTSfileName)
     return true;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

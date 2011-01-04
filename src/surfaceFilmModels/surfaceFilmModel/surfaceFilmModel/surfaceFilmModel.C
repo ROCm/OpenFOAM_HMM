@@ -37,18 +37,19 @@ namespace Foam
         defineTypeNameAndDebug(surfaceFilmModel, 0);
         defineRunTimeSelectionTable(surfaceFilmModel, mesh);
     }
+
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::surfaceFilmModels::surfaceFilmModel::thermoModelType,
+        2
+    >::names[] =
+    {
+        "constant",
+        "singleComponent"
+    };
+
 }
-
-
-template<>
-const char*
-Foam::NamedEnum<Foam::surfaceFilmModels::surfaceFilmModel::thermoModelType, 2>::
-names[] =
-{
-    "constant",
-    "singleComponent"
-};
-
 
 const
 Foam::NamedEnum<Foam::surfaceFilmModels::surfaceFilmModel::thermoModelType, 2>

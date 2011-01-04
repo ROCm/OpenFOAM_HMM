@@ -71,7 +71,7 @@ void Foam::stochasticDispersionRAS::disperseParcels() const
 
     scalar dt = spray_.runTime().deltaTValue();
     const volScalarField& k = turbulence().k();
-    //volVectorField gradk = fvc::grad(k);
+    // volVectorField gradk(fvc::grad(k));
     const volScalarField& epsilon = turbulence().epsilon();
     const volVectorField& U = spray_.U();
 

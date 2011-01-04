@@ -302,7 +302,7 @@ bool Foam::primitiveMesh::checkFaceAreas
             << "checking face area magnitudes" << endl;
     }
 
-    const scalarField magFaceAreas = mag(faceAreas());
+    const scalarField magFaceAreas(mag(faceAreas()));
 
     scalar minArea = GREAT;
     scalar maxArea = -GREAT;

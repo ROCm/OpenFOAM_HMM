@@ -104,7 +104,7 @@ private:
     // Private Member Functions
 
         //- Read the table of data from file
-        void readTable(const word& instance, const fvMesh&);
+        void readTable(const word& instance, const objectRegistry&);
 
         //- Dimension table from dictionaries input and output
         void dimensionTable();
@@ -147,7 +147,7 @@ public:
         (
             const fileName&,
             const word& instance,
-            const fvMesh&
+            const objectRegistry&
         );
 
          //- Construct from dictionary
@@ -171,7 +171,7 @@ public:
             Ostream&,
             const fileName&,
             const word& instance,
-            const fvMesh&
+            const objectRegistry&
         ) const;
 
 

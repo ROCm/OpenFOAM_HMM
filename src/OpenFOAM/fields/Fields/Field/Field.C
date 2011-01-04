@@ -28,42 +28,37 @@ License
 #include "dictionary.H"
 #include "contiguous.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Static Members  * * * * * * * * * * * * * * //
 
 template<class Type>
-const char* const Field<Type>::typeName("Field");
+const char* const Foam::Field<Type>::typeName("Field");
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Field<Type>::Field()
+Foam::Field<Type>::Field()
 :
     List<Type>()
 {}
 
 
 template<class Type>
-Field<Type>::Field(const label size)
+Foam::Field<Type>::Field(const label size)
 :
     List<Type>(size)
 {}
 
 
 template<class Type>
-Field<Type>::Field(const label size, const Type& t)
+Foam::Field<Type>::Field(const label size, const Type& t)
 :
     List<Type>(size, t)
 {}
 
 
 template<class Type>
-Field<Type>::Field
+Foam::Field<Type>::Field
 (
     const UList<Type>& mapF,
     const labelUList& mapAddressing
@@ -74,8 +69,9 @@ Field<Type>::Field
     map(mapF, mapAddressing);
 }
 
+
 template<class Type>
-Field<Type>::Field
+Foam::Field<Type>::Field
 (
     const tmp<Field<Type> >& tmapF,
     const labelUList& mapAddressing
@@ -88,7 +84,7 @@ Field<Type>::Field
 
 
 template<class Type>
-Field<Type>::Field
+Foam::Field<Type>::Field
 (
     const UList<Type>& mapF,
     const labelListList& mapAddressing,
@@ -100,8 +96,9 @@ Field<Type>::Field
     map(mapF, mapAddressing, mapWeights);
 }
 
+
 template<class Type>
-Field<Type>::Field
+Foam::Field<Type>::Field
 (
     const tmp<Field<Type> >& tmapF,
     const labelListList& mapAddressing,
@@ -115,7 +112,7 @@ Field<Type>::Field
 
 
 template<class Type>
-Field<Type>::Field
+Foam::Field<Type>::Field
 (
     const UList<Type>& mapF,
     const FieldMapper& mapper
@@ -126,8 +123,9 @@ Field<Type>::Field
     map(mapF, mapper);
 }
 
+
 template<class Type>
-Field<Type>::Field
+Foam::Field<Type>::Field
 (
     const tmp<Field<Type> >& tmapF,
     const FieldMapper& mapper
@@ -140,7 +138,7 @@ Field<Type>::Field
 
 
 template<class Type>
-Field<Type>::Field(const Field<Type>& f)
+Foam::Field<Type>::Field(const Field<Type>& f)
 :
     refCount(),
     List<Type>(f)
@@ -148,35 +146,37 @@ Field<Type>::Field(const Field<Type>& f)
 
 
 template<class Type>
-Field<Type>::Field(Field<Type>& f, bool reUse)
+Foam::Field<Type>::Field(Field<Type>& f, bool reUse)
 :
     List<Type>(f, reUse)
 {}
 
 
 template<class Type>
-Field<Type>::Field(const Xfer<List<Type> >& f)
+Foam::Field<Type>::Field(const Xfer<List<Type> >& f)
 :
     List<Type>(f)
 {}
 
 
 template<class Type>
-Field<Type>::Field(const Xfer<Field<Type> >& f)
+Foam::Field<Type>::Field(const Xfer<Field<Type> >& f)
 :
     List<Type>(f)
 {}
 
 
+#ifdef __INTEL_COMPILER
 template<class Type>
-Field<Type>::Field(const typename Field<Type>::subField& sf)
+Foam::Field<Type>::Field(const typename Field<Type>::subField& sf)
 :
     List<Type>(sf)
 {}
+#endif
 
 
 template<class Type>
-Field<Type>::Field(const UList<Type>& list)
+Foam::Field<Type>::Field(const UList<Type>& list)
 :
     List<Type>(list)
 {}
@@ -185,7 +185,7 @@ Field<Type>::Field(const UList<Type>& list)
 // Construct as copy of tmp<Field>
 #ifdef ConstructFromTmp
 template<class Type>
-Field<Type>::Field(const tmp<Field<Type> >& tf)
+Foam::Field<Type>::Field(const tmp<Field<Type> >& tf)
 :
     List<Type>(const_cast<Field<Type>&>(tf()), tf.isTmp())
 {
@@ -195,14 +195,14 @@ Field<Type>::Field(const tmp<Field<Type> >& tf)
 
 
 template<class Type>
-Field<Type>::Field(Istream& is)
+Foam::Field<Type>::Field(Istream& is)
 :
     List<Type>(is)
 {}
 
 
 template<class Type>
-Field<Type>::Field
+Foam::Field<Type>::Field
 (
     const word& keyword,
     const dictionary& dict,
@@ -285,7 +285,7 @@ Field<Type>::Field
 
 
 template<class Type>
-tmp<Field<Type> > Field<Type>::clone() const
+Foam::tmp<Foam::Field<Type> > Foam::Field<Type>::clone() const
 {
     return tmp<Field<Type> >(new Field<Type>(*this));
 }
@@ -294,7 +294,7 @@ tmp<Field<Type> > Field<Type>::clone() const
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Field<Type>::map
+void Foam::Field<Type>::map
 (
     const UList<Type>& mapF,
     const labelUList& mapAddressing
@@ -323,7 +323,7 @@ void Field<Type>::map
 
 
 template<class Type>
-void Field<Type>::map
+void Foam::Field<Type>::map
 (
     const tmp<Field<Type> >& tmapF,
     const labelUList& mapAddressing
@@ -335,7 +335,7 @@ void Field<Type>::map
 
 
 template<class Type>
-void Field<Type>::map
+void Foam::Field<Type>::map
 (
     const UList<Type>& mapF,
     const labelListList& mapAddressing,
@@ -378,8 +378,9 @@ void Field<Type>::map
     }
 }
 
+
 template<class Type>
-void Field<Type>::map
+void Foam::Field<Type>::map
 (
     const tmp<Field<Type> >& tmapF,
     const labelListList& mapAddressing,
@@ -392,7 +393,7 @@ void Field<Type>::map
 
 
 template<class Type>
-void Field<Type>::map
+void Foam::Field<Type>::map
 (
     const UList<Type>& mapF,
     const FieldMapper& mapper
@@ -413,8 +414,9 @@ void Field<Type>::map
     }
 }
 
+
 template<class Type>
-void Field<Type>::map
+void Foam::Field<Type>::map
 (
     const tmp<Field<Type> >& tmapF,
     const FieldMapper& mapper
@@ -426,7 +428,7 @@ void Field<Type>::map
 
 
 template<class Type>
-void Field<Type>::autoMap
+void Foam::Field<Type>::autoMap
 (
     const FieldMapper& mapper
 )
@@ -452,7 +454,7 @@ void Field<Type>::autoMap
 
 
 template<class Type>
-void Field<Type>::rmap
+void Foam::Field<Type>::rmap
 (
     const UList<Type>& mapF,
     const labelUList& mapAddressing
@@ -471,8 +473,9 @@ void Field<Type>::rmap
     }
 }
 
+
 template<class Type>
-void Field<Type>::rmap
+void Foam::Field<Type>::rmap
 (
     const tmp<Field<Type> >& tmapF,
     const labelUList& mapAddressing
@@ -484,7 +487,7 @@ void Field<Type>::rmap
 
 
 template<class Type>
-void Field<Type>::rmap
+void Foam::Field<Type>::rmap
 (
     const UList<Type>& mapF,
     const labelUList& mapAddressing,
@@ -501,8 +504,9 @@ void Field<Type>::rmap
     }
 }
 
+
 template<class Type>
-void Field<Type>::rmap
+void Foam::Field<Type>::rmap
 (
     const tmp<Field<Type> >& tmapF,
     const labelUList& mapAddressing,
@@ -515,14 +519,15 @@ void Field<Type>::rmap
 
 
 template<class Type>
-void Field<Type>::negate()
+void Foam::Field<Type>::negate()
 {
     TFOR_ALL_F_OP_OP_F(Type, *this, =, -, Type, *this)
 }
 
 
 template<class Type>
-tmp<Field<typename Field<Type>::cmptType> > Field<Type>::component
+Foam::tmp<Foam::Field<typename Foam::Field<Type>::cmptType> >
+Foam::Field<Type>::component
 (
     const direction d
 ) const
@@ -534,7 +539,7 @@ tmp<Field<typename Field<Type>::cmptType> > Field<Type>::component
 
 
 template<class Type>
-void Field<Type>::replace
+void Foam::Field<Type>::replace
 (
     const direction d,
     const UList<cmptType>& sf
@@ -546,7 +551,7 @@ void Field<Type>::replace
 
 
 template<class Type>
-void Field<Type>::replace
+void Foam::Field<Type>::replace
 (
     const direction d,
     const tmp<Field<cmptType> >& tsf
@@ -558,7 +563,7 @@ void Field<Type>::replace
 
 
 template<class Type>
-void Field<Type>::replace
+void Foam::Field<Type>::replace
 (
     const direction d,
     const cmptType& c
@@ -570,7 +575,7 @@ void Field<Type>::replace
 
 
 template<class Type>
-tmp<Field<Type> > Field<Type>::T() const
+Foam::tmp<Foam::Field<Type> > Foam::Field<Type>::T() const
 {
     tmp<Field<Type> > transpose(new Field<Type>(this->size()));
     ::Foam::T(transpose(), *this);
@@ -579,7 +584,7 @@ tmp<Field<Type> > Field<Type>::T() const
 
 
 template<class Type>
-void Field<Type>::writeEntry(const word& keyword, Ostream& os) const
+void Foam::Field<Type>::writeEntry(const word& keyword, Ostream& os) const
 {
     os.writeKeyword(keyword);
 
@@ -617,7 +622,7 @@ void Field<Type>::writeEntry(const word& keyword, Ostream& os) const
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Type>
-void Field<Type>::operator=(const Field<Type>& rhs)
+void Foam::Field<Type>::operator=(const Field<Type>& rhs)
 {
     if (this == &rhs)
     {
@@ -631,21 +636,21 @@ void Field<Type>::operator=(const Field<Type>& rhs)
 
 
 template<class Type>
-void Field<Type>::operator=(const SubField<Type>& rhs)
+void Foam::Field<Type>::operator=(const SubField<Type>& rhs)
 {
     List<Type>::operator=(rhs);
 }
 
 
 template<class Type>
-void Field<Type>::operator=(const UList<Type>& rhs)
+void Foam::Field<Type>::operator=(const UList<Type>& rhs)
 {
     List<Type>::operator=(rhs);
 }
 
 
 template<class Type>
-void Field<Type>::operator=(const tmp<Field>& rhs)
+void Foam::Field<Type>::operator=(const tmp<Field>& rhs)
 {
     if (this == &(rhs()))
     {
@@ -662,7 +667,7 @@ void Field<Type>::operator=(const tmp<Field>& rhs)
 
 
 template<class Type>
-void Field<Type>::operator=(const Type& t)
+void Foam::Field<Type>::operator=(const Type& t)
 {
     List<Type>::operator=(t);
 }
@@ -670,7 +675,7 @@ void Field<Type>::operator=(const Type& t)
 
 template<class Type>
 template<class Form, class Cmpt, int nCmpt>
-void Field<Type>::operator=(const VectorSpace<Form,Cmpt,nCmpt>& vs)
+void Foam::Field<Type>::operator=(const VectorSpace<Form,Cmpt,nCmpt>& vs)
 {
     typedef VectorSpace<Form,Cmpt,nCmpt> VSType;
     TFOR_ALL_F_OP_S(Type, *this, =, VSType, vs)
@@ -680,20 +685,20 @@ void Field<Type>::operator=(const VectorSpace<Form,Cmpt,nCmpt>& vs)
 #define COMPUTED_ASSIGNMENT(TYPE, op)                                         \
                                                                               \
 template<class Type>                                                          \
-void Field<Type>::operator op(const UList<TYPE>& f)                           \
+void Foam::Field<Type>::operator op(const UList<TYPE>& f)                     \
 {                                                                             \
     TFOR_ALL_F_OP_F(Type, *this, op, TYPE, f)                                 \
 }                                                                             \
                                                                               \
 template<class Type>                                                          \
-void Field<Type>::operator op(const tmp<Field<TYPE> >& tf)                    \
+void Foam::Field<Type>::operator op(const tmp<Field<TYPE> >& tf)              \
 {                                                                             \
     operator op(tf());                                                        \
     tf.clear();                                                               \
 }                                                                             \
                                                                               \
 template<class Type>                                                          \
-void Field<Type>::operator op(const TYPE& t)                                  \
+void Foam::Field<Type>::operator op(const TYPE& t)                            \
 {                                                                             \
     TFOR_ALL_F_OP_S(Type, *this, op, TYPE, t)                                 \
 }
@@ -709,17 +714,17 @@ COMPUTED_ASSIGNMENT(scalar, /=)
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 template<class Type>
-Ostream& operator<<(Ostream& os, const Field<Type>& f)
+Foam::Ostream& Foam::operator<<(Ostream& os, const Field<Type>& f)
 {
-    os << static_cast<const List<Type>&>(f);
+    os  << static_cast<const List<Type>&>(f);
     return os;
 }
 
 
 template<class Type>
-Ostream& operator<<(Ostream& os, const tmp<Field<Type> >& tf)
+Foam::Ostream& Foam::operator<<(Ostream& os, const tmp<Field<Type> >& tf)
 {
-    os << tf();
+    os  << tf();
     tf.clear();
     return os;
 }
@@ -727,10 +732,6 @@ Ostream& operator<<(Ostream& os, const tmp<Field<Type> >& tf)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#   include "FieldFunctions.C"
+#include "FieldFunctions.C"
 
 // ************************************************************************* //

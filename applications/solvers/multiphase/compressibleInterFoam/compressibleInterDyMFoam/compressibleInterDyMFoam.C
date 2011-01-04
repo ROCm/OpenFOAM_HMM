@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
 
         {
             // Store divU from the previous mesh for the correctPhi
-            volScalarField divU = fvc::div(phi);
+            volScalarField divU(fvc::div(phi));
 
             scalar timeBeforeMeshUpdate = runTime.elapsedCpuTime();
 

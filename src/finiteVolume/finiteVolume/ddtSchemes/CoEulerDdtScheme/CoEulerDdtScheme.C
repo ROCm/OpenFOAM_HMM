@@ -43,7 +43,7 @@ namespace fv
 template<class Type>
 tmp<volScalarField> CoEulerDdtScheme<Type>::CorDeltaT() const
 {
-    surfaceScalarField cofrDeltaT = CofrDeltaT();
+    const surfaceScalarField cofrDeltaT(CofrDeltaT());
 
     tmp<volScalarField> tcorDeltaT
     (
@@ -154,7 +154,7 @@ CoEulerDdtScheme<Type>::fvcDdt
     const dimensioned<Type>& dt
 )
 {
-    volScalarField rDeltaT = CorDeltaT();
+    const volScalarField rDeltaT(CorDeltaT());
 
     IOobject ddtIOobject
     (
@@ -213,7 +213,7 @@ CoEulerDdtScheme<Type>::fvcDdt
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    volScalarField rDeltaT = CorDeltaT();
+    const volScalarField rDeltaT(CorDeltaT());
 
     IOobject ddtIOobject
     (
@@ -265,7 +265,7 @@ CoEulerDdtScheme<Type>::fvcDdt
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    volScalarField rDeltaT = CorDeltaT();
+    const volScalarField rDeltaT(CorDeltaT());
 
     IOobject ddtIOobject
     (
@@ -317,7 +317,7 @@ CoEulerDdtScheme<Type>::fvcDdt
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    volScalarField rDeltaT = CorDeltaT();
+    const volScalarField rDeltaT(CorDeltaT());
 
     IOobject ddtIOobject
     (
@@ -382,7 +382,7 @@ CoEulerDdtScheme<Type>::fvmDdt
 
     fvMatrix<Type>& fvm = tfvm();
 
-    scalarField rDeltaT = CorDeltaT()().internalField();
+    scalarField rDeltaT(CorDeltaT()().internalField());
 
     fvm.diag() = rDeltaT*mesh().V();
 
@@ -417,7 +417,7 @@ CoEulerDdtScheme<Type>::fvmDdt
     );
     fvMatrix<Type>& fvm = tfvm();
 
-    scalarField rDeltaT = CorDeltaT()().internalField();
+    scalarField rDeltaT(CorDeltaT()().internalField());
 
     fvm.diag() = rDeltaT*rho.value()*mesh().V();
 
@@ -454,7 +454,7 @@ CoEulerDdtScheme<Type>::fvmDdt
     );
     fvMatrix<Type>& fvm = tfvm();
 
-    scalarField rDeltaT = CorDeltaT()().internalField();
+    scalarField rDeltaT(CorDeltaT()().internalField());
 
     fvm.diag() = rDeltaT*rho.internalField()*mesh().V();
 
@@ -510,14 +510,14 @@ CoEulerDdtScheme<Type>::fvcDdtPhiCorr
     }
     else
     {
-        volScalarField rDeltaT = CorDeltaT();
+        const volScalarField rDeltaT(CorDeltaT());
 
         return tmp<fluxFieldType>
         (
             new fluxFieldType
             (
                 ddtIOobject,
-                fvcDdtPhiCoeff(U.oldTime(), phi.oldTime())*
+                this->fvcDdtPhiCoeff(U.oldTime(), phi.oldTime())*
                 (
                     fvc::interpolate(rDeltaT*rA)*phi.oldTime()
                   - (fvc::interpolate(rDeltaT*rA*U.oldTime()) & mesh().Sf())
@@ -565,7 +565,7 @@ CoEulerDdtScheme<Type>::fvcDdtPhiCorr
     }
     else
     {
-        volScalarField rDeltaT = CorDeltaT();
+        const volScalarField rDeltaT(CorDeltaT());
 
         if
         (
@@ -578,7 +578,7 @@ CoEulerDdtScheme<Type>::fvcDdtPhiCorr
                 new fluxFieldType
                 (
                     ddtIOobject,
-                    fvcDdtPhiCoeff(U.oldTime(), phi.oldTime())
+                    this->fvcDdtPhiCoeff(U.oldTime(), phi.oldTime())
                    *(
                         fvc::interpolate(rDeltaT*rA*rho.oldTime())*phi.oldTime()
                       - (fvc::interpolate(rDeltaT*rA*rho.oldTime()*U.oldTime())
@@ -598,7 +598,7 @@ CoEulerDdtScheme<Type>::fvcDdtPhiCorr
                 new fluxFieldType
                 (
                     ddtIOobject,
-                    fvcDdtPhiCoeff
+                    this->fvcDdtPhiCoeff
                     (
                         U.oldTime(),
                         phi.oldTime()/fvc::interpolate(rho.oldTime())
@@ -627,8 +627,9 @@ CoEulerDdtScheme<Type>::fvcDdtPhiCorr
                 new fluxFieldType
                 (
                     ddtIOobject,
-                    fvcDdtPhiCoeff(rho.oldTime(), U.oldTime(), phi.oldTime())
-                   *(
+                    this->fvcDdtPhiCoeff
+                    (rho.oldTime(), U.oldTime(), phi.oldTime())
+                  * (
                         fvc::interpolate(rDeltaT*rA)*phi.oldTime()
                       - (
                             fvc::interpolate(rDeltaT*rA*U.oldTime())&mesh().Sf()

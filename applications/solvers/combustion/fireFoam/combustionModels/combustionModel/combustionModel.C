@@ -32,7 +32,7 @@ namespace Foam
 {
     defineTypeNameAndDebug(combustionModel, 0);
     defineRunTimeSelectionTable(combustionModel, dictionary);
-};
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -78,8 +78,8 @@ Foam::combustionModel::combustionModel::R(volScalarField& fu) const
 {
     const basicMultiComponentMixture& composition = thermo_.composition();
     const volScalarField& ft = composition.Y("ft");
-    volScalarField fres = composition.fres(ft, stoicRatio_.value());
-    volScalarField wFuelNorm = this->wFuelNorm()*pos(fu - fres);
+    volScalarField fres(composition.fres(ft, stoicRatio_.value()));
+    volScalarField wFuelNorm(this->wFuelNorm()*pos(fu - fres));
 
     return wFuelNorm*fres - fvm::Sp(wFuelNorm, fu);
 }

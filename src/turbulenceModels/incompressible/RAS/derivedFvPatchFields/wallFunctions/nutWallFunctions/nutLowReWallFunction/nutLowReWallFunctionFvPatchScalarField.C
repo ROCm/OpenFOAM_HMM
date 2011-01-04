@@ -102,7 +102,11 @@ nutLowReWallFunctionFvPatchScalarField::nutLowReWallFunctionFvPatchScalarField
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchScalarField, nutLowReWallFunctionFvPatchScalarField);
+makePatchTypeField
+(
+    fvPatchScalarField,
+    nutLowReWallFunctionFvPatchScalarField
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

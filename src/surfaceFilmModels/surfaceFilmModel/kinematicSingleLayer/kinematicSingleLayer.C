@@ -289,12 +289,14 @@ Foam::surfaceFilmModels::kinematicSingleLayer::CourantNumber() const
     {
         const scalar deltaT = time_.deltaTValue();
 
-        surfaceScalarField SfUfbyDelta =
+        surfaceScalarField SfUfbyDelta
+        (
             filmRegion_.surfaceInterpolation::deltaCoeffs()*mag(phi_)
            /fvc::interpolate
             (
                 rho_*(delta_ + dimensionedScalar("SMALL", dimLength, SMALL))
-            );
+            )
+        );
 
         CoNum = max(SfUfbyDelta/filmRegion_.magSf()).value()*deltaT;
 
@@ -310,13 +312,13 @@ Foam::surfaceFilmModels::kinematicSingleLayer::CourantNumber() const
 
 void Foam::surfaceFilmModels::kinematicSingleLayer::continuityCheck()
 {
-    const volScalarField deltaRho0 = deltaRho_;
+    const volScalarField deltaRho0(deltaRho_);
 
     solveContinuity();
 
     if (debug)
     {
-        volScalarField mass = deltaRho_*magSf_;
+        volScalarField mass(deltaRho_*magSf_);
         dimensionedScalar totalMass =
             fvc::domainIntegrate(mass)
           + dimensionedScalar("SMALL", dimMass*dimVolume, ROOTVSMALL);
@@ -478,11 +480,11 @@ void Foam::surfaceFilmModels::kinematicSingleLayer::solveThickness
         Info<< "kinematicSingleLayer::solveThickness()" << endl;
     }
 
-    volScalarField rAU = 1.0/UEqn.A();
+    volScalarField rAU(1.0/UEqn.A());
     U_ = rAU*UEqn.H();
 
-    surfaceScalarField deltarAUf = fvc::interpolate(delta_*rAU);
-    surfaceScalarField rhof = fvc::interpolate(rho_);
+    surfaceScalarField deltarAUf(fvc::interpolate(delta_*rAU));
+    surfaceScalarField rhof(fvc::interpolate(rho_));
 
     surfaceScalarField phiAdd
     (
@@ -504,8 +506,10 @@ void Foam::surfaceFilmModels::kinematicSingleLayer::solveThickness
     );
     constrainFilmField(phid, 0.0);
 
-    surfaceScalarField ddrhorAUppf =
-        fvc::interpolate(delta_)*deltarAUf*rhof*fvc::interpolate(pp);
+    surfaceScalarField ddrhorAUppf
+    (
+        fvc::interpolate(delta_)*deltarAUf*rhof*fvc::interpolate(pp)
+    );
 //    constrainFilmField(ddrhorAUppf, 0.0);
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr_; nonOrth++)

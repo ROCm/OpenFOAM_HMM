@@ -29,13 +29,8 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 template<class Type, class Scheme>
-multivariateScheme<Type, Scheme>::multivariateScheme
+Foam::multivariateScheme<Type, Scheme>::multivariateScheme
 (
     const fvMesh& mesh,
     const typename multivariateSurfaceInterpolationScheme<Type>::
@@ -68,8 +63,10 @@ multivariateScheme<Type, Scheme>::multivariateScheme
     typename multivariateSurfaceInterpolationScheme<Type>::
         fieldTable::const_iterator iter = this->fields().begin();
 
-    surfaceScalarField limiter =
-        Scheme(mesh, faceFlux_, *this).limiter(*iter());
+    surfaceScalarField limiter
+    (
+        Scheme(mesh, faceFlux_, *this).limiter(*iter())
+    );
 
     for (++iter; iter != this->fields().end(); ++iter)
     {
@@ -85,9 +82,5 @@ multivariateScheme<Type, Scheme>::multivariateScheme
       + (scalar(1) - limiter)*upwind<Type>(mesh, faceFlux_).weights();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

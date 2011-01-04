@@ -36,9 +36,11 @@ scalar waveCoNum = 0.0;
 
 if (mesh.nInternalFaces())
 {
-    scalarField sumPhi =
+    scalarField sumPhi
+    (
         fvc::surfaceSum(mag(phi))().internalField()
-       /h.internalField();
+      / h.internalField()
+    );
 
     CoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();
 

@@ -37,7 +37,7 @@ namespace Foam
 
 template<class Type> class cyclicSlipFvPatchField;
 
-makePatchTypeFieldTypedefs(cyclicSlip)
+makePatchTypeFieldTypedefs(cyclicSlip);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -223,6 +223,9 @@ public:
 
     // Public typedefs
 
+        //- Face type used
+        typedef labelledTri FaceType;
+
         //- Placeholder only, but do not remove - it is needed for GeoMesh
         typedef bool BoundaryMesh;
 

@@ -128,14 +128,14 @@ void nuSgsUSpaldingWallFunctionFvPatchScalarField::evaluate
     const fvPatchVectorField& U =
         patch().lookupPatchField<volVectorField, vector>(UName_);
 
-    scalarField magUp = mag(U.patchInternalField() - U);
+    const scalarField magUp(mag(U.patchInternalField() - U));
 
     const scalarField& nuw =
         patch().lookupPatchField<volScalarField, scalar>(nuName_);
 
     scalarField& nuSgsw = *this;
 
-    scalarField magFaceGradU = mag(U.snGrad());
+    const scalarField magFaceGradU(mag(U.snGrad()));
 
     forAll(nuSgsw, facei)
     {

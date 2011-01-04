@@ -105,7 +105,7 @@ bool Foam::layerAdditionRemoval::setLayerPairing() const
         // Flip face based on flip index to recover original orientation
         if (mfFlip[faceI])
         {
-            curLocalFace = curLocalFace.reverseFace();
+            curLocalFace.flip();
         }
 
         // Get the opposing face from the master cell

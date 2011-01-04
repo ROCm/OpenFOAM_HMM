@@ -2,7 +2,7 @@
     word alphaScheme("div(phi,alpha)");
     word alpharScheme("div(phirb,alpha)");
 
-    surfaceScalarField phir = phic*interface.nHatf();
+    surfaceScalarField phir(phic*interface.nHatf());
 
     for (int gCorr=0; gCorr<nAlphaCorr; gCorr++)
     {
@@ -45,7 +45,8 @@
         }
 
 
-        surfaceScalarField phiAlpha1 =
+        surfaceScalarField phiAlpha1
+        (
             fvc::flux
             (
                 phi,
@@ -57,7 +58,8 @@
                 -fvc::flux(-phir, alpha2, alpharScheme),
                 alpha1,
                 alpharScheme
-            );
+            )
+        );
 
         MULES::explicitSolve
         (
@@ -71,8 +73,8 @@
             0
         );
 
-        surfaceScalarField rho1f = fvc::interpolate(rho1);
-        surfaceScalarField rho2f = fvc::interpolate(rho2);
+        surfaceScalarField rho1f(fvc::interpolate(rho1));
+        surfaceScalarField rho2f(fvc::interpolate(rho2));
         rhoPhi = phiAlpha1*(rho1f - rho2f) + phi*rho2f;
 
         alpha2 = scalar(1) - alpha1;

@@ -116,7 +116,8 @@ inline Foam::ThermoParcel<ParcelType>::trackData::trackData
             interpolation<scalar>::New
             (
                 cloud.solution().interpolationSchemes(),
-                cloud.mesh().objectRegistry::lookupObject<volScalarField>("G")
+                cloud.mesh().objectRegistry::template
+                    lookupObject<volScalarField>("G")
             ).ptr()
         );
     }

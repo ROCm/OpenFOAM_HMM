@@ -46,7 +46,7 @@ isotropicKSolidThermoCoeffs
     cpValues            (1700 1700);
     KValues             (80 40);
 
-   
+
     //- radiative properties
     emissivityValues    (1 1);
     kappaValues         (0 0);

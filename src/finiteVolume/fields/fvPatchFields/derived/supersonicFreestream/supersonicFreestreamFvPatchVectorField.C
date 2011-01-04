@@ -28,14 +28,10 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-supersonicFreestreamFvPatchVectorField::supersonicFreestreamFvPatchVectorField
+Foam::supersonicFreestreamFvPatchVectorField::
+supersonicFreestreamFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF
@@ -53,7 +49,8 @@ supersonicFreestreamFvPatchVectorField::supersonicFreestreamFvPatchVectorField
 }
 
 
-supersonicFreestreamFvPatchVectorField::supersonicFreestreamFvPatchVectorField
+Foam::supersonicFreestreamFvPatchVectorField::
+supersonicFreestreamFvPatchVectorField
 (
     const supersonicFreestreamFvPatchVectorField& ptf,
     const fvPatch& p,
@@ -69,7 +66,8 @@ supersonicFreestreamFvPatchVectorField::supersonicFreestreamFvPatchVectorField
 {}
 
 
-supersonicFreestreamFvPatchVectorField::supersonicFreestreamFvPatchVectorField
+Foam::supersonicFreestreamFvPatchVectorField::
+supersonicFreestreamFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
@@ -115,7 +113,8 @@ supersonicFreestreamFvPatchVectorField::supersonicFreestreamFvPatchVectorField
 }
 
 
-supersonicFreestreamFvPatchVectorField::supersonicFreestreamFvPatchVectorField
+Foam::supersonicFreestreamFvPatchVectorField::
+supersonicFreestreamFvPatchVectorField
 (
     const supersonicFreestreamFvPatchVectorField& sfspvf
 )
@@ -128,7 +127,8 @@ supersonicFreestreamFvPatchVectorField::supersonicFreestreamFvPatchVectorField
 {}
 
 
-supersonicFreestreamFvPatchVectorField::supersonicFreestreamFvPatchVectorField
+Foam::supersonicFreestreamFvPatchVectorField::
+supersonicFreestreamFvPatchVectorField
 (
     const supersonicFreestreamFvPatchVectorField& sfspvf,
     const DimensionedField<vector, volMesh>& iF
@@ -144,7 +144,7 @@ supersonicFreestreamFvPatchVectorField::supersonicFreestreamFvPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void supersonicFreestreamFvPatchVectorField::updateCoeffs()
+void Foam::supersonicFreestreamFvPatchVectorField::updateCoeffs()
 {
     if (!size() || updated())
     {
@@ -182,7 +182,7 @@ void supersonicFreestreamFvPatchVectorField::updateCoeffs()
     valueFraction() = 1;
 
     // get the near patch internal cell values
-    vectorField U = patchInternalField();
+    const vectorField U(patchInternalField());
 
 
     // Find the component of U normal to the free-stream flow and in the
@@ -192,23 +192,18 @@ void supersonicFreestreamFvPatchVectorField::updateCoeffs()
     vector UInfHat = UInf_/mag(UInf_);
 
     // Normal to the plane defined by the free-stream and the patch normal
-    vectorField nnInfHat = UInfHat ^ patch().nf();
-
-    //vectorField UnInf = U - nnInfHat*(nnInfHat & U);
-    //vectorField Un = UnInf - UInfHat*(UInfHat & UnInf);
-    //vectorField nHatInf =
-    //    (Un/(mag(Un) + SMALL)) * sign(patch().nf() & Un);
+    tmp<vectorField> nnInfHat = UInfHat ^ patch().nf();
 
     // Normal to the free-stream in the plane defined by the free-stream
     // and the patch normal
-    vectorField nHatInf = nnInfHat ^ UInfHat;
+    const vectorField nHatInf(nnInfHat ^ UInfHat);
 
     // Component of U normal to the free-stream in the plane defined by the
     // free-stream and the patch normal
-    vectorField Un = nHatInf*(nHatInf & U);
+    const vectorField Un(nHatInf*(nHatInf & U));
 
     // The tangential component is
-    vectorField Ut = U - Un;
+    const vectorField Ut(U - Un);
 
     // Calculate the Prandtl-Meyer function of the free-stream
     scalar nuMachInf =
@@ -290,7 +285,7 @@ void supersonicFreestreamFvPatchVectorField::updateCoeffs()
 }
 
 
-void supersonicFreestreamFvPatchVectorField::write(Ostream& os) const
+void Foam::supersonicFreestreamFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
     os.writeKeyword("UInf") << UInf_ << token::END_STATEMENT << nl;
@@ -303,14 +298,13 @@ void supersonicFreestreamFvPatchVectorField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchVectorField,
-    supersonicFreestreamFvPatchVectorField
-);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchVectorField,
+        supersonicFreestreamFvPatchVectorField
+    );
+}
 
 // ************************************************************************* //

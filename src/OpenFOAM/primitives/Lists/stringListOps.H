@@ -91,7 +91,8 @@ namespace Foam
         const bool invert=false
     )
     {
-        return findStrings(regExp(rePattern), lst, invert);
+        const regExp re(rePattern);
+        return findStrings(re, lst, invert);
     }
 
     //- Return list indices for strings matching the regular expression
@@ -104,7 +105,8 @@ namespace Foam
         const bool invert=false
     )
     {
-        return findMatchingStrings(regExp(rePattern), lst, invert);
+        const regExp re(rePattern);
+        return findMatchingStrings(re, lst, invert);
     }
 
     //- Return list indices for strings matching the regular expression
@@ -171,7 +173,8 @@ namespace Foam
         const bool invert=false
     )
     {
-        return subsetMatchingStrings(regExp(rePattern), lst, invert);
+        const regExp re(rePattern);
+        return subsetMatchingStrings(re, lst, invert);
     }
 
     //- Extract elements of StringList when regular expression matches
@@ -184,7 +187,8 @@ namespace Foam
         const bool invert=false
     )
     {
-        return subsetMatchingStrings(regExp(rePattern), lst, invert);
+        const regExp re(rePattern);
+        return subsetMatchingStrings(re, lst, invert);
     }
 
     //- Extract elements of StringList when regular expression matches
@@ -249,7 +253,8 @@ namespace Foam
         const bool invert=false
     )
     {
-        inplaceSubsetMatchingStrings(regExp(rePattern), lst, invert);
+        const regExp re(rePattern);
+        inplaceSubsetMatchingStrings(re, lst, invert);
     }
 
     //- Inplace extract elements of StringList when regular expression matches
@@ -262,7 +267,8 @@ namespace Foam
         const bool invert=false
     )
     {
-        inplaceSubsetMatchingStrings(regExp(rePattern), lst, invert);
+        const regExp re(rePattern);
+        inplaceSubsetMatchingStrings(re, lst, invert);
     }
 
     //- Inplace extract elements of StringList when regular expression matches

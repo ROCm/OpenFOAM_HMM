@@ -408,22 +408,24 @@ Foam::forces::forcesMoments Foam::forces::calcForcesMoment() const
         {
             label patchi = iter.key();
 
-            vectorField Md = mesh.C().boundaryField()[patchi] - CofR_;
+            vectorField Md(mesh.C().boundaryField()[patchi] - CofR_);
 
-            scalarField sA = mag(Sfb[patchi]);
+            scalarField sA(mag(Sfb[patchi]));
 
             // Normal force = surfaceUnitNormal * (surfaceNormal & forceDensity)
-            vectorField fN =
+            vectorField fN
+            (
                 Sfb[patchi]/sA
                *(
                     Sfb[patchi] & fD.boundaryField()[patchi]
-                );
+                )
+            );
 
             fm.first().first() += sum(fN);
             fm.second().first() += sum(Md ^ fN);
 
             // Tangential force (total force minus normal fN)
-            vectorField fT = sA*fD.boundaryField()[patchi] - fN;
+            vectorField fT(sA*fD.boundaryField()[patchi] - fN);
 
             fm.first().second() += sum(fT);
             fm.second().second() += sum(Md ^ fT);
@@ -450,14 +452,14 @@ Foam::forces::forcesMoments Foam::forces::calcForcesMoment() const
         {
             label patchi = iter.key();
 
-            vectorField Md = mesh.C().boundaryField()[patchi] - CofR_;
+            vectorField Md(mesh.C().boundaryField()[patchi] - CofR_);
 
-            vectorField pf = Sfb[patchi]*(p.boundaryField()[patchi] - pRef);
+            vectorField pf(Sfb[patchi]*(p.boundaryField()[patchi] - pRef));
 
             fm.first().first() += rho(p)*sum(pf);
             fm.second().first() += rho(p)*sum(Md ^ pf);
 
-            vectorField vf = Sfb[patchi] & devRhoReffb[patchi];
+            vectorField vf(Sfb[patchi] & devRhoReffb[patchi]);
 
             fm.first().second() += sum(vf);
             fm.second().second() += sum(Md ^ vf);

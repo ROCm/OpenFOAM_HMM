@@ -243,7 +243,7 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, Foam::directionInfo& wDist)
 
     // Check state of Istream
     is.check("Istream& operator>>(Istream&, directionInfo&)");
-    return is;    
+    return is;
 }
 
 // ************************************************************************* //

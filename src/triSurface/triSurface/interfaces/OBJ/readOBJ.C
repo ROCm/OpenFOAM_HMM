@@ -27,14 +27,9 @@ License
 #include "IFstream.H"
 #include "IStringStream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool triSurface::readOBJ(const fileName& OBJfileName)
+bool Foam::triSurface::readOBJ(const fileName& OBJfileName)
 {
     IFstream OBJfile(OBJfileName);
 
@@ -194,9 +189,5 @@ bool triSurface::readOBJ(const fileName& OBJfileName)
     return true;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

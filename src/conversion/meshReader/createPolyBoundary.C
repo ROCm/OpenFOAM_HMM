@@ -305,7 +305,7 @@ void Foam::meshReader::createPolyBoundary()
 
     if (nMissingFaces > 0)
     {
-        patchSizes_[patchSizes_.size() - 1] = nMissingFaces;
+        patchSizes_.last() = nMissingFaces;
     }
     else
     {

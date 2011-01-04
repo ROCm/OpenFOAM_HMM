@@ -119,12 +119,14 @@ bool Foam::fieldValues::cellSource::writeValues(const word& fieldName)
 
     if (ok)
     {
-        Field<Type> values = combineFields(setFieldValues<Type>(fieldName));
+        Field<Type> values(combineFields(setFieldValues<Type>(fieldName)));
 
-        scalarField V = combineFields(filterField(mesh().V()));
+        scalarField V(combineFields(filterField(mesh().V())));
 
-        scalarField weightField =
-            combineFields(setFieldValues<scalar>(weightFieldName_));
+        scalarField weightField
+        (
+            combineFields(setFieldValues<scalar>(weightFieldName_))
+        );
 
         if (Pstream::master())
         {

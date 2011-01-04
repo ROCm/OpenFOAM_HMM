@@ -29,14 +29,11 @@ License
 #include "surfaceFields.H"
 #include "fvcMeshPhi.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-movingWallVelocityFvPatchVectorField::movingWallVelocityFvPatchVectorField
+Foam::movingWallVelocityFvPatchVectorField::
+movingWallVelocityFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF
@@ -47,7 +44,8 @@ movingWallVelocityFvPatchVectorField::movingWallVelocityFvPatchVectorField
 {}
 
 
-movingWallVelocityFvPatchVectorField::movingWallVelocityFvPatchVectorField
+Foam::movingWallVelocityFvPatchVectorField::
+movingWallVelocityFvPatchVectorField
 (
     const movingWallVelocityFvPatchVectorField& ptf,
     const fvPatch& p,
@@ -60,7 +58,8 @@ movingWallVelocityFvPatchVectorField::movingWallVelocityFvPatchVectorField
 {}
 
 
-movingWallVelocityFvPatchVectorField::movingWallVelocityFvPatchVectorField
+Foam::movingWallVelocityFvPatchVectorField::
+movingWallVelocityFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
@@ -74,7 +73,8 @@ movingWallVelocityFvPatchVectorField::movingWallVelocityFvPatchVectorField
 }
 
 
-movingWallVelocityFvPatchVectorField::movingWallVelocityFvPatchVectorField
+Foam::movingWallVelocityFvPatchVectorField::
+movingWallVelocityFvPatchVectorField
 (
     const movingWallVelocityFvPatchVectorField& mwvpvf
 )
@@ -84,7 +84,8 @@ movingWallVelocityFvPatchVectorField::movingWallVelocityFvPatchVectorField
 {}
 
 
-movingWallVelocityFvPatchVectorField::movingWallVelocityFvPatchVectorField
+Foam::movingWallVelocityFvPatchVectorField::
+movingWallVelocityFvPatchVectorField
 (
     const movingWallVelocityFvPatchVectorField& mwvpvf,
     const DimensionedField<vector, volMesh>& iF
@@ -97,7 +98,7 @@ movingWallVelocityFvPatchVectorField::movingWallVelocityFvPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void movingWallVelocityFvPatchVectorField::updateCoeffs()
+void Foam::movingWallVelocityFvPatchVectorField::updateCoeffs()
 {
     if (updated())
     {
@@ -116,15 +117,17 @@ void movingWallVelocityFvPatchVectorField::updateCoeffs()
         oldFc[i] = pp[i].centre(oldPoints);
     }
 
-    vectorField Up = (pp.faceCentres() - oldFc)/mesh.time().deltaTValue();
+    const vectorField Up((pp.faceCentres() - oldFc)/mesh.time().deltaTValue());
 
     const volVectorField& U = db().lookupObject<volVectorField>(UName_);
-    scalarField phip =
-        p.patchField<surfaceScalarField, scalar>(fvc::meshPhi(U));
+    scalarField phip
+    (
+        p.patchField<surfaceScalarField, scalar>(fvc::meshPhi(U))
+    );
 
-    vectorField n = p.nf();
+    const vectorField n(p.nf());
     const scalarField& magSf = p.magSf();
-    scalarField Un = phip/(magSf + VSMALL);
+    tmp<scalarField> Un = phip/(magSf + VSMALL);
 
 
     vectorField::operator=(Up + n*(Un - (n & Up)));
@@ -133,7 +136,7 @@ void movingWallVelocityFvPatchVectorField::updateCoeffs()
 }
 
 
-void movingWallVelocityFvPatchVectorField::write(Ostream& os) const
+void Foam::movingWallVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
     writeEntryIfDifferent<word>(os, "U", "U", UName_);
@@ -143,14 +146,13 @@ void movingWallVelocityFvPatchVectorField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchVectorField,
-    movingWallVelocityFvPatchVectorField
-);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchVectorField,
+        movingWallVelocityFvPatchVectorField
+    );
+}
 
 // ************************************************************************* //

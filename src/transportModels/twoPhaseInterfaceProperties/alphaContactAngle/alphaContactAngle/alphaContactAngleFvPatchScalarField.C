@@ -48,6 +48,7 @@ namespace Foam
     };
 }
 
+
 const Foam::NamedEnum
 <
     Foam::alphaContactAngleFvPatchScalarField::limitControls,

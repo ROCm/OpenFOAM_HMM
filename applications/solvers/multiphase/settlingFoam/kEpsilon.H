@@ -8,14 +8,16 @@ if (turbulence)
     dimensionedScalar kMin("kMin", k.dimensions(), SMALL);
     dimensionedScalar epsilonMin("epsilonMin", epsilon.dimensions(), SMALL);
 
-    volScalarField divU = fvc::div(phi/fvc::interpolate(rho));
+    volScalarField divU(fvc::div(phi/fvc::interpolate(rho)));
 
     tmp<volTensorField> tgradU = fvc::grad(U);
-    volScalarField G = 2*mut*(tgradU() && dev(symm(tgradU())));
+    volScalarField G(2*mut*(tgradU() && dev(symm(tgradU()))));
     tgradU.clear();
 
-    volScalarField Gcoef =
-        Cmu*k/sigmak*(g & fvc::grad(rho))/(epsilon + epsilonMin);
+    volScalarField Gcoef
+    (
+        Cmu*k/sigmak*(g & fvc::grad(rho))/(epsilon + epsilonMin)
+    );
 
     #include "wallFunctions.H"
 

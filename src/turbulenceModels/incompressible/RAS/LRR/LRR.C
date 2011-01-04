@@ -300,7 +300,7 @@ void LRR::correct()
         return;
     }
 
-    volSymmTensorField P = -twoSymm(R_ & fvc::grad(U_));
+    volSymmTensorField P(-twoSymm(R_ & fvc::grad(U_)));
     volScalarField G("RASModel::G", 0.5*mag(tr(P)));
 
     // Update epsilon and G at the wall
@@ -403,7 +403,7 @@ void LRR::correct()
 
             const scalarField& nutw = nut_.boundaryField()[patchi];
 
-            vectorField snGradU = U_.boundaryField()[patchi].snGrad();
+            const vectorField snGradU(U_.boundaryField()[patchi].snGrad());
 
             const vectorField& faceAreas
                 = mesh_.Sf().boundaryField()[patchi];

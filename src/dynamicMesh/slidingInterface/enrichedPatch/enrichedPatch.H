@@ -61,8 +61,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-
 /*---------------------------------------------------------------------------*\
                           Class enrichedPatch Declaration
 \*---------------------------------------------------------------------------*/
