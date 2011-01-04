@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -390,7 +390,7 @@ void LaunderGibsonRSTM::correct()
 
     const volSymmTensorField reflect
     (
-            C1Ref_*epsilon_/k_*R_ - C2Ref_*Clg2_*dev(P)
+        C1Ref_*epsilon_/k_*R_ - C2Ref_*Clg2_*dev(P)
     );
 
     tmp<fvSymmTensorMatrix> REqn
