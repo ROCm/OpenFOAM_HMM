@@ -74,7 +74,6 @@ Foam::boundBox::boundBox
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-
 template<unsigned Size>
 bool Foam::boundBox::contains
 (
