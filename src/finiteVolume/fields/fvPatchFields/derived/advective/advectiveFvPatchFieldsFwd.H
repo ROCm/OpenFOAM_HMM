@@ -37,7 +37,7 @@ namespace Foam
 
 template<class Type> class advectiveFvPatchField;
 
-makePatchTypeFieldTypedefs(advective)
+makePatchTypeFieldTypedefs(advective);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

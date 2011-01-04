@@ -27,15 +27,10 @@ License
 #include "IOstreams.H"
 #include "triPointRef.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Point, class PointRef>
-inline tetrahedron<Point, PointRef>::tetrahedron
+inline Foam::tetrahedron<Point, PointRef>::tetrahedron
 (
     const Point& a,
     const Point& b,
@@ -51,95 +46,100 @@ inline tetrahedron<Point, PointRef>::tetrahedron
 
 
 template<class Point, class PointRef>
-inline tetrahedron<Point, PointRef>::tetrahedron(Istream& is)
+inline Foam::tetrahedron<Point, PointRef>::tetrahedron
+(
+    const UList<Point>& points,
+    const FixedList<label, 4>& indices
+)
+:
+    a_(points[indices[0]]),
+    b_(points[indices[1]]),
+    c_(points[indices[2]]),
+    d_(points[indices[3]])
+{}
+
+
+template<class Point, class PointRef>
+inline Foam::tetrahedron<Point, PointRef>::tetrahedron(Istream& is)
 {
-    // Read beginning of tetrahedron point pair
-    is.readBegin("tetrahedron");
-
-    is >> a_ >> b_ >> c_ >> d_;
-
-    // Read end of tetrahedron point pair
-    is.readEnd("tetrahedron");
-
-    // Check state of Istream
-    is.check("tetrahedron::tetrahedron(Istream& is)");
+    is  >> *this;
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Point, class PointRef>
-inline const Point& tetrahedron<Point, PointRef>::a() const
+inline const Point& Foam::tetrahedron<Point, PointRef>::a() const
 {
     return a_;
 }
 
 
 template<class Point, class PointRef>
-inline const Point& tetrahedron<Point, PointRef>::b() const
+inline const Point& Foam::tetrahedron<Point, PointRef>::b() const
 {
     return b_;
 }
 
 
 template<class Point, class PointRef>
-inline const Point& tetrahedron<Point, PointRef>::c() const
+inline const Point& Foam::tetrahedron<Point, PointRef>::c() const
 {
     return c_;
 }
 
 
 template<class Point, class PointRef>
-inline const Point& tetrahedron<Point, PointRef>::d() const
+inline const Point& Foam::tetrahedron<Point, PointRef>::d() const
 {
     return d_;
 }
 
 
 template<class Point, class PointRef>
-inline vector tetrahedron<Point, PointRef>::Sa() const
+inline Foam::vector Foam::tetrahedron<Point, PointRef>::Sa() const
 {
     return triangle<Point, PointRef>(b_, c_, d_).normal();
 }
 
 
 template<class Point, class PointRef>
-inline vector tetrahedron<Point, PointRef>::Sb() const
+inline Foam::vector Foam::tetrahedron<Point, PointRef>::Sb() const
 {
     return triangle<Point, PointRef>(a_, d_, c_).normal();
 }
 
 
 template<class Point, class PointRef>
-inline vector tetrahedron<Point, PointRef>::Sc() const
+inline Foam::vector Foam::tetrahedron<Point, PointRef>::Sc() const
 {
     return triangle<Point, PointRef>(a_, b_, d_).normal();
 }
 
 
 template<class Point, class PointRef>
-inline vector tetrahedron<Point, PointRef>::Sd() const
+inline Foam::vector Foam::tetrahedron<Point, PointRef>::Sd() const
 {
     return triangle<Point, PointRef>(a_, c_, b_).normal();
 }
 
 
 template<class Point, class PointRef>
-inline Point tetrahedron<Point, PointRef>::centre() const
+inline Point Foam::tetrahedron<Point, PointRef>::centre() const
 {
     return 0.25*(a_ + b_ + c_ + d_);
 }
 
 
 template<class Point, class PointRef>
-inline scalar tetrahedron<Point, PointRef>::mag() const
+inline Foam::scalar Foam::tetrahedron<Point, PointRef>::mag() const
 {
     return (1.0/6.0)*(((b_ - a_) ^ (c_ - a_)) & (d_ - a_));
 }
 
 
 template<class Point, class PointRef>
-inline Point tetrahedron<Point, PointRef>::circumCentre() const
+inline Point Foam::tetrahedron<Point, PointRef>::circumCentre() const
 {
     vector a = b_ - a_;
     vector b = c_ - a_;
@@ -166,7 +166,7 @@ inline Point tetrahedron<Point, PointRef>::circumCentre() const
 
 
 template<class Point, class PointRef>
-inline scalar tetrahedron<Point, PointRef>::circumRadius() const
+inline Foam::scalar Foam::tetrahedron<Point, PointRef>::circumRadius() const
 {
     vector a = b_ - a_;
     vector b = c_ - a_;
@@ -192,7 +192,7 @@ inline scalar tetrahedron<Point, PointRef>::circumRadius() const
 
 
 template<class Point, class PointRef>
-inline scalar tetrahedron<Point, PointRef>::quality() const
+inline Foam::scalar Foam::tetrahedron<Point, PointRef>::quality() const
 {
     return
         mag()
@@ -205,7 +205,10 @@ inline scalar tetrahedron<Point, PointRef>::quality() const
 
 
 template<class Point, class PointRef>
-inline Point tetrahedron<Point, PointRef>::randomPoint(Random& rndGen) const
+inline Point Foam::tetrahedron<Point, PointRef>::randomPoint
+(
+    Random& rndGen
+) const
 {
     // Adapted from
     // http://vcg.isti.cnr.it/activities/geometryegraphics/pointintetraedro.html
@@ -238,7 +241,7 @@ inline Point tetrahedron<Point, PointRef>::randomPoint(Random& rndGen) const
 
 
 template<class Point, class PointRef>
-scalar tetrahedron<Point, PointRef>::barycentric
+Foam::scalar Foam::tetrahedron<Point, PointRef>::barycentric
 (
     const point& pt,
     List<scalar>& bary
@@ -283,7 +286,7 @@ scalar tetrahedron<Point, PointRef>::barycentric
 
 
 template<class Point, class PointRef>
-inline pointHit tetrahedron<Point, PointRef>::nearestPoint
+inline Foam::pointHit Foam::tetrahedron<Point, PointRef>::nearestPoint
 (
     const point& p
 ) const
@@ -379,18 +382,17 @@ inline pointHit tetrahedron<Point, PointRef>::nearestPoint
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-template<class point, class pointRef>
-inline Istream& operator>>(Istream& is, tetrahedron<point, pointRef>& t)
+template<class Point, class PointRef>
+inline Foam::Istream& Foam::operator>>
+(
+    Istream& is,
+    tetrahedron<Point, PointRef>& t
+)
 {
-    // Read beginning of tetrahedron point pair
     is.readBegin("tetrahedron");
-
-    is >> t.a_ >> t.b_ >> t.c_ >> t.d_;
-
-    // Read end of tetrahedron point pair
+    is  >> t.a_ >> t.b_ >> t.c_ >> t.d_;
     is.readEnd("tetrahedron");
 
-    // Check state of Ostream
     is.check("Istream& operator>>(Istream&, tetrahedron&)");
 
     return is;
@@ -398,20 +400,22 @@ inline Istream& operator>>(Istream& is, tetrahedron<point, pointRef>& t)
 
 
 template<class Point, class PointRef>
-inline Ostream& operator<<(Ostream& os, const tetrahedron<Point, PointRef>& t)
+inline Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const tetrahedron<Point, PointRef>& t
+)
 {
     os  << nl
         << token::BEGIN_LIST
-        << t.a_ << token::SPACE << t.b_
-        << token::SPACE << t.c_ << token::SPACE << t.d_
+        << t.a_ << token::SPACE
+        << t.b_ << token::SPACE
+        << t.c_ << token::SPACE
+        << t.d_
         << token::END_LIST;
 
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -118,24 +118,24 @@ public:
 
     // Member Operators
 
-        friend inline bool operator==(const labelBits& a, const labelBits& b)
+        inline friend bool operator==(const labelBits& a, const labelBits& b)
         {
             return a.data_ == b.data_;
         }
 
-        friend inline bool operator!=(const labelBits& a, const labelBits& b)
+        inline friend bool operator!=(const labelBits& a, const labelBits& b)
         {
             return !(a == b);
         }
 
     // IOstream Operators
 
-        friend inline Istream& operator>>(Istream& is, labelBits& lb)
+        inline friend Istream& operator>>(Istream& is, labelBits& lb)
         {
             return is >> lb.data_;
         }
 
-        friend inline Ostream& operator<<(Ostream& os, const labelBits& lb)
+        inline friend Ostream& operator<<(Ostream& os, const labelBits& lb)
         {
             return os << lb.data_;
         }

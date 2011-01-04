@@ -7,4 +7,3 @@ sigmaRadial/sigmaRadial.C
 wedge/wedge.C
 
 LIB = $(FOAM_LIBBIN)/libextrudeModel
-

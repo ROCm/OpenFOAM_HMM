@@ -36,7 +36,11 @@ defineTypeNameAndDebug(Foam::fieldMinMax, 0);
 namespace Foam
 {
     template<>
-    const char* Foam::NamedEnum<Foam::fieldMinMax::modeType, 2>::names[] =
+    const char* Foam::NamedEnum
+    <
+        Foam::fieldMinMax::modeType,
+        2
+    >::names[] =
     {
         "magnitude",
         "component"

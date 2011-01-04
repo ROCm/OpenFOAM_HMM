@@ -42,7 +42,7 @@ namespace Foam
 
 template<class Type> class calculatedFvsPatchField;
 
-makeFvsPatchTypeFieldTypedefs(calculated)
+makeFvsPatchTypeFieldTypedefs(calculated);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

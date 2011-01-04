@@ -472,7 +472,7 @@ faceList hexBlock::patchFaces(const label direc, const labelList& range) const
         // turn all faces inside out
         forAll(result, faceI)
         {
-            result[faceI] = result[faceI].reverseFace();
+            result[faceI].flip();
         }
     }
 

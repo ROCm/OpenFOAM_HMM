@@ -167,7 +167,7 @@ void Foam::alphaFixedPressureFvPatchScalarField::write
 
 namespace Foam
 {
-    makePatchTypeField
+    makeNonTemplatedPatchTypeField
     (
         fvPatchScalarField,
         alphaFixedPressureFvPatchScalarField

@@ -37,7 +37,7 @@ namespace Foam
 
 template<class Type> class outletMappedUniformInletFvPatchField;
 
-makePatchTypeFieldTypedefs(outletMappedUniformInlet)
+makePatchTypeFieldTypedefs(outletMappedUniformInlet);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

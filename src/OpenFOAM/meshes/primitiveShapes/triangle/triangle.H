@@ -40,6 +40,8 @@ SourceFiles
 #include "tensor.H"
 #include "pointHit.H"
 #include "Random.H"
+#include "FixedList.H"
+#include "UList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -69,7 +71,7 @@ inline Ostream& operator<<
 
 
 /*---------------------------------------------------------------------------*\
-                           class triangle Declaration
+                          Class triangle Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Point, class PointRef>
@@ -95,6 +97,14 @@ public:
 
         //- Construct from three points
         inline triangle(const Point& a, const Point& b, const Point& c);
+
+        //- Construct from three points in the list of points
+        //  The indices could be from triFace etc.
+        inline triangle
+        (
+            const UList<Point>&,
+            const FixedList<label, 3>& indices
+        );
 
         //- Construct from Istream
         inline triangle(Istream&);

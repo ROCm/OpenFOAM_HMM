@@ -51,7 +51,7 @@ tmp<scalarField> mutUSpaldingWallFunctionFvPatchScalarField::calcUTau
     const fvPatchVectorField& Uw =
         rasModel.U().boundaryField()[patch().index()];
 
-    scalarField magUp = mag(Uw.patchInternalField() - Uw);
+    scalarField magUp(mag(Uw.patchInternalField() - Uw));
 
     const fvPatchScalarField& rhow =
         rasModel.rho().boundaryField()[patch().index()];
@@ -108,7 +108,7 @@ tmp<scalarField> mutUSpaldingWallFunctionFvPatchScalarField::calcMut() const
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-    const scalarField magGradU = mag(Uw.snGrad());
+    const scalarField magGradU(mag(Uw.snGrad()));
     const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
     const scalarField& muw = rasModel.mu().boundaryField()[patchI];
 
@@ -205,7 +205,7 @@ void mutUSpaldingWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
+makeNonTemplatedPatchTypeField
 (
     fvPatchScalarField,
     mutUSpaldingWallFunctionFvPatchScalarField

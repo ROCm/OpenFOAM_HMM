@@ -1,6 +1,6 @@
     p.boundaryField().updateCoeffs();
 
-    volScalarField AU = UEqn().A();
+    volScalarField AU(UEqn().A());
     U = UEqn().H()/AU;
     UEqn.clear();
     phi = fvc::interpolate(U) & mesh.Sf();

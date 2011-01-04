@@ -131,7 +131,7 @@ void Foam::swirlFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
     const vector avgNormal = gSum(patch().Sf())/totArea;
 
     // Update angular velocity - convert [rpm] to [rad/s]
-    vectorField tangentialVelocity =
+    tmp<vectorField> tangentialVelocity =
     (
         (rpm_*constant::mathematical::pi/30.0)
       * (patch().Cf() - avgCenter) ^ avgNormal
@@ -189,7 +189,7 @@ void Foam::swirlFlowRateInletVelocityFvPatchVectorField::write
 
 namespace Foam
 {
-   makePatchTypeField
+   makeNonTemplatedPatchTypeField
    (
        fvPatchVectorField,
        swirlFlowRateInletVelocityFvPatchVectorField

@@ -34,9 +34,11 @@ Description
 
     if (mesh.nInternalFaces())
     {
-        scalarField sumPhi =
+        scalarField sumPhi
+        (
             fvc::surfaceSum(mag(phiSt))().internalField()
-           /rho.internalField();
+          / rho.internalField()
+        );
 
         StCoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();
 

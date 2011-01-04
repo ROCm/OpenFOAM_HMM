@@ -80,8 +80,10 @@
 
             // Calculate kernel area from b field consistent with the
             // discretisation of the b equation.
-            volScalarField mgb =
-                fvc::div(nf, b, "div(phiSt,b)") - b*fvc::div(nf) + dMgb;
+            const volScalarField mgb
+            (
+                fvc::div(nf, b, "div(phiSt,b)") - b*fvc::div(nf) + dMgb
+            );
             dimensionedScalar AkEst = gSum(mgb*mesh.V().field());
 
             StCorr.value() = max(min((Ak/AkEst).value(), 10.0), 1.0);

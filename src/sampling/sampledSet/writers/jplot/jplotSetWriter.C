@@ -96,7 +96,7 @@ void Foam::jplotSetWriter<Type>::write
         columns[i] = valueSets[i];
     }
 
-    writeTable(points, columns, os);
+    this->writeTable(points, columns, os);
 }
 
 

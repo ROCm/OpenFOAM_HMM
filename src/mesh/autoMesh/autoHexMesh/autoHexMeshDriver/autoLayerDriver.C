@@ -3032,7 +3032,7 @@ void Foam::autoLayerDriver::addLayers
             }
         }
 
-        scalarField invExpansionRatio = 1.0 / expansionRatio;
+        const scalarField invExpansionRatio(1.0 / expansionRatio);
 
         // Add topo regardless of whether extrudeStatus is extruderemove.
         // Not add layer if patchDisp is zero.

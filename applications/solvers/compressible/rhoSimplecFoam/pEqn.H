@@ -3,10 +3,10 @@ rho = max(rho, rhoMin);
 rho = min(rho, rhoMax);
 rho.relax();
 
-volScalarField p0 = p;
+volScalarField p0(p);
 
-volScalarField AU = UEqn().A();
-volScalarField AtU = AU - UEqn().H1();
+volScalarField AU(UEqn().A());
+volScalarField AtU(AU - UEqn().H1());
 U = UEqn().H()/AU;
 UEqn.clear();
 

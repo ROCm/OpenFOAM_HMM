@@ -123,21 +123,21 @@ Foam::dynamicAlphaContactAngleFvPatchScalarField::theta
         return tmp<scalarField>(new scalarField(size(), theta0_));
     }
 
-    vectorField nf = patch().nf();
+    const vectorField nf(patch().nf());
 
     // Calculated the component of the velocity parallel to the wall
-    vectorField Uwall = Up.patchInternalField() - Up;
+    vectorField Uwall(Up.patchInternalField() - Up);
     Uwall -= (nf & Uwall)*nf;
 
     // Find the direction of the interface parallel to the wall
-    vectorField nWall = nHat - (nf & nHat)*nf;
+    vectorField nWall(nHat - (nf & nHat)*nf);
 
     // Normalise nWall
     nWall /= (mag(nWall) + SMALL);
 
     // Calculate Uwall resolved normal to the interface parallel to
     // the interface
-    scalarField uwall = nWall & Uwall;
+    scalarField uwall(nWall & Uwall);
 
     return theta0_ + (thetaA_ - thetaR_)*tanh(uwall/uTheta_);
 }
@@ -158,7 +158,7 @@ void Foam::dynamicAlphaContactAngleFvPatchScalarField::write(Ostream& os) const
 
 namespace Foam
 {
-    makePatchTypeField
+    makeNonTemplatedPatchTypeField
     (
         fvPatchScalarField,
         dynamicAlphaContactAngleFvPatchScalarField

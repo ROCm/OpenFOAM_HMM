@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 
             for (int corr=0; corr<nCorr; corr++)
             {
-                volScalarField rAU = 1.0/UEqn.A();
+                volScalarField rAU(1.0/UEqn.A());
 
                 U = rAU*UEqn.H();
 
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
 
             BEqn.solve();
 
-            volScalarField rBA = 1.0/BEqn.A();
+            volScalarField rBA(1.0/BEqn.A());
 
             phiB = (fvc::interpolate(B) & mesh.Sf())
                 + fvc::ddtPhiCorr(rBA, B, phiB);

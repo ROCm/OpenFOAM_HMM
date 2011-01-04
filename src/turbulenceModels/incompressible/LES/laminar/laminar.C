@@ -98,7 +98,7 @@ tmp<volScalarField> laminar::nuSgs() const
                 IOobject::NO_WRITE
             ),
             mesh_,
-            dimensionedScalar("nuSgs", nu().dimensions(), 0.0)
+            dimensionedScalar("nuSgs", nu()().dimensions(), 0.0)
         )
     );
 }

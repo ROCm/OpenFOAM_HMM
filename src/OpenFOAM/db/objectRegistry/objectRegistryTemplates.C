@@ -84,22 +84,13 @@ bool Foam::objectRegistry::foundObject(const word& name) const
         {
             return true;
         }
-        else
-        {
-            return false;
-        }
     }
-    else
+    else if (this->parentNotTime())
     {
-        if (&parent_ != dynamic_cast<const objectRegistry*>(&time_))
-        {
-            return parent_.foundObject<Type>(name);
-        }
-        else
-        {
-            return false;
-        }
+        return parent_.foundObject<Type>(name);
     }
+
+    return false;
 }
 
 
@@ -117,8 +108,10 @@ const Type& Foam::objectRegistry::lookupObject(const word& name) const
             return *vpsiPtr_;
         }
 
-        FatalErrorIn("objectRegistry::lookupObject<Type>(const word&) const")
-            << nl
+        FatalErrorIn
+        (
+            "objectRegistry::lookupObject<Type>(const word&) const"
+        )   << nl
             << "    lookup of " << name << " from objectRegistry "
             << this->name()
             << " successful\n    but it is not a " << Type::typeName
@@ -127,23 +120,21 @@ const Type& Foam::objectRegistry::lookupObject(const word& name) const
     }
     else
     {
-        if (&parent_ != dynamic_cast<const objectRegistry*>(&time_))
+        if (this->parentNotTime())
         {
             return parent_.lookupObject<Type>(name);
         }
-        else
-        {
-            FatalErrorIn
-            (
-                "objectRegistry::lookupObject<Type>(const word&) const"
-            )   << nl
-                << "    request for " << Type::typeName
-                << " " << name << " from objectRegistry " << this->name()
-                << " failed\n    available objects of type " << Type::typeName
-                << " are" << nl
-                << names<Type>()
-                << abort(FatalError);
-        }
+
+        FatalErrorIn
+        (
+            "objectRegistry::lookupObject<Type>(const word&) const"
+        )   << nl
+            << "    request for " << Type::typeName
+            << " " << name << " from objectRegistry " << this->name()
+            << " failed\n    available objects of type " << Type::typeName
+            << " are" << nl
+            << names<Type>()
+            << abort(FatalError);
     }
 
     return *reinterpret_cast< const Type* >(0);

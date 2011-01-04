@@ -142,14 +142,15 @@ fi
 # Construct test string for remote execution.
 # Source OpenFOAM settings if OpenFOAM environment not set.
 # attempt to preserve the installation directory 'FOAM_INST_DIR'
+# use FOAM_SETTINGS to pass command-line settings
 if [ "$FOAM_INST_DIR" ]
 then
-    sourceFoam='[ "$WM_PROJECT" ] || '"FOAM_INST_DIR=$FOAM_INST_DIR . $sourceFoam"
+    sourceFoam='[ "$WM_PROJECT" ] || '"FOAM_INST_DIR=$FOAM_INST_DIR . $sourceFoam $FOAM_SETTINGS"
 else
-    sourceFoam='[ "$WM_PROJECT" ] || '". $sourceFoam"
+    sourceFoam='[ "$WM_PROJECT" ] || '". $sourceFoam $FOAM_SETTINGS"
 fi
 
-echo "**sourceFoam:$sourceFoam"
+echo "**sourceFoam:$sourceFoam $FOAM_SETTINGS"
 
 rm -f $PWD/mpirun.schema
 touch $PWD/mpirun.schema

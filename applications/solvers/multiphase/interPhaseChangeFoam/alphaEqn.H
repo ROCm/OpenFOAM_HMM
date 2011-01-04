@@ -6,7 +6,8 @@
 
     for (int gCorr=0; gCorr<nAlphaCorr; gCorr++)
     {
-        surfaceScalarField phiAlpha =
+        surfaceScalarField phiAlpha
+        (
             fvc::flux
             (
                 phi,
@@ -18,7 +19,8 @@
                 -fvc::flux(-phir, scalar(1) - alpha1, alpharScheme),
                 alpha1,
                 alpharScheme
-            );
+            )
+        );
 
         Pair<tmp<volScalarField> > vDotAlphal =
             twoPhaseProperties->vDotAlphal();

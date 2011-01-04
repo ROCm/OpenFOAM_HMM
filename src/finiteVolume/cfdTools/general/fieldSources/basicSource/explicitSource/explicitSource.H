@@ -63,7 +63,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class explicitSource Declaration
+                       Class explicitSource Declaration
 \*---------------------------------------------------------------------------*/
 
 class explicitSource
@@ -86,7 +86,7 @@ class explicitSource
             fieldList()
             :
                 HashTable<Type>(0),
-                OwnerPtr_()
+                OwnerPtr_(*reinterpret_cast<explicitSource*>(0))
             {}
 
 
@@ -107,7 +107,7 @@ class explicitSource
                 {
                     geometricField& field = const_cast<geometricField&>
                     (
-                        OwnerPtr_.mesh().lookupObject<geometricField>
+                        OwnerPtr_.mesh().template lookupObject<geometricField>
                             (this->toc()[i])
                     );
 

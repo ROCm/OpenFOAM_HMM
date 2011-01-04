@@ -51,13 +51,6 @@ class lineEdge
 :
     public curvedEdge
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        lineEdge(const lineEdge&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const lineEdge&);
 
 public:
 

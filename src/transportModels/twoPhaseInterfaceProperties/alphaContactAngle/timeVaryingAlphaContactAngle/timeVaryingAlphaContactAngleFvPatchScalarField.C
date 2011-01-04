@@ -143,7 +143,7 @@ void Foam::timeVaryingAlphaContactAngleFvPatchScalarField::write
 
 namespace Foam
 {
-    makePatchTypeField
+    makeNonTemplatedPatchTypeField
     (
         fvPatchScalarField,
         timeVaryingAlphaContactAngleFvPatchScalarField

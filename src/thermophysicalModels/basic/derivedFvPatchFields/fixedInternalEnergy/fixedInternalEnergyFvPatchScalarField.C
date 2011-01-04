@@ -29,14 +29,10 @@ License
 #include "volFields.H"
 #include "basicThermo.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-fixedInternalEnergyFvPatchScalarField::fixedInternalEnergyFvPatchScalarField
+Foam::fixedInternalEnergyFvPatchScalarField::
+fixedInternalEnergyFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -46,7 +42,8 @@ fixedInternalEnergyFvPatchScalarField::fixedInternalEnergyFvPatchScalarField
 {}
 
 
-fixedInternalEnergyFvPatchScalarField::fixedInternalEnergyFvPatchScalarField
+Foam::fixedInternalEnergyFvPatchScalarField::
+fixedInternalEnergyFvPatchScalarField
 (
     const fixedInternalEnergyFvPatchScalarField& ptf,
     const fvPatch& p,
@@ -58,7 +55,8 @@ fixedInternalEnergyFvPatchScalarField::fixedInternalEnergyFvPatchScalarField
 {}
 
 
-fixedInternalEnergyFvPatchScalarField::fixedInternalEnergyFvPatchScalarField
+Foam::fixedInternalEnergyFvPatchScalarField::
+fixedInternalEnergyFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -69,7 +67,8 @@ fixedInternalEnergyFvPatchScalarField::fixedInternalEnergyFvPatchScalarField
 {}
 
 
-fixedInternalEnergyFvPatchScalarField::fixedInternalEnergyFvPatchScalarField
+Foam::fixedInternalEnergyFvPatchScalarField::
+fixedInternalEnergyFvPatchScalarField
 (
     const fixedInternalEnergyFvPatchScalarField& tppsf
 )
@@ -78,7 +77,8 @@ fixedInternalEnergyFvPatchScalarField::fixedInternalEnergyFvPatchScalarField
 {}
 
 
-fixedInternalEnergyFvPatchScalarField::fixedInternalEnergyFvPatchScalarField
+Foam::fixedInternalEnergyFvPatchScalarField::
+fixedInternalEnergyFvPatchScalarField
 (
     const fixedInternalEnergyFvPatchScalarField& tppsf,
     const DimensionedField<scalar, volMesh>& iF
@@ -90,7 +90,7 @@ fixedInternalEnergyFvPatchScalarField::fixedInternalEnergyFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void fixedInternalEnergyFvPatchScalarField::updateCoeffs()
+void Foam::fixedInternalEnergyFvPatchScalarField::updateCoeffs()
 {
     if (updated())
     {
@@ -115,10 +115,13 @@ void fixedInternalEnergyFvPatchScalarField::updateCoeffs()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchScalarField, fixedInternalEnergyFvPatchScalarField);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makeNonTemplatedPatchTypeField
+    (
+        fvPatchScalarField,
+        fixedInternalEnergyFvPatchScalarField
+    );
+}
 
 // ************************************************************************* //

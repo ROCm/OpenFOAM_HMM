@@ -51,7 +51,8 @@ void vanDriestDelta::calcDelta()
     const LESModel& lesModel = mesh_.lookupObject<LESModel>("LESProperties");
 
     const volVectorField& U = lesModel.U();
-    const volScalarField& nu = lesModel.nu();
+    const tmp<volScalarField> tnu = lesModel.nu();
+    const volScalarField& nu = tnu();
     tmp<volScalarField> nuSgs = lesModel.nuSgs();
 
     volScalarField ystar

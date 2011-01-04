@@ -117,7 +117,8 @@ case OpenFOAM:
         # using clang - not gcc
         setenv WM_CC 'clang'
         setenv WM_CXX 'clang++'
-        set clang_version=llvm-2.8
+        #set clang_version=llvm-2.8
+        set clang_version=llvm-svn
         breaksw
     default:
         echo
@@ -236,7 +237,8 @@ unsetenv MPI_ARCH_PATH MPI_HOME
 
 switch ("$WM_MPLIB")
 case OPENMPI:
-    set mpi_version=openmpi-1.4.1
+    #set mpi_version=openmpi-1.4.1
+    set mpi_version=openmpi-1.5.1
     setenv MPI_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$mpi_version
 
     # Tell OpenMPI where to find its install directory

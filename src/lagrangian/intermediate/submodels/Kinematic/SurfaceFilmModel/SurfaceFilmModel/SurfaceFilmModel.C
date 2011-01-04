@@ -134,7 +134,7 @@ void Foam::SurfaceFilmModel<CloudType>::inject(TrackData& td)
 
     // Retrieve the film model from the owner database
     const surfaceFilmModels::surfaceFilmModel& filmModel =
-        this->owner().db().objectRegistry::lookupObject
+        this->owner().db().objectRegistry::template lookupObject
         <surfaceFilmModels::surfaceFilmModel>
         (
             "surfaceFilmProperties"

@@ -124,7 +124,7 @@ public:
         ) const
         {
             const surfaceScalarField& blendingFactor =
-                this->mesh().objectRegistry::
+                this->mesh().objectRegistry::template
                 lookupObject<const surfaceScalarField>
                 (
                     word(vf.name() + "BlendingFactor")
@@ -142,7 +142,7 @@ public:
         {
             const surfaceScalarField& blendingFactor =
             (
-                this->mesh().objectRegistry::
+                this->mesh().objectRegistry::template
                 lookupObject<const surfaceScalarField>
                 (
                     word(vf.name() + "BlendingFactor")
@@ -171,7 +171,7 @@ public:
         ) const
         {
             const surfaceScalarField& blendingFactor =
-                this->mesh().objectRegistry::
+                this->mesh().objectRegistry::template
                 lookupObject<const surfaceScalarField>
                 (
                     word(vf.name() + "BlendingFactor")

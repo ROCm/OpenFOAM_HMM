@@ -55,8 +55,10 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 
         const volTensorField gradU(fvc::grad(U));
 
-        volTensorField SSplusWW =
-            (symm(gradU) & symm(gradU)) + (skew(gradU) & skew(gradU));
+        volTensorField SSplusWW
+        (
+            (symm(gradU) & symm(gradU)) + (skew(gradU) & skew(gradU))
+        );
 
         volScalarField Lambda2
         (

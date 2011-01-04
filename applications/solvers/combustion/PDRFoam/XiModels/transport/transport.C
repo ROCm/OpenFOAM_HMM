@@ -34,8 +34,8 @@ namespace XiModels
 {
     defineTypeNameAndDebug(transport, 0);
     addToRunTimeSelectionTable(XiModel, transport, dictionary);
-};
-};
+}
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -77,17 +77,19 @@ void Foam::XiModels::transport::correct
     const fv::convectionScheme<scalar>& mvConvection
 )
 {
-    volScalarField XiEqEta = XiEqModel_->XiEq();
-    volScalarField GEta = XiGModel_->G();
+    volScalarField XiEqEta(XiEqModel_->XiEq());
+    volScalarField GEta(XiGModel_->G());
 
-    volScalarField R = GEta*XiEqEta/(XiEqEta - 0.999);
+    volScalarField R(GEta*XiEqEta/(XiEqEta - 0.999));
 
-    volScalarField XiEqStar = R/(R - GEta);
+    volScalarField XiEqStar(R/(R - GEta));
 
-    volScalarField XiEq =
-        1.0 + (1.0 + (2*XiShapeCoef)*(0.5 - b_))*(XiEqStar - 1.0);
+    volScalarField XiEq
+    (
+        1.0 + (1.0 + (2*XiShapeCoef)*(0.5 - b_))*(XiEqStar - 1.0)
+    );
 
-    volScalarField G = R*(XiEq - 1.0)/XiEq;
+    volScalarField G(R*(XiEq - 1.0)/XiEq);
 
     const objectRegistry& db = b_.db();
     const volScalarField& betav = db.lookupObject<volScalarField>("betav");

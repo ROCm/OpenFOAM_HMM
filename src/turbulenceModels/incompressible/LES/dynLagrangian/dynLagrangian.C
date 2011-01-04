@@ -118,24 +118,26 @@ void dynLagrangian::correct(const tmp<volTensorField>& gradU)
 {
     LESModel::correct(gradU);
 
-    volSymmTensorField S = dev(symm(gradU()));
+    volSymmTensorField S(dev(symm(gradU())));
 
-    volScalarField magS = mag(S);
+    volScalarField magS(mag(S));
 
-    volVectorField Uf = filter_(U());
+    volVectorField Uf(filter_(U()));
 
-    volSymmTensorField Sf = dev(symm(fvc::grad(Uf)));
+    volSymmTensorField Sf(dev(symm(fvc::grad(Uf))));
 
-    volScalarField magSf = mag(Sf);
+    volScalarField magSf(mag(Sf));
 
-    volSymmTensorField L = dev(filter_(sqr(U())) - (sqr(filter_(U()))));
+    volSymmTensorField L(dev(filter_(sqr(U())) - (sqr(filter_(U())))));
 
-    volSymmTensorField M = 2.0*sqr(delta())*(filter_(magS*S) - 4.0*magSf*Sf);
+    volSymmTensorField M(2.0*sqr(delta())*(filter_(magS*S) - 4.0*magSf*Sf));
 
-    volScalarField invT =
-        (1.0/(theta_.value()*delta()))*pow(flm_*fmm_, 1.0/8.0);
+    volScalarField invT
+    (
+        (1.0/(theta_.value()*delta()))*pow(flm_*fmm_, 1.0/8.0)
+    );
 
-    volScalarField LM = L && M;
+    volScalarField LM(L && M);
 
     fvScalarMatrix flmEqn
     (
@@ -151,7 +153,7 @@ void dynLagrangian::correct(const tmp<volTensorField>& gradU)
 
     bound(flm_, flm0_);
 
-    volScalarField MM = M && M;
+    volScalarField MM(M && M);
 
     fvScalarMatrix fmmEqn
     (

@@ -21,4 +21,4 @@ autoPtr<incompressible::LESModel> sgsModel
     incompressible::LESModel::New(U, phi, laminarTransport)
 );
 
-volScalarField::GeometricBoundaryField d = nearWallDist(mesh).y();
+volScalarField::GeometricBoundaryField d(nearWallDist(mesh).y());

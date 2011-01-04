@@ -39,10 +39,12 @@ Description
 namespace Foam
 {
     class face;
-    typedef UList<face> unallocFaceList;
+    typedef UList<face> faceUList;
     typedef List<face> faceList;
     typedef SubList<face> faceSubList;
     typedef List<faceList> faceListList;
+    // same as faceUList:
+    typedef UList<face> unallocFaceList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

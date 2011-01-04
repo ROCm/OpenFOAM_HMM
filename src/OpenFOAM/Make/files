@@ -64,6 +64,13 @@ $(sha1)/SHA1Digest.C
 primitives/random/Random/Random.C
 primitives/random/cachedRandom/cachedRandom.H
 
+ranges = primitives/ranges
+$(ranges)/labelRange/labelRange.C
+$(ranges)/labelRange/labelRanges.C
+$(ranges)/scalarRange/scalarRange.C
+$(ranges)/scalarRange/scalarRanges.C
+
+
 containers/HashTables/HashTable/HashTableCore.C
 containers/HashTables/StaticHashTable/StaticHashTableCore.C
 containers/Lists/SortableList/ParSortableListName.C
@@ -193,9 +200,6 @@ $(Time)/findInstance.C
 $(Time)/timeSelector.C
 
 $(Time)/instant/instant.C
-
-db/scalarRange/scalarRange.C
-db/scalarRange/scalarRanges.C
 
 dimensionSet/dimensionSet.C
 dimensionSet/dimensionSetIO.C

@@ -39,7 +39,7 @@ Description
 Foam::label Foam::cell::opposingFaceLabel
 (
     const label masterFaceLabel,
-    const unallocFaceList& meshFaces
+    const faceUList& meshFaces
 ) const
 {
     // Algorithm:
@@ -114,7 +114,7 @@ Foam::label Foam::cell::opposingFaceLabel
 Foam::oppositeFace Foam::cell::opposingFace
 (
     const label masterFaceLabel,
-    const unallocFaceList& meshFaces
+    const faceUList& meshFaces
 ) const
 {
     // Get the label of the opposite face

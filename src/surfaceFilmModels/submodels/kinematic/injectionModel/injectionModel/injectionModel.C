@@ -50,7 +50,7 @@ void Foam::surfaceFilmModels::injectionModel::correctDetachedFilm
     const kinematicSingleLayer& film =
         refCast<const kinematicSingleLayer>(owner_);
 
-    const scalarField gNorm = film.gNorm();
+    const scalarField gNorm(film.gNorm());
     const scalarField& delta = film.delta();
     const scalarField& rho = film.rho();
     const scalarField& magSf = film.magSf();

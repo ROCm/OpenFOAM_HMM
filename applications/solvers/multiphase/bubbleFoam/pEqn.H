@@ -1,20 +1,24 @@
 {
-    surfaceScalarField alphaf = fvc::interpolate(alpha);
-    surfaceScalarField betaf = scalar(1) - alphaf;
+    surfaceScalarField alphaf(fvc::interpolate(alpha));
+    surfaceScalarField betaf(scalar(1) - alphaf);
 
-    volScalarField rUaA = 1.0/UaEqn.A();
-    volScalarField rUbA = 1.0/UbEqn.A();
+    volScalarField rUaA(1.0/UaEqn.A());
+    volScalarField rUbA(1.0/UbEqn.A());
 
-    surfaceScalarField rUaAf = fvc::interpolate(rUaA);
-    surfaceScalarField rUbAf = fvc::interpolate(rUbA);
+    surfaceScalarField rUaAf(fvc::interpolate(rUaA));
+    surfaceScalarField rUbAf(fvc::interpolate(rUbA));
 
     Ua = rUaA*UaEqn.H();
     Ub = rUbA*UbEqn.H();
 
-    surfaceScalarField phiDraga =
-        fvc::interpolate(beta/rhoa*dragCoef*rUaA)*phib + rUaAf*(g & mesh.Sf());
-    surfaceScalarField phiDragb =
-        fvc::interpolate(alpha/rhob*dragCoef*rUbA)*phia + rUbAf*(g & mesh.Sf());
+    surfaceScalarField phiDraga
+    (
+        fvc::interpolate(beta/rhoa*dragCoef*rUaA)*phib + rUaAf*(g & mesh.Sf())
+    );
+    surfaceScalarField phiDragb
+    (
+        fvc::interpolate(alpha/rhob*dragCoef*rUbA)*phia + rUbAf*(g & mesh.Sf())
+    );
 
     forAll(p.boundaryField(), patchi)
     {
@@ -50,7 +54,7 @@
 
         if (nonOrth == nNonOrthCorr)
         {
-            surfaceScalarField SfGradp = pEqn.flux()/Dp;
+            surfaceScalarField SfGradp(pEqn.flux()/Dp);
 
             phia -= rUaAf*SfGradp/rhoa;
             phib -= rUbAf*SfGradp/rhob;

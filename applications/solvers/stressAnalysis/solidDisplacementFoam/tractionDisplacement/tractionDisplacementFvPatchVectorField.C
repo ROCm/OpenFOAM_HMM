@@ -168,7 +168,7 @@ void tractionDisplacementFvPatchVectorField::updateCoeffs()
 
     scalar twoMuLambda = (2*mu + lambda).value();
 
-    vectorField n = patch().nf();
+    vectorField n(patch().nf());
 
     const fvPatchField<symmTensor>& sigmaD =
         patch().lookupPatchField<volSymmTensorField, symmTensor>("sigmaD");
@@ -207,7 +207,11 @@ void tractionDisplacementFvPatchVectorField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchVectorField, tractionDisplacementFvPatchVectorField);
+makeNonTemplatedPatchTypeField
+(
+    fvPatchVectorField,
+    tractionDisplacementFvPatchVectorField
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -89,7 +89,7 @@ void Foam::slidingInterface::decoupleInterface
 
         if (masterPatchFlip[faceI])
         {
-            newFace = newFace.reverseFace();
+            newFace.flip();
         }
 
         ref.setAction
@@ -141,7 +141,7 @@ void Foam::slidingInterface::decoupleInterface
 
         if (slavePatchFlip[faceI])
         {
-            newFace = newFace.reverseFace();
+            newFace.flip();
         }
 
         // Recover retired points on the slave side

@@ -162,15 +162,17 @@ updateCoeffs()
     }
 
     scalarField& Iw = *this;
-    vectorField n = patch().Sf()/patch().magSf();
+    const vectorField n(patch().Sf()/patch().magSf());
 
     radiativeIntensityRay& ray =
         const_cast<radiativeIntensityRay&>(dom.IRay(rayId));
 
     ray.Qr().boundaryField()[patchI] += Iw*(n & ray.dAve());
 
-    const scalarField Eb =
-        dom.blackBody().bLambda(lambdaId).boundaryField()[patchI];
+    const scalarField Eb
+    (
+        dom.blackBody().bLambda(lambdaId).boundaryField()[patchI]
+    );
 
     forAll(Iw, faceI)
     {
@@ -232,7 +234,7 @@ namespace Foam
 {
 namespace radiation
 {
-    makePatchTypeField
+    makeNonTemplatedPatchTypeField
     (
         fvPatchScalarField,
         wideBandDiffusiveRadiationMixedFvPatchScalarField

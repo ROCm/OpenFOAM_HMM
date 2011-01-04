@@ -28,14 +28,9 @@ License
 #include "volFields.H"
 #include "fvPatchFieldMapper.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-surfaceNormalFixedValueFvPatchVectorField::
+Foam::surfaceNormalFixedValueFvPatchVectorField::
 surfaceNormalFixedValueFvPatchVectorField
 (
     const fvPatch& p,
@@ -47,7 +42,7 @@ surfaceNormalFixedValueFvPatchVectorField
 {}
 
 
-surfaceNormalFixedValueFvPatchVectorField::
+Foam::surfaceNormalFixedValueFvPatchVectorField::
 surfaceNormalFixedValueFvPatchVectorField
 (
     const surfaceNormalFixedValueFvPatchVectorField& ptf,
@@ -63,7 +58,7 @@ surfaceNormalFixedValueFvPatchVectorField
 }
 
 
-surfaceNormalFixedValueFvPatchVectorField::
+Foam::surfaceNormalFixedValueFvPatchVectorField::
 surfaceNormalFixedValueFvPatchVectorField
 (
     const fvPatch& p,
@@ -78,7 +73,7 @@ surfaceNormalFixedValueFvPatchVectorField
 }
 
 
-surfaceNormalFixedValueFvPatchVectorField::
+Foam::surfaceNormalFixedValueFvPatchVectorField::
 surfaceNormalFixedValueFvPatchVectorField
 (
     const surfaceNormalFixedValueFvPatchVectorField& pivpvf
@@ -89,7 +84,7 @@ surfaceNormalFixedValueFvPatchVectorField
 {}
 
 
-surfaceNormalFixedValueFvPatchVectorField::
+Foam::surfaceNormalFixedValueFvPatchVectorField::
 surfaceNormalFixedValueFvPatchVectorField
 (
     const surfaceNormalFixedValueFvPatchVectorField& pivpvf,
@@ -103,7 +98,7 @@ surfaceNormalFixedValueFvPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void surfaceNormalFixedValueFvPatchVectorField::autoMap
+void Foam::surfaceNormalFixedValueFvPatchVectorField::autoMap
 (
     const fvPatchFieldMapper& m
 )
@@ -113,7 +108,7 @@ void surfaceNormalFixedValueFvPatchVectorField::autoMap
 }
 
 
-void surfaceNormalFixedValueFvPatchVectorField::rmap
+void Foam::surfaceNormalFixedValueFvPatchVectorField::rmap
 (
     const fvPatchVectorField& ptf,
     const labelList& addr
@@ -128,7 +123,7 @@ void surfaceNormalFixedValueFvPatchVectorField::rmap
 }
 
 
-void surfaceNormalFixedValueFvPatchVectorField::write(Ostream& os) const
+void Foam::surfaceNormalFixedValueFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
     refValue_.writeEntry("refValue", os);
@@ -137,15 +132,13 @@ void surfaceNormalFixedValueFvPatchVectorField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchVectorField,
-    surfaceNormalFixedValueFvPatchVectorField
-);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makeNonTemplatedPatchTypeField
+    (
+        fvPatchVectorField,
+        surfaceNormalFixedValueFvPatchVectorField
+    );
+}
 
 // ************************************************************************* //

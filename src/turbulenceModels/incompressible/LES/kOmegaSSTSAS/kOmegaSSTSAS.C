@@ -52,13 +52,13 @@ void kOmegaSSTSAS::updateSubGridScaleFields(const volScalarField& S2)
 
 tmp<volScalarField> kOmegaSSTSAS::F1(const volScalarField& CDkOmega) const
 {
-    volScalarField CDkOmegaPlus = max
+    tmp<volScalarField> CDkOmegaPlus = max
     (
         CDkOmega,
         dimensionedScalar("1.0e-10", dimless/sqr(dimTime), 1.0e-10)
     );
 
-    volScalarField arg1 = min
+    tmp<volScalarField> arg1 = min
     (
         min
         (
@@ -78,7 +78,7 @@ tmp<volScalarField> kOmegaSSTSAS::F1(const volScalarField& CDkOmega) const
 
 tmp<volScalarField> kOmegaSSTSAS::F2() const
 {
-    volScalarField arg2 = min
+    tmp<volScalarField> arg2 = min
     (
         max
         (
@@ -345,15 +345,15 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
         y_.correct();
     }
 
-    volScalarField S2 = magSqr(2.0*symm(gradU()));
+    volScalarField S2(magSqr(2.0*symm(gradU())));
     gradU.clear();
 
-    volVectorField gradK = fvc::grad(k_);
-    volVectorField gradOmega = fvc::grad(omega_);
-    volScalarField L = sqrt(k_)/(pow025(Cmu_)*omega_);
-    volScalarField CDkOmega = (2.0*alphaOmega2_)*(gradK & gradOmega)/omega_;
-    volScalarField F1 = this->F1(CDkOmega);
-    volScalarField G = nuSgs_*0.5*S2;
+    volVectorField gradK(fvc::grad(k_));
+    volVectorField gradOmega(fvc::grad(omega_));
+    volScalarField L(sqrt(k_)/(pow025(Cmu_)*omega_));
+    volScalarField CDkOmega((2.0*alphaOmega2_)*(gradK & gradOmega)/omega_);
+    volScalarField F1(this->F1(CDkOmega));
+    volScalarField G(nuSgs_*0.5*S2);
 
     // Turbulent kinetic energy equation
     {
@@ -373,7 +373,7 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
     }
     bound(k_, kMin_);
 
-    volScalarField grad_omega_k = max
+    tmp<volScalarField> grad_omega_k = max
     (
         magSqr(gradOmega)/sqr(omega_),
         magSqr(gradK)/sqr(k_)

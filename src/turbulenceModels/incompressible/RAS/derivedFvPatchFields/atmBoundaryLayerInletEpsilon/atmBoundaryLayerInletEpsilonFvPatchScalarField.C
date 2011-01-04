@@ -130,7 +130,7 @@ atmBoundaryLayerInletEpsilonFvPatchScalarField
 void atmBoundaryLayerInletEpsilonFvPatchScalarField::updateCoeffs()
 {
     const vectorField& c = patch().Cf();
-    scalarField coord = (c & z_);
+    tmp<scalarField> coord = (c & z_);
     scalarField::operator=(pow3(Ustar_)/(kappa_*(coord - zGround_ + z0_)));
 }
 
@@ -154,7 +154,7 @@ void atmBoundaryLayerInletEpsilonFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
+makeNonTemplatedPatchTypeField
 (
     fvPatchScalarField,
     atmBoundaryLayerInletEpsilonFvPatchScalarField

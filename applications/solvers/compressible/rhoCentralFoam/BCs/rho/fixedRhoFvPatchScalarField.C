@@ -112,7 +112,11 @@ void fixedRhoFvPatchScalarField::updateCoeffs()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchScalarField, fixedRhoFvPatchScalarField);
+makeNonTemplatedPatchTypeField
+(
+    fvPatchScalarField,
+    fixedRhoFvPatchScalarField
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

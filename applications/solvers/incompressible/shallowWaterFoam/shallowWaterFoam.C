@@ -89,10 +89,10 @@ int main(int argc, char *argv[])
             // --- PISO loop
             for (int corr=0; corr<nCorr; corr++)
             {
-                volScalarField rAU = 1.0/hUEqn.A();
-                surfaceScalarField ghrAUf = magg*fvc::interpolate(h*rAU);
+                volScalarField rAU(1.0/hUEqn.A());
+                surfaceScalarField ghrAUf(magg*fvc::interpolate(h*rAU));
 
-                surfaceScalarField phih0 = ghrAUf*mesh.magSf()*fvc::snGrad(h0);
+                surfaceScalarField phih0(ghrAUf*mesh.magSf()*fvc::snGrad(h0));
 
                 if (rotating)
                 {

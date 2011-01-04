@@ -23,116 +23,112 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Time& spray::runTime() const
+inline const Foam::Time& Foam::spray::runTime() const
 {
     return runTime_;
 }
 
 
-inline const fvMesh& spray::mesh() const
+inline const Foam::fvMesh& Foam::spray::mesh() const
 {
     return mesh_;
 }
 
 
-inline const volVectorField& spray::U() const
+inline const Foam::volVectorField& Foam::spray::U() const
 {
     return U_;
 }
 
 
-inline const volScalarField& spray::rho() const
+inline const Foam::volScalarField& Foam::spray::rho() const
 {
     return rho_;
 }
 
 
-inline const volScalarField& spray::p() const
+inline const Foam::volScalarField& Foam::spray::p() const
 {
     return p_;
 }
 
 
-inline const volScalarField& spray::T() const
+inline const Foam::volScalarField& Foam::spray::T() const
 {
     return T_;
 }
 
 
-inline PtrList<injector>& spray::injectors()
+inline Foam::PtrList<Foam::injector>& Foam::spray::injectors()
 {
     return injectors_;
 }
 
 
-inline const PtrList<injector>& spray::injectors() const
+inline const Foam::PtrList<Foam::injector>& Foam::spray::injectors() const
 {
     return injectors_;
 }
 
 
-inline const atomizationModel& spray::atomization() const
+inline const Foam::atomizationModel& Foam::spray::atomization() const
 {
-    return atomization_;
+    return atomization_();
 }
 
 
-inline const breakupModel& spray::breakup() const
+inline const Foam::breakupModel& Foam::spray::breakup() const
 {
-    return breakupModel_;
+    return breakupModel_();
 }
 
 
-inline const collisionModel& spray::collisions() const
+inline const Foam::collisionModel& Foam::spray::collisions() const
 {
-    return collisionModel_;
+    return collisionModel_();
 }
 
 
-inline const dispersionModel& spray::dispersion() const
+inline const Foam::dispersionModel& Foam::spray::dispersion() const
 {
-    return dispersionModel_;
+    return dispersionModel_();
 }
 
 
-inline const dragModel& spray::drag() const
+inline const Foam::dragModel& Foam::spray::drag() const
 {
-    return drag_;
+    return drag_();
 }
 
 
-inline const evaporationModel& spray::evaporation() const
+inline const Foam::evaporationModel& Foam::spray::evaporation() const
 {
-    return evaporation_;
+    return evaporation_();
 }
 
 
-inline const heatTransferModel& spray::heatTransfer() const
+inline const Foam::heatTransferModel& Foam::spray::heatTransfer() const
 {
-    return heatTransfer_;
+    return heatTransfer_();
 }
 
 
-inline const injectorModel& spray::injection() const
+inline const Foam::injectorModel& Foam::spray::injection() const
 {
-    return injectorModel_;
+    return injectorModel_();
 }
 
 
-inline const wallModel& spray::wall() const
+inline const Foam::wallModel& Foam::spray::wall() const
 {
-    return wall_;
+    return wall_();
 }
 
 
-inline tmp<volVectorField> spray::momentumSource() const
+inline Foam::tmp<Foam::volVectorField> Foam::spray::momentumSource() const
 {
     tmp<volVectorField> tsource
     (
@@ -162,7 +158,8 @@ inline tmp<volVectorField> spray::momentumSource() const
 }
 
 
-inline tmp<volScalarField> spray::evaporationSource(const label si) const
+inline Foam::tmp<Foam::volScalarField>
+Foam::spray::evaporationSource(const label si) const
 {
     tmp<volScalarField> tsource
     (
@@ -196,7 +193,7 @@ inline tmp<volScalarField> spray::evaporationSource(const label si) const
 }
 
 
-inline tmp<volScalarField> spray::heatTransferSource() const
+inline Foam::tmp<Foam::volScalarField> Foam::spray::heatTransferSource() const
 {
     tmp<volScalarField> tsource
     (
@@ -221,164 +218,165 @@ inline tmp<volScalarField> spray::heatTransferSource() const
 }
 
 
-inline cachedRandom& spray::rndGen()
+inline Foam::cachedRandom& Foam::spray::rndGen()
 {
     return rndGen_;
 }
 
 
-inline label spray::subCycles() const
+inline Foam::label Foam::spray::subCycles() const
 {
     return subCycles_;
 }
 
 
-inline const vector& spray::g() const
+inline const Foam::vector& Foam::spray::g() const
 {
     return g_;
 }
 
 
-inline const liquidMixture& spray::fuels() const
+inline const Foam::liquidMixture& Foam::spray::fuels() const
 {
-    return fuels_;
+    return fuels_();
 }
 
 
-inline const PtrList<gasThermoPhysics>& spray::gasProperties() const
+inline const Foam::PtrList<Foam::gasThermoPhysics>&
+Foam::spray::gasProperties() const
 {
     return gasProperties_;
 }
 
 
-inline const basicMultiComponentMixture& spray::composition() const
+inline const Foam::basicMultiComponentMixture& Foam::spray::composition() const
 {
     return composition_;
 }
 
 
-inline const List<label>& spray::liquidToGasIndex() const
+inline const Foam::List<Foam::label>& Foam::spray::liquidToGasIndex() const
 {
     return liquidToGasIndex_;
 }
 
 
-inline const List<label>& spray::gasToLiquidIndex() const
+inline const Foam::List<Foam::label>& Foam::spray::gasToLiquidIndex() const
 {
     return gasToLiquidIndex_;
 }
 
 
-inline const List<bool>& spray::isLiquidFuel() const
+inline const Foam::List<bool>& Foam::spray::isLiquidFuel() const
 {
     return isLiquidFuel_;
 }
 
 
-inline bool spray::twoD() const
+inline bool Foam::spray::twoD() const
 {
     return twoD_;
 }
 
 
-inline const vector& spray::axisOfSymmetry() const
+inline const Foam::vector& Foam::spray::axisOfSymmetry() const
 {
     return axisOfSymmetry_;
 }
 
 
-inline const vector& spray::axisOfWedge() const
+inline const Foam::vector& Foam::spray::axisOfWedge() const
 {
     return axisOfWedge_;
 }
 
 
-inline const vector& spray::axisOfWedgeNormal() const
+inline const Foam::vector& Foam::spray::axisOfWedgeNormal() const
 {
     return axisOfWedgeNormal_;
 }
 
 
-inline scalar spray::angleOfWedge() const
+inline Foam::scalar Foam::spray::angleOfWedge() const
 {
     return angleOfWedge_;
 }
 
 
-inline const interpolation<vector>& spray::UInterpolator() const
+inline const Foam::interpolation<Foam::vector>&
+Foam::spray::UInterpolator() const
 {
     return UInterpolator_;
 }
 
 
-inline const interpolation<scalar>& spray::rhoInterpolator() const
+inline const Foam::interpolation<Foam::scalar>&
+Foam::spray::rhoInterpolator() const
 {
     return rhoInterpolator_;
 }
 
 
-inline const interpolation<scalar>& spray::pInterpolator() const
+inline const Foam::interpolation<Foam::scalar>&
+Foam::spray::pInterpolator() const
 {
     return pInterpolator_;
 }
 
 
-inline const interpolation<scalar>& spray::TInterpolator() const
+inline const Foam::interpolation<Foam::scalar>&
+Foam::spray::TInterpolator() const
 {
     return TInterpolator_;
 }
 
 
-inline vectorField& spray::sms()
+inline Foam::vectorField& Foam::spray::sms()
 {
     return sms_;
 }
 
 
-inline const vectorField& spray::sms() const
+inline const Foam::vectorField& Foam::spray::sms() const
 {
     return sms_;
 }
 
 
-inline scalarField& spray::shs()
+inline Foam::scalarField& Foam::spray::shs()
 {
     return shs_;
 }
 
 
-inline const scalarField& spray::shs() const
+inline const Foam::scalarField& Foam::spray::shs() const
 {
     return shs_;
 }
 
 
-inline PtrList<scalarField>& spray::srhos()
+inline Foam::PtrList<Foam::scalarField>& Foam::spray::srhos()
 {
     return srhos_;
 }
 
 
-inline const PtrList<scalarField>& spray::srhos() const
+inline const Foam::PtrList<Foam::scalarField>& Foam::spray::srhos() const
 {
     return srhos_;
 }
 
 
-inline scalar spray::ambientPressure() const
+inline Foam::scalar Foam::spray::ambientPressure() const
 {
     return ambientPressure_;
 }
 
 
-inline scalar spray::ambientTemperature() const
+inline Foam::scalar Foam::spray::ambientTemperature() const
 {
     return ambientTemperature_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

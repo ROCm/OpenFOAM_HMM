@@ -138,7 +138,7 @@ Foam::solidWallHeatFluxTemperatureFvPatchScalarField::K() const
         const symmTensorField& KWall =
             patch().lookupPatchField<volSymmTensorField, scalar>(KName_);
 
-        vectorField n = patch().nf();
+        vectorField n(patch().nf());
 
         return n & KWall & n;
     }
@@ -203,7 +203,7 @@ void Foam::solidWallHeatFluxTemperatureFvPatchScalarField::write
 
 namespace Foam
 {
-    makePatchTypeField
+    makeNonTemplatedPatchTypeField
     (
         fvPatchScalarField,
         solidWallHeatFluxTemperatureFvPatchScalarField

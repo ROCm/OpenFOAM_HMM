@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
             }
 
             {
-                volTensorField gradD = fvc::grad(D);
+                volTensorField gradD(fvc::grad(D));
                 sigmaD = mu*twoSymm(gradD) + (lambda*I)*tr(gradD);
 
                 if (compactNormalStress)

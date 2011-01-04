@@ -163,8 +163,10 @@ void alphatFilmWallFunctionFvPatchScalarField::updateCoeffs()
         }
     }
 
-    scalarField mDotFilm =
-        filmModel.massPhaseChangeForPrimary().boundaryField()[filmPatchI];
+    scalarField mDotFilm
+    (
+        filmModel.massPhaseChangeForPrimary().boundaryField()[filmPatchI]
+    );
     distMap.distribute(mDotFilm);
 
     // Retrieve RAS turbulence model
@@ -232,7 +234,7 @@ void alphatFilmWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
+makeNonTemplatedPatchTypeField
 (
     fvPatchScalarField,
     alphatFilmWallFunctionFvPatchScalarField

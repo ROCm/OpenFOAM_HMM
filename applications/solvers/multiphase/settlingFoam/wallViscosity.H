@@ -13,7 +13,7 @@
         {
             const scalarField& rhow = rho.boundaryField()[patchi];
 
-            const scalarField muw = mul.boundaryField()[patchi];
+            const scalarField muw(mul.boundaryField()[patchi]);
             scalarField& mutw = mut.boundaryField()[patchi];
 
             forAll(curPatch, facei)

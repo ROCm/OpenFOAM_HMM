@@ -71,7 +71,7 @@ tmp<scalarField> nutkRoughWallFunctionFvPatchScalarField::calcNut() const
     const scalarField& y = rasModel.y()[patchI];
     const tmp<volScalarField> tk = rasModel.k();
     const volScalarField& k = tk();
-    const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
+    const scalarField& nuw = rasModel.nu()().boundaryField()[patchI];
 
     const scalar Cmu25 = pow025(Cmu_);
 
@@ -230,7 +230,7 @@ void nutkRoughWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
+makeNonTemplatedPatchTypeField
 (
     fvPatchScalarField,
     nutkRoughWallFunctionFvPatchScalarField

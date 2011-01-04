@@ -182,7 +182,7 @@ tmp<scalarField> RASModel::yPlus(const label patchNo, const scalar Cmu) const
         Yp = pow025(Cmu)
             *y_[patchNo]
             *sqrt(k()().boundaryField()[patchNo].patchInternalField())
-            /nu().boundaryField()[patchNo];
+            /nu()().boundaryField()[patchNo];
     }
     else
     {

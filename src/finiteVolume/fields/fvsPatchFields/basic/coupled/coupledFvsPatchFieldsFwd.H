@@ -40,7 +40,7 @@ namespace Foam
 
 template<class Type> class coupledFvsPatchField;
 
-makeFvsPatchTypeFieldTypedefs(coupled)
+makeFvsPatchTypeFieldTypedefs(coupled);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

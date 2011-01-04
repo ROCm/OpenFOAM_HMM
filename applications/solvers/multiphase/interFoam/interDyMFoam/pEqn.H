@@ -1,6 +1,6 @@
 {
-    volScalarField rAU = 1.0/UEqn.A();
-    surfaceScalarField rAUf = fvc::interpolate(rAU);
+    volScalarField rAU(1.0/UEqn.A());
+    surfaceScalarField rAUf(fvc::interpolate(rAU));
 
     U = rAU*UEqn.H();
     surfaceScalarField phiU("phiU", (fvc::interpolate(U) & mesh.Sf()));

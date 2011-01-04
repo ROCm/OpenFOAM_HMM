@@ -130,12 +130,14 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
         const labelUList& faceCells = p.patch().faceCells();
 
         // Build the d-vectors
-        vectorField pd =
+        vectorField pd
+        (
             mesh.Sf().boundaryField()[patchi]
-           /(
-               mesh.magSf().boundaryField()[patchi]
-              *mesh.deltaCoeffs().boundaryField()[patchi]
-           );
+          / (
+                mesh.magSf().boundaryField()[patchi]
+              * mesh.deltaCoeffs().boundaryField()[patchi]
+           )
+        );
 
         if (!mesh.orthogonal())
         {
@@ -167,7 +169,7 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
 
 
     // Invert the dd tensor
-    symmTensorField invDd = inv(dd);
+    const symmTensorField invDd(inv(dd));
 
 
     // Revisit all faces and calculate the lsP and lsN vectors
@@ -194,12 +196,14 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
         const labelUList& faceCells = p.faceCells();
 
         // Build the d-vectors
-        vectorField pd =
+        vectorField pd
+        (
             mesh.Sf().boundaryField()[patchi]
            /(
                mesh.magSf().boundaryField()[patchi]
               *mesh.deltaCoeffs().boundaryField()[patchi]
-           );
+            )
+        );
 
         if (!mesh.orthogonal())
         {

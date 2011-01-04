@@ -30,7 +30,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 {
-    volScalarField contErr = fvc::div(phi);
+    volScalarField contErr(fvc::div(phi));
 
     scalar sumLocalContErr = runTime.deltaTValue()*
         mag(contErr)().weightedAverage(mesh.V()).value();

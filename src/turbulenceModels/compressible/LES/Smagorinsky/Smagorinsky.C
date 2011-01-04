@@ -45,11 +45,11 @@ addToRunTimeSelectionTable(LESModel, Smagorinsky, dictionary);
 
 void Smagorinsky::updateSubGridScaleFields(const volTensorField& gradU)
 {
-    volSymmTensorField D = symm(gradU);
+    volSymmTensorField D(symm(gradU));
 
-    volScalarField a = ce_/delta();
-    volScalarField b = (2.0/3.0)*tr(D);
-    volScalarField c = 2*ck_*delta()*(dev(D) && D);
+    volScalarField a(ce_/delta());
+    volScalarField b((2.0/3.0)*tr(D));
+    volScalarField c(2*ck_*delta()*(dev(D) && D));
 
     k_ = sqr((-b + sqrt(sqr(b) + 4*a*c))/(2*a));
 

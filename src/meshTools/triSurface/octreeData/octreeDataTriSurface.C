@@ -340,15 +340,7 @@ Foam::label Foam::octreeDataTriSurface::getSampleType
             << abort(FatalError);
     }
 
-    const pointField& pts = surface_.points();
-    const labelledTri& f = surface_[faceI];
-
-    pointHit curHit = triPointRef
-    (
-        pts[f[0]],
-        pts[f[1]],
-        pts[f[2]]
-    ).nearestPoint(sample);
+    pointHit curHit = surface_[faceI].nearestPoint(sample, surface_.points());
 
     // Get normal according to position on face. On point -> pointNormal,
     // on edge-> edge normal, face normal on interior.
@@ -387,17 +379,16 @@ bool Foam::octreeDataTriSurface::overlaps
     // Triangle points
     const pointField& points = surface_.points();
     const labelledTri& f = surface_[index];
-    const point& p0 = points[f[0]];
-    const point& p1 = points[f[1]];
-    const point& p2 = points[f[2]];
 
     // Check if one or more triangle point inside
-    if (cubeBb.contains(p0) || cubeBb.contains(p1) || cubeBb.contains(p2))
+    if (cubeBb.containsAny(points, f))
     {
-        // One or more points inside
         return true;
     }
 
+    const point& p0 = points[f[0]];
+    const point& p1 = points[f[1]];
+    const point& p2 = points[f[2]];
     // Now we have the difficult case: all points are outside but connecting
     // edges might go through cube. Use fast intersection of bounding box.
 
@@ -433,18 +424,18 @@ bool Foam::octreeDataTriSurface::intersects
         return false;
     }
 
-    const pointField& points = surface_.points();
-
-    const labelledTri& f = surface_[index];
-
-    triPointRef tri(points[f[0]], points[f[1]], points[f[2]]);
-
     const vector dir(end - start);
 
     // Disable picking up intersections behind us.
     scalar oldTol = intersection::setPlanarTol(0.0);
 
-    pointHit inter = tri.ray(start, dir, intersection::HALF_RAY);
+    pointHit inter = surface_[index].ray
+    (
+        start,
+        dir,
+        surface_.points(),
+        intersection::HALF_RAY
+    );
 
     intersection::setPlanarTol(oldTol);
 
@@ -512,10 +503,8 @@ Foam::scalar Foam::octreeDataTriSurface::calcSign
 {
     n = surface_.faceNormals()[index];
 
-    const labelledTri& tri = surface_[index];
-
-    // take vector from sample to any point on triangle (we use vertex 0)
-    vector vec = sample - surface_.points()[tri[0]];
+    // take vector from sample to any point on face (we use vertex 0)
+    vector vec = sample - surface_.points()[surface_[index][0]];
 
     vec /= mag(vec) + VSMALL;
 

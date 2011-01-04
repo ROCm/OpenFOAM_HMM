@@ -263,7 +263,7 @@ void Foam::activeBaffleVelocityFvPatchVectorField::updateCoeffs()
         Info<< "openFraction = " << openFraction_ << endl;
 
         vectorField::subField Sfw = this->patch().patch().faceAreas();
-        vectorField newSfw = (1 - openFraction_)*initWallSf_;
+        const vectorField newSfw((1 - openFraction_)*initWallSf_);
         forAll(Sfw, facei)
         {
             Sfw[facei] = newSfw[facei];
@@ -310,11 +310,12 @@ void Foam::activeBaffleVelocityFvPatchVectorField::write(Ostream& os) const
 
 namespace Foam
 {
-    makePatchTypeField
+    makeNonTemplatedPatchTypeField
     (
         fvPatchVectorField,
         activeBaffleVelocityFvPatchVectorField
     );
 }
+
 
 // ************************************************************************* //

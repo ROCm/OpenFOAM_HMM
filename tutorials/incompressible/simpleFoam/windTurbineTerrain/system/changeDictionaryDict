@@ -20,7 +20,7 @@ FoamFile
 dictionaryReplacement
 {
 
-    // Specify 
+    // Specify
     // - all fvPatchFields with potential non-uniform values
     // - all fvPatchFields originating from meshing
     // - all fvPatchFields originating from mesh-redistribution

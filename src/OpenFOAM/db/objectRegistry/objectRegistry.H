@@ -69,6 +69,10 @@ class objectRegistry
 
     // Private Member Functions
 
+        //- Is the objectRegistry parent_ different from time_
+        //  Used to terminate searching within the ancestors
+        bool parentNotTime() const;
+
         //- Disallow Copy constructor
         objectRegistry(const objectRegistry&);
 

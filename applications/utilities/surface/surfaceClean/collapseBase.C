@@ -100,8 +100,8 @@ static void splitTri
     label oldNTris = tris.size();
 
     label fp = findIndex(f, e[0]);
-    label fp1 = (fp+1)%3;
-    label fp2 = (fp1+1)%3;
+    label fp1 = f.fcIndex(fp);
+    label fp2 = f.fcIndex(fp1);
 
     if (f[fp1] == e[1])
     {

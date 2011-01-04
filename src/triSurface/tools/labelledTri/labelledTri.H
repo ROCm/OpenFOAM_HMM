@@ -62,6 +62,13 @@ public:
         //- Construct null
         inline labelledTri();
 
+        //- Construct from triFace and a region label
+        inline labelledTri
+        (
+            const triFace&,
+            const label region
+        );
+
         //- Construct from three point labels and a region label
         inline labelledTri
         (

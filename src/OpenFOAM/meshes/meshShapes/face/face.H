@@ -27,12 +27,16 @@ Class
 Description
     A face is a list of labels corresponding to mesh vertices.
 
+SeeAlso
+    Foam::triFace
+
 SourceFiles
     faceI.H
     face.C
     faceIntersection.C
     faceContactSphere.C
     faceAreaInContact.C
+    faceTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -169,6 +173,10 @@ public:
         //  return the collapsed size
         label collapse();
 
+        //- Flip the face in-place.
+        //  The starting points of the original and flipped face are identical.
+        void flip();
+
         //- Return the points corresponding to this face
         inline pointField points(const pointField& meshPoints) const;
 
@@ -186,11 +194,13 @@ public:
         vector normal(const pointField&) const;
 
         //- Return face with reverse direction
+        //  The starting points of the original and reverse face are identical.
         face reverseFace() const;
 
         //- Navigation through face vertices
 
             //- Which vertex on face (face index given a global index)
+            //  returns -1 if not found
             label which(const label globalIndex) const;
 
             //- Next vertex on face
@@ -289,8 +299,8 @@ public:
         //- Return number of edges
         inline label nEdges() const;
 
-        //- Return edges in face point ordering, i.e. edges()[0] is edge
-        //  between [0] and [1]
+        //- Return edges in face point ordering,
+        //  i.e. edges()[0] is edge between [0] and [1]
         edgeList edges() const;
 
         //- Return n-th face edge

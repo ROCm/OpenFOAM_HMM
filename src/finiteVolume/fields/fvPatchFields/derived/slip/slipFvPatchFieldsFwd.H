@@ -37,7 +37,7 @@ namespace Foam
 
 template<class Type> class slipFvPatchField;
 
-makePatchTypeFieldTypedefs(slip)
+makePatchTypeFieldTypedefs(slip);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

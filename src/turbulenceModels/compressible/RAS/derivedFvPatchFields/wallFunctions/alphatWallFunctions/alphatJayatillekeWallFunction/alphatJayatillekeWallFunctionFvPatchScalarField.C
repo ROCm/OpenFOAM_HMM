@@ -216,15 +216,15 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::updateCoeffs()
     const volScalarField& k = tk();
 
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-    const scalarField magUp = mag(Uw.patchInternalField() - Uw);
-    const scalarField magGradUw = mag(Uw.snGrad());
+    const scalarField magUp(mag(Uw.patchInternalField() - Uw));
+    const scalarField magGradUw(mag(Uw.snGrad()));
 
     const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
     const fvPatchScalarField& hw =
         rasModel.thermo().h().boundaryField()[patchI];
 
     // Heat flux [W/m2] - lagging alphatw
-    const scalarField qDot = (alphaw + alphatw)*hw.snGrad();
+    const scalarField qDot((alphaw + alphatw)*hw.snGrad());
 
     // Populate boundary values
     forAll(alphatw, faceI)
@@ -300,7 +300,7 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
+makeNonTemplatedPatchTypeField
 (
     fvPatchScalarField,
     alphatJayatillekeWallFunctionFvPatchScalarField

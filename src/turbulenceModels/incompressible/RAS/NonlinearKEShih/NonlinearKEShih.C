@@ -237,8 +237,6 @@ NonlinearKEShih::NonlinearKEShih
 
 tmp<volSymmTensorField> NonlinearKEShih::R() const
 {
-    volTensorField gradU_ = fvc::grad(U_);
-
     return tmp<volSymmTensorField>
     (
         new volSymmTensorField
@@ -251,7 +249,7 @@ tmp<volSymmTensorField> NonlinearKEShih::R() const
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            ((2.0/3.0)*I)*k_ - nut_*twoSymm(gradU_) + nonlinearStress_,
+            ((2.0/3.0)*I)*k_ - nut_*twoSymm(fvc::grad(U_)) + nonlinearStress_,
             k_.boundaryField().types()
         )
     );
@@ -328,7 +326,7 @@ void NonlinearKEShih::correct()
     gradU_ = fvc::grad(U_);
 
     // generation term
-    volScalarField S2 = symm(gradU_) && gradU_;
+    tmp<volScalarField> S2 = symm(gradU_) && gradU_;
 
     volScalarField G
     (

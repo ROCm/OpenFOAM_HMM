@@ -26,16 +26,17 @@
 #
 # Description
 #     Aliases for working with OpenFOAM
-#     Sourced from OpenFOAM-??/etc/bashrc and/or ~/.bashrc
+#     Sourced from OpenFOAM-<VERSION>/etc/bashrc and/or ~/.bashrc
 #
 #------------------------------------------------------------------------------
 
 # Change compiled version aliases
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-alias wm64='export WM_ARCH_OPTION=64; . $WM_PROJECT_DIR/etc/bashrc'
-alias wm32='export WM_ARCH_OPTION=32; . $WM_PROJECT_DIR/etc/bashrc'
-alias wmSP='export WM_PRECISION_OPTION=SP; . $WM_PROJECT_DIR/etc/bashrc'
-alias wmDP='export WM_PRECISION_OPTION=DP; . $WM_PROJECT_DIR/etc/bashrc'
+alias wmSET='. $WM_PROJECT_DIR/etc/bashrc'
+alias wm64='wmSET WM_ARCH_OPTION=64'
+alias wm32='wmSET WM_ARCH_OPTION=32'
+alias wmSP='wmSET WM_PRECISION_OPTION=SP'
+alias wmDP='wmSET WM_PRECISION_OPTION=DP'
 
 # Toggle wmakeScheduler on/off
 #  - also need to set WM_HOSTS

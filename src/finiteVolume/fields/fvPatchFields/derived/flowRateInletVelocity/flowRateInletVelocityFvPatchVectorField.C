@@ -168,7 +168,7 @@ void Foam::flowRateInletVelocityFvPatchVectorField::write(Ostream& os) const
 
 namespace Foam
 {
-   makePatchTypeField
+   makeNonTemplatedPatchTypeField
    (
        fvPatchVectorField,
        flowRateInletVelocityFvPatchVectorField

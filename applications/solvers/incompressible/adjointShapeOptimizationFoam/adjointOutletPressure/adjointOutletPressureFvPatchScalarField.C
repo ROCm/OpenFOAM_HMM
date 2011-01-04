@@ -121,7 +121,7 @@ void Foam::adjointOutletPressureFvPatchScalarField::write(Ostream& os) const
 
 namespace Foam
 {
-    makePatchTypeField
+    makeNonTemplatedPatchTypeField
     (
         fvPatchScalarField,
         adjointOutletPressureFvPatchScalarField

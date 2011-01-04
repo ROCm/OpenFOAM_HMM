@@ -32,12 +32,10 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-freestreamPressureFvPatchScalarField::freestreamPressureFvPatchScalarField
+Foam::freestreamPressureFvPatchScalarField::
+freestreamPressureFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -47,7 +45,8 @@ freestreamPressureFvPatchScalarField::freestreamPressureFvPatchScalarField
 {}
 
 
-freestreamPressureFvPatchScalarField::freestreamPressureFvPatchScalarField
+Foam::freestreamPressureFvPatchScalarField::
+freestreamPressureFvPatchScalarField
 (
     const freestreamPressureFvPatchScalarField& ptf,
     const fvPatch& p,
@@ -59,7 +58,8 @@ freestreamPressureFvPatchScalarField::freestreamPressureFvPatchScalarField
 {}
 
 
-freestreamPressureFvPatchScalarField::freestreamPressureFvPatchScalarField
+Foam::freestreamPressureFvPatchScalarField::
+freestreamPressureFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -70,7 +70,8 @@ freestreamPressureFvPatchScalarField::freestreamPressureFvPatchScalarField
 {}
 
 
-freestreamPressureFvPatchScalarField::freestreamPressureFvPatchScalarField
+Foam::freestreamPressureFvPatchScalarField::
+freestreamPressureFvPatchScalarField
 (
     const freestreamPressureFvPatchScalarField& wbppsf
 )
@@ -79,7 +80,8 @@ freestreamPressureFvPatchScalarField::freestreamPressureFvPatchScalarField
 {}
 
 
-freestreamPressureFvPatchScalarField::freestreamPressureFvPatchScalarField
+Foam::freestreamPressureFvPatchScalarField::
+freestreamPressureFvPatchScalarField
 (
     const freestreamPressureFvPatchScalarField& wbppsf,
     const DimensionedField<scalar, volMesh>& iF
@@ -91,7 +93,7 @@ freestreamPressureFvPatchScalarField::freestreamPressureFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void freestreamPressureFvPatchScalarField::updateCoeffs()
+void Foam::freestreamPressureFvPatchScalarField::updateCoeffs()
 {
     if (updated())
     {
@@ -140,10 +142,13 @@ void freestreamPressureFvPatchScalarField::updateCoeffs()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchScalarField, freestreamPressureFvPatchScalarField);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makeNonTemplatedPatchTypeField
+    (
+        fvPatchScalarField,
+        freestreamPressureFvPatchScalarField
+    );
+}
 
 // ************************************************************************* //

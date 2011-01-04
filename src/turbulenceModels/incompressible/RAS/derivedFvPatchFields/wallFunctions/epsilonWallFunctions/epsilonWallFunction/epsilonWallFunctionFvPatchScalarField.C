@@ -199,7 +199,8 @@ void epsilonWallFunctionFvPatchScalarField::updateCoeffs()
     const tmp<volScalarField> tk = rasModel.k();
     const volScalarField& k = tk();
 
-    const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
+    const tmp<volScalarField> tnu = rasModel.nu();
+    const scalarField& nuw = tnu().boundaryField()[patchI];
 
     const tmp<volScalarField> tnut = rasModel.nut();
     const volScalarField& nut = tnut();
@@ -207,7 +208,7 @@ void epsilonWallFunctionFvPatchScalarField::updateCoeffs()
 
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
 
-    const scalarField magGradUw = mag(Uw.snGrad());
+    const scalarField magGradUw(mag(Uw.snGrad()));
 
     // Set epsilon and G
     forAll(nutw, faceI)
@@ -248,7 +249,7 @@ void epsilonWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
+makeNonTemplatedPatchTypeField
 (
     fvPatchScalarField,
     epsilonWallFunctionFvPatchScalarField

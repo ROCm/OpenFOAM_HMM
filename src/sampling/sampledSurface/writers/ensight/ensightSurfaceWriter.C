@@ -77,7 +77,7 @@ void Foam::ensightSurfaceWriter<Type>::writeData
 {
     for (direction cmpt = 0; cmpt < vector::nComponents; cmpt++)
     {
-        scalarField v = values.component(cmpt);
+        scalarField v(values.component(cmpt));
         forAll(v, i)
         {
             os << v[i] << nl;

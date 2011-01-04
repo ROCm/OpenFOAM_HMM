@@ -143,7 +143,7 @@ void turbulentMixingLengthFrequencyInletFvPatchScalarField::write
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
+makeNonTemplatedPatchTypeField
 (
     fvPatchScalarField,
     turbulentMixingLengthFrequencyInletFvPatchScalarField

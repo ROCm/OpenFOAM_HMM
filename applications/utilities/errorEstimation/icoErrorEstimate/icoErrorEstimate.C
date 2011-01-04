@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
                -fvc::grad(p)
             );
 
-            volVectorField e = ee.error();
+            volVectorField e(ee.error());
             e.write();
             mag(e)().write();
         }

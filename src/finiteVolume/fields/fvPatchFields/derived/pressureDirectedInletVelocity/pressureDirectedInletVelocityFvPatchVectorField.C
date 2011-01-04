@@ -29,14 +29,10 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-pressureDirectedInletVelocityFvPatchVectorField::
+Foam::pressureDirectedInletVelocityFvPatchVectorField::
 pressureDirectedInletVelocityFvPatchVectorField
 (
     const fvPatch& p,
@@ -50,7 +46,7 @@ pressureDirectedInletVelocityFvPatchVectorField
 {}
 
 
-pressureDirectedInletVelocityFvPatchVectorField::
+Foam::pressureDirectedInletVelocityFvPatchVectorField::
 pressureDirectedInletVelocityFvPatchVectorField
 (
     const pressureDirectedInletVelocityFvPatchVectorField& ptf,
@@ -66,7 +62,7 @@ pressureDirectedInletVelocityFvPatchVectorField
 {}
 
 
-pressureDirectedInletVelocityFvPatchVectorField::
+Foam::pressureDirectedInletVelocityFvPatchVectorField::
 pressureDirectedInletVelocityFvPatchVectorField
 (
     const fvPatch& p,
@@ -83,7 +79,7 @@ pressureDirectedInletVelocityFvPatchVectorField
 }
 
 
-pressureDirectedInletVelocityFvPatchVectorField::
+Foam::pressureDirectedInletVelocityFvPatchVectorField::
 pressureDirectedInletVelocityFvPatchVectorField
 (
     const pressureDirectedInletVelocityFvPatchVectorField& pivpvf
@@ -96,7 +92,7 @@ pressureDirectedInletVelocityFvPatchVectorField
 {}
 
 
-pressureDirectedInletVelocityFvPatchVectorField::
+Foam::pressureDirectedInletVelocityFvPatchVectorField::
 pressureDirectedInletVelocityFvPatchVectorField
 (
     const pressureDirectedInletVelocityFvPatchVectorField& pivpvf,
@@ -112,7 +108,7 @@ pressureDirectedInletVelocityFvPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void pressureDirectedInletVelocityFvPatchVectorField::autoMap
+void Foam::pressureDirectedInletVelocityFvPatchVectorField::autoMap
 (
     const fvPatchFieldMapper& m
 )
@@ -122,7 +118,7 @@ void pressureDirectedInletVelocityFvPatchVectorField::autoMap
 }
 
 
-void pressureDirectedInletVelocityFvPatchVectorField::rmap
+void Foam::pressureDirectedInletVelocityFvPatchVectorField::rmap
 (
     const fvPatchVectorField& ptf,
     const labelList& addr
@@ -137,7 +133,7 @@ void pressureDirectedInletVelocityFvPatchVectorField::rmap
 }
 
 
-void pressureDirectedInletVelocityFvPatchVectorField::updateCoeffs()
+void Foam::pressureDirectedInletVelocityFvPatchVectorField::updateCoeffs()
 {
     if (updated())
     {
@@ -150,8 +146,8 @@ void pressureDirectedInletVelocityFvPatchVectorField::updateCoeffs()
     const fvsPatchField<scalar>& phip =
         patch().patchField<surfaceScalarField, scalar>(phi);
 
-    vectorField n = patch().nf();
-    scalarField ndmagS = (n & inletDir_)*patch().magSf();
+    tmp<vectorField> n = patch().nf();
+    tmp<scalarField> ndmagS = (n & inletDir_)*patch().magSf();
 
     if (phi.dimensions() == dimVelocity*dimArea)
     {
@@ -180,7 +176,10 @@ void pressureDirectedInletVelocityFvPatchVectorField::updateCoeffs()
 }
 
 
-void pressureDirectedInletVelocityFvPatchVectorField::write(Ostream& os) const
+void Foam::pressureDirectedInletVelocityFvPatchVectorField::write
+(
+    Ostream& os
+) const
 {
     fvPatchVectorField::write(os);
     writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
@@ -192,7 +191,7 @@ void pressureDirectedInletVelocityFvPatchVectorField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void pressureDirectedInletVelocityFvPatchVectorField::operator=
+void Foam::pressureDirectedInletVelocityFvPatchVectorField::operator=
 (
     const fvPatchField<vector>& pvf
 )
@@ -203,15 +202,13 @@ void pressureDirectedInletVelocityFvPatchVectorField::operator=
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchVectorField,
-    pressureDirectedInletVelocityFvPatchVectorField
-);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makeNonTemplatedPatchTypeField
+    (
+        fvPatchVectorField,
+        pressureDirectedInletVelocityFvPatchVectorField
+    );
+}
 
 // ************************************************************************* //

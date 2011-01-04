@@ -105,6 +105,9 @@ public:
                 return rss_;
             }
 
+            //- True if the memory information appears valid
+            bool valid() const;
+
 
     // IOstream Operators
 

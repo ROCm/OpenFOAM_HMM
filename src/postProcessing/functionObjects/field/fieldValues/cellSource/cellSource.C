@@ -31,20 +31,41 @@ License
 
 defineTypeNameAndDebug(Foam::fieldValues::cellSource, 0);
 
-template<>
-const char* Foam::NamedEnum<Foam::fieldValues::cellSource::sourceType, 2>::
-names[] = {"cellZone", "all"};
+namespace Foam
+{
+
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::fieldValues::cellSource::sourceType,
+        2
+    >::names[] =
+    {
+        "cellZone",
+        "all"
+    };
+
+
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::fieldValues::cellSource::operationType,
+        7
+    >::names[] =
+    {
+        "none",
+        "sum",
+        "volAverage",
+        "volIntegrate",
+        "weightedAverage",
+        "min",
+        "max"
+    };
+}
+
 
 const Foam::NamedEnum<Foam::fieldValues::cellSource::sourceType, 2>
     Foam::fieldValues::cellSource::sourceTypeNames_;
-
-template<>
-const char* Foam::NamedEnum<Foam::fieldValues::cellSource::operationType, 7>::
-names[] =
-{
-    "none", "sum", "volAverage",
-    "volIntegrate", "weightedAverage", "min", "max"
-};
 
 const Foam::NamedEnum<Foam::fieldValues::cellSource::operationType, 7>
     Foam::fieldValues::cellSource::operationTypeNames_;

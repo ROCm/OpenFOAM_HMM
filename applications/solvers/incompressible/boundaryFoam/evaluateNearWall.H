@@ -1,7 +1,7 @@
 {
     // Evaluate near-wall behaviour
 
-    scalar nu = turbulence->nu().boundaryField()[patchId][faceId];
+    scalar nu = turbulence->nu()().boundaryField()[patchId][faceId];
     scalar nut = turbulence->nut()().boundaryField()[patchId][faceId];
     symmTensor R = turbulence->devReff()().boundaryField()[patchId][faceId];
     scalar epsilon = turbulence->epsilon()()[cellId];

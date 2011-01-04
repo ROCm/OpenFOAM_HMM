@@ -39,9 +39,11 @@ scalar meanAlphaCoNum = 0.0;
 
 if (mesh.nInternalFaces())
 {
-    scalarField sumPhi =
+    scalarField sumPhi
+    (
         pos(alpha1 - 0.01)*pos(0.99 - alpha1)
-       *fvc::surfaceSum(mag(phi))().internalField();
+       *fvc::surfaceSum(mag(phi))().internalField()
+    );
 
     alphaCoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();
 

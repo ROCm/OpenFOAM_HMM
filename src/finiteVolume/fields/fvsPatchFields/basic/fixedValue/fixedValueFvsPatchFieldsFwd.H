@@ -37,7 +37,7 @@ namespace Foam
 
 template<class Type> class fixedValueFvsPatchField;
 
-makeFvsPatchTypeFieldTypedefs(fixedValue)
+makeFvsPatchTypeFieldTypedefs(fixedValue);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

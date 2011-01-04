@@ -37,7 +37,7 @@ namespace Foam
 
 template<class Type> class mixedFixedValueSlipFvPatchField;
 
-makePatchTypeFieldTypedefs(mixedFixedValueSlip)
+makePatchTypeFieldTypedefs(mixedFixedValueSlip);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -57,13 +57,14 @@ div
     scalarField aNorm(vols.size(), 0.0);
 
     // Get sign of flux
-    const surfaceScalarField signF = pos(flux);
+    const surfaceScalarField signF(pos(flux));
 
     // Calculate gradient of the solution
     GeometricField
     <
         typename outerProduct<vector, Type>::type, fvPatchField, volMesh
-    > gradVf = fvc::grad(vf);
+    >
+    gradVf(fvc::grad(vf));
 
     // Internal faces
     forAll(owner, faceI)

@@ -71,8 +71,8 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                 basicPsiThermo::New(mesh)
             );
 
-            volScalarField Cp = thermo->Cp();
-            volScalarField Cv = thermo->Cv();
+            volScalarField Cp(thermo->Cp());
+            volScalarField Cv(thermo->Cv());
 
             MachPtr.set
             (

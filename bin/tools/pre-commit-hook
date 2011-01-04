@@ -52,7 +52,7 @@
 hookName="pre-commit"
 die()
 {
-    echo '$hookName hook failure' 1>&2
+    echo "$hookName hook failure" 1>&2
     echo '-----------------------' 1>&2
     echo '' 1>&2
     echo "$@" 1>&2

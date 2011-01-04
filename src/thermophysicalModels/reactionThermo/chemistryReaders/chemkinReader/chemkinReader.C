@@ -45,8 +45,9 @@ License
 
 namespace Foam
 {
-    addChemistryReaderType(chemkinReader, gasThermoPhysics);
-};
+    addNonTemplatedChemistryReaderType(chemkinReader, gasThermoPhysics);
+}
+
 
 /* * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * */
 

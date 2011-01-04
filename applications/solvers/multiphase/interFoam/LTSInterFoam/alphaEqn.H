@@ -2,13 +2,14 @@
     word alphaScheme("div(phi,alpha)");
     word alpharScheme("div(phirb,alpha)");
 
-    surfaceScalarField phic = mag(phi/mesh.magSf());
+    surfaceScalarField phic(mag(phi/mesh.magSf()));
     phic = min(interface.cAlpha()*phic, max(phic));
-    surfaceScalarField phir = phic*interface.nHatf();
+    surfaceScalarField phir(phic*interface.nHatf());
 
     for (int aCorr=0; aCorr<nAlphaCorr; aCorr++)
     {
-        surfaceScalarField phiAlpha =
+        surfaceScalarField phiAlpha
+        (
             fvc::flux
             (
                 phi,
@@ -20,7 +21,8 @@
                 -fvc::flux(-phir, scalar(1) - alpha1, alpharScheme),
                 alpha1,
                 alpharScheme
-            );
+            )
+        );
 
         MULES::explicitLTSSolve(alpha1, phi, phiAlpha, 1, 0);
         //MULES::explicitSolve(alpha1, phi, phiAlpha, 1, 0);

@@ -37,7 +37,7 @@ namespace Foam
 
 template<class Type> class transformFvPatchField;
 
-makePatchTypeFieldTypedefs(transform)
+makePatchTypeFieldTypedefs(transform);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

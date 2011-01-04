@@ -318,8 +318,6 @@ tmp<Field<Type> > PrimitivePatchInterpolation<Patch>::faceToEdgeInterpolate
 
     Field<Type>& result = tresult();
 
-    const pointField& points = patch_.localPoints();
-    const faceList& faces = patch_.localFaces();
     const edgeList& edges = patch_.edges();
     const labelListList& edgeFaces = patch_.edgeFaces();
 

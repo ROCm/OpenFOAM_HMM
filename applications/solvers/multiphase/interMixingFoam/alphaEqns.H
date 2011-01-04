@@ -40,7 +40,8 @@
 
 
         // Create the complete convection flux for alpha1
-        surfaceScalarField phiAlpha1 =
+        surfaceScalarField phiAlpha1
+        (
             fvc::flux
             (
                 phi,
@@ -58,11 +59,14 @@
                 -fvc::flux(-phir, alpha3, alpharScheme),
                 alpha1,
                 alpharScheme
-            );
+            )
+        );
 
         // Create the bounded (upwind) flux for alpha1
-        surfaceScalarField phiAlpha1BD =
-            upwind<scalar>(mesh, phi).flux(alpha1);
+        surfaceScalarField phiAlpha1BD
+        (
+            upwind<scalar>(mesh, phi).flux(alpha1)
+        );
 
         // Calculate the flux correction for alpha1
         phiAlpha1 -= phiAlpha1BD;
@@ -83,7 +87,8 @@
         );
 
         // Create the complete flux for alpha2
-        surfaceScalarField phiAlpha2 =
+        surfaceScalarField phiAlpha2
+        (
             fvc::flux
             (
                 phi,
@@ -95,11 +100,14 @@
                 -fvc::flux(phir, alpha1, alpharScheme),
                 alpha2,
                 alpharScheme
-            );
+            )
+        );
 
         // Create the bounded (upwind) flux for alpha2
-        surfaceScalarField phiAlpha2BD =
-            upwind<scalar>(mesh, phi).flux(alpha2);
+        surfaceScalarField phiAlpha2BD
+        (
+            upwind<scalar>(mesh, phi).flux(alpha2)
+        );
 
         // Calculate the flux correction for alpha2
         phiAlpha2 -= phiAlpha2BD;
@@ -127,8 +135,8 @@
         solve(fvm::ddt(alpha1) + fvc::div(phiAlpha1));
 
         // Create the diffusion coefficients for alpha2<->alpha3
-        volScalarField Dc23 = D23*max(alpha3, scalar(0))*pos(alpha2);
-        volScalarField Dc32 = D23*max(alpha2, scalar(0))*pos(alpha3);
+        volScalarField Dc23(D23*max(alpha3, scalar(0))*pos(alpha2));
+        volScalarField Dc32(D23*max(alpha2, scalar(0))*pos(alpha3));
 
         // Add the diffusive flux for alpha3->alpha2
         phiAlpha2 -= fvc::interpolate(Dc32)*mesh.magSf()*fvc::snGrad(alpha1);

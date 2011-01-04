@@ -29,14 +29,9 @@ License
 
 #include "SRFModel.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-SRFVelocityFvPatchVectorField::SRFVelocityFvPatchVectorField
+Foam::SRFVelocityFvPatchVectorField::SRFVelocityFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF
@@ -48,7 +43,7 @@ SRFVelocityFvPatchVectorField::SRFVelocityFvPatchVectorField
 {}
 
 
-SRFVelocityFvPatchVectorField::SRFVelocityFvPatchVectorField
+Foam::SRFVelocityFvPatchVectorField::SRFVelocityFvPatchVectorField
 (
     const SRFVelocityFvPatchVectorField& ptf,
     const fvPatch& p,
@@ -62,7 +57,7 @@ SRFVelocityFvPatchVectorField::SRFVelocityFvPatchVectorField
 {}
 
 
-SRFVelocityFvPatchVectorField::SRFVelocityFvPatchVectorField
+Foam::SRFVelocityFvPatchVectorField::SRFVelocityFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
@@ -77,7 +72,7 @@ SRFVelocityFvPatchVectorField::SRFVelocityFvPatchVectorField
 }
 
 
-SRFVelocityFvPatchVectorField::SRFVelocityFvPatchVectorField
+Foam::SRFVelocityFvPatchVectorField::SRFVelocityFvPatchVectorField
 (
     const SRFVelocityFvPatchVectorField& srfvpvf
 )
@@ -88,7 +83,7 @@ SRFVelocityFvPatchVectorField::SRFVelocityFvPatchVectorField
 {}
 
 
-SRFVelocityFvPatchVectorField::SRFVelocityFvPatchVectorField
+Foam::SRFVelocityFvPatchVectorField::SRFVelocityFvPatchVectorField
 (
     const SRFVelocityFvPatchVectorField& srfvpvf,
     const DimensionedField<vector, volMesh>& iF
@@ -102,7 +97,7 @@ SRFVelocityFvPatchVectorField::SRFVelocityFvPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void SRFVelocityFvPatchVectorField::autoMap
+void Foam::SRFVelocityFvPatchVectorField::autoMap
 (
     const fvPatchFieldMapper& m
 )
@@ -112,7 +107,7 @@ void SRFVelocityFvPatchVectorField::autoMap
 }
 
 
-void SRFVelocityFvPatchVectorField::rmap
+void Foam::SRFVelocityFvPatchVectorField::rmap
 (
     const fvPatchVectorField& ptf,
     const labelList& addr
@@ -127,7 +122,7 @@ void SRFVelocityFvPatchVectorField::rmap
 }
 
 
-void SRFVelocityFvPatchVectorField::updateCoeffs()
+void Foam::SRFVelocityFvPatchVectorField::updateCoeffs()
 {
     if (updated())
     {
@@ -142,7 +137,7 @@ void SRFVelocityFvPatchVectorField::updateCoeffs()
             db().lookupObject<SRF::SRFModel>("SRFProperties");
 
         // Determine patch velocity due to SRF
-        const vectorField SRFVelocity = srf.velocity(patch().Cf());
+        const vectorField SRFVelocity(srf.velocity(patch().Cf()));
 
         operator==(-SRFVelocity + inletValue_);
     }
@@ -156,7 +151,7 @@ void SRFVelocityFvPatchVectorField::updateCoeffs()
 }
 
 
-void SRFVelocityFvPatchVectorField::write(Ostream& os) const
+void Foam::SRFVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
     os.writeKeyword("relative") << relative_ << token::END_STATEMENT << nl;
@@ -167,14 +162,13 @@ void SRFVelocityFvPatchVectorField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchVectorField,
-    SRFVelocityFvPatchVectorField
-);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makeNonTemplatedPatchTypeField
+    (
+        fvPatchVectorField,
+        SRFVelocityFvPatchVectorField
+    );
+}
 
 // ************************************************************************* //

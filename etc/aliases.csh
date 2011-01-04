@@ -26,16 +26,17 @@
 #
 # Description
 #     Aliases for working with OpenFOAM
-#     Sourced from OpenFOAM-??/etc/cshrc and/or ~/.cshrc
+#     Sourced from OpenFOAM-<VERSION>/etc/cshrc and/or ~/.cshrc
 #
 #------------------------------------------------------------------------------
 
 # Change compiled version aliases
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-alias wm64 'setenv WM_ARCH_OPTION 64; source $WM_PROJECT_DIR/etc/cshrc'
-alias wm32 'setenv WM_ARCH_OPTION 32; source $WM_PROJECT_DIR/etc/cshrc'
-alias wmSP 'setenv WM_PRECISION_OPTION SP; source $WM_PROJECT_DIR/etc/cshrc'
-alias wmDP 'setenv WM_PRECISION_OPTION DP; source $WM_PROJECT_DIR/etc/cshrc'
+alias wmSET 'source $WM_PROJECT_DIR/etc/cshrc'
+alias wm64 'wmSET WM_ARCH_OPTION=64'
+alias wm32 'wmSET WM_ARCH_OPTION=32'
+alias wmSP 'wmSET WM_PRECISION_OPTION=SP'
+alias wmDP 'wmSET WM_PRECISION_OPTION=DP'
 
 # Toggle wmakeScheduler on/off
 #  - also need to set WM_HOSTS

@@ -63,6 +63,7 @@ namespace Foam
     };
 }
 
+
 const Foam::NamedEnum<Foam::distributedTriSurfaceMesh::distributionType, 3>
     Foam::distributedTriSurfaceMesh::distributionTypeNames_;
 
@@ -871,18 +872,13 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
         point& bbMin = bbs[distribution[triI]][0].min();
         point& bbMax = bbs[distribution[triI]][0].max();
 
-        const labelledTri& f = s[triI];
-        const point& p0 = s.points()[f[0]];
-        const point& p1 = s.points()[f[1]];
-        const point& p2 = s.points()[f[2]];
-
-        bbMin = min(bbMin, p0);
-        bbMin = min(bbMin, p1);
-        bbMin = min(bbMin, p2);
-
-        bbMax = max(bbMax, p0);
-        bbMax = max(bbMax, p1);
-        bbMax = max(bbMax, p2);
+        const triSurface::FaceType& f = s[triI];
+        forAll(f, fp)
+        {
+            const point& pt = s.points()[f[fp]];
+            bbMin = ::Foam::min(bbMin, pt);
+            bbMax = ::Foam::max(bbMax, pt);
+        }
     }
 
     // Now combine for all processors and convert to correct format.
@@ -971,12 +967,12 @@ void Foam::distributedTriSurfaceMesh::subsetMeshMap
                 // Store new faces compact
                 newToOldFaces[faceI++] = oldFacei;
 
-                // Renumber labels for triangle
-                const labelledTri& tri = s[oldFacei];
+                // Renumber labels for face
+                const triSurface::FaceType& f = s[oldFacei];
 
-                forAll(tri, fp)
+                forAll(f, fp)
                 {
-                    label oldPointI = tri[fp];
+                    label oldPointI = f[fp];
 
                     if (oldToNewPoints[oldPointI] == -1)
                     {
@@ -1090,12 +1086,12 @@ Foam::triSurface Foam::distributedTriSurfaceMesh::subsetMesh
         {
             if (include[oldFacei])
             {
-                // Renumber labels for triangle
-                const labelledTri& tri = s[oldFacei];
+                // Renumber labels for face
+                const triSurface::FaceType& f = s[oldFacei];
 
-                forAll(tri, fp)
+                forAll(f, fp)
                 {
-                    label oldPointI = tri[fp];
+                    label oldPointI = f[fp];
 
                     if (oldToNewPoints[oldPointI] == -1)
                     {

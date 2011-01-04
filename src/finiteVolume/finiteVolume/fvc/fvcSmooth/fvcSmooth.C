@@ -183,8 +183,10 @@ void Foam::fvc::spread
                 label facei = patch.start() + patchFacei;
                 label own = mesh.faceOwner()[facei];
 
-                scalarField alphapn =
-                    alpha.boundaryField()[patchi].patchNeighbourField();
+                const scalarField alphapn
+                (
+                    alpha.boundaryField()[patchi].patchNeighbourField()
+                );
 
                 if
                 (
@@ -283,8 +285,10 @@ void Foam::fvc::sweep
                 label facei = patch.start() + patchFacei;
                 label own = mesh.faceOwner()[facei];
 
-                scalarField alphapn =
-                    alpha.boundaryField()[patchi].patchNeighbourField();
+                const scalarField alphapn
+                (
+                    alpha.boundaryField()[patchi].patchNeighbourField()
+                );
 
                 if (mag(alpha[own] - alphapn[patchFacei]) > alphaDiff)
                 {

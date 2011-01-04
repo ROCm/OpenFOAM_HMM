@@ -110,7 +110,7 @@ void Foam::fluxCorrectedVelocityFvPatchVectorField::evaluate
     const fvsPatchField<scalar>& phip =
         patch().patchField<surfaceScalarField, scalar>(phi);
 
-    vectorField n = patch().nf();
+    const vectorField n(patch().nf());
     const Field<scalar>& magS = patch().magSf();
 
     if (phi.dimensions() == dimVelocity*dimArea)
@@ -152,7 +152,7 @@ void Foam::fluxCorrectedVelocityFvPatchVectorField::write(Ostream& os) const
 
 namespace Foam
 {
-    makePatchTypeField
+    makeNonTemplatedPatchTypeField
     (
         fvPatchVectorField,
         fluxCorrectedVelocityFvPatchVectorField

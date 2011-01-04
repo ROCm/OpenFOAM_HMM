@@ -212,7 +212,7 @@ void epsilonWallFunctionFvPatchScalarField::updateCoeffs()
 
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
 
-    const scalarField magGradUw = mag(Uw.snGrad());
+    const scalarField magGradUw(mag(Uw.snGrad()));
 
     // Set epsilon and G
     forAll(mutw, faceI)
@@ -253,7 +253,7 @@ void epsilonWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
+makeNonTemplatedPatchTypeField
 (
     fvPatchScalarField,
     epsilonWallFunctionFvPatchScalarField

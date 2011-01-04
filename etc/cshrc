@@ -74,7 +74,8 @@ alias _foamSource 'if ($?FOAM_VERBOSE && $?prompt) echo "Sourcing: \!*"; if (\!*
 # Add in preset user or site preferences:
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile prefs.csh`
 
-# Evaluate command-line parameters
+# Evaluate command-line parameters and record settings for later
+setenv FOAM_SETTINGS "${*}"
 while ( $#argv > 0 )
     switch ($argv[1])
     case *=:
@@ -84,6 +85,14 @@ while ( $#argv > 0 )
     case *=*:
         # name=value  -> setenv name value
         eval "setenv $argv[1]:s/=/ /"
+        breaksw
+    default:
+        # filename: source it
+        if ( -f "$1" ) then
+            _foamSource "$1"
+        else
+            _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile "$1"`
+        endif
         breaksw
     endsw
     shift

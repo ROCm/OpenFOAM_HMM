@@ -87,7 +87,7 @@ autoPtr<fvMesh> createMesh
     if (!haveMesh)
     {
         // Create dummy mesh. Only used on procs that don't have mesh.
-        IOobject noReadIO(io);  
+        IOobject noReadIO(io);
         noReadIO.readOpt() = IOobject::NO_READ;
         fvMesh dummyMesh
         (

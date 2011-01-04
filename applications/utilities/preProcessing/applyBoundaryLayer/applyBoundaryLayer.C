@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
     // Calculate nut
     tmp<volScalarField> tnut = turbulence->nut();
     volScalarField& nut = tnut();
-    volScalarField S = mag(dev(symm(fvc::grad(U))));
+    volScalarField S(mag(dev(symm(fvc::grad(U)))));
     nut = sqr(kappa*min(y, ybl))*::sqrt(2)*S;
 
     if (args.optionFound("writenut"))
