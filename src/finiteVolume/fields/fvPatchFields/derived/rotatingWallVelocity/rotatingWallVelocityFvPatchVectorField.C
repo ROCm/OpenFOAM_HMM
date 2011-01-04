@@ -143,7 +143,7 @@ void Foam::rotatingWallVelocityFvPatchVectorField::write(Ostream& os) const
 
 namespace Foam
 {
-    makeNonTemplatedPatchTypeField
+    makePatchTypeField
     (
         fvPatchVectorField,
         rotatingWallVelocityFvPatchVectorField

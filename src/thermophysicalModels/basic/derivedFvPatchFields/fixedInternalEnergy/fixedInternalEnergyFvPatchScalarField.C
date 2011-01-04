@@ -117,7 +117,7 @@ void Foam::fixedInternalEnergyFvPatchScalarField::updateCoeffs()
 
 namespace Foam
 {
-    makeNonTemplatedPatchTypeField
+    makePatchTypeField
     (
         fvPatchScalarField,
         fixedInternalEnergyFvPatchScalarField

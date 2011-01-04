@@ -55,7 +55,7 @@ public:
                 j = y.rcIndex(j);
             }
         }
-    };
+    }
 };
 
 }

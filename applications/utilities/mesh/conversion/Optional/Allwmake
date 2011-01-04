@@ -9,7 +9,7 @@ set -x
 $WM_THIRD_PARTY_DIR/AllwmakeLibccmio
 
 # if the library built properly, the headers should exist too
-if [ -e $FOAM_LIBBIN/libccmio.so ]
+if [ -e $FOAM_EXT_LIBBIN/libccmio.so ]
 then
     wmake ccm26ToFoam
 fi

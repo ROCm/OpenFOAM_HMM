@@ -12,4 +12,4 @@ EXE_INC = \
     $(TYPE_REAL)
 
 LIB_LIBS = \
-    -lMGridGen
+    -L$(FOAM_EXT_LIBBIN) -lMGridGen

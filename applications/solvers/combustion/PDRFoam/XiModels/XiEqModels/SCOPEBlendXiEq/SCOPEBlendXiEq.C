@@ -34,8 +34,8 @@ namespace XiEqModels
 {
     defineTypeNameAndDebug(SCOPEBlend, 0);
     addToRunTimeSelectionTable(XiEqModel, SCOPEBlend, dictionary);
-};
-};
+}
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

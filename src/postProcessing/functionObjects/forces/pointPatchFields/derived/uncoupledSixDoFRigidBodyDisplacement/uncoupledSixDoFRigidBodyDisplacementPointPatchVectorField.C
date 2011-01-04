@@ -185,7 +185,7 @@ void uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField::write
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeNonTemplatedPointPatchTypeField
+makePointPatchTypeField
 (
     pointPatchVectorField,
     uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField

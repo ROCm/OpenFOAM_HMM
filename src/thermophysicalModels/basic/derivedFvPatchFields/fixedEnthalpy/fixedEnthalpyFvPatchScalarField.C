@@ -120,7 +120,7 @@ void Foam::fixedEnthalpyFvPatchScalarField::updateCoeffs()
 
 namespace Foam
 {
-    makeNonTemplatedPatchTypeField
+    makePatchTypeField
     (
         fvPatchScalarField,
         fixedEnthalpyFvPatchScalarField

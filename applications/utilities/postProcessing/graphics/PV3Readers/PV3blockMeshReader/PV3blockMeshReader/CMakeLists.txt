@@ -14,6 +14,7 @@ INCLUDE(${PARAVIEW_USE_FILE})
 
 LINK_DIRECTORIES(
     $ENV{FOAM_LIBBIN}
+    $ENV{FOAM_EXT_LIBBIN}
 )
 
 INCLUDE_DIRECTORIES(
@@ -36,7 +37,8 @@ SET(
 #
 # Define combined plugin
 #
-# Try to extend the auto-generated panel
+
+# Extend the auto-generated panel
 QT4_WRAP_CPP(MOC_SRCS pqPV3blockMeshReaderPanel.h)
 
 ADD_PARAVIEW_OBJECT_PANEL(IFACES IFACE_SRCS

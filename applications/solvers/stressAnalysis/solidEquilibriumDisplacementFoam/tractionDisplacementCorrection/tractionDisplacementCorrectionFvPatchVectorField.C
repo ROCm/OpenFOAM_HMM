@@ -194,7 +194,7 @@ void tractionDisplacementCorrectionFvPatchVectorField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeNonTemplatedPatchTypeField
+makePatchTypeField
 (
     fvPatchVectorField,
     tractionDisplacementCorrectionFvPatchVectorField

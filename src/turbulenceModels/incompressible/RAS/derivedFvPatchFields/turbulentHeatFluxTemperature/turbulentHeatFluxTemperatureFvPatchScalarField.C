@@ -237,7 +237,7 @@ void turbulentHeatFluxTemperatureFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeNonTemplatedPatchTypeField
+makePatchTypeField
 (
     fvPatchScalarField,
     turbulentHeatFluxTemperatureFvPatchScalarField

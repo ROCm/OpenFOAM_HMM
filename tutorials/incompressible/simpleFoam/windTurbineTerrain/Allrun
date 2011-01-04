@@ -18,13 +18,22 @@ runApplication decomposePar
 cp system/decomposeParDict-par system/decomposeParDict
 runParallel snappyHexMesh 2 -overwrite
 
-# Add wildcard entries for meshes patches since not preserved
+# Add wildcard entries for meshed patches since not preserved
 # by decomposePar. Notice -literalRE option to add wildcard itself
 # without evaluation.
 runParallel changeDictionary 2 -literalRE
 
-runParallel setSet 2 -batch makeZones
-runParallel windSimpleFoam 2
+cp system/decomposeParDict-4proc system/decomposeParDict
+runParallel redistributeMeshPar 4 -overwrite
+runParallel renumberMesh 4 -overwrite
+
+# Add wildcard entries for meshes patches since not preserved
+# by decomposePar. Notice -literalRE option to add wildcard itself
+# without evaluation.
+#runParallel changeDictionary 4 -literalRE
+
+runParallel setSet 4 -batch makeZones
+runParallel windSimpleFoam 4
 
 runApplication reconstructParMesh -constant
 runApplication reconstructPar

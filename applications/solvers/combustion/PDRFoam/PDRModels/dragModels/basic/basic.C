@@ -34,8 +34,8 @@ namespace PDRDragModels
 {
     defineTypeNameAndDebug(basic, 0);
     addToRunTimeSelectionTable(PDRDragModel, basic, dictionary);
-};
-};
+}
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

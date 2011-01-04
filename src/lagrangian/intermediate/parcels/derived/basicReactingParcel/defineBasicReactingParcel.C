@@ -31,7 +31,7 @@ License
 namespace Foam
 {
     createReactingParcelTypes(basicReactingParcel);
-};
+}
 
 
 // ************************************************************************* //

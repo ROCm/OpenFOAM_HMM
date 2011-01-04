@@ -1,3 +1,3 @@
 scotchDecomp.C
 
-LIB = $(FOAM_LIBBIN)/libscotchDecomp
+LIB = $(FOAM_EXT_LIBBIN)/libscotchDecomp
