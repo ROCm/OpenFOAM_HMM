@@ -94,7 +94,7 @@ then
     foamCompiler=system
     echo "Warning in $WM_PROJECT_DIR/etc/settings.csh:"
     echo "    foamCompiler not set, using '$foamCompiler'"
-fi
+endif
 
 switch ("$foamCompiler")
 case OpenFOAM:
