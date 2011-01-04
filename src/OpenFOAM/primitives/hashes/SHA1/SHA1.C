@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,7 +74,7 @@ inline uint32_t Foam::SHA1::swapBytes(uint32_t n)
     const short x = 0x0100;
 
     // yields 0x01 for big endian
-    if (*(reinterpret_cast<const char *>(&x)))
+    if (*(reinterpret_cast<const char*>(&x)))
     {
         return n;
     }
@@ -458,11 +458,6 @@ Foam::SHA1Digest Foam::SHA1::digest() const
 //             << abort(FatalError);
 //     }
 // }
-
-// * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * Friend Operators * * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

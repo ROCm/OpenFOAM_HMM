@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -115,10 +115,10 @@ public:
         //- Construct null
         inline SHA1();
 
-        //- Construct and append initial std::string
+        //- Construct null and append initial std::string
         explicit inline SHA1(const std::string&);
 
-        //- Construct and append initial string
+        //- Construct null and append initial string
         explicit inline SHA1(const char*);
 
     // Member Functions
@@ -145,25 +145,44 @@ public:
 
     // Member Operators
 
-        //- Equality operator
-        inline bool operator==(const SHA1Digest&) const;
-
-        //- Inequality operator
-        inline bool operator!=(const SHA1Digest&) const;
-
-        //- Equality operator
+        //- Equality operator, compares %digests
         inline bool operator==(const SHA1&) const;
 
-        //- Inequality operator
+        //- Compare %digest
+        inline bool operator==(const SHA1Digest&) const;
+
+        //- Compare %digest to (40-byte) text representation (eg, from sha1sum)
+        //  An %empty string is equivalent to
+        //  "0000000000000000000000000000000000000000"
+        inline bool operator==(const std::string& hexdigits) const;
+
+        //- Compare %digest to (40-byte) text representation (eg, from sha1sum)
+        //  A %null or %empty string is equivalent to
+        //  "0000000000000000000000000000000000000000"
+        inline bool operator==(const char* hexdigits) const;
+
+
+        //- Inequality operator, compares %digests
         inline bool operator!=(const SHA1&) const;
 
-        //- Convert to a digest, calculate current digest from appended data.
+        //- Inequality operator, compare %digest
+        inline bool operator!=(const SHA1Digest&) const;
+
+        //- Inequality operator, compares %digests
+        inline bool operator!=(const std::string& hexdigits) const;
+
+        //- Inequality operator, compare %digest
+        inline bool operator!=(const char* hexdigits) const;
+
+
+        //- Convert to a SHA1Digest,
+        //  calculate current %digest from appended data
         inline operator SHA1Digest() const;
 
-    // Friend Functions
 
     // Friend Operators
 
+        //- Output the %digest
         inline friend Ostream& operator<<(Ostream&, const SHA1&);
 
 };

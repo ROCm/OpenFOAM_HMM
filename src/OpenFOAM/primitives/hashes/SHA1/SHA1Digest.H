@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,8 @@ SourceFiles
 
 #ifndef SHA1Digest_H
 #define SHA1Digest_H
+
+#include <string>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,11 +77,32 @@ public:
     //- Reset the digest to zero
     void clear();
 
+    //- Return true if the digest is empty (ie, all zero).
+    bool empty() const;
+
     //- Equality operator
     bool operator==(const SHA1Digest&) const;
 
+    //- Compare to (40-byte) text representation (eg, from sha1sum)
+    //  An %empty string is equivalent to
+    //  "0000000000000000000000000000000000000000"
+    bool operator==(const std::string& hexdigits) const;
+
+    //- Compare to (40-byte) text representation (eg, from sha1sum)
+    //  A %null or %empty string is equivalent to
+    //  "0000000000000000000000000000000000000000"
+    bool operator==(const char* hexdigits) const;
+
+
     //- Inequality operator
     bool operator!=(const SHA1Digest&) const;
+
+    //- Inequality operator
+    bool operator!=(const std::string& hexdigits) const;
+
+    //- Inequality operator
+    bool operator!=(const char* hexdigits) const;
+
 
     friend Ostream& operator<<(Ostream&, const SHA1Digest&);
     friend Istream& operator>>(Istream&, SHA1Digest&);
