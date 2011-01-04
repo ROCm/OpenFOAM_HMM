@@ -390,7 +390,7 @@ void LaunderGibsonRSTM::correct()
 
     const volSymmTensorField reflect
     (
-            C1Ref_*epsilon_/k_*R_ - C2Ref_*Clg2_*dev(P)
+        C1Ref_*epsilon_/k_*R_ - C2Ref_*Clg2_*dev(P)
     );
 
     tmp<fvSymmTensorMatrix> REqn
