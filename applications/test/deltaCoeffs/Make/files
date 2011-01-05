@@ -1,3 +1,0 @@
-Test-deltaCoeffs.C
-
-EXE = $(FOAM_USER_APPBIN)/Test-deltaCoeffs
