@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -56,8 +56,7 @@ WM_SCRIPTS   = $(WM_DIR)/scripts
 #------------------------------------------------------------------------------
 
 LIB_SRC            = $(WM_PROJECT_DIR)/src
-LIB_DIR            = $(WM_PROJECT_DIR)/lib
-LIB_WM_OPTIONS_DIR = $(LIB_DIR)/$(WM_OPTIONS)
+LIB_PLATFORMS      = $(WM_PROJECT_DIR)/platforms/$(WM_OPTIONS)/lib
 OBJECTS_DIR        = $(MAKE_DIR)/$(WM_OPTIONS)
 CLASSES_DIR        = $(MAKE_DIR)/classes
 
@@ -148,7 +147,7 @@ LIB_HEADER_DIRS = \
 
 $(EXE):  $(OBJECTS)
 	     @$(WM_SCRIPTS)/makeTargetDir $(EXE)
-	     $(LINKEXE) $(OBJECTS) -L$(LIB_WM_OPTIONS_DIR) \
+	     $(LINKEXE) $(OBJECTS) -L$(LIB_PLATFORMS) \
 	     $(EXE_LIBS) $(PROJECT_LIBS) $(SYS_LIBS) $(LINK_LIBS) $(GLIBS) -o $(EXE)
 
 exe:     $(SEXE)
@@ -173,7 +172,7 @@ $(LIB).$(SO): $(OBJECTS)
 	     @$(WM_SCRIPTS)/makeTargetDir $(LIB)
 	     @rm -f so_locations
 	     @cd $(OBJECTS_DIR) ; \
-	     $(LINKLIBSO) $(LOCAL_OBJECTS) -L$(LIB_WM_OPTIONS_DIR) $(LIB_LIBS) $(GLIB_LIBS) -o $(LIB).$(SO)
+	     $(LINKLIBSO) $(LOCAL_OBJECTS) -L$(LIB_PLATFORMS) $(LIB_LIBS) $(GLIB_LIBS) -o $(LIB).$(SO)
 
 lib:     $(LIB).a
 	     @echo \'$(LIB).a\' is up to date.

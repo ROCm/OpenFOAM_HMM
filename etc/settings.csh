@@ -48,20 +48,20 @@ setenv WM_LINK_LANGUAGE c++
 setenv WM_OPTIONS $WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_COMPILE_OPTION
 
 # base executables/libraries
-setenv FOAM_APPBIN $WM_PROJECT_DIR/bin/$WM_OPTIONS
-setenv FOAM_LIBBIN $WM_PROJECT_DIR/lib/$WM_OPTIONS
+setenv FOAM_APPBIN $WM_PROJECT_DIR/platforms/$WM_OPTIONS/bin
+setenv FOAM_LIBBIN $WM_PROJECT_DIR/platforms/$WM_OPTIONS/lib
 
 # external (ThirdParty) libraries
-setenv FOAM_EXT_LIBBIN $WM_THIRD_PARTY_DIR/lib/$WM_OPTIONS
+setenv FOAM_EXT_LIBBIN $WM_THIRD_PARTY_DIR/platforms/$WM_OPTIONS/lib
 
 # shared site executables/libraries
 # similar naming convention as ~OpenFOAM expansion
-setenv FOAM_SITE_APPBIN $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/bin/$WM_OPTIONS
-setenv FOAM_SITE_LIBBIN $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/lib/$WM_OPTIONS
+setenv FOAM_SITE_APPBIN $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/bin
+setenv FOAM_SITE_LIBBIN $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib
 
 # user executables/libraries
-setenv FOAM_USER_APPBIN $WM_PROJECT_USER_DIR/bin/$WM_OPTIONS
-setenv FOAM_USER_LIBBIN $WM_PROJECT_USER_DIR/lib/$WM_OPTIONS
+setenv FOAM_USER_APPBIN $WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/bin
+setenv FOAM_USER_LIBBIN $WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib
 
 # convenience
 setenv FOAM_APP $WM_PROJECT_DIR/applications
