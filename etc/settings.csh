@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -90,11 +90,10 @@ unsetenv MPFR_ARCH_PATH
 # Location of compiler installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if ( ! $?foamCompiler ) then
-then
     foamCompiler=system
     echo "Warning in $WM_PROJECT_DIR/etc/settings.csh:"
     echo "    foamCompiler not set, using '$foamCompiler'"
-fi
+endif
 
 switch ("$foamCompiler")
 case OpenFOAM:
@@ -253,13 +252,13 @@ unset boost_version cgal_version
 # Communications library
 # ~~~~~~~~~~~~~~~~~~~~~~
 
-unsetenv MPI_ARCH_PATH MPI_HOME
+unsetenv MPI_ARCH_PATH MPI_HOME FOAM_MPI_LIBBIN
 
 switch ("$WM_MPLIB")
 case OPENMPI:
-    #set mpi_version=openmpi-1.4.1
-    set mpi_version=openmpi-1.5.1
-    setenv MPI_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$mpi_version
+    #setenv FOAM_MPI openmpi-1.4.1
+    setenv FOAM_MPI openmpi-1.5.1
+    setenv MPI_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
 
     # Tell OpenMPI where to find its install directory
     setenv OPAL_PREFIX $MPI_ARCH_PATH
@@ -267,14 +266,11 @@ case OPENMPI:
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib
     _foamAddMan     $MPI_ARCH_PATH/man
-
-    setenv FOAM_MPI_LIBBIN $FOAM_EXT_LIBBIN/$mpi_version
-    unset mpi_version
     breaksw
 
 case SYSTEMOPENMPI:
     # Use the system installed openmpi, get library directory via mpicc
-    set mpi_version=openmpi-system
+    setenv FOAM_MPI openmpi-system
 
     # Set compilation flags here instead of in wmake/rules/../mplibSYSTEMOPENMPI
     setenv PINC "`mpicc --showme:compile`"
@@ -289,25 +285,21 @@ case SYSTEMOPENMPI:
     endif
 
     _foamAddLib     $libDir
-
-    setenv FOAM_MPI_LIBBIN $FOAM_EXT_LIBBIN/$mpi_version
-    unset mpi_version libDir
+    unset libDir
     breaksw
 
 case MPICH:
-    set mpi_version=mpich2-1.1.1p1
-    setenv MPI_HOME $WM_THIRD_PARTY_DIR/$mpi_version
-    setenv MPI_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$mpi_version
+    setenv FOAM_MPI mpich2-1.1.1p1
+    setenv MPI_HOME $WM_THIRD_PARTY_DIR/$FOAM_MPI
+    setenv MPI_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
 
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib
     _foamAddMan     $MPI_ARCH_PATH/share/man
-
-    setenv FOAM_MPI_LIBBIN $FOAM_EXT_LIBBIN/$mpi_version
-    unset mpi_version
     breaksw
 
 case MPICH-GM:
+    setenv FOAM_MPI mpich-gm
     setenv MPI_ARCH_PATH /opt/mpi
     setenv MPICH_PATH $MPI_ARCH_PATH
     setenv GM_LIB_PATH /opt/gm/lib64
@@ -315,11 +307,10 @@ case MPICH-GM:
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib
     _foamAddLib     $GM_LIB_PATH
-
-    setenv FOAM_MPI_LIBBIN $FOAM_EXT_LIBBIN/mpich-gm
     breaksw
 
 case HPMPI:
+    setenv FOAM_MPI hpmpi
     setenv MPI_HOME /opt/hpmpi
     setenv MPI_ARCH_PATH $MPI_HOME
 
@@ -339,23 +330,22 @@ case HPMPI:
         echo Unknown processor type `uname -m` for Linux
         breaksw
     endsw
-
-    setenv FOAM_MPI_LIBBIN $FOAM_EXT_LIBBIN/hpmpi
     breaksw
 
 case GAMMA:
+    setenv FOAM_MPI gamma
     setenv MPI_ARCH_PATH /usr
-    setenv FOAM_MPI_LIBBIN $FOAM_EXT_LIBBIN/gamma
     breaksw
 
 case MPI:
+    setenv FOAM_MPI mpi
     setenv MPI_ARCH_PATH /opt/mpi
-    setenv FOAM_MPI_LIBBIN $FOAM_EXT_LIBBIN/mpi
     breaksw
 
 case FJMPI:
+    setenv FOAM_MPI fjmpi
     setenv MPI_ARCH_PATH /opt/FJSVmpi2
-    setenv FOAM_MPI_LIBBIN $FOAM_EXT_LIBBIN/mpi
+
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib/sparcv9
     _foamAddLib     /opt/FSUNf90/lib/sparcv9
@@ -363,20 +353,25 @@ case FJMPI:
     breaksw
 
 case QSMPI:
+    setenv FOAM_MPI qsmpi
     setenv MPI_ARCH_PATH /usr/lib/mpi
-    setenv FOAM_MPI_LIBBIN FOAM_LIBBIN/qsmpi
 
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib
-
     breaksw
 
 default:
-    setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/dummy
+    setenv FOAM_MPI dummy
     breaksw
 endsw
 
-_foamAddLib $FOAM_MPI_LIBBIN
+
+# add (non-dummy) MPI implementation
+# dummy MPI already added to LD_LIBRARY_PATH and has no external libraries
+if ( "$FOAM_MPI" != dummy ) then
+    _foamAddLib ${FOAM_LIBBIN}/${FOAM_MPI}:${FOAM_EXT_LIBBIN}/${FOAM_MPI}
+endif
+
 
 
 # Set the minimum MPI buffer size (used by all platforms except SGI MPI)

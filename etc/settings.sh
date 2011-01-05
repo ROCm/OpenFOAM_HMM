@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -273,13 +273,13 @@ unset boost_version cgal_version
 # Communications library
 # ~~~~~~~~~~~~~~~~~~~~~~
 
-unset MPI_ARCH_PATH MPI_HOME
+unset MPI_ARCH_PATH MPI_HOME FOAM_MPI_LIBBIN
 
 case "$WM_MPLIB" in
 OPENMPI)
-    #mpi_version=openmpi-1.4.1
-    mpi_version=openmpi-1.5.1
-    export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$mpi_version
+    #export FOAM_MPI=openmpi-1.4.1
+    export FOAM_MPI=openmpi-1.5.1
+    export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
 
     # Tell OpenMPI where to find its install directory
     export OPAL_PREFIX=$MPI_ARCH_PATH
@@ -287,14 +287,11 @@ OPENMPI)
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib
     _foamAddMan     $MPI_ARCH_PATH/man
-
-    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/$mpi_version
-    unset mpi_version
     ;;
 
 SYSTEMOPENMPI)
     # Use the system installed openmpi, get library directory via mpicc
-    mpi_version=openmpi-system
+    export FOAM_MPI=openmpi-system
 
     # Set compilation flags here instead of in wmake/rules/../mplibSYSTEMOPENMPI
     export PINC="`mpicc --showme:compile`"
@@ -310,25 +307,21 @@ SYSTEMOPENMPI)
     fi
 
     _foamAddLib     $libDir
-
-    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/$mpi_version
-    unset mpi_version libDir
+    unset libDir
     ;;
 
 MPICH)
-    mpi_version=mpich2-1.1.1p1
-    export MPI_HOME=$WM_THIRD_PARTY_DIR/$mpi_version
-    export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$mpi_version
+    export FOAM_MPI=mpich2-1.1.1p1
+    export MPI_HOME=$WM_THIRD_PARTY_DIR/$FOAM_MPI
+    export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
 
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib
     _foamAddMan     $MPI_ARCH_PATH/share/man
-
-    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/$mpi_version
-    unset mpi_version
     ;;
 
 MPICH-GM)
+    export FOAM_MPI=mpich-gm
     export MPI_ARCH_PATH=/opt/mpi
     export MPICH_PATH=$MPI_ARCH_PATH
     export GM_LIB_PATH=/opt/gm/lib64
@@ -336,11 +329,10 @@ MPICH-GM)
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib
     _foamAddLib     $GM_LIB_PATH
-
-    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/mpich-gm
     ;;
 
 HPMPI)
+    export FOAM_MPI=hpmpi
     export MPI_HOME=/opt/hpmpi
     export MPI_ARCH_PATH=$MPI_HOME
 
@@ -361,23 +353,21 @@ HPMPI)
         echo Unknown processor type `uname -m` for Linux
         ;;
     esac
-
-    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/hpmpi
     ;;
 
 GAMMA)
+    export FOAM_MPI=gamma
     export MPI_ARCH_PATH=/usr
-    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/gamma
     ;;
 
 MPI)
+    export FOAM_MPI=mpi
     export MPI_ARCH_PATH=/opt/mpi
-    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/mpi
     ;;
 
 FJMPI)
+    export FOAM_MPI=fjmpi
     export MPI_ARCH_PATH=/opt/FJSVmpi2
-    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/mpi
 
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib/sparcv9
@@ -386,20 +376,25 @@ FJMPI)
     ;;
 
 QSMPI)
+    export FOAM_MPI=qsmpi
     export MPI_ARCH_PATH=/usr/lib/mpi
-    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/qsmpi
 
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib
-
     ;;
 
 *)
-    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/dummy
+    export FOAM_MPI=dummy
     ;;
 esac
 
-_foamAddLib $FOAM_MPI_LIBBIN
+# add (non-dummy) MPI implementation
+# dummy MPI already added to LD_LIBRARY_PATH and has no external libraries
+if [ "$FOAM_MPI" != dummy ]
+then
+    _foamAddLib $FOAM_LIBBIN/$FOAM_MPI:$FOAM_EXT_LIBBIN/$FOAM_MPI
+fi
+
 
 
 # Set the minimum MPI buffer size (used by all platforms except SGI MPI)
