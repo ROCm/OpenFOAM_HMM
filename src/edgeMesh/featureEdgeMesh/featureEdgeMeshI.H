@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,49 +33,49 @@ inline Foam::label Foam::featureEdgeMesh::convexStart() const
 
 inline Foam::label Foam::featureEdgeMesh::concaveStart() const
 {
-	return concaveStart_;
+    return concaveStart_;
 }
 
 
 inline Foam::label Foam::featureEdgeMesh::mixedStart() const
 {
-	return mixedStart_;
+    return mixedStart_;
 }
 
 
 inline Foam::label Foam::featureEdgeMesh::nonFeatureStart() const
 {
-	return nonFeatureStart_;
+    return nonFeatureStart_;
 }
 
 
 inline Foam::label Foam::featureEdgeMesh::externalStart() const
 {
-	return externalStart_;
+    return externalStart_;
 }
 
 
 inline Foam::label Foam::featureEdgeMesh::internalStart() const
 {
-	return internalStart_;
+    return internalStart_;
 }
 
 
 inline Foam::label Foam::featureEdgeMesh::flatStart() const
 {
-	return flatStart_;
+    return flatStart_;
 }
 
 
 inline Foam::label Foam::featureEdgeMesh::openStart() const
 {
-	return openStart_;
+    return openStart_;
 }
 
 
 inline Foam::label Foam::featureEdgeMesh::multipleStart() const
 {
-	return multipleStart_;
+    return multipleStart_;
 }
 
 

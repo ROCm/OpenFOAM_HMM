@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -702,7 +702,7 @@ void Foam::cyclicPolyPatch::transformPosition(pointField& l) const
 {
     if (!parallel())
     {
-        Foam::transform(forwardT(), l);
+        l = Foam::transform(forwardT(), l);
     }
     else if (separated())
     {

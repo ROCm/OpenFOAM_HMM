@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -94,7 +94,7 @@ then
     foamCompiler=system
     echo "Warning in $WM_PROJECT_DIR/etc/settings.csh:"
     echo "    foamCompiler not set, using '$foamCompiler'"
-fi
+endif
 
 switch ("$foamCompiler")
 case OpenFOAM:

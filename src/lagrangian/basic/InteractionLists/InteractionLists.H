@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ Description
     cells are potentially in range of each other.
 
     Builds referred interaction list, specifying which cells are
-    required to provideinteractions across coupled patched (cyclic or
+    required to provide interactions across coupled patched (cyclic or
     processor).  Generates referred cells, and refers particles to the
     correct processor, applying the appropriate transform.
 
