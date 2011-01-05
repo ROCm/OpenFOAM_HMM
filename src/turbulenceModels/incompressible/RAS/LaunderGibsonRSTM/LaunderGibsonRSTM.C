@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -342,7 +342,7 @@ void LaunderGibsonRSTM::correct()
         yr_.correct();
     }
 
-    volSymmTensorField P = -twoSymm(R_ & fvc::grad(U_));
+    volSymmTensorField P(-twoSymm(R_ & fvc::grad(U_)));
     volScalarField G("RASModel::G", 0.5*mag(tr(P)));
 
     // Update epsilon and G at the wall
@@ -388,7 +388,10 @@ void LaunderGibsonRSTM::correct()
         }
     }
 
-    volSymmTensorField reflect = C1Ref_*epsilon_/k_*R_ - C2Ref_*Clg2_*dev(P);
+    const volSymmTensorField reflect
+    (
+        C1Ref_*epsilon_/k_*R_ - C2Ref_*Clg2_*dev(P)
+    );
 
     tmp<fvSymmTensorMatrix> REqn
     (
@@ -451,7 +454,7 @@ void LaunderGibsonRSTM::correct()
 
             const scalarField& nutw = nut_.boundaryField()[patchi];
 
-            vectorField snGradU = U_.boundaryField()[patchi].snGrad();
+            const vectorField snGradU(U_.boundaryField()[patchi].snGrad());
 
             const vectorField& faceAreas
                 = mesh_.Sf().boundaryField()[patchi];

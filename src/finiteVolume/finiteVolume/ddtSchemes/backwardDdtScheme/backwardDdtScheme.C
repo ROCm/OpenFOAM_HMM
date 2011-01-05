@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -542,7 +542,7 @@ backwardDdtScheme<Type>::fvcDdtPhiCorr
         new fluxFieldType
         (
             ddtIOobject,
-            rDeltaT*fvcDdtPhiCoeff(U.oldTime(), phi.oldTime())
+            rDeltaT*this->fvcDdtPhiCoeff(U.oldTime(), phi.oldTime())
            *(
                 fvc::interpolate(rA)
                *(
@@ -606,7 +606,7 @@ backwardDdtScheme<Type>::fvcDdtPhiCorr
             new fluxFieldType
             (
                 ddtIOobject,
-                rDeltaT*fvcDdtPhiCoeff(U.oldTime(), phiAbs.oldTime())
+                rDeltaT*this->fvcDdtPhiCoeff(U.oldTime(), phiAbs.oldTime())
                *(
                     coefft0*fvc::interpolate(rA*rho.oldTime())
                    *phiAbs.oldTime()
@@ -639,7 +639,7 @@ backwardDdtScheme<Type>::fvcDdtPhiCorr
             (
                 ddtIOobject,
                 rDeltaT
-               *fvcDdtPhiCoeff
+               *this->fvcDdtPhiCoeff
                 (
                     U.oldTime(),
                     phiAbs.oldTime()/fvc::interpolate(rho.oldTime())
@@ -678,10 +678,11 @@ backwardDdtScheme<Type>::fvcDdtPhiCorr
             (
                 ddtIOobject,
                 rDeltaT
-               *fvcDdtPhiCoeff(rho.oldTime(), U.oldTime(), phiAbs.oldTime())
-               *(
+              * this->fvcDdtPhiCoeff
+                (rho.oldTime(), U.oldTime(), phiAbs.oldTime())
+              * (
                     fvc::interpolate(rA)
-                   *(
+                  * (
                        coefft0*phiAbs.oldTime()
                      - coefft00*phiAbs.oldTime().oldTime()
                     )

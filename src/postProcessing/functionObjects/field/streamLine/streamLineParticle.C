@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,7 @@ Foam::scalar Foam::streamLineParticle::calcSubCycleDeltaT
     scalar fraction = testParticle.trackToFace(position()+dt*U, td);
     td.keepParticle = oldKeepParticle;
     td.switchProcessor = oldSwitchProcessor;
-    // Adapt the dt to subdivide the trajectory into 4 substeps.
+    // Adapt the dt to subdivide the trajectory into substeps.
     return dt*fraction/td.nSubCycle_;
 }
 

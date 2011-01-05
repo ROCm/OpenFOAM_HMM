@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -163,8 +163,10 @@ void alphatFilmWallFunctionFvPatchScalarField::updateCoeffs()
         }
     }
 
-    scalarField mDotFilm =
-        filmModel.massPhaseChangeForPrimary().boundaryField()[filmPatchI];
+    scalarField mDotFilm
+    (
+        filmModel.massPhaseChangeForPrimary().boundaryField()[filmPatchI]
+    );
     distMap.distribute(mDotFilm);
 
     // Retrieve RAS turbulence model

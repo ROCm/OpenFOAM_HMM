@@ -9,15 +9,15 @@
         readLabel(piso.lookup("nAlphaSubCycles"))
     );
 
-    surfaceScalarField phic = mag(phi/mesh.magSf());
+    surfaceScalarField phic(mag(phi/mesh.magSf()));
     phic = min(interface.cAlpha()*phic, max(phic));
 
-    volScalarField divU = fvc::div(phi);
+    volScalarField divU(fvc::div(phi));
 
     if (nAlphaSubCycles > 1)
     {
         dimensionedScalar totalDeltaT = runTime.deltaT();
-        surfaceScalarField rhoPhiSum = 0.0*rhoPhi;
+        surfaceScalarField rhoPhiSum(0.0*rhoPhi);
 
         for
         (

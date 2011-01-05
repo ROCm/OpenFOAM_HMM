@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -315,7 +315,7 @@ void Foam::cuttingPlane::walkCellCuts
             // Orient face to point in the same direction as the plane normal
             if ((f.normal(cutPoints) & normal()) < 0)
             {
-                f = f.reverseFace();
+                f.flip();
             }
 
             // the cut faces are usually quite ugly, so optionally triangulate
@@ -378,7 +378,7 @@ void Foam::cuttingPlane::reCut
     MeshStorage::clear();
     cutCells_.clear();
 
-    scalarField dotProducts = (mesh.points() - refPoint()) & normal();
+    const scalarField dotProducts((mesh.points() - refPoint()) & normal());
 
     // Determine cells that are (probably) cut.
     calcCutCells(mesh, dotProducts, cellIdLabels);

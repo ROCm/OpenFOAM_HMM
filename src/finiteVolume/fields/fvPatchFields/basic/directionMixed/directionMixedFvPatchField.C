@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -126,13 +126,13 @@ template<class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::directionMixedFvPatchField<Type>::snGrad() const
 {
-    Field<Type> pif = this->patchInternalField();
+    const Field<Type> pif(this->patchInternalField());
 
-    Field<Type> normalValue = transform(valueFraction_, refValue_);
+    tmp<Field<Type> > normalValue = transform(valueFraction_, refValue_);
 
-    Field<Type> gradValue = pif + refGrad_/this->patch().deltaCoeffs();
+    tmp<Field<Type> > gradValue = pif + refGrad_/this->patch().deltaCoeffs();
 
-    Field<Type> transformGradValue =
+    tmp<Field<Type> > transformGradValue =
         transform(I - valueFraction_, gradValue);
 
     return
@@ -149,12 +149,12 @@ void Foam::directionMixedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
         this->updateCoeffs();
     }
 
-    Field<Type> normalValue = transform(valueFraction_, refValue_);
+    tmp<Field<Type> > normalValue = transform(valueFraction_, refValue_);
 
-    Field<Type> gradValue =
+    tmp<Field<Type> > gradValue =
         this->patchInternalField() + refGrad_/this->patch().deltaCoeffs();
 
-    Field<Type> transformGradValue =
+    tmp<Field<Type> > transformGradValue =
         transform(I - valueFraction_, gradValue);
 
     Field<Type>::operator=(normalValue + transformGradValue);

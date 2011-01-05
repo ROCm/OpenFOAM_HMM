@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,8 +34,8 @@ namespace XiEqModels
 {
     defineTypeNameAndDebug(instability, 0);
     addToRunTimeSelectionTable(XiEqModel, instability, dictionary);
-};
-};
+}
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -64,7 +64,7 @@ Foam::XiEqModels::instability::~instability()
 
 Foam::tmp<Foam::volScalarField> Foam::XiEqModels::instability::XiEq() const
 {
-    volScalarField turbXiEq = XiEqModel_->XiEq();
+    volScalarField turbXiEq(XiEqModel_->XiEq());
     return XiEqIn/turbXiEq + turbXiEq;
 }
 

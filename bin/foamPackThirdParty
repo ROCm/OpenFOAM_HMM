@@ -1,9 +1,9 @@
 #!/bin/sh
-#---------------------------------*- sh -*-------------------------------------
+#------------------------------------------------------------------------------
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -23,48 +23,86 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
-#     foamPackThirdParty [outputDir]
+#     foamPackThirdParty [OPTION]
 #
 # Description
-#     Packs and compresses the OpenFOAM ThirdParty directory for release
+#     Pack and compress the OpenFOAM ThirdParty directory for release
 #
 #------------------------------------------------------------------------------
+packDir=ThirdParty-$WM_PROJECT_VERSION
+toolsDir="${0%/*}/tools"  # this script is located in the tools/ parent dir
 
-timeStamp=$(date +%Y-%m-%d)
-packDir=${WM_THIRD_PARTY_DIR:-ThirdParty}
-packDir=${packDir##*/}
-packFile=${packDir}_${timeStamp}.gtgz
+usage() {
+    while [ $# -gt 0 ]; do echo "$1" 1>&2; shift; done
+cat <<USAGE 1>&2
+Usage: ${0##*/} [OPTION]
+options:
+  -o <dir>          specify alternative output directory
 
-if [ ! -d $packDir ]
-then
-    echo "Error: directory $packDir does not exist"
+* Pack and compress ThirdParty directory for release
+
+USAGE
     exit 1
-fi
+}
+
+unset prefix outputDir nogit
+# parse options
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help)
+        usage
+        ;;
+    -nogit)
+        nogit=true
+        shift
+        ;;
+    -o | -output)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        outputDir=${2%%/}
+        shift 2
+        ;;
+    -*)
+        usage "unknown option: '$*'"
+        ;;
+    *)
+        break
+        ;;
+    esac
+done
+
+# check for essential directories
+for dir in $packDir
+do
+    [ -d $dir ] || {
+        echo "Error: directory $dir does not exist" 1>&2
+        exit 1
+    }
+done
+
+
+#------------------------------------------------------------------------------
+timeStamp=$(date +%Y-%m-%d)
+packExt=tgz
+packBase=${packDir}_${timeStamp}
 
 # add optional output directory
-if [ -d "$1" ]
-then
-    packFile="$1/$packFile"
-fi
+[ -d "$outputDir" ] && packBase="$outputDir/$packBase"
+packFile=$packBase.$packExt
 
+# avoid overwriting old pack file
 if [ -f $packFile ]
 then
     echo "Error: $packFile already exists"
     exit 1
 fi
 
-# Create time stamp file
-# ~~~~~~~~~~~~~~~~~~~~~~
 
+#------------------------------------------------------------------------------
+
+# add time-stamp file before packing
 echo $timeStamp 2>/dev/null > $packDir/.timeStamp
-
-# Pack and compress the packFile
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-echo
-echo "Packing $packDir source files into $packFile"
-echo
-
-foamPackSource $packDir $packFile
+echo "pack manually" 1>&2
+$toolsDir/foamPackSource $packDir $packFile
 
 #------------------------------------------------------------------------------

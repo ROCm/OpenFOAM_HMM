@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -352,8 +352,9 @@ inline Foam::scalarField Foam::DsmcCloud<ParcelType>::maxwellianAverageSpeed
     scalar mass
 ) const
 {
-    return
+    tmp<scalarField> tfld =
         2.0*sqrt(2.0*physicoChemical::k.value()*temperature/(pi*mass));
+    return tfld();
 }
 
 
@@ -375,7 +376,9 @@ inline Foam::scalarField Foam::DsmcCloud<ParcelType>::maxwellianRMSSpeed
     scalar mass
 ) const
 {
-    return sqrt(3.0*physicoChemical::k.value()*temperature/mass);
+    tmp<scalarField> tfld =
+        sqrt(3.0*physicoChemical::k.value()*temperature/mass);
+    return tfld();
 }
 
 
@@ -399,7 +402,9 @@ Foam::DsmcCloud<ParcelType>::maxwellianMostProbableSpeed
     scalar mass
 ) const
 {
-    return sqrt(2.0*physicoChemical::k.value()*temperature/mass);
+    tmp<scalarField> tfld =
+        sqrt(2.0*physicoChemical::k.value()*temperature/mass);
+    return tfld();
 }
 
 

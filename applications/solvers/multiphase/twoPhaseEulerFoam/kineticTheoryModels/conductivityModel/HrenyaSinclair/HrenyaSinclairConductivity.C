@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,8 +75,10 @@ Foam::tmp<Foam::volScalarField> Foam::HrenyaSinclairConductivity::kappa
 {
     const scalar sqrtPi = sqrt(constant::mathematical::pi);
 
-    volScalarField lamda =
-        scalar(1) + da/(6.0*sqrt(2.0)*(alpha + scalar(1.0e-5)))/L_;
+    volScalarField lamda
+    (
+        scalar(1) + da/(6.0*sqrt(2.0)*(alpha + scalar(1.0e-5)))/L_
+    );
 
     return rhoa*da*sqrt(Theta)*
     (

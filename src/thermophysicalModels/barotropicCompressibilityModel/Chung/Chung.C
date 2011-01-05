@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,10 +65,13 @@ Foam::compressibilityModels::Chung::Chung
 
 void Foam::compressibilityModels::Chung::correct()
 {
-    volScalarField sfa = sqrt
+    volScalarField sfa
     (
-        (rhovSat_/psiv_)
-       /((scalar(1) - gamma_)*rhovSat_/psiv_ + gamma_*rholSat_/psil_)
+        sqrt
+        (
+            (rhovSat_/psiv_)
+           /((scalar(1) - gamma_)*rhovSat_/psiv_ + gamma_*rholSat_/psil_)
+        )
     );
 
     psi_ = sqr

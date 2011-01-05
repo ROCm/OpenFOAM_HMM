@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -118,11 +118,13 @@ public:
             // calculate the appropriate interpolation factors
             const surfaceScalarField& lambda = mesh.weights();
 
-            surfaceScalarField kSc =
-                lambda*(scalar(1) - lambda*(scalar(3) - scalar(2)*lambda));
+            const surfaceScalarField kSc
+            (
+                lambda*(scalar(1) - lambda*(scalar(3) - scalar(2)*lambda))
+            );
 
-            surfaceScalarField kVecP = sqr(scalar(1) - lambda)*lambda;
-            surfaceScalarField kVecN = sqr(lambda)*(lambda - scalar(1));
+            const surfaceScalarField kVecP(sqr(scalar(1) - lambda)*lambda);
+            const surfaceScalarField kVecN(sqr(lambda)*(lambda - scalar(1)));
 
             tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tsfCorr
             (

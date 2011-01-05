@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,7 +35,11 @@ defineTypeNameAndDebug(Foam::UPstream, 0);
 namespace Foam
 {
     template<>
-    const char* Foam::NamedEnum<Foam::UPstream::commsTypes, 3>::names[] =
+    const char* Foam::NamedEnum
+    <
+        Foam::UPstream::commsTypes,
+        3
+    >::names[] =
     {
         "blocking",
         "scheduled",

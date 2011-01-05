@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,13 +52,22 @@ const Type& Foam::MeshObject<Mesh, Type>::New
     const Mesh& mesh
 )
 {
-    if (!mesh.thisDb().objectRegistry::foundObject<Type>(Type::typeName))
+    if
+    (
+        mesh.thisDb().objectRegistry::template foundObject<Type>
+        (
+            Type::typeName
+        )
+    )
     {
-        return store(new Type(mesh));
+        return mesh.thisDb().objectRegistry::template lookupObject<Type>
+        (
+            Type::typeName
+        );
     }
     else
     {
-        return mesh.thisDb().objectRegistry::lookupObject<Type>(Type::typeName);
+        return store(new Type(mesh));
     }
 }
 
@@ -71,13 +80,22 @@ const Type& Foam::MeshObject<Mesh, Type>::New
     const Data1& d
 )
 {
-    if (!mesh.thisDb().objectRegistry::foundObject<Type>(Type::typeName))
+    if
+    (
+        mesh.thisDb().objectRegistry::template foundObject<Type>
+        (
+            Type::typeName
+        )
+    )
     {
-        return store(new Type(mesh, d));
+        return mesh.thisDb().objectRegistry::template lookupObject<Type>
+        (
+            Type::typeName
+        );
     }
     else
     {
-        return mesh.thisDb().objectRegistry::lookupObject<Type>(Type::typeName);
+        return store(new Type(mesh, d));
     }
 }
 
@@ -91,13 +109,22 @@ const Type& Foam::MeshObject<Mesh, Type>::New
     const Data2& d2
 )
 {
-    if (!mesh.thisDb().objectRegistry::foundObject<Type>(Type::typeName))
+    if
+    (
+        mesh.thisDb().objectRegistry::template foundObject<Type>
+        (
+            Type::typeName
+        )
+    )
     {
-        return store(new Type(mesh, d1, d2));
+        return mesh.thisDb().objectRegistry::template lookupObject<Type>
+        (
+            Type::typeName
+        );
     }
     else
     {
-        return mesh.thisDb().objectRegistry::lookupObject<Type>(Type::typeName);
+        return store(new Type(mesh, d1, d2));
     }
 }
 
@@ -112,13 +139,22 @@ const Type& Foam::MeshObject<Mesh, Type>::New
     const Data3& d3
 )
 {
-    if (!mesh.thisDb().objectRegistry::foundObject<Type>(Type::typeName))
+    if
+    (
+        mesh.thisDb().objectRegistry::template foundObject<Type>
+        (
+            Type::typeName
+        )
+    )
     {
-        return store(new Type(mesh, d1, d2, d3));
+        return mesh.thisDb().objectRegistry::template lookupObject<Type>
+        (
+            Type::typeName
+        );
     }
     else
     {
-        return mesh.thisDb().objectRegistry::lookupObject<Type>(Type::typeName);
+        return store(new Type(mesh, d1, d2, d3));
     }
 }
 
@@ -134,13 +170,22 @@ const Type& Foam::MeshObject<Mesh, Type>::New
     const Data4& d4
 )
 {
-    if (!mesh.thisDb().objectRegistry::foundObject<Type>(Type::typeName))
+    if
+    (
+        mesh.thisDb().objectRegistry::template foundObject<Type>
+        (
+            Type::typeName
+        )
+    )
     {
-        return store(new Type(mesh, d1, d2, d3, d4));
+        return mesh.thisDb().objectRegistry::template lookupObject<Type>
+        (
+            Type::typeName
+        );
     }
     else
     {
-        return mesh.thisDb().objectRegistry::lookupObject<Type>(Type::typeName);
+        return store(new Type(mesh, d1, d2, d3, d4));
     }
 }
 
@@ -150,13 +195,19 @@ const Type& Foam::MeshObject<Mesh, Type>::New
 template<class Mesh, class Type>
 bool Foam::MeshObject<Mesh, Type>::Delete(const Mesh& mesh)
 {
-    if (mesh.thisDb().objectRegistry::foundObject<Type>(Type::typeName))
+    if
+    (
+        mesh.thisDb().objectRegistry::template foundObject<Type>
+        (
+            Type::typeName
+        )
+    )
     {
         return mesh.thisDb().checkOut
         (
             const_cast<Type&>
             (
-                mesh.thisDb().objectRegistry::lookupObject<Type>
+                mesh.thisDb().objectRegistry::template lookupObject<Type>
                 (
                     Type::typeName
                 )

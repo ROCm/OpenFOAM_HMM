@@ -5,7 +5,7 @@
     // pressure solution - done in 2 parts. Part 1:
     thermo.rho() -= psi*p;
 
-    volScalarField rAU = 1.0/UEqn.A();
+    volScalarField rAU(1.0/UEqn.A());
     U = rAU*UEqn.H();
 
     if (pZones.size() > 0)

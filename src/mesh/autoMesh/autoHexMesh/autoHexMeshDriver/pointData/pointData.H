@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Class
     Foam::pointData
 
 Description
-    Variant of pointEdgePoint with some transported additional data. 
+    Variant of pointEdgePoint with some transported additional data.
     WIP - should be templated on data like wallDistData.
     Passive vector v_ is not a coordinate (so no enterDomain/leaveDomain
     transformation needed)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,19 +59,27 @@ volScalarField locDynOneEqEddy::ck
     const volScalarField& KK
 ) const
 {
-    volSymmTensorField LL =
-        simpleFilter_(dev(filter_(sqr(U())) - (sqr(filter_(U())))));
+    const volSymmTensorField LL
+    (
+        simpleFilter_(dev(filter_(sqr(U())) - (sqr(filter_(U())))))
+    );
 
-    volSymmTensorField MM = simpleFilter_(-2.0*delta()*pow(KK, 0.5)*filter_(D));
+    const volSymmTensorField MM
+    (
+        simpleFilter_(-2.0*delta()*pow(KK, 0.5)*filter_(D))
+    );
 
-    volScalarField ck =
+    const volScalarField ck
+    (
         simpleFilter_(0.5*(LL && MM))
        /(
             simpleFilter_(magSqr(MM))
           + dimensionedScalar("small", sqr(MM.dimensions()), VSMALL)
-        );
+        )
+    );
 
-    return 0.5*(mag(ck) + ck);
+    tmp<volScalarField> tfld = 0.5*(mag(ck) + ck);
+    return tfld();
 }
 
 
@@ -81,11 +89,14 @@ volScalarField locDynOneEqEddy::ce
     const volScalarField& KK
 ) const
 {
-    volScalarField ce =
+    const volScalarField ce
+    (
         simpleFilter_(nuEff()*(filter_(magSqr(D)) - magSqr(filter_(D))))
-       /simpleFilter_(pow(KK, 1.5)/(2.0*delta()));
+       /simpleFilter_(pow(KK, 1.5)/(2.0*delta()))
+    );
 
-    return 0.5*(mag(ce) + ce);
+    tmp<volScalarField> tfld = 0.5*(mag(ce) + ce);
+    return tfld();
 }
 
 
@@ -122,7 +133,7 @@ locDynOneEqEddy::locDynOneEqEddy
 {
     bound(k_, kMin_);
 
-    volScalarField KK = 0.5*(filter_(magSqr(U)) - magSqr(filter_(U)));
+    const volScalarField KK(0.5*(filter_(magSqr(U)) - magSqr(filter_(U))));
     updateSubGridScaleFields(symm(fvc::grad(U)), KK);
 
     printCoeffs();
@@ -135,12 +146,12 @@ void locDynOneEqEddy::correct(const tmp<volTensorField>& gradU)
 {
     LESModel::correct(gradU);
 
-    volSymmTensorField D = symm(gradU);
+    const volSymmTensorField D(symm(gradU));
 
-    volScalarField KK = 0.5*(filter_(magSqr(U())) - magSqr(filter_(U())));
+    volScalarField KK(0.5*(filter_(magSqr(U())) - magSqr(filter_(U()))));
     KK.max(dimensionedScalar("small", KK.dimensions(), SMALL));
 
-    volScalarField P = 2.0*nuSgs_*magSqr(D);
+    const volScalarField P(2.0*nuSgs_*magSqr(D));
 
     tmp<fvScalarMatrix> kEqn
     (

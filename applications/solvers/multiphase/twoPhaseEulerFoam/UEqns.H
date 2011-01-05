@@ -3,7 +3,7 @@ fvVectorMatrix UbEqn(Ub, Ub.dimensions()*dimVol/dimTime);
 
 {
     {
-        volTensorField gradUaT = fvc::grad(Ua)().T();
+        volTensorField gradUaT(fvc::grad(Ua)().T());
 
         if (kineticTheory.on())
         {
@@ -26,9 +26,11 @@ fvVectorMatrix UbEqn(Ub, Ub.dimensions()*dimVol/dimTime);
             Rca -= ((kineticTheory.lambda()/rhoa)*tr(gradUaT))*tensor(I);
         }
 
-        surfaceScalarField phiRa =
+        surfaceScalarField phiRa
+        (
             -fvc::interpolate(nuEffa)*mesh.magSf()*fvc::snGrad(alpha)
-            /fvc::interpolate(alpha + scalar(0.001));
+            /fvc::interpolate(alpha + scalar(0.001))
+        );
 
         UaEqn =
         (
@@ -56,16 +58,18 @@ fvVectorMatrix UbEqn(Ub, Ub.dimensions()*dimVol/dimTime);
     }
 
     {
-        volTensorField gradUbT = fvc::grad(Ub)().T();
+        volTensorField gradUbT(fvc::grad(Ub)().T());
         volTensorField Rcb
         (
             "Rcb",
             ((2.0/3.0)*I)*(k + nuEffb*tr(gradUbT)) - nuEffb*gradUbT
         );
 
-        surfaceScalarField phiRb =
+        surfaceScalarField phiRb
+        (
             -fvc::interpolate(nuEffb)*mesh.magSf()*fvc::snGrad(beta)
-            /fvc::interpolate(beta + scalar(0.001));
+            /fvc::interpolate(beta + scalar(0.001))
+        );
 
         UbEqn =
         (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -435,8 +435,8 @@ void Foam::ODEChemistryModel<CompType, ThermoType>::jacobian
 
     // calculate the dcdT elements numerically
     const scalar delta = 1.0e-8;
-    const scalarField dcdT0 = omega(c2, T - delta, p);
-    const scalarField dcdT1 = omega(c2, T + delta, p);
+    const scalarField dcdT0(omega(c2, T - delta, p));
+    const scalarField dcdT1(omega(c2, T + delta, p));
 
     for (label i = 0; i < nEqns(); i++)
     {
@@ -653,7 +653,7 @@ void Foam::ODEChemistryModel<CompType, ThermoType>::calculate()
                 c[i] = rhoi*Yi/specieThermo_[i].W();
             }
 
-            const scalarField dcdt = omega(c, Ti, pi);
+            const scalarField dcdt(omega(c, Ti, pi));
 
             for (label i=0; i<nSpecie_; i++)
             {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,6 +33,7 @@ Description
 #include "fvMesh.H"
 #include "Time.H"
 #include "IFstream.H"
+#include "memInfo.H"
 
 // VTK includes
 #include "vtkDataArraySelection.h"
@@ -325,44 +326,13 @@ void Foam::vtkPV3Foam::setSelectedArrayEntries
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// parse these bits of info from /proc/meminfo (Linux)
-//
-// MemTotal:      2062660 kB
-// MemFree:       1124400 kB
-//
-// used = MemTotal - MemFree is what the free(1) uses.
-//
 void Foam::vtkPV3Foam::printMemory()
 {
-    const char* meminfo = "/proc/meminfo";
+    memInfo mem;
 
-    if (exists(meminfo))
+    if (mem.valid())
     {
-        IFstream is(meminfo);
-        label memTotal = 0;
-        label memFree = 0;
-
-        string line;
-
-        while (is.getLine(line).good())
-        {
-            char tag[32];
-            int value;
-
-            if (sscanf(line.c_str(), "%30s %d", tag, &value) == 2)
-            {
-                if (!strcmp(tag, "MemTotal:"))
-                {
-                    memTotal = value;
-                }
-                else if (!strcmp(tag, "MemFree:"))
-                {
-                    memFree = value;
-                }
-            }
-        }
-
-        Info<< "memUsed: " << (memTotal - memFree) << " kB\n";
+        Info<< "mem peak/size/rss: " << mem << "\n";
     }
 }
 

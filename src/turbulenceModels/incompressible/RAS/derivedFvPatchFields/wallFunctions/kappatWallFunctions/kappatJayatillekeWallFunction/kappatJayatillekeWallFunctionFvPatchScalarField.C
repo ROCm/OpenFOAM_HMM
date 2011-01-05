@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -207,7 +207,7 @@ void kappatJayatillekeWallFunctionFvPatchScalarField::updateCoeffs()
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const scalar Cmu25 = pow(Cmu_, 0.25);
     const scalarField& y = rasModel.y()[patchI];
-    const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
+    const scalarField& nuw = rasModel.nu()().boundaryField()[patchI];
     const tmp<volScalarField> tk = rasModel.k();
     const volScalarField& k = tk();
 

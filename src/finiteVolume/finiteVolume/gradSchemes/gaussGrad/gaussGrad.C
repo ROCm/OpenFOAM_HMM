@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -154,9 +154,11 @@ void Foam::fv::gaussGrad<Type>::correctBoundaryConditions
     {
         if (!vsf.boundaryField()[patchi].coupled())
         {
-            vectorField n =
+            const vectorField n
+            (
                 vsf.mesh().Sf().boundaryField()[patchi]
-               /vsf.mesh().magSf().boundaryField()[patchi];
+              / vsf.mesh().magSf().boundaryField()[patchi]
+            );
 
             gGrad.boundaryField()[patchi] += n *
             (

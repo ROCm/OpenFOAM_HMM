@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,13 +58,17 @@ enum ExtrudeMode
     SURFACE
 };
 
-template<>
-const char* NamedEnum<ExtrudeMode, 3>::names[] =
+namespace Foam
 {
-    "mesh",
-    "patch",
-    "surface"
-};
+    template<>
+    const char* NamedEnum<ExtrudeMode, 3>::names[] =
+    {
+        "mesh",
+        "patch",
+        "surface"
+    };
+}
+
 static const NamedEnum<ExtrudeMode, 3> ExtrudeModeNames;
 
 
@@ -369,7 +373,7 @@ int main(int argc, char *argv[])
         // Layers per point
         labelList nPointLayers(extrudePatch.nPoints(), model().nLayers());
         // Displacement for first layer
-        vectorField firstLayerDisp = displacement*model().sumThickness(1);
+        vectorField firstLayerDisp(displacement*model().sumThickness(1));
         // Expansion ratio not used.
         scalarField ratio(extrudePatch.nPoints(), 1.0);
 

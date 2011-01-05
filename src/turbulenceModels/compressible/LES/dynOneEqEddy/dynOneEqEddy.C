@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,12 +54,14 @@ void dynOneEqEddy::updateSubGridScaleFields(const volSymmTensorField& D)
 
 dimensionedScalar dynOneEqEddy::ck_(const volSymmTensorField& D) const
 {
-    volScalarField KK = 0.5*(filter_(magSqr(U())) - magSqr(filter_(U())));
+    volScalarField KK(0.5*(filter_(magSqr(U())) - magSqr(filter_(U()))));
 
-    volSymmTensorField LL = dev(filter_(sqr(U())) - (sqr(filter_(U()))));
+    volSymmTensorField LL(dev(filter_(sqr(U())) - (sqr(filter_(U())))));
 
-    volSymmTensorField MM =
-        delta()*(filter_(sqrt(k_)*D) - 2*sqrt(KK + filter_(k_))*filter_(D));
+    volSymmTensorField MM
+    (
+        delta()*(filter_(sqrt(k_)*D) - 2*sqrt(KK + filter_(k_))*filter_(D))
+    );
 
     return average(LL && MM)/average(magSqr(MM));
 }
@@ -67,17 +69,21 @@ dimensionedScalar dynOneEqEddy::ck_(const volSymmTensorField& D) const
 
 dimensionedScalar dynOneEqEddy::ce_(const volSymmTensorField& D) const
 {
-    volScalarField KK = 0.5*(filter_(magSqr(U())) - magSqr(filter_(U())));
+    volScalarField KK(0.5*(filter_(magSqr(U())) - magSqr(filter_(U()))));
 
-    volScalarField mm =
-        pow(KK + filter_(k_), 1.5)/(2*delta()) - filter_(pow(k_, 1.5))/delta();
+    volScalarField mm
+    (
+        pow(KK + filter_(k_), 1.5)/(2*delta()) - filter_(pow(k_, 1.5))/delta()
+    );
 
-    volScalarField ee =
+    volScalarField ee
+    (
         2*delta()*ck_(D)
        *(
             filter_(sqrt(k_)*magSqr(D))
           - 2*sqrt(KK + filter_(k_))*magSqr(filter_(D))
-        );
+        )
+    );
 
     return average(ee*mm)/average(mm*mm);
 }
@@ -115,9 +121,9 @@ void dynOneEqEddy::correct(const tmp<volTensorField>& tgradU)
 
     GenEddyVisc::correct(gradU);
 
-    volSymmTensorField D = dev(symm(gradU));
-    volScalarField divU = fvc::div(phi()/fvc::interpolate(rho()));
-    volScalarField G = 2*muSgs_*(gradU && D);
+    volSymmTensorField D(dev(symm(gradU)));
+    volScalarField divU(fvc::div(phi()/fvc::interpolate(rho())));
+    volScalarField G(2*muSgs_*(gradU && D));
 
     tmp<fvScalarMatrix> kEqn
     (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2007-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -73,7 +73,13 @@ Foam::scalarRange::scalarRange(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::scalarRange::isDefined() const
+bool Foam::scalarRange::empty() const
+{
+    return type_ == EMPTY;
+}
+
+
+bool Foam::scalarRange::valid() const
 {
     return type_ != EMPTY;
 }
@@ -149,23 +155,18 @@ bool Foam::scalarRange::selected(const scalar value) const
 
 bool Foam::scalarRange::operator==(const scalarRange& range) const
 {
-    if
+    return
     (
         type_ == range.type_
      && value_ == range.value_
      && value2_ == range.value2_
-    )
-    {
-        return true;
-    }
-
-    return false;
+    );
 }
 
 
 bool Foam::scalarRange::operator!=(const scalarRange& range) const
 {
-    return operator==(range) ? false : true;
+    return !(operator==(range));
 }
 
 

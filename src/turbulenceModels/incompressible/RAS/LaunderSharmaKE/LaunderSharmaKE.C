@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -237,12 +237,12 @@ void LaunderSharmaKE::correct()
         return;
     }
 
-    volScalarField S2 = 2*magSqr(symm(fvc::grad(U_)));
+    tmp<volScalarField> S2 = 2*magSqr(symm(fvc::grad(U_)));
 
     volScalarField G("RASModel::G", nut_*S2);
 
-    volScalarField E = 2.0*nu()*nut_*fvc::magSqrGradGrad(U_);
-    volScalarField D = 2.0*nu()*magSqr(fvc::grad(sqrt(k_)));
+    const volScalarField E(2.0*nu()*nut_*fvc::magSqrGradGrad(U_));
+    const volScalarField D(2.0*nu()*magSqr(fvc::grad(sqrt(k_))));
 
 
     // Dissipation rate equation

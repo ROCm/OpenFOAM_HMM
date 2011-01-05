@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -273,7 +273,7 @@ void Foam::multiphaseMixture::solve()
 
     if (nAlphaSubCycles > 1)
     {
-        surfaceScalarField rhoPhiSum = 0.0*rhoPhi_;
+        surfaceScalarField rhoPhiSum(0.0*rhoPhi_);
         dimensionedScalar totalDeltaT = runTime.deltaT();
 
         for
@@ -314,9 +314,11 @@ Foam::tmp<Foam::surfaceVectorField> Foam::multiphaseMixture::nHatfv
     surfaceVectorField gradAlphaf = fvc::interpolate(gradAlpha);
     */
 
-    surfaceVectorField gradAlphaf =
+    surfaceVectorField gradAlphaf
+    (
         fvc::interpolate(alpha2)*fvc::interpolate(fvc::grad(alpha1))
-      - fvc::interpolate(alpha1)*fvc::interpolate(fvc::grad(alpha2));
+      - fvc::interpolate(alpha1)*fvc::interpolate(fvc::grad(alpha2))
+    );
 
     // Face unit interface normal
     return gradAlphaf/(mag(gradAlphaf) + deltaN_);
@@ -361,9 +363,11 @@ void Foam::multiphaseMixture::correctContactAngle
 
             vectorField& nHatPatch = nHatb[patchi];
 
-            vectorField AfHatPatch =
+            vectorField AfHatPatch
+            (
                 mesh_.Sf().boundaryField()[patchi]
-               /mesh_.magSf().boundaryField()[patchi];
+               /mesh_.magSf().boundaryField()[patchi]
+            );
 
             alphaContactAngleFvPatchScalarField::thetaPropsTable::
                 const_iterator tp =
@@ -396,21 +400,25 @@ void Foam::multiphaseMixture::correctContactAngle
                 scalar thetaR = convertToRad*tp().thetaR(matched);
 
                 // Calculated the component of the velocity parallel to the wall
-                vectorField Uwall =
+                vectorField Uwall
+                (
                     U_.boundaryField()[patchi].patchInternalField()
-                  - U_.boundaryField()[patchi];
+                  - U_.boundaryField()[patchi]
+                );
                 Uwall -= (AfHatPatch & Uwall)*AfHatPatch;
 
                 // Find the direction of the interface parallel to the wall
-                vectorField nWall =
-                    nHatPatch - (AfHatPatch & nHatPatch)*AfHatPatch;
+                vectorField nWall
+                (
+                    nHatPatch - (AfHatPatch & nHatPatch)*AfHatPatch
+                );
 
                 // Normalise nWall
                 nWall /= (mag(nWall) + SMALL);
 
                 // Calculate Uwall resolved normal to the interface parallel to
                 // the interface
-                scalarField uwall = nWall & Uwall;
+                scalarField uwall(nWall & Uwall);
 
                 theta += (thetaA - thetaR)*tanh(uwall/uTheta);
             }
@@ -418,9 +426,9 @@ void Foam::multiphaseMixture::correctContactAngle
 
             // Reset nHatPatch to correspond to the contact angle
 
-            scalarField a12 = nHatPatch & AfHatPatch;
+            scalarField a12(nHatPatch & AfHatPatch);
 
-            scalarField b1 = cos(theta);
+            scalarField b1(cos(theta));
 
             scalarField b2(nHatPatch.size());
 
@@ -429,10 +437,10 @@ void Foam::multiphaseMixture::correctContactAngle
                 b2[facei] = cos(acos(a12[facei]) - theta[facei]);
             }
 
-            scalarField det = 1.0 - a12*a12;
+            scalarField det(1.0 - a12*a12);
 
-            scalarField a = (b1 - a12*b2)/det;
-            scalarField b = (b2 - a12*b1)/det;
+            scalarField a((b1 - a12*b2)/det);
+            scalarField b((b2 - a12*b1)/det);
 
             nHatPatch = a*AfHatPatch + b*nHatPatch;
 
@@ -508,7 +516,7 @@ void Foam::multiphaseMixture::solveAlphas
         )
     );
 
-    surfaceScalarField phic = mag(phi_/mesh_.magSf());
+    surfaceScalarField phic(mag(phi_/mesh_.magSf()));
     phic = min(cAlpha*phic, max(phic));
 
     for (int gCorr=0; gCorr<nAlphaCorr; gCorr++)
@@ -527,7 +535,7 @@ void Foam::multiphaseMixture::solveAlphas
 
         phase& refPhase = *refPhasePtr;
 
-        volScalarField refPhaseNew = refPhase;
+        volScalarField refPhaseNew(refPhase);
         refPhaseNew == 1.0;
 
         rhoPhi_ = phi_*refPhase.rho();
@@ -550,9 +558,11 @@ void Foam::multiphaseMixture::solveAlphas
 
                 if (&alpha2 == &alpha) continue;
 
-                surfaceScalarField phir = phic*nHatf(alpha, alpha2);
-                surfaceScalarField phirb12 =
-                    -fvc::flux(-phir, alpha2, alphacScheme);
+                surfaceScalarField phir(phic*nHatf(alpha, alpha2));
+                surfaceScalarField phirb12
+                (
+                    -fvc::flux(-phir, alpha2, alphacScheme)
+                );
 
                 alphaEqn += fvm::div(phirb12, alpha, alphacScheme);
             }

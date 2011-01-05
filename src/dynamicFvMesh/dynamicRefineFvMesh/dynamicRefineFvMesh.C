@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -301,12 +301,14 @@ Foam::dynamicRefineFvMesh::refine
             (
                 lookupObject<surfaceScalarField>(correctFluxes_[i][0])
             );
-            surfaceScalarField phiU =
+            const surfaceScalarField phiU
+            (
                 fvc::interpolate
                 (
                     lookupObject<volVectorField>(correctFluxes_[i][1])
                 )
-              & Sf();
+              & Sf()
+            );
 
             // Recalculate new internal faces.
             for (label faceI = 0; faceI < nInternalFaces(); faceI++)
@@ -492,12 +494,14 @@ Foam::dynamicRefineFvMesh::unrefine
             (
                 lookupObject<surfaceScalarField>(correctFluxes_[i][0])
             );
-            surfaceScalarField phiU =
+            surfaceScalarField phiU
+            (
                 fvc::interpolate
                 (
                     lookupObject<volVectorField>(correctFluxes_[i][1])
                 )
-              & Sf();
+              & Sf()
+            );
 
             forAllConstIter(Map<label>, faceToSplitPoint, iter)
             {

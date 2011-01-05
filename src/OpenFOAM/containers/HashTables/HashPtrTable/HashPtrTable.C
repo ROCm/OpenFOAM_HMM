@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ Foam::HashPtrTable<T, Key, Hash>::HashPtrTable
 {
     for (const_iterator iter = ht.begin(); iter != ht.end(); ++iter)
     {
-        insert(iter.key(), new T(**iter));
+        this->insert(iter.key(), new T(**iter));
     }
 }
 
@@ -129,11 +129,11 @@ void Foam::HashPtrTable<T, Key, Hash>::operator=
             << abort(FatalError);
     }
 
-    clear();
+    this->clear();
 
     for (const_iterator iter = rhs.begin(); iter != rhs.end(); ++iter)
     {
-        insert(iter.key(), new T(**iter));
+        this->insert(iter.key(), new T(**iter));
     }
 }
 

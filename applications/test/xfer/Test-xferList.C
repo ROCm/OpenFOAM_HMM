@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     Info<< "xB[" << xB->size() << "]\n";
 
     DynamicList<label> dl(10);
-    for (label i = 0; i < 5; i++)
+    for (label i = 0; i < 5; ++i)
     {
         dl.append(i);
     }
@@ -111,9 +111,21 @@ int main(int argc, char *argv[])
     Info<< "f1: " << f1 << endl;
     Info<< "f2: " << f2 << endl;
 
+    // add some more labels
+    for (label i = 5; i < 8; ++i)
+    {
+        dl.append(i);
+    }
+
     // note: xfer() method returns a plain labelList
-    face f3( dl.xfer() );
+    face f3(dl.xfer());
     Info<< "dl[" << dl.size() << "/" << dl.capacity() << "] " << dl << endl;
+    Info<< "f3: " << f3 << endl;
+
+    Info<<"\nflip faces:" << endl;
+    f1.flip();
+    f3.flip();
+    Info<< "f1: " << f1 << endl;
     Info<< "f3: " << f3 << endl;
 
     return 0;

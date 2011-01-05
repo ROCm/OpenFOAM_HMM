@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -118,9 +118,6 @@ public:
 
         //- Assignment operator.
         inline void operator=(const hashedWordList&);
-
-        //- Allow readonly access to list of words
-        inline operator const Foam::UList<word>&() const;
 
         //- Return name corresponding to specified index
         inline const word& operator[](const label index) const;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,14 +29,10 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-rotatingTotalPressureFvPatchScalarField::rotatingTotalPressureFvPatchScalarField
+Foam::rotatingTotalPressureFvPatchScalarField::
+rotatingTotalPressureFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -47,7 +43,8 @@ rotatingTotalPressureFvPatchScalarField::rotatingTotalPressureFvPatchScalarField
 {}
 
 
-rotatingTotalPressureFvPatchScalarField::rotatingTotalPressureFvPatchScalarField
+Foam::rotatingTotalPressureFvPatchScalarField::
+rotatingTotalPressureFvPatchScalarField
 (
     const rotatingTotalPressureFvPatchScalarField& ptf,
     const fvPatch& p,
@@ -60,7 +57,8 @@ rotatingTotalPressureFvPatchScalarField::rotatingTotalPressureFvPatchScalarField
 {}
 
 
-rotatingTotalPressureFvPatchScalarField::rotatingTotalPressureFvPatchScalarField
+Foam::rotatingTotalPressureFvPatchScalarField::
+rotatingTotalPressureFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -72,7 +70,8 @@ rotatingTotalPressureFvPatchScalarField::rotatingTotalPressureFvPatchScalarField
 {}
 
 
-rotatingTotalPressureFvPatchScalarField::rotatingTotalPressureFvPatchScalarField
+Foam::rotatingTotalPressureFvPatchScalarField::
+rotatingTotalPressureFvPatchScalarField
 (
     const rotatingTotalPressureFvPatchScalarField& tppsf
 )
@@ -82,7 +81,8 @@ rotatingTotalPressureFvPatchScalarField::rotatingTotalPressureFvPatchScalarField
 {}
 
 
-rotatingTotalPressureFvPatchScalarField::rotatingTotalPressureFvPatchScalarField
+Foam::rotatingTotalPressureFvPatchScalarField::
+rotatingTotalPressureFvPatchScalarField
 (
     const rotatingTotalPressureFvPatchScalarField& tppsf,
     const DimensionedField<scalar, volMesh>& iF
@@ -95,7 +95,7 @@ rotatingTotalPressureFvPatchScalarField::rotatingTotalPressureFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void rotatingTotalPressureFvPatchScalarField::updateCoeffs()
+void Foam::rotatingTotalPressureFvPatchScalarField::updateCoeffs()
 {
     if (updated())
     {
@@ -103,17 +103,20 @@ void rotatingTotalPressureFvPatchScalarField::updateCoeffs()
     }
 
     vector axisHat = omega_/mag(omega_);
-    vectorField rotationVelocity =
+    tmp<vectorField> rotationVelocity =
         omega_ ^ (patch().Cf() - axisHat*(axisHat & patch().Cf()));
 
-    vectorField Up = patch().lookupPatchField<volVectorField, vector>(UName())
-        + rotationVelocity;
+    const vectorField Up
+    (
+        patch().lookupPatchField<volVectorField, vector>(UName())
+      + rotationVelocity
+    );
 
     totalPressureFvPatchScalarField::updateCoeffs(Up);
 }
 
 
-void rotatingTotalPressureFvPatchScalarField::write(Ostream& os) const
+void Foam::rotatingTotalPressureFvPatchScalarField::write(Ostream& os) const
 {
     totalPressureFvPatchScalarField::write(os);
     os.writeKeyword("omega")<< omega_ << token::END_STATEMENT << nl;
@@ -122,14 +125,13 @@ void rotatingTotalPressureFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchScalarField,
-    rotatingTotalPressureFvPatchScalarField
-);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchScalarField,
+        rotatingTotalPressureFvPatchScalarField
+    );
+}
 
 // ************************************************************************* //

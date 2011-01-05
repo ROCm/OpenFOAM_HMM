@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,6 +54,8 @@ Description
         }
     }
 
+    const volScalarField nuLam(this->nu());
+
     //- Accumulate the wall face contributions to epsilon and G
     //  Increment cellBoundaryFaceCount for each face for averaging
     forAll(patches, patchi)
@@ -64,10 +66,13 @@ Description
         {
             #include "checkPatchFieldTypes.H"
 
-            const scalarField& nuw = nu().boundaryField()[patchi];
+            const scalarField& nuw = nuLam.boundaryField()[patchi];
             const scalarField& nutw = nut_.boundaryField()[patchi];
 
-            scalarField magFaceGradU = mag(U_.boundaryField()[patchi].snGrad());
+            const scalarField magFaceGradU
+            (
+                mag(U_.boundaryField()[patchi].snGrad())
+            );
 
             forAll(curPatch, facei)
             {

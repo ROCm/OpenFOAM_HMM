@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -109,9 +109,17 @@ public:                                                                       \
 //- Define the typeName as @a Name for template classes
 # define defineTemplateTypeNameWithName(Type, Name)                           \
     defineTypeNameWithName(Type, Name)
+//- Define the typeName as @a Name for template sub-classes
+# define defineTemplate2TypeNameWithName(Type, Name)                          \
+    defineTypeNameWithName(Type, Name)
 #else
 //- Define the typeName as @a Name for template classes
 # define defineTemplateTypeNameWithName(Type, Name)                           \
+    template<>                                                                \
+    defineTypeNameWithName(Type, Name)
+//- Define the typeName as @a Name for template sub-classes
+# define defineTemplate2TypeNameWithName(Type, Name)                          \
+    template<>                                                                \
     template<>                                                                \
     defineTypeNameWithName(Type, Name)
 #endif
@@ -143,9 +151,17 @@ public:                                                                       \
 //- Define the debug information for templates, lookup as @a Name
 # define defineTemplateDebugSwitchWithName(Type, Name, DebugSwitch)           \
     defineDebugSwitchWithName(Type, Name, DebugSwitch)
+//- Define the debug information for templates sub-classes, lookup as @a Name
+# define defineTemplate2DebugSwitchWithName(Type, Name, DebugSwitch)          \
+    defineDebugSwitchWithName(Type, Name, DebugSwitch)
 #else
 //- Define the debug information for templates, lookup as @a Name
 # define defineTemplateDebugSwitchWithName(Type, Name, DebugSwitch)           \
+    template<>                                                                \
+    defineDebugSwitchWithName(Type, Name, DebugSwitch)
+//- Define the debug information for templates sub-classes, lookup as @a Name
+# define defineTemplate2DebugSwitchWithName(Type, Name, DebugSwitch)          \
+    template<>                                                                \
     template<>                                                                \
     defineDebugSwitchWithName(Type, Name, DebugSwitch)
 #endif
@@ -158,6 +174,18 @@ public:                                                                       \
 //- Define the debug information directly for templates
 #define defineNamedTemplateDebugSwitch(Type, DebugSwitch)                     \
     defineTemplateDebugSwitchWithName(Type, Type::typeName_(), DebugSwitch)
+
+
+// for templated sub-classes
+
+//- Define the debug information for templates
+//  Useful with typedefs
+#define defineTemplate2DebugSwitch(Type, DebugSwitch)                         \
+    defineTemplate2DebugSwitchWithName(Type, #Type, DebugSwitch)
+
+//- Define the debug information directly for templates
+#define defineNamedTemplate2DebugSwitch(Type, DebugSwitch)                    \
+    defineTemplate2DebugSwitchWithName(Type, Type::typeName_(), DebugSwitch)
 
 
 
@@ -185,6 +213,19 @@ public:                                                                       \
 #define defineNamedTemplateTypeNameAndDebug(Type, DebugSwitch)                \
     defineNamedTemplateTypeName(Type);                                        \
     defineNamedTemplateDebugSwitch(Type, DebugSwitch)
+
+// for templated sub-classes
+
+//- Define the typeName and debug information, lookup as @a Name
+#define defineTemplate2TypeNameAndDebugWithName(Type, Name, DebugSwitch)      \
+    defineTemplate2TypeNameWithName(Type, Name);                              \
+    defineTemplate2DebugSwitchWithName(Type, Name, DebugSwitch)
+
+//- Define the typeName and debug information for templates, useful
+//  with typedefs
+#define defineTemplate2TypeNameAndDebug(Type, DebugSwitch)                    \
+    defineTemplate2TypeNameAndDebugWithName(Type, #Type, DebugSwitch)
+
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

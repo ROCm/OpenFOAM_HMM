@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,8 +34,8 @@ namespace XiEqModels
 {
     defineTypeNameAndDebug(Gulder, 0);
     addToRunTimeSelectionTable(XiEqModel, Gulder, dictionary);
-};
-};
+}
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -64,15 +64,18 @@ Foam::XiEqModels::Gulder::~Gulder()
 
 Foam::tmp<Foam::volScalarField> Foam::XiEqModels::Gulder::XiEq() const
 {
-    volScalarField up = sqrt((2.0/3.0)*turbulence_.k());
+    volScalarField up(sqrt((2.0/3.0)*turbulence_.k()));
     const volScalarField& epsilon = turbulence_.epsilon();
 
-    volScalarField tauEta = sqrt(mag(thermo_.muu()/(thermo_.rhou()*epsilon)));
+    volScalarField tauEta(sqrt(mag(thermo_.muu()/(thermo_.rhou()*epsilon))));
 
-    volScalarField Reta = up/
+    volScalarField Reta
     (
-        sqrt(epsilon*tauEta)
-      + dimensionedScalar("1e-8", up.dimensions(), 1e-8)
+        up
+      / (
+            sqrt(epsilon*tauEta)
+          + dimensionedScalar("1e-8", up.dimensions(), 1e-8)
+        )
     );
 
     return 1.0 + XiEqCoef*sqrt(up/(Su_ + SuMin))*Reta;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,13 +46,13 @@ addToRunTimeSelectionTable(RASModel, kOmegaSST, dictionary);
 
 tmp<volScalarField> kOmegaSST::F1(const volScalarField& CDkOmega) const
 {
-    volScalarField CDkOmegaPlus = max
+    tmp<volScalarField> CDkOmegaPlus = max
     (
         CDkOmega,
         dimensionedScalar("1.0e-10", dimless/sqr(dimTime), 1.0e-10)
     );
 
-    volScalarField arg1 = min
+    tmp<volScalarField> arg1 = min
     (
         min
         (
@@ -71,7 +71,7 @@ tmp<volScalarField> kOmegaSST::F1(const volScalarField& CDkOmega) const
 
 tmp<volScalarField> kOmegaSST::F2() const
 {
-    volScalarField arg2 = min
+    tmp<volScalarField> arg2 = min
     (
         max
         (
@@ -347,16 +347,18 @@ void kOmegaSST::correct()
         y_.correct();
     }
 
-    volScalarField S2 = magSqr(symm(fvc::grad(U_)));
+    const volScalarField S2(magSqr(symm(fvc::grad(U_))));
     volScalarField G("RASModel::G", nut_*2*S2);
 
     // Update omega and G at the wall
     omega_.boundaryField().updateCoeffs();
 
-    volScalarField CDkOmega =
-        (2*alphaOmega2_)*(fvc::grad(k_) & fvc::grad(omega_))/omega_;
+    const volScalarField CDkOmega
+    (
+        (2*alphaOmega2_)*(fvc::grad(k_) & fvc::grad(omega_))/omega_
+    );
 
-    volScalarField F1 = this->F1(CDkOmega);
+    const volScalarField F1(this->F1(CDkOmega));
 
     // Turbulent frequency equation
     tmp<fvScalarMatrix> omegaEqn

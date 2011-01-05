@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -236,7 +236,7 @@ Foam::pointField Foam::searchableBox::coordinates() const
 {
     pointField ctrs(6);
 
-    const pointField pts = treeBoundBox::points();
+    const pointField pts(treeBoundBox::points());
     const faceList& fcs = treeBoundBox::faces;
 
     forAll(fcs, i)

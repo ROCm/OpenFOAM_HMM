@@ -51,7 +51,7 @@
 
     singlePhaseTransportModel laminarTransport(U, phi);
 
-    const volScalarField nu = laminarTransport.nu();
+    const volScalarField nu(laminarTransport.nu());
 
     autoPtr<incompressible::turbulenceModel> turbulence
     (

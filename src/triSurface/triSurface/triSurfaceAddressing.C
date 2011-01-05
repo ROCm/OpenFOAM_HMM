@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,14 +32,10 @@ Description
 #include "SortableList.H"
 #include "transform.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void triSurface::calcSortedEdgeFaces() const
+void Foam::triSurface::calcSortedEdgeFaces() const
 {
     if (sortedEdgeFacesPtr_)
     {
@@ -126,7 +122,7 @@ void triSurface::calcSortedEdgeFaces() const
 }
 
 
-void triSurface::calcEdgeOwner() const
+void Foam::triSurface::calcEdgeOwner() const
 {
     if (edgeOwnerPtr_)
     {
@@ -186,9 +182,5 @@ void triSurface::calcEdgeOwner() const
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

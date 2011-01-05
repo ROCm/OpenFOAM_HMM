@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,7 +64,7 @@ void Foam::layeredEngineMesh::move()
     // Position of the top of the static mesh layers above the piston
     scalar pistonPlusLayers = pistonPosition_.value() + pistonLayers_.value();
 
-    pointField newPoints = points();
+    pointField newPoints(points());
 
     forAll(newPoints, pointi)
     {

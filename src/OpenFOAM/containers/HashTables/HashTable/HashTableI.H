@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -82,7 +82,7 @@ inline bool Foam::HashTable<T, Key, Hash>::insert
     const T& newEntry
 )
 {
-    return set(key, newEntry, true);
+    return this->set(key, newEntry, true);
 }
 
 
@@ -93,7 +93,7 @@ inline bool Foam::HashTable<T, Key, Hash>::set
     const T& newEntry
 )
 {
-    return set(key, newEntry, false);
+    return this->set(key, newEntry, false);
 }
 
 
@@ -110,9 +110,9 @@ Foam::HashTable<T, Key, Hash>::xfer()
 template<class T, class Key, class Hash>
 inline T& Foam::HashTable<T, Key, Hash>::operator[](const Key& key)
 {
-    iterator iter = find(key);
+    iterator iter = this->find(key);
 
-    if (iter == end())
+    if (iter == this->end())
     {
         FatalErrorIn("HashTable<T, Key, Hash>::operator[](const Key&)")
             << key << " not found in table.  Valid entries: "
@@ -127,9 +127,9 @@ inline T& Foam::HashTable<T, Key, Hash>::operator[](const Key& key)
 template<class T, class Key, class Hash>
 inline const T& Foam::HashTable<T, Key, Hash>::operator[](const Key& key) const
 {
-    const_iterator iter = find(key);
+    const_iterator iter = this->find(key);
 
-    if (iter == cend())
+    if (iter == this->cend())
     {
         FatalErrorIn("HashTable<T, Key, Hash>::operator[](const Key&) const")
             << key << " not found in table.  Valid entries: "
@@ -144,11 +144,11 @@ inline const T& Foam::HashTable<T, Key, Hash>::operator[](const Key& key) const
 template<class T, class Key, class Hash>
 inline T& Foam::HashTable<T, Key, Hash>::operator()(const Key& key)
 {
-    iterator iter = find(key);
+    iterator iter = this->find(key);
 
-    if (iter == end())
+    if (iter == this->end())
     {
-        insert(key, T());
+        this->insert(key, T());
         return *find(key);
     }
     else

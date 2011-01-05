@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -215,7 +215,7 @@ limitedSurfaceInterpolationScheme<Type>::flux
     const GeometricField<Type, fvPatchField, volMesh>& phi
 ) const
 {
-    return faceFlux_*interpolate(phi);
+    return faceFlux_*this->interpolate(phi);
 }
 
 

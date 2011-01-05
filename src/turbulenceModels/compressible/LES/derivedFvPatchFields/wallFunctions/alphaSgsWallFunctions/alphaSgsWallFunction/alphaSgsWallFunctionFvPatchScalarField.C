@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -138,8 +138,10 @@ void alphaSgsWallFunctionFvPatchScalarField::evaluate
 {
     const LESModel& lesModel = db().lookupObject<LESModel>("LESProperties");
 
-    const scalarField muSgsw =
-        lesModel.muSgs()().boundaryField()[patch().index()];
+    const scalarField muSgsw
+    (
+        lesModel.muSgs()().boundaryField()[patch().index()]
+    );
 
     operator==(muSgsw/Prt_);
 }

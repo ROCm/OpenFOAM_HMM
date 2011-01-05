@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -105,7 +105,7 @@ bool Foam::layerAdditionRemoval::setLayerPairing() const
         // Flip face based on flip index to recover original orientation
         if (mfFlip[faceI])
         {
-            curLocalFace = curLocalFace.reverseFace();
+            curLocalFace.flip();
         }
 
         // Get the opposing face from the master cell

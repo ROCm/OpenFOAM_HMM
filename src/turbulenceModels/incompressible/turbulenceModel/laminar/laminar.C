@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -92,7 +92,7 @@ tmp<volScalarField> laminar::nut() const
                 IOobject::NO_WRITE
             ),
             mesh_,
-            dimensionedScalar("nut", nu().dimensions(), 0.0)
+            dimensionedScalar("nut", nu()().dimensions(), 0.0)
         )
     );
 }

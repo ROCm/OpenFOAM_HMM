@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,15 +29,11 @@ License
 #include "surfaceFields.H"
 #include "upwind.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-multivariateSelectionScheme<Type>::multivariateSelectionScheme
+Foam::multivariateSelectionScheme<Type>::multivariateSelectionScheme
 (
     const fvMesh& mesh,
     const typename multivariateSurfaceInterpolationScheme<Type>::
@@ -70,7 +66,7 @@ multivariateSelectionScheme<Type>::multivariateSelectionScheme
     typename multivariateSurfaceInterpolationScheme<Type>::
         fieldTable::const_iterator iter = this->fields().begin();
 
-    surfaceScalarField limiter =
+    surfaceScalarField limiter
     (
         limitedSurfaceInterpolationScheme<Type>::New
         (
@@ -99,9 +95,5 @@ multivariateSelectionScheme<Type>::multivariateSelectionScheme
       + (scalar(1) - limiter)*upwind<Type>(mesh, faceFlux_).weights();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

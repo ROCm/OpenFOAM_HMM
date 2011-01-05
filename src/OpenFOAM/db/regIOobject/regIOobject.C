@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,11 @@ int Foam::regIOobject::fileModificationSkew
 namespace Foam
 {
     template<>
-    const char* Foam::NamedEnum<Foam::regIOobject::fileCheckTypes, 4>::names[] =
+    const char* Foam::NamedEnum
+    <
+        Foam::regIOobject::fileCheckTypes,
+        4
+    >::names[] =
     {
         "timeStamp",
         "timeStampMaster",

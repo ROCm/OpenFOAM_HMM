@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,15 +29,11 @@ License
 #include "symmTransform.H"
 #include "diagTensor.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-wedgeFvPatchField<Type>::wedgeFvPatchField
+Foam::wedgeFvPatchField<Type>::wedgeFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
@@ -48,7 +44,7 @@ wedgeFvPatchField<Type>::wedgeFvPatchField
 
 
 template<class Type>
-wedgeFvPatchField<Type>::wedgeFvPatchField
+Foam::wedgeFvPatchField<Type>::wedgeFvPatchField
 (
     const wedgeFvPatchField<Type>& ptf,
     const fvPatch& p,
@@ -80,7 +76,7 @@ wedgeFvPatchField<Type>::wedgeFvPatchField
 
 
 template<class Type>
-wedgeFvPatchField<Type>::wedgeFvPatchField
+Foam::wedgeFvPatchField<Type>::wedgeFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -113,7 +109,7 @@ wedgeFvPatchField<Type>::wedgeFvPatchField
 
 
 template<class Type>
-wedgeFvPatchField<Type>::wedgeFvPatchField
+Foam::wedgeFvPatchField<Type>::wedgeFvPatchField
 (
     const wedgeFvPatchField<Type>& ptf
 )
@@ -123,7 +119,7 @@ wedgeFvPatchField<Type>::wedgeFvPatchField
 
 
 template<class Type>
-wedgeFvPatchField<Type>::wedgeFvPatchField
+Foam::wedgeFvPatchField<Type>::wedgeFvPatchField
 (
     const wedgeFvPatchField<Type>& ptf,
     const DimensionedField<Type, volMesh>& iF
@@ -136,9 +132,10 @@ wedgeFvPatchField<Type>::wedgeFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<Field<Type> > wedgeFvPatchField<Type>::snGrad() const
+Foam::tmp<Foam::Field<Type> > Foam::wedgeFvPatchField<Type>::snGrad() const
 {
-    Field<Type> pif = this->patchInternalField();
+    const Field<Type> pif(this->patchInternalField());
+
     return
     (
         transform(refCast<const wedgeFvPatch>(this->patch()).cellT(), pif) - pif
@@ -147,7 +144,7 @@ tmp<Field<Type> > wedgeFvPatchField<Type>::snGrad() const
 
 
 template<class Type>
-void wedgeFvPatchField<Type>::evaluate(const Pstream::commsTypes)
+void Foam::wedgeFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     if (!this->updated())
     {
@@ -166,7 +163,8 @@ void wedgeFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 
 
 template<class Type>
-tmp<Field<Type> > wedgeFvPatchField<Type>::snGradTransformDiag() const
+Foam::tmp<Foam::Field<Type> >
+Foam::wedgeFvPatchField<Type>::snGradTransformDiag() const
 {
     const diagTensor diagT =
         0.5*diag(I - refCast<const wedgeFvPatch>(this->patch()).cellT());
@@ -191,9 +189,5 @@ tmp<Field<Type> > wedgeFvPatchField<Type>::snGradTransformDiag() const
     );
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

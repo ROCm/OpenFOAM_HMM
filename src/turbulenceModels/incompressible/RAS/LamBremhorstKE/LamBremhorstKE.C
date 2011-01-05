@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -242,12 +242,12 @@ void LamBremhorstKE::correct()
     // Calculate parameters and coefficients for low-Reynolds number model
 
     Rt_ = sqr(k_)/(nu()*epsilon_);
-    volScalarField Ry = sqrt(k_)*y_/nu();
+    tmp<volScalarField> Ry = sqrt(k_)*y_/nu();
 
     fMu_ = sqr(scalar(1) - exp(-0.0165*Ry))*(scalar(1) + 20.5/(Rt_ + SMALL));
 
-    volScalarField f1 = scalar(1) + pow(0.05/(fMu_ + SMALL), 3);
-    volScalarField f2 = scalar(1) - exp(-sqr(Rt_));
+    tmp<volScalarField> f1 = scalar(1) + pow(0.05/(fMu_ + SMALL), 3);
+    tmp<volScalarField> f2 = scalar(1) - exp(-sqr(Rt_));
 
 
     // Dissipation equation

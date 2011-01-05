@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,14 +29,9 @@ License
 #include "HashTable.H"
 #include "hashSignedLabel.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void triSurface::writeSTLASCII(Ostream& os) const
+void Foam::triSurface::writeSTLASCII(Ostream& os) const
 {
     labelList faceMap;
 
@@ -85,7 +80,7 @@ void triSurface::writeSTLASCII(Ostream& os) const
 }
 
 
-void triSurface::writeSTLBINARY(std::ostream& os) const
+void Foam::triSurface::writeSTLBINARY(std::ostream& os) const
 {
     // Write the STL header
     string header("Foam binary STL", STLheaderSize);
@@ -112,9 +107,5 @@ void triSurface::writeSTLBINARY(std::ostream& os) const
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

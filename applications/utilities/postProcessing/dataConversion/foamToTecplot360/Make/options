@@ -6,8 +6,8 @@ EXE_INC = \
 
 
 EXE_LIBS = \
-    -ltecio \
     -llagrangian \
     -lfiniteVolume \
     -lgenericPatchFields \
-    -lmeshTools
+    -lmeshTools \
+    -L$(FOAM_EXT_LIBBIN) -ltecio

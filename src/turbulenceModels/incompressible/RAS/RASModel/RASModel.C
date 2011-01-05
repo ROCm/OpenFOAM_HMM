@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -182,7 +182,7 @@ tmp<scalarField> RASModel::yPlus(const label patchNo, const scalar Cmu) const
         Yp = pow025(Cmu)
             *y_[patchNo]
             *sqrt(k()().boundaryField()[patchNo].patchInternalField())
-            /nu().boundaryField()[patchNo];
+            /nu()().boundaryField()[patchNo];
     }
     else
     {

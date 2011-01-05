@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1125,7 +1125,7 @@ Foam::label Foam::hexRef8::storeMidPointInfo
         {
             own = anchorCell1;
             nei = anchorCell0;
-            newFace = newFace.reverseFace();
+            newFace.flip();
 
             ownPt = mesh_.points()[anchors.otherVertex(anchorPointI)];
             neiPt = mesh_.points()[anchorPointI];

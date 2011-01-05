@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -92,7 +92,8 @@ Foam::scalarField Foam::pointSolidMixture::X(const scalarField& Y) const
         X[i] = Y[i]/properties_[i].rho();
     }
 
-    return X/rhoInv;
+    tmp<scalarField> tfld = X/rhoInv;
+    return tfld();
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,8 +34,8 @@ namespace XiModels
 {
     defineTypeNameAndDebug(algebraic, 0);
     addToRunTimeSelectionTable(XiModel, algebraic, dictionary);
-};
-};
+}
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -74,12 +74,12 @@ Foam::tmp<Foam::volScalarField> Foam::XiModels::algebraic::Db() const
 
 void Foam::XiModels::algebraic::correct()
 {
-    volScalarField XiEqEta = XiEqModel_->XiEq();
-    volScalarField GEta = XiGModel_->G();
+    volScalarField XiEqEta(XiEqModel_->XiEq());
+    volScalarField GEta(XiGModel_->G());
 
-    volScalarField R = GEta*XiEqEta/(XiEqEta - 0.999);
+    volScalarField R(GEta*XiEqEta/(XiEqEta - 0.999));
 
-    volScalarField XiEqStar = R/(R - GEta);
+    volScalarField XiEqStar(R/(R - GEta));
 
     Xi_ == 1.0 + (1.0 + (2*XiShapeCoef)*(0.5 - b_))*(XiEqStar - 1.0);
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -519,8 +519,7 @@ void Foam::enrichedPatch::calcCutFaces() const
 
                                         // Reverse the face such that it
                                         // points out of the master patch
-                                        cf[cf.size() - 1] =
-                                            cf[cf.size() - 1].reverseFace();
+                                        cf.last().flip();
 
                                         if (debug)
                                         {

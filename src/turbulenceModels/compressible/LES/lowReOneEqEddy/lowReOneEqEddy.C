@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -104,8 +104,8 @@ void lowReOneEqEddy::correct(const tmp<volTensorField>& tgradU)
 
     GenEddyVisc::correct(gradU);
 
-    volScalarField divU = fvc::div(phi()/fvc::interpolate(rho()));
-    volScalarField G = 2*muSgs_*(gradU && dev(symm(gradU)));
+    volScalarField divU(fvc::div(phi()/fvc::interpolate(rho())));
+    volScalarField G(2*muSgs_*(gradU && dev(symm(gradU))));
 
     tmp<fvScalarMatrix> kEqn
     (

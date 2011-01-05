@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -3032,7 +3032,7 @@ void Foam::autoLayerDriver::addLayers
             }
         }
 
-        scalarField invExpansionRatio = 1.0 / expansionRatio;
+        const scalarField invExpansionRatio(1.0 / expansionRatio);
 
         // Add topo regardless of whether extrudeStatus is extruderemove.
         // Not add layer if patchDisp is zero.

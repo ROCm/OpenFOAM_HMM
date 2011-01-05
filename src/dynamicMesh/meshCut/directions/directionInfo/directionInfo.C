@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -243,7 +243,7 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, Foam::directionInfo& wDist)
 
     // Check state of Istream
     is.check("Istream& operator>>(Istream&, directionInfo&)");
-    return is;    
+    return is;
 }
 
 // ************************************************************************* //

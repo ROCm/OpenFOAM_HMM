@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -652,7 +652,8 @@ Foam::scalarField Foam::autoSnapDriver::calcSnapDistance
         -GREAT              // null value
     );
 
-    return snapParams.snapTol()*maxEdgeLen;
+    tmp<scalarField> tfld = snapParams.snapTol()*maxEdgeLen;
+    return tfld();
 }
 
 

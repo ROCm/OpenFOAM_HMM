@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -90,26 +90,26 @@ public:
         inline label nFaces() const;
 
         //- Return labels of cell vertices
-        labelList labels(const unallocFaceList&) const;
+        labelList labels(const faceUList&) const;
 
         //- Return the cell vertices
-        pointField points(const unallocFaceList&, const pointField&) const;
+        pointField points(const faceUList&, const pointField&) const;
 
         //- Return cell edges
-        edgeList edges(const unallocFaceList&) const;
+        edgeList edges(const faceUList&) const;
 
         //- Return index of opposite face
         label opposingFaceLabel
         (
             const label masterFaceLabel,
-            const unallocFaceList& meshFaces
+            const faceUList& meshFaces
         ) const;
 
         //- Return opposite face oriented the same way as the master face
         oppositeFace opposingFace
         (
             const label masterFaceLabel,
-            const unallocFaceList& meshFaces
+            const faceUList& meshFaces
         ) const;
 
 
@@ -122,10 +122,10 @@ public:
         // future.
 
         //- Returns cell centre
-        point centre(const pointField&, const unallocFaceList&) const;
+        point centre(const pointField&, const faceUList&) const;
 
         //- Returns cell volume
-        scalar mag(const pointField&, const unallocFaceList&) const;
+        scalar mag(const pointField&, const faceUList&) const;
 
 
     // Friend Operators

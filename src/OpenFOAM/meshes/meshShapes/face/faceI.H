@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,7 +35,7 @@ inline Foam::label Foam::face::right(const label i) const
 // Edge to the left of face vertex i
 inline Foam::label Foam::face::left(const label i) const
 {
-    return i ? i-1 : size()-1;
+    return rcIndex(i);
 }
 
 

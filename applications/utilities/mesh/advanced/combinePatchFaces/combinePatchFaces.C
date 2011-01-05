@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -130,7 +130,7 @@ void checkSnapMesh
 
         label nOldSize = wrongFaces.size();
 
-        const scalarField magFaceAreas = mag(mesh.faceAreas());
+        const scalarField magFaceAreas(mag(mesh.faceAreas()));
 
         forAll(magFaceAreas, faceI)
         {

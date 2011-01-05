@@ -2,18 +2,18 @@ if (ign.ignited())
 {
     // progress variable
     // ~~~~~~~~~~~~~~~~~
-    volScalarField c = scalar(1) - b;
+    volScalarField c(scalar(1) - b);
 
     // Unburnt gas density
     // ~~~~~~~~~~~~~~~~~~~
-    volScalarField rhou = thermo.rhou();
+    volScalarField rhou(thermo.rhou());
 
     // Calculate flame normal etc.
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    volVectorField n = fvc::grad(b);
+    volVectorField n(fvc::grad(b));
 
-    volScalarField mgb = mag(n);
+    volScalarField mgb(mag(n));
 
     dimensionedScalar dMgb = 1.0e-3*
         (b*c*mgb)().weightedAverage(mesh.V())
@@ -22,11 +22,11 @@ if (ign.ignited())
 
     mgb += dMgb;
 
-    surfaceVectorField SfHat = mesh.Sf()/mesh.magSf();
-    surfaceVectorField nfVec = fvc::interpolate(n);
+    surfaceVectorField SfHat(mesh.Sf()/mesh.magSf());
+    surfaceVectorField nfVec(fvc::interpolate(n));
     nfVec += SfHat*(fvc::snGrad(b) - (SfHat & nfVec));
     nfVec /= (mag(nfVec) + dMgb);
-    surfaceScalarField nf = (mesh.Sf() & nfVec);
+    surfaceScalarField nf((mesh.Sf() & nfVec));
     n /= mgb;
 
 
@@ -34,7 +34,7 @@ if (ign.ignited())
 
     // Calculate turbulent flame speed flux
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    surfaceScalarField phiSt = fvc::interpolate(rhou*StCorr*Su*Xi)*nf;
+    surfaceScalarField phiSt(fvc::interpolate(rhou*StCorr*Su*Xi)*nf);
 
     scalar StCoNum = max
     (
@@ -71,16 +71,20 @@ if (ign.ignited())
     // Calculate coefficients for Gulder's flame speed correlation
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    volScalarField up = uPrimeCoef*sqrt((2.0/3.0)*turbulence->k());
-  //volScalarField up = sqrt(mag(diag(n * n) & diag(turbulence->r())));
+    volScalarField up(uPrimeCoef*sqrt((2.0/3.0)*turbulence->k()));
+  //volScalarField up(sqrt(mag(diag(n * n) & diag(turbulence->r()))));
 
-    volScalarField epsilon = pow(uPrimeCoef, 3)*turbulence->epsilon();
+    volScalarField epsilon(pow(uPrimeCoef, 3)*turbulence->epsilon());
 
-    volScalarField tauEta = sqrt(thermo.muu()/(rhou*epsilon));
+    volScalarField tauEta(sqrt(thermo.muu()/(rhou*epsilon)));
 
-    volScalarField Reta = up/
+    volScalarField Reta
     (
-        sqrt(epsilon*tauEta) + dimensionedScalar("1e-8", up.dimensions(), 1e-8)
+        up
+      / (
+            sqrt(epsilon*tauEta)
+          + dimensionedScalar("1e-8", up.dimensions(), 1e-8)
+        )
     );
 
   //volScalarField l = 0.337*k*sqrt(k)/epsilon;
@@ -88,34 +92,38 @@ if (ign.ignited())
 
     // Calculate Xi flux
     // ~~~~~~~~~~~~~~~~~
-    surfaceScalarField phiXi =
+    surfaceScalarField phiXi
+    (
         phiSt
       - fvc::interpolate(fvc::laplacian(turbulence->alphaEff(), b)/mgb)*nf
-      + fvc::interpolate(rho)*fvc::interpolate(Su*(1.0/Xi - Xi))*nf;
+      + fvc::interpolate(rho)*fvc::interpolate(Su*(1.0/Xi - Xi))*nf
+    );
 
 
     // Calculate mean and turbulent strain rates
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    volVectorField Ut = U + Su*Xi*n;
-    volScalarField sigmat = (n & n)*fvc::div(Ut) - (n & fvc::grad(Ut) & n);
+    volVectorField Ut(U + Su*Xi*n);
+    volScalarField sigmat((n & n)*fvc::div(Ut) - (n & fvc::grad(Ut) & n));
 
-    volScalarField sigmas =
+    volScalarField sigmas
+    (
         ((n & n)*fvc::div(U) - (n & fvc::grad(U) & n))/Xi
       + (
             (n & n)*fvc::div(Su*n)
           - (n & fvc::grad(Su*n) & n)
-        )*(Xi + scalar(1))/(2*Xi);
+        )*(Xi + scalar(1))/(2*Xi)
+    );
 
 
     // Calculate the unstrained laminar flame speed
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    volScalarField Su0 = unstrainedLaminarFlameSpeed()();
+    volScalarField Su0(unstrainedLaminarFlameSpeed()());
 
 
     // Calculate the laminar flame speed in equilibrium with the applied strain
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    volScalarField SuInf = Su0*max(scalar(1) - sigmas/sigmaExt, scalar(0.01));
+    volScalarField SuInf(Su0*max(scalar(1) - sigmas/sigmaExt, scalar(0.01)));
 
     if (SuModel == "unstrained")
     {
@@ -130,9 +138,11 @@ if (ign.ignited())
         // Solve for the strained laminar flame speed
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        volScalarField Rc =
+        volScalarField Rc
+        (
             (sigmas*SuInf*(Su0 - SuInf) + sqr(SuMin)*sigmaExt)
-           /(sqr(Su0 - SuInf) + sqr(SuMin));
+            /(sqr(Su0 - SuInf) + sqr(SuMin))
+        );
 
         fvScalarMatrix SuEqn
         (
@@ -183,17 +193,21 @@ if (ign.ignited())
         // with a linear correction function to give a plausible profile for Xi
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        volScalarField XiEqStar =
-            scalar(1.001) + XiCoef*sqrt(up/(Su + SuMin))*Reta;
+        volScalarField XiEqStar
+        (
+            scalar(1.001) + XiCoef*sqrt(up/(Su + SuMin))*Reta
+        );
 
-        volScalarField XiEq =
+        volScalarField XiEq
+        (
             scalar(1.001)
           + (scalar(1) + (2*XiShapeCoef)*(scalar(0.5) - b))
-           *(XiEqStar - scalar(1.001));
+            *(XiEqStar - scalar(1.001))
+        );
 
-        volScalarField Gstar = 0.28/tauEta;
-        volScalarField R = Gstar*XiEqStar/(XiEqStar - scalar(1));
-        volScalarField G = R*(XiEq - scalar(1.001))/XiEq;
+        volScalarField Gstar(0.28/tauEta);
+        volScalarField R(Gstar*XiEqStar/(XiEqStar - scalar(1)));
+        volScalarField G(R*(XiEq - scalar(1.001))/XiEq);
 
         //R *= (Gstar + 2*mag(dev(symm(fvc::grad(U)))))/Gstar;
 

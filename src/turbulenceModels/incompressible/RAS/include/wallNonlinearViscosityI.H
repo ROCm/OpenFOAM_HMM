@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,13 +34,15 @@ Description
 
     const scalar yPlusLam = this->yPlusLam(kappa_.value(), E_.value());
 
+    const volScalarField nuLam(this->nu());
+
     forAll(patches, patchi)
     {
         const fvPatch& curPatch = patches[patchi];
 
         if (isA<wallFvPatch>(curPatch))
         {
-            const scalarField& nuw = nu().boundaryField()[patchi];
+            const scalarField& nuw = nuLam.boundaryField()[patchi];
             scalarField& nutw = nut_.boundaryField()[patchi];
 
             forAll(curPatch, facei)

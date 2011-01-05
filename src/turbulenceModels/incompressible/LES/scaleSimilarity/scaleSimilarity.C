@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -67,7 +67,7 @@ tmp<volScalarField> scaleSimilarity::k() const
 
 tmp<volScalarField> scaleSimilarity::epsilon() const
 {
-    volSymmTensorField D = symm(fvc::grad(U()));
+    tmp<volSymmTensorField> D = symm(fvc::grad(U()));
 
     return((filter_(sqr(U())) - sqr(filter_(U()))) && D);
 }

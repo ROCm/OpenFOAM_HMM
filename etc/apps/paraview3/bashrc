@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -26,7 +26,7 @@
 #
 # Description
 #     Setup file for paraview-3.x
-#     Sourced from OpenFOAM-*/etc/bashrc or from foamPV alias
+#     Sourced from OpenFOAM-<VERSION>/etc/bashrc or from foamPV alias
 #
 # Note
 #     The env. variables 'ParaView_DIR' and 'ParaView_MAJOR'
@@ -38,7 +38,7 @@ cleaned=`$WM_PROJECT_DIR/bin/foamCleanPath "$PATH" "$WM_THIRD_PARTY_DIR/platform
 
 # determine the cmake to be used
 unset CMAKE_HOME
-for cmake in cmake-2.8.1 cmake-2.8.0 cmake-2.6.4
+for cmake in cmake-2.8.3 cmake-2.8.1
 do
     cmake=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cmake
     if [ -r $cmake ]
@@ -51,8 +51,14 @@ done
 
 
 # set VERSION and MAJOR (version) variables
-ParaView_VERSION=3.8.0
-ParaView_MAJOR=unknown
+if [ -z "$ParaView_VERSION" ]
+then
+    ParaView_VERSION=3.8.0
+    ParaView_MAJOR=unknown
+    echo "Warning in app/paraview3/bashrc:" 1>&2
+    echo "    ParaView_VERSION not set, using '$ParaView_VERSION'" 1>&2
+fi
+[ -n "$ParaView_MAJOR" ] || ParaView_MAJOR=unknown
 
 # if needed, set MAJOR version to correspond to VERSION
 # ParaView_MAJOR is "<digits>.<digits>" from ParaView_VERSION
@@ -76,7 +82,7 @@ if [ -r $ParaView_DIR -o -r $paraviewInstDir ]
 then
     export PATH=$ParaView_DIR/bin:$PATH
     export LD_LIBRARY_PATH=$ParaView_DIR/lib/paraview-$ParaView_MAJOR:$LD_LIBRARY_PATH
-    export PV_PLUGIN_PATH=$FOAM_LIBBIN/paraview-$ParaView_MAJOR
+    export PV_PLUGIN_PATH=$FOAM_EXT_LIBBIN/paraview-$ParaView_MAJOR
 
     # add in python libraries if required
     paraviewPython=$ParaView_DIR/Utilities/VTKPythonWrapping

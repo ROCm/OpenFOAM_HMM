@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,8 +84,11 @@ public:
             surfaceInterpolationScheme<Type>(mesh),
             weights_
             (
-                this->mesh().objectRegistry::
-                lookupObject<const surfaceScalarField>(word(is))
+                this->mesh().objectRegistry::template
+                lookupObject<const surfaceScalarField>
+                (
+                    word(is)
+                )
             )
         {}
 
@@ -100,7 +103,7 @@ public:
             surfaceInterpolationScheme<Type>(mesh),
             weights_
             (
-                this->mesh().objectRegistry::
+                this->mesh().objectRegistry::template
                 lookupObject<const surfaceScalarField>
                 (
                     word(is)

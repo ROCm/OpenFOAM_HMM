@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,8 +34,10 @@ scalar meanCoNum = 0.0;
 
 if (mesh.nInternalFaces())
 {
-    scalarField sumPhi =
-        fvc::surfaceSum(mag(phi))().internalField();
+    scalarField sumPhi
+    (
+        fvc::surfaceSum(mag(phi))().internalField()
+    );
 
     CoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();
 

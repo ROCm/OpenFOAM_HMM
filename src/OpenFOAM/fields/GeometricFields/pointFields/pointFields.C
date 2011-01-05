@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,21 +31,22 @@ License
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTemplateTypeNameAndDebug(pointScalarField::DimensionedInternalField, 0);
-defineTemplateTypeNameAndDebug(pointVectorField::DimensionedInternalField, 0);
-defineTemplateTypeNameAndDebug
+defineTemplate2TypeNameAndDebug(pointScalarField::DimensionedInternalField, 0);
+defineTemplate2TypeNameAndDebug(pointVectorField::DimensionedInternalField, 0);
+defineTemplate2TypeNameAndDebug
 (
     pointSphericalTensorField::DimensionedInternalField,
     0
 );
-defineTemplateTypeNameAndDebug
+defineTemplate2TypeNameAndDebug
 (
     pointSymmTensorField::DimensionedInternalField,
     0
 );
-defineTemplateTypeNameAndDebug(pointTensorField::DimensionedInternalField, 0);
+defineTemplate2TypeNameAndDebug(pointTensorField::DimensionedInternalField, 0);
+
 
 defineTemplateTypeNameAndDebug(pointScalarField, 0);
 defineTemplateTypeNameAndDebug(pointVectorField, 0);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,15 +27,10 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-outletMappedUniformInletFvPatchField<Type>::
+Foam::outletMappedUniformInletFvPatchField<Type>::
 outletMappedUniformInletFvPatchField
 (
     const fvPatch& p,
@@ -49,7 +44,7 @@ outletMappedUniformInletFvPatchField
 
 
 template<class Type>
-outletMappedUniformInletFvPatchField<Type>::
+Foam::outletMappedUniformInletFvPatchField<Type>::
 outletMappedUniformInletFvPatchField
 (
     const outletMappedUniformInletFvPatchField<Type>& ptf,
@@ -65,7 +60,7 @@ outletMappedUniformInletFvPatchField
 
 
 template<class Type>
-outletMappedUniformInletFvPatchField<Type>::
+Foam::outletMappedUniformInletFvPatchField<Type>::
 outletMappedUniformInletFvPatchField
 (
     const fvPatch& p,
@@ -80,7 +75,7 @@ outletMappedUniformInletFvPatchField
 
 
 template<class Type>
-outletMappedUniformInletFvPatchField<Type>::
+Foam::outletMappedUniformInletFvPatchField<Type>::
 outletMappedUniformInletFvPatchField
 (
     const outletMappedUniformInletFvPatchField<Type>& ptf
@@ -94,7 +89,7 @@ outletMappedUniformInletFvPatchField
 
 
 template<class Type>
-outletMappedUniformInletFvPatchField<Type>::
+Foam::outletMappedUniformInletFvPatchField<Type>::
 outletMappedUniformInletFvPatchField
 (
     const outletMappedUniformInletFvPatchField<Type>& ptf,
@@ -110,7 +105,7 @@ outletMappedUniformInletFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void outletMappedUniformInletFvPatchField<Type>::updateCoeffs()
+void Foam::outletMappedUniformInletFvPatchField<Type>::updateCoeffs()
 {
     if (this->updated())
     {
@@ -144,7 +139,9 @@ void outletMappedUniformInletFvPatchField<Type>::updateCoeffs()
         f.boundaryField()[outletPatchID];
 
     const surfaceScalarField& phi =
-        this->db().objectRegistry::lookupObject<surfaceScalarField>(phiName_);
+        this->db().objectRegistry::template lookupObject<surfaceScalarField>
+        (phiName_);
+
     const scalarField& outletPatchPhi = phi.boundaryField()[outletPatchID];
     scalar sumOutletPatchPhi = gSum(outletPatchPhi);
 
@@ -170,7 +167,7 @@ void outletMappedUniformInletFvPatchField<Type>::updateCoeffs()
 
 
 template<class Type>
-void outletMappedUniformInletFvPatchField<Type>::write(Ostream& os) const
+void Foam::outletMappedUniformInletFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
     os.writeKeyword("outletPatchName")
@@ -182,9 +179,5 @@ void outletMappedUniformInletFvPatchField<Type>::write(Ostream& os) const
     this->writeEntry("value", os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

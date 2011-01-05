@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,7 +32,7 @@ const char* const Foam::cell::typeName = "cell";
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::labelList Foam::cell::labels(const unallocFaceList& f) const
+Foam::labelList Foam::cell::labels(const faceUList& f) const
 {
     // return the unordered list of vertex labels supporting the cell
 
@@ -100,7 +100,7 @@ Foam::labelList Foam::cell::labels(const unallocFaceList& f) const
 
 Foam::pointField Foam::cell::points
 (
-    const unallocFaceList& f,
+    const faceUList& f,
     const pointField& meshPoints
 ) const
 {
@@ -117,7 +117,7 @@ Foam::pointField Foam::cell::points
 }
 
 
-Foam::edgeList Foam::cell::edges(const unallocFaceList& f) const
+Foam::edgeList Foam::cell::edges(const faceUList& f) const
 {
     // return the lisf of cell edges
 
@@ -172,7 +172,7 @@ Foam::edgeList Foam::cell::edges(const unallocFaceList& f) const
 Foam::point Foam::cell::centre
 (
     const pointField& p,
-    const unallocFaceList& f
+    const faceUList& f
 ) const
 {
     // When one wants to access the cell centre and magnitude, the
@@ -238,7 +238,7 @@ Foam::point Foam::cell::centre
 Foam::scalar Foam::cell::mag
 (
     const pointField& p,
-    const unallocFaceList& f
+    const faceUList& f
 ) const
 {
     // When one wants to access the cell centre and magnitude, the

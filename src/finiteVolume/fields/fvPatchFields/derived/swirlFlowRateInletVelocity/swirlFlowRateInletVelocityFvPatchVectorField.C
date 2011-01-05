@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -131,7 +131,7 @@ void Foam::swirlFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
     const vector avgNormal = gSum(patch().Sf())/totArea;
 
     // Update angular velocity - convert [rpm] to [rad/s]
-    vectorField tangentialVelocity =
+    tmp<vectorField> tangentialVelocity =
     (
         (rpm_*constant::mathematical::pi/30.0)
       * (patch().Cf() - avgCenter) ^ avgNormal

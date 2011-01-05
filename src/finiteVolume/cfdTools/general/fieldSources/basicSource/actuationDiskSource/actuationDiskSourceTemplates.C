@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,7 +49,7 @@ void Foam::actuationDiskSource::addActuationDiskAxialInertialResistance
     E.xx() = uniDiskDir.x();
     E.yy() = uniDiskDir.y();
     E.zz() = uniDiskDir.z();
-    vectorField U1 = (1.0 - a)*U;
+    const vectorField U1((1.0 - a)*U);
     forAll(cells, i)
     {
         totVol += V[cells[i]];

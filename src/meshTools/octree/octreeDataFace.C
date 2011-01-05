@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -514,13 +514,9 @@ bool Foam::octreeDataFace::overlaps
     const face& f = mesh_.faces()[faceI];
 
     const pointField& points = mesh_.points();
-
-    forAll(f, fp)
+    if (sampleBb.containsAny(points, f))
     {
-        if (sampleBb.contains(points[f[fp]]))
-        {
-            return true;
-        }
+        return true;
     }
 
     // 3. Difficult case: all points are outside but connecting edges might

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,8 @@ void vanDriestDelta::calcDelta()
     const LESModel& lesModel = mesh_.lookupObject<LESModel>("LESProperties");
 
     const volVectorField& U = lesModel.U();
-    const volScalarField& nu = lesModel.nu();
+    const tmp<volScalarField> tnu = lesModel.nu();
+    const volScalarField& nu = tnu();
     tmp<volScalarField> nuSgs = lesModel.nuSgs();
 
     volScalarField ystar

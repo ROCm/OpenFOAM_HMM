@@ -1,7 +1,7 @@
 {
     // Solve fuel equation
     // ~~~~~~~~~~~~~~~~~~~
-    fvScalarMatrix R = combustion->R(fu);
+    fvScalarMatrix R(combustion->R(fu));
 
     {
         fvScalarMatrix fuEqn

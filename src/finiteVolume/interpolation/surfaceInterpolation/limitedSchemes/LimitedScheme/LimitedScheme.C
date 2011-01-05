@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,13 +30,9 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 template<class Type, class Limiter, template<class> class LimitFunc>
-tmp<surfaceScalarField> LimitedScheme<Type, Limiter, LimitFunc>::limiter
+Foam::tmp<Foam::surfaceScalarField>
+Foam::LimitedScheme<Type, Limiter, LimitFunc>::limiter
 (
     const GeometricField<Type, fvPatchField, volMesh>& phi
 ) const
@@ -107,22 +103,33 @@ tmp<surfaceScalarField> LimitedScheme<Type, Limiter, LimitFunc>::limiter
             const scalarField& pCDweights = CDweights.boundaryField()[patchi];
             const scalarField& pFaceFlux =
                 this->faceFlux_.boundaryField()[patchi];
-            Field<typename Limiter::phiType> plPhiP =
-                lPhi.boundaryField()[patchi].patchInternalField();
-            Field<typename Limiter::phiType> plPhiN =
-                lPhi.boundaryField()[patchi].patchNeighbourField();
-            Field<typename Limiter::gradPhiType> pGradcP =
-                gradc.boundaryField()[patchi].patchInternalField();
-            Field<typename Limiter::gradPhiType> pGradcN =
-                gradc.boundaryField()[patchi].patchNeighbourField();
+
+            const Field<typename Limiter::phiType> plPhiP
+            (
+                lPhi.boundaryField()[patchi].patchInternalField()
+            );
+            const Field<typename Limiter::phiType> plPhiN
+            (
+                lPhi.boundaryField()[patchi].patchNeighbourField()
+            );
+            const Field<typename Limiter::gradPhiType> pGradcP
+            (
+                gradc.boundaryField()[patchi].patchInternalField()
+            );
+            const Field<typename Limiter::gradPhiType> pGradcN
+            (
+                gradc.boundaryField()[patchi].patchNeighbourField()
+            );
 
             // Build the d-vectors
-            vectorField pd =
+            vectorField pd
+            (
                 mesh.Sf().boundaryField()[patchi]
-               /(
-                   mesh.magSf().boundaryField()[patchi]
-                  *mesh.deltaCoeffs().boundaryField()[patchi]
-                );
+              / (
+                    mesh.magSf().boundaryField()[patchi]
+                  * mesh.deltaCoeffs().boundaryField()[patchi]
+                )
+            );
 
             if (!mesh.orthogonal())
             {
@@ -153,9 +160,5 @@ tmp<surfaceScalarField> LimitedScheme<Type, Limiter, LimitFunc>::limiter
     return tLimiter;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

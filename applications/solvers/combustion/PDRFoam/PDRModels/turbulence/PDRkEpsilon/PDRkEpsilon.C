@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -78,7 +78,7 @@ void PDRkEpsilon::correct()
 
     RASModel::correct();
 
-    volScalarField divU = fvc::div(phi_/fvc::interpolate(rho_));
+    volScalarField divU(fvc::div(phi_/fvc::interpolate(rho_)));
 
     if (mesh_.moving())
     {
@@ -99,7 +99,7 @@ void PDRkEpsilon::correct()
     const PDRDragModel& drag =
         U_.db().lookupObject<PDRDragModel>("PDRDragModel");
 
-    volScalarField GR = drag.Gk();
+    volScalarField GR(drag.Gk());
 
     // Dissipation equation
     tmp<fvScalarMatrix> epsEqn

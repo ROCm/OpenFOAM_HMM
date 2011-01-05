@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,8 +34,8 @@ namespace XiEqModels
 {
     defineTypeNameAndDebug(basicSubGrid, 0);
     addToRunTimeSelectionTable(XiEqModel, basicSubGrid, dictionary);
-};
-};
+}
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -123,20 +123,24 @@ Foam::tmp<Foam::volScalarField> Foam::XiEqModels::basicSubGrid::XiEq() const
     const objectRegistry& db = Su_.db();
     const volVectorField& U = db.lookupObject<volVectorField>("U");
 
-    volScalarField magU = mag(U);
-    volVectorField Uhat =
-    U/(mag(U) + dimensionedScalar("Usmall", U.dimensions(), 1e-4));
+    volScalarField magU(mag(U));
+    volVectorField Uhat
+    (
+        U/(mag(U) + dimensionedScalar("Usmall", U.dimensions(), 1e-4))
+    );
 
-    volScalarField n = max(N_ - (Uhat & ns_ & Uhat), scalar(1e-4));
+    volScalarField n(max(N_ - (Uhat & ns_ & Uhat), scalar(1e-4)));
 
-    volScalarField b = (Uhat & B_ & Uhat)/n;
+    volScalarField b((Uhat & B_ & Uhat)/n);
 
-    volScalarField up = sqrt((2.0/3.0)*turbulence_.k());
+    volScalarField up(sqrt((2.0/3.0)*turbulence_.k()));
 
-    volScalarField XiSubEq =
+    volScalarField XiSubEq
+    (
         scalar(1)
       + max(2.2*sqrt(b), min(0.34*magU/up, scalar(1.6)))
-       *min(0.25*n, scalar(1));
+       *min(0.25*n, scalar(1))
+    );
 
     return XiSubEq*XiEqModel_->XiEq();
 }

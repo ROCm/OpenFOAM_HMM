@@ -2,13 +2,13 @@
     word scheme("div(phi,alpha)");
     word schemer("div(phir,alpha)");
 
-    surfaceScalarField phic = phi;
-    surfaceScalarField phir = phia - phib;
+    surfaceScalarField phic(phi);
+    surfaceScalarField phir(phia - phib);
 
     if (g0.value() > 0.0)
     {
-        surfaceScalarField alphaf = fvc::interpolate(alpha);
-        surfaceScalarField phipp = ppMagf*fvc::snGrad(alpha)*mesh.magSf();
+        surfaceScalarField alphaf(fvc::interpolate(alpha));
+        surfaceScalarField phipp(ppMagf*fvc::snGrad(alpha)*mesh.magSf());
         phir += phipp;
         phic += fvc::interpolate(alpha)*phipp;
     }

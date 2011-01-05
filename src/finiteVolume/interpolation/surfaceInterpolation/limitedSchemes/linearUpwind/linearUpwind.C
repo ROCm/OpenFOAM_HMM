@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -114,16 +114,20 @@ Foam::linearUpwind<Type>::correction
 
             const scalarField& pFaceFlux = faceFlux.boundaryField()[patchi];
 
-            Field<typename outerProduct<vector, Type>::type> pGradVfNei =
-                gradVf.boundaryField()[patchi].patchNeighbourField();
+            const Field<typename outerProduct<vector, Type>::type> pGradVfNei
+            (
+                gradVf.boundaryField()[patchi].patchNeighbourField()
+            );
 
             // Build the d-vectors
-            vectorField pd =
+            vectorField pd
+            (
                 mesh.Sf().boundaryField()[patchi]
-               /(
-                   mesh.magSf().boundaryField()[patchi]
-                  *mesh.deltaCoeffs().boundaryField()[patchi]
-                );
+              / (
+                    mesh.magSf().boundaryField()[patchi]
+                  * mesh.deltaCoeffs().boundaryField()[patchi]
+                )
+            );
 
             if (!mesh.orthogonal())
             {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -91,7 +91,7 @@ LRRDiffStress::LRRDiffStress
         )
     )
 {
-    volScalarField K = 0.5*tr(B_);
+    volScalarField K(0.5*tr(B_));
     bound(K, kMin_);
 
     updateSubGridScaleFields(K);
@@ -108,12 +108,12 @@ void LRRDiffStress::correct(const tmp<volTensorField>& tgradU)
 
     GenSGSStress::correct(gradU);
 
-    volSymmTensorField D = symm(gradU);
+    const volSymmTensorField D(symm(gradU));
 
-    volSymmTensorField P = -twoSymm(B_ & gradU);
+    const volSymmTensorField P(-twoSymm(B_ & gradU));
 
-    volScalarField K = 0.5*tr(B_);
-    volScalarField Epsilon = 2*nuEff()*magSqr(D);
+    volScalarField K(0.5*tr(B_));
+    const volScalarField Epsilon(2*nuEff()*magSqr(D));
 
     tmp<fvSymmTensorMatrix> BEqn
     (

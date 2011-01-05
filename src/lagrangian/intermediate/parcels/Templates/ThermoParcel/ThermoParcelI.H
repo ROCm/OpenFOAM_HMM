@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -116,7 +116,8 @@ inline Foam::ThermoParcel<ParcelType>::trackData::trackData
             interpolation<scalar>::New
             (
                 cloud.solution().interpolationSchemes(),
-                cloud.mesh().objectRegistry::lookupObject<volScalarField>("G")
+                cloud.mesh().objectRegistry::template
+                    lookupObject<volScalarField>("G")
             ).ptr()
         );
     }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,6 +38,8 @@ SourceFiles
 #include "vector.H"
 #include "PointHit.H"
 #include "point2D.H"
+#include "FixedList.H"
+#include "UList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -79,6 +81,14 @@ public:
 
         //- Construct from two points
         inline line(const Point& start, const Point& end);
+
+        //- Construct from two points in the list of points
+        //  The indices could be from edge etc.
+        inline line
+        (
+            const UList<Point>&,
+            const FixedList<label, 2>& indices
+        );
 
         //- Construct from Istream
         inline line(Istream&);

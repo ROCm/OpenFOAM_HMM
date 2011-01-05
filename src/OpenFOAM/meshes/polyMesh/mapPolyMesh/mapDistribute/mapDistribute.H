@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -123,7 +123,7 @@ public:
         );
 
         //- Construct from list of (possibly) remote elements in globalIndex
-        //  numbering. Determines compact numbering (see above) and
+        //  numbering (or -1). Determines compact numbering (see above) and
         //  distribute map to get data into this ordering and renumbers the
         //  elements to be in compact numbering.
         mapDistribute
@@ -133,7 +133,7 @@ public:
             List<Map<label> >& compactMap
         );
 
-        //- Special variant that works with the into sorted into bins
+        //- Special variant that works with the info sorted into bins
         //  according to local indices. E.g. think cellCells where
         //  cellCells[localCellI] is a list of global cells
         mapDistribute

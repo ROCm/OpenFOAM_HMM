@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -200,7 +200,7 @@ endsolid              {space}("endsolid"|"ENDSOLID")({some_space}{word})*
 
 %{
     // End of read character pointer returned by strtof
-    char* endPtr;
+    // char* endPtr;
 
     STLpoint normal;
     STLpoint vertex;

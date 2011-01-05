@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -157,7 +157,7 @@ void Foam::wallHeatTransferFvPatchScalarField::updateCoeffs()
     const label patchi = patch().index();
 
     const scalarField& Tw = thermo.T().boundaryField()[patchi];
-    scalarField Cpw = thermo.Cp(Tw, patchi);
+    const scalarField Cpw(thermo.Cp(Tw, patchi));
 
     valueFraction() =
         1.0/
@@ -184,7 +184,11 @@ void Foam::wallHeatTransferFvPatchScalarField::write(Ostream& os) const
 
 namespace Foam
 {
-    makePatchTypeField(fvPatchScalarField, wallHeatTransferFvPatchScalarField);
+    makePatchTypeField
+    (
+        fvPatchScalarField,
+        wallHeatTransferFvPatchScalarField
+    );
 }
 
 // ************************************************************************* //

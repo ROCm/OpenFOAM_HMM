@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -250,13 +250,14 @@ void RNGkEpsilon::correct()
         return;
     }
 
-    volScalarField S2 = 2*magSqr(symm(fvc::grad(U_)));
-
+    const volScalarField S2(2*magSqr(symm(fvc::grad(U_))));
     volScalarField G("RASModel::G", nut_*S2);
 
-    volScalarField eta = sqrt(S2)*k_/epsilon_;
-    volScalarField R =
-        ((eta*(scalar(1) - eta/eta0_))/(scalar(1) + beta_*eta*sqr(eta)));
+    const volScalarField eta(sqrt(S2)*k_/epsilon_);
+    volScalarField R
+    (
+        ((eta*(scalar(1) - eta/eta0_))/(scalar(1) + beta_*eta*sqr(eta)))
+    );
 
     // Update epsilon and G at the wall
     epsilon_.boundaryField().updateCoeffs();

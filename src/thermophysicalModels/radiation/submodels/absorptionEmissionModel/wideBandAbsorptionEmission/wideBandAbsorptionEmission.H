@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,7 @@ Description
 
     The emission constant proportionality is specified per band (EhrrCoeff).
 
-    The coefficients for the species in the LookUpTable have to be specified
+    The coefficients for the species in the lookup table have to be specified
     for use in moles x P [atm].i.e. (k[i] = species[i]*p*9.869231e-6).
 
     The coefficients for CO and soot or any other added are multiplied by the
@@ -156,7 +156,7 @@ private:
         //- Proportion of the heat released rate emitted
         FixedList<scalar, maxBands_> iEhrrCoeffs_;
 
-        //- Look-up table of species related to ft
+        //- Lookup table of species related to ft
         mutable interpolationLookUpTable<scalar> lookUpTable_;
 
         //- Thermo package

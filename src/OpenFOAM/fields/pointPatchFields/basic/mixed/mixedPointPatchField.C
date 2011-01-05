@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,15 +26,11 @@ License
 #include "mixedPointPatchField.H"
 #include "pointPatchFieldMapper.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-void mixedPointPatchField<Type>::checkFieldSize() const
+void Foam::mixedPointPatchField<Type>::checkFieldSize() const
 {
     if
     (
@@ -59,7 +55,7 @@ void mixedPointPatchField<Type>::checkFieldSize() const
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-mixedPointPatchField<Type>::mixedPointPatchField
+Foam::mixedPointPatchField<Type>::mixedPointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF
@@ -72,7 +68,7 @@ mixedPointPatchField<Type>::mixedPointPatchField
 
 
 template<class Type>
-mixedPointPatchField<Type>::mixedPointPatchField
+Foam::mixedPointPatchField<Type>::mixedPointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
@@ -86,7 +82,7 @@ mixedPointPatchField<Type>::mixedPointPatchField
 
 
 template<class Type>
-mixedPointPatchField<Type>::mixedPointPatchField
+Foam::mixedPointPatchField<Type>::mixedPointPatchField
 (
     const mixedPointPatchField<Type>& ptf,
     const pointPatch& p,
@@ -108,7 +104,7 @@ mixedPointPatchField<Type>::mixedPointPatchField
 
 
 template<class Type>
-mixedPointPatchField<Type>::mixedPointPatchField
+Foam::mixedPointPatchField<Type>::mixedPointPatchField
 (
     const mixedPointPatchField<Type>& ptf,
     const DimensionedField<Type, pointMesh>& iF
@@ -124,7 +120,7 @@ mixedPointPatchField<Type>::mixedPointPatchField
 
 // Map and resize from self given a mapper
 template<class Type>
-void mixedPointPatchField<Type>::autoMap
+void Foam::mixedPointPatchField<Type>::autoMap
 (
     const pointPatchFieldMapper& m
 )
@@ -137,7 +133,7 @@ void mixedPointPatchField<Type>::autoMap
 
 // Grab the values using rmap
 template<class Type>
-void mixedPointPatchField<Type>::rmap
+void Foam::mixedPointPatchField<Type>::rmap
 (
     const pointPatchField<Type>& ptf,
     const labelList& addr
@@ -154,7 +150,7 @@ void mixedPointPatchField<Type>::rmap
 
 // Evaluate patch field
 template<class Type>
-void mixedPointPatchField<Type>::evaluate(const Pstream::commsTypes)
+void Foam::mixedPointPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     Field<Type>::operator=
     (
@@ -165,22 +161,18 @@ void mixedPointPatchField<Type>::evaluate(const Pstream::commsTypes)
     // Get internal field to insert values into
     Field<Type>& iF = const_cast<Field<Type>&>(this->internalField());
 
-    setInInternalField(iF, *this);
+    this->setInInternalField(iF, *this);
 }
 
 
 // Write
 template<class Type>
-void mixedPointPatchField<Type>::write(Ostream& os) const
+void Foam::mixedPointPatchField<Type>::write(Ostream& os) const
 {
     pointPatchField<Type>::write(os);
     refValue_.writeEntry("refValue", os);
     valueFraction_.writeEntry("valueFraction", os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

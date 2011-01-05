@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -191,7 +191,7 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
     {
         const volScalarField& k = dom_.aLambda(lambdaI);
 
-        surfaceScalarField Ji = dAve_ & mesh_.Sf();
+        const surfaceScalarField Ji(dAve_ & mesh_.Sf());
 
         fvScalarMatrix IiEq
         (

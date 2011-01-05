@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,27 +28,43 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-namespace compressible
-{
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<>
-const char*
-NamedEnum<turbulentHeatFluxTemperatureFvPatchScalarField::heatSourceType, 2>::
-names[] =
+namespace Foam
+{
+    // declare specialization within 'Foam' namespace
+    template<>
+    const char* NamedEnum
+    <
+        Foam::compressible::
+        turbulentHeatFluxTemperatureFvPatchScalarField::heatSourceType,
+        2
+    >::names[] =
     {
         "power",
         "flux"
     };
 
-const
-NamedEnum<turbulentHeatFluxTemperatureFvPatchScalarField::heatSourceType, 2>
-    turbulentHeatFluxTemperatureFvPatchScalarField::heatSourceTypeNames_;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+namespace Foam
+{
+
+namespace compressible
+{
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+const NamedEnum
+<
+    turbulentHeatFluxTemperatureFvPatchScalarField::heatSourceType,
+    2
+> turbulentHeatFluxTemperatureFvPatchScalarField::heatSourceTypeNames_;
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

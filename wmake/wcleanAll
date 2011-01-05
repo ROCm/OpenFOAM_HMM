@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -43,10 +43,13 @@ fi
     exit 1
 }
 
-for dir in lib applications/bin
+for dir in lib bin applications/bin
 do
-    echo "Removing $dir/"
-    [ -d $dir ] && rm -rf $dir/*
+    echo "Removing non-tools directories from $dir/"
+    if [ -d $dir ]
+    then
+        find $dir -mindepth 1 -type d \! -name tools | xargs rm -rf
+    fi
 done
 
 echo "Removing *.dep files"

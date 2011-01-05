@@ -12,8 +12,10 @@
         )
     );
 
-    volVectorField force =
-        U/dimensionedScalar("dt", dimTime, runTime.deltaTValue());
+    volVectorField force
+    (
+        U/dimensionedScalar("dt", dimTime, runTime.deltaTValue())
+    );
 
     Kmesh K(mesh);
     UOprocess forceGen(K, runTime.deltaTValue(), turbulenceProperties);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -138,8 +138,10 @@ public:
             const GeometricField<Type, fvPatchField, volMesh>& vf
         ) const
         {
-            surfaceScalarField blendingFactor =
-                tLimitedScheme_().limiter(vf);
+            surfaceScalarField blendingFactor
+            (
+                tLimitedScheme_().limiter(vf)
+            );
 
             return
                 blendingFactor*tScheme1_().weights(vf)
@@ -151,8 +153,10 @@ public:
         tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
         interpolate(const GeometricField<Type, fvPatchField, volMesh>& vf) const
         {
-            surfaceScalarField blendingFactor =
-                tLimitedScheme_().limiter(vf);
+            surfaceScalarField blendingFactor
+            (
+                tLimitedScheme_().limiter(vf)
+            );
 
             return
                 blendingFactor*tScheme1_().interpolate(vf)
@@ -175,8 +179,10 @@ public:
             const GeometricField<Type, fvPatchField, volMesh>& vf
         ) const
         {
-            surfaceScalarField blendingFactor =
-                tLimitedScheme_().limiter(vf);
+            surfaceScalarField blendingFactor
+            (
+                tLimitedScheme_().limiter(vf)
+            );
 
             if (tScheme1_().corrected())
             {

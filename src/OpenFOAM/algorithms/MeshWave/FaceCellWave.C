@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,8 +36,7 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template <class Type, class TrackingData>
-const Foam::scalar
-Foam::FaceCellWave<Type, TrackingData>::geomTol_ = 1e-6;
+const Foam::scalar Foam::FaceCellWave<Type, TrackingData>::geomTol_ = 1e-6;
 
 template <class Type, class TrackingData>
 Foam::scalar Foam::FaceCellWave<Type, TrackingData>::propagationTol_ = 0.01;

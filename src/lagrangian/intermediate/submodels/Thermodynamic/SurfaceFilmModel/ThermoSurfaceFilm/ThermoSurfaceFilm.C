@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -492,7 +492,10 @@ Foam::ThermoSurfaceFilm<CloudType>::ThermoSurfaceFilm
 :
     SurfaceFilmModel<CloudType>(dict, owner, g, typeName),
     rndGen_(owner.rndGen()),
-    thermo_(owner.db().objectRegistry::lookupObject<SLGThermo>("SLGThermo")),
+    thermo_
+    (
+        owner.db().objectRegistry::template lookupObject<SLGThermo>("SLGThermo")
+    ),
     TFilmPatch_(0),
     CpFilmPatch_(0),
     interactionType_
@@ -567,7 +570,7 @@ bool Foam::ThermoSurfaceFilm<CloudType>::transferParcel
     surfaceFilmModels::surfaceFilmModel& filmModel =
         const_cast<surfaceFilmModels::surfaceFilmModel&>
         (
-            this->owner().db().objectRegistry::
+            this->owner().db().objectRegistry::template
                 lookupObject<surfaceFilmModels::surfaceFilmModel>
                 (
                     "surfaceFilmProperties"

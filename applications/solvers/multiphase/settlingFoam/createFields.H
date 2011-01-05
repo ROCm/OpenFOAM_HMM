@@ -345,7 +345,7 @@
 
     Info<< "Calculating field (g.h)f\n" << endl;
     volScalarField gh("gh", g & mesh.C());
-    surfaceScalarField ghf = surfaceScalarField("gh", g & mesh.Cf());
+    surfaceScalarField ghf(surfaceScalarField("gh", g & mesh.Cf()));
 
     volScalarField p
     (

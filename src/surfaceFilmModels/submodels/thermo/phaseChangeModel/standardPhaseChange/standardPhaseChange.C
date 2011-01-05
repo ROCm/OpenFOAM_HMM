@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -120,10 +120,10 @@ void Foam::surfaceFilmModels::standardPhaseChange::correct
     const scalarField& rhoInf = film.rhoPrimary();
     const scalarField& muInf = film.muPrimary();
     const scalarField& magSf = film.magSf();
-    const scalarField hInf = film.htcs().h();
-    const scalarField hFilm = film.htcw().h();
-    const vectorField dU = film.UPrimary() - film.Us();
-    const scalarField availableMass = (delta - deltaMin_)*rho*magSf;
+    const scalarField hInf(film.htcs().h());
+    const scalarField hFilm(film.htcw().h());
+    const vectorField dU(film.UPrimary() - film.Us());
+    const scalarField availableMass((delta - deltaMin_)*rho*magSf);
 
 
     forAll(dMass, cellI)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -302,7 +302,7 @@ bool Foam::primitiveMesh::checkFaceAreas
             << "checking face area magnitudes" << endl;
     }
 
-    const scalarField magFaceAreas = mag(faceAreas());
+    const scalarField magFaceAreas(mag(faceAreas()));
 
     scalar minArea = GREAT;
     scalar maxArea = -GREAT;

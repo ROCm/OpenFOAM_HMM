@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -481,7 +481,7 @@ Foam::hhuMixtureThermo<MixtureType>::psib() const
 
     volScalarField& psib = tpsib();
     scalarField& psibCells = psib.internalField();
-    volScalarField Tb_ = Tb();
+    const volScalarField Tb_(Tb());
     const scalarField& TbCells = Tb_.internalField();
     const scalarField& pCells = p_.internalField();
 
@@ -579,7 +579,7 @@ Foam::hhuMixtureThermo<MixtureType>::mub() const
 
     volScalarField& mub_ = tmub();
     scalarField& mubCells = mub_.internalField();
-    volScalarField Tb_ = Tb();
+    const volScalarField Tb_(Tb());
     const scalarField& TbCells = Tb_.internalField();
 
     forAll(mubCells, celli)

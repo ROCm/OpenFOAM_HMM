@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,8 +68,8 @@ Foam::tmp<Foam::volScalarField> Foam::SchillerNaumann::K
     const volScalarField& Ur
 ) const
 {
-    volScalarField Re = max(Ur*phasea_.d()/phaseb_.nu(), scalar(1.0e-3));
-    volScalarField Cds = 24.0*(scalar(1) + 0.15*pow(Re, 0.687))/Re;
+    volScalarField Re(max(Ur*phasea_.d()/phaseb_.nu(), scalar(1.0e-3)));
+    volScalarField Cds(24.0*(scalar(1) + 0.15*pow(Re, 0.687))/Re);
 
     forAll(Re, celli)
     {

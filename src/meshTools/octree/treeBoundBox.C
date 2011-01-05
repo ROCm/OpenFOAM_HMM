@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -124,10 +124,9 @@ Foam::FixedList<Foam::vector, 6> Foam::treeBoundBox::calcFaceNormals()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct as the bounding box of the given pointField
 Foam::treeBoundBox::treeBoundBox(const UList<point>& points)
 :
-    boundBox()
+    boundBox(points, false)
 {
     if (points.empty())
     {
@@ -139,55 +138,29 @@ Foam::treeBoundBox::treeBoundBox(const UList<point>& points)
 
         return;
     }
-
-    min() = points[0];
-    max() = points[0];
-
-    for (label i = 1; i < points.size(); i++)
-    {
-        min() = ::Foam::min(min(), points[i]);
-        max() = ::Foam::max(max(), points[i]);
-    }
 }
 
 
-// Construct as the bounding box of the given pointField
 Foam::treeBoundBox::treeBoundBox
 (
     const UList<point>& points,
-    const labelUList& meshPoints
+    const labelUList& indices
 )
 :
-    boundBox()
+    boundBox(points, indices, false)
 {
-    if (points.empty() || meshPoints.empty())
+    if (points.empty() || indices.empty())
     {
         WarningIn
         (
             "treeBoundBox::treeBoundBox"
             "(const UList<point>&, const labelUList&)"
-        )   << "cannot find bounding box for zero-sized pointField"
+        )   << "cannot find bounding box for zero-sized pointField, "
             << "returning zero" << endl;
 
         return;
     }
-
-    min() = points[meshPoints[0]];
-    max() = points[meshPoints[0]];
-
-    for (label i = 1; i < meshPoints.size(); i++)
-    {
-        min() = ::Foam::min(min(), points[meshPoints[i]]);
-        max() = ::Foam::max(max(), points[meshPoints[i]]);
-    }
 }
-
-
-// Construct from Istream
-Foam::treeBoundBox::treeBoundBox(Istream& is)
-:
-    boundBox(is)
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -459,13 +432,6 @@ bool Foam::treeBoundBox::intersects
 {
     direction ptBits;
     return intersects(start, end-start, start, end, pt, ptBits);
-}
-
-
-// this.bb fully contains bb
-bool Foam::treeBoundBox::contains(const treeBoundBox& bb) const
-{
-    return contains(bb.min()) && contains(bb.max());
 }
 
 

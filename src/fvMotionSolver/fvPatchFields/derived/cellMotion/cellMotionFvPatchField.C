@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,15 +28,11 @@ License
 #include "volMesh.H"
 #include "pointFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-cellMotionFvPatchField<Type>::cellMotionFvPatchField
+Foam::cellMotionFvPatchField<Type>::cellMotionFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
@@ -47,7 +43,7 @@ cellMotionFvPatchField<Type>::cellMotionFvPatchField
 
 
 template<class Type>
-cellMotionFvPatchField<Type>::cellMotionFvPatchField
+Foam::cellMotionFvPatchField<Type>::cellMotionFvPatchField
 (
     const cellMotionFvPatchField<Type>& ptf,
     const fvPatch& p,
@@ -60,7 +56,7 @@ cellMotionFvPatchField<Type>::cellMotionFvPatchField
 
 
 template<class Type>
-cellMotionFvPatchField<Type>::cellMotionFvPatchField
+Foam::cellMotionFvPatchField<Type>::cellMotionFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -74,7 +70,7 @@ cellMotionFvPatchField<Type>::cellMotionFvPatchField
 
 
 template<class Type>
-cellMotionFvPatchField<Type>::cellMotionFvPatchField
+Foam::cellMotionFvPatchField<Type>::cellMotionFvPatchField
 (
     const cellMotionFvPatchField<Type>& ptf
 )
@@ -84,7 +80,7 @@ cellMotionFvPatchField<Type>::cellMotionFvPatchField
 
 
 template<class Type>
-cellMotionFvPatchField<Type>::cellMotionFvPatchField
+Foam::cellMotionFvPatchField<Type>::cellMotionFvPatchField
 (
     const cellMotionFvPatchField<Type>& ptf,
     const DimensionedField<Type, volMesh>& iF
@@ -97,7 +93,7 @@ cellMotionFvPatchField<Type>::cellMotionFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void cellMotionFvPatchField<Type>::updateCoeffs()
+void Foam::cellMotionFvPatchField<Type>::updateCoeffs()
 {
     if (this->updated())
     {
@@ -113,11 +109,9 @@ void cellMotionFvPatchField<Type>::updateCoeffs()
     pfName.replace("cell", "point");
 
     const GeometricField<Type, pointPatchField, pointMesh>& pointMotion =
-        this->db().objectRegistry::
-        lookupObject<GeometricField<Type, pointPatchField, pointMesh> >
-        (
-            pfName
-        );
+        this->db().objectRegistry::template
+            lookupObject<GeometricField<Type, pointPatchField, pointMesh> >
+            (pfName);
 
     forAll(p, i)
     {
@@ -129,15 +123,10 @@ void cellMotionFvPatchField<Type>::updateCoeffs()
 
 
 template<class Type>
-void cellMotionFvPatchField<Type>::write(Ostream& os) const
+void Foam::cellMotionFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
     this->writeEntry("value", os);
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

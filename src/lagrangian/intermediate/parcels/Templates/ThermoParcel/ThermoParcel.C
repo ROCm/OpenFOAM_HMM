@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -202,7 +202,7 @@ void Foam::ThermoParcel<ParcelType>::calc
     // Calculate new particle velocity
     scalar Cuh = 0.0;
     scalar T1 =
-        calcHeatTransfer
+        this->calcHeatTransfer
         (
             td,
             dt,
@@ -227,7 +227,7 @@ void Foam::ThermoParcel<ParcelType>::calc
     // Calculate new particle velocity
     scalar Cud = 0.0;
     vector U1 =
-        calcVelocity
+        this->calcVelocity
         (
             td,
             dt,

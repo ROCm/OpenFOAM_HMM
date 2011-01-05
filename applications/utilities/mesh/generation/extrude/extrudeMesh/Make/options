@@ -12,4 +12,3 @@ EXE_LIBS = \
     -lmeshTools \
     -ldynamicMesh \
     -lextrudeModel
-

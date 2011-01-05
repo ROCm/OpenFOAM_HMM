@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,7 +34,7 @@ static void markPointNbrs
     boolList& okToCollapse
 )
 {
-    const labelledTri& f = surf.localFaces()[faceI];
+    const triSurface::FaceType& f = surf.localFaces()[faceI];
 
     forAll(f, fp)
     {
@@ -108,12 +108,12 @@ label collapseEdge(triSurface& surf, const scalar minLen)
             if (okToCollapse[faceI])
             {
                 // Check edge lengths.
-                const labelledTri& f = localFaces[faceI];
+                const triSurface::FaceType& f = localFaces[faceI];
 
                 forAll(f, fp)
                 {
                     label v = f[fp];
-                    label v1 = f[(fp+1) % 3];
+                    label v1 = f[f.fcIndex(fp)];
 
                     if (mag(localPoints[v1] - localPoints[v]) < minLen)
                     {

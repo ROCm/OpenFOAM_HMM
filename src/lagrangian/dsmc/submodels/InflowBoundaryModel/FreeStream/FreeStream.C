@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -188,9 +188,11 @@ void Foam::FreeStream<CloudType>::inflow()
             // negated), dividing by the most probable speed to form
             // molecularSpeedRatio * cosTheta
 
-            scalarField sCosTheta =
+            scalarField sCosTheta
+            (
                 (boundaryU[patchI] & -patch.faceAreas()/mag(patch.faceAreas()))
-               /mostProbableSpeed;
+              / mostProbableSpeed
+            );
 
             // From Bird eqn 4.22
 

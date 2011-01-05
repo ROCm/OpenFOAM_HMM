@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -108,8 +108,10 @@ Foam::fv::leastSquaresGrad<Type>::calcGrad
 
         if (vsf.boundaryField()[patchi].coupled())
         {
-            Field<Type> neiVsf =
-                vsf.boundaryField()[patchi].patchNeighbourField();
+            const Field<Type> neiVsf
+            (
+                vsf.boundaryField()[patchi].patchNeighbourField()
+            );
 
             forAll(neiVsf, patchFaceI)
             {

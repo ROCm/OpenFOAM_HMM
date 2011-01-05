@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -96,7 +96,7 @@ void Foam::inverseFaceDistanceDiffusivity::correct()
     {
         const polyPatch& patch = bdry[iter.key()];
 
-        const vectorField::subField fc = patch.faceCentres();
+        const vectorField::subField fc(patch.faceCentres());
 
         forAll(fc, patchFaceI)
         {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -181,10 +181,7 @@ public:
         public:
 
             //- Construct from base iterator
-            iterator
-            (
-                LListBase_iterator baseIter
-            )
+            iterator(LListBase_iterator baseIter)
             :
                 LListBase_iterator(baseIter)
             {}
@@ -223,19 +220,13 @@ public:
         public:
 
             //- Construct from base const_iterator
-            const_iterator
-            (
-                LListBase_const_iterator baseIter
-            )
+            const_iterator(LListBase_const_iterator baseIter)
             :
                 LListBase_const_iterator(baseIter)
             {}
 
             //- Construct from base iterator
-            const_iterator
-            (
-                LListBase_iterator baseIter
-            )
+            const_iterator(LListBase_iterator baseIter)
             :
                 LListBase_const_iterator(baseIter)
             {}

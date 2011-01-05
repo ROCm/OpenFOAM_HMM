@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,8 +71,8 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                 basicPsiThermo::New(mesh)
             );
 
-            volScalarField Cp = thermo->Cp();
-            volScalarField Cv = thermo->Cv();
+            volScalarField Cp(thermo->Cp());
+            volScalarField Cv(thermo->Cv());
 
             MachPtr.set
             (

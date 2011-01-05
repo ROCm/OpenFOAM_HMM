@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ License
     );
 
     Info<< "Calculating wall distance field" << endl;
-    volScalarField y = wallDist(mesh).y();
+    volScalarField y(wallDist(mesh).y());
 
     // Set the mean boundary-layer thickness
     dimensionedScalar ybl("ybl", dimLength, 0);

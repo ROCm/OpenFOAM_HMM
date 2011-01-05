@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -134,7 +134,7 @@ void muSgsUSpaldingWallFunctionFvPatchScalarField::evaluate
     const fvPatchVectorField& U =
         patch().lookupPatchField<volVectorField, vector>(UName_);
 
-    scalarField magUp = mag(U.patchInternalField() - U);
+    const scalarField magUp(mag(U.patchInternalField() - U));
 
     const scalarField& muw =
         patch().lookupPatchField<volScalarField, scalar>(muName_);
@@ -144,7 +144,7 @@ void muSgsUSpaldingWallFunctionFvPatchScalarField::evaluate
 
     scalarField& muSgsw = *this;
 
-    scalarField magFaceGradU = mag(U.snGrad());
+    const scalarField magFaceGradU(mag(U.snGrad()));
 
     forAll(muSgsw, facei)
     {

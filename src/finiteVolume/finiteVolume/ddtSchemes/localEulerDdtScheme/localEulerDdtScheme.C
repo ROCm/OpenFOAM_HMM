@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,7 +42,8 @@ namespace fv
 template<class Type>
 const volScalarField& localEulerDdtScheme<Type>::localRDeltaT() const
 {
-    return mesh().objectRegistry::lookupObject<volScalarField>(rDeltaTName_);
+    return mesh().objectRegistry::template lookupObject<volScalarField>
+        (rDeltaTName_);
 }
 
 
@@ -416,7 +417,7 @@ localEulerDdtScheme<Type>::fvcDdtPhiCorr
             new fluxFieldType
             (
                 ddtIOobject,
-                fvcDdtPhiCoeff(U.oldTime(), phi.oldTime())*
+                this->fvcDdtPhiCoeff(U.oldTime(), phi.oldTime())*
                 (
                     fvc::interpolate(rDeltaT*rA)*phi.oldTime()
                   - (fvc::interpolate(rDeltaT*rA*U.oldTime()) & mesh().Sf())
@@ -477,7 +478,7 @@ localEulerDdtScheme<Type>::fvcDdtPhiCorr
                 new fluxFieldType
                 (
                     ddtIOobject,
-                    fvcDdtPhiCoeff(U.oldTime(), phi.oldTime())
+                    this->fvcDdtPhiCoeff(U.oldTime(), phi.oldTime())
                    *(
                         fvc::interpolate(rDeltaT*rA*rho.oldTime())*phi.oldTime()
                       - (fvc::interpolate(rDeltaT*rA*rho.oldTime()*U.oldTime())
@@ -497,7 +498,7 @@ localEulerDdtScheme<Type>::fvcDdtPhiCorr
                 new fluxFieldType
                 (
                     ddtIOobject,
-                    fvcDdtPhiCoeff
+                    this->fvcDdtPhiCoeff
                     (
                         U.oldTime(),
                         phi.oldTime()/fvc::interpolate(rho.oldTime())
@@ -526,8 +527,9 @@ localEulerDdtScheme<Type>::fvcDdtPhiCorr
                 new fluxFieldType
                 (
                     ddtIOobject,
-                    fvcDdtPhiCoeff(rho.oldTime(), U.oldTime(), phi.oldTime())
-                   *(
+                    this->fvcDdtPhiCoeff
+                    (rho.oldTime(), U.oldTime(), phi.oldTime())
+                  * (
                         fvc::interpolate(rDeltaT*rA)*phi.oldTime()
                       - (
                             fvc::interpolate(rDeltaT*rA*U.oldTime())&mesh().Sf()

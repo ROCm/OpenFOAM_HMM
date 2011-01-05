@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,15 +27,11 @@ License
 #include "transformField.H"
 #include "symmTransformField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-nonuniformTransformCyclicPointPatchField<Type>::
+Foam::nonuniformTransformCyclicPointPatchField<Type>::
 nonuniformTransformCyclicPointPatchField
 (
     const pointPatch& p,
@@ -47,7 +43,7 @@ nonuniformTransformCyclicPointPatchField
 
 
 template<class Type>
-nonuniformTransformCyclicPointPatchField<Type>::
+Foam::nonuniformTransformCyclicPointPatchField<Type>::
 nonuniformTransformCyclicPointPatchField
 (
     const pointPatch& p,
@@ -60,7 +56,7 @@ nonuniformTransformCyclicPointPatchField
 
 
 template<class Type>
-nonuniformTransformCyclicPointPatchField<Type>::
+Foam::nonuniformTransformCyclicPointPatchField<Type>::
 nonuniformTransformCyclicPointPatchField
 (
     const nonuniformTransformCyclicPointPatchField<Type>& ptf,
@@ -74,7 +70,7 @@ nonuniformTransformCyclicPointPatchField
 
 
 template<class Type>
-nonuniformTransformCyclicPointPatchField<Type>::
+Foam::nonuniformTransformCyclicPointPatchField<Type>::
 nonuniformTransformCyclicPointPatchField
 (
     const nonuniformTransformCyclicPointPatchField<Type>& ptf,
@@ -88,7 +84,7 @@ nonuniformTransformCyclicPointPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void nonuniformTransformCyclicPointPatchField<Type>::evaluate
+void Foam::nonuniformTransformCyclicPointPatchField<Type>::evaluate
 (
     const Pstream::commsTypes
 )
@@ -106,12 +102,8 @@ void nonuniformTransformCyclicPointPatchField<Type>::evaluate
     // Get internal field to insert values into
     Field<Type>& iF = const_cast<Field<Type>&>(this->internalField());
 
-    setInInternalField(iF, tvalues());
+    this->setInInternalField(iF, tvalues());
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

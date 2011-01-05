@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -62,7 +62,7 @@ do
 
     # find . -depth -type d \( -name ii_files -o -name Templates.DB \) -exec rm -rf {} \;
 
-    for dir in lib/$machType applications/bin/$machType
+    for dir in lib/$machType bin/$machType applications/bin/$machType
     do
         [ -d $dir ] && rm -rf $dir
     done

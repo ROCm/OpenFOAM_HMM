@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,13 +33,20 @@ License
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
-template<>
-const char* Foam::NamedEnum<Foam::vector::components, 3>::names[] =
+namespace Foam
 {
-    "x",
-    "y",
-    "z"
-};
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::vector::components,
+        3
+    >::names[] =
+    {
+        "x",
+        "y",
+        "z"
+    };
+}
 
 const Foam::NamedEnum<Foam::vector::components, 3>
     Foam::channelIndex::vectorComponentsNames_;
@@ -281,12 +288,6 @@ Foam::channelIndex::channelIndex
     // Calculate regions.
     calcLayeredRegions(mesh, startFaces);
 }
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

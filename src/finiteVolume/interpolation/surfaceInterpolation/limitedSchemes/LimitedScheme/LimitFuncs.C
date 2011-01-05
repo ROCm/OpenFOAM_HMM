@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -72,7 +72,7 @@ inline tmp<volScalarField> rhoMagSqr<Type>::operator()
 ) const
 {
     const volScalarField& rho =
-        phi.db().objectRegistry::lookupObject<volScalarField>("rho");
+        phi.db().objectRegistry::template lookupObject<volScalarField>("rho");
     return Foam::magSqr(phi/rho);
 }
 

@@ -1,6 +1,6 @@
     if (runTime.outputTime())
     {
-        volVectorField gradT = fvc::grad(T);
+        volVectorField gradT(fvc::grad(T));
 
         volScalarField gradTx
         (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -433,12 +433,9 @@ overlaps
     const pointField& points = patch_.points();
     const face& f = patch_[index];
 
-    forAll(f, fp)
+    if (cubeBb.containsAny(points, f))
     {
-        if (cubeBb.contains(points[f[fp]]))
-        {
-            return true;
-        }
+        return true;
     }
 
     // 3. Difficult case: all points are outside but connecting edges might

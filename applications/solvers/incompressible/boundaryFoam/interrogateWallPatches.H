@@ -13,7 +13,7 @@ forAll(patches, patchi)
 
     if (isA<wallFvPatch>(currPatch))
     {
-        const vectorField nf = currPatch.nf();
+        const vectorField nf(currPatch.nf());
 
         forAll(nf, facei)
         {
@@ -67,8 +67,10 @@ else
 label cellId = patches[patchId].faceCells()[faceId];
 
 // create position array for graph generation
-scalarField y =
+scalarField y
+(
     wallNormal
-  & (mesh.C().internalField() - mesh.C().boundaryField()[patchId][faceId]);
+  & (mesh.C().internalField() - mesh.C().boundaryField()[patchId][faceId])
+);
 
 Info<< "    Height to first cell centre y0 = " << y[cellId] << endl;

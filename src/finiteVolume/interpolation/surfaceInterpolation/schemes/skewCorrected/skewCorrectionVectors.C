@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,7 +84,7 @@ void Foam::skewCorrectionVectors::makeSkewCorrectionVectors() const
     const labelUList& owner = mesh_.owner();
 
     // Build the d-vectors
-    surfaceVectorField d = Sf/(mesh_.magSf()*mesh_.deltaCoeffs());
+    surfaceVectorField d(Sf/(mesh_.magSf()*mesh_.deltaCoeffs()));
 
     if (!mesh_.orthogonal())
     {

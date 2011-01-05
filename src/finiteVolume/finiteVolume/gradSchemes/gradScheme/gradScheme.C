@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -127,7 +127,7 @@ Foam::fv::gradScheme<Type>::grad
 
     if (!this->mesh().changing() && this->mesh().cache(name))
     {
-        if (!mesh().objectRegistry::foundObject<GradFieldType>(name))
+        if (!mesh().objectRegistry::template foundObject<GradFieldType>(name))
         {
             cachePrintMessage("Calculating and caching", name, vsf);
             tmp<GradFieldType> tgGrad = calcGrad(vsf, name);
@@ -137,7 +137,7 @@ Foam::fv::gradScheme<Type>::grad
         cachePrintMessage("Retreiving", name, vsf);
         GradFieldType& gGrad = const_cast<GradFieldType&>
         (
-            mesh().objectRegistry::lookupObject<GradFieldType>(name)
+            mesh().objectRegistry::template lookupObject<GradFieldType>(name)
         );
 
         if (gGrad.upToDate(vsf))
@@ -157,7 +157,10 @@ Foam::fv::gradScheme<Type>::grad
             regIOobject::store(tgGrad.ptr());
             GradFieldType& gGrad = const_cast<GradFieldType&>
             (
-                mesh().objectRegistry::lookupObject<GradFieldType>(name)
+                mesh().objectRegistry::template lookupObject<GradFieldType>
+                (
+                    name
+                )
             );
 
             return gGrad;
@@ -165,11 +168,14 @@ Foam::fv::gradScheme<Type>::grad
     }
     else
     {
-        if (mesh().objectRegistry::foundObject<GradFieldType>(name))
+        if (mesh().objectRegistry::template foundObject<GradFieldType>(name))
         {
             GradFieldType& gGrad = const_cast<GradFieldType&>
             (
-                mesh().objectRegistry::lookupObject<GradFieldType>(name)
+                mesh().objectRegistry::template lookupObject<GradFieldType>
+                (
+                    name
+                )
             );
 
             if (gGrad.ownedByRegistry())

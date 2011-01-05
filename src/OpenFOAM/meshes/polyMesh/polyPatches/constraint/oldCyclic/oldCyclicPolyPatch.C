@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,19 +44,21 @@ namespace Foam
     addToRunTimeSelectionTable(polyPatch, oldCyclicPolyPatch, word);
     addToRunTimeSelectionTable(polyPatch, oldCyclicPolyPatch, dictionary);
 
-
-template<>
-const char* NamedEnum<oldCyclicPolyPatch::transformType, 3>::names[] =
-{
-    "unknown",
-    "rotational",
-    "translational"
-};
-
-const NamedEnum<oldCyclicPolyPatch::transformType, 3>
-    oldCyclicPolyPatch::transformTypeNames;
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::oldCyclicPolyPatch::transformType,
+        3
+    >::names[] =
+    {
+        "unknown",
+        "rotational",
+        "translational"
+    };
 }
 
+const Foam::NamedEnum<Foam::oldCyclicPolyPatch::transformType, 3>
+    Foam::oldCyclicPolyPatch::transformTypeNames;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -536,11 +538,19 @@ Foam::label Foam::oldCyclicPolyPatch::getConsistentRotationFace
     const pointField& faceCentres
 ) const
 {
-    const scalarField magRadSqr =
-        magSqr((faceCentres - rotationCentre_) ^ rotationAxis_);
-    scalarField axisLen = (faceCentres - rotationCentre_) & rotationAxis_;
+    const scalarField magRadSqr
+    (
+        magSqr((faceCentres - rotationCentre_) ^ rotationAxis_)
+    );
+    scalarField axisLen
+    (
+        (faceCentres - rotationCentre_) & rotationAxis_
+    );
     axisLen = axisLen - min(axisLen);
-    const scalarField magLenSqr = magRadSqr + axisLen*axisLen;
+    const scalarField magLenSqr
+    (
+        magRadSqr + axisLen*axisLen
+    );
 
     label rotFace = -1;
     scalar maxMagLenSqr = -GREAT;

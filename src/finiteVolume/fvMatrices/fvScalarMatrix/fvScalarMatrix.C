@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,7 +66,7 @@ Foam::fvMatrix<Foam::scalar>::solver
             << endl;
     }
 
-    scalarField saveDiag = diag();
+    scalarField saveDiag(diag());
     addBoundaryDiag(diag(), 0);
 
     autoPtr<fvMatrix<scalar>::fvSolver> solverPtr
@@ -102,10 +102,10 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::fvSolver::solve
         const_cast<GeometricField<scalar, fvPatchField, volMesh>&>
         (fvMat_.psi());
 
-    scalarField saveDiag = fvMat_.diag();
+    scalarField saveDiag(fvMat_.diag());
     fvMat_.addBoundaryDiag(fvMat_.diag(), 0);
 
-    scalarField totalSource = fvMat_.source();
+    scalarField totalSource(fvMat_.source());
     fvMat_.addBoundarySource(totalSource, false);
 
     // assign new solver controls
@@ -145,10 +145,10 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::solve
     GeometricField<scalar, fvPatchField, volMesh>& psi =
        const_cast<GeometricField<scalar, fvPatchField, volMesh>&>(psi_);
 
-    scalarField saveDiag = diag();
+    scalarField saveDiag(diag());
     addBoundaryDiag(diag(), 0);
 
-    scalarField totalSource = source_;
+    scalarField totalSource(source_);
     addBoundarySource(totalSource, false);
 
     // Solver call

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,14 +29,9 @@ License
 #include "volFields.H"
 #include "hhuCombustionThermo.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-gradientUnburntEnthalpyFvPatchScalarField::
+Foam::gradientUnburntEnthalpyFvPatchScalarField::
 gradientUnburntEnthalpyFvPatchScalarField
 (
     const fvPatch& p,
@@ -47,7 +42,7 @@ gradientUnburntEnthalpyFvPatchScalarField
 {}
 
 
-gradientUnburntEnthalpyFvPatchScalarField::
+Foam::gradientUnburntEnthalpyFvPatchScalarField::
 gradientUnburntEnthalpyFvPatchScalarField
 (
     const gradientUnburntEnthalpyFvPatchScalarField& ptf,
@@ -60,7 +55,7 @@ gradientUnburntEnthalpyFvPatchScalarField
 {}
 
 
-gradientUnburntEnthalpyFvPatchScalarField::
+Foam::gradientUnburntEnthalpyFvPatchScalarField::
 gradientUnburntEnthalpyFvPatchScalarField
 (
     const fvPatch& p,
@@ -72,7 +67,7 @@ gradientUnburntEnthalpyFvPatchScalarField
 {}
 
 
-gradientUnburntEnthalpyFvPatchScalarField::
+Foam::gradientUnburntEnthalpyFvPatchScalarField::
 gradientUnburntEnthalpyFvPatchScalarField
 (
     const gradientUnburntEnthalpyFvPatchScalarField& tppsf
@@ -82,7 +77,7 @@ gradientUnburntEnthalpyFvPatchScalarField
 {}
 
 
-gradientUnburntEnthalpyFvPatchScalarField::
+Foam::gradientUnburntEnthalpyFvPatchScalarField::
 gradientUnburntEnthalpyFvPatchScalarField
 (
     const gradientUnburntEnthalpyFvPatchScalarField& tppsf,
@@ -95,7 +90,7 @@ gradientUnburntEnthalpyFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void gradientUnburntEnthalpyFvPatchScalarField::updateCoeffs()
+void Foam::gradientUnburntEnthalpyFvPatchScalarField::updateCoeffs()
 {
     if (updated())
     {
@@ -127,14 +122,13 @@ void gradientUnburntEnthalpyFvPatchScalarField::updateCoeffs()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchScalarField,
-    gradientUnburntEnthalpyFvPatchScalarField
-);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchScalarField,
+        gradientUnburntEnthalpyFvPatchScalarField
+    );
+}
 
 // ************************************************************************* //

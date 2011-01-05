@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1078,7 +1078,7 @@ void Foam::polyTopoChange::compact
                          && faceNeighbour_[faceI] < faceOwner_[faceI]
                         )
                         {
-                            faces_[faceI] = faces_[faceI].reverseFace();
+                            faces_[faceI].flip();
                             Swap(faceOwner_[faceI], faceNeighbour_[faceI]);
                             flipFaceFlux_[faceI] =
                             (

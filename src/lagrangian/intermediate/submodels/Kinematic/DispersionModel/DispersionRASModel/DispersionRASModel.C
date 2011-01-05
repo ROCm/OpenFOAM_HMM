@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,10 @@ Foam::DispersionRASModel<CloudType>::DispersionRASModel
     DispersionModel<CloudType>(owner),
     turbulence_
     (
-        owner.mesh().objectRegistry::lookupObject<compressible::RASModel>
+        owner.mesh().objectRegistry::template lookupObject
+        <
+            compressible::RASModel
+        >
         (
             "RASProperties"
         )

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -138,7 +138,7 @@ Foam::solidWallHeatFluxTemperatureFvPatchScalarField::K() const
         const symmTensorField& KWall =
             patch().lookupPatchField<volSymmTensorField, scalar>(KName_);
 
-        vectorField n = patch().nf();
+        vectorField n(patch().nf());
 
         return n & KWall & n;
     }

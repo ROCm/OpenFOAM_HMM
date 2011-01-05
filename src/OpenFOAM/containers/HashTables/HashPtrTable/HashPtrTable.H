@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -98,7 +98,7 @@ public:
 
         //- Construct from dictionary using default dictionary constructor
         //  class
-        HashPtrTable(const dictionary& dict);
+        HashPtrTable(const dictionary&);
 
         //- Construct as copy
         HashPtrTable(const HashPtrTable<T, Key, Hash>&);

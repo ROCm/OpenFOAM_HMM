@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -108,16 +108,16 @@ void htcConvFvPatchScalarField::updateCoeffs()
     const label patchI = patch().index();
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const scalarField alphaEffw = rasModel.alphaEff()().boundaryField()[patchI];
+    const scalarField alphaEffw(rasModel.alphaEff()().boundaryField()[patchI]);
     const scalarField& muw = rasModel.mu().boundaryField()[patchI];
     const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
     const vectorField& Uc = rasModel.U();
     const vectorField& Uw = rasModel.U().boundaryField()[patchI];
     const scalarField& Tw = rasModel.thermo().T().boundaryField()[patchI];
-    const scalarField Cpw = rasModel.thermo().Cp(Tw, patchI);
+    const scalarField Cpw(rasModel.thermo().Cp(Tw, patchI));
 
-    const scalarField kappaw = Cpw*alphaEffw;
-    const scalarField Pr = muw*Cpw/kappaw;
+    const scalarField kappaw(Cpw*alphaEffw);
+    const scalarField Pr(muw*Cpw/kappaw);
 
     scalarField& htc = *this;
     forAll(htc, faceI)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -263,7 +263,7 @@ void Foam::activeBaffleVelocityFvPatchVectorField::updateCoeffs()
         Info<< "openFraction = " << openFraction_ << endl;
 
         vectorField::subField Sfw = this->patch().patch().faceAreas();
-        vectorField newSfw = (1 - openFraction_)*initWallSf_;
+        const vectorField newSfw((1 - openFraction_)*initWallSf_);
         forAll(Sfw, facei)
         {
             Sfw[facei] = newSfw[facei];
@@ -316,5 +316,6 @@ namespace Foam
         activeBaffleVelocityFvPatchVectorField
     );
 }
+
 
 // ************************************************************************* //

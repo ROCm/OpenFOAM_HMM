@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,7 +32,7 @@ Foam::UILList<LListBase, T>::UILList(const UILList<LListBase, T>& lst)
 {
     for (const_iterator iter = lst.begin(); iter != lst.end(); ++iter)
     {
-        append(&iter());
+        this->append(&iter());
     }
 }
 
@@ -46,7 +46,7 @@ void Foam::UILList<LListBase, T>::operator=(const UILList<LListBase, T>& rhs)
 
     for (const_iterator iter = rhs.begin(); iter != rhs.end(); ++iter)
     {
-        append(&iter());
+        this->append(&iter());
     }
 }
 

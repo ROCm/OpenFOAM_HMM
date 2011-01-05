@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -239,15 +239,15 @@ bool Foam::sampledTriSurfaceMesh::update()
 
     {
         label newPointI = 0;
-        label newTriI = 0;
+        label newFaceI = 0;
 
-        forAll(s, triI)
+        forAll(s, faceI)
         {
-            if (include[triI])
+            if (include[faceI])
             {
-                faceMap[newTriI++] = triI;
+                faceMap[newFaceI++] = faceI;
 
-                const labelledTri& f = s[triI];
+                const triSurface::FaceType& f = s[faceI];
                 forAll(f, fp)
                 {
                     if (reversePointMap[f[fp]] == -1)
@@ -258,7 +258,7 @@ bool Foam::sampledTriSurfaceMesh::update()
                 }
             }
         }
-        faceMap.setSize(newTriI);
+        faceMap.setSize(newFaceI);
         pointMap.setSize(newPointI);
     }
 

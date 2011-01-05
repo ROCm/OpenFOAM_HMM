@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -139,7 +139,7 @@ Foam::labelList Foam::simpleGeomDecomp::decompose(const pointField& points)
         pointIndices[i] = i;
     }
 
-    pointField rotatedPoints = rotDelta_ & points;
+    const pointField rotatedPoints(rotDelta_ & points);
 
     // and one to take the processor group id's. For each direction.
     // we assign the processors to groups of processors labelled
@@ -212,7 +212,7 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
         pointIndices[i] = i;
     }
 
-    pointField rotatedPoints = rotDelta_ & points;
+    const pointField rotatedPoints(rotDelta_ & points);
 
     // and one to take the processor group id's. For each direction.
     // we assign the processors to groups of processors labelled

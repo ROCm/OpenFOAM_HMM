@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -108,8 +108,8 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "floatScalar.H"
 #include "Time.H"
-#include "cyclicPolyPatch.H"
 #include "OFstream.H"
+#include "globalIndex.H"
 
 extern "C"
 {
@@ -162,8 +162,129 @@ void Foam::scotchDecomp::check(const int retVal, const char* str)
 }
 
 
-// Call scotch with options from dictionary.
 Foam::label Foam::scotchDecomp::decompose
+(
+    const fileName& meshPath,
+    const List<int>& adjncy,
+    const List<int>& xadj,
+    const scalarField& cWeights,
+
+    List<int>& finalDecomp
+)
+{
+    if (!Pstream::parRun())
+    {
+        decomposeOneProc
+        (
+            meshPath,
+            adjncy,
+            xadj,
+            cWeights,
+            finalDecomp
+        );
+    }
+    else
+    {
+        if (debug)
+        {
+            Info<< "scotchDecomp : running in parallel."
+                << " Decomposing all of graph on master processor." << endl;
+        }
+        globalIndex globalCells(xadj.size()-1);
+        label nTotalConnections = returnReduce(adjncy.size(), sumOp<label>());
+
+        // Send all to master. Use scheduled to save some storage.
+        if (Pstream::master())
+        {
+            Field<int> allAdjncy(nTotalConnections);
+            Field<int> allXadj(globalCells.size()+1);
+            scalarField allWeights(globalCells.size());
+
+            // Insert my own
+            label nTotalCells = 0;
+            forAll(cWeights, cellI)
+            {
+                allXadj[nTotalCells] = xadj[cellI];
+                allWeights[nTotalCells++] = cWeights[cellI];
+            }
+            nTotalConnections = 0;
+            forAll(adjncy, i)
+            {
+                allAdjncy[nTotalConnections++] = adjncy[i];
+            }
+
+            for (int slave=1; slave<Pstream::nProcs(); slave++)
+            {
+                IPstream fromSlave(Pstream::scheduled, slave);
+                Field<int> nbrAdjncy(fromSlave);
+                Field<int> nbrXadj(fromSlave);
+                scalarField nbrWeights(fromSlave);
+
+                // Append.
+                //label procStart = nTotalCells;
+                forAll(nbrXadj, cellI)
+                {
+                    allXadj[nTotalCells] = nTotalConnections+nbrXadj[cellI];
+                    allWeights[nTotalCells++] = nbrWeights[cellI];
+                }
+                // No need to renumber xadj since already global.
+                forAll(nbrAdjncy, i)
+                {
+                    allAdjncy[nTotalConnections++] = nbrAdjncy[i];
+                }
+            }
+            allXadj[nTotalCells] = nTotalConnections;
+
+
+            Field<int> allFinalDecomp;
+            decomposeOneProc
+            (
+                meshPath,
+                allAdjncy,
+                allXadj,
+                allWeights,
+                allFinalDecomp
+            );
+
+
+            // Send allFinalDecomp back
+            for (int slave=1; slave<Pstream::nProcs(); slave++)
+            {
+                OPstream toSlave(Pstream::scheduled, slave);
+                toSlave << SubField<int>
+                (
+                    allFinalDecomp,
+                    globalCells.localSize(slave),
+                    globalCells.offset(slave)
+                );
+            }
+            // Get my own part (always first)
+            finalDecomp = SubField<int>
+            (
+                allFinalDecomp,
+                globalCells.localSize()
+            );
+        }
+        else
+        {
+            // Send my part of the graph (already in global numbering)
+            {
+                OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
+                toMaster<< adjncy << SubField<int>(xadj, xadj.size()-1)
+                    << cWeights;
+            }
+
+            // Receive back decomposition
+            IPstream fromMaster(Pstream::scheduled, Pstream::masterNo());
+            fromMaster >> finalDecomp;
+        }
+    }
+    return 0;
+}
+
+
+// Call scotch with options from dictionary.
+Foam::label Foam::scotchDecomp::decomposeOneProc
 (
     const fileName& meshPath,
     const List<int>& adjncy,
@@ -247,7 +368,8 @@ Foam::label Foam::scotchDecomp::decompose
 
 
     // Check for externally provided cellweights and if so initialise weights
-    scalar minWeights = gMin(cWeights);
+    // Note: min, not gMin since routine runs on master only.
+    scalar minWeights = min(cWeights);
     if (cWeights.size() > 0)
     {
         if (minWeights <= 0)
@@ -432,7 +554,7 @@ Foam::labelList Foam::scotchDecomp::decompose
             << exit(FatalError);
     }
 
-
+    // Calculate local or global (if Pstream::parRun()) connectivity
     CompactListList<label> cellCells;
     calcCellCells(mesh, identity(mesh.nCells()), mesh.nCells(), cellCells);
 
@@ -475,6 +597,7 @@ Foam::labelList Foam::scotchDecomp::decompose
             << exit(FatalError);
     }
 
+    // Calculate local or global (if Pstream::parRun()) connectivity
     CompactListList<label> cellCells;
     calcCellCells(mesh, agglom, agglomPoints.size(), cellCells);
 
@@ -528,7 +651,14 @@ Foam::labelList Foam::scotchDecomp::decompose
 
     // Decompose using weights
     List<int> finalDecomp;
-    decompose(".", cellCells.m(), cellCells.offsets(), cWeights, finalDecomp);
+    decompose
+    (
+        "scotch",
+        cellCells.m(),
+        cellCells.offsets(),
+        cWeights,
+        finalDecomp
+    );
 
     // Copy back to labelList
     labelList decomp(finalDecomp.size());

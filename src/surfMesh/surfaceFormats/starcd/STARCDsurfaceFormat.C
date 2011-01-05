@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -234,7 +234,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     }
     mapPointId.clear();
 
-    sortFacesAndStore(dynFaces.xfer(), dynZones.xfer(), sorted);
+    this->sortFacesAndStore(dynFaces.xfer(), dynZones.xfer(), sorted);
 
     // add zones, culling empty ones
     this->addZones(dynSizes, dynNames, true);
@@ -256,7 +256,7 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
     const List<surfZone>& zones =
     (
         surf.surfZones().empty()
-      ? oneZone(faceLst)
+      ? surfaceFormatsCore::oneZone(faceLst)
       : surf.surfZones()
     );
 

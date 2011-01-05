@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -459,7 +459,7 @@ void DimensionedField<Type, GeoMesh>::operator=
     checkField(*this, df, "=");
 
     dimensions_ = df.dimensions();
-    transfer(const_cast<DimensionedField<Type, GeoMesh>&>(df));
+    this->transfer(const_cast<DimensionedField<Type, GeoMesh>&>(df));
     tdf.clear();
 }
 

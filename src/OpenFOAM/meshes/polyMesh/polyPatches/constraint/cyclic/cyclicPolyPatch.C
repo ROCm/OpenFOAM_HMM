@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -443,11 +443,19 @@ Foam::label Foam::cyclicPolyPatch::getConsistentRotationFace
     const pointField& faceCentres
 ) const
 {
-    const scalarField magRadSqr =
-        magSqr((faceCentres - rotationCentre_) ^ rotationAxis_);
-    scalarField axisLen = (faceCentres - rotationCentre_) & rotationAxis_;
-    axisLen = axisLen - min(axisLen);
-    const scalarField magLenSqr = magRadSqr + axisLen*axisLen;
+    const scalarField magRadSqr
+    (
+        magSqr((faceCentres - rotationCentre_) ^ rotationAxis_)
+    );
+    scalarField axisLen
+    (
+        (faceCentres - rotationCentre_) & rotationAxis_
+    );
+    axisLen -= min(axisLen);
+    const scalarField magLenSqr
+    (
+        magRadSqr + axisLen*axisLen
+    );
 
     label rotFace = -1;
     scalar maxMagLenSqr = -GREAT;
@@ -694,7 +702,7 @@ void Foam::cyclicPolyPatch::transformPosition(pointField& l) const
 {
     if (!parallel())
     {
-        Foam::transform(forwardT(), l);
+        l = Foam::transform(forwardT(), l);
     }
     else if (separated())
     {

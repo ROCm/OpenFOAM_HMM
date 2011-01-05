@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,15 +26,11 @@ License
 #include "wedgePointPatchField.H"
 #include "transformField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-wedgePointPatchField<Type>::wedgePointPatchField
+Foam::wedgePointPatchField<Type>::wedgePointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF
@@ -45,7 +41,7 @@ wedgePointPatchField<Type>::wedgePointPatchField
 
 
 template<class Type>
-wedgePointPatchField<Type>::wedgePointPatchField
+Foam::wedgePointPatchField<Type>::wedgePointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
@@ -73,7 +69,7 @@ wedgePointPatchField<Type>::wedgePointPatchField
 
 
 template<class Type>
-wedgePointPatchField<Type>::wedgePointPatchField
+Foam::wedgePointPatchField<Type>::wedgePointPatchField
 (
     const wedgePointPatchField<Type>& ptf,
     const pointPatch& p,
@@ -104,7 +100,7 @@ wedgePointPatchField<Type>::wedgePointPatchField
 
 
 template<class Type>
-wedgePointPatchField<Type>::wedgePointPatchField
+Foam::wedgePointPatchField<Type>::wedgePointPatchField
 (
     const wedgePointPatchField<Type>& ptf,
     const DimensionedField<Type, pointMesh>& iF
@@ -117,7 +113,7 @@ wedgePointPatchField<Type>::wedgePointPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void wedgePointPatchField<Type>::evaluate(const Pstream::commsTypes)
+void Foam::wedgePointPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     // In order to ensure that the wedge patch is always flat, take the
     // normal vector from the first point
@@ -129,12 +125,8 @@ void wedgePointPatchField<Type>::evaluate(const Pstream::commsTypes)
     // Get internal field to insert values into
     Field<Type>& iF = const_cast<Field<Type>&>(this->internalField());
 
-    setInInternalField(iF, tvalues());
+    this->setInInternalField(iF, tvalues());
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

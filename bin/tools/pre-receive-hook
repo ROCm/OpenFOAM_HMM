@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -46,7 +46,7 @@
 hookName="pre-receive"
 die()
 {
-    echo '$hookName hook failure' 1>&2
+    echo "$hookName hook failure" 1>&2
     echo '-----------------------' 1>&2
     echo '' 1>&2
     echo "$@" 1>&2

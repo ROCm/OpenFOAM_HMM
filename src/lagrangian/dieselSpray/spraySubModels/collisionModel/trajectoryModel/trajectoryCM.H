@@ -139,9 +139,9 @@ if (vAlign > 0)
                         (momMax + (1.0-newMinMass/mMin)*momMin)/newMaxMass;
 
                     // update the liquid molar fractions
-                    scalarField Ymin = spray_.fuels().Y(pMin().X());
-                    scalarField Ymax = spray_.fuels().Y(pMax().X());
-                    scalarField Ynew = mMax*Ymax + (mMin - newMinMass)*Ymin;
+                    scalarField Ymin(spray_.fuels().Y(pMin().X()));
+                    scalarField Ymax(spray_.fuels().Y(pMax().X()));
+                    scalarField Ynew(mMax*Ymax + (mMin - newMinMass)*Ymin);
                     scalar Wlinv = 0.0;
                     forAll(Ynew, i)
                     {

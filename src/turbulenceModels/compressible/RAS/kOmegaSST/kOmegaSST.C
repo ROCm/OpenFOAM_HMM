@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,13 +46,13 @@ addToRunTimeSelectionTable(RASModel, kOmegaSST, dictionary);
 
 tmp<volScalarField> kOmegaSST::F1(const volScalarField& CDkOmega) const
 {
-    volScalarField CDkOmegaPlus = max
+    tmp<volScalarField> CDkOmegaPlus = max
     (
         CDkOmega,
         dimensionedScalar("1.0e-10", dimless/sqr(dimTime), 1.0e-10)
     );
 
-    volScalarField arg1 = min
+    tmp<volScalarField> arg1 = min
     (
         min
         (
@@ -71,7 +71,7 @@ tmp<volScalarField> kOmegaSST::F1(const volScalarField& CDkOmega) const
 
 tmp<volScalarField> kOmegaSST::F2() const
 {
-    volScalarField arg2 = min
+    tmp<volScalarField> arg2 = min
     (
         max
         (
@@ -377,7 +377,7 @@ void kOmegaSST::correct()
 
     RASModel::correct();
 
-    volScalarField divU = fvc::div(phi_/fvc::interpolate(rho_));
+    volScalarField divU(fvc::div(phi_/fvc::interpolate(rho_)));
 
     if (mesh_.changing())
     {
@@ -390,19 +390,21 @@ void kOmegaSST::correct()
     }
 
     tmp<volTensorField> tgradU = fvc::grad(U_);
-    volScalarField S2 = magSqr(symm(tgradU()));
-    volScalarField GbyMu = (tgradU() && dev(twoSymm(tgradU())));
+    volScalarField S2(magSqr(symm(tgradU())));
+    volScalarField GbyMu((tgradU() && dev(twoSymm(tgradU()))));
     volScalarField G("RASModel::G", mut_*GbyMu);
     tgradU.clear();
 
     // Update omega and G at the wall
     omega_.boundaryField().updateCoeffs();
 
-    volScalarField CDkOmega =
-        (2*alphaOmega2_)*(fvc::grad(k_) & fvc::grad(omega_))/omega_;
+    volScalarField CDkOmega
+    (
+        (2*alphaOmega2_)*(fvc::grad(k_) & fvc::grad(omega_))/omega_
+    );
 
-    volScalarField F1 = this->F1(CDkOmega);
-    volScalarField rhoGammaF1 = rho_*gamma(F1);
+    volScalarField F1(this->F1(CDkOmega));
+    volScalarField rhoGammaF1(rho_*gamma(F1));
 
     // Turbulent frequency equation
     tmp<fvScalarMatrix> omegaEqn

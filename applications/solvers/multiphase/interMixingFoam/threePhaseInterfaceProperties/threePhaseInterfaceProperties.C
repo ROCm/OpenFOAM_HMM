@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -81,31 +81,35 @@ void Foam::threePhaseInterfaceProperties::correctContactAngle
                 refCast<const alphaContactAngleFvPatchScalarField>
                 (alpha3[patchi]);
 
-            scalarField twoPhaseAlpha2 = max(a2cap, scalar(0));
-            scalarField twoPhaseAlpha3 = max(a3cap, scalar(0));
+            scalarField twoPhaseAlpha2(max(a2cap, scalar(0)));
+            scalarField twoPhaseAlpha3(max(a3cap, scalar(0)));
 
-            scalarField sumTwoPhaseAlpha =
-                twoPhaseAlpha2 + twoPhaseAlpha3 + SMALL;
+            scalarField sumTwoPhaseAlpha
+            (
+                twoPhaseAlpha2 + twoPhaseAlpha3 + SMALL
+            );
 
             twoPhaseAlpha2 /= sumTwoPhaseAlpha;
             twoPhaseAlpha3 /= sumTwoPhaseAlpha;
 
             fvsPatchVectorField& nHatp = nHatb[patchi];
 
-            scalarField theta =
+            scalarField theta
+            (
                 convertToRad
-               *(
+              * (
                    twoPhaseAlpha2*(180 - a2cap.theta(U[patchi], nHatp))
                  + twoPhaseAlpha3*(180 - a3cap.theta(U[patchi], nHatp))
-               );
+                )
+            );
 
-            vectorField nf = boundary[patchi].nf();
+            vectorField nf(boundary[patchi].nf());
 
             // Reset nHatPatch to correspond to the contact angle
 
-            scalarField a12 = nHatp & nf;
+            scalarField a12(nHatp & nf);
 
-            scalarField b1 = cos(theta);
+            scalarField b1(cos(theta));
 
             scalarField b2(nHatp.size());
 
@@ -114,10 +118,10 @@ void Foam::threePhaseInterfaceProperties::correctContactAngle
                 b2[facei] = cos(acos(a12[facei]) - theta[facei]);
             }
 
-            scalarField det = 1.0 - a12*a12;
+            scalarField det(1.0 - a12*a12);
 
-            scalarField a = (b1 - a12*b2)/det;
-            scalarField b = (b2 - a12*b1)/det;
+            scalarField a((b1 - a12*b2)/det);
+            scalarField b((b2 - a12*b1)/det);
 
             nHatp = a*nf + b*nHatp;
 
@@ -135,13 +139,13 @@ void Foam::threePhaseInterfaceProperties::calculateK()
     const surfaceVectorField& Sf = mesh.Sf();
 
     // Cell gradient of alpha
-    volVectorField gradAlpha = fvc::grad(alpha1);
+    volVectorField gradAlpha(fvc::grad(alpha1));
 
     // Interpolated face-gradient of alpha
-    surfaceVectorField gradAlphaf = fvc::interpolate(gradAlpha);
+    surfaceVectorField gradAlphaf(fvc::interpolate(gradAlpha));
 
     // Face unit interface normal
-    surfaceVectorField nHatfv = gradAlphaf/(mag(gradAlphaf) + deltaN_);
+    surfaceVectorField nHatfv(gradAlphaf/(mag(gradAlphaf) + deltaN_));
     correctContactAngle(nHatfv.boundaryField());
 
     // Face unit interface normal flux

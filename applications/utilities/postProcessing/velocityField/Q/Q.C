@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,7 +53,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
     {
         Info<< "    Reading U" << endl;
         volVectorField U(Uheader, mesh);
-        volTensorField gradU = fvc::grad(U);
+        volTensorField gradU(fvc::grad(U));
 
         volScalarField Q
         (
@@ -72,11 +72,11 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
         // This is a second way of calculating Q, that delivers results
         // very close, but not identical to the first approach.
 
-        volSymmTensorField S = symm(gradU);  // symmetric part of tensor
-        volTensorField W = skew(gradU);  // anti-symmetric part
+        volSymmTensorField S(symm(gradU));  // symmetric part of tensor
+        volTensorField W(skew(gradU));      // anti-symmetric part
 
-        volScalarField SS =  S&&S;
-        volScalarField WW =  W&&W;
+        volScalarField SS(S && S);
+        volScalarField WW(W && W);
 
         volScalarField Q
         (

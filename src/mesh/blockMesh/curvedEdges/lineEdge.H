@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,13 +51,6 @@ class lineEdge
 :
     public curvedEdge
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        lineEdge(const lineEdge&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const lineEdge&);
 
 public:
 

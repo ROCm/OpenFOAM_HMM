@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -196,8 +196,7 @@ int main(int argc, char *argv[])
 
         forAll(surf1, faceI)
         {
-            const labelledTri& f = surf1[faceI];
-            const point centre = f.centre(surf1.points());
+            const point centre = surf1[faceI].centre(surf1.points());
 
             if
             (

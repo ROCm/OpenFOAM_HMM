@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,18 +41,17 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createMesh.H"
 
-    volScalarField fx = pow(mesh.C().component(vector::X), 2);
+    volScalarField fx(pow(mesh.C().component(vector::X), 2));
     fx.write();
-    volScalarField gradx4 = fvc::grad(fx)().component(vector::X);
+    volScalarField gradx4(fvc::grad(fx)().component(vector::X));
     gradx4.write();
 
-    //volVectorField curlC = fvc::curl(1.0*mesh.C());
-
+    //volVectorField curlC(fvc::curl(1.0*mesh.C()));
     //curlC.write();
 
     /*
-    surfaceScalarField xf = mesh.Cf().component(vector::X);
-    surfaceScalarField xf4 = pow(xf, 4);
+    surfaceScalarField xf(mesh.Cf().component(vector::X));
+    surfaceScalarField xf4(pow(xf, 4));
 
     for (int i=1; i<xf4.size()-1; i++)
     {

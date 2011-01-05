@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -143,8 +143,8 @@ Foam::tmp<Foam::fvScalarMatrix> Foam::radiation::radiationModel::Sh
 ) const
 {
     volScalarField& h = thermo.h();
-    const volScalarField cp = thermo.Cp();
-    const volScalarField T3 = pow3(T_);
+    const volScalarField cp(thermo.Cp());
+    const volScalarField T3(pow3(T_));
 
     return
     (
@@ -161,8 +161,8 @@ Foam::tmp<Foam::fvScalarMatrix> Foam::radiation::radiationModel::Shs
 ) const
 {
     volScalarField& hs = thermo.hs();
-    const volScalarField cp = thermo.Cp();
-    const volScalarField T3 = pow3(T_);
+    const volScalarField cp(thermo.Cp());
+    const volScalarField T3(pow3(T_));
 
     return
     (

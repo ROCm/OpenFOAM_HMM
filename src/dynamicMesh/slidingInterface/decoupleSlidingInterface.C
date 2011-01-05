@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -89,7 +89,7 @@ void Foam::slidingInterface::decoupleInterface
 
         if (masterPatchFlip[faceI])
         {
-            newFace = newFace.reverseFace();
+            newFace.flip();
         }
 
         ref.setAction
@@ -141,7 +141,7 @@ void Foam::slidingInterface::decoupleInterface
 
         if (slavePatchFlip[faceI])
         {
-            newFace = newFace.reverseFace();
+            newFace.flip();
         }
 
         // Recover retired points on the slave side

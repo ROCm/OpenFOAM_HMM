@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -271,7 +271,7 @@ label twoDNess(const polyMesh& mesh)
         {
             const vectorField& n = patch.faceAreas();
 
-            scalarField cosAngle = mag(n/mag(n) & cellPlane.normal());
+            const scalarField cosAngle(mag(n/mag(n) & cellPlane.normal()));
 
             if (mag(min(cosAngle) - max(cosAngle)) > 1E-6)
             {

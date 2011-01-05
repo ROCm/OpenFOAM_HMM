@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,6 +43,12 @@ inline Foam::treeBoundBox::treeBoundBox(const point& min, const point& max)
 inline Foam::treeBoundBox::treeBoundBox(const boundBox& bb)
 :
     boundBox(bb)
+{}
+
+
+inline Foam::treeBoundBox::treeBoundBox(Istream& is)
+:
+    boundBox(is)
 {}
 
 
@@ -306,20 +312,6 @@ inline void Foam::treeBoundBox::searchOrder
 }
 
 
-// true if bb's intersect or overlap.
-// Note: <= to make sure we catch all.
-inline bool Foam::treeBoundBox::overlaps(const treeBoundBox& bb) const
-{
-    return boundBox::overlaps(bb);
-}
-
-
-inline bool Foam::treeBoundBox::contains(const point& pt) const
-{
-    return boundBox::contains(pt);
-}
-
-
 //- Return slightly wider bounding box
 inline Foam::treeBoundBox Foam::treeBoundBox::extend
 (
@@ -345,7 +337,5 @@ inline Foam::treeBoundBox Foam::treeBoundBox::extend
     return bb;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

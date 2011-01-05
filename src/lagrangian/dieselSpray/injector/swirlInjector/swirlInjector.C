@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -101,8 +101,8 @@ Foam::swirlInjector::swirlInjector
     (
         mag
         (
-            massFlowRateProfile_[massFlowRateProfile_.size() - 1][0]
-          - injectionPressureProfile_[injectionPressureProfile_.size() - 1][0]
+            massFlowRateProfile_.last()[0]
+          - injectionPressureProfile_.last()[0]
         ) > SMALL
     )
     {

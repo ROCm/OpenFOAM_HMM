@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -130,7 +130,7 @@ atmBoundaryLayerInletEpsilonFvPatchScalarField
 void atmBoundaryLayerInletEpsilonFvPatchScalarField::updateCoeffs()
 {
     const vectorField& c = patch().Cf();
-    scalarField coord = (c & z_);
+    tmp<scalarField> coord = (c & z_);
     scalarField::operator=(pow3(Ustar_)/(kappa_*(coord - zGround_ + z0_)));
 }
 

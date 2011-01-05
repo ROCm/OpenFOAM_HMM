@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,7 +50,7 @@ void Foam::surfaceFilmModels::injectionModel::correctDetachedFilm
     const kinematicSingleLayer& film =
         refCast<const kinematicSingleLayer>(owner_);
 
-    const scalarField gNorm = film.gNorm();
+    const scalarField gNorm(film.gNorm());
     const scalarField& delta = film.delta();
     const scalarField& rho = film.rho();
     const scalarField& magSf = film.magSf();

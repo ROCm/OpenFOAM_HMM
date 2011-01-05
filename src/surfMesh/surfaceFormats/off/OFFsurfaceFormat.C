@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -141,7 +141,7 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
     }
 
     // transfer to normal lists, no zone information
-    reset(pointLst.xfer(), dynFaces.xfer(), Xfer<surfZoneList>());
+    this->reset(pointLst.xfer(), dynFaces.xfer(), Xfer<surfZoneList>());
 
     return true;
 }

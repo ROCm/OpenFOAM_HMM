@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -122,12 +122,14 @@ Foam::fv::fourthGrad<Type>::calcGrad
             const scalarField& lambdap = lambda.boundaryField()[patchi];
 
             // Build the d-vectors
-            vectorField pd =
+            vectorField pd
+            (
                 mesh.Sf().boundaryField()[patchi]
-               /(
-                   mesh.magSf().boundaryField()[patchi]
-                  *mesh.deltaCoeffs().boundaryField()[patchi]
-                );
+              / (
+                    mesh.magSf().boundaryField()[patchi]
+                  * mesh.deltaCoeffs().boundaryField()[patchi]
+                )
+            );
 
             if (!mesh.orthogonal())
             {
@@ -138,8 +140,10 @@ Foam::fv::fourthGrad<Type>::calcGrad
             const labelUList& faceCells =
                 fGrad.boundaryField()[patchi].patch().faceCells();
 
-            Field<GradType> neighbourSecondfGrad =
-                secondfGrad.boundaryField()[patchi].patchNeighbourField();
+            const Field<GradType> neighbourSecondfGrad
+            (
+                secondfGrad.boundaryField()[patchi].patchNeighbourField()
+            );
 
             forAll(faceCells, patchFaceI)
             {

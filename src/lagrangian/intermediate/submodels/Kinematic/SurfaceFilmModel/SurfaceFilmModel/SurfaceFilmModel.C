@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -134,7 +134,7 @@ void Foam::SurfaceFilmModel<CloudType>::inject(TrackData& td)
 
     // Retrieve the film model from the owner database
     const surfaceFilmModels::surfaceFilmModel& filmModel =
-        this->owner().db().objectRegistry::lookupObject
+        this->owner().db().objectRegistry::template lookupObject
         <surfaceFilmModels::surfaceFilmModel>
         (
             "surfaceFilmProperties"

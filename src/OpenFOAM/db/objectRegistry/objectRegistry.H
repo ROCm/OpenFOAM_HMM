@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,6 +68,10 @@ class objectRegistry
 
 
     // Private Member Functions
+
+        //- Is the objectRegistry parent_ different from time_
+        //  Used to terminate searching within the ancestors
+        bool parentNotTime() const;
 
         //- Disallow Copy constructor
         objectRegistry(const objectRegistry&);

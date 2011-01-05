@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
             solve(UEqn() == -fvc::grad(p));
 
             p.boundaryField().updateCoeffs();
-            volScalarField rAU = 1.0/UEqn().A();
+            volScalarField rAU(1.0/UEqn().A());
             U = rAU*UEqn().H();
             UEqn.clear();
             phi = fvc::interpolate(U) & mesh.Sf();
@@ -153,10 +153,13 @@ int main(int argc, char *argv[])
         {
             // Adjoint Momentum predictor
 
-            volVectorField adjointTransposeConvection = (fvc::grad(Ua) & U);
-            //volVectorField adjointTransposeConvection = fvc::reconstruct
+            volVectorField adjointTransposeConvection((fvc::grad(Ua) & U));
+            //volVectorField adjointTransposeConvection
             //(
-            //    mesh.magSf()*(fvc::snGrad(Ua) & fvc::interpolate(U))
+            //    fvc::reconstruct
+            //    (
+            //        mesh.magSf()*(fvc::snGrad(Ua) & fvc::interpolate(U))
+            //    )
             //);
 
             zeroCells(adjointTransposeConvection, inletCells);
@@ -174,7 +177,7 @@ int main(int argc, char *argv[])
             solve(UaEqn() == -fvc::grad(pa));
 
             pa.boundaryField().updateCoeffs();
-            volScalarField rAUa = 1.0/UaEqn().A();
+            volScalarField rAUa(1.0/UaEqn().A());
             Ua = rAUa*UaEqn().H();
             UaEqn.clear();
             phia = fvc::interpolate(Ua) & mesh.Sf();

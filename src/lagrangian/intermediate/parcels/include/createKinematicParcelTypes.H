@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,7 +33,7 @@ License
 
 #define createKinematicParcelTypes(ParcelType)                                \
                                                                               \
-    defineTemplateTypeNameAndDebug(ParcelType, 0);                            \
+    defineTypeNameAndDebug(ParcelType, 0);                                    \
     defineTemplateTypeNameAndDebug(Particle<ParcelType>, 0);                  \
     defineTemplateTypeNameAndDebug(Cloud<ParcelType>, 0);                     \
                                                                               \

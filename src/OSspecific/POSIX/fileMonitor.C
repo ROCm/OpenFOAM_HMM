@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,7 +55,11 @@ const Foam::NamedEnum<Foam::fileMonitor::fileState, 3>
 namespace Foam
 {
     template<>
-    const char* Foam::NamedEnum<Foam::fileMonitor::fileState, 3>::names[] =
+    const char* Foam::NamedEnum
+    <
+        Foam::fileMonitor::fileState,
+        3
+    >::names[] =
     {
         "unmodified",
         "modified",

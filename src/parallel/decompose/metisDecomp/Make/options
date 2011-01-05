@@ -4,5 +4,4 @@ EXE_INC = \
     -I../decompositionMethods/lnInclude
 
 LIB_LIBS = \
-    -lmetis \
-    -lGKlib
+    -L$(FOAM_EXT_LIBBIN) -lmetis -lGKlib

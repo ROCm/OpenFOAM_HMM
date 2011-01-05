@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -155,7 +155,7 @@ Foam::tmp<Foam::vectorField> Foam::sphericalCS::localToGlobal
     bool translate
 ) const
 {
-    const scalarField r = local.component(vector::X);
+    const scalarField r(local.component(vector::X));
     const scalarField theta
     (
         local.component(vector::Y)
@@ -206,8 +206,8 @@ Foam::tmp<Foam::vectorField> Foam::sphericalCS::globalToLocal
     bool translate
 ) const
 {
-    const vectorField lc = coordinateSystem::globalToLocal(global, translate);
-    const scalarField r = mag(lc);
+    const vectorField lc(coordinateSystem::globalToLocal(global, translate));
+    const scalarField r(mag(lc));
 
     tmp<vectorField> tresult(new vectorField(lc.size()));
     vectorField& result = tresult();

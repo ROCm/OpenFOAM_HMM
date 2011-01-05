@@ -8,6 +8,12 @@ wmakeCheckPwd "$WM_PROJECT_DIR/src" || {
     exit 1
 }
 
+[ -n "$FOAM_EXT_LIBBIN" ] || {
+    echo "Error: FOAM_EXT_LIBBIN not set"
+    echo "    Check the OpenFOAM entries in your dot-files and source them."
+    exit 1
+}
+
 set -x
 
 # update OpenFOAM version strings if required

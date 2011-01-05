@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -20,9 +20,6 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
-
-Description
-    Return intersection of a line with the face
 
 \*---------------------------------------------------------------------------*/
 
@@ -51,6 +48,17 @@ Foam::pointHit Foam::face::ray
     const intersection::direction dir
 ) const
 {
+    // If the face is a triangle, do a direct calculation
+    if (size() == 3)
+    {
+        return triPointRef
+        (
+            meshPoints[operator[](0)],
+            meshPoints[operator[](1)],
+            meshPoints[operator[](2)]
+        ).ray(p, n, alg, dir);
+    }
+
     point ctr = Foam::average(points(meshPoints));
 
     scalar nearestHitDist = GREAT;
@@ -139,6 +147,17 @@ Foam::pointHit Foam::face::intersection
     const scalar tol
 ) const
 {
+    // If the face is a triangle, do a direct calculation
+    if (size() == 3)
+    {
+        return triPointRef
+        (
+            meshPoints[operator[](0)],
+            meshPoints[operator[](1)],
+            meshPoints[operator[](2)]
+        ).intersection(p, q, alg, tol);
+    }
+
     scalar nearestHitDist = VGREAT;
 
     // Initialize to miss, distance = GREAT
@@ -198,6 +217,17 @@ Foam::pointHit Foam::face::nearestPointClassify
     label& nearLabel
 ) const
 {
+    // If the face is a triangle, do a direct calculation
+    if (size() == 3)
+    {
+        return triPointRef
+        (
+            meshPoints[operator[](0)],
+            meshPoints[operator[](1)],
+            meshPoints[operator[](2)]
+        ).nearestPointClassify(p, nearType, nearLabel);
+    }
+
     const face& f = *this;
     point ctr = centre(meshPoints);
 

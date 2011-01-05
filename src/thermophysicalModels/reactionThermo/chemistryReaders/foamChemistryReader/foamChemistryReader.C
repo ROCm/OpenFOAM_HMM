@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,8 +37,20 @@ Foam::foamChemistryReader<ThermoType>::foamChemistryReader
 )
 :
     chemistryReader<ThermoType>(),
-    chemDict_(IFstream(reactionsFileName.expand())),
-    thermoDict_(IFstream(thermoFileName.expand())),
+    chemDict_
+    (
+        IFstream
+        (
+            fileName(reactionsFileName).expand()
+        )()
+    ),
+    thermoDict_
+    (
+        IFstream
+        (
+            fileName(thermoFileName).expand()
+        )()
+    ),
     speciesThermo_(thermoDict_),
     speciesTable_(chemDict_.lookup("species")),
     reactions_(speciesTable_, speciesThermo_, chemDict_)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -161,7 +161,7 @@ void angularOscillatingVelocityPointPatchVectorField::updateCoeffs()
 
     scalar angle = angle0_ + amplitude_*sin(omega_*t.value());
     vector axisHat = axis_/mag(axis_);
-    vectorField p0Rel = p0_ - origin_;
+    vectorField p0Rel(p0_ - origin_);
 
     vectorField::operator=
     (

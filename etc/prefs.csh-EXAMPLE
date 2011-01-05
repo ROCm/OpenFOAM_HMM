@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -38,7 +38,7 @@
 
 ## Specify system compiler
 ## ~~~~~~~~~~~~~~~~~~~~~~~
-#set compilerInstall=system
+#set foamCompiler=system
 
 ## Specify system openmpi
 ## ~~~~~~~~~~~~~~~~~~~~~~

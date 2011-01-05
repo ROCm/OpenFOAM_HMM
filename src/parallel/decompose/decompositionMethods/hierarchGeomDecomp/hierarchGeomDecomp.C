@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,7 +59,7 @@ void Foam::hierarchGeomDecomp::setDecompOrder()
             << exit(FatalIOError);
     }
 
-    for (label i = 0; i < 3; i++)
+    for (label i = 0; i < 3; ++i)
     {
         if (order[i] == 'x')
         {
@@ -693,8 +693,7 @@ Foam::labelList Foam::hierarchGeomDecomp::decompose
         slice[i] = i;
     }
 
-    pointField rotatedPoints = rotDelta_ & points;
-
+    pointField rotatedPoints(rotDelta_ & points);
 
     // Calculate tolerance of cell distribution. For large cases finding
     // distibution to the cell exact would cause too many iterations so allow
@@ -735,7 +734,7 @@ Foam::labelList Foam::hierarchGeomDecomp::decompose
         slice[i] = i;
     }
 
-    pointField rotatedPoints = rotDelta_ & points;
+    pointField rotatedPoints(rotDelta_ & points);
 
     // Calculate tolerance of cell distribution. For large cases finding
     // distibution to the cell exact would cause too many iterations so allow
@@ -774,7 +773,5 @@ Foam::hierarchGeomDecomp::hierarchGeomDecomp
     setDecompOrder();
 }
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // ************************************************************************* //

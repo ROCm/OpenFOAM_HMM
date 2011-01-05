@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,10 @@ Class
     Foam::scotchDecomp
 
 Description
-    Scotch domain decomposition
+    Scotch domain decomposition.
+    When run in parallel will collect the whole graph on to the master,
+    decompose and send back. Run ptscotchDecomp for proper distributed
+    decomposition.
 
 SourceFiles
     scotchDecomp.C
@@ -62,6 +65,16 @@ class scotchDecomp
             List<int>& finalDecomp
         );
 
+        //- Decompose non-parallel
+        label decomposeOneProc
+        (
+            const fileName& meshPath,
+            const List<int>& adjncy,
+            const List<int>& xadj,
+            const scalarField& cWeights,
+            List<int>& finalDecomp
+        );
+
         //- Disallow default bitwise copy construct and assignment
         void operator=(const scotchDecomp&);
         scotchDecomp(const scotchDecomp&);
@@ -88,8 +101,8 @@ public:
 
         virtual bool parallelAware() const
         {
-            // Metis does not know about proc boundaries
-            return false;
+            // Knows about coupled boundaries
+            return true;
         }
 
         //- Return for every coordinate the wanted processor number. Use the

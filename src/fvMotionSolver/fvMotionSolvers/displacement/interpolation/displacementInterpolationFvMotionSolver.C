@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -180,7 +180,7 @@ displacementInterpolationFvMotionSolver
         zoneCoordinates.last() += SMALL;
 
         // Check if we have static min and max mesh bounds
-        const scalarField meshCoords = points0().component(dir);
+        const scalarField meshCoords(points0().component(dir));
 
         scalar minCoord = gMin(meshCoords);
         scalar maxCoord = gMax(meshCoords);

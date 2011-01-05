@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,13 +69,16 @@ Info<< "Time scales min/max:" << endl;
     // ~~~~~~~~~~~~~~~~~~~~~~
 
     {
-        scalarField tau =
-            runTime.deltaTValue()*mag(parcels.Srho() + massSource.SuTot());
+        scalarField tau
+        (
+            runTime.deltaTValue()*mag(parcels.Srho() + massSource.SuTot())
+        );
 
         tau = alphaTauRho*rho/(tau + ROOTVSMALL);
 
-        Info<< "    Density     = " << min(maxDeltaT, gMin(tau)) << ", "
-             << min(maxDeltaT, gMax(tau)) << endl;
+        Info<< "    Density     = "
+            << min(maxDeltaT, gMin(tau)) << ", "
+            << min(maxDeltaT, gMax(tau)) << endl;
 
         invTauFlow.internalField() = max(invTauFlow.internalField(), 1/tau);
     }
@@ -87,7 +90,8 @@ Info<< "Time scales min/max:" << endl;
     {
 /*
         // Method 1 - mag(U) limit using 'small' nominal velocity
-        scalarField tau =
+        scalarField tau
+        (
             runTime.deltaTValue()
            *mag
             (
@@ -95,7 +99,8 @@ Info<< "Time scales min/max:" << endl;
               + parcels.UTrans()/(mesh.V()*runTime.deltaT())
               + momentumSource.Su()
             )
-           /rho;
+           /rho
+        );
 
         const scalar nomMagU(dimensionedScalar("1", dimVelocity, 1));
         tau = alphaTauU*(nomMagU + mag(U))/(tau + ROOTVSMALL);
@@ -129,13 +134,15 @@ Info<< "Time scales min/max:" << endl;
             fvc::interpolate(runTime.deltaT()*UEqnRhs) & mesh.Sf()
         );
 
-        scalarField tau =
+        scalarField tau
+        (
             alphaTauU*rho
            /fvc::surfaceSum
             (
                 mag(phi + phiSU)*mesh.deltaCoeffs()/mesh.magSf()
               + dimensionedScalar("SMALL", dimDensity/dimTime, ROOTVSMALL)
-            );
+            )
+        );
 
 */
 /*
@@ -151,7 +158,8 @@ Info<< "Time scales min/max:" << endl;
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     {
-        scalarField tau =
+        scalarField tau
+        (
             runTime.deltaTValue()
            *mag
             (
@@ -160,7 +168,8 @@ Info<< "Time scales min/max:" << endl;
               + energySource.Su()
               + chemistrySh
             )
-           /rho;
+           /rho
+        );
 
         tau = alphaTauTemp*thermo.Cp()*T/(tau + ROOTVSMALL);
 
@@ -179,7 +188,8 @@ Info<< "Time scales min/max:" << endl;
         forAll(Y, fieldI)
         {
             const volScalarField& Yi = Y[fieldI];
-            const scalarField deltaYi =
+            const scalarField deltaYi
+            (
                 runTime.deltaTValue()
                *mag
                 (
@@ -187,7 +197,8 @@ Info<< "Time scales min/max:" << endl;
                   + massSource.Su(fieldI)
                   + parcels.Srho(fieldI)
                 )
-               /rho;
+               /rho
+            );
             tau =
                 min
                 (

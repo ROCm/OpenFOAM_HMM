@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -490,7 +490,7 @@ unsigned Foam::Hasher
     const short endianTest = 0x0100;
 
     // yields 0x01 for big endian
-    if (*(reinterpret_cast<const char *>(&endianTest)))
+    if (*(reinterpret_cast<const char*>(&endianTest)))
     {
         return jenkins_hashbig(key, length, initval);
     }

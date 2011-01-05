@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,7 +70,7 @@ void Foam::gradientDispersionRAS::disperseParcels() const
 
     scalar dt = spray_.runTime().deltaTValue();
     const volScalarField& k = turbulence().k();
-    volVectorField gradk = fvc::grad(k);
+    const volVectorField gradk(fvc::grad(k));
     const volScalarField& epsilon = turbulence().epsilon();
     const volVectorField& U = spray_.U();
 

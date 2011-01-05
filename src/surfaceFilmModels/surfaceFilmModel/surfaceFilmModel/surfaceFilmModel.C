@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,18 +37,19 @@ namespace Foam
         defineTypeNameAndDebug(surfaceFilmModel, 0);
         defineRunTimeSelectionTable(surfaceFilmModel, mesh);
     }
+
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::surfaceFilmModels::surfaceFilmModel::thermoModelType,
+        2
+    >::names[] =
+    {
+        "constant",
+        "singleComponent"
+    };
+
 }
-
-
-template<>
-const char*
-Foam::NamedEnum<Foam::surfaceFilmModels::surfaceFilmModel::thermoModelType, 2>::
-names[] =
-{
-    "constant",
-    "singleComponent"
-};
-
 
 const
 Foam::NamedEnum<Foam::surfaceFilmModels::surfaceFilmModel::thermoModelType, 2>

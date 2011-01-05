@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -292,7 +292,7 @@ const Foam::wordList& Foam::searchableSurfaceCollection::regions() const
 
 Foam::label Foam::searchableSurfaceCollection::size() const
 {
-    return indexOffset_[indexOffset_.size()-1];
+    return indexOffset_.last();
 }
 
 

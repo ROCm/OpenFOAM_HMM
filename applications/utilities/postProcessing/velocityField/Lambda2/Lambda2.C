@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,8 +55,10 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 
         const volTensorField gradU(fvc::grad(U));
 
-        volTensorField SSplusWW =
-            (symm(gradU) & symm(gradU)) + (skew(gradU) & skew(gradU));
+        volTensorField SSplusWW
+        (
+            (symm(gradU) & symm(gradU)) + (skew(gradU) & skew(gradU))
+        );
 
         volScalarField Lambda2
         (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,14 +29,9 @@ License
 #include "fvPatchFieldMapper.H"
 #include "surfaceFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-syringePressureFvPatchScalarField::syringePressureFvPatchScalarField
+Foam::syringePressureFvPatchScalarField::syringePressureFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -47,7 +42,7 @@ syringePressureFvPatchScalarField::syringePressureFvPatchScalarField
 {}
 
 
-syringePressureFvPatchScalarField::syringePressureFvPatchScalarField
+Foam::syringePressureFvPatchScalarField::syringePressureFvPatchScalarField
 (
     const syringePressureFvPatchScalarField& sppsf,
     const fvPatch& p,
@@ -71,7 +66,7 @@ syringePressureFvPatchScalarField::syringePressureFvPatchScalarField
 {}
 
 
-syringePressureFvPatchScalarField::syringePressureFvPatchScalarField
+Foam::syringePressureFvPatchScalarField::syringePressureFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -97,7 +92,7 @@ syringePressureFvPatchScalarField::syringePressureFvPatchScalarField
 }
 
 
-syringePressureFvPatchScalarField::syringePressureFvPatchScalarField
+Foam::syringePressureFvPatchScalarField::syringePressureFvPatchScalarField
 (
     const syringePressureFvPatchScalarField& sppsf,
     const DimensionedField<scalar, volMesh>& iF
@@ -119,7 +114,7 @@ syringePressureFvPatchScalarField::syringePressureFvPatchScalarField
 {}
 
 
-syringePressureFvPatchScalarField::syringePressureFvPatchScalarField
+Foam::syringePressureFvPatchScalarField::syringePressureFvPatchScalarField
 (
     const syringePressureFvPatchScalarField& sppsf
 )
@@ -142,7 +137,7 @@ syringePressureFvPatchScalarField::syringePressureFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalar syringePressureFvPatchScalarField::Vs(const scalar t) const
+Foam::scalar Foam::syringePressureFvPatchScalarField::Vs(const scalar t) const
 {
     if (t < tas_)
     {
@@ -181,7 +176,7 @@ scalar syringePressureFvPatchScalarField::Vs(const scalar t) const
 }
 
 
-void syringePressureFvPatchScalarField::updateCoeffs()
+void Foam::syringePressureFvPatchScalarField::updateCoeffs()
 {
     if (updated())
     {
@@ -229,7 +224,7 @@ void syringePressureFvPatchScalarField::updateCoeffs()
 }
 
 
-void syringePressureFvPatchScalarField::write(Ostream& os) const
+void Foam::syringePressureFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
 
@@ -250,14 +245,13 @@ void syringePressureFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchScalarField,
-    syringePressureFvPatchScalarField
-);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchScalarField,
+        syringePressureFvPatchScalarField
+    );
+}
 
 // ************************************************************************* //

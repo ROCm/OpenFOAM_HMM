@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -26,7 +26,7 @@
 #
 # Description
 #     Startup file for OpenFOAM
-#     Sourced from OpenFOAM-??/etc/bashrc
+#     Sourced from OpenFOAM-<VERSION>/etc/bashrc
 #
 #------------------------------------------------------------------------------
 
@@ -70,46 +70,56 @@ export WM_DIR=$WM_PROJECT_DIR/wmake
 export WM_LINK_LANGUAGE=c++
 export WM_OPTIONS=$WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_COMPILE_OPTION
 
-# base configuration
-export FOAM_APP=$WM_PROJECT_DIR/applications
-export FOAM_APPBIN=$WM_PROJECT_DIR/applications/bin/$WM_OPTIONS
-export FOAM_LIB=$WM_PROJECT_DIR/lib
+# base executables/libraries
+export FOAM_APPBIN=$WM_PROJECT_DIR/bin/$WM_OPTIONS
 export FOAM_LIBBIN=$WM_PROJECT_DIR/lib/$WM_OPTIONS
-export FOAM_SRC=$WM_PROJECT_DIR/src
 
-# shared site configuration - similar naming convention as ~OpenFOAM expansion
+# external (ThirdParty) libraries
+export FOAM_EXT_LIBBIN=$WM_THIRD_PARTY_DIR/lib/$WM_OPTIONS
+
+# shared site executables/libraries
+# similar naming convention as ~OpenFOAM expansion
 export FOAM_SITE_APPBIN=$WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/bin/$WM_OPTIONS
 export FOAM_SITE_LIBBIN=$WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/lib/$WM_OPTIONS
 
-# user configuration
-export FOAM_USER_APPBIN=$WM_PROJECT_USER_DIR/applications/bin/$WM_OPTIONS
+# user executables/libraries
+export FOAM_USER_APPBIN=$WM_PROJECT_USER_DIR/bin/$WM_OPTIONS
 export FOAM_USER_LIBBIN=$WM_PROJECT_USER_DIR/lib/$WM_OPTIONS
 
 # convenience
+export FOAM_APP=$WM_PROJECT_DIR/applications
+export FOAM_LIB=$WM_PROJECT_DIR/lib
+export FOAM_SRC=$WM_PROJECT_DIR/src
 export FOAM_TUTORIALS=$WM_PROJECT_DIR/tutorials
 export FOAM_UTILITIES=$FOAM_APP/utilities
 export FOAM_SOLVERS=$FOAM_APP/solvers
 export FOAM_RUN=$WM_PROJECT_USER_DIR/run
 
-# add OpenFOAM scripts and wmake to the path
-export PATH=$WM_DIR:$WM_PROJECT_DIR/bin:$PATH
+# add wmake to the path - not required for runtime only environment
+[ -d "$WM_DIR" ] && PATH=$WM_DIR:$PATH
+# add OpenFOAM scripts to the path
+export PATH=$WM_PROJECT_DIR/bin:$PATH
 
 _foamAddPath $FOAM_USER_APPBIN:$FOAM_SITE_APPBIN:$FOAM_APPBIN
- # Make sure to pick up dummy versions of external libraries last
-_foamAddLib  $FOAM_USER_LIBBIN:$FOAM_SITE_LIBBIN:$FOAM_LIBBIN:$FOAM_LIBBIN/dummy
+# Make sure to pick up dummy versions of external libraries last
+_foamAddLib  $FOAM_USER_LIBBIN:$FOAM_SITE_LIBBIN:$FOAM_LIBBIN:$FOAM_EXT_LIBBIN:$FOAM_LIBBIN/dummy
 
 # Compiler settings
 # ~~~~~~~~~~~~~~~~~
 unset gcc_version gmp_version mpfr_version mpc_version
 unset MPFR_ARCH_PATH
 
-# Select compiler installation
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# compilerInstall = OpenFOAM | system
-: ${compilerInstall:=system}
+# Location of compiler installation
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if [ -z "$foamCompiler" ]
+then
+    foamCompiler=system
+    echo "Warning in $WM_PROJECT_DIR/etc/settings.sh:" 1>&2
+    echo "    foamCompiler not set, using '$foamCompiler'" 1>&2
+fi
 
-case "${compilerInstall:-OpenFOAM}" in
-OpenFOAM)
+case "${foamCompiler}" in
+OpenFOAM | ThirdParty)
     case "$WM_COMPILER" in
     Gcc | Gcc++0x)
         gcc_version=gcc-4.4.3
@@ -136,7 +146,8 @@ OpenFOAM)
         # using clang - not gcc
         export WM_CC='clang'
         export WM_CXX='clang++'
-        clang_version=llvm-2.8
+        #clang_version=llvm-2.8
+        clang_version=llvm-svn
         ;;
     *)
         echo
@@ -160,7 +171,7 @@ OpenFOAM)
             echo "Warning in $WM_PROJECT_DIR/etc/settings.sh:"
             echo "    Cannot find $gccDir installation."
             echo "    Please install this compiler version or if you wish to use the system compiler,"
-            echo "    change the 'compilerInstall' setting to 'system' in this file"
+            echo "    change the 'foamCompiler' setting to 'system'"
             echo
         }
 
@@ -201,7 +212,7 @@ OpenFOAM)
             echo "Warning in $WM_PROJECT_DIR/etc/settings.sh:"
             echo "    Cannot find $clangDir installation."
             echo "    Please install this compiler version or if you wish to use the system compiler,"
-            echo "    change the 'compilerInstall' setting to 'system' in this file"
+            echo "    change the 'foamCompiler' setting to 'system'"
             echo
         }
 
@@ -209,6 +220,13 @@ OpenFOAM)
         _foamAddPath    $clangDir/bin
     fi
     unset clang_version clangDir
+    ;;
+system)
+    # okay, use system compiler
+    ;;
+*)
+    echo "Warn: foamCompiler='$foamCompiler' is unsupported" 1>&2
+    echo "   treating as 'system' instead" 1>&2
     ;;
 esac
 
@@ -260,7 +278,7 @@ unset MPI_ARCH_PATH MPI_HOME
 case "$WM_MPLIB" in
 OPENMPI)
     #mpi_version=openmpi-1.4.1
-    mpi_version=openmpi-1.5
+    mpi_version=openmpi-1.5.1
     export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$mpi_version
 
     # Tell OpenMPI where to find its install directory
@@ -270,7 +288,7 @@ OPENMPI)
     _foamAddLib     $MPI_ARCH_PATH/lib
     _foamAddMan     $MPI_ARCH_PATH/man
 
-    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/$mpi_version
+    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/$mpi_version
     unset mpi_version
     ;;
 
@@ -293,7 +311,7 @@ SYSTEMOPENMPI)
 
     _foamAddLib     $libDir
 
-    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/$mpi_version
+    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/$mpi_version
     unset mpi_version libDir
     ;;
 
@@ -306,7 +324,7 @@ MPICH)
     _foamAddLib     $MPI_ARCH_PATH/lib
     _foamAddMan     $MPI_ARCH_PATH/share/man
 
-    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/$mpi_version
+    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/$mpi_version
     unset mpi_version
     ;;
 
@@ -319,7 +337,7 @@ MPICH-GM)
     _foamAddLib     $MPI_ARCH_PATH/lib
     _foamAddLib     $GM_LIB_PATH
 
-    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/mpich-gm
+    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/mpich-gm
     ;;
 
 HPMPI)
@@ -344,22 +362,22 @@ HPMPI)
         ;;
     esac
 
-    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/hpmpi
+    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/hpmpi
     ;;
 
 GAMMA)
     export MPI_ARCH_PATH=/usr
-    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/gamma
+    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/gamma
     ;;
 
 MPI)
     export MPI_ARCH_PATH=/opt/mpi
-    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/mpi
+    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/mpi
     ;;
 
 FJMPI)
     export MPI_ARCH_PATH=/opt/FJSVmpi2
-    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/mpi
+    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/mpi
 
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib/sparcv9
@@ -369,7 +387,7 @@ FJMPI)
 
 QSMPI)
     export MPI_ARCH_PATH=/usr/lib/mpi
-    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/qsmpi
+    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/qsmpi
 
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib
@@ -397,14 +415,14 @@ export MPI_BUFFER_SIZE
 
 # Enable the hoard memory allocator if available
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#if [ -f $FOAM_LIBBIN/libhoard.so ]
+#if [ -f $FOAM_EXT_LIBBIN/libhoard.so ]
 #then
-#    export LD_PRELOAD=$FOAM_LIBBIN/libhoard.so:$LD_PRELOAD
+#    export LD_PRELOAD=$FOAM_EXT_LIBBIN/libhoard.so:$LD_PRELOAD
 #fi
 
 
 # cleanup environment:
 # ~~~~~~~~~~~~~~~~~~~~
-unset _foamAddPath _foamAddLib _foamAddMan compilerInstall minBufferSize
+unset _foamAddPath _foamAddLib _foamAddMan foamCompiler minBufferSize
 
 # ----------------------------------------------------------------- end-of-file

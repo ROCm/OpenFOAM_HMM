@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -36,7 +36,9 @@ Usage: ${0##*/} <type> {args}
 
 * create a new standard OpenFOAM source or template file
 
-type: (source|template)
+type:
+    -s | -source | source
+    -t | -template | template
 
 USAGE
     exit 1
@@ -47,16 +49,16 @@ USAGE
 [ "$#" -gt 1 ] || usage
 
 case "$1" in
-source)
+(-s | -source | source)
     shift
     $WM_PROJECT_DIR/etc/codeTemplates/source/foamNewSource $*
     ;;
-template)
+(-t | -template | template)
     shift
     $WM_PROJECT_DIR/etc/codeTemplates/template/foamNewTemplate $*
     ;;
-*)
-    usage "unknown type"
+(*)
+    usage "unknown type '$1'"
     ;;
 esac
 

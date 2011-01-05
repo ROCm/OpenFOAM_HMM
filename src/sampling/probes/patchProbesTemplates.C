@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,7 @@ void Foam::patchProbes::sampleAndWrite
     const GeometricField<Type, fvPatchField, volMesh>& vField
 )
 {
-    Field<Type> values = sample(vField);
+    Field<Type> values(sample(vField));
 
     if (Pstream::master())
     {

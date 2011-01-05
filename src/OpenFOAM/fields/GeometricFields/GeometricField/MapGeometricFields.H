@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,8 +74,8 @@ void MapGeometricFields
 {
     HashTable<const GeometricField<Type, PatchField, GeoMesh>*> fields
     (
-        mapper.thisDb().objectRegistry::lookupClass
-            <GeometricField<Type, PatchField, GeoMesh> >()
+        mapper.thisDb().objectRegistry::template
+            lookupClass<GeometricField<Type, PatchField, GeoMesh> >()
     );
 
     // It is necessary to enforce that all old-time fields are stored

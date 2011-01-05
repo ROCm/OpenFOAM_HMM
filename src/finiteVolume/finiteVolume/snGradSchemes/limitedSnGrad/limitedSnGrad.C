@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,10 +66,12 @@ limitedSnGrad<Type>::correction
     const GeometricField<Type, fvPatchField, volMesh>& vf
 ) const
 {
-    GeometricField<Type, fvsPatchField, surfaceMesh> corr =
-        correctedSnGrad<Type>(this->mesh()).correction(vf);
+    const GeometricField<Type, fvsPatchField, surfaceMesh> corr
+    (
+        correctedSnGrad<Type>(this->mesh()).correction(vf)
+    );
 
-    surfaceScalarField limiter
+    const surfaceScalarField limiter
     (
         min
         (

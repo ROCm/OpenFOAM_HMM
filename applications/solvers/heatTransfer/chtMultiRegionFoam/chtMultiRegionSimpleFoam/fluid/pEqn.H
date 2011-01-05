@@ -4,7 +4,7 @@
     rho = min(rho, rhoMax[i]);
     rho.relax();
 
-    volScalarField rAU = 1.0/UEqn().A();
+    volScalarField rAU(1.0/UEqn().A());
     surfaceScalarField rhorAUf("(rho*(1|A(U)))", fvc::interpolate(rho*rAU));
 
     U = rAU*UEqn().H();
@@ -15,7 +15,7 @@
     dimensionedScalar compressibility = fvc::domainIntegrate(psi);
     bool compressible = (compressibility.value() > SMALL);
 
-    surfaceScalarField buoyancyPhi = rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf();
+    surfaceScalarField buoyancyPhi(rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf());
     phi -= buoyancyPhi;
 
     // Solve pressure

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -268,17 +268,7 @@ bool Foam::treeDataTriSurface::overlaps
     const pointField& points = surface_.points();
     const labelledTri& f = surface_[index];
 
-    // Triangle points
-    const point& p0 = points[f[0]];
-    const point& p1 = points[f[1]];
-    const point& p2 = points[f[2]];
-
-    treeBoundBox triBb(p0, p0);
-    triBb.min() = min(triBb.min(), p1);
-    triBb.min() = min(triBb.min(), p2);
-
-    triBb.max() = max(triBb.max(), p1);
-    triBb.max() = max(triBb.max(), p2);
+    treeBoundBox triBb(points, surface_[index]);
 
     //- For testing: robust one
     //return cubeBb.overlaps(triBb);
@@ -293,11 +283,16 @@ bool Foam::treeDataTriSurface::overlaps
     }
 
     // Check if one or more triangle point inside
-    if (cubeBb.contains(p0) || cubeBb.contains(p1) || cubeBb.contains(p2))
+    if (cubeBb.containsAny(points, f))
     {
-        // One or more points inside
         return true;
     }
+
+    // Triangle points
+    const point& p0 = points[f[0]];
+    const point& p1 = points[f[1]];
+    const point& p2 = points[f[2]];
+
 
     // Now we have the difficult case: all points are outside but connecting
     // edges might go through cube. Use fast intersection of bounding box.
@@ -324,13 +319,7 @@ void Foam::treeDataTriSurface::findNearest
     forAll(indices, i)
     {
         label index = indices[i];
-        const labelledTri& f = surface_[index];
-
-        // Triangle points
-        const point& p0 = points[f[0]];
-        const point& p1 = points[f[1]];
-        const point& p2 = points[f[2]];
-
+        const triSurface::FaceType& f = surface_[index];
 
         ////- Possible optimization: do quick rejection of triangle if bounding
         ////  sphere does not intersect triangle bounding box. From simplistic
@@ -379,7 +368,7 @@ void Foam::treeDataTriSurface::findNearest
             //     t
             // );
 
-            pointHit pHit = triPointRef(p0, p1, p2).nearestPoint(sample);
+            pointHit pHit = f.nearestPoint(sample, points);
 
             scalar distSqr = sqr(pHit.distance());
 
@@ -425,14 +414,10 @@ bool Foam::treeDataTriSurface::intersects
 {
     const pointField& points = surface_.points();
 
-    const labelledTri& f = surface_[index];
+    const triSurface::FaceType& f = surface_[index];
 
     // Do quick rejection test
-    treeBoundBox triBb(points[f[0]], points[f[0]]);
-    triBb.min() = min(triBb.min(), points[f[1]]);
-    triBb.max() = max(triBb.max(), points[f[1]]);
-    triBb.min() = min(triBb.min(), points[f[2]]);
-    triBb.max() = max(triBb.max(), points[f[2]]);
+    treeBoundBox triBb(points, f);
 
     const direction startBits(triBb.posBits(start));
     const direction endBits(triBb.posBits(end));
@@ -443,16 +428,14 @@ bool Foam::treeDataTriSurface::intersects
         return false;
     }
 
-    const triPointRef tri(points[f[0]], points[f[1]], points[f[2]]);
-
     const vector dir(end - start);
 
     // Use relative tolerance (from octree) to determine intersection.
-
-    pointHit inter = tri.intersection
+    pointHit inter = f.intersection
     (
         start,
         dir,
+        points,
         intersection::HALF_RAY,
         indexedOctree<treeDataTriSurface>::perturbTol()
     );

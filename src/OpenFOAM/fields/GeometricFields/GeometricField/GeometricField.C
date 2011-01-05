@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -941,7 +941,14 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::relax()
 {
     word name = this->name();
 
-    if (this->mesh().data::lookupOrDefault<bool>("finalIteration", false))
+    if
+    (
+        this->mesh().data::template lookupOrDefault<bool>
+        (
+            "finalIteration",
+            false
+        )
+    )
     {
         name += "Final";
     }

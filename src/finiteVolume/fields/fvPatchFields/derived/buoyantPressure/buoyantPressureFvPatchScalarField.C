@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,14 +29,10 @@ License
 #include "volFields.H"
 #include "uniformDimensionedFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-buoyantPressureFvPatchScalarField::
+Foam::buoyantPressureFvPatchScalarField::
 buoyantPressureFvPatchScalarField
 (
     const fvPatch& p,
@@ -48,7 +44,7 @@ buoyantPressureFvPatchScalarField
 {}
 
 
-buoyantPressureFvPatchScalarField::
+Foam::buoyantPressureFvPatchScalarField::
 buoyantPressureFvPatchScalarField
 (
     const fvPatch& p,
@@ -64,7 +60,7 @@ buoyantPressureFvPatchScalarField
 }
 
 
-buoyantPressureFvPatchScalarField::
+Foam::buoyantPressureFvPatchScalarField::
 buoyantPressureFvPatchScalarField
 (
     const buoyantPressureFvPatchScalarField& ptf,
@@ -78,7 +74,7 @@ buoyantPressureFvPatchScalarField
 {}
 
 
-buoyantPressureFvPatchScalarField::
+Foam::buoyantPressureFvPatchScalarField::
 buoyantPressureFvPatchScalarField
 (
     const buoyantPressureFvPatchScalarField& ptf
@@ -89,7 +85,7 @@ buoyantPressureFvPatchScalarField
 {}
 
 
-buoyantPressureFvPatchScalarField::
+Foam::buoyantPressureFvPatchScalarField::
 buoyantPressureFvPatchScalarField
 (
     const buoyantPressureFvPatchScalarField& ptf,
@@ -103,7 +99,7 @@ buoyantPressureFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void buoyantPressureFvPatchScalarField::updateCoeffs()
+void Foam::buoyantPressureFvPatchScalarField::updateCoeffs()
 {
     if (updated())
     {
@@ -137,7 +133,7 @@ void buoyantPressureFvPatchScalarField::updateCoeffs()
 }
 
 
-void buoyantPressureFvPatchScalarField::write(Ostream& os) const
+void Foam::buoyantPressureFvPatchScalarField::write(Ostream& os) const
 {
     fixedGradientFvPatchScalarField::write(os);
     writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
@@ -147,14 +143,14 @@ void buoyantPressureFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchScalarField,
-    buoyantPressureFvPatchScalarField
-);
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchScalarField,
+        buoyantPressureFvPatchScalarField
+    );
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

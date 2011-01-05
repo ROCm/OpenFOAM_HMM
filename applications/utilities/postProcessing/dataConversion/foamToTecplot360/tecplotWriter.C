@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -403,7 +403,7 @@ void Foam::tecplotWriter::writeConnectivity
         edge e = pp.edges()[edgeI];
         if (e[0] > e[1])
         {
-            e = e.reverseEdge();
+            e.flip();
         }
 
         FaceNodes[nodeI++] = INTEGER4(e[0]+1);
@@ -448,7 +448,7 @@ void Foam::tecplotWriter::writeConnectivity
             edge e = pp.edges()[edgeI];
             if (e[0] > e[1])
             {
-                e = e.reverseEdge();
+                e.flip();
             }
 
             const face& f0 = pp.localFaces()[eFaces[0]];

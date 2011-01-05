@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,7 +49,7 @@ const scalar
     RK::dc1 = RK::c1 - 2825.0/27648.0, RK::dc3 = RK::c3 - 18575.0/48384.0,
     RK::dc4 = RK::c4 - 13525.0/55296.0, RK::dc5 = -277.00/14336.0,
     RK::dc6 = RK::c6 - 0.25;
-};
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

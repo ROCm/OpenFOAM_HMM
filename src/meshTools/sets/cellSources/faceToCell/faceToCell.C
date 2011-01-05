@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,11 @@ namespace Foam
     addToRunTimeSelectionTable(topoSetSource, faceToCell, istream);
 
     template<>
-    const char* Foam::NamedEnum<Foam::faceToCell::faceAction, 4>::names[] =
+    const char* Foam::NamedEnum
+    <
+        Foam::faceToCell::faceAction,
+        4
+    >::names[] =
     {
         "neighbour",
         "owner",

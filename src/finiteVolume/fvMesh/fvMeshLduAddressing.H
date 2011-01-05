@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,7 +60,7 @@ class fvMeshLduAddressing
         const labelList& upperAddr_;
 
         //- Patch addressing as a list of sublists
-        List<const unallocLabelList*> patchAddr_;
+        List<const labelUList*> patchAddr_;
 
         //- Patch field evaluation schedule
         const lduSchedule& patchSchedule_;

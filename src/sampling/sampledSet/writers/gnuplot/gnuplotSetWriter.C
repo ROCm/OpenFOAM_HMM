@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -86,7 +86,7 @@ void Foam::gnuplotSetWriter<Type>::write
 
     forAll(valueSets, i)
     {
-        writeTable(points, *valueSets[i], os);
+        this->writeTable(points, *valueSets[i], os);
         os  << "e" << nl;
     }
 }
@@ -131,7 +131,7 @@ void Foam::gnuplotSetWriter<Type>::write
 
             forAll(valueSets, i)
             {
-                writeTable(trackPoints[trackI], valueSets[i][trackI], os);
+                this->writeTable(trackPoints[trackI], valueSets[i][trackI], os);
                 os  << "e" << nl;
             }
         }

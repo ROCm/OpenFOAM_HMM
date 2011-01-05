@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -202,16 +202,16 @@ void Foam::kineticTheoryModel::solve(const volTensorField& gradUat)
 
     const scalar sqrtPi = sqrt(constant::mathematical::pi);
 
-    surfaceScalarField phi = 1.5*rhoa_*phia_*fvc::interpolate(alpha_);
+    surfaceScalarField phi(1.5*rhoa_*phia_*fvc::interpolate(alpha_));
 
-    volTensorField dU = gradUat.T();//fvc::grad(Ua_);
-    volSymmTensorField D = symm(dU);
+    volTensorField dU(gradUat.T());    //fvc::grad(Ua_);
+    volSymmTensorField D(symm(dU));
 
     // NB, drag = K*alpha*beta,
     // (the alpha and beta has been extracted from the drag function for
     // numerical reasons)
-    volScalarField Ur = mag(Ua_ - Ub_);
-    volScalarField betaPrim = alpha_*(1.0 - alpha_)*draga_.K(Ur);
+    volScalarField Ur(mag(Ua_ - Ub_));
+    volScalarField betaPrim(alpha_*(1.0 - alpha_)*draga_.K(Ur));
 
     // Calculating the radial distribution function (solid volume fraction is
     //  limited close to the packing limit, but this needs improvements)
@@ -223,12 +223,15 @@ void Foam::kineticTheoryModel::solve(const volTensorField& gradUat)
     );
 
     // particle pressure - coefficient in front of Theta (Eq. 3.22, p. 45)
-    volScalarField PsCoeff = granularPressureModel_->granularPressureCoeff
+    volScalarField PsCoeff
     (
-        alpha_,
-        gs0_,
-        rhoa_,
-        e_
+        granularPressureModel_->granularPressureCoeff
+        (
+            alpha_,
+            gs0_,
+            rhoa_,
+            e_
+        )
     );
 
     // 'thermal' conductivity (Table 3.3, p. 49)
@@ -245,23 +248,27 @@ void Foam::kineticTheoryModel::solve(const volTensorField& gradUat)
     );
 
     dimensionedScalar TsmallSqrt = sqrt(Tsmall);
-    volScalarField ThetaSqrt = sqrt(Theta_);
+    volScalarField ThetaSqrt(sqrt(Theta_));
 
     // dissipation (Eq. 3.24, p.50)
-    volScalarField gammaCoeff =
-        12.0*(1.0 - sqr(e_))*sqr(alpha_)*rhoa_*gs0_*(1.0/da_)*ThetaSqrt/sqrtPi;
+    volScalarField gammaCoeff
+    (
+        12.0*(1.0 - sqr(e_))*sqr(alpha_)*rhoa_*gs0_*(1.0/da_)*ThetaSqrt/sqrtPi
+    );
 
     // Eq. 3.25, p. 50 Js = J1 - J2
-    volScalarField J1 = 3.0*betaPrim;
-    volScalarField J2 =
+    volScalarField J1(3.0*betaPrim);
+    volScalarField J2
+    (
         0.25*sqr(betaPrim)*da_*sqr(Ur)
-       /(max(alpha_, scalar(1e-6))*rhoa_*sqrtPi*(ThetaSqrt + TsmallSqrt));
+       /(max(alpha_, scalar(1e-6))*rhoa_*sqrtPi*(ThetaSqrt + TsmallSqrt))
+    );
 
     // bulk viscosity  p. 45 (Lun et al. 1984).
     lambda_ = (4.0/3.0)*sqr(alpha_)*rhoa_*da_*gs0_*(1.0+e_)*ThetaSqrt/sqrtPi;
 
     // stress tensor, Definitions, Table 3.1, p. 43
-    volSymmTensorField tau = 2.0*mua_*D + (lambda_ - (2.0/3.0)*mua_)*tr(D)*I;
+    volSymmTensorField tau(2.0*mua_*D + (lambda_ - (2.0/3.0)*mua_)*tr(D)*I);
 
     if (!equilibrium_)
     {
@@ -289,31 +296,38 @@ void Foam::kineticTheoryModel::solve(const volTensorField& gradUat)
     {
         // equilibrium => dissipation == production
         // Eq. 4.14, p.82
-        volScalarField K1 = 2.0*(1.0 + e_)*rhoa_*gs0_;
-        volScalarField K3 = 0.5*da_*rhoa_*
+        volScalarField K1(2.0*(1.0 + e_)*rhoa_*gs0_);
+        volScalarField K3
+        (
+            0.5*da_*rhoa_*
             (
                 (sqrtPi/(3.0*(3.0-e_)))
                *(1.0 + 0.4*(1.0 + e_)*(3.0*e_ - 1.0)*alpha_*gs0_)
                +1.6*alpha_*gs0_*(1.0 + e_)/sqrtPi
-            );
+            )
+        );
 
-        volScalarField K2 =
-            4.0*da_*rhoa_*(1.0 + e_)*alpha_*gs0_/(3.0*sqrtPi) - 2.0*K3/3.0;
+        volScalarField K2
+        (
+            4.0*da_*rhoa_*(1.0 + e_)*alpha_*gs0_/(3.0*sqrtPi) - 2.0*K3/3.0
+        );
 
-        volScalarField K4 = 12.0*(1.0 - sqr(e_))*rhoa_*gs0_/(da_*sqrtPi);
+        volScalarField K4(12.0*(1.0 - sqr(e_))*rhoa_*gs0_/(da_*sqrtPi));
 
-        volScalarField trD = tr(D);
-        volScalarField tr2D = sqr(trD);
-        volScalarField trD2 = tr(D & D);
+        volScalarField trD(tr(D));
+        volScalarField tr2D(sqr(trD));
+        volScalarField trD2(tr(D & D));
 
-        volScalarField t1 = K1*alpha_ + rhoa_;
-        volScalarField l1 = -t1*trD;
-        volScalarField l2 = sqr(t1)*tr2D;
-        volScalarField l3 =
+        volScalarField t1(K1*alpha_ + rhoa_);
+        volScalarField l1(-t1*trD);
+        volScalarField l2(sqr(t1)*tr2D);
+        volScalarField l3
+        (
             4.0
            *K4
            *max(alpha_, scalar(1e-6))
-           *(2.0*K3*trD2 + K2*tr2D);
+           *(2.0*K3*trD2 + K2*tr2D)
+        );
 
         Theta_ = sqr((l1 + sqrt(l2 + l3))/(2.0*(alpha_ + 1.0e-4)*K4));
     }
@@ -321,14 +335,17 @@ void Foam::kineticTheoryModel::solve(const volTensorField& gradUat)
     Theta_.max(1.0e-15);
     Theta_.min(1.0e+3);
 
-    volScalarField pf = frictionalStressModel_->frictionalPressure
+    volScalarField pf
     (
-        alpha_,
-        alphaMinFriction_,
-        alphaMax_,
-        Fr_,
-        eta_,
-        p_
+        frictionalStressModel_->frictionalPressure
+        (
+            alpha_,
+            alphaMinFriction_,
+            alphaMax_,
+            Fr_,
+            eta_,
+            p_
+        )
     );
 
     PsCoeff += pf/(Theta_+Tsmall);
@@ -340,23 +357,26 @@ void Foam::kineticTheoryModel::solve(const volTensorField& gradUat)
     pa_ = PsCoeff*Theta_;
 
     // frictional shear stress, Eq. 3.30, p. 52
-    volScalarField muf = frictionalStressModel_->muf
+    volScalarField muf
     (
-        alpha_,
-        alphaMax_,
-        pf,
-        D,
-        phi_
+        frictionalStressModel_->muf
+        (
+            alpha_,
+            alphaMax_,
+            pf,
+            D,
+            phi_
+        )
     );
 
-   // add frictional stress
+    // add frictional stress
     mua_ += muf;
     mua_.min(1.0e+2);
     mua_.max(0.0);
 
     Info<< "kinTheory: max(Theta) = " << max(Theta_).value() << endl;
 
-    volScalarField ktn = mua_/rhoa_;
+    volScalarField ktn(mua_/rhoa_);
 
     Info<< "kinTheory: min(nua) = " << min(ktn).value()
         << ", max(nua) = " << max(ktn).value() << endl;

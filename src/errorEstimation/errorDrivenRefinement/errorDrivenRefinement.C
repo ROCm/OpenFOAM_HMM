@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -130,7 +130,7 @@ void Foam::errorDrivenRefinement::setRefinement(polyTopoChange& ref) const
     const volVectorField& resError =
         runTime.lookupObject<volVectorField>(errorField_);
 
-    const volScalarField magResError = Foam::mag(resError);
+    const volScalarField magResError(Foam::mag(resError));
 
     scalar min = Foam::min(magResError).value();
     scalar max = Foam::max(magResError).value();

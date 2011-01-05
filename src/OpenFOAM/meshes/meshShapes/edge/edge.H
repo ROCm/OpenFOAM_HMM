@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -102,6 +102,9 @@ public:
 
         //- Return common vertex
         inline label commonVertex(const edge& a) const;
+
+        //- Flip the edge in-place.
+        inline void flip();
 
         //- Return reverse edge
         inline edge reverseEdge() const;

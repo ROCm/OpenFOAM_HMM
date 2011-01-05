@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -131,7 +131,7 @@ void directMappedFixedInternalValueFvPatchField<Type>::updateCoeffs()
         );
 
     // Retrieve the neighbour patch internal field
-    Field<Type> nbrIntFld = nbrField.patchInternalField();
+    Field<Type> nbrIntFld(nbrField.patchInternalField());
     distMap.distribute(nbrIntFld);
 
     // Assign (this) patch internal field to its neighbour values

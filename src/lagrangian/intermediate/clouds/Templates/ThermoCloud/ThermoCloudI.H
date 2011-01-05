@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -137,7 +137,7 @@ Foam::ThermoCloud<ParcelType>::Sh(volScalarField& hs) const
     {
         if (this->solution().semiImplicit("hs"))
         {
-            const volScalarField Cp = thermo_.thermo().Cp();
+            const volScalarField Cp(thermo_.thermo().Cp());
 
             return
                 hsTrans()/(this->mesh().V()*this->db().time().deltaT())

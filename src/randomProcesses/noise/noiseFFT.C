@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,6 +33,7 @@ License
 // * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * //
 
 Foam::scalar Foam::noiseFFT::p0 = 2e-5;
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -226,9 +227,9 @@ Foam::graph Foam::noiseFFT::meanPf
 
     scalarField MeanPf(N/2, 0.0);
 
-    scalarField Hwf = Hanning(N);
+    scalarField Hwf(Hanning(N));
 
-    for (label wi=0; wi<nw; wi++)
+    for (label wi=0; wi<nw; ++wi)
     {
         MeanPf += Pf(Hwf*window(N, wi));
     }
@@ -272,9 +273,9 @@ Foam::graph Foam::noiseFFT::RMSmeanPf
 
     scalarField RMSMeanPf(N/2, 0.0);
 
-    scalarField Hwf = Hanning(N);
+    scalarField Hwf(Hanning(N));
 
-    for (label wi=0; wi<nw; wi++)
+    for (label wi=0; wi<nw; ++wi)
     {
         RMSMeanPf += sqr(Pf(Hwf*window(N, wi)));
     }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -472,7 +472,7 @@ faceList hexBlock::patchFaces(const label direc, const labelList& range) const
         // turn all faces inside out
         forAll(result, faceI)
         {
-            result[faceI] = result[faceI].reverseFace();
+            result[faceI].flip();
         }
     }
 

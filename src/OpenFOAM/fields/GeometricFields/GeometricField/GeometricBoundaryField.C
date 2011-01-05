@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,7 +53,7 @@ GeometricBoundaryField
 
     forAll(bmesh_, patchi)
     {
-        set
+        this->set
         (
             patchi,
             PatchField<Type>::New
@@ -112,7 +112,7 @@ GeometricBoundaryField
     {
         forAll(bmesh_, patchi)
         {
-            set
+            this->set
             (
                 patchi,
                 PatchField<Type>::New
@@ -129,7 +129,7 @@ GeometricBoundaryField
     {
         forAll(bmesh_, patchi)
         {
-            set
+            this->set
             (
                 patchi,
                 PatchField<Type>::New
@@ -167,7 +167,7 @@ GeometricBoundaryField
 
     forAll(bmesh_, patchi)
     {
-        set(patchi, ptfl[patchi].clone(field));
+        this->set(patchi, ptfl[patchi].clone(field));
     }
 }
 
@@ -195,7 +195,7 @@ GeometricBoundaryField
 
     forAll(bmesh_, patchi)
     {
-        set(patchi, btf[patchi].clone(field));
+        this->set(patchi, btf[patchi].clone(field));
     }
 }
 
@@ -275,7 +275,7 @@ GeometricBoundaryField
                     << " to split cyclics." << exit(FatalIOError);
             }
 
-            set
+            this->set
             (
                 patchi,
                 PatchField<Type>::New
@@ -288,7 +288,7 @@ GeometricBoundaryField
         }
         else
         {
-            set
+            this->set
             (
                 patchi,
                 PatchField<Type>::New

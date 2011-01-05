@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -409,19 +409,25 @@ void LienCubicKELowRe::correct()
     gradU_ = fvc::grad(U_);
 
     // generation term
-    volScalarField S2 = symm(gradU_) && gradU_;
+    tmp<volScalarField> S2 = symm(gradU_) && gradU_;
 
     yStar_ = sqrt(k_)*y_/nu() + SMALL;
-    volScalarField Rt = sqr(k_)/(nu()*epsilon_);
+    tmp<volScalarField> Rt = sqr(k_)/(nu()*epsilon_);
 
-    volScalarField fMu =
+    const volScalarField fMu
+    (
         (scalar(1) - exp(-Am_*yStar_))
-       /(scalar(1) - exp(-Aepsilon_*yStar_) + SMALL);
+       /(scalar(1) - exp(-Aepsilon_*yStar_) + SMALL)
+    );
+    const volScalarField f2
+    (
+        scalar(1) - 0.3*exp(-sqr(Rt))
+    );
 
-    volScalarField f2 = scalar(1) - 0.3*exp(-sqr(Rt));
-
-    volScalarField G =
-        Cmu_*fMu*sqr(k_)/epsilon_*S2 - (nonlinearStress_ && gradU_);
+    volScalarField G
+    (
+        Cmu_*fMu*sqr(k_)/epsilon_*S2 - (nonlinearStress_ && gradU_)
+    );
 
     // Dissipation equation
     tmp<fvScalarMatrix> epsEqn

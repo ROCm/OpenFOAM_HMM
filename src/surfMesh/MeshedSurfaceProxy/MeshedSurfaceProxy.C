@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,10 @@ bool Foam::MeshedSurfaceProxy<Face>::canWriteType
     const bool verbose
 )
 {
-    return checkSupport(writeTypes(), ext, verbose, "writing");
+    return fileFormats::surfaceFormatsCore::checkSupport
+    (
+        writeTypes(), ext, verbose, "writing"
+    );
 }
 
 

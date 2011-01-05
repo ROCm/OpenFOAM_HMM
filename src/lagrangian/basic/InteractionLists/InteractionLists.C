@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1195,7 +1195,7 @@ void Foam::InteractionLists<ParticleType>::sendReferredData
     // buffer but not block, i.e. it is calling
     //     pBufs.finishedSends(false);
     wallFaceMap().send(pBufs, referredWallData_);
-};
+}
 
 
 template<class ParticleType>

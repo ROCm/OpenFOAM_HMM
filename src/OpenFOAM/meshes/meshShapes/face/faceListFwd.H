@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,10 +39,12 @@ Description
 namespace Foam
 {
     class face;
-    typedef UList<face> unallocFaceList;
+    typedef UList<face> faceUList;
     typedef List<face> faceList;
     typedef SubList<face> faceSubList;
     typedef List<faceList> faceListList;
+    // same as faceUList:
+    typedef UList<face> unallocFaceList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

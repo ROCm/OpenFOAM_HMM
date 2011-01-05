@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -129,8 +129,8 @@ int main(int argc, char *argv[])
         scalar eps = ::Foam::exp(-scalar(i + 1));
 
         scalar x = xStart;
-        scalarField y = yStart;
-        scalarField dydx = dyStart;
+        scalarField y(yStart);
+        scalarField dydx(dyStart);
 
         scalarField yScale(ode.nEqns(), 1.0);
         scalar hEst = 0.6;
@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
 
     scalar x = xStart;
     scalar xEnd = x + 1.0;
-    scalarField y = yStart;
+    scalarField y(yStart);
 
     scalarField yEnd(ode.nEqns());
     yEnd[0] = ::Foam::j0(xEnd);

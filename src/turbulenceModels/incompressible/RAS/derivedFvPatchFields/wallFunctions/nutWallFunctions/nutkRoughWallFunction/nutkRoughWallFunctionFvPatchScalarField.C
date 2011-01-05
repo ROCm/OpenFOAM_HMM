@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,7 +71,7 @@ tmp<scalarField> nutkRoughWallFunctionFvPatchScalarField::calcNut() const
     const scalarField& y = rasModel.y()[patchI];
     const tmp<volScalarField> tk = rasModel.k();
     const volScalarField& k = tk();
-    const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
+    const scalarField& nuw = rasModel.nu()().boundaryField()[patchI];
 
     const scalar Cmu25 = pow025(Cmu_);
 

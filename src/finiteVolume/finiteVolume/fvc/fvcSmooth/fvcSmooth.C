@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -183,8 +183,10 @@ void Foam::fvc::spread
                 label facei = patch.start() + patchFacei;
                 label own = mesh.faceOwner()[facei];
 
-                scalarField alphapn =
-                    alpha.boundaryField()[patchi].patchNeighbourField();
+                const scalarField alphapn
+                (
+                    alpha.boundaryField()[patchi].patchNeighbourField()
+                );
 
                 if
                 (
@@ -283,8 +285,10 @@ void Foam::fvc::sweep
                 label facei = patch.start() + patchFacei;
                 label own = mesh.faceOwner()[facei];
 
-                scalarField alphapn =
-                    alpha.boundaryField()[patchi].patchNeighbourField();
+                const scalarField alphapn
+                (
+                    alpha.boundaryField()[patchi].patchNeighbourField()
+                );
 
                 if (mag(alpha[own] - alphapn[patchFacei]) > alphaDiff)
                 {

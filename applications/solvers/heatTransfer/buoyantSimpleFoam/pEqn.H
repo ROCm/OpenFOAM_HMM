@@ -2,7 +2,7 @@
     rho = thermo.rho();
     rho.relax();
 
-    volScalarField rAU = 1.0/UEqn().A();
+    volScalarField rAU(1.0/UEqn().A());
     surfaceScalarField rhorAUf("(rho*(1|A(U)))", fvc::interpolate(rho*rAU));
 
     U = rAU*UEqn().H();
@@ -11,7 +11,7 @@
     phi = fvc::interpolate(rho)*(fvc::interpolate(U) & mesh.Sf());
     bool closedVolume = adjustPhi(phi, U, p_rgh);
 
-    surfaceScalarField buoyancyPhi = rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf();
+    surfaceScalarField buoyancyPhi(rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf());
     phi -= buoyancyPhi;
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)

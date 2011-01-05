@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,8 +42,8 @@ namespace Foam
     template<>
     const char* Foam::NamedEnum
     <
-       Foam::abortCalculation::actionType,
-       3
+        Foam::abortCalculation::actionType,
+        3
     >::names[] =
     {
         "noWriteNow",
