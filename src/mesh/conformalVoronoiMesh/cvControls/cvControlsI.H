@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -152,17 +152,21 @@ Foam::cvControls::continueFilteringOnBadInitialPolyMesh() const
 }
 
 
-inline Foam::scalar
-Foam::cvControls::filterErrorReductionCoeff() const
+inline Foam::scalar Foam::cvControls::filterErrorReductionCoeff() const
 {
     return filterErrorReductionCoeff_;
 }
 
 
-inline Foam::label
-Foam::cvControls::filterCountSkipThreshold() const
+inline Foam::label Foam::cvControls::filterCountSkipThreshold() const
 {
     return filterCountSkipThreshold_;
+}
+
+
+inline Foam::label Foam::cvControls::maxCollapseIterations() const
+{
+    return maxCollapseIterations_;
 }
 
 

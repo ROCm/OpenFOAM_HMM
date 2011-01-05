@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -227,19 +227,23 @@ class cvControls
         //  with filtering anyway?
         Switch continueFilteringOnBadInitialPolyMesh_;
 
-        //- When a face is "bad", what fraction should the
-        //- filterSizeCoeff_ be reduced by.  Recursive, so for a
-        //- filterCount value of fC, the filterSizeCoeff is reduced
-        //- by pow(filterErrorReductionCoeff_, fC)
+        //- When a face is "bad", what fraction should the filterSizeCoeff_ be
+        //  reduced by.  Recursive, so for a filterCount value of fC, the
+        //  filterSizeCoeff is reduced by pow(filterErrorReductionCoeff_, fC)
         scalar filterErrorReductionCoeff_;
 
         //- Maximum number of filterCount applications before a face
-        //  is not attempted to be filtered.
+        //  is not attempted to be filtered
         label filterCountSkipThreshold_;
 
-        //- The maximum allowed angle between a boundary face normal
-        //  and the local surface normal before face will be
-        //  aggressively collapsed
+        //- Maximum number of permissible iterations of the face collapse
+        //  algorithm.  The value to choose will be related the maximum number
+        //  of points on a face that is to be collapsed and how many faces
+        //  around it need to be collapsed.
+        label maxCollapseIterations_;
+
+        //- The maximum allowed angle between a boundary face normal and the
+        //  local surface normal before face will be aggressively collapsed
         scalar surfaceStepFaceAngle_;
 
         //- Defining how close to the midpoint (M) of the projected
@@ -380,8 +384,14 @@ public:
             //- Return the filterErrorReductionCoeff
             inline scalar filterErrorReductionCoeff() const;
 
+            //- Return the maxCollapseIterations
+            inline label maxCollapseIterations() const;
+
             //- Return the filterCountSkipThreshold
             inline label filterCountSkipThreshold() const;
+
+            //- Return the maxCollapseIterations
+            inline label minCollapseFaces() const;
 
             //- Return the surfaceStepFaceAngle
             inline scalar surfaceStepFaceAngle() const;

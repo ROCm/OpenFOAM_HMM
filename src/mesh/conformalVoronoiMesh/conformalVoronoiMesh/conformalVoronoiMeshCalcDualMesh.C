@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -108,7 +108,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     if (filterFaces)
     {
-        label nInitialBadQualityFaces = checkPolyMeshQuality(points);
+        label nInitialBadQualityFaces = checkPolyMeshQuality(points).size();
 
         Info<< nl << "Initial check before face collapse, found "
             << nInitialBadQualityFaces << " bad quality faces"
@@ -138,6 +138,8 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         {
             label nBadQualityFaces = 0;
 
+            labelHashSet lastWrongFaces;
+
             do
             {
                 // Reindexing the Delaunay cells and regenerating the
@@ -165,10 +167,24 @@ void Foam::conformalVoronoiMesh::calcDualMesh
                     collapseFaces(points, boundaryPts, deferredCollapseFaces);
                 }
 
-                nBadQualityFaces = checkPolyMeshQuality(points);
+                labelHashSet wrongFaces = checkPolyMeshQuality(points);
+
+                nBadQualityFaces = wrongFaces.size();
 
                 Info<< nl << "Found " << nBadQualityFaces
                     << " bad quality faces" << endl;
+
+                if (lastWrongFaces == wrongFaces)
+                {
+                    Info<< nl << "Consecutive iterations found the same set "
+                        << "of bad quality faces, stopping filtering" << endl;
+
+                    break;
+                }
+                else
+                {
+                    lastWrongFaces = wrongFaces;
+                }
 
             } while (nBadQualityFaces > nInitialBadQualityFaces);
         }
@@ -501,6 +517,8 @@ void Foam::conformalVoronoiMesh::smoothSurface
 {
     label nCollapsedFaces = 0;
 
+    label iterI = 0;
+
     do
     {
         Map<label> dualPtIndexMap;
@@ -512,15 +530,23 @@ void Foam::conformalVoronoiMesh::smoothSurface
             dualPtIndexMap
         );
 
+        reindexDualVertices(dualPtIndexMap);
+
+        mergeCloseDualVertices(pts, boundaryPts);
+
         if (nCollapsedFaces > 0)
         {
             Info<< "    Collapsed " << nCollapsedFaces << " boundary faces"
                 << endl;
         }
 
-        reindexDualVertices(dualPtIndexMap);
+        if (++iterI > cvMeshControls().maxCollapseIterations())
+        {
+            Info<< nl << "maxCollapseIterations reached, stopping collapse"
+                << endl;
 
-        mergeCloseDualVertices(pts, boundaryPts);
+            break;
+        }
 
     } while (nCollapsedFaces > 0);
 
@@ -724,6 +750,8 @@ void Foam::conformalVoronoiMesh::collapseFaces
 {
     label nCollapsedFaces = 0;
 
+    label iterI = 0;
+
     do
     {
         Map<label> dualPtIndexMap;
@@ -746,6 +774,14 @@ void Foam::conformalVoronoiMesh::collapseFaces
         {
             Info<< "    Collapsed " << nCollapsedFaces << " faces" << endl;
             // Info<< "dualPtIndexMap" << nl << dualPtIndexMap << endl;
+        }
+
+        if (++iterI > cvMeshControls().maxCollapseIterations())
+        {
+            Info<< nl << "maxCollapseIterations reached, stopping collapse"
+                << endl;
+
+            break;
         }
 
     } while (nCollapsedFaces > 0);
@@ -1373,7 +1409,7 @@ void Foam::conformalVoronoiMesh::deferredCollapseFaceSet
 }
 
 
-Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
+Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 (
     const pointField& pts
 ) const
@@ -1580,14 +1616,7 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
     Info<< nl << "Maximum number of filter limits applied: "
         << maxFilterCount << endl;
 
-    return wrongFaces.size();
-
-    // For parallel running:
-    // return returnReduce
-    // (
-    //     wrongFaces.size(),
-    //     sumOp<label>()
-    // );
+    return wrongFaces;
 }
 
 

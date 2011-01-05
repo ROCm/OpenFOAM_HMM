@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -588,7 +588,7 @@ private:
 
         //- Create a polyMesh and check its quality, reports which
         //  elements damage the mesh quality, allowing backtracking.
-        label checkPolyMeshQuality(const pointField& pts) const;
+        labelHashSet checkPolyMeshQuality(const pointField& pts) const;
 
         //- Index all of the the Delaunay cells and calculate their
         //- dual points
