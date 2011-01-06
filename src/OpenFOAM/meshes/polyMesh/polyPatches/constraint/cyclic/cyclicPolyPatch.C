@@ -276,9 +276,16 @@ void Foam::cyclicPolyPatch::calcTransforms
 
         if (transform_ == ROTATIONAL && !parallel() && forwardT().size() > 1)
         {
-            const_cast<tensorField&>(forwardT()).setSize(1);
-            const_cast<tensorField&>(reverseT()).setSize(1);
+            // Get index of maximum area face to minimise truncation errors.
+            label max0I = findMaxArea(half0.points(), half0);
+
+            const tensor fwdT = forwardT()[max0I];
+            const_cast<tensorField&>(forwardT()) = tensorField(1, fwdT);
+            const tensor revT = reverseT()[max0I];
+            const_cast<tensorField&>(reverseT()) = tensorField(1, revT);
+            const bool coll = collocated()[max0I];
             const_cast<boolList&>(collocated()).setSize(1);
+            const_cast<boolList&>(collocated())[0] = coll;
 
             WarningIn
             (
@@ -293,8 +300,9 @@ void Foam::cyclicPolyPatch::calcTransforms
             )   << "For patch " << name()
                 << " calculated non-uniform transform tensor even though"
                 << " the transform type is " << transformTypeNames[transform_]
-                << ". Setting the transformation tensor to be a uniform"
-                << " rotation."
+                << "." << nl
+                << "    Setting the transformation tensor to be a uniform"
+                << " rotation calculated from face " << max0I
                 << endl;
         }
     }
