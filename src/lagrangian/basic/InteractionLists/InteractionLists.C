@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -180,7 +180,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
 
         treeBoundBox tempTransformedBb
         (
-            transform.invTransform(cellBbsToExchange[bbI].points())
+            transform.invTransformPosition(cellBbsToExchange[bbI].points())
         );
 
         treeBoundBox extendedBb
@@ -397,7 +397,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
 
         treeBoundBox tempTransformedBb
         (
-            transform.invTransform(wallFaceBbsToExchange[bbI].points())
+            transform.invTransformPosition(wallFaceBbsToExchange[bbI].points())
         );
 
         treeBoundBox extendedBb
@@ -535,7 +535,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
         referredWallFaces_[rWFI] = referredWallFace
         (
             face(identity(f.size())),
-            transform.invTransform(f.points(mesh_.points())),
+            transform.invTransformPosition(f.points(mesh_.points())),
             patchI
         );
     }
@@ -700,7 +700,7 @@ void Foam::InteractionLists<ParticleType>::findExtendedProcBbsInRange
 
                         treeBoundBox extendedReferredProcBb
                         (
-                            transform.transform
+                            transform.transformPosition
                             (
                                 allExtendedProcBbs[procI].points()
                             )
@@ -747,7 +747,7 @@ void Foam::InteractionLists<ParticleType>::findExtendedProcBbsInRange
 
                     treeBoundBox extendedReferredProcBb
                     (
-                        transform.transform
+                        transform.transformPosition
                         (
                             allExtendedProcBbs[procI].points()
                         )
@@ -790,7 +790,7 @@ void Foam::InteractionLists<ParticleType>::findExtendedProcBbsInRange
 
                 treeBoundBox extendedReferredProcBb
                 (
-                    transform.transform
+                    transform.transformPosition
                     (
                         allExtendedProcBbs[procI].points()
                     )
@@ -957,7 +957,7 @@ void Foam::InteractionLists<ParticleType>::prepareParticleToBeReferred
         globalTransforms_.transformIndex(ciat)
     );
 
-    particle->position() = transform.invTransform(particle->position());
+    particle->position() = transform.invTransformPosition(particle->position());
 
     particle->transformProperties(-transform.t());
 

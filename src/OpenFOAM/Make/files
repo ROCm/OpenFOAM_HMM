@@ -42,6 +42,8 @@ primitives/SphericalTensor2D/sphericalTensor2D/sphericalTensor2D.C
 primitives/Vector2D/vector2D/vector2D.C
 
 primitives/complex/complex.C
+primitives/globalIndexAndTransform/globalIndexAndTransform.C
+primitives/globalIndexAndTransform/vectorTensorTransform/vectorTensorTransform.C
 primitives/quaternion/quaternion.C
 primitives/septernion/septernion.C
 

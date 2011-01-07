@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -324,6 +324,11 @@ void Foam::globalIndexAndTransform::determineTransformPermutations()
 
         transformPermutations_[tPI] = transform;
     }
+
+
+    // Encode index for 0 sign
+    labelList permutationIndices(nIndependentTransforms(), 0);
+    nullTransformIndex_ = encodeTransformIndex(permutationIndices);
 }
 
 
@@ -462,6 +467,7 @@ Foam::globalIndexAndTransform::globalIndexAndTransform
 
     determinePatchTransformSign();
 }
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 

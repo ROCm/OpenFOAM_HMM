@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,6 +51,7 @@ Note:
 
 SourceFiles
     mapDistribute.C
+    mapDistributeTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -71,6 +72,7 @@ namespace Foam
 class mapPolyMesh;
 class globalIndex;
 class PstreamBuffers;
+class globalIndexAndTransform;
 
 /*---------------------------------------------------------------------------*\
                            Class mapDistribute Declaration
@@ -89,6 +91,16 @@ class mapDistribute
         //- Maps from subsetted data to new reconstructed data
         labelListList constructMap_;
 
+        // Optional transformation
+
+            //- For every globalIndexAndTransform::transformPermutations
+            //  gives the elements that need to be transformed
+            labelListList transformElements_;
+
+            //- Destination in constructMap for transformed elements
+            labelList transformStart_;
+
+
         //- Schedule
         mutable autoPtr<List<labelPair> > schedulePtr_;
 
@@ -102,7 +114,69 @@ class mapDistribute
             const label receivedSize
         );
 
+        void printLayout
+        (
+            const label localSize,
+            List<Map<label> >& compactMap,
+            Ostream& os
+        ) const;
+
+        void calcCompactAddressing
+        (
+            const globalIndex& globalNumbering,
+            const labelList& elements,
+            List<Map<label> >& compactMap
+        ) const;
+        void calcCompactAddressing
+        (
+            const globalIndex& globalNumbering,
+            const labelListList& elements,
+            List<Map<label> >& compactMap
+        ) const;
+
+        void exchangeAddressing
+        (
+            const globalIndex& globalNumbering,
+            labelList& elements,
+            List<Map<label> >& compactMap,
+            labelList& compactStart
+        );
+        void exchangeAddressing
+        (
+            const globalIndex& globalNumbering,
+            labelListList& elements,
+            List<Map<label> >& compactMap,
+            labelList& compactStart
+        );
+
+
+        //- Helper function: copy transformElements without transformation
+        template<class T>
+        void copyElements(List<T>& field) const;
+
+        template<class T, class CombineOp>
+        void applyTransforms
+        (
+            const globalIndexAndTransform& globalTransforms,
+            List<T>& field,
+            const bool isPosition,
+            const CombineOp& cop
+        ) const;
+        template<class T, class CombineOp>
+        void applyInverseTransforms
+        (
+            const globalIndexAndTransform& globalTransforms,
+            List<T>& field,
+            const bool isPosition,
+            const CombineOp& cop
+        ) const;
+
+
 public:
+
+    // Declare name of the class and its debug switch
+    ClassName("mapDistribute");
+
 
     // Constructors
 
@@ -112,6 +186,16 @@ public:
             const label constructSize,
             const Xfer<labelListList>& subMap,
             const Xfer<labelListList>& constructMap
+        );
+
+        //- Construct from components
+        mapDistribute
+        (
+            const label constructSize,
+            const Xfer<labelListList>& subMap,
+            const Xfer<labelListList>& constructMap,
+            const Xfer<labelListList>& transformElements,
+            const Xfer<labelList>& transformStart
         );
 
         //- Construct from reverse addressing: per data item the send
@@ -133,6 +217,20 @@ public:
             List<Map<label> >& compactMap
         );
 
+        //- Construct from list of (possibly) remote elements in globalIndex
+        //  numbering (or -1). Determines compact numbering (see above) and
+        //  distribute map to get data into this ordering and renumbers the
+        //  elements to be in compact numbering.
+        mapDistribute
+        (
+            const globalIndex&,
+            labelList& untransformedElements,
+            const globalIndexAndTransform&,
+            const labelPairList& transformedElements,
+            labelList& transformedIndices,
+            List<Map<label> >& compactMap
+        );
+
         //- Special variant that works with the info sorted into bins
         //  according to local indices. E.g. think cellCells where
         //  cellCells[localCellI] is a list of global cells
@@ -140,6 +238,17 @@ public:
         (
             const globalIndex&,
             labelListList& cellCells,
+            List<Map<label> >& compactMap
+        );
+
+        //- As above but with transformed elements as well
+        mapDistribute
+        (
+            const globalIndex&,
+            labelListList& cellCells,
+            const globalIndexAndTransform& ,
+            const List<labelPairList>& transformedElements,
+            labelListList& transformedIndices,
             List<Map<label> >& compactMap
         );
 
@@ -245,88 +354,30 @@ public:
 
             //- Distribute data using default commsType.
             template<class T>
-            void distribute(List<T>& fld) const
-            {
-                if (Pstream::defaultCommsType == Pstream::nonBlocking)
-                {
-                    distribute
-                    (
-                        Pstream::nonBlocking,
-                        List<labelPair>(),
-                        constructSize_,
-                        subMap_,
-                        constructMap_,
-                        fld
-                    );
-                }
-                else if (Pstream::defaultCommsType == Pstream::scheduled)
-                {
-                    distribute
-                    (
-                        Pstream::scheduled,
-                        schedule(),
-                        constructSize_,
-                        subMap_,
-                        constructMap_,
-                        fld
-                    );
-                }
-                else
-                {
-                    distribute
-                    (
-                        Pstream::blocking,
-                        List<labelPair>(),
-                        constructSize_,
-                        subMap_,
-                        constructMap_,
-                        fld
-                    );
-                }
-            }
+            void distribute(List<T>& fld) const;
+
+            //- Same but with transforms
+            template<class T>
+            void distribute
+            (
+                const globalIndexAndTransform&,
+                List<T>& fld,
+                const bool isPosition
+            ) const;
 
             //- Reverse distribute data using default commsType.
             template<class T>
-            void reverseDistribute(const label constructSize, List<T>& fld)
-            const
-            {
-                if (Pstream::defaultCommsType == Pstream::nonBlocking)
-                {
-                    distribute
-                    (
-                        Pstream::nonBlocking,
-                        List<labelPair>(),
-                        constructSize,
-                        constructMap_,
-                        subMap_,
-                        fld
-                    );
-                }
-                else if (Pstream::defaultCommsType == Pstream::scheduled)
-                {
-                    distribute
-                    (
-                        Pstream::scheduled,
-                        schedule(),
-                        constructSize,
-                        constructMap_,
-                        subMap_,
-                        fld
-                    );
-                }
-                else
-                {
-                    distribute
-                    (
-                        Pstream::blocking,
-                        List<labelPair>(),
-                        constructSize,
-                        constructMap_,
-                        subMap_,
-                        fld
-                    );
-                }
-            }
+            void reverseDistribute(const label constructSize, List<T>&) const;
+
+            //- Same but with transforms
+            template<class T>
+            void reverseDistribute
+            (
+                const globalIndexAndTransform&,
+                const label constructSize,
+                List<T>& fld,
+                const bool isPosition
+            ) const;
 
             //- Reverse distribute data using default commsType.
             //  Since constructSize might be larger than supplied size supply
@@ -337,52 +388,18 @@ public:
                 const label constructSize,
                 const T& nullValue,
                 List<T>& fld
-            )
-            const
-            {
-                if (Pstream::defaultCommsType == Pstream::nonBlocking)
-                {
-                    distribute
-                    (
-                        Pstream::nonBlocking,
-                        List<labelPair>(),
-                        constructSize,
-                        constructMap_,
-                        subMap_,
-                        fld,
-                        eqOp<T>(),
-                        nullValue
-                    );
-                }
-                else if (Pstream::defaultCommsType == Pstream::scheduled)
-                {
-                    distribute
-                    (
-                        Pstream::scheduled,
-                        schedule(),
-                        constructSize,
-                        constructMap_,
-                        subMap_,
-                        fld,
-                        eqOp<T>(),
-                        nullValue
-                    );
-                }
-                else
-                {
-                    distribute
-                    (
-                        Pstream::blocking,
-                        List<labelPair>(),
-                        constructSize,
-                        constructMap_,
-                        subMap_,
-                        fld,
-                        eqOp<T>(),
-                        nullValue
-                    );
-                }
-            }
+            ) const;
+
+            //- Same but with transforms
+            template<class T>
+            void reverseDistribute
+            (
+                const globalIndexAndTransform&,
+                const label constructSize,
+                const T& nullValue,
+                List<T>& fld,
+                const bool isPosition
+            ) const;
 
             //- Do all sends using PstreamBuffers
             template<class T>

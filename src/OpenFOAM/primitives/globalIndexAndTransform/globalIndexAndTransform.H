@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,11 +42,9 @@ SourceFiles
 #ifndef globalIndexAndTransform_H
 #define globalIndexAndTransform_H
 
-#include "Pstream.H"
-#include "List.H"
 #include "labelPair.H"
 #include "vectorTensorTransform.H"
-#include "polyMesh.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -82,6 +80,9 @@ class globalIndexAndTransform
         //  transform.
         List<vectorTensorTransform> transformPermutations_;
 
+        //- Index of identity transform.
+        label nullTransformIndex_;
+
         //- Mapping from patch index to which transform it matches (or
         //  -1 for none) (.first()) and what sign to us for it,
         //  i.e. +/- 1 (.second()).
@@ -92,6 +93,7 @@ class globalIndexAndTransform
 
         //- Number of spaces to reserve for transform encoding
         static const label base_;
+
 
     // Private Member Functions
 
@@ -147,6 +149,16 @@ public:
             const List<label>& permutationIndices
         ) const;
 
+        //- Add patch transformation to transformIndex. Return new
+        //  transformIndex. (by default the patch is the sending, not the
+        //  receiving, patch)
+        inline label addToTransformIndex
+        (
+            const label transformIndex,
+            const label patchI,
+            const bool isSendingSide = true
+        ) const;
+
         //- Encode index and bare index as components on own processor
         inline labelPair encode
         (
@@ -163,13 +175,16 @@ public:
         );
 
         //- Index carried by the object
-        inline label index(const labelPair& globalIAndTransform);
+        inline static label index(const labelPair& globalIAndTransform);
 
         //- Which processor does this come from?
-        inline label processor(const labelPair& globalIAndTransform);
+        inline static label processor(const labelPair& globalIAndTransform);
 
         //- Transform carried by the object
-        inline label transformIndex(const labelPair& globalIAndTransform);
+        inline static label transformIndex
+        (
+            const labelPair& globalIAndTransform
+        );
 
         // Access
 
@@ -182,6 +197,10 @@ public:
             //- Return access to the permuted transforms
             inline const List<vectorTensorTransform>&
             transformPermutations() const;
+
+            //- Return the transformIndex (index in transformPermutations)
+            //  of the identity transform
+            inline label nullTransformIndex() const;
 
             //- Return access to the per-patch transform-sign pairs
             inline const List<Pair<label> >& patchTransformSign() const;

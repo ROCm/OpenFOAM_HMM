@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,8 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "polyMesh.H"
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::label Foam::globalIndexAndTransform::encodeTransformIndex
 (
@@ -71,6 +72,90 @@ Foam::label Foam::globalIndexAndTransform::encodeTransformIndex
     }
 
     return transformIndex;
+}
+
+
+Foam::label Foam::globalIndexAndTransform::addToTransformIndex
+(
+    const label transformIndex,
+    const label patchI,
+    const bool isSendingSide
+) const
+{
+    const Pair<label>& transSign = patchTransformSign_[patchI];
+
+    label matchTransI = transSign.first();
+
+    // Hardcoded for max 3 transforms only!
+
+    if (matchTransI > -1 && matchTransI < 3)
+    {
+        label t = transformIndex;
+
+        // Decode permutation as 3 integers
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // Note: FixedList for speed reasons.
+        FixedList<label, 3> permutation;
+        permutation[0] = (t%3)-1;
+        t /= 3;
+        permutation[1] = (t%3)-1;
+        t /= 3;
+        permutation[2] = (t%3)-1;
+
+
+        // Add patch transform
+        // ~~~~~~~~~~~~~~~~~~~
+
+        label sign = transSign.second();
+        if (!isSendingSide)
+        {
+            sign = -sign;
+        }
+
+
+        // If this transform been found already by a patch?
+        if (permutation[matchTransI] != 0)
+        {
+            // If so, if they have opposite signs, then this is
+            // considered an error.  They are allowed to be the
+            // same sign, but this only results in a single
+            // transform.
+            if (permutation[matchTransI] != sign)
+            {
+                FatalErrorIn
+                (
+                    "Foam::label "
+                    "Foam::globalIndexAndTransform::addToTransformIndex\n"
+                    "(\n"
+                        "const label transformIndex,\n"
+                        "const label patchI\n"
+                    ") const\n"
+                )   << "More than one patch accessing the same transform "
+                    << "but not of the same sign." << endl
+                    << "patch:" << mesh_.boundaryMesh()[patchI].name()
+                    << " transform:" << matchTransI << " sign:" << sign
+                    << "  cumulative transforms:" << permutation
+                    << exit(FatalError);
+            }
+        }
+        else
+        {
+            permutation[matchTransI] = sign;
+        }
+
+
+        // Re-ecode permutation
+        // ~~~~~~~~~~~~~~~~~~~~
+
+        return
+            (permutation[2]+1)*9
+          + (permutation[1]+1)*3
+          + (permutation[0]+1);
+    }
+    else
+    {
+        return transformIndex;
+    }
 }
 
 
@@ -177,6 +262,12 @@ const Foam::List<Foam::vectorTensorTransform>&
 Foam::globalIndexAndTransform::transformPermutations() const
 {
     return transformPermutations_;
+}
+
+
+Foam::label Foam::globalIndexAndTransform::nullTransformIndex() const
+{
+    return nullTransformIndex_;
 }
 
 
@@ -399,7 +490,10 @@ Foam::pointField Foam::globalIndexAndTransform::transformPatches
 
     forAll(transIs, tII)
     {
-        transPts[tII] = transformPermutations_[transIs[tII]].transform(pt);
+        transPts[tII] = transformPermutations_[transIs[tII]].transformPosition
+        (
+            pt
+        );
     }
 
     return transPts;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,13 +31,13 @@ Description
 SourceFiles
     vectorTensorTransformI.H
     vectorTensorTransform.C
+    vectorTensorTransformTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef vectorTensorTransform_H
 #define vectorTensorTransform_H
 
-#include "vector.H"
 #include "tensor.H"
 #include "word.H"
 #include "contiguous.H"
@@ -132,17 +132,21 @@ public:
 
         // Transform
 
-            //- Transform the given vector
-            inline vector transform(const vector& v) const;
+            //- Transform the given position
+            inline vector transformPosition(const vector& v) const;
 
             //- Transform the given pointField
-            inline pointField transform(const pointField& pts) const;
+            inline pointField transformPosition(const pointField& pts) const;
 
-            //- Inverse transform the given vector
-            inline vector invTransform(const vector& v) const;
+            //- Inverse transform the given position
+            inline vector invTransformPosition(const vector& v) const;
 
             //- Inverse transform the given pointField
-            inline pointField invTransform(const pointField& pts) const;
+            inline pointField invTransformPosition(const pointField& pts) const;
+
+            //- Transform the given field
+            template<class Type>
+            tmp<Field<Type> > transform(const Field<Type>&) const;
 
 
     // Member operators
@@ -179,6 +183,15 @@ word name(const vectorTensorTransform&);
 //- Data associated with vectorTensorTransform type are contiguous
 template<>
 inline bool contiguous<vectorTensorTransform>() {return true;}
+
+//- Template specialisations
+template<>
+tmp<Field<bool> > vectorTensorTransform::transform(const Field<bool>&) const;
+template<>
+tmp<Field<label> > vectorTensorTransform::transform(const Field<label>&) const;
+template<>
+tmp<Field<scalar> > vectorTensorTransform::transform(const Field<scalar>&)
+const;
 
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
@@ -233,6 +246,10 @@ inline vectorTensorTransform operator&
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "vectorTensorTransformI.H"
+
+#ifdef NoRepository
+#   include "vectorTensorTransformTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
