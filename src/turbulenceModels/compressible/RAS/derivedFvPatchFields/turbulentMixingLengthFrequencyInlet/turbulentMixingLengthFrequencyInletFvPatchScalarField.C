@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2006-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,7 @@ License
 #include "turbulentMixingLengthFrequencyInletFvPatchScalarField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
+#include "surfaceFields.H"
 #include "volFields.H"
 #include "RASModel.H"
 
@@ -45,10 +46,15 @@ turbulentMixingLengthFrequencyInletFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchField<scalar>(p, iF),
+    inletOutletFvPatchScalarField(p, iF),
     mixingLength_(0.0),
-    kName_("k")
-{}
+    phiName_("undefined-phi"),
+    kName_("undefined-k")
+{
+    this->refValue() = 0.0;
+    this->refGrad() = 0.0;
+    this->valueFraction() = 0.0;
+}
 
 turbulentMixingLengthFrequencyInletFvPatchScalarField::
 turbulentMixingLengthFrequencyInletFvPatchScalarField
@@ -59,8 +65,9 @@ turbulentMixingLengthFrequencyInletFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchField<scalar>(ptf, p, iF, mapper),
+    inletOutletFvPatchScalarField(ptf, p, iF, mapper),
     mixingLength_(ptf.mixingLength_),
+    phiName_(ptf.phiName_),
     kName_(ptf.kName_)
 {}
 
@@ -72,10 +79,17 @@ turbulentMixingLengthFrequencyInletFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchField<scalar>(p, iF, dict),
+    inletOutletFvPatchScalarField(p, iF),
     mixingLength_(readScalar(dict.lookup("mixingLength"))),
+    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
     kName_(dict.lookupOrDefault<word>("k", "k"))
-{}
+{
+    fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
+
+    this->refValue() = 0.0;
+    this->refGrad() = 0.0;
+    this->valueFraction() = 0.0;
+}
 
 turbulentMixingLengthFrequencyInletFvPatchScalarField::
 turbulentMixingLengthFrequencyInletFvPatchScalarField
@@ -83,8 +97,9 @@ turbulentMixingLengthFrequencyInletFvPatchScalarField
     const turbulentMixingLengthFrequencyInletFvPatchScalarField& ptf
 )
 :
-    fixedValueFvPatchField<scalar>(ptf),
+    inletOutletFvPatchScalarField(ptf),
     mixingLength_(ptf.mixingLength_),
+    phiName_(ptf.phiName_),
     kName_(ptf.kName_)
 {}
 
@@ -95,8 +110,9 @@ turbulentMixingLengthFrequencyInletFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchField<scalar>(ptf, iF),
+    inletOutletFvPatchScalarField(ptf, iF),
     mixingLength_(ptf.mixingLength_),
+    phiName_(ptf.phiName_),
     kName_(ptf.kName_)
 {}
 
@@ -116,14 +132,18 @@ void turbulentMixingLengthFrequencyInletFvPatchScalarField::updateCoeffs()
     const scalar Cmu =
         rasModel.coeffDict().lookupOrDefault<scalar>("Cmu", 0.09);
 
-    const scalar Cmu25 = pow025(Cmu);
+    const scalar Cmu25 = pow(Cmu, 0.25);
 
-    const fvPatchField<scalar>& kp =
+    const fvPatchScalarField& kp =
         patch().lookupPatchField<volScalarField, scalar>(kName_);
 
-    operator==(sqrt(kp)/(Cmu25*mixingLength_));
+    const fvsPatchScalarField& phip =
+        patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
 
-    fixedValueFvPatchField<scalar>::updateCoeffs();
+    this->refValue() = sqrt(kp)/(Cmu25*mixingLength_);
+    this->valueFraction() = 1.0 - pos(phip);
+
+    inletOutletFvPatchScalarField::updateCoeffs();
 }
 
 
@@ -132,9 +152,10 @@ void turbulentMixingLengthFrequencyInletFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fvPatchField<scalar>::write(os);
+    fvPatchScalarField::write(os);
     os.writeKeyword("mixingLength")
         << mixingLength_ << token::END_STATEMENT << nl;
+    os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
     os.writeKeyword("k") << kName_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
