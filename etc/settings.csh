@@ -108,7 +108,7 @@ case ThirdParty:
         breaksw
     case Gcc45:
     case Gcc45++0x:
-        set gcc_version=gcc-4.5.0
+        set gcc_version=gcc-4.5.2
         set gmp_version=gmp-5.0.1
         set mpfr_version=mpfr-2.4.2
         set mpc_version=mpc-0.8.1

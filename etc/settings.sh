@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -127,7 +127,7 @@ OpenFOAM | ThirdParty)
         mpfr_version=mpfr-2.4.2
         ;;
     Gcc45 | Gcc45++0x)
-        gcc_version=gcc-4.5.0
+        gcc_version=gcc-4.5.2
         gmp_version=gmp-5.0.1
         mpfr_version=mpfr-2.4.2
         mpc_version=mpc-0.8.1
