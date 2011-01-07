@@ -313,7 +313,7 @@ public:
     }
 
 
-    // inline void operator=(const Triangulation::Finite_vertices_iterator vit)
+    // inline void operator=(const Delaunay::Finite_vertices_iterator vit)
     // {
     //     Vb::operator=indexedVertex(vit->point());
 

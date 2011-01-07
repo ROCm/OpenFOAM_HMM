@@ -59,7 +59,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     for
     (
-        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
         vit != finite_vertices_end();
         ++vit
     )
@@ -81,7 +81,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     for
     (
-        Triangulation::Finite_cells_iterator cit = finite_cells_begin();
+        Delaunay::Finite_cells_iterator cit = finite_cells_begin();
         cit != finite_cells_end();
         ++cit
     )
@@ -236,7 +236,7 @@ void Foam::conformalVoronoiMesh::calcTetMesh
 
     for
     (
-        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
         vit != finite_vertices_end();
         ++vit
     )
@@ -255,7 +255,7 @@ void Foam::conformalVoronoiMesh::calcTetMesh
 
     for
     (
-        Triangulation::Finite_cells_iterator cit = finite_cells_begin();
+        Delaunay::Finite_cells_iterator cit = finite_cells_begin();
         cit != finite_cells_end();
         ++cit
     )
@@ -302,7 +302,7 @@ void Foam::conformalVoronoiMesh::calcTetMesh
 
     for
     (
-        Triangulation::Finite_facets_iterator fit = finite_facets_begin();
+        Delaunay::Finite_facets_iterator fit = finite_facets_begin();
         fit != finite_facets_end();
         ++fit
     )
@@ -457,7 +457,7 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
 
     for
     (
-        Triangulation::Finite_facets_iterator fit = finite_facets_begin();
+        Delaunay::Finite_facets_iterator fit = finite_facets_begin();
         fit != finite_facets_end();
         ++fit
     )
@@ -542,7 +542,7 @@ void Foam::conformalVoronoiMesh::smoothSurface
 
         if (++iterI > cvMeshControls().maxCollapseIterations())
         {
-            Info<< nl << "maxCollapseIterations reached, stopping collapse"
+            Info<< "    maxCollapseIterations reached, stopping collapse"
                 << endl;
 
             break;
@@ -554,7 +554,7 @@ void Foam::conformalVoronoiMesh::smoothSurface
 
     for
     (
-        Triangulation::Finite_cells_iterator cit = finite_cells_begin();
+        Delaunay::Finite_cells_iterator cit = finite_cells_begin();
         cit != finite_cells_end();
         ++cit
     )
@@ -574,7 +574,7 @@ void Foam::conformalVoronoiMesh::smoothSurface
         {
             if (boundaryPts[ptI] == true)
             {
-                point& pt = pts[ptI];
+                Foam::point& pt = pts[ptI];
 
                 pointIndexHit surfHit;
                 label hitSurface;
@@ -617,7 +617,7 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
 
     for
     (
-        Triangulation::Finite_edges_iterator eit = finite_edges_begin();
+        Delaunay::Finite_edges_iterator eit = finite_edges_begin();
         eit != finite_edges_end();
         ++eit
     )
@@ -802,7 +802,7 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
 
     for
     (
-        Triangulation::Finite_edges_iterator eit = finite_edges_begin();
+        Delaunay::Finite_edges_iterator eit = finite_edges_begin();
         eit != finite_edges_end();
         ++eit
     )
@@ -935,7 +935,7 @@ Foam::conformalVoronoiMesh::collapseFace
 
     labelList facePts(f);
 
-    const point fC = f.centre(pts);
+    const Foam::point fC = f.centre(pts);
 
     vector fN = f.normal(pts);
 
@@ -1057,7 +1057,7 @@ Foam::conformalVoronoiMesh::collapseFace
 
     forAll(f, fPtI)
     {
-        const point& pt = pts[f[fPtI]];
+        const Foam::point& pt = pts[f[fPtI]];
 
         d[fPtI] = (collapseAxis & (pt - fC));
     }
@@ -1190,7 +1190,7 @@ Foam::conformalVoronoiMesh::collapseFace
 
             label collapseToPtI = facePtsNeg.first();
 
-            point collapseToPt =
+            Foam::point collapseToPt =
                 collapseAxis*(sum(dNeg)/dNeg.size() - dShift) + fC;
 
             forAll(facePtsNeg, fPtI)
@@ -1260,7 +1260,7 @@ Foam::conformalVoronoiMesh::collapseFace
         {
             label collapseToPtI = facePts.first();
 
-            point collapseToPt = fC;
+            Foam::point collapseToPt = fC;
 
             forAll(facePts, fPtI)
             {
@@ -1592,7 +1592,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     for
     (
-        Triangulation::Finite_cells_iterator cit = finite_cells_begin();
+        Delaunay::Finite_cells_iterator cit = finite_cells_begin();
         cit != finite_cells_end();
         ++cit
     )
@@ -1638,7 +1638,7 @@ void Foam::conformalVoronoiMesh::indexDualVertices
 
     for
     (
-        Triangulation::Finite_cells_iterator cit = finite_cells_begin();
+        Delaunay::Finite_cells_iterator cit = finite_cells_begin();
         cit != finite_cells_end();
         ++cit
     )
@@ -1689,7 +1689,7 @@ void Foam::conformalVoronoiMesh::reindexDualVertices
 {
     for
     (
-        Triangulation::Finite_cells_iterator cit = finite_cells_begin();
+        Delaunay::Finite_cells_iterator cit = finite_cells_begin();
         cit != finite_cells_end();
         ++cit
     )
@@ -1737,7 +1737,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 
     for
     (
-        Triangulation::Finite_edges_iterator eit = finite_edges_begin();
+        Delaunay::Finite_edges_iterator eit = finite_edges_begin();
         eit != finite_edges_end();
         ++eit
     )
@@ -1768,8 +1768,8 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                 {
                     // boundary face
 
-                    point ptA = topoint(vA->point());
-                    point ptB = topoint(vB->point());
+                    Foam::point ptA = topoint(vA->point());
+                    Foam::point ptB = topoint(vB->point());
 
                     label patchIndex = geometryToConformTo_.findPatch(ptA, ptB);
 
@@ -1846,7 +1846,7 @@ void Foam::conformalVoronoiMesh::createCellCentres
 
     for
     (
-        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
         vit != finite_vertices_end();
         ++vit
     )

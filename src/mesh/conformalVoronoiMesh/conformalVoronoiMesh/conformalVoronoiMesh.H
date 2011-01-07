@@ -37,7 +37,6 @@ SourceFiles
 #define conformalVoronoiMesh_H
 
 //#define CGAL_INEXACT
-#define CGAL_HIERARCHY
 
 #include "CGALTriangulation3Ddefs.H"
 #include "uint.H"
@@ -64,6 +63,7 @@ SourceFiles
 #include "labelPair.H"
 #include "HashSet.H"
 #include "memInfo.H"
+#include "point.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -84,7 +84,7 @@ class faceAreaWeightModel;
 
 class conformalVoronoiMesh
 :
-    public HTriangulation
+    public Delaunay
 {
 public:
 
@@ -178,7 +178,7 @@ private:
         //  to be on a surface.
         inline scalar targetCellSize
         (
-            const point& pt,
+            const Foam::point& pt,
             bool isSurfacePoint = false
         ) const;
 
@@ -204,34 +204,40 @@ private:
         //  a dual edge
         inline scalar averageAnyCellSize
         (
-            const Triangulation::Finite_facets_iterator& fit
+            const Delaunay::Finite_facets_iterator& fit
         ) const;
 
         //- Return the local point pair separation at the given location
-        inline scalar pointPairDistance(const point& pt) const;
+        inline scalar pointPairDistance(const Foam::point& pt) const;
 
         //- Return the local mixed feature point placement distance
-        inline scalar mixedFeaturePointDistance(const point& pt) const;
+        inline scalar mixedFeaturePointDistance(const Foam::point& pt) const;
 
         //- Return the square of the local feature point exclusion distance
-        inline scalar featurePointExclusionDistanceSqr(const point& pt) const;
+        inline scalar featurePointExclusionDistanceSqr
+        (
+            const Foam::point& pt
+        ) const;
 
         //- Return the square of the local feature edge exclusion distance
-        inline scalar featureEdgeExclusionDistanceSqr(const point& pt) const;
+        inline scalar featureEdgeExclusionDistanceSqr
+        (
+            const Foam::point& pt
+        ) const;
 
         //- Return the square of the local surface search distance
-        inline scalar surfaceSearchDistanceSqr(const point& pt) const;
+        inline scalar surfaceSearchDistanceSqr(const Foam::point& pt) const;
 
         //- Return the local maximum surface protrusion distance
-        inline scalar maxSurfaceProtrusion(const point& pt) const;
+        inline scalar maxSurfaceProtrusion(const Foam::point& pt) const;
 
         //- Return the required alignment directions at the given location
-        tensor requiredAlignment(const point& pt) const;
+        tensor requiredAlignment(const Foam::point& pt) const;
 
         //- Insert point and return its index
         inline label insertPoint
         (
-            const point& pt,
+            const Foam::point& pt,
             const label type
         );
 
@@ -244,7 +250,7 @@ private:
         inline void insertPointPair
         (
             const scalar ppDist,
-            const point& surfPt,
+            const Foam::point& surfPt,
             const vector& n
         );
 
@@ -343,7 +349,7 @@ private:
         const indexedOctree<treeDataPoint>& featurePointTree() const;
 
         //- Check if a location is in exclusion range around a feature point
-        bool nearFeaturePt(const point& pt) const;
+        bool nearFeaturePt(const Foam::point& pt) const;
 
         //- Insert the initial points into the triangulation, based on the
         //  initialPointsMethod
@@ -365,7 +371,7 @@ private:
         //- Builds a dual face by circulating around the supplied edge.
         face buildDualFace
         (
-            const Triangulation::Finite_edges_iterator& eit
+            const Delaunay::Finite_edges_iterator& eit
         ) const;
 
         //- Finds the maximum filterCount of the dual vertices
@@ -373,7 +379,7 @@ private:
         //  supplied edge
         label maxFilterCount
         (
-            const Triangulation::Finite_edges_iterator& eit
+            const Delaunay::Finite_edges_iterator& eit
         ) const;
 
         //- Determines the owner and neighbour labels for dual cells
@@ -406,14 +412,14 @@ private:
         //  intersects the boundary and hence reqires a point-pair
         bool dualCellSurfaceAnyIntersection
         (
-            const Triangulation::Finite_vertices_iterator& vit
+            const Delaunay::Finite_vertices_iterator& vit
         ) const;
 
         //- Find the "worst" protrusion of a dual cell through the surface,
         //  subject to the tolerance
         void dualCellLargestSurfaceProtrusion
         (
-            const Triangulation::Finite_vertices_iterator& vit,
+            const Delaunay::Finite_vertices_iterator& vit,
             pointIndexHit& surfHit,
             label& hitSurface
         ) const;
@@ -422,7 +428,7 @@ private:
         //  surface to be meshed or come too close to it
         void limitDisplacement
         (
-            const Triangulation::Finite_vertices_iterator& vit,
+            const Delaunay::Finite_vertices_iterator& vit,
             vector& displacement,
             label callCount = 0
         ) const;
@@ -431,8 +437,8 @@ private:
         //- edge conformation location
         bool nearFeatureEdgeLocation
         (
-            const point& pt,
-            DynamicList<point>& newEdgeLocations,
+            const Foam::point& pt,
+            DynamicList<Foam::point>& newEdgeLocations,
             pointField& existingEdgeLocations,
             autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree
         ) const;
@@ -451,8 +457,8 @@ private:
         //  and edge conformation locations to add
         void addSurfaceAndEdgeHits
         (
-            const Triangulation::Finite_vertices_iterator& vit,
-            const point& vert,
+            const Delaunay::Finite_vertices_iterator& vit,
+            const Foam::point& vert,
             const pointIndexHit& surfHit,
             label hitSurface,
             scalar surfacePtReplaceDistCoeffSqr,
@@ -461,7 +467,7 @@ private:
             DynamicList<label>& hitSurfaces,
             DynamicList<pointIndexHit>& featureEdgeHits,
             DynamicList<label>& featureEdgeFeaturesHit,
-            DynamicList<point>& newEdgeLocations,
+            DynamicList<Foam::point>& newEdgeLocations,
             pointField& existingEdgeLocations,
             autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree
         ) const;
@@ -504,14 +510,14 @@ private:
         //  edge is a boundary face
         inline bool isBoundaryDualFace
         (
-            const Triangulation::Finite_edges_iterator& eit
+            const Delaunay::Finite_edges_iterator& eit
         ) const;
 
         //- Determines if the dual vertex constructed by the Delaunay
         //  cell is a boundary vertex
         inline bool isBoundaryDualVertex
         (
-            const Triangulation::Finite_cells_iterator& cit
+            const Delaunay::Finite_cells_iterator& cit
         ) const;
 
         //- Merge vertices that are very close together
@@ -691,19 +697,19 @@ public:
         //- Conversion functions between point (OpenFOAM) and Point (CGAL)
 
 #       ifdef CGAL_INEXACT
-            typedef const point& pointFromPoint;
+            typedef const Foam::point& pointFromPoint;
             typedef const Point& PointFrompoint;
 #       else
-            typedef point pointFromPoint;
+            typedef Foam::point pointFromPoint;
             typedef Point PointFrompoint;
 #       endif
 
         inline pointFromPoint topoint(const Point&) const;
-        inline PointFrompoint toPoint(const point&) const;
+        inline PointFrompoint toPoint(const Foam::point&) const;
 
         typedef K::Vector_3 CGALVector;
 
-        inline CGALVector toCGALVector(const point& pt) const;
+        inline CGALVector toCGALVector(const Foam::point& pt) const;
 
         // Access
 
@@ -739,7 +745,7 @@ public:
             void writePoints
             (
                 const fileName& fName,
-                const List<point>& points
+                const List<Foam::point>& points
             ) const;
 
             //- Write the internal Delaunay vertices of the tessellation as a

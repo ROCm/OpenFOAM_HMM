@@ -31,9 +31,6 @@ Description
     otherwise the more robust but much less efficient
     Exact_predicates_exact_constructions will be used.
 
-    Define CGAL_HIERARCHY to use hierarchical Delaunay triangulation which is
-    faster but uses more memory than the standard Delaunay triangulation.
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef CGALTriangulation3Ddefs_H
@@ -60,20 +57,12 @@ Description
 typedef CGAL::indexedVertex<K>          Vb;
 typedef CGAL::indexedCell<K>            Cb;
 
-#ifdef CGAL_HIERARCHY
-    // Data structures for hierarchical Delaunay triangulation which is more
-    // efficient but also uses more storage
-    #include "CGAL/Triangulation_hierarchy_3.h"
-    typedef CGAL::Triangulation_hierarchy_vertex_base_3<Vb>  Vbh;
-    typedef CGAL::Triangulation_data_structure_3<Vbh, Cb>    Tds;
-    typedef CGAL::Delaunay_triangulation_3<K, Tds>           Triangulation;
-    typedef CGAL::Triangulation_hierarchy_3<Triangulation>   HTriangulation;
-#else
-    // Data structures for standard Delaunay triangulation
-    typedef CGAL::Triangulation_data_structure_3<Vb, Cb>     Tds;
-    typedef CGAL::Delaunay_triangulation_3<K, Tds>           Triangulation;
-    typedef Triangulation                                    HTriangulation;
-#endif
+typedef CGAL::Triangulation_data_structure_3<Vb, Cb>     Tds;
+typedef CGAL::Delaunay_triangulation_3 <K, Tds, CGAL::Fast_location> Delaunay;
+
+typedef Delaunay::Vertex_handle    Vertex_handle;
+typedef Delaunay::Cell_handle      Cell_handle;
+typedef Delaunay::Point            Point;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

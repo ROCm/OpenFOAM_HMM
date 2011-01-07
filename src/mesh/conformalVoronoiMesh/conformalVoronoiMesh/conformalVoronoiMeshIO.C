@@ -79,7 +79,7 @@ void Foam::conformalVoronoiMesh::writePoints
 
     for
     (
-        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
         vit != finite_vertices_end();
         ++vit
     )
@@ -95,7 +95,7 @@ void Foam::conformalVoronoiMesh::writePoints
 void Foam::conformalVoronoiMesh::writePoints
 (
     const fileName& fName,
-    const List<point>& points
+    const List<Foam::point>& points
 ) const
 {
     if (points.size())
@@ -124,7 +124,7 @@ void Foam::conformalVoronoiMesh::writeInternalDelaunayVertices
 
     for
     (
-        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
         vit != finite_vertices_end();
         ++vit
     )

@@ -188,4 +188,5 @@ Foam::cvControls::maxCollapseFaceToPointSideLengthCoeff() const
     return maxCollapseFaceToPointSideLengthCoeff_;
 }
 
+
 // ************************************************************************* //

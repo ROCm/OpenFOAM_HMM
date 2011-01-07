@@ -32,7 +32,7 @@ License
 
 Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
 (
-    const point& pt
+    const Foam::point& pt
 ) const
 {
     pointIndexHit surfHit;
@@ -126,7 +126,7 @@ Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
 
         //external spoke
 
-        point mirrorPt = pt + 2*d;
+        Foam::point mirrorPt = pt + 2*d;
 
         geometryToConformTo_.findSurfaceNearestIntersection
         (
@@ -220,7 +220,7 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
 
         const vector& normal = norm[0];
 
-        const point& surfacePt(surfaceHits[i].hitPoint());
+        const Foam::point& surfacePt(surfaceHits[i].hitPoint());
 
         insertPointPair
         (
@@ -232,7 +232,7 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
 
     if(cvMeshControls().objOutput() && fName != fileName::null)
     {
-        List<point> surfacePts(surfaceHits.size());
+        List<Foam::point> surfacePts(surfaceHits.size());
 
         forAll(surfacePts, i)
         {
@@ -272,7 +272,7 @@ void Foam::conformalVoronoiMesh::insertEdgePointGroups
 
     if(cvMeshControls().objOutput() && fName != fileName::null)
     {
-        List<point> edgePts(edgeHits.size());
+        List<Foam::point> edgePts(edgeHits.size());
 
         forAll(edgePts, i)
         {
@@ -335,7 +335,7 @@ void Foam::conformalVoronoiMesh::insertExternalEdgePointGroup
     const pointIndexHit& edHit
 )
 {
-    const point& edgePt = edHit.hitPoint();
+    const Foam::point& edgePt = edHit.hitPoint();
 
     scalar ppDist = pointPairDistance(edgePt);
 
@@ -347,7 +347,7 @@ void Foam::conformalVoronoiMesh::insertExternalEdgePointGroup
     const vector& nB = feNormals[edNormalIs[1]];
 
     // Convex. So refPt will be inside domain and hence a master point
-    point refPt = edgePt - ppDist*(nA + nB)/(1 + (nA & nB) + VSMALL);
+    Foam::point refPt = edgePt - ppDist*(nA + nB)/(1 + (nA & nB) + VSMALL);
 
     // Insert the master point referring the the first slave
     label masterPtIndex = insertPoint(refPt, number_of_vertices() + 1);
@@ -355,10 +355,10 @@ void Foam::conformalVoronoiMesh::insertExternalEdgePointGroup
     // Insert the slave points by reflecting refPt in both faces.
     // with each slave refering to the master
 
-    point reflectedA = refPt + 2*ppDist*nA;
+    Foam::point reflectedA = refPt + 2*ppDist*nA;
     insertPoint(reflectedA, masterPtIndex);
 
-    point reflectedB = refPt + 2*ppDist*nB;
+    Foam::point reflectedB = refPt + 2*ppDist*nB;
     insertPoint(reflectedB, masterPtIndex);
 }
 
@@ -369,7 +369,7 @@ void Foam::conformalVoronoiMesh::insertInternalEdgePointGroup
     const pointIndexHit& edHit
 )
 {
-    const point& edgePt = edHit.hitPoint();
+    const Foam::point& edgePt = edHit.hitPoint();
 
     scalar ppDist = pointPairDistance(edgePt);
 
@@ -381,15 +381,15 @@ void Foam::conformalVoronoiMesh::insertInternalEdgePointGroup
     const vector& nB = feNormals[edNormalIs[1]];
 
     // Concave. master and reflected points inside the domain.
-    point refPt = edgePt - ppDist*(nA + nB)/(1 + (nA & nB) + VSMALL);
+    Foam::point refPt = edgePt - ppDist*(nA + nB)/(1 + (nA & nB) + VSMALL);
 
     // Generate reflected master to be outside.
-    point reflMasterPt = refPt + 2*(edgePt - refPt);
+    Foam::point reflMasterPt = refPt + 2*(edgePt - refPt);
 
     // Reflect reflMasterPt in both faces.
-    point reflectedA = reflMasterPt - 2*ppDist*nA;
+    Foam::point reflectedA = reflMasterPt - 2*ppDist*nA;
 
-    point reflectedB = reflMasterPt - 2*ppDist*nB;
+    Foam::point reflectedB = reflMasterPt - 2*ppDist*nB;
 
     scalar totalAngle =
         radToDeg(constant::mathematical::pi + acos(mag(nA & nB)));
@@ -418,10 +418,10 @@ void Foam::conformalVoronoiMesh::insertInternalEdgePointGroup
     }
     else if (nAddPoints == 2)
     {
-        point reflectedAa = refPt + ppDist*nB;
+        Foam::point reflectedAa = refPt + ppDist*nB;
         insertPoint(reflectedAa, reflectedMaster);
 
-        point reflectedBb = refPt + ppDist*nA;
+        Foam::point reflectedBb = refPt + ppDist*nA;
         insertPoint(reflectedBb, reflectedMaster);
     }
 
@@ -436,7 +436,7 @@ void Foam::conformalVoronoiMesh::insertFlatEdgePointGroup
     const pointIndexHit& edHit
 )
 {
-    const point& edgePt = edHit.hitPoint();
+    const Foam::point& edgePt = edHit.hitPoint();
 
     scalar ppDist = pointPairDistance(edgePt);
 
@@ -518,7 +518,7 @@ void Foam::conformalVoronoiMesh::createFeaturePoints()
 
     for
     (
-        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
         vit != finite_vertices_end();
         vit++
     )
@@ -558,12 +558,13 @@ void Foam::conformalVoronoiMesh::insertConvexFeaturePoints()
         {
             vectorField featPtNormals = feMesh.featurePointNormals(ptI);
 
-            const point& featPt = feMesh.points()[ptI];
+            const Foam::point& featPt = feMesh.points()[ptI];
 
             vector cornerNormal = sum(featPtNormals);
             cornerNormal /= mag(cornerNormal);
 
-            point internalPt = featPt - pointPairDistance(featPt)*cornerNormal;
+            Foam::point internalPt =
+                featPt - pointPairDistance(featPt)*cornerNormal;
 
             label internalPtIndex =
                 insertPoint(internalPt, number_of_vertices() + 1);
@@ -574,7 +575,7 @@ void Foam::conformalVoronoiMesh::insertConvexFeaturePoints()
 
                 plane planeN = plane(featPt, n);
 
-                point externalPt =
+                Foam::point externalPt =
                     internalPt + 2.0 * planeN.distance(internalPt) * n;
 
                 insertPoint(externalPt, internalPtIndex);
@@ -601,12 +602,13 @@ void Foam::conformalVoronoiMesh::insertConcaveFeaturePoints()
         {
             vectorField featPtNormals = feMesh.featurePointNormals(ptI);
 
-            const point& featPt = feMesh.points()[ptI];
+            const Foam::point& featPt = feMesh.points()[ptI];
 
             vector cornerNormal = sum(featPtNormals);
             cornerNormal /= mag(cornerNormal);
 
-            point externalPt = featPt + pointPairDistance(featPt)*cornerNormal;
+            Foam::point externalPt =
+                featPt + pointPairDistance(featPt)*cornerNormal;
 
             label externalPtIndex = number_of_vertices() + featPtNormals.size();
 
@@ -618,7 +620,7 @@ void Foam::conformalVoronoiMesh::insertConcaveFeaturePoints()
 
                 plane planeN = plane(featPt, n);
 
-                point internalPt =
+                Foam::point internalPt =
                     externalPt - 2.0 * planeN.distance(externalPt) * n;
 
                 internalPtIndex = insertPoint(internalPt, externalPtIndex);
@@ -686,7 +688,7 @@ void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
                     continue;
                 }
 
-                const point& pt(feMesh.points()[ptI]);
+                const Foam::point& pt(feMesh.points()[ptI]);
 
                 scalar edgeGroupDistance = mixedFeaturePointDistance(pt);
 
@@ -694,7 +696,7 @@ void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
                 {
                     label edgeI = pEds[e];
 
-                    point edgePt =
+                    Foam::point edgePt =
                         pt + edgeGroupDistance*feMesh.edgeDirection(edgeI, ptI);
 
                     pointIndexHit edgeHit(true, edgePt, edgeI);
@@ -709,7 +711,7 @@ void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
 
 void Foam::conformalVoronoiMesh::constructFeaturePointLocations()
 {
-    DynamicList<point> ftPtLocs;
+    DynamicList<Foam::point> ftPtLocs;
 
     const PtrList<featureEdgeMesh>& feMeshes(geometryToConformTo_.features());
 
@@ -753,8 +755,8 @@ Foam::conformalVoronoiMesh::featurePointTree() const
             treeBoundBox(geometryToConformTo_.bounds()).extend(rndGen_, 1E-4)
         );
 
-        overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-        overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        overallBb.min() -= Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        overallBb.max() += Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
         featurePointTreePtr_.reset
         (
@@ -773,7 +775,7 @@ Foam::conformalVoronoiMesh::featurePointTree() const
 }
 
 
-bool Foam::conformalVoronoiMesh::nearFeaturePt(const point& pt) const
+bool Foam::conformalVoronoiMesh::nearFeaturePt(const Foam::point& pt) const
 {
     const indexedOctree<treeDataPoint>& tree = featurePointTree();
 
@@ -883,14 +885,14 @@ void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
 
     for
     (
-        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
         vit != finite_vertices_end();
         vit++
     )
     {
         if (vit->internalOrBoundaryPoint())
         {
-            point pt(topoint(vit->point()));
+            Foam::point pt(topoint(vit->point()));
 
             pointIndexHit info = tree.findNearest(pt, spanSqr);
 
@@ -904,7 +906,7 @@ void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
 
     // for
     // (
-    //     Triangulation::Finite_vertices_iterator vit =
+    //     Delaunay::Finite_vertices_iterator vit =
     //         finite_vertices_begin();
     //     vit != finite_vertices_end();
     //     vit++
@@ -924,7 +926,7 @@ void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
 
 Foam::face Foam::conformalVoronoiMesh::buildDualFace
 (
-    const Triangulation::Finite_edges_iterator& eit
+    const Delaunay::Finite_edges_iterator& eit
 ) const
 {
     Cell_circulator ccStart = incident_cells(*eit);
@@ -1000,7 +1002,7 @@ Foam::face Foam::conformalVoronoiMesh::buildDualFace
 
 Foam::label Foam::conformalVoronoiMesh::maxFilterCount
 (
-    const Triangulation::Finite_edges_iterator& eit
+    const Delaunay::Finite_edges_iterator& eit
 ) const
 {
     Cell_circulator ccStart = incident_cells(*eit);
@@ -1128,7 +1130,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     const dictionary& cvMeshDict
 )
 :
-    HTriangulation(),
+    Delaunay(),
     runTime_(runTime),
     rndGen_(7864293),
     allGeometry_
@@ -1233,7 +1235,7 @@ void Foam::conformalVoronoiMesh::move()
     // Find the dual point of each tetrahedron and assign it an index.
     for
     (
-        Triangulation::Finite_cells_iterator cit = finite_cells_begin();
+        Delaunay::Finite_cells_iterator cit = finite_cells_begin();
         cit != finite_cells_end();
         ++cit
     )
@@ -1286,7 +1288,7 @@ void Foam::conformalVoronoiMesh::move()
 
     for
     (
-        Triangulation::Finite_edges_iterator eit = finite_edges_begin();
+        Delaunay::Finite_edges_iterator eit = finite_edges_begin();
         eit != finite_edges_end();
         ++eit
     )
@@ -1303,8 +1305,8 @@ void Foam::conformalVoronoiMesh::move()
             Vertex_handle vA = c->vertex(eit->second);
             Vertex_handle vB = c->vertex(eit->third);
 
-            point dVA = topoint(vA->point());
-            point dVB = topoint(vB->point());
+            Foam::point dVA = topoint(vA->point());
+            Foam::point dVB = topoint(vB->point());
 
             Field<vector> alignmentDirsA =
                 vA->alignment() & cartesianDirections;
@@ -1505,7 +1507,7 @@ void Foam::conformalVoronoiMesh::move()
     // Limit displacements that pierce, or get too close to the surface
     for
     (
-        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
         vit != finite_vertices_end();
         ++vit
     )
@@ -1528,7 +1530,7 @@ void Foam::conformalVoronoiMesh::move()
 
     for
     (
-        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
         vit != finite_vertices_end();
         ++vit
     )
