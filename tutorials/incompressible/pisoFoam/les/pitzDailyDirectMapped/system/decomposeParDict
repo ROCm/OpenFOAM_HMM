@@ -32,10 +32,6 @@ hierarchicalCoeffs
     order           xyz;
 }
 
-metisCoeffs
-{
-}
-
 manualCoeffs
 {
     dataFile        "";

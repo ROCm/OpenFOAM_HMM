@@ -33,7 +33,6 @@ Description
         inlet
         {
             type        turbulentIntensityKineticEnergyInlet;
-            U           U;              // Name of U field (optional)
             intensity   0.05;           // 5% turbulence
             value       uniform 1;      // placeholder
         }
@@ -47,7 +46,7 @@ SourceFiles
 #ifndef turbulentIntensityKineticEnergyInletFvPatchScalarField_H
 #define turbulentIntensityKineticEnergyInletFvPatchScalarField_H
 
-#include "fixedValueFvPatchFields.H"
+#include "inletOutletFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,15 +59,19 @@ namespace Foam
 
 class turbulentIntensityKineticEnergyInletFvPatchScalarField
 :
-    public fixedValueFvPatchScalarField
+    public inletOutletFvPatchScalarField
 {
     // Private data
 
-        //- Name of belocity field
-        word UName_;
-
         //- Turbulent intensity as fraction of mean velocity
         scalar intensity_;
+
+        //- Name of the velocity field
+        word UName_;
+
+        //- Name of the flux field
+        word phiName_;
+
 
 public:
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -124,7 +124,7 @@ void Foam::ConstantRateDevolatilisation<CloudType>::calculate
         const scalar A0 = volatileData_[i].second();
 
         // Mass transferred from particle to carrier gas phase
-        dMassDV = min(dt*A0*massVolatile0, massVolatile);
+        dMassDV[id] = min(dt*A0*massVolatile0, massVolatile);
     }
 
     canCombust = done;
