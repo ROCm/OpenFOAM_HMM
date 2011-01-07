@@ -32,11 +32,13 @@ boundaryField
     upperWall
     {
         type            alphaSgsJayatillekeWallFunction;
+        hs              h;
         value           uniform 0;
     }
     lowerWall
     {
         type            alphaSgsJayatillekeWallFunction;
+        hs              h;
         value           uniform 0;
     }
     frontAndBack_half0
