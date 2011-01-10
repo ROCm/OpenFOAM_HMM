@@ -127,7 +127,7 @@ OpenFOAM | ThirdParty)
         mpfr_version=mpfr-2.4.2
         ;;
     Gcc45 | Gcc45++0x)
-        gcc_version=gcc-4.5.0
+        gcc_version=gcc-4.5.2
         gmp_version=gmp-5.0.1
         mpfr_version=mpfr-2.4.2
         mpc_version=mpc-0.8.1
@@ -248,7 +248,7 @@ fi
 # ~~~~~~~~~~~~~~
 
 boost_version=boost_1_42_0
-cgal_version=CGAL-3.5.1
+cgal_version=CGAL-3.7
 
 export BOOST_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$boost_version
 export CGAL_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cgal_version

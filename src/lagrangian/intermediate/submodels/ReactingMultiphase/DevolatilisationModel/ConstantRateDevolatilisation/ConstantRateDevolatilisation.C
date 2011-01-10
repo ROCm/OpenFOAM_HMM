@@ -124,7 +124,7 @@ void Foam::ConstantRateDevolatilisation<CloudType>::calculate
         const scalar A0 = volatileData_[i].second();
 
         // Mass transferred from particle to carrier gas phase
-        dMassDV = min(dt*A0*massVolatile0, massVolatile);
+        dMassDV[id] = min(dt*A0*massVolatile0, massVolatile);
     }
 
     canCombust = done;

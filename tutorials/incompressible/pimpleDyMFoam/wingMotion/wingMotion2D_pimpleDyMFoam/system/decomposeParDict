@@ -37,9 +37,5 @@ manualCoeffs
     dataFile        "cellDecomposition";
 }
 
-metisCoeffs
-{
-}
-
 
 // ************************************************************************* //

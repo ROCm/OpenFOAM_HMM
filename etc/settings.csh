@@ -107,7 +107,7 @@ case ThirdParty:
         breaksw
     case Gcc45:
     case Gcc45++0x:
-        set gcc_version=gcc-4.5.0
+        set gcc_version=gcc-4.5.2
         set gmp_version=gmp-5.0.1
         set mpfr_version=mpfr-2.4.2
         set mpc_version=mpc-0.8.1
@@ -229,7 +229,7 @@ endif
 # ~~~~~~~~~~~~~~
 
 set boost_version=boost_1_42_0
-set cgal_version=CGAL-3.5.1
+set cgal_version=CGAL-3.7
 
 setenv BOOST_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$boost_version
 setenv CGAL_ARCH_PATH  $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cgal_version

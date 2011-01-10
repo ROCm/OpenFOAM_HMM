@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -83,7 +83,7 @@ class globalIndexAndTransform
         List<vectorTensorTransform> transformPermutations_;
 
         //- Mapping from patch index to which transform it matches (or
-        //  -1 for none) (.first()) and what sign to us for it,
+        //  -1 for none) (.first()) and what sign to use for it,
         //  i.e. +/- 1 (.second()).
         List<Pair<label> > patchTransformSign_;
 
