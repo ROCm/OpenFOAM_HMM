@@ -408,14 +408,6 @@ fi
 export MPI_BUFFER_SIZE
 
 
-# Enable the hoard memory allocator if available
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#if [ -f $FOAM_EXT_LIBBIN/libhoard.so ]
-#then
-#    export LD_PRELOAD=$FOAM_EXT_LIBBIN/libhoard.so:$LD_PRELOAD
-#fi
-
-
 # cleanup environment:
 # ~~~~~~~~~~~~~~~~~~~~
 unset _foamAddPath _foamAddLib _foamAddMan foamCompiler minBufferSize

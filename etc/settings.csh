@@ -387,13 +387,6 @@ else
 endif
 
 
-# Enable the hoard memory allocator if available
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#if ( -f $FOAM_EXT_LIBBIN/libhoard.so ) then
-#    setenv LD_PRELOAD $FOAM_EXT_LIBBIN/libhoard.so:$LD_PRELOAD
-#endif
-
-
 # cleanup environment:
 # ~~~~~~~~~~~~~~~~~~~~
 unalias _foamAddPath _foamAddLib _foamAddMan
