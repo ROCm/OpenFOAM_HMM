@@ -50,17 +50,25 @@ do
 done
 
 
-# set VERSION and MAJOR (version) variables
-if [ -z "$ParaView_VERSION" ]
-then
-    ParaView_VERSION=3.8.0
-    ParaView_MAJOR=unknown
-    echo "Warning in app/paraview3/bashrc:" 1>&2
-    echo "    ParaView_VERSION not set, using '$ParaView_VERSION'" 1>&2
-fi
-[ -n "$ParaView_MAJOR" ] || ParaView_MAJOR=unknown
+#- ParaView version, automatically determine major version
+export ParaView_VERSION=3.8.0
+export ParaView_MAJOR=detect
 
-# if needed, set MAJOR version to correspond to VERSION
+
+# Evaluate command-line parameters for ParaView
+while [ $# -gt 0 ]
+do
+    case "$1" in
+    ParaView*=*)
+        # name=value  -> export name=value
+        eval "export $1"
+        ;;
+    esac
+    shift
+done
+
+
+# set MAJOR version to correspond to VERSION
 # ParaView_MAJOR is "<digits>.<digits>" from ParaView_VERSION
 case "$ParaView_VERSION" in
 "$ParaView_MAJOR".* )

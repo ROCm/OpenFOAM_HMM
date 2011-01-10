@@ -48,17 +48,24 @@ foreach cmake ( cmake-2.8.3 cmake-2.8.1 )
     endif
 end
 
-# set VERSION and MAJOR (version) variables
-if ( ! $?ParaView_VERSION )
-then
-    setenv ParaView_VERSION 3.8.0
-    setenv ParaView_MAJOR unknown
-    echo "Warning in app/paraview3/cshrc:"
-    echo "    ParaView_VERSION not set, using '$ParaView_VERSION'"
-fi
-if ( ! $?ParaView_MAJOR ) setenv ParaView_MAJOR unknown
+#- ParaView version, automatically determine major version:
+setenv ParaView_VERSION 3.8.0
+setenv ParaView_MAJOR detect
 
-# if needed, set MAJOR version to correspond to VERSION
+
+# Evaluate command-line parameters for ParaView
+while ( $#argv > 0 )
+    switch ($argv[1])
+    case ParaView*=*:
+        # name=value  -> setenv name value
+        eval "setenv $argv[1]:s/=/ /"
+        breaksw
+    endsw
+    shift
+end
+
+
+# set MAJOR version to correspond to VERSION
 # ParaView_MAJOR is "<digits>.<digits>" from ParaView_VERSION
 switch ("$ParaView_VERSION")
 case "$ParaView_MAJOR".*:

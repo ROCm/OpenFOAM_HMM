@@ -56,10 +56,6 @@ set foamInstall = $HOME/$WM_PROJECT
 #- note the location for later use (eg, in job scripts)
 if ( ! $?FOAM_INST_DIR ) setenv FOAM_INST_DIR $foamInstall
 
-#- ParaView version, automatically determine major version:
-setenv ParaView_VERSION 3.8.0
-setenv ParaView_MAJOR unknown
-
 #- Compiler location:
 #    foamCompiler= system | ThirdParty (OpenFOAM)
 set foamCompiler=system

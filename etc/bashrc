@@ -57,10 +57,6 @@ foamInstall=$HOME/$WM_PROJECT
 #- note the location for later use (eg, in job scripts)
 : ${FOAM_INST_DIR:=$foamInstall}; export FOAM_INST_DIR
 
-#- ParaView version, automatically determine major version:
-export ParaView_VERSION=3.8.0
-export ParaView_MAJOR=unknown
-
 #- Compiler location:
 #    foamCompiler= system | ThirdParty (OpenFOAM)
 foamCompiler=system
