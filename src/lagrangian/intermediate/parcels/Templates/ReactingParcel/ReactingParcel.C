@@ -236,6 +236,9 @@ void Foam::ReactingParcel<ParcelType>::calc
     const label cellI
 )
 {
+    typedef typename ReactingParcel<ParcelType>::trackData::cloudType cloudType;
+    const CompositionModel<cloudType>& composition = td.cloud().composition();
+
     // Define local properties at beginning of time step
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     const scalar np0 = this->nParticle_;
@@ -285,7 +288,7 @@ void Foam::ReactingParcel<ParcelType>::calc
     scalar NCpW = 0.0;
 
     // Surface concentrations of emitted species
-    scalarField Cs(td.cloud().composition().carrier().species().size(), 0.0);
+    scalarField Cs(composition.carrier().species().size(), 0.0);
 
     // Calc mass and enthalpy transfer due to phase change
     calcPhaseChange
@@ -372,8 +375,10 @@ void Foam::ReactingParcel<ParcelType>::calc
         // Transfer mass lost from particle to carrier mass source
         forAll(dMassPC, i)
         {
-            label gid = td.cloud().composition().localToGlobalCarrierId(0, i);
+            label gid = composition.localToGlobalCarrierId(0, i);
             td.cloud().rhoTrans(gid)[cellI] += np0*dMassPC[i];
+            td.cloud().hsTrans()[cellI] +=
+                np0*dMassPC[i]*composition.carrier().Hs(gid, T0);
         }
 
         // Update momentum transfer
@@ -401,13 +406,12 @@ void Foam::ReactingParcel<ParcelType>::calc
             // Absorb parcel into carrier phase
             forAll(Y_, i)
             {
-                label gid =
-                    td.cloud().composition().localToGlobalCarrierId(0, i);
+                label gid = composition.localToGlobalCarrierId(0, i);
                 td.cloud().rhoTrans(gid)[cellI] += np0*mass1*Y_[i];
             }
             td.cloud().UTrans()[cellI] += np0*mass1*U1;
             td.cloud().hsTrans()[cellI] +=
-                np0*mass1*td.cloud().composition().H(0, Y_, pc_, T1);
+                np0*mass1*composition.H(0, Y_, pc_, T1);
         }
     }
 
@@ -417,7 +421,7 @@ void Foam::ReactingParcel<ParcelType>::calc
 
     else
     {
-        this->Cp_ = td.cloud().composition().Cp(0, Y_, pc_, T1);
+        this->Cp_ = composition.Cp(0, Y_, pc_, T1);
         this->T_ = T1;
         this->U_ = U1;
 
