@@ -228,12 +228,12 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
 
     // Calc surface values
     // ~~~~~~~~~~~~~~~~~~~
-    scalar Ts, rhos, mus, Pr, kappa;
+    scalar Ts, rhos, mus, Prs, kappas;
     ThermoParcel<ParcelType>::
-        calcSurfaceValues(td, cellI, T0, Ts, rhos, mus, Pr, kappa);
+        calcSurfaceValues(td, cellI, T0, Ts, rhos, mus, Prs, kappas);
 
     // Reynolds number
-    scalar Re = this->Re(U0, d0, rhos, mus);
+    scalar Res = this->Re(U0, d0, rhos, mus);
 
 
     // Sources
@@ -273,7 +273,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         td,
         dt,
         cellI,
-        Re,
+        Res,
         Ts,
         mus/rhos,
         d0,
@@ -316,7 +316,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     );
 
     // Correct surface values due to emitted species
-    this->correctSurfaceValues(td, cellI, Ts, Cs, rhos, mus, Pr, kappa);
+    this->correctSurfaceValues(td, cellI, Ts, Cs, rhos, mus, Prs, kappas);
+    Res = this->Re(U0, d0, rhos, mus);
 
 
     // Surface reactions
@@ -374,9 +375,9 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             td,
             dt,
             cellI,
-            Re,
-            Pr,
-            kappa,
+            Res,
+            Prs,
+            kappas,
             d0,
             rho0,
             T0,
@@ -399,7 +400,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             td,
             dt,
             cellI,
-            Re,
+            Res,
             mus,
             d0,
             U0,

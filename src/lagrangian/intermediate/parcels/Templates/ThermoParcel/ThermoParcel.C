@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -108,7 +108,7 @@ void Foam::ThermoParcel<ParcelType>::calcSurfaceValues
     scalar& rhos,
     scalar& mus,
     scalar& Pr,
-    scalar& kappa
+    scalar& kappas
 ) const
 {
     // Surface temperature using two thirds rule
@@ -144,7 +144,7 @@ void Foam::ThermoParcel<ParcelType>::calcSurfaceValues
     mus = td.muInterp().interpolate(this->position(), tetIs)/TRatio;
 
     Pr = td.cloud().constProps().Pr();
-    kappa = Cpc_*mus/Pr;
+    kappas = Cpc_*mus/Pr;
 }
 
 
@@ -170,8 +170,8 @@ void Foam::ThermoParcel<ParcelType>::calc
 
     // Calc surface values
     // ~~~~~~~~~~~~~~~~~~~
-    scalar Ts, rhos, mus, Pr, kappa;
-    calcSurfaceValues(td, cellI, T0, Ts, rhos, mus, Pr, kappa);
+    scalar Ts, rhos, mus, Pr, kappas;
+    calcSurfaceValues(td, cellI, T0, Ts, rhos, mus, Pr, kappas);
 
     // Reynolds number
     scalar Re = this->Re(U0, d0, rhos, mus);
@@ -209,7 +209,7 @@ void Foam::ThermoParcel<ParcelType>::calc
             cellI,
             Re,
             Pr,
-            kappa,
+            kappas,
             d0,
             rho0,
             T0,

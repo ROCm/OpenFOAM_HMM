@@ -130,8 +130,8 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
     const scalarField& Cs,
     scalar& rhos,
     scalar& mus,
-    scalar& Pr,
-    scalar& kappa
+    scalar& Prs,
+    scalar& kappas
 )
 {
     // No correction if total concentration of emitted species is small
@@ -177,7 +177,7 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
 
     rhos = 0;
     mus = 0;
-    kappa = 0;
+    kappas = 0;
     scalar Cps = 0;
     scalar sumYiSqrtW = 0;
     scalar sumYiCbrtW = 0;
@@ -190,7 +190,7 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
 
         rhos += Xs[i]*W;
         mus += Ys[i]*sqrtW*thermo.carrier().mu(i, T);
-        kappa += Ys[i]*cbrtW*thermo.carrier().kappa(i, T);
+        kappas += Ys[i]*cbrtW*thermo.carrier().kappa(i, T);
         Cps += Xs[i]*thermo.carrier().Cp(i, T);
 
         sumYiSqrtW += Ys[i]*sqrtW;
@@ -199,8 +199,8 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
 
     rhos *= pc_/(specie::RR*T);
     mus /= sumYiSqrtW;
-    kappa /= sumYiCbrtW;
-    Pr = Cps*mus/kappa;
+    kappas /= sumYiCbrtW;
+    Prs = Cps*mus/kappas;
 }
 
 
@@ -252,11 +252,11 @@ void Foam::ReactingParcel<ParcelType>::calc
 
     // Calc surface values
     // ~~~~~~~~~~~~~~~~~~~
-    scalar Ts, rhos, mus, Pr, kappa;
-    this->calcSurfaceValues(td, cellI, T0, Ts, rhos, mus, Pr, kappa);
+    scalar Ts, rhos, mus, Prs, kappas;
+    this->calcSurfaceValues(td, cellI, T0, Ts, rhos, mus, Prs, kappas);
 
     // Reynolds number
-    scalar Re = this->Re(U0, d0, rhos, mus);
+    scalar Res = this->Re(U0, d0, rhos, mus);
 
 
     // Sources
@@ -296,7 +296,7 @@ void Foam::ReactingParcel<ParcelType>::calc
         td,
         dt,
         cellI,
-        Re,
+        Res,
         Ts,
         mus/rhos,
         d0,
@@ -313,7 +313,8 @@ void Foam::ReactingParcel<ParcelType>::calc
     );
 
     // Correct surface values due to emitted species
-    correctSurfaceValues(td, cellI, Ts, Cs, rhos, mus, Pr, kappa);
+    correctSurfaceValues(td, cellI, Ts, Cs, rhos, mus, Prs, kappas);
+    Res = this->Re(U0, d0, rhos, mus);
 
     // Update particle component mass and mass fractions
     scalar mass1 = updateMassFraction(mass0, dMassPC, Y_);
@@ -330,9 +331,9 @@ void Foam::ReactingParcel<ParcelType>::calc
             td,
             dt,
             cellI,
-            Re,
-            Pr,
-            kappa,
+            Res,
+            Prs,
+            kappas,
             d0,
             rho0,
             T0,
@@ -355,7 +356,7 @@ void Foam::ReactingParcel<ParcelType>::calc
             td,
             dt,
             cellI,
-            Re,
+            Res,
             mus,
             d0,
             U0,
