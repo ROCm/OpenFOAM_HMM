@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -287,6 +287,15 @@ Foam::tmp<Foam::vectorField> Foam::coordinateSystem::globalToLocal
     {
         return (Rtr_ & global);
     }
+}
+
+
+void Foam::coordinateSystem::clear()
+{
+    note_.clear();
+    origin_ = point::zero;
+    R_.clear();
+    Rtr_ = sphericalTensor::I;
 }
 
 

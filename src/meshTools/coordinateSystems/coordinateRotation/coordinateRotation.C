@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -164,6 +164,14 @@ Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
     }
 
     return autoPtr<coordinateRotation>(cstrIter()(dict));
+}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void Foam::coordinateRotation::clear()
+{
+    this->tensor::operator=(sphericalTensor::I);
 }
 
 
