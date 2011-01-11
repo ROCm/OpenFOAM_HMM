@@ -130,6 +130,36 @@ _foamSource()
    done
 }
 
+# Evaluate command-line parameters
+_foamEval()
+{
+    while [ $# -gt 0 ]
+    do
+        case "$1" in
+        *=)
+            # name=       -> unset name
+            [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "unset ${1%=}"
+            eval "unset ${1%=}"
+            ;;
+        *=*)
+            # name=value  -> export name=value
+            [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "export $1"
+            eval "export $1"
+            ;;
+        *)
+            # filename: source it
+            if [ -f "$1" ]
+            then
+                _foamSource "$1"
+            else
+                _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile "$1"`
+            fi
+            ;;
+        esac
+        shift
+    done
+}
+
 
 # Add in preset user or site preferences:
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile prefs.sh`
@@ -137,29 +167,7 @@ _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile prefs.sh`
 # Evaluate command-line parameters and record settings for later
 # these can be used to set/unset values, or specify prefs files
 export FOAM_SETTINGS="$@"
-while [ $# -gt 0 ]
-do
-    case "$1" in
-    *=)
-        # name=       -> unset name
-        eval "unset ${1%=}"
-        ;;
-    *=*)
-        # name=value  -> export name=value
-        eval "export $1"
-        ;;
-    *)
-        # filename: source it
-        if [ -f "$1" ]
-        then
-            _foamSource "$1"
-        else
-            _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile "$1"`
-        fi
-        ;;
-    esac
-    shift
-done
+_foamEval $@
 
 
 # Detect system type and set environment variables appropriately
@@ -307,6 +315,6 @@ fi
 # cleanup environment:
 # ~~~~~~~~~~~~~~~~~~~~
 unset cleaned foamClean foamInstall foamOldDirs
-unset _foamSource
+unset _foamSource _foamEval
 
 # ----------------------------------------------------------------- end-of-file
