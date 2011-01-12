@@ -151,48 +151,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::cellValueSourceCorrection
     const label cellI
 )
 {
-    scalar massCell = this->massCell(cellI);
-
-    scalar addedMass = 0.0;
-    forAll(td.cloud().rhoTrans(), i)
-    {
-        addedMass += td.cloud().rhoTrans(i)[cellI];
-    }
-
-    this->rhoc_ += addedMass/td.cloud().pMesh().cellVolumes()[cellI];
-
-    scalar massCellNew = massCell + addedMass;
-    this->Uc_ += td.cloud().UTrans()[cellI]/massCellNew;
-
-    scalar CpEff = 0;
-    if (addedMass > ROOTVSMALL)
-    {
-        forAll(td.cloud().rhoTrans(), i)
-        {
-            scalar Y = td.cloud().rhoTrans(i)[cellI]/addedMass;
-            CpEff += Y*td.cloud().thermo().carrier().Cp(i, this->Tc_);
-        }
-    }
-    const scalar Cpc = td.CpInterp().psi()[cellI];
-    this->Cpc_ = (massCell*Cpc + addedMass*CpEff)/massCellNew;
-
-    this->Tc_ += td.cloud().hsTrans()[cellI]/(this->Cpc_*massCellNew);
-
-    if (this->Tc_ < td.cloud().constProps().TMin())
-    {
-        WarningIn
-        (
-            "void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection"
-            "("
-                "TrackData&, "
-                "const scalar, "
-                "const label"
-            ")"
-        )   << "Limiting observed temperature in cell " << cellI << " to "
-            << td.cloud().constProps().TMin() <<  nl << endl;
-
-        this->Tc_ = td.cloud().constProps().TMin();
-    }
+    // Re-use correction from reacting parcel
+    ReactingParcel<ParcelType>::cellValueSourceCorrection(td, dt, cellI);
 }
 
 

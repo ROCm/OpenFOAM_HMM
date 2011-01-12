@@ -75,28 +75,43 @@ void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection
     const label cellI
 )
 {
-    scalar massCell = this->massCell(cellI);
-
     scalar addedMass = 0.0;
     forAll(td.cloud().rhoTrans(), i)
     {
         addedMass += td.cloud().rhoTrans(i)[cellI];
     }
 
-    this->rhoc_ += addedMass/td.cloud().pMesh().cellVolumes()[cellI];
+    if (addedMass < ROOTVSMALL)
+    {
+        return;
+    }
+
+    scalar massCell = this->massCell(cellI);
+
+    const scalar V = td.cloud().pMesh().cellVolumes()[cellI];
+    this->rhoc_ += addedMass/V;
 
     scalar massCellNew = massCell + addedMass;
     this->Uc_ += td.cloud().UTrans()[cellI]/massCellNew;
 
-    scalar CpEff = 0;
+    scalar CpEff = 0.0;
+    scalar CsEff = 0.0;
+    scalar Csc = 0.0;
     if (addedMass > ROOTVSMALL)
     {
         forAll(td.cloud().rhoTrans(), i)
         {
             scalar Y = td.cloud().rhoTrans(i)[cellI]/addedMass;
             CpEff += Y*td.cloud().composition().carrier().Cp(i, this->Tc_);
+
+            scalar W = td.cloud().composition().carrier().W(i);
+            CsEff += td.cloud().rhoTrans(i)[cellI]/V*Y/W;
+            scalar Yc = td.cloud().composition().carrier().Y(i)[cellI];
+            Csc += massCell/V*Yc/W;
         }
     }
+    CsEff = (massCell*Csc + addedMass*CsEff)/massCellNew;
+
     const scalar Cpc = td.CpInterp().psi()[cellI];
     this->Cpc_ = (massCell*Cpc + addedMass*CpEff)/massCellNew;
 
@@ -117,6 +132,8 @@ void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection
 
         this->Tc_ = td.cloud().constProps().TMin();
     }
+
+    this->pc_ = CsEff*specie::RR*this->Tc_;
 }
 
 
