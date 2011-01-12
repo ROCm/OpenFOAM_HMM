@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -182,7 +182,7 @@ bool Foam::streamLineParticle::move
     td.keepParticle = true;
 
     scalar tEnd = (1.0 - stepFraction())*trackTime;
-    scalar dtMax = tEnd;
+    scalar maxDt = cloud_.pMesh().bounds().mag();
 
     while
     (
@@ -192,7 +192,7 @@ bool Foam::streamLineParticle::move
     )
     {
         // set the lagrangian time-step
-        scalar dt = min(dtMax, tEnd);
+        scalar dt = maxDt;
 
         // Cross cell in steps:
         // - at subiter 0 calculate dt to cross cell in nSubCycle steps
@@ -210,6 +210,16 @@ bool Foam::streamLineParticle::move
                 U = -U;
             }
 
+            scalar magU = mag(U);
+
+            if (magU < SMALL)
+            {
+                // Stagnant particle. Might as well stop
+                lifeTime_ = 0;
+                break;
+            }
+
+            U /= magU;
 
             if (subIter == 0 && td.nSubCycle_ > 1)
             {
@@ -219,7 +229,7 @@ bool Foam::streamLineParticle::move
             else if (subIter == td.nSubCycle_ - 1)
             {
                 // Do full step on last subcycle
-                dt = min(dtMax, tEnd);
+                dt = maxDt;
             }
 
 
