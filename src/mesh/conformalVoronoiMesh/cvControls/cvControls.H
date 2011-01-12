@@ -242,6 +242,11 @@ class cvControls
         //  around it need to be collapsed.
         label maxCollapseIterations_;
 
+        //- Maximum number of times an to allow an equal faceSet to be
+        //  returned from the face quality assessment before stopping iterations
+        //  to break an infinitie loop.
+        label maxConsecutiveEqualFaceSets_;
+
         //- The maximum allowed angle between a boundary face normal and the
         //  local surface normal before face will be aggressively collapsed
         scalar surfaceStepFaceAngle_;
@@ -386,6 +391,9 @@ public:
 
             //- Return the maxCollapseIterations
             inline label maxCollapseIterations() const;
+
+            //- Return the maxConsecutiveEqualFaceSets
+            inline label maxConsecutiveEqualFaceSets() const;
 
             //- Return the filterCountSkipThreshold
             inline label filterCountSkipThreshold() const;

@@ -140,6 +140,8 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
             labelHashSet lastWrongFaces;
 
+            label nConsecutiveEqualFaceSets = 0;
+
             do
             {
                 // Reindexing the Delaunay cells and regenerating the
@@ -177,9 +179,21 @@ void Foam::conformalVoronoiMesh::calcDualMesh
                 if (lastWrongFaces == wrongFaces)
                 {
                     Info<< nl << "Consecutive iterations found the same set "
-                        << "of bad quality faces, stopping filtering" << endl;
+                        << "of bad quality faces." << endl;
 
-                    break;
+                    if
+                    (
+                        ++nConsecutiveEqualFaceSets
+                     >= cvMeshControls().maxConsecutiveEqualFaceSets()
+                    )
+                    {
+                        Info<< nl << nConsecutiveEqualFaceSets
+                            << " consecutive iterations produced the same "
+                            << " bad quality faceSet, stopping filtering"
+                            << endl;
+
+                        break;
+                    }
                 }
                 else
                 {
