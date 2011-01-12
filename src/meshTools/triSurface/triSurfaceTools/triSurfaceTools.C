@@ -2217,7 +2217,7 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
         // If the sample is essentially on the face, do not check for
         // it being perpendicular.
 
-        if (magSampleNearestVec > SMALL)
+        if (magSampleNearestVec > 10*SMALL)
         {
             c /= magSampleNearestVec*mag(surf.faceNormals()[nearestFaceI]);
 

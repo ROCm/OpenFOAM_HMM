@@ -27,7 +27,7 @@ License
 
 inline Foam::scalar Foam::conformalVoronoiMesh::targetCellSize
 (
-    const point& pt,
+    const Foam::point& pt,
     bool isSurfacePoint
 ) const
 {
@@ -93,7 +93,7 @@ inline Foam::scalar Foam::conformalVoronoiMesh::averageAnyCellSize
 
 inline Foam::scalar Foam::conformalVoronoiMesh::averageAnyCellSize
 (
-    const Triangulation::Finite_facets_iterator& fit
+    const Delaunay::Finite_facets_iterator& fit
 ) const
 {
     // Geometric mean
@@ -138,7 +138,7 @@ inline Foam::scalar Foam::conformalVoronoiMesh::averageAnyCellSize
 
 inline Foam::scalar Foam::conformalVoronoiMesh::pointPairDistance
 (
-    const point& pt
+    const Foam::point& pt
 ) const
 {
     // Point pair distances are always going to be at the surface, so the
@@ -150,7 +150,7 @@ inline Foam::scalar Foam::conformalVoronoiMesh::pointPairDistance
 
 inline Foam::scalar Foam::conformalVoronoiMesh::mixedFeaturePointDistance
 (
-    const point& pt
+    const Foam::point& pt
 ) const
 {
     return
@@ -161,7 +161,7 @@ inline Foam::scalar Foam::conformalVoronoiMesh::mixedFeaturePointDistance
 
 inline Foam::scalar Foam::conformalVoronoiMesh::featurePointExclusionDistanceSqr
 (
-    const point& pt
+    const Foam::point& pt
 ) const
 {
     // Exclusion distance tests are always going to be at the surface, so the
@@ -178,7 +178,7 @@ inline Foam::scalar Foam::conformalVoronoiMesh::featurePointExclusionDistanceSqr
 
 inline Foam::scalar Foam::conformalVoronoiMesh::featureEdgeExclusionDistanceSqr
 (
-    const point& pt
+    const Foam::point& pt
 ) const
 {
     // Exclusion distance tests are always going to be at the surface, so the
@@ -195,7 +195,7 @@ inline Foam::scalar Foam::conformalVoronoiMesh::featureEdgeExclusionDistanceSqr
 
 inline Foam::scalar Foam::conformalVoronoiMesh::surfaceSearchDistanceSqr
 (
-    const point& pt
+    const Foam::point& pt
 ) const
 {
     return
@@ -205,7 +205,7 @@ inline Foam::scalar Foam::conformalVoronoiMesh::surfaceSearchDistanceSqr
 
 inline Foam::scalar Foam::conformalVoronoiMesh::maxSurfaceProtrusion
 (
-    const point& pt
+    const Foam::point& pt
 ) const
 {
     return targetCellSize(pt)*cvMeshControls().maxSurfaceProtrusionCoeff();
@@ -214,7 +214,7 @@ inline Foam::scalar Foam::conformalVoronoiMesh::maxSurfaceProtrusion
 
 inline Foam::label Foam::conformalVoronoiMesh::insertPoint
 (
-    const point& p,
+    const Foam::point& p,
     const label type
 )
 {
@@ -254,7 +254,7 @@ inline void Foam::conformalVoronoiMesh::insertPoints
 
     for
     (
-        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
         vit != finite_vertices_end();
         ++vit
     )
@@ -270,7 +270,7 @@ inline void Foam::conformalVoronoiMesh::insertPoints
 inline void Foam::conformalVoronoiMesh::insertPointPair
 (
     const scalar ppDist,
-    const point& surfPt,
+    const Foam::point& surfPt,
     const vector& n
 )
 {
@@ -319,7 +319,7 @@ inline void Foam::conformalVoronoiMesh::insertVb(const Vb& v, label offset)
 
 inline bool Foam::conformalVoronoiMesh::isBoundaryDualFace
 (
-    const Triangulation::Finite_edges_iterator& eit
+    const Delaunay::Finite_edges_iterator& eit
 ) const
 {
     Cell_handle c = eit->first;
@@ -344,7 +344,7 @@ inline bool Foam::conformalVoronoiMesh::isBoundaryDualFace
 
 inline bool Foam::conformalVoronoiMesh::isBoundaryDualVertex
 (
-    const Triangulation::Finite_cells_iterator& cit
+    const Delaunay::Finite_cells_iterator& cit
 ) const
 {
     // A dual vertex on the boundary will result from a Delaunay cell
@@ -385,7 +385,7 @@ Foam::conformalVoronoiMesh::topoint
 inline Foam::conformalVoronoiMesh::PointFrompoint
 Foam::conformalVoronoiMesh::toPoint
 (
-    const point& p
+    const Foam::point& p
 ) const
 {
     return reinterpret_cast<PointFrompoint>(p);
@@ -400,7 +400,7 @@ Foam::conformalVoronoiMesh::topoint
     const Point& P
 ) const
 {
-    return point
+    return Foam::point
     (
         CGAL::to_double(P.x()),
         CGAL::to_double(P.y()),
@@ -412,7 +412,7 @@ Foam::conformalVoronoiMesh::topoint
 inline Foam::conformalVoronoiMesh::PointFrompoint
 Foam::conformalVoronoiMesh::toPoint
 (
-    const point& p
+    const Foam::point& p
 ) const
 {
     return Point(p.x(), p.y(), p.z());
@@ -422,7 +422,7 @@ Foam::conformalVoronoiMesh::toPoint
 
 
 inline Foam::conformalVoronoiMesh::CGALVector
-Foam::conformalVoronoiMesh::toCGALVector(const point& pt) const
+Foam::conformalVoronoiMesh::toCGALVector(const Foam::point& pt) const
 {
     return CGALVector(pt.x(), pt.y(), pt.z());
 }

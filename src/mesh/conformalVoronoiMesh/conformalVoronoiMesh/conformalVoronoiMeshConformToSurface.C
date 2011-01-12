@@ -105,7 +105,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
     startOfSurfacePointPairs_ = number_of_vertices();
 
     // Initialise containers to store the edge conformation locations
-    DynamicList<point> newEdgeLocations;
+    DynamicList<Foam::point> newEdgeLocations;
 
     pointField existingEdgeLocations(0);
 
@@ -132,7 +132,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
         for
         (
-            Triangulation::Finite_vertices_iterator vit =
+            Delaunay::Finite_vertices_iterator vit =
             finite_vertices_begin();
             vit != finite_vertices_end();
             vit++
@@ -140,7 +140,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
         {
             if (vit->internalPoint())
             {
-                point vert(topoint(vit->point()));
+                Foam::point vert(topoint(vit->point()));
                 scalar searchDistanceSqr = surfaceSearchDistanceSqr(vert);
                 pointIndexHit surfHit;
                 label hitSurface;
@@ -247,7 +247,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
         for
         (
-            Triangulation::Finite_vertices_iterator vit =
+            Delaunay::Finite_vertices_iterator vit =
             finite_vertices_begin();
             vit != finite_vertices_end();
             vit++
@@ -259,7 +259,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
             if (vit->nearBoundary() || vit->ppMaster())
             {
-                point vert(topoint(vit->point()));
+                Foam::point vert(topoint(vit->point()));
                 pointIndexHit surfHit;
                 label hitSurface;
 
@@ -336,7 +336,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
     // for
     // (
-    //     Triangulation::Finite_vertices_iterator vit =
+    //     Delaunay::Finite_vertices_iterator vit =
     //     finite_vertices_begin();
     //     vit != finite_vertices_end();
     //     vit++
@@ -344,7 +344,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
     // {
     //     if (vit->internalOrBoundaryPoint())
     //     {
-    //         point vert(topoint(vit->point()));
+    //         Foam::point vert(topoint(vit->point()));
     //         pointIndexHit surfHit;
     //         label hitSurface;
 
@@ -371,7 +371,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
 bool Foam::conformalVoronoiMesh::dualCellSurfaceAnyIntersection
 (
-    const Triangulation::Finite_vertices_iterator& vit
+    const Delaunay::Finite_vertices_iterator& vit
 ) const
 {
     std::list<Facet> facets;
@@ -393,7 +393,7 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAnyIntersection
             return true;
         }
 
-        point dE0 = topoint(dual(fit->first));
+        Foam::point dE0 = topoint(dual(fit->first));
 
         // If edge end is outside bounding box then edge cuts boundary
         if (!geometryToConformTo_.bounds().contains(dE0))
@@ -401,7 +401,7 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAnyIntersection
             return true;
         }
 
-        point dE1 = topoint(dual(fit->first->neighbor(fit->second)));
+        Foam::point dE1 = topoint(dual(fit->first->neighbor(fit->second)));
 
         // If other edge end is outside bounding box then edge cuts boundary
         if (!geometryToConformTo_.bounds().contains(dE1))
@@ -422,7 +422,7 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAnyIntersection
 
 void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
 (
-    const Triangulation::Finite_vertices_iterator& vit,
+    const Delaunay::Finite_vertices_iterator& vit,
     pointIndexHit& surfHitLargest,
     label& hitSurfaceLargest
 ) const
@@ -430,7 +430,7 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
     std::list<Facet> facets;
     incident_facets(vit, std::back_inserter(facets));
 
-    point vert(topoint(vit->point()));
+    Foam::point vert(topoint(vit->point()));
 
     scalar maxProtrusionDistance = maxSurfaceProtrusion(vert);
 
@@ -447,7 +447,7 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
          && !is_infinite(fit->first->neighbor(fit->second))
         )
         {
-            point edgeMid =
+            Foam::point edgeMid =
                 0.5
                *(
                     topoint(dual(fit->first))
@@ -495,7 +495,7 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
 
 void Foam::conformalVoronoiMesh::limitDisplacement
 (
-    const Triangulation::Finite_vertices_iterator& vit,
+    const Delaunay::Finite_vertices_iterator& vit,
     vector& displacement,
     label callCount
 ) const
@@ -508,8 +508,8 @@ void Foam::conformalVoronoiMesh::limitDisplacement
         return;
     }
 
-    point pt = topoint(vit->point());
-    point dispPt = pt + displacement;
+    Foam::point pt = topoint(vit->point());
+    Foam::point dispPt = pt + displacement;
 
     bool limit = false;
 
@@ -582,8 +582,8 @@ void Foam::conformalVoronoiMesh::limitDisplacement
 
 bool Foam::conformalVoronoiMesh::nearFeatureEdgeLocation
 (
-    const point& pt,
-    DynamicList<point>& newEdgeLocations,
+    const Foam::point& pt,
+    DynamicList<Foam::point>& newEdgeLocations,
     pointField& existingEdgeLocations,
     autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree
 ) const
@@ -637,8 +637,8 @@ void Foam::conformalVoronoiMesh::buildEdgeLocationTree
         treeBoundBox(geometryToConformTo_.bounds()).extend(rndGen_, 1E-4)
     );
 
-    overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-    overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+    overallBb.min() -= Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+    overallBb.max() += Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
     edgeLocationTree.reset
     (
@@ -661,8 +661,8 @@ void Foam::conformalVoronoiMesh::buildSizeAndAlignmentTree() const
         treeBoundBox(geometryToConformTo_.bounds()).extend(rndGen_, 1E-4)
     );
 
-    overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-    overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+    overallBb.min() -= Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+    overallBb.max() += Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
     sizeAndAlignmentTreePtr_.reset
     (
@@ -680,8 +680,8 @@ void Foam::conformalVoronoiMesh::buildSizeAndAlignmentTree() const
 
 void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
 (
-    const Triangulation::Finite_vertices_iterator& vit,
-    const point& vert,
+    const Delaunay::Finite_vertices_iterator& vit,
+    const Foam::point& vert,
     const pointIndexHit& surfHit,
     label hitSurface,
     scalar surfacePtReplaceDistCoeffSqr,
@@ -690,7 +690,7 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
     DynamicList<label>& hitSurfaces,
     DynamicList<pointIndexHit>& featureEdgeHits,
     DynamicList<label>& featureEdgeFeaturesHit,
-    DynamicList<point>& newEdgeLocations,
+    DynamicList<Foam::point>& newEdgeLocations,
     pointField& existingEdgeLocations,
     autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree
 ) const
@@ -727,7 +727,7 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
     // loop as they will prevent nearby edge locations of different types being
     // conformed to.
 
-    DynamicList<point> currentEdgeLocations;
+    DynamicList<Foam::point> currentEdgeLocations;
 
     forAll(edHits, i)
     {
@@ -799,7 +799,7 @@ void Foam::conformalVoronoiMesh::storeSurfaceConformation()
 
     for
     (
-        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
         vit != finite_vertices_end();
         vit++
     )

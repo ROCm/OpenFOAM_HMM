@@ -94,13 +94,258 @@ bool Foam::conformalVoronoiMesh::insertSpecialisedFeaturePoint
 
     if (nExternal == 2 && nInternal == 1)
     {
-        Info<< "nExternal == 2 && nInternal == 1" << endl;
+        // Info<< "nExternal == 2 && nInternal == 1" << endl;
+
+        // const Foam::point& featPt = feMesh.points()[ptI];
+
+        // scalar ppDist = pointPairDistance(featPt);
+
+        // const vectorField& normals = feMesh.normals();
+
+        // const labelListList& edgeNormals = feMesh.edgeNormals();
+
+        // label concaveEdgeI = pEds
+        // [
+        //     findIndex(allEdStat, featureEdgeMesh::INTERNAL)
+        // ];
+
+        // // // Find which planes are joined to the concave edge
+
+        // // List<label> concaveEdgePlanes(2,label(-1));
+
+        // // label concaveEdgeI = concaveEdges[0];
+
+        // // // Pick up the two faces adjacent to the concave feature edge
+        // // const labelList& eFaces = qSurf_.edgeFaces()[concaveEdgeI];
+
+        // // label faceA = eFaces[0];
+
+        // // vector nA = qSurf_.faceNormals()[faceA];
+
+        // // scalar maxNormalDotProduct = -SMALL;
+
+        // // forAll(uniquePlaneNormals, uPN)
+        // // {
+        // //     scalar normalDotProduct = nA & uniquePlaneNormals[uPN];
+
+        // //     if (normalDotProduct > maxNormalDotProduct)
+        // //     {
+        // //         maxNormalDotProduct = normalDotProduct;
+
+        // //         concaveEdgePlanes[0] = uPN;
+        // //     }
+        // // }
+
+        // // label faceB = eFaces[1];
+        // // vector nB = qSurf_.faceNormals()[faceB];
+
+        // // maxNormalDotProduct = -SMALL;
+
+        // // forAll(uniquePlaneNormals, uPN)
+        // // {
+        // //     scalar normalDotProduct = nB & uniquePlaneNormals[uPN];
+
+        // //     if (normalDotProduct > maxNormalDotProduct)
+        // //     {
+        // //         maxNormalDotProduct = normalDotProduct;
+
+        // //         concaveEdgePlanes[1] = uPN;
+        // //     }
+        // // }
+
+        // // const vector& concaveEdgePlaneANormal =
+        // // uniquePlaneNormals[concaveEdgePlanes[0]];
+
+        // // const vector& concaveEdgePlaneBNormal =
+        // // uniquePlaneNormals[concaveEdgePlanes[1]];
+
+        // // label convexEdgesPlaneI;
+
+        // // if (findIndex(concaveEdgePlanes, 0) == -1)
+        // // {
+        // //     convexEdgesPlaneI = 0;
+        // // }
+        // // else if (findIndex(concaveEdgePlanes, 1) == -1)
+        // // {
+        // //     convexEdgesPlaneI = 1;
+        // // }
+        // // else
+        // // {
+        // //     convexEdgesPlaneI = 2;
+        // // }
+
+        // // const vector& convexEdgesPlaneNormal =
+        // // uniquePlaneNormals[convexEdgesPlaneI];
+
+        // // const edge& concaveEdge = edges[concaveEdgeI];
+
+        // // // Check direction of edge, if the feature point is at the end()
+        // // // the reverse direction.
+
+        // // scalar edgeDirection = 1.0;
+
+        // // if (ptI == concaveEdge.end())
+        // // {
+        // //     edgeDirection *= -1.0;
+        // // }
+
+
+        // const vector& concaveEdgePlaneANormal =
+        //     normals[edgeNormals[concaveEdgeI][0]];
+
+        // const vector& concaveEdgePlaneBNormal =
+        //     normals[edgeNormals[concaveEdgeI][1]];
+
+        // // Intersect planes parallel to the concave edge planes offset
+        // // by ppDist and the plane defined by featPt and the edge
+        // // vector.
+        // plane planeA
+        // (
+        //     featPt + ppDist*concaveEdgePlaneANormal,
+        //     concaveEdgePlaneANormal
+        // );
+
+        // plane planeB
+        // (
+        //     featPt + ppDist*concaveEdgePlaneBNormal,
+        //     concaveEdgePlaneBNormal
+        // );
+
+        // const vector& concaveEdgeDir = feMesh.edgeDirection
+        // (
+        //     concaveEdgeI,
+        //     ptI
+        // );
+
+        // Foam::point concaveEdgeLocalFeatPt = featPt + ppDist*concaveEdgeDir;
+
+        // // Finding the nearest point on the intersecting line to the
+        // // edge point.  Floating point errors often encountered using
+        // // planePlaneIntersect
+
+        // plane planeF(concaveEdgeLocalFeatPt, concaveEdgeDir);
+
+        // Foam::point concaveEdgeExternalPt = planeF.planePlaneIntersect
+        // (
+        //     planeA,
+        //     planeB
+        // );
+
+        // label concaveEdgeExternalPtI = number_of_vertices() + 4;
+
+        // // Redefine planes to be on the feature surfaces to project
+        // // through
+
+        // planeA = plane(featPt, concaveEdgePlaneANormal);
+
+        // planeB = plane(featPt, concaveEdgePlaneBNormal);
+
+        // Foam::point internalPtA =
+        //     concaveEdgeExternalPt
+        //   - 2*planeA.distance(concaveEdgeExternalPt)
+        //     *concaveEdgePlaneANormal;
+
+        // label internalPtAI = insertPoint
+        // (
+        //     internalPtA,
+        //     concaveEdgeExternalPtI
+        // );
+
+        // Foam::point internalPtB =
+        //     concaveEdgeExternalPt
+        //   - 2*planeB.distance(concaveEdgeExternalPt)
+        //    *concaveEdgePlaneBNormal;
+
+        // label internalPtBI = insertPoint
+        // (
+        //     internalPtB,
+        //     concaveEdgeExternalPtI
+        // );
+
+        // // TEMPORARY VARIABLE TO TEST
+        // vector convexEdgesPlaneNormal = -concaveEdgeDir;
+
+        // plane planeC(featPt, convexEdgesPlaneNormal);
+        // Foam::point externalPtD =
+        //     internalPtA
+        //   + 2*planeC.distance(internalPtA)*convexEdgesPlaneNormal;
+
+        // insertPoint(externalPtD, internalPtAI);
+
+        // Foam::point externalPtE =
+        //     internalPtB
+        //   + 2*planeC.distance(internalPtB)*convexEdgesPlaneNormal;
+
+        // insertPoint(externalPtE, internalPtBI);
+
+        // insertPoint(concaveEdgeExternalPt, internalPtAI);
+
+        // Info<< nl << "# featPt " << endl;
+        // meshTools::writeOBJ(Info, featPt);
+        // Info<< "# internalPtA" << endl;
+        // meshTools::writeOBJ(Info, internalPtA);
+        // Info<< "# internalPtB" << endl;
+        // meshTools::writeOBJ(Info, internalPtB);
+        // Info<< "# externalPtD" << endl;
+        // meshTools::writeOBJ(Info, externalPtD);
+        // Info<< "# externalPtE" << endl;
+        // meshTools::writeOBJ(Info, externalPtE);
+
+        // scalar totalAngle = radToDeg
+        // (
+        //     constant::mathematical::pi +
+        //     acos(mag(concaveEdgePlaneANormal & concaveEdgePlaneBNormal))
+        // );
+
+        // if (totalAngle > cvMeshControls().maxQuadAngle())
+        // {
+        //     // Add additional mitering points
+
+        //     scalar angleSign = 1.0;
+
+        //     if
+        //     (
+        //         geometryToConformTo_.outside
+        //         (
+        //             featPt - convexEdgesPlaneNormal*ppDist
+        //         )
+        //     )
+        //     {
+        //         angleSign = -1.0;
+        //     }
+
+        //     scalar phi =
+        //         angleSign*acos(concaveEdgeDir & -convexEdgesPlaneNormal);
+
+        //     scalar guard =
+        //     (
+        //         1 + sin(phi)*ppDist/mag
+        //         (
+        //             concaveEdgeLocalFeatPt - concaveEdgeExternalPt
+        //         )
+        //     )/cos(phi) - 1;
+
+        //     Foam::point internalPtF =
+        //         concaveEdgeExternalPt
+        //       + (2 + guard)*(concaveEdgeLocalFeatPt - concaveEdgeExternalPt);
+
+        //     label internalPtFI =
+        //         insertPoint(internalPtF, number_of_vertices() + 1);
+
+        //     Foam::point externalPtG =
+        //         internalPtF
+        //       + 2*planeC.distance(internalPtF) * convexEdgesPlaneNormal;
+
+        //     insertPoint(externalPtG, internalPtFI);
+        // }
+
+        // return true;
 
         return false;
     }
     else if (nExternal == 1 && nInternal == 2)
     {
-        Info<< "nExternal == 1 && nInternal == 2" << endl;
+        // Info<< "nExternal == 1 && nInternal == 2" << endl;
 
         return false;
     }

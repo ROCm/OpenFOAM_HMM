@@ -54,17 +54,71 @@ surfaceOffsetLinearDistance::surfaceOffsetLinearDistance
     surfaceCellSize_(readScalar(coeffsDict().lookup("surfaceCellSize"))),
     distanceCellSize_(readScalar(coeffsDict().lookup("distanceCellSize"))),
     surfaceOffset_(readScalar(coeffsDict().lookup("surfaceOffset"))),
-    totalDistance_
+    totalDistance_(),
+    totalDistanceSqr_(),
+    gradient_(),
+    intercept_()
+{
+    if
     (
-        readScalar(coeffsDict().lookup("distance")) + surfaceOffset_
-    ),
-    totalDistanceSqr_(sqr(totalDistance_)),
-    gradient_
-    (
-        (distanceCellSize_ - surfaceCellSize_)/(totalDistance_ - surfaceOffset_)
-    ),
-    intercept_(surfaceCellSize_ - gradient_*surfaceOffset_)
-{}
+        coeffsDict().found("totalDistance")
+     || coeffsDict().found("linearDistance")
+    )
+    {
+        if
+        (
+            coeffsDict().found("totalDistance")
+         && coeffsDict().found("linearDistance")
+        )
+        {
+            FatalErrorIn
+            (
+                "surfaceOffsetLinearDistance::surfaceOffsetLinearDistance"
+                "("
+                    "const dictionary& initialPointsDict, "
+                    "const conformalVoronoiMesh& cvMesh, "
+                    "const searchableSurface& surface"
+                ")"
+            )
+                << "totalDistance and linearDistance found, "
+                << "specify one or other, not both."
+                << nl << exit(FatalError) << endl;
+        }
+
+        if (coeffsDict().found("totalDistance"))
+        {
+            totalDistance_ = readScalar(coeffsDict().lookup("totalDistance"));
+        }
+        else
+        {
+            totalDistance_ =
+                readScalar(coeffsDict().lookup("linearDistance"))
+              + surfaceOffset_;
+        }
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "surfaceOffsetLinearDistance::surfaceOffsetLinearDistance"
+            "("
+                "const dictionary& initialPointsDict, "
+                "const conformalVoronoiMesh& cvMesh, "
+                "const searchableSurface& surface"
+            ")"
+        )
+            << "totalDistance or linearDistance not found."
+            << nl << exit(FatalError) << endl;
+    }
+
+    totalDistanceSqr_ = sqr(totalDistance_);
+
+    gradient_ =
+        (distanceCellSize_ - surfaceCellSize_)
+       /(totalDistance_ - surfaceOffset_);
+
+    intercept_ = surfaceCellSize_ - gradient_*surfaceOffset_;
+}
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //

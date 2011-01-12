@@ -33,15 +33,6 @@ hierarchicalCoeffs
     order           xyz;
 }
 
-metisCoeffs
-{
-    processorWeights
-    (
-        1
-        3
-    );
-}
-
 manualCoeffs
 {
     dataFile        "";

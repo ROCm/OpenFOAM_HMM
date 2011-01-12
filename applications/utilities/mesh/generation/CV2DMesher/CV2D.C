@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2007-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2007-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -693,7 +693,8 @@ void Foam::CV2D::newPoints(const scalar relaxation)
 
     // for
     // (
-    //     Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+    //     Triangulation::Finite_vertices_iterator vit =
+    //         finite_vertices_begin();
     //     vit != finite_vertices_end();
     //     ++vit
     // )
@@ -826,7 +827,8 @@ void Foam::CV2D::newPoints(const scalar relaxation)
     //                     //w = magSqr(ei)*mag(deltai);
 
     //                     // Use the following for an ~square mesh
-    //                     // Find the coordinate contributions for this edge delta
+    //                     // Find the coordinate contributions for this
+    //                     // edge delta
     //                     scalar cd0deltai = cd0 & deltai;
     //                     scalar cd1deltai = cd1 & deltai;
 
@@ -881,7 +883,8 @@ void Foam::CV2D::newPoints(const scalar relaxation)
 
 //     for
 //     (
-//         Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+//         Triangulation::Finite_vertices_iterator vit =
+//             finite_vertices_begin();
 //         vit != finite_vertices_end();
 //         ++vit
 //     )

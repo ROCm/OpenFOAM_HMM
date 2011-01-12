@@ -34,9 +34,6 @@ hierarchicalCoeffs
     order       xyz;
 }
 
-metisCoeffs
-{}
-
 manualCoeffs
 {
     dataFile    "decompositionData";

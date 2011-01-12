@@ -32,9 +32,9 @@ Description
     @verbatim
         inlet
         {
-            type    compressible::turbulentMixingLengthDissipationRateInlet;
+            type        compressible::turbulentMixingLengthDissipationRateInlet;
             mixingLength    0.005;         // 5 mm
-            value   uniform 200;   // placeholder
+            value           uniform 200;   // placeholder
         }
     @endverbatim
 
@@ -46,7 +46,7 @@ SourceFiles
 #ifndef compressibleturbulentMixingLengthDissipationRateInletFvPatchField_H
 #define compressibleturbulentMixingLengthDissipationRateInletFvPatchField_H
 
-#include "fixedValueFvPatchFields.H"
+#include "inletOutletFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,12 +61,19 @@ namespace compressible
 
 class turbulentMixingLengthDissipationRateInletFvPatchScalarField
 :
-    public fixedValueFvPatchScalarField
+    public inletOutletFvPatchScalarField
 {
     // Private data
 
         //- turbulent length scale
         scalar mixingLength_;
+
+        //- Name of the flux field
+        word phiName_;
+
+        //- Name of the turbulent kinetic energy field
+        word kName_;
+
 
 public:
 
