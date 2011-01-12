@@ -160,14 +160,14 @@ public:
         ) const;
 
         //- Encode index and bare index as components on own processor
-        inline labelPair encode
+        inline static labelPair encode
         (
             const label index,
             const label transformIndex
         );
 
         //- Encode index and bare index as components on given processor
-        inline labelPair encode
+        inline static labelPair encode
         (
             const label procI,
             const label index,

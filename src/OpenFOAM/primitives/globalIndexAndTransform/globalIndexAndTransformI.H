@@ -144,8 +144,8 @@ Foam::label Foam::globalIndexAndTransform::addToTransformIndex
         }
 
 
-        // Re-ecode permutation
-        // ~~~~~~~~~~~~~~~~~~~~
+        // Re-encode permutation
+        // ~~~~~~~~~~~~~~~~~~~~~
 
         return
             (permutation[2]+1)*9
@@ -218,7 +218,7 @@ Foam::labelPair Foam::globalIndexAndTransform::encode
 }
 
 
-Foam::label  Foam::globalIndexAndTransform::index
+Foam::label Foam::globalIndexAndTransform::index
 (
     const labelPair& globalIAndTransform
 )
