@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -342,7 +342,10 @@ bool Foam::KinematicParcel<ParcelType>::move
 
                 if (p.active())
                 {
-                    dt *= p.trackToFace(p.position() + dt*U_, td);
+                    scalar d = mag(dt*U_);
+                    const vector dir = U_/mag(U_);
+                    d = min(d, dir & mesh.bounds().span());
+                    dt *= p.trackToFace(p.position() + d*dir, td);
                 }
 
                 tEnd -= dt;
