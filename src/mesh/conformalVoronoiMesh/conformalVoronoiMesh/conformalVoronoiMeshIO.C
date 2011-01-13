@@ -369,7 +369,7 @@ void Foam::conformalVoronoiMesh::writeCellSizes
 ) const
 {
     {
-        timeCheck();
+        timeCheck("Start writeCellSizes");
 
         Info<< nl << "Create targetCellSize volScalarField" << endl;
 

@@ -75,6 +75,8 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
     reconformationMode reconfMode
 )
 {
+    timeCheck("Start buildSurfaceConformation");
+
     if (reconfMode == rmCoarse)
     {
         Info<< nl << "Build coarse surface conformation" << endl;
@@ -99,8 +101,6 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
         return;
     }
-
-    timeCheck();
 
     startOfSurfacePointPairs_ = number_of_vertices();
 

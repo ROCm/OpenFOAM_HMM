@@ -797,7 +797,7 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
 
     std::vector<Point> initPts = initialPointsMethod_->initialPoints();
 
-    timeCheck();
+    timeCheck("After initial points call");
 
     insertPoints(initPts);
 
@@ -815,7 +815,7 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments
     const std::vector<Point>& storePts
 )
 {
-    timeCheck();
+    timeCheck("Start of storeSizesAndAlignments");
 
     Info << nl << "Store size and alignment" << endl;
 
@@ -838,11 +838,11 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments
         storedAlignments_[i] = requiredAlignment(sizeAndAlignmentLocations_[i]);
     }
 
-    timeCheck();
+    timeCheck("Sizes and alignments calculated, build tree");
 
     buildSizeAndAlignmentTree();
 
-    timeCheck();
+    timeCheck("Size and alignment tree built");
 }
 
 
@@ -1222,13 +1222,17 @@ Foam::conformalVoronoiMesh::~conformalVoronoiMesh()
 
 void Foam::conformalVoronoiMesh::move()
 {
-    timeCheck();
+    timeCheck("Start of move");
 
     scalar relaxation = relaxationModel_->relaxation();
 
     Info<< nl << "Relaxation = " << relaxation << endl;
 
     pointField dualVertices(number_of_cells());
+
+    Info<< dualVertices.size() << endl;
+
+    timeCheck("Start of move - after dualVertices declaration");
 
     label dualVertI = 0;
 
@@ -1258,13 +1262,17 @@ void Foam::conformalVoronoiMesh::move()
         }
     }
 
+    timeCheck("Start of move - before dualVertices.setSize");
+
     dualVertices.setSize(dualVertI);
 
-    timeCheck();
+    Info<< dualVertices.size() << endl;
+
+    timeCheck("Dual vertices indexed");
 
     setVertexSizeAndAlignment();
 
-    timeCheck();
+    timeCheck("Determined sizes and alignments");
 
     Info<< nl << "Determining vertex displacements" << endl;
 
@@ -1562,7 +1570,7 @@ void Foam::conformalVoronoiMesh::move()
 
     startOfInternalPoints_ = number_of_vertices();
 
-    timeCheck();
+    timeCheck("Displacement calculated");
 
     Info<< nl << "Inserting displaced tessellation" << endl;
 
@@ -1575,13 +1583,13 @@ void Foam::conformalVoronoiMesh::move()
       - number_of_vertices()
       + pointsAdded;
 
-    timeCheck();
+    timeCheck("Internal points inserted");
 
     conformToSurface();
 
-    updateSizesAndAlignments(pointsToInsert);
+    timeCheck("After conformToSurface");
 
-    timeCheck();
+    updateSizesAndAlignments(pointsToInsert);
 
     Info<< nl
         << "Total displacement = " << totalDisp << nl
@@ -1589,6 +1597,8 @@ void Foam::conformalVoronoiMesh::move()
         << "Points added = " << pointsAdded << nl
         << "Points removed = " << pointsRemoved
         << endl;
+
+    timeCheck("Updated sizes and alignments (if required), end of move");
 }
 
 

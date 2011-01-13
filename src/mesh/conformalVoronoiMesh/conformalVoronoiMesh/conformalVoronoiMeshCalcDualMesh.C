@@ -41,11 +41,11 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     bool filterFaces
 )
 {
-    timeCheck();
+    timeCheck("Start calcDualMesh");
 
     setVertexSizeAndAlignment();
 
-    timeCheck();
+    timeCheck("After setVertexSizeAndAlignment");
 
     // Dual cell indexing
 
@@ -105,6 +105,8 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         // There is no guarantee that a merge of close points is no-risk
         mergeCloseDualVertices(points, boundaryPts);
     }
+
+    timeCheck("After initial close point merge");
 
     if (filterFaces)
     {
@@ -189,7 +191,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
                     {
                         Info<< nl << nConsecutiveEqualFaceSets
                             << " consecutive iterations produced the same "
-                            << " bad quality faceSet, stopping filtering"
+                            << "bad quality faceSet, stopping filtering"
                             << endl;
 
                         break;
@@ -197,8 +199,12 @@ void Foam::conformalVoronoiMesh::calcDualMesh
                 }
                 else
                 {
+                    nConsecutiveEqualFaceSets = 0;
+
                     lastWrongFaces = wrongFaces;
                 }
+
+                timeCheck("End of filtering iteration");
 
             } while (nBadQualityFaces > nInitialBadQualityFaces);
         }
@@ -206,7 +212,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     // Final dual face and owner neighbour construction
 
-    timeCheck();
+    timeCheck("Before createFacesOwnerNeighbourAndPatches");
 
     createFacesOwnerNeighbourAndPatches
     (
@@ -227,7 +233,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     removeUnusedPoints(faces, points);
 
-    timeCheck();
+    timeCheck("End of calcDualMesh");
 }
 
 
@@ -1436,7 +1442,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
     labelList patchStarts;
     pointField cellCentres;
 
-    timeCheck();
+    timeCheck("Start of checkPolyMeshQuality");
 
     Info<< nl << "Creating polyMesh to assess quality" << endl;
 
@@ -1490,7 +1496,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
     Info<< "NOT OVERRIDING CELL CENTRES" << endl;
     // mesh.overrideCellCentres(cellCentres);
 
-    timeCheck();
+    timeCheck("polyMesh created, checking quality");
 
     labelHashSet wrongFaces(pMesh.nFaces()/100);
 
@@ -1828,11 +1834,11 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
     owner.setSize(nInternalFaces);
     neighbour.setSize(nInternalFaces);
 
-    timeCheck();
+    timeCheck("polyMesh quality checked");
 
     sortFaces(faces, owner, neighbour);
 
-    timeCheck();
+    timeCheck("faces, owner, neighbour sorted");
 
     addPatches
     (

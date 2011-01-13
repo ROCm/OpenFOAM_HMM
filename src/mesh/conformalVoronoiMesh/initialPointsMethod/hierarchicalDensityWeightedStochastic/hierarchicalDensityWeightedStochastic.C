@@ -94,7 +94,7 @@ void Foam::hierarchicalDensityWeightedStochastic::recurseAndFill
 
         if (debug)
         {
-            cvMesh_.timeCheck();
+            cvMesh_.timeCheck(newName);
         }
 
         if (geometry.overlaps(subBB))
