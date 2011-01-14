@@ -338,12 +338,12 @@ bool Foam::KinematicParcel<ParcelType>::move
 
                 // Remember which cell the Parcel is in since this
                 // will change if a face is hit
-                label cellI = p.cell();
+                const label cellI = p.cell();
 
                 const scalar magU = mag(U_);
                 if (p.active() && magU > ROOTVSMALL)
                 {
-                    const scalar d = mag(dt*U_) + ROOTVSMALL;
+                    const scalar d = dt*magU;
                     const vector n = U_/magU;
                     const scalar dCorr = min(d, mag(n & mesh.bounds().span()));
                     dt *= dCorr/d*p.trackToFace(p.position() + dCorr*n, td);
