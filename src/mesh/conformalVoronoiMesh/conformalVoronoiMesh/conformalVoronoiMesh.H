@@ -709,7 +709,7 @@ public:
 
         typedef K::Vector_3 CGALVector;
 
-        inline CGALVector toCGALVector(const Foam::point& pt) const;
+        inline CGALVector toCGALVector(const Foam::vector& v) const;
 
         // Access
 

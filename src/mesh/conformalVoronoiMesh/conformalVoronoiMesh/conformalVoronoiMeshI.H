@@ -422,9 +422,9 @@ Foam::conformalVoronoiMesh::toPoint
 
 
 inline Foam::conformalVoronoiMesh::CGALVector
-Foam::conformalVoronoiMesh::toCGALVector(const Foam::point& pt) const
+Foam::conformalVoronoiMesh::toCGALVector(const Foam::vector& v) const
 {
-    return CGALVector(pt.x(), pt.y(), pt.z());
+    return CGALVector(v.x(), v.y(), v.z());
 }
 
 
