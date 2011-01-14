@@ -325,25 +325,7 @@ public:
         }
 
         //- Neighbour patchID.
-        virtual label neighbPatchID() const
-        {
-            if (neighbPatchID_ == -1)
-            {
-                neighbPatchID_ = this->boundaryMesh().findPatchID
-                (
-                    neighbPatchName_
-                );
-                if (neighbPatchID_ == -1)
-                {
-                    FatalErrorIn("cyclicPolyPatch::neighbPatchID() const")
-                        << "Illegal neighbourPatch name " << neighbPatchName_
-                        << endl << "Valid patch names are "
-                        << this->boundaryMesh().names()
-                        << exit(FatalError);
-                }
-            }
-            return neighbPatchID_;
-        }
+        virtual label neighbPatchID() const;
 
         virtual bool owner() const
         {

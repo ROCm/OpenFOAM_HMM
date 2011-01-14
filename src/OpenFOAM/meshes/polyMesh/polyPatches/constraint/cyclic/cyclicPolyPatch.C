@@ -703,8 +703,42 @@ Foam::cyclicPolyPatch::~cyclicPolyPatch()
 }
 
 
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::label Foam::cyclicPolyPatch::neighbPatchID() const
+{
+    if (neighbPatchID_ == -1)
+    {
+        neighbPatchID_ = this->boundaryMesh().findPatchID(neighbPatchName_);
+
+        if (neighbPatchID_ == -1)
+        {
+            FatalErrorIn("cyclicPolyPatch::neighbPatchID() const")
+                << "Illegal neighbourPatch name " << neighbPatchName_
+                << endl << "Valid patch names are "
+                << this->boundaryMesh().names()
+                << exit(FatalError);
+        }
+
+        // Check that it is a cyclic
+        const cyclicPolyPatch& nbrPatch = refCast<const cyclicPolyPatch>
+        (
+            this->boundaryMesh()[neighbPatchID_]
+        );
+
+        if (nbrPatch.neighbPatchName() != name())
+        {
+            WarningIn("cyclicPolyPatch::neighbPatchID() const")
+                << "Patch " << name()
+                << " specifies neighbour patch " << neighbPatchName()
+                << endl << " but that in return specifies "
+                << nbrPatch.neighbPatchName()
+                << endl;
+        }
+    }
+    return neighbPatchID_;
+}
+
 
 void Foam::cyclicPolyPatch::transformPosition(pointField& l) const
 {
