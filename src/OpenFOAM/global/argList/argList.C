@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,10 +58,10 @@ Foam::argList::initValidTables::initValidTables()
     validParOptions.set("parallel", "");
     argList::addOption
     (
-        "roots", "(dir1 .. dirn)",
+        "roots", "(dir1 .. dirN)",
         "slave root directories for distributed running"
     );
-    validParOptions.set("roots", "(dir1 .. dirn)");
+    validParOptions.set("roots", "(dir1 .. dirN)");
 
     Pstream::addValidParOptions(validParOptions);
 }
@@ -138,8 +138,8 @@ void Foam::argList::noBanner()
 
 void Foam::argList::noParallel()
 {
-    optionUsage.erase("parallel");
-    validOptions.erase("parallel");
+    removeOption("parallel");
+    removeOption("roots");
     validParOptions.clear();
 }
 
@@ -537,10 +537,10 @@ Foam::argList::argList
 
             if (options_.found("roots"))
             {
+                source = "'-roots' option";
                 IStringStream str(options_["roots"]);
                 str >> roots;
                 dictNProcs = roots.size()+1;
-                source = "roots-command-line";
             }
             else
             {
@@ -593,7 +593,7 @@ Foam::argList::argList
             {
                 forAll(roots, i)
                 {
-                    roots[i] = roots[i].expand();
+                    roots[i].expand();
                 }
 
                 if (roots.size() != Pstream::nProcs()-1)

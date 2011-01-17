@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -53,7 +53,7 @@ hookName="pre-commit"
 die()
 {
     echo "$hookName hook failure" 1>&2
-    echo '-----------------------' 1>&2
+    echo '-----------------------------------' 1>&2
     echo '' 1>&2
     echo "$@" 1>&2
     echo '' 1>&2
@@ -105,8 +105,8 @@ dieOnBadFiles()
 {
     if [ -n "$badFiles" ]
     then
-        echo '$hookName hook failure' 1>&2
-        echo '-----------------------' 1>&2
+        echo "$hookName hook failure" 1>&2
+        echo '-----------------------------------' 1>&2
         echo "$@" 1>&2
         echo '' 1>&2
         echo "File(s):" 1>&2
