@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,6 +48,7 @@ void Foam::KinematicCloud<ParcelType>::cloudSolution::read()
     if (steadyState())
     {
         dict_.lookup("calcFrequency") >> calcFrequency_;
+        dict_.lookup("maxCo") >> maxCo_;
         dict_.lookup("maxTrackTime") >> maxTrackTime_;
         dict_.subDict("sourceTerms").lookup("resetOnStartup")
             >> resetSourcesOnStartup_;
@@ -67,6 +68,7 @@ Foam::KinematicCloud<ParcelType>::cloudSolution::cloudSolution
     active_(dict.lookup("active")),
     transient_(false),
     calcFrequency_(1),
+    maxCo_(0.3),
     iter_(1),
     deltaT_(0.0),
     coupled_(false),
@@ -92,6 +94,7 @@ Foam::KinematicCloud<ParcelType>::cloudSolution::cloudSolution
     active_(cs.active_),
     transient_(cs.transient_),
     calcFrequency_(cs.calcFrequency_),
+    maxCo_(cs.maxCo_),
     iter_(cs.iter_),
     deltaT_(cs.deltaT_),
     coupled_(cs.coupled_),
@@ -112,6 +115,7 @@ Foam::KinematicCloud<ParcelType>::cloudSolution::cloudSolution
     active_(false),
     transient_(false),
     calcFrequency_(0),
+    maxCo_(GREAT),
     iter_(0),
     deltaT_(0.0),
     coupled_(false),

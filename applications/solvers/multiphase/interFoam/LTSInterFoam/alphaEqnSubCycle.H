@@ -1,12 +1,6 @@
-label nAlphaCorr
-(
-    readLabel(piso.lookup("nAlphaCorr"))
-);
+label nAlphaCorr(readLabel(piso.lookup("nAlphaCorr")));
 
-label nAlphaSubCycles
-(
-    readLabel(piso.lookup("nAlphaSubCycles"))
-);
+label nAlphaSubCycles(readLabel(piso.lookup("nAlphaSubCycles")));
 
 if (nAlphaSubCycles > 1)
 {
@@ -19,7 +13,7 @@ if (nAlphaSubCycles > 1)
         !(++alphaSubCycle).end();
     )
     {
-#       include "alphaEqn.H"
+        #include "alphaEqn.H"
         rhoPhiSum += (runTime.deltaT()/totalDeltaT)*rhoPhi;
     }
 
@@ -27,7 +21,7 @@ if (nAlphaSubCycles > 1)
 }
 else
 {
-#       include "alphaEqn.H"
+    #include "alphaEqn.H"
 }
 
 interface.correct();

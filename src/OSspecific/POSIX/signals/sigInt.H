@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,9 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#include "OSspecific.H"
+#ifndef sigInt_H
+#define sigInt_H
+
 #include <signal.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -60,13 +62,14 @@ class sigInt
 
     // Private Member Functions
 
-        static void sigIntHandler(int);
+        static void sigHandler(int);
 
 
 public:
 
     // Constructors
 
+        //- Construct null
         sigInt();
 
 
@@ -76,6 +79,7 @@ public:
 
     // Member functions
 
+        //- Activate SIGINT signal handler
         void set(const bool verbose);
 };
 
@@ -83,5 +87,9 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

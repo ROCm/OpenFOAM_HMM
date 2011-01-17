@@ -1,1 +1,1 @@
-EXE_LIBS = $(LIB_WM_OPTIONS_DIR)/libfbsdmalloc.o
+EXE_LIBS = $(FOAM_EXT_LIBBIN)/libfbsdmalloc.o

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,9 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
 #include "sigFpe.H"
-
+#include "error.H"
 #include "JobInfo.H"
 #include "OSspecific.H"
 #include "IOstreams.H"
@@ -52,51 +51,42 @@ License
 struct sigaction Foam::sigFpe::oldAction_;
 
 
-#if defined(LINUX)
+#ifdef LINUX
 
-void *(*Foam::sigFpe::old_malloc_hook)(size_t, const void *) = NULL;
+void *(*Foam::sigFpe::oldMallocHook_)(size_t, const void *) = NULL;
 
-void* Foam::sigFpe::my_malloc_hook(size_t size, const void *caller)
+void* Foam::sigFpe::nanMallocHook_(size_t size, const void *caller)
 {
     void *result;
 
     // Restore all old hooks
-    __malloc_hook = old_malloc_hook;
+    __malloc_hook = oldMallocHook_;
 
     // Call recursively
-    result = malloc (size);
+    result = malloc(size);
 
-    // initialize to signalling nan
+    // initialize to signalling NaN
 #   ifdef WM_SP
 
     const uint32_t sNAN = 0x7ff7fffflu;
-
-    int nScalars = size / sizeof(scalar);
-
     uint32_t* dPtr = reinterpret_cast<uint32_t*>(result);
-
-    for (int i = 0; i < nScalars; i++)
-    {
-        *dPtr++ = sNAN;
-    }
 
 #   else
 
     const uint64_t sNAN = 0x7ff7ffffffffffffllu;
-
-    int nScalars = size/sizeof(scalar);
-
     uint64_t* dPtr = reinterpret_cast<uint64_t*>(result);
 
-    for (int i = 0; i < nScalars; i++)
+#   endif
+
+    const size_t nScalars = size/sizeof(scalar);
+    for (size_t i = 0; i < nScalars; ++i)
     {
         *dPtr++ = sNAN;
     }
 
-#   endif
 
     // Restore our own hooks
-    __malloc_hook = my_malloc_hook;
+    __malloc_hook = nanMallocHook_;
 
     return result;
 }
@@ -106,14 +96,14 @@ void* Foam::sigFpe::my_malloc_hook(size_t size, const void *caller)
 
 #ifdef LINUX_GNUC
 
-void Foam::sigFpe::sigFpeHandler(int)
+void Foam::sigFpe::sigHandler(int)
 {
     // Reset old handling
     if (sigaction(SIGFPE, &oldAction_, NULL) < 0)
     {
         FatalErrorIn
         (
-            "Foam::sigSegv::sigFpeHandler()"
+            "Foam::sigSegv::sigHandler()"
         )   << "Cannot reset SIGFPE trapping"
             << abort(FatalError);
     }
@@ -166,7 +156,7 @@ Foam::sigFpe::~sigFpe()
         // Reset to standard malloc
         if (oldAction_.sa_handler)
         {
-            __malloc_hook = old_malloc_hook;
+            __malloc_hook = oldMallocHook_;
         }
 
 #       endif
@@ -189,13 +179,10 @@ void Foam::sigFpe::set(const bool verbose)
 
     if (env("FOAM_SIGFPE"))
     {
-        if (verbose)
-        {
-            Info<< "SigFpe : Enabling floating point exception trapping"
-                << " (FOAM_SIGFPE)." << endl;
-        }
+        bool supported = false;
 
 #       ifdef LINUX_GNUC
+        supported = true;
 
         feenableexcept
         (
@@ -205,7 +192,7 @@ void Foam::sigFpe::set(const bool verbose)
         );
 
         struct sigaction newAction;
-        newAction.sa_handler = sigFpeHandler;
+        newAction.sa_handler = sigHandler;
         newAction.sa_flags = SA_NODEFER;
         sigemptyset(&newAction.sa_mask);
         if (sigaction(SIGFPE, &newAction, &oldAction_) < 0)
@@ -219,6 +206,7 @@ void Foam::sigFpe::set(const bool verbose)
 
 
 #       elif defined(sgiN32) || defined(sgiN32Gcc)
+        supported = true;
 
         sigfpe_[_DIVZERO].abort=1;
         sigfpe_[_OVERFL].abort=1;
@@ -240,23 +228,50 @@ void Foam::sigFpe::set(const bool verbose)
         );
 
 #       endif
+
+
+        if (verbose)
+        {
+            if (supported)
+            {
+                Info<< "sigFpe : Enabling floating point exception trapping"
+                    << " (FOAM_SIGFPE)." << endl;
+            }
+            else
+            {
+                Info<< "sigFpe : Floating point exception trapping"
+                    << " - not supported on this platform" << endl;
+            }
+        }
     }
 
 
     if (env("FOAM_SETNAN"))
     {
-        if (verbose)
-        {
-            Info<< "SetNaN : Initialising allocated memory to NaN"
-                << " (FOAM_SETNAN)." << endl;
-        }
+        bool supported = false;
 
 #       ifdef LINUX_GNUC
+        supported = true;
 
         // Set our malloc
-        __malloc_hook = Foam::sigFpe::my_malloc_hook;
+        __malloc_hook = Foam::sigFpe::nanMallocHook_;
 
 #       endif
+
+
+        if (verbose)
+        {
+            if (supported)
+            {
+            Info<< "SetNaN : Initialising allocated memory to NaN"
+                << " (FOAM_SETNAN)." << endl;
+            }
+            else
+            {
+                Info<< "SetNaN : Initialise allocated memory to NaN"
+                    << " - not supported on this platform" << endl;
+            }
+        }
     }
 }
 

@@ -1,3 +1,0 @@
-chemFoam.C
-
-EXE = $(FOAM_USER_APPBIN)/chemFoam

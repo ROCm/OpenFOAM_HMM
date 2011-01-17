@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -253,7 +253,8 @@ public:
             //- Increment the nTrackingRescues counter
             void trackingRescue() const
             {
-                if (++nTrackingRescues_ % size() == 0)
+                nTrackingRescues_++;
+                if (cloud::debug && nTrackingRescues_ % size() == 0)
                 {
                     Pout<< "    " << nTrackingRescues_
                         << " tracking rescues " << endl;

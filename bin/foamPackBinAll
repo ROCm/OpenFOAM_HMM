@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -57,10 +57,29 @@ esac
 }
 
 
-# obtain archOptions types from lib/
-for archOptions in $packDir/lib/*
-do
-    $binDir/$packBin $@ ${archOptions##*/}
-done
+if [ -d $packDir/lib ]
+then
+
+    # obtain archOptions types from lib/<archOptions>
+    for archOptions in $packDir/lib/*
+    do
+        $binDir/$packBin $@ ${archOptions##*/}
+    done
+
+elif [ -d $packDir/platforms ]
+
+    # obtain archOptions types from platforms/<archOptions>/lib
+    for archOptions in $packDir/platforms/*/lib
+    do
+        archOptions=${archOptions%%/lib}
+        $binDir/$packBin $@ ${archOptions##*/}
+    done
+
+else
+
+    echo "Error: directory $packDir does not appear packable" 1>&2
+    exit 1
+
+fi
 
 #------------------------------------------------------------------------------
