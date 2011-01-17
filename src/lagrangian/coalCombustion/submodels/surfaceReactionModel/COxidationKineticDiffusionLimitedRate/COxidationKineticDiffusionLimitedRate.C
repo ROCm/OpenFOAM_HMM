@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,12 +36,8 @@ COxidationKineticDiffusionLimitedRate
     CloudType& owner
 )
 :
-    SurfaceReactionModel<CloudType>
-    (
-        dict,
-        owner,
-        typeName
-    ),
+    SurfaceReactionModel<CloudType>(dict, owner, typeName),
+    Sb_(readScalar(this->coeffDict().lookup("Sb"))),
     C1_(readScalar(this->coeffDict().lookup("C1"))),
     C2_(readScalar(this->coeffDict().lookup("C2"))),
     E_(readScalar(this->coeffDict().lookup("E"))),
@@ -76,6 +72,7 @@ COxidationKineticDiffusionLimitedRate
 )
 :
     SurfaceReactionModel<CloudType>(srm),
+    Sb_(srm.Sb_),
     C1_(srm.C1_),
     C2_(srm.C2_),
     E_(srm.E_),
@@ -83,7 +80,8 @@ COxidationKineticDiffusionLimitedRate
     O2GlobalId_(srm.O2GlobalId_),
     CO2GlobalId_(srm.CO2GlobalId_),
     WC_(srm.WC_),
-    WO2_(srm.WO2_)
+    WO2_(srm.WO2_),
+    HcCO2_(srm.HcCO2_)
 {}
 
 
@@ -153,10 +151,10 @@ Foam::scalar Foam::COxidationKineticDiffusionLimitedRate<CloudType>::calculate
     const scalar dOmega = dmC/WC_;
 
     // Change in O2 mass [kg]
-    const scalar dmO2 = dOmega*WO2_;
+    const scalar dmO2 = dOmega*Sb_*WO2_;
 
     // Mass of newly created CO2 [kg]
-    const scalar dmCO2 = dOmega*(WC_ + WO2_);
+    const scalar dmCO2 = dOmega*(WC_ + Sb_*WO2_);
 
     // Update local particle C mass
     dMassSolid[CsLocalId_] += dOmega*WC_;
@@ -165,12 +163,12 @@ Foam::scalar Foam::COxidationKineticDiffusionLimitedRate<CloudType>::calculate
     dMassSRCarrier[O2GlobalId_] -= dmO2;
     dMassSRCarrier[CO2GlobalId_] += dmCO2;
 
-    const scalar HC = thermo.solids().properties()[CsLocalId_].H(T);
-    const scalar HCO2 = thermo.carrier().H(CO2GlobalId_, T);
-    const scalar HO2 = thermo.carrier().H(O2GlobalId_, T);
+    const scalar HsC = thermo.solids().properties()[CsLocalId_].Hs(T);
 
     // Heat of reaction [J]
-    return dOmega*(WC_*HC + WO2_*HO2 - (WC_ + WO2_)*HCO2);
+    // Sensible enthalpy contributions due to O2 depletion and CO2 generation
+    // handled by particle transfer terms
+    return dmC*HsC - dmCO2*HcCO2_;
 }
 
 

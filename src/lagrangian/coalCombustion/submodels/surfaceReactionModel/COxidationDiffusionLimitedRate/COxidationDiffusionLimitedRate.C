@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -160,12 +160,12 @@ Foam::scalar Foam::COxidationDiffusionLimitedRate<CloudType>::calculate
     dMassSRCarrier[O2GlobalId_] -= dmO2;
     dMassSRCarrier[CO2GlobalId_] += dmCO2;
 
-    const scalar HC = thermo.solids().properties()[CsLocalId_].H(T);
-    const scalar HCO2 = thermo.carrier().H(CO2GlobalId_, T);
-    const scalar HO2 = thermo.carrier().H(O2GlobalId_, T);
+    const scalar HsC = thermo.solids().properties()[CsLocalId_].Hs(T);
 
     // Heat of reaction [J]
-    return dmC*HC + dmO2*HO2 - dmCO2*HCO2;
+    // Sensible enthalpy contributions due to O2 depletion and CO2 generation
+    // handled by particle transfer terms
+    return dmC*HsC - dmCO2*HcCO2_;
 }
 
 

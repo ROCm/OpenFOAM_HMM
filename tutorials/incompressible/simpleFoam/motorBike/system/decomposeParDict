@@ -18,7 +18,6 @@ FoamFile
 numberOfSubdomains 6;
 
 method          hierarchical;
-// method          metis;
 // method          ptscotch;
 
 simpleCoeffs
@@ -37,12 +36,6 @@ hierarchicalCoeffs
 manualCoeffs
 {
     dataFile        "cellDecomposition";
-}
-
-metisCoeffs
-{
-    //n                   (5 1 1);
-    //cellWeightsFile     "constant/cellWeightsFile";
 }
 
 

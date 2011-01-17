@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2006-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ SourceFiles
 #ifndef incompressibleturbulentMixingLengthDissipationRateInlet_H
 #define incompressibleturbulentMixingLengthDissipationRateInlet_H
 
-#include "fixedValueFvPatchFields.H"
+#include "inletOutletFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,12 +61,19 @@ namespace incompressible
 
 class turbulentMixingLengthDissipationRateInletFvPatchScalarField
 :
-    public fixedValueFvPatchScalarField
+    public inletOutletFvPatchScalarField
 {
     // Private data
 
         //- turbulent length scale
         scalar mixingLength_;
+
+        //- Name of the flux field
+        word phiName_;
+
+        //- Name of the turbulent kinetic energy field
+        word kName_;
+
 
 public:
 

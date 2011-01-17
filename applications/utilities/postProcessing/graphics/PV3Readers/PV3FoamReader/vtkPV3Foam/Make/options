@@ -19,5 +19,5 @@ LIB_LIBS = \
     -lfiniteVolume \
     -lgenericPatchFields \
     -llagrangian \
-    -L$(FOAM_EXT_LIBBIN) -lvtkPV3Readers \
+    -L$(FOAM_LIBBIN) -lvtkPV3Readers \
     $(GLIBS)

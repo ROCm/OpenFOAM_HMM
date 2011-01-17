@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -136,6 +136,11 @@ public:
             //  NOTE: Steady operation only
             label calcFrequency_;
 
+            //- Maximum particle Courant number
+            //  Max fraction of current cell that can be traversed in a single
+            //  step
+            scalar maxCo_;
+
             //- Current cloud iteration
             label iter_;
 
@@ -217,6 +222,9 @@ public:
 
                 //- Return const access to the calculation frequency
                 inline label calcFrequency() const;
+
+                //- Return const access to the max particle Courant number
+                inline scalar maxCo() const;
 
                 //- Return const access to the current cloud iteration
                 inline label iter() const;

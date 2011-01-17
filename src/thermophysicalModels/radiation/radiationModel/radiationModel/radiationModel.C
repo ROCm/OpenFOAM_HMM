@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -143,14 +143,14 @@ Foam::tmp<Foam::fvScalarMatrix> Foam::radiation::radiationModel::Sh
 ) const
 {
     volScalarField& h = thermo.h();
-    const volScalarField cp(thermo.Cp());
+    const volScalarField Cp(thermo.Cp());
     const volScalarField T3(pow3(T_));
 
     return
     (
         Ru()
-      - fvm::Sp(4.0*Rp()*T3/cp, h)
-      - Rp()*T3*(T_ - 4.0*h/cp)
+      - fvm::Sp(4.0*Rp()*T3/Cp, h)
+      - Rp()*T3*(T_ - 4.0*h/Cp)
     );
 }
 
@@ -161,14 +161,14 @@ Foam::tmp<Foam::fvScalarMatrix> Foam::radiation::radiationModel::Shs
 ) const
 {
     volScalarField& hs = thermo.hs();
-    const volScalarField cp(thermo.Cp());
+    const volScalarField Cp(thermo.Cp());
     const volScalarField T3(pow3(T_));
 
     return
     (
         Ru()
-      - fvm::Sp(4.0*Rp()*T3/cp, hs)
-      - Rp()*T3*(T_ - 4.0*hs/cp)
+      - fvm::Sp(4.0*Rp()*T3/Cp, hs)
+      - Rp()*T3*(T_ - 4.0*hs/Cp)
     );
 }
 

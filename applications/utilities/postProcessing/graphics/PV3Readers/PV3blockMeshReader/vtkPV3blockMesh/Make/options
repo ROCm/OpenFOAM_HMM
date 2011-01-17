@@ -10,5 +10,5 @@ EXE_INC = \
 LIB_LIBS = \
     -lmeshTools \
     -lblockMesh \
-    -L$(FOAM_EXT_LIBBIN) -lvtkPV3Readers \
+    -L$(FOAM_LIBBIN) -lvtkPV3Readers \
     $(GLIBS)

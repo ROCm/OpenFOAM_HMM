@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -73,13 +73,10 @@ do
 done
 
 # check for essential directories
-for dir in $packDir
-do
-    [ -d $dir ] || {
-        echo "Error: directory $dir does not exist" 1>&2
-        exit 1
-    }
-done
+[ -d $packDir ] || {
+    echo "Error: directory $packDir does not exist" 1>&2
+    exit 1
+}
 
 
 #------------------------------------------------------------------------------

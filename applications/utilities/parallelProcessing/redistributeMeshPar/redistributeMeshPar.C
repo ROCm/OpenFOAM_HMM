@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -275,7 +275,7 @@ autoPtr<fvMesh> createMesh
                 mesh.cellZones()
             );
         }
-        mesh.addZones(pz, fz, cz);        
+        mesh.addZones(pz, fz, cz);
     }
 
 
@@ -399,7 +399,7 @@ void printMeshData(const polyMesh& mesh)
         label nProcFaces = 0;
 
         const labelList& nei = patchNeiProcNo[procI];
-        
+
         forAll(patchNeiProcNo[procI], i)
         {
             Info<< "    Number of faces shared with processor "

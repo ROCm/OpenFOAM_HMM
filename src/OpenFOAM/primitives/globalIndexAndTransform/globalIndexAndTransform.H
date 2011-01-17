@@ -84,7 +84,7 @@ class globalIndexAndTransform
         label nullTransformIndex_;
 
         //- Mapping from patch index to which transform it matches (or
-        //  -1 for none) (.first()) and what sign to us for it,
+        //  -1 for none) (.first()) and what sign to use for it,
         //  i.e. +/- 1 (.second()).
         List<Pair<label> > patchTransformSign_;
 
