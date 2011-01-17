@@ -151,48 +151,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::cellValueSourceCorrection
     const label cellI
 )
 {
-    scalar massCell = this->massCell(cellI);
-
-    scalar addedMass = 0.0;
-    forAll(td.cloud().rhoTrans(), i)
-    {
-        addedMass += td.cloud().rhoTrans(i)[cellI];
-    }
-
-    this->rhoc_ += addedMass/td.cloud().pMesh().cellVolumes()[cellI];
-
-    scalar massCellNew = massCell + addedMass;
-    this->Uc_ += td.cloud().UTrans()[cellI]/massCellNew;
-
-    scalar CpEff = 0;
-    if (addedMass > ROOTVSMALL)
-    {
-        forAll(td.cloud().rhoTrans(), i)
-        {
-            scalar Y = td.cloud().rhoTrans(i)[cellI]/addedMass;
-            CpEff += Y*td.cloud().thermo().carrier().Cp(i, this->Tc_);
-        }
-    }
-    const scalar Cpc = td.CpInterp().psi()[cellI];
-    this->Cpc_ = (massCell*Cpc + addedMass*CpEff)/massCellNew;
-
-    this->Tc_ += td.cloud().hsTrans()[cellI]/(this->Cpc_*massCellNew);
-
-    if (this->Tc_ < td.cloud().constProps().TMin())
-    {
-        WarningIn
-        (
-            "void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection"
-            "("
-                "TrackData&, "
-                "const scalar, "
-                "const label"
-            ")"
-        )   << "Limiting observed temperature in cell " << cellI << " to "
-            << td.cloud().constProps().TMin() <<  nl << endl;
-
-        this->Tc_ = td.cloud().constProps().TMin();
-    }
+    // Re-use correction from reacting parcel
+    ReactingParcel<ParcelType>::cellValueSourceCorrection(td, dt, cellI);
 }
 
 
@@ -228,12 +188,12 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
 
     // Calc surface values
     // ~~~~~~~~~~~~~~~~~~~
-    scalar Ts, rhos, mus, Pr, kappa;
+    scalar Ts, rhos, mus, Prs, kappas;
     ThermoParcel<ParcelType>::
-        calcSurfaceValues(td, cellI, T0, Ts, rhos, mus, Pr, kappa);
+        calcSurfaceValues(td, cellI, T0, Ts, rhos, mus, Prs, kappas);
 
     // Reynolds number
-    scalar Re = this->Re(U0, d0, rhos, mus);
+    scalar Res = this->Re(U0, d0, rhos, mus);
 
 
     // Sources
@@ -273,7 +233,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         td,
         dt,
         cellI,
-        Re,
+        Res,
         Ts,
         mus/rhos,
         d0,
@@ -316,7 +276,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     );
 
     // Correct surface values due to emitted species
-    this->correctSurfaceValues(td, cellI, Ts, Cs, rhos, mus, Pr, kappa);
+    this->correctSurfaceValues(td, cellI, Ts, Cs, rhos, mus, Prs, kappas);
+    Res = this->Re(U0, d0, rhos, mus);
 
 
     // Surface reactions
@@ -374,9 +335,9 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             td,
             dt,
             cellI,
-            Re,
-            Pr,
-            kappa,
+            Res,
+            Prs,
+            kappas,
             d0,
             rho0,
             T0,
@@ -399,7 +360,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             td,
             dt,
             cellI,
-            Re,
+            Res,
             mus,
             d0,
             U0,
