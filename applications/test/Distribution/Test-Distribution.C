@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    DistributionTest
+    Test-Distribution
 
 Description
     Test the Distribution class

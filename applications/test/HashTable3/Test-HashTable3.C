@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,12 +22,16 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
+    Test speeds for some HashTable operations
 
 \*---------------------------------------------------------------------------*/
 
+#include "argList.H"
 #include "HashTable.H"
 #include "HashPtrTable.H"
 #include "Map.H"
+#include "StaticHashTable.H"
+#include "cpuTime.H"
 
 using namespace Foam;
 
@@ -36,49 +40,45 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    HashTable<label, Foam::string> table1(0);
+    const label nLoops = 30;
+    const label nBase  = 100000;
+    const label nSize  = nLoops * nBase;
 
-    table1.insert("kjhk", 10);
-    table1.insert("kjhk2", 12);
+    cpuTime timer;
 
-    Info<< "table1: " << table1 << nl
-        << "toc: " << table1.toc() << endl;
+    // ie, a
+    // Map<label> map(2 * nSize);
+    // HashTable<label, label, Hash<label> > map(2 * nSize);
+    // StaticHashTable<label, label, Hash<label> > map(2 * nSize);
+    HashTable<label, label, Hash<label> > map(2 * nSize);
 
-    HashTable<label, label, Hash<label> > table2(10);
+    Info<< "Constructed map of size: " << nSize
+        << " (size " << map.size() << " capacity " << map.capacity() << ") "
+        << "  " << timer.cpuTimeIncrement() << " s\n\n";
 
-    table2.insert(3, 10);
-    table2.insert(5, 12);
-    table2.insert(7, 16);
+    for (label i = 0; i < nSize; i++)
+    {
+        map.insert(i, i);
+    }
+    Info<< "Inserted " << nSize << " elements"
+        << " (size " << map.size() << " capacity " << map.capacity() << ") "
+        << timer.cpuTimeIncrement() << " s\n";
 
-    Info<< "table2: " << table2 << nl
-        << "toc: " << table2.toc() << endl;
+    label elemI = 0;
+    for (label iLoop = 0; iLoop < nLoops; iLoop++)
+    {
+        for (label i = 0; i < nBase; i++)
+        {
+            map.erase(elemI++);
+        }
 
-    Map<label> table3(1);
-    table3.transfer(table2);
-
-    Info<< "table2: " << table2 << nl
-        << "toc: " << table2.toc() << endl;
-
-    Info<< "table3: " << table3 << nl
-        << "toc: " << table3.toc() << endl;
-
-    Map<label> table4(table3.xfer());
-
-    Info<< "table3: " << table3 << nl
-        << "toc: " << table3.toc() << endl;
-
-    Info<< "table4: " << table4 << nl
-        << "toc: " << table4.toc() << endl;
-
-    HashPtrTable<label, Foam::string> ptable1(0);
-    ptable1.insert("kjhkjh", new label(10));
-
-    Info<< "PtrTable toc: " << ptable1.toc() << endl;
-
-    Info<< "End\n" << endl;
+        map.shrink();
+        Info<< "loop " << iLoop << " - Erased " << nBase << " elements"
+            << " (size " << map.size() << " capacity " << map.capacity() << ") "
+            << timer.cpuTimeIncrement() << " s\n";
+    }
 
     return 0;
 }
-
 
 // ************************************************************************* //
