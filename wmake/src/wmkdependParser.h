@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,25 +61,25 @@ namespace wmake {
 class Errors
 {
 public:
-        int count;      //!< The number of errors detected
+	int count;      //!< The number of errors detected
 
-        //! Return a string describing the given error code.
-        static std::wstring strerror(int n);
+	//! Return a string describing the given error code.
+	static std::wstring strerror(int n);
 
-        Errors();               //!< Construct null - start with no errors
-        virtual ~Errors();      //!< Destructor
-        virtual void clear();   //!< Clear the error count
+	Errors();               //!< Construct null - start with no errors
+	virtual ~Errors();      //!< Destructor
+	virtual void clear();   //!< Clear the error count
 
-        //! Handle a general warning 'msg'
-        virtual void Warning(const std::wstring& msg);
-        //! Handle a general warning 'msg'
-        virtual void Warning(int line, int col, const std::wstring& msg);
-        //! Handle general error 'msg' (eg, a semantic error)
-        virtual void Error(int line, int col, const std::wstring& msg);
-        //! Handle syntax error 'n', uses strerror for the message, calls Error()
-        virtual void SynErr(int line, int col, int n);
-        //! Handle a general exception 'msg'
-        virtual void Exception(const std::wstring& msg);
+	//! Handle a general warning 'msg'
+	virtual void Warning(const std::wstring& msg);
+	//! Handle a general warning 'msg'
+	virtual void Warning(int line, int col, const std::wstring& msg);
+	//! Handle general error 'msg' (eg, a semantic error)
+	virtual void Error(int line, int col, const std::wstring& msg);
+	//! Handle syntax error 'n', uses strerror for the message, calls Error()
+	virtual void SynErr(int line, int col, int n);
+	//! Handle a general exception 'msg'
+	virtual void Exception(const std::wstring& msg);
 
 }; // Errors
 
@@ -91,33 +91,33 @@ public:
 //! A Coco/R Parser
 class Parser
 {
-        enum {
-                _EOF=0,
-                _string=1,
-                _sqstring=2,
-                _package_name=3,
-                _package_dir=4,
-                maxT = 10    //<! max term (w/o pragmas)
-        };
-        static const int minErrDist = 2; //!< min. distance before reporting errors
+	enum {
+		_EOF=0,
+		_string=1,
+		_sqstring=2,
+		_package_name=3,
+		_package_dir=4,
+		maxT = 10    //<! max term (w/o pragmas)
+	};
+	static const int minErrDist = 2; //!< min. distance before reporting errors
 
-        Token *dummyToken;
-        bool deleteErrorsDestruct_; //!< delete the 'errors' member in destructor
-        int  errDist;
+	Token *dummyToken;
+	bool deleteErrorsDestruct_; //!< delete the 'errors' member in destructor
+	int  errDist;
 
-        void SynErr(int n);         //!< Handle syntax error 'n'
-        void Get();
-        void Expect(int n);
-        bool StartOf(int s);
-        void ExpectWeak(int n, int follow);
-        bool WeakSeparator(int n, int syFol, int repFol);
+	void SynErr(int n);         //!< Handle syntax error 'n'
+	void Get();
+	void Expect(int n);
+	bool StartOf(int s);
+	void ExpectWeak(int n, int follow);
+	bool WeakSeparator(int n, int syFol, int repFol);
 
 public:
-        Scanner *scanner;
-        Errors  *errors;
+	Scanner *scanner;
+	Errors  *errors;
 
-        Token *t;                   //!< last recognized token
-        Token *la;                  //!< lookahead token
+	Token *t;                   //!< last recognized token
+	Token *la;                  //!< lookahead token
 
 private:
 
@@ -154,18 +154,18 @@ public:
 
 /*---------------------------------------------------------------------------*/
 
-        //! Construct for the specified scanner
-        /*!
-         * Use the default error handling, or optionally provide an error
-         * handler, which will not be deleted upon destruction.
-         */
-        Parser(Scanner* scan, Errors* err = 0);
-        ~Parser();
-        void Parse();                          //!< Execute the parse operation
-        void SemErr(const std::wstring& msg);  //!< Handle semantic error
-        bool isUTF8() const;   //!< Return true if scanner buffer is UTF8
+	//! Construct for the specified scanner
+	/*!
+	 * Use the default error handling, or optionally provide an error
+	 * handler, which will not be deleted upon destruction.
+	 */
+	Parser(Scanner* scan, Errors* err = 0);
+	~Parser();
+	void Parse();                          //!< Execute the parse operation
+	void SemErr(const std::wstring& msg);  //!< Handle semantic error
+	bool isUTF8() const;   //!< Return true if scanner buffer is UTF8
 
-        void wmkdepend();
+	void wmkdepend();
 
 }; // end Parser
 
