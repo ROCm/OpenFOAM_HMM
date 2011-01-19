@@ -37,6 +37,118 @@ defineTypeNameAndDebug(cellSizeControlSurfaces, 0);
 }
 
 
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+bool Foam::cellSizeControlSurfaces::evalCellSizeFunctions
+(
+    const point& pt,
+    scalar& minSize,
+    bool isSurfacePoint
+) const
+{
+    bool anyFunctionFound = false;
+
+    // // Regions requesting with the same priority take the average
+
+    // scalar sizeAccumulator = 0;
+    // scalar numberOfFunctions = 0;
+
+    // label previousPriority = defaultPriority_;
+
+    // if (cellSizeFunctions_.size())
+    // {
+    //     previousPriority =
+    //         cellSizeFunctions_[cellSizeFunctions_.size() - 1].priority();
+
+    //     forAll(cellSizeFunctions_, i)
+    //     {
+    //         const cellSizeFunction& cSF = cellSizeFunctions_[i];
+
+    //         if (cSF.priority() < previousPriority && numberOfFunctions > 0)
+    //         {
+    //             return sizeAccumulator/numberOfFunctions;
+    //         }
+
+    //         scalar sizeI;
+
+    //         if (cSF.cellSize(pt, sizeI, isSurfacePoint))
+    //         {
+    //             anyFunctionFound = true;
+
+    //             previousPriority = cSF.priority();
+
+    //             sizeAccumulator += sizeI;
+    //             numberOfFunctions++;
+    //         }
+    //     }
+    // }
+
+    // if (previousPriority == defaultPriority_ || numberOfFunctions == 0)
+    // {
+    //     sizeAccumulator += defaultCellSize_;
+    //     numberOfFunctions++;
+    // }
+
+    // minSize = sizeAccumulator/numberOfFunctions;
+
+    // return anyFunctionFound;
+
+    // Regions requesting with the same priority take the smallest
+
+    if (cellSizeFunctions_.size())
+    {
+        // Initialise to the last (lowest) priority
+        label previousPriority = cellSizeFunctions_.last().priority();
+
+        forAll(cellSizeFunctions_, i)
+        {
+            const cellSizeFunction& cSF = cellSizeFunctions_[i];
+
+            if (debug)
+            {
+                Info<< "size function "
+                    << allGeometry_.names()[surfaces_[i]]
+                    << " priority " << cSF.priority()
+                    << endl;
+            }
+
+            if (cSF.priority() < previousPriority)
+            {
+                return minSize;
+            }
+
+            scalar sizeI;
+
+            if (cSF.cellSize(pt, sizeI, isSurfacePoint))
+            {
+                anyFunctionFound = true;
+
+                if (cSF.priority() == previousPriority)
+                {
+                    if (sizeI < minSize)
+                    {
+                        minSize = sizeI;
+                    }
+                }
+                else
+                {
+                    minSize = sizeI;
+                }
+
+                if (debug)
+                {
+                    Info<< "sizeI " << sizeI << " minSize " << minSize << endl;
+                }
+
+                previousPriority = cSF.priority();
+            }
+        }
+    }
+
+    return anyFunctionFound;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::cellSizeControlSurfaces::cellSizeControlSurfaces
@@ -172,102 +284,54 @@ Foam::scalar Foam::cellSizeControlSurfaces::cellSize
     bool isSurfacePoint
 ) const
 {
+    scalar size = defaultCellSize_;
 
-    // // Regions requesting with the same priority take the average
+    bool anyFunctionFound = evalCellSizeFunctions(pt, size, isSurfacePoint);
 
-    // scalar sizeAccumulator = 0;
-    // scalar numberOfFunctions = 0;
-
-    // label previousPriority = defaultPriority_;
-
-    // if (cellSizeFunctions_.size())
-    // {
-    //     previousPriority =
-    //         cellSizeFunctions_[cellSizeFunctions_.size() - 1].priority();
-
-    //     forAll(cellSizeFunctions_, i)
-    //     {
-    //         const cellSizeFunction& cSF = cellSizeFunctions_[i];
-
-    //         if (cSF.priority() < previousPriority && numberOfFunctions > 0)
-    //         {
-    //             return sizeAccumulator/numberOfFunctions;
-    //         }
-
-    //         scalar sizeI;
-
-    //         if (cSF.cellSize(pt, sizeI, isSurfacePoint))
-    //         {
-    //             previousPriority = cSF.priority();
-
-    //             sizeAccumulator += sizeI;
-    //             numberOfFunctions++;
-    //         }
-    //     }
-    // }
-
-    // if (previousPriority == defaultPriority_ || numberOfFunctions == 0)
-    // {
-    //     sizeAccumulator += defaultCellSize_;
-    //     numberOfFunctions++;
-    // }
-
-    // return sizeAccumulator/numberOfFunctions;
-
-
-    // Regions requesting with the same priority take the smallest
-
-    scalar minSize = defaultCellSize_;
-
-    if (cellSizeFunctions_.size())
+    if (!anyFunctionFound)
     {
-        // Initialise to the last (lowest) priority
-        label previousPriority = cellSizeFunctions_.last().priority();
+        // Check if the point in question was actually inside the domain, if
+        // not, then it may be falling back to an inappropriate default size.
 
-        forAll(cellSizeFunctions_, i)
+        if (cvMesh_.geometryToConformTo().outside(pt))
         {
-            const cellSizeFunction& cSF = cellSizeFunctions_[i];
+            pointIndexHit surfHit;
+            label hitSurface;
 
-            if (debug)
+            cvMesh_.geometryToConformTo().findSurfaceNearest
+            (
+                pt,
+                cvMesh_.geometryToConformTo().spanMagSqr(),
+                surfHit,
+                hitSurface
+            );
+
+            if (!surfHit.hit())
             {
-                Info<< "size function "
-                    << allGeometry_.names()[surfaces_[i]]
-                    << " priority " << cSF.priority()
-                    << endl;
+                FatalErrorIn
+                (
+                    "Foam::scalar Foam::cellSizeControlSurfaces::cellSize"
+                    "("
+                        "const point& pt, "
+                        "bool isSurfacePoint"
+                    ") const"
+                )
+                    << "Point " << pt << "was not within "
+                    << cvMesh_.geometryToConformTo().spanMag()
+                    << " of the surface." << nl
+                    << "findSurfaceNearest did not find a hit across the span "
+                    << "of the surfaces."
+                    << nl << exit(FatalError) << endl;
             }
-
-            if (cSF.priority() < previousPriority)
+            else
             {
-                return minSize;
-            }
-
-            scalar sizeI;
-
-            if (cSF.cellSize(pt, sizeI, isSurfacePoint))
-            {
-                if (cSF.priority() == previousPriority)
-                {
-                    if (sizeI < minSize)
-                    {
-                        minSize = sizeI;
-                    }
-                }
-                else
-                {
-                    minSize = sizeI;
-                }
-
-                if (debug)
-                {
-                    Info<< "sizeI " << sizeI << " minSize " << minSize << endl;
-                }
-
-                previousPriority = cSF.priority();
+                // Evaluating the cell size at the nearest surface
+                evalCellSizeFunctions(surfHit.hitPoint(), size, true);
             }
         }
     }
 
-    return minSize;
+    return size;
 }
 
 

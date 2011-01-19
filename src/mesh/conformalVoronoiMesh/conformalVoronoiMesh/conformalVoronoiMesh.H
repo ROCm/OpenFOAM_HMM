@@ -416,12 +416,22 @@ private:
         ) const;
 
         //- Find the "worst" protrusion of a dual cell through the surface,
-        //  subject to the tolerance
+        //  subject to the maxSurfaceProtrusion tolerance
         void dualCellLargestSurfaceProtrusion
         (
             const Delaunay::Finite_vertices_iterator& vit,
             pointIndexHit& surfHit,
             label& hitSurface
+        ) const;
+
+        //- Find the "worst" incursion of the dual cell of a non-internal or
+        //  boundary point through the surface, subject to the
+        //  maxSurfaceProtrusion tolerance
+        void dualCellLargestSurfaceIncursion
+        (
+            const Delaunay::Finite_vertices_iterator& vit,
+            pointIndexHit& surfHitLargest,
+            label& hitSurfaceLargest
         ) const;
 
         //- Limit the displacement of a point so that it doesn't penetrate the

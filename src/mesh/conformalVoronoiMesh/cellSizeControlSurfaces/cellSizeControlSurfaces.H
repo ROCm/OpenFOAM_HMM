@@ -74,11 +74,20 @@ class cellSizeControlSurfaces
         scalar defaultCellSize_;
 
         //- Assigning a priority to all requests for cell sizes, the highest
-        //  overrules.
+        //  overrules
         label defaultPriority_;
 
 
     // Private Member Functions
+
+        //- Evaluate the cell size functions, returning a bool stating if a
+        //  function was found or not
+        bool evalCellSizeFunctions
+        (
+            const point& pt,
+            scalar& minSize,
+            bool isSurfacePoint
+        ) const;
 
         //- Disallow default bitwise copy construct
         cellSizeControlSurfaces(const cellSizeControlSurfaces&);

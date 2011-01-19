@@ -906,8 +906,7 @@ void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
 
     // for
     // (
-    //     Delaunay::Finite_vertices_iterator vit =
-    //         finite_vertices_begin();
+    //     Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
     //     vit != finite_vertices_end();
     //     vit++
     // )
@@ -1230,10 +1229,6 @@ void Foam::conformalVoronoiMesh::move()
 
     pointField dualVertices(number_of_cells());
 
-    Info<< dualVertices.size() << endl;
-
-    timeCheck("Start of move - after dualVertices declaration");
-
     label dualVertI = 0;
 
     // Find the dual point of each tetrahedron and assign it an index.
@@ -1262,13 +1257,7 @@ void Foam::conformalVoronoiMesh::move()
         }
     }
 
-    timeCheck("Start of move - before dualVertices.setSize");
-
     dualVertices.setSize(dualVertI);
-
-    Info<< dualVertices.size() << endl;
-
-    timeCheck("Dual vertices indexed");
 
     setVertexSizeAndAlignment();
 
@@ -1547,10 +1536,21 @@ void Foam::conformalVoronoiMesh::move()
         {
             if (pointToBeRetained[vit->index()] == true)
             {
+                // Convert vit->point() to FOAM vector (double) to do addition,
+                // avoids memory increase because a record of the constructions
+                // would be kept otherwise.
+                // See cgal-discuss@lists-sop.inria.fr:
+                // "Memory issue with openSUSE 11.3, exact kernel, adding
+                //  points/vectors"
+                // 14/1/2011.
+
                 pointsToInsert.push_back
                 (
-                    vit->point()
-                  + toCGALVector(displacementAccumulator[vit->index()])
+                    toPoint
+                    (
+                        topoint(vit->point())
+                      + displacementAccumulator[vit->index()]
+                    )
                 );
             }
         }

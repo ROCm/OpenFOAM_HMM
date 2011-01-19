@@ -132,8 +132,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
         for
         (
-            Delaunay::Finite_vertices_iterator vit =
-            finite_vertices_begin();
+            Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
             vit != finite_vertices_end();
             vit++
         )
@@ -247,8 +246,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
         for
         (
-            Delaunay::Finite_vertices_iterator vit =
-            finite_vertices_begin();
+            Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
             vit != finite_vertices_end();
             vit++
         )
@@ -264,6 +262,34 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                 label hitSurface;
 
                 dualCellLargestSurfaceProtrusion(vit, surfHit, hitSurface);
+
+                if (surfHit.hit())
+                {
+                    addSurfaceAndEdgeHits
+                    (
+                        vit,
+                        vert,
+                        surfHit,
+                        hitSurface,
+                        surfacePtReplaceDistCoeffSqr,
+                        edgeSearchDistCoeffSqr,
+                        surfaceHits,
+                        hitSurfaces,
+                        featureEdgeHits,
+                        featureEdgeFeaturesHit,
+                        newEdgeLocations,
+                        existingEdgeLocations,
+                        edgeLocationTree
+                    );
+                }
+            }
+            else if (vit->ppSlave())
+            {
+                Foam::point vert(topoint(vit->point()));
+                pointIndexHit surfHit;
+                label hitSurface;
+
+                dualCellLargestSurfaceIncursion(vit, surfHit, hitSurface);
 
                 if (surfHit.hit())
                 {
@@ -336,8 +362,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
     // for
     // (
-    //     Delaunay::Finite_vertices_iterator vit =
-    //     finite_vertices_begin();
+    //     Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
     //     vit != finite_vertices_end();
     //     vit++
     // )
@@ -361,6 +386,81 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
     //                 << vert << nl
     //                 << surfHit.hitPoint()
     //                 << endl;
+    //         }
+    //     }
+    // }
+
+    // {
+    //     // TEST - ASSESS CLOSE SURFACE POINTS
+
+    //     setVertexSizeAndAlignment();
+
+    //     for
+    //     (
+    //         Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+    //         vit != finite_vertices_end();
+    //         vit++
+    //     )
+    //     {
+    //         if
+    //         (
+    //             vit->index() >= startOfSurfacePointPairs_
+    //          && vit->internalOrBoundaryPoint()
+    //         )
+    //         {
+    //             std::list<Vertex_handle> adjacentVertices;
+
+    //             adjacent_vertices(vit, std::back_inserter(adjacentVertices));
+
+    //             Foam::point pt = topoint(vit->point());
+
+    //             // Info<< nl << "vit: " << vit->index() << " "
+    //             //     << topoint(vit->point())
+    //             //     << endl;
+
+    //             // Info<< adjacentVertices.size() << endl;
+
+    //             for
+    //             (
+    //                 std::list<Vertex_handle>::iterator
+    //                 avit = adjacentVertices.begin();
+    //                 avit != adjacentVertices.end();
+    //                 ++avit
+    //             )
+    //             {
+    //                 Vertex_handle avh = *avit;
+
+    //                 // The lower indexed vertex will perform the assessment
+    //                 if
+    //                 (
+    //                     avh->index() >= startOfSurfacePointPairs_
+    //                  && avh->internalOrBoundaryPoint()
+    //                  && vit->index() < avh->index()
+    //                  && vit->type() != avh->type()
+    //                 )
+    //                 {
+    //                     scalar targetSize = 0.2*averageAnyCellSize(vit, avh);
+
+    //                     // Info<< "diff " << mag(pt - topoint(avh->point()))
+    //                     //     << " " << targetSize << endl;
+
+    //                     if
+    //                     (
+    //                         magSqr(pt - topoint(avh->point()))
+    //                       < sqr(targetSize)
+    //                     )
+    //                     {
+    //                         Info<< nl << "vit: " << vit->index() << " "
+    //                             << topoint(vit->point())
+    //                             << endl;
+
+    //                         Info<< "    adjacent too close: "
+    //                             << avh->index() << " "
+    //                             << topoint(avh->point())
+    //                             << endl;
+    //                     }
+    //                 }
+    //             }
     //         }
     //     }
     // }
@@ -486,6 +586,84 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
                     hitSurfaceLargest = hitSurface;
 
                     maxProtrusionDistance = normalProtrusionDistance;
+                }
+            }
+        }
+    }
+}
+
+
+void Foam::conformalVoronoiMesh::dualCellLargestSurfaceIncursion
+(
+    const Delaunay::Finite_vertices_iterator& vit,
+    pointIndexHit& surfHitLargest,
+    label& hitSurfaceLargest
+) const
+{
+    std::list<Facet> facets;
+    incident_facets(vit, std::back_inserter(facets));
+
+    Foam::point vert(topoint(vit->point()));
+
+    scalar minIncursionDistance = -maxSurfaceProtrusion(vert);
+
+    for
+    (
+        std::list<Facet>::iterator fit=facets.begin();
+        fit != facets.end();
+        ++fit
+    )
+    {
+        if
+        (
+            !is_infinite(fit->first)
+         && !is_infinite(fit->first->neighbor(fit->second))
+        )
+        {
+            Foam::point edgeMid =
+                0.5
+               *(
+                    topoint(dual(fit->first))
+                  + topoint(dual(fit->first->neighbor(fit->second)))
+                );
+
+            pointIndexHit surfHit;
+            label hitSurface;
+
+            geometryToConformTo_.findSurfaceAnyIntersection
+            (
+                vert,
+                edgeMid,
+                surfHit,
+                hitSurface
+            );
+
+            if (surfHit.hit())
+            {
+                vectorField norm(1);
+
+                allGeometry_[hitSurface].getNormal
+                (
+                    List<pointIndexHit>(1, surfHit),
+                    norm
+                );
+
+                const vector& n = norm[0];
+
+                scalar normalIncursionDistance =
+                    (edgeMid - surfHit.hitPoint()) & n;
+
+                if (normalIncursionDistance < minIncursionDistance)
+                {
+                    surfHitLargest = surfHit;
+                    hitSurfaceLargest = hitSurface;
+
+                    minIncursionDistance = normalIncursionDistance;
+
+                    // Info<< nl << "# Incursion: " << endl;
+                    // meshTools::writeOBJ(Info, vert);
+                    // meshTools::writeOBJ(Info, edgeMid);
+                    // Info<< "l Na Nb" << endl;
                 }
             }
         }
