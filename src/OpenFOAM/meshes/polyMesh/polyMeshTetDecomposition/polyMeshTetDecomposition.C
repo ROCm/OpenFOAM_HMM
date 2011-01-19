@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,8 +30,7 @@ License
 // Note: the use of this tolerance is ad-hoc, there may be extreme
 // cases where the resulting tetrahedra still have particle tracking
 // problems, or tets with lower quality may track OK.
-// const Foam::scalar Foam::polyMeshTetDecomposition::minTetQuality = SMALL;
-const Foam::scalar Foam::polyMeshTetDecomposition::minTetQuality = ROOTVSMALL;
+const Foam::scalar Foam::polyMeshTetDecomposition::minTetQuality = sqr(SMALL);
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //

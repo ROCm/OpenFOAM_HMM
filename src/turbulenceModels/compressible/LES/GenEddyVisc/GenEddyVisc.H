@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,7 +75,6 @@ protected:
 
     // Fields
 
-        volScalarField k_;
         volScalarField muSgs_;
         volScalarField alphaSgs_;
 
@@ -106,16 +105,10 @@ public:
 
     // Member Functions
 
-        //- Return SGS kinetic energy
-        virtual tmp<volScalarField> k() const
-        {
-            return k_;
-        }
-
         //- Return sub-grid disipation rate
         virtual tmp<volScalarField> epsilon() const
         {
-            return ce_*k_*sqrt(k_)/delta();
+            return ce_*k()*sqrt(k())/delta();
         }
 
         //- Return viscosity

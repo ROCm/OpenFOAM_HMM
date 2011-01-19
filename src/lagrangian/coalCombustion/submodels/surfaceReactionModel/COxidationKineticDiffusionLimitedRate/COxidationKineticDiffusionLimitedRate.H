@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,6 +60,9 @@ class COxidationKineticDiffusionLimitedRate
     // Private data
 
         // Model constants
+
+            //- Stoichiometry of reaction
+            const scalar Sb_;
 
             //- Mass diffusion limited rate constant, C1
             const scalar C1_;

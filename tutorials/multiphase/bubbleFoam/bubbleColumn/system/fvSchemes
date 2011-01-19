@@ -33,8 +33,8 @@ divSchemes
     div(phib,k)     Gauss limitedLinear 1;
     div(phib,epsilon) Gauss limitedLinear 1;
     div(phi,alpha)  Gauss limitedLinear01 1;
-    div((-nuEffa*grad(Ua).T())) Gauss linear;
-    div((-nuEffb*grad(Ub).T())) Gauss linear;
+    div((-nuEffa*T(grad(Ua)))) Gauss linear;
+    div((-nuEffb*T(grad(Ub)))) Gauss linear;
 }
 
 laplacianSchemes

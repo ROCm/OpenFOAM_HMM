@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,7 +59,7 @@ Description
 Note
     - The document browser used is defined by the @b FOAM_DOC_BROWSER
       environment variable or the <tt>Documentation/docBrowser</tt> entry
-      in the <tt>~OpenFOAM/controlDict</tt> file. 
+      in the <tt>~OpenFOAM/controlDict</tt> file.
       The \%f token is used as a placeholder for the file name.
     - The valid (mandatory) arguments can be adjusted
       by directly manipulating the argList::validArgs static member.
@@ -83,6 +83,7 @@ SourceFiles
 #include "fileName.H"
 #include "parRun.H"
 #include "IStringStream.H"
+#include "OSspecific.H"
 
 #include "sigFpe.H"
 #include "sigInt.H"
@@ -94,7 +95,9 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+/*---------------------------------------------------------------------------*\
+                           Class argList Declaration
+\*---------------------------------------------------------------------------*/
 
 class argList
 {
@@ -165,7 +168,7 @@ public:
         //- Max screen width for displaying usage (default: 80)
         static string::size_type usageMax;
 
-        //! @cond ignoreDocumentation
+        //! @cond internalClass
         class initValidTables
         {
         public:

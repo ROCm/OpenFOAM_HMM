@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,6 +70,19 @@ lowReOneEqEddy::lowReOneEqEddy
 :
     LESModel(modelName, rho, U, phi, thermoPhysicalModel, turbulenceModelName),
     GenEddyVisc(rho, U, phi, thermoPhysicalModel),
+
+    k_
+    (
+        IOobject
+        (
+            "k",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_
+    ),
 
     ck_
     (
