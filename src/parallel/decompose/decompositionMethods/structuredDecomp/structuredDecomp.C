@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,6 @@ License
 
 #include "structuredDecomp.H"
 #include "addToRunTimeSelectionTable.H"
-#include "IFstream.H"
 #include "FaceCellWave.H"
 #include "topoDistanceData.H"
 #include "fvMeshSubset.H"
