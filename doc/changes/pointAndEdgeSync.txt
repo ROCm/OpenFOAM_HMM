@@ -1,0 +1,41 @@
+http://www.openfoam.com
+Copyright (c) 2011 OpenCFD Ltd.
+
+Some background on the new structure to synchronise point and edge data. The
+building blocks:
+- globalIndex : globally consecutive numbering of (untransformed) data. It
+consists of a single label which starts at 0 on processor 0 and is numbered
+consecutively on consecutive processors. The globalIndex class contains
+functions to convert to/from processor and local index.
+
+- globalIndexAndTransform : all the transformations in a mesh. Because the
+transformations (cyclics, processorCyclics) need to fill space there can
+be only three independent transforms. This class contains functions to encode
+local index,processor and transformation into a labelPair.
+
+- mapDistribute : contains constructors from local and remote data and
+works out a compact storage scheme and returns corresponding indices into
+the local storage and calculates a scheduling to get the local and remote
+data into the local storage. The wanted data is
+    - untransformed: labelList(List) in globalIndex numbering
+    - transformed: labelPairList(List) in globalIndexAndTransform
+See also mapDistribute.H
+
+- globalMeshData : works out and stores a mapDistribute to get hold
+of coupled point or edge data:
+    - globalPointSlavesMap() : the map to get all coupled point data
+    into a compact form
+    - globalPointSlaves : per point (on the patch of coupled faces) the
+    indices into the compact data corresponding to untransformed connected
+    points
+    - globalPointTransformedSlaves : same but for transformed connected
+    points
+See e.g. syncPointData which applies a reduction operator to data on
+coupled points. Note that it needs to know whether the data is a position
+(since might need separation() vector).
+
+These structures get used in e.g.
+- syncTools : general synchronisation on points,edges, faces. The point and
+edge synchronisation are thin wrappers around the globalMeshData functionality.
+- volPointInterpolation : uses a mix of globalMeshData (for synchronising
+collocated points) and patch-wise (for separated points).

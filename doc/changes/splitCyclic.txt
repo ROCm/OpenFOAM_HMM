@@ -1,3 +1,6 @@
+http://www.openfoam.com
+Copyright (c) 2011 OpenCFD Ltd.
+
 Short overview of the changes to have cyclics split into two halves.
 
 Cyclics
