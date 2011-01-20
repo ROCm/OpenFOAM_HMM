@@ -75,6 +75,38 @@ Foam::label Foam::globalIndexAndTransform::encodeTransformIndex
 }
 
 
+Foam::FixedList<Foam::label, 3>
+Foam::globalIndexAndTransform::decodeTransformIndex
+(
+    const label transformIndex
+)
+{
+    FixedList<label, 3> permutation;
+
+    label t = transformIndex;
+    permutation[0] = (t%3)-1;
+    t /= 3;
+    permutation[1] = (t%3)-1;
+    t /= 3;
+    permutation[2] = (t%3)-1;
+
+#   ifdef FULLDEBUG
+    t /= 3;
+    if (t != 0)
+    {
+        FatalErrorIn
+        (
+            "globalIndexAndTransform::decodeTransformIndex(const label)"
+        )   << "transformIndex : " << transformIndex
+            << " has more than 3 fields."
+            << abort(FatalError);
+    }
+#   endif
+
+    return permutation;
+}
+
+
 Foam::label Foam::globalIndexAndTransform::addToTransformIndex
 (
     const label transformIndex,
@@ -90,17 +122,7 @@ Foam::label Foam::globalIndexAndTransform::addToTransformIndex
 
     if (matchTransI > -1 && matchTransI < 3)
     {
-        label t = transformIndex;
-
-        // Decode permutation as 3 integers
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        // Note: FixedList for speed reasons.
-        FixedList<label, 3> permutation;
-        permutation[0] = (t%3)-1;
-        t /= 3;
-        permutation[1] = (t%3)-1;
-        t /= 3;
-        permutation[2] = (t%3)-1;
+        FixedList<label, 3> permutation = decodeTransformIndex(transformIndex);
 
 
         // Add patch transform
@@ -116,26 +138,36 @@ Foam::label Foam::globalIndexAndTransform::addToTransformIndex
         // If this transform been found already by a patch?
         if (permutation[matchTransI] != 0)
         {
-            // If so, if they have opposite signs, then this is
-            // considered an error.  They are allowed to be the
-            // same sign, but this only results in a single
-            // transform.
-            if (permutation[matchTransI] != sign)
+            if (sign == 0)
+            {
+                // sent from patch without a transformation. Do nothing.
+                FatalErrorIn("globalIndexAndTransform::addToTransformIndex(..)")
+                    << "patch:" << mesh_.boundaryMesh()[patchI].name()
+                    << " transform:" << matchTransI << " sign:" << sign
+                    << "  current transforms:" << permutation
+                    << exit(FatalError);
+            }
+            else if (sign == permutation[matchTransI])
             {
                 FatalErrorIn
                 (
                     "Foam::label "
                     "Foam::globalIndexAndTransform::addToTransformIndex\n"
                     "(\n"
-                        "const label transformIndex,\n"
-                        "const label patchI\n"
+                        "const label,\n"
+                        "const label,\n"
+                        "const bool\n"
                     ") const\n"
                 )   << "More than one patch accessing the same transform "
                     << "but not of the same sign." << endl
                     << "patch:" << mesh_.boundaryMesh()[patchI].name()
                     << " transform:" << matchTransI << " sign:" << sign
-                    << "  cumulative transforms:" << permutation
+                    << "  current transforms:" << permutation
                     << exit(FatalError);
+            }
+            else
+            {
+                permutation[matchTransI] = 0;
             }
         }
         else
@@ -156,6 +188,94 @@ Foam::label Foam::globalIndexAndTransform::addToTransformIndex
     {
         return transformIndex;
     }
+}
+
+
+Foam::label Foam::globalIndexAndTransform::mergeTransformIndex
+(
+    const label transformIndex0,
+    const label transformIndex1
+)
+{
+    FixedList<label, 3> permutation0 = decodeTransformIndex(transformIndex0);
+    FixedList<label, 3> permutation1 = decodeTransformIndex(transformIndex1);
+
+    forAll(permutation0, i)
+    {
+        if (permutation0[i] == 0)
+        {
+            // Take over whatever sign 1 has
+            permutation0[i] = permutation1[i];
+        }
+        else if (permutation1[i] != 0 && permutation0[i] != permutation1[i])
+        {
+            FatalErrorIn
+            (
+                "Foam::label "
+                "Foam::globalIndexAndTransform::addToTransformIndex\n"
+                "(\n"
+                    "const label,\n"
+                    "const label\n"
+                ") const\n"
+            )   << "More than one patch accessing the same transform "
+                << "but not of the same sign." << endl
+                << "Trying to combine two transforms " << transformIndex0
+                << " with signs " << permutation0
+                << " and " << transformIndex1
+                << " with signs " << permutation1
+                << exit(FatalError);
+        }
+    }
+    return
+        (permutation0[2]+1)*9
+      + (permutation0[1]+1)*3
+      + (permutation0[0]+1);
+}
+
+
+Foam::label Foam::globalIndexAndTransform::minimumTransformIndex
+(
+    const label transformIndex0,
+    const label transformIndex1
+)
+{
+    FixedList<label, 3> permutation0 = decodeTransformIndex(transformIndex0);
+    FixedList<label, 3> permutation1 = decodeTransformIndex(transformIndex1);
+
+    forAll(permutation0, i)
+    {
+        if (permutation0[i] == 0)
+        {
+            // 0 wins.
+        }
+        else if (permutation1[i] == 0)
+        {
+            // 0 wins.
+            permutation0[i] = permutation1[i];
+        }
+        else if (permutation0[i] != permutation1[i])
+        {
+            FatalErrorIn
+            (
+                "Foam::label "
+                "Foam::globalIndexAndTransform::minimumTransformIndex\n"
+                "(\n"
+                    "const label,\n"
+                    "const label\n"
+                ") const\n"
+            )   << "More than one patch accessing the same transform "
+                << "but not of the same sign." << endl
+                << "Trying to combine two transforms " << transformIndex0
+                << " with signs " << permutation0
+                << " and " << transformIndex1
+                << " with signs " << permutation1
+                << exit(FatalError);
+        }
+    }
+    return
+        (permutation0[2]+1)*9
+      + (permutation0[1]+1)*3
+      + (permutation0[0]+1);
 }
 
 

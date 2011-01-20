@@ -120,6 +120,12 @@ class globalIndexAndTransform
             bool checkBothSigns
         ) const;
 
+        //- Decode transform index. Hardcoded to 3 independent transforms max.
+        inline static FixedList<label, 3> decodeTransformIndex
+        (
+            const label transformIndex
+        );
+
         //- Disallow default bitwise copy construct
         globalIndexAndTransform(const globalIndexAndTransform&);
 
@@ -158,6 +164,20 @@ public:
             const label patchI,
             const bool isSendingSide = true
         ) const;
+
+        //- Combine two transformIndices
+        static inline label mergeTransformIndex
+        (
+            const label transformIndex0,
+            const label transformIndex1
+        );
+
+        //- Combine two transformIndices
+        static inline label minimumTransformIndex
+        (
+            const label transformIndex0,
+            const label transformIndex1
+        );
 
         //- Encode index and bare index as components on own processor
         inline static labelPair encode
