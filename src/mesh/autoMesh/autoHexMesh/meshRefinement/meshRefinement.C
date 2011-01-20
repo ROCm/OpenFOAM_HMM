@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1791,7 +1791,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
             "meshRefinement::splitMeshRegions(const point&)"
         )   << "Point " << keepPoint
             << " is not inside the mesh." << nl
-            << "Bounding box of the mesh:" << mesh_.globalData().bb()
+            << "Bounding box of the mesh:" << mesh_.bounds()
             << exit(FatalError);
     }
 
