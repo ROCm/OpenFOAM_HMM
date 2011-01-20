@@ -28,6 +28,7 @@ License
 #include "HashSet.H"
 #include "globalIndex.H"
 #include "globalIndexAndTransform.H"
+#include "transformField.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -199,35 +200,66 @@ void Foam::mapDistribute::checkReceivedSize
 }
 
 
-void Foam::mapDistribute::printLayout
-(
-    const label localSize,
-    List<Map<label> >& compactMap,
-    Ostream& os
-) const
+void Foam::mapDistribute::printLayout(Ostream& os) const
 {
+    // Determine offsets of remote data.
+    labelList minIndex(Pstream::nProcs(), labelMax);
+    labelList maxIndex(Pstream::nProcs(), labelMin);
+    forAll(constructMap_, procI)
+    {
+        const labelList& construct = constructMap_[procI];
+        minIndex[procI] = min(minIndex[procI], min(construct));
+        maxIndex[procI] = max(maxIndex[procI], max(construct));
+    }
+
+    label localSize;
+    if (maxIndex[Pstream::myProcNo()] == labelMin)
+    {
+        localSize = 0;
+    }
+    else
+    {
+        localSize = maxIndex[Pstream::myProcNo()]+1;
+    }
+
     os  << "Layout:" << endl
         << "local (processor " << Pstream::myProcNo() << "):" << endl
         << "    start : 0" << endl
         << "    size  : " << localSize << endl;
 
     label offset = localSize;
-    forAll(compactMap, procI)
+    forAll(minIndex, procI)
     {
         if (procI != Pstream::myProcNo())
         {
-            os  << "processor " << procI << ':' << endl
-                << "    start : " << offset << endl
-                << "    size  : " << compactMap[procI].size() << endl;
+            if (constructMap_[procI].size() > 0)
+            {
+                if (minIndex[procI] != offset)
+                {
+                    FatalErrorIn("mapDistribute::printLayout(..)")
+                        << "offset:" << offset
+                        << " procI:" << procI
+                        << " minIndex:" << minIndex[procI]
+                        << abort(FatalError);
+                }
 
-            offset += compactMap[procI].size();
+                label size = maxIndex[procI]-minIndex[procI]+1;
+                os  << "processor " << procI << ':' << endl
+                    << "    start : " << offset << endl
+                    << "    size  : " << size << endl;
+
+                offset += size;
+            }
         }
     }
     forAll(transformElements_, trafoI)
     {
-        os  << "transform " << trafoI << ':' << endl
-            << "    start : " << transformStart_[trafoI] << endl
-            << "    size  : " << transformElements_[trafoI].size() << endl;
+        if (transformElements_[trafoI].size() > 0)
+        {
+            os  << "transform " << trafoI << ':' << endl
+                << "    start : " << transformStart_[trafoI] << endl
+                << "    size  : " << transformElements_[trafoI].size() << endl;
+        }
     }
 }
 
@@ -502,7 +534,110 @@ void Foam::mapDistribute::exchangeAddressing
 }
 
 
+template<>
+void Foam::mapDistribute::applyTransforms
+(
+    const globalIndexAndTransform& globalTransforms,
+    List<point>& field,
+    const bool isPosition
+) const
+{
+    const List<vectorTensorTransform>& totalTransform =
+        globalTransforms.transformPermutations();
+
+    forAll(totalTransform, trafoI)
+    {
+        const vectorTensorTransform& vt = totalTransform[trafoI];
+        const labelList& elems = transformElements_[trafoI];
+        label n = transformStart_[trafoI];
+
+        // Could be optimised to avoid memory allocations
+
+        if (isPosition)
+        {
+            Field<point> transformFld
+            (
+                vt.transformPosition(Field<point>(field, elems))
+            );
+            forAll(transformFld, i)
+            {
+                //cop(field[n++], transformFld[i]);
+                field[n++] = transformFld[i];
+            }
+        }
+        else
+        {
+            Field<point> transformFld
+            (
+                transform(vt.R(), Field<point>(field, elems))
+            );
+
+            forAll(transformFld, i)
+            {
+                //cop(field[n++], transformFld[i]);
+                field[n++] = transformFld[i];
+            }
+        }
+    }
+}
+
+
+template<>
+void Foam::mapDistribute::applyInverseTransforms
+(
+    const globalIndexAndTransform& globalTransforms,
+    List<point>& field,
+    const bool isPosition
+) const
+{
+    const List<vectorTensorTransform>& totalTransform =
+        globalTransforms.transformPermutations();
+
+    forAll(totalTransform, trafoI)
+    {
+        const vectorTensorTransform& vt = totalTransform[trafoI];
+        const labelList& elems = transformElements_[trafoI];
+        label n = transformStart_[trafoI];
+
+        // Could be optimised to avoid memory allocations
+
+        if (isPosition)
+        {
+            Field<point> transformFld
+            (
+                vt.invTransformPosition
+                (
+                    SubField<point>(field, elems.size(), n)
+                )
+            );
+            forAll(transformFld, i)
+            {
+                field[elems[i]] = transformFld[i];
+            }
+        }
+        else
+        {
+            Field<point> transformFld(SubField<point>(field, elems.size(), n));
+            transform(transformFld, vt.R().T(), transformFld);
+
+            forAll(transformFld, i)
+            {
+                field[elems[i]] = transformFld[i];
+            }
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+//- Construct null
+Foam::mapDistribute::mapDistribute()
+:
+    constructSize_(0),
+    schedulePtr_()
+{}
+
 
 //- Construct from components
 Foam::mapDistribute::mapDistribute
@@ -663,7 +798,7 @@ Foam::mapDistribute::mapDistribute
 
     if (debug)
     {
-        printLayout(globalNumbering.localSize(), compactMap, Pout);
+        printLayout(Pout);
     }
 }
 
@@ -719,7 +854,7 @@ Foam::mapDistribute::mapDistribute
 
     if (debug)
     {
-        printLayout(globalNumbering.localSize(), compactMap, Pout);
+        printLayout(Pout);
     }
 }
 
@@ -821,10 +956,9 @@ Foam::mapDistribute::mapDistribute
         n++;
     }
 
-
     if (debug)
     {
-        printLayout(globalNumbering.localSize(), compactMap, Pout);
+        printLayout(Pout);
     }
 }
 
@@ -939,10 +1073,9 @@ Foam::mapDistribute::mapDistribute
         }
     }
 
-
     if (debug)
     {
-        printLayout(globalNumbering.localSize(), compactMap, Pout);
+        printLayout(Pout);
     }
 }
 
@@ -958,7 +1091,35 @@ Foam::mapDistribute::mapDistribute(const mapDistribute& map)
 {}
 
 
+Foam::mapDistribute::mapDistribute(const Xfer<mapDistribute>& map)
+:
+    constructSize_(map().constructSize_),
+    subMap_(map().subMap_.xfer()),
+    constructMap_(map().constructMap_.xfer()),
+    transformElements_(map().transformElements_.xfer()),
+    transformStart_(map().transformStart_.xfer()),
+    schedulePtr_()
+{}
+
+
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void Foam::mapDistribute::transfer(mapDistribute& rhs)
+{
+    constructSize_ = rhs.constructSize_;
+    subMap_.transfer(rhs.subMap_);
+    constructMap_.transfer(rhs.constructMap_);
+    transformElements_.transfer(rhs.transformElements_);
+    transformStart_.transfer(rhs.transformStart_);
+    schedulePtr_.clear();
+}
+
+
+Foam::Xfer<Foam::mapDistribute> Foam::mapDistribute::xfer()
+{
+    return xferMove(*this);
+}
+
 
 Foam::label Foam::mapDistribute::renumber
 (
