@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,6 +51,28 @@ const word triSurfaceSymmTensorField::typeName
 
 template<>
 const word triSurfaceTensorField::typeName("triSurfaceTensorField");
+
+
+template<>
+const word triSurfacePointLabelField::typeName("triSurfacePointLabelField");
+
+template<>
+const word triSurfacePointScalarField::typeName("triSurfacePointScalarField");
+
+template<>
+const word triSurfacePointVectorField::typeName("triSurfacePointVectorField");
+
+template<>
+const word triSurfacePointSphericalTensorField::typeName
+("triSurfacePointSphericalTensorField");
+
+template<>
+const word triSurfacePointSymmTensorField::typeName
+("triSurfacePointSymmTensorField");
+
+template<>
+const word triSurfacePointTensorField::typeName("triSurfacePointTensorField");
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

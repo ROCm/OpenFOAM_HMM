@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,24 +21,64 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InClass
-    Foam::triSurfaceFields
+Class
+    Foam::triSurfaceGeoMesh
 
 Description
-    Fields for triSurface
+    The triSurface  point GeoMesh (for holding vertex fields).
 
-SourceFiles
-    triSurfaceFields.C
+    Similar to the volMesh used for the Finite Volume discretization.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef triSurfaceFields_H
-#define triSurfaceFields_H
+#ifndef triSurfacePointGeoMesh_H
+#define triSurfacePointGeoMesh_H
 
-#include "DimensionedField.H"
-#include "triSurfaceGeoMesh.H"
-#include "triSurfacePointGeoMesh.H"
-#include "triSurfaceFieldsFwd.H"
+#include "GeoMesh.H"
+#include "triSurface.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+class triSurfacePointGeoMesh
+:
+    public GeoMesh<triSurface>
+{
+
+public:
+
+    // Constructors
+
+        //- Construct from triSurface reference
+        explicit triSurfacePointGeoMesh(const triSurface& mesh)
+        :
+            GeoMesh<triSurface>(mesh)
+        {}
+
+
+    // Member Functions
+
+        //- Return size
+        static label size(const triSurface& mesh)
+        {
+            return mesh.points().size();
+        }
+
+        //- Return size
+        label size() const
+        {
+            return size(mesh_);
+        }
+
+};
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

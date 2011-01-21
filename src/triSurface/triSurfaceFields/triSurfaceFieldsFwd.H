@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,6 +53,21 @@ typedef Foam::DimensionedField<symmTensor, triSurfaceGeoMesh>
     triSurfaceSymmTensorField;
 typedef Foam::DimensionedField<tensor, triSurfaceGeoMesh>
     triSurfaceTensorField;
+
+class triSurfacePointGeoMesh;
+
+typedef Foam::DimensionedField<label, triSurfacePointGeoMesh>
+    triSurfacePointLabelField;
+typedef Foam::DimensionedField<scalar, triSurfacePointGeoMesh>
+    triSurfacePointScalarField;
+typedef Foam::DimensionedField<vector, triSurfacePointGeoMesh>
+    triSurfacePointVectorField;
+typedef Foam::DimensionedField<sphericalTensor, triSurfacePointGeoMesh>
+    triSurfacePointSphericalTensorField;
+typedef Foam::DimensionedField<symmTensor, triSurfacePointGeoMesh>
+    triSurfacePointSymmTensorField;
+typedef Foam::DimensionedField<tensor, triSurfacePointGeoMesh>
+    triSurfacePointTensorField;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
