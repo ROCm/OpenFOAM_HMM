@@ -1,12 +1,15 @@
 EXE_FROUNDING_MATH = -frounding-math
+EXE_NDEBUG = -DNDEBUG
 USE_F2C = -DCGAL_USE_F2C
 
 include $(GENERAL_RULES)/CGAL
 
 EXE_INC = \
     ${EXE_FROUNDING_MATH} \
+    ${EXE_NDEBUG} \
     ${USE_F2C} \
     ${CGAL_INC} \
+    -ICGALPolyhedron \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/edgeMesh/lnInclude \
     -I$(LIB_SRC)/triSurface/lnInclude \

@@ -59,9 +59,9 @@ void Foam::buildCGALPolyhedron::operator()
 
     B.begin_surface
     (
-        surf_.points().size(), // n points
-        surf_.size(),          // n facets
-        2*surf_.edges().size() // n halfedges
+        surf_.points().size(),      // n points
+        surf_.size(),               // n facets
+        2*surf_.edges().size()      // n halfedges
     );
 
     forAll(surf_.points(), pI)

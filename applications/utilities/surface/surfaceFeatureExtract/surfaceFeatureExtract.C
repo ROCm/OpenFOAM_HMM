@@ -528,7 +528,7 @@ int main(int argc, char *argv[])
 
     args.optionReadIfPresent("closeness", span);
 
-    Info<< "span " << span << endl;
+    // Info<< "span " << span << endl;
 
     pointField start = searchSurf.faceCentres() - span*normals;
     pointField end = searchSurf.faceCentres() + span*normals;
@@ -766,6 +766,16 @@ int main(int argc, char *argv[])
 
     scalarField k = curvature(surf);
 
+    // Modify the curvature values on feature edges and points to be zero.
+
+    forAll(newSet.featureEdges(), fEI)
+    {
+        const edge& e = surf.edges()[newSet.featureEdges()[fEI]];
+
+        k[surf.meshPoints()[e.start()]] = 0.0;
+        k[surf.meshPoints()[e.end()]] = 0.0;
+    }
+
     triSurfacePointScalarField kField
     (
         IOobject
@@ -784,7 +794,7 @@ int main(int argc, char *argv[])
 
     kField.write();
 
-    if (args.optionFound("writeObj"))
+    if (args.optionFound("writeVTK"))
     {
         vtkSurfaceWriter<scalar>().write
         (
