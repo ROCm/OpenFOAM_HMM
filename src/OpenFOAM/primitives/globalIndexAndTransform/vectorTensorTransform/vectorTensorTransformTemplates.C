@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,36 +21,25 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::labelPair
-
-Description
-    Label pair
-
-Typedef
-    Foam::labelPairList
-
-Description
-    List of labelPairs
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef labelPair_H
-#define labelPair_H
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-#include "Pair.H"
-#include "List.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+template<class Type>
+Foam::tmp<Foam::Field<Type> > Foam::vectorTensorTransform::transform
+(
+    const Field<Type>& fld
+) const
 {
-    typedef Pair<label> labelPair;
-    typedef List<labelPair> labelPairList;
+    if (hasR_)
+    {
+        return R() & fld;
+    }
+    else
+    {
+        return fld;
+    }
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

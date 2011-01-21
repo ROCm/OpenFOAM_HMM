@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1263,7 +1263,7 @@ void Foam::meshRefinement::findCellZoneInsideWalk
                 ", const labelList&, const labelList&)"
             )   << "Point " << insidePoint
                 << " is not inside the mesh." << nl
-                << "Bounding box of the mesh:" << mesh_.globalData().bb()
+                << "Bounding box of the mesh:" << mesh_.bounds()
                 << exit(FatalError);
         }
 
@@ -1431,7 +1431,7 @@ void Foam::meshRefinement::findCellZoneTopo
             "(const point&, const labelList&, const labelList&, labelList&)"
         )   << "Point " << keepPoint
             << " is not inside the mesh." << nl
-            << "Bounding box of the mesh:" << mesh_.globalData().bb()
+            << "Bounding box of the mesh:" << mesh_.bounds()
             << exit(FatalError);
     }
 
@@ -1972,7 +1972,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
             "(const label, const labelList&, const point&)"
         )   << "Point " << keepPoint
             << " is not inside the mesh." << nl
-            << "Bounding box of the mesh:" << mesh_.globalData().bb()
+            << "Bounding box of the mesh:" << mesh_.bounds()
             << exit(FatalError);
     }
 

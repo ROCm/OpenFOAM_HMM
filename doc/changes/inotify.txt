@@ -1,4 +1,6 @@
-2010-05-28
+http://www.openfoam.com
+Copyright (c) 2011 OpenCFD Ltd.
+
 Cleanup of automatic regIOobject rereading.
 
 - all files (usually only IOdictionary) that need to be monitored

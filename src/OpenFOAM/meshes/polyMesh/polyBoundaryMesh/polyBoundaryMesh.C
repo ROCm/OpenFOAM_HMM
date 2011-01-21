@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -673,6 +673,8 @@ bool Foam::polyBoundaryMesh::checkDefinition(const bool report) const
 
     bool hasError = false;
 
+    HashSet<word> patchNames(2*size());
+
     forAll(bm, patchI)
     {
         if (bm[patchI].start() != nextPatchStart && !hasError)
@@ -687,6 +689,17 @@ bool Foam::polyBoundaryMesh::checkDefinition(const bool report) const
                 << "." << endl
                 << "Possibly consecutive patches have this same problem."
                 << " Suppressing future warnings." << endl;
+        }
+
+        if (!patchNames.insert(bm[patchI].name()) && !hasError)
+        {
+            hasError = true;
+
+            Info<< " ****Duplicate boundary patch " << patchI
+                << " named " << bm[patchI].name()
+                << " of type " <<  bm[patchI].type()
+                << "." << endl
+                << "Suppressing future warnings." << endl;
         }
 
         nextPatchStart += bm[patchI].size();

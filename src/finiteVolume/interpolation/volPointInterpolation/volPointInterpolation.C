@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -101,10 +101,11 @@ void volPointInterpolation::calcBoundaryAddressing()
     // no face of a certain patch still can have boundary points marked.
     if (debug)
     {
-
         boolList oldData(isPatchPoint_);
 
-        mesh().globalData().syncPointData(isPatchPoint_, orEqOp<bool>());
+        //mesh().globalData().syncPointData(isPatchPoint_, orEqOp<bool>());
+        syncUntransformedData(isPatchPoint_, orEqOp<bool>());
+
 
         forAll(isPatchPoint_, pointI)
         {
@@ -281,7 +282,8 @@ void volPointInterpolation::makeWeights()
 
 
     // Sum collocated contributions
-    mesh().globalData().syncPointData(sumWeights, plusEqOp<scalar>());
+    //mesh().globalData().syncPointData(sumWeights, plusEqOp<scalar>());
+    syncUntransformedData(sumWeights, plusEqOp<scalar>());
 
     // And add separated contributions
     addSeparated(sumWeights);
@@ -290,7 +292,8 @@ void volPointInterpolation::makeWeights()
     // a coupled point to have its master on a different patch so
     // to make sure just push master data to slaves. Reuse the syncPointData
     // structure.
-    mesh().globalData().syncPointData(sumWeights, nopEqOp<scalar>());
+    //mesh().globalData().syncPointData(sumWeights, nopEqOp<scalar>());
+    pushUntransformedData(sumWeights);
 
 
     // Normalise internal weights

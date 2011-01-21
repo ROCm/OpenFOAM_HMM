@@ -17,7 +17,6 @@ set -x
 wmakeLnInclude decompositionMethods
 
 wmake libso scotchDecomp
-wmake libso metisDecomp
 
 if [ -d "$FOAM_LIBBIN/$FOAM_MPI" ]
 then

@@ -42,11 +42,9 @@ SourceFiles
 #ifndef globalIndexAndTransform_H
 #define globalIndexAndTransform_H
 
-#include "Pstream.H"
-#include "List.H"
 #include "labelPair.H"
 #include "vectorTensorTransform.H"
-#include "polyMesh.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -82,6 +80,9 @@ class globalIndexAndTransform
         //  transform.
         List<vectorTensorTransform> transformPermutations_;
 
+        //- Index of identity transform.
+        label nullTransformIndex_;
+
         //- Mapping from patch index to which transform it matches (or
         //  -1 for none) (.first()) and what sign to use for it,
         //  i.e. +/- 1 (.second()).
@@ -92,6 +93,7 @@ class globalIndexAndTransform
 
         //- Number of spaces to reserve for transform encoding
         static const label base_;
+
 
     // Private Member Functions
 
@@ -117,6 +119,12 @@ class globalIndexAndTransform
             scalar tolerance,
             bool checkBothSigns
         ) const;
+
+        //- Decode transform index. Hardcoded to 3 independent transforms max.
+        inline static FixedList<label, 3> decodeTransformIndex
+        (
+            const label transformIndex
+        );
 
         //- Disallow default bitwise copy construct
         globalIndexAndTransform(const globalIndexAndTransform&);
@@ -147,15 +155,39 @@ public:
             const List<label>& permutationIndices
         ) const;
 
+        //- Add patch transformation to transformIndex. Return new
+        //  transformIndex. (by default the patch is the sending, not the
+        //  receiving, patch)
+        inline label addToTransformIndex
+        (
+            const label transformIndex,
+            const label patchI,
+            const bool isSendingSide = true
+        ) const;
+
+        //- Combine two transformIndices
+        static inline label mergeTransformIndex
+        (
+            const label transformIndex0,
+            const label transformIndex1
+        );
+
+        //- Combine two transformIndices
+        static inline label minimumTransformIndex
+        (
+            const label transformIndex0,
+            const label transformIndex1
+        );
+
         //- Encode index and bare index as components on own processor
-        inline labelPair encode
+        inline static labelPair encode
         (
             const label index,
             const label transformIndex
         );
 
         //- Encode index and bare index as components on given processor
-        inline labelPair encode
+        inline static labelPair encode
         (
             const label procI,
             const label index,
@@ -163,13 +195,16 @@ public:
         );
 
         //- Index carried by the object
-        inline label index(const labelPair& globalIAndTransform);
+        inline static label index(const labelPair& globalIAndTransform);
 
         //- Which processor does this come from?
-        inline label processor(const labelPair& globalIAndTransform);
+        inline static label processor(const labelPair& globalIAndTransform);
 
         //- Transform carried by the object
-        inline label transformIndex(const labelPair& globalIAndTransform);
+        inline static label transformIndex
+        (
+            const labelPair& globalIAndTransform
+        );
 
         // Access
 
@@ -182,6 +217,10 @@ public:
             //- Return access to the permuted transforms
             inline const List<vectorTensorTransform>&
             transformPermutations() const;
+
+            //- Return the transformIndex (index in transformPermutations)
+            //  of the identity transform
+            inline label nullTransformIndex() const;
 
             //- Return access to the per-patch transform-sign pairs
             inline const List<Pair<label> >& patchTransformSign() const;
