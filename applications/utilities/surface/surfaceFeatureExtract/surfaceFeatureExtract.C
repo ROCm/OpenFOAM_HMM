@@ -316,6 +316,8 @@ int main(int argc, char *argv[])
     Info<< "Feature line extraction is only valid on closed manifold surfaces."
         << endl;
 
+    bool writeVTK = args.optionFound("writeVTK");
+    bool writeObj = args.optionFound("writeObj");
 
     const fileName surfFileName = args[1];
     const fileName outFileName  = args[2];
@@ -323,6 +325,8 @@ int main(int argc, char *argv[])
     Info<< "Surface            : " << surfFileName << nl
         << "Output feature set : " << outFileName << nl
         << endl;
+
+    fileName sFeatFileName = surfFileName.lessExt().name();
 
 
     // Read
@@ -333,6 +337,13 @@ int main(int argc, char *argv[])
     Info<< "Statistics:" << endl;
     surf.writeStats(Info);
     Info<< endl;
+
+    faceList faces(surf.size());
+
+    forAll(surf, fI)
+    {
+        faces[fI] = surf[fI].triFaceFace();
+    }
 
 
     // Either construct features from surface&featureangle or read set.
@@ -467,12 +478,41 @@ int main(int argc, char *argv[])
         << "        internal edges : " << newSet.nInternalEdges() << nl
         << endl;
 
+    // Dummy trim operation to mark features
+    labelList featureEdgeIndexing = newSet.trimFeatures(-GREAT, 0);
+
+    scalarField surfacePtFeatureIndex(surf.points().size(), -1);
+
+    forAll(newSet.featureEdges(), eI)
+    {
+        const edge& e = surf.edges()[newSet.featureEdges()[eI]];
+
+        surfacePtFeatureIndex[surf.meshPoints()[e.start()]] =
+            featureEdgeIndexing[newSet.featureEdges()[eI]];
+
+        surfacePtFeatureIndex[surf.meshPoints()[e.end()]] =
+            featureEdgeIndexing[newSet.featureEdges()[eI]];
+    }
+
+    if (writeVTK)
+    {
+        vtkSurfaceWriter<scalar>().write
+        (
+            runTime.constant()/"triSurface",    // outputDir
+            sFeatFileName,                      // surfaceName
+            surf.points(),
+            faces,
+            "surfacePtFeatureIndex",            // fieldName
+            surfacePtFeatureIndex,
+            true,                               // isNodeValues
+            true                                // verbose
+        );
+    }
+
     // Extracting and writing a featureEdgeMesh
 
     Pout<< nl << "Writing featureEdgeMesh to constant/featureEdgeMesh."
         << endl;
-
-    fileName sFeatFileName = surfFileName.lessExt().name();
 
     featureEdgeMesh feMesh
     (
@@ -490,7 +530,7 @@ int main(int argc, char *argv[])
 
     feMesh.write();
 
-    if (args.optionFound("writeObj"))
+    if (writeObj)
     {
         feMesh.writeObj(runTime.constant()/"featureEdgeMesh"/sFeatFileName);
     };
@@ -516,13 +556,6 @@ int main(int argc, char *argv[])
     // Prepare start and end points for intersection tests
 
     const vectorField& normals = searchSurf.faceNormals();
-
-    faceList faces(surf.size());
-
-    forAll(surf, fI)
-    {
-        faces[fI] = surf[fI].triFaceFace();
-    }
 
     scalar span = searchSurf.bounds().mag();
 
@@ -794,7 +827,7 @@ int main(int argc, char *argv[])
 
     kField.write();
 
-    if (args.optionFound("writeVTK"))
+    if (writeVTK)
     {
         vtkSurfaceWriter<scalar>().write
         (
