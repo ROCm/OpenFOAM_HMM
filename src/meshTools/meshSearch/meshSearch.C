@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -101,9 +101,11 @@ Foam::label Foam::meshSearch::findNearestCellTree(const point& location) const
 {
     const indexedOctree<treeDataCell>& tree = cellTree();
 
-    scalar span = tree.bb().mag();
-
-    pointIndexHit info = tree.findNearest(location, Foam::sqr(span));
+    pointIndexHit info = tree.findNearest
+    (
+        location,
+        magSqr(tree.bb().max()-tree.bb().min())
+    );
 
     if (!info.hit())
     {
@@ -178,10 +180,12 @@ Foam::label Foam::meshSearch::findNearestFaceTree(const point& location) const
     // Search nearest cell centre.
     const indexedOctree<treeDataCell>& tree = cellTree();
 
-    scalar span = tree.bb().mag();
-
     // Search with decent span
-    pointIndexHit info = tree.findNearest(location, Foam::sqr(span));
+    pointIndexHit info = tree.findNearest
+    (
+        location,
+        magSqr(tree.bb().max()-tree.bb().min())
+    );
 
     if (!info.hit())
     {
@@ -767,12 +771,10 @@ Foam::label Foam::meshSearch::findNearestBoundaryFace
         {
             const indexedOctree<treeDataFace>& tree = boundaryTree();
 
-            scalar span = tree.bb().mag();
-
             pointIndexHit info = boundaryTree().findNearest
             (
                 location,
-                Foam::sqr(span)
+                magSqr(tree.bb().max()-tree.bb().min())
             );
 
             if (!info.hit())
