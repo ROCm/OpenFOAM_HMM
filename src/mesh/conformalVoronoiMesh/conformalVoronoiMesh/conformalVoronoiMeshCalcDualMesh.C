@@ -1531,29 +1531,76 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
         wrongFaces
     );
 
-    label nInvalidPolyhedra = 0;
-
-    const cellList& cells = pMesh.cells();
-
-    forAll(cells, cI)
     {
-        if (cells[cI].size() < 4 && cells[cI].size() > 0)
+        // Check for cells with more than 1 but fewer than 4 faces
+        label nInvalidPolyhedra = 0;
+
+        const cellList& cells = pMesh.cells();
+
+        forAll(cells, cI)
         {
-            // Info<< "cell " << cI << " " << cells[cI]
-            //     << " has " << cells[cI].size() << " faces."
-            //     << endl;
-
-            nInvalidPolyhedra++;
-
-            forAll(cells[cI], cFI)
+            if (cells[cI].size() < 4 && cells[cI].size() > 0)
             {
-                wrongFaces.insert(cells[cI][cFI]);
+                // Info<< "cell " << cI << " " << cells[cI]
+                //     << " has " << cells[cI].size() << " faces."
+                //     << endl;
+
+                nInvalidPolyhedra++;
+
+                forAll(cells[cI], cFI)
+                {
+                    wrongFaces.insert(cells[cI][cFI]);
+                }
             }
         }
+
+        Info<< "    cells with more than 1 but fewer than 4 faces          : "
+            << nInvalidPolyhedra << endl;
+
+        // Check for cells with one internal face only
+
+        labelList nInternalFaces(pMesh.nCells(), 0);
+
+        for (label fI = 0; fI < pMesh.nInternalFaces(); fI++)
+        {
+            nInternalFaces[pMesh.faceOwner()[fI]]++;
+            nInternalFaces[pMesh.faceNeighbour()[fI]]++;
+        }
+
+        const polyBoundaryMesh& patches = pMesh.boundaryMesh();
+
+        forAll(patches, patchI)
+        {
+            if (patches[patchI].coupled())
+            {
+                const labelUList& owners = patches[patchI].faceCells();
+
+                forAll(owners, i)
+                {
+                    nInternalFaces[owners[i]]++;
+                }
+            }
+        }
+
+        label oneInternalFaceCells = 0;
+
+        forAll(nInternalFaces, cI)
+        {
+            if (nInternalFaces[cI] <= 1)
+            {
+                oneInternalFaceCells++;
+
+                forAll(cells[cI], cFI)
+                {
+                    wrongFaces.insert(cells[cI][cFI]);
+                }
+            }
+        }
+
+        Info<< "    cells with with zero or one non-boundary face          : "
+            << oneInternalFaceCells << endl;
     }
 
-    Info<< "Cells with more than 1 but fewer than 4 faces              : "
-        << nInvalidPolyhedra << endl;
 
     PackedBoolList ptToBeLimited(pts.size(), false);
 

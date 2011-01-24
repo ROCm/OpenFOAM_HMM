@@ -301,7 +301,7 @@ Foam::scalar Foam::cellSizeControlSurfaces::cellSize
             cvMesh_.geometryToConformTo().findSurfaceNearest
             (
                 pt,
-                cvMesh_.geometryToConformTo().spanMagSqr(),
+                sqr(GREAT),
                 surfHit,
                 hitSurface
             );
@@ -316,11 +316,7 @@ Foam::scalar Foam::cellSizeControlSurfaces::cellSize
                         "bool isSurfacePoint"
                     ") const"
                 )
-                    << "Point " << pt << "was not within "
-                    << cvMesh_.geometryToConformTo().spanMag()
-                    << " of the surface." << nl
-                    << "findSurfaceNearest did not find a hit across the span "
-                    << "of the surfaces."
+                    << "Point " << pt << " did not find a nearest surface point"
                     << nl << exit(FatalError) << endl;
             }
             else

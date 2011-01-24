@@ -97,6 +97,53 @@ void deleteBox
 }
 
 
+void drawHitProblem
+(
+    label fI,
+    const triSurface& surf,
+    const pointField& start,
+    const pointField& faceCentres,
+    const pointField& end,
+    const List<pointIndexHit>& hitInfo
+)
+{
+    Info<< nl << "# findLineAll did not hit its own face."
+        << nl << "# fI " << fI
+        << nl << "# start " << start[fI]
+        << nl << "# f centre " << faceCentres[fI]
+        << nl << "# end " << end[fI]
+        << nl << "# hitInfo " << hitInfo
+        << endl;
+
+    meshTools::writeOBJ(Info, start[fI]);
+    meshTools::writeOBJ(Info, faceCentres[fI]);
+    meshTools::writeOBJ(Info, end[fI]);
+
+    Info<< "l 1 2 3" << endl;
+
+    meshTools::writeOBJ(Info, surf.points()[surf[fI][0]]);
+    meshTools::writeOBJ(Info, surf.points()[surf[fI][1]]);
+    meshTools::writeOBJ(Info, surf.points()[surf[fI][2]]);
+
+    Info<< "f 4 5 6" << endl;
+
+    forAll(hitInfo, hI)
+    {
+        label hFI = hitInfo[hI].index();
+
+        meshTools::writeOBJ(Info, surf.points()[surf[hFI][0]]);
+        meshTools::writeOBJ(Info, surf.points()[surf[hFI][1]]);
+        meshTools::writeOBJ(Info, surf.points()[surf[hFI][2]]);
+
+        Info<< "f "
+            << 3*hI + 7 << " "
+            << 3*hI + 8 << " "
+            << 3*hI + 9
+            << endl;
+    }
+}
+
+
 scalarField curvature(const triSurface& surf)
 {
     scalarField k(surf.points().size(), 0);
@@ -598,23 +645,24 @@ int main(int argc, char *argv[])
 
         if (hitInfo.size() < 1)
         {
-            Info<< nl << "# fI " << fI
-                << nl << "# start " << start[fI]
-                << nl << "# f centre " << faceCentres[fI]
-                << nl << "# end " << end[fI]
-                << endl;
+            drawHitProblem(fI, surf, start, faceCentres, end, hitInfo);
+            // Info<< nl << "# fI " << fI
+            //     << nl << "# start " << start[fI]
+            //     << nl << "# f centre " << faceCentres[fI]
+            //     << nl << "# end " << end[fI]
+            //     << endl;
 
-            meshTools::writeOBJ(Info, start[fI]);
-            meshTools::writeOBJ(Info, faceCentres[fI]);
-            meshTools::writeOBJ(Info, end[fI]);
+            // meshTools::writeOBJ(Info, start[fI]);
+            // meshTools::writeOBJ(Info, faceCentres[fI]);
+            // meshTools::writeOBJ(Info, end[fI]);
 
-            Info<< "l 1 2 3" << endl;
+            // Info<< "l 1 2 3" << endl;
 
-            meshTools::writeOBJ(Info, surf.points()[surf[fI][0]]);
-            meshTools::writeOBJ(Info, surf.points()[surf[fI][1]]);
-            meshTools::writeOBJ(Info, surf.points()[surf[fI][2]]);
+            // meshTools::writeOBJ(Info, surf.points()[surf[fI][0]]);
+            // meshTools::writeOBJ(Info, surf.points()[surf[fI][1]]);
+            // meshTools::writeOBJ(Info, surf.points()[surf[fI][2]]);
 
-            Info<< "f 4 5 6" << endl;
+            // Info<< "f 4 5 6" << endl;
 
             FatalErrorIn(args.executable())
                 << "findLineAll did not hit its own face."
@@ -630,40 +678,42 @@ int main(int argc, char *argv[])
             }
             else if (hitInfo[0].index() != fI)
             {
-                Info<< nl << "# findLineAll did not hit its own face."
-                    << nl << "# fI " << fI
-                    << nl << "# start " << start[fI]
-                    << nl << "# f centre " << faceCentres[fI]
-                    << nl << "# end " << end[fI]
-                    << nl << "# hitInfo " << hitInfo
-                    << endl;
+                drawHitProblem(fI, surf, start, faceCentres, end, hitInfo);
 
-                meshTools::writeOBJ(Info, start[fI]);
-                meshTools::writeOBJ(Info, faceCentres[fI]);
-                meshTools::writeOBJ(Info, end[fI]);
+                // Info<< nl << "# findLineAll did not hit its own face."
+                //     << nl << "# fI " << fI
+                //     << nl << "# start " << start[fI]
+                //     << nl << "# f centre " << faceCentres[fI]
+                //     << nl << "# end " << end[fI]
+                //     << nl << "# hitInfo " << hitInfo
+                //     << endl;
 
-                Info<< "l 1 2 3" << endl;
+                // meshTools::writeOBJ(Info, start[fI]);
+                // meshTools::writeOBJ(Info, faceCentres[fI]);
+                // meshTools::writeOBJ(Info, end[fI]);
 
-                meshTools::writeOBJ(Info, surf.points()[surf[fI][0]]);
-                meshTools::writeOBJ(Info, surf.points()[surf[fI][1]]);
-                meshTools::writeOBJ(Info, surf.points()[surf[fI][2]]);
+                // Info<< "l 1 2 3" << endl;
 
-                Info<< "f 4 5 6" << endl;
+                // meshTools::writeOBJ(Info, surf.points()[surf[fI][0]]);
+                // meshTools::writeOBJ(Info, surf.points()[surf[fI][1]]);
+                // meshTools::writeOBJ(Info, surf.points()[surf[fI][2]]);
 
-                forAll(hitInfo, hI)
-                {
-                    label hFI = hitInfo[hI].index();
+                // Info<< "f 4 5 6" << endl;
 
-                    meshTools::writeOBJ(Info, surf.points()[surf[hFI][0]]);
-                    meshTools::writeOBJ(Info, surf.points()[surf[hFI][1]]);
-                    meshTools::writeOBJ(Info, surf.points()[surf[hFI][2]]);
+                // forAll(hitInfo, hI)
+                // {
+                //     label hFI = hitInfo[hI].index();
 
-                    Info<< "f "
-                        << 3*hI + 7 << " "
-                        << 3*hI + 8 << " "
-                        << 3*hI + 9
-                        << endl;
-                }
+                //     meshTools::writeOBJ(Info, surf.points()[surf[hFI][0]]);
+                //     meshTools::writeOBJ(Info, surf.points()[surf[hFI][1]]);
+                //     meshTools::writeOBJ(Info, surf.points()[surf[hFI][2]]);
+
+                //     Info<< "f "
+                //         << 3*hI + 7 << " "
+                //         << 3*hI + 8 << " "
+                //         << 3*hI + 9
+                //         << endl;
+                // }
                 // FatalErrorIn(args.executable())
                 //     << "findLineAll did not hit its own face."
                 //     << exit(FatalError);
@@ -687,40 +737,41 @@ int main(int argc, char *argv[])
 
             if (ownHitI < 0)
             {
-                Info<< nl << "# findLineAll did not hit its own face."
-                    << nl << "# fI " << fI
-                    << nl << "# start " << start[fI]
-                    << nl << "# f centre " << faceCentres[fI]
-                    << nl << "# end " << end[fI]
-                    << nl << "# hitInfo " << hitInfo
-                    << endl;
+                drawHitProblem(fI, surf, start, faceCentres, end, hitInfo);
+                // Info<< nl << "# findLineAll did not hit its own face."
+                //     << nl << "# fI " << fI
+                //     << nl << "# start " << start[fI]
+                //     << nl << "# f centre " << faceCentres[fI]
+                //     << nl << "# end " << end[fI]
+                //     << nl << "# hitInfo " << hitInfo
+                //     << endl;
 
-                meshTools::writeOBJ(Info, start[fI]);
-                meshTools::writeOBJ(Info, faceCentres[fI]);
-                meshTools::writeOBJ(Info, end[fI]);
+                // meshTools::writeOBJ(Info, start[fI]);
+                // meshTools::writeOBJ(Info, faceCentres[fI]);
+                // meshTools::writeOBJ(Info, end[fI]);
 
-                Info<< "l 1 2 3" << endl;
+                // Info<< "l 1 2 3" << endl;
 
-                meshTools::writeOBJ(Info, surf.points()[surf[fI][0]]);
-                meshTools::writeOBJ(Info, surf.points()[surf[fI][1]]);
-                meshTools::writeOBJ(Info, surf.points()[surf[fI][2]]);
+                // meshTools::writeOBJ(Info, surf.points()[surf[fI][0]]);
+                // meshTools::writeOBJ(Info, surf.points()[surf[fI][1]]);
+                // meshTools::writeOBJ(Info, surf.points()[surf[fI][2]]);
 
-                Info<< "f 4 5 6" << endl;
+                // Info<< "f 4 5 6" << endl;
 
-                forAll(hitInfo, hI)
-                {
-                    label hFI = hitInfo[hI].index();
+                // forAll(hitInfo, hI)
+                // {
+                //     label hFI = hitInfo[hI].index();
 
-                    meshTools::writeOBJ(Info, surf.points()[surf[hFI][0]]);
-                    meshTools::writeOBJ(Info, surf.points()[surf[hFI][1]]);
-                    meshTools::writeOBJ(Info, surf.points()[surf[hFI][2]]);
+                //     meshTools::writeOBJ(Info, surf.points()[surf[hFI][0]]);
+                //     meshTools::writeOBJ(Info, surf.points()[surf[hFI][1]]);
+                //     meshTools::writeOBJ(Info, surf.points()[surf[hFI][2]]);
 
-                    Info<< "f "
-                        << 3*hI + 7 << " "
-                        << 3*hI + 8 << " "
-                        << 3*hI + 9
-                        << endl;
-                }
+                //     Info<< "f "
+                //         << 3*hI + 7 << " "
+                //         << 3*hI + 8 << " "
+                //         << 3*hI + 9
+                //         << endl;
+                // }
 
                 // FatalErrorIn(args.executable())
                 //     << "findLineAll did not hit its own face."

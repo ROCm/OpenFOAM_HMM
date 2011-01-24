@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -2209,38 +2209,45 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
     {
         vector sampleNearestVec = (sample - nearestPoint);
 
-        scalar magSampleNearestVec = mag(sampleNearestVec);
-
         // Nearest to face interior. Use faceNormal to determine side
         scalar c = sampleNearestVec & surf.faceNormals()[nearestFaceI];
 
         // If the sample is essentially on the face, do not check for
         // it being perpendicular.
 
-        if (magSampleNearestVec > 10*SMALL)
-        {
-            c /= magSampleNearestVec*mag(surf.faceNormals()[nearestFaceI]);
+        // if (debug)
+        // {
+        //     scalar magSampleNearestVec = mag(sampleNearestVec);
 
-            if (mag(c) < 0.99)
-            {
-                FatalErrorIn("triSurfaceTools::surfaceSide")
-                    << "nearestPoint identified as being on triangle face "
-                    << "but vector from nearestPoint to sample is not "
-                    << "perpendicular to the normal." << nl
-                    << "sample: " << sample << nl
-                    << "nearestPoint: " << nearestPoint << nl
-                    << "sample - nearestPoint: " << sample - nearestPoint << nl
-                    << "normal: " << surf.faceNormals()[nearestFaceI] << nl
-                    << "mag(sample - nearestPoint): "
-                    << mag(sample - nearestPoint) << nl
-                    << "normalised dot product: " << c << nl
-                    << "triangle vertices: " << nl
-                    << "    " << points[f[0]] << nl
-                    << "    " << points[f[1]] << nl
-                    << "    " << points[f[2]] << nl
-                    << abort(FatalError);
-            }
-        }
+        //     if (magSampleNearestVec > SMALL)
+        //     {
+        //         c /=
+        //             magSampleNearestVec
+        //            *mag(surf.faceNormals()[nearestFaceI]);
+
+        //         if (mag(c) < 0.99)
+        //         {
+        //             WarningIn("triSurfaceTools::surfaceSide")
+        //                 << "nearestPoint identified as being on triangle "
+        //                 << "face but vector from nearestPoint to sample is "
+        //                 << "not perpendicular to the normal." << nl
+        //                 << "sample: " << sample << nl
+        //                 << "nearestPoint: " << nearestPoint << nl
+        //                 << "sample - nearestPoint: "
+        //                 << sample - nearestPoint << nl
+        //                 << "normal: "
+        //                 << surf.faceNormals()[nearestFaceI] << nl
+        //                 << "mag(sample - nearestPoint): "
+        //                 << mag(sample - nearestPoint) << nl
+        //                 << "normalised dot product: " << c << nl
+        //                 << "triangle vertices: " << nl
+        //                 << "    " << points[f[0]] << nl
+        //                 << "    " << points[f[1]] << nl
+        //                 << "    " << points[f[2]] << nl
+        //                 << endl;;
+        //         }
+        //     }
+        // }
 
         if (c > 0)
         {

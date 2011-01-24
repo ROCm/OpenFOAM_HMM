@@ -64,6 +64,7 @@ SourceFiles
 #include "HashSet.H"
 #include "memInfo.H"
 #include "point.H"
+#include "cellSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -797,6 +798,10 @@ public:
             //  target cell volume, actual cell volume and equivalent
             //  actual cell size (cbrt(actual cell volume)).
             void writeCellSizes(const fvMesh& mesh) const;
+
+            //- Find the cellSet of the boundary cells which have points that
+            //  protrude out of the surface beyond a tolerance.
+            void findRemainingProtrusionSet(const fvMesh& mesh) const;
 };
 
 
