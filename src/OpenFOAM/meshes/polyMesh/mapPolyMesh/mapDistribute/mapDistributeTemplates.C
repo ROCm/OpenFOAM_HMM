@@ -966,8 +966,6 @@ void Foam::mapDistribute::reverseDistribute
     const bool dummyTransform
 ) const
 {
-    fld.setSize(constructSize);
-
     if (dummyTransform)
     {
         applyDummyInverseTransforms(fld);
@@ -1024,8 +1022,6 @@ void Foam::mapDistribute::reverseDistribute
     const bool dummyTransform
 ) const
 {
-    fld.setSize(constructSize);
-
     if (dummyTransform)
     {
         applyDummyInverseTransforms(fld);
