@@ -31,6 +31,29 @@ License
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
 template<class ParcelType>
+void Foam::ReactingMultiphaseCloud<ParcelType>::setModels()
+{
+    devolatilisationModel_.reset
+    (
+        DevolatilisationModel<ReactingMultiphaseCloud<ParcelType> >::New
+        (
+            this->subModelProperties(),
+            *this
+        ).ptr()
+    );
+
+    surfaceReactionModel_.reset
+    (
+        SurfaceReactionModel<ReactingMultiphaseCloud<ParcelType> >::New
+        (
+            this->subModelProperties(),
+            *this
+        ).ptr()
+    );
+}
+
+
+template<class ParcelType>
 void Foam::ReactingMultiphaseCloud<ParcelType>::cloudReset
 (
     ReactingMultiphaseCloud<ParcelType>& c
@@ -62,26 +85,17 @@ Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
     ReactingCloud<ParcelType>(cloudName, rho, U, g, thermo, false),
     reactingMultiphaseCloud(),
     cloudCopyPtr_(NULL),
-    constProps_(this->particleProperties()),
-    devolatilisationModel_
-    (
-        DevolatilisationModel<ReactingMultiphaseCloud<ParcelType> >::New
-        (
-            this->subModelProperties(),
-            *this
-        )
-    ),
-    surfaceReactionModel_
-    (
-        SurfaceReactionModel<ReactingMultiphaseCloud<ParcelType> >::New
-        (
-            this->subModelProperties(),
-            *this
-        )
-    ),
+    constProps_(this->particleProperties(), this->solution().active()),
+    devolatilisationModel_(NULL),
+    surfaceReactionModel_(NULL),
     dMassDevolatilisation_(0.0),
     dMassSurfaceReaction_(0.0)
 {
+    if (this->solution().active())
+    {
+        setModels();
+    }
+
     if (readFields)
     {
         ParcelType::readFields(*this);
