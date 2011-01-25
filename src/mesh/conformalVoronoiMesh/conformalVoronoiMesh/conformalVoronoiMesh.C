@@ -1193,6 +1193,21 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         )
     )
 {
+    fvMesh mesh
+    (
+        IOobject
+        (
+            fvMesh::defaultRegion,
+            runTime_.constant(),
+            runTime_,
+            IOobject::MUST_READ
+        )
+    );
+
+    findRemainingProtrusionSet(mesh);
+
+    return;
+
     createFeaturePoints();
 
     if (cvMeshControls().objOutput())

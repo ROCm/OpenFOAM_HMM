@@ -336,6 +336,7 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInOutSide
     bool testForInside
 ) const
 {
+    Info<< "Enter wellInOutSide " << endl;
     List<List<searchableSurface::volumeType> > surfaceVolumeTests
     (
         surfaces_.size(),
@@ -402,10 +403,19 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInOutSide
             {
                 inOutSidePoint[i] = !testForInside;
 
+                Info<< "    break " << endl;
+
                 break;
             }
         }
     }
+
+    Info<< "# " << referenceVolumeTypes_[0] << " "
+        << surfaceVolumeTests[0][0] << " "
+        << hitInfo[0].hit() << " "
+        << inOutSidePoint[0] << endl;
+
+    Info<< "Return wellInOutSide " << inOutSidePoint << endl;
 
     return inOutSidePoint;
 }
@@ -437,7 +447,15 @@ Foam::Field<bool> Foam::conformationSurfaces::wellOutside
     const scalarField& testDistSqr
 ) const
 {
-    return wellInOutSide(samplePts, testDistSqr, false);
+    Info<< "field pt wellOutside" << endl;
+
+    Field<bool> wO = wellInOutSide(samplePts, testDistSqr, false);
+
+    Info<< "field pt wellOutside field " << wO << endl;
+
+    return wO;
+
+    // return wellInOutSide(samplePts, testDistSqr, false);
 }
 
 
@@ -447,7 +465,19 @@ bool Foam::conformationSurfaces::wellOutside
     scalar testDistSqr
 ) const
 {
-    return wellOutside(pointField(1, samplePt), scalarField(1, testDistSqr))[0];
+    Info<< "single pt wellOutside" << endl;
+
+    Field<bool> wO = wellOutside
+    (
+        pointField(1, samplePt),
+        scalarField(1, testDistSqr)
+    );
+
+    Info<< "single pt wellOutside field " << wO << endl;
+
+    return wO[0];
+
+ // return wellOutside(pointField(1, samplePt), scalarField(1, testDistSqr))[0];
 }
 
 

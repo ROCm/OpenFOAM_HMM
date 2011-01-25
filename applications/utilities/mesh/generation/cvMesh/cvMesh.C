@@ -2,7 +2,7 @@
  =========                   |
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
-   \\  /     A nd            | Copyright (C) 2008-2010 OpenCFD Ltd.
+   \\  /     A nd            | Copyright (C) 2008-2011 OpenCFD Ltd.
     \\/      M anipulation   |
 -------------------------------------------------------------------------------
 License
@@ -56,18 +56,18 @@ int main(int argc, char *argv[])
 
     conformalVoronoiMesh mesh(runTime, cvMeshDict);
 
-    while (runTime.loop())
-    {
-        Info<< nl << "Time = " << runTime.timeName() << endl;
+    // while (runTime.loop())
+    // {
+    //     Info<< nl << "Time = " << runTime.timeName() << endl;
 
-        mesh.move();
+    //     mesh.move();
 
-        Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
-    }
+    //     Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+    //         << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+    //         << nl << endl;
+    // }
 
-    mesh.writeMesh(runTime.constant());
+    // mesh.writeMesh(runTime.constant());
 
     Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
         << "  ClockTime = " << runTime.elapsedClockTime() << " s"
