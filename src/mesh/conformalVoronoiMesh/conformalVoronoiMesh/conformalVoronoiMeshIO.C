@@ -399,76 +399,76 @@ void Foam::conformalVoronoiMesh::writeCellSizes
             cellSize[i] = cellSizeControl().cellSize(C[i]);
         }
 
-        // Info<< nl << "Create targetCellVolume volScalarField" << endl;
+        Info<< nl << "Create targetCellVolume volScalarField" << endl;
 
-        // volScalarField targetCellVolume
-        // (
-        //     IOobject
-        //     (
-        //         "targetCellVolume",
-        //         mesh.polyMesh::instance(),
-        //         mesh,
-        //         IOobject::NO_READ,
-        //         IOobject::AUTO_WRITE
-        //     ),
-        //     mesh,
-        //     dimensionedScalar("cellVolume", dimLength, 0),
-        //     zeroGradientPointPatchField<scalar>::typeName
-        // );
+        volScalarField targetCellVolume
+        (
+            IOobject
+            (
+                "targetCellVolume",
+                mesh.polyMesh::instance(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh,
+            dimensionedScalar("cellVolume", dimLength, 0),
+            zeroGradientPointPatchField<scalar>::typeName
+        );
 
-        // targetCellVolume.internalField() = pow3(cellSize);
+        targetCellVolume.internalField() = pow3(cellSize);
 
-        // Info<< nl << "Create actualCellVolume volScalarField" << endl;
+        Info<< nl << "Create actualCellVolume volScalarField" << endl;
 
-        // volScalarField actualCellVolume
-        // (
-        //     IOobject
-        //     (
-        //         "actualCellVolume",
-        //         mesh.polyMesh::instance(),
-        //         mesh,
-        //         IOobject::NO_READ,
-        //         IOobject::AUTO_WRITE
-        //     ),
-        //     mesh,
-        //     dimensionedScalar("cellVolume", dimVolume, 0),
-        //     zeroGradientPointPatchField<scalar>::typeName
-        // );
+        volScalarField actualCellVolume
+        (
+            IOobject
+            (
+                "actualCellVolume",
+                mesh.polyMesh::instance(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh,
+            dimensionedScalar("cellVolume", dimVolume, 0),
+            zeroGradientPointPatchField<scalar>::typeName
+        );
 
-        // actualCellVolume.internalField() = mesh.cellVolumes();
+        actualCellVolume.internalField() = mesh.cellVolumes();
 
-        // Info<< nl << "Create equivalentCellSize volScalarField" << endl;
+        Info<< nl << "Create equivalentCellSize volScalarField" << endl;
 
-        // volScalarField equivalentCellSize
-        // (
-        //     IOobject
-        //     (
-        //         "equivalentCellSize",
-        //         mesh.polyMesh::instance(),
-        //         mesh,
-        //         IOobject::NO_READ,
-        //         IOobject::AUTO_WRITE
-        //     ),
-        //     mesh,
-        //     dimensionedScalar("cellSize", dimLength, 0),
-        //     zeroGradientPointPatchField<scalar>::typeName
-        // );
+        volScalarField equivalentCellSize
+        (
+            IOobject
+            (
+                "equivalentCellSize",
+                mesh.polyMesh::instance(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh,
+            dimensionedScalar("cellSize", dimLength, 0),
+            zeroGradientPointPatchField<scalar>::typeName
+        );
 
-        // equivalentCellSize.internalField() = pow
-        // (
-        //     actualCellVolume.internalField(),
-        //     1.0/3.0
-        // );
+        equivalentCellSize.internalField() = pow
+        (
+            actualCellVolume.internalField(),
+            1.0/3.0
+        );
 
         targetCellSize.correctBoundaryConditions();
-        // targetCellVolume.correctBoundaryConditions();
-        // actualCellVolume.correctBoundaryConditions();
-        // equivalentCellSize.correctBoundaryConditions();
+        targetCellVolume.correctBoundaryConditions();
+        actualCellVolume.correctBoundaryConditions();
+        equivalentCellSize.correctBoundaryConditions();
 
         targetCellSize.write();
-        // targetCellVolume.write();
-        // actualCellVolume.write();
-        // equivalentCellSize.write();
+        targetCellVolume.write();
+        actualCellVolume.write();
+        equivalentCellSize.write();
     }
 
     // {
@@ -525,96 +525,29 @@ void Foam::conformalVoronoiMesh::findRemainingProtrusionSet
 
     labelHashSet protrudingBoundaryPoints;
 
-    label objPtI = 2;
-
-    meshTools::writeOBJ(Info, vector::zero);
-
-    // forAll(patches, patchI)
-    // {
-    //     Info<< "# " << patches[patchI].name() << endl;
-
-    //     const labelList& patchLocalPtIs = patches[patchI].boundaryPoints();
-
-    //     forAll(patchLocalPtIs, ppI)
-    //     {
-    //         label meshPtI =
-    //             patches[patchI].meshPoints()[patchLocalPtIs[ppI]];
-
-    //         const Foam::point& pt = mesh.points()[meshPtI];
-
-    //         if
-    //         (
-    //             geometryToConformTo_.wellOutside
-    //             (
-    //                 pt,
-    //                 sqr(1.2*targetCellSize(pt))
-    //             )
-    //         )
-    //         {
-    //             Info<< "# maxSurfaceProtrusion " << maxSurfaceProtrusion(pt)
-    //                 << endl;
-
-    //             meshTools::writeOBJ(Info, pt);
-    //             Info<< "l 1 " << objPtI++ << endl;
-
-    //             protrudingBoundaryPoints.insert(meshPtI);
-    //         }
-    //     }
-    // }
-
-    label patchI = patches.size() - 1;
-
-    Info<< "# " << patches[patchI].name() << endl;
-
-    const labelList& patchLocalPtIs = patches[patchI].boundaryPoints();
-
-    forAll(patchLocalPtIs, ppI)
+    forAll(patches, patchI)
     {
-        label meshPtI = patches[patchI].meshPoints()[patchLocalPtIs[ppI]];
+        const labelList& patchLocalPtIs = patches[patchI].boundaryPoints();
 
-        const Foam::point& pt = mesh.points()[meshPtI];
-
-        Info<< nl << "# ppI " << ppI << " " << pt << endl;
-
-        bool wO = geometryToConformTo_.wellOutside
-        (
-            pt,
-            sqr(1.2*targetCellSize(pt))
-        );
-
-        Info<< "# wO " << wO << endl;
-
-        if (wO)
+        forAll(patchLocalPtIs, ppI)
         {
-            meshTools::writeOBJ(Info, pt);
-            Info<< "l 1 " << objPtI++ << endl;
+            label meshPtI = patches[patchI].meshPoints()[patchLocalPtIs[ppI]];
 
-            protrudingBoundaryPoints.insert(meshPtI);
+            const Foam::point& pt = mesh.points()[meshPtI];
+
+            if
+            (
+                geometryToConformTo_.wellOutside
+                (
+                    pt,
+                    sqr(2.0*maxSurfaceProtrusion(pt))
+                )
+            )
+            {
+                protrudingBoundaryPoints.insert(meshPtI);
+            }
         }
     }
-
-    // forAll(mesh.points(), pI)
-    // {
-    //     const Foam::point& pt = mesh.points()[pI];
-
-    //     if
-    //     (
-    //         geometryToConformTo_.wellOutside
-    //         (
-    //             pt,
-    //             sqr(1.2*targetCellSize(pt))
-    //         )
-    //     )
-    //     {
-    //         Info<< "# maxSurfaceProtrusion " << maxSurfaceProtrusion(pt)
-    //             << endl;
-
-    //         meshTools::writeOBJ(Info, pt);
-    //         Info<< "l 1 " << objPtI++ << endl;
-
-    //         protrudingBoundaryPoints.insert(pI);
-    //     }
-    // }
 
     cellSet protrudingCells
     (
@@ -628,9 +561,9 @@ void Foam::conformalVoronoiMesh::findRemainingProtrusionSet
         const label pointI = iter.key();
         const labelList& pCells = mesh.pointCells()[pointI];
 
-        forAll(pCells, pCI)
+        forAll(pCells, pCellI)
         {
-            protrudingCells.insert(pCells[pCI]);
+            protrudingCells.insert(pCells[pCellI]);
         }
     }
 
