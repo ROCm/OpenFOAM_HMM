@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -381,7 +381,7 @@ public:
                 scalar& rhos,
                 scalar& mus,
                 scalar& Pr,
-                scalar& kappa
+                scalar& kappas
             ) const;
 
             //- Update parcel properties over the time interval

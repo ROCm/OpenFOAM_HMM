@@ -117,7 +117,7 @@ void Foam::SingleKineticRateDevolatilisation<CloudType>::calculate
     forAll(volatileData_, i)
     {
         const label id = volatileToGasMap_[i];
-        const scalar massVolatile0 = mass0*YVolatile0_[id];
+        const scalar massVolatile0 = mass0*YVolatile0_[i];
         const scalar massVolatile = mass*YGasEff[id];
 
         // Combustion allowed once all volatile components evolved

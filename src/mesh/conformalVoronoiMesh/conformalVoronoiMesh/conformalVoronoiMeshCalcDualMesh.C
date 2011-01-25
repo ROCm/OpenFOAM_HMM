@@ -41,11 +41,11 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     bool filterFaces
 )
 {
-    timeCheck();
+    timeCheck("Start calcDualMesh");
 
     setVertexSizeAndAlignment();
 
-    timeCheck();
+    timeCheck("After setVertexSizeAndAlignment");
 
     // Dual cell indexing
 
@@ -106,6 +106,8 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         mergeCloseDualVertices(points, boundaryPts);
     }
 
+    timeCheck("After initial close point merge");
+
     if (filterFaces)
     {
         label nInitialBadQualityFaces = checkPolyMeshQuality(points).size();
@@ -139,6 +141,8 @@ void Foam::conformalVoronoiMesh::calcDualMesh
             label nBadQualityFaces = 0;
 
             labelHashSet lastWrongFaces;
+
+            label nConsecutiveEqualFaceSets = 0;
 
             do
             {
@@ -177,14 +181,30 @@ void Foam::conformalVoronoiMesh::calcDualMesh
                 if (lastWrongFaces == wrongFaces)
                 {
                     Info<< nl << "Consecutive iterations found the same set "
-                        << "of bad quality faces, stopping filtering" << endl;
+                        << "of bad quality faces." << endl;
 
-                    break;
+                    if
+                    (
+                        ++nConsecutiveEqualFaceSets
+                     >= cvMeshControls().maxConsecutiveEqualFaceSets()
+                    )
+                    {
+                        Info<< nl << nConsecutiveEqualFaceSets
+                            << " consecutive iterations produced the same "
+                            << "bad quality faceSet, stopping filtering"
+                            << endl;
+
+                        break;
+                    }
                 }
                 else
                 {
+                    nConsecutiveEqualFaceSets = 0;
+
                     lastWrongFaces = wrongFaces;
                 }
+
+                timeCheck("End of filtering iteration");
 
             } while (nBadQualityFaces > nInitialBadQualityFaces);
         }
@@ -192,7 +212,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     // Final dual face and owner neighbour construction
 
-    timeCheck();
+    timeCheck("Before createFacesOwnerNeighbourAndPatches");
 
     createFacesOwnerNeighbourAndPatches
     (
@@ -213,7 +233,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     removeUnusedPoints(faces, points);
 
-    timeCheck();
+    timeCheck("End of calcDualMesh");
 }
 
 
@@ -1422,7 +1442,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
     labelList patchStarts;
     pointField cellCentres;
 
-    timeCheck();
+    timeCheck("Start of checkPolyMeshQuality");
 
     Info<< nl << "Creating polyMesh to assess quality" << endl;
 
@@ -1476,7 +1496,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
     Info<< "NOT OVERRIDING CELL CENTRES" << endl;
     // mesh.overrideCellCentres(cellCentres);
 
-    timeCheck();
+    timeCheck("polyMesh created, checking quality");
 
     labelHashSet wrongFaces(pMesh.nFaces()/100);
 
@@ -1511,29 +1531,76 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
         wrongFaces
     );
 
-    label nInvalidPolyhedra = 0;
-
-    const cellList& cells = pMesh.cells();
-
-    forAll(cells, cI)
     {
-        if (cells[cI].size() < 4 && cells[cI].size() > 0)
+        // Check for cells with more than 1 but fewer than 4 faces
+        label nInvalidPolyhedra = 0;
+
+        const cellList& cells = pMesh.cells();
+
+        forAll(cells, cI)
         {
-            // Info<< "cell " << cI << " " << cells[cI]
-            //     << " has " << cells[cI].size() << " faces."
-            //     << endl;
-
-            nInvalidPolyhedra++;
-
-            forAll(cells[cI], cFI)
+            if (cells[cI].size() < 4 && cells[cI].size() > 0)
             {
-                wrongFaces.insert(cells[cI][cFI]);
+                // Info<< "cell " << cI << " " << cells[cI]
+                //     << " has " << cells[cI].size() << " faces."
+                //     << endl;
+
+                nInvalidPolyhedra++;
+
+                forAll(cells[cI], cFI)
+                {
+                    wrongFaces.insert(cells[cI][cFI]);
+                }
             }
         }
+
+        Info<< "    cells with more than 1 but fewer than 4 faces          : "
+            << nInvalidPolyhedra << endl;
+
+        // Check for cells with one internal face only
+
+        labelList nInternalFaces(pMesh.nCells(), 0);
+
+        for (label fI = 0; fI < pMesh.nInternalFaces(); fI++)
+        {
+            nInternalFaces[pMesh.faceOwner()[fI]]++;
+            nInternalFaces[pMesh.faceNeighbour()[fI]]++;
+        }
+
+        const polyBoundaryMesh& patches = pMesh.boundaryMesh();
+
+        forAll(patches, patchI)
+        {
+            if (patches[patchI].coupled())
+            {
+                const labelUList& owners = patches[patchI].faceCells();
+
+                forAll(owners, i)
+                {
+                    nInternalFaces[owners[i]]++;
+                }
+            }
+        }
+
+        label oneInternalFaceCells = 0;
+
+        forAll(nInternalFaces, cI)
+        {
+            if (nInternalFaces[cI] <= 1)
+            {
+                oneInternalFaceCells++;
+
+                forAll(cells[cI], cFI)
+                {
+                    wrongFaces.insert(cells[cI][cFI]);
+                }
+            }
+        }
+
+        Info<< "    cells with with zero or one non-boundary face          : "
+            << oneInternalFaceCells << endl;
     }
 
-    Info<< "Cells with more than 1 but fewer than 4 faces              : "
-        << nInvalidPolyhedra << endl;
 
     PackedBoolList ptToBeLimited(pts.size(), false);
 
@@ -1814,11 +1881,11 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
     owner.setSize(nInternalFaces);
     neighbour.setSize(nInternalFaces);
 
-    timeCheck();
+    timeCheck("polyMesh quality checked");
 
     sortFaces(faces, owner, neighbour);
 
-    timeCheck();
+    timeCheck("faces, owner, neighbour sorted");
 
     addPatches
     (

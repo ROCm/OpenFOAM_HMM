@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,12 +35,48 @@ Foam::sampledTriSurfaceMesh::sampleField
 ) const
 {
     // One value per face
-    tmp<Field<Type> > tvalues(new Field<Type>(cellLabels_.size()));
+    tmp<Field<Type> > tvalues(new Field<Type>(sampleElements_.size()));
     Field<Type>& values = tvalues();
 
-    forAll(cellLabels_, triI)
+    if (sampleSource_ == cells)
     {
-        values[triI] = vField[cellLabels_[triI]];
+        // Sample cells
+
+        forAll(sampleElements_, triI)
+        {
+            values[triI] = vField[sampleElements_[triI]];
+        }
+    }
+    else
+    {
+        // Sample boundary faces
+
+        const polyBoundaryMesh& pbm = mesh().boundaryMesh();
+        label nBnd = mesh().nFaces()-mesh().nInternalFaces();
+
+        // Create flat boundary field
+
+        Field<Type> bVals(nBnd, pTraits<Type>::zero);
+
+        forAll(vField.boundaryField(), patchI)
+        {
+            label bFaceI = pbm[patchI].start() - mesh().nInternalFaces();
+
+            SubList<Type>
+            (
+                bVals,
+                vField.boundaryField()[patchI].size(),
+                bFaceI
+            ).assign(vField.boundaryField()[patchI]);
+        }
+
+        // Sample in flat boundary field
+
+        forAll(sampleElements_, triI)
+        {
+            label faceI = sampleElements_[triI];
+            values[triI] = bVals[faceI-mesh().nInternalFaces()];
+        }
     }
 
     return tvalues;
@@ -55,15 +91,37 @@ Foam::sampledTriSurfaceMesh::interpolateField
 ) const
 {
     // One value per vertex
-    tmp<Field<Type> > tvalues(new Field<Type>(pointToFace_.size()));
+    tmp<Field<Type> > tvalues(new Field<Type>(sampleElements_.size()));
     Field<Type>& values = tvalues();
 
-    forAll(pointToFace_, pointI)
+    if (sampleSource_ == cells)
     {
-        label triI = pointToFace_[pointI];
-        label cellI = cellLabels_[triI];
+        // Sample cells.
 
-        values[pointI] = interpolator.interpolate(points()[pointI], cellI);
+        forAll(sampleElements_, pointI)
+        {
+            values[pointI] = interpolator.interpolate
+            (
+                samplePoints_[pointI],
+                sampleElements_[pointI]
+            );
+        }
+    }
+    else
+    {
+        // Sample boundary faces.
+
+        forAll(samplePoints_, pointI)
+        {
+            label faceI = sampleElements_[pointI];
+
+            values[pointI] = interpolator.interpolate
+            (
+                samplePoints_[pointI],
+                mesh().faceOwner()[faceI],
+                faceI
+            );
+        }
     }
 
     return tvalues;

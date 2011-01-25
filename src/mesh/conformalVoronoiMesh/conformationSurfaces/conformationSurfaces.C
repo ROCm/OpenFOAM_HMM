@@ -329,10 +329,11 @@ bool Foam::conformationSurfaces::outside
 }
 
 
-Foam::Field<bool> Foam::conformationSurfaces::wellInside
+Foam::Field<bool> Foam::conformationSurfaces::wellInOutSide
 (
     const pointField& samplePts,
-    const scalarField& testDistSqr
+    const scalarField& testDistSqr,
+    bool testForInside
 ) const
 {
     List<List<searchableSurface::volumeType> > surfaceVolumeTests
@@ -360,7 +361,7 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInside
     // reference value and if the points are inside the surface by a given
     // distanceSquared
 
-    Field<bool> insidePoints(samplePts.size(), true);
+    Field<bool> inOutSidePoint(samplePts.size(), true);
 
     //Check if the points are inside the surface by the given distance squared
 
@@ -384,23 +385,39 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInside
 
         if (pHit.hit())
         {
-            insidePoints[i] = false;
+            // If the point is within range of the surface, then it can't be
+            // well (in|out)side
+            inOutSidePoint[i] = false;
 
             continue;
         }
 
         forAll(surfaces_, s)
         {
+            // If one of the pattern tests is failed, then the point cannot be
+            // inside, therefore, if this is a testForInside = true call, the
+            // result is false.  If this is a testForInside = false call, then
+            // the result is true.
             if (surfaceVolumeTests[s][i] != referenceVolumeTypes_[s])
             {
-                insidePoints[i] = false;
+                inOutSidePoint[i] = !testForInside;
 
                 break;
             }
         }
     }
 
-    return insidePoints;
+    return inOutSidePoint;
+}
+
+
+Foam::Field<bool> Foam::conformationSurfaces::wellInside
+(
+    const pointField& samplePts,
+    const scalarField& testDistSqr
+) const
+{
+    return wellInOutSide(samplePts, testDistSqr, true);
 }
 
 
@@ -420,9 +437,7 @@ Foam::Field<bool> Foam::conformationSurfaces::wellOutside
     const scalarField& testDistSqr
 ) const
 {
-    notImplemented("Field<bool> Foam::conformationSurfaces::wellOutside");
-
-    return Field<bool>(samplePts.size(), true);
+    return wellInOutSide(samplePts, testDistSqr, false);
 }
 
 

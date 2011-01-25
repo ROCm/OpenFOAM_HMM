@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,6 +34,11 @@ using namespace Foam::constant::mathematical;
 template<class CloudType>
 void Foam::InjectionModel<CloudType>::readProps()
 {
+    if (!this->owner().solution().transient())
+    {
+        return;
+    }
+
     IOobject propsDictHeader
     (
         "injectionProperties",
@@ -60,6 +65,11 @@ void Foam::InjectionModel<CloudType>::readProps()
 template<class CloudType>
 void Foam::InjectionModel<CloudType>::writeProps()
 {
+    if (!this->owner().solution().transient())
+    {
+        return;
+    }
+
     if (this->owner().db().time().outputTime())
     {
         IOdictionary propsDict

@@ -64,6 +64,7 @@ SourceFiles
 #include "HashSet.H"
 #include "memInfo.H"
 #include "point.H"
+#include "cellSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -416,12 +417,22 @@ private:
         ) const;
 
         //- Find the "worst" protrusion of a dual cell through the surface,
-        //  subject to the tolerance
+        //  subject to the maxSurfaceProtrusion tolerance
         void dualCellLargestSurfaceProtrusion
         (
             const Delaunay::Finite_vertices_iterator& vit,
             pointIndexHit& surfHit,
             label& hitSurface
+        ) const;
+
+        //- Find the "worst" incursion of the dual cell of a non-internal or
+        //  boundary point through the surface, subject to the
+        //  maxSurfaceProtrusion tolerance
+        void dualCellLargestSurfaceIncursion
+        (
+            const Delaunay::Finite_vertices_iterator& vit,
+            pointIndexHit& surfHitLargest,
+            label& hitSurfaceLargest
         ) const;
 
         //- Limit the displacement of a point so that it doesn't penetrate the
@@ -709,7 +720,7 @@ public:
 
         typedef K::Vector_3 CGALVector;
 
-        inline CGALVector toCGALVector(const Foam::point& pt) const;
+        inline CGALVector toCGALVector(const Foam::vector& v) const;
 
         // Access
 
@@ -787,6 +798,10 @@ public:
             //  target cell volume, actual cell volume and equivalent
             //  actual cell size (cbrt(actual cell volume)).
             void writeCellSizes(const fvMesh& mesh) const;
+
+            //- Find the cellSet of the boundary cells which have points that
+            //  protrude out of the surface beyond a tolerance.
+            void findRemainingProtrusionSet(const fvMesh& mesh) const;
 };
 
 

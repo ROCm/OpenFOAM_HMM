@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,7 +24,6 @@ License
 \*----------------------------------------------------------------------------*/
 
 #include "syncTools.H"
-#include "polyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -99,24 +98,6 @@ void Foam::syncTools::transform::operator()
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Does anyone have couples? Since meshes might have 0 cells and 0 proc
-// boundaries need to reduce this info.
-bool Foam::syncTools::hasCouples(const polyBoundaryMesh& patches)
-{
-    bool hasAnyCouples = false;
-
-    forAll(patches, patchI)
-    {
-        if (patches[patchI].coupled())
-        {
-            hasAnyCouples = true;
-            break;
-        }
-    }
-    return returnReduce(hasAnyCouples, orOp<bool>());
-}
-
-
 // Determines for every point whether it is coupled and if so sets only one.
 Foam::PackedBoolList Foam::syncTools::getMasterPoints(const polyMesh& mesh)
 {
@@ -125,12 +106,21 @@ Foam::PackedBoolList Foam::syncTools::getMasterPoints(const polyMesh& mesh)
 
     const globalMeshData& globalData = mesh.globalData();
     const labelList& meshPoints = globalData.coupledPatch().meshPoints();
-    const labelListList& pointSlaves = globalData.globalPointAllSlaves();
+    const labelListList& slaves = globalData.globalPointSlaves();
+    const labelListList& transformedSlaves =
+            globalData.globalPointTransformedSlaves();
 
     forAll(meshPoints, coupledPointI)
     {
         label meshPointI = meshPoints[coupledPointI];
-        if (pointSlaves[coupledPointI].size() > 0)
+        if
+        (
+            (
+                slaves[coupledPointI].size()
+              + transformedSlaves[coupledPointI].size()
+            )
+          > 0
+        )
         {
             isMasterPoint[meshPointI] = true;
         }
@@ -161,12 +151,21 @@ Foam::PackedBoolList Foam::syncTools::getMasterEdges(const polyMesh& mesh)
 
     const globalMeshData& globalData = mesh.globalData();
     const labelList& meshEdges = globalData.coupledPatchMeshEdges();
-    const labelListList& edgeSlaves = globalData.globalEdgeAllSlaves();
+    const labelListList& slaves = globalData.globalEdgeSlaves();
+    const labelListList& transformedSlaves =
+        globalData.globalEdgeTransformedSlaves();
 
     forAll(meshEdges, coupledEdgeI)
     {
         label meshEdgeI = meshEdges[coupledEdgeI];
-        if (edgeSlaves[coupledEdgeI].size() > 0)
+        if
+        (
+            (
+                slaves[coupledEdgeI].size()
+              + transformedSlaves[coupledEdgeI].size()
+            )
+          > 0
+        )
         {
             isMasterEdge[meshEdgeI] = true;
         }

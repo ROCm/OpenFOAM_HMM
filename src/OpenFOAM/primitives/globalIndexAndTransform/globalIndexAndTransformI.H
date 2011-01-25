@@ -23,8 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "polyMesh.H"
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::label Foam::globalIndexAndTransform::encodeTransformIndex
 (
@@ -71,6 +72,210 @@ Foam::label Foam::globalIndexAndTransform::encodeTransformIndex
     }
 
     return transformIndex;
+}
+
+
+Foam::FixedList<Foam::label, 3>
+Foam::globalIndexAndTransform::decodeTransformIndex
+(
+    const label transformIndex
+)
+{
+    FixedList<label, 3> permutation;
+
+    label t = transformIndex;
+    permutation[0] = (t%3)-1;
+    t /= 3;
+    permutation[1] = (t%3)-1;
+    t /= 3;
+    permutation[2] = (t%3)-1;
+
+#   ifdef FULLDEBUG
+    t /= 3;
+    if (t != 0)
+    {
+        FatalErrorIn
+        (
+            "globalIndexAndTransform::decodeTransformIndex(const label)"
+        )   << "transformIndex : " << transformIndex
+            << " has more than 3 fields."
+            << abort(FatalError);
+    }
+#   endif
+
+    return permutation;
+}
+
+
+Foam::label Foam::globalIndexAndTransform::addToTransformIndex
+(
+    const label transformIndex,
+    const label patchI,
+    const bool isSendingSide
+) const
+{
+    const Pair<label>& transSign = patchTransformSign_[patchI];
+
+    label matchTransI = transSign.first();
+
+    // Hardcoded for max 3 transforms only!
+
+    if (matchTransI > -1 && matchTransI < 3)
+    {
+        FixedList<label, 3> permutation = decodeTransformIndex(transformIndex);
+
+
+        // Add patch transform
+        // ~~~~~~~~~~~~~~~~~~~
+
+        label sign = transSign.second();
+        if (!isSendingSide)
+        {
+            sign = -sign;
+        }
+
+
+        // If this transform been found already by a patch?
+        if (permutation[matchTransI] != 0)
+        {
+            if (sign == 0)
+            {
+                // sent from patch without a transformation. Do nothing.
+                FatalErrorIn("globalIndexAndTransform::addToTransformIndex(..)")
+                    << "patch:" << mesh_.boundaryMesh()[patchI].name()
+                    << " transform:" << matchTransI << " sign:" << sign
+                    << "  current transforms:" << permutation
+                    << exit(FatalError);
+            }
+            else if (sign == permutation[matchTransI])
+            {
+                FatalErrorIn
+                (
+                    "Foam::label "
+                    "Foam::globalIndexAndTransform::addToTransformIndex\n"
+                    "(\n"
+                        "const label,\n"
+                        "const label,\n"
+                        "const bool\n"
+                    ") const\n"
+                )   << "More than one patch accessing the same transform "
+                    << "but not of the same sign." << endl
+                    << "patch:" << mesh_.boundaryMesh()[patchI].name()
+                    << " transform:" << matchTransI << " sign:" << sign
+                    << "  current transforms:" << permutation
+                    << exit(FatalError);
+            }
+            else
+            {
+                permutation[matchTransI] = 0;
+            }
+        }
+        else
+        {
+            permutation[matchTransI] = sign;
+        }
+
+
+        // Re-encode permutation
+        // ~~~~~~~~~~~~~~~~~~~~~
+
+        return
+            (permutation[2]+1)*9
+          + (permutation[1]+1)*3
+          + (permutation[0]+1);
+    }
+    else
+    {
+        return transformIndex;
+    }
+}
+
+
+Foam::label Foam::globalIndexAndTransform::mergeTransformIndex
+(
+    const label transformIndex0,
+    const label transformIndex1
+)
+{
+    FixedList<label, 3> permutation0 = decodeTransformIndex(transformIndex0);
+    FixedList<label, 3> permutation1 = decodeTransformIndex(transformIndex1);
+
+    forAll(permutation0, i)
+    {
+        if (permutation0[i] == 0)
+        {
+            // Take over whatever sign 1 has
+            permutation0[i] = permutation1[i];
+        }
+        else if (permutation1[i] != 0 && permutation0[i] != permutation1[i])
+        {
+            FatalErrorIn
+            (
+                "Foam::label "
+                "Foam::globalIndexAndTransform::addToTransformIndex\n"
+                "(\n"
+                    "const label,\n"
+                    "const label\n"
+                ") const\n"
+            )   << "More than one patch accessing the same transform "
+                << "but not of the same sign." << endl
+                << "Trying to combine two transforms " << transformIndex0
+                << " with signs " << permutation0
+                << " and " << transformIndex1
+                << " with signs " << permutation1
+                << exit(FatalError);
+        }
+    }
+    return
+        (permutation0[2]+1)*9
+      + (permutation0[1]+1)*3
+      + (permutation0[0]+1);
+}
+
+
+Foam::label Foam::globalIndexAndTransform::minimumTransformIndex
+(
+    const label transformIndex0,
+    const label transformIndex1
+)
+{
+    FixedList<label, 3> permutation0 = decodeTransformIndex(transformIndex0);
+    FixedList<label, 3> permutation1 = decodeTransformIndex(transformIndex1);
+
+    forAll(permutation0, i)
+    {
+        if (permutation0[i] == 0)
+        {
+            // 0 wins.
+        }
+        else if (permutation1[i] == 0)
+        {
+            // 0 wins.
+            permutation0[i] = permutation1[i];
+        }
+        else if (permutation0[i] != permutation1[i])
+        {
+            FatalErrorIn
+            (
+                "Foam::label "
+                "Foam::globalIndexAndTransform::minimumTransformIndex\n"
+                "(\n"
+                    "const label,\n"
+                    "const label\n"
+                ") const\n"
+            )   << "More than one patch accessing the same transform "
+                << "but not of the same sign." << endl
+                << "Trying to combine two transforms " << transformIndex0
+                << " with signs " << permutation0
+                << " and " << transformIndex1
+                << " with signs " << permutation1
+                << exit(FatalError);
+        }
+    }
+    return
+        (permutation0[2]+1)*9
+      + (permutation0[1]+1)*3
+      + (permutation0[0]+1);
 }
 
 
@@ -133,7 +338,7 @@ Foam::labelPair Foam::globalIndexAndTransform::encode
 }
 
 
-Foam::label  Foam::globalIndexAndTransform::index
+Foam::label Foam::globalIndexAndTransform::index
 (
     const labelPair& globalIAndTransform
 )
@@ -177,6 +382,12 @@ const Foam::List<Foam::vectorTensorTransform>&
 Foam::globalIndexAndTransform::transformPermutations() const
 {
     return transformPermutations_;
+}
+
+
+Foam::label Foam::globalIndexAndTransform::nullTransformIndex() const
+{
+    return nullTransformIndex_;
 }
 
 
@@ -399,7 +610,10 @@ Foam::pointField Foam::globalIndexAndTransform::transformPatches
 
     forAll(transIs, tII)
     {
-        transPts[tII] = transformPermutations_[transIs[tII]].transform(pt);
+        transPts[tII] = transformPermutations_[transIs[tII]].transformPosition
+        (
+            pt
+        );
     }
 
     return transPts;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,12 +33,6 @@ Description
     - null value which gets overridden by any valid value.
     - transform function
 
-    note:Can apply coordinate rotation/separation on cyclics but only for faces
-    or if there is a single rotation/separation tensor.
-    note:syncPointList or syncEdgeList will visit shared points/edges
-    multiple times (once through patch exchange, once through shared
-    points reduce). Should be replaced by pointMesh functionality.
-
 SourceFiles
     syncTools.C
     syncToolsTemplates.C
@@ -48,9 +42,7 @@ SourceFiles
 #ifndef syncTools_H
 #define syncTools_H
 
-#include "UList.H"
 #include "Pstream.H"
-#include "Map.H"
 #include "EdgeMap.H"
 #include "PackedBoolList.H"
 #include "polyMesh.H"
@@ -71,9 +63,6 @@ class polyBoundaryMesh;
 class syncTools
 {
     // Private Member Functions
-
-        //- Check whether uses couples.
-        static bool hasCouples(const polyBoundaryMesh&);
 
         //- Combine value with existing value in map.
         template <class T, class CombineOp>
@@ -174,41 +163,41 @@ public:
                 const CombineOp& cop,
                 const TransformOp& top
             );
-
-            //- Synchronize values on all mesh points.
-            template <class T, class CombineOp, class TransformOp>
-            static void syncPointList
-            (
-                const polyMesh&,
-                UList<T>&,
-                const CombineOp& cop,
-                const T& nullValue,
-                const TransformOp& top
-            );
-
-            //- Synchronize values on selected mesh points.
-            template <class T, class CombineOp, class TransformOp>
-            static void syncPointList
-            (
-                const polyMesh&,
-                const labelList& meshPoints,
-                UList<T>&,
-                const CombineOp& cop,
-                const T& nullValue,
-                const TransformOp& top
-            );
-
-            //- Synchronize values on all mesh edges.
-            template <class T, class CombineOp, class TransformOp>
-            static void syncEdgeList
-            (
-                const polyMesh&,
-                UList<T>&,
-                const CombineOp& cop,
-                const T& nullValue,
-                const TransformOp& top
-            );
-
+//
+//            //- Synchronize values on all mesh points.
+//            template <class T, class CombineOp, class TransformOp>
+//            static void syncPointList
+//            (
+//                const polyMesh&,
+//                UList<T>&,
+//                const CombineOp& cop,
+//                const T& nullValue,
+//                const TransformOp& top
+//            );
+//
+//            //- Synchronize values on selected mesh points.
+//            template <class T, class CombineOp, class TransformOp>
+//            static void syncPointList
+//            (
+//                const polyMesh&,
+//                const labelList& meshPoints,
+//                UList<T>&,
+//                const CombineOp& cop,
+//                const T& nullValue,
+//                const TransformOp& top
+//            );
+//
+//            //- Synchronize values on all mesh edges.
+//            template <class T, class CombineOp, class TransformOp>
+//            static void syncEdgeList
+//            (
+//                const polyMesh&,
+//                UList<T>&,
+//                const CombineOp& cop,
+//                const T& nullValue,
+//                const TransformOp& top
+//            );
+//
             //- Synchronize values on boundary faces only.
             template <class T, class CombineOp, class TransformOp>
             static void syncBoundaryFaceList
@@ -227,26 +216,20 @@ public:
             static void syncPointList
             (
                 const polyMesh& mesh,
-                UList<T>& l,
+                List<T>& l,
                 const CombineOp& cop,
                 const T& nullValue
-            )
-            {
-                syncPointList(mesh, l, cop, nullValue, transform());
-            }
+            );
 
             //- Synchronize locations on all mesh points.
             template <class CombineOp>
             static void syncPointPositions
             (
                 const polyMesh& mesh,
-                UList<point>& l,
+                List<point>& l,
                 const CombineOp& cop,
                 const point& nullValue
-            )
-            {
-                syncPointList(mesh, l, cop, nullValue, transformPosition());
-            }
+            );
 
             //- Synchronize values on selected mesh points.
             template <class T, class CombineOp>
@@ -257,18 +240,7 @@ public:
                 UList<T>& l,
                 const CombineOp& cop,
                 const T& nullValue
-            )
-            {
-                syncPointList
-                (
-                    mesh,
-                    meshPoints,
-                    l,
-                    cop,
-                    nullValue,
-                    transform()
-                );
-            }
+            );
 
             //- Synchronize locations on selected mesh points.
             template <class CombineOp>
@@ -279,18 +251,7 @@ public:
                 UList<point>& l,
                 const CombineOp& cop,
                 const point& nullValue
-            )
-            {
-                syncPointList
-                (
-                    mesh,
-                    meshPoints,
-                    l,
-                    cop,
-                    nullValue,
-                    transformPosition()
-                );
-            }
+            );
 
 
         // Synchronise edge-wise data
@@ -303,10 +264,7 @@ public:
                 UList<T>& l,
                 const CombineOp& cop,
                 const T& nullValue
-            )
-            {
-                syncEdgeList(mesh, l, cop, nullValue, transform());
-            }
+            );
 
             //- Synchronize values on all mesh edges.
             template <class CombineOp>
@@ -316,10 +274,7 @@ public:
                 UList<point>& l,
                 const CombineOp& cop,
                 const point& nullValue
-            )
-            {
-                syncEdgeList(mesh, l, cop, nullValue, transformPosition());
-            }
+            );
 
 
         // Synchronise face-wise data

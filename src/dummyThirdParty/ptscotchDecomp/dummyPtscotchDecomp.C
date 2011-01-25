@@ -60,6 +60,7 @@ void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 
 Foam::label Foam::ptscotchDecomp::decomposeZeroDomains
 (
+    const fileName& meshPath,
     const List<int>& initxadj,
     const List<int>& initadjncy,
     const scalarField& initcWeights,
@@ -82,6 +83,7 @@ Foam::label Foam::ptscotchDecomp::decomposeZeroDomains
 }
 Foam::label Foam::ptscotchDecomp::decompose
 (
+    const fileName& meshPath,
     const List<int>& adjncy,
     const List<int>& xadj,
     const scalarField& cWeights,

@@ -288,6 +288,19 @@ void Foam::globalIndexAndTransform::determineTransforms()
     }
 
     Pstream::scatter(transforms_);
+
+    if (transforms_.size() > 3)
+    {
+        WarningIn
+        (
+            "void globalIndexAndTransform::determineTransforms()"
+        )   << "More than three independent basic "
+            << "transforms detected:" << nl
+            << transforms_ << nl
+            << "This is not a space filling tiling and will probably"
+            << " give problems for e.g. lagrangian tracking or interpolation"
+            << endl;
+    }
 }
 
 
@@ -324,6 +337,11 @@ void Foam::globalIndexAndTransform::determineTransformPermutations()
 
         transformPermutations_[tPI] = transform;
     }
+
+
+    // Encode index for 0 sign
+    labelList permutationIndices(nIndependentTransforms(), 0);
+    nullTransformIndex_ = encodeTransformIndex(permutationIndices);
 }
 
 
@@ -462,6 +480,7 @@ Foam::globalIndexAndTransform::globalIndexAndTransform
 
     determinePatchTransformSign();
 }
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 

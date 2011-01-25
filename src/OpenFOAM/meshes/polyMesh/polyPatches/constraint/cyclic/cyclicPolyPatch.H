@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -197,6 +197,10 @@ protected:
 
 public:
 
+    //- Declare friendship with processorCyclicPolyPatch
+    friend class processorCyclicPolyPatch;
+
+
     //- Runtime type information
     TypeName("cyclic");
 
@@ -321,25 +325,7 @@ public:
         }
 
         //- Neighbour patchID.
-        virtual label neighbPatchID() const
-        {
-            if (neighbPatchID_ == -1)
-            {
-                neighbPatchID_ = this->boundaryMesh().findPatchID
-                (
-                    neighbPatchName_
-                );
-                if (neighbPatchID_ == -1)
-                {
-                    FatalErrorIn("cyclicPolyPatch::neighbPatchID() const")
-                        << "Illegal neighbourPatch name " << neighbPatchName_
-                        << endl << "Valid patch names are "
-                        << this->boundaryMesh().names()
-                        << exit(FatalError);
-                }
-            }
-            return neighbPatchID_;
-        }
+        virtual label neighbPatchID() const;
 
         virtual bool owner() const
         {

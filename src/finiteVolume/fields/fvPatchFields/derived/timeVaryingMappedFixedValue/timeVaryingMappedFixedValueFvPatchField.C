@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -342,8 +342,6 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::readSamplePoints()
         localVertices2D[i][1] = localVertices[i][1];
     }
 
-    triSurface s(triSurfaceTools::delaunay2D(localVertices2D));
-
     tmp<pointField> localFaceCentres
     (
         referenceCS().localPosition
@@ -351,6 +349,26 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::readSamplePoints()
             this->patch().patch().faceCentres()
         )
     );
+
+    if (debug)
+    {
+        OFstream str
+        (
+            this->db().time().path()/this->patch().name()
+          + "_localFaceCentres.obj"
+        );
+        Pout<< "readSamplePoints :"
+            << " Dumping face centres to " << str.name() << endl;
+
+        forAll(localFaceCentres(), i)
+        {
+            const point& p = localFaceCentres()[i];
+            str<< "v " << p.x() << ' ' << p.y() << ' ' << p.z() << nl;
+        }
+    }
+
+
+    triSurface s(triSurfaceTools::delaunay2D(localVertices2D));
 
     if (debug)
     {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -315,32 +315,12 @@ int main(int argc, char *argv[])
             }
             else
             {
-                triPointRef tri
+                triQ[faceI] = triPointRef
                 (
                     surf.points()[f[0]],
                     surf.points()[f[1]],
                     surf.points()[f[2]]
-                );
-
-                vector ba(tri.b() - tri.a());
-                ba /= mag(ba) + VSMALL;
-
-                vector ca(tri.c() - tri.a());
-                ca /= mag(ca) + VSMALL;
-
-                if (mag(ba&ca) > 1-1E-3)
-                {
-                    triQ[faceI] = SMALL;
-                }
-                else
-                {
-                    triQ[faceI] = triPointRef
-                    (
-                        surf.points()[f[0]],
-                        surf.points()[f[1]],
-                        surf.points()[f[2]]
-                    ).quality();
-                }
+                ).quality();
             }
         }
 

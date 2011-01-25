@@ -44,12 +44,7 @@ Foam::COxidationMurphyShaddix<CloudType>::COxidationMurphyShaddix
     CloudType& owner
 )
 :
-    SurfaceReactionModel<CloudType>
-    (
-        dict,
-        owner,
-        typeName
-    ),
+    SurfaceReactionModel<CloudType>(dict, owner, typeName),
     D0_(readScalar(this->coeffDict().lookup("D0"))),
     rho0_(readScalar(this->coeffDict().lookup("rho0"))),
     T0_(readScalar(this->coeffDict().lookup("T0"))),
@@ -62,7 +57,8 @@ Foam::COxidationMurphyShaddix<CloudType>::COxidationMurphyShaddix
     O2GlobalId_(owner.composition().globalCarrierId("O2")),
     CO2GlobalId_(owner.composition().globalCarrierId("CO2")),
     WC_(0.0),
-    WO2_(0.0)
+    WO2_(0.0),
+    HcCO2_(0.0)
 {
     // Determine Cs ids
     label idSolid = owner.composition().idSolid();
@@ -72,6 +68,7 @@ Foam::COxidationMurphyShaddix<CloudType>::COxidationMurphyShaddix
     WO2_ = owner.thermo().carrier().W(O2GlobalId_);
     const scalar WCO2 = owner.thermo().carrier().W(CO2GlobalId_);
     WC_ = WCO2 - WO2_;
+    HcCO2_ = owner.thermo().carrier().Hc(CO2GlobalId_);
 
     const scalar YCloc = owner.composition().Y0(idSolid)[CsLocalId_];
     const scalar YSolidTot = owner.composition().YMixture0()[idSolid];
@@ -98,7 +95,8 @@ Foam::COxidationMurphyShaddix<CloudType>::COxidationMurphyShaddix
     O2GlobalId_(srm.O2GlobalId_),
     CO2GlobalId_(srm.CO2GlobalId_),
     WC_(srm.WC_),
-    WO2_(srm.WO2_)
+    WO2_(srm.WO2_),
+    HcCO2_(srm.HcCO2_)
 {}
 
 
@@ -225,12 +223,12 @@ Foam::scalar Foam::COxidationMurphyShaddix<CloudType>::calculate
     // Add to particle mass transfer
     dMassSolid[CsLocalId_] += dOmega*WC_;
 
-    const scalar HC = thermo.solids().properties()[CsLocalId_].H(T);
-    const scalar HCO2 = thermo.carrier().H(CO2GlobalId_, T);
-    const scalar HO2 = thermo.carrier().H(O2GlobalId_, T);
+    const scalar HsC = thermo.solids().properties()[CsLocalId_].Hs(T);
 
-    // Heat of reaction
-    return dOmega*(WC_*HC + WO2_*HO2 - (WC_ + WO2_)*HCO2);
+    // Heat of reaction [J]
+    // Sensible enthalpy contributions due to O2 depletion and CO2 generation
+    // handled by particle transfer terms
+    return dOmega*(WC_*HsC - (WC_ + WO2_)*HcCO2_);
 }
 
 

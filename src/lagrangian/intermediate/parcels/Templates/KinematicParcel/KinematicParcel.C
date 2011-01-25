@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -308,6 +308,7 @@ bool Foam::KinematicParcel<ParcelType>::move
 
     const polyMesh& mesh = td.cloud().pMesh();
     const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
+    const scalarField& V = mesh.cellVolumes();
 
     switch (td.part())
     {
@@ -336,13 +337,19 @@ bool Foam::KinematicParcel<ParcelType>::move
                 // Set the Lagrangian time-step
                 scalar dt = min(dtMax, tEnd);
 
-                // Remember which cell the Parcel is in since this
+                // Remember which cell the parcel is in since this
                 // will change if a face is hit
-                label cellI = p.cell();
+                const label cellI = p.cell();
 
-                if (p.active())
+                const scalar magU = mag(U_);
+                if (p.active() && magU > ROOTVSMALL)
                 {
-                    dt *= p.trackToFace(p.position() + dt*U_, td);
+                    const scalar d = dt*magU;
+                    const scalar maxCo = td.cloud().solution().maxCo();
+                    const scalar dCorr = min(d, maxCo*cbrt(V[cellI]));
+                    dt *=
+                        dCorr/d
+                       *p.trackToFace(p.position() + dCorr*U_/magU, td);
                 }
 
                 tEnd -= dt;

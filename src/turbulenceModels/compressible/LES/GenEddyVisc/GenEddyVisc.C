@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -73,19 +73,6 @@ GenEddyVisc::GenEddyVisc
         )
     ),
 
-    k_
-    (
-        IOobject
-        (
-            "k",
-            runTime_.timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_
-    ),
-
     muSgs_
     (
         IOobject
@@ -112,7 +99,7 @@ GenEddyVisc::GenEddyVisc
         mesh_
     )
 {
-    bound(k_, kMin_);
+//    printCoeffs();
 }
 
 
@@ -120,7 +107,7 @@ GenEddyVisc::GenEddyVisc
 
 tmp<volSymmTensorField> GenEddyVisc::B() const
 {
-    return ((2.0/3.0)*I)*k_ - (muSgs_/rho())*dev(twoSymm(fvc::grad(U())));
+    return ((2.0/3.0)*I)*k() - (muSgs_/rho())*dev(twoSymm(fvc::grad(U())));
 }
 
 

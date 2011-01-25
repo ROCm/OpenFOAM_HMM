@@ -2,7 +2,7 @@
  =========                   |
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
-   \\  /     A nd            | Copyright (C) 2009-2011 OpenCFD Ltd.
+   \\  /     A nd            | Copyright (C) 2009-2010 OpenCFD Ltd.
     \\/      M anipulation   |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ Application
 
 Description
     Calculates the inertia tensor and principal axes and moments of a
-    test face, tetrahedron and mesh.
+    test face, tetrahedron and cell.
 
 \*---------------------------------------------------------------------------*/
 

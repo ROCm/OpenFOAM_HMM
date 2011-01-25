@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -96,6 +96,14 @@ inline Foam::label
 Foam::KinematicCloud<ParcelType>::cloudSolution::calcFrequency() const
 {
     return calcFrequency_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar
+Foam::KinematicCloud<ParcelType>::cloudSolution::maxCo() const
+{
+    return maxCo_;
 }
 
 

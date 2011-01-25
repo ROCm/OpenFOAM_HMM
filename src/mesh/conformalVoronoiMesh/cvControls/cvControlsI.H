@@ -170,6 +170,12 @@ inline Foam::label Foam::cvControls::maxCollapseIterations() const
 }
 
 
+inline Foam::label Foam::cvControls::maxConsecutiveEqualFaceSets() const
+{
+    return maxConsecutiveEqualFaceSets_;
+}
+
+
 inline Foam::scalar Foam::cvControls::surfaceStepFaceAngle() const
 {
     return surfaceStepFaceAngle_;

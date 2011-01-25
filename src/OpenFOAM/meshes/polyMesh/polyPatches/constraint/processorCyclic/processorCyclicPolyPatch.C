@@ -26,6 +26,7 @@ License
 #include "processorCyclicPolyPatch.H"
 #include "addToRunTimeSelectionTable.H"
 #include "SubField.H"
+#include "cyclicPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -171,9 +172,9 @@ void Foam::processorCyclicPolyPatch::calcGeometry(PstreamBuffers& pBufs)
         // - or do we not auto-calculate the transformation but
         //   have option of reading it.
 
-        // Update underlying cyclic
+        // Update underlying cyclic halves. Need to do both since only one
+        // half might be present as a processorCyclic.
         coupledPolyPatch& pp = const_cast<coupledPolyPatch&>(referPatch());
-
         pp.calcGeometry
         (
             *this,
@@ -184,6 +185,21 @@ void Foam::processorCyclicPolyPatch::calcGeometry(PstreamBuffers& pBufs)
             neighbFaceAreas(),
             neighbFaceCellCentres()
         );
+
+        if (isA<cyclicPolyPatch>(pp))
+        {
+            const cyclicPolyPatch& cpp = refCast<const cyclicPolyPatch>(pp);
+            const_cast<cyclicPolyPatch&>(cpp.neighbPatch()).calcGeometry
+            (
+                *this,
+                neighbFaceCentres(),
+                neighbFaceAreas(),
+                neighbFaceCellCentres(),
+                faceCentres(),
+                faceAreas(),
+                faceCellCentres()
+            );
+        }
     }
 }
 

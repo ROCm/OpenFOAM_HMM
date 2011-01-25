@@ -296,6 +296,11 @@ Foam::cvControls::cvControls
         filteringDict.lookup("maxCollapseIterations")
     );
 
+    maxConsecutiveEqualFaceSets_ = readLabel
+    (
+        filteringDict.lookup("maxConsecutiveEqualFaceSets")
+    );
+
     surfaceStepFaceAngle_ = readScalar
     (
         filteringDict.lookup("surfaceStepFaceAngle")

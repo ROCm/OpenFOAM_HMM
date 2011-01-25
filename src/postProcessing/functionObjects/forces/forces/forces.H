@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,11 +28,25 @@ Description
     Calculates the forces and moments by integrating the pressure and
     skin-friction forces over a given list of patches.
 
-    Member function calcForcesMoment()calculates and returns the forces and
-    moments.
+    Member function forces::write() calculates the forces/moments and
+    writes the forces/moments into the file \<timeDir\>/forces.dat
 
-    Member function forces::write() calls calcForcesMoment() and writes the
-    forces and moments into the file \<timeDir\>/forces.dat
+Note
+    The centre of rotation for moment calculations can either be specified
+    by an @c CofR entry, or be taken from origin of the local coordinateSystem.
+    For example,
+    @verbatim
+        CofR        (0 0 0);
+    @endverbatim
+    or
+    @verbatim
+        coordinateSystem
+        {
+            origin  (0 0 0);
+            e3      (0 0 1);
+            e1      (1 0 0);
+        }
+    @endverbatim
 
 SourceFiles
     forces.C
@@ -43,6 +57,8 @@ SourceFiles
 #ifndef forces_H
 #define forces_H
 
+#include "coordinateSystem.H"
+#include "coordinateSystems.H"
 #include "primitiveFieldsFwd.H"
 #include "volFieldsFwd.H"
 #include "HashSet.H"
@@ -69,15 +85,14 @@ class forces
 {
 public:
 
-    // Tuple which holds the pressure (.first()) and viscous (.second) forces
+    // Tuple for pressure (.first()) and viscous (.second()) forces
     typedef Tuple2<vector, vector> pressureViscous;
 
-    // Tuple which holds the forces (.first()) and moment (.second)
+    // Tuple for forces (.first()) and moment (.second())
     // pressure/viscous forces Tuples.
     typedef Tuple2<pressureViscous, pressureViscous> forcesMoments;
 
-    //- Sum operation class to accumulate the pressure, viscous forces
-    //  and moments
+    //- Sum operation class to accumulate pressure/viscous forces and moments
     class sumOp
     {
     public:
@@ -92,12 +107,12 @@ public:
             (
                 pressureViscous
                 (
-                    fm1.first().first() + fm2.first().first(),
+                    fm1.first().first()  + fm2.first().first(),
                     fm1.first().second() + fm2.first().second()
                 ),
                 pressureViscous
                 (
-                    fm1.second().first() + fm2.second().first(),
+                    fm1.second().first()  + fm2.second().first(),
                     fm1.second().second() + fm2.second().second()
                 )
             );
@@ -147,8 +162,8 @@ protected:
             //- Reference pressure
             scalar pRef_;
 
-            //- Centre of rotation
-            vector CofR_;
+            //- Coordinate system used when evaluting forces/moments
+            coordinateSystem coordSys_;
 
 
         //- Forces/moment file ptr

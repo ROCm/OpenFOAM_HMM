@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -342,7 +342,7 @@ bool Foam::sampledSurfaces::update()
     }
 
     // dimension as fraction of mesh bounding box
-    scalar mergeDim = mergeTol_ * mesh_.globalData().bb().mag();
+    scalar mergeDim = mergeTol_ * mesh_.bounds().mag();
 
     if (Pstream::master() && debug)
     {

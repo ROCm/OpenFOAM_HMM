@@ -328,6 +328,8 @@ void Foam::conformalVoronoiMesh::writeMesh
     // cellCs.write();
 
     writeCellSizes(mesh);
+
+    findRemainingProtrusionSet(mesh);
 }
 
 
@@ -369,7 +371,7 @@ void Foam::conformalVoronoiMesh::writeCellSizes
 ) const
 {
     {
-        timeCheck();
+        timeCheck("Start writeCellSizes");
 
         Info<< nl << "Create targetCellSize volScalarField" << endl;
 
@@ -509,6 +511,71 @@ void Foam::conformalVoronoiMesh::writeCellSizes
 
     //     ptTargetCellSize.write();
     // }
+}
+
+
+void Foam::conformalVoronoiMesh::findRemainingProtrusionSet
+(
+    const fvMesh& mesh
+) const
+{
+    timeCheck("Start findRemainingProtrusionSet");
+
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+    labelHashSet protrudingBoundaryPoints;
+
+    forAll(patches, patchI)
+    {
+        const labelList& patchLocalPtIs = patches[patchI].boundaryPoints();
+
+        forAll(patchLocalPtIs, ppI)
+        {
+            label meshPtI = patches[patchI].meshPoints()[patchLocalPtIs[ppI]];
+
+            const Foam::point& pt = mesh.points()[meshPtI];
+
+            if
+            (
+                geometryToConformTo_.wellOutside
+                (
+                    pt,
+                    sqr(2.0*maxSurfaceProtrusion(pt))
+                )
+            )
+            {
+                protrudingBoundaryPoints.insert(meshPtI);
+            }
+        }
+    }
+
+    cellSet protrudingCells
+    (
+        mesh,
+        "cvMesh_remainingProtrusions",
+        mesh.nCells()/1000
+    );
+
+    forAllConstIter(labelHashSet, protrudingBoundaryPoints, iter)
+    {
+        const label pointI = iter.key();
+        const labelList& pCells = mesh.pointCells()[pointI];
+
+        forAll(pCells, pCellI)
+        {
+            protrudingCells.insert(pCells[pCellI]);
+        }
+    }
+
+    if (!protrudingCells.empty())
+    {
+        Info<< nl << "Found " << protrudingCells.size()
+            << " cells protruding from the surface, writing cellSet "
+            << protrudingCells.name()
+            << endl;
+
+        protrudingCells.write();
+    }
 }
 
 

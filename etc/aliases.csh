@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -44,9 +44,9 @@ alias wmDP 'wmSET WM_PRECISION_OPTION=DP'
 alias wmSchedON 'setenv WM_SCHEDULER $WM_PROJECT_DIR/wmake/wmakeScheduler'
 alias wmSchedOFF 'unsetenv WM_SCHEDULER'
 
-# Change paraview version
+# Change ParaView version
 # ~~~~~~~~~~~~~~~~~~~~~~~
-alias foamPV 'setenv ParaView_VERSION \!*; source $WM_PROJECT_DIR/etc/apps/paraview3/cshrc; echo paraview-$ParaView_VERSION'
+alias foamPV 'source `$WM_PROJECT_DIR/etc/apps/paraview3/cshrc` ParaView_VERSION=\!*; echo paraview-$ParaView_VERSION'
 
 
 # Change directory aliases

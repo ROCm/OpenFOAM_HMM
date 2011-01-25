@@ -32,7 +32,7 @@ divSchemes
     div(phi,k)      Gauss limitedLinear 0.2;
     div(phi,epsilon) Gauss limitedLinear 0.2;
     div(phi,omega) Gauss limitedLinear 0.2;
-    div((muEff*dev2(grad(U).T()))) Gauss linear;
+    div((muEff*dev2(T(grad(U))))) Gauss linear;
 }
 
 laplacianSchemes

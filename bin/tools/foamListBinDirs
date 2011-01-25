@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -67,19 +67,35 @@ arch3264=$(echo "$archOS" | sed -e 's@64@-64@')
 #------------------------------------------------------------------------------
 
 # check for essential directories
-for dir in $packDir $packDir/lib/$archOptions
-do
-    [ -d $dir ] || {
-        echo "Error: directory $dir does not exist" 1>&2
-        exit 1
-    }
-done
+[ -d $packDir ] || {
+    echo "Error: directory $packDir does not exist" 1>&2
+    exit 1
+}
 
-# check new/old places for executables - same as $FOAM_APPBIN
-[ -d $packDir/bin/$archOptions -o -d $packDir/applications/bin/$archOptions ] || {
+
+#
+# check places for libraries - same as $FOAM_LIBBIN
+# this has moved around a bit in the recent past
+#
+[ -d $packDir/lib/$archOptions ] || \
+[ -d $packDir/platforms/$archOptions/lib ] || {
+cat <<LIB_CHECK 1>&2
+Error: no directory for libraries exists:
+    $packDir/lib/$archOptions
+    $packDir/platforms/$archOptions/lib
+LIB_CHECK
+    exit 1
+}
+
+#
+# check places for executables - same as $FOAM_APPBIN
+# this has moved around a bit in the recent past
+#
+[ -d $packDir/applications/bin/$archOptions ] || \
+[ -d $packDir/platforms/$archOptions/bin ] || {
 cat <<BIN_CHECK 1>&2
 Error: no directory for executables exists:
-    $packDir/bin/$archOptions
+    $packDir/platforms/$archOptions/bin
     $packDir/applications/bin/$archOptions
 BIN_CHECK
     exit 1
@@ -90,14 +106,15 @@ BIN_CHECK
 # list of directories
 dirList=$(
     for dir in \
-        $packDir/bin/$archOptions \
-        $packDir/lib/$archOptions \
-        $packDir/applications/bin/$archOptions \
+        $packDir/platforms/$archOptions/bin \
+        $packDir/platforms/$archOptions/lib \
         $packDir/wmake/bin/$archCompiler \
         $packDir/wmake/bin/$archOS \
         $packDir/wmake/rules/General \
         $packDir/wmake/rules/$archCompiler \
         $packDir/wmake/rules/$archOS \
+        $packDir/applications/bin/$archOptions \
+        $packDir/lib/$archOptions \
         ;
     do
         [ -d $dir ] && echo $dir

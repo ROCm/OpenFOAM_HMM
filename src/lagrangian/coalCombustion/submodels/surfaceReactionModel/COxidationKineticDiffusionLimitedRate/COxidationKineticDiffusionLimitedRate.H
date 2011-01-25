@@ -61,6 +61,9 @@ class COxidationKineticDiffusionLimitedRate
 
         // Model constants
 
+            //- Stoichiometry of reaction
+            const scalar Sb_;
+
             //- Mass diffusion limited rate constant, C1
             const scalar C1_;
 

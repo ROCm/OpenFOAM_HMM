@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -160,7 +160,15 @@ inline Foam::scalar Foam::triangle<Point, PointRef>::circumRadius() const
 template<class Point, class PointRef>
 inline Foam::scalar Foam::triangle<Point, PointRef>::quality() const
 {
-    return mag()/(Foam::sqr(circumRadius())*3.0*sqrt(3.0)/4.0 + VSMALL);
+    scalar c = circumRadius();
+
+    if (c < ROOTVSMALL)
+    {
+        // zero circumRadius, something has gone wrong.
+        return SMALL;
+    }
+
+    return mag()/(Foam::sqr(c)*3.0*sqrt(3.0)/4.0);
 }
 
 

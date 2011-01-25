@@ -56,7 +56,7 @@ Foam::vectorTensorTransform::vectorTensorTransform(Istream& is)
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::word Foam::name(const vectorTensorTransform& s)
 {
@@ -65,6 +65,32 @@ Foam::word Foam::name(const vectorTensorTransform& s)
     buf << '(' << s.t() << ',' << s.R() << ')';
 
     return buf.str();
+}
+
+
+template<>
+Foam::tmp<Foam::Field<bool> > Foam::vectorTensorTransform::transform
+(
+    const Field<bool>& fld
+) const
+{
+    return fld;
+}
+template<>
+Foam::tmp<Foam::Field<Foam::label> > Foam::vectorTensorTransform::transform
+(
+    const Field<label>& fld
+) const
+{
+    return fld;
+}
+template<>
+Foam::tmp<Foam::Field<Foam::scalar> > Foam::vectorTensorTransform::transform
+(
+    const Field<scalar>& fld
+) const
+{
+    return fld;
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -257,7 +257,7 @@ public:
 
             //- Delete small sets of edges. Edges are stringed up and any
             //  string of length < minLen (or nElems < minElems) is deleted.
-            void trimFeatures(const scalar minLen, const label minElems);
+            labelList trimFeatures(const scalar minLen, const label minElems);
 
             //- From member feature edges to status per edge.
             List<edgeStatus> toStatus() const;

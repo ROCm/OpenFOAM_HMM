@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1623,56 +1623,74 @@ void Foam::indexedOctree<Type>::traverseNode
     {
         const labelList& indices = contents_[getContent(index)];
 
-        if (findAny)
+        if (indices.size())
         {
-            // Find any intersection
-
-            forAll(indices, elemI)
+            if (findAny)
             {
-                label shapeI = indices[elemI];
+                // Find any intersection
 
-                point pt;
-                bool hit = shapes_.intersects(shapeI, start, end, pt);
-
-                if (hit)
+                forAll(indices, elemI)
                 {
-                    // Hit so pt is nearer than nearestPoint.
-                    // Update hit info
-                    hitInfo.setHit();
-                    hitInfo.setIndex(shapeI);
-                    hitInfo.setPoint(pt);
+                    label shapeI = indices[elemI];
+
+                    point pt;
+                    bool hit = shapes_.intersects(shapeI, start, end, pt);
+
+                    // Note that intersection of shape might actually be
+                    // in a neighbouring box. For findAny this is not important.
+                    if (hit)
+                    {
+                        // Hit so pt is nearer than nearestPoint.
+                        // Update hit info
+                        hitInfo.setHit();
+                        hitInfo.setIndex(shapeI);
+                        hitInfo.setPoint(pt);
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                // Find nearest intersection
+
+                const treeBoundBox octantBb(subBbox(nodeI, octant));
+
+                point nearestPoint(end);
+
+                forAll(indices, elemI)
+                {
+                    label shapeI = indices[elemI];
+
+                    point pt;
+                    bool hit = shapes_.intersects
+                    (
+                        shapeI,
+                        start,
+                        nearestPoint,
+                        pt
+                    );
+
+                    // Note that intersection of shape might actually be
+                    // in a neighbouring box. Since we need to maintain strict
+                    // (findAny=false) ordering skip such an intersection. It
+                    // will be found when we are doing the next box.
+
+                    if (hit && octantBb.contains(pt))
+                    {
+                        // Hit so pt is nearer than nearestPoint.
+                        nearestPoint = pt;
+                        // Update hit info
+                        hitInfo.setHit();
+                        hitInfo.setIndex(shapeI);
+                        hitInfo.setPoint(pt);
+                    }
+                }
+
+                if (hitInfo.hit())
+                {
+                    // Found intersected shape.
                     return;
                 }
-            }
-        }
-        else
-        {
-            // Find nearest intersection.
-
-            point nearestPoint(end);
-
-            forAll(indices, elemI)
-            {
-                label shapeI = indices[elemI];
-
-                point pt;
-                bool hit = shapes_.intersects(shapeI, start, nearestPoint, pt);
-
-                if (hit)
-                {
-                    // Hit so pt is nearer than nearestPoint.
-                    nearestPoint = pt;
-                    // Update hit info
-                    hitInfo.setHit();
-                    hitInfo.setIndex(shapeI);
-                    hitInfo.setPoint(pt);
-                }
-            }
-
-            if (hitInfo.hit())
-            {
-                // Found intersected shape.
-                return;
             }
         }
     }

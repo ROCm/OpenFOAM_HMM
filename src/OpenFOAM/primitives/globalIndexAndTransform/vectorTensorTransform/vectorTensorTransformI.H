@@ -99,7 +99,7 @@ inline Foam::tensor& Foam::vectorTensorTransform::R()
 }
 
 
-inline Foam::vector Foam::vectorTensorTransform::transform
+inline Foam::vector Foam::vectorTensorTransform::transformPosition
 (
     const vector& v
 ) const
@@ -115,7 +115,7 @@ inline Foam::vector Foam::vectorTensorTransform::transform
 }
 
 
-inline Foam::pointField Foam::vectorTensorTransform::transform
+inline Foam::pointField Foam::vectorTensorTransform::transformPosition
 (
     const pointField& pts
 ) const
@@ -134,7 +134,7 @@ inline Foam::pointField Foam::vectorTensorTransform::transform
 }
 
 
-inline Foam::vector Foam::vectorTensorTransform::invTransform
+inline Foam::vector Foam::vectorTensorTransform::invTransformPosition
 (
     const vector& v
 ) const
@@ -150,7 +150,7 @@ inline Foam::vector Foam::vectorTensorTransform::invTransform
 }
 
 
-inline Foam::pointField Foam::vectorTensorTransform::invTransform
+inline Foam::pointField Foam::vectorTensorTransform::invTransformPosition
 (
     const pointField& pts
 ) const

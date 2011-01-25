@@ -3,4 +3,4 @@ Pstream.C
 OPwrite.C
 IPread.C
 
-LIB = $(FOAM_MPI_LIBBIN)/libPstream
+LIB = $(FOAM_LIBBIN)/$(FOAM_MPI)/libPstream

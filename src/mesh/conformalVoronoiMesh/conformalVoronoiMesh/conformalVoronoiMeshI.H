@@ -66,17 +66,15 @@ inline Foam::scalar Foam::conformalVoronoiMesh::averageAnyCellSize
      && !vB->internalOrBoundaryPoint()
     )
     {
-        FatalErrorIn
+        // There are no internalOrBoundaryPoints available, determine
+        // size from scratch
+
+        // Geometric mean
+        return sqrt
         (
-            "Foam::conformalVoronoiMesh::averageAnyCellSize"
-            "("
-                "const Vertex_handle& vA,"
-                "const Vertex_handle& vB"
-            ") const"
-        )
-            << "Requested averageCellSize for two external points"
-            << nl
-            << exit(FatalError);
+            targetCellSize(topoint(vA->point()))
+           *targetCellSize(topoint(vB->point()))
+        );
     }
     else if (!vB->internalOrBoundaryPoint())
     {
@@ -391,8 +389,8 @@ Foam::conformalVoronoiMesh::toPoint
     return reinterpret_cast<PointFrompoint>(p);
 }
 
-
 #else
+
 
 inline Foam::conformalVoronoiMesh::pointFromPoint
 Foam::conformalVoronoiMesh::topoint
@@ -422,9 +420,9 @@ Foam::conformalVoronoiMesh::toPoint
 
 
 inline Foam::conformalVoronoiMesh::CGALVector
-Foam::conformalVoronoiMesh::toCGALVector(const Foam::point& pt) const
+Foam::conformalVoronoiMesh::toCGALVector(const Foam::vector& v) const
 {
-    return CGALVector(pt.x(), pt.y(), pt.z());
+    return CGALVector(v.x(), v.y(), v.z());
 }
 
 

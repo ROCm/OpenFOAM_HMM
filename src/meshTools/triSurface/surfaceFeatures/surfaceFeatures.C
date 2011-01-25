@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -546,7 +546,7 @@ void Foam::surfaceFeatures::findFeatures(const scalar includedAngle)
 
 // Remove small strings of edges. First assigns string number to
 // every edge and then works out the length of them.
-void Foam::surfaceFeatures::trimFeatures
+Foam::labelList Foam::surfaceFeatures::trimFeatures
 (
     const scalar minLen,
     const label minElems
@@ -679,6 +679,8 @@ void Foam::surfaceFeatures::trimFeatures
 
     // Convert back to edge labels
     setFromStatus(edgeStat);
+
+    return featLines;
 }
 
 

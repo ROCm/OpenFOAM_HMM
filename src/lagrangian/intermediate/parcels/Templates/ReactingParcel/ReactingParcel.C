@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,28 +75,43 @@ void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection
     const label cellI
 )
 {
-    scalar massCell = this->massCell(cellI);
-
     scalar addedMass = 0.0;
     forAll(td.cloud().rhoTrans(), i)
     {
         addedMass += td.cloud().rhoTrans(i)[cellI];
     }
 
-    this->rhoc_ += addedMass/td.cloud().pMesh().cellVolumes()[cellI];
+    if (addedMass < ROOTVSMALL)
+    {
+        return;
+    }
+
+    scalar massCell = this->massCell(cellI);
+
+    const scalar V = td.cloud().pMesh().cellVolumes()[cellI];
+    this->rhoc_ += addedMass/V;
 
     scalar massCellNew = massCell + addedMass;
     this->Uc_ += td.cloud().UTrans()[cellI]/massCellNew;
 
-    scalar CpEff = 0;
+    scalar CpEff = 0.0;
+    scalar CsEff = 0.0;
+    scalar Csc = 0.0;
     if (addedMass > ROOTVSMALL)
     {
         forAll(td.cloud().rhoTrans(), i)
         {
             scalar Y = td.cloud().rhoTrans(i)[cellI]/addedMass;
             CpEff += Y*td.cloud().composition().carrier().Cp(i, this->Tc_);
+
+            scalar W = td.cloud().composition().carrier().W(i);
+            CsEff += td.cloud().rhoTrans(i)[cellI]/V*Y/W;
+            scalar Yc = td.cloud().composition().carrier().Y(i)[cellI];
+            Csc += massCell/V*Yc/W;
         }
     }
+    CsEff = (massCell*Csc + addedMass*CsEff)/massCellNew;
+
     const scalar Cpc = td.CpInterp().psi()[cellI];
     this->Cpc_ = (massCell*Cpc + addedMass*CpEff)/massCellNew;
 
@@ -117,6 +132,8 @@ void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection
 
         this->Tc_ = td.cloud().constProps().TMin();
     }
+
+    this->pc_ = CsEff*specie::RR*this->Tc_;
 }
 
 
@@ -130,8 +147,8 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
     const scalarField& Cs,
     scalar& rhos,
     scalar& mus,
-    scalar& Pr,
-    scalar& kappa
+    scalar& Prs,
+    scalar& kappas
 )
 {
     // No correction if total concentration of emitted species is small
@@ -177,7 +194,7 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
 
     rhos = 0;
     mus = 0;
-    kappa = 0;
+    kappas = 0;
     scalar Cps = 0;
     scalar sumYiSqrtW = 0;
     scalar sumYiCbrtW = 0;
@@ -190,7 +207,7 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
 
         rhos += Xs[i]*W;
         mus += Ys[i]*sqrtW*thermo.carrier().mu(i, T);
-        kappa += Ys[i]*cbrtW*thermo.carrier().kappa(i, T);
+        kappas += Ys[i]*cbrtW*thermo.carrier().kappa(i, T);
         Cps += Xs[i]*thermo.carrier().Cp(i, T);
 
         sumYiSqrtW += Ys[i]*sqrtW;
@@ -199,8 +216,8 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
 
     rhos *= pc_/(specie::RR*T);
     mus /= sumYiSqrtW;
-    kappa /= sumYiCbrtW;
-    Pr = Cps*mus/kappa;
+    kappas /= sumYiCbrtW;
+    Prs = Cps*mus/kappas;
 }
 
 
@@ -236,6 +253,9 @@ void Foam::ReactingParcel<ParcelType>::calc
     const label cellI
 )
 {
+    typedef typename ReactingParcel<ParcelType>::trackData::cloudType cloudType;
+    const CompositionModel<cloudType>& composition = td.cloud().composition();
+
     // Define local properties at beginning of time step
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     const scalar np0 = this->nParticle_;
@@ -249,11 +269,11 @@ void Foam::ReactingParcel<ParcelType>::calc
 
     // Calc surface values
     // ~~~~~~~~~~~~~~~~~~~
-    scalar Ts, rhos, mus, Pr, kappa;
-    this->calcSurfaceValues(td, cellI, T0, Ts, rhos, mus, Pr, kappa);
+    scalar Ts, rhos, mus, Prs, kappas;
+    this->calcSurfaceValues(td, cellI, T0, Ts, rhos, mus, Prs, kappas);
 
     // Reynolds number
-    scalar Re = this->Re(U0, d0, rhos, mus);
+    scalar Res = this->Re(U0, d0, rhos, mus);
 
 
     // Sources
@@ -285,7 +305,7 @@ void Foam::ReactingParcel<ParcelType>::calc
     scalar NCpW = 0.0;
 
     // Surface concentrations of emitted species
-    scalarField Cs(td.cloud().composition().carrier().species().size(), 0.0);
+    scalarField Cs(composition.carrier().species().size(), 0.0);
 
     // Calc mass and enthalpy transfer due to phase change
     calcPhaseChange
@@ -293,7 +313,7 @@ void Foam::ReactingParcel<ParcelType>::calc
         td,
         dt,
         cellI,
-        Re,
+        Res,
         Ts,
         mus/rhos,
         d0,
@@ -310,7 +330,8 @@ void Foam::ReactingParcel<ParcelType>::calc
     );
 
     // Correct surface values due to emitted species
-    correctSurfaceValues(td, cellI, Ts, Cs, rhos, mus, Pr, kappa);
+    correctSurfaceValues(td, cellI, Ts, Cs, rhos, mus, Prs, kappas);
+    Res = this->Re(U0, d0, rhos, mus);
 
     // Update particle component mass and mass fractions
     scalar mass1 = updateMassFraction(mass0, dMassPC, Y_);
@@ -327,9 +348,9 @@ void Foam::ReactingParcel<ParcelType>::calc
             td,
             dt,
             cellI,
-            Re,
-            Pr,
-            kappa,
+            Res,
+            Prs,
+            kappas,
             d0,
             rho0,
             T0,
@@ -352,7 +373,7 @@ void Foam::ReactingParcel<ParcelType>::calc
             td,
             dt,
             cellI,
-            Re,
+            Res,
             mus,
             d0,
             U0,
@@ -372,8 +393,10 @@ void Foam::ReactingParcel<ParcelType>::calc
         // Transfer mass lost from particle to carrier mass source
         forAll(dMassPC, i)
         {
-            label gid = td.cloud().composition().localToGlobalCarrierId(0, i);
+            label gid = composition.localToGlobalCarrierId(0, i);
             td.cloud().rhoTrans(gid)[cellI] += np0*dMassPC[i];
+            td.cloud().hsTrans()[cellI] +=
+                np0*dMassPC[i]*composition.carrier().Hs(gid, T0);
         }
 
         // Update momentum transfer
@@ -401,13 +424,12 @@ void Foam::ReactingParcel<ParcelType>::calc
             // Absorb parcel into carrier phase
             forAll(Y_, i)
             {
-                label gid =
-                    td.cloud().composition().localToGlobalCarrierId(0, i);
+                label gid = composition.localToGlobalCarrierId(0, i);
                 td.cloud().rhoTrans(gid)[cellI] += np0*mass1*Y_[i];
             }
             td.cloud().UTrans()[cellI] += np0*mass1*U1;
             td.cloud().hsTrans()[cellI] +=
-                np0*mass1*td.cloud().composition().H(0, Y_, pc_, T1);
+                np0*mass1*composition.H(0, Y_, pc_, T1);
         }
     }
 
@@ -417,7 +439,7 @@ void Foam::ReactingParcel<ParcelType>::calc
 
     else
     {
-        this->Cp_ = td.cloud().composition().Cp(0, Y_, pc_, T1);
+        this->Cp_ = composition.Cp(0, Y_, pc_, T1);
         this->T_ = T1;
         this->U_ = U1;
 

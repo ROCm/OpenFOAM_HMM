@@ -51,14 +51,6 @@ Foam::InteractionLists<ParticleType>::wallFaceMap() const
 
 
 template<class ParticleType>
-const Foam::globalIndexAndTransform&
-Foam::InteractionLists<ParticleType>::globalTransforms() const
-{
-    return globalTransforms_;
-}
-
-
-template<class ParticleType>
 const Foam::labelListList& Foam::InteractionLists<ParticleType>::dil() const
 {
     return dil_;

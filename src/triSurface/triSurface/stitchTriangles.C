@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -150,6 +150,11 @@ bool Foam::triSurface::stitchTriangles
                 }
             }
         }
+    }
+    else
+    {
+        // Can happen for e.g. single triangle or cloud of unconnected triangles
+        storedPoints() = rawPoints;
     }
 
     return hasMerged;

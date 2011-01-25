@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,91 +25,18 @@ License
 
 #include "globalPoints.H"
 #include "processorPolyPatch.H"
-#include "processorCyclicPolyPatch.H"
 #include "cyclicPolyPatch.H"
 #include "polyMesh.H"
+#include "mapDistribute.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(Foam::globalPoints, 0);
 
-const Foam::label Foam::globalPoints::fromCollocated = labelMax/2;
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Routines to handle global indices
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Foam::label Foam::globalPoints::toGlobal
-(
-    const label localPointI,
-    const bool isCollocated
-) const
-{
-    label globalPointI = globalIndices_.toGlobal(localPointI);
-
-    if (isCollocated)
-    {
-        return globalPointI + fromCollocated;
-    }
-    else
-    {
-        return globalPointI;
-    }
-}
-
-
-bool Foam::globalPoints::isCollocated(const label globalI) const
-{
-    return globalI >= fromCollocated;
-}
-
-
-Foam::label Foam::globalPoints::removeCollocated(const label globalI) const
-{
-    if (globalI >= fromCollocated)
-    {
-        return globalI - fromCollocated;
-    }
-    else
-    {
-        return globalI;
-    }
-}
-
-
-bool Foam::globalPoints::isLocal(const label globalI) const
-{
-    return globalIndices_.isLocal(removeCollocated(globalI));
-}
-
-
-Foam::label Foam::globalPoints::whichProcID(const label globalI) const
-{
-    return globalIndices_.whichProcID(removeCollocated(globalI));
-}
-
-
-Foam::label Foam::globalPoints::toLocal
-(
-    const label procI,
-    const label globalI
-) const
-{
-    return globalIndices_.toLocal(procI, removeCollocated(globalI));
-}
-
-
-Foam::label Foam::globalPoints::toLocal(const label globalI) const
-{
-    return toLocal(Pstream::myProcNo(), globalI);
-}
-
-
-// Collect all topological information about a point on a patch.
-
-// Total number of points on processor patches. Is upper limit for number
+// Total number of points on coupled patches. Is upper limit for number
 // of shared points
 Foam::label Foam::globalPoints::countPatchPoints
 (
@@ -121,18 +48,38 @@ Foam::label Foam::globalPoints::countPatchPoints
     forAll(patches, patchI)
     {
         const polyPatch& pp = patches[patchI];
-
-        if
-        (
-            (Pstream::parRun() && isA<processorPolyPatch>(pp))
-         || isA<cyclicPolyPatch>(pp)
-        )
+        if (pp.coupled())
         {
             nTotPoints += pp.nPoints();
         }
     }
-
     return nTotPoints;
+}
+
+
+Foam::labelPairList Foam::globalPoints::addSendTransform
+(
+    const label patchI,
+    const labelPairList& info
+) const
+{
+    labelPairList sendInfo(info.size());
+
+    forAll(info, i)
+    {
+        sendInfo[i] = globalIndexAndTransform::encode
+        (
+            globalIndexAndTransform::processor(info[i]),
+            globalIndexAndTransform::index(info[i]),
+            globalTransforms_.addToTransformIndex
+            (
+                globalIndexAndTransform::transformIndex(info[i]),
+                patchI,
+                true           // patchI is sending side
+            )
+        );
+    }
+    return sendInfo;
 }
 
 
@@ -141,14 +88,14 @@ Foam::label Foam::globalPoints::countPatchPoints
 // position of the point in the face)
 void Foam::globalPoints::addToSend
 (
-    const primitivePatch& pp,
+    const polyPatch& pp,
     const label patchPointI,
-    const labelList& knownInfo,
+    const labelPairList& knownInfo,
 
     DynamicList<label>& patchFaces,
     DynamicList<label>& indexInFace,
-    DynamicList<labelList>& allInfo
-)
+    DynamicList<labelPairList>& allInfo
+) const
 {
     label meshPointI = pp.meshPoints()[patchPointI];
 
@@ -164,7 +111,9 @@ void Foam::globalPoints::addToSend
 
         patchFaces.append(patchFaceI);
         indexInFace.append(findIndex(f, meshPointI));
-        allInfo.append(knownInfo);
+
+        // Add patch transformation
+        allInfo.append(addSendTransform(pp.index(), knownInfo));
     }
 }
 
@@ -173,29 +122,82 @@ void Foam::globalPoints::addToSend
 // nbrInfo is for a point a list of all the global points using it
 bool Foam::globalPoints::mergeInfo
 (
-    const labelList& nbrInfo,
-    labelList& myInfo
+    const labelPairList& nbrInfo,
+    const label localPointI,
+    labelPairList& myInfo
 )
 {
-    labelList newInfo(myInfo);
+    bool anyChanged = false;
+
+    labelPairList newInfo(myInfo);
     label newI = newInfo.size();
     newInfo.setSize(newI + nbrInfo.size());
 
     forAll(nbrInfo, i)
     {
-        label index = findIndex(myInfo, nbrInfo[i]);
+        const labelPair& info = nbrInfo[i];
+        label nbrProcI = globalIndexAndTransform::processor(info);
+        label nbrIndex = globalIndexAndTransform::index(info);
+        label nbrTransform = globalIndexAndTransform::transformIndex(info);
 
-        if (index == -1)
+        // Check if already have information about nbr point. There are two
+        // possibilities:
+        // - information found about same point but different transform.
+        //   Combine transforms
+        // - information not found.
+
+        label myIndex = -1;
+        forAll(myInfo, myI)
         {
+            if (myInfo[myI] == info)
+            {
+                // Fully identical. We already have nbrInfo.
+                myIndex = myI;
+            }
+            else if
+            (
+                globalIndexAndTransform::processor(myInfo[myI]) == nbrProcI
+             && globalIndexAndTransform::index(myInfo[myI]) == nbrIndex
+            )
+            {
+                // Only differing is the transform.
+                label myTransform = globalIndexAndTransform::transformIndex
+                (
+                    myInfo[myI]
+                );
+
+                // Combine mine and nbr transform
+                label t = globalIndexAndTransform::mergeTransformIndex
+                (
+                    nbrTransform,
+                    myTransform
+                );
+                myIndex = myI;
+
+                if (t != myTransform)
+                {
+                    // Same point but different transformation
+                    newInfo[myI] = globalIndexAndTransform::encode
+                    (
+                        nbrProcI,
+                        nbrIndex,
+                        t
+                    );
+                    anyChanged = true;
+                    break;
+                }
+            }
+        }
+
+        if (myIndex == -1)
+        {
+            // New point
             newInfo[newI++] = nbrInfo[i];
+            anyChanged = true;
         }
     }
 
     newInfo.setSize(newI);
-
-    // Did anything change?
-    bool anyChanged = (newI > myInfo.size());
-
     myInfo.transfer(newInfo);
 
     return anyChanged;
@@ -234,11 +236,10 @@ Foam::label Foam::globalPoints::localToMeshPoint
 
 // Updates database of current information on meshpoints with nbrInfo.
 // Uses mergeInfo above. Returns true if data kept for meshPointI changed.
-bool Foam::globalPoints::storeInfo
+bool Foam::globalPoints::mergeInfo
 (
-    const labelList& nbrInfo,
-    const label localPointI,
-    const bool isCollocated
+    const labelPairList& nbrInfo,
+    const label localPointI
 )
 {
     label infoChanged = false;
@@ -248,16 +249,26 @@ bool Foam::globalPoints::storeInfo
 
     if (iter != meshToProcPoint_.end())
     {
-        if (mergeInfo(nbrInfo, procPoints_[iter()]))
+        if (mergeInfo(nbrInfo, localPointI, procPoints_[iter()]))
         {
             infoChanged = true;
         }
     }
     else
     {
-        labelList knownInfo(1, toGlobal(localPointI, isCollocated));
+        // Construct local index for point
+        labelPairList knownInfo
+        (
+            1,
+            globalIndexAndTransform::encode
+            (
+                Pstream::myProcNo(),
+                localPointI,
+                globalTransforms_.nullTransformIndex()
+            )
+        );
 
-        if (mergeInfo(nbrInfo, knownInfo))
+        if (mergeInfo(nbrInfo, localPointI, knownInfo))
         {
             // Update addressing from into procPoints
             meshToProcPoint_.insert(localPointI, procPoints_.size());
@@ -271,42 +282,85 @@ bool Foam::globalPoints::storeInfo
 }
 
 
+// Updates database of current information on meshpoints with nbrInfo.
+// Uses mergeInfo above. Returns true if data kept for meshPointI changed.
+bool Foam::globalPoints::storeInitialInfo
+(
+    const labelPairList& nbrInfo,
+    const label localPointI
+)
+{
+    label infoChanged = false;
+
+    // Get the index into the procPoints list.
+    Map<label>::iterator iter = meshToProcPoint_.find(localPointI);
+
+    if (iter != meshToProcPoint_.end())
+    {
+        if (mergeInfo(nbrInfo, localPointI, procPoints_[iter()]))
+        {
+            infoChanged = true;
+        }
+    }
+    else
+    {
+        // Update addressing into procPoints
+        meshToProcPoint_.insert(localPointI, procPoints_.size());
+        // Insert into list of equivalences.
+        procPoints_.append(nbrInfo);
+
+        infoChanged = true;
+    }
+    return infoChanged;
+}
+
+
+Foam::FixedList<Foam::label, 3> Foam::globalPoints::transformBits
+(
+    const label transformIndex
+) const
+{
+    label t = transformIndex;
+
+    // Decode permutation as 3 integers
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Note: FixedList for speed reasons.
+    FixedList<label, 3> permutation;
+    permutation[0] = (t%3)-1;
+    t /= 3;
+    permutation[1] = (t%3)-1;
+    t /= 3;
+    permutation[2] = (t%3)-1;
+
+    return permutation;
+}
+
+
 void Foam::globalPoints::printProcPoints
 (
     const labelList& patchToMeshPoint,
-    const labelList& pointInfo,
-    Ostream& os
+    const labelPairList& pointInfo
 ) const
 {
     forAll(pointInfo, i)
     {
-        label globalI = pointInfo[i];
+        label procI = globalIndexAndTransform::processor(pointInfo[i]);
+        label index = globalIndexAndTransform::index(pointInfo[i]);
+        label trafoI = globalIndexAndTransform::transformIndex(pointInfo[i]);
 
-        label procI = whichProcID(globalI);
-        os  << "    connected to proc " << procI;
+        Pout<< "proc:" << procI;
+        Pout<< " localpoint:";
+        Pout<< index;
+        Pout<< " through transform:"
+            << trafoI << " bits:" << transformBits(trafoI);
 
-        if (isCollocated(globalI))
+        if (procI == Pstream::myProcNo())
         {
-            os  << " collocated localpoint:";
-        }
-        else
-        {
-            os  << " separated localpoint:";
-        }
-
-        os  << toLocal(procI, globalI);
-
-        if (isLocal(globalI))
-        {
-            label meshPointI = localToMeshPoint
-            (
-                patchToMeshPoint,
-                toLocal(globalI)
-            );
-            os  << " at:" <<  mesh_.points()[meshPointI];
+            label meshPointI = localToMeshPoint(patchToMeshPoint, index);
+            Pout<< " at:" <<  mesh_.points()[meshPointI];
         }
 
-        os  << endl;
+        Pout<< endl;
     }
 }
 
@@ -325,16 +379,8 @@ void Foam::globalPoints::initOwnPoints
     {
         const polyPatch& pp = patches[patchI];
 
-        if
-        (
-            (Pstream::parRun() && isA<processorPolyPatch>(pp))
-         || isA<cyclicPolyPatch>(pp)
-        )
+        if (pp.coupled())
         {
-            // Assume all processor points are collocated and all
-            // processorCyclic and cyclic are separated.
-            bool isCollocatedPoint = isType<processorPolyPatch>(pp);
-
             const labelList& meshPoints = pp.meshPoints();
 
             if (allPoints)
@@ -348,19 +394,23 @@ void Foam::globalPoints::initOwnPoints
                         meshToPatchPoint,
                         meshPointI
                     );
-                    labelList knownInfo
+
+                    labelPairList knownInfo
                     (
                         1,
-                        toGlobal(localPointI, isCollocatedPoint)
+                        globalIndexAndTransform::encode
+                        (
+                            Pstream::myProcNo(),
+                            localPointI,
+                            globalTransforms_.nullTransformIndex()
+                        )
                     );
 
-                    // Update addressing from point to index in procPoints
-                    meshToProcPoint_.insert(localPointI, procPoints_.size());
-                    // Insert into list of equivalences.
-                    procPoints_.append(knownInfo);
-
                     // Update changedpoints info.
-                    changedPoints.insert(localPointI);
+                    if (storeInitialInfo(knownInfo, localPointI))
+                    {
+                        changedPoints.insert(localPointI);
+                    }
                 }
             }
             else
@@ -377,19 +427,21 @@ void Foam::globalPoints::initOwnPoints
                         meshPointI
                     );
 
-                    labelList knownInfo
+                    labelPairList knownInfo
                     (
                         1,
-                        toGlobal(localPointI, isCollocatedPoint)
+                        globalIndexAndTransform::encode
+                        (
+                            Pstream::myProcNo(),
+                            localPointI,
+                            globalTransforms_.nullTransformIndex()
+                        )
                     );
 
-                    // Update addressing from point to index in procPoints
-                    meshToProcPoint_.insert(localPointI, procPoints_.size());
-                    // Insert into list of equivalences.
-                    procPoints_.append(knownInfo);
-
-                    // Update changedpoints info.
-                    changedPoints.insert(localPointI);
+                    if (storeInitialInfo(knownInfo, localPointI))
+                    {
+                        changedPoints.insert(localPointI);
+                    }
                 }
             }
         }
@@ -407,23 +459,21 @@ void Foam::globalPoints::sendPatchPoints
 ) const
 {
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+    const labelPairList& patchInfo = globalTransforms_.patchTransformSign();
 
     forAll(patches, patchI)
     {
         const polyPatch& pp = patches[patchI];
 
+        // mergeSeparated=true : send from all processor patches
+        //               =false: send from ones without transform
+
         if
         (
-            Pstream::parRun()
-         && (
-                isType<processorPolyPatch>(pp)
-             || (mergeSeparated && isA<processorCyclicPolyPatch>(pp))
-            )
+            (Pstream::parRun() && isA<processorPolyPatch>(pp))
+         && (mergeSeparated || patchInfo[patchI].first() == -1)
         )
         {
-            // processor cyclics are considered separated, pure processor
-            // always collocated.
-
             const processorPolyPatch& procPatch =
                 refCast<const processorPolyPatch>(pp);
 
@@ -433,7 +483,7 @@ void Foam::globalPoints::sendPatchPoints
             // index in patch face
             DynamicList<label> indexInFace(pp.nPoints());
             // all information I currently hold about this patchPoint
-            DynamicList<labelList> allInfo(pp.nPoints());
+            DynamicList<labelPairList> allInfo(pp.nPoints());
 
 
             // Now collect information on all points mentioned in
@@ -455,10 +505,10 @@ void Foam::globalPoints::sendPatchPoints
                 {
                     label index = meshToProcPoint_[localPointI];
 
-                    const labelList& knownInfo = procPoints_[index];
+                    const labelPairList& knownInfo = procPoints_[index];
 
                     // Add my information about localPointI to the
-                    // send buffers
+                    // send buffers. Encode the transformation
                     addToSend
                     (
                         pp,
@@ -496,11 +546,13 @@ void Foam::globalPoints::receivePatchPoints
 (
     const bool mergeSeparated,
     const Map<label>& meshToPatchPoint,
+    const labelList& patchToMeshPoint,
     PstreamBuffers& pBufs,
     labelHashSet& changedPoints
 )
 {
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+    const labelPairList& patchInfo = globalTransforms_.patchTransformSign();
 
     // Reset changed points
     changedPoints.clear();
@@ -511,22 +563,16 @@ void Foam::globalPoints::receivePatchPoints
 
         if
         (
-            Pstream::parRun()
-         && (
-                isType<processorPolyPatch>(pp)
-             || (mergeSeparated && isA<processorCyclicPolyPatch>(pp))
-            )
+            (Pstream::parRun() && isA<processorPolyPatch>(pp))
+         && (mergeSeparated || patchInfo[patchI].first() == -1)
         )
         {
             const processorPolyPatch& procPatch =
                 refCast<const processorPolyPatch>(pp);
 
-            // Processor patch is always collocated, processorCyclic is not.
-            bool isCollocatedPoint = isType<processorPolyPatch>(pp);
-
             labelList patchFaces;
             labelList indexInFace;
-            List<labelList> nbrInfo;
+            List<labelPairList> nbrInfo;
 
             {
                 UIPstream fromNeighbour(procPatch.neighbProcNo(), pBufs);
@@ -556,19 +602,28 @@ void Foam::globalPoints::receivePatchPoints
                     meshPointI
                 );
 
-                if (storeInfo(nbrInfo[i], localPointI, isCollocatedPoint))
+                if (mergeInfo(nbrInfo[i], localPointI))
                 {
                     changedPoints.insert(localPointI);
                 }
             }
         }
-        else if (mergeSeparated && isA<cyclicPolyPatch>(pp))
+        else if
+        (
+            (
+                isA<cyclicPolyPatch>(pp)
+             && refCast<const cyclicPolyPatch>(pp).owner()
+            )
+         && (mergeSeparated || patchInfo[patchI].first() == -1)
+        )
         {
             // Handle cyclics: send lower half to upper half and vice versa.
             // Or since they both are in memory just do it point by point.
 
             const cyclicPolyPatch& cycPatch =
                 refCast<const cyclicPolyPatch>(pp);
+
+            //Pout<< "Patch:" << patchI << " name:" << pp.name() << endl;
 
             const labelList& meshPoints = pp.meshPoints();
             const labelList coupledMeshPoints(reverseMeshPoints(cycPatch));
@@ -577,6 +632,11 @@ void Foam::globalPoints::receivePatchPoints
             {
                 label meshPointA = meshPoints[i];
                 label meshPointB = coupledMeshPoints[i];
+
+                //Pout<< "Connection between point " << meshPointA
+                //    << " at " << mesh_.points()[meshPointA]
+                //    << " and " << meshPointB
+                //    << " at " << mesh_.points()[meshPointB] << endl;
 
                 label localA = meshToLocalPoint
                 (
@@ -594,24 +654,58 @@ void Foam::globalPoints::receivePatchPoints
                 Map<label>::iterator procPointA =
                     meshToProcPoint_.find(localA);
 
+                labelPairList infoA;
                 if (procPointA != meshToProcPoint_.end())
                 {
-                    // Store A info onto pointB
-                    if (storeInfo(procPoints_[procPointA()], localB, false))
-                    {
-                        changedPoints.insert(localB);
-                    }
+                    infoA = addSendTransform
+                    (
+                        cycPatch.index(),
+                        procPoints_[procPointA()]
+                    );
                 }
 
                 // Same for info on pointB
                 Map<label>::iterator procPointB =
                     meshToProcPoint_.find(localB);
 
+                labelPairList infoB;
                 if (procPointB != meshToProcPoint_.end())
                 {
-                    // Store B info onto pointA
-                    if (storeInfo(procPoints_[procPointB()], localA, false))
+                    infoB = addSendTransform
+                    (
+                        cycPatch.neighbPatchID(),
+                        procPoints_[procPointB()]
+                    );
+                }
+
+
+                if (infoA.size())
+                {
+                    if (mergeInfo(infoA, localB))
                     {
+                        //Pout<< "  Combined info at point "
+                        //    << mesh_.points()[meshPointB]
+                        //    << " now " << endl;
+                        //printProcPoints
+                        //(
+                        //    patchToMeshPoint,
+                        //    procPoints_[meshToProcPoint_[localB]]
+                        //);
+                        changedPoints.insert(localB);
+                    }
+                }
+                if (infoB.size())
+                {
+                    if (mergeInfo(infoB, localA))
+                    {
+                        //Pout<< "  Combined info at point "
+                        //    << mesh_.points()[meshPointA]
+                        //    << " now " << endl;
+                        //printProcPoints
+                        //(
+                        //    patchToMeshPoint,
+                        //    procPoints_[meshToProcPoint_[localA]]
+                        //);
                         changedPoints.insert(localA);
                     }
                 }
@@ -630,17 +724,16 @@ void Foam::globalPoints::remove
 )
 {
     // Save old ones.
-    Map<label> oldMeshToProcPoint(meshToProcPoint_);
-    meshToProcPoint_.clear();
-
-    List<labelList> oldProcPoints;
-    oldProcPoints.transfer(procPoints_);
+    Map<label> oldMeshToProcPoint(meshToProcPoint_.xfer());
+    meshToProcPoint_.resize(oldMeshToProcPoint.size());
+    DynamicList<labelPairList> oldProcPoints(procPoints_.xfer());
+    procPoints_.setCapacity(oldProcPoints.size());
 
     // Go through all equivalences
     forAllConstIter(Map<label>, oldMeshToProcPoint, iter)
     {
         label localPointI = iter.key();
-        const labelList& pointInfo = oldProcPoints[iter()];
+        const labelPairList& pointInfo = oldProcPoints[iter()];
 
         if (pointInfo.size() == 2)
         {
@@ -649,32 +742,40 @@ void Foam::globalPoints::remove
             // is in it. This would be an ordinary connection and can be
             // handled by normal face-face connectivity.
 
-            const label a = pointInfo[0];
-            const label b = pointInfo[1];
+            label proc0 = globalIndexAndTransform::processor(pointInfo[0]);
+            label proc1 = globalIndexAndTransform::processor(pointInfo[1]);
 
             if
             (
                 (
-                    isLocal(a)
-                 && directNeighbours.found(toLocal(a))
+                    proc0 == Pstream::myProcNo()
+                 && directNeighbours.found
+                    (
+                        globalIndexAndTransform::index(pointInfo[0])
+                    )
                 )
              || (
-                    isLocal(b)
-                 && directNeighbours.found(toLocal(b))
+                    proc1 == Pstream::myProcNo()
+                 && directNeighbours.found
+                    (
+                        globalIndexAndTransform::index(pointInfo[1])
+                    )
                 )
             )
             {
                 // Normal faceNeighbours
-                if (isLocal(a))
+                if (proc0 == Pstream::myProcNo())
                 {
                     //Pout<< "Removing direct neighbour:"
-                    //    << mesh_.points()[a[1]]
+                    //    << mesh_.points()
+                    //       [globalIndexAndTransform::index(pointInfo[0])]
                     //    << endl;
                 }
-                else if (isLocal(b))
+                else if (proc1 == Pstream::myProcNo())
                 {
                     //Pout<< "Removing direct neighbour:"
-                    //    << mesh_.points()[b[1]]
+                    //    << mesh_.points()
+                    //       [globalIndexAndTransform::index(pointInfo[1])]
                     //    << endl;
                 }
             }
@@ -703,8 +804,12 @@ void Foam::globalPoints::remove
             // So this meshPoint will have info of size one only.
             if
             (
-                !isLocal(pointInfo[0])
-             || !directNeighbours.found(toLocal(pointInfo[0]))
+                globalIndexAndTransform::processor(pointInfo[0])
+             != Pstream::myProcNo()
+             || !directNeighbours.found
+                (
+                    globalIndexAndTransform::index(pointInfo[0])
+                )
             )
             {
                 meshToProcPoint_.insert(localPointI, procPoints_.size());
@@ -719,439 +824,7 @@ void Foam::globalPoints::remove
     }
 
     procPoints_.shrink();
-}
-
-
-// Compact indices
-void Foam::globalPoints::compact(const labelList& patchToMeshPoint)
-{
-    labelList oldToNew(procPoints_.size(), -1);
-    labelList newToOld(meshToProcPoint_.size());
-
-    label newIndex = 0;
-    forAllConstIter(Map<label>, meshToProcPoint_, iter)
-    {
-        label oldIndex = iter();
-
-        if (oldToNew[oldIndex] == -1)
-        {
-            // Check if one of the procPoints already is merged.
-            const labelList& pointInfo = procPoints_[oldIndex];
-
-            if (pointInfo.size() >= 2)
-            {
-                // Merge out single entries
-
-                label minIndex = labelMax;
-
-                forAll(pointInfo, i)
-                {
-                    if (isLocal(pointInfo[i]))
-                    {
-                        label localI = toLocal(pointInfo[i]);
-
-                        // Is localPoint itself already merged?
-                        label index = meshToProcPoint_[localI];
-
-                        //Pout<< "        found point:" << localI
-                        //    << " with current index " << index << endl;
-
-                        if (oldToNew[index] != -1)
-                        {
-                            minIndex = min(minIndex, oldToNew[index]);
-                        }
-                    }
-                }
-
-                if (minIndex < labelMax && minIndex != oldIndex)
-                {
-                    // Make my index point to minIndex
-                    oldToNew[oldIndex] = minIndex;
-                }
-                else
-                {
-                    // Nothing compacted yet. Allocate new index.
-                    oldToNew[oldIndex] = newIndex;
-                    newToOld[newIndex] = oldIndex;
-                    newIndex++;
-                }
-            }
-            else
-            {
-                //Pout<< "Removed singlepoint pointI:" << iter.key()
-                //    << " currentindex:" << iter()
-                //    << endl;
-            }
-        }
-    }
-
-    // Redo indices
-    Map<label> oldMeshToProcPoint(meshToProcPoint_.xfer());
-    forAllConstIter(Map<label>, oldMeshToProcPoint, iter)
-    {
-        label newIndex = oldToNew[iter()];
-        if (newIndex != -1)
-        {
-            meshToProcPoint_.insert(iter.key(), newIndex);
-        }
-    }
-
-    List<labelList> oldProcPoints;
-    oldProcPoints.transfer(procPoints_);
-
-    newToOld.setSize(newIndex);
-
-    procPoints_.setSize(newIndex);
-
-    forAll(procPoints_, i)
-    {
-        // Transfer
-        procPoints_[i].transfer(oldProcPoints[newToOld[i]]);
-    }
-}
-
-
-// Get (indices of) points for which I am master (= lowest numbered point on
-// lowest numbered processor).
-// (equivalence lists should be complete by now)
-Foam::labelList Foam::globalPoints::getMasterPoints
-(
-    const labelList& patchToMeshPoint
-) const
-{
-    //labelList masterPoints(nPatchPoints_);
-    //label nMaster = 0;
-
-    labelHashSet masterPointSet(nPatchPoints_);
-
-
-    // Go through all equivalences and determine points where I am master.
-    forAllConstIter(Map<label>, meshToProcPoint_, iter)
-    {
-        label localPointI = iter.key();
-        const labelList& pointInfo = procPoints_[iter()];
-
-        if (pointInfo.size() < 2)
-        {
-            // Points should have an equivalence list >= 2 since otherwise
-            // they would be direct neighbours and have been removed in the
-            // call to 'remove'.
-            label meshPointI = localToMeshPoint(patchToMeshPoint, localPointI);
-
-            FatalErrorIn("globalPoints::getMasterPoints(..)")
-                << '[' << Pstream::myProcNo() << ']'
-                << " MeshPoint:" << meshPointI
-                << " coord:" << mesh_.points()[meshPointI]
-                << " has no corresponding point on a neighbouring processor"
-                << abort(FatalError);
-        }
-        else
-        {
-            // Check if lowest numbered processor and point is
-            // on this processor. Since already sorted is first element.
-
-            if
-            (
-                isLocal(pointInfo[0])
-             && toLocal(pointInfo[0]) == localPointI
-            )
-            {
-                // I am lowest numbered processor and point. Add to my list.
-                //masterPoints[nMaster++] = localPointI;
-                masterPointSet.insert(localPointI);
-            }
-        }
-    }
-
-    return masterPointSet.toc();
-}
-
-
-// Send subset of lists.
-// Note: might not be used if separated
-void Foam::globalPoints::sendSharedPoints
-(
-    const bool mergeSeparated,
-    PstreamBuffers& pBufs,
-    const DynamicList<label>& changedIndices
-) const
-{
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-    forAll(patches, patchI)
-    {
-        const polyPatch& pp = patches[patchI];
-
-        if
-        (
-            Pstream::parRun()
-         && (
-                isType<processorPolyPatch>(pp)
-             || (mergeSeparated && isA<processorCyclicPolyPatch>(pp))
-            )
-        )
-        {
-            const processorPolyPatch& procPatch =
-                refCast<const processorPolyPatch>(pp);
-
-            UOPstream toNeighbour(procPatch.neighbProcNo(), pBufs);
-
-            if (debug)
-            {
-                Pout<< "Sending to " << procPatch.neighbProcNo()
-                    << "  changed sharedPoints info:"
-                    << changedIndices.size() << endl;
-            }
-
-            // Send over changed elements
-            toNeighbour
-                << UIndirectList<label>(sharedPointAddr_, changedIndices)()
-                << UIndirectList<label>(sharedPointLabels_, changedIndices)();
-        }
-    }
-}
-
-
-// Check if any connected local points already have a sharedPoint. This handles
-// locally connected points.
-void Foam::globalPoints::extendSharedPoints
-(
-    const Map<label>& meshToShared,
-    DynamicList<label>& changedIndices
-)
-{
-    forAllConstIter(Map<label>, meshToProcPoint_, iter)
-    {
-        label localI = iter.key();
-        label sharedI = meshToShared[localI];
-
-        if (sharedPointLabels_[sharedI] == -1)
-        {
-            // No sharedpoint yet for me. Check if any of my connected
-            // points have.
-
-            const labelList& pointInfo = procPoints_[iter()];
-            forAll(pointInfo, i)
-            {
-                if (isLocal(pointInfo[i]))
-                {
-                    label nbrLocalI = toLocal(pointInfo[i]);
-                    label nbrSharedI = meshToShared[nbrLocalI];
-
-                    if (sharedPointAddr_[nbrSharedI] != -1)
-                    {
-                        // I do have a sharedpoint for nbrSharedI. Reuse it.
-                        sharedPointLabels_[sharedI] = localI;
-                        sharedPointAddr_[sharedI] =
-                            sharedPointAddr_[nbrSharedI];
-                        changedIndices.append(sharedI);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-// Receive shared point indices for all my shared points. Note that since
-// there are only a few here we can build a reverse map using the point label
-// instead of doing all this relative point indexing (patch face + index in
-// face) as in send/receivePatchPoints
-void Foam::globalPoints::receiveSharedPoints
-(
-    const bool mergeSeparated,
-    const Map<label>& meshToPatchPoint,
-    const Map<label>& meshToShared,
-    PstreamBuffers& pBufs,
-    DynamicList<label>& changedIndices
-)
-{
-    changedIndices.clear();
-
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-    // Receive and set shared points
-    forAll(patches, patchI)
-    {
-        const polyPatch& pp = patches[patchI];
-
-        if
-        (
-            Pstream::parRun()
-         && (
-                isType<processorPolyPatch>(pp)
-             || (mergeSeparated && isA<processorCyclicPolyPatch>(pp))
-            )
-        )
-        {
-            const processorPolyPatch& procPatch =
-                refCast<const processorPolyPatch>(pp);
-
-            // Map from neighbouring mesh or patch point to sharedPoint)
-            Map<label> nbrSharedPoints(sharedPointAddr_.size());
-
-            {
-                // Receive points on neighbour and sharedPoints and build
-                // map from it. Note that we could have built the map on the
-                // neighbour and sent it over.
-                labelList nbrSharedPointAddr;
-                labelList nbrSharedPointLabels;
-
-                {
-                    UIPstream fromNeighbour(procPatch.neighbProcNo(), pBufs);
-                    fromNeighbour >> nbrSharedPointAddr >> nbrSharedPointLabels;
-                }
-
-                // Insert into to map
-                forAll(nbrSharedPointLabels, i)
-                {
-                    nbrSharedPoints.insert
-                    (
-                        nbrSharedPointLabels[i], // mesh/patchpoint on neighbour
-                        nbrSharedPointAddr[i]    // sharedPoint label
-                    );
-                }
-            }
-
-
-            // Merge into whatever information I hold.
-            forAllConstIter(Map<label>, meshToProcPoint_, iter)
-            {
-                label localPointI = iter.key();
-                label sharedI = meshToShared[localPointI];
-
-                if (sharedPointAddr_[sharedI] == -1)
-                {
-                    // No shared point known yet for this point.
-                    // See if was received from neighbour.
-                    const labelList& knownInfo = procPoints_[iter()];
-
-                    // Check through the whole equivalence list for any
-                    // point from the neighbour.
-                    forAll(knownInfo, j)
-                    {
-                        const label info = knownInfo[j];
-                        label procI = whichProcID(info);
-                        label pointI = toLocal(procI, info);
-
-                        if
-                        (
-                            procI == procPatch.neighbProcNo()
-                         && nbrSharedPoints.found(pointI)
-                        )
-                        {
-                            // So this knownInfo contains the neighbour point
-                            label sharedPointI = nbrSharedPoints[pointI];
-
-                            sharedPointAddr_[sharedI] = sharedPointI;
-                            sharedPointLabels_[sharedI] = localPointI;
-                            changedIndices.append(sharedI);
-
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        else if (mergeSeparated && isA<cyclicPolyPatch>(pp))
-        {
-            const cyclicPolyPatch& cycPatch =
-                refCast<const cyclicPolyPatch>(pp);
-
-            // Build map from mesh or patch point to sharedPoint.
-            Map<label> localToSharedPoint(sharedPointAddr_.size());
-            forAll(sharedPointLabels_, i)
-            {
-                if (sharedPointLabels_[i] != -1)
-                {
-                    localToSharedPoint.insert
-                    (
-                        sharedPointLabels_[i],
-                        sharedPointAddr_[i]
-                    );
-                }
-            }
-
-            // Sync all info.
-
-            const labelList& meshPoints = cycPatch.meshPoints();
-            const labelList coupledMeshPoints(reverseMeshPoints(cycPatch));
-
-            forAll(meshPoints, i)
-            {
-                label meshPointA = meshPoints[i];
-                label meshPointB = coupledMeshPoints[i];
-
-                label localA = meshToLocalPoint
-                (
-                    meshToPatchPoint,
-                    meshPointA
-                );
-                label localB = meshToLocalPoint
-                (
-                    meshToPatchPoint,
-                    meshPointB
-                );
-
-                // Do we already have shared point for pointA?
-                Map<label>::iterator fndA = localToSharedPoint.find(localA);
-                Map<label>::iterator fndB = localToSharedPoint.find(localB);
-
-                if (fndA != localToSharedPoint.end())
-                {
-                    if (fndB != localToSharedPoint.end())
-                    {
-                        if (fndA() != fndB())
-                        {
-                            FatalErrorIn
-                            (
-                                "globalPoints::receiveSharedPoints(..)"
-                            )   << "On patch " << pp.name()
-                                << " connected points " << meshPointA
-                                << ' ' << mesh_.points()[meshPointA]
-                                << " and " << meshPointB
-                                << ' ' << mesh_.points()[meshPointB]
-                                << " are mapped to different shared"
-                                << " points: "
-                                << fndA() << " and " << fndB()
-                                << abort(FatalError);
-                        }
-                    }
-                    else
-                    {
-                        // No shared point yet for B.
-                        label sharedPointI = fndA();
-
-                        // Store shared point for pointB
-                        label sharedI = meshToShared[localB];
-
-                        sharedPointAddr_[sharedI] = sharedPointI;
-                        sharedPointLabels_[sharedI] = localB;
-                        changedIndices.append(sharedI);
-                    }
-                }
-                else
-                {
-                    // No shared point yet for A.
-                    if (fndB != localToSharedPoint.end())
-                    {
-                        label sharedPointI = fndB();
-
-                        // Store shared point for pointA
-                        label sharedI = meshToShared[localA];
-
-                        sharedPointAddr_[sharedI] = sharedPointI;
-                        sharedPointLabels_[sharedI] = localA;
-                        changedIndices.append(sharedI);
-                    }
-                }
-            }
-        }
-    }
-
-    // Extend shared points from local connections.
-    extendSharedPoints(meshToShared, changedIndices);
+    meshToProcPoint_.resize(2*procPoints_.size());
 }
 
 
@@ -1177,6 +850,49 @@ Foam::labelList Foam::globalPoints::reverseMeshPoints
 }
 
 
+bool Foam::globalPoints::globalIndexAndTransformLessThan::operator()
+(
+    const labelPair& a,
+    const labelPair& b
+)
+{
+    label procA = globalIndexAndTransform::processor(a);
+    label procB = globalIndexAndTransform::processor(b);
+
+    if (procA < procB)
+    {
+        return true;
+    }
+    else if (procA > procB)
+    {
+        return false;
+    }
+    else
+    {
+        // Equal proc.
+        label indexA = globalIndexAndTransform::index(a);
+        label indexB = globalIndexAndTransform::index(b);
+
+        if (indexA < indexB)
+        {
+            return true;
+        }
+        else if (indexA > indexB)
+        {
+            return false;
+        }
+        else
+        {
+            // Equal index
+            label transformA = globalIndexAndTransform::transformIndex(a);
+            label transformB = globalIndexAndTransform::transformIndex(b);
+
+            return transformA < transformB;
+        }
+    }
+}
+
+
 void Foam::globalPoints::calculateSharedPoints
 (
     const Map<label>& meshToPatchPoint, // from mesh point to local numbering
@@ -1192,17 +908,8 @@ void Foam::globalPoints::calculateSharedPoints
             << endl;
     }
 
-    if (globalIndices_.size() >= fromCollocated)
-    {
-        FatalErrorIn("globalPoints::calculateSharedPoints(..)")
-            << "Integer overflow. Total number of points "
-            << globalIndices_.size()
-            << " is too large to be represented." << exit(FatalError);
-    }
 
-
-
-    labelHashSet changedPoints(nPatchPoints_);
+    labelHashSet changedPoints(2*nPatchPoints_);
 
     // Initialize procPoints with my patch points. Keep track of points
     // inserted (in changedPoints)
@@ -1243,11 +950,11 @@ void Foam::globalPoints::calculateSharedPoints
         (
             mergeSeparated,
             meshToPatchPoint,
+            patchToMeshPoint,
             pBufs,
             changedPoints
         );
     }
-
 
     // Save neighbours reachable through face-face communication.
     Map<label> neighbourList;
@@ -1281,6 +988,7 @@ void Foam::globalPoints::calculateSharedPoints
         (
             mergeSeparated,
             meshToPatchPoint,
+            patchToMeshPoint,
             pBufs,
             changedPoints
         );
@@ -1291,183 +999,117 @@ void Foam::globalPoints::calculateSharedPoints
     } while (changed);
 
 
+    //Pout<< "**ALL** connected points:" << endl;
+    //forAllConstIter(Map<label>, meshToProcPoint_, iter)
+    //{
+    //    label localI = iter.key();
+    //    const labelPairList& pointInfo = procPoints_[iter()];
+    //    Pout<< "pointI:" << localI << " index:" << iter()
+    //        << " coord:"
+    //        << mesh_.points()[localToMeshPoint(patchToMeshPoint, localI)]
+    //        << endl;
+    //    printProcPoints(patchToMeshPoint, pointInfo);
+    //    Pout<< endl;
+    //}
+    //
+
     // Remove direct neighbours from point equivalences.
     if (!keepAllPoints)
     {
-        //Pout<< "**Removing direct neighbours:" << endl;
-        //forAllConstIter(Map<label>, neighbourList, iter)
-        //{
-        //    label localI = iter.key();
-        //    Pout<< "pointI:" << localI << " index:" << iter()
-        //        << " coord:"
-        //        << mesh_.points()[localToMeshPoint(patchToMeshPoint, localI)]
-        //        << endl;
-        //}
         remove(patchToMeshPoint, neighbourList);
     }
 
 
-    // Compact out unused elements
-    compact(patchToMeshPoint);
-
-
-
-    procPoints_.shrink();
-
-    // Sort procPoints in incremental order. This will make the master the
-    // first element.
+    // Sort procPoints in incremental order. This will make
+    // the master the first element on all processors.
+    // Note: why not sort in decreasing order? Give more work to higher
+    //       processors.
     forAllConstIter(Map<label>, meshToProcPoint_, iter)
     {
-        sort(procPoints_[iter()]);
+        labelPairList& pointInfo = procPoints_[iter()];
+        sort(pointInfo, globalIndexAndTransformLessThan());
     }
-    // We can now remove the collocated bit
-    forAll(procPoints_, index)
-    {
-        labelList& pointInfo = procPoints_[index];
-
-        forAll(pointInfo, i)
-        {
-            pointInfo[i] = removeCollocated(pointInfo[i]);
-        }
-    }
-
-
-//Pout<< "Now connected points:" << endl;
-//forAllConstIter(Map<label>, meshToProcPoint_, iter)
-//{
-//    label localI = iter.key();
-//    const labelList& pointInfo = procPoints_[iter()];
-//
-//    Pout<< "pointI:" << localI << " index:" << iter()
-//        << " coord:"
-//        << mesh_.points()[localToMeshPoint(patchToMeshPoint, localI)]
-//        << endl;
-//
-//    printProcPoints(patchToMeshPoint, pointInfo, Pout);
-//}
 
 
     // We now have - in procPoints_ - a list of points which are shared between
-    // multiple processors. These are the ones for which are sharedPoint
-    // needs to be determined. This is done by having the lowest numbered
-    // processor in the equivalence list 'ask' for a sharedPoint number
-    // and then distribute it across processor patches to the non-master
-    // processors. Note: below piece of coding is not very efficient. Uses
-    // a Map where possibly it shouldn't
+    // multiple processors. Filter into non-transformed and transformed
+    // connections.
 
-    // Initialize sharedPoint addressing. Is for every entry in procPoints_
-    // the sharedPoint.
-    sharedPointAddr_.setSize(meshToProcPoint_.size());
-    sharedPointAddr_ = -1;
-    sharedPointLabels_.setSize(meshToProcPoint_.size());
-    sharedPointLabels_ = -1;
-
-    // Get point labels of points for which I am master (lowest
-    // numbered proc)
-    labelList masterPoints(getMasterPoints(patchToMeshPoint));
-
-
-    // Get global numbering for master points
-    globalIndex globalMasterPoints(masterPoints.size());
-    nGlobalPoints_ = globalMasterPoints.size();
-
-    // Number meshToProcPoint
-    label sharedI = 0;
-    Map<label> meshToShared(meshToProcPoint_.size());
+    pointPoints_.setSize(globalIndices_.localSize());
+    List<labelPairList> transformedPoints(globalIndices_.localSize());
     forAllConstIter(Map<label>, meshToProcPoint_, iter)
     {
-        meshToShared.insert(iter.key(), sharedI++);
-    }
+        const labelPairList& pointInfo = procPoints_[iter()];
 
-    // Assign the entries for the masters
-    forAll(masterPoints, i)
-    {
-        label localPointI = masterPoints[i];
-        label sharedI = meshToShared[localPointI];
-
-        sharedPointLabels_[sharedI] = localPointI;
-        sharedPointAddr_[sharedI] = globalMasterPoints.toGlobal(i);
-    }
-
-
-    // Now we have a sharedPointLabel for some of the entries in procPoints.
-    // Send this information to neighbours. Receive their information.
-    // Loop until nothing changes.
-
-    // Initial subset to send is points for which I have sharedPoints
-    DynamicList<label> changedIndices(sharedPointAddr_.size());
-    forAll(sharedPointAddr_, i)
-    {
-        if (sharedPointAddr_[i] != -1)
+        if (pointInfo.size() >= 2)
         {
-            changedIndices.append(i);
-        }
-    }
+            // Since sorted master point is the first element
+            const labelPair& masterInfo = pointInfo[0];
 
-    // Assign local slaves from local master
-    extendSharedPoints(meshToShared, changedIndices);
-
-
-    changed = false;
-
-    do
-    {
-        if (debug)
-        {
-            Pout<< "Determined " << changedIndices.size() << " shared points."
-                << " Exchanging them" << endl;
-        }
-        PstreamBuffers pBufs
-        (
+            if
             (
-                Pstream::defaultCommsType == Pstream::scheduled
-              ? Pstream::nonBlocking
-              : Pstream::defaultCommsType
+                (
+                    globalIndexAndTransform::processor(masterInfo)
+                 == Pstream::myProcNo()
+                )
+             && (globalIndexAndTransform::index(masterInfo) == iter.key())
             )
-        );
+            {
+                labelList& pPoints = pointPoints_[iter.key()];
+                pPoints.setSize(pointInfo.size()-1);
 
-        sendSharedPoints(mergeSeparated, pBufs, changedIndices);
-        pBufs.finishedSends();
-        receiveSharedPoints
-        (
-            mergeSeparated,
-            meshToPatchPoint,
-            meshToShared,
-            pBufs,
-            changedIndices
-        );
+                labelPairList& trafoPPoints = transformedPoints[iter.key()];
+                trafoPPoints.setSize(pointInfo.size()-1);
 
-        changed = changedIndices.size() > 0;
-        reduce(changed, orOp<bool>());
+                label nonTransformI = 0;
+                label transformI = 0;
 
-    } while (changed);
+                for (label i = 1; i < pointInfo.size(); i++)
+                {
+                    labelPair info = pointInfo[i];
+                    label procI = globalIndexAndTransform::processor(info);
+                    label index = globalIndexAndTransform::index(info);
+                    label transform = globalIndexAndTransform::transformIndex
+                    (
+                        info
+                    );
 
+                    if (transform == globalTransforms_.nullTransformIndex())
+                    {
+                        pPoints[nonTransformI++] = globalIndices_.toGlobal
+                        (
+                            procI,
+                            index
+                        );
+                    }
+                    else
+                    {
+                        trafoPPoints[transformI++] = info;
+                    }
+                }
 
-//    forAll(sharedPointLabels_, sharedI)
-//    {
-//        label localI = sharedPointLabels_[sharedI];
-//
-//        Pout<< "point:" << localI
-//            << " coord:"
-//            << mesh_.points()[localToMeshPoint(patchToMeshPoint, localI)]
-//            << " ON TO GLOBAL:" << sharedPointAddr_[sharedI]
-//            << endl;
-//    }
-
-
-    forAll(sharedPointLabels_, i)
-    {
-        if (sharedPointLabels_[i] == -1)
-        {
-            FatalErrorIn("globalPoints::calculateSharedPoints(..)")
-                << "Problem: shared point on processor " << Pstream::myProcNo()
-                << " not set at index " << sharedPointLabels_[i] << endl
-                << "This might mean the individual processor domains are not"
-                << " connected and the overall domain consists of multiple"
-                << " regions. You can check this with checkMesh"
-                << abort(FatalError);
+                pPoints.setSize(nonTransformI);
+                trafoPPoints.setSize(transformI);
+            }
         }
     }
+
+
+    List<Map<label> > compactMap;
+    map_.reset
+    (
+        new mapDistribute
+        (
+            globalIndices_,
+            pointPoints_,
+
+            globalTransforms_,
+            transformedPoints,
+            transformedPointPoints_,
+
+            compactMap
+        )
+    );
 
     if (debug)
     {
@@ -1489,12 +1131,10 @@ Foam::globalPoints::globalPoints
 :
     mesh_(mesh),
     globalIndices_(mesh_.nPoints()),
+    globalTransforms_(mesh),
     nPatchPoints_(countPatchPoints(mesh.boundaryMesh())),
     procPoints_(nPatchPoints_),
-    meshToProcPoint_(nPatchPoints_),
-    sharedPointAddr_(0),
-    sharedPointLabels_(0),
-    nGlobalPoints_(0)
+    meshToProcPoint_(nPatchPoints_)
 {
     // Empty patch maps to signal storing mesh point labels
     Map<label> meshToPatchPoint(0);
@@ -1521,12 +1161,10 @@ Foam::globalPoints::globalPoints
 :
     mesh_(mesh),
     globalIndices_(coupledPatch.nPoints()),
+    globalTransforms_(mesh),
     nPatchPoints_(coupledPatch.nPoints()),
     procPoints_(nPatchPoints_),
-    meshToProcPoint_(nPatchPoints_),
-    sharedPointAddr_(0),
-    sharedPointLabels_(0),
-    nGlobalPoints_(0)
+    meshToProcPoint_(nPatchPoints_)
 {
     calculateSharedPoints
     (

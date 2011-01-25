@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -135,7 +135,7 @@ void Foam::regionToCell::combine(topoSet& set, const bool add) const
             "regionToCell::combine(topoSet&, const bool) const"
         )   << "Point " << insidePoint_
             << " is not inside the mesh." << nl
-            << "Bounding box of the mesh:" << mesh_.globalData().bb()
+            << "Bounding box of the mesh:" << mesh_.bounds()
             << endl;
         return;
     }

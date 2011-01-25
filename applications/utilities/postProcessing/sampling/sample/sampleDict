@@ -231,6 +231,7 @@ surfaces
         // Sampling on triSurface
         type        sampledTriSurfaceMesh;
         surface     integrationPlane.stl;
+        source      boundaryFaces;  // sample cells or boundaryFaces
         interpolate true;
     }
 );

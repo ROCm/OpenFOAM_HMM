@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -164,6 +164,9 @@ public:
 
 
     // Member Functions
+
+        //- Reset rotation to an identity rotation
+        virtual void clear();
 
         //- Return local-to-global transformation tensor
         const tensor& R() const

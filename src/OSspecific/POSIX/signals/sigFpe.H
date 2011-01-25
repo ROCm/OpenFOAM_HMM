@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,7 +43,6 @@ SourceFiles
 #ifndef sigFpe_H
 #define sigFpe_H
 
-#include "OSspecific.H"
 #include <signal.h>
 
 #if defined(linux) || defined(linuxAMD64) || defined(linuxIA64)
@@ -73,10 +72,10 @@ class sigFpe
 #       ifdef LINUX
 
             //- Saved old malloc
-            static void *(*old_malloc_hook)(size_t, const void *);
+            static void *(*oldMallocHook_)(size_t, const void *);
 
-            //- nan malloc function. From malloc_hook manpage.
-            static void* my_malloc_hook(size_t size, const void *caller);
+            //- NaN malloc function. From malloc_hook manpage.
+            static void* nanMallocHook_(size_t size, const void *caller);
 
 #       endif
 
@@ -86,7 +85,7 @@ class sigFpe
 #   ifdef LINUX_GNUC
 
         //- Handler for caught signals
-        static void sigFpeHandler(int);
+        static void sigHandler(int);
 
 #   endif
 
@@ -96,6 +95,7 @@ public:
 
     // Constructors
 
+        //- Construct null
         sigFpe();
 
 
@@ -105,6 +105,8 @@ public:
 
     // Member functions
 
+        //- Activate SIGFPE signal handler when FOAM_SIGFPE is %set
+        //  Fill memory with NaN when FOAM_SETNAN is %set
         void set(const bool verbose);
 };
 
