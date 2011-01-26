@@ -7,9 +7,9 @@ ELEMENTS
 O  H  C  N  AR
 END
 SPECIES
-CH      CH2O    CH3O    H        O2     H2      O       OH      H2O     HO2     H2O2    
+CH4	 	CH2O 	CH3O H	O2 		H2       O      OH      H2O     HO2     H2O2    
 C       CH      CH2     CH2(S)  CH3     CO      CO2     
-HCO     CH2OH   CH3OH   C2H     C2H2    C2H3
+HCO     	CH2OH     CH3OH   C2H     C2H2    C2H3    
 C2H4    C2H5    C2H6    HCCO    CH2CO   HCCOH   N       NH      
 NH2     NH3     NNH     NO      NO2     N2O     HNO     CN      
 HCN     H2CN    HCNN    HCNO    HOCN    HNCO    NCO     N2      
@@ -307,7 +307,7 @@ HO2+C3H7<=>O2+C3H8                       2.550E+10    0.255   -943.00
 HO2+C3H7=>OH+C2H5+CH2O                   2.410E+13     .000       .00
 CH3+C3H7<=>2C2H5                         1.927E+13   -0.320       .00
 !
-!       + M Reactions
+!	+ M Reactions
 !
 2O+M<=>O2+M                              1.200E+17   -1.000        .00
 H2/2.40/ H2O/15.40/ CH4/ 2.00/ CO/ 1.75/ CO2/3.60/ C2H6/ 3.00/ AR/0.83/ 
