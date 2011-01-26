@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -83,7 +83,7 @@ void Foam::sampledSurfaces::writeGeometry() const
         {
             if (Pstream::master() && mergeList_[surfI].faces.size())
             {
-                genericFormatter_->write
+                formatter_->write
                 (
                     outputDir,
                     s.name(),
@@ -94,7 +94,7 @@ void Foam::sampledSurfaces::writeGeometry() const
         }
         else if (s.faces().size())
         {
-            genericFormatter_->write
+            formatter_->write
             (
                 outputDir,
                 s.name(),
@@ -123,9 +123,8 @@ Foam::sampledSurfaces::sampledSurfaces
     outputPath_(fileName::null),
     fieldSelection_(),
     interpolationScheme_(word::null),
-    writeFormat_(word::null),
     mergeList_(),
-    genericFormatter_(NULL),
+    formatter_(NULL),
     scalarFields_(),
     vectorFields_(),
     sphericalTensorFields_(),
@@ -201,7 +200,7 @@ void Foam::sampledSurfaces::write()
 
         // write geometry first if required,
         // or when no fields would otherwise be written
-        if (nFields == 0 || genericFormatter_->separateFiles())
+        if (nFields == 0 || formatter_->separateGeometry())
         {
             writeGeometry();
         }
@@ -221,11 +220,11 @@ void Foam::sampledSurfaces::read(const dictionary& dict)
     clearFieldGroups();
 
     dict.lookup("interpolationScheme") >> interpolationScheme_;
-    dict.lookup("surfaceFormat") >> writeFormat_;
 
-    // define the generic (geometry) writer
-    genericFormatter_ = surfaceWriter<bool>::New(writeFormat_);
+    word writeFormat(dict.lookup("surfaceFormat"));
 
+    // define the surface formatter
+    formatter_ = surfaceWriter::New(writeFormat);
 
     PtrList<sampledSurface> newList
     (

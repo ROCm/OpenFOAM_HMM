@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,26 +22,39 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::surfaceWriter
+    Foam::starcdSurfaceWriter
 
 Description
+    A surfaceWriter for STARCD files.
+
+    The geometry is written via the MeshedSurfaceProxy, the fields
+    are written in a trivial ASCII format with ID and VALUE as
+    so-called user data. These @c .usr files can be read into proSTAR
+    with these types of commands. For element data:
+     @verbatim
+        getuser FILENAME.usr cell scalar free
+        getuser FILENAME.usr cell vector free
+    @endverbatim
+    and for vertex data:
+    @verbatim
+        getuser FILENAME.usr vertex scalar free
+        getuser FILENAME.usr vertex vector free
+    @endverbatim
+
+Note
+    Only scalar and vector fields are supported directly.
+    A sphericalTensor is written as a scalar.
+    Other field types are not written.
 
 SourceFiles
-    surfaceWriter.C
+    starcdSurfaceWriter.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfaceWriter_H
-#define surfaceWriter_H
+#ifndef starcdSurfaceWriter_H
+#define starcdSurfaceWriter_H
 
-#include "volFields.H"
-#include "typeInfo.H"
-#include "autoPtr.H"
-#include "pointField.H"
-#include "faceList.H"
-#include "fileName.H"
-
-#include "runTimeSelectionTables.H"
+#include "surfaceWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,42 +62,48 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class surfaceWriter Declaration
+                     Class starcdSurfaceWriter Declaration
 \*---------------------------------------------------------------------------*/
 
-class surfaceWriter
+class starcdSurfaceWriter
+:
+    public surfaceWriter
 {
+    // Private Member Functions
+
+        template<class Type>
+        static inline void writeData(Ostream&, const Type&);
+
+
+        //- Templated write operation
+        template<class Type>
+        void writeTemplate
+        (
+            const fileName& outputDir,
+            const fileName& surfaceName,
+            const pointField& points,
+            const faceList& faces,
+            const word& fieldName,
+            const Field<Type>& values,
+            const bool isNodeValues,
+            const bool verbose
+        ) const;
+
+
 public:
 
     //- Runtime type information
-    TypeName("surfaceWriter");
-
-    // Declare run-time constructor selection table
-
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            surfaceWriter,
-            word,
-            (),
-            ()
-        );
-
-
-    // Selectors
-
-        //- Return a reference to the selected surfaceWriter
-        static autoPtr<surfaceWriter> New(const word& writeFormat);
+    TypeName("starcd");
 
 
     // Constructors
 
         //- Construct null
-        surfaceWriter();
+        starcdSurfaceWriter();
 
 
     //- Destructor
-    virtual ~surfaceWriter();
+    virtual ~starcdSurfaceWriter();
 
 
     // Member Functions
@@ -93,21 +112,18 @@ public:
         //  False if geometry and field must be in a single file
         virtual bool separateGeometry()
         {
-            return false;
+            return true;
         }
-
 
         //- Write single surface geometry to file.
         virtual void write
         (
-            const fileName& outputDir,      // <root>/<case>/surface/TIME
-            const fileName& surfaceName,    // name of surface
+            const fileName& outputDir,
+            const fileName& surfaceName,
             const pointField& points,
             const faceList& faces,
             const bool verbose = false
-        ) const
-        {}
-
+        ) const;
 
         //- Write scalarField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
@@ -121,8 +137,7 @@ public:
             const Field<scalar>& values,
             const bool isNodeValues,
             const bool verbose = false
-        ) const
-        {}
+        ) const;
 
         //- Write vectorField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
@@ -136,8 +151,7 @@ public:
             const Field<vector>& values,
             const bool isNodeValues,
             const bool verbose = false
-        ) const
-        {}
+        ) const;
 
         //- Write sphericalTensorField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
@@ -151,39 +165,7 @@ public:
             const Field<sphericalTensor>& values,
             const bool isNodeValues,
             const bool verbose = false
-        ) const
-        {}
-
-        //- Write symmTensorField for a single surface to file.
-        //  One value per face or vertex (isNodeValues = true)
-        virtual void write
-        (
-            const fileName& outputDir,      // <root>/<case>/surface/TIME
-            const fileName& surfaceName,    // name of surface
-            const pointField& points,
-            const faceList& faces,
-            const word& fieldName,          // name of field
-            const Field<symmTensor>& values,
-            const bool isNodeValues,
-            const bool verbose = false
-        ) const
-        {}
-
-        //- Write tensorField for a single surface to file.
-        //  One value per face or vertex (isNodeValues = true)
-        virtual void write
-        (
-            const fileName& outputDir,      // <root>/<case>/surface/TIME
-            const fileName& surfaceName,    // name of surface
-            const pointField& points,
-            const faceList& faces,
-            const word& fieldName,          // name of field
-            const Field<tensor>& values,
-            const bool isNodeValues,
-            const bool verbose = false
-        ) const
-        {}
-
+        ) const;
 
 };
 

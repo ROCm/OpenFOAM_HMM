@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,8 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "foamFileSurfaceWriter.H"
+#include "starcdSurfaceWriter.H"
 
+#include "MeshedSurfaceProxy.H"
 #include "OFstream.H"
 #include "OSspecific.H"
 
@@ -34,14 +35,60 @@ License
 
 namespace Foam
 {
-    makeSurfaceWriterType(foamFileSurfaceWriter);
+    makeSurfaceWriterType(starcdSurfaceWriter);
 }
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+namespace Foam
+{
+    template<>
+    inline void Foam::starcdSurfaceWriter::writeData
+    (
+        Ostream& os,
+        const scalar& v
+    )
+    {
+        os  << v << nl;
+    }
+
+
+    template<>
+    inline void Foam::starcdSurfaceWriter::writeData
+    (
+        Ostream& os,
+        const vector& v
+    )
+    {
+        os  << v[0] << ' ' << v[1] << ' ' << v[2] << nl;
+    }
+
+
+    template<>
+    inline void Foam::starcdSurfaceWriter::writeData
+    (
+        Ostream& os,
+        const sphericalTensor& v
+    )
+    {
+        os  << v[0] << nl;
+    }
+
+}
+
+
 template<class Type>
-void Foam::foamFileSurfaceWriter::writeTemplate
+inline void Foam::starcdSurfaceWriter::writeData
+(
+    Ostream& os,
+    const Type& v
+)
+{}
+
+
+template<class Type>
+void Foam::starcdSurfaceWriter::writeTemplate
 (
     const fileName& outputDir,
     const fileName& surfaceName,
@@ -53,37 +100,31 @@ void Foam::foamFileSurfaceWriter::writeTemplate
     const bool verbose
 ) const
 {
-    fileName surfaceDir(outputDir/surfaceName);
-
-    if (!isDir(surfaceDir))
+    if (!isDir(outputDir))
     {
-        mkDir(surfaceDir);
+        mkDir(outputDir);
     }
+
+    OFstream os(outputDir/fieldName + '_' + surfaceName + ".usr");
 
     if (verbose)
     {
-        Info<< "Writing field " << fieldName << " to " << surfaceDir << endl;
+        Info<< "Writing field " << fieldName << " to " << os.name() << endl;
     }
 
-    // geometry should already have been written
-    // Values to separate directory (e.g. "scalarField/p")
-
-    fileName foamName(pTraits<Type>::typeName);
-    fileName valuesDir(surfaceDir  / (foamName + Field<Type>::typeName));
-
-    if (!isDir(valuesDir))
+    // no header, just write values
+    forAll(values, elemI)
     {
-        mkDir(valuesDir);
+        os  << elemI+1 << ' ';
+        writeData(os, values[elemI]);
     }
-
-    // values
-    OFstream(valuesDir/fieldName)()  << values;
 }
+
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::foamFileSurfaceWriter::foamFileSurfaceWriter()
+Foam::starcdSurfaceWriter::starcdSurfaceWriter()
 :
     surfaceWriter()
 {}
@@ -91,13 +132,13 @@ Foam::foamFileSurfaceWriter::foamFileSurfaceWriter()
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::foamFileSurfaceWriter::~foamFileSurfaceWriter()
+Foam::starcdSurfaceWriter::~starcdSurfaceWriter()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::foamFileSurfaceWriter::write
+void Foam::starcdSurfaceWriter::write
 (
     const fileName& outputDir,
     const fileName& surfaceName,
@@ -106,40 +147,26 @@ void Foam::foamFileSurfaceWriter::write
     const bool verbose
 ) const
 {
-    fileName surfaceDir(outputDir/surfaceName);
-
-    if (!isDir(surfaceDir))
+    if (!isDir(outputDir))
     {
-        mkDir(surfaceDir);
+        mkDir(outputDir);
     }
+
+    fileName outName(outputDir/surfaceName + ".inp");
 
     if (verbose)
     {
-        Info<< "Writing geometry to " << surfaceDir << endl;
+        Info<< "Writing geometry to " << outName << endl;
     }
 
-
-    // Points
-    OFstream(surfaceDir/"points")() << points;
-
-    // Faces
-    OFstream(surfaceDir/"faces")() << faces;
-
-    // Face centers. Not really necessary but very handy when reusing as inputs
-    // for e.g. timeVaryingMapped bc.
-    pointField faceCentres(faces.size(),point::zero);
-
-    forAll(faces, faceI)
-    {
-        faceCentres[faceI] = faces[faceI].centre(points);
-    }
-
-    OFstream(surfaceDir/"faceCentres")() << faceCentres;
+    MeshedSurfaceProxy<face>(points, faces).write(outName);
 }
 
 
 // create write methods
-defineSurfaceWriterWriteFields(Foam::foamFileSurfaceWriter);
+defineSurfaceWriterWriteField(Foam::starcdSurfaceWriter, scalar);
+defineSurfaceWriterWriteField(Foam::starcdSurfaceWriter, vector);
+defineSurfaceWriterWriteField(Foam::starcdSurfaceWriter, sphericalTensor);
 
 
 // ************************************************************************* //

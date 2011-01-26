@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,6 +31,16 @@ License
 #include "ensightGeoFile.H"
 #include "ensightPartNonMeshFaces.H"
 
+#include "makeSurfaceWriterMethods.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    makeSurfaceWriterType(ensightSurfaceWriter);
+}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 namespace Foam
@@ -38,30 +48,15 @@ namespace Foam
 
     // Write scalarField in ensight format
     template<>
-    void Foam::ensightSurfaceWriter<Foam::scalar>::writeData
+    inline void Foam::ensightSurfaceWriter::writeData
     (
         Ostream& os,
-        const Field<Foam::scalar>& values
+        const Field<scalar>& values
     )
     {
         forAll(values, i)
         {
-            os << values[i] << nl;
-        }
-    }
-
-
-    // Write booField in ensight format
-    template<>
-    void Foam::ensightSurfaceWriter<bool>::writeData
-    (
-        Ostream& os,
-        const Field<bool>& values
-    )
-    {
-        forAll(values, i)
-        {
-            os << values[i] << nl;
+            os  << values[i] << nl;
         }
     }
 }
@@ -69,96 +64,25 @@ namespace Foam
 
 // Write generic field in ensight format
 template<class Type>
-void Foam::ensightSurfaceWriter<Type>::writeData
+inline void Foam::ensightSurfaceWriter::writeData
 (
     Ostream& os,
     const Field<Type>& values
 )
 {
-    for (direction cmpt = 0; cmpt < vector::nComponents; cmpt++)
+    for (direction cmpt = 0; cmpt < vector::nComponents; ++cmpt)
     {
         scalarField v(values.component(cmpt));
         forAll(v, i)
         {
-            os << v[i] << nl;
+            os  << v[i] << nl;
         }
     }
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-// Construct from components
 template<class Type>
-Foam::ensightSurfaceWriter<Type>::ensightSurfaceWriter()
-:
-    surfaceWriter<Type>()
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::ensightSurfaceWriter<Type>::~ensightSurfaceWriter()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-void Foam::ensightSurfaceWriter<Type>::write
-(
-    const fileName& outputDir,
-    const fileName& surfaceName,
-    const pointField& points,
-    const faceList& faces,
-    const bool verbose
-) const
-{
-    if (!isDir(outputDir))
-    {
-        mkDir(outputDir);
-    }
-
-    //const scalar timeValue = Foam::name(this->mesh().time().timeValue());
-    const scalar timeValue = 0.0;
-
-
-    OFstream caseStr(outputDir/surfaceName + ".case");
-    ensightGeoFile geomStr
-    (
-        outputDir/surfaceName + ".000.mesh",
-        IOstream::ASCII
-    );
-
-    if (verbose)
-    {
-        Info<< "Writing case file to " << caseStr.name() << endl;
-    }
-
-    caseStr
-        << "FORMAT" << nl
-        << "type: ensight gold" << nl
-        << nl
-        << "GEOMETRY" << nl
-        << "model:        1     " << geomStr.name().name() << nl
-        << nl
-        << "TIME" << nl
-        << "time set:                      1" << nl
-        << "number of steps:               1" << nl
-        << "filename start number:         0" << nl
-        << "filename increment:            1" << nl
-        << "time values:" << nl
-        << timeValue << nl
-        << nl;
-
-    ensightPartNonMeshFaces faceWriter(0, geomStr.name().name(), faces, points);
-    faceWriter.writeGeometry(geomStr);
-}
-
-
-template<class Type>
-void Foam::ensightSurfaceWriter<Type>::write
+void Foam::ensightSurfaceWriter::writeTemplate
 (
     const fileName& outputDir,
     const fileName& surfaceName,
@@ -175,9 +99,8 @@ void Foam::ensightSurfaceWriter<Type>::write
         mkDir(outputDir/fieldName);
     }
 
-    //const scalar timeValue = Foam::name(this->mesh().time().timeValue());
+    // const scalar timeValue = Foam::name(this->mesh().time().timeValue());
     const scalar timeValue = 0.0;
-
 
     OFstream caseStr(outputDir/fieldName/surfaceName + ".case");
     ensightGeoFile geomStr
@@ -230,8 +153,8 @@ void Foam::ensightSurfaceWriter<Type>::write
         << timeValue << nl
         << nl;
 
-    ensightPartNonMeshFaces faceWriter(0, geomStr.name().name(), faces, points);
-    faceWriter.writeGeometry(geomStr);
+    ensightPartNonMeshFaces ensPart(0, geomStr.name().name(), faces, points);
+    geomStr << ensPart;
 
     // Write field
     fieldStr
@@ -246,25 +169,96 @@ void Foam::ensightSurfaceWriter<Type>::write
     }
     else
     {
-        //faceWriter.writeField(fieldStr, values);
-        forAll(faceWriter.elementTypes(), elemI)
+        // ensPart.writeField(fieldStr, values);
+        forAll(ensPart.elementTypes(), elemI)
         {
-            if (faceWriter.elemLists()[elemI].size())
+            if (ensPart.elemLists()[elemI].size())
             {
-                fieldStr.writeKeyword(faceWriter.elementTypes()[elemI]);
+                fieldStr.writeKeyword(ensPart.elementTypes()[elemI]);
                 writeData
                 (
                     fieldStr,
                     Field<Type>
                     (
                         values,
-                        faceWriter.elemLists()[elemI]
+                        ensPart.elemLists()[elemI]
                     )
                 );
             }
         }
     }
 }
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::ensightSurfaceWriter::ensightSurfaceWriter()
+:
+    surfaceWriter()
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::ensightSurfaceWriter::~ensightSurfaceWriter()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::ensightSurfaceWriter::write
+(
+    const fileName& outputDir,
+    const fileName& surfaceName,
+    const pointField& points,
+    const faceList& faces,
+    const bool verbose
+) const
+{
+    if (!isDir(outputDir))
+    {
+        mkDir(outputDir);
+    }
+
+    //const scalar timeValue = Foam::name(this->mesh().time().timeValue());
+    const scalar timeValue = 0.0;
+
+
+    OFstream caseStr(outputDir/surfaceName + ".case");
+    ensightGeoFile geomStr
+    (
+        outputDir/surfaceName + ".000.mesh",
+        IOstream::ASCII
+    );
+
+    if (verbose)
+    {
+        Info<< "Writing case file to " << caseStr.name() << endl;
+    }
+
+    caseStr
+        << "FORMAT" << nl
+        << "type: ensight gold" << nl
+        << nl
+        << "GEOMETRY" << nl
+        << "model:        1     " << geomStr.name().name() << nl
+        << nl
+        << "TIME" << nl
+        << "time set:                      1" << nl
+        << "number of steps:               1" << nl
+        << "filename start number:         0" << nl
+        << "filename increment:            1" << nl
+        << "time values:" << nl
+        << timeValue << nl
+        << nl;
+
+    ensightPartNonMeshFaces ensPart(0, geomStr.name().name(), faces, points);
+    geomStr << ensPart;
+}
+
+
+// create write methods
+defineSurfaceWriterWriteFields(Foam::ensightSurfaceWriter);
 
 
 // ************************************************************************* //

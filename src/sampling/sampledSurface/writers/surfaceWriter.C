@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,47 +26,43 @@ License
 #include "surfaceWriter.H"
 
 #include "MeshedSurfaceProxy.H"
-#include "nullSurfaceWriter.H"
 #include "proxySurfaceWriter.H"
 
 #include "HashTable.H"
 #include "word.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::autoPtr< Foam::surfaceWriter<Type> >
-Foam::surfaceWriter<Type>::New(const word& writeType)
+namespace Foam
 {
-    typename wordConstructorTable::iterator cstrIter =
+    defineTypeNameAndDebug(surfaceWriter, 0);
+    defineRunTimeSelectionTable(surfaceWriter, word);
+    addNamedToRunTimeSelectionTable
+    (
+        surfaceWriter,
+        surfaceWriter,
+        word,
+        null
+    );
+}
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::surfaceWriter>
+Foam::surfaceWriter::New(const word& writeType)
+{
+    wordConstructorTable::iterator cstrIter =
         wordConstructorTablePtr_->find(writeType);
 
     if (cstrIter == wordConstructorTablePtr_->end())
     {
-        // not supported for this data type, but it generally does work
-        // (it handles the 'bool' specialization - ie, geometry write)
-        if
-        (
-            Foam::surfaceWriter<bool>::wordConstructorTablePtr_->found
-            (
-                writeType
-            )
-        )
-        {
-            // use 'null' handler instead
-            return autoPtr< surfaceWriter<Type> >
-            (
-                new nullSurfaceWriter<Type>()
-            );
-        }
-        else if (MeshedSurfaceProxy<face>::canWriteType(writeType))
+        if (MeshedSurfaceProxy<face>::canWriteType(writeType))
         {
             // generally unknown, but can be written via MeshedSurfaceProxy
             // use 'proxy' handler instead
-            return autoPtr< surfaceWriter<Type> >
-            (
-                new proxySurfaceWriter<Type>(writeType)
-            );
+            return autoPtr<surfaceWriter>(new proxySurfaceWriter(writeType));
         }
 
         if (cstrIter == wordConstructorTablePtr_->end())
@@ -83,24 +79,20 @@ Foam::surfaceWriter<Type>::New(const word& writeType)
         }
     }
 
-    return autoPtr< surfaceWriter<Type> >(cstrIter()());
+    return autoPtr<surfaceWriter>(cstrIter()());
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::surfaceWriter<Type>::surfaceWriter()
+Foam::surfaceWriter::surfaceWriter()
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::surfaceWriter<Type>::~surfaceWriter()
+Foam::surfaceWriter::~surfaceWriter()
 {}
 
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 // ************************************************************************* //
