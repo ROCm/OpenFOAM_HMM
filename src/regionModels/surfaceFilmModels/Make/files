@@ -1,0 +1,45 @@
+/* Surface film models */
+surfaceFilmModel/surfaceFilmModel.C
+surfaceFilmModel/surfaceFilmModelNew.C
+noFilm/noFilm.C
+kinematicSingleLayer/kinematicSingleLayer.C
+thermoSingleLayer/thermoSingleLayer.C
+
+
+/* Sub-models */
+submodels/subModelBase.C
+
+KINEMATICMODELS=submodels/kinematic
+$(KINEMATICMODELS)/injectionModel/injectionModel/injectionModel.C
+$(KINEMATICMODELS)/injectionModel/injectionModel/injectionModelNew.C
+$(KINEMATICMODELS)/injectionModel/noInjection/noInjection.C
+$(KINEMATICMODELS)/injectionModel/cloudInjection/cloudInjection.C
+$(KINEMATICMODELS)/injectionModel/removeInjection/removeInjection.C
+
+THERMOMODELS=submodels/thermo
+$(THERMOMODELS)/phaseChangeModel/phaseChangeModel/phaseChangeModel.C
+$(THERMOMODELS)/phaseChangeModel/phaseChangeModel/phaseChangeModelNew.C
+$(THERMOMODELS)/phaseChangeModel/noPhaseChange/noPhaseChange.C
+$(THERMOMODELS)/phaseChangeModel/standardPhaseChange/standardPhaseChange.C
+
+$(THERMOMODELS)/heatTransferModel/heatTransferModel/heatTransferModel.C
+$(THERMOMODELS)/heatTransferModel/heatTransferModel/heatTransferModelNew.C
+$(THERMOMODELS)/heatTransferModel/constantHeatTransfer/constantHeatTransfer.C
+$(THERMOMODELS)/heatTransferModel/mappedConvectiveHeatTransfer/mappedConvectiveHeatTransfer.C
+
+$(THERMOMODELS)/filmRadiationModel/filmRadiationModel/filmRadiationModel.C
+$(THERMOMODELS)/filmRadiationModel/filmRadiationModel/filmRadiationModelNew.C
+$(THERMOMODELS)/filmRadiationModel/noRadiation/noRadiation.C
+$(THERMOMODELS)/filmRadiationModel/standardRadiation/standardRadiation.C
+
+
+/* Boundary conditions */
+derivedFvPatchFields/filmHeightInletVelocity/filmHeightInletVelocityFvPatchVectorField.C
+derivedFvPatchFields/htcConv/htcConvFvPatchScalarField.C
+
+/* Wall functions for primary region */
+derivedFvPatchFields/wallFunctions/alphatFilmWallFunction/alphatFilmWallFunctionFvPatchScalarField.C
+derivedFvPatchFields/wallFunctions/mutkFilmWallFunction/mutkFilmWallFunctionFvPatchScalarField.C
+
+
+LIB = $(FOAM_LIBBIN)/libsurfaceFilmModels

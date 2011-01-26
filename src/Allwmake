@@ -58,7 +58,7 @@ wmake libso randomProcesses
 thermophysicalModels/Allwmake
 transportModels/Allwmake
 turbulenceModels/Allwmake
-wmake libso surfaceFilmModels
+regionModels/Allwmake
 lagrangian/Allwmake
 postProcessing/Allwmake
 mesh/Allwmake
