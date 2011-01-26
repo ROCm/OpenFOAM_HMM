@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ Description
 SourceFiles
     ensightPart.C
     ensightPartIO.C
-    ensightPartI.H
+    ensightPartTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -52,7 +52,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class ensightPart Declaration
+                         Class ensightPart Declaration
 \*---------------------------------------------------------------------------*/
 
 class ensightPart
@@ -60,7 +60,7 @@ class ensightPart
     // Private data
 
         // Static data members
-        static List<word> elemTypes_;
+        static const List<word> elemTypes_;
 
 
 protected:
@@ -88,8 +88,8 @@ protected:
         //- material id (numeric)
         label matId_;
 
-        //- mesh reference used
-        const polyMesh* meshPtr_;
+        //- pointField referenced
+        const pointField& points_;
 
 
     // Protected Classes
@@ -104,25 +104,27 @@ protected:
             //- map global to local indices
             labelList list;
 
-            // null constructor
+            //- null constructor
             localPoints()
             :
                 nPoints(0),
                 list(0)
             {}
 
-            // construct for mesh points
-            localPoints(const polyMesh& pMesh)
+            //- construct for mesh points
+            localPoints(const pointField& pts)
             :
                 nPoints(0),
-                list(pMesh.points().size(), -1)
+                list(pts.size(), -1)
             {}
         };
 
 
     // Protected Member Functions
 
-        //- reconstruct contents from Istream
+        //- Reconstruct part characteristics (eg, element types) from Istream
+        //  A part reconstructed in this manner can be used when writing fields,
+        //  but cannot be used to write a new geometry
         void reconstruct(Istream&);
 
         //- check for fully defined fields
@@ -170,12 +172,12 @@ public:
         //- Construct empty part with number and description
         ensightPart(label partNumber, const string& partDescription);
 
-        //- Construct empty part with number and description
+        //- Construct part with number, description and points reference
         ensightPart
         (
             label partNumber,
             const string& partDescription,
-            const polyMesh& pMesh
+            const pointField& points
         );
 
         //- Construct as copy
@@ -202,8 +204,9 @@ public:
             return autoPtr<ensightPart>(new ensightPart(*this));
         };
 
-        //- Construct on freestore from Istream
-        static autoPtr<ensightPart> New(Istream& is);
+        //- Reconstruct part characteristics on freestore from Istream
+        //  @sa reconstruct
+        static autoPtr<ensightPart> New(Istream&);
 
 
     //- Destructor
@@ -212,7 +215,7 @@ public:
 
     // Static members
 
-        virtual List<word> const& elementTypes() const
+        virtual const List<word>& elementTypes() const
         {
             return elemTypes_;
         }
@@ -256,12 +259,13 @@ public:
             return matId_;
         }
 
-        //- non-const access
+        //- non-const access to part name or description
         void name(const string& value)
         {
             name_ = value;
         }
 
+        //- non-const access to material id
         void materialId(const label value)
         {
             matId_ = value;
@@ -283,7 +287,7 @@ public:
     // Edit
 
         //- renumber elements
-        void renumber(labelList const&);
+        void renumber(const labelList&);
 
         //- write summary information about the object
         bool writeSummary(Ostream&) const;
@@ -296,7 +300,7 @@ public:
         {}
 
         //- Helper: write geometry given the pointField
-        void writeGeometry(ensightGeoFile&, const pointField& points) const;
+        void writeGeometry(ensightGeoFile&, const pointField&) const;
 
         //- write scalar field
         void writeScalarField
@@ -316,7 +320,7 @@ public:
 
 
         //- write generalized field components
-        template <class Type>
+        template<class Type>
         void writeField
         (
             ensightFile&,
@@ -339,11 +343,8 @@ public:
         friend Ostream& operator<<(Ostream&, const ensightPart&);
 
         //- write geometry
-        friend ensightGeoFile& operator<<
-        (
-            ensightGeoFile&,
-            const ensightPart&
-        );
+        friend ensightGeoFile& operator<<(ensightGeoFile&, const ensightPart&);
+
 };
 
 
@@ -354,7 +355,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "ensightPartI.H"
+#   include "ensightPartTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

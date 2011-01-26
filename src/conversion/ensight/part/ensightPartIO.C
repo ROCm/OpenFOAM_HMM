@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -77,6 +77,32 @@ void Foam::ensightPart::writeFieldList
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::ensightPart::reconstruct(Istream& is)
+{
+    dictionary dict(is);
+    dict.lookup("id") >> number_;
+    dict.lookup("name") >> name_;
+
+    offset_ = 0;
+    dict.readIfPresent("offset", offset_);
+
+    // populate elemLists_
+    elemLists_.setSize(elementTypes().size());
+
+    forAll(elementTypes(), elemI)
+    {
+        word key(elementTypes()[elemI]);
+
+        elemLists_[elemI].clear();
+        dict.readIfPresent(key, elemLists_[elemI]);
+
+        size_ += elemLists_[elemI].size();
+    }
+
+    is.check("ensightPart::reconstruct(Istream&)");
+}
+
+
 bool Foam::ensightPart::writeSummary(Ostream& os) const
 {
     os  << indent << type() << nl
@@ -88,7 +114,7 @@ bool Foam::ensightPart::writeSummary(Ostream& os) const
     os.writeKeyword("offset") << offset() << token::END_STATEMENT << nl;
     os.writeKeyword("size") << size() << token::END_STATEMENT << nl;
 
-    os   << decrIndent << indent << token::END_BLOCK << nl << endl;
+    os  << decrIndent << indent << token::END_BLOCK << nl << endl;
 
     return true;
 }
@@ -112,7 +138,7 @@ bool Foam::ensightPart::writeData(Ostream& os) const
         }
     }
 
-    os   << decrIndent << indent << token::END_BLOCK << nl << endl;
+    os  << decrIndent << indent << token::END_BLOCK << nl << endl;
 
     return true;
 }
@@ -136,13 +162,13 @@ void Foam::ensightPart::writeGeometry
         os.write(ptList.nPoints);
         os.newline();
 
-        for (direction cmpt=0; cmpt < vector::nComponents; cmpt++)
+        for (direction cmpt=0; cmpt < point::nComponents; ++cmpt)
         {
             forAll(pointMap, ptI)
             {
                 if (pointMap[ptI] > -1)
                 {
-                    os.write( points[ptI].component(cmpt) );
+                    os.write(points[ptI].component(cmpt));
                     os.newline();
                 }
             }
@@ -182,7 +208,7 @@ void Foam::ensightPart::writeScalarField
 
             if (idList.size())
             {
-                os.writeKeyword( elementTypes()[elemI] );
+                os.writeKeyword(elementTypes()[elemI]);
                 writeFieldList(os, field, idList);
             }
         }
@@ -208,7 +234,7 @@ void Foam::ensightPart::writeVectorField
 
             if (idList.size())
             {
-                os.writeKeyword( elementTypes()[elemI] );
+                os.writeKeyword(elementTypes()[elemI]);
                 writeFieldList(os, field0, idList);
                 writeFieldList(os, field1, idList);
                 writeFieldList(os, field2, idList);

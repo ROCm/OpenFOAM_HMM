@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,22 +24,21 @@ License
 \*----------------------------------------------------------------------------*/
 
 #include "ensightPartCells.H"
-#include "addToRunTimeSelectionTable.H"
 #include "IOstream.H"
 #include "IStringStream.H"
 #include "dictionary.H"
 #include "cellModeller.H"
-
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-   defineTypeNameAndDebug(ensightPartCells, 0);
-   addToRunTimeSelectionTable(ensightPart, ensightPartCells, istream);
+    defineTypeNameAndDebug(ensightPartCells, 0);
+    addToRunTimeSelectionTable(ensightPart, ensightPartCells, istream);
 }
 
-Foam::List<Foam::word> Foam::ensightPartCells::elemTypes_
+const Foam::List<Foam::word> Foam::ensightPartCells::elemTypes_
 (
     IStringStream
     (
@@ -50,7 +49,11 @@ Foam::List<Foam::word> Foam::ensightPartCells::elemTypes_
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::ensightPartCells::classify(const labelList& idList)
+void Foam::ensightPartCells::classify
+(
+    const polyMesh& mesh,
+    const labelList& idList
+)
 {
     // References to cell shape models
     const cellModel& tet   = *(cellModeller::lookup("tet"));
@@ -58,7 +61,6 @@ void Foam::ensightPartCells::classify(const labelList& idList)
     const cellModel& prism = *(cellModeller::lookup("prism"));
     const cellModel& hex   = *(cellModeller::lookup("hex"));
 
-    const polyMesh& mesh = *meshPtr_;
     const cellShapeList& cellShapes = mesh.cellShapes();
 
     offset_ = 0;
@@ -77,13 +79,6 @@ void Foam::ensightPartCells::classify(const labelList& idList)
     label nPrism = 0;
     label nHex   = 0;
     label nPoly  = 0;
-
-
-    // TODO: allow tet-decomposition of polyhedral cells
-#if 0
-    label nTetDecomp = 0;
-    label nPyrDecomp = 0;
-#endif
 
     for (label listI = 0; listI < size_; ++listI)
     {
@@ -115,26 +110,6 @@ void Foam::ensightPartCells::classify(const labelList& idList)
         else
         {
             nPoly++;
-
-            // TODO: allow tet-decomposition of polyhedral cells
-#if 0
-            const cell& cFaces = mesh.cells()[cellI];
-
-            forAll(cFaces, cFaceI)
-            {
-                const face& f = mesh.faces()[cFaces[cFaceI]];
-
-                label nQuads = 0;
-                label nTris = 0;
-                f.nTrianglesQuads(mesh.points(), nTris, nQuads);
-
-                nTetDecomp += nTris;
-                nPyrDecomp += nQuads;
-            }
-
-            nAddCells--;
-            nAddPoints++;
-#endif
         }
     }
 
@@ -183,29 +158,6 @@ void Foam::ensightPartCells::classify(const labelList& idList)
         else
         {
             polyCells[nPoly++] = cellId;
-
-            // TODO: allow tet-decomposition of polyhedral cells
-#if 0
-            // Mapping from additional point to cell
-            addPointCellLabels_[api] = cellId;
-
-            const cell& cFaces = mesh.cells()[cellId];
-
-            forAll(cFaces, cFaceI)
-            {
-                const face& f = mesh.faces()[cFaces[cFaceI]];
-
-                label nQuads = 0;
-                label nTris = 0;
-                f.nTrianglesQuads(mesh.points(), nTris, nQuads);
-
-                nTetDecomp += nTris;
-                nPyrDecomp += nQuads;
-            }
-
-            nAddCells--;
-            nAddPoints++;
-#endif
         }
     }
 
@@ -213,11 +165,11 @@ void Foam::ensightPartCells::classify(const labelList& idList)
     // MUST match with elementTypes
     elemLists_.setSize(elementTypes().size());
 
-    elemLists_[tetra4Elements].transfer( tetCells );
-    elemLists_[pyramid5Elements].transfer( pyramidCells );
-    elemLists_[penta6Elements].transfer( prismCells );
-    elemLists_[hexa8Elements].transfer( hexCells );
-    elemLists_[nfacedElements].transfer( polyCells );
+    elemLists_[tetra4Elements].transfer(tetCells);
+    elemLists_[pyramid5Elements].transfer(pyramidCells);
+    elemLists_[penta6Elements].transfer(prismCells);
+    elemLists_[hexa8Elements].transfer(hexCells);
+    elemLists_[nfacedElements].transfer(polyCells);
 }
 
 
@@ -229,57 +181,63 @@ Foam::ensightPartCells::ensightPartCells
     const string& partDescription
 )
 :
-    ensightPart(partNumber, partDescription)
+    ensightPart(partNumber, partDescription),
+    mesh_(*reinterpret_cast<polyMesh*>(0))
 {}
 
 
 Foam::ensightPartCells::ensightPartCells
 (
     label partNumber,
-    const polyMesh& pMesh
+    const polyMesh& mesh
 )
 :
-    ensightPart(partNumber, "cells", pMesh)
+    ensightPart(partNumber, "cells", mesh.points()),
+    mesh_(mesh)
 {
-    classify();
+    classify(mesh);
 }
 
 
 Foam::ensightPartCells::ensightPartCells
 (
     label partNumber,
-    const polyMesh& pMesh,
+    const polyMesh& mesh,
     const labelList& idList
 )
 :
-    ensightPart(partNumber, "cells", pMesh)
+    ensightPart(partNumber, "cells", mesh.points()),
+    mesh_(mesh)
 {
-    classify(idList);
+    classify(mesh, idList);
 }
 
 
 Foam::ensightPartCells::ensightPartCells
 (
     label partNumber,
-    const polyMesh& pMesh,
+    const polyMesh& mesh,
     const cellZone& cZone
 )
 :
-    ensightPart(partNumber, cZone.name(), pMesh)
+    ensightPart(partNumber, cZone.name(), mesh.points()),
+    mesh_(mesh)
 {
-    classify(cZone);
+    classify(mesh, cZone);
 }
 
 
 Foam::ensightPartCells::ensightPartCells(const ensightPartCells& part)
 :
-    ensightPart(part)
+    ensightPart(part),
+    mesh_(part.mesh_)
 {}
 
 
 Foam::ensightPartCells::ensightPartCells(Istream& is)
 :
-    ensightPart()
+    ensightPart(),
+    mesh_(*reinterpret_cast<polyMesh*>(0))
 {
     reconstruct(is);
 }
@@ -295,9 +253,7 @@ Foam::ensightPartCells::~ensightPartCells()
 
 Foam::ensightPart::localPoints Foam::ensightPartCells::calcLocalPoints() const
 {
-    const polyMesh& mesh = *meshPtr_;
-
-    localPoints ptList(mesh);
+    localPoints ptList(points_);
     labelList& usedPoints = ptList.list;
     label nPoints = 0;
 
@@ -309,11 +265,11 @@ Foam::ensightPart::localPoints Foam::ensightPartCells::calcLocalPoints() const
         forAll(idList, i)
         {
             label id = idList[i] + offset_;
-            const labelList& cFaces = mesh.cells()[id];
+            const labelList& cFaces = mesh_.cells()[id];
 
             forAll(cFaces, cFaceI)
             {
-                const face& f = mesh.faces()[cFaces[cFaceI]];
+                const face& f = mesh_.faces()[cFaces[cFaceI]];
 
                 forAll(f, fp)
                 {
@@ -353,20 +309,18 @@ void Foam::ensightPartCells::writeConnectivity
     os.write(idList.size());
     os.newline();
 
-    const polyMesh& mesh = *meshPtr_;
-
     // write polyhedral
     if (key == "nfaced")
     {
-        const faceList& meshFaces = mesh.faces();
+        const faceList& meshFaces = mesh_.faces();
 
         // write the number of faces per element
         forAll(idList, i)
         {
             label id = idList[i] + offset_;
-            const labelList& cFace = mesh.cells()[id];
+            const labelList& cFace = mesh_.cells()[id];
 
-            os.write( cFace.size() );
+            os.write(cFace.size());
             os.newline();
         }
 
@@ -374,13 +328,13 @@ void Foam::ensightPartCells::writeConnectivity
         forAll(idList, i)
         {
             label id = idList[i] + offset_;
-            const labelList& cFace = mesh.cells()[id];
+            const labelList& cFace = mesh_.cells()[id];
 
             forAll(cFace, faceI)
             {
                 const face& cf = meshFaces[cFace[faceI]];
 
-                os.write( cf.size() );
+                os.write(cf.size());
                 os.newline();
             }
         }
@@ -389,7 +343,7 @@ void Foam::ensightPartCells::writeConnectivity
         forAll(idList, i)
         {
             label id = idList[i] + offset_;
-            const labelList& cFace = mesh.cells()[id];
+            const labelList& cFace = mesh_.cells()[id];
 
             forAll(cFace, faceI)
             {
@@ -399,7 +353,7 @@ void Foam::ensightPartCells::writeConnectivity
                 {
                     // convert global -> local index
                     // (note: Ensight indices start with 1)
-                    os.write( pointMap[cf[ptI]] + 1);
+                    os.write(pointMap[cf[ptI]] + 1);
                 }
                 os.newline();
             }
@@ -408,7 +362,7 @@ void Foam::ensightPartCells::writeConnectivity
     else
     {
         // write primitive
-        const cellShapeList& cellShapes = mesh.cellShapes();
+        const cellShapeList& cellShapes = mesh_.cellShapes();
 
         forAll(idList, i)
         {
@@ -419,7 +373,7 @@ void Foam::ensightPartCells::writeConnectivity
             // (note: Ensight indices start with 1)
             forAll(cellPoints, ptI)
             {
-                os.write( pointMap[cellPoints[ptI]] + 1 );
+                os.write(pointMap[cellPoints[ptI]] + 1);
             }
             os.newline();
         }
@@ -429,8 +383,7 @@ void Foam::ensightPartCells::writeConnectivity
 
 void Foam::ensightPartCells::writeGeometry(ensightGeoFile& os) const
 {
-    const polyMesh& mesh = *meshPtr_;
-    ensightPart::writeGeometry(os, mesh.points());
+    ensightPart::writeGeometry(os, points_);
 }
 
 

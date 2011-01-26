@@ -28,8 +28,7 @@ License
 #include "OFstream.H"
 #include "OSspecific.H"
 #include "IOmanip.H"
-#include "ensightGeoFile.H"
-#include "ensightPartNonMeshFaces.H"
+#include "ensightPartFaces.H"
 
 #include "makeSurfaceWriterMethods.H"
 
@@ -153,7 +152,7 @@ void Foam::ensightSurfaceWriter::writeTemplate
         << timeValue << nl
         << nl;
 
-    ensightPartNonMeshFaces ensPart(0, geomStr.name().name(), faces, points);
+    ensightPartFaces ensPart(0, geomStr.name().name(), points, faces, true);
     geomStr << ensPart;
 
     // Write field
@@ -252,7 +251,7 @@ void Foam::ensightSurfaceWriter::write
         << timeValue << nl
         << nl;
 
-    ensightPartNonMeshFaces ensPart(0, geomStr.name().name(), faces, points);
+    ensightPartFaces ensPart(0, geomStr.name().name(), points, faces, true);
     geomStr << ensPart;
 }
 

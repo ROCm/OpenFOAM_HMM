@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,41 +61,52 @@ class ensightPartFaces
         //- element connectivity
         virtual void writeConnectivity
         (
-            ensightGeoFile& os,
+            ensightGeoFile&,
             const word& key,
             const labelList& idList,
             const labelList& pointMap
         ) const;
 
-        //- write geometry
-        virtual void writeGeometry(ensightGeoFile& os) const;
-
 
 protected:
 
-    //- addressable ensight element types
-    enum elemType
-    {
-        tria3Elements,
-        quad4Elements,
-        nsidedElements
-    };
+        //- addressable ensight element types
+        enum elemType
+        {
+            tria3Elements,
+            quad4Elements,
+            nsidedElements
+        };
+
 
     // Static data members
-    static List<word> elemTypes_;
 
-    //- Divide the shapes, set elemLists.
-    void binShapes(const faceList& faces);
+        static const List<word> elemTypes_;
 
-    //- Helper: write connectivity
-    void writeConnectivity
-    (
-        ensightGeoFile& os,
-        const word& key,
-        const faceList& faces,
-        const labelList& idList,
-        const labelList& pointMap
-    ) const;
+
+    // Protected data
+
+        //- faces referenced
+        const faceList& faces_;
+
+        //- Can skip local point renumbering when points are contiguous
+        const bool contiguousPoints_;
+
+
+    // Protected Member Functions
+
+        //- Classify the face shapes, set elemLists.
+        void classify(const faceList&);
+
+        //- Helper: write connectivity
+        void writeConnectivity
+        (
+            ensightGeoFile&,
+            const word& key,
+            const faceList&,
+            const labelList& idList,
+            const labelList& pointMap
+        ) const;
 
 
 public:
@@ -108,6 +119,17 @@ public:
         //- Construct empty part with number and description
         ensightPartFaces(label partNumber, const string& partDescription);
 
+        //- Construct part with number, description, points and faces
+        //  Can skip local point renumbering when points are contiguous
+        ensightPartFaces
+        (
+            label partNumber,
+            const string& partDescription,
+            const pointField&,
+            const faceList&,
+            const bool contiguousPoints = false
+        );
+
         //- Construct from polyMesh and polyPatch
         ensightPartFaces
         (
@@ -119,10 +141,13 @@ public:
         //- Construct as copy
         ensightPartFaces(const ensightPartFaces&);
 
-        //- Construct from Istream
+        //- Reconstruct part characteristics (eg, element types) from Istream
+        //  A part reconstructed in this manner can be used when writing fields,
+        //  but cannot be used to write a new geometry
+        //  @sa Foam::ensightPart::reconstruct
         ensightPartFaces(Istream&);
 
-        //- Construct on freestore from Istream
+        //- Reconstruct part characteristics on freestore from Istream
         static autoPtr<ensightPartFaces> New(Istream& is)
         {
             return autoPtr<ensightPartFaces>(new ensightPartFaces(is));
@@ -135,8 +160,11 @@ public:
 
     // Member Functions
 
+        //- write geometry
+        virtual void writeGeometry(ensightGeoFile&) const;
+
         //- static listing of the element types
-        virtual List<word> const& elementTypes() const
+        virtual const List<word>& elementTypes() const
         {
             return elemTypes_;
         }

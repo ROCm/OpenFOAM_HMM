@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,8 +56,12 @@ class ensightPartCells
         //- Disallow default bitwise assignment
         void operator=(const ensightPartCells&);
 
-        //- classify the cell types
-        void classify(const labelList& idLabels = labelList::null());
+        //- Classify the cell types, set elemLists.
+        void classify
+        (
+            const polyMesh&,
+            const labelList& idLabels = labelList::null()
+        );
 
         //- track points used
         virtual localPoints calcLocalPoints() const;
@@ -74,24 +78,29 @@ class ensightPartCells
             const labelList& pointMap
         ) const;
 
-        //- write geometry
-        virtual void writeGeometry(ensightGeoFile& os) const;
-
 
 protected:
 
-    //- addressable Ensight element types
-    enum elemType
-    {
-        tetra4Elements,
-        pyramid5Elements,
-        penta6Elements,
-        hexa8Elements,
-        nfacedElements
-    };
+        //- addressable ensight element types
+        enum elemType
+        {
+            tetra4Elements,
+            pyramid5Elements,
+            penta6Elements,
+            hexa8Elements,
+            nfacedElements
+        };
+
 
     // Static data members
-    static List<word> elemTypes_;
+
+        static const List<word> elemTypes_;
+
+
+    // Protected data
+
+        //- mesh referenced
+        const polyMesh& mesh_;
 
 
 public:
@@ -126,10 +135,13 @@ public:
         //- Construct as copy
         ensightPartCells(const ensightPartCells&);
 
-        //- Construct from Istream
+        //- Reconstruct part characteristics (eg, element types) from Istream
+        //  A part reconstructed in this manner can be used when writing fields,
+        //  but cannot be used to write a new geometry
+        //  @sa Foam::ensightPart::reconstruct
         ensightPartCells(Istream&);
 
-        //- Construct on freestore from Istream
+        //- Reconstruct part characteristics on freestore from Istream
         static autoPtr<ensightPartCells> New(Istream& is)
         {
             return autoPtr<ensightPartCells>(new ensightPartCells(is));
@@ -142,8 +154,11 @@ public:
 
     // Member Functions
 
+        //- write geometry
+        virtual void writeGeometry(ensightGeoFile&) const;
+
         //- static listing of the element types
-        virtual List<word> const& elementTypes() const
+        virtual const List<word>& elementTypes() const
         {
             return elemTypes_;
         }

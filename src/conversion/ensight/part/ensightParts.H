@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     ensightParts.C
-    ensightPartsI.H
+    ensightPartsTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -128,7 +128,7 @@ public:
 
 
         //- write generalized field components
-        template <class Type>
+        template<class Type>
         void writeField
         (
             ensightFile&,
@@ -138,11 +138,8 @@ public:
 
     // Friend Operators
 
-        friend ensightGeoFile& operator<<
-        (
-            ensightGeoFile&,
-            const ensightParts&
-        );
+        //- write geometry
+        friend ensightGeoFile& operator<<(ensightGeoFile&, const ensightParts&);
 };
 
 
@@ -153,7 +150,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "ensightPartsI.H"
+#   include "ensightPartsTemplates.C"
 #endif
 
 #endif

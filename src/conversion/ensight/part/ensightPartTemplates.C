@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,14 +30,14 @@ Description
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-template <class Type>
+template<class Type>
 void Foam::ensightPart::writeField
 (
     ensightFile& os,
     const Field<Type>& field
 ) const
 {
-    if (size() && field.size())
+    if (this->size() && field.size())
     {
         writeHeader(os);
 
@@ -47,13 +47,13 @@ void Foam::ensightPart::writeField
 
             if (idList.size())
             {
-                os.writeKeyword( elementTypes()[elemI] );
+                os.writeKeyword(elementTypes()[elemI]);
 
                 for
                 (
                     direction cmpt=0;
                     cmpt < pTraits<Type>::nComponents;
-                    cmpt++
+                    ++cmpt
                 )
                 {
                     writeFieldList(os, field.component(cmpt), idList);
