@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,6 +63,7 @@ class ptscotchDecomp
         //- Decompose with optionally zero sized domains
         label decomposeZeroDomains
         (
+            const fileName& meshPath,
             const List<int>& initadjncy,
             const List<int>& initxadj,
             const scalarField& initcWeights,
@@ -72,6 +73,7 @@ class ptscotchDecomp
         //- Decompose
         label decompose
         (
+            const fileName& meshPath,
             const List<int>& adjncy,
             const List<int>& xadj,
             const scalarField& cWeights,

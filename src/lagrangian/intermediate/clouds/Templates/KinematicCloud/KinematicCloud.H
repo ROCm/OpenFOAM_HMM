@@ -364,6 +364,12 @@ protected:
             autoPtr<DimensionedField<scalar, volMesh> > UCoeff_;
 
 
+        // Initialisation
+
+            //- Set cloud sub-models
+            void setModels();
+
+
         // Cloud evolution functions
 
             //- Solve the cloud - calls all evolution functions

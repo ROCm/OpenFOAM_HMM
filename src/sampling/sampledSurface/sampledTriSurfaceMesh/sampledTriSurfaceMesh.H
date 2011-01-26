@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,22 +61,38 @@ class sampledTriSurfaceMesh
     public sampledSurface,
     public MeshedSurface<face>
 {
+public:
+        //- Types of communications
+        enum samplingSource
+        {
+            cells,
+            boundaryFaces
+        };
+
+private:
+
     //- Private typedefs for convenience
         typedef MeshedSurface<face> MeshStorage;
 
+
     // Private data
+
+        static const NamedEnum<samplingSource, 2> samplingSourceNames_;
 
         //- Surface to sample on
         const triSurfaceMesh surface_;
 
+        //- Whether to sample internal cell values or boundary values
+        const samplingSource sampleSource_;
+
         //- Track if the surface needs an update
         mutable bool needsUpdate_;
 
-        //- From local surface triangle to mesh cell.
-        labelList cellLabels_;
+        //- From local surface triangle to mesh cell/face.
+        labelList sampleElements_;
 
-        //- From local surface back to surface_
-        labelList pointToFace_;
+        //- Local points to sample per point
+        pointField samplePoints_;
 
 
     // Private Member Functions
@@ -106,7 +122,8 @@ public:
         (
             const word& name,
             const polyMesh& mesh,
-            const word& surfaceName
+            const word& surfaceName,
+            const samplingSource sampleSource
         );
 
         //- Construct from dictionary

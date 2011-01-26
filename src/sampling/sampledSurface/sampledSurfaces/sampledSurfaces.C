@@ -341,7 +341,7 @@ bool Foam::sampledSurfaces::update()
     }
 
     // dimension as fraction of mesh bounding box
-    scalar mergeDim = mergeTol_ * mesh_.globalData().bb().mag();
+    scalar mergeDim = mergeTol_ * mesh_.bounds().mag();
 
     if (Pstream::master() && debug)
     {

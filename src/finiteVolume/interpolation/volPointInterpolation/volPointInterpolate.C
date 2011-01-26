@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,6 +38,104 @@ namespace Foam
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class Type, class CombineOp>
+void volPointInterpolation::syncUntransformedData
+(
+    List<Type>& pointData,
+    const CombineOp& cop
+) const
+{
+    // Transfer onto coupled patch
+    const globalMeshData& gmd = mesh().globalData();
+    const indirectPrimitivePatch& cpp = gmd.coupledPatch();
+    const labelList& meshPoints = cpp.meshPoints();
+
+    const mapDistribute& slavesMap = gmd.globalPointSlavesMap();
+    const labelListList& slaves = gmd.globalPointSlaves();
+
+    List<Type> elems(slavesMap.constructSize());
+    forAll(meshPoints, i)
+    {
+        elems[i] = pointData[meshPoints[i]];
+    }
+
+    // Pull slave data onto master. No need to update transformed slots.
+    slavesMap.distribute(elems, false);
+
+    // Combine master data with slave data
+    forAll(slaves, i)
+    {
+        Type& elem = elems[i];
+
+        const labelList& slavePoints = slaves[i];
+
+        // Combine master with untransformed slave data
+        forAll(slavePoints, j)
+        {
+            cop(elem, elems[slavePoints[j]]);
+        }
+
+        // Copy result back to slave slots
+        forAll(slavePoints, j)
+        {
+            elems[slavePoints[j]] = elem;
+        }
+    }
+
+    // Push slave-slot data back to slaves
+    slavesMap.reverseDistribute(elems.size(), elems, false);
+
+    // Extract back onto mesh
+    forAll(meshPoints, i)
+    {
+        pointData[meshPoints[i]] = elems[i];
+    }
+}
+
+
+template<class Type>
+void volPointInterpolation::pushUntransformedData
+(
+    List<Type>& pointData
+) const
+{
+    // Transfer onto coupled patch
+    const globalMeshData& gmd = mesh().globalData();
+    const indirectPrimitivePatch& cpp = gmd.coupledPatch();
+    const labelList& meshPoints = cpp.meshPoints();
+
+    const mapDistribute& slavesMap = gmd.globalPointSlavesMap();
+    const labelListList& slaves = gmd.globalPointSlaves();
+
+    List<Type> elems(slavesMap.constructSize());
+    forAll(meshPoints, i)
+    {
+        elems[i] = pointData[meshPoints[i]];
+    }
+
+    // Combine master data with slave data
+    forAll(slaves, i)
+    {
+        const labelList& slavePoints = slaves[i];
+
+        // Copy master data to slave slots
+        forAll(slaves, j)
+        {
+            elems[slavePoints[j]] = elems[i];
+        }
+    }
+
+    // Push slave-slot data back to slaves
+    slavesMap.reverseDistribute(elems.size(), elems, false);
+
+    // Extract back onto mesh
+    forAll(meshPoints, i)
+    {
+        pointData[meshPoints[i]] = elems[i];
+    }
+}
+
 
 template<class Type>
 void volPointInterpolation::addSeparated
@@ -204,7 +302,8 @@ void volPointInterpolation::interpolateBoundaryField
     }
 
     // Sum collocated contributions
-    mesh().globalData().syncPointData(pfi, plusEqOp<Type>());
+    //mesh().globalData().syncPointData(pfi, plusEqOp<Type>());
+    syncUntransformedData(pfi, plusEqOp<Type>());
 
     // And add separated contributions
     addSeparated(pf);
@@ -213,7 +312,8 @@ void volPointInterpolation::interpolateBoundaryField
     // a coupled point to have its master on a different patch so
     // to make sure just push master data to slaves. Reuse the syncPointData
     // structure.
-    mesh().globalData().syncPointData(pfi, nopEqOp<Type>());
+    //mesh().globalData().syncPointData(pfi, nopEqOp<Type>());
+    pushUntransformedData(pfi);
 
 
 
@@ -238,7 +338,8 @@ void volPointInterpolation::interpolateBoundaryField
     pf.correctBoundaryConditions();
 
     // Sync any dangling points
-    mesh().globalData().syncPointData(pfi, nopEqOp<Type>());
+    //mesh().globalData().syncPointData(pfi, nopEqOp<Type>());
+    pushUntransformedData(pfi);
 
     // Apply multiple constraints on edge/corner points
     applyCornerConstraints(pf);

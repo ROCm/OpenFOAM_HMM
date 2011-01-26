@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -104,6 +104,18 @@ class volPointInterpolation
 
         //- Make patch-patch constraints
         void makePatchPatchAddressing();
+
+        //- Helper: sync data on collocated points only
+        template<class Type, class CombineOp>
+        void syncUntransformedData
+        (
+            List<Type>& pointData,
+            const CombineOp& cop
+        ) const;
+
+        //- Helper: push master point data to collocated points
+        template<class Type>
+        void pushUntransformedData(List<Type>&) const;
 
         //- Get boundary field in same order as boundary faces. Field is
         //  zero on all coupled and empty patches

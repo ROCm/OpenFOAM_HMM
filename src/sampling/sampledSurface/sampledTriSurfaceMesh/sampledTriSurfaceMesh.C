@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,7 @@ License
 #include "Tuple2.H"
 #include "globalIndex.H"
 #include "treeDataCell.H"
+#include "treeDataFace.H"
 
 #include "addToRunTimeSelectionTable.H"
 
@@ -42,6 +43,17 @@ namespace Foam
         sampledTriSurfaceMesh,
         word
     );
+
+    template<>
+    const char* NamedEnum<sampledTriSurfaceMesh::samplingSource, 2>::names[] =
+    {
+        "cells",
+        "boundaryFaces"
+    };
+
+    const NamedEnum<sampledTriSurfaceMesh::samplingSource, 2>
+    sampledTriSurfaceMesh::samplingSourceNames_;
+
 
     //- Private class for finding nearest
     //  - global index
@@ -70,7 +82,8 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
 (
     const word& name,
     const polyMesh& mesh,
-    const word& surfaceName
+    const word& surfaceName,
+    const samplingSource sampleSource
 )
 :
     sampledSurface(name, mesh),
@@ -78,7 +91,7 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
     (
         IOobject
         (
-            name,
+            surfaceName,
             mesh.time().constant(), // instance
             "triSurface",           // local
             mesh,                   // registry
@@ -87,9 +100,10 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
             false
         )
     ),
+    sampleSource_(sampleSource),
     needsUpdate_(true),
-    cellLabels_(0),
-    pointToFace_(0)
+    sampleElements_(0),
+    samplePoints_(0)
 {}
 
 
@@ -114,9 +128,10 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
             false
         )
     ),
+    sampleSource_(samplingSourceNames_[dict.lookup("source")]),
     needsUpdate_(true),
-    cellLabels_(0),
-    pointToFace_(0)
+    sampleElements_(0),
+    samplePoints_(0)
 {}
 
 
@@ -144,8 +159,8 @@ bool Foam::sampledTriSurfaceMesh::expire()
 
     sampledSurface::clearGeom();
     MeshStorage::clear();
-    cellLabels_.clear();
-    pointToFace_.clear();
+    sampleElements_.clear();
+    samplePoints_.clear();
 
     needsUpdate_ = true;
     return true;
@@ -164,43 +179,79 @@ bool Foam::sampledTriSurfaceMesh::update()
     // Does approximation by looking at the face centres only
     const pointField& fc = surface_.faceCentres();
 
+    // Mesh search engine, no triangulation of faces.
     meshSearch meshSearcher(mesh(), false);
 
-    const indexedOctree<treeDataCell>& cellTree = meshSearcher.cellTree();
 
-
-    // Global numbering for cells - only used to uniquely identify local cells.
-    globalIndex globalCells(mesh().nCells());
     List<nearInfo> nearest(fc.size());
+
+    // Global numbering for cells/faces - only used to uniquely identify local
+    // elements
+    globalIndex globalCells
+    (
+        sampleSource_ == cells
+      ? mesh().nCells()
+      : mesh().nFaces()
+    );
+
     forAll(nearest, i)
     {
         nearest[i].first() = GREAT;
         nearest[i].second() = labelMax;
     }
 
-    // Search triangles using nearest on local mesh
-    forAll(fc, triI)
+    if (sampleSource_ == cells)
     {
-        pointIndexHit nearInfo = cellTree.findNearest
-        (
-            fc[triI],
-            sqr(GREAT)
-        );
-        if (nearInfo.hit())
+        // Search for nearest cell
+
+        const indexedOctree<treeDataCell>& cellTree = meshSearcher.cellTree();
+
+        forAll(fc, triI)
         {
-            nearest[triI].first() = magSqr(nearInfo.hitPoint()-fc[triI]);
-            nearest[triI].second() = globalCells.toGlobal(nearInfo.index());
+            pointIndexHit nearInfo = cellTree.findNearest
+            (
+                fc[triI],
+                sqr(GREAT)
+            );
+            if (nearInfo.hit())
+            {
+                nearest[triI].first() = magSqr(nearInfo.hitPoint()-fc[triI]);
+                nearest[triI].second() = globalCells.toGlobal(nearInfo.index());
+            }
+        }
+    }
+    else
+    {
+        // Search for nearest boundaryFace
+
+        const indexedOctree<treeDataFace>& bTree = meshSearcher.boundaryTree();
+
+        forAll(fc, triI)
+        {
+            pointIndexHit nearInfo = bTree.findNearest
+            (
+                fc[triI],
+                sqr(GREAT)
+            );
+            if (nearInfo.hit())
+            {
+                nearest[triI].first() = magSqr(nearInfo.hitPoint()-fc[triI]);
+                nearest[triI].second() = globalCells.toGlobal
+                (
+                    bTree.shapes().faceLabels()[nearInfo.index()]
+                );
+            }
         }
     }
 
-    // See which processor has the nearest.
+
+    // See which processor has the nearest. Mark and subset
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     Pstream::listCombineGather(nearest, nearestEqOp());
     Pstream::listCombineScatter(nearest);
 
-    boolList include(surface_.size(), false);
-
-    cellLabels_.setSize(fc.size());
-    cellLabels_ = -1;
+    labelList cellOrFaceLabels(fc.size(), -1);
 
     label nFound = 0;
     forAll(nearest, triI)
@@ -211,9 +262,10 @@ bool Foam::sampledTriSurfaceMesh::update()
         }
         else if (globalCells.isLocal(nearest[triI].second()))
         {
-            cellLabels_[triI] = globalCells.toLocal(nearest[triI].second());
-
-            include[triI] = true;
+            cellOrFaceLabels[triI] = globalCells.toLocal
+            (
+                nearest[triI].second()
+            );
             nFound++;
         }
     }
@@ -221,7 +273,7 @@ bool Foam::sampledTriSurfaceMesh::update()
 
     if (debug)
     {
-        Pout<< "Local out of faces:" << cellLabels_.size()
+        Pout<< "Local out of faces:" << cellOrFaceLabels.size()
             << " keeping:" << nFound << endl;
     }
 
@@ -243,7 +295,7 @@ bool Foam::sampledTriSurfaceMesh::update()
 
         forAll(s, faceI)
         {
-            if (include[faceI])
+            if (cellOrFaceLabels[faceI] != -1)
             {
                 faceMap[newFaceI++] = faceI;
 
@@ -262,11 +314,12 @@ bool Foam::sampledTriSurfaceMesh::update()
         pointMap.setSize(newPointI);
     }
 
-    // Subset cellLabels
-    cellLabels_ = UIndirectList<label>(cellLabels_, faceMap)();
 
-    // Store any face per point
-    pointToFace_.setSize(pointMap.size());
+    // Subset cellOrFaceLabels
+    cellOrFaceLabels = UIndirectList<label>(cellOrFaceLabels, faceMap)();
+
+    // Store any face per point (without using pointFaces())
+    labelList pointToFace(pointMap.size());
 
     // Create faces and points for subsetted surface
     faceList& faces = this->storedFaces();
@@ -284,7 +337,7 @@ bool Foam::sampledTriSurfaceMesh::update()
 
         forAll(newF, fp)
         {
-            pointToFace_[newF[fp]] = i;
+            pointToFace[newF[fp]] = i;
         }
     }
 
@@ -295,6 +348,161 @@ bool Foam::sampledTriSurfaceMesh::update()
         print(Pout);
         Pout<< endl;
     }
+
+
+
+    // Collect the samplePoints and sampleElements
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    if (sampledSurface::interpolate())
+    {
+        samplePoints_.setSize(pointMap.size());
+        sampleElements_.setSize(pointMap.size(), -1);
+
+        if (sampleSource_ == cells)
+        {
+            // samplePoints_   : per surface point a location inside the cell
+            // sampleElements_ : per surface point the cell
+
+            forAll(points(), pointI)
+            {
+                const point& pt = points()[pointI];
+                label cellI = cellOrFaceLabels[pointToFace[pointI]];
+                sampleElements_[pointI] = cellI;
+
+                // Check if point inside cell
+                if (mesh().pointInCell(pt, sampleElements_[pointI]))
+                {
+                    samplePoints_[pointI] = pt;
+                }
+                else
+                {
+                    // Find nearest point on faces of cell
+                    const cell& cFaces = mesh().cells()[cellI];
+
+                    scalar minDistSqr = VGREAT;
+
+                    forAll(cFaces, i)
+                    {
+                        const face& f = mesh().faces()[cFaces[i]];
+                        pointHit info = f.nearestPoint(pt, mesh().points());
+                        if (info.distance() < minDistSqr)
+                        {
+                            minDistSqr = info.distance();
+                            samplePoints_[pointI] = info.rawPoint();
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            // samplePoints_   : per surface point a location on the boundary
+            // sampleElements_ : per surface point the boundary face containing
+            //                   the location
+
+            forAll(points(), pointI)
+            {
+                const point& pt = points()[pointI];
+                label faceI = cellOrFaceLabels[pointToFace[pointI]];
+                sampleElements_[pointI] = faceI;
+                samplePoints_[pointI] =  mesh().faces()[faceI].nearestPoint
+                (
+                    pt,
+                    mesh().points()
+                ).rawPoint();
+            }
+        }
+    }
+    else
+    {
+        // if sampleSource_ == cells:
+        //      samplePoints_   : n/a
+        //      sampleElements_ : per surface triangle the cell
+        // else:
+        //      samplePoints_   : n/a
+        //      sampleElements_ : per surface triangle the boundary face
+        samplePoints_.clear();
+        sampleElements_.transfer(cellOrFaceLabels);
+    }
+
+
+    if (debug)
+    {
+        this->clearOut();
+        OFstream str(mesh().time().path()/"surfaceToMesh.obj");
+        Info<< "Dumping correspondence from local surface (points or faces)"
+            << " to mesh (cells or faces) to " << str.name() << endl;
+        label vertI = 0;
+
+        if (sampledSurface::interpolate())
+        {
+            if (sampleSource_ == cells)
+            {
+                forAll(samplePoints_, pointI)
+                {
+                    meshTools::writeOBJ(str, points()[pointI]);
+                    vertI++;
+
+                    meshTools::writeOBJ(str, samplePoints_[pointI]);
+                    vertI++;
+
+                    label cellI = sampleElements_[pointI];
+                    meshTools::writeOBJ(str, mesh().cellCentres()[cellI]);
+                    vertI++;
+                    str << "l " << vertI-2 << ' ' << vertI-1 << ' ' << vertI
+                        << nl;
+                }
+            }
+            else
+            {
+                forAll(samplePoints_, pointI)
+                {
+                    meshTools::writeOBJ(str, points()[pointI]);
+                    vertI++;
+
+                    meshTools::writeOBJ(str, samplePoints_[pointI]);
+                    vertI++;
+
+                    label faceI = sampleElements_[pointI];
+                    meshTools::writeOBJ(str, mesh().faceCentres()[faceI]);
+                    vertI++;
+                    str << "l " << vertI-2 << ' ' << vertI-1 << ' ' << vertI
+                        << nl;
+                }
+            }
+        }
+        else
+        {
+            if (sampleSource_ == cells)
+            {
+                forAll(sampleElements_, triI)
+                {
+                    meshTools::writeOBJ(str, faceCentres()[triI]);
+                    vertI++;
+
+                    label cellI = sampleElements_[triI];
+                    meshTools::writeOBJ(str, mesh().cellCentres()[cellI]);
+                    vertI++;
+                    str << "l " << vertI-1 << ' ' << vertI << nl;
+                }
+            }
+            else
+            {
+                forAll(sampleElements_, triI)
+                {
+                    meshTools::writeOBJ(str, faceCentres()[triI]);
+                    vertI++;
+
+                    label faceI = sampleElements_[triI];
+                    meshTools::writeOBJ(str, mesh().faceCentres()[faceI]);
+                    vertI++;
+                    str << "l " << vertI-1 << ' ' << vertI << nl;
+                }
+            }
+        }
+    }
+
 
     needsUpdate_ = false;
     return true;

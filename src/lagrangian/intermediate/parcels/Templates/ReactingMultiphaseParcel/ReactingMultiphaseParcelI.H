@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,24 +54,31 @@ template<class ParcelType>
 inline Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
 constantProperties
 (
-    const dictionary& parentDict
+    const dictionary& parentDict,
+    const bool readFields
 )
 :
-    ReactingParcel<ParcelType>::constantProperties(parentDict),
-    LDevol_(readScalar(this->dict().lookup("LDevol"))),
-    hRetentionCoeff_(readScalar(this->dict().lookup("hRetentionCoeff")))
+    ReactingParcel<ParcelType>::constantProperties(parentDict, readFields),
+    LDevol_(0.0),
+    hRetentionCoeff_(0.0)
 {
-    if ((hRetentionCoeff_ < 0) || (hRetentionCoeff_ > 1))
+    if (readFields)
     {
-        FatalErrorIn
-        (
-            "ReactingMultiphaseParcel<ParcelType>::constantProperties::"
-            "constantProperties"
-        )   << "hRetentionCoeff must be in the range 0 to 1" << nl
-            << exit(FatalError) << endl;
-    }
+        this->dict().lookup("LDevol") >> LDevol_;
+        this->dict().lookup("hRetentionCoeff") >> hRetentionCoeff_;
 
-    hRetentionCoeff_ = max(1e-06, hRetentionCoeff_);
+        if ((hRetentionCoeff_ < 0) || (hRetentionCoeff_ > 1))
+        {
+            FatalErrorIn
+            (
+                "ReactingMultiphaseParcel<ParcelType>::constantProperties::"
+                "constantProperties"
+            )   << "hRetentionCoeff must be in the range 0 to 1" << nl
+                << exit(FatalError) << endl;
+        }
+
+        hRetentionCoeff_ = max(1e-06, hRetentionCoeff_);
+    }
 }
 
 
