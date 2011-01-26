@@ -67,6 +67,13 @@ std::vector<Vb::Point> pointFile::initialPoints() const
 
     Info<< "    Inserting points from file " << pointFileName_ << endl;
 
+    if (points.empty())
+    {
+        FatalErrorIn("std::vector<Vb::Point> pointFile::initialPoints() const")
+            << "Point file contain no points"
+            << exit(FatalError) << endl;
+    }
+
     std::vector<Vb::Point> initialPoints;
 
     Field<bool> insidePoints = cvMesh_.geometryToConformTo().wellInside

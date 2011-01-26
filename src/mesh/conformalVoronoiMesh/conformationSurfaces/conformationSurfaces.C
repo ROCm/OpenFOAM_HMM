@@ -361,7 +361,8 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInOutSide
     // reference value and if the points are inside the surface by a given
     // distanceSquared
 
-    Field<bool> inOutSidePoint(samplePts.size(), true);
+    // Assume that the point is wellInside until demonstrated otherwise.
+    Field<bool> inOutSidePoint(samplePts.size(), testForInside);
 
     //Check if the points are inside the surface by the given distance squared
 
