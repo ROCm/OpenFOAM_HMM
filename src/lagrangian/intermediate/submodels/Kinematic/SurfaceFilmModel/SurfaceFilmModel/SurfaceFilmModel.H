@@ -47,9 +47,12 @@ namespace Foam
 {
 
 // Forward declaration of classes
-namespace surfaceFilmModels
+namespace regionModels
 {
-    class surfaceFilmModel;
+    namespace surfaceFilmModels
+    {
+        class surfaceFilmModel;
+    }
 }
 
 class mapDistribute;
@@ -114,7 +117,7 @@ protected:
             const label filmPatchI,
             const label primaryPatchI,
             const mapDistribute& distMap,
-            const surfaceFilmModels::surfaceFilmModel& filmModel
+            const regionModels::surfaceFilmModels::surfaceFilmModel& filmModel
         );
 
         //- Set the individual parcel properties

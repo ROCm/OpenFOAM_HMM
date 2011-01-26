@@ -133,29 +133,33 @@ void Foam::SurfaceFilmModel<CloudType>::inject(TrackData& td)
     }
 
     // Retrieve the film model from the owner database
-    const surfaceFilmModels::surfaceFilmModel& filmModel =
+    const regionModels::surfaceFilmModels::surfaceFilmModel& filmModel =
         this->owner().db().objectRegistry::template lookupObject
-        <surfaceFilmModels::surfaceFilmModel>
+        <regionModels::surfaceFilmModels::surfaceFilmModel>
         (
             "surfaceFilmProperties"
         );
 
-    const labelList& filmPatches = filmModel.filmBottomPatchIDs();
+    if (!filmModel.active())
+    {
+        return;
+    }
+
+    const labelList& filmPatches = filmModel.intCoupledPatchIDs();
     const labelList& primaryPatches = filmModel.primaryPatchIDs();
+
+    const polyBoundaryMesh& pbm = this->owner().mesh().boundaryMesh();
 
     forAll(filmPatches, i)
     {
-        const label primaryPatchI = primaryPatches[i];
-        const directMappedWallPolyPatch& wpp =
-            refCast<const directMappedWallPolyPatch>
-            (
-                 this->owner().mesh().boundaryMesh()[primaryPatchI]
-            );
-
-        const labelList& injectorCellsPatch = wpp.faceCells();
-
         const label filmPatchI = filmPatches[i];
-        const mapDistribute& distMap = wpp.map();
+        const label primaryPatchI = primaryPatches[i];
+        const directMappedPatchBase& mapPatch =
+            filmModel.mappedPatches()[filmPatchI];
+        const mapDistribute& distMap = mapPatch.map();
+
+        const labelList& injectorCellsPatch = pbm[primaryPatchI].faceCells();
+
         cacheFilmFields(filmPatchI, primaryPatchI, distMap, filmModel);
 
         forAll(injectorCellsPatch, j)
@@ -209,7 +213,7 @@ void Foam::SurfaceFilmModel<CloudType>::cacheFilmFields
     const label filmPatchI,
     const label primaryPatchI,
     const mapDistribute& distMap,
-    const surfaceFilmModels::surfaceFilmModel& filmModel
+    const regionModels::surfaceFilmModels::surfaceFilmModel& filmModel
 )
 {
     massParcelPatch_ = filmModel.massForPrimary().boundaryField()[filmPatchI];
