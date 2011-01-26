@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,6 +29,29 @@ License
 #include "PhaseChangeModel.H"
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
+
+template<class ParcelType>
+void Foam::ReactingCloud<ParcelType>::setModels()
+{
+    compositionModel_.reset
+    (
+        CompositionModel<ReactingCloud<ParcelType> >::New
+        (
+            this->subModelProperties(),
+            *this
+        ).ptr()
+    );
+
+    phaseChangeModel_.reset
+    (
+        PhaseChangeModel<ReactingCloud<ParcelType> >::New
+        (
+            this->subModelProperties(),
+            *this
+        ).ptr()
+    );
+}
+
 
 template<class ParcelType>
 void Foam::ReactingCloud<ParcelType>::checkSuppliedComposition
@@ -85,26 +108,17 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
     ThermoCloud<ParcelType>(cloudName, rho, U, g, thermo, false),
     reactingCloud(),
     cloudCopyPtr_(NULL),
-    constProps_(this->particleProperties()),
-    compositionModel_
-    (
-        CompositionModel<ReactingCloud<ParcelType> >::New
-        (
-            this->subModelProperties(),
-            *this
-        )
-    ),
-    phaseChangeModel_
-    (
-        PhaseChangeModel<ReactingCloud<ParcelType> >::New
-        (
-            this->subModelProperties(),
-            *this
-        )
-    ),
+    constProps_(this->particleProperties(), this->solution().active()),
+    compositionModel_(NULL),
+    phaseChangeModel_(NULL),
     rhoTrans_(thermo.carrier().species().size()),
     dMassPhaseChange_(0.0)
 {
+    if (this->solution().active())
+    {
+        setModels();
+    }
+
     // Set storage for mass source fields and initialise to zero
     forAll(rhoTrans_, i)
     {

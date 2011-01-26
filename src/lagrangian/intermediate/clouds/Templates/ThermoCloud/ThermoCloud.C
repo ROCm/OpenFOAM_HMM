@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,6 +29,31 @@ License
 #include "HeatTransferModel.H"
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::setModels()
+{
+    heatTransferModel_.reset
+    (
+        HeatTransferModel<ThermoCloud<ParcelType> >::New
+        (
+            this->subModelProperties(),
+            *this
+        ).ptr()
+    );
+
+    TIntegrator_.reset
+    (
+        scalarIntegrationScheme::New
+        (
+            "T",
+            this->solution().integrationSchemes()
+        ).ptr()
+    );
+
+    this->subModelProperties().lookup("radiation") >> radiation_;
+}
+
 
 template<class ParcelType>
 void Foam::ThermoCloud<ParcelType>::cloudReset(ThermoCloud<ParcelType>& c)
@@ -66,27 +91,13 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
     ),
     thermoCloud(),
     cloudCopyPtr_(NULL),
-    constProps_(this->particleProperties()),
+    constProps_(this->particleProperties(), this->solution().active()),
     thermo_(thermo),
     T_(thermo.thermo().T()),
     p_(thermo.thermo().p()),
-    heatTransferModel_
-    (
-        HeatTransferModel<ThermoCloud<ParcelType> >::New
-        (
-            this->subModelProperties(),
-            *this
-        )
-    ),
-    TIntegrator_
-    (
-        scalarIntegrationScheme::New
-        (
-            "T",
-            this->solution().integrationSchemes()
-        )
-    ),
-    radiation_(this->subModelProperties().lookup("radiation")),
+    heatTransferModel_(NULL),
+    TIntegrator_(NULL),
+    radiation_(false),
     hsTrans_
     (
         new DimensionedField<scalar, volMesh>
@@ -121,6 +132,11 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
     )
 
 {
+    if (this->solution().active())
+    {
+        setModels();
+    }
+
     if (readFields)
     {
         ParcelType::readFields(*this);
@@ -143,7 +159,7 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
     KinematicCloud<ParcelType>(c, name),
     thermoCloud(),
     cloudCopyPtr_(NULL),
-    constProps_(c.particleProperties_),
+    constProps_(c.constProps_),
     thermo_(c.thermo_),
     T_(c.T()),
     p_(c.p()),

@@ -77,22 +77,22 @@ public:
         // Private data
 
             //- Particle initial temperature [K]
-            const scalar T0_;
+            scalar T0_;
 
             //- Minimum temperature [K]
-            const scalar TMin_;
+            scalar TMin_;
 
             //- Particle specific heat capacity [J/(kg.K)]
-            const scalar Cp0_;
+            scalar Cp0_;
 
             //- Particle emissivity [] (radiation)
-            const scalar epsilon0_;
+            scalar epsilon0_;
 
             //- Particle scattering factor [] (radiation)
-            const scalar f0_;
+            scalar f0_;
 
             //- Default carrier Prandtl number []
-            const scalar Pr_;
+            scalar Pr_;
 
 
     public:
@@ -106,7 +106,11 @@ public:
             constantProperties(const constantProperties& cp);
 
             //- Constructor from dictionary
-            constantProperties(const dictionary& parentDict);
+            constantProperties
+            (
+                const dictionary& parentDict,
+                const bool readFields = true
+            );
 
 
         // Member functions

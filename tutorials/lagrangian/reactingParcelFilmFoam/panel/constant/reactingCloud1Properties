@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -18,70 +18,6 @@ FoamFile
 solution
 {
     active          false;
-
-    integrationSchemes
-    {
-        U               Euler;
-        T               Analytical;
-    }
-}
-
-constantProperties
-{
-    parcelTypeId    1;
-
-    rhoMin          1e-15;
-    TMin            200;
-    pMin            1000;
-    minParticleMass 1e-15;
-
-    rho0            1000;
-    T0              300;
-    Cp0             4187;
-
-    youngsModulus   1e9;
-    poissonsRatio   0.35;
-
-    epsilon0        1;
-    f0              0.5;
-    Pr              0.7;
-    Tvap            273;
-    Tbp             373;
-
-    constantVolume  false;
-}
-
-particleForces
-{
-    gravity             on;
-    virtualMass         off;
-    pressureGradient    off;
-    paramagnetic        off;
-}
-
-subModels
-{
-    InjectionModel  none;
-
-    DragModel       none;
-
-    DispersionModel none;
-
-    PatchInteractionModel none;
-
-    HeatTransferModel none;
-
-    CompositionModel none;
-
-    PhaseChangeModel none;
-
-    PostProcessingModel none;
-
-    CollisionModel none;
-
-    SurfaceFilmModel none;
-
-    radiation       off;
 }
 
 

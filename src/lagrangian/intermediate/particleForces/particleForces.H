@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -134,7 +134,8 @@ public:
         (
             const fvMesh& mesh,
             const dictionary& dict,
-            const vector& g
+            const vector& g,
+            const bool readFields = true
         );
 
         //- Construct copy

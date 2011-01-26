@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,15 +54,24 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
 template<class ParcelType>
 inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
 (
-    const dictionary& parentDict
+    const dictionary& parentDict,
+    const bool readFields
 )
 :
-    ThermoParcel<ParcelType>::constantProperties(parentDict),
-    pMin_(readScalar(this->dict().lookup("pMin"))),
-    constantVolume_(this->dict().lookup("constantVolume")),
-    Tvap_(readScalar(this->dict().lookup("Tvap"))),
-    Tbp_(readScalar(this->dict().lookup("Tbp")))
-{}
+    ThermoParcel<ParcelType>::constantProperties(parentDict, readFields),
+    pMin_(0.0),
+    constantVolume_(false),
+    Tvap_(0.0),
+    Tbp_(0.0)
+{
+    if (readFields)
+    {
+        this->dict().lookup("pMin") >> pMin_;
+        this->dict().lookup("constantVolume") >> constantVolume_;
+        this->dict().lookup("Tvap") >> Tvap_;
+        this->dict().lookup("Tbp") >> Tbp_;
+    }
+}
 
 
 template<class ParcelType>
