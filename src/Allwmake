@@ -17,13 +17,13 @@ wmakeCheckPwd "$WM_PROJECT_DIR/src" || {
 set -x
 
 # update OpenFOAM version strings if required
-wmakePrintBuild -check || /bin/rm -f OpenFOAM/Make/$WM_OPTIONS/global.? 2>/dev/null
+wmakePrintBuild -check || /bin/rm -f OpenFOAM/Make/*/global.? 2>/dev/null
 
 wmakeLnInclude OpenFOAM
-wmakeLnInclude OSspecific/$WM_OSTYPE
+wmakeLnInclude OSspecific/${WM_OSTYPE:-POSIX}
 Pstream/Allwmake
 
-OSspecific/$WM_OSTYPE/Allwmake
+OSspecific/${WM_OSTYPE:-POSIX}/Allwmake
 wmake libso OpenFOAM
 
 wmake libso fileFormats
