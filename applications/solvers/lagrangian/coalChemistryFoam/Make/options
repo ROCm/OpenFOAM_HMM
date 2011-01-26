@@ -17,7 +17,8 @@ EXE_INC = \
     -I$(LIB_SRC)/thermophysicalModels/SLGThermo/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/chemistryModel/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/radiation/lnInclude \
-    -I$(LIB_SRC)/surfaceFilmModels/lnInclude \
+    -I$(LIB_SRC)/regionModels/regionModel/lnInclude \
+    -I$(LIB_SRC)/regionModels/surfaceFilmModels/lnInclude \
     -I$(LIB_SRC)/ODE/lnInclude
 
 EXE_LIBS = \
@@ -40,5 +41,6 @@ EXE_LIBS = \
     -lSLGThermo \
     -lchemistryModel \
     -lradiation \
+    -lregionModels \
     -lsurfaceFilmModels \
     -lODE
