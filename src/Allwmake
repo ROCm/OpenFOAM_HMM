@@ -1,6 +1,9 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
 
+makeOption=libso
+[ $# -ge 1 ] && makeOption=$1
+
 wmakeCheckPwd "$WM_PROJECT_DIR/src" || {
     echo "Error: Current directory is not \$WM_PROJECT_DIR/src"
     echo "    The environment variables are inconsistent with the installation."
@@ -21,53 +24,53 @@ wmakePrintBuild -check || /bin/rm -f OpenFOAM/Make/$WM_OPTIONS/global.? 2>/dev/n
 
 wmakeLnInclude OpenFOAM
 wmakeLnInclude OSspecific/$WM_OSTYPE
-Pstream/Allwmake
+Pstream/Allwmake $*
 
 OSspecific/$WM_OSTYPE/Allwmake
-wmake libso OpenFOAM
+wmake $makeOption OpenFOAM
 
-wmake libso fileFormats
-wmake libso triSurface
-wmake libso meshTools
-wmake libso edgeMesh
-wmake libso surfMesh
+wmake $makeOption fileFormats
+wmake $makeOption triSurface
+wmake $makeOption meshTools
+wmake $makeOption edgeMesh
+wmake $makeOption surfMesh
 
 # Decomposition methods needed by dummyThirdParty
 parallel/decompose/AllwmakeLnInclude
 # dummyThirdParty (dummy metisDecomp, scotchDecomp etc) needed by e.g. meshTools
-dummyThirdParty/Allwmake
+dummyThirdParty/Allwmake $*
 
-wmake libso lagrangian/basic
-wmake libso finiteVolume
-wmake libso genericPatchFields
+wmake $makeOption lagrangian/basic
+wmake $makeOption finiteVolume
+wmake $makeOption genericPatchFields
 
 # Build the proper scotchDecomp, metisDecomp etc.
-parallel/Allwmake
+parallel/Allwmake $*
 
-wmake libso conversion
+wmake $makeOption conversion
 
-wmake libso sampling
+wmake $makeOption sampling
 
-wmake libso dynamicMesh
-wmake libso dynamicFvMesh
-wmake libso topoChangerFvMesh
+wmake $makeOption dynamicMesh
+wmake $makeOption dynamicFvMesh
+wmake $makeOption topoChangerFvMesh
 
-wmake libso ODE
-wmake libso randomProcesses
+wmake $makeOption ODE
+wmake $makeOption randomProcesses
 
-thermophysicalModels/Allwmake
-transportModels/Allwmake
-turbulenceModels/Allwmake
-wmake libso surfaceFilmModels
-lagrangian/Allwmake
-postProcessing/Allwmake
-mesh/Allwmake
+thermophysicalModels/Allwmake $*
+transportModels/Allwmake $*
+turbulenceModels/Allwmake $*
+wmake $makeOption surfaceFilmModels
+lagrangian/Allwmake $*
+postProcessing/Allwmake $*
+mesh/Allwmake $*
 
-wmake libso errorEstimation
+wmake $makeOption errorEstimation
 
-fvAgglomerationMethods/Allwmake
+fvAgglomerationMethods/Allwmake $*
 
-wmake libso fvMotionSolver
-wmake libso engine
+wmake $makeOption fvMotionSolver
+wmake $makeOption engine
 
 # ----------------------------------------------------------------- end-of-file

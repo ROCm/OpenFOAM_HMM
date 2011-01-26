@@ -2,13 +2,16 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-wmake libso basic
-wmake libso solidParticle
-wmake libso intermediate
-wmake libso dieselSpray
-wmake libso dsmc
-wmake libso coalCombustion
+makeOption=libso
+[ $# -ge 1 ] && makeOption=$1
 
-molecularDynamics/Allwmake
+wmake $makeOption basic
+wmake $makeOption solidParticle
+wmake $makeOption intermediate
+wmake $makeOption dieselSpray
+wmake $makeOption dsmc
+wmake $makeOption coalCombustion
+
+molecularDynamics/Allwmake $*
 
 # ----------------------------------------------------------------- end-of-file

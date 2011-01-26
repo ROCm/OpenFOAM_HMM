@@ -2,9 +2,12 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-wmake libso incompressible
-wmake libso interfaceProperties
-wmake libso twoPhaseInterfaceProperties
-# wmake libso compressible
+makeOption=libso
+[ $# -ge 1 ] && makeOption=$1
+
+wmake $makeOption incompressible
+wmake $makeOption interfaceProperties
+wmake $makeOption twoPhaseInterfaceProperties
+# wmake $makeOption compressible
 
 # ----------------------------------------------------------------- end-of-file

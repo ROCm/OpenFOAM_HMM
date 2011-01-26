@@ -2,9 +2,12 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-wmake libo postCalc
-wmake libso foamCalcFunctions
+makeOption=libso
+[ $# -ge 1 ] && makeOption=$1
 
-functionObjects/Allwmake
+wmake libo postCalc
+wmake $makeOption foamCalcFunctions
+
+functionObjects/Allwmake $*
 
 # ----------------------------------------------------------------- end-of-file
