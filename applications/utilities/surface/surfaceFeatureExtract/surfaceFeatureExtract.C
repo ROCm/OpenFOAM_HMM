@@ -41,6 +41,9 @@ Description
 #include "triSurfaceMesh.H"
 #include "vtkSurfaceWriter.H"
 #include "triSurfaceFields.H"
+#include "unitConversion.H"
+#include "indexedOctree.H"
+#include "treeDataEdge.H"
 
 #include "buildCGALPolyhedron.H"
 #include "CGALPolyhedronRings.H"
@@ -351,6 +354,12 @@ int main(int argc, char *argv[])
         "scalar",
         "span to look for surface closeness"
     );
+    argList::addOption
+    (
+        "featureProximity",
+        "scalar",
+        "distance to look for close features"
+    );
     argList::addBoolOption
     (
         "writeVTK",
@@ -427,7 +436,6 @@ int main(int argc, char *argv[])
             << " or -includedAngle (to new set construct from angle)"
             << exit(FatalError);
     }
-
 
     Info<< nl
         << "Initial feature set:" << nl
@@ -582,10 +590,6 @@ int main(int argc, char *argv[])
         feMesh.writeObj(runTime.constant()/"featureEdgeMesh"/sFeatFileName);
     };
 
-    // Examine curvature, feature proximity and internal and external closeness.
-
-    // Internal and external closeness
-
     triSurfaceMesh searchSurf
     (
         IOobject
@@ -600,6 +604,46 @@ int main(int argc, char *argv[])
         surf
     );
 
+    // Find close features
+
+    Random rndGen(343267);
+
+    treeBoundBox surfBB
+    (
+        treeBoundBox(searchSurf.bounds()).extend(rndGen, 1e-4)
+    );
+
+    surfBB.min() -= Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+    surfBB.max() += Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+
+    indexedOctree<treeDataEdge> ftEdTree
+    (
+        treeDataEdge
+        (
+            false,
+            surf.edges(),
+            surf.localPoints(),
+            newSet.featureEdges()
+        ),
+        surfBB,
+        8,      // maxLevel
+        10,     // leafsize
+        3.0     // duplicity
+    );
+
+    // labelList nearPoints = ftEdTree.findBox
+    // (
+    //     treeBoundBox
+    //     (
+    //         sPt - featureSearchSpan*Foam::vector::one,
+    //         sPt + featureSearchSpan*Foam::vector::one
+    //     )
+    // );
+
+    // Examine curvature, feature proximity and internal and external closeness.
+
+    // Internal and external closeness
+
     // Prepare start and end points for intersection tests
 
     const vectorField& normals = searchSurf.faceNormals();
@@ -608,28 +652,27 @@ int main(int argc, char *argv[])
 
     args.optionReadIfPresent("closeness", span);
 
+    scalar externalAngleTolerance = 10;
+    scalar externalToleranceCosAngle = Foam::cos
+    (
+        degToRad(180 - externalAngleTolerance)
+    );
+
+    scalar internalAngleTolerance = 45;
+    scalar internalToleranceCosAngle = Foam::cos
+    (
+        degToRad(180 - internalAngleTolerance)
+    );
+
+    Info<< "externalToleranceCosAngle: " << externalToleranceCosAngle << nl
+        << "internalToleranceCosAngle: " << internalToleranceCosAngle
+        << endl;
+
     // Info<< "span " << span << endl;
 
     pointField start = searchSurf.faceCentres() - span*normals;
     pointField end = searchSurf.faceCentres() + span*normals;
     const pointField& faceCentres = searchSurf.faceCentres();
-
-    // {
-    //     label testI = 192;
-
-    //     List<List<pointIndexHit> > testAllHitInfo;
-
-    //     searchSurf.findLineAll
-    //     (
-    //         pointField(1, start[testI]),
-    //         pointField(1, end[testI]),
-    //         testAllHitInfo
-    //     );
-
-    //     Info<< testAllHitInfo << endl;
-
-    //     // return 0;
-    // }
 
     List<List<pointIndexHit> > allHitInfo;
 
@@ -646,23 +689,6 @@ int main(int argc, char *argv[])
         if (hitInfo.size() < 1)
         {
             drawHitProblem(fI, surf, start, faceCentres, end, hitInfo);
-            // Info<< nl << "# fI " << fI
-            //     << nl << "# start " << start[fI]
-            //     << nl << "# f centre " << faceCentres[fI]
-            //     << nl << "# end " << end[fI]
-            //     << endl;
-
-            // meshTools::writeOBJ(Info, start[fI]);
-            // meshTools::writeOBJ(Info, faceCentres[fI]);
-            // meshTools::writeOBJ(Info, end[fI]);
-
-            // Info<< "l 1 2 3" << endl;
-
-            // meshTools::writeOBJ(Info, surf.points()[surf[fI][0]]);
-            // meshTools::writeOBJ(Info, surf.points()[surf[fI][1]]);
-            // meshTools::writeOBJ(Info, surf.points()[surf[fI][2]]);
-
-            // Info<< "f 4 5 6" << endl;
 
             FatalErrorIn(args.executable())
                 << "findLineAll did not hit its own face."
@@ -680,43 +706,9 @@ int main(int argc, char *argv[])
             {
                 drawHitProblem(fI, surf, start, faceCentres, end, hitInfo);
 
-                // Info<< nl << "# findLineAll did not hit its own face."
-                //     << nl << "# fI " << fI
-                //     << nl << "# start " << start[fI]
-                //     << nl << "# f centre " << faceCentres[fI]
-                //     << nl << "# end " << end[fI]
-                //     << nl << "# hitInfo " << hitInfo
-                //     << endl;
-
-                // meshTools::writeOBJ(Info, start[fI]);
-                // meshTools::writeOBJ(Info, faceCentres[fI]);
-                // meshTools::writeOBJ(Info, end[fI]);
-
-                // Info<< "l 1 2 3" << endl;
-
-                // meshTools::writeOBJ(Info, surf.points()[surf[fI][0]]);
-                // meshTools::writeOBJ(Info, surf.points()[surf[fI][1]]);
-                // meshTools::writeOBJ(Info, surf.points()[surf[fI][2]]);
-
-                // Info<< "f 4 5 6" << endl;
-
-                // forAll(hitInfo, hI)
-                // {
-                //     label hFI = hitInfo[hI].index();
-
-                //     meshTools::writeOBJ(Info, surf.points()[surf[hFI][0]]);
-                //     meshTools::writeOBJ(Info, surf.points()[surf[hFI][1]]);
-                //     meshTools::writeOBJ(Info, surf.points()[surf[hFI][2]]);
-
-                //     Info<< "f "
-                //         << 3*hI + 7 << " "
-                //         << 3*hI + 8 << " "
-                //         << 3*hI + 9
-                //         << endl;
-                // }
-                // FatalErrorIn(args.executable())
-                //     << "findLineAll did not hit its own face."
-                //     << exit(FatalError);
+                FatalErrorIn(args.executable())
+                    << "findLineAll did not hit its own face."
+                    << exit(FatalError);
             }
         }
         else
@@ -738,76 +730,70 @@ int main(int argc, char *argv[])
             if (ownHitI < 0)
             {
                 drawHitProblem(fI, surf, start, faceCentres, end, hitInfo);
-                // Info<< nl << "# findLineAll did not hit its own face."
-                //     << nl << "# fI " << fI
-                //     << nl << "# start " << start[fI]
-                //     << nl << "# f centre " << faceCentres[fI]
-                //     << nl << "# end " << end[fI]
-                //     << nl << "# hitInfo " << hitInfo
-                //     << endl;
 
-                // meshTools::writeOBJ(Info, start[fI]);
-                // meshTools::writeOBJ(Info, faceCentres[fI]);
-                // meshTools::writeOBJ(Info, end[fI]);
-
-                // Info<< "l 1 2 3" << endl;
-
-                // meshTools::writeOBJ(Info, surf.points()[surf[fI][0]]);
-                // meshTools::writeOBJ(Info, surf.points()[surf[fI][1]]);
-                // meshTools::writeOBJ(Info, surf.points()[surf[fI][2]]);
-
-                // Info<< "f 4 5 6" << endl;
-
-                // forAll(hitInfo, hI)
-                // {
-                //     label hFI = hitInfo[hI].index();
-
-                //     meshTools::writeOBJ(Info, surf.points()[surf[hFI][0]]);
-                //     meshTools::writeOBJ(Info, surf.points()[surf[hFI][1]]);
-                //     meshTools::writeOBJ(Info, surf.points()[surf[hFI][2]]);
-
-                //     Info<< "f "
-                //         << 3*hI + 7 << " "
-                //         << 3*hI + 8 << " "
-                //         << 3*hI + 9
-                //         << endl;
-                // }
-
-                // FatalErrorIn(args.executable())
-                //     << "findLineAll did not hit its own face."
-                //     << exit(FatalError);
+                FatalErrorIn(args.executable())
+                    << "findLineAll did not hit its own face."
+                    << exit(FatalError);
             }
             else if (ownHitI == 0)
             {
                 // There are no internal hits, the first hit is the closest
                 // external hit
 
-                externalCloseness[fI] = mag
+                if
                 (
-                    faceCentres[fI] - hitInfo[ownHitI + 1].hitPoint()
-                );
+                    (normals[fI] & normals[hitInfo[ownHitI + 1].index()])
+                  < externalToleranceCosAngle
+                )
+                {
+                    externalCloseness[fI] = mag
+                    (
+                        faceCentres[fI] - hitInfo[ownHitI + 1].hitPoint()
+                    );
+                }
             }
             else if (ownHitI == hitInfo.size() - 1)
             {
                 // There are no external hits, the last but one hit is the
                 // closest internal hit
 
-                internalCloseness[fI] = mag
+                if
                 (
-                    faceCentres[fI] - hitInfo[ownHitI - 1].hitPoint()
-                );
+                    (normals[fI] & normals[hitInfo[ownHitI - 1].index()])
+                  < internalToleranceCosAngle
+                )
+                {
+                    internalCloseness[fI] = mag
+                    (
+                        faceCentres[fI] - hitInfo[ownHitI - 1].hitPoint()
+                    );
+                }
             }
             else
             {
-                externalCloseness[fI] = mag
+                if
                 (
-                    faceCentres[fI] - hitInfo[ownHitI + 1].hitPoint()
-                );
+                    (normals[fI] & normals[hitInfo[ownHitI + 1].index()])
+                  < externalToleranceCosAngle
+                )
+                {
+                    externalCloseness[fI] = mag
+                    (
+                        faceCentres[fI] - hitInfo[ownHitI + 1].hitPoint()
+                    );
+                }
 
-                internalCloseness[fI] = mag
+                if
                 (
-                    faceCentres[fI] - hitInfo[ownHitI - 1].hitPoint()
-                );
+                    (normals[fI] & normals[hitInfo[ownHitI - 1].index()])
+                  < internalToleranceCosAngle
+                )
+                {
+                    internalCloseness[fI] = mag
+                    (
+                        faceCentres[fI] - hitInfo[ownHitI - 1].hitPoint()
+                    );
+                }
             }
         }
     }
