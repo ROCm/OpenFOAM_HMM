@@ -120,7 +120,7 @@ void volPointInterpolation::pushUntransformedData
         const labelList& slavePoints = slaves[i];
 
         // Copy master data to slave slots
-        forAll(slaves, j)
+        forAll(slavePoints, j)
         {
             elems[slavePoints[j]] = elems[i];
         }

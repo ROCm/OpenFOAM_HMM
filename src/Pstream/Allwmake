@@ -2,7 +2,10 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-wmake libso dummy
+makeOption=libso
+[ $# -ge 1 ] && makeOption=$1
+
+wmake $makeOption dummy
 
 case "$WM_MPLIB" in
 *MPI*)
@@ -11,11 +14,11 @@ case "$WM_MPLIB" in
     echo "Note: ignore spurious warnings about missing mpicxx.h headers"
     set -x
     # force compilation into qualified directory
-    WM_OPTIONS=${WM_OPTIONS}$WM_MPLIB  wmake libso mpi
+    WM_OPTIONS=${WM_OPTIONS}$WM_MPLIB  wmake $makeOption mpi
     ;;
 
 #GAMMA)
-#    wmake libso gamma
+#    wmake $makeOption gamma
 #    ;;
 esac
 

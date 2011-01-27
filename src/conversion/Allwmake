@@ -2,6 +2,9 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-wmake libso
+makeOption=libso
+[ $# -ge 1 ] && makeOption=$1
+
+wmake $makeOption
 
 # ----------------------------------------------------------------- end-of-file
