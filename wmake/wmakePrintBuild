@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -30,6 +30,8 @@
 #
 #------------------------------------------------------------------------------
 usage() {
+    exec 1>&2
+
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 usage: ${0##*/} [OPTION]
@@ -38,6 +40,7 @@ options:
                   (exit code 0 for no changes)
   -major          report \$WM_PROJECT_VERSION only and exit
   -update         update \$WM_PROJECT_DIR/.build from the git information
+  -pkg TAG        specify packager/release tag ('none' marks an empty packager)
   -version VER    specify an alternative version
 
 Print the version used when building the project, in this order of precedence:
@@ -50,7 +53,7 @@ USAGE
 }
 #------------------------------------------------------------------------------
 
-unset checkOnly update version
+unset checkOnly update package version oldPackage oldVersion
 
 # parse options
 while [ "$#" -gt 0 ]
@@ -71,6 +74,12 @@ do
         update=true
         shift
         ;;
+    -pkg | -package)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        # mark empty as 'none', disallow '!' and spaces in string
+        package=$(echo "${2:-none}" | sed -e 's/!//g' -e 's/ //g')
+        shift 2
+        ;;
     -v | -version)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         version="$2"
@@ -88,7 +97,31 @@ done
 # persistent build tag
 #
 build="$WM_PROJECT_DIR/.build"
-previous=$(tail -1 $build 2>/dev/null)
+
+# retrieve old values from the $WM_PROJECT_DIR/.build cache, stored as
+#     version [packager]
+set -- $(tail -1 $build 2>/dev/null)
+
+oldVersion="$1"; shift
+oldPackage="$@"
+[ "${oldPackage:-none}" = none ] && unset oldPackage
+
+
+#
+# printTag - output the build tag
+# reuses the old -package tag if needed
+#
+printTag()
+{
+    if [ "${package:-${oldPackage:-none}}" = none ]
+    then
+        echo "$version"
+    else
+        echo "$version ${package:-$oldPackage}"
+    fi
+}
+
+
 
 if [ -n "$version" ]
 then
@@ -115,12 +148,17 @@ else
 fi
 
 
+#
 # update persistent build tag if possible
-if [ $rc -eq 0 -a -n "$update" -a "$version" != "$previous" ]
+#
+if [ $rc -eq 0 -a -n "$update" ]
 then
-    if [ -w "$build" -o \( -w "$WM_PROJECT_DIR" -a ! -e "$build" \) ]
+    if [ "$version:$package" != "$oldVersion:$oldPackage" ]
     then
-        echo $version >| "$build" 2>/dev/null
+        if [ -w "$build" -o \( -w "$WM_PROJECT_DIR" -a ! -e "$build" \) ]
+        then
+            printTag >| "$build" 2>/dev/null
+        fi
     fi
 fi
 
@@ -130,32 +168,38 @@ if [ -n "$checkOnly" ]
 then
     if [ $rc -eq 0 ]
     then
-        test "$version" = "$previous"
+        test "$version:${package:-$oldPackage}" = "$oldVersion:$oldPackage"
         rc=$?
         if [ $rc -eq 0 ]
         then
-            echo "same version as previous build"
+            echo "same version as previous build" 1>&2
         else
-            echo "version changed from previous build"
+            echo "version changed from previous build" 1>&2
         fi
     else
-        echo "no git description found"
+        echo "no git description found" 1>&2
     fi
     exit $rc
 fi
 
 
-if [ $rc -eq 0 ]
+#
+# cannot get git information or  -version version
+#
+if [ $rc -ne 0 ]
 then
-    # output the git information or the -version version
-    echo $version
-elif [ -n "$previous" ]
-then
-    # use previous build tag
-    echo $previous
-else
-    # fallback to WM_PROJECT_VERSION alone
-    echo ${WM_PROJECT_VERSION:-unknown}
+    if [ -n "$oldVersion" ]
+    then
+        # use previous version info
+        version="$oldVersion"
+    else
+        # fallback to WM_PROJECT_VERSION alone
+        version="${WM_PROJECT_VERSION:-unknown}"
+    fi
 fi
+
+
+# output the tag
+printTag
 
 #------------------------------------------------------------------------------
