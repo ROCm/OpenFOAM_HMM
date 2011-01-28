@@ -59,20 +59,41 @@ void Foam::ensightPart::writeFieldList
     const labelUList& idList
 ) const
 {
-    forAll(idList, i)
+    if (&idList)
     {
-        if (idList[i] >= field.size() || isnan(field[idList[i]]))
+        forAll(idList, i)
         {
-            os.writeUndef();
-        }
-        else
-        {
-            os.write(field[idList[i]]);
-        }
+            if (idList[i] >= field.size() || isnan(field[idList[i]]))
+            {
+                os.writeUndef();
+            }
+            else
+            {
+                os.write(field[idList[i]]);
+            }
 
-        os.newline();
+            os.newline();
+        }
+    }
+    else
+    {
+        // no idList => perNode
+        forAll(field, i)
+        {
+            if (isnan(field[i]))
+            {
+                os.writeUndef();
+            }
+            else
+            {
+                os.write(field[i]);
+            }
+
+            os.newline();
+        }
     }
 }
+
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -153,7 +174,7 @@ void Foam::ensightPart::writeGeometry
     if (size())
     {
         const localPoints ptList = calcLocalPoints();
-        const labelList& pointMap = ptList.list;
+        const labelUList& pointMap = ptList.list;
 
         writeHeader(os, true);
 
@@ -195,21 +216,30 @@ void Foam::ensightPart::writeGeometry
 void Foam::ensightPart::writeScalarField
 (
     ensightFile& os,
-    const List<scalar>& field
+    const List<scalar>& field,
+    const bool perNode
 ) const
 {
     if (size() && field.size() && (os.allowUndef() || isFieldDefined(field)))
     {
         writeHeader(os);
 
-        forAll(elementTypes(), elemI)
+        if (perNode)
         {
-            const labelList& idList = elemLists_[elemI];
-
-            if (idList.size())
+            os.writeKeyword("coordinates");
+            writeFieldList(os, field, labelUList::null());
+        }
+        else
+        {
+            forAll(elementTypes(), elemI)
             {
-                os.writeKeyword(elementTypes()[elemI]);
-                writeFieldList(os, field, idList);
+                const labelUList& idList = elemLists_[elemI];
+
+                if (idList.size())
+                {
+                    os.writeKeyword(elementTypes()[elemI]);
+                    writeFieldList(os, field, idList);
+                }
             }
         }
     }
@@ -221,23 +251,34 @@ void Foam::ensightPart::writeVectorField
     ensightFile& os,
     const List<scalar>& field0,
     const List<scalar>& field1,
-    const List<scalar>& field2
+    const List<scalar>& field2,
+    const bool perNode
 ) const
 {
     if (size() && field0.size() && (os.allowUndef() || isFieldDefined(field0)))
     {
         writeHeader(os);
 
-        forAll(elementTypes(), elemI)
+        if (perNode)
         {
-            const labelList& idList = elemLists_[elemI];
-
-            if (idList.size())
+            os.writeKeyword("coordinates");
+            writeFieldList(os, field0, labelUList::null());
+            writeFieldList(os, field1, labelUList::null());
+            writeFieldList(os, field2, labelUList::null());
+        }
+        else
+        {
+            forAll(elementTypes(), elemI)
             {
-                os.writeKeyword(elementTypes()[elemI]);
-                writeFieldList(os, field0, idList);
-                writeFieldList(os, field1, idList);
-                writeFieldList(os, field2, idList);
+                const labelUList& idList = elemLists_[elemI];
+
+                if (idList.size())
+                {
+                    os.writeKeyword(elementTypes()[elemI]);
+                    writeFieldList(os, field0, idList);
+                    writeFieldList(os, field1, idList);
+                    writeFieldList(os, field2, idList);
+                }
             }
         }
     }

@@ -217,12 +217,12 @@ Foam::ensightPart::localPoints Foam::ensightPartFaces::calcLocalPoints() const
 
     forAll(elemLists_, typeI)
     {
-        const labelList& idList = elemLists_[typeI];
+        const labelUList& idList = elemLists_[typeI];
 
         // add all points from faces
         forAll(idList, i)
         {
-            label id = idList[i] + offset_;
+            const label id = idList[i] + offset_;
             const face& f = faces_[id];
 
             forAll(f, fp)
@@ -255,8 +255,8 @@ void Foam::ensightPartFaces::writeConnectivity
     ensightGeoFile& os,
     const word& key,
     const faceList& faces,
-    const labelList& idList,
-    const labelList& pointMap
+    const labelUList& idList,
+    const labelUList& pointMap
 ) const
 {
     os.writeKeyword(key);
@@ -269,7 +269,7 @@ void Foam::ensightPartFaces::writeConnectivity
         // write the number of points per face
         forAll(idList, i)
         {
-            label id = idList[i] + offset_;
+            const label id = idList[i] + offset_;
             const face& f = faces[id];
 
             os.write(f.size());
@@ -280,7 +280,7 @@ void Foam::ensightPartFaces::writeConnectivity
     // write the points describing the face
     forAll(idList, i)
     {
-        label id = idList[i] + offset_;
+        const label id = idList[i] + offset_;
         const face& f = faces[id];
 
         // convert global -> local index
@@ -298,8 +298,8 @@ void Foam::ensightPartFaces::writeConnectivity
 (
     ensightGeoFile& os,
     const word& key,
-    const labelList& idList,
-    const labelList& pointMap
+    const labelUList& idList,
+    const labelUList& pointMap
 ) const
 {
     writeConnectivity

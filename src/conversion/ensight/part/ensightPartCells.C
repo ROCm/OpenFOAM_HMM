@@ -52,7 +52,7 @@ const Foam::List<Foam::word> Foam::ensightPartCells::elemTypes_
 void Foam::ensightPartCells::classify
 (
     const polyMesh& mesh,
-    const labelList& idList
+    const labelUList& idList
 )
 {
     // References to cell shape models
@@ -203,7 +203,7 @@ Foam::ensightPartCells::ensightPartCells
 (
     label partNumber,
     const polyMesh& mesh,
-    const labelList& idList
+    const labelUList& idList
 )
 :
     ensightPart(partNumber, "cells", mesh.points()),
@@ -259,13 +259,13 @@ Foam::ensightPart::localPoints Foam::ensightPartCells::calcLocalPoints() const
 
     forAll(elemLists_, typeI)
     {
-        const labelList& idList = elemLists_[typeI];
+        const labelUList& idList = elemLists_[typeI];
 
         // add all points from cells
         forAll(idList, i)
         {
-            label id = idList[i] + offset_;
-            const labelList& cFaces = mesh_.cells()[id];
+            const label id = idList[i] + offset_;
+            const labelUList& cFaces = mesh_.cells()[id];
 
             forAll(cFaces, cFaceI)
             {
@@ -301,8 +301,8 @@ void Foam::ensightPartCells::writeConnectivity
 (
     ensightGeoFile& os,
     const word& key,
-    const labelList& idList,
-    const labelList& pointMap
+    const labelUList& idList,
+    const labelUList& pointMap
 ) const
 {
     os.writeKeyword(key);
@@ -317,8 +317,8 @@ void Foam::ensightPartCells::writeConnectivity
         // write the number of faces per element
         forAll(idList, i)
         {
-            label id = idList[i] + offset_;
-            const labelList& cFace = mesh_.cells()[id];
+            const label id = idList[i] + offset_;
+            const labelUList& cFace = mesh_.cells()[id];
 
             os.write(cFace.size());
             os.newline();
@@ -327,8 +327,8 @@ void Foam::ensightPartCells::writeConnectivity
         // write the number of points per element face
         forAll(idList, i)
         {
-            label id = idList[i] + offset_;
-            const labelList& cFace = mesh_.cells()[id];
+            const label id = idList[i] + offset_;
+            const labelUList& cFace = mesh_.cells()[id];
 
             forAll(cFace, faceI)
             {
@@ -342,8 +342,8 @@ void Foam::ensightPartCells::writeConnectivity
         // write the points describing each element face
         forAll(idList, i)
         {
-            label id = idList[i] + offset_;
-            const labelList& cFace = mesh_.cells()[id];
+            const label id = idList[i] + offset_;
+            const labelUList& cFace = mesh_.cells()[id];
 
             forAll(cFace, faceI)
             {
@@ -366,7 +366,7 @@ void Foam::ensightPartCells::writeConnectivity
 
         forAll(idList, i)
         {
-            label id = idList[i] + offset_;
+            const label id = idList[i] + offset_;
             const cellShape& cellPoints = cellShapes[id];
 
             // convert global -> local index

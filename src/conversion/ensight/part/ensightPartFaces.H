@@ -63,8 +63,8 @@ class ensightPartFaces
         (
             ensightGeoFile&,
             const word& key,
-            const labelList& idList,
-            const labelList& pointMap
+            const labelUList& idList,
+            const labelUList& pointMap
         ) const;
 
 
@@ -104,8 +104,8 @@ protected:
             ensightGeoFile&,
             const word& key,
             const faceList&,
-            const labelList& idList,
-            const labelList& pointMap
+            const labelUList& idList,
+            const labelUList& pointMap
         ) const;
 
 

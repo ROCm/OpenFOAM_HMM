@@ -221,10 +221,10 @@ void Foam::sampledSurfaces::read(const dictionary& dict)
 
     dict.lookup("interpolationScheme") >> interpolationScheme_;
 
-    word writeFormat(dict.lookup("surfaceFormat"));
+    word writeType(dict.lookup("surfaceFormat"));
 
     // define the surface formatter
-    formatter_ = surfaceWriter::New(writeFormat);
+    formatter_ = surfaceWriter::New(writeType);
 
     PtrList<sampledSurface> newList
     (

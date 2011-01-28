@@ -45,11 +45,11 @@ bool Foam::ensightPart::isFieldDefined(const List<scalar>& field) const
 {
     forAll(elemLists_, elemI)
     {
-        const labelList& idList = elemLists_[elemI];
+        const labelUList& idList = elemLists_[elemI];
 
         forAll(idList, i)
         {
-            label id = idList[i];
+            const label id = idList[i];
 
             if (id >= field.size() || isnan(field[id]))
             {
@@ -159,7 +159,7 @@ Foam::ensightPart::~ensightPart()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::ensightPart::renumber(const labelList& origId)
+void Foam::ensightPart::renumber(const labelUList& origId)
 {
     // transform to global values first
     if (offset_)

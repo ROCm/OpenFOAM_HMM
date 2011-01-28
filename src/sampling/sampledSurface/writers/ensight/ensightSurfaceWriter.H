@@ -52,17 +52,11 @@ class ensightSurfaceWriter
 {
     // Private data
 
-//        fileName caseFileName_;
-//        fileName surfaceName_;
-//        fileName geomName_;
-//        DynamicList<word> varNames_;
-//        DynamicList<fileName> varFileNames_;
+        //- Write option (default is IOstream::ASCII
+        IOstream::streamFormat writeFormat_;
 
 
     // Private Member Functions
-
-        template<class Type>
-        static inline void writeData(Ostream&, const Field<Type>&);
 
         //- Templated write operation
         template<class Type>

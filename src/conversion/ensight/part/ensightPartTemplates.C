@@ -34,29 +34,46 @@ template<class Type>
 void Foam::ensightPart::writeField
 (
     ensightFile& os,
-    const Field<Type>& field
+    const Field<Type>& field,
+    const bool perNode
 ) const
 {
     if (this->size() && field.size())
     {
         writeHeader(os);
 
-        forAll(elementTypes(), elemI)
+        if (perNode)
         {
-            const labelList& idList = elemLists_[elemI];
-
-            if (idList.size())
+            os.writeKeyword("coordinates");
+            for
+            (
+                direction cmpt=0;
+                cmpt < pTraits<Type>::nComponents;
+                ++cmpt
+            )
             {
-                os.writeKeyword(elementTypes()[elemI]);
+                writeFieldList(os, field.component(cmpt), labelUList::null());
+            }
+        }
+        else
+        {
+            forAll(elementTypes(), elemI)
+            {
+                const labelUList& idList = elemLists_[elemI];
 
-                for
-                (
-                    direction cmpt=0;
-                    cmpt < pTraits<Type>::nComponents;
-                    ++cmpt
-                )
+                if (idList.size())
                 {
-                    writeFieldList(os, field.component(cmpt), idList);
+                    os.writeKeyword(elementTypes()[elemI]);
+
+                    for
+                    (
+                        direction cmpt=0;
+                        cmpt < pTraits<Type>::nComponents;
+                        ++cmpt
+                    )
+                    {
+                        writeFieldList(os, field.component(cmpt), idList);
+                    }
                 }
             }
         }

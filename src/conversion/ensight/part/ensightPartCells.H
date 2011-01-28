@@ -60,7 +60,7 @@ class ensightPartCells
         void classify
         (
             const polyMesh&,
-            const labelList& idLabels = labelList::null()
+            const labelUList& idLabels = labelUList::null()
         );
 
         //- track points used
@@ -72,10 +72,10 @@ class ensightPartCells
         //- element connectivity
         virtual void writeConnectivity
         (
-            ensightGeoFile& os,
+            ensightGeoFile&,
             const word& key,
-            const labelList& idList,
-            const labelList& pointMap
+            const labelUList& idList,
+            const labelUList& pointMap
         ) const;
 
 
@@ -121,7 +121,7 @@ public:
         (
             label partNumber,
             const polyMesh&,
-            const labelList&
+            const labelUList&
         );
 
         //- Construct from polyMesh and cellZone

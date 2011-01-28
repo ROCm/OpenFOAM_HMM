@@ -42,44 +42,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-namespace Foam
-{
-
-    // Write scalarField in ensight format
-    template<>
-    inline void Foam::ensightSurfaceWriter::writeData
-    (
-        Ostream& os,
-        const Field<scalar>& values
-    )
-    {
-        forAll(values, i)
-        {
-            os  << values[i] << nl;
-        }
-    }
-}
-
-
-// Write generic field in ensight format
-template<class Type>
-inline void Foam::ensightSurfaceWriter::writeData
-(
-    Ostream& os,
-    const Field<Type>& values
-)
-{
-    for (direction cmpt = 0; cmpt < vector::nComponents; ++cmpt)
-    {
-        scalarField v(values.component(cmpt));
-        forAll(v, i)
-        {
-            os  << v[i] << nl;
-        }
-    }
-}
-
-
 template<class Type>
 void Foam::ensightSurfaceWriter::writeTemplate
 (
@@ -101,47 +63,35 @@ void Foam::ensightSurfaceWriter::writeTemplate
     // const scalar timeValue = Foam::name(this->mesh().time().timeValue());
     const scalar timeValue = 0.0;
 
-    OFstream caseStr(outputDir/fieldName/surfaceName + ".case");
-    ensightGeoFile geomStr
+    OFstream osCase(outputDir/fieldName/surfaceName + ".case");
+    ensightGeoFile osGeom
     (
         outputDir/fieldName/surfaceName + ".000.mesh",
-        IOstream::ASCII
+        writeFormat_
     );
-    ensightFile fieldStr
+    ensightFile osField
     (
         outputDir/fieldName/surfaceName + ".000." + fieldName,
-        IOstream::ASCII
+        writeFormat_
     );
 
     if (verbose)
     {
-        Info<< "Writing case file to " << caseStr.name() << endl;
+        Info<< "Writing case file to " << osCase.name() << endl;
     }
 
-    caseStr
+    osCase
         << "FORMAT" << nl
         << "type: ensight gold" << nl
         << nl
         << "GEOMETRY" << nl
-        << "model:        1     " << geomStr.name().name() << nl
+        << "model:        1     " << osGeom.name().name() << nl
         << nl
-        << "VARIABLE" << nl;
-    if (isNodeValues)
-    {
-        caseStr
-            << pTraits<Type>::typeName << " per node:" << setw(10) << 1
-            << "       " << fieldName
-            << "       " << surfaceName.c_str() << ".***." << fieldName << nl;
-    }
-    else
-    {
-        caseStr
-            << pTraits<Type>::typeName << " per element:" << setw(10) << 1
-            << "       " << fieldName
-            << "       " << surfaceName.c_str() << ".***." << fieldName << nl;
-    }
-
-    caseStr
+        << "VARIABLE" << nl
+        << pTraits<Type>::typeName << " per "
+        << word(isNodeValues ? "node:" : "element:") << setw(10) << 1
+        << "       " << fieldName
+        << "       " << surfaceName.c_str() << ".***." << fieldName << nl
         << nl
         << "TIME" << nl
         << "time set:                      1" << nl
@@ -152,40 +102,12 @@ void Foam::ensightSurfaceWriter::writeTemplate
         << timeValue << nl
         << nl;
 
-    ensightPartFaces ensPart(0, geomStr.name().name(), points, faces, true);
-    geomStr << ensPart;
+    ensightPartFaces ensPart(0, osGeom.name().name(), points, faces, true);
+    osGeom << ensPart;
 
     // Write field
-    fieldStr
-        << pTraits<Type>::typeName << nl
-        << "part" << nl
-        << setw(10) << 1 << nl;
-
-    if (isNodeValues)
-    {
-        fieldStr << "coordinates" << nl;
-        writeData(fieldStr, values);
-    }
-    else
-    {
-        // ensPart.writeField(fieldStr, values);
-        forAll(ensPart.elementTypes(), elemI)
-        {
-            if (ensPart.elemLists()[elemI].size())
-            {
-                fieldStr.writeKeyword(ensPart.elementTypes()[elemI]);
-                writeData
-                (
-                    fieldStr,
-                    Field<Type>
-                    (
-                        values,
-                        ensPart.elemLists()[elemI]
-                    )
-                );
-            }
-        }
-    }
+    osField.writeKeyword(pTraits<Type>::typeName);
+    ensPart.writeField(osField, values, isNodeValues);
 }
 
 
@@ -193,7 +115,8 @@ void Foam::ensightSurfaceWriter::writeTemplate
 
 Foam::ensightSurfaceWriter::ensightSurfaceWriter()
 :
-    surfaceWriter()
+    surfaceWriter(),
+    writeFormat_(IOstream::ASCII)
 {}
 
 
@@ -219,28 +142,27 @@ void Foam::ensightSurfaceWriter::write
         mkDir(outputDir);
     }
 
-    //const scalar timeValue = Foam::name(this->mesh().time().timeValue());
+    // const scalar timeValue = Foam::name(this->mesh().time().timeValue());
     const scalar timeValue = 0.0;
 
-
-    OFstream caseStr(outputDir/surfaceName + ".case");
-    ensightGeoFile geomStr
+    OFstream osCase(outputDir/surfaceName + ".case");
+    ensightGeoFile osGeom
     (
         outputDir/surfaceName + ".000.mesh",
-        IOstream::ASCII
+        writeFormat_
     );
 
     if (verbose)
     {
-        Info<< "Writing case file to " << caseStr.name() << endl;
+        Info<< "Writing case file to " << osCase.name() << endl;
     }
 
-    caseStr
+    osCase
         << "FORMAT" << nl
         << "type: ensight gold" << nl
         << nl
         << "GEOMETRY" << nl
-        << "model:        1     " << geomStr.name().name() << nl
+        << "model:        1     " << osGeom.name().name() << nl
         << nl
         << "TIME" << nl
         << "time set:                      1" << nl
@@ -251,8 +173,8 @@ void Foam::ensightSurfaceWriter::write
         << timeValue << nl
         << nl;
 
-    ensightPartFaces ensPart(0, geomStr.name().name(), points, faces, true);
-    geomStr << ensPart;
+    ensightPartFaces ensPart(0, osGeom.name().name(), points, faces, true);
+    osGeom << ensPart;
 }
 
 

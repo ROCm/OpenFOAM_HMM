@@ -74,7 +74,7 @@ public:
     // Selectors
 
         //- Return a reference to the selected surfaceWriter
-        static autoPtr<surfaceWriter> New(const word& writeFormat);
+        static autoPtr<surfaceWriter> New(const word& writeType);
 
 
     // Constructors

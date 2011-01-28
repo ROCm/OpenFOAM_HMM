@@ -107,7 +107,7 @@ void Foam::ensightParts::recalculate(const polyMesh& mesh)
 
         forAll(mesh.cellZones(), zoneI)
         {
-            const labelList& idList = mesh.cellZones()[zoneI];
+            const labelUList& idList = mesh.cellZones()[zoneI];
 
             forAll(idList, i)
             {
@@ -162,8 +162,8 @@ void Foam::ensightParts::recalculate(const polyMesh& mesh)
 
 void Foam::ensightParts::renumber
 (
-    const labelList& origCellId,
-    const labelList& origFaceId
+    const labelUList& origCellId,
+    const labelUList& origFaceId
 )
 {
     forAll(partsList_, partI)
@@ -228,7 +228,8 @@ void Foam::ensightParts::writeScalarField
 (
     ensightFile& os,
     const List<scalar>& field,
-    bool useFaceData
+    const bool useFaceData,
+    const bool perNode
 ) const
 {
     forAll(partsList_, partI)
@@ -240,7 +241,7 @@ void Foam::ensightParts::writeScalarField
           : partsList_[partI].isCellData()
         )
         {
-            partsList_[partI].writeScalarField(os,field);
+            partsList_[partI].writeScalarField(os, field, perNode);
         }
     }
 }
@@ -252,7 +253,8 @@ void Foam::ensightParts::writeVectorField
     const List<scalar>& field0,
     const List<scalar>& field1,
     const List<scalar>& field2,
-    bool useFaceData
+    const bool useFaceData,
+    const bool perNode
 ) const
 {
     forAll(partsList_, partI)
@@ -264,7 +266,12 @@ void Foam::ensightParts::writeVectorField
           : partsList_[partI].isCellData()
         )
         {
-            partsList_[partI].writeVectorField(os, field0, field1, field2);
+            partsList_[partI].writeVectorField
+            (
+                os,
+                field0, field1, field2,
+                perNode
+            );
         }
     }
 }

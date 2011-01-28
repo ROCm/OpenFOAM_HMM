@@ -89,8 +89,8 @@ public:
         //- renumber elements
         void renumber
         (
-            const labelList& origCellId,
-            const labelList& origFaceId
+            const labelUList& origCellId,
+            const labelUList& origFaceId
         );
 
         //- number of parts
@@ -108,26 +108,32 @@ public:
         //- write the lists
         void writeData(Ostream&) const;
 
-        //- write scalar field
+        //- write (volume) scalar field
+        //  optionally write data for face parts
+        //  optionally write data per node
         void writeScalarField
         (
             ensightFile&,
             const List<scalar>& field,
-            bool useFaceData = false
+            const bool useFaceData = false,
+            const bool perNode = false
         ) const;
 
-        //- write vector field components
+        //- write (volume) vector field components
+        //  optionally write data for face parts
+        //  optionally write data per node
         void writeVectorField
         (
             ensightFile&,
             const List<scalar>& field0,
             const List<scalar>& field1,
             const List<scalar>& field2,
-            bool useFaceData = false
+            const bool useFaceData = false,
+            const bool perNode = false
         ) const;
 
 
-        //- write generalized field components
+        //- write generalized volume field components
         template<class Type>
         void writeField
         (

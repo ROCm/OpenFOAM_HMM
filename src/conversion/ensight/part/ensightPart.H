@@ -134,6 +134,7 @@ protected:
         void writeHeader(ensightFile&, bool withDescription=false) const;
 
         //- write a scalar field for idList
+        //  A null reference for idList writes the perNode values
         void writeFieldList
         (
             ensightFile& os,
@@ -150,10 +151,10 @@ protected:
         //- write connectivities
         virtual void writeConnectivity
         (
-            ensightGeoFile& os,
+            ensightGeoFile&,
             const word& key,
-            const labelList& idList,
-            const labelList& pointMap
+            const labelUList& idList,
+            const labelUList& pointMap
         ) const
         {}
 
@@ -287,7 +288,7 @@ public:
     // Edit
 
         //- renumber elements
-        void renumber(const labelList&);
+        void renumber(const labelUList&);
 
         //- write summary information about the object
         bool writeSummary(Ostream&) const;
@@ -303,28 +304,34 @@ public:
         void writeGeometry(ensightGeoFile&, const pointField&) const;
 
         //- write scalar field
+        //  optionally write data per node
         void writeScalarField
         (
             ensightFile&,
-            const List<scalar>& field
+            const List<scalar>& field,
+            const bool perNode = false
         ) const;
 
         //- write vector field components
+        //  optionally write data per node
         void writeVectorField
         (
             ensightFile&,
             const List<scalar>& field0,
             const List<scalar>& field1,
-            const List<scalar>& field2
+            const List<scalar>& field2,
+            const bool perNode = false
         ) const;
 
 
         //- write generalized field components
+        //  optionally write data per node
         template<class Type>
         void writeField
         (
             ensightFile&,
-            const Field<Type>&
+            const Field<Type>&,
+            const bool perNode = false
         ) const;
 
 
