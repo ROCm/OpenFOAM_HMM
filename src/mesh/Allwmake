@@ -2,8 +2,11 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-wmake libso autoMesh
-wmake libso blockMesh
-wmake libso conformalVoronoiMesh
+makeOption=libso
+[ $# -ge 1 ] && makeOption=$1
+
+wmake $makeOption autoMesh
+wmake $makeOption blockMesh
+wmake $makeOption conformalVoronoiMesh
 
 # ----------------------------------------------------------------- end-of-file

@@ -2,9 +2,12 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-decompose/Allwmake
-reconstruct/Allwmake
-wmake libso distributed
+makeOption=libso
+[ $# -ge 1 ] && makeOption=$1
+
+decompose/Allwmake $*
+reconstruct/Allwmake $*
+wmake $makeOption distributed
 
 
 # ----------------------------------------------------------------- end-of-file

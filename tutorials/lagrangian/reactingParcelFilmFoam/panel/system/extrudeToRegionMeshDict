@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,15 +10,28 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
-    object      reactingCloud1Properties;
+    object      extrudeToRegionMeshDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-solution
+region          wallFilmRegion;
+
+faceZones       (wallFilmFaces);
+
+adaptMesh       true;
+
+oneD            false;
+
+extrudeModel    linearNormal;
+
+nLayers         1;
+
+expansionRatio  1;
+
+linearNormalCoeffs
 {
-    active          false;
+    thickness       0.01;
 }
 
 
-// ************************************************************************* //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
