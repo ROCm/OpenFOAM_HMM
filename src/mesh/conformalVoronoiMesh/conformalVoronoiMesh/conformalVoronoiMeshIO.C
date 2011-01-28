@@ -306,8 +306,6 @@ void Foam::conformalVoronoiMesh::writeMesh
             << exit(FatalError);
     }
 
-    Info<< "Not writing cell centres" << endl;
-
     // pointIOField cellCs
     // (
     //     IOobject

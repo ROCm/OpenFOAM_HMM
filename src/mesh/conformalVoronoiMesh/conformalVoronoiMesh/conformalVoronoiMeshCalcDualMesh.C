@@ -1493,7 +1493,6 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     pMesh.addPatches(patches);
 
-    Info<< "NOT OVERRIDING CELL CENTRES" << endl;
     // mesh.overrideCellCentres(cellCentres);
 
     timeCheck("polyMesh created, checking quality");
