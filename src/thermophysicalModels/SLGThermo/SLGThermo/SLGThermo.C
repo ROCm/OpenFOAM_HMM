@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,7 +61,7 @@ Foam::SLGThermo::SLGThermo(const fvMesh& mesh, basicThermo& thermo)
 
     if (thermo.found("liquids"))
     {
-        liquids_ = liquidMixture::New(thermo.subDict("liquids"));
+        liquids_ = liquidMixtureProperties::New(thermo.subDict("liquids"));
         Info<< "    liquids - " << liquids_->components().size()
             << " components" << endl;
     }
@@ -72,7 +72,7 @@ Foam::SLGThermo::SLGThermo(const fvMesh& mesh, basicThermo& thermo)
 
     if (thermo.found("solids"))
     {
-        solids_  = pointSolidMixture::New(thermo.subDict("solids"));
+        solids_  = solidMixtureProperties::New(thermo.subDict("solids"));
         Info<< "    solids - " << solids_->components().size()
             << " components" << endl;
     }
@@ -113,13 +113,14 @@ const Foam::basicMultiComponentMixture& Foam::SLGThermo::carrier() const
 }
 
 
-const Foam::liquidMixture& Foam::SLGThermo::liquids() const
+const Foam::liquidMixtureProperties& Foam::SLGThermo::liquids() const
 {
     if (!liquids_.valid())
     {
         FatalErrorIn
         (
-            "const Foam::liquidMixture& Foam::SLGThermo::liquids() const"
+            "const Foam::liquidMixtureProperties& "
+            "Foam::SLGThermo::liquids() const"
         )   << "liquids requested, but object is not allocated"
             << abort(FatalError);
     }
@@ -128,13 +129,14 @@ const Foam::liquidMixture& Foam::SLGThermo::liquids() const
 }
 
 
-const Foam::pointSolidMixture& Foam::SLGThermo::solids() const
+const Foam::solidMixtureProperties& Foam::SLGThermo::solids() const
 {
     if (!solids_.valid())
     {
         FatalErrorIn
         (
-            "const Foam::pointSolidtMixture& Foam::SLGThermo::solids() const"
+            "const Foam::solidMixtureProperties& "
+            "Foam::SLGThermo::solids() const"
         )   << "solids requested, but object is not allocated"
             << abort(FatalError);
     }

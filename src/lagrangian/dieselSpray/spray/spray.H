@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,13 +32,13 @@ Description
 #ifndef spray_H
 #define spray_H
 
+#include "autoPtr.H"
 #include "parcel.H"
 #include "injector.H"
 #include "IOPtrList.H"
 #include "interpolation.H"
-#include "liquid.H"
-#include "autoPtr.H"
-#include "liquidMixture.H"
+#include "liquidProperties.H"
+#include "liquidMixtureProperties.H"
 #include "cachedRandom.H"
 #include "thermoPhysicsTypes.H"
 
@@ -115,7 +115,7 @@ class spray
             autoPtr<breakupModel> breakupModel_;
             autoPtr<collisionModel> collisionModel_;
             autoPtr<dispersionModel> dispersionModel_;
-            autoPtr<liquidMixture> fuels_;
+            autoPtr<liquidMixtureProperties> fuels_;
             autoPtr<injectorModel> injectorModel_;
 
 
@@ -254,7 +254,7 @@ public:
             inline label subCycles() const;
             inline const vector& g() const;
 
-            inline const liquidMixture& fuels() const;
+            inline const liquidMixtureProperties& fuels() const;
             inline const PtrList<gasThermoPhysics>& gasProperties() const;
             inline const basicMultiComponentMixture& composition() const;
 

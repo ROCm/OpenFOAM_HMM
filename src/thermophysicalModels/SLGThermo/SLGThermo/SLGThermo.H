@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,8 +48,8 @@ SourceFiles
 #include "MeshObject.H"
 #include "basicThermo.H"
 #include "basicMultiComponentMixture.H"
-#include "liquidMixture.H"
-#include "pointSolidMixture.H"
+#include "liquidMixtureProperties.H"
+#include "solidMixtureProperties.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,10 +73,10 @@ class SLGThermo
         basicMultiComponentMixture* carrier_;
 
         //- Additional liquid properties data
-        autoPtr<liquidMixture> liquids_;
+        autoPtr<liquidMixtureProperties> liquids_;
 
         //- Additional solid properties data
-        autoPtr<pointSolidMixture> solids_;
+        autoPtr<solidMixtureProperties> solids_;
 
 
 public:
@@ -105,10 +105,10 @@ public:
             const basicMultiComponentMixture& carrier() const;
 
             //- Return reference to the global (additional) liquids
-            const liquidMixture& liquids() const;
+            const liquidMixtureProperties& liquids() const;
 
             //- Return reference to the global (additional) solids
-            const pointSolidMixture& solids() const;
+            const solidMixtureProperties& solids() const;
 
 
             // Index retrieval

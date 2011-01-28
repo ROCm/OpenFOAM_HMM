@@ -5,10 +5,10 @@ set -x
 wmake libso specie
 wmake libso solid
 wmake libso thermophysicalFunctions
-wmake libso liquids
-wmake libso liquidMixture
-wmake libso pointSolids
-wmake libso pointSolidMixture
+wmake libso liquidProperties
+wmake libso liquidMixtureProperties
+wmake libso solidProperties
+wmake libso solidMixtureProperties
 
 wmake libso basic
 wmake libso reactionThermo

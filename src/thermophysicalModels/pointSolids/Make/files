@@ -1,8 +1,0 @@
-pointSolid/pointSolid.C
-pointSolid/pointSolidNew.C
-
-ash/ash.C
-C/C.C
-CaCO3/CaCO3.C
-
-LIB = $(FOAM_LIBBIN)/libpointSolids
