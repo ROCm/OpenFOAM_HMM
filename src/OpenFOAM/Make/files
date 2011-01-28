@@ -47,6 +47,12 @@ primitives/globalIndexAndTransform/vectorTensorTransform/vectorTensorTransform.C
 primitives/quaternion/quaternion.C
 primitives/septernion/septernion.C
 
+/* functions, data entries */
+primitives/functions/DataEntry/makeDataEntries.C
+primitives/functions/DataEntry/polynomial/polynomial.C
+primitives/functions/DataEntry/polynomial/polynomialIO.C
+
+
 strings = primitives/strings
 $(strings)/string/string.C
 $(strings)/string/stringIO.C

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,10 +49,10 @@ Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
     sCoeffs_ = CpCoeffs_.integrateMinus1();
 
     // Offset h poly so that it is relative to the enthalpy at Tstd
-    hCoeffs_[0] += Hf_ - hCoeffs_.evaluate(specie::Tstd);
+    hCoeffs_[0] += Hf_ - hCoeffs_.value(specie::Tstd);
 
     // Offset s poly so that it is relative to the entropy at Tstd
-    sCoeffs_[0] += Sf_ - sCoeffs_.evaluate(specie::Tstd);
+    sCoeffs_[0] += Sf_ - sCoeffs_.value(specie::Tstd);
 }
 
 
@@ -77,10 +77,10 @@ Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
     sCoeffs_ = CpCoeffs_.integrateMinus1();
 
     // Offset h poly so that it is relative to the enthalpy at Tstd
-    hCoeffs_[0] += Hf_ - hCoeffs_.evaluate(specie::Tstd);
+    hCoeffs_[0] += Hf_ - hCoeffs_.value(specie::Tstd);
 
     // Offset s poly so that it is relative to the entropy at Tstd
-    sCoeffs_[0] += Sf_ - sCoeffs_.evaluate(specie::Tstd);
+    sCoeffs_[0] += Sf_ - sCoeffs_.value(specie::Tstd);
 }
 
 

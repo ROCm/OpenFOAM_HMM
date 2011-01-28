@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,38 +23,38 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "polynomial.H"
+#include "DataEntry.H"
 
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<
+template<class Type>
+Foam::autoPtr<Foam::DataEntry<Type> > Foam::DataEntry<Type>::New
 (
-    Ostream& os,
-    const polynomial& poly
+    const word& entryName,
+    const dictionary& dict
 )
 {
-    if (os.format() == IOstream::ASCII)
+    Istream& is(dict.lookup(entryName));
+
+    word DataEntryType(is);
+
+    typename dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(DataEntryType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        os  << static_cast<const DataEntry<scalar>& >(poly)
-            << token::SPACE << poly.coeffs_;
-    }
-    else
-    {
-        os  << static_cast<const DataEntry<scalar>& >(poly);
-        os.write
+        FatalErrorIn
         (
-            reinterpret_cast<const char*>(&poly.coeffs_),
-            sizeof(poly.coeffs_)
-        );
+            "DataEntry<Type>::New(Istream&)"
+        )   << "Unknown DataEntry type "
+            << DataEntryType << " for DataEntry "
+            << entryName << nl << nl
+            << "Valid DataEntry types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc() << nl
+            << exit(FatalError);
     }
 
-    // Check state of Ostream
-    os.check
-    (
-        "Ostream& operator<<(Ostream&, const polynomial&)"
-    );
-
-    return os;
+    return autoPtr<DataEntry<Type> >(cstrIter()(entryName, is));
 }
 
 
