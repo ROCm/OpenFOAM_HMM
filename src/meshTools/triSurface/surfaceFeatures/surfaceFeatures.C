@@ -632,11 +632,6 @@ Foam::labelList Foam::surfaceFeatures::trimFeatures
             // Rewalk same route (recognizable by featLines == featI)
             // to reset featLines.
 
-            Info<< "In too small case:" << startEdgeI
-                << nl << leftPath.len_ << " " << rightPath.len_
-                << nl << leftPath.n_ << " " << rightPath.n_
-                << endl;
-
             featLines[startEdgeI] = -2;
 
             walkSegment
