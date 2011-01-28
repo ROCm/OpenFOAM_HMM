@@ -70,11 +70,30 @@ public:
             ()
         );
 
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            surfaceWriter,
+            wordDict,
+            (
+                const dictionary& optDict
+            ),
+            (optDict)
+        );
+
 
     // Selectors
 
         //- Return a reference to the selected surfaceWriter
         static autoPtr<surfaceWriter> New(const word& writeType);
+
+        //- Return a reference to the selected surfaceWriter
+        //  Select with extra write option
+        static autoPtr<surfaceWriter> New
+        (
+            const word& writeType,
+            const dictionary& writeOptions
+        );
 
 
     // Constructors

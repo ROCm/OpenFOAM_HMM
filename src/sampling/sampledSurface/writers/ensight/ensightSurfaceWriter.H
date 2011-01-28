@@ -84,6 +84,9 @@ public:
         //- Construct null
         ensightSurfaceWriter();
 
+        //- Construct with some output options
+        ensightSurfaceWriter(const dictionary& options);
+
 
     //- Destructor
     virtual ~ensightSurfaceWriter();

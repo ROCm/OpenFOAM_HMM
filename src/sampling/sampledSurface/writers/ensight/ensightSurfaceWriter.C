@@ -37,6 +37,7 @@ License
 namespace Foam
 {
     makeSurfaceWriterType(ensightSurfaceWriter);
+    addToRunTimeSelectionTable(surfaceWriter, ensightSurfaceWriter, wordDict);
 }
 
 
@@ -118,6 +119,19 @@ Foam::ensightSurfaceWriter::ensightSurfaceWriter()
     surfaceWriter(),
     writeFormat_(IOstream::ASCII)
 {}
+
+
+Foam::ensightSurfaceWriter::ensightSurfaceWriter(const dictionary& options)
+:
+    surfaceWriter(),
+    writeFormat_(IOstream::ASCII)
+{
+    // choose ascii or binary format
+    if (options.found("format"))
+    {
+        writeFormat_ = IOstream::formatEnum(options.lookup("format"));
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

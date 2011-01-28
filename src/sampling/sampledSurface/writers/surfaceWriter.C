@@ -38,6 +38,7 @@ namespace Foam
 {
     defineTypeNameAndDebug(surfaceWriter, 0);
     defineRunTimeSelectionTable(surfaceWriter, word);
+    defineRunTimeSelectionTable(surfaceWriter, wordDict);
     addNamedToRunTimeSelectionTable
     (
         surfaceWriter,
@@ -80,6 +81,23 @@ Foam::surfaceWriter::New(const word& writeType)
     }
 
     return autoPtr<surfaceWriter>(cstrIter()());
+}
+
+
+Foam::autoPtr<Foam::surfaceWriter>
+Foam::surfaceWriter::New(const word& writeType, const dictionary& optDict)
+{
+    // find constructors with dictionary options
+    wordDictConstructorTable::iterator cstrIter =
+        wordDictConstructorTablePtr_->find(writeType);
+
+    if (cstrIter == wordDictConstructorTablePtr_->end())
+    {
+        // revert to versions without options
+        return Foam::surfaceWriter::New(writeType);
+    }
+
+    return autoPtr<surfaceWriter>(cstrIter()(optDict));
 }
 
 
