@@ -2,27 +2,30 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-wmake libso specie
-wmake libso solid
-wmake libso thermophysicalFunctions
-wmake libso liquidProperties
-wmake libso liquidMixtureProperties
-wmake libso solidProperties
-wmake libso solidMixtureProperties
+makeOption=libso
+[ $# -ge 1 ] && makeOption=$1
 
-wmake libso basic
-wmake libso reactionThermo
-wmake libso laminarFlameSpeed
-wmake libso chemistryModel
-wmake libso pdfs
-wmake libso radiation
-wmake libso barotropicCompressibilityModel
-wmake libso thermalPorousZone
+wmake $makeOption specie
+wmake $makeOption solid
+wmake $makeOption thermophysicalFunctions
+wmake $makeOption liquidProperties
+wmake $makeOption liquidMixtureProperties
+wmake $makeOption solidProperties
+wmake $makeOption solidMixtureProperties
 
-wmake libso SLGThermo
+wmake $makeOption basic
+wmake $makeOption reactionThermo
+wmake $makeOption laminarFlameSpeed
+wmake $makeOption chemistryModel
+wmake $makeOption pdfs
+wmake $makeOption radiation
+wmake $makeOption barotropicCompressibilityModel
+wmake $makeOption thermalPorousZone
+
+wmake $makeOption SLGThermo
 
 # Should be combined with solids&solidMixture
-wmake libso basicSolidThermo
+wmake $makeOption basicSolidThermo
 
 
 # ----------------------------------------------------------------- end-of-file

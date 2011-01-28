@@ -2,10 +2,13 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-wmake libso scotchDecomp
-wmake libso ptscotchDecomp
-wmake libso metisDecomp
-wmake libso MGridGen
+makeOption=libso
+[ $# -ge 1 ] && makeOption=$1
+
+wmake $makeOption scotchDecomp
+wmake $makeOption ptscotchDecomp
+wmake $makeOption metisDecomp
+wmake $makeOption MGridGen
 
 
 # ----------------------------------------------------------------- end-of-file

@@ -222,7 +222,7 @@ void Foam::mapDistribute::printLayout(Ostream& os) const
         localSize = maxIndex[Pstream::myProcNo()]+1;
     }
 
-    os  << "Layout:" << endl
+    os  << "Layout: (constructSize:" << constructSize_ << ")" << endl
         << "local (processor " << Pstream::myProcNo() << "):" << endl
         << "    start : 0" << endl
         << "    size  : " << localSize << endl;
