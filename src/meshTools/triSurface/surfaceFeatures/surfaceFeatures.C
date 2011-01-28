@@ -263,6 +263,16 @@ Foam::surfaceFeatures::labelScalar Foam::surfaceFeatures::walkSegment
 
     label vertI = startPointI;
 
+    scalar visitedLength = 0.0;
+
+    label nVisited = 0;
+
+    if (findIndex(featurePoints_, startPointI) >= 0)
+    {
+        // Do not walk across feature points
+
+        return labelScalar(nVisited, visitedLength);
+    }
 
     //
     // Now we have:
@@ -283,11 +293,6 @@ Foam::surfaceFeatures::labelScalar Foam::surfaceFeatures::walkSegment
     {
         unsetVal = currentFeatI;
     }
-
-
-    scalar visitedLength = 0.0;
-
-    label nVisited = 0;
 
     do
     {

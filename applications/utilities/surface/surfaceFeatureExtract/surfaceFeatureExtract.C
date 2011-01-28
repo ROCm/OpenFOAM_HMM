@@ -535,37 +535,6 @@ int main(int argc, char *argv[])
         << "        internal edges : " << newSet.nInternalEdges() << nl
         << endl;
 
-    // Dummy trim operation to mark features
-    labelList featureEdgeIndexing = newSet.trimFeatures(-GREAT, 0);
-
-    scalarField surfacePtFeatureIndex(surf.points().size(), -1);
-
-    forAll(newSet.featureEdges(), eI)
-    {
-        const edge& e = surf.edges()[newSet.featureEdges()[eI]];
-
-        surfacePtFeatureIndex[surf.meshPoints()[e.start()]] =
-            featureEdgeIndexing[newSet.featureEdges()[eI]];
-
-        surfacePtFeatureIndex[surf.meshPoints()[e.end()]] =
-            featureEdgeIndexing[newSet.featureEdges()[eI]];
-    }
-
-    if (writeVTK)
-    {
-        vtkSurfaceWriter<scalar>().write
-        (
-            runTime.constant()/"triSurface",    // outputDir
-            sFeatFileName,                      // surfaceName
-            surf.points(),
-            faces,
-            "surfacePtFeatureIndex",            // fieldName
-            surfacePtFeatureIndex,
-            true,                               // isNodeValues
-            true                                // verbose
-        );
-    }
-
     // Extracting and writing a featureEdgeMesh
 
     Pout<< nl << "Writing featureEdgeMesh to constant/featureEdgeMesh."
@@ -608,30 +577,61 @@ int main(int argc, char *argv[])
 
     // Find close features
 
-    Random rndGen(343267);
+    // // Dummy trim operation to mark features
+    // labelList featureEdgeIndexing = newSet.trimFeatures(-GREAT, 0);
 
-    treeBoundBox surfBB
-    (
-        treeBoundBox(searchSurf.bounds()).extend(rndGen, 1e-4)
-    );
+    // scalarField surfacePtFeatureIndex(surf.points().size(), -1);
 
-    surfBB.min() -= Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-    surfBB.max() += Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+    // forAll(newSet.featureEdges(), eI)
+    // {
+    //     const edge& e = surf.edges()[newSet.featureEdges()[eI]];
 
-    indexedOctree<treeDataEdge> ftEdTree
-    (
-        treeDataEdge
-        (
-            false,
-            surf.edges(),
-            surf.localPoints(),
-            newSet.featureEdges()
-        ),
-        surfBB,
-        8,      // maxLevel
-        10,     // leafsize
-        3.0     // duplicity
-    );
+    //     surfacePtFeatureIndex[surf.meshPoints()[e.start()]] =
+    //     featureEdgeIndexing[newSet.featureEdges()[eI]];
+
+    //     surfacePtFeatureIndex[surf.meshPoints()[e.end()]] =
+    //     featureEdgeIndexing[newSet.featureEdges()[eI]];
+    // }
+
+    // if (writeVTK)
+    // {
+    //     vtkSurfaceWriter<scalar>().write
+    //     (
+    //         runTime.constant()/"triSurface",    // outputDir
+    //         sFeatFileName,                      // surfaceName
+    //         surf.points(),
+    //         faces,
+    //         "surfacePtFeatureIndex",            // fieldName
+    //         surfacePtFeatureIndex,
+    //         true,                               // isNodeValues
+    //         true                                // verbose
+    //     );
+    // }
+
+    // Random rndGen(343267);
+
+    // treeBoundBox surfBB
+    // (
+    //     treeBoundBox(searchSurf.bounds()).extend(rndGen, 1e-4)
+    // );
+
+    // surfBB.min() -= Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+    // surfBB.max() += Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+
+    // indexedOctree<treeDataEdge> ftEdTree
+    // (
+    //     treeDataEdge
+    //     (
+    //         false,
+    //         surf.edges(),
+    //         surf.localPoints(),
+    //         newSet.featureEdges()
+    //     ),
+    //     surfBB,
+    //     8,      // maxLevel
+    //     10,     // leafsize
+    //     3.0     // duplicity
+    // );
 
     // labelList nearPoints = ftEdTree.findBox
     // (
@@ -904,6 +904,8 @@ int main(int argc, char *argv[])
             true                                // verbose
         );
     }
+
+    Info<< nl << "End" << endl;
 
     return 0;
 }
