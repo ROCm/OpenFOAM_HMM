@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -106,7 +106,7 @@ void Foam::surfaceFilmModels::standardPhaseChange::correct
     // set local thermo properties
     const SLGThermo& thermo = film.thermo();
     const label liqId = film.liquidId();
-    const liquid& liq = thermo.liquids().properties()[liqId];
+    const liquidProperties& liq = thermo.liquids().properties()[liqId];
     const label vapId = thermo.carrierId(thermo.liquids().components()[liqId]);
 
     // retrieve fields from film model

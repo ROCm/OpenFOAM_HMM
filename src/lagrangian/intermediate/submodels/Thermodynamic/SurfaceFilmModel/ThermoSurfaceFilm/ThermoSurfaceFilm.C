@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -230,7 +230,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::drySplashInteraction
         Info<< "Parcel " << p.origId() << " drySplashInteraction" << endl;
     }
 
-    const liquid& liq = thermo_.liquids().properties()[0];
+    const liquidProperties& liq = thermo_.liquids().properties()[0];
 
     // Patch face velocity and normal
     const vector& Up = this->owner().U().boundaryField()[pp.index()][faceI];
@@ -286,7 +286,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::wetSplashInteraction
         Info<< "Parcel " << p.origId() << " wetSplashInteraction" << endl;
     }
 
-    const liquid& liq = thermo_.liquids().properties()[0];
+    const liquidProperties& liq = thermo_.liquids().properties()[0];
 
     // Patch face velocity and normal
     const vector& Up = this->owner().U().boundaryField()[pp.index()][faceI];
