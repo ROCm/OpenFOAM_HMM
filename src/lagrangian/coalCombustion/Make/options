@@ -6,10 +6,10 @@ EXE_INC = \
     -I$(LIB_SRC)/thermophysicalModels/pdfs/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/liquids/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/liquidMixture/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/pointSolids/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/pointSolidMixture/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/liquidProperties/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/liquidMixtureProperties/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/solidProperties/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/solidMixtureProperties/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/reactionThermo/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/SLGThermo/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/radiation/lnInclude \
@@ -28,10 +28,10 @@ LIB_LIBS = \
     -lpdf \
     -lspecie \
     -lbasicThermophysicalModels \
-    -lliquids \
-    -lliquidMixture \
-    -lpointSolids \
-    -lpointSolidMixture \
+    -lliquidProperties \
+    -lliquidMixtureProperties \
+    -lsolidProperties \
+    -lsolidMixtureProperties \
     -lreactionThermophysicalModels \
     -lSLGThermo \
     -lcompressibleRASModels \

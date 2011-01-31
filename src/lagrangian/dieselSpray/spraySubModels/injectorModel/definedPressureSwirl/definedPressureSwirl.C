@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -97,7 +97,7 @@ Foam::scalar Foam::definedPressureSwirlInjector::d0
 
     //  modifications to take account of flash boiling....
 
-    const liquidMixture& fuels = sm_.fuels();
+    const liquidMixtureProperties& fuels = sm_.fuels();
     scalar chi = 0.0;
     scalar Tinj = it.T(t);
     label Nf = fuels.components().size();

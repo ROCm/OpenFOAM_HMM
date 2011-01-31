@@ -6,10 +6,10 @@ set -x
 wmake $makeOption specie
 wmake $makeOption solid
 wmake $makeOption thermophysicalFunctions
-wmake $makeOption liquids
-wmake $makeOption liquidMixture
-wmake $makeOption pointSolids
-wmake $makeOption pointSolidMixture
+wmake $makeOption liquidProperties
+wmake $makeOption liquidMixtureProperties
+wmake $makeOption solidProperties
+wmake $makeOption solidMixtureProperties
 
 wmake $makeOption basic
 wmake $makeOption reactionThermo
