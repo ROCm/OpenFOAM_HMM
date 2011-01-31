@@ -1,3 +1,0 @@
-pointSolidMixture/pointSolidMixture.C
-
-LIB = $(FOAM_LIBBIN)/libpointSolidMixture

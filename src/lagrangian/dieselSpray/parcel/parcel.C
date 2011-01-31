@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -99,7 +99,7 @@ bool Foam::parcel::move(spray& sDB, const scalar trackTime)
     const polyMesh& mesh = cloud().pMesh();
     const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
 
-    const liquidMixture& fuels = sDB.fuels();
+    const liquidMixtureProperties& fuels = sDB.fuels();
 
     label Nf = fuels.components().size();
     label Ns = sDB.composition().Y().size();
@@ -333,7 +333,7 @@ void Foam::parcel::updateParcelProperties
     const label faceI
 )
 {
-    const liquidMixture& fuels = sDB.fuels();
+    const liquidMixtureProperties& fuels = sDB.fuels();
 
     label Nf = sDB.fuels().components().size();
     label Ns = sDB.composition().Y().size();

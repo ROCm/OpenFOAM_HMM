@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -140,10 +140,10 @@ public:
                 const basicMultiComponentMixture& carrier() const;
 
                 //- Return the global (additional) liquids
-                const liquidMixture& liquids() const;
+                const liquidMixtureProperties& liquids() const;
 
                 //- Return the global (additional) solids
-                const pointSolidMixture& solids() const;
+                const solidMixtureProperties& solids() const;
 
                 //- Return the list of phase properties
                 const phasePropertiesList& phaseProps() const;

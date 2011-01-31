@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -81,7 +81,8 @@ void Foam::surfaceFilmModels::thermoSingleLayer::correctThermoFields()
         }
         case tmSingleComponent:
         {
-            const liquid& liq = thermo_.liquids().properties()[liquidId_];
+            const liquidProperties& liq =
+                thermo_.liquids().properties()[liquidId_];
             forAll(rho_, cellI)
             {
                 const scalar T = T_[cellI];

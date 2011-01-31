@@ -8,8 +8,8 @@ EXE_INC = \
     -I$(LIB_SRC)/turbulenceModels/LES/LESdeltas/lnInclude \
     -I$(LIB_SRC)/turbulenceModels/compressible/LES/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/liquids/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/liquidMixture/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/liquidProperties/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/liquidMixtureProperties/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/thermophysicalFunctions/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/reactionThermo/lnInclude \
@@ -22,8 +22,8 @@ LIB_LIBS = \
     -lcompressibleRASModels \
     -lcompressibleLESModels \
     -lLESdeltas \
-    -lliquids \
-    -lliquidMixture \
+    -lliquidProperties \
+    -lliquidMixtureProperties \
     -lthermophysicalFunctions \
     -lspecie \
     -lpdf
