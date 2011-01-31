@@ -9,6 +9,7 @@ $(bools)/bool/bool.C
 $(bools)/bool/boolIO.C
 $(bools)/Switch/Switch.C
 $(bools)/Switch/SwitchIO.C
+$(bools)/lists/boolList.C
 
 chars = primitives/chars
 $(chars)/char/charIO.C
@@ -22,10 +23,16 @@ $(ints)/longLong/longLongIO.C
 $(ints)/ulong/ulongIO.C
 $(ints)/label/label.C
 $(ints)/uLabel/uLabel.C
+$(ints)/lists/labelIOList.C
+$(ints)/lists/labelListIOList.C
 
 primitives/Scalar/doubleScalar/doubleScalar.C
 primitives/Scalar/floatScalar/floatScalar.C
 primitives/Scalar/scalar/scalar.C
+primitives/Scalar/lists/scalarList.C
+primitives/Scalar/lists/scalarIOList.C
+primitives/Scalar/lists/scalarListIOList.C
+
 primitives/DiagTensor/diagTensor/diagTensor.C
 primitives/SphericalTensor/sphericalTensor/sphericalTensor.C
 primitives/SphericalTensor/labelSphericalTensor/labelSphericalTensor.C
@@ -33,9 +40,16 @@ primitives/SymmTensor/labelSymmTensor/labelSymmTensor.C
 primitives/SymmTensor/symmTensor/symmTensor.C
 primitives/Tensor/labelTensor/labelTensor.C
 primitives/Tensor/tensor/tensor.C
+primitives/Tensor/lists/sphericalTensorList.C
+primitives/Tensor/lists/symmTensorList.C
+primitives/Tensor/lists/tensorList.C
+
 primitives/Vector/complexVector/complexVector.C
 primitives/Vector/labelVector/labelVector.C
 primitives/Vector/vector/vector.C
+primitives/Vector/lists/vectorList.C
+primitives/Vector/lists/vectorIOList.C
+primitives/Vector/lists/vectorListIOList.C
 
 primitives/Tensor2D/tensor2D/tensor2D.C
 primitives/SphericalTensor2D/sphericalTensor2D/sphericalTensor2D.C
@@ -62,6 +76,7 @@ $(strings)/fileName/fileName.C
 $(strings)/fileName/fileNameIO.C
 $(strings)/keyType/keyType.C
 $(strings)/wordRe/wordRe.C
+$(strings)/lists/hashedWordList.C
 
 primitives/hashes/Hasher/Hasher.C
 
@@ -87,21 +102,6 @@ containers/Lists/PackedList/PackedBoolList.C
 containers/Lists/ListOps/ListOps.C
 containers/LinkedLists/linkTypes/SLListBase/SLListBase.C
 containers/LinkedLists/linkTypes/DLListBase/DLListBase.C
-
-primitiveLists = primitives/Lists
-$(primitiveLists)/boolList.C
-$(primitiveLists)/labelIOList.C
-$(primitiveLists)/labelListIOList.C
-$(primitiveLists)/scalarList.C
-$(primitiveLists)/scalarIOList.C
-$(primitiveLists)/scalarListIOList.C
-$(primitiveLists)/vectorList.C
-$(primitiveLists)/vectorIOList.C
-$(primitiveLists)/vectorListIOList.C
-$(primitiveLists)/sphericalTensorList.C
-$(primitiveLists)/symmTensorList.C
-$(primitiveLists)/tensorList.C
-$(primitiveLists)/hashedWordList.C
 
 Streams = db/IOstreams
 $(Streams)/token/tokenIO.C
