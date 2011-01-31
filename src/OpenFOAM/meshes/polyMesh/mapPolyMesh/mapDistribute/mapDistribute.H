@@ -385,6 +385,9 @@ public:
                 return transformStart_;
             }
 
+            //- Find transform from transformElements
+            label whichTransform(const label index) const;
+
             //- Calculate a schedule. See above.
             static List<labelPair> schedule
             (
