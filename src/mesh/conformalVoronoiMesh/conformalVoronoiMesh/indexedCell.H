@@ -34,6 +34,7 @@ Description
 #define indexedCell_H
 
 #include <CGAL/Triangulation_3.h>
+#include <CGAL/Triangulation_cell_base_with_circumcenter_3.h>
 #include "indexedVertex.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -45,7 +46,11 @@ namespace CGAL
                           Class indexedCell Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Gt, class Cb=CGAL::Triangulation_cell_base_3<Gt> >
+template
+<
+    class Gt,
+    class Cb=CGAL::Triangulation_cell_base_with_circumcenter_3<Gt>
+>
 class indexedCell
 :
     public Cb

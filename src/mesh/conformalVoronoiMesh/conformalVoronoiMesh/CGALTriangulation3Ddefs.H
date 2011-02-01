@@ -47,7 +47,9 @@ Description
     // Fast kernel using a double as the storage type but the triangulation
     // may fail
     #include "CGAL/Exact_predicates_inexact_constructions_kernel.h"
-    typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+    #include <CGAL/Robust_circumcenter_traits_3.h>
+    typedef CGAL::Exact_predicates_inexact_constructions_kernel inexactK;
+    typedef CGAL::Robust_circumcenter_traits_3<inexactK>  K;
 #else
     // Very robust but expensive kernel
     #include "CGAL/Exact_predicates_exact_constructions_kernel.h"
@@ -58,7 +60,7 @@ typedef CGAL::indexedVertex<K>          Vb;
 typedef CGAL::indexedCell<K>            Cb;
 
 typedef CGAL::Triangulation_data_structure_3<Vb, Cb>     Tds;
-typedef CGAL::Delaunay_triangulation_3 <K, Tds, CGAL::Fast_location> Delaunay;
+typedef CGAL::Delaunay_triangulation_3<K, Tds, CGAL::Fast_location> Delaunay;
 
 typedef Delaunay::Vertex_handle    Vertex_handle;
 typedef Delaunay::Cell_handle      Cell_handle;

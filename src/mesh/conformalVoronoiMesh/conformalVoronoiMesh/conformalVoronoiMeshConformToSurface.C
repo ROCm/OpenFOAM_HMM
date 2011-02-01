@@ -185,6 +185,8 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
             << "    Number of edge hits " << featureEdgeHits.size()
             << endl;
 
+        timeCheck("After initial conformation");
+
         insertSurfacePointPairs
         (
             surfaceHits,
@@ -318,6 +320,8 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
             << "    Number of surface hits " << surfaceHits.size() << nl
             << "    Number of edge hits " << featureEdgeHits.size()
             << endl;
+
+        timeCheck("Conformation iteration " + name(iterationNo));
 
         totalHits = surfaceHits.size() + featureEdgeHits.size();
 
