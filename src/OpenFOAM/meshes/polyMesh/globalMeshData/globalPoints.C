@@ -1066,7 +1066,7 @@ void Foam::globalPoints::calculateSharedPoints
 
                 for (label i = 1; i < pointInfo.size(); i++)
                 {
-                    labelPair info = pointInfo[i];
+                    const labelPair& info = pointInfo[i];
                     label procI = globalIndexAndTransform::processor(info);
                     label index = globalIndexAndTransform::index(info);
                     label transform = globalIndexAndTransform::transformIndex
