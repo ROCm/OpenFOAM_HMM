@@ -13,7 +13,7 @@ EXE_INC = \
     -I$(LIB_SRC)/thermophysicalModels/reactionThermo/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/SLGThermo/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/chemistryModel/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/radiation/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/radiationModels/lnInclude \
     -I$(LIB_SRC)/surfaceFilmModels/lnInclude \
     -I$(LIB_SRC)/lagrangian/basic/lnInclude \
     -I$(LIB_SRC)/lagrangian/intermediate/lnInclude \
@@ -32,7 +32,7 @@ EXE_LIBS = \
     -lreactionThermophysicalModels \
     -lSLGThermo \
     -lchemistryModel \
-    -lradiation \
+    -lradiationModels \
     -lsurfaceFilmModels \
     -llagrangianIntermediate \
     -lODE

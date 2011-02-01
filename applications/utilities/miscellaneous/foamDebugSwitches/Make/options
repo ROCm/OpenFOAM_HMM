@@ -43,7 +43,7 @@ EXE_LIBS = \
     -lOpenFOAM \
     -lpdf \
     -lpotential \
-    -lradiation \
+    -lradiationModels \
     -lrandomProcesses \
     -lreactionThermophysicalModels \
     -lsampling \
