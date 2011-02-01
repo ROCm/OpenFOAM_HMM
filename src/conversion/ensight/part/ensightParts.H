@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     ensightParts.C
-    ensightPartsI.H
+    ensightPartsTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -89,8 +89,8 @@ public:
         //- renumber elements
         void renumber
         (
-            const labelList& origCellId,
-            const labelList& origFaceId
+            const labelUList& origCellId,
+            const labelUList& origFaceId
         );
 
         //- number of parts
@@ -108,27 +108,33 @@ public:
         //- write the lists
         void writeData(Ostream&) const;
 
-        //- write scalar field
+        //- write (volume) scalar field
+        //  optionally write data for face parts
+        //  optionally write data per node
         void writeScalarField
         (
             ensightFile&,
             const List<scalar>& field,
-            bool useFaceData = false
+            const bool useFaceData = false,
+            const bool perNode = false
         ) const;
 
-        //- write vector field components
+        //- write (volume) vector field components
+        //  optionally write data for face parts
+        //  optionally write data per node
         void writeVectorField
         (
             ensightFile&,
             const List<scalar>& field0,
             const List<scalar>& field1,
             const List<scalar>& field2,
-            bool useFaceData = false
+            const bool useFaceData = false,
+            const bool perNode = false
         ) const;
 
 
-        //- write generalized field components
-        template <class Type>
+        //- write generalized volume field components
+        template<class Type>
         void writeField
         (
             ensightFile&,
@@ -138,11 +144,8 @@ public:
 
     // Friend Operators
 
-        friend ensightGeoFile& operator<<
-        (
-            ensightGeoFile&,
-            const ensightParts&
-        );
+        //- write geometry
+        friend ensightGeoFile& operator<<(ensightGeoFile&, const ensightParts&);
 };
 
 
@@ -153,7 +156,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "ensightPartsI.H"
+#   include "ensightPartsTemplates.C"
 #endif
 
 #endif

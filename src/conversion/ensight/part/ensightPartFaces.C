@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,21 +24,21 @@ License
 \*----------------------------------------------------------------------------*/
 
 #include "ensightPartFaces.H"
-#include "addToRunTimeSelectionTable.H"
 #include "IOstreams.H"
 #include "IStringStream.H"
 #include "dictionary.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-   defineTypeNameAndDebug(ensightPartFaces, 0);
-   addToRunTimeSelectionTable(ensightPart, ensightPartFaces, istream);
+    defineTypeNameAndDebug(ensightPartFaces, 0);
+    addToRunTimeSelectionTable(ensightPart, ensightPartFaces, istream);
 }
 
 
-Foam::List<Foam::word> Foam::ensightPartFaces::elemTypes_
+const Foam::List<Foam::word> Foam::ensightPartFaces::elemTypes_
 (
     IStringStream
     (
@@ -49,7 +49,7 @@ Foam::List<Foam::word> Foam::ensightPartFaces::elemTypes_
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::ensightPartFaces::binShapes(const faceList& faces)
+void Foam::ensightPartFaces::classify(const faceList& faces)
 {
     // count the shapes
     label nTri  = 0;
@@ -107,9 +107,9 @@ void Foam::ensightPartFaces::binShapes(const faceList& faces)
     // MUST match with elementTypes
     elemLists_.setSize(elementTypes().size());
 
-    elemLists_[tria3Elements].transfer( triCells );
-    elemLists_[quad4Elements].transfer( quadCells );
-    elemLists_[nsidedElements].transfer( polygonCells );
+    elemLists_[tria3Elements].transfer(triCells);
+    elemLists_[quad4Elements].transfer(quadCells);
+    elemLists_[nsidedElements].transfer(polygonCells);
 
     size_ = faces.size();
 }
@@ -123,7 +123,9 @@ Foam::ensightPartFaces::ensightPartFaces
     const string& partDescription
 )
 :
-    ensightPart(partNumber, partDescription)
+    ensightPart(partNumber, partDescription),
+    faces_(faceList::null()),
+    contiguousPoints_(false)
 {
     isCellData_ = false;
     offset_ = 0;
@@ -134,29 +136,57 @@ Foam::ensightPartFaces::ensightPartFaces
 Foam::ensightPartFaces::ensightPartFaces
 (
     label partNumber,
-    const polyMesh& pMesh,
-    const polyPatch& pPatch
+    const string& partDescription,
+    const pointField& points,
+    const faceList& faces,
+    const bool contiguousPoints
 )
 :
-    ensightPart(partNumber, pPatch.name(), pMesh)
+    ensightPart(partNumber, partDescription, points),
+    faces_(faces),
+    contiguousPoints_(contiguousPoints)
 {
     isCellData_ = false;
-    offset_ = pPatch.start();
+    offset_ = 0;
+    size_ = 0;
 
-    // count the shapes
-    binShapes(pPatch);
+    // classify the face shapes
+    classify(faces);
+}
+
+
+Foam::ensightPartFaces::ensightPartFaces
+(
+    label partNumber,
+    const polyMesh& mesh,
+    const polyPatch& patch
+)
+:
+    ensightPart(partNumber, patch.name(), mesh.points()),
+    faces_(mesh.faces()),
+    contiguousPoints_(false)
+{
+    isCellData_ = false;
+    offset_ = patch.start();
+
+    // classify the face shapes
+    classify(patch);
 }
 
 
 Foam::ensightPartFaces::ensightPartFaces(const ensightPartFaces& part)
 :
-    ensightPart(part)
+    ensightPart(part),
+    faces_(part.faces_),
+    contiguousPoints_(part.contiguousPoints_)
 {}
 
 
 Foam::ensightPartFaces::ensightPartFaces(Istream& is)
 :
-    ensightPart()
+    ensightPart(),
+    faces_(faceList::null()),
+    contiguousPoints_(false)
 {
     isCellData_ = false;
     reconstruct(is);
@@ -173,21 +203,27 @@ Foam::ensightPartFaces::~ensightPartFaces()
 
 Foam::ensightPart::localPoints Foam::ensightPartFaces::calcLocalPoints() const
 {
-    const polyMesh& mesh = *meshPtr_;
+    if (contiguousPoints_)
+    {
+        localPoints ptList;
+        ptList.list = identity(points_.size());
+        ptList.nPoints = points_.size();
+        return ptList;
+    }
 
-    localPoints ptList(mesh);
+    localPoints ptList(points_);
     labelList& usedPoints = ptList.list;
     label nPoints = 0;
 
     forAll(elemLists_, typeI)
     {
-        const labelList& idList = elemLists_[typeI];
+        const labelUList& idList = elemLists_[typeI];
 
         // add all points from faces
         forAll(idList, i)
         {
-            label id = idList[i] + offset_;
-            const face& f = mesh.faces()[id];
+            const label id = idList[i] + offset_;
+            const face& f = faces_[id];
 
             forAll(f, fp)
             {
@@ -219,8 +255,8 @@ void Foam::ensightPartFaces::writeConnectivity
     ensightGeoFile& os,
     const word& key,
     const faceList& faces,
-    const labelList& idList,
-    const labelList& pointMap
+    const labelUList& idList,
+    const labelUList& pointMap
 ) const
 {
     os.writeKeyword(key);
@@ -233,10 +269,10 @@ void Foam::ensightPartFaces::writeConnectivity
         // write the number of points per face
         forAll(idList, i)
         {
-            label id = idList[i] + offset_;
+            const label id = idList[i] + offset_;
             const face& f = faces[id];
 
-            os.write( f.size() );
+            os.write(f.size());
             os.newline();
         }
     }
@@ -244,14 +280,14 @@ void Foam::ensightPartFaces::writeConnectivity
     // write the points describing the face
     forAll(idList, i)
     {
-        label id = idList[i] + offset_;
+        const label id = idList[i] + offset_;
         const face& f = faces[id];
 
         // convert global -> local index
         // (note: Ensight indices start with 1)
         forAll(f, fp)
         {
-            os.write( pointMap[f[fp]] + 1 );
+            os.write(pointMap[f[fp]] + 1);
         }
         os.newline();
     }
@@ -262,15 +298,15 @@ void Foam::ensightPartFaces::writeConnectivity
 (
     ensightGeoFile& os,
     const word& key,
-    const labelList& idList,
-    const labelList& pointMap
+    const labelUList& idList,
+    const labelUList& pointMap
 ) const
 {
     writeConnectivity
     (
         os,
         key,
-        meshPtr_->faces(),
+        faces_,
         idList,
         pointMap
     );
@@ -279,9 +315,7 @@ void Foam::ensightPartFaces::writeConnectivity
 
 void Foam::ensightPartFaces::writeGeometry(ensightGeoFile& os) const
 {
-    const polyMesh& mesh = *meshPtr_;
-    const pointField& points = mesh.points();
-    ensightPart::writeGeometry(os, points);
+    ensightPart::writeGeometry(os, points_);
 }
 
 

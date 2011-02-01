@@ -29,6 +29,7 @@ License
 #include "globalIndex.H"
 #include "globalIndexAndTransform.H"
 #include "transformField.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -1103,6 +1104,12 @@ Foam::mapDistribute::mapDistribute(const Xfer<mapDistribute>& map)
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+Foam::label Foam::mapDistribute::whichTransform(const label index) const
+{
+    return findLower(transformStart_, index+1);
+}
+
 
 void Foam::mapDistribute::transfer(mapDistribute& rhs)
 {
