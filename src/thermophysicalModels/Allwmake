@@ -12,7 +12,6 @@ wmake $makeOption basic
 wmake $makeOption reactionThermo
 wmake $makeOption laminarFlameSpeed
 wmake $makeOption chemistryModel
-wmake $makeOption pdfs
 wmake $makeOption radiationModels
 wmake $makeOption barotropicCompressibilityModel
 wmake $makeOption thermalPorousZone
