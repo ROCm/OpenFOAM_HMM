@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -122,7 +122,22 @@ void Foam::fieldValues::cellSource::initialise(const dictionary& dict)
 {
     setCellZoneCells();
 
-    Info<< type() << " " << name_ << ":" << nl
+    if (nCells_ == 0)
+    {
+        WarningIn
+        (
+            "Foam::fieldValues::cellSource::initialise(const dictionary&)"
+        )
+            << type() << " " << name_ << ": "
+            << sourceTypeNames_[source_] << "(" << sourceName_ << "):" << nl
+            << "    Source has no cells - deactivating" << endl;
+
+        active_ = false;
+        return;
+    }
+
+    Info<< type() << " " << name_ << ":"
+        << sourceTypeNames_[source_] << "(" << sourceName_ << "):" << nl
         << "    total cells  = " << nCells_ << nl
         << "    total volume = " << gSum(filterField(mesh().V()))
         << nl << endl;

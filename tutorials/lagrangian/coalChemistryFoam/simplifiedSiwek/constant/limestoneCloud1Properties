@@ -107,10 +107,10 @@ subModels
         SOI             0;
         positionsFile   "limestonePositions";
         U0              ( 0 0 0 );
-        parcelPDF
+        sizeDistribution
         {
             pdfType         RosinRammler;
-            RosinRammlerPDF
+            RosinRammlerDistribution
             {
                 minValue        5e-06;
                 maxValue        0.000565;

@@ -131,10 +131,10 @@ subModels
         thetaInner      constant 0;
         thetaOuter      constant 45;
 
-        parcelPDF
+        sizeDistribution
         {
             pdfType         RosinRammler;
-            RosinRammlerPDF
+            RosinRammlerDistribution
             {
                 minValue        5e-04;
                 maxValue        0.0012;

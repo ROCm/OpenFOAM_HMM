@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,11 +52,11 @@ Foam::hollowConeInjector::hollowConeInjector
 :
     injectorModel(dict, sm),
     hollowConeDict_(dict.subDict(typeName + "Coeffs")),
-    dropletPDF_
+    sizeDistribution_
     (
-        pdfs::pdf::New
+        distributionModels::distributionModel::New
         (
-            hollowConeDict_.subDict("dropletPDF"),
+            hollowConeDict_.subDict("sizeDistribution"),
             sm.rndGen()
         )
     ),
@@ -112,7 +112,7 @@ Foam::scalar Foam::hollowConeInjector::d0
     const scalar
 ) const
 {
-    return dropletPDF_->sample();
+    return sizeDistribution_->sample();
 }
 
 
