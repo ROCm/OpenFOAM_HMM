@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
 
     - user defined:
       - inner/outer cone angle vs. time
-      - droplet PDF
+      - droplet distribution model
 
 \*---------------------------------------------------------------------------*/
 
@@ -38,7 +38,7 @@ Description
 
 #include "injectorModel.H"
 #include "vector.H"
-#include "pdf.H"
+#include "distributionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,7 +60,7 @@ private:
         typedef VectorSpace<Vector<scalar>, scalar, 2> pair;
 
         dictionary definedHollowConeDict_;
-        autoPtr<pdfs::pdf> dropletPDF_;
+        autoPtr<distributionModels::distributionModel> sizeDistribution_;
 
         // inner and outer cone angle time histories
         // 2 column vectors = (time, coneAngle)

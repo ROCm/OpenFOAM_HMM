@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -138,6 +138,7 @@ bool Foam::triSurface::readTRI(const fileName& TRIfileName)
 
     setSize(STLlabels.size());
 
+    // Assign triangles
     pointI = 0;
     SLList<label>::const_iterator iter = STLlabels.begin();
     forAll(*this, i)
@@ -149,7 +150,10 @@ bool Foam::triSurface::readTRI(const fileName& TRIfileName)
         ++iter;
     }
 
-    stitchTriangles(rawPoints);
+    // Assign coordinates
+    storedPoints().transfer(rawPoints);
+    // Merge duplicate points
+    stitchTriangles();
 
     // Convert solidNames into regionNames
     stringList names(STLsolidNames.toc());

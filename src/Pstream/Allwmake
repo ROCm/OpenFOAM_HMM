@@ -1,9 +1,7 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
+[ $# -ge 1 ] && makeOption=$1 || makeOption=libso
 set -x
-
-makeOption=libso
-[ $# -ge 1 ] && makeOption=$1
 
 wmake $makeOption dummy
 
@@ -12,6 +10,7 @@ case "$WM_MPLIB" in
     set +x
     echo
     echo "Note: ignore spurious warnings about missing mpicxx.h headers"
+    echo
     set -x
     # force compilation into qualified directory
     WM_OPTIONS=${WM_OPTIONS}$WM_MPLIB  wmake $makeOption mpi

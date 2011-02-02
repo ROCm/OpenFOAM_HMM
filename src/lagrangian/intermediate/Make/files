@@ -74,12 +74,6 @@ $(REACTINGMPINJECTION)/ReactingMultiphaseLookupTableInjection/reactingMultiphase
 $(REACTINGMPINJECTION)/ReactingMultiphaseLookupTableInjection/reactingMultiphaseParcelInjectionDataIOList.C
 
 
-/* data entries */
-submodels/IO/DataEntry/makeDataEntries.C
-submodels/IO/DataEntry/polynomial/polynomial.C
-submodels/IO/DataEntry/polynomial/polynomialIO.C
-
-
 /* integration schemes */
 IntegrationScheme/makeIntegrationSchemes.C
 

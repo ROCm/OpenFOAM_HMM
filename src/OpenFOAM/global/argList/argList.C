@@ -507,12 +507,22 @@ Foam::argList::argList
     jobInfo.add("startTime", timeString);
     jobInfo.add("userName", userName());
     jobInfo.add("foamVersion", word(FOAMversion));
-    jobInfo.add("foamBuild", Foam::FOAMbuild);
     jobInfo.add("code", executable_);
     jobInfo.add("argList", argListString);
     jobInfo.add("currentDir", cwd());
     jobInfo.add("PPID", ppid());
     jobInfo.add("PGID", pgid());
+
+    // add build information - only use the first word
+    {
+        std::string build(Foam::FOAMbuild);
+        std::string::size_type found = build.find(' ');
+        if (found != std::string::npos)
+        {
+            build.resize(found);
+        }
+        jobInfo.add("foamBuild", build);
+    }
 
 
     // Case is a single processor run unless it is running parallel
@@ -883,9 +893,10 @@ void Foam::argList::printUsage() const
     printNotes();
 
     Info<< nl
-        <<"Using OpenFOAM-" << Foam::FOAMversion
-        <<" (build: " << Foam::FOAMbuild << ") - see www.OpenFOAM.com"
-        << nl << endl;
+        <<"Using: OpenFOAM-" << Foam::FOAMversion
+        << " (see www.OpenFOAM.com)" << nl
+        <<"Build: " << Foam::FOAMbuild << nl
+        << endl;
 }
 
 

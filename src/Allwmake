@@ -1,8 +1,6 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
-
-makeOption=libso
-[ $# -ge 1 ] && makeOption=$1
+[ $# -ge 1 ] && makeOption=$1 || makeOption=libso
 
 wmakeCheckPwd "$WM_PROJECT_DIR/src" || {
     echo "Error: Current directory is not \$WM_PROJECT_DIR/src"
@@ -20,13 +18,13 @@ wmakeCheckPwd "$WM_PROJECT_DIR/src" || {
 set -x
 
 # update OpenFOAM version strings if required
-wmakePrintBuild -check || /bin/rm -f OpenFOAM/Make/$WM_OPTIONS/global.? 2>/dev/null
+wmakePrintBuild -check || /bin/rm -f OpenFOAM/Make/*/global.? 2>/dev/null
 
 wmakeLnInclude OpenFOAM
-wmakeLnInclude OSspecific/$WM_OSTYPE
+wmakeLnInclude OSspecific/${WM_OSTYPE:-POSIX}
 Pstream/Allwmake $*
 
-OSspecific/$WM_OSTYPE/Allwmake
+OSspecific/${WM_OSTYPE:-POSIX}/Allwmake
 wmake $makeOption OpenFOAM
 
 wmake $makeOption fileFormats

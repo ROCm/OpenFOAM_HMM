@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,7 @@ SourceFiles
 #define cloudInjection_H
 
 #include "injectionModel.H"
-#include "pdf.H"
+#include "distributionModel.H"
 #include "cachedRandom.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -76,7 +76,8 @@ protected:
         cachedRandom rndGen_;
 
         //- Parcel size PDF model
-        const autoPtr<pdfs::pdf> parcelPDF_;
+        const autoPtr<distributionModels::distributionModel>
+            parcelDistribution_;
 
         //- Diameters of particles to inject into the cloud
         scalarList diameter_;

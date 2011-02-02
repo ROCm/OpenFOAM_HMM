@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -311,8 +311,9 @@ void rewriteField
             {
                 IOWarningIn("rewriteField(..)", patchDict)
                     << "Cyclic patch " << patchName
-                    << " has value entry. Please remove this and rerun."
+                    << " has value entry. This will be removed."
                     << endl;
+                patchDict.remove("value");
             }
 
 

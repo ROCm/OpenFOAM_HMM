@@ -1,24 +1,18 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
+[ $# -ge 1 ] && makeOption=$1 || makeOption=libso
 set -x
-
-makeOption=libso
-[ $# -ge 1 ] && makeOption=$1
 
 wmake $makeOption specie
 wmake $makeOption solid
 wmake $makeOption thermophysicalFunctions
-wmake $makeOption liquidProperties
-wmake $makeOption liquidMixtureProperties
-wmake $makeOption solidProperties
-wmake $makeOption solidMixtureProperties
+./properties/Allwmake $*
 
 wmake $makeOption basic
 wmake $makeOption reactionThermo
 wmake $makeOption laminarFlameSpeed
 wmake $makeOption chemistryModel
-wmake $makeOption pdfs
-wmake $makeOption radiation
+wmake $makeOption radiationModels
 wmake $makeOption barotropicCompressibilityModel
 wmake $makeOption thermalPorousZone
 

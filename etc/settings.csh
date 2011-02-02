@@ -65,7 +65,7 @@ setenv FOAM_USER_LIBBIN $WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib
 
 # convenience
 setenv FOAM_APP $WM_PROJECT_DIR/applications
-setenv FOAM_LIB $WM_PROJECT_DIR/lib
+#setenv FOAM_LIB $WM_PROJECT_DIR/lib
 setenv FOAM_SRC $WM_PROJECT_DIR/src
 setenv FOAM_TUTORIALS $WM_PROJECT_DIR/tutorials
 setenv FOAM_UTILITIES $FOAM_APP/utilities
@@ -90,7 +90,7 @@ unsetenv MPFR_ARCH_PATH
 # Location of compiler installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if ( ! $?foamCompiler ) then
-    foamCompiler=system
+    set foamCompiler=system
     echo "Warning in $WM_PROJECT_DIR/etc/settings.csh:"
     echo "    foamCompiler not set, using '$foamCompiler'"
 endif

@@ -57,7 +57,7 @@ foamPV()
 # Change directory aliases
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 alias src='cd $FOAM_SRC'
-alias lib='cd $FOAM_LIB'
+alias lib='cd $FOAM_LIBBIN'
 alias run='cd $FOAM_RUN'
 alias foam='cd $WM_PROJECT_DIR'
 alias foamsrc='cd $FOAM_SRC/$WM_PROJECT'

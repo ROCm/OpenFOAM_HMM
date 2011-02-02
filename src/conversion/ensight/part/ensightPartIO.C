@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,23 +59,70 @@ void Foam::ensightPart::writeFieldList
     const labelUList& idList
 ) const
 {
-    forAll(idList, i)
+    if (&idList)
     {
-        if (idList[i] >= field.size() || isnan(field[idList[i]]))
+        forAll(idList, i)
         {
-            os.writeUndef();
-        }
-        else
-        {
-            os.write(field[idList[i]]);
-        }
+            if (idList[i] >= field.size() || isnan(field[idList[i]]))
+            {
+                os.writeUndef();
+            }
+            else
+            {
+                os.write(field[idList[i]]);
+            }
 
-        os.newline();
+            os.newline();
+        }
+    }
+    else
+    {
+        // no idList => perNode
+        forAll(field, i)
+        {
+            if (isnan(field[i]))
+            {
+                os.writeUndef();
+            }
+            else
+            {
+                os.write(field[i]);
+            }
+
+            os.newline();
+        }
     }
 }
 
 
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::ensightPart::reconstruct(Istream& is)
+{
+    dictionary dict(is);
+    dict.lookup("id") >> number_;
+    dict.lookup("name") >> name_;
+
+    offset_ = 0;
+    dict.readIfPresent("offset", offset_);
+
+    // populate elemLists_
+    elemLists_.setSize(elementTypes().size());
+
+    forAll(elementTypes(), elemI)
+    {
+        word key(elementTypes()[elemI]);
+
+        elemLists_[elemI].clear();
+        dict.readIfPresent(key, elemLists_[elemI]);
+
+        size_ += elemLists_[elemI].size();
+    }
+
+    is.check("ensightPart::reconstruct(Istream&)");
+}
+
 
 bool Foam::ensightPart::writeSummary(Ostream& os) const
 {
@@ -88,7 +135,7 @@ bool Foam::ensightPart::writeSummary(Ostream& os) const
     os.writeKeyword("offset") << offset() << token::END_STATEMENT << nl;
     os.writeKeyword("size") << size() << token::END_STATEMENT << nl;
 
-    os   << decrIndent << indent << token::END_BLOCK << nl << endl;
+    os  << decrIndent << indent << token::END_BLOCK << nl << endl;
 
     return true;
 }
@@ -112,7 +159,7 @@ bool Foam::ensightPart::writeData(Ostream& os) const
         }
     }
 
-    os   << decrIndent << indent << token::END_BLOCK << nl << endl;
+    os  << decrIndent << indent << token::END_BLOCK << nl << endl;
 
     return true;
 }
@@ -127,7 +174,7 @@ void Foam::ensightPart::writeGeometry
     if (size())
     {
         const localPoints ptList = calcLocalPoints();
-        const labelList& pointMap = ptList.list;
+        const labelUList& pointMap = ptList.list;
 
         writeHeader(os, true);
 
@@ -136,13 +183,13 @@ void Foam::ensightPart::writeGeometry
         os.write(ptList.nPoints);
         os.newline();
 
-        for (direction cmpt=0; cmpt < vector::nComponents; cmpt++)
+        for (direction cmpt=0; cmpt < point::nComponents; ++cmpt)
         {
             forAll(pointMap, ptI)
             {
                 if (pointMap[ptI] > -1)
                 {
-                    os.write( points[ptI].component(cmpt) );
+                    os.write(points[ptI].component(cmpt));
                     os.newline();
                 }
             }
@@ -169,21 +216,30 @@ void Foam::ensightPart::writeGeometry
 void Foam::ensightPart::writeScalarField
 (
     ensightFile& os,
-    const List<scalar>& field
+    const List<scalar>& field,
+    const bool perNode
 ) const
 {
     if (size() && field.size() && (os.allowUndef() || isFieldDefined(field)))
     {
         writeHeader(os);
 
-        forAll(elementTypes(), elemI)
+        if (perNode)
         {
-            const labelList& idList = elemLists_[elemI];
-
-            if (idList.size())
+            os.writeKeyword("coordinates");
+            writeFieldList(os, field, labelUList::null());
+        }
+        else
+        {
+            forAll(elementTypes(), elemI)
             {
-                os.writeKeyword( elementTypes()[elemI] );
-                writeFieldList(os, field, idList);
+                const labelUList& idList = elemLists_[elemI];
+
+                if (idList.size())
+                {
+                    os.writeKeyword(elementTypes()[elemI]);
+                    writeFieldList(os, field, idList);
+                }
             }
         }
     }
@@ -195,23 +251,34 @@ void Foam::ensightPart::writeVectorField
     ensightFile& os,
     const List<scalar>& field0,
     const List<scalar>& field1,
-    const List<scalar>& field2
+    const List<scalar>& field2,
+    const bool perNode
 ) const
 {
     if (size() && field0.size() && (os.allowUndef() || isFieldDefined(field0)))
     {
         writeHeader(os);
 
-        forAll(elementTypes(), elemI)
+        if (perNode)
         {
-            const labelList& idList = elemLists_[elemI];
-
-            if (idList.size())
+            os.writeKeyword("coordinates");
+            writeFieldList(os, field0, labelUList::null());
+            writeFieldList(os, field1, labelUList::null());
+            writeFieldList(os, field2, labelUList::null());
+        }
+        else
+        {
+            forAll(elementTypes(), elemI)
             {
-                os.writeKeyword( elementTypes()[elemI] );
-                writeFieldList(os, field0, idList);
-                writeFieldList(os, field1, idList);
-                writeFieldList(os, field2, idList);
+                const labelUList& idList = elemLists_[elemI];
+
+                if (idList.size())
+                {
+                    os.writeKeyword(elementTypes()[elemI]);
+                    writeFieldList(os, field0, idList);
+                    writeFieldList(os, field1, idList);
+                    writeFieldList(os, field2, idList);
+                }
             }
         }
     }
