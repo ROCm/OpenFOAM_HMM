@@ -896,9 +896,26 @@ void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
 
             pointIndexHit info = tree.findNearest(pt, spanSqr);
 
-            vit->alignment() = storedAlignments_[info.index()];
+            if (info.hit())
+            {
+                vit->alignment() = storedAlignments_[info.index()];
 
-            vit->targetCellSize() = storedSizes_[info.index()];
+                vit->targetCellSize() = storedSizes_[info.index()];
+            }
+            else
+            {
+                WarningIn
+                (
+                    "void "
+                    "Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()"
+                )
+                    << "Point " << pt << " did not find a nearest point "
+                    << " for alignment and size lookup." << endl;
+
+                vit->alignment() = requiredAlignment(pt);
+
+                vit->targetCellSize() = cellSizeControl().cellSize(pt, false);
+            }
         }
     }
 
