@@ -37,13 +37,33 @@ namespace Foam
 Foam::polynomial::polynomial(const word& entryName, Istream& is)
 :
     DataEntry<scalar>(entryName),
-    coeffs_(is)
+    coeffs_(is),
+    canIntegrate_(true)
 {
     if (!coeffs_.size())
     {
         FatalErrorIn("Foam::polynomial::polynomial(const word&, Istream&)")
             << "polynomial coefficients for entry " << this->name_
-            << " is invalid (empty)" << nl << exit(FatalError);
+            << " are invalid (empty)" << nl << exit(FatalError);
+    }
+
+    forAll(coeffs_, i)
+    {
+        if (mag(coeffs_[i].second() + 1) < ROOTVSMALL)
+        {
+            canIntegrate_ = false;
+            break;
+        }
+    }
+
+    if (debug)
+    {
+        if (!canIntegrate_)
+        {
+            WarningIn("Foam::polynomial::polynomial(const word&, Istream&)")
+                << "Polynomial " << this->name_ << " cannot be integrated"
+                << endl;
+        }
     }
 }
 
@@ -51,7 +71,8 @@ Foam::polynomial::polynomial(const word& entryName, Istream& is)
 Foam::polynomial::polynomial(const polynomial& poly)
 :
     DataEntry<scalar>(poly),
-    coeffs_(poly.coeffs_)
+    coeffs_(poly.coeffs_),
+    canIntegrate_(poly.canIntegrate_)
 {}
 
 
@@ -65,13 +86,10 @@ Foam::polynomial::~polynomial()
 
 Foam::scalar Foam::polynomial::value(const scalar x) const
 {
-    scalar y = coeffs_[0].first();
-    scalar powX = x;
-
-    for (label i = 1; i < coeffs_.size(); i++)
+    scalar y = 0.0;
+    forAll(coeffs_, i)
     {
-        y +=  coeffs_[i].first()*powX;
-        powX *= x;
+        y += coeffs_[i].first()*pow(x, coeffs_[i].second());
     }
 
     return y;
@@ -82,14 +100,17 @@ Foam::scalar Foam::polynomial::integrate(const scalar x1, const scalar x2) const
 {
     scalar intx = 0.0;
 
-    forAll(coeffs_, i)
+    if (canIntegrate_)
     {
-        intx +=
-            coeffs_[i].first()/(coeffs_[i].second() + 1)
-           *(
-                pow(x2, coeffs_[i].second() + 1)
-              - pow(x1, coeffs_[i].second() + 1)
-            );
+        forAll(coeffs_, i)
+        {
+            intx +=
+                coeffs_[i].first()/(coeffs_[i].second() + 1)
+               *(
+                    pow(x2, coeffs_[i].second() + 1)
+                  - pow(x1, coeffs_[i].second() + 1)
+                );
+        }
     }
 
     return intx;

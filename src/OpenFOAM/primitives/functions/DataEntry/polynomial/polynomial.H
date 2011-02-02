@@ -76,6 +76,9 @@ class polynomial
         //- Polynomial coefficients - list of prefactor, exponent
         List<Tuple2<scalar, scalar> > coeffs_;
 
+        //- Flag to indicate whether poly can be integrated
+        bool canIntegrate_;
+
 
     // Private Member Functions
 
