@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -260,7 +260,12 @@ Foam::SHA1Digest Foam::dictionary::digest() const
 }
 
 
-bool Foam::dictionary::found(const word& keyword, bool recursive) const
+bool Foam::dictionary::found
+(
+    const word& keyword,
+    bool recursive,
+    bool patternMatch
+) const
 {
     if (hashedEntries_.found(keyword))
     {
@@ -268,7 +273,7 @@ bool Foam::dictionary::found(const word& keyword, bool recursive) const
     }
     else
     {
-        if (patternEntries_.size())
+        if (patternMatch && patternEntries_.size())
         {
             DLList<entry*>::const_iterator wcLink =
                 patternEntries_.begin();
@@ -276,7 +281,7 @@ bool Foam::dictionary::found(const word& keyword, bool recursive) const
                 patternRegexps_.begin();
 
             // Find in patterns using regular expressions only
-            if (findInPatterns(true, keyword, wcLink, reLink))
+            if (findInPatterns(patternMatch, keyword, wcLink, reLink))
             {
                 return true;
             }
@@ -284,7 +289,7 @@ bool Foam::dictionary::found(const word& keyword, bool recursive) const
 
         if (recursive && &parent_ != &dictionary::null)
         {
-            return parent_.found(keyword, recursive);
+            return parent_.found(keyword, recursive, patternMatch);
         }
         else
         {
