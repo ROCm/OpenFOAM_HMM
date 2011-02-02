@@ -27,7 +27,7 @@ Class
 Description
     Injector model based on an idea of Jerzy Chomiak.
 
-    Given the initial droplet size distributionModel in an interval d = (d0, d1),
+    Given the initial droplet size distribution in an interval d = (d0, d1),
     the spray angle phi = phi(d), such that
     the largest droplets have zero spray angle
     and the smallest droplets have maximum spray angle.
