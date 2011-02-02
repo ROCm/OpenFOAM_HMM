@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,12 +53,19 @@ Foam::surfaceFilmModels::cloudInjection::cloudInjection
     injectionModel(type(), owner, dict),
     particlesPerParcel_(readScalar(coeffs_.lookup("particlesPerParcel"))),
     rndGen_(label(0), -1),
-    parcelPDF_(pdfs::pdf::New(coeffs_.subDict("parcelPDF"), rndGen_)),
+    parcelDistribution_
+    (
+        distributionModels::distributionModel::New
+        (
+            coeffs_.subDict("parcelDistribution"),
+            rndGen_
+        )
+    ),
     diameter_(owner.film().nCells(), 0.0)
 {
     forAll(diameter_, faceI)
     {
-        diameter_[faceI] = parcelPDF_->sample();
+        diameter_[faceI] = parcelDistribution_->sample();
     }
 }
 
@@ -95,7 +102,7 @@ void Foam::surfaceFilmModels::cloudInjection::inject
             diameterToInject[cellI] = diameter_[cellI];
 
             // Retrieve new particle diameter sample
-            diameter_[cellI] = parcelPDF_->sample();
+            diameter_[cellI] = parcelDistribution_->sample();
         }
         else
         {

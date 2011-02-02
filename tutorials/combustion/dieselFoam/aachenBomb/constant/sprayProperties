@@ -120,10 +120,10 @@ RanzMarshallCoeffs
 
 hollowConeInjectorCoeffs
 {
-    dropletPDF
+    dropletDistribution
     {
         pdfType         RosinRammler;
-        RosinRammlerPDF
+        RosinRammlerDistribution
         {
             minValue        1e-06;
             maxValue        0.00015;
@@ -131,7 +131,7 @@ hollowConeInjectorCoeffs
             n               3;
         }
 
-        exponentialPDF
+        exponentialDistribution
         {
             minValue        0.0001;
             maxValue        0.001;

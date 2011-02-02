@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,29 +30,33 @@ License
 
 namespace Foam
 {
-    namespace pdfs
+    namespace distributionModels
     {
         defineTypeNameAndDebug(uniform, 0);
-        addToRunTimeSelectionTable(pdf, uniform, dictionary);
+        addToRunTimeSelectionTable(distributionModel, uniform, dictionary);
     }
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pdfs::uniform::uniform(const dictionary& dict, cachedRandom& rndGen)
+Foam::distributionModels::uniform::uniform
+(
+    const dictionary& dict,
+    cachedRandom& rndGen
+)
 :
-    pdf(typeName, dict, rndGen),
-    minValue_(readScalar(pdfDict_.lookup("minValue"))),
-    maxValue_(readScalar(pdfDict_.lookup("maxValue"))),
+    distributionModel(typeName, dict, rndGen),
+    minValue_(readScalar(distributionModelDict_.lookup("minValue"))),
+    maxValue_(readScalar(distributionModelDict_.lookup("maxValue"))),
     range_(maxValue_ - minValue_)
 {
     check();
 }
 
 
-Foam::pdfs::uniform::uniform(const uniform& p)
+Foam::distributionModels::uniform::uniform(const uniform& p)
 :
-    pdf(p),
+    distributionModel(p),
     minValue_(p.minValue_),
     maxValue_(p.maxValue_)
 {}
@@ -60,25 +64,25 @@ Foam::pdfs::uniform::uniform(const uniform& p)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::pdfs::uniform::~uniform()
+Foam::distributionModels::uniform::~uniform()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::pdfs::uniform::sample() const
+Foam::scalar Foam::distributionModels::uniform::sample() const
 {
     return rndGen_.position<scalar>(minValue_, maxValue_);
 }
 
 
-Foam::scalar Foam::pdfs::uniform::minValue() const
+Foam::scalar Foam::distributionModels::uniform::minValue() const
 {
     return minValue_;
 }
 
 
-Foam::scalar Foam::pdfs::uniform::maxValue() const
+Foam::scalar Foam::distributionModels::uniform::maxValue() const
 {
     return maxValue_;
 }

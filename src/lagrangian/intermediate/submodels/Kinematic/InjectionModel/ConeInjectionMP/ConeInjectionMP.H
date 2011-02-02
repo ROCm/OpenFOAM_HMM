@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,7 +34,7 @@ Description
       - parcel flow rate
       - parcel velocities
       - inner and outer cone angles
-    - Parcel diameters obtained by PDF model
+    - Parcel diameters obtained by distribution model model
 
 SourceFiles
     ConeInjectionMP.C
@@ -45,7 +45,7 @@ SourceFiles
 #define ConeInjectionMP_H
 
 #include "InjectionModel.H"
-#include "pdf.H"
+#include "distributionModel.H"
 #include "vectorList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -108,8 +108,8 @@ class ConeInjectionMP
         //- Outer cone angle relative to SOI [deg]
         const autoPtr<DataEntry<scalar> > thetaOuter_;
 
-        //- Parcel size PDF model
-        const autoPtr<pdfs::pdf> parcelPDF_;
+        //- Parcel size distribution model model
+        const autoPtr<distributionModels::distributionModel> parcelDistributionModel_;
 
         //- Number of parcels per injector already injected
         mutable label nInjected_;

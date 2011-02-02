@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,7 @@ Description
 
 #include "injectorModel.H"
 #include "scalarList.H"
-#include "pdf.H"
+#include "distributionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,7 +58,7 @@ private:
 
         dictionary hollowConeDict_;
 
-        autoPtr<pdfs::pdf> dropletPDF_;
+        autoPtr<distributionModels::distributionModel> dropletDistributionModel_;
         scalarList innerAngle_;
         scalarList outerAngle_;
 

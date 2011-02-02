@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,36 +23,36 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "pdf.H"
+#include "distributionModel.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    namespace pdfs
+    namespace distributionModels
     {
-        defineTypeNameAndDebug(pdf, 0);
-        defineRunTimeSelectionTable(pdf, dictionary);
+        defineTypeNameAndDebug(distributionModel, 0);
+        defineRunTimeSelectionTable(distributionModel, dictionary);
     }
 }
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-void Foam::pdfs::pdf::check() const
+void Foam::distributionModels::distributionModel::check() const
 {
     if (minValue() < 0)
     {
-        FatalErrorIn("pdfs::pdf::check() const")
-            << type() << "PDF: Minimum value must be greater than zero." << nl
-            << "Supplied minValue = " << minValue()
+        FatalErrorIn("distributionModels::distributionModel::check() const")
+            << type() << "distribution: Minimum value must be greater than "
+            << "zero." << nl << "Supplied minValue = " << minValue()
             << abort(FatalError);
     }
 
     if (maxValue() < minValue())
     {
-        FatalErrorIn("pdfs::pdf::check() const")
-            << type() << "PDF: Maximum value is smaller than the minimum value:"
-            << nl << "    maxValue = " << maxValue()
+        FatalErrorIn("distributionModels::distributionModel::check() const")
+            << type() << "distribution: Maximum value is smaller than the "
+            << "minimum value:" << nl << "    maxValue = " << maxValue()
             << ", minValue = " << minValue()
             << abort(FatalError);
     }
@@ -61,50 +61,65 @@ void Foam::pdfs::pdf::check() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pdfs::pdf::pdf
+Foam::distributionModels::distributionModel::distributionModel
 (
     const word& name,
     const dictionary& dict,
     cachedRandom& rndGen
 )
 :
-    pdfDict_(dict.subDict(name + "PDF")),
+    distributionModelDict_(dict.subDict(name + "Distribution")),
     rndGen_(rndGen)
 {}
 
 
-Foam::pdfs::pdf::pdf(const pdf& p)
+Foam::distributionModels::distributionModel::distributionModel
+(
+    const distributionModel& p
+)
 :
-    pdfDict_(p.pdfDict_),
+    distributionModelDict_(p.distributionModelDict_),
     rndGen_(p.rndGen_)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::pdfs::pdf::~pdf()
+Foam::distributionModels::distributionModel::~distributionModel()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::pdfs::pdf::sample() const
+Foam::scalar Foam::distributionModels::distributionModel::sample() const
 {
-    notImplemented("Foam::scalar Foam::pdfs::pdf::sample() const");
+    notImplemented
+    (
+        "Foam::scalar "
+        "Foam::distributionModels::distributionModel::sample() const"
+    );
     return 0.0;
 }
 
 
-Foam::scalar Foam::pdfs::pdf::minValue() const
+Foam::scalar Foam::distributionModels::distributionModel::minValue() const
 {
-    notImplemented("Foam::scalar Foam::pdfs::pdf::minValue() const");
+    notImplemented
+    (
+        "Foam::scalar "
+        "Foam::distributionModels::distributionModel::minValue() const"
+    );
     return 0.0;
 }
 
 
-Foam::scalar Foam::pdfs::pdf::maxValue() const
+Foam::scalar Foam::distributionModels::distributionModel::maxValue() const
 {
-    notImplemented("Foam::scalar Foam::pdfs::pdf::maxValue() const");
+    notImplemented
+    (
+        "Foam::scalar "
+        "Foam::distributionModels::distributionModel::maxValue() const"
+    );
     return 0.0;
 }
 

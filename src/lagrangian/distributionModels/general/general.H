@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,76 +22,81 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::uniform
+    Foam::general
 
 Description
-    uniform pdf
+    general distribution model
 
 SourceFiles
-    uniform.C
+    general.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef uniform_H
-#define uniform_H
+#ifndef general_H
+#define general_H
 
-#include "pdf.H"
+#include "distributionModel.H"
+#include "Vector.H"
+#include "VectorSpace.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace pdfs
+namespace distributionModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class uniform Declaration
+                           Class general Declaration
 \*---------------------------------------------------------------------------*/
 
-class uniform
+class general
 :
-    public pdf
+    public distributionModel
 {
     // Private data
 
-        //- Distribution minimum
-        scalar minValue_;
+        typedef VectorSpace<Vector<scalar>, scalar, 2> pair;
 
-        //- Distribution maximum
+        List<pair> xy_;
+
+        label nEntries_;
+
+        //- min and max values of the distribution
+        scalar minValue_;
         scalar maxValue_;
 
-        //- Distribution range
-        scalar range_;
+        List<scalar> integral_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("uniform");
+    TypeName("general");
 
 
     // Constructors
 
         //- Construct from components
-        uniform(const dictionary& dict, cachedRandom& rndGen);
+        general(const dictionary& dict, cachedRandom& rndGen);
 
         //- Construct copy
-        uniform(const uniform& p);
+        general(const general& p);
 
         //- Construct and return a clone
-        virtual autoPtr<pdf> clone() const
+        virtual autoPtr<distributionModel> clone() const
         {
-            return autoPtr<pdf>(new uniform(*this));
+            return autoPtr<distributionModel>(new general(*this));
         }
 
 
     //- Destructor
-    virtual ~uniform();
+    virtual ~general();
 
 
     // Member Functions
 
-         //- Sample the pdf
+        //- Sample the distributionModel
         virtual scalar sample() const;
 
         //- Return the minimum value
@@ -104,7 +109,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace pdfs
+} // End namespace distributionModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,22 +31,26 @@ License
 
 namespace Foam
 {
-    namespace pdfs
+    namespace distributionModels
     {
         defineTypeNameAndDebug(normal, 0);
-        addToRunTimeSelectionTable(pdf, normal, dictionary);
+        addToRunTimeSelectionTable(distributionModel, normal, dictionary);
     }
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pdfs::normal::normal(const dictionary& dict, cachedRandom& rndGen)
+Foam::distributionModels::normal::normal
+(
+    const dictionary& dict,
+    cachedRandom& rndGen
+)
 :
-    pdf(typeName, dict, rndGen),
-    minValue_(readScalar(pdfDict_.lookup("minValue"))),
-    maxValue_(readScalar(pdfDict_.lookup("maxValue"))),
-    expectation_(readScalar(pdfDict_.lookup("expectation"))),
-    variance_(readScalar(pdfDict_.lookup("variance"))),
+    distributionModel(typeName, dict, rndGen),
+    minValue_(readScalar(distributionModelDict_.lookup("minValue"))),
+    maxValue_(readScalar(distributionModelDict_.lookup("maxValue"))),
+    expectation_(readScalar(distributionModelDict_.lookup("expectation"))),
+    variance_(readScalar(distributionModelDict_.lookup("variance"))),
     a_(0.147)
 {
     if (minValue_ < 0)
@@ -67,9 +71,9 @@ Foam::pdfs::normal::normal(const dictionary& dict, cachedRandom& rndGen)
 }
 
 
-Foam::pdfs::normal::normal(const normal& p)
+Foam::distributionModels::normal::normal(const normal& p)
 :
-    pdf(p),
+    distributionModel(p),
     minValue_(p.minValue_),
     maxValue_(p.maxValue_),
     expectation_(p.expectation_),
@@ -80,13 +84,13 @@ Foam::pdfs::normal::normal(const normal& p)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::pdfs::normal::~normal()
+Foam::distributionModels::normal::~normal()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::pdfs::normal::sample() const
+Foam::scalar Foam::distributionModels::normal::sample() const
 {
 
     scalar a = erf((minValue_ - expectation_)/variance_);
@@ -104,19 +108,19 @@ Foam::scalar Foam::pdfs::normal::sample() const
 }
 
 
-Foam::scalar Foam::pdfs::normal::minValue() const
+Foam::scalar Foam::distributionModels::normal::minValue() const
 {
     return minValue_;
 }
 
 
-Foam::scalar Foam::pdfs::normal::maxValue() const
+Foam::scalar Foam::distributionModels::normal::maxValue() const
 {
     return maxValue_;
 }
 
 
-Foam::scalar Foam::pdfs::normal::erfInv(const scalar y) const
+Foam::scalar Foam::distributionModels::normal::erfInv(const scalar y) const
 {
     scalar k = 2.0/(constant::mathematical::pi*a_) +  0.5*log(1.0 - y*y);
     scalar h = log(1.0 - y*y)/a_;

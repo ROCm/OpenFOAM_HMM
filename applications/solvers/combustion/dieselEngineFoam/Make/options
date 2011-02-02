@@ -35,4 +35,4 @@ EXE_LIBS = \
     -llaminarFlameSpeedModels \
     -lchemistryModel \
     -lODE \
-    -lpdf
+    -ldistributionModels

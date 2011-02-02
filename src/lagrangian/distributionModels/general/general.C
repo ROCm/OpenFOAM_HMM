@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,19 +30,23 @@ License
 
 namespace Foam
 {
-    namespace pdfs
+    namespace distributionModels
     {
         defineTypeNameAndDebug(general, 0);
-        addToRunTimeSelectionTable(pdf, general, dictionary);
+        addToRunTimeSelectionTable(distributionModel, general, dictionary);
     }
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pdfs::general::general(const dictionary& dict, cachedRandom& rndGen)
+Foam::distributionModels::general::general
+(
+    const dictionary& dict,
+    cachedRandom& rndGen
+)
 :
-    pdf(typeName, dict, rndGen),
-    xy_(pdfDict_.lookup("distribution")),
+    distributionModel(typeName, dict, rndGen),
+    xy_(distributionModelDict_.lookup("distribution")),
     nEntries_(xy_.size()),
     minValue_(xy_[0][0]),
     maxValue_(xy_[nEntries_-1][0]),
@@ -50,7 +54,7 @@ Foam::pdfs::general::general(const dictionary& dict, cachedRandom& rndGen)
 {
     check();
 
-    // normalize the cumulative pdf
+    // normalize the cumulative distributionModel
 
     integral_[0] = 0.0;
     for (label i=1; i<nEntries_; i++)
@@ -74,9 +78,9 @@ Foam::pdfs::general::general(const dictionary& dict, cachedRandom& rndGen)
 }
 
 
-Foam::pdfs::general::general(const general& p)
+Foam::distributionModels::general::general(const general& p)
 :
-    pdf(p),
+    distributionModel(p),
     xy_(p.xy_),
     nEntries_(p.nEntries_),
     minValue_(p.minValue_),
@@ -87,13 +91,13 @@ Foam::pdfs::general::general(const general& p)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::pdfs::general::~general()
+Foam::distributionModels::general::~general()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::pdfs::general::sample() const
+Foam::scalar Foam::distributionModels::general::sample() const
 {
     scalar y = rndGen_.sample01<scalar>();
 
@@ -137,13 +141,13 @@ Foam::scalar Foam::pdfs::general::sample() const
 }
 
 
-Foam::scalar Foam::pdfs::general::minValue() const
+Foam::scalar Foam::distributionModels::general::minValue() const
 {
     return minValue_;
 }
 
 
-Foam::scalar Foam::pdfs::general::maxValue() const
+Foam::scalar Foam::distributionModels::general::maxValue() const
 {
     return maxValue_;
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,71 +23,63 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "exponential.H"
+#include "fixedValue.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    namespace pdfs
+    namespace distributionModels
     {
-        defineTypeNameAndDebug(exponential, 0);
-        addToRunTimeSelectionTable(pdf, exponential, dictionary);
+        defineTypeNameAndDebug(fixedValue, 0);
+        addToRunTimeSelectionTable(distributionModel, fixedValue, dictionary);
     }
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pdfs::exponential::exponential
+Foam::distributionModels::fixedValue::fixedValue
 (
     const dictionary& dict,
     cachedRandom& rndGen
 )
 :
-    pdf(typeName, dict, rndGen),
-    minValue_(readScalar(pdfDict_.lookup("minValue"))),
-    maxValue_(readScalar(pdfDict_.lookup("maxValue"))),
-    lambda_(readScalar(pdfDict_.lookup("lambda")))
-{
-    check();
-}
+    distributionModel(typeName, dict, rndGen),
+    value_(readScalar(distributionModelDict_.lookup("value")))
+{}
 
 
-Foam::pdfs::exponential::exponential(const exponential& p)
+Foam::distributionModels::fixedValue::fixedValue(const fixedValue& p)
 :
-    pdf(p),
-    minValue_(p.minValue_),
-    maxValue_(p.maxValue_),
-    lambda_(p.lambda_)
+    distributionModel(p),
+    value_(p.value_)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::pdfs::exponential::~exponential()
+Foam::distributionModels::fixedValue::~fixedValue()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::pdfs::exponential::sample() const
+Foam::scalar Foam::distributionModels::fixedValue::fixedValue::sample() const
 {
-    scalar y = rndGen_.sample01<scalar>();
-    scalar K = exp(-lambda_*maxValue_) - exp(-lambda_*minValue_);
-    return -(1.0/lambda_)*log(exp(-lambda_*minValue_) + y*K);
+    return value_;
 }
 
 
-Foam::scalar Foam::pdfs::exponential::minValue() const
+Foam::scalar Foam::distributionModels::fixedValue::fixedValue::minValue() const
 {
-    return minValue_;
+    return value_;
 }
 
 
-Foam::scalar Foam::pdfs::exponential::maxValue() const
+Foam::scalar Foam::distributionModels::fixedValue::fixedValue::maxValue() const
 {
-    return maxValue_;
+    return value_;
 }
 
 

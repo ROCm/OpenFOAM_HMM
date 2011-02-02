@@ -1,5 +1,5 @@
-pdf/pdf.C
-pdf/pdfNew.C
+distributionModel/distributionModel.C
+distributionModel/distributionModelNew.C
 
 exponential/exponential.C
 fixedValue/fixedValue.C
@@ -9,4 +9,4 @@ normal/normal.C
 RosinRammler/RosinRammler.C
 uniform/uniform.C
 
-LIB = $(FOAM_LIBBIN)/libpdf
+LIB = $(FOAM_LIBBIN)/libdistributionModels

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,40 +22,35 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::multiNormal
+    Foam::uniform
 
 Description
-    A multiNormal pdf
-
-    @verbatim
-        pdf = sum_i strength_i * exp(-0.5*((x - expectation_i)/variance_i)^2 )
-    @endverbatim
-
+    Uniform/equally-weighted distribution model
 
 SourceFiles
-    multiNormal.C
+    uniform.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef multiNormal_H
-#define multiNormal_H
+#ifndef uniform_H
+#define uniform_H
 
-#include "pdf.H"
+#include "distributionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace pdfs
+namespace distributionModels
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class multiNormal Declaration
+                           Class uniform Declaration
 \*---------------------------------------------------------------------------*/
 
-class multiNormal
+class uniform
 :
-    public pdf
+    public distributionModel
 {
     // Private data
 
@@ -69,41 +64,34 @@ class multiNormal
         scalar range_;
 
 
-        // Model coefficients
-
-            List<scalar> expectation_;
-            List<scalar> variance_;
-            List<scalar> strength_;
-
-
 public:
 
     //- Runtime type information
-    TypeName("multiNormal");
+    TypeName("uniform");
 
 
     // Constructors
 
         //- Construct from components
-        multiNormal(const dictionary& dict, cachedRandom& rndGen);
+        uniform(const dictionary& dict, cachedRandom& rndGen);
 
         //- Construct copy
-        multiNormal(const multiNormal& p);
+        uniform(const uniform& p);
 
         //- Construct and return a clone
-        virtual autoPtr<pdf> clone() const
+        virtual autoPtr<distributionModel> clone() const
         {
-            return autoPtr<pdf>(new multiNormal(*this));
+            return autoPtr<distributionModel>(new uniform(*this));
         }
 
 
     //- Destructor
-    virtual ~multiNormal();
+    virtual ~uniform();
 
 
     // Member Functions
 
-        //- Sample the pdf
+         //- Sample the distributionModel
         virtual scalar sample() const;
 
         //- Return the minimum value
@@ -116,7 +104,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace pdfs
+} // End namespace distributionModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

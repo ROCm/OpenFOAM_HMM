@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -95,9 +95,9 @@ Foam::ConeInjection<CloudType>::ConeInjection
     Umag_(DataEntry<scalar>::New("Umag", this->coeffDict())),
     thetaInner_(DataEntry<scalar>::New("thetaInner", this->coeffDict())),
     thetaOuter_(DataEntry<scalar>::New("thetaOuter", this->coeffDict())),
-    parcelPDF_
+    parcelDistributionModel_
     (
-        pdfs::pdf::New(this->coeffDict().subDict("parcelPDF"), owner.rndGen())
+        distributionModels::distributionModel::New(this->coeffDict().subDict("parcelDistributionModel"), owner.rndGen())
     ),
     tanVec1_(vector::zero),
     tanVec2_(vector::zero)
@@ -153,7 +153,7 @@ Foam::ConeInjection<CloudType>::ConeInjection
     Umag_(im.Umag_().clone().ptr()),
     thetaInner_(im.thetaInner_().clone().ptr()),
     thetaOuter_(im.thetaOuter_().clone().ptr()),
-    parcelPDF_(im.parcelPDF_().clone().ptr()),
+    parcelDistributionModel_(im.parcelDistributionModel_().clone().ptr()),
     tanVec1_(im.tanVec1_),
     tanVec2_(im.tanVec2_)
 {}
@@ -222,7 +222,7 @@ void Foam::ConeInjection<CloudType>::setProperties
     parcel.U() = Umag_().value(t)*dirVec;
 
     // set particle diameter
-    parcel.d() = parcelPDF_().sample();
+    parcel.d() = parcelDistributionModel_().sample();
 }
 
 

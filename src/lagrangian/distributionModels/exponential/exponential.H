@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,42 +22,35 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::RosinRammler
+    Foam::exponential
 
 Description
-    Rosin-Rammler pdf
-
-   @f[
-       cumulative pdf =
-           (1.0 - exp( -(( x - d0)/d)^n )
-         / (1.0 - exp( -((d1 - d0)/d)^n )
-   @f]
-
+    exponential distribution model
 
 SourceFiles
-    RosinRammler.C
+    exponential.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef RosinRammler_H
-#define RosinRammler_H
+#ifndef exponential_H
+#define exponential_H
 
-#include "pdf.H"
+#include "distributionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace pdfs
+namespace distributionModels
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class RosinRammler Declaration
+                        Class exponential Declaration
 \*---------------------------------------------------------------------------*/
 
-class RosinRammler
+class exponential
 :
-    public pdf
+    public distributionModel
 {
     // Private data
 
@@ -67,40 +60,40 @@ class RosinRammler
         //- Distribution maximum
         scalar maxValue_;
 
+
         // Model coefficients
 
-            scalar d_;
-            scalar n_;
+            scalar lambda_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("RosinRammler");
+    TypeName("exponential");
 
 
     // Constructors
 
         //- Construct from components
-        RosinRammler(const dictionary& dict, cachedRandom& rndGen);
+        exponential(const dictionary& dict, cachedRandom& rndGen);
 
         //- Construct copy
-        RosinRammler(const RosinRammler& p);
+        exponential(const exponential& p);
 
         //- Construct and return a clone
-        virtual autoPtr<pdf> clone() const
+        virtual autoPtr<distributionModel> clone() const
         {
-            return autoPtr<pdf>(new RosinRammler(*this));
+            return autoPtr<distributionModel>(new exponential(*this));
         }
 
 
     //- Destructor
-    virtual ~RosinRammler();
+    virtual ~exponential();
 
 
     // Member Functions
 
-         //- Sample the pdf
+         //- Sample the distributionModel
         virtual scalar sample() const;
 
         //- Return the minimum value
@@ -113,7 +106,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace pdfs
+} // End namespace distributionModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

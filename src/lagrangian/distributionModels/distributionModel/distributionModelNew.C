@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,33 +23,41 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "pdf.H"
+#include "distributionModel.H"
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::pdfs::pdf> Foam::pdfs::pdf::New
+Foam::autoPtr<Foam::distributionModels::distributionModel>
+Foam::distributionModels::distributionModel::New
 (
     const dictionary& dict,
     cachedRandom& rndGen
 )
 {
-    const word modelType(dict.lookup("pdfType"));
+    const word modelType(dict.lookup("distributionModelType"));
 
-    Info<< "Selecting pdfType " << modelType << endl;
+    Info<< "Selecting distributionModelType " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalErrorIn("pdfs::pdf::New(const dictionary&, cachedRandom&)")
-            << "Unknown pdf type " << modelType << nl << nl
-            << "Valid pdf types are:" << nl
+        FatalErrorIn
+        (
+            "distributionModels::distributionModel::New"
+            "("
+                "const dictionary&, "
+                "cachedRandom&"
+            ")"
+        )
+            << "Unknown distributionModel type " << modelType << nl << nl
+            << "Valid distributionModel types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
-    return autoPtr<pdf>(cstrIter()(dict, rndGen));
+    return autoPtr<distributionModel>(cstrIter()(dict, rndGen));
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -114,11 +114,11 @@ Foam::FieldActivatedInjection<CloudType>::FieldActivatedInjection
     nParcelsInjected_(positions_.size(), 0),
     U0_(this->coeffDict().lookup("U0")),
     diameters_(positions_.size()),
-    parcelPDF_
+    parcelDistributionModel_
     (
-        pdfs::pdf::New
+        distributionModels::distributionModel::New
         (
-            this->coeffDict().subDict("parcelPDF"),
+            this->coeffDict().subDict("parcelDistributionModel"),
             owner.rndGen()
         )
     )
@@ -126,7 +126,7 @@ Foam::FieldActivatedInjection<CloudType>::FieldActivatedInjection
     // Construct parcel diameters - one per injector cell
     forAll(diameters_, i)
     {
-        diameters_[i] = parcelPDF_->sample();
+        diameters_[i] = parcelDistributionModel_->sample();
     }
 
     // Determine total volume of particles to inject
@@ -166,7 +166,7 @@ Foam::FieldActivatedInjection<CloudType>::FieldActivatedInjection
     nParcelsInjected_(im.nParcelsInjected_),
     U0_(im.U0_),
     diameters_(im.diameters_),
-    parcelPDF_(im.parcelPDF_().clone().ptr())
+    parcelDistributionModel_(im.parcelDistributionModel_().clone().ptr())
 {}
 
 

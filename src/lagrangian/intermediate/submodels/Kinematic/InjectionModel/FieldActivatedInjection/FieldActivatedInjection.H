@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ SourceFiles
 #define FieldActivatedInjection_H
 
 #include "InjectionModel.H"
-#include "pdf.H"
+#include "distributionModel.H"
 #include "volFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -110,8 +110,8 @@ class FieldActivatedInjection
             //- List of parcel diameters
             scalarList diameters_;
 
-            //- Parcel size PDF model
-            const autoPtr<pdfs::pdf> parcelPDF_;
+            //- Parcel size distribution model model
+            const autoPtr<distributionModels::distributionModel> parcelDistributionModel_;
 
 
 protected:

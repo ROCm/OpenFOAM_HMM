@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,13 +25,13 @@ Class
     Foam::normal
 
 Description
-    A normal pdf
+    A normal distribution model
 
     @verbatim
-        pdf = strength * exp(-0.5*((x - expectation)/variance)^2 )
+        model = strength * exp(-0.5*((x - expectation)/variance)^2 )
     @endverbatim
 
-    strength only has meaning if there's more than one pdf
+    strength only has meaning if there's more than one distribution model
 
 SourceFiles
     normal.C
@@ -41,13 +41,13 @@ SourceFiles
 #ifndef normal_H
 #define normal_H
 
-#include "pdf.H"
+#include "distributionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace pdfs
+namespace distributionModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -56,7 +56,7 @@ namespace pdfs
 
 class normal
 :
-    public pdf
+    public distributionModel
 {
     // Private data
 
@@ -91,9 +91,9 @@ public:
         normal(const normal& p);
 
         //- Construct and return a clone
-        virtual autoPtr<pdf> clone() const
+        virtual autoPtr<distributionModel> clone() const
         {
-            return autoPtr<pdf>(new normal(*this));
+            return autoPtr<distributionModel>(new normal(*this));
         }
 
 
@@ -103,7 +103,7 @@ public:
 
     // Member Functions
 
-        //- Sample the pdf
+        //- Sample the distributionModel
         virtual scalar sample() const;
 
         //- Return the minimum value
@@ -118,7 +118,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace pdfs
+} // End namespace distributionModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -87,10 +87,10 @@ subModels
         SOI             0;
         positionsFile   "kinematicCloud1Positions";
         U0              ( 0 0 0 );
-        parcelPDF
+        parcelDistribution
         {
             pdfType         RosinRammler;
-            RosinRammlerPDF
+            RosinRammlerDistribution
             {
                 minValue        5e-05;
                 maxValue        0.0001;

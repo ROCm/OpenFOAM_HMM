@@ -131,10 +131,10 @@ subModels
         SOI             0;
         positionsFile   "coalCloud1Positions";
         U0              ( 0 -10 0 );
-        parcelPDF
+        parcelDistribution
         {
             pdfType         RosinRammler;
-            RosinRammlerPDF
+            RosinRammlerDistribution
             {
                 minValue        5e-06;
                 maxValue        0.0005;

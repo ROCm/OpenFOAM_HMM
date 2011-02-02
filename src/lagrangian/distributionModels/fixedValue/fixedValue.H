@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,78 +22,69 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::exponential
+    Foam::fixedValue
 
 Description
-    exponential pdf
+    Returns a fixed value
 
 SourceFiles
-    exponential.C
+    fixedValue.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef exponential_H
-#define exponential_H
+#ifndef distributionModelFixedValue_H
+#define distributionModelFixedValue_H
 
-#include "pdf.H"
+#include "distributionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace pdfs
+namespace distributionModels
 {
-
 /*---------------------------------------------------------------------------*\
-                        Class exponential Declaration
+                       Class fixedValue Declaration
 \*---------------------------------------------------------------------------*/
 
-class exponential
+class fixedValue
 :
-    public pdf
+    public distributionModel
 {
     // Private data
 
-        //- Distribution minimum
-        scalar minValue_;
-
-        //- Distribution maximum
-        scalar maxValue_;
-
-
-        // Model coefficients
-
-            scalar lambda_;
+        //- Fixed value
+        scalar value_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("exponential");
+    TypeName("fixedValue");
 
 
     // Constructors
 
         //- Construct from components
-        exponential(const dictionary& dict, cachedRandom& rndGen);
+        fixedValue(const dictionary& dict, cachedRandom& rndGen);
 
         //- Construct copy
-        exponential(const exponential& p);
+        fixedValue(const fixedValue& p);
 
         //- Construct and return a clone
-        virtual autoPtr<pdf> clone() const
+        virtual autoPtr<distributionModel> clone() const
         {
-            return autoPtr<pdf>(new exponential(*this));
+            return autoPtr<distributionModel>(new fixedValue(*this));
         }
 
 
     //- Destructor
-    virtual ~exponential();
+    virtual ~fixedValue();
 
 
     // Member Functions
 
-         //- Sample the pdf
+         //- Sample the distributionModel
         virtual scalar sample() const;
 
         //- Return the minimum value
@@ -106,7 +97,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace pdfs
+} // End namespace distributionModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

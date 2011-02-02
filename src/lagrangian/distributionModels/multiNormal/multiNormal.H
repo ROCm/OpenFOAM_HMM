@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,81 +22,88 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::general
+    Foam::multiNormal
 
 Description
-    general pdf
+    A multiNormal distribution model
+
+    @verbatim
+        model = sum_i strength_i * exp(-0.5*((x - expectation_i)/variance_i)^2 )
+    @endverbatim
+
 
 SourceFiles
-    general.C
+    multiNormal.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef general_H
-#define general_H
+#ifndef multiNormal_H
+#define multiNormal_H
 
-#include "pdf.H"
-#include "Vector.H"
-#include "VectorSpace.H"
+#include "distributionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace pdfs
+namespace distributionModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class general Declaration
+                        Class multiNormal Declaration
 \*---------------------------------------------------------------------------*/
 
-class general
+class multiNormal
 :
-    public pdf
+    public distributionModel
 {
     // Private data
 
-        typedef VectorSpace<Vector<scalar>, scalar, 2> pair;
-
-        List<pair> xy_;
-
-        label nEntries_;
-
-        //- min and max values of the distribution
+        //- Distribution minimum
         scalar minValue_;
+
+        //- Distribution maximum
         scalar maxValue_;
 
-        List<scalar> integral_;
+        //- Distribution range
+        scalar range_;
+
+
+        // Model coefficients
+
+            List<scalar> expectation_;
+            List<scalar> variance_;
+            List<scalar> strength_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("general");
+    TypeName("multiNormal");
 
 
     // Constructors
 
         //- Construct from components
-        general(const dictionary& dict, cachedRandom& rndGen);
+        multiNormal(const dictionary& dict, cachedRandom& rndGen);
 
         //- Construct copy
-        general(const general& p);
+        multiNormal(const multiNormal& p);
 
         //- Construct and return a clone
-        virtual autoPtr<pdf> clone() const
+        virtual autoPtr<distributionModel> clone() const
         {
-            return autoPtr<pdf>(new general(*this));
+            return autoPtr<distributionModel>(new multiNormal(*this));
         }
 
 
     //- Destructor
-    virtual ~general();
+    virtual ~multiNormal();
 
 
     // Member Functions
 
-        //- Sample the pdf
+        //- Sample the distributionModel
         virtual scalar sample() const;
 
         //- Return the minimum value
@@ -109,7 +116,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace pdfs
+} // End namespace distributionModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

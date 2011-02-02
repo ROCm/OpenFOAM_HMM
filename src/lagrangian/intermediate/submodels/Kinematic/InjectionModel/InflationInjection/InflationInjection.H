@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,7 @@ SourceFiles
 #define InflationInjection_H
 
 #include "InjectionModel.H"
-#include "pdf.H"
+#include "distributionModel.H"
 #include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -107,8 +107,8 @@ class InflationInjection
         //- Diameter with which to create new seed particles
         scalar dSeed_;
 
-        //- Parcel size PDF model
-        const autoPtr<pdfs::pdf> parcelPDF_;
+        //- Parcel size distribution model model
+        const autoPtr<distributionModels::distributionModel> parcelDistributionModel_;
 
 
 protected:

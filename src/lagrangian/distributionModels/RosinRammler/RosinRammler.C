@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,34 +30,34 @@ License
 
 namespace Foam
 {
-    namespace pdfs
+    namespace distributionModels
     {
         defineTypeNameAndDebug(RosinRammler, 0);
-        addToRunTimeSelectionTable(pdf, RosinRammler, dictionary);
+        addToRunTimeSelectionTable(distributionModel, RosinRammler, dictionary);
     }
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pdfs::RosinRammler::RosinRammler
+Foam::distributionModels::RosinRammler::RosinRammler
 (
     const dictionary& dict,
     cachedRandom& rndGen
 )
 :
-    pdf(typeName, dict, rndGen),
-    minValue_(readScalar(pdfDict_.lookup("minValue"))),
-    maxValue_(readScalar(pdfDict_.lookup("maxValue"))),
-    d_(readScalar(pdfDict_.lookup("d"))),
-    n_(readScalar(pdfDict_.lookup("n")))
+    distributionModel(typeName, dict, rndGen),
+    minValue_(readScalar(distributionModelDict_.lookup("minValue"))),
+    maxValue_(readScalar(distributionModelDict_.lookup("maxValue"))),
+    d_(readScalar(distributionModelDict_.lookup("d"))),
+    n_(readScalar(distributionModelDict_.lookup("n")))
 {
     check();
 }
 
 
-Foam::pdfs::RosinRammler::RosinRammler(const RosinRammler& p)
+Foam::distributionModels::RosinRammler::RosinRammler(const RosinRammler& p)
 :
-    pdf(p),
+    distributionModel(p),
     minValue_(p.minValue_),
     maxValue_(p.maxValue_),
     d_(p.d_),
@@ -67,13 +67,13 @@ Foam::pdfs::RosinRammler::RosinRammler(const RosinRammler& p)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::pdfs::RosinRammler::~RosinRammler()
+Foam::distributionModels::RosinRammler::~RosinRammler()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::pdfs::RosinRammler::sample() const
+Foam::scalar Foam::distributionModels::RosinRammler::sample() const
 {
     scalar K = 1.0 - exp(-pow((maxValue_ - minValue_)/d_, n_));
     scalar y = rndGen_.sample01<scalar>();
@@ -82,13 +82,13 @@ Foam::scalar Foam::pdfs::RosinRammler::sample() const
 }
 
 
-Foam::scalar Foam::pdfs::RosinRammler::minValue() const
+Foam::scalar Foam::distributionModels::RosinRammler::minValue() const
 {
     return minValue_;
 }
 
 
-Foam::scalar Foam::pdfs::RosinRammler::maxValue() const
+Foam::scalar Foam::distributionModels::RosinRammler::maxValue() const
 {
     return maxValue_;
 }

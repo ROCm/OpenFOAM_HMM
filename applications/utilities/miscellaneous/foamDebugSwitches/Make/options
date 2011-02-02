@@ -41,7 +41,7 @@ EXE_LIBS = \
     -lmolecule \
     -lODE \
     -lOpenFOAM \
-    -lpdf \
+    -ldistributionModels \
     -lpotential \
     -lradiationModels \
     -lrandomProcesses \

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,28 +30,28 @@ License
 
 namespace Foam
 {
-    namespace pdfs
+    namespace distributionModels
     {
         defineTypeNameAndDebug(multiNormal, 0);
-        addToRunTimeSelectionTable(pdf, multiNormal, dictionary);
+        addToRunTimeSelectionTable(distributionModel, multiNormal, dictionary);
     }
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pdfs::multiNormal::multiNormal
+Foam::distributionModels::multiNormal::multiNormal
 (
     const dictionary& dict,
     cachedRandom& rndGen
 )
 :
-    pdf(typeName, dict, rndGen),
-    minValue_(readScalar(pdfDict_.lookup("minValue"))),
-    maxValue_(readScalar(pdfDict_.lookup("maxValue"))),
+    distributionModel(typeName, dict, rndGen),
+    minValue_(readScalar(distributionModelDict_.lookup("minValue"))),
+    maxValue_(readScalar(distributionModelDict_.lookup("maxValue"))),
     range_(maxValue_ - minValue_),
-    expectation_(pdfDict_.lookup("expectation")),
-    variance_(pdfDict_.lookup("variance")),
-    strength_(pdfDict_.lookup("strength"))
+    expectation_(distributionModelDict_.lookup("expectation")),
+    variance_(distributionModelDict_.lookup("variance")),
+    strength_(distributionModelDict_.lookup("strength"))
 {
     check();
 
@@ -81,9 +81,9 @@ Foam::pdfs::multiNormal::multiNormal
 }
 
 
-Foam::pdfs::multiNormal::multiNormal(const multiNormal& p)
+Foam::distributionModels::multiNormal::multiNormal(const multiNormal& p)
 :
-    pdf(p),
+    distributionModel(p),
     minValue_(p.minValue_),
     maxValue_(p.maxValue_),
     range_(p.range_),
@@ -95,13 +95,13 @@ Foam::pdfs::multiNormal::multiNormal(const multiNormal& p)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::pdfs::multiNormal::~multiNormal()
+Foam::distributionModels::multiNormal::~multiNormal()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::pdfs::multiNormal::sample() const
+Foam::scalar Foam::distributionModels::multiNormal::sample() const
 {
     scalar y = 0;
     scalar x = 0;
@@ -133,13 +133,13 @@ Foam::scalar Foam::pdfs::multiNormal::sample() const
 }
 
 
-Foam::scalar Foam::pdfs::multiNormal::minValue() const
+Foam::scalar Foam::distributionModels::multiNormal::minValue() const
 {
     return minValue_;
 }
 
 
-Foam::scalar Foam::pdfs::multiNormal::maxValue() const
+Foam::scalar Foam::distributionModels::multiNormal::maxValue() const
 {
     return maxValue_;
 }

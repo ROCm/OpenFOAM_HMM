@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,69 +22,85 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fixedValue
+    Foam::RosinRammler
 
 Description
-    Returns a fixed value
+    Rosin-Rammler distributionModel
+
+   @f[
+       cumulative model =
+           (1.0 - exp( -(( x - d0)/d)^n )
+         / (1.0 - exp( -((d1 - d0)/d)^n )
+   @f]
+
 
 SourceFiles
-    fixedValue.C
+    RosinRammler.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pdfFixedValue_H
-#define pdfFixedValue_H
+#ifndef RosinRammler_H
+#define RosinRammler_H
 
-#include "pdf.H"
+#include "distributionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace pdfs
+namespace distributionModels
 {
+
 /*---------------------------------------------------------------------------*\
-                       Class fixedValue Declaration
+                       Class RosinRammler Declaration
 \*---------------------------------------------------------------------------*/
 
-class fixedValue
+class RosinRammler
 :
-    public pdf
+    public distributionModel
 {
     // Private data
 
-        //- Fixed value
-        scalar value_;
+        //- Distribution minimum
+        scalar minValue_;
+
+        //- Distribution maximum
+        scalar maxValue_;
+
+        // Model coefficients
+
+            scalar d_;
+            scalar n_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("fixedValue");
+    TypeName("RosinRammler");
 
 
     // Constructors
 
         //- Construct from components
-        fixedValue(const dictionary& dict, cachedRandom& rndGen);
+        RosinRammler(const dictionary& dict, cachedRandom& rndGen);
 
         //- Construct copy
-        fixedValue(const fixedValue& p);
+        RosinRammler(const RosinRammler& p);
 
         //- Construct and return a clone
-        virtual autoPtr<pdf> clone() const
+        virtual autoPtr<distributionModel> clone() const
         {
-            return autoPtr<pdf>(new fixedValue(*this));
+            return autoPtr<distributionModel>(new RosinRammler(*this));
         }
 
 
     //- Destructor
-    virtual ~fixedValue();
+    virtual ~RosinRammler();
 
 
     // Member Functions
 
-         //- Sample the pdf
+         //- Sample the distributionModel
         virtual scalar sample() const;
 
         //- Return the minimum value
@@ -97,7 +113,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace pdfs
+} // End namespace distributionModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

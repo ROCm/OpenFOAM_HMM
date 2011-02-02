@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,14 +22,14 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::pdf
+    Foam::distributionModel
 
 Description
-    A library of runtime-selectable PDF's.
+    A library of runtime-selectable distribution models.
 
     Returns a sampled value given the expectation (nu) and variance (sigma^2)
 
-    Current PDF's include:
+    Current distribution models include:
     - exponential
     - fixedValue
     - general
@@ -38,19 +38,19 @@ Description
     - Rosin-Rammler
     - uniform
 
-    The pdf is tabulated in equidistant nPoints, in an interval.
-    These values are integrated to obtain the cumulated PDF,
+    The distributionModel is tabulated in equidistant nPoints, in an interval.
+    These values are integrated to obtain the cumulated distribution model,
     which is then used to change the distribution from unifrom to
-    the actual pdf.
+    the actual distributionModel.
 
 SourceFiles
-    pdf.C
-    pdfNew.C
+    distributionModel.C
+    distributionModelNew.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pdf_H
-#define pdf_H
+#ifndef distributionModel_H
+#define distributionModel_H
 
 #include "IOdictionary.H"
 #include "autoPtr.H"
@@ -60,14 +60,14 @@ SourceFiles
 
 namespace Foam
 {
-namespace pdfs
+namespace distributionModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class pdf Declaration
+                     Class distributionModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class pdf
+class distributionModel
 {
 
 protected:
@@ -75,7 +75,7 @@ protected:
     // Protected data
 
         //- Coefficients dictionary
-        const dictionary pdfDict_;
+        const dictionary distributionModelDict_;
 
         //- Reference to the random number generator
         cachedRandom& rndGen_;
@@ -83,21 +83,21 @@ protected:
 
     // Protected Member Functions
 
-        //- Check that the PDF is valid
+        //- Check that the distribution model is valid
         virtual void check() const;
 
 
 public:
 
     //-Runtime type information
-    TypeName("pdf");
+    TypeName("distributionModel");
 
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable
     (
         autoPtr,
-        pdf,
+        distributionModel,
         dictionary,
         (
             const dictionary& dict,
@@ -110,29 +110,38 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        pdf(const word& name, const dictionary& dict, cachedRandom& rndGen);
+        distributionModel
+        (
+            const word& name,
+            const dictionary& dict,
+            cachedRandom& rndGen
+        );
 
         //- Construct copy
-        pdf(const pdf& p);
+        distributionModel(const distributionModel& p);
 
         //- Construct and return a clone
-        virtual autoPtr<pdf> clone() const
+        virtual autoPtr<distributionModel> clone() const
         {
-            return autoPtr<pdf>(new pdf(*this));
+            return autoPtr<distributionModel>(new distributionModel(*this));
         }
 
 
     //- Selector
-    static autoPtr<pdf> New(const dictionary& dict, cachedRandom& rndGen);
+    static autoPtr<distributionModel> New
+    (
+        const dictionary& dict,
+        cachedRandom& rndGen
+    );
 
 
     //- Destructor
-    virtual ~pdf();
+    virtual ~distributionModel();
 
 
     // Member Functions
 
-        //- Sample the pdf
+        //- Sample the distributionModel
         virtual scalar sample() const;
 
         //- Return the minimum value
@@ -145,7 +154,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace pdfs
+} // End namespace distributionModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
