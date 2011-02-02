@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,8 @@ Class
 
 Description
     linearUpwind interpolation scheme class derived from upwind and returns
-    upwind weighting factors but also applies an explicit correction.
+    upwind weighting factors and also applies a gradient-based explicit
+    correction.
 
 SourceFiles
     linearUpwind.C
@@ -66,6 +67,12 @@ class linearUpwind
 
         //- Disallow default bitwise assignment
         void operator=(const linearUpwind&);
+
+        //- Hide the limiter because this is not formally a limited scheme
+        virtual tmp<surfaceScalarField> limiter
+        (
+            const GeometricField<Type, fvPatchField, volMesh>&
+        ) const;
 
 
 public:

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,6 @@ License
 
 #include "linearUpwind.H"
 #include "fvMesh.H"
-#include "zeroGradientFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -85,16 +84,8 @@ Foam::linearUpwind<Type>::correction
 
     forAll(faceFlux, facei)
     {
-        if (faceFlux[facei] > 0)
-        {
-            label own = owner[facei];
-            sfCorr[facei] = (Cf[facei] - C[own]) & gradVf[own];
-        }
-        else
-        {
-            label nei = neighbour[facei];
-            sfCorr[facei] = (Cf[facei] - C[nei]) & gradVf[nei];
-        }
+        label celli = (faceFlux[facei] > 0) ? owner[facei] : neighbour[facei];
+        sfCorr[facei] = (Cf[facei] - C[celli]) & gradVf[celli];
     }
 
 
