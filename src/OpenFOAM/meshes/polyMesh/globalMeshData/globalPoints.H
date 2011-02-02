@@ -139,18 +139,6 @@ class globalPoints
 
     // Private Member Functions
 
-        //- Helper function to sort according minimum proc, minimum index,
-        //  minimum transform
-        class globalIndexAndTransformLessThan
-        {
-            public:
-            bool operator()
-            (
-                const labelPair& a,
-                const labelPair& b
-            );
-        };
-
         //- Count all points on processorPatches. Is all points for which
         //  information is collected.
         static label countPatchPoints(const polyBoundaryMesh&);

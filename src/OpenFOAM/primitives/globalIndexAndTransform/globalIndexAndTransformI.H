@@ -27,6 +27,49 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+bool Foam::globalIndexAndTransform::less::operator()
+(
+    const labelPair& a,
+    const labelPair& b
+) const
+{
+    label procA = globalIndexAndTransform::processor(a);
+    label procB = globalIndexAndTransform::processor(b);
+
+    if (procA < procB)
+    {
+        return true;
+    }
+    else if (procA > procB)
+    {
+        return false;
+    }
+    else
+    {
+        // Equal proc.
+        label indexA = globalIndexAndTransform::index(a);
+        label indexB = globalIndexAndTransform::index(b);
+
+        if (indexA < indexB)
+        {
+            return true;
+        }
+        else if (indexA > indexB)
+        {
+            return false;
+        }
+        else
+        {
+            // Equal index
+            label transformA = globalIndexAndTransform::transformIndex(a);
+            label transformB = globalIndexAndTransform::transformIndex(b);
+
+            return transformA < transformB;
+        }
+    }
+}
+
+
 Foam::label Foam::globalIndexAndTransform::encodeTransformIndex
 (
     const List<label>& permutationIndices
@@ -272,6 +315,27 @@ Foam::label Foam::globalIndexAndTransform::minimumTransformIndex
                 << exit(FatalError);
         }
     }
+    return
+        (permutation0[2]+1)*9
+      + (permutation0[1]+1)*3
+      + (permutation0[0]+1);
+}
+
+
+Foam::label Foam::globalIndexAndTransform::subtractTransformIndex
+(
+    const label transformIndex0,
+    const label transformIndex1
+)
+{
+    FixedList<label, 3> permutation0 = decodeTransformIndex(transformIndex0);
+    FixedList<label, 3> permutation1 = decodeTransformIndex(transformIndex1);
+
+    forAll(permutation0, i)
+    {
+        permutation0[i] -= permutation1[i];
+    }
+
     return
         (permutation0[2]+1)*9
       + (permutation0[1]+1)*3

@@ -850,49 +850,6 @@ Foam::labelList Foam::globalPoints::reverseMeshPoints
 }
 
 
-bool Foam::globalPoints::globalIndexAndTransformLessThan::operator()
-(
-    const labelPair& a,
-    const labelPair& b
-)
-{
-    label procA = globalIndexAndTransform::processor(a);
-    label procB = globalIndexAndTransform::processor(b);
-
-    if (procA < procB)
-    {
-        return true;
-    }
-    else if (procA > procB)
-    {
-        return false;
-    }
-    else
-    {
-        // Equal proc.
-        label indexA = globalIndexAndTransform::index(a);
-        label indexB = globalIndexAndTransform::index(b);
-
-        if (indexA < indexB)
-        {
-            return true;
-        }
-        else if (indexA > indexB)
-        {
-            return false;
-        }
-        else
-        {
-            // Equal index
-            label transformA = globalIndexAndTransform::transformIndex(a);
-            label transformB = globalIndexAndTransform::transformIndex(b);
-
-            return transformA < transformB;
-        }
-    }
-}
-
-
 void Foam::globalPoints::calculateSharedPoints
 (
     const Map<label>& meshToPatchPoint, // from mesh point to local numbering
@@ -1027,7 +984,7 @@ void Foam::globalPoints::calculateSharedPoints
     forAllConstIter(Map<label>, meshToProcPoint_, iter)
     {
         labelPairList& pointInfo = procPoints_[iter()];
-        sort(pointInfo, globalIndexAndTransformLessThan());
+        sort(pointInfo, globalIndexAndTransform::less());
     }
 
 

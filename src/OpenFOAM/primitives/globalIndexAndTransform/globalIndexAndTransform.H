@@ -60,6 +60,24 @@ class polyMesh;
 
 class globalIndexAndTransform
 {
+public:
+
+    // Public classes
+
+        //- Less function class used in sorting encoded transforms and indices
+        //  - minimum processor
+        //  - minimum local index
+        //  - minimum transform
+        class less
+        {
+        public:
+
+            inline bool operator()(const labelPair&, const labelPair&) const;
+        };
+
+
+private:
+
     // Private data
 
         //- Reference to mesh
@@ -174,6 +192,13 @@ public:
 
         //- Combine two transformIndices
         static inline label minimumTransformIndex
+        (
+            const label transformIndex0,
+            const label transformIndex1
+        );
+
+        //- Subtract two transformIndices
+        static inline label subtractTransformIndex
         (
             const label transformIndex0,
             const label transformIndex1
