@@ -3,6 +3,11 @@ cd ${0%/*} || exit 1    # run from this directory
 [ $# -ge 1 ] && makeOption=$1 || makeOption=libso
 set -x
 
-wmake $makeOption MGridGenGamgAgglomeration
+export ParMGridGen=$WM_THIRD_PARTY_DIR/ParMGridGen-1.0
+
+if [ -d "$ParMGridGen/MGridGen/Lib" ]
+then
+    wmake $makeOption MGridGenGamgAgglomeration
+fi
 
 # ----------------------------------------------------------------- end-of-file
