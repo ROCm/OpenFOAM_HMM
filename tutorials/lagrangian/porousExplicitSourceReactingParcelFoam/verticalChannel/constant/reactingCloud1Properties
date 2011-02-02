@@ -133,7 +133,7 @@ subModels
         parcelsPerSecond 1e5;
         U0              (40 0 0);
         flowRateProfile constant 1;
-        parcelDistribution
+        sizeDistribution
         {
             pdfType         general;
             generalDistribution

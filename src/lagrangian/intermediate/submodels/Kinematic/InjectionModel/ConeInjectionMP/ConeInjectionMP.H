@@ -109,7 +109,7 @@ class ConeInjectionMP
         const autoPtr<DataEntry<scalar> > thetaOuter_;
 
         //- Parcel size distribution model model
-        const autoPtr<distributionModels::distributionModel> parcelDistributionModel_;
+        const autoPtr<distributionModels::distributionModel> sizeDistribution_;
 
         //- Number of parcels per injector already injected
         mutable label nInjected_;

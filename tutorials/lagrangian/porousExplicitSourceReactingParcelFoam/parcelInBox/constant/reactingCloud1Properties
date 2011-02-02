@@ -130,7 +130,7 @@ subModels
         SOI             0;
         positionsFile   "reactingCloud1Positions";
         U0              (0 0 0);
-        parcelDistribution
+        sizeDistribution
         {
             pdfType         uniform;
             uniformDistribution

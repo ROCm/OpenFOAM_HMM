@@ -114,11 +114,11 @@ Foam::FieldActivatedInjection<CloudType>::FieldActivatedInjection
     nParcelsInjected_(positions_.size(), 0),
     U0_(this->coeffDict().lookup("U0")),
     diameters_(positions_.size()),
-    parcelDistributionModel_
+    sizeDistribution_
     (
         distributionModels::distributionModel::New
         (
-            this->coeffDict().subDict("parcelDistributionModel"),
+            this->coeffDict().subDict("sizeDistribution"),
             owner.rndGen()
         )
     )
@@ -126,7 +126,7 @@ Foam::FieldActivatedInjection<CloudType>::FieldActivatedInjection
     // Construct parcel diameters - one per injector cell
     forAll(diameters_, i)
     {
-        diameters_[i] = parcelDistributionModel_->sample();
+        diameters_[i] = sizeDistribution_->sample();
     }
 
     // Determine total volume of particles to inject
@@ -166,7 +166,7 @@ Foam::FieldActivatedInjection<CloudType>::FieldActivatedInjection
     nParcelsInjected_(im.nParcelsInjected_),
     U0_(im.U0_),
     diameters_(im.diameters_),
-    parcelDistributionModel_(im.parcelDistributionModel_().clone().ptr())
+    sizeDistribution_(im.sizeDistribution_().clone().ptr())
 {}
 
 

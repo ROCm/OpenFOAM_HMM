@@ -96,11 +96,11 @@ Foam::ManualInjection<CloudType>::ManualInjection
     injectorTetFaces_(positions_.size(), -1),
     injectorTetPts_(positions_.size(), -1),
     U0_(this->coeffDict().lookup("U0")),
-    parcelDistributionModel_
+    sizeDistribution_
     (
         distributionModels::distributionModel::New
         (
-            this->coeffDict().subDict("parcelDistributionModel"),
+            this->coeffDict().subDict("sizeDistribution"),
             owner.rndGen()
         )
     )
@@ -149,7 +149,7 @@ Foam::ManualInjection<CloudType>::ManualInjection
     // Construct parcel diameters
     forAll(diameters_, i)
     {
-        diameters_[i] = parcelDistributionModel_->sample();
+        diameters_[i] = sizeDistribution_->sample();
     }
 
     // Determine volume of particles to inject
@@ -171,7 +171,7 @@ Foam::ManualInjection<CloudType>::ManualInjection
     injectorTetFaces_(im.injectorTetFaces_),
     injectorTetPts_(im.injectorTetPts_),
     U0_(im.U0_),
-    parcelDistributionModel_(im.parcelDistributionModel_().clone().ptr())
+    sizeDistribution_(im.sizeDistribution_().clone().ptr())
 {}
 
 

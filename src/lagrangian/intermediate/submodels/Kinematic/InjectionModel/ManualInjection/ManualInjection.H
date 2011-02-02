@@ -83,7 +83,7 @@ class ManualInjection
         const vector U0_;
 
         //- Parcel size distribution model model
-        const autoPtr<distributionModels::distributionModel> parcelDistributionModel_;
+        const autoPtr<distributionModels::distributionModel> sizeDistribution_;
 
 
 protected:

@@ -104,11 +104,11 @@ Foam::PatchInjection<CloudType>::PatchInjection
     (
         DataEntry<scalar>::New("flowRateProfile", this->coeffDict())
     ),
-    parcelDistributionModel_
+    sizeDistribution_
     (
         distributionModels::distributionModel::New
         (
-            this->coeffDict().subDict("parcelDistributionModel"),
+            this->coeffDict().subDict("sizeDistribution"),
             owner.rndGen()
         )
     ),
@@ -157,7 +157,7 @@ Foam::PatchInjection<CloudType>::PatchInjection
     parcelsPerSecond_(im.parcelsPerSecond_),
     U0_(im.U0_),
     flowRateProfile_(im.flowRateProfile_().clone().ptr()),
-    parcelDistributionModel_(im.parcelDistributionModel_().clone().ptr()),
+    sizeDistribution_(im.sizeDistribution_().clone().ptr()),
     cellOwners_(im.cellOwners_),
     fraction_(im.fraction_)
 {}
@@ -240,7 +240,7 @@ void Foam::PatchInjection<CloudType>::setProperties
     parcel.U() = U0_;
 
     // set particle diameter
-    parcel.d() = parcelDistributionModel_->sample();
+    parcel.d() = sizeDistribution_->sample();
 }
 
 

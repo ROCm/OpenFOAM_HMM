@@ -144,7 +144,7 @@ subModels
         duration        1; // NOTE: set to 1 for steady state
         U0              (0 40 0);
         flowRateProfile constant 1;
-        parcelDistribution
+        sizeDistribution
         {
             pdfType         general;
             generalDistribution

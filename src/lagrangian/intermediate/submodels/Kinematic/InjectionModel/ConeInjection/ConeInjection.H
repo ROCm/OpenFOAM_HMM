@@ -102,7 +102,7 @@ class ConeInjection
         const autoPtr<DataEntry<scalar> > thetaOuter_;
 
         //- Parcel size distribution model model
-        const autoPtr<distributionModels::distributionModel> parcelDistributionModel_;
+        const autoPtr<distributionModels::distributionModel> sizeDistribution_;
 
 
         // Tangential vectors to the direction vector

@@ -131,7 +131,7 @@ subModels
         SOI             0;
         positionsFile   "coalCloud1Positions";
         U0              ( 0 -10 0 );
-        parcelDistribution
+        sizeDistribution
         {
             pdfType         RosinRammler;
             RosinRammlerDistribution

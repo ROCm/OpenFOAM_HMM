@@ -126,9 +126,12 @@ Foam::ConeInjectionMP<CloudType>::ConeInjectionMP
     Umag_(DataEntry<scalar>::New("Umag", this->coeffDict())),
     thetaInner_(DataEntry<scalar>::New("thetaInner", this->coeffDict())),
     thetaOuter_(DataEntry<scalar>::New("thetaOuter", this->coeffDict())),
-    parcelDistributionModel_
+    sizeDistribution_
     (
-        distributionModels::distributionModel::New(this->coeffDict().subDict("parcelDistributionModel"), owner.rndGen())
+        distributionModels::distributionModel::New
+        (
+            this->coeffDict().subDict("sizeDistribution"), owner.rndGen()
+        )
     ),
     nInjected_(this->parcelsAddedTotal()),
     tanVec1_(positions_.size()),
@@ -193,7 +196,7 @@ Foam::ConeInjectionMP<CloudType>::ConeInjectionMP
     Umag_(im.Umag_().clone().ptr()),
     thetaInner_(im.thetaInner_().clone().ptr()),
     thetaOuter_(im.thetaOuter_().clone().ptr()),
-    parcelDistributionModel_(im.parcelDistributionModel_().clone().ptr()),
+    sizeDistribution_(im.sizeDistribution_().clone().ptr()),
     nInjected_(im.nInjected_),
     tanVec1_(im.tanVec1_),
     tanVec2_(im.tanVec2_)
@@ -268,7 +271,7 @@ void Foam::ConeInjectionMP<CloudType>::setProperties
     parcel.U() = Umag_().value(t)*dirVec;
 
     // set particle diameter
-    parcel.d() = parcelDistributionModel_().sample();
+    parcel.d() = sizeDistribution_().sample();
 }
 
 

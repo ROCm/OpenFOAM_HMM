@@ -86,7 +86,7 @@ class PatchInjection
         const autoPtr<DataEntry<scalar> > flowRateProfile_;
 
         //- Parcel size distribution model model
-        const autoPtr<distributionModels::distributionModel> parcelDistributionModel_;
+        const autoPtr<distributionModels::distributionModel> sizeDistribution_;
 
         //- List of cell labels corresponding to injector positions
         labelList cellOwners_;

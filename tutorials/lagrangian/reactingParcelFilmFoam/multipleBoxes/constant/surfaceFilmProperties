@@ -61,7 +61,7 @@ thermoSingleLayerCoeffs
 
         particlesPerParcel 100.0;
 
-        parcelDistribution
+        sizeDistribution
         {
             pdfType         RosinRammler;
             RosinRammlerDistribution

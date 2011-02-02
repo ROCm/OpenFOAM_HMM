@@ -131,7 +131,7 @@ subModels
         thetaInner      constant 0;
         thetaOuter      constant 45;
 
-        parcelDistribution
+        sizeDistribution
         {
             pdfType         RosinRammler;
             RosinRammlerDistribution

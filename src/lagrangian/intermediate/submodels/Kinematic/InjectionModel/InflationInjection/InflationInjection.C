@@ -90,7 +90,7 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
     (
         1,
         (10*volumeAccumulator_)
-       /CloudType::parcelType::volume(parcelDistributionModel_().minValue())
+       /CloudType::parcelType::volume(sizeDistribution_().minValue())
     );
 
     label iterationNo = 0;
@@ -128,7 +128,7 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
         {
             if (selfSeed_ && !cellCentresUsed.found(cI))
             {
-                scalar dNew = parcelDistributionModel_().sample();
+                scalar dNew = sizeDistribution_().sample();
 
                 newParticles_.append
                 (
@@ -191,7 +191,7 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
                 scalar R = sqrt(3.0)*a/(2.0*sqrt(2.0));
                 scalar d = a/(2.0*sqrt(3.0));
 
-                scalar dNew = parcelDistributionModel_().sample();
+                scalar dNew = sizeDistribution_().sample();
                 scalar volNew = CloudType::parcelType::volume(dNew);
 
                 newParticles_.append
@@ -204,7 +204,7 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
                 );
                 volumeAccumulator_ -= volNew;
 
-                dNew = parcelDistributionModel_().sample();
+                dNew = sizeDistribution_().sample();
                 newParticles_.append
                 (
                     vectorPairScalarPair
@@ -215,7 +215,7 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
                 );
                 volumeAccumulator_ -= volNew;
 
-                dNew = parcelDistributionModel_().sample();
+                dNew = sizeDistribution_().sample();
                 newParticles_.append
                 (
                     vectorPairScalarPair
@@ -226,7 +226,7 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
                 );
                 volumeAccumulator_ -= volNew;
 
-                dNew = parcelDistributionModel_().sample();
+                dNew = sizeDistribution_().sample();
                 newParticles_.append
                 (
                     vectorPairScalarPair
@@ -341,11 +341,11 @@ Foam::InflationInjection<CloudType>::InflationInjection
     fraction_(1.0),
     selfSeed_(this->coeffDict().lookupOrDefault("selfSeed", false)),
     dSeed_(SMALL),
-    parcelDistributionModel_
+    sizeDistribution_
     (
         distributionModels::distributionModel::New
         (
-            this->coeffDict().subDict("parcelDistributionModel"),
+            this->coeffDict().subDict("sizeDistribution"),
             owner.rndGen()
         )
     )
@@ -409,7 +409,7 @@ Foam::InflationInjection<CloudType>::InflationInjection
     fraction_(im.fraction_),
     selfSeed_(im.selfSeed_),
     dSeed_(im.dSeed_),
-    parcelDistributionModel_(im.parcelDistributionModel_().clone().ptr())
+    sizeDistribution_(im.sizeDistribution_().clone().ptr())
 {}
 
 
