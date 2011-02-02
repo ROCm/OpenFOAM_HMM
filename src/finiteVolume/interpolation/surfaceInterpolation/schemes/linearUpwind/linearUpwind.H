@@ -68,12 +68,6 @@ class linearUpwind
         //- Disallow default bitwise assignment
         void operator=(const linearUpwind&);
 
-        //- Hide the limiter because this is not formally a limited scheme
-        virtual tmp<surfaceScalarField> limiter
-        (
-            const GeometricField<Type, fvPatchField, volMesh>&
-        ) const;
-
 
 public:
 
