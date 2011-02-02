@@ -60,7 +60,7 @@ private:
         typedef VectorSpace<Vector<scalar>, scalar, 2> pair;
 
         dictionary definedHollowConeDict_;
-        autoPtr<distributionModels::distributionModel> dropletDistributionModel_;
+        autoPtr<distributionModels::distributionModel> sizeDistribution_;
 
         // inner and outer cone angle time histories
         // 2 column vectors = (time, coneAngle)

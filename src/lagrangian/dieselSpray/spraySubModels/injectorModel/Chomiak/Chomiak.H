@@ -63,7 +63,7 @@ private:
 
         dictionary ChomiakDict_;
 
-        autoPtr<distributionModels::distributionModel> dropletDistributionModel_;
+        autoPtr<distributionModels::distributionModel> sizeDistribution_;
         scalarList maxSprayAngle_;
 
 

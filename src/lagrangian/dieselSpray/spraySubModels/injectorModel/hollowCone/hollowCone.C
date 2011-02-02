@@ -52,11 +52,11 @@ Foam::hollowConeInjector::hollowConeInjector
 :
     injectorModel(dict, sm),
     hollowConeDict_(dict.subDict(typeName + "Coeffs")),
-    dropletDistributionModel_
+    sizeDistribution_
     (
         distributionModels::distributionModel::New
         (
-            hollowConeDict_.subDict("dropletDistributionModel"),
+            hollowConeDict_.subDict("sizeDistribution"),
             sm.rndGen()
         )
     ),
@@ -112,7 +112,7 @@ Foam::scalar Foam::hollowConeInjector::d0
     const scalar
 ) const
 {
-    return dropletDistributionModel_->sample();
+    return sizeDistribution_->sample();
 }
 
 

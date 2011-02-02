@@ -58,7 +58,7 @@ private:
 
         dictionary hollowConeDict_;
 
-        autoPtr<distributionModels::distributionModel> dropletDistributionModel_;
+        autoPtr<distributionModels::distributionModel> sizeDistribution_;
         scalarList innerAngle_;
         scalarList outerAngle_;
 

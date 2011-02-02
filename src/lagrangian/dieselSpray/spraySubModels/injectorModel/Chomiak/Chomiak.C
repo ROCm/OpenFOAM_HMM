@@ -52,11 +52,11 @@ Foam::ChomiakInjector::ChomiakInjector
 :
     injectorModel(dict, sm),
     ChomiakDict_(dict.subDict(typeName + "Coeffs")),
-    dropletDistributionModel_
+    sizeDistribution_
     (
         distributionModels::distributionModel::New
         (
-            ChomiakDict_.subDict("dropletDistributionModel"),
+            ChomiakDict_.subDict("sizeDistribution"),
             sm.rndGen()
         )
     ),
@@ -101,7 +101,7 @@ Foam::scalar Foam::ChomiakInjector::d0
     const scalar
 ) const
 {
-    return dropletDistributionModel_->sample();
+    return sizeDistribution_->sample();
 }
 
 
@@ -113,8 +113,8 @@ Foam::vector Foam::ChomiakInjector::direction
     const scalar d
 ) const
 {
-    scalar dMin = dropletDistributionModel_->minValue();
-    scalar dMax = dropletDistributionModel_->maxValue();
+    scalar dMin = sizeDistribution_->minValue();
+    scalar dMax = sizeDistribution_->maxValue();
 
     scalar angle =
         (d - dMax)*maxSprayAngle_[n]
