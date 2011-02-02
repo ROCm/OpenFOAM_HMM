@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -247,6 +247,20 @@ void Foam::fieldValues::faceSource::initialise(const dictionary& dict)
                 << nl << "    Unknown source type. Valid source types are:"
                 << sourceTypeNames_.sortedToc() << nl << exit(FatalError);
         }
+    }
+
+    if (nFaces_ == 0)
+    {
+        WarningIn
+        (
+            "Foam::fieldValues::faceSource::initialise(const dictionary&)"
+        )
+            << type() << " " << name_ << ": "
+            << sourceTypeNames_[source_] << "(" << sourceName_ << "):" << nl
+            << "    Source has no faces - deactivating" << endl;
+
+        active_ = false;
+        return;
     }
 
     scalar totalArea;

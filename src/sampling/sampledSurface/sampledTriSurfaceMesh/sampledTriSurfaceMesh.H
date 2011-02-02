@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,12 +28,31 @@ Description
     A sampledSurface from a triSurfaceMesh. It samples on the points/triangles
     of the triSurface.
 
-    It samples using the cell nearest to the triangle centre so does
-    not check the cell the centre is actually in ...
+    - it either samples cells or (non-coupled) boundary faces
 
-    In parallel every processor just operates on the part of the surface
-    where the face centres are inside the mesh. It is then up to the
-    caller to stitch the partial surfaces together.
+    - 4 different modes:
+        - source=cells, interpolate=false:
+            finds per triangle centre the nearest cell centre and uses its value
+        - source=cells, interpolate=true
+            finds per triangle centre the nearest cell centre.
+            Per surface point checks if this nearest cell is the one containing
+            point; otherwise projects the point onto the nearest point on
+            the boundary of the cell (to make sure interpolateCellPoint
+            gets a valid location)
+
+        - source=boundaryFaces, interpolate=false:
+            finds per triangle centre the nearest point on the boundary
+            (uncoupled faces only) and uses the value (or 0 if the nearest
+            is on an empty boundary)
+        - source=boundaryFaces, interpolate=true:
+            finds per triangle centre the nearest point on the boundary
+            (uncoupled faces only).
+            Per surface point projects the point onto this boundary face
+            (to make sure interpolateCellPoint gets a valid location)
+
+    - since it finds a nearest per triangle each triangle is guaranteed
+    to be on one processor only. So after stitching (by sampledSurfaces)
+    the original surface should be complete.
 
 SourceFiles
     sampledTriSurfaceMesh.C
@@ -52,6 +71,8 @@ SourceFiles
 namespace Foam
 {
 
+class treeDataFace;
+
 /*---------------------------------------------------------------------------*\
                        Class sampledTriSurfaceMesh Declaration
 \*---------------------------------------------------------------------------*/
@@ -61,25 +82,47 @@ class sampledTriSurfaceMesh
     public sampledSurface,
     public MeshedSurface<face>
 {
+public:
+        //- Types of communications
+        enum samplingSource
+        {
+            cells,
+            boundaryFaces
+        };
+
+private:
+
     //- Private typedefs for convenience
         typedef MeshedSurface<face> MeshStorage;
 
+
     // Private data
+
+        static const NamedEnum<samplingSource, 2> samplingSourceNames_;
 
         //- Surface to sample on
         const triSurfaceMesh surface_;
 
+        //- Whether to sample internal cell values or boundary values
+        const samplingSource sampleSource_;
+
         //- Track if the surface needs an update
         mutable bool needsUpdate_;
 
-        //- From local surface triangle to mesh cell.
-        labelList cellLabels_;
+        //- Search tree for all non-coupled boundary faces
+        mutable autoPtr<indexedOctree<treeDataFace> > boundaryTreePtr_;
 
-        //- From local surface back to surface_
-        labelList pointToFace_;
+        //- From local surface triangle to mesh cell/face.
+        labelList sampleElements_;
+
+        //- Local points to sample per point
+        pointField samplePoints_;
 
 
     // Private Member Functions
+
+        //- Get tree of all non-coupled boundary faces
+        const indexedOctree<treeDataFace>& nonCoupledboundaryTree() const;
 
         //- sample field on faces
         template <class Type>
@@ -106,7 +149,8 @@ public:
         (
             const word& name,
             const polyMesh& mesh,
-            const word& surfaceName
+            const word& surfaceName,
+            const samplingSource sampleSource
         );
 
         //- Construct from dictionary

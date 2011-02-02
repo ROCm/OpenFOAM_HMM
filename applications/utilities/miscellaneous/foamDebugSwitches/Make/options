@@ -34,22 +34,22 @@ EXE_LIBS = \
     -llaminarFlameSpeedModels \
     -lLESdeltas \
     -lLESfilters \
-    -lliquidMixture \
-    -lliquids \
+    -lliquidMixtureProperties \
+    -lliquidProperties \
     -lmeshTools \
     -lmolecularMeasurements \
     -lmolecule \
     -lODE \
     -lOpenFOAM \
-    -lpdf \
+    -ldistributionModels \
     -lpotential \
-    -lradiation \
+    -lradiationModels \
     -lrandomProcesses \
     -lreactionThermophysicalModels \
     -lsampling \
-    -lpointSolidMixture \
+    -lsolidMixtureProperties \
     -lsolidParticle \
-    -lpointSolids \
+    -lsolidProperties \
     -lspecie \
     -lsurfMesh \
     -lsystemCall \

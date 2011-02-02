@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,32 +74,41 @@ Foam::particleForces::particleForces
 (
     const fvMesh& mesh,
     const dictionary& dict,
-    const vector& g
+    const vector& g,
+    const bool readFields
 )
 :
     mesh_(mesh),
-    dict_(dict.subDict("particleForces")),
+    dict_(dict.subOrEmptyDict("particleForces")),
     g_(g),
     gradUPtr_(NULL),
     HdotGradHInterPtr_(NULL),
-    gravity_(dict_.lookup("gravity")),
-    virtualMass_(dict_.lookup("virtualMass")),
+    gravity_(false),
+    virtualMass_(false),
     Cvm_(0.0),
-    pressureGradient_(dict_.lookup("pressureGradient")),
-    paramagnetic_(dict_.lookup("paramagnetic")),
+    pressureGradient_(false),
+    paramagnetic_(false),
     magneticSusceptibility_(0.0),
     refFrame_(rfInertial),
     UName_(dict_.lookupOrDefault<word>("UName", "U")),
     HdotGradHName_(dict_.lookupOrDefault<word>("HdotGradHName", "HdotGradH"))
 {
-    if (virtualMass_)
+    if (readFields)
     {
-        dict_.lookup("Cvm") >> Cvm_;
-    }
+        dict_.lookup("gravity") >> gravity_;
+        dict_.lookup("virtualMass") >> virtualMass_;
+        dict_.lookup("pressureGradient") >> pressureGradient_;
+        dict_.lookup("paramagnetic") >> paramagnetic_;
 
-    if (paramagnetic_)
-    {
-        dict_.lookup("magneticSusceptibility") >> magneticSusceptibility_;
+        if (virtualMass_)
+        {
+            dict_.lookup("Cvm") >> Cvm_;
+        }
+
+        if (paramagnetic_)
+        {
+            dict_.lookup("magneticSusceptibility") >> magneticSusceptibility_;
+        }
     }
 
     if (dict_.found("referenceFrame"))
@@ -116,9 +125,10 @@ Foam::particleForces::particleForces
             (
                 "Foam::particleForces::particleForces"
                 "("
-                    "const fvMesh& mesh,"
-                    "const dictionary& dict,"
-                    "const vector& g"
+                    "const fvMesh&, "
+                    "const dictionary&, "
+                    "const vector&, "
+                    "const bool"
                 ")"
             )
                 << "Unknown referenceFrame, options are inertial and SRF."
@@ -235,10 +245,8 @@ void Foam::particleForces::cacheFields
 
         if (paramagnetic_)
         {
-            const volVectorField& HdotGradH = mesh_.lookupObject<volVectorField>
-            (
-                HdotGradHName_
-            );
+            const volVectorField& HdotGradH =
+                mesh_.lookupObject<volVectorField>(HdotGradHName_);
 
             HdotGradHInterPtr_ = interpolation<vector>::New
             (
@@ -329,7 +337,7 @@ Foam::vector Foam::particleForces::calcNonCoupled
         // *magneticSusceptibility_/(magneticSusceptibility_ + 3)
         // *HdotGradH[cellI];
 
-        // which is divided by mass ((4/3)*pi*r^3*rho) to produce
+        // which is divided by mass (pi*d^3*rho/6) to produce
         // acceleration
     }
 

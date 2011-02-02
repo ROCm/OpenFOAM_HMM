@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
     const scalar searchTol = args.optionLookupOrDefault("tol", 1e-3);
 
     // Get search box. Anything not within this box will not be considered.
-    const boundBox& meshBb = mesh.globalData().bb();
+    const boundBox& meshBb = mesh.bounds();
     const vector searchSpan = searchTol * meshBb.span();
 
     Info<< "All boundary faces further away than " << searchTol

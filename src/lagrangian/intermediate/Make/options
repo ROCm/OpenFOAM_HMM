@@ -2,16 +2,16 @@ EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/lagrangian/basic/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/pdfs/lnInclude \
+    -I$(LIB_SRC)/lagrangian/distributionModels/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/liquids/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/liquidMixture/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/pointSolids/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/pointSolidMixture/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/properties/liquidProperties/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/properties/liquidMixtureProperties/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/properties/solidProperties/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/properties/solidMixtureProperties/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/reactionThermo/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/SLGThermo/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/radiation/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/radiationModels/lnInclude \
     -I$(LIB_SRC)/turbulenceModels \
     -I$(LIB_SRC)/turbulenceModels/compressible/turbulenceModel \
     -I$(LIB_SRC)/turbulenceModels/compressible/RAS/lnInclude \
@@ -24,17 +24,17 @@ LIB_LIBS = \
     -lfiniteVolume \
     -lmeshTools \
     -llagrangian \
-    -lpdf \
-    -lliquids \
-    -lliquidMixture \
-    -lpointSolids \
-    -lpointSolidMixture \
+    -ldistributionModels \
+    -lliquidProperties \
+    -lliquidMixtureProperties \
+    -lsolidProperties \
+    -lsolidMixtureProperties \
     -lspecie \
     -lbasicThermophysicalModels \
     -lreactionThermophysicalModels \
     -lSLGThermo \
     -lchemistryModel \
-    -lradiation \
+    -lradiationModels \
     -lODE \
     -lcompressibleRASModels \
     -lcompressibleLESModels \

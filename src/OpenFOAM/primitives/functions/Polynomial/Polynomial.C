@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -149,7 +149,7 @@ Foam::scalar& Foam::Polynomial<PolySize>::logCoeff()
 
 
 template<int PolySize>
-Foam::scalar Foam::Polynomial<PolySize>::evaluate(const scalar x) const
+Foam::scalar Foam::Polynomial<PolySize>::value(const scalar x) const
 {
     scalar y = this->v_[0];
 
@@ -192,7 +192,7 @@ Foam::scalar Foam::Polynomial<PolySize>::integrateLimits
 
     intPolyType poly = this->integrate();
 
-    return poly.evaluate(x2) - poly.evaluate(x1);
+    return poly.value(x2) - poly.value(x1);
 }
 
 

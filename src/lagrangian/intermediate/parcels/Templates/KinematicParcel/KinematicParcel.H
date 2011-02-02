@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -98,22 +98,22 @@ public:
 
             //- Parcel type id - used for post-processing to flag the type
             //  of parcels issued by this cloud
-            const label parcelTypeId_;
+            label parcelTypeId_;
 
             //- Minimum density [kg/m3]
-            const scalar rhoMin_;
+            scalar rhoMin_;
 
             //- Particle density [kg/m3] (constant)
-            const scalar rho0_;
+            scalar rho0_;
 
             //- Minimum particle mass [kg]
-            const scalar minParticleMass_;
+            scalar minParticleMass_;
 
             //- Young's modulus [N/m2]
-            const scalar youngsModulus_;
+            scalar youngsModulus_;
 
             //- Poisson's ratio
-            const scalar poissonsRatio_;
+            scalar poissonsRatio_;
 
 
     public:
@@ -127,7 +127,11 @@ public:
             constantProperties(const constantProperties& cp);
 
             //- Constructor from dictionary
-            constantProperties(const dictionary& parentDict);
+            constantProperties
+            (
+                const dictionary& parentDict,
+                const bool readFields = true
+            );
 
 
         // Member functions

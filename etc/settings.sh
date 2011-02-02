@@ -88,7 +88,7 @@ export FOAM_USER_LIBBIN=$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib
 
 # convenience
 export FOAM_APP=$WM_PROJECT_DIR/applications
-export FOAM_LIB=$WM_PROJECT_DIR/lib
+#export FOAM_LIB=$WM_PROJECT_DIR/lib
 export FOAM_SRC=$WM_PROJECT_DIR/src
 export FOAM_TUTORIALS=$WM_PROJECT_DIR/tutorials
 export FOAM_UTILITIES=$FOAM_APP/utilities

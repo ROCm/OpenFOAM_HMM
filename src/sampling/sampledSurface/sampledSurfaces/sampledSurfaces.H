@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,36 +68,11 @@ class sampledSurfaces
         {
         public:
 
-            //- The surface formatter
-            autoPtr< surfaceWriter<Type> > formatter;
-
             //- Construct null
             fieldGroup()
             :
-                DynamicList<word>(0),
-                formatter(NULL)
+                DynamicList<word>(0)
             {}
-
-            //- Construct for a particular surface format
-            fieldGroup(const word& writeFormat)
-            :
-                DynamicList<word>(0),
-                formatter(surfaceWriter<Type>::New(writeFormat))
-            {}
-
-            //- Reset format and field list
-            void clear()
-            {
-                DynamicList<word>::clear();
-                formatter.clear();
-            }
-
-            //- Assign a new formatter
-            void operator=(const word& writeFormat)
-            {
-                formatter = surfaceWriter<Type>::New(writeFormat);
-            }
-
         };
 
 
@@ -151,10 +126,6 @@ class sampledSurfaces
             //- Interpolation scheme to use
             word interpolationScheme_;
 
-            //- Output format to use
-            word writeFormat_;
-
-
         // surfaces
 
             //- Information for merging surfaces
@@ -163,8 +134,8 @@ class sampledSurfaces
 
         // Calculated
 
-            //- Generic surface formatter
-            autoPtr< surfaceWriter<bool> > genericFormatter_;
+            //- Surface formatter
+            autoPtr<surfaceWriter> formatter_;
 
             //- Categorized scalar/vector/tensor fields
             fieldGroup<scalar> scalarFields_;
@@ -190,14 +161,10 @@ class sampledSurfaces
 
         //- Sample and write a particular volume field
         template<class Type>
-        void sampleAndWrite
-        (
-            const GeometricField<Type, fvPatchField, volMesh>&,
-            const surfaceWriter<Type>& formatter
-        );
+        void sampleAndWrite(const GeometricField<Type, fvPatchField, volMesh>&);
 
         //- Sample and write all the fields of the given type
-        template <class Type>
+        template<class Type>
         void sampleAndWrite(fieldGroup<Type>&);
 
         //- Disallow default bitwise copy construct and assignment

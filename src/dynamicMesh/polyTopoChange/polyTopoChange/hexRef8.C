@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -4394,7 +4394,7 @@ void Foam::hexRef8::distribute(const mapDistributePolyMesh& map)
 
 void Foam::hexRef8::checkMesh() const
 {
-    const scalar smallDim = 1E-6 * mesh_.globalData().bb().mag();
+    const scalar smallDim = 1E-6 * mesh_.bounds().mag();
 
     if (debug)
     {

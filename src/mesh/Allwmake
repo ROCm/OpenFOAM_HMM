@@ -1,8 +1,9 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
+[ $# -ge 1 ] && makeOption=$1 || makeOption=libso
 set -x
 
-wmake libso autoMesh
-wmake libso blockMesh
+wmake $makeOption autoMesh
+wmake $makeOption blockMesh
 
 # ----------------------------------------------------------------- end-of-file

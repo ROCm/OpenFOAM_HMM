@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -96,11 +96,11 @@ Foam::ManualInjection<CloudType>::ManualInjection
     injectorTetFaces_(positions_.size(), -1),
     injectorTetPts_(positions_.size(), -1),
     U0_(this->coeffDict().lookup("U0")),
-    parcelPDF_
+    sizeDistribution_
     (
-        pdfs::pdf::New
+        distributionModels::distributionModel::New
         (
-            this->coeffDict().subDict("parcelPDF"),
+            this->coeffDict().subDict("sizeDistribution"),
             owner.rndGen()
         )
     )
@@ -149,7 +149,7 @@ Foam::ManualInjection<CloudType>::ManualInjection
     // Construct parcel diameters
     forAll(diameters_, i)
     {
-        diameters_[i] = parcelPDF_->sample();
+        diameters_[i] = sizeDistribution_->sample();
     }
 
     // Determine volume of particles to inject
@@ -171,7 +171,7 @@ Foam::ManualInjection<CloudType>::ManualInjection
     injectorTetFaces_(im.injectorTetFaces_),
     injectorTetPts_(im.injectorTetPts_),
     U0_(im.U0_),
-    parcelPDF_(im.parcelPDF_().clone().ptr())
+    sizeDistribution_(im.sizeDistribution_().clone().ptr())
 {}
 
 

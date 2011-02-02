@@ -6,7 +6,7 @@ runApplication blockMesh
 runApplication setSet -batch wallFilmRegion.setSet
 mv log.setSet log.wallFilmRegion.setSet
 
-runApplication extrudeToRegionMesh wallFilmRegion '(wallFilmFaces)' 0.01 -overwrite
+runApplication extrudeToRegionMesh -overwrite
 
 runApplication setSet -region wallFilmRegion -batch createWallFilmRegionPatches.setSet
 mv log.setSet log.createWallFilmRegionPatches.setSet

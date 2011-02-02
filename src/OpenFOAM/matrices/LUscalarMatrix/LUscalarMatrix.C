@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -260,6 +260,11 @@ void Foam::LUscalarMatrix::convert
             }
             else if (interface.myProcNo_ < interface.neighbProcNo_)
             {
+                // Interface to neighbour proc. Find on neighbour proc the
+                // corresponding interface. The problem is that there can
+                // be multiple interfaces between two processors (from
+                // processorCyclics) so also compare the communication tag
+
                 const PtrList<procLduInterface>& neiInterfaces =
                     lduMatrices[interface.neighbProcNo_].interfaces_;
 
@@ -269,8 +274,11 @@ void Foam::LUscalarMatrix::convert
                 {
                     if
                     (
-                        neiInterfaces[ninti].neighbProcNo_
-                     == interface.myProcNo_
+                        (
+                            neiInterfaces[ninti].neighbProcNo_
+                         == interface.myProcNo_
+                        )
+                     && (neiInterfaces[ninti].tag_ ==  interface.tag_)
                     )
                     {
                         neiInterfacei = ninti;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,14 +47,6 @@ const Foam::mapDistribute&
 Foam::InteractionLists<ParticleType>::wallFaceMap() const
 {
     return wallFaceMapPtr_();
-}
-
-
-template<class ParticleType>
-const Foam::globalIndexAndTransform&
-Foam::InteractionLists<ParticleType>::globalTransforms() const
-{
-    return globalTransforms_;
 }
 
 

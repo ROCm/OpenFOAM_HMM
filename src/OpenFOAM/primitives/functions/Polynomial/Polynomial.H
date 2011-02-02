@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,7 +32,7 @@ Description
     where 0 \<= i \<= n
 
     - integer powers, starting at zero
-    - evaluate(x) to evaluate the poly for a given value
+    - value(x) to evaluate the poly for a given value
     - integrate(x1, x2) between two scalar values
     - integrate() to return a new, intergated coeff polynomial
       - increases the size (order)
@@ -134,7 +134,7 @@ public:
         // Evaluation
 
             //- Return polynomial value
-            scalar evaluate(const scalar x) const;
+            scalar value(const scalar x) const;
 
             //- Return integrated polynomial coefficients
             //  argument becomes zeroth element (constant of integration)

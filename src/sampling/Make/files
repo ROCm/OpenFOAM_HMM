@@ -46,14 +46,14 @@ sampledSurface/thresholdCellFaces/sampledThresholdCellFaces.C
 
 surfWriters = sampledSurface/writers
 
-$(surfWriters)/surfaceWriters.C
-$(surfWriters)/dx/dxSurfaceWriterRunTime.C
-$(surfWriters)/ensight/ensightSurfaceWriterRunTime.C
-$(surfWriters)/foamFile/foamFileSurfaceWriterRunTime.C
-$(surfWriters)/null/nullSurfaceWriterRunTime.C
-$(surfWriters)/proxy/proxySurfaceWriterRunTime.C
-$(surfWriters)/raw/rawSurfaceWriterRunTime.C
-$(surfWriters)/vtk/vtkSurfaceWriterRunTime.C
+$(surfWriters)/surfaceWriter.C
+$(surfWriters)/dx/dxSurfaceWriter.C
+$(surfWriters)/ensight/ensightSurfaceWriter.C
+$(surfWriters)/foamFile/foamFileSurfaceWriter.C
+$(surfWriters)/proxy/proxySurfaceWriter.C
+$(surfWriters)/raw/rawSurfaceWriter.C
+$(surfWriters)/starcd/starcdSurfaceWriter.C
+$(surfWriters)/vtk/vtkSurfaceWriter.C
 
 graphField/writePatchGraph.C
 graphField/writeCellGraph.C

@@ -23,7 +23,7 @@ fvMesh mesh
         fvMesh::defaultRegion,
         runTime.timeName(),
         runTime,
-        IOobject::NO_READ
+        IOobject::MUST_READ
     ),
     xferMove<Field<vector> >(points),
     faces.xfer(),
