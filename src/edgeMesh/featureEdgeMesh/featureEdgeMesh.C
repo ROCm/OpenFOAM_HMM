@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -120,9 +120,15 @@ Foam::featureEdgeMesh::edgeStatus Foam::featureEdgeMesh::classifyEdge
         const vector n0(norms[edNorms[0]]);
         const vector n1(norms[edNorms[1]]);
 
-        if ((n0 & n1) > cosNormalAngleTol_)
+        scalar n0n1 = n0 & n1;
+
+        if (n0n1 > cosNormalAngleTol_)
         {
             return FLAT;
+        }
+        else if (n0n1 < -cosNormalAngleTol_)
+        {
+            return OPEN;
         }
         else if ((fC0tofC1 & n0) > 0.0)
         {
