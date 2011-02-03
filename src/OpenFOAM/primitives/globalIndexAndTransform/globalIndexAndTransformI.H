@@ -118,20 +118,56 @@ Foam::label Foam::globalIndexAndTransform::encodeTransformIndex
 }
 
 
+Foam::label Foam::globalIndexAndTransform::encodeTransformIndex
+(
+    const FixedList<Foam::label, 3>& permutation
+) const
+{
+    if (nIndependentTransforms() == 0)
+    {
+        return 0;
+    }
+    if (nIndependentTransforms() == 1)
+    {
+        return permutation[0]+1;
+    }
+    else if (nIndependentTransforms() == 2)
+    {
+        return (permutation[1]+1)*3 + (permutation[0]+1);
+    }
+    else
+    {
+        return
+            (permutation[2]+1)*9
+          + (permutation[1]+1)*3
+          + (permutation[0]+1);
+    }
+}
+
+
 Foam::FixedList<Foam::label, 3>
 Foam::globalIndexAndTransform::decodeTransformIndex
 (
     const label transformIndex
-)
+) const
 {
-    FixedList<label, 3> permutation;
+    FixedList<label, 3> permutation(0);
 
     label t = transformIndex;
-    permutation[0] = (t%3)-1;
-    t /= 3;
-    permutation[1] = (t%3)-1;
-    t /= 3;
-    permutation[2] = (t%3)-1;
+    if (nIndependentTransforms() > 0)
+    {
+        permutation[0] = (t%3)-1;
+        if (nIndependentTransforms() > 1)
+        {
+            t /= 3;
+            permutation[1] = (t%3)-1;
+            if (nIndependentTransforms() > 2)
+            {
+                t /= 3;
+                permutation[2] = (t%3)-1;
+            }
+        }
+    }
 
 #   ifdef FULLDEBUG
     t /= 3;
@@ -222,10 +258,7 @@ Foam::label Foam::globalIndexAndTransform::addToTransformIndex
         // Re-encode permutation
         // ~~~~~~~~~~~~~~~~~~~~~
 
-        return
-            (permutation[2]+1)*9
-          + (permutation[1]+1)*3
-          + (permutation[0]+1);
+        return encodeTransformIndex(permutation);
     }
     else
     {
@@ -238,7 +271,7 @@ Foam::label Foam::globalIndexAndTransform::mergeTransformIndex
 (
     const label transformIndex0,
     const label transformIndex1
-)
+) const
 {
     FixedList<label, 3> permutation0 = decodeTransformIndex(transformIndex0);
     FixedList<label, 3> permutation1 = decodeTransformIndex(transformIndex1);
@@ -269,10 +302,7 @@ Foam::label Foam::globalIndexAndTransform::mergeTransformIndex
                 << exit(FatalError);
         }
     }
-    return
-        (permutation0[2]+1)*9
-      + (permutation0[1]+1)*3
-      + (permutation0[0]+1);
+    return encodeTransformIndex(permutation0);
 }
 
 
@@ -280,7 +310,7 @@ Foam::label Foam::globalIndexAndTransform::minimumTransformIndex
 (
     const label transformIndex0,
     const label transformIndex1
-)
+) const
 {
     FixedList<label, 3> permutation0 = decodeTransformIndex(transformIndex0);
     FixedList<label, 3> permutation1 = decodeTransformIndex(transformIndex1);
@@ -315,10 +345,7 @@ Foam::label Foam::globalIndexAndTransform::minimumTransformIndex
                 << exit(FatalError);
         }
     }
-    return
-        (permutation0[2]+1)*9
-      + (permutation0[1]+1)*3
-      + (permutation0[0]+1);
+    return encodeTransformIndex(permutation0);
 }
 
 
@@ -326,7 +353,7 @@ Foam::label Foam::globalIndexAndTransform::subtractTransformIndex
 (
     const label transformIndex0,
     const label transformIndex1
-)
+) const
 {
     FixedList<label, 3> permutation0 = decodeTransformIndex(transformIndex0);
     FixedList<label, 3> permutation1 = decodeTransformIndex(transformIndex1);
@@ -336,10 +363,7 @@ Foam::label Foam::globalIndexAndTransform::subtractTransformIndex
         permutation0[i] -= permutation1[i];
     }
 
-    return
-        (permutation0[2]+1)*9
-      + (permutation0[1]+1)*3
-      + (permutation0[0]+1);
+    return encodeTransformIndex(permutation0);
 }
 
 
