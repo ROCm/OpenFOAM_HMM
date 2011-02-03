@@ -595,7 +595,7 @@ int main(int argc, char *argv[])
 
     // if (writeVTK)
     // {
-    //     vtkSurfaceWriter<scalar>().write
+    //     vtkSurfaceWriter().write
     //     (
     //         runTime.constant()/"triSurface",    // outputDir
     //         sFeatFileName,                      // surfaceName
@@ -692,25 +692,25 @@ int main(int argc, char *argv[])
         {
             drawHitProblem(fI, surf, start, faceCentres, end, hitInfo);
 
-            FatalErrorIn(args.executable())
-                << "findLineAll did not hit its own face."
-                << exit(FatalError);
+            // FatalErrorIn(args.executable())
+            //     << "findLineAll did not hit its own face."
+            //     << exit(FatalError);
         }
         else if (hitInfo.size() == 1)
         {
             if (!hitInfo[0].hit())
             {
-                FatalErrorIn(args.executable())
-                    << "findLineAll did not hit any face."
-                    << exit(FatalError);
+                // FatalErrorIn(args.executable())
+                //     << "findLineAll did not hit any face."
+                //     << exit(FatalError);
             }
             else if (hitInfo[0].index() != fI)
             {
                 drawHitProblem(fI, surf, start, faceCentres, end, hitInfo);
 
-                FatalErrorIn(args.executable())
-                    << "findLineAll did not hit its own face."
-                    << exit(FatalError);
+                // FatalErrorIn(args.executable())
+                //     << "findLineAll did not hit its own face."
+                //     << exit(FatalError);
             }
         }
         else
@@ -733,9 +733,9 @@ int main(int argc, char *argv[])
             {
                 drawHitProblem(fI, surf, start, faceCentres, end, hitInfo);
 
-                FatalErrorIn(args.executable())
-                    << "findLineAll did not hit its own face."
-                    << exit(FatalError);
+                // FatalErrorIn(args.executable())
+                //     << "findLineAll did not hit its own face."
+                //     << exit(FatalError);
             }
             else if (ownHitI == 0)
             {
@@ -868,7 +868,7 @@ int main(int argc, char *argv[])
 
     if (writeVTK)
     {
-        vtkSurfaceWriter<scalar>().write
+        vtkSurfaceWriter().write
         (
             runTime.constant()/"triSurface",    // outputDir
             sFeatFileName,                      // surfaceName
@@ -880,7 +880,7 @@ int main(int argc, char *argv[])
             true                                // verbose
         );
 
-        vtkSurfaceWriter<scalar>().write
+        vtkSurfaceWriter().write
         (
             runTime.constant()/"triSurface",    // outputDir
             sFeatFileName,                      // surfaceName
@@ -892,7 +892,7 @@ int main(int argc, char *argv[])
             true                                // verbose
         );
 
-        vtkSurfaceWriter<scalar>().write
+        vtkSurfaceWriter().write
         (
             runTime.constant()/"triSurface",    // outputDir
             sFeatFileName,                      // surfaceName

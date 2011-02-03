@@ -10,6 +10,7 @@ EXE_INC = \
     ${USE_F2C} \
     ${CGAL_INC} \
     -ICGALPolyhedron \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/edgeMesh/lnInclude \
     -I$(LIB_SRC)/triSurface/lnInclude \
