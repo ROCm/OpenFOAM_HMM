@@ -52,6 +52,21 @@ Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
             << "findSurfaceNearest did not find a hit across the span of the "
             << "surfaces."
             << exit(FatalError) << endl;
+
+        WarningIn
+        (
+            "Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment"
+        )
+            << "findSurfaceNearest did not find a hit across the span of the "
+            << "surfaces for point " << pt << endl;
+
+        geometryToConformTo_.findSurfaceNearest
+        (
+            pt,
+            sqr(GREAT),
+            surfHit,
+            hitSurface
+        );
     }
 
     // Primary alignment
