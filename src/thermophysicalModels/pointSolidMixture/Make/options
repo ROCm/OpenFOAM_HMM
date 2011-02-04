@@ -1,3 +1,0 @@
-EXE_INC = \
-    -I${LIB_SRC}/thermophysicalModels/pointSolids/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -82,7 +82,7 @@ public:
         // Private data
 
             //- Latent heat of devolatilisation [J/kg]
-            const scalar LDevol_;
+            scalar LDevol_;
 
             //- Fraction of enthalpy retained by parcel due to surface
             //  reactions
@@ -100,7 +100,11 @@ public:
             constantProperties(const constantProperties& cp);
 
             //- Constructor from dictionary
-            constantProperties(const dictionary& parentDict);
+            constantProperties
+            (
+                const dictionary& parentDict,
+                const bool readFields = true
+            );
 
 
         // Access

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,9 +51,9 @@ void Smagorinsky::updateSubGridScaleFields(const volTensorField& gradU)
     volScalarField b((2.0/3.0)*tr(D));
     volScalarField c(2*ck_*delta()*(dev(D) && D));
 
-    k_ = sqr((-b + sqrt(sqr(b) + 4*a*c))/(2*a));
+    volScalarField k(sqr((-b + sqrt(sqr(b) + 4*a*c))/(2*a)));
 
-    muSgs_ = ck_*rho()*delta()*sqrt(k_);
+    muSgs_ = ck_*rho()*delta()*sqrt(k);
     muSgs_.correctBoundaryConditions();
 
     alphaSgs_ = muSgs_/Prt_;

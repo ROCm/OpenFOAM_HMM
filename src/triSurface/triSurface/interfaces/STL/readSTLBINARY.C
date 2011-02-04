@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -123,7 +123,11 @@ bool Foam::triSurface::readSTLBINARY(const fileName& STLfileName)
 
     //STLfile.close();
 
-    stitchTriangles(rawPoints);
+    // Assign coordinates
+    storedPoints().transfer(rawPoints);
+
+    // Stitch all points within SMALL meters.
+    stitchTriangles();
 
     return true;
 }

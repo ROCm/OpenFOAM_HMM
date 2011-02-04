@@ -31,8 +31,8 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 //! @cond fileScope
-const char hexChars[] = "0123456789abcdef";
-//! @endcond fileScope
+static const char hexChars[] = "0123456789abcdef";
+//! @endcond
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -87,6 +87,20 @@ void Foam::SHA1Digest::clear()
 }
 
 
+bool Foam::SHA1Digest::empty() const
+{
+    for (unsigned i = 0; i < length; ++i)
+    {
+        if (v_[i])
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
 bool Foam::SHA1Digest::operator==(const SHA1Digest& rhs) const
@@ -103,9 +117,79 @@ bool Foam::SHA1Digest::operator==(const SHA1Digest& rhs) const
 }
 
 
+bool Foam::SHA1Digest::operator==(const std::string& hexdigits) const
+{
+    // null or empty string is not an error - interpret as '0000..'
+    if (hexdigits.empty())
+    {
+        return empty();
+    }
+
+    // incorrect length - can never match
+    if (hexdigits.size() != length*2)
+    {
+        return false;
+    }
+
+    for (unsigned i = 0, charI = 0; i < length; ++i, charI += 2)
+    {
+        const char c1 = hexChars[((v_[i] >> 4) & 0xF)];
+        const char c2 = hexChars[(v_[i] & 0xF)];
+
+        if (c1 != hexdigits[charI] || c2 != hexdigits[charI+1])
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+bool Foam::SHA1Digest::operator==(const char* hexdigits) const
+{
+    // null or empty string is not an error - interpret as '0000..'
+    if (!hexdigits || !*hexdigits)
+    {
+        return empty();
+    }
+
+    // incorrect length - can never match
+    if (strlen(hexdigits) != length*2)
+    {
+        return false;
+    }
+
+    for (unsigned i = 0, charI = 0; i < length; ++i, charI += 2)
+    {
+        const char c1 = hexChars[((v_[i] >> 4) & 0xF)];
+        const char c2 = hexChars[(v_[i] & 0xF)];
+
+        if (c1 != hexdigits[charI] || c2 != hexdigits[charI+1])
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
 bool Foam::SHA1Digest::operator!=(const SHA1Digest& rhs) const
 {
-    return !this->operator==(rhs);
+    return !operator==(rhs);
+}
+
+
+bool Foam::SHA1Digest::operator!=(const std::string& rhs) const
+{
+    return !operator==(rhs);
+}
+
+
+bool Foam::SHA1Digest::operator!=(const char* rhs) const
+{
+    return !operator==(rhs);
 }
 
 

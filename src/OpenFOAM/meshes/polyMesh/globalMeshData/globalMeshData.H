@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,52 +32,56 @@ Description
     - all processor patches to have correct ordering.
     - all processorPatches to have their transforms set.
 
-    The shared point addressing is quite interesting. It gives on each processor
-    the vertices that cannot be set using a normal swap on processor patches.
-    These are the vertices that are shared between more than 2 processors.
+    The shared point and edge addressing is quite interesting.
+    It calculates addressing for points and edges on coupled patches. In
+    the 'old' way a distincation was made between points/edges that are
+    only on two processors and those that are on multiple processors. The
+    problem is that those on multiple processors do not allow any
+    transformations and require a global reduction on the master processor.
 
-    There is an issue with these shared vertices if they originate from
-    cyclics (i.e. are now separated processor patches). They will all be
-    mapped to the same global point (so even though the processor points are
-    not on the same location) since topologically they are one and the same.
+    The alternative is to have an exchange schedule (through a 'mapDistribute')
+    which sends all point/edge data (no distinction is made between
+    those on two and those on more than two coupled patches) to the local
+    'master'. This master then does any calculation and sends
+    the result back to the 'slave' points/edges. This only needs to be done
+    on points on coupled faces. Any transformation is done using a predetermined
+    set of transformations - since transformations have to be space filling
+    only a certain number of transformation is supported.
 
-    So if you ask for sharedPoints() you get only one of the coordinates of
-    the topologically shared points.
+    The exchange needs
+    - a field of data
+    - a mapDistribute which does all parallel exchange and transformations
+      This appens remote data to the end of the field.
+    - a set of indices which indicate where to get untransformed data in the
+      field
+    - a set of indices which indicate where to get transformed data in the
+      field
 
-    All the hard work of these shared points is done by the globalPoints class.
+    See also mapDistribute, globalIndexAndTransform
 
-    Shared edges: similar to shared points gives on all processors the edges
-    that are shared between more than two patches (i.e. the edges on which
-    data cannot be synchronized by a straightforward edge data swap). Note
-    that shared edges will use shared points but not all edges between shared
-    points need to be shared edges (e.g. there might be an edge connecting
-    two disconnected regions of shared points).
-
-    Currently an edge is considered shared
+    Notes:
+    - compared to 17x nTotalFaces, nTotalPoints do not compensate for
+    shared points since this would trigger full connectivity analysis
+    - most calculation is demand driven and uses parallel communication
+    so make sure to invoke on all processors at the same time.
+    - old sharedEdge calculation: currently an edge is considered shared
     if it uses two shared points and is used more than once. This is not
     correct on processor patches but it only slightly overestimates the number
     of shared edges. Doing full analysis of how many patches use the edge
     would be too complicated.
 
-    Shared edge calculation is demand driven so always make sure to have
-    your first call to one of the access functions synchronous amongst all
-    processors!
-
-
 SourceFiles
     globalMeshData.C
+    globalMeshDataTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef globalMeshData_H
 #define globalMeshData_H
 
-#include "Switch.H"
 #include "processorTopology.H"
 #include "labelPair.H"
 #include "indirectPrimitivePatch.H"
-#include "boundBox.H"
-#include "IOobject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -86,13 +90,11 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 
-class globalMeshData;
-Ostream& operator<<(Ostream&, const globalMeshData&);
-class globalIndex;
 class polyMesh;
 class mapDistribute;
 template<class T> class EdgeMap;
-class globalPoints;
+class globalIndex;
+class globalIndexAndTransform;
 
 /*---------------------------------------------------------------------------*\
                            Class globalMeshData Declaration
@@ -126,9 +128,6 @@ class globalMeshData
         };
 
 
-        typedef List<labelPair> labelPairList;
-
-
     // Private data
 
         //- Reference to mesh
@@ -136,9 +135,6 @@ class globalMeshData
 
 
         // Data related to the complete mesh
-
-            //- Bounding box of complete mesh
-            boundBox bb_;
 
             //- Total number of points in the complete mesh
             label nTotalPoints_;
@@ -165,23 +161,70 @@ class globalMeshData
             labelList processorPatchNeighbours_;
 
 
+        // Coupled point addressing
+        // This is addressing from coupled point to coupled points/faces/cells.
+        // This is a full schedule so includes points used by only two
+        // coupled patches.
+
+            //- Patch of coupled faces. Additional patch edge to mesh edges
+            //  correspondence:
+            //      points: meshPoints(), meshPointMap()
+            //      edges : meshEdges(), meshEdgeMap()
+            mutable autoPtr<indirectPrimitivePatch> coupledPatchPtr_;
+            mutable autoPtr<labelList> coupledPatchMeshEdgesPtr_;
+            mutable autoPtr<Map<label> > coupledPatchMeshEdgeMapPtr_;
+
+            //- Global numbering for coupledPatch points
+            mutable autoPtr<globalIndex> globalPointNumberingPtr_;
+
+            //- Global numbering for transforms
+            mutable autoPtr<globalIndexAndTransform> globalTransformsPtr_;
+
+            // Coupled point to coupled points
+
+            mutable autoPtr<labelListList> globalPointSlavesPtr_;
+            mutable autoPtr<labelListList> globalPointTransformedSlavesPtr_;
+            mutable autoPtr<mapDistribute> globalPointSlavesMapPtr_;
+
+            // Coupled edge to coupled edges
+
+            mutable autoPtr<globalIndex> globalEdgeNumberingPtr_;
+            mutable autoPtr<labelListList> globalEdgeSlavesPtr_;
+            mutable autoPtr<labelListList> globalEdgeTransformedSlavesPtr_;
+            mutable autoPtr<mapDistribute> globalEdgeSlavesMapPtr_;
+
+
+            //// Coupled point to boundary faces
+            //
+            //mutable autoPtr<globalIndex> globalBoundaryFaceNumberingPtr_;
+            //mutable autoPtr<labelListList> globalPointBoundaryFacesPtr_;
+            //mutable autoPtr<mapDistribute> globalPointBoundaryFacesMapPtr_;
+            //
+            //// Coupled point to collocated boundary cells
+            //
+            //mutable autoPtr<labelList> boundaryCellsPtr_;
+            //mutable autoPtr<globalIndex> globalBoundaryCellNumberingPtr_;
+            //mutable autoPtr<labelListList> globalPointBoundaryCellsPtr_;
+            //mutable autoPtr<mapDistribute> globalPointBoundaryCellsMapPtr_;
+
+
         // Globally shared point addressing
 
             //- Total number of global points
-            label nGlobalPoints_;
+            mutable label nGlobalPoints_;
 
             //- Indices of local points that are globally shared
-            labelList sharedPointLabels_;
+            mutable autoPtr<labelList> sharedPointLabelsPtr_;
 
             //- Indices of globally shared points in the master list
             //  This list contains all the shared points in the mesh
-            labelList sharedPointAddr_;
+            mutable autoPtr<labelList> sharedPointAddrPtr_;
 
             //- Shared point global labels.
             //  Global point index for every local shared point.
             //  Only valid if constructed with this information or if
             //  pointProcAddressing read.
-            mutable labelList* sharedPointGlobalLabelsPtr_;
+            mutable autoPtr<labelList> sharedPointGlobalLabelsPtr_;
 
 
         // Globally shared edge addressing. Derived from shared points.
@@ -191,68 +234,11 @@ class globalMeshData
             mutable label nGlobalEdges_;
 
             //- Indices of local edges that are globally shared
-            mutable labelList* sharedEdgeLabelsPtr_;
+            mutable autoPtr<labelList> sharedEdgeLabelsPtr_;
 
             //- Indices of globally shared edge in the master list
             //  This list contains all the shared edges in the mesh
-            mutable labelList* sharedEdgeAddrPtr_;
-
-
-        // Coupled point addressing
-        // This is addressing from coupled point to coupled points/faces/cells.
-        // Two variants:
-        //  - collocated (so not physically separated)
-        //  - also separated
-        // This is a full schedule so includes points only used by two
-        // coupled patches.
-
-            mutable autoPtr<indirectPrimitivePatch> coupledPatchPtr_;
-
-            mutable autoPtr<labelList> coupledPatchMeshEdgesPtr_;
-
-            mutable autoPtr<Map<label> > coupledPatchMeshEdgeMapPtr_;
-
-            // Collocated
-
-                // Coupled point to collocated coupled points
-
-                mutable autoPtr<globalIndex> globalPointNumberingPtr_;
-                mutable autoPtr<labelListList> globalPointSlavesPtr_;
-                mutable autoPtr<mapDistribute> globalPointSlavesMapPtr_;
-
-                // Coupled edge to collocated coupled edges
-
-                mutable autoPtr<globalIndex> globalEdgeNumberingPtr_;
-                mutable autoPtr<labelListList> globalEdgeSlavesPtr_;
-                mutable autoPtr<mapDistribute> globalEdgeSlavesMapPtr_;
-
-                // Coupled point to collocated boundary faces
-
-                mutable autoPtr<globalIndex> globalBoundaryFaceNumberingPtr_;
-                mutable autoPtr<labelListList> globalPointBoundaryFacesPtr_;
-                mutable autoPtr<mapDistribute> globalPointBoundaryFacesMapPtr_;
-
-                // Coupled point to collocated boundary cells
-
-                mutable autoPtr<labelList> boundaryCellsPtr_;
-                mutable autoPtr<globalIndex> globalBoundaryCellNumberingPtr_;
-                mutable autoPtr<labelListList> globalPointBoundaryCellsPtr_;
-                mutable autoPtr<mapDistribute> globalPointBoundaryCellsMapPtr_;
-
-
-            // Non-collocated as well
-
-                // Coupled point to all coupled points
-
-                mutable autoPtr<globalIndex> globalPointAllNumberingPtr_;
-                mutable autoPtr<labelListList> globalPointAllSlavesPtr_;
-                mutable autoPtr<mapDistribute> globalPointAllSlavesMapPtr_;
-
-                // Coupled edge to all coupled edges (same numbering as
-                // collocated coupled edges)
-
-                mutable autoPtr<labelListList> globalEdgeAllSlavesPtr_;
-                mutable autoPtr<mapDistribute> globalEdgeAllSlavesMapPtr_;
+            mutable autoPtr<labelList> sharedEdgeAddrPtr_;
 
 
     // Private Member Functions
@@ -268,69 +254,38 @@ class globalMeshData
             label&
         );
 
+        //- Calculate shared point addressing
+        void calcSharedPoints() const;
+
         //- Calculate shared edge addressing
         void calcSharedEdges() const;
 
-        //- Count coincident faces.
-        static label countCoincidentFaces
-        (
-            const scalar tolDim,
-            const vectorField& separationDist
-        );
-
-        //- Calculate global point addressing.
-        void calcGlobalPointSlaves
-        (
-            const globalPoints&,
-            autoPtr<globalIndex>&,
-            autoPtr<labelListList>&,
-            autoPtr<mapDistribute>&
-        ) const;
-
-        //- Calculate global point addressing.
+       //- Calculate global point addressing.
         void calcGlobalPointSlaves() const;
 
-        //- Calculate global edge addressing.
-        void calcGlobalEdgeSlaves
-        (
-            const labelListList&,
-            const mapDistribute&,
-            const globalIndex&,
-            autoPtr<labelListList>&,
-            autoPtr<mapDistribute>&
-        ) const;
+        // Global edge addressing
 
-        //- Calculate global edge addressing.
-        void calcGlobalEdgeSlaves() const;
+            //- Calculate connected points
+            void calcPointConnectivity(List<labelPairList>&) const;
 
-        //- Calculate coupled point to uncoupled boundary faces. Local only.
-        void calcPointBoundaryFaces(labelListList& pointBoundaryFaces) const;
+            //- Calculate pointEdges and pointPoints addressing
+            void calcGlobalPointEdges
+            (
+                labelListList& globalPointEdges,
+                List<labelPairList>& globalPointPoints
+            ) const;
 
-        //- Calculate global point to global boundary face addressing.
-        void calcGlobalPointBoundaryFaces() const;
-
-        //- Calculate global point to global boundary cell addressing.
-        void calcGlobalPointBoundaryCells() const;
-
-
-        // Non-collocated
-
-            //- Calculate global point addressing.
-            void calcGlobalPointAllSlaves() const;
+            //- Look up remote and local point and find using info the
+            //  transforms to go from remotePoint to localPoint
+            label findTransform
+            (
+                const labelPairList& info,
+                const labelPair& remotePoint,
+                const label localPoint
+            ) const;
 
             //- Calculate global edge addressing.
-            void calcGlobalEdgeAllSlaves() const;
-
-
-        //- Synchronise pointwise data
-        template<class Type, class CombineOp>
-        void syncPointData
-        (
-            List<Type>& pointData,
-            const labelListList& slaves,
-            const mapDistribute& slavesMap,
-            const CombineOp& cop
-        ) const;
+            void calcGlobalEdgeSlaves() const;
 
 
         //- Disallow default bitwise copy construct
@@ -348,7 +303,7 @@ public:
 
     // Static data members
 
-        //- Geomtric tolerance (fraction of bounding box)
+        //- Geometric tolerance (fraction of bounding box)
         static const Foam::scalar matchTol_;
 
 
@@ -356,10 +311,6 @@ public:
 
         //- Construct from mesh, derive rest (does parallel communication!)
         globalMeshData(const polyMesh& mesh);
-
-        //- Old behaviour: read constructor given IOobject and a polyMesh
-        //  reference. Only use this for testing!
-        globalMeshData(const IOobject& io, const polyMesh& mesh);
 
 
     //- Destructor
@@ -386,24 +337,21 @@ public:
                 return processorPatches_.size() > 0;
             }
 
-            const boundBox& bb() const
-            {
-                return bb_;
-            }
-
-            //- Return total number of points in decomposed mesh
+            //- Return total number of points in decomposed mesh. Not
+            //  compensated for duplicate points!
             label nTotalPoints() const
             {
                 return nTotalPoints_;
             }
 
-            //- Return total number of faces in decomposed mesh
+            //- Return total number of faces in decomposed mesh. Not
+            //  compensated for duplicate faces!
             label nTotalFaces() const
             {
                 return nTotalFaces_;
             }
 
-            //- Return total number of cells in decomposed mesh
+            //- Return total number of cells in decomposed mesh.
             label nTotalCells() const
             {
                 return nTotalCells_;
@@ -438,16 +386,10 @@ public:
         // Globally shared point addressing
 
             //- Return number of globally shared points
-            label nGlobalPoints() const
-            {
-                return nGlobalPoints_;
-            }
+            label nGlobalPoints() const;
 
             //- Return indices of local points that are globally shared
-            const labelList& sharedPointLabels() const
-            {
-                return sharedPointLabels_;
-            }
+            const labelList& sharedPointLabels() const;
 
             //- Return addressing into the complete globally shared points
             //  list
@@ -457,10 +399,7 @@ public:
             //  points. Shared point addressing gives the index in the
             //  list of all globally shared points for each of the locally
             //  shared points.
-            const labelList& sharedPointAddr() const
-            {
-                return sharedPointAddr_;
-            }
+            const labelList& sharedPointAddr() const;
 
             //- Return shared point global labels. Tries to read
             //  'pointProcAddressing' and returns list or -1 if none
@@ -515,70 +454,58 @@ public:
             //- Return map from mesh edges to coupledPatch edges
             const Map<label>& coupledPatchMeshEdgeMap() const;
 
+            //- Global transforms numbering
+            const globalIndexAndTransform& globalTransforms() const;
 
-            // Coupled point to collocated coupled points. Coupled points are
+            //- Helper: synchronise data with transforms
+            template<class Type, class CombineOp>
+            static void syncData
+            (
+                List<Type>& pointData,
+                const labelListList& slaves,
+                const labelListList& transformedSlaves,
+                const mapDistribute& slavesMap,
+                const globalIndexAndTransform&,
+                const CombineOp& cop,
+                const bool isPosition
+            );
+
+            //- Helper: synchronise data without transforms
+            template<class Type, class CombineOp>
+            static void syncData
+            (
+                List<Type>& pointData,
+                const labelListList& slaves,
+                const labelListList& transformedSlaves,
+                const mapDistribute& slavesMap,
+                const CombineOp& cop
+            );
+
+
+            // Coupled point to coupled points. Coupled points are
             // points on any coupled patch.
 
                 //- Numbering of coupled points is according to coupledPatch.
                 const globalIndex& globalPointNumbering() const;
-                //- For every coupled point the indices into the field
-                //  distributed by below map.
                 const labelListList& globalPointSlaves() const;
+                const labelListList& globalPointTransformedSlaves() const;
                 const mapDistribute& globalPointSlavesMap() const;
-                //- Helper to synchronise mesh data
+                //- Helper to synchronise mesh point data
                 template<class Type, class CombineOp>
                 void syncPointData
                 (
                     List<Type>& pointData,
-                    const CombineOp& cop
+                    const CombineOp& cop,
+                    const bool isPosition
                 ) const;
 
             // Coupled edge to coupled edges.
 
                 const globalIndex& globalEdgeNumbering() const;
                 const labelListList& globalEdgeSlaves() const;
+                const labelListList& globalEdgeTransformedSlaves() const;
                 const mapDistribute& globalEdgeSlavesMap() const;
 
-            // Coupled point to boundary faces. These are uncoupled boundary
-            // faces only but include empty patches.
-
-                //- Numbering of boundary faces is face-mesh.nInternalFaces()
-                const globalIndex& globalBoundaryFaceNumbering() const;
-                const labelListList& globalPointBoundaryFaces() const;
-                const mapDistribute& globalPointBoundaryFacesMap() const;
-
-            // Coupled point to boundary cell
-
-                //- From boundary cell to mesh cell
-                const labelList& boundaryCells() const;
-
-                //- Numbering of boundary cells is according to boundaryCells()
-                const globalIndex& globalBoundaryCellNumbering() const;
-                const labelListList& globalPointBoundaryCells() const;
-                const mapDistribute& globalPointBoundaryCellsMap() const;
-
-
-            // Collocated & non-collocated
-
-                // Coupled point to all coupled points (collocated and
-                // non-collocated).
-
-                    const globalIndex& globalPointAllNumbering()const;
-                    const labelListList& globalPointAllSlaves() const;
-                    const mapDistribute& globalPointAllSlavesMap() const;
-                    //- Helper to synchronise mesh data
-                    template<class Type, class CombineOp>
-                    void syncPointAllData
-                    (
-                        List<Type>& pointData,
-                        const CombineOp& cop
-                    ) const;
-
-                // Coupled edge to all coupled edges (same numbering as
-                // collocated)
-
-                    const labelListList& globalEdgeAllSlaves() const;
-                    const mapDistribute& globalEdgeAllSlavesMap() const;
 
             // Other
 
@@ -617,16 +544,6 @@ public:
             //  full parallel analysis to determine shared points and
             //  boundaries.
             void updateMesh();
-
-
-        // Write
-
-            bool write() const;
-
-
-    // Ostream Operator
-
-        friend Ostream& operator<<(Ostream&, const globalMeshData&);
 };
 
 

@@ -77,16 +77,16 @@ public:
         // Private data
 
             //- Minimum pressure [Pa]
-            const scalar pMin_;
+            scalar pMin_;
 
             //- Constant volume flag - e.g. during mass transfer
             Switch constantVolume_;
 
             //- Vaporisation temperature [K]
-            const scalar Tvap_;
+            scalar Tvap_;
 
             //- Boiling point [K]
-            const scalar Tbp_;
+            scalar Tbp_;
 
 
     public:
@@ -100,7 +100,11 @@ public:
             constantProperties(const constantProperties& cp);
 
             //- Constructor from dictionary
-            constantProperties(const dictionary& parentDict);
+            constantProperties
+            (
+                const dictionary& parentDict,
+                const bool readFields = true
+            );
 
 
         // Access

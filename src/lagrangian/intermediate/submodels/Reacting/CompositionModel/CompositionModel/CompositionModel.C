@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -93,14 +93,16 @@ Foam::CompositionModel<CloudType>::carrier() const
 
 
 template<class CloudType>
-const Foam::liquidMixture& Foam::CompositionModel<CloudType>::liquids() const
+const Foam::liquidMixtureProperties&
+Foam::CompositionModel<CloudType>::liquids() const
 {
     return thermo_.liquids();
 }
 
 
 template<class CloudType>
-const Foam::pointSolidMixture& Foam::CompositionModel<CloudType>::solids() const
+const Foam::solidMixtureProperties&
+Foam::CompositionModel<CloudType>::solids() const
 {
     return thermo_.solids();
 }

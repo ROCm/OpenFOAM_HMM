@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,12 +30,125 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type, class CombineOp>
+void Foam::globalMeshData::syncData
+(
+    List<Type>& elems,
+    const labelListList& slaves,
+    const labelListList& transformedSlaves,
+    const mapDistribute& slavesMap,
+    const globalIndexAndTransform& transforms,
+    const CombineOp& cop,
+    const bool isPosition
+)
+{
+    // Pull slave data onto master
+    slavesMap.distribute(transforms, elems, isPosition);
+
+    // Combine master data with slave data
+    forAll(slaves, i)
+    {
+        Type& elem = elems[i];
+
+        const labelList& slavePoints = slaves[i];
+        const labelList& transformSlavePoints = transformedSlaves[i];
+
+        if (slavePoints.size()+transformSlavePoints.size() > 0)
+        {
+            // Combine master with untransformed slave data
+            forAll(slavePoints, j)
+            {
+                cop(elem, elems[slavePoints[j]]);
+            }
+
+            // Combine master with transformed slave data
+            forAll(transformSlavePoints, j)
+            {
+                cop(elem, elems[transformSlavePoints[j]]);
+            }
+
+
+            // Copy result back to slave slots
+            forAll(slavePoints, j)
+            {
+                elems[slavePoints[j]] = elem;
+            }
+            forAll(transformSlavePoints, j)
+            {
+                elems[transformSlavePoints[j]] = elem;
+            }
+        }
+    }
+
+    // Push slave-slot data back to slaves
+    slavesMap.reverseDistribute
+    (
+        transforms,
+        elems.size(),
+        elems,
+        isPosition
+    );
+}
+
+
+template<class Type, class CombineOp>
+void Foam::globalMeshData::syncData
+(
+    List<Type>& elems,
+    const labelListList& slaves,
+    const labelListList& transformedSlaves,
+    const mapDistribute& slavesMap,
+    const CombineOp& cop
+)
+{
+    // Pull slave data onto master
+    slavesMap.distribute(elems);
+
+    // Combine master data with slave data
+    forAll(slaves, i)
+    {
+        Type& elem = elems[i];
+
+        const labelList& slavePoints = slaves[i];
+        const labelList& transformSlavePoints = transformedSlaves[i];
+
+        if (slavePoints.size()+transformSlavePoints.size() > 0)
+        {
+            // Combine master with untransformed slave data
+            forAll(slavePoints, j)
+            {
+                cop(elem, elems[slavePoints[j]]);
+            }
+
+            // Combine master with transformed slave data
+            forAll(transformSlavePoints, j)
+            {
+                cop(elem, elems[transformSlavePoints[j]]);
+            }
+
+
+            // Copy result back to slave slots
+            forAll(slavePoints, j)
+            {
+                elems[slavePoints[j]] = elem;
+            }
+            forAll(transformSlavePoints, j)
+            {
+                elems[transformSlavePoints[j]] = elem;
+            }
+        }
+    }
+
+    // Push slave-slot data back to slaves
+    slavesMap.reverseDistribute(elems.size(), elems);
+}
+
+
+template<class Type, class CombineOp>
 void Foam::globalMeshData::syncPointData
 (
     List<Type>& pointData,
-    const labelListList& slaves,
-    const mapDistribute& slavesMap,
-    const CombineOp& cop
+    const CombineOp& cop,
+    const bool isPosition
 ) const
 {
     if (pointData.size() != mesh_.nPoints())
@@ -46,81 +159,26 @@ void Foam::globalMeshData::syncPointData
             << abort(FatalError);
     }
 
+    // Transfer onto coupled patch
     const indirectPrimitivePatch& cpp = coupledPatch();
-    const labelList& meshPoints = cpp.meshPoints();
+    List<Type> cppFld(UIndirectList<Type>(pointData, cpp.meshPoints()));
 
-    // Copy mesh (point)data to coupled patch (point)data
-    Field<Type> cppFld(slavesMap.constructSize());
-    forAll(meshPoints, patchPointI)
-    {
-        cppFld[patchPointI] = pointData[meshPoints[patchPointI]];
-    }
-
-    // Pull slave data onto master
-    slavesMap.distribute(cppFld);
-
-    // Combine master data with slave data
-    forAll(slaves, patchPointI)
-    {
-        const labelList& slavePoints = slaves[patchPointI];
-
-        // Combine master with slave data
-        forAll(slavePoints, i)
-        {
-            cop(cppFld[patchPointI], cppFld[slavePoints[i]]);
-        }
-        // Copy result back to slave slots
-        forAll(slavePoints, i)
-        {
-            cppFld[slavePoints[i]] = cppFld[patchPointI];
-        }
-    }
-
-    // Push master data back to slaves
-    slavesMap.reverseDistribute(meshPoints.size(), cppFld);
-
-    // Update mesh (point)data from coupled patch (point)data
-    forAll(meshPoints, patchPointI)
-    {
-        pointData[meshPoints[patchPointI]] = cppFld[patchPointI];
-    }
-}
-
-
-template<class Type, class CombineOp>
-void Foam::globalMeshData::syncPointData
-(
-    List<Type>& pointData,
-    const CombineOp& cop
-) const
-{
-    const labelListList& slaves = globalPointSlaves();
-    const mapDistribute& map = globalPointSlavesMap();
-
-    syncPointData
+    syncData
     (
-        pointData,
-        slaves,
-        map,
-        cop
+        cppFld,
+        globalPointSlaves(),
+        globalPointTransformedSlaves(),
+        globalPointSlavesMap(),
+        globalTransforms(),
+        cop,
+        isPosition
     );
-}
 
-
-template<class Type, class CombineOp>
-void Foam::globalMeshData::syncPointAllData
-(
-    List<Type>& pointData,
-    const CombineOp& cop
-) const
-{
-    syncPointData
-    (
-        pointData,
-        globalPointAllSlaves(),
-        globalPointAllSlavesMap(),
-        cop
-    );
+    // Extract back onto mesh
+    forAll(cpp.meshPoints(), i)
+    {
+        pointData[cpp.meshPoints()[i]] = cppFld[i];
+    }
 }
 
 

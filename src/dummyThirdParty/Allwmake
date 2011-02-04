@@ -1,11 +1,12 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
+[ $# -ge 1 ] && makeOption=$1 || makeOption=libso
 set -x
 
-wmake libso scotchDecomp
-wmake libso ptscotchDecomp
-wmake libso metisDecomp
-wmake libso MGridGen
+wmake $makeOption scotchDecomp
+wmake $makeOption ptscotchDecomp
+wmake $makeOption metisDecomp
+wmake $makeOption MGridGen
 
 
 # ----------------------------------------------------------------- end-of-file

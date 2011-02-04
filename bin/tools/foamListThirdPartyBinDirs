@@ -66,7 +66,7 @@ arch3264=$(echo "$archOS" | sed -e 's@64@-64@')
 
 #------------------------------------------------------------------------------
 # check for essential directories
-for dir in $packDir $packDir/lib/$archOptions
+for dir in $packDir $packDir/platforms/$archOptions/lib
 do
     [ -d $dir ] || {
         echo "Error: directory $dir does not exist" 1>&2
@@ -78,12 +78,6 @@ done
 # list of directories
 dirList=$(
     for dir in \
-        $packDir/bin/$archOptions \
-        $packDir/bin/$archCompiler \
-        $packDir/bin/$archOS \
-        $packDir/lib/$archOptions \
-        $packDir/lib/$archCompiler \
-        $packDir/lib/$archOS \
         $packDir/platforms/$archOptions \
         $packDir/platforms/$archCompiler \
         $packDir/platforms/$archOS \

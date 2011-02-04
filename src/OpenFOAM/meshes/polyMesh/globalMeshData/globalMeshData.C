@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,6 @@ License
 #include "processorPolyPatch.H"
 #include "demandDrivenData.H"
 #include "globalPoints.H"
-//#include "geomGlobalPoints.H"
 #include "polyMesh.H"
 #include "mapDistribute.H"
 #include "labelIOList.H"
@@ -38,6 +37,7 @@ License
 #include "mergePoints.H"
 #include "matchPoints.H"
 #include "OFstream.H"
+#include "globalIndexAndTransform.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -117,6 +117,126 @@ void Foam::globalMeshData::initProcAddr()
 }
 
 
+void Foam::globalMeshData::calcSharedPoints() const
+{
+    if
+    (
+        nGlobalPoints_ != -1
+     || sharedPointLabelsPtr_.valid()
+     || sharedPointAddrPtr_.valid()
+    )
+    {
+        FatalErrorIn("globalMeshData::calcSharedPoints()")
+            << "Shared point addressing already done" << abort(FatalError);
+    }
+
+    // Calculate all shared points (exclude points that are only
+    // on two coupled patches). This does all the hard work.
+    globalPoints parallelPoints(mesh_, false, true);
+
+    // Count the number of master points
+    label nMaster = 0;
+    forAll(parallelPoints.pointPoints(), i)
+    {
+        const labelList& pPoints = parallelPoints.pointPoints()[i];
+        const labelList& transPPoints =
+            parallelPoints.transformedPointPoints()[i];
+
+        if (pPoints.size()+transPPoints.size() > 0)
+        {
+            nMaster++;
+        }
+    }
+
+    // Allocate global numbers
+    globalIndex masterNumbering(nMaster);
+
+    nGlobalPoints_ = masterNumbering.size();
+
+
+    // Push master number to slaves
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // 1. Fill master and slave slots
+    nMaster = 0;
+    labelList master(parallelPoints.map().constructSize(), -1);
+    forAll(parallelPoints.pointPoints(), i)
+    {
+        const labelList& pPoints = parallelPoints.pointPoints()[i];
+        const labelList& transPPoints =
+            parallelPoints.transformedPointPoints()[i];
+
+        if (pPoints.size()+transPPoints.size() > 0)
+        {
+            master[i] = masterNumbering.toGlobal(nMaster);
+            forAll(pPoints, j)
+            {
+                master[pPoints[j]] = master[i];
+            }
+            forAll(transPPoints, j)
+            {
+                master[transPPoints[j]] = master[i];
+            }
+            nMaster++;
+        }
+    }
+
+
+    // 2. Push slave slots back to local storage on originating processor
+    // For all the four types of points:
+    // - local master : already set
+    // - local transformed slave point : the reverse transform at
+    //   reverseDistribute will have copied it back to its originating local
+    //   point
+    // - remote untransformed slave point : sent back to originating processor
+    // - remote transformed slave point : the reverse transform will
+    //   copy it back into the remote slot which then gets sent back to
+    //   originating processor
+
+    parallelPoints.map().reverseDistribute
+    (
+        parallelPoints.map().constructSize(),
+        master
+    );
+
+
+    // Collect all points that are a master or refer to a master.
+    nMaster = 0;
+    forAll(parallelPoints.pointPoints(), i)
+    {
+        if (master[i] != -1)
+        {
+            nMaster++;
+        }
+    }
+
+    sharedPointLabelsPtr_.reset(new labelList(nMaster));
+    labelList& sharedPointLabels = sharedPointLabelsPtr_();
+    sharedPointAddrPtr_.reset(new labelList(nMaster));
+    labelList& sharedPointAddr = sharedPointAddrPtr_();
+    nMaster = 0;
+
+    forAll(parallelPoints.pointPoints(), i)
+    {
+        if (master[i] != -1)
+        {
+            // I am master or slave
+            sharedPointLabels[nMaster] = i;
+            sharedPointAddr[nMaster] = master[i];
+            nMaster++;
+        }
+    }
+
+    if (debug)
+    {
+        Pout<< "globalMeshData : nGlobalPoints_:" << nGlobalPoints_ << nl
+            << "globalMeshData : sharedPointLabels_:"
+            << sharedPointLabelsPtr_().size() << nl
+            << "globalMeshData : sharedPointAddr_:"
+            << sharedPointAddrPtr_().size() << endl;
+    }
+}
+
+
 // Given information about locally used edges allocate global shared edges.
 void Foam::globalMeshData::countSharedEdges
 (
@@ -166,7 +286,12 @@ void Foam::globalMeshData::countSharedEdges
 // clusters of shared points)
 void Foam::globalMeshData::calcSharedEdges() const
 {
-    if (nGlobalEdges_ != -1 || sharedEdgeLabelsPtr_ || sharedEdgeAddrPtr_)
+    if
+    (
+        nGlobalEdges_ != -1
+     || sharedEdgeLabelsPtr_.valid()
+     || sharedEdgeAddrPtr_.valid()
+    )
     {
         FatalErrorIn("globalMeshData::calcSharedEdges()")
             << "Shared edge addressing already done" << abort(FatalError);
@@ -370,12 +495,12 @@ void Foam::globalMeshData::calcSharedEdges() const
         }
     }
 
-    sharedEdgeLabelsPtr_ = new labelList();
-    labelList& sharedEdgeLabels = *sharedEdgeLabelsPtr_;
+    sharedEdgeLabelsPtr_.reset(new labelList());
+    labelList& sharedEdgeLabels = sharedEdgeLabelsPtr_();
     sharedEdgeLabels.transfer(dynSharedEdgeLabels);
 
-    sharedEdgeAddrPtr_ = new labelList();
-    labelList& sharedEdgeAddr = *sharedEdgeAddrPtr_;
+    sharedEdgeAddrPtr_.reset(new labelList());
+    labelList& sharedEdgeAddr = sharedEdgeAddrPtr_();
     sharedEdgeAddr.transfer(dynSharedEdgeAddr);
 
     if (debug)
@@ -389,141 +514,140 @@ void Foam::globalMeshData::calcSharedEdges() const
 }
 
 
-// Helper function to count coincident faces. This part used to be
-// in updateMesh but I've had to move it to a separate function
-// because of aliasing optimisation errors in icc9.1 on the
-// Itanium.
-Foam::label Foam::globalMeshData::countCoincidentFaces
-(
-    const scalar tolDim,
-    const vectorField& separationDist
-)
-{
-    label nCoincident = 0;
-
-    forAll(separationDist, faceI)
-    {
-        if (mag(separationDist[faceI]) < tolDim)
-        {
-            // Faces coincide
-            nCoincident++;
-        }
-    }
-    return nCoincident;
-}
-
-
-void Foam::globalMeshData::calcGlobalPointSlaves
-(
-    const globalPoints& globalData,
-    autoPtr<globalIndex>& globalIndicesPtr,
-    autoPtr<labelListList>& globalPointSlavesPtr,
-    autoPtr<mapDistribute>& globalPointSlavesMapPtr
-) const
-{
-    // Create global numbering for coupled points
-    globalIndicesPtr.reset
-    (
-        new globalIndex(globalData.globalIndices())
-    );
-    const globalIndex& globalIndices = globalIndicesPtr();
-
-    // Create master to slave addressing. Empty for slave points.
-    globalPointSlavesPtr.reset
-    (
-        new labelListList(coupledPatch().nPoints())
-    );
-    labelListList& globalPointSlaves = globalPointSlavesPtr();
-
-
-    const Map<label>& meshToProcPoint = globalData.meshToProcPoint();
-
-    forAllConstIter(Map<label>, meshToProcPoint, iter)
-    {
-        label localPointI = iter.key();
-        const labelList& pPoints = globalData.procPoints()[iter()];
-
-        // Am I master?
-        if
-        (
-            globalIndices.isLocal(pPoints[0])
-         && globalIndices.toLocal(pPoints[0]) == localPointI
-        )
-        {
-            labelList& slaves = globalPointSlaves[localPointI];
-            slaves.setSize(pPoints.size()-1);
-            for (label i = 1; i < pPoints.size(); i++)
-            {
-                slaves[i-1] = pPoints[i];
-            }
-        }
-    }
-
-    // Create schedule to get information from slaves onto master
-
-    // Construct compact numbering and distribution map.
-    // Changes globalPointSlaves to be indices into compact data
-
-    List<Map<label> > compactMap(Pstream::nProcs());
-    globalPointSlavesMapPtr.reset
-    (
-        new mapDistribute
-        (
-            globalIndices,
-            globalPointSlaves,
-            compactMap
-        )
-    );
-
-    if (debug)
-    {
-        Pout<< "globalMeshData::calcGlobalPointSlaves(..) :"
-            << " coupled points:" << coupledPatch().nPoints()
-            << " additional remote points:"
-            <<  globalPointSlavesMapPtr().constructSize()
-              - coupledPatch().nPoints()
-            << endl;
-    }
-}
-
-
 void Foam::globalMeshData::calcGlobalPointSlaves() const
 {
     if (debug)
     {
         Pout<< "globalMeshData::calcGlobalPointSlaves() :"
-            << " calculating coupled master to collocated"
-            << " slave point addressing."
+            << " calculating coupled master to slave point addressing."
             << endl;
     }
 
-    // Calculate collocated connected points for master points.
-    globalPoints collocatedGlobalData(mesh_, coupledPatch(), true, false);
+    // Calculate connected points for master points.
+    globalPoints globalData(mesh_, coupledPatch(), true, true);
+    globalPointNumberingPtr_.reset(new globalIndex(globalData.globalIndices()));
 
-    calcGlobalPointSlaves
+    globalPointSlavesPtr_.reset
     (
-        collocatedGlobalData,
-        globalPointNumberingPtr_,
-        globalPointSlavesPtr_,
-        globalPointSlavesMapPtr_
+        new labelListList
+        (
+            globalData.pointPoints().xfer()
+        )
+    );
+    globalPointTransformedSlavesPtr_.reset
+    (
+        new labelListList
+        (
+            globalData.transformedPointPoints().xfer()
+        )
+    );
+
+    globalPointSlavesMapPtr_.reset
+    (
+        new mapDistribute
+        (
+            globalData.map().xfer()
+        )
     );
 }
 
 
-void Foam::globalMeshData::calcGlobalEdgeSlaves
+void Foam::globalMeshData::calcPointConnectivity
 (
-    const labelListList& pointSlaves,
-    const mapDistribute& pointSlavesMap,
-    const globalIndex& globalEdgeIndices,
-    autoPtr<labelListList>& globalEdgeSlavesPtr,
-    autoPtr<mapDistribute>& globalEdgeSlavesMapPtr
+    List<labelPairList>& allPointConnectivity
 ) const
 {
-    // Coupled point to global coupled edges.
-    labelListList globalPointEdges(pointSlavesMap.constructSize());
+    const globalIndexAndTransform& transforms = globalTransforms();
+    const labelListList& slaves = globalPointSlaves();
+    const labelListList& transformedSlaves = globalPointTransformedSlaves();
+
+
+    // Create field with my local data
+    labelPairList myData(globalPointSlavesMap().constructSize());
+    forAll(slaves, pointI)
+    {
+        myData[pointI] = globalIndexAndTransform::encode
+        (
+            Pstream::myProcNo(),
+            pointI,
+            transforms.nullTransformIndex()
+        );
+    }
+    // Send over.
+    globalPointSlavesMap().distribute(myData);
+
+
+    // String of connected points with their transform
+    allPointConnectivity.setSize(globalPointSlavesMap().constructSize());
+    forAll(slaves, pointI)
+    {
+        // Reconstruct string of connected points
+        const labelList& pSlaves = slaves[pointI];
+        const labelList& pTransformSlaves = transformedSlaves[pointI];
+        labelPairList& pConnectivity = allPointConnectivity[pointI];
+        pConnectivity.setSize(1+pSlaves.size()+pTransformSlaves.size());
+        label connI = 0;
+
+        // Add myself
+        pConnectivity[connI++] = myData[pointI];
+        // Add untransformed points
+        forAll(pSlaves, i)
+        {
+            pConnectivity[connI++] = myData[pSlaves[i]];
+        }
+        // Add transformed points.
+        forAll(pTransformSlaves, i)
+        {
+            // Get transform from index
+            label transformI = globalPointSlavesMap().whichTransform
+            (
+                pTransformSlaves[i]
+            );
+            // Add transform to connectivity
+            const labelPair& n = myData[pTransformSlaves[i]];
+            label procI = globalIndexAndTransform::processor(n);
+            label index = globalIndexAndTransform::index(n);
+            pConnectivity[connI++] = globalIndexAndTransform::encode
+            (
+                procI,
+                index,
+                transformI
+            );
+        }
+
+        // Put back in slots
+        forAll(pSlaves, i)
+        {
+            allPointConnectivity[pSlaves[i]] = pConnectivity;
+        }
+        forAll(pTransformSlaves, i)
+        {
+            allPointConnectivity[pTransformSlaves[i]] = pConnectivity;
+        }
+    }
+    globalPointSlavesMap().reverseDistribute
+    (
+        allPointConnectivity.size(),
+        allPointConnectivity
+    );
+}
+
+
+void Foam::globalMeshData::calcGlobalPointEdges
+(
+    labelListList& globalPointEdges,
+    List<labelPairList>& globalPointPoints
+) const
+{
+    const edgeList& edges = coupledPatch().edges();
+    const labelListList& pointEdges = coupledPatch().pointEdges();
+    const globalIndex& globalEdgeNumbers = globalEdgeNumbering();
+    const labelListList& slaves = globalPointSlaves();
+    const labelListList& transformedSlaves = globalPointTransformedSlaves();
 
     // Create local version
-    const labelListList& pointEdges = coupledPatch().pointEdges();
+    globalPointEdges.setSize(globalPointSlavesMap().constructSize());
+    globalPointPoints.setSize(globalPointSlavesMap().constructSize());
     forAll(pointEdges, pointI)
     {
         const labelList& pEdges = pointEdges[pointI];
@@ -531,78 +655,197 @@ void Foam::globalMeshData::calcGlobalEdgeSlaves
         globalPEdges.setSize(pEdges.size());
         forAll(pEdges, i)
         {
-            globalPEdges[i] = globalEdgeIndices.toGlobal(pEdges[i]);
+            globalPEdges[i] = globalEdgeNumbers.toGlobal(pEdges[i]);
+        }
+
+        labelPairList& globalPPoints = globalPointPoints[pointI];
+        globalPPoints.setSize(pEdges.size());
+        forAll(pEdges, i)
+        {
+            label otherPointI = edges[pEdges[i]].otherVertex(pointI);
+            globalPPoints[i] = globalIndexAndTransform::encode
+            (
+                Pstream::myProcNo(),
+                otherPointI,
+                globalTransforms().nullTransformIndex()
+            );
         }
     }
 
-    // Pull slave data to master
-    pointSlavesMap.distribute(globalPointEdges);
-
-    // Now check on master if any of my edges are also on slave.
-    // This assumes that if slaves have a coupled edge it is also on
-    // the master (otherwise the mesh would be illegal anyway)
-
-    labelHashSet pointEdgeSet;
-
-    const edgeList& edges = coupledPatch().edges();
-
-    // Create master to slave addressing. Empty for slave edges.
-    globalEdgeSlavesPtr.reset(new labelListList(edges.size()));
-    labelListList& globalEdgeSlaves = globalEdgeSlavesPtr();
-
-    forAll(edges, edgeI)
+    // Pull slave data to master. Dummy transform.
+    globalPointSlavesMap().distribute(globalPointEdges);
+    globalPointSlavesMap().distribute(globalPointPoints);
+    // Add all pointEdges
+    forAll(slaves, pointI)
     {
-        const edge& e = edges[edgeI];
-        const labelList& slaves0 = pointSlaves[e[0]];
-        const labelList& slaves1 = pointSlaves[e[1]];
+        const labelList& pSlaves = slaves[pointI];
+        const labelList& pTransformSlaves = transformedSlaves[pointI];
 
-        // Check for edges that are in both slaves0 and slaves1.
-        pointEdgeSet.clear();
-        forAll(slaves0, i)
+        label n = 0;
+        forAll(pSlaves, i)
         {
-            const labelList& connectedEdges = globalPointEdges[slaves0[i]];
-            pointEdgeSet.insert(connectedEdges);
+            n += globalPointEdges[pSlaves[i]].size();
         }
-        forAll(slaves1, i)
+        forAll(pTransformSlaves, i)
         {
-            const labelList& connectedEdges = globalPointEdges[slaves1[i]];
+            n += globalPointEdges[pTransformSlaves[i]].size();
+        }
 
-            forAll(connectedEdges, j)
+        // Add all the point edges of the slaves to those of the (master) point
+        {
+            labelList& globalPEdges = globalPointEdges[pointI];
+            label sz = globalPEdges.size();
+            globalPEdges.setSize(sz+n);
+            forAll(pSlaves, i)
             {
-                label globalEdgeI = connectedEdges[j];
-
-                if (pointEdgeSet.found(globalEdgeI))
+                const labelList& otherData = globalPointEdges[pSlaves[i]];
+                forAll(otherData, j)
                 {
-                    // Found slave edge.
-                    label sz = globalEdgeSlaves[edgeI].size();
-                    globalEdgeSlaves[edgeI].setSize(sz+1);
-                    globalEdgeSlaves[edgeI][sz] = globalEdgeI;
+                    globalPEdges[sz++] = otherData[j];
                 }
+            }
+            forAll(pTransformSlaves, i)
+            {
+                const labelList& otherData =
+                    globalPointEdges[pTransformSlaves[i]];
+                forAll(otherData, j)
+                {
+                    globalPEdges[sz++] = otherData[j];
+                }
+            }
+
+            // Put back in slots
+            forAll(pSlaves, i)
+            {
+                globalPointEdges[pSlaves[i]] = globalPEdges;
+            }
+            forAll(pTransformSlaves, i)
+            {
+                globalPointEdges[pTransformSlaves[i]] = globalPEdges;
+            }
+        }
+
+
+        // Same for corresponding pointPoints
+        {
+            labelPairList& globalPPoints = globalPointPoints[pointI];
+            label sz = globalPPoints.size();
+            globalPPoints.setSize(sz + n);
+
+            // Add untransformed points
+            forAll(pSlaves, i)
+            {
+                const labelPairList& otherData = globalPointPoints[pSlaves[i]];
+                forAll(otherData, j)
+                {
+                    globalPPoints[sz++] = otherData[j];
+                }
+            }
+            // Add transformed points.
+            forAll(pTransformSlaves, i)
+            {
+                // Get transform from index
+                label transformI = globalPointSlavesMap().whichTransform
+                (
+                    pTransformSlaves[i]
+                );
+
+                const labelPairList& otherData =
+                    globalPointPoints[pTransformSlaves[i]];
+                forAll(otherData, j)
+                {
+                    // Add transform to connectivity
+                    const labelPair& n = otherData[j];
+                    label procI = globalIndexAndTransform::processor(n);
+                    label index = globalIndexAndTransform::index(n);
+                    globalPPoints[sz++] = globalIndexAndTransform::encode
+                    (
+                        procI,
+                        index,
+                        transformI
+                    );
+                }
+            }
+
+            // Put back in slots
+            forAll(pSlaves, i)
+            {
+                globalPointPoints[pSlaves[i]] = globalPPoints;
+            }
+            forAll(pTransformSlaves, i)
+            {
+                globalPointPoints[pTransformSlaves[i]] = globalPPoints;
             }
         }
     }
-
-
-    // Construct map
-    List<Map<label> > compactMap(Pstream::nProcs());
-    globalEdgeSlavesMapPtr.reset
+    // Push back
+    globalPointSlavesMap().reverseDistribute
     (
-        new mapDistribute
-        (
-            globalEdgeIndices,
-            globalEdgeSlaves,
-            compactMap
-        )
+        globalPointEdges.size(),
+        globalPointEdges
     );
+    // Push back
+    globalPointSlavesMap().reverseDistribute
+    (
+        globalPointPoints.size(),
+        globalPointPoints
+    );
+}
 
-    if (debug)
+
+// Find transformation to take remotePoint to localPoint. Use info to find
+// the transforms.
+Foam::label Foam::globalMeshData::findTransform
+(
+    const labelPairList& info,
+    const labelPair& remotePoint,
+    const label localPoint
+) const
+{
+    const label remoteProcI = globalIndexAndTransform::processor(remotePoint);
+    const label remoteIndex = globalIndexAndTransform::index(remotePoint);
+
+    label remoteTransformI = -1;
+    label localTransformI = -1;
+    forAll(info, i)
     {
-        Pout<< "globalMeshData::calcGlobalEdgeSlaves() :"
-            << " coupled edge:" << edges.size()
-            << " additional remote edges:"
-            << globalEdgeSlavesMapPtr().constructSize() - edges.size()
-            << endl;
+        label procI = globalIndexAndTransform::processor(info[i]);
+        label pointI = globalIndexAndTransform::index(info[i]);
+        label transformI = globalIndexAndTransform::transformIndex(info[i]);
+
+        if (procI == Pstream::myProcNo() && pointI == localPoint)
+        {
+            localTransformI = transformI;
+            //Pout<< "For local :" << localPoint
+            //    << " found transform:" << localTransformI
+            //    << endl;
+        }
+        if (procI == remoteProcI && pointI == remoteIndex)
+        {
+            remoteTransformI = transformI;
+            //Pout<< "For remote:" << remotePoint
+            //    << " found transform:" << remoteTransformI
+            //    << " at index:" << i
+            //    << endl;
+        }
     }
+
+    if (remoteTransformI == -1 || localTransformI == -1)
+    {
+        FatalErrorIn("globalMeshData::findTransform(..)")
+            << "Problem. Cannot find " << remotePoint
+            << " or " << localPoint << " in " << info
+            << endl
+            << "remoteTransformI:" << remoteTransformI << endl
+            << "localTransformI:" << localTransformI
+            << abort(FatalError);
+    }
+
+    return globalTransforms().subtractTransformIndex
+    (
+        remoteTransformI,
+        localTransformI
+    );
 }
 
 
@@ -611,440 +854,608 @@ void Foam::globalMeshData::calcGlobalEdgeSlaves() const
     if (debug)
     {
         Pout<< "globalMeshData::calcGlobalEdgeSlaves() :"
-            << " calculating coupled master to collocated slave"
-            << " edge addressing." << endl;
+            << " calculating coupled master to slave edge addressing." << endl;
     }
 
-    // - Send across connected edges (in global edge addressing)
-    // - Check on receiving side whether edge has same slave edge
-    //   on both endpoints.
-
-    // Create global numbering for coupled edges
-    const globalIndex& globalIndices = globalEdgeNumbering();
-
-    calcGlobalEdgeSlaves
-    (
-        globalPointSlaves(),
-        globalPointSlavesMap(),
-        globalIndices,
-        globalEdgeSlavesPtr_,
-        globalEdgeSlavesMapPtr_
-    );
-}
+    const edgeList& edges = coupledPatch().edges();
+    const globalIndex& globalEdgeNumbers = globalEdgeNumbering();
 
 
-// Calculate uncoupled boundary faces (without calculating
-// primitiveMesh::pointFaces())
-void Foam::globalMeshData::calcPointBoundaryFaces
-(
-    labelListList& pointBoundaryFaces
-) const
-{
-    const polyBoundaryMesh& bMesh = mesh_.boundaryMesh();
-    const Map<label>& meshPointMap = coupledPatch().meshPointMap();
+    // The whole problem with deducting edge-connectivity from
+    // point-connectivity is that one of the the endpoints might be
+    // a local master but the other endpoint might not. So we first
+    // need to make sure that all points know about connectivity and
+    // the transformations.
 
-    // 1. Count
 
-    labelList nPointFaces(coupledPatch().nPoints(), 0);
+    // 1. collect point connectivity - basically recreating globalPoints ouput.
+    // All points will now have a string of points. The transforms are
+    // in respect to the master.
+    List<labelPairList> allPointConnectivity;
+    calcPointConnectivity(allPointConnectivity);
 
-    forAll(bMesh, patchI)
+
+    // 2. Get all pointEdges and pointPoints
+    // Coupled point to global coupled edges and corresponding endpoint.
+    labelListList globalPointEdges;
+    List<labelPairList> globalPointPoints;
+    calcGlobalPointEdges(globalPointEdges, globalPointPoints);
+
+
+    // 3. Now all points have
+    //      - all the connected points with original transform
+    //      - all the connected global edges
+
+    // Now all we need to do is go through all the edges and check
+    // both endpoints. If there is a edge between the two which is
+    // produced by transforming both points in the same way it is a shared
+    // edge.
+
+    // Collect strings of connected edges.
+    List<labelPairList> allEdgeConnectivity(edges.size());
+
+    forAll(edges, edgeI)
     {
-        const polyPatch& pp = bMesh[patchI];
+        const edge& e = edges[edgeI];
+        const labelList& pEdges0 = globalPointEdges[e[0]];
+        const labelPairList& pPoints0 = globalPointPoints[e[0]];
+        const labelList& pEdges1 = globalPointEdges[e[1]];
+        const labelPairList& pPoints1 = globalPointPoints[e[1]];
 
-        if (!pp.coupled())
+        // Most edges will be size 2
+        DynamicList<labelPair> eEdges(2);
+        // Append myself.
+        eEdges.append
+        (
+            globalIndexAndTransform::encode
+            (
+                Pstream::myProcNo(),
+                edgeI,
+                globalTransforms().nullTransformIndex()
+            )
+        );
+
+        forAll(pEdges0, i)
         {
-            forAll(pp, i)
+            forAll(pEdges1, j)
             {
-                const face& f = pp[i];
-
-                forAll(f, fp)
+                if
+                (
+                    pEdges0[i] == pEdges1[j]
+                 && pEdges0[i] != globalEdgeNumbers.toGlobal(edgeI)
+                )
                 {
-                    Map<label>::const_iterator iter = meshPointMap.find(f[fp]);
-                    if (iter != meshPointMap.end())
+                    // Found a shared edge. Now check if the endpoints
+                    // go through the same transformation.
+                    // Local: e[0]    remote:pPoints1[j]
+                    // Local: e[1]    remote:pPoints0[i]
+
+
+                    // Find difference in transforms to go from point on remote
+                    // edge (pPoints1[j]) to this point.
+
+                    label transform0 = findTransform
+                    (
+                        allPointConnectivity[e[0]],
+                        pPoints1[j],
+                        e[0]
+                    );
+                    label transform1 = findTransform
+                    (
+                        allPointConnectivity[e[1]],
+                        pPoints0[i],
+                        e[1]
+                    );
+
+                    if (transform0 == transform1)
                     {
-                        nPointFaces[iter()]++;
+                        label procI = globalEdgeNumbers.whichProcID(pEdges0[i]);
+                        eEdges.append
+                        (
+                            globalIndexAndTransform::encode
+                            (
+                                procI,
+                                globalEdgeNumbers.toLocal(procI, pEdges0[i]),
+                                transform0
+                            )
+                        );
                     }
                 }
+            }
+        }
+
+        allEdgeConnectivity[edgeI].transfer(eEdges);
+        sort(allEdgeConnectivity[edgeI], globalIndexAndTransform::less());
+    }
+
+    // We now have - in allEdgeConnectivity - a list of edges which are shared
+    // between multiple processors. Filter into non-transformed and transformed
+    // connections.
+
+    globalEdgeSlavesPtr_.reset(new labelListList(edges.size()));
+    labelListList& globalEdgeSlaves = globalEdgeSlavesPtr_();
+    List<labelPairList> transformedEdges(edges.size());
+    forAll(allEdgeConnectivity, edgeI)
+    {
+        const labelPairList& edgeInfo = allEdgeConnectivity[edgeI];
+        if (edgeInfo.size() >= 2)
+        {
+            const labelPair& masterInfo = edgeInfo[0];
+
+            // Check if master edge (= first element (since sorted)) is me.
+            if
+            (
+                (
+                    globalIndexAndTransform::processor(masterInfo)
+                 == Pstream::myProcNo()
+                )
+             && (globalIndexAndTransform::index(masterInfo) == edgeI)
+            )
+            {
+                // Sort into transformed and untransformed
+                labelList& eEdges = globalEdgeSlaves[edgeI];
+                eEdges.setSize(edgeInfo.size()-1);
+
+                labelPairList& trafoEEdges = transformedEdges[edgeI];
+                trafoEEdges.setSize(edgeInfo.size()-1);
+
+                label nonTransformI = 0;
+                label transformI = 0;
+
+                for (label i = 1; i < edgeInfo.size(); i++)
+                {
+                    const labelPair& info = edgeInfo[i];
+                    label procI = globalIndexAndTransform::processor(info);
+                    label index = globalIndexAndTransform::index(info);
+                    label transform = globalIndexAndTransform::transformIndex
+                    (
+                        info
+                    );
+
+                    if (transform == globalTransforms().nullTransformIndex())
+                    {
+                        eEdges[nonTransformI++] = globalEdgeNumbers.toGlobal
+                        (
+                            procI,
+                            index
+                        );
+                    }
+                    else
+                    {
+                        trafoEEdges[transformI++] = info;
+                    }
+                }
+
+                eEdges.setSize(nonTransformI);
+                trafoEEdges.setSize(transformI);
             }
         }
     }
 
 
-    // 2. Size
+    // Construct map
+    globalEdgeTransformedSlavesPtr_.reset(new labelListList());
 
-    pointBoundaryFaces.setSize(coupledPatch().nPoints());
-    forAll(nPointFaces, pointI)
-    {
-        pointBoundaryFaces[pointI].setSize(nPointFaces[pointI]);
-    }
-    nPointFaces = 0;
-
-
-    // 3. Fill
-
-    forAll(bMesh, patchI)
-    {
-        const polyPatch& pp = bMesh[patchI];
-
-        if (!pp.coupled())
-        {
-            forAll(pp, i)
-            {
-                const face& f = pp[i];
-                forAll(f, fp)
-                {
-                    Map<label>::const_iterator iter = meshPointMap.find(f[fp]);
-                    if (iter != meshPointMap.end())
-                    {
-                        label bFaceI = pp.start() + i - mesh_.nInternalFaces();
-                        pointBoundaryFaces[iter()][nPointFaces[iter()]++] =
-                            bFaceI;
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-void Foam::globalMeshData::calcGlobalPointBoundaryFaces() const
-{
-    if (debug)
-    {
-        Pout<< "globalMeshData::calcGlobalPointBoundaryFaces() :"
-            << " calculating coupled point to boundary face addressing."
-            << endl;
-    }
-
-    // Construct local point to (uncoupled)boundaryfaces.
-    labelListList pointBoundaryFaces;
-    calcPointBoundaryFaces(pointBoundaryFaces);
-
-
-    // Global indices for boundary faces
-    globalBoundaryFaceNumberingPtr_.reset
-    (
-        new globalIndex(mesh_.nFaces()-mesh_.nInternalFaces())
-    );
-    globalIndex& globalIndices = globalBoundaryFaceNumberingPtr_();
-
-
-    // Convert local boundary faces to global numbering
-    globalPointBoundaryFacesPtr_.reset
-    (
-        new labelListList(globalPointSlavesMap().constructSize())
-    );
-    labelListList& globalPointBoundaryFaces = globalPointBoundaryFacesPtr_();
-
-    forAll(pointBoundaryFaces, pointI)
-    {
-        const labelList& bFaces = pointBoundaryFaces[pointI];
-        labelList& globalFaces = globalPointBoundaryFaces[pointI];
-        globalFaces.setSize(bFaces.size());
-        forAll(bFaces, i)
-        {
-            globalFaces[i] = globalIndices.toGlobal(bFaces[i]);
-        }
-    }
-
-
-    // Pull slave pointBoundaryFaces to master
-    globalPointSlavesMap().distribute(globalPointBoundaryFaces);
-
-
-    // Merge slave labels into master globalPointBoundaryFaces
-    const labelListList& pointSlaves = globalPointSlaves();
-
-    forAll(pointSlaves, pointI)
-    {
-        const labelList& slaves = pointSlaves[pointI];
-
-        if (slaves.size() > 0)
-        {
-            labelList& myBFaces = globalPointBoundaryFaces[pointI];
-
-            forAll(slaves, i)
-            {
-                const labelList& slaveBFaces =
-                    globalPointBoundaryFaces[slaves[i]];
-
-                // Add all slaveBFaces. Note that need to check for
-                // uniqueness only in case of cyclics.
-
-                label sz = myBFaces.size();
-                myBFaces.setSize(sz+slaveBFaces.size());
-                forAll(slaveBFaces, j)
-                {
-                    label slave = slaveBFaces[j];
-                    if (findIndex(SubList<label>(myBFaces, sz), slave) == -1)
-                    {
-                        myBFaces[sz++] = slave;
-                    }
-                }
-                myBFaces.setSize(sz);
-            }
-        }
-    }
-
-
-    // Copy merged boundaryFaces back from master into slave slot
-    forAll(pointSlaves, pointI)
-    {
-        const labelList& bFaces = globalPointBoundaryFaces[pointI];
-        const labelList& slaves = pointSlaves[pointI];
-
-        forAll(slaves, i)
-        {
-            globalPointBoundaryFaces[slaves[i]] = bFaces;
-        }
-    }
-
-
-    // Sync back to slaves.
-    globalPointSlavesMap().reverseDistribute
-    (
-        coupledPatch().nPoints(),
-        globalPointBoundaryFaces
-    );
-
-
-    // Construct a map to get the face data directly
     List<Map<label> > compactMap(Pstream::nProcs());
-    globalPointBoundaryFacesMapPtr_.reset
+    globalEdgeSlavesMapPtr_.reset
     (
         new mapDistribute
         (
-            globalIndices,
-            globalPointBoundaryFaces,
+            globalEdgeNumbers,
+            globalEdgeSlaves,
+
+            globalTransforms(),
+            transformedEdges,
+            globalEdgeTransformedSlavesPtr_(),
+
             compactMap
         )
     );
 
+
     if (debug)
     {
-        Pout<< "globalMeshData::calcGlobalPointBoundaryFaces() :"
-            << " coupled points:" << coupledPatch().nPoints()
-            << " local boundary faces:" <<  globalIndices.localSize()
-            << " additional remote faces:"
-            <<  globalPointBoundaryFacesMapPtr_().constructSize()
-              - globalIndices.localSize()
+        Pout<< "globalMeshData::calcGlobalEdgeSlaves() :"
+            << " coupled edges:" << edges.size()
+            << " additional coupled edges:"
+            << globalEdgeSlavesMapPtr_().constructSize() - edges.size()
             << endl;
     }
 }
 
 
-void Foam::globalMeshData::calcGlobalPointBoundaryCells() const
-{
-    if (debug)
-    {
-        Pout<< "globalMeshData::calcGlobalPointBoundaryCells() :"
-            << " calculating coupled point to boundary cell addressing."
-            << endl;
-    }
+//// Calculate uncoupled boundary faces (without calculating
+//// primitiveMesh::pointFaces())
+//void Foam::globalMeshData::calcPointBoundaryFaces
+//(
+//    labelListList& pointBoundaryFaces
+//) const
+//{
+//    const polyBoundaryMesh& bMesh = mesh_.boundaryMesh();
+//    const Map<label>& meshPointMap = coupledPatch().meshPointMap();
+//
+//    // 1. Count
+//
+//    labelList nPointFaces(coupledPatch().nPoints(), 0);
+//
+//    forAll(bMesh, patchI)
+//    {
+//        const polyPatch& pp = bMesh[patchI];
+//
+//        if (!pp.coupled())
+//        {
+//            forAll(pp, i)
+//            {
+//                const face& f = pp[i];
+//
+//                forAll(f, fp)
+//                {
+//                    Map<label>::const_iterator iter = meshPointMap.find
+//                    (
+//                        f[fp]
+//                    );
+//                    if (iter != meshPointMap.end())
+//                    {
+//                        nPointFaces[iter()]++;
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//
+//    // 2. Size
+//
+//    pointBoundaryFaces.setSize(coupledPatch().nPoints());
+//    forAll(nPointFaces, pointI)
+//    {
+//        pointBoundaryFaces[pointI].setSize(nPointFaces[pointI]);
+//    }
+//    nPointFaces = 0;
+//
+//
+//    // 3. Fill
+//
+//    forAll(bMesh, patchI)
+//    {
+//        const polyPatch& pp = bMesh[patchI];
+//
+//        if (!pp.coupled())
+//        {
+//            forAll(pp, i)
+//            {
+//                const face& f = pp[i];
+//                forAll(f, fp)
+//                {
+//                    Map<label>::const_iterator iter = meshPointMap.find
+//                    (
+//                        f[fp]
+//                    );
+//                    if (iter != meshPointMap.end())
+//                    {
+//                        label bFaceI =
+//                             pp.start() + i - mesh_.nInternalFaces();
+//                        pointBoundaryFaces[iter()][nPointFaces[iter()]++] =
+//                            bFaceI;
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
+//
+//
+//void Foam::globalMeshData::calcGlobalPointBoundaryFaces() const
+//{
+//    if (debug)
+//    {
+//        Pout<< "globalMeshData::calcGlobalPointBoundaryFaces() :"
+//            << " calculating coupled point to boundary face addressing."
+//            << endl;
+//    }
+//
+//    // Construct local point to (uncoupled)boundaryfaces.
+//    labelListList pointBoundaryFaces;
+//    calcPointBoundaryFaces(pointBoundaryFaces);
+//
+//
+//    // Global indices for boundary faces
+//    globalBoundaryFaceNumberingPtr_.reset
+//    (
+//        new globalIndex(mesh_.nFaces()-mesh_.nInternalFaces())
+//    );
+//    globalIndex& globalIndices = globalBoundaryFaceNumberingPtr_();
+//
+//
+//    // Convert local boundary faces to global numbering
+//    globalPointBoundaryFacesPtr_.reset
+//    (
+//        new labelListList(globalPointSlavesMap().constructSize())
+//    );
+//    labelListList& globalPointBoundaryFaces = globalPointBoundaryFacesPtr_();
+//
+//    forAll(pointBoundaryFaces, pointI)
+//    {
+//        const labelList& bFaces = pointBoundaryFaces[pointI];
+//        labelList& globalFaces = globalPointBoundaryFaces[pointI];
+//        globalFaces.setSize(bFaces.size());
+//        forAll(bFaces, i)
+//        {
+//            globalFaces[i] = globalIndices.toGlobal(bFaces[i]);
+//        }
+//    }
+//
+//
+//    // Pull slave pointBoundaryFaces to master
+//    globalPointSlavesMap().distribute
+//    (
+//        globalTransforms(),
+//        globalPointBoundaryFaces
+//    );
+//
+//
+//    // Merge slave labels into master globalPointBoundaryFaces.
+//    // Split into untransformed and transformed values.
+//    const labelListList& pointSlaves = globalPointSlaves();
+//    const labelListList& pointTransformSlaves =
+//        globalPointTransformedSlaves();
+//
+//
+//    List<labelPairList> transformedFaces;
+//
+//
+//    forAll(pointSlaves, pointI)
+//    {
+//        const labelList& slaves = pointSlaves[pointI];
+//
+//        if (slaves.size() > 0)
+//        {
+//            labelList& myBFaces = globalPointBoundaryFaces[pointI];
+//
+//            forAll(slaves, i)
+//            {
+//                const labelList& slaveBFaces =
+//                    globalPointBoundaryFaces[slaves[i]];
+//
+//                // Add all slaveBFaces. Note that need to check for
+//                // uniqueness only in case of cyclics.
+//
+//                label sz = myBFaces.size();
+//                myBFaces.setSize(sz+slaveBFaces.size());
+//                forAll(slaveBFaces, j)
+//                {
+//                    label slave = slaveBFaces[j];
+//                    if (findIndex(SubList<label>(myBFaces, sz), slave) == -1)
+//                    {
+//                        myBFaces[sz++] = slave;
+//                    }
+//                }
+//                myBFaces.setSize(sz);
+//            }
+//        }
+//    }
+//
+//
+//    // Copy merged boundaryFaces back from master into slave slot
+//    forAll(pointSlaves, pointI)
+//    {
+//        const labelList& bFaces = globalPointBoundaryFaces[pointI];
+//        const labelList& slaves = pointSlaves[pointI];
+//
+//        forAll(slaves, i)
+//        {
+//            globalPointBoundaryFaces[slaves[i]] = bFaces;
+//        }
+//    }
+//
+//
+//    // Sync back to slaves.
+//    globalPointSlavesMap().reverseDistribute
+//    (
+//        coupledPatch().nPoints(),
+//        globalPointBoundaryFaces
+//    );
+//
+//
+//    // Construct a map to get the face data directly
+//    List<Map<label> > compactMap(Pstream::nProcs());
+//
+//    globalPointTransformedBoundaryFacesPtr_.reset
+//    (
+//        new labelList(transformedFaces.size())
+//    );
+//
+//    globalPointBoundaryFacesMapPtr_.reset
+//    (
+//        new mapDistribute
+//        (
+//            globalIndices,
+//            globalPointBoundaryFaces,
+//
+//            globalTransforms(),
+//            transformedFaces,
+//            globalPointTransformedBoundaryFacesPtr_,
+//
+//            compactMap
+//        )
+//    );
+//
+//    if (debug)
+//    {
+//        Pout<< "globalMeshData::calcGlobalPointBoundaryFaces() :"
+//            << " coupled points:" << coupledPatch().nPoints()
+//            << " local boundary faces:" <<  globalIndices.localSize()
+//            << " additional coupled faces:"
+//            <<  globalPointBoundaryFacesMapPtr_().constructSize()
+//              - globalIndices.localSize()
+//            << endl;
+//    }
+//}
 
-    // Create map of boundary cells and point-cell addressing
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    label bCellI = 0;
-    Map<label> meshCellMap(4*coupledPatch().nPoints());
-    DynamicList<label> cellMap(meshCellMap.size());
-
-    // Create addressing for point to boundary cells (local)
-    labelListList pointBoundaryCells(coupledPatch().nPoints());
-
-    forAll(coupledPatch().meshPoints(), pointI)
-    {
-        label meshPointI = coupledPatch().meshPoints()[pointI];
-        const labelList& pCells = mesh_.pointCells(meshPointI);
-
-        labelList& bCells = pointBoundaryCells[pointI];
-        bCells.setSize(pCells.size());
-
-        forAll(pCells, i)
-        {
-            label cellI = pCells[i];
-            Map<label>::iterator fnd = meshCellMap.find(cellI);
-
-            if (fnd != meshCellMap.end())
-            {
-                bCells[i] = fnd();
-            }
-            else
-            {
-                meshCellMap.insert(cellI, bCellI);
-                cellMap.append(cellI);
-                bCells[i] = bCellI;
-                bCellI++;
-            }
-        }
-    }
-
-
-    boundaryCellsPtr_.reset(new labelList());
-    labelList& boundaryCells = boundaryCellsPtr_();
-    boundaryCells.transfer(cellMap.shrink());
-
-
-    // Convert point-cells to global point numbers
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    globalBoundaryCellNumberingPtr_.reset
-    (
-        new globalIndex(boundaryCells.size())
-    );
-    globalIndex& globalIndices = globalBoundaryCellNumberingPtr_();
-
-
-    globalPointBoundaryCellsPtr_.reset
-    (
-        new labelListList(globalPointSlavesMap().constructSize())
-    );
-    labelListList& globalPointBoundaryCells = globalPointBoundaryCellsPtr_();
-
-    forAll(pointBoundaryCells, pointI)
-    {
-        const labelList& pCells = pointBoundaryCells[pointI];
-        labelList& globalCells = globalPointBoundaryCells[pointI];
-        globalCells.setSize(pCells.size());
-        forAll(pCells, i)
-        {
-            globalCells[i] = globalIndices.toGlobal(pCells[i]);
-        }
-    }
-
-
-    // Pull slave pointBoundaryCells to master
-    globalPointSlavesMap().distribute(globalPointBoundaryCells);
-
-
-    // Merge slave labels into master globalPointBoundaryCells
-    const labelListList& pointSlaves = globalPointSlaves();
-
-    forAll(pointSlaves, pointI)
-    {
-        const labelList& slaves = pointSlaves[pointI];
-
-        if (slaves.size() > 0)
-        {
-            labelList& myBCells = globalPointBoundaryCells[pointI];
-
-            forAll(slaves, i)
-            {
-                const labelList& slaveBCells =
-                    globalPointBoundaryCells[slaves[i]];
-
-                // Add all slaveBCells. Note that need to check for
-                // uniqueness only in case of cyclics.
-
-                label sz = myBCells.size();
-                myBCells.setSize(sz+slaveBCells.size());
-                forAll(slaveBCells, j)
-                {
-                    label slave = slaveBCells[j];
-                    if (findIndex(SubList<label>(myBCells, sz), slave) == -1)
-                    {
-                        myBCells[sz++] = slave;
-                    }
-                }
-                myBCells.setSize(sz);
-            }
-        }
-    }
-
-
-    // Copy merged boundaryCells back from master into slave slot
-    forAll(pointSlaves, pointI)
-    {
-        const labelList& bCells = globalPointBoundaryCells[pointI];
-        const labelList& slaves = pointSlaves[pointI];
-
-        forAll(slaves, i)
-        {
-            globalPointBoundaryCells[slaves[i]] = bCells;
-        }
-    }
-
-
-    // Sync back to slaves.
-    globalPointSlavesMap().reverseDistribute
-    (
-        coupledPatch().nPoints(),
-        globalPointBoundaryCells
-    );
-
-
-    // Construct a map to get the cell data directly
-    List<Map<label> > compactMap(Pstream::nProcs());
-    globalPointBoundaryCellsMapPtr_.reset
-    (
-        new mapDistribute
-        (
-            globalIndices,
-            globalPointBoundaryCells,
-            compactMap
-        )
-    );
-
-    if (debug)
-    {
-        Pout<< "globalMeshData::calcGlobalPointBoundaryCells() :"
-            << " coupled points:" << coupledPatch().nPoints()
-            << " local boundary cells:" <<  globalIndices.localSize()
-            << " additional remote cells:"
-            <<  globalPointBoundaryCellsMapPtr_().constructSize()
-              - globalIndices.localSize()
-            << endl;
-    }
-}
-
-
-void Foam::globalMeshData::calcGlobalPointAllSlaves() const
-{
-    if (debug)
-    {
-        Pout<< "globalMeshData::calcGlobalPointAllSlaves() :"
-            << " calculating coupled master to slave point addressing."
-            << endl;
-    }
-
-    // Calculate collocated&non-collocated connected points for master points.
-    globalPoints allGlobalData(mesh_, coupledPatch(), true, true);
-
-    calcGlobalPointSlaves
-    (
-        allGlobalData,
-        globalPointAllNumberingPtr_,
-        globalPointAllSlavesPtr_,
-        globalPointAllSlavesMapPtr_
-    );
-}
-
-
-void Foam::globalMeshData::calcGlobalEdgeAllSlaves() const
-{
-    if (debug)
-    {
-        Pout<< "globalMeshData::calcGlobalEdgeAllSlaves() :"
-            << " calculating coupled master to slave edge addressing."
-            << endl;
-    }
-
-    // - Send across connected edges (in global edge addressing)
-    // - Check on receiving side whether edge has same slave edge
-    //   on both endpoints.
-
-    // Create global numbering for coupled edges
-    const globalIndex& globalIndices = globalEdgeNumbering();
-
-    calcGlobalEdgeSlaves
-    (
-        globalPointAllSlaves(),
-        globalPointAllSlavesMap(),
-        globalIndices,
-        globalEdgeAllSlavesPtr_,
-        globalEdgeAllSlavesMapPtr_
-    );
-}
+//void Foam::globalMeshData::calcGlobalPointBoundaryCells() const
+//{
+//    if (debug)
+//    {
+//        Pout<< "globalMeshData::calcGlobalPointBoundaryCells() :"
+//            << " calculating coupled point to boundary cell addressing."
+//            << endl;
+//    }
+//
+//    // Create map of boundary cells and point-cell addressing
+//    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    label bCellI = 0;
+//    Map<label> meshCellMap(4*coupledPatch().nPoints());
+//    DynamicList<label> cellMap(meshCellMap.size());
+//
+//    // Create addressing for point to boundary cells (local)
+//    labelListList pointBoundaryCells(coupledPatch().nPoints());
+//
+//    forAll(coupledPatch().meshPoints(), pointI)
+//    {
+//        label meshPointI = coupledPatch().meshPoints()[pointI];
+//        const labelList& pCells = mesh_.pointCells(meshPointI);
+//
+//        labelList& bCells = pointBoundaryCells[pointI];
+//        bCells.setSize(pCells.size());
+//
+//        forAll(pCells, i)
+//        {
+//            label cellI = pCells[i];
+//            Map<label>::iterator fnd = meshCellMap.find(cellI);
+//
+//            if (fnd != meshCellMap.end())
+//            {
+//                bCells[i] = fnd();
+//            }
+//            else
+//            {
+//                meshCellMap.insert(cellI, bCellI);
+//                cellMap.append(cellI);
+//                bCells[i] = bCellI;
+//                bCellI++;
+//            }
+//        }
+//    }
+//
+//
+//    boundaryCellsPtr_.reset(new labelList());
+//    labelList& boundaryCells = boundaryCellsPtr_();
+//    boundaryCells.transfer(cellMap.shrink());
+//
+//
+//    // Convert point-cells to global point numbers
+//    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//    globalBoundaryCellNumberingPtr_.reset
+//    (
+//        new globalIndex(boundaryCells.size())
+//    );
+//    globalIndex& globalIndices = globalBoundaryCellNumberingPtr_();
+//
+//
+//    globalPointBoundaryCellsPtr_.reset
+//    (
+//        new labelListList(globalPointSlavesMap().constructSize())
+//    );
+//    labelListList& globalPointBoundaryCells = globalPointBoundaryCellsPtr_();
+//
+//    forAll(pointBoundaryCells, pointI)
+//    {
+//        const labelList& pCells = pointBoundaryCells[pointI];
+//        labelList& globalCells = globalPointBoundaryCells[pointI];
+//        globalCells.setSize(pCells.size());
+//        forAll(pCells, i)
+//        {
+//            globalCells[i] = globalIndices.toGlobal(pCells[i]);
+//        }
+//    }
+//
+//
+//    // Pull slave pointBoundaryCells to master
+//    globalPointSlavesMap().distribute(globalPointBoundaryCells);
+//
+//
+//    // Merge slave labels into master globalPointBoundaryCells
+//    const labelListList& pointSlaves = globalPointSlaves();
+//
+//    forAll(pointSlaves, pointI)
+//    {
+//        const labelList& slaves = pointSlaves[pointI];
+//
+//        if (slaves.size() > 0)
+//        {
+//            labelList& myBCells = globalPointBoundaryCells[pointI];
+//
+//            forAll(slaves, i)
+//            {
+//                const labelList& slaveBCells =
+//                    globalPointBoundaryCells[slaves[i]];
+//
+//                // Add all slaveBCells. Note that need to check for
+//                // uniqueness only in case of cyclics.
+//
+//                label sz = myBCells.size();
+//                myBCells.setSize(sz+slaveBCells.size());
+//                forAll(slaveBCells, j)
+//                {
+//                    label slave = slaveBCells[j];
+//                    if (findIndex(SubList<label>(myBCells, sz), slave) == -1)
+//                    {
+//                        myBCells[sz++] = slave;
+//                    }
+//                }
+//                myBCells.setSize(sz);
+//            }
+//        }
+//    }
+//
+//
+//    // Copy merged boundaryCells back from master into slave slot
+//    forAll(pointSlaves, pointI)
+//    {
+//        const labelList& bCells = globalPointBoundaryCells[pointI];
+//        const labelList& slaves = pointSlaves[pointI];
+//
+//        forAll(slaves, i)
+//        {
+//            globalPointBoundaryCells[slaves[i]] = bCells;
+//        }
+//    }
+//
+//
+//    // Sync back to slaves.
+//    globalPointSlavesMap().reverseDistribute
+//    (
+//        coupledPatch().nPoints(),
+//        globalPointBoundaryCells
+//    );
+//
+//
+//    // Construct a map to get the cell data directly
+//    List<Map<label> > compactMap(Pstream::nProcs());
+//    globalPointBoundaryCellsMapPtr_.reset
+//    (
+//        new mapDistribute
+//        (
+//            globalIndices,
+//            globalPointBoundaryCells,
+//            compactMap
+//        )
+//    );
+//
+//    if (debug)
+//    {
+//        Pout<< "globalMeshData::calcGlobalPointBoundaryCells() :"
+//            << " coupled points:" << coupledPatch().nPoints()
+//            << " local boundary cells:" <<  globalIndices.localSize()
+//            << " additional coupled cells:"
+//            <<  globalPointBoundaryCellsMapPtr_().constructSize()
+//              - globalIndices.localSize()
+//            << endl;
+//    }
+//}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -1054,7 +1465,6 @@ Foam::globalMeshData::globalMeshData(const polyMesh& mesh)
 :
     processorTopology(mesh.boundaryMesh()),
     mesh_(mesh),
-    bb_(vector::zero, vector::zero),
     nTotalPoints_(-1),
     nTotalFaces_(-1),
     nTotalCells_(-1),
@@ -1062,50 +1472,14 @@ Foam::globalMeshData::globalMeshData(const polyMesh& mesh)
     processorPatchIndices_(0),
     processorPatchNeighbours_(0),
     nGlobalPoints_(-1),
-    sharedPointLabels_(0),
-    sharedPointAddr_(0),
+    sharedPointLabelsPtr_(NULL),
+    sharedPointAddrPtr_(NULL),
     sharedPointGlobalLabelsPtr_(NULL),
     nGlobalEdges_(-1),
     sharedEdgeLabelsPtr_(NULL),
     sharedEdgeAddrPtr_(NULL)
 {
     updateMesh();
-}
-
-
-// Read constructor given IOobject and a polyMesh reference
-Foam::globalMeshData::globalMeshData(const IOobject& io, const polyMesh& mesh)
-:
-    processorTopology(mesh.boundaryMesh()),
-    mesh_(mesh),
-    bb_(mesh.points()),
-    nTotalPoints_(-1),
-    nTotalFaces_(-1),
-    nTotalCells_(-1),
-    processorPatches_(0),
-    processorPatchIndices_(0),
-    processorPatchNeighbours_(0),
-    nGlobalPoints_(-1),
-    sharedPointLabels_(0),
-    sharedPointAddr_(0),
-    sharedPointGlobalLabelsPtr_(NULL),
-    nGlobalEdges_(-1),
-    sharedEdgeLabelsPtr_(NULL),
-    sharedEdgeAddrPtr_(NULL)
-{
-    initProcAddr();
-
-    IOdictionary dict(io);
-
-    dict.lookup("nTotalPoints") >> nTotalPoints_;
-    dict.lookup("nTotalFaces") >> nTotalFaces_;
-    dict.lookup("nTotalCells") >> nTotalCells_;
-    dict.lookup("nGlobalPoints") >> nGlobalPoints_;
-    dict.lookup("sharedPointLabels") >> sharedPointLabels_;
-    dict.lookup("sharedPointAddr") >> sharedPointAddr_;
-    labelList sharedPointGlobalLabels(dict.lookup("sharedPointGlobalLabels"));
-
-    sharedPointGlobalLabelsPtr_ = new labelList(sharedPointGlobalLabels);
 }
 
 
@@ -1119,44 +1493,43 @@ Foam::globalMeshData::~globalMeshData()
 
 void Foam::globalMeshData::clearOut()
 {
-    deleteDemandDrivenData(sharedPointGlobalLabelsPtr_);
-    // Edge
+    // Point
     nGlobalPoints_ = -1;
-    deleteDemandDrivenData(sharedEdgeLabelsPtr_);
-    deleteDemandDrivenData(sharedEdgeAddrPtr_);
+    sharedPointLabelsPtr_.clear();
+    sharedPointAddrPtr_.clear();
+    sharedPointGlobalLabelsPtr_.clear();
 
+    // Edge
+    nGlobalEdges_ = -1;
+    sharedEdgeLabelsPtr_.clear();
+    sharedEdgeAddrPtr_.clear();
+
+    // Coupled patch
     coupledPatchPtr_.clear();
     coupledPatchMeshEdgesPtr_.clear();
     coupledPatchMeshEdgeMapPtr_.clear();
+    globalTransformsPtr_.clear();
 
     // Point
     globalPointNumberingPtr_.clear();
     globalPointSlavesPtr_.clear();
+    globalPointTransformedSlavesPtr_.clear();
     globalPointSlavesMapPtr_.clear();
     // Edge
     globalEdgeNumberingPtr_.clear();
     globalEdgeSlavesPtr_.clear();
+    globalEdgeTransformedSlavesPtr_.clear();
     globalEdgeSlavesMapPtr_.clear();
-    // Face
-    globalBoundaryFaceNumberingPtr_.clear();
-    globalPointBoundaryFacesPtr_.clear();
-    globalPointBoundaryFacesMapPtr_.clear();
-    // Cell
-    boundaryCellsPtr_.clear();
-    globalBoundaryCellNumberingPtr_.clear();
-    globalPointBoundaryCellsPtr_.clear();
-    globalPointBoundaryCellsMapPtr_.clear();
 
-    //- Non-collocated
-
-    // Point
-    globalPointAllNumberingPtr_.clear();
-    globalPointAllSlavesPtr_.clear();
-    globalPointAllSlavesMapPtr_.clear();
-    // Edge
-    globalEdgeAllSlavesPtr_.clear();
-    globalEdgeAllSlavesMapPtr_.clear();
-
+//    // Face
+//    globalBoundaryFaceNumberingPtr_.clear();
+//    globalPointBoundaryFacesPtr_.clear();
+//    globalPointBoundaryFacesMapPtr_.clear();
+//    // Cell
+//    boundaryCellsPtr_.clear();
+//    globalBoundaryCellNumberingPtr_.clear();
+//    globalPointBoundaryCellsPtr_.clear();
+//    globalPointBoundaryCellsMapPtr_.clear();
 }
 
 
@@ -1165,10 +1538,13 @@ void Foam::globalMeshData::clearOut()
 // Return shared point global labels.
 const Foam::labelList& Foam::globalMeshData::sharedPointGlobalLabels() const
 {
-    if (!sharedPointGlobalLabelsPtr_)
+    if (!sharedPointGlobalLabelsPtr_.valid())
     {
-        sharedPointGlobalLabelsPtr_ = new labelList(sharedPointLabels_.size());
-        labelList& sharedPointGlobalLabels = *sharedPointGlobalLabelsPtr_;
+        sharedPointGlobalLabelsPtr_.reset
+        (
+            new labelList(sharedPointLabels().size())
+        );
+        labelList& sharedPointGlobalLabels = sharedPointGlobalLabelsPtr_();
 
         IOobject addrHeader
         (
@@ -1187,10 +1563,12 @@ const Foam::labelList& Foam::globalMeshData::sharedPointGlobalLabels() const
 
             labelIOList pointProcAddressing(addrHeader);
 
-            forAll(sharedPointLabels_, i)
+            const labelList& pointLabels = sharedPointLabels();
+
+            forAll(pointLabels, i)
             {
                 // Get my mesh point
-                label pointI = sharedPointLabels_[i];
+                label pointI = pointLabels[i];
 
                 // Map to mesh point of original mesh
                 sharedPointGlobalLabels[i] = pointProcAddressing[pointI];
@@ -1204,7 +1582,7 @@ const Foam::labelList& Foam::globalMeshData::sharedPointGlobalLabels() const
             sharedPointGlobalLabels = -1;
         }
     }
-    return *sharedPointGlobalLabelsPtr_;
+    return sharedPointGlobalLabelsPtr_();
 }
 
 
@@ -1214,17 +1592,19 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
     // Get all processors to send their shared points to master.
     // (not very efficient)
 
-    pointField sharedPoints(nGlobalPoints_);
+    pointField sharedPoints(nGlobalPoints());
+    const labelList& pointAddr = sharedPointAddr();
+    const labelList& pointLabels = sharedPointLabels();
 
     if (Pstream::master())
     {
         // Master:
         // insert my own data first
-        forAll(sharedPointLabels_, i)
+        forAll(pointLabels, i)
         {
-            label sharedPointI = sharedPointAddr_[i];
+            label sharedPointI = pointAddr[i];
 
-            sharedPoints[sharedPointI] = mesh_.points()[sharedPointLabels_[i]];
+            sharedPoints[sharedPointI] = mesh_.points()[pointLabels[i]];
         }
 
         // Receive data from slaves and insert
@@ -1274,8 +1654,8 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
             OPstream toMaster(Pstream::blocking, Pstream::masterNo());
 
             toMaster
-                << sharedPointAddr_
-                << UIndirectList<point>(mesh_.points(), sharedPointLabels_)();
+                << pointAddr
+                << UIndirectList<point>(mesh_.points(), pointLabels)();
         }
 
         // Receive sharedPoints
@@ -1293,20 +1673,13 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
 Foam::pointField Foam::globalMeshData::geometricSharedPoints() const
 {
     // Get coords of my shared points
-    pointField sharedPoints(sharedPointLabels_.size());
-
-    forAll(sharedPointLabels_, i)
-    {
-        label meshPointI = sharedPointLabels_[i];
-
-        sharedPoints[i] = mesh_.points()[meshPointI];
-    }
+    pointField sharedPoints(mesh_.points(), sharedPointLabels());
 
     // Append from all processors
     combineReduce(sharedPoints, plusEqOp<pointField>());
 
     // Merge tolerance
-    scalar tolDim = matchTol_ * bb_.mag();
+    scalar tolDim = matchTol_ * mesh_.bounds().mag();
 
     // And see how many are unique
     labelList pMap;
@@ -1325,6 +1698,36 @@ Foam::pointField Foam::globalMeshData::geometricSharedPoints() const
 }
 
 
+Foam::label Foam::globalMeshData::nGlobalPoints() const
+{
+    if (nGlobalPoints_ == -1)
+    {
+        calcSharedPoints();
+    }
+    return nGlobalPoints_;
+}
+
+
+const Foam::labelList& Foam::globalMeshData::sharedPointLabels() const
+{
+    if (!sharedPointLabelsPtr_.valid())
+    {
+        calcSharedPoints();
+    }
+    return sharedPointLabelsPtr_();
+}
+
+
+const Foam::labelList& Foam::globalMeshData::sharedPointAddr() const
+{
+    if (!sharedPointAddrPtr_.valid())
+    {
+        calcSharedPoints();
+    }
+    return sharedPointAddrPtr_();
+}
+
+
 Foam::label Foam::globalMeshData::nGlobalEdges() const
 {
     if (nGlobalEdges_ == -1)
@@ -1337,21 +1740,21 @@ Foam::label Foam::globalMeshData::nGlobalEdges() const
 
 const Foam::labelList& Foam::globalMeshData::sharedEdgeLabels() const
 {
-    if (!sharedEdgeLabelsPtr_)
+    if (!sharedEdgeLabelsPtr_.valid())
     {
         calcSharedEdges();
     }
-    return *sharedEdgeLabelsPtr_;
+    return sharedEdgeLabelsPtr_();
 }
 
 
 const Foam::labelList& Foam::globalMeshData::sharedEdgeAddr() const
 {
-    if (!sharedEdgeAddrPtr_)
+    if (!sharedEdgeAddrPtr_.valid())
     {
         calcSharedEdges();
     }
-    return *sharedEdgeAddrPtr_;
+    return sharedEdgeAddrPtr_();
 }
 
 
@@ -1465,6 +1868,17 @@ const Foam::globalIndex& Foam::globalMeshData::globalPointNumbering() const
 }
 
 
+const Foam::globalIndexAndTransform&
+Foam::globalMeshData::globalTransforms() const
+{
+    if (!globalTransformsPtr_.valid())
+    {
+        globalTransformsPtr_.reset(new globalIndexAndTransform(mesh_));
+    }
+    return globalTransformsPtr_();
+}
+
+
 const Foam::labelListList& Foam::globalMeshData::globalPointSlaves() const
 {
     if (!globalPointSlavesPtr_.valid())
@@ -1472,6 +1886,17 @@ const Foam::labelListList& Foam::globalMeshData::globalPointSlaves() const
         calcGlobalPointSlaves();
     }
     return globalPointSlavesPtr_();
+}
+
+
+const Foam::labelListList& Foam::globalMeshData::globalPointTransformedSlaves()
+const
+{
+    if (!globalPointTransformedSlavesPtr_.valid())
+    {
+        calcGlobalPointSlaves();
+    }
+    return globalPointTransformedSlavesPtr_();
 }
 
 
@@ -1508,6 +1933,17 @@ const Foam::labelListList& Foam::globalMeshData::globalEdgeSlaves() const
 }
 
 
+const Foam::labelListList& Foam::globalMeshData::globalEdgeTransformedSlaves()
+const
+{
+    if (!globalEdgeTransformedSlavesPtr_.valid())
+    {
+        calcGlobalEdgeSlaves();
+    }
+    return globalEdgeTransformedSlavesPtr_();
+}
+
+
 const Foam::mapDistribute& Foam::globalMeshData::globalEdgeSlavesMap() const
 {
     if (!globalEdgeSlavesMapPtr_.valid())
@@ -1515,135 +1951,6 @@ const Foam::mapDistribute& Foam::globalMeshData::globalEdgeSlavesMap() const
         calcGlobalEdgeSlaves();
     }
     return globalEdgeSlavesMapPtr_();
-}
-
-
-const Foam::globalIndex& Foam::globalMeshData::globalBoundaryFaceNumbering()
-const
-{
-    if (!globalBoundaryFaceNumberingPtr_.valid())
-    {
-        calcGlobalPointBoundaryFaces();
-    }
-    return globalBoundaryFaceNumberingPtr_();
-}
-
-
-const Foam::labelListList& Foam::globalMeshData::globalPointBoundaryFaces()
-const
-{
-    if (!globalPointBoundaryFacesPtr_.valid())
-    {
-        calcGlobalPointBoundaryFaces();
-    }
-    return globalPointBoundaryFacesPtr_();
-}
-
-
-const Foam::mapDistribute& Foam::globalMeshData::globalPointBoundaryFacesMap()
-const
-{
-    if (!globalPointBoundaryFacesMapPtr_.valid())
-    {
-        calcGlobalPointBoundaryFaces();
-    }
-    return globalPointBoundaryFacesMapPtr_();
-}
-
-
-const Foam::labelList& Foam::globalMeshData::boundaryCells() const
-{
-    if (!boundaryCellsPtr_.valid())
-    {
-        calcGlobalPointBoundaryCells();
-    }
-    return boundaryCellsPtr_();
-}
-
-
-const Foam::globalIndex& Foam::globalMeshData::globalBoundaryCellNumbering()
-const
-{
-    if (!globalBoundaryCellNumberingPtr_.valid())
-    {
-        calcGlobalPointBoundaryCells();
-    }
-    return globalBoundaryCellNumberingPtr_();
-}
-
-
-const Foam::labelListList& Foam::globalMeshData::globalPointBoundaryCells()
-const
-{
-    if (!globalPointBoundaryCellsPtr_.valid())
-    {
-        calcGlobalPointBoundaryCells();
-    }
-    return globalPointBoundaryCellsPtr_();
-}
-
-
-const Foam::mapDistribute& Foam::globalMeshData::globalPointBoundaryCellsMap()
-const
-{
-    if (!globalPointBoundaryCellsMapPtr_.valid())
-    {
-        calcGlobalPointBoundaryCells();
-    }
-    return globalPointBoundaryCellsMapPtr_();
-}
-
-
-
-// Non-collocated coupled point/edge addressing
-
-const Foam::globalIndex& Foam::globalMeshData::globalPointAllNumbering() const
-{
-    if (!globalPointAllNumberingPtr_.valid())
-    {
-        calcGlobalPointAllSlaves();
-    }
-    return globalPointAllNumberingPtr_();
-}
-
-
-const Foam::labelListList& Foam::globalMeshData::globalPointAllSlaves() const
-{
-    if (!globalPointAllSlavesPtr_.valid())
-    {
-        calcGlobalPointAllSlaves();
-    }
-    return globalPointAllSlavesPtr_();
-}
-
-
-const Foam::mapDistribute& Foam::globalMeshData::globalPointAllSlavesMap() const
-{
-    if (!globalPointAllSlavesMapPtr_.valid())
-    {
-        calcGlobalPointAllSlaves();
-    }
-    return globalPointAllSlavesMapPtr_();
-}
-
-
-const Foam::labelListList& Foam::globalMeshData::globalEdgeAllSlaves() const
-{
-    if (!globalEdgeAllSlavesPtr_.valid())
-    {
-        calcGlobalEdgeAllSlaves();
-    }
-    return globalEdgeAllSlavesPtr_();
-}
-
-
-const Foam::mapDistribute& Foam::globalMeshData::globalEdgeAllSlavesMap() const
-{
-    if (!globalEdgeAllSlavesMapPtr_.valid())
-    {
-        calcGlobalEdgeAllSlaves();
-    }
-    return globalEdgeAllSlavesMapPtr_();
 }
 
 
@@ -1874,7 +2181,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::globalMeshData::mergePoints
         }
     }
 
-    // Allocate globals for master 
+    // Allocate globals for master
     labelList masterToGlobal(pointSlavesMap.constructSize(), -456);
 
     forAll(masterPoints, i)
@@ -1935,6 +2242,8 @@ void Foam::globalMeshData::movePoints(const pointField& newPoints)
 {
     // Topology does not change and we don't store any geometry so nothing
     // needs to be done.
+    // Only global transformations might change but this is not really
+    // supported.
 }
 
 
@@ -1947,268 +2256,34 @@ void Foam::globalMeshData::updateMesh()
     // Do processor patch addressing
     initProcAddr();
 
-    // Note: boundBox does reduce
-    bb_ = boundBox(mesh_.points());
-
-    scalar tolDim = matchTol_ * bb_.mag();
+    scalar tolDim = matchTol_ * mesh_.bounds().mag();
 
     if (debug)
     {
-        Pout<< "globalMeshData : bb_:" << bb_
-            << " merge dist:" << tolDim << endl;
+        Pout<< "globalMeshData : merge dist:" << tolDim << endl;
     }
 
-
-    // Option 1. Topological
-    {
-        // Calculate all shared points (excluded points that are only
-        // on two coupled patches). This does all the hard work.
-        globalPoints parallelPoints(mesh_, false, true);
-
-        // Copy data out.
-        nGlobalPoints_ = parallelPoints.nGlobalPoints();
-        sharedPointLabels_ = parallelPoints.sharedPointLabels();
-        sharedPointAddr_ = parallelPoints.sharedPointAddr();
-    }
-    //// Option 2. Geometric
-    //{
-    //    // Calculate all shared points. This does all the hard work.
-    //    geomGlobalPoints parallelPoints(mesh_, tolDim);
-    //
-    //    // Copy data out.
-    //    nGlobalPoints_ = parallelPoints.nGlobalPoints();
-    //    sharedPointLabels_ = parallelPoints.sharedPointLabels();
-    //    sharedPointAddr_ = parallelPoints.sharedPointAddr();
-    //
-    //    nGlobalEdges_ = parallelPoints.nGlobalEdges();
-    //    sharedEdgeLabels_ = parallelPoints.sharedEdgeLabels();
-    //    sharedEdgeAddr_ = parallelPoints.sharedEdgeAddr();
-    //}
-
-    if (debug)
-    {
-        Pout<< "globalMeshData : nGlobalPoints_:" << nGlobalPoints_ << nl
-            << "globalMeshData : sharedPointLabels_:"
-            << sharedPointLabels_.size() << nl
-            << "globalMeshData : sharedPointAddr_:"
-            << sharedPointAddr_.size() << endl;
-    }
-
-
-    // Total number of faces. Start off from all faces. Remove coincident
-    // processor faces (on highest numbered processor) before summing.
-    nTotalFaces_ = mesh_.nFaces();
-
-    // Do not count processor-patch faces that are coincident.
-    forAll(processorPatches_, i)
-    {
-        label patchI = processorPatches_[i];
-
-        if (isType<processorPolyPatch>(mesh_.boundaryMesh()[patchI]))
-        {
-            // Normal, unseparated processor patch. Remove duplicates.
-            nTotalFaces_ -= mesh_.boundaryMesh()[patchI].size();
-        }
-    }
-    reduce(nTotalFaces_, sumOp<label>());
+    // Total number of faces.
+    nTotalFaces_ = returnReduce(mesh_.nFaces(), sumOp<label>());
 
     if (debug)
     {
         Pout<< "globalMeshData : nTotalFaces_:" << nTotalFaces_ << endl;
     }
 
-
-    nTotalCells_ = mesh_.nCells();
-    reduce(nTotalCells_, sumOp<label>());
+    nTotalCells_ = returnReduce(mesh_.nCells(), sumOp<label>());
 
     if (debug)
     {
         Pout<< "globalMeshData : nTotalCells_:" << nTotalCells_ << endl;
     }
 
-    nTotalPoints_ = mesh_.nPoints();
-
-    // Correct points for duplicate ones. We have
-    // - points shared between 2 processor patches only. Count only on
-    //   lower numbered processor. Make sure to count only once since points
-    //   can be on multiple patches on the same processor.
-    // - globally shared points.
-
-    if (Pstream::parRun())
-    {
-        const label UNSET = 0;      // not set
-        const label SHARED = 1;     // globally shared
-        const label VISITED = 2;    // corrected for
-
-        // Mark globally shared points
-        PackedList<2> pointStatus(mesh_.nPoints(), UNSET);
-
-        forAll(sharedPointLabels_, i)
-        {
-            label meshPointI = sharedPointLabels_[i];
-
-            pointStatus.set(meshPointI, SHARED);
-        }
-
-        PstreamBuffers pBufs(Pstream::nonBlocking);
-
-        // Send patch local points
-        forAll(processorPatches_, i)
-        {
-            label patchI = processorPatches_[i];
-
-            const processorPolyPatch& procPatch =
-                refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchI]);
-
-            UOPstream toNeighbour(procPatch.neighbProcNo(), pBufs);
-
-            toNeighbour << procPatch.localPoints();
-        }
-
-        pBufs.finishedSends();
-
-        // Receive patch local points and uncount if coincident (and not shared)
-        forAll(processorPatches_, i)
-        {
-            label patchI = processorPatches_[i];
-
-            const processorPolyPatch& procPatch =
-                refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchI]);
-
-            UIPstream fromNeighbour(procPatch.neighbProcNo(), pBufs);
-
-            pointField nbrPoints(fromNeighbour);
-
-            if (Pstream::myProcNo() > procPatch.neighbProcNo())
-            {
-                labelList pMap;
-                matchPoints
-                (
-                    procPatch.localPoints(),
-                    nbrPoints,
-                    scalarField(procPatch.nPoints(), tolDim),   // tolerance
-                    false,      // verbosity
-                    pMap        // map from my points to nbrPoints
-                );
-
-                forAll(pMap, patchPointI)
-                {
-                    label meshPointI = procPatch.meshPoints()[patchPointI];
-
-                    label stat = pointStatus.get(meshPointI);
-
-                    if (stat == UNSET)
-                    {
-                        // Mark point as visited so if point is on multiple proc
-                        // patches it only gets uncounted once.
-                        pointStatus.set(meshPointI, VISITED);
-
-                        if (pMap[patchPointI] != -1)
-                        {
-                            // Points share same coordinate so uncount.
-                            nTotalPoints_--;
-                        }
-                    }
-                }
-            }
-        }
-        // Sum all points
-        reduce(nTotalPoints_, sumOp<label>());
-    }
-
-    // nTotalPoints has not been corrected yet for shared points. For these
-    // just collect all their coordinates and count unique ones.
-
-    label mySharedPoints = sharedPointLabels_.size();
-    reduce(mySharedPoints, sumOp<label>());
-
-    // Collect and merge shared points (does parallel communication)
-    pointField geomSharedPoints(geometricSharedPoints());
-    label nGeomSharedPoints = geomSharedPoints.size();
-
-    // Shared points merged down to mergedPoints size.
-    nTotalPoints_ -= mySharedPoints - nGeomSharedPoints;
+    nTotalPoints_ = returnReduce(mesh_.nPoints(), sumOp<label>());
 
     if (debug)
     {
         Pout<< "globalMeshData : nTotalPoints_:" << nTotalPoints_ << endl;
     }
-
-    //
-    // Now we have all info we wanted.
-    // Do some checking (if debug is set)
-    //
-
-    if (debug)
-    {
-        if (Pstream::master())
-        {
-            // We have the geometricSharedPoints already so write them.
-            // Ideally would like to write the networks of connected points as
-            // well but this is harder. (Todo)
-            Pout<< "globalMeshData : writing geometrically separated shared"
-                << " points to geomSharedPoints.obj" << endl;
-
-            OFstream str("geomSharedPoints.obj");
-
-            forAll(geomSharedPoints, i)
-            {
-                const point& pt = geomSharedPoints[i];
-
-                str << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z()
-                    << nl;
-            }
-        }
-    }
-}
-
-
-// Write data
-bool Foam::globalMeshData::write() const
-{
-    IOdictionary dict
-    (
-        IOobject
-        (
-            "parallelData",
-            mesh_.facesInstance(),
-            mesh_.meshSubDir,
-            mesh_
-        )
-    );
-
-    dict.add("nTotalPoints", nTotalPoints());
-    dict.add("nTotalFaces", nTotalFaces());
-    dict.add("nTotalCells", nTotalCells());
-
-    dict.add("nGlobalPoints", nGlobalPoints());
-    dict.add("sharedPointLabels", sharedPointLabels());
-    dict.add("sharedPointAddr", sharedPointAddr());
-    dict.add("sharedPointGlobalLabels", sharedPointGlobalLabels());
-
-    return dict.writeObject
-    (
-        IOstream::ASCII,
-        IOstream::currentVersion,
-        IOstream::UNCOMPRESSED
-    );
-}
-
-
-// * * * * * * * * * * * * * * * Ostream Operators * * * * * * * * * * * * * //
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const globalMeshData& p)
-{
-    os  << "nTotalPoints " << p.nTotalPoints() << token::END_STATEMENT << nl
-        << "nTotalFaces " << p.nTotalFaces() << token::END_STATEMENT << nl
-        << "nTotalCells " << p.nTotalCells() << token::END_STATEMENT << nl
-        << "nGlobalPoints " << p.nGlobalPoints() << token::END_STATEMENT << nl
-        << "sharedPointLabels " << p.sharedPointLabels()
-        << token::END_STATEMENT << nl
-        << "sharedPointAddr " << p.sharedPointAddr()
-        << token::END_STATEMENT << endl;
-
-    return os;
 }
 
 

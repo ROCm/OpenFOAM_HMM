@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,29 +31,27 @@ License
 
 bool Foam::triSurface::stitchTriangles
 (
-    const pointField& rawPoints,
     const scalar tol,
     bool verbose
 )
 {
+    pointField& ps = storedPoints();
+
     // Merge points
     labelList pointMap;
     pointField newPoints;
-    bool hasMerged = mergePoints(rawPoints, tol, verbose, pointMap, newPoints);
+    bool hasMerged = mergePoints(ps, tol, verbose, pointMap, newPoints);
 
     if (hasMerged)
     {
-        pointField& ps = storedPoints();
+        if (verbose)
+        {
+            Pout<< "stitchTriangles : Merged from " << ps.size()
+                << " points down to " << newPoints.size() << endl;
+        }
 
         // Set the coordinates to the merged ones
         ps.transfer(newPoints);
-
-
-        if (verbose)
-        {
-            Pout<< "stitchTriangles : Merged from " << rawPoints.size()
-                << " points down to " << ps.size() << endl;
-        }
 
         // Reset the triangle point labels to the unique points array
         label newTriangleI = 0;

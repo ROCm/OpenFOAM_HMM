@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -112,7 +112,6 @@ class triSurface
         //  Returns true if any points merged
         bool stitchTriangles
         (
-            const pointField& rawPoints,
             const scalar tol = SMALL,
             const bool verbose = false
         );
@@ -222,9 +221,6 @@ protected:
 public:
 
     // Public typedefs
-
-        //- Face type used
-        typedef labelledTri FaceType;
 
         //- Placeholder only, but do not remove - it is needed for GeoMesh
         typedef bool BoundaryMesh;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -155,8 +155,8 @@ void Foam::cellPointWeight::findTriangle
     List<tetIndices> faceTets = polyMeshTetDecomposition::faceTetIndices
     (
         mesh,
-        mesh.faceOwner()[faceI],
-        faceI
+        faceI,
+        mesh.faceOwner()[faceI]
     );
 
     const scalar faceAreaSqr = magSqr(mesh.faceAreas()[faceI]);

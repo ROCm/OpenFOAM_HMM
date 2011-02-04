@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -300,19 +300,24 @@ void rewriteField
 
         Info<< "Looking for entry for patch " << patchName << endl;
 
-        if (boundaryField.found(patchName) && !boundaryField.found(newName))
+        // Find old patch name either direct or through wildcards
+        // Find new patch name direct only
+
+        if
+        (
+            boundaryField.found(patchName)
+        && !boundaryField.found(newName, false, false)
+        )
         {
             Info<< "    Changing entry " << patchName << " to " << newName
                 << endl;
 
-            dictionary patchDict(boundaryField.subDict(patchName));
+            dictionary& patchDict = boundaryField.subDict(patchName);
 
             if (patchDict.found("value"))
             {
-                IOWarningIn("rewriteField(..)", patchDict)
-                    << "Cyclic patch " << patchName
-                    << " has value entry. Please remove this and rerun."
-                    << endl;
+                // Remove any value field since wrong size.
+                patchDict.remove("value");
             }
 
 

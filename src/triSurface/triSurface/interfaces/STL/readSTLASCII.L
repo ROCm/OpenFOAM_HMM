@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -422,6 +422,7 @@ bool triSurface::readSTLASCII(const fileName& STLfileName)
     setSize(lexer.nTriangles());
     DynamicList<label>& STLlabels = lexer.STLlabels();
 
+    // Assign triangles
     label pointi = 0;
     forAll(*this, i)
     {
@@ -433,8 +434,11 @@ bool triSurface::readSTLASCII(const fileName& STLfileName)
 
     STLlabels.clear();
 
+    // Assign coordinates
+    storedPoints().transfer(rawPoints);
+
     // Stitch all points within SMALL meters.
-    stitchTriangles(rawPoints);
+    stitchTriangles();
 
     // Convert solidNames into regionNames
     patches_.setSize(lexer.STLsolidNames().size());

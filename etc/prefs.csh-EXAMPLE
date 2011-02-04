@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -44,9 +44,5 @@
 ## ~~~~~~~~~~~~~~~~~~~~~~
 #setenv WM_MPLIB SYSTEMOPENMPI
 
-# Specify ParaView version
-# ~~~~~~~~~~~~~~~~~~~~~~~~
-setenv ParaView_VERSION git        # eg, cvs/git version
-setenv ParaView_MAJOR 3.7
 
 # ----------------------------------------------------------------- end-of-file

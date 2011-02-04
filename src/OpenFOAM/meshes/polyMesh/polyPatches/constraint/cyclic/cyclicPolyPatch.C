@@ -276,9 +276,16 @@ void Foam::cyclicPolyPatch::calcTransforms
 
         if (transform_ == ROTATIONAL && !parallel() && forwardT().size() > 1)
         {
-            const_cast<tensorField&>(forwardT()).setSize(1);
-            const_cast<tensorField&>(reverseT()).setSize(1);
+            // Get index of maximum area face to minimise truncation errors.
+            label max0I = findMaxArea(half0.points(), half0);
+
+            const tensor fwdT = forwardT()[max0I];
+            const_cast<tensorField&>(forwardT()) = tensorField(1, fwdT);
+            const tensor revT = reverseT()[max0I];
+            const_cast<tensorField&>(reverseT()) = tensorField(1, revT);
+            const bool coll = collocated()[max0I];
             const_cast<boolList&>(collocated()).setSize(1);
+            const_cast<boolList&>(collocated())[0] = coll;
 
             WarningIn
             (
@@ -293,8 +300,9 @@ void Foam::cyclicPolyPatch::calcTransforms
             )   << "For patch " << name()
                 << " calculated non-uniform transform tensor even though"
                 << " the transform type is " << transformTypeNames[transform_]
-                << ". Setting the transformation tensor to be a uniform"
-                << " rotation."
+                << "." << nl
+                << "    Setting the transformation tensor to be a uniform"
+                << " rotation calculated from face " << max0I
                 << endl;
         }
     }
@@ -695,8 +703,42 @@ Foam::cyclicPolyPatch::~cyclicPolyPatch()
 }
 
 
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::label Foam::cyclicPolyPatch::neighbPatchID() const
+{
+    if (neighbPatchID_ == -1)
+    {
+        neighbPatchID_ = this->boundaryMesh().findPatchID(neighbPatchName_);
+
+        if (neighbPatchID_ == -1)
+        {
+            FatalErrorIn("cyclicPolyPatch::neighbPatchID() const")
+                << "Illegal neighbourPatch name " << neighbPatchName_
+                << endl << "Valid patch names are "
+                << this->boundaryMesh().names()
+                << exit(FatalError);
+        }
+
+        // Check that it is a cyclic
+        const cyclicPolyPatch& nbrPatch = refCast<const cyclicPolyPatch>
+        (
+            this->boundaryMesh()[neighbPatchID_]
+        );
+
+        if (nbrPatch.neighbPatchName() != name())
+        {
+            WarningIn("cyclicPolyPatch::neighbPatchID() const")
+                << "Patch " << name()
+                << " specifies neighbour patch " << neighbPatchName()
+                << endl << " but that in return specifies "
+                << nbrPatch.neighbPatchName()
+                << endl;
+        }
+    }
+    return neighbPatchID_;
+}
+
 
 void Foam::cyclicPolyPatch::transformPosition(pointField& l) const
 {

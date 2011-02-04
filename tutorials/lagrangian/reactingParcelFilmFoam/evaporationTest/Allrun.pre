@@ -11,5 +11,5 @@ mv log.setSet log.wallFilmRegion.setSet
 runApplication setsToZones -noFlipMap
 mv log.setsToZones log.setsToZones.primaryRegion
 
-runApplication extrudeToRegionMesh wallFilmRegion '(wallFilmFaces)' 0.01 -overwrite
+runApplication extrudeToRegionMesh -overwrite
 

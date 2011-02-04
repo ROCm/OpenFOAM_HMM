@@ -60,20 +60,16 @@ SourceFiles
 #define InteractionLists_H
 
 #include "polyMesh.H"
-#include "globalIndexAndTransform.H"
 #include "referredWallFace.H"
-#include "indexedOctree.H"
-#include "Tuple2.H"
-#include "treeDataCell.H"
-#include "treeDataFace.H"
-#include "mapDistribute.H"
-#include "volFields.H"
-#include "Random.H"
+//#include "mapDistribute.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+class globalIndexAndTransform;
+class mapDistribute;
 
 /*---------------------------------------------------------------------------*\
                        Class InteractionLists Declaration
@@ -99,10 +95,6 @@ class InteractionLists
 
         //- mapDistribute to exchange wall face data
         autoPtr<mapDistribute> wallFaceMapPtr_;
-
-        //- Storage and encoding/decoding for all possible transforms
-        //  of the geometry
-        globalIndexAndTransform globalTransforms_;
 
         //- Maximum distance over which interactions will be detected
         scalar maxDistance_;
@@ -258,9 +250,6 @@ public:
 
             //- Return access to the wallFaceMap
             inline const mapDistribute& wallFaceMap() const;
-
-            //- Return access to the globalTransforms
-            inline const globalIndexAndTransform& globalTransforms() const;
 
             //- Return access to the direct interaction list
             inline const labelListList& dil() const;

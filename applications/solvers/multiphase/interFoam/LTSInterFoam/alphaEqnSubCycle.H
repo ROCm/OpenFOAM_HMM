@@ -1,6 +1,6 @@
 label nAlphaCorr(readLabel(piso.lookup("nAlphaCorr")));
 
-label nAlphaSubCycles(readLabel(piso.lookup("nAlphaSubCycles"))));
+label nAlphaSubCycles(readLabel(piso.lookup("nAlphaSubCycles")));
 
 if (nAlphaSubCycles > 1)
 {

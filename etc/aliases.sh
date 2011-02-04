@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -44,23 +44,20 @@ alias wmDP='wmSET WM_PRECISION_OPTION=DP'
 alias wmSchedON='export WM_SCHEDULER=$WM_PROJECT_DIR/wmake/wmakeScheduler'
 alias wmSchedOFF='unset WM_SCHEDULER'
 
-# Change paraview version
+# Change ParaView version
 # ~~~~~~~~~~~~~~~~~~~~~~~
 unset foamPV
 foamPV()
 {
-    export ParaView_VERSION=$1
-    . $WM_PROJECT_DIR/etc/apps/paraview3/bashrc
+    . $WM_PROJECT_DIR/etc/apps/paraview3/bashrc ParaView_VERSION=$1
     echo "paraview-$ParaView_VERSION  (major: $ParaView_MAJOR)"
-    echo "dir: $ParaView_DIR"
-    [ -d "$ParaView_DIR" ] || echo "WARNING: directory does not exist"
 }
 
 
 # Change directory aliases
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 alias src='cd $FOAM_SRC'
-alias lib='cd $FOAM_LIB'
+alias lib='cd $FOAM_LIBBIN'
 alias run='cd $FOAM_RUN'
 alias foam='cd $WM_PROJECT_DIR'
 alias foamsrc='cd $FOAM_SRC/$WM_PROJECT'

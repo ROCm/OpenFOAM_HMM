@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,6 +75,14 @@ void Foam::multiLevelDecomp::subsetGlobalCellCells
     labelList allDist(dist);
     map.distribute(allDist);
 
+    // Now we have:
+    // oldToNew : the locally-compact numbering of all our cellCells. -1 if
+    //            cellCell is not in set.
+    // allDist  : destination domain for all our cellCells
+    // subCellCells : indexes into oldToNew and allDist
+
+    // Globally compact numbering for cells in set.
+    globalIndex globalSubCells(set.size());
 
     // Now subCellCells contains indices into oldToNew which are the
     // new locations of the neighbouring cells.
@@ -90,14 +98,23 @@ void Foam::multiLevelDecomp::subsetGlobalCellCells
         label newI = 0;
         forAll(cCells, i)
         {
-            label subCellI = oldToNew[cCells[i]];
-            if (subCellI == -1)
+            // Get locally-compact cell index of neighbouring cell
+            label nbrCellI = oldToNew[cCells[i]];
+            if (nbrCellI == -1)
             {
                 cutConnections[allDist[cCells[i]]]++;
             }
             else
             {
-                cCells[newI++] = subCellI;
+                // Reconvert local cell index into global one
+
+                // Get original neighbour
+                label cellI = set[subCellI];
+                label oldNbrCellI = cellCells[cellI][i];
+                // Get processor from original neighbour
+                label procI = globalCells.whichProcID(oldNbrCellI);
+                // Convert into global compact numbering
+                cCells[newI++] = globalSubCells.toGlobal(procI, nbrCellI);
             }
         }
         cCells.setSize(newI);

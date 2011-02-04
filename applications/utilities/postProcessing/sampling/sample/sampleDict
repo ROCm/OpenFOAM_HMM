@@ -38,6 +38,16 @@ setFormat raw;
 // but without any values!
 surfaceFormat vtk;
 
+// optionally define extra controls for the output formats
+formatOptions
+{
+    ensight
+    {
+        format  ascii;
+    }
+}
+
+
 // interpolationScheme. choice of
 //      cell          : use cell-centre value only; constant over cells (default)
 //      cellPoint     : use cell-centre and vertex values
@@ -231,6 +241,7 @@ surfaces
         // Sampling on triSurface
         type        sampledTriSurfaceMesh;
         surface     integrationPlane.stl;
+        source      boundaryFaces;  // sample cells or boundaryFaces
         interpolate true;
     }
 );

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,6 +48,7 @@ void Foam::KinematicCloud<ParcelType>::cloudSolution::read()
     if (steadyState())
     {
         dict_.lookup("calcFrequency") >> calcFrequency_;
+        dict_.lookup("maxCo") >> maxCo_;
         dict_.lookup("maxTrackTime") >> maxTrackTime_;
         dict_.subDict("sourceTerms").lookup("resetOnStartup")
             >> resetSourcesOnStartup_;
@@ -67,12 +68,13 @@ Foam::KinematicCloud<ParcelType>::cloudSolution::cloudSolution
     active_(dict.lookup("active")),
     transient_(false),
     calcFrequency_(1),
+    maxCo_(0.3),
     iter_(1),
     deltaT_(0.0),
     coupled_(false),
     cellValueSourceCorrection_(false),
     maxTrackTime_(0.0),
-    resetSourcesOnStartup_(false)
+    resetSourcesOnStartup_(true)
 {
     if (active_)
     {
@@ -92,6 +94,7 @@ Foam::KinematicCloud<ParcelType>::cloudSolution::cloudSolution
     active_(cs.active_),
     transient_(cs.transient_),
     calcFrequency_(cs.calcFrequency_),
+    maxCo_(cs.maxCo_),
     iter_(cs.iter_),
     deltaT_(cs.deltaT_),
     coupled_(cs.coupled_),
@@ -112,6 +115,7 @@ Foam::KinematicCloud<ParcelType>::cloudSolution::cloudSolution
     active_(false),
     transient_(false),
     calcFrequency_(0),
+    maxCo_(GREAT),
     iter_(0),
     deltaT_(0.0),
     coupled_(false),
@@ -183,6 +187,84 @@ bool Foam::KinematicCloud<ParcelType>::cloudSolution::output() const
 
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+template<class ParcelType>
+void Foam::KinematicCloud<ParcelType>::setModels()
+{
+    collisionModel_.reset
+    (
+        CollisionModel<KinematicCloud<ParcelType> >::New
+        (
+            subModelProperties_,
+            *this
+        ).ptr()
+    );
+
+    dispersionModel_.reset
+    (
+        DispersionModel<KinematicCloud<ParcelType> >::New
+        (
+            subModelProperties_,
+            *this
+        ).ptr()
+    );
+
+    dragModel_.reset
+    (
+        DragModel<KinematicCloud<ParcelType> >::New
+        (
+            subModelProperties_,
+            *this
+        ).ptr()
+    );
+
+    injectionModel_.reset
+    (
+        InjectionModel<KinematicCloud<ParcelType> >::New
+        (
+            subModelProperties_,
+            *this
+        ).ptr()
+    );
+
+    patchInteractionModel_.reset
+    (
+        PatchInteractionModel<KinematicCloud<ParcelType> >::New
+        (
+            subModelProperties_,
+            *this
+        ).ptr()
+    );
+
+    postProcessingModel_.reset
+    (
+        PostProcessingModel<KinematicCloud<ParcelType> >::New
+        (
+            subModelProperties_,
+            *this
+        ).ptr()
+    );
+
+    surfaceFilmModel_.reset
+    (
+        SurfaceFilmModel<KinematicCloud<ParcelType> >::New
+        (
+            subModelProperties_,
+            *this,
+            g_
+        ).ptr()
+    );
+
+    UIntegrator_.reset
+    (
+        vectorIntegrationScheme::New
+        (
+            "U",
+            solution_.integrationSchemes()
+        ).ptr()
+    );
+}
+
 
 template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::solve
@@ -446,8 +528,8 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
         )
     ),
     solution_(mesh_, particleProperties_.subDict("solution")),
-    constProps_(particleProperties_),
-    subModelProperties_(particleProperties_.subDict("subModels")),
+    constProps_(particleProperties_, solution_.active()),
+    subModelProperties_(particleProperties_.subOrEmptyDict("subModels")),
     rndGen_
     (
         label(0),
@@ -458,72 +540,15 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     U_(U),
     mu_(mu),
     g_(g),
-    forces_(mesh_, particleProperties_, g_.value()),
-    collisionModel_
-    (
-        CollisionModel<KinematicCloud<ParcelType> >::New
-        (
-            subModelProperties_,
-            *this
-        )
-    ),
-    dispersionModel_
-    (
-        DispersionModel<KinematicCloud<ParcelType> >::New
-        (
-            subModelProperties_,
-            *this
-        )
-    ),
-    dragModel_
-    (
-        DragModel<KinematicCloud<ParcelType> >::New
-        (
-            subModelProperties_,
-            *this
-        )
-    ),
-    injectionModel_
-    (
-        InjectionModel<KinematicCloud<ParcelType> >::New
-        (
-            subModelProperties_,
-            *this
-        )
-    ),
-    patchInteractionModel_
-    (
-        PatchInteractionModel<KinematicCloud<ParcelType> >::New
-        (
-            subModelProperties_,
-            *this
-        )
-    ),
-    postProcessingModel_
-    (
-        PostProcessingModel<KinematicCloud<ParcelType> >::New
-        (
-            subModelProperties_,
-            *this
-        )
-    ),
-    surfaceFilmModel_
-    (
-        SurfaceFilmModel<KinematicCloud<ParcelType> >::New
-        (
-            subModelProperties_,
-            *this,
-            g
-        )
-    ),
-    UIntegrator_
-    (
-        vectorIntegrationScheme::New
-        (
-            "U",
-            solution_.integrationSchemes()
-        )
-    ),
+    forces_(mesh_, particleProperties_, g_.value(), solution_.active()),
+    collisionModel_(NULL),
+    dispersionModel_(NULL),
+    dragModel_(NULL),
+    injectionModel_(NULL),
+    patchInteractionModel_(NULL),
+    postProcessingModel_(NULL),
+    surfaceFilmModel_(NULL),
+    UIntegrator_(NULL),
     UTrans_
     (
         new DimensionedField<vector, volMesh>
@@ -557,6 +582,11 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
         )
     )
 {
+    if (solution_.active())
+    {
+        setModels();
+    }
+
     if (readFields)
     {
         ParcelType::readFields(*this);

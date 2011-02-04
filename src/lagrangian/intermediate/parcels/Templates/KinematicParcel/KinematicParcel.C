@@ -308,6 +308,7 @@ bool Foam::KinematicParcel<ParcelType>::move
 
     const polyMesh& mesh = td.cloud().pMesh();
     const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
+    const scalarField& V = mesh.cellVolumes();
 
     switch (td.part())
     {
@@ -336,7 +337,7 @@ bool Foam::KinematicParcel<ParcelType>::move
                 // Set the Lagrangian time-step
                 scalar dt = min(dtMax, tEnd);
 
-                // Remember which cell the Parcel is in since this
+                // Remember which cell the parcel is in since this
                 // will change if a face is hit
                 const label cellI = p.cell();
 
@@ -344,9 +345,11 @@ bool Foam::KinematicParcel<ParcelType>::move
                 if (p.active() && magU > ROOTVSMALL)
                 {
                     const scalar d = dt*magU;
-                    const vector n = U_/magU;
-                    const scalar dCorr = min(d, mag(n & mesh.bounds().span()));
-                    dt *= dCorr/d*p.trackToFace(p.position() + dCorr*n, td);
+                    const scalar maxCo = td.cloud().solution().maxCo();
+                    const scalar dCorr = min(d, maxCo*cbrt(V[cellI]));
+                    dt *=
+                        dCorr/d
+                       *p.trackToFace(p.position() + dCorr*U_/magU, td);
                 }
 
                 tEnd -= dt;

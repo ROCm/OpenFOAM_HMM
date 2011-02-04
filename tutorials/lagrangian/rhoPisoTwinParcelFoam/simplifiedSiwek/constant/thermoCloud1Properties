@@ -106,10 +106,10 @@ subModels
         SOI             0;
         positionsFile   "thermoCloud1Positions";
         U0              ( 0 0 0 );
-        parcelPDF
+        sizeDistribution
         {
             pdfType         RosinRammler;
-            RosinRammlerPDF
+            RosinRammlerDistribution
             {
                 minValue        5e-06;
                 maxValue        0.0005;

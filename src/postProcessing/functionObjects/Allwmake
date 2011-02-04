@@ -1,12 +1,13 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
+[ $# -ge 1 ] && makeOption=$1 || makeOption=libso
 set -x
 
-wmake libso field
-wmake libso forces
-wmake libso IO
-wmake libso utilities
-wmake libso jobControl
-wmake libso systemCall
+wmake $makeOption field
+wmake $makeOption forces
+wmake $makeOption IO
+wmake $makeOption utilities
+wmake $makeOption jobControl
+wmake $makeOption systemCall
 
 # ----------------------------------------------------------------- end-of-file

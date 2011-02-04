@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,6 +71,8 @@ class lowReOneEqEddy
 {
     // Private data
 
+        volScalarField k_;
+
         dimensionedScalar ck_;
         dimensionedScalar beta_;
 
@@ -110,6 +112,12 @@ public:
 
 
     // Member Functions
+
+        //- Return SGS kinetic energy
+        virtual tmp<volScalarField> k() const
+        {
+            return k_;
+        }
 
         //- Return the effective diffusivity for k
         tmp<volScalarField> DkEff() const

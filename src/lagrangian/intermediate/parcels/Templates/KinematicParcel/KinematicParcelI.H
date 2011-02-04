@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,17 +62,28 @@ inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
 template<class ParcelType>
 inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
 (
-    const dictionary& parentDict
+    const dictionary& parentDict,
+    const bool readFields
 )
 :
-    dict_(parentDict.subDict("constantProperties")),
-    parcelTypeId_(readLabel(dict_.lookup("parcelTypeId"))),
-    rhoMin_(readScalar(dict_.lookup("rhoMin"))),
-    rho0_(readScalar(dict_.lookup("rho0"))),
-    minParticleMass_(readScalar(dict_.lookup("minParticleMass"))),
-    youngsModulus_(readScalar(dict_.lookup("youngsModulus"))),
-    poissonsRatio_(readScalar(dict_.lookup("poissonsRatio")))
-{}
+    dict_(parentDict.subOrEmptyDict("constantProperties")),
+    parcelTypeId_(-1),
+    rhoMin_(0.0),
+    rho0_(0.0),
+    minParticleMass_(0.0),
+    youngsModulus_(0.0),
+    poissonsRatio_(0.0)
+{
+    if (readFields)
+    {
+        dict_.lookup("parcelTypeId") >> parcelTypeId_;
+        dict_.lookup("rhoMin") >> rhoMin_;
+        dict_.lookup("rho0") >> rho0_;
+        dict_.lookup("minParticleMass") >> minParticleMass_;
+        dict_.lookup("youngsModulus") >> youngsModulus_;
+        dict_.lookup("poissonsRatio") >> poissonsRatio_;
+    }
+}
 
 
 template<class ParcelType>

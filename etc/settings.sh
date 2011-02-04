@@ -71,24 +71,24 @@ export WM_LINK_LANGUAGE=c++
 export WM_OPTIONS=$WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_COMPILE_OPTION
 
 # base executables/libraries
-export FOAM_APPBIN=$WM_PROJECT_DIR/bin/$WM_OPTIONS
-export FOAM_LIBBIN=$WM_PROJECT_DIR/lib/$WM_OPTIONS
+export FOAM_APPBIN=$WM_PROJECT_DIR/platforms/$WM_OPTIONS/bin
+export FOAM_LIBBIN=$WM_PROJECT_DIR/platforms/$WM_OPTIONS/lib
 
 # external (ThirdParty) libraries
-export FOAM_EXT_LIBBIN=$WM_THIRD_PARTY_DIR/lib/$WM_OPTIONS
+export FOAM_EXT_LIBBIN=$WM_THIRD_PARTY_DIR/platforms/$WM_OPTIONS/lib
 
 # shared site executables/libraries
 # similar naming convention as ~OpenFOAM expansion
-export FOAM_SITE_APPBIN=$WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/bin/$WM_OPTIONS
-export FOAM_SITE_LIBBIN=$WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/lib/$WM_OPTIONS
+export FOAM_SITE_APPBIN=$WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/bin
+export FOAM_SITE_LIBBIN=$WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib
 
 # user executables/libraries
-export FOAM_USER_APPBIN=$WM_PROJECT_USER_DIR/bin/$WM_OPTIONS
-export FOAM_USER_LIBBIN=$WM_PROJECT_USER_DIR/lib/$WM_OPTIONS
+export FOAM_USER_APPBIN=$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/bin
+export FOAM_USER_LIBBIN=$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib
 
 # convenience
 export FOAM_APP=$WM_PROJECT_DIR/applications
-export FOAM_LIB=$WM_PROJECT_DIR/lib
+#export FOAM_LIB=$WM_PROJECT_DIR/lib
 export FOAM_SRC=$WM_PROJECT_DIR/src
 export FOAM_TUTORIALS=$WM_PROJECT_DIR/tutorials
 export FOAM_UTILITIES=$FOAM_APP/utilities
@@ -273,13 +273,13 @@ unset boost_version cgal_version
 # Communications library
 # ~~~~~~~~~~~~~~~~~~~~~~
 
-unset MPI_ARCH_PATH MPI_HOME
+unset MPI_ARCH_PATH MPI_HOME FOAM_MPI_LIBBIN
 
 case "$WM_MPLIB" in
 OPENMPI)
-    #mpi_version=openmpi-1.4.1
-    mpi_version=openmpi-1.5.1
-    export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$mpi_version
+    #export FOAM_MPI=openmpi-1.4.1
+    export FOAM_MPI=openmpi-1.5.1
+    export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
 
     # Tell OpenMPI where to find its install directory
     export OPAL_PREFIX=$MPI_ARCH_PATH
@@ -287,14 +287,11 @@ OPENMPI)
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib
     _foamAddMan     $MPI_ARCH_PATH/man
-
-    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/$mpi_version
-    unset mpi_version
     ;;
 
 SYSTEMOPENMPI)
     # Use the system installed openmpi, get library directory via mpicc
-    mpi_version=openmpi-system
+    export FOAM_MPI=openmpi-system
 
     # Set compilation flags here instead of in wmake/rules/../mplibSYSTEMOPENMPI
     export PINC="`mpicc --showme:compile`"
@@ -310,25 +307,21 @@ SYSTEMOPENMPI)
     fi
 
     _foamAddLib     $libDir
-
-    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/$mpi_version
-    unset mpi_version libDir
+    unset libDir
     ;;
 
 MPICH)
-    mpi_version=mpich2-1.1.1p1
-    export MPI_HOME=$WM_THIRD_PARTY_DIR/$mpi_version
-    export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$mpi_version
+    export FOAM_MPI=mpich2-1.1.1p1
+    export MPI_HOME=$WM_THIRD_PARTY_DIR/$FOAM_MPI
+    export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
 
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib
     _foamAddMan     $MPI_ARCH_PATH/share/man
-
-    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/$mpi_version
-    unset mpi_version
     ;;
 
 MPICH-GM)
+    export FOAM_MPI=mpich-gm
     export MPI_ARCH_PATH=/opt/mpi
     export MPICH_PATH=$MPI_ARCH_PATH
     export GM_LIB_PATH=/opt/gm/lib64
@@ -336,11 +329,10 @@ MPICH-GM)
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib
     _foamAddLib     $GM_LIB_PATH
-
-    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/mpich-gm
     ;;
 
 HPMPI)
+    export FOAM_MPI=hpmpi
     export MPI_HOME=/opt/hpmpi
     export MPI_ARCH_PATH=$MPI_HOME
 
@@ -361,23 +353,21 @@ HPMPI)
         echo Unknown processor type `uname -m` for Linux
         ;;
     esac
-
-    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/hpmpi
     ;;
 
 GAMMA)
+    export FOAM_MPI=gamma
     export MPI_ARCH_PATH=/usr
-    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/gamma
     ;;
 
 MPI)
+    export FOAM_MPI=mpi
     export MPI_ARCH_PATH=/opt/mpi
-    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/mpi
     ;;
 
 FJMPI)
+    export FOAM_MPI=fjmpi
     export MPI_ARCH_PATH=/opt/FJSVmpi2
-    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/mpi
 
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib/sparcv9
@@ -386,20 +376,25 @@ FJMPI)
     ;;
 
 QSMPI)
+    export FOAM_MPI=qsmpi
     export MPI_ARCH_PATH=/usr/lib/mpi
-    export FOAM_MPI_LIBBIN=$FOAM_EXT_LIBBIN/qsmpi
 
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib
-
     ;;
 
 *)
-    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/dummy
+    export FOAM_MPI=dummy
     ;;
 esac
 
-_foamAddLib $FOAM_MPI_LIBBIN
+# add (non-dummy) MPI implementation
+# dummy MPI already added to LD_LIBRARY_PATH and has no external libraries
+if [ "$FOAM_MPI" != dummy ]
+then
+    _foamAddLib $FOAM_LIBBIN/$FOAM_MPI:$FOAM_EXT_LIBBIN/$FOAM_MPI
+fi
+
 
 
 # Set the minimum MPI buffer size (used by all platforms except SGI MPI)
@@ -411,14 +406,6 @@ then
     MPI_BUFFER_SIZE=$minBufferSize
 fi
 export MPI_BUFFER_SIZE
-
-
-# Enable the hoard memory allocator if available
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#if [ -f $FOAM_EXT_LIBBIN/libhoard.so ]
-#then
-#    export LD_PRELOAD=$FOAM_EXT_LIBBIN/libhoard.so:$LD_PRELOAD
-#fi
 
 
 # cleanup environment:

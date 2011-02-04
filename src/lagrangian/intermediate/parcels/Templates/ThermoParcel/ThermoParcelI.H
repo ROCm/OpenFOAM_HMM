@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,17 +57,28 @@ inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
 template<class ParcelType>
 inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
 (
-    const dictionary& parentDict
+    const dictionary& parentDict,
+    const bool readFields
 )
 :
-    KinematicParcel<ParcelType>::constantProperties(parentDict),
-    T0_(readScalar(this->dict().lookup("T0"))),
-    TMin_(readScalar(this->dict().lookup("TMin"))),
-    Cp0_(readScalar(this->dict().lookup("Cp0"))),
-    epsilon0_(readScalar(this->dict().lookup("epsilon0"))),
-    f0_(readScalar(this->dict().lookup("f0"))),
-    Pr_(readScalar(this->dict().lookup("Pr")))
-{}
+    KinematicParcel<ParcelType>::constantProperties(parentDict, readFields),
+    T0_(0.0),
+    TMin_(0.0),
+    Cp0_(0.0),
+    epsilon0_(0.0),
+    f0_(0.0),
+    Pr_(0.0)
+{
+    if (readFields)
+    {
+        this->dict().lookup("T0") >> T0_;
+        this->dict().lookup("TMin") >> TMin_;
+        this->dict().lookup("Cp0") >> Cp0_;
+        this->dict().lookup("epsilon0") >> epsilon0_;
+        this->dict().lookup("f0") >> f0_;
+        this->dict().lookup("Pr") >> Pr_;
+    }
+}
 
 
 template<class ParcelType>

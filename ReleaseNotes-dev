@@ -5,7 +5,7 @@
 #+DATE:                            TBA
 #+LINK:                  http://www.openfoam.com
 #+OPTIONS: author:nil ^:{}
-# Copyright (c) 2010 OpenCFD Ltd.
+# Copyright (c) 2011 OpenCFD Ltd.
 
 * Overview
   OpenFOAM-dev is the latest major release of OpenFOAM including many new
@@ -117,7 +117,7 @@
 *** *New* compact binary I/O for faces and cells. This speeds up reading/writing meshes in binary.
 *** *Updated* runTimeModifiable
     + user selectable model to use for checking run-time modifiable
-      dictionaries:
+      dictionaries (see also doc/changes/inotify.txt):
       + timeStamp : use time stamp as before
       + inotify : use inotify instead of time stamp
       + timeStampMaster : only master checks and reads file. Slaves get file
