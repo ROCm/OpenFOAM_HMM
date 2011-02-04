@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::Polynomial
+    Foam::polynomialFunction
 
 Description
-    Polynomial templated on size (order):
+    Polynomial function representation
 
         poly = logCoeff*log(x) + sum(coeff_[i]*x^i)
 
@@ -39,19 +39,20 @@ Description
     - integralMinus1() to return a new, integral coeff polynomial where
       the base poly starts at order -1
 
+SeeAlso
+    Foam::Polynomial for a templated implementation
+
 SourceFiles
-    Polynomial.C
+    polynomialFunction.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Polynomial_H
-#define Polynomial_H
+#ifndef polynomialFunction_H
+#define polynomialFunction_H
 
-#include "word.H"
-#include "scalar.H"
+#include "scalarList.H"
 #include "Ostream.H"
-#include "VectorSpace.H"
-#include "StaticAssert.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,30 +60,20 @@ namespace Foam
 {
 
 // Forward declaration of classes
-template<int PolySize>
-class Polynomial;
+class polynomialFunction;
 
 // Forward declaration of friend functions
-template<int PolySize>
-Ostream& operator<<
-(
-    Ostream&,
-    const Polynomial<PolySize>&
-);
+Ostream& operator<<(Ostream&, const polynomialFunction&);
 
 
 /*---------------------------------------------------------------------------*\
-                        Class Polynomial Declaration
+                     Class polynomialFunction Declaration
 \*---------------------------------------------------------------------------*/
 
-template<int PolySize>
-class Polynomial
+class polynomialFunction
 :
-    public VectorSpace<Polynomial<PolySize>, scalar, PolySize>
+    private scalarList
 {
-    //- Size must be positive (non-zero)
-    StaticAssert(PolySize > 0);
-
     // Private data
 
         //- Include the log term? - only activated using integralMinus1()
@@ -92,37 +83,66 @@ class Polynomial
         scalar logCoeff_;
 
 
+    // Private Member Functions
+
+        //- Return integral coefficients.
+        //  Argument becomes zeroth element (constant of integration)
+        static polynomialFunction cloneIntegral
+        (
+            const polynomialFunction&,
+            const scalar intConstant = 0.0
+        );
+
+        //- Return integral coefficients when lowest order is -1.
+        //  Argument becomes zeroth element (constant of integration)
+        static polynomialFunction cloneIntegralMinus1
+        (
+            const polynomialFunction&,
+            const scalar intConstant = 0.0
+        );
+
+
+        //- Disallow default bitwise assignment
+        void operator=(const polynomialFunction&);
+
+
+
 public:
 
-    typedef Polynomial<PolySize> polyType;
-
-    typedef Polynomial<PolySize+1> intPolyType;
+    //- Runtime type information
+    TypeName("polynomialFunction");
 
 
     // Constructors
 
-        //- Construct null, with all coefficients = 0.0
-        Polynomial();
+        //- Construct a particular size, with all coefficients = 0.0
+        explicit polynomialFunction(const label);
 
         //- Copy constructor
-        Polynomial(const Polynomial&);
-
-        //- Construct from C-array of coefficients
-        explicit Polynomial(const scalar coeffs[PolySize]);
+        polynomialFunction(const polynomialFunction&);
 
         //- Construct from a list of coefficients
-        explicit Polynomial(const UList<scalar>& coeffs);
+        explicit polynomialFunction(const UList<scalar>& coeffs);
 
         //- Construct from Istream
-        Polynomial(Istream&);
+        polynomialFunction(Istream&);
 
-        //- Construct from name and Istream
-        Polynomial(const word& name, Istream&);
+
+    //- Destructor
+    virtual ~polynomialFunction();
 
 
     // Member Functions
 
+            //- Return the number of coefficients
+            using scalarList::size;
+
+            //- Return coefficient
+            using scalarList::operator[];
+
+
         // Access
+
 
             //- Return true if the log term is active
             bool logActive() const;
@@ -142,32 +162,82 @@ public:
 
             //- Return integral coefficients.
             //  Argument becomes zeroth element (constant of integration)
-            intPolyType integral(const scalar intConstant = 0.0) const;
+            polynomialFunction integral
+            (
+                const scalar intConstant = 0.0
+            ) const;
 
             //- Return integral coefficients when lowest order is -1.
             //  Argument becomes zeroth element (constant of integration)
-            polyType integralMinus1(const scalar intConstant = 0.0) const;
+            polynomialFunction integralMinus1
+            (
+                const scalar intConstant = 0.0
+            ) const;
+
+
+    // Member Operators
+
+        polynomialFunction& operator+=(const polynomialFunction&);
+        polynomialFunction& operator-=(const polynomialFunction&);
+
+        polynomialFunction& operator*=(const scalar);
+        polynomialFunction& operator/=(const scalar);
 
 
     //- Ostream Operator
-    friend Ostream& operator<< <PolySize>
-    (
-        Ostream&,
-        const Polynomial&
-    );
+    friend Ostream& operator<<(Ostream&, const polynomialFunction&);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+
+polynomialFunction operator+
+(
+    const polynomialFunction&,
+    const polynomialFunction&
+);
+
+
+polynomialFunction operator-
+(
+    const polynomialFunction&,
+    const polynomialFunction&
+);
+
+
+polynomialFunction operator*
+(
+    const scalar,
+    const polynomialFunction&
+);
+
+
+polynomialFunction operator/
+(
+    const scalar,
+    const polynomialFunction&
+);
+
+
+polynomialFunction operator*
+(
+    const polynomialFunction&,
+    const scalar
+);
+
+
+polynomialFunction operator/
+(
+    const polynomialFunction&,
+    const scalar
+);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#ifdef NoRepository
-#   include "Polynomial.C"
-#   include "PolynomialIO.C"
-#endif
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
