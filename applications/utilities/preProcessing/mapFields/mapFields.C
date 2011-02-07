@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,8 @@ Description
 void mapConsistentMesh
 (
     const fvMesh& meshSource,
-    const fvMesh& meshTarget
+    const fvMesh& meshTarget,
+    const meshToMesh::order& mapOrder
 )
 {
     // Create the interpolation scheme
@@ -61,11 +62,16 @@ void mapConsistentMesh
 
         // Map volFields
         // ~~~~~~~~~~~~~
-        MapConsistentVolFields<scalar>(objects, meshToMeshInterp);
-        MapConsistentVolFields<vector>(objects, meshToMeshInterp);
-        MapConsistentVolFields<sphericalTensor>(objects, meshToMeshInterp);
-        MapConsistentVolFields<symmTensor>(objects, meshToMeshInterp);
-        MapConsistentVolFields<tensor>(objects, meshToMeshInterp);
+        MapConsistentVolFields<scalar>(objects, meshToMeshInterp, mapOrder);
+        MapConsistentVolFields<vector>(objects, meshToMeshInterp, mapOrder);
+        MapConsistentVolFields<sphericalTensor>
+        (
+            objects,
+            meshToMeshInterp,
+            mapOrder
+        );
+        MapConsistentVolFields<symmTensor>(objects, meshToMeshInterp, mapOrder);
+        MapConsistentVolFields<tensor>(objects, meshToMeshInterp, mapOrder);
     }
 
     {
@@ -98,7 +104,8 @@ void mapSubMesh
     const fvMesh& meshSource,
     const fvMesh& meshTarget,
     const HashTable<word>& patchMap,
-    const wordList& cuttingPatches
+    const wordList& cuttingPatches,
+    const meshToMesh::order& mapOrder
 )
 {
     // Create the interpolation scheme
@@ -120,11 +127,11 @@ void mapSubMesh
 
         // Map volFields
         // ~~~~~~~~~~~~~
-        MapVolFields<scalar>(objects, meshToMeshInterp);
-        MapVolFields<vector>(objects, meshToMeshInterp);
-        MapVolFields<sphericalTensor>(objects, meshToMeshInterp);
-        MapVolFields<symmTensor>(objects, meshToMeshInterp);
-        MapVolFields<tensor>(objects, meshToMeshInterp);
+        MapVolFields<scalar>(objects, meshToMeshInterp, mapOrder);
+        MapVolFields<vector>(objects, meshToMeshInterp, mapOrder);
+        MapVolFields<sphericalTensor>(objects, meshToMeshInterp, mapOrder);
+        MapVolFields<symmTensor>(objects, meshToMeshInterp, mapOrder);
+        MapVolFields<tensor>(objects, meshToMeshInterp, mapOrder);
     }
 
     {
@@ -155,7 +162,8 @@ void mapSubMesh
 void mapConsistentSubMesh
 (
     const fvMesh& meshSource,
-    const fvMesh& meshTarget
+    const fvMesh& meshTarget,
+    const meshToMesh::order& mapOrder
 )
 {
     HashTable<word> patchMap;
@@ -181,7 +189,14 @@ void mapConsistentSubMesh
         }
     }
 
-    mapSubMesh(meshSource, meshTarget, patchMap, cuttingPatchTable.toc());
+    mapSubMesh
+    (
+        meshSource,
+        meshTarget,
+        patchMap,
+        cuttingPatchTable.toc(),
+        mapOrder
+    );
 }
 
 
@@ -240,6 +255,18 @@ int main(int argc, char *argv[])
         "scalar",
         "specify the source time"
     );
+    argList::addOption
+    (
+        "sourceRegion",
+        "word",
+        "specify the source region"
+    );
+    argList::addOption
+    (
+        "targetRegion",
+        "word",
+        "specify the target region"
+    );
     argList::addBoolOption
     (
         "parallelSource",
@@ -255,12 +282,18 @@ int main(int argc, char *argv[])
         "consistent",
         "source and target geometry and boundary conditions identical"
     );
+    argList::addOption
+    (
+        "mapMethod",
+        "word",
+        "specify the mapping method"
+    );
 
     argList args(argc, argv);
 
     if (!args.check())
     {
-         FatalError.exit();
+        FatalError.exit();
     }
 
     fileName rootDirTarget(args.rootPath());
@@ -270,12 +303,52 @@ int main(int argc, char *argv[])
     const fileName rootDirSource = casePath.path();
     const fileName caseDirSource = casePath.name();
 
-    Info<< "Source: " << rootDirSource << " " << caseDirSource << nl
-        << "Target: " << rootDirTarget << " " << caseDirTarget << endl;
+    Info<< "Source: " << rootDirSource << " " << caseDirSource << endl;
+    word sourceRegion = fvMesh::defaultRegion;
+    if (args.optionFound("sourceRegion"))
+    {
+        sourceRegion = args["sourceRegion"];
+        Info<< "Source region: " << sourceRegion << endl;
+    }
+
+    Info<< "Target: " << rootDirTarget << " " << caseDirTarget << endl;
+    word targetRegion = fvMesh::defaultRegion;
+    if (args.optionFound("targetRegion"))
+    {
+        targetRegion = args["targetRegion"];
+        Info<< "Target region: " << targetRegion << endl;
+    }
 
     const bool parallelSource = args.optionFound("parallelSource");
     const bool parallelTarget = args.optionFound("parallelTarget");
-    const bool consistent     = args.optionFound("consistent");
+    const bool consistent = args.optionFound("consistent");
+
+    meshToMesh::order mapOrder = meshToMesh::INTERPOLATE;
+    if (args.optionFound("mapMethod"))
+    {
+        const word mapMethod(args["mapMethod"]);
+        if (mapMethod == "mapNearest")
+        {
+            mapOrder = meshToMesh::MAP;
+        }
+        else if (mapMethod == "interpolate")
+        {
+            mapOrder = meshToMesh::INTERPOLATE;
+        }
+        else if (mapMethod == "cellPointInterpolate")
+        {
+            mapOrder = meshToMesh::CELL_POINT_INTERPOLATE;
+        }
+        else
+        {
+            FatalErrorIn(args.executable())
+                << "Unknown mapMethod " << mapMethod << ". Valid options are: "
+                << "mapNearest, interpolate and cellPointInterpolate"
+                << exit(FatalError);
+        }
+
+        Info<< "Mapping method: " << mapMethod << endl;
+    }
 
     #include "createTimes.H"
 
@@ -323,7 +396,7 @@ int main(int argc, char *argv[])
         (
             IOobject
             (
-                fvMesh::defaultRegion,
+                targetRegion,
                 runTimeTarget.timeName(),
                 runTimeTarget
             )
@@ -348,7 +421,7 @@ int main(int argc, char *argv[])
             (
                 IOobject
                 (
-                    fvMesh::defaultRegion,
+                    sourceRegion,
                     runTimeSource.timeName(),
                     runTimeSource
                 )
@@ -358,11 +431,18 @@ int main(int argc, char *argv[])
 
             if (consistent)
             {
-                mapConsistentSubMesh(meshSource, meshTarget);
+                mapConsistentSubMesh(meshSource, meshTarget, mapOrder);
             }
             else
             {
-                mapSubMesh(meshSource, meshTarget, patchMap, cuttingPatches);
+                mapSubMesh
+                (
+                    meshSource,
+                    meshTarget,
+                    patchMap,
+                    cuttingPatches,
+                    mapOrder
+                );
             }
         }
     }
@@ -390,7 +470,7 @@ int main(int argc, char *argv[])
         (
             IOobject
             (
-                fvMesh::defaultRegion,
+                sourceRegion,
                 runTimeSource.timeName(),
                 runTimeSource
             )
@@ -413,7 +493,7 @@ int main(int argc, char *argv[])
             (
                 IOobject
                 (
-                    fvMesh::defaultRegion,
+                    targetRegion,
                     runTimeTarget.timeName(),
                     runTimeTarget
                 )
@@ -423,7 +503,7 @@ int main(int argc, char *argv[])
 
             if (consistent)
             {
-                mapConsistentSubMesh(meshSource, meshTarget);
+                mapConsistentSubMesh(meshSource, meshTarget, mapOrder);
             }
             else
             {
@@ -432,7 +512,8 @@ int main(int argc, char *argv[])
                     meshSource,
                     meshTarget,
                     patchMap,
-                    addProcessorPatches(meshTarget, cuttingPatches)
+                    addProcessorPatches(meshTarget, cuttingPatches),
+                    mapOrder
                 );
             }
         }
@@ -494,7 +575,7 @@ int main(int argc, char *argv[])
             (
                 IOobject
                 (
-                    fvMesh::defaultRegion,
+                    sourceRegion,
                     runTimeSource.timeName(),
                     runTimeSource
                 )
@@ -529,7 +610,7 @@ int main(int argc, char *argv[])
                     (
                         IOobject
                         (
-                            fvMesh::defaultRegion,
+                            targetRegion,
                             runTimeTarget.timeName(),
                             runTimeTarget
                         )
@@ -544,7 +625,12 @@ int main(int argc, char *argv[])
                     {
                         if (consistent)
                         {
-                            mapConsistentSubMesh(meshSource, meshTarget);
+                            mapConsistentSubMesh
+                            (
+                                meshSource,
+                                meshTarget,
+                                mapOrder
+                            );
                         }
                         else
                         {
@@ -553,7 +639,8 @@ int main(int argc, char *argv[])
                                 meshSource,
                                 meshTarget,
                                 patchMap,
-                                addProcessorPatches(meshTarget, cuttingPatches)
+                                addProcessorPatches(meshTarget, cuttingPatches),
+                                mapOrder
                             );
                         }
                     }
@@ -571,7 +658,7 @@ int main(int argc, char *argv[])
         (
             IOobject
             (
-                fvMesh::defaultRegion,
+                sourceRegion,
                 runTimeSource.timeName(),
                 runTimeSource
             )
@@ -581,7 +668,7 @@ int main(int argc, char *argv[])
         (
             IOobject
             (
-                fvMesh::defaultRegion,
+                targetRegion,
                 runTimeTarget.timeName(),
                 runTimeTarget
             )
@@ -592,11 +679,18 @@ int main(int argc, char *argv[])
 
         if (consistent)
         {
-            mapConsistentMesh(meshSource, meshTarget);
+            mapConsistentMesh(meshSource, meshTarget, mapOrder);
         }
         else
         {
-            mapSubMesh(meshSource, meshTarget, patchMap, cuttingPatches);
+            mapSubMesh
+            (
+                meshSource,
+                meshTarget,
+                patchMap,
+                cuttingPatches,
+                mapOrder
+            );
         }
     }
 
