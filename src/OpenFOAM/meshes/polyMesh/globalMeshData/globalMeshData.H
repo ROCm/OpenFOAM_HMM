@@ -470,6 +470,17 @@ public:
                 const bool isPosition
             );
 
+            //- Helper: synchronise data without transforms
+            template<class Type, class CombineOp>
+            static void syncData
+            (
+                List<Type>& pointData,
+                const labelListList& slaves,
+                const labelListList& transformedSlaves,
+                const mapDistribute& slavesMap,
+                const CombineOp& cop
+            );
+
 
             // Coupled point to coupled points. Coupled points are
             // points on any coupled patch.

@@ -841,7 +841,7 @@ Foam::label Foam::globalMeshData::findTransform
             << abort(FatalError);
     }
 
-    return globalIndexAndTransform::subtractTransformIndex
+    return globalTransforms().subtractTransformIndex
     (
         remoteTransformI,
         localTransformI
@@ -859,7 +859,6 @@ void Foam::globalMeshData::calcGlobalEdgeSlaves() const
 
     const edgeList& edges = coupledPatch().edges();
     const globalIndex& globalEdgeNumbers = globalEdgeNumbering();
-    const pointField& localPoints = coupledPatch().localPoints();
 
 
     // The whole problem with deducting edge-connectivity from
@@ -920,7 +919,11 @@ void Foam::globalMeshData::calcGlobalEdgeSlaves() const
         {
             forAll(pEdges1, j)
             {
-                if (pEdges0[i] == pEdges1[j] && pEdges0[i] != edgeI)
+                if
+                (
+                    pEdges0[i] == pEdges1[j]
+                 && pEdges0[i] != globalEdgeNumbers.toGlobal(edgeI)
+                )
                 {
                     // Found a shared edge. Now check if the endpoints
                     // go through the same transformation.

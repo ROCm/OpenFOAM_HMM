@@ -91,6 +91,59 @@ void Foam::globalMeshData::syncData
 
 
 template<class Type, class CombineOp>
+void Foam::globalMeshData::syncData
+(
+    List<Type>& elems,
+    const labelListList& slaves,
+    const labelListList& transformedSlaves,
+    const mapDistribute& slavesMap,
+    const CombineOp& cop
+)
+{
+    // Pull slave data onto master
+    slavesMap.distribute(elems);
+
+    // Combine master data with slave data
+    forAll(slaves, i)
+    {
+        Type& elem = elems[i];
+
+        const labelList& slavePoints = slaves[i];
+        const labelList& transformSlavePoints = transformedSlaves[i];
+
+        if (slavePoints.size()+transformSlavePoints.size() > 0)
+        {
+            // Combine master with untransformed slave data
+            forAll(slavePoints, j)
+            {
+                cop(elem, elems[slavePoints[j]]);
+            }
+
+            // Combine master with transformed slave data
+            forAll(transformSlavePoints, j)
+            {
+                cop(elem, elems[transformSlavePoints[j]]);
+            }
+
+
+            // Copy result back to slave slots
+            forAll(slavePoints, j)
+            {
+                elems[slavePoints[j]] = elem;
+            }
+            forAll(transformSlavePoints, j)
+            {
+                elems[transformSlavePoints[j]] = elem;
+            }
+        }
+    }
+
+    // Push slave-slot data back to slaves
+    slavesMap.reverseDistribute(elems.size(), elems);
+}
+
+
+template<class Type, class CombineOp>
 void Foam::globalMeshData::syncPointData
 (
     List<Type>& pointData,
