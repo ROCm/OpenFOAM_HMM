@@ -60,6 +60,24 @@ class polyMesh;
 
 class globalIndexAndTransform
 {
+public:
+
+    // Public classes
+
+        //- Less function class used in sorting encoded transforms and indices
+        //  - minimum processor
+        //  - minimum local index
+        //  - minimum transform
+        class less
+        {
+        public:
+
+            inline bool operator()(const labelPair&, const labelPair&) const;
+        };
+
+
+private:
+
     // Private data
 
         //- Reference to mesh
@@ -120,11 +138,17 @@ class globalIndexAndTransform
             bool checkBothSigns
         ) const;
 
+        //- Encode transform index. Hardcoded to 3 independent transforms max.
+        inline label encodeTransformIndex
+        (
+            const FixedList<Foam::label, 3>& permutationIndices
+        ) const;
+
         //- Decode transform index. Hardcoded to 3 independent transforms max.
-        inline static FixedList<label, 3> decodeTransformIndex
+        inline FixedList<label, 3> decodeTransformIndex
         (
             const label transformIndex
-        );
+        ) const;
 
         //- Disallow default bitwise copy construct
         globalIndexAndTransform(const globalIndexAndTransform&);
@@ -134,6 +158,10 @@ class globalIndexAndTransform
 
 
 public:
+
+        //- Declare friendship with the entry class for IO
+        friend class globalPoints;
+
 
     // Constructors
 
@@ -166,18 +194,25 @@ public:
         ) const;
 
         //- Combine two transformIndices
-        static inline label mergeTransformIndex
+        inline label mergeTransformIndex
         (
             const label transformIndex0,
             const label transformIndex1
-        );
+        ) const;
 
         //- Combine two transformIndices
-        static inline label minimumTransformIndex
+        inline label minimumTransformIndex
         (
             const label transformIndex0,
             const label transformIndex1
-        );
+        ) const;
+
+        //- Subtract two transformIndices
+        inline label subtractTransformIndex
+        (
+            const label transformIndex0,
+            const label transformIndex1
+        ) const;
 
         //- Encode index and bare index as components on own processor
         inline static labelPair encode

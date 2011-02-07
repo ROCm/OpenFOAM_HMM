@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -331,7 +331,7 @@ bool triSurface::readAC(const fileName& ACfileName)
 
     *this = triSurface(faces, patches, allPoints, true);
 
-    stitchTriangles(allPoints);
+    stitchTriangles();
 
     return true;
 }

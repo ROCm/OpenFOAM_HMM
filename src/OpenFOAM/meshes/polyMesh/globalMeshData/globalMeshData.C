@@ -552,25 +552,102 @@ void Foam::globalMeshData::calcGlobalPointSlaves() const
 }
 
 
-void Foam::globalMeshData::calcGlobalEdgeSlaves() const
+void Foam::globalMeshData::calcPointConnectivity
+(
+    List<labelPairList>& allPointConnectivity
+) const
 {
-    if (debug)
+    const globalIndexAndTransform& transforms = globalTransforms();
+    const labelListList& slaves = globalPointSlaves();
+    const labelListList& transformedSlaves = globalPointTransformedSlaves();
+
+
+    // Create field with my local data
+    labelPairList myData(globalPointSlavesMap().constructSize());
+    forAll(slaves, pointI)
     {
-        Pout<< "globalMeshData::calcGlobalEdgeSlaves() :"
-            << " calculating coupled master to slave edge addressing." << endl;
+        myData[pointI] = globalIndexAndTransform::encode
+        (
+            Pstream::myProcNo(),
+            pointI,
+            transforms.nullTransformIndex()
+        );
     }
-
-    // - Send across connected edges (in global edge addressing)
-    // - Check on receiving side whether edge has same slave edge
-    //   on both endpoints.
+    // Send over.
+    globalPointSlavesMap().distribute(myData);
 
 
-    // Coupled point to global coupled edges.
-    labelListList globalPointEdges(globalPointSlavesMap().constructSize());
+    // String of connected points with their transform
+    allPointConnectivity.setSize(globalPointSlavesMap().constructSize());
+    forAll(slaves, pointI)
+    {
+        // Reconstruct string of connected points
+        const labelList& pSlaves = slaves[pointI];
+        const labelList& pTransformSlaves = transformedSlaves[pointI];
+        labelPairList& pConnectivity = allPointConnectivity[pointI];
+        pConnectivity.setSize(1+pSlaves.size()+pTransformSlaves.size());
+        label connI = 0;
 
-    // Create local version
+        // Add myself
+        pConnectivity[connI++] = myData[pointI];
+        // Add untransformed points
+        forAll(pSlaves, i)
+        {
+            pConnectivity[connI++] = myData[pSlaves[i]];
+        }
+        // Add transformed points.
+        forAll(pTransformSlaves, i)
+        {
+            // Get transform from index
+            label transformI = globalPointSlavesMap().whichTransform
+            (
+                pTransformSlaves[i]
+            );
+            // Add transform to connectivity
+            const labelPair& n = myData[pTransformSlaves[i]];
+            label procI = globalIndexAndTransform::processor(n);
+            label index = globalIndexAndTransform::index(n);
+            pConnectivity[connI++] = globalIndexAndTransform::encode
+            (
+                procI,
+                index,
+                transformI
+            );
+        }
+
+        // Put back in slots
+        forAll(pSlaves, i)
+        {
+            allPointConnectivity[pSlaves[i]] = pConnectivity;
+        }
+        forAll(pTransformSlaves, i)
+        {
+            allPointConnectivity[pTransformSlaves[i]] = pConnectivity;
+        }
+    }
+    globalPointSlavesMap().reverseDistribute
+    (
+        allPointConnectivity.size(),
+        allPointConnectivity
+    );
+}
+
+
+void Foam::globalMeshData::calcGlobalPointEdges
+(
+    labelListList& globalPointEdges,
+    List<labelPairList>& globalPointPoints
+) const
+{
+    const edgeList& edges = coupledPatch().edges();
     const labelListList& pointEdges = coupledPatch().pointEdges();
     const globalIndex& globalEdgeNumbers = globalEdgeNumbering();
+    const labelListList& slaves = globalPointSlaves();
+    const labelListList& transformedSlaves = globalPointTransformedSlaves();
+
+    // Create local version
+    globalPointEdges.setSize(globalPointSlavesMap().constructSize());
+    globalPointPoints.setSize(globalPointSlavesMap().constructSize());
     forAll(pointEdges, pointI)
     {
         const labelList& pEdges = pointEdges[pointI];
@@ -580,154 +657,377 @@ void Foam::globalMeshData::calcGlobalEdgeSlaves() const
         {
             globalPEdges[i] = globalEdgeNumbers.toGlobal(pEdges[i]);
         }
+
+        labelPairList& globalPPoints = globalPointPoints[pointI];
+        globalPPoints.setSize(pEdges.size());
+        forAll(pEdges, i)
+        {
+            label otherPointI = edges[pEdges[i]].otherVertex(pointI);
+            globalPPoints[i] = globalIndexAndTransform::encode
+            (
+                Pstream::myProcNo(),
+                otherPointI,
+                globalTransforms().nullTransformIndex()
+            );
+        }
     }
 
     // Pull slave data to master. Dummy transform.
     globalPointSlavesMap().distribute(globalPointEdges);
+    globalPointSlavesMap().distribute(globalPointPoints);
+    // Add all pointEdges
+    forAll(slaves, pointI)
+    {
+        const labelList& pSlaves = slaves[pointI];
+        const labelList& pTransformSlaves = transformedSlaves[pointI];
+
+        label n = 0;
+        forAll(pSlaves, i)
+        {
+            n += globalPointEdges[pSlaves[i]].size();
+        }
+        forAll(pTransformSlaves, i)
+        {
+            n += globalPointEdges[pTransformSlaves[i]].size();
+        }
+
+        // Add all the point edges of the slaves to those of the (master) point
+        {
+            labelList& globalPEdges = globalPointEdges[pointI];
+            label sz = globalPEdges.size();
+            globalPEdges.setSize(sz+n);
+            forAll(pSlaves, i)
+            {
+                const labelList& otherData = globalPointEdges[pSlaves[i]];
+                forAll(otherData, j)
+                {
+                    globalPEdges[sz++] = otherData[j];
+                }
+            }
+            forAll(pTransformSlaves, i)
+            {
+                const labelList& otherData =
+                    globalPointEdges[pTransformSlaves[i]];
+                forAll(otherData, j)
+                {
+                    globalPEdges[sz++] = otherData[j];
+                }
+            }
+
+            // Put back in slots
+            forAll(pSlaves, i)
+            {
+                globalPointEdges[pSlaves[i]] = globalPEdges;
+            }
+            forAll(pTransformSlaves, i)
+            {
+                globalPointEdges[pTransformSlaves[i]] = globalPEdges;
+            }
+        }
 
 
-    // Now check on master if any of my edges are also on slave.
-    // This assumes that if slaves have a coupled edge it is also on
-    // the master (otherwise the mesh would be illegal anyway)
+        // Same for corresponding pointPoints
+        {
+            labelPairList& globalPPoints = globalPointPoints[pointI];
+            label sz = globalPPoints.size();
+            globalPPoints.setSize(sz + n);
 
-    // From global edge to slot in distributed data.
-    Map<label> pointEdgeSet;
+            // Add untransformed points
+            forAll(pSlaves, i)
+            {
+                const labelPairList& otherData = globalPointPoints[pSlaves[i]];
+                forAll(otherData, j)
+                {
+                    globalPPoints[sz++] = otherData[j];
+                }
+            }
+            // Add transformed points.
+            forAll(pTransformSlaves, i)
+            {
+                // Get transform from index
+                label transformI = globalPointSlavesMap().whichTransform
+                (
+                    pTransformSlaves[i]
+                );
+
+                const labelPairList& otherData =
+                    globalPointPoints[pTransformSlaves[i]];
+                forAll(otherData, j)
+                {
+                    // Add transform to connectivity
+                    const labelPair& n = otherData[j];
+                    label procI = globalIndexAndTransform::processor(n);
+                    label index = globalIndexAndTransform::index(n);
+                    globalPPoints[sz++] = globalIndexAndTransform::encode
+                    (
+                        procI,
+                        index,
+                        transformI
+                    );
+                }
+            }
+
+            // Put back in slots
+            forAll(pSlaves, i)
+            {
+                globalPointPoints[pSlaves[i]] = globalPPoints;
+            }
+            forAll(pTransformSlaves, i)
+            {
+                globalPointPoints[pTransformSlaves[i]] = globalPPoints;
+            }
+        }
+    }
+    // Push back
+    globalPointSlavesMap().reverseDistribute
+    (
+        globalPointEdges.size(),
+        globalPointEdges
+    );
+    // Push back
+    globalPointSlavesMap().reverseDistribute
+    (
+        globalPointPoints.size(),
+        globalPointPoints
+    );
+}
+
+
+// Find transformation to take remotePoint to localPoint. Use info to find
+// the transforms.
+Foam::label Foam::globalMeshData::findTransform
+(
+    const labelPairList& info,
+    const labelPair& remotePoint,
+    const label localPoint
+) const
+{
+    const label remoteProcI = globalIndexAndTransform::processor(remotePoint);
+    const label remoteIndex = globalIndexAndTransform::index(remotePoint);
+
+    label remoteTransformI = -1;
+    label localTransformI = -1;
+    forAll(info, i)
+    {
+        label procI = globalIndexAndTransform::processor(info[i]);
+        label pointI = globalIndexAndTransform::index(info[i]);
+        label transformI = globalIndexAndTransform::transformIndex(info[i]);
+
+        if (procI == Pstream::myProcNo() && pointI == localPoint)
+        {
+            localTransformI = transformI;
+            //Pout<< "For local :" << localPoint
+            //    << " found transform:" << localTransformI
+            //    << endl;
+        }
+        if (procI == remoteProcI && pointI == remoteIndex)
+        {
+            remoteTransformI = transformI;
+            //Pout<< "For remote:" << remotePoint
+            //    << " found transform:" << remoteTransformI
+            //    << " at index:" << i
+            //    << endl;
+        }
+    }
+
+    if (remoteTransformI == -1 || localTransformI == -1)
+    {
+        FatalErrorIn("globalMeshData::findTransform(..)")
+            << "Problem. Cannot find " << remotePoint
+            << " or " << localPoint << " in " << info
+            << endl
+            << "remoteTransformI:" << remoteTransformI << endl
+            << "localTransformI:" << localTransformI
+            << abort(FatalError);
+    }
+
+    return globalTransforms().subtractTransformIndex
+    (
+        remoteTransformI,
+        localTransformI
+    );
+}
+
+
+void Foam::globalMeshData::calcGlobalEdgeSlaves() const
+{
+    if (debug)
+    {
+        Pout<< "globalMeshData::calcGlobalEdgeSlaves() :"
+            << " calculating coupled master to slave edge addressing." << endl;
+    }
 
     const edgeList& edges = coupledPatch().edges();
-    const labelListList& slaves = globalPointSlaves();
-    const labelListList& transformedSlaves = globalPointTransformedSlaves();
+    const globalIndex& globalEdgeNumbers = globalEdgeNumbering();
 
-    // Create master to slave addressing. Empty for slave edges.
-    // - labelListList to store untransformed elements
-    // - List<labelPair> to store transformed elements
-    globalEdgeSlavesPtr_.reset(new labelListList(edges.size()));
-    labelListList& globalEdgeSlaves = globalEdgeSlavesPtr_();
-    List<labelPairList> transformedEdges(edges.size());
+
+    // The whole problem with deducting edge-connectivity from
+    // point-connectivity is that one of the the endpoints might be
+    // a local master but the other endpoint might not. So we first
+    // need to make sure that all points know about connectivity and
+    // the transformations.
+
+
+    // 1. collect point connectivity - basically recreating globalPoints ouput.
+    // All points will now have a string of points. The transforms are
+    // in respect to the master.
+    List<labelPairList> allPointConnectivity;
+    calcPointConnectivity(allPointConnectivity);
+
+
+    // 2. Get all pointEdges and pointPoints
+    // Coupled point to global coupled edges and corresponding endpoint.
+    labelListList globalPointEdges;
+    List<labelPairList> globalPointPoints;
+    calcGlobalPointEdges(globalPointEdges, globalPointPoints);
+
+
+    // 3. Now all points have
+    //      - all the connected points with original transform
+    //      - all the connected global edges
+
+    // Now all we need to do is go through all the edges and check
+    // both endpoints. If there is a edge between the two which is
+    // produced by transforming both points in the same way it is a shared
+    // edge.
+
+    // Collect strings of connected edges.
+    List<labelPairList> allEdgeConnectivity(edges.size());
 
     forAll(edges, edgeI)
     {
         const edge& e = edges[edgeI];
+        const labelList& pEdges0 = globalPointEdges[e[0]];
+        const labelPairList& pPoints0 = globalPointPoints[e[0]];
+        const labelList& pEdges1 = globalPointEdges[e[1]];
+        const labelPairList& pPoints1 = globalPointPoints[e[1]];
 
-        // For this edge check get the pointEdges of the connected points
-        // Any edge in both pointEdges must be connected to this edge.
+        // Most edges will be size 2
+        DynamicList<labelPair> eEdges(2);
+        // Append myself.
+        eEdges.append
+        (
+            globalIndexAndTransform::encode
+            (
+                Pstream::myProcNo(),
+                edgeI,
+                globalTransforms().nullTransformIndex()
+            )
+        );
 
-        // Untransformed
-        // ~~~~~~~~~~~~~
+        forAll(pEdges0, i)
         {
-            const labelList& slaves0 = slaves[e[0]];
-            const labelList& slaves1 = slaves[e[1]];
-
-            // Check for edges that are in both slaves0 and slaves1.
-            pointEdgeSet.clear();
-            forAll(slaves0, i)
+            forAll(pEdges1, j)
             {
-                const labelList& connectedEdges = globalPointEdges[slaves0[i]];
-                // Store edges (data on Map not used)
-                forAll(connectedEdges, j)
+                if
+                (
+                    pEdges0[i] == pEdges1[j]
+                 && pEdges0[i] != globalEdgeNumbers.toGlobal(edgeI)
+                )
                 {
-                    pointEdgeSet.insert(connectedEdges[j], slaves0[i]);
-                }
-            }
-            forAll(slaves1, i)
-            {
-                const labelList& connectedEdges = globalPointEdges[slaves1[i]];
-                forAll(connectedEdges, j)
-                {
-                    label globalEdgeI = connectedEdges[j];
+                    // Found a shared edge. Now check if the endpoints
+                    // go through the same transformation.
+                    // Local: e[0]    remote:pPoints1[j]
+                    // Local: e[1]    remote:pPoints0[i]
 
-                    if (pointEdgeSet.found(globalEdgeI))
+
+                    // Find difference in transforms to go from point on remote
+                    // edge (pPoints1[j]) to this point.
+
+                    label transform0 = findTransform
+                    (
+                        allPointConnectivity[e[0]],
+                        pPoints1[j],
+                        e[0]
+                    );
+                    label transform1 = findTransform
+                    (
+                        allPointConnectivity[e[1]],
+                        pPoints0[i],
+                        e[1]
+                    );
+
+                    if (transform0 == transform1)
                     {
-                        // Found slave edge.
-                        label sz = globalEdgeSlaves[edgeI].size();
-                        globalEdgeSlaves[edgeI].setSize(sz+1);
-                        globalEdgeSlaves[edgeI][sz] = globalEdgeI;
+                        label procI = globalEdgeNumbers.whichProcID(pEdges0[i]);
+                        eEdges.append
+                        (
+                            globalIndexAndTransform::encode
+                            (
+                                procI,
+                                globalEdgeNumbers.toLocal(procI, pEdges0[i]),
+                                transform0
+                            )
+                        );
                     }
                 }
             }
         }
 
+        allEdgeConnectivity[edgeI].transfer(eEdges);
+        sort(allEdgeConnectivity[edgeI], globalIndexAndTransform::less());
+    }
 
-        // Transformed
-        // ~~~~~~~~~~~
+    // We now have - in allEdgeConnectivity - a list of edges which are shared
+    // between multiple processors. Filter into non-transformed and transformed
+    // connections.
+
+    globalEdgeSlavesPtr_.reset(new labelListList(edges.size()));
+    labelListList& globalEdgeSlaves = globalEdgeSlavesPtr_();
+    List<labelPairList> transformedEdges(edges.size());
+    forAll(allEdgeConnectivity, edgeI)
+    {
+        const labelPairList& edgeInfo = allEdgeConnectivity[edgeI];
+        if (edgeInfo.size() >= 2)
         {
-            // We look at the slots which hold transformed points
-            // So now when we find the edge we can look at which slot
-            // it came from and work out the transform
+            const labelPair& masterInfo = edgeInfo[0];
 
-            const labelList& slaves0 = transformedSlaves[e[0]];
-            const labelList& slaves1 = transformedSlaves[e[1]];
-
-            // Check for edges that are in both slaves0 and slaves1 (and get
-            // to master through the same transform?)
-
-            pointEdgeSet.clear();
-            forAll(slaves0, i)
+            // Check if master edge (= first element (since sorted)) is me.
+            if
+            (
+                (
+                    globalIndexAndTransform::processor(masterInfo)
+                 == Pstream::myProcNo()
+                )
+             && (globalIndexAndTransform::index(masterInfo) == edgeI)
+            )
             {
-                const labelList& connected = globalPointEdges[slaves0[i]];
-                forAll(connected, j)
-                {
-                    pointEdgeSet.insert(connected[j], slaves0[i]);
-                }
-            }
-            forAll(slaves1, i)
-            {
-                const labelList& connected = globalPointEdges[slaves1[i]];
-                forAll(connected, j)
-                {
-                    label globalEdgeI = connected[j];
+                // Sort into transformed and untransformed
+                labelList& eEdges = globalEdgeSlaves[edgeI];
+                eEdges.setSize(edgeInfo.size()-1);
 
-                    Map<label>::const_iterator iter = pointEdgeSet.find
+                labelPairList& trafoEEdges = transformedEdges[edgeI];
+                trafoEEdges.setSize(edgeInfo.size()-1);
+
+                label nonTransformI = 0;
+                label transformI = 0;
+
+                for (label i = 1; i < edgeInfo.size(); i++)
+                {
+                    const labelPair& info = edgeInfo[i];
+                    label procI = globalIndexAndTransform::processor(info);
+                    label index = globalIndexAndTransform::index(info);
+                    label transform = globalIndexAndTransform::transformIndex
                     (
-                        globalEdgeI
+                        info
                     );
-                    if (iter != pointEdgeSet.end())
+
+                    if (transform == globalTransforms().nullTransformIndex())
                     {
-                        // Found slave edge. Compare both transforms.
-                        // Get the transform by looking at where the point
-                        // slots came from.
-                        label transform0 = findLower
+                        eEdges[nonTransformI++] = globalEdgeNumbers.toGlobal
                         (
-                            globalPointSlavesMap().transformStart(),
-                            iter()+1
+                            procI,
+                            index
                         );
-                        label transform1 = findLower
-                        (
-                            globalPointSlavesMap().transformStart(),
-                            slaves1[i]+1
-                        );
-                        label mergedTransform =
-                            globalIndexAndTransform::minimumTransformIndex
-                            (
-                                transform0,
-                                transform1
-                            );
-
-                        // Reencode originating edge index and processor
-                        // with new transform.
-                        label procI = globalEdgeNumbers.whichProcID
-                        (
-                            globalEdgeI
-                        );
-
-                        labelPair edgeInfo
-                        (
-                            globalIndexAndTransform::encode
-                            (
-                                procI,
-                                globalEdgeNumbers.toLocal
-                                (
-                                    procI,
-                                    globalEdgeI
-                                ),
-                                mergedTransform
-                            )
-                        );
-
-                        label sz = transformedEdges[edgeI].size();
-                        transformedEdges[edgeI].setSize(sz+1);
-                        transformedEdges[edgeI][sz] = edgeInfo;
+                    }
+                    else
+                    {
+                        trafoEEdges[transformI++] = info;
                     }
                 }
+
+                eEdges.setSize(nonTransformI);
+                trafoEEdges.setSize(transformI);
             }
         }
     }
