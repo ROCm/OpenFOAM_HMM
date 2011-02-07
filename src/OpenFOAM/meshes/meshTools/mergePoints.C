@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,11 +61,26 @@ bool Foam::mergePoints
         return false;
     }
 
+    // We're comparing distance squared to origin first.
+    // Say if starting from two close points:
+    //     x, y, z
+    //     x+mergeTol, y+mergeTol, z+mergeTol
+    // Then the magSqr of both will be
+    //     x^2+y^2+z^2
+    //     x^2+y^2+z^2 + 2*mergeTol*(x+z+y) + mergeTol^2*...
+    // so the difference will be 2*mergeTol*(x+y+z)
 
     const scalar mergeTolSqr = sqr(mergeTol);
 
     // Sort points by magSqr
-    SortableList<scalar> sortedMagSqr(magSqr(points - compareOrigin));
+    const pointField d(points - compareOrigin);
+    SortableList<scalar> sortedMagSqr(magSqr(d));
+    scalarField sortedTol(points.size());
+    forAll(sortedMagSqr.indices(), sortI)
+    {
+        const point& pt = d[sortedMagSqr.indices()[sortI]];
+        sortedTol[sortI] = 2*mergeTol*(mag(pt.x())+mag(pt.y())+mag(pt.z()));
+    }
 
     bool hasMerged = false;
 
@@ -94,7 +109,7 @@ bool Foam::mergePoints
             (
                 sortedMagSqr[prevSortI]
              -  sortedMagSqr[sortI]
-            ) <= mergeTolSqr;
+            ) <= sortedTol[sortI];
             prevSortI--
         )
         {

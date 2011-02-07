@@ -1,4 +1,4 @@
-ParMGridGen = $(WM_THIRD_PARTY_DIR)/ParMGridGen-1.0
+/* Needs ParMGridGen environment variable set. (see Allwmake script) */
 
 TYPE_REAL=
 #if defined(WM_SP)

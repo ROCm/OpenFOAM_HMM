@@ -1,0 +1,35 @@
+http://www.openfoam.com
+Copyright (c) 2011 OpenCFD Ltd.
+
+Static linkage:
+
+- compile libraries as static objects:
+    src; ./Allwmake libo
+- in the desired application (e.g. interFoam) adapt Make/options
+  to link all indirect and direct dependencies as .o files:
+
+    sinclude $(GENERAL_RULES)/mplib$(WM_MPLIB)
+    sinclude $(RULES)/mplib$(WM_MPLIB)
+
+    EXE_LIBS = \
+        -lz $(PLIBS) \
+        $(FOAM_LIBBIN)/$(FOAM_MPI)/libPstream.o \
+        $(FOAM_LIBBIN)/libOSspecific.o \
+        $(FOAM_LIBBIN)/libtwoPhaseInterfaceProperties.o \
+        $(FOAM_LIBBIN)/libinterfaceProperties.o \
+        $(FOAM_LIBBIN)/libincompressibleTransportModels.o \
+        $(FOAM_LIBBIN)/libincompressibleTurbulenceModel.o \
+        $(FOAM_LIBBIN)/libincompressibleRASModels.o \
+        $(FOAM_LIBBIN)/libincompressibleLESModels.o \
+        $(FOAM_LIBBIN)/libLESdeltas.o \
+        $(FOAM_LIBBIN)/libLESfilters.o \
+        $(FOAM_LIBBIN)/libfiniteVolume.o \
+        $(FOAM_LIBBIN)/libmeshTools.o \
+        $(FOAM_LIBBIN)/libtriSurface.o \
+        $(FOAM_LIBBIN)/libfileFormats.o \
+        $(FOAM_LIBBIN)/libOpenFOAM.o \
+
+- in Make/files add
+    SEXE = $(FOAM_USER_APPBIN)/interFoam-static
+- wmake exe
+- check with ldd

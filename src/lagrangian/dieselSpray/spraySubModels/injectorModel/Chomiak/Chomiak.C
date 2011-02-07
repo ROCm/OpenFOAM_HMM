@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,11 +52,11 @@ Foam::ChomiakInjector::ChomiakInjector
 :
     injectorModel(dict, sm),
     ChomiakDict_(dict.subDict(typeName + "Coeffs")),
-    dropletPDF_
+    sizeDistribution_
     (
-        pdfs::pdf::New
+        distributionModels::distributionModel::New
         (
-            ChomiakDict_.subDict("dropletPDF"),
+            ChomiakDict_.subDict("sizeDistribution"),
             sm.rndGen()
         )
     ),
@@ -101,7 +101,7 @@ Foam::scalar Foam::ChomiakInjector::d0
     const scalar
 ) const
 {
-    return dropletPDF_->sample();
+    return sizeDistribution_->sample();
 }
 
 
@@ -113,8 +113,8 @@ Foam::vector Foam::ChomiakInjector::direction
     const scalar d
 ) const
 {
-    scalar dMin = dropletPDF_->minValue();
-    scalar dMax = dropletPDF_->maxValue();
+    scalar dMin = sizeDistribution_->minValue();
+    scalar dMax = sizeDistribution_->maxValue();
 
     scalar angle =
         (d - dMax)*maxSprayAngle_[n]

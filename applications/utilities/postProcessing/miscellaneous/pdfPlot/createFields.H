@@ -22,7 +22,14 @@
 
     cachedRandom rndGen(label(0), -1);
 
-    autoPtr<pdfs::pdf> p(pdfs::pdf::New(pdfDictionary, rndGen));
+    autoPtr<distributionModels::distributionModel> p
+    (
+        distributionModels::distributionModel::New
+        (
+            pdfDictionary,
+            rndGen
+        )
+    );
 
     const scalar xMin = p->minValue();
     const scalar xMax = p->maxValue();

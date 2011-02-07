@@ -139,18 +139,6 @@ class globalPoints
 
     // Private Member Functions
 
-        //- Helper function to sort according minimum proc, minimum index,
-        //  minimum transform
-        class globalIndexAndTransformLessThan
-        {
-            public:
-            bool operator()
-            (
-                const labelPair& a,
-                const labelPair& b
-            );
-        };
-
         //- Count all points on processorPatches. Is all points for which
         //  information is collected.
         static label countPatchPoints(const polyBoundaryMesh&);
@@ -174,12 +162,12 @@ class globalPoints
         ) const;
 
         //- Merge info from neighbour into my data
-        static bool mergeInfo
+        bool mergeInfo
         (
             const labelPairList& nbrInfo,
             const label localPointI,
             labelPairList& myInfo
-        );
+        ) const;
 
         //- From mesh point to 'local point'. Is the mesh point itself
         //  if meshToPatchPoint is empty.
@@ -210,9 +198,7 @@ class globalPoints
             const label localPointI
         );
 
-        //- Get the signs for the individual transforms
-        FixedList<label, 3> transformBits(const label transformIndex) const;
-
+        //- Debug printing
         void printProcPoints
         (
             const labelList& patchToMeshPoint,

@@ -3,6 +3,7 @@ cd ${0%/*} || exit 1    # run from this directory
 [ $# -ge 1 ] && makeOption=$1 || makeOption=libso
 set -x
 
+wmake $makeOption distributionModels
 wmake $makeOption basic
 wmake $makeOption solidParticle
 wmake $makeOption intermediate

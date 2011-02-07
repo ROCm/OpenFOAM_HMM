@@ -263,8 +263,29 @@ class globalMeshData
        //- Calculate global point addressing.
         void calcGlobalPointSlaves() const;
 
-        //- Calculate global edge addressing.
-        void calcGlobalEdgeSlaves() const;
+        // Global edge addressing
+
+            //- Calculate connected points
+            void calcPointConnectivity(List<labelPairList>&) const;
+
+            //- Calculate pointEdges and pointPoints addressing
+            void calcGlobalPointEdges
+            (
+                labelListList& globalPointEdges,
+                List<labelPairList>& globalPointPoints
+            ) const;
+
+            //- Look up remote and local point and find using info the
+            //  transforms to go from remotePoint to localPoint
+            label findTransform
+            (
+                const labelPairList& info,
+                const labelPair& remotePoint,
+                const label localPoint
+            ) const;
+
+            //- Calculate global edge addressing.
+            void calcGlobalEdgeSlaves() const;
 
 
         //- Disallow default bitwise copy construct
@@ -282,7 +303,7 @@ public:
 
     // Static data members
 
-        //- Geomteric tolerance (fraction of bounding box)
+        //- Geometric tolerance (fraction of bounding box)
         static const Foam::scalar matchTol_;
 
 
@@ -447,6 +468,17 @@ public:
                 const globalIndexAndTransform&,
                 const CombineOp& cop,
                 const bool isPosition
+            );
+
+            //- Helper: synchronise data without transforms
+            template<class Type, class CombineOp>
+            static void syncData
+            (
+                List<Type>& pointData,
+                const labelListList& slaves,
+                const labelListList& transformedSlaves,
+                const mapDistribute& slavesMap,
+                const CombineOp& cop
             );
 
 
