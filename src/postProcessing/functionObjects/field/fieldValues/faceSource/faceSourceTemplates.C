@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -91,32 +91,32 @@ Type Foam::fieldValues::faceSource::processValues
     {
         case opSum:
         {
-            result = gSum(values);
+            result = sum(values);
             break;
         }
         case opAreaAverage:
         {
-            result = gSum(values*magSf)/gSum(magSf);
+            result = sum(values*magSf)/sum(magSf);
             break;
         }
         case opAreaIntegrate:
         {
-            result = gSum(values*magSf);
+            result = sum(values*magSf);
             break;
         }
         case opWeightedAverage:
         {
-            result = gSum(values*weightField)/gSum(weightField);
+            result = sum(values*weightField)/sum(weightField);
             break;
         }
         case opMin:
         {
-            result = gMin(values);
+            result = min(values);
             break;
         }
         case opMax:
         {
-            result = gMax(values);
+            result = max(values);
             break;
         }
         default:
