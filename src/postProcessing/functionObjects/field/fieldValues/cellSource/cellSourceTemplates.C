@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -119,14 +119,14 @@ bool Foam::fieldValues::cellSource::writeValues(const word& fieldName)
 
     if (ok)
     {
-        Field<Type> values(combineFields(setFieldValues<Type>(fieldName)));
+        Field<Type> values(setFieldValues<Type>(fieldName));
+        combineFields(values);
 
-        scalarField V(combineFields(filterField(mesh().V())));
+        scalarField V(filterField(mesh().V()));
+        combineFields(V);
 
-        scalarField weightField
-        (
-            combineFields(setFieldValues<scalar>(weightFieldName_))
-        );
+        scalarField weightField(setFieldValues<scalar>(weightFieldName_));
+        combineFields(weightField);
 
         if (Pstream::master())
         {
