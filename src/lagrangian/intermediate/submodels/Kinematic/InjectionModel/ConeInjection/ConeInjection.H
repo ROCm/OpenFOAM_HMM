@@ -26,7 +26,6 @@ Class
 
 Description
     Multi-point cone injection model
-
     - User specifies
       - time of start of injection
       - list of injector positions and directions (along injection axes)

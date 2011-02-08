@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -130,18 +130,21 @@ public:
         inline label end() const;
 
         //- Compare the given start and end points with this curve
+        //  Return:
         //  -  0: different
         //  - +1: identical
         //  - -1: same edge, but different orientation
         inline int compare(const curvedEdge&) const;
 
         //- Compare the given start and end points with this curve
+        //  Return:
         //  -  0: different
         //  - +1: identical
         //  - -1: same edge, but different orientation
         inline int compare(const edge&) const;
 
         //- Compare the given start and end points with this curve
+        //  Return:
         //  -  0: different
         //  - +1: identical
         //  - -1: same edge, but different orientation
@@ -158,6 +161,7 @@ public:
     // Member operators
 
         void operator=(const curvedEdge&);
+
 
     // Ostream operator
 

@@ -509,7 +509,8 @@ public:
 
             // Other
 
-                //- Helper for merging mesh point data. Determines
+                //- Helper for merging mesh point data.
+                //  Determines:
                 //  - my unique indices
                 //  - global numbering over all unique indices
                 //  - the global number for all local points (so this will
@@ -520,7 +521,8 @@ public:
                     labelList& uniquePoints
                 ) const;
 
-                //- Helper for merging patch point data. Takes maps from
+                //- Helper for merging patch point data.
+                //  Takes maps from:
                 //  local points to/from mesh. Determines
                 //  - my unique points. These are mesh points, not patch points
                 //    since the master might not be on the patch.
