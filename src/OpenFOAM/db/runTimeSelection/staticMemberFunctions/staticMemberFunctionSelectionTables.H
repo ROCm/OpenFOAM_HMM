@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,7 +21,8 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-@file Foam::staticMemberFunctionSelectionTables
+Global
+    Foam::staticMemberFunctionSelectionTables
 
 Description
     Macros to enable the easy declaration of member function selection tables.
@@ -34,7 +35,6 @@ Description
 #include "memberFunctionSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 // external use:
 // ~~~~~~~~~~~~~
@@ -139,7 +139,6 @@ Description
         (baseType,memberFunction,argNames)                                    \
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 #endif
 

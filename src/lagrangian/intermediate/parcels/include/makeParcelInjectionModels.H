@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,6 @@ License
 #include "KinematicCloud.H"
 
 #include "ConeInjection.H"
-#include "ConeInjectionMP.H"
 #include "FieldActivatedInjection.H"
 #include "InflationInjection.H"
 #include "KinematicLookupTableInjection.H"
@@ -49,12 +48,6 @@ License
     makeInjectionModelType                                                    \
     (                                                                         \
         ConeInjection,                                                        \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeInjectionModelType                                                    \
-    (                                                                         \
-        ConeInjectionMP,                                                      \
         KinematicCloud,                                                       \
         ParcelType                                                            \
     );                                                                        \

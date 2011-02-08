@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Class
     Foam::interpolationTable
 
 Description
-    An interpolation/look-up table of scalar vs <Type> values.
+    An interpolation/look-up table of scalar vs \<Type\> values.
     The reference scalar values must be monotonically increasing.
 
     The handling of out-of-bounds values depends on the current setting
