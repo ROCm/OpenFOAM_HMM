@@ -1,7 +1,7 @@
 #                            -*- mode: org; -*-
 #
 #+TITLE:                 OpenFOAM C++ style guide
-#+AUTHOR:                     OpenCFD Ltd.
+#+AUTHOR:                    2011 OpenCFD Ltd.
 #+DATE:                         Feb 2011
 #+LINK:                  http://www.opencfd.co.uk
 #+OPTIONS: author:nil ^:{}
