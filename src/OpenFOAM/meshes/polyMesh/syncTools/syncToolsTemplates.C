@@ -764,7 +764,7 @@ void Foam::syncTools::syncEdgeMap
 //void Foam::syncTools::syncPointList
 //(
 //    const polyMesh& mesh,
-//    UList<T>& pointValues,
+//    List<T>& pointValues,
 //    const CombineOp& cop,
 //    const T& nullValue,
 //    const TransformOp& top
@@ -775,7 +775,7 @@ void Foam::syncTools::syncEdgeMap
 //        FatalErrorIn
 //        (
 //            "syncTools<class T, class CombineOp>::syncPointList"
-//            "(const polyMesh&, UList<T>&, const CombineOp&, const T&"
+//            "(const polyMesh&, List<T>&, const CombineOp&, const T&"
 //            ", const bool)"
 //        )   << "Number of values " << pointValues.size()
 //            << " is not equal to the number of points in the mesh "
@@ -941,7 +941,7 @@ void Foam::syncTools::syncEdgeMap
 //(
 //    const polyMesh& mesh,
 //    const labelList& meshPoints,
-//    UList<T>& pointValues,
+//    List<T>& pointValues,
 //    const CombineOp& cop,
 //    const T& nullValue,
 //    const TransformOp& top
@@ -952,7 +952,7 @@ void Foam::syncTools::syncEdgeMap
 //        FatalErrorIn
 //        (
 //            "syncTools<class T, class CombineOp>::syncPointList"
-//            "(const polyMesh&, const labelList&, UList<T>&, const CombineOp&"
+//            "(const polyMesh&, const labelList&, List<T>&, const CombineOp&"
 //            ", const T&, const bool)"
 //        )   << "Number of values " << pointValues.size()
 //            << " is not equal to the number of points "
@@ -986,13 +986,14 @@ void Foam::syncTools::syncEdgeMap
 //    }
 //}
 
-template <class T, class CombineOp>
+template <class T, class CombineOp, class TransformOp>
 void Foam::syncTools::syncPointList
 (
     const polyMesh& mesh,
     List<T>& pointValues,
     const CombineOp& cop,
-    const T& nullValue
+    const T& nullValue,
+    const TransformOp& top
 )
 {
     if (pointValues.size() != mesh.nPoints())
@@ -1000,48 +1001,50 @@ void Foam::syncTools::syncPointList
         FatalErrorIn
         (
             "syncTools<class T, class CombineOp>::syncPointList"
-            "(const polyMesh&, UList<T>&, const CombineOp&, const T&)"
+            "(const polyMesh&, List<T>&, const CombineOp&, const T&"
+            ", const bool)"
         )   << "Number of values " << pointValues.size()
             << " is not equal to the number of points in the mesh "
             << mesh.nPoints() << abort(FatalError);
     }
 
-    mesh.globalData().syncPointData(pointValues, cop, false);
+    mesh.globalData().syncPointData(pointValues, cop, top);
 }
 
 
-template <class CombineOp>
-void Foam::syncTools::syncPointPositions
-(
-    const polyMesh& mesh,
-    List<point>& pointValues,
-    const CombineOp& cop,
-    const point& nullValue
-)
-{
-    if (pointValues.size() != mesh.nPoints())
-    {
-        FatalErrorIn
-        (
-            "syncTools<class CombineOp>::syncPointPositions"
-            "(const polyMesh&, List<point>&, const CombineOp&, const point&)"
-        )   << "Number of values " << pointValues.size()
-            << " is not equal to the number of points in the mesh "
-            << mesh.nPoints() << abort(FatalError);
-    }
+//template <class CombineOp>
+//void Foam::syncTools::syncPointPositions
+//(
+//    const polyMesh& mesh,
+//    List<point>& pointValues,
+//    const CombineOp& cop,
+//    const point& nullValue
+//)
+//{
+//    if (pointValues.size() != mesh.nPoints())
+//    {
+//        FatalErrorIn
+//        (
+//            "syncTools<class CombineOp>::syncPointPositions"
+//            "(const polyMesh&, List<point>&, const CombineOp&, const point&)"
+//        )   << "Number of values " << pointValues.size()
+//            << " is not equal to the number of points in the mesh "
+//            << mesh.nPoints() << abort(FatalError);
+//    }
+//
+//    mesh.globalData().syncPointData(pointValues, cop, true);
+//}
 
-    mesh.globalData().syncPointData(pointValues, cop, true);
-}
 
-
-template <class T, class CombineOp>
+template <class T, class CombineOp, class TransformOp>
 void Foam::syncTools::syncPointList
 (
     const polyMesh& mesh,
     const labelList& meshPoints,
-    UList<T>& pointValues,
+    List<T>& pointValues,
     const CombineOp& cop,
-    const T& nullValue
+    const T& nullValue,
+    const TransformOp& top
 )
 {
     if (pointValues.size() != meshPoints.size())
@@ -1049,7 +1052,7 @@ void Foam::syncTools::syncPointList
         FatalErrorIn
         (
             "syncTools<class T, class CombineOp>::syncPointList"
-            "(const polyMesh&, UList<T>&, const CombineOp&, const T&)"
+            "(const polyMesh&, List<T>&, const CombineOp&, const T&)"
         )   << "Number of values " << pointValues.size()
             << " is not equal to the number of meshPoints "
             << meshPoints.size() << abort(FatalError);
@@ -1078,7 +1081,7 @@ void Foam::syncTools::syncPointList
         gd.globalPointSlavesMap(),
         gd.globalTransforms(),
         cop,
-        false       //position?
+        top
     );
 
     forAll(meshPoints, i)
@@ -1093,72 +1096,74 @@ void Foam::syncTools::syncPointList
 }
 
 
-template <class CombineOp>
-void Foam::syncTools::syncPointPositions
-(
-    const polyMesh& mesh,
-    const labelList& meshPoints,
-    UList<point>& pointValues,
-    const CombineOp& cop,
-    const point& nullValue
-)
-{
-    if (pointValues.size() != meshPoints.size())
-    {
-        FatalErrorIn
-        (
-            "syncTools<class CombineOp>::syncPointList"
-            "(const polyMesh&, UList<point>&, const CombineOp&, const point&)"
-        )   << "Number of values " << pointValues.size()
-            << " is not equal to the number of meshPoints "
-            << meshPoints.size() << abort(FatalError);
-    }
-    const globalMeshData& gd = mesh.globalData();
-    const indirectPrimitivePatch& cpp = gd.coupledPatch();
-    const Map<label>& mpm = cpp.meshPointMap();
+//template <class CombineOp>
+//void Foam::syncTools::syncPointPositions
+//(
+//    const polyMesh& mesh,
+//    const labelList& meshPoints,
+//    List<point>& pointValues,
+//    const CombineOp& cop,
+//    const point& nullValue
+//)
+//{
+//    if (pointValues.size() != meshPoints.size())
+//    {
+//        FatalErrorIn
+//        (
+//            "syncTools<class CombineOp>::syncPointList"
+//            "(const polyMesh&, List<point>&, const CombineOp&, const point&)"
+//        )   << "Number of values " << pointValues.size()
+//            << " is not equal to the number of meshPoints "
+//            << meshPoints.size() << abort(FatalError);
+//    }
+//    const globalMeshData& gd = mesh.globalData();
+//    const indirectPrimitivePatch& cpp = gd.coupledPatch();
+//    const Map<label>& mpm = cpp.meshPointMap();
+//
+//    List<point> cppFld(cpp.nPoints(), nullValue);
+//
+//    forAll(meshPoints, i)
+//    {
+//        label pointI = meshPoints[i];
+//        Map<label>::const_iterator iter = mpm.find(pointI);
+//        if (iter != mpm.end())
+//        {
+//            cppFld[iter()] = pointValues[i];
+//        }
+//    }
+//
+//    globalMeshData::syncData
+//    (
+//        cppFld,
+//        gd.globalPointSlaves(),
+//        gd.globalPointTransformedSlaves(),
+//        gd.globalPointSlavesMap(),
+//        gd.globalTransforms(),
+//        cop,
+//        true,   //position?
+//        mapDistribute::transform()  // not used
+//    );
+//
+//    forAll(meshPoints, i)
+//    {
+//        label pointI = meshPoints[i];
+//        Map<label>::const_iterator iter = mpm.find(pointI);
+//        if (iter != mpm.end())
+//        {
+//            pointValues[i] = cppFld[iter()];
+//        }
+//    }
+//}
 
-    List<point> cppFld(cpp.nPoints(), nullValue);
 
-    forAll(meshPoints, i)
-    {
-        label pointI = meshPoints[i];
-        Map<label>::const_iterator iter = mpm.find(pointI);
-        if (iter != mpm.end())
-        {
-            cppFld[iter()] = pointValues[i];
-        }
-    }
-
-    globalMeshData::syncData
-    (
-        cppFld,
-        gd.globalPointSlaves(),
-        gd.globalPointTransformedSlaves(),
-        gd.globalPointSlavesMap(),
-        gd.globalTransforms(),
-        cop,
-        true    //position?
-    );
-
-    forAll(meshPoints, i)
-    {
-        label pointI = meshPoints[i];
-        Map<label>::const_iterator iter = mpm.find(pointI);
-        if (iter != mpm.end())
-        {
-            pointValues[i] = cppFld[iter()];
-        }
-    }
-}
-
-
-template <class T, class CombineOp>
+template <class T, class CombineOp, class TransformOp>
 void Foam::syncTools::syncEdgeList
 (
     const polyMesh& mesh,
-    UList<T>& edgeValues,
+    List<T>& edgeValues,
     const CombineOp& cop,
-    const T& nullValue
+    const T& nullValue,
+    const TransformOp& top
 )
 {
     if (edgeValues.size() != mesh.nEdges())
@@ -1166,7 +1171,7 @@ void Foam::syncTools::syncEdgeList
         FatalErrorIn
         (
             "syncTools<class T, class CombineOp>::syncEdgeList"
-            "(const polyMesh&, UList<T>&, const CombineOp&, const T&)"
+            "(const polyMesh&, List<T>&, const CombineOp&, const T&)"
         )   << "Number of values " << edgeValues.size()
             << " is not equal to the number of edges in the mesh "
             << mesh.nEdges() << abort(FatalError);
@@ -1187,7 +1192,7 @@ void Foam::syncTools::syncEdgeList
         edgeMap,
         git,
         cop,
-        false       //position?
+        top
     );
 
     // Extract back onto mesh
@@ -1198,50 +1203,51 @@ void Foam::syncTools::syncEdgeList
 }
 
 
-template <class CombineOp>
-void Foam::syncTools::syncEdgePositions
-(
-    const polyMesh& mesh,
-    UList<point>& edgeValues,
-    const CombineOp& cop,
-    const point& nullValue
-)
-{
-    if (edgeValues.size() != mesh.nEdges())
-    {
-        FatalErrorIn
-        (
-            "syncTools<class CombineOp>::syncEdgePositions"
-            "(const polyMesh&, UList<point>&, const CombineOp&, const point&)"
-        )   << "Number of values " << edgeValues.size()
-            << " is not equal to the number of edges in the mesh "
-            << mesh.nEdges() << abort(FatalError);
-    }
-
-    const globalMeshData& gd = mesh.globalData();
-    const labelList& meshEdges = gd.coupledPatchMeshEdges();
-    const globalIndexAndTransform& git = gd.globalTransforms();
-    const mapDistribute& map = gd.globalEdgeSlavesMap();
-
-    List<point> cppFld(UIndirectList<point>(edgeValues, meshEdges));
-
-    globalMeshData::syncData
-    (
-        cppFld,
-        gd.globalEdgeSlaves(),
-        gd.globalEdgeTransformedSlaves(),
-        map,
-        git,
-        cop,
-        true        //position?
-    );
-
-    // Extract back onto mesh
-    forAll(meshEdges, i)
-    {
-        edgeValues[meshEdges[i]] = cppFld[i];
-    }
-}
+//template <class CombineOp>
+//void Foam::syncTools::syncEdgePositions
+//(
+//    const polyMesh& mesh,
+//    List<point>& edgeValues,
+//    const CombineOp& cop,
+//    const point& nullValue
+//)
+//{
+//    if (edgeValues.size() != mesh.nEdges())
+//    {
+//        FatalErrorIn
+//        (
+//            "syncTools<class CombineOp>::syncEdgePositions"
+//            "(const polyMesh&, List<point>&, const CombineOp&, const point&)"
+//        )   << "Number of values " << edgeValues.size()
+//            << " is not equal to the number of edges in the mesh "
+//            << mesh.nEdges() << abort(FatalError);
+//    }
+//
+//    const globalMeshData& gd = mesh.globalData();
+//    const labelList& meshEdges = gd.coupledPatchMeshEdges();
+//    const globalIndexAndTransform& git = gd.globalTransforms();
+//    const mapDistribute& map = gd.globalEdgeSlavesMap();
+//
+//    List<point> cppFld(UIndirectList<point>(edgeValues, meshEdges));
+//
+//    globalMeshData::syncData
+//    (
+//        cppFld,
+//        gd.globalEdgeSlaves(),
+//        gd.globalEdgeTransformedSlaves(),
+//        map,
+//        git,
+//        cop,
+//        true,       //position?
+//        mapDistribute::transform()  // not used
+//    );
+//
+//    // Extract back onto mesh
+//    forAll(meshEdges, i)
+//    {
+//        edgeValues[meshEdges[i]] = cppFld[i];
+//    }
+//}
 
 
 template <class T, class CombineOp, class TransformOp>

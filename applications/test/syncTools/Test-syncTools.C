@@ -30,12 +30,12 @@ Description
 \*---------------------------------------------------------------------------*/
 
 
+#include "syncTools.H"
 #include "argList.H"
 #include "polyMesh.H"
 #include "Time.H"
 #include "Random.H"
 #include "PackedList.H"
-#include "syncTools.H"
 
 using namespace Foam;
 
@@ -285,7 +285,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
 
     {
         // Create some data. Use slightly perturbed positions.
-        EdgeMap<vector> sparseData;
+        EdgeMap<point> sparseData;
         pointField fullData(mesh.nEdges(), point::max);
 
         const edgeList& edges = allBoundary.edges();
@@ -313,13 +313,13 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
         (
             mesh,
             sparseData,
-            minEqOp<vector>()
+            minMagSqrEqOp<point>()
         );
         syncTools::syncEdgeList
         (
             mesh,
             fullData,
-            minEqOp<vector>(),
+            minMagSqrEqOp<point>(),
             point::max
         );
 
@@ -350,7 +350,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
         {
             const edge& e = mesh.edges()[meshEdgeI];
 
-            EdgeMap<vector>::const_iterator iter = sparseData.find(e);
+            EdgeMap<point>::const_iterator iter = sparseData.find(e);
 
             if (iter != sparseData.end())
             {
