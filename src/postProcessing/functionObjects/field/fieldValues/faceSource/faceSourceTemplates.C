@@ -91,32 +91,32 @@ Type Foam::fieldValues::faceSource::processValues
     {
         case opSum:
         {
-            result = gSum(values);
+            result = sum(values);
             break;
         }
         case opAreaAverage:
         {
-            result = gSum(values*magSf)/gSum(magSf);
+            result = sum(values*magSf)/sum(magSf);
             break;
         }
         case opAreaIntegrate:
         {
-            result = gSum(values*magSf);
+            result = sum(values*magSf);
             break;
         }
         case opWeightedAverage:
         {
-            result = gSum(values*weightField)/gSum(weightField);
+            result = sum(values*weightField)/sum(weightField);
             break;
         }
         case opMin:
         {
-            result = gMin(values);
+            result = min(values);
             break;
         }
         case opMax:
         {
-            result = gMax(values);
+            result = max(values);
             break;
         }
         default:
@@ -150,18 +150,19 @@ bool Foam::fieldValues::faceSource::writeValues(const word& fieldName)
         else
         {
             // Get unoriented magSf
-            magSf = combineFields(filterField(mesh().magSf(), false));
+            magSf = filterField(mesh().magSf(), false);
         }
 
         // Combine onto master
-        values = combineFields(values);
-        magSf = combineFields(magSf);
-        weightField = combineFields(weightField);
+        combineFields(values);
+        combineFields(magSf);
+        combineFields(weightField);
 
-        Type result = processValues(values, magSf, weightField);
 
         if (Pstream::master())
         {
+            Type result = processValues(values, magSf, weightField);
+
             if (valueOutput_)
             {
                 IOField<Type>
