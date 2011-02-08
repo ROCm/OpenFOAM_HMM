@@ -207,14 +207,16 @@ OPTIMIZE_FOR_FORTRAN   = NO
 
 OPTIMIZE_OUTPUT_VHDL   = NO
 
-# Doxygen selects the parser to use depending on the extension of the files it parses.
-# With this tag you can assign which parser to use for a given extension.
-# Doxygen has a built-in mapping, but you can override or extend it using this tag.
-# The format is ext=language, where ext is a file extension, and language is one of
-# the parsers supported by doxygen: IDL, Java, Javascript, C#, C, C++, D, PHP,
-# Objective-C, Python, Fortran, VHDL, C, C++. For instance to make doxygen treat
-# .inc files as Fortran files (default is PHP), and .f files as C (default is Fortran),
-# use: inc=Fortran f=C. Note that for custom extensions you also need to set FILE_PATTERNS otherwise the files are not read by doxygen.
+# Doxygen selects the parser to use depending on the extension of the files it
+# parses.  With this tag you can assign which parser to use for a given
+# extension.  Doxygen has a built-in mapping, but you can override or extend it
+# using this tag.  The format is ext=language, where ext is a file extension,
+# and language is one of the parsers supported by doxygen: IDL, Java,
+# Javascript, C#, C, C++, D, PHP, Objective-C, Python, Fortran, VHDL, C,
+# C++. For instance to make doxygen treat .inc files as Fortran files (default
+# is PHP), and .f files as C (default is Fortran), use: inc=Fortran f=C. Note
+# that for custom extensions you also need to set FILE_PATTERNS otherwise the
+# files are not read by doxygen.
 
 EXTENSION_MAPPING      =
 
@@ -238,10 +240,10 @@ CPP_CLI_SUPPORT        = NO
 
 SIP_SUPPORT            = NO
 
-# For Microsoft's IDL there are propget and propput attributes to indicate getter
-# and setter methods for a property. Setting this option to YES (the default)
-# will make doxygen to replace the get and set methods by a property in the
-# documentation. This will only work if the methods are indeed getting or
+# For Microsoft's IDL there are propget and propput attributes to indicate
+# getter and setter methods for a property. Setting this option to YES (the
+# default) will make doxygen to replace the get and set methods by a property in
+# the documentation. This will only work if the methods are indeed getting or
 # setting a simple type. If this is not the case, or you want to show the
 # methods anyway, you should set this option to NO.
 
@@ -411,7 +413,12 @@ SORT_MEMBER_DOCS       = NO
 
 SORT_BRIEF_DOCS        = NO
 
-# If the SORT_MEMBERS_CTORS_1ST tag is set to YES then doxygen will sort the (brief and detailed) documentation of class members so that constructors and destructors are listed first. If set to NO (the default) the constructors will appear in the respective orders defined by SORT_MEMBER_DOCS and SORT_BRIEF_DOCS. This tag will be ignored for brief docs if SORT_BRIEF_DOCS is set to NO and ignored for detailed docs if SORT_MEMBER_DOCS is set to NO.
+# If the SORT_MEMBERS_CTORS_1ST tag is set to YES then doxygen will sort the
+# (brief and detailed) documentation of class members so that constructors and
+# destructors are listed first. If set to NO (the default) the constructors will
+# appear in the respective orders defined by SORT_MEMBER_DOCS and
+# SORT_BRIEF_DOCS. This tag will be ignored for brief docs if SORT_BRIEF_DOCS is
+# set to NO and ignored for detailed docs if SORT_MEMBER_DOCS is set to NO.
 
 SORT_MEMBERS_CTORS_1ST = NO
 
@@ -505,12 +512,12 @@ SHOW_NAMESPACES        = YES
 
 FILE_VERSION_FILTER    =
 
-# The LAYOUT_FILE tag can be used to specify a layout file which will be parsed by
-# doxygen. The layout file controls the global structure of the generated output files
-# in an output format independent way. The create the layout file that represents
-# doxygen's defaults, run doxygen with the -l option. You can optionally specify a
-# file name after the option, if omitted DoxygenLayout.xml will be used as the name
-# of the layout file.
+# The LAYOUT_FILE tag can be used to specify a layout file which will be parsed
+# by doxygen. The layout file controls the global structure of the generated
+# output files in an output format independent way. The create the layout file
+# that represents doxygen's defaults, run doxygen with the -l option. You can
+# optionally specify a file name after the option, if omitted DoxygenLayout.xml
+# will be used as the name of the layout file.
 
 LAYOUT_FILE            =
 
@@ -582,6 +589,7 @@ WARN_LOGFILE           =
 INPUT                  = $(WM_PROJECT_DIR)/src/OpenFOAM/global \
                          $(WM_PROJECT_DIR)/src/OpenFOAM/containers \
                          $(WM_PROJECT_DIR)/src/OpenFOAM/primitives \
+                         $(WM_PROJECT_DIR)/sampling \
                          $(WM_PROJECT_DIR)/src/finiteVolume/fvMesh
 
 # This tag can be used to specify the character encoding of the source files
@@ -837,15 +845,15 @@ HTML_ALIGN_MEMBERS     = YES
 
 HTML_DYNAMIC_SECTIONS  = NO
 
-# If the GENERATE_DOCSET tag is set to YES, additional index files
-# will be generated that can be used as input for Apple's Xcode 3
-# integrated development environment, introduced with OSX 10.5 (Leopard).
-# To create a documentation set, doxygen will generate a Makefile in the
-# HTML output directory. Running make will produce the docset in that
-# directory and running "make install" will install the docset in
-# ~/Library/Developer/Shared/Documentation/DocSets so that Xcode will find
-# it at startup.
-# See http://developer.apple.com/tools/creatingdocsetswithdoxygen.html for more information.
+# If the GENERATE_DOCSET tag is set to YES, additional index files will be
+# generated that can be used as input for Apple's Xcode 3 integrated development
+# environment, introduced with OSX 10.5 (Leopard).  To create a documentation
+# set, doxygen will generate a Makefile in the HTML output directory. Running
+# make will produce the docset in that directory and running "make install" will
+# install the docset in ~/Library/Developer/Shared/Documentation/DocSets so that
+# Xcode will find it at startup.  See
+# http://developer.apple.com/tools/creatingdocsetswithdoxygen.html for more
+# information.
 
 GENERATE_DOCSET        = NO
 
@@ -907,10 +915,10 @@ BINARY_TOC             = NO
 
 TOC_EXPAND             = NO
 
-# If the GENERATE_QHP tag is set to YES and both QHP_NAMESPACE and QHP_VIRTUAL_FOLDER
-# are set, an additional index file will be generated that can be used as input for
-# Qt's qhelpgenerator to generate a Qt Compressed Help (.qch) of the generated
-# HTML documentation.
+# If the GENERATE_QHP tag is set to YES and both QHP_NAMESPACE and
+# QHP_VIRTUAL_FOLDER are set, an additional index file will be generated that
+# can be used as input for Qt's qhelpgenerator to generate a Qt Compressed Help
+# (.qch) of the generated HTML documentation.
 
 GENERATE_QHP           = NO
 
@@ -932,20 +940,23 @@ QHP_NAMESPACE          = org.doxygen.Project
 
 QHP_VIRTUAL_FOLDER     = doc
 
-# If QHP_CUST_FILTER_NAME is set, it specifies the name of a custom filter to add.
-# For more information please see
+# If QHP_CUST_FILTER_NAME is set, it specifies the name of a custom filter to
+# add.  For more information please see
 # http://doc.trolltech.com/qthelpproject.html#custom-filters
 
 QHP_CUST_FILTER_NAME   =
 
-# The QHP_CUST_FILT_ATTRS tag specifies the list of the attributes of the custom filter to add.For more information please see
-# <a href="http://doc.trolltech.com/qthelpproject.html#custom-filters">Qt Help Project / Custom Filters</a>.
+# The QHP_CUST_FILT_ATTRS tag specifies the list of the attributes of the custom
+# filter to add.For more information please see <a
+# href="http://doc.trolltech.com/qthelpproject.html#custom-filters">Qt Help
+# Project / Custom Filters</a>.
 
 QHP_CUST_FILTER_ATTRS  =
 
-# The QHP_SECT_FILTER_ATTRS tag specifies the list of the attributes this project's
-# filter section matches.
-# <a href="http://doc.trolltech.com/qthelpproject.html#filter-attributes">Qt Help Project / Filter Attributes</a>.
+# The QHP_SECT_FILTER_ATTRS tag specifies the list of the attributes this
+# project's filter section matches.  <a
+# href="http://doc.trolltech.com/qthelpproject.html#filter-attributes">Qt Help
+# Project / Filter Attributes</a>.
 
 QHP_SECT_FILTER_ATTRS  =
 
@@ -956,13 +967,14 @@ QHP_SECT_FILTER_ATTRS  =
 
 QHG_LOCATION           =
 
-# If the GENERATE_ECLIPSEHELP tag is set to YES, additional index files
-#  will be generated, which together with the HTML files, form an Eclipse help
+# If the GENERATE_ECLIPSEHELP tag is set to YES, additional index files will be
+#  generated, which together with the HTML files, form an Eclipse help
 #  plugin. To install this plugin and make it available under the help contents
-# menu in Eclipse, the contents of the directory containing the HTML and XML
-# files needs to be copied into the plugins directory of eclipse. The name of
-# the directory within the plugins directory should be the same as
-# the ECLIPSE_DOC_ID value. After copying Eclipse needs to be restarted before the help appears.
+#  menu in Eclipse, the contents of the directory containing the HTML and XML
+#  files needs to be copied into the plugins directory of eclipse. The name of
+#  the directory within the plugins directory should be the same as the
+#  ECLIPSE_DOC_ID value. After copying Eclipse needs to be restarted before the
+#  help appears.
 
 GENERATE_ECLIPSEHELP   = NO
 
@@ -1012,16 +1024,23 @@ TREEVIEW_WIDTH         = 250
 
 FORMULA_FONTSIZE       = 10
 
-# When the SEARCHENGINE tag is enabled doxygen will generate a search box for the HTML output. The underlying search engine uses javascript
-# and DHTML and should work on any modern browser. Note that when using HTML help (GENERATE_HTMLHELP), Qt help (GENERATE_QHP), or docsets (GENERATE_DOCSET) there is already a search function so this one should
-# typically be disabled. For large projects the javascript based search engine
-# can be slow, then enabling SERVER_BASED_SEARCH may provide a better solution.
+# When the SEARCHENGINE tag is enabled doxygen will generate a search box for
+# the HTML output. The underlying search engine uses javascript and DHTML and
+# should work on any modern browser. Note that when using HTML help
+# (GENERATE_HTMLHELP), Qt help (GENERATE_QHP), or docsets (GENERATE_DOCSET)
+# there is already a search function so this one should typically be
+# disabled. For large projects the javascript based search engine can be slow,
+# then enabling SERVER_BASED_SEARCH may provide a better solution.
 
 SEARCHENGINE           = YES
 
-# When the SERVER_BASED_SEARCH tag is enabled the search engine will be implemented using a PHP enabled web server instead of at the web client using Javascript. Doxygen will generate the search PHP script and index
-# file to put on the web server. The advantage of the server based approach is that it scales better to large projects and allows full text search. The disadvances is that it is more difficult to setup
-# and does not have live searching capabilities.
+# When the SERVER_BASED_SEARCH tag is enabled the search engine will be
+# implemented using a PHP enabled web server instead of at the web client using
+# Javascript. Doxygen will generate the search PHP script and index file to put
+# on the web server. The advantage of the server based approach is that it
+# scales better to large projects and allows full text search. The disadvances
+# is that it is more difficult to setup and does not have live searching
+# capabilities.
 
 SERVER_BASED_SEARCH    = NO
 # old default
@@ -1106,7 +1125,9 @@ LATEX_BATCHMODE        = NO
 
 LATEX_HIDE_INDICES     = NO
 
-# If LATEX_SOURCE_CODE is set to YES then doxygen will include source code with syntax highlighting in the LaTeX output. Note that which sources are shown also depends on other settings such as SOURCE_BROWSER.
+# If LATEX_SOURCE_CODE is set to YES then doxygen will include source code with
+# syntax highlighting in the LaTeX output. Note that which sources are shown
+# also depends on other settings such as SOURCE_BROWSER.
 
 LATEX_SOURCE_CODE      = NO
 
@@ -1409,8 +1430,8 @@ HIDE_UNDOC_RELATIONS   = YES
 HAVE_DOT               = YES
 
 # By default doxygen will write a font called FreeSans.ttf to the output
-# directory and reference it in all dot files that doxygen generates. This
-# font does not include all possible unicode characters however, so when you need
+# directory and reference it in all dot files that doxygen generates. This font
+# does not include all possible unicode characters however, so when you need
 # these (or just want a differently looking font) you can specify the font name
 # using DOT_FONTNAME. You need need to make sure dot is able to find the font,
 # which can be done by putting it in a standard location or by setting the
