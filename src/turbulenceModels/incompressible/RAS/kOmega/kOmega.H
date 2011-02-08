@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
     incompressible flows.
 
     References:
-    @verbatim
+    \verbatim
         "Turbulence Modeling for CFD"
         D. C. Wilcox,
         DCW Industries, Inc., La Canada,
@@ -37,10 +37,10 @@ Description
 
         See also:
         http://www.cfd-online.com/Wiki/Wilcox's_k-omega_model
-    @endverbatim
+    \endverbatim
 
     The default model coefficients correspond to the following:
-    @verbatim
+    \verbatim
         kOmegaCoeffs
         {
             Cmu         0.09;  // Equivalent to betaStar
@@ -49,7 +49,7 @@ Description
             alphak      0.5;
             alphaOmega  0.5;
         }
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     kOmega.C

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,10 +29,10 @@ Description
     type in the field and polyMesh/boundary files.
 
     Reads dictionaries (fields) and entries to change from a dictionary.
-    E.g. to make the @em movingWall a @em fixedValue for @em p but all other
-    @em Walls a zeroGradient boundary condition, the
-    @c system/changeDictionaryDict would contain the following:
-    @verbatim
+    E.g. to make the \em movingWall a \em fixedValue for @em p but all other
+    \em Walls a zeroGradient boundary condition, the
+    \c system/changeDictionaryDict would contain the following:
+    \verbatim
     dictionaryReplacement
     {
         p                           // field to change
@@ -51,13 +51,13 @@ Description
             }
         }
     }
-    @endverbatim
+    \endverbatim
 
 Usage
 
     - changeDictionary [OPTION]
 
-    @param -literalRE \n
+    \param -literalRE \n
     Do not interpret regular expressions; treat them as any other keyword.
 
 

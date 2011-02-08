@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,7 +35,7 @@ Description
       indices into splitCells.
 
     E.g. 2 cells, cell 1 gets refined so end up with 9 cells:
-    @verbatim
+    \verbatim
         // splitCells
         9
         (
@@ -52,7 +52,7 @@ Description
 
         // visibleCells
         9(-1 1 2 3 4 5 6 7 8)
-    @endverbatim
+    \endverbatim
 
 
     So cell0 (visibleCells=-1) is unrefined.

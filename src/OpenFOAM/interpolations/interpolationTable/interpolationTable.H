@@ -29,9 +29,9 @@ Description
     The reference scalar values must be monotonically increasing.
 
     The handling of out-of-bounds values depends on the current setting
-    of @a outOfBounds.
+    of \a outOfBounds.
 
-    If @a REPEAT is chosen for the out-of-bounds handling, the final time
+    If \a REPEAT is chosen for the out-of-bounds handling, the final time
     value is treated as being equivalent to time=0 for the following periods.
 
 Note

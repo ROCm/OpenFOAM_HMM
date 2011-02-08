@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,7 @@ Description
     Work in progress! Handles ascii multiblock (and optionally singleBlock)
     format.
     By default expects blanking. Use -noBlank if none.
-    Use -2D @a thickness if 2D.
+    Use -2D \a thickness if 2D.
 
     Niklas Nordin has experienced a problem with lefthandedness of the blocks.
     The code should detect this automatically - see hexBlock::readPoints but

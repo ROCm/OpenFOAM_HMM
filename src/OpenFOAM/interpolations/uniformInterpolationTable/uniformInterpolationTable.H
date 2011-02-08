@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ Description
 
     Example usage (scalar): values specified within a dictionary:
 
-    @verbatim
+    \verbatim
     {
         x0          0;          // lower limit
         dx          0.2;        // fixed interval
@@ -43,7 +43,7 @@ Description
             7870                // value at x0 + n*dx
         );
     }
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     uniformInterpolationTable.C

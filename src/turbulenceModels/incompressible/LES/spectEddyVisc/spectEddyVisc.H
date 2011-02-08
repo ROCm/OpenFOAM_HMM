@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,7 @@ Description
     local equilibrium prevail and that viscous effects may be of importance.
 
     Thus,
-    @verbatim
+    \verbatim
         B = 2/3*k*I - 2*nuSgs*dev(D)
         Beff = 2/3*k*I - 2*nuEff*dev(D)
 
@@ -44,7 +44,7 @@ Description
         nuSgs = nuEff - nu
 
         Re = delta^2*mag(D)/nu
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     spectEddyVisc.C

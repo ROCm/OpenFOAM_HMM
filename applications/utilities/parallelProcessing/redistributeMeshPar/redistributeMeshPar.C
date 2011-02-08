@@ -32,7 +32,7 @@ Description
     Balances mesh and writes new mesh to new time directory.
 
     Can also work like decomposePar:
-    @verbatim
+    \verbatim
         # Create empty processor directories (have to exist for argList)
         mkdir processor0
                 ..
@@ -43,7 +43,7 @@ Description
 
         # Distribute
         mpirun -np ddd redistributeMeshPar -parallel
-    @endverbatim
+    \endverbatim
 \*---------------------------------------------------------------------------*/
 
 #include "fvMesh.H"

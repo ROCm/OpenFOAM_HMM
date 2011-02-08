@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ Description
     corresponding to PDR basic drag model (\link basic.H \endlink)
 
     The default model coefficients correspond to the following:
-    @verbatim
+    \verbatim
         PDRkEpsilonCoeffs
         {
             Cmu         0.09;
@@ -41,7 +41,7 @@ Description
             sigmaEps    1.3;
             Prt         1.0;    // only for compressible
         }
-    @endverbatim
+    \endverbatim
 
     The turbulence source term \f$ G_{R} \f$ appears in the
     \f$ \kappa-\epsilon \f$ equation for the generation of turbulence due to

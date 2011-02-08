@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,7 +35,7 @@ Description
     expansion/compression.
 
     Example of the BC specification:
-    @verbatim
+    \verbatim
         outlet
         {
             type            syringePressure;
@@ -51,7 +51,7 @@ Description
             ams             0;        // Added (or removed) gas mass
                                       // Initially 0 but used for restarting.
         }
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     syringePressureFvPatchScalarField.C

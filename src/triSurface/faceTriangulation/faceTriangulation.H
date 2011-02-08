@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,10 +32,10 @@ Description
     internal angle (i.e. closest to 180 deg).
 
     Based on routine 'Diagonal' in
-    @verbatim
+    \verbatim
         "Efficient Triangulation of Simple Polygons"
         Godfried Toussaint, McGill University.
-    @endverbatim
+    \endverbatim
 
     After construction is the list of triangles the face is decomposed into.
     (Or empty list if no valid triangulation could be found).

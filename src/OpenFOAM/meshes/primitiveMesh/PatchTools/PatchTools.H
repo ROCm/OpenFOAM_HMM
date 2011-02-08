@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -115,9 +115,9 @@ public:
 
     //- Determine the mapping for a sub-patch.
     //  Only include faces for which bool-list entry is true.
-    //  @param[in]  includeFaces faces to include
-    //  @param[out] pointMap mapping new to old localPoints
-    //  @param[out] faceMap  mapping new to old faces
+    //  \param[in]  includeFaces faces to include
+    //  \param[out] pointMap mapping new to old localPoints
+    //  \param[out] faceMap  mapping new to old faces
     template
     <
         class BoolListType,

@@ -45,11 +45,11 @@ Description
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-//! @cond fileScope
+//! \cond fileScope
 //  The bytes used to pad buffer to the next 64-byte boundary.
 //  (RFC 1321, 3.1: Step 1)
 static const unsigned char fillbuf[64] = { 0x80, 0 /* , 0, 0, ...  */ };
-//! @endcond
+//! \endcond
 
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //

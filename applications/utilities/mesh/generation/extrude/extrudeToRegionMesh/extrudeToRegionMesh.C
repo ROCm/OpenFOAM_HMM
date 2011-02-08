@@ -108,13 +108,13 @@ Usage
 
     - extrudeToRegionMesh \<regionName\> \<faceZones\> \<thickness\>
 
-    @param \<regionName\> \n
+    \param \<regionName\> \n
     Name of mesh to create.
 
-    @param \<faceZones\> \n
+    \param \<faceZones\> \n
     List of faceZones to extrude
 
-    @param \<thickness\> \n
+    \param \<thickness\> \n
     Thickness of extruded mesh.
 
 \*---------------------------------------------------------------------------*/

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,7 @@ Description
     Has various utility functions to deal with 'features' on this level
     where the mesh still has all inside and outside cells.
 
-    @par Concepts
+    \par Concepts
 
     - point classification:
         - point used by meshType cells only
@@ -56,7 +56,7 @@ Description
       same type.
 
     Seen from above:
-    @verbatim
+    \verbatim
     Ok:
          A | A
            |
@@ -70,7 +70,7 @@ Description
         ---+---
            |
          B | A
-    @endverbatim
+    \endverbatim
 
     because this latter situation would cause the surface after subsetting
     type A or B to be multiply connected across this edge. And also when

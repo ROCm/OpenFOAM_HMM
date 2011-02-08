@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,18 +33,18 @@ Usage
     for it. Normal behaviour is to have each point become a cell
     (1.5 behaviour)
 
-    @param -concaveMultiCells
+    \param -concaveMultiCells
     Creates multiple cells for each point on a concave edge. Might limit
     the amount of distortion on some meshes.
 
-    @param -splitAllFaces
+    \param -splitAllFaces
     Normally only constructs a single face between two cells. This single face
     might be too distorted. splitAllFaces will create a single face for every
     original cell the face passes through. The mesh will thus have
     multiple faces inbetween two cells! (so is not strictly upper-triangular
     anymore - checkMesh will complain)
 
-    @param -doNotPreserveFaceZones:
+    \param -doNotPreserveFaceZones:
     By default all faceZones are preserved by marking all faces, edges and
     points on them as features. The -doNotPreserveFaceZones disables this
     behaviour.

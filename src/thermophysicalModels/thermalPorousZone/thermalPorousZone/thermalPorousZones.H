@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,10 +31,10 @@ Description
     member functions implemented to loop over the functions for each
     thermalPorousZone.
 
-    The input file @c constant/thermalPorousZone is implemented as
+    The input file \c constant/thermalPorousZone is implemented as
     IOPtrList\<thermalPorousZone\> and contains the following type of data:
 
-    @verbatim
+    \verbatim
     1
     (
     cat1
@@ -53,7 +53,7 @@ Description
         }
     }
     )
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     thermalPorousZones.C

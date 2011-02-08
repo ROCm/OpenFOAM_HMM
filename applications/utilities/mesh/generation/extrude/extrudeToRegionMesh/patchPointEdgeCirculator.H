@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ Description
     Walks from starting edge/face around point on patch.
 
     -# Use in-place: \n
-        @code
+        \code
             patchPointEdgeCirculator circ(..);
 
             // Walk
@@ -38,10 +38,10 @@ Description
                 ++circ;
             }
             while (circ != circ.end());
-        @endcode
+        \endcode
 
     -# Use like STL iterator: \n
-        @code
+        \code
             patchPointEdgeCirculator circ(..);
             for
             (
@@ -52,7 +52,7 @@ Description
             {
                 Info<< "edge:" << iter.edgeID() << endl;
             }
-        @endcode
+        \endcode
 
 
 SourceFiles

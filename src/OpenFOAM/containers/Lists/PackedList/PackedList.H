@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,11 +42,11 @@ Note
 
     Using the iteratorBase as a proxy allows assignment of values
     between list elements. Thus the following bit of code works as expected:
-    @code
+    \code
         list[1] = list[5];      // value assignment, not iterator position
         list[2] = list[5] = 4;  // propagates value
         list[1] = list[5] = list[6];  // propagates value
-    @endcode
+    \endcode
 
     Using get() or the '[]' operator are similarly fast. Looping and reading
     via an iterator is approx. 15% slower, but can be more flexible.
@@ -56,21 +56,21 @@ Note
     advantage of also returning a bool if the value changed.  This can be
     useful for branching on changed values.
 
-    @code
+    \code
         list[5] = 4;
         changed = list.set(5, 8);
         if (changed) ...
-    @endcode
+    \endcode
 
     The lazy evaluation used means that reading an out-of-range element
     returns zero, but does not affect the list size.  Even in a non-const
     context, only the assigment itself causes the element to be created.
     For example,
-    @code
+    \code
         list.resize(4);
         Info<< list[10] << "\n";  // print zero, but doesn't adjust list
         list[8] = 1;
-    @endcode
+    \endcode
 
     Also note that all unused internal storage elements are guaranteed to
     always be bit-wise zero. This property must not be violated by any
@@ -79,14 +79,14 @@ Note
     In addition to the normal output format, PackedList also supports a
     compact ASCII format that may be convenient for user input in some
     situations. The general format is a group of index/value pairs:
-    @verbatim
+    \verbatim
         { (index1 value1) (index2 value2) (index3 value3) }
-    @endverbatim
+    \endverbatim
     The bool specialization just uses the indices corresponding to
     non-zero entries instead of a index/value pair:
-    @verbatim
+    \verbatim
         { index1 index2 index3 }
-    @endverbatim
+    \endverbatim
     In both cases, the supplied indices can be randomly ordered.
 
 SeeAlso
@@ -356,14 +356,14 @@ public:
             //
             // The indexed output may be convenient in some situations.
             // The general format is a group of index/value pairs:
-            //  @verbatim
+            //  \verbatim
             //      { (index1 value1) (index2 value2) (index3 value3) }
-            // @endverbatim
+            // \endverbatim
             // The bool specialization just uses the indices corresponding to
             // non-zero entries instead of a index/value pair:
-            // @verbatim
+            // \verbatim
             //     { index1 index2 index3 }
-            // @endverbatim
+            // \endverbatim
             //
             // Note the indexed output is only supported for ASCII streams.
             Ostream& write

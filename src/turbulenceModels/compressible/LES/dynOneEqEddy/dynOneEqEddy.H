@@ -30,7 +30,7 @@ Description
     Eddy viscosity SGS model using a modeled balance equation to simulate
     the behaviour of k.
     Thus
-    @verbatim
+    \verbatim
         d/dt(k) + div(U*k) - div(nuSgs*grad(k))
         =
         -rho*B*L - ce*rho*k^3/2/delta
@@ -43,7 +43,7 @@ Description
 
         D = symm(grad(U));
         nuSgs = ck*sqrt(k)*delta
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     dynOneEqEddy.C

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,16 +31,16 @@ Usage
     - foamToStarMesh [OPTION] \n
     Reads an OpenFOAM mesh and writes a pro-STAR (v4) bnd/cel/vrt format.
 
-    @param -noBnd \n
-    Suppress writing the @c .bnd file
+    \param -noBnd \n
+    Suppress writing the \c .bnd file
 
-    @param -scale \<factor\>\n
+    \param -scale \<factor\>\n
     Specify an alternative geometry scaling factor.
-    The default is @b 1000 (scale @em [m] to @em [mm]).
+    The default is \b 1000 (scale \em [m] to \em [mm]).
 
 Note
     The cellTable information available in the files
-    @c constant/cellTable and @c constant/polyMesh/cellTableId
+    \c constant/cellTable and @c constant/polyMesh/cellTableId
     will be used if available. Otherwise the cellZones are used when
     creating the cellTable information.
 

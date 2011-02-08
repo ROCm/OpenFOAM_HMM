@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,10 +32,10 @@ License
 
 // set values for what is close to zero and what is considered to
 // be positive (and not just rounding noise)
-//! @cond localScope
+//! \cond localScope
 const Foam::scalar zeroish  = Foam::SMALL;
 const Foam::scalar positive = Foam::SMALL * 1E3;
-//! @endcond
+//! \endcond
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

@@ -29,13 +29,13 @@ Description
     Tuple2's. First column is always stored as scalar entries. Data is read
     in the form, e.g. for an entry \<entryName\> that is (scalar, vector):
 
-    @verbatim
+    \verbatim
         <entryName>   table
         (
             0.0 (1 2 3)
             1.0 (4 5 6)
         );
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     Table.C

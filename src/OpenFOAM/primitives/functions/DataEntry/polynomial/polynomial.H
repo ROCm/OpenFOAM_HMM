@@ -29,13 +29,13 @@ Description
     Tuple2's. Data is input in the form, e.g. for an entry \<entryName\> that
     describes y = x^2 + 2x^3
 
-    @verbatim
+    \verbatim
         <entryName>   polynomial
         (
             (1    2)
             (2    3)
         );
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     polynomial.C

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,7 @@ Description
 
         E.g. 2 boundary faces on patches a,b. 2 layers for a, 3 for b.
 
-    @verbatim
+    \verbatim
         Was:
 
            a      b         <- patch of boundary face
@@ -62,7 +62,7 @@ Description
         +------+------+
         |      |      |     <- original cells
         +------+------+
-    @endverbatim
+    \endverbatim
 
 
     - added faces get same patchID as face they are extruded from
@@ -72,7 +72,7 @@ Description
 
     E.g. 3 boundary faces on patches a,b. b gets extruded, a doesn't.
 
-    @verbatim
+    \verbatim
            a      b      b        <- patch of boundary face
         +------+------+------+
         |      |      |      |    <- cells
@@ -91,7 +91,7 @@ Description
         +------+------+------+    2. side-face gets patch a, not b.
         |      |      |      |
         +------+------+------+
-    @endverbatim
+    \endverbatim
 
 
 SourceFiles
