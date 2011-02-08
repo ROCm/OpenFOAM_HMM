@@ -288,7 +288,7 @@ protected:
         typename ParcelType::constantProperties constProps_;
 
         //- Sub-models dictionary
-        const dictionary& subModelProperties_;
+        const dictionary subModelProperties_;
 
         //- Random number generator - used by some injection routines
         cachedRandom rndGen_;
