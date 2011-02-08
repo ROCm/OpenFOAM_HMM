@@ -26,7 +26,6 @@ Class
 
 Description
     Cone injection
-
     - User specifies
       - time of start of injection
       - injector position

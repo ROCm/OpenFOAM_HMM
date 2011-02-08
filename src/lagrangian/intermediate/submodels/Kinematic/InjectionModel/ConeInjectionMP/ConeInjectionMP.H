@@ -26,7 +26,6 @@ Class
 
 Description
     Cone injection multi-point
-
     - User specifies
       - time of start of injection
       - injector positions

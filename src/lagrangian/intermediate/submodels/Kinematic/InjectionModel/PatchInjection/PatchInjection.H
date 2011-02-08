@@ -26,7 +26,6 @@ Class
 
 Description
     Patch injection
-
     - User specifies
       - Total mass to inject
       - Name of patch

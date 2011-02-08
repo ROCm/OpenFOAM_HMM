@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -518,8 +518,7 @@ public:
 
     // Tracking
 
-        //- Test point on plane of triangle to see if on edge or point
-        //  or inside.
+        //- Test point on plane of triangle to see if on edge or point or inside
         static surfaceLocation classify
         (
             const triSurface&,
@@ -527,7 +526,8 @@ public:
             const point& trianglePoint
         );
 
-        //- Track on surface to get closer to point. Possible situations:
+        //- Track on surface to get closer to point.
+        //  Possible situations:
         //  - 1. reached endpoint
         //  - 2. reached edge (normal situation)
         //  - 3. reached end of surface (edge on single face)

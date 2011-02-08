@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -511,7 +511,8 @@ public:
 
         // Queries
 
-            //- Calculate nearest point on nearest shape. Returns
+            //- Calculate nearest point on nearest shape.
+            //  Returns
             //  - bool : any point found nearer than nearestDistSqr
             //  - label: index in shapes
             //  - point: actual nearest point found
@@ -532,7 +533,8 @@ public:
                 point& nearestPoint
             ) const;
 
-            //- Find nearest to line. Returns
+            //- Find nearest to line.
+            //  Returns
             //  - bool : any point found?
             //  - label: index in shapes
             //  - point: actual nearest point found
@@ -621,10 +623,10 @@ public:
 
             bool write(Ostream& os) const;
 
+
     // IOstream Operators
 
         friend Ostream& operator<< <Type>(Ostream&, const indexedOctree<Type>&);
-
 };
 
 
