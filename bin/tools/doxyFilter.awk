@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 # -----------------------------------------------------------------------------
 # License
@@ -57,7 +57,7 @@ BEGIN {
     # start comment block
     if (state == 1)
     {
-        printf "/*!\n"
+        printf "/*! "
         state = 2
     }
 
@@ -79,7 +79,7 @@ BEGIN {
     # end comment block
     if (state == 2)
     {
-        printf "*/\n"
+        printf "*/ "
     }
     state = 0
     print

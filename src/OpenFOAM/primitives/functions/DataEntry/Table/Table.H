@@ -27,7 +27,7 @@ Class
 Description
     Templated table container data entry. Items are stored in a list of
     Tuple2's. First column is always stored as scalar entries. Data is read
-    in the form, e.g. for an entry <entryName> that is (scalar, vector):
+    in the form, e.g. for an entry \<entryName\> that is (scalar, vector):
 
     @verbatim
         <entryName>   table
