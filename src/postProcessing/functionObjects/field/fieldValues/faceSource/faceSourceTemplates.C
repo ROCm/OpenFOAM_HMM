@@ -158,10 +158,11 @@ bool Foam::fieldValues::faceSource::writeValues(const word& fieldName)
         magSf = combineFields(magSf);
         weightField = combineFields(weightField);
 
-        Type result = processValues(values, magSf, weightField);
 
         if (Pstream::master())
         {
+            Type result = processValues(values, magSf, weightField);
+
             if (valueOutput_)
             {
                 IOField<Type>
