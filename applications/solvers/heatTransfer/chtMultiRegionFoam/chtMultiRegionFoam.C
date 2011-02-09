@@ -38,6 +38,7 @@ Description
 #include "compressibleCourantNo.H"
 #include "solidRegionDiffNo.H"
 #include "basicSolidThermo.H"
+#include "radiationModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

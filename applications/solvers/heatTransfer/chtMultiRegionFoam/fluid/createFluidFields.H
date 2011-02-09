@@ -9,6 +9,7 @@
     PtrList<volScalarField> p_rghFluid(fluidRegions.size());
     PtrList<volScalarField> ghFluid(fluidRegions.size());
     PtrList<surfaceScalarField> ghfFluid(fluidRegions.size());
+    PtrList<radiation::radiationModel> radiation(fluidRegions.size());
     PtrList<volScalarField> DpDtFluid(fluidRegions.size());
 
     List<scalar> initialMassFluid(fluidRegions.size());
@@ -166,6 +167,12 @@
         // Force p_rgh to be consistent with p
         p_rghFluid[i] = thermoFluid[i].p() - rhoFluid[i]*ghFluid[i];
 
+        radiation.set
+        (
+            i,
+            radiation::radiationModel::New(thermoFluid[i].T())
+        );
+        
         initialMassFluid[i] = fvc::domainIntegrate(rhoFluid[i]).value();
 
         Info<< "    Adding to DpDtFluid\n" << endl;

@@ -1,4 +1,6 @@
 chtMultiRegionSimpleFoam.C
+../derivedFvPatchFields/turbulentTemperatureCoupledMixedST/turbulentTemperatureCoupledMixedSTFvPatchScalarField.C
+../derivedFvPatchFields/externalWallHeatFluxTemperature/externalWallHeatFluxTemperatureFvPatchScalarField.C
 
 EXE = $(FOAM_APPBIN)/chtMultiRegionSimpleFoam
 
