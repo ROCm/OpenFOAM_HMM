@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,7 +74,7 @@ private:
         //- Type of output
         outputControls outputControl_;
 
-        //- The execution interval (in time steps) when using @c timeStep mode,
+        //- The execution interval (in time steps) when using \c timeStep mode,
         //  a value <= 1 means execute at every time step
         label outputInterval_;
 

@@ -28,12 +28,12 @@ Description
     SchnerrSauer cavitation model.
 
     Reference:
-    @verbatim
+    \verbatim
         Schnerr, G. H., And Sauer, J.,
         "Physical and Numerical Modeling of Unsteady Cavitation Dynamics",
         Proc. 4th International Conference on Multiphase Flow,
         New Orleans, U.S.A., 2001.
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     SchnerrSauer.C

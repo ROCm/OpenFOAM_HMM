@@ -29,14 +29,14 @@ Description
     Calculate epsilon via the mixing length [m]
 
     Example of the boundary condition specification:
-    @verbatim
+    \verbatim
         inlet
         {
             type            turbulentMixingLengthDissipationRateInlet;
             mixingLength    0.005;         // 5 mm
             value           uniform 200;   // placeholder
         }
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     turbulentMixingLengthDissipationRateInletFvPatchScalarField.C

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ Description
     given a central axis, central point, rpm, axial and radial velocity.
 
     Example of the boundary condition specification:
-    @verbatim
+    \verbatim
     inlet
     {
         type            cylindricalInletVelocity;
@@ -40,7 +40,7 @@ Description
         rpm             100;
         radialVelocity  -10;
     }
-    @endverbatim
+    \endverbatim
 
 
 SourceFiles

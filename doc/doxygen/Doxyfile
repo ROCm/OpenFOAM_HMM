@@ -581,16 +581,16 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-#INPUT                  = $(WM_PROJECT_DIR)/src \
-#                         $(WM_PROJECT_DIR)/applications/utilities \
-#                         $(WM_PROJECT_DIR)/applications/solvers
+INPUT                  = $(WM_PROJECT_DIR)/src \
+                         $(WM_PROJECT_DIR)/applications/utilities \
+                         $(WM_PROJECT_DIR)/applications/solvers
 
 # limit input for testing purposes
-INPUT                  = $(WM_PROJECT_DIR)/src/OpenFOAM/global \
-                         $(WM_PROJECT_DIR)/src/OpenFOAM/containers \
-                         $(WM_PROJECT_DIR)/src/OpenFOAM/primitives \
-                         $(WM_PROJECT_DIR)/sampling \
-                         $(WM_PROJECT_DIR)/src/finiteVolume/fvMesh
+# INPUT                  = $(WM_PROJECT_DIR)/src/OpenFOAM/global \
+#                          $(WM_PROJECT_DIR)/src/OpenFOAM/containers \
+#                          $(WM_PROJECT_DIR)/src/OpenFOAM/primitives \
+#                          $(WM_PROJECT_DIR)/sampling \
+#                          $(WM_PROJECT_DIR)/src/finiteVolume/fvMesh
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is

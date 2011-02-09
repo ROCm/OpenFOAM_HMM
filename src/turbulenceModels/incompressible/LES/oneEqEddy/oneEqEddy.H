@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
 
     Eddy viscosity SGS model using a modeled balance equation to simulate the
     behaviour of k, hence,
-    @verbatim
+    \verbatim
         d/dt(k) + div(U*k) - div(nuEff*grad(k))
         =
         -B*L - ce*k^3/2/delta
@@ -44,7 +44,7 @@ Description
         D = symm(grad(U));
         nuSgs = ck*sqrt(k)*delta
         nuEff = nuSgs + nu
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     oneEqEddy.C

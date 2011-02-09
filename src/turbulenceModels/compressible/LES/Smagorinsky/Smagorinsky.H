@@ -30,7 +30,7 @@ Description
     Algebraic eddy viscosity SGS model founded on the assumption that
     local equilibrium prevails.
     Thus,
-    @verbatim
+    \verbatim
 
         B = 2/3*k*I - 2*nuSgs*dev(D)
 
@@ -39,7 +39,7 @@ Description
         D = symm(grad(U));
         k from rho*D:B + ce*rho*k^3/2/delta = 0
         muSgs = ck*rho*sqrt(k)*delta
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     Smagorinsky.C

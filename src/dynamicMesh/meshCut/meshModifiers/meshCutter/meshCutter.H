@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,7 +44,7 @@ Description
 
     -# Start:
        cell with anchor points at bottom
-    @verbatim
+    \verbatim
     +-------+
     |       +
     |       +
@@ -55,13 +55,13 @@ Description
     |       +
     +-------+
     anchor  anchor
-    @endverbatim
+    \endverbatim
 
 
     -# Topo change:
        splitface introduced at bottom of cell, introducing a new
        cell and splitting the side faces into two.
-    @verbatim
+    \verbatim
     +-------+
     |       +
     |       +
@@ -72,12 +72,12 @@ Description
     +-------+ <- splitFace
     +-------+ <- original cell
     anchor  anchor
-    @endverbatim
+    \endverbatim
 
 
     -# Inflation:
        splitface shifted up to middle of cell (or wherever cut was)
-    @verbatim
+    \verbatim
     +-------+
     |       +
     |       + <- addedCell
@@ -88,7 +88,7 @@ Description
     |       +
     +-------+
     anchor  anchor
-    @endverbatim
+    \endverbatim
 
     Anyway this was the original idea. Inflation was meant to handle
     conservative properties distribution without interpolation.

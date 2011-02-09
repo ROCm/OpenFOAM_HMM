@@ -90,7 +90,7 @@ fileName cwd();
 //  else return false
 bool chDir(const fileName& dir);
 
-//- Search for @em name
+//- Search for \em name
 //  in the following hierarchy:
 //  -# personal settings:
 //    - ~/.OpenFOAM/\<VERSION\>/
@@ -105,7 +105,7 @@ bool chDir(const fileName& dir);
 //  -# shipped settings:
 //    - $WM_PROJECT_DIR/etc/
 //
-//  @return the full path name or fileName() if the name cannot be found
+//  \return the full path name or fileName() if the name cannot be found
 //  Optionally abort if the file cannot be found
 fileName findEtcFile(const fileName&, bool mandatory=false);
 

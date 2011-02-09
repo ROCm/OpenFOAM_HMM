@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,14 +27,14 @@ Class
 Description
     Remove a dictionary entry.
 
-    The @c \#remove directive takes a list or a single wordRe.
+    The \c \#remove directive takes a list or a single wordRe.
     For example,
-    @verbatim
+    \verbatim
         #remove entry0
         #remove ( entry1 entry2 entry3 otherEntry )
         #remove "entry[1-3]"
         #remove ( "entry[1-3]" otherEntry )
-    @endverbatim
+    \endverbatim
 
     The removal only occurs in the current context.
     Removing sub-entries or parent entries is not supported.

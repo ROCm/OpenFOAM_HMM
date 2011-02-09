@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ Description
     NSRDS function number 101
 
     Source:
-    @verbatim
+    \verbatim
                       NSRDS - AICHE
                  Data Compilation Tables
                     of Properties of
@@ -47,7 +47,7 @@ Description
             Department of Chemical Engineering
             The Pennsylvania State University
                 University Park, PA 16802
-    @endverbatim
+    \endverbatim
 
 \*---------------------------------------------------------------------------*/
 

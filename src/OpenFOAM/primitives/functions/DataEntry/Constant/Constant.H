@@ -28,9 +28,9 @@ Description
     Templated basic entry that holds a constant value.
 
     Usage - for entry \<entryName\> having the value <value>:
-    @verbatim
+    \verbatim
         <entryName>    constant  <value>
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     Constant.C

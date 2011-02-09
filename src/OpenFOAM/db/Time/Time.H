@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -393,39 +393,39 @@ public:
             //- Return true if run should continue,
             //  also invokes the functionObjectList::end() method
             //  when the time goes out of range
-            //  @note
+            //  \note
             //  For correct behaviour, the following style of time-loop
             //  is recommended:
-            //  @code
+            //  \code
             //      while (runTime.run())
             //      {
             //          runTime++;
             //          solve;
             //          runTime.write();
             //      }
-            //  @endcode
+            //  \endcode
             virtual bool run() const;
 
             //- Return true if run should continue and if so increment time
             //  also invokes the functionObjectList::end() method
             //  when the time goes out of range
-            //  @note
+            //  \note
             //  For correct behaviour, the following style of time-loop
             //  is recommended:
-            //  @code
+            //  \code
             //      while (runTime.loop())
             //      {
             //          solve;
             //          runTime.write();
             //      }
-            //  @endcode
+            //  \endcode
             virtual bool loop();
 
             //- Return true if end of run,
             //  does not invoke any functionObject methods
-            //  @note
+            //  \note
             //      The rounding heuristics near endTime mean that
-            //      @code run() @endcode and @code !end() @endcode may
+            //      \code run() \endcode and \code !end() \endcode may
             //      not yield the same result
             virtual bool end() const;
 

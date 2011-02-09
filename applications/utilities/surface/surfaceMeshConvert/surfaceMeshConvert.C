@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,25 +31,25 @@ Description
 Usage
     - surfaceMeshConvert inputFile outputFile [OPTION]
 
-    @param -clean \n
+    \param -clean \n
     Perform some surface checking/cleanup on the input surface.
 
-    @param -scaleIn \<scale\> \n
+    \param -scaleIn \<scale\> \n
     Specify a scaling factor when reading files.
 
-    @param -scaleOut \<scale\> \n
+    \param -scaleOut \<scale\> \n
     Specify a scaling factor when writing files.
 
-    @param -dict \<dictionary\> \n
+    \param -dict \<dictionary\> \n
     Specify an alternative dictionary for constant/coordinateSystems.
 
-    @param -from \<coordinateSystem\> \n
+    \param -from \<coordinateSystem\> \n
     Specify a coordinate System when reading files.
 
-    @param -to \<coordinateSystem\> \n
+    \param -to \<coordinateSystem\> \n
     Specify a coordinate System when writing files.
 
-    @param -tri \n
+    \param -tri \n
     Triangulate surface.
 
 Note

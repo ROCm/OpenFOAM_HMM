@@ -27,9 +27,9 @@ Class
 Description
     A normal distribution model
 
-    @verbatim
+    \verbatim
         model = strength * exp(-0.5*((x - expectation)/variance)^2 )
-    @endverbatim
+    \endverbatim
 
     strength only has meaning if there's more than one distribution model
 

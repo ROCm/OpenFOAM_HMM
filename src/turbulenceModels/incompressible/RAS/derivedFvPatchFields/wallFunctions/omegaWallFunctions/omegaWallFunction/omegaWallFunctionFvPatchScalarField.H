@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,12 +36,12 @@ Description
         omega_log = omega in logarithmic region
 
     Model described by Eq.(15) of:
-    @verbatim
+    \verbatim
         Menter, F., Esch, T.
         "Elements of Industrial Heat Transfer Prediction"
         16th Brazilian Congress of Mechanical Engineering (COBEM),
         Nov. 2001
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     omegaWallFunctionFvPatchScalarField.C

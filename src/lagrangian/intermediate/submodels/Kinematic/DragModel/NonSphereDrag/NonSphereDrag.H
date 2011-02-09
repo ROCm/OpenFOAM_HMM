@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,13 +46,13 @@ Description
     constant, it offers little benefit.
 
     Reference:
-    @verbatim
+    \verbatim
         "Drag coefficient and terminal velocity of spherical and nonspherical
         particles"
         A. Haider and O. Levenspiel,
         Powder Technology
         Volume 58, Issue 1, May 1989, Pages 63-70
-    @endverbatim
+    \endverbatim
 
 
 \*---------------------------------------------------------------------------*/

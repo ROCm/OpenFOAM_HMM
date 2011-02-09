@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,10 +30,10 @@ Description
     handling has been switched on (off by default).
 
 Usage
-    @code
+    \code
         error << "message1" << "message2" << FoamDataType << exit(error, errNo);
         error << "message1" << "message2" << FoamDataType << abort(error);
-    @endcode
+    \endcode
 
 \*---------------------------------------------------------------------------*/
 

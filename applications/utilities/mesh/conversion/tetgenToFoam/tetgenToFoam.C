@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
     and run tetgen with -f option.
 
     Sample smesh file:
-    @verbatim
+    \verbatim
         # cube.smesh -- A 10x10x10 cube
         8 3
         1       0 0 0
@@ -49,7 +49,7 @@ Description
         4       2 6 7 3 65
         0
         0
-    @endverbatim
+    \endverbatim
 
 Note
     - for some reason boundary faces point inwards. I just reverse them

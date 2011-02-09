@@ -30,9 +30,9 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-//! @cond fileScope
+//! \cond fileScope
 static const char hexChars[] = "0123456789abcdef";
-//! @endcond
+//! \endcond
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

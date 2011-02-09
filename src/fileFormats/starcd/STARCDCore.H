@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2006-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -94,7 +94,7 @@ public:
 
         //- Read points from a (.vrt) file
         // The file format is as follows:
-        // @verbatim
+        // \verbatim
         // Line 1:
         //   PROSTAR_VERTEX  newline
         //
@@ -103,7 +103,7 @@ public:
         //
         // Body:
         //   {vertexId}  {x}  {y}  {z}  newline
-        // @endverbatim
+        // \endverbatim
         static bool readPoints(IFstream&, pointField&, labelList& ids);
 
         //- Write header and points to (.vrt) file

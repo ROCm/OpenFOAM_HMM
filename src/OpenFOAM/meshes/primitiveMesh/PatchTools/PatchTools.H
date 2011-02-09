@@ -118,9 +118,9 @@ public:
 
     //- Determine the mapping for a sub-patch.
     //  Only include faces for which bool-list entry is true.
-    //  @param[in]  includeFaces faces to include
-    //  @param[out] pointMap mapping new to old localPoints
-    //  @param[out] faceMap  mapping new to old faces
+    //  \param[in]  includeFaces faces to include
+    //  \param[out] pointMap mapping new to old localPoints
+    //  \param[out] faceMap  mapping new to old faces
     template
     <
         class BoolListType,

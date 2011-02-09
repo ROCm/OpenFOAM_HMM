@@ -28,12 +28,12 @@ Description
     Merkle cavitation model.
 
     Reference:
-    @verbatim
+    \verbatim
         C. L. Merkle, J. Feng, and P. E. O. Buelow,
         "Computational modeling of the dynamics of sheet cavitation",
         in Proceedings Third International Symposium on Cavitation
         Grenoble, France 1998.
-   @endverbatim
+   \endverbatim
 
 SourceFiles
     Merkle.C

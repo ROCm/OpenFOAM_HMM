@@ -72,32 +72,32 @@ Type Foam::fieldValues::cellSource::processValues
     {
         case opSum:
         {
-            result = gSum(values);
+            result = sum(values);
             break;
         }
         case opVolAverage:
         {
-            result = gSum(values*V)/gSum(V);
+            result = sum(values*V)/sum(V);
             break;
         }
         case opVolIntegrate:
         {
-            result = gSum(values*V);
+            result = sum(values*V);
             break;
         }
         case opWeightedAverage:
         {
-            result = gSum(values*weightField)/gSum(weightField);
+            result = sum(values*weightField)/sum(weightField);
             break;
         }
         case opMin:
         {
-            result = gMin(values);
+            result = min(values);
             break;
         }
         case opMax:
         {
-            result = gMax(values);
+            result = max(values);
             break;
         }
         default:
@@ -119,19 +119,19 @@ bool Foam::fieldValues::cellSource::writeValues(const word& fieldName)
 
     if (ok)
     {
-        Field<Type> values(combineFields(setFieldValues<Type>(fieldName)));
+        Field<Type> values(setFieldValues<Type>(fieldName));
+        combineFields(values);
 
-        scalarField V(combineFields(filterField(mesh().V())));
+        scalarField V(filterField(mesh().V()));
+        combineFields(V);
 
-        scalarField weightField
-        (
-            combineFields(setFieldValues<scalar>(weightFieldName_))
-        );
-
-        Type result = processValues(values, V, weightField);
+        scalarField weightField(setFieldValues<scalar>(weightFieldName_));
+        combineFields(weightField);
 
         if (Pstream::master())
         {
+            Type result = processValues(values, V, weightField);
+
             if (valueOutput_)
             {
                 IOField<Type>

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ Description
     The DSEM uses a model version of the full balance equation for the SGS
     stress tensor to simulate the behaviour of B.
     Thus,
-    @verbatim
+    \verbatim
         d/dt(B) + div(U*B) - div(nuSgs*grad(B))
         =
         P - c1*epsilon/k*B - 0.667*(1 - c1)*epsilon*I - c2*(P - 0.333*trP*I)
@@ -43,7 +43,7 @@ Description
         P = -(B'L + L'B)
         nuSgs = ck*sqrt(k)*delta
         nuEff = nuSgs + nu
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     DeardorffDiffStress.C

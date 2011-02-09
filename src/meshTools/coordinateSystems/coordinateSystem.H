@@ -31,10 +31,10 @@ Description
     All systems are defined by an origin point and a coordinateRotation.
     For convenience, the dictionary constructor forms allow a few shortcuts:
     - the default origin corresponds to <em>(0 0 0)</em>
-    - if the @c type is not otherwise specified, a Cartesian coordinateSystem
+    - if the \c type is not otherwise specified, a Cartesian coordinateSystem
       is implicit
 
-    @verbatim
+    \verbatim
         flipped
         {
             origin  (0 0 0);
@@ -44,12 +44,12 @@ Description
                 rotation    (0 0 90);
             }
         }
-    @endverbatim
+    \endverbatim
 
     - if an axes specification (eg, e3/e1) is used, the coordinateRotation
       sub-dictionary can be dropped.
 
-    @verbatim
+    \verbatim
         flipped     // the same, specified as axes
         {
             origin  (0 0 0);
@@ -65,14 +65,14 @@ Description
             e3      (1 0 0);
             e1      (0 0 -1);
         }
-    @endverbatim
+    \endverbatim
 
     - if a sub-dictionary coordinateSystem is found within the dictionary, it
       will be used. This provides a convenient means of embedding
       coordinateSystem information in another dictionary.
       This is used, for example, in the porousZones:
 
-    @verbatim
+    \verbatim
         1
         (
         cat1
@@ -94,12 +94,12 @@ Description
             }
         }
         )
-    @endverbatim
+    \endverbatim
 
     - additionally, if the coordinateSystem points to a plain entry,
       it can be used to reference one of the global coordinateSystems
 
-    @verbatim
+    \verbatim
         1
         (
         cat1
@@ -113,7 +113,7 @@ Description
             }
         }
         )
-    @endverbatim
+    \endverbatim
     For this to work correctly, the coordinateSystem constructor must be
     supplied with both a dictionary and an objectRegistry.
 
@@ -364,21 +364,21 @@ public:
             }
 
             //- Return axis (e3: local Cartesian z-axis)
-            // @deprecated method e3 is preferred (deprecated Apr 2008)
+            // \deprecated method e3 is preferred (deprecated Apr 2008)
             const vector axis() const
             {
                 return Rtr_.z();
             }
 
             //- Return direction (e1: local Cartesian x-axis)
-            // @deprecated method e1 is preferred (deprecated Apr 2008)
+            // \deprecated method e1 is preferred (deprecated Apr 2008)
             const vector direction() const
             {
                 return Rtr_.x();
             }
 
             //- Return as dictionary of entries
-            //  @param [in] ignoreType drop type (cartesian, cylindrical, etc)
+            //  \param [in] ignoreType drop type (cartesian, cylindrical, etc)
             //  when generating the dictionary
             virtual dictionary dict(bool ignoreType=false) const;
 
