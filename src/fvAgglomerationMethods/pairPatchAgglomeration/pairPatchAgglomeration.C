@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "pairPatchAgglomeration.H"
-//#include "OFstream.H"
 #include "meshTools.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -494,8 +493,6 @@ Foam::tmp<Foam::labelField> Foam::pairPatchAgglomeration::agglomerateOneLevel
             ) << " face " << facei
             << " is not part of a cluster"
             << exit(FatalError);
-            //coarseCellMap[facei] = nCoarseCells;
-            //nCoarseCells++;
         }
     }
 
