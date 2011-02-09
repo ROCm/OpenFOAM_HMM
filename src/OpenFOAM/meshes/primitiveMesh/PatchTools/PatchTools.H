@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,6 +35,7 @@ SourceFiles
     PatchToolsEdgeOwner.C
     PatchToolsSearch.C
     PatchToolsSortEdges.C
+    PatchToolsNormals.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -48,6 +49,8 @@ SourceFiles
 
 namespace Foam
 {
+
+class polyMesh;
 
 /*---------------------------------------------------------------------------*\
                          Class PatchTools Declaration
@@ -165,6 +168,22 @@ public:
         const PrimitivePatch<Face, FaceList, PointField, PointType>&
     );
 
+
+    //- Return parallel consistent point normals for patches (on boundary faces)
+    //  using mesh points.
+    template
+    <
+        class Face,
+        template<class> class FaceList,
+        class PointField,
+        class PointType
+    >
+    static tmp<pointField> pointNormals
+    (
+        const polyMesh&,
+        const PrimitivePatch<Face, FaceList, PointField, PointType>&,
+        const labelList& meshFaces
+    );
 
 };
 
