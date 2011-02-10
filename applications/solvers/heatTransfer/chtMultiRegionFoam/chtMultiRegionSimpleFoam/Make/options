@@ -1,7 +1,5 @@
 EXE_INC = \
-    /* -DFULLDEBUG -O0 -g */ \
     -I.. \
-    -I../derivedFvPatchFields \
     -Ifluid \
     -Isolid \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
@@ -22,4 +20,5 @@ EXE_LIBS = \
     -lcompressibleTurbulenceModel \
     -lcompressibleRASModels \
     -lcompressibleLESModels \
-    -lradiationModels
+    -lradiationModels \
+    -lcoupledDerivedFvPatch

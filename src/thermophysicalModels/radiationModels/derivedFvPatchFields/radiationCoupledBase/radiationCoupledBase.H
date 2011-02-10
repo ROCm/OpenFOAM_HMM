@@ -25,9 +25,8 @@ Class
     radiationCoupledBase
 
 Description
-    Common functions for use in temperature coupled boundaries when
-    radiation is used. For now only emissivity() : emissivity
-    gets supplied from lookup or calculate:
+    Common functions to emissivity. It gets supplied from lookup into a
+    dictionary or calculated by the solidThermo:
 
     - 'lookup' : lookup volScalarField with name
     - 'solidThermo' : use basicSolidThermo emissivity()
@@ -73,11 +72,15 @@ private:
         //- Underlying patch
         const fvPatch& patch_;
 
+protected:
+
+    // Protected data
+
         //- How to get emissivity
         const emissivityMethodType method_;
 
          //- Emissivity
-         // Cached locally when is read from dictionary
+         // Cached locally when is read from dictionary (lookup mode)
         scalarField emissivity_;
 
 
@@ -85,11 +88,12 @@ public:
 
     // Constructors
 
-        //- Construct from patch and emissivity name
+        //- Construct from patch, emissivity mode and emissivity
         radiationCoupledBase
         (
             const fvPatch& patch,
-            const word& calculationMethod
+            const word& calculationMethod,
+            const scalarField& emissivity
         );
 
         //- Construct from patch and dictionary
@@ -108,13 +112,7 @@ public:
             return emissivityMethodTypeNames_[method_];
         }
 
-/*
-        //- Name of thermal conductivity field
-        const word& emissivityName() const
-        {
-            return emissivityName_;
-        }
-*/
+
         //- Calculate corresponding emissivity field
         tmp<scalarField> emissivity() const;
 

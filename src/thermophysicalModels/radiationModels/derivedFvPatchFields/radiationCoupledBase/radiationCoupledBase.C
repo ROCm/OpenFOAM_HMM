@@ -56,12 +56,13 @@ const Foam::NamedEnum<Foam::radiationCoupledBase::emissivityMethodType, 2>
 Foam::radiationCoupledBase::radiationCoupledBase
 (
     const fvPatch& patch,
-    const word& calculationType
+    const word& calculationType,
+    const scalarField& emissivity
 )
 :
     patch_(patch),
     method_(emissivityMethodTypeNames_[calculationType]),
-    emissivity_(patch.size(), 0.0)
+    emissivity_(emissivity)
 {}
 
 
@@ -93,35 +94,7 @@ Foam::radiationCoupledBase::radiationCoupledBase
                     << exit(FatalError);
             }
 
-            const directMappedPatchBase& mpp = refCast
-            <
-                const directMappedPatchBase
-            >
-            (
-                patch_.patch()
-            );
-
-            const polyMesh& nbrMesh = mpp.sampleMesh();
-
-            if
-            (
-                !nbrMesh.foundObject<basicSolidThermo>
-                (
-                    "solidThermophysicalProperties"
-                )
-            )
-            {
-                FatalErrorIn
-                (
-                    "radiationCoupledBase::radiationCoupledBase\n"
-                    "(\n"
-                    "    const fvPatch& p,\n"
-                    "    const dictionary& dict\n"
-                    ")\n"
-                )   << "\n solidThermophysicalProperties does not exist "
-                    << "\n in mesh ' " << nbrMesh.name() << "'"
-                    << exit(FatalError);
-            }
+            emissivity_ = scalarField(patch_.size(), 0.0);
         }
         break;
 
@@ -136,9 +109,8 @@ Foam::radiationCoupledBase::radiationCoupledBase
                     "    const fvPatch& p,\n"
                     "    const dictionary& dict\n"
                     ")\n"
-                )   << "\n    emissivity key"
-                    << "\n    does not exist "
-                    << "\n    for patch " << patch_.name()
+                )   << "\n    emissivity key does not exist for patch "
+                    << patch_.name()
                     << exit(FatalError);
             }
             else
@@ -159,7 +131,6 @@ Foam::tmp<Foam::scalarField> Foam::radiationCoupledBase::emissivity() const
     {
         case SOLIDTHERMO:
         {
-
             // Get the coupling information from the directMappedPatchBase
             const directMappedPatchBase& mpp =
                 refCast<const directMappedPatchBase>
@@ -168,25 +139,36 @@ Foam::tmp<Foam::scalarField> Foam::radiationCoupledBase::emissivity() const
                 );
 
             const polyMesh& nbrMesh = mpp.sampleMesh();
+
             const fvPatch& nbrPatch = refCast<const fvMesh>
             (
                 nbrMesh
             ).boundary()[mpp.samplePolyPatch().index()];
 
-            scalarField emissivity
-            (
-                nbrPatch.lookupPatchField<volScalarField, scalar>("emissivity")
-            );
+            if (nbrMesh.foundObject<volScalarField>("emissivity"))
+            {
+                tmp<scalarField> temissivity
+                (
+                    new scalarField
+                    (
+                        nbrPatch.lookupPatchField<volScalarField, scalar>
+                        (
+                            "emissivity"
+                        )
+                    )
+                );
 
-            // Force recalculation of mapping and schedule
-            const mapDistribute& distMap = mpp.map();
+                scalarField& emissivity = temissivity();
 
-            distMap.distribute(emissivity);
+                // Use direct map mapping to exchange data
+                mpp.map().distribute(emissivity);
 
-            return tmp<scalarField>
-            (
-                new scalarField(emissivity)
-            );
+                return temissivity;
+            }
+            else
+            {
+                return scalarField(0);
+            }
 
         }
         break;
@@ -219,8 +201,7 @@ void Foam::radiationCoupledBase::write(Ostream& os) const
 {
     os.writeKeyword("emissivityMode") << emissivityMethodTypeNames_[method_]
         << token::END_STATEMENT << nl;
-    os.writeKeyword("emissivity") << emissivity_
-        << token::END_STATEMENT << nl;
+    emissivity_.writeEntry("emissivity", os);
 }
 
 

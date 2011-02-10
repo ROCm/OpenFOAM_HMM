@@ -10,12 +10,6 @@
       + rad.Sh(thermo)
     );
 
-/*
-    fvScalarMatrix hEqn
-    (
-        - fvm::laplacian(turb.alphaEff(), h)
-    );
-*/
     hEqn.relax();
 
     hEqn.solve();
