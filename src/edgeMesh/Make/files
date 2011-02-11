@@ -20,7 +20,10 @@ $(edgeFormats)/starcd/STARCDedgeFormatRunTime.C
 $(edgeFormats)/vtk/VTKedgeFormat.C
 $(edgeFormats)/vtk/VTKedgeFormatRunTime.C
 
+extendedFeatureEdgeMesh/extendedFeatureEdgeMesh.C
+
 featureEdgeMesh/featureEdgeMesh.C
+
 
 
 LIB = $(FOAM_LIBBIN)/libedgeMesh
