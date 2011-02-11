@@ -76,8 +76,8 @@ do
         ;;
     -pkg | -package)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-        # mark empty as 'none', disallow '!' and spaces in string
-        package=$(echo "${2:-none}" | sed -e 's/!//g' -e 's/ //g')
+        # mark empty as 'none', disallow '!' in string
+        package=$(echo "${2:-none}" | sed -e 's/!//g')
         shift 2
         ;;
     -v | -version)
