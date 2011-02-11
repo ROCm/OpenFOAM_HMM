@@ -210,7 +210,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
     {
         // Create some data. Use slightly perturbed positions.
         Map<point> sparseData;
-        pointField fullData(mesh.nPoints(), point::max);
+        pointField fullData(mesh.nPoints(), point(GREAT, GREAT, GREAT));
 
         forAll(localPoints, i)
         {
@@ -236,7 +236,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
             mesh,
             fullData,
             minMagSqrEqOp<point>(),
-            point::max
+            point(GREAT, GREAT, GREAT)
             // true                    // apply separation
         );
 
@@ -246,7 +246,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
         {
             const point& fullPt = fullData[meshPointI];
 
-            if (fullPt != point::max)
+            if (fullPt != point(GREAT, GREAT, GREAT))
             {
                 const point& sparsePt = sparseData[meshPointI];
 
@@ -286,7 +286,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
     {
         // Create some data. Use slightly perturbed positions.
         EdgeMap<point> sparseData;
-        pointField fullData(mesh.nEdges(), point::max);
+        pointField fullData(mesh.nEdges(), point(GREAT, GREAT, GREAT));
 
         const edgeList& edges = allBoundary.edges();
         const labelList meshEdges = allBoundary.meshEdges
@@ -320,7 +320,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
             mesh,
             fullData,
             minMagSqrEqOp<point>(),
-            point::max
+            point(GREAT, GREAT, GREAT)
         );
 
         // Compare.
@@ -329,7 +329,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
         {
             const point& fullPt = fullData[meshEdgeI];
 
-            if (fullPt != point::max)
+            if (fullPt != point(GREAT, GREAT, GREAT))
             {
                 const point& sparsePt = sparseData[mesh.edges()[meshEdgeI]];
 
@@ -385,7 +385,7 @@ void testPointSync(const polyMesh& mesh, Random& rndGen)
             mesh,
             syncedPoints,
             minMagSqrEqOp<point>(),
-            point::max
+            point(GREAT, GREAT, GREAT)
         );
 
         forAll(syncedPoints, pointI)
@@ -461,7 +461,7 @@ void testEdgeSync(const polyMesh& mesh, Random& rndGen)
             mesh,
             syncedMids,
             minMagSqrEqOp<point>(),
-            point::max
+            point(GREAT, GREAT, GREAT)
         );
 
         forAll(syncedMids, edgeI)
