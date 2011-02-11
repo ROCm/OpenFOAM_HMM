@@ -1,4 +1,0 @@
-turbulentTemperatureRadCoupledMixed/turbulentTemperatureRadCoupledMixedFvPatchScalarField.C
-externalWallHeatFluxTemperature/externalWallHeatFluxTemperatureFvPatchScalarField.C
-
-LIB = $(FOAM_LIBBIN)/libcoupledDerivedFvPatch
