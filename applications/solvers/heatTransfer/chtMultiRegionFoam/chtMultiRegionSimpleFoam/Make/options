@@ -21,4 +21,4 @@ EXE_LIBS = \
     -lcompressibleRASModels \
     -lcompressibleLESModels \
     -lradiationModels \
-    -lcoupledDerivedFvPatch
+    -lcoupledDerivedFvPatchFields

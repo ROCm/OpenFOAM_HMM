@@ -20,4 +20,4 @@ EXE_LIBS = \
     -lmeshTools \
     -lfiniteVolume \
     -lradiationModels \
-    -lcoupledDerivedFvPatch
+    -lcoupledDerivedFvPatchFields
