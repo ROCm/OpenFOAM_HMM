@@ -28,11 +28,11 @@ Description
     A mixture of solids.
 
 Note
-    The dictionary constructor searches for the entry @c solidComponents,
+    The dictionary constructor searches for the entry \c solidComponents,
     which is a wordList. The solid properties of each component can either
-    be contained within a @c solidProperties sub-dictionary or (for legacy
+    be contained within a \c solidProperties sub-dictionary or (for legacy
     purposes) can be found directly in the dictionary.
-    The @c solidProperties sub-dictionary entry should be used when possible
+    The \c solidProperties sub-dictionary entry should be used when possible
     to avoid conflicts with identically named gas-phase entries.
 
 SeeAlso

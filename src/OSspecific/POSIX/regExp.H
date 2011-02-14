@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
 
 SeeAlso
     The manpage regex(7) for more information about POSIX regular expressions.
-    These differ somewhat from @c Perl and @c sed regular expressions.
+    These differ somewhat from \c Perl and @c sed regular expressions.
 
 SourceFiles
     regExp.C

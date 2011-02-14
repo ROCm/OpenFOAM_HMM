@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,7 +32,7 @@ License
 
 namespace Foam
 {
-   //! @cond fileScope
+   //! \cond fileScope
    inline label rep
    (
        const label i,
@@ -43,7 +43,7 @@ namespace Foam
    {
        return (k + j*nn[2] + i*nn[1]*nn[2]);
    }
-   //! @endcond
+   //! \endcond
 
 } // End namespace Foam
 

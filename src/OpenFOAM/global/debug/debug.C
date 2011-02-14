@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ namespace Foam
 namespace debug
 {
 
-//! @cond ignoreDocumentation - local scope
+//! \cond ignoreDocumentation - local scope
 dictionary* controlDictPtr_(NULL);
 dictionary* debugSwitchesPtr_(NULL);
 dictionary* infoSwitchesPtr_(NULL);
@@ -63,7 +63,7 @@ public:
 };
 
 deleteControlDictPtr deleteControlDictPtr_;
-//! @endcond
+//! \endcond
 
 
 } // End namespace debug

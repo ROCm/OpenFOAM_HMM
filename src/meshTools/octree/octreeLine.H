@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ Description
     Iterates over intersections of line with octree leaf elements.
 
     Used as in
-    @code
+    \code
         octree<octreeDataFace> oc( .. );
 
         octreeLine<octreeDataFace> lineSearch(oc, pStart, pEnd);
@@ -38,7 +38,7 @@ Description
             const point& pt = lineSearch.hitInfo().hitPoint();
             ..
         }
-    @endcode
+    \endcode
 
 SourceFiles
     octreeLine.C

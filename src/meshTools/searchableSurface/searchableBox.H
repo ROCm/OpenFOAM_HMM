@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -137,7 +137,8 @@ public:
 
         // Single point queries.
 
-            //- Calculate nearest point on surface. Returns
+            //- Calculate nearest point on surface.
+            //  Returns
             //  - bool : any point found nearer than nearestDistSqr
             //  - label: relevant index in surface (=face 0..5)
             //  - point: actual nearest point found
@@ -147,7 +148,8 @@ public:
                 const scalar nearestDistSqr
             ) const;
 
-            //- Calculate nearest point on edge. Returns
+            //- Calculate nearest point on edge.
+            //  Returns
             //  - bool : any point found nearer than nearestDistSqr
             //  - label: relevant index in surface(=?)
             //  - point: actual nearest point found
@@ -157,7 +159,8 @@ public:
                 const scalar nearestDistSqr
             ) const;
 
-            //- Find nearest to segment. Returns
+            //- Find nearest to segment.
+            //  Returns
             //  - bool : any point found?
             //  - label: relevant index in shapes (=face 0..5)
             //  - point: actual nearest point found
@@ -247,7 +250,6 @@ public:
                 notImplemented("searchableBox::writeData(Ostream&) const");
                 return false;
             }
-
 };
 
 

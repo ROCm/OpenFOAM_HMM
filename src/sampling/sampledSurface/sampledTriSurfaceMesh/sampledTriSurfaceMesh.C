@@ -56,6 +56,7 @@ namespace Foam
 
 
     //- Private class for finding nearest
+    //  Comprising:
     //  - global index
     //  - sqr(distance)
     typedef Tuple2<scalar, label> nearInfo;

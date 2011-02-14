@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,7 @@ Description
 
     On the back plane (z=0):
 
-    @verbatim
+    \verbatim
         Y
         ^
         |
@@ -42,7 +42,7 @@ Description
         |        |
         |0      1|
         +--------+->X
-    @endverbatim
+    \endverbatim
 
     For the front plane add 4 to the point labels.
 

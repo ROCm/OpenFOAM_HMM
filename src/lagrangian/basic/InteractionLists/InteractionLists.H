@@ -36,18 +36,18 @@ Description
 
     Simultaneous communication and computation is possible using:
 
-    @verbatim
+    \verbatim
     PstreamBuffers pBufs(Pstream::nonBlocking);
     il_.sendReferredData(cellOccupancy_, pBufs);
     // Do other things
     il_.receiveReferredData(pBufs);
-    @endverbatim
+    \endverbatim
 
     Requiring data:
 
-    @verbatim
+    \verbatim
     List<DynamicList<typename CloudType::parcelType*> > cellOccupancy_;
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     InteractionListsI.H

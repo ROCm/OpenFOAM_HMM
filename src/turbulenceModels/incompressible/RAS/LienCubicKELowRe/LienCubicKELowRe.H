@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
     incompressible flows.
 
     References:
-    @verbatim
+    \verbatim
         Lien, F.S., Chen, W.L., Leschziner, M.A.,
         "Low-Reynolds-number eddy-viscosity modeling based on non-linear
          stress-strain/vorticity relations"
@@ -40,7 +40,7 @@ Description
         Etemad, S., et al.,
         "Turbulent flow and heat transfer in a square-sectioned U bend"
         Progress in compuational fluid dynamics 6, 89-100. 2006.
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     LienCubicKELowRe.C

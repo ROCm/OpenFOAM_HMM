@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,20 +60,35 @@ List<T> transform
 //- Apply transformation to list. Either single transformation tensor
 //  or one tensor per element.
 template<class T>
+void transformList(const tensor&, UList<T>&);
+template<class T>
 void transformList(const tensorField&, UList<T>&);
 
 template<class T>
+void transformList(const tensor&, Map<T>&);
+template<class T>
 void transformList(const tensorField&, Map<T>&);
 
+template<class T>
+void transformList(const tensor&, EdgeMap<T>&);
 template<class T>
 void transformList(const tensorField&, EdgeMap<T>&);
 
 
 template<>
+inline void transformList(const tensor&, labelUList&)
+{}
+template<>
 inline void transformList(const tensorField&, labelUList&)
 {}
 template<>
+inline void transformList(const tensor&, Map<label>&)
+{}
+template<>
 inline void transformList(const tensorField&, Map<label>&)
+{}
+template<>
+inline void transformList(const tensor&, EdgeMap<label>&)
 {}
 template<>
 inline void transformList(const tensorField&, EdgeMap<label>&)
@@ -81,10 +96,19 @@ inline void transformList(const tensorField&, EdgeMap<label>&)
 
 
 template<>
+inline void transformList(const tensor&, UList<scalar>&)
+{}
+template<>
 inline void transformList(const tensorField&, UList<scalar>&)
 {}
 template<>
+inline void transformList(const tensor&, Map<scalar>&)
+{}
+template<>
 inline void transformList(const tensorField&, Map<scalar>&)
+{}
+template<>
+inline void transformList(const tensor&, EdgeMap<scalar>&)
 {}
 template<>
 inline void transformList(const tensorField&, EdgeMap<scalar>&)

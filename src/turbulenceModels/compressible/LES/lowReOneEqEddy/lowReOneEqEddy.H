@@ -27,7 +27,7 @@ Class
 Description
     One Equation Eddy Viscosity Model for compressible flow
 
-    @verbatim
+    \verbatim
         d/dt(rho*k) + div(rho*U*k) - div(muEff*grad(k))
         =
         -rho*B*L - ce*rho*k^3/2/delta
@@ -40,7 +40,7 @@ Description
 
         nuSgsHiRe = ck*sqrt(k)*delta
         nuSgs = (nu/beta)*(1 - exp(-beta*nuSgsHiRe/nu));
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     lowReOneEqEddy.C

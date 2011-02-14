@@ -70,7 +70,7 @@ class particleForces
         const fvMesh& mesh_;
 
         //- The particleForces dictionary
-        const dictionary& dict_;
+        const dictionary dict_;
 
         //- Gravity
         const vector g_;

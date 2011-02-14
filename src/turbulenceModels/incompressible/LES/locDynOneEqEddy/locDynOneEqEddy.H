@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ Description
 
     Eddy viscosity SGS model using a modeled balance equation to simulate
     the behaviour of k, hence
-    @verbatim
+    \verbatim
         d/dt(k) + div(U*k) - div(nuSgs*grad(k))
         =
         -B*L - ce*rho*k^3/2/delta
@@ -40,10 +40,10 @@ Description
     where
         nuSgs = cD*delta^2*||D||
         nuEff = nuSgs + nu
-    @endverbatim
+    \endverbatim
 
     A dynamic procedure is here applied to evaluate ck and ce
-    @verbatim
+    \verbatim
         ck=<L.M>/<M.M>
     and
         ce=<e*m>/<m*m>
@@ -53,7 +53,7 @@ Description
        M = delta*(F(sqrt(k)*D) - 2*sqrt(K + filter(k))*F(D))
        m = pow(K + F(k), 3.0/2.0)/(2*delta) - F(pow(k, 3.0/2.0))/delta
        e = 2*delta*ck*(F(sqrt(k)*(D && D)) - 2*sqrt(K + F(k))*(F(D) && F(D)))/
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     locDynOneEqEddy.C

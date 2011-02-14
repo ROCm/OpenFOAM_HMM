@@ -29,12 +29,12 @@ Description
 
     Plot normal distribution test in gnuplot using:
 
-    @verbatim
+    \verbatim
     normalDistribution(mean, sigma, x) = \
         sqrt(1.0/(2.0*pi*sigma**2))*exp(-(x - mean)**2.0/(2.0*sigma**2))
 
     plot normalDistribution(8.5, 2.5, x), "Distribution_scalar_test_x" w p
-    @endverbatim
+    \endverbatim
 
 \*---------------------------------------------------------------------------*/
 

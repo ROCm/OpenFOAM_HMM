@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ Description
     Selects:
     - all cells inside/outside/cut by surface
     - cells with centre nearer than XXX to surface
-    - cells with centre nearer than XXX to surface @b and with normal
+    - cells with centre nearer than XXX to surface \b and with normal
       at nearest point to centre and cell-corners differing by
       more than YYY (i.e., point of high curvature)
 

@@ -37,6 +37,99 @@ defineTypeNameAndDebug(Foam::mapDistribute, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+template<>
+void Foam::mapDistribute::transform::operator()
+(
+    const vectorTensorTransform&,
+    const bool,
+    List<label>&
+) const
+{}
+template<>
+void Foam::mapDistribute::transform::operator()
+(
+    const coupledPolyPatch&,
+    UList<label>&
+) const
+{}
+template<>
+void Foam::mapDistribute::transform::operator()
+(
+    const coupledPolyPatch&,
+    Map<label>&
+) const
+{}
+template<>
+void Foam::mapDistribute::transform::operator()
+(
+    const coupledPolyPatch&,
+    EdgeMap<label>&
+) const
+{}
+
+
+template<>
+void Foam::mapDistribute::transform::operator()
+(
+    const vectorTensorTransform&,
+    const bool,
+    List<scalar>&
+) const
+{}
+template<>
+void Foam::mapDistribute::transform::operator()
+(
+    const coupledPolyPatch&,
+    UList<scalar>&
+) const
+{}
+template<>
+void Foam::mapDistribute::transform::operator()
+(
+    const coupledPolyPatch&,
+    Map<scalar>&
+) const
+{}
+template<>
+void Foam::mapDistribute::transform::operator()
+(
+    const coupledPolyPatch&,
+    EdgeMap<scalar>&
+) const
+{}
+
+
+template<>
+void Foam::mapDistribute::transform::operator()
+(
+    const vectorTensorTransform&,
+    const bool,
+    List<bool>&
+) const
+{}
+template<>
+void Foam::mapDistribute::transform::operator()
+(
+    const coupledPolyPatch&,
+    UList<bool>&
+) const
+{}
+template<>
+void Foam::mapDistribute::transform::operator()
+(
+    const coupledPolyPatch&,
+    Map<bool>&
+) const
+{}
+template<>
+void Foam::mapDistribute::transform::operator()
+(
+    const coupledPolyPatch&,
+    EdgeMap<bool>&
+) const
+{}
+
+
 Foam::List<Foam::labelPair> Foam::mapDistribute::schedule
 (
     const labelListList& subMap,
@@ -530,101 +623,6 @@ void Foam::mapDistribute::exchangeAddressing
         forAll(cCells, i)
         {
             cCells[i] = renumber(globalNumbering, compactMap, cCells[i]);
-        }
-    }
-}
-
-
-template<>
-void Foam::mapDistribute::applyTransforms
-(
-    const globalIndexAndTransform& globalTransforms,
-    List<point>& field,
-    const bool isPosition
-) const
-{
-    const List<vectorTensorTransform>& totalTransform =
-        globalTransforms.transformPermutations();
-
-    forAll(totalTransform, trafoI)
-    {
-        const vectorTensorTransform& vt = totalTransform[trafoI];
-        const labelList& elems = transformElements_[trafoI];
-        label n = transformStart_[trafoI];
-
-        // Could be optimised to avoid memory allocations
-
-        if (isPosition)
-        {
-            Field<point> transformFld
-            (
-                vt.transformPosition(Field<point>(field, elems))
-            );
-            forAll(transformFld, i)
-            {
-                //cop(field[n++], transformFld[i]);
-                field[n++] = transformFld[i];
-            }
-        }
-        else
-        {
-            Field<point> transformFld
-            (
-                transform(vt.R(), Field<point>(field, elems))
-            );
-
-            forAll(transformFld, i)
-            {
-                //cop(field[n++], transformFld[i]);
-                field[n++] = transformFld[i];
-            }
-        }
-    }
-}
-
-
-template<>
-void Foam::mapDistribute::applyInverseTransforms
-(
-    const globalIndexAndTransform& globalTransforms,
-    List<point>& field,
-    const bool isPosition
-) const
-{
-    const List<vectorTensorTransform>& totalTransform =
-        globalTransforms.transformPermutations();
-
-    forAll(totalTransform, trafoI)
-    {
-        const vectorTensorTransform& vt = totalTransform[trafoI];
-        const labelList& elems = transformElements_[trafoI];
-        label n = transformStart_[trafoI];
-
-        // Could be optimised to avoid memory allocations
-
-        if (isPosition)
-        {
-            Field<point> transformFld
-            (
-                vt.invTransformPosition
-                (
-                    SubField<point>(field, elems.size(), n)
-                )
-            );
-            forAll(transformFld, i)
-            {
-                field[elems[i]] = transformFld[i];
-            }
-        }
-        else
-        {
-            Field<point> transformFld(SubField<point>(field, elems.size(), n));
-            transform(transformFld, vt.R().T(), transformFld);
-
-            forAll(transformFld, i)
-            {
-                field[elems[i]] = transformFld[i];
-            }
         }
     }
 }

@@ -125,7 +125,7 @@ bool Foam::globalPoints::mergeInfo
     const labelPairList& nbrInfo,
     const label localPointI,
     labelPairList& myInfo
-)
+) const
 {
     bool anyChanged = false;
 
@@ -167,7 +167,7 @@ bool Foam::globalPoints::mergeInfo
                 );
 
                 // Combine mine and nbr transform
-                label t = globalIndexAndTransform::mergeTransformIndex
+                label t = globalTransforms_.mergeTransformIndex
                 (
                     nbrTransform,
                     myTransform
@@ -315,27 +315,6 @@ bool Foam::globalPoints::storeInitialInfo
 }
 
 
-Foam::FixedList<Foam::label, 3> Foam::globalPoints::transformBits
-(
-    const label transformIndex
-) const
-{
-    label t = transformIndex;
-
-    // Decode permutation as 3 integers
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Note: FixedList for speed reasons.
-    FixedList<label, 3> permutation;
-    permutation[0] = (t%3)-1;
-    t /= 3;
-    permutation[1] = (t%3)-1;
-    t /= 3;
-    permutation[2] = (t%3)-1;
-
-    return permutation;
-}
-
-
 void Foam::globalPoints::printProcPoints
 (
     const labelList& patchToMeshPoint,
@@ -352,7 +331,8 @@ void Foam::globalPoints::printProcPoints
         Pout<< " localpoint:";
         Pout<< index;
         Pout<< " through transform:"
-            << trafoI << " bits:" << transformBits(trafoI);
+            << trafoI << " bits:"
+            << globalTransforms_.decodeTransformIndex(trafoI);
 
         if (procI == Pstream::myProcNo())
         {
@@ -850,49 +830,6 @@ Foam::labelList Foam::globalPoints::reverseMeshPoints
 }
 
 
-bool Foam::globalPoints::globalIndexAndTransformLessThan::operator()
-(
-    const labelPair& a,
-    const labelPair& b
-)
-{
-    label procA = globalIndexAndTransform::processor(a);
-    label procB = globalIndexAndTransform::processor(b);
-
-    if (procA < procB)
-    {
-        return true;
-    }
-    else if (procA > procB)
-    {
-        return false;
-    }
-    else
-    {
-        // Equal proc.
-        label indexA = globalIndexAndTransform::index(a);
-        label indexB = globalIndexAndTransform::index(b);
-
-        if (indexA < indexB)
-        {
-            return true;
-        }
-        else if (indexA > indexB)
-        {
-            return false;
-        }
-        else
-        {
-            // Equal index
-            label transformA = globalIndexAndTransform::transformIndex(a);
-            label transformB = globalIndexAndTransform::transformIndex(b);
-
-            return transformA < transformB;
-        }
-    }
-}
-
-
 void Foam::globalPoints::calculateSharedPoints
 (
     const Map<label>& meshToPatchPoint, // from mesh point to local numbering
@@ -1027,7 +964,7 @@ void Foam::globalPoints::calculateSharedPoints
     forAllConstIter(Map<label>, meshToProcPoint_, iter)
     {
         labelPairList& pointInfo = procPoints_[iter()];
-        sort(pointInfo, globalIndexAndTransformLessThan());
+        sort(pointInfo, globalIndexAndTransform::less());
     }
 
 

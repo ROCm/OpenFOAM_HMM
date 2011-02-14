@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,12 +30,12 @@ Description
 \*---------------------------------------------------------------------------*/
 
 
+#include "syncTools.H"
 #include "argList.H"
 #include "polyMesh.H"
 #include "Time.H"
 #include "Random.H"
 #include "PackedList.H"
-#include "syncTools.H"
 
 using namespace Foam;
 
@@ -130,6 +130,7 @@ void testPackedList(const polyMesh& mesh, Random& rndGen)
             {
                 FatalErrorIn("testPackedList()")
                     << "point:" << i
+                    << " at:" << mesh.points()[i]
                     << " minlabel:" << pointValues[i]
                     << " minbits:" << bits.get(i)
                     << " maxLabel:" << maxPointValues[i]
@@ -186,6 +187,10 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
 {
     Info<< nl << "Testing Map synchronisation." << endl;
 
+    WarningIn("testSparseData()")
+        << "Position test of sparse data only correct for cases without cyclics"
+        << " with shared points." << endl;
+
     primitivePatch allBoundary
     (
         SubList<face>
@@ -204,7 +209,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
 
     {
         // Create some data. Use slightly perturbed positions.
-        Map<vector> sparseData;
+        Map<point> sparseData;
         pointField fullData(mesh.nPoints(), point::max);
 
         forAll(localPoints, i)
@@ -223,14 +228,14 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
         (
             mesh,
             sparseData,
-            minEqOp<vector>()
+            minMagSqrEqOp<point>()
             // true                    // apply separation
         );
         syncTools::syncPointList
         (
             mesh,
             fullData,
-            minEqOp<vector>(),
+            minMagSqrEqOp<point>(),
             point::max
             // true                    // apply separation
         );
@@ -257,7 +262,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
         }
 
         // 2. Does sparseData contain more?
-        forAllConstIter(Map<vector>, sparseData, iter)
+        forAllConstIter(Map<point>, sparseData, iter)
         {
             const point& sparsePt = iter();
             label meshPointI = iter.key();
@@ -280,7 +285,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
 
     {
         // Create some data. Use slightly perturbed positions.
-        EdgeMap<vector> sparseData;
+        EdgeMap<point> sparseData;
         pointField fullData(mesh.nEdges(), point::max);
 
         const edgeList& edges = allBoundary.edges();
@@ -308,13 +313,13 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
         (
             mesh,
             sparseData,
-            minEqOp<vector>()
+            minMagSqrEqOp<point>()
         );
         syncTools::syncEdgeList
         (
             mesh,
             fullData,
-            minEqOp<vector>(),
+            minMagSqrEqOp<point>(),
             point::max
         );
 
@@ -345,7 +350,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
         {
             const edge& e = mesh.edges()[meshEdgeI];
 
-            EdgeMap<vector>::const_iterator iter = sparseData.find(e);
+            EdgeMap<point>::const_iterator iter = sparseData.find(e);
 
             if (iter != sparseData.end())
             {
@@ -374,16 +379,12 @@ void testPointSync(const polyMesh& mesh, Random& rndGen)
     // Test position.
 
     {
-        WarningIn("testPointSync()")
-            << "Position test only correct for cases without cyclics"
-            << " with shared points." << endl;
-
         pointField syncedPoints(mesh.points());
-        syncTools::syncPointList
+        syncTools::syncPointPositions
         (
             mesh,
             syncedPoints,
-            minEqOp<point>(),
+            minMagSqrEqOp<point>(),
             point::max
         );
 
@@ -450,20 +451,16 @@ void testEdgeSync(const polyMesh& mesh, Random& rndGen)
     // Test position.
 
     {
-        WarningIn("testEdgeSync()")
-            << "Position test only correct for cases without cyclics"
-            << " with shared edges." << endl;
-
         pointField syncedMids(edges.size());
         forAll(syncedMids, edgeI)
         {
             syncedMids[edgeI] = edges[edgeI].centre(mesh.points());
         }
-        syncTools::syncEdgeList
+        syncTools::syncEdgePositions
         (
             mesh,
             syncedMids,
-            minEqOp<point>(),
+            minMagSqrEqOp<point>(),
             point::max
         );
 
@@ -509,10 +506,11 @@ void testEdgeSync(const polyMesh& mesh, Random& rndGen)
         {
             if (nMasters[edgeI] != 1)
             {
+                const edge& e = edges[edgeI];
                 //FatalErrorIn("testEdgeSync()")
                 WarningIn("testEdgeSync()")
                     << "Edge " << edgeI
-                    << " midpoint " << edges[edgeI].centre(mesh.points())
+                    << " at:" << mesh.points()[e[0]] << mesh.points()[e[1]]
                     << " has " << nMasters[edgeI]
                     << " masters."
                     //<< exit(FatalError);
@@ -532,11 +530,11 @@ void testFaceSync(const polyMesh& mesh, Random& rndGen)
     {
         pointField syncedFc(mesh.faceCentres());
 
-        syncTools::syncFaceList
+        syncTools::syncFacePositions
         (
             mesh,
             syncedFc,
-            maxEqOp<point>()
+            maxMagSqrEqOp<point>()
         );
 
         forAll(syncedFc, faceI)

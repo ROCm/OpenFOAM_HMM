@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ Description
     Read/write the surface shells from pro-STAR vrt/cel files.
 
 Note
-    Uses the extension @a .inp (input) to denote the format.
+    Uses the extension \a .inp (input) to denote the format.
 
 See Also
     Foam::meshReaders::STARCD

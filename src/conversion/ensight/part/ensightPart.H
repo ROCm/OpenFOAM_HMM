@@ -206,7 +206,7 @@ public:
         };
 
         //- Reconstruct part characteristics on freestore from Istream
-        //  @sa reconstruct
+        //  \sa reconstruct
         static autoPtr<ensightPart> New(Istream&);
 
 

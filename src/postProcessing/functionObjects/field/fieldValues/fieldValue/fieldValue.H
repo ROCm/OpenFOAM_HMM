@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -166,12 +166,11 @@ public:
 
             //- Combine fields from all processor domains into single field
             template<class Type>
-            tmp<Field<Type> > combineFields(const Field<Type>& field) const;
+            void combineFields(Field<Type>& field);
 
             //- Combine fields from all processor domains into single field
             template<class Type>
-            tmp<Field<Type> > combineFields(const tmp<Field<Type> >&) const;
-
+            void combineFields(tmp<Field<Type> >&);
 };
 
 
