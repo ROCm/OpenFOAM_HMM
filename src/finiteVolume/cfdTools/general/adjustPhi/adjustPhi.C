@@ -40,7 +40,8 @@ bool Foam::adjustPhi
 {
     if (p.needReference())
     {
-        p.boundaryField().updateCoeffs();
+        // p coefficients should not be updated here
+        // p.boundaryField().updateCoeffs();
 
         scalar massIn = 0.0;
         scalar fixedMassOut = 0.0;
