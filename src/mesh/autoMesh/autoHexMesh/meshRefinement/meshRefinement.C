@@ -1549,60 +1549,28 @@ void Foam::meshRefinement::checkCoupledFaceZones(const polyMesh& mesh)
 }
 
 
-// Adds patch if not yet there. Returns patchID.
-Foam::label Foam::meshRefinement::addPatch
+Foam::label Foam::meshRefinement::appendPatch
 (
     fvMesh& mesh,
+    const label insertPatchI,
     const word& patchName,
-    const dictionary& patchInfo
+    const dictionary& patchDict
 )
 {
-    polyBoundaryMesh& polyPatches =
-        const_cast<polyBoundaryMesh&>(mesh.boundaryMesh());
-
-    const label patchI = polyPatches.findPatchID(patchName);
-    if (patchI != -1)
-    {
-        // Already there
-        return patchI;
-    }
-
-
-    label insertPatchI = polyPatches.size();
-    label startFaceI = mesh.nFaces();
-
-    forAll(polyPatches, patchI)
-    {
-        const polyPatch& pp = polyPatches[patchI];
-
-        if (isA<processorPolyPatch>(pp))
-        {
-            insertPatchI = patchI;
-            startFaceI = pp.start();
-            break;
-        }
-    }
-
-
-    // Below is all quite a hack. Feel free to change once there is a better
-    // mechanism to insert and reorder patches.
-
     // Clear local fields and e.g. polyMesh parallelInfo.
     mesh.clearOut();
 
-    label sz = polyPatches.size();
-
+    polyBoundaryMesh& polyPatches =
+        const_cast<polyBoundaryMesh&>(mesh.boundaryMesh());
     fvBoundaryMesh& fvPatches = const_cast<fvBoundaryMesh&>(mesh.boundary());
 
-    dictionary patchDict(patchInfo);
-    patchDict.set("nFaces", 0);
-    patchDict.set("startFace", startFaceI);
+    label patchI = polyPatches.size();
 
     // Add polyPatch at the end
-    polyPatches.setSize(sz+1);
+    polyPatches.setSize(patchI+1);
     polyPatches.set
     (
-        sz,
+        patchI,
         polyPatch::New
         (
             patchName,
@@ -1611,13 +1579,13 @@ Foam::label Foam::meshRefinement::addPatch
             polyPatches
         )
     );
-    fvPatches.setSize(sz+1);
+    fvPatches.setSize(patchI+1);
     fvPatches.set
     (
-        sz,
+        patchI,
         fvPatch::New
         (
-            polyPatches[sz],  // point to newly added polyPatch
+            polyPatches[patchI],  // point to newly added polyPatch
             mesh.boundary()
         )
     );
@@ -1675,21 +1643,69 @@ Foam::label Foam::meshRefinement::addPatch
         mesh,
         calculatedFvPatchField<tensor>::typeName
     );
+    return patchI;
+}
+
+
+// Adds patch if not yet there. Returns patchID.
+Foam::label Foam::meshRefinement::addPatch
+(
+    fvMesh& mesh,
+    const word& patchName,
+    const dictionary& patchInfo
+)
+{
+    polyBoundaryMesh& polyPatches =
+        const_cast<polyBoundaryMesh&>(mesh.boundaryMesh());
+    fvBoundaryMesh& fvPatches = const_cast<fvBoundaryMesh&>(mesh.boundary());
+
+    const label patchI = polyPatches.findPatchID(patchName);
+    if (patchI != -1)
+    {
+        // Already there
+        return patchI;
+    }
+
+
+    label insertPatchI = polyPatches.size();
+    label startFaceI = mesh.nFaces();
+
+    forAll(polyPatches, patchI)
+    {
+        const polyPatch& pp = polyPatches[patchI];
+
+        if (isA<processorPolyPatch>(pp))
+        {
+            insertPatchI = patchI;
+            startFaceI = pp.start();
+            break;
+        }
+    }
+
+    dictionary patchDict(patchInfo);
+    patchDict.set("nFaces", 0);
+    patchDict.set("startFace", startFaceI);
+
+    // Below is all quite a hack. Feel free to change once there is a better
+    // mechanism to insert and reorder patches.
+
+    label addedPatchI = appendPatch(mesh, insertPatchI, patchName, patchDict);
+
 
     // Create reordering list
     // patches before insert position stay as is
-    labelList oldToNew(sz+1);
+    labelList oldToNew(addedPatchI+1);
     for (label i = 0; i < insertPatchI; i++)
     {
         oldToNew[i] = i;
     }
     // patches after insert position move one up
-    for (label i = insertPatchI; i < sz; i++)
+    for (label i = insertPatchI; i < addedPatchI; i++)
     {
         oldToNew[i] = i+1;
     }
     // appended patch gets moved to insert position
-    oldToNew[sz] = insertPatchI;
+    oldToNew[addedPatchI] = insertPatchI;
 
     // Shuffle into place
     polyPatches.reorder(oldToNew);
