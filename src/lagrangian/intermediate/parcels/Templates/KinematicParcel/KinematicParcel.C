@@ -176,37 +176,13 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     scalar& Cud
 ) const
 {
-    const polyMesh& mesh = this->cloud().pMesh();
-
-    // Momentum transfer coefficient
-    const scalar utc = td.cloud().drag().utc(Re, d, mu) + ROOTVSMALL;
-
-    tetIndices tetIs = this->currentTetIndices();
+    const typename ParcelType::forceType& forces = td.cloud().forces();
 
     // Momentum source due to particle forces
-    const vector Fcp = mass*td.cloud().forces().calcCoupled
-    (
-        this->position(),
-        tetIs,
-        dt,
-        rhoc_,
-        rho,
-        Uc_,
-        U,
-        d
-    );
-
-    const vector Fncp = mass*td.cloud().forces().calcNonCoupled
-    (
-        this->position(),
-        tetIs,
-        dt,
-        rhoc_,
-        rho,
-        Uc_,
-        U,
-        d
-    );
+    const ParcelType& p = static_cast<const ParcelType&>(*this);
+    const forceSuSp Fcp = forces.calcCoupled(p, dt, Re, rho, mu);
+    const forceSuSp Fncp = forces.calcNonCoupled(p, dt, Re, rho, mu);
+    const forceSuSp Feff = Fcp + Fncp;
 
 
     // New particle velocity
@@ -214,8 +190,8 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
 
     // Update velocity - treat as 3-D
     const scalar As = this->areaS(d);
-    const vector ap = Uc_ + (Fcp + Fncp + Su)/(utc*As);
-    const scalar bp = 6.0*utc/(rho*d);
+    const vector ap = Uc_ + (mass*Feff.Su() + Su)/(As*Feff.Sp());
+    const scalar bp = 6.0*Feff.Sp()/(rho*d);
 
     Cud = bp;
 
@@ -224,9 +200,10 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
 
     vector Unew = Ures.value();
 
-    dUTrans += dt*(utc*As*(Ures.average() - Uc_) - Fcp);
+    dUTrans += dt*(Fncp.Sp()*As*(Ures.average() - Uc_) - mass*Fcp.Su());
 
     // Apply correction to velocity and dUTrans for reduced-D cases
+    const polyMesh& mesh = this->cloud().pMesh();
     meshTools::constrainDirection(mesh, mesh.solutionD(), Unew);
     meshTools::constrainDirection(mesh, mesh.solutionD(), dUTrans);
 

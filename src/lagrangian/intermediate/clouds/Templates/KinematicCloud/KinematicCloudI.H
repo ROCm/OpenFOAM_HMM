@@ -257,7 +257,7 @@ Foam::KinematicCloud<ParcelType>::g() const
 
 
 template<class ParcelType>
-inline const Foam::particleForces&
+inline const typename ParcelType::forceType&
 Foam::KinematicCloud<ParcelType>::forces() const
 {
     return forces_;
@@ -293,14 +293,6 @@ inline Foam::DispersionModel<Foam::KinematicCloud<ParcelType> >&
 Foam::KinematicCloud<ParcelType>::dispersion()
 {
     return dispersionModel_();
-}
-
-
-template<class ParcelType>
-inline const Foam::DragModel<Foam::KinematicCloud<ParcelType> >&
-Foam::KinematicCloud<ParcelType>::drag() const
-{
-    return dragModel_;
 }
 
 

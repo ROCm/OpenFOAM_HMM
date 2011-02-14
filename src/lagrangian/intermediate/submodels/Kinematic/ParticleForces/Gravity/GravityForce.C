@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,33 +23,56 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicThermoParcel.H"
+#include "GravityForce.H"
 
-// Kinematic
-#include "makeParcelDispersionModels.H"
-#include "makeParcelInjectionModels.H"
-#include "makeParcelCollisionModels.H"
-#include "makeParcelPatchInteractionModels.H"
-#include "makeParcelPostProcessingModels.H"
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Thermodynamic
-#include "makeParcelHeatTransferModels.H"
-#include "makeThermoParcelSurfaceFilmModels.H"
+template<class CloudType>
+Foam::GravityForce<CloudType>::GravityForce
+(
+    CloudType& owner,
+    const fvMesh& mesh,
+    const dictionary& dict,
+    const word& forceType
+)
+:
+    ParticleForce<CloudType>(owner, mesh, dict, forceType),
+    g_(owner.g().value())
+{}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+template<class CloudType>
+Foam::GravityForce<CloudType>::GravityForce(const GravityForce& gf)
+:
+    ParticleForce<CloudType>(gf),
+    g_(gf.g_)
+{}
+
+
+// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::GravityForce<CloudType>::~GravityForce()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::forceSuSp Foam::GravityForce<CloudType>::calcNonCoupled
+(
+    const typename CloudType::parcelType& p,
+    const scalar dt,
+    const scalar Re,
+    const scalar rhoc,
+    const scalar muc
+) const
 {
-    // Kinematic sub-models
-    makeParcelDispersionModels(basicThermoParcel);
-    makeParcelInjectionModels(basicThermoParcel);
-    makeParcelCollisionModels(basicThermoParcel);
-    makeParcelPatchInteractionModels(basicThermoParcel);
-    makeParcelPostProcessingModels(basicThermoParcel);
+    forceSuSp value(vector::zero, 0.0);
 
-    // Thermo sub-models
-    makeParcelHeatTransferModels(basicThermoParcel);
-    makeParcelSurfaceFilmModels(basicThermoParcel);
+    value.Su() = g_*(1.0 - rhoc/p.rho());
+
+    return value;
 }
 
 

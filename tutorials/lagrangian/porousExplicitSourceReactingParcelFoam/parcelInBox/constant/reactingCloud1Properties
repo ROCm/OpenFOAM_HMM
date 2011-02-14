@@ -89,17 +89,16 @@ constantProperties
 
 particleForces
 {
-    gravity         on;
-    virtualMass     off;
-    pressureGradient off;
-    paramagnetic    off;
+     activeForces
+     (
+         sphereDrag
+         gravity
+     );
 }
 
 subModels
 {
     InjectionModel  ManualInjection;
-
-    DragModel       SphereDrag;
 
     DispersionModel none;
 
@@ -132,7 +131,7 @@ subModels
         U0              (0 0 0);
         sizeDistribution
         {
-            pdfType         uniform;
+            distributionModelType uniform;
             uniformDistribution
             {
                 minValue        100e-06;

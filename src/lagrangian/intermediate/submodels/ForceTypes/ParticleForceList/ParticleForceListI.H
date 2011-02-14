@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,33 +23,33 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicThermoParcel.H"
-
-// Kinematic
-#include "makeParcelDispersionModels.H"
-#include "makeParcelInjectionModels.H"
-#include "makeParcelCollisionModels.H"
-#include "makeParcelPatchInteractionModels.H"
-#include "makeParcelPostProcessingModels.H"
-
-// Thermodynamic
-#include "makeParcelHeatTransferModels.H"
-#include "makeThermoParcelSurfaceFilmModels.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+template<class CloudType>
+inline const CloudType& Foam::ParticleForceList<CloudType>::owner() const
 {
-    // Kinematic sub-models
-    makeParcelDispersionModels(basicThermoParcel);
-    makeParcelInjectionModels(basicThermoParcel);
-    makeParcelCollisionModels(basicThermoParcel);
-    makeParcelPatchInteractionModels(basicThermoParcel);
-    makeParcelPostProcessingModels(basicThermoParcel);
+    return owner_;
+}
 
-    // Thermo sub-models
-    makeParcelHeatTransferModels(basicThermoParcel);
-    makeParcelSurfaceFilmModels(basicThermoParcel);
+
+template<class CloudType>
+inline CloudType& Foam::ParticleForceList<CloudType>::owner()
+{
+    return owner_;
+}
+
+
+template<class CloudType>
+inline const Foam::fvMesh& Foam::ParticleForceList<CloudType>::mesh() const
+{
+    return mesh_;
+}
+
+
+template<class CloudType>
+inline const Foam::dictionary& Foam::ParticleForceList<CloudType>::dict() const
+{
+    return dict_;
 }
 
 

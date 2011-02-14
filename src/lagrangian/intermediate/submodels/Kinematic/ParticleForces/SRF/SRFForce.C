@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,73 +23,84 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "DragModel.H"
+#include "SRFForce.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::DragModel<CloudType>::DragModel(CloudType& owner)
-:
-    SubModelBase<CloudType>(owner)
-{}
-
-
-template<class CloudType>
-Foam::DragModel<CloudType>::DragModel
+Foam::SRFForce<CloudType>::SRFForce
 (
-    const dictionary& dict,
     CloudType& owner,
-    const word& type
+    const fvMesh& mesh,
+    const dictionary& dict,
+    const word& forceType
 )
 :
-    SubModelBase<CloudType>(owner, dict, type)
+    ParticleForce<CloudType>(owner, mesh, dict, forceType),
+    srfPtr_(NULL)
 {}
 
 
 template<class CloudType>
-Foam::DragModel<CloudType>::DragModel(const DragModel<CloudType>& dm)
+Foam::SRFForce<CloudType>::SRFForce
+(
+    const SRFForce& srff
+)
 :
-    SubModelBase<CloudType>(dm)
+    ParticleForce<CloudType>(srff),
+    srfPtr_(NULL)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::DragModel<CloudType>::~DragModel()
+Foam::SRFForce<CloudType>::~SRFForce()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::scalar Foam::DragModel<CloudType>::Cd(const scalar) const
+void Foam::SRFForce<CloudType>::cacheFields(const bool store)
 {
-    notImplemented
-    (
-        "Foam::scalar Foam::DragModel<CloudType>::Cd(const scalar) const"
-    );
-    return 0.0;
+    if (store)
+    {
+        const typename SRF::SRFModel& model = this->mesh().template
+            lookupObject<SRF::SRFModel>("SRFProperties");
+        srfPtr_ = &model;
+    }
+    else
+    {
+        srfPtr_ = NULL;
+    }
 }
 
 
 template<class CloudType>
-Foam::scalar Foam::DragModel<CloudType>::utc
+Foam::forceSuSp Foam::SRFForce<CloudType>::calcNonCoupled
 (
+    const typename CloudType::parcelType& p,
+    const scalar dt,
     const scalar Re,
-    const scalar d,
-    const scalar mu
+    const scalar rhoc,
+    const scalar muc
 ) const
 {
-    const scalar Cd = this->Cd(Re);
+    forceSuSp value(vector::zero, 0.0);
 
-    return Cd*Re/d*mu/8.0;
+    const typename SRF::SRFModel& srf = *srfPtr_;
+
+    const vector& omega = srf.omega().value();
+    const vector& axis = srf.axis();
+
+    const vector r = p.position() - axis*(axis & p.position());
+
+    // Coriolis and centrifugal acceleration terms
+    value.Su() = 2.0*(p.U() ^ omega) + (omega ^ (r ^ omega));
+
+    return value;
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "DragModelNew.C"
-
 // ************************************************************************* //
-

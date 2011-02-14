@@ -409,6 +409,27 @@ inline const Foam::vector& Foam::KinematicParcel<ParcelType>::UTurb() const
 }
 
 
+template <class ParcelType>
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::rhoc() const
+{
+    return rhoc_;
+}
+
+
+template <class ParcelType>
+inline const Foam::vector& Foam::KinematicParcel<ParcelType>::Uc() const
+{
+    return Uc_;
+}
+
+
+template <class ParcelType>
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::muc() const
+{
+    return muc_;
+}
+
+
 template<class ParcelType>
 inline bool& Foam::KinematicParcel<ParcelType>::active()
 {

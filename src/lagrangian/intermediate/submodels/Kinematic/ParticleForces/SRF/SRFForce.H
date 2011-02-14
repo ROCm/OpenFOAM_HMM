@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,66 +22,95 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::NoDrag
+    Foam::SRFForce
 
 Description
-    Dummy drag model for 'none'
+    Calculates particle SRF reference frame force
+
+SourceFiles
+    SRFForceI.H
+    SRFForce.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef NoDrag_H
-#define NoDrag_H
+#ifndef SRFForce_H
+#define SRFForce_H
 
-#include "DragModel.H"
+#include "ParticleForce.H"
+#include "SRFModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+class fvMesh;
+
 /*---------------------------------------------------------------------------*\
-                            Class NoDrag Declaration
+                       Class SRFForce Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class NoDrag
+class SRFForce
 :
-    public DragModel<CloudType>
+    public ParticleForce<CloudType>
 {
+    // Private data
+
+        //- Pointer to the SRF model
+        const typename SRF::SRFModel* srfPtr_;
+
+
 public:
 
     //- Runtime type information
-    TypeName("none");
+    TypeName("SRF");
 
 
     // Constructors
 
-        //- Construct from dictionary
-        NoDrag(const dictionary&, CloudType&);
+        //- Construct from mesh
+        SRFForce
+        (
+            CloudType& owner,
+            const fvMesh& mesh,
+            const dictionary& dict,
+            const word& forceType
+        );
 
         //- Construct copy
-        NoDrag(const NoDrag<CloudType>& dm);
+        SRFForce(const SRFForce& srff);
 
         //- Construct and return a clone
-        virtual autoPtr<DragModel<CloudType> > clone() const
+        virtual autoPtr<ParticleForce<CloudType> > clone() const
         {
-            return autoPtr<DragModel<CloudType> >
+            return autoPtr<ParticleForce<CloudType> >
             (
-                new NoDrag<CloudType>(*this)
+                new ParticleForce<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~NoDrag();
+    virtual ~SRFForce();
 
 
     // Member Functions
 
-        //- Flag to indicate whether model activates drag model
-        bool active() const;
+        // Evaluation
 
-        //- Return drag coefficient
-        scalar Cd(const scalar) const;
+            //- Cache fields
+            virtual void cacheFields(const bool store);
+
+            //- Calculate the non-coupled force
+            virtual forceSuSp calcNonCoupled
+            (
+                const typename CloudType::parcelType& p,
+                const scalar dt,
+                const scalar Re,
+                const scalar rhoc,
+                const scalar muc
+            ) const;
 };
 
 
@@ -92,7 +121,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "NoDrag.C"
+    #include "SRFForce.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

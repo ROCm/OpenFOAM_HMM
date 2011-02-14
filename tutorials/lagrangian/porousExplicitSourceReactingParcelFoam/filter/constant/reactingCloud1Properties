@@ -89,17 +89,16 @@ constantProperties
 
 particleForces
 {
-    gravity         on;
-    virtualMass     off;
-    pressureGradient off;
-    paramagnetic    off;
+     activeForces
+     (
+         sphereDrag
+         gravity
+     );
 }
 
 subModels
 {
     InjectionModel  ReactingMultiphaseLookupTableInjection;
-
-    DragModel       SphereDrag;
 
     DispersionModel none;
 

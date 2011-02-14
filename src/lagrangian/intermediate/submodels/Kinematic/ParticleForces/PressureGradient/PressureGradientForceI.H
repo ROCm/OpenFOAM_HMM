@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,33 +23,26 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicThermoParcel.H"
-
-// Kinematic
-#include "makeParcelDispersionModels.H"
-#include "makeParcelInjectionModels.H"
-#include "makeParcelCollisionModels.H"
-#include "makeParcelPatchInteractionModels.H"
-#include "makeParcelPostProcessingModels.H"
-
-// Thermodynamic
-#include "makeParcelHeatTransferModels.H"
-#include "makeThermoParcelSurfaceFilmModels.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+template<class CloudType>
+const Foam::volTensorField& Foam::PressureGradientForce<CloudType>::gradU()
+const
 {
-    // Kinematic sub-models
-    makeParcelDispersionModels(basicThermoParcel);
-    makeParcelInjectionModels(basicThermoParcel);
-    makeParcelCollisionModels(basicThermoParcel);
-    makeParcelPatchInteractionModels(basicThermoParcel);
-    makeParcelPostProcessingModels(basicThermoParcel);
+    if (gradUPtr_)
+    {
+        return *gradUPtr_;
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "const volTensorField& PressureGradientForce<CloudType>::gradU()"
+            "const"
+        )   << "gradU field not allocated" << abort(FatalError);
 
-    // Thermo sub-models
-    makeParcelHeatTransferModels(basicThermoParcel);
-    makeParcelSurfaceFilmModels(basicThermoParcel);
+        return reinterpret_cast<const volTensorField>(0);
+    }
 }
 
 

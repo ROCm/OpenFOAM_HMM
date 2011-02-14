@@ -322,6 +322,20 @@ inline Foam::scalar Foam::ThermoParcel<ParcelType>::hs() const
 
 
 template<class ParcelType>
+inline Foam::scalar Foam::ThermoParcel<ParcelType>::Tc() const
+{
+    return Tc_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar Foam::ThermoParcel<ParcelType>::Cpc() const
+{
+    return Cpc_;
+}
+
+
+template<class ParcelType>
 inline Foam::scalar& Foam::ThermoParcel<ParcelType>::T()
 {
     return T_;

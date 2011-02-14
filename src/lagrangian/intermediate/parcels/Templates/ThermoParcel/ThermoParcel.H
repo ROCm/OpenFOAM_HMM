@@ -344,6 +344,12 @@ public:
             //- Return the parcel sensible enthalpy
             inline scalar hs() const;
 
+            //- Return const access to carrier temperature
+            inline scalar Tc() const;
+
+            //- Return const access to carrier specific heat capacity
+            inline scalar Cpc() const;
+
 
         // Edit
 

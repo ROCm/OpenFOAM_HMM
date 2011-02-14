@@ -22,114 +22,84 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::NonSphereDrag
+    Foam::SphereDragForce
 
 Description
-    Drag model for non-spherical particles.
-
-    Takes the form of
-
-        24.0/Re*(1.0 + a_*pow(Re, b_)) + Re*c_/(Re + d_);
-
-    Where a(phi), b(phi), c(phi) and d(phi) are model coefficients, with phi
-    defined as:
-
-              area of sphere with same volume as particle
-        phi = -------------------------------------------
-                       actual particle area
-
-    Equation used is Eqn (11) of reference below - good to within 2 to 4 % of
-    RMS values from experiment.
-
-    H and L also give a simplified model with greater error compared to
-    results from experiment - Eqn 12 - but since phi is presumed
-    constant, it offers little benefit.
-
-    Reference:
-    \verbatim
-        "Drag coefficient and terminal velocity of spherical and nonspherical
-        particles"
-        A. Haider and O. Levenspiel,
-        Powder Technology
-        Volume 58, Issue 1, May 1989, Pages 63-70
-    \endverbatim
-
+    Drag model based on assumption of solid spheres
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef NonSphereDrag_H
-#define NonSphereDrag_H
+#ifndef SphereDragForce_H
+#define SphereDragForce_H
 
-#include "DragModel.H"
+#include "ParticleForce.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                        Class NonSphereDrag Declaration
+                       Class SphereDragForce Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class NonSphereDrag
+class SphereDragForce
 :
-    public DragModel<CloudType>
+    public ParticleForce<CloudType>
 {
-protected:
+    // Private Member Functions
 
-    // Protected Data
-
-        //- Flag to indicate `Simple model'
-        bool simpleModel_;
-
-        //- Ratio of surface of sphere having same volume as particle to
-        //  actual surface area of particle (0 < phi <= 1)
-        scalar phi_;
-
-
-        // Model coefficients
-
-            scalar a_;
-
-            scalar b_;
-
-            scalar c_;
-
-            scalar d_;
+        //- Drag coefficient
+        scalar Cd(const scalar Re) const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("NonSphereDrag");
+    TypeName("sphereDrag");
 
 
     // Constructors
 
-        //- Construct from dictionary
-        NonSphereDrag(const dictionary& dict, CloudType& owner);
+        //- Construct from mesh
+        SphereDragForce
+        (
+            CloudType& owner,
+            const fvMesh& mesh,
+            const dictionary& dict,
+            const word& forceType
+        );
 
         //- Construct copy
-        NonSphereDrag(const NonSphereDrag<CloudType>& dm);
+        SphereDragForce(const SphereDragForce<CloudType>& df);
 
         //- Construct and return a clone
-        virtual autoPtr<DragModel<CloudType> > clone() const
+        virtual autoPtr<ParticleForce<CloudType> > clone() const
         {
-            return autoPtr<DragModel<CloudType> >
+            return autoPtr<ParticleForce<CloudType> >
             (
-                new NonSphereDrag<CloudType>(*this)
+                new SphereDragForce<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~NonSphereDrag();
+    virtual ~SphereDragForce();
 
 
     // Member Functions
 
-        //- Return drag coefficient
-        scalar Cd(const scalar Re) const;
+        // Evaluation
+
+            //- Calculate the non-coupled force
+            virtual forceSuSp calcNonCoupled
+            (
+                const typename CloudType::parcelType& p,
+                const scalar dt,
+                const scalar Re,
+                const scalar rhoc,
+                const scalar muc
+            ) const;
 };
 
 
@@ -140,7 +110,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "NonSphereDrag.C"
+#   include "SphereDragForce.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,69 +23,88 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "NonSphereDrag.H"
+#include "ParticleForce.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::NonSphereDrag<CloudType>::NonSphereDrag
+Foam::ParticleForce<CloudType>::ParticleForce
 (
+    CloudType& owner,
+    const fvMesh& mesh,
     const dictionary& dict,
-    CloudType& owner
+    const word& forceType
 )
 :
-    DragModel<CloudType>(dict, owner, typeName),
-    phi_(readScalar(this->coeffDict().lookup("phi"))),
-    a_(exp(2.3288 - 6.4581*phi_ + 2.4486*sqr(phi_))),
-    b_(0.0964 + 0.5565*phi_),
-    c_(exp(4.9050 - 13.8944*phi_ + 18.4222*sqr(phi_) - 10.2599*pow3(phi_))),
-    d_(exp(1.4681 + 12.2584*phi_ - 20.7322*sqr(phi_) + 15.8855*pow3(phi_)))
-{
-    if (phi_ <= 0 || phi_ > 1)
-    {
-        FatalErrorIn
-        (
-            "NonSphereDrag<CloudType>::NonSphereDrag"
-            "("
-                "const dictionary&, "
-                "CloudType&"
-            ")"
-        )   << "Ratio of surface of sphere having same volume as particle to "
-            << "actual surface area of particle (phi) must be greater than 0 "
-            << "and less than or equal to 1" << exit(FatalError);
-    }
-}
-
-
-template<class CloudType>
-Foam::NonSphereDrag<CloudType>::NonSphereDrag
-(
-    const NonSphereDrag<CloudType>& dm
-)
-:
-    DragModel<CloudType>(dm),
-    phi_(dm.phi_),
-    a_(dm.a_),
-    b_(dm.b_),
-    c_(dm.c_),
-    d_(dm.d_)
+    owner_(owner),
+    mesh_(mesh),
+    dict_(dict),
+    coeffs_(dict.subOrEmptyDict(forceType + "Coeffs"))
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+template<class CloudType>
+Foam::ParticleForce<CloudType>::ParticleForce(const ParticleForce& pf)
+:
+    owner_(pf.owner_),
+    mesh_(pf.mesh_),
+    dict_(pf.dict_),
+    coeffs_(pf.coeffs_)
+{}
+
+
+// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::NonSphereDrag<CloudType>::~NonSphereDrag()
+Foam::ParticleForce<CloudType>::~ParticleForce()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::scalar Foam::NonSphereDrag<CloudType>::Cd(const scalar Re) const
+void Foam::ParticleForce<CloudType>::cacheFields(const bool store)
+{}
+
+
+template<class CloudType>
+Foam::forceSuSp Foam::ParticleForce<CloudType>::calcCoupled
+(
+    const typename CloudType::parcelType&,
+    const scalar dt,
+    const scalar Re,
+    const scalar rhoc,
+    const scalar muc
+) const
 {
-    return 24.0/(Re + ROOTVSMALL)*(1.0 + a_*pow(Re, b_)) + Re*c_/(Re + d_);
+    forceSuSp value;
+    value.Su() = vector::zero;
+    value.Sp() = 0.0;
+
+    return value;
 }
 
+
+template<class CloudType>
+Foam::forceSuSp Foam::ParticleForce<CloudType>::calcNonCoupled
+(
+    const typename CloudType::parcelType&,
+    const scalar dt,
+    const scalar Re,
+    const scalar rhoc,
+    const scalar muc
+) const
+{
+    forceSuSp value;
+    value.Su() = vector::zero;
+    value.Sp() = 0.0;
+
+    return value;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "ParticleForceNew.C"
 
 // ************************************************************************* //

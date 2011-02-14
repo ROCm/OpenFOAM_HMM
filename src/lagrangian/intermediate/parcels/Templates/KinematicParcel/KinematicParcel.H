@@ -56,6 +56,8 @@ SourceFiles
 #include "labelFieldIOField.H"
 #include "vectorFieldIOField.H"
 
+#include "ParticleForceList.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -87,6 +89,10 @@ class KinematicParcel
     public Particle<ParcelType>
 {
 public:
+
+    //- Type of force to be used by this parcel type
+    typedef ParticleForceList<KinematicCloud<ParcelType> > forceType;
+
 
     //- Class to hold kinematic particle constant properties
     class constantProperties
@@ -455,6 +461,15 @@ public:
 
             //- Return const access to turbulent velocity fluctuation
             inline const vector& UTurb() const;
+
+            //- Return const access to carrier density [kg/m3]
+            inline scalar rhoc() const;
+
+            //- Return const access to carrier velocity [m/s]
+            inline const vector& Uc() const;
+
+            //- Return const access to carrier viscosity [Pa.s]
+            inline scalar muc() const;
 
             //- Return const access to the collision records
             inline const collisionRecordList& collisionRecords() const;

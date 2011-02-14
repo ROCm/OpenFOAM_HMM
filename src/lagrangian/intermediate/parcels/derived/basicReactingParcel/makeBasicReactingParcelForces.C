@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,42 +23,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "DragModel.H"
+#include "basicReactingParcel.H"
+
+// Using thermodynamic variant
+#include "makeThermoParcelForces.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class CloudType>
-Foam::autoPtr<Foam::DragModel<CloudType> > Foam::DragModel<CloudType>::New
-(
-    const dictionary& dict,
-    CloudType& owner
-)
+namespace Foam
 {
-    const word modelType(dict.lookup("DragModel"));
-
-    Info<< "Selecting DragModel " << modelType << endl;
-
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
-
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
-    {
-        FatalErrorIn
-        (
-            "DragModel<CloudType>::New"
-            "("
-                "const dictionary&,"
-                "CloudType&"
-            ")"
-        )   << "Unknown DragModel type "
-            << modelType << nl << nl
-            << "Valid DragModel types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
-    }
-
-    return autoPtr<DragModel<CloudType> >(cstrIter()(dict, owner));
-}
+    // Kinematic sub-models
+    makeThermoParcelForces(basicReactingParcel);
+};
 
 
 // ************************************************************************* //

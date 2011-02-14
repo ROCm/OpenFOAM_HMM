@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,30 +23,22 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeParcelDragModels_H
-#define makeParcelDragModels_H
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "KinematicCloud.H"
-
-#include "NoDrag.H"
-#include "NonSphereDrag.H"
-#include "SphereDrag.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#define makeParcelDragModels(ParcelType)                                     \
-                                                                             \
-    makeDragModel(KinematicCloud<ParcelType>);                               \
-                                                                             \
-    makeDragModelType(NoDrag, KinematicCloud, ParcelType);                   \
-    makeDragModelType(NonSphereDrag, KinematicCloud, ParcelType);            \
-    makeDragModelType(SphereDrag, KinematicCloud, ParcelType);
+template<class CloudType>
+inline const Foam::word&
+Foam::ParamagneticForce<CloudType>::HdotGradHName() const
+{
+    return HdotGradHName_;
+}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class CloudType>
+inline Foam::scalar
+Foam::ParamagneticForce<CloudType>::magneticSusceptibility() const
+{
+    return magneticSusceptibility_;
+}
 
-#endif
 
 // ************************************************************************* //

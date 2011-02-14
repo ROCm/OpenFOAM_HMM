@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,55 +23,40 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "SphereDrag.H"
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::SphereDrag<CloudType>::SphereDrag
-(
-    const dictionary&,
-    CloudType& owner
-)
-:
-    DragModel<CloudType>(owner)
-{}
-
-
-template<class CloudType>
-Foam::SphereDrag<CloudType>::SphereDrag(const SphereDrag<CloudType>& dm)
-:
-    DragModel<CloudType>(dm)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::SphereDrag<CloudType>::~SphereDrag()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::scalar Foam::SphereDrag<CloudType>::Cd(const scalar Re) const
+inline const CloudType& Foam::ParticleForce<CloudType>::owner() const
 {
-    scalar Cd;
-    if (Re < SMALL)
-    {
-        Cd = GREAT;
-    }
-    else if (Re > 1000.0)
-    {
-        Cd =  0.424;
-    }
-    else
-    {
-        Cd = 24.0/Re*(1.0 + 1.0/6.0*pow(Re, 2.0/3.0));
-    }
+    return owner_;
+}
 
-    return Cd;
+
+template<class CloudType>
+inline CloudType& Foam::ParticleForce<CloudType>::owner()
+{
+    return owner_;
+}
+
+
+template<class CloudType>
+inline const Foam::fvMesh& Foam::ParticleForce<CloudType>::mesh() const
+{
+    return mesh_;
+}
+
+
+template<class CloudType>
+inline const Foam::dictionary& Foam::ParticleForce<CloudType>::dict() const
+{
+    return dict_;
+}
+
+
+template<class CloudType>
+inline const Foam::dictionary& Foam::ParticleForce<CloudType>::coeffs() const
+{
+    return coeffs_;
 }
 
 
