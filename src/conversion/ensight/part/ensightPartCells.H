@@ -138,7 +138,7 @@ public:
         //- Reconstruct part characteristics (eg, element types) from Istream
         //  A part reconstructed in this manner can be used when writing fields,
         //  but cannot be used to write a new geometry
-        //  @sa Foam::ensightPart::reconstruct
+        //  \sa Foam::ensightPart::reconstruct
         ensightPartCells(Istream&);
 
         //- Reconstruct part characteristics on freestore from Istream

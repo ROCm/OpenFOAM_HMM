@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,7 +21,8 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-@file Foam::addToGlobalFunctionSelectionTable
+Global
+    Foam::addToGlobalFunctionSelectionTable
 
 Description
     Macros for easy insertion into global function selection tables
@@ -33,19 +34,17 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
 // add to hash-table of functions with 'lookup' as the key
 #define addNamedToGlobalFunctionSelectionTable\
 (memberFunction,argNames,lookup,functionPtr)                                  \
                                                                               \
     /* Add to the table, find by lookup name */                               \
     add##memberFunction##argNames##GlobalMemberFunctionToTable                \
-    add_##lookup##_##memberFunction##argNames##GlobalMemberFunctionTo##Table_\
+    add_##lookup##_##memberFunction##argNames##GlobalMemberFunctionTo##Table_ \
     (#lookup, functionPtr)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 #endif
 

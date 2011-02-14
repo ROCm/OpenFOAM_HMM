@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2006-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,14 +34,14 @@ Description
     mass basis.
 
     Example of the boundary condition specification:
-    @verbatim
+    \verbatim
     inlet
     {
         type        flowRateInletVelocity;
         flowRate    0.2;        // Volumetric/mass flow rate [m3/s or kg/s]
         value       uniform (0 0 0); // placeholder
     }
-    @endverbatim
+    \endverbatim
 
 Note
     - The value is positive inwards

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
 
     Algebraic eddy viscosity SGS model founded on the assumption that
     local equilibrium prevails, hence
-    @verbatim
+    \verbatim
         B = 2/3*k*I - 2*nuSgs*dev(D) - 2*cD2*delta*(D.dev(D));
         Beff = 2/3*k*I - 2*nuEff*dev(D) - 2*cD2*delta*(D.dev(D));
 
@@ -39,7 +39,7 @@ Description
         k = cI*delta^2*||D||^2
         nuSgs = ck*sqrt(k)*delta
         nuEff = nuSgs + nu
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     Smagorinsky2.C

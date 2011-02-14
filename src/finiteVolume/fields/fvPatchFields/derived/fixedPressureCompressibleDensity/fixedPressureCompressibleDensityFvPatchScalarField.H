@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,14 +29,14 @@ Description
     properties.
 
     Example of the boundary condition specification:
-    @verbatim
+    \verbatim
         inlet
         {
             type        fixedPressureCompressibleDensity;
             p           p;               // Name of static pressure field
             value       uniform 1;       // Initial value
         }
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     fixedPressureCompressibleDensityFvPatchScalarField.C

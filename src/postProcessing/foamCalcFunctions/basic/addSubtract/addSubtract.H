@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,10 +28,10 @@ Description
     adds/subtracts a field or value to/from a base field.
 
     New field name specified by -resultName option, or automatically as:
-        <baseFieldName>_add_<addSubtractFieldName>
-        <baseFieldName>_add_value
-        <baseFieldName>_subtract_<addSubtractFieldName>
-        <baseFieldName>_subtract_value
+        \<baseFieldName\>_add_<addSubtractFieldName>
+        \<baseFieldName\>_add_value
+        \<baseFieldName\>_subtract_<addSubtractFieldName>
+        \<baseFieldName\>_subtract_value
 
     Example usage:
         addSubtract p add -value 100000 -resultName pAbs

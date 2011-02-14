@@ -29,17 +29,17 @@ Description
 
     The geometry is written via the MeshedSurfaceProxy, the fields
     are written in a trivial ASCII format with ID and VALUE as
-    so-called user data. These @c .usr files can be read into proSTAR
+    so-called user data. These \c .usr files can be read into proSTAR
     with these types of commands. For element data:
-     @verbatim
+     \verbatim
         getuser FILENAME.usr cell scalar free
         getuser FILENAME.usr cell vector free
-    @endverbatim
+    \endverbatim
     and for vertex data:
-    @verbatim
+    \verbatim
         getuser FILENAME.usr vertex scalar free
         getuser FILENAME.usr vertex vector free
-    @endverbatim
+    \endverbatim
 
 Note
     Only scalar and vector fields are supported directly.

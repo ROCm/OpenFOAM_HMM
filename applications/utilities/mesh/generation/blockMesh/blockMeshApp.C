@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,20 +28,20 @@ Description
     A multi-block mesh generator.
 
     Uses the block mesh description found in
-    @a constant/polyMesh/blockMeshDict
-    (or @a constant/\<region\>/polyMesh/blockMeshDict).
+    \a constant/polyMesh/blockMeshDict
+    (or \a constant/\<region\>/polyMesh/blockMeshDict).
 
 Usage
 
     - blockMesh [OPTION]
 
-    @param -blockTopology \n
+    \param -blockTopology \n
     Write the topology as a set of edges in OBJ format.
 
-    @param -region \<name\> \n
+    \param -region \<name\> \n
     Specify an alternative mesh region.
 
-    @param -dict \<filename\> \n
+    \param -dict \<filename\> \n
     Specify alternative dictionary for the block mesh description.
 
 \*---------------------------------------------------------------------------*/

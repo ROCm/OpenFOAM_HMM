@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,7 +40,7 @@ Description
     Comparable to running a meshModifier of the form
     (if masterPatch is called "M" and slavePatch "S"):
 
-    @verbatim
+    \verbatim
     couple
     {
         type                    slidingInterface;
@@ -52,7 +52,7 @@ Description
         slavePatchName          S;
         typeOfMatch             partial or integral
     }
-    @endverbatim
+    \endverbatim
 
 
 \*---------------------------------------------------------------------------*/

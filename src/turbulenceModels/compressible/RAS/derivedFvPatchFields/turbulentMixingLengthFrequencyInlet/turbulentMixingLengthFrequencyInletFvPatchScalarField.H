@@ -28,7 +28,7 @@ Description
     Calculate omega via the mixing length
 
     Example of the boundary condition specification:
-    @verbatim
+    \verbatim
         inlet
         {
             type            compressible::turbulentMixingLengthFrequencyInlet;
@@ -36,7 +36,7 @@ Description
             k               k;             // turbulent k field
             value           uniform 5;     // initial value
         }
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     turbulentMixingLengthFrequencyInletFvPatchScalarField.C

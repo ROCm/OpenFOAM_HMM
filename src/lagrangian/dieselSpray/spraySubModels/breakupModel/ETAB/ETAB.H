@@ -28,7 +28,7 @@ Description
     The Enhanced %TAB model.
 
     Described in the papers below.
-    @verbatim
+    \verbatim
     F.X. Tanner
         "Liquid Jet Atomization and Droplet Breakup Modeling of
         Non-Evaporating Diesel Fuel Sprays"
@@ -40,7 +40,7 @@ Description
         Fuel Sprays by Means of Cascade Drop Breakup Model"
         SAE 980808
         SAE Technical Paper Series
-    @endverbatim
+    \endverbatim
 
 See Also
     The TAB model

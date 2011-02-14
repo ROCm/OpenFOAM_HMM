@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,12 +31,12 @@ Description
     Box defined as origin and i,j,k vectors.
     E.g. box rotated 45 degrees around z-axis with sizes sqrt(0.2^2+0.2^2)
     (and extra large, 200 in z direction):
-    @verbatim
+    \verbatim
        origin   ( 0.4 0.4 -100);
        i        ( 0.2 0.2    0);
        j        (-0.2 0.2    0);
        k        ( 0.0 0.0  100);
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     rotatedBoxToCell.C

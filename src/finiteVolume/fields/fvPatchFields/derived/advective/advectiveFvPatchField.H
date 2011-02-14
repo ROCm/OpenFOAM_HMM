@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ Description
     advectionSpeed() the default implementation of which requires the name of
     flux field a the outlet (phi) and optionally the density (rho) if the
     mass-flux rather than the volumetric-flux is given.
-    @verbatim
+    \verbatim
         outlet
         {
             type            advective;
@@ -47,7 +47,7 @@ Description
             // fieldInf     1e5; // Optional
             // lInf         0.1; // Optional
         }
-    @endverbatim
+    \endverbatim
 
     The flow/wave speed at the outlet can be changed by deriving a specialised
     BC fron this class and overriding advectionSpeed() e.g. in

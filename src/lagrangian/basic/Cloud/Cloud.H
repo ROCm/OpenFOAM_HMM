@@ -381,7 +381,7 @@ public:
                 IOstream::compressionType cmp
             ) const;
 
-            //- Write positions to <cloudName>_positions.obj file
+            //- Write positions to \<cloudName\>_positions.obj file
             void writePositions() const;
 
 

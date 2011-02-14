@@ -65,9 +65,10 @@ public:
     // Public classes
 
         //- Less function class used in sorting encoded transforms and indices
-        //  - minimum processor
-        //  - minimum local index
-        //  - minimum transform
+        //  Minimum of:
+        //  - processor
+        //  - local index
+        //  - transform
         class less
         {
         public:

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,12 +29,12 @@ Description
     flows.
 
     Turbulence model described in:
-    @verbatim
+    \verbatim
         Menter, F., Esch, T.
         "Elements of Industrial Heat Transfer Prediction"
         16th Brazilian Congress of Mechanical Engineering (COBEM),
         Nov. 2001
-    @endverbatim
+    \endverbatim
 
     Note that this implementation is written in terms of alpha diffusion
     coefficients rather than the more traditional sigma (alpha = 1/sigma) so
@@ -53,7 +53,7 @@ Description
     sufficiently small blending u_tau in this manner clearly becomes nonsense.
 
     The default model coefficients correspond to the following:
-    @verbatim
+    \verbatim
         kOmegaSSTCoeffs
         {
             alphaK1     0.85034;
@@ -68,7 +68,7 @@ Description
             a1          0.31;
             c1          10.0;
         }
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     kOmegaSST.C

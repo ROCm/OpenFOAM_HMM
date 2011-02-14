@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ Description
     Implements a timeout mechanism via sigalarm.
 
     Example usage:
-    @code
+    \code
         timer myTimer(5);     // 5 sec
         ..
         if (timedOut(myTimer))
@@ -39,7 +39,7 @@ Description
         {
             // do something possible blocking
         }
-    @endcode
+    \endcode
 
     Constructor set signal handler on sigalarm and alarm(). Destructor
     clears these.

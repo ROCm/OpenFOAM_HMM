@@ -33,15 +33,15 @@ Description
 
     For now it does not do much, since the perfect gas equation is used.
 
-    The dictionary constructor searches for the entry @c liquidComponents,
+    The dictionary constructor searches for the entry \c liquidComponents,
     which is a wordList. The liquid properties of each component can either
-    be contained within a @c liquidProperties sub-dictionary or (for legacy
+    be contained within a \c liquidProperties sub-dictionary or (for legacy
     purposes) can be found directly in the dictionary.
-    The @c liquidProperties sub-dictionary entry should be used when possible
+    The \c liquidProperties sub-dictionary entry should be used when possible
     to avoid conflicts with identically named gas-phase entries.
 
     A simple example of a single-component liquidMixtureProperties:
-    @verbatim
+    \verbatim
         liquidComponents
         (
             H2O
@@ -77,7 +77,7 @@ Description
         {
             H2O H2O defaultCoeffs;
         }
-    @endverbatim
+    \endverbatim
 
 \*---------------------------------------------------------------------------*/
 

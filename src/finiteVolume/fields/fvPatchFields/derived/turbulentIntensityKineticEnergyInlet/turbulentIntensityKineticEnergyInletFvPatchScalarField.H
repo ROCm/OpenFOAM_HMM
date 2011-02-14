@@ -29,14 +29,14 @@ Description
     fraction of the mean velocity
 
     Example of the boundary condition specification:
-    @verbatim
+    \verbatim
         inlet
         {
             type        turbulentIntensityKineticEnergyInlet;
             intensity   0.05;           // 5% turbulence
             value       uniform 1;      // placeholder
         }
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     turbulentIntensityKineticEnergyInletFvPatchScalarField.C

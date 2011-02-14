@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -382,6 +382,7 @@ public:
             ) const;
 
             //- Like consistentRefinement but slower:
+            //
             //  - specify number of cells between consecutive refinement levels
             //    (consistentRefinement equivalent to 1)
             //  - specify max level difference between point-connected cells.

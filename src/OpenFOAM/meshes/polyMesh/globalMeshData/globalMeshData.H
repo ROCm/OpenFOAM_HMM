@@ -194,18 +194,22 @@ class globalMeshData
             mutable autoPtr<mapDistribute> globalEdgeSlavesMapPtr_;
 
 
-            //// Coupled point to boundary faces
-            //
-            //mutable autoPtr<globalIndex> globalBoundaryFaceNumberingPtr_;
-            //mutable autoPtr<labelListList> globalPointBoundaryFacesPtr_;
-            //mutable autoPtr<mapDistribute> globalPointBoundaryFacesMapPtr_;
-            //
-            //// Coupled point to collocated boundary cells
-            //
-            //mutable autoPtr<labelList> boundaryCellsPtr_;
-            //mutable autoPtr<globalIndex> globalBoundaryCellNumberingPtr_;
-            //mutable autoPtr<labelListList> globalPointBoundaryCellsPtr_;
-            //mutable autoPtr<mapDistribute> globalPointBoundaryCellsMapPtr_;
+            // Coupled point to boundary faces
+
+            mutable autoPtr<globalIndex> globalBoundaryFaceNumberingPtr_;
+            mutable autoPtr<labelListList> globalPointBoundaryFacesPtr_;
+            mutable autoPtr<labelListList>
+                globalPointTransformedBoundaryFacesPtr_;
+            mutable autoPtr<mapDistribute> globalPointBoundaryFacesMapPtr_;
+
+            // Coupled point to collocated boundary cells
+
+            mutable autoPtr<labelList> boundaryCellsPtr_;
+            mutable autoPtr<globalIndex> globalBoundaryCellNumberingPtr_;
+            mutable autoPtr<labelListList> globalPointBoundaryCellsPtr_;
+            mutable autoPtr<labelListList>
+                globalPointTransformedBoundaryCellsPtr_;
+            mutable autoPtr<mapDistribute> globalPointBoundaryCellsMapPtr_;
 
 
         // Globally shared point addressing
@@ -286,6 +290,18 @@ class globalMeshData
 
             //- Calculate global edge addressing.
             void calcGlobalEdgeSlaves() const;
+
+
+        // Global boundary face/cell addressing
+
+            //- Calculate coupled point to uncoupled boundary faces. Local only.
+            void calcPointBoundaryFaces(labelListList&) const;
+
+            //- Calculate global point to global boundary face addressing.
+            void calcGlobalPointBoundaryFaces() const;
+
+            //- Calculate global point to global boundary cell addressing.
+            void calcGlobalPointBoundaryCells() const;
 
 
         //- Disallow default bitwise copy construct
@@ -458,7 +474,7 @@ public:
             const globalIndexAndTransform& globalTransforms() const;
 
             //- Helper: synchronise data with transforms
-            template<class Type, class CombineOp>
+            template<class Type, class CombineOp, class TransformOp>
             static void syncData
             (
                 List<Type>& pointData,
@@ -467,7 +483,7 @@ public:
                 const mapDistribute& slavesMap,
                 const globalIndexAndTransform&,
                 const CombineOp& cop,
-                const bool isPosition
+                const TransformOp& top
             );
 
             //- Helper: synchronise data without transforms
@@ -490,13 +506,13 @@ public:
                 const labelListList& globalPointSlaves() const;
                 const labelListList& globalPointTransformedSlaves() const;
                 const mapDistribute& globalPointSlavesMap() const;
-                //- Helper to synchronise mesh point data
-                template<class Type, class CombineOp>
+                //- Helper to synchronise coupled patch point data
+                template<class Type, class CombineOp, class TransformOp>
                 void syncPointData
                 (
                     List<Type>& pointData,
                     const CombineOp& cop,
-                    const bool isPosition
+                    const TransformOp& top
                 ) const;
 
             // Coupled edge to coupled edges.
@@ -506,10 +522,33 @@ public:
                 const labelListList& globalEdgeTransformedSlaves() const;
                 const mapDistribute& globalEdgeSlavesMap() const;
 
+            // Coupled point to boundary faces. These are uncoupled boundary
+            // faces only but include empty patches.
+
+                //- Numbering of boundary faces is face-mesh.nInternalFaces()
+                const globalIndex& globalBoundaryFaceNumbering() const;
+                const labelListList& globalPointBoundaryFaces() const;
+                const labelListList& globalPointTransformedBoundaryFaces()
+                const;
+                const mapDistribute& globalPointBoundaryFacesMap() const;
+
+            // Coupled point to boundary cell
+
+                //- From boundary cell to mesh cell
+                const labelList& boundaryCells() const;
+
+                //- Numbering of boundary cells is according to boundaryCells()
+                const globalIndex& globalBoundaryCellNumbering() const;
+                const labelListList& globalPointBoundaryCells() const;
+                const labelListList& globalPointTransformedBoundaryCells()
+                const;
+                const mapDistribute& globalPointBoundaryCellsMap() const;
+
 
             // Other
 
-                //- Helper for merging mesh point data. Determines
+                //- Helper for merging mesh point data.
+                //  Determines:
                 //  - my unique indices
                 //  - global numbering over all unique indices
                 //  - the global number for all local points (so this will
@@ -520,7 +559,8 @@ public:
                     labelList& uniquePoints
                 ) const;
 
-                //- Helper for merging patch point data. Takes maps from
+                //- Helper for merging patch point data.
+                //  Takes maps from:
                 //  local points to/from mesh. Determines
                 //  - my unique points. These are mesh points, not patch points
                 //    since the master might not be on the patch.

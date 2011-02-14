@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2006-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ Description
     A time-varying form of a flow normal vector boundary condition.
 
     Example of the boundary condition specification:
-    @verbatim
+    \verbatim
     inlet
     {
         type            timeVaryingFlowRateInletVelocity;
@@ -37,7 +37,7 @@ Description
         fileName        "$FOAM_CASE/time-series";
         outOfBounds     repeat;           // (error|warn|clamp|repeat)
     }
-    @endverbatim
+    \endverbatim
 
 Note
     - The value is positive inwards

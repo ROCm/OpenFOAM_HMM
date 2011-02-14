@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,13 +28,13 @@ Description
     Specify an include file when reading dictionaries, expects a
     single string to follow.
 
-    An example of the @c \#include directive:
-    @verbatim
+    An example of the \c \#include directive:
+    \verbatim
         #include "includeFile"
-    @endverbatim
+    \endverbatim
 
     The usual expansion of environment variables and other constructs
-    (eg, the @c ~OpenFOAM/ expansion) is retained.
+    (eg, the \c ~OpenFOAM/ expansion) is retained.
 
 See Also
     fileName, string::expand()

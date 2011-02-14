@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,14 +36,11 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(removeCells, 0);
-
+    defineTypeNameAndDebug(removeCells, 0);
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Remove count of elements of f.
 void Foam::removeCells::uncount
 (
     const labelList& f,
@@ -59,7 +56,6 @@ void Foam::removeCells::uncount
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from mesh
 Foam::removeCells::removeCells
 (
     const polyMesh& mesh,
@@ -73,10 +69,6 @@ Foam::removeCells::removeCells
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-//- Get labels of exposed faces. These are
-//  - internal faces that become boundary faces
-//  - coupled faces that become uncoupled (since on of the sides
-//    gets deleted)
 Foam::labelList Foam::removeCells::getExposedFaces
 (
     const labelList& cellLabels

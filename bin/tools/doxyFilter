@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -52,7 +52,7 @@ then
 #    */applications/solvers/*.H | */applications/utilities/*.H )
 #        awkScript=$WM_PROJECT_DIR/bin/tools/doxyFilter-ignore.awk
 #        ;;
-   esac
+    esac
 
     awk -f $awkScript $1 | \
     sed -f $WM_PROJECT_DIR/bin/tools/doxyFilter.sed \

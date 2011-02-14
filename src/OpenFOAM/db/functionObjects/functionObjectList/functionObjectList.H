@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -108,7 +108,7 @@ public:
 
         //- Construct from Time, a dictionary with "functions" entry
         //  and the execution setting.
-        //  @param[in]  parentDict - the parent dictionary containing
+        //  \param[in]  parentDict - the parent dictionary containing
         //    a "functions" entry, which can either be a list or a dictionary
         //    of functionObject specifications.
         functionObjectList
