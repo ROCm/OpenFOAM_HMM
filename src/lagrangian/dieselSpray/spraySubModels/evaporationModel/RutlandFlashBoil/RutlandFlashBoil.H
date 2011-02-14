@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,11 +32,11 @@ Description
       - superheated vaporization of a boiling droplet
 
     Accurated description in
-    @verbatim
+    \verbatim
     B. Zuo, A.M. Gomes, C.J. Rutland
     "Modeling Superheated Fuel Spray Vaporization"
     Int. Journal of Engine Research, 2000. Vol. 1, pp. 321-326
-    @endverbatim
+    \endverbatim
 \*---------------------------------------------------------------------------*/
 
 #ifndef RutlandFlashBoil_H

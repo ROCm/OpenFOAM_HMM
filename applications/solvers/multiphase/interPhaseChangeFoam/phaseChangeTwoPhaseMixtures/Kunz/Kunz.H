@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,14 +32,14 @@ Description
     implicit term in the pressure equation.
 
     Reference:
-    @verbatim
+    \verbatim
         Kunz, R.F., Boger, D.A., Stinebring, D.R., Chyczewski, Lindau. J.W.,
         Gibeling, H.J., Venkateswaran, S., Govindan, T.R.,
         “A Preconditioned Implicit Method for Two-Phase Flows with Application
          to Cavitation Prediction,”
         Computers and Fluids,
         29(8):849-875, 2000.
-    @verbatim
+    \endverbatim
 
 SourceFiles
     Kunz.C

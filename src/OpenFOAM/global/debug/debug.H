@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,7 +49,7 @@ namespace debug
 {
     //- The central control dictionary.
     //  Located in ~/.OpenFOAM/VERSION or $WM_PROJECT_DIR/etc
-    //  @sa Foam::findEtcFile()
+    //  \sa Foam::findEtcFile()
     dictionary& controlDict();
 
     //- The DebugSwitches sub-dictionary in the central controlDict.

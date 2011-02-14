@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ Description
     Foam::pairPotentials::maitlandSmith
 
     From:
-    @verbatim
+    \verbatim
         @ARTICLE{MA_Maitland_Smith,
         author = {{Maitland}, G.~C. and {Smith}, E.~B.},
         title = {A simplified representation of
@@ -41,10 +41,10 @@ Description
         adsurl = {http://adsabs.harvard.edu/abs/1973CPL....22..443M},
         adsnote = {Provided by the SAO/NASA Astrophysics Data System}
         }
-    @endverbatim
+    \endverbatim
 
     Parameters for other monoatomics from:
-    @verbatim
+    \verbatim
         @BOOK{MD_Maitland_Rigby_Smith_Wakeham,
         AUTHOR =       {Geoffrey C. Maitland and Maurice Rigby and
         E. Brian Smith and William A. Wakeham},
@@ -52,7 +52,7 @@ Description
         PUBLISHER =    {Oxford University Press},
         YEAR =         {1981}
         }
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     maitlandSmith.C

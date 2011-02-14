@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,11 +29,11 @@ Description
 
     The meshReader supports cellTable information.
 
-    The <tt>constant/cellTable</tt> file is an @c IOMap<dictionary> that is
+    The <tt>constant/cellTable</tt> file is an \c IOMap<dictionary> that is
     used to save the information persistently. It contains the cellTable
     information of the following form:
 
-    @verbatim
+    \verbatim
         (
             ID
             {
@@ -46,10 +46,10 @@ Description
             }
         ...
         )
-    @endverbatim
+    \endverbatim
 
-    If the @a Label is missing, a value <tt>cellTable_{ID}</tt> will be
-    inferred. If the @a MaterialType is missing, the value @a fluid will
+    If the \a Label is missing, a value <tt>cellTable_{ID}</tt> will be
+    inferred. If the \a MaterialType is missing, the value @a fluid will
     be inferred.
 
 SourceFiles

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,13 +28,13 @@ Description
     Helper class to describe what form of averaging to apply. A set will be
     applied to each base field in Foam::fieldAverage, of the form:
 
-    @verbatim
+    \verbatim
         {
             mean            on;
             prime2Mean      on;
             base            time; // iteration
         }
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     fieldAverageItem.C

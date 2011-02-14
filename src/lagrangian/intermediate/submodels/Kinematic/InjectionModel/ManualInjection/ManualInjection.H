@@ -26,10 +26,9 @@ Class
 
 Description
     Manual injection
-
     - User specifies
       - Total mass to inject
-      - Parcel positions in file @c positionsFile
+      - Parcel positions in file \c positionsFile
       - Initial parcel velocity
     - Parcel diameters obtained by distribution model model
     - All parcels introduced at SOI

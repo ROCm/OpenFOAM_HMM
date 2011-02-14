@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ Description
     Realizable k-epsilon turbulence model for compressible flows.
 
     Model described in the paper:
-    @verbatim
+    \verbatim
         "A New k-epsilon Eddy Viscosity Model for High Reynolds Number
         Turbulent Flows"
 
@@ -36,10 +36,10 @@ Description
         Jiang Zhu
 
         Computers and Fluids Vol. 24, No. 3, pp. 227-238, 1995
-    @endverbatim
+    \endverbatim
 
     The default model coefficients correspond to the following:
-    @verbatim
+    \verbatim
         realizableKECoeffs
         {
             Cmu         0.09;
@@ -49,7 +49,7 @@ Description
             sigmaEps    1.2;
             Prt         1.0;    // only for compressible
         }
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     realizableKE.C

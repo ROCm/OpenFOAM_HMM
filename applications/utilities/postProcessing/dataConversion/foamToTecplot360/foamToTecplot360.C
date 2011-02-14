@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,40 +31,40 @@ Usage
 
     - foamToTecplot360 [OPTION]
 
-    @param -fields \<names\>\n
+    \param -fields \<names\>\n
     Convert selected fields only. For example,
-    @verbatim
+    \verbatim
          -fields '( p T U )'
-    @endverbatim
+    \endverbatim
     The quoting is required to avoid shell expansions and to pass the
     information as a single argument.
 
-    @param -cellSet \<name\>\n
-    @param -faceSet \<name\>\n
+    \param -cellSet \<name\>\n
+    \param -faceSet \<name\>\n
     Restrict conversion to the cellSet, faceSet.
 
-    @param -nearCellValue \n
+    \param -nearCellValue \n
     Output cell value on patches instead of patch value itself
 
-    @param -noInternal \n
+    \param -noInternal \n
     Do not generate file for mesh, only for patches
 
-    @param -noPointValues \n
+    \param -noPointValues \n
     No pointFields
 
-    @param -noFaceZones \n
+    \param -noFaceZones \n
     No faceZones
 
-    @param -excludePatches \<patchNames\>\n
+    \param -excludePatches \<patchNames\>\n
     Specify patches (wildcards) to exclude. For example,
-    @verbatim
+    \verbatim
          -excludePatches '( inlet_1 inlet_2 "proc.*")'
-    @endverbatim
+    \endverbatim
     The quoting is required to avoid shell expansions and to pass the
     information as a single argument. The double quotes denote a regular
     expression.
 
-    @param -useTimeName \n
+    \param -useTimeName \n
     use the time index in the VTK file name instead of the time index
 
 \*---------------------------------------------------------------------------*/

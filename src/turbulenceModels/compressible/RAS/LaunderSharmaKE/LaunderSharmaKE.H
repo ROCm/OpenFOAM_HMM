@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
     compressible and combusting flows.
 
     The default model coefficients correspond to the following:
-    @verbatim
+    \verbatim
         LaunderSharmaKECoeffs
         {
             Cmu         0.09;
@@ -40,7 +40,7 @@ Description
             alphahk     1.0;    // only for compressible
             alphaEps    0.76923;
         }
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     LaunderSharmaKE.C

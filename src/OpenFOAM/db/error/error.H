@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,10 +35,10 @@ Description
     handling has beed switched on (off by default).
 
 Usage
-    @code
+    \code
         error << "message1" << "message2" << FoamDataType << exit(errNo);
         error << "message1" << "message2" << FoamDataType << abort();
-    @endcode
+    \endcode
 
 SourceFiles
     error.C
@@ -296,7 +296,7 @@ extern IOerror FatalIOError;
 // Convenience macros to add the file name and line number to the function name
 
 /**
- * @def FatalErrorIn(functionName)
+ * \def FatalErrorIn(functionName)
  * Report an error message using Foam::FatalError for functionName in
  * file __FILE__ at line __LINE__
 */
@@ -304,7 +304,7 @@ extern IOerror FatalIOError;
     ::Foam::FatalError((fn), __FILE__, __LINE__)
 
 /**
- * @def FatalIOErrorIn(functionName, ios)
+ * \def FatalIOErrorIn(functionName, ios)
  * Report an error message using Foam::FatalIOError for functionName in
  * file __FILE__ at line __LINE__
  * for a particular IOstream
@@ -313,12 +313,12 @@ extern IOerror FatalIOError;
     ::Foam::FatalIOError((fn), __FILE__, __LINE__, (ios))
 
 /**
- * @def notImplemented(functionName)
+ * \def notImplemented(functionName)
  * Issue a FatalErrorIn for the functionName.
  * This is used for functions that are not currently implemented.
  * The functionName is printed and then abort is called.
  *
- * @note
+ * \note
  * This macro can be particularly useful when methods must be defined to
  * complete the interface of a derived class even if they should never be
  * called for this derived class.

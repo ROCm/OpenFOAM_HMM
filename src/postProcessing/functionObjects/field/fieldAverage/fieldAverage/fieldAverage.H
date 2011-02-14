@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,7 @@ Class
 Description
     Calculates the field averages given list of fieldAverageItems, e.g.
 
-    @verbatim
+    \verbatim
     fieldAverage1
     {
         // Type of functionObject
@@ -61,7 +61,7 @@ Description
                 base            time;
             }
         );
-    @endverbatim
+    \endverbatim
 
     Member function calcAverages() calculates the averages.
 

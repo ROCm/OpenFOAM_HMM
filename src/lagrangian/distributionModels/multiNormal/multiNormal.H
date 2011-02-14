@@ -27,9 +27,9 @@ Class
 Description
     A multiNormal distribution model
 
-    @verbatim
+    \verbatim
         model = sum_i strength_i * exp(-0.5*((x - expectation_i)/variance_i)^2 )
-    @endverbatim
+    \endverbatim
 
 
 SourceFiles

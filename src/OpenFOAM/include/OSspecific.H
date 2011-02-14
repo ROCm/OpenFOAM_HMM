@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -90,7 +90,8 @@ fileName cwd();
 //  else return false
 bool chDir(const fileName& dir);
 
-//- Search for @em name in the following hierarchy:
+//- Search for \em name
+//  in the following hierarchy:
 //  -# personal settings:
 //    - ~/.OpenFOAM/\<VERSION\>/
 //      <em>for version-specific files</em>
@@ -104,7 +105,7 @@ bool chDir(const fileName& dir);
 //  -# shipped settings:
 //    - $WM_PROJECT_DIR/etc/
 //
-//  @return the full path name or fileName() if the name cannot be found
+//  \return the full path name or fileName() if the name cannot be found
 //  Optionally abort if the file cannot be found
 fileName findEtcFile(const fileName&, bool mandatory=false);
 
