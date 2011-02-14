@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,12 +36,12 @@ License
 int Foam::solution::debug(::Foam::debug::debugSwitch("solution", 0));
 
 // List of sub-dictionaries to rewrite
-//! @cond localScope
+//! \cond localScope
 static const Foam::List<Foam::word> subDictNames
 (
     Foam::IStringStream("(preconditioner smoother)")()
 );
-//! @endcond
+//! \endcond
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //

@@ -29,7 +29,7 @@ Description
 
     Eddy viscosity SGS model using a modeled balance equation to simulate the
     behaviour of k, hence,
-    @verbatim
+    \verbatim
         d/dt(rho*k) + div(rho*U*k) - div(muEff*grad(k))
         =
         -rho*D:B - ce*rho*k^3/2/delta
@@ -42,7 +42,7 @@ Description
 
         D = symm(grad(U));
         muSgs = ck*rho*sqrt(k)*delta
-    @endverbatim
+    \endverbatim
 
 
 SourceFiles

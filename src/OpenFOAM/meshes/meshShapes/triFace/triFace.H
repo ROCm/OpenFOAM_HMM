@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -201,12 +201,14 @@ public:
         inline edge faceEdge(const label n) const;
 
         //- Return the edge direction on the face
+        //  Returns:
         //  - +1: forward (counter-clockwise) on the face
         //  - -1: reverse (clockwise) on the face
         //  -  0: edge not found on the face
         inline int edgeDirection(const edge&) const;
 
         //- compare triFaces
+        //  Returns:
         //  -  0: different
         //  - +1: identical
         //  - -1: same face, but different orientation

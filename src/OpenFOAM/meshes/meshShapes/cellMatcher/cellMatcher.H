@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,22 +31,22 @@ Description
     cell-face to mesh-face mapping.
 
     For example,
-    @verbatim
+    \verbatim
         hexMatcher hex(mesh);
         cellShape shape;
         ..
         bool isHex = hex.match(cellI, shape);
-    @endverbatim
-    Now shape is set to the correct Hex cellShape (if @a isHex is true)
+    \endverbatim
+    Now shape is set to the correct Hex cellShape (if \a isHex is true)
 
     Alternatively there is direct access to the vertex and face mapping:
-    @verbatim
+    \verbatim
         const labelList& hexVertLabels = hex.vertLabels();
         const labelList& hexFaceLabels = hex.faceLabels();
-    @endverbatim
+    \endverbatim
     Now
-      - @c hexVertLabels[n] is vertex label of hex vertex n
-      - @c hexFaceLabels[n] is face   label of hex vertex n
+      - \c hexVertLabels[n] is vertex label of hex vertex n
+      - \c hexFaceLabels[n] is face   label of hex vertex n
 
     Process of cellShape recognition consists of following steps:
     - renumber vertices of cell to local vertex numbers

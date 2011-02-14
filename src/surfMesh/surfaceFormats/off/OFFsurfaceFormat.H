@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,7 +34,7 @@ See Also
     http://www.geomview.org/docs/html/OFF.html#OFF
 
 Note
-    When reading, the optional @a colorspec is ignored.
+    When reading, the optional \a colorspec is ignored.
     When writing, it is set to the zone number (integer).
 
 SourceFiles

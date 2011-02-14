@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -236,10 +236,10 @@ public:
 
 //- Read a bracket-delimited list, or handle a single value as list of size 1.
 //  For example,
-//  @code
+//  \code
 //      wList = readList<word>(IStringStream("(patch1 patch2 patch3)")());
 //      wList = readList<word>(IStringStream("patch0")());
-//  @endcode
+//  \endcode
 //  Mostly useful for handling command-line arguments.
 template<class T>
 List<T> readList(Istream&);

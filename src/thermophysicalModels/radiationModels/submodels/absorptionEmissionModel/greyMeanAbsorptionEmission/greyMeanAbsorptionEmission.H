@@ -44,7 +44,7 @@ Description
     The look-up table ("speciesTable") file should be in constant
 
     i.e. dictionary
-    @verbatim
+    \verbatim
         LookUpTableFileName     "speciesTable";
 
         EhrrCoeff       0.0;
@@ -75,7 +75,7 @@ Description
                 -5.8169e15
             );
         }
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     greyMeanAbsorptionEmission.C

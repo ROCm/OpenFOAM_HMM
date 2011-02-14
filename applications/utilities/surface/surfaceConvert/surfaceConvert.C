@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,13 +30,13 @@ Description
 Usage
     - surfaceConvert inputFile outputFile [OPTION]
 
-    @param -clean \n
+    \param -clean \n
     Perform some surface checking/cleanup on the input surface
 
-    @param -scale \<scale\> \n
+    \param -scale \<scale\> \n
     Specify a scaling factor for writing the files
 
-    @param -group \n
+    \param -group \n
     Orders faces by region
 
 Note

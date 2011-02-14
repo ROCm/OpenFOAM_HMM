@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,7 @@ Description
     in one go, minimizing communication, and then picked apart and recombined.
 
     Example:
-    @code
+    \code
         // Assuming myContainer defined which holds all the data I want to
         // transfer (say a pointField and a faceList). myContainer also defines
         // access operators to
@@ -76,7 +76,7 @@ Description
                 gatheredData, sizes, myContainerFaces(), offsetOp<face>()
             )
         );
-    @endcode
+    \endcode
 
 SourceFiles
     ListListOps.C

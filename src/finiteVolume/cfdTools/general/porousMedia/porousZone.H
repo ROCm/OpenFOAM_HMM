@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,15 +40,15 @@ Description
 
     Implemented porosity models:
 
-    powerLaw (@e C0 and @e C1 parameters)
-    @f[
+    powerLaw (\e C0 and \e C1 parameters)
+    \f[
         S = - \rho C_0 |U|^{(C_1 - 1)/2} U
-    @f]
+    \f]
 
-    Darcy-Forchheimer (@e d and @e f parameters)
-    @f[
+    Darcy-Forchheimer (@e d and \e f parameters)
+    \f[
         S = - (\mu \, d + \frac{\rho |U|}{2} \, f) U
-    @f]
+    \f]
 
 
     Since negative Darcy/Forchheimer parameters are invalid, they can be used
@@ -58,7 +58,7 @@ Description
     method, but accounts for the effective volume of the cells.
 
     An example dictionary entry:
-    @verbatim
+    \verbatim
     cat1
     {
         note            "some catalyst";
@@ -74,7 +74,7 @@ Description
             f   f [0 -1 0 0 0]  (-1000 -1000 15.83);
         }
     }
-    @endverbatim
+    \endverbatim
 
 See Also
     porousZones and coordinateSystems

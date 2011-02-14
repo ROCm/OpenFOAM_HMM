@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -307,6 +307,7 @@ public:
         inline edge faceEdge(const label n) const;
 
         //- Return the edge direction on the face
+        //  Returns:
         //  -  0: edge not found on the face
         //  - +1: forward (counter-clockwise) on the face
         //  - -1: reverse (clockwise) on the face

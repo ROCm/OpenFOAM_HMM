@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,9 +46,9 @@ namespace Foam
 // Largest message sent so far. This tracks the size of the receive
 // buffer on the receiving end. Done so we only send out resize messages
 // if necessary
-//! @cond fileScope
+//! \cond fileScope
 labelList maxSendSize;
-//! @endcond
+//! \endcond
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ Description
     Lagrangian Two Equations Eddy Viscosity Model for incompressible
     flows
 
-    @verbatim
+    \verbatim
         B = 2/3*k*I - 2*nuSgs*dev(D)
         Beff = 2/3*k*I - 2*nuEff*dev(D)
 
@@ -54,7 +54,7 @@ Description
         M = 2.0 delta^2 (F(|D|.D) - 4 F(|D|).F(D))
         T = 1.5*delta*(flm.fmm)^(-1.0/8.0)
 
-    @endverbatim
+    \endverbatim
 
     Reference:
     1. Charles Meneveau, Thomas Lund and William Cabot

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,7 +66,7 @@ Description
       -# bb.max incremented by 1% -> total 80 leaves
          (every point in exactly 1 leaf)
 
-    @par Ideas for parallel implementation:
+    \par Ideas for parallel implementation:
 
     The data inserted into the octree (the
     'octreeData') has to be local to the processor. The data to be looked

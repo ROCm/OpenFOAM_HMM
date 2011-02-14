@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ Description
     velocity inlet profile given the friction velocity value,
     flow direction n and direction of the parabolic coordinate z.
 
-    @verbatim
+    \verbatim
         U = (Ustar/K) ln((z - zGround + z0)/z0)
 
     where:
@@ -50,7 +50,7 @@ Description
         Uref is the reference velocity at Zref
         Zref is the reference height.
 
-    @endverbatim
+    \endverbatim
 
     Reference:
     D.M. Hargreaves and N.G. Wright

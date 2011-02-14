@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -94,7 +94,8 @@ public:
 
         // Topology changes
 
-            //- Get labels of exposed faces. These are
+            //- Get labels of exposed faces.
+            //  These are
             //  - internal faces that become boundary faces
             //  - coupled faces that become uncoupled (since one of the sides
             //    gets deleted)
@@ -114,7 +115,6 @@ public:
             //- Force recalculation of locally stored data on topological change
             void updateMesh(const mapPolyMesh&)
             {}
-
 };
 
 

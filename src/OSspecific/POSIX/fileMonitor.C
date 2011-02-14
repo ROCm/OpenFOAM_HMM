@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -109,8 +109,7 @@ namespace Foam
 
 
 
-    //! @cond internalClass
-    //- Internal tracking via stat(3p) or inotify(7)
+    //-  Internal tracking via stat(3p) or inotify(7)
     class fileMonitorWatcher
     {
     public:
@@ -140,7 +139,7 @@ namespace Foam
         {
             if (useInotify_)
             {
-#ifdef FOAM_USE_INOTIFY
+                #ifdef FOAM_USE_INOTIFY
                 inotifyFd_ = inotify_init();
                 dirWatches_.setCapacity(sz);
                 dirFiles_.setCapacity(sz);
@@ -167,13 +166,13 @@ namespace Foam
                             << endl;
                     }
                 }
-#else
+                #else
                     FatalErrorIn("fileMonitorWatcher(const bool, const label)")
                         << "You selected inotify but this file was compiled"
                         << " without FOAM_USE_INOTIFY"
                         << "Please select another fileModification test method"
                         << exit(FatalError);
-#endif
+                #endif
             }
             else
             {
@@ -184,7 +183,7 @@ namespace Foam
         //- remove all watches
         inline ~fileMonitorWatcher()
         {
-#ifdef FOAM_USE_INOTIFY
+            #ifdef FOAM_USE_INOTIFY
             if (useInotify_ && inotifyFd_ >= 0)
             {
                 forAll(dirWatches_, i)
@@ -200,7 +199,7 @@ namespace Foam
                     }
                 }
             }
-#endif
+            #endif
         }
 
         inline bool addWatch(const label watchFd, const fileName& fName)
@@ -212,7 +211,7 @@ namespace Foam
                     return false;
                 }
 
-#ifdef FOAM_USE_INOTIFY
+                #ifdef FOAM_USE_INOTIFY
                 // Add/retrieve watch on directory containing file.
                 // Note that fName might be non-existing in special situations
                 // (master-only reading for IODictionaries)
@@ -250,7 +249,7 @@ namespace Foam
 
                 dirWatches_(watchFd) = dirWatchID;
                 dirFiles_(watchFd) = fName.name();
-#endif
+                #endif
             }
             else
             {
@@ -288,7 +287,6 @@ namespace Foam
         }
 
     };
-    //! @endcond
 }
 
 
@@ -298,7 +296,7 @@ void Foam::fileMonitor::checkFiles() const
 {
     if (useInotify_)
     {
-#ifdef FOAM_USE_INOTIFY
+        #ifdef FOAM_USE_INOTIFY
         // Large buffer for lots of events
         char buffer[EVENT_BUF_LEN];
 
@@ -392,7 +390,7 @@ void Foam::fileMonitor::checkFiles() const
                 return;
             }
         }
-#endif
+        #endif
     }
     else
     {

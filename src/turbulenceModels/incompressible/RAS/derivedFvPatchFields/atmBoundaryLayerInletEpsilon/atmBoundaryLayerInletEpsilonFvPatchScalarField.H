@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ Description
     layer (ABL). This boundaty is to be used in conjunction with
     ABLInletVelocity.
 
-    @verbatim
+    \verbatim
         epsilon = Ustar^3 / (K(z - zGround + z0))
 
     where:
@@ -41,7 +41,7 @@ Description
         z0 is the surface roughness lenght
         zGround minium vlaue in z direction
 
-    @endverbatim
+    \endverbatim
 
     Reference:
     D.M. Hargreaves and N.G. Wright

@@ -41,9 +41,9 @@ Description
     Works by constructing equivalence lists for all the points on processor
     patches. These list are in globalIndexAndTransform numbering
     E.g.
-    @verbatim
+    \verbatim
           ((7 93)(4 731)(3 114))
-    @endverbatim
+    \endverbatim
 
     means point 93 on proc7 is connected to point 731 on proc4 and 114 on proc3.
     It then assigns the lowest numbered processor to be the local 'master' and

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,32 +33,32 @@ Description
     path, a reference to a objectRegistry, and parameters determining its
     storage status.
 
-    @par Read options
+    \par Read options
 
     Define what is done on object construction and explicit reads:
-    @param MUST_READ
+    \param MUST_READ
         Object must be read from Istream on construction. \n
         Error if Istream does not exist or can't be read.
         Does not check timestamp or re-read.
-    @param MUST_READ_IF_MODIFIED
+    \param MUST_READ_IF_MODIFIED
         Object must be read from Istream on construction. \n
         Error if Istream does not exist or can't be read. If object is
         registered its timestamp will be checked every timestep and possibly
         re-read.
-    @param READ_IF_PRESENT
+    \param READ_IF_PRESENT
         Read object from Istream if Istream exists, otherwise don't. \n
         Error only if Istream exists but can't be read.
         Does not check timestamp or re-read.
-    @param NO_READ
+    \param NO_READ
           Don't read
 
-    @par Write options
+    \par Write options
 
     Define what is done on object destruction and explicit writes:
-    @param AUTO_WRITE
+    \param AUTO_WRITE
         Object is written automatically when requested to by the
         objectRegistry.
-    @param NO_WRITE
+    \param NO_WRITE
         No automatic write on destruction but can be written explicitly
 
 SourceFiles

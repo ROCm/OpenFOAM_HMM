@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,9 +30,9 @@ Description
 
 Note
     Since the timeIndex is used directly from Foam::Time, it is unaffected
-    by user-time conversions. For example, Foam::engineTime might cause @a
+    by user-time conversions. For example, Foam::engineTime might cause \a
     writeInterval to be degrees crank angle, but the functionObject
-    execution @a interval would still be in timestep.
+    execution \a interval would still be in timestep.
 
 SourceFiles
     OutputFilterFunctionObject.C

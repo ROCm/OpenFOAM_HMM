@@ -33,20 +33,20 @@ Description
 
 Note
     The centre of rotation for moment calculations can either be specified
-    by an @c CofR entry, or be taken from origin of the local coordinateSystem.
+    by an \c CofR entry, or be taken from origin of the local coordinateSystem.
     For example,
-    @verbatim
+    \verbatim
         CofR        (0 0 0);
-    @endverbatim
+    \endverbatim
     or
-    @verbatim
+    \verbatim
         coordinateSystem
         {
             origin  (0 0 0);
             e3      (0 0 1);
             e1      (1 0 0);
         }
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     forces.C

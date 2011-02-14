@@ -70,7 +70,12 @@ int main(int argc, char *argv[])
         );
 
         // Exchange data. Apply positional transforms.
-        globalPointSlavesMap.distribute(transforms, coords, true);
+        globalPointSlavesMap.distribute
+        (
+            transforms,
+            coords,
+            mapDistribute::transformPosition()
+        );
 
         // Print
         forAll(slaves, pointI)
@@ -127,7 +132,12 @@ int main(int argc, char *argv[])
         }
 
         // Exchange data Apply positional transforms.
-        globalEdgeSlavesMap.distribute(transforms, ec, true);
+        globalEdgeSlavesMap.distribute
+        (
+            transforms,
+            ec,
+            mapDistribute::transformPosition()
+        );
 
         // Print
         forAll(slaves, edgeI)
@@ -163,82 +173,131 @@ int main(int argc, char *argv[])
     }
 
 
-    //// Test: (collocated) point to faces addressing
-    //{
-    //    const labelListList& globalPointBoundaryFaces =
-    //        globalData.globalPointBoundaryFaces();
-    //    const mapDistribute& globalPointBoundaryFacesMap =
-    //        globalData.globalPointBoundaryFacesMap();
-    //
-    //    label nBnd = mesh.nFaces()-mesh.nInternalFaces();
-    //
-    //    pointField fc(globalPointBoundaryFacesMap.constructSize());
-    //    SubList<point>(fc, nBnd).assign
-    //    (
-    //        primitivePatch
-    //        (
-    //            SubList<face>
-    //            (
-    //                mesh.faces(),
-    //                nBnd,
-    //                mesh.nInternalFaces()
-    //            ),
-    //            mesh.points()
-    //        ).faceCentres()
-    //    );
-    //
-    //    // Exchange data
-    //    globalPointBoundaryFacesMap.distribute(fc);
-    //
-    //    // Print
-    //    forAll(globalPointBoundaryFaces, pointI)
-    //    {
-    //        const labelList& bFaces = globalPointBoundaryFaces[pointI];
-    //
-    //        Pout<< "Point:" << pointI
-    //            << " at:" << coupledPatch.localPoints()[pointI]
-    //            << " connected to faces:" << endl;
-    //
-    //        forAll(bFaces, i)
-    //        {
-    //            Pout<< "    " << fc[bFaces[i]] << endl;
-    //        }
-    //    }
-    //}
-    //
-    //
-    //// Test:(collocated) point to cells addressing
-    //{
-    //    const labelList& boundaryCells = globalData.boundaryCells();
-    //    const labelListList& globalPointBoundaryCells =
-    //        globalData.globalPointBoundaryCells();
-    //    const mapDistribute& globalPointBoundaryCellsMap =
-    //        globalData.globalPointBoundaryCellsMap();
-    //
-    //    pointField cc(globalPointBoundaryCellsMap.constructSize());
-    //    forAll(boundaryCells, i)
-    //    {
-    //        cc[i] = mesh.cellCentres()[boundaryCells[i]];
-    //    }
-    //
-    //    // Exchange data
-    //    globalPointBoundaryCellsMap.distribute(cc);
-    //
-    //    // Print
-    //    forAll(globalPointBoundaryCells, pointI)
-    //    {
-    //        const labelList& bCells = globalPointBoundaryCells[pointI];
-    //
-    //        Pout<< "Point:" << pointI
-    //            << " at:" << coupledPatch.localPoints()[pointI]
-    //            << " connected to cells:" << endl;
-    //
-    //        forAll(bCells, i)
-    //        {
-    //            Pout<< "    " << cc[bCells[i]] << endl;
-    //        }
-    //    }
-    //}
+    // Test: point to faces addressing
+    {
+        const mapDistribute& globalPointBoundaryFacesMap =
+            globalData.globalPointBoundaryFacesMap();
+        const labelListList& slaves =
+            globalData.globalPointBoundaryFaces();
+        const labelListList& transformedSlaves =
+            globalData.globalPointTransformedBoundaryFaces();
+
+        label nBnd = mesh.nFaces()-mesh.nInternalFaces();
+
+        pointField fc(globalPointBoundaryFacesMap.constructSize());
+        SubList<point>(fc, nBnd).assign
+        (
+            primitivePatch
+            (
+                SubList<face>
+                (
+                    mesh.faces(),
+                    nBnd,
+                    mesh.nInternalFaces()
+                ),
+                mesh.points()
+            ).faceCentres()
+        );
+
+        // Exchange data
+        globalPointBoundaryFacesMap.distribute
+        (
+            transforms,
+            fc,
+            mapDistribute::transformPosition()
+        );
+
+        // Print
+        forAll(slaves, pointI)
+        {
+            const labelList& slaveFaces = slaves[pointI];
+
+            if (slaveFaces.size() > 0)
+            {
+                Pout<< "Master point:" << pointI
+                    << " at:" << coupledPatch.localPoints()[pointI]
+                    << " connected to " << slaveFaces.size()
+                    << " untransformed faces:" << endl;
+
+                forAll(slaveFaces, i)
+                {
+                    Pout<< "    " << fc[slaveFaces[i]] << endl;
+                }
+            }
+
+            const labelList& transformedSlaveFaces = transformedSlaves[pointI];
+
+            if (transformedSlaveFaces.size() > 0)
+            {
+                Pout<< "Master point:" << pointI
+                    << " connected to " << transformedSlaveFaces.size()
+                    << " transformed faces:" << endl;
+
+                forAll(transformedSlaveFaces, i)
+                {
+                    Pout<< "    " << fc[transformedSlaveFaces[i]] << endl;
+                }
+            }
+        }
+    }
+
+
+    // Test: point to cells addressing
+    {
+        const labelList& boundaryCells = globalData.boundaryCells();
+        const mapDistribute& globalPointBoundaryCellsMap =
+            globalData.globalPointBoundaryCellsMap();
+        const labelListList& slaves = globalData.globalPointBoundaryCells();
+        const labelListList& transformedSlaves =
+            globalData.globalPointTransformedBoundaryCells();
+
+        pointField cc(globalPointBoundaryCellsMap.constructSize());
+        forAll(boundaryCells, i)
+        {
+            cc[i] = mesh.cellCentres()[boundaryCells[i]];
+        }
+
+        // Exchange data
+        globalPointBoundaryCellsMap.distribute
+        (
+            transforms,
+            cc,
+            mapDistribute::transformPosition()
+        );
+
+        // Print
+        forAll(slaves, pointI)
+        {
+            const labelList& pointCells = slaves[pointI];
+
+            if (pointCells.size() > 0)
+            {
+                Pout<< "Master point:" << pointI
+                    << " at:" << coupledPatch.localPoints()[pointI]
+                    << " connected to " << pointCells.size()
+                    << " untransformed boundaryCells:" << endl;
+
+                forAll(pointCells, i)
+                {
+                    Pout<< "    " << cc[pointCells[i]] << endl;
+                }
+            }
+
+            const labelList& transformPointCells = transformedSlaves[pointI];
+
+            if (transformPointCells.size() > 0)
+            {
+                Pout<< "Master point:" << pointI
+                    << " connected to " << transformPointCells.size()
+                    << " transformed boundaryCells:" << endl;
+
+                forAll(transformPointCells, i)
+                {
+                    Pout<< "    " << cc[transformPointCells[i]] << endl;
+                }
+            }
+        }
+    }
 
 
     Info<< "End\n" << endl;

@@ -31,7 +31,7 @@ Usage
 
     - foamUpgradeCyclics [OPTION]
 
-    @param -test \n
+    \param -test \n
     Suppress writing the updated files with split cyclics
 
 \*---------------------------------------------------------------------------*/
@@ -195,7 +195,7 @@ void rewriteBoundary
                         dictionary::null,
                         patchDict
                     )
-                );      
+                );
                 oldToNew[addedPatchI] = newPatchI++;
                 dictionary& nbrPatchDict = patches[addedPatchI].dict();
                 nbrPatchDict.set("neighbourPatch", thisName);

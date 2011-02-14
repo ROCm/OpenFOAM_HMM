@@ -46,7 +46,7 @@ Description
     The look Up table file should be in the constant directory.
 
     band dictionary:
-    @verbatim
+    \verbatim
         band0
         {
             bandLimits (1.0e-6 2.63e-6);
@@ -91,7 +91,7 @@ Description
                 }
             }
         }
-    @endverbatim
+    \endverbatim
 
 
 SourceFiles

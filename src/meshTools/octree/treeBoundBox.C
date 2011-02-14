@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,7 +44,7 @@ const Foam::treeBoundBox Foam::treeBoundBox::invertedBox
 );
 
 
-//! @cond - skip documentation : local scope only
+//! \cond - skip documentation : local scope only
 const Foam::label facesArray[6][4] =
 {
     {0, 4, 6, 2}, // left
@@ -54,7 +54,7 @@ const Foam::label facesArray[6][4] =
     {0, 2, 3, 1}, // back
     {4, 5, 7, 6}  // front
 };
-//! @endcond
+//! \endcond
 
 
 const Foam::faceList Foam::treeBoundBox::faces
@@ -63,7 +63,7 @@ const Foam::faceList Foam::treeBoundBox::faces
 );
 
 
-//! @cond - skip documentation : local scope only
+//! \cond - skip documentation : local scope only
 const Foam::label edgesArray[12][2] =
 {
     {0, 1}, // 0
@@ -79,7 +79,7 @@ const Foam::label edgesArray[12][2] =
     {3, 7}, // 10
     {2, 6}
 };
-//! @endcond
+//! \endcond
 
 
 const Foam::edgeList Foam::treeBoundBox::edges
