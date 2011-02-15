@@ -26,6 +26,7 @@ License
 #include "basicReactingMultiphaseParcel.H"
 
 // Kinematic
+#include "makeThermoParcelForces.H" // thermo variant
 #include "makeParcelDispersionModels.H"
 #include "makeReactingMultiphaseParcelInjectionModels.H" // MP variant
 #include "makeParcelCollisionModels.H"
@@ -49,6 +50,7 @@ License
 namespace Foam
 {
     // Kinematic sub-models
+    makeThermoParcelForces(basicReactingMultiphaseParcel);
     makeParcelDispersionModels(basicReactingMultiphaseParcel);
     makeReactingMultiphaseParcelInjectionModels(basicReactingMultiphaseParcel);
     makeParcelCollisionModels(basicReactingMultiphaseParcel);

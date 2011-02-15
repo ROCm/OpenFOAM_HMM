@@ -23,7 +23,6 @@ KINEMATICPARCEL=$(DERIVEDPARCELS)/basicKinematicParcel
 $(KINEMATICPARCEL)/basicKinematicParcel.C
 $(KINEMATICPARCEL)/defineBasicKinematicParcel.C
 $(KINEMATICPARCEL)/makeBasicKinematicParcelSubmodels.C
-$(KINEMATICPARCEL)/makeBasicKinematicParcelForces.C
 
 
 /* thermo parcel sub-models */
@@ -31,7 +30,6 @@ THERMOPARCEL=$(DERIVEDPARCELS)/basicThermoParcel
 $(THERMOPARCEL)/basicThermoParcel.C
 $(THERMOPARCEL)/defineBasicThermoParcel.C
 $(THERMOPARCEL)/makeBasicThermoParcelSubmodels.C
-$(THERMOPARCEL)/makeBasicThermoParcelForces.C
 
 
 /* reacting parcel sub-models */
@@ -39,7 +37,6 @@ REACTINGPARCEL=$(DERIVEDPARCELS)/basicReactingParcel
 $(REACTINGPARCEL)/basicReactingParcel.C
 $(REACTINGPARCEL)/defineBasicReactingParcel.C
 $(REACTINGPARCEL)/makeBasicReactingParcelSubmodels.C
-$(REACTINGPARCEL)/makeBasicReactingParcelForces.C
 
 
 /* reacting multiphase parcel sub-models */
@@ -47,7 +44,6 @@ REACTINGMPPARCEL=$(DERIVEDPARCELS)/basicReactingMultiphaseParcel
 $(REACTINGMPPARCEL)/basicReactingMultiphaseParcel.C
 $(REACTINGMPPARCEL)/defineBasicReactingMultiphaseParcel.C
 $(REACTINGMPPARCEL)/makeBasicReactingMultiphaseParcelSubmodels.C
-$(REACTINGMPPARCEL)/makeBasicReactingMultiphaseParcelForces.C
 
 
 /* bolt-on models */
