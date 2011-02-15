@@ -81,7 +81,7 @@ do
         if [ "$restrictOpt" = true ]
         then
             echo "touching all .o files under Make/$WM_OPTIONS* : $i"
-            find -depth -name Make -type d -print | \
+            find $i -depth -name Make -type d -print | \
                 xargs -i find '{}' -depth -name "$WM_OPTIONS*" -type d -print | \
                 xargs -i find '{}' -name '*.o' -type f -print | \
                 xargs -t touch
