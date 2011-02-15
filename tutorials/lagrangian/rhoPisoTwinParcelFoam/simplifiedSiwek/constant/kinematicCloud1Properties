@@ -56,17 +56,17 @@ constantProperties
     poissonsRatio   0.35;
 }
 
-particleForces
-{
-     activeForces
-     (
-         sphereDrag
-         gravity
-     );
-}
-
 subModels
 {
+    particleForces
+    {
+        activeForces
+        (
+            sphereDrag
+            gravity
+        );
+    }
+
     InjectionModel  ManualInjection;
 
     DispersionModel StochasticDispersionRAS;

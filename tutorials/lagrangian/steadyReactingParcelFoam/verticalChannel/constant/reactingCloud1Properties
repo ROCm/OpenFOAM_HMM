@@ -98,18 +98,17 @@ constantProperties
 }
 
 
-particleForces
-{
-     activeForces
-     (
-         sphereDrag
-         gravity
-     );
-}
-
-
 subModels
 {
+    particleForces
+    {
+        activeForces
+        (
+            sphereDrag
+            gravity
+        );
+    }
+
     InjectionModel  PatchInjection;
 
     DispersionModel StochasticDispersionRAS;

@@ -84,17 +84,17 @@ constantProperties
     constantVolume  false;
 }
 
-particleForces
-{
-     activeForces
-     (
-         sphereDrag
-         gravity
-     );
-}
-
 subModels
 {
+    particleForces
+    {
+        activeForces
+        (
+            sphereDrag
+            gravity
+        );
+    }
+
     InjectionModel  ManualInjection;
 
     DispersionModel none;
