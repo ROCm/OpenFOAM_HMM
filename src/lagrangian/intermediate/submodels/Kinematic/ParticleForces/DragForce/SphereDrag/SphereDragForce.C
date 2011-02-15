@@ -30,21 +30,14 @@ License
 template<class CloudType>
 Foam::scalar Foam::SphereDragForce<CloudType>::Cd(const scalar Re) const
 {
-    scalar Cd;
-    if (Re < SMALL)
+    if (Re > 1000.0)
     {
-        Cd = GREAT;
-    }
-    else if (Re > 1000.0)
-    {
-        Cd =  0.424;
+        return 0.424;
     }
     else
     {
-        Cd = 24.0/Re*(1.0 + 1.0/6.0*pow(Re, 2.0/3.0));
+        return 24.0/Re*(1.0 + 1.0/6.0*pow(Re, 2.0/3.0));
     }
-
-    return Cd;
 }
 
 
@@ -59,7 +52,7 @@ Foam::SphereDragForce<CloudType>::SphereDragForce
     const word& forceType
 )
 :
-    ParticleForce<CloudType>(owner, mesh, dict, forceType)
+    ParticleForce<CloudType>(owner, mesh, dict)
 {}
 
 
@@ -87,14 +80,15 @@ Foam::forceSuSp Foam::SphereDragForce<CloudType>::calcNonCoupled
 (
     const typename CloudType::parcelType& p,
     const scalar dt,
+    const scalar mass,
     const scalar Re,
-    const scalar rhoc,
     const scalar muc
 ) const
 {
     forceSuSp value(vector::zero, 0.0);
 
-    value.Sp()  = Cd(Re)*Re/p.d()*muc/8.0 + ROOTVSMALL;
+    const scalar ReCorr = max(Re, 1e-6);
+    value.Sp() = mass*0.75*muc*Cd(ReCorr)*ReCorr/(p.rho()*sqr(p.d()));
 
     return value;
 }

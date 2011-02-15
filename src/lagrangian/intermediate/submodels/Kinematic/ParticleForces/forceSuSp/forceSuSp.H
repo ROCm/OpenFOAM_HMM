@@ -25,7 +25,12 @@ Class
     Foam::forceSuSp
 
 Description
-    Helper container for force Su and Sp terms
+    Helper container for force Su and Sp terms.
+
+        F = Sp(U - Up) + Su
+
+    Explicit contribution, Su specified as a force
+    Implicit coefficient, Sp specified as force/velocity
 
 SourceFiles
     forceSuSpI.H
@@ -58,20 +63,12 @@ class forceSuSp
 
 public:
 
-    //- Component labeling enumeration
-    enum components
-    {
-        SU = 0,
-        SP = 1
-    };
-
-
     // Constructors
 
         //- Construct null
         inline forceSuSp();
 
-        //- Construct given VectorSpace
+        //- Construct given Tuple2
         inline forceSuSp(const Tuple2<vector, scalar>& susp);
 
         //- Construct given two components
@@ -85,10 +82,10 @@ public:
 
         // Access
 
-            //- Return const access to the explicit contribution
+            //- Return const access to the explicit contribution [kg.m/s2]
             inline const vector& Su() const;
 
-            //- Return const access to the implicit contribution
+            //- Return const access to the implicit coefficient [kg/s]
             inline scalar Sp() const;
 
 
@@ -97,7 +94,7 @@ public:
             //- Return reference to the explicit contribution
             inline vector& Su();
 
-            //- Return reference to the explicit contribution
+            //- Return reference to the implicit coefficient
             inline scalar& Sp();
 
 

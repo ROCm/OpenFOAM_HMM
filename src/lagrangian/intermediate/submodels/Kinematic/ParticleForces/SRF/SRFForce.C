@@ -36,7 +36,7 @@ Foam::SRFForce<CloudType>::SRFForce
     const word& forceType
 )
 :
-    ParticleForce<CloudType>(owner, mesh, dict, forceType),
+    ParticleForce<CloudType>(owner, mesh, dict),
     srfPtr_(NULL)
 {}
 
@@ -82,8 +82,8 @@ Foam::forceSuSp Foam::SRFForce<CloudType>::calcNonCoupled
 (
     const typename CloudType::parcelType& p,
     const scalar dt,
+    const scalar mass,
     const scalar Re,
-    const scalar rhoc,
     const scalar muc
 ) const
 {
@@ -97,7 +97,7 @@ Foam::forceSuSp Foam::SRFForce<CloudType>::calcNonCoupled
     const vector r = p.position() - axis*(axis & p.position());
 
     // Coriolis and centrifugal acceleration terms
-    value.Su() = 2.0*(p.U() ^ omega) + (omega ^ (r ^ omega));
+    value.Su() = mass*2.0*(p.U() ^ omega) + (omega ^ (r ^ omega));
 
     return value;
 }

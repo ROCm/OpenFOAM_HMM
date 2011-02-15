@@ -36,7 +36,7 @@ Foam::GravityForce<CloudType>::GravityForce
     const word& forceType
 )
 :
-    ParticleForce<CloudType>(owner, mesh, dict, forceType),
+    ParticleForce<CloudType>(owner, mesh, dict),
     g_(owner.g().value())
 {}
 
@@ -63,14 +63,14 @@ Foam::forceSuSp Foam::GravityForce<CloudType>::calcNonCoupled
 (
     const typename CloudType::parcelType& p,
     const scalar dt,
+    const scalar mass,
     const scalar Re,
-    const scalar rhoc,
     const scalar muc
 ) const
 {
     forceSuSp value(vector::zero, 0.0);
 
-    value.Su() = g_*(1.0 - rhoc/p.rho());
+    value.Su() = mass*g_*(1.0 - p.rhoc()/p.rho());
 
     return value;
 }

@@ -161,8 +161,8 @@ Foam::forceSuSp Foam::BrownianMotionForce<CloudType>::calcCoupled
 (
     const typename CloudType::parcelType& p,
     const scalar dt,
+    const scalar mass,
     const scalar Re,
-    const scalar rhoc,
     const scalar muc
 ) const
 {
@@ -180,18 +180,17 @@ Foam::forceSuSp Foam::BrownianMotionForce<CloudType>::calcCoupled
     scalar f = 0.0;
     if (turbulence_)
     {
-        const scalar mp = p.mass();
         const label cellI = p.cell();
         const volScalarField& k = *kPtr_;
         const scalar kc = k[cellI];
         const scalar Dp = sigma*Tc*cc/(3*mathematical::pi*muc*dp);
-        f = eta/mp*sqrt(2.0*sqr(kc)*sqr(Tc)/(Dp*dt));
+        f = eta/mass*sqrt(2.0*sqr(kc)*sqr(Tc)/(Dp*dt));
     }
     else
     {
-        const scalar rhop = p.rho();
+        const scalar rhoRatio = p.rho()/p.rhoc();
         const scalar s0 =
-            216*muc*sigma*Tc/(sqr(mathematical::pi)*pow5(dp)*(rhop/rhoc)*cc);
+            216*muc*sigma*Tc/(sqr(mathematical::pi)*pow5(dp)*(rhoRatio)*cc);
         f = eta*sqrt(mathematical::pi*s0/dt);
     }
 
@@ -200,7 +199,7 @@ Foam::forceSuSp Foam::BrownianMotionForce<CloudType>::calcCoupled
     {
         const scalar x = rndGen_.sample01<scalar>();
         const scalar eta = sqrt2*erfInv(2*x - 1.0);
-        value.Su()[i] = f*eta;
+        value.Su()[i] = mass*f*eta;
     }
 
     return value;

@@ -95,6 +95,14 @@ public:
 
     // Constructors
 
+        //- Construct null
+        ParticleForce
+        (
+            CloudType& owner,
+            const fvMesh& mesh,
+            const dictionary& dict
+        );
+
         //- Construct from mesh
         ParticleForce
         (
@@ -161,8 +169,8 @@ public:
             (
                 const typename CloudType::parcelType& p,
                 const scalar dt,
+                const scalar mass,
                 const scalar Re,
-                const scalar rhoc,
                 const scalar muc
             ) const;
 
@@ -171,8 +179,8 @@ public:
             (
                 const typename CloudType::parcelType& p,
                 const scalar dt,
+                const scalar mass,
                 const scalar Re,
-                const scalar rhoc,
                 const scalar muc
             ) const;
 };

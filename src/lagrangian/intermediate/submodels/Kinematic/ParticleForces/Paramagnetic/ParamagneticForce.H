@@ -122,8 +122,8 @@ public:
             (
                 const typename CloudType::parcelType& p,
                 const scalar dt,
+                const scalar mass,
                 const scalar Re,
-                const scalar rhoc,
                 const scalar muc
             ) const;
 };

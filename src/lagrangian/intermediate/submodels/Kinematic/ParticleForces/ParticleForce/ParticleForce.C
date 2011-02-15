@@ -32,6 +32,21 @@ Foam::ParticleForce<CloudType>::ParticleForce
 (
     CloudType& owner,
     const fvMesh& mesh,
+    const dictionary& dict
+)
+:
+    owner_(owner),
+    mesh_(mesh),
+    dict_(dict),
+    coeffs_(dictionary::null)
+{}
+
+
+template<class CloudType>
+Foam::ParticleForce<CloudType>::ParticleForce
+(
+    CloudType& owner,
+    const fvMesh& mesh,
     const dictionary& dict,
     const word& forceType
 )
@@ -39,14 +54,7 @@ Foam::ParticleForce<CloudType>::ParticleForce
     owner_(owner),
     mesh_(mesh),
     dict_(dict),
-    coeffs_
-    (
-        dict.subOrEmptyDict
-        (
-            forceType + "Coeffs",
-            owner.solution().active()
-        )
-    )
+    coeffs_(dict.subOrEmptyDict(forceType + "Coeffs"))
 {}
 
 
@@ -79,8 +87,8 @@ Foam::forceSuSp Foam::ParticleForce<CloudType>::calcCoupled
 (
     const typename CloudType::parcelType&,
     const scalar dt,
+    const scalar mass,
     const scalar Re,
-    const scalar rhoc,
     const scalar muc
 ) const
 {
@@ -97,8 +105,8 @@ Foam::forceSuSp Foam::ParticleForce<CloudType>::calcNonCoupled
 (
     const typename CloudType::parcelType&,
     const scalar dt,
+    const scalar mass,
     const scalar Re,
-    const scalar rhoc,
     const scalar muc
 ) const
 {

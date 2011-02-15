@@ -180,8 +180,8 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
 
     // Momentum source due to particle forces
     const ParcelType& p = static_cast<const ParcelType&>(*this);
-    const forceSuSp Fcp = forces.calcCoupled(p, dt, Re, rho, mu);
-    const forceSuSp Fncp = forces.calcNonCoupled(p, dt, Re, rho, mu);
+    const forceSuSp Fcp = forces.calcCoupled(p, dt, mass, Re, mu);
+    const forceSuSp Fncp = forces.calcNonCoupled(p, dt, mass, Re, mu);
     const forceSuSp Feff = Fcp + Fncp;
 
 
@@ -189,9 +189,8 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     //~~~~~~~~~~~~~~~~~~~~~~
 
     // Update velocity - treat as 3-D
-    const scalar As = this->areaS(d);
-    const vector ap = Uc_ + (mass*Feff.Su() + Su)/(As*Feff.Sp());
-    const scalar bp = 6.0*Feff.Sp()/(rho*d);
+    const vector ap = Uc_ + (Feff.Su() + Su)/(Feff.Sp() + ROOTVSMALL);
+    const scalar bp = Feff.Sp()/mass;
 
     Cud = bp;
 
@@ -200,7 +199,7 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
 
     vector Unew = Ures.value();
 
-    dUTrans += dt*(Fncp.Sp()*As*(Ures.average() - Uc_) - mass*Fcp.Su());
+    dUTrans += dt*(Feff.Sp()*(Ures.average() - Uc_) - Fcp.Su());
 
     // Apply correction to velocity and dUTrans for reduced-D cases
     const polyMesh& mesh = this->cloud().pMesh();

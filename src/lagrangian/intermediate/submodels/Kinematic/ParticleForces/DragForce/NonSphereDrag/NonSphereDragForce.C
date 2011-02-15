@@ -30,7 +30,7 @@ License
 template<class CloudType>
 Foam::scalar Foam::NonSphereDragForce<CloudType>::Cd(const scalar Re) const
 {
-    return 24.0/(Re + ROOTVSMALL)*(1.0 + a_*pow(Re, b_)) + Re*c_/(Re + d_);
+    return 24.0/Re*(1.0 + a_*pow(Re, b_)) + Re*c_/(Re + d_);
 }
 
 
@@ -97,14 +97,15 @@ Foam::forceSuSp Foam::NonSphereDragForce<CloudType>::calcNonCoupled
 (
     const typename CloudType::parcelType& p,
     const scalar dt,
+    const scalar mass,
     const scalar Re,
-    const scalar rhoc,
     const scalar muc
 ) const
 {
     forceSuSp value(vector::zero, 0.0);
 
-    value.Sp()  = Cd(Re)*Re/p.d()*muc/8.0 + ROOTVSMALL;
+    const scalar ReCorr = max(Re, 1e-6);
+    value.Sp() = mass*0.75*muc*Cd(ReCorr)*ReCorr/(p.rho()*sqr(p.d()));
 
     return value;
 }

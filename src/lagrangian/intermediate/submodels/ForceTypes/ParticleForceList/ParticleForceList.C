@@ -120,15 +120,15 @@ Foam::forceSuSp Foam::ParticleForceList<CloudType>::calcCoupled
 (
     const typename CloudType::parcelType& p,
     const scalar dt,
+    const scalar mass,
     const scalar Re,
-    const scalar rhoc,
     const scalar muc
 ) const
 {
     forceSuSp value(vector::zero, 0.0);
     forAll(*this, i)
     {
-        value += this->operator[](i).calcCoupled(p, dt, Re, rhoc, muc);
+        value += this->operator[](i).calcCoupled(p, dt, mass, Re, muc);
     }
 
     return value;
@@ -140,15 +140,15 @@ Foam::forceSuSp Foam::ParticleForceList<CloudType>::calcNonCoupled
 (
     const typename CloudType::parcelType& p,
     const scalar dt,
+    const scalar mass,
     const scalar Re,
-    const scalar rhoc,
     const scalar muc
 ) const
 {
     forceSuSp value(vector::zero, 0.0);
     forAll(*this, i)
     {
-        value += this->operator[](i).calcNonCoupled(p, dt, Re, rhoc, muc);
+        value += this->operator[](i).calcNonCoupled(p, dt, mass, Re, muc);
     }
 
     return value;

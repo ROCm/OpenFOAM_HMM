@@ -99,8 +99,8 @@ Foam::forceSuSp Foam::ParamagneticForce<CloudType>::calcNonCoupled
 (
     const typename CloudType::parcelType& p,
     const scalar dt,
+    const scalar mass,
     const scalar Re,
-    const scalar rhoc,
     const scalar muc
 ) const
 {
@@ -109,7 +109,7 @@ Foam::forceSuSp Foam::ParamagneticForce<CloudType>::calcNonCoupled
     const interpolation<vector>& HdotGradHInterp = *HdotGradHInterpPtr_;
 
     value.Su()=
-        3.0*constant::electromagnetic::mu0.value()/p.rho()
+        mass*3.0*constant::electromagnetic::mu0.value()/p.rho()
        *magneticSusceptibility_/(magneticSusceptibility_ + 3)
        *HdotGradHInterp.interpolate(p.position(), p.currentTetIndices());
 

@@ -89,15 +89,15 @@ Foam::forceSuSp Foam::PressureGradientForce<CloudType>::calcCoupled
 (
     const typename CloudType::parcelType& p,
     const scalar dt,
+    const scalar mass,
     const scalar Re,
-    const scalar rhoc,
     const scalar muc
 ) const
 {
     forceSuSp value(vector::zero, 0.0);
 
     const volTensorField& gradU = *gradUPtr_;
-    value.Su() = rhoc/p.rho()*(p.U() & gradU[p.cell()]);
+    value.Su() = mass*p.rhoc()/p.rho()*(p.U() & gradU[p.cell()]);
 
     return value;
 }
