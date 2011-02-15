@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -31,8 +31,9 @@
 #
 #------------------------------------------------------------------------------
 usage() {
-    while [ "$#" -ge 1 ]; do echo "$1" 1>&2; shift; done
-    cat <<USAGE 1>&2
+    exec 1>&2
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat <<USAGE
 
 Usage: ${0##*/} [OPTION]
 options:

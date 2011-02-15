@@ -33,8 +33,9 @@ packDir=$WM_PROJECT-$WM_PROJECT_VERSION
 htmlDir=doc/Doxygen/html
 
 usage() {
-    while [ $# -gt 0 ]; do echo "$1" 1>&2; shift; done
-cat <<USAGE 1>&2
+    exec 1>&2
+    while [ "$#" -gt 0 ]; do echo "$1"; shift; done
+cat <<USAGE
 Usage: ${0##*/} [OPTION]
 options:
   -b, -bzip2            use bzip2 instead of gzip compression

@@ -54,8 +54,9 @@ esac
 
 
 usage() {
-    while [ $# -gt 0 ]; do echo "$1" 1>&2; shift; done
-cat <<USAGE 1>&2
+    exec 1>&2
+    while [ "$#" -gt 0 ]; do echo "$1"; shift; done
+cat <<USAGE
 Usage: ${0##*/} [OPTION] <archOptions>
        ${0##*/} [OPTION] -current
 options:

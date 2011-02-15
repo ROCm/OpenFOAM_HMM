@@ -29,6 +29,7 @@
 #     touch all .o files
 #------------------------------------------------------------------------------
 usage() {
+    exec 1>&2
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
