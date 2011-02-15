@@ -368,7 +368,7 @@ public:
 
             //- Find and return a sub-dictionary as a copy, or
             //  return an empty dictionary if the sub-dictionary does not exist
-            dictionary subOrEmptyDict(const word&) const;
+            dictionary subOrEmptyDict(const word&, const bool mustRead = false) const;
 
             //- Return the table of contents
             wordList toc() const;

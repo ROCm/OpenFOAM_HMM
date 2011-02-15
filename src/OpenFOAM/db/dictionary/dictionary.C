@@ -486,14 +486,29 @@ Foam::dictionary& Foam::dictionary::subDict(const word& keyword)
 
 Foam::dictionary Foam::dictionary::subOrEmptyDict
 (
-    const word& keyword
+    const word& keyword,
+    const bool mustRead
 ) const
 {
     const entry* entryPtr = lookupEntryPtr(keyword, false, true);
 
     if (entryPtr == NULL)
     {
-        return dictionary(*this, dictionary(name() + "::" + keyword));
+        if (mustRead)
+        {
+            FatalIOErrorIn
+            (
+                "dictionary::subOrEmptyDict(const word& keyword, const bool)",
+                *this
+            )   << "keyword " << keyword << " is undefined in dictionary "
+                << name()
+                << exit(FatalIOError);
+            return entryPtr->dict();
+        }
+        else
+        {
+            return dictionary(*this, dictionary(name() + "::" + keyword));
+        }
     }
     else
     {
