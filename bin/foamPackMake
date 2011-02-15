@@ -55,8 +55,10 @@ usage() {
     while [ $# -gt 0 ]; do echo "$1" 1>&2; shift; done
 cat <<USAGE 1>&2
 Usage: ${0##*/} [OPTION] <archOptions>
+       ${0##*/} [OPTION] -current
 options:
-  -o <dir>          specify alternative output directory
+  -c, -current          use current value of \$WM_OPTIONS
+  -o, -output <dir>     specify alternative output directory
 
 * Pack and compress $codeBase Make/<archOptions> directories
 
@@ -68,13 +70,18 @@ USAGE
 }
 
 
-unset outputDir
+unset archOptions outputDir
+
 # parse options
 while [ "$#" -gt 0 ]
 do
     case "$1" in
     -h | -help)
         usage
+        ;;
+    -c | -current)      # use $WM_OPTIONS - eg, 'linux64GccDPOpt'
+        archOptions="$WM_OPTIONS"
+        shift
         ;;
     -o | -output)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
@@ -90,10 +97,14 @@ do
     esac
 done
 
-[ $# -eq 1 ] || usage "Error: specify architecture"
+if [ -n "$archOptions" ]
+then
+    [ $# -eq 0 ] || usage "Error: cannot specify both -current and architecture"
+else
+    archOptions="$1"
+    [ $# -eq 1 ] || usage "Error: specify architecture"
+fi
 
-# same as $WM_OPTIONS - eg, 'linux64GccDPOpt'
-archOptions="$1"
 
 #------------------------------------------------------------------------------
 timeStamp=$(date +%Y-%m-%d)

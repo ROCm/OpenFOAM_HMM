@@ -37,8 +37,8 @@ usage() {
 cat <<USAGE 1>&2
 Usage: ${0##*/} [OPTION]
 options:
-  -prefix <dir>     use alternative prefix
-  -o <dir>          specify alternative output directory
+  -o, -output <dir>     specify alternative output directory
+  -prefix <dir>         use alternative prefix
 
 * Pack and compress the OpenFOAM doxygen html for release
 
@@ -54,14 +54,14 @@ do
     -h | -help)
         usage
         ;;
-    -prefix | --prefix)
-        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-        prefix=${2%%/}
-        shift 2
-        ;;
     -o | -output)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         outputDir=${2%%/}
+        shift 2
+        ;;
+    -prefix | --prefix)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        prefix=${2%%/}
         shift 2
         ;;
     -*)
@@ -120,9 +120,9 @@ fi
 
 if [ $? -eq 0 ]
 then
-    echo "Finished packing doxygen html into file $packFile" 1>&2
+    echo "Finished packing doxygen html into $packFile" 1>&2
 else
-    echo "Error: failure packing doxygen html into file $packFile" 1>&2
+    echo "Error: failure packing doxygen html into $packFile" 1>&2
     rm -f $packFile 2>/dev/null
 fi
 

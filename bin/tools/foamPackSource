@@ -84,9 +84,9 @@ trap 'rm -f $packFile $tmpFile 2>/dev/null' INT
 tar cpzf $packFile --files-from $tmpFile
 if [ $? -eq 0 ]
 then
-    echo "Finished packing $packDir into file $packFile" 1>&2
+    echo "Finished packing $packDir into $packFile" 1>&2
 else
-    echo "Error: failure packing $packDir into file $packFile" 1>&2
+    echo "Error: failure packing $packDir into $packFile" 1>&2
     rm -f $packFile 2>/dev/null
 fi
 

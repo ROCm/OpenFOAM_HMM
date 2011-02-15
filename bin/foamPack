@@ -37,8 +37,8 @@ usage() {
 cat <<USAGE 1>&2
 Usage: ${0##*/} [OPTION]
 options:
-  -o <dir>          specify alternative output directory
-  -nogit            bypass using 'git archive'
+  -o, -output <dir>     specify alternative output directory
+  -nogit                bypass using 'git archive'
 
 * Pack and compress OpenFOAM directory for release
 
@@ -46,7 +46,7 @@ USAGE
     exit 1
 }
 
-unset prefix outputDir nogit
+unset outputDir nogit
 # parse options
 while [ "$#" -gt 0 ]
 do
