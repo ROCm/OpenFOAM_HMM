@@ -45,7 +45,7 @@ case "${0##*/}" in
     ;;
 *)
     # regular
-    codeBase="OpenFOAM ThirdParty"
+    codeBase="OpenFOAM"
     packDir=$WM_PROJECT-$WM_PROJECT_VERSION
     ;;
 esac
