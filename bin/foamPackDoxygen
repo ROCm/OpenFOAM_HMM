@@ -37,6 +37,7 @@ usage() {
 cat <<USAGE 1>&2
 Usage: ${0##*/} [OPTION]
 options:
+  -b, -bzip2            use bzip2 instead of gzip compression
   -o, -output <dir>     specify alternative output directory
   -prefix <dir>         use alternative prefix
 
@@ -46,13 +47,20 @@ USAGE
     exit 1
 }
 
+
 unset prefix outputDir
+packExt=tgz
+
 # parse options
 while [ "$#" -gt 0 ]
 do
     case $1 in
     -h | -help)
         usage
+        ;;
+    -b | -bzip2)
+        packExt=tbz
+        shift
         ;;
     -o | -output)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
@@ -87,7 +95,6 @@ then
 fi
 
 #------------------------------------------------------------------------------
-packExt=tgz
 packName=${packDir}_Doxygen
 
 # add optional output directory
@@ -107,15 +114,25 @@ Packing doxygen html into $packFile
 
 INFO
 
+# bzip2 or gzip compression
+case "$packFile" in
+*tbz)
+    tarOpt=cpjf
+    ;;
+*)
+    tarOpt=cpzf
+    ;;
+esac
+
 # Clean up on Ctrl-C
 trap 'rm -f $packFile 2>/dev/null' INT
 
 if [ -n "$prefix" ]
 then
     # requires GNU tar
-    tar cpzf $packFile --transform="s@^@$prefix/@" $htmlDir
+    tar $tarOpt $packFile --transform="s@^@$prefix/@" $htmlDir
 else
-    tar cpzf $packFile $packDir/$htmlDir
+    tar $tarOpt $packFile $packDir/$htmlDir
 fi
 
 if [ $? -eq 0 ]

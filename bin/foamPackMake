@@ -57,6 +57,7 @@ cat <<USAGE 1>&2
 Usage: ${0##*/} [OPTION] <archOptions>
        ${0##*/} [OPTION] -current
 options:
+  -b, -bzip2            use bzip2 instead of gzip compression
   -c, -current          use current value of \$WM_OPTIONS
   -o, -output <dir>     specify alternative output directory
 
@@ -71,6 +72,7 @@ USAGE
 
 
 unset archOptions outputDir
+packExt=tgz
 
 # parse options
 while [ "$#" -gt 0 ]
@@ -78,6 +80,10 @@ do
     case "$1" in
     -h | -help)
         usage
+        ;;
+    -b | -bzip2)
+        packExt=tbz
+        shift
         ;;
     -c | -current)      # use $WM_OPTIONS - eg, 'linux64GccDPOpt'
         archOptions="$WM_OPTIONS"
@@ -108,7 +114,6 @@ fi
 
 #------------------------------------------------------------------------------
 timeStamp=$(date +%Y-%m-%d)
-packExt=tgz
 packBase=${packDir}.Make-${archOptions}_${timeStamp}
 
 # add optional output directory
@@ -128,12 +133,24 @@ Pack and compress Make/$archOptions* directories into $packFile
 
 INFO
 
+
+# bzip2 or gzip compression
+case "$packFile" in
+*tbz)
+    tarOpt=cpjf
+    ;;
+*)
+    tarOpt=cpzf
+    ;;
+esac
+
+
 # Clean up on Ctrl-C
 trap 'rm -f $packFile 2>/dev/null' INT
 
 find -H $packDir -depth -name Make -type d -print | \
     xargs -i find '{}' -depth -name "$archOptions*" -type d -print | \
-    tar cpzf $packFile -T -
+    tar $tarOpt $packFile -T -
 
 if [ $? -eq 0 ]
 then

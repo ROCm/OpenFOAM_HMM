@@ -56,6 +56,7 @@ usage() {
 cat <<USAGE 1>&2
 Usage: ${0##*/} [OPTION]
 options:
+  -b, -bzip2            use bzip2 instead of gzip compression
   -o, -output <dir>     specify alternative output directory
 
 * Pack and compress *.dep files from $codeBase
@@ -66,12 +67,18 @@ USAGE
 
 
 unset outputDir
+packExt=tgz
+
 # parse options
 while [ "$#" -gt 0 ]
 do
     case "$1" in
     -h | -help)
         usage
+        ;;
+    -b | -bzip2)
+        packExt=tbz
+        shift
         ;;
     -o | -output)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
@@ -96,7 +103,6 @@ done
 
 #------------------------------------------------------------------------------
 timeStamp=$(date +%Y-%m-%d)
-packExt=tgz
 packBase=${packDir}.deps_${timeStamp}
 
 # add optional output directory
@@ -116,10 +122,22 @@ Packing *.dep files into $packFile
 
 INFO
 
+
+# bzip2 or gzip compression
+case "$packFile" in
+*tbz)
+    tarOpt=cpjf
+    ;;
+*)
+    tarOpt=cpzf
+    ;;
+esac
+
+
 # Clean up on Ctrl-C
 trap 'rm -f $packFile 2>/dev/null' INT
 
-find -H $packDir -name '*.dep' -type f -print | tar cpzf $packFile -T -
+find -H $packDir -name '*.dep' -type f -print | tar $tarOpt $packFile -T -
 
 if [ $? -eq 0 ]
 then
