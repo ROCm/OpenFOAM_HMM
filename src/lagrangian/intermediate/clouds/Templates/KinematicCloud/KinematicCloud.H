@@ -555,6 +555,10 @@ public:
                 inline const PatchInteractionModel<KinematicCloud<ParcelType> >&
                     patchInteraction() const;
 
+                //- Return reference to the patch interaction model
+                inline PatchInteractionModel<KinematicCloud<ParcelType> >&
+                    patchInteraction();
+
                 //- Return reference to post-processing model
                 inline PostProcessingModel<KinematicCloud<ParcelType> >&
                     postProcessing();

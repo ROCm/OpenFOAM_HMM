@@ -313,6 +313,14 @@ Foam::KinematicCloud<ParcelType>::patchInteraction() const
 
 
 template<class ParcelType>
+inline Foam::PatchInteractionModel<Foam::KinematicCloud<ParcelType> >&
+Foam::KinematicCloud<ParcelType>::patchInteraction()
+{
+    return patchInteractionModel_();
+}
+
+
+template<class ParcelType>
 inline Foam::InjectionModel<Foam::KinematicCloud<ParcelType> >&
 Foam::KinematicCloud<ParcelType>::injection()
 {

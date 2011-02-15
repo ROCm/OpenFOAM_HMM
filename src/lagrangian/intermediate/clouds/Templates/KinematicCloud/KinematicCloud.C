@@ -830,8 +830,10 @@ void Foam::KinematicCloud<ParcelType>::info() const
         << linearKineticEnergy << nl
         << "    Rotational kinetic energy       = "
         << rotationalKineticEnergy << nl;
+
     this->injection().info(Info);
     this->surfaceFilm().info(Info);
+    this->patchInteraction().info(Info);
 }
 
 
