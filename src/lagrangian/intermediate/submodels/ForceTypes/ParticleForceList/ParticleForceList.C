@@ -57,19 +57,22 @@ Foam::ParticleForceList<CloudType>::ParticleForceList
 {
     if (readFields)
     {
-        const wordList models(dict.lookup("activeForces"));
+        const wordList activeForces(dict.lookup("activeForces"));
+
+        wordHashSet models;
+        models.insert(activeForces);
 
         Info<< "Constructing particle forces" << endl;
         if (models.size() > 0)
         {
             this->setSize(models.size());
-            forAll(models, i)
+
+            label i = 0;
+            forAllConstIter(wordHashSet, models, iter)
             {
-                set
-                (
-                    i,
-                    ParticleForce<CloudType>::New(owner, mesh, dict, models[i])
-                );
+                const word& model = iter.key();
+                set(i, ParticleForce<CloudType>::New(owner, mesh, dict, model));
+                i++;
             }
         }
         else
