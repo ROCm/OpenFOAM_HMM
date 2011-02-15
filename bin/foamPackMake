@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -23,41 +23,58 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
-#     foamPackDoxygen [-prefix DIR] [-o outputDir]
+#     foamPackMake [OPTION] <archOptions>
 #
 # Description
-#     Pack and compress the OpenFOAM doxygen html for release
+#     Pack and compress OpenFOAM Make/<archOptions> directories
+#
+# Script
+#     foamPackThirdPartyMake [OPTION] <archOptions>
+#
+# Description
+#     Pack and compress OpenFOAM ThirdParty Make/<archOptions> directories
 #
 #------------------------------------------------------------------------------
-packDir=$WM_PROJECT-$WM_PROJECT_VERSION
-htmlDir=doc/Doxygen/html
+toolsDir="${0%/*}/tools"  # this script is located in the tools/ parent dir
+
+case "${0##*/}" in
+*ThirdParty*)
+    # for ThirdParty
+    codeBase="OpenFOAM ThirdParty"
+    packDir=ThirdParty-$WM_PROJECT_VERSION
+    ;;
+*)
+    # regular
+    codeBase="OpenFOAM ThirdParty"
+    packDir=$WM_PROJECT-$WM_PROJECT_VERSION
+    ;;
+esac
+
 
 usage() {
     while [ $# -gt 0 ]; do echo "$1" 1>&2; shift; done
 cat <<USAGE 1>&2
-Usage: ${0##*/} [OPTION]
+Usage: ${0##*/} [OPTION] <archOptions>
 options:
-  -prefix <dir>     use alternative prefix
   -o <dir>          specify alternative output directory
 
-* Pack and compress the OpenFOAM doxygen html for release
+* Pack and compress $codeBase Make/<archOptions> directories
+
+    The value of 'archOptions' normally corresponds to \$WM_OPTIONS
+    The current value of \$WM_OPTIONS = $WM_OPTIONS
 
 USAGE
     exit 1
 }
 
-unset prefix outputDir
+
+unset outputDir
 # parse options
 while [ "$#" -gt 0 ]
 do
-    case $1 in
+    case "$1" in
     -h | -help)
         usage
-        ;;
-    -prefix | --prefix)
-        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-        prefix=${2%%/}
-        shift 2
         ;;
     -o | -output)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
@@ -67,34 +84,27 @@ do
     -*)
         usage "unknown option: '$*'"
         ;;
+    *)
+        break
+        ;;
     esac
 done
 
-# if packing from within the directory, use -prefix form
-if [ "${PWD##*/}" = "$packDir" ]
-then
-    : ${prefix:=$packDir}
-fi
+[ $# -eq 1 ] || usage "Error: specify architecture"
 
-# pack the directories directly and add prefix afterwards
-if [ -n "$prefix" ]
-then
-    packDir="$prefix"
-elif [ ! -d $packDir ]
-then
-    echo "Error: directory $packDir does not exist" 1>&2
-    exit 1
-fi
+# same as $WM_OPTIONS - eg, 'linux64GccDPOpt'
+archOptions="$1"
 
 #------------------------------------------------------------------------------
+timeStamp=$(date +%Y-%m-%d)
 packExt=tgz
-packName=${packDir}_Doxygen
+packBase=${packDir}.Make-${archOptions}_${timeStamp}
 
 # add optional output directory
-[ -d "$outputDir" ] && packName="$outputDir/$packName"
-packFile=$packName.$packExt
+[ -d "$outputDir" ] && packBase="$outputDir/$packBase"
+packFile=$packBase.$packExt
 
-
+# avoid overwriting old pack file
 if [ -f $packFile ]
 then
     echo "Error: $packFile already exists" 1>&2
@@ -103,26 +113,22 @@ fi
 
 cat <<INFO 1>&2
 -------------------------------------------------------------------------------
-Packing doxygen html into $packFile
+Pack and compress Make/$archOptions* directories into $packFile
 
 INFO
 
 # Clean up on Ctrl-C
 trap 'rm -f $packFile 2>/dev/null' INT
 
-if [ -n "$prefix" ]
-then
-    # requires GNU tar
-    tar cpzf $packFile --transform="s@^@$prefix/@" $htmlDir
-else
-    tar cpzf $packFile $packDir/$htmlDir
-fi
+find -H $packDir -depth -name Make -type d -print | \
+    xargs -i find '{}' -depth -name "$archOptions*" -type d -print | \
+    tar cpzf $packFile -T -
 
 if [ $? -eq 0 ]
 then
-    echo "Finished packing doxygen html into file $packFile" 1>&2
+    echo "Finished packing Make/$archOptions directories into $packFile" 1>&2
 else
-    echo "Error: failure packing doxygen html into file $packFile" 1>&2
+    echo "Error: failure packing Make/$archOptions directories into $packFile" 1>&2
     rm -f $packFile 2>/dev/null
 fi
 
