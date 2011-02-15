@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type, class CombineOp>
+template<class Type, class CombineOp, class TransformOp>
 void Foam::globalMeshData::syncData
 (
     List<Type>& elems,
@@ -38,11 +38,11 @@ void Foam::globalMeshData::syncData
     const mapDistribute& slavesMap,
     const globalIndexAndTransform& transforms,
     const CombineOp& cop,
-    const bool isPosition
+    const TransformOp& top
 )
 {
     // Pull slave data onto master
-    slavesMap.distribute(transforms, elems, isPosition);
+    slavesMap.distribute(transforms, elems, top);
 
     // Combine master data with slave data
     forAll(slaves, i)
@@ -85,7 +85,7 @@ void Foam::globalMeshData::syncData
         transforms,
         elems.size(),
         elems,
-        isPosition
+        top
     );
 }
 
@@ -143,12 +143,12 @@ void Foam::globalMeshData::syncData
 }
 
 
-template<class Type, class CombineOp>
+template<class Type, class CombineOp, class TransformOp>
 void Foam::globalMeshData::syncPointData
 (
     List<Type>& pointData,
     const CombineOp& cop,
-    const bool isPosition
+    const TransformOp& top
 ) const
 {
     if (pointData.size() != mesh_.nPoints())
@@ -171,7 +171,7 @@ void Foam::globalMeshData::syncPointData
         globalPointSlavesMap(),
         globalTransforms(),
         cop,
-        isPosition
+        top
     );
 
     // Extract back onto mesh

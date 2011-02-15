@@ -98,14 +98,20 @@ done
 #
 build="$WM_PROJECT_DIR/.build"
 
+unset oldVersion oldPackage
+
+#
 # retrieve old values from the $WM_PROJECT_DIR/.build cache, stored as
 #     version [packager]
-set -- $(tail -1 $build 2>/dev/null)
-
-oldVersion="$1"; shift
-oldPackage="$@"
-[ "${oldPackage:-none}" = none ] && unset oldPackage
-
+#
+getOldValues()
+{
+    set -- $(tail -1 $build 2>/dev/null)
+    oldVersion="$1"
+    [ "$#" -gt 0 ] && shift
+    oldPackage="$@"
+    [ "${oldPackage:-none}" = none ] && unset oldPackage
+}
 
 #
 # printTag - output the build tag
@@ -147,6 +153,9 @@ else
     fi
 fi
 
+
+# retrieve old values
+getOldValues
 
 #
 # update persistent build tag if possible

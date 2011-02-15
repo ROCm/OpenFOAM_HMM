@@ -1064,398 +1064,504 @@ void Foam::globalMeshData::calcGlobalEdgeSlaves() const
 }
 
 
-//// Calculate uncoupled boundary faces (without calculating
-//// primitiveMesh::pointFaces())
-//void Foam::globalMeshData::calcPointBoundaryFaces
-//(
-//    labelListList& pointBoundaryFaces
-//) const
-//{
-//    const polyBoundaryMesh& bMesh = mesh_.boundaryMesh();
-//    const Map<label>& meshPointMap = coupledPatch().meshPointMap();
-//
-//    // 1. Count
-//
-//    labelList nPointFaces(coupledPatch().nPoints(), 0);
-//
-//    forAll(bMesh, patchI)
-//    {
-//        const polyPatch& pp = bMesh[patchI];
-//
-//        if (!pp.coupled())
-//        {
-//            forAll(pp, i)
-//            {
-//                const face& f = pp[i];
-//
-//                forAll(f, fp)
-//                {
-//                    Map<label>::const_iterator iter = meshPointMap.find
-//                    (
-//                        f[fp]
-//                    );
-//                    if (iter != meshPointMap.end())
-//                    {
-//                        nPointFaces[iter()]++;
-//                    }
-//                }
-//            }
-//        }
-//    }
-//
-//
-//    // 2. Size
-//
-//    pointBoundaryFaces.setSize(coupledPatch().nPoints());
-//    forAll(nPointFaces, pointI)
-//    {
-//        pointBoundaryFaces[pointI].setSize(nPointFaces[pointI]);
-//    }
-//    nPointFaces = 0;
-//
-//
-//    // 3. Fill
-//
-//    forAll(bMesh, patchI)
-//    {
-//        const polyPatch& pp = bMesh[patchI];
-//
-//        if (!pp.coupled())
-//        {
-//            forAll(pp, i)
-//            {
-//                const face& f = pp[i];
-//                forAll(f, fp)
-//                {
-//                    Map<label>::const_iterator iter = meshPointMap.find
-//                    (
-//                        f[fp]
-//                    );
-//                    if (iter != meshPointMap.end())
-//                    {
-//                        label bFaceI =
-//                             pp.start() + i - mesh_.nInternalFaces();
-//                        pointBoundaryFaces[iter()][nPointFaces[iter()]++] =
-//                            bFaceI;
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//
-//void Foam::globalMeshData::calcGlobalPointBoundaryFaces() const
-//{
-//    if (debug)
-//    {
-//        Pout<< "globalMeshData::calcGlobalPointBoundaryFaces() :"
-//            << " calculating coupled point to boundary face addressing."
-//            << endl;
-//    }
-//
-//    // Construct local point to (uncoupled)boundaryfaces.
-//    labelListList pointBoundaryFaces;
-//    calcPointBoundaryFaces(pointBoundaryFaces);
-//
-//
-//    // Global indices for boundary faces
-//    globalBoundaryFaceNumberingPtr_.reset
-//    (
-//        new globalIndex(mesh_.nFaces()-mesh_.nInternalFaces())
-//    );
-//    globalIndex& globalIndices = globalBoundaryFaceNumberingPtr_();
-//
-//
-//    // Convert local boundary faces to global numbering
-//    globalPointBoundaryFacesPtr_.reset
-//    (
-//        new labelListList(globalPointSlavesMap().constructSize())
-//    );
-//    labelListList& globalPointBoundaryFaces = globalPointBoundaryFacesPtr_();
-//
-//    forAll(pointBoundaryFaces, pointI)
-//    {
-//        const labelList& bFaces = pointBoundaryFaces[pointI];
-//        labelList& globalFaces = globalPointBoundaryFaces[pointI];
-//        globalFaces.setSize(bFaces.size());
-//        forAll(bFaces, i)
-//        {
-//            globalFaces[i] = globalIndices.toGlobal(bFaces[i]);
-//        }
-//    }
-//
-//
-//    // Pull slave pointBoundaryFaces to master
-//    globalPointSlavesMap().distribute
-//    (
-//        globalTransforms(),
-//        globalPointBoundaryFaces
-//    );
-//
-//
-//    // Merge slave labels into master globalPointBoundaryFaces.
-//    // Split into untransformed and transformed values.
-//    const labelListList& pointSlaves = globalPointSlaves();
-//    const labelListList& pointTransformSlaves =
-//        globalPointTransformedSlaves();
-//
-//
-//    List<labelPairList> transformedFaces;
-//
-//
-//    forAll(pointSlaves, pointI)
-//    {
-//        const labelList& slaves = pointSlaves[pointI];
-//
-//        if (slaves.size() > 0)
-//        {
-//            labelList& myBFaces = globalPointBoundaryFaces[pointI];
-//
-//            forAll(slaves, i)
-//            {
-//                const labelList& slaveBFaces =
-//                    globalPointBoundaryFaces[slaves[i]];
-//
-//                // Add all slaveBFaces. Note that need to check for
-//                // uniqueness only in case of cyclics.
-//
-//                label sz = myBFaces.size();
-//                myBFaces.setSize(sz+slaveBFaces.size());
-//                forAll(slaveBFaces, j)
-//                {
-//                    label slave = slaveBFaces[j];
-//                    if (findIndex(SubList<label>(myBFaces, sz), slave) == -1)
-//                    {
-//                        myBFaces[sz++] = slave;
-//                    }
-//                }
-//                myBFaces.setSize(sz);
-//            }
-//        }
-//    }
-//
-//
-//    // Copy merged boundaryFaces back from master into slave slot
-//    forAll(pointSlaves, pointI)
-//    {
-//        const labelList& bFaces = globalPointBoundaryFaces[pointI];
-//        const labelList& slaves = pointSlaves[pointI];
-//
-//        forAll(slaves, i)
-//        {
-//            globalPointBoundaryFaces[slaves[i]] = bFaces;
-//        }
-//    }
-//
-//
-//    // Sync back to slaves.
-//    globalPointSlavesMap().reverseDistribute
-//    (
-//        coupledPatch().nPoints(),
-//        globalPointBoundaryFaces
-//    );
-//
-//
-//    // Construct a map to get the face data directly
-//    List<Map<label> > compactMap(Pstream::nProcs());
-//
-//    globalPointTransformedBoundaryFacesPtr_.reset
-//    (
-//        new labelList(transformedFaces.size())
-//    );
-//
-//    globalPointBoundaryFacesMapPtr_.reset
-//    (
-//        new mapDistribute
-//        (
-//            globalIndices,
-//            globalPointBoundaryFaces,
-//
-//            globalTransforms(),
-//            transformedFaces,
-//            globalPointTransformedBoundaryFacesPtr_,
-//
-//            compactMap
-//        )
-//    );
-//
-//    if (debug)
-//    {
-//        Pout<< "globalMeshData::calcGlobalPointBoundaryFaces() :"
-//            << " coupled points:" << coupledPatch().nPoints()
-//            << " local boundary faces:" <<  globalIndices.localSize()
-//            << " additional coupled faces:"
-//            <<  globalPointBoundaryFacesMapPtr_().constructSize()
-//              - globalIndices.localSize()
-//            << endl;
-//    }
-//}
+// Calculate uncoupled boundary faces (without calculating
+// primitiveMesh::pointFaces())
+void Foam::globalMeshData::calcPointBoundaryFaces
+(
+    labelListList& pointBoundaryFaces
+) const
+{
+    const polyBoundaryMesh& bMesh = mesh_.boundaryMesh();
+    const Map<label>& meshPointMap = coupledPatch().meshPointMap();
+
+    // 1. Count
+
+    labelList nPointFaces(coupledPatch().nPoints(), 0);
+
+    forAll(bMesh, patchI)
+    {
+        const polyPatch& pp = bMesh[patchI];
+
+        if (!pp.coupled())
+        {
+            forAll(pp, i)
+            {
+                const face& f = pp[i];
+
+                forAll(f, fp)
+                {
+                    Map<label>::const_iterator iter = meshPointMap.find
+                    (
+                        f[fp]
+                    );
+                    if (iter != meshPointMap.end())
+                    {
+                        nPointFaces[iter()]++;
+                    }
+                }
+            }
+        }
+    }
 
 
-//void Foam::globalMeshData::calcGlobalPointBoundaryCells() const
-//{
-//    if (debug)
-//    {
-//        Pout<< "globalMeshData::calcGlobalPointBoundaryCells() :"
-//            << " calculating coupled point to boundary cell addressing."
-//            << endl;
-//    }
-//
-//    // Create map of boundary cells and point-cell addressing
-//    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
-//    label bCellI = 0;
-//    Map<label> meshCellMap(4*coupledPatch().nPoints());
-//    DynamicList<label> cellMap(meshCellMap.size());
-//
-//    // Create addressing for point to boundary cells (local)
-//    labelListList pointBoundaryCells(coupledPatch().nPoints());
-//
-//    forAll(coupledPatch().meshPoints(), pointI)
-//    {
-//        label meshPointI = coupledPatch().meshPoints()[pointI];
-//        const labelList& pCells = mesh_.pointCells(meshPointI);
-//
-//        labelList& bCells = pointBoundaryCells[pointI];
-//        bCells.setSize(pCells.size());
-//
-//        forAll(pCells, i)
-//        {
-//            label cellI = pCells[i];
-//            Map<label>::iterator fnd = meshCellMap.find(cellI);
-//
-//            if (fnd != meshCellMap.end())
-//            {
-//                bCells[i] = fnd();
-//            }
-//            else
-//            {
-//                meshCellMap.insert(cellI, bCellI);
-//                cellMap.append(cellI);
-//                bCells[i] = bCellI;
-//                bCellI++;
-//            }
-//        }
-//    }
-//
-//
-//    boundaryCellsPtr_.reset(new labelList());
-//    labelList& boundaryCells = boundaryCellsPtr_();
-//    boundaryCells.transfer(cellMap.shrink());
-//
-//
-//    // Convert point-cells to global point numbers
-//    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
-//    globalBoundaryCellNumberingPtr_.reset
-//    (
-//        new globalIndex(boundaryCells.size())
-//    );
-//    globalIndex& globalIndices = globalBoundaryCellNumberingPtr_();
-//
-//
-//    globalPointBoundaryCellsPtr_.reset
-//    (
-//        new labelListList(globalPointSlavesMap().constructSize())
-//    );
-//    labelListList& globalPointBoundaryCells = globalPointBoundaryCellsPtr_();
-//
-//    forAll(pointBoundaryCells, pointI)
-//    {
-//        const labelList& pCells = pointBoundaryCells[pointI];
-//        labelList& globalCells = globalPointBoundaryCells[pointI];
-//        globalCells.setSize(pCells.size());
-//        forAll(pCells, i)
-//        {
-//            globalCells[i] = globalIndices.toGlobal(pCells[i]);
-//        }
-//    }
-//
-//
-//    // Pull slave pointBoundaryCells to master
-//    globalPointSlavesMap().distribute(globalPointBoundaryCells);
-//
-//
-//    // Merge slave labels into master globalPointBoundaryCells
-//    const labelListList& pointSlaves = globalPointSlaves();
-//
-//    forAll(pointSlaves, pointI)
-//    {
-//        const labelList& slaves = pointSlaves[pointI];
-//
-//        if (slaves.size() > 0)
-//        {
-//            labelList& myBCells = globalPointBoundaryCells[pointI];
-//
-//            forAll(slaves, i)
-//            {
-//                const labelList& slaveBCells =
-//                    globalPointBoundaryCells[slaves[i]];
-//
-//                // Add all slaveBCells. Note that need to check for
-//                // uniqueness only in case of cyclics.
-//
-//                label sz = myBCells.size();
-//                myBCells.setSize(sz+slaveBCells.size());
-//                forAll(slaveBCells, j)
-//                {
-//                    label slave = slaveBCells[j];
-//                    if (findIndex(SubList<label>(myBCells, sz), slave) == -1)
-//                    {
-//                        myBCells[sz++] = slave;
-//                    }
-//                }
-//                myBCells.setSize(sz);
-//            }
-//        }
-//    }
-//
-//
-//    // Copy merged boundaryCells back from master into slave slot
-//    forAll(pointSlaves, pointI)
-//    {
-//        const labelList& bCells = globalPointBoundaryCells[pointI];
-//        const labelList& slaves = pointSlaves[pointI];
-//
-//        forAll(slaves, i)
-//        {
-//            globalPointBoundaryCells[slaves[i]] = bCells;
-//        }
-//    }
-//
-//
-//    // Sync back to slaves.
-//    globalPointSlavesMap().reverseDistribute
-//    (
-//        coupledPatch().nPoints(),
-//        globalPointBoundaryCells
-//    );
-//
-//
-//    // Construct a map to get the cell data directly
-//    List<Map<label> > compactMap(Pstream::nProcs());
-//    globalPointBoundaryCellsMapPtr_.reset
-//    (
-//        new mapDistribute
-//        (
-//            globalIndices,
-//            globalPointBoundaryCells,
-//            compactMap
-//        )
-//    );
-//
-//    if (debug)
-//    {
-//        Pout<< "globalMeshData::calcGlobalPointBoundaryCells() :"
-//            << " coupled points:" << coupledPatch().nPoints()
-//            << " local boundary cells:" <<  globalIndices.localSize()
-//            << " additional coupled cells:"
-//            <<  globalPointBoundaryCellsMapPtr_().constructSize()
-//              - globalIndices.localSize()
-//            << endl;
-//    }
-//}
+    // 2. Size
+
+    pointBoundaryFaces.setSize(coupledPatch().nPoints());
+    forAll(nPointFaces, pointI)
+    {
+        pointBoundaryFaces[pointI].setSize(nPointFaces[pointI]);
+    }
+    nPointFaces = 0;
+
+
+    // 3. Fill
+
+    forAll(bMesh, patchI)
+    {
+        const polyPatch& pp = bMesh[patchI];
+
+        if (!pp.coupled())
+        {
+            forAll(pp, i)
+            {
+                const face& f = pp[i];
+                forAll(f, fp)
+                {
+                    Map<label>::const_iterator iter = meshPointMap.find
+                    (
+                        f[fp]
+                    );
+                    if (iter != meshPointMap.end())
+                    {
+                        label bFaceI =
+                             pp.start() + i - mesh_.nInternalFaces();
+                        pointBoundaryFaces[iter()][nPointFaces[iter()]++] =
+                            bFaceI;
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+void Foam::globalMeshData::calcGlobalPointBoundaryFaces() const
+{
+    if (debug)
+    {
+        Pout<< "globalMeshData::calcGlobalPointBoundaryFaces() :"
+            << " calculating coupled point to boundary face addressing."
+            << endl;
+    }
+
+    // Construct local point to (uncoupled)boundaryfaces.
+    labelListList pointBoundaryFaces;
+    calcPointBoundaryFaces(pointBoundaryFaces);
+
+
+    // Global indices for boundary faces
+    globalBoundaryFaceNumberingPtr_.reset
+    (
+        new globalIndex(mesh_.nFaces()-mesh_.nInternalFaces())
+    );
+    globalIndex& globalIndices = globalBoundaryFaceNumberingPtr_();
+
+
+    // Convert local boundary faces to global numbering
+    globalPointBoundaryFacesPtr_.reset
+    (
+        new labelListList(globalPointSlavesMap().constructSize())
+    );
+    labelListList& globalPointBoundaryFaces = globalPointBoundaryFacesPtr_();
+
+    forAll(pointBoundaryFaces, pointI)
+    {
+        const labelList& bFaces = pointBoundaryFaces[pointI];
+        labelList& globalFaces = globalPointBoundaryFaces[pointI];
+        globalFaces.setSize(bFaces.size());
+        forAll(bFaces, i)
+        {
+            globalFaces[i] = globalIndices.toGlobal(bFaces[i]);
+        }
+    }
+
+
+    // Pull slave pointBoundaryFaces to master
+    globalPointSlavesMap().distribute
+    (
+        globalPointBoundaryFaces,
+        true    // put data on transformed points into correct slots
+    );
+
+
+    // Merge slave labels into master globalPointBoundaryFaces.
+    // Split into untransformed and transformed values.
+    const labelListList& pointSlaves = globalPointSlaves();
+    const labelListList& pointTransformSlaves =
+        globalPointTransformedSlaves();
+
+
+    // Any faces coming in through transformation
+    List<labelPairList> transformedFaces(pointSlaves.size());
+
+
+    forAll(pointSlaves, pointI)
+    {
+        const labelList& slaves = pointSlaves[pointI];
+        const labelList& transformedSlaves = pointTransformSlaves[pointI];
+
+        if (slaves.size() > 0)
+        {
+            labelList& myBFaces = globalPointBoundaryFaces[pointI];
+            label sz = myBFaces.size();
+
+            // Count
+            label n = 0;
+            forAll(slaves, i)
+            {
+                n += globalPointBoundaryFaces[slaves[i]].size();
+            }
+            // Fill
+            myBFaces.setSize(sz+n);
+            n = sz;
+            forAll(slaves, i)
+            {
+                const labelList& slaveBFaces =
+                    globalPointBoundaryFaces[slaves[i]];
+
+                // Add all slaveBFaces. Note that need to check for
+                // uniqueness only in case of cyclics.
+
+                forAll(slaveBFaces, j)
+                {
+                    label slave = slaveBFaces[j];
+                    if (findIndex(SubList<label>(myBFaces, sz), slave) == -1)
+                    {
+                        myBFaces[n++] = slave;
+                    }
+                }
+            }
+            myBFaces.setSize(n);
+        }
+
+
+        if (transformedSlaves.size() > 0)
+        {
+            const labelList& untrafoFaces = globalPointBoundaryFaces[pointI];
+
+            labelPairList& myBFaces = transformedFaces[pointI];
+            label sz = myBFaces.size();
+
+            // Count
+            label n = 0;
+            forAll(transformedSlaves, i)
+            {
+                n += globalPointBoundaryFaces[transformedSlaves[i]].size();
+            }
+            // Fill
+            myBFaces.setSize(sz+n);
+            n = sz;
+            forAll(transformedSlaves, i)
+            {
+                label transformI = globalPointSlavesMap().whichTransform
+                (
+                    transformedSlaves[i]
+                );
+
+                const labelList& slaveBFaces =
+                    globalPointBoundaryFaces[transformedSlaves[i]];
+
+                forAll(slaveBFaces, j)
+                {
+                    label slave = slaveBFaces[j];
+                    // Check that same face not already present untransformed
+                    if (findIndex(untrafoFaces, slave)== -1)
+                    {
+                        label procI = globalIndices.whichProcID(slave);
+                        label faceI = globalIndices.toLocal(procI, slave);
+
+                        myBFaces[n++] = globalIndexAndTransform::encode
+                        (
+                            procI,
+                            faceI,
+                            transformI
+                        );
+                    }
+                }
+            }
+            myBFaces.setSize(n);
+        }
+
+
+        if (slaves.size() + transformedSlaves.size() == 0)
+        {
+             globalPointBoundaryFaces[pointI].clear();
+        }
+    }
+
+    // Construct a map to get the face data directly
+    List<Map<label> > compactMap(Pstream::nProcs());
+
+    globalPointTransformedBoundaryFacesPtr_.reset
+    (
+        new labelListList(transformedFaces.size())
+    );
+
+    globalPointBoundaryFacesMapPtr_.reset
+    (
+        new mapDistribute
+        (
+            globalIndices,
+            globalPointBoundaryFaces,
+
+            globalTransforms(),
+            transformedFaces,
+            globalPointTransformedBoundaryFacesPtr_(),
+
+            compactMap
+        )
+    );
+    globalPointBoundaryFaces.setSize(coupledPatch().nPoints());
+    globalPointTransformedBoundaryFacesPtr_().setSize(coupledPatch().nPoints());
+
+    if (debug)
+    {
+        Pout<< "globalMeshData::calcGlobalPointBoundaryFaces() :"
+            << " coupled points:" << coupledPatch().nPoints()
+            << " local boundary faces:" <<  globalIndices.localSize()
+            << " additional coupled faces:"
+            <<  globalPointBoundaryFacesMapPtr_().constructSize()
+              - globalIndices.localSize()
+            << endl;
+    }
+}
+
+
+void Foam::globalMeshData::calcGlobalPointBoundaryCells() const
+{
+    if (debug)
+    {
+        Pout<< "globalMeshData::calcGlobalPointBoundaryCells() :"
+            << " calculating coupled point to boundary cell addressing."
+            << endl;
+    }
+
+    // Create map of boundary cells and point-cell addressing
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    label bCellI = 0;
+    Map<label> meshCellMap(4*coupledPatch().nPoints());
+    DynamicList<label> cellMap(meshCellMap.size());
+
+    // Create addressing for point to boundary cells (local)
+    labelListList pointBoundaryCells(coupledPatch().nPoints());
+
+    forAll(coupledPatch().meshPoints(), pointI)
+    {
+        label meshPointI = coupledPatch().meshPoints()[pointI];
+        const labelList& pCells = mesh_.pointCells(meshPointI);
+
+        labelList& bCells = pointBoundaryCells[pointI];
+        bCells.setSize(pCells.size());
+
+        forAll(pCells, i)
+        {
+            label cellI = pCells[i];
+            Map<label>::iterator fnd = meshCellMap.find(cellI);
+
+            if (fnd != meshCellMap.end())
+            {
+                bCells[i] = fnd();
+            }
+            else
+            {
+                meshCellMap.insert(cellI, bCellI);
+                cellMap.append(cellI);
+                bCells[i] = bCellI;
+                bCellI++;
+            }
+        }
+    }
+
+
+    boundaryCellsPtr_.reset(new labelList());
+    labelList& boundaryCells = boundaryCellsPtr_();
+    boundaryCells.transfer(cellMap.shrink());
+
+
+    // Convert point-cells to global (boundary)cell numbers
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    globalBoundaryCellNumberingPtr_.reset
+    (
+        new globalIndex(boundaryCells.size())
+    );
+    globalIndex& globalIndices = globalBoundaryCellNumberingPtr_();
+
+
+    globalPointBoundaryCellsPtr_.reset
+    (
+        new labelListList(globalPointSlavesMap().constructSize())
+    );
+    labelListList& globalPointBoundaryCells = globalPointBoundaryCellsPtr_();
+
+    forAll(pointBoundaryCells, pointI)
+    {
+        const labelList& pCells = pointBoundaryCells[pointI];
+        labelList& globalCells = globalPointBoundaryCells[pointI];
+        globalCells.setSize(pCells.size());
+        forAll(pCells, i)
+        {
+            globalCells[i] = globalIndices.toGlobal(pCells[i]);
+        }
+    }
+
+
+    // Pull slave pointBoundaryCells to master
+    globalPointSlavesMap().distribute
+    (
+        globalPointBoundaryCells,
+        true    // put data on transformed points into correct slots
+    );
+
+
+    // Merge slave labels into master globalPointBoundaryCells
+    const labelListList& pointSlaves = globalPointSlaves();
+    const labelListList& pointTransformSlaves =
+        globalPointTransformedSlaves();
+
+    List<labelPairList> transformedCells(pointSlaves.size());
+
+
+    forAll(pointSlaves, pointI)
+    {
+        const labelList& slaves = pointSlaves[pointI];
+        const labelList& transformedSlaves = pointTransformSlaves[pointI];
+
+        if (slaves.size() > 0)
+        {
+            labelList& myBCells = globalPointBoundaryCells[pointI];
+            label sz = myBCells.size();
+
+            // Count
+            label n = 0;
+            forAll(slaves, i)
+            {
+                n += globalPointBoundaryCells[slaves[i]].size();
+            }
+            // Fill
+            myBCells.setSize(sz+n);
+            n = sz;
+            forAll(slaves, i)
+            {
+                const labelList& slaveBCells =
+                    globalPointBoundaryCells[slaves[i]];
+
+                // Add all slaveBCells. Note that need to check for
+                // uniqueness only in case of cyclics.
+
+                forAll(slaveBCells, j)
+                {
+                    label slave = slaveBCells[j];
+                    if (findIndex(SubList<label>(myBCells, sz), slave) == -1)
+                    {
+                        myBCells[n++] = slave;
+                    }
+                }
+            }
+            myBCells.setSize(n);
+        }
+
+
+        if (transformedSlaves.size() > 0)
+        {
+            const labelList& untrafoCells = globalPointBoundaryCells[pointI];
+
+            labelPairList& myBCells = transformedCells[pointI];
+            label sz = myBCells.size();
+
+            // Count
+            label n = 0;
+            forAll(transformedSlaves, i)
+            {
+                n += globalPointBoundaryCells[transformedSlaves[i]].size();
+            }
+            // Fill
+            myBCells.setSize(sz+n);
+            n = sz;
+            forAll(transformedSlaves, i)
+            {
+                label transformI = globalPointSlavesMap().whichTransform
+                (
+                    transformedSlaves[i]
+                );
+
+                const labelList& slaveBCells =
+                    globalPointBoundaryCells[transformedSlaves[i]];
+
+                forAll(slaveBCells, j)
+                {
+                    label slave = slaveBCells[j];
+
+                    // Check that same cell not already present untransformed
+                    if (findIndex(untrafoCells, slave)== -1)
+                    {
+                        label procI = globalIndices.whichProcID(slave);
+                        label cellI = globalIndices.toLocal(procI, slave);
+                        myBCells[n++] = globalIndexAndTransform::encode
+                        (
+                            procI,
+                            cellI,
+                            transformI
+                        );
+                    }
+                }
+            }
+            myBCells.setSize(n);
+        }
+
+        if (slaves.size() + transformedSlaves.size() == 0)
+        {
+             globalPointBoundaryCells[pointI].clear();
+        }
+    }
+
+    // Construct a map to get the cell data directly
+    List<Map<label> > compactMap(Pstream::nProcs());
+
+    globalPointTransformedBoundaryCellsPtr_.reset
+    (
+        new labelListList(transformedCells.size())
+    );
+
+    globalPointBoundaryCellsMapPtr_.reset
+    (
+        new mapDistribute
+        (
+            globalIndices,
+            globalPointBoundaryCells,
+
+            globalTransforms(),
+            transformedCells,
+            globalPointTransformedBoundaryCellsPtr_(),
+
+            compactMap
+        )
+    );
+    globalPointBoundaryCells.setSize(coupledPatch().nPoints());
+    globalPointTransformedBoundaryCellsPtr_().setSize(coupledPatch().nPoints());
+
+    if (debug)
+    {
+        Pout<< "globalMeshData::calcGlobalPointBoundaryCells() :"
+            << " coupled points:" << coupledPatch().nPoints()
+            << " local boundary cells:" <<  globalIndices.localSize()
+            << " additional coupled cells:"
+            <<  globalPointBoundaryCellsMapPtr_().constructSize()
+              - globalIndices.localSize()
+            << endl;
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -1521,15 +1627,18 @@ void Foam::globalMeshData::clearOut()
     globalEdgeTransformedSlavesPtr_.clear();
     globalEdgeSlavesMapPtr_.clear();
 
-//    // Face
-//    globalBoundaryFaceNumberingPtr_.clear();
-//    globalPointBoundaryFacesPtr_.clear();
-//    globalPointBoundaryFacesMapPtr_.clear();
-//    // Cell
-//    boundaryCellsPtr_.clear();
-//    globalBoundaryCellNumberingPtr_.clear();
-//    globalPointBoundaryCellsPtr_.clear();
-//    globalPointBoundaryCellsMapPtr_.clear();
+    // Face
+    globalBoundaryFaceNumberingPtr_.clear();
+    globalPointBoundaryFacesPtr_.clear();
+    globalPointTransformedBoundaryFacesPtr_.clear();
+    globalPointBoundaryFacesMapPtr_.clear();
+
+    // Cell
+    boundaryCellsPtr_.clear();
+    globalBoundaryCellNumberingPtr_.clear();
+    globalPointBoundaryCellsPtr_.clear();
+    globalPointTransformedBoundaryCellsPtr_.clear();
+    globalPointBoundaryCellsMapPtr_.clear();
 }
 
 
@@ -1951,6 +2060,104 @@ const Foam::mapDistribute& Foam::globalMeshData::globalEdgeSlavesMap() const
         calcGlobalEdgeSlaves();
     }
     return globalEdgeSlavesMapPtr_();
+}
+
+
+const Foam::globalIndex& Foam::globalMeshData::globalBoundaryFaceNumbering()
+const
+{
+    if (!globalBoundaryFaceNumberingPtr_.valid())
+    {
+        calcGlobalPointBoundaryFaces();
+    }
+    return globalBoundaryFaceNumberingPtr_();
+}
+
+
+const Foam::labelListList& Foam::globalMeshData::globalPointBoundaryFaces()
+const
+{
+    if (!globalPointBoundaryFacesPtr_.valid())
+    {
+        calcGlobalPointBoundaryFaces();
+    }
+    return globalPointBoundaryFacesPtr_();
+}
+
+
+const Foam::labelListList&
+Foam::globalMeshData::globalPointTransformedBoundaryFaces() const
+{
+    if (!globalPointTransformedBoundaryFacesPtr_.valid())
+    {
+        calcGlobalPointBoundaryFaces();
+    }
+    return globalPointTransformedBoundaryFacesPtr_();
+}
+
+
+const Foam::mapDistribute& Foam::globalMeshData::globalPointBoundaryFacesMap()
+const
+{
+    if (!globalPointBoundaryFacesMapPtr_.valid())
+    {
+        calcGlobalPointBoundaryFaces();
+    }
+    return globalPointBoundaryFacesMapPtr_();
+}
+
+
+const Foam::labelList& Foam::globalMeshData::boundaryCells() const
+{
+    if (!boundaryCellsPtr_.valid())
+    {
+        calcGlobalPointBoundaryCells();
+    }
+    return boundaryCellsPtr_();
+}
+
+
+const Foam::globalIndex& Foam::globalMeshData::globalBoundaryCellNumbering()
+const
+{
+    if (!globalBoundaryCellNumberingPtr_.valid())
+    {
+        calcGlobalPointBoundaryCells();
+    }
+    return globalBoundaryCellNumberingPtr_();
+}
+
+
+const Foam::labelListList& Foam::globalMeshData::globalPointBoundaryCells()
+const
+{
+    if (!globalPointBoundaryCellsPtr_.valid())
+    {
+        calcGlobalPointBoundaryCells();
+    }
+    return globalPointBoundaryCellsPtr_();
+}
+
+
+const Foam::labelListList&
+Foam::globalMeshData::globalPointTransformedBoundaryCells() const
+{
+    if (!globalPointTransformedBoundaryCellsPtr_.valid())
+    {
+        calcGlobalPointBoundaryCells();
+    }
+    return globalPointTransformedBoundaryCellsPtr_();
+}
+
+
+const Foam::mapDistribute& Foam::globalMeshData::globalPointBoundaryCellsMap()
+const
+{
+    if (!globalPointBoundaryCellsMapPtr_.valid())
+    {
+        calcGlobalPointBoundaryCells();
+    }
+    return globalPointBoundaryCellsMapPtr_();
 }
 
 
