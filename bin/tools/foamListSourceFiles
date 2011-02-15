@@ -46,7 +46,7 @@ USAGE
 packDir=$(echo "$1" | sed -e 's@//*@/@g' -e 's@/$@@')
 
 # check for essential directories
-[ -d $packDir ] || {
+[ -d "$packDir" ] || {
     echo "Error: directory $packDir does not exist" 1>&2
     exit 1
 }
@@ -77,12 +77,9 @@ find -H $packDir                                                              \
  -a ! -name "core.[1-9]*"                                                     \
  -a ! -name "libccmio*"                                                       \
 | sed                                                                         \
- -e "\@$packDir/lib/@d"                                                       \
  -e '\@/\.git/@d'                                                             \
  -e '\@/\.tags/@d'                                                            \
  -e '\@/README\.org@d'                                                        \
- -e '\@/bin/[^/]*/@{ \@/bin/tools/@!d }'                                      \
- -e '\@/lib/@d'                                                               \
  -e '\@/platforms/@d'                                                         \
  -e '\@/t/@d'                                                                 \
  -e '\@/Make[.A-Za-z]*/[^/]*/@d'                                              \
