@@ -2,5 +2,6 @@
 coalParcel/coalParcel.C
 coalParcel/defineCoalParcel.C
 coalParcel/makeCoalParcelSubmodels.C
+coalParcel/makeCoalParcelForces.C
 
 LIB = $(FOAM_LIBBIN)/libcoalCombustion
