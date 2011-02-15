@@ -520,7 +520,10 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     ),
     solution_(mesh_, particleProperties_.subDict("solution")),
     constProps_(particleProperties_, solution_.active()),
-    subModelProperties_(particleProperties_.subOrEmptyDict("subModels")),
+    subModelProperties_
+    (
+        particleProperties_.subOrEmptyDict("subModels", solution_.active())
+    ),
     rndGen_
     (
         label(0),
@@ -535,7 +538,11 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     (
         *this,
         mesh_,
-        particleProperties_.subOrEmptyDict("particleForces"),
+        subModelProperties_.subOrEmptyDict
+        (
+            "particleForces",
+            solution_.active()
+        ),
         solution_.active()
     ),
     collisionModel_(NULL),

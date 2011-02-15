@@ -39,7 +39,14 @@ Foam::ParticleForce<CloudType>::ParticleForce
     owner_(owner),
     mesh_(mesh),
     dict_(dict),
-    coeffs_(dict.subOrEmptyDict(forceType + "Coeffs"))
+    coeffs_
+    (
+        dict.subOrEmptyDict
+        (
+            forceType + "Coeffs",
+            owner.solution().active()
+        )
+    )
 {}
 
 
