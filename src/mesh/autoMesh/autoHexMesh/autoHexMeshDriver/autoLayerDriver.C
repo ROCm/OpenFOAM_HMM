@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,6 +45,7 @@ Description
 #include "layerParameters.H"
 #include "combineFaces.H"
 #include "IOmanip.H"
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -888,68 +889,6 @@ void Foam::autoLayerDriver::handleNonManifolds
     Info<< "Outside of local patch is multiply connected across edges or"
         << " points at " << nNonManif << " points." << endl;
 
-
-    const labelList& meshPoints = pp.meshPoints();
-
-
-    // 2. Parallel check
-    // For now disable extrusion at any shared edges.
-    const labelHashSet sharedEdgeSet(mesh.globalData().sharedEdgeLabels());
-
-    forAll(pp.edges(), edgeI)
-    {
-        if (sharedEdgeSet.found(meshEdges[edgeI]))
-        {
-            const edge& e = mesh.edges()[meshEdges[edgeI]];
-
-            Pout<< "Disabling extrusion at edge "
-                << mesh.points()[e[0]] << mesh.points()[e[1]]
-                << " since it is non-manifold across coupled patches."
-                << endl;
-
-            nonManifoldPoints.insert(e[0]);
-            nonManifoldPoints.insert(e[1]);
-        }
-    }
-
-    // 3b. extrusion can produce multiple faces between 2 cells
-    // across processor boundary
-    // This occurs when a coupled face shares more than 1 edge with a
-    // non-coupled boundary face.
-    // This is now correctly handled by addPatchCellLayer in that it
-    // extrudes a single face from the stringed up edges.
-
-
-    nNonManif = returnReduce(nonManifoldPoints.size(), sumOp<label>());
-
-    if (nNonManif > 0)
-    {
-        Info<< "Outside of patches is multiply connected across edges or"
-            << " points at " << nNonManif << " points." << nl
-            << "Writing " << nNonManif
-            << " points where this happens to pointSet "
-            << nonManifoldPoints.name() << nl
-            << "and setting layer thickness to zero on these points."
-            << endl;
-
-        nonManifoldPoints.instance() = mesh.time().timeName();
-        nonManifoldPoints.write();
-
-        forAll(meshPoints, patchPointI)
-        {
-            if (nonManifoldPoints.found(meshPoints[patchPointI]))
-            {
-                unmarkExtrusion
-                (
-                    patchPointI,
-                    patchDisp,
-                    patchNLayers,
-                    extrudeStatus
-                );
-            }
-        }
-    }
-
     Info<< "Set displacement to zero for all " << nNonManif
         << " non-manifold points" << endl;
 }
@@ -1348,7 +1287,6 @@ void Foam::autoLayerDriver::setNumLayers
 }
 
 
-// Grow no-extrusion layer
 void Foam::autoLayerDriver::growNoExtrusion
 (
     const indirectPrimitivePatch& pp,
@@ -1436,6 +1374,103 @@ void Foam::autoLayerDriver::growNoExtrusion
 
     Info<< "Set displacement to zero for an additional " << nGrown
         << " points." << endl;
+}
+
+
+void Foam::autoLayerDriver::determineSidePatches
+(
+    const globalIndex& globalFaces,
+    const labelListList& edgeGlobalFaces,
+    const indirectPrimitivePatch& pp,
+
+    labelList& sidePatchID
+)
+{
+    // Sometimes edges-to-be-extruded are on more than 2 processors.
+    // Work out which 2 hold the faces to be extruded and thus which procpatch
+    // the side-face should be in. As an additional complication this might
+    // mean that 2 procesors that were only edge-connected now suddenly need
+    // to become face-connected i.e. have a processor patch between them.
+
+    fvMesh& mesh = meshRefiner_.mesh();
+
+    // Determine sidePatchID. Any additional processor boundary gets added to
+    // patchToNbrProc,nbrProcToPatch and nPatches gets set to the new number
+    // of patches.
+    label nPatches;
+    Map<label> nbrProcToPatch;
+    Map<label> patchToNbrProc;
+    addPatchCellLayer::calcSidePatch
+    (
+        mesh,
+        globalFaces,
+        edgeGlobalFaces,
+        pp,
+
+        sidePatchID,
+        nPatches,
+        nbrProcToPatch,
+        patchToNbrProc
+    );
+
+    label nOldPatches = mesh.boundaryMesh().size();
+    label nAdded = returnReduce(nPatches-nOldPatches, sumOp<label>());
+    Info<< nl << "Adding in total " << nAdded/2 << " inter-processor patches to"
+        << " handle extrusion of non-manifold processor boundaries."
+        << endl;
+
+    if (nAdded > 0)
+    {
+        // We might not add patches in same order as in patchToNbrProc
+        // so prepare to renumber sidePatchID
+        Map<label> wantedToAddedPatch;
+
+        for (label patchI = nOldPatches; patchI < nPatches; patchI++)
+        {
+            label nbrProcI = patchToNbrProc[patchI];
+            word name =
+                    "procBoundary"
+                  + Foam::name(Pstream::myProcNo())
+                  + "to"
+                  + Foam::name(nbrProcI);
+
+            dictionary patchDict;
+            patchDict.add("type", processorPolyPatch::typeName);
+            patchDict.add("myProcNo", Pstream::myProcNo());
+            patchDict.add("neighbProcNo", nbrProcI);
+            patchDict.add("nFaces", 0);
+            patchDict.add("startFace", mesh.nFaces());
+
+            Pout<< "Adding patch " << patchI
+                << " name:" << name
+                << " between " << Pstream::myProcNo()
+                << " and " << nbrProcI
+                << endl;
+
+            label procPatchI = meshRefiner_.appendPatch
+            (
+                mesh,
+                mesh.boundaryMesh().size(), // new patch index
+                name,
+                patchDict
+            );
+            wantedToAddedPatch.insert(patchI, procPatchI);
+        }
+
+        // Renumber sidePatchID
+        forAll(sidePatchID, i)
+        {
+            label patchI = sidePatchID[i];
+            Map<label>::const_iterator fnd = wantedToAddedPatch.find(patchI);
+            if (fnd != wantedToAddedPatch.end())
+            {
+                sidePatchID[i] = fnd();
+            }
+        }
+
+        mesh.clearOut();
+        const_cast<polyBoundaryMesh&>(mesh.boundaryMesh()).updateMesh();
+    }
 }
 
 
@@ -2553,6 +2588,37 @@ void Foam::autoLayerDriver::addLayers
         )
     );
 
+
+    // Global face indices engine
+    const globalIndex globalFaces(mesh.nFaces());
+
+    // Determine extrudePatch.edgeFaces in global numbering (so across
+    // coupled patches). This is used only to string up edges between coupled
+    // faces (all edges between same (global)face indices get extruded).
+    labelListList edgeGlobalFaces
+    (
+        addPatchCellLayer::globalEdgeFaces
+        (
+            mesh,
+            globalFaces,
+            pp
+        )
+    );
+
+    // Determine patches for extruded boundary edges. Calculates if any
+    // additional processor patches need to be constructed.
+
+    labelList sidePatchID;
+    determineSidePatches
+    (
+        globalFaces,
+        edgeGlobalFaces,
+        pp,
+
+        sidePatchID
+    );
+
+
     // Construct iterative mesh mover.
     Info<< "Constructing mesh displacer ..." << endl;
 
@@ -3038,8 +3104,12 @@ void Foam::autoLayerDriver::addLayers
         // Not add layer if patchDisp is zero.
         addLayer.setRefinement
         (
+            globalFaces,
+            edgeGlobalFaces,
+
             invExpansionRatio,
             pp(),
+            sidePatchID,        // boundary patch for extruded boundary edges
             labelList(0),       // exposed patchIDs, not used for adding layers
             nPatchFaceLayers,   // layers per face
             nPatchPointLayers,  // layers per point

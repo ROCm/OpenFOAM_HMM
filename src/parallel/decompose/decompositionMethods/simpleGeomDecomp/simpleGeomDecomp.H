@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,7 +49,7 @@ class simpleGeomDecomp
 {
     // Private Member Functions
 
-        void assignToProcessorGroup(labelList& processorGroup, const label);
+        void assignToProcessorGroup(labelList&, const label) const;
 
         void assignToProcessorGroup
         (
@@ -58,7 +58,15 @@ class simpleGeomDecomp
             const labelList& indices,
             const scalarField& weights,
             const scalar summedWeights
-        );
+        ) const;
+
+        labelList decomposeOneProc(const pointField& points) const;
+
+        labelList decomposeOneProc
+        (
+            const pointField& points,
+            const scalarField& weights
+        ) const;
 
         //- Disallow default bitwise copy construct and assignment
         void operator=(const simpleGeomDecomp&);
@@ -86,9 +94,9 @@ public:
 
         virtual bool parallelAware() const
         {
-            // simpleDecomp does not attempt to do anything across proc
-            // boundaries
-            return false;
+            // simpleDecomp sends all points to the master which does
+            // the decomposition.
+            return true;
         }
 
         virtual labelList decompose(const pointField&);

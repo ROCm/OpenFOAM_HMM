@@ -104,6 +104,11 @@
       taking film into account
     + Parallel aware
 *** *New* ptscotch decomposition method
+*** *Updated* scotch decomposition method to run in parallel by doing
+    decomposition on the master. Unfortunately scotch and ptscotch cannot
+    be linked in to the same executable.
+*** *Updated* simple decomposition method to run in parallel by doing
+    decomposition on the master.
 *** *Updated* decomposePar maps polyPatches instead of recreating them so
     polyPatches holding data can map the data.
 *** *Updated* particle tracking algorithm
@@ -183,6 +188,9 @@
       e.g. pitzDailyDirectMapped tutorial.
     + =setSet=: allows time range (e.g. 0:100) in combination with -batch argument
     to execute the commands for multiple times.
+    + =extrudeMesh=:
+            - option to add extrusion to existing mesh.
+            - works in parallel
 * Post-processing
   + =paraFoam=, =foamToVTK=: full support for polyhedral cell type in recent
      Paraview versions.

@@ -43,75 +43,6 @@ defineTypeNameAndDebug(Foam::addPatchCellLayer, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Calculate global faces per pp edge.
-Foam::labelListList Foam::addPatchCellLayer::calcGlobalEdgeFaces
-(
-    const polyMesh& mesh,
-    const globalIndex& globalFaces,
-    const indirectPrimitivePatch& pp,
-    const labelList& meshEdges
-)
-{
-    //// Determine coupled edges just so we don't have to have storage
-    //// for all non-coupled edges.
-    //
-    //PackedBoolList isCoupledEdge(mesh.nEdges());
-    //
-    //const polyBoundaryMesh& patches = mesh.boundaryMesh();
-    //
-    //forAll(patches, patchI)
-    //{
-    //    const polyPatch& pp = patches[patchI];
-    //
-    //    if (pp.coupled())
-    //    {
-    //        const labelList& meshEdges = pp.meshEdges();
-    //
-    //        forAll(meshEdges, i)
-    //        {
-    //            isCoupledEdge.set(meshEdges[i], 1);
-    //        }
-    //    }
-    //}
-
-    // From mesh edge to global face labels. Sized only for pp edges.
-    labelListList globalEdgeFaces(mesh.nEdges());
-
-    const labelListList& edgeFaces = pp.edgeFaces();
-
-    forAll(edgeFaces, edgeI)
-    {
-        label meshEdgeI = meshEdges[edgeI];
-
-        //if (isCoupledEdge.get(meshEdgeI) == 1)
-        {
-            const labelList& eFaces = edgeFaces[edgeI];
-
-            // Store face and processor as unique tag.
-            labelList& globalEFaces = globalEdgeFaces[meshEdgeI];
-            globalEFaces.setSize(eFaces.size());
-            forAll(eFaces, i)
-            {
-                globalEFaces[i] =
-                    globalFaces.toGlobal(pp.addressing()[eFaces[i]]);
-            }
-        }
-    }
-
-    // Synchronise across coupled edges.
-    syncTools::syncEdgeList
-    (
-        mesh,
-        globalEdgeFaces,
-        uniqueEqOp(),
-        labelList()     // null value
-    );
-
-    // Extract pp part
-    return labelListList(UIndirectList<labelList>(globalEdgeFaces, meshEdges));
-}
-
-
 Foam::label Foam::addPatchCellLayer::nbrFace
 (
     const labelListList& edgeFaces,
@@ -316,12 +247,12 @@ Foam::labelPair Foam::addPatchCellLayer::getEdgeString
 Foam::label Foam::addPatchCellLayer::addSideFace
 (
     const indirectPrimitivePatch& pp,
-    const labelList& patchID,           // prestored patch per pp face
     const labelListList& addedCells,    // per pp face the new extruded cell
     const face& newFace,
+    const label newPatchID,
+
     const label ownFaceI,               // pp face that provides owner
     const label nbrFaceI,
-    const label patchEdgeI,             // edge to add to
     const label meshEdgeI,              // corresponding mesh edge
     const label layerI,                 // layer
     const label numEdgeFaces,           // number of layers for edge
@@ -329,8 +260,9 @@ Foam::label Foam::addPatchCellLayer::addSideFace
     polyTopoChange& meshMod
 ) const
 {
-    // Edge to 'inflate' from
+    // Face or edge to 'inflate' from
     label inflateEdgeI = -1;
+    label inflateFaceI = -1;
 
     // Check mesh faces using edge
     if (addToMesh_)
@@ -346,8 +278,6 @@ Foam::label Foam::addPatchCellLayer::addSideFace
         }
     }
 
-    // Get my mesh face and its zone.
-    label meshFaceI = pp.addressing()[ownFaceI];
     // Zone info comes from any side patch face. Otherwise -1 since we
     // don't know what to put it in - inherit from the extruded faces?
     label zoneI = -1;   //mesh_.faceZones().whichZone(meshFaceI);
@@ -358,14 +288,15 @@ Foam::label Foam::addPatchCellLayer::addSideFace
     // Is patch edge external edge of indirectPrimitivePatch?
     if (nbrFaceI == -1)
     {
-        // External edge so external face. Patch id is obtained from
-        // any other patch connected to edge.
+        // External edge so external face.
 
         const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
         // Loop over all faces connected to edge to inflate and
-        // see if any boundary face (but not meshFaceI)
-        label otherPatchID = patchID[ownFaceI];
+        // see if we can find a face that is otherPatchID
+
+        // Get my mesh face and its zone.
+        label meshFaceI = pp.addressing()[ownFaceI];
 
         forAll(meshFaces, k)
         {
@@ -373,11 +304,14 @@ Foam::label Foam::addPatchCellLayer::addSideFace
 
             if
             (
-                faceI != meshFaceI
-             && !mesh_.isInternalFace(faceI)
+                (faceI != meshFaceI)
+             && (patches.whichPatch(faceI) == newPatchID)
             )
             {
-                otherPatchID = patches.whichPatch(faceI);
+                // Found the patch face. Use it to inflate from
+                inflateEdgeI = -1;
+                inflateFaceI = faceI;
+
                 zoneI = mesh_.faceZones().whichZone(faceI);
                 if (zoneI != -1)
                 {
@@ -414,7 +348,7 @@ Foam::label Foam::addPatchCellLayer::addSideFace
 
         //Pout<< "Added boundary face:" << newFace
         //    << " own:" << addedCells[ownFaceI][layerOwn]
-        //    << " patch:" << otherPatchID
+        //    << " patch:" << newPatchID
         //    << endl;
 
         addedFaceI = meshMod.setAction
@@ -426,9 +360,9 @@ Foam::label Foam::addPatchCellLayer::addSideFace
                 -1,                         // neighbour
                 -1,                         // master point
                 inflateEdgeI,               // master edge
-                -1,                         // master face
+                inflateFaceI,               // master face
                 false,                      // flux flip
-                otherPatchID,               // patch for face
+                newPatchID,                 // patch for face
                 zoneI,                      // zone for face
                 flip                        // face zone flip
             )
@@ -510,6 +444,51 @@ Foam::label Foam::addPatchCellLayer::addSideFace
 }
 
 
+Foam::label Foam::addPatchCellLayer::findProcPatch
+(
+    const polyMesh& mesh,
+    const label nbrProcID
+)
+{
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+    forAll(mesh.globalData().processorPatches(), i)
+    {
+        label patchI = mesh.globalData().processorPatches()[i];
+
+        if
+        (
+            refCast<const processorPolyPatch>(patches[patchI]).neighbProcNo()
+         == nbrProcID
+        )
+        {
+            return patchI;
+        }
+    }
+    return -1;
+}
+
+
+void Foam::addPatchCellLayer::setFaceProps
+(
+    const polyMesh& mesh,
+    const label faceI,
+
+    label& patchI,
+    label& zoneI,
+    bool& zoneFlip
+)
+{
+    patchI = mesh.boundaryMesh().whichPatch(faceI);
+    zoneI = mesh.faceZones().whichZone(faceI);
+    if (zoneI != -1)
+    {
+        label index = mesh.faceZones()[zoneI].whichFace(faceI);
+        zoneFlip = mesh.faceZones()[zoneI].flipMap()[index];
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from mesh
@@ -561,10 +540,251 @@ Foam::labelListList Foam::addPatchCellLayer::addedCells() const
 }
 
 
+// Calculate global faces per pp edge.
+Foam::labelListList Foam::addPatchCellLayer::globalEdgeFaces
+(
+    const polyMesh& mesh,
+    const globalIndex& globalFaces,
+    const indirectPrimitivePatch& pp
+)
+{
+    // Precalculate mesh edges for pp.edges.
+    const labelList meshEdges(pp.meshEdges(mesh.edges(), mesh.pointEdges()));
+
+    // From mesh edge to global face labels. Non-empty sublists only for
+    // pp edges.
+    labelListList globalEdgeFaces(mesh.nEdges());
+
+    const labelListList& edgeFaces = pp.edgeFaces();
+
+    forAll(edgeFaces, edgeI)
+    {
+        label meshEdgeI = meshEdges[edgeI];
+
+        const labelList& eFaces = edgeFaces[edgeI];
+
+        // Store face and processor as unique tag.
+        labelList& globalEFaces = globalEdgeFaces[meshEdgeI];
+        globalEFaces.setSize(eFaces.size());
+        forAll(eFaces, i)
+        {
+            globalEFaces[i] = globalFaces.toGlobal(pp.addressing()[eFaces[i]]);
+        }
+    }
+
+    // Synchronise across coupled edges.
+    syncTools::syncEdgeList
+    (
+        mesh,
+        globalEdgeFaces,
+        uniqueEqOp(),
+        labelList()             // null value
+    );
+
+    // Extract pp part
+    return labelListList(UIndirectList<labelList>(globalEdgeFaces, meshEdges));
+}
+
+
+void Foam::addPatchCellLayer::calcSidePatch
+(
+    const polyMesh& mesh,
+    const globalIndex& globalFaces,
+    const labelListList& globalEdgeFaces,
+    const indirectPrimitivePatch& pp,
+
+    labelList& sidePatchID,
+    label& nPatches,
+    Map<label>& nbrProcToPatch,
+    Map<label>& patchToNbrProc
+)
+{
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+    // Precalculate mesh edges for pp.edges.
+    const labelList meshEdges(pp.meshEdges(mesh.edges(), mesh.pointEdges()));
+
+    sidePatchID.setSize(pp.nEdges());
+    sidePatchID = -1;
+
+    // These also get determined but not (yet) exported:
+    // - whether face is created from other face or edge
+    // - what zone&orientation face should have
+
+    labelList inflateEdgeI(pp.nEdges(), -1);
+    labelList inflateFaceI(pp.nEdges(), -1);
+    labelList sideZoneID(pp.nEdges(), -1);
+    boolList sideFlip(pp.nEdges(), false);
+
+    nPatches = patches.size();
+
+    forAll(globalEdgeFaces, edgeI)
+    {
+        const labelList& eGlobalFaces = globalEdgeFaces[edgeI];
+        if
+        (
+            eGlobalFaces.size() == 2
+         && pp.edgeFaces()[edgeI].size() == 1
+        )
+        {
+            // Locally but not globally a boundary edge. Hence a coupled
+            // edge. Find the patch to use if on different
+            // processors.
+
+            label f0 = eGlobalFaces[0];
+            label f1 = eGlobalFaces[1];
+
+            label otherProcI = -1;
+            if (globalFaces.isLocal(f0) && !globalFaces.isLocal(f1))
+            {
+                otherProcI = globalFaces.whichProcID(f1);
+            }
+            else if (!globalFaces.isLocal(f0) && globalFaces.isLocal(f1))
+            {
+                otherProcI = globalFaces.whichProcID(f0);
+            }
+
+
+            if (otherProcI != -1)
+            {
+                sidePatchID[edgeI] = findProcPatch(mesh, otherProcI);
+                if (sidePatchID[edgeI] == -1)
+                {
+                    // Cannot find a patch to processor. See if already
+                    // marked for addition
+                    if (nbrProcToPatch.found(otherProcI))
+                    {
+                        sidePatchID[edgeI] = nbrProcToPatch[otherProcI];
+                    }
+                    else
+                    {
+                        sidePatchID[edgeI] = nPatches;
+                        nbrProcToPatch.insert(otherProcI, nPatches);
+                        patchToNbrProc.insert(nPatches, otherProcI);
+                        nPatches++;
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    // Determine face properties for all other boundary edges
+    // ------------------------------------------------------
+
+    const labelListList& edgeFaces = pp.edgeFaces();
+    forAll(edgeFaces, edgeI)
+    {
+        if (edgeFaces[edgeI].size() == 1 && sidePatchID[edgeI] == -1)
+        {
+            // Proper, uncoupled patch edge.
+
+            label myFaceI = pp.addressing()[edgeFaces[edgeI][0]];
+
+            // Pick up any boundary face on this edge and use its properties
+            label meshEdgeI = meshEdges[edgeI];
+            const labelList& meshFaces = mesh.edgeFaces()[meshEdgeI];
+
+            forAll(meshFaces, k)
+            {
+                label faceI = meshFaces[k];
+
+                if (faceI != myFaceI && !mesh.isInternalFace(faceI))
+                {
+                    setFaceProps
+                    (
+                        mesh,
+                        faceI,
+
+                        sidePatchID[edgeI],
+                        sideZoneID[edgeI],
+                        sideFlip[edgeI]
+                    );
+                    inflateFaceI[edgeI] = faceI;
+                    inflateEdgeI[edgeI] = -1;
+
+                    break;
+                }
+            }
+        }
+    }
+
+
+
+    // Now hopefully every boundary edge has a side patch. Check
+    forAll(edgeFaces, edgeI)
+    {
+        if (edgeFaces[edgeI].size() == 1 && sidePatchID[edgeI] == -1)
+        {
+            const edge& e = pp.edges()[edgeI];
+            FatalErrorIn("addPatchCellLayer::calcSidePatch(..)")
+                << "Have no sidePatchID for edge " << edgeI << " points "
+                << pp.points()[pp.meshPoints()[e[0]]]
+                << pp.points()[pp.meshPoints()[e[1]]]
+                << abort(FatalError);
+        }
+    }
+
+
+
+    // Now we have sidepatch see if we have patchface or edge to inflate
+    // from.
+    forAll(edgeFaces, edgeI)
+    {
+        if (edgeFaces[edgeI].size() == 1 && inflateFaceI[edgeI] == -1)
+        {
+            // 1. Do we have a boundary face to inflate from
+
+            label myFaceI = pp.addressing()[edgeFaces[edgeI][0]];
+
+            // Pick up any boundary face on this edge and use its properties
+            label meshEdgeI = meshEdges[edgeI];
+            const labelList& meshFaces = mesh.edgeFaces()[meshEdgeI];
+
+            forAll(meshFaces, k)
+            {
+                label faceI = meshFaces[k];
+
+                if (faceI != myFaceI)
+                {
+                    if (mesh.isInternalFace(faceI))
+                    {
+                        inflateEdgeI[edgeI] = meshEdgeI;
+                    }
+                    else
+                    {
+                        if (patches.whichPatch(faceI) == sidePatchID[edgeI])
+                        {
+                            setFaceProps
+                            (
+                                mesh,
+                                faceI,
+
+                                sidePatchID[edgeI],
+                                sideZoneID[edgeI],
+                                sideFlip[edgeI]
+                            );
+                            inflateFaceI[edgeI] = faceI;
+                            inflateEdgeI[edgeI] = -1;
+
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 void Foam::addPatchCellLayer::setRefinement
 (
+    const globalIndex& globalFaces,
+    const labelListList& globalEdgeFaces,
     const scalarField& expansionRatio,
     const indirectPrimitivePatch& pp,
+    const labelList& sidePatchID,
     const labelList& exposedPatchID,
     const labelList& nFaceLayers,
     const labelList& nPointLayers,
@@ -575,7 +795,7 @@ void Foam::addPatchCellLayer::setRefinement
     if (debug)
     {
         Pout<< "addPatchCellLayer::setRefinement : Adding up to "
-            << max(nPointLayers)
+            << gMax(nPointLayers)
             << " layers of cells to indirectPrimitivePatch with "
             << pp.nPoints() << " points" << endl;
     }
@@ -787,8 +1007,6 @@ void Foam::addPatchCellLayer::setRefinement
                 label myFaceI = pp.addressing()[eFaces[0]];
 
                 label meshEdgeI = meshEdges[edgeI];
-
-                // Mesh faces using edge
 
                 // Mesh faces using edge
                 const labelList& meshFaces = mesh_.edgeFaces(meshEdgeI, ef);
@@ -1213,22 +1431,6 @@ void Foam::addPatchCellLayer::setRefinement
     }
 
 
-    // Global indices engine
-    const globalIndex globalFaces(mesh_.nFaces());
-
-    // Get for all pp edgeFaces a unique faceID
-    labelListList globalEdgeFaces
-    (
-         calcGlobalEdgeFaces
-         (
-            mesh_,
-            globalFaces,
-            pp,
-            meshEdges
-        )
-    );
-
-
     // Mark off which edges have been extruded
     boolList doneEdge(pp.nEdges(), false);
 
@@ -1474,16 +1676,17 @@ void Foam::addPatchCellLayer::setRefinement
                         addSideFace
                         (
                             pp,
-                            patchID,
                             addedCells,
-                            newFace,
+
+                            newFace,                // vertices of new face
+                            sidePatchID[startEdgeI],// -1 or patch for face
+
                             patchFaceI,
                             nbrFaceI,
-                            startEdgeI,     // edge to inflate from
-                            meshEdgeI,      // corresponding mesh edge
-                            i,
-                            numEdgeSideFaces,
-                            meshFaces,
+                            meshEdgeI,          // (mesh) edge to inflate
+                            i,                  // layer
+                            numEdgeSideFaces,   // num layers
+                            meshFaces,          // edgeFaces
                             meshMod
                         );
                     }

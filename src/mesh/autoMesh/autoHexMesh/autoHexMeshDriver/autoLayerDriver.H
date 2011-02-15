@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -242,6 +242,16 @@ class autoLayerDriver
                     labelList& patchNLayers,
                     List<extrudeMode>& extrudeStatus
                 ) const;
+
+                //- See what patches boundaryedges should be extruded into
+                void determineSidePatches
+                (
+                    const globalIndex& globalFaces,
+                    const labelListList& edgeGlobalFaces,
+                    const indirectPrimitivePatch& pp,
+
+                    labelList& sidePatchID
+                );
 
                 //- Calculate pointwise wanted and minimum thickness.
                 //  thickness: wanted thickness
