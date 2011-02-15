@@ -525,6 +525,7 @@ void readFields
 
             // Receive field
             IPstream fromMaster(Pstream::blocking, Pstream::masterNo());
+            dictionary fieldDict(fromMaster);
 
             fields.set
             (
@@ -540,7 +541,7 @@ void readFields
                         IOobject::AUTO_WRITE
                     ),
                     mesh,
-                    fromMaster
+                    fieldDict
                 )
             );
 
