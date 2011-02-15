@@ -480,13 +480,13 @@ void Foam::KinematicCloud<ParcelType>::cloudReset(KinematicCloud<ParcelType>& c)
 
     forces_.transfer(c.forces_);
 
-    collisionModel_ = c.collisionModel_->clone();
-    dispersionModel_= c.dispersionModel_->clone();
-    injectionModel_ = c.injectionModel_->clone();
-    patchInteractionModel_ = c.patchInteractionModel_->clone();
-    postProcessingModel_ = c.postProcessingModel_->clone();
+    collisionModel_.reset(c.collisionModel_.ptr());
+    dispersionModel_.reset(c.dispersionModel_.ptr());
+    injectionModel_.reset(c.injectionModel_.ptr());
+    patchInteractionModel_.reset(c.patchInteractionModel_.ptr());
+    postProcessingModel_.reset(c.postProcessingModel_.ptr());
 
-    UIntegrator_ = c.UIntegrator_->clone();
+    UIntegrator_.reset(c.UIntegrator_.ptr());
 }
 
 

@@ -85,8 +85,8 @@ void Foam::ReactingCloud<ParcelType>::cloudReset(ReactingCloud<ParcelType>& c)
 {
     ThermoCloud<ParcelType>::cloudReset(c);
 
-    compositionModel_ = c.compositionModel_->clone();
-    phaseChangeModel_ = c.phaseChangeModel_->clone();
+    compositionModel_.reset(c.compositionModel_.ptr());
+    phaseChangeModel_.reset(c.phaseChangeModel_.ptr());
 
     dMassPhaseChange_ = c.dMassPhaseChange_;
 }
