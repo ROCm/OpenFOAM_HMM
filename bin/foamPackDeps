@@ -58,6 +58,7 @@ cat <<USAGE
 Usage: ${0##*/} [OPTION]
 options:
   -b, -bzip2            use bzip2 instead of gzip compression
+  -c, -current          for compatibility - currently ignored
   -o, -output <dir>     specify alternative output directory
 
 * Pack and compress *.dep files from $codeBase
@@ -67,7 +68,7 @@ USAGE
 }
 
 
-unset outputDir
+unset archOptions outputDir
 packExt=tgz
 
 # parse options
@@ -79,6 +80,10 @@ do
         ;;
     -b | -bzip2)
         packExt=tbz
+        shift
+        ;;
+    -c | -current)      # use $WM_OPTIONS - eg, 'linux64GccDPOpt'
+        archOptions="$WM_OPTIONS"
         shift
         ;;
     -o | -output)
