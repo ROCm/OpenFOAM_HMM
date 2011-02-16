@@ -117,7 +117,7 @@ public:
         //  One value per face or vertex (isNodeValues = true)
         virtual void write
         (
-            const fileName& outputDir,      // <root>/<case>/surface/TIME
+            const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
             const pointField& points,
             const faceList& faces,
@@ -131,7 +131,7 @@ public:
         //  One value per face or vertex (isNodeValues = true)
         virtual void write
         (
-            const fileName& outputDir,      // <root>/<case>/surface/TIME
+            const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
             const pointField& points,
             const faceList& faces,
@@ -145,7 +145,7 @@ public:
         //  One value per face or vertex (isNodeValues = true)
         virtual void write
         (
-            const fileName& outputDir,      // <root>/<case>/surface/TIME
+            const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
             const pointField& points,
             const faceList& faces,
@@ -159,7 +159,7 @@ public:
         //  One value per face or vertex (isNodeValues = true)
         virtual void write
         (
-            const fileName& outputDir,      // <root>/<case>/surface/TIME
+            const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
             const pointField& points,
             const faceList& faces,
@@ -173,7 +173,7 @@ public:
         //  One value per face or vertex (isNodeValues = true)
         virtual void write
         (
-            const fileName& outputDir,      // <root>/<case>/surface/TIME
+            const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
             const pointField& points,
             const faceList& faces,

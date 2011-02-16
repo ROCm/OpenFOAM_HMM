@@ -29,6 +29,9 @@
 #     Print the version used when building the project
 #
 #------------------------------------------------------------------------------
+# persistent build tag
+build="$WM_PROJECT_DIR/.build"
+
 usage() {
     exec 1>&2
 
@@ -41,6 +44,7 @@ options:
   -major          report \$WM_PROJECT_VERSION only and exit
   -update         update \$WM_PROJECT_DIR/.build from the git information
   -pkg TAG        specify packager/release tag ('none' marks an empty packager)
+  -short          report short version information (ie, without pkg tag)
   -version VER    specify an alternative version
 
 Print the version used when building the project, in this order of precedence:
@@ -53,7 +57,7 @@ USAGE
 }
 #------------------------------------------------------------------------------
 
-unset checkOnly update package version oldPackage oldVersion
+unset checkOnly update package version shortOpt
 
 # parse options
 while [ "$#" -gt 0 ]
@@ -76,9 +80,13 @@ do
         ;;
     -pkg | -package)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-        # mark empty as 'none', disallow '!' and spaces in string
-        package=$(echo "${2:-none}" | sed -e 's/!//g' -e 's/ //g')
+        # mark empty as 'none', disallow '!' in string
+        package=$(echo "${2:-none}" | sed -e 's/!//g')
         shift 2
+        ;;
+    -short)
+        shortOpt=true
+        shift
         ;;
     -v | -version)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
@@ -94,16 +102,10 @@ done
 #------------------------------------------------------------------------------
 
 #
-# persistent build tag
-#
-build="$WM_PROJECT_DIR/.build"
-
-unset oldVersion oldPackage
-
-#
 # retrieve old values from the $WM_PROJECT_DIR/.build cache, stored as
 #     version [packager]
 #
+unset oldPackage oldVersion
 getOldValues()
 {
     set -- $(tail -1 $build 2>/dev/null)
@@ -157,6 +159,11 @@ fi
 # retrieve old values
 getOldValues
 
+if [ "$shortOpt" = true ]
+then
+    unset package oldPackage
+fi
+
 #
 # update persistent build tag if possible
 #
@@ -170,6 +177,14 @@ then
         fi
     fi
 fi
+
+# cat<< DEBUG 1>&2
+# Debug information
+#     version='$version'
+#     package='$package'
+#     oldVersion='$oldVersion'
+#     oldPackage='$oldPackage'
+# DEBUG
 
 
 # check git vs. persistent build tag

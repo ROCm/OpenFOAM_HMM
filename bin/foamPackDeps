@@ -3,9 +3,9 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -23,14 +23,33 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
-#     foamPack [OPTION]
+#     foamPackDeps [OPTION]
 #
 # Description
-#     Pack and compress the OpenFOAM directory for release
+#     Pack and compress *.dep files from OpenFOAM
+#
+# Script
+#     foamPackDeps [OPTION]
+#
+# Description
+#     Pack and compress *.dep files from OpenFOAM ThirdParty
 #
 #------------------------------------------------------------------------------
-packDir=$WM_PROJECT-$WM_PROJECT_VERSION
 toolsDir="${0%/*}/tools"  # this script is located in the tools/ parent dir
+
+case "${0##*/}" in
+*ThirdParty*)
+    # for ThirdParty
+    codeBase="OpenFOAM ThirdParty"
+    packDir=ThirdParty-$WM_PROJECT_VERSION
+    ;;
+*)
+    # regular
+    codeBase="OpenFOAM"
+    packDir=$WM_PROJECT-$WM_PROJECT_VERSION
+    ;;
+esac
+
 
 usage() {
     exec 1>&2
@@ -38,16 +57,20 @@ usage() {
 cat <<USAGE
 Usage: ${0##*/} [OPTION]
 options:
+  -b, -bzip2            use bzip2 instead of gzip compression
+  -c, -current          for compatibility - currently ignored
   -o, -output <dir>     specify alternative output directory
-  -nogit                bypass using 'git archive'
 
-* Pack and compress OpenFOAM directory for release
+* Pack and compress *.dep files from $codeBase
 
 USAGE
     exit 1
 }
 
-unset outputDir nogit
+
+unset archOptions outputDir
+packExt=tgz
+
 # parse options
 while [ "$#" -gt 0 ]
 do
@@ -55,8 +78,12 @@ do
     -h | -help)
         usage
         ;;
-    -nogit)
-        nogit=true
+    -b | -bzip2)
+        packExt=tbz
+        shift
+        ;;
+    -c | -current)      # use $WM_OPTIONS - eg, 'linux64GccDPOpt'
+        archOptions="$WM_OPTIONS"
         shift
         ;;
     -o | -output)
@@ -82,8 +109,7 @@ done
 
 #------------------------------------------------------------------------------
 timeStamp=$(date +%Y-%m-%d)
-packExt=tgz
-packBase=${packDir}_${timeStamp}
+packBase=${packDir}.deps_${timeStamp}
 
 # add optional output directory
 [ -d "$outputDir" ] && packBase="$outputDir/$packBase"
@@ -96,27 +122,35 @@ then
     exit 1
 fi
 
-# add time-stamp file before packing
-echo $timeStamp 2>/dev/null > $packDir/.timeStamp
+cat <<INFO 1>&2
+-------------------------------------------------------------------------------
+Packing *.dep files into $packFile
 
-# check for git (program and .git directory)
-(cd $packDir && git branch) > /dev/null 2>&1 || nogit=true
+INFO
 
-if [ "$nogit" = true ]
+
+# bzip2 or gzip compression
+case "$packFile" in
+*tbz)
+    tarOpt=cpjf
+    ;;
+*)
+    tarOpt=cpzf
+    ;;
+esac
+
+
+# Clean up on Ctrl-C
+trap 'rm -f $packFile 2>/dev/null' INT
+
+find -H $packDir -name '*.dep' -type f -print | tar $tarOpt $packFile -T -
+
+if [ $? -eq 0 ]
 then
-    echo "pack manually" 1>&2
-    $toolsDir/foamPackSource $packDir $packFile
+    echo "Finished packing *.dep files into $packFile" 1>&2
 else
-    echo "pack with git-archive" 1>&2
-    ( cd $packDir && git archive --format=tar --prefix=$packDir/ HEAD) > $packBase.tar
-
-    echo "add in time-stamp and lnInclude directories" 1>&2
-    tar cf $packBase.tar2 $packDir/.timeStamp $packDir/.build `find -H $packDir -type d -name lnInclude`
-    tar Af $packBase.tar $packBase.tar2
-
-    echo "gzip tar file" 1>&2
-    gzip -c9 $packBase.tar > $packFile
-    rm -f $packBase.tar $packBase.tar2 2>/dev/null
+    echo "Error: failure packing *.dep files into $packFile" 1>&2
+    rm -f $packFile 2>/dev/null
 fi
 
 #------------------------------------------------------------------------------

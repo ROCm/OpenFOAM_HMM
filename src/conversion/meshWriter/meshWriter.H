@@ -35,7 +35,7 @@ Description
     write OpenFOAM meshes and/or results to another CFD format
     - currently just STAR-CD
 
-@par Files
+\par Files
 
     "constant/boundaryRegion" is an IOMap<dictionary> that contains
     the boundary type and names. eg,

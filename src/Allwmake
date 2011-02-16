@@ -39,6 +39,7 @@ parallel/decompose/AllwmakeLnInclude
 dummyThirdParty/Allwmake $*
 
 wmake $makeOption lagrangian/basic
+wmake $makeOption lagrangian/distributionModels
 wmake $makeOption finiteVolume
 wmake $makeOption genericPatchFields
 
