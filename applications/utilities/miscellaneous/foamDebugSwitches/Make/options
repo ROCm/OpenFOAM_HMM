@@ -21,7 +21,6 @@ EXE_LIBS = \
     -ledgeMesh \
     -lengine \
     -lerrorEstimation \
-    -lEulerianInterfacialModels \
     -lextrudeModel \
     -lfieldFunctionObjects \
     -lfileFormats \
