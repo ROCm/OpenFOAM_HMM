@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -120,7 +120,7 @@ public:
 
 protected:
 
-    // Private data
+    // Protected data
 
         //- Reference to the particle cloud
         const Cloud<ParticleType>& cloud_;
@@ -179,18 +179,18 @@ protected:
             const label tetPtI
         ) const;
 
-         //- Find the lambda value for a moving tri face
-         inline scalar movingTetLambda
-         (
-             const vector& from,
-             const vector& to,
-             const label triI,
-             const vector& tetArea,
-             const label tetPlaneBasePtI,
-             const label cellI,
-             const label tetFaceI,
-             const label tetPtI
-         ) const;
+        //- Find the lambda value for a moving tri face
+        inline scalar movingTetLambda
+        (
+            const vector& from,
+            const vector& to,
+            const label triI,
+            const vector& tetArea,
+            const label tetPlaneBasePtI,
+            const label cellI,
+            const label tetFaceI,
+            const label tetPtI
+        ) const;
 
         //- Modify the tet owner data by crossing triI
         inline void tetNeighbour(label triI);
