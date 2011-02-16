@@ -65,8 +65,6 @@ lagrangian/Allwmake $*
 postProcessing/Allwmake $*
 mesh/Allwmake $*
 
-wmake $makeOption errorEstimation
-
 fvAgglomerationMethods/Allwmake $*
 
 wmake $makeOption fvMotionSolver
