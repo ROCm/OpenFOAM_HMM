@@ -75,6 +75,9 @@ public:
         //- Construct given an IOobject and dictionary
         IOdictionary(const IOobject&, const dictionary&);
 
+        //- Construct given an IOobject and Istream
+        IOdictionary(const IOobject&, Istream&);
+
 
     //- Destructor
     virtual ~IOdictionary();

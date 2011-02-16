@@ -137,7 +137,7 @@ Foam::IOdictionary::IOdictionary(const IOobject& io)
     }
 
     // Everyone check or just master
-    bool masterOnly = 
+    bool masterOnly =
         regIOobject::fileModificationChecking == timeStampMaster
      || regIOobject::fileModificationChecking == inotifyMaster;
 
@@ -195,7 +195,7 @@ Foam::IOdictionary::IOdictionary(const IOobject& io, const dictionary& dict)
     }
 
     // Everyone check or just master
-    bool masterOnly = 
+    bool masterOnly =
         regIOobject::fileModificationChecking == timeStampMaster
      || regIOobject::fileModificationChecking == inotifyMaster;
 
@@ -235,6 +235,15 @@ Foam::IOdictionary::IOdictionary(const IOobject& io, const dictionary& dict)
         dictionary::operator=(dict);
     }
 
+    dictionary::name() = IOobject::objectPath();
+}
+
+
+Foam::IOdictionary::IOdictionary(const IOobject& io, Istream& is)
+:
+    regIOobject(io),
+    dictionary(is)
+{
     dictionary::name() = IOobject::objectPath();
 }
 

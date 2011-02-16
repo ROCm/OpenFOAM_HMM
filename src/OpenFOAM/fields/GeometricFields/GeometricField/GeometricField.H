@@ -325,14 +325,6 @@ public:
             const Mesh&
         );
 
-        //- Construct and read from given stream
-        GeometricField
-        (
-            const IOobject&,
-            const Mesh&,
-            Istream&
-        );
-
         //- Construct from dictionary
         GeometricField
         (

@@ -95,17 +95,22 @@ Foam::tmp
 >
 Foam::GeometricField<Type, PatchField, GeoMesh>::readField(Istream& is)
 {
-    if (is.version() < 2.0)
-    {
-        FatalIOErrorIn
+    return readField
+    (
+        IOdictionary
         (
-            "GeometricField<Type, PatchField, GeoMesh>::readField(Istream&)",
+            IOobject
+            (
+                this->name(),
+                this->time().timeName(),
+                this->db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
             is
-        )   << "IO versions < 2.0 are not supported."
-            << exit(FatalIOError);
-    }
-
-    return readField(dictionary(is));
+        )
+    );
 }
 
 
@@ -368,45 +373,6 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
             "GeometricField<Type, PatchField, GeoMesh>::GeometricField"
             "(const IOobject&, const Mesh&)",
             this->readStream(typeName)
-        )   << "   number of field elements = " << this->size()
-            << " number of mesh elements = " << GeoMesh::size(this->mesh())
-            << exit(FatalIOError);
-    }
-
-    readOldTimeIfPresent();
-
-    if (debug)
-    {
-        Info<< "Finishing read-construct of "
-               "GeometricField<Type, PatchField, GeoMesh>"
-            << endl << this->info() << endl;
-    }
-}
-
-
-template<class Type, template<class> class PatchField, class GeoMesh>
-Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
-(
-    const IOobject& io,
-    const Mesh& mesh,
-    Istream& is
-)
-:
-    DimensionedField<Type, GeoMesh>(io, mesh, dimless, false),
-    timeIndex_(this->time().timeIndex()),
-    field0Ptr_(NULL),
-    fieldPrevIterPtr_(NULL),
-    boundaryField_(*this, readField(is))
-{
-    // Check compatibility between field and mesh
-
-    if (this->size() != GeoMesh::size(this->mesh()))
-    {
-        FatalIOErrorIn
-        (
-            "GeometricField<Type, PatchField, GeoMesh>::GeometricField"
-            "(const IOobject&, const Mesh&, Istream&)",
-            is
         )   << "   number of field elements = " << this->size()
             << " number of mesh elements = " << GeoMesh::size(this->mesh())
             << exit(FatalIOError);
