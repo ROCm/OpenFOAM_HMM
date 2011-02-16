@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -257,7 +257,7 @@ Foam::KinematicCloud<ParcelType>::g() const
 
 
 template<class ParcelType>
-inline const Foam::particleForces&
+inline const typename ParcelType::forceType&
 Foam::KinematicCloud<ParcelType>::forces() const
 {
     return forces_;
@@ -297,14 +297,6 @@ Foam::KinematicCloud<ParcelType>::dispersion()
 
 
 template<class ParcelType>
-inline const Foam::DragModel<Foam::KinematicCloud<ParcelType> >&
-Foam::KinematicCloud<ParcelType>::drag() const
-{
-    return dragModel_;
-}
-
-
-template<class ParcelType>
 inline const Foam::InjectionModel<Foam::KinematicCloud<ParcelType> >&
 Foam::KinematicCloud<ParcelType>::injection() const
 {
@@ -317,6 +309,14 @@ inline const Foam::PatchInteractionModel<Foam::KinematicCloud<ParcelType> >&
 Foam::KinematicCloud<ParcelType>::patchInteraction() const
 {
     return patchInteractionModel_;
+}
+
+
+template<class ParcelType>
+inline Foam::PatchInteractionModel<Foam::KinematicCloud<ParcelType> >&
+Foam::KinematicCloud<ParcelType>::patchInteraction()
+{
+    return patchInteractionModel_();
 }
 
 

@@ -56,19 +56,18 @@ constantProperties
     poissonsRatio   0.35;
 }
 
-particleForces
-{
-    gravity             on;
-    virtualMass         off;
-    pressureGradient    off;
-    paramagnetic        off;
-}
-
 subModels
 {
-    InjectionModel  ManualInjection;
+    particleForces
+    {
+        activeForces
+        (
+            sphereDrag
+            gravity
+        );
+    }
 
-    DragModel       SphereDrag;
+    InjectionModel  ManualInjection;
 
     DispersionModel StochasticDispersionRAS;
 

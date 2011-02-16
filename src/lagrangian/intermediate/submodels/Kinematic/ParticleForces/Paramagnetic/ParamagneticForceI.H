@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,44 +23,21 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "NoDrag.H"
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::NoDrag<CloudType>::NoDrag(const dictionary& dict, CloudType& owner)
-:
-    DragModel<CloudType>(owner)
-{}
-
-
-template<class CloudType>
-Foam::NoDrag<CloudType>::NoDrag(const NoDrag<CloudType>& dm)
-:
-    DragModel<CloudType>(dm.owner_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::NoDrag<CloudType>::~NoDrag()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::NoDrag<CloudType>::active() const
+inline const Foam::word&
+Foam::ParamagneticForce<CloudType>::HdotGradHName() const
 {
-    return false;
+    return HdotGradHName_;
 }
 
 
 template<class CloudType>
-Foam::scalar Foam::NoDrag<CloudType>::Cd(const scalar) const
+inline Foam::scalar
+Foam::ParamagneticForce<CloudType>::magneticSusceptibility() const
 {
-    return 0.0;
+    return magneticSusceptibility_;
 }
 
 

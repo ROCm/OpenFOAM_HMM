@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,66 +22,102 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::NoDrag
+    Foam::PressureGradientForce
 
 Description
-    Dummy drag model for 'none'
+    Calculates particle pressure gradient force
+
+SourceFiles
+    PressureGradientForceI.H
+    PressureGradientForce.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef NoDrag_H
-#define NoDrag_H
+#ifndef PressureGradientForce_H
+#define PressureGradientForce_H
 
-#include "DragModel.H"
+#include "ParticleForce.H"
+#include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
 /*---------------------------------------------------------------------------*\
-                            Class NoDrag Declaration
+                    Class PressureGradientForce Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class NoDrag
+class PressureGradientForce
 :
-    public DragModel<CloudType>
+    public ParticleForce<CloudType>
 {
+    // Private data
+
+        //- Name of velocity field
+        const word UName_;
+
+        //- Velocity gradient field
+        const volTensorField* gradUPtr_;
+
+
 public:
 
     //- Runtime type information
-    TypeName("none");
+    TypeName("pressureGradient");
 
 
     // Constructors
 
-        //- Construct from dictionary
-        NoDrag(const dictionary&, CloudType&);
+        //- Construct from mesh
+        PressureGradientForce
+        (
+            CloudType& owner,
+            const fvMesh& mesh,
+            const dictionary& dict,
+            const word& forceType
+        );
 
         //- Construct copy
-        NoDrag(const NoDrag<CloudType>& dm);
+        PressureGradientForce(const PressureGradientForce& pgf);
 
         //- Construct and return a clone
-        virtual autoPtr<DragModel<CloudType> > clone() const
+        virtual autoPtr<ParticleForce<CloudType> > clone() const
         {
-            return autoPtr<DragModel<CloudType> >
+            return autoPtr<ParticleForce<CloudType> >
             (
-                new NoDrag<CloudType>(*this)
+                new PressureGradientForce<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~NoDrag();
+    virtual ~PressureGradientForce();
 
 
     // Member Functions
 
-        //- Flag to indicate whether model activates drag model
-        bool active() const;
+        // Access
 
-        //- Return drag coefficient
-        scalar Cd(const scalar) const;
+            //- Return const access to the velocity gradient field
+            inline const volTensorField& gradU() const;
+
+
+        // Evaluation
+
+            //- Cache fields
+            virtual void cacheFields(const bool store);
+
+            //- Calculate the non-coupled force
+            virtual forceSuSp calcCoupled
+            (
+                const typename CloudType::parcelType& p,
+                const scalar dt,
+                const scalar mass,
+                const scalar Re,
+                const scalar muc
+            ) const;
 };
 
 
@@ -91,8 +127,10 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "PressureGradientForceI.H"
+
 #ifdef NoRepository
-#   include "NoDrag.C"
+    #include "PressureGradientForce.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

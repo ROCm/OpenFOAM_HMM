@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,19 +23,30 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "NonSphereDrag.H"
+#include "NonSphereDragForce.H"
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::scalar Foam::NonSphereDragForce<CloudType>::Cd(const scalar Re) const
+{
+    return 24.0/Re*(1.0 + a_*pow(Re, b_)) + Re*c_/(Re + d_);
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::NonSphereDrag<CloudType>::NonSphereDrag
+Foam::NonSphereDragForce<CloudType>::NonSphereDragForce
 (
+    CloudType& owner,
+    const fvMesh& mesh,
     const dictionary& dict,
-    CloudType& owner
+    const word& forceType
 )
 :
-    DragModel<CloudType>(dict, owner, typeName),
-    phi_(readScalar(this->coeffDict().lookup("phi"))),
+    ParticleForce<CloudType>(owner, mesh, dict, forceType),
+    phi_(readScalar(this->coeffs().lookup("phi"))),
     a_(exp(2.3288 - 6.4581*phi_ + 2.4486*sqr(phi_))),
     b_(0.0964 + 0.5565*phi_),
     c_(exp(4.9050 - 13.8944*phi_ + 18.4222*sqr(phi_) - 10.2599*pow3(phi_))),
@@ -58,33 +69,45 @@ Foam::NonSphereDrag<CloudType>::NonSphereDrag
 
 
 template<class CloudType>
-Foam::NonSphereDrag<CloudType>::NonSphereDrag
+Foam::NonSphereDragForce<CloudType>::NonSphereDragForce
 (
-    const NonSphereDrag<CloudType>& dm
+    const NonSphereDragForce<CloudType>& df
 )
 :
-    DragModel<CloudType>(dm),
-    phi_(dm.phi_),
-    a_(dm.a_),
-    b_(dm.b_),
-    c_(dm.c_),
-    d_(dm.d_)
+    ParticleForce<CloudType>(df),
+    phi_(df.phi_),
+    a_(df.a_),
+    b_(df.b_),
+    c_(df.c_),
+    d_(df.d_)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::NonSphereDrag<CloudType>::~NonSphereDrag()
+Foam::NonSphereDragForce<CloudType>::~NonSphereDragForce()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::scalar Foam::NonSphereDrag<CloudType>::Cd(const scalar Re) const
+Foam::forceSuSp Foam::NonSphereDragForce<CloudType>::calcNonCoupled
+(
+    const typename CloudType::parcelType& p,
+    const scalar dt,
+    const scalar mass,
+    const scalar Re,
+    const scalar muc
+) const
 {
-    return 24.0/(Re + ROOTVSMALL)*(1.0 + a_*pow(Re, b_)) + Re*c_/(Re + d_);
+    forceSuSp value(vector::zero, 0.0);
+
+    const scalar ReCorr = max(Re, 1e-6);
+    value.Sp() = mass*0.75*muc*Cd(ReCorr)*ReCorr/(p.rho()*sqr(p.d()));
+
+    return value;
 }
 
 
