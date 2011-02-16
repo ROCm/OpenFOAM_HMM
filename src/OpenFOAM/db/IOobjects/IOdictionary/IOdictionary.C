@@ -241,10 +241,13 @@ Foam::IOdictionary::IOdictionary(const IOobject& io, const dictionary& dict)
 
 Foam::IOdictionary::IOdictionary(const IOobject& io, Istream& is)
 :
-    regIOobject(io),
-    dictionary(is)
+    regIOobject(io)
 {
     dictionary::name() = IOobject::objectPath();
+    // Note that we do construct the dictionary null and read in afterwards
+    // so that if there is some fancy massaging due to a functionEntry in
+    // the dictionary at least the type information is already complete.
+    is  >> *this;
 }
 
 
