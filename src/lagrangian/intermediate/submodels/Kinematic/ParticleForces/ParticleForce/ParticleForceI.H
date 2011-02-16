@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,41 +23,40 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "DragModel.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::autoPtr<Foam::DragModel<CloudType> > Foam::DragModel<CloudType>::New
-(
-    const dictionary& dict,
-    CloudType& owner
-)
+inline const CloudType& Foam::ParticleForce<CloudType>::owner() const
 {
-    const word modelType(dict.lookup("DragModel"));
+    return owner_;
+}
 
-    Info<< "Selecting DragModel " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+template<class CloudType>
+inline CloudType& Foam::ParticleForce<CloudType>::owner()
+{
+    return owner_;
+}
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
-    {
-        FatalErrorIn
-        (
-            "DragModel<CloudType>::New"
-            "("
-                "const dictionary&,"
-                "CloudType&"
-            ")"
-        )   << "Unknown DragModel type "
-            << modelType << nl << nl
-            << "Valid DragModel types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
-    }
 
-    return autoPtr<DragModel<CloudType> >(cstrIter()(dict, owner));
+template<class CloudType>
+inline const Foam::fvMesh& Foam::ParticleForce<CloudType>::mesh() const
+{
+    return mesh_;
+}
+
+
+template<class CloudType>
+inline const Foam::dictionary& Foam::ParticleForce<CloudType>::dict() const
+{
+    return dict_;
+}
+
+
+template<class CloudType>
+inline const Foam::dictionary& Foam::ParticleForce<CloudType>::coeffs() const
+{
+    return coeffs_;
 }
 
 

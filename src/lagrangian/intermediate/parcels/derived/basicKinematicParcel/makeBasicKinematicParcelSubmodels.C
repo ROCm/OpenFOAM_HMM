@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,8 +26,8 @@ License
 #include "basicKinematicParcel.H"
 
 // Kinematic
+#include "makeParcelForces.H"
 #include "makeParcelDispersionModels.H"
-#include "makeParcelDragModels.H"
 #include "makeParcelInjectionModels.H"
 #include "makeParcelCollisionModels.H"
 #include "makeParcelPatchInteractionModels.H"
@@ -39,8 +39,8 @@ License
 namespace Foam
 {
     // Kinematic sub-models
+    makeParcelForces(basicKinematicParcel);
     makeParcelDispersionModels(basicKinematicParcel);
-    makeParcelDragModels(basicKinematicParcel);
     makeParcelInjectionModels(basicKinematicParcel);
     makeParcelCollisionModels(basicKinematicParcel);
     makeParcelPatchInteractionModels(basicKinematicParcel);

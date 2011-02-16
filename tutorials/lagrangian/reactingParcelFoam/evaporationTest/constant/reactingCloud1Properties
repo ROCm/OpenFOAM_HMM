@@ -84,19 +84,18 @@ constantProperties
     constantVolume  false;
 }
 
-particleForces
-{
-    gravity             off;
-    virtualMass         off;
-    pressureGradient    off;
-    paramagnetic        off;
-}
-
 subModels
 {
-    InjectionModel  ManualInjection;
+    particleForces
+    {
+        activeForces
+        (
+            sphereDrag
+            gravity
+        );
+    }
 
-    DragModel       SphereDrag;
+    InjectionModel  ManualInjection;
 
     DispersionModel none;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,63 +22,95 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::SphereDrag
+    Foam::SRFForce
 
 Description
-    Drag model based on assumption of solid spheres
+    Calculates particle SRF reference frame force
+
+SourceFiles
+    SRFForceI.H
+    SRFForce.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SphereDrag_H
-#define SphereDrag_H
+#ifndef SRFForce_H
+#define SRFForce_H
 
-#include "DragModel.H"
+#include "ParticleForce.H"
+#include "SRFModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+class fvMesh;
+
 /*---------------------------------------------------------------------------*\
-                         Class SphereDrag Declaration
+                       Class SRFForce Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class SphereDrag
+class SRFForce
 :
-    public DragModel<CloudType>
+    public ParticleForce<CloudType>
 {
+    // Private data
+
+        //- Pointer to the SRF model
+        const typename SRF::SRFModel* srfPtr_;
+
+
 public:
 
     //- Runtime type information
-    TypeName("SphereDrag");
+    TypeName("SRF");
 
 
     // Constructors
 
-        //- Construct from dictionary
-        SphereDrag(const dictionary& dict, CloudType& owner);
+        //- Construct from mesh
+        SRFForce
+        (
+            CloudType& owner,
+            const fvMesh& mesh,
+            const dictionary& dict,
+            const word& forceType
+        );
 
         //- Construct copy
-        SphereDrag(const SphereDrag<CloudType>& dm);
+        SRFForce(const SRFForce& srff);
 
         //- Construct and return a clone
-        virtual autoPtr<DragModel<CloudType> > clone() const
+        virtual autoPtr<ParticleForce<CloudType> > clone() const
         {
-            return autoPtr<DragModel<CloudType> >
+            return autoPtr<ParticleForce<CloudType> >
             (
-                new SphereDrag<CloudType>(*this)
+                new ParticleForce<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~SphereDrag();
+    virtual ~SRFForce();
 
 
     // Member Functions
 
-        //- Return drag coefficient
-        scalar Cd(const scalar Re) const;
+        // Evaluation
+
+            //- Cache fields
+            virtual void cacheFields(const bool store);
+
+            //- Calculate the non-coupled force
+            virtual forceSuSp calcNonCoupled
+            (
+                const typename CloudType::parcelType& p,
+                const scalar dt,
+                const scalar mass,
+                const scalar Re,
+                const scalar muc
+            ) const;
 };
 
 
@@ -89,7 +121,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "SphereDrag.C"
+    #include "SRFForce.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

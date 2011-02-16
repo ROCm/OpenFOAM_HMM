@@ -57,30 +57,27 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef NonSphereDrag_H
-#define NonSphereDrag_H
+#ifndef NonSphereDragForce_H
+#define NonSphereDragForce_H
 
-#include "DragModel.H"
+#include "ParticleForce.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                        Class NonSphereDrag Declaration
+                    Class NonSphereDragForce Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class NonSphereDrag
+class NonSphereDragForce
 :
-    public DragModel<CloudType>
+    public ParticleForce<CloudType>
 {
 protected:
 
     // Protected Data
-
-        //- Flag to indicate `Simple model'
-        bool simpleModel_;
 
         //- Ratio of surface of sphere having same volume as particle to
         //  actual surface area of particle (0 < phi <= 1)
@@ -98,38 +95,59 @@ protected:
             scalar d_;
 
 
+    // Private Member Functions
+
+        //- Drag coefficient
+        scalar Cd(const scalar Re) const;
+
+
 public:
 
     //- Runtime type information
-    TypeName("NonSphereDrag");
+    TypeName("nonSphereDrag");
 
 
     // Constructors
 
-        //- Construct from dictionary
-        NonSphereDrag(const dictionary& dict, CloudType& owner);
+        //- Construct from mesh
+        NonSphereDragForce
+        (
+            CloudType& owner,
+            const fvMesh& mesh,
+            const dictionary& dict,
+            const word& forceType
+        );
 
         //- Construct copy
-        NonSphereDrag(const NonSphereDrag<CloudType>& dm);
+        NonSphereDragForce(const NonSphereDragForce<CloudType>& df);
 
         //- Construct and return a clone
-        virtual autoPtr<DragModel<CloudType> > clone() const
+        virtual autoPtr<ParticleForce<CloudType> > clone() const
         {
-            return autoPtr<DragModel<CloudType> >
+            return autoPtr<ParticleForce<CloudType> >
             (
-                new NonSphereDrag<CloudType>(*this)
+                new NonSphereDragForce<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~NonSphereDrag();
+    virtual ~NonSphereDragForce();
 
 
     // Member Functions
 
-        //- Return drag coefficient
-        scalar Cd(const scalar Re) const;
+        // Evaluation
+
+            //- Calculate the non-coupled force
+            virtual forceSuSp calcNonCoupled
+            (
+                const typename CloudType::parcelType& p,
+                const scalar dt,
+                const scalar mass,
+                const scalar Re,
+                const scalar muc
+            ) const;
 };
 
 
@@ -140,7 +158,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "NonSphereDrag.C"
+#   include "NonSphereDragForce.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

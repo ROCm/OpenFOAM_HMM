@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,6 @@ License
 
 #include "CollisionModel.H"
 #include "DispersionModel.H"
-#include "DragModel.H"
 #include "InjectionModel.H"
 #include "PatchInteractionModel.H"
 #include "PostProcessingModel.H"
@@ -209,15 +208,6 @@ void Foam::KinematicCloud<ParcelType>::setModels()
         ).ptr()
     );
 
-    dragModel_.reset
-    (
-        DragModel<KinematicCloud<ParcelType> >::New
-        (
-            subModelProperties_,
-            *this
-        ).ptr()
-    );
-
     injectionModel_.reset
     (
         InjectionModel<KinematicCloud<ParcelType> >::New
@@ -306,7 +296,7 @@ void Foam::KinematicCloud<ParcelType>::preEvolve()
     Info<< "\nSolving cloud " << this->name() << endl;
 
     this->dispersion().cacheFields(true);
-    forces_.cacheFields(true, solution_.interpolationSchemes());
+    forces_.cacheFields(true);
     updateCellOccupancy();
 }
 
@@ -390,7 +380,7 @@ void Foam::KinematicCloud<ParcelType>::evolveCloud
     }
     else
     {
-//        this->surfaceFilm().injectStreadyState(td);
+//        this->surfaceFilm().injectSteadyState(td);
 
         this->injection().injectSteadyState(td, solution_.deltaT());
 
@@ -473,7 +463,7 @@ void Foam::KinematicCloud<ParcelType>::postEvolve()
     }
 
     this->dispersion().cacheFields(false);
-    forces_.cacheFields(false, solution_.interpolationSchemes());
+    forces_.cacheFields(false);
 
     this->postProcessing().post();
 
@@ -488,14 +478,15 @@ void Foam::KinematicCloud<ParcelType>::cloudReset(KinematicCloud<ParcelType>& c)
 
     rndGen_ = c.rndGen_;
 
-    collisionModel_ = c.collisionModel_->clone();
-    dispersionModel_= c.dispersionModel_->clone();
-    dragModel_ = c.dragModel_->clone();
-    injectionModel_ = c.injectionModel_->clone();
-    patchInteractionModel_ = c.patchInteractionModel_->clone();
-    postProcessingModel_ = c.postProcessingModel_->clone();
+    forces_.transfer(c.forces_);
 
-    UIntegrator_ = c.UIntegrator_->clone();
+    collisionModel_.reset(c.collisionModel_.ptr());
+    dispersionModel_.reset(c.dispersionModel_.ptr());
+    injectionModel_.reset(c.injectionModel_.ptr());
+    patchInteractionModel_.reset(c.patchInteractionModel_.ptr());
+    postProcessingModel_.reset(c.postProcessingModel_.ptr());
+
+    UIntegrator_.reset(c.UIntegrator_.ptr());
 }
 
 
@@ -529,7 +520,10 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     ),
     solution_(mesh_, particleProperties_.subDict("solution")),
     constProps_(particleProperties_, solution_.active()),
-    subModelProperties_(particleProperties_.subOrEmptyDict("subModels")),
+    subModelProperties_
+    (
+        particleProperties_.subOrEmptyDict("subModels", solution_.active())
+    ),
     rndGen_
     (
         label(0),
@@ -540,10 +534,19 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     U_(U),
     mu_(mu),
     g_(g),
-    forces_(mesh_, particleProperties_, g_.value(), solution_.active()),
+    forces_
+    (
+        *this,
+        mesh_,
+        subModelProperties_.subOrEmptyDict
+        (
+            "particleForces",
+            solution_.active()
+        ),
+        solution_.active()
+    ),
     collisionModel_(NULL),
     dispersionModel_(NULL),
-    dragModel_(NULL),
     injectionModel_(NULL),
     patchInteractionModel_(NULL),
     postProcessingModel_(NULL),
@@ -606,7 +609,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     const word& name
 )
 :
-    Cloud<ParcelType>(c.mesh(), name, c),
+    Cloud<ParcelType>(c.mesh_, name, c),
     kinematicCloud(),
     cloudCopyPtr_(NULL),
     mesh_(c.mesh_),
@@ -623,7 +626,6 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     forces_(c.forces_),
     collisionModel_(c.collisionModel_->clone()),
     dispersionModel_(c.dispersionModel_->clone()),
-    dragModel_(c.dragModel_->clone()),
     injectionModel_(c.injectionModel_->clone()),
     patchInteractionModel_(c.patchInteractionModel_->clone()),
     postProcessingModel_(c.postProcessingModel_->clone()),
@@ -661,7 +663,6 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
             c.UCoeff_()
         )
     )
-
 {}
 
 
@@ -698,10 +699,9 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     U_(c.U_),
     mu_(c.mu_),
     g_(c.g_),
-    forces_(mesh),
+    forces_(*this, mesh),
     collisionModel_(NULL),
     dispersionModel_(NULL),
-    dragModel_(NULL),
     injectionModel_(NULL),
     patchInteractionModel_(NULL),
     postProcessingModel_(NULL),
@@ -830,8 +830,10 @@ void Foam::KinematicCloud<ParcelType>::info() const
         << linearKineticEnergy << nl
         << "    Rotational kinetic energy       = "
         << rotationalKineticEnergy << nl;
+
     this->injection().info(Info);
     this->surfaceFilm().info(Info);
+    this->patchInteraction().info(Info);
 }
 
 

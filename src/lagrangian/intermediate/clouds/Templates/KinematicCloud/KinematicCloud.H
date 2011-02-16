@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,10 +29,14 @@ Description
 
     - holds a 'cloudSolution' class that stores all relevant solution info
 
+    - particle forces
+      - buoyancy
+      - drag
+      - pressure gradient
+
     - sub-models:
       - Collision model
       - Dispersion model
-      - Drag model
       - Injection model
       - Patch interaction model
       - Post-processing model
@@ -55,7 +59,6 @@ SourceFiles
 #include "fvMesh.H"
 #include "volFields.H"
 #include "fvMatrices.H"
-#include "particleForces.H"
 
 #include "IntegrationSchemesFwd.H"
 
@@ -71,9 +74,6 @@ class CollisionModel;
 
 template<class CloudType>
 class DispersionModel;
-
-template<class CloudType>
-class DragModel;
 
 template<class CloudType>
 class InjectionModel;
@@ -98,6 +98,14 @@ class KinematicCloud
     public Cloud<ParcelType>,
     public kinematicCloud
 {
+public:
+
+    //- Type of parcel the cloud was instantiated for
+    typedef ParcelType parcelType;
+
+
+private:
+
     // Private data
 
         //- Cloud copy pointer
@@ -316,7 +324,7 @@ protected:
 
 
         //- Optional particle forces
-        particleForces forces_;
+        typename ParcelType::forceType forces_;
 
 
         // References to the cloud sub-models
@@ -328,9 +336,6 @@ protected:
             //- Dispersion model
             autoPtr<DispersionModel<KinematicCloud<ParcelType> > >
                 dispersionModel_;
-
-            //- Drag transfer model
-            autoPtr<DragModel<KinematicCloud<ParcelType> > > dragModel_;
 
             //- Injector model
             autoPtr<InjectionModel<KinematicCloud<ParcelType> > >
@@ -450,10 +455,6 @@ public:
     virtual ~KinematicCloud();
 
 
-    //- Type of parcel the cloud was instantiated for
-    typedef ParcelType parcelType;
-
-
     // Member Functions
 
         // Access
@@ -521,7 +522,7 @@ public:
 
 
             //- Optional particle forces
-            inline const particleForces& forces() const;
+            inline const typename ParcelType::forceType& forces() const;
 
 
             // Sub-models
@@ -542,10 +543,6 @@ public:
                 inline DispersionModel<KinematicCloud<ParcelType> >&
                     dispersion();
 
-                //- Return const-access to the drag model
-                inline const DragModel<KinematicCloud<ParcelType> >&
-                    drag() const;
-
                 //- Return const access to the injection model
                 inline const InjectionModel<KinematicCloud<ParcelType> >&
                     injection() const;
@@ -557,6 +554,10 @@ public:
                 //- Return const-access to the patch interaction model
                 inline const PatchInteractionModel<KinematicCloud<ParcelType> >&
                     patchInteraction() const;
+
+                //- Return reference to the patch interaction model
+                inline PatchInteractionModel<KinematicCloud<ParcelType> >&
+                    patchInteraction();
 
                 //- Return reference to post-processing model
                 inline PostProcessingModel<KinematicCloud<ParcelType> >&

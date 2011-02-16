@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,73 +23,57 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "DragModel.H"
+#include "GravityForce.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::DragModel<CloudType>::DragModel(CloudType& owner)
-:
-    SubModelBase<CloudType>(owner)
-{}
-
-
-template<class CloudType>
-Foam::DragModel<CloudType>::DragModel
+Foam::GravityForce<CloudType>::GravityForce
 (
-    const dictionary& dict,
     CloudType& owner,
-    const word& type
+    const fvMesh& mesh,
+    const dictionary& dict,
+    const word& forceType
 )
 :
-    SubModelBase<CloudType>(owner, dict, type)
+    ParticleForce<CloudType>(owner, mesh, dict),
+    g_(owner.g().value())
 {}
 
 
 template<class CloudType>
-Foam::DragModel<CloudType>::DragModel(const DragModel<CloudType>& dm)
+Foam::GravityForce<CloudType>::GravityForce(const GravityForce& gf)
 :
-    SubModelBase<CloudType>(dm)
+    ParticleForce<CloudType>(gf),
+    g_(gf.g_)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::DragModel<CloudType>::~DragModel()
+Foam::GravityForce<CloudType>::~GravityForce()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::scalar Foam::DragModel<CloudType>::Cd(const scalar) const
-{
-    notImplemented
-    (
-        "Foam::scalar Foam::DragModel<CloudType>::Cd(const scalar) const"
-    );
-    return 0.0;
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::DragModel<CloudType>::utc
+Foam::forceSuSp Foam::GravityForce<CloudType>::calcNonCoupled
 (
+    const typename CloudType::parcelType& p,
+    const scalar dt,
+    const scalar mass,
     const scalar Re,
-    const scalar d,
-    const scalar mu
+    const scalar muc
 ) const
 {
-    const scalar Cd = this->Cd(Re);
+    forceSuSp value(vector::zero, 0.0);
 
-    return Cd*Re/d*mu/8.0;
+    value.Su() = mass*g_*(1.0 - p.rhoc()/p.rho());
+
+    return value;
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "DragModelNew.C"
-
 // ************************************************************************* //
-

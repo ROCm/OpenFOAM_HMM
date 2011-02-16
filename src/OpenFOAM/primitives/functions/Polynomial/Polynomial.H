@@ -29,14 +29,14 @@ Description
 
         poly = logCoeff*log(x) + sum(coeff_[i]*x^i)
 
-    where 0 \<= i \<= n
+    where 0 \<= i \<= N
 
     - integer powers, starting at zero
     - value(x) to evaluate the poly for a given value
     - integrate(x1, x2) between two scalar values
-    - integrate() to return a new, intergated coeff polynomial
+    - integral() to return a new, integral coeff polynomial
       - increases the size (order)
-    - integrateMinus1() to return a new, integrated coeff polynomial where
+    - integralMinus1() to return a new, integral coeff polynomial where
       the base poly starts at order -1
 
 SourceFiles
@@ -85,10 +85,10 @@ class Polynomial
 
     // Private data
 
-        //- Include the log term? - only activated using integrateMinus1()
+        //- Include the log term? - only activated using integralMinus1()
         bool logActive_;
 
-        //- Log coefficient - only activated using integrateMinus1()
+        //- Log coefficient - only activated using integralMinus1()
         scalar logCoeff_;
 
 
@@ -104,6 +104,9 @@ public:
         //- Construct null, with all coefficients = 0.0
         Polynomial();
 
+        //- Copy constructor
+        Polynomial(const Polynomial&);
+
         //- Construct from C-array of coefficients
         explicit Polynomial(const scalar coeffs[PolySize]);
 
@@ -111,24 +114,21 @@ public:
         explicit Polynomial(const UList<scalar>& coeffs);
 
         //- Construct from Istream
-        Polynomial(Istream& is);
+        Polynomial(Istream&);
 
         //- Construct from name and Istream
-        Polynomial(const word& name, Istream& is);
-
-        //- Copy constructor
-        Polynomial(const Polynomial& poly);
+        Polynomial(const word& name, Istream&);
 
 
     // Member Functions
 
         // Access
 
-            //- Return access to the log term active flag
-            bool& logActive();
+            //- Return true if the log term is active
+            bool logActive() const;
 
-            //- Return access to the log coefficient
-            scalar& logCoeff();
+            //- Return the log coefficient
+            scalar logCoeff() const;
 
 
         // Evaluation
@@ -136,16 +136,17 @@ public:
             //- Return polynomial value
             scalar value(const scalar x) const;
 
-            //- Return integrated polynomial coefficients
-            //  argument becomes zeroth element (constant of integration)
-            intPolyType integrate(const scalar intConstant = 0.0);
-
-            //- Return integrated polynomial coefficients when lowest order
-            //  is -1. Argument added to zeroth element
-            polyType integrateMinus1(const scalar intConstant = 0.0);
-
             //- Integrate between two values
-            scalar integrateLimits(const scalar x1, const scalar x2) const;
+            scalar integrate(const scalar x1, const scalar x2) const;
+
+
+            //- Return integral coefficients.
+            //  Argument becomes zeroth element (constant of integration)
+            intPolyType integral(const scalar intConstant = 0.0) const;
+
+            //- Return integral coefficients when lowest order is -1.
+            //  Argument becomes zeroth element (constant of integration)
+            polyType integralMinus1(const scalar intConstant = 0.0) const;
 
 
     //- Ostream Operator

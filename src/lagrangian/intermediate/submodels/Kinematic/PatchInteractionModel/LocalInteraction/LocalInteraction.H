@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,11 +57,52 @@ class LocalInteraction
         List<label> patchIds_;
 
 
+        // Counters for initial particle fates
+
+            //- Number of parcels escaped
+            List<label> nEscape0_;
+
+            //- Mass of parcels escaped
+            List<scalar> massEscape0_;
+
+            //- Number of parcels stuck to patches
+            List<label> nStick0_;
+
+            //- Mass of parcels stuck to patches
+            List<scalar> massStick0_;
+
+
+        // Counters for particle fates
+
+            //- Number of parcels escaped
+            List<label> nEscape_;
+
+            //- Mass of parcels escaped
+            List<scalar> massEscape_;
+
+            //- Number of parcels stuck to patches
+            List<label> nStick_;
+
+            //- Mass of parcels stuck to patches
+            List<scalar> massStick_;
+
+
     // Private Member Functions
 
         //- Returns local patchI if patch is in patchIds_ list
         label applyToPatch(const label globalPatchI) const;
 
+        //- Read interaction properties from file
+        void readProps();
+
+        //- Write interaction properties to file
+        void writeProps
+        (
+            const labelList& nEscape,
+            const scalarList& massEscape,
+            const labelList& nStick,
+            const scalarList& massStick
+        ) const;
 
 
 public:
@@ -103,7 +144,13 @@ public:
             bool& keepParticle,
             const scalar trackFraction,
             const tetIndices& tetIs
-        ) const;
+        );
+
+
+        // I-O
+
+            //- Write patch interaction info to stream
+            virtual void info(Ostream& os) const;
 };
 
 

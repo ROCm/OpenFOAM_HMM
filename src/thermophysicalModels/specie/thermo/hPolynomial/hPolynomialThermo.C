@@ -45,8 +45,8 @@ Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
     Sf_ *= this->W();
     CpCoeffs_ *= this->W();
 
-    hCoeffs_ = CpCoeffs_.integrate();
-    sCoeffs_ = CpCoeffs_.integrateMinus1();
+    hCoeffs_ = CpCoeffs_.integral();
+    sCoeffs_ = CpCoeffs_.integralMinus1();
 
     // Offset h poly so that it is relative to the enthalpy at Tstd
     hCoeffs_[0] += Hf_ - hCoeffs_.value(specie::Tstd);
@@ -73,8 +73,8 @@ Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
     Sf_ *= this->W();
     CpCoeffs_ *= this->W();
 
-    hCoeffs_ = CpCoeffs_.integrate();
-    sCoeffs_ = CpCoeffs_.integrateMinus1();
+    hCoeffs_ = CpCoeffs_.integral();
+    sCoeffs_ = CpCoeffs_.integralMinus1();
 
     // Offset h poly so that it is relative to the enthalpy at Tstd
     hCoeffs_[0] += Hf_ - hCoeffs_.value(specie::Tstd);

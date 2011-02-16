@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,30 +23,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeParcelDragModels_H
-#define makeParcelDragModels_H
+#include "coalParcel.H"
+
+// Using thermodynamic variant
+#include "makeThermoParcelForces.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "KinematicCloud.H"
+namespace Foam
+{
+    // Kinematic sub-models
+    makeThermoParcelForces(coalParcel);
+};
 
-#include "NoDrag.H"
-#include "NonSphereDrag.H"
-#include "SphereDrag.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#define makeParcelDragModels(ParcelType)                                     \
-                                                                             \
-    makeDragModel(KinematicCloud<ParcelType>);                               \
-                                                                             \
-    makeDragModelType(NoDrag, KinematicCloud, ParcelType);                   \
-    makeDragModelType(NonSphereDrag, KinematicCloud, ParcelType);            \
-    makeDragModelType(SphereDrag, KinematicCloud, ParcelType);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

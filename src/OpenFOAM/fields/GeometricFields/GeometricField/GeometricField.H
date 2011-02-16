@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -323,14 +323,6 @@ public:
         (
             const IOobject&,
             const Mesh&
-        );
-
-        //- Construct and read from given stream
-        GeometricField
-        (
-            const IOobject&,
-            const Mesh&,
-            Istream&
         );
 
         //- Construct from dictionary
