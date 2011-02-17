@@ -36,6 +36,7 @@ Description
 #include "Time.H"
 #include "surfaceFeatures.H"
 #include "featureEdgeMesh.H"
+#include "extendedFeatureEdgeMesh.H"
 #include "treeBoundBox.H"
 #include "meshTools.H"
 #include "OFstream.H"
@@ -537,10 +538,7 @@ int main(int argc, char *argv[])
 
     // Extracting and writing a featureEdgeMesh
 
-    Pout<< nl << "Writing featureEdgeMesh to constant/featureEdgeMesh."
-        << endl;
-
-    featureEdgeMesh feMesh
+    extendedFeatureEdgeMesh feMesh
     (
         IOobject
         (
@@ -554,12 +552,38 @@ int main(int argc, char *argv[])
         newSet
     );
 
+    Info<< nl << "Writing extendedFeatureEdgeMesh to " << feMesh.objectPath()
+        << endl;
+
+
+    feMesh.writeObj(surfFileName.lessExt().name());
+
     feMesh.write();
 
-    if (writeObj)
+
+    // Write a featureEdgeMesh for backwards compatibility
     {
-        feMesh.writeObj(runTime.constant()/"featureEdgeMesh"/sFeatFileName);
-    };
+        featureEdgeMesh bfeMesh
+        (
+            IOobject
+            (
+                surfFileName.lessExt().name() + ".eMesh",   // name
+                runTime.constant(), // instance
+                "triSurface",
+                runTime,            // registry
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            feMesh.points(),
+            feMesh.edges()
+        );
+
+        Info<< nl << "Writing featureEdgeMesh to "
+            << bfeMesh.objectPath() << endl;
+
+        bfeMesh.regIOobject::write();
+    }
 
     triSurfaceMesh searchSurf
     (
@@ -905,7 +929,7 @@ int main(int argc, char *argv[])
         );
     }
 
-    Info<< nl << "End" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

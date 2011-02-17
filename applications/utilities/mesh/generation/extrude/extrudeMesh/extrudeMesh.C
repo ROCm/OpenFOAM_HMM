@@ -43,6 +43,7 @@ Description
 #include "addPatchCellLayer.H"
 #include "fvMesh.H"
 #include "MeshedSurfaces.H"
+#include "globalIndex.H"
 
 #include "extrudedMesh.H"
 #include "extrudeModel.H"
@@ -261,6 +262,12 @@ int main(int argc, char *argv[])
         sourceCasePath.expand();
         fileName sourceRootDir = sourceCasePath.path();
         fileName sourceCaseDir = sourceCasePath.name();
+        if (Pstream::parRun())
+        {
+            sourceCaseDir =
+                sourceCaseDir
+               /"processor" + Foam::name(Pstream::myProcNo());
+        }
         wordList sourcePatches;
         dict.lookup("sourcePatches") >> sourcePatches;
 
@@ -279,54 +286,173 @@ int main(int argc, char *argv[])
             sourceRootDir,
             sourceCaseDir
         );
+
         #include "createMesh.H"
 
         const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
 
-        // Topo change container. Either copy an existing mesh or start
-        // with empty storage (number of patches only needed for checking)
-        autoPtr<polyTopoChange> meshMod
-        (
-            (
-                mode == MESH
-              ? new polyTopoChange(mesh)
-              : new polyTopoChange(patches.size())
-            )
-        );
-
         // Extrusion engine. Either adding to existing mesh or
         // creating separate mesh.
         addPatchCellLayer layerExtrude(mesh, (mode == MESH));
 
+        const labelList meshFaces(patchFaces(patches, sourcePatches));
         indirectPrimitivePatch extrudePatch
         (
             IndirectList<face>
             (
                 mesh.faces(),
-                patchFaces(patches, sourcePatches)
+                meshFaces
             ),
             mesh.points()
         );
 
+        // Determine extrudePatch normal
+        pointField extrudePatchPointNormals
+        (
+            PatchTools::pointNormals    //calcNormals
+            (
+                mesh,
+                extrudePatch,
+                meshFaces
+            )
+        );
+
+
+        // Precalculate mesh edges for pp.edges.
+        const labelList meshEdges
+        (
+            extrudePatch.meshEdges
+            (
+                mesh.edges(),
+                mesh.pointEdges()
+            )
+        );
+
+        // Global face indices engine
+        const globalIndex globalFaces(mesh.nFaces());
+
+        // Determine extrudePatch.edgeFaces in global numbering (so across
+        // coupled patches)
+        labelListList edgeGlobalFaces
+        (
+            addPatchCellLayer::globalEdgeFaces
+            (
+                mesh,
+                globalFaces,
+                extrudePatch
+            )
+        );
+
+
+        // Determine what patches boundary edges need to get extruded into.
+        // This might actually cause edge-connected processors to become
+        // face-connected so might need to introduce new processor boundaries.
+        // Calculates:
+        //  - per pp.edge the patch to extrude into
+        //  - any additional processor boundaries (patchToNbrProc = map from
+        //    new patchID to neighbour processor)
+        //  - number of new patches (nPatches)
+
+        labelList sidePatchID;
+        label nPatches;
+        Map<label> nbrProcToPatch;
+        Map<label> patchToNbrProc;
+        addPatchCellLayer::calcSidePatch
+        (
+            mesh,
+            globalFaces,
+            edgeGlobalFaces,
+            extrudePatch,
+
+            sidePatchID,
+            nPatches,
+            nbrProcToPatch,
+            patchToNbrProc
+        );
+
+
+        // Add any patches.
+
+        label nAdded = nPatches - mesh.boundaryMesh().size();
+        reduce(nAdded, sumOp<label>());
+
+        Info<< "Adding overall " << nAdded << " processor patches." << endl;
+
+        if (nAdded > 0)
+        {
+            DynamicList<polyPatch*> newPatches(nPatches);
+            forAll(mesh.boundaryMesh(), patchI)
+            {
+                newPatches.append
+                (
+                    mesh.boundaryMesh()[patchI].clone
+                    (
+                        mesh.boundaryMesh()
+                    ).ptr()
+                );
+            }
+            for
+            (
+                label patchI = mesh.boundaryMesh().size();
+                patchI < nPatches;
+                patchI++
+            )
+            {
+                label nbrProcI = patchToNbrProc[patchI];
+                word name =
+                        "procBoundary"
+                      + Foam::name(Pstream::myProcNo())
+                      + "to"
+                      + Foam::name(nbrProcI);
+
+                Pout<< "Adding patch " << patchI
+                    << " name:" << name
+                    << " between " << Pstream::myProcNo()
+                    << " and " << nbrProcI
+                    << endl;
+
+
+                newPatches.append
+                (
+                    new processorPolyPatch
+                    (
+                        name,
+                        0,                  // size
+                        mesh.nFaces(),      // start
+                        patchI,             // index
+                        mesh.boundaryMesh(),// polyBoundaryMesh
+                        Pstream::myProcNo(),// myProcNo
+                        nbrProcI            // neighbProcNo
+                    )
+                );
+            }
+
+            // Add patches. Do no parallel updates.
+            mesh.removeFvBoundary();
+            mesh.addFvPatches(newPatches, true);
+        }
+
+
+
         // Only used for addPatchCellLayer into new mesh
-        labelList exposedPatchIDs;
+        labelList exposedPatchID;
         if (mode == PATCH)
         {
             dict.lookup("exposedPatchName") >> backPatchName;
-            exposedPatchIDs.setSize
+            exposedPatchID.setSize
             (
                 extrudePatch.size(),
                 findPatchID(patches, backPatchName)
             );
         }
 
-
+        // Determine points and extrusion
         pointField layer0Points(extrudePatch.nPoints());
         pointField displacement(extrudePatch.nPoints());
         forAll(displacement, pointI)
         {
-            const vector& patchNormal = extrudePatch.pointNormals()[pointI];
+            const vector& patchNormal = extrudePatchPointNormals[pointI];
 
             // layer0 point
             layer0Points[pointI] = model()
@@ -373,15 +499,31 @@ int main(int argc, char *argv[])
         // Layers per point
         labelList nPointLayers(extrudePatch.nPoints(), model().nLayers());
         // Displacement for first layer
-        vectorField firstLayerDisp(displacement*model().sumThickness(1));
+        vectorField firstLayerDisp = displacement*model().sumThickness(1);
+
         // Expansion ratio not used.
         scalarField ratio(extrudePatch.nPoints(), 1.0);
 
+        // Topo change container. Either copy an existing mesh or start
+        // with empty storage (number of patches only needed for checking)
+        autoPtr<polyTopoChange> meshMod
+        (
+            (
+                mode == MESH
+              ? new polyTopoChange(mesh)
+              : new polyTopoChange(patches.size())
+            )
+        );
+
         layerExtrude.setRefinement
         (
+            globalFaces,
+            edgeGlobalFaces,
+
             ratio,              // expansion ratio
             extrudePatch,       // patch faces to extrude
-            exposedPatchIDs,    // if new mesh: patches for exposed faces
+            sidePatchID,        // if boundary edge: patch to use
+            exposedPatchID,     // if new mesh: patches for exposed faces
             nFaceLayers,
             nPointLayers,
             firstLayerDisp,
@@ -401,7 +543,7 @@ int main(int argc, char *argv[])
                     model()
                     (
                         extrudePatch.localPoints()[pointI],
-                        extrudePatch.pointNormals()[pointI],
+                        extrudePatchPointNormals[pointI],
                         pPointI+1       // layer
                     )
                 );

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,6 +36,7 @@ SourceFiles
 #define inverseDistanceDiffusivity_H
 
 #include "uniformDiffusivity.H"
+#include "wordReList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class inverseDistanceDiffusivity Declaration
+                 Class inverseDistanceDiffusivity Declaration
 \*---------------------------------------------------------------------------*/
 
 class inverseDistanceDiffusivity
@@ -53,9 +54,8 @@ class inverseDistanceDiffusivity
     // Private data
 
         //- Patches selected to base the distance on
-        //  These can contain regular expressions and the actual patch names
-        //  will be searched for.
-        wordList patchNames_;
+        //  These can contain patch names or regular expressions to search for.
+        wordReList patchNames_;
 
 
     // Private Member Functions

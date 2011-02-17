@@ -61,8 +61,8 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::cloudReset
 {
     ReactingCloud<ParcelType>::cloudReset(c);
 
-    devolatilisationModel_ = c.devolatilisationModel_->clone();
-    surfaceReactionModel_ = c.surfaceReactionModel_->clone();
+    devolatilisationModel_.reset(c.devolatilisationModel_.ptr());
+    surfaceReactionModel_.reset(c.surfaceReactionModel_.ptr());
 
     dMassDevolatilisation_ = c.dMassDevolatilisation_;
     dMassSurfaceReaction_ = c.dMassSurfaceReaction_;

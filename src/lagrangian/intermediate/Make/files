@@ -78,10 +78,6 @@ $(REACTINGMPINJECTION)/ReactingMultiphaseLookupTableInjection/reactingMultiphase
 IntegrationScheme/makeIntegrationSchemes.C
 
 
-/* particle forces */
-particleForces/particleForces.C
-
-
 /* phase properties */
 phaseProperties/phaseProperties/phaseProperties.C
 phaseProperties/phaseProperties/phasePropertiesIO.C

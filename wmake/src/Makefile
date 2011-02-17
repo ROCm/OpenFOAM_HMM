@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -49,7 +49,7 @@ SHELL      = /bin/sh
 
 GENERAL_RULES = $(WM_DIR)/rules/General
 RULES         = $(WM_DIR)/rules/$(WM_ARCH)$(WM_COMPILER)
-BIN           = $(WM_DIR)/bin/$(WM_ARCH)$(WM_COMPILER)
+WMAKE_BIN     = $(WM_DIR)/platforms/$(WM_ARCH)$(WM_COMPILER)
 
 include $(RULES)/general
 include $(RULES)/$(WM_LINK_LANGUAGE)
@@ -59,31 +59,31 @@ include $(RULES)/$(WM_LINK_LANGUAGE)
 # targets
 #------------------------------------------------------------------------------
 
-all:  $(BIN)/dirToString $(BIN)/wmkdep $(BIN)/wmkdepend
+all:  $(WMAKE_BIN)/dirToString $(WMAKE_BIN)/wmkdep $(WMAKE_BIN)/wmkdepend
 
 clean:
-	rm -f $(BIN)/dirToString $(BIN)/wmkdep $(BIN)/wmkdepend 2>/dev/null
+	rm -f $(WMAKE_BIN)/* 2>/dev/null
 
 
-$(BIN)/dirToString: dirToString.c
-	@mkdir -p $(BIN)
-	$(cc) $(cFLAGS) dirToString.c -o $(BIN)/dirToString
+$(WMAKE_BIN)/dirToString: dirToString.c
+	@mkdir -p $(WMAKE_BIN)
+	$(cc) $(cFLAGS) dirToString.c -o $(WMAKE_BIN)/dirToString
 
 
-$(BIN)/wmkdep: wmkdep.l
-	@mkdir -p $(BIN)
+$(WMAKE_BIN)/wmkdep: wmkdep.l
+	@mkdir -p $(WMAKE_BIN)
 	flex wmkdep.l
-	$(cc) $(cFLAGS) lex.yy.c -o $(BIN)/wmkdep
+	$(cc) $(cFLAGS) lex.yy.c -o $(WMAKE_BIN)/wmkdep
 	@rm -f lex.yy.c 2>/dev/null
 
 
 # for bootstrapping - use generated files directly (instead of from .atg file)
-$(BIN)/wmkdepend: wmkdepend.cpp \
+$(WMAKE_BIN)/wmkdepend: wmkdepend.cpp \
     wmkdependParser.cpp wmkdependScanner.cpp \
     wmkdependParser.h   wmkdependScanner.h
-	@mkdir -p $(BIN)
+	@mkdir -p $(WMAKE_BIN)
 	$(CC) $(c++FLAGS) \
 	     wmkdepend.cpp wmkdependParser.cpp wmkdependScanner.cpp \
-	    -o $(BIN)/wmkdepend
+	    -o $(WMAKE_BIN)/wmkdepend
 
 #------------------------------------------------------------------------------

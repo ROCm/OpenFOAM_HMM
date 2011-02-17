@@ -111,7 +111,7 @@ checkIllegalCode()
     do
         case "$f" in
         # exclude potential makefiles
-        (wmake/[Mm]akefile* | wmake/rules/*)
+        (*[Mm]akefile* | wmake/rules/*)
         ;;
         (*)
             # parse line numbers from grep output:

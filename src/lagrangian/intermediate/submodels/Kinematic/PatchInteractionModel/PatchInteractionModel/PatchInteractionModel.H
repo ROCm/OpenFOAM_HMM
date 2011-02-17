@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -162,7 +162,7 @@ public:
             bool& keepParticle,
             const scalar trackFraction,
             const tetIndices& tetIs
-        ) const;
+        );
 
         //- Calculate the patch normal and velocity to interact with,
         //  accounting for patch motion if required.
@@ -175,6 +175,12 @@ public:
             vector& normal,
             vector& Up
         ) const;
+
+
+        // I-O
+
+            //- Write patch interaction info to stream
+            virtual void info(Ostream& os) const;
 };
 
 
