@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -747,8 +747,17 @@ public:
 
         // Other topo changes
 
+            //- Helper:append patch to end of mesh.
+            static label appendPatch
+            (
+                fvMesh&,
+                const label insertPatchI,
+                const word&,
+                const dictionary&
+            );
+
             //- Helper:add patch to mesh. Update all registered fields.
-            //  Use addMeshedPatch to add patches originating from surfaces.
+            //  Used by addMeshedPatch to add patches originating from surfaces.
             static label addPatch(fvMesh&, const word& name, const dictionary&);
 
             //- Add patch originating from meshing. Update meshedPatches_.

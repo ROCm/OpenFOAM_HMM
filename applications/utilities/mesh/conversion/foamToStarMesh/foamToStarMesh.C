@@ -40,7 +40,7 @@ Usage
 
 Note
     The cellTable information available in the files
-    \c constant/cellTable and @c constant/polyMesh/cellTableId
+    \c constant/cellTable and \c constant/polyMesh/cellTableId
     will be used if available. Otherwise the cellZones are used when
     creating the cellTable information.
 

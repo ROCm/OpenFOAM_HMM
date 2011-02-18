@@ -87,19 +87,18 @@ constantProperties
     constantVolume  false;
 }
 
-particleForces
-{
-    gravity         on;
-    virtualMass     off;
-    pressureGradient off;
-    paramagnetic    off;
-}
-
 subModels
 {
-    InjectionModel  PatchInjection;
+    particleForces
+    {
+        activeForces
+        (
+            sphereDrag
+            gravity
+        );
+    }
 
-    DragModel       SphereDrag;
+    InjectionModel  PatchInjection;
 
     DispersionModel StochasticDispersionRAS;
 
@@ -135,7 +134,7 @@ subModels
         flowRateProfile constant 1;
         sizeDistribution
         {
-            pdfType         general;
+            distributionModelType general;
             generalDistribution
             {
                 distribution

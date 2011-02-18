@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,8 +60,8 @@ void Foam::ThermoCloud<ParcelType>::cloudReset(ThermoCloud<ParcelType>& c)
 {
     KinematicCloud<ParcelType>::cloudReset(c);
 
-    heatTransferModel_ = c.heatTransferModel_->clone();
-    TIntegrator_ = c.TIntegrator_->clone();
+    heatTransferModel_.reset(c.heatTransferModel_.ptr());
+    TIntegrator_.reset(c.TIntegrator_.ptr());
 
     radiation_ = c.radiation_;
 }

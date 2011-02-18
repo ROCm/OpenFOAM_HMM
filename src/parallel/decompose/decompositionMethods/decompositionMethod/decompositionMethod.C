@@ -398,7 +398,15 @@ void Foam::decompositionMethod::calcCellCells
     // Create global cell numbers
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    label nAgglom = max(agglom)+1;
+    label nAgglom;
+    if (agglom.size())
+    {
+        nAgglom = max(agglom)+1;
+    }
+    else
+    {
+        nAgglom = 0;
+    }
     globalIndex globalAgglom(nAgglom);
 
     const labelList& faceOwner = mesh.faceOwner();

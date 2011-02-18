@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,8 +85,8 @@ void Foam::ReactingCloud<ParcelType>::cloudReset(ReactingCloud<ParcelType>& c)
 {
     ThermoCloud<ParcelType>::cloudReset(c);
 
-    compositionModel_ = c.compositionModel_->clone();
-    phaseChangeModel_ = c.phaseChangeModel_->clone();
+    compositionModel_.reset(c.compositionModel_.ptr());
+    phaseChangeModel_.reset(c.phaseChangeModel_.ptr());
 
     dMassPhaseChange_ = c.dMassPhaseChange_;
 }

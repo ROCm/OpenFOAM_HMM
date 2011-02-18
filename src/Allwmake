@@ -39,6 +39,7 @@ parallel/decompose/AllwmakeLnInclude
 dummyThirdParty/Allwmake $*
 
 wmake $makeOption lagrangian/basic
+wmake $makeOption lagrangian/distributionModels
 wmake $makeOption finiteVolume
 wmake $makeOption genericPatchFields
 
@@ -63,8 +64,6 @@ wmake $makeOption surfaceFilmModels
 lagrangian/Allwmake $*
 postProcessing/Allwmake $*
 mesh/Allwmake $*
-
-wmake $makeOption errorEstimation
 
 fvAgglomerationMethods/Allwmake $*
 

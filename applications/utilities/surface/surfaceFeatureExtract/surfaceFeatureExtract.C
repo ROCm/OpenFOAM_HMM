@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,6 +36,7 @@ Description
 #include "Time.H"
 #include "surfaceFeatures.H"
 #include "featureEdgeMesh.H"
+#include "extendedFeatureEdgeMesh.H"
 #include "treeBoundBox.H"
 #include "meshTools.H"
 #include "OFstream.H"
@@ -298,19 +299,45 @@ int main(int argc, char *argv[])
 
     // Extracting and writing a featureEdgeMesh
 
-    Pout<< nl << "Writing featureEdgeMesh to constant/featureEdgeMesh."
-        << endl;
-
-    featureEdgeMesh feMesh
+    extendedFeatureEdgeMesh feMesh
     (
         newSet,
         runTime,
         surfFileName.lessExt().name() + ".featureEdgeMesh"
     );
 
+    Info<< nl << "Writing extendedFeatureEdgeMesh to " << feMesh.objectPath()
+        << endl;
+
+
     feMesh.writeObj(surfFileName.lessExt().name());
 
     feMesh.write();
+
+
+    // Write a featureEdgeMesh for backwards compatibility
+    {
+        featureEdgeMesh bfeMesh
+        (
+            IOobject
+            (
+                surfFileName.lessExt().name() + ".eMesh",   // name
+                runTime.constant(), // instance
+                "triSurface",
+                runTime,            // registry
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            feMesh.points(),
+            feMesh.edges()
+        );
+
+        Info<< nl << "Writing featureEdgeMesh to "
+            << bfeMesh.objectPath() << endl;
+
+        bfeMesh.regIOobject::write();
+    }
 
     Info<< "End\n" << endl;
 

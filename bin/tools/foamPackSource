@@ -78,15 +78,25 @@ INFO
 wc $tmpFile | awk '{print "Packing",$1,"files - this could take some time ..."}' 1>&2
 
 
+# bzip2 or gzip compression
+case "$packFile" in
+*tbz)
+    tarOpt=cpjf
+    ;;
+*)
+    tarOpt=cpzf
+    ;;
+esac
+
 # Clean up on Ctrl-C
 trap 'rm -f $packFile $tmpFile 2>/dev/null' INT
 
-tar cpzf $packFile --files-from $tmpFile
+tar $tarOpt $packFile --files-from $tmpFile
 if [ $? -eq 0 ]
 then
-    echo "Finished packing $packDir into file $packFile" 1>&2
+    echo "Finished packing $packDir into $packFile" 1>&2
 else
-    echo "Error: failure packing $packDir into file $packFile" 1>&2
+    echo "Error: failure packing $packDir into $packFile" 1>&2
     rm -f $packFile 2>/dev/null
 fi
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,6 +45,67 @@ Foam::label Foam::LocalInteraction<CloudType>::applyToPatch
 }
 
 
+template<class CloudType>
+void Foam::LocalInteraction<CloudType>::readProps()
+{
+    IOobject propsDictHeader
+    (
+        "localInteractionProperties",
+        this->owner().db().time().timeName(),
+        "uniform"/cloud::prefix/this->owner().name(),
+        this->owner().db(),
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE,
+        false
+    );
+
+    if (propsDictHeader.headerOk())
+    {
+        const IOdictionary propsDict(propsDictHeader);
+
+        propsDict.readIfPresent("nEscape", nEscape0_);
+        propsDict.readIfPresent("massEscape", massEscape0_);
+        propsDict.readIfPresent("nStick", nStick0_);
+        propsDict.readIfPresent("massStick", massStick0_);
+    }
+}
+
+
+template<class CloudType>
+void Foam::LocalInteraction<CloudType>::writeProps
+(
+    const labelList& nEscape,
+    const scalarList& massEscape,
+    const labelList& nStick,
+    const scalarList& massStick
+) const
+{
+    if (this->owner().db().time().outputTime())
+    {
+        IOdictionary propsDict
+        (
+            IOobject
+            (
+                "localInteractionProperties",
+                this->owner().db().time().timeName(),
+                "uniform"/cloud::prefix/this->owner().name(),
+                this->owner().db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            )
+        );
+
+        propsDict.add("nEscape", nEscape);
+        propsDict.add("massEscape", massEscape);
+        propsDict.add("nStick", nStick);
+        propsDict.add("massStick", massStick);
+
+        propsDict.regIOobject::write();
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -56,7 +117,15 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
 :
     PatchInteractionModel<CloudType>(dict, cloud, typeName),
     patchData_(this->coeffDict().lookup("patches")),
-    patchIds_(patchData_.size())
+    patchIds_(patchData_.size()),
+    nEscape0_(patchData_.size(), 0),
+    massEscape0_(patchData_.size(), 0.0),
+    nStick0_(patchData_.size(), 0),
+    massStick0_(patchData_.size(), 0.0),
+    nEscape_(patchData_.size(), 0),
+    massEscape_(patchData_.size(), 0.0),
+    nStick_(patchData_.size(), 0),
+    massStick_(patchData_.size(), 0.0)
 {
     const polyMesh& mesh = cloud.mesh();
     const polyBoundaryMesh& bMesh = mesh.boundaryMesh();
@@ -115,6 +184,8 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
                 << nl << exit(FatalError);
         }
     }
+
+    readProps();
 }
 
 
@@ -126,7 +197,15 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
 :
     PatchInteractionModel<CloudType>(pim),
     patchData_(pim.patchData_),
-    patchIds_(pim.patchIds_)
+    patchIds_(pim.patchIds_),
+    nEscape0_(pim.nEscape0_),
+    massEscape0_(pim.massEscape0_),
+    nStick0_(pim.nStick0_),
+    massStick0_(pim.massStick0_),
+    nEscape_(pim.nEscape_),
+    massEscape_(pim.massEscape_),
+    nStick_(pim.nStick_),
+    massStick_(pim.massStick_)
 {}
 
 
@@ -147,7 +226,7 @@ bool Foam::LocalInteraction<CloudType>::correct
     bool& keepParticle,
     const scalar trackFraction,
     const tetIndices& tetIs
-) const
+)
 {
     vector& U = p.U();
 
@@ -170,6 +249,8 @@ bool Foam::LocalInteraction<CloudType>::correct
                 keepParticle = false;
                 active = false;
                 U = vector::zero;
+                nEscape_[patchI]++;
+                massEscape_[patchI] += p.mass()*p.nParticle();
                 break;
             }
             case PatchInteractionModel<CloudType>::itStick:
@@ -177,6 +258,8 @@ bool Foam::LocalInteraction<CloudType>::correct
                 keepParticle = true;
                 active = false;
                 U = vector::zero;
+                nStick_[patchI]++;
+                massStick_[patchI] += p.mass()*p.nParticle();
                 break;
             }
             case PatchInteractionModel<CloudType>::itRebound:
@@ -232,6 +315,40 @@ bool Foam::LocalInteraction<CloudType>::correct
     }
 
     return false;
+}
+
+
+template<class CloudType>
+void Foam::LocalInteraction<CloudType>::info(Ostream& os) const
+{
+    labelList npe(nEscape_);
+    Pstream::listCombineGather(npe, plusEqOp<label>());
+    npe = npe + nEscape0_;
+
+    scalarList mpe(massEscape_);
+    Pstream::listCombineGather(mpe, plusEqOp<scalar>());
+    mpe = mpe + massEscape0_;
+
+    labelList nps(nStick_);
+    Pstream::listCombineGather(nps, plusEqOp<label>());
+    nps = nps + nStick0_;
+
+    scalarList mps(massStick_);
+    Pstream::listCombineGather(mps, plusEqOp<scalar>());
+    mps = mps + massStick0_;
+
+
+    forAll(patchData_, i)
+    {
+        os  << "    Parcel fate (number, mass)      : patch "
+            <<  patchData_[i].patchName() << nl
+            << "      - escape                      = " << npe[i]
+            << ", " << mpe[i] << nl
+            << "      - stick                       = " << nps[i]
+            << ", " << mps[i] << nl;
+    }
+
+    writeProps(npe, mpe, nps, mps);
 }
 
 

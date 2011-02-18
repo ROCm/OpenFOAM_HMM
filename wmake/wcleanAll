@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -30,33 +30,44 @@
 #     directories of all machines and delete them.
 #
 #------------------------------------------------------------------------------
-if [ "$1" = "-h" -o "$1" = "-help" ]
-then
-    echo "Usage: ${0##*/}"
-    echo
-    echo "    Remove all object files and *.dep files"
-    exit 1
-fi
+usage() {
+    exec 1>&2
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
+usage: ${0##*/}
 
-[ -d bin -a -d src ] || {
-    echo "${0##*/}: not in the project top level directory"
+    Remove all object files and *.dep files
+
+USAGE
     exit 1
 }
 
-for dir in lib bin applications/bin
+# parse options
+while [ "$#" -gt 0 ]
 do
-    echo "Removing non-tools directories from $dir/"
-    if [ -d $dir ]
-    then
-        find $dir -mindepth 1 -type d \! -name tools | xargs rm -rf
-    fi
+    case "$1" in
+    -h | -help)
+        usage
+        ;;
+    *)
+        usage "unknown option/argument: '$*'"
+        ;;
+    esac
 done
+
+[ -d bin -a -d src ] || usage "not in the project top level directory"
+
+
+echo "Removing platforms/ subdirectores"
+rm -rf platforms/*
 
 echo "Removing *.dep files"
 find . -name '*.dep' -exec rm {} \;
 
 echo "Cleaning Make subdirectories"
-find `find . -depth \( -name "Make.[A-Za-z]*" -o -name Make \) -type d -print` -depth \( -type d ! -name "*Make.[A-Za-z]*" ! -name "*Make" \) -exec rm -rf {} \;
+find . -depth \( -name Make -o -name "Make.[A-Za-z]*" \) -type d -print | \
+    xargs -i find '{}' -mindepth 1 -maxdepth 1 -type d -print | \
+    xargs rm -rf
 
 echo "Removing lnInclude and intermediate directories"
 find . -depth -type d \( -name lnInclude -o -name ii_files -o -name Templates.DB \) -exec rm -rf {} \;

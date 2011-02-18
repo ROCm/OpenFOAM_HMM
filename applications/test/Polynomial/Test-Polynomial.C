@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,6 +31,7 @@ Description
 
 #include "IStringStream.H"
 #include "Polynomial.H"
+#include "polynomialFunction.H"
 #include "Random.H"
 #include "cpuTime.H"
 
@@ -38,7 +39,7 @@ using namespace Foam;
 
 const int PolySize = 8;
 const scalar coeff[] = { 0.11, 0.45, -0.94, 1.58, -2.58, 0.08, 3.15, -4.78 };
-const char* polyDef = "testPoly (0.11 0.45 -0.94 1.58 -2.58 0.08 3.15 -4.78)";
+const char* polyDef = "(0.11 0.45 -0.94 1.58 -2.58 0.08 3.15 -4.78)";
 
 
 scalar polyValue(const scalar x)
@@ -58,7 +59,7 @@ scalar polyValue(const scalar x)
 
 scalar intPolyValue(const scalar x)
 {
-    // Hard-coded integrated form of above polynomial
+    // Hard-coded integral form of above polynomial
     return
         coeff[0]*x
       + coeff[1]/2.0*sqr(x)
@@ -109,27 +110,44 @@ int main(int argc, char *argv[])
     const label nIters = 1000;
     scalar sum = 0.0;
 
-    Info<< "null poly = " << (Polynomial<8>()) << nl << endl;
+    Info<< "null poly = " << (Polynomial<8>()) << nl
+        << "null poly = " << (polynomialFunction(8)) << nl
+        << endl;
 
-    // Polynomial<8> poly("testPoly", IStringStream(polyDef)());
     Polynomial<8> poly(coeff);
-    Polynomial<9> intPoly(poly.integrate(0.0));
+    Polynomial<9> intPoly(poly.integral(0.0));
 
-    Info<< "poly = " << poly << endl;
-    Info<< "intPoly = " << intPoly << nl << endl;
+    IStringStream is(polyDef);
+    polynomialFunction polyfunc(is);
 
-    Info<< "2*poly = " << 2*poly << endl;
-    Info<< "poly+poly = " << poly + poly << nl << endl;
+    Info<< "poly = " << poly << nl
+        << "intPoly = " << intPoly << nl
+        << endl;
 
-    Info<< "3*poly = " << 3*poly << endl;
-    Info<< "poly+poly+poly = " << poly + poly + poly << nl << endl;
+    Info<< "2*poly = " << 2*poly << nl
+        << "poly+poly = " << poly + poly << nl
+        << "3*poly = " << 3*poly << nl
+        << "poly+poly+poly = " << poly + poly + poly << nl
+        << "3*poly - 2*poly = " << 3*poly - 2*poly << nl
+        << endl;
 
-    Info<< "3*poly - 2*poly = " << 3*poly - 2*poly << nl << endl;
+    Info<< nl << "--- as polynomialFunction" << nl << endl;
+    Info<< "polyf = " << polyfunc << nl
+        << "intPoly = " << poly.integral(0.0) << nl
+        << endl;
+
+    Info<< "2*polyf = " << 2*polyfunc << nl
+        << "polyf+polyf = " << polyfunc + polyfunc << nl
+        << "3*polyf = " << 3*polyfunc << nl
+        << "polyf+polyf+polyf = " << polyfunc + polyfunc + polyfunc << nl
+        << "3*polyf - 2*polyf = " << 3*polyfunc - 2*polyfunc << nl
+        << endl;
+
 
     Polynomial<8> polyCopy = poly;
     Info<< "poly, polyCopy = " << poly << ", " << polyCopy << nl << endl;
     polyCopy = 2.5*poly;
-    Info<< "2.5*polyCopy = " << polyCopy << nl << endl;
+    Info<< "2.5*poly = " << polyCopy << nl << endl;
 
     Random rnd(123456);
     for (int i=0; i<10; i++)
@@ -139,8 +157,8 @@ int main(int argc, char *argv[])
         scalar px = polyValue(x);
         scalar ipx = intPolyValue(x);
 
-        scalar pxTest = poly.evaluate(x);
-        scalar ipxTest = intPoly.evaluate(x);
+        scalar pxTest = poly.value(x);
+        scalar ipxTest = intPoly.value(x);
 
         Info<<"\nx = " << x << endl;
         Info<< "    px, pxTest = " << px << ", " << pxTest << endl;
@@ -173,10 +191,21 @@ int main(int argc, char *argv[])
         sum = 0.0;
         for (label iter = 0; iter < nIters; ++iter)
         {
-            sum += poly.evaluate(loop+iter);
+            sum += poly.value(loop+iter);
         }
     }
-    Info<< "evaluate:     " << sum
+    Info<< "value:        " << sum
+        << " in " << timer.cpuTimeIncrement() << " s\n";
+
+    for (int loop = 0; loop < n; ++loop)
+    {
+        sum = 0.0;
+        for (label iter = 0; iter < nIters; ++iter)
+        {
+            sum += polyfunc.value(loop+iter);
+        }
+    }
+    Info<< "via function: " << sum
         << " in " << timer.cpuTimeIncrement() << " s\n";
 
 

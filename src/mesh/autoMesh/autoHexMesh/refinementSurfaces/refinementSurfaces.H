@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -325,6 +325,19 @@ public:
                 const scalarField& nearestDistSqr,
                 labelList& hitSurface,
                 labelList& hitRegion
+            ) const;
+
+            //- Find nearest point on surfaces. Return surface, region and
+            //  normal on surface (so not global surface)
+            void findNearestRegion
+            (
+                const labelList& surfacesToTest,
+                const pointField& samples,
+                const scalarField& nearestDistSqr,
+                labelList& hitSurface,
+                List<pointIndexHit>& hitInfo,
+                labelList& hitRegion,
+                vectorField& hitNormal
             ) const;
 
             //- Detect if a point is 'inside' (closed) surfaces.

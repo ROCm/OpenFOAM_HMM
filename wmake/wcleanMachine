@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -33,6 +33,7 @@
 #
 #------------------------------------------------------------------------------
 usage() {
+    exec 1>&2
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 usage: ${0##*/} machineType [... machineTypeN]
@@ -40,9 +41,13 @@ usage: ${0##*/} machineType [... machineTypeN]
   Searches the directories below the current directory for the object file
   directories of the specified machine type(s) and deletes them
 
+Note:
+can also use '-current' for the current value of \$WM_OPTIONS
+
 USAGE
     exit 1
 }
+
 
 # needs some machine types ... or provide immediate help
 if [ "$#" -lt 1 -o "$1" = "-h" -o "$1" = "-help" ]
@@ -50,22 +55,25 @@ then
     usage
 fi
 
-[ -d lib -a -d src ] || usage "not in the project top level directory"
-
+[ -d bin -a -d src ] || usage "not in the project top level directory"
 
 for machType
 do
+    if [ "$machType" = "-current" ]
+    then
+        machType="$WM_OPTIONS"
+        echo "Using current = $machType"
+        [ -n "$machType" ] || continue
+    fi
+
     echo "Cleaning machine type: $machType"
 
-    find `find . -depth \( -name "Make.[A-Za-z]*" -o -name Make \) -type d -print` \
-        -depth \( -type d -name "*$machType" -o -name "*$machType$WM_MPLIB" \) -exec rm -r {} \;
+    find . -depth \( -name Make -o -name "Make.[A-Za-z]*" \) -type d -print | \
+        xargs -i find '{}' -mindepth 1 -maxdepth 1 \
+           \( -type d -name "*$machType" -o -name "*$machType$WM_MPLIB" \) -print |
+        xargs rm -rf
 
-    # find . -depth -type d \( -name ii_files -o -name Templates.DB \) -exec rm -rf {} \;
-
-    for dir in lib/$machType bin/$machType applications/bin/$machType
-    do
-        [ -d $dir ] && rm -rf $dir
-    done
+    rm -rf platforms/$machType
 
 done
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -343,6 +343,12 @@ public:
 
             //- Return the parcel sensible enthalpy
             inline scalar hs() const;
+
+            //- Return const access to carrier temperature
+            inline scalar Tc() const;
+
+            //- Return const access to carrier specific heat capacity
+            inline scalar Cpc() const;
 
 
         // Edit

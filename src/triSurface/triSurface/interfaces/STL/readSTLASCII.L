@@ -39,7 +39,7 @@ License
 using namespace Foam;
 
 // Dummy yyFlexLexer::yylex() to keep the linker happy. It is not called
-//! @cond dummy
+//! \cond dummy
 int yyFlexLexer::yylex()
 {
     FatalErrorIn("yyFlexLexer::yylex()")
@@ -47,12 +47,12 @@ int yyFlexLexer::yylex()
         << abort(FatalError);
     return 0;
 }
-//! @endcond
+//! \endcond
 
 // Dummy yywrap to keep yylex happy at compile time.
 // It is called by yylex but is not used as the mechanism to change file.
 // See <<EOF>>
-//! @cond dummy
+//! \cond dummy
 #if YY_FLEX_SUBMINOR_VERSION < 34
 extern "C" int yywrap()
 #else
@@ -61,7 +61,7 @@ int yyFlexLexer::yywrap()
 {
     return 1;
 }
-//! @endcond
+//! \endcond
 
 
 class STLLexer
