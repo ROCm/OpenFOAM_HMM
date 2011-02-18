@@ -550,7 +550,7 @@ Foam::label Foam::polyBoundaryMesh::whichPatch(const label faceIndex) const
 
 Foam::labelHashSet Foam::polyBoundaryMesh::patchSet
 (
-    const wordReList& patchNames,
+    const UList<wordRe>& patchNames,
     const bool warnNotFound
 ) const
 {
