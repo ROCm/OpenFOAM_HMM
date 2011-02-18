@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -137,7 +137,7 @@ Foam::IOdictionary::IOdictionary(const IOobject& io)
     }
 
     // Everyone check or just master
-    bool masterOnly = 
+    bool masterOnly =
         regIOobject::fileModificationChecking == timeStampMaster
      || regIOobject::fileModificationChecking == inotifyMaster;
 
@@ -195,7 +195,7 @@ Foam::IOdictionary::IOdictionary(const IOobject& io, const dictionary& dict)
     }
 
     // Everyone check or just master
-    bool masterOnly = 
+    bool masterOnly =
         regIOobject::fileModificationChecking == timeStampMaster
      || regIOobject::fileModificationChecking == inotifyMaster;
 
@@ -236,6 +236,18 @@ Foam::IOdictionary::IOdictionary(const IOobject& io, const dictionary& dict)
     }
 
     dictionary::name() = IOobject::objectPath();
+}
+
+
+Foam::IOdictionary::IOdictionary(const IOobject& io, Istream& is)
+:
+    regIOobject(io)
+{
+    dictionary::name() = IOobject::objectPath();
+    // Note that we do construct the dictionary null and read in afterwards
+    // so that if there is some fancy massaging due to a functionEntry in
+    // the dictionary at least the type information is already complete.
+    is  >> *this;
 }
 
 

@@ -6,7 +6,6 @@ EXE_LIBS = \
     -lblockMesh \
     -lchemistryModel \
     -lcoalCombustion \
-    -lcombustionModels \
     -lcompressibleLESModels \
     -lcompressibleRASModels \
     -lcompressibleTurbulenceModel \
@@ -21,7 +20,6 @@ EXE_LIBS = \
     -ledgeMesh \
     -lengine \
     -lerrorEstimation \
-    -lEulerianInterfacialModels \
     -lextrudeModel \
     -lfieldFunctionObjects \
     -lfileFormats \
