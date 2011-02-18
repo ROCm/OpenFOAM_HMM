@@ -35,14 +35,14 @@ namespace Foam
 template<class ReactionThermo>
 inline word& Reaction<ReactionThermo>::name()
 {
-    return name();
+    return name_;
 }
 
 
 template<class ReactionThermo>
 inline const word& Reaction<ReactionThermo>::name() const
 {
-    return name();
+    return name_;
 }
 
 

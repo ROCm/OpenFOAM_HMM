@@ -6,7 +6,6 @@ EXE_LIBS = \
     -lblockMesh \
     -lchemistryModel \
     -lcoalCombustion \
-    -lcombustionModels \
     -lcompressibleLESModels \
     -lcompressibleRASModels \
     -lcompressibleTurbulenceModel \
