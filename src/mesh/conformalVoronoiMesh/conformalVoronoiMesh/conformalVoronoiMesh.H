@@ -281,42 +281,42 @@ private:
         //- Call the appropriate function to conform to an edge
         void insertEdgePointGroup
         (
-            const featureEdgeMesh& feMesh,
+            const extendedFeatureEdgeMesh& feMesh,
             const pointIndexHit& edHit
         );
 
         //- Insert points to conform to an external edge
         void insertExternalEdgePointGroup
         (
-            const featureEdgeMesh& feMesh,
+            const extendedFeatureEdgeMesh& feMesh,
             const pointIndexHit& edHit
         );
 
         //- Insert points to conform to an internal edge
         void insertInternalEdgePointGroup
         (
-            const featureEdgeMesh& feMesh,
+            const extendedFeatureEdgeMesh& feMesh,
             const pointIndexHit& edHit
         );
 
         //- Insert points to conform to a flat edge
         void insertFlatEdgePointGroup
         (
-            const featureEdgeMesh& feMesh,
+            const extendedFeatureEdgeMesh& feMesh,
             const pointIndexHit& edHit
         );
 
         //- Insert points to conform to an open edge
         void insertOpenEdgePointGroup
         (
-            const featureEdgeMesh& feMesh,
+            const extendedFeatureEdgeMesh& feMesh,
             const pointIndexHit& edHit
         );
 
         //- Insert points to conform to multiply connected edge
         void insertMultipleEdgePointGroup
         (
-            const featureEdgeMesh& feMesh,
+            const extendedFeatureEdgeMesh& feMesh,
             const pointIndexHit& edHit
         );
 
@@ -336,7 +336,7 @@ private:
         //  structure
         bool insertSpecialisedFeaturePoint
         (
-            const featureEdgeMesh& feMesh,
+            const extendedFeatureEdgeMesh& feMesh,
             label ptI
         );
 

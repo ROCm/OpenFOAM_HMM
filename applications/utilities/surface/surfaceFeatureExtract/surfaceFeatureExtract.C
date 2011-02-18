@@ -348,7 +348,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "writeObj",
-        "write featureEdgeMesh obj files"
+        "write extendedFeatureEdgeMesh obj files"
     );
     argList::addOption
     (
@@ -536,13 +536,13 @@ int main(int argc, char *argv[])
         << "        internal edges : " << newSet.nInternalEdges() << nl
         << endl;
 
-    // Extracting and writing a featureEdgeMesh
+    // Extracting and writing a extendedFeatureEdgeMesh
 
     extendedFeatureEdgeMesh feMesh
     (
         IOobject
         (
-            sFeatFileName + ".featureEdgeMesh",
+            sFeatFileName + ".extendedFeatureEdgeMesh",
             runTime.constant(),
             "featureEdgeMesh",
             runTime,

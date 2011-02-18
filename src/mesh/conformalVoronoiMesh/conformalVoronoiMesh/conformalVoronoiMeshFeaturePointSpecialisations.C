@@ -29,7 +29,7 @@ License
 
 bool Foam::conformalVoronoiMesh::insertSpecialisedFeaturePoint
 (
-    const featureEdgeMesh& feMesh,
+    const extendedFeatureEdgeMesh& feMesh,
     label ptI
 )
 {
@@ -48,44 +48,44 @@ bool Foam::conformalVoronoiMesh::insertSpecialisedFeaturePoint
     label nOpen = 0;
     label nMultiple = 0;
 
-    List<featureEdgeMesh::edgeStatus> allEdStat(pEds.size());
+    List<extendedFeatureEdgeMesh::edgeStatus> allEdStat(pEds.size());
 
     forAll(pEds, i)
     {
         label edgeI = pEds[i];
 
-        featureEdgeMesh::edgeStatus& eS = allEdStat[i];
+        extendedFeatureEdgeMesh::edgeStatus& eS = allEdStat[i];
 
         eS = feMesh.getEdgeStatus(edgeI);
 
         switch (eS)
         {
-            case featureEdgeMesh::EXTERNAL:
+            case extendedFeatureEdgeMesh::EXTERNAL:
             {
                 nExternal++;
                 break;
             }
-            case featureEdgeMesh::INTERNAL:
+            case extendedFeatureEdgeMesh::INTERNAL:
             {
                 nInternal++;
                 break;
             }
-            case featureEdgeMesh::FLAT:
+            case extendedFeatureEdgeMesh::FLAT:
             {
                 nFlat++;
                 break;
             }
-            case featureEdgeMesh::OPEN:
+            case extendedFeatureEdgeMesh::OPEN:
             {
                 nOpen++;
                 break;
             }
-            case featureEdgeMesh::MULTIPLE:
+            case extendedFeatureEdgeMesh::MULTIPLE:
             {
                 nMultiple++;
                 break;
             }
-            case featureEdgeMesh::NONE:
+            case extendedFeatureEdgeMesh::NONE:
             {
                 break;
             }
@@ -106,7 +106,7 @@ bool Foam::conformalVoronoiMesh::insertSpecialisedFeaturePoint
 
         // label concaveEdgeI = pEds
         // [
-        //     findIndex(allEdStat, featureEdgeMesh::INTERNAL)
+        //     findIndex(allEdStat, extendedFeatureEdgeMesh::INTERNAL)
         // ];
 
         // // // Find which planes are joined to the concave edge

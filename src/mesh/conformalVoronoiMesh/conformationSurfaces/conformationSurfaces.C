@@ -120,7 +120,7 @@ Foam::conformationSurfaces::conformationSurfaces
             features_.set
             (
                 featureI++,
-                new featureEdgeMesh
+                new extendedFeatureEdgeMesh
                 (
                     IOobject
                     (
@@ -153,7 +153,7 @@ Foam::conformationSurfaces::conformationSurfaces
             // features_.set
             // (
             //     featureI++,
-            //     new featureEdgeMesh
+            //     new extendedFeatureEdgeMesh
             //     (
             //         IOobject
             //         (
@@ -210,7 +210,7 @@ Foam::conformationSurfaces::conformationSurfaces
             features_.set
             (
                 featureI++,
-                new featureEdgeMesh
+                new extendedFeatureEdgeMesh
                 (
                     IOobject
                     (
@@ -693,13 +693,13 @@ void Foam::conformationSurfaces::findEdgeNearestByType
 ) const
 {
     // Initialise
-    featuresHit.setSize(featureEdgeMesh::nEdgeTypes);
+    featuresHit.setSize(extendedFeatureEdgeMesh::nEdgeTypes);
     featuresHit = -1;
-    edgeHits.setSize(featureEdgeMesh::nEdgeTypes);
+    edgeHits.setSize(extendedFeatureEdgeMesh::nEdgeTypes);
 
     // Work arrays
-    scalarField minDistSqr(featureEdgeMesh::nEdgeTypes, nearestDistSqr);
-    List<pointIndexHit> hitInfo(featureEdgeMesh::nEdgeTypes);
+    scalarField minDistSqr(extendedFeatureEdgeMesh::nEdgeTypes, nearestDistSqr);
+    List<pointIndexHit> hitInfo(extendedFeatureEdgeMesh::nEdgeTypes);
 
     forAll(features_, testI)
     {
@@ -733,7 +733,7 @@ void Foam::conformationSurfaces::writeFeatureObj(const fileName& prefix) const
 
     forAll(features_, i)
     {
-        const featureEdgeMesh& fEM(features_[i]);
+        const extendedFeatureEdgeMesh& fEM(features_[i]);
         const pointField pts(fEM.points());
         const edgeList eds(fEM.edges());
 

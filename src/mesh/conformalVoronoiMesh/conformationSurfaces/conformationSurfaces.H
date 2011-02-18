@@ -37,7 +37,7 @@ SourceFiles
 
 #include "searchableSurfaces.H"
 #include "searchableSurfacesQueries.H"
-#include "featureEdgeMesh.H"
+#include "extendedFeatureEdgeMesh.H"
 #include "triSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -63,8 +63,8 @@ class conformationSurfaces
         //- Reference to the searchableSurfaces object holding all geometry data
         const searchableSurfaces& allGeometry_;
 
-        //- A list of featureEdge meshes
-        PtrList<featureEdgeMesh> features_;
+        //- A list of extendedFeatureEdgeMesh
+        PtrList<extendedFeatureEdgeMesh> features_;
 
         //- The location in the mesh that specifies which portion of surfaces is
         //  to be meshed.
@@ -140,7 +140,7 @@ public:
             inline const searchableSurfaces& geometry() const;
 
             //- Return the object holding the feature points and edges
-            inline const PtrList<featureEdgeMesh>& features() const;
+            inline const PtrList<extendedFeatureEdgeMesh>& features() const;
 
             //- Return the surface indices
             inline const labelList& surfaces() const;
@@ -295,7 +295,8 @@ public:
 
         // Write
 
-            //- Write all components of all the featureEdgeMeshes as an obj file
+            //- Write all components of all the extendedFeatureEdgeMeshes as
+            //  an obj file
             void writeFeatureObj(const fileName& prefix) const;
 
 };

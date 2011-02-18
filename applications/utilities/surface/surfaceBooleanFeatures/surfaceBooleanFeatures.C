@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,8 +26,9 @@ Application
 
 Description
 
-    Generates the featureEdgeMesh for the interface between a boolean operation
-    on two surfaces.  Assumes that the orientation of the surfaces is correct:
+    Generates the extendedFeatureEdgeMesh for the interface between a boolean
+    operation on two surfaces.  Assumes that the orientation of the surfaces is
+    correct:
 
     + if the operation is union or intersection, that both surface's normals
       (n) have the same orientation with respect to a point, i.e. surfaces and b
@@ -70,7 +71,7 @@ Description
 #include "triSurface.H"
 #include "argList.H"
 #include "Time.H"
-#include "featureEdgeMesh.H"
+#include "extendedFeatureEdgeMesh.H"
 #include "triSurfaceSearch.H"
 #include "OFstream.H"
 #include "booleanSurface.H"
@@ -420,11 +421,11 @@ int main(int argc, char *argv[])
     // Flat, open or multiple edges are assumed to be impossible
     // Region edges are not explicitly supported by surfaceIntersection
 
-    featureEdgeMesh feMesh
+    extendedFeatureEdgeMesh feMesh
     (
         IOobject
         (
-            sFeatFileName + ".featureEdgeMesh",
+            sFeatFileName + ".extendedFeatureEdgeMesh",
             runTime.constant(),
             "featureEdgeMesh",
             runTime,

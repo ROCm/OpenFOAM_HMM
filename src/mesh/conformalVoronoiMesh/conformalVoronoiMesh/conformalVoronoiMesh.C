@@ -277,7 +277,7 @@ void Foam::conformalVoronoiMesh::insertEdgePointGroups
 
     forAll(edgeHits, i)
     {
-        const featureEdgeMesh& feMesh
+        const extendedFeatureEdgeMesh& feMesh
         (
             geometryToConformTo_.features()[featuresHit[i]]
         );
@@ -301,42 +301,42 @@ void Foam::conformalVoronoiMesh::insertEdgePointGroups
 
 void Foam::conformalVoronoiMesh::insertEdgePointGroup
 (
-    const featureEdgeMesh& feMesh,
+    const extendedFeatureEdgeMesh& feMesh,
     const pointIndexHit& edHit
 )
 {
     label edgeI = edHit.index();
 
-    featureEdgeMesh::edgeStatus edStatus = feMesh.getEdgeStatus(edgeI);
+    extendedFeatureEdgeMesh::edgeStatus edStatus = feMesh.getEdgeStatus(edgeI);
 
     switch (edStatus)
     {
-        case featureEdgeMesh::EXTERNAL:
+        case extendedFeatureEdgeMesh::EXTERNAL:
         {
             insertExternalEdgePointGroup(feMesh, edHit);
             break;
         }
-        case featureEdgeMesh::INTERNAL:
+        case extendedFeatureEdgeMesh::INTERNAL:
         {
             insertInternalEdgePointGroup(feMesh, edHit);
             break;
         }
-        case featureEdgeMesh::FLAT:
+        case extendedFeatureEdgeMesh::FLAT:
         {
             insertFlatEdgePointGroup(feMesh, edHit);
             break;
         }
-        case featureEdgeMesh::OPEN:
+        case extendedFeatureEdgeMesh::OPEN:
         {
             insertOpenEdgePointGroup(feMesh, edHit);
             break;
         }
-        case featureEdgeMesh::MULTIPLE:
+        case extendedFeatureEdgeMesh::MULTIPLE:
         {
             insertMultipleEdgePointGroup(feMesh, edHit);
             break;
         }
-        case featureEdgeMesh::NONE:
+        case extendedFeatureEdgeMesh::NONE:
         {
             break;
         }
@@ -346,7 +346,7 @@ void Foam::conformalVoronoiMesh::insertEdgePointGroup
 
 void Foam::conformalVoronoiMesh::insertExternalEdgePointGroup
 (
-    const featureEdgeMesh& feMesh,
+    const extendedFeatureEdgeMesh& feMesh,
     const pointIndexHit& edHit
 )
 {
@@ -380,7 +380,7 @@ void Foam::conformalVoronoiMesh::insertExternalEdgePointGroup
 
 void Foam::conformalVoronoiMesh::insertInternalEdgePointGroup
 (
-    const featureEdgeMesh& feMesh,
+    const extendedFeatureEdgeMesh& feMesh,
     const pointIndexHit& edHit
 )
 {
@@ -447,7 +447,7 @@ void Foam::conformalVoronoiMesh::insertInternalEdgePointGroup
 
 void Foam::conformalVoronoiMesh::insertFlatEdgePointGroup
 (
-    const featureEdgeMesh& feMesh,
+    const extendedFeatureEdgeMesh& feMesh,
     const pointIndexHit& edHit
 )
 {
@@ -478,7 +478,7 @@ void Foam::conformalVoronoiMesh::insertFlatEdgePointGroup
 
 void Foam::conformalVoronoiMesh::insertOpenEdgePointGroup
 (
-    const featureEdgeMesh& feMesh,
+    const extendedFeatureEdgeMesh& feMesh,
     const pointIndexHit& edHit
 )
 {
@@ -488,7 +488,7 @@ void Foam::conformalVoronoiMesh::insertOpenEdgePointGroup
 
 void Foam::conformalVoronoiMesh::insertMultipleEdgePointGroup
 (
-    const featureEdgeMesh& feMesh,
+    const extendedFeatureEdgeMesh& feMesh,
     const pointIndexHit& edHit
 )
 {
@@ -558,11 +558,14 @@ void Foam::conformalVoronoiMesh::createFeaturePoints()
 
 void Foam::conformalVoronoiMesh::insertConvexFeaturePoints()
 {
-    const PtrList<featureEdgeMesh>& feMeshes(geometryToConformTo_.features());
+    const PtrList<extendedFeatureEdgeMesh>& feMeshes
+    (
+        geometryToConformTo_.features()
+    );
 
     forAll(feMeshes, i)
     {
-        const featureEdgeMesh& feMesh(feMeshes[i]);
+        const extendedFeatureEdgeMesh& feMesh(feMeshes[i]);
 
         for
         (
@@ -602,11 +605,14 @@ void Foam::conformalVoronoiMesh::insertConvexFeaturePoints()
 
 void Foam::conformalVoronoiMesh::insertConcaveFeaturePoints()
 {
-    const PtrList<featureEdgeMesh>& feMeshes(geometryToConformTo_.features());
+    const PtrList<extendedFeatureEdgeMesh>& feMeshes
+    (
+        geometryToConformTo_.features()
+    );
 
     forAll(feMeshes, i)
     {
-        const featureEdgeMesh& feMesh(feMeshes[i]);
+        const extendedFeatureEdgeMesh& feMesh(feMeshes[i]);
 
         for
         (
@@ -649,11 +655,14 @@ void Foam::conformalVoronoiMesh::insertConcaveFeaturePoints()
 
 void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
 {
-    const PtrList<featureEdgeMesh>& feMeshes(geometryToConformTo_.features());
+    const PtrList<extendedFeatureEdgeMesh>& feMeshes
+    (
+        geometryToConformTo_.features()
+    );
 
     forAll(feMeshes, i)
     {
-        const featureEdgeMesh& feMesh(feMeshes[i]);
+        const extendedFeatureEdgeMesh& feMesh(feMeshes[i]);
 
         for
         (
@@ -678,13 +687,13 @@ void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
                 {
                     label edgeI = pEds[e];
 
-                    featureEdgeMesh::edgeStatus edStatus =
+                    extendedFeatureEdgeMesh::edgeStatus edStatus =
                         feMesh.getEdgeStatus(edgeI);
 
                     if
                     (
-                        edStatus == featureEdgeMesh::OPEN
-                     || edStatus == featureEdgeMesh::MULTIPLE
+                        edStatus == extendedFeatureEdgeMesh::OPEN
+                     || edStatus == extendedFeatureEdgeMesh::MULTIPLE
                     )
                     {
                         Info<< "Edge type " << edStatus
@@ -728,11 +737,14 @@ void Foam::conformalVoronoiMesh::constructFeaturePointLocations()
 {
     DynamicList<Foam::point> ftPtLocs;
 
-    const PtrList<featureEdgeMesh>& feMeshes(geometryToConformTo_.features());
+    const PtrList<extendedFeatureEdgeMesh>& feMeshes
+    (
+        geometryToConformTo_.features()
+    );
 
     forAll(feMeshes, i)
     {
-        const featureEdgeMesh& feMesh(feMeshes[i]);
+        const extendedFeatureEdgeMesh& feMesh(feMeshes[i]);
 
         for
         (

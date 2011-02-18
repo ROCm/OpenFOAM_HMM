@@ -31,7 +31,7 @@ const Foam::searchableSurfaces& Foam::conformationSurfaces::geometry() const
 }
 
 
-const Foam::PtrList<Foam::featureEdgeMesh>&
+const Foam::PtrList<Foam::extendedFeatureEdgeMesh>&
 Foam::conformationSurfaces::features() const
 {
     return features_;
