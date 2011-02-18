@@ -229,7 +229,7 @@ endif
 # boost and CGAL
 # ~~~~~~~~~~~~~~
 
-set boost_version=boost_1_42_0
+set boost_version=boost_1_45_0
 set cgal_version=CGAL-3.7
 
 setenv BOOST_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$boost_version
