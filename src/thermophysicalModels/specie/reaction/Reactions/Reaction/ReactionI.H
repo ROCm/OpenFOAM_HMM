@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,6 +31,20 @@ namespace Foam
 {
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class ReactionThermo>
+inline word& Reaction<ReactionThermo>::name()
+{
+    return name();
+}
+
+
+template<class ReactionThermo>
+inline const word& Reaction<ReactionThermo>::name() const
+{
+    return name();
+}
+
 
 template<class ReactionThermo>
 inline const List<typename Reaction<ReactionThermo>::specieCoeffs>&
