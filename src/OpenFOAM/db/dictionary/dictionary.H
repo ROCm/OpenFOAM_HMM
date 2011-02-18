@@ -239,7 +239,7 @@ public:
 
 
     //- Destructor
-    ~dictionary();
+    virtual ~dictionary();
 
 
     // Member functions

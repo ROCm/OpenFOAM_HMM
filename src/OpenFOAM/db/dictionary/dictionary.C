@@ -756,13 +756,14 @@ bool Foam::dictionary::changeKeyword
 
     if (iter()->keyword().isPattern())
     {
-        FatalErrorIn
+        FatalIOErrorIn
         (
-            "dictionary::changeKeyword(const word&, const word&, bool)"
+            "dictionary::changeKeyword(const word&, const word&, bool)",
+            *this
         )   << "Old keyword "<< oldKeyword
             << " is a pattern."
             << "Pattern replacement not yet implemented."
-            << exit(FatalError);
+            << exit(FatalIOError);
     }
 
 
@@ -796,9 +797,10 @@ bool Foam::dictionary::changeKeyword
         }
         else
         {
-            WarningIn
+            IOWarningIn
             (
-                "dictionary::changeKeyword(const word&, const word&, bool)"
+                "dictionary::changeKeyword(const word&, const word&, bool)",
+                *this
             )   << "cannot rename keyword "<< oldKeyword
                 << " to existing keyword " << newKeyword
                 << " in dictionary " << name() << endl;
@@ -830,9 +832,9 @@ bool Foam::dictionary::merge(const dictionary& dict)
     // Check for assignment to self
     if (this == &dict)
     {
-        FatalErrorIn("dictionary::merge(const dictionary&)")
+        FatalIOErrorIn("dictionary::merge(const dictionary&)", *this)
             << "attempted merge to self for dictionary " << name()
-            << abort(FatalError);
+            << abort(FatalIOError);
     }
 
     bool changed = false;
@@ -911,9 +913,9 @@ void Foam::dictionary::operator=(const dictionary& rhs)
     // Check for assignment to self
     if (this == &rhs)
     {
-        FatalErrorIn("dictionary::operator=(const dictionary&)")
+        FatalIOErrorIn("dictionary::operator=(const dictionary&)", *this)
             << "attempted assignment to self for dictionary " << name()
-            << abort(FatalError);
+            << abort(FatalIOError);
     }
 
     name() = rhs.name();
@@ -934,9 +936,9 @@ void Foam::dictionary::operator+=(const dictionary& rhs)
     // Check for assignment to self
     if (this == &rhs)
     {
-        FatalErrorIn("dictionary::operator+=(const dictionary&)")
+        FatalIOErrorIn("dictionary::operator+=(const dictionary&)", *this)
             << "attempted addition assignment to self for dictionary " << name()
-            << abort(FatalError);
+            << abort(FatalIOError);
     }
 
     forAllConstIter(IDLList<entry>, rhs, iter)
@@ -951,9 +953,9 @@ void Foam::dictionary::operator|=(const dictionary& rhs)
     // Check for assignment to self
     if (this == &rhs)
     {
-        FatalErrorIn("dictionary::operator|=(const dictionary&)")
+        FatalIOErrorIn("dictionary::operator|=(const dictionary&)", *this)
             << "attempted assignment to self for dictionary " << name()
-            << abort(FatalError);
+            << abort(FatalIOError);
     }
 
     forAllConstIter(IDLList<entry>, rhs, iter)
@@ -971,9 +973,9 @@ void Foam::dictionary::operator<<=(const dictionary& rhs)
     // Check for assignment to self
     if (this == &rhs)
     {
-        FatalErrorIn("dictionary::operator<<=(const dictionary&)")
+        FatalIOErrorIn("dictionary::operator<<=(const dictionary&)", *this)
             << "attempted assignment to self for dictionary " << name()
-            << abort(FatalError);
+            << abort(FatalIOError);
     }
 
     forAllConstIter(IDLList<entry>, rhs, iter)
