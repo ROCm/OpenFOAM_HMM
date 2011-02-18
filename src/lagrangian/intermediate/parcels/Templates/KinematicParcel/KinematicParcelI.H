@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -406,6 +406,27 @@ template<class ParcelType>
 inline const Foam::vector& Foam::KinematicParcel<ParcelType>::UTurb() const
 {
     return UTurb_;
+}
+
+
+template <class ParcelType>
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::rhoc() const
+{
+    return rhoc_;
+}
+
+
+template <class ParcelType>
+inline const Foam::vector& Foam::KinematicParcel<ParcelType>::Uc() const
+{
+    return Uc_;
+}
+
+
+template <class ParcelType>
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::muc() const
+{
+    return muc_;
 }
 
 

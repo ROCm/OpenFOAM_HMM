@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -87,8 +87,7 @@ void Foam::nearWallFields::read(const dictionary& dict)
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
 
         dict.lookup("fields") >> fieldSet_;
-        patchSet_ =
-            mesh.boundaryMesh().patchSet(wordList(dict.lookup("patches")));
+        patchSet_ = mesh.boundaryMesh().patchSet(dict.lookup("patches"));
         distance_ = readScalar(dict.lookup("distance"));
 
 

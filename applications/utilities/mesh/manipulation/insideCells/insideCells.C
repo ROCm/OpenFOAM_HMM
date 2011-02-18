@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,8 +22,8 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    Picks up cells with cell centre 'inside' of surface. Requires surface
-    to be closed and singly connected.
+    Picks up cells with cell centre 'inside' of surface.
+    Requires surface to be closed and singly connected.
 
 \*---------------------------------------------------------------------------*/
 
@@ -42,9 +42,16 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Create a cellSet for cells with their centres inside the defined "
+        "surface.\n"
+        "Surface must be closed and singly connected."
+    );
+
     argList::noParallel();
-    argList::validArgs.append("surface file");
-    argList::validArgs.append("destination cellSet");
+    argList::validArgs.append("surfaceFile");
+    argList::validArgs.append("cellSet");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -75,14 +82,13 @@ int main(int argc, char *argv[])
     }
 
 
-    Info<< "Selected " << insideCells.size()
-        << " cells out of " << mesh.nCells() << endl
-        << endl
+    Info<< "Selected " << insideCells.size() << " of " << mesh.nCells()
+        << " cells" << nl << nl
         << "Writing selected cells to cellSet " << insideCells.name()
-        << endl << endl
-        << "Use this cellSet e.g. with subsetMesh : " << endl << endl
-        << "    subsetMesh <root> <case> " << insideCells.name()
-        << endl << endl;
+        << nl << nl
+        << "Use this cellSet e.g. with subsetMesh : " << nl << nl
+        << "    subsetMesh " << insideCells.name()
+        << nl << endl;
 
     insideCells.write();
 

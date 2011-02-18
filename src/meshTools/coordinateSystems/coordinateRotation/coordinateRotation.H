@@ -32,7 +32,7 @@ Description
     or (e3/e1). Any nonorthogonality will be absorbed into the second vector.
 
     For convenience, the dictionary constructor forms allow a few shortcuts:
-    - if the \c type is not otherwise specified, the type @c axes
+    - if the \c type is not otherwise specified, the type \c axes
       is implicit
     - if an axes specification (eg, e3/e1) is used, the coordinateRotation
       sub-dictionary can be dropped.

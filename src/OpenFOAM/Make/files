@@ -66,6 +66,7 @@ primitives/functions/DataEntry/makeDataEntries.C
 primitives/functions/DataEntry/polynomial/polynomial.C
 primitives/functions/DataEntry/polynomial/polynomialIO.C
 
+primitives/functions/Polynomial/polynomialFunction.C
 
 strings = primitives/strings
 $(strings)/string/string.C
@@ -164,11 +165,16 @@ $(functionEntries)/includeIfPresentEntry/includeIfPresentEntry.C
 $(functionEntries)/inputModeEntry/inputModeEntry.C
 $(functionEntries)/removeEntry/removeEntry.C
 
-calcEntry = $(functionEntries)/calcEntry
-$(calcEntry)/calcEntryParser.atg
-$(calcEntry)/calcEntryInternal.C
-$(calcEntry)/calcEntry.C
-
+/*
+ * Requires customized coco-cpp
+ * could be dropped or activated in the future
+ */
+/*
+  calcEntry = $(functionEntries)/calcEntry
+  $(calcEntry)/calcEntryParser.atg
+  $(calcEntry)/calcEntryInternal.C
+  $(calcEntry)/calcEntry.C
+*/
 
 IOdictionary = db/IOobjects/IOdictionary
 $(IOdictionary)/IOdictionary.C

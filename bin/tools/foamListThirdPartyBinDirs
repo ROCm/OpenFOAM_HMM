@@ -23,7 +23,7 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
-#     foamListThirdPartyBinDirs <directory> <archOptions>
+#     foamListThirdPartyBinDirs <directory> [archOptions]
 #
 # Description
 #     Lists directories containing binary files for OpenFOAM ThirdParty
@@ -33,9 +33,9 @@
 #------------------------------------------------------------------------------
 toolsDir="${0%/*}"  # this script is already located in the tools/ directory
 
-[ $# -eq 2 ] || {
+[ $# -eq 1 -o $# -eq 2 ] || {
 cat <<USAGE 1>&2
-Usage : ${0##*/} <packDir> <archOptions>
+Usage : ${0##*/} <packDir> [archOptions]
 
 * List directories containing binary files for OpenFOAM ThirdParty
 
@@ -49,8 +49,13 @@ USAGE
 #------------------------------------------------------------------------------
 packDir="$1"
 
-# same as $WM_OPTIONS - eg, 'linux64GccDPOpt'
-archOptions="$2"
+# default to same as $WM_OPTIONS - eg, 'linux64GccDPOpt'
+archOptions="${2:-$WM_OPTIONS}"
+
+[ -n "$archOptions" ] || {
+    echo "Error: no archOptions specified" 1>&2
+    exit 1
+}
 
 # base arch (w/o precision, optimization, etc)
 # same as "$WM_ARCH$WM_COMPILER"
@@ -66,7 +71,10 @@ arch3264=$(echo "$archOS" | sed -e 's@64@-64@')
 
 #------------------------------------------------------------------------------
 # check for essential directories
-for dir in $packDir $packDir/platforms/$archOptions/lib
+for dir in \
+    $packDir \
+    $packDir/platforms/$archOptions/lib \
+    ;
 do
     [ -d $dir ] || {
         echo "Error: directory $dir does not exist" 1>&2

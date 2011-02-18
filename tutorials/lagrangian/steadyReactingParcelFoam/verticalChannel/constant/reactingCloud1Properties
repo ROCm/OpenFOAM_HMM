@@ -22,6 +22,7 @@ solution
     transient       no; // yes;
     calcFrequency   10;
     maxTrackTime    5.0;
+    maxCo           0.3;
 
     coupled         true;
     cellValueSourceCorrection off;
@@ -97,20 +98,18 @@ constantProperties
 }
 
 
-particleForces
-{
-    gravity         on;
-    virtualMass     off;
-    pressureGradient off;
-    paramagnetic    off;
-}
-
-
 subModels
 {
-    InjectionModel  PatchInjection;
+    particleForces
+    {
+        activeForces
+        (
+            sphereDrag
+            gravity
+        );
+    }
 
-    DragModel       SphereDrag;
+    InjectionModel  PatchInjection;
 
     DispersionModel StochasticDispersionRAS;
 
@@ -146,7 +145,7 @@ subModels
         flowRateProfile constant 1;
         sizeDistribution
         {
-            pdfType         general;
+            distributionModelType general;
             generalDistribution
             {
                 distribution

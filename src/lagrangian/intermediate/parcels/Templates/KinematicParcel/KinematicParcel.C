@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,16 +42,19 @@ void Foam::KinematicParcel<ParcelType>::setCellValues
 
     if (rhoc_ < td.cloud().constProps().rhoMin())
     {
-        WarningIn
-        (
-            "void Foam::KinematicParcel<ParcelType>::setCellValues"
-            "("
-                "TrackData&, "
-                "const scalar, "
-                "const label"
-            ")"
-        )   << "Limiting observed density in cell " << cellI << " to "
-            << td.cloud().constProps().rhoMin() <<  nl << endl;
+        if (debug)
+        {
+            WarningIn
+            (
+                "void Foam::KinematicParcel<ParcelType>::setCellValues"
+                "("
+                    "TrackData&, "
+                    "const scalar, "
+                    "const label"
+                ")"
+            )   << "Limiting observed density in cell " << cellI << " to "
+                << td.cloud().constProps().rhoMin() <<  nl << endl;
+        }
 
         rhoc_ = td.cloud().constProps().rhoMin();
     }
@@ -176,46 +179,21 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     scalar& Cud
 ) const
 {
-    const polyMesh& mesh = this->cloud().pMesh();
-
-    // Momentum transfer coefficient
-    const scalar utc = td.cloud().drag().utc(Re, d, mu) + ROOTVSMALL;
-
-    tetIndices tetIs = this->currentTetIndices();
+    const typename ParcelType::forceType& forces = td.cloud().forces();
 
     // Momentum source due to particle forces
-    const vector Fcp = mass*td.cloud().forces().calcCoupled
-    (
-        this->position(),
-        tetIs,
-        dt,
-        rhoc_,
-        rho,
-        Uc_,
-        U,
-        d
-    );
-
-    const vector Fncp = mass*td.cloud().forces().calcNonCoupled
-    (
-        this->position(),
-        tetIs,
-        dt,
-        rhoc_,
-        rho,
-        Uc_,
-        U,
-        d
-    );
+    const ParcelType& p = static_cast<const ParcelType&>(*this);
+    const forceSuSp Fcp = forces.calcCoupled(p, dt, mass, Re, mu);
+    const forceSuSp Fncp = forces.calcNonCoupled(p, dt, mass, Re, mu);
+    const forceSuSp Feff = Fcp + Fncp;
 
 
     // New particle velocity
     //~~~~~~~~~~~~~~~~~~~~~~
 
     // Update velocity - treat as 3-D
-    const scalar As = this->areaS(d);
-    const vector ap = Uc_ + (Fcp + Fncp + Su)/(utc*As);
-    const scalar bp = 6.0*utc/(rho*d);
+    const vector ap = Uc_ + (Feff.Su() + Su)/(Feff.Sp() + ROOTVSMALL);
+    const scalar bp = Feff.Sp()/mass;
 
     Cud = bp;
 
@@ -224,9 +202,10 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
 
     vector Unew = Ures.value();
 
-    dUTrans += dt*(utc*As*(Ures.average() - Uc_) - Fcp);
+    dUTrans += dt*(Feff.Sp()*(Ures.average() - Uc_) - Fcp.Su());
 
     // Apply correction to velocity and dUTrans for reduced-D cases
+    const polyMesh& mesh = this->cloud().pMesh();
     meshTools::constrainDirection(mesh, mesh.solutionD(), Unew);
     meshTools::constrainDirection(mesh, mesh.solutionD(), dUTrans);
 

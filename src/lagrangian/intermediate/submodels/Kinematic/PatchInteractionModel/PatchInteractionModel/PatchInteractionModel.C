@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -163,7 +163,7 @@ bool Foam::PatchInteractionModel<CloudType>::correct
     bool&,
     const scalar,
     const tetIndices&
-) const
+)
 {
     notImplemented
     (
@@ -328,6 +328,13 @@ void Foam::PatchInteractionModel<CloudType>::patchData
         // No further action is required if the motion is
         // translational only, nw and Up have already been set.
     }
+}
+
+
+template<class CloudType>
+void Foam::PatchInteractionModel<CloudType>::info(Ostream& os) const
+{
+    // do nothing
 }
 
 

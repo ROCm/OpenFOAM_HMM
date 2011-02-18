@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,7 @@ License
 #include "simpleGeomDecomp.H"
 #include "addToRunTimeSelectionTable.H"
 #include "SortableList.H"
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,7 +54,7 @@ void Foam::simpleGeomDecomp::assignToProcessorGroup
 (
     labelList& processorGroup,
     const label nProcGroup
-)
+) const
 {
     label jump = processorGroup.size()/nProcGroup;
     label jumpb = jump + 1;
@@ -90,7 +91,7 @@ void Foam::simpleGeomDecomp::assignToProcessorGroup
     const labelList& indices,
     const scalarField& weights,
     const scalar summedWeights
-)
+) const
 {
     // This routine gets the sorted points.
     // Easiest to explain with an example.
@@ -126,7 +127,10 @@ void Foam::simpleGeomDecomp::assignToProcessorGroup
 }
 
 
-Foam::labelList Foam::simpleGeomDecomp::decompose(const pointField& points)
+Foam::labelList Foam::simpleGeomDecomp::decomposeOneProc
+(
+    const pointField& points
+) const
 {
     // construct a list for the final result
     labelList finalDecomp(points.size());
@@ -195,11 +199,11 @@ Foam::labelList Foam::simpleGeomDecomp::decompose(const pointField& points)
 }
 
 
-Foam::labelList Foam::simpleGeomDecomp::decompose
+Foam::labelList Foam::simpleGeomDecomp::decomposeOneProc
 (
     const pointField& points,
     const scalarField& weights
-)
+) const
 {
     // construct a list for the final result
     labelList finalDecomp(points.size());
@@ -299,5 +303,163 @@ Foam::simpleGeomDecomp::simpleGeomDecomp(const dictionary& decompositionDict)
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::labelList Foam::simpleGeomDecomp::decompose
+(
+    const pointField& points
+)
+{
+    if (!Pstream::parRun())
+    {
+        return decomposeOneProc(points);
+    }
+    else
+    {
+        globalIndex globalNumbers(points.size());
+
+        // Collect all points on master
+        if (Pstream::master())
+        {
+            pointField allPoints(globalNumbers.size());
+
+            label nTotalPoints = 0;
+            // Master first
+            SubField<point>(allPoints, points.size()).assign(points);
+            nTotalPoints += points.size();
+
+            // Add slaves
+            for (int slave=1; slave<Pstream::nProcs(); slave++)
+            {
+                IPstream fromSlave(Pstream::scheduled, slave);
+                pointField nbrPoints(fromSlave);
+                SubField<point>
+                (
+                    allPoints,
+                    nbrPoints.size(),
+                    nTotalPoints
+                ).assign(nbrPoints);
+                nTotalPoints += nbrPoints.size();
+            }
+
+            // Decompose
+            labelList finalDecomp(decomposeOneProc(allPoints));
+
+            // Send back
+            for (int slave=1; slave<Pstream::nProcs(); slave++)
+            {
+                OPstream toSlave(Pstream::scheduled, slave);
+                toSlave << SubField<label>
+                (
+                    finalDecomp,
+                    globalNumbers.localSize(slave),
+                    globalNumbers.offset(slave)
+                );
+            }
+            // Get my own part
+            finalDecomp.setSize(points.size());
+
+            return finalDecomp;
+        }
+        else
+        {
+            // Send my points
+            {
+                OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
+                toMaster<< points;
+            }
+
+            // Receive back decomposition
+            IPstream fromMaster(Pstream::scheduled, Pstream::masterNo());
+            labelList finalDecomp(fromMaster);
+
+            return finalDecomp;
+        }
+    }
+}
+
+
+Foam::labelList Foam::simpleGeomDecomp::decompose
+(
+    const pointField& points,
+    const scalarField& weights
+)
+{
+    if (!Pstream::parRun())
+    {
+        return decomposeOneProc(points, weights);
+    }
+    else
+    {
+        globalIndex globalNumbers(points.size());
+
+        // Collect all points on master
+        if (Pstream::master())
+        {
+            pointField allPoints(globalNumbers.size());
+            scalarField allWeights(allPoints.size());
+
+            label nTotalPoints = 0;
+            // Master first
+            SubField<point>(allPoints, points.size()).assign(points);
+            SubField<scalar>(allWeights, points.size()).assign(weights);
+            nTotalPoints += points.size();
+
+            // Add slaves
+            for (int slave=1; slave<Pstream::nProcs(); slave++)
+            {
+                IPstream fromSlave(Pstream::scheduled, slave);
+                pointField nbrPoints(fromSlave);
+                scalarField nbrWeights(fromSlave);
+                SubField<point>
+                (
+                    allPoints,
+                    nbrPoints.size(),
+                    nTotalPoints
+                ).assign(nbrPoints);
+                SubField<scalar>
+                (
+                    allWeights,
+                    nbrWeights.size(),
+                    nTotalPoints
+                ).assign(nbrWeights);
+                nTotalPoints += nbrPoints.size();
+            }
+
+            // Decompose
+            labelList finalDecomp(decomposeOneProc(allPoints, allWeights));
+
+            // Send back
+            for (int slave=1; slave<Pstream::nProcs(); slave++)
+            {
+                OPstream toSlave(Pstream::scheduled, slave);
+                toSlave << SubField<label>
+                (
+                    finalDecomp,
+                    globalNumbers.localSize(slave),
+                    globalNumbers.offset(slave)
+                );
+            }
+            // Get my own part
+            finalDecomp.setSize(points.size());
+
+            return finalDecomp;
+        }
+        else
+        {
+            // Send my points
+            {
+                OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
+                toMaster<< points << weights;
+            }
+
+            // Receive back decomposition
+            IPstream fromMaster(Pstream::scheduled, Pstream::masterNo());
+            labelList finalDecomp(fromMaster);
+
+            return finalDecomp;
+        }
+    }
+}
+
 
 // ************************************************************************* //
