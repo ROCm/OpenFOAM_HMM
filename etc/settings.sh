@@ -107,7 +107,7 @@ _foamAddLib  $FOAM_USER_LIBBIN:$FOAM_SITE_LIBBIN:$FOAM_LIBBIN:$FOAM_EXT_LIBBIN:$
 # Compiler settings
 # ~~~~~~~~~~~~~~~~~
 unset gcc_version gmp_version mpfr_version mpc_version
-unset MPFR_ARCH_PATH
+unset MPFR_ARCH_PATH GMP_ARCH_PATH
 
 # Location of compiler installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -198,6 +198,7 @@ OpenFOAM | ThirdParty)
 
         # used by boost/CGAL:
         export MPFR_ARCH_PATH=$mpfrDir
+        export GMP_ARCH_PATH=$gmpDir
     fi
     unset gcc_version gccDir
     unset gmp_version gmpDir  mpfr_version mpfrDir  mpc_version mpcDir
@@ -264,7 +265,7 @@ then
     fi
     _foamAddLib $CGAL_ARCH_PATH/lib
 else
-    unset BOOST_ARCH_PATH CGAL_ARCH_PATH MPFR_ARCH_PATH
+    unset BOOST_ARCH_PATH CGAL_ARCH_PATH MPFR_ARCH_PATH GMP_ARCH_PATH
 fi
 
 unset boost_version cgal_version

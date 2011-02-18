@@ -84,7 +84,7 @@ _foamAddLib  ${FOAM_USER_LIBBIN}:${FOAM_SITE_LIBBIN}:${FOAM_LIBBIN}:${FOAM_EXT_L
 # Compiler settings
 # ~~~~~~~~~~~~~~~~~
 unset gcc_version gmp_version mpfr_version mpc_version
-unsetenv MPFR_ARCH_PATH
+unsetenv MPFR_ARCH_PATH GMP_ARCH_PATH
 
 
 # Location of compiler installation
@@ -178,6 +178,7 @@ case ThirdParty:
 
         # used by boost/CGAL:
         setenv MPFR_ARCH_PATH $mpfrDir
+        setenv GMP_ARCH_PATH $gmpDir
     endif
     unset gcc_version gccDir
     unset gmp_version gmpDir  mpfr_version mpfrDir  mpc_version mpcDir
@@ -243,7 +244,7 @@ if ( -d "$CGAL_ARCH_PATH" ) then
     endif
     _foamAddLib $CGAL_ARCH_PATH/lib
 else
-    unsetenv BOOST_ARCH_PATH CGAL_ARCH_PATH MPFR_ARCH_PATH
+    unsetenv BOOST_ARCH_PATH CGAL_ARCH_PATH MPFR_ARCH_PATH GMP_ARCH_PATH
 endif
 
 unset boost_version cgal_version
