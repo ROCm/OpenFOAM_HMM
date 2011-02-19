@@ -19,7 +19,6 @@ EXE_LIBS = \
     -ldynamicMesh \
     -ledgeMesh \
     -lengine \
-    -lerrorEstimation \
     -lextrudeModel \
     -lfieldFunctionObjects \
     -lfileFormats \

@@ -1,4 +1,0 @@
-icoMomentError.C
-
-EXE = $(FOAM_APPBIN)/icoMomentError
-
