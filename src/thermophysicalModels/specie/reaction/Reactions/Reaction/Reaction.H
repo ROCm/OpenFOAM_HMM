@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,6 +69,12 @@ class Reaction
 
 public:
 
+    // Static data
+
+        //- Number of un-named reactions
+        static label nUnNamedReactions;
+
+
     // Public data types
 
         //- Class to hold the specie index and its coefficients in the
@@ -112,6 +118,9 @@ private:
 
     // Private data
 
+        //- Name of reaction
+        const word name_;
+
         //- List of specie names present in reaction system
         const speciesTable& species_;
 
@@ -135,6 +144,9 @@ private:
 
         //- Disallow default bitwise assignment
         void operator=(const Reaction<ReactionThermo>&);
+
+        //- Return new reaction ID for un-named reactions
+        label getNewReactionID();
 
 
 public:
@@ -281,6 +293,9 @@ public:
     // Member Functions
 
         // Access
+
+            inline word& name();
+            inline const word& name() const;
 
             inline const List<specieCoeffs>& lhs() const;
             inline const List<specieCoeffs>& rhs() const;
