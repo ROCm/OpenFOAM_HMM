@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "systemCall.H"
-#include "dictionary.H"
 #include "Time.H"
+#include "codeStreamTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -71,6 +71,30 @@ void Foam::systemCall::read(const dictionary& dict)
             << "no executeCalls, endCalls or writeCalls defined."
             << endl;
     }
+    else if (!codeStreamTools::allowSystemOperations)
+    {
+        FatalErrorIn
+        (
+            "systemCall::read(const dictionary&)"
+        )   <<  "Executing user-supplied system calls is not"
+            << " enabled by default" << endl
+            << "because of security issues. If you trust the case you can"
+            << " enable this" << endl
+            << "facility be adding to the InfoSwitches setting in the system"
+            << " controlDict:" << endl
+            << endl
+            << "    allowSystemOperations 1" << endl
+            << endl
+            << "The system controlDict is either" << endl
+            << endl
+            << "    ~/.OpenFOAM/$WM_PROJECT_VERSION/controlDict" << endl
+            << endl
+            << "or" << endl
+            << endl
+            << "    $WM_PROJECT_DIR/etc/controlDict" << endl
+            << endl
+            << exit(FatalError);
+    }
 }
 
 
@@ -78,7 +102,7 @@ void Foam::systemCall::execute()
 {
     forAll(executeCalls_, callI)
     {
-        ::system(executeCalls_[callI].c_str());
+        Foam::system(executeCalls_[callI].c_str());
     }
 }
 
@@ -87,7 +111,7 @@ void Foam::systemCall::end()
 {
     forAll(endCalls_, callI)
     {
-        ::system(endCalls_[callI].c_str());
+        Foam::system(endCalls_[callI].c_str());
     }
 }
 
@@ -96,7 +120,7 @@ void Foam::systemCall::write()
 {
     forAll(writeCalls_, callI)
     {
-        ::system(writeCalls_[callI].c_str());
+        Foam::system(writeCalls_[callI].c_str());
     }
 }
 
