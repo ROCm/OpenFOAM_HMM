@@ -35,7 +35,7 @@ Description
 
         movingWall
         {
-            type            codedFixedValue;
+            type            codedFixedValue<scalar>;
             value           uniform 0;
             redirectType    rampedFixedValue;   // name of generated bc
 
@@ -118,7 +118,7 @@ class codedFixedValueFvPatchScalarField
 public:
 
     //- Runtime type information
-    TypeName("codedFixedValue");
+    TypeName("codedFixedValue<scalar>");
 
 
     // Constructors

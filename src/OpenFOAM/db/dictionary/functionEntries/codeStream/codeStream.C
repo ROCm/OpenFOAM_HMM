@@ -143,14 +143,18 @@ bool Foam::functionEntries::codeStream::execute
             {
                 Info<< "Creating new library in " << libPath << endl;
 
-                fileName templates(Foam::getEnv("OTF_TEMPLATE_DIR"));
+                fileName templates
+                (
+                    Foam::getEnv("FOAM_CODESTREAM_TEMPLATE_DIR")
+                );
                 if (!templates.size())
                 {
                     FatalIOErrorIn
                     (
                         "functionEntries::codeStream::execute(..)",
                         parentDict
-                    )   << "Please set environment variable OTF_TEMPLATE_DIR"
+                    )   << "Please set environment variable"
+                        " FOAM_CODESTREAM_TEMPLATE_DIR"
                         << " to point to the location of codeStreamTemplate.C"
                         << exit(FatalIOError);
                 }
@@ -158,8 +162,8 @@ bool Foam::functionEntries::codeStream::execute
                 List<fileAndVars> copyFiles(1);
                 copyFiles[0].first() = templates/"codeStreamTemplate.C";
                 stringPairList bodyVars(2);
-                bodyVars[0] = Pair<string>("OTF_INCLUDES", codeInclude);
-                bodyVars[1] = Pair<string>("OTF_BODY", code);
+                bodyVars[0] = Pair<string>("codeInclude", codeInclude);
+                bodyVars[1] = Pair<string>("code", code);
                 copyFiles[0].second() = bodyVars;
 
                 List<fileAndContent> filesContents(2);

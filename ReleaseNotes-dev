@@ -190,7 +190,7 @@
 
     outlet
     {
-        type            codedFixedValue;
+        type            codedFixedValue<scalar>;
         value           uniform 0;
         redirectType    fixedValue10;
 
@@ -230,6 +230,9 @@
     + =extrudeMesh=:
             - option to add extrusion to existing mesh.
             - works in parallel
+    + =snappyHexMesh=:
+        + extrude across multi-processor boundaries
+        + preserve faceZones during layering
 * Post-processing
   + =paraFoam=, =foamToVTK=: full support for polyhedral cell type in recent
      Paraview versions.
