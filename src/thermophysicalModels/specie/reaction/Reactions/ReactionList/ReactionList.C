@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -105,13 +105,15 @@ bool Foam::ReactionList<ThermoType>::readReactionDict()
 
     forAllConstIter(dictionary, reactions, iter)
     {
+        const word reactionName = iter().keyword();
+
         this->append
         (
             Reaction<ThermoType>::New
             (
                 species_,
                 thermoDb_,
-                reactions.subDict(iter().keyword())
+                reactions.subDict(reactionName)
             ).ptr()
         );
     }
@@ -129,8 +131,9 @@ void Foam::ReactionList<ThermoType>::write(Ostream& os) const
     forAllConstIter(typename SLPtrList<Reaction<ThermoType> >, *this, iter)
     {
         const Reaction<ThermoType>& r = iter();
-        os  << indent << r.type() << nl
+        os  << indent << r.name() << nl
             << indent << token::BEGIN_BLOCK << incrIndent << nl;
+        os.writeKeyword("type") << r.type() << token::END_STATEMENT << nl;
         r.write(os);
         os  << decrIndent << indent << token::END_BLOCK << nl;
     }

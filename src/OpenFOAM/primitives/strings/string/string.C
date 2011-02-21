@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -94,7 +94,7 @@ Foam::string& Foam::string::replaceAll
 
 
 // Expand all occurences of environment variables and initial tilde sequences
-Foam::string& Foam::string::expand(const bool recurse)
+Foam::string& Foam::string::expand(const bool recurse, const bool allowEmptyVar)
 {
     size_type startEnvar = 0;
 
@@ -142,7 +142,7 @@ Foam::string& Foam::string::expand(const bool recurse)
                 {
                     if (recurse)
                     {
-                        enVarString.expand();
+                        enVarString.expand(recurse, allowEmptyVar);
                     }
                     std::string::replace
                     (
@@ -152,11 +152,18 @@ Foam::string& Foam::string::expand(const bool recurse)
                     );
                     startEnvar += enVarString.size();
                 }
+                else if (allowEmptyVar)
+                {
+                    std::string::replace
+                    (
+                        startEnvar,
+                        endEnvar - startEnvar + 1,
+                        ""
+                    );
+                }
                 else
                 {
-                    //startEnvar = endEnvar;
-
-                    FatalErrorIn("string::expand()")
+                    FatalErrorIn("string::expand(const bool, const bool)")
                         << "Unknown variable name " << enVar << '.'
                         << exit(FatalError);
                 }

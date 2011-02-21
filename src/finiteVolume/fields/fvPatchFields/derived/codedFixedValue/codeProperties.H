@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,42 +21,68 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::codeProperties
+
+Description
+    IOdictionary + flag whether file has changed.
+
+SourceFiles
+    codeProperties.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "DimensionedTensorField.H"
-#include "tensorField.H"
+#ifndef codeProperties_H
+#define codeProperties_H
 
-#define TEMPLATE template<class GeoMesh>
-#include "DimensionedFieldFunctionsM.C"
+#include "MeshObject.H"
+#include "IOdictionary.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+/*---------------------------------------------------------------------------*\
+                         Class codeProperties Declaration
+\*---------------------------------------------------------------------------*/
 
-UNARY_FUNCTION(scalar, tensor, tr, transform)
-UNARY_FUNCTION(sphericalTensor, tensor, sph, transform)
-UNARY_FUNCTION(symmTensor, tensor, symm, transform)
-UNARY_FUNCTION(symmTensor, tensor, twoSymm, transform)
-UNARY_FUNCTION(tensor, tensor, skew, transform)
-UNARY_FUNCTION(tensor, tensor, dev, transform)
-UNARY_FUNCTION(tensor, tensor, dev2, transform)
-UNARY_FUNCTION(scalar, tensor, det, transform)
-UNARY_FUNCTION(tensor, tensor, cof, cof)
-UNARY_FUNCTION(tensor, tensor, inv, inv)
-UNARY_FUNCTION(vector, tensor, eigenValues, transform)
-UNARY_FUNCTION(tensor, tensor, eigenVectors, sign)
+class codeProperties
+:
+    public IOdictionary
+{
+    // Private data
 
-UNARY_FUNCTION(vector, symmTensor, eigenValues, transform)
-UNARY_FUNCTION(symmTensor, symmTensor, eigenVectors, sign)
+        //- File change
+        mutable bool modified_;
+
+public:
+
+    // Declare name of the class and its debug switch
+    ClassName("codeDict");
+
+    // Constructors
+
+        //- Construct from IOobject
+        codeProperties(const IOobject&);
 
 
-// * * * * * * * * * * * * * * * global operators  * * * * * * * * * * * * * //
+    // Member Functions
 
-UNARY_OPERATOR(vector, tensor, *, hdual, transform)
-UNARY_OPERATOR(tensor, vector, *, hdual, transform)
+        bool modified() const
+        {
+            return modified_;
+        }
+
+        void setUnmodified() const
+        {
+            modified_ = false;
+        }
+
+        //- Read the solution dictionary
+        virtual bool read();
+
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -65,6 +91,6 @@ UNARY_OPERATOR(tensor, vector, *, hdual, transform)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "undefFieldFunctionsM.H"
+#endif
 
 // ************************************************************************* //

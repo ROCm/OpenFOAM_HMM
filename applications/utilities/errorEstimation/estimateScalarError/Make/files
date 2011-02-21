@@ -1,3 +1,0 @@
-estimateScalarError.C
-
-EXE = $(FOAM_APPBIN)/estimateScalarError

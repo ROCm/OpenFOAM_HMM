@@ -77,6 +77,9 @@ word domainName();
 //- Return the user's login name
 word userName();
 
+//- Is user administrator
+bool isAdministrator();
+
 //- Return home directory path name for the current user
 fileName home();
 
@@ -180,6 +183,16 @@ bool ping(const word&, const label timeOut=10);
 
 //- Execute the specified command
 int system(const string& command);
+
+//- open a shared library. Return handle to library
+void* dlOpen(const fileName& lib);
+
+//- Close a dlopened library using handle. Return true if successful
+bool dlClose(void*);
+
+//- Lookup a symbol in a dlopened library using handle
+void* dlSym(void* handle, const string& symbol);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

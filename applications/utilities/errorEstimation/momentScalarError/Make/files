@@ -1,3 +1,0 @@
-momentScalarError.C
-
-EXE = $(FOAM_APPBIN)/momentScalarError
