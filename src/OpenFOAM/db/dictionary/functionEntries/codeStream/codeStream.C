@@ -217,8 +217,11 @@ bool Foam::functionEntries::codeStream::execute
 
 
     // Find the library handle.
-    void (*function)(const dictionary&, Ostream& os);
-    *(void **) (&function) = dlSym(lib, name);
+    void (*function)(const dictionary&, Ostream&);
+    function = reinterpret_cast<void(*)(const dictionary&, Ostream&)>
+    (
+        dlSym(lib, name)
+    );
 
     if (!function)
     {
