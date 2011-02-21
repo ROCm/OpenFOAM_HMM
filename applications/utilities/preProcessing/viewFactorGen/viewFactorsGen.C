@@ -327,7 +327,7 @@ int main(int argc, char *argv[])
             (
                 availablePoints,
                 upp.localPoints().size(),
-		        upp.faceCentres().size()
+                upp.faceCentres().size()
             ).assign(upp.localPoints());
 
             point cfo = cf;
