@@ -91,8 +91,8 @@ default - you have to enable it by setting in the system-wide controlDict
 
 
 5. Field manipulation.
-Fields are read in as IOdictionary so can be upcast to provide access to the
-mesh:
+Fields are read in as IOdictionary (*) so can be upcast to provide access
+to the mesh:
 
 internalField  #codeStream
 {
@@ -115,6 +115,16 @@ internalField  #codeStream
     #};
 };
 
+There are unfortunately some exceptions. Following applications read
+the field as a dictionary:
+- foamFormatConvert
+- changeDictionaryDict
+- foamUpgradeCyclics
+- fieldToCell
+
+Note: above construct has the problem that the boundary conditions are
+not evaluated so e.g. processor boundaries will might not hold the opposite
+cell value.
 
 
 6. Other
