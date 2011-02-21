@@ -1,4 +1,0 @@
-icoErrorEstimate.C
-
-EXE = $(FOAM_APPBIN)/icoErrorEstimate
-
