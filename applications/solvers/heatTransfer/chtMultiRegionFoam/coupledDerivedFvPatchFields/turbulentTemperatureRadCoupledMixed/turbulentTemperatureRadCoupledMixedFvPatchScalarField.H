@@ -44,7 +44,8 @@ Description
 
     Needs to be on underlying directMapped(Wall)FvPatch.
 
-     Note: K : heat conduction at patch. Gets supplied how to lookup/calculate K:
+     Note: K : heat conduction at patch. Gets supplied how to lookup/calculate
+     K:
     - 'lookup' : lookup volScalarField (or volSymmTensorField) with name
     - 'basicThermo' : use basicThermo and compressible::RASmodel to calculate K
     - 'solidThermo' : use basicSolidThermo K()
