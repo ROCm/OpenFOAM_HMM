@@ -550,7 +550,7 @@ Foam::Istream& Foam::ISstream::read(string& str)
 
 Foam::Istream& Foam::ISstream::readVerbatim(string& str)
 {
-    static const int maxLen = 1024;
+    static const int maxLen = 8000;
     static const int errLen = 80; // truncate error message for readability
     static char buf[maxLen];
 

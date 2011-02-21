@@ -165,7 +165,7 @@ void Foam::codedFixedValueFvPatchScalarField::updateLibrary()
     }
 
     const fileName dir =
-        db().time().constantPath()/"codedFixedValue"/redirectType_;
+        db().time().constantPath()/"codeStream"/redirectType_;
     //Info<< "dir:" << dir << endl;
 
     const fileName libPath
