@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ License
 #include "int.H"
 #include "token.H"
 #include <cctype>
+#include "IOstreams.H"
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
@@ -109,6 +110,27 @@ char Foam::ISstream::nextValid()
 }
 
 
+void Foam::ISstream::readWordToken(token& t)
+{
+    word* wPtr = new word;
+
+    if (read(*wPtr).bad())
+    {
+        delete wPtr;
+        t.setBad();
+    }
+    else if (token::compound::isCompound(*wPtr))
+    {
+        t = token::compound::New(*wPtr, *this).ptr();
+        delete wPtr;
+    }
+    else
+    {
+        t = wPtr;
+    }
+}
+
+
 Foam::Istream& Foam::ISstream::read(token& t)
 {
     static const int maxLen = 128;
@@ -181,7 +203,44 @@ Foam::Istream& Foam::ISstream::read(token& t)
 
             return *this;
         }
+        // Verbatim string
+        case token::HASH :
+        {
+            char nextC;
+            if (read(nextC).bad())
+            {
+                // Return hash as word
+                t = token(word(c));
+                return *this;
+            }
+            else if (nextC == token::BEGIN_BLOCK)
+            {
+                // Verbatim string
+                string* sPtr = new string;
 
+                if (readVerbatim(*sPtr).bad())
+                {
+                    delete sPtr;
+                    t.setBad();
+                }
+                else
+                {
+                    t = sPtr;
+                }
+
+                return *this;
+            }
+            else
+            {
+                // Word beginning with #
+                putback(nextC);
+                putback(c);
+
+                readWordToken(t);
+
+                return *this;
+            }
+        }
 
         // Number: integer or floating point
         //
@@ -302,22 +361,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
         default:
         {
             putback(c);
-            word* wPtr = new word;
-
-            if (read(*wPtr).bad())
-            {
-                delete wPtr;
-                t.setBad();
-            }
-            else if (token::compound::isCompound(*wPtr))
-            {
-                t = token::compound::New(*wPtr, *this).ptr();
-                delete wPtr;
-            }
-            else
-            {
-                t = wPtr;
-            }
+            readWordToken(t);
 
             return *this;
         }
@@ -497,6 +541,60 @@ Foam::Istream& Foam::ISstream::read(string& str)
     buf[errLen] = buf[nChar] = '\0';
 
     FatalIOErrorIn("ISstream::read(string&)", *this)
+        << "problem while reading string \"" << buf << "...\""
+        << exit(FatalIOError);
+
+    return *this;
+}
+
+
+Foam::Istream& Foam::ISstream::readVerbatim(string& str)
+{
+    static const int maxLen = 8000;
+    static const int errLen = 80; // truncate error message for readability
+    static char buf[maxLen];
+
+    char c;
+
+    register int nChar = 0;
+
+    while (get(c))
+    {
+        if (c == token::HASH)
+        {
+            char nextC;
+            get(nextC);
+            if (nextC == token::END_BLOCK)
+            {
+                buf[nChar] = '\0';
+                str = buf;
+                return *this;
+            }
+            else
+            {
+                putback(nextC);
+            }
+        }
+
+        buf[nChar++] = c;
+        if (nChar == maxLen)
+        {
+            buf[errLen] = '\0';
+
+            FatalIOErrorIn("ISstream::readVerbatim(string&)", *this)
+                << "string \"" << buf << "...\"\n"
+                << "    is too long (max. " << maxLen << " characters)"
+                << exit(FatalIOError);
+
+            return *this;
+        }
+    }
+
+
+    // don't worry about a dangling backslash if string terminated prematurely
+    buf[errLen] = buf[nChar] = '\0';
+
+    FatalIOErrorIn("ISstream::readVerbatim(string&)", *this)
         << "problem while reading string \"" << buf << "...\""
         << exit(FatalIOError);
 

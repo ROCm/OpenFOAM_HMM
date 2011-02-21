@@ -1,0 +1,135 @@
+#                            -*- mode: org; -*-
+#
+#+TITLE:           =codeStream=: On-the-fly code compilation
+#+AUTHOR:                      OpenCFD Ltd.
+#+DATE:                            TBA
+#+LINK:                  http://www.openfoam.com
+#+OPTIONS: author:nil ^:{}
+# Copyright (c) 2011 OpenCFD Ltd.
+
+* Dictionary preprocessing directive: =#codeStream=
+  This is a dictionary preprocessing directive ('=functionEntry=') which
+  provides a snippet of OpenFOAM C++ code which gets compiled and executed to
+  provide the actual dictionary entry. The snippet gets provided as three
+  sections of C++ code which just gets inserted into a template:
+  - =code= section: the actual body of the code. It gets called with arguments
+    =const dictionary& dict, OStream& os= and the C++ code can do a
+    =dict.lookup= to find current dictionary values.
+  - optional =codeInclude= section: any #include statements to include OpenFOAM
+    files.
+  - optional 'codeOptions' section: any extra compilation flags to be added to
+    =EXE_INC= in =Make/options=
+
+  To ease inputting mulit-line code there is the =#{ #}= syntax. Anything in
+  between these two delimiters becomes a string with all newlines, quotes etc
+  preserved.
+
+  Example: Look up dictionary entries and do some calculation
+  #+BEGIN_SRC c++
+    startTime       0;
+    endTime         100;
+    ..
+    writeInterval   #codeStream
+    {
+        code
+        #{
+            scalar start = readScalar(dict["startTime"]);
+            scalar end = readScalar(dict["endTime"]);
+            label nDumps = 5;
+            label interval = end-start
+            os  << ((start-end)/nDumps)
+        #}
+    };
+  #+END_SRC
+
+* Implementation
+  - the =#codeStream= entry reads the dictionary following it, extracts the
+    =code=, =codeInclude=, =codeOptions= sections (these are just strings) and
+    calculates the SHA1 checksum of the contents.
+  - it copies a template file
+    =($FOAM_CODESTREAM_TEMPLATE_DIR/codeStreamTemplate.C)=, substituting all
+    occurences of =code=, =codeInclude=, =codeOptions=.
+  - it writes library source files to =constant/codeStream/<sha1>= and compiles
+    it using =wmake libso=.
+  - the resulting library gets loaded (=dlopen=, =dlsym=) and the function
+    executed
+  - the function will have written its output into the Ostream which then gets
+    used to construct the entry to replace the whole =#codeStream= section.
+  - using the sha1 means that same code will only be compiled and loaded once.
+
+* Boundary condition: =codedFixedValue=
+  This uses the code from codeStream to have an in-line specialised
+  =fixedValueFvPatchScalarField=. For now only for scalars:
+  #+BEGIN_SRC c++
+  outlet
+  {
+      type            codedFixedValue<scalar>;
+      value           uniform 0;
+      redirectType    fixedValue10;
+
+      code
+      #{
+          operator==(min(10, 0.1*this->db().time().value()));
+      #};
+  }
+  #+END_SRC
+  It by default always includes =fvCFD.H= and adds the =finiteVolume= library to
+  the include search path.
+
+* Security
+  Allowing the case to execute C++ code does introduce security risks.  A
+  third-party case might have a =#codeStream{#code system("rm -rf .");};= hidden
+  somewhere in a dictionary.  =#codeStream= is therefore not enabled by default
+  you have to enable it by setting in the system-wide =controlDict=
+  #+BEGIN_SRC c++
+  InfoSwitches
+  {
+      // Allow case-supplied c++ code (#codeStream, codedFixedValue)
+      allowSystemOperations   1;
+  }
+  #+END_SRC
+
+* Field manipulation
+  Fields are read in as =IOdictionary= so can be upcast to provide access to the
+  mesh:
+  #+BEGIN_SRC c++
+  internalField  #codeStream
+  {
+      codeInclude
+      #{
+          #include "fvCFD.H"
+      #};
+
+      code
+      #{
+          const IOdictionary& d = dynamicCast<const IOdictionary>(dict);
+          const fvMesh& mesh = refCast<const fvMesh>(d.db());
+          scalarField fld(mesh.nCells(), 12.34);
+          fld.writeEntry("", os);
+      #};
+
+      codeOptions
+      #{
+          -I$(LIB_SRC)/finiteVolume/lnInclude
+      #};
+  };
+  #+END_SRC
+
+* Exceptions
+  There are unfortunately some exceptions. Following applications read
+  the field as a dictionary, not as an =IOdictionary=:
+  - =foamFormatConvert=
+  - =changeDictionaryDict=
+  - =foamUpgradeCyclics=
+  - =fieldToCell=
+
+  Note: above field initialisation has the problem that the boundary conditions
+  are not evaluated so e.g. processor boundaries will not hold the opposite cell
+  value.
+
+* Other
+  - the implementation is still a bit raw - it compiles code overly much
+  - both =codeStream= and =codedFixedValue= take the contents of the dictionary
+    and extract values and re-assemble list of files and environment vars to
+    replace.  Should just directly pass the dictionary into =codeStreamTools=.
+  - parallel running not tested a lot. What about distributed data parallel?

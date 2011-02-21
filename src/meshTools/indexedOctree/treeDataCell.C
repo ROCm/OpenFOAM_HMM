@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -139,7 +139,6 @@ Foam::pointField Foam::treeDataCell::points() const
 }
 
 
-// Check if any point on shape is inside cubeBb.
 bool Foam::treeDataCell::overlaps
 (
     const label index,
@@ -167,8 +166,6 @@ bool Foam::treeDataCell::contains
 }
 
 
-// Calculate nearest point to sample. Updates (if any) nearestDistSqr, minIndex,
-// nearestPoint.
 void Foam::treeDataCell::findNearest
 (
     const labelUList& indices,

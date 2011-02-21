@@ -27,7 +27,7 @@
     (
         fvc::ddt(rho) + psi*correction(fvm::ddt(p))
       + fvc::div(phi)
-      ==
+     ==
         parcels.Srho()
       + massSource.SuTot()
     );
