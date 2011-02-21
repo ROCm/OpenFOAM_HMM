@@ -149,8 +149,8 @@ bool Foam::codeStreamTools::copyFilesContents(const fileName& dir) const
     // Create dir
     mkDir(dir);
 
-    //Info<< "Setting envvar OTF_TYPENAME=" << name_ << endl;
-    setEnv("OTF_TYPENAME", name_, true);
+    //Info<< "Setting envvar typeName=" << name_ << endl;
+    setEnv("typeName", name_, true);
     // Copy any template files
     forAll(copyFiles_, i)
     {

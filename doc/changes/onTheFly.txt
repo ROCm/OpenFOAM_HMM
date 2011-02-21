@@ -48,6 +48,9 @@ Example: Look up dictionary entries and do some calculation
 - the #codeStream entry reads the dictionary following it, extracts the
 code, codeInclude, codeOptions sections (these are just strings) and
 calculates the SHA1 checksum of the contents.
+- it copies a template file
+($FOAM_CODESTREAM_TEMPLATE_DIR/codeStreamTemplate.C), substituting all
+occurences of code, codeInclude, codeOptions.
 - it writes library source files to constant/codeStream/<sha1> and compiles it
 using 'wmake libso'.
 - the resulting library gets loaded (dlopen, dlsym) and the function
@@ -59,11 +62,11 @@ gets used to construct the entry to replace the whole #codeStream section.
 
 3. codedFixedValue
 This uses the code from codeStream to have an in-line specialised
-fixedValueFvPatchScalarField:
+fixedValueFvPatchScalarField. For now only for scalars:
 
     outlet
     {
-        type            codedFixedValue;
+        type            codedFixedValue<scalar>;
         value           uniform 0;
         redirectType    fixedValue10;
 
@@ -103,9 +106,9 @@ internalField  #codeStream
 
     code
     #{
-        const IOdictionary& d = refCast<const IOdictionary&>(dict);
+        const IOdictionary& d = dynamicCast<const IOdictionary>(dict);
         const fvMesh& mesh = refCast<const fvMesh>(d.db());
-        scalarField fld(mesh.nCells(), 0.0);
+        scalarField fld(mesh.nCells(), 12.34);
         fld.writeEntry("", os);
     #};
 
@@ -115,18 +118,22 @@ internalField  #codeStream
     #};
 };
 
-There are unfortunately some exceptions. Following applications read
-the field as a dictionary:
+* There are unfortunately some exceptions. Following applications read
+the field as a dictionary, not as an IOdictionary:
 - foamFormatConvert
 - changeDictionaryDict
 - foamUpgradeCyclics
 - fieldToCell
 
-Note: above construct has the problem that the boundary conditions are
-not evaluated so e.g. processor boundaries will might not hold the opposite
-cell value.
+
+Note: above field initialisation has the problem that the boundary
+conditions are not evaluated so e.g. processor boundaries will
+not hold the opposite cell value.
 
 
 6. Other
 - the implementation is still a bit raw - it compiles code overly much
-- parallel running not tested a lot. What about distributed data parallel.
+- both codeStream and codedFixedValue take the contents of the dictionary
+and extract values and re-assemble list of files and environment vars to
+replace. Should just directly pass the dictionary into codeStreamTools.
+- parallel running not tested a lot. What about distributed data parallel?

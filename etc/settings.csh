@@ -63,6 +63,9 @@ setenv FOAM_SITE_LIBBIN $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/
 setenv FOAM_USER_APPBIN $WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/bin
 setenv FOAM_USER_LIBBIN $WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib
 
+# codeStream templates
+setenv FOAM_CODESTREAM_TEMPLATE_DIR $WM_PROJECT_DIR/etc/codeTemplates/codeStream
+
 # convenience
 setenv FOAM_APP $WM_PROJECT_DIR/applications
 #setenv FOAM_LIB $WM_PROJECT_DIR/lib

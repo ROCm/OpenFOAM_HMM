@@ -86,6 +86,9 @@ export FOAM_SITE_LIBBIN=$WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/
 export FOAM_USER_APPBIN=$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/bin
 export FOAM_USER_LIBBIN=$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib
 
+# codeStream templates
+export FOAM_CODESTREAM_TEMPLATE_DIR=$WM_PROJECT_DIR/etc/codeTemplates/codeStream
+
 # convenience
 export FOAM_APP=$WM_PROJECT_DIR/applications
 #export FOAM_LIB=$WM_PROJECT_DIR/lib

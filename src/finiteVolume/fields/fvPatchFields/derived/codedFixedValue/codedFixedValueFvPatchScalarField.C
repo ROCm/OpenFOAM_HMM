@@ -78,14 +78,15 @@ void Foam::codedFixedValueFvPatchScalarField::writeLibrary
     // Write files for new library
     if (Pstream::master())
     {
-        fileName templates(Foam::getEnv("OTF_TEMPLATE_DIR"));
+        fileName templates(Foam::getEnv("FOAM_CODESTREAM_TEMPLATE_DIR"));
         if (!templates.size())
         {
             FatalIOErrorIn
             (
                 "codedFixedValueFvPatchScalarField::writeLibrary(..)",
                 dict
-            )   << "Please set environment variable OTF_TEMPLATE_DIR"
+            )   << "Please set environment variable"
+                << " FOAM_CODESTREAM_TEMPLATE_DIR"
                 << " to point to the location of "
                 << "fixedValueFvPatchScalarFieldTemplate.C"
                 << exit(FatalIOError);
@@ -112,8 +113,8 @@ void Foam::codedFixedValueFvPatchScalarField::writeLibrary
             templates/"fixedValueFvPatchScalarFieldTemplate.C";
 
         copyFiles[0].second().setSize(2);
-        copyFiles[0].second()[0] = Pair<string>("OTF_INCLUDES", codeInclude);
-        copyFiles[0].second()[1] = Pair<string>("OTF_UPDATECOEFFS", code);
+        copyFiles[0].second()[0] = Pair<string>("codeInclude", codeInclude);
+        copyFiles[0].second()[1] = Pair<string>("code", code);
 
         copyFiles[1].first() =
             templates/"fixedValueFvPatchScalarFieldTemplate.H";
