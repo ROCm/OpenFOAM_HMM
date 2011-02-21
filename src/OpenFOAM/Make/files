@@ -159,6 +159,8 @@ $(dictionaryEntry)/dictionaryEntry.C
 $(dictionaryEntry)/dictionaryEntryIO.C
 
 functionEntries = $(dictionary)/functionEntries
+$(functionEntries)/codeStream/codeStream.C
+$(functionEntries)/codeStream/codeStreamTools.C
 $(functionEntries)/functionEntry/functionEntry.C
 $(functionEntries)/includeEntry/includeEntry.C
 $(functionEntries)/includeIfPresentEntry/includeIfPresentEntry.C

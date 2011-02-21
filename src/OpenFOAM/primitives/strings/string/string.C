@@ -142,7 +142,7 @@ Foam::string& Foam::string::expand(const bool recurse, const bool allowEmptyVar)
                 {
                     if (recurse)
                     {
-                        enVarString.expand();
+                        enVarString.expand(recurse, allowEmptyVar);
                     }
                     std::string::replace
                     (
@@ -154,7 +154,12 @@ Foam::string& Foam::string::expand(const bool recurse, const bool allowEmptyVar)
                 }
                 else if (allowEmptyVar)
                 {
-                    startEnvar = endEnvar;
+                    std::string::replace
+                    (
+                        startEnvar,
+                        endEnvar - startEnvar + 1,
+                        ""
+                    );
                 }
                 else
                 {
