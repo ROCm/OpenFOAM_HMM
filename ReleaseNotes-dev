@@ -134,6 +134,28 @@
     + single integer reduction instead of one reduction per monitored file.
     + only files that can be re-read are being checked. Drastic reduction of
       number of files to check.
+*** *New* #codeStream dictionary entry method. Uses on-the-fly compilation
+    of OpenFOAM C++ code to construct dictionary.
+    E.g. in blockMeshDict:
+
+        convertToMeters 0.001;
+
+        vertices #codeStream
+        {
+            code
+            #{
+                label nVerts =
+                    readLabel(dict.lookup("nx"))
+                  * readLabel(dict.lookup("ny"))
+                  * readLabel(dict.lookup("nz"));
+                pointField verts(nVerts);
+                // Now fill verts here
+                // ..
+                os  << verts;
+            #};
+        }
+    See also doc/changes/onTheFly.txt
+
 * Solvers
   A number of new solvers have been developed for a range of engineering
   applications.  There has been a set of improvements to certain classes of
@@ -163,6 +185,23 @@
     + takes optional fieldName to sample
     + directMapped patch added 'normal' method to calculate sample points
       to e.g. sample fields just above wall (e.g. for streaklines)
+  + *New* codedFixedValue: Uses the on-the-fly code compilation from #codeStream
+    to provide an in-line fixedValueFvPatchScalarField. E.g.
+
+    outlet
+    {
+        type            codedFixedValue;
+        value           uniform 0;
+        redirectType    fixedValue10;
+
+        code
+        #{
+            operator==(min(10, 0.1*this->db().time().value()));
+        #};
+    }
+
+    See doc/changes/onTheFly.txt
+
 * Utilities
   There have been some utilities added and updated in this release.
 *** *New* utilities

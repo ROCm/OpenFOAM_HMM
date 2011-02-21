@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -96,6 +96,12 @@ public:
 
         //- Open the named library
         static bool open(const fileName& name);
+
+        //- Close the named library
+        static bool close(const fileName& name);
+
+        //- Find the handle of the named library
+        static void* findLibrary(const fileName& name);
 
         //- Open all the libraries listed in the 'libsEntry' entry in the
         //  given dictionary if present

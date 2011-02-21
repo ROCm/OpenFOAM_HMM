@@ -868,6 +868,9 @@ InfoSwitches
 {
     writePrecision  6;
     writeJobInfo    0;
+
+    // Allow case-supplied c++ code (#codeStream, codedFixedValue)
+    allowSystemOperations   0;
 }
 
 OptimisationSwitches

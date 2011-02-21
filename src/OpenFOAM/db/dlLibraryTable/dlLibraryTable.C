@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "dlLibraryTable.H"
-
-#include <dlfcn.h>
+#include "OSspecific.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -56,7 +55,7 @@ Foam::dlLibraryTable::~dlLibraryTable()
 {
     forAllConstIter(dlLibraryTable, *this, iter)
     {
-        dlclose(iter.key());
+        dlClose(iter.key());
     }
 }
 
@@ -67,15 +66,14 @@ bool Foam::dlLibraryTable::open(const fileName& functionLibName)
 {
     if (functionLibName.size())
     {
-        void* functionLibPtr =
-            dlopen(functionLibName.c_str(), RTLD_LAZY|RTLD_GLOBAL);
+        void* functionLibPtr = dlOpen(functionLibName);
 
         if (!functionLibPtr)
         {
             WarningIn
             (
                 "dlLibraryTable::open(const fileName& functionLibName)"
-            )   << "could not load " << dlerror()
+            )   << "could not load " << functionLibName
                 << endl;
 
             return false;
@@ -96,6 +94,43 @@ bool Foam::dlLibraryTable::open(const fileName& functionLibName)
     {
         return false;
     }
+}
+
+
+bool Foam::dlLibraryTable::close(const fileName& functionLibName)
+{
+    void* libPtr = findLibrary(functionLibName);
+    if (libPtr)
+    {
+        loadedLibraries.erase(libPtr);
+
+        if (!dlClose(libPtr))
+        {
+            WarningIn
+            (
+                "dlLibraryTable::close(const fileName& functionLibName)"
+            )   << "could not close " << functionLibName
+                << endl;
+
+            return false;
+        }
+
+        return true;
+    }
+    return false;
+}
+
+
+void* Foam::dlLibraryTable::findLibrary(const fileName& functionLibName)
+{
+    forAllConstIter(dlLibraryTable, loadedLibraries, iter)
+    {
+        if (iter() == functionLibName)
+        {
+            return iter.key();
+        }
+    }
+    return NULL;
 }
 
 

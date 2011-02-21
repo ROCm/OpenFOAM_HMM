@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,6 +51,7 @@ Description
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <dlfcn.h>
 
 #include <netinet/in.h>
 
@@ -164,6 +165,12 @@ Foam::word Foam::userName()
 }
 
 
+bool Foam::isAdministrator()
+{
+    return (geteuid() == 0);
+}
+
+
 // use $HOME environment variable or passwd info
 Foam::fileName Foam::home()
 {
@@ -240,7 +247,7 @@ Foam::fileName Foam::cwd()
 
 bool Foam::chDir(const fileName& dir)
 {
-    return chdir(dir.c_str()) != 0;
+    return chdir(dir.c_str()) == 0;
 }
 
 
@@ -1062,6 +1069,33 @@ bool Foam::ping(const word& hostname, const label timeOut)
 int Foam::system(const string& command)
 {
     return ::system(command.c_str());
+}
+
+
+void* Foam::dlOpen(const fileName& lib)
+{
+    return dlopen(lib.c_str(), RTLD_LAZY|RTLD_GLOBAL);
+}
+
+
+bool Foam::dlClose(void* handle)
+{
+    return dlclose(handle) == 0;
+}
+
+
+void* Foam::dlSym(void* handle, const string& symbol)
+{
+    void* fun = dlsym(handle, symbol.c_str());
+
+    char *error;
+    if ((error = dlerror()) != NULL)
+    {
+        WarningIn("dlSym(void*, const string&)")
+            << "Cannot lookup symbol " << symbol << " : " << error
+            << endl;
+    }
+    return fun;
 }
 
 
