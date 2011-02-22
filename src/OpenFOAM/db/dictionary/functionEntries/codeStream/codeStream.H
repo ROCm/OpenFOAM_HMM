@@ -76,6 +76,14 @@ Description
     - probably some other limitations (uses string::expand which expands
       \c \$ and \c ~ sequences)
 
+Note
+    The code to be compiled is stored under the local \f codeStream directory
+    with a subdirectory name corresponding to the SHA1 of the contents.
+
+    The corresponding library code is located under the local
+    \f codeStream/platforms/$WM_OPTIONS/lib directory in a library
+    \f libcodeStream_SHA1.so
+
 SourceFiles
     codeStream.C
 

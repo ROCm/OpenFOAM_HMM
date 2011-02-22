@@ -114,31 +114,46 @@ bool Foam::functionEntries::codeStream::execute
         sha = os.digest();
     }
 
-    // write code into _SHA1 subdirectory
-    fileName dir;
-    if (isA<IOdictionary>(parentDict))
-    {
-        const IOdictionary& d = static_cast<const IOdictionary&>(parentDict);
-        dir = d.db().time().constantPath()/"codeStream"/"_" + sha.str();
-    }
-    else
-    {
-        dir = fileName("codeStream")/"_" + sha.str();
-    }
 
-    fileName name = "codeStream_" + sha.str();
-    fileName libPath
+    // the code name = prefix + sha1
+    const fileName codeName("codeStream_" + sha.str());
+
+    // local directory for compile/link
+    const fileName baseDir
     (
-        Foam::getEnv("FOAM_USER_LIBBIN")/"lib" + name + ".so"
+        stringOps::expandEnv("$FOAM_CASE/codeStream")
     );
+
+    // code is written into _SHA1 subdir
+    const fileName codeDir
+    (
+        baseDir
+      / "_" + sha.str()
+    );
+
+    // library is written into platforms/$WM_OPTIONS/lib subdir
+    const fileName libPath
+    (
+        baseDir
+      / stringOps::expandEnv("platforms/$WM_OPTIONS/lib")
+      / "lib" + codeName + ".so"
+    );
+
 
     void* lib = dlLibraryTable::findLibrary(libPath);
 
+    // try to load if not already loaded
+    if (!lib && dlLibraryTable::open(libPath, false))
+    {
+        lib = dlLibraryTable::findLibrary(libPath);
+    }
+
+    // did not load - need to compile it
     if (!lib)
     {
         if (Pstream::master())
         {
-            if (!codeStreamTools::upToDate(dir, sha))
+            if (!codeStreamTools::upToDate(codeDir, sha))
             {
                 Info<< "Creating new library in " << libPath << endl;
 
@@ -175,15 +190,16 @@ bool Foam::functionEntries::codeStream::execute
                 filesContents[0].first() = "Make/files";
                 filesContents[0].second() =
                     codeTemplateC + "\n\n"
-                    "LIB = $(FOAM_USER_LIBBIN)/lib" + name;
+                    "LIB = $(PWD)/../platforms/$(WM_OPTIONS)/lib/lib"
+                    + codeName;
 
                 // Write Make/options
                 filesContents[1].first() = "Make/options";
                 filesContents[1].second() =
                     "EXE_INC = -g \\\n" + codeOptions + "\n\nLIB_LIBS =";
 
-                codeStreamTools writer(name, copyFiles, filesContents);
-                if (!writer.copyFilesContents(dir))
+                codeStreamTools writer(codeName, copyFiles, filesContents);
+                if (!writer.copyFilesContents(codeDir))
                 {
                     FatalIOErrorIn
                     (
@@ -196,7 +212,7 @@ bool Foam::functionEntries::codeStream::execute
                 }
             }
 
-            Foam::string wmakeCmd("wmake libso " + dir);
+            const Foam::string wmakeCmd("wmake libso " + codeDir);
             Info<< "Invoking " << wmakeCmd << endl;
             if (Foam::system(wmakeCmd))
             {
@@ -209,7 +225,10 @@ bool Foam::functionEntries::codeStream::execute
             }
         }
 
-        if (!dlLibraryTable::open(libPath))
+        bool dummy = true;
+        reduce(dummy, orOp<bool>());
+
+        if (!dlLibraryTable::open(libPath, false))
         {
             FatalIOErrorIn
             (
@@ -231,7 +250,7 @@ bool Foam::functionEntries::codeStream::execute
     void (*function)(const dictionary&, Ostream&);
     function = reinterpret_cast<void(*)(const dictionary&, Ostream&)>
     (
-        dlSym(lib, name)
+        dlSym(lib, codeName)
     );
 
     if (!function)
@@ -240,7 +259,7 @@ bool Foam::functionEntries::codeStream::execute
         (
             "functionEntries::codeStream::execute(..)",
             parentDict
-        )   << "Failed looking up symbol " << name
+        )   << "Failed looking up symbol " << codeName
             << " in library " << lib << exit(FatalIOError);
     }
 
