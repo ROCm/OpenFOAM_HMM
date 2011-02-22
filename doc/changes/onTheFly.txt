@@ -49,7 +49,7 @@ Example: Look up dictionary entries and do some calculation
 code, codeInclude, codeOptions sections (these are just strings) and
 calculates the SHA1 checksum of the contents.
 - it copies a template file
-($FOAM_CODESTREAM_TEMPLATE_DIR/codeStreamTemplate.C), substituting all
+($FOAM_CODESTREAM_TEMPLATES/codeStreamTemplate.C), substituting all
 occurences of code, codeInclude, codeOptions.
 - it writes library source files to constant/codeStream/<sha1> and compiles it
 using 'wmake libso'.

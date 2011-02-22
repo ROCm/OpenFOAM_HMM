@@ -34,6 +34,16 @@ License
 #include "OFstream.H"
 #include "codeStreamTools.H"
 #include "codeProperties.H"
+#include "stringOps.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+const Foam::word Foam::codedFixedValueFvPatchScalarField::codeTemplateC
+    = "fixedValueFvPatchScalarFieldTemplate.C";
+
+const Foam::word Foam::codedFixedValueFvPatchScalarField::codeTemplateH
+    = "fixedValueFvPatchScalarFieldTemplate.H";
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -68,84 +78,101 @@ Foam::codedFixedValueFvPatchScalarField::dict() const
 
 void Foam::codedFixedValueFvPatchScalarField::writeLibrary
 (
-    const fileName dir,
-    const fileName libPath,
+    const fileName& dir,
+    const fileName& libPath,
     const dictionary& dict
 )
 {
+    // Write files for new library
+    if (!Pstream::master())
+    {
+        return;
+    }
+
+    // "codeInclude" is optional
+    string codeInclude;
+    if (dict.found("codeInclude"))
+    {
+        codeInclude = stringOps::trimLeft(dict["codeInclude"]);
+    }
+
+    // "codeOptions" is optional
+    string codeOptions;
+    if (dict.found("codeOptions"))
+    {
+        codeOptions = stringOps::trimLeft(dict["codeOptions"]);
+    }
+
+    // "code" is mandatory
+    string code = stringOps::trimLeft(dict["code"]);
+
+
     Info<< "Creating new library in " << libPath << endl;
 
-    // Write files for new library
-    if (Pstream::master())
+    const fileName fileCsrc
+    (
+        codeStreamTools::findTemplate
+        (
+            codeTemplateC
+        )
+    );
+
+    const fileName fileHsrc
+    (
+        codeStreamTools::findTemplate
+        (
+            codeTemplateH
+        )
+    );
+
+    if (fileCsrc.empty() || fileHsrc.empty())
     {
-        fileName templates(Foam::getEnv("FOAM_CODESTREAM_TEMPLATE_DIR"));
-        if (!templates.size())
-        {
-            FatalIOErrorIn
-            (
-                "codedFixedValueFvPatchScalarField::writeLibrary(..)",
-                dict
-            )   << "Please set environment variable"
-                << " FOAM_CODESTREAM_TEMPLATE_DIR"
-                << " to point to the location of "
-                << "fixedValueFvPatchScalarFieldTemplate.C"
-                << exit(FatalIOError);
-        }
-
-
-        // Extract sections of code
-        string codeInclude = "";
-        if (dict.found("codeInclude"))
-        {
-            codeInclude = codeStreamTools::stripLeading(dict["codeInclude"]);
-        }
-        string code = codeStreamTools::stripLeading(dict["code"]);
-
-        string codeOptions = "";
-        if (dict.found("codeOptions"))
-        {
-            codeOptions = codeStreamTools::stripLeading(dict["codeOptions"]);
-        }
-
-
-        List<fileAndVars> copyFiles(2);
-        copyFiles[0].first() =
-            templates/"fixedValueFvPatchScalarFieldTemplate.C";
-
-        copyFiles[0].second().setSize(2);
-        copyFiles[0].second()[0] = Pair<string>("codeInclude", codeInclude);
-        copyFiles[0].second()[1] = Pair<string>("code", code);
-
-        copyFiles[1].first() =
-            templates/"fixedValueFvPatchScalarFieldTemplate.H";
+        FatalIOErrorIn
+        (
+            "codedFixedValueFvPatchScalarField::writeLibrary(..)",
+            dict
+        )   << "Could not find one or both code templates: "
+            << codeTemplateC << ", " << codeTemplateH << nl
+            << codeStreamTools::searchedLocations()
+            << exit(FatalIOError);
+    }
 
 
 
-        List<fileAndContent> filesContents(2);
-        // Write Make/files
-        filesContents[0].first() = "Make/files";
-        filesContents[0].second() =
-            "fixedValueFvPatchScalarFieldTemplate.C \n\n"
-            "LIB = $(FOAM_USER_LIBBIN)/lib" + redirectType_;
-        // Write Make/options
-        filesContents[1].first() = "Make/options";
-        filesContents[1].second() =
-            "EXE_INC = -g\\\n    -I$(LIB_SRC)/finiteVolume/lnInclude\\\n"
-          + codeOptions
-          + "\n\nLIB_LIBS = ";
+    List<codeStreamTools::fileAndVars> copyFiles(2);
+    copyFiles[0].file() = fileCsrc;
+    copyFiles[0].set("codeInclude", codeInclude);
+    copyFiles[0].set("code", code);
 
-        codeStreamTools writer(redirectType_, copyFiles, filesContents);
-        if (!writer.copyFilesContents(dir))
-        {
-            FatalIOErrorIn
-            (
-                "codedFixedValueFvPatchScalarField::writeLibrary(..)",
-                dict
-            )   << "Failed writing " << endl
-                << copyFiles << endl
-                << filesContents
-                << exit(FatalIOError);
-        }
+    copyFiles[1].file() = fileHsrc;
+
+
+    List<codeStreamTools::fileAndContent> filesContents(2);
+
+    // Write Make/files
+    filesContents[0].first() = "Make/files";
+    filesContents[0].second() =
+        codeTemplateC + "\n\n"
+        "LIB = $(FOAM_USER_LIBBIN)/lib" + redirectType_;
+
+    // Write Make/options
+    filesContents[1].first() = "Make/options";
+    filesContents[1].second() =
+        "EXE_INC = -g \\\n-I$(LIB_SRC)/finiteVolume/lnInclude\\\n"
+        + codeOptions
+        + "\n\nLIB_LIBS = ";
+
+    codeStreamTools writer(redirectType_, copyFiles, filesContents);
+    if (!writer.copyFilesContents(dir))
+    {
+        FatalIOErrorIn
+        (
+            "codedFixedValueFvPatchScalarField::writeLibrary(..)",
+            dict
+        )   << "Failed writing " << nl
+            << copyFiles << nl
+            << filesContents
+            << exit(FatalIOError);
     }
 }
 
@@ -221,7 +248,7 @@ void Foam::codedFixedValueFvPatchScalarField::updateLibrary()
     {
         if (Pstream::master())
         {
-            Foam::string wmakeCmd("wmake libso " + dir);
+            const Foam::string wmakeCmd("wmake libso " + dir);
             Info<< "Invoking " << wmakeCmd << endl;
             if (Foam::system(wmakeCmd))
             {
@@ -229,7 +256,8 @@ void Foam::codedFixedValueFvPatchScalarField::updateLibrary()
                 (
                     "codedFixedValueFvPatchScalarField::updateLibrary()",
                     dict_
-                )   << "Failed " << wmakeCmd << exit(FatalIOError);
+                )   << "Failed " << wmakeCmd
+                    << exit(FatalIOError);
             }
         }
 
@@ -242,7 +270,8 @@ void Foam::codedFixedValueFvPatchScalarField::updateLibrary()
             (
                 "codedFixedValueFvPatchScalarField::updateLibrary()",
                 dict_
-            )   << "Failed loading library " << libPath << exit(FatalIOError);
+            )   << "Failed loading library " << libPath
+                << exit(FatalIOError);
         }
     }
 }

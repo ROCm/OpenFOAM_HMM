@@ -40,6 +40,53 @@ int Foam::codeStreamTools::allowSystemOperations
 );
 
 
+const Foam::word Foam::codeStreamTools::codeTemplateEnvName
+    = "FOAM_CODESTREAM_TEMPLATES";
+
+const Foam::fileName Foam::codeStreamTools::codeTemplateDirName
+    = "codeTemplates/codeStream";
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::fileName Foam::codeStreamTools::findTemplate(const word& templateFile)
+{
+    // try to get template from FOAM_CODESTREAM_TEMPLATES
+    fileName templateDir(Foam::getEnv(codeTemplateEnvName));
+
+    fileName file;
+    if (!templateDir.empty() && isDir(templateDir))
+    {
+        file = templateDir/templateFile;
+        if (!isFile(file, false))
+        {
+            file.clear();
+        }
+    }
+
+    // not found - fallback to ~OpenFOAM expansion
+    if (file.empty())
+    {
+        file = findEtcFile(codeTemplateDirName/templateFile);
+    }
+
+    return file;
+}
+
+
+Foam::string Foam::codeStreamTools::searchedLocations()
+{
+    return
+    (
+        "Under the $"
+      + codeTemplateDirName
+      + " directory or via via the ~OpenFOAM/"
+      + codeTemplateDirName
+      + " expansion"
+    );
+}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::codeStreamTools::copyAndExpand

@@ -57,14 +57,8 @@ namespace functionEntries
 }
 
 
-const Foam::word Foam::functionEntries::codeStream::codeTemplateName
+const Foam::word Foam::functionEntries::codeStream::codeTemplateC
     = "codeStreamTemplate.C";
-
-const Foam::word Foam::functionEntries::codeStream::codeTemplateEnvName
-    = "FOAM_CODESTREAM_TEMPLATES";
-
-const Foam::fileName Foam::functionEntries::codeStream::codeTemplateDirName
-    = "codeTemplates/codeStream";
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -148,49 +142,30 @@ bool Foam::functionEntries::codeStream::execute
             {
                 Info<< "Creating new library in " << libPath << endl;
 
-                fileName srcFile;
-
-                // try to get template from FOAM_CODESTREAM_TEMPLATES
-                fileName templateDir
+                const fileName fileCsrc
                 (
-                    Foam::getEnv(codeTemplateEnvName)
+                    codeStreamTools::findTemplate
+                    (
+                        codeTemplateC
+                    )
                 );
 
-                if (!templateDir.empty())
-                {
-                    srcFile = templateDir/codeTemplateName;
-                    if (!isFile(srcFile, false))
-                    {
-                        srcFile.clear();
-                    }
-                }
-
-                // not found - fallback to ~OpenFOAM expansion
-                if (srcFile.empty())
-                {
-                    srcFile = findEtcFile
-                    (
-                        codeTemplateDirName/codeTemplateName
-                    );
-                }
-
-                if (srcFile.empty())
+                // not found!
+                if (fileCsrc.empty())
                 {
                     FatalIOErrorIn
                     (
                         "functionEntries::codeStream::execute(..)",
                         parentDict
                     )   << "Could not find the code template: "
-                        << codeTemplateName << nl
-                        << "Under the $FOAM_CODESTREAM_TEMPLATES directory"
-                        << " via via the ~OpenFOAM/" / codeTemplateDirName
-                        << " expansion"
+                        << codeTemplateC << nl
+                        << codeStreamTools::searchedLocations()
                         << exit(FatalIOError);
                 }
 
 
                 List<codeStreamTools::fileAndVars> copyFiles(1);
-                copyFiles[0].file() = srcFile;
+                copyFiles[0].file() = fileCsrc;
                 copyFiles[0].set("codeInclude", codeInclude);
                 copyFiles[0].set("code", code);
 
@@ -199,7 +174,7 @@ bool Foam::functionEntries::codeStream::execute
                 // Write Make/files
                 filesContents[0].first() = "Make/files";
                 filesContents[0].second() =
-                    codeTemplateName + "\n"
+                    codeTemplateC + "\n\n"
                     "LIB = $(FOAM_USER_LIBBIN)/lib" + name;
 
                 // Write Make/options
@@ -214,7 +189,7 @@ bool Foam::functionEntries::codeStream::execute
                     (
                         "functionEntries::codeStream::execute(..)",
                         parentDict
-                    )   << "Failed writing " << endl
+                    )   << "Failed writing " <<nl
                         << copyFiles << endl
                         << filesContents
                         << exit(FatalIOError);

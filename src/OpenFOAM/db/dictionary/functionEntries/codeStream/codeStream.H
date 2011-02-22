@@ -114,16 +114,8 @@ public:
 
     // Static data members
 
-        //- Name of the code template to be used
-        const static word codeTemplateName;
-
-        //- Name of the code template environment variable
-        //  Used to located the codeTemplateName
-        const static word codeTemplateEnvName;
-
-        //- Name of the code template sub-directory
-        //  Used when locating the codeTemplateName via Foam::findEtcFile
-        const static fileName codeTemplateDirName;
+        //- Name of the C code template to be used
+        const static word codeTemplateC;
 
 
     //- Runtime type information

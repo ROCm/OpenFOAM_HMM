@@ -109,7 +109,18 @@ protected:
 
 public:
 
-    static int allowSystemOperations;
+    // Static data members
+
+        //- Name of the code template environment variable
+        //  Used to located the codeTemplateName
+        const static word codeTemplateEnvName;
+
+        //- Name of the code template sub-directory
+        //  Used when locating the codeTemplateName via Foam::findEtcFile
+        const static fileName codeTemplateDirName;
+
+
+        static int allowSystemOperations;
 
     // Constructors
 
@@ -149,6 +160,15 @@ public:
         }
 
         bool copyFilesContents(const fileName& dir) const;
+
+
+        //- Find a code-template via the codeTemplateEnvName
+        //  alternatively in the codeTemplateDirName via Foam::findEtcFile
+        static fileName findTemplate(const word& templateName);
+
+        //- List searched locations in a format suitable for display an error
+        static string searchedLocations();
+
 
         static void* findLibrary(const fileName& libPath);
 
