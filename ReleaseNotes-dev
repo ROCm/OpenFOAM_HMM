@@ -278,3 +278,7 @@
     + multipleBoxes, hotBoxes, panel, evaporationTest
   + =interDyMFoam= tutorials:
     + testTubeMixer: showcases =solidBodyMotionFunction=
+
+* Other
+  + compilable with =clang=
+    In your prefs.sh set the WM_COMPILER to Clang
