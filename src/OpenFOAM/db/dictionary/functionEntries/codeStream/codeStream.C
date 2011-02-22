@@ -237,7 +237,7 @@ bool Foam::functionEntries::codeStream::execute
             << " in library " << lib << exit(FatalIOError);
     }
 
-    OStringStream os;
+    OStringStream os(is.format());
     (*function)(parentDict, os);
     IStringStream resultStream(os.str());
     entry.read(parentDict, resultStream);
