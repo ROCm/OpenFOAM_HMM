@@ -84,13 +84,11 @@ SourceFiles
 
 namespace Foam
 {
-class ISstream;
-
 namespace functionEntries
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class codeStream Declaration
+                         Class codeStream Declaration
 \*---------------------------------------------------------------------------*/
 
 class codeStream

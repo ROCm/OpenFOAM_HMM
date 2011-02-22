@@ -78,6 +78,7 @@ $(strings)/fileName/fileNameIO.C
 $(strings)/keyType/keyType.C
 $(strings)/wordRe/wordRe.C
 $(strings)/lists/hashedWordList.C
+$(strings)/stringOps/stringOps.C
 
 primitives/hashes/Hasher/Hasher.C
 

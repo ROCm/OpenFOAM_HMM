@@ -31,6 +31,7 @@ License
 #include "SHA1Digest.H"
 #include "OSHA1stream.H"
 #include "codeStreamTools.H"
+#include "stringOps.H"
 #include "dlLibraryTable.H"
 #include "OSspecific.H"
 #include "Time.H"
@@ -87,19 +88,18 @@ bool Foam::functionEntries::codeStream::execute
     string codeInclude = "";
     if (codeDict.found("codeInclude"))
     {
-        codeInclude = codeStreamTools::stripLeading(codeDict["codeInclude"]);
+        codeInclude = stringOps::trimLeft(codeDict["codeInclude"]);
     }
-    string code = codeStreamTools::stripLeading(codeDict["code"]);
+    string code = stringOps::trimLeft(codeDict["code"]);
 
     string codeOptions = "";
     if (codeDict.found("codeOptions"))
     {
-        codeOptions = codeStreamTools::stripLeading(codeDict["codeOptions"]);
+        codeOptions = stringOps::trimLeft(codeDict["codeOptions"]);
     }
 
 
-    // Create name out of contents
-
+    // Create name from the contents
     SHA1Digest sha;
     {
         OSHA1stream os;

@@ -120,8 +120,6 @@ public:
 
         static void* findLibrary(const fileName& libPath);
 
-        static string stripLeading(const string&);
-
         static bool writeDigest(const fileName& dir, const SHA1Digest& sha1);
         static SHA1Digest readDigest(const fileName& dir);
         static bool upToDate(const fileName& dir, const SHA1Digest& sha1);

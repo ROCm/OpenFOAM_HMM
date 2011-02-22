@@ -211,20 +211,6 @@ bool Foam::codeStreamTools::copyFilesContents(const fileName& dir) const
 }
 
 
-Foam::string Foam::codeStreamTools::stripLeading(const string& s)
-{
-    label sz = s.size();
-    if (sz > 0 && s[0] == '\n')
-    {
-        return s(1, sz-1);
-    }
-    else
-    {
-        return s;
-    }
-}
-
-
 bool Foam::codeStreamTools::writeDigest
 (
     const fileName& dir,
