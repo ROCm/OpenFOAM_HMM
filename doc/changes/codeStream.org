@@ -76,6 +76,21 @@
   It by default always includes =fvCFD.H= and adds the =finiteVolume= library to
   the include search path.
 
+  A special form is where the code is not supplied in-line but instead comes
+  from the =codeDict= dictionary in the =system= directory. It should contain
+  a =fixedValue10= entry:
+  #+BEGIN_SRC c++
+  fixedValue10
+  {
+      code
+      #{
+          operator==(min(10, 0.1*this->db().time().value()));
+      #};
+  }
+  #+END_SRC
+  The advantage of using this indirect way is that it supports
+  runTimeModifiable so any change of the code will be picked up next iteration.
+
 * Security
   Allowing the case to execute C++ code does introduce security risks.  A
   third-party case might have a =#codeStream{#code system("rm -rf .");};= hidden
