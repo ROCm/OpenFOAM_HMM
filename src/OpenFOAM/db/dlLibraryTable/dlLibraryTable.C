@@ -62,7 +62,11 @@ Foam::dlLibraryTable::~dlLibraryTable()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::dlLibraryTable::open(const fileName& functionLibName)
+bool Foam::dlLibraryTable::open
+(
+    const fileName& functionLibName,
+    const bool verbose
+)
 {
     if (functionLibName.size())
     {
@@ -70,11 +74,14 @@ bool Foam::dlLibraryTable::open(const fileName& functionLibName)
 
         if (!functionLibPtr)
         {
-            WarningIn
-            (
-                "dlLibraryTable::open(const fileName& functionLibName)"
-            )   << "could not load " << functionLibName
-                << endl;
+            if (verbose)
+            {
+                WarningIn
+                (
+                    "dlLibraryTable::open(const fileName&)"
+                )   << "could not load " << functionLibName
+                    << endl;
+            }
 
             return false;
         }
@@ -97,7 +104,11 @@ bool Foam::dlLibraryTable::open(const fileName& functionLibName)
 }
 
 
-bool Foam::dlLibraryTable::close(const fileName& functionLibName)
+bool Foam::dlLibraryTable::close
+(
+    const fileName& functionLibName,
+    const bool verbose
+)
 {
     void* libPtr = findLibrary(functionLibName);
     if (libPtr)
@@ -106,11 +117,14 @@ bool Foam::dlLibraryTable::close(const fileName& functionLibName)
 
         if (!dlClose(libPtr))
         {
-            WarningIn
-            (
-                "dlLibraryTable::close(const fileName& functionLibName)"
-            )   << "could not close " << functionLibName
-                << endl;
+            if (verbose)
+            {
+                WarningIn
+                (
+                    "dlLibraryTable::close(const fileName&)"
+                )   << "could not close " << functionLibName
+                    << endl;
+            }
 
             return false;
         }
@@ -144,7 +158,7 @@ bool Foam::dlLibraryTable::open
     {
         fileNameList libNames(dict.lookup(libsEntry));
 
-        bool allOpened = (libNames.size() > 0);
+        bool allOpened = !libNames.empty();
 
         forAll(libNames, i)
         {

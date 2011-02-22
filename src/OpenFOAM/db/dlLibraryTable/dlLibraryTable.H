@@ -94,11 +94,11 @@ public:
 
     // Member Functions
 
-        //- Open the named library
-        static bool open(const fileName& name);
+        //- Open the named library, optionally with warnings if problems occur
+        static bool open(const fileName& name, const bool verbose = true);
 
-        //- Close the named library
-        static bool close(const fileName& name);
+        //- Close the named library, optionally with warnings if problems occur
+        static bool close(const fileName& name, const bool verbose = true);
 
         //- Find the handle of the named library
         static void* findLibrary(const fileName& name);
@@ -109,7 +109,7 @@ public:
 
         //- Open all the libraries listed in the 'libsEntry' entry in the
         //  given dictionary if present and check the additions
-        //  to the give constructor table
+        //  to the given constructor table
         template<class TablePtr>
         static bool open
         (
