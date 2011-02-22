@@ -23,6 +23,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "dictionary.H"
+#include "Ostream.H"
+#include "Pstream.H"
+
 ${codeInclude}
 
 using namespace Foam;
