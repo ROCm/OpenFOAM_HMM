@@ -36,6 +36,7 @@ SourceFiles
 #define greyDiffusiveRadiationMixedFvPatchScalarField_H
 
 #include "mixedFvPatchFields.H"
+#include "radiationCoupledBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,15 +50,13 @@ namespace radiation
 
 class greyDiffusiveRadiationMixedFvPatchScalarField
 :
-    public mixedFvPatchScalarField
+    public mixedFvPatchScalarField,
+    public radiationCoupledBase
 {
     // Private data
 
         //- Name of temperature field
         word TName_;
-
-        //- Emissivity
-        scalar emissivity_;
 
 
 public:
@@ -143,18 +142,6 @@ public:
             word& TName()
             {
                 return TName_;
-            }
-
-            //- Return the emissivity
-            scalar emissivity() const
-            {
-                return emissivity_;
-            }
-
-            //- Return reference to the emissivity to allow adjustment
-            scalar& emissivity()
-            {
-                return emissivity_;
             }
 
 

@@ -1,5 +1,3 @@
-derivedFvPatchFields/solidWallHeatFluxTemperature/solidWallHeatFluxTemperatureFvPatchScalarField.C
-
 fluid/compressibleCourantNo.C
 solid/solidRegionDiffNo.C
 
