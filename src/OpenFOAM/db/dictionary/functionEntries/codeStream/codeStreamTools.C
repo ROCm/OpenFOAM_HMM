@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "codeStreamTools.H"
+#include "stringOps.H"
 #include "IFstream.H"
 #include "OFstream.H"
 #include "OSspecific.H"
@@ -43,38 +44,46 @@ int Foam::codeStreamTools::allowSystemOperations
 
 void Foam::codeStreamTools::copyAndExpand
 (
-    ISstream& sourceStr,
-    OSstream& destStr
+    ISstream& is,
+    OSstream& os,
+    const HashTable<string>& mapping
 ) const
 {
-    if (!sourceStr.good())
+    if (!is.good())
     {
         FatalErrorIn
         (
             "codeStreamTools::copyAndExpand()"
             " const"
-        )   << "Failed opening for reading " << sourceStr.name()
+        )   << "Failed opening for reading " << is.name()
             << exit(FatalError);
     }
 
-    if (!destStr.good())
+    if (!os.good())
     {
         FatalErrorIn
         (
             "codeStreamTools::copyAndExpand()"
             " const"
-        )   << "Failed writing " << destStr.name() << exit(FatalError);
+        )   << "Failed writing " << os.name()
+            << exit(FatalError);
     }
 
-    // Copy file whilst rewriting environment vars
+    // Copy file while rewriting $VARS and ${VARS}
     string line;
     do
     {
-        sourceStr.getLine(line);
-        line.expand(true, true);  // replace any envvars inside substitutions
-        destStr<< line.c_str() << nl;
+        is.getLine(line);
+
+        // normal expansion according to mapping
+        stringOps::inplaceExpand(line, mapping);
+
+        // expand according to env variables
+        stringOps::inplaceExpandEnv(line, true, true);
+
+        os  << line.c_str() << nl;
     }
-    while (sourceStr.good());
+    while (is.good());
 }
 
 
@@ -109,11 +118,11 @@ Foam::codeStreamTools::codeStreamTools
 {}
 
 
-Foam::codeStreamTools::codeStreamTools(const codeStreamTools& otf)
+Foam::codeStreamTools::codeStreamTools(const codeStreamTools& tools)
 :
-    name_(otf.name_),
-    copyFiles_(otf.copyFiles_),
-    filesContents_(otf.filesContents_)
+    name_(tools.name_),
+    copyFiles_(tools.copyFiles_),
+    filesContents_(tools.filesContents_)
 {}
 
 
@@ -127,21 +136,17 @@ bool Foam::codeStreamTools::copyFilesContents(const fileName& dir) const
         (
             "codeStreamTools::copyFilesContents(const fileName&) const"
         )   <<  "Loading a shared library using case-supplied code is not"
-            << " enabled by default" << endl
+            << " enabled by default" << nl
             << "because of security issues. If you trust the code you can"
-            << " enable this" << endl
+            << " enable this" << nl
             << "facility be adding to the InfoSwitches setting in the system"
-            << " controlDict" << endl
-            << endl
-            << "    allowSystemOperations 1" << endl
-            << endl
-            << "The system controlDict is either" << endl
-            << endl
-            << "    ~/.OpenFOAM/$WM_PROJECT_VERSION/controlDict" << endl
-            << endl
-            << "or" << endl
-            << endl
-            << "    $WM_PROJECT_DIR/etc/controlDict" << endl
+            << " controlDict" << nl
+            << nl
+            << "    allowSystemOperations 1" << nl << nl
+            << "The system controlDict is either" << nl << nl
+            << "    ~/.OpenFOAM/$WM_PROJECT_VERSION/controlDict" << nl << nl
+            << "or" << nl << nl
+            << "    $WM_PROJECT_DIR/etc/controlDict" << nl
             << endl
             << exit(FatalError);
     }
@@ -149,64 +154,64 @@ bool Foam::codeStreamTools::copyFilesContents(const fileName& dir) const
     // Create dir
     mkDir(dir);
 
-    //Info<< "Setting envvar typeName=" << name_ << endl;
-    setEnv("typeName", name_, true);
+    // Info<< "set mapping typeName=" << name_ << endl;
     // Copy any template files
     forAll(copyFiles_, i)
     {
-        const List<Pair<string> >& rules = copyFiles_[i].second();
-        forAll(rules, j)
-        {
-            //Info<< "Setting envvar " << rules[j].first() << endl;
-            setEnv(rules[j].first(), rules[j].second(), true);
-        }
+        const fileName sourceFile(fileName(copyFiles_[i].file()).expand());
+        const fileName destFile(dir/sourceFile.name());
 
-        const fileName sourceFile = fileName(copyFiles_[i].first()).expand();
-        const fileName destFile = dir/sourceFile.name();
-
-        IFstream sourceStr(sourceFile);
-        //Info<< "Reading from " << sourceStr.name() << endl;
-        if (!sourceStr.good())
+        IFstream is(sourceFile);
+        //Info<< "Reading from " << is.name() << endl;
+        if (!is.good())
         {
             FatalErrorIn
             (
-                "codeStreamTools::copyFilesContents()"
+                "codeStreamTools::copyFilesContents(const fileName&)"
                 " const"
             )   << "Failed opening " << sourceFile << exit(FatalError);
         }
 
-        OFstream destStr(destFile);
+        OFstream os(destFile);
         //Info<< "Writing to " << destFile.name() << endl;
-        if (!destStr.good())
+        if (!os.good())
         {
             FatalErrorIn
             (
-                "codeStreamTools::copyFilesContents()"
+                "codeStreamTools::copyFilesContents(const fileName&)"
                 " const"
             )   << "Failed writing " << destFile << exit(FatalError);
         }
 
-        copyAndExpand(sourceStr, destStr);
+        // variables mapping
+        HashTable<string> mapping(copyFiles_[i]);
+        mapping.set("typeName", name_);
+        copyAndExpand(is, os, mapping);
     }
+
 
     // Files that are always written:
     forAll(filesContents_, i)
     {
-        fileName f = fileName(dir/filesContents_[i].first()).expand();
+        const fileName dstFile
+        (
+            fileName(dir/filesContents_[i].first()).expand()
+        );
 
-        mkDir(f.path());
-        OFstream str(f);
+        mkDir(dstFile.path());
+        OFstream os(dstFile);
         //Info<< "Writing to " << filesContents_[i].first() << endl;
-        if (!str.good())
+        if (!os.good())
         {
             FatalErrorIn
             (
                 "codeStreamTools::copyFilesContents()"
                 " const"
-            )   << "Failed writing " << f << exit(FatalError);
+            )   << "Failed writing " << dstFile << exit(FatalError);
         }
-        str << filesContents_[i].second().c_str() << endl;
+        os  << filesContents_[i].second().c_str() << endl;
     }
+
     return true;
 }
 
@@ -217,16 +222,16 @@ bool Foam::codeStreamTools::writeDigest
     const SHA1Digest& sha1
 )
 {
-    OFstream str(dir/"SHA1Digest");
-    str << sha1;
-    return str.good();
+    OFstream os(dir/"SHA1Digest");
+    os  << sha1;
+    return os.good();
 }
 
 
 Foam::SHA1Digest Foam::codeStreamTools::readDigest(const fileName& dir)
 {
-    IFstream str(dir/"SHA1Digest");
-    return SHA1Digest(str);
+    IFstream is(dir/"SHA1Digest");
+    return SHA1Digest(is);
 }
 
 

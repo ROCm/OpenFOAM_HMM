@@ -39,20 +39,16 @@ SourceFiles
 #include "Tuple2.H"
 #include "Pair.H"
 #include "SHA1Digest.H"
+#include "HashTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-
-typedef List<Pair<string> > stringPairList;
-typedef Tuple2<fileName, List<Pair<string> > > fileAndVars;
-typedef Tuple2<fileName, string> fileAndContent;
-
-
-class OSstream;
+// Forward declaration of classes
 class ISstream;
+class OSstream;
 
 /*---------------------------------------------------------------------------*\
                         Class codeStreamTools Declaration
@@ -60,20 +56,56 @@ class ISstream;
 
 class codeStreamTools
 {
+public:
+    typedef Tuple2<fileName, string> fileAndContent;
+
+    //- Helper class for managing file and variables
+    class fileAndVars
+    :
+        public HashTable<string>
+    {
+        // Private data
+        fileName file_;
+
+    public:
+        //- Construct null
+        fileAndVars()
+        {}
+
+        //- Return the file name
+        const fileName& file() const
+        {
+            return file_;
+        }
+
+        //- Return the file name
+        fileName& file()
+        {
+            return file_;
+        }
+    };
+
+
+private:
     // Private data
 
         //- Name for underlying set
         word name_;
 
         //- Files to copy
-        List<fileAndVars> copyFiles_;
+        List<codeStreamTools::fileAndVars> copyFiles_;
 
         //- Direct contents for files
         List<fileAndContent> filesContents_;
 
 protected:
 
-        void copyAndExpand(ISstream&, OSstream&) const;
+        void copyAndExpand
+        (
+            ISstream&,
+            OSstream&,
+            const HashTable<string>& mapping
+        ) const;
 
 public:
 
@@ -96,12 +128,17 @@ public:
         );
 
         //- Construct copy
-        codeStreamTools(const codeStreamTools& otf);
+        codeStreamTools(const codeStreamTools&);
 
 
     // Member functions
 
-        const List<Tuple2<fileName, List<Pair<string> > > >& copyFiles() const
+        const word& name() const
+        {
+            return name_;
+        }
+
+        const List<fileAndVars>& copyFiles() const
         {
             return copyFiles_;
         }
@@ -109,11 +146,6 @@ public:
         const List<Tuple2<fileName, string> >& filesContents() const
         {
             return filesContents_;
-        }
-
-        const word& name() const
-        {
-            return name_;
         }
 
         bool copyFilesContents(const fileName& dir) const;

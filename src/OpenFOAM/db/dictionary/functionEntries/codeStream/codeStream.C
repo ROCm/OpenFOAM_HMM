@@ -57,6 +57,16 @@ namespace functionEntries
 }
 
 
+const Foam::word Foam::functionEntries::codeStream::codeTemplateName
+    = "codeStreamTemplate.C";
+
+const Foam::word Foam::functionEntries::codeStream::codeTemplateEnvName
+    = "FOAM_CODESTREAM_TEMPLATES";
+
+const Foam::fileName Foam::functionEntries::codeStream::codeTemplateDirName
+    = "codeTemplates/codeStream";
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionEntries::codeStream::execute
@@ -80,57 +90,52 @@ bool Foam::functionEntries::codeStream::execute
     }
 
 
-    // Read three sections of code. Remove any leading empty lines
-    // (necessary for compilation options, just visually pleasing for includes
-    // and body).
+    // Read three sections of code.
+    // Remove any leading whitespace - necessary for compilation options,
+    // convenience for includes and body.
     dictionary codeDict(is);
 
-    string codeInclude = "";
+    // "codeInclude" is optional
+    string codeInclude;
     if (codeDict.found("codeInclude"))
     {
         codeInclude = stringOps::trimLeft(codeDict["codeInclude"]);
     }
-    string code = stringOps::trimLeft(codeDict["code"]);
 
-    string codeOptions = "";
+    // "codeOptions" is optional
+    string codeOptions;
     if (codeDict.found("codeOptions"))
     {
         codeOptions = stringOps::trimLeft(codeDict["codeOptions"]);
     }
 
+    // "code" is mandatory
+    string code = stringOps::trimLeft(codeDict["code"]);
 
     // Create name from the contents
     SHA1Digest sha;
     {
         OSHA1stream os;
-        os  << codeInclude << code << codeOptions;
+        os  << codeInclude << codeOptions << code;
         sha = os.digest();
     }
-    fileName name;
-    {
-        OStringStream str;
-        str << sha;
-        name = "codeStream" + str.str();
-    }
 
+    // write code into _SHA1 subdirectory
     fileName dir;
     if (isA<IOdictionary>(parentDict))
     {
         const IOdictionary& d = static_cast<const IOdictionary&>(parentDict);
-        dir = d.db().time().constantPath()/"codeStream"/name;
+        dir = d.db().time().constantPath()/"codeStream"/"_" + sha.str();
     }
     else
     {
-        dir = "codeStream"/name;
+        dir = fileName("codeStream")/"_" + sha.str();
     }
 
-
+    fileName name = "codeStream_" + sha.str();
     fileName libPath
     (
-        Foam::getEnv("FOAM_USER_LIBBIN")
-      / "lib"
-      + name
-      + ".so"
+        Foam::getEnv("FOAM_USER_LIBBIN")/"lib" + name + ".so"
     );
 
     void* lib = dlLibraryTable::findLibrary(libPath);
@@ -143,39 +148,64 @@ bool Foam::functionEntries::codeStream::execute
             {
                 Info<< "Creating new library in " << libPath << endl;
 
-                fileName templates
+                fileName srcFile;
+
+                // try to get template from FOAM_CODESTREAM_TEMPLATES
+                fileName templateDir
                 (
-                    Foam::getEnv("FOAM_CODESTREAM_TEMPLATE_DIR")
+                    Foam::getEnv(codeTemplateEnvName)
                 );
-                if (!templates.size())
+
+                if (!templateDir.empty())
+                {
+                    srcFile = templateDir/codeTemplateName;
+                    if (!isFile(srcFile, false))
+                    {
+                        srcFile.clear();
+                    }
+                }
+
+                // not found - fallback to ~OpenFOAM expansion
+                if (srcFile.empty())
+                {
+                    srcFile = findEtcFile
+                    (
+                        codeTemplateDirName/codeTemplateName
+                    );
+                }
+
+                if (srcFile.empty())
                 {
                     FatalIOErrorIn
                     (
                         "functionEntries::codeStream::execute(..)",
                         parentDict
-                    )   << "Please set environment variable"
-                        " FOAM_CODESTREAM_TEMPLATE_DIR"
-                        << " to point to the location of codeStreamTemplate.C"
+                    )   << "Could not find the code template: "
+                        << codeTemplateName << nl
+                        << "Under the $FOAM_CODESTREAM_TEMPLATES directory"
+                        << " via via the ~OpenFOAM/" / codeTemplateDirName
+                        << " expansion"
                         << exit(FatalIOError);
                 }
 
-                List<fileAndVars> copyFiles(1);
-                copyFiles[0].first() = templates/"codeStreamTemplate.C";
-                stringPairList bodyVars(2);
-                bodyVars[0] = Pair<string>("codeInclude", codeInclude);
-                bodyVars[1] = Pair<string>("code", code);
-                copyFiles[0].second() = bodyVars;
 
-                List<fileAndContent> filesContents(2);
+                List<codeStreamTools::fileAndVars> copyFiles(1);
+                copyFiles[0].file() = srcFile;
+                copyFiles[0].set("codeInclude", codeInclude);
+                copyFiles[0].set("code", code);
+
+                List<codeStreamTools::fileAndContent> filesContents(2);
+
                 // Write Make/files
                 filesContents[0].first() = "Make/files";
                 filesContents[0].second() =
-                    "codeStreamTemplate.C \n\
-                    LIB = $(FOAM_USER_LIBBIN)/lib" + name;
+                    codeTemplateName + "\n"
+                    "LIB = $(FOAM_USER_LIBBIN)/lib" + name;
+
                 // Write Make/options
                 filesContents[1].first() = "Make/options";
                 filesContents[1].second() =
-                    "EXE_INC = -g\\\n" + codeOptions + "\n\nLIB_LIBS = ";
+                    "EXE_INC = -g \\\n" + codeOptions + "\n\nLIB_LIBS =";
 
                 codeStreamTools writer(name, copyFiles, filesContents);
                 if (!writer.copyFilesContents(dir))
@@ -199,7 +229,8 @@ bool Foam::functionEntries::codeStream::execute
                 (
                     "functionEntries::codeStream::execute(..)",
                     parentDict
-                )   << "Failed " << wmakeCmd << exit(FatalIOError);
+                )   << "Failed " << wmakeCmd
+                    << exit(FatalIOError);
             }
         }
 
@@ -209,7 +240,8 @@ bool Foam::functionEntries::codeStream::execute
             (
                 "functionEntries::codeStream::execute(..)",
                 parentDict
-            )   << "Failed loading library " << libPath << exit(FatalIOError);
+            )   << "Failed loading library " << libPath
+                << exit(FatalIOError);
         }
 
         lib = dlLibraryTable::findLibrary(libPath);
