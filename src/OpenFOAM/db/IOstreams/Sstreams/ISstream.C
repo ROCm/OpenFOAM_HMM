@@ -203,7 +203,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
 
             return *this;
         }
-        // Verbatim string
+        // Possible verbatim string or dictionary functionEntry
         case token::HASH :
         {
             char nextC;
@@ -226,6 +226,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
                 else
                 {
                     t = sPtr;
+                    t.type() = token::VERBATIMSTRING;
                 }
 
                 return *this;

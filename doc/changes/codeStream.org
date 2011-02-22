@@ -136,7 +136,8 @@
   - =foamFormatConvert=
   - =changeDictionaryDict=
   - =foamUpgradeCyclics=
-  - =fieldToCell=
+  These applications will usually switch off all '#' processing.
+
 
   Note: above field initialisation has the problem that the boundary conditions
   are not evaluated so e.g. processor boundaries will not hold the opposite cell

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -98,21 +98,32 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
     }
     else  // Keyword starts entry ...
     {
-        if (keyword[0] == '#')         // ... Function entry
+        if
+        (
+           !disableFunctionEntries
+         && keyword[0] == '#'
+        )                           // ... Function entry
         {
             word functionName = keyword(1, keyword.size()-1);
             return functionEntry::execute(functionName, parentDict, is);
         }
-        else if (keyword[0] == '$')    // ... Substitution entry
+        else if
+        (
+           !disableFunctionEntries
+         && keyword[0] == '$')      // ... Substitution entry
         {
             parentDict.substituteKeyword(keyword);
             return true;
         }
-        else if (keyword == "include") // ... For backward compatibility
+        else if
+        (
+           !disableFunctionEntries
+         && keyword == "include"
+        )                           // ... For backward compatibility
         {
             return functionEntries::includeEntry::execute(parentDict, is);
         }
-        else                           // ... Data entries
+        else                        // ... Data entries
         {
             token nextToken(is);
             is.putBack(nextToken);
