@@ -19,6 +19,8 @@
         initialMassFluid[i]
     );
 
+    radiation::radiationModel& rad = radiation[i];
+
     const label pRefCell = pRefCellFluid[i];
     const scalar pRefValue = pRefValueFluid[i];
 

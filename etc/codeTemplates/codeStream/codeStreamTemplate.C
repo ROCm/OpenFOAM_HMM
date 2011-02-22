@@ -26,6 +26,10 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+#include "dictionary.H"
+#include "Ostream.H"
+#include "Pstream.H"
+
 //{{{ begin codeInclude
 ${codeInclude}
 //}}} end codeInclude

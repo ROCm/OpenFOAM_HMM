@@ -89,7 +89,8 @@ SourceFiles
 #include "absorptionEmissionModel.H"
 #include "HashTable.H"
 #include "absorptionCoeffs.H"
-#include "basicThermo.H"
+#include "SLGThermo.H"
+//#include "basicThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -110,10 +111,10 @@ public:
 
     // Public data
 
-        // - Maximum number of species considered for absorptivity
+        // Maximum number of species considered for absorptivity
         static const int nSpecies_ = 5;
 
-        //  Absorption Coefficients
+        // Absorption Coefficients
         absorptionCoeffs coeffs_[nSpecies_];
 
 
@@ -127,14 +128,14 @@ private:
         //- Hash table of species names
         HashTable<label> speciesNames_;
 
-        // Indices of species in the look-up table
+        //- Indices of species in the look-up table
         FixedList<label, nSpecies_> specieIndex_;
 
-        // Look-up table of species related to ft
-        mutable interpolationLookUpTable<scalar> lookUpTable_;
+        //- Look-up table of species related to ft
+        mutable autoPtr<interpolationLookUpTable<scalar> > lookUpTablePtr_;
 
-        // Thermo package
-        const basicThermo& thermo_;
+        //- SLG thermo package
+        SLGThermo thermo_;
 
         //- Emission constant coefficient
         const scalar EhrrCoeff_;

@@ -224,8 +224,7 @@ bool Foam::codeStreamTools::copyFilesContents(const fileName& dir) const
             << "because of security issues. If you trust the code you can"
             << " enable this" << nl
             << "facility be adding to the InfoSwitches setting in the system"
-            << " controlDict" << nl
-            << nl
+            << " controlDict:" << nl << nl
             << "    allowSystemOperations 1" << nl << nl
             << "The system controlDict is either" << nl << nl
             << "    ~/.OpenFOAM/$WM_PROJECT_VERSION/controlDict" << nl << nl

@@ -130,7 +130,8 @@ public:
             const scalar deltaTheta,
             const label lambda,
             const absorptionEmissionModel& absEmmModel_,
-            const blackBodyEmission& blackBody
+            const blackBodyEmission& blackBody,
+            const label rayId
         );
 
 

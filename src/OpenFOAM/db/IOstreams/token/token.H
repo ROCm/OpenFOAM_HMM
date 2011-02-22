@@ -78,6 +78,7 @@ public:
         PUNCTUATION,
         WORD,
         STRING,
+        VERBATIMSTRING,
         LABEL,
         FLOAT_SCALAR,
         DOUBLE_SCALAR,
@@ -318,6 +319,7 @@ public:
         // Access
 
             inline tokenType type() const;
+            inline tokenType& type();
 
             inline bool good() const;
             inline bool undefined() const;

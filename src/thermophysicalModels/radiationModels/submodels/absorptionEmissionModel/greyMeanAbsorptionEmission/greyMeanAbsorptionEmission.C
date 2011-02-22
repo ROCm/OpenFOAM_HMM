@@ -25,6 +25,8 @@ License
 
 #include "greyMeanAbsorptionEmission.H"
 #include "addToRunTimeSelectionTable.H"
+#include "unitConversion.H"
+#include "zeroGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -56,13 +58,15 @@ Foam::radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission
     coeffsDict_((dict.subDict(typeName + "Coeffs"))),
     speciesNames_(0),
     specieIndex_(0),
-    lookUpTable_
+    lookUpTablePtr_(),
+    thermo_
     (
-        fileName(coeffsDict_.lookup("lookUpTableFileName")),
-        mesh.time().constant(),
-        mesh
+        mesh,
+        const_cast<basicThermo&>
+        (
+            mesh.lookupObject<basicThermo>("thermophysicalProperties")
+        )
     ),
-    thermo_(mesh.lookupObject<basicThermo>("thermophysicalProperties")),
     EhrrCoeff_(readScalar(coeffsDict_.lookup("EhrrCoeff"))),
     Yj_(nSpecies_)
 {
@@ -83,17 +87,45 @@ Foam::radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission
         nFunc++;
     }
 
+    if (coeffsDict_.found("lookUpTableFileName"))
+    {
+        const word name = coeffsDict_.lookup("lookUpTableFileName");
+        if (name != "none")
+        {
+            lookUpTablePtr_.set
+            (
+                new interpolationLookUpTable<scalar>
+                (
+                    fileName(coeffsDict_.lookup("lookUpTableFileName")),
+                    mesh.time().constant(),
+                    mesh
+                )
+            );
+
+            if (!mesh.foundObject<volScalarField>("ft"))
+            {
+                FatalErrorIn
+                (
+                    "Foam::radiation::greyMeanAbsorptionEmission(const"
+                    "dictionary& dict, const fvMesh& mesh)"
+                )   << "specie ft is not present to use with "
+                    << "lookUpTableFileName " << nl
+                    << exit(FatalError);
+            }
+        }
+    }
+
     // Check that all the species on the dictionary are present in the
     // look-up table and save the corresponding indices of the look-up table
 
     label j = 0;
     forAllConstIter(HashTable<label>, speciesNames_, iter)
     {
-        if (mesh.foundObject<volScalarField>("ft"))
+        if (!lookUpTablePtr_.empty())
         {
-            if (lookUpTable_.found(iter.key()))
+            if (lookUpTablePtr_().found(iter.key()))
             {
-                label index = lookUpTable_.findFieldIndex(iter.key());
+                label index = lookUpTablePtr_().findFieldIndex(iter.key());
 
                 Info<< "specie: " << iter.key() << " found on look-up table "
                     << " with index: " << index << endl;
@@ -120,10 +152,22 @@ Foam::radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission
                     "dictionary& dict, const fvMesh& mesh)"
                 )   << "specie: " << iter.key()
                     << " is neither in look-up table: "
-                    << lookUpTable_.tableName()
+                    << lookUpTablePtr_().tableName()
                     << " nor is being solved" << nl
                     << exit(FatalError);
             }
+        }
+        else if (mesh.foundObject<volScalarField>(iter.key()))
+        {
+            volScalarField& Y =
+                const_cast<volScalarField&>
+                (
+                    mesh.lookupObject<volScalarField>(iter.key())
+                );
+
+            Yj_.set(j, &Y);
+            specieIndex_[iter()] = 0;
+            j++;
         }
         else
         {
@@ -131,7 +175,9 @@ Foam::radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission
             (
                 "Foam::radiation::greyMeanAbsorptionEmission(const"
                 "dictionary& dict, const fvMesh& mesh)"
-            )   << "specie ft is not present " << nl
+            )   << " there is not lookup table and the specie" << nl
+                << iter.key() << nl
+                << " is not found " << nl
                 << exit(FatalError);
 
         }
@@ -149,11 +195,10 @@ Foam::radiation::greyMeanAbsorptionEmission::~greyMeanAbsorptionEmission()
 Foam::tmp<Foam::volScalarField>
 Foam::radiation::greyMeanAbsorptionEmission::aCont(const label bandI) const
 {
-    const volScalarField& T = thermo_.T();
-    const volScalarField& p = thermo_.p();
-    const volScalarField& ft = mesh_.lookupObject<volScalarField>("ft");
+    const volScalarField& T = thermo_.thermo().T();
+    const volScalarField& p = thermo_.thermo().p();
 
-    label nSpecies = speciesNames_.size();
+    const basicMultiComponentMixture& mixture = thermo_.carrier();
 
     tmp<volScalarField> ta
     (
@@ -168,48 +213,60 @@ Foam::radiation::greyMeanAbsorptionEmission::aCont(const label bandI) const
                 IOobject::NO_WRITE
             ),
             mesh(),
-            dimensionedScalar("a", dimless/dimLength, 0.0)
+            dimensionedScalar("a", dimless/dimLength, 0.0),
+            zeroGradientFvPatchVectorField::typeName
         )
     );
 
     scalarField& a = ta().internalField();
 
-    forAll(a, i)
+    forAll(a, cellI)
     {
-        const List<scalar>& species = lookUpTable_.lookUp(ft[i]);
-
-        for (label n=0; n<nSpecies; n++)
+        forAllConstIter(HashTable<label>, speciesNames_, iter)
         {
-            label l = 0;
-            scalar Yipi = 0;
+            label n = iter();
+            scalar Xipi = 0.0;
             if (specieIndex_[n] != 0)
             {
+                //Specie found in the lookUpTable.
+                const volScalarField& ft =
+                    mesh_.lookupObject<volScalarField>("ft");
+
+                const List<scalar>& Ynft = lookUpTablePtr_().lookUp(ft[cellI]);
                 //moles x pressure [atm]
-                Yipi = species[specieIndex_[n]]*p[i]*9.869231e-6;
+                Xipi = Ynft[specieIndex_[n]]*paToAtm(p[cellI]);
             }
             else
             {
-                // mass fraction
-                Yipi = Yj_[l][i];
-                l++;
+                scalar invWt = 0.0;
+                forAll (mixture.Y(), s)
+                {
+                    invWt += mixture.Y(s)[cellI]/mixture.W(s);
+                }
+
+                label index = mixture.species()[iter.key()];
+                scalar Xk = mixture.Y(index)[cellI]/(mixture.W(index)*invWt);
+
+                Xipi = Xk*paToAtm(p[cellI]);
             }
 
-            const absorptionCoeffs::coeffArray& b = coeffs_[n].coeffs(T[i]);
+            const absorptionCoeffs::coeffArray& b = coeffs_[n].coeffs(T[cellI]);
 
-            scalar Ti = T[i];
+            scalar Ti = T[cellI];
             // negative temperature exponents
             if (coeffs_[n].invTemp())
             {
-                Ti = 1./T[i];
+                Ti = 1.0/T[cellI];
             }
-            a[i] +=
-                Yipi
+            a[cellI] +=
+                Xipi
                *(
                     ((((b[5]*Ti + b[4])*Ti + b[3])*Ti + b[2])*Ti + b[1])*Ti
                   + b[0]
                 );
         }
     }
+    ta().correctBoundaryConditions();
     return ta;
 }
 

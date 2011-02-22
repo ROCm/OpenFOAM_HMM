@@ -37,6 +37,7 @@ SourceFiles
 #define MarshakRadiationFixedTMixedFvPatchField_H
 
 #include "mixedFvPatchFields.H"
+#include "radiationCoupledBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,16 +50,14 @@ namespace Foam
 
 class MarshakRadiationFixedTMixedFvPatchScalarField
 :
-    public mixedFvPatchScalarField
+    public mixedFvPatchScalarField,
+    public radiationCoupledBase
 {
 
     // Private data
 
         //- Radiation temperature field
         scalarField Trad_;
-
-        //- Emissivity
-        scalar emissivity_;
 
 
 public:
@@ -144,18 +143,6 @@ public:
             scalarField& Trad()
             {
                 return Trad_;
-            }
-
-            //- Return the emissivity
-            scalar emissivity() const
-            {
-                return emissivity_;
-            }
-
-            //- Return reference to the emissivity to allow adjustment
-            scalar& emissivity()
-            {
-                return emissivity_;
             }
 
 

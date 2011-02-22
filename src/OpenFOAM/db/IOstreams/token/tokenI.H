@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,7 @@ inline void token::clear()
     {
         delete wordTokenPtr_;
     }
-    else if (type_ == STRING)
+    else if (type_ == STRING || type_ == VERBATIMSTRING)
     {
         delete stringTokenPtr_;
     }
@@ -88,6 +88,7 @@ inline token::token(const token& t)
         break;
 
         case STRING:
+        case VERBATIMSTRING:
             stringTokenPtr_ = new string(*t.stringTokenPtr_);
         break;
 
@@ -178,6 +179,11 @@ inline token::tokenType token::type() const
     return type_;
 }
 
+inline token::tokenType& token::type()
+{
+    return type_;
+}
+
 inline bool token::good() const
 {
     return (type_ != ERROR && type_ != UNDEFINED);
@@ -231,12 +237,12 @@ inline const word& token::wordToken() const
 
 inline bool token::isString() const
 {
-    return (type_ == STRING);
+    return (type_ == STRING || type_ == VERBATIMSTRING);
 }
 
 inline const string& token::stringToken() const
 {
-    if (type_ == STRING)
+    if (type_ == STRING || type_ == VERBATIMSTRING)
     {
         return *stringTokenPtr_;
     }
@@ -405,6 +411,7 @@ inline void token::operator=(const token& t)
         break;
 
         case STRING:
+        case VERBATIMSTRING:
             stringTokenPtr_ = new string(*t.stringTokenPtr_);
         break;
 
@@ -511,6 +518,7 @@ inline bool token::operator==(const token& t) const
             return *wordTokenPtr_ == *t.wordTokenPtr_;
 
         case STRING:
+        case VERBATIMSTRING:
             return *stringTokenPtr_ == *t.stringTokenPtr_;
 
         case LABEL:
@@ -544,7 +552,7 @@ inline bool token::operator==(const word& w) const
 
 inline bool token::operator==(const string& s) const
 {
-    return (type_ == STRING && stringToken() == s);
+    return ((type_ == STRING || type_ == VERBATIMSTRING) && stringToken() == s);
 }
 
 inline bool token::operator==(const label l) const
