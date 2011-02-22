@@ -58,7 +58,7 @@ Description
 
     A special form is if the 'code' section is not supplied. In this case
     the code gets read from a (runTimeModifiable!) dictionary system/codeDict
-    which would have an entry
+    which would have a corresponding entry
 
     \verbatim
     rampedFixedValue
@@ -82,6 +82,7 @@ SourceFiles
 #define codedFixedValueFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
+#include "SHA1Digest.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -100,7 +101,12 @@ class codedFixedValueFvPatchScalarField
 {
     // Private data
 
+        //- Dictionary contents for the boundary condition
         mutable dictionary dict_;
+
+        //- SHA1Digest of the Dictionary contents
+        //  Currently unused, but useful for reloading?
+        mutable SHA1Digest sha1_;
 
         const word redirectType_;
 

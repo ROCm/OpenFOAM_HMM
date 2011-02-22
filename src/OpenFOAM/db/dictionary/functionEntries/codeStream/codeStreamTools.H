@@ -119,6 +119,7 @@ public:
         //  Used when locating the codeTemplateName via Foam::findEtcFile
         static const fileName codeTemplateDirName;
 
+
         static int allowSystemOperations;
 
 
@@ -144,6 +145,35 @@ public:
 
     // Member functions
 
+        //- Directory for compile/link (case-specific)
+        //  Expanded from \$FOAM_CASE/codeStream
+        static fileName baseDir();
+
+        //- Subdirectory name for library
+        //  Expanded from platforms/\$WM_OPTIONS/lib
+        static fileName libSubDir();
+
+        //- Local path for specified code name
+        //  Expanded from \$FOAM_CASE/codeStream
+        static fileName codePath(const word& subDirName);
+
+        //- Local library path for specified code name
+        //  Expanded from \$FOAM_CASE/platforms/\$WM_OPTIONS/lib
+        static fileName libPath(const word& codeName);
+
+        //- The library target path for Make/files
+        static string libTarget(const word& codeName);
+
+
+        //- Find a code-template via the codeTemplateEnvName
+        //  alternatively in the codeTemplateDirName via Foam::findEtcFile
+        static fileName findTemplate(const word& templateName);
+
+        //- List searched locations in a format suitable for display an error
+        static string searchedLocations();
+
+
+
         const word& name() const
         {
             return name_;
@@ -160,14 +190,6 @@ public:
         }
 
         bool copyFilesContents(const fileName& dir) const;
-
-
-        //- Find a code-template via the codeTemplateEnvName
-        //  alternatively in the codeTemplateDirName via Foam::findEtcFile
-        static fileName findTemplate(const word& templateName);
-
-        //- List searched locations in a format suitable for display an error
-        static string searchedLocations();
 
 
         static void* findLibrary(const fileName& libPath);

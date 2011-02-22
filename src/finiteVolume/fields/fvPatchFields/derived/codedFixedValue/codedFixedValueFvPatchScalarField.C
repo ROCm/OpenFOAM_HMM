@@ -80,7 +80,7 @@ Foam::codedFixedValueFvPatchScalarField::dict() const
 
 void Foam::codedFixedValueFvPatchScalarField::writeLibrary
 (
-    const fileName& codeDir,
+    const fileName& codePath,
     const fileName& libPath,
     const dictionary& dict
 )
@@ -116,7 +116,13 @@ void Foam::codedFixedValueFvPatchScalarField::writeLibrary
         sha = os.digest();
     }
 
-    if (!codeStreamTools::upToDate(codeDir, sha))
+//    Info<<"old SHA1: " << sha1_ << nl
+//        <<"new SHA1: " << sha << endl;
+
+
+    // (void) codeStreamTools::upToDate(codePath, sha)
+    // TODO: compile on-demand
+    if (true)
     {
         Info<< "Creating new library in " << libPath << endl;
 
@@ -152,8 +158,7 @@ void Foam::codedFixedValueFvPatchScalarField::writeLibrary
         filesContents[0].first() = "Make/files";
         filesContents[0].second() =
             codeTemplateC + "\n\n"
-            "LIB = $(PWD)/../platforms/$(WM_OPTIONS)/lib/lib"
-            + redirectType_;
+          + codeStreamTools::libTarget(redirectType_);
 
         // Write Make/options
         filesContents[1].first() = "Make/options";
@@ -164,7 +169,7 @@ void Foam::codedFixedValueFvPatchScalarField::writeLibrary
           + "\n\nLIB_LIBS = ";
 
         codeStreamTools writer(redirectType_, copyFiles, filesContents);
-        if (!writer.copyFilesContents(codeDir))
+        if (!writer.copyFilesContents(codePath))
         {
             FatalIOErrorIn
             (
@@ -194,32 +199,20 @@ void Foam::codedFixedValueFvPatchScalarField::updateLibrary()
             << exit(FatalIOError);
     }
 
-    // local directory for compile/link
-    const fileName baseDir
-    (
-        stringOps::expandEnv("$FOAM_CASE/codeStream")
-    );
+    // write code into redirectType_ subdir
+    const fileName codePath = codeStreamTools::codePath(redirectType_);
 
-    // code is written into redirectType_ subdir
-    const fileName codeDir
-    (
-        baseDir
-      / redirectType_
-    );
+//    const fileName oldLibPath = codeStreamTools::libPath
+//    (
+//        redirectType_ + "_" + sha1_
+//    );
+
+    // write library into platforms/$WM_OPTIONS/lib subdir
+    const fileName libPath = codeStreamTools::libPath(redirectType_);
 
 
-    //Info<< "codeDir:" << codeDir << endl;
-
-    // library is written into platforms/$WM_OPTIONS/lib subdir
-    const fileName libPath
-    (
-        baseDir
-      / stringOps::expandEnv("platforms/$WM_OPTIONS/lib")
-      / "lib" + redirectType_ + ".so"
-    );
-
-
-    //Info<< "libPath:" << libPath << endl;
+    //Info<< "codePath:" << codePath << nl
+    //    << "libPath:" << libPath << endl;
 
     void* lib = dlLibraryTable::findLibrary(libPath);
 
@@ -227,7 +220,7 @@ void Foam::codedFixedValueFvPatchScalarField::updateLibrary()
     {
         if (!lib)
         {
-            writeLibrary(codeDir, libPath, dict_);
+            writeLibrary(codePath, libPath, dict_);
         }
     }
     else
@@ -256,7 +249,7 @@ void Foam::codedFixedValueFvPatchScalarField::updateLibrary()
             }
 
             const dictionary& codeDict = onTheFlyDict.subDict(redirectType_);
-            writeLibrary(codeDir, libPath, codeDict);
+            writeLibrary(codePath, libPath, codeDict);
         }
     }
 
@@ -264,7 +257,7 @@ void Foam::codedFixedValueFvPatchScalarField::updateLibrary()
     {
         if (Pstream::master())
         {
-            const Foam::string wmakeCmd("wmake libso " + codeDir);
+            const Foam::string wmakeCmd("wmake libso " + codePath);
             Info<< "Invoking " << wmakeCmd << endl;
             if (Foam::system(wmakeCmd))
             {

@@ -49,6 +49,43 @@ const Foam::fileName Foam::codeStreamTools::codeTemplateDirName
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
+Foam::fileName Foam::codeStreamTools::baseDir()
+{
+    return stringOps::expandEnv("$FOAM_CASE/codeStream");
+}
+
+
+Foam::fileName Foam::codeStreamTools::libSubDir()
+{
+    return stringOps::expandEnv("platforms/$WM_OPTIONS/lib");
+}
+
+
+Foam::fileName Foam::codeStreamTools::codePath(const word& subDirName)
+{
+    return stringOps::expandEnv
+    (
+        "$FOAM_CASE/codeStream/" + subDirName
+    );
+}
+
+
+Foam::fileName Foam::codeStreamTools::libPath(const word& codeName)
+{
+    return stringOps::expandEnv
+    (
+        "$FOAM_CASE/codeStream/platforms/$WM_OPTIONS/lib/lib"
+      + codeName + ".so"
+    );
+}
+
+
+Foam::string Foam::codeStreamTools::libTarget(const word& codeName)
+{
+    return "LIB = $(PWD)/../platforms/$(WM_OPTIONS)/lib/lib" + codeName;
+}
+
+
 Foam::fileName Foam::codeStreamTools::findTemplate(const word& templateFile)
 {
     // try to get template from FOAM_CODESTREAM_TEMPLATES

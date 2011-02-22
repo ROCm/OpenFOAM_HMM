@@ -115,29 +115,14 @@ bool Foam::functionEntries::codeStream::execute
     }
 
 
-    // the code name = prefix + sha1
-    const fileName codeName("codeStream_" + sha.str());
+    // codeName = prefix + sha1
+    const fileName codeName = "codeStream_" + sha.str();
 
-    // local directory for compile/link
-    const fileName baseDir
-    (
-        stringOps::expandEnv("$FOAM_CASE/codeStream")
-    );
+    // write code into _SHA1 subdir
+    const fileName codePath = codeStreamTools::codePath("_" + sha.str());
 
-    // code is written into _SHA1 subdir
-    const fileName codeDir
-    (
-        baseDir
-      / "_" + sha.str()
-    );
-
-    // library is written into platforms/$WM_OPTIONS/lib subdir
-    const fileName libPath
-    (
-        baseDir
-      / stringOps::expandEnv("platforms/$WM_OPTIONS/lib")
-      / "lib" + codeName + ".so"
-    );
+    // write library into platforms/$WM_OPTIONS/lib subdir
+    const fileName libPath = codeStreamTools::libPath(codeName);
 
 
     void* lib = dlLibraryTable::findLibrary(libPath);
@@ -153,7 +138,7 @@ bool Foam::functionEntries::codeStream::execute
     {
         if (Pstream::master())
         {
-            if (!codeStreamTools::upToDate(codeDir, sha))
+            if (!codeStreamTools::upToDate(codePath, sha))
             {
                 Info<< "Creating new library in " << libPath << endl;
 
@@ -190,8 +175,7 @@ bool Foam::functionEntries::codeStream::execute
                 filesContents[0].first() = "Make/files";
                 filesContents[0].second() =
                     codeTemplateC + "\n\n"
-                    "LIB = $(PWD)/../platforms/$(WM_OPTIONS)/lib/lib"
-                    + codeName;
+                  + codeStreamTools::libTarget(codeName);
 
                 // Write Make/options
                 filesContents[1].first() = "Make/options";
@@ -201,7 +185,7 @@ bool Foam::functionEntries::codeStream::execute
                   + "\n\nLIB_LIBS =";
 
                 codeStreamTools writer(codeName, copyFiles, filesContents);
-                if (!writer.copyFilesContents(codeDir))
+                if (!writer.copyFilesContents(codePath))
                 {
                     FatalIOErrorIn
                     (
@@ -214,7 +198,7 @@ bool Foam::functionEntries::codeStream::execute
                 }
             }
 
-            const Foam::string wmakeCmd("wmake libso " + codeDir);
+            const Foam::string wmakeCmd("wmake libso " + codePath);
             Info<< "Invoking " << wmakeCmd << endl;
             if (Foam::system(wmakeCmd))
             {
