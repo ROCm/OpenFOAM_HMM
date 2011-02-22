@@ -106,7 +106,7 @@ bool Foam::functionEntries::codeStream::execute
     // "code" is mandatory
     string code = stringOps::trimLeft(codeDict["code"]);
 
-    // Create name from the contents
+    // Create SHA1 digest from the contents
     SHA1Digest sha;
     {
         OSHA1stream os;
@@ -196,7 +196,9 @@ bool Foam::functionEntries::codeStream::execute
                 // Write Make/options
                 filesContents[1].first() = "Make/options";
                 filesContents[1].second() =
-                    "EXE_INC = -g \\\n" + codeOptions + "\n\nLIB_LIBS =";
+                    "EXE_INC = -g \\\n"
+                  + codeOptions
+                  + "\n\nLIB_LIBS =";
 
                 codeStreamTools writer(codeName, copyFiles, filesContents);
                 if (!writer.copyFilesContents(codeDir))
@@ -225,8 +227,8 @@ bool Foam::functionEntries::codeStream::execute
             }
         }
 
-        bool dummy = true;
-        reduce(dummy, orOp<bool>());
+//        bool dummy = true;
+//        reduce(dummy, orOp<bool>());
 
         if (!dlLibraryTable::open(libPath, false))
         {

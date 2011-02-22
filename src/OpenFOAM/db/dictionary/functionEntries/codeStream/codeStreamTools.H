@@ -113,14 +113,14 @@ public:
 
         //- Name of the code template environment variable
         //  Used to located the codeTemplateName
-        const static word codeTemplateEnvName;
+        static const word codeTemplateEnvName;
 
         //- Name of the code template sub-directory
         //  Used when locating the codeTemplateName via Foam::findEtcFile
-        const static fileName codeTemplateDirName;
-
+        static const fileName codeTemplateDirName;
 
         static int allowSystemOperations;
+
 
     // Constructors
 

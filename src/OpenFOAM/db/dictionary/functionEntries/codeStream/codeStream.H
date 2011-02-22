@@ -29,7 +29,7 @@ Description
     generate the entry itself. So
     - codeStream reads three entries: 'code', 'codeInclude' (optional),
     'codeOptions' (optional)
-    and uses those to generate library sources inside \f constant/codeStream/
+    and uses those to generate library sources inside \f codeStream/
     - these get compiled using 'wmake libso'
     - the resulting library is loaded in executed with as arguments
     \code
@@ -123,7 +123,7 @@ public:
     // Static data members
 
         //- Name of the C code template to be used
-        const static word codeTemplateC;
+        static const word codeTemplateC;
 
 
     //- Runtime type information
