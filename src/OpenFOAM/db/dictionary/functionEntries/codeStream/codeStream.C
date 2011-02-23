@@ -93,18 +93,18 @@ bool Foam::functionEntries::codeStream::execute
     string codeInclude;
     if (codeDict.found("codeInclude"))
     {
-        codeInclude = stringOps::trimLeft(codeDict["codeInclude"]);
+        codeInclude = stringOps::trim(codeDict["codeInclude"]);
     }
 
     // "codeOptions" is optional
     string codeOptions;
     if (codeDict.found("codeOptions"))
     {
-        codeOptions = stringOps::trimLeft(codeDict["codeOptions"]);
+        codeOptions = stringOps::trim(codeDict["codeOptions"]);
     }
 
     // "code" is mandatory
-    string code = stringOps::trimLeft(codeDict["code"]);
+    string code = stringOps::trim(codeDict["code"]);
 
     // Create SHA1 digest from the contents
     SHA1Digest sha;
