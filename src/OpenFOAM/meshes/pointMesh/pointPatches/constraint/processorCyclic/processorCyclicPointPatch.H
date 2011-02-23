@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -99,43 +99,6 @@ public:
             return procCycPolyPatch_.tag();
         }
 
-//        //- Return true if running parallel
-//        virtual bool coupled() const
-//        {
-//            if (Pstream::parRun())
-//            {
-//                return true;
-//            }
-//            else
-//            {
-//                return false;
-//            }
-//        }
-//
-//        //- Return processor number
-//        int myProcNo() const
-//        {
-//            return procPolyPatch_.myProcNo();
-//        }
-//
-//        //- Return neigbour processor number
-//        int neighbProcNo() const
-//        {
-//            return procPolyPatch_.neighbProcNo();
-//        }
-//
-//        //- Is this a master patch
-//        bool isMaster() const
-//        {
-//            return myProcNo() < neighbProcNo();
-//        }
-//
-//        //- Is this a slave patch
-//        bool isSlave() const
-//        {
-//            return !isMaster();
-//        }
-//
         //- Return the underlying processorCyclicPolyPatch
         const processorCyclicPolyPatch& procCyclicPolyPatch() const
         {

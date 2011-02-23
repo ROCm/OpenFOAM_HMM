@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Class
     Foam::lduPrimitiveMesh
 
 Description
-    Simplest contrete lduMesh which stores the addressing needed bu lduMatrix.
+    Simplest contrete lduMesh which stores the addressing needed by lduMatrix.
 
 \*---------------------------------------------------------------------------*/
 
