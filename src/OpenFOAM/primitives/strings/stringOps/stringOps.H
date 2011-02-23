@@ -128,19 +128,15 @@ namespace stringOps
     string& inplaceTrimLeft(string&);
 
     //- Return string trimmed of trailing whitespace
-    //  NOT IMPLEMENTED
     string trimRight(const string&);
 
     //- Trim trailing whitespace inplace
-    //  NOT IMPLEMENTED
     string& inplaceTrimRight(string&);
 
     //- Return string trimmed of leading and trailing whitespace
-    //  NOT IMPLEMENTED
     string trim(const string&);
 
     //- Trim leading and trailing whitespace inplace
-    //  NOT IMPLEMENTED
     string& inplaceTrim(string&);
 
 

@@ -210,31 +210,43 @@ Foam::primitiveEntry::primitiveEntry(const keyType& key, Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::primitiveEntry::write(Ostream& os) const
+void Foam::primitiveEntry::write(Ostream& os, const bool contentsOnly) const
 {
-    os.writeKeyword(keyword());
+    if (!contentsOnly)
+    {
+        os.writeKeyword(keyword());
+    }
 
     for (label i=0; i<size(); ++i)
     {
         const token& t = operator[](i);
         if (t.type() == token::VERBATIMSTRING)
         {
-            os << token::HASH << token::BEGIN_BLOCK;
+            os  << token::HASH << token::BEGIN_BLOCK;
             os.writeQuoted(t.stringToken(), false);
-            os << token::HASH << token::END_BLOCK;
+            os  << token::HASH << token::END_BLOCK;
         }
         else
         {
-            os << t;
+            os  << t;
         }
 
         if (i < size()-1)
         {
-            os << token::SPACE;
+            os  << token::SPACE;
         }
     }
 
-    os << token::END_STATEMENT << endl;
+    if (!contentsOnly)
+    {
+        os  << token::END_STATEMENT << endl;
+    }
+}
+
+
+void Foam::primitiveEntry::write(Ostream& os) const
+{
+    this->write(os, false);
 }
 
 
