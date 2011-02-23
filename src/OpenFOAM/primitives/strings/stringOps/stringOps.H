@@ -36,6 +36,7 @@ SourceFiles
 #define stringOps_H
 
 #include "string.H"
+#include "dictionary.H"
 #include "HashTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -54,6 +55,8 @@ namespace stringOps
     //  -# variables
     //    - "$VAR", "${VAR}"
     //
+    //  Any unknown entries are removed
+    //
     //  \note the leading sigil can be changed to avoid conflicts with other
     //  string expansions
     string expand
@@ -69,12 +72,47 @@ namespace stringOps
     //  -# variables
     //    - "$VAR", "${VAR}"
     //
+    //  Any unknown entries are removed
+    //
     //  \note the leading sigil can be changed to avoid conflicts with other
     //  string expansions
     string& inplaceExpand
     (
         string&,
         const HashTable<string, word, string::hash>& mapping,
+        const char sigil = '$'
+    );
+
+    //- Expand occurences of variables according to the dictionary
+    //  Expansion includes:
+    //  -# variables
+    //    - "$VAR", "${VAR}"
+    //
+    //  Any unknown entries are left as-is
+    //
+    //  \note the leading sigil can be changed to avoid conflicts with other
+    //  string expansions
+    string expandDict
+    (
+        const string&,
+        const dictionary& dict,
+        const char sigil = '$'
+    );
+
+
+    //- Inplace expand occurences of variables according to the dictionary
+    //  Expansion includes:
+    //  -# variables
+    //    - "$VAR", "${VAR}"
+    //
+    //  Any unknown entries are left as-is
+    //
+    //  \note the leading sigil can be changed to avoid conflicts with other
+    //  string expansions
+    string& inplaceExpandDict
+    (
+        string&,
+        const dictionary& dict,
         const char sigil = '$'
     );
 
@@ -90,6 +128,7 @@ namespace stringOps
     //    - leading "~user" : home directory for specified user
     //    - leading "~OpenFOAM" : site/user OpenFOAM configuration directory
     //
+    //  Any unknown entries are removed silently if allowEmptyVar is true
     //  \sa
     //  Foam::findEtcFile
     string expandEnv
@@ -111,6 +150,7 @@ namespace stringOps
     //    - leading "~user" : home directory for specified user
     //    - leading "~OpenFOAM" : site/user OpenFOAM configuration directory
     //
+    //  Any unknown entries are removed silently if allowEmptyVar is true
     //  \sa
     //  Foam::findEtcFile
     string& inplaceExpandEnv
@@ -138,7 +178,6 @@ namespace stringOps
 
     //- Trim leading and trailing whitespace inplace
     string& inplaceTrim(string&);
-
 
 
 } // End namespace stringOps

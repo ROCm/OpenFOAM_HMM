@@ -22,11 +22,13 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
+    Test some string functionality
 
 \*---------------------------------------------------------------------------*/
 
 #include "string.H"
 #include "stringOps.H"
+#include "dictionary.H"
 #include "IOstreams.H"
 
 using namespace Foam;
@@ -38,8 +40,18 @@ int main(int argc, char *argv[])
 {
     string test
     (
-        "  $HOME kjhkjhkjh \" \\$HOME/tyetyery ${FOAM_RUN} \n ; hkjh ;$   "
+        "  $HOME kjhkjhkjh \" \\$HOME/tyetyery ${FOAM_RUN} \n ; hkjh ;$ with "
+        " $(DONOTSUBST) some other ${USER} entries   "
     );
+
+    dictionary dict;
+    dict.add("HOME", "myHome");
+
+    dictionary subDict;
+    subDict.add("value1", "test1");
+    subDict.add("value2", "test2");
+    dict.add("FOAM_RUN", subDict);
+
 
     Info<< "string:" << test << nl << "hash:"
         << unsigned(string::hash()(test)) << endl;
@@ -73,7 +85,10 @@ int main(int argc, char *argv[])
     Info<< string(test).replaceAll("kj", "zzz") << endl;
     Info<< string(test).replaceAll("kj", "z") << endl;
 
-    Info<< string(test).expand() << endl;
+    Info<< "expanded: " << string(test).expand() << endl;
+
+    Info<<"dictionary-based substitution: " << dict << endl;
+    Info<< "expandDict: " << stringOps::expandDict(test, dict) << endl;
 
     string test2("~OpenFOAM/controlDict");
     Info<< test2 << " => " << test2.expand() << endl;
