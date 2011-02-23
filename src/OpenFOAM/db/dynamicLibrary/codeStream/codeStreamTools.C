@@ -159,11 +159,10 @@ void Foam::codeStreamTools::copyAndExpand
     {
         is.getLine(line);
 
-        // normal expansion according to mapping
+        // expand according to mapping
+        // expanding according to env variables might cause too many
+        // surprises
         stringOps::inplaceExpand(line, mapping);
-
-        // expand according to env variables
-        stringOps::inplaceExpandEnv(line, true, true);
 
         os  << line.c_str() << nl;
     }

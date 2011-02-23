@@ -96,6 +96,7 @@ void Foam::codedFixedValueFvPatchScalarField::writeLibrary
     if (dict.found("codeInclude"))
     {
         codeInclude = stringOps::trim(dict["codeInclude"]);
+        stringOps::inplaceExpandDict(codeInclude, dict);
     }
 
     // "codeOptions" is optional
@@ -103,10 +104,13 @@ void Foam::codedFixedValueFvPatchScalarField::writeLibrary
     if (dict.found("codeOptions"))
     {
         codeOptions = stringOps::trim(dict["codeOptions"]);
+        stringOps::inplaceExpandDict(codeOptions, dict);
     }
 
     // "code" is mandatory
     string code = stringOps::trim(dict["code"]);
+    stringOps::inplaceExpandDict(code, dict);
+
 
     // Create SHA1 digest from the contents
     SHA1Digest sha;

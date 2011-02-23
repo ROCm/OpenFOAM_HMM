@@ -83,17 +83,21 @@ bool Foam::functionEntries::codeStream::execute
             << exit(FatalIOError);
     }
 
+    // get code dictionary
+    // must reference parent for stringOps::expandDict to work nicely
+    dictionary codeDict("#codeStream", parentDict, is);
+
 
     // Read three sections of code.
     // Remove any leading whitespace - necessary for compilation options,
     // convenience for includes and body.
-    dictionary codeDict(is);
 
     // "codeInclude" is optional
     string codeInclude;
     if (codeDict.found("codeInclude"))
     {
         codeInclude = stringOps::trim(codeDict["codeInclude"]);
+        stringOps::inplaceExpandDict(codeInclude, codeDict);
     }
 
     // "codeOptions" is optional
@@ -101,10 +105,13 @@ bool Foam::functionEntries::codeStream::execute
     if (codeDict.found("codeOptions"))
     {
         codeOptions = stringOps::trim(codeDict["codeOptions"]);
+        stringOps::inplaceExpandDict(codeOptions, codeDict);
     }
 
     // "code" is mandatory
     string code = stringOps::trim(codeDict["code"]);
+    stringOps::inplaceExpandDict(code, codeDict);
+
 
     // Create SHA1 digest from the contents
     SHA1Digest sha;
