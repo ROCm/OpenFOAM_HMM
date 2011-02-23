@@ -36,8 +36,8 @@ Foam::string Foam::stringOps::expand
     const char sigil
 )
 {
-    string str(original);
-    return inplaceExpand(str, mapping);
+    string s(original);
+    return inplaceExpand(s, mapping);
 }
 
 
@@ -137,8 +137,8 @@ Foam::string Foam::stringOps::expandEnv
     const bool allowEmptyVar
 )
 {
-    string str(original);
-    return inplaceExpandEnv(str, recurse, allowEmptyVar);
+    string s(original);
+    return inplaceExpandEnv(s, recurse, allowEmptyVar);
 }
 
 
@@ -331,28 +331,52 @@ Foam::string& Foam::stringOps::inplaceTrimLeft(string& s)
 
 Foam::string Foam::stringOps::trimRight(const string& s)
 {
-    notImplemented("string stringOps::trimRight(const string&)");
+    if (!s.empty())
+    {
+        string::size_type sz = s.size();
+        while (sz && isspace(s[sz-1]))
+        {
+            --sz;
+        }
+
+        if (sz < s.size())
+        {
+            return s.substr(0, sz);
+        }
+    }
+
     return s;
 }
 
 
 Foam::string& Foam::stringOps::inplaceTrimRight(string& s)
 {
-    notImplemented("string& stringOps::inplaceTrimRight(string&)");
+    if (!s.empty())
+    {
+        string::size_type sz = s.size();
+        while (sz && isspace(s[sz-1]))
+        {
+            --sz;
+        }
+
+        s.resize(sz);
+    }
+
     return s;
 }
 
 
 Foam::string Foam::stringOps::trim(const string& original)
 {
-    notImplemented("string stringOps::trim(const string&)");
-    return original;
+    return trimLeft(trimRight(original));
 }
 
 
 Foam::string& Foam::stringOps::inplaceTrim(string& s)
 {
-    notImplemented("string& stringOps::inplaceTrim(string&)");
+    inplaceTrimRight(s);
+    inplaceTrimLeft(s);
+
     return s;
 }
 
