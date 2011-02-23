@@ -93,8 +93,7 @@ Foam::string& Foam::string::replaceAll
 }
 
 
-// Expand all occurences of environment variables and initial tilde sequences
-Foam::string& Foam::string::expand(const bool recurse, const bool allowEmptyVar)
+Foam::string& Foam::string::expand(const bool allowEmpty)
 {
     size_type begVar = 0;
 
@@ -134,20 +133,15 @@ Foam::string& Foam::string::expand(const bool recurse, const bool allowEmptyVar)
 
             if (endVar != npos && endVar != begVar)
             {
-                string varName = substr
+                const string varName = substr
                 (
                     begVar + 1 + delim,
                     endVar - begVar - 2*delim
                 );
 
-                string varValue = getEnv(varName);
-
+                const string varValue = getEnv(varName);
                 if (varValue.size())
                 {
-                    if (recurse)
-                    {
-                        varValue.expand(recurse, allowEmptyVar);
-                    }
                     std::string::replace
                     (
                         begVar,
@@ -156,7 +150,7 @@ Foam::string& Foam::string::expand(const bool recurse, const bool allowEmptyVar)
                     );
                     begVar += varValue.size();
                 }
-                else if (allowEmptyVar)
+                else if (allowEmpty)
                 {
                     std::string::replace
                     (

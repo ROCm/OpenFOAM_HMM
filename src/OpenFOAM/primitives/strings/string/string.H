@@ -180,13 +180,10 @@ public:
         //    - leading "~user" : home directory for specified user
         //    - leading "~OpenFOAM" : site/user OpenFOAM configuration directory
         //
+        //  Any unknown entries are removed silently if allowEmpty is true
         //  \sa
         //  Foam::findEtcFile
-        string& expand
-        (
-            const bool recurse=false,
-            const bool allowEmptyVar = false
-        );
+        string& expand(const bool allowEmpty = false);
 
         //- Remove repeated characters returning true if string changed
         bool removeRepeated(const char);
