@@ -36,6 +36,7 @@ License
 #include "OSspecific.H"
 #include "Time.H"
 #include "Pstream.H"
+#include "PstreamReduceOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -211,8 +212,8 @@ bool Foam::functionEntries::codeStream::execute
             }
         }
 
-//        bool dummy = true;
-//        reduce(dummy, orOp<bool>());
+        bool dummy = true;
+        reduce(dummy, orOp<bool>());
 
         if (!dlLibraryTable::open(libPath, false))
         {

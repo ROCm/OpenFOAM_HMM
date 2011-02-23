@@ -38,7 +38,7 @@
 
 # Specify system compiler
 # ~~~~~~~~~~~~~~~~~~~~~~~
-foamCompiler=system
+foamCompiler=OpenFOAM
 
 # Specify system openmpi
 # ~~~~~~~~~~~~~~~~~~~~~~
