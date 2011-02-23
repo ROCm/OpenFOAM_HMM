@@ -92,7 +92,7 @@ namespace stringOps
     //
     //  \note the leading sigil can be changed to avoid conflicts with other
     //  string expansions
-    string expandDict
+    string expand
     (
         const string&,
         const dictionary& dict,
@@ -109,7 +109,7 @@ namespace stringOps
     //
     //  \note the leading sigil can be changed to avoid conflicts with other
     //  string expansions
-    string& inplaceExpandDict
+    string& inplaceExpand
     (
         string&,
         const dictionary& dict,
@@ -128,14 +128,13 @@ namespace stringOps
     //    - leading "~user" : home directory for specified user
     //    - leading "~OpenFOAM" : site/user OpenFOAM configuration directory
     //
-    //  Any unknown entries are removed silently if allowEmptyVar is true
+    //  Any unknown entries are removed silently if allowEmpty is true
     //  \sa
     //  Foam::findEtcFile
-    string expandEnv
+    string expand
     (
         const string&,
-        const bool recurse=false,
-        const bool allowEmptyVar = false
+        const bool allowEmpty = false
     );
 
 
@@ -150,14 +149,13 @@ namespace stringOps
     //    - leading "~user" : home directory for specified user
     //    - leading "~OpenFOAM" : site/user OpenFOAM configuration directory
     //
-    //  Any unknown entries are removed silently if allowEmptyVar is true
+    //  Any unknown entries are removed silently if allowEmpty is true
     //  \sa
     //  Foam::findEtcFile
-    string& inplaceExpandEnv
+    string& inplaceExpand
     (
         string&,
-        const bool recurse=false,
-        const bool allowEmptyVar = false
+        const bool allowEmpty = false
     );
 
 

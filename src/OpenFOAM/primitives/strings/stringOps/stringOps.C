@@ -143,7 +143,7 @@ Foam::string& Foam::stringOps::inplaceExpand
 }
 
 
-Foam::string Foam::stringOps::expandDict
+Foam::string Foam::stringOps::expand
 (
     const string& original,
     const dictionary& dict,
@@ -151,11 +151,11 @@ Foam::string Foam::stringOps::expandDict
 )
 {
     string s(original);
-    return inplaceExpandDict(s, dict, sigil);
+    return inplaceExpand(s, dict, sigil);
 }
 
 
-Foam::string& Foam::stringOps::inplaceExpandDict
+Foam::string& Foam::stringOps::inplaceExpand
 (
     string& s,
     const dictionary& dict,
@@ -218,11 +218,11 @@ Foam::string& Foam::stringOps::inplaceExpandDict
                 );
 
 
-                // lookup the variable name in the given dictionary
+                // lookup in the dictionary
                 const entry* ePtr = dict.lookupEntryPtr(varName, true, true);
 
                 // if defined - copy its entries
-                if (ePtr != NULL)
+                if (ePtr)
                 {
                     OStringStream buf;
                     if (ePtr->isDict())
@@ -248,7 +248,7 @@ Foam::string& Foam::stringOps::inplaceExpandDict
                 }
                 else
                 {
-                    // not defined - leave untouched.
+                    // not defined - leave original string untouched
                     begVar = endVar;
                 }
             }
@@ -267,24 +267,21 @@ Foam::string& Foam::stringOps::inplaceExpandDict
 }
 
 
-Foam::string Foam::stringOps::expandEnv
+Foam::string Foam::stringOps::expand
 (
     const string& original,
-    const bool recurse,
-    const bool allowEmptyVar
+    const bool allowEmpty
 )
 {
     string s(original);
-    return inplaceExpandEnv(s, recurse, allowEmptyVar);
+    return inplaceExpand(s, allowEmpty);
 }
 
 
-// Expand all occurences of environment variables and initial tilde sequences
-Foam::string& Foam::stringOps::inplaceExpandEnv
+Foam::string& Foam::stringOps::inplaceExpand
 (
     string& s,
-    const bool recurse,
-    const bool allowEmptyVar
+    const bool allowEmpty
 )
 {
     string::size_type begVar = 0;
@@ -325,20 +322,19 @@ Foam::string& Foam::stringOps::inplaceExpandEnv
 
             if (endVar != string::npos && endVar != begVar)
             {
-                string varName = s.substr
+                const word varName
                 (
-                    begVar + 1 + delim,
-                    endVar - begVar - 2*delim
+                    s.substr
+                    (
+                        begVar + 1 + delim,
+                        endVar - begVar - 2*delim
+                    ),
+                    false
                 );
 
-                string varValue = getEnv(varName);
-
+                const string varValue = getEnv(varName);
                 if (varValue.size())
                 {
-                    if (recurse)
-                    {
-                        varValue.expand(recurse, allowEmptyVar);
-                    }
                     s.std::string::replace
                     (
                         begVar,
@@ -347,7 +343,7 @@ Foam::string& Foam::stringOps::inplaceExpandEnv
                     );
                     begVar += varValue.size();
                 }
-                else if (allowEmptyVar)
+                else if (allowEmpty)
                 {
                     s.std::string::replace
                     (
@@ -358,7 +354,10 @@ Foam::string& Foam::stringOps::inplaceExpandEnv
                 }
                 else
                 {
-                    FatalErrorIn("string::expand(const bool, const bool)")
+                    FatalErrorIn
+                    (
+                        "stringOps::inplaceExpand(string&, const bool)"
+                    )
                         << "Unknown variable name " << varName << '.'
                         << exit(FatalError);
                 }
@@ -431,7 +430,7 @@ Foam::string Foam::stringOps::trimLeft(const string& s)
     if (!s.empty())
     {
         string::size_type beg = 0;
-        while (isspace(s[beg]))
+        while (beg < s.size() && isspace(s[beg]))
         {
             ++beg;
         }
@@ -451,7 +450,7 @@ Foam::string& Foam::stringOps::inplaceTrimLeft(string& s)
     if (!s.empty())
     {
         string::size_type beg = 0;
-        while (isspace(s[beg]))
+        while (beg < s.size() && isspace(s[beg]))
         {
             ++beg;
         }
@@ -516,5 +515,6 @@ Foam::string& Foam::stringOps::inplaceTrim(string& s)
 
     return s;
 }
+
 
 // ************************************************************************* //

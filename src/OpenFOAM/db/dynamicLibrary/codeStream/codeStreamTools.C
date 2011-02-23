@@ -51,28 +51,25 @@ const Foam::fileName Foam::codeStreamTools::codeTemplateDirName
 
 Foam::fileName Foam::codeStreamTools::baseDir()
 {
-    return stringOps::expandEnv("$FOAM_CASE/codeStream");
+    return stringOps::expand("$FOAM_CASE/codeStream");
 }
 
 
 Foam::fileName Foam::codeStreamTools::libSubDir()
 {
-    return stringOps::expandEnv("platforms/$WM_OPTIONS/lib");
+    return stringOps::expand("platforms/$WM_OPTIONS/lib");
 }
 
 
 Foam::fileName Foam::codeStreamTools::codePath(const word& subDirName)
 {
-    return stringOps::expandEnv
-    (
-        "$FOAM_CASE/codeStream/" + subDirName
-    );
+    return stringOps::expand("$FOAM_CASE/codeStream/" + subDirName);
 }
 
 
 Foam::fileName Foam::codeStreamTools::libPath(const word& codeName)
 {
-    return stringOps::expandEnv
+    return stringOps::expand
     (
         "$FOAM_CASE/codeStream/platforms/$WM_OPTIONS/lib/lib"
       + codeName + ".so"

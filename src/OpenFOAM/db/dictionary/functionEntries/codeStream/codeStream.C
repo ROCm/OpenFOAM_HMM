@@ -84,7 +84,7 @@ bool Foam::functionEntries::codeStream::execute
     }
 
     // get code dictionary
-    // must reference parent for stringOps::expandDict to work nicely
+    // must reference parent for stringOps::expand to work nicely
     dictionary codeDict("#codeStream", parentDict, is);
 
 
@@ -97,7 +97,7 @@ bool Foam::functionEntries::codeStream::execute
     if (codeDict.found("codeInclude"))
     {
         codeInclude = stringOps::trim(codeDict["codeInclude"]);
-        stringOps::inplaceExpandDict(codeInclude, codeDict);
+        stringOps::inplaceExpand(codeInclude, codeDict);
     }
 
     // "codeOptions" is optional
@@ -105,12 +105,12 @@ bool Foam::functionEntries::codeStream::execute
     if (codeDict.found("codeOptions"))
     {
         codeOptions = stringOps::trim(codeDict["codeOptions"]);
-        stringOps::inplaceExpandDict(codeOptions, codeDict);
+        stringOps::inplaceExpand(codeOptions, codeDict);
     }
 
     // "code" is mandatory
     string code = stringOps::trim(codeDict["code"]);
-    stringOps::inplaceExpandDict(code, codeDict);
+    stringOps::inplaceExpand(code, codeDict);
 
 
     // Create SHA1 digest from the contents
