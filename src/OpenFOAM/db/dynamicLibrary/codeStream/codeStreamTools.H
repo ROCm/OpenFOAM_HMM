@@ -145,14 +145,6 @@ public:
 
     // Member functions
 
-        //- Directory for compile/link (case-specific)
-        //  Expanded from \$FOAM_CASE/codeStream
-        static fileName baseDir();
-
-        //- Subdirectory name for library
-        //  Expanded from platforms/\$WM_OPTIONS/lib
-        static fileName libSubDir();
-
         //- Local path for specified code name
         //  Expanded from \$FOAM_CASE/codeStream
         static fileName codePath(const word& subDirName);

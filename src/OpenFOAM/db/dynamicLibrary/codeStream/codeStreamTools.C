@@ -49,18 +49,6 @@ const Foam::fileName Foam::codeStreamTools::codeTemplateDirName
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::fileName Foam::codeStreamTools::baseDir()
-{
-    return stringOps::expand("$FOAM_CASE/codeStream");
-}
-
-
-Foam::fileName Foam::codeStreamTools::libSubDir()
-{
-    return stringOps::expand("platforms/$WM_OPTIONS/lib");
-}
-
-
 Foam::fileName Foam::codeStreamTools::codePath(const word& subDirName)
 {
     return stringOps::expand("$FOAM_CASE/codeStream/" + subDirName);
