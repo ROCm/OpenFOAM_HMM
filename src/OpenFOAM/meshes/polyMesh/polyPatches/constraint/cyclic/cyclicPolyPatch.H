@@ -64,20 +64,6 @@ class cyclicPolyPatch
 :
     public coupledPolyPatch
 {
-public:
-
-    enum transformType
-    {
-        UNKNOWN,            // unspecified; automatic ordering
-        ROTATIONAL,         // rotation along coordinate axis
-        TRANSLATIONAL,      // translation
-        NOORDERING          // unspecified, no automatic ordering
-    };
-    static const NamedEnum<transformType, 4> transformTypeNames;
-
-
-private:
-
     // Private data
 
         //- Name of other half

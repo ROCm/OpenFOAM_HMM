@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,9 +30,24 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::coupledPolyPatch, 0);
+namespace Foam
+{
+    defineTypeNameAndDebug(coupledPolyPatch, 0);
 
-Foam::scalar Foam::coupledPolyPatch::matchTol = 1E-3;
+    scalar coupledPolyPatch::matchTol = 1E-3;
+
+    template<>
+    const char* NamedEnum<coupledPolyPatch::transformType, 4>::names[] =
+    {
+        "unknown",
+        "rotational",
+        "translational",
+        "noOrdering"
+    };
+
+    const NamedEnum<coupledPolyPatch::transformType, 4>
+        coupledPolyPatch::transformTypeNames;
+}
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -204,12 +219,14 @@ void Foam::coupledPolyPatch::calcTransformTensors
     const vectorField& nf,
     const vectorField& nr,
     const scalarField& smallDist,
-    const scalar absTol
+    const scalar absTol,
+    const transformType transform
 ) const
 {
     if (debug)
     {
         Pout<< "coupledPolyPatch::calcTransformTensors : " << name() << endl
+            << "    transform:" << transformTypeNames[transform] << nl
             << "    (half)size:" << Cf.size() << nl
             << "    absTol:" << absTol << nl
             << "    smallDist min:" << min(smallDist) << nl
@@ -242,9 +259,16 @@ void Foam::coupledPolyPatch::calcTransformTensors
             Pout<< "    error:" << error << endl;
         }
 
-        if (sum(mag(nf & nr)) < Cf.size()-error)
+        if
+        (
+            transform == ROTATIONAL
+         || (
+                transform != TRANSLATIONAL
+             && (sum(mag(nf & nr)) < Cf.size()-error)
+            )
+        )
         {
-            // Rotation, no separation
+            // Type is rotation or unknown and normals not aligned
 
             // Assume per-face differing transformation, correct later
 
@@ -284,7 +308,7 @@ void Foam::coupledPolyPatch::calcTransformTensors
         }
         else
         {
-            // No rotation, possible separation
+            // Translational or (unknown and normals aligned)
 
             forwardT_.setSize(0);
             reverseT_.setSize(0);
