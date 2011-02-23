@@ -29,11 +29,12 @@ Description
     generate the entry itself. So
     - codeStream reads three entries: 'code', 'codeInclude' (optional),
     'codeOptions' (optional)
-    and uses those to generate library sources inside constant/codeStream/
+    and uses those to generate library sources inside \f codeStream/
     - these get compiled using 'wmake libso'
     - the resulting library is loaded in executed with as arguments
-            const dictionary& dict,
-            Ostream& os
+    \code
+        (const dictionary& dict, Ostream& os)
+     \endcode
     where the dictionary is the current dictionary.
     - the code has to write into Ostream which is then used to construct
     the actual dictionary entry.
@@ -41,6 +42,7 @@ Description
 
     E.g. to set the internal field of a field:
 
+    \verbatim
     internalField  #codeStream
     {
         code
@@ -56,19 +58,31 @@ Description
         #{
             #include "fvCFD.H"
         #};
+
+        //- Optional:
         codeOptions
         #{
             -I$(LIB_SRC)/finiteVolume/lnInclude
         #};
     };
+    \endverbatim
 
 
-    Note the #{ #} syntax which is just a way of inputting strings with embedded
-    newlines.
+    Note the \c \#{ ... \c \#} syntax is a 'verbatim' input mode that allows
+    inputting strings with embedded newlines.
 
     Limitations:
     - '~' symbol not allowed inside the code sections.
-    - probably some other limitations (uses string::expand which expands $, ~)
+    - probably some other limitations (uses string::expand which expands
+      \c \$ and \c ~ sequences)
+
+Note
+    The code to be compiled is stored under the local \f codeStream directory
+    with a subdirectory name corresponding to the SHA1 of the contents.
+
+    The corresponding library code is located under the local
+    \f codeStream/platforms/$WM_OPTIONS/lib directory in a library
+    \f libcodeStream_SHA1.so
 
 SourceFiles
     codeStream.C
@@ -84,13 +98,11 @@ SourceFiles
 
 namespace Foam
 {
-class ISstream;
-
 namespace functionEntries
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class codeStream Declaration
+                         Class codeStream Declaration
 \*---------------------------------------------------------------------------*/
 
 class codeStream
@@ -107,6 +119,12 @@ class codeStream
 
 
 public:
+
+    // Static data members
+
+        //- Name of the C code template to be used
+        static const word codeTemplateC;
+
 
     //- Runtime type information
     ClassName("codeStream");

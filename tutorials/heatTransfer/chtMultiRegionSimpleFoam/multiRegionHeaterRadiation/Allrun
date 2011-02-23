@@ -18,23 +18,23 @@ done
 ## remove solid fields from fluid regions (important for post-processing)
 for i in bottomAir topAir
 do
-   rm -f 0*/$i/{Ypmma,Ychar}
+    rm -f 0*/$i/{Ypmma,Ychar}
 done
 
 for i in bottomAir topAir heater leftSolid rightSolid
 do
-   changeDictionary -region $i > log.changeDictionary.$i 2>&1
+    changeDictionary -region $i > log.changeDictionary.$i 2>&1
 done
 
 
-for i in bottomAir topAir 
+for i in bottomAir topAir
 do
-   faceAgglomerate -region $i > log.faceAgglomerate.$i 2>&1
+    faceAgglomerate -region $i > log.faceAgglomerate.$i 2>&1
 done
 
-for i in bottomAir topAir 
+for i in bottomAir topAir
 do
-   viewFactorsGen -region $i > log.viewFactorsGen.$i 2>&1
+    viewFactorsGen -region $i > log.viewFactorsGen.$i 2>&1
 done
 
 
@@ -63,7 +63,7 @@ echo "creating files for paraview post-processing"
 echo
 for i in bottomAir topAir heater leftSolid rightSolid
 do
-   paraFoam -touch -region $i
+    paraFoam -touch -region $i
 done
 
 # ----------------------------------------------------------------- end-of-file

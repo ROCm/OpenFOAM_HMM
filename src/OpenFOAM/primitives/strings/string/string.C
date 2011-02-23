@@ -96,75 +96,79 @@ Foam::string& Foam::string::replaceAll
 // Expand all occurences of environment variables and initial tilde sequences
 Foam::string& Foam::string::expand(const bool recurse, const bool allowEmptyVar)
 {
-    size_type startEnvar = 0;
+    size_type begVar = 0;
 
     // Expand $VARS
     // Repeat until nothing more is found
     while
     (
-        (startEnvar = find('$', startEnvar)) != npos
-     && startEnvar < size()-1
+        (begVar = find('$', begVar)) != npos
+     && begVar < size()-1
     )
     {
-        if (startEnvar == 0 || operator[](startEnvar-1) != '\\')
+        if (begVar == 0 || operator[](begVar-1) != '\\')
         {
             // Find end of first occurrence
-            size_type endEnvar = startEnvar;
-            size_type nd = 0;
+            size_type endVar = begVar;
+            size_type delim = 0;
 
-            if (operator[](startEnvar+1) == '{')
+            if (operator[](begVar+1) == '{')
             {
-                endEnvar = find('}', startEnvar);
-                nd = 1;
+                endVar = find('}', begVar);
+                delim = 1;
             }
             else
             {
-                iterator iter = begin() + startEnvar + 1;
+                iterator iter = begin() + begVar + 1;
 
-                while (iter != end() && (isalnum(*iter) || *iter == '_'))
+                while
+                (
+                    iter != end()
+                 && (isalnum(*iter) || *iter == '_')
+                )
                 {
                     ++iter;
-                    ++endEnvar;
+                    ++endVar;
                 }
             }
 
-            if (endEnvar != npos && endEnvar != startEnvar)
+            if (endVar != npos && endVar != begVar)
             {
-                string enVar = substr
+                string varName = substr
                 (
-                    startEnvar + 1 + nd,
-                    endEnvar - startEnvar - 2*nd
+                    begVar + 1 + delim,
+                    endVar - begVar - 2*delim
                 );
 
-                string enVarString = getEnv(enVar);
+                string varValue = getEnv(varName);
 
-                if (enVarString.size())
+                if (varValue.size())
                 {
                     if (recurse)
                     {
-                        enVarString.expand(recurse, allowEmptyVar);
+                        varValue.expand(recurse, allowEmptyVar);
                     }
                     std::string::replace
                     (
-                        startEnvar,
-                        endEnvar - startEnvar + 1,
-                        enVarString
+                        begVar,
+                        endVar - begVar + 1,
+                        varValue
                     );
-                    startEnvar += enVarString.size();
+                    begVar += varValue.size();
                 }
                 else if (allowEmptyVar)
                 {
                     std::string::replace
                     (
-                        startEnvar,
-                        endEnvar - startEnvar + 1,
+                        begVar,
+                        endVar - begVar + 1,
                         ""
                     );
                 }
                 else
                 {
                     FatalErrorIn("string::expand(const bool, const bool)")
-                        << "Unknown variable name " << enVar << '.'
+                        << "Unknown variable name " << varName << '.'
                         << exit(FatalError);
                 }
             }
@@ -175,7 +179,7 @@ Foam::string& Foam::string::expand(const bool recurse, const bool allowEmptyVar)
         }
         else
         {
-            startEnvar++;
+            ++begVar;
         }
     }
 
@@ -191,10 +195,10 @@ Foam::string& Foam::string::expand(const bool recurse, const bool allowEmptyVar)
             word user;
             fileName file;
 
-            if ((startEnvar = find('/')) != npos)
+            if ((begVar = find('/')) != npos)
             {
-                user = substr(1, startEnvar - 1);
-                file = substr(startEnvar + 1);
+                user = substr(1, begVar - 1);
+                file = substr(begVar + 1);
             }
             else
             {
@@ -215,7 +219,7 @@ Foam::string& Foam::string::expand(const bool recurse, const bool allowEmptyVar)
         }
         else if (operator[](0) == '.')
         {
-            // Expand initial '.' and './' into cwd
+            // Expand a lone '.' and an initial './' into cwd
             if (size() == 1)
             {
                 *this = cwd();

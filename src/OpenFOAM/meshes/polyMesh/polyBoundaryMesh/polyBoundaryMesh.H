@@ -38,7 +38,6 @@ SourceFiles
 #include "polyPatchList.H"
 #include "regIOobject.H"
 #include "labelPair.H"
-#include "wordReList.H"
 #include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -46,7 +45,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of classes
 class polyMesh;
+class wordRe;
 
 // Forward declaration of friend functions and operators
 
@@ -171,7 +172,7 @@ public:
         //  By default warns if given names are not found.
         labelHashSet patchSet
         (
-            const wordReList& patchNames,
+            const UList<wordRe>& patchNames,
             const bool warnNotFound = true
         ) const;
 

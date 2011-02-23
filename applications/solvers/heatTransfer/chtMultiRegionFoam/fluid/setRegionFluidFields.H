@@ -18,7 +18,7 @@
     const surfaceScalarField& ghf = ghfFluid[i];
 
     radiation::radiationModel& rad = radiation[i];
-    
+
     const dimensionedScalar initialMass
     (
         "initialMass",

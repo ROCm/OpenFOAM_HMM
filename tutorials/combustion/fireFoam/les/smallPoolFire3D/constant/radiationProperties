@@ -135,22 +135,22 @@ greyMeanAbsorptionEmissionCoeffs
             0
         );
     }
-    
+
     N2
     {
         Tcommon         300;
         invTemp         false;
-        Tlow            200; 
+        Tlow            200;
         Thigh           2500;
 
         loTcoeffs
         (
             0.01
-            0   
-            0   
-            0   
-            0   
-            0   
+            0
+            0
+            0
+            0
+            0
         );
         hiTcoeffs
         (
@@ -173,14 +173,14 @@ greyMeanAbsorptionEmissionCoeffs
 
         loTcoeffs
         (
-            0.01 
-            0       
-            0         
-            0         
-            0         
-            0         
+            0.01
+            0
+            0
+            0
+            0
+            0
         );
-        hiTcoeffs     
+        hiTcoeffs
         (
             0.01
             0

@@ -102,7 +102,7 @@ Foam::string Foam::getEnv(const word& envName)
 bool Foam::setEnv
 (
     const word& envName,
-    const string& value,
+    const std::string& value,
     const bool overwrite
 )
 {
@@ -1066,7 +1066,7 @@ bool Foam::ping(const word& hostname, const label timeOut)
 }
 
 
-int Foam::system(const string& command)
+int Foam::system(const std::string& command)
 {
     return ::system(command.c_str());
 }
@@ -1084,14 +1084,14 @@ bool Foam::dlClose(void* handle)
 }
 
 
-void* Foam::dlSym(void* handle, const string& symbol)
+void* Foam::dlSym(void* handle, const std::string& symbol)
 {
     void* fun = dlsym(handle, symbol.c_str());
 
     char *error;
     if ((error = dlerror()) != NULL)
     {
-        WarningIn("dlSym(void*, const string&)")
+        WarningIn("dlSym(void*, const std::string&)")
             << "Cannot lookup symbol " << symbol << " : " << error
             << endl;
     }

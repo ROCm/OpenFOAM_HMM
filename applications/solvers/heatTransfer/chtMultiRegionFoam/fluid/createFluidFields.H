@@ -172,7 +172,7 @@
             i,
             radiation::radiationModel::New(thermoFluid[i].T())
         );
-        
+
         initialMassFluid[i] = fvc::domainIntegrate(rhoFluid[i]).value();
 
         Info<< "    Adding to DpDtFluid\n" << endl;

@@ -101,6 +101,22 @@ bool Foam::SHA1Digest::empty() const
 }
 
 
+std::string Foam::SHA1Digest::str() const
+{
+    std::string buf;
+    buf.resize(length*2);
+
+    unsigned nChar = 0;
+    for (unsigned i = 0; i < length; ++i)
+    {
+        buf[nChar++] = hexChars[((v_[i] >> 4) & 0xF)];
+        buf[nChar++] = hexChars[(v_[i] & 0xF)];
+    }
+
+    return buf;
+}
+
+
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
 bool Foam::SHA1Digest::operator==(const SHA1Digest& rhs) const

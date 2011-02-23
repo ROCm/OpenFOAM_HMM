@@ -31,6 +31,7 @@ License
 #include "SHA1Digest.H"
 #include "OSHA1stream.H"
 #include "codeStreamTools.H"
+#include "stringOps.H"
 #include "dlLibraryTable.H"
 #include "OSspecific.H"
 #include "Time.H"
@@ -56,6 +57,10 @@ namespace functionEntries
 }
 
 
+const Foam::word Foam::functionEntries::codeStream::codeTemplateC
+    = "codeStreamTemplate.C";
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionEntries::codeStream::execute
@@ -79,119 +84,121 @@ bool Foam::functionEntries::codeStream::execute
     }
 
 
-    // Read three sections of code. Remove any leading empty lines
-    // (necessary for compilation options, just visually pleasing for includes
-    // and body).
+    // Read three sections of code.
+    // Remove any leading whitespace - necessary for compilation options,
+    // convenience for includes and body.
     dictionary codeDict(is);
 
-    string codeInclude = "";
+    // "codeInclude" is optional
+    string codeInclude;
     if (codeDict.found("codeInclude"))
     {
-        codeInclude = codeStreamTools::stripLeading(codeDict["codeInclude"]);
+        codeInclude = stringOps::trim(codeDict["codeInclude"]);
     }
-    string code = codeStreamTools::stripLeading(codeDict["code"]);
 
-    string codeOptions = "";
+    // "codeOptions" is optional
+    string codeOptions;
     if (codeDict.found("codeOptions"))
     {
-        codeOptions = codeStreamTools::stripLeading(codeDict["codeOptions"]);
+        codeOptions = stringOps::trim(codeDict["codeOptions"]);
     }
 
+    // "code" is mandatory
+    string code = stringOps::trim(codeDict["code"]);
 
-    // Create name out of contents
-
+    // Create SHA1 digest from the contents
     SHA1Digest sha;
     {
         OSHA1stream os;
-        os  << codeInclude << code << codeOptions;
+        os  << codeInclude << codeOptions << code;
         sha = os.digest();
     }
-    fileName name;
-    {
-        OStringStream str;
-        str << sha;
-        name = "codeStream" + str.str();
-    }
-
-    fileName dir;
-    if (isA<IOdictionary>(parentDict))
-    {
-        const IOdictionary& d = static_cast<const IOdictionary&>(parentDict);
-        dir = d.db().time().constantPath()/"codeStream"/name;
-    }
-    else
-    {
-        dir = "codeStream"/name;
-    }
 
 
-    fileName libPath
-    (
-        Foam::getEnv("FOAM_USER_LIBBIN")
-      / "lib"
-      + name
-      + ".so"
-    );
+    // codeName = prefix + sha1
+    const fileName codeName = "codeStream_" + sha.str();
+
+    // write code into _SHA1 subdir
+    const fileName codePath = codeStreamTools::codePath("_" + sha.str());
+
+    // write library into platforms/$WM_OPTIONS/lib subdir
+    const fileName libPath = codeStreamTools::libPath(codeName);
+
 
     void* lib = dlLibraryTable::findLibrary(libPath);
 
+    // try to load if not already loaded
+    if (!lib && dlLibraryTable::open(libPath, false))
+    {
+        lib = dlLibraryTable::findLibrary(libPath);
+    }
+
+    // did not load - need to compile it
     if (!lib)
     {
         if (Pstream::master())
         {
-            if (!codeStreamTools::upToDate(dir, sha))
+            if (!codeStreamTools::upToDate(codePath, sha))
             {
                 Info<< "Creating new library in " << libPath << endl;
 
-                fileName templates
+                const fileName fileCsrc
                 (
-                    Foam::getEnv("FOAM_CODESTREAM_TEMPLATE_DIR")
+                    codeStreamTools::findTemplate
+                    (
+                        codeTemplateC
+                    )
                 );
-                if (!templates.size())
+
+                // not found!
+                if (fileCsrc.empty())
                 {
                     FatalIOErrorIn
                     (
                         "functionEntries::codeStream::execute(..)",
                         parentDict
-                    )   << "Please set environment variable"
-                        " FOAM_CODESTREAM_TEMPLATE_DIR"
-                        << " to point to the location of codeStreamTemplate.C"
+                    )   << "Could not find the code template: "
+                        << codeTemplateC << nl
+                        << codeStreamTools::searchedLocations()
                         << exit(FatalIOError);
                 }
 
-                List<fileAndVars> copyFiles(1);
-                copyFiles[0].first() = templates/"codeStreamTemplate.C";
-                stringPairList bodyVars(2);
-                bodyVars[0] = Pair<string>("codeInclude", codeInclude);
-                bodyVars[1] = Pair<string>("code", code);
-                copyFiles[0].second() = bodyVars;
 
-                List<fileAndContent> filesContents(2);
+                List<codeStreamTools::fileAndVars> copyFiles(1);
+                copyFiles[0].file() = fileCsrc;
+                copyFiles[0].set("codeInclude", codeInclude);
+                copyFiles[0].set("code", code);
+
+                List<codeStreamTools::fileAndContent> filesContents(2);
+
                 // Write Make/files
                 filesContents[0].first() = "Make/files";
                 filesContents[0].second() =
-                    "codeStreamTemplate.C \n\
-                    LIB = $(FOAM_USER_LIBBIN)/lib" + name;
+                    codeTemplateC + "\n\n"
+                  + codeStreamTools::libTarget(codeName);
+
                 // Write Make/options
                 filesContents[1].first() = "Make/options";
                 filesContents[1].second() =
-                    "EXE_INC = -g\\\n" + codeOptions + "\n\nLIB_LIBS = ";
+                    "EXE_INC = -g \\\n"
+                  + codeOptions
+                  + "\n\nLIB_LIBS =";
 
-                codeStreamTools writer(name, copyFiles, filesContents);
-                if (!writer.copyFilesContents(dir))
+                codeStreamTools writer(codeName, copyFiles, filesContents);
+                if (!writer.copyFilesContents(codePath))
                 {
                     FatalIOErrorIn
                     (
                         "functionEntries::codeStream::execute(..)",
                         parentDict
-                    )   << "Failed writing " << endl
+                    )   << "Failed writing " <<nl
                         << copyFiles << endl
                         << filesContents
                         << exit(FatalIOError);
                 }
             }
 
-            Foam::string wmakeCmd("wmake libso " + dir);
+            const Foam::string wmakeCmd("wmake libso " + codePath);
             Info<< "Invoking " << wmakeCmd << endl;
             if (Foam::system(wmakeCmd))
             {
@@ -199,17 +206,22 @@ bool Foam::functionEntries::codeStream::execute
                 (
                     "functionEntries::codeStream::execute(..)",
                     parentDict
-                )   << "Failed " << wmakeCmd << exit(FatalIOError);
+                )   << "Failed " << wmakeCmd
+                    << exit(FatalIOError);
             }
         }
 
-        if (!dlLibraryTable::open(libPath))
+//        bool dummy = true;
+//        reduce(dummy, orOp<bool>());
+
+        if (!dlLibraryTable::open(libPath, false))
         {
             FatalIOErrorIn
             (
                 "functionEntries::codeStream::execute(..)",
                 parentDict
-            )   << "Failed loading library " << libPath << exit(FatalIOError);
+            )   << "Failed loading library " << libPath
+                << exit(FatalIOError);
         }
 
         lib = dlLibraryTable::findLibrary(libPath);
@@ -224,7 +236,7 @@ bool Foam::functionEntries::codeStream::execute
     void (*function)(const dictionary&, Ostream&);
     function = reinterpret_cast<void(*)(const dictionary&, Ostream&)>
     (
-        dlSym(lib, name)
+        dlSym(lib, codeName)
     );
 
     if (!function)
@@ -233,7 +245,7 @@ bool Foam::functionEntries::codeStream::execute
         (
             "functionEntries::codeStream::execute(..)",
             parentDict
-        )   << "Failed looking up symbol " << name
+        )   << "Failed looking up symbol " << codeName
             << " in library " << lib << exit(FatalIOError);
     }
 

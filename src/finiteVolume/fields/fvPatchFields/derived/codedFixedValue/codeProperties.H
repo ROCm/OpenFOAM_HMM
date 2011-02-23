@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class codeProperties Declaration
+                       Class codeProperties Declaration
 \*---------------------------------------------------------------------------*/
 
 class codeProperties
@@ -79,7 +79,7 @@ public:
             modified_ = false;
         }
 
-        //- Read the solution dictionary
+        //- Read the dictionary
         virtual bool read();
 
 };

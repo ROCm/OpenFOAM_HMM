@@ -65,7 +65,7 @@ bool env(const word&);
 string getEnv(const word&);
 
 //- Set an environment variable
-bool setEnv(const word& name, const string& value, const bool overwrite);
+bool setEnv(const word& name, const std::string& value, const bool overwrite);
 
 //- Return the system's host name, as per hostname(1)
 //  Optionally with the full name (as per the '-f' option)
@@ -182,7 +182,7 @@ bool ping(const word&, const label port, const label timeOut);
 bool ping(const word&, const label timeOut=10);
 
 //- Execute the specified command
-int system(const string& command);
+int system(const std::string& command);
 
 //- open a shared library. Return handle to library
 void* dlOpen(const fileName& lib);
@@ -191,7 +191,7 @@ void* dlOpen(const fileName& lib);
 bool dlClose(void*);
 
 //- Lookup a symbol in a dlopened library using handle
-void* dlSym(void* handle, const string& symbol);
+void* dlSym(void* handle, const std::string& symbol);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

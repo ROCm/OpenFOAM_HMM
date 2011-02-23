@@ -32,7 +32,7 @@ Description
     See also codeStream.
 
     Example:
-
+    \verbatim
         movingWall
         {
             type            codedFixedValue<scalar>;
@@ -53,13 +53,14 @@ Description
             //#{
             //    -I$(LIB_SRC)/finiteVolume/lnInclude
             //#};
-
         }
+    \endverbatim
 
     A special form is if the 'code' section is not supplied. In this case
     the code gets read from a (runTimeModifiable!) dictionary system/codeDict
-    which would have an entry
+    which would have a corresponding entry
 
+    \verbatim
     rampedFixedValue
     {
         code
@@ -67,6 +68,10 @@ Description
             operator==(min(10, 0.1*this->db().time().value()));
         #};
     }
+    \endverbatim
+
+SeeAlso
+    Foam::codeStreamTools for constant paths used
 
 SourceFiles
     codedFixedValueFvPatchScalarField.C
@@ -77,6 +82,7 @@ SourceFiles
 #define codedFixedValueFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
+#include "SHA1Digest.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -86,7 +92,7 @@ namespace Foam
 class codeProperties;
 
 /*---------------------------------------------------------------------------*\
-          Class codedFixedValueFvPatchScalarField Declaration
+              Class codedFixedValueFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class codedFixedValueFvPatchScalarField
@@ -95,7 +101,12 @@ class codedFixedValueFvPatchScalarField
 {
     // Private data
 
+        //- Dictionary contents for the boundary condition
         mutable dictionary dict_;
+
+        //- SHA1Digest of the Dictionary contents
+        //  Currently unused, but useful for reloading?
+        mutable SHA1Digest sha1_;
 
         const word redirectType_;
 
@@ -108,14 +119,23 @@ class codedFixedValueFvPatchScalarField
 
         void writeLibrary
         (
-            const fileName dir,
-            const fileName libPath,
+            const fileName& dir,
+            const fileName& libPath,
             const dictionary& dict
         );
 
         void updateLibrary();
 
 public:
+
+    // Static data members
+
+        //- Name of the C code template to be used
+        const static word codeTemplateC;
+
+        //- Name of the H code template to be used
+        const static word codeTemplateH;
+
 
     //- Runtime type information
     TypeName("codedFixedValue<scalar>");
