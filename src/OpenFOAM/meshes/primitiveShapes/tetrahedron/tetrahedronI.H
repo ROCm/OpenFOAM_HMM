@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -377,6 +377,38 @@ inline Foam::pointHit Foam::tetrahedron<Point, PointRef>::nearestPoint
         minOutsideDistance,
         !inside
     );
+}
+
+
+template<class Point, class PointRef>
+bool Foam::tetrahedron<Point, PointRef>::inside(const point& pt) const
+{
+    // For robustness, assuming that the point is in the tet unless
+    // "definitively" shown otherwise by obtaining a positive dot
+    // product greater than a tolerance of SMALL.
+
+    // The tet is defined: tet(Cc, tetBasePt, pA, pB) where the normal
+    // vectors and base points for the half-space planes are:
+    // area[0] = Sa();
+    // area[1] = Sb();
+    // area[2] = Sc();
+    // area[3] = Sd();
+    // planeBase[0] = tetBasePt = tet.b()
+    // planeBase[1] = ptA       = tet.c()
+    // planeBase[2] = tetBasePt = tet.b()
+    // planeBase[3] = tetBasePt = tet.b()
+
+    vector n = Sa();
+    n /= (Foam::mag(n) + VSMALL);
+
+    if (((pt - b_) & n) > SMALL)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
 }
 
 
