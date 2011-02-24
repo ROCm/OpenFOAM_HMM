@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,11 +24,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "polyMesh.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class ParticleType>
-inline void Foam::Particle<ParticleType>::findTris
+inline void Foam::particle::findTris
 (
     const vector& position,
     DynamicList<label>& faceList,
@@ -63,8 +63,7 @@ inline void Foam::Particle<ParticleType>::findTris
 }
 
 
-template<class ParticleType>
-inline Foam::scalar Foam::Particle<ParticleType>::tetLambda
+inline Foam::scalar Foam::particle::tetLambda
 (
     const vector& from,
     const vector& to,
@@ -76,10 +75,9 @@ inline Foam::scalar Foam::Particle<ParticleType>::tetLambda
     const label tetPtI
 ) const
 {
-    const polyMesh& mesh = cloud_.polyMesh_;
-    const pointField& pPts = mesh.points();
+    const pointField& pPts = mesh_.points();
 
-    if (mesh.moving())
+    if (mesh_.moving())
     {
         return movingTetLambda
         (
@@ -132,9 +130,7 @@ inline Foam::scalar Foam::Particle<ParticleType>::tetLambda
 }
 
 
-
-template<class ParticleType>
-inline Foam::scalar Foam::Particle<ParticleType>::movingTetLambda
+inline Foam::scalar Foam::particle::movingTetLambda
 (
     const vector& from,
     const vector& to,
@@ -146,9 +142,8 @@ inline Foam::scalar Foam::Particle<ParticleType>::movingTetLambda
     const label tetPtI
 ) const
 {
-    const polyMesh& mesh = cloud_.polyMesh_;
-    const pointField& pPts = mesh.points();
-    const pointField& oldPPts = mesh.oldPoints();
+    const pointField& pPts = mesh_.points();
+    const pointField& oldPPts = mesh_.oldPoints();
 
     // Base point of plane at end of motion
     const point& b = pPts[tetPlaneBasePtI];
@@ -166,13 +161,13 @@ inline Foam::scalar Foam::Particle<ParticleType>::movingTetLambda
     vector n0 = vector::zero;
 
     {
-        tetIndices tetIs(cellI, tetFaceI, tetPtI, mesh);
+        tetIndices tetIs(cellI, tetFaceI, tetPtI, mesh_);
 
         // tet at timestep start
-        tetPointRef tet00 = tetIs.oldTet(mesh);
+        tetPointRef tet00 = tetIs.oldTet(mesh_);
 
         // tet at timestep end
-        tetPointRef tet = tetIs.tet(mesh);
+        tetPointRef tet = tetIs.tet(mesh_);
 
         point tet0PtA = tet00.a() + stepFraction_*(tet.a() - tet00.a());
         point tet0PtB = tet00.b() + stepFraction_*(tet.b() - tet00.b());
@@ -329,25 +324,23 @@ inline Foam::scalar Foam::Particle<ParticleType>::movingTetLambda
 }
 
 
-template<class ParticleType>
-inline void Foam::Particle<ParticleType>::tetNeighbour(label triI)
-{
-    const polyMesh& mesh = cloud_.polyMesh_;
 
-    const labelList& pOwner = mesh.faceOwner();
-    const faceList& pFaces = mesh.faces();
+inline void Foam::particle::tetNeighbour(label triI)
+{
+    const labelList& pOwner = mesh_.faceOwner();
+    const faceList& pFaces = mesh_.faces();
 
     bool own = (pOwner[tetFaceI_] == cellI_);
 
     const Foam::face& f = pFaces[tetFaceI_];
 
-    label tetBasePtI = mesh.tetBasePtIs()[tetFaceI_];
+    label tetBasePtI = mesh_.tetBasePtIs()[tetFaceI_];
 
     if (tetBasePtI == -1)
     {
         FatalErrorIn
         (
-            "inline void Foam::Particle<ParticleType>::tetNeighbour(label triI)"
+            "inline void Foam::particle::tetNeighbour(label triI)"
         )
             << "No base point for face " << tetFaceI_ << ", " << f
             << ", produces a valid tet decomposition."
@@ -464,19 +457,18 @@ inline void Foam::Particle<ParticleType>::tetNeighbour(label triI)
             FatalErrorIn
             (
                 "inline void "
-                "Foam::Particle<ParticleType>::tetNeighbour(label triI)"
+                "Foam::particle::tetNeighbour(label triI)"
             )
                 << "Tet tri face index error, can only be 0..3, supplied "
-                << triI << nl
-                << abort(FatalError);
+                << triI << abort(FatalError);
 
             break;
         }
     }
 }
 
-template<class ParticleType>
-inline void Foam::Particle<ParticleType>::crossEdgeConnectedFace
+
+inline void Foam::particle::crossEdgeConnectedFace
 (
     const label& cellI,
     label& tetFaceI,
@@ -484,10 +476,8 @@ inline void Foam::Particle<ParticleType>::crossEdgeConnectedFace
     const edge& e
 )
 {
-    const polyMesh& mesh = cloud_.polyMesh_;
-
-    const faceList& pFaces = mesh.faces();
-    const cellList& pCells = mesh.cells();
+    const faceList& pFaces = mesh_.faces();
+    const cellList& pCells = mesh_.cells();
 
     const Foam::face& f = pFaces[tetFaceI];
 
@@ -536,14 +526,14 @@ inline void Foam::Particle<ParticleType>::crossEdgeConnectedFace
                 eIndex = findIndex(otherFace, e.end());
             }
 
-            label tetBasePtI = mesh.tetBasePtIs()[fI];
+            label tetBasePtI = mesh_.tetBasePtIs()[fI];
 
             if (tetBasePtI == -1)
             {
                 FatalErrorIn
                 (
                     "inline void "
-                    "Foam::Particle<ParticleType>::crossEdgeConnectedFace"
+                    "Foam::particle::crossEdgeConnectedFace"
                     "("
                         "const label& cellI,"
                         "label& tetFaceI,"
@@ -590,344 +580,117 @@ inline void Foam::Particle<ParticleType>::crossEdgeConnectedFace
 }
 
 
-template<class ParticleType>
-inline void Foam::Particle<ParticleType>::hitWallFaces
-(
-    const vector& from,
-    const vector& to,
-    scalar& lambdaMin,
-    tetIndices& closestTetIs
-)
-{
-    if (!(cloud_.hasWallImpactDistance() && cloud_.cellHasWallFaces()[cellI_]))
-    {
-        return;
-    }
-
-    const polyMesh& mesh = cloud_.polyMesh_;
-    const faceList& pFaces = mesh.faces();
-
-    const ParticleType& p = static_cast<const ParticleType&>(*this);
-
-    const Foam::cell& thisCell = mesh.cells()[cellI_];
-
-    const polyBoundaryMesh& patches = mesh.boundaryMesh();
-
-    forAll(thisCell, cFI)
-    {
-        label fI = thisCell[cFI];
-
-        if (cloud_.internalFace(fI))
-        {
-            continue;
-        }
-
-        label patchI = patches.patchID()[fI - mesh.nInternalFaces()];
-
-        if (isA<wallPolyPatch>(patches[patchI]))
-        {
-            // Get the decomposition of this wall face
-
-            const List<tetIndices>& faceTetIs =
-                polyMeshTetDecomposition::faceTetIndices(mesh, fI, cellI_);
-
-            const Foam::face& f = pFaces[fI];
-
-            forAll(faceTetIs, tI)
-            {
-                const tetIndices& tetIs = faceTetIs[tI];
-
-                triPointRef tri = tetIs.faceTri(mesh);
-
-                vector n = tri.normal();
-
-                vector nHat = n/mag(n);
-
-                // Radius of particle with respect to this wall face
-                // triangle.  Assuming that the wallImpactDistance
-                // does not change as the particle or the mesh moves
-                // forward in time.
-                scalar r = p.wallImpactDistance(nHat);
-
-                vector toPlusRNHat = to + r*nHat;
-
-                // triI = 0 because it is the cell face tri of the tet
-                // we are concerned with.
-                scalar tetClambda = tetLambda
-                (
-                    tetIs.tet(mesh).centre(),
-                    toPlusRNHat,
-                    0,
-                    n,
-                    f[tetIs.faceBasePt()],
-                    cellI_,
-                    fI,
-                    tetIs.tetPt()
-                );
-
-                if ((tetClambda <= 0.0) || (tetClambda >= 1.0))
-                {
-                    // toPlusRNHat is not on the outside of the plane of
-                    // the wall face tri, the tri cannot be hit.
-                    continue;
-                }
-
-                // Check if the actual trajectory of the near-tri
-                // points intersects the triangle.
-
-                vector fromPlusRNHat = from + r*nHat;
-
-                // triI = 0 because it is the cell face tri of the tet
-                // we are concerned with.
-                scalar lambda = tetLambda
-                (
-                    fromPlusRNHat,
-                    toPlusRNHat,
-                    0,
-                    n,
-                    f[tetIs.faceBasePt()],
-                    cellI_,
-                    fI,
-                    tetIs.tetPt()
-                );
-
-                pointHit hitInfo(vector::zero);
-
-                if (mesh.moving())
-                {
-                    // For a moving mesh, the position of wall
-                    // triangle needs to be moved in time to be
-                    // consistent with the moment defined by the
-                    // current value of stepFraction and the value of
-                    // lambda just calculated.
-
-                    // Total fraction thought the timestep of the
-                    // motion, including stepFraction before the
-                    // current tracking step and the current
-                    // lambda
-                    // i.e.
-                    // let s = stepFraction, l = lambda
-                    // Motion of x in time:
-                    // |-----------------|---------|---------|
-                    // x00               x0        xi        x
-                    //
-                    // where xi is the correct value of x at the required
-                    // tracking instant.
-                    //
-                    // x0 = x00 + s*(x - x00) = s*x + (1 - s)*x00
-                    //
-                    // i.e. the motion covered by previous tracking portions
-                    // within this timestep, and
-                    //
-                    // xi = x0 + l*(x - x0)
-                    //    = l*x + (1 - l)*x0
-                    //    = l*x + (1 - l)*(s*x + (1 - s)*x00)
-                    //    = (s + l - s*l)*x + (1 - (s + l - s*l))*x00
-                    //
-                    // let m = (s + l - s*l)
-                    //
-                    // xi = m*x + (1 - m)*x00 = x00 + m*(x - x00);
-                    //
-                    // In the same form as before.
-
-                    // Clip lambda to 0.0-1.0 to ensure that sensible
-                    // positions are used for triangle intersections.
-                    scalar lam = max(0.0, min(1.0, lambda));
-
-                    scalar m = stepFraction_ + lam - (stepFraction_*lam);
-
-                    triPointRef tri00 = tetIs.oldFaceTri(mesh);
-
-                    // Use SMALL positive tolerance to make the triangle
-                    // slightly "fat" to improve robustness.  Intersection
-                    // is calculated as the ray (from + r*nHat) -> (to +
-                    // r*nHat).
-
-                    point tPtA = tri00.a() + m*(tri.a() - tri00.a());
-                    point tPtB = tri00.b() + m*(tri.b() - tri00.b());
-                    point tPtC = tri00.c() + m*(tri.c() - tri00.c());
-
-                    triPointRef t(tPtA, tPtB, tPtC);
-
-                    // The point fromPlusRNHat + m*(to - from) is on the
-                    // plane of the triangle.  Determine the
-                    // intersection with this triangle by testing if
-                    // this point is inside or outside of the triangle.
-                    hitInfo = t.intersection
-                    (
-                        fromPlusRNHat + m*(to - from),
-                        t.normal(),
-                        intersection::FULL_RAY,
-                        SMALL
-                    );
-                }
-                else
-                {
-                    // Use SMALL positive tolerance to make the triangle
-                    // slightly "fat" to improve robustness.  Intersection
-                    // is calculated as the ray (from + r*nHat) -> (to +
-                    // r*nHat).
-                    hitInfo = tri.intersection
-                    (
-                        fromPlusRNHat,
-                        (to - from),
-                        intersection::FULL_RAY,
-                        SMALL
-                    );
-                }
-
-                if (hitInfo.hit())
-                {
-                    if (lambda < lambdaMin)
-                    {
-                        lambdaMin = lambda;
-
-                        faceI_ = fI;
-
-                        closestTetIs = tetIs;
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class ParticleType>
-inline Foam::Particle<ParticleType>::trackData::trackData
-(
-    Cloud<ParticleType>& cloud
-)
-:
-    cloud_(cloud)
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class ParticleType>
-inline Foam::Cloud<ParticleType>&
-Foam::Particle<ParticleType>::trackData::cloud()
+inline Foam::label Foam::particle::getNewParticleID() const
 {
-    return cloud_;
+    label id = particleCount_++;
+
+    if (id == labelMax)
+    {
+        WarningIn("particle::getNewParticleID() const")
+            << "Particle counter has overflowed. This might cause problems"
+            << " when reconstructing particle tracks." << endl;
+    }
+    return id;
 }
 
 
-template<class ParticleType>
-inline const Foam::Cloud<ParticleType>&
-Foam::Particle<ParticleType>::cloud() const
+inline const Foam::polyMesh& Foam::particle::mesh() const
 {
-    return cloud_;
+    return mesh_;
 }
 
 
-template<class ParticleType>
-inline const Foam::vector& Foam::Particle<ParticleType>::position() const
-{
-    return position_;
-}
-
-
-template<class ParticleType>
-inline Foam::vector& Foam::Particle<ParticleType>::position()
+inline const Foam::vector& Foam::particle::position() const
 {
     return position_;
 }
 
 
-template<class ParticleType>
-inline Foam::label Foam::Particle<ParticleType>::cell() const
+inline Foam::vector& Foam::particle::position()
+{
+    return position_;
+}
+
+
+inline Foam::label Foam::particle::cell() const
 {
     return cellI_;
 }
 
 
-template<class ParticleType>
-inline Foam::label& Foam::Particle<ParticleType>::cell()
+inline Foam::label& Foam::particle::cell()
 {
     return cellI_;
 }
 
 
-template<class ParticleType>
-inline Foam::label Foam::Particle<ParticleType>::tetFace() const
+inline Foam::label Foam::particle::tetFace() const
 {
     return tetFaceI_;
 }
 
 
-template<class ParticleType>
-inline Foam::label& Foam::Particle<ParticleType>::tetFace()
+inline Foam::label& Foam::particle::tetFace()
 {
     return tetFaceI_;
 }
 
 
-template<class ParticleType>
-inline Foam::label Foam::Particle<ParticleType>::tetPt() const
+inline Foam::label Foam::particle::tetPt() const
 {
     return tetPtI_;
 }
 
 
-template<class ParticleType>
-inline Foam::label& Foam::Particle<ParticleType>::tetPt()
+inline Foam::label& Foam::particle::tetPt()
 {
     return tetPtI_;
 }
 
 
-template<class ParticleType>
-inline Foam::tetIndices Foam::Particle<ParticleType>::currentTetIndices() const
+inline Foam::tetIndices Foam::particle::currentTetIndices() const
 {
-    return tetIndices(cellI_, tetFaceI_, tetPtI_, cloud_.polyMesh_);
+    return tetIndices(cellI_, tetFaceI_, tetPtI_, mesh_);
 }
 
 
-template<class ParticleType>
-inline Foam::tetPointRef Foam::Particle<ParticleType>::currentTet() const
+inline Foam::tetPointRef Foam::particle::currentTet() const
 {
-    return currentTetIndices().tet(cloud_.polyMesh_);
+    return currentTetIndices().tet(mesh_);
 }
 
 
-template<class ParticleType>
-inline Foam::vector Foam::Particle<ParticleType>::normal() const
+inline Foam::vector Foam::particle::normal() const
 {
-    return currentTetIndices().faceTri(cloud_.polyMesh_).normal();
+    return currentTetIndices().faceTri(mesh_).normal();
 }
 
 
-template<class ParticleType>
-inline Foam::vector
-Foam::Particle<ParticleType>::oldNormal() const
+inline Foam::vector Foam::particle::oldNormal() const
 {
-    return currentTetIndices().oldFaceTri(cloud_.polyMesh_).normal();
+    return currentTetIndices().oldFaceTri(mesh_).normal();
 }
 
 
-template<class ParticleType>
-inline Foam::label Foam::Particle<ParticleType>::face() const
+inline Foam::label Foam::particle::face() const
 {
     return faceI_;
 }
 
 
-template<class ParticleType>
-inline Foam::label& Foam::Particle<ParticleType>::face()
+inline Foam::label& Foam::particle::face()
 {
     return faceI_;
 }
 
 
-template<class ParticleType>
-inline void Foam::Particle<ParticleType>::initCellFacePt()
+inline void Foam::particle::initCellFacePt()
 {
     if (cellI_ == -1)
     {
-        cloud_.findCellFacePt
+        mesh_.findCellFacePt
         (
             position_,
             cellI_,
@@ -937,26 +700,20 @@ inline void Foam::Particle<ParticleType>::initCellFacePt()
 
         if (cellI_ == -1)
         {
-            FatalErrorIn
-            (
-                "Foam::Particle<ParticleType>::Particle"
-                "("
-                    "void Foam::Particle<ParticleType>::initCellFacePt()"
-                ")"
-            )   << "cell, tetFace and tetPt search failure at position "
-                << position_ << nl
-                << abort(FatalError);
+            FatalErrorIn("void Foam::particle::initCellFacePt()")
+                << "cell, tetFace and tetPt search failure at position "
+                << position_ << abort(FatalError);
         }
     }
     else
     {
-        cloud_.findFacePt(cellI_, position_, tetFaceI_, tetPtI_);
+        mesh_.findTetFacePt(cellI_, position_, tetFaceI_, tetPtI_);
 
         if (tetFaceI_ == -1 || tetPtI_ == -1)
         {
             label oldCellI = cellI_;
 
-            cloud_.findCellFacePt
+            mesh_.findCellFacePt
             (
                 position_,
                 cellI_,
@@ -970,23 +727,16 @@ inline void Foam::Particle<ParticleType>::initCellFacePt()
                 // number, but hasn't been able to find a cell to
                 // occupy.
 
-                if(!cloud_.polyMesh_.pointInCellBB(position_, oldCellI, 0.1))
+                if(!mesh_.pointInCellBB(position_, oldCellI, 0.1))
                 {
                     // If the position is not inside the (slightly
                     // extended) bound-box of the cell that it thought
                     // it should be in, then this is considered an
                     // error.
 
-                    FatalErrorIn
-                    (
-                        "Foam::Particle<ParticleType>::Particle"
-                        "("
-                            "void "
-                            "Foam::Particle<ParticleType>::initCellFacePt()"
-                        ")"
-                    )   << "cell, tetFace and tetPt search failure at position "
-                        << position_ << nl
-                        << "for requested cell " << oldCellI << nl
+                    FatalErrorIn("void Foam::particle::initCellFacePt()")
+                        << "cell, tetFace and tetPt search failure at position "
+                        << position_ << nl << "for requested cell " << oldCellI
                         << abort(FatalError);
                 }
 
@@ -1005,19 +755,17 @@ inline void Foam::Particle<ParticleType>::initCellFacePt()
 
                 point newPosition = position_;
 
-                const point& cC = cloud_.polyMesh_.cellCentres()[cellI_];
+                const point& cC = mesh_.cellCentres()[cellI_];
 
-                label trap(1.0/Cloud<ParticleType>::trackingCorrectionTol + 1);
+                label trap(1.0/trackingCorrectionTol + 1);
 
                 label iterNo = 0;
 
                 do
                 {
-                    newPosition +=
-                        Cloud<ParticleType>::trackingCorrectionTol
-                       *(cC - position_);
+                    newPosition += trackingCorrectionTol*(cC - position_);
 
-                    cloud_.findFacePt
+                    mesh_.findTetFacePt
                     (
                         cellI_,
                         newPosition,
@@ -1029,27 +777,14 @@ inline void Foam::Particle<ParticleType>::initCellFacePt()
 
                 } while (tetFaceI_ < 0  && iterNo <= trap);
 
-                if(tetFaceI_ == -1)
+                if (tetFaceI_ == -1)
                 {
-                    FatalErrorIn
-                    (
-                        "Foam::Particle<ParticleType>::Particle"
-                        "("
-                        "void "
-                        "Foam::Particle<ParticleType>::initCellFacePt()"
-                        ")"
-                    )   << "cell, tetFace and tetPt search failure at position "
-                        << position_ << nl
-                        << abort(FatalError);
+                    FatalErrorIn("void Foam::particle::initCellFacePt()")
+                        << "cell, tetFace and tetPt search failure at position "
+                        << position_ << abort(FatalError);
                 }
 
-                WarningIn
-                (
-                    "Foam::Particle<ParticleType>::Particle"
-                    "("
-                        "void Foam::Particle<ParticleType>::initCellFacePt()"
-                    ")"
-                )
+                WarningIn("void Foam::particle::initCellFacePt()")
                     << "Particle moved from " << position_
                     << " to " << newPosition
                     << " in cell " << cellI_
@@ -1067,13 +802,7 @@ inline void Foam::Particle<ParticleType>::initCellFacePt()
 
             if (cellI_ != oldCellI)
             {
-                WarningIn
-                (
-                    "Foam::Particle<ParticleType>::Particle"
-                    "("
-                        "void Foam::Particle<ParticleType>::initCellFacePt()"
-                    ")"
-                )
+                WarningIn("void Foam::particle::initCellFacePt()")
                     << "Particle at position " << position_
                     << " searched for a cell, tetFace and tetPt." << nl
                     << "    Found"
@@ -1089,99 +818,100 @@ inline void Foam::Particle<ParticleType>::initCellFacePt()
 }
 
 
-template<class ParticleType>
-inline bool Foam::Particle<ParticleType>::onBoundary() const
+inline bool Foam::particle::onBoundary() const
 {
-    return faceI_ != -1 && faceI_ >= cloud_.pMesh().nInternalFaces();
+    return faceI_ != -1 && faceI_ >= mesh_.nInternalFaces();
 }
 
 
-template<class ParticleType>
-inline Foam::scalar& Foam::Particle<ParticleType>::stepFraction()
+inline Foam::scalar& Foam::particle::stepFraction()
 {
     return stepFraction_;
 }
 
 
-template<class ParticleType>
-inline Foam::scalar Foam::Particle<ParticleType>::stepFraction() const
+inline Foam::scalar Foam::particle::stepFraction() const
 {
     return stepFraction_;
 }
 
 
-template<class ParticleType>
-inline Foam::label Foam::Particle<ParticleType>::origProc() const
+inline Foam::label Foam::particle::origProc() const
 {
     return origProc_;
 }
 
 
-template<class ParticleType>
-inline Foam::label& Foam::Particle<ParticleType>::origProc()
+inline Foam::label& Foam::particle::origProc()
 {
     return origProc_;
 }
 
 
-template<class ParticleType>
-inline Foam::label Foam::Particle<ParticleType>::origId() const
+inline Foam::label Foam::particle::origId() const
 {
     return origId_;
 }
 
 
-template<class ParticleType>
-inline Foam::label& Foam::Particle<ParticleType>::origId()
+inline Foam::label& Foam::particle::origId()
 {
     return origId_;
 }
 
 
-template<class ParticleType>
-inline bool Foam::Particle<ParticleType>::softImpact() const
+inline bool Foam::particle::softImpact() const
 {
     return false;
 }
 
 
-template<class ParticleType>
-inline Foam::scalar Foam::Particle<ParticleType>::currentTime() const
+inline Foam::scalar Foam::particle::currentTime() const
 {
     return
-        cloud_.pMesh().time().value()
-      + stepFraction_*cloud_.pMesh().time().deltaTValue();
+        mesh_.time().value()
+      + stepFraction_*mesh_.time().deltaTValue();
 }
 
 
-template<class ParticleType>
-inline Foam::label Foam::Particle<ParticleType>::patch(const label faceI) const
+inline bool Foam::particle::internalFace(const label faceI) const
 {
-    return cloud_.facePatch(faceI);
+    return mesh_.isInternalFace(faceI);
 }
 
 
-template<class ParticleType>
-inline Foam::label Foam::Particle<ParticleType>::patchFace
+bool Foam::particle::boundaryFace(const label faceI) const
+{
+    return !internalFace(faceI);
+}
+
+
+inline Foam::label Foam::particle::patch(const label faceI) const
+{
+//    return cloud_.facePatch(faceI);
+    return mesh_.boundaryMesh().whichPatch(faceI);
+}
+
+
+inline Foam::label Foam::particle::patchFace
 (
     const label patchI,
     const label faceI
 ) const
 {
-    return cloud_.patchFace(patchI, faceI);
+//    return cloud_.patchFace(patchI, faceI);
+    return mesh_.boundaryMesh()[patchI].whichFace(faceI);
 }
 
 
-template<class ParticleType>
 inline Foam::scalar
-Foam::Particle<ParticleType>::wallImpactDistance(const vector&) const
+Foam::particle::wallImpactDistance(const vector&) const
 {
     return 0.0;
 }
 
 
-template<class ParticleType>
-inline Foam::label Foam::Particle<ParticleType>::faceInterpolation() const
+inline Foam::label Foam::particle::faceInterpolation() const
 {
     return faceI_;
 }

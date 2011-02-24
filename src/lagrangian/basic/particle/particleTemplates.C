@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,19 +23,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Particle.H"
-#include "Cloud.H"
-#include "wedgePolyPatch.H"
-#include "symmetryPolyPatch.H"
+#include "IOPosition.H"
+
 #include "cyclicPolyPatch.H"
 #include "processorPolyPatch.H"
-#include "transform.H"
+#include "symmetryPolyPatch.H"
+#include "wallPolyPatch.H"
+#include "wedgePolyPatch.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class ParticleType>
 template<class TrackData>
-void Foam::Particle<ParticleType>::prepareForParallelTransfer
+void Foam::particle::prepareForParallelTransfer
 (
     const label patchI,
     TrackData& td
@@ -46,17 +45,15 @@ void Foam::Particle<ParticleType>::prepareForParallelTransfer
 }
 
 
-template<class ParticleType>
 template<class TrackData>
-void Foam::Particle<ParticleType>::correctAfterParallelTransfer
+void Foam::particle::correctAfterParallelTransfer
 (
     const label patchI,
     TrackData& td
 )
 {
     const processorPolyPatch& ppp =
-        refCast<const processorPolyPatch>
-        (cloud_.pMesh().boundaryMesh()[patchI]);
+        refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchI]);
 
     cellI_ = ppp.faceCells()[faceI_];
 
@@ -70,7 +67,7 @@ void Foam::Particle<ParticleType>::correctAfterParallelTransfer
         );
 
         transformPosition(T);
-        static_cast<ParticleType&>(*this).transformProperties(T);
+        transformProperties(T);
     }
     else if (ppp.separated())
     {
@@ -81,10 +78,7 @@ void Foam::Particle<ParticleType>::correctAfterParallelTransfer
           : ppp.separation()[faceI_]
         );
         position_ -= s;
-        static_cast<ParticleType&>(*this).transformProperties
-        (
-            -s
-        );
+        transformProperties(-s);
     }
 
     tetFaceI_ = faceI_ + ppp.start();
@@ -110,7 +104,7 @@ void Foam::Particle<ParticleType>::correctAfterParallelTransfer
     // This relationship can be verified for other points and sizes of
     // face.
 
-    tetPtI_ = cloud_.polyMesh_.faces()[tetFaceI_].size() - 1 - tetPtI_;
+    tetPtI_ = mesh_.faces()[tetFaceI_].size() - 1 - tetPtI_;
 
     // Reset the face index for the next tracking operation
     if (stepFraction_ > (1.0 - SMALL))
@@ -125,99 +119,69 @@ void Foam::Particle<ParticleType>::correctAfterParallelTransfer
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class ParticleType>
-Foam::Particle<ParticleType>::Particle
-(
-    const Cloud<ParticleType>& cloud,
-    const vector& position,
-    const label cellI,
-    const label tetFaceI,
-    const label tetPtI
-)
-:
-    cloud_(cloud),
-    position_(position),
-    cellI_(cellI),
-    faceI_(-1),
-    stepFraction_(0.0),
-    tetFaceI_(tetFaceI),
-    tetPtI_(tetPtI),
-    origProc_(Pstream::myProcNo()),
-    origId_(cloud_.getNewParticleID())
-{}
-
-
-template<class ParticleType>
-Foam::Particle<ParticleType>::Particle
-(
-    const Cloud<ParticleType>& cloud,
-    const vector& position,
-    const label cellI,
-    bool doCellFacePt
-)
-:
-    cloud_(cloud),
-    position_(position),
-    cellI_(cellI),
-    faceI_(-1),
-    stepFraction_(0.0),
-    tetFaceI_(-1),
-    tetPtI_(-1),
-    origProc_(Pstream::myProcNo()),
-    origId_(cloud_.getNewParticleID())
+template<class CloudType>
+void Foam::particle::readFields(CloudType& c)
 {
-    if (doCellFacePt)
+    if (!c.size())
     {
-        initCellFacePt();
+        return;
+    }
+
+    IOobject procIO(c.fieldIOobject("origProcId", IOobject::MUST_READ));
+
+    if (procIO.headerOk())
+    {
+        IOField<label> origProcId(procIO);
+        c.checkFieldIOobject(c, origProcId);
+        IOField<label> origId(c.fieldIOobject("origId", IOobject::MUST_READ));
+        c.checkFieldIOobject(c, origId);
+
+        label i = 0;
+        forAllIter(typename CloudType, c, iter)
+        {
+            particle& p = iter();
+
+            p.origProc_ = origProcId[i];
+            p.origId_ = origId[i];
+            i++;
+        }
     }
 }
 
 
-template<class ParticleType>
-Foam::Particle<ParticleType>::Particle(const Particle<ParticleType>& p)
-:
-    cloud_(p.cloud_),
-    position_(p.position_),
-    cellI_(p.cellI_),
-    faceI_(p.faceI_),
-    stepFraction_(p.stepFraction_),
-    tetFaceI_(p.tetFaceI_),
-    tetPtI_(p.tetPtI_),
-    origProc_(p.origProc_),
-    origId_(p.origId_)
-{}
+template<class CloudType>
+void Foam::particle::writeFields(const CloudType& c)
+{
+    // Write the cloud position file
+    IOPosition<CloudType> ioP(c);
+    ioP.write();
+
+    label np =  c.size();
+
+    IOField<label> origProc
+    (
+        c.fieldIOobject("origProcId", IOobject::NO_READ),
+        np
+    );
+    IOField<label> origId(c.fieldIOobject("origId", IOobject::NO_READ), np);
+
+    label i = 0;
+    forAllConstIter(typename CloudType, c, iter)
+    {
+        origProc[i] = iter().origProc_;
+        origId[i] = iter().origId_;
+        i++;
+    }
+
+    origProc.write();
+    origId.write();
+}
 
 
-template<class ParticleType>
-Foam::Particle<ParticleType>::Particle
-(
-    const Particle<ParticleType>& p,
-    const Cloud<ParticleType>& c
-)
-:
-    cloud_(c),
-    position_(p.position_),
-    cellI_(p.cellI_),
-    faceI_(p.faceI_),
-    stepFraction_(p.stepFraction_),
-    tetFaceI_(p.tetFaceI_),
-    tetPtI_(p.tetPtI_),
-    origProc_(p.origProc_),
-    origId_(p.origId_)
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class ParticleType>
 template<class TrackData>
-Foam::label Foam::Particle<ParticleType>::track
-(
-    const vector& endPosition,
-    TrackData& td
-)
+Foam::label Foam::particle::track(const vector& endPosition, TrackData& td)
 {
     faceI_ = -1;
 
@@ -231,28 +195,22 @@ Foam::label Foam::Particle<ParticleType>::track
 }
 
 
-
-template<class ParticleType>
-Foam::label Foam::Particle<ParticleType>::track(const vector& endPosition)
-{
-    int dummyTd;
-    return track(endPosition, dummyTd);
-}
-
-
-template<class ParticleType>
 template<class TrackData>
-Foam::scalar Foam::Particle<ParticleType>::trackToFace
+Foam::scalar Foam::particle::trackToFace
 (
     const vector& endPosition,
     TrackData& td
 )
 {
-    const polyMesh& mesh = cloud_.polyMesh_;
+    typedef typename TrackData::cloudType cloudType;
+    typedef typename cloudType::particleType particleType;
 
-    const faceList& pFaces = mesh.faces();
-    const pointField& pPts = mesh.points();
-    const vectorField& pC = mesh.cellCentres();
+    cloudType& cloud = td.cloud();
+
+
+    const faceList& pFaces = mesh_.faces();
+    const pointField& pPts = mesh_.points();
+    const vectorField& pC = mesh_.cellCentres();
 
     faceI_ = -1;
 
@@ -317,7 +275,7 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
     // current tet centre.
     scalar lambdaMin = VGREAT;
 
-    DynamicList<label>& tris = cloud_.labels_;
+    DynamicList<label>& tris = cloud.labels();
 
     // Tet indices that will be set by hitWallFaces if a wall face is
     // to be hit, or are set when any wall tri of a tet is hit.
@@ -336,9 +294,9 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
 
         const Foam::face& f = pFaces[tetFaceI_];
 
-        bool own = (mesh.faceOwner()[tetFaceI_] == cellI_);
+        bool own = (mesh_.faceOwner()[tetFaceI_] == cellI_);
 
-        label tetBasePtI = mesh.tetBasePtIs()[tetFaceI_];
+        label tetBasePtI = mesh_.tetBasePtIs()[tetFaceI_];
 
         label basePtI = f[tetBasePtI];
 
@@ -376,9 +334,7 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
                 Pout<< "tracking rescue using tetCentre from " << position();
             }
 
-            position_ +=
-                Cloud<ParticleType>::trackingCorrectionTol
-               *(tet.centre() - position_);
+            position_ += trackingCorrectionTol*(tet.centre() - position_);
 
             if (debug)
             {
@@ -386,12 +342,12 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
                     << (tet.centre() - position_) << endl;
             }
 
-            cloud_.trackingRescue();
+            cloud.trackingRescue();
 
             return trackFraction;
         }
 
-        if (triI != -1 && mesh.moving())
+        if (triI != -1 && mesh_.moving())
         {
             // Mesh motion requires stepFraction to be correct for
             // each tracking portion, so trackToFace must return after
@@ -423,7 +379,14 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
 
         // Sets a value for lambdaMin and faceI_ if a wall face is hit
         // by the track.
-        hitWallFaces(position_, endPosition, lambdaMin, faceHitTetIs);
+        hitWallFaces
+        (
+            cloud,
+            position_,
+            endPosition,
+            lambdaMin,
+            faceHitTetIs
+        );
 
         // Did not hit any tet tri faces, and no wall face has been
         // found to hit.
@@ -544,10 +507,10 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
 
     } while (faceI_ < 0);
 
-    ParticleType& p = static_cast<ParticleType&>(*this);
+    particleType& p = static_cast<particleType&>(*this);
     p.hitFace(td);
 
-    if (cloud_.internalFace(faceI_))
+    if (internalFace(faceI_))
     {
         // Change tet ownership because a tri face has been crossed,
         // in general this is:
@@ -556,21 +519,18 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
         // No modifications are required for triI = 0, no call required to
         //     tetNeighbour(0);
 
-        if (cellI_ == mesh.faceOwner()[faceI_])
+        if (cellI_ == mesh_.faceOwner()[faceI_])
         {
-            cellI_ = mesh.faceNeighbour()[faceI_];
+            cellI_ = mesh_.faceNeighbour()[faceI_];
         }
-        else if (cellI_ == mesh.faceNeighbour()[faceI_])
+        else if (cellI_ == mesh_.faceNeighbour()[faceI_])
         {
-            cellI_ = mesh.faceOwner()[faceI_];
+            cellI_ = mesh_.faceOwner()[faceI_];
         }
         else
         {
-            FatalErrorIn
-            (
-                "Particle::trackToFace(const vector&, TrackData&)"
-            )   << "addressing failure" << nl
-                << abort(FatalError);
+            FatalErrorIn("Particle::trackToFace(const vector&, TrackData&)")
+                << "addressing failure" << abort(FatalError);
         }
     }
     else
@@ -585,7 +545,7 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
         (
             !p.hitPatch
             (
-                mesh.boundaryMesh()[patchI],
+                mesh_.boundaryMesh()[patchI],
                 td,
                 patchI,
                 trackFraction,
@@ -599,7 +559,7 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
                 patchI = patch(faceI_);
             }
 
-            const polyPatch& patch = mesh.boundaryMesh()[patchI];
+            const polyPatch& patch = mesh_.boundaryMesh()[patchI];
 
             if (isA<wedgePolyPatch>(patch))
             {
@@ -656,22 +616,20 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
                 << "from " << position();
         }
 
-        position_ +=
-            Cloud<ParticleType>::trackingCorrectionTol
-           *(tet.centre() - position_);
+        position_ += trackingCorrectionTol*(tet.centre() - position_);
 
         if
         (
-            cloud_.hasWallImpactDistance()
-            && !cloud_.internalFace(faceHitTetIs.face())
-            && cloud_.cellHasWallFaces()[faceHitTetIs.cell()]
+            cloud.hasWallImpactDistance()
+         && !internalFace(faceHitTetIs.face())
+         && cloud.cellHasWallFaces()[faceHitTetIs.cell()]
         )
         {
-            const polyBoundaryMesh& patches = mesh.boundaryMesh();
+            const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
             label fI = faceHitTetIs.face();
 
-            label patchI = patches.patchID()[fI - mesh.nInternalFaces()];
+            label patchI = patches.patchID()[fI - mesh_.nInternalFaces()];
 
             if (isA<wallPolyPatch>(patches[patchI]))
             {
@@ -686,9 +644,9 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
                 // position that hit the wall that is in need of a
                 // rescue correction.
 
-                triPointRef wallTri = faceHitTetIs.faceTri(mesh);
+                triPointRef wallTri = faceHitTetIs.faceTri(mesh_);
 
-                tetPointRef wallTet = faceHitTetIs.tet(mesh);
+                tetPointRef wallTet = faceHitTetIs.tet(mesh_);
 
                 vector nHat = wallTri.normal();
                 nHat /= mag(nHat);
@@ -701,7 +659,7 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
                 // normal direction is larger towards the wall than
                 // the new correction is away from it.
                 position_ +=
-                    Cloud<ParticleType>::trackingCorrectionTol
+                    trackingCorrectionTol
                    *(
                         (wallTet.centre() - (position_ + r*nHat))
                       - (nHat & (tet.centre() - position_))*nHat
@@ -714,50 +672,221 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
             Pout<< " to " << position() << endl;
         }
 
-        cloud_.trackingRescue();
+        cloud.trackingRescue();
     }
 
     return trackFraction;
 }
 
 
-template<class ParticleType>
-Foam::scalar Foam::Particle<ParticleType>::trackToFace
+template<class CloudType>
+void Foam::particle::hitWallFaces
 (
-    const vector& endPosition
+    const CloudType& cloud,
+    const vector& from,
+    const vector& to,
+    scalar& lambdaMin,
+    tetIndices& closestTetIs
 )
 {
-    int dummyTd;
-    return trackToFace(endPosition, dummyTd);
+    if (!(cloud.hasWallImpactDistance() && cloud.cellHasWallFaces()[cellI_]))
+    {
+        return;
+    }
+
+    const faceList& pFaces = mesh_.faces();
+
+    const Foam::cell& thisCell = mesh_.cells()[cellI_];
+
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    forAll(thisCell, cFI)
+    {
+        label fI = thisCell[cFI];
+
+        if (internalFace(fI))
+        {
+            continue;
+        }
+
+        label patchI = patches.patchID()[fI - mesh_.nInternalFaces()];
+
+        if (isA<wallPolyPatch>(patches[patchI]))
+        {
+            // Get the decomposition of this wall face
+
+            const List<tetIndices>& faceTetIs =
+                polyMeshTetDecomposition::faceTetIndices(mesh_, fI, cellI_);
+
+            const Foam::face& f = pFaces[fI];
+
+            forAll(faceTetIs, tI)
+            {
+                const tetIndices& tetIs = faceTetIs[tI];
+
+                triPointRef tri = tetIs.faceTri(mesh_);
+
+                vector n = tri.normal();
+
+                vector nHat = n/mag(n);
+
+                // Radius of particle with respect to this wall face
+                // triangle.  Assuming that the wallImpactDistance
+                // does not change as the particle or the mesh moves
+                // forward in time.
+                scalar r = wallImpactDistance(nHat);
+
+                vector toPlusRNHat = to + r*nHat;
+
+                // triI = 0 because it is the cell face tri of the tet
+                // we are concerned with.
+                scalar tetClambda = tetLambda
+                (
+                    tetIs.tet(mesh_).centre(),
+                    toPlusRNHat,
+                    0,
+                    n,
+                    f[tetIs.faceBasePt()],
+                    cellI_,
+                    fI,
+                    tetIs.tetPt()
+                );
+
+                if ((tetClambda <= 0.0) || (tetClambda >= 1.0))
+                {
+                    // toPlusRNHat is not on the outside of the plane of
+                    // the wall face tri, the tri cannot be hit.
+                    continue;
+                }
+
+                // Check if the actual trajectory of the near-tri
+                // points intersects the triangle.
+
+                vector fromPlusRNHat = from + r*nHat;
+
+                // triI = 0 because it is the cell face tri of the tet
+                // we are concerned with.
+                scalar lambda = tetLambda
+                (
+                    fromPlusRNHat,
+                    toPlusRNHat,
+                    0,
+                    n,
+                    f[tetIs.faceBasePt()],
+                    cellI_,
+                    fI,
+                    tetIs.tetPt()
+                );
+
+                pointHit hitInfo(vector::zero);
+
+                if (mesh_.moving())
+                {
+                    // For a moving mesh, the position of wall
+                    // triangle needs to be moved in time to be
+                    // consistent with the moment defined by the
+                    // current value of stepFraction and the value of
+                    // lambda just calculated.
+
+                    // Total fraction thought the timestep of the
+                    // motion, including stepFraction before the
+                    // current tracking step and the current
+                    // lambda
+                    // i.e.
+                    // let s = stepFraction, l = lambda
+                    // Motion of x in time:
+                    // |-----------------|---------|---------|
+                    // x00               x0        xi        x
+                    //
+                    // where xi is the correct value of x at the required
+                    // tracking instant.
+                    //
+                    // x0 = x00 + s*(x - x00) = s*x + (1 - s)*x00
+                    //
+                    // i.e. the motion covered by previous tracking portions
+                    // within this timestep, and
+                    //
+                    // xi = x0 + l*(x - x0)
+                    //    = l*x + (1 - l)*x0
+                    //    = l*x + (1 - l)*(s*x + (1 - s)*x00)
+                    //    = (s + l - s*l)*x + (1 - (s + l - s*l))*x00
+                    //
+                    // let m = (s + l - s*l)
+                    //
+                    // xi = m*x + (1 - m)*x00 = x00 + m*(x - x00);
+                    //
+                    // In the same form as before.
+
+                    // Clip lambda to 0.0-1.0 to ensure that sensible
+                    // positions are used for triangle intersections.
+                    scalar lam = max(0.0, min(1.0, lambda));
+
+                    scalar m = stepFraction_ + lam - (stepFraction_*lam);
+
+                    triPointRef tri00 = tetIs.oldFaceTri(mesh_);
+
+                    // Use SMALL positive tolerance to make the triangle
+                    // slightly "fat" to improve robustness.  Intersection
+                    // is calculated as the ray (from + r*nHat) -> (to +
+                    // r*nHat).
+
+                    point tPtA = tri00.a() + m*(tri.a() - tri00.a());
+                    point tPtB = tri00.b() + m*(tri.b() - tri00.b());
+                    point tPtC = tri00.c() + m*(tri.c() - tri00.c());
+
+                    triPointRef t(tPtA, tPtB, tPtC);
+
+                    // The point fromPlusRNHat + m*(to - from) is on the
+                    // plane of the triangle.  Determine the
+                    // intersection with this triangle by testing if
+                    // this point is inside or outside of the triangle.
+                    hitInfo = t.intersection
+                    (
+                        fromPlusRNHat + m*(to - from),
+                        t.normal(),
+                        intersection::FULL_RAY,
+                        SMALL
+                    );
+                }
+                else
+                {
+                    // Use SMALL positive tolerance to make the triangle
+                    // slightly "fat" to improve robustness.  Intersection
+                    // is calculated as the ray (from + r*nHat) -> (to +
+                    // r*nHat).
+                    hitInfo = tri.intersection
+                    (
+                        fromPlusRNHat,
+                        (to - from),
+                        intersection::FULL_RAY,
+                        SMALL
+                    );
+                }
+
+                if (hitInfo.hit())
+                {
+                    if (lambda < lambdaMin)
+                    {
+                        lambdaMin = lambda;
+
+                        faceI_ = fI;
+
+                        closestTetIs = tetIs;
+                    }
+                }
+            }
+        }
+    }
 }
 
 
-template<class ParticleType>
-void Foam::Particle<ParticleType>::transformPosition(const tensor& T)
-{
-    position_ = transform(T, position_);
-}
-
-
-template<class ParticleType>
-void Foam::Particle<ParticleType>::transformProperties(const tensor&)
-{}
-
-
-template<class ParticleType>
-void Foam::Particle<ParticleType>::transformProperties(const vector&)
-{}
-
-
-template<class ParticleType>
 template<class TrackData>
-void Foam::Particle<ParticleType>::hitFace(TrackData&)
+void Foam::particle::hitFace(TrackData&)
 {}
 
 
-template<class ParticleType>
 template<class TrackData>
-bool Foam::Particle<ParticleType>::hitPatch
+bool Foam::particle::hitPatch
 (
     const polyPatch&,
     TrackData&,
@@ -770,9 +899,8 @@ bool Foam::Particle<ParticleType>::hitPatch
 }
 
 
-template<class ParticleType>
 template<class TrackData>
-void Foam::Particle<ParticleType>::hitWedgePatch
+void Foam::particle::hitWedgePatch
 (
     const wedgePolyPatch& wpp,
     TrackData&
@@ -780,7 +908,7 @@ void Foam::Particle<ParticleType>::hitWedgePatch
 {
     FatalErrorIn
     (
-        "void Foam::Particle<ParticleType>::hitWedgePatch"
+        "void Foam::particle::hitWedgePatch"
         "("
             "const wedgePolyPatch& wpp, "
             "TrackData&"
@@ -791,13 +919,12 @@ void Foam::Particle<ParticleType>::hitWedgePatch
     vector nf = normal();
     nf /= mag(nf);
 
-    static_cast<ParticleType&>(*this).transformProperties(I - 2.0*nf*nf);
+    transformProperties(I - 2.0*nf*nf);
 }
 
 
-template<class ParticleType>
 template<class TrackData>
-void Foam::Particle<ParticleType>::hitSymmetryPatch
+void Foam::particle::hitSymmetryPatch
 (
     const symmetryPolyPatch& spp,
     TrackData&
@@ -806,28 +933,25 @@ void Foam::Particle<ParticleType>::hitSymmetryPatch
     vector nf = normal();
     nf /= mag(nf);
 
-    static_cast<ParticleType&>(*this).transformProperties(I - 2.0*nf*nf);
+    transformProperties(I - 2.0*nf*nf);
 }
 
 
-template<class ParticleType>
 template<class TrackData>
-void Foam::Particle<ParticleType>::hitCyclicPatch
+void Foam::particle::hitCyclicPatch
 (
     const cyclicPolyPatch& cpp,
-    TrackData&
+    TrackData& td
 )
 {
-    // label patchFaceI_ = cpp.whichFace(faceI_);
-
     faceI_ = cpp.transformGlobalFace(faceI_);
 
-    cellI_ = cloud_.polyMesh_.faceOwner()[faceI_];
+    cellI_ = mesh_.faceOwner()[faceI_];
 
     tetFaceI_ = faceI_;
 
     // See note in correctAfterParallelTransfer for tetPtI_ addressing.
-    tetPtI_ = cloud_.polyMesh_.faces()[tetFaceI_].size() - 1 - tetPtI_;
+    tetPtI_ = mesh_.faces()[tetFaceI_].size() - 1 - tetPtI_;
 
     const cyclicPolyPatch& receiveCpp = cpp.neighbPatch();
 
@@ -843,7 +967,7 @@ void Foam::Particle<ParticleType>::hitCyclicPatch
         );
 
         transformPosition(T);
-        static_cast<ParticleType&>(*this).transformProperties(T);
+        transformProperties(T);
     }
     else if (receiveCpp.separated())
     {
@@ -854,75 +978,29 @@ void Foam::Particle<ParticleType>::hitCyclicPatch
           : receiveCpp.separation()[receiveCpp.whichFace(faceI_)]
         );
         position_ -= s;
-        static_cast<ParticleType&>(*this).transformProperties
-        (
-            -s
-        );
+        transformProperties(-s);
     }
 }
 
 
-template<class ParticleType>
 template<class TrackData>
-void Foam::Particle<ParticleType>::hitProcessorPatch
-(
-    const processorPolyPatch& spp,
-    TrackData& td
-)
+void Foam::particle::hitProcessorPatch(const processorPolyPatch&, TrackData&)
 {}
 
 
-template<class ParticleType>
 template<class TrackData>
-void Foam::Particle<ParticleType>::hitWallPatch
+void Foam::particle::hitWallPatch
 (
-    const wallPolyPatch& spp,
+    const wallPolyPatch&,
     TrackData&,
     const tetIndices&
 )
 {}
 
 
-template<class ParticleType>
 template<class TrackData>
-void Foam::Particle<ParticleType>::hitPatch
-(
-    const polyPatch& spp,
-    TrackData&
-)
+void Foam::particle::hitPatch(const polyPatch&, TrackData&)
 {}
 
-
-// * * * * * * * * * * * * * * Friend Operators * * * * * * * * * * * * * * //
-
-template<class ParticleType>
-bool Foam::operator==
-(
-    const Particle<ParticleType>& pA,
-    const Particle<ParticleType>& pB
-)
-{
-    return
-    (
-        pA.origProc() == pB.origProc()
-     && pA.origId() == pB.origId()
-    );
-}
-
-
-template<class ParticleType>
-bool Foam::operator!=
-(
-    const Particle<ParticleType>& pA,
-    const Particle<ParticleType>& pB
-)
-{
-    return !(pA == pB);
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "ParticleIO.C"
 
 // ************************************************************************* //

@@ -22,99 +22,102 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::Particle
+    Foam::particle
 
 Description
+    Base particle class
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Particle_H
-#define Particle_H
+#ifndef particle_H
+#define particle_H
 
 #include "vector.H"
+#include "Cloud.H"
 #include "IDLList.H"
 #include "labelList.H"
 #include "pointField.H"
 #include "faceList.H"
-#include "typeInfo.H"
+//#include "typeInfo.H"
 #include "OFstream.H"
 #include "tetPointRef.H"
 #include "FixedList.H"
 #include "polyMeshTetDecomposition.H"
-#include "wallPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-template<class Particle>
-class Cloud;
+// Forward declaration of classes
+class particle;
 
-class wedgePolyPatch;
-class symmetryPolyPatch;
+class polyPatch;
+
 class cyclicPolyPatch;
 class processorPolyPatch;
+class symmetryPolyPatch;
 class wallPolyPatch;
-class polyPatch;
+class wedgePolyPatch;
 
 // Forward declaration of friend functions and operators
 
-template<class ParticleType>
-class Particle;
-
-// Friend Operators
-
-template<class ParticleType>
 Ostream& operator<<
 (
     Ostream&,
-    const Particle<ParticleType>&
+    const particle&
 );
 
-template<class ParticleType>
-bool operator==(const Particle<ParticleType>&, const Particle<ParticleType>&);
+bool operator==(const particle&, const particle&);
 
-template<class ParticleType>
-bool operator!=(const Particle<ParticleType>&, const Particle<ParticleType>&);
+bool operator!=(const particle&, const particle&);
 
 /*---------------------------------------------------------------------------*\
-                           Class Particle Declaration
+                          Class Particle Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ParticleType>
-class Particle
+class particle
 :
-    public IDLList<ParticleType>::link
+    public IDLList<particle>::link
 {
-
 public:
 
-    //- Class used to pass tracking data to the trackToFace function
-    class trackData
+    template<class CloudType>
+    class TrackingData
     {
-
         // Private data
 
-            //- Reference to the cloud containing this particle
-            Cloud<ParticleType>& cloud_;
+            //- Reference to the cloud containing (this) particle
+            CloudType& cloud_;
 
 
     public:
 
-        bool switchProcessor;
-        bool keepParticle;
+        // Public data
+
+            typedef CloudType cloudType;
+
+            //- Flag to switch processor
+            bool switchProcessor;
+
+            //- Flag to indicate whether to keep particle (false = delete)
+            bool keepParticle;
 
 
-        // Constructors
-
-            inline trackData(Cloud<ParticleType>& cloud);
+        // Constructor
+        TrackingData(CloudType& cloud)
+        :
+            cloud_(cloud)
+        {}
 
 
         // Member functions
 
             //- Return a reference to the cloud
-            inline Cloud<ParticleType>& cloud();
+            CloudType& cloud()
+            {
+                return cloud_;
+            }
     };
 
 
@@ -122,8 +125,8 @@ protected:
 
     // Protected data
 
-        //- Reference to the particle cloud
-        const Cloud<ParticleType>& cloud_;
+        //- Reference to the polyMesh database
+        const polyMesh& mesh_;
 
         //- Position of particle
         vector position_;
@@ -156,7 +159,7 @@ protected:
     // Private Member Functions
 
         //- Find the tet tri faces between position and tet centre
-        inline void findTris
+        void findTris
         (
             const vector& position,
             DynamicList<label>& faceList,
@@ -208,8 +211,10 @@ protected:
         //- Hit wall faces in the current cell if the
         //- wallImpactDistance is non-zero.  They may not be in
         //- different tets to the current.
+        template<class CloudType>
         inline void hitWallFaces
         (
+            const CloudType& td,
             const vector& from,
             const vector& to,
             scalar& lambdaMin,
@@ -239,37 +244,21 @@ protected:
 
         //- Overridable function to handle the particle hitting a wedgePatch
         template<class TrackData>
-        void hitWedgePatch
-        (
-            const wedgePolyPatch&,
-            TrackData& td
-        );
+        void hitWedgePatch(const wedgePolyPatch&, TrackData& td);
 
         //- Overridable function to handle the particle hitting a
         //  symmetryPatch
         template<class TrackData>
-        void hitSymmetryPatch
-        (
-            const symmetryPolyPatch&,
-            TrackData& td
-        );
+        void hitSymmetryPatch(const symmetryPolyPatch&, TrackData& td);
 
         //- Overridable function to handle the particle hitting a cyclicPatch
         template<class TrackData>
-        void hitCyclicPatch
-        (
-            const cyclicPolyPatch&,
-            TrackData& td
-        );
+        void hitCyclicPatch(const cyclicPolyPatch&, TrackData& td);
 
         //- Overridable function to handle the particle hitting a
         //  processorPatch
         template<class TrackData>
-        void hitProcessorPatch
-        (
-            const processorPolyPatch&,
-            TrackData& td
-        );
+        void hitProcessorPatch(const processorPolyPatch&, TrackData& td);
 
         //- Overridable function to handle the particle hitting a wallPatch
         template<class TrackData>
@@ -283,61 +272,33 @@ protected:
         //- Overridable function to handle the particle hitting a
         //  general patch
         template<class TrackData>
-        void hitPatch
-        (
-            const polyPatch&,
-            TrackData& td
-        );
-
-
-    // Transformations
-
-        //- Transform the position the particle
-        //  according to the given transformation tensor
-        virtual void transformPosition(const tensor& T);
-
-        //- Transform the physical properties of the particle
-        //  according to the given transformation tensor
-        virtual void transformProperties(const tensor& T);
-
-        //- Transform the physical properties of the particle
-        //  according to the given separation vector
-        virtual void transformProperties(const vector& separation);
-
-
-    // Parallel transfer
-
-        //- Convert global addressing to the processor patch
-        //  local equivalents
-        template<class TrackData>
-        void prepareForParallelTransfer(const label patchI, TrackData& td);
-
-        //- Convert processor patch addressing to the global equivalents
-        //  and set the cellI to the face-neighbour
-        template<class TrackData>
-        void correctAfterParallelTransfer(const label patchI, TrackData& td);
+        void hitPatch(const polyPatch&, TrackData& td);
 
 
 public:
 
-    friend class Cloud<ParticleType>;
-
-
     // Static data members
 
         //- Runtime type information
-        TypeName("Particle");
+        TypeName("particle");
 
         //- String representation of properties
         static string propHeader;
+
+        //- Cumulative particle counter - used to provode unique ID
+        static label particleCount_;
+
+        //- Fraction of distance to tet centre to move a particle to
+        // 'rescue' it from a tracking problem
+        static const scalar trackingCorrectionTol;
 
 
     // Constructors
 
         //- Construct from components
-        Particle
+        particle
         (
-            const Cloud<ParticleType>&,
+            const polyMesh& mesh,
             const vector& position,
             const label cellI,
             const label tetFaceI,
@@ -346,47 +307,27 @@ public:
 
         //- Construct from components, tetFaceI_ and tetPtI_ are not
         //  supplied so they will be deduced by a search
-        Particle
+        particle
         (
-            const Cloud<ParticleType>&,
+            const polyMesh& mesh,
             const vector& position,
             const label cellI,
             bool doCellFacePt = true
         );
 
         //- Construct from Istream
-        Particle
-        (
-            const Cloud<ParticleType>&,
-            Istream&,
-            bool readFields = true
-        );
+        particle(const polyMesh& mesh, Istream&, bool readFields = true);
 
         //- Construct as a copy
-        Particle(const Particle& p);
+        particle(const particle& p);
 
-        //- Construct as a copy
-        Particle(const Particle& p, const Cloud<ParticleType>& c);
-
-        //- Construct a clone
-        virtual autoPtr<Particle<ParticleType> > clone() const
-        {
-            return autoPtr<Particle<ParticleType> >
-            (
-                new Particle<ParticleType>(*this)
-            );
-        }
+        //- Construct as a copy with refernce to a new mesh
+        particle(const particle& p, const polyMesh& mesh);
 
         //- Construct a clone
-        virtual autoPtr<Particle<ParticleType> > clone
-        (
-            const Cloud<ParticleType>& c
-        ) const
+        virtual autoPtr<particle> clone() const
         {
-            return autoPtr<Particle<ParticleType> >
-            (
-                new Particle<ParticleType>(*this, c)
-            );
+            return autoPtr<particle>(new particle(*this));
         }
 
 
@@ -394,42 +335,36 @@ public:
         //  parallel transfer
         class iNew
         {
-            // Private data
-
-                //- Reference to the cloud
-                const Cloud<ParticleType>& cloud_;
-
+            const polyMesh& mesh_;
 
         public:
 
-            iNew(const Cloud<ParticleType>& cloud)
+            iNew(const polyMesh& mesh)
             :
-                cloud_(cloud)
+                mesh_(mesh)
             {}
 
-            autoPtr<ParticleType> operator()(Istream& is) const
+            autoPtr<particle> operator()(Istream& is) const
             {
-                return autoPtr<ParticleType>
-                (
-                    new ParticleType
-                    (
-                        cloud_,
-                        is,
-                        true
-                    )
-                );
+                return autoPtr<particle>(new particle(mesh_, is, true));
             }
         };
 
 
     //- Destructor
-    virtual ~Particle()
+    virtual ~particle()
     {}
 
 
     // Member Functions
 
         // Access
+
+            //- Get unique particle creation id
+            inline label getNewParticleID() const;
+
+            //- Return the mesh database
+            inline const polyMesh& mesh() const;
 
             //- Return current particle position
             inline const vector& position() const;
@@ -478,9 +413,6 @@ public:
             //- Return current face particle is on otherwise -1
             inline label face() const;
 
-            //- Return reference to the particle cloud
-            inline const Cloud<ParticleType>& cloud() const;
-
             //- Return the impact model to be used, soft or hard (default).
             inline bool softImpact() const;
 
@@ -496,6 +428,12 @@ public:
 
             //- Is the particle on the boundary/(or outside the domain)?
             inline bool onBoundary() const;
+
+            //- Is this global face an internal face?
+            inline bool internalFace(const label faceI) const;
+
+            //- Is this global face a boundary face?
+            inline bool boundaryFace(const label faceI) const;
 
             //- Which patch is particle on
             inline label patch(const label faceI) const;
@@ -540,14 +478,7 @@ public:
             //  Returns the boundary face index if the track stops at the
             //  boundary, -1 otherwise.
             template<class TrackData>
-            label track
-            (
-                const vector& endPosition,
-                TrackData& td
-            );
-
-            //- Calls the templated track with dummy TrackData
-            label track(const vector& endPosition);
+            label track(const vector& endPosition, TrackData& td);
 
             //- Track particle to a given position and returns 1.0 if the
             //  trajectory is completed without hitting a face otherwise
@@ -556,50 +487,62 @@ public:
             //  on entry 'stepFraction()' should be set to the fraction of the
             //  time-step at which the tracking starts.
             template<class TrackData>
-            scalar trackToFace
-            (
-                const vector& endPosition,
-                TrackData& td
-            );
-
-            //- Calls the templated trackToFace with dummy TrackData
-            scalar trackToFace(const vector& endPosition);
+            scalar trackToFace(const vector& endPosition, TrackData& td);
 
             //- Return the index of the face to be used in the interpolation
             //  routine
             inline label faceInterpolation() const;
 
 
+    // Transformations
+
+        //- Transform the position the particle
+        //  according to the given transformation tensor
+        virtual void transformPosition(const tensor& T);
+
+        //- Transform the physical properties of the particle
+        //  according to the given transformation tensor
+        virtual void transformProperties(const tensor& T);
+
+        //- Transform the physical properties of the particle
+        //  according to the given separation vector
+        virtual void transformProperties(const vector& separation);
+
+
+    // Parallel transfer
+
+        //- Convert global addressing to the processor patch
+        //  local equivalents
+        template<class TrackData>
+        void prepareForParallelTransfer(const label patchI, TrackData& td);
+
+        //- Convert processor patch addressing to the global equivalents
+        //  and set the cellI to the face-neighbour
+        template<class TrackData>
+        void correctAfterParallelTransfer(const label patchI, TrackData& td);
+
+
     // I-O
 
         //- Read the fields associated with the owner cloud
-        static void readFields(Cloud<ParticleType>& c);
+        template<class CloudType>
+        static void readFields(CloudType& c);
 
         //- Write the fields associated with the owner cloud
-        static void writeFields(const Cloud<ParticleType>& c);
+        template<class CloudType>
+        static void writeFields(const CloudType& c);
 
         //- Write the particle data
         void write(Ostream& os, bool writeFields) const;
 
+
     // Friend Operators
 
-        friend Ostream& operator<< <ParticleType>
-        (
-            Ostream&,
-            const Particle<ParticleType>&
-        );
+        friend Ostream& operator<<(Ostream&, const particle&);
 
-        friend bool operator== <ParticleType>
-        (
-            const Particle<ParticleType>& pA,
-            const Particle<ParticleType>& pB
-        );
+        friend bool operator==(const particle& pA, const particle& pB);
 
-        friend bool operator!= <ParticleType>
-        (
-            const Particle<ParticleType>& pA,
-            const Particle<ParticleType>& pB
-        );
+        friend bool operator!=(const particle& pA, const particle& pB);
 };
 
 
@@ -609,18 +552,18 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "ParticleI.H"
-
+#include "particleI.H"
+/*
 #define defineParticleTypeNameAndDebug(Type, DebugSwitch)                     \
     template<>                                                                \
     const Foam::word Particle<Type>::typeName(#Type);                         \
     template<>                                                                \
     int Particle<Type>::debug(Foam::debug::debugSwitch(#Type, DebugSwitch));
-
+*/
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "Particle.C"
+#   include "particleTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

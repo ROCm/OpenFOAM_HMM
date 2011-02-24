@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,28 +23,21 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Particle.H"
+#include "particle.H"
 #include "IOstreams.H"
 #include "IOPosition.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<class ParticleType>
-Foam::string Foam::Particle<ParticleType>::propHeader =
+Foam::string Foam::particle::propHeader =
     "(Px Py Pz) cellI tetFaceI tetPtI origProc origId";
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class ParticleType>
-Foam::Particle<ParticleType>::Particle
-(
-    const Cloud<ParticleType>& cloud,
-    Istream& is,
-    bool readFields
-)
+Foam::particle::particle(const polyMesh& mesh, Istream& is, bool readFields)
 :
-    cloud_(cloud),
+    mesh_(mesh),
     position_(),
     cellI_(-1),
     faceI_(-1),
@@ -97,81 +90,11 @@ Foam::Particle<ParticleType>::Particle
     }
 
     // Check state of Istream
-    is.check("Particle<ParticleType>::Particle(Istream&)");
+    is.check("particle::particle(Istream&, bool)");
 }
 
 
-template<class ParticleType>
-void Foam::Particle<ParticleType>::readFields
-(
-    Cloud<ParticleType>& c
-)
-{
-    if (!c.size())
-    {
-        return;
-    }
-
-    IOobject procIO(c.fieldIOobject("origProcId", IOobject::MUST_READ));
-
-    if (procIO.headerOk())
-    {
-        IOField<label> origProcId(procIO);
-        c.checkFieldIOobject(c, origProcId);
-        IOField<label> origId(c.fieldIOobject("origId", IOobject::MUST_READ));
-        c.checkFieldIOobject(c, origId);
-
-        label i = 0;
-        forAllIter(typename Cloud<ParticleType>, c, iter)
-        {
-            ParticleType& p = iter();
-
-            p.origProc_ = origProcId[i];
-            p.origId_ = origId[i];
-            i++;
-        }
-    }
-}
-
-
-template<class ParticleType>
-void Foam::Particle<ParticleType>::writeFields
-(
-    const Cloud<ParticleType>& c
-)
-{
-    // Write the cloud position file
-    IOPosition<ParticleType> ioP(c);
-    ioP.write();
-
-    label np =  c.size();
-
-    IOField<label> origProc
-    (
-        c.fieldIOobject
-        (
-            "origProcId",
-            IOobject::NO_READ
-        ),
-        np
-    );
-    IOField<label> origId(c.fieldIOobject("origId", IOobject::NO_READ), np);
-
-    label i = 0;
-    forAllConstIter(typename Cloud<ParticleType>, c, iter)
-    {
-        origProc[i] = iter().origProc_;
-        origId[i] = iter().origId_;
-        i++;
-    }
-
-    origProc.write();
-    origId.write();
-}
-
-
-template<class ParticleType>
-void Foam::Particle<ParticleType>::write(Ostream& os, bool writeFields) const
+void Foam::particle::write(Ostream& os, bool writeFields) const
 {
     if (os.format() == IOstream::ASCII)
     {
@@ -223,12 +146,11 @@ void Foam::Particle<ParticleType>::write(Ostream& os, bool writeFields) const
     }
 
     // Check state of Ostream
-    os.check("Particle<ParticleType>::write(Ostream& os, bool) const");
+    os.check("particle::write(Ostream& os, bool) const");
 }
 
 
-template<class ParticleType>
-Foam::Ostream& Foam::operator<<(Ostream& os, const Particle<ParticleType>& p)
+Foam::Ostream& Foam::operator<<(Ostream& os, const particle& p)
 {
     // Write all data
     p.write(os, true);
