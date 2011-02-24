@@ -32,7 +32,7 @@ License
 #include "JobInfo.H"
 #include "labelList.H"
 #include "regIOobject.H"
-#include "codeStreamTools.H"
+#include "dynamicCode.H"
 
 #include <cctype>
 
@@ -790,7 +790,7 @@ Foam::argList::argList
             << endl;
 
         Info<< "allowSystemOperations : ";
-        if (codeStreamTools::allowSystemOperations)
+        if (dynamicCode::allowSystemOperations)
         {
             Info<< "Allowing user-supplied system call operations" << endl;
         }

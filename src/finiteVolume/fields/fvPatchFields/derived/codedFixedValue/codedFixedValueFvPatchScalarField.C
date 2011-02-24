@@ -33,8 +33,8 @@ License
 #include "IFstream.H"
 #include "OFstream.H"
 #include "SHA1Digest.H"
-#include "OSHA1stream.H"
-#include "codeStreamTools.H"
+#include "dynamicCode.H"
+#include "dynamicCodeContext.H"
 #include "codeProperties.H"
 #include "stringOps.H"
 
@@ -78,113 +78,52 @@ Foam::codedFixedValueFvPatchScalarField::dict() const
 }
 
 
-void Foam::codedFixedValueFvPatchScalarField::writeLibrary
+void Foam::codedFixedValueFvPatchScalarField::createLibrary
 (
-    const fileName& codePath,
-    const fileName& libPath,
-    const dictionary& dict
+    dynamicCode& dynCode,
+    const dynamicCodeContext& context
 )
 {
     // Write files for new library
-    if (!Pstream::master())
+    if (Pstream::master() && !dynCode.upToDate(context))
     {
-        return;
-    }
+        Info<< "Creating new library in " << dynCode.libPath() << endl;
+        dynCode.clear();
 
-    // "codeInclude" is optional
-    string codeInclude;
-    if (dict.found("codeInclude"))
-    {
-        codeInclude = stringOps::trim(dict["codeInclude"]);
-        stringOps::inplaceExpand(codeInclude, dict);
-    }
+        // filter with this context
+        dynCode.setFilterContext(context);
 
-    // "codeOptions" is optional
-    string codeOptions;
-    if (dict.found("codeOptions"))
-    {
-        codeOptions = stringOps::trim(dict["codeOptions"]);
-        stringOps::inplaceExpand(codeOptions, dict);
-    }
+        // filter C/H template
+        dynCode.addFilterFile(codeTemplateC);
+        dynCode.addFilterFile(codeTemplateH);
 
-    // "code" is mandatory
-    string code = stringOps::trim(dict["code"]);
-    stringOps::inplaceExpand(code, dict);
-
-
-    // Create SHA1 digest from the contents
-    SHA1Digest sha;
-    {
-        OSHA1stream os;
-        os  << codeInclude << codeOptions << code;
-        sha = os.digest();
-    }
-
-//    Info<<"old SHA1: " << sha1_ << nl
-//        <<"new SHA1: " << sha << endl;
-
-
-    // only use side-effect of writing  SHA1Digest for now
-    (void) codeStreamTools::upToDate(codePath, sha);
-
-    // TODO: compile on-demand
-    if (true)
-    {
-        Info<< "Creating new library in " << libPath << endl;
-
-        const fileName fileCsrc(codeStreamTools::findTemplate(codeTemplateC));
-        const fileName fileHsrc(codeStreamTools::findTemplate(codeTemplateH));
-
-        // not found!
-        if (fileCsrc.empty() || fileHsrc.empty())
-        {
-            FatalIOErrorIn
-            (
-                "codedFixedValueFvPatchScalarField::writeLibrary(..)",
-                dict
-            )   << "Could not find one or both code templates: "
-                << codeTemplateC << ", " << codeTemplateH << nl
-                << codeStreamTools::searchedLocations()
-                << exit(FatalIOError);
-        }
-
-
-
-        List<codeStreamTools::fileAndVars> copyFiles(2);
-        copyFiles[0].file() = fileCsrc;
-        copyFiles[0].set("codeInclude", codeInclude);
-        copyFiles[0].set("code", code);
-        copyFiles[0].set("SHA1sum", sha.str());
-
-        copyFiles[1].file() = fileHsrc;
-
-
-        List<codeStreamTools::fileAndContent> filesContents(2);
-
-        // Write Make/files
-        filesContents[0].first() = "Make/files";
-        filesContents[0].second() =
+        // Make/files
+        dynCode.addCreateFile
+        (
+            "Make/files",
             codeTemplateC + "\n\n"
-          + codeStreamTools::libTarget(redirectType_);
+          + dynCode.libTarget()
+        );
 
-        // Write Make/options
-        filesContents[1].first() = "Make/options";
-        filesContents[1].second() =
+        // Make/options
+        dynCode.addCreateFile
+        (
+            "Make/options",
             "EXE_INC = -g \\\n"
             "-I$(LIB_SRC)/finiteVolume/lnInclude\\\n"
-          + codeOptions
-          + "\n\nLIB_LIBS = ";
+          + context.options()
+          + "\n\nLIB_LIBS = "
+        );
 
-        codeStreamTools writer(redirectType_, copyFiles, filesContents);
-        if (!writer.copyFilesContents(codePath))
+        if (!dynCode.copyFilesContents())
         {
             FatalIOErrorIn
             (
                 "codedFixedValueFvPatchScalarField::writeLibrary(..)",
-                dict
+                context.dict()
             )   << "Failed writing " << nl
-                << copyFiles << nl
-                << filesContents
+                // << copyFiles << nl
+                // << filesContents
                 << exit(FatalIOError);
         }
     }
@@ -193,98 +132,113 @@ void Foam::codedFixedValueFvPatchScalarField::writeLibrary
 
 void Foam::codedFixedValueFvPatchScalarField::updateLibrary()
 {
-    codeStreamTools::checkSecurity
+    dynamicCode::checkSecurity
     (
         "codedFixedValueFvPatchScalarField::updateLibrary()",
         dict_
     );
 
-    // write code into redirectType_ subdir
-    const fileName codePath = codeStreamTools::codePath(redirectType_);
+    // use in-line or via codeProperties
+    const bool useInlineDict = dict_.found("code");
 
-//    const fileName oldLibPath = codeStreamTools::libPath
-//    (
-//        redirectType_ + "_" + sha1_
-//    );
+    // determine code context (code, codeInclude, codeOptions)
+    dynamicCodeContext context
+    (
+        useInlineDict
+      ? dict_
+      : this->dict().subDict(redirectType_)
+    );
 
-    // write library into platforms/$WM_OPTIONS/lib subdir
-    const fileName libPath = codeStreamTools::libPath(redirectType_);
+
+    // NOTE: probably don't need codeProperties anymore
+    // since we use the sha1 directly
+    if (!useInlineDict)
+    {
+        this->dict().setUnmodified();
+    }
 
 
-    //Info<< "codePath:" << codePath << nl
-    //    << "libPath:" << libPath << endl;
+    // write code into redirectType_ subdir as well
+    dynamicCode dynCode(redirectType_);
 
+    // The version function name - based on the SHA1
+    const string checkFuncName
+    (
+        dynCode.codeName() + "_" + context.sha1().str()
+    );
+
+
+    const fileName libPath = dynCode.libPath();
     void* lib = dlLibraryTable::findLibrary(libPath);
 
-
-    // TODO:
-    // calculate old/new SHA1 for code
-    // check if the correct library version was already loaded.
-    // Find the library handle.
- //
- // string signatureName(redirectType_ + "_" + sha().str());
- // void (*signatureFunction)();
- // signatureFunction = reinterpret_cast<void(*)()>(dlSym(lib, signatureName));
-
-    if (dict_.found("code"))
+    // Load library if not already loaded
+    bool reusing = false;
+    if (!lib && dlLibraryTable::open(libPath, false))
     {
-        if (!lib)
-        {
-            writeLibrary(codePath, libPath, dict_);
-        }
+        lib = dlLibraryTable::findLibrary(libPath);
+        reusing = true;
     }
-    else
+
+
+    // library may have loaded, the version may not be correct
+    bool waiting = false;
+    if (lib)
     {
-        const codeProperties& onTheFlyDict = dict();
-
-        if (onTheFlyDict.modified())
+        // Unload library if needed
+        if (!dlSym(lib, checkFuncName))
         {
-            onTheFlyDict.setUnmodified();
-
-            // Remove instantiation of fvPatchField provided by library
-            redirectPatchFieldPtr_.clear();
-            // Unload library
-            if (lib)
+            reusing = false;
+            waiting = true;
+            if (!dlLibraryTable::close(libPath, false))
             {
-                if (!dlLibraryTable::close(libPath))
-                {
-                    FatalIOErrorIn
-                    (
-                        "codedFixedValueFvPatchScalarField::updateLibrary(..)",
-                        onTheFlyDict
-                    )   << "Failed unloading library " << libPath
-                        << exit(FatalIOError);
-                }
-                lib = NULL;
+                FatalIOErrorIn
+                (
+                    "codedFixedValueFvPatchScalarField::updateLibrary(..)",
+                    context.dict()
+                )   << "Failed unloading library "
+                    << libPath
+                    << exit(FatalIOError);
             }
-
-            const dictionary& codeDict = onTheFlyDict.subDict(redirectType_);
-            writeLibrary(codePath, libPath, codeDict);
+            lib = 0;
         }
+
+        // unload from all processes
+        reduce(waiting, orOp<bool>());
     }
 
+
+    // create library
     if (!lib)
     {
+        if (useInlineDict)
+        {
+            createLibrary(dynCode, context);
+        }
+        else
+        {
+            // Remove instantiation of fvPatchField provided by library
+            redirectPatchFieldPtr_.clear();
+            createLibrary(dynCode, context);
+        }
+
         if (Pstream::master())
         {
-            const Foam::string wmakeCmd("wmake libso " + codePath);
-            Info<< "Invoking " << wmakeCmd << endl;
-            if (Foam::system(wmakeCmd))
+            if (!dynCode.wmakeLibso())
             {
                 FatalIOErrorIn
                 (
                     "codedFixedValueFvPatchScalarField::updateLibrary()",
                     dict_
-                )   << "Failed " << wmakeCmd
+                )   << "Failed wmake " << libPath
                     << exit(FatalIOError);
             }
         }
 
         // all processes must wait for compile
-        bool dummy = true;
-        reduce(dummy, orOp<bool>());
+        waiting = true;
+        reduce(waiting, orOp<bool>());
 
-        if (!dlLibraryTable::open(libPath))
+        if (!dlLibraryTable::open(libPath, false))
         {
             FatalIOErrorIn
             (
@@ -293,6 +247,29 @@ void Foam::codedFixedValueFvPatchScalarField::updateLibrary()
             )   << "Failed loading library " << libPath
                 << exit(FatalIOError);
         }
+
+
+        // paranoid - check that signature function is really there
+        lib = dlLibraryTable::findLibrary(libPath);
+        if (lib)
+        {
+            if (!dlSym(lib, checkFuncName))
+            {
+               FatalIOErrorIn
+               (
+                   "codedFixedValueFvPatchScalarField::updateLibrary(..)",
+                   dict_
+               )   << "Library loaded - but wrong version!"
+                    << libPath
+                    << exit(FatalIOError);
+            }
+            lib = 0;
+        }
+    }
+    else if (reusing)
+    {
+        Info<< "Reusing library in " << libPath << nl
+            << "    with " << context.sha1().str() << nl;
     }
 }
 
