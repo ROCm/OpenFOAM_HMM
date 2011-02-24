@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,7 @@ SourceFiles
 #ifndef DsmcParcel_H
 #define DsmcParcel_H
 
-#include "Particle.H"
+#include "particle.H"
 #include "IOstream.H"
 #include "autoPtr.H"
 #include "contiguous.H"
@@ -68,7 +68,7 @@ Ostream& operator<<
 template<class ParcelType>
 class DsmcParcel
 :
-    public Particle<ParcelType>
+    public ParcelType
 {
 public:
 
@@ -123,31 +123,22 @@ public:
 
 
     //- Class used to pass kinematic tracking data to the trackToFace function
-    class trackData
+    class trackingData
     :
-        public Particle<ParcelType>::trackData
+        public particle::TrackingData<DsmcCloud<DsmcParcel<ParcelType> > >
     {
-        // Private data
-
-            //- Reference to the cloud containing this particle
-            DsmcCloud<ParcelType>& cloud_;
-
-
     public:
 
         // Constructors
 
             //- Construct from components
-            inline trackData
-            (
-                DsmcCloud<ParcelType>& cloud
-            );
-
-
-        // Member functions
-
-            //- Return access to the owner cloud
-            inline DsmcCloud<ParcelType>& cloud();
+            trackingData(DsmcCloud<DsmcParcel<ParcelType> >& cloud)
+            :
+                particle::TrackingData<DsmcCloud<DsmcParcel<ParcelType> > >
+                (
+                    cloud
+                )
+            {}
     };
 
 
@@ -181,7 +172,7 @@ public:
         //- Construct from components
         inline DsmcParcel
         (
-            DsmcCloud<ParcelType>& owner,
+            const polyMesh& mesh,
             const vector& position,
             const vector& U,
             const scalar Ei,
@@ -194,19 +185,39 @@ public:
         //- Construct from Istream
         DsmcParcel
         (
-            const Cloud<ParcelType>& c,
+            const polyMesh& mesh,
             Istream& is,
             bool readFields = true
         );
 
         //- Construct and return a clone
-        virtual autoPtr<Particle<ParcelType> > clone() const
+        virtual autoPtr<particle> clone() const
         {
-            return autoPtr<Particle<ParcelType> >
-            (
-                new DsmcParcel<ParcelType>(*this)
-            );
+            return autoPtr<particle>(new DsmcParcel<ParcelType>(*this));
         }
+
+
+        //- Factory class to read-construct particles used for
+        //  parallel transfer
+        class iNew
+        {
+            const polyMesh& mesh_;
+
+        public:
+
+            iNew(const polyMesh& mesh)
+            :
+                mesh_(mesh)
+            {}
+
+            autoPtr<DsmcParcel<ParcelType> > operator()(Istream& is) const
+            {
+                return autoPtr<DsmcParcel<ParcelType> >
+                (
+                    new DsmcParcel<ParcelType>(mesh_, is, true)
+                );
+            }
+        };
 
 
     // Member Functions
@@ -263,14 +274,6 @@ public:
                 TrackData& td
             );
 
-            //- Overridable function to handle the particle hitting a
-            //  processorPatch without trackData
-            void hitProcessorPatch
-            (
-                const processorPolyPatch&,
-                int&
-            );
-
             //- Overridable function to handle the particle hitting a wallPatch
             template<class TrackData>
             void hitWallPatch
@@ -280,29 +283,12 @@ public:
                 const tetIndices&
             );
 
-            //- Overridable function to handle the particle hitting a wallPatch
-            //  without trackData
-            void hitWallPatch
-            (
-                const wallPolyPatch&,
-                int&,
-                const tetIndices&
-            );
-
             //- Overridable function to handle the particle hitting a polyPatch
             template<class TrackData>
             void hitPatch
             (
                 const polyPatch&,
                 TrackData& td
-            );
-
-            //- Overridable function to handle the particle hitting a polyPatch
-            //- without trackData
-            void hitPatch
-            (
-                const polyPatch&,
-                int&
             );
 
             //- Transform the physical properties of the particle
@@ -316,9 +302,9 @@ public:
 
         // I-O
 
-            static void readFields(Cloud<ParcelType>& c);
+            static void readFields(Cloud<DsmcParcel<ParcelType> >& c);
 
-            static void writeFields(const Cloud<ParcelType>& c);
+            static void writeFields(const Cloud<DsmcParcel<ParcelType> >& c);
 
 
     // Ostream Operator
