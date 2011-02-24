@@ -41,7 +41,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Sample till hits boundary.
 bool Foam::polyLineSet::trackToBoundary
 (
     passiveParticle& singleParticle,
