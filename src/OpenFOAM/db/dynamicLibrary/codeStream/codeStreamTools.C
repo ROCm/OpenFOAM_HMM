@@ -49,6 +49,28 @@ const Foam::fileName Foam::codeStreamTools::codeTemplateDirName
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
+void Foam::codeStreamTools::checkSecurity
+(
+    const char* title,
+    const dictionary& context
+)
+{
+    if (isAdministrator())
+    {
+        FatalIOErrorIn
+        (
+            title,
+            context
+        )   << "This code should not be executed by someone with administrator"
+            << " rights due to security reasons." << nl
+            << "(it writes a shared library which then gets loaded "
+            << "using dlopen)"
+            << exit(FatalIOError);
+    }
+}
+
+
+
 Foam::fileName Foam::codeStreamTools::codePath(const word& subDirName)
 {
     return stringOps::expand("$FOAM_CASE/codeStream/" + subDirName);
@@ -253,6 +275,13 @@ bool Foam::codeStreamTools::copyFilesContents(const fileName& dir) const
         // variables mapping
         HashTable<string> mapping(copyFiles_[i]);
         mapping.set("typeName", name_);
+
+        // provide a zero digest if not otherwise specified
+        if (!mapping.found("SHA1sum"))
+        {
+            mapping.insert("SHA1sum", SHA1Digest().str());
+        }
+
         copyAndExpand(is, os, mapping);
     }
 

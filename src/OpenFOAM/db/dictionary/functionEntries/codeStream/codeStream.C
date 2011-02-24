@@ -35,7 +35,8 @@ License
 #include "dlLibraryTable.H"
 #include "OSspecific.H"
 #include "Time.H"
-#include "Pstream.H"
+#include "PstreamReduceOps.H"
+
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -70,18 +71,11 @@ bool Foam::functionEntries::codeStream::execute
     Istream& is
 )
 {
-    if (isAdministrator())
-    {
-        FatalIOErrorIn
-        (
-            "functionEntries::codeStream::execute(..)",
-            parentDict
-        )   << "This code should not be executed by someone with administrator"
-            << " rights due to security reasons." << endl
-            << "(it writes a shared library which then gets loaded "
-            << "using dlopen)"
-            << exit(FatalIOError);
-    }
+    codeStreamTools::checkSecurity
+    (
+        "functionEntries::codeStream::execute(..)",
+        parentDict
+    );
 
     // get code dictionary
     // must reference parent for stringOps::expand to work nicely
@@ -175,6 +169,7 @@ bool Foam::functionEntries::codeStream::execute
                 copyFiles[0].file() = fileCsrc;
                 copyFiles[0].set("codeInclude", codeInclude);
                 copyFiles[0].set("code", code);
+                copyFiles[0].set("SHA1sum", sha.str());
 
                 List<codeStreamTools::fileAndContent> filesContents(2);
 
@@ -218,8 +213,9 @@ bool Foam::functionEntries::codeStream::execute
             }
         }
 
-//        bool dummy = true;
-//        reduce(dummy, orOp<bool>());
+        // all processes must wait for compile
+        bool dummy = true;
+        reduce(dummy, orOp<bool>());
 
         if (!dlLibraryTable::open(libPath, false))
         {

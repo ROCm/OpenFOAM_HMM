@@ -145,6 +145,13 @@ public:
 
     // Member functions
 
+        //- Check security for creating dynamic code
+        static void checkSecurity
+        (
+            const char* title,
+            const dictionary& context
+        );
+
         //- Local path for specified code name
         //  Expanded from \$FOAM_CASE/codeStream
         static fileName codePath(const word& subDirName);
