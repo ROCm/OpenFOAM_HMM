@@ -82,7 +82,7 @@ class uniformSet
         //  reached
         bool trackToBoundary
         (
-            passiveParticleCloud& particles,
+            passiveParticle& singleParticle,
             point& samplePt,
             label& sampleI,
             DynamicList<point>& samplingPts,

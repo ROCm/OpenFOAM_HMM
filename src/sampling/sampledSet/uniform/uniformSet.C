@@ -77,7 +77,7 @@ bool Foam::uniformSet::nextSample
 
 bool Foam::uniformSet::trackToBoundary
 (
-    passiveParticleCloud& particles,
+    passiveParticle& singleParticle,
     point& samplePt,
     label& sampleI,
     DynamicList<point>& samplingPts,
@@ -91,12 +91,11 @@ bool Foam::uniformSet::trackToBoundary
     const vector smallVec = tol*offset;
     const scalar smallDist = mag(smallVec);
 
-    passiveParticle& singleParticle = *particles.first();
-
     // Alias
     const point& trackPt = singleParticle.position();
 
-    particle::TrackingData<passiveParticleCloud> trackData(particles);
+    passiveParticleCloud particleCloud(mesh());
+    particle::TrackingData<passiveParticleCloud> trackData(particleCloud);
 
     while(true)
     {
@@ -305,16 +304,12 @@ void Foam::uniformSet::calcSamples
 
     while(true)
     {
-        passiveParticleCloud particles(mesh());
-
         // Initialize tracking starting from trackPt
         passiveParticle singleParticle(mesh(), trackPt, trackCellI);
 
-        particles.addParticle(&singleParticle);
-
         bool reachedBoundary = trackToBoundary
         (
-            particles,
+            singleParticle,
             samplePt,
             sampleI,
             samplingPts,

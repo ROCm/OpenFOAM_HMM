@@ -44,7 +44,7 @@ namespace Foam
 // Sample till hits boundary.
 bool Foam::polyLineSet::trackToBoundary
 (
-    passiveParticleCloud& particles,
+    passiveParticle& singleParticle,
     label& sampleI,
     DynamicList<point>& samplingPts,
     DynamicList<label>& samplingCells,
@@ -52,9 +52,8 @@ bool Foam::polyLineSet::trackToBoundary
     DynamicList<scalar>& samplingCurveDist
 ) const
 {
-    passiveParticle& singleParticle = *particles.first();
-
-    particle::TrackingData<passiveParticleCloud> trackData(particles);
+    passiveParticleCloud particleCloud(mesh());
+    particle::TrackingData<passiveParticleCloud> trackData(particleCloud);
 
     // Alias
     const point& trackPt = singleParticle.position();
@@ -260,8 +259,6 @@ void Foam::polyLineSet::calcSamples
         //
 
         // Initialize tracking starting from sampleI
-        passiveParticleCloud particles(mesh());
-
         passiveParticle singleParticle
         (
             mesh(),
@@ -271,7 +268,7 @@ void Foam::polyLineSet::calcSamples
 
         bool bReached = trackToBoundary
         (
-            particles,
+            singleParticle,
             sampleI,
             samplingPts,
             samplingCells,

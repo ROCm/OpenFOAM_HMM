@@ -65,7 +65,7 @@ class polyLineSet
         //  Returns false if end of samples reached.
         bool trackToBoundary
         (
-            passiveParticleCloud& particles,
+            passiveParticle& singleParticle,
             label& sampleI,
             DynamicList<point>& samplingPts,
             DynamicList<label>& samplingCells,

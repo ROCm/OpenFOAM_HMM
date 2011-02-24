@@ -43,7 +43,7 @@ namespace Foam
 
 bool Foam::faceOnlySet::trackToBoundary
 (
-    passiveParticleCloud& particles,
+    passiveParticle& singleParticle,
     DynamicList<point>& samplingPts,
     DynamicList<label>& samplingCells,
     DynamicList<label>& samplingFaces,
@@ -55,9 +55,8 @@ bool Foam::faceOnlySet::trackToBoundary
     const vector smallVec = tol*offset;
     const scalar smallDist = mag(smallVec);
 
-    passiveParticle& singleParticle = *particles.first();
-
-    particle::TrackingData<passiveParticleCloud> trackData(particles);
+    passiveParticleCloud particleCloud(mesh());
+    particle::TrackingData<passiveParticleCloud> trackData(particleCloud);
 
     // Alias
     const point& trackPt = singleParticle.position();
@@ -210,8 +209,6 @@ void Foam::faceOnlySet::calcSamples
         }
 
         // Initialize tracking starting from trackPt
-        passiveParticleCloud particles(mesh());
-
         passiveParticle singleParticle
         (
             mesh(),
@@ -219,11 +216,9 @@ void Foam::faceOnlySet::calcSamples
             trackCellI
         );
 
-        particles.addParticle(&singleParticle);
-
         bool reachedBoundary = trackToBoundary
         (
-            particles,
+            singleParticle,
             samplingPts,
             samplingCells,
             samplingFaces,

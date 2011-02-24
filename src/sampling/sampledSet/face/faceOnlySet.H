@@ -68,7 +68,7 @@ class faceOnlySet
         //  reached
         bool trackToBoundary
         (
-            passiveParticleCloud& particles,
+            passiveParticle& singleParticle,
             DynamicList<point>& samplingPts,
             DynamicList<label>& samplingCells,
             DynamicList<label>& samplingFaces,
