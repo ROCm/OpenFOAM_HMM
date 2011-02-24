@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -72,19 +72,6 @@ protected:
 
         //- Initialise the calculation of the patch geometry
         void initGeometry(PstreamBuffers&);
-
-//        //- Initialise the calculation of the patch geometry with externally
-//        //  provided geometry
-//        virtual void initGeometry
-//        (
-//            const primitivePatch& referPatch,
-//            UList<point>&,
-//            UList<point>&,
-//            UList<point>&
-//        )
-//        {
-//            notImplemented("processorCyclicPolyPatch::initGeometry(..)");
-//        }
 
         //- Calculate the patch geometry
         void calcGeometry(PstreamBuffers&);
@@ -285,36 +272,6 @@ public:
         {
             return referPatch().owner();
         }
-
-//        //- Transform a patch-based field from other side to this side.
-//        virtual bool doTransform() const
-//        {
-//            return referPatch().doTransform();
-//        }
-//        virtual void transform(scalarField& l) const
-//        {
-//            referPatch().transform(l);
-//        }
-//        virtual void transform(vectorField& l) const
-//        {
-//            referPatch().transform(l);
-//        }
-//        virtual void transform(sphericalTensorField& l) const
-//        {
-//            referPatch().transform(l);
-//        }
-//        virtual void transform(diagTensorField& l) const
-//        {
-//            referPatch().transform(l);
-//        }
-//        virtual void transform(symmTensorField& l) const
-//        {
-//            referPatch().transform(l);
-//        }
-//        virtual void transform(tensorField& l) const
-//        {
-//            referPatch().transform(l);
-//        }
 
         //- Transform a patch-based position from other side to this side
         virtual void transformPosition(pointField& l) const

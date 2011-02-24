@@ -1,7 +1,5 @@
 EXE_INC = \
-    /* -DFULLDEBUG -O0 -g */ \
     -I.. \
-    -I../derivedFvPatchFields \
     -Ifluid \
     -Isolid \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
@@ -9,6 +7,7 @@ EXE_INC = \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basicSolidThermo/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/radiationModels/lnInclude \
     -I$(LIB_SRC)/turbulenceModels \
     -I$(LIB_SRC)/turbulenceModels/compressible/turbulenceModel/lnInclude \
     -I$(LIB_SRC)/turbulenceModels/compressible/RAS/lnInclude
@@ -20,4 +19,6 @@ EXE_LIBS = \
     -lspecie \
     -lcompressibleTurbulenceModel \
     -lcompressibleRASModels \
-    -lcompressibleLESModels
+    -lcompressibleLESModels \
+    -lradiationModels \
+    -lcoupledDerivedFvPatchFields

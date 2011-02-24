@@ -80,6 +80,9 @@ public:
     //- Return true if the digest is empty (ie, all zero).
     bool empty() const;
 
+    //- Return string representation
+    std::string str() const;
+
     //- Equality operator
     bool operator==(const SHA1Digest&) const;
 

@@ -86,6 +86,9 @@ export FOAM_SITE_LIBBIN=$WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/
 export FOAM_USER_APPBIN=$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/bin
 export FOAM_USER_LIBBIN=$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib
 
+# codeStream templates
+export FOAM_CODESTREAM_TEMPLATE_DIR=$WM_PROJECT_DIR/etc/codeTemplates/codeStream
+
 # convenience
 export FOAM_APP=$WM_PROJECT_DIR/applications
 #export FOAM_LIB=$WM_PROJECT_DIR/lib
@@ -107,7 +110,7 @@ _foamAddLib  $FOAM_USER_LIBBIN:$FOAM_SITE_LIBBIN:$FOAM_LIBBIN:$FOAM_EXT_LIBBIN:$
 # Compiler settings
 # ~~~~~~~~~~~~~~~~~
 unset gcc_version gmp_version mpfr_version mpc_version
-unset MPFR_ARCH_PATH
+unset MPFR_ARCH_PATH GMP_ARCH_PATH
 
 # Location of compiler installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -198,6 +201,7 @@ OpenFOAM | ThirdParty)
 
         # used by boost/CGAL:
         export MPFR_ARCH_PATH=$mpfrDir
+        export GMP_ARCH_PATH=$gmpDir
     fi
     unset gcc_version gccDir
     unset gmp_version gmpDir  mpfr_version mpfrDir  mpc_version mpcDir
@@ -247,7 +251,7 @@ fi
 # boost and CGAL
 # ~~~~~~~~~~~~~~
 
-boost_version=boost_1_42_0
+boost_version=boost_1_45_0
 cgal_version=CGAL-3.7
 
 export BOOST_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$boost_version
@@ -264,7 +268,7 @@ then
     fi
     _foamAddLib $CGAL_ARCH_PATH/lib
 else
-    unset BOOST_ARCH_PATH CGAL_ARCH_PATH MPFR_ARCH_PATH
+    unset BOOST_ARCH_PATH CGAL_ARCH_PATH MPFR_ARCH_PATH GMP_ARCH_PATH
 fi
 
 unset boost_version cgal_version

@@ -63,6 +63,9 @@ setenv FOAM_SITE_LIBBIN $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/
 setenv FOAM_USER_APPBIN $WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/bin
 setenv FOAM_USER_LIBBIN $WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib
 
+# codeStream templates
+setenv FOAM_CODESTREAM_TEMPLATE_DIR $WM_PROJECT_DIR/etc/codeTemplates/codeStream
+
 # convenience
 setenv FOAM_APP $WM_PROJECT_DIR/applications
 #setenv FOAM_LIB $WM_PROJECT_DIR/lib
@@ -84,7 +87,7 @@ _foamAddLib  ${FOAM_USER_LIBBIN}:${FOAM_SITE_LIBBIN}:${FOAM_LIBBIN}:${FOAM_EXT_L
 # Compiler settings
 # ~~~~~~~~~~~~~~~~~
 unset gcc_version gmp_version mpfr_version mpc_version
-unsetenv MPFR_ARCH_PATH
+unsetenv MPFR_ARCH_PATH GMP_ARCH_PATH
 
 
 # Location of compiler installation
@@ -178,6 +181,7 @@ case ThirdParty:
 
         # used by boost/CGAL:
         setenv MPFR_ARCH_PATH $mpfrDir
+        setenv GMP_ARCH_PATH $gmpDir
     endif
     unset gcc_version gccDir
     unset gmp_version gmpDir  mpfr_version mpfrDir  mpc_version mpcDir
@@ -228,7 +232,7 @@ endif
 # boost and CGAL
 # ~~~~~~~~~~~~~~
 
-set boost_version=boost_1_42_0
+set boost_version=boost_1_45_0
 set cgal_version=CGAL-3.7
 
 setenv BOOST_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$boost_version
@@ -243,7 +247,7 @@ if ( -d "$CGAL_ARCH_PATH" ) then
     endif
     _foamAddLib $CGAL_ARCH_PATH/lib
 else
-    unsetenv BOOST_ARCH_PATH CGAL_ARCH_PATH MPFR_ARCH_PATH
+    unsetenv BOOST_ARCH_PATH CGAL_ARCH_PATH MPFR_ARCH_PATH GMP_ARCH_PATH
 endif
 
 unset boost_version cgal_version

@@ -25,7 +25,8 @@ boundaryField
     {
         type            MarshakRadiation;
         T               T;
-        emissivity      1.0;
+        emissivityMode  lookup;
+        emissivity      uniform 1.0;
         value           uniform 0;
     }
     frontAndBack

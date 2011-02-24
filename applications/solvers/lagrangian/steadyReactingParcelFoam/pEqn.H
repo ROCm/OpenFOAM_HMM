@@ -23,16 +23,21 @@
             );
     }
 
+    fvScalarMatrix DrhoDtEqn
+    (
+        fvc::ddt(rho) + psi*correction(fvm::ddt(p))
+      + fvc::div(phi)
+     ==
+        parcels.Srho()
+      + massSource.SuTot()
+    );
+
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
         fvScalarMatrix pEqn
         (
-            fvc::ddt(rho) + psi*correction(fvm::ddt(p))
-          + fvc::div(phi)
+            DrhoDtEqn
           - fvm::laplacian(rho*rAU, p)
-        ==
-            parcels.Srho()
-          + massSource.SuTot()
         );
 
         pEqn.solve();

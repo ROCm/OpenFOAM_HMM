@@ -49,7 +49,10 @@ Foam::label Foam::PatchInjection<CloudType>::parcelsToInject
         if
         (
             nParcelsToInject > 0
-         && (nParcels - scalar(nParcelsToInject) > rnd.position(0.0, 1.0))
+         && (
+               nParcels - scalar(nParcelsToInject)
+             > rnd.position(scalar(0), scalar(1))
+            )
         )
         {
             ++nParcelsToInject;

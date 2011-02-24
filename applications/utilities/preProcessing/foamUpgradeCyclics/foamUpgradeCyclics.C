@@ -34,6 +34,9 @@ Usage
     \param -test \n
     Suppress writing the updated files with split cyclics
 
+    \param -enableFunctionEntries \n
+    By default all dictionary preprocessing of fields is disabled
+
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
@@ -391,7 +394,12 @@ int main(int argc, char *argv[])
 {
     timeSelector::addOptions();
 
-    argList::addBoolOption("test");
+    argList::addBoolOption("test", "test only; do not change any files");
+    argList::addBoolOption
+    (
+        "enableFunctionEntries",
+        "enable expansion of dictionary directives - #include, #codeStream etc"
+    );
 #   include "addRegionOption.H"
 
 #   include "setRootCase.H"
@@ -404,6 +412,7 @@ int main(int argc, char *argv[])
     {
         Info<< "-test option: no changes made" << nl << endl;
     }
+    const bool enableEntries = args.optionFound("enableFunctionEntries");
 
 
     Foam::word regionName = polyMesh::defaultRegion;
@@ -481,6 +490,13 @@ int main(int argc, char *argv[])
 
         IOobjectList objects(runTime, runTime.timeName());
 
+
+        int oldFlag = entry::disableFunctionEntries;
+        if (!enableEntries)
+        {
+            // By default disable dictionary expansion for fields
+            entry::disableFunctionEntries = 1;
+        }
 
         // volFields
         // ~~~~~~~~~
@@ -615,6 +631,8 @@ int main(int argc, char *argv[])
             thisNames,
             nbrNames
         );
+
+        entry::disableFunctionEntries = oldFlag;
     }
 
     return 0;

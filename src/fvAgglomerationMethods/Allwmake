@@ -10,4 +10,6 @@ then
     wmake $makeOption MGridGenGamgAgglomeration
 fi
 
+wmake libso pairPatchAgglomeration
+
 # ----------------------------------------------------------------- end-of-file

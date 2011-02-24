@@ -78,6 +78,7 @@ $(strings)/fileName/fileNameIO.C
 $(strings)/keyType/keyType.C
 $(strings)/wordRe/wordRe.C
 $(strings)/lists/hashedWordList.C
+$(strings)/stringOps/stringOps.C
 
 primitives/hashes/Hasher/Hasher.C
 
@@ -159,22 +160,12 @@ $(dictionaryEntry)/dictionaryEntry.C
 $(dictionaryEntry)/dictionaryEntryIO.C
 
 functionEntries = $(dictionary)/functionEntries
+$(functionEntries)/codeStream/codeStream.C
 $(functionEntries)/functionEntry/functionEntry.C
 $(functionEntries)/includeEntry/includeEntry.C
 $(functionEntries)/includeIfPresentEntry/includeIfPresentEntry.C
 $(functionEntries)/inputModeEntry/inputModeEntry.C
 $(functionEntries)/removeEntry/removeEntry.C
-
-/*
- * Requires customized coco-cpp
- * could be dropped or activated in the future
- */
-/*
-  calcEntry = $(functionEntries)/calcEntry
-  $(calcEntry)/calcEntryParser.atg
-  $(calcEntry)/calcEntryInternal.C
-  $(calcEntry)/calcEntry.C
-*/
 
 IOdictionary = db/IOobjects/IOdictionary
 $(IOdictionary)/IOdictionary.C
@@ -196,7 +187,10 @@ $(regIOobject)/regIOobjectWrite.C
 db/IOobjectList/IOobjectList.C
 db/objectRegistry/objectRegistry.C
 db/CallbackRegistry/CallbackRegistryName.C
-db/dlLibraryTable/dlLibraryTable.C
+
+dll = db/dynamicLibrary
+$(dll)/codeStream/codeStreamTools.C
+$(dll)/dlLibraryTable/dlLibraryTable.C
 
 db/functionObjects/functionObject/functionObject.C
 db/functionObjects/functionObjectList/functionObjectList.C

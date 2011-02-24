@@ -25,21 +25,24 @@ boundaryField
     {
         type            MarshakRadiation;
         T               T;
-        emissivity      1.0;
+        emissivityMode  lookup;
+        emissivity      uniform 1.0;
         value           uniform 0;
     }
     bottom
     {
         type            MarshakRadiation;
         T               T;
-        emissivity      1.0;
+        emissivityMode  lookup;
+        emissivity      uniform 1.0;
         value           uniform 0;
     }
     walls
     {
         type            MarshakRadiation;
         T               T;
-        emissivity      1.0;
+        emissivityMode  lookup;
+        emissivity      uniform 1.0;
         value           uniform 0;
     }
     symmetry

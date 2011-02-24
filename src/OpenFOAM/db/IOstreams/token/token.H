@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -78,6 +78,7 @@ public:
         PUNCTUATION,
         WORD,
         STRING,
+        VERBATIMSTRING,
         LABEL,
         FLOAT_SCALAR,
         DOUBLE_SCALAR,
@@ -104,6 +105,7 @@ public:
         END_BLOCK      = '}',
         COLON          = ':',
         COMMA          = ',',
+        HASH           = '#',
 
         BEGIN_STRING   = '"',
         END_STRING     = BEGIN_STRING,
@@ -317,6 +319,7 @@ public:
         // Access
 
             inline tokenType type() const;
+            inline tokenType& type();
 
             inline bool good() const;
             inline bool undefined() const;

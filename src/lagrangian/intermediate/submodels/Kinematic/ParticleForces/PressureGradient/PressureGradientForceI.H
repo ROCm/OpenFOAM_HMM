@@ -41,7 +41,7 @@ const
             "const"
         )   << "gradU field not allocated" << abort(FatalError);
 
-        return reinterpret_cast<const volTensorField>(0);
+        return *reinterpret_cast<const volTensorField*>(0);
     }
 }
 

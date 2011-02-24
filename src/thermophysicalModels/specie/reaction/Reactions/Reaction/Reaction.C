@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,20 @@ License
 #include "Reaction.H"
 #include "DynamicList.H"
 
+// * * * * * * * * * * * * * * * * Static Data * * * * * * * * * * * * * * * //
+
+template<class ReactionThermo>
+Foam::label Foam::Reaction<ReactionThermo>::nUnNamedReactions = 0;
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class ReactionThermo>
+Foam::label Foam::Reaction<ReactionThermo>::getNewReactionID()
+{
+    return nUnNamedReactions++;
+}
+
 
 template<class ReactionThermo>
 Foam::string Foam::Reaction<ReactionThermo>::reactionStr() const
@@ -114,6 +127,7 @@ Foam::Reaction<ReactionThermo>::Reaction
 )
 :
     ReactionThermo(*thermoDatabase[species[0]]),
+    name_("un-named-reaction-" + Foam::name(getNewReactionID())),
     species_(species),
     lhs_(lhs),
     rhs_(rhs)
@@ -130,6 +144,7 @@ Foam::Reaction<ReactionThermo>::Reaction
 )
 :
     ReactionThermo(r),
+    name_(r.name() + "Copy"),
     species_(species),
     lhs_(r.lhs_),
     rhs_(r.rhs_)
@@ -236,6 +251,7 @@ Foam::Reaction<ReactionThermo>::Reaction
 )
 :
     ReactionThermo(*thermoDatabase[species[0]]),
+    name_("un-named-reaction" + Foam::name(getNewReactionID())),
     species_(species)
 {
     setLRhs(is);
@@ -252,6 +268,7 @@ Foam::Reaction<ReactionThermo>::Reaction
 )
 :
     ReactionThermo(*thermoDatabase[species[0]]),
+    name_(dict.dictName()),
     species_(species)
 {
     setLRhs(IStringStream(dict.lookup("reaction"))());
@@ -318,7 +335,7 @@ Foam::Reaction<ReactionThermo>::New
     const dictionary& dict
 )
 {
-    const word& reactionTypeName = dict.dictName();
+    const word& reactionTypeName = dict.lookup("type");
 
     typename dictionaryConstructorTable::iterator cstrIter
         = dictionaryConstructorTablePtr_->find(reactionTypeName);

@@ -105,7 +105,7 @@ echo $timeStamp 2>/dev/null > $packDir/.timeStamp
 if [ "$nogit" = true ]
 then
     echo "pack manually" 1>&2
-    $toolsDir/foamPackSource $packDir $packFile
+    foamPackSource $packDir $packFile
 else
     echo "pack with git-archive" 1>&2
     ( cd $packDir && git archive --format=tar --prefix=$packDir/ HEAD) > $packBase.tar

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,6 +45,7 @@ Description
 #include "IOPtrList.H"
 #include "polyTopoChange.H"
 #include "polyModifyFace.H"
+#include "wordReList.H"
 
 using namespace Foam;
 
@@ -669,7 +670,13 @@ int main(int argc, char *argv[])
 
         if (sourceType == "patches")
         {
-            labelHashSet patchSources(patches.patchSet(dict.lookup("patches")));
+            labelHashSet patchSources
+            (
+                patches.patchSet
+                (
+                    wordReList(dict.lookup("patches"))
+                )
+            );
 
             // Repatch faces of the patches.
             forAllConstIter(labelHashSet, patchSources, iter)

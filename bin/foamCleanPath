@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -34,9 +34,11 @@
 #         - elements whose start matches a wildcard
 #         - inaccessible directories (with the -strip (at your option)
 #
-#     Note:
-#         - this routine will fail when directories have embedded spaces
-#         - false matches possible if a wildcard contains '.' (sed regex)
+# Note
+#     - this routine will fail when directories have embedded spaces
+#     - false matches possible if a wildcard contains '.' (sed regex)
+#     - the wildcards can themselves can be written together and separated
+#       by colons or whitespace
 #------------------------------------------------------------------------------
 usage() {
     cat <<USAGE 1>&2
@@ -81,11 +83,12 @@ shift
 
 ##DEBUG echo "input>$dirList<" 1>&2
 
-# preserve current IFS and split on whitespace
+# preserve current IFS and split on colon or whitespace
 oldIFS="$IFS"
-IFS=' '
+IFS=': '
 
 # "wildcard1 ... wildcardN" may have been passed as a single parameter
+# or may contain ':' separators
 set -- $*
 
 # strip out wildcards via sed
@@ -94,7 +97,10 @@ do
     wildcard=$1
     shift
     ##DEBUG echo "remove>$wildcard<" 1>&2
-    dirList=$(echo "$dirList" | sed -e "s@${wildcard}[^:]*:@@g")
+    if [ -n "$wildcard" ]
+    then
+        dirList=$(echo "$dirList:" | sed -e "s@${wildcard}[^:]*:@@g")
+    fi
 done
 
 # split on ':' (and on space as well to avoid any surprises)

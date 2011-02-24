@@ -60,6 +60,8 @@ Usage
     \param -literalRE \n
     Do not interpret regular expressions; treat them as any other keyword.
 
+    \param -enableFunctionEntries \n
+    By default all dictionary preprocessing of fields is disabled
 
 \*---------------------------------------------------------------------------*/
 
@@ -255,6 +257,11 @@ int main(int argc, char *argv[])
         "literalRE",
         "treat regular expressions literally (ie, as a keyword)"
     );
+    argList::addBoolOption
+    (
+        "enableFunctionEntries",
+        "enable expansion of dictionary directives - #include, #codeStream etc"
+    );
     #include "addRegionOption.H"
 
     #include "setRootCase.H"
@@ -269,6 +276,20 @@ int main(int argc, char *argv[])
             << " in the changeDictionaryDict." << endl
             << "Instead they are handled as any other entry, i.e. added if"
             << " not present." << endl;
+    }
+
+    const bool enableEntries = args.optionFound("enableFunctionEntries");
+    if (enableEntries)
+    {
+        Info<< "Allowing dictionary preprocessing ('#include', '#codeStream')."
+            << endl;
+    }
+
+    int oldFlag = entry::disableFunctionEntries;
+    if (!enableEntries)
+    {
+        // By default disable dictionary expansion for fields
+        entry::disableFunctionEntries = 1;
     }
 
 
@@ -410,6 +431,7 @@ int main(int argc, char *argv[])
                     false
                 )
             );
+
             const_cast<word&>(IOdictionary::typeName) = oldTypeName;
             // Fake type back to what was in field
             const_cast<word&>(fieldDict.type()) = fieldDict.headerClassName();
@@ -428,6 +450,8 @@ int main(int argc, char *argv[])
             fieldDict.regIOobject::write();
         }
     }
+
+    entry::disableFunctionEntries = oldFlag;
 
     Info<< endl;
 
