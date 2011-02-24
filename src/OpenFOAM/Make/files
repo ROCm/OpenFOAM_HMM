@@ -167,17 +167,6 @@ $(functionEntries)/includeIfPresentEntry/includeIfPresentEntry.C
 $(functionEntries)/inputModeEntry/inputModeEntry.C
 $(functionEntries)/removeEntry/removeEntry.C
 
-/*
- * Requires customized coco-cpp
- * could be dropped or activated in the future
- */
-/*
-  calcEntry = $(functionEntries)/calcEntry
-  $(calcEntry)/calcEntryParser.atg
-  $(calcEntry)/calcEntryInternal.C
-  $(calcEntry)/calcEntry.C
-*/
-
 IOdictionary = db/IOobjects/IOdictionary
 $(IOdictionary)/IOdictionary.C
 $(IOdictionary)/IOdictionaryIO.C

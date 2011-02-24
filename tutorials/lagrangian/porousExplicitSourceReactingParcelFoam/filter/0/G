@@ -25,8 +25,7 @@ boundaryField
     {
         type            MarshakRadiation;
         T               T;
-        emissivityMode  lookup;
-        emissivity      uniform 1.0;
+        emissivity      1;
         value           uniform 0;
         refValue        uniform 0;
         refGradient     uniform 0;
@@ -36,8 +35,7 @@ boundaryField
     {
         type            MarshakRadiation;
         T               T;
-        emissivityMode  lookup;
-        emissivity      uniform 1.0;
+        emissivity      1;
         value           uniform 0;
         refValue        uniform 0;
         refGradient     uniform 0;
