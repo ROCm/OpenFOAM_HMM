@@ -393,22 +393,66 @@ bool Foam::tetrahedron<Point, PointRef>::inside(const point& pt) const
     // area[1] = Sb();
     // area[2] = Sc();
     // area[3] = Sd();
-    // planeBase[0] = tetBasePt = tet.b()
-    // planeBase[1] = ptA       = tet.c()
-    // planeBase[2] = tetBasePt = tet.b()
-    // planeBase[3] = tetBasePt = tet.b()
+    // planeBase[0] = tetBasePt = b_
+    // planeBase[1] = ptA       = c_
+    // planeBase[2] = tetBasePt = b_
+    // planeBase[3] = tetBasePt = b_
 
-    vector n = Sa();
-    n /= (Foam::mag(n) + VSMALL);
+    vector n = vector::zero;
 
-    if (((pt - b_) & n) > SMALL)
     {
-        return false;
+        // 0, a
+        const point& basePt = b_;
+
+        n = Sa();
+        n /= (mag(n) + VSMALL);
+
+        if (((pt - basePt) & n) > SMALL)
+        {
+            return false;
+        }
     }
-    else
+
     {
-        return true;
+        // 1, b
+        const point& basePt = c_;
+
+        n = Sb();
+        n /= (mag(n) + VSMALL);
+
+        if (((pt - basePt) & n) > SMALL)
+        {
+            return false;
+        }
     }
+
+    {
+        // 2, c
+        const point& basePt = b_;
+
+        n = Sc();
+        n /= (mag(n) + VSMALL);
+
+        if (((pt - basePt) & n) > SMALL)
+        {
+            return false;
+        }
+    }
+
+    {
+        // 3, d
+        const point& basePt = b_;
+
+        n = Sd();
+        n /= (mag(n) + VSMALL);
+
+        if (((pt - basePt) & n) > SMALL)
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 
