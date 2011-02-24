@@ -405,7 +405,7 @@ bool Foam::tetrahedron<Point, PointRef>::inside(const point& pt) const
         const point& basePt = b_;
 
         n = Sa();
-        n /= (mag(n) + VSMALL);
+        n /= (Foam::mag(n) + VSMALL);
 
         if (((pt - basePt) & n) > SMALL)
         {
@@ -418,7 +418,7 @@ bool Foam::tetrahedron<Point, PointRef>::inside(const point& pt) const
         const point& basePt = c_;
 
         n = Sb();
-        n /= (mag(n) + VSMALL);
+        n /= (Foam::mag(n) + VSMALL);
 
         if (((pt - basePt) & n) > SMALL)
         {
@@ -431,7 +431,7 @@ bool Foam::tetrahedron<Point, PointRef>::inside(const point& pt) const
         const point& basePt = b_;
 
         n = Sc();
-        n /= (mag(n) + VSMALL);
+        n /= (Foam::mag(n) + VSMALL);
 
         if (((pt - basePt) & n) > SMALL)
         {
@@ -444,7 +444,7 @@ bool Foam::tetrahedron<Point, PointRef>::inside(const point& pt) const
         const point& basePt = b_;
 
         n = Sd();
-        n /= (mag(n) + VSMALL);
+        n /= (Foam::mag(n) + VSMALL);
 
         if (((pt - basePt) & n) > SMALL)
         {
