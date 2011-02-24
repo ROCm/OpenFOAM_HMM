@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,29 +63,14 @@ Foam::tensor Foam::molecule::rotationTensorZ(scalar phi) const
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::molecule::trackData::trackData
-(
-    moleculeCloud& molCloud,
-    label part
-)
-:
-    Particle<molecule>::trackData(molCloud),
-    molCloud_(molCloud),
-    part_(part)
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
-bool Foam::molecule::move(molecule::trackData& td, const scalar trackTime)
+bool Foam::molecule::move(molecule::trackingData& td, const scalar trackTime)
 {
     td.switchProcessor = false;
     td.keepParticle = true;
 
-    const constantProperties& constProps(td.molCloud().constProps(id_));
+    const constantProperties& constProps(td.cloud().constProps(id_));
 
     if (td.part() == 0)
     {
@@ -195,9 +180,8 @@ bool Foam::molecule::move(molecule::trackData& td, const scalar trackTime)
     }
     else
     {
-        FatalErrorIn("molecule::move(molecule::trackData& td)") << nl
-            << td.part()
-            << " is an invalid part of the integration method."
+        FatalErrorIn("molecule::move(trackingData&, const scalar)") << nl
+            << td.part() << " is an invalid part of the integration method."
             << abort(FatalError);
     }
 
@@ -207,7 +191,7 @@ bool Foam::molecule::move(molecule::trackData& td, const scalar trackTime)
 
 void Foam::molecule::transformProperties(const tensor& T)
 {
-    Particle<molecule>::transformProperties(T);
+    particle::transformProperties(T);
 
     Q_ = T & Q_;
 
@@ -229,7 +213,7 @@ void Foam::molecule::transformProperties(const tensor& T)
 
 void Foam::molecule::transformProperties(const vector& separation)
 {
-    Particle<molecule>::transformProperties(separation);
+    particle::transformProperties(separation);
 
     if (special_ == SPECIAL_TETHERED)
     {
@@ -257,20 +241,7 @@ void Foam::molecule::setSiteSizes(label size)
 bool Foam::molecule::hitPatch
 (
     const polyPatch&,
-    molecule::trackData&,
-    const label,
-    const scalar,
-    const tetIndices&
-)
-{
-    return false;
-}
-
-
-bool Foam::molecule::hitPatch
-(
-    const polyPatch&,
-    int&,
+    trackingData&,
     const label,
     const scalar,
     const tetIndices&
@@ -283,25 +254,17 @@ bool Foam::molecule::hitPatch
 void Foam::molecule::hitProcessorPatch
 (
     const processorPolyPatch&,
-    molecule::trackData& td
+    trackingData& td
 )
 {
     td.switchProcessor = true;
 }
 
 
-void Foam::molecule::hitProcessorPatch
-(
-    const processorPolyPatch&,
-    int&
-)
-{}
-
-
 void Foam::molecule::hitWallPatch
 (
     const wallPolyPatch& wpp,
-    molecule::trackData& td,
+    trackingData& td,
     const tetIndices& tetIs
 )
 {
@@ -320,31 +283,14 @@ void Foam::molecule::hitWallPatch
 }
 
 
-void Foam::molecule::hitWallPatch
-(
-    const wallPolyPatch&,
-    int&,
-    const tetIndices&
-)
-{}
-
-
 void Foam::molecule::hitPatch
 (
     const polyPatch&,
-    molecule::trackData& td
+    trackingData& td
 )
 {
     td.keepParticle = false;
 }
-
-
-void Foam::molecule::hitPatch
-(
-    const polyPatch&,
-    int&
-)
-{}
 
 
 // ************************************************************************* //
