@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "MapLagrangianFields.H"
-#include "Cloud.H"
-#include "passiveParticle.H"
+#include "passiveParticleCloud.H"
 #include "meshSearch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -44,7 +43,9 @@ static label findCell(const Cloud<passiveParticle>& cloud, const point& pt)
     label tetFaceI = -1;
     label tetPtI = -1;
 
-    cloud.findCellFacePt(pt, cellI, tetFaceI, tetPtI);
+    const polyMesh& mesh = cloud.pMesh();
+
+    mesh.findCellFacePt(pt, cellI, tetFaceI, tetPtI);
 
     if (cellI >= 0)
     {
@@ -54,8 +55,6 @@ static label findCell(const Cloud<passiveParticle>& cloud, const point& pt)
     {
         // See if particle on face by finding nearest face and shifting
         // particle.
-
-        const polyMesh& mesh = cloud.pMesh();
 
         meshSearch meshSearcher(mesh, false);
 
@@ -67,7 +66,7 @@ static label findCell(const Cloud<passiveParticle>& cloud, const point& pt)
 
             const point perturbPt = (1-perturbFactor)*pt+perturbFactor*cc;
 
-            cloud.findCellFacePt(perturbPt, cellI, tetFaceI, tetPtI);
+            mesh.findCellFacePt(perturbPt, cellI, tetFaceI, tetPtI);
 
             return cellI;
         }
@@ -124,7 +123,7 @@ void mapLagrangian(const meshToMesh& meshToMeshInterp)
             Info<< nl << "    processing cloud " << cloudDirs[cloudI] << endl;
 
             // Read positions & cell
-            Cloud<passiveParticle> sourceParcels
+            passiveParticleCloud sourceParcels
             (
                 meshSource,
                 cloudDirs[cloudI],
@@ -134,12 +133,14 @@ void mapLagrangian(const meshToMesh& meshToMeshInterp)
                 << " parcels from source mesh." << endl;
 
             // Construct empty target cloud
-            Cloud<passiveParticle> targetParcels
+            passiveParticleCloud targetParcels
             (
                 meshTarget,
                 cloudDirs[cloudI],
                 IDLList<passiveParticle>()
             );
+
+            particle::TrackingData<passiveParticleCloud> td(targetParcels);
 
             label sourceParticleI = 0;
 
@@ -176,15 +177,14 @@ void mapLagrangian(const meshToMesh& meshToMeshInterp)
                         (
                             new passiveParticle
                             (
-                                targetParcels,
+                                meshTarget,
                                 targetCc[targetCells[i]],
                                 targetCells[i]
                             )
                         );
                         passiveParticle& newP = newPtr();
 
-                        scalar fraction = 0;
-                        label faceI = newP.track(iter().position(), fraction);
+                        label faceI = newP.track(iter().position(), td);
 
                         if (faceI < 0 && newP.cell() >= 0)
                         {
@@ -246,7 +246,7 @@ void mapLagrangian(const meshToMesh& meshToMeshInterp)
 
             if (addParticles.size())
             {
-                IOPosition<passiveParticle>(targetParcels).write();
+                IOPosition<passiveParticleCloud>(targetParcels).write();
 
                 // addParticles now contains the indices of the sourceMesh
                 // particles that were appended to the target mesh.

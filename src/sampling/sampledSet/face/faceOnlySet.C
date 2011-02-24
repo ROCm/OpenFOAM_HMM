@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,10 +28,6 @@ License
 #include "DynamicList.H"
 #include "polyMesh.H"
 
-#include "Cloud.H"
-#include "passiveParticle.H"
-#include "IDLList.H"
-
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -45,11 +41,9 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-
-// Sample singly connected segment. Returns false if end_ reached.
 bool Foam::faceOnlySet::trackToBoundary
 (
-    Particle<passiveParticle>& singleParticle,
+    passiveParticleCloud& particles,
     DynamicList<point>& samplingPts,
     DynamicList<label>& samplingCells,
     DynamicList<label>& samplingFaces,
@@ -61,6 +55,10 @@ bool Foam::faceOnlySet::trackToBoundary
     const vector smallVec = tol*offset;
     const scalar smallDist = mag(smallVec);
 
+    passiveParticle& singleParticle = *particles.first();
+
+    particle::TrackingData<passiveParticleCloud> trackData(particles);
+
     // Alias
     const point& trackPt = singleParticle.position();
 
@@ -68,7 +66,7 @@ bool Foam::faceOnlySet::trackToBoundary
     {
         point oldPoint = trackPt;
 
-        singleParticle.trackToFace(end_);
+        singleParticle.trackToFace(end_, trackData);
 
         if (singleParticle.face() != -1 && mag(oldPoint - trackPt) > smallDist)
         {
@@ -212,18 +210,20 @@ void Foam::faceOnlySet::calcSamples
         }
 
         // Initialize tracking starting from trackPt
-        Cloud<passiveParticle> particles(mesh(), IDLList<passiveParticle>());
+        passiveParticleCloud particles(mesh());
 
         passiveParticle singleParticle
         (
-            particles,
+            mesh(),
             trackPt,
             trackCellI
         );
 
+        particles.addParticle(&singleParticle);
+
         bool reachedBoundary = trackToBoundary
         (
-            singleParticle,
+            particles,
             samplingPts,
             samplingCells,
             samplingFaces,

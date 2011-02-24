@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,15 +37,12 @@ SourceFiles
 
 #include "sampledSet.H"
 #include "DynamicList.H"
+#include "passiveParticleCloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward declaration of classes
-class passiveParticle;
-template<class Type> class Particle;
 
 /*---------------------------------------------------------------------------*\
                         Class polyLineSet Declaration
@@ -68,7 +65,7 @@ class polyLineSet
         //  Returns false if end of samples reached.
         bool trackToBoundary
         (
-            Particle<passiveParticle>& singleParticle,
+            passiveParticleCloud& particles,
             label& sampleI,
             DynamicList<point>& samplingPts,
             DynamicList<label>& samplingCells,

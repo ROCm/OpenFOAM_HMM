@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,6 +34,7 @@ SourceFiles
 #ifndef uniformSet_H
 #define uniformSet_H
 
+#include "passiveParticleCloud.H"
 #include "sampledSet.H"
 #include "DynamicList.H"
 
@@ -41,10 +42,6 @@ SourceFiles
 
 namespace Foam
 {
-
-// Forward declaration of classes
-class passiveParticle;
-template<class Type> class Particle;
 
 /*---------------------------------------------------------------------------*\
                            Class uniformSet Declaration
@@ -85,7 +82,7 @@ class uniformSet
         //  reached
         bool trackToBoundary
         (
-            Particle<passiveParticle>& singleParticle,
+            passiveParticleCloud& particles,
             point& samplePt,
             label& sampleI,
             DynamicList<point>& samplingPts,
