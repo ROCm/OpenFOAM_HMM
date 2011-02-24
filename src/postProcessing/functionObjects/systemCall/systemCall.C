@@ -102,7 +102,7 @@ void Foam::systemCall::execute()
 {
     forAll(executeCalls_, callI)
     {
-        Foam::system(executeCalls_[callI].c_str());
+        Foam::system(executeCalls_[callI]);
     }
 }
 
@@ -111,7 +111,7 @@ void Foam::systemCall::end()
 {
     forAll(endCalls_, callI)
     {
-        Foam::system(endCalls_[callI].c_str());
+        Foam::system(endCalls_[callI]);
     }
 }
 
@@ -120,7 +120,7 @@ void Foam::systemCall::write()
 {
     forAll(writeCalls_, callI)
     {
-        Foam::system(writeCalls_[callI].c_str());
+        Foam::system(writeCalls_[callI]);
     }
 }
 
