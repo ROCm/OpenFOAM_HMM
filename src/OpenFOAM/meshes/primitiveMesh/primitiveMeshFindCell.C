@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,11 +25,11 @@ License
 
 #include "primitiveMesh.H"
 #include "cell.H"
-
+#include "tetIndices.H"
+#include "polyMeshTetDecomposition.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Is the point in the cell bounding box
 bool Foam::primitiveMesh::pointInCellBB
 (
     const point& p,
@@ -60,7 +60,6 @@ bool Foam::primitiveMesh::pointInCellBB
 }
 
 
-// Is the point in the cell
 bool Foam::primitiveMesh::pointInCell(const point& p, label celli) const
 {
     const labelList& f = cells()[celli];
@@ -86,7 +85,6 @@ bool Foam::primitiveMesh::pointInCell(const point& p, label celli) const
 }
 
 
-// Find the cell with the nearest cell centre
 Foam::label Foam::primitiveMesh::findNearestCell(const point& location) const
 {
     const vectorField& centres = cellCentres();
@@ -109,7 +107,6 @@ Foam::label Foam::primitiveMesh::findNearestCell(const point& location) const
 }
 
 
-// Find cell enclosing this location
 Foam::label Foam::primitiveMesh::findCell(const point& location) const
 {
     if (nCells() == 0)

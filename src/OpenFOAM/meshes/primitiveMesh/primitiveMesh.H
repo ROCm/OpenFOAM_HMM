@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -67,6 +67,8 @@ SourceFiles
 #include "Map.H"
 #include "EdgeMap.H"
 #include "boundBox.H"
+#include "indexedOctree.H"
+#include "treeDataCell.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -154,6 +156,9 @@ class primitiveMesh
 
             //- Cell-points
             mutable labelListList* cpPtr_;
+
+            //- Search tree to allow spatial tet searching
+            mutable indexedOctree<treeDataCell>* cellTreePtr_;
 
 
         // On-the-fly edge addresing storage
@@ -480,6 +485,10 @@ public:
                 const labelListList& pointEdges() const;
                 const labelListList& pointPoints() const;
                 const labelListList& cellPoints() const;
+
+
+            //- Build (if necessary) and return the cell search tree
+            const indexedOctree<treeDataCell>& cellTree() const;
 
 
             // Geometric data (raw!)
@@ -813,6 +822,9 @@ public:
 
             //- Clear topological data
             void clearAddressing();
+
+            //- Clear cell tree data
+            void clearCellTree();
 
             //- Clear all geometry and addressing unnecessary for CFD
             void clearOut();
