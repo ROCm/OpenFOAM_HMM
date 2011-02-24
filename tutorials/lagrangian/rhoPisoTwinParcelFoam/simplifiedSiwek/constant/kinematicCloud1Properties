@@ -88,7 +88,7 @@ subModels
         U0              ( 0 0 0 );
         sizeDistribution
         {
-            pdfType         RosinRammler;
+            distributionModelType RosinRammler;
             RosinRammlerDistribution
             {
                 minValue        5e-05;

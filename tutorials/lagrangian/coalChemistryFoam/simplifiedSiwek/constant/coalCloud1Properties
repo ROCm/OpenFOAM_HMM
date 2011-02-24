@@ -132,7 +132,7 @@ subModels
         U0              ( 0 -10 0 );
         sizeDistribution
         {
-            pdfType         RosinRammler;
+            distributionModelType RosinRammler;
             RosinRammlerDistribution
             {
                 minValue        5e-06;
@@ -201,6 +201,7 @@ subModels
 
     COxidationKineticDiffusionLimitedRateCoeffs
     {
+        Sb              1;
         C1              5.0E-12;
         C2              0.002;
         E               7.9E+07;

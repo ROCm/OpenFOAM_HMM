@@ -124,7 +124,7 @@ subModels
         U0              ( 0 0 0 );
         sizeDistribution
         {
-            pdfType         uniform;
+            distributionModelType uniform;
             uniformDistribution
             {
                 minValue        1e-04;
