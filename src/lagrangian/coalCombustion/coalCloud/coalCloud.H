@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,13 +25,17 @@ Class
     CoalCloud
 
 Description
-    Coal cloud
+    Cloud class to introduce coal parcels
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef coalCloud_H
 #define coalCloud_H
 
+#include "Cloud.H"
+#include "KinematicCloud.H"
+#include "ThermoCloud.H"
+#include "ReactingCloud.H"
 #include "ReactingMultiphaseCloud.H"
 #include "coalParcel.H"
 
@@ -39,7 +43,22 @@ Description
 
 namespace Foam
 {
-    typedef ReactingMultiphaseCloud<coalParcel> coalCloud;
+    typedef ReactingMultiphaseCloud
+    <
+        ReactingCloud
+        <
+            ThermoCloud
+            <
+                KinematicCloud
+                <
+                    Cloud
+                    <
+                        coalParcel
+                    >
+                >
+            >
+        >
+    > coalCloud;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
