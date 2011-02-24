@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,8 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "Cloud.H"
+#include "KinematicCloud.H"
 #include "ThermoCloud.H"
 
 #include "NoHeatTransfer.H"
@@ -37,20 +39,12 @@ License
 
 #define makeParcelHeatTransferModels(ParcelType)                              \
                                                                               \
-    makeHeatTransferModel(ThermoCloud<ParcelType>);                           \
+    typedef ThermoCloud<KinematicCloud<Cloud<ParcelType> > > TKC##ParcelType; \
                                                                               \
-    makeHeatTransferModelType                                                 \
-    (                                                                         \
-        NoHeatTransfer,                                                       \
-        ThermoCloud,                                                          \
-        ParcelType                                                            \
-    );                                                                        \
-    makeHeatTransferModelType                                                 \
-    (                                                                         \
-        RanzMarshall,                                                         \
-        ThermoCloud,                                                          \
-        ParcelType                                                            \
-    );
+    makeHeatTransferModel(TKC##ParcelType);                                   \
+                                                                              \
+    makeHeatTransferModelType(NoHeatTransfer, TKC##ParcelType);               \
+    makeHeatTransferModelType(RanzMarshall, TKC##ParcelType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

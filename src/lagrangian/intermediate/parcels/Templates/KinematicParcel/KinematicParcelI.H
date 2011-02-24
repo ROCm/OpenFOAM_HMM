@@ -87,56 +87,19 @@ inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
 
 
 template<class ParcelType>
-inline Foam::KinematicParcel<ParcelType>::trackData::trackData
-(
-    KinematicCloud<ParcelType>& cloud,
-    trackPart part
-)
-:
-    Particle<ParcelType>::trackData(cloud),
-    cloud_(cloud),
-    rhoInterp_
-    (
-        interpolation<scalar>::New
-        (
-            cloud.solution().interpolationSchemes(),
-            cloud.rho()
-        )
-    ),
-    UInterp_
-    (
-        interpolation<vector>::New
-        (
-            cloud.solution().interpolationSchemes(),
-            cloud.U()
-        )
-    ),
-    muInterp_
-    (
-        interpolation<scalar>::New
-        (
-            cloud.solution().interpolationSchemes(),
-            cloud.mu()
-        )
-    ),
-    g_(cloud.g().value()),
-    part_(part)
-{}
-
-
-template<class ParcelType>
 inline Foam::KinematicParcel<ParcelType>::KinematicParcel
 (
-    KinematicCloud<ParcelType>& owner,
+    const polyMesh& owner,
     const vector& position,
     const label cellI,
     const label tetFaceI,
     const label tetPtI
 )
 :
-    Particle<ParcelType>(owner, position, cellI, tetFaceI, tetPtI),
+    ParcelType(owner, position, cellI, tetFaceI, tetPtI),
     active_(true),
-    typeId_(owner.constProps().parcelTypeId()),
+//    typeId_(owner.constProps().parcelTypeId()),
+    typeId_(-1),
     nParticle_(0),
     d_(0.0),
     dTarget_(0.0),
@@ -152,13 +115,17 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     rhoc_(0.0),
     Uc_(vector::zero),
     muc_(0.0)
-{}
+{
+    // TODO
+    WarningIn("inline Foam::KinematicParcel<ParcelType>::KinematicParcel")
+        << "typeId set to -1 instead of constProps value" << endl;
+}
 
 
 template<class ParcelType>
 inline Foam::KinematicParcel<ParcelType>::KinematicParcel
 (
-    KinematicCloud<ParcelType>& owner,
+    const polyMesh& owner,
     const vector& position,
     const label cellI,
     const label tetFaceI,
@@ -174,7 +141,7 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     const constantProperties& constProps
 )
 :
-    Particle<ParcelType>(owner, position, cellI, tetFaceI, tetPtI),
+    ParcelType(owner, position, cellI, tetFaceI, tetPtI),
     active_(true),
     typeId_(typeId),
     nParticle_(nParticle0),
@@ -239,8 +206,7 @@ Foam::KinematicParcel<ParcelType>::constantProperties::minParticleMass() const
 
 template<class ParcelType>
 inline Foam::scalar
-Foam::KinematicParcel<ParcelType>::
-constantProperties::youngsModulus() const
+Foam::KinematicParcel<ParcelType>::constantProperties::youngsModulus() const
 {
     return youngsModulus_;
 }
@@ -248,68 +214,9 @@ constantProperties::youngsModulus() const
 
 template<class ParcelType>
 inline Foam::scalar
-Foam::KinematicParcel<ParcelType>::
-constantProperties::poissonsRatio() const
+Foam::KinematicParcel<ParcelType>::constantProperties::poissonsRatio() const
 {
     return poissonsRatio_;
-}
-
-
-// * * * * * * * * * * * trackData Member Functions  * * * * * * * * * * * * //
-
-template<class ParcelType>
-inline Foam::KinematicCloud<ParcelType>&
-Foam::KinematicParcel<ParcelType>::trackData::cloud()
-{
-    return cloud_;
-}
-
-
-template<class ParcelType>
-inline const Foam::interpolation<Foam::scalar>&
-Foam::KinematicParcel<ParcelType>::trackData::rhoInterp() const
-{
-    return rhoInterp_();
-}
-
-
-template<class ParcelType>
-inline const Foam::interpolation<Foam::vector>&
-Foam::KinematicParcel<ParcelType>::trackData::UInterp() const
-{
-    return UInterp_();
-}
-
-
-template<class ParcelType>
-inline const Foam::interpolation<Foam::scalar>&
-Foam::KinematicParcel<ParcelType>::trackData::muInterp() const
-{
-    return muInterp_();
-}
-
-
-template<class ParcelType>
-inline const Foam::vector&
-Foam::KinematicParcel<ParcelType>::trackData::g() const
-{
-    return g_;
-}
-
-
-template<class ParcelType>
-inline typename Foam::KinematicParcel<ParcelType>::trackData::trackPart
-Foam::KinematicParcel<ParcelType>::trackData::part() const
-{
-    return part_;
-}
-
-
-template<class ParcelType>
-inline typename Foam::KinematicParcel<ParcelType>::trackData::trackPart&
-Foam::KinematicParcel<ParcelType>::trackData::part()
-{
-    return part_;
 }
 
 
@@ -568,7 +475,7 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::massCell
     const label cellI
 ) const
 {
-    return rhoc_*this->cloud().pMesh().cellVolumes()[cellI];
+    return rhoc_*this->mesh().cellVolumes()[cellI];
 }
 
 

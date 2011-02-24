@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,11 +26,24 @@ License
 #ifndef createKinematicParcelTypes_H
 #define createKinematicParcelTypes_H
 
-#include "KinematicParcel.H"
-#include "KinematicCloud.H"
+#include "Cloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#define createKinematicParcelTypes(ParcelType)                                \
+                                                                              \
+    defineTemplateTypeNameAndDebug(ParcelType, 0);                            \
+                                                                              \
+    defineTemplateTypeNameAndDebug(Cloud<ParcelType>, 0);
+
+/*
+    defineTemplateTypeNameAndDebug(KinematicParcel<particle>, 0);             \
+                                                                              \
+    typedef KinematicParcel<particle> KinematicParcelType;                    \
+    defineTemplateTypeNameAndDebug(Cloud<KinematicParcelType>, 0);
+*/
+
+/*
 #define createKinematicParcelTypes(ParcelType)                                \
                                                                               \
     defineTypeNameAndDebug(ParcelType, 0);                                    \
@@ -39,7 +52,10 @@ License
                                                                               \
     defineParcelTypeNameAndDebug(KinematicParcel<ParcelType>, 0);             \
     defineTemplateTypeNameAndDebug(KinematicParcel<ParcelType>, 0);           \
-    defineParcelTypeNameAndDebug(KinematicCloud<ParcelType>, 0);
+    typedef Cloud<ParcelType> cloudParcelType                                 \
+    defineParcelTypeNameAndDebug(KinematicCloud<cloudParcelType>, 0);
+*/
+
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

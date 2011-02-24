@@ -47,32 +47,31 @@ Foam::word Foam::PatchInteractionModel<CloudType>::interactionTypeToWord
     const interactionType& itEnum
 )
 {
+    word it = "other";
+
     switch (itEnum)
     {
         case itRebound:
         {
-            return "rebound";
+            it = "rebound";
             break;
         }
         case itStick:
         {
-            return "stick";
+            it = "stick";
             break;
         }
         case itEscape:
         {
-            return "escape";
+            it = "escape";
             break;
         }
         default:
         {
-            return "other";
         }
     }
-#ifdef __ICC
-    // Prevent Icc complaining about missing return statement.
-    return word::null;
-#endif
+
+    return it;
 }
 
 

@@ -204,7 +204,7 @@ bool Foam::InjectionModel<CloudType>::findCellAtPosition
 
     const vector p0 = position;
 
-    this->owner().findCellFacePt
+    this->owner().mesh().findCellFacePt
     (
         position,
         cellI,
@@ -571,7 +571,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                 // Create a new parcel
                 parcelType* pPtr = new parcelType
                 (
-                    td.cloud(),
+                    td.cloud().pMesh(),
                     pos,
                     cellI,
                     tetFaceI,
@@ -671,7 +671,7 @@ void Foam::InjectionModel<CloudType>::injectSteadyState
             // Create a new parcel
             parcelType* pPtr = new parcelType
             (
-                td.cloud(),
+                td.cloud().pMesh(),
                 pos,
                 cellI,
                 tetFaceI,

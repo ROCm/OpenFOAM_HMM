@@ -28,6 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "Cloud.H"
 #include "KinematicCloud.H"
 
 #include "ConeInjection.H"
@@ -43,50 +44,17 @@ License
 
 #define makeParcelInjectionModels(ParcelType)                                 \
                                                                               \
-    makeInjectionModel(KinematicCloud<ParcelType>);                           \
+    typedef KinematicCloud<Cloud<ParcelType> > KC##ParcelType;                \
                                                                               \
-    makeInjectionModelType                                                    \
-    (                                                                         \
-        ConeInjection,                                                        \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeInjectionModelType                                                    \
-    (                                                                         \
-        FieldActivatedInjection,                                              \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeInjectionModelType                                                    \
-    (                                                                         \
-        InflationInjection,                                                   \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeInjectionModelType                                                    \
-    (                                                                         \
-        KinematicLookupTableInjection,                                        \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeInjectionModelType                                                    \
-    (                                                                         \
-        ManualInjection,                                                      \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeInjectionModelType                                                    \
-    (                                                                         \
-        NoInjection,                                                          \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeInjectionModelType                                                    \
-    (                                                                         \
-        PatchInjection,                                                       \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );
+    makeInjectionModel(KC##ParcelType);                                       \
+                                                                              \
+    makeInjectionModelType(ConeInjection, KC##ParcelType);                    \
+    makeInjectionModelType(FieldActivatedInjection, KC##ParcelType);          \
+    makeInjectionModelType(InflationInjection, KC##ParcelType);               \
+    makeInjectionModelType(KinematicLookupTableInjection, KC##ParcelType);    \
+    makeInjectionModelType(ManualInjection, KC##ParcelType);                  \
+    makeInjectionModelType(NoInjection, KC##ParcelType);                      \
+    makeInjectionModelType(PatchInjection, KC##ParcelType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

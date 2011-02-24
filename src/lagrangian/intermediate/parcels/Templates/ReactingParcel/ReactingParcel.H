@@ -40,7 +40,6 @@ SourceFiles
 
 #include "ThermoParcel.H"
 #include "ReactingCloud.H"
-#include "reactingParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,15 +63,14 @@ Ostream& operator<<
 template<class ParcelType>
 class ReactingParcel
 :
-    public reactingParcel,
-    public ThermoParcel<ParcelType>
+    public ParcelType
 {
 public:
 
     //- Class to hold reacting particle constant properties
     class constantProperties
     :
-        public ThermoParcel<ParcelType>::constantProperties
+        public ParcelType::constantProperties
     {
         // Private data
 
@@ -120,47 +118,45 @@ public:
 
             //- Return const access to the boiling point
             inline scalar Tbp() const;
-   };
+    };
 
 
-    //- Class used to pass reacting tracking data to the trackToFace function
-    class trackData
+    template<class CloudType>
+    class TrackingData
     :
-        public ThermoParcel<ParcelType>::trackData
+        public ParcelType::template TrackingData<CloudType>
     {
+    private:
 
         // Private data
 
-            //- Reference to the cloud containing this particle
-            ReactingCloud<ParcelType>& cloud_;
+            // Interpolators for continuous phase fields
 
-            //- Interpolator for continuous phase pressure field
-            autoPtr<interpolation<scalar> > pInterp_;
+                //- Interpolator for continuous phase pressure field
+                autoPtr<interpolation<scalar> > pInterp_;
+
 
 
     public:
 
-        typedef ReactingCloud<ParcelType> cloudType;
-
+        typedef typename ParcelType::template TrackingData<CloudType>::trackPart
+            trackPart;
 
         // Constructors
 
             //- Construct from components
-            inline trackData
+            inline TrackingData
             (
-                ReactingCloud<ParcelType>& cloud,
-                typename ThermoParcel<ParcelType>::trackData::trackPart
-                    part = ThermoParcel<ParcelType>::trackData::tpLinearTrack
+                CloudType& cloud,
+                trackPart part = ParcelType::template
+                    TrackingData<CloudType>::tpLinearTrack
             );
 
 
         // Member functions
 
-            //- Return access to the owner cloud
-            inline ReactingCloud<ParcelType>& cloud();
-
-            //- Return const access to the interpolator for continuous
-            //  phase pressure field
+            //- Return const access to the interpolator for continuous phase
+            //  pressure field
             inline const interpolation<scalar>& pInterp() const;
     };
 
@@ -229,16 +225,13 @@ public:
         TypeName("ReactingParcel");
 
 
-    friend class Cloud<ParcelType>;
-
-
     // Constructors
 
         //- Construct from owner, position, and cloud owner
         //  Other properties initialised as null
         inline ReactingParcel
         (
-            ReactingCloud<ParcelType>& owner,
+            const polyMesh& mesh,
             const vector& position,
             const label cellI,
             const label tetFaceI,
@@ -248,7 +241,7 @@ public:
         //- Construct from components
         inline ReactingParcel
         (
-            ReactingCloud<ParcelType>& owner,
+            const polyMesh& mesh,
             const vector& position,
             const label cellI,
             const label tetFaceI,
@@ -268,7 +261,7 @@ public:
         //- Construct from Istream
         ReactingParcel
         (
-            const Cloud<ParcelType>& c,
+            const polyMesh& mesh,
             Istream& is,
             bool readFields = true
         );
@@ -277,36 +270,48 @@ public:
         ReactingParcel
         (
             const ReactingParcel& p,
-            const ReactingCloud<ParcelType>& c
+            const polyMesh& mesh
         );
 
         //- Construct as a copy
         ReactingParcel(const ReactingParcel& p);
 
         //- Construct and return a (basic particle) clone
-        virtual autoPtr<Particle<ParcelType> > clone() const
+        virtual autoPtr<particle> clone() const
         {
-            return autoPtr<Particle<ParcelType> >
-            (
-                new ReactingParcel<ParcelType>(*this)
-            );
+            return autoPtr<particle>(new ReactingParcel<ParcelType>(*this));
         }
 
         //- Construct and return a (basic particle) clone
-        virtual autoPtr<Particle<ParcelType> > clone
-        (
-            const Cloud<ParcelType>& c
-        ) const
+        virtual autoPtr<particle> clone(const polyMesh& mesh) const
         {
-            return autoPtr<Particle<ParcelType> >
+            return autoPtr<particle>
             (
-                new ReactingParcel<ParcelType>
-                (
-                    *this,
-                    static_cast<const ReactingCloud<ParcelType>&>(c)
-                )
+                new ReactingParcel<ParcelType>(*this, mesh)
             );
         }
+
+        //- Factory class to read-construct particles used for
+        //  parallel transfer
+        class iNew
+        {
+            const polyMesh& mesh_;
+
+        public:
+
+            iNew(const polyMesh& mesh)
+            :
+                mesh_(mesh)
+            {}
+
+            autoPtr<ReactingParcel<ParcelType> > operator()(Istream& is) const
+            {
+                return autoPtr<ReactingParcel<ParcelType> >
+                (
+                    new ReactingParcel<ParcelType>(mesh_, is, true)
+                );
+            }
+        };
 
 
     // Member Functions
@@ -379,10 +384,28 @@ public:
         // I-O
 
             //- Read
-            static void readFields(Cloud<ParcelType>& c);
+            template<class CloudType, class CompositionType>
+            static void readFields
+            (
+                CloudType& c,
+                const CompositionType& compModel
+            );
+
+            //- Read - no composition
+            template<class CloudType>
+            static void readFields(CloudType& c);
 
             //- Write
-            static void writeFields(const Cloud<ParcelType>& c);
+            template<class CloudType, class CompositionType>
+            static void writeFields
+            (
+                const CloudType& c,
+                const CompositionType& compModel
+            );
+
+            //- Read - composition supplied
+            template<class CloudType>
+            static void writeFields(const CloudType& c);
 
 
     // Ostream Operator
@@ -402,6 +425,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "ReactingParcelI.H"
+#include "ReactingParcelTrackingDataI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

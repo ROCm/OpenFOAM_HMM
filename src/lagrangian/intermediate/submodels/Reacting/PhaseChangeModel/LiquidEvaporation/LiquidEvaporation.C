@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -192,6 +192,51 @@ void Foam::LiquidEvaporation<CloudType>::calculate
         // mass transfer [kg]
         dMassPC[lid] += Ni*A*liquids_.properties()[lid].W()*dt;
     }
+}
+
+template<class CloudType>
+Foam::scalar Foam::LiquidEvaporation<CloudType>::dh
+(
+    const label idc,
+    const label idl,
+    const label p,
+    const label T
+) const
+{
+    scalar dh = 0;
+
+    typedef PhaseChangeModel<CloudType> parent;
+    switch (parent::enthalpyTransfer_)
+    {
+        case (parent::etLatentHeat):
+        {
+            dh = liquids_.properties()[idl].hl(p, T);
+            break;
+        }
+        case (parent::etEnthalpyDifference):
+        {
+            scalar hc = this->owner().composition().carrier().H(idc, T);
+            scalar hp = liquids_.properties()[idl].h(p, T);
+
+            dh = hc - hp;
+            break;
+        }
+        default:
+        {
+            FatalErrorIn
+            (
+                "Foam::scalar Foam::LiquidEvaporation<CloudType>::dh"
+                "("
+                    "const label, "
+                    "const label, "
+                    "const label, "
+                    "const label"
+                ")"
+            )   << "Unknown enthalpyTransfer type" << abort(FatalError);
+        }
+    }
+
+    return dh;
 }
 
 

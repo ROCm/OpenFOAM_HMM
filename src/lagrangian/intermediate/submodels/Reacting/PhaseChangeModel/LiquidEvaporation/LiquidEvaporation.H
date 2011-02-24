@@ -118,6 +118,15 @@ public:
             const scalar pc,
             scalarField& dMassPC
         ) const;
+
+        //- Return the enthalpy per unit mass
+        virtual scalar dh
+        (
+            const label idc,
+            const label idl,
+            const label p,
+            const label T
+        ) const;
 };
 
 

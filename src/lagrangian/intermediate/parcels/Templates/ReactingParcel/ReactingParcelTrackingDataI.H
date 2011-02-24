@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,60 +21,35 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::basicReactingParcel
-
-Description
-    Base class for reacting parcel - simply used to set the contiguous flag
-
-SourceFiles
-    reactingParcel.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef reactingParcel_H
-#define reactingParcel_H
+template<class ParcelType>
+template<class CloudType>
+inline Foam::ReactingParcel<ParcelType>::TrackingData<CloudType>::TrackingData
+(
+    CloudType& cloud,
+    trackPart part
+)
+:
+    ParcelType::template TrackingData<CloudType>(cloud, part),
+    pInterp_
+    (
+        interpolation<scalar>::New
+        (
+            cloud.solution().interpolationSchemes(),
+            cloud.p()
+        )
+    )
+{}
 
-#include "typeInfo.H"
-#include "contiguous.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+template<class ParcelType>
+template<class CloudType>
+inline const Foam::interpolation<Foam::scalar>&
+Foam::ReactingParcel<ParcelType>::TrackingData<CloudType>::pInterp() const
 {
-
-/*---------------------------------------------------------------------------*\
-                       Class reactingParcel Declaration
-\*---------------------------------------------------------------------------*/
-
-class reactingParcel
-{
-public:
-
-    //- Run-time type information
-    TypeName("reactingParcel");
-
-    //- Construct null
-    reactingParcel();
-
-    //- Destructor
-    virtual ~reactingParcel();
-};
-
-
-template<>
-inline bool contiguous<reactingParcel>()
-{
-    return false; // Derived classes include scalar lists/fields
+    return pInterp_();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

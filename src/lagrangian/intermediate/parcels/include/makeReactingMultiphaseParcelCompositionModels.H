@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,11 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "ReactingMultiphaseCloud.H"
+#include "Cloud.H"
+#include "KinematicCloud.H"
+#include "ThermoCloud.H"
+#include "ReactingCloud.H"
+
 #include "NoComposition.H"
 #include "SingleMixtureFraction.H"
 
@@ -36,21 +40,12 @@ License
 
 #define makeReactingMultiphaseParcelCompositionModels(ParcelType)             \
                                                                               \
-    makeCompositionModel(ReactingCloud<ParcelType>);                          \
+    typedef ReactingCloud<ThermoCloud<KinematicCloud<Cloud<ParcelType> > > >  \
+        RTKC##ParcelType;                                                     \
                                                                               \
-    makeCompositionModelType                                                  \
-    (                                                                         \
-        NoComposition,                                                        \
-        ReactingCloud,                                                        \
-        ParcelType                                                            \
-    );                                                                        \
-                                                                              \
-    makeCompositionModelType                                                  \
-    (                                                                         \
-        SingleMixtureFraction,                                                \
-        ReactingCloud,                                                        \
-        ParcelType                                                            \
-    );
+    makeCompositionModel(RTKC##ParcelType);                                   \
+    makeCompositionModelType(NoComposition, RTKC##ParcelType);                \
+    makeCompositionModelType(SingleMixtureFraction, RTKC##ParcelType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

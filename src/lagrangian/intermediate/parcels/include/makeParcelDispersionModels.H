@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "Cloud.H"
 #include "KinematicCloud.H"
 
 #include "NoDispersion.H"
@@ -38,32 +39,19 @@ License
 
 #define makeParcelDispersionModels(ParcelType)                                \
                                                                               \
-    makeDispersionModel(KinematicCloud<ParcelType>);                          \
+    typedef KinematicCloud<Cloud<ParcelType> > KC##ParcelType;                \
+                                                                              \
+    makeDispersionModel(KC##ParcelType);                                      \
                                                                               \
     defineNamedTemplateTypeNameAndDebug                                       \
     (                                                                         \
-        DispersionRASModel<KinematicCloud<ParcelType> >,                      \
+        DispersionRASModel<KC##ParcelType>,                                   \
         0                                                                     \
     );                                                                        \
                                                                               \
-    makeDispersionModelType                                                   \
-    (                                                                         \
-        NoDispersion,                                                         \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeDispersionModelType                                                   \
-    (                                                                         \
-        GradientDispersionRAS,                                                \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeDispersionModelType                                                   \
-    (                                                                         \
-        StochasticDispersionRAS,                                              \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );
+    makeDispersionModelType(NoDispersion, KC##ParcelType);                    \
+    makeDispersionModelType(GradientDispersionRAS, KC##ParcelType);           \
+    makeDispersionModelType(StochasticDispersionRAS, KC##ParcelType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

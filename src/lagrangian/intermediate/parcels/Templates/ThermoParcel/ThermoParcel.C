@@ -39,7 +39,7 @@ void Foam::ThermoParcel<ParcelType>::setCellValues
     const label cellI
 )
 {
-    KinematicParcel<ParcelType>::setCellValues(td, dt, cellI);
+    ParcelType::setCellValues(td, dt, cellI);
 
     tetIndices tetIs = this->currentTetIndices();
 
@@ -353,7 +353,7 @@ Foam::ThermoParcel<ParcelType>::ThermoParcel
     const ThermoParcel<ParcelType>& p
 )
 :
-    KinematicParcel<ParcelType>(p),
+    ParcelType(p),
     T_(p.T_),
     Cp_(p.Cp_),
     Tc_(p.Tc_),
@@ -365,10 +365,10 @@ template<class ParcelType>
 Foam::ThermoParcel<ParcelType>::ThermoParcel
 (
     const ThermoParcel<ParcelType>& p,
-    const ThermoCloud<ParcelType>& c
+    const polyMesh& mesh
 )
 :
-    KinematicParcel<ParcelType>(p, c),
+    ParcelType(p, mesh),
     T_(p.T_),
     Cp_(p.Cp_),
     Tc_(p.Tc_),

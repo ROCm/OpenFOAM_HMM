@@ -28,6 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "Cloud.H"
 #include "KinematicCloud.H"
 
 #include "SphereDragForce.H"
@@ -41,52 +42,18 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeThermoParcelForces(ParcelType)                                        \
+#define makeThermoParcelForces(ParcelType)                                    \
                                                                               \
-    makeParticleForceModel(KinematicCloud<ParcelType>);                       \
+    typedef KinematicCloud<Cloud<ParcelType> > KC##ParcelType;                \
                                                                               \
-    makeParticleForceModelType                                                \
-    (                                                                         \
-        SphereDragForce,                                                      \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeParticleForceModelType                                                \
-    (                                                                         \
-        NonSphereDragForce,                                                   \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeParticleForceModelType                                                \
-    (                                                                         \
-        BrownianMotionForce,                                                  \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeParticleForceModelType                                                \
-    (                                                                         \
-        GravityForce,                                                         \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeParticleForceModelType                                                \
-    (                                                                         \
-        ParamagneticForce,                                                    \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeParticleForceModelType                                                \
-    (                                                                         \
-        PressureGradientForce,                                                \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeParticleForceModelType                                                \
-    (                                                                         \
-        SRFForce,                                                             \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );
+    makeParticleForceModel(KC##ParcelType);                                   \
+    makeParticleForceModelType(SphereDragForce, KC##ParcelType);              \
+    makeParticleForceModelType(NonSphereDragForce, KC##ParcelType);           \
+    makeParticleForceModelType(BrownianMotionForce, KC##ParcelType);          \
+    makeParticleForceModelType(GravityForce, KC##ParcelType);                 \
+    makeParticleForceModelType(ParamagneticForce, KC##ParcelType);            \
+    makeParticleForceModelType(PressureGradientForce, KC##ParcelType);        \
+    makeParticleForceModelType(SRFForce, KC##ParcelType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

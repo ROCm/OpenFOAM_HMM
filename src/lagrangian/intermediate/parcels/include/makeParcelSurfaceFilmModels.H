@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "Cloud.H"
 #include "KinematicCloud.H"
 
 #include "NoSurfaceFilm.H"
@@ -36,14 +37,10 @@ License
 
 #define makeParcelSurfaceFilmModels(ParcelType)                               \
                                                                               \
-    makeSurfaceFilmModel(KinematicCloud<ParcelType>);                         \
+    typedef KinematicCloud<Cloud<ParcelType> > KC##ParcelType;                \
                                                                               \
-    makeSurfaceFilmModelType                                                  \
-    (                                                                         \
-        NoSurfaceFilm,                                                        \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );
+    makeSurfaceFilmModel(KC##ParcelType);                                     \
+    makeSurfaceFilmModelType(NoSurfaceFilm, KC##ParcelType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

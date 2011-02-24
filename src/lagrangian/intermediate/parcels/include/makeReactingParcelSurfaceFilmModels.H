@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "Cloud.H"
 #include "KinematicCloud.H"
 
 #include "NoSurfaceFilm.H"
@@ -37,20 +38,11 @@ License
 
 #define makeReactingParcelSurfaceFilmModels(ParcelType)                       \
                                                                               \
-    makeSurfaceFilmModel(KinematicCloud<ParcelType>);                         \
+    typedef KinematicCloud<Cloud<ParcelType> > KC##ParcelType;                \
                                                                               \
-    makeSurfaceFilmModelType                                                  \
-    (                                                                         \
-        NoSurfaceFilm,                                                        \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeSurfaceFilmModelType                                                  \
-    (                                                                         \
-        ThermoSurfaceFilm,                                                    \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );
+    makeSurfaceFilmModel(KC##ParcelType);                                     \
+    makeSurfaceFilmModelType(NoSurfaceFilm, KC##ParcelType);                  \
+    makeSurfaceFilmModelType(ThermoSurfaceFilm, KC##ParcelType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

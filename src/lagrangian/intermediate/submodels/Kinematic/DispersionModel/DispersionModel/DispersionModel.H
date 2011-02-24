@@ -141,13 +141,13 @@ public:
     );
 
 
-#define makeDispersionModelType(SS, CloudType, ParcelType)                    \
+#define makeDispersionModelType(SS, CloudType)                                \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
+    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
                                                                               \
-    DispersionModel<CloudType<ParcelType> >::                                 \
-        adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
-            add##SS##CloudType##ParcelType##ConstructorToTable_;
+    DispersionModel<CloudType>::                                              \
+        adddictionaryConstructorToTable<SS<CloudType> >                       \
+            add##SS##CloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

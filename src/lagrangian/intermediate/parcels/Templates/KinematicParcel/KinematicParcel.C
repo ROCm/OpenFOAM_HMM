@@ -179,10 +179,14 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     scalar& Cud
 ) const
 {
-    const typename ParcelType::forceType& forces = td.cloud().forces();
+    typedef typename TrackData::cloudType cloudType;
+    typedef typename cloudType::parcelType parcelType;
+    typedef typename cloudType::forceType forceType;
+
+    const forceType& forces = td.cloud().forces();
 
     // Momentum source due to particle forces
-    const ParcelType& p = static_cast<const ParcelType&>(*this);
+    const parcelType& p = static_cast<const parcelType&>(*this);
     const forceSuSp Fcp = forces.calcCoupled(p, dt, mass, Re, mu);
     const forceSuSp Fncp = forces.calcNonCoupled(p, dt, mass, Re, mu);
     const forceSuSp Feff = Fcp + Fncp;
@@ -205,7 +209,7 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     dUTrans += dt*(Feff.Sp()*(Ures.average() - Uc_) - Fcp.Su());
 
     // Apply correction to velocity and dUTrans for reduced-D cases
-    const polyMesh& mesh = this->cloud().pMesh();
+    const polyMesh& mesh = td.cloud().pMesh();
     meshTools::constrainDirection(mesh, mesh.solutionD(), Unew);
     meshTools::constrainDirection(mesh, mesh.solutionD(), dUTrans);
 
@@ -221,7 +225,7 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     const KinematicParcel<ParcelType>& p
 )
 :
-    Particle<ParcelType>(p),
+    ParcelType(p),
     active_(p.active_),
     typeId_(p.typeId_),
     nParticle_(p.nParticle_),
@@ -246,10 +250,10 @@ template<class ParcelType>
 Foam::KinematicParcel<ParcelType>::KinematicParcel
 (
     const KinematicParcel<ParcelType>& p,
-    const KinematicCloud<ParcelType>& c
+    const polyMesh& mesh
 )
 :
-    Particle<ParcelType>(p, c),
+    ParcelType(p, mesh),
     active_(p.active_),
     typeId_(p.typeId_),
     nParticle_(p.nParticle_),
@@ -280,7 +284,8 @@ bool Foam::KinematicParcel<ParcelType>::move
     const scalar trackTime
 )
 {
-    ParcelType& p = static_cast<ParcelType&>(*this);
+    typename TrackData::cloudType::parcelType& p =
+        static_cast<typename TrackData::cloudType::parcelType&>(*this);
 
     td.switchProcessor = false;
     td.keepParticle = true;
@@ -385,7 +390,9 @@ template<class ParcelType>
 template<class TrackData>
 void Foam::KinematicParcel<ParcelType>::hitFace(TrackData& td)
 {
-    ParcelType& p = static_cast<ParcelType&>(*this);
+    typename TrackData::cloudType::parcelType& p =
+        static_cast<typename TrackData::cloudType::parcelType&>(*this);
+
     td.cloud().postProcessing().postFace(p);
 }
 
@@ -406,7 +413,8 @@ bool Foam::KinematicParcel<ParcelType>::hitPatch
     const tetIndices& tetIs
 )
 {
-    ParcelType& p = static_cast<ParcelType&>(*this);
+    typename TrackData::cloudType::parcelType& p =
+        static_cast<typename TrackData::cloudType::parcelType&>(*this);
 
     // Invoke post-processing model
     td.cloud().postProcessing().postPatch(p, patchI);
@@ -422,27 +430,13 @@ bool Foam::KinematicParcel<ParcelType>::hitPatch
         // Invoke patch interaction model
         return td.cloud().patchInteraction().correct
         (
-            static_cast<ParcelType&>(*this),
+            p,
             pp,
             td.keepParticle,
             trackFraction,
             tetIs
         );
     }
-}
-
-
-template<class ParcelType>
-bool Foam::KinematicParcel<ParcelType>::hitPatch
-(
-    const polyPatch& pp,
-    int& td,
-    const label patchI,
-    const scalar trackFraction,
-    const tetIndices& tetIs
-)
-{
-    return false;
 }
 
 
@@ -459,15 +453,6 @@ void Foam::KinematicParcel<ParcelType>::hitProcessorPatch
 
 
 template<class ParcelType>
-void Foam::KinematicParcel<ParcelType>::hitProcessorPatch
-(
-    const processorPolyPatch&,
-    int&
-)
-{}
-
-
-template<class ParcelType>
 template<class TrackData>
 void Foam::KinematicParcel<ParcelType>::hitWallPatch
 (
@@ -478,16 +463,6 @@ void Foam::KinematicParcel<ParcelType>::hitWallPatch
 {
     // Wall interactions handled by generic hitPatch function
 }
-
-
-template<class ParcelType>
-void Foam::KinematicParcel<ParcelType>::hitWallPatch
-(
-    const wallPolyPatch&,
-    int&,
-    const tetIndices&
-)
-{}
 
 
 template<class ParcelType>
@@ -503,18 +478,9 @@ void Foam::KinematicParcel<ParcelType>::hitPatch
 
 
 template<class ParcelType>
-void Foam::KinematicParcel<ParcelType>::hitPatch
-(
-    const polyPatch&,
-    int&
-)
-{}
-
-
-template<class ParcelType>
 void Foam::KinematicParcel<ParcelType>::transformProperties(const tensor& T)
 {
-    Particle<ParcelType>::transformProperties(T);
+    ParcelType::transformProperties(T);
 
     U_ = transform(T, U_);
 
@@ -532,7 +498,7 @@ void Foam::KinematicParcel<ParcelType>::transformProperties
     const vector& separation
 )
 {
-    Particle<ParcelType>::transformProperties(separation);
+    ParcelType::transformProperties(separation);
 }
 
 

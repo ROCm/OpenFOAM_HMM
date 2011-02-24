@@ -446,7 +446,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::splashInteraction
         // Create a new parcel by copying source parcel
         parcelType* pPtr = new parcelType(p);
 
-        pPtr->origId() = this->owner().getNewParticleID();
+        pPtr->origId() = pPtr->getNewParticleID();
 
         pPtr->origProc() = Pstream::myProcNo();
 

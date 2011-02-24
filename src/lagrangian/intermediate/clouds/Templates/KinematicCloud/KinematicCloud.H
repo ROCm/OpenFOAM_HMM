@@ -51,6 +51,7 @@ SourceFiles
 #ifndef KinematicCloud_H
 #define KinematicCloud_H
 
+#include "particle.H"
 #include "Cloud.H"
 #include "kinematicCloud.H"
 #include "IOdictionary.H"
@@ -61,6 +62,9 @@ SourceFiles
 #include "fvMatrices.H"
 
 #include "IntegrationSchemesFwd.H"
+
+
+#include "ParticleForceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -92,16 +96,21 @@ class SurfaceFilmModel;
                        Class KinematicCloud Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ParcelType>
+template<class CloudType>
 class KinematicCloud
 :
-    public Cloud<ParcelType>,
+    public CloudType,
     public kinematicCloud
 {
 public:
 
-    //- Type of parcel the cloud was instantiated for
-    typedef ParcelType parcelType;
+    // Public typedefs
+
+        //- Redefine particle type as parcel type
+        typedef typename CloudType::particleType parcelType;
+
+        //- Force type
+        typedef ParticleForceList<KinematicCloud<CloudType> > forceType;
 
 
 private:
@@ -109,7 +118,7 @@ private:
     // Private data
 
         //- Cloud copy pointer
-        autoPtr<KinematicCloud<ParcelType> > cloudCopyPtr_;
+        autoPtr<KinematicCloud<CloudType> > cloudCopyPtr_;
 
 
     // Private Member Functions
@@ -293,7 +302,7 @@ protected:
         cloudSolution solution_;
 
         //- Parcel constant properties
-        typename ParcelType::constantProperties constProps_;
+        typename parcelType::constantProperties constProps_;
 
         //- Sub-models dictionary
         const dictionary subModelProperties_;
@@ -302,7 +311,7 @@ protected:
         cachedRandom rndGen_;
 
         //- Cell occupancy information for each parcel, (demand driven)
-        autoPtr<List<DynamicList<ParcelType*> > > cellOccupancyPtr_;
+        autoPtr<List<DynamicList<parcelType*> > > cellOccupancyPtr_;
 
 
         // References to the carrier gas fields
@@ -324,33 +333,33 @@ protected:
 
 
         //- Optional particle forces
-        typename ParcelType::forceType forces_;
+        forceType forces_;
 
 
         // References to the cloud sub-models
 
             //- Collision model
-            autoPtr<CollisionModel<KinematicCloud<ParcelType> > >
+            autoPtr<CollisionModel<KinematicCloud<CloudType> > >
                 collisionModel_;
 
             //- Dispersion model
-            autoPtr<DispersionModel<KinematicCloud<ParcelType> > >
+            autoPtr<DispersionModel<KinematicCloud<CloudType> > >
                 dispersionModel_;
 
             //- Injector model
-            autoPtr<InjectionModel<KinematicCloud<ParcelType> > >
+            autoPtr<InjectionModel<KinematicCloud<CloudType> > >
                 injectionModel_;
 
             //- Patch interaction model
-            autoPtr<PatchInteractionModel<KinematicCloud<ParcelType> > >
+            autoPtr<PatchInteractionModel<KinematicCloud<CloudType> > >
                 patchInteractionModel_;
 
             //- Post-processing model
-            autoPtr<PostProcessingModel<KinematicCloud<ParcelType> > >
+            autoPtr<PostProcessingModel<KinematicCloud<CloudType> > >
                 postProcessingModel_;
 
             //- Surface film model
-            autoPtr<SurfaceFilmModel<KinematicCloud<ParcelType> > >
+            autoPtr<SurfaceFilmModel<KinematicCloud<CloudType> > >
                 surfaceFilmModel_;
 
 
@@ -378,7 +387,8 @@ protected:
         // Cloud evolution functions
 
             //- Solve the cloud - calls all evolution functions
-            void solve(typename ParcelType::trackData& td);
+            template<class TrackData>
+            void solve(TrackData& td);
 
             //- Pre-evolve
             void preEvolve();
@@ -391,22 +401,27 @@ protected:
             void updateCellOccupancy();
 
             //- Evolve the cloud
-            void evolveCloud(typename ParcelType::trackData& td);
+            template<class TrackData>
+            void evolveCloud(TrackData& td);
 
             //- Particle motion
-            void motion(typename ParcelType::trackData& td);
+            template<class TrackData>
+            void motion(TrackData& td);
 
             //- Move-collide particles
-            void moveCollide(typename ParcelType::trackData& td);
+            template<class TrackData>
+            void moveCollide(TrackData& td);
 
             //- Post-evolve
             void postEvolve();
 
             //- Reset state of cloud
-            void cloudReset(KinematicCloud<ParcelType>& c);
+            void cloudReset(KinematicCloud<CloudType>& c);
 
 
 public:
+
+    typedef CloudType cloudType;
 
     // Constructors
 
@@ -422,29 +437,33 @@ public:
         );
 
         //- Copy constructor with new name
-        KinematicCloud(KinematicCloud<ParcelType>& c, const word& name);
+        KinematicCloud
+        (
+            KinematicCloud<CloudType>& c,
+            const word& name
+        );
 
         //- Copy constructor with new name - creates bare cloud
         KinematicCloud
         (
             const fvMesh& mesh,
             const word& name,
-            const KinematicCloud<ParcelType>& c
+            const KinematicCloud<CloudType>& c
         );
 
         //- Construct and return clone based on (this) with new name
-        virtual autoPtr<Cloud<ParcelType> > clone(const word& name)
+        virtual autoPtr<Cloud<parcelType> > clone(const word& name)
         {
-            return autoPtr<Cloud<ParcelType> >
+            return autoPtr<Cloud<parcelType> >
             (
                 new KinematicCloud(*this, name)
             );
         }
 
         //- Construct and return bare clone based on (this) with new name
-        virtual autoPtr<Cloud<ParcelType> > cloneBare(const word& name) const
+        virtual autoPtr<Cloud<parcelType> > cloneBare(const word& name) const
         {
-            return autoPtr<Cloud<ParcelType> >
+            return autoPtr<Cloud<parcelType> >
             (
                 new KinematicCloud(this->mesh(), name, *this)
             );
@@ -471,7 +490,7 @@ public:
 
             // References to the mesh and databases
 
-                //- Return refernce to the mesh
+                //- Return reference to the mesh
                 inline const fvMesh& mesh() const;
 
                 //- Return particle properties dictionary
@@ -484,7 +503,7 @@ public:
                 inline cloudSolution& solution();
 
                 //- Return the constant properties
-                inline const typename ParcelType::constantProperties&
+                inline const typename parcelType::constantProperties&
                     constProps() const;
 
                     //- Return reference to the sub-models dictionary
@@ -493,14 +512,14 @@ public:
 
             // Cloud data
 
-                //- Return refernce to the random object
+                //- Return reference to the random object
                 inline cachedRandom& rndGen();
 
                 //- Return the cell occupancy information for each
                 //  parcel, non-const access, the caller is
                 //  responsible for updating it for its own purposes
                 //  if particles are removed or created.
-                inline List<DynamicList<ParcelType*> >& cellOccupancy();
+                inline List<DynamicList<parcelType*> >& cellOccupancy();
 
 
             // References to the carrier gas fields
@@ -522,53 +541,54 @@ public:
 
 
             //- Optional particle forces
-            inline const typename ParcelType::forceType& forces() const;
+//            inline const typename parcelType::forceType& forces() const;
+            inline const forceType& forces() const;
 
 
             // Sub-models
 
                 //- Return const access to the collision model
-                inline const CollisionModel<KinematicCloud<ParcelType> >&
+                inline const CollisionModel<KinematicCloud<CloudType> >&
                     collision() const;
 
                 //- Return reference to the collision model
-                inline CollisionModel<KinematicCloud<ParcelType> >&
+                inline CollisionModel<KinematicCloud<CloudType> >&
                     collision();
 
                 //- Return const-access to the dispersion model
-                inline const DispersionModel<KinematicCloud<ParcelType> >&
+                inline const DispersionModel<KinematicCloud<CloudType> >&
                     dispersion() const;
 
                 //- Return reference to the dispersion model
-                inline DispersionModel<KinematicCloud<ParcelType> >&
+                inline DispersionModel<KinematicCloud<CloudType> >&
                     dispersion();
 
                 //- Return const access to the injection model
-                inline const InjectionModel<KinematicCloud<ParcelType> >&
+                inline const InjectionModel<KinematicCloud<CloudType> >&
                     injection() const;
 
                 //- Return reference to the injection model
-                inline InjectionModel<KinematicCloud<ParcelType> >&
+                inline InjectionModel<KinematicCloud<CloudType> >&
                     injection();
 
                 //- Return const-access to the patch interaction model
-                inline const PatchInteractionModel<KinematicCloud<ParcelType> >&
+                inline const PatchInteractionModel<KinematicCloud<CloudType> >&
                     patchInteraction() const;
 
                 //- Return reference to the patch interaction model
-                inline PatchInteractionModel<KinematicCloud<ParcelType> >&
+                inline PatchInteractionModel<KinematicCloud<CloudType> >&
                     patchInteraction();
 
                 //- Return reference to post-processing model
-                inline PostProcessingModel<KinematicCloud<ParcelType> >&
+                inline PostProcessingModel<KinematicCloud<CloudType> >&
                     postProcessing();
 
                 //- Return const-access to the surface film model
-                inline const SurfaceFilmModel<KinematicCloud<ParcelType> >&
+                inline const SurfaceFilmModel<KinematicCloud<CloudType> >&
                     surfaceFilm() const;
 
                 //- Return reference to the surface film model
-                inline SurfaceFilmModel<KinematicCloud<ParcelType> >&
+                inline SurfaceFilmModel<KinematicCloud<CloudType> >&
                     surfaceFilm();
 
 
@@ -638,7 +658,7 @@ public:
             //- Check parcel properties
             void checkParcelProperties
             (
-                ParcelType& parcel,
+                parcelType& parcel,
                 const scalar lagrangianDt,
                 const bool fullyDescribed
             );
@@ -662,7 +682,7 @@ public:
             ) const;
 
             //- Apply relaxation to (steady state) cloud sources
-            void relaxSources(const KinematicCloud<ParcelType>& cloudOldTime);
+            void relaxSources(const KinematicCloud<CloudType>& cloudOldTime);
 
             //- Evolve the cloud
             void evolve();

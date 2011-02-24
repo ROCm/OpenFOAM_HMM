@@ -24,13 +24,14 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "basicReactingParcel.H"
-#include "createReactingParcelTypes.H"
+#include "Cloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    createReactingParcelTypes(basicReactingParcel);
+    defineTemplateTypeNameAndDebug(basicReactingParcel, 0);
+    defineTemplateTypeNameAndDebug(Cloud<basicReactingParcel>, 0);
 }
 
 

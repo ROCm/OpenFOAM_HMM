@@ -24,13 +24,14 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "basicKinematicParcel.H"
-#include "createKinematicParcelTypes.H"
+#include "Cloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    createKinematicParcelTypes(basicKinematicParcel);
+    defineTemplateTypeNameAndDebug(basicKinematicParcel, 0);
+    defineTemplateTypeNameAndDebug(Cloud<basicKinematicParcel>, 0);
 }
 
 

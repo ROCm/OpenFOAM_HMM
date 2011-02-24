@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,9 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "Cloud.H"
+#include "KinematicCloud.H"
+#include "ThermoCloud.H"
 #include "ReactingCloud.H"
 
 #include "NoPhaseChange.H"
@@ -37,20 +40,12 @@ License
 
 #define makeReactingParcelPhaseChangeModels(ParcelType)                       \
                                                                               \
-    makePhaseChangeModel(ReactingCloud<ParcelType>);                          \
+    typedef ReactingCloud<ThermoCloud<KinematicCloud<Cloud<ParcelType> > > >  \
+        RTKC##ParcelType;                                                     \
                                                                               \
-    makePhaseChangeModelType                                                  \
-    (                                                                         \
-        NoPhaseChange,                                                        \
-        ReactingCloud,                                                        \
-        ParcelType                                                            \
-    );                                                                        \
-    makePhaseChangeModelType                                                  \
-    (                                                                         \
-        LiquidEvaporation,                                                    \
-        ReactingCloud,                                                        \
-        ParcelType                                                            \
-    );
+    makePhaseChangeModel(RTKC##ParcelType);                                   \
+    makePhaseChangeModelType(NoPhaseChange, RTKC##ParcelType);                \
+    makePhaseChangeModelType(LiquidEvaporation, RTKC##ParcelType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

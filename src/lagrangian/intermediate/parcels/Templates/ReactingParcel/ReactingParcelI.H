@@ -26,10 +26,9 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
-inline
-Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties()
+inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties()
 :
-    ThermoParcel<ParcelType>::constantProperties(),
+    ParcelType::constantProperties(),
     pMin_(0.0),
     constantVolume_(false),
     Tvap_(0.0),
@@ -43,7 +42,7 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
     const constantProperties& cp
 )
 :
-    ThermoParcel<ParcelType>::constantProperties(cp),
+    ParcelType::constantProperties(cp),
     pMin_(cp.pMin_),
     constantVolume_(cp.constantVolume_),
     Tvap_(cp.Tvap_),
@@ -58,7 +57,7 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
     const bool readFields
 )
 :
-    ThermoParcel<ParcelType>::constantProperties(parentDict, readFields),
+    ParcelType::constantProperties(parentDict, readFields),
     pMin_(0.0),
     constantVolume_(false),
     Tvap_(0.0),
@@ -75,36 +74,16 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
 
 
 template<class ParcelType>
-inline Foam::ReactingParcel<ParcelType>::trackData::trackData
-(
-    ReactingCloud<ParcelType>& cloud,
-    typename ThermoParcel<ParcelType>::trackData::trackPart part
-)
-:
-    ThermoParcel<ParcelType>::trackData(cloud, part),
-    cloud_(cloud),
-    pInterp_
-    (
-        interpolation<scalar>::New
-        (
-            cloud.solution().interpolationSchemes(),
-            cloud.p()
-        )
-    )
-{}
-
-
-template<class ParcelType>
 inline Foam::ReactingParcel<ParcelType>::ReactingParcel
 (
-    ReactingCloud<ParcelType>& owner,
+    const polyMesh& mesh,
     const vector& position,
     const label cellI,
     const label tetFaceI,
     const label tetPtI
 )
 :
-    ThermoParcel<ParcelType>(owner, position, cellI, tetFaceI, tetPtI),
+    ParcelType(mesh, position, cellI, tetFaceI, tetPtI),
     mass0_(0.0),
     Y_(0),
     pc_(0.0)
@@ -114,7 +93,7 @@ inline Foam::ReactingParcel<ParcelType>::ReactingParcel
 template<class ParcelType>
 inline Foam::ReactingParcel<ParcelType>::ReactingParcel
 (
-    ReactingCloud<ParcelType>& owner,
+    const polyMesh& mesh,
     const vector& position,
     const label cellI,
     const label tetFaceI,
@@ -131,9 +110,9 @@ inline Foam::ReactingParcel<ParcelType>::ReactingParcel
     const constantProperties& constProps
 )
 :
-    ThermoParcel<ParcelType>
+    ParcelType
     (
-        owner,
+        mesh,
         position,
         cellI,
         tetFaceI,
@@ -188,24 +167,6 @@ inline Foam::scalar
 Foam::ReactingParcel<ParcelType>::constantProperties::Tbp() const
 {
     return Tbp_;
-}
-
-
-// * * * * * * * * * * * trackData Member Functions  * * * * * * * * * * * * //
-
-template<class ParcelType>
-inline Foam::ReactingCloud<ParcelType>&
-Foam::ReactingParcel<ParcelType>::trackData::cloud()
-{
-    return cloud_;
-}
-
-
-template<class ParcelType>
-inline const Foam::interpolation<Foam::scalar>&
-Foam::ReactingParcel<ParcelType>::trackData::pInterp() const
-{
-    return pInterp_();
 }
 
 
