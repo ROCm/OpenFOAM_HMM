@@ -49,7 +49,6 @@ SourceFiles
 #include "IOstream.H"
 #include "autoPtr.H"
 #include "interpolation.H"
-#include "contiguous.H"
 
 #include "KinematicCloud.H"
 #include "CollisionRecordList.H"
