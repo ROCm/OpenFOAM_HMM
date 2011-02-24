@@ -59,12 +59,12 @@ void Foam::radiation::absorptionCoeffs::checkT(const scalar T) const
 {
     if (T < Tlow_ || T > Thigh_)
     {
-        FatalErrorIn
+        WarningIn
         (
             "absorptionCoeffs::checkT(const scalar T) const"
-        )   << "attempt to use absCoeff out of temperature range:" << nl
+        )   << "usinf absCoeff out of temperature range:" << nl
             << "    " << Tlow_ << " -> " << Thigh_ << ";  T = " << T
-            << nl << abort(FatalError);
+            << nl << endl;
     }
 }
 
