@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,12 +32,6 @@ License
 #include "OFstream.H"
 #include "wallPolyPatch.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-template<class ParticleType>
-const Foam::scalar Foam::Cloud<ParticleType>::trackingCorrectionTol = 1e-5;
-
-
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 template<class ParticleType>
@@ -47,7 +41,7 @@ void Foam::Cloud<ParticleType>::calcCellWallFaces() const
 
     PackedBoolList& cellWallFaces = cellWallFacesPtr_();
 
-    const polyBoundaryMesh& patches = pMesh().boundaryMesh();
+    const polyBoundaryMesh& patches = polyMesh_.boundaryMesh();
 
     forAll(patches, patchI)
     {
@@ -78,9 +72,7 @@ Foam::Cloud<ParticleType>::Cloud
     cloud(pMesh),
     IDLList<ParticleType>(),
     polyMesh_(pMesh),
-    particleCount_(0),
     labels_(),
-    cellTree_(),
     nTrackingRescues_(),
     cellWallFacesPtr_()
 {
@@ -104,9 +96,7 @@ Foam::Cloud<ParticleType>::Cloud
     cloud(pMesh, cloudName),
     IDLList<ParticleType>(),
     polyMesh_(pMesh),
-    particleCount_(0),
     labels_(),
-    cellTree_(),
     nTrackingRescues_(),
     cellWallFacesPtr_()
 {
@@ -122,236 +112,6 @@ Foam::Cloud<ParticleType>::Cloud
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParticleType>
-void Foam::Cloud<ParticleType>::findCellFacePt
-(
-    const point& pt,
-    label& cellI,
-    label& tetFaceI,
-    label& tetPtI
-) const
-{
-    cellI = -1;
-    tetFaceI = -1;
-    tetPtI = -1;
-
-    const indexedOctree<treeDataCell>& tree = cellTree();
-
-    // Find nearest cell to the point
-
-    pointIndexHit info = tree.findNearest(pt, sqr(GREAT));
-
-    if (info.hit())
-    {
-        label nearestCellI = tree.shapes().cellLabels()[info.index()];
-
-        // Check the nearest cell to see if the point is inside.
-        findFacePt(nearestCellI, pt, tetFaceI, tetPtI);
-
-        if (tetFaceI != -1)
-        {
-            // Point was in the nearest cell
-
-            cellI = nearestCellI;
-
-            return;
-        }
-        else
-        {
-            // Check the other possible cells that the point may be in
-
-            labelList testCells = tree.findIndices(pt);
-
-            forAll(testCells, pCI)
-            {
-                label testCellI = tree.shapes().cellLabels()[testCells[pCI]];
-
-                if (testCellI == nearestCellI)
-                {
-                    // Don't retest the nearest cell
-
-                    continue;
-                }
-
-                // Check the test cell to see if the point is inside.
-                findFacePt(testCellI, pt, tetFaceI, tetPtI);
-
-                if (tetFaceI != -1)
-                {
-                    // Point was in the test cell
-
-                    cellI = testCellI;
-
-                    return;
-                }
-            }
-        }
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "void Foam::Cloud<ParticleType>::findCellFacePt"
-            "("
-                "const point& pt, "
-                "label& cellI, "
-                "label& tetFaceI, "
-                "label& tetPtI"
-            ") const"
-        )   << "Did not find nearest cell in search tree."
-            << abort(FatalError);
-    }
-}
-
-
-template<class ParticleType>
-void Foam::Cloud<ParticleType>::findFacePt
-(
-    label cellI,
-    const point& pt,
-    label& tetFaceI,
-    label& tetPtI
-) const
-{
-    tetFaceI = -1;
-    tetPtI = -1;
-
-    List<tetIndices> cellTets = polyMeshTetDecomposition::cellTetIndices
-    (
-        polyMesh_,
-        cellI
-    );
-
-    forAll(cellTets, tetI)
-    {
-        const tetIndices& cellTetIs = cellTets[tetI];
-
-        if (inTet(pt, cellTetIs.tet(polyMesh_)))
-        {
-            tetFaceI = cellTetIs.face();
-            tetPtI = cellTetIs.tetPt();
-
-            return;
-        }
-    }
-}
-
-
-template<class ParticleType>
-bool Foam::Cloud<ParticleType>::inTet
-(
-    const point& pt,
-    const tetPointRef& tet
-) const
-{
-    // For robustness, assuming that the point is in the tet unless
-    // "definitively" shown otherwise by obtaining a positive dot
-    // product greater than a tolerance of SMALL.
-
-    // The tet is defined: tet(Cc, tetBasePt, pA, pB) where the normal
-    // vectors and base points for the half-space planes are:
-    // area[0] = tet.Sa();
-    // area[1] = tet.Sb();
-    // area[2] = tet.Sc();
-    // area[3] = tet.Sd();
-    // planeBase[0] = tetBasePt = tet.b()
-    // planeBase[1] = ptA       = tet.c()
-    // planeBase[2] = tetBasePt = tet.b()
-    // planeBase[3] = tetBasePt = tet.b()
-
-    vector n = vector::zero;
-
-    {
-        // 0, a
-        const point& basePt = tet.b();
-
-        n = tet.Sa();
-        n /= (mag(n) + VSMALL);
-
-        if (((pt - basePt) & n) > SMALL)
-        {
-            return false;
-        }
-    }
-
-    {
-        // 1, b
-        const point& basePt = tet.c();
-
-        n = tet.Sb();
-        n /= (mag(n) + VSMALL);
-
-        if (((pt - basePt) & n) > SMALL)
-        {
-            return false;
-        }
-    }
-
-    {
-        // 2, c
-        const point& basePt = tet.b();
-
-        n = tet.Sc();
-        n /= (mag(n) + VSMALL);
-
-        if (((pt - basePt) & n) > SMALL)
-        {
-            return false;
-        }
-    }
-
-    {
-        // 3, d
-        const point& basePt = tet.b();
-
-        n = tet.Sd();
-        n /= (mag(n) + VSMALL);
-
-        if (((pt - basePt) & n) > SMALL)
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-
-template<class ParticleType>
-const Foam::indexedOctree<Foam::treeDataCell>&
-Foam::Cloud<ParticleType>::cellTree() const
-{
-    if (cellTree_.empty())
-    {
-        treeBoundBox overallBb(polyMesh_.points());
-
-        Random rndGen(261782);
-
-        overallBb = overallBb.extend(rndGen, 1E-4);
-        overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-        overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-
-        cellTree_.reset
-        (
-            new indexedOctree<treeDataCell>
-            (
-                treeDataCell
-                (
-                    false,      // not cache bb
-                    polyMesh_
-                ),
-                overallBb,
-                8,              // maxLevel
-                10,             // leafsize
-                3.0             // duplicity
-            )
-        );
-    }
-
-    return cellTree_();
-}
-
-
-template<class ParticleType>
 const Foam::PackedBoolList& Foam::Cloud<ParticleType>::cellHasWallFaces()
 const
 {
@@ -361,22 +121,6 @@ const
     }
 
     return cellWallFacesPtr_();
-}
-
-
-
-template<class ParticleType>
-Foam::label Foam::Cloud<ParticleType>::getNewParticleID() const
-{
-    label id = particleCount_++;
-
-    if (id == labelMax)
-    {
-        WarningIn("Cloud<ParticleType>::getNewParticleID() const")
-            << "Particle counter has overflowed. This might cause problems"
-            << " when reconstructing particle tracks." << endl;
-    }
-    return id;
 }
 
 
@@ -399,14 +143,14 @@ void Foam::Cloud<ParticleType>::cloudReset(const Cloud<ParticleType>& c)
 {
     // Reset particle cound and particles only
     // - not changing the cloud object registry or reference to the polyMesh
-    particleCount_ = 0;
+    ParticleType::particleCount_ = 0;
     IDLList<ParticleType>::operator=(c);
 }
 
 
 template<class ParticleType>
-template<class TrackingData>
-void Foam::Cloud<ParticleType>::move(TrackingData& td, const scalar trackTime)
+template<class TrackData>
+void Foam::Cloud<ParticleType>::move(TrackData& td, const scalar trackTime)
 {
     const polyBoundaryMesh& pbm = pMesh().boundaryMesh();
     const globalMeshData& pData = polyMesh_.globalData();
@@ -472,9 +216,9 @@ void Foam::Cloud<ParticleType>::move(TrackingData& td, const scalar trackTime)
             {
                 // If we are running in parallel and the particle is on a
                 // boundary face
-                if (Pstream::parRun() && p.faceI_ >= pMesh().nInternalFaces())
+                if (Pstream::parRun() && p.face() >= pMesh().nInternalFaces())
                 {
-                    label patchI = pbm.whichPatch(p.faceI_);
+                    label patchI = pbm.whichPatch(p.face());
 
                     // ... and the face is on a processor patch
                     // prepare it for transfer
@@ -571,7 +315,7 @@ void Foam::Cloud<ParticleType>::move(TrackingData& td, const scalar trackTime)
                 IDLList<ParticleType> newParticles
                 (
                     particleStream,
-                    typename ParticleType::iNew(*this)
+                    typename ParticleType::iNew(polyMesh_)
                 );
 
                 label pI = 0;
@@ -600,57 +344,64 @@ void Foam::Cloud<ParticleType>::move(TrackingData& td, const scalar trackTime)
 
 
 template<class ParticleType>
-void Foam::Cloud<ParticleType>::autoMap(const mapPolyMesh& mapper)
+template<class TrackData>
+void Foam::Cloud<ParticleType>::autoMap
+(
+    TrackData& td,
+    const mapPolyMesh& mapper
+)
 {
     if (cloud::debug)
     {
-        Info<< "Cloud<ParticleType>::autoMap(const morphFieldMapper& map) "
-               "for lagrangian cloud " << cloud::name() << endl;
+        Info<< "Cloud<ParticleType>::autoMap(TrackData&, const mapPolyMesh&) "
+            << "for lagrangian cloud " << cloud::name() << endl;
     }
 
     const labelList& reverseCellMap = mapper.reverseCellMap();
     const labelList& reverseFaceMap = mapper.reverseFaceMap();
 
     // Reset stored data that relies on the mesh
-    cellTree_.clear();
+//    polyMesh_.clearCellTree();
     cellWallFacesPtr_.clear();
 
     forAllIter(typename Cloud<ParticleType>, *this, pIter)
     {
-        if (reverseCellMap[pIter().cellI_] >= 0)
-        {
-            pIter().cellI_ = reverseCellMap[pIter().cellI_];
+        ParticleType& p = pIter();
 
-            if (pIter().faceI_ >= 0 && reverseFaceMap[pIter().faceI_] >= 0)
+        if (reverseCellMap[p.cell()] >= 0)
+        {
+            p.cell() = reverseCellMap[p.cell()];
+
+            if (p.face() >= 0 && reverseFaceMap[p.face()] >= 0)
             {
-                pIter().faceI_ = reverseFaceMap[pIter().faceI_];
+                p.face() = reverseFaceMap[p.face()];
             }
             else
             {
-                pIter().faceI_ = -1;
+                p.face() = -1;
             }
 
-            pIter().initCellFacePt();
+            p.initCellFacePt();
         }
         else
         {
-            label trackStartCell = mapper.mergedCell(pIter().cellI_);
+            label trackStartCell = mapper.mergedCell(p.cell());
 
             if (trackStartCell < 0)
             {
                 trackStartCell = 0;
             }
 
-            vector p = pIter().position();
+            vector pos = p.position();
 
-            const_cast<vector&>(pIter().position()) =
+            const_cast<vector&>(p.position()) =
                 polyMesh_.cellCentres()[trackStartCell];
 
-            pIter().stepFraction() = 0;
+            p.stepFraction() = 0;
 
-            pIter().initCellFacePt();
+            p.initCellFacePt();
 
-            pIter().track(p);
+            p.track(pos, td);
         }
     }
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,15 +25,17 @@ Class
     Foam::passiveParticle
 
 Description
+    Copy of base particle
 
 SourceFiles
+    passiveParticle.H
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef passiveParticle_H
 #define passiveParticle_H
 
-#include "Particle.H"
+#include "particle.H"
 #include "IOstream.H"
 #include "autoPtr.H"
 
@@ -48,7 +50,7 @@ namespace Foam
 
 class passiveParticle
 :
-    public Particle<passiveParticle>
+    public particle
 {
 
 public:
@@ -58,53 +60,50 @@ public:
         //- Construct from components
         passiveParticle
         (
-            const Cloud<passiveParticle>& c,
+            const polyMesh& mesh,
             const vector& position,
             const label cellI,
             const label tetFaceI,
             const label tetPtI
         )
         :
-            Particle<passiveParticle>(c, position, cellI, tetFaceI, tetPtI)
+            particle(mesh, position, cellI, tetFaceI, tetPtI)
         {}
 
         //- Construct from components, with searching for tetFace and
         //  tetPt unless disabled by doCellFacePt = false.
         passiveParticle
         (
-            const Cloud<passiveParticle>& c,
+            const polyMesh& mesh,
             const vector& position,
             const label cellI,
             bool doCellFacePt = true
         )
         :
-            Particle<passiveParticle>(c, position, cellI, doCellFacePt)
+            particle(mesh, position, cellI, doCellFacePt)
         {}
 
         //- Construct from Istream
         passiveParticle
         (
-            const Cloud<passiveParticle>& c,
+            const polyMesh& mesh,
             Istream& is,
             bool readFields = true
         )
         :
-            Particle<passiveParticle>(c, is, readFields)
+            particle(mesh, is, readFields)
         {}
 
         //- Construct as copy
         passiveParticle(const passiveParticle& p)
         :
-            Particle<passiveParticle>(p)
+            particle(p)
         {}
 
         //- Construct and return a clone
-        virtual autoPtr<Particle<passiveParticle> > clone() const
+        virtual autoPtr<particle> clone() const
         {
-            return autoPtr<Particle<passiveParticle> >
-            (
-                new passiveParticle(*this)
-            );
+            return autoPtr<particle>(new passiveParticle(*this));
         }
 };
 
