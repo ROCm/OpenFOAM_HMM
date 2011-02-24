@@ -63,8 +63,9 @@ setenv FOAM_SITE_LIBBIN $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/
 setenv FOAM_USER_APPBIN $WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/bin
 setenv FOAM_USER_LIBBIN $WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib
 
-# codeStream templates
-setenv FOAM_CODESTREAM_TEMPLATE_DIR $WM_PROJECT_DIR/etc/codeTemplates/codeStream
+# dynamicCode templates
+# - default location is the "~OpenFOAM/codeTemplates/dynamicCode" expansion
+# setenv FOAM_CODE_TEMPLATES $WM_PROJECT_DIR/etc/codeTemplates/dynamicCode
 
 # convenience
 setenv FOAM_APP $WM_PROJECT_DIR/applications

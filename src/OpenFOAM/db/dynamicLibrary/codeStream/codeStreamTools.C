@@ -41,10 +41,10 @@ int Foam::codeStreamTools::allowSystemOperations
 
 
 const Foam::word Foam::codeStreamTools::codeTemplateEnvName
-    = "FOAM_CODESTREAM_TEMPLATES";
+    = "FOAM_CODE_TEMPLATES";
 
 const Foam::fileName Foam::codeStreamTools::codeTemplateDirName
-    = "codeTemplates/codeStream";
+    = "codeTemplates/dynamicCode";
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -73,7 +73,7 @@ void Foam::codeStreamTools::checkSecurity
 
 Foam::fileName Foam::codeStreamTools::codePath(const word& subDirName)
 {
-    return stringOps::expand("$FOAM_CASE/codeStream/" + subDirName);
+    return stringOps::expand("$FOAM_CASE/dynamicCode/" + subDirName);
 }
 
 
@@ -81,7 +81,7 @@ Foam::fileName Foam::codeStreamTools::libPath(const word& codeName)
 {
     return stringOps::expand
     (
-        "$FOAM_CASE/codeStream/platforms/$WM_OPTIONS/lib/lib"
+        "$FOAM_CASE/dynamicCode/platforms/$WM_OPTIONS/lib/lib"
       + codeName + ".so"
     );
 }
@@ -95,7 +95,7 @@ Foam::string Foam::codeStreamTools::libTarget(const word& codeName)
 
 Foam::fileName Foam::codeStreamTools::findTemplate(const word& templateFile)
 {
-    // try to get template from FOAM_CODESTREAM_TEMPLATES
+    // try to get template from FOAM_CODE_TEMPLATES
     fileName templateDir(Foam::getEnv(codeTemplateEnvName));
 
     fileName file;
