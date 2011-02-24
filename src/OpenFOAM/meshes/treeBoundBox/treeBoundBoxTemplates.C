@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,10 +23,34 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "indexedOctree.H"
+#include "treeBoundBox.H"
+#include "FixedList.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::indexedOctreeName, 0);
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+
+template<unsigned Size>
+Foam::treeBoundBox::treeBoundBox
+(
+    const UList<point>& points,
+    const FixedList<label, Size>& indices
+)
+:
+    boundBox(points, indices, false)
+{
+    // points may be empty, but a FixedList is never empty
+    if (points.empty())
+    {
+        WarningIn
+        (
+            "treeBoundBox::treeBoundBox"
+            "(const UList<point>&, const FixedList<label, Size>&)"
+        )   << "cannot find bounding box for zero-sized pointField, "
+            << "returning zero" << endl;
+
+        return;
+    }
+}
 
 // ************************************************************************* //

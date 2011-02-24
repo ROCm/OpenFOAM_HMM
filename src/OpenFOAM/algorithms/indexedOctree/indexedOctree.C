@@ -25,8 +25,8 @@ License
 
 #include "indexedOctree.H"
 #include "linePointRef.H"
-#include "meshTools.H"
 #include "OFstream.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -1730,26 +1730,6 @@ void Foam::indexedOctree<Type>::traverseNode
 
         point perturbedEnd(pushPoint(octantBb, end, false));
 
-
-        //if (debug)
-        {
-            // Dump octantBb to obj
-            writeOBJ(nodeI, octant);
-            // Dump ray to obj as well
-            {
-                OFstream str("ray.obj");
-                meshTools::writeOBJ(str, start);
-                meshTools::writeOBJ(str, end);
-                str << "l 1 2" << nl;
-            }
-            WarningIn("indexedOctree<Type>::traverseNode(..)")
-                << "Did not intersect ray from endpoint:" << end
-                << " to startpoint:" << start
-                << " with bounding box:" << octantBb << nl
-                << "Re-intersecting with perturbed endpoint:" << perturbedEnd
-                << endl;
-        }
-
         traverseNode
         (
             findAny,
@@ -2316,12 +2296,6 @@ void Foam::indexedOctree<Type>::writeOBJ
     pointField bbPoints(subBb.points());
 
     label pointVertI = vertI;
-    forAll(bbPoints, i)
-    {
-        meshTools::writeOBJ(str, bbPoints[i]);
-        vertI++;
-    }
-
     forAll(treeBoundBox::edges, i)
     {
         const edge& e = treeBoundBox::edges[i];
