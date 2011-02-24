@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,15 +29,14 @@ License
 
 bool Foam::solidParticle::move
 (
-    solidParticle::trackData& td,
+    trackingData& td,
     const scalar trackTime
 )
 {
     td.switchProcessor = false;
     td.keepParticle = true;
 
-    const polyMesh& mesh = cloud().pMesh();
-    const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
+    const polyBoundaryMesh& pbMesh = mesh_.boundaryMesh();
 
     scalar tEnd = (1.0 - stepFraction())*trackTime;
     scalar dtMax = tEnd;
@@ -46,7 +45,7 @@ bool Foam::solidParticle::move
     {
         if (debug)
         {
-            Info<< "Time = " << mesh.time().timeName()
+            Info<< "Time = " << mesh_.time().timeName()
                 << " trackTime = " << trackTime
                 << " tEnd = " << tEnd
                 << " steptFraction() = " << stepFraction() << endl;
@@ -64,12 +63,12 @@ bool Foam::solidParticle::move
         tEnd -= dt;
         stepFraction() = 1.0 - tEnd/trackTime;
 
-        cellPointWeight cpw(mesh, position(), cellI, face());
+        cellPointWeight cpw(mesh_, position(), cellI, face());
         scalar rhoc = td.rhoInterp().interpolate(cpw);
         vector Uc = td.UInterp().interpolate(cpw);
         scalar nuc = td.nuInterp().interpolate(cpw);
 
-        scalar rhop = td.spc().rhop();
+        scalar rhop = td.cloud().rhop();
         scalar magUr = mag(Uc - U_);
 
         scalar ReFunc = 1.0;
@@ -100,20 +99,7 @@ bool Foam::solidParticle::move
 bool Foam::solidParticle::hitPatch
 (
     const polyPatch&,
-    solidParticle::trackData&,
-    const label,
-    const scalar,
-    const tetIndices&
-)
-{
-    return false;
-}
-
-
-bool Foam::solidParticle::hitPatch
-(
-    const polyPatch&,
-    int&,
+    trackingData&,
     const label,
     const scalar,
     const tetIndices&
@@ -126,29 +112,21 @@ bool Foam::solidParticle::hitPatch
 void Foam::solidParticle::hitProcessorPatch
 (
     const processorPolyPatch&,
-    solidParticle::trackData& td
+    trackingData& td
 )
 {
     td.switchProcessor = true;
 }
 
 
-void Foam::solidParticle::hitProcessorPatch
-(
-    const processorPolyPatch&,
-    int&
-)
-{}
-
-
 void Foam::solidParticle::hitWallPatch
 (
     const wallPolyPatch& wpp,
-    solidParticle::trackData& td,
+    trackingData& td,
     const tetIndices& tetIs
 )
 {
-    vector nw = tetIs.faceTri(cloud().pMesh()).normal();
+    vector nw = tetIs.faceTri(mesh_).normal();
     nw /= mag(nw);
 
     scalar Un = U_ & nw;
@@ -156,50 +134,33 @@ void Foam::solidParticle::hitWallPatch
 
     if (Un > 0)
     {
-        U_ -= (1.0 + td.spc().e())*Un*nw;
+        U_ -= (1.0 + td.cloud().e())*Un*nw;
     }
 
-    U_ -= td.spc().mu()*Ut;
+    U_ -= td.cloud().mu()*Ut;
 }
-
-
-void Foam::solidParticle::hitWallPatch
-(
-    const wallPolyPatch&,
-    int&,
-    const tetIndices&
-)
-{}
 
 
 void Foam::solidParticle::hitPatch
 (
     const polyPatch&,
-    solidParticle::trackData& td
+    trackingData& td
 )
 {
     td.keepParticle = false;
 }
 
 
-void Foam::solidParticle::hitPatch
-(
-    const polyPatch&,
-    int&
-)
-{}
-
-
 void Foam::solidParticle::transformProperties (const tensor& T)
 {
-    Particle<solidParticle>::transformProperties(T);
+    particle::transformProperties(T);
     U_ = transform(T, U_);
 }
 
 
 void Foam::solidParticle::transformProperties(const vector& separation)
 {
-    Particle<solidParticle>::transformProperties(separation);
+    particle::transformProperties(separation);
 }
 
 
