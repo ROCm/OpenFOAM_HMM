@@ -46,6 +46,7 @@ License
 
 namespace Foam
 {
+    defineTemplateTypeNameAndDebug(Cloud<parcel>, 0);
     defineTemplateTypeNameAndDebug(IOPtrList<injector>, 0);
 }
 

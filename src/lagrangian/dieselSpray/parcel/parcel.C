@@ -39,15 +39,15 @@ License
 
 namespace Foam
 {
-    defineParticleTypeNameAndDebug(parcel, 0);
-    defineTemplateTypeNameAndDebug(Cloud<parcel>, 0);
+//    defineParticleTypeNameAndDebug(parcel, 0);
+//    defineTemplateTypeNameAndDebug(Cloud<parcel>, 0);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::parcel::parcel
 (
-    const Cloud<parcel>& cloud,
+    const polyMesh& mesh,
     const vector& position,
     const label cellI,
     const label tetFaceI,
@@ -69,11 +69,8 @@ Foam::parcel::parcel
     const List<word>& liquidNames
 )
 :
-    Particle<parcel>(cloud, position, cellI, tetFaceI, tetPtI),
-    liquidComponents_
-    (
-        liquidNames
-    ),
+    particle(mesh, position, cellI, tetFaceI, tetPtI),
+    liquidComponents_(liquidNames),
     d_(d),
     T_(T),
     m_(m),
@@ -94,11 +91,14 @@ Foam::parcel::parcel
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::parcel::move(spray& sDB, const scalar trackTime)
+bool Foam::parcel::move(trackingData& td, const scalar trackTime)
 {
-    const polyMesh& mesh = cloud().pMesh();
-    const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
+    td.switchProcessor = false;
+    td.keepParticle = true;
 
+    const polyBoundaryMesh& pbMesh = mesh_.boundaryMesh();
+
+    spray& sDB = td.cloud();
     const liquidMixtureProperties& fuels = sDB.fuels();
 
     label Nf = fuels.components().size();
@@ -138,8 +138,6 @@ bool Foam::parcel::move(spray& sDB, const scalar trackTime)
     scalar tauHeatTransfer = GREAT;
     scalarField tauEvaporation(Nf, GREAT);
     scalarField tauBoiling(Nf, GREAT);
-
-    bool keepParcel = true;
 
     setRelaxationTimes
     (
@@ -185,7 +183,6 @@ bool Foam::parcel::move(spray& sDB, const scalar trackTime)
     // (10 000 seems high enough)
     dtMax = max(dtMax, 1.0e-4*tEnd);
 
-    bool switchProcessor = false;
     vector planeNormal = vector::zero;
     if (sDB.twoD())
     {
@@ -194,7 +191,7 @@ bool Foam::parcel::move(spray& sDB, const scalar trackTime)
     }
 
     // move the parcel until there is no 'timeLeft'
-    while (keepParcel && tEnd > SMALL && !switchProcessor)
+    while (td.keepParticle && !td.switchProcessor && tEnd > SMALL)
     {
         // set the lagrangian time-step
         scalar dt = min(dtMax, tEnd);
@@ -205,10 +202,10 @@ bool Foam::parcel::move(spray& sDB, const scalar trackTime)
         scalar p = sDB.p()[cellI];
 
         // track parcel to face, or end of trajectory
-        if (keepParcel)
+        if (td.keepParticle)
         {
             // Track and adjust the time step if the trajectory is not completed
-            dt *= trackToFace(position() + dt*U_, sDB);
+            dt *= trackToFace(position() + dt*U_, td);
 
             // Decrement the end-time acording to how much time the track took
             tEnd -= dt;
@@ -218,11 +215,11 @@ bool Foam::parcel::move(spray& sDB, const scalar trackTime)
 
             if (onBoundary()) // hit face
             {
-#               include "boundaryTreatment.H"
+                #include "boundaryTreatment.H"
             }
         }
 
-        if (keepParcel && sDB.twoD())
+        if (td.keepParticle && sDB.twoD())
         {
             scalar z = position() & sDB.axisOfSymmetry();
             vector r = position() - z*sDB.axisOfSymmetry();
@@ -297,7 +294,7 @@ bool Foam::parcel::move(spray& sDB, const scalar trackTime)
         // remove parcel if it is 'small'
         if (m() < 1.0e-12)
         {
-            keepParcel = false;
+            td.keepParticle = false;
 
             // ... and add the removed 'stuff' to the gas
             forAll(nMass, i)
@@ -309,19 +306,19 @@ bool Foam::parcel::move(spray& sDB, const scalar trackTime)
             sDB.shs()[cellI] += m()*(nH + nPE);
         }
 
-        if (onBoundary() && keepParcel)
+        if (onBoundary() && td.keepParticle)
         {
             if (face() > -1)
             {
                 if (isA<processorPolyPatch>(pbMesh[patch(face())]))
                 {
-                    switchProcessor = true;
+                    td.switchProcessor = true;
                 }
             }
         }
     }
 
-    return keepParcel;
+    return td.keepParticle;
 }
 
 

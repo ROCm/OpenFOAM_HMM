@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,6 +35,8 @@ void Foam::spray::inject()
 {
     scalar time = runTime_.value();
     scalar time0 = time0_;
+
+    parcel::trackingData td(*this);
 
     // Inject the parcels for each injector sequentially
     forAll(injectors_, i)
@@ -111,7 +113,7 @@ void Foam::spray::inject()
                     label injectorTetFaceI = -1;
                     label injectorTetPtI = -1;
 
-                    findCellFacePt
+                    mesh_.findCellFacePt
                     (
                         injectionPosition,
                         injectorCell,
@@ -119,7 +121,7 @@ void Foam::spray::inject()
                         injectorTetPtI
                     );
 
-#                   include "findInjectorCell.H"
+                    #include "findInjectorCell.H"
 
                     if (injectorCell >= 0)
                     {
@@ -129,7 +131,7 @@ void Foam::spray::inject()
 
                         parcel* pPtr = new parcel
                         (
-                            *this,
+                            mesh_,
                             injectionPosition,
                             injectorCell,
                             injectorTetFaceI,
@@ -160,7 +162,7 @@ void Foam::spray::inject()
                            /runTime_.deltaTValue();
 
                         bool keepParcel =
-                            pPtr->move(*this, runTime_.deltaTValue());
+                            pPtr->move(td, runTime_.deltaTValue());
 
                         if (keepParcel)
                         {
