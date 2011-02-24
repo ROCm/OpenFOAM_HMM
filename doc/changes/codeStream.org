@@ -47,7 +47,7 @@
     =code=, =codeInclude=, =codeOptions= sections (these are just strings) and
     calculates the SHA1 checksum of the contents.
   - it copies a template file
-    =($FOAM_CODESTREAM_TEMPLATE_DIR/codeStreamTemplate.C)=, substituting all
+    =($FOAM_CODESTREAM_TEMPLATES/codeStreamTemplate.C)=, substituting all
     occurences of =code=, =codeInclude=, =codeOptions=.
   - it writes library source files to =constant/codeStream/<sha1>= and compiles
     it using =wmake libso=.
@@ -75,6 +75,21 @@
   #+END_SRC
   It by default always includes =fvCFD.H= and adds the =finiteVolume= library to
   the include search path.
+
+  A special form is where the code is not supplied in-line but instead comes
+  from the =codeDict= dictionary in the =system= directory. It should contain
+  a =fixedValue10= entry:
+  #+BEGIN_SRC c++
+  fixedValue10
+  {
+      code
+      #{
+          operator==(min(10, 0.1*this->db().time().value()));
+      #};
+  }
+  #+END_SRC
+  The advantage of using this indirect way is that it supports
+  runTimeModifiable so any change of the code will be picked up next iteration.
 
 * Security
   Allowing the case to execute C++ code does introduce security risks.  A
@@ -121,7 +136,8 @@
   - =foamFormatConvert=
   - =changeDictionaryDict=
   - =foamUpgradeCyclics=
-  - =fieldToCell=
+  These applications will usually switch off all '#' processing.
+
 
   Note: above field initialisation has the problem that the boundary conditions
   are not evaluated so e.g. processor boundaries will not hold the opposite cell

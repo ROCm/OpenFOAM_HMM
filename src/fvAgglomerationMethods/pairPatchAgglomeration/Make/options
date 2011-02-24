@@ -7,4 +7,3 @@ LIB_LIBS = \
     -lfiniteVolume \
     -lOpenFOAM \
     -lmeshTools
-

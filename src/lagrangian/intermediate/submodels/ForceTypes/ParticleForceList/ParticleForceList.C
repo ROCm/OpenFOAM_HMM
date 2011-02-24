@@ -71,7 +71,11 @@ Foam::ParticleForceList<CloudType>::ParticleForceList
             forAllConstIter(wordHashSet, models, iter)
             {
                 const word& model = iter.key();
-                set(i, ParticleForce<CloudType>::New(owner, mesh, dict, model));
+                this->set
+                (
+                    i,
+                    ParticleForce<CloudType>::New(owner, mesh, dict, model)
+                );
                 i++;
             }
         }

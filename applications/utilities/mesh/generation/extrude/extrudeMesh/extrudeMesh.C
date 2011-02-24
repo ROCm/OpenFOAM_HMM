@@ -499,7 +499,7 @@ int main(int argc, char *argv[])
         // Layers per point
         labelList nPointLayers(extrudePatch.nPoints(), model().nLayers());
         // Displacement for first layer
-        vectorField firstLayerDisp = displacement*model().sumThickness(1);
+        vectorField firstLayerDisp(displacement*model().sumThickness(1));
 
         // Expansion ratio not used.
         scalarField ratio(extrudePatch.nPoints(), 1.0);

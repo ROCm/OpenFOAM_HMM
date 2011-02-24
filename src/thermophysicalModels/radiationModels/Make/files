@@ -34,4 +34,3 @@ derivedFvPatchFields/radiationCoupledBase/radiationCoupledBase.C
 derivedFvPatchFields/greyDiffusiveViewFactor/greyDiffusiveViewFactorFixedValueFvPatchScalarField.C
 
 LIB = $(FOAM_LIBBIN)/libradiationModels
-

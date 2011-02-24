@@ -43,7 +43,7 @@ dictionaryReplacement
                 type            zeroGradient;
                 value           uniform 300;
             }
-            
+
             heater_to_topAir
             {
                 type            compressible::turbulentTemperatureRadCoupledMixed;
@@ -51,10 +51,10 @@ dictionaryReplacement
                 K               solidThermo;
                 QrNbr           Qr;
                 Qr              none;
-                KName           none;                
+                KName           none;
                 value           uniform 300;
             }
-            
+
             heater_to_bottomAir
             {
                 type            compressible::turbulentTemperatureRadCoupledMixed;
@@ -62,10 +62,10 @@ dictionaryReplacement
                 K               solidThermo;
                 QrNbr           Qr;
                 Qr              none;
-                KName           none;                
+                KName           none;
                 value           uniform 300;
             }
-            
+
             "heater_to_.*"
             {
                 type            compressible::turbulentTemperatureCoupledBaffleMixed;

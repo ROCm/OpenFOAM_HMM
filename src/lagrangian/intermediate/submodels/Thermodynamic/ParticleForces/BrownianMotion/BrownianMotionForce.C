@@ -72,7 +72,7 @@ Foam::BrownianMotionForce<CloudType>::BrownianMotionForce
     if (turbulence_)
     {
         HashTable<const compressible::turbulenceModel*> models =
-            this->mesh().objectRegistry::lookupClass
+            this->mesh().objectRegistry::template lookupClass
             <
                 compressible::turbulenceModel
             >();

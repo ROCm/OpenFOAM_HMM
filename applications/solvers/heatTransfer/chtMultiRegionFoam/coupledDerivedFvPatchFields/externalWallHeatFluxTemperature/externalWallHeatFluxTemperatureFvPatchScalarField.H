@@ -44,7 +44,7 @@ Description
 
 Note:
     Only the pair h, Ta or q can be specified in the dictionary.
-    
+
 
 SourceFiles
     externalWallHeatFluxTemperatureFvPatchScalarField.C

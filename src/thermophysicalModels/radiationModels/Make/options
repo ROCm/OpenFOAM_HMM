@@ -23,5 +23,3 @@ LIB_LIBS = \
     -lliquidMixtureProperties \
     -lsolidProperties \
     -lliquidProperties
-
-

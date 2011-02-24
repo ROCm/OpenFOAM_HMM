@@ -69,7 +69,7 @@ dictionaryReplacement
                 K               basicThermo;
                 QrNbr           none;
                 Qr              Qr;
-                KName           none;                
+                KName           none;
                 value           uniform 300;
             }
         }
@@ -162,7 +162,7 @@ dictionaryReplacement
             }
         }
     }
-    
+
     Qr
     {
         internalField   uniform 0;
@@ -176,7 +176,7 @@ dictionaryReplacement
                 emissivity      uniform 1.0;
                 value           uniform 0;
             }
-            
+
             "topAir_to_.*"
             {
                 type            greyDiffusiveRadiationViewFactor;
@@ -186,7 +186,7 @@ dictionaryReplacement
             }
         }
     }
-    
+
     G
     {
         internalField   uniform 0;
@@ -200,7 +200,7 @@ dictionaryReplacement
                 emissivity      uniform 1.0;
                 value           uniform 0;
             }
-        
+
             "topAir_to_.*"
             {
                 type            MarshakRadiation;
@@ -210,7 +210,7 @@ dictionaryReplacement
             }
         }
     }
-    
+
     IDefault
     {
         internalField   uniform 0;

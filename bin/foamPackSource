@@ -32,7 +32,7 @@
 #     Not normally called directly by the user
 #------------------------------------------------------------------------------
 tmpFile=${TMPDIR:-/tmp}/foamPackFiles.$$
-toolsDir="${0%/*}"  # this script is already located in the tools/ directory
+toolsDir="${0%/*}/tools"  # this script is located in the tools/ parent dir
 
 [ $# -eq 2 ] || {
 cat <<USAGE 1>&2

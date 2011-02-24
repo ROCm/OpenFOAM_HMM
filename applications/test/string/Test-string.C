@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "string.H"
+#include "stringOps.H"
 #include "IOstreams.H"
 
 using namespace Foam;
@@ -35,10 +36,18 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    string test("$HOME kjhkjhkjh \" \\$HOME/tyetyery ${FOAM_RUN} \n ; hkjh ;$");
+    string test
+    (
+        "  $HOME kjhkjhkjh \" \\$HOME/tyetyery ${FOAM_RUN} \n ; hkjh ;$   "
+    );
 
     Info<< "string:" << test << nl << "hash:"
         << unsigned(string::hash()(test)) << endl;
+
+    Info<<"trimLeft: " << stringOps::trimLeft(test) << endl;
+    Info<<"trimRight: " << stringOps::trimRight(test) << endl;
+    Info<<"trim: " << stringOps::trim(test) << endl;
+
 
     // test sub-strings via iterators
     string::const_iterator iter  = test.end();
