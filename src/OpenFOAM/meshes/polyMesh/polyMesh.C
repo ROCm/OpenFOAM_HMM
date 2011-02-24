@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1183,9 +1183,122 @@ void Foam::polyMesh::removeFiles(const fileName& instanceDir) const
     }
 }
 
+
 void Foam::polyMesh::removeFiles() const
 {
     removeFiles(instance());
+}
+
+
+void Foam::polyMesh::findCellFacePt
+(
+    const point& pt,
+    label& cellI,
+    label& tetFaceI,
+    label& tetPtI
+) const
+{
+    cellI = -1;
+    tetFaceI = -1;
+    tetPtI = -1;
+
+    const indexedOctree<treeDataCell>& tree = cellTree();
+
+    // Find nearest cell to the point
+
+    pointIndexHit info = tree.findNearest(pt, sqr(GREAT));
+
+    if (info.hit())
+    {
+        label nearestCellI = tree.shapes().cellLabels()[info.index()];
+
+        // Check the nearest cell to see if the point is inside.
+        findTetFacePt(nearestCellI, pt, tetFaceI, tetPtI);
+
+        if (tetFaceI != -1)
+        {
+            // Point was in the nearest cell
+
+            cellI = nearestCellI;
+
+            return;
+        }
+        else
+        {
+            // Check the other possible cells that the point may be in
+
+            labelList testCells = tree.findIndices(pt);
+
+            forAll(testCells, pCI)
+            {
+                label testCellI = tree.shapes().cellLabels()[testCells[pCI]];
+
+                if (testCellI == nearestCellI)
+                {
+                    // Don't retest the nearest cell
+
+                    continue;
+                }
+
+                // Check the test cell to see if the point is inside.
+                findTetFacePt(testCellI, pt, tetFaceI, tetPtI);
+
+                if (tetFaceI != -1)
+                {
+                    // Point was in the test cell
+
+                    cellI = testCellI;
+
+                    return;
+                }
+            }
+        }
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "void Foam::polyMesh::findCellFacePt"
+            "("
+                "const point&, "
+                "label&, "
+                "label&, "
+                "label&"
+            ") const"
+        )   << "Did not find nearest cell in search tree."
+            << abort(FatalError);
+    }
+}
+
+
+void Foam::polyMesh::findTetFacePt
+(
+    const label cellI,
+    const point& pt,
+    label& tetFaceI,
+    label& tetPtI
+) const
+{
+    const polyMesh& mesh = *this;
+
+    tetFaceI = -1;
+    tetPtI = -1;
+
+    List<tetIndices> cellTets =
+        polyMeshTetDecomposition::cellTetIndices(mesh, cellI);
+
+    forAll(cellTets, tetI)
+    {
+        const tetIndices& cellTetIs = cellTets[tetI];
+
+        if (cellTetIs.tet(mesh).inside(pt))
+        {
+            tetFaceI = cellTetIs.face();
+            tetPtI = cellTetIs.tetPt();
+
+            return;
+        }
+    }
 }
 
 

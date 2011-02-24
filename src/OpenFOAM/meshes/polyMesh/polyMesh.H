@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,6 +34,7 @@ SourceFiles
     polyMeshFromShapeMesh.C
     polyMeshIO.C
     polyMeshUpdate.C
+    polyMeshFindCell.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -391,6 +392,7 @@ public:
                 return *this;
             }
 
+
         // Mesh motion
 
             //- Is mesh moving
@@ -508,6 +510,28 @@ public:
 
             //- Remove all files from mesh instance()
             void removeFiles() const;
+
+
+        // Helper functions
+
+            //- Find the cell, tetFaceI and tetPtI for the given position
+            void findCellFacePt
+            (
+                const point& pt,
+                label& cellI,
+                label& tetFaceI,
+                label& tetPtI
+            ) const;
+
+            //- Find the tetFaceI and tetPtI for the given position in
+            //  the supplied cell, tetFaceI and tetPtI = -1 if not found
+            void findTetFacePt
+            (
+                const label cellI,
+                const point& pt,
+                label& tetFaceI,
+                label& tetPtI
+            ) const;
 };
 
 
