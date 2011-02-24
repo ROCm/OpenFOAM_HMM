@@ -38,9 +38,9 @@ parallel/decompose/AllwmakeLnInclude
 # dummyThirdParty (dummy metisDecomp, scotchDecomp etc) needed by e.g. meshTools
 dummyThirdParty/Allwmake $*
 
+wmake $makeOption finiteVolume
 wmake $makeOption lagrangian/basic
 wmake $makeOption lagrangian/distributionModels
-wmake $makeOption finiteVolume
 wmake $makeOption genericPatchFields
 
 # Build the proper scotchDecomp, metisDecomp etc.
