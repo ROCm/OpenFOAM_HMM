@@ -728,6 +728,7 @@ void Foam::KinematicCloud<CloudType>::checkParcelProperties
 
     const scalar carrierDt = this->db().time().deltaTValue();
     parcel.stepFraction() = (carrierDt - lagrangianDt)/carrierDt;
+    parcel.typeId() = constProps_.parcelTypeId();
 }
 
 

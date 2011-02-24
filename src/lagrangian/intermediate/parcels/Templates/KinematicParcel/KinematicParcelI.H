@@ -98,7 +98,6 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
 :
     ParcelType(owner, position, cellI, tetFaceI, tetPtI),
     active_(true),
-//    typeId_(owner.constProps().parcelTypeId()),
     typeId_(-1),
     nParticle_(0),
     d_(0.0),
@@ -115,11 +114,7 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     rhoc_(0.0),
     Uc_(vector::zero),
     muc_(0.0)
-{
-    // TODO
-    WarningIn("inline Foam::KinematicParcel<ParcelType>::KinematicParcel")
-        << "typeId set to -1 instead of constProps value" << endl;
-}
+{}
 
 
 template<class ParcelType>
