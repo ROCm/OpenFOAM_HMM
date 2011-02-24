@@ -25,8 +25,6 @@ License
 
 #include "primitiveMesh.H"
 #include "cell.H"
-#include "tetIndices.H"
-#include "polyMeshTetDecomposition.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
