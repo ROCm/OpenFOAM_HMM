@@ -28,23 +28,17 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "Cloud.H"
-#include "KinematicCloud.H"
-#include "ThermoCloud.H"
-
 #include "NoHeatTransfer.H"
 #include "RanzMarshall.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelHeatTransferModels(ParcelType)                              \
+#define makeParcelHeatTransferModels(CloudType)                               \
                                                                               \
-    typedef ThermoCloud<KinematicCloud<Cloud<ParcelType> > > TKC##ParcelType; \
+    makeHeatTransferModel(CloudType);                                         \
                                                                               \
-    makeHeatTransferModel(TKC##ParcelType);                                   \
-                                                                              \
-    makeHeatTransferModelType(NoHeatTransfer, TKC##ParcelType);               \
-    makeHeatTransferModelType(RanzMarshall, TKC##ParcelType);
+    makeHeatTransferModelType(NoHeatTransfer, CloudType);                     \
+    makeHeatTransferModelType(RanzMarshall, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

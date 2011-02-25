@@ -28,24 +28,16 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "Cloud.H"
-#include "KinematicCloud.H"
-#include "ThermoCloud.H"
-#include "ReactingCloud.H"
-
 #include "NoComposition.H"
 #include "SingleMixtureFraction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeReactingMultiphaseParcelCompositionModels(ParcelType)             \
+#define makeReactingMultiphaseParcelCompositionModels(CloudType)              \
                                                                               \
-    typedef ReactingCloud<ThermoCloud<KinematicCloud<Cloud<ParcelType> > > >  \
-        RTKC##ParcelType;                                                     \
-                                                                              \
-    makeCompositionModel(RTKC##ParcelType);                                   \
-    makeCompositionModelType(NoComposition, RTKC##ParcelType);                \
-    makeCompositionModelType(SingleMixtureFraction, RTKC##ParcelType);
+    makeCompositionModel(CloudType);                                          \
+    makeCompositionModelType(NoComposition, CloudType);                       \
+    makeCompositionModelType(SingleMixtureFraction, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

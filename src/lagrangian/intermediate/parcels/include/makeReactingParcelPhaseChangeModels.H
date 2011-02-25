@@ -28,24 +28,16 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "Cloud.H"
-#include "KinematicCloud.H"
-#include "ThermoCloud.H"
-#include "ReactingCloud.H"
-
 #include "NoPhaseChange.H"
 #include "LiquidEvaporation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeReactingParcelPhaseChangeModels(ParcelType)                       \
+#define makeReactingParcelPhaseChangeModels(CloudType)                        \
                                                                               \
-    typedef ReactingCloud<ThermoCloud<KinematicCloud<Cloud<ParcelType> > > >  \
-        RTKC##ParcelType;                                                     \
-                                                                              \
-    makePhaseChangeModel(RTKC##ParcelType);                                   \
-    makePhaseChangeModelType(NoPhaseChange, RTKC##ParcelType);                \
-    makePhaseChangeModelType(LiquidEvaporation, RTKC##ParcelType);
+    makePhaseChangeModel(CloudType);                                          \
+    makePhaseChangeModelType(NoPhaseChange, CloudType);                       \
+    makePhaseChangeModelType(LiquidEvaporation, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

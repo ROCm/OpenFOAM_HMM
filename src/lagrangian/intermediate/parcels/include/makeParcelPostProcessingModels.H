@@ -28,24 +28,19 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "Cloud.H"
-#include "KinematicCloud.H"
-
 #include "NoPostProcessing.H"
 #include "ParticleTracks.H"
 #include "PatchPostProcessing.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelPostProcessingModels(ParcelType)                            \
+#define makeParcelPostProcessingModels(CloudType)                             \
                                                                               \
-    typedef KinematicCloud<Cloud<ParcelType> > KC##ParcelType;                \
+    makePostProcessingModel(CloudType);                                       \
                                                                               \
-    makePostProcessingModel(KC##ParcelType);                                  \
-                                                                              \
-    makePostProcessingModelType(NoPostProcessing, KC##ParcelType);            \
-    makePostProcessingModelType(ParticleTracks, KC##ParcelType);              \
-    makePostProcessingModelType(PatchPostProcessing, KC##ParcelType);
+    makePostProcessingModelType(NoPostProcessing, CloudType);                 \
+    makePostProcessingModelType(ParticleTracks, CloudType);                   \
+    makePostProcessingModelType(PatchPostProcessing, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -28,9 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "Cloud.H"
-#include "KinematicCloud.H"
-
 #include "NoCollision.H"
 #include "PairCollision.H"
 
@@ -41,20 +38,18 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelCollisionModels(ParcelType)                                 \
+#define makeParcelCollisionModels(CloudType)                                  \
                                                                               \
-    typedef KinematicCloud<Cloud<ParcelType> > KC##ParcelType;                \
+    makeCollisionModel(CloudType);                                            \
+    makeCollisionModelType(NoCollision, CloudType);                           \
+    makeCollisionModelType(PairCollision, CloudType);                         \
                                                                               \
-    makeCollisionModel(KC##ParcelType);                                       \
-    makeCollisionModelType(NoCollision, KC##ParcelType);                      \
-    makeCollisionModelType(PairCollision, KC##ParcelType);                    \
+    makePairModel(CloudType);                                                 \
+    makePairModelType(PairSpringSliderDashpot, CloudType);                    \
                                                                               \
-    makePairModel(KC##ParcelType);                                            \
-    makePairModelType(PairSpringSliderDashpot, KC##ParcelType);               \
-                                                                              \
-    makeWallModel(KC##ParcelType);                                            \
-    makeWallModelType(WallSpringSliderDashpot, KC##ParcelType);               \
-    makeWallModelType(WallLocalSpringSliderDashpot, KC##ParcelType);
+    makeWallModel(CloudType);                                                 \
+    makeWallModelType(WallSpringSliderDashpot, CloudType);                    \
+    makeWallModelType(WallLocalSpringSliderDashpot, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

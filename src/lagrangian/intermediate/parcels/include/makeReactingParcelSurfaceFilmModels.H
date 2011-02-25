@@ -28,21 +28,16 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "Cloud.H"
-#include "KinematicCloud.H"
-
 #include "NoSurfaceFilm.H"
 #include "ThermoSurfaceFilm.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeReactingParcelSurfaceFilmModels(ParcelType)                       \
+#define makeReactingParcelSurfaceFilmModels(CloudType)                        \
                                                                               \
-    typedef KinematicCloud<Cloud<ParcelType> > KC##ParcelType;                \
-                                                                              \
-    makeSurfaceFilmModel(KC##ParcelType);                                     \
-    makeSurfaceFilmModelType(NoSurfaceFilm, KC##ParcelType);                  \
-    makeSurfaceFilmModelType(ThermoSurfaceFilm, KC##ParcelType);
+    makeSurfaceFilmModel(CloudType);                                          \
+    makeSurfaceFilmModelType(NoSurfaceFilm, CloudType);                       \
+    makeSurfaceFilmModelType(ThermoSurfaceFilm, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

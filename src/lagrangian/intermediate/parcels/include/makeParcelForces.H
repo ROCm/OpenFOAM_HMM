@@ -28,9 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "Cloud.H"
-#include "KinematicCloud.H"
-
 #include "SphereDragForce.H"
 #include "NonSphereDragForce.H"
 
@@ -41,17 +38,15 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelForces(ParcelType)                                          \
+#define makeParcelForces(CloudType)                                           \
                                                                               \
-    typedef KinematicCloud<Cloud<ParcelType> > KC##ParcelType;                \
-                                                                              \
-    makeParticleForceModel(KC##ParcelType);                                   \
-    makeParticleForceModelType(SphereDragForce, KC##ParcelType);              \
-    makeParticleForceModelType(NonSphereDragForce, KC##ParcelType);           \
-    makeParticleForceModelType(GravityForce, KC##ParcelType);                 \
-    makeParticleForceModelType(ParamagneticForce, KC##ParcelType);            \
-    makeParticleForceModelType(PressureGradientForce, KC##ParcelType);        \
-    makeParticleForceModelType(SRFForce, KC##ParcelType);
+    makeParticleForceModel(CloudType);                                        \
+    makeParticleForceModelType(SphereDragForce, CloudType);                   \
+    makeParticleForceModelType(NonSphereDragForce, CloudType);                \
+    makeParticleForceModelType(GravityForce, CloudType);                      \
+    makeParticleForceModelType(ParamagneticForce, CloudType);                 \
+    makeParticleForceModelType(PressureGradientForce, CloudType);             \
+    makeParticleForceModelType(SRFForce, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -28,9 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "Cloud.H"
-#include "KinematicCloud.H"
-
 #include "ConeInjection.H"
 #include "FieldActivatedInjection.H"
 #include "InflationInjection.H"
@@ -42,19 +39,17 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelInjectionModels(ParcelType)                                 \
+#define makeParcelInjectionModels(CloudType)                                  \
                                                                               \
-    typedef KinematicCloud<Cloud<ParcelType> > KC##ParcelType;                \
+    makeInjectionModel(CloudType);                                            \
                                                                               \
-    makeInjectionModel(KC##ParcelType);                                       \
-                                                                              \
-    makeInjectionModelType(ConeInjection, KC##ParcelType);                    \
-    makeInjectionModelType(FieldActivatedInjection, KC##ParcelType);          \
-    makeInjectionModelType(InflationInjection, KC##ParcelType);               \
-    makeInjectionModelType(KinematicLookupTableInjection, KC##ParcelType);    \
-    makeInjectionModelType(ManualInjection, KC##ParcelType);                  \
-    makeInjectionModelType(NoInjection, KC##ParcelType);                      \
-    makeInjectionModelType(PatchInjection, KC##ParcelType);
+    makeInjectionModelType(ConeInjection, CloudType);                         \
+    makeInjectionModelType(FieldActivatedInjection, CloudType);               \
+    makeInjectionModelType(InflationInjection, CloudType);                    \
+    makeInjectionModelType(KinematicLookupTableInjection, CloudType);         \
+    makeInjectionModelType(ManualInjection, CloudType);                       \
+    makeInjectionModelType(NoInjection, CloudType);                           \
+    makeInjectionModelType(PatchInjection, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -28,30 +28,21 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "Cloud.H"
-#include "KinematicCloud.H"
-
 #include "NoDispersion.H"
 #include "GradientDispersionRAS.H"
 #include "StochasticDispersionRAS.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelDispersionModels(ParcelType)                                \
+#define makeParcelDispersionModels(CloudType)                                 \
                                                                               \
-    typedef KinematicCloud<Cloud<ParcelType> > KC##ParcelType;                \
+    makeDispersionModel(CloudType);                                           \
                                                                               \
-    makeDispersionModel(KC##ParcelType);                                      \
+    defineNamedTemplateTypeNameAndDebug(DispersionRASModel<CloudType>, 0);    \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug                                       \
-    (                                                                         \
-        DispersionRASModel<KC##ParcelType>,                                   \
-        0                                                                     \
-    );                                                                        \
-                                                                              \
-    makeDispersionModelType(NoDispersion, KC##ParcelType);                    \
-    makeDispersionModelType(GradientDispersionRAS, KC##ParcelType);           \
-    makeDispersionModelType(StochasticDispersionRAS, KC##ParcelType);
+    makeDispersionModelType(NoDispersion, CloudType);                         \
+    makeDispersionModelType(GradientDispersionRAS, CloudType);                \
+    makeDispersionModelType(StochasticDispersionRAS, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

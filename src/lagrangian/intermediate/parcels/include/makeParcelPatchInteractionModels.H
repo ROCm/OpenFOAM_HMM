@@ -28,9 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "Cloud.H"
-#include "KinematicCloud.H"
-
 #include "LocalInteraction.H"
 #include "NoInteraction.H"
 #include "Rebound.H"
@@ -38,16 +35,14 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelPatchInteractionModels(ParcelType)                          \
+#define makeParcelPatchInteractionModels(CloudType)                           \
                                                                               \
-    typedef KinematicCloud<Cloud<ParcelType> > KC##ParcelType;                \
+    makePatchInteractionModel(CloudType);                                     \
                                                                               \
-    makePatchInteractionModel(KC##ParcelType);                                \
-                                                                              \
-    makePatchInteractionModelType(LocalInteraction, KC##ParcelType);          \
-    makePatchInteractionModelType(NoInteraction, KC##ParcelType);             \
-    makePatchInteractionModelType(Rebound, KC##ParcelType);                   \
-    makePatchInteractionModelType(StandardWallInteraction, KC##ParcelType);
+    makePatchInteractionModelType(LocalInteraction, CloudType);               \
+    makePatchInteractionModelType(NoInteraction, CloudType);                  \
+    makePatchInteractionModelType(Rebound, CloudType);                        \
+    makePatchInteractionModelType(StandardWallInteraction, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

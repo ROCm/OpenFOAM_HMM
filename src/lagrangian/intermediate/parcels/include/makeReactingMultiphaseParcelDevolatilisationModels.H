@@ -28,52 +28,21 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "Cloud.H"
-#include "KinematicCloud.H"
-#include "ThermoCloud.H"
-#include "ReactingCloud.H"
-#include "ReactingMultiphaseCloud.H"
-
 #include "ConstantRateDevolatilisation.H"
 #include "NoDevolatilisation.H"
 #include "SingleKineticRateDevolatilisation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeReactingMultiphaseParcelDevolatilisationModels(ParcelType)        \
+#define makeReactingMultiphaseParcelDevolatilisationModels(CloudType)         \
                                                                               \
-    typedef ReactingMultiphaseCloud                                           \
-    <                                                                         \
-        ReactingCloud                                                         \
-        <                                                                     \
-            ThermoCloud                                                       \
-            <                                                                 \
-                KinematicCloud                                                \
-                <                                                             \
-                    Cloud                                                     \
-                    <                                                         \
-                        ParcelType                                            \
-                    >                                                         \
-                >                                                             \
-            >                                                                 \
-        >                                                                     \
-    > RMPRTKC##ParcelType;                                                    \
-                                                                              \
-    makeDevolatilisationModel(RMPRTKC##ParcelType);                           \
-    makeDevolatilisationModelType                                             \
-    (                                                                         \
-        ConstantRateDevolatilisation,                                         \
-        RMPRTKC##ParcelType                                                   \
-    );                                                                        \
-    makeDevolatilisationModelType                                             \
-    (                                                                         \
-        NoDevolatilisation,                                                   \
-        RMPRTKC##ParcelType                                                   \
-    );                                                                        \
+    makeDevolatilisationModel(CloudType);                                     \
+    makeDevolatilisationModelType(ConstantRateDevolatilisation, CloudType);   \
+    makeDevolatilisationModelType(NoDevolatilisation, CloudType);             \
     makeDevolatilisationModelType                                             \
     (                                                                         \
         SingleKineticRateDevolatilisation,                                    \
-        RMPRTKC##ParcelType                                                   \
+        CloudType                                                             \
     );
 
 

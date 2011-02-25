@@ -28,9 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "Cloud.H"
-#include "KinematicCloud.H"
-
 #include "ConeInjection.H"
 #include "FieldActivatedInjection.H"
 #include "ManualInjection.H"
@@ -40,17 +37,15 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeReactingParcelInjectionModels(ParcelType)                         \
+#define makeReactingParcelInjectionModels(CloudType)                          \
                                                                               \
-    typedef KinematicCloud<Cloud<ParcelType> > KC##ParcelType;                \
-                                                                              \
-    makeInjectionModel(KC##ParcelType);                                       \
-    makeInjectionModelType(ConeInjection, KC##ParcelType);                    \
-    makeInjectionModelType(FieldActivatedInjection, KC##ParcelType);          \
-    makeInjectionModelType(ManualInjection, KC##ParcelType);                  \
-    makeInjectionModelType(NoInjection, KC##ParcelType);                      \
-    makeInjectionModelType(PatchInjection, KC##ParcelType);                   \
-    makeInjectionModelType(ReactingLookupTableInjection, KC##ParcelType);
+    makeInjectionModel(CloudType);                                            \
+    makeInjectionModelType(ConeInjection, CloudType);                         \
+    makeInjectionModelType(FieldActivatedInjection, CloudType);               \
+    makeInjectionModelType(ManualInjection, CloudType);                       \
+    makeInjectionModelType(NoInjection, CloudType);                           \
+    makeInjectionModelType(PatchInjection, CloudType);                        \
+    makeInjectionModelType(ReactingLookupTableInjection, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
