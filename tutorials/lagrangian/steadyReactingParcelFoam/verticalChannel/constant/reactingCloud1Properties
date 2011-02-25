@@ -64,7 +64,7 @@ solution
     integrationSchemes
     {
         U               Euler;
-        T               Analytical;
+        T               analytical;
     }
 }
 
@@ -109,32 +109,30 @@ subModels
         );
     }
 
-    InjectionModel  PatchInjection;
+    injectionModel  patchInjection;
 
-    DispersionModel StochasticDispersionRAS;
+    dispersionModel stochasticDispersionRAS;
 
-    PatchInteractionModel StandardWallInteraction;
+    patchInteractionModel standardWallInteraction;
 
-    HeatTransferModel RanzMarshall;
+    heatTransferModel RanzMarshall;
 
-    CompositionModel SingleMixtureFraction;
+    compositionModel singleMixtureFraction;
 
-    PhaseChangeModel LiquidEvaporation;
+    phaseChangeModel liquidEvaporation;
 
-    DevolatilisationModel none;
+    devolatilisationModel none;
 
-    SurfaceReactionModel none;
+    surfaceReactionModel none;
 
-    PostProcessingModel ParticleTracks;
+    postProcessingModel particleTracks;
 
-    SurfaceFilmModel none;
-
-    CollisionModel none;
+    surfaceFilmModel none;
 
     radiation       off;
 
 
-    PatchInjectionCoeffs
+    patchInjectionCoeffs
     {
         massFlowRate    0.8e-03;
         parcelBasisType mass;
@@ -145,7 +143,7 @@ subModels
         flowRateProfile constant 1;
         sizeDistribution
         {
-            distributionModelType general;
+            type        general;
             generalDistribution
             {
                 distribution
@@ -172,7 +170,7 @@ subModels
         }
     }
 
-    StandardWallInteractionCoeffs
+    standardWallInteractionCoeffs
     {
         type            rebound;
     }
@@ -182,7 +180,7 @@ subModels
         BirdCorrection  off;
     }
 
-    SingleMixtureFractionCoeffs
+    singleMixtureFractionCoeffs
     {
         phases
         (
@@ -202,19 +200,19 @@ subModels
         YSolidTot0      0;
     }
 
-    LiquidEvaporationCoeffs
+    liquidEvaporationCoeffs
     {
         enthalpyTransfer enthalpyDifference;
         activeLiquids   ( H2O );
     }
 
-    PatchPostProcessingCoeffs
+    patchPostProcessingCoeffs
     {
         maxStoredParcels 100;
         patches         ( outlet );
     }
 
-    ParticleTracksCoeffs
+    particleTracksCoeffs
     {
         trackInterval   5;
         maxSamples      1000000;

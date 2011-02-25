@@ -67,19 +67,17 @@ subModels
         );
     }
 
-    InjectionModel  ManualInjection;
+    injectionModel  manualInjection;
 
-    DispersionModel StochasticDispersionRAS;
+    dispersionModel stochasticDispersionRAS;
 
-    PatchInteractionModel StandardWallInteraction;
+    patchInteractionModel standardWallInteraction;
 
-    PostProcessingModel none;
+    postProcessingModel none;
 
-    SurfaceFilmModel none;
+    surfaceFilmModel none;
 
-    CollisionModel none;
-
-    ManualInjectionCoeffs
+    manualInjectionCoeffs
     {
         massTotal       0.0002;
         parcelBasisType mass;
@@ -88,7 +86,7 @@ subModels
         U0              ( 0 0 0 );
         sizeDistribution
         {
-            distributionModelType RosinRammler;
+            type        RosinRammler;
             RosinRammlerDistribution
             {
                 minValue        5e-05;
@@ -99,7 +97,7 @@ subModels
         }
     }
 
-    StandardWallInteractionCoeffs
+    standardWallInteractionCoeffs
     {
         type            rebound;
     }

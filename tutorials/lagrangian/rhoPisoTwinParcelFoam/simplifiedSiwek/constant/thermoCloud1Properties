@@ -46,7 +46,7 @@ solution
     integrationSchemes
     {
         U               Euler;
-        T               Analytical;
+        T               analytical;
     }
 }
 
@@ -82,23 +82,21 @@ subModels
         );
     }
 
-    InjectionModel  ManualInjection;
+    injectionModel  manualInjection;
 
-    DispersionModel StochasticDispersionRAS;
+    dispersionModel stochasticDispersionRAS;
 
-    PatchInteractionModel StandardWallInteraction;
+    patchInteractionModel standardWallInteraction;
 
-    HeatTransferModel RanzMarshall;
+    heatTransferModel RanzMarshall;
 
-    PostProcessingModel none;
+    postProcessingModel none;
 
-    CollisionModel none;
-
-    SurfaceFilmModel none;
+    surfaceFilmModel none;
 
     radiation       off;
 
-    ManualInjectionCoeffs
+    manualInjectionCoeffs
     {
         massTotal       0.0001;
         parcelBasisType mass;
@@ -107,7 +105,7 @@ subModels
         U0              ( 0 0 0 );
         sizeDistribution
         {
-            distributionModelType RosinRammler;
+            type        RosinRammler;
             RosinRammlerDistribution
             {
                 minValue        5e-06;
@@ -118,7 +116,7 @@ subModels
         }
     }
 
-    StandardWallInteractionCoeffs
+    standardWallInteractionCoeffs
     {
         type            rebound;
     }

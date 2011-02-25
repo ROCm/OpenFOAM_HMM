@@ -106,7 +106,7 @@ subModels
         U0              ( 0 0 0 );
         sizeDistribution
         {
-            distributionModelType RosinRammler;
+            type        RosinRammler;
             RosinRammlerDistribution
             {
                 minValue        5e-06;

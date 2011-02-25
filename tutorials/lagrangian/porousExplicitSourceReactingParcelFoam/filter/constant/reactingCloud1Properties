@@ -55,7 +55,7 @@ solution
     integrationSchemes
     {
         U               Euler;
-        T               Analytical;
+        T               analytical;
     }
 }
 
@@ -98,31 +98,29 @@ subModels
         );
     }
 
-    InjectionModel  ReactingMultiphaseLookupTableInjection;
+    injectionModel  reactingMultiphaseLookupTableInjection;
 
-    DispersionModel none;
+    dispersionModel none;
 
-    PatchInteractionModel LocalInteraction;
+    patchInteractionModel localInteraction;
 
-    HeatTransferModel RanzMarshall;
+    heatTransferModel RanzMarshall;
 
-    CompositionModel SingleMixtureFraction;
+    compositionModel singleMixtureFraction;
 
-    PhaseChangeModel LiquidEvaporation;
+    phaseChangeModel liquidEvaporation;
 
-    PostProcessingModel PatchPostProcessing;
+    postProcessingModel patchPostProcessing;
 
-    DevolatilisationModel none;
+    devolatilisationModel none;
 
-    SurfaceReactionModel none;
+    surfaceReactionModel none;
 
-    SurfaceFilmModel none;
-
-    CollisionModel  none;
+    surfaceFilmModel none;
 
     radiation       off;
 
-    ReactingMultiphaseLookupTableInjectionCoeffs
+    reactingMultiphaseLookupTableInjectionCoeffs
     {
         massTotal       1e-2;
         parcelBasisType mass;
@@ -132,7 +130,7 @@ subModels
         parcelsPerSecond 250;
     }
 
-    LocalInteractionCoeffs
+    localInteractionCoeffs
     {
         patches
         (
@@ -156,7 +154,7 @@ subModels
         BirdCorrection  true;
     }
 
-    SingleMixtureFractionCoeffs
+    singleMixtureFractionCoeffs
     {
         phases
         (
@@ -176,14 +174,14 @@ subModels
         YSolidTot0      0;
     }
 
-    LiquidEvaporationCoeffs
+    liquidEvaporationCoeffs
     {
         enthalpyTransfer enthalpyDifference;
 
         activeLiquids   ( H2O );
     }
 
-    PatchPostProcessingCoeffs
+    patchPostProcessingCoeffs
     {
         maxStoredParcels 20;
 
