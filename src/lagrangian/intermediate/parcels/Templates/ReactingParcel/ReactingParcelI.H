@@ -26,7 +26,8 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
-inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties()
+inline
+Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties()
 :
     ParcelType::constantProperties(),
     pMin_(0.0),
