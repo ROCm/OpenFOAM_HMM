@@ -96,6 +96,7 @@ void Foam::codedFixedValueFvPatchScalarField::writeLibrary
     if (dict.found("codeInclude"))
     {
         codeInclude = stringOps::trim(dict["codeInclude"]);
+        stringOps::inplaceExpand(codeInclude, dict);
     }
 
     // "codeOptions" is optional
@@ -103,10 +104,13 @@ void Foam::codedFixedValueFvPatchScalarField::writeLibrary
     if (dict.found("codeOptions"))
     {
         codeOptions = stringOps::trim(dict["codeOptions"]);
+        stringOps::inplaceExpand(codeOptions, dict);
     }
 
     // "code" is mandatory
     string code = stringOps::trim(dict["code"]);
+    stringOps::inplaceExpand(code, dict);
+
 
     // Create SHA1 digest from the contents
     SHA1Digest sha;
@@ -120,7 +124,9 @@ void Foam::codedFixedValueFvPatchScalarField::writeLibrary
 //        <<"new SHA1: " << sha << endl;
 
 
-    // (void) codeStreamTools::upToDate(codePath, sha)
+    // only use side-effect of writing  SHA1Digest for now
+    (void) codeStreamTools::upToDate(codePath, sha);
+
     // TODO: compile on-demand
     if (true)
     {
@@ -148,6 +154,7 @@ void Foam::codedFixedValueFvPatchScalarField::writeLibrary
         copyFiles[0].file() = fileCsrc;
         copyFiles[0].set("codeInclude", codeInclude);
         copyFiles[0].set("code", code);
+        copyFiles[0].set("SHA1sum", sha.str());
 
         copyFiles[1].file() = fileHsrc;
 
@@ -186,18 +193,11 @@ void Foam::codedFixedValueFvPatchScalarField::writeLibrary
 
 void Foam::codedFixedValueFvPatchScalarField::updateLibrary()
 {
-    if (isAdministrator())
-    {
-        FatalIOErrorIn
-        (
-            "codedFixedValueFvPatchScalarField::updateLibrary()",
-            dict_
-        )   << "This code should not be executed by someone with administrator"
-            << " rights due to security reasons." << endl
-            << "(it writes a shared library which then gets loaded "
-            << "using dlopen)"
-            << exit(FatalIOError);
-    }
+    codeStreamTools::checkSecurity
+    (
+        "codedFixedValueFvPatchScalarField::updateLibrary()",
+        dict_
+    );
 
     // write code into redirectType_ subdir
     const fileName codePath = codeStreamTools::codePath(redirectType_);
@@ -215,6 +215,16 @@ void Foam::codedFixedValueFvPatchScalarField::updateLibrary()
     //    << "libPath:" << libPath << endl;
 
     void* lib = dlLibraryTable::findLibrary(libPath);
+
+
+    // TODO:
+    // calculate old/new SHA1 for code
+    // check if the correct library version was already loaded.
+    // Find the library handle.
+ //
+ // string signatureName(redirectType_ + "_" + sha().str());
+ // void (*signatureFunction)();
+ // signatureFunction = reinterpret_cast<void(*)()>(dlSym(lib, signatureName));
 
     if (dict_.found("code"))
     {
@@ -270,6 +280,7 @@ void Foam::codedFixedValueFvPatchScalarField::updateLibrary()
             }
         }
 
+        // all processes must wait for compile
         bool dummy = true;
         reduce(dummy, orOp<bool>());
 

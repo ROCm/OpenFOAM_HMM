@@ -145,13 +145,12 @@ public:
 
     // Member functions
 
-        //- Directory for compile/link (case-specific)
-        //  Expanded from \$FOAM_CASE/codeStream
-        static fileName baseDir();
-
-        //- Subdirectory name for library
-        //  Expanded from platforms/\$WM_OPTIONS/lib
-        static fileName libSubDir();
+        //- Check security for creating dynamic code
+        static void checkSecurity
+        (
+            const char* title,
+            const dictionary& context
+        );
 
         //- Local path for specified code name
         //  Expanded from \$FOAM_CASE/codeStream

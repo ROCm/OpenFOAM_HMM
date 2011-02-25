@@ -35,6 +35,20 @@ ${codeInclude}
 namespace Foam
 {
 
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+extern "C"
+{
+    // unique function name that can be checked if the correct library version
+    // has been loaded
+    bool ${typeName}_${SHA1sum}()
+    {
+        return true;
+    }
+}
+
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 ${typeName}FixedValueFvPatchScalarField::

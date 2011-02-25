@@ -49,13 +49,14 @@
   - it copies a template file
     =($FOAM_CODESTREAM_TEMPLATES/codeStreamTemplate.C)=, substituting all
     occurences of =code=, =codeInclude=, =codeOptions=.
-  - it writes library source files to =constant/codeStream/<sha1>= and compiles
+  - it writes library source files to =codeStream/<SHA1>= and compiles
     it using =wmake libso=.
-  - the resulting library gets loaded (=dlopen=, =dlsym=) and the function
-    executed
+  - the resulting library is generated under
+    =codeStream/platforms/$WM_OPTIONS/lib= and is loaded (=dlopen=, =dlsym=)
+    and the function executed
   - the function will have written its output into the Ostream which then gets
     used to construct the entry to replace the whole =#codeStream= section.
-  - using the sha1 means that same code will only be compiled and loaded once.
+  - using the SHA1 means that same code will only be compiled and loaded once.
 
 * Boundary condition: =codedFixedValue=
   This uses the code from codeStream to have an in-line specialised

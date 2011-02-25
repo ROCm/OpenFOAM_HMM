@@ -14,10 +14,15 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// #include "codeStreamDefaults"
+// values from outer-scope
+begIter     0;
+endIter     200;
 
 writeInterval   #codeStream
 {
+    // values from inner-scope
+    nDumps      5;
+
     codeInclude
     #{
         #include "fvCFD.H"
@@ -30,14 +35,15 @@ writeInterval   #codeStream
 
     code
     #{
-        scalar start = 0;
-        scalar end = 100;
-        label nDumps = 5;
-        label interval = end - start;
-        Info<<"on-the-fly: " << ((interval)/nDumps) << endl;
-        os  << ((interval)/nDumps);
+        label interval = ($endIter - $begIter);
+        label nDumps = $nDumps;
+        os  << (interval / nDumps);
     #};
 };
+
+
+// play with cleanup
+#remove begIter
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

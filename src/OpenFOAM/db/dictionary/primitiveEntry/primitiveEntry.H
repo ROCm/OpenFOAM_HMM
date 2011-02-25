@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -167,6 +167,9 @@ public:
 
         //- Write
         void write(Ostream&) const;
+
+        //- Write, optionally with contents only (no keyword, etc)
+        void write(Ostream&, const bool contentsOnly) const;
 
         //- Return info proxy.
         //  Used to print token information to a stream

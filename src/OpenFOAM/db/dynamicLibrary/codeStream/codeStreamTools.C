@@ -49,30 +49,37 @@ const Foam::fileName Foam::codeStreamTools::codeTemplateDirName
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::fileName Foam::codeStreamTools::baseDir()
+void Foam::codeStreamTools::checkSecurity
+(
+    const char* title,
+    const dictionary& context
+)
 {
-    return stringOps::expandEnv("$FOAM_CASE/codeStream");
+    if (isAdministrator())
+    {
+        FatalIOErrorIn
+        (
+            title,
+            context
+        )   << "This code should not be executed by someone with administrator"
+            << " rights due to security reasons." << nl
+            << "(it writes a shared library which then gets loaded "
+            << "using dlopen)"
+            << exit(FatalIOError);
+    }
 }
 
-
-Foam::fileName Foam::codeStreamTools::libSubDir()
-{
-    return stringOps::expandEnv("platforms/$WM_OPTIONS/lib");
-}
 
 
 Foam::fileName Foam::codeStreamTools::codePath(const word& subDirName)
 {
-    return stringOps::expandEnv
-    (
-        "$FOAM_CASE/codeStream/" + subDirName
-    );
+    return stringOps::expand("$FOAM_CASE/codeStream/" + subDirName);
 }
 
 
 Foam::fileName Foam::codeStreamTools::libPath(const word& codeName)
 {
-    return stringOps::expandEnv
+    return stringOps::expand
     (
         "$FOAM_CASE/codeStream/platforms/$WM_OPTIONS/lib/lib"
       + codeName + ".so"
@@ -159,11 +166,10 @@ void Foam::codeStreamTools::copyAndExpand
     {
         is.getLine(line);
 
-        // normal expansion according to mapping
+        // expand according to mapping
+        // expanding according to env variables might cause too many
+        // surprises
         stringOps::inplaceExpand(line, mapping);
-
-        // expand according to env variables
-        stringOps::inplaceExpandEnv(line, true, true);
 
         os  << line.c_str() << nl;
     }
@@ -269,6 +275,13 @@ bool Foam::codeStreamTools::copyFilesContents(const fileName& dir) const
         // variables mapping
         HashTable<string> mapping(copyFiles_[i]);
         mapping.set("typeName", name_);
+
+        // provide a zero digest if not otherwise specified
+        if (!mapping.found("SHA1sum"))
+        {
+            mapping.insert("SHA1sum", SHA1Digest().str());
+        }
+
         copyAndExpand(is, os, mapping);
     }
 

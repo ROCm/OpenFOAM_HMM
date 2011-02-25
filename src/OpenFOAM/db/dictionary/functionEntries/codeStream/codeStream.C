@@ -35,8 +35,8 @@ License
 #include "dlLibraryTable.H"
 #include "OSspecific.H"
 #include "Time.H"
-#include "Pstream.H"
 #include "PstreamReduceOps.H"
+
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -71,30 +71,27 @@ bool Foam::functionEntries::codeStream::execute
     Istream& is
 )
 {
-    if (isAdministrator())
-    {
-        FatalIOErrorIn
-        (
-            "functionEntries::codeStream::execute(..)",
-            parentDict
-        )   << "This code should not be executed by someone with administrator"
-            << " rights due to security reasons." << endl
-            << "(it writes a shared library which then gets loaded "
-            << "using dlopen)"
-            << exit(FatalIOError);
-    }
+    codeStreamTools::checkSecurity
+    (
+        "functionEntries::codeStream::execute(..)",
+        parentDict
+    );
+
+    // get code dictionary
+    // must reference parent for stringOps::expand to work nicely
+    dictionary codeDict("#codeStream", parentDict, is);
 
 
     // Read three sections of code.
     // Remove any leading whitespace - necessary for compilation options,
     // convenience for includes and body.
-    dictionary codeDict(is);
 
     // "codeInclude" is optional
     string codeInclude;
     if (codeDict.found("codeInclude"))
     {
         codeInclude = stringOps::trim(codeDict["codeInclude"]);
+        stringOps::inplaceExpand(codeInclude, codeDict);
     }
 
     // "codeOptions" is optional
@@ -102,10 +99,13 @@ bool Foam::functionEntries::codeStream::execute
     if (codeDict.found("codeOptions"))
     {
         codeOptions = stringOps::trim(codeDict["codeOptions"]);
+        stringOps::inplaceExpand(codeOptions, codeDict);
     }
 
     // "code" is mandatory
     string code = stringOps::trim(codeDict["code"]);
+    stringOps::inplaceExpand(code, codeDict);
+
 
     // Create SHA1 digest from the contents
     SHA1Digest sha;
@@ -169,6 +169,7 @@ bool Foam::functionEntries::codeStream::execute
                 copyFiles[0].file() = fileCsrc;
                 copyFiles[0].set("codeInclude", codeInclude);
                 copyFiles[0].set("code", code);
+                copyFiles[0].set("SHA1sum", sha.str());
 
                 List<codeStreamTools::fileAndContent> filesContents(2);
 
@@ -212,6 +213,7 @@ bool Foam::functionEntries::codeStream::execute
             }
         }
 
+        // all processes must wait for compile
         bool dummy = true;
         reduce(dummy, orOp<bool>());
 
