@@ -45,7 +45,8 @@ Foam::cloudSolution::cloudSolution
     coupled_(false),
     cellValueSourceCorrection_(false),
     maxTrackTime_(0.0),
-    resetSourcesOnStartup_(true)
+    resetSourcesOnStartup_(true),
+    schemes_()
 {
     if (active_)
     {
@@ -70,7 +71,8 @@ Foam::cloudSolution::cloudSolution
     coupled_(cs.coupled_),
     cellValueSourceCorrection_(cs.cellValueSourceCorrection_),
     maxTrackTime_(cs.maxTrackTime_),
-    resetSourcesOnStartup_(cs.resetSourcesOnStartup_)
+    resetSourcesOnStartup_(cs.resetSourcesOnStartup_),
+    schemes_(cs.schemes_)
 {}
 
 
@@ -90,7 +92,8 @@ Foam::cloudSolution::cloudSolution
     coupled_(false),
     cellValueSourceCorrection_(false),
     maxTrackTime_(0.0),
-    resetSourcesOnStartup_(false)
+    resetSourcesOnStartup_(false),
+    schemes_()
 {}
 
 
@@ -116,18 +119,73 @@ void Foam::cloudSolution::read()
         dict_.subDict("sourceTerms").lookup("resetOnStartup")
             >> resetSourcesOnStartup_;
     }
+
+    const dictionary&
+        schemesDict(dict_.subDict("sourceTerms").subDict("schemes"));
+
+    wordList vars(schemesDict.toc());
+    schemes_.setSize(vars.size());
+    forAll(vars, i)
+    {
+        schemes_[i].first() = vars[i];
+
+        Istream& is = schemesDict.lookup(vars[i]);
+        const word scheme(is);
+        if (scheme == "semiImplicit")
+        {
+            is >> schemes_[i].second();
+        }
+        else if (scheme == "explicit")
+        {
+            schemes_[i].second() = -1;
+        }
+        else
+        {
+            FatalErrorIn("void cloudSolution::read()")
+                << "Invalid scheme " << scheme << ". Valid schemes are "
+                << "explicit and semiImplicit" << exit(FatalError);
+        }
+    }
 }
 
 
 Foam::scalar Foam::cloudSolution::relaxCoeff(const word& fieldName) const
 {
-    return readScalar(sourceTermDict().subDict(fieldName).lookup("alpha"));
+    forAll(schemes_, i)
+    {
+        if (fieldName == schemes_[i].first())
+        {
+            return schemes_[i].second();
+        }
+    }
+
+    FatalErrorIn
+    (
+        "scalar cloudSolution::relaxCoeff(const word& fieldName) const"
+    )   << "Field name " << fieldName << " not found in schemes"
+        << abort(FatalError);
+
+    return 1.0;
 }
 
 
 bool Foam::cloudSolution::semiImplicit(const word& fieldName) const
 {
-    return readBool(sourceTermDict().subDict(fieldName).lookup("semiImplicit"));
+    forAll(schemes_, i)
+    {
+        if (fieldName == schemes_[i].first())
+        {
+            return schemes_[i].second() >= 0;
+        }
+    }
+
+    FatalErrorIn
+    (
+        "bool cloudSolution::semiImplicit(const word& fieldName) const"
+    )   << "Field name " << fieldName << " not found in schemes"
+        << abort(FatalError);
+
+    return false;
 }
 
 

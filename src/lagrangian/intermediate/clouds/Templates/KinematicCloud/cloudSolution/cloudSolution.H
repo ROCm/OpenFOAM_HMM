@@ -38,6 +38,7 @@ SourceFiles
 
 #include "fvMesh.H"
 #include "Switch.H"
+#include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -97,6 +98,9 @@ class cloudSolution
             //- Flag to indicate whether coupling source terms should be
             //  reset on start-up/first read
             Switch resetSourcesOnStartup_;
+
+            //- List schemes, e.g. U semiImplicit 1
+            List<Tuple2<word, scalar> > schemes_;
 
 
     // Private Member Functions
