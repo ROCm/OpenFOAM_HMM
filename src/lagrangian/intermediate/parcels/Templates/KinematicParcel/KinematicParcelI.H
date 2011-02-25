@@ -110,7 +110,6 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     age_(0.0),
     tTurb_(0.0),
     UTurb_(vector::zero),
-    collisionRecords_(),
     rhoc_(0.0),
     Uc_(vector::zero),
     muc_(0.0)
@@ -150,7 +149,6 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     age_(0.0),
     tTurb_(0.0),
     UTurb_(vector::zero),
-    collisionRecords_(),
     rhoc_(0.0),
     Uc_(vector::zero),
     muc_(0.0)
@@ -340,14 +338,6 @@ inline bool& Foam::KinematicParcel<ParcelType>::active()
 
 
 template<class ParcelType>
-inline const Foam::collisionRecordList&
-Foam::KinematicParcel<ParcelType>::collisionRecords() const
-{
-    return collisionRecords_;
-}
-
-
-template<class ParcelType>
 inline Foam::label& Foam::KinematicParcel<ParcelType>::typeId()
 {
     return typeId_;
@@ -428,14 +418,6 @@ template<class ParcelType>
 inline Foam::vector& Foam::KinematicParcel<ParcelType>::UTurb()
 {
     return UTurb_;
-}
-
-
-template<class ParcelType>
-inline Foam::collisionRecordList&
-Foam::KinematicParcel<ParcelType>::collisionRecords()
-{
-    return collisionRecords_;
 }
 
 

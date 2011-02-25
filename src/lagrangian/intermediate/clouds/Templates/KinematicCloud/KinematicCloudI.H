@@ -173,13 +173,6 @@ Foam::KinematicCloud<CloudType>::cloudCopy() const
 
 
 template<class CloudType>
-inline bool Foam::KinematicCloud<CloudType>::hasWallImpactDistance() const
-{
-    return !collision().controlsWallInteraction();
-}
-
-
-template<class CloudType>
 inline const Foam::fvMesh& Foam::KinematicCloud<CloudType>::mesh() const
 {
     return mesh_;
@@ -260,22 +253,6 @@ inline const typename Foam::KinematicCloud<CloudType>::forceType&
 Foam::KinematicCloud<CloudType>::forces() const
 {
     return forces_;
-}
-
-
-template<class CloudType>
-inline const Foam::CollisionModel<Foam::KinematicCloud<CloudType> >&
-Foam::KinematicCloud<CloudType>::collision() const
-{
-    return collisionModel_();
-}
-
-
-template<class CloudType>
-inline Foam::CollisionModel<Foam::KinematicCloud<CloudType> >&
-Foam::KinematicCloud<CloudType>::collision()
-{
-    return collisionModel_();
 }
 
 

@@ -28,7 +28,6 @@ License
 #include "interpolation.H"
 #include "subCycleTime.H"
 
-#include "CollisionModel.H"
 #include "DispersionModel.H"
 #include "InjectionModel.H"
 #include "PatchInteractionModel.H"
@@ -190,15 +189,6 @@ bool Foam::KinematicCloud<CloudType>::cloudSolution::output() const
 template<class CloudType>
 void Foam::KinematicCloud<CloudType>::setModels()
 {
-    collisionModel_.reset
-    (
-        CollisionModel<KinematicCloud<CloudType> >::New
-        (
-            subModelProperties_,
-            *this
-        ).ptr()
-    );
-
     dispersionModel_.reset
     (
         DispersionModel<KinematicCloud<CloudType> >::New
@@ -372,7 +362,7 @@ void Foam::KinematicCloud<CloudType>::evolveCloud(TrackData& td)
 
         // Assume that motion will update the cellOccupancy as necessary
         // before it is required.
-        motion(td);
+        td.cloud().motion(td);
     }
     else
     {
@@ -383,64 +373,6 @@ void Foam::KinematicCloud<CloudType>::evolveCloud(TrackData& td)
         td.part() = TrackData::tpLinearTrack;
         CloudType::move(td,  solution_.deltaT());
     }
-}
-
-
-template<class CloudType>
-template<class TrackData>
-void  Foam::KinematicCloud<CloudType>::motion(TrackData& td)
-{
-    // Sympletic leapfrog integration of particle forces:
-    // + apply half deltaV with stored force
-    // + move positions with new velocity
-    // + calculate forces in new position
-    // + apply half deltaV with new force
-
-    label nSubCycles = collision().nSubCycles();
-
-    if (nSubCycles > 1)
-    {
-        Info<< "    " << nSubCycles << " move-collide subCycles" << endl;
-
-        subCycleTime moveCollideSubCycle
-        (
-            const_cast<Time&>(this->db().time()),
-            nSubCycles
-        );
-
-        while(!(++moveCollideSubCycle).end())
-        {
-            moveCollide(td);
-        }
-
-        moveCollideSubCycle.endSubCycle();
-    }
-    else
-    {
-        moveCollide(td);
-    }
-}
-
-
-template<class CloudType>
-template<class TrackData>
-void  Foam::KinematicCloud<CloudType>::moveCollide(TrackData& td)
-{
-    td.part() = TrackData::tpVelocityHalfStep;
-    CloudType::move(td,  solution_.deltaT());
-
-    td.part() = TrackData::tpLinearTrack;
-    CloudType::move(td,  solution_.deltaT());
-
-    // td.part() = TrackData::tpRotationalTrack;
-    // CloudType::move(td);
-
-    updateCellOccupancy();
-
-    this->collision().collide();
-
-    td.part() = TrackData::tpVelocityHalfStep;
-    CloudType::move(td,  solution_.deltaT());
 }
 
 
@@ -472,7 +404,6 @@ void Foam::KinematicCloud<CloudType>::cloudReset(KinematicCloud<CloudType>& c)
 
     forces_.transfer(c.forces_);
 
-    collisionModel_.reset(c.collisionModel_.ptr());
     dispersionModel_.reset(c.dispersionModel_.ptr());
     injectionModel_.reset(c.injectionModel_.ptr());
     patchInteractionModel_.reset(c.patchInteractionModel_.ptr());
@@ -537,7 +468,6 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
         ),
         solution_.active()
     ),
-    collisionModel_(NULL),
     dispersionModel_(NULL),
     injectionModel_(NULL),
     patchInteractionModel_(NULL),
@@ -616,7 +546,6 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     mu_(c.mu_),
     g_(c.g_),
     forces_(c.forces_),
-    collisionModel_(c.collisionModel_->clone()),
     dispersionModel_(c.dispersionModel_->clone()),
     injectionModel_(c.injectionModel_->clone()),
     patchInteractionModel_(c.patchInteractionModel_->clone()),
@@ -692,7 +621,6 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     mu_(c.mu_),
     g_(c.g_),
     forces_(*this, mesh),
-    collisionModel_(NULL),
     dispersionModel_(NULL),
     injectionModel_(NULL),
     patchInteractionModel_(NULL),
@@ -796,6 +724,17 @@ void Foam::KinematicCloud<CloudType>::evolve()
 
         solve(td);
     }
+}
+
+
+template<class CloudType>
+template<class TrackData>
+void  Foam::KinematicCloud<CloudType>::motion(TrackData& td)
+{
+    td.part() = TrackData::tpLinearTrack;
+    CloudType::move(td,  solution_.deltaT());
+
+    updateCellOccupancy();
 }
 
 

@@ -35,7 +35,6 @@ Description
       - pressure gradient
 
     - sub-models:
-      - Collision model
       - Dispersion model
       - Injection model
       - Patch interaction model
@@ -72,9 +71,6 @@ namespace Foam
 {
 
 // Forward declaration of classes
-
-template<class CloudType>
-class CollisionModel;
 
 template<class CloudType>
 class DispersionModel;
@@ -338,10 +334,6 @@ protected:
 
         // References to the cloud sub-models
 
-            //- Collision model
-            autoPtr<CollisionModel<KinematicCloud<CloudType> > >
-                collisionModel_;
-
             //- Dispersion model
             autoPtr<DispersionModel<KinematicCloud<CloudType> > >
                 dispersionModel_;
@@ -403,14 +395,6 @@ protected:
             //- Evolve the cloud
             template<class TrackData>
             void evolveCloud(TrackData& td);
-
-            //- Particle motion
-            template<class TrackData>
-            void motion(TrackData& td);
-
-            //- Move-collide particles
-            template<class TrackData>
-            void moveCollide(TrackData& td);
 
             //- Post-evolve
             void postEvolve();
@@ -481,12 +465,6 @@ public:
             //- Return a reference to the cloud copy
             inline const KinematicCloud& cloudCopy() const;
 
-            //- If the collision model controls the wall interaction,
-            //  then the wall impact distance should be zero.
-            //  Otherwise, it should be allowed to be the value from
-            //  the Parcel.
-            inline bool hasWallImpactDistance() const;
-
 
             // References to the mesh and databases
 
@@ -546,14 +524,6 @@ public:
 
 
             // Sub-models
-
-                //- Return const access to the collision model
-                inline const CollisionModel<KinematicCloud<CloudType> >&
-                    collision() const;
-
-                //- Return reference to the collision model
-                inline CollisionModel<KinematicCloud<CloudType> >&
-                    collision();
 
                 //- Return const-access to the dispersion model
                 inline const DispersionModel<KinematicCloud<CloudType> >&
@@ -686,6 +656,10 @@ public:
 
             //- Evolve the cloud
             void evolve();
+
+            //- Particle motion
+            template<class TrackData>
+            void motion(TrackData& td);
 
             //- Print cloud information
             void info() const;

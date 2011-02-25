@@ -19,6 +19,10 @@ KINEMATICPARCEL=$(DERIVEDPARCELS)/basicKinematicParcel
 $(KINEMATICPARCEL)/defineBasicKinematicParcel.C
 $(KINEMATICPARCEL)/makeBasicKinematicParcelSubmodels.C
 
+KINEMATICCOLLIDINGPARCEL=$(DERIVEDPARCELS)/basicKinematicCollidingParcel
+$(KINEMATICCOLLIDINGPARCEL)/defineBasicKinematicCollidingParcel.C
+$(KINEMATICCOLLIDINGPARCEL)/makeBasicKinematicCollidingParcelSubmodels.C
+
 
 /* thermo parcel sub-models */
 THERMOPARCEL=$(DERIVEDPARCELS)/basicThermoParcel

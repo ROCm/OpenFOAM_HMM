@@ -45,15 +45,7 @@ Foam::string Foam::KinematicParcel<ParcelType>::propHeader =
   + " rho"
   + " age"
   + " tTurb"
-  + " (UTurbx UTurby UTurbz)"
-  + " collisionRecordsPairAccessed"
-  + " collisionRecordsPairOrigProcOfOther"
-  + " collisionRecordsPairOrigIdOfOther"
-  + " (collisionRecordsPairData)"
-  + " collisionRecordsWallAccessed"
-  + " collisionRecordsWallPRel"
-  + " (collisionRecordsWallData)";
-
+  + " (UTurbx UTurby UTurbz)";
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -79,7 +71,6 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     age_(0.0),
     tTurb_(0.0),
     UTurb_(vector::zero),
-    collisionRecords_(),
     rhoc_(0.0),
     Uc_(vector::zero),
     muc_(0.0)
@@ -101,7 +92,6 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
             age_ = readScalar(is);
             tTurb_ = readScalar(is);
             is >> UTurb_;
-            is >> collisionRecords_;
         }
         else
         {
@@ -122,7 +112,6 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
               + sizeof(tTurb_)
               + sizeof(UTurb_)
             );
-            is  >> collisionRecords_;
         }
     }
 
@@ -189,56 +178,6 @@ void Foam::KinematicParcel<ParcelType>::readFields(CloudType& c)
     IOField<vector> UTurb(c.fieldIOobject("UTurb", IOobject::MUST_READ));
     c.checkFieldIOobject(c, UTurb);
 
-    labelFieldCompactIOField collisionRecordsPairAccessed
-    (
-        c.fieldIOobject("collisionRecordsPairAccessed", IOobject::MUST_READ)
-    );
-    c.checkFieldFieldIOobject(c, collisionRecordsPairAccessed);
-
-    labelFieldCompactIOField collisionRecordsPairOrigProcOfOther
-    (
-        c.fieldIOobject
-        (
-            "collisionRecordsPairOrigProcOfOther",
-            IOobject::MUST_READ
-        )
-    );
-    c.checkFieldFieldIOobject(c, collisionRecordsPairOrigProcOfOther);
-
-    labelFieldCompactIOField collisionRecordsPairOrigIdOfOther
-    (
-        c.fieldIOobject
-        (
-            "collisionRecordsPairOrigIdOfOther",
-            IOobject::MUST_READ
-        )
-    );
-    c.checkFieldFieldIOobject(c, collisionRecordsPairOrigProcOfOther);
-
-    pairDataFieldCompactIOField collisionRecordsPairData
-    (
-        c.fieldIOobject("collisionRecordsPairData", IOobject::MUST_READ)
-    );
-    c.checkFieldFieldIOobject(c, collisionRecordsPairData);
-
-    labelFieldCompactIOField collisionRecordsWallAccessed
-    (
-        c.fieldIOobject("collisionRecordsWallAccessed", IOobject::MUST_READ)
-    );
-    c.checkFieldFieldIOobject(c, collisionRecordsWallAccessed);
-
-    vectorFieldCompactIOField collisionRecordsWallPRel
-    (
-        c.fieldIOobject("collisionRecordsWallPRel", IOobject::MUST_READ)
-    );
-    c.checkFieldFieldIOobject(c, collisionRecordsWallPRel);
-
-    wallDataFieldCompactIOField collisionRecordsWallData
-    (
-        c.fieldIOobject("collisionRecordsWallData", IOobject::MUST_READ)
-    );
-    c.checkFieldFieldIOobject(c, collisionRecordsWallData);
-
     label i = 0;
 
     forAllIter(typename CloudType, c, iter)
@@ -257,16 +196,6 @@ void Foam::KinematicParcel<ParcelType>::readFields(CloudType& c)
         p.age_ = age[i];
         p.tTurb_ = tTurb[i];
         p.UTurb_ = UTurb[i];
-        p.collisionRecords_ = collisionRecordList
-        (
-            collisionRecordsPairAccessed[i],
-            collisionRecordsPairOrigProcOfOther[i],
-            collisionRecordsPairOrigIdOfOther[i],
-            collisionRecordsPairData[i],
-            collisionRecordsWallAccessed[i],
-            collisionRecordsWallPRel[i],
-            collisionRecordsWallData[i]
-        );
 
         i++;
     }
@@ -303,46 +232,6 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const CloudType& c)
     IOField<scalar> tTurb(c.fieldIOobject("tTurb", IOobject::NO_READ), np);
     IOField<vector> UTurb(c.fieldIOobject("UTurb", IOobject::NO_READ), np);
 
-    labelFieldCompactIOField collisionRecordsPairAccessed
-    (
-        c.fieldIOobject("collisionRecordsPairAccessed", IOobject::NO_READ),
-        np
-    );
-    labelFieldCompactIOField collisionRecordsPairOrigProcOfOther
-    (
-        c.fieldIOobject
-        (
-            "collisionRecordsPairOrigProcOfOther",
-            IOobject::NO_READ
-        ),
-        np
-    );
-    labelFieldCompactIOField collisionRecordsPairOrigIdOfOther
-    (
-        c.fieldIOobject("collisionRecordsPairOrigIdOfOther", IOobject::NO_READ),
-        np
-    );
-    pairDataFieldCompactIOField collisionRecordsPairData
-    (
-        c.fieldIOobject("collisionRecordsPairData", IOobject::NO_READ),
-        np
-    );
-    labelFieldCompactIOField collisionRecordsWallAccessed
-    (
-        c.fieldIOobject("collisionRecordsWallAccessed", IOobject::NO_READ),
-        np
-    );
-    vectorFieldCompactIOField collisionRecordsWallPRel
-    (
-        c.fieldIOobject("collisionRecordsWallPRel", IOobject::NO_READ),
-        np
-    );
-    wallDataFieldCompactIOField collisionRecordsWallData
-    (
-        c.fieldIOobject("collisionRecordsWallData", IOobject::NO_READ),
-        np
-    );
-
     label i = 0;
 
     forAllConstIter(typename CloudType, c, iter)
@@ -362,15 +251,6 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const CloudType& c)
         age[i] = p.age();
         tTurb[i] = p.tTurb();
         UTurb[i] = p.UTurb();
-        collisionRecordsPairAccessed[i] = p.collisionRecords().pairAccessed();
-        collisionRecordsPairOrigProcOfOther[i] =
-            p.collisionRecords().pairOrigProcOfOther();
-        collisionRecordsPairOrigIdOfOther[i] =
-            p.collisionRecords().pairOrigIdOfOther();
-        collisionRecordsPairData[i] = p.collisionRecords().pairData();
-        collisionRecordsWallAccessed[i] = p.collisionRecords().wallAccessed();
-        collisionRecordsWallPRel[i] = p.collisionRecords().wallPRel();
-        collisionRecordsWallData[i] = p.collisionRecords().wallData();
 
         i++;
     }
@@ -388,13 +268,6 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const CloudType& c)
     age.write();
     tTurb.write();
     UTurb.write();
-    collisionRecordsPairAccessed.write();
-    collisionRecordsPairOrigProcOfOther.write();
-    collisionRecordsPairOrigIdOfOther.write();
-    collisionRecordsPairData.write();
-    collisionRecordsWallAccessed.write();
-    collisionRecordsWallPRel.write();
-    collisionRecordsWallData.write();
 }
 
 
@@ -422,8 +295,7 @@ Foam::Ostream& Foam::operator<<
             << token::SPACE << p.rho()
             << token::SPACE << p.age()
             << token::SPACE << p.tTurb()
-            << token::SPACE << p.UTurb()
-            << token::SPACE << p.collisionRecords();
+            << token::SPACE << p.UTurb();
     }
     else
     {
@@ -445,7 +317,6 @@ Foam::Ostream& Foam::operator<<
           + sizeof(p.tTurb())
           + sizeof(p.UTurb())
         );
-        os  << p.collisionRecords();
     }
 
     // Check state of Ostream

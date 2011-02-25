@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,27 +23,33 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "basicKinematicCollidingCloud.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class PairType, class WallType>
-const Foam::DynamicList<Foam::PairCollisionRecord<PairType> >&
-Foam::CollisionRecordList<PairType, WallType>::pairRecords() const
-{
-    return pairRecords_;
-}
-
-
-template<class PairType, class WallType>
-const Foam::DynamicList<Foam::WallCollisionRecord<WallType> >&
-Foam::CollisionRecordList<PairType, WallType>::wallRecords() const
-{
-    return wallRecords_;
-}
-
+// Kinematic
+#include "makeParcelForcesNew.H"
+#include "makeParcelDispersionModelsNew.H"
+#include "makeParcelInjectionModelsNew.H"
+#include "makeParcelCollisionModels.H"
+#include "makeParcelPatchInteractionModelsNew.H"
+#include "makeParcelPostProcessingModelsNew.H"
+#include "makeParcelSurfaceFilmModelsNew.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    // Kinematic sub-models
+    typedef basicKinematicCollidingCloud::cloudType
+        basicKinematicCollidingCloud_1;
+
+    makeParcelForcesNew(basicKinematicCollidingCloud_1);
+    makeParcelDispersionModelsNew(basicKinematicCollidingCloud_1);
+    makeParcelInjectionModelsNew(basicKinematicCollidingCloud_1);
+    makeParcelCollisionModels(basicKinematicCollidingCloud);
+    makeParcelPatchInteractionModelsNew(basicKinematicCollidingCloud_1);
+    makeParcelPostProcessingModelsNew(basicKinematicCollidingCloud_1);
+    makeParcelSurfaceFilmModelsNew(basicKinematicCollidingCloud_1);
+}
 
 
 // ************************************************************************* //
