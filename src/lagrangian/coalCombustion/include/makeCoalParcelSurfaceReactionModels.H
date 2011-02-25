@@ -28,12 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "Cloud.H"
-#include "KinematicCloud.H"
-#include "ThermoCloud.H"
-#include "ReactingCloud.H"
-#include "ReactingMultiphaseCloud.H"
-
 #include "NoSurfaceReaction.H"
 #include "COxidationDiffusionLimitedRate.H"
 #include "COxidationKineticDiffusionLimitedRate.H"
@@ -41,46 +35,17 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeCoalParcelSurfaceReactionModels(ParcelType)                       \
+#define makeCoalParcelSurfaceReactionModels(CloudType)                        \
                                                                               \
-    typedef ReactingMultiphaseCloud                                           \
-    <                                                                         \
-        ReactingCloud                                                         \
-        <                                                                     \
-            ThermoCloud                                                       \
-            <                                                                 \
-                KinematicCloud                                                \
-                <                                                             \
-                    Cloud                                                     \
-                    <                                                         \
-                        ParcelType                                            \
-                    >                                                         \
-                >                                                             \
-            >                                                                 \
-        >                                                                     \
-    > RMPRTKC##ParcelType;                                                    \
-                                                                              \
-    makeSurfaceReactionModel(RMPRTKC##ParcelType);                            \
-    makeSurfaceReactionModelType                                              \
-    (                                                                         \
-        NoSurfaceReaction,                                                    \
-        RMPRTKC##ParcelType                                                   \
-    );                                                                        \
-    makeSurfaceReactionModelType                                              \
-    (                                                                         \
-        COxidationDiffusionLimitedRate,                                       \
-        RMPRTKC##ParcelType                                                   \
-    );                                                                        \
+    makeSurfaceReactionModel(CloudType);                                      \
+    makeSurfaceReactionModelType(NoSurfaceReaction, CloudType);               \
+    makeSurfaceReactionModelType(COxidationDiffusionLimitedRate, CloudType);  \
     makeSurfaceReactionModelType                                              \
     (                                                                         \
         COxidationKineticDiffusionLimitedRate,                                \
-        RMPRTKC##ParcelType                                                   \
+        CloudType                                                             \
     );                                                                        \
-    makeSurfaceReactionModelType                                              \
-    (                                                                         \
-        COxidationMurphyShaddix,                                              \
-        RMPRTKC##ParcelType                                                   \
-    );
+    makeSurfaceReactionModelType(COxidationMurphyShaddix, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
