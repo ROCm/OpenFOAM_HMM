@@ -1086,15 +1086,22 @@ bool Foam::dlClose(void* handle)
 
 void* Foam::dlSym(void* handle, const std::string& symbol)
 {
+    // clear any old errors - see manpage dlopen
+    (void) ::dlerror();
+
+    // get address of symbol
     void* fun = ::dlsym(handle, symbol.c_str());
 
-    char *error;
-    if ((error = dlerror()) != NULL)
+    // find error (if any)
+    char *error = ::dlerror();
+
+    if (error)
     {
         WarningIn("dlSym(void*, const std::string&)")
             << "Cannot lookup symbol " << symbol << " : " << error
             << endl;
     }
+
     return fun;
 }
 
