@@ -1106,4 +1106,24 @@ void* Foam::dlSym(void* handle, const std::string& symbol)
 }
 
 
+bool Foam::dlSymFound(void* handle, const std::string& symbol)
+{
+    if (handle && !symbol.empty())
+    {
+        // clear any old errors - see manpage dlopen
+        (void) ::dlerror();
+
+        // get address of symbol
+        (void) ::dlsym(handle, symbol.c_str());
+
+        // symbol can be found if there was no error
+        return !::dlerror();
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
 // ************************************************************************* //
