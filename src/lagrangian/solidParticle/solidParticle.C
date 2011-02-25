@@ -25,6 +25,13 @@ License
 
 #include "solidParticleCloud.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTemplateTypeNameAndDebug(Cloud<solidParticle>, 0);
+}
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::solidParticle::move
