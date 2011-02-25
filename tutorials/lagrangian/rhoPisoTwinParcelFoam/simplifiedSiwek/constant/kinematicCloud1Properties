@@ -24,9 +24,9 @@ solution
 
     sourceTerms
     {
-        U
+        schemes
         {
-            semiImplicit    false;
+            U               explicit;
         }
     }
 

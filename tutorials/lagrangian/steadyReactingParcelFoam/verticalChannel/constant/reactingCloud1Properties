@@ -30,24 +30,12 @@ solution
     sourceTerms
     {
         resetOnStartup  false;
-        U
+        schemes
         {
-            alpha           1;
-            semiImplicit    true;
-        }
-        hs
-        {
-            alpha           1;
-            semiImplicit    true;
-        }
-        rho
-        {
-            alpha           1;
-            semiImplicit    false;
-        }
-        Yi
-        {
-            semiImplicit    true;
+            rho             semiImplicit 1;
+            U               semiImplicit 1;
+            Yi              semiImplicit 1;
+            hs              semiImplicit 1;
         }
     }
 

@@ -24,13 +24,10 @@ solution
 
     sourceTerms
     {
-        U
+        schemes
         {
-            semiImplicit    false;
-        }
-        hs
-        {
-            semiImplicit    false;
+            U               explicit;
+            hs              explicit;
         }
     }
 

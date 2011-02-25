@@ -24,21 +24,12 @@ solution
 
     sourceTerms
     {
-        rho
+        schemes
         {
-            semiImplicit    false;
-        }
-        U
-        {
-            semiImplicit    false;
-        }
-        Yi
-        {
-            semiImplicit    false;
-        }
-        hs
-        {
-            semiImplicit    false;
+            rho             explicit;
+            U               explicit;
+            Yi              explicit;
+            hs              explicit;
         }
     }
 
