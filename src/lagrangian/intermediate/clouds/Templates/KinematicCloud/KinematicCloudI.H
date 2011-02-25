@@ -25,143 +25,6 @@ License
 
 #include "fvmSup.H"
 
-// * * * * * * * * * * * cloudSolution Member Functions  * * * * * * * * * * //
-
-template<class CloudType>
-inline const Foam::fvMesh&
-Foam::KinematicCloud<CloudType>::cloudSolution::mesh() const
-{
-    return mesh_;
-}
-
-
-template<class CloudType>
-inline const Foam::dictionary&
-Foam::KinematicCloud<CloudType>::cloudSolution::dict() const
-{
-    return dict_;
-}
-
-
-template<class CloudType>
-inline const Foam::Switch
-Foam::KinematicCloud<CloudType>::cloudSolution::active() const
-{
-    return active_;
-}
-
-
-template<class CloudType>
-inline const Foam::dictionary&
-Foam::KinematicCloud<CloudType>::cloudSolution::sourceTermDict() const
-{
-    return dict_.subDict("sourceTerms");
-}
-
-
-template<class CloudType>
-inline const Foam::dictionary&
-Foam::KinematicCloud<CloudType>::cloudSolution::interpolationSchemes() const
-{
-    return dict_.subDict("interpolationSchemes");
-}
-
-
-template<class CloudType>
-inline const Foam::dictionary&
-Foam::KinematicCloud<CloudType>::cloudSolution::integrationSchemes() const
-{
-    return dict_.subDict("integrationSchemes");
-}
-
-
-template<class CloudType>
-inline const Foam::Switch
-Foam::KinematicCloud<CloudType>::cloudSolution::transient() const
-{
-    return transient_;
-}
-
-
-template<class CloudType>
-inline const Foam::Switch
-Foam::KinematicCloud<CloudType>::cloudSolution::steadyState() const
-{
-    return !transient_;
-}
-
-
-template<class CloudType>
-inline Foam::label
-Foam::KinematicCloud<CloudType>::cloudSolution::calcFrequency() const
-{
-    return calcFrequency_;
-}
-
-
-template<class CloudType>
-inline Foam::scalar
-Foam::KinematicCloud<CloudType>::cloudSolution::maxCo() const
-{
-    return maxCo_;
-}
-
-
-template<class CloudType>
-inline Foam::label Foam::KinematicCloud<CloudType>::cloudSolution::iter() const
-{
-    return iter_;
-}
-
-
-template<class CloudType>
-inline Foam::label Foam::KinematicCloud<CloudType>::cloudSolution::nextIter()
-{
-    return ++iter_;
-}
-
-
-template<class CloudType>
-inline Foam::scalar
-Foam::KinematicCloud<CloudType>::cloudSolution::deltaT() const
-{
-    return deltaT_;
-}
-
-
-template<class CloudType>
-inline const Foam::Switch
-Foam::KinematicCloud<CloudType>::cloudSolution::coupled() const
-{
-    return coupled_;
-}
-
-
-template<class CloudType>
-inline const Foam::Switch
-Foam::KinematicCloud<CloudType>::cloudSolution::cellValueSourceCorrection()
-const
-{
-    return cellValueSourceCorrection_;
-}
-
-
-template<class CloudType>
-inline Foam::scalar
-Foam::KinematicCloud<CloudType>::cloudSolution::maxTrackTime() const
-{
-    return maxTrackTime_;
-}
-
-
-template<class CloudType>
-inline const Foam::Switch
-Foam::KinematicCloud<CloudType>::cloudSolution::resetSourcesOnStartup() const
-{
-    return resetSourcesOnStartup_;
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -188,7 +51,7 @@ Foam::KinematicCloud<CloudType>::particleProperties() const
 
 
 template<class CloudType>
-inline const typename Foam::KinematicCloud<CloudType>::cloudSolution&
+inline const Foam::cloudSolution&
 Foam::KinematicCloud<CloudType>::solution() const
 {
     return solution_;
@@ -196,8 +59,7 @@ Foam::KinematicCloud<CloudType>::solution() const
 
 
 template<class CloudType>
-inline typename Foam::KinematicCloud<CloudType>::cloudSolution&
-Foam::KinematicCloud<CloudType>::solution()
+inline Foam::cloudSolution& Foam::KinematicCloud<CloudType>::solution()
 {
     return solution_;
 }
