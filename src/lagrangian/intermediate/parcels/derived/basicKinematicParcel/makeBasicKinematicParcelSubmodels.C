@@ -26,24 +26,24 @@ License
 #include "basicKinematicCloud.H"
 
 // Kinematic
-#include "makeParcelForcesNew.H"
-#include "makeParcelDispersionModelsNew.H"
-#include "makeParcelInjectionModelsNew.H"
-#include "makeParcelPatchInteractionModelsNew.H"
-#include "makeParcelPostProcessingModelsNew.H"
-#include "makeParcelSurfaceFilmModelsNew.H"
+#include "makeParcelForces.H"
+#include "makeParcelDispersionModels.H"
+#include "makeParcelInjectionModels.H"
+#include "makeParcelPatchInteractionModels.H"
+#include "makeParcelPostProcessingModels.H"
+#include "makeParcelSurfaceFilmModels.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     // Kinematic sub-models
-    makeParcelForcesNew(basicKinematicCloud);
-    makeParcelDispersionModelsNew(basicKinematicCloud);
-    makeParcelInjectionModelsNew(basicKinematicCloud);
-    makeParcelPatchInteractionModelsNew(basicKinematicCloud);
-    makeParcelPostProcessingModelsNew(basicKinematicCloud);
-    makeParcelSurfaceFilmModelsNew(basicKinematicCloud);
+    makeParcelForces(basicKinematicCloud);
+    makeParcelDispersionModels(basicKinematicCloud);
+    makeParcelInjectionModels(basicKinematicCloud);
+    makeParcelPatchInteractionModels(basicKinematicCloud);
+    makeParcelPostProcessingModels(basicKinematicCloud);
+    makeParcelSurfaceFilmModels(basicKinematicCloud);
 }
 
 
