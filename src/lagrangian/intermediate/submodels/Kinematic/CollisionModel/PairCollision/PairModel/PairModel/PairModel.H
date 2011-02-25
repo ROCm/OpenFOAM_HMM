@@ -67,7 +67,7 @@ class PairModel
 public:
 
     //- Runtime type information
-    TypeName("PairModel");
+    TypeName("pairModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable

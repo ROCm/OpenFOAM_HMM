@@ -127,7 +127,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("ConeInjection");
+    TypeName("coneInjection");
 
 
     // Constructors

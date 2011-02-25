@@ -193,7 +193,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("InjectionModel");
+    TypeName("injectionModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable

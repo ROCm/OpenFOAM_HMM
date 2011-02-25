@@ -74,7 +74,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("DispersionRASModel");
+    TypeName("dispersionRASModel");
 
 
     // Constructors

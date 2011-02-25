@@ -77,7 +77,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("StandardWallInteraction");
+    TypeName("standardWallInteraction");
 
 
     // Constructors

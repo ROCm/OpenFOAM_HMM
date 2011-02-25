@@ -128,7 +128,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("SurfaceFilmModel");
+    TypeName("surfaceFilmModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,10 +35,9 @@ Foam::WallModel<CloudType>::New
     CloudType& owner
 )
 {
-    word WallModelType(dict.lookup("WallModel"));
+    word WallModelType(dict.lookup("wallModel"));
 
-    Info<< "Selecting WallModel " << WallModelType
-        << endl;
+    Info<< "Selecting wall model " << WallModelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(WallModelType);
@@ -52,10 +51,9 @@ Foam::WallModel<CloudType>::New
                 "const dictionary&, "
                 "CloudType&"
             ")"
-        )   << "Unknown WallModelType type "
-            << WallModelType
+        )   << "Unknown wall model type type " << WallModelType
             << ", constructor not in hash table" << nl << nl
-            << "    Valid WallModel types are:" << nl
+            << "    Valid wall model types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
     }
 

@@ -68,7 +68,7 @@ class WallModel
 public:
 
     //- Runtime type information
-    TypeName("WallModel");
+    TypeName("wallModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable

@@ -53,7 +53,7 @@ class DispersionModel
 public:
 
     //- Runtime type information
-    TypeName("DispersionModel");
+    TypeName("dispersionModel");
 
 
     // Declare runtime constructor selection table
@@ -132,7 +132,7 @@ public:
 
 #define makeDispersionModel(CloudType)                                        \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(DispersionModel<CloudType>, 0);       \
+    defineTemplateTypeNameAndDebug(DispersionModel<CloudType>, 0);            \
                                                                               \
     defineTemplateRunTimeSelectionTable                                       \
     (                                                                         \

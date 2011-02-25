@@ -64,7 +64,7 @@ class CollisionModel
 public:
 
     //- Runtime type information
-    TypeName("CollisionModel");
+    TypeName("collisionModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable

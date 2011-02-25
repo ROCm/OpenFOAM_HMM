@@ -64,7 +64,7 @@ class HeatTransferModel
 public:
 
     //- Runtime type information
-    TypeName("HeatTransferModel");
+    TypeName("heatTransferModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable

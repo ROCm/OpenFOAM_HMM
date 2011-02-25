@@ -90,7 +90,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("PhaseChangeModel");
+    TypeName("phaseChangeModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable

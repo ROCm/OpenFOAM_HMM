@@ -72,7 +72,7 @@ class CompositionModel
 public:
 
     //- Runtime type information
-    TypeName("CompositionModel");
+    TypeName("compositionModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable

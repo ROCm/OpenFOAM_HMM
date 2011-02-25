@@ -59,7 +59,7 @@ class SurfaceReactionModel
 public:
 
     //-Runtime type information
-    TypeName("SurfaceReactionModel");
+    TypeName("surfaceReactionModel");
 
 
     //- Declare runtime constructor selection table

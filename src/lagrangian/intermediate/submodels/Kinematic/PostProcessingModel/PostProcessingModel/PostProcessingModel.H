@@ -64,7 +64,7 @@ class PostProcessingModel
 public:
 
     //- Runtime type information
-    TypeName("PostProcessingModel");
+    TypeName("postProcessingModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable

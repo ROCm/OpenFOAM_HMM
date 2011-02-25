@@ -85,7 +85,7 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("PatchInteractionModel");
+    TypeName("patchInteractionModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable

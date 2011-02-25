@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,9 +35,9 @@ Foam::DevolatilisationModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType(dict.lookup("DevolatilisationModel"));
+    const word modelType(dict.lookup("devolatilisationModel"));
 
-    Info<< "Selecting DevolatilisationModel " << modelType << endl;
+    Info<< "Selecting devolatilisation model " << modelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
@@ -51,9 +51,9 @@ Foam::DevolatilisationModel<CloudType>::New
                 "const dictionary&, "
                 "CloudType&"
             ")"
-        )   << "Unknown DevolatilisationModel type "
+        )   << "Unknown devolatilisation model type "
             << modelType << nl << nl
-            << "Valid DevolatilisationModel types are:" << nl
+            << "Valid devolatilisation model types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

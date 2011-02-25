@@ -58,7 +58,7 @@ class DevolatilisationModel
 public:
 
     //- Runtime type information
-    TypeName("DevolatilisationModel");
+    TypeName("devolatilisationModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable

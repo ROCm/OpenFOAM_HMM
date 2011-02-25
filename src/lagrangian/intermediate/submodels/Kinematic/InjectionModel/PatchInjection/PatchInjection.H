@@ -108,7 +108,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("PatchInjection");
+    TypeName("patchInjection");
 
 
     // Constructors

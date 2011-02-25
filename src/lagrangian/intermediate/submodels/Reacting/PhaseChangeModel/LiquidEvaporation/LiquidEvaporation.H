@@ -78,7 +78,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("LiquidEvaporation");
+    TypeName("liquidEvaporation");
 
 
     // Constructors
