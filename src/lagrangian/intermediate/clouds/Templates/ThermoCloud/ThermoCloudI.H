@@ -141,7 +141,7 @@ Foam::ThermoCloud<CloudType>::Sh(volScalarField& hs) const
 
             return
                 hsTrans()/(this->mesh().V()*this->db().time().deltaT())
-              + fvm::SuSp(-hsCoeff()/(Cp*this->mesh().V()), hs)
+              - fvm::Sp(hsCoeff()/(Cp*this->mesh().V()), hs)
               + hsCoeff()/(Cp*this->mesh().V())*hs;
         }
         else
