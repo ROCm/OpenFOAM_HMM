@@ -97,7 +97,12 @@ void Foam::Cloud<ParticleType>::writeCloudUniformProperties() const
         uniformPropsDict.subDict(procName).add("particleCount", np[i]);
     }
 
-    uniformPropsDict.regIOobject::write();
+    uniformPropsDict.writeObject
+    (
+        IOstream::ASCII,
+        IOstream::currentVersion,
+        time().writeCompression()
+    );
 }
 
 

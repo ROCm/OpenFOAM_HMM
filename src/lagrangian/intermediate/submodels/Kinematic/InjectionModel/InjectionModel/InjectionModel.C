@@ -91,7 +91,12 @@ void Foam::InjectionModel<CloudType>::writeProps()
         propsDict.add("parcelsAddedTotal", parcelsAddedTotal_);
         propsDict.add("timeStep0", timeStep0_);
 
-        propsDict.regIOobject::write();
+        propsDict.writeObject
+        (
+            IOstream::ASCII,
+            IOstream::currentVersion,
+            this->owner().db().time().writeCompression()
+        );
     }
 }
 
