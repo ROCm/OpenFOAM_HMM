@@ -90,6 +90,23 @@ Foam::CollidingCloud<CloudType>::CollidingCloud
     CloudType(cloudName, rho, U, mu, g, false),
     collisionModel_(NULL)
 {
+    if (this->solution().steadyState())
+    {
+        FatalErrorIn
+        (
+            "Foam::CollidingCloud<CloudType>::CollidingCloud"
+            "("
+                "const word&, "
+                "const volScalarField&, "
+                "const volVectorField&, "
+                "const volScalarField&, "
+                "const dimensionedVector&, "
+                "bool"
+            ")"
+        )   << "Collision modelling not currently available for steady state "
+            << "calculations" << exit(FatalError);
+    }
+
     if (this->solution().active())
     {
         setModels();
