@@ -97,8 +97,8 @@ protected:
 
     // Private Member Functions
 
-        //- Drag coefficient
-        scalar Cd(const scalar Re) const;
+        //- Drag coefficient multiplied by Reynolds number
+        scalar CdRe(const scalar Re) const;
 
 
 public:
@@ -140,7 +140,7 @@ public:
         // Evaluation
 
             //- Calculate the non-coupled force
-            virtual forceSuSp calcNonCoupled
+            virtual forceSuSp calcCoupled
             (
                 const typename CloudType::parcelType& p,
                 const scalar dt,

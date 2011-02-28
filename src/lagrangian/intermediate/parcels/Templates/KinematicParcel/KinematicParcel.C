@@ -127,7 +127,7 @@ void Foam::KinematicParcel<ParcelType>::calc
     // ~~~~~~
 
     // Calculate new particle velocity
-    scalar Cud = 0.0;
+    scalar Spu = 0.0;
     vector U1 =
         calcVelocity
         (
@@ -142,7 +142,7 @@ void Foam::KinematicParcel<ParcelType>::calc
             mass0,
             Su,
             dUTrans,
-            Cud
+            Spu
         );
 
 
@@ -154,7 +154,7 @@ void Foam::KinematicParcel<ParcelType>::calc
         td.cloud().UTrans()[cellI] += np0*dUTrans;
 
         // Update momentum transfer coefficient
-        td.cloud().UCoeff()[cellI] += np0*mass0*Cud;
+        td.cloud().UCoeff()[cellI] += np0*Spu;
     }
 
 
@@ -179,7 +179,7 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     const scalar mass,
     const vector& Su,
     vector& dUTrans,
-    scalar& Cud
+    scalar& Spu
 ) const
 {
     typedef typename TrackData::cloudType cloudType;
@@ -202,13 +202,14 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     const vector ap = Uc_ + (Feff.Su() + Su)/(Feff.Sp() + ROOTVSMALL);
     const scalar bp = Feff.Sp()/mass;
 
-    Cud = bp;
+    Spu = Feff.Sp();
 
     IntegrationScheme<vector>::integrationResult Ures =
         td.cloud().UIntegrator().integrate(U, dt, ap, bp);
 
     vector Unew = Ures.value();
 
+    // note: Feff.Sp() and Fc.Sp() must be the same
     dUTrans += dt*(Feff.Sp()*(Ures.average() - Uc_) - Fcp.Su());
 
     // Apply correction to velocity and dUTrans for reduced-D cases
