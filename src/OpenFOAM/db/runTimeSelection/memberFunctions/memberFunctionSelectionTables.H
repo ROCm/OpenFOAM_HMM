@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -98,13 +98,11 @@ Description
     void baseType::construct##memberFunction##argNames##MemberFunctionTables()\
     {                                                                         \
         static bool constructed = false;                                      \
-                                                                              \
         if (!constructed)                                                     \
         {                                                                     \
+            constructed = true;                                               \
             baseType::memberFunction##argNames##MemberFunctionTablePtr_       \
                 = new baseType::memberFunction##argNames##MemberFunctionTable;\
-                                                                              \
-            constructed = true;                                               \
         }                                                                     \
     }
 
@@ -191,14 +189,12 @@ Description
     MemberFunctionTables()                                                    \
     {                                                                         \
         static bool constructed = false;                                      \
-                                                                              \
         if (!constructed)                                                     \
         {                                                                     \
+            constructed = true;                                               \
             baseType<Targ>::memberFunction##argNames##MemberFunctionTablePtr_ \
                 = new baseType<Targ>::memberFunction##argNames##              \
                   MemberFunctionTable;                                        \
-                                                                              \
-            constructed = true;                                               \
         }                                                                     \
     }
 
@@ -253,6 +249,7 @@ Description
     template<>                                                                \
     defineTemplatedMemberFunctionSelectionTableDestructor                     \
         (baseType,memberFunction,argNames,Targ)
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

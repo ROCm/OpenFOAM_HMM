@@ -85,13 +85,14 @@ Description
         }                                                                     \
     }
 
+
 // internal use:
 // constructor/destructor aid
 #define defineGlobalFunctionSelectionTableConstructDestruct\
 (memberFunction,argNames)                                                     \
                                                                               \
     /* Table constructor called from the table add function */                \
-    void construct##memberFunction##argNames##MemberFunctionTables()\
+    void construct##memberFunction##argNames##MemberFunctionTables()          \
     {                                                                         \
         static bool constructed = false;                                      \
         if (!constructed)                                                     \
@@ -103,7 +104,7 @@ Description
     }                                                                         \
                                                                               \
     /* Table destructor called from the table add function destructor */      \
-    void destroy##memberFunction##argNames##MemberFunctionTables()\
+    void destroy##memberFunction##argNames##MemberFunctionTables()            \
     {                                                                         \
         if (memberFunction##argNames##MemberFunctionTablePtr_)                \
         {                                                                     \
