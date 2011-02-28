@@ -334,7 +334,7 @@ Foam::KinematicCloud<CloudType>::SU(volVectorField& U) const
         {
             return
                 UTrans()/(mesh_.V()*this->db().time().deltaT())
-              + fvm::SuSp(-UCoeff()/mesh_.V(), U)
+              - fvm::Sp(UCoeff()/mesh_.V(), U)
               + UCoeff()/mesh_.V()*U;
         }
         else
