@@ -25,6 +25,83 @@ License
 
 #include "StandardWallInteraction.H"
 
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+template<class CloudType>
+void Foam::StandardWallInteraction<CloudType>::readProps()
+{
+    if (!this->owner().solution().transient())
+    {
+        return;
+    }
+
+    IOobject propsDictHeader
+    (
+        "standardWallInteractionProperties",
+        this->owner().db().time().timeName(),
+        "uniform"/cloud::prefix/this->owner().name(),
+        this->owner().db(),
+        IOobject::MUST_READ_IF_MODIFIED,
+        IOobject::NO_WRITE,
+        false
+    );
+
+    if (propsDictHeader.headerOk())
+    {
+        const IOdictionary propsDict(propsDictHeader);
+        propsDict.readIfPresent("nEscape", nEscape0_);
+        propsDict.readIfPresent("massEscape", massEscape0_);
+        propsDict.readIfPresent("nStick", nStick0_);
+        propsDict.readIfPresent("massStick", massStick0_);
+    }
+}
+
+
+template<class CloudType>
+void Foam::StandardWallInteraction<CloudType>::writeProps
+(
+    const label nEscape,
+    const scalar massEscape,
+    const label nStick,
+    const scalar massStick
+) const
+{
+    if (!this->owner().solution().transient())
+    {
+        return;
+    }
+
+    if (this->owner().db().time().outputTime())
+    {
+        IOdictionary propsDict
+        (
+            IOobject
+            (
+                "standardWallInteractionProperties",
+                this->owner().db().time().timeName(),
+                "uniform"/cloud::prefix/this->owner().name(),
+                this->owner().db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            )
+        );
+
+        propsDict.add("nEscape", nEscape);
+        propsDict.add("massEscape", massEscape);
+        propsDict.add("nStick", nStick);
+        propsDict.add("massStick", massStick);
+
+        propsDict.writeObject
+        (
+            IOstream::ASCII,
+            IOstream::currentVersion,
+            this->owner().db().time().writeCompression()
+        );
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -40,7 +117,15 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
         this->wordToInteractionType(this->coeffDict().lookup("type"))
     ),
     e_(0.0),
-    mu_(0.0)
+    mu_(0.0),
+    nEscape0_(0),
+    massEscape0_(0.0),
+    nStick0_(0),
+    massStick0_(0.0),
+    nEscape_(0),
+    massEscape_(0.0),
+    nStick_(0),
+    massStick_(0.0)
 {
     switch (interactionType_)
     {
@@ -85,7 +170,15 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
     PatchInteractionModel<CloudType>(pim),
     interactionType_(pim.interactionType_),
     e_(pim.e_),
-    mu_(pim.mu_)
+    mu_(pim.mu_),
+    nEscape0_(pim.nEscape0_),
+    massEscape0_(pim.massEscape0_),
+    nStick0_(pim.nStick0_),
+    massStick0_(pim.massStick0_),
+    nEscape_(pim.nEscape_),
+    massEscape_(pim.massEscape_),
+    nStick_(pim.nStick_),
+    massStick_(pim.massStick_)
 {}
 
 
@@ -121,6 +214,7 @@ bool Foam::StandardWallInteraction<CloudType>::correct
                 keepParticle = false;
                 active = false;
                 U = vector::zero;
+                nEscape_++;
                 break;
             }
             case PatchInteractionModel<CloudType>::itStick:
@@ -128,6 +222,7 @@ bool Foam::StandardWallInteraction<CloudType>::correct
                 keepParticle = true;
                 active = false;
                 U = vector::zero;
+                nStick_++;
                 break;
             }
             case PatchInteractionModel<CloudType>::itRebound:
@@ -180,6 +275,23 @@ bool Foam::StandardWallInteraction<CloudType>::correct
     }
 
     return false;
+}
+
+
+template<class CloudType>
+void Foam::StandardWallInteraction<CloudType>::info(Ostream& os) const
+{
+    label npe = returnReduce(nEscape_, sumOp<label>()) + nEscape0_;
+    scalar mpe = returnReduce(massEscape_, sumOp<scalar>()) + massEscape0_;
+
+    label nps = returnReduce(nStick_, sumOp<label>()) + nStick0_;
+    scalar mps = returnReduce(massStick_, sumOp<scalar>()) + massStick0_;
+
+    os  << "    Parcel fates:"
+        << "      - escape                      = " << npe << ", " << mpe << nl
+        << "      - stick                       = " << nps << ", " << mps << nl;
+
+    writeProps(npe, mpe, nps, mps);
 }
 
 

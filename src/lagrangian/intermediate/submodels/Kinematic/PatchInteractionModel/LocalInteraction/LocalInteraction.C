@@ -52,6 +52,7 @@ void Foam::LocalInteraction<CloudType>::readProps()
     {
         return;
     }
+
     IOobject propsDictHeader
     (
         "localInteractionProperties",
