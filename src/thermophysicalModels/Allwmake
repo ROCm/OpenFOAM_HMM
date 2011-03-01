@@ -15,10 +15,10 @@ wmake $makeOption chemistryModel
 wmake $makeOption barotropicCompressibilityModel
 wmake $makeOption thermalPorousZone
 wmake $makeOption SLGThermo
-wmake $makeOption radiationModels
 
 # Should be combined with solids&solidMixture
 wmake $makeOption basicSolidThermo
 
+wmake $makeOption radiationModels
 
 # ----------------------------------------------------------------- end-of-file
