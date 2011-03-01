@@ -189,8 +189,9 @@ db/objectRegistry/objectRegistry.C
 db/CallbackRegistry/CallbackRegistryName.C
 
 dll = db/dynamicLibrary
-$(dll)/codeStream/codeStreamTools.C
 $(dll)/dlLibraryTable/dlLibraryTable.C
+$(dll)/dynamicCode/dynamicCode.C
+$(dll)/dynamicCode/dynamicCodeContext.C
 
 db/functionObjects/functionObject/functionObject.C
 db/functionObjects/functionObjectList/functionObjectList.C
@@ -494,6 +495,8 @@ $(pointBoundaryMesh)/pointBoundaryMesh.C
 
 meshes/boundBox/boundBox.C
 
+meshes/treeBoundBox/treeBoundBox.C
+
 meshTools = meshes/meshTools
 $(meshTools)/matchPoints.C
 $(meshTools)/mergePoints.C
@@ -570,6 +573,11 @@ $(interpolations)/patchToPatchInterpolation/PatchToPatchInterpolationName.C
 
 algorithms/MeshWave/MeshWaveName.C
 algorithms/MeshWave/FaceCellWaveName.C
+
+algorithms/indexedOctree/indexedOctreeName.C
+algorithms/indexedOctree/treeDataCell.C
+
+
 
 graph/curve/curve.C
 graph/graph.C

@@ -29,6 +29,7 @@ License
 #include "globalIndex.H"
 #include "treeDataCell.H"
 #include "treeDataFace.H"
+#include "meshTools.H"
 
 #include "addToRunTimeSelectionTable.H"
 

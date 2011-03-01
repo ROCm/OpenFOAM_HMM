@@ -24,7 +24,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "stringOps.H"
+#include "typeInfo.H"
 #include "OSspecific.H"
+#include "OStringStream.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -73,10 +75,17 @@ Foam::string& Foam::stringOps::inplaceExpand
             {
                 string::iterator iter = s.begin() + begVar + 1;
 
+                // more generous in accepting keywords than for env variables
                 while
                 (
                     iter != s.end()
-                 && (isalnum(*iter) || *iter == '_')
+                 &&
+                    (
+                        isalnum(*iter)
+                     || *iter == '.'
+                     || *iter == ':'
+                     || *iter == '_'
+                    )
                 )
                 {
                     ++iter;
@@ -86,10 +95,14 @@ Foam::string& Foam::stringOps::inplaceExpand
 
             if (endVar != string::npos && endVar != begVar)
             {
-                string varName = s.substr
+                const word varName
                 (
-                    begVar + 1 + delim,
-                    endVar - begVar - 2*delim
+                    s.substr
+                    (
+                        begVar + 1 + delim,
+                        endVar - begVar - 2*delim
+                    ),
+                    false
                 );
 
                 HashTable<string, word, string::hash>::const_iterator fnd =
@@ -130,24 +143,145 @@ Foam::string& Foam::stringOps::inplaceExpand
 }
 
 
-Foam::string Foam::stringOps::expandEnv
+Foam::string Foam::stringOps::expand
 (
     const string& original,
-    const bool recurse,
-    const bool allowEmptyVar
+    const dictionary& dict,
+    const char sigil
 )
 {
     string s(original);
-    return inplaceExpandEnv(s, recurse, allowEmptyVar);
+    return inplaceExpand(s, dict, sigil);
 }
 
 
-// Expand all occurences of environment variables and initial tilde sequences
-Foam::string& Foam::stringOps::inplaceExpandEnv
+Foam::string& Foam::stringOps::inplaceExpand
 (
     string& s,
-    const bool recurse,
-    const bool allowEmptyVar
+    const dictionary& dict,
+    const char sigil
+)
+{
+    string::size_type begVar = 0;
+
+    // Expand $VAR or ${VAR}
+    // Repeat until nothing more is found
+    while
+    (
+        (begVar = s.find(sigil, begVar)) != string::npos
+     && begVar < s.size()-1
+    )
+    {
+        if (begVar == 0 || s[begVar-1] != '\\')
+        {
+            // Find end of first occurrence
+            string::size_type endVar = begVar;
+            string::size_type delim = 0;
+
+            if (s[begVar+1] == '{')
+            {
+                endVar = s.find('}', begVar);
+                delim = 1;
+            }
+            else
+            {
+                string::iterator iter = s.begin() + begVar + 1;
+
+                // more generous in accepting keywords than for env variables
+                while
+                (
+                    iter != s.end()
+                 &&
+                    (
+                        isalnum(*iter)
+                     || *iter == '.'
+                     || *iter == ':'
+                     || *iter == '_'
+                    )
+                )
+                {
+                    ++iter;
+                    ++endVar;
+                }
+            }
+
+            if (endVar != string::npos && endVar != begVar)
+            {
+                const word varName
+                (
+                    s.substr
+                    (
+                        begVar + 1 + delim,
+                        endVar - begVar - 2*delim
+                    ),
+                    false
+                );
+
+
+                // lookup in the dictionary
+                const entry* ePtr = dict.lookupEntryPtr(varName, true, true);
+
+                // if defined - copy its entries
+                if (ePtr)
+                {
+                    OStringStream buf;
+                    if (ePtr->isDict())
+                    {
+                        ePtr->dict().write(buf, false);
+                    }
+                    else
+                    {
+                        // fail for other types
+                        dynamicCast<const primitiveEntry>
+                        (
+                            *ePtr
+                        ).write(buf, true);
+                    }
+
+                    s.std::string::replace
+                    (
+                        begVar,
+                        endVar - begVar + 1,
+                        buf.str()
+                    );
+                    begVar += buf.str().size();
+                }
+                else
+                {
+                    // not defined - leave original string untouched
+                    begVar = endVar;
+                }
+            }
+            else
+            {
+                break;
+            }
+        }
+        else
+        {
+            ++begVar;
+        }
+    }
+
+    return s;
+}
+
+
+Foam::string Foam::stringOps::expand
+(
+    const string& original,
+    const bool allowEmpty
+)
+{
+    string s(original);
+    return inplaceExpand(s, allowEmpty);
+}
+
+
+Foam::string& Foam::stringOps::inplaceExpand
+(
+    string& s,
+    const bool allowEmpty
 )
 {
     string::size_type begVar = 0;
@@ -188,20 +322,19 @@ Foam::string& Foam::stringOps::inplaceExpandEnv
 
             if (endVar != string::npos && endVar != begVar)
             {
-                string varName = s.substr
+                const word varName
                 (
-                    begVar + 1 + delim,
-                    endVar - begVar - 2*delim
+                    s.substr
+                    (
+                        begVar + 1 + delim,
+                        endVar - begVar - 2*delim
+                    ),
+                    false
                 );
 
-                string varValue = getEnv(varName);
-
+                const string varValue = getEnv(varName);
                 if (varValue.size())
                 {
-                    if (recurse)
-                    {
-                        varValue.expand(recurse, allowEmptyVar);
-                    }
                     s.std::string::replace
                     (
                         begVar,
@@ -210,7 +343,7 @@ Foam::string& Foam::stringOps::inplaceExpandEnv
                     );
                     begVar += varValue.size();
                 }
-                else if (allowEmptyVar)
+                else if (allowEmpty)
                 {
                     s.std::string::replace
                     (
@@ -221,7 +354,10 @@ Foam::string& Foam::stringOps::inplaceExpandEnv
                 }
                 else
                 {
-                    FatalErrorIn("string::expand(const bool, const bool)")
+                    FatalErrorIn
+                    (
+                        "stringOps::inplaceExpand(string&, const bool)"
+                    )
                         << "Unknown variable name " << varName << '.'
                         << exit(FatalError);
                 }
@@ -294,7 +430,7 @@ Foam::string Foam::stringOps::trimLeft(const string& s)
     if (!s.empty())
     {
         string::size_type beg = 0;
-        while (isspace(s[beg]))
+        while (beg < s.size() && isspace(s[beg]))
         {
             ++beg;
         }
@@ -314,7 +450,7 @@ Foam::string& Foam::stringOps::inplaceTrimLeft(string& s)
     if (!s.empty())
     {
         string::size_type beg = 0;
-        while (isspace(s[beg]))
+        while (beg < s.size() && isspace(s[beg]))
         {
             ++beg;
         }
@@ -379,5 +515,6 @@ Foam::string& Foam::stringOps::inplaceTrim(string& s)
 
     return s;
 }
+
 
 // ************************************************************************* //

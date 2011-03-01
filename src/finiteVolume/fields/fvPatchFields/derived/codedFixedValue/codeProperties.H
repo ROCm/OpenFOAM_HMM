@@ -25,7 +25,7 @@ Class
     Foam::codeProperties
 
 Description
-    IOdictionary + flag whether file has changed.
+    IOdictionary with an internal flag to explicitly track when a file changed.
 
 SourceFiles
     codeProperties.C
@@ -35,7 +35,6 @@ SourceFiles
 #ifndef codeProperties_H
 #define codeProperties_H
 
-#include "MeshObject.H"
 #include "IOdictionary.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -53,7 +52,7 @@ class codeProperties
 {
     // Private data
 
-        //- File change
+        //- Monitor file change
         mutable bool modified_;
 
 public:
@@ -69,15 +68,12 @@ public:
 
     // Member Functions
 
-        bool modified() const
-        {
-            return modified_;
-        }
+        //- A sticky version of regIOobject::modified()
+        //  Must explicitly clear with setUnmodified()
+        virtual bool modified() const;
 
-        void setUnmodified() const
-        {
-            modified_ = false;
-        }
+        //- Make modification unsticky
+        void setUnmodified() const;
 
         //- Read the dictionary
         virtual bool read();

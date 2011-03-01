@@ -24,21 +24,12 @@ solution
 
     sourceTerms
     {
-        rho
+        schemes
         {
-            semiImplicit    false;
-        }
-        U
-        {
-            semiImplicit    false;
-        }
-        Yi
-        {
-            semiImplicit    false;
-        }
-        hs
-        {
-            semiImplicit    false;
+            rho             explicit;
+            U               explicit;
+            Yi              explicit;
+            hs              explicit;
         }
     }
 
@@ -55,7 +46,7 @@ solution
     integrationSchemes
     {
         U               Euler;
-        T               Analytical;
+        T               analytical;
     }
 }
 
@@ -95,27 +86,25 @@ subModels
         );
     }
 
-    InjectionModel  ManualInjection;
+    injectionModel  manualInjection;
 
-    DispersionModel none;
+    dispersionModel none;
 
-    PatchInteractionModel StandardWallInteraction;
+    patchInteractionModel standardWallInteraction;
 
-    HeatTransferModel RanzMarshall;
+    heatTransferModel RanzMarshall;
 
-    CompositionModel SinglePhaseMixture;
+    compositionModel singlePhaseMixture;
 
-    PhaseChangeModel LiquidEvaporation;
+    phaseChangeModel liquidEvaporation;
 
-    PostProcessingModel none;
+    postProcessingModel none;
 
-    CollisionModel none;
-
-    SurfaceFilmModel none;
+    surfaceFilmModel none;
 
     radiation       off;
 
-    ManualInjectionCoeffs
+    manualInjectionCoeffs
     {
         massTotal       1e-8;
         parcelBasisType mass;
@@ -124,7 +113,7 @@ subModels
         U0              ( 0 0 0 );
         sizeDistribution
         {
-            pdfType         uniform;
+            type        uniform;
             uniformDistribution
             {
                 minValue        1e-04;
@@ -133,7 +122,7 @@ subModels
         }
     }
 
-    StandardWallInteractionCoeffs
+    standardWallInteractionCoeffs
     {
         type            rebound;
     }
@@ -143,7 +132,7 @@ subModels
         BirdCorrection  true;
     }
 
-    SinglePhaseMixtureCoeffs
+    singlePhaseMixtureCoeffs
     {
         phases
         (
@@ -154,7 +143,7 @@ subModels
         );
     }
 
-    LiquidEvaporationCoeffs
+    liquidEvaporationCoeffs
     {
         enthalpyTransfer enthalpyDifference;
 

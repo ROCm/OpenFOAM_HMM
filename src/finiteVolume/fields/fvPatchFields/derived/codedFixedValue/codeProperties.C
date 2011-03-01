@@ -24,11 +24,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "codeProperties.H"
-#include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(Foam::codeProperties, 0);
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -40,6 +40,20 @@ Foam::codeProperties::codeProperties(const IOobject& io)
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+bool Foam::codeProperties::modified() const
+{
+    modified_ = modified_ || regIOobject::modified();
+
+    return modified_;
+}
+
+
+void Foam::codeProperties::setUnmodified() const
+{
+    modified_ = false;
+}
+
 
 bool Foam::codeProperties::read()
 {

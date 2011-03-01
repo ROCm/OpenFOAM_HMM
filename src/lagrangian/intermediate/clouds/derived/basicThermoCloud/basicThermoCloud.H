@@ -27,9 +27,6 @@ Class
 Description
     Cloud class to introduce thermodynamic parcels
 
-SourceFiles
-    basicThermoCloud.C
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef basicThermoCloud_H
@@ -42,7 +39,16 @@ SourceFiles
 
 namespace Foam
 {
-    typedef ThermoCloud<basicThermoParcel> basicThermoCloud;
+    typedef ThermoCloud
+    <
+        KinematicCloud
+        <
+            Cloud
+            <
+                basicThermoParcel
+            >
+        >
+    > basicThermoCloud;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

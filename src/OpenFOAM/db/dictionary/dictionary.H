@@ -477,7 +477,8 @@ public:
 
         // Write
 
-            void write(Ostream&, bool subDict=true) const;
+            //- Write dictionary, normally with sub-dictionary formatting
+            void write(Ostream&, const bool subDict=true) const;
 
 
     // Member Operators

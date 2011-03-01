@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,11 +21,8 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::runTimeSelectionTables
-
 Description
-    Macros to enable the easy declaration of run-time selection tables.
+    Macros to ease declaration of run-time selection tables.
 
     declareRunTimeSelectionTable is used to create a run-time selection table
     for a base-class which holds constructor pointers on the table.
@@ -62,6 +59,12 @@ Description
     /* Construct from argList function pointer table pointer */               \
     static argNames##ConstructorTable* argNames##ConstructorTablePtr_;        \
                                                                               \
+    /* Table constructor called from the table add function */                \
+    static void construct##argNames##ConstructorTables();                     \
+                                                                              \
+    /* Table destructor called from the table add function destructor */      \
+    static void destroy##argNames##ConstructorTables();                       \
+                                                                              \
     /* Class to add constructor from argList to table */                      \
     template< class baseType##Type >                                          \
     class add##argNames##ConstructorToTable                                   \
@@ -88,11 +91,41 @@ Description
         }                                                                     \
     };                                                                        \
                                                                               \
-    /* Table constructor called from the table add function */                \
-    static void construct##argNames##ConstructorTables();                     \
+    /* Class to add constructor from argList to table */                      \
+    /* Remove only the entry (not the table) upon destruction */              \
+    template< class baseType##Type >                                          \
+    class addRemovable##argNames##ConstructorToTable                          \
+    {                                                                         \
+        /* retain lookup name for later removal */                            \
+        const word& lookup_;                                                  \
                                                                               \
-    /* Table destructor called from the table add function destructor */      \
-    static void destroy##argNames##ConstructorTables()
+    public:                                                                   \
+                                                                              \
+        static autoPtr< baseType > New argList                                \
+        {                                                                     \
+            return autoPtr< baseType >(new baseType##Type parList);           \
+        }                                                                     \
+                                                                              \
+        addRemovable##argNames##ConstructorToTable                            \
+        (                                                                     \
+            const word& lookup = baseType##Type::typeName                     \
+        )                                                                     \
+        :                                                                     \
+            lookup_(lookup)                                                   \
+        {                                                                     \
+            construct##argNames##ConstructorTables();                         \
+            argNames##ConstructorTablePtr_->set(lookup, New);                 \
+        }                                                                     \
+                                                                              \
+        ~addRemovable##argNames##ConstructorToTable()                         \
+        {                                                                     \
+            if (argNames##ConstructorTablePtr_)                               \
+            {                                                                 \
+                argNames##ConstructorTablePtr_->erase(lookup_);               \
+            }                                                                 \
+        }                                                                     \
+    };
+
 
 
 // external use:
@@ -110,6 +143,12 @@ Description
                                                                               \
     /* Construct from argList function pointer table pointer */               \
     static argNames##ConstructorTable* argNames##ConstructorTablePtr_;        \
+                                                                              \
+    /* Table constructor called from the table add function */                \
+    static void construct##argNames##ConstructorTables();                     \
+                                                                              \
+    /* Table destructor called from the table add function destructor */      \
+    static void destroy##argNames##ConstructorTables();                       \
                                                                               \
     /* Class to add constructor from argList to table */                      \
     template< class baseType##Type >                                          \
@@ -141,11 +180,43 @@ Description
         }                                                                     \
     };                                                                        \
                                                                               \
-    /* Table constructor called from the table add function */                \
-    static void construct##argNames##ConstructorTables();                     \
+    /* Class to add constructor from argList to table */                      \
+    template< class baseType##Type >                                          \
+    class addRemovable##argNames##ConstructorToTable                          \
+    {                                                                         \
+        /* retain lookup name for later removal */                            \
+        const word& lookup_;                                                  \
                                                                               \
-    /* Table destructor called from the table add function destructor */      \
-    static void destroy##argNames##ConstructorTables()
+    public:                                                                   \
+                                                                              \
+        static autoPtr< baseType > New##baseType argList                      \
+        {                                                                     \
+            return autoPtr< baseType >(baseType##Type::New parList.ptr());    \
+        }                                                                     \
+                                                                              \
+        addRemovable##argNames##ConstructorToTable                            \
+        (                                                                     \
+            const word& lookup = baseType##Type::typeName                     \
+        )                                                                     \
+        :                                                                     \
+            lookup_(lookup)                                                   \
+        {                                                                     \
+            construct##argNames##ConstructorTables();                         \
+            argNames##ConstructorTablePtr_->set                               \
+            (                                                                 \
+                lookup,                                                       \
+                New##baseType                                                 \
+            );                                                                \
+        }                                                                     \
+                                                                              \
+        ~addRemovable##argNames##ConstructorToTable()                         \
+        {                                                                     \
+            if (argNames##ConstructorTablePtr_)                               \
+            {                                                                 \
+                argNames##ConstructorTablePtr_->erase(lookup_);               \
+            }                                                                 \
+        }                                                                     \
+    };
 
 
 // internal use:
@@ -157,13 +228,11 @@ Description
     void baseType::construct##argNames##ConstructorTables()                   \
     {                                                                         \
         static bool constructed = false;                                      \
-                                                                              \
         if (!constructed)                                                     \
         {                                                                     \
+            constructed = true;                                               \
             baseType::argNames##ConstructorTablePtr_                          \
                 = new baseType::argNames##ConstructorTable;                   \
-                                                                              \
-            constructed = true;                                               \
         }                                                                     \
     }
 
@@ -244,13 +313,11 @@ Description
     void baseType< Targ >::construct##argNames##ConstructorTables()           \
     {                                                                         \
         static bool constructed = false;                                      \
-                                                                              \
         if (!constructed)                                                     \
         {                                                                     \
+            constructed = true;                                               \
             baseType< Targ >::argNames##ConstructorTablePtr_                  \
                 = new baseType< Targ >::argNames##ConstructorTable;           \
-                                                                              \
-            constructed = true;                                               \
         }                                                                     \
     }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -501,7 +501,7 @@ void Foam::DsmcCloud<ParcelType>::addNewParcel
 {
     ParcelType* pPtr = new ParcelType
     (
-        *this,
+        mesh_,
         position,
         U,
         Ei,
@@ -970,7 +970,7 @@ Foam::DsmcCloud<ParcelType>::~DsmcCloud()
 template<class ParcelType>
 void Foam::DsmcCloud<ParcelType>::evolve()
 {
-    typename ParcelType::trackData td(*this);
+    typename ParcelType::trackingData td(*this);
 
     // Reset the data collection fields
     resetFields();

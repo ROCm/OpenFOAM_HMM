@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,7 +32,7 @@ Description
 #ifndef parcel_H
 #define parcel_H
 
-#include "Particle.H"
+#include "particle.H"
 #include "contiguous.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -48,7 +48,7 @@ class spray;
 
 class parcel
 :
-    public Particle<parcel>
+    public particle
 {
     // Private member data
 
@@ -142,13 +142,25 @@ public:
 
     friend class Cloud<parcel>;
 
+    //- Class used to pass tracking data to the trackToFace function
+    class trackingData
+    :
+        public particle::TrackingData<spray>
+    {
+    public:
+
+        trackingData(spray& cloud)
+        :
+            particle::TrackingData<spray>(cloud)
+        {}
+    };
 
     // Constructors
 
         //- Construct from components
         parcel
         (
-            const Cloud<parcel>& cloud,
+            const polyMesh& mesh,
             const vector& position,
             const label cellI,
             const label tetFaceI,
@@ -173,10 +185,29 @@ public:
         //- Construct from Istream reading field values if required
         parcel
         (
-            const Cloud<parcel>& cloud,
+            const polyMesh& mesh,
             Istream& is,
             bool readFields = true
         );
+
+        //- Factory class to read-construct particles used for
+        //  parallel transfer
+        class iNew
+        {
+            const polyMesh& mesh_;
+
+        public:
+
+            iNew(const polyMesh& mesh)
+            :
+                mesh_(mesh)
+            {}
+
+            autoPtr<parcel> operator()(Istream& is) const
+            {
+                return autoPtr<parcel>(new parcel(mesh_, is, true));
+            }
+        };
 
 
     // Member Functions
@@ -349,7 +380,7 @@ public:
 
         // Parcel operations
 
-            bool move(spray& sprayData, const scalar trackTime);
+            bool move(trackingData& td, const scalar trackTime);
 
             //- Transform the position and physical properties of the particle
             //  according to the given transformation tensor

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,29 +29,18 @@ License
 #include "VariableHardSphere.H"
 #include "LarsenBorgnakkeVariableHardSphere.H"
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 namespace Foam
 {
+    typedef DsmcCloud<dsmcParcel> CloudType;
+
     makeBinaryCollisionModel(DsmcCloud<dsmcParcel>);
 
     // Add instances of collision model to the table
-    makeBinaryCollisionModelType
-    (
-        NoBinaryCollision,
-        DsmcCloud,
-        dsmcParcel
-    );
-    makeBinaryCollisionModelType
-    (
-        VariableHardSphere,
-        DsmcCloud,
-        dsmcParcel
-    );
-    makeBinaryCollisionModelType
-    (
-        LarsenBorgnakkeVariableHardSphere,
-        DsmcCloud,
-        dsmcParcel
-    );
+    makeBinaryCollisionModelType(NoBinaryCollision, CloudType);
+    makeBinaryCollisionModelType(VariableHardSphere, CloudType);
+    makeBinaryCollisionModelType(LarsenBorgnakkeVariableHardSphere, CloudType);
 }
 
 

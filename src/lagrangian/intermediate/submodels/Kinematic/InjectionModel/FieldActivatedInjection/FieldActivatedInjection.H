@@ -129,7 +129,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("FieldActivatedInjection");
+    TypeName("fieldActivatedInjection");
 
 
     // Constructors

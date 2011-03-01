@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,29 +28,17 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "KinematicCloud.H"
 #include "NoSurfaceFilm.H"
 #include "ThermoSurfaceFilm.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelSurfaceFilmModels(ParcelType)                               \
+#define makeParcelSurfaceFilmModels(CloudType)                                \
                                                                               \
-    makeSurfaceFilmModel(KinematicCloud<ParcelType>);                         \
+    makeSurfaceFilmModel(CloudType);                                          \
                                                                               \
-    makeSurfaceFilmModelType                                                  \
-    (                                                                         \
-        NoSurfaceFilm,                                                        \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-                                                                              \
-    makeSurfaceFilmModelType                                                  \
-    (                                                                         \
-        ThermoSurfaceFilm,                                                    \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );
+    makeSurfaceFilmModelType(NoSurfaceFilm, CloudType);                       \
+    makeSurfaceFilmModelType(ThermoSurfaceFilm, CloudType);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -99,7 +99,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("ManualInjection");
+    TypeName("manualInjection");
 
 
     // Constructors

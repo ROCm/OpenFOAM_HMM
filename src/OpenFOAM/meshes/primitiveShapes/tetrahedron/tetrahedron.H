@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -174,10 +174,10 @@ public:
             ) const;
 
             //- Return nearest point to p on tetrahedron
-            inline pointHit nearestPoint
-            (
-                const point& p
-            ) const;
+            inline pointHit nearestPoint(const point& p) const;
+
+            //- Return true if point is inside tetrahedron
+            inline bool inside(const point& pt) const;
 
             //- Return (min)containment sphere, i.e. the smallest sphere with
             //  all points inside. Returns pointHit with:

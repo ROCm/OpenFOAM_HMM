@@ -30,16 +30,15 @@ License
 
 namespace Foam
 {
-    defineParticleTypeNameAndDebug(streamLineParticle, 0);
+//    defineParticleTypeNameAndDebug(streamLineParticle, 0);
 }
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Estimate dt to cross cell in a few steps
 Foam::scalar Foam::streamLineParticle::calcSubCycleDeltaT
 (
-    streamLineParticle::trackData& td,
+    trackingData& td,
     const scalar dt,
     const vector& U
 ) const
@@ -58,7 +57,7 @@ Foam::scalar Foam::streamLineParticle::calcSubCycleDeltaT
 
 Foam::vector Foam::streamLineParticle::interpolateFields
 (
-    const streamLineParticle::trackData& td,
+    const trackingData& td,
     const point& position,
     const label cellI
 )
@@ -103,29 +102,27 @@ Foam::vector Foam::streamLineParticle::interpolateFields
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct from components
 Foam::streamLineParticle::streamLineParticle
 (
-    const Cloud<streamLineParticle>& c,
+    const polyMesh& mesh,
     const vector& position,
     const label cellI,
     const label lifeTime
 )
 :
-    Particle<streamLineParticle>(c, position, cellI),
+    particle(mesh, position, cellI),
     lifeTime_(lifeTime)
 {}
 
 
-//- Construct from Istream
 Foam::streamLineParticle::streamLineParticle
 (
-    const Cloud<streamLineParticle>& c,
+    const polyMesh& mesh,
     Istream& is,
     bool readFields
 )
 :
-    Particle<streamLineParticle>(c, is, readFields)
+    particle(mesh, is, readFields)
 {
     if (readFields)
     {
@@ -157,16 +154,15 @@ Foam::streamLineParticle::streamLineParticle
 }
 
 
-// Construct copy
 Foam::streamLineParticle::streamLineParticle
 (
-    const streamLineParticle& c
+    const streamLineParticle& p
 )
 :
-    Particle<streamLineParticle>(c),
-    lifeTime_(c.lifeTime_),
-    sampledPositions_(c.sampledPositions_),
-    sampledScalars_(c.sampledScalars_)
+    particle(p),
+    lifeTime_(p.lifeTime_),
+    sampledPositions_(p.sampledPositions_),
+    sampledScalars_(p.sampledScalars_)
 {}
 
 
@@ -174,15 +170,17 @@ Foam::streamLineParticle::streamLineParticle
 
 bool Foam::streamLineParticle::move
 (
-    streamLineParticle::trackData& td,
+    trackingData& td,
     const scalar trackTime
 )
 {
+    streamLineParticle& p = static_cast<streamLineParticle&>(*this);
+
     td.switchProcessor = false;
     td.keepParticle = true;
 
     scalar tEnd = (1.0 - stepFraction())*trackTime;
-    scalar maxDt = cloud_.pMesh().bounds().mag();
+    scalar maxDt = mesh_.bounds().mag();
 
     while
     (
@@ -266,8 +264,7 @@ bool Foam::streamLineParticle::move
             if (debug)
             {
                 Pout<< "streamLineParticle : Removing stagnant particle:"
-                    << static_cast<Particle<streamLineParticle> >(*this)
-                    << " sampled positions:" << sampledPositions_.size()
+                    << p << " sampled positions:" << sampledPositions_.size()
                     << endl;
             }
             td.keepParticle = false;
@@ -281,13 +278,12 @@ bool Foam::streamLineParticle::move
             if (debug)
             {
                 Pout<< "streamLineParticle : Removing particle:"
-                    << static_cast<Particle<streamLineParticle> >(*this)
-                    << " sampled positions:" << sampledPositions_.size()
+                    << p << " sampled positions:" << sampledPositions_.size()
                     << endl;
             }
         }
 
-        // Transfer particle data into trackData.
+        // Transfer particle data into trackingData.
         //td.allPositions_.append(sampledPositions_);
         td.allPositions_.append(vectorList());
         vectorList& top = td.allPositions_.last();
@@ -316,7 +312,7 @@ bool Foam::streamLineParticle::move
 bool Foam::streamLineParticle::hitPatch
 (
     const polyPatch&,
-    streamLineParticle::trackData& td,
+    trackingData& td,
     const label patchI,
     const scalar trackFraction,
     const tetIndices& tetIs
@@ -327,62 +323,32 @@ bool Foam::streamLineParticle::hitPatch
 }
 
 
-bool Foam::streamLineParticle::hitPatch
-(
-    const polyPatch&,
-    int&,
-    const label,
-    const scalar,
-    const tetIndices&
-)
-{
-    // Disable generic patch interaction
-    return false;
-}
-
-
 void Foam::streamLineParticle::hitWedgePatch
 (
     const wedgePolyPatch& pp,
-    streamLineParticle::trackData& td
+    trackingData& td
 )
 {
     // Remove particle
     td.keepParticle = false;
 }
-
-
-void Foam::streamLineParticle::hitWedgePatch
-(
-    const wedgePolyPatch&,
-    int&
-)
-{}
 
 
 void Foam::streamLineParticle::hitSymmetryPatch
 (
     const symmetryPolyPatch& pp,
-    streamLineParticle::trackData& td
+    trackingData& td
 )
 {
     // Remove particle
     td.keepParticle = false;
 }
-
-
-void Foam::streamLineParticle::hitSymmetryPatch
-(
-    const symmetryPolyPatch&,
-    int&
-)
-{}
 
 
 void Foam::streamLineParticle::hitCyclicPatch
 (
     const cyclicPolyPatch& pp,
-    streamLineParticle::trackData& td
+    trackingData& td
 )
 {
     // Remove particle
@@ -390,18 +356,10 @@ void Foam::streamLineParticle::hitCyclicPatch
 }
 
 
-void Foam::streamLineParticle::hitCyclicPatch
-(
-    const cyclicPolyPatch&,
-    int&
-)
-{}
-
-
 void Foam::streamLineParticle::hitProcessorPatch
 (
     const processorPolyPatch&,
-    streamLineParticle::trackData& td
+    trackingData& td
 )
 {
     // Switch particle
@@ -409,39 +367,11 @@ void Foam::streamLineParticle::hitProcessorPatch
 }
 
 
-void Foam::streamLineParticle::hitProcessorPatch
-(
-    const processorPolyPatch&,
-    int&
-)
-{}
-
-
 void Foam::streamLineParticle::hitWallPatch
 (
     const wallPolyPatch& wpp,
-    streamLineParticle::trackData& td,
+    trackingData& td,
     const tetIndices&
-)
-{
-    // Remove particle
-    td.keepParticle = false;
-}
-
-
-void Foam::streamLineParticle::hitWallPatch
-(
-    const wallPolyPatch& wpp,
-    int&,
-    const tetIndices&
-)
-{}
-
-
-void Foam::streamLineParticle::hitPatch
-(
-    const polyPatch& wpp,
-    streamLineParticle::trackData& td
 )
 {
     // Remove particle
@@ -452,9 +382,12 @@ void Foam::streamLineParticle::hitPatch
 void Foam::streamLineParticle::hitPatch
 (
     const polyPatch& wpp,
-    int&
+    trackingData& td
 )
-{}
+{
+    // Remove particle
+    td.keepParticle = false;
+}
 
 
 void Foam::streamLineParticle::readFields(Cloud<streamLineParticle>& c)
@@ -463,6 +396,8 @@ void Foam::streamLineParticle::readFields(Cloud<streamLineParticle>& c)
     {
         return;
     }
+
+    particle::readFields(c);
 
     IOField<label> lifeTime
     (
@@ -495,7 +430,7 @@ void Foam::streamLineParticle::readFields(Cloud<streamLineParticle>& c)
 
 void Foam::streamLineParticle::writeFields(const Cloud<streamLineParticle>& c)
 {
-    Particle<streamLineParticle>::writeFields(c);
+    particle::writeFields(c);
 
     label np =  c.size();
 
@@ -534,7 +469,7 @@ void Foam::streamLineParticle::writeFields(const Cloud<streamLineParticle>& c)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const streamLineParticle& p)
 {
-    os  << static_cast<const Particle<streamLineParticle>&>(p)
+    os  << static_cast<const particle&>(p)
         << token::SPACE << p.lifeTime_
         << token::SPACE << p.sampledPositions_
         << token::SPACE << p.sampledScalars_

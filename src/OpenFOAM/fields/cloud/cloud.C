@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,7 +41,7 @@ Foam::cloud::cloud(const objectRegistry& obr, const word& cloudName)
     (
         IOobject
         (
-            ( cloudName.size() ? cloudName : defaultName ),
+            (cloudName.size() ? cloudName : defaultName),
             obr.time().timeName(),
             prefix,
             obr,
@@ -56,6 +56,14 @@ Foam::cloud::cloud(const objectRegistry& obr, const word& cloudName)
 
 Foam::cloud::~cloud()
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::cloud::autoMap(const mapPolyMesh&)
+{
+    notImplemented("cloud::autoMap(const mapPolyMesh&)");
+}
 
 
 // ************************************************************************* //

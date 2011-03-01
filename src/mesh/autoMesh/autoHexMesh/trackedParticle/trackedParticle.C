@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ License
 
 Foam::trackedParticle::trackedParticle
 (
-    const Cloud<trackedParticle>& c,
+    const polyMesh& mesh,
     const vector& position,
     const label cellI,
     const label tetFaceI,
@@ -40,7 +40,7 @@ Foam::trackedParticle::trackedParticle
     const label j
 )
 :
-    Particle<trackedParticle>(c, position, cellI, tetFaceI, tetPtI),
+    particle(mesh, position, cellI, tetFaceI, tetPtI),
     end_(end),
     level_(level),
     i_(i),
@@ -50,12 +50,12 @@ Foam::trackedParticle::trackedParticle
 
 Foam::trackedParticle::trackedParticle
 (
-    const Cloud<trackedParticle>& c,
+    const polyMesh& mesh,
     Istream& is,
     bool readFields
 )
 :
-    Particle<trackedParticle>(c, is, readFields)
+    particle(mesh, is, readFields)
 {
     if (readFields)
     {
@@ -89,7 +89,7 @@ Foam::trackedParticle::trackedParticle
 
 bool Foam::trackedParticle::move
 (
-    trackedParticle::trackData& td,
+    trackingData& td,
     const scalar trackedParticle
 )
 {
@@ -120,7 +120,7 @@ bool Foam::trackedParticle::move
 bool Foam::trackedParticle::hitPatch
 (
     const polyPatch&,
-    trackedParticle::trackData& td,
+    trackingData& td,
     const label patchI,
     const scalar trackFraction,
     const tetIndices& tetIs
@@ -130,42 +130,10 @@ bool Foam::trackedParticle::hitPatch
 }
 
 
-bool Foam::trackedParticle::hitPatch
-(
-    const polyPatch&,
-    int&,
-    const label,
-    const scalar trackFraction,
-    const tetIndices& tetIs
-)
-{
-    return false;
-}
-
-
 void Foam::trackedParticle::hitWedgePatch
 (
     const wedgePolyPatch&,
-    trackedParticle::trackData& td
-)
-{
-    // Remove particle
-    td.keepParticle = false;
-}
-
-
-void Foam::trackedParticle::hitWedgePatch
-(
-    const wedgePolyPatch&,
-    int&
-)
-{}
-
-
-void Foam::trackedParticle::hitSymmetryPatch
-(
-    const symmetryPolyPatch&,
-    trackedParticle::trackData& td
+    trackingData& td
 )
 {
     // Remove particle
@@ -176,15 +144,7 @@ void Foam::trackedParticle::hitSymmetryPatch
 void Foam::trackedParticle::hitSymmetryPatch
 (
     const symmetryPolyPatch&,
-    int&
-)
-{}
-
-
-void Foam::trackedParticle::hitCyclicPatch
-(
-    const cyclicPolyPatch&,
-    trackedParticle::trackData& td
+    trackingData& td
 )
 {
     // Remove particle
@@ -195,15 +155,18 @@ void Foam::trackedParticle::hitCyclicPatch
 void Foam::trackedParticle::hitCyclicPatch
 (
     const cyclicPolyPatch&,
-    int&
+    trackingData& td
 )
-{}
+{
+    // Remove particle
+    td.keepParticle = false;
+}
 
 
 void Foam::trackedParticle::hitProcessorPatch
 (
     const processorPolyPatch&,
-    trackedParticle::trackData& td
+    trackingData& td
 )
 {
     // Remove particle
@@ -211,39 +174,11 @@ void Foam::trackedParticle::hitProcessorPatch
 }
 
 
-void Foam::trackedParticle::hitProcessorPatch
-(
-    const processorPolyPatch&,
-    int&
-)
-{}
-
-
 void Foam::trackedParticle::hitWallPatch
 (
     const wallPolyPatch& wpp,
-    trackedParticle::trackData& td,
+    trackingData& td,
     const tetIndices&
-)
-{
-    // Remove particle
-    td.keepParticle = false;
-}
-
-
-void Foam::trackedParticle::hitWallPatch
-(
-    const wallPolyPatch& wpp,
-    int&,
-    const tetIndices&
-)
-{}
-
-
-void Foam::trackedParticle::hitPatch
-(
-    const polyPatch& wpp,
-    trackedParticle::trackData& td
 )
 {
     // Remove particle
@@ -254,9 +189,12 @@ void Foam::trackedParticle::hitPatch
 void Foam::trackedParticle::hitPatch
 (
     const polyPatch& wpp,
-    int&
+    trackingData& td
 )
-{}
+{
+    // Remove particle
+    td.keepParticle = false;
+}
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
@@ -265,7 +203,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const trackedParticle& p)
 {
     if (os.format() == IOstream::ASCII)
     {
-        os  << static_cast<const Particle<trackedParticle>&>(p)
+        os  << static_cast<const particle&>(p)
             << token::SPACE << p.end_
             << token::SPACE << p.level_
             << token::SPACE << p.i_
@@ -273,7 +211,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const trackedParticle& p)
     }
     else
     {
-        os  << static_cast<const Particle<trackedParticle>&>(p);
+        os  << static_cast<const particle&>(p);
         os.write
         (
             reinterpret_cast<const char*>(&p.end_),

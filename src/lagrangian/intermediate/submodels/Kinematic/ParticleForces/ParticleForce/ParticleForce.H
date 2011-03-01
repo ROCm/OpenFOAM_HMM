@@ -206,13 +206,12 @@ public:
     defineTemplateRunTimeSelectionTable(ParticleForce<CloudType>, dictionary);
 
 
-#define makeParticleForceModelType(SS, CloudType, ParcelType)                 \
+#define makeParticleForceModelType(SS, CloudType)                             \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
+    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
                                                                               \
-    ParticleForce<CloudType<ParcelType> >::                                   \
-        adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
-            add##SS##CloudType##ParcelType##ConstructorToTable_;
+    ParticleForce<CloudType>::adddictionaryConstructorToTable<SS<CloudType> > \
+        add##SS##CloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

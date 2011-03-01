@@ -48,13 +48,18 @@ Foam::label Foam::LocalInteraction<CloudType>::applyToPatch
 template<class CloudType>
 void Foam::LocalInteraction<CloudType>::readProps()
 {
+    if (!this->owner().solution().transient())
+    {
+        return;
+    }
+
     IOobject propsDictHeader
     (
         "localInteractionProperties",
         this->owner().db().time().timeName(),
         "uniform"/cloud::prefix/this->owner().name(),
         this->owner().db(),
-        IOobject::MUST_READ,
+        IOobject::MUST_READ_IF_MODIFIED,
         IOobject::NO_WRITE,
         false
     );
@@ -62,7 +67,6 @@ void Foam::LocalInteraction<CloudType>::readProps()
     if (propsDictHeader.headerOk())
     {
         const IOdictionary propsDict(propsDictHeader);
-
         propsDict.readIfPresent("nEscape", nEscape0_);
         propsDict.readIfPresent("massEscape", massEscape0_);
         propsDict.readIfPresent("nStick", nStick0_);
@@ -80,6 +84,11 @@ void Foam::LocalInteraction<CloudType>::writeProps
     const scalarList& massStick
 ) const
 {
+    if (!this->owner().solution().transient())
+    {
+        return;
+    }
+
     if (this->owner().db().time().outputTime())
     {
         IOdictionary propsDict
@@ -101,7 +110,12 @@ void Foam::LocalInteraction<CloudType>::writeProps
         propsDict.add("nStick", nStick);
         propsDict.add("massStick", massStick);
 
-        propsDict.regIOobject::write();
+        propsDict.writeObject
+        (
+            IOstream::ASCII,
+            IOstream::currentVersion,
+            this->owner().db().time().writeCompression()
+        );
     }
 }
 

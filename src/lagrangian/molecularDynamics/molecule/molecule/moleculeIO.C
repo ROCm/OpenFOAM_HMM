@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,12 +31,12 @@ License
 
 Foam::molecule::molecule
 (
-    const Cloud<molecule>& cloud,
+    const polyMesh& mesh,
     Istream& is,
     bool readFields
 )
 :
-    Particle<molecule>(cloud, is, readFields),
+    particle(mesh, is, readFields),
     Q_(tensor::zero),
     v_(vector::zero),
     a_(vector::zero),
@@ -104,7 +104,7 @@ void Foam::molecule::readFields(Cloud<molecule>& mC)
         return;
     }
 
-    Particle<molecule>::readFields(mC);
+    particle::readFields(mC);
 
     IOField<tensor> Q(mC.fieldIOobject("Q", IOobject::MUST_READ));
     mC.checkFieldIOobject(mC, Q);
@@ -153,7 +153,7 @@ void Foam::molecule::readFields(Cloud<molecule>& mC)
 
 void Foam::molecule::writeFields(const Cloud<molecule>& mC)
 {
-    Particle<molecule>::writeFields(mC);
+    particle::writeFields(mC);
 
     label np = mC.size();
 
@@ -262,7 +262,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const molecule& mol)
 {
     if (os.format() == IOstream::ASCII)
     {
-        os  << token::SPACE << static_cast<const Particle<molecule>&>(mol)
+        os  << token::SPACE << static_cast<const particle&>(mol)
             << token::SPACE << mol.face()
             << token::SPACE << mol.stepFraction()
             << token::SPACE << mol.Q_
@@ -280,7 +280,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const molecule& mol)
     }
     else
     {
-        os  << static_cast<const Particle<molecule>&>(mol);
+        os  << static_cast<const particle&>(mol);
         os.write
         (
             reinterpret_cast<const char*>(&mol.Q_),

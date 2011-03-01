@@ -24,6 +24,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "KinematicParcel.H"
+#include "forceSuSp.H"
+#include "IntegrationScheme.H"
+#include "meshTools.H"
 
 // * * * * * * * * * * *  Protected Member Functions * * * * * * * * * * * * //
 
@@ -124,7 +127,7 @@ void Foam::KinematicParcel<ParcelType>::calc
     // ~~~~~~
 
     // Calculate new particle velocity
-    scalar Cud = 0.0;
+    scalar Spu = 0.0;
     vector U1 =
         calcVelocity
         (
@@ -139,7 +142,7 @@ void Foam::KinematicParcel<ParcelType>::calc
             mass0,
             Su,
             dUTrans,
-            Cud
+            Spu
         );
 
 
@@ -151,7 +154,7 @@ void Foam::KinematicParcel<ParcelType>::calc
         td.cloud().UTrans()[cellI] += np0*dUTrans;
 
         // Update momentum transfer coefficient
-        td.cloud().UCoeff()[cellI] += np0*mass0*Cud;
+        td.cloud().UCoeff()[cellI] += np0*Spu;
     }
 
 
@@ -176,36 +179,42 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     const scalar mass,
     const vector& Su,
     vector& dUTrans,
-    scalar& Cud
+    scalar& Spu
 ) const
 {
-    const typename ParcelType::forceType& forces = td.cloud().forces();
+    typedef typename TrackData::cloudType cloudType;
+    typedef typename cloudType::parcelType parcelType;
+    typedef typename cloudType::forceType forceType;
+
+    const forceType& forces = td.cloud().forces();
 
     // Momentum source due to particle forces
-    const ParcelType& p = static_cast<const ParcelType&>(*this);
+    const parcelType& p = static_cast<const parcelType&>(*this);
     const forceSuSp Fcp = forces.calcCoupled(p, dt, mass, Re, mu);
     const forceSuSp Fncp = forces.calcNonCoupled(p, dt, mass, Re, mu);
-    const forceSuSp Feff = Fcp + Fncp;
+    forceSuSp Feff = Fcp + Fncp;
+    Feff.Sp() += ROOTVSMALL;
 
 
     // New particle velocity
     //~~~~~~~~~~~~~~~~~~~~~~
 
     // Update velocity - treat as 3-D
-    const vector ap = Uc_ + (Feff.Su() + Su)/(Feff.Sp() + ROOTVSMALL);
+    const vector ap = Uc_ + (Feff.Su() + Su)/Feff.Sp();
     const scalar bp = Feff.Sp()/mass;
 
-    Cud = bp;
+    Spu = Feff.Sp();
 
     IntegrationScheme<vector>::integrationResult Ures =
         td.cloud().UIntegrator().integrate(U, dt, ap, bp);
 
     vector Unew = Ures.value();
 
+    // note: Feff.Sp() and Fc.Sp() must be the same
     dUTrans += dt*(Feff.Sp()*(Ures.average() - Uc_) - Fcp.Su());
 
     // Apply correction to velocity and dUTrans for reduced-D cases
-    const polyMesh& mesh = this->cloud().pMesh();
+    const polyMesh& mesh = td.cloud().pMesh();
     meshTools::constrainDirection(mesh, mesh.solutionD(), Unew);
     meshTools::constrainDirection(mesh, mesh.solutionD(), dUTrans);
 
@@ -221,7 +230,7 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     const KinematicParcel<ParcelType>& p
 )
 :
-    Particle<ParcelType>(p),
+    ParcelType(p),
     active_(p.active_),
     typeId_(p.typeId_),
     nParticle_(p.nParticle_),
@@ -235,7 +244,6 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     age_(p.age_),
     tTurb_(p.tTurb_),
     UTurb_(p.UTurb_),
-    collisionRecords_(p.collisionRecords_),
     rhoc_(p.rhoc_),
     Uc_(p.Uc_),
     muc_(p.muc_)
@@ -246,10 +254,10 @@ template<class ParcelType>
 Foam::KinematicParcel<ParcelType>::KinematicParcel
 (
     const KinematicParcel<ParcelType>& p,
-    const KinematicCloud<ParcelType>& c
+    const polyMesh& mesh
 )
 :
-    Particle<ParcelType>(p, c),
+    ParcelType(p, mesh),
     active_(p.active_),
     typeId_(p.typeId_),
     nParticle_(p.nParticle_),
@@ -263,7 +271,6 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     age_(p.age_),
     tTurb_(p.tTurb_),
     UTurb_(p.UTurb_),
-    collisionRecords_(p.collisionRecords_),
     rhoc_(p.rhoc_),
     Uc_(p.Uc_),
     muc_(p.muc_)
@@ -280,7 +287,8 @@ bool Foam::KinematicParcel<ParcelType>::move
     const scalar trackTime
 )
 {
-    ParcelType& p = static_cast<ParcelType&>(*this);
+    typename TrackData::cloudType::parcelType& p =
+        static_cast<typename TrackData::cloudType::parcelType&>(*this);
 
     td.switchProcessor = false;
     td.keepParticle = true;
@@ -288,93 +296,59 @@ bool Foam::KinematicParcel<ParcelType>::move
     const polyMesh& mesh = td.cloud().pMesh();
     const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
     const scalarField& V = mesh.cellVolumes();
+    const scalar maxCo = td.cloud().solution().maxCo();
 
-    switch (td.part())
+    scalar tEnd = (1.0 - p.stepFraction())*trackTime;
+    const scalar dtMax = tEnd;
+
+    while (td.keepParticle && !td.switchProcessor && tEnd > ROOTVSMALL)
     {
-        case TrackData::tpVelocityHalfStep:
+        // Apply correction to position for reduced-D cases
+        meshTools::constrainToMeshCentre(mesh, p.position());
+
+        // Set the Lagrangian time-step
+        scalar dt = min(dtMax, tEnd);
+
+        // Remember which cell the parcel is in since this will change if
+        // a face is hit
+        const label cellI = p.cell();
+
+        const scalar magU = mag(U_);
+        if (p.active() && magU > ROOTVSMALL)
         {
-            // First and last leapfrog velocity adjust part, required
-            // before and after tracking and force calculation
-
-            p.U() += 0.5*trackTime*p.f()/p.mass();
-
-            angularMomentum_ += 0.5*trackTime*torque_;
-
-            break;
+            const scalar d = dt*magU;
+            const scalar dCorr = min(d, maxCo*cbrt(V[cellI]));
+            dt *=
+                dCorr/d
+               *p.trackToFace(p.position() + dCorr*U_/magU, td);
         }
 
-        case TrackData::tpLinearTrack:
+        tEnd -= dt;
+        p.stepFraction() = 1.0 - tEnd/trackTime;
+
+        // Avoid problems with extremely small timesteps
+        if (dt > ROOTVSMALL)
         {
-            scalar tEnd = (1.0 - p.stepFraction())*trackTime;
-            const scalar dtMax = tEnd;
+            // Update cell based properties
+            p.setCellValues(td, dt, cellI);
 
-            while (td.keepParticle && !td.switchProcessor && tEnd > ROOTVSMALL)
+            if (td.cloud().solution().cellValueSourceCorrection())
             {
-                // Apply correction to position for reduced-D cases
-                meshTools::constrainToMeshCentre(mesh, p.position());
-
-                // Set the Lagrangian time-step
-                scalar dt = min(dtMax, tEnd);
-
-                // Remember which cell the parcel is in since this
-                // will change if a face is hit
-                const label cellI = p.cell();
-
-                const scalar magU = mag(U_);
-                if (p.active() && magU > ROOTVSMALL)
-                {
-                    const scalar d = dt*magU;
-                    const scalar maxCo = td.cloud().solution().maxCo();
-                    const scalar dCorr = min(d, maxCo*cbrt(V[cellI]));
-                    dt *=
-                        dCorr/d
-                       *p.trackToFace(p.position() + dCorr*U_/magU, td);
-                }
-
-                tEnd -= dt;
-                p.stepFraction() = 1.0 - tEnd/trackTime;
-
-                // Avoid problems with extremely small timesteps
-                if (dt > ROOTVSMALL)
-                {
-                    // Update cell based properties
-                    p.setCellValues(td, dt, cellI);
-
-                    if (td.cloud().solution().cellValueSourceCorrection())
-                    {
-                        p.cellValueSourceCorrection(td, dt, cellI);
-                    }
-
-                    p.calc(td, dt, cellI);
-                }
-
-                if (p.onBoundary() && td.keepParticle)
-                {
-                    if (isA<processorPolyPatch>(pbMesh[p.patch(p.face())]))
-                    {
-                        td.switchProcessor = true;
-                    }
-                }
-
-                p.age() += dt;
+                p.cellValueSourceCorrection(td, dt, cellI);
             }
 
-            break;
+            p.calc(td, dt, cellI);
         }
 
-        case TrackData::tpRotationalTrack:
+        if (p.onBoundary() && td.keepParticle)
         {
-            notImplemented("TrackData::tpRotationalTrack");
-
-            break;
+            if (isA<processorPolyPatch>(pbMesh[p.patch(p.face())]))
+            {
+                td.switchProcessor = true;
+            }
         }
 
-        default:
-        {
-            FatalErrorIn("KinematicParcel<ParcelType>::move(TrackData& td)")
-                << td.part() << " is an invalid part of the tracking method."
-                << abort(FatalError);
-        }
+        p.age() += dt;
     }
 
     return td.keepParticle;
@@ -385,7 +359,9 @@ template<class ParcelType>
 template<class TrackData>
 void Foam::KinematicParcel<ParcelType>::hitFace(TrackData& td)
 {
-    ParcelType& p = static_cast<ParcelType&>(*this);
+    typename TrackData::cloudType::parcelType& p =
+        static_cast<typename TrackData::cloudType::parcelType&>(*this);
+
     td.cloud().postProcessing().postFace(p);
 }
 
@@ -406,7 +382,8 @@ bool Foam::KinematicParcel<ParcelType>::hitPatch
     const tetIndices& tetIs
 )
 {
-    ParcelType& p = static_cast<ParcelType&>(*this);
+    typename TrackData::cloudType::parcelType& p =
+        static_cast<typename TrackData::cloudType::parcelType&>(*this);
 
     // Invoke post-processing model
     td.cloud().postProcessing().postPatch(p, patchI);
@@ -422,27 +399,13 @@ bool Foam::KinematicParcel<ParcelType>::hitPatch
         // Invoke patch interaction model
         return td.cloud().patchInteraction().correct
         (
-            static_cast<ParcelType&>(*this),
+            p,
             pp,
             td.keepParticle,
             trackFraction,
             tetIs
         );
     }
-}
-
-
-template<class ParcelType>
-bool Foam::KinematicParcel<ParcelType>::hitPatch
-(
-    const polyPatch& pp,
-    int& td,
-    const label patchI,
-    const scalar trackFraction,
-    const tetIndices& tetIs
-)
-{
-    return false;
 }
 
 
@@ -459,15 +422,6 @@ void Foam::KinematicParcel<ParcelType>::hitProcessorPatch
 
 
 template<class ParcelType>
-void Foam::KinematicParcel<ParcelType>::hitProcessorPatch
-(
-    const processorPolyPatch&,
-    int&
-)
-{}
-
-
-template<class ParcelType>
 template<class TrackData>
 void Foam::KinematicParcel<ParcelType>::hitWallPatch
 (
@@ -478,16 +432,6 @@ void Foam::KinematicParcel<ParcelType>::hitWallPatch
 {
     // Wall interactions handled by generic hitPatch function
 }
-
-
-template<class ParcelType>
-void Foam::KinematicParcel<ParcelType>::hitWallPatch
-(
-    const wallPolyPatch&,
-    int&,
-    const tetIndices&
-)
-{}
 
 
 template<class ParcelType>
@@ -503,18 +447,9 @@ void Foam::KinematicParcel<ParcelType>::hitPatch
 
 
 template<class ParcelType>
-void Foam::KinematicParcel<ParcelType>::hitPatch
-(
-    const polyPatch&,
-    int&
-)
-{}
-
-
-template<class ParcelType>
 void Foam::KinematicParcel<ParcelType>::transformProperties(const tensor& T)
 {
-    Particle<ParcelType>::transformProperties(T);
+    ParcelType::transformProperties(T);
 
     U_ = transform(T, U_);
 
@@ -532,7 +467,7 @@ void Foam::KinematicParcel<ParcelType>::transformProperties
     const vector& separation
 )
 {
-    Particle<ParcelType>::transformProperties(separation);
+    ParcelType::transformProperties(separation);
 }
 
 

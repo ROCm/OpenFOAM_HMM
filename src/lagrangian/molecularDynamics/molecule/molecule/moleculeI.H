@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -219,7 +219,7 @@ inline Foam::molecule::constantProperties::constantProperties
 
 inline Foam::molecule::molecule
 (
-    const Cloud<molecule>& c,
+    const polyMesh& mesh,
     const vector& position,
     const label cellI,
     const label tetFaceI,
@@ -236,7 +236,7 @@ inline Foam::molecule::molecule
 
 )
 :
-    Particle<molecule>(c, position, cellI, tetFaceI, tetPtI),
+    particle(mesh, position, cellI, tetFaceI, tetPtI),
     Q_(Q),
     v_(v),
     a_(a),
@@ -254,8 +254,7 @@ inline Foam::molecule::molecule
 }
 
 
-// * * * constantProperties Private Member Functions * * * * * * * * * * * * //
-
+// * * * * * * * constantProperties Private Member Functions * * * * * * * * //
 
 inline void Foam::molecule::constantProperties::checkSiteListSizes() const
 {
@@ -394,6 +393,7 @@ Foam::molecule::constantProperties::electrostaticSites() const
     return electrostaticSites_;
 }
 
+
 inline bool Foam::molecule::constantProperties::electrostaticSite
 (
     label sId
@@ -460,19 +460,6 @@ inline Foam::label Foam::molecule::constantProperties::nSites() const
 {
     return siteIds_.size();
 
-}
-
-// * * * * * * * * * * *  trackData Member Functions * * * * * * * * * * * * //
-
-inline Foam::moleculeCloud& Foam::molecule::trackData::molCloud()
-{
-    return molCloud_;
-}
-
-
-inline Foam::label Foam::molecule::trackData::part() const
-{
-    return part_;
 }
 
 

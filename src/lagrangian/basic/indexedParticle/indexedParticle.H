@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,18 +25,17 @@ Class
     Foam::indexedParticle
 
 Description
+    Adds label index to base particle
 
 SourceFiles
-    indexedParticleI.H
-    indexedParticle.C
-    indexedParticleIO.C
+    indexedParticle.H
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef indexedParticle_H
 #define indexedParticle_H
 
-#include "Particle.H"
+#include "particle.H"
 #include "IOstream.H"
 #include "autoPtr.H"
 
@@ -51,7 +50,7 @@ namespace Foam
 
 class indexedParticle
 :
-    public Particle<indexedParticle>
+    public particle
 {
     // Private data
 
@@ -65,7 +64,7 @@ public:
         //- Construct from components
         indexedParticle
         (
-            const Cloud<indexedParticle>& c,
+            const polyMesh& mesh,
             const vector& position,
             const label cellI,
             const label tetFaceI,
@@ -73,47 +72,44 @@ public:
             const label index = 0
         )
         :
-            Particle<indexedParticle>(c, position, cellI, tetFaceI, tetPtI),
+            particle(mesh, position, cellI, tetFaceI, tetPtI),
             index_(index)
         {}
 
         //- Construct from components, with searching for tetFace and tetPt
         indexedParticle
         (
-            const Cloud<indexedParticle>& c,
+            const polyMesh& mesh,
             const vector& position,
             const label cellI,
             const label index = 0
         )
         :
-            Particle<indexedParticle>(c, position, cellI),
+            particle(mesh, position, cellI),
             index_(index)
         {}
 
         //- Construct from Istream
         indexedParticle
         (
-            const Cloud<indexedParticle>& c,
+            const polyMesh& mesh,
             Istream& is,
             bool readFields = true
         )
         :
-            Particle<indexedParticle>(c, is, readFields)
+            particle(mesh, is, readFields)
         {}
 
         //- Construct as a copy
         indexedParticle(const indexedParticle& p)
         :
-            Particle<indexedParticle>(p)
+            particle(p)
         {}
 
         //- Construct and return a clone
-        virtual autoPtr<Particle<indexedParticle> > clone() const
+        virtual autoPtr<particle> clone() const
         {
-            return autoPtr<Particle<indexedParticle> >
-            (
-                new indexedParticle(*this)
-            );
+            return autoPtr<particle>(new indexedParticle(*this));
         }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,8 +32,8 @@ License
 
 namespace Foam
 {
-    defineParticleTypeNameAndDebug(solidParticle, 0);
-    defineTemplateTypeNameAndDebug(Cloud<solidParticle>, 0);
+//    defineParticleTypeNameAndDebug(solidParticle, 0);
+//    defineTemplateTypeNameAndDebug(Cloud<solidParticle>, 0);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -81,7 +81,8 @@ void Foam::solidParticleCloud::move(const dimensionedVector& g)
     interpolationCellPoint<vector> UInterp(U);
     interpolationCellPoint<scalar> nuInterp(nu);
 
-    solidParticle::trackData td(*this, rhoInterp, UInterp, nuInterp, g.value());
+    solidParticle::trackingData
+        td(*this, rhoInterp, UInterp, nuInterp, g.value());
 
     Cloud<solidParticle>::move(td, mesh_.time().deltaTValue());
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,29 +29,18 @@ License
 #include "SpecularReflection.H"
 #include "MixedDiffuseSpecular.H"
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 namespace Foam
 {
-    makeWallInteractionModel(DsmcCloud<dsmcParcel>);
+    typedef DsmcCloud<dsmcParcel> CloudType;
+
+    makeWallInteractionModel(CloudType);
 
     // Add instances of wall interaction model to the table
-    makeWallInteractionModelType
-    (
-        MaxwellianThermal,
-        DsmcCloud,
-        dsmcParcel
-    );
-    makeWallInteractionModelType
-    (
-        SpecularReflection,
-        DsmcCloud,
-        dsmcParcel
-    );
-    makeWallInteractionModelType
-    (
-        MixedDiffuseSpecular,
-        DsmcCloud,
-        dsmcParcel
-    );
+    makeWallInteractionModelType(MaxwellianThermal, CloudType);
+    makeWallInteractionModelType(SpecularReflection, CloudType);
+    makeWallInteractionModelType(MixedDiffuseSpecular, CloudType);
 }
 
 

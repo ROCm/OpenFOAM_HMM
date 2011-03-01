@@ -28,9 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "thermoPhysicsTypes.H"
-#include "KinematicCloud.H"
-
 #include "ConeInjection.H"
 #include "FieldActivatedInjection.H"
 #include "ManualInjection.H"
@@ -40,46 +37,15 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeReactingMultiphaseParcelInjectionModels(ParcelType)               \
+#define makeReactingMultiphaseParcelInjectionModels(CloudType)                \
                                                                               \
-    makeInjectionModel(KinematicCloud<ParcelType>);                           \
-                                                                              \
-    makeInjectionModelType                                                    \
-    (                                                                         \
-        ConeInjection,                                                        \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeInjectionModelType                                                    \
-    (                                                                         \
-        FieldActivatedInjection,                                              \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeInjectionModelType                                                    \
-    (                                                                         \
-        ManualInjection,                                                      \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeInjectionModelType                                                    \
-    (                                                                         \
-        NoInjection,                                                          \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeInjectionModelType                                                    \
-    (                                                                         \
-        PatchInjection,                                                       \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeInjectionModelType                                                    \
-    (                                                                         \
-        ReactingMultiphaseLookupTableInjection,                               \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );
+    makeInjectionModel(CloudType);                                            \
+    makeInjectionModelType(ConeInjection, CloudType);                         \
+    makeInjectionModelType(FieldActivatedInjection, CloudType);               \
+    makeInjectionModelType(ManualInjection, CloudType);                       \
+    makeInjectionModelType(NoInjection, CloudType);                           \
+    makeInjectionModelType(PatchInjection, CloudType);                        \
+    makeInjectionModelType(ReactingMultiphaseLookupTableInjection, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

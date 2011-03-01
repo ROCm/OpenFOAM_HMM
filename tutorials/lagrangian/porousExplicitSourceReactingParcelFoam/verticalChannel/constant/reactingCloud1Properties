@@ -24,21 +24,12 @@ solution
 
     sourceTerms
     {
-        rho
+        schemes
         {
-            semiImplicit    false;
-        }
-        U
-        {
-            semiImplicit    false;
-        }
-        Yi
-        {
-            semiImplicit    false;
-        }
-        hs
-        {
-            semiImplicit    false;
+            rho             explicit;
+            U               explicit;
+            Yi              explicit;
+            hs              explicit;
         }
     }
 
@@ -55,7 +46,7 @@ solution
     integrationSchemes
     {
         U               Euler;
-        T               Analytical;
+        T               analytical;
     }
 }
 
@@ -98,31 +89,29 @@ subModels
         );
     }
 
-    InjectionModel  PatchInjection;
+    injectionModel  patchInjection;
 
-    DispersionModel StochasticDispersionRAS;
+    dispersionModel stochasticDispersionRAS;
 
-    PatchInteractionModel StandardWallInteraction;
+    patchInteractionModel standardWallInteraction;
 
-    HeatTransferModel RanzMarshall;
+    heatTransferModel RanzMarshall;
 
-    CompositionModel SingleMixtureFraction;
+    compositionModel singleMixtureFraction;
 
-    PhaseChangeModel LiquidEvaporation;
+    phaseChangeModel liquidEvaporation;
 
-    DevolatilisationModel none;
+    devolatilisationModel none;
 
-    SurfaceReactionModel none;
+    surfaceReactionModel none;
 
-    PostProcessingModel PatchPostProcessing;
+    postProcessingModel patchPostProcessing;
 
-    SurfaceFilmModel none;
-
-    CollisionModel none;
+    surfaceFilmModel none;
 
     radiation       off;
 
-    PatchInjectionCoeffs
+    patchInjectionCoeffs
     {
         SOI             0.01;
         massTotal       8;
@@ -134,7 +123,7 @@ subModels
         flowRateProfile constant 1;
         sizeDistribution
         {
-            distributionModelType general;
+            type        general;
             generalDistribution
             {
                 distribution
@@ -161,7 +150,7 @@ subModels
         }
     }
 
-    StandardWallInteractionCoeffs
+    standardWallInteractionCoeffs
     {
         type            rebound;
     }
@@ -171,7 +160,7 @@ subModels
         BirdCorrection  off;
     }
 
-    SingleMixtureFractionCoeffs
+    singleMixtureFractionCoeffs
     {
         phases
         (
@@ -191,14 +180,14 @@ subModels
         YSolidTot0      0;
     }
 
-    LiquidEvaporationCoeffs
+    liquidEvaporationCoeffs
     {
         enthalpyTransfer enthalpyDifference;
 
         activeLiquids   ( H2O );
     }
 
-    PatchPostProcessingCoeffs
+    patchPostProcessingCoeffs
     {
         maxStoredParcels 100;
 

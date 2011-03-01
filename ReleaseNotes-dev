@@ -140,7 +140,7 @@
     + only files that can be re-read are being checked. Drastic reduction of
       number of files to check.
 *** *New* #codeStream dictionary entry
-    Uses on-the-fly compilation of OpenFOAM C++ code to construct dictionary.
+    Uses dynamic compilation of OpenFOAM C++ code to construct dictionary.
     E.g. in blockMeshDict:
     #+BEGIN_SRC c++
     convertToMeters 0.001;
@@ -160,7 +160,7 @@
         #};
     }
     #+END_SRC
-    See also ./[[doc/changes/codeStream.org]]
+    See also ./[[doc/changes/dynamicCode.org]]
 
 * Solvers
   A number of new solvers have been developed for a range of engineering
@@ -191,7 +191,7 @@
     + takes optional fieldName to sample
     + directMapped patch added 'normal' method to calculate sample points
       to e.g. sample fields just above wall (e.g. for streaklines)
-  + *New* codedFixedValue: Uses the on-the-fly code compilation from #codeStream
+  + *New* codedFixedValue: Uses the dynamic code compilation from #codeStream
     to provide an in-line fixedValueFvPatchScalarField. E.g.
     #+BEGIN_SRC c++
     outlet
@@ -206,7 +206,7 @@
         #};
     }
     #+END_SRC
-    See also [[./doc/changes/codeStream.org]]
+    See also [[./doc/changes/dynamicCode.org]]
 
 * Utilities
   There have been some utilities added and updated in this release.

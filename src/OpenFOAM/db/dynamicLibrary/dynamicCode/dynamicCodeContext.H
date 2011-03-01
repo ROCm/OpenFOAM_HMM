@@ -1,0 +1,120 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+Class
+    Foam::dynamicCodeContext
+
+Description
+    Encapsulation of dynamic code dictionaries
+
+SourceFiles
+    dynamicCodeContext.C
+
+\*---------------------------------------------------------------------------*/
+
+#ifndef dynamicCodeContext_H
+#define dynamicCodeContext_H
+
+#include "dictionary.H"
+#include "SHA1Digest.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+/*---------------------------------------------------------------------------*\
+                     Class dynamicCodeContext Declaration
+\*---------------------------------------------------------------------------*/
+
+class dynamicCodeContext
+{
+    // Private data
+        //- The parent dictionary context
+        const dictionary& dict_;
+
+        //- Mandatory "code" entry
+        string code_;
+
+        //- Optional "codeInclude" entry
+        string include_;
+
+        //- Optional "codeOptions" entry
+        string options_;
+
+        //- Calculated SHA1Digest
+        SHA1Digest sha1_;
+
+public:
+
+    // Constructors
+
+        //- Construct from a dictionary
+        dynamicCodeContext(const dictionary&);
+
+    // Member functions
+
+        //- Return the parent dictionary context
+        const dictionary& dict() const
+        {
+            return dict_;
+        }
+
+        //- Return the code-includes
+        const string& include() const
+        {
+            return include_;
+        }
+
+        //- Return the code-options
+        const string& options() const
+        {
+            return options_;
+        }
+
+        //- Return the code
+        const string& code() const
+        {
+            return code_;
+        }
+
+        //- Return SHA1 digest calculated from include, options, code
+        const SHA1Digest& sha1() const
+        {
+            return sha1_;
+        }
+
+
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //

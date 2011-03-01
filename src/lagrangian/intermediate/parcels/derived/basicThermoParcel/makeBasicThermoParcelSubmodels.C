@@ -23,13 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicThermoParcel.H"
+#include "basicThermoCloud.H"
 
 // Kinematic
 #include "makeThermoParcelForces.H" // thermo variant
 #include "makeParcelDispersionModels.H"
 #include "makeParcelInjectionModels.H"
-#include "makeParcelCollisionModels.H"
 #include "makeParcelPatchInteractionModels.H"
 #include "makeParcelPostProcessingModels.H"
 
@@ -42,16 +41,18 @@ License
 namespace Foam
 {
     // Kinematic sub-models
-    makeThermoParcelForces(basicThermoParcel);
-    makeParcelDispersionModels(basicThermoParcel);
-    makeParcelInjectionModels(basicThermoParcel);
-    makeParcelCollisionModels(basicThermoParcel);
-    makeParcelPatchInteractionModels(basicThermoParcel);
-    makeParcelPostProcessingModels(basicThermoParcel);
+    typedef basicThermoCloud::cloudType basicThermoCloud_K;
+
+    // Kinematic sub-models
+    makeThermoParcelForces(basicThermoCloud_K);
+    makeParcelDispersionModels(basicThermoCloud_K);
+    makeParcelInjectionModels(basicThermoCloud_K);
+    makeParcelPatchInteractionModels(basicThermoCloud_K);
+    makeParcelPostProcessingModels(basicThermoCloud_K);
 
     // Thermo sub-models
-    makeParcelHeatTransferModels(basicThermoParcel);
-    makeParcelSurfaceFilmModels(basicThermoParcel);
+    makeParcelHeatTransferModels(basicThermoCloud);
+    makeParcelSurfaceFilmModels(basicThermoCloud_K);
 }
 
 

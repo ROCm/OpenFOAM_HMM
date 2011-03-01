@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,6 +32,10 @@ Description
 #ifndef basicReactingMultiphaseCloud_H
 #define basicReactingMultiphaseCloud_H
 
+#include "Cloud.H"
+#include "KinematicCloud.H"
+#include "ThermoCloud.H"
+#include "ReactingCloud.H"
 #include "ReactingMultiphaseCloud.H"
 #include "basicReactingMultiphaseParcel.H"
 
@@ -40,10 +44,21 @@ Description
 namespace Foam
 {
     typedef ReactingMultiphaseCloud
+    <
+        ReactingCloud
         <
-            basicReactingMultiphaseParcel
+            ThermoCloud
+            <
+                KinematicCloud
+                <
+                    Cloud
+                    <
+                        basicReactingMultiphaseParcel
+                    >
+                >
+            >
         >
-        basicReactingMultiphaseCloud;
+    > basicReactingMultiphaseCloud;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

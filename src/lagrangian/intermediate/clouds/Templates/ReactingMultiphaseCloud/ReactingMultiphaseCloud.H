@@ -61,16 +61,24 @@ class SurfaceReactionModel;
                    Class ReactingMultiphaseCloud Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ParcelType>
+template<class CloudType>
 class ReactingMultiphaseCloud
 :
-    public ReactingCloud<ParcelType>,
+    public CloudType,
     public reactingMultiphaseCloud
 {
+public:
+
+    //- Type of parcel the cloud was instantiated for
+    typedef typename CloudType::particleType parcelType;
+
+
+private:
+
     // Private data
 
         //- Cloud copy pointer
-        autoPtr<ReactingMultiphaseCloud<ParcelType> > cloudCopyPtr_;
+        autoPtr<ReactingMultiphaseCloud<CloudType> > cloudCopyPtr_;
 
 
     // Private member functions
@@ -87,7 +95,7 @@ protected:
     // Protected data
 
         //- Parcel constant properties
-        typename ParcelType::constantProperties constProps_;
+        typename parcelType::constantProperties constProps_;
 
 
         // References to the cloud sub-models
@@ -95,14 +103,14 @@ protected:
             //- Devolatilisation model
             autoPtr
             <
-                DevolatilisationModel<ReactingMultiphaseCloud<ParcelType> >
+                DevolatilisationModel<ReactingMultiphaseCloud<CloudType> >
             >
             devolatilisationModel_;
 
             //- Surface reaction model
             autoPtr
             <
-                SurfaceReactionModel<ReactingMultiphaseCloud<ParcelType> >
+                SurfaceReactionModel<ReactingMultiphaseCloud<CloudType> >
             >
             surfaceReactionModel_;
 
@@ -128,10 +136,12 @@ protected:
         // Cloud evolution functions
 
             //- Reset state of cloud
-            void cloudReset(ReactingMultiphaseCloud<ParcelType>& c);
+            void cloudReset(ReactingMultiphaseCloud<CloudType>& c);
 
 
 public:
+
+    typedef CloudType cloudType;
 
     // Constructors
 
@@ -150,7 +160,7 @@ public:
         //- Copy constructor with new name
         ReactingMultiphaseCloud
         (
-            ReactingMultiphaseCloud<ParcelType>& c,
+            ReactingMultiphaseCloud<CloudType>& c,
             const word& name
         );
 
@@ -159,22 +169,22 @@ public:
         (
             const fvMesh& mesh,
             const word& name,
-            const ReactingMultiphaseCloud<ParcelType>& c
+            const ReactingMultiphaseCloud<CloudType>& c
         );
 
         //- Construct and return clone based on (this) with new name
-        virtual autoPtr<Cloud<ParcelType> > clone(const word& name)
+        virtual autoPtr<Cloud<parcelType> > clone(const word& name)
         {
-            return autoPtr<Cloud<ParcelType> >
+            return autoPtr<Cloud<parcelType> >
             (
                 new ReactingMultiphaseCloud(*this, name)
             );
         }
 
         //- Construct and return bare clone based on (this) with new name
-        virtual autoPtr<Cloud<ParcelType> > cloneBare(const word& name) const
+        virtual autoPtr<Cloud<parcelType> > cloneBare(const word& name) const
         {
-            return autoPtr<Cloud<ParcelType> >
+            return autoPtr<Cloud<parcelType> >
             (
                 new ReactingMultiphaseCloud(this->mesh(), name, *this)
             );
@@ -185,10 +195,6 @@ public:
     virtual ~ReactingMultiphaseCloud();
 
 
-    //- Type of parcel the cloud was instantiated for
-    typedef ParcelType parcelType;
-
-
     // Member Functions
 
         // Access
@@ -197,7 +203,7 @@ public:
             inline const ReactingMultiphaseCloud& cloudCopy() const;
 
             //- Return the constant properties
-            inline const typename ParcelType::constantProperties&
+            inline const typename parcelType::constantProperties&
                 constProps() const;
 
 
@@ -206,14 +212,14 @@ public:
                 //- Return reference to devolatilisation model
                 inline const DevolatilisationModel
                 <
-                    ReactingMultiphaseCloud<ParcelType>
+                    ReactingMultiphaseCloud<CloudType>
                 >&
                 devolatilisation() const;
 
                 //- Return reference to reacting surface reaction model
                 inline const SurfaceReactionModel
                 <
-                    ReactingMultiphaseCloud<ParcelType>
+                    ReactingMultiphaseCloud<CloudType>
                 >&
                 surfaceReaction() const;
 
@@ -232,7 +238,7 @@ public:
             //- Check parcel properties
             void checkParcelProperties
             (
-                ParcelType& parcel,
+                parcelType& parcel,
                 const scalar lagrangianDt,
                 const bool fullyDescribed
             );
@@ -251,6 +257,12 @@ public:
 
             //- Print cloud information
             void info() const;
+
+
+        // I-O
+
+            //- Write the field data for the cloud
+            virtual void writeFields() const;
 };
 
 

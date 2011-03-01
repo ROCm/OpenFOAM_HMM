@@ -28,15 +28,15 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::scalar Foam::SphereDragForce<CloudType>::Cd(const scalar Re) const
+Foam::scalar Foam::SphereDragForce<CloudType>::CdRe(const scalar Re) const
 {
     if (Re > 1000.0)
     {
-        return 0.424;
+        return 0.424*Re;
     }
     else
     {
-        return 24.0/Re*(1.0 + 1.0/6.0*pow(Re, 2.0/3.0));
+        return 24.0*(1.0 + 1.0/6.0*pow(Re, 2.0/3.0));
     }
 }
 
@@ -76,7 +76,7 @@ Foam::SphereDragForce<CloudType>::~SphereDragForce()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::forceSuSp Foam::SphereDragForce<CloudType>::calcNonCoupled
+Foam::forceSuSp Foam::SphereDragForce<CloudType>::calcCoupled
 (
     const typename CloudType::parcelType& p,
     const scalar dt,
@@ -87,8 +87,7 @@ Foam::forceSuSp Foam::SphereDragForce<CloudType>::calcNonCoupled
 {
     forceSuSp value(vector::zero, 0.0);
 
-    const scalar ReCorr = max(Re, 1e-6);
-    value.Sp() = mass*0.75*muc*Cd(ReCorr)*ReCorr/(p.rho()*sqr(p.d()));
+    value.Sp() = mass*0.75*muc*CdRe(Re)/(p.rho()*sqr(p.d()));
 
     return value;
 }

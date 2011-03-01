@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,8 +25,8 @@ Class
     Foam::readerDatabase
 
 Description
-    Singleton caching OpenFOAM database and mesh and various. Used in Fv reader
-    to keep track of data inbetween callbacks.
+    Singleton caching OpenFOAM database and mesh and various.
+    Used in Fv reader to keep track of data in between callbacks.
 
 SourceFiles
     readerDatabase.C
@@ -54,7 +54,7 @@ class fileName;
 class instant;
 
 /*---------------------------------------------------------------------------*\
-                           Class readerDatabase Declaration
+                       Class readerDatabase Declaration
 \*---------------------------------------------------------------------------*/
 
 class readerDatabase
@@ -107,7 +107,7 @@ public:
         //- Debug flag. Note: uses envvar instead of controlDict since
         //  *this is static as well. Might be initialized before controlDict
         //  read.
-        const static bool debug_;
+        static const bool debug_;
 
 
     // Constructors

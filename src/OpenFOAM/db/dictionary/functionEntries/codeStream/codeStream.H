@@ -135,8 +135,8 @@ public:
         static bool execute
         (
             const dictionary& parentDict,
-            primitiveEntry& entry,
-            Istream& is
+            primitiveEntry&,
+            Istream&
         );
 
 };

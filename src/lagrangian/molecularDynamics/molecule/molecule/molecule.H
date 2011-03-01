@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,7 @@ SourceFiles
 #ifndef molecule_H
 #define molecule_H
 
-#include "Particle.H"
+#include "particle.H"
 #include "IOstream.H"
 #include "autoPtr.H"
 #include "diagTensor.H"
@@ -56,7 +56,7 @@ class moleculeCloud;
 
 class molecule
 :
-    public Particle<molecule>
+    public particle
 {
 
 public:
@@ -76,7 +76,6 @@ public:
     //- Class to hold molecule constant properties
     class constantProperties
     {
-
         // Private data
 
             Field<vector> siteReferencePositions_;
@@ -94,6 +93,7 @@ public:
             diagTensor momentOfInertia_;
 
             scalar mass_;
+
 
         // Private Member Functions
 
@@ -150,12 +150,10 @@ public:
 
 
     //- Class used to pass tracking data to the trackToFace function
-    class trackData
+    class trackingData
     :
-        public Particle<molecule>::trackData
+        public particle::TrackingData<moleculeCloud>
     {
-        moleculeCloud& molCloud_;
-
         // label specifying which part of the integration algorithm is taking
         label part_;
 
@@ -164,17 +162,18 @@ public:
 
         // Constructors
 
-            trackData
-            (
-                moleculeCloud& molCloud,
-                label part
-            );
+            trackingData(moleculeCloud& cloud, label part)
+            :
+                particle::TrackingData<moleculeCloud>(cloud),
+                part_(part)
+            {}
 
         // Member functions
 
-            inline moleculeCloud& molCloud();
-
-            inline label part() const;
+            inline label part() const
+            {
+                return part_;
+            }
     };
 
 
@@ -226,7 +225,7 @@ public:
         //- Construct from components
         inline molecule
         (
-            const Cloud<molecule>& c,
+            const polyMesh& mesh,
             const vector& position,
             const label cellI,
             const label tetFaceI,
@@ -245,23 +244,42 @@ public:
         //- Construct from Istream
         molecule
         (
-            const Cloud<molecule>& c,
+            const polyMesh& mesh,
             Istream& is,
             bool readFields = true
         );
 
         //- Construct and return a clone
-        autoPtr<Particle<molecule> > clone() const
+        autoPtr<particle> clone() const
         {
-            return autoPtr<Particle<molecule> >(new molecule(*this));
+            return autoPtr<particle>(new molecule(*this));
         }
+
+        //- Factory class to read-construct particles used for
+        //  parallel transfer
+        class iNew
+        {
+            const polyMesh& mesh_;
+
+        public:
+
+            iNew(const polyMesh& mesh)
+            :
+                mesh_(mesh)
+            {}
+
+            autoPtr<molecule> operator()(Istream& is) const
+            {
+                return autoPtr<molecule>(new molecule(mesh_, is, true));
+            }
+        };
 
 
     // Member Functions
 
         // Tracking
 
-            bool move(trackData&, const scalar trackTime);
+            bool move(trackingData&, const scalar trackTime);
 
             void transformProperties(const tensor& T);
 
@@ -318,18 +336,7 @@ public:
         bool hitPatch
         (
             const polyPatch&,
-            molecule::trackData& td,
-            const label patchI,
-            const scalar trackFraction,
-            const tetIndices& tetIs
-        );
-
-        //- Overridable function to handle the particle hitting a patch
-        //  Executed before other patch-hitting functions without trackData
-        bool hitPatch
-        (
-            const polyPatch& p,
-            int& td,
+            trackingData& td,
             const label patchI,
             const scalar trackFraction,
             const tetIndices& tetIs
@@ -339,31 +346,14 @@ public:
         void hitProcessorPatch
         (
             const processorPolyPatch&,
-            molecule::trackData& td
-        );
-
-        //- Overridable function to handle the particle hitting a processorPatch
-        //  without trackData
-        void hitProcessorPatch
-        (
-            const processorPolyPatch&,
-            int&
+            trackingData& td
         );
 
         //- Overridable function to handle the particle hitting a wallPatch
         void hitWallPatch
         (
             const wallPolyPatch&,
-            molecule::trackData& td,
-            const tetIndices&
-        );
-
-        //- Overridable function to handle the particle hitting a wallPatch
-        //  without trackData
-        void hitWallPatch
-        (
-            const wallPolyPatch&,
-            int&,
+            trackingData& td,
             const tetIndices&
         );
 
@@ -371,15 +361,7 @@ public:
         void hitPatch
         (
             const polyPatch&,
-            molecule::trackData& td
-        );
-
-        //- Overridable function to handle the particle hitting a polyPatch
-        //  without trackData
-        void hitPatch
-        (
-            const polyPatch&,
-            int&
+            trackingData& td
         );
 
 

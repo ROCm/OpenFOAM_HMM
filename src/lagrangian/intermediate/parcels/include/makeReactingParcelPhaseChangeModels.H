@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,29 +28,16 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "ReactingCloud.H"
-
 #include "NoPhaseChange.H"
 #include "LiquidEvaporation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeReactingParcelPhaseChangeModels(ParcelType)                       \
+#define makeReactingParcelPhaseChangeModels(CloudType)                        \
                                                                               \
-    makePhaseChangeModel(ReactingCloud<ParcelType>);                          \
-                                                                              \
-    makePhaseChangeModelType                                                  \
-    (                                                                         \
-        NoPhaseChange,                                                        \
-        ReactingCloud,                                                        \
-        ParcelType                                                            \
-    );                                                                        \
-    makePhaseChangeModelType                                                  \
-    (                                                                         \
-        LiquidEvaporation,                                                    \
-        ReactingCloud,                                                        \
-        ParcelType                                                            \
-    );
+    makePhaseChangeModel(CloudType);                                          \
+    makePhaseChangeModelType(NoPhaseChange, CloudType);                       \
+    makePhaseChangeModelType(LiquidEvaporation, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

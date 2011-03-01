@@ -29,8 +29,6 @@ Description
     Constructs on-the-fly a new boundary condition (derived from
     fixedValueFvPatchScalarField) which is then used to evaluate.
 
-    See also codeStream.
-
     Example:
     \verbatim
         movingWall
@@ -71,7 +69,7 @@ Description
     \endverbatim
 
 SeeAlso
-    Foam::codeStreamTools for constant paths used
+    Foam::dynamicCode and Foam::functionEntries::codeStream
 
 SourceFiles
     codedFixedValueFvPatchScalarField.C
@@ -82,14 +80,16 @@ SourceFiles
 #define codedFixedValueFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
-#include "SHA1Digest.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of classes
 class codeProperties;
+class dynamicCode;
+class dynamicCodeContext;
 
 /*---------------------------------------------------------------------------*\
               Class codedFixedValueFvPatchScalarField Declaration
@@ -104,10 +104,6 @@ class codedFixedValueFvPatchScalarField
         //- Dictionary contents for the boundary condition
         mutable dictionary dict_;
 
-        //- SHA1Digest of the Dictionary contents
-        //  Currently unused, but useful for reloading?
-        mutable SHA1Digest sha1_;
-
         const word redirectType_;
 
         mutable autoPtr<fvPatchScalarField> redirectPatchFieldPtr_;
@@ -117,24 +113,21 @@ class codedFixedValueFvPatchScalarField
 
         const codeProperties& dict() const;
 
-        void writeLibrary
-        (
-            const fileName& dir,
-            const fileName& libPath,
-            const dictionary& dict
-        );
+        void createLibrary(dynamicCode&, const dynamicCodeContext&) const;
 
-        void updateLibrary();
+        //- Update library as required
+        //  Use 'firstTime' to alter behaviour
+        void updateLibrary(bool firstTime=false) const;
 
 public:
 
     // Static data members
 
         //- Name of the C code template to be used
-        const static word codeTemplateC;
+        static const word codeTemplateC;
 
         //- Name of the H code template to be used
-        const static word codeTemplateH;
+        static const word codeTemplateH;
 
 
     //- Runtime type information
@@ -226,7 +219,7 @@ public:
         );
 
         //- Write
-        virtual void write(Ostream& os) const;
+        virtual void write(Ostream&) const;
 };
 
 

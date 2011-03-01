@@ -30,12 +30,12 @@ License
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::setModels()
+template<class CloudType>
+void Foam::ThermoCloud<CloudType>::setModels()
 {
     heatTransferModel_.reset
     (
-        HeatTransferModel<ThermoCloud<ParcelType> >::New
+        HeatTransferModel<ThermoCloud<CloudType> >::New
         (
             this->subModelProperties(),
             *this
@@ -55,10 +55,10 @@ void Foam::ThermoCloud<ParcelType>::setModels()
 }
 
 
-template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::cloudReset(ThermoCloud<ParcelType>& c)
+template<class CloudType>
+void Foam::ThermoCloud<CloudType>::cloudReset(ThermoCloud<CloudType>& c)
 {
-    KinematicCloud<ParcelType>::cloudReset(c);
+    CloudType::cloudReset(c);
 
     heatTransferModel_.reset(c.heatTransferModel_.ptr());
     TIntegrator_.reset(c.TIntegrator_.ptr());
@@ -69,8 +69,8 @@ void Foam::ThermoCloud<ParcelType>::cloudReset(ThermoCloud<ParcelType>& c)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class ParcelType>
-Foam::ThermoCloud<ParcelType>::ThermoCloud
+template<class CloudType>
+Foam::ThermoCloud<CloudType>::ThermoCloud
 (
     const word& cloudName,
     const volScalarField& rho,
@@ -80,7 +80,7 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
     bool readFields
 )
 :
-    KinematicCloud<ParcelType>
+    CloudType
     (
         cloudName,
         rho,
@@ -139,7 +139,7 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
 
     if (readFields)
     {
-        ParcelType::readFields(*this);
+        parcelType::readFields(*this);
     }
 
     if (this->solution().resetSourcesOnStartup())
@@ -149,14 +149,14 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
 }
 
 
-template<class ParcelType>
-Foam::ThermoCloud<ParcelType>::ThermoCloud
+template<class CloudType>
+Foam::ThermoCloud<CloudType>::ThermoCloud
 (
-    ThermoCloud<ParcelType>& c,
+    ThermoCloud<CloudType>& c,
     const word& name
 )
 :
-    KinematicCloud<ParcelType>(c, name),
+    CloudType(c, name),
     thermoCloud(),
     cloudCopyPtr_(NULL),
     constProps_(c.constProps_),
@@ -201,15 +201,15 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
 {}
 
 
-template<class ParcelType>
-Foam::ThermoCloud<ParcelType>::ThermoCloud
+template<class CloudType>
+Foam::ThermoCloud<CloudType>::ThermoCloud
 (
     const fvMesh& mesh,
     const word& name,
-    const ThermoCloud<ParcelType>& c
+    const ThermoCloud<CloudType>& c
 )
 :
-    KinematicCloud<ParcelType>(mesh, name, c),
+    CloudType(mesh, name, c),
     thermoCloud(),
     cloudCopyPtr_(NULL),
     constProps_(),
@@ -226,27 +226,22 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class ParcelType>
-Foam::ThermoCloud<ParcelType>::~ThermoCloud()
+template<class CloudType>
+Foam::ThermoCloud<CloudType>::~ThermoCloud()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::checkParcelProperties
+template<class CloudType>
+void Foam::ThermoCloud<CloudType>::checkParcelProperties
 (
-    ParcelType& parcel,
+    parcelType& parcel,
     const scalar lagrangianDt,
     const bool fullyDescribed
 )
 {
-    KinematicCloud<ParcelType>::checkParcelProperties
-    (
-        parcel,
-        lagrangianDt,
-        fullyDescribed
-    );
+    CloudType::checkParcelProperties(parcel, lagrangianDt, fullyDescribed);
 
     if (!fullyDescribed)
     {
@@ -256,12 +251,12 @@ void Foam::ThermoCloud<ParcelType>::checkParcelProperties
 }
 
 
-template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::storeState()
+template<class CloudType>
+void Foam::ThermoCloud<CloudType>::storeState()
 {
     cloudCopyPtr_.reset
     (
-        static_cast<ThermoCloud<ParcelType>*>
+        static_cast<ThermoCloud<CloudType>*>
         (
             clone(this->name() + "Copy").ptr()
         )
@@ -269,51 +264,52 @@ void Foam::ThermoCloud<ParcelType>::storeState()
 }
 
 
-template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::restoreState()
+template<class CloudType>
+void Foam::ThermoCloud<CloudType>::restoreState()
 {
     cloudReset(cloudCopyPtr_());
     cloudCopyPtr_.clear();
 }
 
 
-template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::resetSourceTerms()
+template<class CloudType>
+void Foam::ThermoCloud<CloudType>::resetSourceTerms()
 {
-    KinematicCloud<ParcelType>::resetSourceTerms();
+    CloudType::resetSourceTerms();
     hsTrans_->field() = 0.0;
     hsCoeff_->field() = 0.0;
 }
 
 
-template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::relaxSources
+template<class CloudType>
+void Foam::ThermoCloud<CloudType>::relaxSources
 (
-    const ThermoCloud<ParcelType>& cloudOldTime
+    const ThermoCloud<CloudType>& cloudOldTime
 )
 {
-    KinematicCloud<ParcelType>::relaxSources(cloudOldTime);
+    CloudType::relaxSources(cloudOldTime);
 
     this->relax(hsTrans_(), cloudOldTime.hsTrans(), "hs");
 }
 
 
-template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::evolve()
+template<class CloudType>
+void Foam::ThermoCloud<CloudType>::evolve()
 {
     if (this->solution().canEvolve())
     {
-        typename ParcelType::trackData td(*this);
+        typename parcelType::template
+            TrackingData<ThermoCloud<CloudType> > td(*this);
 
         this->solve(td);
     }
 }
 
 
-template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::info() const
+template<class CloudType>
+void Foam::ThermoCloud<CloudType>::info() const
 {
-    KinematicCloud<ParcelType>::info();
+    CloudType::info();
 }
 
 

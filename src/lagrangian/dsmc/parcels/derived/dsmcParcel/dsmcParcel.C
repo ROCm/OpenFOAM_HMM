@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,14 +24,14 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "dsmcParcel.H"
-
+/*
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(dsmcParcel, 0);
-    defineParticleTypeNameAndDebug(dsmcParcel, 0);
-    defineParcelTypeNameAndDebug(dsmcParcel, 0);
+//    defineTypeNameAndDebug(dsmcParcel, 0);
+//    defineParticleTypeNameAndDebug(dsmcParcel, 0);
+//    defineParcelTypeNameAndDebug(dsmcParcel, 0);
 }
 
 
@@ -39,7 +39,7 @@ namespace Foam
 
 Foam::dsmcParcel::dsmcParcel
 (
-    DsmcCloud<dsmcParcel>& owner,
+    c& owner,
     const vector& position,
     const vector& U,
     const scalar Ei,
@@ -78,6 +78,6 @@ Foam::dsmcParcel::dsmcParcel
 
 Foam::dsmcParcel::~dsmcParcel()
 {}
-
+*/
 
 // ************************************************************************* //

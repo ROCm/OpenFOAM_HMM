@@ -57,13 +57,13 @@ cleanTimeDirectories()
 
 
 #
-# Remove codeStream subdirectory if it looks appropriate
+# Remove dynamicCode subdirectory if it looks appropriate
 #
-cleanCodeStream()
+cleanDynamicCode()
 {
-    if [ -d system -a -d codeStream ]
+    if [ -d system -a -d dynamicCode ]
     then
-        rm -rf codeStream > /dev/null 2>&1
+        rm -rf dynamicCode > /dev/null 2>&1
     fi
 }
 
@@ -71,7 +71,7 @@ cleanCodeStream()
 cleanCase()
 {
     cleanTimeDirectories
-    cleanCodeStream
+    cleanDynamicCode
 
     rm -rf processor* > /dev/null 2>&1
     rm -rf probes* > /dev/null 2>&1
