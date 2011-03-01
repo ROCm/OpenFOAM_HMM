@@ -287,7 +287,7 @@ void Foam::StandardWallInteraction<CloudType>::info(Ostream& os) const
     label nps = returnReduce(nStick_, sumOp<label>()) + nStick0_;
     scalar mps = returnReduce(massStick_, sumOp<scalar>()) + massStick0_;
 
-    os  << "    Parcel fates:"
+    os  << "    Parcel fates:" << nl
         << "      - escape                      = " << npe << ", " << mpe << nl
         << "      - stick                       = " << nps << ", " << mps << nl;
 
