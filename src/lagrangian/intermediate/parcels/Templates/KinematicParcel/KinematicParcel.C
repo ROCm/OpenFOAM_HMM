@@ -192,14 +192,15 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     const parcelType& p = static_cast<const parcelType&>(*this);
     const forceSuSp Fcp = forces.calcCoupled(p, dt, mass, Re, mu);
     const forceSuSp Fncp = forces.calcNonCoupled(p, dt, mass, Re, mu);
-    const forceSuSp Feff = Fcp + Fncp;
+    forceSuSp Feff = Fcp + Fncp;
+    Feff.Sp() += ROOTVSMALL;
 
 
     // New particle velocity
     //~~~~~~~~~~~~~~~~~~~~~~
 
     // Update velocity - treat as 3-D
-    const vector ap = Uc_ + (Feff.Su() + Su)/(Feff.Sp() + ROOTVSMALL);
+    const vector ap = Uc_ + (Feff.Su() + Su)/Feff.Sp();
     const scalar bp = Feff.Sp()/mass;
 
     Spu = Feff.Sp();
