@@ -151,7 +151,7 @@ void Foam::SHA1::processBytes(const void *data, size_t len)
 //            while (len > 64)
             while (len >= 64)
             {
-                processBlock(memcpy (buffer_, data, 64), 64);
+                processBlock(memcpy(buffer_, data, 64), 64);
                 data = reinterpret_cast<const unsigned char*>(data) + 64;
                 len -= 64;
             }
@@ -177,7 +177,7 @@ void Foam::SHA1::processBytes(const void *data, size_t len)
         {
             processBlock(buffer_, 64);
             remaining -= 64;
-            memcpy (buffer_, &buffer_[16], remaining);
+            memcpy(buffer_, &buffer_[16], remaining);
         }
         bufLen_ = remaining;
     }
@@ -241,10 +241,10 @@ Foam::SHA1::processBlock(const void *data, size_t len)
     while (words < endp)
     {
         uint32_t tm;
-        for (int t = 0; t < 16; t++)
+        for (int t = 0; t < 16; ++t)
         {
-            x[t] = swapBytes (*words);
-            words++;
+            x[t] = swapBytes(*words);
+            ++words;
         }
 
         R( a, b, c, d, e, F1, K1, x[ 0] );
@@ -343,11 +343,11 @@ void Foam::SHA1::calcDigest(SHA1Digest& dig) const
     {
         unsigned char *r = dig.v_;
 
-        set_uint32 (r + 0 * sizeof(uint32_t), swapBytes(hashsumA_));
-        set_uint32 (r + 1 * sizeof(uint32_t), swapBytes(hashsumB_));
-        set_uint32 (r + 2 * sizeof(uint32_t), swapBytes(hashsumC_));
-        set_uint32 (r + 3 * sizeof(uint32_t), swapBytes(hashsumD_));
-        set_uint32 (r + 4 * sizeof(uint32_t), swapBytes(hashsumE_));
+        set_uint32(r + 0 * sizeof(uint32_t), swapBytes(hashsumA_));
+        set_uint32(r + 1 * sizeof(uint32_t), swapBytes(hashsumB_));
+        set_uint32(r + 2 * sizeof(uint32_t), swapBytes(hashsumC_));
+        set_uint32(r + 3 * sizeof(uint32_t), swapBytes(hashsumD_));
+        set_uint32(r + 4 * sizeof(uint32_t), swapBytes(hashsumE_));
     }
     else
     {

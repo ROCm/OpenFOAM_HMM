@@ -190,8 +190,11 @@ void* dlOpen(const fileName& lib);
 //- Close a dlopened library using handle. Return true if successful
 bool dlClose(void*);
 
-//- Lookup a symbol in a dlopened library using handle
+//- Lookup a symbol in a dlopened library using handle to library
 void* dlSym(void* handle, const std::string& symbol);
+
+//- Report if symbol in a dlopened library could be found
+bool dlSymFound(void* handle, const std::string& symbol);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

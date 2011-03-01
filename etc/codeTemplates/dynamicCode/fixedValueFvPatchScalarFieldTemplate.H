@@ -121,6 +121,9 @@ public:
             );
         }
 
+    //- Destructor
+    virtual ~${typeName}FixedValueFvPatchScalarField();
+
 
     // Member functions
 

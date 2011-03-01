@@ -1,6 +1,6 @@
 #                            -*- mode: org; -*-
 #
-#+TITLE:           =codeStream=: On-the-fly code compilation
+#+TITLE:           =dynamicCode=: Dynamic code compilation
 #+AUTHOR:                      OpenCFD Ltd.
 #+DATE:                            TBA
 #+LINK:                  http://www.openfoam.com
@@ -13,7 +13,7 @@
   provide the actual dictionary entry. The snippet gets provided as three
   sections of C++ code which just gets inserted into a template:
   - =code= section: the actual body of the code. It gets called with arguments
-    =const dictionary& dict, OStream& os= and the C++ code can do a
+    =OStream& os, const dictionary& dict= and the C++ code can do a
     =dict.lookup= to find current dictionary values.
   - optional =codeInclude= section: any #include statements to include OpenFOAM
     files.
@@ -47,12 +47,13 @@
     =code=, =codeInclude=, =codeOptions= sections (these are just strings) and
     calculates the SHA1 checksum of the contents.
   - it copies a template file
-    =($FOAM_CODESTREAM_TEMPLATES/codeStreamTemplate.C)=, substituting all
+    =(~OpenFOAM/codeTemplates/dynamicCode/codeStreamTemplate.C)= or
+    =($FOAM_CODE_TEMPLATES/codeStreamTemplate.C)=, substituting all
     occurences of =code=, =codeInclude=, =codeOptions=.
-  - it writes library source files to =codeStream/<SHA1>= and compiles
+  - it writes library source files to =dynamicCode/<SHA1>= and compiles
     it using =wmake libso=.
   - the resulting library is generated under
-    =codeStream/platforms/$WM_OPTIONS/lib= and is loaded (=dlopen=, =dlsym=)
+    =dynamicCode/platforms/$WM_OPTIONS/lib= and is loaded (=dlopen=, =dlsym=)
     and the function executed
   - the function will have written its output into the Ostream which then gets
     used to construct the entry to replace the whole =#codeStream= section.

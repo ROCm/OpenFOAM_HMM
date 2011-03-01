@@ -25,7 +25,7 @@ License
 
 #include "systemCall.H"
 #include "Time.H"
-#include "codeStreamTools.H"
+#include "dynamicCode.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -71,7 +71,7 @@ void Foam::systemCall::read(const dictionary& dict)
             << "no executeCalls, endCalls or writeCalls defined."
             << endl;
     }
-    else if (!codeStreamTools::allowSystemOperations)
+    else if (!dynamicCode::allowSystemOperations)
     {
         FatalErrorIn
         (

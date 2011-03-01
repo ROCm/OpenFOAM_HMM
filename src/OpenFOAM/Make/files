@@ -189,8 +189,9 @@ db/objectRegistry/objectRegistry.C
 db/CallbackRegistry/CallbackRegistryName.C
 
 dll = db/dynamicLibrary
-$(dll)/codeStream/codeStreamTools.C
 $(dll)/dlLibraryTable/dlLibraryTable.C
+$(dll)/dynamicCode/dynamicCode.C
+$(dll)/dynamicCode/dynamicCodeContext.C
 
 db/functionObjects/functionObject/functionObject.C
 db/functionObjects/functionObjectList/functionObjectList.C

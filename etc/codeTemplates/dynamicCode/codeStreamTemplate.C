@@ -44,8 +44,8 @@ extern "C"
 {
 void ${typeName}
 (
-    const dictionary& dict,
-    Ostream& os
+    Ostream& os,
+    const dictionary& dict
 )
 {
 //{{{ begin code

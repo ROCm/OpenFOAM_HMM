@@ -28,10 +28,9 @@ License
 #include "IStringStream.H"
 #include "OStringStream.H"
 #include "IOstreams.H"
-#include "SHA1Digest.H"
-#include "OSHA1stream.H"
-#include "codeStreamTools.H"
 #include "stringOps.H"
+#include "dynamicCode.H"
+#include "dynamicCodeContext.H"
 #include "dlLibraryTable.H"
 #include "OSspecific.H"
 #include "Time.H"
@@ -71,7 +70,7 @@ bool Foam::functionEntries::codeStream::execute
     Istream& is
 )
 {
-    codeStreamTools::checkSecurity
+    dynamicCode::checkSecurity
     (
         "functionEntries::codeStream::execute(..)",
         parentDict
@@ -81,141 +80,82 @@ bool Foam::functionEntries::codeStream::execute
     // must reference parent for stringOps::expand to work nicely
     dictionary codeDict("#codeStream", parentDict, is);
 
+    // get code, codeInclude, codeOptions
+    dynamicCodeContext context(codeDict);
 
-    // Read three sections of code.
-    // Remove any leading whitespace - necessary for compilation options,
-    // convenience for includes and body.
+    // codeName: codeStream + _<sha1>
+    // codeDir : _<sha1>
+    dynamicCode dynCode
+    (
+        "codeStream" + context.sha1().str(true),
+        context.sha1().str(true)
+    );
 
-    // "codeInclude" is optional
-    string codeInclude;
-    if (codeDict.found("codeInclude"))
-    {
-        codeInclude = stringOps::trim(codeDict["codeInclude"]);
-        stringOps::inplaceExpand(codeInclude, codeDict);
-    }
+    // Load library if not already loaded
+    // Version information is encoded in the libPath (encoded with the SHA1)
+    const fileName libPath = dynCode.libPath();
 
-    // "codeOptions" is optional
-    string codeOptions;
-    if (codeDict.found("codeOptions"))
-    {
-        codeOptions = stringOps::trim(codeDict["codeOptions"]);
-        stringOps::inplaceExpand(codeOptions, codeDict);
-    }
-
-    // "code" is mandatory
-    string code = stringOps::trim(codeDict["code"]);
-    stringOps::inplaceExpand(code, codeDict);
-
-
-    // Create SHA1 digest from the contents
-    SHA1Digest sha;
-    {
-        OSHA1stream os;
-        os  << codeInclude << codeOptions << code;
-        sha = os.digest();
-    }
-
-
-    // codeName = prefix + sha1
-    const fileName codeName = "codeStream_" + sha.str();
-
-    // write code into _SHA1 subdir
-    const fileName codePath = codeStreamTools::codePath("_" + sha.str());
-
-    // write library into platforms/$WM_OPTIONS/lib subdir
-    const fileName libPath = codeStreamTools::libPath(codeName);
-
-
+    // see if library is loaded
     void* lib = dlLibraryTable::findLibrary(libPath);
 
-    // try to load if not already loaded
+    bool reuseLib = false;
+
+    // nothing loaded
+    // avoid compilation if possible by loading an existing library
     if (!lib && dlLibraryTable::open(libPath, false))
     {
         lib = dlLibraryTable::findLibrary(libPath);
+        reuseLib = true;
     }
 
-    // did not load - need to compile it
+
+    // create library if required
     if (!lib)
     {
         if (Pstream::master())
         {
-            if (!codeStreamTools::upToDate(codePath, sha))
+            if (!dynCode.upToDate(context))
             {
-                Info<< "Creating new library in " << libPath << endl;
+                // filter with this context
+                dynCode.reset(context);
 
-                const fileName fileCsrc
+                // compile filtered C template
+                dynCode.addCompileFile(codeTemplateC);
+
+                // define Make/options
+                dynCode.setMakeOptions
                 (
-                    codeStreamTools::findTemplate
-                    (
-                        codeTemplateC
-                    )
+                    "EXE_INC = -g \\\n"
+                  + context.options()
+                  + "\n\nLIB_LIBS ="
                 );
 
-                // not found!
-                if (fileCsrc.empty())
+                if (!dynCode.copyOrCreateFiles(true))
                 {
                     FatalIOErrorIn
                     (
                         "functionEntries::codeStream::execute(..)",
                         parentDict
-                    )   << "Could not find the code template: "
-                        << codeTemplateC << nl
-                        << codeStreamTools::searchedLocations()
-                        << exit(FatalIOError);
-                }
-
-
-                List<codeStreamTools::fileAndVars> copyFiles(1);
-                copyFiles[0].file() = fileCsrc;
-                copyFiles[0].set("codeInclude", codeInclude);
-                copyFiles[0].set("code", code);
-                copyFiles[0].set("SHA1sum", sha.str());
-
-                List<codeStreamTools::fileAndContent> filesContents(2);
-
-                // Write Make/files
-                filesContents[0].first() = "Make/files";
-                filesContents[0].second() =
-                    codeTemplateC + "\n\n"
-                  + codeStreamTools::libTarget(codeName);
-
-                // Write Make/options
-                filesContents[1].first() = "Make/options";
-                filesContents[1].second() =
-                    "EXE_INC = -g \\\n"
-                  + codeOptions
-                  + "\n\nLIB_LIBS =";
-
-                codeStreamTools writer(codeName, copyFiles, filesContents);
-                if (!writer.copyFilesContents(codePath))
-                {
-                    FatalIOErrorIn
-                    (
-                        "functionEntries::codeStream::execute(..)",
-                        parentDict
-                    )   << "Failed writing " <<nl
-                        << copyFiles << endl
-                        << filesContents
+                    )   << "Failed writing files for" << nl
+                        << dynCode.libPath() << nl
                         << exit(FatalIOError);
                 }
             }
 
-            const Foam::string wmakeCmd("wmake libso " + codePath);
-            Info<< "Invoking " << wmakeCmd << endl;
-            if (Foam::system(wmakeCmd))
+            if (!dynCode.wmakeLibso())
             {
                 FatalIOErrorIn
                 (
                     "functionEntries::codeStream::execute(..)",
                     parentDict
-                )   << "Failed " << wmakeCmd
+                )   << "Failed wmake " << libPath
                     << exit(FatalIOError);
             }
         }
 
         // all processes must wait for compile
-        bool dummy = true;
-        reduce(dummy, orOp<bool>());
+        bool waiting = true;
+        reduce(waiting, orOp<bool>());
 
         if (!dlLibraryTable::open(libPath, false))
         {
@@ -229,18 +169,19 @@ bool Foam::functionEntries::codeStream::execute
 
         lib = dlLibraryTable::findLibrary(libPath);
     }
-    else
+    else if (reuseLib)
     {
         Info<< "Reusing library in " << libPath << endl;
     }
 
 
-    // Find the library handle.
-    void (*function)(const dictionary&, Ostream&);
-    function = reinterpret_cast<void(*)(const dictionary&, Ostream&)>
+    // Find the function handle in the library
+    void (*function)(Ostream&, const dictionary&);
+    function = reinterpret_cast<void(*)(Ostream&, const dictionary&)>
     (
-        dlSym(lib, codeName)
+        dlSym(lib, dynCode.codeName())
     );
+
 
     if (!function)
     {
@@ -248,12 +189,15 @@ bool Foam::functionEntries::codeStream::execute
         (
             "functionEntries::codeStream::execute(..)",
             parentDict
-        )   << "Failed looking up symbol " << codeName
+        )   << "Failed looking up symbol " << dynCode.codeName()
             << " in library " << lib << exit(FatalIOError);
     }
 
+    // use function to write stream
     OStringStream os(is.format());
-    (*function)(parentDict, os);
+    (*function)(os, parentDict);
+
+    // get the entry from this stream
     IStringStream resultStream(os.str());
     entry.read(parentDict, resultStream);
 
