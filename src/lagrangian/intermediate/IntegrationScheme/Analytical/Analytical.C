@@ -59,9 +59,9 @@ template<class Type>
 typename Foam::IntegrationScheme<Type>::integrationResult
 Foam::Analytical<Type>::integrate
 (
-    const Type phi,
+    const Type& phi,
     const scalar dt,
-    const Type alpha,
+    const Type& alpha,
     const scalar beta
 ) const
 {

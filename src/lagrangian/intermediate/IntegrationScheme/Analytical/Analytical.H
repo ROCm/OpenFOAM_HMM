@@ -81,9 +81,9 @@ public:
         //- Perform the integration
         virtual typename IntegrationScheme<Type>::integrationResult integrate
         (
-            const Type phi,
+            const Type& phi,
             const scalar dt,
-            const Type alpha,
+            const Type& alpha,
             const scalar beta
         ) const;
 };
