@@ -113,19 +113,21 @@ class codedFixedValueFvPatchScalarField
 
         const codeProperties& dict() const;
 
-        void createLibrary(dynamicCode&, const dynamicCodeContext& dict);
+        void createLibrary(dynamicCode&, const dynamicCodeContext&) const;
 
-        void updateLibrary();
+        //- Update library as required
+        //  Use 'firstTime' to alter behaviour
+        void updateLibrary(bool firstTime=false) const;
 
 public:
 
     // Static data members
 
         //- Name of the C code template to be used
-        const static word codeTemplateC;
+        static const word codeTemplateC;
 
         //- Name of the H code template to be used
-        const static word codeTemplateH;
+        static const word codeTemplateH;
 
 
     //- Runtime type information
@@ -217,7 +219,7 @@ public:
         );
 
         //- Write
-        virtual void write(Ostream& os) const;
+        virtual void write(Ostream&) const;
 };
 
 

@@ -13,7 +13,7 @@
   provide the actual dictionary entry. The snippet gets provided as three
   sections of C++ code which just gets inserted into a template:
   - =code= section: the actual body of the code. It gets called with arguments
-    =const dictionary& dict, OStream& os= and the C++ code can do a
+    =OStream& os, const dictionary& dict= and the C++ code can do a
     =dict.lookup= to find current dictionary values.
   - optional =codeInclude= section: any #include statements to include OpenFOAM
     files.

@@ -83,67 +83,61 @@ bool Foam::functionEntries::codeStream::execute
     // get code, codeInclude, codeOptions
     dynamicCodeContext context(codeDict);
 
-    // codeName: prefix_ + sha1
+    // codeName: codeStream + _<sha1>
     // codeDir : _<sha1>
     dynamicCode dynCode
     (
-        "codeStream_" + context.sha1().str(),
-        "_" + context.sha1().str()
+        "codeStream" + context.sha1().str(true),
+        context.sha1().str(true)
     );
 
     // Load library if not already loaded
     // Version information is encoded in the libPath (encoded with the SHA1)
     const fileName libPath = dynCode.libPath();
 
+    // see if library is loaded
     void* lib = dlLibraryTable::findLibrary(libPath);
 
+    bool reuseLib = false;
+
+    // nothing loaded
+    // avoid compilation if possible by loading an existing library
     if (!lib && dlLibraryTable::open(libPath, false))
     {
         lib = dlLibraryTable::findLibrary(libPath);
+        reuseLib = true;
     }
 
-    // did not load - need to compile it
+
+    // create library if required
     if (!lib)
     {
         if (Pstream::master())
         {
             if (!dynCode.upToDate(context))
             {
-                Info<< "Creating new library in "
-                    << dynCode.libPath() << endl;
-
-                // filter C template
-                dynCode.addFilterFile(codeTemplateC);
-
                 // filter with this context
-                dynCode.setFilterContext(context);
+                dynCode.reset(context);
 
-                // Write Make/files
-                dynCode.addCreateFile
-                (
-                    "Make/files",
-                    codeTemplateC + "\n\n"
-                  + dynCode.libTarget()
-                );
+                // compile filtered C template
+                dynCode.addCompileFile(codeTemplateC);
 
-                // Write Make/options
-                dynCode.addCreateFile
+                // define Make/options
+                dynCode.setMakeOptions
                 (
-                    "Make/options",
                     "EXE_INC = -g \\\n"
                   + context.options()
                   + "\n\nLIB_LIBS ="
                 );
 
-                if (!dynCode.copyFilesContents())
+                if (!dynCode.copyOrCreateFiles(true))
                 {
                     FatalIOErrorIn
                     (
                         "functionEntries::codeStream::execute(..)",
                         parentDict
-                    )   << "Failed writing " << nl
-                        // << copyFiles << endl
-                        // << filesContents
+                    )   << "Failed writing files for" << nl
+                        << dynCode.libPath() << nl
                         << exit(FatalIOError);
                 }
             }
@@ -160,8 +154,8 @@ bool Foam::functionEntries::codeStream::execute
         }
 
         // all processes must wait for compile
-        bool dummy = true;
-        reduce(dummy, orOp<bool>());
+        bool waiting = true;
+        reduce(waiting, orOp<bool>());
 
         if (!dlLibraryTable::open(libPath, false))
         {
@@ -175,15 +169,15 @@ bool Foam::functionEntries::codeStream::execute
 
         lib = dlLibraryTable::findLibrary(libPath);
     }
-    else
+    else if (reuseLib)
     {
         Info<< "Reusing library in " << libPath << endl;
     }
 
 
-    // Find the library handle.
-    void (*function)(const dictionary&, Ostream&);
-    function = reinterpret_cast<void(*)(const dictionary&, Ostream&)>
+    // Find the function handle in the library
+    void (*function)(Ostream&, const dictionary&);
+    function = reinterpret_cast<void(*)(Ostream&, const dictionary&)>
     (
         dlSym(lib, dynCode.codeName())
     );
@@ -199,8 +193,11 @@ bool Foam::functionEntries::codeStream::execute
             << " in library " << lib << exit(FatalIOError);
     }
 
+    // use function to write stream
     OStringStream os(is.format());
-    (*function)(parentDict, os);
+    (*function)(os, parentDict);
+
+    // get the entry from this stream
     IStringStream resultStream(os.str());
     entry.read(parentDict, resultStream);
 

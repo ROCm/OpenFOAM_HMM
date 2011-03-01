@@ -64,41 +64,86 @@ public:
 private:
     // Private data
 
+        //- Root for dynamic code compilation
+        fileName codeRoot_;
+
+        //- Subdirectory name for loading libraries
+        const fileName libSubDir_;
+
         //- Name for code
         word codeName_;
 
         //- Name for code subdirectory
-        mutable word codeDirName_;
+        word codeDirName_;
 
-        //- Variables to use during filtering
-        HashTable<string> filterVars_;
+        //- Files to copy and filter
+        DynamicList<fileName> compileFiles_;
+
+        //- Files to copy and filter
+        DynamicList<fileName> copyFiles_;
 
         //- Direct contents for files
         DynamicList<fileAndContent> createFiles_;
 
-        //- Files to copy and filter
-        DynamicList<fileName> filterFiles_;
+        //- Variables to use during filtering
+        HashTable<string> filterVars_;
+
+        //- Contents for Make/options
+        std::string makeOptions_;
+
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        dynamicCode(const dynamicCode&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const dynamicCode&);
 
 
 protected:
 
-        void copyAndFilter
+    // Static data members
+
+        //- Root of the LIB target for Make/files
+        static const char* libTargetRoot;
+
+
+    // Protected Member Functions
+
+        //- Copy lines while expanding variables
+        static void copyAndFilter
         (
             ISstream&,
             OSstream&,
             const HashTable<string>& mapping
-        ) const;
+        );
 
         //- Resolve code-templates via the codeTemplateEnvName
         //  alternatively in the codeTemplateDirName via Foam::findEtcFile
-        static List<fileName> resolveTemplates
+        static bool resolveTemplates
         (
-            const UList<fileName>& names
+            const UList<fileName>& templateNames,
+            DynamicList<fileName>& resolvedFiles,
+            DynamicList<fileName>& badFiles
         );
 
+        //- Write SHA1 value as C-comment
+        bool writeCommentSHA1(Ostream&) const;
 
-        bool writeDigest(const fileName& dir, const SHA1Digest& sha1) const;
-        SHA1Digest readDigest(const fileName& dir) const;
+        //- Copy/create Make/files prior to compilation
+        bool createMakeFiles() const;
+
+        //- Copy/create Make/options prior to compilation
+        bool createMakeOptions() const;
+
+
+        //- Write digest to Make/SHA1Digest
+        bool writeDigest(const SHA1Digest&) const;
+
+        //- Write digest to Make/SHA1Digest
+        bool writeDigest(const std::string&) const;
+
 
 public:
 
@@ -112,26 +157,25 @@ public:
         //  Used when locating the codeTemplateName via Foam::findEtcFile
         static const fileName codeTemplateDirName;
 
+        //- Flag if system operations are allowed
         static int allowSystemOperations;
 
 
     // Static Member functions
 
         //- Check security for creating dynamic code
-        static void checkSecurity
-        (
-            const char* title,
-            const dictionary& dict
-        );
+        static void checkSecurity(const char* title, const dictionary&);
 
 
     // Constructors
 
-        //- Construct for a specified code name
-        dynamicCode(const word& codeName);
-
-        //- Construct for a specified code name and directory name
-        dynamicCode(const word& codeName, const word& dirName);
+        //- Construct for a specified code name and code directory name
+        //  Defaults to using the code name for the code directory name
+        dynamicCode
+        (
+            const word& codeName,
+            const word& codeDirName = ""
+        );
 
 
     // Member functions
@@ -148,43 +192,76 @@ public:
             return codeDirName_;
         }
 
-        //- Clear variables and files
+        //- Root for dynamic code compilation
+        //  Expanded from \$FOAM_CASE/dynamicCode
+        const fileName& codeRoot() const
+        {
+            return codeRoot_;
+        }
+
+        //- Subdirectory name for loading libraries
+        //  Expanded from platforms/\$WM_OPTIONS/lib
+        fileName libSubDir() const
+        {
+            return libSubDir_;
+        }
+
+        //- Path for specified code name
+        //  Corresponds to codeRoot()/codeDirName()
+        fileName codePath() const
+        {
+            return codeRoot_/codeDirName_;
+        }
+
+        //- Library path for specified code name
+        //  Corresponds to codeRoot()/libSubDir()/lib\<codeName\>.so
+        fileName libPath() const
+        {
+            return codeRoot_/libSubDir_/"lib" + codeName_ + ".so";
+        }
+
+        //- Path for SHA1Digest
+        //  Corresponds to codePath()/Make/SHA1Digest
+        fileName digestFile() const
+        {
+            return codeRoot_/codeDirName_/"Make/SHA1Digest";
+        }
+
+
+        //- Clear files and variables
         void clear();
 
+        //- Clear files and reset variables to specified context
+        void reset(const dynamicCodeContext&);
+
+
+        //- Add a file template name, which will be found and filtered
+        void addCompileFile(const fileName& name);
+
+        //- Add a file template name, which will be found and filtered
+        void addCopyFile(const fileName& name);
 
         //- Add a file to create with its contents. Will not be filtered
         void addCreateFile(const fileName& name, const string& contents);
-
-        //- Add a file template name, which will be found and filtered
-        void addFilterFile(const fileName& name);
 
         //- Define filter variables for code, codeInclude, SHA1sum
         void setFilterContext(const dynamicCodeContext&);
 
         //- Define a filter variable
-        void setFilterVariable(const word& key, const string& value);
+        void setFilterVariable(const word& key, const std::string& value);
+
+        //- Define contents for Make/options
+        void setMakeOptions(const std::string& content);
 
 
-        //- Local path for specified code name
-        //  Expanded from \$FOAM_CASE/dynamicCode/codeDirName
-        fileName codePath() const;
-
-        //- Local library path for specified code name
-        //  Expanded from \$FOAM_CASE/dynamicCode/platforms/\$WM_OPTIONS/lib
-        fileName libPath() const;
-
-        //- The library target path for Make/files
-        string libTarget() const;
-
-
-        //- Verify if the copied code is up-to-date
+        //- Verify if the copied code is up-to-date, based on Make/SHA1Digest
         bool upToDate(const dynamicCodeContext& context) const;
 
-        //- Verify if the copied code is up-to-date
+        //- Verify if the copied code is up-to-date, based on Make/SHA1Digest
         bool upToDate(const SHA1Digest& sha1) const;
 
         //- Copy/create files prior to compilation
-        bool copyFilesContents() const;
+        bool copyOrCreateFiles(const bool verbose = false) const;
 
         //- Compile a libso
         bool wmakeLibso() const;
@@ -198,8 +275,6 @@ public:
 //        //- Find the handle of the libPath() library
 //        void* findLibrary() const;
 
-//        bool read(const dictionary&);
-//        void writeDict(Ostream&) const;
 
 };
 
