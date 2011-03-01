@@ -44,13 +44,17 @@ void Foam::CollidingCloud<CloudType>::setModels()
 
 template<class CloudType>
 template<class TrackData>
-void  Foam::CollidingCloud<CloudType>::moveCollide(TrackData& td)
+void  Foam::CollidingCloud<CloudType>::moveCollide
+(
+    TrackData& td,
+    const scalar deltaT
+)
 {
     td.part() = TrackData::tpVelocityHalfStep;
-    CloudType::move(td,  this->solution().deltaT());
+    CloudType::move(td,  deltaT);
 
     td.part() = TrackData::tpLinearTrack;
-    CloudType::move(td,  this->solution().deltaT());
+    CloudType::move(td,  deltaT);
 
     // td.part() = TrackData::tpRotationalTrack;
     // CloudType::move(td);
@@ -60,7 +64,7 @@ void  Foam::CollidingCloud<CloudType>::moveCollide(TrackData& td)
     this->collision().collide();
 
     td.part() = TrackData::tpVelocityHalfStep;
-    CloudType::move(td,  this->solution().deltaT());
+    CloudType::move(td,  deltaT);
 }
 
 
@@ -211,14 +215,14 @@ void  Foam::CollidingCloud<CloudType>::motion(TrackData& td)
 
         while(!(++moveCollideSubCycle).end())
         {
-            moveCollide(td);
+            moveCollide(td, this->db().time().deltaTValue());
         }
 
         moveCollideSubCycle.endSubCycle();
     }
     else
     {
-        moveCollide(td);
+        moveCollide(td, this->db().time().deltaTValue());
     }
 }
 

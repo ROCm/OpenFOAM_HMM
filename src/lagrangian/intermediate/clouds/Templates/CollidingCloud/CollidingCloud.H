@@ -108,7 +108,7 @@ protected:
 
             //- Move-collide particles
             template<class TrackData>
-            void moveCollide(TrackData& td);
+            void moveCollide(TrackData& td, const scalar deltaT);
 
             //- Reset state of cloud
             void cloudReset(CollidingCloud<CloudType>& c);

@@ -192,14 +192,15 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     const parcelType& p = static_cast<const parcelType&>(*this);
     const forceSuSp Fcp = forces.calcCoupled(p, dt, mass, Re, mu);
     const forceSuSp Fncp = forces.calcNonCoupled(p, dt, mass, Re, mu);
-    const forceSuSp Feff = Fcp + Fncp;
+    forceSuSp Feff = Fcp + Fncp;
+    Feff.Sp() += ROOTVSMALL;
 
 
     // New particle velocity
     //~~~~~~~~~~~~~~~~~~~~~~
 
     // Update velocity - treat as 3-D
-    const vector ap = Uc_ + (Feff.Su() + Su)/(Feff.Sp() + ROOTVSMALL);
+    const vector ap = Uc_ + (Feff.Su() + Su)/Feff.Sp();
     const scalar bp = Feff.Sp()/mass;
 
     Spu = Feff.Sp();
@@ -295,6 +296,7 @@ bool Foam::KinematicParcel<ParcelType>::move
     const polyMesh& mesh = td.cloud().pMesh();
     const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
     const scalarField& V = mesh.cellVolumes();
+    const scalar maxCo = td.cloud().solution().maxCo();
 
     scalar tEnd = (1.0 - p.stepFraction())*trackTime;
     const scalar dtMax = tEnd;
@@ -315,7 +317,6 @@ bool Foam::KinematicParcel<ParcelType>::move
         if (p.active() && magU > ROOTVSMALL)
         {
             const scalar d = dt*magU;
-            const scalar maxCo = td.cloud().solution().maxCo();
             const scalar dCorr = min(d, maxCo*cbrt(V[cellI]));
             dt *=
                 dCorr/d
