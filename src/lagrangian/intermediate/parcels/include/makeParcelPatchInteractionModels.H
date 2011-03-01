@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,8 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "KinematicCloud.H"
-
 #include "LocalInteraction.H"
 #include "NoInteraction.H"
 #include "Rebound.H"
@@ -37,34 +35,14 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelPatchInteractionModels(ParcelType)                          \
+#define makeParcelPatchInteractionModels(CloudType)                           \
                                                                               \
-    makePatchInteractionModel(KinematicCloud<ParcelType>);                    \
+    makePatchInteractionModel(CloudType);                                     \
                                                                               \
-    makePatchInteractionModelType                                             \
-    (                                                                         \
-        LocalInteraction,                                                     \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makePatchInteractionModelType                                             \
-    (                                                                         \
-        NoInteraction,                                                        \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makePatchInteractionModelType                                             \
-    (                                                                         \
-        Rebound,                                                              \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makePatchInteractionModelType                                             \
-    (                                                                         \
-        StandardWallInteraction,                                              \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );
+    makePatchInteractionModelType(LocalInteraction, CloudType);               \
+    makePatchInteractionModelType(NoInteraction, CloudType);                  \
+    makePatchInteractionModelType(Rebound, CloudType);                        \
+    makePatchInteractionModelType(StandardWallInteraction, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

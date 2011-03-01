@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,10 +28,6 @@ License
 #include "DynamicList.H"
 #include "polyMesh.H"
 
-#include "Cloud.H"
-#include "passiveParticle.H"
-#include "IDLList.H"
-
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -45,9 +41,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Finds along line (samplePt + t * offset) next sample beyond or equal to
-// currentPt.
-// Updates samplePt, sampleI
 bool Foam::uniformSet::nextSample
 (
     const point& currentPt,
@@ -82,10 +75,9 @@ bool Foam::uniformSet::nextSample
 }
 
 
-// Sample singly connected segment. Returns false if end_ reached.
 bool Foam::uniformSet::trackToBoundary
 (
-    Particle<passiveParticle>& singleParticle,
+    passiveParticle& singleParticle,
     point& samplePt,
     label& sampleI,
     DynamicList<point>& samplingPts,
@@ -101,6 +93,9 @@ bool Foam::uniformSet::trackToBoundary
 
     // Alias
     const point& trackPt = singleParticle.position();
+
+    passiveParticleCloud particleCloud(mesh());
+    particle::TrackingData<passiveParticleCloud> trackData(particleCloud);
 
     while(true)
     {
@@ -161,7 +156,7 @@ bool Foam::uniformSet::trackToBoundary
         do
         {
             singleParticle.stepFraction() = 0;
-            singleParticle.track(samplePt);
+            singleParticle.track(samplePt, trackData);
 
             if (debug)
             {
@@ -310,14 +305,7 @@ void Foam::uniformSet::calcSamples
     while(true)
     {
         // Initialize tracking starting from trackPt
-        Cloud<passiveParticle> particles(mesh(), IDLList<passiveParticle>());
-
-        passiveParticle singleParticle
-        (
-            particles,
-            trackPt,
-            trackCellI
-        );
+        passiveParticle singleParticle(mesh(), trackPt, trackCellI);
 
         bool reachedBoundary = trackToBoundary
         (

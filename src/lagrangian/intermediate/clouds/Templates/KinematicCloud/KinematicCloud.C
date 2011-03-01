@@ -28,180 +28,20 @@ License
 #include "interpolation.H"
 #include "subCycleTime.H"
 
-#include "CollisionModel.H"
 #include "DispersionModel.H"
 #include "InjectionModel.H"
 #include "PatchInteractionModel.H"
 #include "PostProcessingModel.H"
 #include "SurfaceFilmModel.H"
 
-// * * * * * * * * * * * * * * cloudSolution * * * * * * * * * * * * * * * * //
-
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::cloudSolution::read()
-{
-    dict_.lookup("transient") >> transient_;
-    dict_.lookup("coupled") >> coupled_;
-    dict_.lookup("cellValueSourceCorrection") >> cellValueSourceCorrection_;
-
-    if (steadyState())
-    {
-        dict_.lookup("calcFrequency") >> calcFrequency_;
-        dict_.lookup("maxCo") >> maxCo_;
-        dict_.lookup("maxTrackTime") >> maxTrackTime_;
-        dict_.subDict("sourceTerms").lookup("resetOnStartup")
-            >> resetSourcesOnStartup_;
-    }
-}
-
-
-template<class ParcelType>
-Foam::KinematicCloud<ParcelType>::cloudSolution::cloudSolution
-(
-    const fvMesh& mesh,
-    const dictionary& dict
-)
-:
-    mesh_(mesh),
-    dict_(dict),
-    active_(dict.lookup("active")),
-    transient_(false),
-    calcFrequency_(1),
-    maxCo_(0.3),
-    iter_(1),
-    deltaT_(0.0),
-    coupled_(false),
-    cellValueSourceCorrection_(false),
-    maxTrackTime_(0.0),
-    resetSourcesOnStartup_(true)
-{
-    if (active_)
-    {
-        read();
-    }
-}
-
-
-template<class ParcelType>
-Foam::KinematicCloud<ParcelType>::cloudSolution::cloudSolution
-(
-    const cloudSolution& cs
-)
-:
-    mesh_(cs.mesh_),
-    dict_(cs.dict_),
-    active_(cs.active_),
-    transient_(cs.transient_),
-    calcFrequency_(cs.calcFrequency_),
-    maxCo_(cs.maxCo_),
-    iter_(cs.iter_),
-    deltaT_(cs.deltaT_),
-    coupled_(cs.coupled_),
-    cellValueSourceCorrection_(cs.cellValueSourceCorrection_),
-    maxTrackTime_(cs.maxTrackTime_),
-    resetSourcesOnStartup_(cs.resetSourcesOnStartup_)
-{}
-
-
-template<class ParcelType>
-Foam::KinematicCloud<ParcelType>::cloudSolution::cloudSolution
-(
-    const fvMesh& mesh
-)
-:
-    mesh_(mesh),
-    dict_(dictionary::null),
-    active_(false),
-    transient_(false),
-    calcFrequency_(0),
-    maxCo_(GREAT),
-    iter_(0),
-    deltaT_(0.0),
-    coupled_(false),
-    cellValueSourceCorrection_(false),
-    maxTrackTime_(0.0),
-    resetSourcesOnStartup_(false)
-{}
-
-
-template<class ParcelType>
-Foam::KinematicCloud<ParcelType>::cloudSolution::~cloudSolution()
-{}
-
-
-template<class ParcelType>
-Foam::scalar Foam::KinematicCloud<ParcelType>::cloudSolution::relaxCoeff
-(
-    const word& fieldName
-) const
-{
-    return readScalar(sourceTermDict().subDict(fieldName).lookup("alpha"));
-}
-
-
-template<class ParcelType>
-bool Foam::KinematicCloud<ParcelType>::cloudSolution::semiImplicit
-(
-    const word& fieldName
-) const
-{
-    return readBool(sourceTermDict().subDict(fieldName).lookup("semiImplicit"));
-}
-
-
-template<class ParcelType>
-bool Foam::KinematicCloud<ParcelType>::cloudSolution::solveThisStep() const
-{
-    return
-        active_
-     && (
-            mesh_.time().outputTime()
-         || (mesh_.time().timeIndex() % calcFrequency_ == 0)
-        );
-}
-
-
-template<class ParcelType>
-bool Foam::KinematicCloud<ParcelType>::cloudSolution::canEvolve()
-{
-    // Set the calculation time step
-    if (transient_)
-    {
-        deltaT_ = mesh_.time().deltaTValue();
-    }
-    else
-    {
-        deltaT_ = maxTrackTime_;
-    }
-
-    return solveThisStep();
-}
-
-
-template<class ParcelType>
-bool Foam::KinematicCloud<ParcelType>::cloudSolution::output() const
-{
-    return active_ && mesh_.time().outputTime();
-}
-
-
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::setModels()
+template<class CloudType>
+void Foam::KinematicCloud<CloudType>::setModels()
 {
-    collisionModel_.reset
-    (
-        CollisionModel<KinematicCloud<ParcelType> >::New
-        (
-            subModelProperties_,
-            *this
-        ).ptr()
-    );
-
     dispersionModel_.reset
     (
-        DispersionModel<KinematicCloud<ParcelType> >::New
+        DispersionModel<KinematicCloud<CloudType> >::New
         (
             subModelProperties_,
             *this
@@ -210,7 +50,7 @@ void Foam::KinematicCloud<ParcelType>::setModels()
 
     injectionModel_.reset
     (
-        InjectionModel<KinematicCloud<ParcelType> >::New
+        InjectionModel<KinematicCloud<CloudType> >::New
         (
             subModelProperties_,
             *this
@@ -219,7 +59,7 @@ void Foam::KinematicCloud<ParcelType>::setModels()
 
     patchInteractionModel_.reset
     (
-        PatchInteractionModel<KinematicCloud<ParcelType> >::New
+        PatchInteractionModel<KinematicCloud<CloudType> >::New
         (
             subModelProperties_,
             *this
@@ -228,7 +68,7 @@ void Foam::KinematicCloud<ParcelType>::setModels()
 
     postProcessingModel_.reset
     (
-        PostProcessingModel<KinematicCloud<ParcelType> >::New
+        PostProcessingModel<KinematicCloud<CloudType> >::New
         (
             subModelProperties_,
             *this
@@ -237,7 +77,7 @@ void Foam::KinematicCloud<ParcelType>::setModels()
 
     surfaceFilmModel_.reset
     (
-        SurfaceFilmModel<KinematicCloud<ParcelType> >::New
+        SurfaceFilmModel<KinematicCloud<CloudType> >::New
         (
             subModelProperties_,
             *this,
@@ -256,11 +96,9 @@ void Foam::KinematicCloud<ParcelType>::setModels()
 }
 
 
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::solve
-(
-    typename ParcelType::trackData& td
-)
+template<class CloudType>
+template<class TrackData>
+void Foam::KinematicCloud<CloudType>::solve(TrackData& td)
 {
     if (solution_.transient())
     {
@@ -290,8 +128,8 @@ void Foam::KinematicCloud<ParcelType>::solve
 }
 
 
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::preEvolve()
+template<class CloudType>
+void Foam::KinematicCloud<CloudType>::preEvolve()
 {
     Info<< "\nSolving cloud " << this->name() << endl;
 
@@ -301,14 +139,14 @@ void Foam::KinematicCloud<ParcelType>::preEvolve()
 }
 
 
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::buildCellOccupancy()
+template<class CloudType>
+void Foam::KinematicCloud<CloudType>::buildCellOccupancy()
 {
     if (cellOccupancyPtr_.empty())
     {
         cellOccupancyPtr_.reset
         (
-            new List<DynamicList<ParcelType*> >(mesh_.nCells())
+            new List<DynamicList<parcelType*> >(mesh_.nCells())
         );
     }
     else if (cellOccupancyPtr_().size() != mesh_.nCells())
@@ -319,22 +157,22 @@ void Foam::KinematicCloud<ParcelType>::buildCellOccupancy()
         cellOccupancyPtr_().setSize(mesh_.nCells());
     }
 
-    List<DynamicList<ParcelType*> >& cellOccupancy = cellOccupancyPtr_();
+    List<DynamicList<parcelType*> >& cellOccupancy = cellOccupancyPtr_();
 
     forAll(cellOccupancy, cO)
     {
         cellOccupancy[cO].clear();
     }
 
-    forAllIter(typename KinematicCloud<ParcelType>, *this, iter)
+    forAllIter(typename KinematicCloud<CloudType>, *this, iter)
     {
         cellOccupancy[iter().cell()].append(&iter());
     }
 }
 
 
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::updateCellOccupancy()
+template<class CloudType>
+void Foam::KinematicCloud<CloudType>::updateCellOccupancy()
 {
     // Only build the cellOccupancy if the pointer is set, i.e. it has
     // been requested before.
@@ -346,11 +184,9 @@ void Foam::KinematicCloud<ParcelType>::updateCellOccupancy()
 }
 
 
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::evolveCloud
-(
-    typename ParcelType::trackData& td
-)
+template<class CloudType>
+template<class TrackData>
+void Foam::KinematicCloud<CloudType>::evolveCloud(TrackData& td)
 {
     if (solution_.coupled())
     {
@@ -376,7 +212,7 @@ void Foam::KinematicCloud<ParcelType>::evolveCloud
 
         // Assume that motion will update the cellOccupancy as necessary
         // before it is required.
-        motion(td);
+        td.cloud().motion(td);
     }
     else
     {
@@ -384,76 +220,14 @@ void Foam::KinematicCloud<ParcelType>::evolveCloud
 
         this->injection().injectSteadyState(td, solution_.deltaT());
 
-        td.part() = ParcelType::trackData::tpLinearTrack;
-        Cloud<ParcelType>::move(td,  solution_.deltaT());
+        td.part() = TrackData::tpLinearTrack;
+        CloudType::move(td,  solution_.deltaT());
     }
 }
 
 
-template<class ParcelType>
-void  Foam::KinematicCloud<ParcelType>::motion
-(
-    typename ParcelType::trackData& td
-)
-{
-    // Sympletic leapfrog integration of particle forces:
-    // + apply half deltaV with stored force
-    // + move positions with new velocity
-    // + calculate forces in new position
-    // + apply half deltaV with new force
-
-    label nSubCycles = collision().nSubCycles();
-
-    if (nSubCycles > 1)
-    {
-        Info<< "    " << nSubCycles << " move-collide subCycles" << endl;
-
-        subCycleTime moveCollideSubCycle
-        (
-            const_cast<Time&>(this->db().time()),
-            nSubCycles
-        );
-
-        while(!(++moveCollideSubCycle).end())
-        {
-            moveCollide(td);
-        }
-
-        moveCollideSubCycle.endSubCycle();
-    }
-    else
-    {
-        moveCollide(td);
-    }
-}
-
-
-template<class ParcelType>
-void  Foam::KinematicCloud<ParcelType>::moveCollide
-(
-    typename ParcelType::trackData& td
-)
-{
-    td.part() = ParcelType::trackData::tpVelocityHalfStep;
-    Cloud<ParcelType>::move(td,  solution_.deltaT());
-
-    td.part() = ParcelType::trackData::tpLinearTrack;
-    Cloud<ParcelType>::move(td,  solution_.deltaT());
-
-    // td.part() = ParcelType::trackData::tpRotationalTrack;
-    // Cloud<ParcelType>::move(td);
-
-    updateCellOccupancy();
-
-    this->collision().collide();
-
-    td.part() = ParcelType::trackData::tpVelocityHalfStep;
-    Cloud<ParcelType>::move(td,  solution_.deltaT());
-}
-
-
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::postEvolve()
+template<class CloudType>
+void Foam::KinematicCloud<CloudType>::postEvolve()
 {
     Info<< endl;
 
@@ -471,16 +245,15 @@ void Foam::KinematicCloud<ParcelType>::postEvolve()
 }
 
 
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::cloudReset(KinematicCloud<ParcelType>& c)
+template<class CloudType>
+void Foam::KinematicCloud<CloudType>::cloudReset(KinematicCloud<CloudType>& c)
 {
-    Cloud<ParcelType>::cloudReset(c);
+    CloudType::cloudReset(c);
 
     rndGen_ = c.rndGen_;
 
     forces_.transfer(c.forces_);
 
-    collisionModel_.reset(c.collisionModel_.ptr());
     dispersionModel_.reset(c.dispersionModel_.ptr());
     injectionModel_.reset(c.injectionModel_.ptr());
     patchInteractionModel_.reset(c.patchInteractionModel_.ptr());
@@ -492,8 +265,8 @@ void Foam::KinematicCloud<ParcelType>::cloudReset(KinematicCloud<ParcelType>& c)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class ParcelType>
-Foam::KinematicCloud<ParcelType>::KinematicCloud
+template<class CloudType>
+Foam::KinematicCloud<CloudType>::KinematicCloud
 (
     const word& cloudName,
     const volScalarField& rho,
@@ -503,7 +276,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     bool readFields
 )
 :
-    Cloud<ParcelType>(rho.mesh(), cloudName, false),
+    CloudType(rho.mesh(), cloudName, false),
     kinematicCloud(),
     cloudCopyPtr_(NULL),
     mesh_(rho.mesh()),
@@ -545,7 +318,6 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
         ),
         solution_.active()
     ),
-    collisionModel_(NULL),
     dispersionModel_(NULL),
     injectionModel_(NULL),
     patchInteractionModel_(NULL),
@@ -592,7 +364,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
 
     if (readFields)
     {
-        ParcelType::readFields(*this);
+        parcelType::readFields(*this);
     }
 
     if (solution_.resetSourcesOnStartup())
@@ -602,14 +374,14 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
 }
 
 
-template<class ParcelType>
-Foam::KinematicCloud<ParcelType>::KinematicCloud
+template<class CloudType>
+Foam::KinematicCloud<CloudType>::KinematicCloud
 (
-    KinematicCloud<ParcelType>& c,
+    KinematicCloud<CloudType>& c,
     const word& name
 )
 :
-    Cloud<ParcelType>(c.mesh_, name, c),
+    CloudType(c.mesh_, name, c),
     kinematicCloud(),
     cloudCopyPtr_(NULL),
     mesh_(c.mesh_),
@@ -624,7 +396,6 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     mu_(c.mu_),
     g_(c.g_),
     forces_(c.forces_),
-    collisionModel_(c.collisionModel_->clone()),
     dispersionModel_(c.dispersionModel_->clone()),
     injectionModel_(c.injectionModel_->clone()),
     patchInteractionModel_(c.patchInteractionModel_->clone()),
@@ -666,15 +437,15 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
 {}
 
 
-template<class ParcelType>
-Foam::KinematicCloud<ParcelType>::KinematicCloud
+template<class CloudType>
+Foam::KinematicCloud<CloudType>::KinematicCloud
 (
     const fvMesh& mesh,
     const word& name,
-    const KinematicCloud<ParcelType>& c
+    const KinematicCloud<CloudType>& c
 )
 :
-    Cloud<ParcelType>(mesh, name, IDLList<ParcelType>()),
+    CloudType(mesh, name, IDLList<parcelType>()),
     kinematicCloud(),
     cloudCopyPtr_(NULL),
     mesh_(mesh),
@@ -700,7 +471,6 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     mu_(c.mu_),
     g_(c.g_),
     forces_(*this, mesh),
-    collisionModel_(NULL),
     dispersionModel_(NULL),
     injectionModel_(NULL),
     patchInteractionModel_(NULL),
@@ -714,17 +484,17 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class ParcelType>
-Foam::KinematicCloud<ParcelType>::~KinematicCloud()
+template<class CloudType>
+Foam::KinematicCloud<CloudType>::~KinematicCloud()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::checkParcelProperties
+template<class CloudType>
+void Foam::KinematicCloud<CloudType>::checkParcelProperties
 (
-    ParcelType& parcel,
+    parcelType& parcel,
     const scalar lagrangianDt,
     const bool fullyDescribed
 )
@@ -736,15 +506,16 @@ void Foam::KinematicCloud<ParcelType>::checkParcelProperties
 
     const scalar carrierDt = this->db().time().deltaTValue();
     parcel.stepFraction() = (carrierDt - lagrangianDt)/carrierDt;
+    parcel.typeId() = constProps_.parcelTypeId();
 }
 
 
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::storeState()
+template<class CloudType>
+void Foam::KinematicCloud<CloudType>::storeState()
 {
     cloudCopyPtr_.reset
     (
-        static_cast<KinematicCloud<ParcelType>*>
+        static_cast<KinematicCloud<CloudType>*>
         (
             clone(this->name() + "Copy").ptr()
         )
@@ -752,25 +523,25 @@ void Foam::KinematicCloud<ParcelType>::storeState()
 }
 
 
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::restoreState()
+template<class CloudType>
+void Foam::KinematicCloud<CloudType>::restoreState()
 {
     cloudReset(cloudCopyPtr_());
     cloudCopyPtr_.clear();
 }
 
 
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::resetSourceTerms()
+template<class CloudType>
+void Foam::KinematicCloud<CloudType>::resetSourceTerms()
 {
     UTrans().field() = vector::zero;
     UCoeff().field() = 0.0;
 }
 
 
-template<class ParcelType>
+template<class CloudType>
 template<class Type>
-void Foam::KinematicCloud<ParcelType>::relax
+void Foam::KinematicCloud<CloudType>::relax
 (
     DimensionedField<Type, volMesh>& field,
     const DimensionedField<Type, volMesh>& field0,
@@ -783,30 +554,42 @@ void Foam::KinematicCloud<ParcelType>::relax
 }
 
 
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::relaxSources
+template<class CloudType>
+void Foam::KinematicCloud<CloudType>::relaxSources
 (
-    const KinematicCloud<ParcelType>& cloudOldTime
+    const KinematicCloud<CloudType>& cloudOldTime
 )
 {
     this->relax(UTrans_(), cloudOldTime.UTrans(), "U");
 }
 
 
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::evolve()
+template<class CloudType>
+void Foam::KinematicCloud<CloudType>::evolve()
 {
     if (solution_.canEvolve())
     {
-        typename ParcelType::trackData td(*this);
+        typename parcelType::template
+            TrackingData<KinematicCloud<CloudType> > td(*this);
 
         solve(td);
     }
 }
 
 
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::info() const
+template<class CloudType>
+template<class TrackData>
+void  Foam::KinematicCloud<CloudType>::motion(TrackData& td)
+{
+    td.part() = TrackData::tpLinearTrack;
+    CloudType::move(td,  solution_.deltaT());
+
+    updateCellOccupancy();
+}
+
+
+template<class CloudType>
+void Foam::KinematicCloud<CloudType>::info() const
 {
     vector linearMomentum = linearMomentumOfSystem();
     reduce(linearMomentum, sumOp<vector>());

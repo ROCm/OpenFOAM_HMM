@@ -23,7 +23,7 @@ if (!foundCell)
 {
     injectionPosition = it->position(n);
 
-    findCellFacePt
+    mesh_.findCellFacePt
     (
         injectionPosition,
         injectorCell,

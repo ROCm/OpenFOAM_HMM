@@ -30,12 +30,12 @@ License
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::setModels()
+template<class CloudType>
+void Foam::ReactingCloud<CloudType>::setModels()
 {
     compositionModel_.reset
     (
-        CompositionModel<ReactingCloud<ParcelType> >::New
+        CompositionModel<ReactingCloud<CloudType> >::New
         (
             this->subModelProperties(),
             *this
@@ -44,7 +44,7 @@ void Foam::ReactingCloud<ParcelType>::setModels()
 
     phaseChangeModel_.reset
     (
-        PhaseChangeModel<ReactingCloud<ParcelType> >::New
+        PhaseChangeModel<ReactingCloud<CloudType> >::New
         (
             this->subModelProperties(),
             *this
@@ -53,8 +53,8 @@ void Foam::ReactingCloud<ParcelType>::setModels()
 }
 
 
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::checkSuppliedComposition
+template<class CloudType>
+void Foam::ReactingCloud<CloudType>::checkSuppliedComposition
 (
     const scalarField& YSupplied,
     const scalarField& Y,
@@ -65,7 +65,7 @@ void Foam::ReactingCloud<ParcelType>::checkSuppliedComposition
     {
         FatalErrorIn
         (
-            "ReactingCloud<ParcelType>::checkSuppliedComposition"
+            "ReactingCloud<CloudType>::checkSuppliedComposition"
             "("
                 "const scalarField&, "
                 "const scalarField&, "
@@ -80,10 +80,10 @@ void Foam::ReactingCloud<ParcelType>::checkSuppliedComposition
 }
 
 
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::cloudReset(ReactingCloud<ParcelType>& c)
+template<class CloudType>
+void Foam::ReactingCloud<CloudType>::cloudReset(ReactingCloud<CloudType>& c)
 {
-    ThermoCloud<ParcelType>::cloudReset(c);
+    CloudType::cloudReset(c);
 
     compositionModel_.reset(c.compositionModel_.ptr());
     phaseChangeModel_.reset(c.phaseChangeModel_.ptr());
@@ -94,8 +94,8 @@ void Foam::ReactingCloud<ParcelType>::cloudReset(ReactingCloud<ParcelType>& c)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class ParcelType>
-Foam::ReactingCloud<ParcelType>::ReactingCloud
+template<class CloudType>
+Foam::ReactingCloud<CloudType>::ReactingCloud
 (
     const word& cloudName,
     const volScalarField& rho,
@@ -105,7 +105,7 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
     bool readFields
 )
 :
-    ThermoCloud<ParcelType>(cloudName, rho, U, g, thermo, false),
+    CloudType(cloudName, rho, U, g, thermo, false),
     reactingCloud(),
     cloudCopyPtr_(NULL),
     constProps_(this->particleProperties(), this->solution().active()),
@@ -144,7 +144,7 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
 
     if (readFields)
     {
-        ParcelType::readFields(*this);
+        parcelType::readFields(*this, this->composition());
     }
 
     if (this->solution().resetSourcesOnStartup())
@@ -154,14 +154,14 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
 }
 
 
-template<class ParcelType>
-Foam::ReactingCloud<ParcelType>::ReactingCloud
+template<class CloudType>
+Foam::ReactingCloud<CloudType>::ReactingCloud
 (
-    ReactingCloud<ParcelType>& c,
+    ReactingCloud<CloudType>& c,
     const word& name
 )
 :
-    ThermoCloud<ParcelType>(c, name),
+    CloudType(c, name),
     reactingCloud(),
     cloudCopyPtr_(NULL),
     constProps_(c.constProps_),
@@ -194,15 +194,15 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
 }
 
 
-template<class ParcelType>
-Foam::ReactingCloud<ParcelType>::ReactingCloud
+template<class CloudType>
+Foam::ReactingCloud<CloudType>::ReactingCloud
 (
     const fvMesh& mesh,
     const word& name,
-    const ReactingCloud<ParcelType>& c
+    const ReactingCloud<CloudType>& c
 )
 :
-    ThermoCloud<ParcelType>(mesh, name, c),
+    CloudType(mesh, name, c),
     reactingCloud(),
     cloudCopyPtr_(NULL),
     constProps_(),
@@ -216,22 +216,22 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class ParcelType>
-Foam::ReactingCloud<ParcelType>::~ReactingCloud()
+template<class CloudType>
+Foam::ReactingCloud<CloudType>::~ReactingCloud()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::checkParcelProperties
+template<class CloudType>
+void Foam::ReactingCloud<CloudType>::checkParcelProperties
 (
-    ParcelType& parcel,
+    parcelType& parcel,
     const scalar lagrangianDt,
     const bool fullyDescribed
 )
 {
-    ThermoCloud<ParcelType>::checkParcelProperties
+    CloudType::checkParcelProperties
     (
         parcel,
         lagrangianDt,
@@ -257,12 +257,12 @@ void Foam::ReactingCloud<ParcelType>::checkParcelProperties
 }
 
 
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::storeState()
+template<class CloudType>
+void Foam::ReactingCloud<CloudType>::storeState()
 {
     cloudCopyPtr_.reset
     (
-        static_cast<ReactingCloud<ParcelType>*>
+        static_cast<ReactingCloud<CloudType>*>
         (
             clone(this->name() + "Copy").ptr()
         )
@@ -270,18 +270,18 @@ void Foam::ReactingCloud<ParcelType>::storeState()
 }
 
 
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::restoreState()
+template<class CloudType>
+void Foam::ReactingCloud<CloudType>::restoreState()
 {
     cloudReset(cloudCopyPtr_());
     cloudCopyPtr_.clear();
 }
 
 
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::resetSourceTerms()
+template<class CloudType>
+void Foam::ReactingCloud<CloudType>::resetSourceTerms()
 {
-    ThermoCloud<ParcelType>::resetSourceTerms();
+    CloudType::resetSourceTerms();
     forAll(rhoTrans_, i)
     {
         rhoTrans_[i].field() = 0.0;
@@ -289,15 +289,15 @@ void Foam::ReactingCloud<ParcelType>::resetSourceTerms()
 }
 
 
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::relaxSources
+template<class CloudType>
+void Foam::ReactingCloud<CloudType>::relaxSources
 (
-    const ReactingCloud<ParcelType>& cloudOldTime
+    const ReactingCloud<CloudType>& cloudOldTime
 )
 {
     typedef DimensionedField<scalar, volMesh> dsfType;
 
-    ThermoCloud<ParcelType>::relaxSources(cloudOldTime);
+    CloudType::relaxSources(cloudOldTime);
 
     forAll(rhoTrans_, fieldI)
     {
@@ -308,32 +308,43 @@ void Foam::ReactingCloud<ParcelType>::relaxSources
 }
 
 
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::evolve()
+template<class CloudType>
+void Foam::ReactingCloud<CloudType>::evolve()
 {
     if (this->solution().canEvolve())
     {
-        typename ParcelType::trackData td(*this);
+        typename parcelType::template
+            TrackingData<ReactingCloud<CloudType> > td(*this);
 
         this->solve(td);
     }
 }
 
 
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::addToMassPhaseChange(const scalar dMass)
+template<class CloudType>
+void Foam::ReactingCloud<CloudType>::addToMassPhaseChange(const scalar dMass)
 {
     dMassPhaseChange_ += dMass;
 }
 
 
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::info() const
+template<class CloudType>
+void Foam::ReactingCloud<CloudType>::info() const
 {
-    ThermoCloud<ParcelType>::info();
+    CloudType::info();
 
     Info<< "    Mass transfer phase change      = "
         << returnReduce(dMassPhaseChange_, sumOp<scalar>()) << nl;
+}
+
+
+template<class CloudType>
+void Foam::ReactingCloud<CloudType>::writeFields() const
+{
+    if (this->size())
+    {
+        CloudType::particleType::writeFields(*this, this->composition());
+    }
 }
 
 

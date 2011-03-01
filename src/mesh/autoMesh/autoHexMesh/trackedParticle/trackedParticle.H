@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,7 @@ SourceFiles
 #ifndef trackedParticle_H
 #define trackedParticle_H
 
-#include "Particle.H"
+#include "particle.H"
 #include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -52,7 +52,7 @@ class trackedParticleCloud;
 
 class trackedParticle
 :
-    public Particle<trackedParticle>
+    public particle
 {
     // Private data
 
@@ -74,34 +74,25 @@ public:
     friend class Cloud<trackedParticle>;
 
     //- Class used to pass tracking data to the trackToFace function
-    class trackData
+    class trackingData
+    :
+        public particle::TrackingData<Cloud<trackedParticle> >
     {
-        //- Reference to the cloud containing this particle
-        Cloud<trackedParticle>& cloud_;
-
         labelList& maxLevel_;
 
     public:
 
-        bool switchProcessor;
-        bool keepParticle;
-
 
         // Constructors
 
-            trackData(Cloud<trackedParticle>& cloud, labelList& maxLevel)
+            trackingData(Cloud<trackedParticle>& cloud, labelList& maxLevel)
             :
-                cloud_(cloud),
+                particle::TrackingData<Cloud<trackedParticle> >(cloud),
                 maxLevel_(maxLevel)
             {}
 
 
         // Member functions
-
-            Cloud<trackedParticle>& cloud()
-            {
-                return cloud_;
-            }
 
             labelList& maxLevel()
             {
@@ -116,7 +107,7 @@ public:
         //- Construct from components
         trackedParticle
         (
-            const Cloud<trackedParticle>& c,
+            const polyMesh& mesh,
             const vector& position,
             const label cellI,
             const label tetFaceI,
@@ -130,19 +121,38 @@ public:
         //- Construct from Istream
         trackedParticle
         (
-            const Cloud<trackedParticle>& c,
+            const polyMesh& mesh,
             Istream& is,
             bool readFields = true
         );
 
         //- Construct and return a clone
-        autoPtr<Particle<trackedParticle> > clone() const
+        autoPtr<particle> clone() const
         {
-            return autoPtr<Particle<trackedParticle> >
-            (
-                new trackedParticle(*this)
-            );
+            return autoPtr<particle>(new trackedParticle(*this));
         }
+
+        //- Factory class to read-construct particles used for
+        //  parallel transfer
+        class iNew
+        {
+            const polyMesh& mesh_;
+
+        public:
+
+            iNew(const polyMesh& mesh)
+            :
+                mesh_(mesh)
+            {}
+
+            autoPtr<trackedParticle> operator()(Istream& is) const
+            {
+                return autoPtr<trackedParticle>
+                (
+                    new trackedParticle(mesh_, is, true)
+                );
+            }
+        };
 
 
     // Member Functions
@@ -170,7 +180,7 @@ public:
         // Tracking
 
             //- Track all particles to their end point
-            bool move(trackData&, const scalar);
+            bool move(trackingData&, const scalar);
 
 
             //- Overridable function to handle the particle hitting a patch
@@ -178,30 +188,17 @@ public:
             bool hitPatch
             (
                 const polyPatch&,
-                trackedParticle::trackData& td,
+                trackingData& td,
                 const label patchI,
                 const scalar trackFraction,
                 const tetIndices& tetIs
             );
-            bool hitPatch
-            (
-                const polyPatch&,
-                int&,
-                const label patchI,
-                const scalar trackFraction,
-                const tetIndices& tetIs
-           );
 
             //- Overridable function to handle the particle hitting a wedge
             void hitWedgePatch
             (
                 const wedgePolyPatch&,
-                trackedParticle::trackData& td
-            );
-            void hitWedgePatch
-            (
-                const wedgePolyPatch&,
-                int&
+                trackingData& td
             );
 
             //- Overridable function to handle the particle hitting a
@@ -209,24 +206,14 @@ public:
             void hitSymmetryPatch
             (
                 const symmetryPolyPatch&,
-                trackedParticle::trackData& td
-            );
-            void hitSymmetryPatch
-            (
-                const symmetryPolyPatch&,
-                int&
+                trackingData& td
             );
 
             //- Overridable function to handle the particle hitting a cyclic
             void hitCyclicPatch
             (
                 const cyclicPolyPatch&,
-                trackedParticle::trackData& td
-            );
-            void hitCyclicPatch
-            (
-                const cyclicPolyPatch&,
-                int&
+                trackingData& td
             );
 
             //- Overridable function to handle the particle hitting a
@@ -234,25 +221,14 @@ public:
             void hitProcessorPatch
             (
                 const processorPolyPatch&,
-                trackedParticle::trackData& td
-            );
-            void hitProcessorPatch
-            (
-                const processorPolyPatch&,
-                int&
+                trackingData& td
             );
 
             //- Overridable function to handle the particle hitting a wallPatch
             void hitWallPatch
             (
                 const wallPolyPatch&,
-                trackedParticle::trackData& td,
-                const tetIndices&
-            );
-            void hitWallPatch
-            (
-                const wallPolyPatch&,
-                int&,
+                trackingData& td,
                 const tetIndices&
             );
 
@@ -260,20 +236,13 @@ public:
             void hitPatch
             (
                 const polyPatch&,
-                trackedParticle::trackData& td
-            );
-            void hitPatch
-            (
-                const polyPatch&,
-                int&
+                trackingData& td
             );
 
 
     // Ostream Operator
 
         friend Ostream& operator<<(Ostream&, const trackedParticle&);
-
-
 };
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -100,7 +100,7 @@ Foam::lagrangianFieldDecomposer::lagrangianFieldDecomposer
                 (
                     new passiveParticle
                     (
-                        positions_,
+                        procMesh,
                         ppi.position(),
                         procCelli,
                         false
@@ -112,7 +112,7 @@ Foam::lagrangianFieldDecomposer::lagrangianFieldDecomposer
 
     particleIndices_.setSize(pi);
 
-    IOPosition<passiveParticle>(positions_).write();
+    IOPosition<Cloud<passiveParticle> >(positions_).write();
 }
 
 

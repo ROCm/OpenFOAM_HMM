@@ -34,9 +34,9 @@ Foam::distributionModels::distributionModel::New
     cachedRandom& rndGen
 )
 {
-    const word modelType(dict.lookup("distributionModelType"));
+    const word modelType(dict.lookup("type"));
 
-    Info<< "Selecting distributionModelType " << modelType << endl;
+    Info<< "Selecting distribution model " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
@@ -51,8 +51,8 @@ Foam::distributionModels::distributionModel::New
                 "cachedRandom&"
             ")"
         )
-            << "Unknown distributionModel type " << modelType << nl << nl
-            << "Valid distributionModel types are:" << nl
+            << "Unknown distribution model type " << modelType << nl << nl
+            << "Valid distribution model types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

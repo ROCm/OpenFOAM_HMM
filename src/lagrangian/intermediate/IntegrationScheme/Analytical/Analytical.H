@@ -51,7 +51,7 @@ class Analytical
 public:
 
     //- Runtime type information
-    TypeName("Analytical");
+    TypeName("analytical");
 
 
     // Constructors

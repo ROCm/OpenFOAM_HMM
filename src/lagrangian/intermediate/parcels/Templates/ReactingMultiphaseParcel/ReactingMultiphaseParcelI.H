@@ -30,7 +30,7 @@ inline
 Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
 constantProperties()
 :
-    ReactingParcel<ParcelType>::constantProperties(),
+    ParcelType::constantProperties(),
     LDevol_(0.0),
     hRetentionCoeff_(0.0)
 {}
@@ -44,7 +44,7 @@ constantProperties
     const constantProperties& cp
 )
 :
-    ReactingParcel<ParcelType>::constantProperties(cp),
+    ParcelType::constantProperties(cp),
     LDevol_(cp.LDevol_),
     hRetentionCoeff_(cp.hRetentionCoeff_)
 {}
@@ -58,7 +58,7 @@ constantProperties
     const bool readFields
 )
 :
-    ReactingParcel<ParcelType>::constantProperties(parentDict, readFields),
+    ParcelType::constantProperties(parentDict, readFields),
     LDevol_(0.0),
     hRetentionCoeff_(0.0)
 {
@@ -83,28 +83,16 @@ constantProperties
 
 
 template<class ParcelType>
-inline Foam::ReactingMultiphaseParcel<ParcelType>::trackData::trackData
-(
-    ReactingMultiphaseCloud<ParcelType>& cloud,
-    typename ReactingParcel<ParcelType>::trackData::trackPart part
-)
-:
-    ReactingParcel<ParcelType>::trackData(cloud, part),
-    cloud_(cloud)
-{}
-
-
-template<class ParcelType>
 inline Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
 (
-    ReactingMultiphaseCloud<ParcelType>& owner,
+    const polyMesh& mesh,
     const vector& position,
     const label cellI,
     const label tetFaceI,
     const label tetPtI
 )
 :
-    ReactingParcel<ParcelType>(owner, position, cellI, tetFaceI, tetPtI),
+    ParcelType(mesh, position, cellI, tetFaceI, tetPtI),
     YGas_(0),
     YLiquid_(0),
     YSolid_(0),
@@ -115,7 +103,7 @@ inline Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
 template<class ParcelType>
 inline Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
 (
-    ReactingMultiphaseCloud<ParcelType>& owner,
+    const polyMesh& mesh,
     const vector& position,
     const label cellI,
     const label tetFaceI,
@@ -135,9 +123,9 @@ inline Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
     const constantProperties& constProps
 )
 :
-    ReactingParcel<ParcelType>
+    ParcelType
     (
-        owner,
+        mesh,
         position,
         cellI,
         tetFaceI,
@@ -176,16 +164,6 @@ Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
 hRetentionCoeff() const
 {
     return hRetentionCoeff_;
-}
-
-
-// * * * * * * * * * * * trackData Member Functions  * * * * * * * * * * * * //
-
-template<class ParcelType>
-inline Foam::ReactingMultiphaseCloud<ParcelType>&
-Foam::ReactingMultiphaseParcel<ParcelType>::trackData::cloud()
-{
-    return cloud_;
 }
 
 

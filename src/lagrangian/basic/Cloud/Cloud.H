@@ -25,6 +25,7 @@ Class
     Foam::Cloud
 
 Description
+    Base cloud calls templated on particle type
 
 SourceFiles
     Cloud.C
@@ -80,14 +81,8 @@ class Cloud
 
         const polyMesh& polyMesh_;
 
-        //- Overall count of particles ever created. Never decreases.
-        mutable label particleCount_;
-
         //- Temporary storage for addressing. Used in findTris.
         mutable DynamicList<label> labels_;
-
-        //- Search tree to allow spatial tet searching
-        mutable autoPtr<indexedOctree<treeDataCell> > cellTree_;
 
         //- Count of how many tracking rescue corrections have been
         //  applied
@@ -114,8 +109,7 @@ class Cloud
 
 public:
 
-    template<class ParticleT>
-    friend class Particle;
+    friend class particle;
     template<class ParticleT>
     friend class IOPosition;
 
@@ -132,10 +126,6 @@ public:
 
         //- Name of cloud properties dictionary
         static word cloudPropertiesName;
-
-        //- Fraction of distance to tet centre to move a particle to
-        // 'rescue' it from a tracking problem
-        static const scalar trackingCorrectionTol;
 
 
     // Constructors
@@ -184,65 +174,15 @@ public:
                 return polyMesh_;
             }
 
-            //- Is this global face an internal face?
-            bool internalFace(const label faceI) const
-            {
-                return polyMesh_.isInternalFace(faceI);
-            }
-
-            //- Is this global face a boundary face?
-            bool boundaryFace(const label faceI) const
-            {
-                return !internalFace(faceI);
-            }
-
-            //- Which patch is this global face on
-            label facePatch(const label faceI) const
-            {
-                return polyMesh_.boundaryMesh().whichPatch(faceI);
-            }
-
-            //- Which face of this patch is this global face
-            label patchFace(const label patchI, const label faceI) const
-            {
-                return polyMesh_.boundaryMesh()[patchI].whichFace(faceI);
-            }
-
             label size() const
             {
                 return IDLList<ParticleType>::size();
             };
 
-            //- Find the cell, tetFaceI and tetPtI for the given
-            //  position
-            void findCellFacePt
-            (
-                const point& pt,
-                label& cellI,
-                label& tetFaceI,
-                label& tetPtI
-            ) const;
-
-            //- Find the tetFaceI and tetPtI for the given position in
-            //  the supplied cell, tetFaceI and tetPtI = -1 if not
-            //  found
-            void findFacePt
-            (
-                label cellI,
-                const point& pt,
-                label& tetFaceI,
-                label& tetPtI
-            ) const;
-
-            //- Test if the given position is inside the give tet
-            bool inTet
-            (
-                const point& pt,
-                const tetPointRef& tet
-            ) const;
-
-            //- Build (if necessary) and return the cell search tree
-            const indexedOctree<treeDataCell>& cellTree() const;
+            DynamicList<label>& labels()
+            {
+                return labels_;
+            }
 
             //- Return nTrackingRescues
             label nTrackingRescues() const
@@ -314,9 +254,6 @@ public:
                 return IDLList<ParticleType>::clear();
             };
 
-            //- Get unique particle creation id
-            label getNewParticleID() const;
-
             //- Transfer particle to cloud
             void addParticle(ParticleType* pPtr);
 
@@ -328,12 +265,13 @@ public:
 
             //- Move the particles
             //  passing the TrackingData to the track function
-            template<class TrackingData>
-            void move(TrackingData& td, const scalar trackTime);
+            template<class TrackData>
+            void move(TrackData& td, const scalar trackTime);
 
             //- Remap the cells of particles corresponding to the
             //  mesh topology change
-            virtual void autoMap(const mapPolyMesh&);
+            template<class TrackData>
+            void autoMap(TrackData& td, const mapPolyMesh&);
 
 
         // Read

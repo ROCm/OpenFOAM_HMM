@@ -28,8 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "KinematicCloud.H"
-
 #include "SphereDragForce.H"
 #include "NonSphereDragForce.H"
 
@@ -40,46 +38,15 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelForces(ParcelType)                                          \
+#define makeParcelForces(CloudType)                                           \
                                                                               \
-    makeParticleForceModel(KinematicCloud<ParcelType>);                       \
-                                                                              \
-    makeParticleForceModelType                                                \
-    (                                                                         \
-        SphereDragForce,                                                      \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeParticleForceModelType                                                \
-    (                                                                         \
-        NonSphereDragForce,                                                   \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeParticleForceModelType                                                \
-    (                                                                         \
-        GravityForce,                                                         \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeParticleForceModelType                                                \
-    (                                                                         \
-        ParamagneticForce,                                                    \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeParticleForceModelType                                                \
-    (                                                                         \
-        PressureGradientForce,                                                \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeParticleForceModelType                                                \
-    (                                                                         \
-        SRFForce,                                                             \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );
+    makeParticleForceModel(CloudType);                                        \
+    makeParticleForceModelType(SphereDragForce, CloudType);                   \
+    makeParticleForceModelType(NonSphereDragForce, CloudType);                \
+    makeParticleForceModelType(GravityForce, CloudType);                      \
+    makeParticleForceModelType(ParamagneticForce, CloudType);                 \
+    makeParticleForceModelType(PressureGradientForce, CloudType);             \
+    makeParticleForceModelType(SRFForce, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

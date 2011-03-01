@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,191 +23,210 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline const List<word>& parcel::liquidNames() const
+inline const Foam::List<Foam::word>& Foam::parcel::liquidNames() const
 {
     return liquidComponents_;
 }
 
-inline const List<word>& parcel::fuelNames() const
+
+inline const Foam::List<Foam::word>& Foam::parcel::fuelNames() const
 {
     return liquidComponents_;
 }
 
-inline scalar parcel::d() const
+
+inline Foam::scalar Foam::parcel::d() const
 {
     return d_;
 }
 
-inline scalar& parcel::d()
+
+inline Foam::scalar& Foam::parcel::d()
 {
     return d_;
 }
 
-inline scalar parcel::T() const
+
+inline Foam::scalar Foam::parcel::T() const
 {
     return T_;
 }
 
-inline scalar& parcel::T()
+
+inline Foam::scalar& Foam::parcel::T()
 {
     return T_;
 }
 
-inline scalar parcel::m() const
+
+inline Foam::scalar Foam::parcel::m() const
 {
     return m_;
 }
 
-inline scalar& parcel::m()
+
+inline Foam::scalar& Foam::parcel::m()
 {
     return m_;
 }
 
-inline scalar parcel::dev() const
+
+inline Foam::scalar Foam::parcel::dev() const
 {
     return y_;
 }
 
-inline scalar& parcel::dev()
+
+inline Foam::scalar& Foam::parcel::dev()
 {
     return y_;
 }
 
-inline scalar parcel::ddev() const
+
+inline Foam::scalar Foam::parcel::ddev() const
 {
     return yDot_;
 }
 
-inline scalar& parcel::ddev()
+
+inline Foam::scalar& Foam::parcel::ddev()
 {
     return yDot_;
 }
 
-inline scalar parcel::ct() const
+
+inline Foam::scalar Foam::parcel::ct() const
 {
     return ct_;
 }
 
-inline scalar& parcel::ct()
+
+inline Foam::scalar& Foam::parcel::ct()
 {
     return ct_;
 }
 
-inline scalar& parcel::ms()
+
+inline Foam::scalar& Foam::parcel::ms()
 {
     return ms_;
 }
 
-inline scalar parcel::ms() const
+
+inline Foam::scalar Foam::parcel::ms() const
 {
     return ms_;
 }
 
-inline scalar& parcel::tTurb()
+
+inline Foam::scalar& Foam::parcel::tTurb()
 {
     return tTurb_;
 }
 
-inline scalar parcel::tTurb() const
+
+inline Foam::scalar Foam::parcel::tTurb() const
 {
     return tTurb_;
 }
 
-inline scalar& parcel::liquidCore()
+
+inline Foam::scalar& Foam::parcel::liquidCore()
 {
     return liquidCore_;
 }
 
-inline scalar parcel::liquidCore() const
+
+inline Foam::scalar Foam::parcel::liquidCore() const
 {
     return liquidCore_;
 }
 
-inline scalar& parcel::injector()
+
+inline Foam::scalar& Foam::parcel::injector()
 {
     return injector_;
 }
 
-inline scalar parcel::injector() const
+
+inline Foam::scalar Foam::parcel::injector() const
 {
     return injector_;
 }
 
-inline const vector& parcel::U() const
+
+inline const Foam::vector& Foam::parcel::U() const
 {
     return U_;
 }
 
-inline vector& parcel::U()
+
+inline Foam::vector& Foam::parcel::U()
 {
     return U_;
 }
 
-inline const vector& parcel::Uturb() const
+
+inline const Foam::vector& Foam::parcel::Uturb() const
 {
     return Uturb_;
 }
 
-inline vector& parcel::Uturb()
+
+inline Foam::vector& Foam::parcel::Uturb()
 {
     return Uturb_;
 }
 
-inline const vector& parcel::n() const
+
+inline const Foam::vector& Foam::parcel::n() const
 {
     return n_;
 }
 
-inline vector& parcel::n()
+
+inline Foam::vector& Foam::parcel::n()
 {
     return n_;
 }
 
-inline const scalarField& parcel::X() const
+
+inline const Foam::scalarField& Foam::parcel::X() const
 {
     return X_;
 }
 
-inline scalarField& parcel::X()
+
+inline Foam::scalarField& Foam::parcel::X()
 {
     return X_;
 }
 
-inline scalar& parcel::tMom()
+
+inline Foam::scalar& Foam::parcel::tMom()
 {
     return tMom_;
 }
 
-inline scalar parcel::tMom() const
+
+inline Foam::scalar Foam::parcel::tMom() const
 {
     return tMom_;
 }
 
-inline vector parcel::Urel(const vector& U) const
+
+inline Foam::vector Foam::parcel::Urel(const vector& U) const
 {
     return U_ - U;
 }
 
-inline void parcel::correctNormal
-(
-    const vector& sym
-)
+
+inline void Foam::parcel::correctNormal(const vector& sym)
 {
     scalar d = position() & sym;
     n_ = position() - d*sym;
     n_ /= mag(n_);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -128,7 +128,7 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("IntegrationScheme");
+    TypeName("integrationScheme");
 
 
     //- Declare runtime constructor selection table

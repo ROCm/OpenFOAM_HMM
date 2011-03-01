@@ -29,6 +29,7 @@ License
 #include "treeDataFace.H"
 #include "treeDataCell.H"
 #include "volFields.H"
+#include "meshTools.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -1237,7 +1238,7 @@ void Foam::InteractionLists<ParticleType>::receiveReferredData
                 referredParticles_[constructMap[i]] = IDLList<ParticleType>
                 (
                     str,
-                    typename ParticleType::iNew(cloud_)
+                    typename ParticleType::iNew(mesh_)
                 );
             }
         }

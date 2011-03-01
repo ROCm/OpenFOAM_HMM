@@ -35,9 +35,9 @@ Foam::DispersionModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType(dict.lookup("DispersionModel"));
+    const word modelType(dict.lookup("dispersionModel"));
 
-    Info<< "Selecting DispersionModel " << modelType << endl;
+    Info<< "Selecting dispersion model " << modelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
@@ -51,9 +51,9 @@ Foam::DispersionModel<CloudType>::New
                 "const dictionary&, "
                 "CloudType&"
             ")"
-        )   << "Unknown DispersionModel type "
+        )   << "Unknown dispersion model type "
             << modelType << nl << nl
-            << "Valid DispersionModel types are:" << nl
+            << "Valid dispersion model types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

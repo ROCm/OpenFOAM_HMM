@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,10 +28,6 @@ License
 #include "DynamicList.H"
 #include "polyMesh.H"
 
-#include "Cloud.H"
-#include "passiveParticle.H"
-#include "IDLList.H"
-
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -45,10 +41,9 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Sample till hits boundary.
 bool Foam::polyLineSet::trackToBoundary
 (
-    Particle<passiveParticle>& singleParticle,
+    passiveParticle& singleParticle,
     label& sampleI,
     DynamicList<point>& samplingPts,
     DynamicList<label>& samplingCells,
@@ -56,6 +51,9 @@ bool Foam::polyLineSet::trackToBoundary
     DynamicList<scalar>& samplingCurveDist
 ) const
 {
+    passiveParticleCloud particleCloud(mesh());
+    particle::TrackingData<passiveParticleCloud> trackData(particleCloud);
+
     // Alias
     const point& trackPt = singleParticle.position();
 
@@ -70,7 +68,7 @@ bool Foam::polyLineSet::trackToBoundary
         do
         {
             singleParticle.stepFraction() = 0;
-            singleParticle.track(sampleCoords_[sampleI+1]);
+            singleParticle.track(sampleCoords_[sampleI+1], trackData);
         }
         while
         (
@@ -260,11 +258,9 @@ void Foam::polyLineSet::calcSamples
         //
 
         // Initialize tracking starting from sampleI
-        Cloud<passiveParticle> particles(mesh(), IDLList<passiveParticle>());
-
         passiveParticle singleParticle
         (
-            particles,
+            mesh(),
             trackPt,
             trackCellI
         );

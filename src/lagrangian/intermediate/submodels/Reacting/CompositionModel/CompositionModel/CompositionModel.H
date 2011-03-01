@@ -72,7 +72,7 @@ class CompositionModel
 public:
 
     //- Runtime type information
-    TypeName("CompositionModel");
+    TypeName("compositionModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable
@@ -280,13 +280,13 @@ public:
     );
 
 
-#define makeCompositionModelType(SS, CloudType, ParcelType)                   \
+#define makeCompositionModelType(SS, CloudType)                               \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
+    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
                                                                               \
-    CompositionModel<CloudType<ParcelType> >::                                \
-        adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
-            add##SS##CloudType##ParcelType##ConstructorToTable_;
+    CompositionModel<CloudType>::                                             \
+        adddictionaryConstructorToTable<SS<CloudType> >                       \
+            add##SS##CloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

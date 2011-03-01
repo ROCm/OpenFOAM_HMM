@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,12 +30,12 @@ License
 
 Foam::solidParticle::solidParticle
 (
-    const Cloud<solidParticle>& cloud,
+    const polyMesh& mesh,
     Istream& is,
     bool readFields
 )
 :
-    Particle<solidParticle>(cloud, is, readFields)
+    particle(mesh, is, readFields)
 {
     if (readFields)
     {
@@ -65,6 +65,9 @@ void Foam::solidParticle::readFields(Cloud<solidParticle>& c)
     {
         return;
     }
+
+    particle::readFields(c);
+
     IOField<scalar> d(c.fieldIOobject("d", IOobject::MUST_READ));
     c.checkFieldIOobject(c, d);
 
@@ -85,7 +88,7 @@ void Foam::solidParticle::readFields(Cloud<solidParticle>& c)
 
 void Foam::solidParticle::writeFields(const Cloud<solidParticle>& c)
 {
-    Particle<solidParticle>::writeFields(c);
+    particle::writeFields(c);
 
     label np = c.size();
 
@@ -113,13 +116,13 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const solidParticle& p)
 {
     if (os.format() == IOstream::ASCII)
     {
-        os  << static_cast<const Particle<solidParticle>&>(p)
+        os  << static_cast<const particle&>(p)
             << token::SPACE << p.d_
             << token::SPACE << p.U_;
     }
     else
     {
-        os  << static_cast<const Particle<solidParticle>&>(p);
+        os  << static_cast<const particle&>(p);
         os.write
         (
             reinterpret_cast<const char*>(&p.d_),

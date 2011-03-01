@@ -495,6 +495,8 @@ $(pointBoundaryMesh)/pointBoundaryMesh.C
 
 meshes/boundBox/boundBox.C
 
+meshes/treeBoundBox/treeBoundBox.C
+
 meshTools = meshes/meshTools
 $(meshTools)/matchPoints.C
 $(meshTools)/mergePoints.C
@@ -571,6 +573,11 @@ $(interpolations)/patchToPatchInterpolation/PatchToPatchInterpolationName.C
 
 algorithms/MeshWave/MeshWaveName.C
 algorithms/MeshWave/FaceCellWaveName.C
+
+algorithms/indexedOctree/indexedOctreeName.C
+algorithms/indexedOctree/treeDataCell.C
+
+
 
 graph/curve/curve.C
 graph/graph.C

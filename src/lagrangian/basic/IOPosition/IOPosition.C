@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,11 +27,8 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class ParticleType>
-Foam::IOPosition<ParticleType>::IOPosition
-(
-    const Cloud<ParticleType>& c
-)
+template<class CloudType>
+Foam::IOPosition<CloudType>::IOPosition(const CloudType& c)
 :
     regIOobject
     (
@@ -50,8 +47,8 @@ Foam::IOPosition<ParticleType>::IOPosition
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class ParticleType>
-bool Foam::IOPosition<ParticleType>::write() const
+template<class CloudType>
+bool Foam::IOPosition<CloudType>::write() const
 {
     if (cloud_.size())
     {
@@ -64,19 +61,18 @@ bool Foam::IOPosition<ParticleType>::write() const
 }
 
 
-template<class ParticleType>
-bool Foam::IOPosition<ParticleType>::writeData(Ostream& os) const
+template<class CloudType>
+bool Foam::IOPosition<CloudType>::writeData(Ostream& os) const
 {
     os  << cloud_.size() << nl << token::BEGIN_LIST << nl;
 
-    forAllConstIter(typename Cloud<ParticleType>, cloud_, iter)
+    forAllConstIter(typename CloudType, cloud_, iter)
     {
+        const typename CloudType::particleType& p = iter();
+
         // Prevent writing additional fields
-        static_cast<const Particle<ParticleType>&>(iter()).write
-        (
-            os,
-            false
-        );
+        p.write(os, false);
+
         os  << nl;
     }
 
@@ -86,13 +82,11 @@ bool Foam::IOPosition<ParticleType>::writeData(Ostream& os) const
 }
 
 
-template<class ParticleType>
-void Foam::IOPosition<ParticleType>::readData
-(
-    Cloud<ParticleType>& c,
-    bool checkClass
-)
+template<class CloudType>
+void Foam::IOPosition<CloudType>::readData(CloudType& c, bool checkClass)
 {
+    const polyMesh& mesh = c.pMesh();
+
     Istream& is = readStream(checkClass ? typeName : "");
 
     token firstToken(is);
@@ -102,16 +96,16 @@ void Foam::IOPosition<ParticleType>::readData
         label s = firstToken.labelToken();
 
         // Read beginning of contents
-        is.readBeginList("Cloud<ParticleType>");
+        is.readBeginList("IOPosition<CloudType>::readData(CloudType, bool)");
 
         for (label i=0; i<s; i++)
         {
             // Do not read any fields, position only
-            c.append(new ParticleType(c, is, false));
+            c.append(new typename CloudType::particleType(mesh, is, false));
         }
 
         // Read end of contents
-        is.readEndList("Cloud<ParticleType>");
+        is.readEndList("IOPosition<CloudType>::readData(CloudType, bool)");
     }
     else if (firstToken.isPunctuation())
     {
@@ -119,12 +113,10 @@ void Foam::IOPosition<ParticleType>::readData
         {
             FatalIOErrorIn
             (
-                "void IOPosition<ParticleType>::readData"
-                "(Cloud<ParticleType>&, bool)",
+                "void IOPosition<CloudType>::readData(CloudType&, bool)",
                 is
             )   << "incorrect first token, '(', found "
-                << firstToken.info()
-                << exit(FatalIOError);
+                << firstToken.info() << exit(FatalIOError);
         }
 
         token lastToken(is);
@@ -138,26 +130,24 @@ void Foam::IOPosition<ParticleType>::readData
         {
             is.putBack(lastToken);
             // Do not read any fields, position only
-            c.append(new ParticleType(c, is, false));
-            is >> lastToken;
+            c.append(new typename CloudType::particleType(mesh, is, false));
+            is  >> lastToken;
         }
     }
     else
     {
         FatalIOErrorIn
         (
-            "void IOPosition<ParticleType>::readData"
-            "(Cloud<ParticleType>&, bool)",
+            "void IOPosition<ParticleType>::readData(CloudType&, bool)",
             is
         )   << "incorrect first token, expected <int> or '(', found "
-            << firstToken.info()
-            << exit(FatalIOError);
+            << firstToken.info() << exit(FatalIOError);
     }
 
     // Check state of IOstream
     is.check
     (
-        "void IOPosition<ParticleType>::readData(Cloud<ParticleType>&, bool)"
+        "void IOPosition<CloudType>::readData(CloudType&, bool)"
     );
 }
 

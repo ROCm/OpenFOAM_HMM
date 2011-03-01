@@ -63,7 +63,7 @@ Ostream& operator<<
 template<class ParcelType>
 class ReactingMultiphaseParcel
 :
-    public ReactingParcel<ParcelType>
+    public ParcelType
 {
 public:
 
@@ -77,7 +77,7 @@ public:
     //- Class to hold reacting multiphase particle constant properties
     class constantProperties
     :
-        public ReactingParcel<ParcelType>::constantProperties
+        public ParcelType::constantProperties
     {
         // Private data
 
@@ -115,37 +115,6 @@ public:
             //- Return const access to the fraction of enthalpy retained by
             //  parcel due to surface reactions
             inline scalar hRetentionCoeff() const;
-    };
-
-
-    //- Class used to pass reacting tracking data to the trackToFace function
-    class trackData
-    :
-        public ReactingParcel<ParcelType>::trackData
-    {
-        // Private data
-
-            //- Reference to the cloud containing this particle
-            ReactingMultiphaseCloud<ParcelType>& cloud_;
-
-
-    public:
-
-        // Constructors
-
-            //- Construct from components
-            inline trackData
-            (
-                ReactingMultiphaseCloud<ParcelType>& cloud,
-                typename ReactingParcel<ParcelType>::trackData::trackPart
-                    part = ReactingParcel<ParcelType>::trackData::tpLinearTrack
-             );
-
-
-        // Member functions
-
-            //- Return access to the owner cloud
-            inline ReactingMultiphaseCloud<ParcelType>& cloud();
     };
 
 
@@ -277,16 +246,13 @@ public:
         TypeName("ReactingMultiphaseParcel");
 
 
-    friend class Cloud<ParcelType>;
-
-
     // Constructors
 
         //- Construct from owner, position, and cloud owner
         //  Other properties initialised as null
         inline ReactingMultiphaseParcel
         (
-            ReactingMultiphaseCloud<ParcelType>& owner,
+            const polyMesh& mesh,
             const vector& position,
             const label cellI,
             const label tetFaceI,
@@ -297,7 +263,7 @@ public:
         //- Construct from components
         inline ReactingMultiphaseParcel
         (
-            ReactingMultiphaseCloud<ParcelType>& owner,
+            const polyMesh& mesh,
             const vector& position,
             const label cellI,
             const label tetFaceI,
@@ -320,7 +286,7 @@ public:
         //- Construct from Istream
         ReactingMultiphaseParcel
         (
-            const Cloud<ParcelType>& c,
+            const polyMesh& mesh,
             Istream& is,
             bool readFields = true
         );
@@ -332,33 +298,45 @@ public:
         ReactingMultiphaseParcel
         (
             const ReactingMultiphaseParcel& p,
-            const ReactingMultiphaseCloud<ParcelType>& c
+            const polyMesh& mesh
         );
 
         //- Construct and return a (basic particle) clone
-        virtual autoPtr<Particle<ParcelType> > clone() const
+        virtual autoPtr<particle> clone() const
         {
-            return autoPtr<Particle<ParcelType> >
-            (
-                new ReactingMultiphaseParcel(*this)
-            );
+            return autoPtr<particle>(new ReactingMultiphaseParcel(*this));
         }
 
         //- Construct and return a (basic particle) clone
-        virtual autoPtr<Particle<ParcelType> > clone
-        (
-            const Cloud<ParcelType>& c
-        ) const
+        virtual autoPtr<particle> clone(const polyMesh& mesh) const
         {
-            return autoPtr<Particle<ParcelType> >
-            (
-                new ReactingMultiphaseParcel
-                (
-                    *this,
-                    static_cast<const ReactingMultiphaseCloud<ParcelType>&>(c)
-                )
-            );
+            return autoPtr<particle>(new ReactingMultiphaseParcel(*this, mesh));
         }
+
+        //- Factory class to read-construct particles used for
+        //  parallel transfer
+        class iNew
+        {
+            const polyMesh& mesh_;
+
+        public:
+
+            iNew(const polyMesh& mesh)
+            :
+                mesh_(mesh)
+            {}
+
+            autoPtr<ReactingMultiphaseParcel<ParcelType> > operator()
+            (
+                Istream& is
+            ) const
+            {
+                return autoPtr<ReactingMultiphaseParcel<ParcelType> >
+                (
+                    new ReactingMultiphaseParcel<ParcelType>(mesh_, is, true)
+                );
+            }
+        };
 
 
     // Member Functions
@@ -426,10 +404,28 @@ public:
         // I-O
 
             //- Read
-            static void readFields(Cloud<ParcelType>& c);
+            template<class CloudType, class CompositionType>
+            static void readFields
+            (
+                CloudType& c,
+                const CompositionType& compModel
+            );
+
+            //- Read - no composition
+            template<class CloudType>
+            static void readFields(CloudType& c);
 
             //- Write
-            static void writeFields(const Cloud<ParcelType>& c);
+            template<class CloudType, class CompositionType>
+            static void writeFields
+            (
+                const CloudType& c,
+                const CompositionType& compModel
+            );
+
+            //- Read - composition supplied
+            template<class CloudType>
+            static void writeFields(const CloudType& c);
 
 
     // Ostream Operator

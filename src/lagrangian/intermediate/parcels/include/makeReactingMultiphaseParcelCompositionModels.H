@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,29 +28,16 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "ReactingMultiphaseCloud.H"
 #include "NoComposition.H"
 #include "SingleMixtureFraction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeReactingMultiphaseParcelCompositionModels(ParcelType)             \
+#define makeReactingMultiphaseParcelCompositionModels(CloudType)              \
                                                                               \
-    makeCompositionModel(ReactingCloud<ParcelType>);                          \
-                                                                              \
-    makeCompositionModelType                                                  \
-    (                                                                         \
-        NoComposition,                                                        \
-        ReactingCloud,                                                        \
-        ParcelType                                                            \
-    );                                                                        \
-                                                                              \
-    makeCompositionModelType                                                  \
-    (                                                                         \
-        SingleMixtureFraction,                                                \
-        ReactingCloud,                                                        \
-        ParcelType                                                            \
-    );
+    makeCompositionModel(CloudType);                                          \
+    makeCompositionModelType(NoComposition, CloudType);                       \
+    makeCompositionModelType(SingleMixtureFraction, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

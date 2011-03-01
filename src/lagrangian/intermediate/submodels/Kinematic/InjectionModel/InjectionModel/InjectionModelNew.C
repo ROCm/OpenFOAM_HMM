@@ -35,9 +35,9 @@ Foam::InjectionModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType(dict.lookup("InjectionModel"));
+    const word modelType(dict.lookup("injectionModel"));
 
-    Info<< "Selecting InjectionModel " << modelType << endl;
+    Info<< "Selecting injection model " << modelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
@@ -51,9 +51,9 @@ Foam::InjectionModel<CloudType>::New
                 "const dictionary&, "
                 "CloudType&"
             ")"
-        )   << "Unknown InjectionModel type "
+        )   << "Unknown injection model type "
             << modelType << nl << nl
-            << "Valid InjectionModel types are:" << nl
+            << "Valid injection model types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
     }
 

@@ -33,7 +33,6 @@ Description
     - drag
     - turbulent dispersion
     - wall interactions
-    - many-body collisions, including memory of data from previous collision
 
 SourceFiles
     KinematicParcelI.H
@@ -45,27 +44,17 @@ SourceFiles
 #ifndef KinematicParcel_H
 #define KinematicParcel_H
 
-#include "Particle.H"
+#include "particle.H"
 #include "IOstream.H"
 #include "autoPtr.H"
 #include "interpolation.H"
-#include "contiguous.H"
 
-#include "KinematicCloud.H"
-#include "CollisionRecordList.H"
-#include "labelFieldIOField.H"
-#include "vectorFieldIOField.H"
-
-#include "ParticleForceList.H"
+// #include "ParticleForceList.H" // TODO
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-typedef CollisionRecordList<vector, vector> collisionRecordList;
-typedef vectorFieldCompactIOField pairDataFieldCompactIOField;
-typedef vectorFieldCompactIOField wallDataFieldCompactIOField;
 
 template<class ParcelType>
 class KinematicParcel;
@@ -86,13 +75,9 @@ Ostream& operator<<
 template<class ParcelType>
 class KinematicParcel
 :
-    public Particle<ParcelType>
+    public ParcelType
 {
 public:
-
-    //- Type of force to be used by this parcel type
-    typedef ParticleForceList<KinematicCloud<ParcelType> > forceType;
-
 
     //- Class to hold kinematic particle constant properties
     class constantProperties
@@ -165,10 +150,10 @@ public:
     };
 
 
-    //- Class used to pass kinematic tracking data to the trackToFace function
-    class trackData
+    template<class CloudType>
+    class TrackingData
     :
-        public Particle<ParcelType>::trackData
+        public ParcelType::template TrackingData<CloudType>
     {
     public:
 
@@ -183,10 +168,6 @@ public:
     private:
 
         // Private data
-
-            //- Reference to the cloud containing this particle
-            KinematicCloud<ParcelType>& cloud_;
-
 
             // Interpolators for continuous phase fields
 
@@ -208,22 +189,19 @@ public:
             trackPart part_;
 
 
-   public:
+    public:
 
         // Constructors
 
             //- Construct from components
-            inline trackData
+            inline TrackingData
             (
-                KinematicCloud<ParcelType>& cloud,
+                CloudType& cloud,
                 trackPart part = tpLinearTrack
             );
 
 
         // Member functions
-
-            //- Return access to the owner cloud
-            inline KinematicCloud<ParcelType>& cloud();
 
             //- Return conat access to the interpolator for continuous
             //  phase density field
@@ -295,9 +273,6 @@ protected:
             //- Turbulent velocity fluctuation [m/s]
             vector UTurb_;
 
-            //- Particle collision records
-            collisionRecordList collisionRecords_;
-
 
         // Cell-based quantities
 
@@ -328,7 +303,7 @@ protected:
             const scalar mass,         // mass
             const vector& Su,          // explicit particle momentum source
             vector& dUTrans,           // momentum transfer to carrier
-            scalar& Cud                // linearised drag coefficient
+            scalar& Spu                // linearised drag coefficient
         ) const;
 
 
@@ -343,16 +318,13 @@ public:
         TypeName("KinematicParcel");
 
 
-    friend class Cloud<ParcelType>;
-
-
     // Constructors
 
         //- Construct from owner, position, and cloud owner
         //  Other properties initialised as null
         inline KinematicParcel
         (
-            KinematicCloud<ParcelType>& owner,
+            const polyMesh& mesh,
             const vector& position,
             const label cellI,
             const label tetFaceI,
@@ -362,7 +334,7 @@ public:
         //- Construct from components
         inline KinematicParcel
         (
-            KinematicCloud<ParcelType>& owner,
+            const polyMesh& mesh,
             const vector& position,
             const label cellI,
             const label tetFaceI,
@@ -381,7 +353,7 @@ public:
         //- Construct from Istream
         KinematicParcel
         (
-            const Cloud<ParcelType>& c,
+            const polyMesh& mesh,
             Istream& is,
             bool readFields = true
         );
@@ -390,33 +362,41 @@ public:
         KinematicParcel(const KinematicParcel& p);
 
         //- Construct as a copy
-        KinematicParcel
-        (
-            const KinematicParcel& p,
-            const KinematicCloud<ParcelType>& c
-        );
+        KinematicParcel(const KinematicParcel& p, const polyMesh& mesh);
 
         //- Construct and return a (basic particle) clone
-        virtual autoPtr<Particle<ParcelType> > clone() const
+        virtual autoPtr<particle> clone() const
         {
-            return autoPtr<Particle<ParcelType> >(new KinematicParcel(*this));
+            return autoPtr<particle>(new KinematicParcel(*this));
         }
 
         //- Construct and return a (basic particle) clone
-        virtual autoPtr<Particle<ParcelType> > clone
-        (
-            const Cloud<ParcelType>& c
-        ) const
+        virtual autoPtr<particle> clone(const polyMesh& mesh) const
         {
-            return autoPtr<Particle<ParcelType> >
-            (
-                new KinematicParcel
+            return autoPtr<particle>(new KinematicParcel(*this, mesh));
+        }
+
+        //- Factory class to read-construct particles used for
+        //  parallel transfer
+        class iNew
+        {
+            const polyMesh& mesh_;
+
+        public:
+
+            iNew(const polyMesh& mesh)
+            :
+                mesh_(mesh)
+            {}
+
+            autoPtr<KinematicParcel<ParcelType> > operator()(Istream& is) const
+            {
+                return autoPtr<KinematicParcel<ParcelType> >
                 (
-                    *this,
-                    static_cast<const KinematicCloud<ParcelType>&>(c)
-                )
-            );
-        }
+                    new KinematicParcel<ParcelType>(mesh_, is, true)
+                );
+            }
+        };
 
 
     // Member Functions
@@ -471,9 +451,6 @@ public:
             //- Return const access to carrier viscosity [Pa.s]
             inline scalar muc() const;
 
-            //- Return const access to the collision records
-            inline const collisionRecordList& collisionRecords() const;
-
 
         // Edit
 
@@ -515,9 +492,6 @@ public:
 
             //- Return access to turbulent velocity fluctuation
             inline vector& UTurb();
-
-            //- Return access to collision records
-            inline collisionRecordList& collisionRecords();
 
 
         // Helper functions
@@ -629,17 +603,6 @@ public:
                 const tetIndices& tetIs
             );
 
-            //- Overridable function to handle the particle hitting a patch
-            //  Executed before other patch-hitting functions without trackData
-            bool hitPatch
-            (
-                const polyPatch& p,
-                int& td,
-                const label patchI,
-                const scalar trackFraction,
-                const tetIndices& tetIs
-            );
-
             //- Overridable function to handle the particle hitting a
             //  processorPatch
             template<class TrackData>
@@ -647,14 +610,6 @@ public:
             (
                 const processorPolyPatch&,
                 TrackData& td
-            );
-
-            //- Overridable function to handle the particle hitting a
-            //  processorPatch without trackData
-            void hitProcessorPatch
-            (
-                const processorPolyPatch&,
-                int&
             );
 
             //- Overridable function to handle the particle hitting a wallPatch
@@ -666,29 +621,12 @@ public:
                 const tetIndices&
             );
 
-            //- Overridable function to handle the particle hitting a wallPatch
-            //  without trackData
-            void hitWallPatch
-            (
-                const wallPolyPatch&,
-                int&,
-                const tetIndices&
-            );
-
             //- Overridable function to handle the particle hitting a polyPatch
             template<class TrackData>
             void hitPatch
             (
                 const polyPatch&,
                 TrackData& td
-            );
-
-            //- Overridable function to handle the particle hitting a polyPatch
-            //- without trackData
-            void hitPatch
-            (
-                const polyPatch&,
-                int&
             );
 
             //- Transform the physical properties of the particle
@@ -703,10 +641,12 @@ public:
         // I-O
 
             //- Read
-            static void readFields(Cloud<ParcelType>& c);
+            template<class CloudType>
+            static void readFields(CloudType& c);
 
             //- Write
-            static void writeFields(const Cloud<ParcelType>& c);
+            template<class CloudType>
+            static void writeFields(const CloudType& c);
 
 
     // Ostream Operator
@@ -726,6 +666,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "KinematicParcelI.H"
+#include "KinematicParcelTrackingDataI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

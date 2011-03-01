@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,9 +35,9 @@ Foam::PhaseChangeModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType(dict.lookup("PhaseChangeModel"));
+    const word modelType(dict.lookup("phaseChangeModel"));
 
-    Info<< "Selecting PhaseChangeModel " << modelType << endl;
+    Info<< "Selecting phase change model " << modelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
@@ -51,9 +51,9 @@ Foam::PhaseChangeModel<CloudType>::New
                 "const dictionary&, "
                 "CloudType&"
             ")"
-        )   << "Unknown PhaseChangeModel type "
+        )   << "Unknown phase change model type "
             << modelType << nl << nl
-            << "Valid PhaseChangeModel types are:" << nl
+            << "Valid phase change model types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

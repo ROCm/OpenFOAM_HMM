@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,12 +33,12 @@ License
 template <class ParcelType>
 Foam::DsmcParcel<ParcelType>::DsmcParcel
 (
-    const Cloud<ParcelType>& cloud,
+    const polyMesh& mesh,
     Istream& is,
     bool readFields
 )
 :
-    Particle<ParcelType>(cloud, is, readFields),
+    ParcelType(mesh, is, readFields),
     U_(vector::zero),
     Ei_(0.0),
     typeId_(-1)
@@ -73,14 +73,14 @@ Foam::DsmcParcel<ParcelType>::DsmcParcel
 
 
 template<class ParcelType>
-void Foam::DsmcParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
+void Foam::DsmcParcel<ParcelType>::readFields(Cloud<DsmcParcel<ParcelType> >& c)
 {
     if (!c.size())
     {
         return;
     }
 
-    Particle<ParcelType>::readFields(c);
+    ParcelType::readFields(c);
 
     IOField<vector> U(c.fieldIOobject("U", IOobject::MUST_READ));
     c.checkFieldIOobject(c, U);
@@ -92,9 +92,9 @@ void Foam::DsmcParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
     c.checkFieldIOobject(c, typeId);
 
     label i = 0;
-    forAllIter(typename Cloud<ParcelType>, c, iter)
+    forAllIter(typename Cloud<DsmcParcel<ParcelType> >, c, iter)
     {
-        ParcelType& p = iter();
+        DsmcParcel<ParcelType>& p = iter();
 
         p.U_ = U[i];
         p.Ei_ = Ei[i];
@@ -105,9 +105,12 @@ void Foam::DsmcParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
 
 
 template<class ParcelType>
-void Foam::DsmcParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
+void Foam::DsmcParcel<ParcelType>::writeFields
+(
+    const Cloud<DsmcParcel<ParcelType> >& c
+)
 {
-    Particle<ParcelType>::writeFields(c);
+    ParcelType::writeFields(c);
 
     label np =  c.size();
 
@@ -116,7 +119,7 @@ void Foam::DsmcParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
     IOField<label> typeId(c.fieldIOobject("typeId", IOobject::NO_READ), np);
 
     label i = 0;
-    forAllConstIter(typename Cloud<ParcelType>, c, iter)
+    forAllConstIter(typename Cloud<DsmcParcel<ParcelType> >, c, iter)
     {
         const DsmcParcel<ParcelType>& p = iter();
 
@@ -143,14 +146,14 @@ Foam::Ostream& Foam::operator<<
 {
     if (os.format() == IOstream::ASCII)
     {
-        os  << static_cast<const Particle<ParcelType>& >(p)
+        os  << static_cast<const ParcelType& >(p)
             << token::SPACE << p.U()
             << token::SPACE << p.Ei()
             << token::SPACE << p.typeId();
     }
     else
     {
-        os  << static_cast<const Particle<ParcelType>& >(p);
+        os  << static_cast<const ParcelType& >(p);
         os.write
         (
             reinterpret_cast<const char*>(&p.U_),

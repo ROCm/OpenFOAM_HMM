@@ -56,7 +56,7 @@ libs
     "libOpenFOAM.so"
     "libcompressibleTurbulenceModel.so"
     "libcompressibleRASModels.so"
-    "libradiation.so"
+    "libradiationModels.so"
 );
 
 // ************************************************************************* //
