@@ -51,6 +51,8 @@ const Foam::fileName Foam::dynamicCode::codeTemplateDirName
 const char* Foam::dynamicCode::libTargetRoot =
     "LIB = $(PWD)/../platforms/$(WM_OPTIONS)/lib/lib";
 
+const char* Foam::dynamicCode::topDirName = "dynamicCode";
+
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -281,7 +283,7 @@ bool Foam::dynamicCode::writeDigest(const std::string& sha1) const
 
 Foam::dynamicCode::dynamicCode(const word& codeName, const word& codeDirName)
 :
-    codeRoot_(stringOps::expand("$FOAM_CASE/dynamicCode")),
+    codeRoot_(stringOps::expand("$FOAM_CASE")/topDirName),
     libSubDir_(stringOps::expand("platforms/$WM_OPTIONS/lib")),
     codeName_(codeName),
     codeDirName_(codeDirName)
@@ -296,6 +298,18 @@ Foam::dynamicCode::dynamicCode(const word& codeName, const word& codeDirName)
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::fileName Foam::dynamicCode::codeRelPath() const
+{
+    return topDirName/codeDirName_;
+}
+
+
+Foam::fileName Foam::dynamicCode::libRelPath() const
+{
+    return codeRelPath()/libSubDir_/"lib" + codeName_ + ".so";
+}
+
 
 void Foam::dynamicCode::clear()
 {
@@ -376,7 +390,7 @@ bool Foam::dynamicCode::copyOrCreateFiles(const bool verbose) const
 {
     if (verbose)
     {
-        Info<< "Creating new library in " << this->libPath() << endl;
+        Info<< "Creating new library in " << this->libRelPath() << endl;
     }
 
     if (!allowSystemOperations)
@@ -500,7 +514,7 @@ bool Foam::dynamicCode::copyOrCreateFiles(const bool verbose) const
 
 bool Foam::dynamicCode::wmakeLibso() const
 {
-    const Foam::string wmakeCmd("wmake libso " + this->codePath());
+    const Foam::string wmakeCmd("wmake libso " + this->codeRelPath());
     Info<< "Invoking " << wmakeCmd << endl;
 
     if (Foam::system(wmakeCmd))

@@ -108,6 +108,9 @@ protected:
         //- Root of the LIB target for Make/files
         static const char* libTargetRoot;
 
+        //- Top-level directory name for copy/compiling
+        static const char* topDirName;
+
 
     // Protected Member Functions
 
@@ -219,6 +222,17 @@ public:
         {
             return codeRoot_/libSubDir_/"lib" + codeName_ + ".so";
         }
+
+        //- Path for specified code name relative to \$FOAM_CASE
+        //  Corresponds to topDirName/codeDirName()
+        fileName codeRelPath() const;
+
+
+        //- Library path for specified code name relative to \$FOAM_CASE
+        //  Corresponds to
+        //  dynamicCode/codeDirName()/libSubDir()/lib\<codeName\>.so
+        fileName libRelPath() const;
+
 
         //- Path for SHA1Digest
         //  Corresponds to codePath()/Make/SHA1Digest
