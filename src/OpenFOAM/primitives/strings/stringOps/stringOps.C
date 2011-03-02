@@ -66,10 +66,23 @@ Foam::string& Foam::stringOps::inplaceExpand
             string::size_type endVar = begVar;
             string::size_type delim = 0;
 
+            // The position of the ":-" default value
+            string::size_type altPos = string::npos;
+
             if (s[begVar+1] == '{')
             {
                 endVar = s.find('}', begVar);
                 delim = 1;
+
+                // looks like ${parameter:-word}
+                if (endVar != string::npos)
+                {
+                    altPos = s.find(":-", begVar);
+                    if (altPos != string::npos && altPos > endVar)
+                    {
+                        altPos = string::npos;
+                    }
+                }
             }
             else
             {
@@ -110,10 +123,25 @@ Foam::string& Foam::stringOps::inplaceExpand
                     s.substr
                     (
                         begVar + 1 + delim,
-                        endVar - begVar - 2*delim
+                        (
+                            (altPos == string::npos ? endVar : altPos)
+                          - begVar - 2*delim
+                        )
                     ),
                     false
                 );
+
+                std::string altValue;
+                if (altPos != string::npos)
+                {
+                    // had ":-" default value
+                    altValue = s.substr
+                    (
+                        altPos + 2,
+                        endVar - altPos - 2*delim
+                    );
+                }
+
 
                 HashTable<string, word, string::hash>::const_iterator fnd =
                     mapping.find(varName);
@@ -127,6 +155,17 @@ Foam::string& Foam::stringOps::inplaceExpand
                         *fnd
                     );
                     begVar += (*fnd).size();
+                }
+                else if (altPos != string::npos)
+                {
+                    // use alternative provided
+                    s.std::string::replace
+                    (
+                        begVar,
+                        endVar - begVar + 1,
+                        altValue
+                    );
+                    begVar += altValue.size();
                 }
                 else
                 {
@@ -312,10 +351,23 @@ Foam::string& Foam::stringOps::inplaceExpand
             string::size_type endVar = begVar;
             string::size_type delim = 0;
 
+            // The position of the ":-" default value
+            string::size_type altPos = string::npos;
+
             if (s[begVar+1] == '{')
             {
                 endVar = s.find('}', begVar);
                 delim = 1;
+
+                // looks like ${parameter:-word}
+                if (endVar != string::npos)
+                {
+                    altPos = s.find(":-", begVar);
+                    if (altPos != string::npos && altPos > endVar)
+                    {
+                        altPos = string::npos;
+                    }
+                }
             }
             else
             {
@@ -350,10 +402,24 @@ Foam::string& Foam::stringOps::inplaceExpand
                     s.substr
                     (
                         begVar + 1 + delim,
-                        endVar - begVar - 2*delim
+                        (
+                            (altPos == string::npos ? endVar : altPos)
+                          - begVar - 2*delim
+                        )
                     ),
                     false
                 );
+
+                std::string altValue;
+                if (altPos != string::npos)
+                {
+                    // had ":-" default value
+                    altValue = s.substr
+                    (
+                        altPos + 2,
+                        endVar - altPos - 2*delim
+                    );
+                }
 
                 const string varValue = getEnv(varName);
                 if (varValue.size())
@@ -366,6 +432,17 @@ Foam::string& Foam::stringOps::inplaceExpand
                         varValue
                     );
                     begVar += varValue.size();
+                }
+                else if (altPos != string::npos)
+                {
+                    // use alternative provided
+                    s.std::string::replace
+                    (
+                        begVar,
+                        endVar - begVar + 1,
+                        altValue
+                    );
+                    begVar += altValue.size();
                 }
                 else if (allowEmpty)
                 {
