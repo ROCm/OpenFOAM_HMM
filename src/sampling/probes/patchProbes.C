@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,23 +53,15 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
     {
         const vector& sample = operator[](probeI);
         label faceI = meshSearchEngine.findNearestBoundaryFace(sample);
-        if (faceI == -1)
-        {
-            nearest[probeI].second().first() = Foam::sqr(GREAT);
-            nearest[probeI].second().second() = Pstream::myProcNo();
-        }
-        else
-        {
-            const point& fc = mesh.faceCentres()[faceI];
-            nearest[probeI].first() = pointIndexHit
-            (
-                true,
-                fc,
-                faceI
-            );
-            nearest[probeI].second().first() = magSqr(fc-sample);
-            nearest[probeI].second().second() = Pstream::myProcNo();
-        }
+        const point& fc = mesh.faceCentres()[faceI];
+        nearest[probeI].first() = pointIndexHit
+        (
+            true,
+            fc,
+            faceI
+        );
+        nearest[probeI].second().first() = magSqr(fc-sample);
+        nearest[probeI].second().second() = Pstream::myProcNo();
     }
 
 
@@ -92,27 +84,16 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
         }
     }
 
-
-
     // Check if all patchProbes have been found.
     forAll(nearest, sampleI)
     {
-        label localI = nearest[sampleI].first().index();
+        label localI = -1;
+        if (nearest[sampleI].second().second() == Pstream::myProcNo())
+        {
+            localI = nearest[sampleI].first().index();
+        }
 
-        if (localI == -1)
-        {
-             if (Pstream::master())
-             {
-                WarningIn("patchProbes::findElements()")
-                    << "Did not find location "
-                    <<  nearest[sampleI].second().first()
-                    << " in any cell. Skipping location." << endl;
-             }
-        }
-        else
-        {
-            elementList_[sampleI] = localI;
-        }
+        elementList_[sampleI] = localI;
     }
 }
 
