@@ -202,7 +202,7 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     const vector abp = (Feff.Sp()*Uc_ + (Feff.Su() + Su))/mass;
     const scalar bp = Feff.Sp()/mass;
 
-    Spu = Feff.Sp();
+    Spu = Feff.Sp()*dt/td.cloud().solution().deltaT();
 
     IntegrationScheme<vector>::integrationResult Ures =
         td.cloud().UIntegrator().integrate(U, dt, abp, bp);
