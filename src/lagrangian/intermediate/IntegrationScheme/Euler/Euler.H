@@ -80,7 +80,7 @@ public:
         (
             const Type& phi,
             const scalar dt,
-            const Type& alpha,
+            const Type& alphaBeta,
             const scalar beta
         ) const;
 };

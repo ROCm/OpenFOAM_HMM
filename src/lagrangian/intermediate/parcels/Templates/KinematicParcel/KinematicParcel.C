@@ -192,21 +192,20 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     const parcelType& p = static_cast<const parcelType&>(*this);
     const forceSuSp Fcp = forces.calcCoupled(p, dt, mass, Re, mu);
     const forceSuSp Fncp = forces.calcNonCoupled(p, dt, mass, Re, mu);
-    forceSuSp Feff = Fcp + Fncp;
-    Feff.Sp() += ROOTVSMALL;
+    const forceSuSp Feff = Fcp + Fncp;
 
 
     // New particle velocity
     //~~~~~~~~~~~~~~~~~~~~~~
 
     // Update velocity - treat as 3-D
-    const vector ap = Uc_ + (Feff.Su() + Su)/Feff.Sp();
+    const vector abp = (Feff.Sp()*Uc_ + (Feff.Su() + Su))/mass;
     const scalar bp = Feff.Sp()/mass;
 
     Spu = Feff.Sp();
 
     IntegrationScheme<vector>::integrationResult Ures =
-        td.cloud().UIntegrator().integrate(U, dt, ap, bp);
+        td.cloud().UIntegrator().integrate(U, dt, abp, bp);
 
     vector Unew = Ures.value();
 
