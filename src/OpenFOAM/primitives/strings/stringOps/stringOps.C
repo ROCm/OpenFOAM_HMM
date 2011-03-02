@@ -93,7 +93,17 @@ Foam::string& Foam::stringOps::inplaceExpand
                 }
             }
 
-            if (endVar != string::npos && endVar != begVar)
+            if (endVar == string::npos)
+            {
+                // likely parsed '${...' without closing '}' - abort
+                break;
+            }
+            else if (endVar == begVar)
+            {
+                // parsed '${}' or $badChar  - skip over
+                begVar = endVar + 1;
+            }
+            else
             {
                 const word varName
                 (
@@ -127,10 +137,6 @@ Foam::string& Foam::stringOps::inplaceExpand
                         ""
                     );
                 }
-            }
-            else
-            {
-                break;
             }
         }
         else
@@ -205,7 +211,17 @@ Foam::string& Foam::stringOps::inplaceExpand
                 }
             }
 
-            if (endVar != string::npos && endVar != begVar)
+            if (endVar == string::npos)
+            {
+                // likely parsed '${...' without closing '}' - abort
+                break;
+            }
+            else if (endVar == begVar)
+            {
+                // parsed '${}' or $badChar  - skip over
+                begVar = endVar + 1;
+            }
+            else
             {
                 const word varName
                 (
@@ -249,12 +265,8 @@ Foam::string& Foam::stringOps::inplaceExpand
                 else
                 {
                     // not defined - leave original string untouched
-                    begVar = endVar;
+                    begVar = endVar + 1;
                 }
-            }
-            else
-            {
-                break;
             }
         }
         else
@@ -320,7 +332,18 @@ Foam::string& Foam::stringOps::inplaceExpand
                 }
             }
 
-            if (endVar != string::npos && endVar != begVar)
+
+            if (endVar == string::npos)
+            {
+                // likely parsed '${...' without closing '}' - abort
+                break;
+            }
+            else if (endVar == begVar)
+            {
+                // parsed '${}' or $badChar  - skip over
+                begVar = endVar + 1;
+            }
+            else
             {
                 const word varName
                 (
@@ -335,6 +358,7 @@ Foam::string& Foam::stringOps::inplaceExpand
                 const string varValue = getEnv(varName);
                 if (varValue.size())
                 {
+                    // direct replacement
                     s.std::string::replace
                     (
                         begVar,
@@ -361,10 +385,6 @@ Foam::string& Foam::stringOps::inplaceExpand
                         << "Unknown variable name " << varName << '.'
                         << exit(FatalError);
                 }
-            }
-            else
-            {
-                break;
             }
         }
         else

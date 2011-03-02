@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     Info<< "expanded: " << string(test).expand() << endl;
 
     Info<<"dictionary-based substitution: " << dict << endl;
-    Info<< "expandDict: " << stringOps::expandDict(test, dict) << endl;
+    Info<< "expand dict: " << stringOps::expand(test, dict) << endl;
 
     string test2("~OpenFOAM/controlDict");
     Info<< test2 << " => " << test2.expand() << endl;
