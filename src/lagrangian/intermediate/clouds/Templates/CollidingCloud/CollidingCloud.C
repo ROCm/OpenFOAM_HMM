@@ -114,11 +114,11 @@ Foam::CollidingCloud<CloudType>::CollidingCloud
     if (this->solution().active())
     {
         setModels();
-    }
 
-    if (readFields)
-    {
-        parcelType::readFields(*this);
+        if (readFields)
+        {
+            parcelType::readFields(*this);
+        }
     }
 }
 

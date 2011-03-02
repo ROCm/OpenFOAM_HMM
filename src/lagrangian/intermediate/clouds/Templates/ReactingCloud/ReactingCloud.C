@@ -117,6 +117,11 @@ Foam::ReactingCloud<CloudType>::ReactingCloud
     if (this->solution().active())
     {
         setModels();
+
+        if (readFields)
+        {
+            parcelType::readFields(*this, this->composition());
+        }
     }
 
     // Set storage for mass source fields and initialise to zero
@@ -140,11 +145,6 @@ Foam::ReactingCloud<CloudType>::ReactingCloud
                 dimensionedScalar("zero", dimMass, 0.0)
             )
         );
-    }
-
-    if (readFields)
-    {
-        parcelType::readFields(*this, this->composition());
     }
 
     if (this->solution().resetSourcesOnStartup())

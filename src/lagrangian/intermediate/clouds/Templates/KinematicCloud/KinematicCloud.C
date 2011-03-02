@@ -360,11 +360,11 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     if (solution_.active())
     {
         setModels();
-    }
 
-    if (readFields)
-    {
-        parcelType::readFields(*this);
+        if (readFields)
+        {
+            parcelType::readFields(*this);
+        }
     }
 
     if (solution_.resetSourcesOnStartup())
