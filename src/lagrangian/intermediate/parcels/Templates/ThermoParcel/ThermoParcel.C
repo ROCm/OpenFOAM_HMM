@@ -333,13 +333,13 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
 
     // Integrate to find the new parcel temperature
     IntegrationScheme<scalar>::integrationResult Tres =
-        td.cloud().TIntegrator().integrate(T, dt, ap, bp);
+        td.cloud().TIntegrator().integrate(T, dt, ap*bp, bp);
 
     scalar Tnew = max(Tres.value(), td.cloud().constProps().TMin());
 
     dhsTrans += dt*htc*As*(0.5*(T + Tnew) - Tc_);
 
-    Cuh = bp;
+    Cuh = bp*dt/td.cloud().solution().deltaT();
 
     return Tnew;
 }

@@ -73,12 +73,12 @@
 
     dimensionedScalar rhoMax
     (
-        mesh.solutionDict().subDict("SIMPLE").lookup("rhoMax")
+        mesh.solutionDict().subDict("PISO").lookup("rhoMax")
     );
 
     dimensionedScalar rhoMin
     (
-        mesh.solutionDict().subDict("SIMPLE").lookup("rhoMin")
+        mesh.solutionDict().subDict("PISO").lookup("rhoMin")
     );
 
     Info<< "Creating turbulence model\n" << endl;

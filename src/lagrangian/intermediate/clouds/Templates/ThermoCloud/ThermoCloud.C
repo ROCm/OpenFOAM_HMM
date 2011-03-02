@@ -135,11 +135,11 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
     if (this->solution().active())
     {
         setModels();
-    }
 
-    if (readFields)
-    {
-        parcelType::readFields(*this);
+        if (readFields)
+        {
+            parcelType::readFields(*this);
+        }
     }
 
     if (this->solution().resetSourcesOnStartup())
