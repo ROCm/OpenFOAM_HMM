@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,17 +22,13 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    porousExplicitSourceReactingParcelFoam
+    LTSReactingParcelFoam
 
 Description
-    Transient PISO solver for compressible, laminar or turbulent flow with
-    reacting multiphase Lagrangian parcels for porous media, including explicit
-    sources for mass, momentum and energy
-
-    The solver includes:
-    - reacting multiphase parcel cloud
-    - porous media
-    - mass, momentum and energy sources
+    Local time stepping (LTS) solver for steady, compressible, laminar or
+    turbulent reacting and non-reacting flow with multiphase Lagrangian
+    parcels and porous media, including explicit sources for mass, momentum
+    and energy
 
     Note: ddtPhiCorr not used here when porous zones are active
     - not well defined for porous calculations
@@ -75,7 +71,7 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-        #include "readSIMPLEControls.H"
+        #include "readPISOControls.H"
         #include "readChemistryProperties.H"
         #include "readAdditionalSolutionControls.H"
         #include "readTimeControls.H"
@@ -84,25 +80,23 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        p.storePrevIter();
+        parcels.evolve();
 
-        // --- Pressure-velocity corrector
+        #include "chemistry.H"
+        #include "timeScales.H"
+
+        #include "rhoEqn.H"
+        #include "UEqn.H"
+        #include "YEqn.H"
+        #include "hsEqn.H"
+
+        // --- PISO loop
+        for (int corr=0; corr<nCorr; corr++)
         {
-            parcels.evolve();
-
-            #include "chemistry.H"
-
-            #include "timeScales.H"
-
-            #include "rhoEqn.H"
-            #include "UEqn.H"
-            #include "YEqn.H"
-            #include "hsEqn.H"
-
             #include "pEqn.H"
-
-            turbulence->correct();
         }
+
+        turbulence->correct();
 
         if (runTime.write())
         {
