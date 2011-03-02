@@ -28,7 +28,9 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+//{{{ begin codeInclude
 ${codeInclude}
+//}}} end codeInclude
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,7 +63,13 @@ ${typeName}FixedValueFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF)
-{}
+{
+    if (${verbose:-false})
+    {
+        Info<<"construct ${typeName} sha1: ${SHA1sum}"
+            " from patch/DimensionedField\n";
+    }
+}
 
 
 ${typeName}FixedValueFvPatchScalarField::
@@ -74,7 +82,13 @@ ${typeName}FixedValueFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper)
-{}
+{
+    if (${verbose:-false})
+    {
+        Info<<"construct ${typeName} sha1: ${SHA1sum}"
+            " from patch/DimensionedField/mapper\n";
+    }
+}
 
 
 ${typeName}FixedValueFvPatchScalarField::
@@ -86,7 +100,13 @@ ${typeName}FixedValueFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict)
-{}
+{
+    if (${verbose:-false})
+    {
+        Info<<"construct ${typeName} sha1: ${SHA1sum}"
+            " from patch/dictionary\n";
+    }
+}
 
 
 ${typeName}FixedValueFvPatchScalarField::
@@ -96,7 +116,13 @@ ${typeName}FixedValueFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(ptf)
-{}
+{
+    if (${verbose:-false})
+    {
+        Info<<"construct ${typeName} sha1: ${SHA1sum}"
+            " as copy\n";
+    }
+}
 
 
 ${typeName}FixedValueFvPatchScalarField::
@@ -107,14 +133,25 @@ ${typeName}FixedValueFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(ptf, iF)
-{}
+{
+    if (${verbose:-false})
+    {
+        Info<<"construct ${typeName} sha1: ${SHA1sum} "
+            "as copy/DimensionedField\n";
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 ${typeName}FixedValueFvPatchScalarField::
 ~${typeName}FixedValueFvPatchScalarField()
-{}
+{
+    if (${verbose:-false})
+    {
+        Info<<"destroy ${typeName} sha1: ${SHA1sum}\n";
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -126,7 +163,15 @@ void ${typeName}FixedValueFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    ${code}
+    if (${verbose:-false})
+    {
+        Info<<"updateCoeffs ${typeName} sha1: ${SHA1sum}\n";
+    }
+
+//{{{ begin code
+    ${code};
+//}}} end code
+
     fixedValueFvPatchScalarField::updateCoeffs();
 }
 
