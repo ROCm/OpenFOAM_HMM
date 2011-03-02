@@ -191,6 +191,7 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
     if (QrNbrName_ != "none")
     {
         QrNbr = nbrPatch.lookupPatchField<volScalarField, scalar>(QrNbrName_);
+        mpp.map().distribute(QrNbr);
     }
 
     scalarField alpha(KDeltaNbr - (Qr + QrNbr)/Tp);

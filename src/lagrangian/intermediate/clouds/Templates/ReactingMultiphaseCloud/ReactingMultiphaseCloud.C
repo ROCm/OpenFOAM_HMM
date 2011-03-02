@@ -94,11 +94,11 @@ Foam::ReactingMultiphaseCloud<CloudType>::ReactingMultiphaseCloud
     if (this->solution().active())
     {
         setModels();
-    }
 
-    if (readFields)
-    {
-        parcelType::readFields(*this, this->composition());
+        if (readFields)
+        {
+            parcelType::readFields(*this, this->composition());
+        }
     }
 
     if (this->solution().resetSourcesOnStartup())
