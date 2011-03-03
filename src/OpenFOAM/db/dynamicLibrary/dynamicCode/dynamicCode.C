@@ -77,6 +77,15 @@ void Foam::dynamicCode::checkSecurity
 }
 
 
+Foam::word Foam::dynamicCode::libraryBaseName(const fileName& libPath)
+{
+    word libName(libPath.name(true));
+    libName.erase(0, 3);    // remove leading 'lib' from name
+    return libName;
+}
+
+
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::dynamicCode::copyAndFilter

@@ -169,6 +169,9 @@ public:
         //- Check security for creating dynamic code
         static void checkSecurity(const char* title, const dictionary&);
 
+        //- Return the library basename without leading 'lib' or trailing '.so'
+        static word libraryBaseName(const fileName& libPath);
+
 
     // Constructors
 
