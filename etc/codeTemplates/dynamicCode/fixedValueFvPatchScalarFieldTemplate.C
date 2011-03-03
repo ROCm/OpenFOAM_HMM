@@ -32,6 +32,7 @@ License
 ${codeInclude}
 //}}} end codeInclude
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -46,9 +47,16 @@ extern "C"
     //
     // unique function name that can be checked if the correct library version
     // has been loaded
-    bool ${typeName}_${SHA1sum}()
+    void ${typeName}_${SHA1sum}(bool load)
     {
-        return true;
+        if (load)
+        {
+            // code that can be explicitly executed after loading
+        }
+        else
+        {
+            // code that can be explicitly executed before unloading
+        }
     }
 }
 
