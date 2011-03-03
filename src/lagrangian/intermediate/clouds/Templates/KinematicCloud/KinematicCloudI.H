@@ -332,10 +332,10 @@ Foam::KinematicCloud<CloudType>::SU(volVectorField& U) const
     {
         if (solution_.semiImplicit("U"))
         {
-            return
-                UTrans()/(mesh_.V()*this->db().time().deltaT())
-              - fvm::Sp(UCoeff()/mesh_.V(), U)
-              + UCoeff()/mesh_.V()*U;
+            const DimensionedField<scalar, volMesh>
+                Vdt(mesh_.V()*this->db().time().deltaT());
+
+            return UTrans()/Vdt - fvm::Sp(UCoeff()/Vdt, U) + UCoeff()/Vdt*U;
         }
         else
         {
@@ -374,16 +374,38 @@ Foam::KinematicCloud<CloudType>::theta() const
         )
     );
 
-    scalarField& theta = ttheta().internalField();
+    volScalarField& theta = ttheta();
+    theta.boundaryField() == 0;
+
     forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
     {
         const parcelType& p = iter();
         const label cellI = p.cell();
 
+        if ((p.face() != -1))
+        {
+            const label patchI = p.patch(p.face());
+            if (patchI != -1)
+            {
+                scalarField& thetap = theta.boundaryField()[patchI];
+                const label faceI = p.patchFace(patchI, p.face());
+                thetap[faceI] += p.nParticle()*p.areaP();
+            }
+        }
+
         theta[cellI] += p.nParticle()*p.volume();
     }
 
-    theta /= mesh().V();
+    theta.internalField() /= mesh_.V();
+
+    forAll(theta.boundaryField(), patchI)
+    {
+        scalarField& thetap = theta.boundaryField()[patchI];
+        if (thetap.size() > 0)
+        {
+            thetap /= mesh_.magSf().boundaryField()[patchI];
+        }
+    }
 
     return ttheta;
 }
@@ -420,7 +442,7 @@ Foam::KinematicCloud<CloudType>::alpha() const
         alpha[cellI] += p.nParticle()*p.mass();
     }
 
-    alpha /= (mesh().V()*rho_);
+    alpha /= (mesh_.V()*rho_);
 
     return talpha;
 }
@@ -457,7 +479,7 @@ Foam::KinematicCloud<CloudType>::rhoEff() const
         rhoEff[cellI] += p.nParticle()*p.mass();
     }
 
-    rhoEff /= mesh().V();
+    rhoEff /= mesh_.V();
 
     return trhoEff;
 }

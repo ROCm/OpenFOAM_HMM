@@ -98,21 +98,20 @@ bool Foam::functionEntries::codeStream::execute
     // see if library is loaded
     void* lib = dlLibraryTable::findLibrary(libPath);
 
-    bool reuseLib = false;
-
     // nothing loaded
     // avoid compilation if possible by loading an existing library
     if (!lib && dlLibraryTable::open(libPath, false))
     {
         lib = dlLibraryTable::findLibrary(libPath);
-        reuseLib = true;
     }
 
 
     // create library if required
     if (!lib)
     {
-        if (Pstream::master())
+        bool create = Pstream::master();
+
+        if (create)
         {
             if (!dynCode.upToDate(context))
             {
@@ -137,7 +136,7 @@ bool Foam::functionEntries::codeStream::execute
                         "functionEntries::codeStream::execute(..)",
                         parentDict
                     )   << "Failed writing files for" << nl
-                        << dynCode.libPath() << nl
+                        << dynCode.libRelPath() << nl
                         << exit(FatalIOError);
                 }
             }
@@ -148,14 +147,13 @@ bool Foam::functionEntries::codeStream::execute
                 (
                     "functionEntries::codeStream::execute(..)",
                     parentDict
-                )   << "Failed wmake " << libPath
+                )   << "Failed wmake " << dynCode.libRelPath() << nl
                     << exit(FatalIOError);
             }
         }
 
-        // all processes must wait for compile
-        bool waiting = true;
-        reduce(waiting, orOp<bool>());
+        // all processes must wait for compile to finish
+        reduce(create, orOp<bool>());
 
         if (!dlLibraryTable::open(libPath, false))
         {
@@ -163,24 +161,20 @@ bool Foam::functionEntries::codeStream::execute
             (
                 "functionEntries::codeStream::execute(..)",
                 parentDict
-            )   << "Failed loading library " << libPath
+            )   << "Failed loading library " << libPath << nl
                 << exit(FatalIOError);
         }
 
         lib = dlLibraryTable::findLibrary(libPath);
     }
-    else if (reuseLib)
-    {
-        Info<< "Reusing library in " << libPath << endl;
-    }
 
 
     // Find the function handle in the library
-    void (*function)(Ostream&, const dictionary&);
-    function = reinterpret_cast<void(*)(Ostream&, const dictionary&)>
-    (
-        dlSym(lib, dynCode.codeName())
-    );
+    streamingFunctionType function =
+        reinterpret_cast<streamingFunctionType>
+        (
+            dlSym(lib, dynCode.codeName())
+        );
 
 
     if (!function)

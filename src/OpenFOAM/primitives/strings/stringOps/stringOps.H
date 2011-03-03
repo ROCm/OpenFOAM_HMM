@@ -55,7 +55,17 @@ namespace stringOps
     //  -# variables
     //    - "$VAR", "${VAR}"
     //
-    //  Any unknown entries are removed
+    //  Supports default values as per the Bourne/Korn shell.
+    //  \code
+    //      "${parameter:-defValue}"
+    //  \endcode
+    //  If parameter is unset or null, the \c defValue is substituted.
+    //  Otherwise, the value of parameter is substituted.
+    //
+    //  Any unknown entries are removed silently.
+    //
+    //  Malformed entries (eg, brace mismatch, sigil followed by bad character)
+    //  are left as is.
     //
     //  \note the leading sigil can be changed to avoid conflicts with other
     //  string expansions
@@ -72,7 +82,17 @@ namespace stringOps
     //  -# variables
     //    - "$VAR", "${VAR}"
     //
-    //  Any unknown entries are removed
+    //  Supports default values as per the Bourne/Korn shell.
+    //  \code
+    //      "${parameter:-defValue}"
+    //  \endcode
+    //  If parameter is unset or null, the \c defValue is substituted.
+    //  Otherwise, the value of parameter is substituted.
+    //
+    //  Any unknown entries are removed silently.
+    //
+    //  Malformed entries (eg, brace mismatch, sigil followed by bad character)
+    //  are left as is.
     //
     //  \note the leading sigil can be changed to avoid conflicts with other
     //  string expansions
@@ -128,7 +148,18 @@ namespace stringOps
     //    - leading "~user" : home directory for specified user
     //    - leading "~OpenFOAM" : site/user OpenFOAM configuration directory
     //
-    //  Any unknown entries are removed silently if allowEmpty is true
+    //  Supports default values as per the Bourne/Korn shell.
+    //  \code
+    //      "${parameter:-defValue}"
+    //  \endcode
+    //  If parameter is unset or null, the \c defValue is substituted.
+    //  Otherwise, the value of parameter is substituted.
+    //
+    //  Any unknown entries are removed silently, if allowEmpty is true.
+    //
+    //  Malformed entries (eg, brace mismatch, sigil followed by bad character)
+    //  are left as is.
+    //
     //  \sa
     //  Foam::findEtcFile
     string expand
@@ -149,7 +180,19 @@ namespace stringOps
     //    - leading "~user" : home directory for specified user
     //    - leading "~OpenFOAM" : site/user OpenFOAM configuration directory
     //
-    //  Any unknown entries are removed silently if allowEmpty is true
+    //  Supports default values as per the Bourne/Korn shell.
+    //  \code
+    //      "${parameter:-defValue}"
+    //  \endcode
+    //  If parameter is unset or null, the \c defValue is substituted.
+    //  Otherwise, the value of parameter is substituted.
+    //
+    //  Any unknown entries are removed silently, if allowEmpty is true.
+    //
+    //  Malformed entries (eg, brace mismatch, sigil followed by bad character)
+    //  are left as is.
+    //
+    //  Any unknown entries are removed silently if allowEmpty is true.
     //  \sa
     //  Foam::findEtcFile
     string& inplaceExpand

@@ -40,8 +40,9 @@ int main(int argc, char *argv[])
 {
     string test
     (
-        "  $HOME kjhkjhkjh \" \\$HOME/tyetyery ${FOAM_RUN} \n ; hkjh ;$ with "
-        " $(DONOTSUBST) some other ${USER} entries   "
+        "  $HOME kjhkjhkjh \" \\$HOME/tyetyery $; ${FOAM_RUN} \n $; hkjh;"
+        " $(DONOTSUBST) some other <${USER}> with '${__UNKNOWN:-some default}'"
+        " value "
     );
 
     dictionary dict;
@@ -88,7 +89,7 @@ int main(int argc, char *argv[])
     Info<< "expanded: " << string(test).expand() << endl;
 
     Info<<"dictionary-based substitution: " << dict << endl;
-    Info<< "expandDict: " << stringOps::expandDict(test, dict) << endl;
+    Info<< "expand dict: " << stringOps::expand(test, dict) << endl;
 
     string test2("~OpenFOAM/controlDict");
     Info<< test2 << " => " << test2.expand() << endl;

@@ -290,7 +290,7 @@ void Foam::PatchInteractionModel<CloudType>::patchData
         }
         else
         {
-            Up = (Cf - Cf00)/this->owner().solution().deltaT();
+            Up = (Cf - Cf00)/this->owner().time().deltaTValue();
         }
 
         if (mag(dn) > SMALL)
@@ -314,7 +314,7 @@ void Foam::PatchInteractionModel<CloudType>::patchData
             // angle/dt to give the correct angular velocity vector.
             omega *=
                 Foam::asin(magOmega)
-               /(magOmega*this->owner().solution().deltaT());
+               /(magOmega*this->owner().time().deltaTValue());
 
             // Project position onto face and calculate this position
             // relative to the face centre.

@@ -87,9 +87,9 @@ namespace Foam
 {
 
 // Forward declaration of classes
-class codeProperties;
 class dynamicCode;
 class dynamicCodeContext;
+class IOdictionary;
 
 /*---------------------------------------------------------------------------*\
               Class codedFixedValueFvPatchScalarField Declaration
@@ -106,18 +106,39 @@ class codedFixedValueFvPatchScalarField
 
         const word redirectType_;
 
+        //- Previously loaded library
+        mutable fileName oldLibPath_;
+
         mutable autoPtr<fvPatchScalarField> redirectPatchFieldPtr_;
 
 
     // Private Member Functions
 
-        const codeProperties& dict() const;
+        const IOdictionary& dict() const;
+
+        //- Global loader/unloader function type
+        typedef void (*loaderFunctionType)(bool);
+
+        static void* loadLibrary
+        (
+            const fileName& libPath,
+            const string& globalFuncName,
+            const dictionary& contextDict
+        );
+
+        static void unloadLibrary
+        (
+            const fileName& libPath,
+            const string& globalFuncName,
+            const dictionary& contextDict
+        );
+
 
         void createLibrary(dynamicCode&, const dynamicCodeContext&) const;
 
         //- Update library as required
-        //  Use 'firstTime' to alter behaviour
-        void updateLibrary(bool firstTime=false) const;
+        void updateLibrary() const;
+
 
 public:
 

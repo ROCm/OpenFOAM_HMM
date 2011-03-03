@@ -19,12 +19,17 @@
     surfaceScalarField buoyancyPhi(-rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf());
     phi += buoyancyPhi;
 
+    fvScalarMatrix p_rghDDtEqn
+    (
+        fvc::ddt(rho) + psi*correction(fvm::ddt(p_rgh))
+      + fvc::div(phi)
+    );
+
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
         fvScalarMatrix p_rghEqn
         (
-            fvc::ddt(rho) + psi*correction(fvm::ddt(p_rgh))
-          + fvc::div(phi)
+            p_rghDDtEqn
           - fvm::laplacian(rhorAUf, p_rgh)
         );
 

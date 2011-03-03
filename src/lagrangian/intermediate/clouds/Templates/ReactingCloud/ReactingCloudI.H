@@ -114,7 +114,7 @@ inline Foam::tmp<Foam::fvScalarMatrix> Foam::ReactingCloud<CloudType>::SYi
             volScalarField& sourceField = trhoTrans();
 
             sourceField.internalField() =
-                rhoTrans_[i]/(this->db().time().deltaT()*this->mesh().V());
+                rhoTrans_[i]/(this->db().time().deltaTValue()*this->mesh().V());
 
             const dimensionedScalar YiSMALL("YiSMALL", dimless, SMALL);
 
@@ -127,7 +127,7 @@ inline Foam::tmp<Foam::fvScalarMatrix> Foam::ReactingCloud<CloudType>::SYi
             tmp<fvScalarMatrix> tfvm(new fvScalarMatrix(Yi, dimMass/dimTime));
             fvScalarMatrix& fvm = tfvm();
 
-            fvm.source() = -rhoTrans_[i]/this->db().time().deltaT();
+            fvm.source() = -rhoTrans_[i]/this->db().time().deltaTValue();
 
             return tfvm;
         }
@@ -167,7 +167,7 @@ Foam::ReactingCloud<CloudType>::Srho(const label i) const
     if (this->solution().coupled())
     {
         scalarField& rhoi = tRhoi();
-        rhoi = rhoTrans_[i]/(this->db().time().deltaT()*this->mesh().V());
+        rhoi = rhoTrans_[i]/(this->db().time().deltaTValue()*this->mesh().V());
     }
 
     return tRhoi;
@@ -209,7 +209,7 @@ Foam::ReactingCloud<CloudType>::Srho() const
             sourceField += rhoTrans_[i];
         }
 
-        sourceField /= this->db().time().deltaT()*this->mesh().V();
+        sourceField /= this->db().time().deltaTValue()*this->mesh().V();
     }
 
     return trhoTrans;
@@ -249,7 +249,7 @@ Foam::ReactingCloud<CloudType>::Srho(volScalarField& rho) const
             {
                 sourceField += rhoTrans_[i];
             }
-            sourceField /= this->db().time().deltaT()*this->mesh().V();
+            sourceField /= this->db().time().deltaTValue()*this->mesh().V();
 
             return fvm::SuSp(trhoTrans()/rho, rho);
         }
