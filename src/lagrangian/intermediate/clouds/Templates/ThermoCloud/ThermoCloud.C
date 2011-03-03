@@ -127,7 +127,7 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
                 IOobject::AUTO_WRITE
             ),
             this->mesh(),
-            dimensionedScalar("zero", dimEnergy/dimTime/dimTemperature, 0.0)
+            dimensionedScalar("zero", dimEnergy/dimTemperature, 0.0)
         )
     )
 

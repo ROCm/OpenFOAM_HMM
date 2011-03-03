@@ -339,7 +339,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
 
     dhsTrans += dt*htc*As*(0.5*(T + Tnew) - Tc_);
 
-    Cuh = bp*dt/td.cloud().solution().deltaT();
+    Cuh = dt*bp;
 
     return Tnew;
 }

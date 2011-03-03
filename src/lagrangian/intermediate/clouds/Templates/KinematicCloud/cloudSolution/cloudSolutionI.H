@@ -95,9 +95,15 @@ inline Foam::label Foam::cloudSolution::nextIter()
 }
 
 
-inline Foam::scalar Foam::cloudSolution::deltaT() const
+inline Foam::scalar Foam::cloudSolution::deltaTValue() const
 {
     return deltaT_;
+}
+
+
+inline const Foam::dimensionedScalar Foam::cloudSolution::deltaT() const
+{
+    return dimensionedScalar("cloudSolution::deltaT", dimTime, deltaT_);
 }
 
 

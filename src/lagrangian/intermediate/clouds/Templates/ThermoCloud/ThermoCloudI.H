@@ -138,11 +138,13 @@ Foam::ThermoCloud<CloudType>::Sh(volScalarField& hs) const
         if (this->solution().semiImplicit("hs"))
         {
             const volScalarField Cp(thermo_.thermo().Cp());
+            const DimensionedField<scalar, volMesh>
+                Vdt(this->mesh().V()*this->db().time().deltaT());
 
             return
-                hsTrans()/(this->mesh().V()*this->db().time().deltaT())
-              - fvm::Sp(hsCoeff()/(Cp*this->mesh().V()), hs)
-              + hsCoeff()/(Cp*this->mesh().V())*hs;
+                hsTrans()/Vdt
+              - fvm::Sp(hsCoeff()/(Cp*Vdt), hs)
+              + hsCoeff()/(Cp*Vdt)*hs;
         }
         else
         {
