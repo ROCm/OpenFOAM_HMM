@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    fileName
+    Test-fileName
 
 Description
-
+    Test some basic fileName functionality
 
 \*---------------------------------------------------------------------------*/
 
@@ -52,9 +52,10 @@ int main()
     fileName pathName(wrdList);
 
     Info<< "pathName = " << pathName << nl
-        << "pathName.name() = " << pathName.name() << nl
-        << "pathName.path() = " << pathName.path() << nl
-        << "pathName.ext()  = " << pathName.ext() << endl;
+        << "pathName.name()     = >" << pathName.name() << "<\n"
+        << "pathName.path()     = "  << pathName.path() << nl
+        << "pathName.ext()      = >" << pathName.ext() << "<\n"
+        << "pathName.name(true) = >" << pathName.name(true) << "<\n";
 
     Info<< "pathName.components() = " << pathName.components() << nl
         << "pathName.component(2) = " << pathName.component(2) << nl
