@@ -327,7 +327,7 @@ void Foam::triSurface::checkEdges(const bool verbose)
                 << " has no edgeFaces"
                 << exit(FatalError);
         }
-        else if (myFaces.size() > 2)
+        else if (myFaces.size() > 2 && verbose)
         {
             WarningIn
             (
