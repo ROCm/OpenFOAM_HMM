@@ -33,10 +33,9 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "dynamicFvMesh.H"
 #include "singlePhaseTransportModel.H"
 #include "turbulenceModel.H"
-#include "basicKinematicCloud.H"
+#include "basicKinematicCollidingCloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,8 +50,7 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
     #include "createTime.H"
-    #include "createDynamicFvMesh.H"
-
+    #include "createMesh.H"
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"
 
@@ -63,10 +61,6 @@ int main(int argc, char *argv[])
     while (runTime.loop())
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
-
-        mesh.update();
-
-        U.correctBoundaryConditions();
 
         Info<< "Evolving " << kinematicCloud.name() << endl;
 
