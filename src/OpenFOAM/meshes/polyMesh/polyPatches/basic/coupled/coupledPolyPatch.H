@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,6 +53,20 @@ class coupledPolyPatch
 :
     public polyPatch
 {
+public:
+
+    enum transformType
+    {
+        UNKNOWN,            // unspecified; automatic ordering
+        ROTATIONAL,         // rotation along coordinate axis
+        TRANSLATIONAL,      // translation
+        NOORDERING          // unspecified, no automatic ordering
+    };
+    static const NamedEnum<transformType, 4> transformTypeNames;
+
+
+private:
+
     // Private data
 
         //- offset (distance) vector from one side of the couple to the other
@@ -82,6 +96,8 @@ protected:
         //- Calculate the transformation tensors
         //  smallDist : matching distance per face
         //  absTol    : absolute error in normal
+        //  if transformType = unknown it first tries rotational, then
+        //  translational transform
         void calcTransformTensors
         (
             const vectorField& Cf,
@@ -89,7 +105,8 @@ protected:
             const vectorField& nf,
             const vectorField& nr,
             const scalarField& smallDist,
-            const scalar absTol = matchTol
+            const scalar absTol = matchTol,
+            const transformType = UNKNOWN
         ) const;
 
         //- Initialise the calculation of the patch geometry
