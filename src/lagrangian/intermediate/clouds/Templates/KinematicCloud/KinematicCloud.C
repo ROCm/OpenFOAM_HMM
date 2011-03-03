@@ -360,11 +360,11 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     if (solution_.active())
     {
         setModels();
-    }
 
-    if (readFields)
-    {
-        parcelType::readFields(*this);
+        if (readFields)
+        {
+            parcelType::readFields(*this);
+        }
     }
 
     if (solution_.resetSourcesOnStartup())
@@ -504,7 +504,7 @@ void Foam::KinematicCloud<CloudType>::checkParcelProperties
         parcel.rho() = constProps_.rho0();
     }
 
-    const scalar carrierDt = this->db().time().deltaTValue();
+    const scalar carrierDt = solution_.deltaT();
     parcel.stepFraction() = (carrierDt - lagrangianDt)/carrierDt;
     parcel.typeId() = constProps_.parcelTypeId();
 }

@@ -8,4 +8,6 @@ cd ${0%/*} || exit 1    # run from this directory
 runApplication blockMesh
 
 # run the solver
-runApplication steadyReactingParcelFoam
+runApplication LTSReactingParcelFoam
+
+# ----------------------------------------------------------------- end-of-file

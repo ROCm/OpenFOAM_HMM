@@ -1,3 +1,0 @@
-steadyReactingParcelFoam.C
-
-EXE = $(FOAM_APPBIN)/steadyReactingParcelFoam

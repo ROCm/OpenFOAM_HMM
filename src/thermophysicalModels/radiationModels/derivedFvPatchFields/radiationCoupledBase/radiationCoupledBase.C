@@ -81,17 +81,18 @@ Foam::radiationCoupledBase::radiationCoupledBase
         {
             if (!isA<directMappedPatchBase>(patch_.patch()))
             {
-                FatalErrorIn
+                FatalIOErrorIn
                 (
                     "radiationCoupledBase::radiationCoupledBase\n"
                     "(\n"
                     "    const fvPatch& p,\n"
                     "    const dictionary& dict\n"
-                    ")\n"
+                    ")\n",
+                    dict
                 )   << "\n    patch type '" << patch_.type()
                     << "' not type '" << directMappedPatchBase::typeName << "'"
                     << "\n    for patch " << patch_.name()
-                    << exit(FatalError);
+                    << exit(FatalIOError);
             }
 
             emissivity_ = scalarField(patch_.size(), 0.0);
@@ -102,16 +103,17 @@ Foam::radiationCoupledBase::radiationCoupledBase
         {
             if(!dict.found("emissivity"))
             {
-                FatalErrorIn
+                FatalIOErrorIn
                 (
                     "radiationCoupledBase::radiationCoupledBase\n"
                     "(\n"
                     "    const fvPatch& p,\n"
                     "    const dictionary& dict\n"
-                    ")\n"
+                    ")\n",
+                    dict
                 )   << "\n    emissivity key does not exist for patch "
                     << patch_.name()
-                    << exit(FatalError);
+                    << exit(FatalIOError);
             }
             else
             {

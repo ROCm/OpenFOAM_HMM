@@ -1,14 +1,14 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
-    format      binary;
+    format      ascii;
     class       dictionary;
     location    "system";
     object      fvSolution;
@@ -17,19 +17,11 @@ FoamFile
 
 solvers
 {
-    rho
-    {
-        solver          PCG;
-        preconditioner  DIC;
-        tolerance       0;
-        relTol          0.1;
-    }
     p
     {
         solver           GAMG;
-
         tolerance        0;
-        relTol           0.05;
+        relTol           0.1;
 
         smoother         DICGaussSeidel;
         nPreSweeps       0;
@@ -41,24 +33,41 @@ solvers
         agglomerator     faceAreaPair;
         mergeLevels      1;
 
-        maxIter          50;
+        maxIter          20;
     };
-
-    "(U|Yi|hs|k|epsilon)"
+    "(rho|G)"
     {
-        solver          smoothSolver;
-        smoother        GaussSeidel;
-        tolerance       0;
-        relTol          0.1;
-    }
+        solver           PCG;
+        preconditioner   DIC;
+        tolerance        0;
+        relTol           0.1;
+        maxIter          20;
+    };
+    "(Yi|hs)"
+    {
+        solver           smoothSolver;
+        smoother         GaussSeidel;
+        tolerance        0;
+        relTol           0.1;
+        maxIter          20;
+    };
+    "(U|k|omega)"
+    {
+        solver           smoothSolver;
+        smoother         GaussSeidel;
+        tolerance        0;
+        relTol           0.1;
+        maxIter          20;
+    };
 }
 
-SIMPLE
+PISO
 {
-    nNonOrthogonalCorrectors 0;
+    nCorrectors          2;
+    nNonOrthogonalCorrectors 0; // 10;
     momentumPredictor yes;
-    rhoMin rhoMin [1 -3 0 0 0] 0.1;
-    rhoMax rhoMax [1 -3 0 0 0] 1.5;
+    rhoMin rhoMin [ 1 -3 0 0 0 ] 0; // 0.5;
+    rhoMax rhoMax [ 1 -3 0 0 0 ] 100; // 1.5;
 }
 
 additional
@@ -66,11 +75,6 @@ additional
     eWork           true;
     hWork           true;
     solveSpecies    true;
-}
-
-relaxationFactors
-{
-    p               0.3;
 }
 
 
