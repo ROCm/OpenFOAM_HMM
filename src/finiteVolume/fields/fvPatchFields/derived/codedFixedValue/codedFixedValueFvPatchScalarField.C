@@ -47,32 +47,6 @@ const Foam::word Foam::codedFixedValueFvPatchScalarField::codeTemplateH
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-
-Foam::string Foam::codedFixedValueFvPatchScalarField::libraryGlobalName
-(
-    const fileName& libPath
-)
-{
-    // global function name (SHA1-encoded)
-    // that can be used for version control and/or explicit loading/unloading
-    string globalFuncName = libPath.name();
-
-    // remove ".so" extension
-    string::size_type dot = globalFuncName.find('.');
-    if (dot != string::npos)
-    {
-        globalFuncName.resize(dot);
-    }
-
-    // remove leading 'lib' from name
-    globalFuncName.erase(0, 3);
-
-    return globalFuncName;
-}
-
-
-
-
 void* Foam::codedFixedValueFvPatchScalarField::loadLibrary
 (
     const fileName& libPath,
@@ -82,20 +56,17 @@ void* Foam::codedFixedValueFvPatchScalarField::loadLibrary
 {
     void* lib = 0;
 
-    // global function name (SHA1-encoded)
-    // that can be used for version control and/or explicit loading/unloading
-
     // avoid compilation by loading an existing library
-    if (dlLibraryTable::open(libPath, false))
+    if (!libPath.empty() && dlLibraryTable::open(libPath, false))
     {
         lib = dlLibraryTable::findLibrary(libPath);
 
         // verify the loaded version and unload if needed
         if (lib)
         {
+            // provision for manual execution of code after loading
             if (dlSymFound(lib, globalFuncName))
             {
-                // Find the function handle in the library
                 loaderFunctionType function =
                     reinterpret_cast<loaderFunctionType>
                     (
@@ -104,8 +75,7 @@ void* Foam::codedFixedValueFvPatchScalarField::loadLibrary
 
                 if (function)
                 {
-                    // force load
-                    (*function)(true);
+                    (*function)(true);    // force load
                 }
                 else
                 {
@@ -152,7 +122,12 @@ void Foam::codedFixedValueFvPatchScalarField::unloadLibrary
     const dictionary& contextDict
 )
 {
-    void* lib = dlLibraryTable::findLibrary(libPath);
+    void* lib = 0;
+
+    if (!libPath.empty())
+    {
+        lib = dlLibraryTable::findLibrary(libPath);
+    }
 
     if (!lib)
     {
@@ -162,7 +137,6 @@ void Foam::codedFixedValueFvPatchScalarField::unloadLibrary
     // provision for manual execution of code before unloading
     if (dlSymFound(lib, globalFuncName))
     {
-        // Find the function handle in the library
         loaderFunctionType function =
             reinterpret_cast<loaderFunctionType>
             (
@@ -171,8 +145,7 @@ void Foam::codedFixedValueFvPatchScalarField::unloadLibrary
 
         if (function)
         {
-            // force unload
-            (*function)(false);
+            (*function)(false);    // force unload
         }
         else
         {
@@ -181,8 +154,7 @@ void Foam::codedFixedValueFvPatchScalarField::unloadLibrary
                 "codedFixedValueFvPatchScalarField::unloadLibrary()",
                 contextDict
             )   << "Failed looking up symbol " << globalFuncName << nl
-                << "from " << libPath
-                << exit(FatalIOError);
+                << "from " << libPath << exit(FatalIOError);
         }
     }
 
@@ -233,46 +205,65 @@ void Foam::codedFixedValueFvPatchScalarField::createLibrary
     const dynamicCodeContext& context
 ) const
 {
-    // Write files for new library
-    if (Pstream::master() && !dynCode.upToDate(context))
+    bool create = Pstream::master();
+
+    if (create)
     {
-        // filter with this context
-        dynCode.reset(context);
+        // Write files for new library
+        if (!dynCode.upToDate(context))
+        {
+            // filter with this context
+            dynCode.reset(context);
 
-        // compile filtered C template
-        dynCode.addCompileFile(codeTemplateC);
+            // compile filtered C template
+            dynCode.addCompileFile(codeTemplateC);
 
-        // copy filtered H template
-        dynCode.addCopyFile(codeTemplateH);
+            // copy filtered H template
+            dynCode.addCopyFile(codeTemplateH);
 
-        // take no chances - typeName must be identical to redirectType_
-        dynCode.setFilterVariable("typeName", redirectType_);
+            // take no chances - typeName must be identical to redirectType_
+            dynCode.setFilterVariable("typeName", redirectType_);
 
-        // debugging: make BC verbose
-//         dynCode.setFilterVariable("verbose", "true");
-//         Info<<"compile " << redirectType_ << " sha1: "
-//             << context.sha1() << endl;
+            // debugging: make BC verbose
+            //         dynCode.setFilterVariable("verbose", "true");
+            //         Info<<"compile " << redirectType_ << " sha1: "
+            //             << context.sha1() << endl;
 
-        // define Make/options
-        dynCode.setMakeOptions
-        (
-            "EXE_INC = -g \\\n"
-            "-I$(LIB_SRC)/finiteVolume/lnInclude\\\n"
-          + context.options()
-          + "\n\nLIB_LIBS = "
-        );
+            // define Make/options
+            dynCode.setMakeOptions
+            (
+                "EXE_INC = -g \\\n"
+                "-I$(LIB_SRC)/finiteVolume/lnInclude\\\n"
+              + context.options()
+              + "\n\nLIB_LIBS = "
+            );
 
-        if (!dynCode.copyOrCreateFiles(true))
+            if (!dynCode.copyOrCreateFiles(true))
+            {
+                FatalIOErrorIn
+                (
+                    "codedFixedValueFvPatchScalarField::createLibrary(..)",
+                    context.dict()
+                )   << "Failed writing files for" << nl
+                    << dynCode.libRelPath() << nl
+                    << exit(FatalIOError);
+            }
+        }
+
+        if (!dynCode.wmakeLibso())
         {
             FatalIOErrorIn
             (
-                "codedFixedValueFvPatchScalarField::writeLibrary(..)",
+                "codedFixedValueFvPatchScalarField::createLibrary(..)",
                 context.dict()
-            )   << "Failed writing files for" << nl
-                << dynCode.libPath() << nl
+            )   << "Failed wmake " << dynCode.libRelPath() << nl
                 << exit(FatalIOError);
         }
     }
+
+
+    // all processes must wait for compile to finish
+    reduce(create, orOp<bool>());
 }
 
 
@@ -294,7 +285,6 @@ void Foam::codedFixedValueFvPatchScalarField::updateLibrary() const
 
     dynamicCodeContext context(codeDict);
 
-
     // codeName: redirectType + _<sha1>
     // codeDir : redirectType
     dynamicCode dynCode
@@ -305,77 +295,33 @@ void Foam::codedFixedValueFvPatchScalarField::updateLibrary() const
     const fileName libPath = dynCode.libPath();
 
 
-    // see if library is loaded
-    void* lib = dlLibraryTable::findLibrary(libPath);
-
-    // library not loaded, and also need to unload old version
-    if (!lib && !oldLibPath_.empty())
-    {
-        // unload code
-        // Remove instantiation of fvPatchField provided by library
-        redirectPatchFieldPtr_.clear();
-
-        unloadLibrary
-        (
-            oldLibPath_,
-            libraryGlobalName(oldLibPath_),
-            context.dict()
-        );
-    }
-
-
-    // retain for future reference
-    oldLibPath_ = libPath;
-
-    bool waiting = false;
-
-    if (lib)
+    // the correct library was already loaded => we are done
+    if (dlLibraryTable::findLibrary(libPath))
     {
         return;
     }
 
-    // Remove instantiation of fvPatchField provided by library
+    // remove instantiation of fvPatchField provided by library
     redirectPatchFieldPtr_.clear();
 
-    // avoid compilation by loading an existing library
-    lib = loadLibrary
+    // may need to unload old library
+    unloadLibrary
     (
-        libPath,
-        dynCode.codeName(),
+        oldLibPath_,
+        dynamicCode::libraryBaseName(oldLibPath_),
         context.dict()
     );
 
-
-    // really do need to create library
-    if (!lib)
+    // try loading an existing library (avoid compilation when possible)
+    if (!loadLibrary(libPath, dynCode.codeName(), context.dict()))
     {
-        if (Pstream::master())
-        {
-            createLibrary(dynCode, context);
+        createLibrary(dynCode, context);
 
-            if (!dynCode.wmakeLibso())
-            {
-                FatalIOErrorIn
-                (
-                    "codedFixedValueFvPatchScalarField::updateLibrary()",
-                    context.dict()
-                )   << "Failed wmake " << libPath
-                    << exit(FatalIOError);
-            }
-        }
-
-        // all processes must wait for compile
-        waiting = true;
-        reduce(waiting, orOp<bool>());
-
-        // load newly compiled libray
-        lib = loadLibrary
-        (
-            libPath,
-            dynCode.codeName(),
-            context.dict()
-        );
+        loadLibrary(libPath, dynCode.codeName(), context.dict());
     }
+
+    // retain for future reference
+    oldLibPath_ = libPath;
 }
 
 

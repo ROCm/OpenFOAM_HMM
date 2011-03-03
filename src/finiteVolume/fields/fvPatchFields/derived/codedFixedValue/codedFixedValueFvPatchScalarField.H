@@ -114,12 +114,10 @@ class codedFixedValueFvPatchScalarField
 
     // Private Member Functions
 
-        // Generic library management pieces
+        const IOdictionary& dict() const;
 
         //- Global loader/unloader function type
         typedef void (*loaderFunctionType)(bool);
-
-        static string libraryGlobalName(const fileName& libPath);
 
         static void* loadLibrary
         (
@@ -136,12 +134,11 @@ class codedFixedValueFvPatchScalarField
         );
 
 
-        const IOdictionary& dict() const;
-
         void createLibrary(dynamicCode&, const dynamicCodeContext&) const;
 
         //- Update library as required
         void updateLibrary() const;
+
 
 public:
 
