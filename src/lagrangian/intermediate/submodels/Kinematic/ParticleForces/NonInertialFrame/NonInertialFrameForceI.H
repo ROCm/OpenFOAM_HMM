@@ -23,36 +23,51 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeParcelForces_H
-#define makeParcelForces_H
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "SphereDragForce.H"
-#include "NonSphereDragForce.H"
-
-#include "GravityForce.H"
-#include "NonInertialFrameForce.H"
-#include "ParamagneticForce.H"
-#include "PressureGradientForce.H"
-#include "SRFForce.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#define makeParcelForces(CloudType)                                           \
-                                                                              \
-    makeParticleForceModel(CloudType);                                        \
-    makeParticleForceModelType(SphereDragForce, CloudType);                   \
-    makeParticleForceModelType(NonSphereDragForce, CloudType);                \
-    makeParticleForceModelType(GravityForce, CloudType);                      \
-    makeParticleForceModelType(NonInertialFrameForce, CloudType);             \
-    makeParticleForceModelType(ParamagneticForce, CloudType);                 \
-    makeParticleForceModelType(PressureGradientForce, CloudType);             \
-    makeParticleForceModelType(SRFForce, CloudType);
+template<class CloudType>
+inline const Foam::vector& Foam::NonInertialFrameForce<CloudType>::W() const
+{
+    return W_;
+}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class CloudType>
+inline const Foam::vector& Foam::NonInertialFrameForce<CloudType>::omega() const
+{
+    return omegaMag_*axis_;
+}
 
-#endif
+
+template<class CloudType>
+inline const Foam::vector&
+Foam::NonInertialFrameForce<CloudType>::omegaDot() const
+{
+    return omegaDot_;
+}
+
+
+template<class CloudType>
+inline const Foam::vector&
+Foam::NonInertialFrameForce<CloudType>::axis() const
+{
+    return axis_;
+}
+
+
+template<class CloudType>
+inline bool Foam::NonInertialFrameForce<CloudType>::hasAxis() const
+{
+    return hasAxis_;
+}
+
+
+template<class CloudType>
+inline const Foam::vector&
+Foam::NonInertialFrameForce<CloudType>::axisRefPoint() const
+{
+    return axisRefPoint_;
+}
+
 
 // ************************************************************************* //

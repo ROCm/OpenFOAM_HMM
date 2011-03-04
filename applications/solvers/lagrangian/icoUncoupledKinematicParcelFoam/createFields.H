@@ -89,30 +89,17 @@
         "H",
         runTime.timeName(),
         mesh,
-        IOobject::NO_READ
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
     );
 
-    autoPtr<volVectorField> HPtr_;
+    autoPtr<volVectorField> HPtr;
 
     if (Hheader.headerOk())
     {
         Info<< "\nReading field H\n" << endl;
 
-        HPtr_.reset
-        (
-            new volVectorField
-            (
-                IOobject
-                (
-                    "H",
-                    runTime.timeName(),
-                    mesh,
-                    IOobject::MUST_READ,
-                    IOobject::AUTO_WRITE
-                ),
-                mesh
-            )
-        );
+        HPtr.reset(new volVectorField (Hheader, mesh));
     }
 
     IOobject HdotGradHheader
@@ -120,28 +107,17 @@
         "HdotGradH",
         runTime.timeName(),
         mesh,
-        IOobject::NO_READ
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
     );
 
-    autoPtr<volVectorField> HdotGradHPtr_;
+    autoPtr<volVectorField> HdotGradHPtr;
 
     if (HdotGradHheader.headerOk())
     {
         Info<< "Reading field HdotGradH" << endl;
 
-        HdotGradHPtr_.reset
-        (
-            new volVectorField
-            (
-                IOobject
-                (
-                    "HdotGradH",
-                    runTime.timeName(),
-                    mesh,
-                    IOobject::MUST_READ,
-                    IOobject::AUTO_WRITE
-                ),
-                mesh
-            )
-        );
+        HdotGradHPtr.reset(new volVectorField(HdotGradHheader, mesh));
     }
+
+    #include "createNonInertialFrameFields.H"

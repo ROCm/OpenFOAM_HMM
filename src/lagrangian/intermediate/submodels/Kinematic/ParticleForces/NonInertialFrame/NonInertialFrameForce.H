@@ -22,19 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::GravityForce
+    Foam::NonInertialFrameForce
 
 Description
-    Calculates particle gravity force
+    Calculates particle non-inertial reference frame force.  Variable names as
+    from Landau and Lifshitz, Mechanics, 3rd Ed, p126-129.
 
 SourceFiles
-    GravityForceI.H
-    GravityForce.C
+    NonInertialFrameForce.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef GravityForce_H
-#define GravityForce_H
+#ifndef NonInertialFrameForce_H
+#define NonInertialFrameForce_H
 
 #include "ParticleForce.H"
 
@@ -46,30 +46,64 @@ namespace Foam
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\
-                       Class GravityForce Declaration
+                  Class NonInertialFrameForce Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class GravityForce
+class NonInertialFrameForce
 :
     public ParticleForce<CloudType>
 {
     // Private data
 
-        //- Reference to the acceleration due to gravity
-        const vector& g_;
+        //- Name of the linear acceleration field
+        word WName_;
+
+        //- The linear acceleration of the reference frame
+        vector W_;
+
+        //- Name of the angular velocity magnitude field
+        word omegaMagName_;
+
+        //- The magnitude of the angular velocity of the reference frame,
+        //  combines with axis to give omega
+        scalar omegaMag_;
+
+        //- Name of the angular acceleration field
+        word omegaDotName_;
+
+        //- Pointer to the angular acceleration of the reference frame
+        vector omegaDot_;
+
+        //- Name of the axis field
+        word axisName_;
+
+        //- Pointer to the axis of rotation - assumed to be a unit vector.
+        //  duplication of omega to allow situations where omega = 0 and
+        //  omegaDot != 0.
+        vector axis_;
+
+        // Boolean flag for whether rotational motion is active
+        bool hasAxis_;
+
+        //- Name of the axisRefPoint field
+        word axisRefPointName_;
+
+        //- Pointer to a point in non-inertial space on the axis of rotation
+        //  (omega), used to calculate r.
+        vector axisRefPoint_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("gravity");
+    TypeName("nonInertialFrame");
 
 
     // Constructors
 
         //- Construct from mesh
-        GravityForce
+        NonInertialFrameForce
         (
             CloudType& owner,
             const fvMesh& mesh,
@@ -78,31 +112,48 @@ public:
         );
 
         //- Construct copy
-        GravityForce(const GravityForce& gf);
+        NonInertialFrameForce(const NonInertialFrameForce& niff);
 
         //- Construct and return a clone
         virtual autoPtr<ParticleForce<CloudType> > clone() const
         {
             return autoPtr<ParticleForce<CloudType> >
             (
-                new GravityForce<CloudType>(*this)
+                new ParticleForce<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~GravityForce();
+    virtual ~NonInertialFrameForce();
 
 
     // Member Functions
 
         // Access
 
-            //- Return the acceleration due to gravity
-            inline const vector& g() const;
+            //- Return the linear acceleration of the reference frame
+            inline const vector& W() const;
 
+            //- Return the angular velocity of the reference frame
+            inline const vector& omega() const;
+
+            //- Return the angular acceleration of the reference frame
+            inline const vector& omegaDot() const;
+
+            //- Return the axis of rotation
+            inline const vector& axis() const;
+
+            //- Return bool stating if the frame is rotating
+            inline bool hasAxis() const;
+
+            //- Return the point in non-inertial space on the axis of rotation
+            inline const vector& axisRefPoint() const;
 
         // Evaluation
+
+            //- Cache fields
+            virtual void cacheFields(const bool store);
 
             //- Calculate the non-coupled force
             virtual forceSuSp calcNonCoupled
@@ -122,10 +173,10 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "GravityForceI.H"
+#include "NonInertialFrameForceI.H"
 
 #ifdef NoRepository
-    #include "GravityForce.C"
+    #include "NonInertialFrameForce.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
