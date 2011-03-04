@@ -334,11 +334,14 @@ void Foam::Cloud<ParticleType>::move(TrackData& td, const scalar trackTime)
         }
     }
 
-    reduce(nTrackingRescues_, sumOp<label>());
-
-    if (nTrackingRescues_ > 0)
+    if (cloud::debug)
     {
-        Info<< nTrackingRescues_ << " tracking rescue corrections" << endl;
+        reduce(nTrackingRescues_, sumOp<label>());
+
+        if (nTrackingRescues_ > 0)
+        {
+            Info<< nTrackingRescues_ << " tracking rescue corrections" << endl;
+        }
     }
 }
 
