@@ -96,7 +96,8 @@ public:
 
 
     //- Destructor
-    virtual ~transport();
+
+        virtual ~transport();
 
 
     // Member Functions
@@ -124,6 +125,12 @@ public:
 
         //- Update properties from given dictionary
         virtual bool read(const dictionary& XiProperties);
+
+        //- Write fields of the XiEq model
+        virtual void writeFields()
+        {
+            XiEqModel_().writeFields();
+        }
 };
 
 

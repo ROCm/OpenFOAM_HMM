@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,24 +23,11 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fixed.H"
-#include "addToRunTimeSelectionTable.H"
+#include "XiModel.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-namespace XiModels
-{
-    defineTypeNameAndDebug(fixed, 0);
-    addToRunTimeSelectionTable(XiModel, fixed, dictionary);
-}
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::XiModels::fixed::fixed
+Foam::autoPtr<Foam::XiModel> Foam::XiModel::New
 (
     const dictionary& XiProperties,
     const hhuCombustionThermo& thermo,
@@ -50,22 +37,28 @@ Foam::XiModels::fixed::fixed
     const volScalarField& b,
     const surfaceScalarField& phi
 )
-:
-    XiModel(XiProperties, thermo, turbulence, Su, rho, b, phi)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
-
-Foam::XiModels::fixed::~fixed()
-{}
-
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-bool Foam::XiModels::fixed::read(const dictionary& XiProperties)
 {
-    return XiModel::read(XiProperties);
+    word XiModelTypeName = XiProperties.lookup("XiModel");
+
+    Info<< "Selecting flame-wrinkling model " << XiModelTypeName << endl;
+
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(XiModelTypeName);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "XiModel::New"
+        )   << "Unknown XiModel type "
+            << XiModelTypeName << endl << endl
+            << "Valid  XiModels are : " << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<XiModel>
+        (cstrIter()(XiProperties, thermo, turbulence, Su, rho, b, phi));
 }
 
 

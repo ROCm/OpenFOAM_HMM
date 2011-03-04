@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,49 +23,40 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fixed.H"
-#include "addToRunTimeSelectionTable.H"
+#include "PDRDragModel.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-namespace XiModels
-{
-    defineTypeNameAndDebug(fixed, 0);
-    addToRunTimeSelectionTable(XiModel, fixed, dictionary);
-}
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::XiModels::fixed::fixed
+Foam::autoPtr<Foam::PDRDragModel> Foam::PDRDragModel::New
 (
-    const dictionary& XiProperties,
-    const hhuCombustionThermo& thermo,
+    const dictionary& PDRProperties,
     const compressible::RASModel& turbulence,
-    const volScalarField& Su,
     const volScalarField& rho,
-    const volScalarField& b,
+    const volVectorField& U,
     const surfaceScalarField& phi
 )
-:
-    XiModel(XiProperties, thermo, turbulence, Su, rho, b, phi)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
-
-Foam::XiModels::fixed::~fixed()
-{}
-
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-bool Foam::XiModels::fixed::read(const dictionary& XiProperties)
 {
-    return XiModel::read(XiProperties);
+    word PDRDragModelTypeName = PDRProperties.lookup("PDRDragModel");
+
+    Info<< "Selecting flame-wrinkling model " << PDRDragModelTypeName << endl;
+
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(PDRDragModelTypeName);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "PDRDragModel::New"
+        )   << "Unknown PDRDragModel type "
+            << PDRDragModelTypeName << endl << endl
+            << "Valid  PDRDragModels are : " << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<PDRDragModel>
+        (cstrIter()(PDRProperties, turbulence, rho, U, phi));
 }
 
 

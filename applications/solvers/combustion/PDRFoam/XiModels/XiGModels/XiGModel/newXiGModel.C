@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,49 +23,44 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fixed.H"
-#include "addToRunTimeSelectionTable.H"
+#include "XiGModel.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-namespace XiModels
-{
-    defineTypeNameAndDebug(fixed, 0);
-    addToRunTimeSelectionTable(XiModel, fixed, dictionary);
-}
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::XiModels::fixed::fixed
+Foam::autoPtr<Foam::XiGModel> Foam::XiGModel::New
 (
-    const dictionary& XiProperties,
+    const dictionary& XiGProperties,
     const hhuCombustionThermo& thermo,
     const compressible::RASModel& turbulence,
-    const volScalarField& Su,
-    const volScalarField& rho,
-    const volScalarField& b,
-    const surfaceScalarField& phi
+    const volScalarField& Su
 )
-:
-    XiModel(XiProperties, thermo, turbulence, Su, rho, b, phi)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
-
-Foam::XiModels::fixed::~fixed()
-{}
-
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-bool Foam::XiModels::fixed::read(const dictionary& XiProperties)
 {
-    return XiModel::read(XiProperties);
+    word XiGModelTypeName = XiGProperties.lookup("XiGModel");
+
+    Info<< "Selecting flame-wrinkling model " << XiGModelTypeName << endl;
+
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(XiGModelTypeName);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "XiGModel::New"
+            "("
+            "    const hhuCombustionThermo& thermo,"
+            "    const compressible::RASModel& turbulence,"
+            "    const volScalarField& Su"
+            ")"
+        )   << "Unknown XiGModel type "
+            << XiGModelTypeName << endl << endl
+            << "Valid  XiGModels are : " << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<XiGModel>
+        (cstrIter()(XiGProperties, thermo, turbulence, Su));
 }
 
 

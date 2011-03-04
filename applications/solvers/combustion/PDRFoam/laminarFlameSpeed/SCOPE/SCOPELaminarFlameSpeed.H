@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -134,7 +134,7 @@ class SCOPE
         polynomial MaPolyU_;
 
 
-    // Private Member Functions
+    // Private member functions
 
         //- Polynomial evaluated from the given equivalence ratio
         //  and polynomial coefficients
@@ -194,7 +194,7 @@ public:
         );
 
 
-    //- Destructor
+    // Destructor
     ~SCOPE();
 
 

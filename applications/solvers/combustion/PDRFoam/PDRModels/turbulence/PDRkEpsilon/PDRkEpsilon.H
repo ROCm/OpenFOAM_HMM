@@ -25,23 +25,23 @@ Class
     Foam::compressible::RASModels::PDRkEpsilon
 
 Description
-    Standard k-epsilon turbulence model for compressible flow
-    with additional source terms
+    Standard k-epsilon turbulence model with additional source terms
     corresponding to PDR basic drag model (\link basic.H \endlink)
 
     The default model coefficients correspond to the following:
-    \verbatim
+    @verbatim
         PDRkEpsilonCoeffs
         {
             Cmu         0.09;
             C1          1.44;
             C2          1.92;
             C3          -0.33;  // only for compressible
+            C4          0.1;
             sigmak      1.0;    // only for compressible
             sigmaEps    1.3;
             Prt         1.0;    // only for compressible
         }
-    \endverbatim
+    @endverbatim
 
     The turbulence source term \f$ G_{R} \f$ appears in the
     \f$ \kappa-\epsilon \f$ equation for the generation of turbulence due to
@@ -80,6 +80,11 @@ class PDRkEpsilon
 :
     public kEpsilon
 {
+    // Private data
+
+        // Model coefficients
+        dimensionedScalar C4_;
+
 
 public:
 
@@ -107,10 +112,12 @@ public:
 
 
     // Member Functions
-
+    
         //- Solve the turbulence equations and correct the turbulence viscosity
-        virtual void correct();
+        void correct();
 
+        //- Read turbulenceProperties dictionary
+        bool read();
 };
 
 

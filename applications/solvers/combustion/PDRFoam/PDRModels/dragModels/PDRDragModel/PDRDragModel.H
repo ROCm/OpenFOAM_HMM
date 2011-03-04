@@ -138,7 +138,8 @@ public:
 
 
     //- Destructor
-    virtual ~PDRDragModel();
+
+        virtual ~PDRDragModel();
 
 
     // Member Functions
@@ -161,6 +162,11 @@ public:
         virtual bool writeData(Ostream&) const
         {
             return true;
+        }
+
+        virtual void writeFields() const
+        {
+            notImplemented("PDRDragModel::write()");
         }
 };
 
