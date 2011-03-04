@@ -24,13 +24,15 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "string.H"
-#include "OSspecific.H"
+#include "stringOps.H"
+
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
 const char* const Foam::string::typeName = "string";
-int Foam::string::debug(debug::debugSwitch(string::typeName, 0));
+int Foam::string::debug(Foam::debug::debugSwitch(string::typeName, 0));
 const Foam::string Foam::string::null;
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -43,7 +45,7 @@ Foam::string::size_type Foam::string::count(const char c) const
     {
         if (*iter == c)
         {
-            cCount++;
+            ++cCount;
         }
     }
 
@@ -95,136 +97,7 @@ Foam::string& Foam::string::replaceAll
 
 Foam::string& Foam::string::expand(const bool allowEmpty)
 {
-    size_type begVar = 0;
-
-    // Expand $VARS
-    // Repeat until nothing more is found
-    while
-    (
-        (begVar = find('$', begVar)) != npos
-     && begVar < size()-1
-    )
-    {
-        if (begVar == 0 || operator[](begVar-1) != '\\')
-        {
-            // Find end of first occurrence
-            size_type endVar = begVar;
-            size_type delim = 0;
-
-            if (operator[](begVar+1) == '{')
-            {
-                endVar = find('}', begVar);
-                delim = 1;
-            }
-            else
-            {
-                iterator iter = begin() + begVar + 1;
-
-                while
-                (
-                    iter != end()
-                 && (isalnum(*iter) || *iter == '_')
-                )
-                {
-                    ++iter;
-                    ++endVar;
-                }
-            }
-
-            if (endVar != npos && endVar != begVar)
-            {
-                const string varName = substr
-                (
-                    begVar + 1 + delim,
-                    endVar - begVar - 2*delim
-                );
-
-                const string varValue = getEnv(varName);
-                if (varValue.size())
-                {
-                    std::string::replace
-                    (
-                        begVar,
-                        endVar - begVar + 1,
-                        varValue
-                    );
-                    begVar += varValue.size();
-                }
-                else if (allowEmpty)
-                {
-                    std::string::replace
-                    (
-                        begVar,
-                        endVar - begVar + 1,
-                        ""
-                    );
-                }
-                else
-                {
-                    FatalErrorIn("string::expand(const bool, const bool)")
-                        << "Unknown variable name " << varName << '.'
-                        << exit(FatalError);
-                }
-            }
-            else
-            {
-                break;
-            }
-        }
-        else
-        {
-            ++begVar;
-        }
-    }
-
-    if (size())
-    {
-        if (operator[](0) == '~')
-        {
-            // Expand initial ~
-            //   ~/        => home directory
-            //   ~OpenFOAM => site/user OpenFOAM configuration directory
-            //   ~user     => home directory for specified user
-
-            word user;
-            fileName file;
-
-            if ((begVar = find('/')) != npos)
-            {
-                user = substr(1, begVar - 1);
-                file = substr(begVar + 1);
-            }
-            else
-            {
-                user = substr(1);
-            }
-
-            // NB: be a bit lazy and expand ~unknownUser as an
-            // empty string rather than leaving it untouched.
-            // otherwise add extra test
-            if (user == "OpenFOAM")
-            {
-                *this = findEtcFile(file);
-            }
-            else
-            {
-                *this = home(user)/file;
-            }
-        }
-        else if (operator[](0) == '.')
-        {
-            // Expand a lone '.' and an initial './' into cwd
-            if (size() == 1)
-            {
-                *this = cwd();
-            }
-            else if (operator[](1) == '/')
-            {
-                std::string::replace(0, 1, cwd());
-            }
-        }
-    }
-
+    stringOps::inplaceExpand(*this, allowEmpty);
     return *this;
 }
 

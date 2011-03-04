@@ -109,6 +109,11 @@ class codeStream
 :
     public functionEntry
 {
+
+        //- Interpreter function type
+        typedef void (*streamingFunctionType)(Ostream&, const dictionary&);
+
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct

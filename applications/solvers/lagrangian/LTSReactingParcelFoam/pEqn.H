@@ -23,7 +23,7 @@
             );
     }
 
-    fvScalarMatrix DrhoDtEqn
+    fvScalarMatrix pDDtEqn
     (
         fvc::ddt(rho) + psi*correction(fvm::ddt(p))
       + fvc::div(phi)
@@ -36,7 +36,7 @@
     {
         fvScalarMatrix pEqn
         (
-            DrhoDtEqn
+            pDDtEqn
           - fvm::laplacian(rho*rAU, p)
         );
 

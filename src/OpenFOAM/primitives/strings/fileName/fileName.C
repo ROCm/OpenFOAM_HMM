@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -204,6 +204,42 @@ Foam::word Foam::fileName::name() const
 }
 
 
+Foam::word Foam::fileName::name(const bool noExt) const
+{
+    if (noExt)
+    {
+        size_type beg = rfind('/');
+        if (beg == npos)
+        {
+            beg = 0;
+        }
+        else
+        {
+            ++beg;
+        }
+
+        size_type dot = rfind('.');
+        if (dot != npos && dot <= beg)
+        {
+            dot = npos;
+        }
+
+        if (dot == npos)
+        {
+            return substr(beg, npos);
+        }
+        else
+        {
+            return substr(beg, dot - beg);
+        }
+    }
+    else
+    {
+        return this->name();
+    }
+}
+
+
 //  Return directory path name (part before last /)
 //
 //  behaviour compared to /usr/bin/dirname:
@@ -283,22 +319,22 @@ Foam::wordList Foam::fileName::components(const char delimiter) const
 {
     DynamicList<word> wrdList(20);
 
-    size_type start=0, end=0;
+    size_type beg=0, end=0;
 
-    while ((end = find(delimiter, start)) != npos)
+    while ((end = find(delimiter, beg)) != npos)
     {
         // avoid empty element (caused by doubled slashes)
-        if (start < end)
+        if (beg < end)
         {
-            wrdList.append(substr(start, end-start));
+            wrdList.append(substr(beg, end-beg));
         }
-        start = end + 1;
+        beg = end + 1;
     }
 
     // avoid empty trailing element
-    if (start < size())
+    if (beg < size())
     {
-        wrdList.append(substr(start, npos));
+        wrdList.append(substr(beg, npos));
     }
 
     // transfer to wordList

@@ -169,7 +169,10 @@ public:
             inline label nextIter();
 
             //- Return the time step
-            inline scalar deltaT() const;
+            inline scalar deltaTValue() const;
+
+            //- Return the time step
+            inline const dimensionedScalar deltaT() const;
 
             //- Return const access to the coupled flag
             inline const Switch coupled() const;
