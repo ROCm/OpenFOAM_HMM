@@ -91,8 +91,7 @@ public:
 
 
     //- Destructor
-
-        virtual ~instability();
+    virtual ~instability();
 
 
     // Member Functions

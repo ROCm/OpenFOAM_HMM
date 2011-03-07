@@ -84,8 +84,7 @@ public:
 
 
     //- Destructor
-
-        virtual ~fixed();
+    virtual ~fixed();
 
 
     // Member Functions

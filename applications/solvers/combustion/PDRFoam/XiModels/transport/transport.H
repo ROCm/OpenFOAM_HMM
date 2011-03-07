@@ -96,8 +96,7 @@ public:
 
 
     //- Destructor
-
-        virtual ~transport();
+    virtual ~transport();
 
 
     // Member Functions

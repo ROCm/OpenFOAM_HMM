@@ -107,8 +107,7 @@ public:
 
 
     //- Destructor
-    virtual ~PDRkEpsilon()
-    {}
+    virtual ~PDRkEpsilon();
 
 
     // Member Functions
