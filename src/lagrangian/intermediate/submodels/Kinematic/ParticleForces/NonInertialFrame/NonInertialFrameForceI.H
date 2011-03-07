@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,49 +23,35 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fixed.H"
-#include "addToRunTimeSelectionTable.H"
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
+template<class CloudType>
+inline const Foam::vector& Foam::NonInertialFrameForce<CloudType>::W() const
 {
-namespace XiModels
-{
-    defineTypeNameAndDebug(fixed, 0);
-    addToRunTimeSelectionTable(XiModel, fixed, dictionary);
-}
+    return W_;
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::XiModels::fixed::fixed
-(
-    const dictionary& XiProperties,
-    const hhuCombustionThermo& thermo,
-    const compressible::RASModel& turbulence,
-    const volScalarField& Su,
-    const volScalarField& rho,
-    const volScalarField& b,
-    const surfaceScalarField& phi
-)
-:
-    XiModel(XiProperties, thermo, turbulence, Su, rho, b, phi)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
-
-Foam::XiModels::fixed::~fixed()
-{}
-
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-bool Foam::XiModels::fixed::read(const dictionary& XiProperties)
+template<class CloudType>
+inline const Foam::vector& Foam::NonInertialFrameForce<CloudType>::omega() const
 {
-    return XiModel::read(XiProperties);
+    return omega_;
+}
+
+
+template<class CloudType>
+inline const Foam::vector&
+Foam::NonInertialFrameForce<CloudType>::omegaDot() const
+{
+    return omegaDot_;
+}
+
+
+template<class CloudType>
+inline const Foam::vector&
+Foam::NonInertialFrameForce<CloudType>::centreOfRotation() const
+{
+    return centreOfRotation_;
 }
 
 

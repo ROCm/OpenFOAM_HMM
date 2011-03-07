@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "initContinuityErrs.H"
     #include "readTimeControls.H"
-    #include "CourantNo.H"
+    #include "compressibleCourantNo.H"
     #include "setInitialDeltaT.H"
 
     scalar StCoNum = 0.0;
@@ -91,11 +91,10 @@ int main(int argc, char *argv[])
     {
         #include "readTimeControls.H"
         #include "readPISOControls.H"
-        #include "CourantNo.H"
+        #include "compressibleCourantNo.H"
         #include "setDeltaT.H"
 
         runTime++;
-
         Info<< "\n\nTime = " << runTime.timeName() << endl;
 
         #include "rhoEqn.H"

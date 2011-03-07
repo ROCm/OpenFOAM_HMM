@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,17 +85,8 @@ class basicSubGrid
 {
     // Private data
 
-        //- Count
-        volScalarField N_;
-
-        //- Sub-count
-        volSymmTensorField ns_;
-
         //- tblock
         volSymmTensorField B_;
-
-        //- Typical obstacle diameters per cell
-        volScalarField Lobs_;
 
         //- Equilibrium Xi model due to turbulence
         autoPtr<XiEqModel> XiEqModel_;

@@ -207,7 +207,7 @@ public:
             //- Switch to specify if particles of the cloud can return
             //  non-zero wall distance values.  By default, assume
             //  that they can't (default for wallImpactDistance in
-            //  Particle is 0.0).
+            //  particle is 0.0).
             virtual bool hasWallImpactDistance() const
             {
                 return false;

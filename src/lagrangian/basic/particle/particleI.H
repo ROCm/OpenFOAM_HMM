@@ -784,23 +784,26 @@ inline void Foam::particle::initCellFacePt()
                         << position_ << abort(FatalError);
                 }
 
-                WarningIn("void Foam::particle::initCellFacePt()")
-                    << "Particle moved from " << position_
-                    << " to " << newPosition
-                    << " in cell " << cellI_
-                    << " tetFace " << tetFaceI_
-                    << " tetPt " << tetPtI_ << nl
-                    << "    (A fraction of "
-                    << 1.0 - mag(cC - newPosition)/mag(cC - position_)
-                    << " of the distance to the cell centre)"
-                    << " because a decomposition tetFace and tetPt "
-                    << "could not be found."
-                    << endl;
+                if (debug)
+                {
+                    WarningIn("void Foam::particle::initCellFacePt()")
+                        << "Particle moved from " << position_
+                        << " to " << newPosition
+                        << " in cell " << cellI_
+                        << " tetFace " << tetFaceI_
+                        << " tetPt " << tetPtI_ << nl
+                        << "    (A fraction of "
+                        << 1.0 - mag(cC - newPosition)/mag(cC - position_)
+                        << " of the distance to the cell centre)"
+                        << " because a decomposition tetFace and tetPt "
+                        << "could not be found."
+                        << endl;
+                }
 
                 position_ = newPosition;
             }
 
-            if (cellI_ != oldCellI)
+            if (debug && cellI_ != oldCellI)
             {
                 WarningIn("void Foam::particle::initCellFacePt()")
                     << "Particle at position " << position_
@@ -888,7 +891,6 @@ bool Foam::particle::boundaryFace(const label faceI) const
 
 inline Foam::label Foam::particle::patch(const label faceI) const
 {
-//    return cloud_.facePatch(faceI);
     return mesh_.boundaryMesh().whichPatch(faceI);
 }
 
@@ -899,15 +901,7 @@ inline Foam::label Foam::particle::patchFace
     const label faceI
 ) const
 {
-//    return cloud_.patchFace(patchI, faceI);
     return mesh_.boundaryMesh()[patchI].whichFace(faceI);
-}
-
-
-inline Foam::scalar
-Foam::particle::wallImpactDistance(const vector&) const
-{
-    return 0.0;
 }
 
 

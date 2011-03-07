@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,6 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "IFstream.H"
 #include "SCOPELaminarFlameSpeed.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -68,7 +69,19 @@ Foam::laminarFlameSpeedModels::SCOPE::SCOPE
 :
     laminarFlameSpeed(dict, ct),
 
-    coeffsDict_(dict.subDict(typeName + "Coeffs").subDict(fuel_)),
+    coeffsDict_
+    (
+        dictionary
+        (
+          IFstream
+          (
+              fileName
+              (
+                  dict.lookup("fuelFile")
+              )
+          )()
+        ).subDict(typeName + "Coeffs")
+    ),
     LFL_(readScalar(coeffsDict_.lookup("lowerFlamabilityLimit"))),
     UFL_(readScalar(coeffsDict_.lookup("upperFlamabilityLimit"))),
     SuPolyL_(coeffsDict_.subDict("lowerSuPolynomial")),

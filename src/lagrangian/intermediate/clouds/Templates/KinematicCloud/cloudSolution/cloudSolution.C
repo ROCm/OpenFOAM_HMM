@@ -41,7 +41,7 @@ Foam::cloudSolution::cloudSolution
     calcFrequency_(1),
     maxCo_(0.3),
     iter_(1),
-    deltaT_(0.0),
+    trackTime_(0.0),
     coupled_(false),
     cellValueSourceCorrection_(false),
     maxTrackTime_(0.0),
@@ -67,7 +67,7 @@ Foam::cloudSolution::cloudSolution
     calcFrequency_(cs.calcFrequency_),
     maxCo_(cs.maxCo_),
     iter_(cs.iter_),
-    deltaT_(cs.deltaT_),
+    trackTime_(cs.trackTime_),
     coupled_(cs.coupled_),
     cellValueSourceCorrection_(cs.cellValueSourceCorrection_),
     maxTrackTime_(cs.maxTrackTime_),
@@ -88,7 +88,7 @@ Foam::cloudSolution::cloudSolution
     calcFrequency_(0),
     maxCo_(GREAT),
     iter_(0),
-    deltaT_(0.0),
+    trackTime_(0.0),
     coupled_(false),
     cellValueSourceCorrection_(false),
     maxTrackTime_(0.0),
@@ -159,10 +159,8 @@ Foam::scalar Foam::cloudSolution::relaxCoeff(const word& fieldName) const
         }
     }
 
-    FatalErrorIn
-    (
-        "scalar cloudSolution::relaxCoeff(const word& fieldName) const"
-    )   << "Field name " << fieldName << " not found in schemes"
+    FatalErrorIn("scalar cloudSolution::relaxCoeff(const word&) const")
+        << "Field name " << fieldName << " not found in schemes"
         << abort(FatalError);
 
     return 1.0;
@@ -179,10 +177,8 @@ bool Foam::cloudSolution::semiImplicit(const word& fieldName) const
         }
     }
 
-    FatalErrorIn
-    (
-        "bool cloudSolution::semiImplicit(const word& fieldName) const"
-    )   << "Field name " << fieldName << " not found in schemes"
+    FatalErrorIn("bool cloudSolution::semiImplicit(const word&) const")
+        << "Field name " << fieldName << " not found in schemes"
         << abort(FatalError);
 
     return false;
@@ -202,14 +198,13 @@ bool Foam::cloudSolution::solveThisStep() const
 
 bool Foam::cloudSolution::canEvolve()
 {
-    // Set the calculation time step
     if (transient_)
     {
-        deltaT_ = mesh_.time().deltaTValue();
+        trackTime_ = mesh_.time().deltaTValue();
     }
     else
     {
-        deltaT_ = maxTrackTime_;
+        trackTime_ = maxTrackTime_;
     }
 
     return solveThisStep();
