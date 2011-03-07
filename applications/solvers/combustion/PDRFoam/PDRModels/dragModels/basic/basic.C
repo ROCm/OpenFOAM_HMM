@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,34 +53,12 @@ Foam::PDRDragModels::basic::basic
     Csu("Csu", dimless, PDRDragModelCoeffs_.lookup("Csu")),
     Csk("Csk", dimless, PDRDragModelCoeffs_.lookup("Csk")),
 
-    Aw2_
-    (
-        "Aw2",
-        sqr
-        (
-            volScalarField
-            (
-                IOobject
-                (
-                    "Aw",
-                    U_.mesh().time().findInstance(polyMesh::meshSubDir, "Aw"),
-                    polyMesh::meshSubDir,
-                    U_.mesh(),
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                ),
-                U_.mesh()
-            )
-        )
-    ),
-
-    CR_
+    Aw_
     (
         IOobject
         (
-            "CR",
-            U_.mesh().time().findInstance(polyMesh::meshSubDir, "CR"),
-            polyMesh::meshSubDir,
+            "Aw",
+            U_.mesh().facesInstance(),
             U_.mesh(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE
@@ -88,13 +66,12 @@ Foam::PDRDragModels::basic::basic
         U_.mesh()
     ),
 
-    CT_
+    CR_
     (
         IOobject
         (
-            "CT",
-            U_.mesh().time().findInstance(polyMesh::meshSubDir, "CT"),
-            polyMesh::meshSubDir,
+            "CR",
+            U_.mesh().facesInstance(),
             U_.mesh(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE
@@ -114,19 +91,24 @@ Foam::PDRDragModels::basic::~basic()
 
 Foam::tmp<Foam::volSymmTensorField> Foam::PDRDragModels::basic::Dcu() const
 {
-    const volScalarField& betav = U_.db().lookupObject<volScalarField>("betav");
+    const volScalarField& betav =
+        U_.db().lookupObject<volScalarField>("betav");
 
-    return (0.5*rho_)*CR_*mag(U_) + (Csu*I)*betav*turbulence_.muEff()*Aw2_;
+    return (0.5*rho_)*CR_*mag(U_) + (Csu*I)*betav*turbulence_.muEff()*sqr(Aw_);
 }
 
 
 Foam::tmp<Foam::volScalarField> Foam::PDRDragModels::basic::Gk() const
 {
-    const volScalarField& betav = U_.db().lookupObject<volScalarField>("betav");
+    const volScalarField& betav =
+        U_.db().lookupObject<volScalarField>("betav");
+
+    const volSymmTensorField& CT =
+        U_.db().lookupObject<volSymmTensorField>("CT");
 
     return
-        (0.5*rho_)*mag(U_)*(U_ & CT_ & U_)
-      + Csk*betav*turbulence_.muEff()*Aw2_*magSqr(U_);
+        (0.5*rho_)*mag(U_)*(U_ & CT & U_)
+      + Csk*betav*turbulence_.muEff()*sqr(Aw_)*magSqr(U_);
 }
 
 
@@ -140,5 +122,11 @@ bool Foam::PDRDragModels::basic::read(const dictionary& PDRProperties)
     return true;
 }
 
+
+void Foam::PDRDragModels::basic::writeFields() const
+{
+    Aw_.write();
+    CR_.write();
+}
 
 // ************************************************************************* //

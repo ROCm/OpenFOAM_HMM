@@ -23,49 +23,44 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fixed.H"
-#include "addToRunTimeSelectionTable.H"
+#include "XiEqModel.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-namespace XiModels
-{
-    defineTypeNameAndDebug(fixed, 0);
-    addToRunTimeSelectionTable(XiModel, fixed, dictionary);
-}
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::XiModels::fixed::fixed
+Foam::autoPtr<Foam::XiEqModel> Foam::XiEqModel::New
 (
-    const dictionary& XiProperties,
+    const dictionary& XiEqProperties,
     const hhuCombustionThermo& thermo,
     const compressible::RASModel& turbulence,
-    const volScalarField& Su,
-    const volScalarField& rho,
-    const volScalarField& b,
-    const surfaceScalarField& phi
+    const volScalarField& Su
 )
-:
-    XiModel(XiProperties, thermo, turbulence, Su, rho, b, phi)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
-
-Foam::XiModels::fixed::~fixed()
-{}
-
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-bool Foam::XiModels::fixed::read(const dictionary& XiProperties)
 {
-    return XiModel::read(XiProperties);
+    word XiEqModelTypeName = XiEqProperties.lookup("XiEqModel");
+
+    Info<< "Selecting flame-wrinkling model " << XiEqModelTypeName << endl;
+
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(XiEqModelTypeName);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "XiEqModel::New"
+            "("
+            "    const hhuCombustionThermo& thermo,"
+            "    const compressible::RASModel& turbulence,"
+            "    const volScalarField& Su"
+            ")"
+        )   << "Unknown XiEqModel type "
+            << XiEqModelTypeName << endl << endl
+            << "Valid  XiEqModels are : " << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<XiEqModel>
+        (cstrIter()(XiEqProperties, thermo, turbulence, Su));
 }
 
 

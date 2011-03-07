@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -67,6 +67,8 @@ protected:
         const hhuCombustionThermo& thermo_;
         const compressible::RASModel& turbulence_;
         const volScalarField& Su_;
+        volScalarField Nv_;
+        volSymmTensorField nsv_;
 
 
 private:
@@ -133,7 +135,8 @@ public:
 
 
     //- Destructor
-    virtual ~XiEqModel();
+
+        virtual ~XiEqModel();
 
 
     // Member Functions
@@ -146,6 +149,9 @@ public:
 
         //- Update properties from given dictionary
         virtual bool read(const dictionary& XiEqProperties) = 0;
+
+        //- Write fields
+        void writeFields() const;
 };
 
 

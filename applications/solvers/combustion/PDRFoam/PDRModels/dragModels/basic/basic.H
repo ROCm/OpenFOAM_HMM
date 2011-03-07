@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -102,9 +102,8 @@ class basic
         dimensionedScalar Csu;
         dimensionedScalar Csk;
 
-        volScalarField Aw2_;
+        volScalarField Aw_;
         volSymmTensorField CR_;
-        volSymmTensorField CT_;
 
 
     // Private Member Functions
@@ -136,7 +135,8 @@ public:
 
 
     //- Destructor
-    virtual ~basic();
+
+        virtual ~basic();
 
 
     // Member Functions
@@ -149,6 +149,9 @@ public:
 
         //- Update properties from given dictionary
         virtual bool read(const dictionary& PDRProperties);
+
+        //- Write fields
+        void writeFields() const;
 };
 
 

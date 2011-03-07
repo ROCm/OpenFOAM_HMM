@@ -27,7 +27,7 @@ Class
 Description
     Simple SCOPEBlendXiEq model for XiEq based on SCOPEXiEqs correlation
     with a linear correction function to give a plausible profile for XiEq.
-    See \link SCOPELaminarFlameSpeed.H \endlink for details on the SCOPE
+    See @link SCOPELaminarFlameSpeed.H @endlink for details on the SCOPE
     laminar flame speed model.
 
 SourceFiles
@@ -92,7 +92,8 @@ public:
 
 
     //- Destructor
-    virtual ~SCOPEBlend();
+
+        virtual ~SCOPEBlend();
 
 
     // Member Functions
@@ -105,6 +106,7 @@ public:
         {
             return true;
         }
+
 };
 
 

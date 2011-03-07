@@ -25,18 +25,9 @@ License
 
 #include "PDRDragModel.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(PDRDragModel, 0);
-    defineRunTimeSelectionTable(PDRDragModel, dictionary);
-};
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::PDRDragModel::PDRDragModel
+Foam::autoPtr<Foam::PDRDragModel> Foam::PDRDragModel::New
 (
     const dictionary& PDRProperties,
     const compressible::RASModel& turbulence,
@@ -44,46 +35,28 @@ Foam::PDRDragModel::PDRDragModel
     const volVectorField& U,
     const surfaceScalarField& phi
 )
-:
-    regIOobject
-    (
-        IOobject
-        (
-            "PDRDragModel",
-            U.time().constant(),
-            U.db()
-        )
-    ),
-    PDRDragModelCoeffs_
-    (
-        PDRProperties.subDict
-        (
-            word(PDRProperties.lookup("PDRDragModel")) + "Coeffs"
-        )
-    ),
-    turbulence_(turbulence),
-    rho_(rho),
-    U_(U),
-    phi_(phi),
-    on_(PDRDragModelCoeffs_.lookup("drag"))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
-
-Foam::PDRDragModel::~PDRDragModel()
-{}
-
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-bool Foam::PDRDragModel::read(const dictionary& PDRProperties)
 {
-    PDRDragModelCoeffs_ = PDRProperties.subDict(type() + "Coeffs");
+    word PDRDragModelTypeName = PDRProperties.lookup("PDRDragModel");
 
-    PDRDragModelCoeffs_.lookup("PDRDragModel") >> on_;
+    Info<< "Selecting flame-wrinkling model " << PDRDragModelTypeName << endl;
 
-    return true;
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(PDRDragModelTypeName);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "PDRDragModel::New"
+        )   << "Unknown PDRDragModel type "
+            << PDRDragModelTypeName << endl << endl
+            << "Valid  PDRDragModels are : " << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<PDRDragModel>
+        (cstrIter()(PDRProperties, turbulence, rho, U, phi));
 }
 
 

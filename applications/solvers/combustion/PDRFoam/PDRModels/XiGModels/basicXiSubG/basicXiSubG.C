@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,8 +34,8 @@ namespace XiGModels
 {
     defineTypeNameAndDebug(basicSubGrid, 0);
     addToRunTimeSelectionTable(XiGModel, basicSubGrid, dictionary);
-}
-}
+};
+};
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -66,11 +66,36 @@ Foam::tmp<Foam::volScalarField> Foam::XiGModels::basicSubGrid::G() const
 {
     const objectRegistry& db = Su_.db();
     const volVectorField& U = db.lookupObject<volVectorField>("U");
-    const volScalarField& N = db.lookupObject<volScalarField>("N");
+    const volScalarField& Nv = db.lookupObject<volScalarField>("Nv");
     const volScalarField& Lobs = db.lookupObject<volScalarField>("Lobs");
 
     tmp<volScalarField> tGtot = XiGModel_->G();
     volScalarField& Gtot = tGtot();
+
+    const scalarField Cw = pow(Su_.mesh().V(), 2.0/3.0);
+
+    tmp<volScalarField> tN
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "tN",
+                Su_.mesh().time().timeName(),
+                Su_.mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            Su_.mesh(),
+            dimensionedScalar("zero", Nv.dimensions(), 0.0),
+            zeroGradientFvPatchVectorField::typeName
+        )
+    );
+
+    volScalarField& N = tN();
+
+    N.internalField() = Nv.internalField()*Cw;
 
     forAll(N, celli)
     {
