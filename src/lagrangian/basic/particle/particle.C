@@ -130,6 +130,14 @@ void Foam::particle::transformProperties(const vector&)
 {}
 
 
+Foam::scalar Foam::particle::wallImpactDistance(const vector&) const
+{
+    Info<< "particle::wallImpactDistance" << endl;
+
+    return 0.0;
+}
+
+
 // * * * * * * * * * * * * * * Friend Operators * * * * * * * * * * * * * * //
 
 bool Foam::operator==(const particle& pA, const particle& pB)

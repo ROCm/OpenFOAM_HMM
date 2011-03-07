@@ -52,8 +52,9 @@ class parcel
 {
     // Private member data
 
-        // Reference to the names of the liquid components
-            List<word> liquidComponents_;
+        //- Reference to the names of the liquid components
+        List<word> liquidComponents_;
+
 
         // Defining data (read and written to field files)
 
@@ -384,11 +385,11 @@ public:
 
             //- Transform the position and physical properties of the particle
             //  according to the given transformation tensor
-            void transformProperties(const tensor& T);
+            virtual void transformProperties(const tensor& T);
 
             //- Transform the position and physical properties of the particle
             //  according to the given separation vector
-            void transformProperties(const vector& separation);
+            virtual void transformProperties(const vector& separation);
 
             //- fix the 2D plane normal,
             // when particle hits a face it is slightly perturbed

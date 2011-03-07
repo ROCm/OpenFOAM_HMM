@@ -174,10 +174,6 @@ public:
             //- Return velocity
             inline const vector& U() const;
 
-            //- The nearest distance to a wall that
-            //  the particle can be in the n direction
-            inline scalar wallImpactDistance(const vector& n) const;
-
 
         // Tracking
 
@@ -223,17 +219,15 @@ public:
 
             //- Transform the physical properties of the particle
             //  according to the given transformation tensor
-            void transformProperties
-            (
-                const tensor& T
-            );
+            virtual void transformProperties(const tensor& T);
 
             //- Transform the physical properties of the particle
             //  according to the given separation vector
-            void transformProperties
-            (
-                const vector& separation
-            );
+            virtual void transformProperties(const vector& separation);
+
+            //- The nearest distance to a wall that
+            //  the particle can be in the n direction
+            virtual scalar wallImpactDistance(const vector& n) const;
 
 
     // I-O
