@@ -17,39 +17,39 @@ FoamFile
 
 application     PDRFoam;
 
-startFrom	    latestTime;
+startFrom       latestTime;
 
-startTime	    0;
+startTime       0;
 
-stopAt	        endTime;
+stopAt          endTime;
 
-endTime	        0.2;
+endTime         0.2;
 
-deltaT	        5e-06;
+deltaT          5e-06;
 
-writeControl	adjustableRunTime;
+writeControl    adjustableRunTime;
 
-writeInterval	0.01;
+writeInterval   0.01;
 
-purgeWrite	    0;
+purgeWrite      0;
 
-writeFormat	    ascii;
+writeFormat     ascii;
 
-writePrecision	8;
+writePrecision  8;
 
 writeCompression off;
 
-timeFormat	    general;
+timeFormat      general;
 
-timePrecision	6;
+timePrecision   6;
 
 runTimeModifiable yes;
 
-adjustTimeStep	yes;
+adjustTimeStep  yes;
 
-maxCo	        0.3;
+maxCo           0.3;
 
-maxDeltaT	    1;
+maxDeltaT       1;
 
 // ************************************************************************* //
 
