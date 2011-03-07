@@ -304,6 +304,8 @@ public:
             //- Return a reference to the cloud copy
             inline const KinematicCloud& cloudCopy() const;
 
+            inline bool hasWallImpactDistance() const;
+
 
             // References to the mesh and databases
 

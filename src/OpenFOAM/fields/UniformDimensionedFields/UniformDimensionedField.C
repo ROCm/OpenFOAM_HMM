@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,7 +61,7 @@ Foam::UniformDimensionedField<Type>::UniformDimensionedField
 {
     dictionary dict(readStream(typeName));
     this->dimensions().reset(dict.lookup("dimensions"));
-    this->value() = dict.lookup("value");
+    dict.lookup("value") >> this->value();
 }
 
 
