@@ -202,7 +202,7 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     const vector abp = (Feff.Sp()*Uc_ + (Feff.Su() + Su))/mass;
     const scalar bp = Feff.Sp()/mass;
 
-    Spu = Feff.Sp()*dt/td.cloud().solution().deltaT();
+    Spu = dt*Feff.Sp();
 
     IntegrationScheme<vector>::integrationResult Ures =
         td.cloud().UIntegrator().integrate(U, dt, abp, bp);
@@ -467,6 +467,16 @@ void Foam::KinematicParcel<ParcelType>::transformProperties
 )
 {
     ParcelType::transformProperties(separation);
+}
+
+
+template<class ParcelType>
+Foam::scalar Foam::KinematicParcel<ParcelType>::wallImpactDistance
+(
+    const vector&
+) const
+{
+    return 0.5*d_;
 }
 
 

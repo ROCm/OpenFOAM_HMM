@@ -24,12 +24,17 @@
             fvc::interpolate(thermo.psi())*phiv
         );
 
+        fvScalarMatrix pDDtEqn
+        (
+            fvc::ddt(rho) + fvc::div(phi)
+          + correction(fvm::ddt(psi, p) + fvm::div(phid, p))
+        );
+
         for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
         {
             fvScalarMatrix pEqn
             (
-                fvc::ddt(rho) + fvc::div(phi)
-              + correction(fvm::ddt(psi, p) + fvm::div(phid, p))
+                pDDtEqn
               - fvm::laplacian(rho*rAU, p)
             );
 
@@ -63,12 +68,17 @@
               + fvc::ddtPhiCorr(rAU, rho, U, phi)
             );
 
+        fvScalarMatrix pDDtEqn
+        (
+            fvc::ddt(rho) + psi*correction(fvm::ddt(p))
+          + fvc::div(phi)
+        );
+
         for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
         {
             fvScalarMatrix pEqn
             (
-                fvc::ddt(rho) + psi*correction(fvm::ddt(p))
-              + fvc::div(phi)
+                pDDtEqn
               - fvm::laplacian(rho*rAU, p)
             );
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,10 +49,10 @@ Foam::XiEqModels::SCOPEXiEq::SCOPEXiEq
 )
 :
     XiEqModel(XiEqProperties, thermo, turbulence, Su),
-    XiEqCoef(readScalar(XiEqModelCoeffs_.lookup("XiEqCoef"))),
-    XiEqExp(readScalar(XiEqModelCoeffs_.lookup("XiEqExp"))),
-    lCoef(readScalar(XiEqModelCoeffs_.lookup("lCoef"))),
-    SuMin(0.01*Su.average()),
+    XiEqCoef_(readScalar(XiEqModelCoeffs_.lookup("XiEqCoef"))),
+    XiEqExp_(readScalar(XiEqModelCoeffs_.lookup("XiEqExp"))),
+    lCoef_(readScalar(XiEqModelCoeffs_.lookup("lCoef"))),
+    SuMin_(0.01*Su.average()),
     MaModel
     (
         IOdictionary
@@ -62,7 +62,7 @@ Foam::XiEqModels::SCOPEXiEq::SCOPEXiEq
                 "combustionProperties",
                 Su.mesh().time().constant(),
                 Su.mesh(),
-                IOobject::MUST_READ_IF_MODIFIED
+                IOobject::MUST_READ
             )
         ),
         thermo
@@ -84,10 +84,10 @@ Foam::tmp<Foam::volScalarField> Foam::XiEqModels::SCOPEXiEq::XiEq() const
     const volScalarField& epsilon = turbulence_.epsilon();
 
     volScalarField up(sqrt((2.0/3.0)*k));
-    volScalarField l((lCoef*sqrt(3.0/2.0))*up*k/epsilon);
+    volScalarField l(lCoef_*sqrt(3.0/2.0)*up*k/epsilon);
     volScalarField Rl(up*l*thermo_.rhou()/thermo_.muu());
 
-    volScalarField upBySu(up/(Su_ + SuMin));
+    volScalarField upBySu(up/(Su_ + SuMin_));
     volScalarField K(0.157*upBySu/sqrt(Rl));
     volScalarField Ma(MaModel.Ma());
 
@@ -114,7 +114,7 @@ Foam::tmp<Foam::volScalarField> Foam::XiEqModels::SCOPEXiEq::XiEq() const
         if (Ma[celli] > 0.01)
         {
             xieq[celli] =
-                XiEqCoef*pow(K[celli]*Ma[celli], -XiEqExp)*upBySu[celli];
+                XiEqCoef_*pow(K[celli]*Ma[celli], -XiEqExp_)*upBySu[celli];
         }
     }
 
@@ -130,7 +130,8 @@ Foam::tmp<Foam::volScalarField> Foam::XiEqModels::SCOPEXiEq::XiEq() const
             if (Ma[facei] > 0.01)
             {
                 xieqp[facei] =
-                    XiEqCoef*pow(Kp[facei]*Map[facei], -XiEqExp)*upBySup[facei];
+                    XiEqCoef_*pow(Kp[facei]*Map[facei], -XiEqExp_)
+                   *upBySup[facei];
             }
         }
     }
@@ -143,9 +144,9 @@ bool Foam::XiEqModels::SCOPEXiEq::read(const dictionary& XiEqProperties)
 {
     XiEqModel::read(XiEqProperties);
 
-    XiEqModelCoeffs_.lookup("XiEqCoef") >> XiEqCoef;
-    XiEqModelCoeffs_.lookup("XiEqExp") >> XiEqExp;
-    XiEqModelCoeffs_.lookup("lCoef") >> lCoef;
+    XiEqModelCoeffs_.lookup("XiEqCoef") >> XiEqCoef_;
+    XiEqModelCoeffs_.lookup("XiEqExp") >> XiEqExp_;
+    XiEqModelCoeffs_.lookup("lCoef") >> lCoef_;
 
     return true;
 }

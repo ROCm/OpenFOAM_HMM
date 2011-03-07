@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,11 +55,41 @@ PDRkEpsilon::PDRkEpsilon
     const word& modelName
 )
 :
-    kEpsilon(rho, U, phi, thermophysicalModel, turbulenceModelName, modelName)
+    kEpsilon(rho, U, phi, thermophysicalModel, turbulenceModelName, modelName),
+
+    C4_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C4",
+            coeffDict_,
+            0.1
+        )
+    )
+{}
+
+
+// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
+
+PDRkEpsilon::~PDRkEpsilon()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool PDRkEpsilon::read()
+{
+    if (RASModel::read())
+    {
+        C4_.readIfPresent(coeffDict_);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 
 void PDRkEpsilon::correct()
 {
@@ -89,17 +119,24 @@ void PDRkEpsilon::correct()
     volScalarField G("RASModel::G", mut_*(tgradU() && dev(twoSymm(tgradU()))));
     tgradU.clear();
 
-    // Update epsilon and G at the wall
+    // Update espsilon and G at the wall
     epsilon_.boundaryField().updateCoeffs();
 
     // Add the blockage generation term so that it is included consistently
     // in both the k and epsilon equations
-    const volScalarField& betav = U_.db().lookupObject<volScalarField>("betav");
+    const volScalarField& betav =
+        U_.db().lookupObject<volScalarField>("betav");
+
+    const volScalarField& Lobs =
+        U_.db().lookupObject<volScalarField>("Lobs");
 
     const PDRDragModel& drag =
         U_.db().lookupObject<PDRDragModel>("PDRDragModel");
 
     volScalarField GR(drag.Gk());
+
+     volScalarField LI =
+        C4_*(Lobs + dimensionedScalar("minLength", dimLength, VSMALL));
 
     // Dissipation equation
     tmp<fvScalarMatrix> epsEqn
@@ -108,7 +145,8 @@ void PDRkEpsilon::correct()
       + fvm::div(phi_, epsilon_)
       - fvm::laplacian(DepsilonEff(), epsilon_)
      ==
-        C1_*(betav*G + GR)*epsilon_/k_
+        C1_*betav*G*epsilon_/k_
+      + 1.5*pow(Cmu_, 3.0/4.0)*GR*sqrt(k_)/LI
       - fvm::SuSp(((2.0/3.0)*C1_)*betav*rho_*divU, epsilon_)
       - fvm::Sp(C2_*betav*rho_*epsilon_/k_, epsilon_)
     );
@@ -137,7 +175,6 @@ void PDRkEpsilon::correct()
     kEqn().relax();
     solve(kEqn);
     bound(k_, kMin_);
-
 
     // Re-calculate viscosity
     mut_ = rho_*Cmu_*sqr(k_)/epsilon_;

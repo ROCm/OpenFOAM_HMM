@@ -38,7 +38,6 @@ Description
 #include "labelList.H"
 #include "pointField.H"
 #include "faceList.H"
-//#include "typeInfo.H"
 #include "OFstream.H"
 #include "tetPointRef.H"
 #include "FixedList.H"
@@ -445,10 +444,6 @@ public:
                 const label faceI
             ) const;
 
-            //- The nearest distance to a wall that
-            //  the particle can be in the n direction
-            inline scalar wallImpactDistance(const vector& n) const;
-
             //- Return the fraction of time-step completed
             inline scalar& stepFraction();
 
@@ -507,6 +502,10 @@ public:
         //- Transform the physical properties of the particle
         //  according to the given separation vector
         virtual void transformProperties(const vector& separation);
+
+        //- The nearest distance to a wall that
+        //  the particle can be in the n direction
+        virtual scalar wallImpactDistance(const vector& n) const;
 
 
     // Parallel transfer

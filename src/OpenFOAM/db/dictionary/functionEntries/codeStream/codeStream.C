@@ -98,6 +98,13 @@ bool Foam::functionEntries::codeStream::execute
     // see if library is loaded
     void* lib = dlLibraryTable::findLibrary(libPath);
 
+
+    if (!lib)
+    {
+        Info<< "Using #codeStream with " << libPath << endl;
+    }
+
+
     // nothing loaded
     // avoid compilation if possible by loading an existing library
     if (!lib && dlLibraryTable::open(libPath, false))

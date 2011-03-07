@@ -98,7 +98,7 @@ public:
 
         // Access
 
-            //- Return the the acceleration due to gravity
+            //- Return the acceleration due to gravity
             inline const vector& g() const;
 
 

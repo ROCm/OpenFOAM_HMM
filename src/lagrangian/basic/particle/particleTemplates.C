@@ -689,10 +689,14 @@ void Foam::particle::hitWallFaces
     tetIndices& closestTetIs
 )
 {
+    typedef typename CloudType::particleType particleType;
+
     if (!(cloud.hasWallImpactDistance() && cloud.cellHasWallFaces()[cellI_]))
     {
         return;
     }
+
+    particleType& p = static_cast<particleType&>(*this);
 
     const faceList& pFaces = mesh_.faces();
 
@@ -734,7 +738,7 @@ void Foam::particle::hitWallFaces
                 // triangle.  Assuming that the wallImpactDistance
                 // does not change as the particle or the mesh moves
                 // forward in time.
-                scalar r = wallImpactDistance(nHat);
+                scalar r = p.wallImpactDistance(nHat);
 
                 vector toPlusRNHat = to + r*nHat;
 

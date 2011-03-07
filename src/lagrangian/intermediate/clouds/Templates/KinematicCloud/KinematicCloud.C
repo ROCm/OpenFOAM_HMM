@@ -218,10 +218,10 @@ void Foam::KinematicCloud<CloudType>::evolveCloud(TrackData& td)
     {
 //        this->surfaceFilm().injectSteadyState(td);
 
-        this->injection().injectSteadyState(td, solution_.deltaT());
+        this->injection().injectSteadyState(td, solution_.trackTime());
 
         td.part() = TrackData::tpLinearTrack;
-        CloudType::move(td,  solution_.deltaT());
+        CloudType::move(td,  solution_.trackTime());
     }
 }
 
@@ -353,7 +353,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
                 IOobject::AUTO_WRITE
             ),
             mesh_,
-            dimensionedScalar("zero",  dimMass/dimTime, 0.0)
+            dimensionedScalar("zero",  dimMass, 0.0)
         )
     )
 {
@@ -492,6 +492,13 @@ Foam::KinematicCloud<CloudType>::~KinematicCloud()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
+bool Foam::KinematicCloud<CloudType>::hasWallImpactDistance() const
+{
+    return true;
+}
+
+
+template<class CloudType>
 void Foam::KinematicCloud<CloudType>::checkParcelProperties
 (
     parcelType& parcel,
@@ -504,7 +511,7 @@ void Foam::KinematicCloud<CloudType>::checkParcelProperties
         parcel.rho() = constProps_.rho0();
     }
 
-    const scalar carrierDt = solution_.deltaT();
+    const scalar carrierDt = mesh_.time().deltaTValue();
     parcel.stepFraction() = (carrierDt - lagrangianDt)/carrierDt;
     parcel.typeId() = constProps_.parcelTypeId();
 }
@@ -582,7 +589,7 @@ template<class TrackData>
 void  Foam::KinematicCloud<CloudType>::motion(TrackData& td)
 {
     td.part() = TrackData::tpLinearTrack;
-    CloudType::move(td,  solution_.deltaT());
+    CloudType::move(td,  solution_.trackTime());
 
     updateCellOccupancy();
 }

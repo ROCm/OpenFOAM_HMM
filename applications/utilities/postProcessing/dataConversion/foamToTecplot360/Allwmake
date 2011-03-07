@@ -1,14 +1,11 @@
 #!/bin/sh
-#
-# Build optional components (eg, may depend on third-party libraries)
-# -----------------------------------------------------------------------------
 cd ${0%/*} || exit 1    # run from this directory
-set -x
 
-# build tecio
-wmake libso tecio/tecsrc
-
-# build converter
-wmake
+if [ ! -d ${WM_THIRD_PARTY_DIR}/tecio ]
+then
+    echo "Did not find tecio in ${WM_THIRD_PARTY_DIR}. Not building foamToTecplot360."
+else
+    wmake
+fi
 
 # ----------------------------------------------------------------- end-of-file
