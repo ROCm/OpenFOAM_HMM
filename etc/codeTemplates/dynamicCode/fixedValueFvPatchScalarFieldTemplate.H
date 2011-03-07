@@ -55,6 +55,9 @@ class ${typeName}FixedValueFvPatchScalarField
 
 public:
 
+    //- Information about the SHA1 of the code itself
+    static const char* SHA1sum;
+
     //- Runtime type information
     TypeName("${typeName}");
 

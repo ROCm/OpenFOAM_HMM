@@ -60,6 +60,17 @@ extern "C"
     }
 }
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+makeRemovablePatchTypeField
+(
+    fvPatchScalarField,
+    ${typeName}FixedValueFvPatchScalarField
+);
+
+
+const char* ${typeName}FixedValueFvPatchScalarField::SHA1sum = "${SHA1sum}";
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -182,15 +193,6 @@ void ${typeName}FixedValueFvPatchScalarField::updateCoeffs()
 
     fixedValueFvPatchScalarField::updateCoeffs();
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-makeRemovablePatchTypeField
-(
-    fvPatchScalarField,
-    ${typeName}FixedValueFvPatchScalarField
-);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
