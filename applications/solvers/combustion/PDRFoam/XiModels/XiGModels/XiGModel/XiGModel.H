@@ -130,8 +130,7 @@ public:
 
 
     //- Destructor
-
-        virtual ~XiGModel();
+    virtual ~XiGModel();
 
 
     // Member Functions

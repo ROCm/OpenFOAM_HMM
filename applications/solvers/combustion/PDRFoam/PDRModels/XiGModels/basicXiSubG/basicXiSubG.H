@@ -108,8 +108,7 @@ public:
 
 
     //- Destructor
-
-        virtual ~basicSubGrid();
+    virtual ~basicSubGrid();
 
 
     // Member Functions

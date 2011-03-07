@@ -201,8 +201,7 @@ public:
 
 
     //- Destructor
-
-        virtual ~XiModel();
+    virtual ~XiModel();
 
 
     // Member Functions

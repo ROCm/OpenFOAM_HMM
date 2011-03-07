@@ -1,4 +1,5 @@
 EXE_INC = \
+    -I../icoUncoupledKinematicParcelFoam \
     -I$(LIB_SRC)/lagrangian/basic/lnInclude \
     -I$(LIB_SRC)/lagrangian/intermediate/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \

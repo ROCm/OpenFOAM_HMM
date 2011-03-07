@@ -97,8 +97,7 @@ public:
 
 
     //- Destructor
-
-        virtual ~SCOPEXiEq();
+    virtual ~SCOPEXiEq();
 
 
     // Member Functions
