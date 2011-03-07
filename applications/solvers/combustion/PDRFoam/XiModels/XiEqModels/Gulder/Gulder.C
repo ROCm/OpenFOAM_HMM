@@ -73,7 +73,7 @@ Foam::tmp<Foam::volScalarField> Foam::XiEqModels::Gulder::XiEq() const
 
     const volSymmTensorField& CT = mesh.lookupObject<volSymmTensorField>("CT");
     const volScalarField& Nv = mesh.lookupObject<volScalarField>("Nv");
-    const volSymmTensorField& nsv = 
+    const volSymmTensorField& nsv =
         mesh.lookupObject<volSymmTensorField>("nsv");
 
     tmp<volScalarField> tN
@@ -130,13 +130,13 @@ Foam::tmp<Foam::volScalarField> Foam::XiEqModels::Gulder::XiEq() const
         U/(mag(U) + dimensionedScalar("Usmall", U.dimensions(), 1e-4))
     );
 
-    const volScalarField nr(sqrt(max(N - (Uhat & ns & Uhat), 1e-4)));
+    const volScalarField nr(sqrt(max(N - (Uhat & ns & Uhat), scalar(1e-4))));
 
     const scalarField cellWidth(pow(mesh.V(), 1.0/3.0));
 
     const scalarField upLocal(uPrimeCoef_*sqrt((U & CT & U)*cellWidth));
 
-    const scalarField deltaUp(upLocal*(max(1.0, pow(nr, 0.5)) - 1.0));
+    const scalarField deltaUp(upLocal*(max(scalar(1.0), pow(nr, 0.5)) - 1.0));
 
     up.internalField() += deltaUp;
 
