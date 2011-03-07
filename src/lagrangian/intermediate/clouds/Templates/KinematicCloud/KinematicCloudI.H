@@ -36,13 +36,6 @@ Foam::KinematicCloud<CloudType>::cloudCopy() const
 
 
 template<class CloudType>
-inline bool Foam::KinematicCloud<CloudType>::hasWallImpactDistance() const
-{
-    return true;
-}
-
-
-template<class CloudType>
 inline const Foam::fvMesh& Foam::KinematicCloud<CloudType>::mesh() const
 {
     return mesh_;
