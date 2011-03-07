@@ -22,24 +22,24 @@
     }
 
 
-    IOobject angularVelocityMagHeader
+    IOobject angularVelocityHeader
     (
-        "angularVelocityMag",
+        "angularVelocity",
         runTime.timeName(),
         mesh,
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     );
 
-    autoPtr<uniformDimensionedScalarField> angularVelocityMagPtr;
+    autoPtr<uniformDimensionedVectorField> angularVelocityPtr;
 
-    if (angularVelocityMagHeader.headerOk())
+    if (angularVelocityHeader.headerOk())
     {
-        Info<< "    Reading " << angularVelocityMagHeader.name() << endl;
+        Info<< "    Reading " << angularVelocityHeader.name() << endl;
 
-        angularVelocityMagPtr.reset
+        angularVelocityPtr.reset
         (
-            new uniformDimensionedScalarField(angularVelocityMagHeader)
+            new uniformDimensionedVectorField(angularVelocityHeader)
         );
     }
 
@@ -66,45 +66,23 @@
     }
 
 
-    IOobject axisHeader
+    IOobject centreOfRotationHeader
     (
-        "axis",
+        "centreOfRotation",
         runTime.timeName(),
         mesh,
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     );
 
-    autoPtr<uniformDimensionedVectorField> axisPtr;
+    autoPtr<uniformDimensionedVectorField> centreOfRotationPtr;
 
-    if (axisHeader.headerOk())
+    if (centreOfRotationHeader.headerOk())
     {
-        Info<< "    Reading " << axisHeader.name() << endl;
+        Info<< "    Reading " << centreOfRotationHeader.name() << endl;
 
-        axisPtr.reset
+        centreOfRotationPtr.reset
         (
-            new uniformDimensionedVectorField(axisHeader)
-        );
-    }
-
-
-    IOobject axisRefPointHeader
-    (
-        "axisRefPoint",
-        runTime.timeName(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    );
-
-    autoPtr<uniformDimensionedVectorField> axisRefPointPtr;
-
-    if (axisRefPointHeader.headerOk())
-    {
-        Info<< "    Reading " << axisRefPointHeader.name() << endl;
-
-        axisRefPointPtr.reset
-        (
-            new uniformDimensionedVectorField(axisRefPointHeader)
+            new uniformDimensionedVectorField(centreOfRotationHeader)
         );
     }

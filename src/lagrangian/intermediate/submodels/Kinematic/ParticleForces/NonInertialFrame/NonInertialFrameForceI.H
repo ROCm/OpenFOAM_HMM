@@ -35,7 +35,7 @@ inline const Foam::vector& Foam::NonInertialFrameForce<CloudType>::W() const
 template<class CloudType>
 inline const Foam::vector& Foam::NonInertialFrameForce<CloudType>::omega() const
 {
-    return omegaMag_*axis_;
+    return omega_;
 }
 
 
@@ -49,24 +49,9 @@ Foam::NonInertialFrameForce<CloudType>::omegaDot() const
 
 template<class CloudType>
 inline const Foam::vector&
-Foam::NonInertialFrameForce<CloudType>::axis() const
+Foam::NonInertialFrameForce<CloudType>::centreOfRotation() const
 {
-    return axis_;
-}
-
-
-template<class CloudType>
-inline bool Foam::NonInertialFrameForce<CloudType>::hasAxis() const
-{
-    return hasAxis_;
-}
-
-
-template<class CloudType>
-inline const Foam::vector&
-Foam::NonInertialFrameForce<CloudType>::axisRefPoint() const
-{
-    return axisRefPoint_;
+    return centreOfRotation_;
 }
 
 

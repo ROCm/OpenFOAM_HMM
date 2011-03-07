@@ -47,15 +47,15 @@ Foam::NonInertialFrameForce<CloudType>::NonInertialFrameForce
         )
     ),
     W_(vector::zero),
-    omegaMagName_
+    omegaName_
     (
         this->coeffs().template lookupOrDefault<word>
         (
-            "angularVelocityMagName",
-            "angularVelocityMag"
+            "angularVelocityName",
+            "angularVelocity"
         )
     ),
-    omegaMag_(0.0),
+    omega_(vector::zero),
     omegaDotName_
     (
         this->coeffs().template lookupOrDefault<word>
@@ -65,25 +65,15 @@ Foam::NonInertialFrameForce<CloudType>::NonInertialFrameForce
         )
     ),
     omegaDot_(vector::zero),
-    axisName_
+    centreOfRotationName_
     (
         this->coeffs().template lookupOrDefault<word>
         (
-            "axisName",
-            "axis"
+            "centreOfRotationName",
+            "centreOfRotation"
         )
     ),
-    axis_(vector::zero),
-    hasAxis_(false),
-    axisRefPointName_
-    (
-        this->coeffs().template lookupOrDefault<word>
-        (
-            "axisRefPointName",
-            "axisRefPoint"
-        )
-    ),
-    axisRefPoint_(vector::zero)
+    centreOfRotation_(vector::zero)
 {}
 
 
@@ -96,15 +86,12 @@ Foam::NonInertialFrameForce<CloudType>::NonInertialFrameForce
     ParticleForce<CloudType>(niff),
     WName_(niff.WName_),
     W_(niff.W_),
-    omegaMagName_(niff.omegaMagName_),
-    omegaMag_(niff.omegaMag_),
+    omegaName_(niff.omegaName_),
+    omega_(niff.omega_),
     omegaDotName_(niff.omegaDotName_),
     omegaDot_(niff.omegaDot_),
-    axisName_(niff.axisName_),
-    axis_(niff.axis_),
-    hasAxis_(niff.hasAxis_),
-    axisRefPointName_(niff.axisRefPointName_),
-    axisRefPoint_(niff.axisRefPoint_)
+    centreOfRotationName_(niff.centreOfRotationName_),
+    centreOfRotation_(niff.centreOfRotation_)
 {}
 
 
@@ -121,71 +108,18 @@ template<class CloudType>
 void Foam::NonInertialFrameForce<CloudType>::cacheFields(const bool store)
 {
     W_ = vector::zero;
-    omegaMag_ = 0.0;
+    omega_ = vector::zero;
     omegaDot_ = vector::zero;
-    axis_ = vector::zero;
-    hasAxis_ = false;
-    axisRefPoint_ = vector::zero;
+    centreOfRotation_ = vector::zero;
 
     if (store)
     {
         if
         (
-            this->mesh().template
-                foundObject<uniformDimensionedScalarField>(omegaMagName_)
-        )
-        {
-            uniformDimensionedScalarField omegaMag = this->mesh().template
-                lookupObject<uniformDimensionedScalarField>(omegaMagName_);
-
-            omegaMag_ = omegaMag.value();
-
-            // If omegaMag is found, require that the axis and axisRefPoint is
-            // found.
-            uniformDimensionedVectorField a = this->mesh().template
-                lookupObject<uniformDimensionedVectorField>(axisName_);
-
-            axis_ = a.value();
-
-            hasAxis_ = true;
-
-            scalar axisMag = mag(axis_);
-
-            if (mag(axis_) < SMALL)
-            {
-                FatalErrorIn
-                (
-                    "void Foam::NonInertialFrameForce<CloudType>::"
-                    "cacheFields(const bool store)"
-                )   << axisName_ << " " << axis_ << " too small."
-                    << abort(FatalError);
-            }
-
-            axis_ /= axisMag;
-
-            uniformDimensionedVectorField axisRefPoint = this->mesh().template
-                lookupObject<uniformDimensionedVectorField>(axisRefPointName_);
-
-            axisRefPoint_ = axisRefPoint.value();
-
-            // Only look for omegaDot is omegaMag is found, optional.
-            if
+            this->mesh().template foundObject<uniformDimensionedVectorField>
             (
-                this->mesh().template
-                    foundObject<uniformDimensionedVectorField>(omegaDotName_)
+                WName_
             )
-            {
-                uniformDimensionedVectorField omegaDot = this->mesh().template
-                    lookupObject<uniformDimensionedVectorField>(omegaDotName_);
-
-                omegaDot_ = omegaDot.value();
-            }
-        }
-
-        if
-        (
-            this->mesh().template
-                foundObject<uniformDimensionedVectorField>(WName_)
         )
         {
             uniformDimensionedVectorField W = this->mesh().template
@@ -193,13 +127,50 @@ void Foam::NonInertialFrameForce<CloudType>::cacheFields(const bool store)
 
             W_ = W.value();
         }
-        else if (!hasAxis_)
-        {
-            WarningIn
+
+        if
+        (
+            this->mesh().template foundObject<uniformDimensionedVectorField>
             (
-                "void Foam::NonInertialFrameForce<CloudType>::"
-                "cacheFields(const bool store)"
-            )  << "No " << typeName << " variables found." << endl;
+                omegaName_
+            )
+        )
+        {
+            uniformDimensionedVectorField omega = this->mesh().template
+                lookupObject<uniformDimensionedVectorField>(omegaName_);
+
+            omega_ = omega.value();
+        }
+
+        if
+        (
+            this->mesh().template foundObject<uniformDimensionedVectorField>
+            (
+                omegaDotName_
+            )
+        )
+        {
+            uniformDimensionedVectorField omegaDot = this->mesh().template
+                lookupObject<uniformDimensionedVectorField>(omegaDotName_);
+
+            omegaDot_ = omegaDot.value();
+        }
+
+        if
+        (
+            this->mesh().template foundObject<uniformDimensionedVectorField>
+            (
+                centreOfRotationName_
+            )
+        )
+        {
+            uniformDimensionedVectorField omegaDot = this->mesh().template
+                lookupObject<uniformDimensionedVectorField>
+                (
+                    centreOfRotationName_
+                );
+
+            centreOfRotation_ = omegaDot.value();
         }
     }
 }
@@ -217,24 +188,16 @@ Foam::forceSuSp Foam::NonInertialFrameForce<CloudType>::calcNonCoupled
 {
     forceSuSp value(vector::zero, 0.0);
 
-    value.Su() += -mass*W_;
+    const vector& r = p.position() - centreOfRotation_;
 
-    if (hasAxis_)
-    {
-        const vector pRel = p.position() - axisRefPoint_;
-
-        const vector r = pRel - axis_*(axis_ & pRel);
-
-        vector omega = axis_*omegaMag_;
-
-        value.Su() +=
-            mass
-           *(
-               (r ^ omegaDot_)
-             + 2.0*(p.U() ^ omega)
-             + (omega ^ (r ^ omega))
-            );
-    }
+    value.Su() =
+        mass
+       *(
+           -W_
+          + (r ^ omegaDot_)
+          + 2.0*(p.U() ^ omega_)
+          + (omega_ ^ (r ^ omega_))
+        );
 
     return value;
 }

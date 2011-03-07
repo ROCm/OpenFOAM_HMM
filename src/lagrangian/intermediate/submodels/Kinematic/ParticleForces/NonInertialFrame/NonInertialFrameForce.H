@@ -62,36 +62,23 @@ class NonInertialFrameForce
         //- The linear acceleration of the reference frame
         vector W_;
 
-        //- Name of the angular velocity magnitude field
-        word omegaMagName_;
+        //- Name of the angular velocity field
+        word omegaName_;
 
-        //- The magnitude of the angular velocity of the reference frame,
-        //  combines with axis to give omega
-        scalar omegaMag_;
+        //- The angular velocity of the reference frame
+        vector omega_;
 
         //- Name of the angular acceleration field
         word omegaDotName_;
 
-        //- Pointer to the angular acceleration of the reference frame
+        //- The angular acceleration of the reference frame
         vector omegaDot_;
 
-        //- Name of the axis field
-        word axisName_;
+        //- Name of the centre of rotation field
+        word centreOfRotationName_;
 
-        //- Pointer to the axis of rotation - assumed to be a unit vector.
-        //  duplication of omega to allow situations where omega = 0 and
-        //  omegaDot != 0.
-        vector axis_;
-
-        // Boolean flag for whether rotational motion is active
-        bool hasAxis_;
-
-        //- Name of the axisRefPoint field
-        word axisRefPointName_;
-
-        //- Pointer to a point in non-inertial space on the axis of rotation
-        //  (omega), used to calculate r.
-        vector axisRefPoint_;
+        //- The centre of rotation of the reference frame
+        vector centreOfRotation_;
 
 
 public:
@@ -141,14 +128,9 @@ public:
             //- Return the angular acceleration of the reference frame
             inline const vector& omegaDot() const;
 
-            //- Return the axis of rotation
-            inline const vector& axis() const;
+            //- Return the centre of rotation of the reference frame
+            inline const vector& centreOfRotation() const;
 
-            //- Return bool stating if the frame is rotating
-            inline bool hasAxis() const;
-
-            //- Return the point in non-inertial space on the axis of rotation
-            inline const vector& axisRefPoint() const;
 
         // Evaluation
 
