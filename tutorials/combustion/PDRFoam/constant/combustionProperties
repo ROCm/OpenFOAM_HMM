@@ -17,31 +17,30 @@ FoamFile
 
 laminarFlameSpeedCorrelation SCOPE;
 
-fuel	Propane;
+fuel        Propane;
 
-fuelFile	"fuels/propane.dat";
+fuelFile    "fuels/propane.dat";
 
-ignite	yes;
+ignite      yes;
 
 ignitionSites
 (
-	    
+
     {
-		location        (1.5 1.5 0.5);
-		diameter        0.005;
-		start           1E-05;
-		duration        0.05;
-		strength        10.0;
+        location        (1.5 1.5 0.5);
+        diameter        0.005;
+        start           1E-05;
+        duration        0.05;
+        strength        10.0;
 	}
 );
 
-ignitionSphereFraction	1.;
+ignitionSphereFraction  1;
 
-ignitionThickness	ignitionThickness [0 1 0 0 0 0 0] 0.05;
+ignitionThickness   ignitionThickness [0 1 0 0 0 0 0] 0;
 
-ignitionCircleFraction	0.5;
+ignitionCircleFraction  0;
+
+ignitionKernelArea ignitionKernelArea [0 2 0 0 0 0 0] 0;
 
 // ************************************************************************* //
-
- 	;
-
