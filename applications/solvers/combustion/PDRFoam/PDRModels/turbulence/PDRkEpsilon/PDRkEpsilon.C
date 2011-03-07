@@ -69,6 +69,12 @@ PDRkEpsilon::PDRkEpsilon
 {}
 
 
+// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
+
+PDRkEpsilon::~PDRkEpsilon()
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool PDRkEpsilon::read()

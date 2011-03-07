@@ -281,9 +281,9 @@ public:
 
             bool move(trackingData&, const scalar trackTime);
 
-            void transformProperties(const tensor& T);
+            virtual void transformProperties(const tensor& T);
 
-            void transformProperties(const vector& separation);
+            virtual void transformProperties(const vector& separation);
 
             void setSitePositions(const constantProperties& constProps);
 

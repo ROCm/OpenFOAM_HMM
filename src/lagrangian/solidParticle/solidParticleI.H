@@ -93,12 +93,6 @@ inline Foam::scalar Foam::solidParticle::d() const
 }
 
 
-inline Foam::scalar Foam::solidParticle::wallImpactDistance(const vector&) const
-{
-    return 0.5*d_;
-}
-
-
 inline const Foam::vector& Foam::solidParticle::U() const
 {
     return U_;

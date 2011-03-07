@@ -28,14 +28,6 @@ License
 #include "volFields.H"
 #include "interpolationCellPoint.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-//    defineParticleTypeNameAndDebug(solidParticle, 0);
-//    defineTemplateTypeNameAndDebug(Cloud<solidParticle>, 0);
-}
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::solidParticleCloud::solidParticleCloud
@@ -70,6 +62,12 @@ Foam::solidParticleCloud::solidParticleCloud
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::solidParticleCloud::hasWallImpactDistance() const
+{
+    return true;
+}
+
 
 void Foam::solidParticleCloud::move(const dimensionedVector& g)
 {

@@ -891,7 +891,6 @@ bool Foam::particle::boundaryFace(const label faceI) const
 
 inline Foam::label Foam::particle::patch(const label faceI) const
 {
-//    return cloud_.facePatch(faceI);
     return mesh_.boundaryMesh().whichPatch(faceI);
 }
 
@@ -902,15 +901,7 @@ inline Foam::label Foam::particle::patchFace
     const label faceI
 ) const
 {
-//    return cloud_.patchFace(patchI, faceI);
     return mesh_.boundaryMesh()[patchI].whichFace(faceI);
-}
-
-
-inline Foam::scalar
-Foam::particle::wallImpactDistance(const vector&) const
-{
-    return 0.0;
 }
 
 
