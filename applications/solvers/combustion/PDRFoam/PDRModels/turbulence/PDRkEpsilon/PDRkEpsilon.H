@@ -107,12 +107,11 @@ public:
 
 
     //- Destructor
-    virtual ~PDRkEpsilon()
-    {}
+    virtual ~PDRkEpsilon();
 
 
     // Member Functions
-    
+
         //- Solve the turbulence equations and correct the turbulence viscosity
         void correct();
 
