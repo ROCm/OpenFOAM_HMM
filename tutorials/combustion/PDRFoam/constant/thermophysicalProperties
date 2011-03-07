@@ -15,9 +15,9 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType	hhuMixtureThermo<inhomogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>>;
+thermoType  hhuMixtureThermo<inhomogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>>;
 
-stoichiometricAirFuelMassRatio	stoichiometricAirFuelMassRatio [0 0 0 0 0 0 0] 15.5776;
+stoichiometricAirFuelMassRatio  stoichiometricAirFuelMassRatio [0 0 0 0 0 0 0] 15.5776;
 
 fuel
 {
@@ -61,5 +61,4 @@ burntProducts
 
 // ************************************************************************* //
 
- 	;
 

@@ -32,7 +32,7 @@ ignitionSites
         start           1E-05;
         duration        0.05;
         strength        10.0;
-	}
+    }
 );
 
 ignitionSphereFraction  1;
