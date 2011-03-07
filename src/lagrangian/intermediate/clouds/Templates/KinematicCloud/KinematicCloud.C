@@ -218,10 +218,10 @@ void Foam::KinematicCloud<CloudType>::evolveCloud(TrackData& td)
     {
 //        this->surfaceFilm().injectSteadyState(td);
 
-        this->injection().injectSteadyState(td, solution_.deltaTValue());
+        this->injection().injectSteadyState(td, solution_.trackTime());
 
         td.part() = TrackData::tpLinearTrack;
-        CloudType::move(td,  solution_.deltaTValue());
+        CloudType::move(td,  solution_.trackTime());
     }
 }
 
@@ -511,7 +511,7 @@ void Foam::KinematicCloud<CloudType>::checkParcelProperties
         parcel.rho() = constProps_.rho0();
     }
 
-    const scalar carrierDt = solution_.deltaTValue();
+    const scalar carrierDt = mesh_.time().deltaTValue();
     parcel.stepFraction() = (carrierDt - lagrangianDt)/carrierDt;
     parcel.typeId() = constProps_.parcelTypeId();
 }
@@ -589,7 +589,7 @@ template<class TrackData>
 void  Foam::KinematicCloud<CloudType>::motion(TrackData& td)
 {
     td.part() = TrackData::tpLinearTrack;
-    CloudType::move(td,  solution_.deltaTValue());
+    CloudType::move(td,  solution_.trackTime());
 
     updateCellOccupancy();
 }
