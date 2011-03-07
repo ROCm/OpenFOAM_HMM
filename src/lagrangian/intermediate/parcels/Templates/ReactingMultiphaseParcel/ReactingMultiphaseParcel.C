@@ -382,16 +382,11 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         {
             label gid = td.cloud().composition().localToGlobalCarrierId(GAS, i);
             td.cloud().rhoTrans(gid)[cellI] += np0*dMassGas[i];
-            td.cloud().hsTrans()[cellI] +=
-                np0*dMassGas[i]*td.cloud().composition().carrier().Hs(gid, T0);
         }
         forAll(YLiquid_, i)
         {
             label gid = td.cloud().composition().localToGlobalCarrierId(LIQ, i);
             td.cloud().rhoTrans(gid)[cellI] += np0*dMassLiquid[i];
-            td.cloud().hsTrans()[cellI] +=
-                np0*dMassLiquid[i]
-               *td.cloud().composition().carrier().Hs(gid, T0);
         }
 /*
         // No mapping between solid components and carrier phase
@@ -399,17 +394,11 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         {
             label gid = td.cloud().composition().localToGlobalCarrierId(SLD, i);
             td.cloud().rhoTrans(gid)[cellI] += np0*dMassSolid[i];
-            td.cloud().hsTrans()[cellI] +=
-                np0*dMassSolid[i]
-               *td.cloud().composition().carrier().Hs(gid, T0);
         }
 */
         forAll(dMassSRCarrier, i)
         {
             td.cloud().rhoTrans(i)[cellI] += np0*dMassSRCarrier[i];
-            td.cloud().hsTrans()[cellI] +=
-                np0*dMassSRCarrier[i]
-               *td.cloud().composition().carrier().Hs(i, T0);
         }
 
         // Update momentum transfer
