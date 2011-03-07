@@ -60,7 +60,7 @@ SourceFiles
 #ifndef compressiblePDRkEpsilon_H
 #define compressiblePDRkEpsilon_H
 
-#include "RASModel.H"
+
 #include "kEpsilon.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -107,7 +107,8 @@ public:
 
 
     //- Destructor
-    virtual ~PDRkEpsilon();
+    virtual ~PDRkEpsilon()
+    {}
 
 
     // Member Functions
