@@ -164,18 +164,19 @@ case ThirdParty:
         _foamAddMan     $gccDir/man
         _foamAddPath    $gccDir/bin
 
+        # add compiler libraries to run-time environment
         # 64-bit needs lib64, but 32-bit needs lib (not lib32)
-        if ($WM_ARCH_OPTION == 64) then
+        if ($WM_ARCH_OPTION == 64 && $?WM_COMPILER_LIB_ARCH) then
             _foamAddLib     $gccDir/lib$WM_COMPILER_LIB_ARCH
         else
             _foamAddLib     $gccDir/lib
         endif
 
-        # add in gmp/mpfr libraries
+        # add gmp/mpfr libraries to run-time environment
         _foamAddLib     $gmpDir/lib
         _foamAddLib     $mpfrDir/lib
 
-        # add in mpc libraries (not need for older gcc)
+        # add mpc libraries (not need for older gcc) to run-time environment
         if ( $?mpc_version ) then
             _foamAddLib     $mpcDir/lib
         endif
