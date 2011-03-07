@@ -125,8 +125,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given activePressureForceBaffleVelocityFvPatchVectorField
-        //  onto a new patch
+        //- Construct by mapping
         activePressureForceBaffleVelocityFvPatchVectorField
         (
             const activePressureForceBaffleVelocityFvPatchVectorField&,
@@ -165,7 +164,11 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new activePressureForceBaffleVelocityFvPatchVectorField(*this, iF)
+                new activePressureForceBaffleVelocityFvPatchVectorField
+                (
+                    *this,
+                    iF
+                )
             );
         }
 
