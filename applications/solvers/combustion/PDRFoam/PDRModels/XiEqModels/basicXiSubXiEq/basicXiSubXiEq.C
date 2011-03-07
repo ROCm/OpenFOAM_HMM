@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,55 +50,12 @@ Foam::XiEqModels::basicSubGrid::basicSubGrid
 :
     XiEqModel(XiEqProperties, thermo, turbulence, Su),
 
-    N_
-    (
-        IOobject
-        (
-            "N",
-            Su.mesh().time().findInstance(polyMesh::meshSubDir, "N"),
-            polyMesh::meshSubDir,
-            Su.mesh(),
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        ),
-        Su.mesh()
-    ),
-
-    ns_
-    (
-        IOobject
-        (
-            "ns",
-            Su.mesh().time().findInstance(polyMesh::meshSubDir, "ns"),
-            polyMesh::meshSubDir,
-            Su.mesh(),
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        ),
-        Su.mesh()
-    ),
-
     B_
     (
         IOobject
         (
             "B",
-            Su.mesh().time().findInstance(polyMesh::meshSubDir, "B"),
-            polyMesh::meshSubDir,
-            Su.mesh(),
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        ),
-        Su.mesh()
-    ),
-
-    Lobs_
-    (
-        IOobject
-        (
-            "Lobs",
-            Su.mesh().time().findInstance(polyMesh::meshSubDir, "Lobs"),
-            polyMesh::meshSubDir,
+            Su.mesh().facesInstance(),
             Su.mesh(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE
@@ -120,8 +77,12 @@ Foam::XiEqModels::basicSubGrid::~basicSubGrid()
 
 Foam::tmp<Foam::volScalarField> Foam::XiEqModels::basicSubGrid::XiEq() const
 {
-    const objectRegistry& db = Su_.db();
-    const volVectorField& U = db.lookupObject<volVectorField>("U");
+    const fvMesh& mesh = Su_.mesh();
+    const volVectorField& U = mesh.lookupObject<volVectorField>("U");
+
+    const volScalarField& Nv = mesh.lookupObject<volScalarField>("Nv");
+    const volSymmTensorField& nsv =
+        mesh.lookupObject<volSymmTensorField>("nsv");
 
     volScalarField magU(mag(U));
     volVectorField Uhat
@@ -129,20 +90,71 @@ Foam::tmp<Foam::volScalarField> Foam::XiEqModels::basicSubGrid::XiEq() const
         U/(mag(U) + dimensionedScalar("Usmall", U.dimensions(), 1e-4))
     );
 
-    volScalarField n(max(N_ - (Uhat & ns_ & Uhat), scalar(1e-4)));
+    const scalarField Cw = pow(mesh.V(), 2.0/3.0);
 
-    volScalarField b((Uhat & B_ & Uhat)/n);
+    tmp<volScalarField> tN
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "tN",
+                mesh.time().constant(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            dimensionedScalar("zero", Nv.dimensions(), 0.0),
+            zeroGradientFvPatchVectorField::typeName
+        )
+    );
+
+    volScalarField& N = tN();
+
+    N.internalField() = Nv.internalField()*Cw;
+
+    tmp<volSymmTensorField> tns
+    (
+        new volSymmTensorField
+        (
+            IOobject
+            (
+                "tns",
+                U.mesh().time().timeName(),
+                U.mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            U.mesh(),
+            dimensionedSymmTensor
+            (
+                "zero",
+                nsv.dimensions(),
+                pTraits<symmTensor>::zero
+            ),
+             zeroGradientFvPatchSymmTensorField::typeName
+        )
+    );
+
+    volSymmTensorField& ns = tns();
+
+    ns.internalField() = nsv.internalField()*Cw;
+
+    volScalarField n(max(N - (Uhat & ns & Uhat), scalar(1e-4)));
+
+    volScalarField b((Uhat & B_ & Uhat)/sqrt(n));
 
     volScalarField up(sqrt((2.0/3.0)*turbulence_.k()));
 
     volScalarField XiSubEq
     (
         scalar(1)
-      + max(2.2*sqrt(b), min(0.34*magU/up, scalar(1.6)))
-       *min(0.25*n, scalar(1))
+      + max(2.2*sqrt(b), min(0.34*magU/up*sqrt(b), scalar(1.6)))
+      * min(n, scalar(1))
     );
 
-    return XiSubEq*XiEqModel_->XiEq();
+    return (XiSubEq*XiEqModel_->XiEq());
 }
 
 

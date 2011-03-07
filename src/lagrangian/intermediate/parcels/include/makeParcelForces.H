@@ -32,6 +32,7 @@ License
 #include "NonSphereDragForce.H"
 
 #include "GravityForce.H"
+#include "NonInertialFrameForce.H"
 #include "ParamagneticForce.H"
 #include "PressureGradientForce.H"
 #include "SRFForce.H"
@@ -44,6 +45,7 @@ License
     makeParticleForceModelType(SphereDragForce, CloudType);                   \
     makeParticleForceModelType(NonSphereDragForce, CloudType);                \
     makeParticleForceModelType(GravityForce, CloudType);                      \
+    makeParticleForceModelType(NonInertialFrameForce, CloudType);             \
     makeParticleForceModelType(ParamagneticForce, CloudType);                 \
     makeParticleForceModelType(PressureGradientForce, CloudType);             \
     makeParticleForceModelType(SRFForce, CloudType);

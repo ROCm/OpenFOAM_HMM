@@ -132,6 +132,19 @@
   };
   #+END_SRC
 
+* Pitfalls
+  The syntax of =#codeStream= can be quite hard to get right. These are some
+  common pitfalls:
+  + the =code= string has to be a valid set of C++ expressions so has to end in
+    a ';'
+  + the C++ code upon execution has to print a valid dictionary entry. In above example it
+    prints 'uniform 12.34;'. Note the ';' at the end. It is advised to use the
+    =writeEntry= as above to handle this and also e.g. binary streams (=codeStream=
+    inherits the stream type from the dictionary)
+  + the =code=, =codeInclude=, =codeOptions= entries are just like any other
+    dictionary string entry so there has to be a ';' after the string
+  + the =#codeStream= entry (itself a dictionary) has to end in a ';'
+
 * Exceptions
   There are unfortunately some exceptions. Following applications read
   the field as a dictionary, not as an =IOdictionary=:
@@ -146,8 +159,6 @@
   value.
 
 * Other
-  - the implementation is still a bit raw - it compiles code overly much
-  - both =codeStream= and =codedFixedValue= take the contents of the dictionary
-    and extract values and re-assemble list of files and environment vars to
-    replace.  Should just directly pass the dictionary into =codeStreamTools=.
-  - parallel running not tested a lot. What about distributed data parallel?
+  - the implementation is still changing though the syntax is fixed
+  - parallel running not tested a lot. What about distributed data
+    (i.e. non-=NFS=) parallel?

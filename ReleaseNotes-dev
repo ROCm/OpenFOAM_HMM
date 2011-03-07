@@ -240,6 +240,13 @@
     + =snappyHexMesh=:
       + extrude across multi-processor boundaries
       + preserve faceZones during layering
+      + *Warning*:
+            - minMedianAxisAngle angle fixed w.r.t. 17x. Set to
+              90 to get same behaviour as 130 in 17x.
+            - nGrow did not work in 17x. Set to 0
+              to get same behaviour as 130 in 17x.
+            - new minTetQuality setting (see tracking). Disable for 17x
+              compatibility.
 * Post-processing
   + =paraFoam=, =foamToVTK=: full support for polyhedral cell type in recent
      Paraview versions.
