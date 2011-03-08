@@ -15,7 +15,6 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
 solvers
 {
     rho
@@ -29,9 +28,9 @@ solvers
     p
     {
         solver          PCG;
-        preconditioner   DIC;
-        tolerance        1e-6;
-        relTol           0;
+        preconditioner  DIC;
+        tolerance       1e-6;
+        relTol          0;
     };
 
     "(U|ft|fu|b|Xi|Su|h|hu|R|k|epsilon)"
