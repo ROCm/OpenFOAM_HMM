@@ -1,8 +1,8 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
-[ $# -ge 1 ] && makeOption=$1 || makeOption=libso
+makeType=${1:-libso}
 set -x
 
-wmake $makeOption reconstruct
+wmake $makeType reconstruct
 
 # ----------------------------------------------------------------- end-of-file

@@ -38,6 +38,13 @@ ${codeInclude}
 namespace Foam
 {
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+//{{{ begin localCode
+${localCode}
+//}}} end localCode
+
+
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 extern "C"
@@ -59,6 +66,17 @@ extern "C"
         }
     }
 }
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+makeRemovablePatchTypeField
+(
+    fvPatchScalarField,
+    ${typeName}FixedValueFvPatchScalarField
+);
+
+
+const char* ${typeName}FixedValueFvPatchScalarField::SHA1sum = "${SHA1sum}";
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -177,20 +195,11 @@ void ${typeName}FixedValueFvPatchScalarField::updateCoeffs()
     }
 
 //{{{ begin code
-    ${code};
+    ${code}
 //}}} end code
 
     fixedValueFvPatchScalarField::updateCoeffs();
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-makeRemovablePatchTypeField
-(
-    fvPatchScalarField,
-    ${typeName}FixedValueFvPatchScalarField
-);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
