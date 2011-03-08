@@ -49,7 +49,20 @@ Foam::cloud::cloud(const objectRegistry& obr, const word& cloudName)
             IOobject::AUTO_WRITE
         )
     )
-{}
+{
+    if (isA<polyMesh>(obr))
+    {
+        if (debug)
+        {
+            Pout<< "cloud: Initialising polyMesh nGeometricD" << endl;
+        }
+
+        // initialise mesh dimensions - needed for parallel runs
+        // due to lazy evaluation of valid mesh dimensions
+        const polyMesh& mesh = dynamic_cast<const polyMesh&>(obr);
+        const_cast<polyMesh&>(mesh).nGeometricD();
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
