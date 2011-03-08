@@ -45,6 +45,7 @@ const Foam::word Foam::codedFixedValueFvPatchScalarField::codeTemplateC
 const Foam::word Foam::codedFixedValueFvPatchScalarField::codeTemplateH
     = "fixedValueFvPatchScalarFieldTemplate.H";
 
+
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 void* Foam::codedFixedValueFvPatchScalarField::loadLibrary
@@ -352,7 +353,7 @@ codedFixedValueFvPatchScalarField
     fixedValueFvPatchField<scalar>(ptf, p, iF, mapper),
     dict_(ptf.dict_),
     redirectType_(ptf.redirectType_),
-    oldLibPath_(),
+    oldLibPath_(ptf.oldLibPath_),
     redirectPatchFieldPtr_()
 {}
 
@@ -384,7 +385,7 @@ codedFixedValueFvPatchScalarField
     fixedValueFvPatchField<scalar>(ptf),
     dict_(ptf.dict_),
     redirectType_(ptf.redirectType_),
-    oldLibPath_(),
+    oldLibPath_(ptf.oldLibPath_),
     redirectPatchFieldPtr_()
 {}
 
@@ -399,7 +400,7 @@ codedFixedValueFvPatchScalarField
     fixedValueFvPatchField<scalar>(ptf, iF),
     dict_(ptf.dict_),
     redirectType_(ptf.redirectType_),
-    oldLibPath_(),
+    oldLibPath_(ptf.oldLibPath_),
     redirectPatchFieldPtr_()
 {}
 
@@ -412,7 +413,7 @@ Foam::codedFixedValueFvPatchScalarField::redirectPatchField() const
     if (!redirectPatchFieldPtr_.valid())
     {
         // Construct a patch
-        // Make sure to construct the patchfield with uptodate value.
+        // Make sure to construct the patchfield with up-to-date value
 
         OStringStream os;
         os.writeKeyword("type") << redirectType_ << token::END_STATEMENT
@@ -420,19 +421,6 @@ Foam::codedFixedValueFvPatchScalarField::redirectPatchField() const
         static_cast<const scalarField&>(*this).writeEntry("value", os);
         IStringStream is(os.str());
         dictionary dict(is);
-//        Info<< "constructing patchField from :" << dict << endl;
-
-//        if (fvPatchScalarField::dictionaryConstructorTablePtr_)
-//        {
-//            fvPatchScalarField::dictionaryConstructorPtr funcPtr =
-//            (
-//                fvPatchScalarField::dictionaryConstructorTablePtr_->
-//                find(redirectType_)()
-//            );
-//
-//            Info<< redirectType_ << " FunctionPtr => "
-//                << long(funcPtr) << endl;
-//        }
 
         redirectPatchFieldPtr_.set
         (
@@ -455,7 +443,7 @@ void Foam::codedFixedValueFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    // Make sure library containing user-defined fvPatchField is uptodate
+    // Make sure library containing user-defined fvPatchField is up-to-date
     updateLibrary();
 
     const fvPatchScalarField& fvp = redirectPatchField();
@@ -474,7 +462,7 @@ void Foam::codedFixedValueFvPatchScalarField::evaluate
     const Pstream::commsTypes commsType
 )
 {
-    // Make sure library containing user-defined fvPatchField is uptodate
+    // Make sure library containing user-defined fvPatchField is up-to-date
     updateLibrary();
 
     const fvPatchScalarField& fvp = redirectPatchField();

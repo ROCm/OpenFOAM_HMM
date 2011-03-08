@@ -38,20 +38,16 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 extern "C"
 {
-void ${typeName}
-(
-    Ostream& os,
-    const dictionary& dict
-)
-{
+    void ${typeName}(Ostream& os, const dictionary& dict)
+    {
 //{{{ begin code
-${code};
+        ${code};
 //}}} end code
-}
+    }
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

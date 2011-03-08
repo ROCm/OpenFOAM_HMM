@@ -119,6 +119,7 @@ class codedFixedValueFvPatchScalarField
         //- Global loader/unloader function type
         typedef void (*loaderFunctionType)(bool);
 
+        //- Load specified library and execute globalFuncName(true)
         static void* loadLibrary
         (
             const fileName& libPath,
@@ -126,6 +127,7 @@ class codedFixedValueFvPatchScalarField
             const dictionary& contextDict
         );
 
+        //- Execute globalFuncName(false) and unload specified library
         static void unloadLibrary
         (
             const fileName& libPath,
@@ -134,6 +136,7 @@ class codedFixedValueFvPatchScalarField
         );
 
 
+        //- Create library based on the dynamicCodeContext
         void createLibrary(dynamicCode&, const dynamicCodeContext&) const;
 
         //- Update library as required
