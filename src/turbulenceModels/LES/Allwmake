@@ -1,11 +1,11 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
-[ $# -ge 1 ] && makeOption=$1 || makeOption=libso
+makeType=${1:-libso}
 set -x
 
 wmakeLnInclude ../incompressible/LES
 
-wmake $makeOption LESfilters
-wmake $makeOption LESdeltas
+wmake $makeType LESfilters
+wmake $makeType LESdeltas
 
 # ----------------------------------------------------------------- end-of-file

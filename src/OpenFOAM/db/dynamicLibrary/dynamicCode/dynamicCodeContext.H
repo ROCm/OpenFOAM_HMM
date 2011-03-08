@@ -57,6 +57,9 @@ class dynamicCodeContext
         //- Mandatory "code" entry
         string code_;
 
+        //- Optional "localCode" entry
+        string localCode_;
+
         //- Optional "codeInclude" entry
         string include_;
 
@@ -97,6 +100,12 @@ public:
         const string& code() const
         {
             return code_;
+        }
+
+        //- Return the local (file-scope) code
+        const string& localCode() const
+        {
+            return localCode_;
         }
 
         //- Return SHA1 digest calculated from include, options, code

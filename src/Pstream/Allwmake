@@ -1,9 +1,9 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
-[ $# -ge 1 ] && makeOption=$1 || makeOption=libso
+makeType=${1:-libso}
 set -x
 
-wmake $makeOption dummy
+wmake $makeType dummy
 
 case "$WM_MPLIB" in
 *MPI*)
@@ -13,11 +13,11 @@ case "$WM_MPLIB" in
     echo
     set -x
     # force compilation into qualified directory
-    WM_OPTIONS=${WM_OPTIONS}$WM_MPLIB  wmake $makeOption mpi
+    WM_OPTIONS=${WM_OPTIONS}$WM_MPLIB  wmake $makeType mpi
     ;;
 
 #GAMMA)
-#    wmake $makeOption gamma
+#    wmake $makeType gamma
 #    ;;
 esac
 

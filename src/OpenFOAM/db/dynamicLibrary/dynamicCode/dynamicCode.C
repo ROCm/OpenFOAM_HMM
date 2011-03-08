@@ -373,6 +373,7 @@ void Foam::dynamicCode::setFilterContext
     const dynamicCodeContext& context
 )
 {
+    filterVars_.set("localCode", context.localCode());
     filterVars_.set("code", context.code());
     filterVars_.set("codeInclude", context.include());
     filterVars_.set("SHA1sum", context.sha1().str());
@@ -523,7 +524,7 @@ bool Foam::dynamicCode::copyOrCreateFiles(const bool verbose) const
 
 bool Foam::dynamicCode::wmakeLibso() const
 {
-    const Foam::string wmakeCmd("wmake libso " + this->codeRelPath());
+    const Foam::string wmakeCmd("wmake -s libso " + this->codeRelPath());
     Info<< "Invoking " << wmakeCmd << endl;
 
     if (Foam::system(wmakeCmd))
