@@ -122,7 +122,7 @@ fi
 # check arguments and change to the directory in which to run wmake
 #------------------------------------------------------------------------------
 
-unset dir makeOption
+unset dir makeType
 MakeDir=Make
 
 if [ $# -ge 1 ]
@@ -131,7 +131,7 @@ then
     then
         dir=$1
     else
-        makeOption=$1
+        makeType=$1
     fi
 
     # specified directory name:
@@ -154,7 +154,7 @@ fi
 # Recurse the application directories tree
 #------------------------------------------------------------------------------
 
-if [ "$makeOption" = all ]
+if [ "$makeType" = all ]
 then
     if [ -e Allwmake ]
     then
@@ -187,12 +187,12 @@ fi
 
 # transform "all" option to "libso" if that looks appropriate or remove it
 # so that the call to make builds the application
-if [ "$makeOption" = all ]
+if [ "$makeType" = all ]
 then
-    unset makeOption
+    unset makeType
     if grep -e '^ *LIB *=' "$MakeDir/files" >/dev/null 2>&1
     then
-        makeOption=libso
+        makeType=libso
     fi
 fi
 
@@ -226,7 +226,7 @@ OBJECTS_DIR=$MakeDir/$WM_OPTIONS
 
 touch $OBJECTS_DIR/dontIncludeDeps
 
-case "$makeOption" in
+case "$makeType" in
 lib | libo | libso )
     $make -s -f $WM_DIR/Makefile MAKE_DIR=$MakeDir INCLUDE_DEPS=$OBJECTS_DIR/dontIncludeDeps lnInclude/uptodate
     ;;
@@ -241,7 +241,7 @@ rc=$?
 # make the object files and link
 #------------------------------------------------------------------------------
 
-cmd="$make -f $WM_DIR/Makefile MAKE_DIR=$MakeDir INCLUDE_DEPS=$OBJECTS_DIR/includeDeps $makeOption"
+cmd="$make -f $WM_DIR/Makefile MAKE_DIR=$MakeDir INCLUDE_DEPS=$OBJECTS_DIR/includeDeps $makeType"
 # echo "cmd=$cmd"
 exec $cmd
 
