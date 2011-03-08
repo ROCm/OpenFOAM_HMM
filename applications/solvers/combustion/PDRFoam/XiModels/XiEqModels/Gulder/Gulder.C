@@ -50,8 +50,7 @@ Foam::XiEqModels::Gulder::Gulder
 :
     XiEqModel(XiEqProperties, thermo, turbulence, Su),
     XiEqCoef_(readScalar(XiEqModelCoeffs_.lookup("XiEqCoef"))),
-    SuMin_(0.01*Su.average()),
-    uPrimeCoef_(readScalar(XiEqModelCoeffs_.lookup("uPrimeCoef")))
+    SuMin_(0.01*Su.average())
 {}
 
 
@@ -67,78 +66,11 @@ Foam::tmp<Foam::volScalarField> Foam::XiEqModels::Gulder::XiEq() const
 {
     volScalarField up(sqrt((2.0/3.0)*turbulence_.k()));
     const volScalarField& epsilon = turbulence_.epsilon();
-    const fvMesh& mesh = Su_.mesh();
 
-    const volVectorField& U = mesh.lookupObject<volVectorField>("U");
-
-    const volSymmTensorField& CT = mesh.lookupObject<volSymmTensorField>("CT");
-    const volScalarField& Nv = mesh.lookupObject<volScalarField>("Nv");
-    const volSymmTensorField& nsv =
-        mesh.lookupObject<volSymmTensorField>("nsv");
-
-    tmp<volScalarField> tN
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "tN",
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh,
-            dimensionedScalar("zero", Nv.dimensions(), 0.0),
-            zeroGradientFvPatchVectorField::typeName
-        )
-    );
-
-    volScalarField& N = tN();
-
-    N.internalField() = Nv.internalField()*pow(mesh.V(), 2.0/3.0);
-
-    tmp<volSymmTensorField> tns
-    (
-        new volSymmTensorField
-        (
-            IOobject
-            (
-                "tns",
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh,
-            dimensionedSymmTensor
-            (
-                "zero",
-                nsv.dimensions(),
-                pTraits<symmTensor>::zero
-            )
-        )
-    );
-
-    volSymmTensorField& ns = tns();
-
-    ns.internalField() = nsv.internalField()*pow(mesh.V(), 2.0/3.0);
-
-    const volVectorField Uhat
-    (
-        U/(mag(U) + dimensionedScalar("Usmall", U.dimensions(), 1e-4))
-    );
-
-    const volScalarField nr(sqrt(max(N - (Uhat & ns & Uhat), scalar(1e-4))));
-
-    const scalarField cellWidth(pow(mesh.V(), 1.0/3.0));
-
-    const scalarField upLocal(uPrimeCoef_*sqrt((U & CT & U)*cellWidth));
-
-    const scalarField deltaUp(upLocal*(max(scalar(1.0), pow(nr, 0.5)) - 1.0));
-
-    up.internalField() += deltaUp;
+    if (subGridSchelkin())
+    {
+        up.internalField() += calculateSchelkinEffect();
+    }
 
     volScalarField tauEta(sqrt(mag(thermo_.muu()/(thermo_.rhou()*epsilon))));
 
@@ -161,6 +93,7 @@ bool Foam::XiEqModels::Gulder::read(const dictionary& XiEqProperties)
 
     XiEqModelCoeffs_.lookup("XiEqCoef") >> XiEqCoef_;
     XiEqModelCoeffs_.lookup("uPrimeCoef") >> uPrimeCoef_;
+    XiEqModelCoeffs_.lookup("subGridSchelkin") >> subGridSchelkin_;
 
     return true;
 }
