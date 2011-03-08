@@ -352,7 +352,7 @@ codedFixedValueFvPatchScalarField
     fixedValueFvPatchField<scalar>(ptf, p, iF, mapper),
     dict_(ptf.dict_),
     redirectType_(ptf.redirectType_),
-    oldLibPath_(),
+    oldLibPath_(ptf.oldLibPath_),
     redirectPatchFieldPtr_()
 {}
 
@@ -384,7 +384,7 @@ codedFixedValueFvPatchScalarField
     fixedValueFvPatchField<scalar>(ptf),
     dict_(ptf.dict_),
     redirectType_(ptf.redirectType_),
-    oldLibPath_(),
+    oldLibPath_(ptf.oldLibPath_),
     redirectPatchFieldPtr_()
 {}
 
@@ -399,7 +399,7 @@ codedFixedValueFvPatchScalarField
     fixedValueFvPatchField<scalar>(ptf, iF),
     dict_(ptf.dict_),
     redirectType_(ptf.redirectType_),
-    oldLibPath_(),
+    oldLibPath_(ptf.oldLibPath_),
     redirectPatchFieldPtr_()
 {}
 
