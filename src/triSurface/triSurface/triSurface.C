@@ -211,8 +211,6 @@ void Foam::triSurface::checkTriangles(const bool verbose)
     boolList valid(size(), true);
     bool hasInvalid = false;
 
-    const labelListList& fFaces = faceFaces();
-
     forAll(*this, faceI)
     {
         const labelledTri& f = (*this)[faceI];
@@ -236,47 +234,53 @@ void Foam::triSurface::checkTriangles(const bool verbose)
         else
         {
             // duplicate triangle check
-            const labelList& neighbours = fFaces[faceI];
+            const labelList& fEdges = faceEdges()[faceI];
 
             // Check if faceNeighbours use same points as this face.
             // Note: discards normal information - sides of baffle are merged.
-            forAll(neighbours, neighbourI)
+
+            forAll(fEdges, fp)
             {
-                if (neighbours[neighbourI] <= faceI)
+                const labelList& eFaces = edgeFaces()[fEdges[fp]];
+
+                forAll(eFaces, i)
                 {
-                    // lower numbered faces already checked
-                    continue;
-                }
+                    label neighbour = eFaces[i];
 
-                const labelledTri& n = (*this)[neighbours[neighbourI]];
-
-                if
-                (
-                    ((f[0] == n[0]) || (f[0] == n[1]) || (f[0] == n[2]))
-                 && ((f[1] == n[0]) || (f[1] == n[1]) || (f[1] == n[2]))
-                 && ((f[2] == n[0]) || (f[2] == n[1]) || (f[2] == n[2]))
-                )
-                {
-                    valid[faceI] = false;
-                    hasInvalid = true;
-
-                    if (verbose)
+                    if (neighbour > faceI)
                     {
-                        WarningIn
+                        // lower numbered faces already checked
+                        const labelledTri& n = (*this)[neighbour];
+
+                        if
                         (
-                            "triSurface::checkTriangles(bool verbose)"
-                        )   << "triangles share the same vertices:\n"
-                            << "    face 1 :" << faceI << endl;
-                        printTriangle(Warning, "    ", f, points());
+                            ((f[0] == n[0]) || (f[0] == n[1]) || (f[0] == n[2]))
+                         && ((f[1] == n[0]) || (f[1] == n[1]) || (f[1] == n[2]))
+                         && ((f[2] == n[0]) || (f[2] == n[1]) || (f[2] == n[2]))
+                        )
+                        {
+                            valid[faceI] = false;
+                            hasInvalid = true;
 
-                        Warning
-                            << endl
-                            << "    face 2 :"
-                            << neighbours[neighbourI] << endl;
-                        printTriangle(Warning, "    ", n, points());
+                            if (verbose)
+                            {
+                                WarningIn
+                                (
+                                    "triSurface::checkTriangles(bool verbose)"
+                                )   << "triangles share the same vertices:\n"
+                                    << "    face 1 :" << faceI << endl;
+                                printTriangle(Warning, "    ", f, points());
+
+                                Warning
+                                    << endl
+                                    << "    face 2 :"
+                                    << neighbour << endl;
+                                printTriangle(Warning, "    ", n, points());
+                            }
+
+                            break;
+                        }
                     }
-
-                    break;
                 }
             }
         }
