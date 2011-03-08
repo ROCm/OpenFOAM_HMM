@@ -73,9 +73,11 @@ class externalWallHeatFluxTemperatureFvPatchScalarField
     public mixedFvPatchScalarField,
     public temperatureCoupledBase
 {
-    // Private data
+public:
 
-        //- how to operate the BC
+    // Public data
+
+        //- Operation mode enumeration
         enum operationMode
         {
             fixedHeatFlux,
@@ -83,6 +85,11 @@ class externalWallHeatFluxTemperatureFvPatchScalarField
             unknown
         };
         static const NamedEnum<operationMode, 3> operationModeNames;
+
+
+private:
+
+    // Private data
 
         //- Operation mode
         operationMode oldMode_;
