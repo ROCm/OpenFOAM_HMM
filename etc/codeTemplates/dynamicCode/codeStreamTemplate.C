@@ -34,22 +34,37 @@ Description
 ${codeInclude}
 //}}} end codeInclude
 
-using namespace Foam;
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+//{{{ begin localCode
+${localCode}
+//}}} end localCode
+
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 extern "C"
 {
-    void ${typeName}(Ostream& os, const dictionary& dict)
+    void ${typeName}
+    (
+        Ostream& os,
+        const dictionary& dict
+    )
     {
 //{{{ begin code
-        ${code};
+        ${code}
 //}}} end code
     }
 }
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // ************************************************************************* //

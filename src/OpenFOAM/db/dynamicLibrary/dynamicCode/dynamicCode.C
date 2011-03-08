@@ -373,6 +373,7 @@ void Foam::dynamicCode::setFilterContext
     const dynamicCodeContext& context
 )
 {
+    filterVars_.set("localCode", context.localCode());
     filterVars_.set("code", context.code());
     filterVars_.set("codeInclude", context.include());
     filterVars_.set("SHA1sum", context.sha1().str());

@@ -38,6 +38,13 @@ ${codeInclude}
 namespace Foam
 {
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+//{{{ begin localCode
+${localCode}
+//}}} end localCode
+
+
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 extern "C"
@@ -188,7 +195,7 @@ void ${typeName}FixedValueFvPatchScalarField::updateCoeffs()
     }
 
 //{{{ begin code
-    ${code};
+    ${code}
 //}}} end code
 
     fixedValueFvPatchScalarField::updateCoeffs();
