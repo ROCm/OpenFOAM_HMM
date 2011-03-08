@@ -40,6 +40,7 @@ Usage: $Script [OPTION] [dir]
        $Script [OPTION] target [dir [MakeDir]]
 
 options:
+  -s | -silent      ignored - for compatibility with wmake
   -help             print the usage
 
 Clean up the wmake control directory Make/\$WM_OPTIONS and remove the
@@ -52,14 +53,28 @@ The targets correspond to a subset of the 'wmake' special targets:
                     clean Make, any *.dep files and lnInclude directories
 
 USAGE
-   exit 1
+    exit 1
 }
 
-# provide immediate help
-if [ "$1" = "-h" -o "$1" = "-help" ]
-then
-    usage
-fi
+
+# parse options
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help)
+        usage
+        ;;
+    -s | -silent)    # ignored - for compatibility with wmake
+        shift
+        ;;
+    -*)
+        usage "unknown option: '$*'"
+        ;;
+    *)
+        break
+        ;;
+    esac
+done
 
 
 #------------------------------------------------------------------------------
