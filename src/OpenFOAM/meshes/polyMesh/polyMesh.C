@@ -309,6 +309,9 @@ Foam::polyMesh::polyMesh(const IOobject& io)
         WarningIn("polyMesh(const IOobject&)")
             << "no cells in mesh" << endl;
     }
+
+    // Initialise demand-driven data
+    calcDirections();
 }
 
 
