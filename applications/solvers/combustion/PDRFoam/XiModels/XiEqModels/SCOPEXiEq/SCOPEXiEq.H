@@ -58,9 +58,16 @@ class SCOPEXiEq
 {
     // Private data
 
+        // Model constant
         scalar XiEqCoef_;
+
+        // Model constant
         scalar XiEqExp_;
+
+        // Model constant
         scalar lCoef_;
+
+        //- Minimum Su
         dimensionedScalar SuMin_;
 
         //- The SCOPE laminar flame speed model used to obtain the

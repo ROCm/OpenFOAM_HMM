@@ -84,6 +84,11 @@ Foam::tmp<Foam::volScalarField> Foam::XiEqModels::SCOPEXiEq::XiEq() const
     const volScalarField& epsilon = turbulence_.epsilon();
 
     volScalarField up(sqrt((2.0/3.0)*k));
+    if (subGridSchelkin())
+    {
+        up.internalField() += calculateSchelkinEffect();
+    }
+
     volScalarField l(lCoef_*sqrt(3.0/2.0)*up*k/epsilon);
     volScalarField Rl(up*l*thermo_.rhou()/thermo_.muu());
 

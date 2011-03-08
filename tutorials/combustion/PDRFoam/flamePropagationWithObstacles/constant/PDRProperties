@@ -49,25 +49,27 @@ instabilityCoeffs
         {
             XiEqModelL
             {
-                XiEqModel Gulder;
+                XiEqModel       Gulder;
+                uPrimeCoef      1.0;
+                subGridSchelkin true;
 
                 GulderCoeffs
                 {
-                XiEqCoef   0.62;
-                uPrimeCoef 1.0;
+                    XiEqCoef   0.62;
                 }
             }
 
             XiEqModelH
             {
-                XiEqModel SCOPEXiEq;
+                XiEqModel       SCOPEXiEq;
+                uPrimeCoef      1.0;
+                subGridSchelkin true;
 
-            SCOPEXiEqCoeffs
-            {
-                XiEqCoef   1.6;
-                XiEqExp    0.33333;
-                lCoef      0.336;
-                uPrimeCoef 1.0;
+                SCOPEXiEqCoeffs
+                {
+                    XiEqCoef   1.6;
+                    XiEqExp    0.33333;
+                    lCoef      0.336;
                 }
             }
         }

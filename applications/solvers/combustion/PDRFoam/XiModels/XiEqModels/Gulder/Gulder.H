@@ -61,9 +61,6 @@ class Gulder
         //- Minimum laminar burning velocity
         const dimensionedScalar SuMin_;
 
-        //- Model constant
-        scalar uPrimeCoef_;
-
 
     // Private Member Functions
 
