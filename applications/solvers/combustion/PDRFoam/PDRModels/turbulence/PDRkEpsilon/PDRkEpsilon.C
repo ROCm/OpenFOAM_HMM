@@ -135,8 +135,8 @@ void PDRkEpsilon::correct()
 
     volScalarField GR(drag.Gk());
 
-     volScalarField LI =
-        C4_*(Lobs + dimensionedScalar("minLength", dimLength, VSMALL));
+    volScalarField LI
+        (C4_*(Lobs + dimensionedScalar("minLength", dimLength, VSMALL)));
 
     // Dissipation equation
     tmp<fvScalarMatrix> epsEqn

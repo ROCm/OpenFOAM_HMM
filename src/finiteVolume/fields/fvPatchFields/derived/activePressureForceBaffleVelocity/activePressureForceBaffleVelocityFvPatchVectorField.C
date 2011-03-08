@@ -319,7 +319,7 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::updateCoeffs()
         Info<< "Pressure difference = " << valueDiff << endl;
 
         vectorField::subField Sfw = patch().patch().faceAreas();
-        vectorField newSfw = (1 - openFraction_)*initWallSf_;
+        vectorField newSfw((1 - openFraction_)*initWallSf_);
         forAll(Sfw, facei)
         {
             Sfw[facei] = newSfw[facei];
