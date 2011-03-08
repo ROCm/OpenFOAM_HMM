@@ -25,6 +25,7 @@ License
 
 #include "cloud.H"
 #include "Time.H"
+#include "polyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
