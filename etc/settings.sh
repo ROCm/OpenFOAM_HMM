@@ -61,6 +61,98 @@ _foamAddMan()
 }
 
 #------------------------------------------------------------------------------
+# Set environment variables according to system type
+export WM_ARCH=`uname -s`
+
+case "$WM_ARCH" in
+Linux)
+    WM_ARCH=linux
+
+    # compiler specifics
+    case `uname -m` in
+    i686)
+        ;;
+
+    x86_64)
+        case "$WM_ARCH_OPTION" in
+        32)
+            export WM_COMPILER_ARCH='-64'
+            export WM_CC='gcc'
+            export WM_CXX='g++'
+            export WM_CFLAGS='-m32 -fPIC'
+            export WM_CXXFLAGS='-m32 -fPIC'
+            export WM_LDFLAGS='-m32'
+            ;;
+        64)
+            WM_ARCH=linux64
+            export WM_COMPILER_LIB_ARCH=64
+            export WM_CC='gcc'
+            export WM_CXX='g++'
+            export WM_CFLAGS='-m64 -fPIC'
+            export WM_CXXFLAGS='-m64 -fPIC'
+            export WM_LDFLAGS='-m64'
+            ;;
+        *)
+            echo "Unknown WM_ARCH_OPTION '$WM_ARCH_OPTION', should be 32 or 64"
+            ;;
+        esac
+        ;;
+
+    ia64)
+        WM_ARCH=linuxIA64
+        export WM_COMPILER=I64
+        ;;
+
+    mips64)
+        WM_ARCH=SiCortex64
+        WM_MPLIB=MPI
+        export WM_COMPILER_LIB_ARCH=64
+        export WM_CC='gcc'
+        export WM_CXX='g++'
+        export WM_CFLAGS='-mabi=64 -fPIC'
+        export WM_CXXFLAGS='-mabi=64 -fPIC'
+        export WM_LDFLAGS='-mabi=64 -G0'
+        ;;
+
+    ppc64)
+        WM_ARCH=linuxPPC64
+        export WM_COMPILER_LIB_ARCH=64
+        export WM_CC='gcc'
+        export WM_CXX='g++'
+        export WM_CFLAGS='-m64 -fPIC'
+        export WM_CXXFLAGS='-m64 -fPIC'
+        export WM_LDFLAGS='-m64'
+        ;;
+
+    *)
+        echo Unknown processor type `uname -m` for Linux
+        ;;
+    esac
+    ;;
+
+SunOS)
+    WM_ARCH=SunOS64
+    WM_MPLIB=FJMPI
+    export WM_COMPILER_LIB_ARCH=64
+    export WM_CC='gcc'
+    export WM_CXX='g++'
+    export WM_CFLAGS='-mabi=64 -fPIC'
+    export WM_CXXFLAGS='-mabi=64 -fPIC'
+    export WM_LDFLAGS='-mabi=64 -G0'
+    ;;
+
+*)    # an unsupported operating system
+    cat <<USAGE
+
+    Your "$WM_ARCH" operating system is not supported by this release
+    of OpenFOAM. For further assistance, please contact www.OpenFOAM.com
+
+USAGE
+    ;;
+esac
+
+
+#------------------------------------------------------------------------------
 
 # location of the jobControl directory
 export FOAM_JOB_DIR=$WM_PROJECT_INST_DIR/jobControl
