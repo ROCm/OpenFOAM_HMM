@@ -172,7 +172,7 @@ do
         node=""
     esac
 
-    echo "#!/bin/sh" > $procCmdFile
+    echo "#!/bin/bash" > $procCmdFile
     case "$method" in
     0)
         echo "$sourceFoam; cd $PWD; $exec $args | tee $procLog" >> $procCmdFile
