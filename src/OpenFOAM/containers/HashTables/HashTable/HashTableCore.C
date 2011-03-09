@@ -37,9 +37,6 @@ const Foam::label Foam::HashTableCore::maxTableSize
     )
 );
 
-const Foam::HashTableCore::iteratorEnd Foam::HashTableCore::endIter;
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::label Foam::HashTableCore::canonicalSize(const label size)
