@@ -904,7 +904,6 @@ void Foam::InteractionLists<ParticleType>::buildMap
     (
         new mapDistribute
         (
-
             constructSize,
             sendMap.xfer(),
             constructMap.xfer()
