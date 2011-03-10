@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -97,16 +97,18 @@ struct HashTableCore
         {}
     };
 
+    static const iteratorEnd endIter;
+
     //- iteratorEnd set to beyond the end of any HashTable
-    inline static iteratorEnd cend()
+    inline static const iteratorEnd& cend()
     {
-        return iteratorEnd();
+        return endIter;
     }
 
     //- iteratorEnd set to beyond the end of any HashTable
-    inline static iteratorEnd end()
+    inline static const iteratorEnd& end()
     {
-        return iteratorEnd();
+        return endIter;
     }
 };
 

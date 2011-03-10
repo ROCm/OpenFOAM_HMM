@@ -101,6 +101,6 @@ fi
 # add time-stamp file before packing
 echo $timeStamp 2>/dev/null > $packDir/.timeStamp
 echo "pack manually" 1>&2
-$toolsDir/foamPackSource $packDir $packFile
+foamPackSource $packDir $packFile
 
 #------------------------------------------------------------------------------

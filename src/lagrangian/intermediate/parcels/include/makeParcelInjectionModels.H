@@ -28,8 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "KinematicCloud.H"
-
 #include "ConeInjection.H"
 #include "FieldActivatedInjection.H"
 #include "InflationInjection.H"
@@ -41,52 +39,17 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelInjectionModels(ParcelType)                                 \
+#define makeParcelInjectionModels(CloudType)                                  \
                                                                               \
-    makeInjectionModel(KinematicCloud<ParcelType>);                           \
+    makeInjectionModel(CloudType);                                            \
                                                                               \
-    makeInjectionModelType                                                    \
-    (                                                                         \
-        ConeInjection,                                                        \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeInjectionModelType                                                    \
-    (                                                                         \
-        FieldActivatedInjection,                                              \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeInjectionModelType                                                    \
-    (                                                                         \
-        InflationInjection,                                                   \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeInjectionModelType                                                    \
-    (                                                                         \
-        KinematicLookupTableInjection,                                        \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeInjectionModelType                                                    \
-    (                                                                         \
-        ManualInjection,                                                      \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeInjectionModelType                                                    \
-    (                                                                         \
-        NoInjection,                                                          \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeInjectionModelType                                                    \
-    (                                                                         \
-        PatchInjection,                                                       \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );
+    makeInjectionModelType(ConeInjection, CloudType);                         \
+    makeInjectionModelType(FieldActivatedInjection, CloudType);               \
+    makeInjectionModelType(InflationInjection, CloudType);                    \
+    makeInjectionModelType(KinematicLookupTableInjection, CloudType);         \
+    makeInjectionModelType(ManualInjection, CloudType);                       \
+    makeInjectionModelType(NoInjection, CloudType);                           \
+    makeInjectionModelType(PatchInjection, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

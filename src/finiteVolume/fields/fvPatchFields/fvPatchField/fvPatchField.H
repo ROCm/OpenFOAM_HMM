@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -73,7 +73,7 @@ Ostream& operator<<(Ostream&, const fvPatchField<Type>&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class patch Declaration
+                        Class fvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -516,10 +516,39 @@ public:
     );
 
 
+// use with caution
+#define addRemovableToPatchFieldRunTimeSelection\
+(PatchTypeField, typePatchTypeField)                                          \
+                                                                              \
+    addRemovableToRunTimeSelectionTable                                       \
+    (                                                                         \
+        PatchTypeField,                                                       \
+        typePatchTypeField,                                                   \
+        patch                                                                 \
+    );                                                                        \
+    addRemovableToRunTimeSelectionTable                                       \
+    (                                                                         \
+        PatchTypeField,                                                       \
+        typePatchTypeField,                                                   \
+        patchMapper                                                           \
+    );                                                                        \
+    addRemovableToRunTimeSelectionTable                                       \
+    (                                                                         \
+        PatchTypeField,                                                       \
+        typePatchTypeField,                                                   \
+        dictionary                                                            \
+    );
+
+
 // for non-templated patch fields
 #define makePatchTypeField(PatchTypeField, typePatchTypeField)                \
     defineTypeNameAndDebug(typePatchTypeField, 0);                            \
     addToPatchFieldRunTimeSelection(PatchTypeField, typePatchTypeField)
+
+// for non-templated patch fields - use with caution
+#define makeRemovablePatchTypeField(PatchTypeField, typePatchTypeField)       \
+    defineTypeNameAndDebug(typePatchTypeField, 0);                            \
+    addRemovableToPatchFieldRunTimeSelection(PatchTypeField, typePatchTypeField)
 
 
 // for templated patch fields

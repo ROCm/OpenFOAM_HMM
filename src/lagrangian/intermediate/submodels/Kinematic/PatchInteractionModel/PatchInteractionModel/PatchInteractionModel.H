@@ -85,7 +85,7 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("PatchInteractionModel");
+    TypeName("patchInteractionModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable
@@ -201,13 +201,13 @@ public:
     );
 
 
-#define makePatchInteractionModelType(SS, CloudType, ParcelType)              \
+#define makePatchInteractionModelType(SS, CloudType)                          \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
+    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
                                                                               \
-    PatchInteractionModel<CloudType<ParcelType> >::                           \
-        adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
-            add##SS##CloudType##ParcelType##ConstructorToTable_;
+    PatchInteractionModel<CloudType>::                                        \
+        adddictionaryConstructorToTable<SS<CloudType> >                       \
+            add##SS##CloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

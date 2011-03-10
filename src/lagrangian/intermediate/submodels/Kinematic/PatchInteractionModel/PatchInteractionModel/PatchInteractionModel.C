@@ -47,32 +47,31 @@ Foam::word Foam::PatchInteractionModel<CloudType>::interactionTypeToWord
     const interactionType& itEnum
 )
 {
+    word it = "other";
+
     switch (itEnum)
     {
         case itRebound:
         {
-            return "rebound";
+            it = "rebound";
             break;
         }
         case itStick:
         {
-            return "stick";
+            it = "stick";
             break;
         }
         case itEscape:
         {
-            return "escape";
+            it = "escape";
             break;
         }
         default:
         {
-            return "other";
         }
     }
-#ifdef __ICC
-    // Prevent Icc complaining about missing return statement.
-    return word::null;
-#endif
+
+    return it;
 }
 
 
@@ -291,7 +290,7 @@ void Foam::PatchInteractionModel<CloudType>::patchData
         }
         else
         {
-            Up = (Cf - Cf00)/mesh.time().deltaTValue();
+            Up = (Cf - Cf00)/this->owner().time().deltaTValue();
         }
 
         if (mag(dn) > SMALL)
@@ -313,7 +312,9 @@ void Foam::PatchInteractionModel<CloudType>::patchData
             // magOmega = sin(angle between unit normals)
             // Normalise omega vector by magOmega, then multiply by
             // angle/dt to give the correct angular velocity vector.
-            omega *= Foam::asin(magOmega)/(magOmega*mesh.time().deltaTValue());
+            omega *=
+                Foam::asin(magOmega)
+               /(magOmega*this->owner().time().deltaTValue());
 
             // Project position onto face and calculate this position
             // relative to the face centre.

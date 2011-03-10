@@ -28,7 +28,6 @@ Description
     Calculates particle SRF reference frame force
 
 SourceFiles
-    SRFForceI.H
     SRFForce.C
 
 \*---------------------------------------------------------------------------*/

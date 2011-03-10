@@ -32,6 +32,7 @@ License
 #include "JobInfo.H"
 #include "labelList.H"
 #include "regIOobject.H"
+#include "dynamicCode.H"
 
 #include <cctype>
 
@@ -787,6 +788,16 @@ Foam::argList::argList
                     regIOobject::fileModificationChecking
                 ]
             << endl;
+
+        Info<< "allowSystemOperations : ";
+        if (dynamicCode::allowSystemOperations)
+        {
+            Info<< "Allowing user-supplied system call operations" << endl;
+        }
+        else
+        {
+            Info<< "Disallowing user-supplied system call operations" << endl;
+        }
     }
 
     if (Pstream::master() && bannerEnabled)

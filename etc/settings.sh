@@ -86,6 +86,10 @@ export FOAM_SITE_LIBBIN=$WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/
 export FOAM_USER_APPBIN=$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/bin
 export FOAM_USER_LIBBIN=$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib
 
+# dynamicCode templates
+# - default location is the "~OpenFOAM/codeTemplates/dynamicCode" expansion
+# export FOAM_CODE_TEMPLATES=$WM_PROJECT_DIR/etc/codeTemplates/dynamicCode
+
 # convenience
 export FOAM_APP=$WM_PROJECT_DIR/applications
 #export FOAM_LIB=$WM_PROJECT_DIR/lib
@@ -178,6 +182,7 @@ OpenFOAM | ThirdParty)
         _foamAddMan     $gccDir/man
         _foamAddPath    $gccDir/bin
 
+        # add compiler libraries to run-time environment
         # 64-bit needs lib64, but 32-bit needs lib (not lib32)
         if [ "$WM_ARCH_OPTION" = 64 ]
         then
@@ -186,11 +191,12 @@ OpenFOAM | ThirdParty)
             _foamAddLib     $gccDir/lib
         fi
 
-        # add in gmp/mpfr libraries
+
+        # add gmp/mpfr libraries to run-time environment
         _foamAddLib     $gmpDir/lib
         _foamAddLib     $mpfrDir/lib
 
-        # add in mpc libraries (not need for older gcc)
+        # add mpc libraries (not need for older gcc) to run-time environment
         if [ -n "$mpc_version" ]
         then
             _foamAddLib     $mpcDir/lib

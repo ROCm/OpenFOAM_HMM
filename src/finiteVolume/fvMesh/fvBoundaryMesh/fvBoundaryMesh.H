@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ class fvMesh;
 class polyBoundaryMesh;
 
 /*---------------------------------------------------------------------------*\
-                           Class fvBoundaryMesh Declaration
+                       Class fvBoundaryMesh Declaration
 \*---------------------------------------------------------------------------*/
 
 class fvBoundaryMesh
@@ -86,17 +86,10 @@ public:
     // Constructors
 
         //- Construct with zero size
-        fvBoundaryMesh
-        (
-            const fvMesh&
-        );
+        fvBoundaryMesh(const fvMesh&);
 
         //- Construct from polyBoundaryMesh
-        fvBoundaryMesh
-        (
-            const fvMesh&,
-            const polyBoundaryMesh&
-        );
+        fvBoundaryMesh(const fvMesh&, const polyBoundaryMesh&);
 
 
     // Member Functions
@@ -120,6 +113,7 @@ public:
         //- Correct patches after moving points
         void movePoints();
 
+
     // Member Operators
 
         //- Return const and non-const reference to fvPatch by index.
@@ -130,7 +124,6 @@ public:
 
         //- Return reference to fvPatch by name.
         fvPatch& operator[](const word&);
-
 };
 
 

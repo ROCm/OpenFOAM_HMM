@@ -24,21 +24,12 @@ solution
 
     sourceTerms
     {
-        rho
+        schemes
         {
-            semiImplicit    false;
-        }
-        U
-        {
-            semiImplicit    false;
-        }
-        Yi
-        {
-            semiImplicit    false;
-        }
-        hs
-        {
-            semiImplicit    false;
+            rho             explicit;
+            U               explicit;
+            Yi              explicit;
+            hs              explicit;
         }
     }
 
@@ -98,31 +89,29 @@ subModels
         );
     }
 
-    InjectionModel  ManualInjection;
+    injectionModel  manualInjection;
 
-    DispersionModel none;
+    dispersionModel none;
 
-    PatchInteractionModel StandardWallInteraction;
+    patchInteractionModel standardWallInteraction;
 
-    HeatTransferModel RanzMarshall;
+    heatTransferModel RanzMarshall;
 
-    CompositionModel SingleMixtureFraction;
+    compositionModel singleMixtureFraction;
 
-    PhaseChangeModel LiquidEvaporation;
+    phaseChangeModel liquidEvaporation;
 
-    DevolatilisationModel none;
+    devolatilisationModel none;
 
-    SurfaceReactionModel none;
+    surfaceReactionModel none;
 
-    PostProcessingModel none;
+    postProcessingModel none;
 
-    SurfaceFilmModel none;
-
-    CollisionModel none;
+    surfaceFilmModel none;
 
     radiation       off;
 
-    ManualInjectionCoeffs
+    manualInjectionCoeffs
     {
         massTotal       5.23599e-10; // 1 droplet of density 1000 kg/m3
         parcelBasisType mass;
@@ -131,7 +120,7 @@ subModels
         U0              (0 0 0);
         sizeDistribution
         {
-            distributionModelType uniform;
+            type uniform;
             uniformDistribution
             {
                 minValue        100e-06;
@@ -139,7 +128,8 @@ subModels
             }
         }
     }
-    StandardWallInteractionCoeffs
+
+    standardWallInteractionCoeffs
     {
         type            rebound;
     }
@@ -149,7 +139,7 @@ subModels
         BirdCorrection  off;
     }
 
-    SingleMixtureFractionCoeffs
+    singleMixtureFractionCoeffs
     {
         phases
         (
@@ -169,7 +159,7 @@ subModels
         YSolidTot0      0;
     }
 
-    LiquidEvaporationCoeffs
+    liquidEvaporationCoeffs
     {
         enthalpyTransfer enthalpyDifference; // latentHeat;
 

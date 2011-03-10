@@ -24,21 +24,12 @@ solution
 
     sourceTerms
     {
-        rho
+        schemes
         {
-            semiImplicit    false;
-        }
-        U
-        {
-            semiImplicit    false;
-        }
-        Yi
-        {
-            semiImplicit    false;
-        }
-        hs
-        {
-            semiImplicit    false;
+            rho             explicit;
+            U               explicit;
+            Yi              explicit;
+            hs              explicit;
         }
     }
 
@@ -56,7 +47,7 @@ solution
     integrationSchemes
     {
         U               Euler;
-        T               Analytical;
+        T               analytical;
     }
 }
 
@@ -99,31 +90,29 @@ subModels
         );
     }
 
-    InjectionModel  ManualInjection;
+    injectionModel  manualInjection;
 
-    DispersionModel StochasticDispersionRAS;
+    dispersionModel stochasticDispersionRAS;
 
-    PatchInteractionModel StandardWallInteraction;
+    patchInteractionModel standardWallInteraction;
 
-    HeatTransferModel RanzMarshall;
+    heatTransferModel RanzMarshall;
 
-    CompositionModel SingleMixtureFraction;
+    compositionModel singleMixtureFraction;
 
-    PhaseChangeModel LiquidEvaporation;
+    phaseChangeModel liquidEvaporation;
 
-    DevolatilisationModel ConstantRateDevolatilisation;
+    devolatilisationModel constantRateDevolatilisation;
 
-    SurfaceReactionModel COxidationKineticDiffusionLimitedRate;
+    surfaceReactionModel COxidationKineticDiffusionLimitedRate;
 
-    PostProcessingModel none;
+    postProcessingModel none;
 
-    CollisionModel  none;
-
-    SurfaceFilmModel none;
+    surfaceFilmModel none;
 
     radiation       on;
 
-    ManualInjectionCoeffs
+    manualInjectionCoeffs
     {
         massTotal       0.0001;
         parcelBasisType mass;
@@ -132,7 +121,7 @@ subModels
         U0              ( 0 -10 0 );
         sizeDistribution
         {
-            pdfType         RosinRammler;
+            type        RosinRammler;
             RosinRammlerDistribution
             {
                 minValue        5e-06;
@@ -143,7 +132,7 @@ subModels
         }
     }
 
-    StandardWallInteractionCoeffs
+    standardWallInteractionCoeffs
     {
         type            rebound;
         e               1;
@@ -155,7 +144,7 @@ subModels
         BirdCorrection  true;
     }
 
-    SingleMixtureFractionCoeffs
+    singleMixtureFractionCoeffs
     {
         phases
         (
@@ -180,7 +169,7 @@ subModels
         YSolidTot0      0.763;
     }
 
-    LiquidEvaporationCoeffs
+    liquidEvaporationCoeffs
     {
         enthalpyTransfer enthalpyDifference;
 
@@ -190,7 +179,7 @@ subModels
         );
     }
 
-    ConstantRateDevolatilisationCoeffs
+    constantRateDevolatilisationCoeffs
     {
         volatileData
         (
@@ -201,6 +190,7 @@ subModels
 
     COxidationKineticDiffusionLimitedRateCoeffs
     {
+        Sb              1;
         C1              5.0E-12;
         C2              0.002;
         E               7.9E+07;

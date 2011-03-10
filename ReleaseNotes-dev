@@ -35,43 +35,44 @@
 *** Core library
     + Large number of code refinements and consistency improvements to support
       other developments.
-      Parallel : using non-blocking communications wherever possible. This will
+    + Parallel : using non-blocking communications wherever possible. This will
       lead to lower requirements for MPI_BUFFER_SIZE and possibly better
       start-up performance on larger numbers of processors.
 *** Turbulence modelling
 *** *Updated* thermophysical libraries
     + Now use the more descriptive dictionary input format, e.g. for a single
       component mixture:
+      #+BEGIN_SRC c++
+      thermoType      hPsiThermo<pureMixture<sutherlandTransport<specieThermo<hConstThermo<perfectGas>>>>>;
 
-    thermoType      hPsiThermo<pureMixture<sutherlandTransport<specieThermo<hConstThermo<perfectGas>>>>>;
-
-    mixture
-    {
-        nMoles      1;
-        molWeight   28.9;
-        Cp          1007;
-        Hf          0;
-        As          1.4792e-06;
-        Ts          116;
-    }
+      mixture
+      {
+          nMoles      1;
+          molWeight   28.9;
+          Cp          1007;
+          Hf          0;
+          As          1.4792e-06;
+          Ts          116;
+      }
+      #+END_SRC
 *** Lagrangian intermediate library
-    Extensively updated
-    *Updated* input format
-    Extended to include steady cloud tracking
-    *New* collision modelling
-    *Coupled* to new surface film modelling library
-    *New* sub-models
-    + NonSphereDrag: drag model to account for non-spherical particles
-    + ParticleTracks: post-processing model to generate track data, typically
-      during steady calculations
-    *Updated* sub-models
-    + Devolatilisation models: now act on a per-specie basis
+    + Extensively updated
+    + *Updated* input format
+    + Extended to include steady cloud tracking
+    + *New* collision modelling
+    + *Coupled* to new surface film modelling library
+    + *New* sub-models
+      + NonSphereDrag: drag model to account for non-spherical particles
+      + ParticleTracks: post-processing model to generate track data, typically
+        during steady calculations
+    + *Updated* sub-models
+      + Devolatilisation models: now act on a per-specie basis
 
 *** DSMC
 *** Dynamic Mesh
 *** Numerics
 *** *Updated* command line help, e.g. `snappyHexMesh -help' now gives:
-
+    #+BEGIN_SRC c++
     Usage: snappyHexMesh [OPTIONS]
     options:
       -case <dir>       specify alternate case directory, default is the cwd
@@ -80,12 +81,13 @@
       -srcDoc           display source code in browser
       -doc              display application documentation in browser
       -help             print the usage
-
+    #+END_SRC
 *** *New* basicSolidThermo solids thermophysical library
     + Used in all conjugate heat transfer solvers
       + constant properties
       + temperature dependent properties
-      + temperature and direction (in local coordinate system) dependent properties
+      + temperature and direction (in local coordinate system) dependent
+        properties
 *** *New* Surface film library
     + Creation of films by particle addition, or initial film distribution
     + Coupled with the lagrangian/intermediate cloud hierarchy library
@@ -113,13 +115,16 @@
     polyPatches holding data can map the data.
 *** *Updated* particle tracking algorithm
     + uses non-blocking parallel transfers
-    + does 'minimum-tet' decomposition of face to work with warped faces (snappyHexMesh!)
+    + does 'minimum-tet' decomposition of face to work with warped faces
+      (snappyHexMesh!)
     + reuses tracking state in interpolation - improves consistency and speed
-*** *Updated* split cyclics into two separate patches. See doc/changed/splitCyclics.txt
+*** *Updated* split cyclics into two separate patches.
+    See [[./doc/changes/splitCyclic.txt]]
   * *Updated* interpolation (volPointInterpolation) now works without the
     globalPointPatch. Moving mesh cases can now be run non-parallel and
     continued in parallel and reconstructed without any limitation.
-*** *New* compact binary I/O for faces and cells. This speeds up reading/writing meshes in binary.
+*** *New* compact binary I/O for faces and cells.
+    This speeds up reading/writing meshes in binary.
 *** *Updated* runTimeModifiable
     + user selectable model to use for checking run-time modifiable
       dictionaries (see also doc/changes/inotify.txt):
@@ -129,11 +134,34 @@
         contents from master.
       + inotifyMaster : only master checks and reads file. Slaves get file
         contents from master.
-    + on linux optionally uses inotify instead of time stamps - more efficient for large
-      numbers of monitored files. No more fileModificationSkew needed.
+    + on linux optionally uses inotify instead of time stamps - more efficient
+      for large numbers of monitored files. No more fileModificationSkew needed.
     + single integer reduction instead of one reduction per monitored file.
     + only files that can be re-read are being checked. Drastic reduction of
       number of files to check.
+*** *New* #codeStream dictionary entry
+    Uses dynamic compilation of OpenFOAM C++ code to construct dictionary.
+    E.g. in blockMeshDict:
+    #+BEGIN_SRC c++
+    convertToMeters 0.001;
+
+    vertices #codeStream
+    {
+        code
+        #{
+            label nVerts =
+                readLabel(dict.lookup("nx"))
+               *readLabel(dict.lookup("ny"))
+               *readLabel(dict.lookup("nz"));
+            pointField verts(nVerts);
+            // Now fill verts here
+            // ..
+            os  << verts;
+        #};
+    }
+    #+END_SRC
+    See also ./[[doc/changes/dynamicCode.org]]
+
 * Solvers
   A number of new solvers have been developed for a range of engineering
   applications.  There has been a set of improvements to certain classes of
@@ -163,6 +191,23 @@
     + takes optional fieldName to sample
     + directMapped patch added 'normal' method to calculate sample points
       to e.g. sample fields just above wall (e.g. for streaklines)
+  + *New* codedFixedValue: Uses the dynamic code compilation from #codeStream
+    to provide an in-line fixedValueFvPatchScalarField. E.g.
+    #+BEGIN_SRC c++
+    outlet
+    {
+        type            codedFixedValue<scalar>;
+        value           uniform 0;
+        redirectType    fixedValue10;
+
+        code
+        #{
+            operator==(min(10, 0.1*this->db().time().value()));
+        #};
+    }
+    #+END_SRC
+    See also [[./doc/changes/dynamicCode.org]]
+
 * Utilities
   There have been some utilities added and updated in this release.
 *** *New* utilities
@@ -182,20 +227,31 @@
     + =topoSet=: replacement of cellSet,faceSet,pointSet utilities.
       Comparable to a dictionary driven =setSet= utility.
 *** Updated utilities
-    + =setFields=: optionally use faceSets to set patch values (see e.g. hotRoom tutorial).
+    + =setFields=: optionally use faceSets to set patch values (see
+      e.g. =hotRoom= tutorial).
     + =blockMesh=: specify patches via dictionary instead of type only. This
       makes rereading the boundary file superfluous. see
       e.g. pitzDailyDirectMapped tutorial.
-    + =setSet=: allows time range (e.g. 0:100) in combination with -batch argument
-    to execute the commands for multiple times.
+    + =setSet=: allows time range (e.g. 0:100) in combination with -batch
+    argument to execute the commands for multiple times.
     + =extrudeMesh=:
-            - option to add extrusion to existing mesh.
-            - works in parallel
+      - option to add extrusion to existing mesh.
+      - works in parallel
+    + =snappyHexMesh=:
+      + extrude across multi-processor boundaries
+      + preserve faceZones during layering
+      + *Warning*:
+            - minMedianAxisAngle angle fixed w.r.t. 17x. Set to
+              90 to get same behaviour as 130 in 17x.
+            - nGrow did not work in 17x. Set to 0
+              to get same behaviour as 130 in 17x.
+            - new minTetQuality setting (see tracking). Disable for 17x
+              compatibility.
 * Post-processing
   + =paraFoam=, =foamToVTK=: full support for polyhedral cell type in recent
      Paraview versions.
-  + =foamToEnsight=: parallel continuous data. new =-nodeValues= option to generate and output nodal
-    field data.
+  + =foamToEnsight=: parallel continuous data. new =-nodeValues= option to
+    generate and output nodal field data.
   + =singleCellMesh=: new utility to convert mesh and fields to a single cell
     mesh. Great for postprocessing.
   + =steadyParticleTracks=: Generates VTK tracks from the output of the cloud
@@ -229,3 +285,7 @@
     + multipleBoxes, hotBoxes, panel, evaporationTest
   + =interDyMFoam= tutorials:
     + testTubeMixer: showcases =solidBodyMotionFunction=
+
+* Other
+  + compilable with =clang=
+    In your prefs.sh set the WM_COMPILER to Clang

@@ -41,8 +41,8 @@ Foam::MarshakRadiationFvPatchScalarField::MarshakRadiationFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    TName_("undefined"),
-    emissivity_(0.0)
+    radiationCoupledBase(p, "undefined", scalarField::null()),
+    TName_("undefined")
 {
     refValue() = 0.0;
     refGrad() = 0.0;
@@ -59,8 +59,13 @@ Foam::MarshakRadiationFvPatchScalarField::MarshakRadiationFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(ptf, p, iF, mapper),
-    TName_(ptf.TName_),
-    emissivity_(ptf.emissivity_)
+    radiationCoupledBase
+    (
+        p,
+        ptf.emissivityMethod(),
+        ptf.emissivity_
+    ),
+    TName_(ptf.TName_)
 {}
 
 
@@ -72,8 +77,8 @@ Foam::MarshakRadiationFvPatchScalarField::MarshakRadiationFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    TName_(dict.lookup("T")),
-    emissivity_(readScalar(dict.lookup("emissivity")))
+    radiationCoupledBase(p, dict),
+    TName_(dict.lookup("T"))
 {
     if (dict.found("value"))
     {
@@ -99,8 +104,13 @@ Foam::MarshakRadiationFvPatchScalarField::MarshakRadiationFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(ptf),
-    TName_(ptf.TName_),
-    emissivity_(ptf.emissivity_)
+    radiationCoupledBase
+    (
+        ptf.patch(),
+        ptf.emissivityMethod(),
+        ptf.emissivity_
+    ),
+    TName_(ptf.TName_)
 {}
 
 
@@ -111,8 +121,13 @@ Foam::MarshakRadiationFvPatchScalarField::MarshakRadiationFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(ptf, iF),
-    TName_(ptf.TName_),
-    emissivity_(ptf.emissivity_)
+    radiationCoupledBase
+    (
+        ptf.patch(),
+        ptf.emissivityMethod(),
+        ptf.emissivity_
+    ),
+    TName_(ptf.TName_)
 {}
 
 
@@ -155,7 +170,7 @@ void Foam::MarshakRadiationFvPatchScalarField::updateCoeffs()
     const scalarField& gamma =
         patch().lookupPatchField<volScalarField, scalar>("gammaRad");
 
-    const scalar Ep = emissivity_/(2.0*(2.0 - emissivity_));
+    const scalarField Ep(emissivity()/(2.0*(2.0 - emissivity())));
 
     // Set value fraction
     valueFraction() = 1.0/(1.0 + gamma*patch().deltaCoeffs()/Ep);
@@ -167,8 +182,8 @@ void Foam::MarshakRadiationFvPatchScalarField::updateCoeffs()
 void Foam::MarshakRadiationFvPatchScalarField::write(Ostream& os) const
 {
     mixedFvPatchScalarField::write(os);
+    radiationCoupledBase::write(os);
     os.writeKeyword("T") << TName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("emissivity") << emissivity_ << token::END_STATEMENT << nl;
 }
 
 

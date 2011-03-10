@@ -25,7 +25,7 @@ Class
     Foam::basicReactingParcel
 
 Description
-
+    Definition of basic reacting parcel
 
 SourceFiles
     basicReactingParcel.C
@@ -35,120 +35,25 @@ SourceFiles
 #ifndef basicReactingParcel_H
 #define basicReactingParcel_H
 
+#include "contiguous.H"
+#include "particle.H"
+#include "KinematicParcel.H"
+#include "ThermoParcel.H"
 #include "ReactingParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    typedef ReactingParcel<ThermoParcel<KinematicParcel<particle> > >
+        basicReactingParcel;
 
-/*---------------------------------------------------------------------------*\
-                    Class basicReactingParcel Declaration
-\*---------------------------------------------------------------------------*/
-
-class basicReactingParcel
-:
-    public ReactingParcel<basicReactingParcel>
-{
-
-public:
-
-    //- Run-time type information
-    TypeName("basicReactingParcel");
-
-    // Constructors
-
-        //- Construct from owner, position, and cloud owner
-        //  Other properties initialised as null
-        basicReactingParcel
-        (
-            ReactingCloud<basicReactingParcel>& owner,
-            const vector& position,
-            const label cellI,
-            const label tetFaceI,
-            const label tetPtI
-        );
-
-        //- Construct from components
-        basicReactingParcel
-        (
-            ReactingCloud<basicReactingParcel>& owner,
-            const vector& position,
-            const label cellI,
-            const label tetFaceI,
-            const label tetPtI,
-            const label typeId,
-            const scalar nParticle0,
-            const scalar d0,
-            const scalar dTarget0,
-            const vector& U0,
-            const vector& f0,
-            const vector& angularMomentum0,
-            const vector& torque0,
-            const scalarField& Y0,
-            const ReactingParcel<basicReactingParcel>::constantProperties&
-                constProps
-        );
-
-        //- Construct from Istream
-        basicReactingParcel
-        (
-            const Cloud<basicReactingParcel>& c,
-            Istream& is,
-            bool readFields = true
-        );
-
-        //- Construct as a copy
-        basicReactingParcel(const basicReactingParcel& p);
-
-        //- Construct as a copy
-        basicReactingParcel
-        (
-            const basicReactingParcel& p,
-            const ReactingCloud<basicReactingParcel>& c
-        );
-
-        //- Construct and return a clone
-        virtual autoPtr<Particle<basicReactingParcel> > clone() const
-        {
-            return autoPtr<Particle<basicReactingParcel> >
-            (
-                new basicReactingParcel(*this)
-            );
-        }
-
-        //- Construct and return a clone
-        virtual autoPtr<Particle<basicReactingParcel> > clone
-        (
-            const Cloud<basicReactingParcel>& c
-        ) const
-        {
-            return autoPtr<Particle<basicReactingParcel> >
-            (
-                new basicReactingParcel
-                (
-                    *this,
-                    static_cast<const ReactingCloud<basicReactingParcel>&>(c)
-                )
-            );
-        }
-
-
-    //- Destructor
-    virtual ~basicReactingParcel();
-};
-
-
-template<>
-inline bool contiguous<basicReactingParcel>()
-{
-    return false;
+    template<>
+    inline bool contiguous<basicReactingParcel>()
+    {
+        return false;
+    }
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

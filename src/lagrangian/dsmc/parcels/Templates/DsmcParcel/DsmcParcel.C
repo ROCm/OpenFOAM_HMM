@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,13 +30,10 @@ License
 
 template<class ParcelType>
 template<class TrackData>
-bool Foam::DsmcParcel<ParcelType>::move
-(
-    TrackData& td,
-    const scalar trackTime
-)
+bool Foam::DsmcParcel<ParcelType>::move(TrackData& td, const scalar trackTime)
 {
-    ParcelType& p = static_cast<ParcelType&>(*this);
+    typename TrackData::cloudType::parcelType& p =
+        static_cast<typename TrackData::cloudType::parcelType&>(*this);
 
     td.switchProcessor = false;
     td.keepParticle = true;
@@ -114,15 +111,6 @@ void Foam::DsmcParcel<ParcelType>::hitProcessorPatch
 
 
 template<class ParcelType>
-void Foam::DsmcParcel<ParcelType>::hitProcessorPatch
-(
-    const processorPolyPatch&,
-    int&
-)
-{}
-
-
-template<class ParcelType>
 template<class TrackData>
 void Foam::DsmcParcel<ParcelType>::hitWallPatch
 (
@@ -174,7 +162,7 @@ void Foam::DsmcParcel<ParcelType>::hitWallPatch
 
     td.cloud().wallInteraction().correct
     (
-        static_cast<ParcelType&>(*this),
+        static_cast<DsmcParcel<ParcelType> &>(*this),
         wpp
     );
 
@@ -216,43 +204,17 @@ void Foam::DsmcParcel<ParcelType>::hitWallPatch
 
 
 template<class ParcelType>
-void Foam::DsmcParcel<ParcelType>::hitWallPatch
-(
-    const wallPolyPatch&,
-    int&,
-    const tetIndices&
-)
-{}
-
-
-template<class ParcelType>
 template<class TrackData>
-void Foam::DsmcParcel<ParcelType>::hitPatch
-(
-    const polyPatch&,
-    TrackData& td
-)
+void Foam::DsmcParcel<ParcelType>::hitPatch(const polyPatch&, TrackData& td)
 {
     td.keepParticle = false;
 }
 
 
 template<class ParcelType>
-void Foam::DsmcParcel<ParcelType>::hitPatch
-(
-    const polyPatch&,
-    int&
-)
-{}
-
-
-template<class ParcelType>
-void Foam::DsmcParcel<ParcelType>::transformProperties
-(
-    const tensor& T
-)
+void Foam::DsmcParcel<ParcelType>::transformProperties(const tensor& T)
 {
-    Particle<ParcelType>::transformProperties(T);
+    ParcelType::transformProperties(T);
     U_ = transform(T, U_);
 }
 
@@ -263,7 +225,7 @@ void Foam::DsmcParcel<ParcelType>::transformProperties
     const vector& separation
 )
 {
-    Particle<ParcelType>::transformProperties(separation);
+    ParcelType::transformProperties(separation);
 }
 
 

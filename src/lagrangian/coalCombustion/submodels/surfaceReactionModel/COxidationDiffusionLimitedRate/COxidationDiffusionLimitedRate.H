@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,9 +85,6 @@ class COxidationDiffusionLimitedRate
 
             //- Molecular weight of O2 [kg/kmol]
             scalar WO2_;
-
-            //- Chemical enthalpy of CO2 [J/kg]
-            scalar HcCO2_;
 
 
 public:

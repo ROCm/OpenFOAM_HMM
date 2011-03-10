@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Class
     coalParcel
 
 Description
-    Coal parcel class
+    Definition of coal parcel
 
 SourceFiles
     CoalParcel.C
@@ -35,112 +35,37 @@ SourceFiles
 #ifndef coalParcel_H
 #define coalParcel_H
 
+#include "contiguous.H"
+#include "particle.H"
+#include "KinematicParcel.H"
+#include "ThermoParcel.H"
+#include "ReactingParcel.H"
 #include "ReactingMultiphaseParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    typedef ReactingMultiphaseParcel
+    <
+        ReactingParcel
+        <
+            ThermoParcel
+            <
+                KinematicParcel
+                <
+                    particle
+                >
+            >
+        >
+    > coalParcel;
 
-/*---------------------------------------------------------------------------*\
-                         Class coalParcel Declaration
-\*---------------------------------------------------------------------------*/
-
-class coalParcel
-:
-    public ReactingMultiphaseParcel<coalParcel>
-{
-public:
-
-    // Run-time type information
-    TypeName("coalParcel");
-
-    // Constructors
-
-        //- Construct from owner, position, and cloud owner
-        //  Other properties initialised as null
-        coalParcel
-        (
-             ReactingMultiphaseCloud<coalParcel>& owner,
-             const vector& position,
-             const label cellI,
-             const label tetFaceI,
-             const label tetPtI
-        );
-
-        //- Construct from components
-        coalParcel
-        (
-             ReactingMultiphaseCloud<coalParcel>& owner,
-             const vector& position,
-             const label cellI,
-             const label tetFaceI,
-             const label tetPtI,
-             const label typeId,
-             const scalar nParticle0,
-             const scalar d0,
-             const scalar dTarget0,
-             const vector& U0,
-             const vector& f0,
-             const vector& pi0,
-             const vector& tau0,
-             const scalarField& YMixture0,
-             const scalarField& YGas0,
-             const scalarField& YLiquid0,
-             const scalarField& YSolid0,
-             const ReactingMultiphaseParcel<coalParcel>::constantProperties&
-                 constProps
-        );
-
-        //- Construct from Istream
-        coalParcel
-        (
-            const Cloud<coalParcel>& c,
-            Istream& is,
-            bool readFields = true
-        );
-
-        //- Construct as a copy
-        coalParcel(const coalParcel& p);
-
-        //- Construct as a copy
-        coalParcel
-        (
-            const coalParcel& p,
-            const ReactingMultiphaseCloud<coalParcel>& c
-        );
-
-        //- Construct and return a (basic particle) clone
-        virtual autoPtr<Particle<coalParcel> > clone() const
-        {
-            return autoPtr<Particle<coalParcel> >(new coalParcel(*this));
-        }
-
-        //- Construct and return a (basic particle) clone
-        virtual autoPtr<Particle<coalParcel> > clone
-        (
-            const Cloud<coalParcel>& c
-        ) const
-        {
-            return autoPtr<Particle<coalParcel> >
-            (
-                new coalParcel
-                (
-                    *this,
-                    static_cast<const ReactingMultiphaseCloud<coalParcel>&>(c)
-                )
-            );
-        }
-
-
-    //- Destructor
-    virtual ~coalParcel();
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    template<>
+    inline bool contiguous<coalParcel>()
+    {
+        return false;
+    }
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

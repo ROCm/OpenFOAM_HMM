@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,10 +58,17 @@ class SCOPEXiEq
 {
     // Private data
 
-        scalar XiEqCoef;
-        scalar XiEqExp;
-        scalar lCoef;
-        dimensionedScalar SuMin;
+        // Model constant
+        scalar XiEqCoef_;
+
+        // Model constant
+        scalar XiEqExp_;
+
+        // Model constant
+        scalar lCoef_;
+
+        //- Minimum Su
+        dimensionedScalar SuMin_;
 
         //- The SCOPE laminar flame speed model used to obtain the
         //  Marstein number.  Note: the laminar flame speed need not be
@@ -107,6 +114,7 @@ public:
 
         //- Update properties from given dictionary
         virtual bool read(const dictionary& XiEqProperties);
+
 };
 
 

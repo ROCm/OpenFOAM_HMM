@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,11 +62,29 @@ protected:
 
     // Protected data
 
+        //- Dictionary
         dictionary XiEqModelCoeffs_;
 
+        //- Thermo
         const hhuCombustionThermo& thermo_;
+
+        //- Turbulence
         const compressible::RASModel& turbulence_;
+
+        //- Laminar burning velocity
         const volScalarField& Su_;
+
+        //- Volumetric obstacles number
+        volScalarField Nv_;
+
+        //
+        volSymmTensorField nsv_;
+
+        //- Schelkin effect Model constant
+        scalar uPrimeCoef_;
+
+        //- Use sub-grid Schelkin effect
+        bool subGridSchelkin_;
 
 
 private:
@@ -144,8 +162,20 @@ public:
             return turbulence_.muEff();
         }
 
+        //- Return state of the sub-grid Schelkin effect
+        bool subGridSchelkin() const
+        {
+            return subGridSchelkin_;
+        }
+
+        //- Return the sub-grid Schelkin effect
+        tmp<volScalarField> calculateSchelkinEffect() const;
+
         //- Update properties from given dictionary
         virtual bool read(const dictionary& XiEqProperties) = 0;
+
+        //- Write fields
+        void writeFields() const;
 };
 
 

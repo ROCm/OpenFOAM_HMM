@@ -195,7 +195,7 @@ void Foam::reitzKHRT::breakupParcel
                 (
                     new parcel
                     (
-                        spray_,
+                        p.mesh(),
                         p.position(),
                         p.cell(),
                         p.tetFace(),

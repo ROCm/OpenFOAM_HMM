@@ -30,12 +30,12 @@ License
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-template<class ParcelType>
-void Foam::ReactingMultiphaseCloud<ParcelType>::setModels()
+template<class CloudType>
+void Foam::ReactingMultiphaseCloud<CloudType>::setModels()
 {
     devolatilisationModel_.reset
     (
-        DevolatilisationModel<ReactingMultiphaseCloud<ParcelType> >::New
+        DevolatilisationModel<ReactingMultiphaseCloud<CloudType> >::New
         (
             this->subModelProperties(),
             *this
@@ -44,7 +44,7 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::setModels()
 
     surfaceReactionModel_.reset
     (
-        SurfaceReactionModel<ReactingMultiphaseCloud<ParcelType> >::New
+        SurfaceReactionModel<ReactingMultiphaseCloud<CloudType> >::New
         (
             this->subModelProperties(),
             *this
@@ -53,13 +53,13 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::setModels()
 }
 
 
-template<class ParcelType>
-void Foam::ReactingMultiphaseCloud<ParcelType>::cloudReset
+template<class CloudType>
+void Foam::ReactingMultiphaseCloud<CloudType>::cloudReset
 (
-    ReactingMultiphaseCloud<ParcelType>& c
+    ReactingMultiphaseCloud<CloudType>& c
 )
 {
-    ReactingCloud<ParcelType>::cloudReset(c);
+    CloudType::cloudReset(c);
 
     devolatilisationModel_.reset(c.devolatilisationModel_.ptr());
     surfaceReactionModel_.reset(c.surfaceReactionModel_.ptr());
@@ -71,8 +71,8 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::cloudReset
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class ParcelType>
-Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
+template<class CloudType>
+Foam::ReactingMultiphaseCloud<CloudType>::ReactingMultiphaseCloud
 (
     const word& cloudName,
     const volScalarField& rho,
@@ -82,7 +82,7 @@ Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
     bool readFields
 )
 :
-    ReactingCloud<ParcelType>(cloudName, rho, U, g, thermo, false),
+    CloudType(cloudName, rho, U, g, thermo, false),
     reactingMultiphaseCloud(),
     cloudCopyPtr_(NULL),
     constProps_(this->particleProperties(), this->solution().active()),
@@ -94,11 +94,11 @@ Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
     if (this->solution().active())
     {
         setModels();
-    }
 
-    if (readFields)
-    {
-        ParcelType::readFields(*this);
+        if (readFields)
+        {
+            parcelType::readFields(*this, this->composition());
+        }
     }
 
     if (this->solution().resetSourcesOnStartup())
@@ -108,14 +108,14 @@ Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
 }
 
 
-template<class ParcelType>
-Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
+template<class CloudType>
+Foam::ReactingMultiphaseCloud<CloudType>::ReactingMultiphaseCloud
 (
-    ReactingMultiphaseCloud<ParcelType>& c,
+    ReactingMultiphaseCloud<CloudType>& c,
     const word& name
 )
 :
-    ReactingCloud<ParcelType>(c, name),
+    CloudType(c, name),
     reactingMultiphaseCloud(),
     cloudCopyPtr_(NULL),
     constProps_(c.constProps_),
@@ -126,15 +126,15 @@ Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
 {}
 
 
-template<class ParcelType>
-Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
+template<class CloudType>
+Foam::ReactingMultiphaseCloud<CloudType>::ReactingMultiphaseCloud
 (
     const fvMesh& mesh,
     const word& name,
-    const ReactingMultiphaseCloud<ParcelType>& c
+    const ReactingMultiphaseCloud<CloudType>& c
 )
 :
-    ReactingCloud<ParcelType>(mesh, name, c),
+    CloudType(mesh, name, c),
     reactingMultiphaseCloud(),
     cloudCopyPtr_(NULL),
     constProps_(),
@@ -147,22 +147,22 @@ Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class ParcelType>
-Foam::ReactingMultiphaseCloud<ParcelType>::~ReactingMultiphaseCloud()
+template<class CloudType>
+Foam::ReactingMultiphaseCloud<CloudType>::~ReactingMultiphaseCloud()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class ParcelType>
-void Foam::ReactingMultiphaseCloud<ParcelType>::checkParcelProperties
+template<class CloudType>
+void Foam::ReactingMultiphaseCloud<CloudType>::checkParcelProperties
 (
-    ParcelType& parcel,
+    parcelType& parcel,
     const scalar lagrangianDt,
     const bool fullyDescribed
 )
 {
-    ReactingCloud<ParcelType>::checkParcelProperties
+    CloudType::checkParcelProperties
     (
         parcel,
         lagrangianDt,
@@ -203,12 +203,12 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::checkParcelProperties
 }
 
 
-template<class ParcelType>
-void Foam::ReactingMultiphaseCloud<ParcelType>::storeState()
+template<class CloudType>
+void Foam::ReactingMultiphaseCloud<CloudType>::storeState()
 {
     cloudCopyPtr_.reset
     (
-        static_cast<ReactingMultiphaseCloud<ParcelType>*>
+        static_cast<ReactingMultiphaseCloud<CloudType>*>
         (
             clone(this->name() + "Copy").ptr()
         )
@@ -216,35 +216,36 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::storeState()
 }
 
 
-template<class ParcelType>
-void Foam::ReactingMultiphaseCloud<ParcelType>::restoreState()
+template<class CloudType>
+void Foam::ReactingMultiphaseCloud<CloudType>::restoreState()
 {
     cloudReset(cloudCopyPtr_());
     cloudCopyPtr_.clear();
 }
 
 
-template<class ParcelType>
-void Foam::ReactingMultiphaseCloud<ParcelType>::resetSourceTerms()
+template<class CloudType>
+void Foam::ReactingMultiphaseCloud<CloudType>::resetSourceTerms()
 {
-    ReactingCloud<ParcelType>::resetSourceTerms();
+    CloudType::resetSourceTerms();
 }
 
 
-template<class ParcelType>
-void Foam::ReactingMultiphaseCloud<ParcelType>::evolve()
+template<class CloudType>
+void Foam::ReactingMultiphaseCloud<CloudType>::evolve()
 {
     if (this->solution().canEvolve())
     {
-        typename ParcelType::trackData td(*this);
+        typename parcelType::template
+            TrackingData<ReactingMultiphaseCloud<CloudType> > td(*this);
 
         this->solve(td);
     }
 }
 
 
-template<class ParcelType>
-void Foam::ReactingMultiphaseCloud<ParcelType>::addToMassDevolatilisation
+template<class CloudType>
+void Foam::ReactingMultiphaseCloud<CloudType>::addToMassDevolatilisation
 (
     const scalar dMass
 )
@@ -253,8 +254,8 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::addToMassDevolatilisation
 }
 
 
-template<class ParcelType>
-void Foam::ReactingMultiphaseCloud<ParcelType>::addToMassSurfaceReaction
+template<class CloudType>
+void Foam::ReactingMultiphaseCloud<CloudType>::addToMassSurfaceReaction
 (
     const scalar dMass
 )
@@ -263,14 +264,24 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::addToMassSurfaceReaction
 }
 
 
-template<class ParcelType>
-void Foam::ReactingMultiphaseCloud<ParcelType>::info() const
+template<class CloudType>
+void Foam::ReactingMultiphaseCloud<CloudType>::info() const
 {
-    ReactingCloud<ParcelType>::info();
+    CloudType::info();
     Info<< "    Mass transfer devolatilisation  = "
         << returnReduce(dMassDevolatilisation_, sumOp<scalar>()) << nl;
     Info<< "    Mass transfer surface reaction  = "
         << returnReduce(dMassSurfaceReaction_, sumOp<scalar>()) << nl;
+}
+
+
+template<class CloudType>
+void Foam::ReactingMultiphaseCloud<CloudType>::writeFields() const
+{
+    if (this->size())
+    {
+        CloudType::particleType::writeFields(*this, this->composition());
+    }
 }
 
 

@@ -18,7 +18,6 @@ LINK_DIRECTORIES(
 )
 
 INCLUDE_DIRECTORIES(
-    $ENV{WM_PROJECT_DIR}/src/OSspecific/$ENV{WM_OSTYPE}
     $ENV{WM_PROJECT_DIR}/src/OpenFOAM/lnInclude
     $ENV{WM_PROJECT_DIR}/src/finiteVolume/lnInclude
     ${PROJECT_SOURCE_DIR}/../vtkPV3Foam

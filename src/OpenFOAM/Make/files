@@ -78,6 +78,7 @@ $(strings)/fileName/fileNameIO.C
 $(strings)/keyType/keyType.C
 $(strings)/wordRe/wordRe.C
 $(strings)/lists/hashedWordList.C
+$(strings)/stringOps/stringOps.C
 
 primitives/hashes/Hasher/Hasher.C
 
@@ -159,22 +160,12 @@ $(dictionaryEntry)/dictionaryEntry.C
 $(dictionaryEntry)/dictionaryEntryIO.C
 
 functionEntries = $(dictionary)/functionEntries
+$(functionEntries)/codeStream/codeStream.C
 $(functionEntries)/functionEntry/functionEntry.C
 $(functionEntries)/includeEntry/includeEntry.C
 $(functionEntries)/includeIfPresentEntry/includeIfPresentEntry.C
 $(functionEntries)/inputModeEntry/inputModeEntry.C
 $(functionEntries)/removeEntry/removeEntry.C
-
-/*
- * Requires customized coco-cpp
- * could be dropped or activated in the future
- */
-/*
-  calcEntry = $(functionEntries)/calcEntry
-  $(calcEntry)/calcEntryParser.atg
-  $(calcEntry)/calcEntryInternal.C
-  $(calcEntry)/calcEntry.C
-*/
 
 IOdictionary = db/IOobjects/IOdictionary
 $(IOdictionary)/IOdictionary.C
@@ -196,7 +187,11 @@ $(regIOobject)/regIOobjectWrite.C
 db/IOobjectList/IOobjectList.C
 db/objectRegistry/objectRegistry.C
 db/CallbackRegistry/CallbackRegistryName.C
-db/dlLibraryTable/dlLibraryTable.C
+
+dll = db/dynamicLibrary
+$(dll)/dlLibraryTable/dlLibraryTable.C
+$(dll)/dynamicCode/dynamicCode.C
+$(dll)/dynamicCode/dynamicCodeContext.C
 
 db/functionObjects/functionObject/functionObject.C
 db/functionObjects/functionObjectList/functionObjectList.C
@@ -500,6 +495,8 @@ $(pointBoundaryMesh)/pointBoundaryMesh.C
 
 meshes/boundBox/boundBox.C
 
+meshes/treeBoundBox/treeBoundBox.C
+
 meshTools = meshes/meshTools
 $(meshTools)/matchPoints.C
 $(meshTools)/mergePoints.C
@@ -576,6 +573,11 @@ $(interpolations)/patchToPatchInterpolation/PatchToPatchInterpolationName.C
 
 algorithms/MeshWave/MeshWaveName.C
 algorithms/MeshWave/FaceCellWaveName.C
+
+algorithms/indexedOctree/indexedOctreeName.C
+algorithms/indexedOctree/treeDataCell.C
+
+
 
 graph/curve/curve.C
 graph/graph.C

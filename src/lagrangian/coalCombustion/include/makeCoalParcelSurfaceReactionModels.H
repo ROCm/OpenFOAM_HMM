@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,8 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "ReactingMultiphaseCloud.H"
-
 #include "NoSurfaceReaction.H"
 #include "COxidationDiffusionLimitedRate.H"
 #include "COxidationKineticDiffusionLimitedRate.H"
@@ -37,34 +35,17 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeCoalParcelSurfaceReactionModels(ParcelType)                       \
+#define makeCoalParcelSurfaceReactionModels(CloudType)                        \
                                                                               \
-    makeSurfaceReactionModel(ReactingMultiphaseCloud<ParcelType>);            \
-                                                                              \
-    makeSurfaceReactionModelType                                              \
-    (                                                                         \
-        NoSurfaceReaction,                                                    \
-        ReactingMultiphaseCloud,                                              \
-        ParcelType                                                            \
-    );                                                                        \
-    makeSurfaceReactionModelType                                              \
-    (                                                                         \
-        COxidationDiffusionLimitedRate,                                       \
-        ReactingMultiphaseCloud,                                              \
-        ParcelType                                                            \
-    );                                                                        \
+    makeSurfaceReactionModel(CloudType);                                      \
+    makeSurfaceReactionModelType(NoSurfaceReaction, CloudType);               \
+    makeSurfaceReactionModelType(COxidationDiffusionLimitedRate, CloudType);  \
     makeSurfaceReactionModelType                                              \
     (                                                                         \
         COxidationKineticDiffusionLimitedRate,                                \
-        ReactingMultiphaseCloud,                                              \
-        ParcelType                                                            \
+        CloudType                                                             \
     );                                                                        \
-    makeSurfaceReactionModelType                                              \
-    (                                                                         \
-        COxidationMurphyShaddix,                                              \
-        ReactingMultiphaseCloud,                                              \
-        ParcelType                                                            \
-    );
+    makeSurfaceReactionModelType(COxidationMurphyShaddix, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

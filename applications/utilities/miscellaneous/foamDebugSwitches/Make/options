@@ -19,8 +19,6 @@ EXE_LIBS = \
     -ldynamicMesh \
     -ledgeMesh \
     -lengine \
-    -lerrorEstimation \
-    -lextrudeModel \
     -lfieldFunctionObjects \
     -lfileFormats \
     -lfiniteVolume \
@@ -44,7 +42,6 @@ EXE_LIBS = \
     -lliquidMixtureProperties \
     -lliquidProperties \
     -lmeshTools \
-    -lMGridGenGAMGAgglomeration \
     -lmolecularMeasurements \
     -lmolecule \
     -lmultiphaseInterFoam \

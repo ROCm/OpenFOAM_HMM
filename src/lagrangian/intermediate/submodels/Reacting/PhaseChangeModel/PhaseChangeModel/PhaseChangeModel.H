@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -90,7 +90,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("PhaseChangeModel");
+    TypeName("phaseChangeModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable
@@ -165,6 +165,15 @@ public:
             const scalar pc,
             scalarField& dMassPC
         ) const;
+
+        //- Return the enthalpy per unit mass
+        virtual scalar dh
+        (
+            const label idc,
+            const label idl,
+            const label p,
+            const label T
+        ) const;
 };
 
 
@@ -185,13 +194,13 @@ public:
     );
 
 
-#define makePhaseChangeModelType(SS, CloudType, ParcelType)                   \
+#define makePhaseChangeModelType(SS, CloudType)                               \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
+    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
                                                                               \
-    PhaseChangeModel<CloudType<ParcelType> >::                                \
-        adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
-            add##SS##CloudType##ParcelType##ConstructorToTable_;
+    PhaseChangeModel<CloudType>::                                             \
+        adddictionaryConstructorToTable<SS<CloudType> >                       \
+            add##SS##CloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

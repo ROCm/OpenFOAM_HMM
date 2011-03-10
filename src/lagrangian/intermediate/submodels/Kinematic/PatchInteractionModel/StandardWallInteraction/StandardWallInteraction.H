@@ -74,10 +74,55 @@ protected:
         scalar mu_;
 
 
+        // Counters for initial particle fates
+
+            //- Number of parcels escaped
+            label nEscape0_;
+
+            //- Mass of parcels escaped
+            scalar massEscape0_;
+
+            //- Number of parcels stuck to patches
+            label nStick0_;
+
+            //- Mass of parcels stuck to patches
+            scalar massStick0_;
+
+
+        // Counters for particle fates
+
+            //- Number of parcels escaped
+            label nEscape_;
+
+            //- Mass of parcels escaped
+            scalar massEscape_;
+
+            //- Number of parcels stuck to patches
+            label nStick_;
+
+            //- Mass of parcels stuck to patches
+            scalar massStick_;
+
+
+    // Protected Member Functions
+
+        //- Read interaction properties from file
+        void readProps();
+
+        //- Write interaction properties to file
+        void writeProps
+        (
+            const label nEscape,
+            const scalar massEscape,
+            const label nStick,
+            const scalar massStick
+        ) const;
+
+
 public:
 
     //- Runtime type information
-    TypeName("StandardWallInteraction");
+    TypeName("standardWallInteraction");
 
 
     // Constructors
@@ -114,6 +159,12 @@ public:
             const scalar trackFraction,
             const tetIndices& tetIs
         );
+
+
+        // I-O
+
+            //- Write patch interaction info to stream
+            virtual void info(Ostream& os) const;
 };
 
 

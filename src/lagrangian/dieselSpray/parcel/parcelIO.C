@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,17 +30,18 @@ License
 
 Foam::parcel::parcel
 (
-    const Cloud<parcel>& cloud,
+    const polyMesh& mesh,
     Istream& is,
     bool readFields
 )
 :
-    Particle<parcel>(cloud, is, readFields),
+    particle(mesh, is, readFields),
 
     liquidComponents_
     (
-        (cloud.pMesh().lookupObject<dictionary>("thermophysicalProperties"))
-       .lookup("liquidComponents")
+        (
+            mesh.lookupObject<dictionary>("thermophysicalProperties")
+        ).lookup("liquidComponents")
     ),
     X_(liquidComponents_.size(), 0.0),
 
@@ -102,7 +103,7 @@ void Foam::parcel::readFields(Cloud<parcel>& c)
         return;
     }
 
-    Particle<parcel>::readFields(c);
+    particle::readFields(c);
 
     IOField<scalar> d(c.fieldIOobject("d", IOobject::MUST_READ));
     c.checkFieldIOobject(c, d);
@@ -195,7 +196,7 @@ void Foam::parcel::readFields(Cloud<parcel>& c)
 
 void Foam::parcel::writeFields(const Cloud<parcel>& c)
 {
-    Particle<parcel>::writeFields(c);
+    particle::writeFields(c);
 
     label np = c.size();
 
@@ -289,10 +290,9 @@ void Foam::parcel::writeFields(const Cloud<parcel>& c)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const parcel& p)
 {
-
     if (os.format() == IOstream::ASCII)
     {
-        os  << static_cast<const Particle<parcel>&>(p)
+        os  << static_cast<const particle&>(p)
             << token::SPACE << p.d_
             << token::SPACE << p.T_
             << token::SPACE << p.m_
@@ -310,7 +310,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const parcel& p)
     }
     else
     {
-        os  << static_cast<const Particle<parcel>&>(p);
+        os  << static_cast<const particle>(p);
         os.write
         (
             reinterpret_cast<const char*>(&p.d_),

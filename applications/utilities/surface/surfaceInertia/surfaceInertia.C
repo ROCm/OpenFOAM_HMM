@@ -2,7 +2,7 @@
  =========                   |
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
-   \\  /     A nd            | Copyright (C) 2009-2010 OpenCFD Ltd.
+   \\  /     A nd            | Copyright (C) 2009-2011 OpenCFD Ltd.
     \\/      M anipulation   |
 -------------------------------------------------------------------------------
 License
@@ -327,10 +327,36 @@ int main(int argc, char *argv[])
         showTransform = false;
     }
 
+    // calculate the total surface area
+
+    scalar surfaceArea = 0;
+
+    forAll(surf, faceI)
+    {
+        const labelledTri& f = surf[faceI];
+
+        if (f[0] == f[1] || f[0] == f[2] || f[1] == f[2])
+        {
+            WarningIn(args.executable())
+               << "Illegal triangle " << faceI << " vertices " << f
+               << " coords " << f.points(surf.points()) << endl;
+        }
+        else
+        {
+            surfaceArea += triPointRef
+            (
+                surf.points()[f[0]],
+                surf.points()[f[1]],
+                surf.points()[f[2]]
+            ).mag();
+        }
+    }
+
     Info<< nl << setprecision(12)
         << "Density: " << density << nl
         << "Mass: " << m << nl
         << "Centre of mass: " << cM << nl
+        << "Surface area: " << surfaceArea << nl
         << "Inertia tensor around centre of mass: " << nl << J << nl
         << "eigenValues (principal moments): " << eVal << nl
         << "eigenVectors (principal axes): " << nl

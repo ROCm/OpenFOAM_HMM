@@ -57,7 +57,7 @@ class Rebound
 public:
 
     //- Runtime type information
-    TypeName("Rebound");
+    TypeName("rebound");
 
 
     // Constructors

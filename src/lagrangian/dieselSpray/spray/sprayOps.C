@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -76,7 +76,8 @@ void Foam::spray::move()
         srhos_[i] = 0.0;
     }
 
-    Cloud<parcel>::move(*this, runTime_.deltaTValue());
+    parcel::trackingData td(*this);
+    Cloud<parcel>::move(td, runTime_.deltaTValue());
 }
 
 

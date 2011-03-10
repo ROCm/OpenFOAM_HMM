@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,9 +35,9 @@ Foam::PostProcessingModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType(dict.lookup("PostProcessingModel"));
+    const word modelType(dict.lookup("postProcessingModel"));
 
-    Info<< "Selecting PostProcessingModel " << modelType << endl;
+    Info<< "Selecting post-processing model " << modelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
@@ -51,9 +51,9 @@ Foam::PostProcessingModel<CloudType>::New
                 "const dictionary&, "
                 "CloudType&"
             ")"
-        )   << "Unknown PostProcessingModel type "
+        )   << "Unknown post-processing model type "
             << modelType << nl << nl
-            << "Valid PostProcessingModel types are:" << nl
+            << "Valid post-processing model types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

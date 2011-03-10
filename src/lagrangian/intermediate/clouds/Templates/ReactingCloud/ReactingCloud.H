@@ -40,7 +40,6 @@ SourceFiles
 #ifndef ReactingCloud_H
 #define ReactingCloud_H
 
-#include "ThermoCloud.H"
 #include "reactingCloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -60,19 +59,24 @@ class PhaseChangeModel;
                       Class ReactingCloud Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ParcelType>
+template<class CloudType>
 class ReactingCloud
 :
-    public ThermoCloud<ParcelType>,
+    public CloudType,
     public reactingCloud
 {
+public:
+
+    //- Type of parcel the cloud was instantiated for
+    typedef typename CloudType::particleType parcelType;
+
 
 private:
 
     // Private data
 
         //- Cloud copy pointer
-        autoPtr<ReactingCloud<ParcelType> > cloudCopyPtr_;
+        autoPtr<ReactingCloud<CloudType> > cloudCopyPtr_;
 
 
     // Private member functions
@@ -89,17 +93,17 @@ protected:
     // Protected data
 
         //- Parcel constant properties
-        typename ParcelType::constantProperties constProps_;
+        typename parcelType::constantProperties constProps_;
 
 
         // References to the cloud sub-models
 
             //- Reacting composition model
-            autoPtr<CompositionModel<ReactingCloud<ParcelType> > >
+            autoPtr<CompositionModel<ReactingCloud<CloudType> > >
                 compositionModel_;
 
             //- Reacting phase change model
-            autoPtr<PhaseChangeModel<ReactingCloud<ParcelType> > >
+            autoPtr<PhaseChangeModel<ReactingCloud<CloudType> > >
                 phaseChangeModel_;
 
 
@@ -137,10 +141,12 @@ protected:
         // Cloud evolution functions
 
             //- Reset state of cloud
-            void cloudReset(ReactingCloud<ParcelType>& c);
+            void cloudReset(ReactingCloud<CloudType>& c);
 
 
 public:
+
+    typedef CloudType cloudType;
 
     // Constructors
 
@@ -156,29 +162,29 @@ public:
         );
 
         //- Copy constructor with new name
-        ReactingCloud(ReactingCloud<ParcelType>& c, const word& name);
+        ReactingCloud(ReactingCloud<CloudType>& c, const word& name);
 
         //- Copy constructor with new name - creates bare cloud
         ReactingCloud
         (
             const fvMesh& mesh,
             const word& name,
-            const ReactingCloud<ParcelType>& c
+            const ReactingCloud<CloudType>& c
         );
 
         //- Construct and return clone based on (this) with new name
-        virtual autoPtr<Cloud<ParcelType> > clone(const word& name)
+        virtual autoPtr<Cloud<parcelType> > clone(const word& name)
         {
-            return autoPtr<Cloud<ParcelType> >
+            return autoPtr<Cloud<parcelType> >
             (
                 new ReactingCloud(*this, name)
             );
         }
 
         //- Construct and return bare clone based on (this) with new name
-        virtual autoPtr<Cloud<ParcelType> > cloneBare(const word& name) const
+        virtual autoPtr<Cloud<parcelType> > cloneBare(const word& name) const
         {
-            return autoPtr<Cloud<ParcelType> >
+            return autoPtr<Cloud<parcelType> >
             (
                 new ReactingCloud(this->mesh(), name, *this)
             );
@@ -189,10 +195,6 @@ public:
     virtual ~ReactingCloud();
 
 
-    //- Type of parcel the cloud was instantiated for
-    typedef ParcelType parcelType;
-
-
     // Member Functions
 
         // Access
@@ -201,18 +203,18 @@ public:
             inline const ReactingCloud& cloudCopy() const;
 
             //- Return the constant properties
-            inline const typename ParcelType::constantProperties&
+            inline const typename parcelType::constantProperties&
                 constProps() const;
 
 
             // Sub-models
 
                 //- Return reference to reacting composition model
-                inline const CompositionModel<ReactingCloud<ParcelType> >&
+                inline const CompositionModel<ReactingCloud<CloudType> >&
                     composition() const;
 
                 //- Return reference to reacting phase change model
-                inline const PhaseChangeModel<ReactingCloud<ParcelType> >&
+                inline const PhaseChangeModel<ReactingCloud<CloudType> >&
                     phaseChange() const;
 
 
@@ -262,7 +264,7 @@ public:
             //- Check parcel properties
             void checkParcelProperties
             (
-                ParcelType& parcel,
+                parcelType& parcel,
                 const scalar lagrangianDt,
                 const bool fullyDescribed
             );
@@ -277,13 +279,19 @@ public:
             void resetSourceTerms();
 
             //- Apply relaxation to (steady state) cloud sources
-            void relaxSources(const ReactingCloud<ParcelType>& cloudOldTime);
+            void relaxSources(const ReactingCloud<CloudType>& cloudOldTime);
 
             //- Evolve the cloud
             void evolve();
 
             //- Print cloud information
             void info() const;
+
+
+        // I-O
+
+            //- Write the field data for the cloud
+            virtual void writeFields() const;
 };
 
 

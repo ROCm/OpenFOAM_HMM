@@ -66,7 +66,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("GradientDispersionRAS");
+    TypeName("gradientDispersionRAS");
 
 
     // Constructors

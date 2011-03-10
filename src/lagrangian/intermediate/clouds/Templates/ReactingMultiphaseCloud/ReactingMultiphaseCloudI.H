@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,39 +25,39 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class ParcelType>
-inline const Foam::ReactingMultiphaseCloud<ParcelType>&
-Foam::ReactingMultiphaseCloud<ParcelType>::cloudCopy() const
+template<class CloudType>
+inline const Foam::ReactingMultiphaseCloud<CloudType>&
+Foam::ReactingMultiphaseCloud<CloudType>::cloudCopy() const
 {
     return cloudCopyPtr_();
 }
 
 
-template<class ParcelType>
-inline const typename ParcelType::constantProperties&
-Foam::ReactingMultiphaseCloud<ParcelType>::constProps() const
+template<class CloudType>
+inline const typename CloudType::particleType::constantProperties&
+Foam::ReactingMultiphaseCloud<CloudType>::constProps() const
 {
     return constProps_;
 }
 
 
-template<class ParcelType>
+template<class CloudType>
 inline const Foam::DevolatilisationModel
 <
-    Foam::ReactingMultiphaseCloud<ParcelType>
+    Foam::ReactingMultiphaseCloud<CloudType>
 >&
-Foam::ReactingMultiphaseCloud<ParcelType>::devolatilisation() const
+Foam::ReactingMultiphaseCloud<CloudType>::devolatilisation() const
 {
     return devolatilisationModel_;
 }
 
 
-template<class ParcelType>
+template<class CloudType>
 inline const Foam::SurfaceReactionModel
 <
-    Foam::ReactingMultiphaseCloud<ParcelType>
+    Foam::ReactingMultiphaseCloud<CloudType>
 >&
-Foam::ReactingMultiphaseCloud<ParcelType>::surfaceReaction() const
+Foam::ReactingMultiphaseCloud<CloudType>::surfaceReaction() const
 {
     return surfaceReactionModel_;
 }

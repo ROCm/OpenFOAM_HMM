@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ namespace Foam
                          Class IOPosition Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ParticleType>
+template<class CloudType>
 class IOPosition
 :
     public regIOobject
@@ -55,7 +55,7 @@ class IOPosition
     // Private data
 
         //- Reference to the cloud
-        const Cloud<ParticleType>& cloud_;
+        const CloudType& cloud_;
 
 
 public:
@@ -65,19 +65,20 @@ public:
         //- Runtime type name information. Use cloud type.
         virtual const word& type() const
         {
-            return cloud_.type();
+            return Cloud<typename CloudType::particleType>::typeName;
+            //cloud_.type();
         }
 
 
     // Constructors
 
         //- Construct from cloud
-        IOPosition(const Cloud<ParticleType>&);
+        IOPosition(const CloudType&);
 
 
     // Member functions
 
-        virtual void readData(Cloud<ParticleType>& c, bool checkClass);
+        virtual void readData(CloudType& c, bool checkClass);
 
         virtual bool write() const;
 

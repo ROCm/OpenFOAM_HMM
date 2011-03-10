@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,13 +24,13 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "dsmcParcel.H"
+#include "DsmcParcel.H"
 #include "DsmcCloud.H"
 
 namespace Foam
 {
+    defineTemplateTypeNameAndDebug(DsmcParcel<particle>, 0);
     defineTemplateTypeNameAndDebug(Cloud<dsmcParcel>, 0);
-
-    defineParcelTypeNameAndDebug(DsmcCloud<dsmcParcel>, 0);
 }
 
 

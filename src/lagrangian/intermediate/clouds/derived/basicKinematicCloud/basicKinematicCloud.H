@@ -27,14 +27,12 @@ Class
 Description
     Cloud class to introduce kinematic parcels
 
-SourceFiles
-    basicKinematicCloud.C
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef basicKinematicCloud_H
 #define basicKinematicCloud_H
 
+#include "Cloud.H"
 #include "KinematicCloud.H"
 #include "basicKinematicParcel.H"
 
@@ -42,7 +40,7 @@ SourceFiles
 
 namespace Foam
 {
-    typedef KinematicCloud<basicKinematicParcel> basicKinematicCloud;
+    typedef KinematicCloud<Cloud<basicKinematicParcel> > basicKinematicCloud;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

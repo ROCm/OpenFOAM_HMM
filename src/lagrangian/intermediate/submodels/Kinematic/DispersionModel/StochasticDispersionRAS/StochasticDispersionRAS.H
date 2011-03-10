@@ -53,7 +53,7 @@ class StochasticDispersionRAS
 public:
 
     //- Runtime type information
-    TypeName("StochasticDispersionRAS");
+    TypeName("stochasticDispersionRAS");
 
 
     // Constructors

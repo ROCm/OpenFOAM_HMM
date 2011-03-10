@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,6 +51,18 @@ inline scalar degToRad(const scalar deg)
 inline scalar radToDeg(const scalar rad)
 {
     return (rad * 180.0/constant::mathematical::pi);
+}
+
+//- Conversion from atm to Pa
+inline scalar atmToPa(const scalar atm)
+{
+    return (atm * 101035.0);
+}
+
+//- Conversion from atm to Pa
+inline scalar paToAtm(const scalar pa)
+{
+    return (pa / 101035.0);
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

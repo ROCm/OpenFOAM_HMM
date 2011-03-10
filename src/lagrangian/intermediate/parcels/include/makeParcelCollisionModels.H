@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,8 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "KinematicCloud.H"
-
 #include "NoCollision.H"
 #include "PairCollision.H"
 
@@ -40,48 +38,18 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelCollisionModels(ParcelType)                                 \
+#define makeParcelCollisionModels(CloudType)                                  \
                                                                               \
-    makeCollisionModel(KinematicCloud<ParcelType>);                           \
+    makeCollisionModel(CloudType);                                            \
+    makeCollisionModelType(NoCollision, CloudType);                           \
+    makeCollisionModelType(PairCollision, CloudType);                         \
                                                                               \
-    makeCollisionModelType                                                    \
-    (                                                                         \
-        NoCollision,                                                          \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
+    makePairModel(CloudType);                                                 \
+    makePairModelType(PairSpringSliderDashpot, CloudType);                    \
                                                                               \
-    makeCollisionModelType                                                    \
-    (                                                                         \
-        PairCollision,                                                        \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-                                                                              \
-    makePairModel(KinematicCloud<ParcelType>);                                \
-                                                                              \
-    makePairModelType                                                         \
-    (                                                                         \
-        PairSpringSliderDashpot,                                              \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-                                                                              \
-    makeWallModel(KinematicCloud<ParcelType>);                                \
-                                                                              \
-    makeWallModelType                                                         \
-    (                                                                         \
-        WallSpringSliderDashpot,                                              \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-                                                                              \
-    makeWallModelType                                                         \
-    (                                                                         \
-        WallLocalSpringSliderDashpot,                                         \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );
+    makeWallModel(CloudType);                                                 \
+    makeWallModelType(WallSpringSliderDashpot, CloudType);                    \
+    makeWallModelType(WallLocalSpringSliderDashpot, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

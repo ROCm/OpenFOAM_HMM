@@ -44,8 +44,8 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    TName_("undefinedT"),
-    emissivity_(0.0)
+    radiationCoupledBase(p, "undefined", scalarField::null()),
+    TName_("undefinedT")
 {
     refValue() = 0.0;
     refGrad() = 0.0;
@@ -63,8 +63,13 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(ptf, p, iF, mapper),
-    TName_(ptf.TName_),
-    emissivity_(ptf.emissivity_)
+    radiationCoupledBase
+    (
+        p,
+        ptf.emissivityMethod(),
+        ptf.emissivity_
+    ),
+    TName_(ptf.TName_)
 {}
 
 
@@ -77,8 +82,8 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    TName_(dict.lookup("T")),
-    emissivity_(readScalar(dict.lookup("emissivity")))
+    radiationCoupledBase(p, dict),
+    TName_(dict.lookup("T"))
 {
     if (dict.found("refValue"))
     {
@@ -98,7 +103,7 @@ greyDiffusiveRadiationMixedFvPatchScalarField
             patch().lookupPatchField<volScalarField, scalar>(TName_);
 
         refValue() =
-            emissivity_*4.0*physicoChemical::sigma.value()*pow4(Tp)/pi;
+            4.0*physicoChemical::sigma.value()*pow4(Tp)*emissivity()/pi;
         refGrad() = 0.0;
         valueFraction() = 1.0;
 
@@ -114,8 +119,13 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(ptf),
-    TName_(ptf.TName_),
-    emissivity_(ptf.emissivity_)
+    radiationCoupledBase
+    (
+        ptf.patch(),
+        ptf.emissivityMethod(),
+        ptf.emissivity_
+    ),
+    TName_(ptf.TName_)
 {}
 
 
@@ -127,8 +137,13 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(ptf, iF),
-    TName_(ptf.TName_),
-    emissivity_(ptf.emissivity_)
+    radiationCoupledBase
+    (
+        ptf.patch(),
+        ptf.emissivityMethod(),
+        ptf.emissivity_
+    ),
+    TName_(ptf.TName_)
 {}
 
 
@@ -202,8 +217,9 @@ updateCoeffs()
             valueFraction()[faceI] = 1.0;
             refValue()[faceI] =
                 (
-                    Ir*(1.0 - emissivity_)
-                  + emissivity_*physicoChemical::sigma.value()*pow4(Tp[faceI])
+                    Ir*(scalar(1.0) - emissivity()()[faceI])
+                  + emissivity()()[faceI]*physicoChemical::sigma.value()
+                  * pow4(Tp[faceI])
                 )/pi;
         }
         else
@@ -225,8 +241,8 @@ void Foam::radiation::greyDiffusiveRadiationMixedFvPatchScalarField::write
 ) const
 {
     mixedFvPatchScalarField::write(os);
+    radiationCoupledBase::write(os);
     os.writeKeyword("T") << TName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("emissivity") << emissivity_ << token::END_STATEMENT << nl;
 }
 
 

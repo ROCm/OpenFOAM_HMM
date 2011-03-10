@@ -24,8 +24,9 @@ createBaffles cycLeft '(cycLeft_half0 cycLeft_half1)' -overwrite > log.createBaf
 
 # create the second cyclic - rhs of porous zone
 createBaffles cycRight '(cycRight_half0 cycRight_half1)' -overwrite > log.createBaffles2 2>&1
+
 # Initialise newly created patchFields to 0
-changeDictionary
+runApplication changeDictionary
 
 runApplication $application
 

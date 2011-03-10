@@ -25,129 +25,32 @@ Class
     Foam::basicKinematicParcel
 
 Description
-
+    Definition of basic kinematic parcel
 
 SourceFiles
-    basicKinematicParcel.C
+    basicKinematicParcel.H
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef basicKinematicParcel_H
 #define basicKinematicParcel_H
 
+#include "contiguous.H"
+#include "particle.H"
 #include "KinematicParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    typedef KinematicParcel<particle> basicKinematicParcel;
 
-/*---------------------------------------------------------------------------*\
-                   Class basicKinematicParcel Declaration
-\*---------------------------------------------------------------------------*/
-
-class basicKinematicParcel
-:
-    public KinematicParcel<basicKinematicParcel>
-{
-
-public:
-
-    //- Run-time type information
-    TypeName("basicKinematicParcel");
-
-
-    // Constructors
-
-        //- Construct from owner, position, and cloud owner
-        //  Other properties initialised as null
-        basicKinematicParcel
-        (
-            KinematicCloud<basicKinematicParcel>& owner,
-            const vector& position,
-            const label cellI,
-            const label tetFaceI,
-            const label tetPtI
-        );
-
-        //- Construct from components
-        basicKinematicParcel
-        (
-            KinematicCloud<basicKinematicParcel>& owner,
-            const vector& position,
-            const label cellI,
-            const label tetFaceI,
-            const label tetPtI,
-            const label typeId,
-            const scalar nParticle0,
-            const scalar d0,
-            const scalar dTarget0,
-            const vector& U0,
-            const vector& f0,
-            const vector& angularMomentum0,
-            const vector& torque0,
-            const constantProperties& constProps
-        );
-
-        //- Construct from Istream
-        basicKinematicParcel
-        (
-            const Cloud<basicKinematicParcel>& c,
-            Istream& is,
-            bool readFields = true
-        );
-
-        //- Construct as a copy
-        basicKinematicParcel(const basicKinematicParcel& p);
-
-        //- Construct as a copy
-        basicKinematicParcel
-        (
-            const basicKinematicParcel& p,
-            const KinematicCloud<basicKinematicParcel>& c
-        );
-
-        //- Construct and return a clone
-        virtual autoPtr<Particle<basicKinematicParcel> > clone() const
-        {
-            return autoPtr<Particle<basicKinematicParcel> >
-            (
-                new basicKinematicParcel(*this)
-            );
-        }
-
-        //- Construct and return a clone
-        virtual autoPtr<Particle<basicKinematicParcel> > clone
-        (
-            const Cloud<basicKinematicParcel>& c
-        ) const
-        {
-            return autoPtr<Particle<basicKinematicParcel> >
-            (
-                new basicKinematicParcel
-                (
-                    *this,
-                    static_cast<const KinematicCloud<basicKinematicParcel>&>(c)
-                )
-            );
-        }
-
-
-    //- Destructor
-    virtual ~basicKinematicParcel();
-};
-
-
-template<>
-inline bool contiguous<basicKinematicParcel>()
-{
-    return true;
+    template<>
+    inline bool contiguous<basicKinematicParcel>()
+    {
+        return true;
+    }
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

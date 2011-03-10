@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,9 +35,9 @@ Foam::PatchInteractionModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType(dict.lookup("PatchInteractionModel"));
+    const word modelType(dict.lookup("patchInteractionModel"));
 
-    Info<< "Selecting PatchInteractionModel " << modelType << endl;
+    Info<< "Selecting patch interaction model " << modelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
@@ -51,9 +51,9 @@ Foam::PatchInteractionModel<CloudType>::New
                 "const dictionary&, "
                 "CloudType&"
             ")"
-        )   << "Unknown PatchInteractionModel type "
+        )   << "Unknown patch interaction model type "
             << modelType << nl << nl
-            << "Valid PatchInteractionModel types are:" << nl
+            << "Valid patch interaction model types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

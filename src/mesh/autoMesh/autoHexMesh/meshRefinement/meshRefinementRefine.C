@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -283,7 +283,7 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
     label tetFaceI = -1;
     label tetPtI = -1;
 
-    cloud.findCellFacePt(keepPoint, cellI, tetFaceI, tetPtI);
+    mesh_.findCellFacePt(keepPoint, cellI, tetFaceI, tetPtI);
 
     if (cellI != -1)
     {
@@ -309,7 +309,7 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
                     (
                         new trackedParticle
                         (
-                            cloud,
+                            mesh_,
                             keepPoint,
                             cellI,
                             tetFaceI,
@@ -330,7 +330,7 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
     labelList maxFeatureLevel(mesh_.nCells(), -1);
 
     // Database to pass into trackedParticle::move
-    trackedParticle::trackData td(cloud, maxFeatureLevel);
+    trackedParticle::trackingData td(cloud, maxFeatureLevel);
 
     // Track all particles to their end position (= starting feature point)
     cloud.move(td, GREAT);

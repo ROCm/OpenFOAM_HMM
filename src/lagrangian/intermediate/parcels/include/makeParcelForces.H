@@ -28,58 +28,27 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "KinematicCloud.H"
-
 #include "SphereDragForce.H"
 #include "NonSphereDragForce.H"
 
 #include "GravityForce.H"
+#include "NonInertialFrameForce.H"
 #include "ParamagneticForce.H"
 #include "PressureGradientForce.H"
 #include "SRFForce.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelForces(ParcelType)                                          \
+#define makeParcelForces(CloudType)                                           \
                                                                               \
-    makeParticleForceModel(KinematicCloud<ParcelType>);                       \
-                                                                              \
-    makeParticleForceModelType                                                \
-    (                                                                         \
-        SphereDragForce,                                                      \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeParticleForceModelType                                                \
-    (                                                                         \
-        NonSphereDragForce,                                                   \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeParticleForceModelType                                                \
-    (                                                                         \
-        GravityForce,                                                         \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeParticleForceModelType                                                \
-    (                                                                         \
-        ParamagneticForce,                                                    \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeParticleForceModelType                                                \
-    (                                                                         \
-        PressureGradientForce,                                                \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makeParticleForceModelType                                                \
-    (                                                                         \
-        SRFForce,                                                             \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );
+    makeParticleForceModel(CloudType);                                        \
+    makeParticleForceModelType(SphereDragForce, CloudType);                   \
+    makeParticleForceModelType(NonSphereDragForce, CloudType);                \
+    makeParticleForceModelType(GravityForce, CloudType);                      \
+    makeParticleForceModelType(NonInertialFrameForce, CloudType);             \
+    makeParticleForceModelType(ParamagneticForce, CloudType);                 \
+    makeParticleForceModelType(PressureGradientForce, CloudType);             \
+    makeParticleForceModelType(SRFForce, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

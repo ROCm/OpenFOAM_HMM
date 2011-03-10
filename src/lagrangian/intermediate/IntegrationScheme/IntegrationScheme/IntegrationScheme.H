@@ -128,7 +128,7 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("IntegrationScheme");
+    TypeName("integrationScheme");
 
 
     //- Declare runtime constructor selection table
@@ -183,9 +183,9 @@ public:
         //- Perform the Integration
         virtual integrationResult integrate
         (
-            const Type phi,
+            const Type& phi,
             const scalar dt,
-            const Type alpha,
+            const Type& alphaBeta,
             const scalar beta
         ) const;
 };

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,8 +25,6 @@ License
 
 #include "primitiveMesh.H"
 #include "demandDrivenData.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -62,6 +60,8 @@ Foam::primitiveMesh::primitiveMesh()
     pePtr_(NULL),
     ppPtr_(NULL),
     cpPtr_(NULL),
+
+    cellTreePtr_(NULL),
 
     labels_(0),
 
@@ -104,6 +104,8 @@ Foam::primitiveMesh::primitiveMesh
     pePtr_(NULL),
     ppPtr_(NULL),
     cpPtr_(NULL),
+
+    cellTreePtr_(NULL),
 
     labels_(0),
 
@@ -344,6 +346,38 @@ const Foam::cellShapeList& Foam::primitiveMesh::cellShapes() const
     }
 
     return *cellShapesPtr_;
+}
+
+
+const Foam::indexedOctree<Foam::treeDataCell>&
+Foam::primitiveMesh::cellTree() const
+{
+    if (!cellTreePtr_)
+    {
+        treeBoundBox overallBb(points());
+
+        Random rndGen(261782);
+
+        overallBb = overallBb.extend(rndGen, 1E-4);
+        overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+
+        cellTreePtr_ =
+            new indexedOctree<treeDataCell>
+            (
+                treeDataCell
+                (
+                    false,      // not cache bb
+                    *this
+                ),
+                overallBb,
+                8,              // maxLevel
+                10,             // leafsize
+                3.0             // duplicity
+            );
+    }
+
+    return *cellTreePtr_;
 }
 
 

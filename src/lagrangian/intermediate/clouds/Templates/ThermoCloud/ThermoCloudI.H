@@ -29,101 +29,101 @@ using namespace Foam::constant;
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class ParcelType>
-inline const Foam::ThermoCloud<ParcelType>&
-Foam::ThermoCloud<ParcelType>::cloudCopy() const
+template<class CloudType>
+inline const Foam::ThermoCloud<CloudType>&
+Foam::ThermoCloud<CloudType>::cloudCopy() const
 {
     return cloudCopyPtr_();
 }
 
 
-template<class ParcelType>
-inline const typename ParcelType::constantProperties&
-Foam::ThermoCloud<ParcelType>::constProps() const
+template<class CloudType>
+inline const typename CloudType::particleType::constantProperties&
+Foam::ThermoCloud<CloudType>::constProps() const
 {
     return constProps_;
 }
 
 
-template<class ParcelType>
-inline const Foam::SLGThermo& Foam::ThermoCloud<ParcelType>::thermo() const
+template<class CloudType>
+inline const Foam::SLGThermo& Foam::ThermoCloud<CloudType>::thermo() const
 {
     return thermo_;
 }
 
 
-template<class ParcelType>
-inline const Foam::volScalarField& Foam::ThermoCloud<ParcelType>::T() const
+template<class CloudType>
+inline const Foam::volScalarField& Foam::ThermoCloud<CloudType>::T() const
 {
     return T_;
 }
 
 
-template<class ParcelType>
-inline const Foam::volScalarField& Foam::ThermoCloud<ParcelType>::p() const
+template<class CloudType>
+inline const Foam::volScalarField& Foam::ThermoCloud<CloudType>::p() const
 {
     return p_;
 }
 
 
-template<class ParcelType>
-inline const Foam::HeatTransferModel<Foam::ThermoCloud<ParcelType> >&
-Foam::ThermoCloud<ParcelType>::heatTransfer() const
+template<class CloudType>
+inline const Foam::HeatTransferModel<Foam::ThermoCloud<CloudType> >&
+Foam::ThermoCloud<CloudType>::heatTransfer() const
 {
     return heatTransferModel_;
 }
 
 
-template<class ParcelType>
+template<class CloudType>
 inline const Foam::scalarIntegrationScheme&
-Foam::ThermoCloud<ParcelType>::TIntegrator() const
+Foam::ThermoCloud<CloudType>::TIntegrator() const
 {
     return TIntegrator_;
 }
 
 
-template<class ParcelType>
-inline bool Foam::ThermoCloud<ParcelType>::radiation() const
+template<class CloudType>
+inline bool Foam::ThermoCloud<CloudType>::radiation() const
 {
     return radiation_;
 }
 
 
-template<class ParcelType>
+template<class CloudType>
 inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
-Foam::ThermoCloud<ParcelType>::hsTrans()
+Foam::ThermoCloud<CloudType>::hsTrans()
 {
     return hsTrans_();
 }
 
 
-template<class ParcelType>
+template<class CloudType>
 inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
-Foam::ThermoCloud<ParcelType>::hsTrans() const
+Foam::ThermoCloud<CloudType>::hsTrans() const
 {
     return hsTrans_();
 }
 
 
-template<class ParcelType>
+template<class CloudType>
 inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
-Foam::ThermoCloud<ParcelType>::hsCoeff()
+Foam::ThermoCloud<CloudType>::hsCoeff()
 {
     return hsCoeff_();
 }
 
 
-template<class ParcelType>
+template<class CloudType>
 inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
-Foam::ThermoCloud<ParcelType>::hsCoeff() const
+Foam::ThermoCloud<CloudType>::hsCoeff() const
 {
     return hsCoeff_();
 }
 
 
-template<class ParcelType>
+template<class CloudType>
 inline Foam::tmp<Foam::fvScalarMatrix>
-Foam::ThermoCloud<ParcelType>::Sh(volScalarField& hs) const
+Foam::ThermoCloud<CloudType>::Sh(volScalarField& hs) const
 {
     if (debug)
     {
@@ -138,11 +138,13 @@ Foam::ThermoCloud<ParcelType>::Sh(volScalarField& hs) const
         if (this->solution().semiImplicit("hs"))
         {
             const volScalarField Cp(thermo_.thermo().Cp());
+            const DimensionedField<scalar, volMesh>
+                Vdt(this->mesh().V()*this->db().time().deltaT());
 
             return
-                hsTrans()/(this->mesh().V()*this->db().time().deltaT())
-              + fvm::SuSp(-hsCoeff()/(Cp*this->mesh().V()), hs)
-              + hsCoeff()/(Cp*this->mesh().V())*hs;
+                hsTrans()/Vdt
+              - fvm::Sp(hsCoeff()/(Cp*Vdt), hs)
+              + hsCoeff()/(Cp*Vdt)*hs;
         }
         else
         {
@@ -159,9 +161,8 @@ Foam::ThermoCloud<ParcelType>::Sh(volScalarField& hs) const
 }
 
 
-template<class ParcelType>
-inline Foam::tmp<Foam::volScalarField>
-Foam::ThermoCloud<ParcelType>::Ep() const
+template<class CloudType>
+inline Foam::tmp<Foam::volScalarField> Foam::ThermoCloud<CloudType>::Ep() const
 {
     tmp<volScalarField> tEp
     (
@@ -188,9 +189,9 @@ Foam::ThermoCloud<ParcelType>::Ep() const
         const scalarField& V = this->mesh().V();
         const scalar epsilon = constProps_.epsilon0();
 
-        forAllConstIter(typename ThermoCloud<ParcelType>, *this, iter)
+        forAllConstIter(typename ThermoCloud<CloudType>, *this, iter)
         {
-            const ParcelType& p = iter();
+            const parcelType& p = iter();
             const label cellI = p.cell();
             Ep[cellI] += p.nParticle()*p.areaP()*pow4(p.T());
         }
@@ -202,9 +203,8 @@ Foam::ThermoCloud<ParcelType>::Ep() const
 }
 
 
-template<class ParcelType>
-inline Foam::tmp<Foam::volScalarField>
-Foam::ThermoCloud<ParcelType>::ap() const
+template<class CloudType>
+inline Foam::tmp<Foam::volScalarField> Foam::ThermoCloud<CloudType>::ap() const
 {
     tmp<volScalarField> tap
     (
@@ -231,9 +231,9 @@ Foam::ThermoCloud<ParcelType>::ap() const
         const scalarField& V = this->mesh().V();
         const scalar epsilon = constProps_.epsilon0();
 
-        forAllConstIter(typename ThermoCloud<ParcelType>, *this, iter)
+        forAllConstIter(typename ThermoCloud<CloudType>, *this, iter)
         {
-            const ParcelType& p = iter();
+            const parcelType& p = iter();
             const label cellI = p.cell();
             ap[cellI] += p.nParticle()*p.areaP();
         }
@@ -245,9 +245,9 @@ Foam::ThermoCloud<ParcelType>::ap() const
 }
 
 
-template<class ParcelType>
+template<class CloudType>
 inline Foam::tmp<Foam::volScalarField>
-Foam::ThermoCloud<ParcelType>::sigmap() const
+Foam::ThermoCloud<CloudType>::sigmap() const
 {
     tmp<volScalarField> tsigmap
     (
@@ -276,9 +276,9 @@ Foam::ThermoCloud<ParcelType>::sigmap() const
         const scalar epsilon = constProps_.epsilon0();
         const scalar f = constProps_.f0();
 
-        forAllConstIter(typename ThermoCloud<ParcelType>, *this, iter)
+        forAllConstIter(typename ThermoCloud<CloudType>, *this, iter)
         {
-            const ParcelType& p = iter();
+            const parcelType& p = iter();
             const label cellI = p.cell();
             sigmap[cellI] += p.nParticle()*p.areaP();
         }

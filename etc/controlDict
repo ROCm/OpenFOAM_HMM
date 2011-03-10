@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.7                                   |
+|  \\    /   O peration     | Version:  2.0                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -24,6 +24,7 @@ Documentation
         "$WM_PROJECT_USER_DIR/html"
         "~OpenFOAM/html"
         "$WM_PROJECT_DIR/doc/Doxygen/html"
+        "$WM_PROJECT_DIR/doc/doxygen/html"
     );
     doxySourceFileExts
     (
@@ -31,6 +32,34 @@ Documentation
         "_8C.html"
     );
 }
+
+
+InfoSwitches
+{
+    writePrecision  6;
+    writeJobInfo    0;
+
+    // Allow case-supplied C++ code (#codeStream, codedFixedValue)
+    allowSystemOperations   0;
+}
+
+
+OptimisationSwitches
+{
+    fileModificationSkew 10;
+
+    //- Modification checking:
+    //  - timeStamp         : use modification time on file
+    //  - inotify           : use inotify framework
+    //  - timeStampMaster   : do time stamp (and file reading) only on master.
+    //  - inotifyMaster     : do inotify (and file reading) only on master.
+    fileModificationChecking timeStampMaster;//inotify;timeStamp;inotifyMaster;
+
+    commsType       nonBlocking; //scheduled; //blocking;
+    floatTransfer   0;
+    nProcsSimpleSum 0;
+}
+
 
 DebugSwitches
 {
@@ -866,27 +895,6 @@ DebugSwitches
     zoneToPoint         0;
 }
 
-InfoSwitches
-{
-    writePrecision  6;
-    writeJobInfo    0;
-}
-
-OptimisationSwitches
-{
-    fileModificationSkew 10;
-
-    //- Modification checking:
-    //  - timeStamp         : use modification time on file
-    //  - inotify           : use inotify framework
-    //  - timeStampMaster   : do time stamp (and file reading) only on master.
-    //  - inotifyMaster     : do inotify (and file reading) only on master.
-    fileModificationChecking timeStampMaster;//inotify;timeStamp;inotifyMaster;
-
-    commsType       nonBlocking; //scheduled; //blocking;
-    floatTransfer   0;
-    nProcsSimpleSum 0;
-}
 
 DimensionedConstants
 {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,7 +33,6 @@ using namespace Foam::constant::mathematical;
 
 namespace Foam
 {
-    defineParticleTypeNameAndDebug(molecule, 0);
     defineTemplateTypeNameAndDebug(Cloud<molecule>, 0);
 }
 
@@ -746,7 +745,7 @@ void Foam::moleculeCloud::initialiseMolecules
                             label tetFace = -1;
                             label tetPt = -1;
 
-                            findCellFacePt
+                            mesh_.findCellFacePt
                             (
                                 globalPosition,
                                 cell,
@@ -834,7 +833,7 @@ void Foam::moleculeCloud::initialiseMolecules
                                         label tetFace = -1;
                                         label tetPt = -1;
 
-                                        findCellFacePt
+                                        mesh_.findCellFacePt
                                         (
                                             globalPosition,
                                             cell,
@@ -913,7 +912,7 @@ void Foam::moleculeCloud::initialiseMolecules
                                         label tetFace = -1;
                                         label tetPt = -1;
 
-                                        findCellFacePt
+                                        mesh_.findCellFacePt
                                         (
                                             globalPosition,
                                             cell,
@@ -1000,11 +999,9 @@ void Foam::moleculeCloud::createMolecule
     const vector& bulkVelocity
 )
 {
-    const Cloud<molecule>& cloud = *this;
-
     if (cell == -1)
     {
-        findCellFacePt(position, cell, tetFace, tetPt);
+        mesh_.findCellFacePt(position, cell, tetFace, tetPt);
     }
 
     if (cell == -1)
@@ -1063,7 +1060,7 @@ void Foam::moleculeCloud::createMolecule
     (
         new molecule
         (
-            cloud,
+            mesh_,
             position,
             cell,
             tetFace,
@@ -1159,18 +1156,18 @@ Foam::moleculeCloud::moleculeCloud
 
 void Foam::moleculeCloud::evolve()
 {
-    molecule::trackData td0(*this, 0);
+    molecule::trackingData td0(*this, 0);
     Cloud<molecule>::move(td0, mesh_.time().deltaTValue());
 
-    molecule::trackData td1(*this, 1);
+    molecule::trackingData td1(*this, 1);
     Cloud<molecule>::move(td1, mesh_.time().deltaTValue());
 
-    molecule::trackData td2(*this, 2);
+    molecule::trackingData td2(*this, 2);
     Cloud<molecule>::move(td2, mesh_.time().deltaTValue());
 
     calculateForce();
 
-    molecule::trackData td3(*this, 3);
+    molecule::trackingData td3(*this, 3);
     Cloud<molecule>::move(td3, mesh_.time().deltaTValue());
 }
 

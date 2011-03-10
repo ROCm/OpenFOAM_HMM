@@ -91,7 +91,12 @@ void Foam::InjectionModel<CloudType>::writeProps()
         propsDict.add("parcelsAddedTotal", parcelsAddedTotal_);
         propsDict.add("timeStep0", timeStep0_);
 
-        propsDict.regIOobject::write();
+        propsDict.writeObject
+        (
+            IOstream::ASCII,
+            IOstream::currentVersion,
+            this->owner().db().time().writeCompression()
+        );
     }
 }
 
@@ -204,7 +209,7 @@ bool Foam::InjectionModel<CloudType>::findCellAtPosition
 
     const vector p0 = position;
 
-    this->owner().findCellFacePt
+    this->owner().mesh().findCellFacePt
     (
         position,
         cellI,
@@ -515,7 +520,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     }
 
     const scalar time = this->owner().db().time().value();
-    const scalar carrierDt = this->owner().db().time().deltaTValue();
+    const scalar trackTime = this->owner().solution().trackTime();
     const polyMesh& mesh = this->owner().mesh();
 
     // Prepare for next time step
@@ -528,7 +533,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
 
     // Duration of injection period during this timestep
     const scalar deltaT =
-        max(0.0, min(carrierDt, min(time - SOI_, timeEnd() - time0_)));
+        max(0.0, min(trackTime, min(time - SOI_, timeEnd() - time0_)));
 
     // Pad injection time if injection starts during this timestep
     const scalar padTime = max(0.0, SOI_ - time0_);
@@ -571,7 +576,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                 // Create a new parcel
                 parcelType* pPtr = new parcelType
                 (
-                    td.cloud(),
+                    td.cloud().pMesh(),
                     pos,
                     cellI,
                     tetFaceI,
@@ -671,7 +676,7 @@ void Foam::InjectionModel<CloudType>::injectSteadyState
             // Create a new parcel
             parcelType* pPtr = new parcelType
             (
-                td.cloud(),
+                td.cloud().pMesh(),
                 pos,
                 cellI,
                 tetFaceI,

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,8 +55,11 @@ class Gulder
 {
     // Private data
 
-        scalar XiEqCoef;
-        dimensionedScalar SuMin;
+        //- Model constant
+        scalar XiEqCoef_;
+
+        //- Minimum laminar burning velocity
+        const dimensionedScalar SuMin_;
 
 
     // Private Member Functions
@@ -97,6 +100,7 @@ public:
 
         //- Update properties from given dictionary
         virtual bool read(const dictionary& XiEqProperties);
+
 };
 
 

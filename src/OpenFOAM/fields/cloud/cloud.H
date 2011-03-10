@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -91,7 +91,7 @@ public:
 
             //- Remap the cells of particles corresponding to the
             //  mesh topology change
-            virtual void autoMap(const mapPolyMesh&) = 0;
+            virtual void autoMap(const mapPolyMesh&);
 };
 
 

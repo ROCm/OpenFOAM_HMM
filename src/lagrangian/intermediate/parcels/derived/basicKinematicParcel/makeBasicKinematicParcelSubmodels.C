@@ -23,13 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicKinematicParcel.H"
+#include "basicKinematicCloud.H"
 
 // Kinematic
 #include "makeParcelForces.H"
 #include "makeParcelDispersionModels.H"
 #include "makeParcelInjectionModels.H"
-#include "makeParcelCollisionModels.H"
 #include "makeParcelPatchInteractionModels.H"
 #include "makeParcelPostProcessingModels.H"
 #include "makeParcelSurfaceFilmModels.H"
@@ -39,13 +38,12 @@ License
 namespace Foam
 {
     // Kinematic sub-models
-    makeParcelForces(basicKinematicParcel);
-    makeParcelDispersionModels(basicKinematicParcel);
-    makeParcelInjectionModels(basicKinematicParcel);
-    makeParcelCollisionModels(basicKinematicParcel);
-    makeParcelPatchInteractionModels(basicKinematicParcel);
-    makeParcelPostProcessingModels(basicKinematicParcel);
-    makeParcelSurfaceFilmModels(basicKinematicParcel);
+    makeParcelForces(basicKinematicCloud);
+    makeParcelDispersionModels(basicKinematicCloud);
+    makeParcelInjectionModels(basicKinematicCloud);
+    makeParcelPatchInteractionModels(basicKinematicCloud);
+    makeParcelPostProcessingModels(basicKinematicCloud);
+    makeParcelSurfaceFilmModels(basicKinematicCloud);
 }
 
 
