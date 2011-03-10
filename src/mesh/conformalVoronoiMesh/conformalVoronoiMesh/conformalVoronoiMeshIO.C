@@ -150,7 +150,7 @@ void Foam::conformalVoronoiMesh::writeInternalDelaunayVertices
         internalDelaunayVertices
     );
 
-    Info<< nl
+    Pout<< nl
         << "Writing " << internalDVs.name()
         << " to " << internalDVs.instance()
         << endl;
@@ -228,7 +228,7 @@ void Foam::conformalVoronoiMesh::writeMesh
             filterFaces
         );
 
-        Info<< nl << "Writing polyMesh to " << instance << endl;
+        Pout<< nl << "Writing polyMesh to " << instance << endl;
 
         writeMesh
         (
@@ -572,7 +572,7 @@ void Foam::conformalVoronoiMesh::findRemainingProtrusionSet
 
     if (!protrudingCells.empty())
     {
-        Info<< nl << "Found " << protrudingCells.size()
+        Pout<< nl << "Found " << protrudingCells.size()
             << " cells protruding from the surface, writing cellSet "
             << protrudingCells.name()
             << endl;

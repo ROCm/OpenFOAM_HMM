@@ -170,6 +170,9 @@ public:
             //  the surfaces
             bool overlaps(const treeBoundBox& bb) const;
 
+            //- Check if the point is in the domain handled by this processor
+            bool positionOnThisProc(const point& pt) const;
+
             //- Check if points are inside surfaces to conform to
             Field<bool> inside(const pointField& samplePts) const;
 

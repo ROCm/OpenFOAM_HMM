@@ -416,6 +416,18 @@ private:
             const Delaunay::Finite_vertices_iterator& vit
         ) const;
 
+        //- Check to see if dual cell specified by given vertex iterator
+        //  intersects the parallel interface, hence needs referred.  Returns
+        //  destination processor(s).
+        List<label> parallelInterfaceIntersection
+        (
+            const Delaunay::Finite_vertices_iterator& vit
+        ) const;
+
+        //- Which processor should a vertex generating the given dual edge be
+        //  referred to
+        label targetProc(direction ptOnFace) const;
+
         //- Find the "worst" protrusion of a dual cell through the surface,
         //  subject to the maxSurfaceProtrusion tolerance
         void dualCellLargestSurfaceProtrusion

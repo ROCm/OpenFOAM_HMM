@@ -59,6 +59,7 @@ class indexedVertex
         //  ptNearBoundaryPoint  : internal near boundary point.
         //  ptInternalPoint      : internal point.
         //  ptFarPoint           : far-point.
+        //  > ptFarPoint, < 0    : referred point from processor -(type_ + 1)
         //  >= 0                 : part of point-pair. Index of other point.
         //                         Lowest numbered is inside one (master).
         int type_;
@@ -72,10 +73,9 @@ public:
 
     enum pointTypes
     {
-        ptNearBoundaryPoint  = -4,
-        ptInternalPoint      = -3,
-        ptMirrorPoint        = -2,
-        ptFarPoint           = -1
+        ptNearBoundaryPoint  = INT_MIN,
+        ptInternalPoint      = INT_MIN + 1,
+        ptFarPoint           = INT_MIN + 2
     };
 
     typedef typename Vb::Vertex_handle      Vertex_handle;
@@ -198,6 +198,27 @@ public:
     }
 
 
+    // is this a referred vertex
+    inline bool referred() const
+    {
+        return type_ < 0 && type_ > ptFarPoint;
+    }
+
+
+    // For referred vertices, what is the processor index
+    inline int procIndex() const
+    {
+        if (referred())
+        {
+            return -(type_ + 1);
+        }
+        else
+        {
+            return -1;
+        }
+    }
+
+
     //- Set the point to be internal
     inline void setInternal()
     {
@@ -216,12 +237,6 @@ public:
     inline void setNearBoundary()
     {
         type_ = ptNearBoundaryPoint;
-    }
-
-    //- Is point a mirror point
-    inline bool mirrorPoint() const
-    {
-        return type_ == ptMirrorPoint;
     }
 
 
@@ -270,7 +285,7 @@ public:
     //- Is point near the boundary or part of the boundary definition
     inline bool nearOrOnBoundary() const
     {
-        return pairPoint() || mirrorPoint() || nearBoundary();
+        return pairPoint() || nearBoundary();
     }
 
 

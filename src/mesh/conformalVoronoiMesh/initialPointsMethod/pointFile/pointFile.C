@@ -74,6 +74,18 @@ std::vector<Vb::Point> pointFile::initialPoints() const
             << exit(FatalError) << endl;
     }
 
+    boolList procPt(points.size(), false);
+
+    forAll(points, ptI)
+    {
+        procPt[ptI] = cvMesh_.geometryToConformTo().positionOnThisProc
+        (
+            points[ptI]
+        );
+    }
+
+    inplaceSubset(procPt, points);
+
     std::vector<Vb::Point> initialPoints;
 
     Field<bool> insidePoints = cvMesh_.geometryToConformTo().wellInside

@@ -361,6 +361,15 @@ bool Foam::conformationSurfaces::overlaps(const treeBoundBox& bb) const
 }
 
 
+bool Foam::conformationSurfaces::positionOnThisProc(const point& pt) const
+{
+    // This is likely to give problems when a point is on the boundary between
+    // two processors.
+
+    return bounds_.contains(pt);
+}
+
+
 Foam::Field<bool> Foam::conformationSurfaces::inside
 (
     const pointField& samplePts

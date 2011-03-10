@@ -514,7 +514,7 @@ void Foam::conformalVoronoiMesh::createFeaturePoints()
 
     insertMixedFeaturePoints();
 
-    Info<< "    Inserted " << number_of_vertices() << " vertices" << endl;
+    Pout<< "    Inserted " << number_of_vertices() << " vertices" << endl;
 
     featureVertices_.setSize(number_of_vertices());
 
@@ -563,9 +563,14 @@ void Foam::conformalVoronoiMesh::insertConvexFeaturePoints()
             ptI++
         )
         {
-            vectorField featPtNormals = feMesh.featurePointNormals(ptI);
-
             const Foam::point& featPt = feMesh.points()[ptI];
+
+            if (!geometryToConformTo_.positionOnThisProc(featPt))
+            {
+                continue;
+            }
+
+            vectorField featPtNormals = feMesh.featurePointNormals(ptI);
 
             vector cornerNormal = sum(featPtNormals);
             cornerNormal /= mag(cornerNormal);
@@ -610,9 +615,14 @@ void Foam::conformalVoronoiMesh::insertConcaveFeaturePoints()
             ptI++
         )
         {
-            vectorField featPtNormals = feMesh.featurePointNormals(ptI);
-
             const Foam::point& featPt = feMesh.points()[ptI];
+
+            if (!geometryToConformTo_.positionOnThisProc(featPt))
+            {
+                continue;
+            }
+
+            vectorField featPtNormals = feMesh.featurePointNormals(ptI);
 
             vector cornerNormal = sum(featPtNormals);
             cornerNormal /= mag(cornerNormal);
@@ -702,6 +712,11 @@ void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
                 }
 
                 const Foam::point& pt(feMesh.points()[ptI]);
+
+                if (!geometryToConformTo_.positionOnThisProc(pt))
+                {
+                    continue;
+                }
 
                 scalar edgeGroupDistance = mixedFeaturePointDistance(pt);
 
@@ -1162,7 +1177,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 :
     Delaunay(),
     runTime_(runTime),
-    rndGen_(7864293),
+    rndGen_(64293*Pstream::myProcNo()),
     allGeometry_
     (
         IOobject

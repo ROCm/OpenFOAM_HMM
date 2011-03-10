@@ -152,6 +152,8 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                     hitSurface
                 );
 
+                // Pout<< "vert " << vert << endl;
+
                 if (surfHit.hit())
                 {
                     vit->setNearBoundary();
@@ -176,10 +178,12 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                         );
                     }
                 }
+
+                // Pout<< "    surfHit " << surfHit << endl;
             }
         }
 
-        Info<< nl << "Initial conformation" << nl
+        Pout<< nl << "Initial conformation" << nl
             << "    Number of vertices " << number_of_vertices() << nl
             << "    Number of surface hits " << surfaceHits.size() << nl
             << "    Number of edge hits " << featureEdgeHits.size()
@@ -204,6 +208,171 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
         initialTotalHits = surfaceHits.size() + featureEdgeHits.size();
     }
 
+    label totalInterfacePoints = 0;
+
+    label nIter = 0;
+
+    if (Pstream::parRun())
+    {
+        do
+        {
+            // Propagating vertices to other processors to form halo information
+
+            DynamicList<Foam::point> parallelInterfacePoints;
+            DynamicList<label> targetProcessor;
+
+            for
+            (
+                Delaunay::Finite_vertices_iterator vit =
+                    finite_vertices_begin();
+                vit != finite_vertices_end();
+                vit++
+            )
+            {
+                if (vit->internalOrBoundaryPoint())
+                {
+                    List<label> toProcs = parallelInterfaceIntersection(vit);
+
+                    forAll(toProcs, tPI)
+                    {
+                        label toProc = toProcs[tPI];
+
+                        if (toProc > -1)
+                        {
+                            parallelInterfacePoints.append
+                            (
+                                topoint(vit->point())
+                            );
+
+                            targetProcessor.append(toProc);
+
+                            std::list<Vertex_handle> incidentVertices;
+
+                            incident_vertices
+                            (
+                                vit,
+                                std::back_inserter(incidentVertices)
+                            );
+
+                            for
+                            (
+                                std::list<Vertex_handle>::iterator ivit =
+                                    incidentVertices.begin();
+                                ivit != incidentVertices.end();
+                                ++ivit
+                            )
+                            {
+                                parallelInterfacePoints.append
+                                (
+                                    topoint((*ivit)->point())
+                                );
+
+                                targetProcessor.append(toProc);
+                            }
+                        }
+                    }
+                }
+            }
+
+            writePoints("parallelInterfacePoints.obj", parallelInterfacePoints);
+
+            // Determine send map
+            // ~~~~~~~~~~~~~~~~~~
+
+            // 1. Count
+            labelList nSend(Pstream::nProcs(), 0);
+
+            forAll(targetProcessor, i)
+            {
+                label procI = targetProcessor[i];
+
+                nSend[procI]++;
+            }
+
+            // Send over how many I need to receive
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            labelListList sendSizes(Pstream::nProcs());
+
+            sendSizes[Pstream::myProcNo()] = nSend;
+
+            combineReduce(sendSizes, UPstream::listEq());
+
+            // 2. Size sendMap
+            labelListList sendMap(Pstream::nProcs());
+
+            forAll(nSend, procI)
+            {
+                sendMap[procI].setSize(nSend[procI]);
+
+                nSend[procI] = 0;
+            }
+
+            // 3. Fill sendMap
+            forAll(targetProcessor, i)
+            {
+                label procI = targetProcessor[i];
+
+                sendMap[procI][nSend[procI]++] = i;
+            }
+
+            // Determine receive map
+            // ~~~~~~~~~~~~~~~~~~~~~
+
+            labelListList constructMap(Pstream::nProcs());
+
+            // Local transfers first
+            constructMap[Pstream::myProcNo()] = identity
+            (
+                sendMap[Pstream::myProcNo()].size()
+            );
+
+            label constructSize = constructMap[Pstream::myProcNo()].size();
+
+            forAll(constructMap, procI)
+            {
+                if (procI != Pstream::myProcNo())
+                {
+                    label nRecv = sendSizes[procI][Pstream::myProcNo()];
+
+                    constructMap[procI].setSize(nRecv);
+
+                    for (label i = 0; i < nRecv; i++)
+                    {
+                        constructMap[procI][i] = constructSize++;
+                    }
+                }
+            }
+
+            mapDistribute pointMap
+            (
+                constructSize,
+                sendMap.xfer(),
+                constructMap.xfer()
+            );
+
+            totalInterfacePoints = parallelInterfacePoints.size();
+
+            reduce(totalInterfacePoints, sumOp<label>());
+
+            pointMap.distribute(parallelInterfacePoints);
+
+            forAll(parallelInterfacePoints, ptI)
+            {
+                insertPoint
+                (
+                    parallelInterfacePoints[ptI],
+                    Vb::ptFarPoint
+                );
+            }
+
+            Info<< "totalInterfacePoints " << totalInterfacePoints << endl;
+
+            nIter++;
+
+        } while (totalInterfacePoints > 0 && nIter < 3);
+    }
+
     label iterationNo = 0;
 
     label maxIterations =
@@ -214,7 +383,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
     label hitLimit = label(iterationToIntialHitRatioLimit*initialTotalHits);
 
-    Info<< nl << "Stopping iterations when: " << nl
+    Pout<< nl << "Stopping iterations when: " << nl
         <<"    total number of hits drops below "
         << iterationToIntialHitRatioLimit << " of initial hits ("
         << hitLimit << ")" << nl
@@ -469,7 +638,8 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
     //     }
     // }
 
-    storeSurfaceConformation();
+    Pout<< "NOT STORING SURFACE CONFORMATION" << endl;
+    //storeSurfaceConformation();
 }
 
 
@@ -498,20 +668,7 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAnyIntersection
         }
 
         Foam::point dE0 = topoint(dual(fit->first));
-
-        // If edge end is outside bounding box then edge cuts boundary
-        if (!geometryToConformTo_.bounds().contains(dE0))
-        {
-            return true;
-        }
-
         Foam::point dE1 = topoint(dual(fit->first->neighbor(fit->second)));
-
-        // If other edge end is outside bounding box then edge cuts boundary
-        if (!geometryToConformTo_.bounds().contains(dE1))
-        {
-            return true;
-        }
 
         // Check for the edge passing through a surface
         if (geometryToConformTo_.findSurfaceAnyIntersection(dE0, dE1))
@@ -522,6 +679,115 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAnyIntersection
 
     return false;
 }
+
+
+Foam::List<Foam::label>
+Foam::conformalVoronoiMesh::parallelInterfaceIntersection
+(
+    const Delaunay::Finite_vertices_iterator& vit
+) const
+{
+    std::list<Facet> facets;
+    incident_facets(vit, std::back_inserter(facets));
+
+    DynamicList<label> procs;
+
+    for
+    (
+        std::list<Facet>::iterator fit=facets.begin();
+        fit != facets.end();
+        ++fit
+    )
+    {
+        if
+        (
+            is_infinite(fit->first)
+         || is_infinite(fit->first->neighbor(fit->second))
+        )
+        {
+            return procs;
+        }
+
+        Foam::point dE0 = topoint(dual(fit->first));
+        Foam::point dE1 = topoint(dual(fit->first->neighbor(fit->second)));
+
+        Foam::point boxPt(vector::one*GREAT);
+        direction ptOnFace = -1;
+
+        geometryToConformTo_.bounds().intersects
+        (
+            dE0,
+            dE1 - dE0,
+            dE0,
+            dE1,
+            boxPt,
+            ptOnFace
+        );
+
+        if
+        (
+            ptOnFace > 0
+         && !geometryToConformTo_.findSurfaceAnyIntersection(dE0, dE1)
+        )
+        {
+            // A surface penetration is not found, and a bounds penetration is
+            // found, so the dual edge has crossed the parallel interface.
+
+            label target = targetProc(ptOnFace);
+
+            if
+            (
+                target > -1
+             && findIndex(procs, target) == -1
+            )
+            {
+                procs.append(target);
+            }
+
+            // Pout<< "Parallel box penetration, face " << ptOnFace
+            //     << " proc " << target << endl;
+            // meshTools::writeOBJ(Pout, dE0);
+            // meshTools::writeOBJ(Pout, dE1);
+            // meshTools::writeOBJ(Pout, boxPt);
+            // Pout << "l 1 2" << endl;
+        }
+    }
+
+    return procs;
+}
+
+
+Foam::label Foam::conformalVoronoiMesh::targetProc
+(
+     direction ptOnFace
+) const
+{
+    // Hard coded to 8 proc, bound-box octant split:
+
+    label faceIndex = 0;
+
+    // From: http://graphics.stanford.edu/~seander/bithacks.html
+    while (ptOnFace >>= 1)
+    {
+        faceIndex++;
+    }
+
+    label procArray[8][6] =
+    {
+        {-1,  1, -1,  2, -1, 4},
+        { 0, -1, -1,  3, -1, 5},
+        {-1,  3,  0, -1, -1, 6},
+        { 2, -1,  1, -1, -1, 7},
+        {-1,  5, -1,  6,  0, -1},
+        { 4, -1, -1,  7,  1, -1},
+        {-1,  7,  4, -1,  2, -1},
+        { 6, -1,  5, -1,  3, -1}
+    };
+
+    return initListList<List<label>, label, 8, 6>(procArray)
+        [Pstream::myProcNo()][faceIndex];
+}
+
 
 
 void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
