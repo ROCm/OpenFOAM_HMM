@@ -62,15 +62,15 @@ std::vector<Vb::Point> uniformGrid::initialPoints() const
 
     scalar x0 = bb.min().x();
     scalar xR = bb.max().x() - x0;
-    label ni = label(xR/initialCellSize_) + 1;
+    label ni = label(xR/initialCellSize_);
 
     scalar y0 = bb.min().y();
     scalar yR = bb.max().y() - y0;
-    label nj = label(yR/initialCellSize_) + 1;
+    label nj = label(yR/initialCellSize_);
 
     scalar z0 = bb.min().z();
     scalar zR = bb.max().z() - z0;
-    label nk = label(zR/initialCellSize_) + 1;
+    label nk = label(zR/initialCellSize_);
 
     vector delta(xR/ni, yR/nj, zR/nk);
 

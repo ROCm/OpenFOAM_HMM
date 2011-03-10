@@ -218,8 +218,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
         {
             // Propagating vertices to other processors to form halo information
 
-            DynamicList<Foam::point> parallelInterfacePoints;
-            DynamicList<label> targetProcessor;
+            List<DynamicList<label> > verticesToProc(number_of_vertices());
 
             for
             (
@@ -233,19 +232,23 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                 {
                     List<label> toProcs = parallelInterfaceIntersection(vit);
 
+                    label vIndex = vit->index();
+
+                    DynamicList<label>& vertexToProc = verticesToProc[vIndex];
+
                     forAll(toProcs, tPI)
                     {
                         label toProc = toProcs[tPI];
 
                         if (toProc > -1)
                         {
-                            parallelInterfacePoints.append
-                            (
-                                topoint(vit->point())
-                            );
+                            if (findIndex(vertexToProc, toProc) == -1)
+                            {
+                                vertexToProc.append(toProc);
+                            }
 
-                            targetProcessor.append(toProc);
-
+                            // Refer all incident vertices to neighbour
+                            // processor too
                             std::list<Vertex_handle> incidentVertices;
 
                             incident_vertices
@@ -262,13 +265,49 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                                 ++ivit
                             )
                             {
-                                parallelInterfacePoints.append
-                                (
-                                    topoint((*ivit)->point())
-                                );
+                                label ivIndex = (*ivit)->index();
 
-                                targetProcessor.append(toProc);
+                                DynamicList<label>& iVertexToProc =
+                                    verticesToProc[ivIndex];
+
+                                if (findIndex(iVertexToProc, toProc) == -1)
+                                {
+                                    iVertexToProc.append(toProc);
+                                }
                             }
+                        }
+                    }
+                }
+            }
+
+            DynamicList<Foam::point> parallelInterfacePoints;
+            DynamicList<label> targetProcessor;
+
+            for
+            (
+                Delaunay::Finite_vertices_iterator vit =
+                    finite_vertices_begin();
+                vit != finite_vertices_end();
+                vit++
+            )
+            {
+                if (vit->internalOrBoundaryPoint())
+                {
+                    label vIndex = vit->index();
+
+                    const DynamicList<label>& vertexToProc =
+                        verticesToProc[vIndex];
+
+                    if (!verticesToProc.empty())
+                    {
+                        forAll(vertexToProc, vTPI)
+                        {
+                            parallelInterfacePoints.append
+                            (
+                                topoint(vit->point())
+                            );
+
+                            targetProcessor.append(vertexToProc[vTPI]);
                         }
                     }
                 }
@@ -357,13 +396,22 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
             pointMap.distribute(parallelInterfacePoints);
 
-            forAll(parallelInterfacePoints, ptI)
+            for (label domain = 0; domain < Pstream::nProcs(); domain++)
             {
-                insertPoint
-                (
-                    parallelInterfacePoints[ptI],
-                    Vb::ptFarPoint
-                );
+                const labelList& constructMap =
+                    pointMap.constructMap()[domain];
+
+                if (constructMap.size())
+                {
+                    forAll(constructMap, i)
+                    {
+                        insertPoint
+                        (
+                            parallelInterfacePoints[constructMap[i]],
+                           -(domain + 1)
+                        );
+                    }
+                }
             }
 
             Info<< "totalInterfacePoints " << totalInterfacePoints << endl;

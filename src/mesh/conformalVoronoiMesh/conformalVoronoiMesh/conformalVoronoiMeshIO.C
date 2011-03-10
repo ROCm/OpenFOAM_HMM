@@ -299,9 +299,6 @@ void Foam::conformalVoronoiMesh::writeMesh
 
     mesh.addFvPatches(patches);
 
-    Pout<< "Writing mesh to " << mesh.pointsInstance()
-        << " " << mesh.name() << endl;
-
     if (!mesh.write())
     {
         FatalErrorIn("Foam::conformalVoronoiMesh::writeMesh")

@@ -70,6 +70,10 @@ void Foam::conformalVoronoiMesh::calcDualMesh
             vit->index() = dualCellI;
             dualCellI++;
         }
+        else if (vit->referred())
+        {
+            vit->index() = -1;
+        }
         else
         {
             vit->type() = Vb::ptFarPoint;
@@ -1781,11 +1785,66 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 {
     patchNames = geometryToConformTo_.patchNames();
 
+    label nProcPatches = 0;
+
+    labelList procPatchIndices(0);
+
+    if (Pstream::parRun())
+    {
+
+        boolList procUsed(Pstream::nProcs(), false);
+
+        // Determine which processor patches are required
+        for
+        (
+            Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+            vit != finite_vertices_end();
+            vit++
+        )
+        {
+            if (vit->referred())
+            {
+                procUsed[vit->procIndex()] = true;
+            }
+        }
+
+        forAll(procUsed, pUI)
+        {
+            if (procUsed[pUI])
+            {
+                nProcPatches++;
+            }
+        }
+
+        label nNonProcPatches = patchNames.size();
+
+        patchNames.setSize(patchNames.size() + nProcPatches);
+
+        procPatchIndices.setSize(patchNames.size() + 1, -1);
+
+        label procAddI = 0;
+
+        forAll(procUsed, pUI)
+        {
+            if (procUsed[pUI])
+            {
+                patchNames[nNonProcPatches + procAddI] =
+                    "proc_" + name(Pstream::myProcNo()) + "_" + name(pUI);
+
+                procPatchIndices[nNonProcPatches + procAddI] = pUI;
+
+                procAddI++;
+            }
+        }
+    }
+
     patchNames.setSize(patchNames.size() + 1);
 
     label defaultPatchIndex = patchNames.size() - 1;
 
     patchNames[defaultPatchIndex] = "cvMesh_defaultPatch";
+
+    Pout<< patchNames << endl;
 
     label nPatches = patchNames.size();
 
@@ -1837,7 +1896,21 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                     Foam::point ptA = topoint(vA->point());
                     Foam::point ptB = topoint(vB->point());
 
-                    label patchIndex = geometryToConformTo_.findPatch(ptA, ptB);
+                    label patchIndex = -1;
+
+                    if (vA->referred() || vB->referred())
+                    {
+                        // One (and only one) of the points is from another
+                        // processor
+
+                        label procIndex = max(vA->procIndex(), vB->procIndex());
+
+                        patchIndex = findIndex(procPatchIndices, procIndex);
+                    }
+                    else
+                    {
+                        patchIndex = geometryToConformTo_.findPatch(ptA, ptB);
+                    }
 
                     if (patchIndex == -1)
                     {

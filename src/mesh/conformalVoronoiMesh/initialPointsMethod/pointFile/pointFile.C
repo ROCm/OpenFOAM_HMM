@@ -74,6 +74,7 @@ std::vector<Vb::Point> pointFile::initialPoints() const
             << exit(FatalError) << endl;
     }
 
+    // Filter the points to be only those on this processor
     boolList procPt(points.size(), false);
 
     forAll(points, ptI)
