@@ -49,9 +49,9 @@ void Foam::hierarchicalDensityWeightedStochastic::writeOBJ
     fileName name
 ) const
 {
-    OFstream str(name + ".obj");
+    OFstream str(cvMesh_.time().path()/name + ".obj");
 
-    Info<< "Writing " << str.name() << endl;
+    Pout<< "Writing " << str.name() << endl;
 
     label vertI = 0;
 

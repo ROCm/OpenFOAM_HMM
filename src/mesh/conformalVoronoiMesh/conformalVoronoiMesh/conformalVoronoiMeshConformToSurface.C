@@ -698,7 +698,7 @@ void Foam::conformalVoronoiMesh::limitDisplacement
     pointIndexHit surfHit;
     label hitSurface;
 
-    if (!geometryToConformTo_.bounds().contains(dispPt))
+    if (!geometryToConformTo_.globalBounds().contains(dispPt))
     {
         // If dispPt is outside bounding box then displacement cuts boundary
         limit = true;

@@ -90,8 +90,11 @@ class conformationSurfaces
         //  the entry in the overall patch list
         labelList patchOffsets_;
 
+        //- The boundBox of volume to be conformed to on this processor
+        treeBoundBox bounds_;
+
         //- The overall boundBox of all of the surfaces to be conformed to
-        boundBox bounds_;
+        treeBoundBox globalBounds_;
 
         //- Magnitude of the span of the domain
         scalar spanMag_;
@@ -148,8 +151,11 @@ public:
             //- Return the patch names
             inline const List<word>& patchNames() const;
 
-            //- Return the boundBox
-            inline const boundBox& bounds() const;
+            //- Return the bounds
+            inline const treeBoundBox& bounds() const;
+
+            //- Return the global bounds
+            inline const treeBoundBox& globalBounds() const;
 
             //- Return the spanMag
             inline scalar spanMag() const;
@@ -162,7 +168,7 @@ public:
 
             //- Check if the supplied bound box overlaps any part of any of
             //  the surfaces
-            bool overlaps(const boundBox& bb) const;
+            bool overlaps(const treeBoundBox& bb) const;
 
             //- Check if points are inside surfaces to conform to
             Field<bool> inside(const pointField& samplePts) const;

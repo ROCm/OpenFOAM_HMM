@@ -73,9 +73,9 @@ void Foam::conformalVoronoiMesh::writePoints
     bool internalOnly
 ) const
 {
-    Info<< nl << "Writing points to " << fName << endl;
+    OFstream str(runTime_.path()/fName);
 
-    OFstream str(fName);
+    Pout<< nl << "Writing points to " << str.name() << endl;
 
     for
     (
@@ -100,10 +100,10 @@ void Foam::conformalVoronoiMesh::writePoints
 {
     if (points.size())
     {
-        Info<< nl << "Writing " << points.size() << " points from pointList to "
-            << fName << endl;
+        OFstream str(runTime_.path()/fName);
 
-        OFstream str(fName);
+        Pout<< nl << "Writing " << points.size() << " points from pointList to "
+            << str.name() << endl;
 
         forAll(points, p)
         {
@@ -299,6 +299,9 @@ void Foam::conformalVoronoiMesh::writeMesh
 
     mesh.addFvPatches(patches);
 
+    Pout<< "Writing mesh to " << mesh.pointsInstance()
+        << " " << mesh.name() << endl;
+
     if (!mesh.write())
     {
         FatalErrorIn("Foam::conformalVoronoiMesh::writeMesh")
@@ -340,9 +343,9 @@ void Foam::conformalVoronoiMesh::writeObjMesh
     const fileName& fName
 ) const
 {
-    Info<< nl << "Writing points and faces to " << fName << endl;
+    OFstream str(runTime_.path()/fName);
 
-    OFstream str(fName);
+    Pout<< nl << "Writing points and faces to " << str.name() << endl;
 
     forAll(points, p)
     {

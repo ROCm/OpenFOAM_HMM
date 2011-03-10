@@ -41,32 +41,19 @@ Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
     geometryToConformTo_.findSurfaceNearest
     (
         pt,
-        geometryToConformTo_.spanMagSqr(),
+        sqr(GREAT),
         surfHit,
         hitSurface
     );
 
     if (!surfHit.hit())
     {
-        FatalErrorIn("conformalVoronoiMesh::requiredAlignment")
-            << "findSurfaceNearest did not find a hit across the span of the "
-            << "surfaces."
-            << exit(FatalError) << endl;
-
-        WarningIn
+        FatalErrorIn
         (
             "Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment"
         )
-            << "findSurfaceNearest did not find a hit across the span of the "
-            << "surfaces for point " << pt << endl;
-
-        geometryToConformTo_.findSurfaceNearest
-        (
-            pt,
-            sqr(GREAT),
-            surfHit,
-            hitSurface
-        );
+            << "findSurfaceNearest did not find a hit across the surfaces."
+            << exit(FatalError) << endl;
     }
 
     // Primary alignment
@@ -97,6 +84,8 @@ Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
 
     label closestSpokeSurface = -1;
 
+    scalar spanMag = geometryToConformTo_.globalBounds().mag();
+
     for(label i = 0; i < s; i++)
     {
         vector spoke
@@ -106,7 +95,7 @@ Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
             0
         );
 
-        spoke *= geometryToConformTo_.spanMag();
+        spoke *= spanMag;
 
         spoke = Rp & spoke;
 
@@ -906,8 +895,6 @@ void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
 {
     Info<< nl << "Looking up target cell alignment and size" << endl;
 
-    scalar spanSqr = geometryToConformTo_.spanMagSqr();
-
     const indexedOctree<treeDataPoint>& tree = sizeAndAlignmentTree();
 
     for
@@ -921,7 +908,7 @@ void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
         {
             Foam::point pt(topoint(vit->point()));
 
-            pointIndexHit info = tree.findNearest(pt, spanSqr);
+            pointIndexHit info = tree.findNearest(pt, sqr(GREAT));
 
             if (info.hit())
             {
@@ -1349,10 +1336,8 @@ void Foam::conformalVoronoiMesh::move()
             Foam::point dVA = topoint(vA->point());
             Foam::point dVB = topoint(vB->point());
 
-            Field<vector> alignmentDirsA =
-                vA->alignment() & cartesianDirections;
-            Field<vector> alignmentDirsB =
-                vB->alignment() & cartesianDirections;
+            Field<vector> alignmentDirsA(vA->alignment() & cartesianDirections);
+            Field<vector> alignmentDirsB(vB->alignment() & cartesianDirections);
 
             Field<vector> alignmentDirs(3);
 
@@ -1587,6 +1572,8 @@ void Foam::conformalVoronoiMesh::move()
                 // "Memory issue with openSUSE 11.3, exact kernel, adding
                 //  points/vectors"
                 // 14/1/2011.
+                // Only necessary if using an exact constructions kernel
+                // (extended precision)
 
                 pointsToInsert.push_back
                 (

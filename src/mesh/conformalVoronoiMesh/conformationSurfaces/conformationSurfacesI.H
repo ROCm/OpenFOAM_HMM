@@ -50,9 +50,15 @@ const Foam::List<Foam::word>& Foam::conformationSurfaces::patchNames() const
 }
 
 
-const Foam::boundBox& Foam::conformationSurfaces::bounds() const
+const Foam::treeBoundBox& Foam::conformationSurfaces::bounds() const
 {
     return bounds_;
+}
+
+
+const Foam::treeBoundBox& Foam::conformationSurfaces::globalBounds() const
+{
+    return globalBounds_;
 }
 
 

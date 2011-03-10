@@ -45,6 +45,7 @@ Foam::conformationSurfaces::conformationSurfaces
     patchNames_(0),
     patchOffsets_(),
     bounds_(),
+    globalBounds_(),
     spanMag_(),
     spanMagSqr_(),
     referenceVolumeTypes_(0)
@@ -233,7 +234,74 @@ Foam::conformationSurfaces::conformationSurfaces
     // Remove unnecessary space from the features list
     features_.setSize(featureI);
 
-    bounds_ = searchableSurfacesQueries::bounds(allGeometry_, surfaces_);
+    globalBounds_ = treeBoundBox
+    (
+        searchableSurfacesQueries::bounds(allGeometry_, surfaces_)
+    );
+
+    if (Pstream::parRun())
+    {
+        if (Pstream::nProcs() != 8)
+        {
+            FatalErrorIn
+            (
+                "Foam::conformationSurfaces::conformationSurfaces"
+                "("
+                    "const conformalVoronoiMesh& cvMesh, "
+                    "const searchableSurfaces& allGeometry, "
+                    "const dictionary& surfaceConformationDict"
+                ")"
+            )
+                << "Hard coded to 8 procs"
+                << exit(FatalError);
+        }
+        else
+        {
+            bounds_ = globalBounds_.subBbox
+            (
+                direction(Pstream::myProcNo())
+            );
+        }
+    }
+    else
+    {
+        bounds_ = globalBounds_;
+    }
+
+    Info<< "global bounds " << globalBounds_ << endl;
+
+    if (Pstream::parRun())
+    {
+        Pout<< " proc bounds " << bounds_ << endl;
+
+        OFstream str
+        (
+            cvMesh_.time().path()
+           /"proc_" + name(Pstream::myProcNo()) + "_bounds.obj"
+        );
+
+        Pout<< "Writing " << str.name() << endl;
+
+        pointField bbPoints(bounds_.points());
+
+        forAll(bbPoints, i)
+        {
+            meshTools::writeOBJ(str, bbPoints[i]);
+        }
+
+        forAll(treeBoundBox::faces, i)
+        {
+            const face& f = treeBoundBox::faces[i];
+
+            str << "f"
+                << ' ' << f[0] + 1
+                << ' ' << f[1] + 1
+                << ' ' << f[2] + 1
+                << ' ' << f[3] + 1
+                << nl;
+        }
+
+    }
 
     spanMag_ = bounds_.mag();
 
@@ -279,7 +347,7 @@ Foam::conformationSurfaces::~conformationSurfaces()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::conformationSurfaces::overlaps(const boundBox& bb) const
+bool Foam::conformationSurfaces::overlaps(const treeBoundBox& bb) const
 {
     forAll(surfaces_, s)
     {
@@ -726,7 +794,8 @@ void Foam::conformationSurfaces::findEdgeNearestByType
 
 void Foam::conformationSurfaces::writeFeatureObj(const fileName& prefix) const
 {
-    OFstream ftStr(prefix + "_allFeatures.obj");
+    OFstream ftStr(cvMesh_.time().path()/prefix + "_allFeatures.obj");
+
     Pout<< nl << "Writing all features to " << ftStr.name() << endl;
 
     label verti = 0;

@@ -602,7 +602,7 @@ void Foam::conformalVoronoiMesh::smoothSurface
                 geometryToConformTo_.findSurfaceNearest
                 (
                     pt,
-                    geometryToConformTo_.spanMagSqr(),
+                    sqr(GREAT),
                     surfHit,
                     hitSurface
                 );
@@ -691,7 +691,7 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
             geometryToConformTo_.findSurfaceNearest
             (
                 dualFace.centre(pts),
-                geometryToConformTo_.spanMagSqr(),
+                sqr(GREAT),
                 surfHit,
                 hitSurface
             );
