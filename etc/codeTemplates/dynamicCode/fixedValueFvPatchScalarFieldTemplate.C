@@ -76,7 +76,8 @@ makeRemovablePatchTypeField
 );
 
 
-const char* ${typeName}FixedValueFvPatchScalarField::SHA1sum = "${SHA1sum}";
+const char* const ${typeName}FixedValueFvPatchScalarField::SHA1sum =
+    "${SHA1sum}";
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
