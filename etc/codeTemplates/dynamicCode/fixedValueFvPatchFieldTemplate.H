@@ -21,21 +21,19 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::fixedValueFvPatchScalarFieldTemplate
-
 Description
-    Template for use with onTheFlyFixedValue.
-    - fixedValueFvPatchScalarField
+    Template for use with dynamic code generation of a
+    fixedValue fvPatchField.
+
     - without state
 
 SourceFiles
-    fixedValueFvPatchScalarFieldTemplate.C
+    fixedValueFvPatchFieldTemplate.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedValueFvPatchScalarFieldTemplate_H
-#define fixedValueFvPatchScalarFieldTemplate_H
+#ifndef fixedValueFvPatchTemplate${FieldType}_H
+#define fixedValueFvPatchTemplate${FieldType}_H
 
 #include "fixedValueFvPatchFields.H"
 
@@ -45,14 +43,13 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-             Class fixedValueFvPatchScalarField Declaration
+                         A templated FixedValueFvPatch
 \*---------------------------------------------------------------------------*/
 
-class ${typeName}FixedValueFvPatchScalarField
+class ${typeName}FixedValueFvPatch${FieldType}
 :
-    public fixedValueFvPatchScalarField
+    public fixedValueFvPatchField<${TemplateType}>
 {
-
 public:
 
     //- Information about the SHA1 of the code itself
@@ -65,75 +62,72 @@ public:
     // Constructors
 
         //- Construct from patch and internal field
-        ${typeName}FixedValueFvPatchScalarField
+        ${typeName}FixedValueFvPatch${FieldType}
         (
             const fvPatch&,
-            const DimensionedField<scalar, volMesh>&
+            const DimensionedField<${TemplateType}, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        ${typeName}FixedValueFvPatchScalarField
+        ${typeName}FixedValueFvPatch${FieldType}
         (
             const fvPatch&,
-            const DimensionedField<scalar, volMesh>&,
+            const DimensionedField<${TemplateType}, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given
-        //  ${typeName}FixedValueFvPatchScalarField
-        //  onto a new patch
-        ${typeName}FixedValueFvPatchScalarField
+        //- Construct by mapping a copy onto a new patch
+        ${typeName}FixedValueFvPatch${FieldType}
         (
-            const ${typeName}FixedValueFvPatchScalarField&,
+            const ${typeName}FixedValueFvPatch${FieldType}&,
             const fvPatch&,
-            const DimensionedField<scalar, volMesh>&,
+            const DimensionedField<${TemplateType}, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        ${typeName}FixedValueFvPatchScalarField
+        ${typeName}FixedValueFvPatch${FieldType}
         (
-            const ${typeName}FixedValueFvPatchScalarField&
+            const ${typeName}FixedValueFvPatch${FieldType}&
         );
 
         //- Construct and return a clone
-        virtual tmp<fvPatchScalarField> clone() const
+        virtual tmp< fvPatch${FieldType} > clone() const
         {
-            return tmp<fvPatchScalarField>
+            return tmp< fvPatch${FieldType} >
             (
-                new ${typeName}FixedValueFvPatchScalarField(*this)
+                new ${typeName}FixedValueFvPatch${FieldType}(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        ${typeName}FixedValueFvPatchScalarField
+        ${typeName}FixedValueFvPatch${FieldType}
         (
-            const ${typeName}FixedValueFvPatchScalarField&,
-            const DimensionedField<scalar, volMesh>&
+            const ${typeName}FixedValueFvPatch${FieldType}&,
+            const DimensionedField<${TemplateType}, volMesh>&
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchScalarField> clone
+        virtual tmp< fvPatch${FieldType} > clone
         (
-            const DimensionedField<scalar, volMesh>& iF
+            const DimensionedField<${TemplateType}, volMesh>& iF
         ) const
         {
-            return tmp<fvPatchScalarField>
+            return tmp< fvPatch${FieldType} >
             (
-                new ${typeName}FixedValueFvPatchScalarField(*this, iF)
+                new ${typeName}FixedValueFvPatch${FieldType}(*this, iF)
             );
         }
 
+
     //- Destructor
-    virtual ~${typeName}FixedValueFvPatchScalarField();
+    virtual ~${typeName}FixedValueFvPatch${FieldType}();
 
 
     // Member functions
 
-        // Evaluation functions
-
-            //- Update the coefficients associated with the patch field
-            virtual void updateCoeffs();
+        //- Update the coefficients associated with the patch field
+        virtual void updateCoeffs();
 };
 
 
