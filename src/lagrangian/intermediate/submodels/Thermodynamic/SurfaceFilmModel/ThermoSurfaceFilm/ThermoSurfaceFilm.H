@@ -228,7 +228,8 @@ protected:
                 const label filmPatchI,
                 const label primaryPatchI,
                 const mapDistribute& distMap,
-                const regionModels::surfaceFilmModels::surfaceFilmModel& filmModel
+                const regionModels::surfaceFilmModels::surfaceFilmModel&
+                    filmModel
             );
 
             //- Set the individual parcel properties
