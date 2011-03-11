@@ -24,8 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "SurfaceFilmModel.H"
-#include "mathematicalConstants.H"
 #include "surfaceFilmModel.H"
+#include "mathematicalConstants.H"
 #include "directMappedWallPolyPatch.H"
 
 using namespace Foam::constant;
