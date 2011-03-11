@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,13 +27,13 @@ Class
 Description
     Laplace filter for LES
 
-    @verbatim
+    \verbatim
     Kernel                 as filter          as Test filter with ratio 2
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Box filter:            g = delta2/24  ->  g = delta2/6
     Spherical box filter:  g = delta2/64  ->  g = delta2/16
     Gaussian filter:       g = delta2/24  ->  g = delta2/6
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     laplaceFilter.C

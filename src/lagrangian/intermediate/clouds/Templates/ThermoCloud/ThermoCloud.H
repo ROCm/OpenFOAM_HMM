@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,16 +57,23 @@ class HeatTransferModel;
                         Class ThermoCloud Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ParcelType>
+template<class CloudType>
 class ThermoCloud
 :
-    public KinematicCloud<ParcelType>,
+    public CloudType,
     public thermoCloud
 {
+public:
+
+    //- Type of parcel the cloud was instantiated for
+    typedef typename CloudType::particleType parcelType;
+
+private:
+
     // Private data
 
         //- Cloud copy pointer
-        autoPtr<ThermoCloud<ParcelType> > cloudCopyPtr_;
+        autoPtr<ThermoCloud<CloudType> > cloudCopyPtr_;
 
 
     // Private member functions
@@ -83,7 +90,7 @@ protected:
     // Protected data
 
         //- Thermo parcel constant properties
-        typename ParcelType::constantProperties constProps_;
+        typename parcelType::constantProperties constProps_;
 
 
         // References to the carrier gas fields
@@ -101,7 +108,7 @@ protected:
         // References to the cloud sub-models
 
             //- Heat transfer model
-            autoPtr<HeatTransferModel<ThermoCloud<ParcelType> > >
+            autoPtr<HeatTransferModel<ThermoCloud<CloudType> > >
                 heatTransferModel_;
 
 
@@ -137,10 +144,12 @@ protected:
         // Cloud evolution functions
 
             //- Reset state of cloud
-            void cloudReset(ThermoCloud<ParcelType>& c);
+            void cloudReset(ThermoCloud<CloudType>& c);
 
 
 public:
+
+    typedef CloudType cloudType;
 
     // Constructors
 
@@ -156,29 +165,29 @@ public:
         );
 
         //- Copy constructor with new name
-        ThermoCloud(ThermoCloud<ParcelType>& c, const word& name);
+        ThermoCloud(ThermoCloud<CloudType>& c, const word& name);
 
         //- Copy constructor with new name - creates bare cloud
         ThermoCloud
         (
             const fvMesh& mesh,
             const word& name,
-            const ThermoCloud<ParcelType>& c
+            const ThermoCloud<CloudType>& c
         );
 
         //- Construct and return clone based on (this) with new name
-        virtual autoPtr<Cloud<ParcelType> > clone(const word& name)
+        virtual autoPtr<Cloud<parcelType> > clone(const word& name)
         {
-            return autoPtr<Cloud<ParcelType> >
+            return autoPtr<Cloud<parcelType> >
             (
                 new ThermoCloud(*this, name)
             );
         }
 
         //- Construct and return bare clone based on (this) with new name
-        virtual autoPtr<Cloud<ParcelType> > cloneBare(const word& name) const
+        virtual autoPtr<Cloud<parcelType> > cloneBare(const word& name) const
         {
-            return autoPtr<Cloud<ParcelType> >
+            return autoPtr<Cloud<parcelType> >
             (
                 new ThermoCloud(this->mesh(), name, *this)
             );
@@ -189,10 +198,6 @@ public:
     virtual ~ThermoCloud();
 
 
-    //- Type of parcel the cloud was instantiated for
-    typedef ParcelType parcelType;
-
-
     // Member Functions
 
         // Access
@@ -201,7 +206,7 @@ public:
             inline const ThermoCloud& cloudCopy() const;
 
             //- Return the constant properties
-            inline const typename ParcelType::constantProperties&
+            inline const typename parcelType::constantProperties&
                 constProps() const;
 
             //- Return const access to thermo package
@@ -217,7 +222,7 @@ public:
             // Sub-models
 
                 //- Return reference to heat transfer model
-                inline const HeatTransferModel<ThermoCloud<ParcelType> >&
+                inline const HeatTransferModel<ThermoCloud<CloudType> >&
                     heatTransfer() const;
 
 
@@ -272,7 +277,7 @@ public:
             //- Check parcel properties
             void checkParcelProperties
             (
-                ParcelType& parcel,
+                parcelType& parcel,
                 const scalar lagrangianDt,
                 const bool fullyDescribed
             );
@@ -287,7 +292,7 @@ public:
             void resetSourceTerms();
 
             //- Apply relaxation to (steady state) cloud sources
-            void relaxSources(const ThermoCloud<ParcelType>& cloudOldTime);
+            void relaxSources(const ThermoCloud<CloudType>& cloudOldTime);
 
             //- Evolve the cloud
             void evolve();
@@ -297,7 +302,6 @@ public:
 
             //- Print cloud information
             void info() const;
-
 };
 
 

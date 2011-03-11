@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ License
 template<class ParcelType>
 inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties()
 :
-    KinematicParcel<ParcelType>::constantProperties(),
+    ParcelType::constantProperties(),
     T0_(0.0),
     TMin_(0.0),
     Cp0_(0.0),
@@ -44,7 +44,7 @@ inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
     const constantProperties& cp
 )
 :
-    KinematicParcel<ParcelType>::constantProperties(cp),
+    ParcelType::constantProperties(cp),
     T0_(cp.T0_),
     TMin_(cp.TMin_),
     Cp0_(cp.Cp0_),
@@ -61,7 +61,7 @@ inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
     const bool readFields
 )
 :
-    KinematicParcel<ParcelType>::constantProperties(parentDict, readFields),
+    ParcelType::constantProperties(parentDict, readFields),
     T0_(0.0),
     TMin_(0.0),
     Cp0_(0.0),
@@ -82,70 +82,16 @@ inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
 
 
 template<class ParcelType>
-inline Foam::ThermoParcel<ParcelType>::trackData::trackData
-(
-    ThermoCloud<ParcelType>& cloud,
-    typename KinematicParcel<ParcelType>::trackData::trackPart part
-)
-:
-    KinematicParcel<ParcelType>::trackData(cloud, part),
-    cloud_(cloud),
-    Cp_
-    (
-        IOobject
-        (
-            "Cp",
-            cloud.db().time().timeName(),
-            cloud.db(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        cloud.thermo().thermo().Cp()
-    ),
-    TInterp_
-    (
-        interpolation<scalar>::New
-        (
-            cloud.solution().interpolationSchemes(),
-            cloud.T()
-        )
-    ),
-    CpInterp_
-    (
-        interpolation<scalar>::New
-        (
-            cloud.solution().interpolationSchemes(),
-            Cp_
-        )
-    ),
-    GInterp_(NULL)
-{
-    if (cloud.radiation())
-    {
-        GInterp_.reset
-        (
-            interpolation<scalar>::New
-            (
-                cloud.solution().interpolationSchemes(),
-                cloud.mesh().objectRegistry::template
-                    lookupObject<volScalarField>("G")
-            ).ptr()
-        );
-    }
-}
-
-
-template<class ParcelType>
 inline Foam::ThermoParcel<ParcelType>::ThermoParcel
 (
-    ThermoCloud<ParcelType>& owner,
+    const polyMesh& mesh,
     const vector& position,
     const label cellI,
     const label tetFaceI,
     const label tetPtI
 )
 :
-    KinematicParcel<ParcelType>(owner, position, cellI, tetFaceI, tetPtI),
+    ParcelType(mesh, position, cellI, tetFaceI, tetPtI),
     T_(0.0),
     Cp_(0.0),
     Tc_(0.0),
@@ -156,7 +102,7 @@ inline Foam::ThermoParcel<ParcelType>::ThermoParcel
 template<class ParcelType>
 inline Foam::ThermoParcel<ParcelType>::ThermoParcel
 (
-    ThermoCloud<ParcelType>& owner,
+    const polyMesh& mesh,
     const vector& position,
     const label cellI,
     const label tetFaceI,
@@ -172,9 +118,9 @@ inline Foam::ThermoParcel<ParcelType>::ThermoParcel
     const constantProperties& constProps
 )
 :
-    KinematicParcel<ParcelType>
+    ParcelType
     (
-        owner,
+        mesh,
         position,
         cellI,
         tetFaceI,
@@ -246,58 +192,6 @@ Foam::ThermoParcel<ParcelType>::constantProperties::Pr() const
 }
 
 
-// * * * * * * * * * * * trackData Member Functions  * * * * * * * * * * * * //
-
-template<class ParcelType>
-inline Foam::ThermoCloud<ParcelType>&
-Foam::ThermoParcel<ParcelType>::trackData::cloud()
-{
-    return cloud_;
-}
-
-
-template<class ParcelType>
-inline const Foam::volScalarField&
-Foam::ThermoParcel<ParcelType>::trackData::Cp() const
-{
-    return Cp_;
-}
-
-
-template<class ParcelType>
-inline const Foam::interpolation<Foam::scalar>&
-Foam::ThermoParcel<ParcelType>::trackData::TInterp() const
-{
-    return TInterp_();
-}
-
-
-template<class ParcelType>
-inline const Foam::interpolation<Foam::scalar>&
-Foam::ThermoParcel<ParcelType>::trackData::CpInterp() const
-{
-    return CpInterp_();
-}
-
-
-template<class ParcelType>
-inline const Foam::interpolation<Foam::scalar>&
-Foam::ThermoParcel<ParcelType>::trackData::GInterp() const
-{
-    if (!GInterp_.valid())
-    {
-        FatalErrorIn
-        (
-            "inline const Foam::interpolation<Foam::scalar>&"
-            "Foam::ThermoParcel<ParcelType>::trackData::GInterp() const"
-        )   << "Radiation G interpolation object not set"
-            << abort(FatalError);
-    }
-
-    return GInterp_();
-}
-
-
 // * * * * * * * * * * ThermoParcel Member Functions * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -318,6 +212,20 @@ template<class ParcelType>
 inline Foam::scalar Foam::ThermoParcel<ParcelType>::hs() const
 {
     return Cp_*(T_ - 298.15);
+}
+
+
+template<class ParcelType>
+inline Foam::scalar Foam::ThermoParcel<ParcelType>::Tc() const
+{
+    return Tc_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar Foam::ThermoParcel<ParcelType>::Cpc() const
+{
+    return Cpc_;
 }
 
 

@@ -230,7 +230,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::drySplashInteraction
         Info<< "Parcel " << p.origId() << " drySplashInteraction" << endl;
     }
 
-    const liquid& liq = thermo_.liquids().properties()[0];
+    const liquidProperties& liq = thermo_.liquids().properties()[0];
 
     // Patch face velocity and normal
     const vector& Up = this->owner().U().boundaryField()[pp.index()][faceI];
@@ -286,7 +286,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::wetSplashInteraction
         Info<< "Parcel " << p.origId() << " wetSplashInteraction" << endl;
     }
 
-    const liquid& liq = thermo_.liquids().properties()[0];
+    const liquidProperties& liq = thermo_.liquids().properties()[0];
 
     // Patch face velocity and normal
     const vector& Up = this->owner().U().boundaryField()[pp.index()][faceI];
@@ -447,7 +447,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::splashInteraction
         // Create a new parcel by copying source parcel
         parcelType* pPtr = new parcelType(p);
 
-        pPtr->origId() = this->owner().getNewParticleID();
+        pPtr->origId() = pPtr->getNewParticleID();
 
         pPtr->origProc() = Pstream::myProcNo();
 

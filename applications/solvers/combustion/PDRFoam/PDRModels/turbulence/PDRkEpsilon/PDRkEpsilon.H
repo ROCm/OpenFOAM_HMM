@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,8 +25,7 @@ Class
     Foam::compressible::RASModels::PDRkEpsilon
 
 Description
-    Standard k-epsilon turbulence model for compressible flow
-    with additional source terms
+    Standard k-epsilon turbulence model with additional source terms
     corresponding to PDR basic drag model (\link basic.H \endlink)
 
     The default model coefficients correspond to the following:
@@ -37,6 +36,7 @@ Description
             C1          1.44;
             C2          1.92;
             C3          -0.33;  // only for compressible
+            C4          0.1;
             sigmak      1.0;    // only for compressible
             sigmaEps    1.3;
             Prt         1.0;    // only for compressible
@@ -60,7 +60,7 @@ SourceFiles
 #ifndef compressiblePDRkEpsilon_H
 #define compressiblePDRkEpsilon_H
 
-#include "RASModel.H"
+
 #include "kEpsilon.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -80,6 +80,11 @@ class PDRkEpsilon
 :
     public kEpsilon
 {
+    // Private data
+
+        // Model coefficients
+        dimensionedScalar C4_;
+
 
 public:
 
@@ -102,15 +107,16 @@ public:
 
 
     //- Destructor
-    virtual ~PDRkEpsilon()
-    {}
+    virtual ~PDRkEpsilon();
 
 
     // Member Functions
 
         //- Solve the turbulence equations and correct the turbulence viscosity
-        virtual void correct();
+        void correct();
 
+        //- Read turbulenceProperties dictionary
+        bool read();
 };
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ License
 
 template<class ParcelType>
 Foam::string Foam::ThermoParcel<ParcelType>::propHeader =
-    KinematicParcel<ParcelType>::propHeader
+    ParcelType::propHeader
   + " T"
   + " Cp";
 
@@ -40,12 +40,12 @@ Foam::string Foam::ThermoParcel<ParcelType>::propHeader =
 template<class ParcelType>
 Foam::ThermoParcel<ParcelType>::ThermoParcel
 (
-    const Cloud<ParcelType>& cloud,
+    const polyMesh& mesh,
     Istream& is,
     bool readFields
 )
 :
-    KinematicParcel<ParcelType>(cloud, is, readFields),
+    ParcelType(mesh, is, readFields),
     T_(0.0),
     Cp_(0.0),
     Tc_(0.0),
@@ -72,20 +72,21 @@ Foam::ThermoParcel<ParcelType>::ThermoParcel
     // Check state of Istream
     is.check
     (
-        "ThermoParcel::ThermoParcel(const Cloud<ParcelType>&, Istream&, bool)"
+        "ThermoParcel::ThermoParcel(const polyMesh&, Istream&, bool)"
     );
 }
 
 
 template<class ParcelType>
-void Foam::ThermoParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
+template<class CloudType>
+void Foam::ThermoParcel<ParcelType>::readFields(CloudType& c)
 {
     if (!c.size())
     {
         return;
     }
 
-    KinematicParcel<ParcelType>::readFields(c);
+    ParcelType::readFields(c);
 
     IOField<scalar> T(c.fieldIOobject("T", IOobject::MUST_READ));
     c.checkFieldIOobject(c, T);
@@ -95,7 +96,7 @@ void Foam::ThermoParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
 
 
     label i = 0;
-    forAllIter(typename Cloud<ParcelType>, c, iter)
+    forAllIter(typename Cloud<ThermoParcel<ParcelType> >, c, iter)
     {
         ThermoParcel<ParcelType>& p = iter();
 
@@ -107,9 +108,10 @@ void Foam::ThermoParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
 
 
 template<class ParcelType>
-void Foam::ThermoParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
+template<class CloudType>
+void Foam::ThermoParcel<ParcelType>::writeFields(const CloudType& c)
 {
-    KinematicParcel<ParcelType>::writeFields(c);
+    ParcelType::writeFields(c);
 
     label np =  c.size();
 
@@ -117,7 +119,7 @@ void Foam::ThermoParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
     IOField<scalar> Cp(c.fieldIOobject("Cp", IOobject::NO_READ), np);
 
     label i = 0;
-    forAllConstIter(typename Cloud<ParcelType>, c, iter)
+    forAllConstIter(typename Cloud<ThermoParcel<ParcelType> >, c, iter)
     {
         const ThermoParcel<ParcelType>& p = iter();
 
@@ -142,13 +144,13 @@ Foam::Ostream& Foam::operator<<
 {
     if (os.format() == IOstream::ASCII)
     {
-        os  << static_cast<const KinematicParcel<ParcelType>&>(p)
+        os  << static_cast<const ParcelType&>(p)
             << token::SPACE << p.T()
             << token::SPACE << p.Cp();
     }
     else
     {
-        os  << static_cast<const KinematicParcel<ParcelType>&>(p);
+        os  << static_cast<const ParcelType&>(p);
         os.write
         (
             reinterpret_cast<const char*>(&p.T_),

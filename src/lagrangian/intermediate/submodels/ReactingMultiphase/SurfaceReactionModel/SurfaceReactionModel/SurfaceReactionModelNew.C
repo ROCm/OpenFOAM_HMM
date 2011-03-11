@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,9 +35,9 @@ Foam::SurfaceReactionModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType(dict.lookup("SurfaceReactionModel"));
+    const word modelType(dict.lookup("surfaceReactionModel"));
 
-    Info<< "Selecting SurfaceReactionModel " << modelType << endl;
+    Info<< "Selecting surface reaction model " << modelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
@@ -51,9 +51,9 @@ Foam::SurfaceReactionModel<CloudType>::New
                 "const dictionary&, "
                 "CloudType&"
             ")"
-        )   << "Unknown SurfaceReactionModel type "
+        )   << "Unknown surface reaction model type "
             << modelType << nl << nl
-            << "Valid SurfaceReactionModel types are:" << nl
+            << "Valid surface reaction model types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

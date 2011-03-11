@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -180,9 +180,10 @@ public:
         //    - leading "~user" : home directory for specified user
         //    - leading "~OpenFOAM" : site/user OpenFOAM configuration directory
         //
-        //  @sa
+        //  Any unknown entries are removed silently if allowEmpty is true
+        //  \sa
         //  Foam::findEtcFile
-        string& expand(const bool recurse=false);
+        string& expand(const bool allowEmpty = false);
 
         //- Remove repeated characters returning true if string changed
         bool removeRepeated(const char);
@@ -199,14 +200,14 @@ public:
 
     // Member Operators
 
-        //- Return the sub-string from the i-th character for @a n characters
+        //- Return the sub-string from the i-th character for \a n characters
         inline string operator()
         (
             const size_type i,
             const size_type n
         ) const;
 
-        //- Return the sub-string from the first character for @a n characters
+        //- Return the sub-string from the first character for \a n characters
         inline string operator()
         (
             const size_type n

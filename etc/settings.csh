@@ -63,9 +63,13 @@ setenv FOAM_SITE_LIBBIN $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/
 setenv FOAM_USER_APPBIN $WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/bin
 setenv FOAM_USER_LIBBIN $WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib
 
+# dynamicCode templates
+# - default location is the "~OpenFOAM/codeTemplates/dynamicCode" expansion
+# setenv FOAM_CODE_TEMPLATES $WM_PROJECT_DIR/etc/codeTemplates/dynamicCode
+
 # convenience
 setenv FOAM_APP $WM_PROJECT_DIR/applications
-setenv FOAM_LIB $WM_PROJECT_DIR/lib
+#setenv FOAM_LIB $WM_PROJECT_DIR/lib
 setenv FOAM_SRC $WM_PROJECT_DIR/src
 setenv FOAM_TUTORIALS $WM_PROJECT_DIR/tutorials
 setenv FOAM_UTILITIES $FOAM_APP/utilities
@@ -84,13 +88,13 @@ _foamAddLib  ${FOAM_USER_LIBBIN}:${FOAM_SITE_LIBBIN}:${FOAM_LIBBIN}:${FOAM_EXT_L
 # Compiler settings
 # ~~~~~~~~~~~~~~~~~
 unset gcc_version gmp_version mpfr_version mpc_version
-unsetenv MPFR_ARCH_PATH
+unsetenv MPFR_ARCH_PATH GMP_ARCH_PATH
 
 
 # Location of compiler installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if ( ! $?foamCompiler ) then
-    foamCompiler=system
+    set foamCompiler=system
     echo "Warning in $WM_PROJECT_DIR/etc/settings.csh:"
     echo "    foamCompiler not set, using '$foamCompiler'"
 endif
@@ -160,24 +164,26 @@ case ThirdParty:
         _foamAddMan     $gccDir/man
         _foamAddPath    $gccDir/bin
 
+        # add compiler libraries to run-time environment
         # 64-bit needs lib64, but 32-bit needs lib (not lib32)
-        if ($WM_ARCH_OPTION == 64) then
+        if ($WM_ARCH_OPTION == 64 && $?WM_COMPILER_LIB_ARCH) then
             _foamAddLib     $gccDir/lib$WM_COMPILER_LIB_ARCH
         else
             _foamAddLib     $gccDir/lib
         endif
 
-        # add in gmp/mpfr libraries
+        # add gmp/mpfr libraries to run-time environment
         _foamAddLib     $gmpDir/lib
         _foamAddLib     $mpfrDir/lib
 
-        # add in mpc libraries (not need for older gcc)
+        # add mpc libraries (not need for older gcc) to run-time environment
         if ( $?mpc_version ) then
             _foamAddLib     $mpcDir/lib
         endif
 
         # used by boost/CGAL:
         setenv MPFR_ARCH_PATH $mpfrDir
+        setenv GMP_ARCH_PATH $gmpDir
     endif
     unset gcc_version gccDir
     unset gmp_version gmpDir  mpfr_version mpfrDir  mpc_version mpcDir
@@ -228,7 +234,7 @@ endif
 # boost and CGAL
 # ~~~~~~~~~~~~~~
 
-set boost_version=boost_1_42_0
+set boost_version=boost_1_45_0
 set cgal_version=CGAL-3.7
 
 setenv BOOST_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$boost_version
@@ -243,7 +249,7 @@ if ( -d "$CGAL_ARCH_PATH" ) then
     endif
     _foamAddLib $CGAL_ARCH_PATH/lib
 else
-    unsetenv BOOST_ARCH_PATH CGAL_ARCH_PATH MPFR_ARCH_PATH
+    unsetenv BOOST_ARCH_PATH CGAL_ARCH_PATH MPFR_ARCH_PATH GMP_ARCH_PATH
 endif
 
 unset boost_version cgal_version

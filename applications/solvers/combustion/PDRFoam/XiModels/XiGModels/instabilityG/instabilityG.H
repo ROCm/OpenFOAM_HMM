@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,10 +58,10 @@ class instabilityG
     // Private data
 
         //- Flame instabilityG wrinling generation rate coefficient
-        dimensionedScalar GIn;
+        dimensionedScalar GIn_;
 
         //- InstabilityG length-scale
-        dimensionedScalar lambdaIn;
+        dimensionedScalar lambdaIn_;
 
         //- Xi generation rate model due to all other processes
         autoPtr<XiGModel> XiGModel_;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,14 +27,14 @@ Class
 Description
     Cloud class to introduce reacting parcels
 
-SourceFiles
-    BasicReactingCloud.C
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef basicReactingCloud_H
 #define basicReactingCloud_H
 
+#include "Cloud.H"
+#include "KinematicCloud.H"
+#include "ThermoCloud.H"
 #include "ReactingCloud.H"
 #include "basicReactingParcel.H"
 
@@ -42,7 +42,19 @@ SourceFiles
 
 namespace Foam
 {
-    typedef ReactingCloud<basicReactingParcel> basicReactingCloud;
+    typedef ReactingCloud
+    <
+        ThermoCloud
+        <
+            KinematicCloud
+            <
+                Cloud
+                <
+                    basicReactingParcel
+                >
+            >
+        >
+    > basicReactingCloud;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

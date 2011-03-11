@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,9 +30,9 @@ Description
         - create baffles in original mesh with directMappedWall patches
     - if extruding boundary faces:
         - convert boundary faces to directMappedWall patches
-    - extrude edges of faceZone as a <zone>_sidePatch
+    - extrude edges of faceZone as a \<zone\>_sidePatch
     - extrude edges inbetween different faceZones as a
-      (nonuniformTransform)cyclic <zoneA>_<zoneB>
+      (nonuniformTransform)cyclic \<zoneA\>_\<zoneB\>
     - extrudes into master direction (i.e. away from the owner cell
       if flipMap is false)
     - not parallel
@@ -106,15 +106,15 @@ becomes
 
 Usage
 
-    - extrudeToRegionMesh <regionName> <faceZones> <thickness>
+    - extrudeToRegionMesh \<regionName\> \<faceZones\> \<thickness\>
 
-    @param \<regionName\> \n
+    \param \<regionName\> \n
     Name of mesh to create.
 
-    @param \<faceZones\> \n
+    \param \<faceZones\> \n
     List of faceZones to extrude
 
-    @param \<thickness\> \n
+    \param \<thickness\> \n
     Thickness of extruded mesh.
 
 \*---------------------------------------------------------------------------*/

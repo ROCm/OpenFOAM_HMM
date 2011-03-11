@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ Description
     causing pressure loss as estimated using an adjoint formulation.
 
     References:
-    @verbatim
+    \verbatim
         "Implementation of a continuous adjoint for topology optimization of
          ducted flows"
         C. Othmer,
@@ -38,7 +38,7 @@ Description
         H.G. Weller
         AIAA-2007-3947
         http://pdf.aiaa.org/preview/CDReadyMCFD07_1379/PV2007_3947.pdf
-    @endverbatim
+    \endverbatim
 
     Note that this solver optimises for total pressure loss whereas the
     above paper describes the method for optimising power-loss.

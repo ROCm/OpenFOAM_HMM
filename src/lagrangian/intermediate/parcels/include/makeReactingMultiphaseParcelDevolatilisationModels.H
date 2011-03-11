@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,35 +28,21 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "ReactingMultiphaseCloud.H"
-
 #include "ConstantRateDevolatilisation.H"
 #include "NoDevolatilisation.H"
 #include "SingleKineticRateDevolatilisation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeReactingMultiphaseParcelDevolatilisationModels(ParcelType)        \
+#define makeReactingMultiphaseParcelDevolatilisationModels(CloudType)         \
                                                                               \
-    makeDevolatilisationModel(ReactingMultiphaseCloud<ParcelType>);           \
-                                                                              \
-    makeDevolatilisationModelType                                             \
-    (                                                                         \
-        ConstantRateDevolatilisation,                                         \
-        ReactingMultiphaseCloud,                                              \
-        ParcelType                                                            \
-    );                                                                        \
-    makeDevolatilisationModelType                                             \
-    (                                                                         \
-        NoDevolatilisation,                                                   \
-        ReactingMultiphaseCloud,                                              \
-        ParcelType                                                            \
-    );                                                                        \
+    makeDevolatilisationModel(CloudType);                                     \
+    makeDevolatilisationModelType(ConstantRateDevolatilisation, CloudType);   \
+    makeDevolatilisationModelType(NoDevolatilisation, CloudType);             \
     makeDevolatilisationModelType                                             \
     (                                                                         \
         SingleKineticRateDevolatilisation,                                    \
-        ReactingMultiphaseCloud,                                              \
-        ParcelType                                                            \
+        CloudType                                                             \
     );
 
 

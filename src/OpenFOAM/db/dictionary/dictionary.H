@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -239,7 +239,7 @@ public:
 
 
     //- Destructor
-    ~dictionary();
+    virtual ~dictionary();
 
 
     // Member functions
@@ -264,7 +264,13 @@ public:
 
             //- Search dictionary for given keyword
             //  If recursive, search parent dictionaries
-            bool found(const word&, bool recursive=false) const;
+            //  If patternMatch, use regular expressions
+            bool found
+            (
+                const word&,
+                bool recursive=false,
+                bool patternMatch = true
+            ) const;
 
             //- Find and return an entry data stream pointer if present
             //  otherwise return NULL.
@@ -362,7 +368,11 @@ public:
 
             //- Find and return a sub-dictionary as a copy, or
             //  return an empty dictionary if the sub-dictionary does not exist
-            dictionary subOrEmptyDict(const word&) const;
+            dictionary subOrEmptyDict
+            (
+                const word&,
+                const bool mustRead = false
+            ) const;
 
             //- Return the table of contents
             wordList toc() const;
@@ -467,7 +477,8 @@ public:
 
         // Write
 
-            void write(Ostream&, bool subDict=true) const;
+            //- Write dictionary, normally with sub-dictionary formatting
+            void write(Ostream&, const bool subDict=true) const;
 
 
     // Member Operators

@@ -107,7 +107,7 @@ void standardPhaseChange::correct
     // set local thermo properties
     const SLGThermo& thermo = film.thermo();
     const label liqId = film.liquidId();
-    const liquid& liq = thermo.liquids().properties()[liqId];
+    const liquidProperties& liq = thermo.liquids().properties()[liqId];
     const label vapId = thermo.carrierId(thermo.liquids().components()[liqId]);
 
     // retrieve fields from film model

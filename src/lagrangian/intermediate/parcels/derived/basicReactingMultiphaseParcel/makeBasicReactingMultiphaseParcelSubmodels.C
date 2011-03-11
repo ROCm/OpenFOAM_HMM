@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,13 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingMultiphaseParcel.H"
+#include "basicReactingMultiphaseCloud.H"
 
 // Kinematic
+#include "makeThermoParcelForces.H" // thermo variant
 #include "makeParcelDispersionModels.H"
-#include "makeParcelDragModels.H"
 #include "makeReactingMultiphaseParcelInjectionModels.H" // MP variant
-#include "makeParcelCollisionModels.H"
 #include "makeParcelPatchInteractionModels.H"
 #include "makeParcelPostProcessingModels.H"
 
@@ -49,36 +48,42 @@ License
 
 namespace Foam
 {
+    typedef basicReactingMultiphaseCloud::cloudType
+        basicReactingMultiphaseCloud_R;
+    typedef basicReactingMultiphaseCloud_R::cloudType
+        basicReactingMultiphaseCloud_T;
+    typedef basicReactingMultiphaseCloud_T::cloudType
+        basicReactingMultiphaseCloud_K;
+
     // Kinematic sub-models
-    makeParcelDispersionModels(basicReactingMultiphaseParcel);
-    makeParcelDragModels(basicReactingMultiphaseParcel);
-    makeReactingMultiphaseParcelInjectionModels(basicReactingMultiphaseParcel);
-    makeParcelCollisionModels(basicReactingMultiphaseParcel);
-    makeParcelPatchInteractionModels(basicReactingMultiphaseParcel);
-    makeParcelPostProcessingModels(basicReactingMultiphaseParcel);
+    makeThermoParcelForces(basicReactingMultiphaseCloud_K);
+    makeParcelDispersionModels(basicReactingMultiphaseCloud_K);
+    makeReactingMultiphaseParcelInjectionModels(basicReactingMultiphaseCloud_K);
+    makeParcelPatchInteractionModels(basicReactingMultiphaseCloud_K);
+    makeParcelPostProcessingModels(basicReactingMultiphaseCloud_K);
 
     // Thermo sub-models
-    makeParcelHeatTransferModels(basicReactingMultiphaseParcel);
+    makeParcelHeatTransferModels(basicReactingMultiphaseCloud_T);
 
     // Reacting sub-models
     makeReactingMultiphaseParcelCompositionModels
     (
-        basicReactingMultiphaseParcel
+        basicReactingMultiphaseCloud_R
     );
-    makeReactingParcelPhaseChangeModels(basicReactingMultiphaseParcel);
+    makeReactingParcelPhaseChangeModels(basicReactingMultiphaseCloud_R);
 
     // Reacting multiphase sub-models
     makeReactingMultiphaseParcelDevolatilisationModels
     (
-        basicReactingMultiphaseParcel
+        basicReactingMultiphaseCloud
     );
     makeReactingParcelSurfaceFilmModels
     (
-        basicReactingMultiphaseParcel
+        basicReactingMultiphaseCloud_K
     );
     makeReactingMultiphaseParcelSurfaceReactionModels
     (
-        basicReactingMultiphaseParcel
+        basicReactingMultiphaseCloud
     );
 }
 

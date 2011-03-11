@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,7 +59,7 @@ class SurfaceReactionModel
 public:
 
     //-Runtime type information
-    TypeName("SurfaceReactionModel");
+    TypeName("surfaceReactionModel");
 
 
     //- Declare runtime constructor selection table
@@ -158,13 +158,13 @@ public:
     );
 
 
-#define makeSurfaceReactionModelType(SS, CloudType, ParcelType)               \
+#define makeSurfaceReactionModelType(SS, CloudType)                           \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
+    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
                                                                               \
-    SurfaceReactionModel<CloudType<ParcelType> >::                            \
-        adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
-            add##SS##CloudType##ParcelType##ConstructorToTable_;
+    SurfaceReactionModel<CloudType>::                                         \
+        adddictionaryConstructorToTable<SS<CloudType> >                       \
+            add##SS##CloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

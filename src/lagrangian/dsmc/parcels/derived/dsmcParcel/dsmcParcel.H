@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Class
     Foam::dsmcParcel
 
 Description
-
+    Declaration of dsmc parcel type
 
 SourceFiles
     dsmcParcel.C
@@ -35,6 +35,7 @@ SourceFiles
 #ifndef dsmcParcel_H
 #define dsmcParcel_H
 
+#include "particle.H"
 #include "DsmcParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -42,10 +43,11 @@ SourceFiles
 namespace Foam
 {
 
+    typedef DsmcParcel<particle> dsmcParcel;
 /*---------------------------------------------------------------------------*\
                          Class dsmcParcel Declaration
 \*---------------------------------------------------------------------------*/
-
+/*
 class dsmcParcel
 :
     public DsmcParcel<dsmcParcel>
@@ -100,7 +102,7 @@ inline bool contiguous<dsmcParcel>()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+*/
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,10 +22,13 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
+    Test some string functionality
 
 \*---------------------------------------------------------------------------*/
 
 #include "string.H"
+#include "stringOps.H"
+#include "dictionary.H"
 #include "IOstreams.H"
 
 using namespace Foam;
@@ -35,10 +38,29 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    string test("$HOME kjhkjhkjh \" \\$HOME/tyetyery ${FOAM_RUN} \n ; hkjh ;$");
+    string test
+    (
+        "  $HOME kjhkjhkjh \" \\$HOME/tyetyery $; ${FOAM_RUN} \n $; hkjh;"
+        " $(DONOTSUBST) some other <${USER}> with '${__UNKNOWN:-some default}'"
+        " value "
+    );
+
+    dictionary dict;
+    dict.add("HOME", "myHome");
+
+    dictionary subDict;
+    subDict.add("value1", "test1");
+    subDict.add("value2", "test2");
+    dict.add("FOAM_RUN", subDict);
+
 
     Info<< "string:" << test << nl << "hash:"
         << unsigned(string::hash()(test)) << endl;
+
+    Info<<"trimLeft: " << stringOps::trimLeft(test) << endl;
+    Info<<"trimRight: " << stringOps::trimRight(test) << endl;
+    Info<<"trim: " << stringOps::trim(test) << endl;
+
 
     // test sub-strings via iterators
     string::const_iterator iter  = test.end();
@@ -64,7 +86,10 @@ int main(int argc, char *argv[])
     Info<< string(test).replaceAll("kj", "zzz") << endl;
     Info<< string(test).replaceAll("kj", "z") << endl;
 
-    Info<< string(test).expand() << endl;
+    Info<< "expanded: " << string(test).expand() << endl;
+
+    Info<<"dictionary-based substitution: " << dict << endl;
+    Info<< "expand dict: " << stringOps::expand(test, dict) << endl;
 
     string test2("~OpenFOAM/controlDict");
     Info<< test2 << " => " << test2.expand() << endl;

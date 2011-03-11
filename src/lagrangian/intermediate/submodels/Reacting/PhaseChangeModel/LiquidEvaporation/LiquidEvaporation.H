@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,7 +34,7 @@ Description
 #define LiquidEvaporation_H
 
 #include "PhaseChangeModel.H"
-#include "liquidMixture.H"
+#include "liquidMixtureProperties.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,7 +54,7 @@ protected:
     // Protected data
 
         //- Global liquid properties data
-        const liquidMixture& liquids_;
+        const liquidMixtureProperties& liquids_;
 
         //- List of active liquid names
         List<word> activeLiquids_;
@@ -78,7 +78,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("LiquidEvaporation");
+    TypeName("liquidEvaporation");
 
 
     // Constructors
@@ -117,6 +117,15 @@ public:
             const scalar Ts,
             const scalar pc,
             scalarField& dMassPC
+        ) const;
+
+        //- Return the enthalpy per unit mass
+        virtual scalar dh
+        (
+            const label idc,
+            const label idl,
+            const label p,
+            const label T
         ) const;
 };
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,13 +27,13 @@ Description
 
     Keywords:
 
-    @param setFormat : set output format, choice of \n
+    \param setFormat : set output format, choice of \n
       - xmgr
       - jplot
       - gnuplot
       - raw
 
-    @param surfaceFormat : surface output format, choice of \n
+    \param surfaceFormat : surface output format, choice of \n
       - null        : suppress output
       - foamFile    : separate points, faces and values file
       - dx          : DX scalar or vector format
@@ -42,7 +42,7 @@ Description
       - obj         : Wavefron stl. Does not contain values!
       - stl         : ascii stl. Does not contain values!
 
-    @param interpolationScheme : interpolation scheme, choice of \n
+    \param interpolationScheme : interpolation scheme, choice of \n
       - cell          : use cell-centre value; constant over cells (default)
       - cellPoint     : use cell-centre and vertex values
       - cellPointFace : use cell-centre, vertex and face values. \n
@@ -50,9 +50,9 @@ Description
         -# face values determined using the current face interpolation scheme
            for the field (linear, limitedLinear, etc.)
 
-    @param fields : list of fields to sample
+    \param fields : list of fields to sample
 
-    @param sets : list of sets to sample, choice of \n
+    \param sets : list of sets to sample, choice of \n
       - uniform             evenly distributed points on line
       - face                one point per face intersection
       - midPoint            one point per cell, inbetween two face intersections
@@ -74,7 +74,7 @@ Description
             uniform: extra number of sampling points
             curve, cloud: list of coordinates
 
-    @param surfaces : list of surfaces to sample, choice of \n
+    \param surfaces : list of surfaces to sample, choice of \n
       - plane : values on plane defined by point, normal.
       - patch : values on patch.
 

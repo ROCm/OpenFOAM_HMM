@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "Analytical.H"
-#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -59,9 +58,9 @@ template<class Type>
 typename Foam::IntegrationScheme<Type>::integrationResult
 Foam::Analytical<Type>::integrate
 (
-    const Type phi,
+    const Type& phi,
     const scalar dt,
-    const Type alpha,
+    const Type& alphaBeta,
     const scalar beta
 ) const
 {
@@ -69,9 +68,18 @@ Foam::Analytical<Type>::integrate
 
     const scalar expTerm = exp(min(50, -beta*dt));
 
-    retValue.average() =
-        alpha + (phi - alpha)*(1 - expTerm)/(beta*dt + ROOTVSMALL);
-    retValue.value() =  alpha + (phi - alpha)*expTerm;
+    if (beta > ROOTVSMALL)
+    {
+        const Type alpha = alphaBeta/beta;
+        retValue.average() = alpha + (phi - alpha)*(1 - expTerm)/(beta*dt);
+        retValue.value() =  alpha + (phi - alpha)*expTerm;
+    }
+    else
+    {
+        retValue.average() = phi;
+        retValue.value() =  phi;
+    }
+
 
     return retValue;
 }

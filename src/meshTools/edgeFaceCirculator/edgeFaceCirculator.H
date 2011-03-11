@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,7 +33,7 @@ Description
     - direction (cell to walk into)
 
     -# Use in-place: \n
-        @code
+        \code
             edgeFaceCirculator circ(..);
             // Optionally rotate to beginning: circ.setCanonical();
 
@@ -44,10 +44,10 @@ Description
                 ++circ;
             }
             while (circ != circ.end());
-        @endcode
+        \endcode
 
     -# Use like STL iterator: \n
-        @code
+        \code
             edgeFaceCirculator circ(..);
             for
             (
@@ -58,7 +58,7 @@ Description
             {
                 Info<< "face:" << iter.face() << endl;
             }
-        @endcode
+        \endcode
 
 
 SourceFiles

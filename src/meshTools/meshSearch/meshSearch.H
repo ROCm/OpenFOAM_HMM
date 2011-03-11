@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -195,10 +195,11 @@ public:
             bool pointInCell(const point& p, const label celli) const;
 
             //- Find nearest cell in terms of cell centre.
-            // - use octree
-            // - use linear search
-            // - if seed is provided walk. (uses findNearestCellWalk;
-            //   does not handle holes in domain)
+            //  Options:
+            //  - use octree
+            //  - use linear search
+            //  - if seed is provided walk. (uses findNearestCellWalk;
+            //    does not handle holes in domain)
             label findNearestCell
             (
                 const point& location,

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,7 @@ Class
 Description
     Specify a file to include if it exists. Expects a single string to follow.
 
-    The @c \#includeIfPresent directive is similar to the @c \#include
+    The \c \#includeIfPresent directive is similar to the \c \#include
     directive, but does not generate an error if the file does not exist.
 
 See Also

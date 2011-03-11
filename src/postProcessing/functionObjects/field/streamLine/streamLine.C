@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,7 +61,7 @@ void Foam::streamLine::track()
         (
             new streamLineParticle
             (
-                particles,
+                mesh,
                 seedPoints[i],
                 seedPoints.cells()[i],
                 lifeTime_               // lifetime
@@ -215,7 +215,7 @@ void Foam::streamLine::track()
     }
 
     // additional particle info
-    streamLineParticle::trackData td
+    streamLineParticle::trackingData td
     (
         particles,
         vsInterp,

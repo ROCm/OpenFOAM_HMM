@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,8 +35,6 @@ SourceFiles
 #ifndef processorCyclicFvPatchField_H
 #define processorCyclicFvPatchField_H
 
-//#include "coupledFvPatchField.H"
-//#include "processorLduInterfaceField.H"
 #include "processorCyclicFvPatch.H"
 #include "processorFvPatchField.H"
 
@@ -52,22 +50,12 @@ namespace Foam
 template<class Type>
 class processorCyclicFvPatchField
 :
-//    public processorLduInterfaceField,
-//    public coupledFvPatchField<Type>
     public processorFvPatchField<Type>
 {
     // Private data
 
         //- Local reference cast into the processor patch
         const processorCyclicFvPatch& procPatch_;
-
-    // Private Member Functions
-
-        // //- Get other patchfield
-        // const coupledFvPatchField<Type>& patchField
-        // (
-        //     const label patchID
-        // ) const;
 
 public:
 
@@ -151,70 +139,6 @@ public:
 
         // Access
 
-//            //- Return true if running parallel
-//            virtual bool coupled() const
-//            {
-//                if (Pstream::parRun())
-//                {
-//                    return true;
-//                }
-//                else
-//                {
-//                    return false;
-//                }
-//            }
-//
-//            //- Return neighbour field given internal field
-//            tmp<Field<Type> > patchNeighbourField() const;
-//
-//
-//        // Evaluation functions
-//
-//            //- Initialise the evaluation of the patch field
-//            virtual void initEvaluate(const Pstream::commsTypes commsType);
-//
-//            //- Evaluate the patch field
-//            virtual void evaluate(const Pstream::commsTypes commsType);
-//
-//            //- Return patch-normal gradient
-//            virtual tmp<Field<Type> > snGrad() const;
-//
-//            //- Initialise neighbour matrix update
-//            virtual void initInterfaceMatrixUpdate
-//            (
-//                const scalarField& psiInternal,
-//                scalarField& result,
-//                const lduMatrix& m,
-//                const scalarField& coeffs,
-//                const direction cmpt,
-//                const Pstream::commsTypes commsType
-//            ) const;
-//
-//            //- Update result field based on interface functionality
-//            virtual void updateInterfaceMatrix
-//            (
-//                const scalarField& psiInternal,
-//                scalarField& result,
-//                const lduMatrix& m,
-//                const scalarField& coeffs,
-//                const direction cmpt,
-//                const Pstream::commsTypes commsType
-//            ) const;
-//
-//        //- Processor coupled interface functions
-//
-//            //- Return processor number
-//            virtual int myProcNo() const
-//            {
-//                return procPatch_.myProcNo();
-//            }
-//
-//            //- Return neigbour processor number
-//            virtual int neighbProcNo() const
-//            {
-//                return procPatch_.neighbProcNo();
-//            }
-
             //- Does the patch field perform the transfromation
             virtual bool doTransform() const
             {
@@ -226,103 +150,6 @@ public:
             {
                 return procPatch_.forwardT();
             }
-
-//            //- Return rank of component for transform
-//            virtual int rank() const
-//            {
-//                return pTraits<Type>::rank;
-//            }
-
-//            //- Transform given patch component field
-//            void transformCoupleField
-//            (
-//                scalarField& f,
-//                const direction cmpt
-//            ) const;
-
-//        // Referred-patch functionality. Get called with a slice (size, start)
-//        // of a patch that supplies fields and geometry/topology.
-//
-//            //- Get patch-normal gradient
-//            virtual void snGrad
-//            (
-//                Field<Type>& exchangeBuf,
-//                const Field<Type>& subFld,
-//                const coupledFvPatch& referringPatch,
-//                const label size,
-//                const label start
-//            ) const
-//            {
-//                notImplemented("processorCyclicFvPatchField::snGrad(..)");
-//            }
-//
-//            //- Initialise the evaluation of the patch field.
-//            virtual void initEvaluate
-//            (
-//                Field<Type>& exchangeBuf,
-//                const coupledFvPatch& referringPatch,
-//                const label size,
-//                const label start
-//            ) const
-//            {
-//                notImplemented
-//                (
-//                    "processorCyclicFvPatchField::initEvaluate(..)"
-//                );
-//            }
-//
-//            //- Evaluate the patch field.
-//            virtual void evaluate
-//            (
-//                Field<Type>& exchangeBuf,
-//                const coupledFvPatch& referringPatch,
-//                const label size,
-//                const label start
-//            ) const
-//            {
-//                notImplemented("processorCyclicFvPatchField::evaluate(..)");
-//            }
-//
-//            //- Initialise neighbour matrix update
-//            virtual void initInterfaceMatrixUpdate
-//            (
-//                const scalarField& psiInternal,
-//                scalarField& result,
-//                const lduMatrix& m,
-//                const scalarField& coeffs,
-//                const direction cmpt,
-//                const coupledFvPatch& referringPatch,
-//                const label size,
-//                const label start,
-//                scalarField& exchangeBuf
-//            ) const
-//            {
-//                notImplemented
-//                (
-//                    "processorCyclicFvPatchField::"
-//                    "initInterfaceMatrixUpdate(..)"
-//                );
-//            }
-//
-//            //- Update result field based on interface functionality
-//            virtual void updateInterfaceMatrix
-//            (
-//                const scalarField& psiInternal,
-//                scalarField& result,
-//                const lduMatrix&,
-//                const scalarField& coeffs,
-//                const direction,
-//                const coupledFvPatch& referringPatch,
-//                const label size,
-//                const label start,
-//                scalarField& exchangeBuf
-//            ) const
-//            {
-//                notImplemented
-//                (
-//                    "processorCyclicFvPatchField::updateInterfaceMatrix(..)"
-//                );
-//            }
 
 
 };

@@ -26,38 +26,38 @@ Class
 
 Description
     Extract command arguments and options from the supplied
-    @a argc and @a argv parameters.
+    \a argc and @a argv parameters.
 
     Sequences with "(" ... ")" are transformed into a stringList.
     For example,
-    @verbatim
+    \verbatim
         program -listFiles \( *.txt \)
-    @endverbatim
+    \endverbatim
     would create a stringList:
-    @verbatim
+    \verbatim
         ( "file1.txt" "file2.txt" ... "fileN.txt" )
-    @endverbatim
+    \endverbatim
     The backslash-escaping is required to avoid interpretation by the shell.
 
-    @par Default command-line options
-    @param -case \<dir\> \n
+    \par Default command-line options
+    \param -case \<dir\> \n
         select an case directory instead of the current working directory
-    @param -parallel \n
+    \param -parallel \n
         specify case as a parallel job
-    @param -doc \n
+    \param -doc \n
         display the documentation in browser
-    @param -srcDoc \n
+    \param -srcDoc \n
         display the source documentation in browser
-    @param -help \n
+    \param -help \n
        print the usage
 
-    The environment variable @b FOAM_CASE is set to the path of the
+    The environment variable \b FOAM_CASE is set to the path of the
     global case (same for serial and parallel jobs).
-    The environment variable @b FOAM_CASENAME is set to the name of the
+    The environment variable \b FOAM_CASENAME is set to the name of the
     global case.
 
 Note
-    - The document browser used is defined by the @b FOAM_DOC_BROWSER
+    - The document browser used is defined by the \b FOAM_DOC_BROWSER
       environment variable or the <tt>Documentation/docBrowser</tt> entry
       in the <tt>~OpenFOAM/controlDict</tt> file.
       The \%f token is used as a placeholder for the file name.
@@ -168,14 +168,14 @@ public:
         //- Max screen width for displaying usage (default: 80)
         static string::size_type usageMax;
 
-        //! @cond internalClass
+        //! \cond internalClass
         class initValidTables
         {
         public:
 
             initValidTables();
         };
-        //! @endcond
+        //! \endcond
 
 
     // Constructors
@@ -230,7 +230,7 @@ public:
             inline T argRead(const label index) const;
 
             //- Return arguments that are additional to the executable
-            //  @deprecated use operator[] directly (deprecated Feb 2010)
+            //  \deprecated use operator[] directly (deprecated Feb 2010)
             stringList::subList additionalArgs() const
             {
                 return stringList::subList(args_, args_.size()-1, 1);
@@ -292,7 +292,7 @@ public:
             inline const string& operator[](const label index) const;
 
             //- Return the argument string associated with the named option
-            //  @sa option()
+            //  \sa option()
             inline const string& operator[](const word& opt) const;
 
         // Edit

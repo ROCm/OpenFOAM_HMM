@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,9 +35,9 @@ Foam::CompositionModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType(dict.lookup("CompositionModel"));
+    const word modelType(dict.lookup("compositionModel"));
 
-    Info<< "Selecting CompositionModel " << modelType << endl;
+    Info<< "Selecting composition model " << modelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
@@ -51,9 +51,9 @@ Foam::CompositionModel<CloudType>::New
                 "const dictionary&, "
                 "CloudType&"
             ")"
-        )   << "Unknown CompositionModel type "
+        )   << "Unknown composition model type "
             << modelType << nl << nl
-            << "Valid CompositionModel types are:" << nl
+            << "Valid composition model types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc() << nl
             << exit(FatalError);
     }

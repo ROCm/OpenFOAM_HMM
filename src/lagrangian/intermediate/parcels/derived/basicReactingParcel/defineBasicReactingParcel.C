@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,13 +24,14 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "basicReactingParcel.H"
-#include "createReactingParcelTypes.H"
+#include "Cloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    createReactingParcelTypes(basicReactingParcel);
+    defineTemplateTypeNameAndDebug(basicReactingParcel, 0);
+    defineTemplateTypeNameAndDebug(Cloud<basicReactingParcel>, 0);
 }
 
 

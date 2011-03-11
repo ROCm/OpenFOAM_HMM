@@ -44,23 +44,7 @@ namespace Foam
 
     addToRunTimeSelectionTable(polyPatch, cyclicPolyPatch, word);
     addToRunTimeSelectionTable(polyPatch, cyclicPolyPatch, dictionary);
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::cyclicPolyPatch::transformType,
-        4
-    >::names[] =
-    {
-        "unknown",
-        "rotational",
-        "translational",
-        "noOrdering"
-    };
 }
-
-const Foam::NamedEnum<Foam::cyclicPolyPatch::transformType, 4>
-    Foam::cyclicPolyPatch::transformTypeNames;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -271,7 +255,9 @@ void Foam::cyclicPolyPatch::calcTransforms
             static_cast<const pointField&>(half1Ctrs),
             half0Normals,
             half1Normals,
-            half0Tols
+            half0Tols,
+            matchTol,
+            transform_
         );
 
         if (transform_ == ROTATIONAL && !parallel() && forwardT().size() > 1)

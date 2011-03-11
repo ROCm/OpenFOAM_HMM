@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,13 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingParcel.H"
+#include "basicReactingCloud.H"
 
 // Kinematic
+#include "makeThermoParcelForces.H" // thermo variant
 #include "makeParcelDispersionModels.H"
-#include "makeParcelDragModels.H"
 #include "makeReactingParcelInjectionModels.H" // Reacting variant
-#include "makeParcelCollisionModels.H"
 #include "makeParcelPatchInteractionModels.H"
 #include "makeParcelPostProcessingModels.H"
 
@@ -45,21 +44,23 @@ License
 
 namespace Foam
 {
+    typedef basicReactingCloud::cloudType basicReactingCloud_T;
+    typedef basicReactingCloud_T::cloudType basicReactingCloud_K;
+
     // Kinematic sub-models
-    makeParcelDispersionModels(basicReactingParcel);
-    makeParcelDragModels(basicReactingParcel);
-    makeReactingParcelInjectionModels(basicReactingParcel);
-    makeParcelCollisionModels(basicReactingParcel);
-    makeParcelPatchInteractionModels(basicReactingParcel);
-    makeParcelPostProcessingModels(basicReactingParcel);
+    makeThermoParcelForces(basicReactingCloud_K);
+    makeParcelDispersionModels(basicReactingCloud_K);
+    makeReactingParcelInjectionModels(basicReactingCloud_K);
+    makeParcelPatchInteractionModels(basicReactingCloud_K);
+    makeParcelPostProcessingModels(basicReactingCloud_K);
 
     // Thermo sub-models
-    makeParcelHeatTransferModels(basicReactingParcel);
+    makeParcelHeatTransferModels(basicReactingCloud_T);
 
     // Reacting sub-models
-    makeReactingParcelCompositionModels(basicReactingParcel);
-    makeReactingParcelPhaseChangeModels(basicReactingParcel);
-    makeReactingParcelSurfaceFilmModels(basicReactingParcel);
+    makeReactingParcelCompositionModels(basicReactingCloud);
+    makeReactingParcelPhaseChangeModels(basicReactingCloud);
+    makeReactingParcelSurfaceFilmModels(basicReactingCloud_K);
 }
 
 

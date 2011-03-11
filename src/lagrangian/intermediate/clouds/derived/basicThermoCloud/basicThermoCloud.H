@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,9 +27,6 @@ Class
 Description
     Cloud class to introduce thermodynamic parcels
 
-SourceFiles
-    basicThermoCloud.C
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef basicThermoCloud_H
@@ -42,7 +39,16 @@ SourceFiles
 
 namespace Foam
 {
-    typedef ThermoCloud<basicThermoParcel> basicThermoCloud;
+    typedef ThermoCloud
+    <
+        KinematicCloud
+        <
+            Cloud
+            <
+                basicThermoParcel
+            >
+        >
+    > basicThermoCloud;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,7 @@ void Foam::ThermoParcel<ParcelType>::setCellValues
     const label cellI
 )
 {
-    KinematicParcel<ParcelType>::setCellValues(td, dt, cellI);
+    ParcelType::setCellValues(td, dt, cellI);
 
     tetIndices tetIs = this->currentTetIndices();
 
@@ -49,16 +49,19 @@ void Foam::ThermoParcel<ParcelType>::setCellValues
 
     if (Tc_ < td.cloud().constProps().TMin())
     {
-        WarningIn
-        (
-            "void Foam::ThermoParcel<ParcelType>::setCellValues"
-            "("
-                "TrackData&, "
-                "const scalar, "
-                "const label"
-            ")"
-        )   << "Limiting observed temperature in cell " << cellI << " to "
-            << td.cloud().constProps().TMin() <<  nl << endl;
+        if (debug)
+        {
+            WarningIn
+            (
+                "void Foam::ThermoParcel<ParcelType>::setCellValues"
+                "("
+                    "TrackData&, "
+                    "const scalar, "
+                    "const label"
+                ")"
+            )   << "Limiting observed temperature in cell " << cellI << " to "
+                << td.cloud().constProps().TMin() <<  nl << endl;
+        }
 
         Tc_ = td.cloud().constProps().TMin();
     }
@@ -81,16 +84,19 @@ void Foam::ThermoParcel<ParcelType>::cellValueSourceCorrection
 
     if (Tc_ < td.cloud().constProps().TMin())
     {
-        WarningIn
-        (
-            "void Foam::ThermoParcel<ParcelType>::cellValueSourceCorrection"
-            "("
-                "TrackData&, "
-                "const scalar, "
-                "const label"
-            ")"
-        )   << "Limiting observed temperature in cell " << cellI << " to "
-            << td.cloud().constProps().TMin() <<  nl << endl;
+        if (debug)
+        {
+            WarningIn
+            (
+                "void Foam::ThermoParcel<ParcelType>::cellValueSourceCorrection"
+                "("
+                    "TrackData&, "
+                    "const scalar, "
+                    "const label"
+                ")"
+            )   << "Limiting observed temperature in cell " << cellI << " to "
+                << td.cloud().constProps().TMin() <<  nl << endl;
+        }
 
         Tc_ = td.cloud().constProps().TMin();
     }
@@ -116,21 +122,24 @@ void Foam::ThermoParcel<ParcelType>::calcSurfaceValues
 
     if (Ts < td.cloud().constProps().TMin())
     {
-        WarningIn
-        (
-            "void Foam::ThermoParcel<ParcelType>::calcSurfaceValues"
-            "("
-                "TrackData&, "
-                "const label, "
-                "const scalar, "
-                "scalar&, "
-                "scalar&, "
-                "scalar&, "
-                "scalar&, "
-                "scalar&"
-            ") const"
-        )   << "Limiting parcel surface temperature to "
-            << td.cloud().constProps().TMin() <<  nl << endl;
+        if (debug)
+        {
+            WarningIn
+            (
+                "void Foam::ThermoParcel<ParcelType>::calcSurfaceValues"
+                "("
+                    "TrackData&, "
+                    "const label, "
+                    "const scalar, "
+                    "scalar&, "
+                    "scalar&, "
+                    "scalar&, "
+                    "scalar&, "
+                    "scalar&"
+                ") const"
+            )   << "Limiting parcel surface temperature to "
+                << td.cloud().constProps().TMin() <<  nl << endl;
+        }
 
         Ts = td.cloud().constProps().TMin();
     }
@@ -225,7 +234,7 @@ void Foam::ThermoParcel<ParcelType>::calc
     // ~~~~~~
 
     // Calculate new particle velocity
-    scalar Cud = 0.0;
+    scalar Spu = 0.0;
     vector U1 =
         this->calcVelocity
         (
@@ -240,7 +249,7 @@ void Foam::ThermoParcel<ParcelType>::calc
             mass0,
             Su,
             dUTrans,
-            Cud
+            Spu
         );
 
 
@@ -252,7 +261,7 @@ void Foam::ThermoParcel<ParcelType>::calc
         td.cloud().UTrans()[cellI] += np0*dUTrans;
 
         // Update momentum transfer coefficient
-        td.cloud().UCoeff()[cellI] += np0*mass0*Cud;
+        td.cloud().UCoeff()[cellI] += np0*Spu;
 
         // Update sensible enthalpy transfer
         td.cloud().hsTrans()[cellI] += np0*dhsTrans;
@@ -324,13 +333,13 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
 
     // Integrate to find the new parcel temperature
     IntegrationScheme<scalar>::integrationResult Tres =
-        td.cloud().TIntegrator().integrate(T, dt, ap, bp);
+        td.cloud().TIntegrator().integrate(T, dt, ap*bp, bp);
 
     scalar Tnew = max(Tres.value(), td.cloud().constProps().TMin());
 
     dhsTrans += dt*htc*As*(0.5*(T + Tnew) - Tc_);
 
-    Cuh = bp;
+    Cuh = dt*bp;
 
     return Tnew;
 }
@@ -344,7 +353,7 @@ Foam::ThermoParcel<ParcelType>::ThermoParcel
     const ThermoParcel<ParcelType>& p
 )
 :
-    KinematicParcel<ParcelType>(p),
+    ParcelType(p),
     T_(p.T_),
     Cp_(p.Cp_),
     Tc_(p.Tc_),
@@ -356,10 +365,10 @@ template<class ParcelType>
 Foam::ThermoParcel<ParcelType>::ThermoParcel
 (
     const ThermoParcel<ParcelType>& p,
-    const ThermoCloud<ParcelType>& c
+    const polyMesh& mesh
 )
 :
-    KinematicParcel<ParcelType>(p, c),
+    ParcelType(p, mesh),
     T_(p.T_),
     Cp_(p.Cp_),
     Tc_(p.Tc_),

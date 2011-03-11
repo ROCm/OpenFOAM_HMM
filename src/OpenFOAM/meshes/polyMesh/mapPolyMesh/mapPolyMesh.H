@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,7 +49,7 @@ Description
 
     All this information is nessecary to correctly map fields.
 
-    @par points
+    \par points
 
     - unchanged:
         - pointMap[pointI] contains old point label
@@ -66,7 +66,7 @@ Description
     - appended:
         - pointMap[pointI] contains -1
 
-    @par faces
+    \par faces
 
     - unchanged:
         - faceMap[faceI] contains old face label
@@ -98,7 +98,7 @@ Description
        only be boundary faces; if the new face is an internal face they
        will only be internal faces.
 
-    @par cells
+    \par cells
 
     - unchanged:
         - cellMap[cellI] contains old cell label

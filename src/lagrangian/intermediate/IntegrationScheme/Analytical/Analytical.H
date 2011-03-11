@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,7 @@ class Analytical
 public:
 
     //- Runtime type information
-    TypeName("Analytical");
+    TypeName("analytical");
 
 
     // Constructors
@@ -81,9 +81,9 @@ public:
         //- Perform the integration
         virtual typename IntegrationScheme<Type>::integrationResult integrate
         (
-            const Type phi,
+            const Type& phi,
             const scalar dt,
-            const Type alpha,
+            const Type& alphaBeta,
             const scalar beta
         ) const;
 };

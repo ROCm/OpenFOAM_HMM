@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "Euler.H"
-#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -59,14 +58,14 @@ template<class Type>
 typename Foam::IntegrationScheme<Type>::integrationResult
 Foam::Euler<Type>::integrate
 (
-    const Type phi,
+    const Type& phi,
     const scalar dt,
-    const Type alpha,
+    const Type& alphaBeta,
     const scalar beta
 ) const
 {
     typename IntegrationScheme<Type>::integrationResult retValue;
-    retValue.value() = (phi + beta*dt*alpha)/(1.0 + beta*dt);
+    retValue.value() = (phi + alphaBeta*dt)/(1.0 + beta*dt);
     retValue.average() = 0.5*(phi + retValue.value());
 
     return retValue;

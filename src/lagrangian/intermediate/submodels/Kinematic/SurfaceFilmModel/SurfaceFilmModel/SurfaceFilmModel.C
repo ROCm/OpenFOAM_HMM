@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -154,6 +154,7 @@ void Foam::SurfaceFilmModel<CloudType>::inject(TrackData& td)
     {
         const label filmPatchI = filmPatches[i];
         const label primaryPatchI = primaryPatches[i];
+
         const directMappedPatchBase& mapPatch =
             filmModel.mappedPatches()[filmPatchI];
         const mapDistribute& distMap = mapPatch.map();
@@ -181,10 +182,10 @@ void Foam::SurfaceFilmModel<CloudType>::inject(TrackData& td)
                 const point& pos = this->owner().mesh().C()[cellI];
 
                 // Create a new parcel
-                typename CloudType::parcelType* pPtr =
-                    new typename CloudType::parcelType
+                parcelType* pPtr =
+                    new parcelType
                     (
-                        td.cloud(),
+                        this->owner().pMesh(),
                         pos,
                         cellI,
                         tetFaceI,

@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -40,6 +40,7 @@ Usage: $Script [OPTION] [dir]
        $Script [OPTION] target [dir [MakeDir]]
 
 options:
+  -s | -silent      ignored - for compatibility with wmake
   -help             print the usage
 
 Clean up the wmake control directory Make/\$WM_OPTIONS and remove the
@@ -52,21 +53,35 @@ The targets correspond to a subset of the 'wmake' special targets:
                     clean Make, any *.dep files and lnInclude directories
 
 USAGE
-   exit 1
+    exit 1
 }
 
-# provide immediate help
-if [ "$1" = "-h" -o "$1" = "-help" ]
-then
-    usage
-fi
+
+# parse options
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help)
+        usage
+        ;;
+    -s | -silent)    # ignored - for compatibility with wmake
+        shift
+        ;;
+    -*)
+        usage "unknown option: '$*'"
+        ;;
+    *)
+        break
+        ;;
+    esac
+done
 
 
 #------------------------------------------------------------------------------
-# check arguments and change to the directory in which to run wmake
+# check arguments and change to the directory in which to run wclean
 #------------------------------------------------------------------------------
 
-unset dir makeOption
+unset dir makeType
 MakeDir=Make
 
 if [ $# -ge 1 ]
@@ -76,7 +91,7 @@ then
     then
         dir=$1
     else
-        makeOption=$1
+        makeType=$1
     fi
 
     # specified directory name:
@@ -101,7 +116,7 @@ fi
 # Recurse the directories tree
 #------------------------------------------------------------------------------
 
-if [ "$makeOption" = all ]
+if [ "$makeType" = all ]
 then
     if [ -e Allwclean ]       # consistent with Allwmake
     then
@@ -121,8 +136,8 @@ then
     fi
 fi
 
-# makeOption is not needed beyond this point
-unset makeOption
+# makeType is not needed beyond this point
+unset makeType
 
 
 #------------------------------------------------------------------------------

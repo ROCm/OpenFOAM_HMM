@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,11 +29,11 @@ Description
 
     The meshReader supports boundaryRegion information.
 
-    The <tt>constant/boundaryRegion</tt> file is an @c IOMap<dictionary>
+    The <tt>constant/boundaryRegion</tt> file is an \c IOMap<dictionary>
     that is used to save the information persistently.
     It contains the boundaryRegion information of the following form:
 
-    @verbatim
+    \verbatim
         (
             INT
             {
@@ -42,7 +42,7 @@ Description
             }
             ...
         )
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     boundaryRegion.C
@@ -149,9 +149,9 @@ public:
 
         //- Rename regions
         //  each dictionary entry is a single word:
-        //  @verbatim
+        //  \verbatim
         //      newPatchName    originalName;
-        //  @endverbatim
+        //  \endverbatim
         void rename(const dictionary&);
 };
 

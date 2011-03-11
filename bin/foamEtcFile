@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -33,10 +33,10 @@
 #     personal settings to site-wide settings.
 #
 #     For example, within the user ~/.OpenFOAM/<VER>/prefs.sh:
-#     @verbatim
+#     \code
 #        foamPrefs=`$WM_PROJECT_DIR/bin/foamEtcFile -m go prefs.sh` \
 #            && _foamSource $foamPrefs
-#     @endverbatim
+#     \endcode
 #
 #-------------------------------------------------------------------------------
 usage() {

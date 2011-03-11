@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -150,13 +150,13 @@ bool Foam::fieldValues::faceSource::writeValues(const word& fieldName)
         else
         {
             // Get unoriented magSf
-            magSf = combineFields(filterField(mesh().magSf(), false));
+            magSf = filterField(mesh().magSf(), false);
         }
 
         // Combine onto master
-        values = combineFields(values);
-        magSf = combineFields(magSf);
-        weightField = combineFields(weightField);
+        combineFields(values);
+        combineFields(magSf);
+        combineFields(weightField);
 
 
         if (Pstream::master())

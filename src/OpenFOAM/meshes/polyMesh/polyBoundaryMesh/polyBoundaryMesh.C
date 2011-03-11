@@ -550,11 +550,12 @@ Foam::label Foam::polyBoundaryMesh::whichPatch(const label faceIndex) const
 
 Foam::labelHashSet Foam::polyBoundaryMesh::patchSet
 (
-    const wordList& patchNames
+    const UList<wordRe>& patchNames,
+    const bool warnNotFound
 ) const
 {
-    wordList allPatchNames = names();
-    labelHashSet ps(size());
+    const wordList allPatchNames(this->names());
+    labelHashSet ids(size());
 
     forAll(patchNames, i)
     {
@@ -562,20 +563,23 @@ Foam::labelHashSet Foam::polyBoundaryMesh::patchSet
         // of all patch names for matches
         labelList patchIDs = findStrings(patchNames[i], allPatchNames);
 
-        if (patchIDs.empty())
+        if (patchIDs.empty() && warnNotFound)
         {
-            WarningIn("polyBoundaryMesh::patchSet(const wordList&)")
-                << "Cannot find any patch names matching " << patchNames[i]
+            WarningIn
+            (
+                "polyBoundaryMesh::patchSet"
+                "(const wordReList&, const bool) const"
+            )   << "Cannot find any patch names matching " << patchNames[i]
                 << endl;
         }
 
         forAll(patchIDs, j)
         {
-            ps.insert(patchIDs[j]);
+            ids.insert(patchIDs[j]);
         }
     }
 
-    return ps;
+    return ids;
 }
 
 

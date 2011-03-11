@@ -30,15 +30,14 @@
 
 #cleanTimeDirectories()
 #{
-#    echo "Cleaning $case case of $application application"
-#    TIME_DIRS=`foamInfoExec . $1 -times | sed '1,/constant/d'`
-#    for T in $TIME_DIRS
+#    echo "Cleaning $PWD case"
+#    for time in $(foamInfoExec -times)
 #    do
-#        if [ $T != "0" ]
-#        then
-#            echo "Deleting directory $T"
-#            rm -rf ${T} > /dev/null 2>&1
-#        fi
+#        # keep 0 and constant directories
+#        [ "$time" = "0" -o "$time" = constant ] || {
+#            echo "Deleting directory $time"
+#            rm -rf $time > /dev/null 2>&1
+#        }
 #    done
 #    rm -rf {log,log.*,log-*,logSummary.*,.fxLock,*.xml,ParaView*,paraFoam*,*.OpenFOAM} > /dev/null 2>&1
 #}
@@ -56,15 +55,32 @@ cleanTimeDirectories()
     rm -rf ./[1-9]* ./-[1-9]* ./log ./log.* ./log-* ./logSummary.* ./.fxLock ./*.xml ./ParaView* ./paraFoam* ./*.OpenFOAM > /dev/null 2>&1
 }
 
+
+#
+# Remove dynamicCode subdirectory if it looks appropriate
+#
+cleanDynamicCode()
+{
+    if [ -d system -a -d dynamicCode ]
+    then
+        rm -rf dynamicCode > /dev/null 2>&1
+    fi
+}
+
+
 cleanCase()
 {
     cleanTimeDirectories
+    cleanDynamicCode
+
     rm -rf processor* > /dev/null 2>&1
     rm -rf probes* > /dev/null 2>&1
     rm -rf forces* > /dev/null 2>&1
     rm -rf sets > /dev/null 2>&1
     rm -rf system/machines > /dev/null 2>&1
-    if [ -d "constant/polyMesh" ]; then 
+
+    if [ -d constant/polyMesh ]
+    then
         (cd constant/polyMesh && \
             rm -rf \
             allOwner* cell* face* meshModifiers* \
@@ -94,7 +110,7 @@ cleanCase()
 
 removeCase()
 {
-    echo "Removing $case case"
+    echo "Removing ${1:-unknown} case"
     rm -rf $1
 }
 

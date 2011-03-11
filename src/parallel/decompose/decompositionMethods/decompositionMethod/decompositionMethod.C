@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -398,15 +398,24 @@ void Foam::decompositionMethod::calcCellCells
     // Create global cell numbers
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    globalIndex globalCells(mesh.nCells());
+    label nAgglom;
+    if (agglom.size())
+    {
+        nAgglom = max(agglom)+1;
+    }
+    else
+    {
+        nAgglom = 0;
+    }
+    globalIndex globalAgglom(nAgglom);
 
     const labelList& faceOwner = mesh.faceOwner();
     const labelList& faceNeighbour = mesh.faceNeighbour();
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
 
-    // Get renumbered owner on other side of coupled faces
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Get agglomerate owner on other side of coupled faces
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     labelList globalNeighbour(mesh.nFaces()-mesh.nInternalFaces());
 
@@ -421,10 +430,13 @@ void Foam::decompositionMethod::calcCellCells
 
             forAll(pp, i)
             {
-                globalNeighbour[bFaceI++] = globalCells.toGlobal
+                globalNeighbour[bFaceI] = globalAgglom.toGlobal
                 (
-                    faceOwner[faceI++]
+                    agglom[faceOwner[faceI]]
                 );
+
+                bFaceI++;
+                faceI++;
             }
         }
     }
@@ -448,8 +460,13 @@ void Foam::decompositionMethod::calcCellCells
         nFacesPerCell[nei]++;
     }
 
-    // Handle coupled faces
-    HashSet<edge, Hash<edge> > cellPair(mesh.nFaces()-mesh.nInternalFaces());
+    // Handle coupled faces. In case of agglomeration you might end up
+    // with multiple connections ('faces') between the same two agglomerations.
+    // This is illegal so mark.
+    HashSet<labelPair, Hash<labelPair> > cellPair
+    (
+        mesh.nFaces()-mesh.nInternalFaces()
+    );
 
     forAll(patches, patchI)
     {
@@ -464,7 +481,7 @@ void Foam::decompositionMethod::calcCellCells
             {
                 label own = agglom[faceOwner[faceI]];
                 label globalNei = globalNeighbour[bFaceI];
-                if (cellPair.insert(edge(own, globalNei)))
+                if (cellPair.insert(labelPair(own, globalNei)))
                 {
                     nFacesPerCell[own]++;
                 }
@@ -491,8 +508,8 @@ void Foam::decompositionMethod::calcCellCells
         label own = agglom[faceOwner[faceI]];
         label nei = agglom[faceNeighbour[faceI]];
 
-        m[offsets[own] + nFacesPerCell[own]++] = globalCells.toGlobal(nei);
-        m[offsets[nei] + nFacesPerCell[nei]++] = globalCells.toGlobal(own);
+        m[offsets[own] + nFacesPerCell[own]++] = globalAgglom.toGlobal(nei);
+        m[offsets[nei] + nFacesPerCell[nei]++] = globalAgglom.toGlobal(own);
     }
 
     // For boundary faces is offsetted coupled neighbour
@@ -510,7 +527,7 @@ void Foam::decompositionMethod::calcCellCells
             {
                 label own = agglom[faceOwner[faceI]];
                 label globalNei = globalNeighbour[bFaceI];
-                if (cellPair.insert(edge(own, globalNei)))
+                if (cellPair.insert(labelPair(own, globalNei)))
                 {
                     m[offsets[own] + nFacesPerCell[own]++] = globalNei;
                 }

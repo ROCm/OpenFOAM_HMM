@@ -36,13 +36,13 @@
 #
 #------------------------------------------------------------------------------
 
-# Specify system compiler
-# ~~~~~~~~~~~~~~~~~~~~~~~
-foamCompiler=system
+## Specify OpenFOAM ThirdParty compiler
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# foamCompiler=ThirdParty
 
-# Specify system openmpi
-# ~~~~~~~~~~~~~~~~~~~~~~
-export WM_MPLIB=SYSTEMOPENMPI
+## Specify system openmpi
+## ~~~~~~~~~~~~~~~~~~~~~~
+# export WM_MPLIB=SYSTEMOPENMPI
 
 
 # ----------------------------------------------------------------- end-of-file

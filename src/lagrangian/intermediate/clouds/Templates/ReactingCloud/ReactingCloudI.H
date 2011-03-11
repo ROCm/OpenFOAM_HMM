@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,66 +25,65 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class ParcelType>
-inline const Foam::ReactingCloud<ParcelType>&
-Foam::ReactingCloud<ParcelType>::cloudCopy() const
+template<class CloudType>
+inline const Foam::ReactingCloud<CloudType>&
+Foam::ReactingCloud<CloudType>::cloudCopy() const
 {
     return cloudCopyPtr_();
 }
 
 
-template<class ParcelType>
-inline const typename ParcelType::constantProperties&
-Foam::ReactingCloud<ParcelType>::constProps() const
+template<class CloudType>
+inline const typename CloudType::particleType::constantProperties&
+Foam::ReactingCloud<CloudType>::constProps() const
 {
     return constProps_;
 }
 
 
-template<class ParcelType>
-inline const Foam::CompositionModel<Foam::ReactingCloud<ParcelType> >&
-Foam::ReactingCloud<ParcelType>::composition() const
+template<class CloudType>
+inline const Foam::CompositionModel<Foam::ReactingCloud<CloudType> >&
+Foam::ReactingCloud<CloudType>::composition() const
 {
     return compositionModel_;
 }
 
 
-template<class ParcelType>
-inline const Foam::PhaseChangeModel<Foam::ReactingCloud<ParcelType> >&
-Foam::ReactingCloud<ParcelType>::phaseChange() const
+template<class CloudType>
+inline const Foam::PhaseChangeModel<Foam::ReactingCloud<CloudType> >&
+Foam::ReactingCloud<CloudType>::phaseChange() const
 {
     return phaseChangeModel_;
 }
 
 
-template<class ParcelType>
+template<class CloudType>
 inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
-Foam::ReactingCloud<ParcelType>::rhoTrans(const label i)
+Foam::ReactingCloud<CloudType>::rhoTrans(const label i)
 {
     return rhoTrans_[i];
 }
 
 
-template<class ParcelType>
+template<class CloudType>
 inline
 const Foam::PtrList<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >&
-Foam::ReactingCloud<ParcelType>::rhoTrans() const
+Foam::ReactingCloud<CloudType>::rhoTrans() const
 {
     return rhoTrans_;
 }
 
 
-template<class ParcelType>
+template<class CloudType>
 inline Foam::PtrList<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >&
-Foam::ReactingCloud<ParcelType>::rhoTrans()
+Foam::ReactingCloud<CloudType>::rhoTrans()
 {
     return rhoTrans_;
 }
 
 
-template<class ParcelType>
-inline Foam::tmp<Foam::fvScalarMatrix>
-Foam::ReactingCloud<ParcelType>::SYi
+template<class CloudType>
+inline Foam::tmp<Foam::fvScalarMatrix> Foam::ReactingCloud<CloudType>::SYi
 (
     const label i,
     volScalarField& Yi
@@ -115,7 +114,7 @@ Foam::ReactingCloud<ParcelType>::SYi
             volScalarField& sourceField = trhoTrans();
 
             sourceField.internalField() =
-                rhoTrans_[i]/(this->db().time().deltaT()*this->mesh().V());
+                rhoTrans_[i]/(this->db().time().deltaTValue()*this->mesh().V());
 
             const dimensionedScalar YiSMALL("YiSMALL", dimless, SMALL);
 
@@ -128,7 +127,7 @@ Foam::ReactingCloud<ParcelType>::SYi
             tmp<fvScalarMatrix> tfvm(new fvScalarMatrix(Yi, dimMass/dimTime));
             fvScalarMatrix& fvm = tfvm();
 
-            fvm.source() = -rhoTrans_[i]/this->db().time().deltaT();
+            fvm.source() = -rhoTrans_[i]/this->db().time().deltaTValue();
 
             return tfvm;
         }
@@ -138,9 +137,9 @@ Foam::ReactingCloud<ParcelType>::SYi
 }
 
 
-template<class ParcelType>
+template<class CloudType>
 inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
-Foam::ReactingCloud<ParcelType>::Srho(const label i) const
+Foam::ReactingCloud<CloudType>::Srho(const label i) const
 {
     tmp<DimensionedField<scalar, volMesh> > tRhoi
     (
@@ -168,16 +167,16 @@ Foam::ReactingCloud<ParcelType>::Srho(const label i) const
     if (this->solution().coupled())
     {
         scalarField& rhoi = tRhoi();
-        rhoi = rhoTrans_[i]/(this->db().time().deltaT()*this->mesh().V());
+        rhoi = rhoTrans_[i]/(this->db().time().deltaTValue()*this->mesh().V());
     }
 
     return tRhoi;
 }
 
 
-template<class ParcelType>
+template<class CloudType>
 inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
-Foam::ReactingCloud<ParcelType>::Srho() const
+Foam::ReactingCloud<CloudType>::Srho() const
 {
     tmp<DimensionedField<scalar, volMesh> > trhoTrans
     (
@@ -210,16 +209,16 @@ Foam::ReactingCloud<ParcelType>::Srho() const
             sourceField += rhoTrans_[i];
         }
 
-        sourceField /= this->db().time().deltaT()*this->mesh().V();
+        sourceField /= this->db().time().deltaTValue()*this->mesh().V();
     }
 
     return trhoTrans;
 }
 
 
-template<class ParcelType>
+template<class CloudType>
 inline Foam::tmp<Foam::fvScalarMatrix>
-Foam::ReactingCloud<ParcelType>::Srho(volScalarField& rho) const
+Foam::ReactingCloud<CloudType>::Srho(volScalarField& rho) const
 {
     if (this->solution().coupled())
     {
@@ -250,7 +249,7 @@ Foam::ReactingCloud<ParcelType>::Srho(volScalarField& rho) const
             {
                 sourceField += rhoTrans_[i];
             }
-            sourceField /= this->db().time().deltaT()*this->mesh().V();
+            sourceField /= this->db().time().deltaTValue()*this->mesh().V();
 
             return fvm::SuSp(trhoTrans()/rho, rho);
         }

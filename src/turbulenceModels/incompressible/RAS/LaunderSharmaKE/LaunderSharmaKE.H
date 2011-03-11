@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
     incompressible flows.
 
     The default model coefficients correspond to the following:
-    @verbatim
+    \verbatim
         LaunderSharmaKECoeffs
         {
             Cmu         0.09;
@@ -38,7 +38,7 @@ Description
             C3          -0.33;
             sigmaEps    1.3;
         }
-    @endverbatim
+    \endverbatim
 
 SourceFiles
     LaunderSharmaKE.C

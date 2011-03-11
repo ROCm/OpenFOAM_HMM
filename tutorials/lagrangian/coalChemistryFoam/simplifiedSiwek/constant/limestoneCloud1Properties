@@ -24,13 +24,10 @@ solution
 
     sourceTerms
     {
-        U
+        schemes
         {
-            semiImplicit    false;
-        }
-        hs
-        {
-            semiImplicit    false;
+            U               explicit;
+            hs              explicit;
         }
     }
 
@@ -47,7 +44,7 @@ solution
     integrationSchemes
     {
         U               Euler;
-        T               Analytical;
+        T               analytical;
     }
 }
 
@@ -72,45 +69,42 @@ constantProperties
     Pr              0.7;
 }
 
-particleForces
-{
-    gravity             on;
-    virtualMass         off;
-    pressureGradient    off;
-    paramagnetic        off;
-}
-
 subModels
 {
-    InjectionModel  ManualInjection;
+    particleForces
+    {
+        activeForces
+        (
+            sphereDrag
+            gravity
+        );
+    }
 
-    DragModel       SphereDrag;
+    injectionModel  manualInjection;
 
-    DispersionModel StochasticDispersionRAS;
+    dispersionModel stochasticDispersionRAS;
 
-    PatchInteractionModel StandardWallInteraction;
+    patchInteractionModel standardWallInteraction;
 
-    HeatTransferModel RanzMarshall;
+    heatTransferModel RanzMarshall;
 
-    PostProcessingModel none;
+    postProcessingModel none;
 
-    CollisionModel  none;
-
-    SurfaceFilmModel none;
+    surfaceFilmModel none;
 
     radiation       on;
 
-    ManualInjectionCoeffs
+    manualInjectionCoeffs
     {
         massTotal       0.0001;
         parcelBasisType mass;
         SOI             0;
         positionsFile   "limestonePositions";
         U0              ( 0 0 0 );
-        parcelPDF
+        sizeDistribution
         {
-            pdfType         RosinRammler;
-            RosinRammlerPDF
+            type        RosinRammler;
+            RosinRammlerDistribution
             {
                 minValue        5e-06;
                 maxValue        0.000565;
@@ -120,7 +114,7 @@ subModels
         }
     }
 
-    StandardWallInteractionCoeffs
+    standardWallInteractionCoeffs
     {
         type            rebound;
         e               1;

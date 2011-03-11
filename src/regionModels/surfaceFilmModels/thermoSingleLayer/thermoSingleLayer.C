@@ -103,7 +103,8 @@ void thermoSingleLayer::correctThermoFields()
         }
         case tmSingleComponent:
         {
-            const liquid& liq = thermo_.liquids().properties()[liquidId_];
+            const liquidProperties& liq =
+                thermo_.liquids().properties()[liquidId_];
             forAll(rho_, cellI)
             {
                 const scalar T = T_[cellI];

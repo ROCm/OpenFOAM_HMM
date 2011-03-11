@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,12 +26,11 @@ Class
 
 Description
     Manual injection
-
     - User specifies
       - Total mass to inject
-      - Parcel positions in file @c positionsFile
+      - Parcel positions in file \c positionsFile
       - Initial parcel velocity
-    - Parcel diameters obtained by PDF model
+    - Parcel diameters obtained by distribution model model
     - All parcels introduced at SOI
 
 SourceFiles
@@ -43,7 +42,7 @@ SourceFiles
 #define ManualInjection_H
 
 #include "InjectionModel.H"
-#include "pdf.H"
+#include "distributionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -82,8 +81,8 @@ class ManualInjection
         //- Initial parcel velocity
         const vector U0_;
 
-        //- Parcel size PDF model
-        const autoPtr<pdfs::pdf> parcelPDF_;
+        //- Parcel size distribution model model
+        const autoPtr<distributionModels::distributionModel> sizeDistribution_;
 
 
 protected:
@@ -100,7 +99,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("ManualInjection");
+    TypeName("manualInjection");
 
 
     // Constructors

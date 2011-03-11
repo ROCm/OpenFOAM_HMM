@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,13 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "coalParcel.H"
+#include "coalCloud.H"
 
 // Kinematic
+#include "makeThermoParcelForces.H" // thermo variant
 #include "makeParcelDispersionModels.H"
-#include "makeParcelDragModels.H"
 #include "makeReactingMultiphaseParcelInjectionModels.H" // MP variant
-#include "makeParcelCollisionModels.H"
 #include "makeParcelPatchInteractionModels.H"
 #include "makeParcelPostProcessingModels.H"
 
@@ -51,25 +50,28 @@ License
 
 namespace Foam
 {
+    typedef coalCloud::cloudType coalCloud_R;
+    typedef coalCloud_R::cloudType coalCloud_T;
+    typedef coalCloud_T::cloudType coalCloud_K;
+
     // Kinematic sub-models
-    makeParcelDispersionModels(coalParcel);
-    makeParcelDragModels(coalParcel);
-    makeReactingMultiphaseParcelInjectionModels(coalParcel);
-    makeParcelCollisionModels(coalParcel);
-    makeParcelPatchInteractionModels(coalParcel);
-    makeParcelPostProcessingModels(coalParcel);
+    makeThermoParcelForces(coalCloud_K);
+    makeParcelDispersionModels(coalCloud_K);
+    makeReactingMultiphaseParcelInjectionModels(coalCloud_K);
+    makeParcelPatchInteractionModels(coalCloud_K);
+    makeParcelPostProcessingModels(coalCloud_K);
 
     // Thermo sub-models
-    makeParcelHeatTransferModels(coalParcel);
+    makeParcelHeatTransferModels(coalCloud_T);
 
     // Reacting sub-models
-    makeReactingMultiphaseParcelCompositionModels(coalParcel);
-    makeReactingParcelPhaseChangeModels(coalParcel);
+    makeReactingMultiphaseParcelCompositionModels(coalCloud_R);
+    makeReactingParcelPhaseChangeModels(coalCloud_R);
 
     // Reacting multiphase sub-models
-    makeReactingMultiphaseParcelDevolatilisationModels(coalParcel);
-    makeReactingParcelSurfaceFilmModels(coalParcel);
-    makeCoalParcelSurfaceReactionModels(coalParcel);
+    makeReactingMultiphaseParcelDevolatilisationModels(coalCloud);
+    makeReactingParcelSurfaceFilmModels(coalCloud_K);
+    makeCoalParcelSurfaceReactionModels(coalCloud);
 }
 
 

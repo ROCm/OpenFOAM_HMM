@@ -1,6 +1,6 @@
 CPP        = /lib/cpp -traditional-cpp $(GFLAGS) -DICC_IA64_PREFETCH
 
-GLIBS      = -liberty
+GLIBS      =
 
 include $(GENERAL_RULES)/standard
 

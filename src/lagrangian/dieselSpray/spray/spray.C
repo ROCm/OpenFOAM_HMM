@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,6 +46,7 @@ License
 
 namespace Foam
 {
+    defineTemplateTypeNameAndDebug(Cloud<parcel>, 0);
     defineTemplateTypeNameAndDebug(IOPtrList<injector>, 0);
 }
 
@@ -169,7 +170,7 @@ Foam::spray::spray
 
     fuels_
     (
-        liquidMixture::New
+        liquidMixtureProperties::New
         (
             mesh_.lookupObject<dictionary>("thermophysicalProperties")
         )

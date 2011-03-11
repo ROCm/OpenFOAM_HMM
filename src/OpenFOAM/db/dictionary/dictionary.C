@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -260,7 +260,12 @@ Foam::SHA1Digest Foam::dictionary::digest() const
 }
 
 
-bool Foam::dictionary::found(const word& keyword, bool recursive) const
+bool Foam::dictionary::found
+(
+    const word& keyword,
+    bool recursive,
+    bool patternMatch
+) const
 {
     if (hashedEntries_.found(keyword))
     {
@@ -268,7 +273,7 @@ bool Foam::dictionary::found(const word& keyword, bool recursive) const
     }
     else
     {
-        if (patternEntries_.size())
+        if (patternMatch && patternEntries_.size())
         {
             DLList<entry*>::const_iterator wcLink =
                 patternEntries_.begin();
@@ -276,7 +281,7 @@ bool Foam::dictionary::found(const word& keyword, bool recursive) const
                 patternRegexps_.begin();
 
             // Find in patterns using regular expressions only
-            if (findInPatterns(true, keyword, wcLink, reLink))
+            if (findInPatterns(patternMatch, keyword, wcLink, reLink))
             {
                 return true;
             }
@@ -284,7 +289,7 @@ bool Foam::dictionary::found(const word& keyword, bool recursive) const
 
         if (recursive && &parent_ != &dictionary::null)
         {
-            return parent_.found(keyword, recursive);
+            return parent_.found(keyword, recursive, patternMatch);
         }
         else
         {
@@ -481,14 +486,29 @@ Foam::dictionary& Foam::dictionary::subDict(const word& keyword)
 
 Foam::dictionary Foam::dictionary::subOrEmptyDict
 (
-    const word& keyword
+    const word& keyword,
+    const bool mustRead
 ) const
 {
     const entry* entryPtr = lookupEntryPtr(keyword, false, true);
 
     if (entryPtr == NULL)
     {
-        return dictionary(*this, dictionary(name() + "::" + keyword));
+        if (mustRead)
+        {
+            FatalIOErrorIn
+            (
+                "dictionary::subOrEmptyDict(const word& keyword, const bool)",
+                *this
+            )   << "keyword " << keyword << " is undefined in dictionary "
+                << name()
+                << exit(FatalIOError);
+            return entryPtr->dict();
+        }
+        else
+        {
+            return dictionary(*this, dictionary(name() + "::" + keyword));
+        }
     }
     else
     {
@@ -736,13 +756,14 @@ bool Foam::dictionary::changeKeyword
 
     if (iter()->keyword().isPattern())
     {
-        FatalErrorIn
+        FatalIOErrorIn
         (
-            "dictionary::changeKeyword(const word&, const word&, bool)"
+            "dictionary::changeKeyword(const word&, const word&, bool)",
+            *this
         )   << "Old keyword "<< oldKeyword
             << " is a pattern."
             << "Pattern replacement not yet implemented."
-            << exit(FatalError);
+            << exit(FatalIOError);
     }
 
 
@@ -776,9 +797,10 @@ bool Foam::dictionary::changeKeyword
         }
         else
         {
-            WarningIn
+            IOWarningIn
             (
-                "dictionary::changeKeyword(const word&, const word&, bool)"
+                "dictionary::changeKeyword(const word&, const word&, bool)",
+                *this
             )   << "cannot rename keyword "<< oldKeyword
                 << " to existing keyword " << newKeyword
                 << " in dictionary " << name() << endl;
@@ -810,9 +832,9 @@ bool Foam::dictionary::merge(const dictionary& dict)
     // Check for assignment to self
     if (this == &dict)
     {
-        FatalErrorIn("dictionary::merge(const dictionary&)")
+        FatalIOErrorIn("dictionary::merge(const dictionary&)", *this)
             << "attempted merge to self for dictionary " << name()
-            << abort(FatalError);
+            << abort(FatalIOError);
     }
 
     bool changed = false;
@@ -891,9 +913,9 @@ void Foam::dictionary::operator=(const dictionary& rhs)
     // Check for assignment to self
     if (this == &rhs)
     {
-        FatalErrorIn("dictionary::operator=(const dictionary&)")
+        FatalIOErrorIn("dictionary::operator=(const dictionary&)", *this)
             << "attempted assignment to self for dictionary " << name()
-            << abort(FatalError);
+            << abort(FatalIOError);
     }
 
     name() = rhs.name();
@@ -914,9 +936,9 @@ void Foam::dictionary::operator+=(const dictionary& rhs)
     // Check for assignment to self
     if (this == &rhs)
     {
-        FatalErrorIn("dictionary::operator+=(const dictionary&)")
+        FatalIOErrorIn("dictionary::operator+=(const dictionary&)", *this)
             << "attempted addition assignment to self for dictionary " << name()
-            << abort(FatalError);
+            << abort(FatalIOError);
     }
 
     forAllConstIter(IDLList<entry>, rhs, iter)
@@ -931,9 +953,9 @@ void Foam::dictionary::operator|=(const dictionary& rhs)
     // Check for assignment to self
     if (this == &rhs)
     {
-        FatalErrorIn("dictionary::operator|=(const dictionary&)")
+        FatalIOErrorIn("dictionary::operator|=(const dictionary&)", *this)
             << "attempted assignment to self for dictionary " << name()
-            << abort(FatalError);
+            << abort(FatalIOError);
     }
 
     forAllConstIter(IDLList<entry>, rhs, iter)
@@ -951,9 +973,9 @@ void Foam::dictionary::operator<<=(const dictionary& rhs)
     // Check for assignment to self
     if (this == &rhs)
     {
-        FatalErrorIn("dictionary::operator<<=(const dictionary&)")
+        FatalIOErrorIn("dictionary::operator<<=(const dictionary&)", *this)
             << "attempted assignment to self for dictionary " << name()
-            << abort(FatalError);
+            << abort(FatalIOError);
     }
 
     forAllConstIter(IDLList<entry>, rhs, iter)

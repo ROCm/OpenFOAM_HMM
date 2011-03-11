@@ -57,12 +57,19 @@ cloudInjection::cloudInjection
     injectionModel(type(), owner, dict),
     particlesPerParcel_(readScalar(coeffs_.lookup("particlesPerParcel"))),
     rndGen_(label(0), -1),
-    parcelPDF_(pdfs::pdf::New(coeffs_.subDict("parcelPDF"), rndGen_)),
+    parcelDistribution_
+    (
+        distributionModels::distributionModel::New
+        (
+            coeffs_.subDict("parcelDistribution"),
+            rndGen_
+        )
+    ),
     diameter_(owner.regionMesh().nCells(), 0.0)
 {
     forAll(diameter_, faceI)
     {
-        diameter_[faceI] = parcelPDF_->sample();
+        diameter_[faceI] = parcelDistribution_->sample();
     }
 }
 
@@ -97,7 +104,7 @@ void cloudInjection::correct
             diameterToInject[cellI] = diameter_[cellI];
 
             // Retrieve new particle diameter sample
-            diameter_[cellI] = parcelPDF_->sample();
+            diameter_[cellI] = parcelDistribution_->sample();
         }
         else
         {

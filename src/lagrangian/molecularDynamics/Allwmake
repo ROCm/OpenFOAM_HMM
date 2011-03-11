@@ -1,9 +1,10 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
+makeType=${1:-libso}
 set -x
 
-wmake libso potential
-wmake libso molecularMeasurements
-wmake libso molecule
+wmake $makeType potential
+wmake $makeType molecularMeasurements
+wmake $makeType molecule
 
 # ----------------------------------------------------------------- end-of-file

@@ -1,6 +1,6 @@
 if (isA<wallPolyPatch>(pbMesh[patch(face())]))
 {
-    keepParcel = sDB.wall().wallTreatment(*this, face());
+    td.keepParticle = sDB.wall().wallTreatment(*this, face());
 
     if (sDB.twoD())
     {
@@ -50,5 +50,5 @@ else if (isA<symmetryPolyPatch>(pbMesh[patch(face())]))
 else if (isType<polyPatch>(pbMesh[patch(face())]))
 {
     // Parcel has hit an inlet or outlet or some such so throw it away
-    keepParcel = false;
+    td.keepParticle = false;
 }

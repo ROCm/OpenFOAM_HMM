@@ -9,6 +9,7 @@ $(bools)/bool/bool.C
 $(bools)/bool/boolIO.C
 $(bools)/Switch/Switch.C
 $(bools)/Switch/SwitchIO.C
+$(bools)/lists/boolList.C
 
 chars = primitives/chars
 $(chars)/char/charIO.C
@@ -22,10 +23,16 @@ $(ints)/longLong/longLongIO.C
 $(ints)/ulong/ulongIO.C
 $(ints)/label/label.C
 $(ints)/uLabel/uLabel.C
+$(ints)/lists/labelIOList.C
+$(ints)/lists/labelListIOList.C
 
 primitives/Scalar/doubleScalar/doubleScalar.C
 primitives/Scalar/floatScalar/floatScalar.C
 primitives/Scalar/scalar/scalar.C
+primitives/Scalar/lists/scalarList.C
+primitives/Scalar/lists/scalarIOList.C
+primitives/Scalar/lists/scalarListIOList.C
+
 primitives/DiagTensor/diagTensor/diagTensor.C
 primitives/SphericalTensor/sphericalTensor/sphericalTensor.C
 primitives/SphericalTensor/labelSphericalTensor/labelSphericalTensor.C
@@ -33,9 +40,16 @@ primitives/SymmTensor/labelSymmTensor/labelSymmTensor.C
 primitives/SymmTensor/symmTensor/symmTensor.C
 primitives/Tensor/labelTensor/labelTensor.C
 primitives/Tensor/tensor/tensor.C
+primitives/Tensor/lists/sphericalTensorList.C
+primitives/Tensor/lists/symmTensorList.C
+primitives/Tensor/lists/tensorList.C
+
 primitives/Vector/complexVector/complexVector.C
 primitives/Vector/labelVector/labelVector.C
 primitives/Vector/vector/vector.C
+primitives/Vector/lists/vectorList.C
+primitives/Vector/lists/vectorIOList.C
+primitives/Vector/lists/vectorListIOList.C
 
 primitives/Tensor2D/tensor2D/tensor2D.C
 primitives/SphericalTensor2D/sphericalTensor2D/sphericalTensor2D.C
@@ -47,6 +61,13 @@ primitives/globalIndexAndTransform/vectorTensorTransform/vectorTensorTransform.C
 primitives/quaternion/quaternion.C
 primitives/septernion/septernion.C
 
+/* functions, data entries */
+primitives/functions/DataEntry/makeDataEntries.C
+primitives/functions/DataEntry/polynomial/polynomial.C
+primitives/functions/DataEntry/polynomial/polynomialIO.C
+
+primitives/functions/Polynomial/polynomialFunction.C
+
 strings = primitives/strings
 $(strings)/string/string.C
 $(strings)/string/stringIO.C
@@ -56,6 +77,8 @@ $(strings)/fileName/fileName.C
 $(strings)/fileName/fileNameIO.C
 $(strings)/keyType/keyType.C
 $(strings)/wordRe/wordRe.C
+$(strings)/lists/hashedWordList.C
+$(strings)/stringOps/stringOps.C
 
 primitives/hashes/Hasher/Hasher.C
 
@@ -81,21 +104,6 @@ containers/Lists/PackedList/PackedBoolList.C
 containers/Lists/ListOps/ListOps.C
 containers/LinkedLists/linkTypes/SLListBase/SLListBase.C
 containers/LinkedLists/linkTypes/DLListBase/DLListBase.C
-
-primitiveLists = primitives/Lists
-$(primitiveLists)/boolList.C
-$(primitiveLists)/labelIOList.C
-$(primitiveLists)/labelListIOList.C
-$(primitiveLists)/scalarList.C
-$(primitiveLists)/scalarIOList.C
-$(primitiveLists)/scalarListIOList.C
-$(primitiveLists)/vectorList.C
-$(primitiveLists)/vectorIOList.C
-$(primitiveLists)/vectorListIOList.C
-$(primitiveLists)/sphericalTensorList.C
-$(primitiveLists)/symmTensorList.C
-$(primitiveLists)/tensorList.C
-$(primitiveLists)/hashedWordList.C
 
 Streams = db/IOstreams
 $(Streams)/token/tokenIO.C
@@ -152,17 +160,12 @@ $(dictionaryEntry)/dictionaryEntry.C
 $(dictionaryEntry)/dictionaryEntryIO.C
 
 functionEntries = $(dictionary)/functionEntries
+$(functionEntries)/codeStream/codeStream.C
 $(functionEntries)/functionEntry/functionEntry.C
 $(functionEntries)/includeEntry/includeEntry.C
 $(functionEntries)/includeIfPresentEntry/includeIfPresentEntry.C
 $(functionEntries)/inputModeEntry/inputModeEntry.C
 $(functionEntries)/removeEntry/removeEntry.C
-
-calcEntry = $(functionEntries)/calcEntry
-$(calcEntry)/calcEntryParser.atg
-$(calcEntry)/calcEntryInternal.C
-$(calcEntry)/calcEntry.C
-
 
 IOdictionary = db/IOobjects/IOdictionary
 $(IOdictionary)/IOdictionary.C
@@ -184,7 +187,11 @@ $(regIOobject)/regIOobjectWrite.C
 db/IOobjectList/IOobjectList.C
 db/objectRegistry/objectRegistry.C
 db/CallbackRegistry/CallbackRegistryName.C
-db/dlLibraryTable/dlLibraryTable.C
+
+dll = db/dynamicLibrary
+$(dll)/dlLibraryTable/dlLibraryTable.C
+$(dll)/dynamicCode/dynamicCode.C
+$(dll)/dynamicCode/dynamicCodeContext.C
 
 db/functionObjects/functionObject/functionObject.C
 db/functionObjects/functionObjectList/functionObjectList.C
@@ -488,6 +495,8 @@ $(pointBoundaryMesh)/pointBoundaryMesh.C
 
 meshes/boundBox/boundBox.C
 
+meshes/treeBoundBox/treeBoundBox.C
+
 meshTools = meshes/meshTools
 $(meshTools)/matchPoints.C
 $(meshTools)/mergePoints.C
@@ -564,6 +573,11 @@ $(interpolations)/patchToPatchInterpolation/PatchToPatchInterpolationName.C
 
 algorithms/MeshWave/MeshWaveName.C
 algorithms/MeshWave/FaceCellWaveName.C
+
+algorithms/indexedOctree/indexedOctreeName.C
+algorithms/indexedOctree/treeDataCell.C
+
+
 
 graph/curve/curve.C
 graph/graph.C

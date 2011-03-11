@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,15 +36,12 @@ SourceFiles
 
 #include "sampledSet.H"
 #include "DynamicList.H"
+#include "passiveParticleCloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward declaration of classes
-class passiveParticle;
-template<class Type> class Particle;
 
 /*---------------------------------------------------------------------------*\
                          Class faceOnlySet Declaration
@@ -71,7 +68,7 @@ class faceOnlySet
         //  reached
         bool trackToBoundary
         (
-            Particle<passiveParticle>& singleParticle,
+            passiveParticle& singleParticle,
             DynamicList<point>& samplingPts,
             DynamicList<label>& samplingCells,
             DynamicList<label>& samplingFaces,

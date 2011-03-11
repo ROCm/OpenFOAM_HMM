@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ Class
     Foam::ensightSurfaceWriter
 
 Description
+    A surfaceWriter for Ensight format.
 
 SourceFiles
     ensightSurfaceWriter.C
@@ -41,29 +42,35 @@ SourceFiles
 namespace Foam
 {
 
-class ensightGeoFile;
-
 /*---------------------------------------------------------------------------*\
                      Class ensightSurfaceWriter Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type>
 class ensightSurfaceWriter
 :
-    public surfaceWriter<Type>
+    public surfaceWriter
 {
     // Private data
 
-        fileName caseFileName_;
-        fileName surfaceName_;
-        fileName geomName_;
-        DynamicList<word> varNames_;
-        DynamicList<fileName> varFileNames_;
+        //- Write option (default is IOstream::ASCII
+        IOstream::streamFormat writeFormat_;
 
 
     // Private Member Functions
 
-        static void writeData(Ostream&, const Field<Type>& values);
+        //- Templated write operation
+        template<class Type>
+        void writeTemplate
+        (
+            const fileName& outputDir,
+            const fileName& surfaceName,
+            const pointField& points,
+            const faceList& faces,
+            const word& fieldName,
+            const Field<Type>& values,
+            const bool isNodeValues,
+            const bool verbose
+        ) const;
 
 
 public:
@@ -77,6 +84,9 @@ public:
         //- Construct null
         ensightSurfaceWriter();
 
+        //- Construct with some output options
+        ensightSurfaceWriter(const dictionary& options);
+
 
     //- Destructor
     virtual ~ensightSurfaceWriter();
@@ -84,9 +94,15 @@ public:
 
     // Member Functions
 
-        // Write
+        //- True if the surface format supports geometry in a separate file.
+        //  False if geometry and field must be in a single file
+        virtual bool separateGeometry()
+        {
+            return true;
+        }
 
-        //- Write geometry to file.
+
+        //- Write single surface geometry to file.
         virtual void write
         (
             const fileName& outputDir,
@@ -97,30 +113,82 @@ public:
         ) const;
 
 
-        //- Writes single surface to file.
+        //- Write scalarField for a single surface to file.
+        //  One value per face or vertex (isNodeValues = true)
         virtual void write
         (
-            const fileName& outputDir,
-            const fileName& surfaceName,
+            const fileName& outputDir,      // <case>/surface/TIME
+            const fileName& surfaceName,    // name of surface
             const pointField& points,
             const faceList& faces,
-            const word& fieldName,
-            const Field<Type>& values,
+            const word& fieldName,          // name of field
+            const Field<scalar>& values,
             const bool isNodeValues,
             const bool verbose = false
         ) const;
+
+        //- Write vectorField for a single surface to file.
+        //  One value per face or vertex (isNodeValues = true)
+        virtual void write
+        (
+            const fileName& outputDir,      // <case>/surface/TIME
+            const fileName& surfaceName,    // name of surface
+            const pointField& points,
+            const faceList& faces,
+            const word& fieldName,          // name of field
+            const Field<vector>& values,
+            const bool isNodeValues,
+            const bool verbose = false
+        ) const;
+
+        //- Write sphericalTensorField for a single surface to file.
+        //  One value per face or vertex (isNodeValues = true)
+        virtual void write
+        (
+            const fileName& outputDir,      // <case>/surface/TIME
+            const fileName& surfaceName,    // name of surface
+            const pointField& points,
+            const faceList& faces,
+            const word& fieldName,          // name of field
+            const Field<sphericalTensor>& values,
+            const bool isNodeValues,
+            const bool verbose = false
+        ) const;
+
+        //- Write symmTensorField for a single surface to file.
+        //  One value per face or vertex (isNodeValues = true)
+        virtual void write
+        (
+            const fileName& outputDir,      // <case>/surface/TIME
+            const fileName& surfaceName,    // name of surface
+            const pointField& points,
+            const faceList& faces,
+            const word& fieldName,          // name of field
+            const Field<symmTensor>& values,
+            const bool isNodeValues,
+            const bool verbose = false
+        ) const;
+
+        //- Write tensorField for a single surface to file.
+        //  One value per face or vertex (isNodeValues = true)
+        virtual void write
+        (
+            const fileName& outputDir,      // <case>/surface/TIME
+            const fileName& surfaceName,    // name of surface
+            const pointField& points,
+            const faceList& faces,
+            const word& fieldName,          // name of field
+            const Field<tensor>& values,
+            const bool isNodeValues,
+            const bool verbose = false
+        ) const;
+
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "ensightSurfaceWriter.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

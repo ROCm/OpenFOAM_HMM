@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,7 +21,8 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-@file Foam::globalFunctionSelectionTables
+Global
+    Foam::globalFunctionSelectionTables
 
 Description
     Macros to enable the easy declaration of global function selection tables.
@@ -34,7 +35,6 @@ Description
 #include "memberFunctionSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 // external use:
 // ~~~~~~~~~~~~~
@@ -85,13 +85,14 @@ Description
         }                                                                     \
     }
 
+
 // internal use:
 // constructor/destructor aid
 #define defineGlobalFunctionSelectionTableConstructDestruct\
 (memberFunction,argNames)                                                     \
                                                                               \
     /* Table constructor called from the table add function */                \
-    void construct##memberFunction##argNames##MemberFunctionTables()\
+    void construct##memberFunction##argNames##MemberFunctionTables()          \
     {                                                                         \
         static bool constructed = false;                                      \
         if (!constructed)                                                     \
@@ -103,7 +104,7 @@ Description
     }                                                                         \
                                                                               \
     /* Table destructor called from the table add function destructor */      \
-    void destroy##memberFunction##argNames##MemberFunctionTables()\
+    void destroy##memberFunction##argNames##MemberFunctionTables()            \
     {                                                                         \
         if (memberFunction##argNames##MemberFunctionTablePtr_)                \
         {                                                                     \
@@ -137,7 +138,6 @@ Description
         (memberFunction,argNames)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 #endif
 

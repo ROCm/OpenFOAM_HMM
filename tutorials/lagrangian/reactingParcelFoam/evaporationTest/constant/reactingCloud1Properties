@@ -24,21 +24,12 @@ solution
 
     sourceTerms
     {
-        rho
+        schemes
         {
-            semiImplicit    false;
-        }
-        U
-        {
-            semiImplicit    false;
-        }
-        Yi
-        {
-            semiImplicit    false;
-        }
-        hs
-        {
-            semiImplicit    false;
+            rho             explicit;
+            U               explicit;
+            Yi              explicit;
+            hs              explicit;
         }
     }
 
@@ -55,7 +46,7 @@ solution
     integrationSchemes
     {
         U               Euler;
-        T               Analytical;
+        T               analytical;
     }
 }
 
@@ -84,49 +75,46 @@ constantProperties
     constantVolume  false;
 }
 
-particleForces
-{
-    gravity             off;
-    virtualMass         off;
-    pressureGradient    off;
-    paramagnetic        off;
-}
-
 subModels
 {
-    InjectionModel  ManualInjection;
+    particleForces
+    {
+        activeForces
+        (
+            sphereDrag
+            gravity
+        );
+    }
 
-    DragModel       SphereDrag;
+    injectionModel  manualInjection;
 
-    DispersionModel none;
+    dispersionModel none;
 
-    PatchInteractionModel StandardWallInteraction;
+    patchInteractionModel standardWallInteraction;
 
-    HeatTransferModel RanzMarshall;
+    heatTransferModel RanzMarshall;
 
-    CompositionModel SinglePhaseMixture;
+    compositionModel singlePhaseMixture;
 
-    PhaseChangeModel LiquidEvaporation;
+    phaseChangeModel liquidEvaporation;
 
-    PostProcessingModel none;
+    postProcessingModel none;
 
-    CollisionModel none;
-
-    SurfaceFilmModel none;
+    surfaceFilmModel none;
 
     radiation       off;
 
-    ManualInjectionCoeffs
+    manualInjectionCoeffs
     {
         massTotal       1e-8;
         parcelBasisType mass;
         SOI             0;
         positionsFile   "reactingCloud1Positions";
         U0              ( 0 0 0 );
-        parcelPDF
+        sizeDistribution
         {
-            pdfType         uniform;
-            uniformPDF
+            type        uniform;
+            uniformDistribution
             {
                 minValue        1e-04;
                 maxValue        1e-04;
@@ -134,7 +122,7 @@ subModels
         }
     }
 
-    StandardWallInteractionCoeffs
+    standardWallInteractionCoeffs
     {
         type            rebound;
     }
@@ -144,7 +132,7 @@ subModels
         BirdCorrection  true;
     }
 
-    SinglePhaseMixtureCoeffs
+    singlePhaseMixtureCoeffs
     {
         phases
         (
@@ -155,7 +143,7 @@ subModels
         );
     }
 
-    LiquidEvaporationCoeffs
+    liquidEvaporationCoeffs
     {
         enthalpyTransfer enthalpyDifference;
 

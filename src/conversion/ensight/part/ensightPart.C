@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,31 +24,32 @@ License
 \*----------------------------------------------------------------------------*/
 
 #include "ensightPart.H"
-#include "addToRunTimeSelectionTable.H"
 #include "dictionary.H"
 #include "ListOps.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 namespace Foam
 {
-   defineTypeNameAndDebug(ensightPart, 0);
-   defineTemplateTypeNameAndDebug(IOPtrList<ensightPart>, 0);
-   defineRunTimeSelectionTable(ensightPart, istream);
+    defineTypeNameAndDebug(ensightPart, 0);
+    defineTemplateTypeNameAndDebug(IOPtrList<ensightPart>, 0);
+    defineRunTimeSelectionTable(ensightPart, istream);
 }
 
-Foam::List<Foam::word> Foam::ensightPart::elemTypes_(0);
+const Foam::List<Foam::word> Foam::ensightPart::elemTypes_(0);
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 bool Foam::ensightPart::isFieldDefined(const List<scalar>& field) const
 {
     forAll(elemLists_, elemI)
     {
-        const labelList& idList = elemLists_[elemI];
+        const labelUList& idList = elemLists_[elemI];
 
         forAll(idList, i)
         {
-            label id = idList[i];
+            const label id = idList[i];
 
             if (id >= field.size() || isnan(field[id]))
             {
@@ -72,7 +73,7 @@ Foam::ensightPart::ensightPart
     size_(0),
     isCellData_(true),
     matId_(0),
-    meshPtr_(0)
+    points_(pointField::null())
 {}
 
 
@@ -89,7 +90,7 @@ Foam::ensightPart::ensightPart
     size_(0),
     isCellData_(true),
     matId_(0),
-    meshPtr_(0)
+    points_(pointField::null())
 {}
 
 
@@ -97,7 +98,7 @@ Foam::ensightPart::ensightPart
 (
     label partNumber,
     const string& partDescription,
-    const polyMesh& pMesh
+    const pointField& points
 )
 :
     number_(partNumber),
@@ -107,7 +108,7 @@ Foam::ensightPart::ensightPart
     size_(0),
     isCellData_(true),
     matId_(0),
-    meshPtr_(&pMesh)
+    points_(points)
 {}
 
 
@@ -120,7 +121,7 @@ Foam::ensightPart::ensightPart(const ensightPart& part)
     size_(part.size_),
     isCellData_(part.isCellData_),
     matId_(part.matId_),
-    meshPtr_(part.meshPtr_)
+    points_(part.points_)
 {}
 
 
@@ -158,31 +159,7 @@ Foam::ensightPart::~ensightPart()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::ensightPart::reconstruct(Istream& is)
-{
-    dictionary dict(is);
-    dict.lookup("id") >> number_;
-    dict.lookup("name") >> name_;
-    dict.readIfPresent("offset", offset_);
-
-    // populate elemLists_
-    elemLists_.setSize(elementTypes().size());
-
-    forAll(elementTypes(), elemI)
-    {
-        word key(elementTypes()[elemI]);
-
-        elemLists_[elemI].clear();
-        dict.readIfPresent(key, elemLists_[elemI]);
-
-        size_ += elemLists_[elemI].size();
-    }
-
-    is.check("ensightPart::reconstruct(Istream&)");
-}
-
-
-void Foam::ensightPart::renumber(labelList const& origId)
+void Foam::ensightPart::renumber(const labelUList& origId)
 {
     // transform to global values first
     if (offset_)

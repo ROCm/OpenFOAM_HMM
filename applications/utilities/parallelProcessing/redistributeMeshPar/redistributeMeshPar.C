@@ -32,7 +32,7 @@ Description
     Balances mesh and writes new mesh to new time directory.
 
     Can also work like decomposePar:
-    @verbatim
+    \verbatim
         # Create empty processor directories (have to exist for argList)
         mkdir processor0
                 ..
@@ -43,7 +43,7 @@ Description
 
         # Distribute
         mpirun -np ddd redistributeMeshPar -parallel
-    @endverbatim
+    \endverbatim
 \*---------------------------------------------------------------------------*/
 
 #include "fvMesh.H"
@@ -73,8 +73,8 @@ autoPtr<fvMesh> createMesh
     const bool haveMesh
 )
 {
-    Pout<< "Create mesh for time = "
-        << runTime.timeName() << nl << endl;
+    //Pout<< "Create mesh for time = "
+    //    << runTime.timeName() << nl << endl;
 
     IOobject io
     (
@@ -98,12 +98,12 @@ autoPtr<fvMesh> createMesh
             xferCopy(labelList()),
             false
         );
-        Pout<< "Writing dummy mesh to " << dummyMesh.polyMesh::objectPath()
-            << endl;
+        //Pout<< "Writing dummy mesh to " << dummyMesh.polyMesh::objectPath()
+        //    << endl;
         dummyMesh.write();
     }
 
-    Pout<< "Reading mesh from " << io.objectPath() << endl;
+    //Pout<< "Reading mesh from " << io.objectPath() << endl;
     autoPtr<fvMesh> meshPtr(new fvMesh(io));
     fvMesh& mesh = meshPtr();
 
@@ -201,9 +201,8 @@ autoPtr<fvMesh> createMesh
                     break;
                 }
 
-                Pout<< "Adding patch:" << nPatches
-                    << " name:" << name
-                    << " type:" << type << endl;
+                //Pout<< "Adding patch:" << nPatches
+                //    << " name:" << name << " type:" << type << endl;
 
                 dictionary patchDict(e.dict());
                 patchDict.remove("nFaces");
@@ -282,8 +281,7 @@ autoPtr<fvMesh> createMesh
     if (!haveMesh)
     {
         // We created a dummy mesh file above. Delete it.
-        Pout<< "Removing dummy mesh " << io.objectPath()
-            << endl;
+        //Pout<< "Removing dummy mesh " << io.objectPath() << endl;
         rmDir(io.objectPath());
     }
 
@@ -351,17 +349,19 @@ scalar getMergeDistance
 }
 
 
-void printMeshData(Ostream& os, const polyMesh& mesh)
-{
-    os  << "Number of points:           " << mesh.points().size() << nl
-        << "          faces:            " << mesh.faces().size() << nl
-        << "          internal faces:   " << mesh.faceNeighbour().size() << nl
-        << "          cells:            " << mesh.cells().size() << nl
-        << "          boundary patches: " << mesh.boundaryMesh().size() << nl
-        << "          point zones:      " << mesh.pointZones().size() << nl
-        << "          face zones:       " << mesh.faceZones().size() << nl
-        << "          cell zones:       " << mesh.cellZones().size() << nl;
-}
+//void printMeshData(Ostream& os, const polyMesh& mesh)
+//{
+//    os  << "Number of points:           " << mesh.points().size() << nl
+//        << "          faces:            " << mesh.faces().size() << nl
+//        << "          internal faces:   " << mesh.faceNeighbour().size() << nl
+//        << "          cells:            " << mesh.cells().size() << nl
+//        << "          boundary patches: " << mesh.boundaryMesh().size() << nl
+//        << "          point zones:      " << mesh.pointZones().size() << nl
+//        << "          face zones:       " << mesh.faceZones().size() << nl
+//        << "          cell zones:       " << mesh.cellZones().size() << nl;
+//}
+
+
 void printMeshData(const polyMesh& mesh)
 {
     // Collect all data on master
@@ -525,6 +525,7 @@ void readFields
 
             // Receive field
             IPstream fromMaster(Pstream::blocking, Pstream::masterNo());
+            dictionary fieldDict(fromMaster);
 
             fields.set
             (
@@ -540,7 +541,7 @@ void readFields
                         IOobject::AUTO_WRITE
                     ),
                     mesh,
-                    fromMaster
+                    fieldDict
                 )
             );
 
@@ -916,8 +917,8 @@ int main(int argc, char *argv[])
     // Mesh distribution engine
     fvMeshDistribute distributor(mesh, tolDim);
 
-    Pout<< "Wanted distribution:"
-        << distributor.countCells(finalDecomp) << nl << endl;
+    //Pout<< "Wanted distribution:"
+    //    << distributor.countCells(finalDecomp) << nl << endl;
 
     // Do actual sending/receiving of mesh
     autoPtr<mapDistributePolyMesh> map = distributor.distribute(finalDecomp);
@@ -987,7 +988,7 @@ int main(int argc, char *argv[])
     Info<< endl;
 
 
-    Pout<< "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

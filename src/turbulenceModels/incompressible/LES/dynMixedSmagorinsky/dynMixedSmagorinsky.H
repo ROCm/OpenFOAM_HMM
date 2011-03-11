@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,26 +29,26 @@ Description
 
     The mixed model is a linear combination of an eddy viscosity model
     with a scale similarity model.
-    @verbatim
+    \verbatim
           B = (L + C) + R = (F(v*v) - F(v)*F(v)) + R
-    @endverbatim
+    \endverbatim
 
     The algebraic eddy viscosity SGS model is founded on the assumption
     that local equilibrium prevails, hence
-    @verbatim
+    \verbatim
         R = 2/3*rho*k*I - 2*nuEff*dev(D)
     where
         k = cI*delta^2*||D||^2
         nuEff = ck*sqrt(k)*delta + nu
-    @endverbatim
+    \endverbatim
 
     The Leonard and cross contributions are incorporated
     by adding,
-    @verbatim
+    \verbatim
         + div(((filter(U*U) - filter(U)*filter(U)) -
           0.333*I*tr(filter(U*U) - filter(U)*filter(U))))
         + div((filter(U*epsilon) - filter(U)*filter(epsilon)))
-    @endverbatim
+    \endverbatim
     to the rhs. of the equations.  This version implements filtering to
     evaluate the coefficients in the model.
 

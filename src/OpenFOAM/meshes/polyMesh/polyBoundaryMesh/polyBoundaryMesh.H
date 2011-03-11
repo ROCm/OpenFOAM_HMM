@@ -45,7 +45,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of classes
 class polyMesh;
+class wordRe;
 
 // Forward declaration of friend functions and operators
 
@@ -166,9 +168,13 @@ public:
         //- Per boundary face label the patch index
         const labelList& patchID() const;
 
-        //- Return the set of patch IDs corresponding to the given list of names
-        //  Wild cards are expanded.
-        labelHashSet patchSet(const wordList&) const;
+        //- Return the set of patch IDs corresponding to the given names
+        //  By default warns if given names are not found.
+        labelHashSet patchSet
+        (
+            const UList<wordRe>& patchNames,
+            const bool warnNotFound = true
+        ) const;
 
         //- Check whether all procs have all patches and in same order. Return
         //  true if in error.

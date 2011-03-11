@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,7 +64,7 @@ class CollisionModel
 public:
 
     //- Runtime type information
-    TypeName("CollisionModel");
+    TypeName("collisionModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable
@@ -146,13 +146,13 @@ public:
     defineTemplateRunTimeSelectionTable(CollisionModel<CloudType>, dictionary);
 
 
-#define makeCollisionModelType(SS, CloudType, ParcelType)                     \
+#define makeCollisionModelType(SS, CloudType)                                 \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
+    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
                                                                               \
-    CollisionModel<CloudType<ParcelType> >::                                  \
-        adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
-            add##SS##CloudType##ParcelType##ConstructorToTable_;
+    CollisionModel<CloudType>::                                               \
+        adddictionaryConstructorToTable<SS<CloudType> >                       \
+            add##SS##CloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

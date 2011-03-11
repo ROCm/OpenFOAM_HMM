@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,8 +31,11 @@ Usage
 
     - foamUpgradeCyclics [OPTION]
 
-    @param -test \n
+    \param -test \n
     Suppress writing the updated files with split cyclics
+
+    \param -enableFunctionEntries \n
+    By default all dictionary preprocessing of fields is disabled
 
 \*---------------------------------------------------------------------------*/
 
@@ -195,7 +198,7 @@ void rewriteBoundary
                         dictionary::null,
                         patchDict
                     )
-                );      
+                );
                 oldToNew[addedPatchI] = newPatchI++;
                 dictionary& nbrPatchDict = patches[addedPatchI].dict();
                 nbrPatchDict.set("neighbourPatch", thisName);
@@ -300,19 +303,24 @@ void rewriteField
 
         Info<< "Looking for entry for patch " << patchName << endl;
 
-        if (boundaryField.found(patchName) && !boundaryField.found(newName))
+        // Find old patch name either direct or through wildcards
+        // Find new patch name direct only
+
+        if
+        (
+            boundaryField.found(patchName)
+        && !boundaryField.found(newName, false, false)
+        )
         {
             Info<< "    Changing entry " << patchName << " to " << newName
                 << endl;
 
-            dictionary patchDict(boundaryField.subDict(patchName));
+            dictionary& patchDict = boundaryField.subDict(patchName);
 
             if (patchDict.found("value"))
             {
-                IOWarningIn("rewriteField(..)", patchDict)
-                    << "Cyclic patch " << patchName
-                    << " has value entry. Please remove this and rerun."
-                    << endl;
+                // Remove any value field since wrong size.
+                patchDict.remove("value");
             }
 
 
@@ -386,7 +394,12 @@ int main(int argc, char *argv[])
 {
     timeSelector::addOptions();
 
-    argList::addBoolOption("test");
+    argList::addBoolOption("test", "test only; do not change any files");
+    argList::addBoolOption
+    (
+        "enableFunctionEntries",
+        "enable expansion of dictionary directives - #include, #codeStream etc"
+    );
 #   include "addRegionOption.H"
 
 #   include "setRootCase.H"
@@ -399,6 +412,7 @@ int main(int argc, char *argv[])
     {
         Info<< "-test option: no changes made" << nl << endl;
     }
+    const bool enableEntries = args.optionFound("enableFunctionEntries");
 
 
     Foam::word regionName = polyMesh::defaultRegion;
@@ -476,6 +490,13 @@ int main(int argc, char *argv[])
 
         IOobjectList objects(runTime, runTime.timeName());
 
+
+        int oldFlag = entry::disableFunctionEntries;
+        if (!enableEntries)
+        {
+            // By default disable dictionary expansion for fields
+            entry::disableFunctionEntries = 1;
+        }
 
         // volFields
         // ~~~~~~~~~
@@ -610,6 +631,8 @@ int main(int argc, char *argv[])
             thisNames,
             nbrNames
         );
+
+        entry::disableFunctionEntries = oldFlag;
     }
 
     return 0;

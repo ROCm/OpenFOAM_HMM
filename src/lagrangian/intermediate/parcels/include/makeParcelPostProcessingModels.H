@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,36 +28,19 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "KinematicCloud.H"
-
 #include "NoPostProcessing.H"
 #include "ParticleTracks.H"
 #include "PatchPostProcessing.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelPostProcessingModels(ParcelType)                            \
+#define makeParcelPostProcessingModels(CloudType)                             \
                                                                               \
-    makePostProcessingModel(KinematicCloud<ParcelType>);                      \
+    makePostProcessingModel(CloudType);                                       \
                                                                               \
-    makePostProcessingModelType                                               \
-    (                                                                         \
-        NoPostProcessing,                                                     \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makePostProcessingModelType                                               \
-    (                                                                         \
-        ParticleTracks,                                                       \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );                                                                        \
-    makePostProcessingModelType                                               \
-    (                                                                         \
-        PatchPostProcessing,                                                  \
-        KinematicCloud,                                                       \
-        ParcelType                                                            \
-    );
+    makePostProcessingModelType(NoPostProcessing, CloudType);                 \
+    makePostProcessingModelType(ParticleTracks, CloudType);                   \
+    makePostProcessingModelType(PatchPostProcessing, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

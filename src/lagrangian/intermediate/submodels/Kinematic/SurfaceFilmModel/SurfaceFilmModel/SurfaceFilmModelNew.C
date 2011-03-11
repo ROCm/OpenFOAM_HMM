@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,9 +36,9 @@ Foam::SurfaceFilmModel<CloudType>::New
     const dimensionedVector& g
 )
 {
-    const word modelType(dict.lookup("SurfaceFilmModel"));
+    const word modelType(dict.lookup("surfaceFilmModel"));
 
-    Info<< "Selecting SurfaceFilmModel " << modelType << endl;
+    Info<< "Selecting surface film model " << modelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
@@ -52,9 +52,9 @@ Foam::SurfaceFilmModel<CloudType>::New
                 "const dictionary&, "
                 "CloudType&"
             ")"
-        )   << "Unknown SurfaceFilmModel type "
+        )   << "Unknown surface film model type "
             << modelType << nl << nl
-            << "Valid SurfaceFilmModel types are:" << nl
+            << "Valid surface film model types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

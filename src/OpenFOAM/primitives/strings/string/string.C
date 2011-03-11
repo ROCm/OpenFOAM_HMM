@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,13 +24,15 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "string.H"
-#include "OSspecific.H"
+#include "stringOps.H"
+
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
 const char* const Foam::string::typeName = "string";
-int Foam::string::debug(debug::debugSwitch(string::typeName, 0));
+int Foam::string::debug(Foam::debug::debugSwitch(string::typeName, 0));
 const Foam::string Foam::string::null;
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -43,7 +45,7 @@ Foam::string::size_type Foam::string::count(const char c) const
     {
         if (*iter == c)
         {
-            cCount++;
+            ++cCount;
         }
     }
 
@@ -93,133 +95,9 @@ Foam::string& Foam::string::replaceAll
 }
 
 
-// Expand all occurences of environment variables and initial tilde sequences
-Foam::string& Foam::string::expand(const bool recurse)
+Foam::string& Foam::string::expand(const bool allowEmpty)
 {
-    size_type startEnvar = 0;
-
-    // Expand $VARS
-    // Repeat until nothing more is found
-    while
-    (
-        (startEnvar = find('$', startEnvar)) != npos
-     && startEnvar < size()-1
-    )
-    {
-        if (startEnvar == 0 || operator[](startEnvar-1) != '\\')
-        {
-            // Find end of first occurrence
-            size_type endEnvar = startEnvar;
-            size_type nd = 0;
-
-            if (operator[](startEnvar+1) == '{')
-            {
-                endEnvar = find('}', startEnvar);
-                nd = 1;
-            }
-            else
-            {
-                iterator iter = begin() + startEnvar + 1;
-
-                while (iter != end() && (isalnum(*iter) || *iter == '_'))
-                {
-                    ++iter;
-                    ++endEnvar;
-                }
-            }
-
-            if (endEnvar != npos && endEnvar != startEnvar)
-            {
-                string enVar = substr
-                (
-                    startEnvar + 1 + nd,
-                    endEnvar - startEnvar - 2*nd
-                );
-
-                string enVarString = getEnv(enVar);
-
-                if (enVarString.size())
-                {
-                    if (recurse)
-                    {
-                        enVarString.expand();
-                    }
-                    std::string::replace
-                    (
-                        startEnvar,
-                        endEnvar - startEnvar + 1,
-                        enVarString
-                    );
-                    startEnvar += enVarString.size();
-                }
-                else
-                {
-                    //startEnvar = endEnvar;
-
-                    FatalErrorIn("string::expand()")
-                        << "Unknown variable name " << enVar << '.'
-                        << exit(FatalError);
-                }
-            }
-            else
-            {
-                break;
-            }
-        }
-        else
-        {
-            startEnvar++;
-        }
-    }
-
-    if (size())
-    {
-        if (operator[](0) == '~')
-        {
-            // Expand initial ~
-            //   ~/        => home directory
-            //   ~OpenFOAM => site/user OpenFOAM configuration directory
-            //   ~user     => home directory for specified user
-
-            word user;
-            fileName file;
-
-            if ((startEnvar = find('/')) != npos)
-            {
-                user = substr(1, startEnvar - 1);
-                file = substr(startEnvar + 1);
-            }
-            else
-            {
-                user = substr(1);
-            }
-
-            // NB: be a bit lazy and expand ~unknownUser as an
-            // empty string rather than leaving it untouched.
-            // otherwise add extra test
-            if (user == "OpenFOAM")
-            {
-                *this = findEtcFile(file);
-            }
-            else
-            {
-                *this = home(user)/file;
-            }
-        }
-        else if (operator[](0) == '.')
-        {
-            // Expand initial '.' and './' into cwd
-            if (size() == 1)
-            {
-                *this = cwd();
-            }
-            else if (operator[](1) == '/')
-            {
-                std::string::replace(0, 1, cwd());
-            }
-        }
-    }
-
+    stringOps::inplaceExpand(*this, allowEmpty);
     return *this;
 }
 

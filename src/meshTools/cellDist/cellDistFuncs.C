@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,14 +28,9 @@ License
 #include "wallPolyPatch.H"
 #include "polyBoundaryMesh.H"
 
-namespace Foam
-{
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(cellDistFuncs, 0);
-
-}
+defineTypeNameAndDebug(Foam::cellDistFuncs, 0);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -61,7 +56,6 @@ Foam::label Foam::cellDistFuncs::findIndex
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from mesh
 Foam::cellDistFuncs::cellDistFuncs(const polyMesh& mesh)
 :
     mesh_(mesh)
@@ -70,36 +64,12 @@ Foam::cellDistFuncs::cellDistFuncs(const polyMesh& mesh)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Get patch ids of named patches
 Foam::labelHashSet Foam::cellDistFuncs::getPatchIDs
 (
-    const wordList& patchNames
+    const wordReList& patchNames
 ) const
 {
-    const polyBoundaryMesh& bMesh = mesh().boundaryMesh();
-
-    // Construct Set of patchNames for easy checking if included
-    HashSet<word> patchNamesHash(patchNames.size());
-
-    forAll(patchNames, patchI)
-    {
-        patchNamesHash.insert(patchNames[patchI]);
-    }
-
-    // Loop over all patches and check if patch name in hashset
-
-    labelHashSet patchIDs(bMesh.size());
-
-    forAll(bMesh, patchI)
-    {
-        const polyPatch& patch = bMesh[patchI];
-
-        if (patchNamesHash.found(patch.name()))
-        {
-            patchIDs.insert(patchI);
-        }
-    }
-    return patchIDs;
+    return mesh().boundaryMesh().patchSet(patchNames, false);
 }
 
 
@@ -252,8 +222,10 @@ Foam::label Foam::cellDistFuncs::getPointNeighbours
 
 
 // size of largest patch (out of supplied subset of patches)
-Foam::label Foam::cellDistFuncs::maxPatchSize(const labelHashSet& patchIDs)
- const
+Foam::label Foam::cellDistFuncs::maxPatchSize
+(
+    const labelHashSet& patchIDs
+) const
 {
     label maxSize = 0;
 
@@ -271,8 +243,11 @@ Foam::label Foam::cellDistFuncs::maxPatchSize(const labelHashSet& patchIDs)
 
 
 // sum of patch sizes (out of supplied subset of patches)
-Foam::label Foam::cellDistFuncs::sumPatchSize(const labelHashSet& patchIDs)
- const
+Foam::label Foam::cellDistFuncs::sumPatchSize
+(
+    const labelHashSet& patchIDs
+)
+const
 {
     label sum = 0;
 

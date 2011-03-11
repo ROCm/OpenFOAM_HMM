@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,6 +69,10 @@ class InjectionModel
 {
 public:
 
+    //- Convenience typedef for parcelType
+    typedef typename CloudType::parcelType parcelType;
+
+
     // Enumerations
 
         //- Parcel basis representation options
@@ -95,9 +99,6 @@ private:
 protected:
 
     // Protected data
-
-        //- Convenience typedef for parcel type
-        typedef typename CloudType::parcelType parcelType;
 
         // Global injection properties
 
@@ -192,7 +193,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("InjectionModel");
+    TypeName("injectionModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable
@@ -305,7 +306,7 @@ public:
                 const label parcelI,
                 const label nParcels,
                 const scalar time,
-                typename CloudType::parcelType& parcel
+                parcelType& parcel
             );
 
             //- Flag to identify whether model fully describes the parcel
@@ -332,13 +333,12 @@ public:
     defineTemplateRunTimeSelectionTable(InjectionModel<CloudType>, dictionary);
 
 
-#define makeInjectionModelType(SS, CloudType, ParcelType)                     \
+#define makeInjectionModelType(SS, CloudType)                                 \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
+    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
                                                                               \
-    InjectionModel<CloudType<ParcelType> >::                                  \
-        adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
-            add##SS##CloudType##ParcelType##ConstructorToTable_;
+    InjectionModel<CloudType>::adddictionaryConstructorToTable<SS<CloudType> >\
+        add##SS##CloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,22 +30,22 @@ Usage
     - foamToEnsight [OPTION] \n
     Translates OpenFOAM data to Ensight format
 
-    @param -ascii \n
+    \param -ascii \n
     Write Ensight data in ASCII format instead of "C Binary"
 
-    @param -patches patchList \n
+    \param -patches patchList \n
     Specify particular patches to write.
     Specifying an empty list suppresses writing the internalMesh.
 
-    @param -noPatches \n
+    \param -noPatches \n
     Suppress writing any patches.
 
-    @param -faceZones zoneList \n
+    \param -faceZones zoneList \n
     Specify faceZones to write, with wildcards
 
 Note
     Parallel support for cloud data is not supported
-    - writes to @a EnSight directory to avoid collisions with foamToEnsightParts
+    - writes to \a EnSight directory to avoid collisions with foamToEnsightParts
 
 \*---------------------------------------------------------------------------*/
 

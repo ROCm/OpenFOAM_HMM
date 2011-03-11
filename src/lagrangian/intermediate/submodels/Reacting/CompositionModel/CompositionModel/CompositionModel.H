@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -72,7 +72,7 @@ class CompositionModel
 public:
 
     //- Runtime type information
-    TypeName("CompositionModel");
+    TypeName("compositionModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable
@@ -140,10 +140,10 @@ public:
                 const basicMultiComponentMixture& carrier() const;
 
                 //- Return the global (additional) liquids
-                const liquidMixture& liquids() const;
+                const liquidMixtureProperties& liquids() const;
 
                 //- Return the global (additional) solids
-                const pointSolidMixture& solids() const;
+                const solidMixtureProperties& solids() const;
 
                 //- Return the list of phase properties
                 const phasePropertiesList& phaseProps() const;
@@ -280,13 +280,13 @@ public:
     );
 
 
-#define makeCompositionModelType(SS, CloudType, ParcelType)                   \
+#define makeCompositionModelType(SS, CloudType)                               \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
+    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
                                                                               \
-    CompositionModel<CloudType<ParcelType> >::                                \
-        adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
-            add##SS##CloudType##ParcelType##ConstructorToTable_;
+    CompositionModel<CloudType>::                                             \
+        adddictionaryConstructorToTable<SS<CloudType> >                       \
+            add##SS##CloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

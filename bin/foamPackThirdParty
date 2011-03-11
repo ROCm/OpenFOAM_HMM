@@ -33,8 +33,9 @@ packDir=ThirdParty-$WM_PROJECT_VERSION
 toolsDir="${0%/*}/tools"  # this script is located in the tools/ parent dir
 
 usage() {
-    while [ $# -gt 0 ]; do echo "$1" 1>&2; shift; done
-cat <<USAGE 1>&2
+    exec 1>&2
+    while [ "$#" -gt 0 ]; do echo "$1"; shift; done
+cat <<USAGE
 Usage: ${0##*/} [OPTION]
 options:
   -o <dir>          specify alternative output directory
@@ -100,6 +101,6 @@ fi
 # add time-stamp file before packing
 echo $timeStamp 2>/dev/null > $packDir/.timeStamp
 echo "pack manually" 1>&2
-$toolsDir/foamPackSource $packDir $packFile
+foamPackSource $packDir $packFile
 
 #------------------------------------------------------------------------------

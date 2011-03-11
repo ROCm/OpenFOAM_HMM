@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,7 +56,7 @@ class polyMesh;
 class meshSearch;
 
 /*---------------------------------------------------------------------------*\
-                           Class sampledSet Declaration
+                         Class sampledSet Declaration
 \*---------------------------------------------------------------------------*/
 
 class sampledSet
@@ -194,7 +194,7 @@ public:
 
         //- Tolerance when comparing points. Usually relative to difference
         //  between start_ and end_
-        const static scalar tol;
+        static const scalar tol;
 
 
     // Constructors

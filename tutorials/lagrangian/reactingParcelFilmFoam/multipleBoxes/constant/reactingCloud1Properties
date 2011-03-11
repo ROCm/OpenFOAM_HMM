@@ -120,8 +120,11 @@ subModels
     {
         SOI             0.000;
         duration        20.000;
-        positionsFile   "reactingCloud1Positions";
-        axesFile        "reactingCloud1Axes";
+        positionAxis
+        (
+            (0.3 0.35 1.45) (0 0 -1)
+            (0.6 0.35 1.45) (0 0 -1)
+        );
         massTotal       10;
         parcelsPerInjector 20000;
         parcelsPerSecond 500;
@@ -131,10 +134,10 @@ subModels
         thetaInner      constant 0;
         thetaOuter      constant 45;
 
-        parcelPDF
+        sizeDistribution
         {
             pdfType         RosinRammler;
-            RosinRammlerPDF
+            RosinRammlerDistribution
             {
                 minValue        5e-04;
                 maxValue        0.0012;

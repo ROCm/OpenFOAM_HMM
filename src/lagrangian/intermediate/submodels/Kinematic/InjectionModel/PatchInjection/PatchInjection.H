@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,14 +26,13 @@ Class
 
 Description
     Patch injection
-
     - User specifies
       - Total mass to inject
       - Name of patch
       - Injection duration
       - Initial parcel velocity
       - Injection volume flow rate
-    - Parcel diameters obtained by PDF model
+    - Parcel diameters obtained by distribution model model
     - Parcels injected at cell centres adjacent to patch
 
 SourceFiles
@@ -54,7 +53,7 @@ namespace Foam
 template<class Type>
 class DataEntry;
 
-class pdf;
+class distributionModel;
 
 /*---------------------------------------------------------------------------*\
                        Class PatchInjection Declaration
@@ -85,8 +84,8 @@ class PatchInjection
         //- Flow rate profile relative to SOI []
         const autoPtr<DataEntry<scalar> > flowRateProfile_;
 
-        //- Parcel size PDF model
-        const autoPtr<pdfs::pdf> parcelPDF_;
+        //- Parcel size distribution model model
+        const autoPtr<distributionModels::distributionModel> sizeDistribution_;
 
         //- List of cell labels corresponding to injector positions
         labelList cellOwners_;
@@ -109,7 +108,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("PatchInjection");
+    TypeName("patchInjection");
 
 
     // Constructors

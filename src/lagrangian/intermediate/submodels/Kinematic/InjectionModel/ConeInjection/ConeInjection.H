@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,16 +25,14 @@ Class
     Foam::ConeInjection
 
 Description
-    Cone injection
-
+    Multi-point cone injection model
     - User specifies
       - time of start of injection
-      - injector position
-      - direction (along injection axis)
-      - parcel flow rate
-      - parcel velocity
+      - list of injector positions and directions (along injection axes)
+      - number of parcels to inject per injector
+      - parcel velocities
       - inner and outer cone angles
-    - Parcel diameters obtained by PDF model
+    - Parcel diameters obtained by distribution model model
 
 SourceFiles
     ConeInjection.C
@@ -45,7 +43,8 @@ SourceFiles
 #define ConeInjection_H
 
 #include "InjectionModel.H"
-#include "pdf.H"
+#include "distributionModel.H"
+#include "vectorList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,26 +67,23 @@ class ConeInjection
 {
     // Private data
 
+        //- List of position and axis for each injector
+        List<Tuple2<vector, vector> > positionAxis_;
+
+        //- List of cell labels corresponding to injector positions
+        labelList injectorCells_;
+
+        //- List of tetFace labels corresponding to injector positions
+        labelList injectorTetFaces_;
+
+        //- List of tetPt labels corresponding to injector positions
+        labelList injectorTetPts_;
+
         //- Injection duration [s]
         const scalar duration_;
 
-        //- Injector position [m]
-        vector position_;
-
-        //- Cell containing injector position []
-        label injectorCell_;
-
-        //- tetFace of tet containing injector position []
-        label injectorTetFace_;
-
-        //- tetPt of tet containing injector position []
-        label injectorTetPt_;
-
-        //- Injector direction []
-        vector direction_;
-
-        //- Number of parcels to introduce per second []
-        const label parcelsPerSecond_;
+        //- Number of parcels to introduce per injector
+        const label parcelsPerInjector_;
 
         //- Flow rate profile relative to SOI []
         const autoPtr<DataEntry<scalar> > flowRateProfile_;
@@ -101,17 +97,20 @@ class ConeInjection
         //- Outer cone angle relative to SOI [deg]
         const autoPtr<DataEntry<scalar> > thetaOuter_;
 
-        //- Parcel size PDF model
-        const autoPtr<pdfs::pdf> parcelPDF_;
+        //- Parcel size distribution model model
+        const autoPtr<distributionModels::distributionModel> sizeDistribution_;
+
+        //- Number of parcels per injector already injected
+        mutable label nInjected_;
 
 
         // Tangential vectors to the direction vector
 
             //- First tangential vector
-            vector tanVec1_;
+            vectorList tanVec1_;
 
             //- Second tangential vector
-            vector tanVec2_;
+            vectorList tanVec2_;
 
 
 protected:
@@ -128,7 +127,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("ConeInjection");
+    TypeName("coneInjection");
 
 
     // Constructors

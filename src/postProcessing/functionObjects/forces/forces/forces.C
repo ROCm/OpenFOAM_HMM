@@ -27,6 +27,7 @@ License
 #include "volFields.H"
 #include "dictionary.H"
 #include "Time.H"
+#include "wordReList.H"
 
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
 #include "incompressible/RAS/RASModel/RASModel.H"
@@ -229,8 +230,10 @@ void Foam::forces::read(const dictionary& dict)
 
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
 
-        patchSet_ =
-            mesh.boundaryMesh().patchSet(wordList(dict.lookup("patches")));
+        patchSet_ = mesh.boundaryMesh().patchSet
+        (
+            wordReList(dict.lookup("patches"))
+        );
 
         if (directForceDensity_)
         {

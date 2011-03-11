@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -107,7 +107,7 @@ inline Foam::scalar Foam::polynomialTransport<Thermo, PolySize>::mu
     const scalar T
 ) const
 {
-    return muCoeffs_.evaluate(T)/this->W();
+    return muCoeffs_.value(T)/this->W();
 }
 
 
@@ -117,7 +117,7 @@ inline Foam::scalar Foam::polynomialTransport<Thermo, PolySize>::kappa
     const scalar T
 ) const
 {
-    return kappaCoeffs_.evaluate(T)/this->W();
+    return kappaCoeffs_.value(T)/this->W();
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "Cloud.H"
-#include "Particle.H"
 #include "Time.H"
 #include "IOPosition.H"
 
@@ -58,12 +57,12 @@ void Foam::Cloud<ParticleType>::readCloudUniformProperties()
         if (uniformPropsDict.found(procName))
         {
             uniformPropsDict.subDict(procName).lookup("particleCount")
-                >> particleCount_;
+                >> ParticleType::particleCount_;
         }
     }
     else
     {
-        particleCount_ = 0;
+        ParticleType::particleCount_ = 0;
     }
 }
 
@@ -86,7 +85,7 @@ void Foam::Cloud<ParticleType>::writeCloudUniformProperties() const
     );
 
     labelList np(Pstream::nProcs(), 0);
-    np[Pstream::myProcNo()] = particleCount_;
+    np[Pstream::myProcNo()] = ParticleType::particleCount_;
 
     Pstream::listCombineGather(np, maxEqOp<label>());
     Pstream::listCombineScatter(np);
@@ -98,7 +97,12 @@ void Foam::Cloud<ParticleType>::writeCloudUniformProperties() const
         uniformPropsDict.subDict(procName).add("particleCount", np[i]);
     }
 
-    uniformPropsDict.regIOobject::write();
+    uniformPropsDict.writeObject
+    (
+        IOstream::ASCII,
+        IOstream::currentVersion,
+        time().writeCompression()
+    );
 }
 
 
@@ -107,7 +111,7 @@ void Foam::Cloud<ParticleType>::initCloud(const bool checkClass)
 {
     readCloudUniformProperties();
 
-    IOPosition<ParticleType> ioP(*this);
+    IOPosition<Cloud<ParticleType> > ioP(*this);
 
     if (ioP.headerOk())
     {
@@ -154,9 +158,7 @@ Foam::Cloud<ParticleType>::Cloud
 :
     cloud(pMesh),
     polyMesh_(pMesh),
-    particleCount_(0),
     labels_(),
-    cellTree_(),
     nTrackingRescues_(),
     cellWallFacesPtr_()
 {
@@ -174,9 +176,7 @@ Foam::Cloud<ParticleType>::Cloud
 :
     cloud(pMesh, cloudName),
     polyMesh_(pMesh),
-    particleCount_(0),
     labels_(),
-    cellTree_(),
     nTrackingRescues_(),
     cellWallFacesPtr_()
 {
@@ -262,8 +262,7 @@ void Foam::Cloud<ParticleType>::writeFields() const
 {
     if (this->size())
     {
-        const ParticleType& p = *this->first();
-        ParticleType::writeFields(p.cloud());
+        ParticleType::writeFields(*this);
     }
 }
 

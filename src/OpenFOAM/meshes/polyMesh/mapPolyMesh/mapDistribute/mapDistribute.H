@@ -127,12 +127,14 @@ SourceFiles
 #ifndef mapDistribute_H
 #define mapDistribute_H
 
+#include "transformList.H"
 #include "labelList.H"
 #include "labelPair.H"
 #include "Pstream.H"
 #include "boolList.H"
 #include "Map.H"
-#include "point.H"
+#include "vectorTensorTransform.H"
+#include "coupledPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -217,30 +219,123 @@ class mapDistribute
         template<class T>
         void applyDummyTransforms(List<T>& field) const;
 
-        template<class T>   //, class CombineOp>
+        template<class T, class TransformOp>
         void applyTransforms
         (
             const globalIndexAndTransform& globalTransforms,
             List<T>& field,
-            const bool isPosition
-            //const CombineOp& cop
+            const TransformOp& top
         ) const;
 
         //- Helper function: copy transformElements without transformation
         template<class T>
         void applyDummyInverseTransforms(List<T>& field) const;
 
-        template<class T>   //, class CombineOp>
+        template<class T, class TransformOp>
         void applyInverseTransforms
         (
             const globalIndexAndTransform& globalTransforms,
             List<T>& field,
-            const bool isPosition
-            //const CombineOp& cop
+            const TransformOp& top
         ) const;
 
 
 public:
+
+    // Public classes
+
+        //- Default transformation behaviour
+        class transform
+        {
+        public:
+
+            template<class T>
+            void operator()
+            (
+                const vectorTensorTransform& vt,
+                const bool forward,
+                List<T>& fld
+            ) const
+            {
+                if (forward)
+                {
+                    transformList(vt.R(), fld);
+                }
+                else
+                {
+                    transformList(vt.R().T(), fld);
+                }
+            }
+
+            //- Transform patch-based field
+            template<class T>
+            void operator()(const coupledPolyPatch& cpp, UList<T>& fld) const
+            {
+                if (!cpp.parallel())
+                {
+                    transformList(cpp.forwardT(), fld);
+                }
+            }
+
+            //- Transform sparse field
+            template<class T, template<class> class Container>
+            void operator()(const coupledPolyPatch& cpp, Container<T>& map)
+            const
+            {
+                if (!cpp.parallel())
+                {
+                    transformList(cpp.forwardT(), map);
+                }
+            }
+        };
+
+        //- Default transformation behaviour for position
+        class transformPosition
+        {
+        public:
+
+            void operator()
+            (
+                const vectorTensorTransform& vt,
+                const bool forward,
+                List<point>& fld
+            ) const
+            {
+                pointField pfld(fld.xfer());
+                if (forward)
+                {
+                    fld = vt.transformPosition(pfld);
+                }
+                else
+                {
+                    fld = vt.invTransformPosition(pfld);
+                }
+            }
+            //- Transform patch-based field
+            void operator()(const coupledPolyPatch& cpp, pointField& fld) const
+            {
+                cpp.transformPosition(fld);
+            }
+            template<template<class> class Container>
+            void operator()(const coupledPolyPatch& cpp, Container<point>& map)
+            const
+            {
+                Field<point> fld(map.size());
+                label i = 0;
+                forAllConstIter(typename Container<point>, map, iter)
+                {
+                    fld[i++] = iter();
+                }
+                cpp.transformPosition(fld);
+                i = 0;
+                forAllIter(typename Container<point>, map, iter)
+                {
+                    iter() = fld[i++];
+                }
+            }
+        };
+
+
 
     // Declare name of the class and its debug switch
     ClassName("mapDistribute");
@@ -385,6 +480,9 @@ public:
                 return transformStart_;
             }
 
+            //- Find transform from transformElements
+            label whichTransform(const label index) const;
+
             //- Calculate a schedule. See above.
             static List<labelPair> schedule
             (
@@ -453,12 +551,12 @@ public:
             const;
 
             //- Same but with transforms
-            template<class T>
+            template<class T, class TransformOp>
             void distribute
             (
                 const globalIndexAndTransform&,
                 List<T>& fld,
-                const bool isPosition
+                const TransformOp& top
             ) const;
 
             //- Reverse distribute data using default commsType.
@@ -471,13 +569,13 @@ public:
             ) const;
 
             //- Same but with transforms
-            template<class T>
+            template<class T, class TransformOp>
             void reverseDistribute
             (
                 const globalIndexAndTransform&,
                 const label constructSize,
                 List<T>& fld,
-                const bool isPosition
+                const TransformOp& top
             ) const;
 
             //- Reverse distribute data using default commsType.
@@ -493,14 +591,14 @@ public:
             ) const;
 
             //- Same but with transforms
-            template<class T>
+            template<class T, class TransformOp>
             void reverseDistribute
             (
                 const globalIndexAndTransform&,
                 const label constructSize,
                 const T& nullValue,
                 List<T>& fld,
-                const bool isPosition
+                const TransformOp& top
             ) const;
 
             //- Do all sends using PstreamBuffers
@@ -528,24 +626,85 @@ public:
 
 };
 
-//- Specialisation for transforms that can apply positional transform
+
 template<>
-void mapDistribute::applyTransforms
+void mapDistribute::transform::operator()
 (
-    const globalIndexAndTransform& globalTransforms,
-    List<point>& field,
-    const bool isPosition
-    //const CombineOp& cop
+    const vectorTensorTransform&,
+    const bool,
+    List<label>&
+) const;
+template<>
+void mapDistribute::transform::operator()
+(
+    const coupledPolyPatch&,
+    UList<label>&
+) const;
+template<>
+void mapDistribute::transform::operator()
+(
+    const coupledPolyPatch&,
+    Map<label>&
+) const;
+template<>
+void mapDistribute::transform::operator()
+(
+    const coupledPolyPatch&,
+    EdgeMap<label>&
 ) const;
 
-template<>   //, class CombineOp>
-void mapDistribute::applyInverseTransforms
+template<>
+void mapDistribute::transform::operator()
 (
-    const globalIndexAndTransform& globalTransforms,
-    List<point>& field,
-    const bool isPosition
-    //const CombineOp& cop
+    const coupledPolyPatch&,
+    UList<scalar>&
 ) const;
+template<>
+void mapDistribute::transform::operator()
+(
+    const vectorTensorTransform&,
+    const bool,
+    List<scalar>&
+) const;
+template<>
+void mapDistribute::transform::operator()
+(
+    const coupledPolyPatch&,
+    Map<scalar>&
+) const;
+template<>
+void mapDistribute::transform::operator()
+(
+    const coupledPolyPatch&,
+    EdgeMap<scalar>&
+) const;
+
+template<>
+void mapDistribute::transform::operator()
+(
+    const coupledPolyPatch& cpp,
+    UList<bool>& fld
+) const;
+template<>
+void mapDistribute::transform::operator()
+(
+    const vectorTensorTransform&,
+    const bool,
+    List<bool>&
+) const;
+template<>
+void mapDistribute::transform::operator()
+(
+    const coupledPolyPatch&,
+    Map<bool>&
+) const;
+template<>
+void mapDistribute::transform::operator()
+(
+    const coupledPolyPatch&,
+    EdgeMap<bool>&
+) const;
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

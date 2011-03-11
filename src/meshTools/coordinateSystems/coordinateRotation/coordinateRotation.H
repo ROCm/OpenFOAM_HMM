@@ -32,7 +32,7 @@ Description
     or (e3/e1). Any nonorthogonality will be absorbed into the second vector.
 
     For convenience, the dictionary constructor forms allow a few shortcuts:
-    - if the @c type is not otherwise specified, the type @c axes
+    - if the \c type is not otherwise specified, the type \c axes
       is implicit
     - if an axes specification (eg, e3/e1) is used, the coordinateRotation
       sub-dictionary can be dropped.
@@ -41,28 +41,28 @@ Description
     (type "EulerRotation") or by a STARCDCoordinateRotation
     (type "STARCDRotation") requires the coordinateRotation sub-dictionary.
 
-    @verbatim
+    \verbatim
         coordinateRotation
         {
             type        STARCDRotation
             rotation    (0 0 90);
         }
-    @endverbatim
+    \endverbatim
 
     - the rotation angles are in degrees, unless otherwise explictly specified:
 
-    @verbatim
+    \verbatim
         coordinateRotation
         {
             type        STARCDRotation
             degrees     false;
             rotation    (0 0 3.141592654);
         }
-    @endverbatim
+    \endverbatim
 
 Deprecated
-    Specifying the local vectors as an @c axis (corresponding to e3) and a
-    @c direction (corresponding to e1), is allowed for backwards
+    Specifying the local vectors as an \c axis (corresponding to e3) and a
+    \c direction (corresponding to e1), is allowed for backwards
     compatibility, but this terminology is generally a bit confusing.
     (deprecated Apr 2008)
 

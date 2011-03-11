@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,16 +24,14 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "nearWallFields.H"
+#include "wordReList.H"
 //#include "volFields.H"
 //#include "selfContainedDirectMappedFixedValueFvPatchFields.H"
 //#include "interpolationCellPoint.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(nearWallFields, 0);
-}
+defineTypeNameAndDebug(Foam::nearWallFields, 0);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -87,8 +85,10 @@ void Foam::nearWallFields::read(const dictionary& dict)
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
 
         dict.lookup("fields") >> fieldSet_;
-        patchSet_ =
-            mesh.boundaryMesh().patchSet(wordList(dict.lookup("patches")));
+        patchSet_ = mesh.boundaryMesh().patchSet
+        (
+            wordReList(dict.lookup("patches"))
+        );
         distance_ = readScalar(dict.lookup("distance"));
 
 

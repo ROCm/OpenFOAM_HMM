@@ -1,12 +1,13 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
+makeType=${1:-libso}
 set -x
 
-wmake libso field
-wmake libso forces
-wmake libso IO
-wmake libso utilities
-wmake libso jobControl
-wmake libso systemCall
+wmake $makeType field
+wmake $makeType forces
+wmake $makeType IO
+wmake $makeType utilities
+wmake $makeType jobControl
+wmake $makeType systemCall
 
 # ----------------------------------------------------------------- end-of-file

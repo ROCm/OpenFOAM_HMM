@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,14 +31,14 @@ Usage
     - star4ToFoam [OPTION] ccmMesh\n
       convert pro-STAR mesh to OpenFOAM
 
-    @param -ascii \n
+    \param -ascii \n
     Write in ASCII format instead of binary
 
-    @param -scale \<factor\>\n
+    \param -scale \<factor\>\n
     Specify an alternative geometry scaling factor.
-    The default is @b 0.001 (scale @em [mm] to @em [m]).
+    The default is \b 0.001 (scale \em [mm] to \em [m]).
 
-    @param -solids \n
+    \param -solids \n
     Treat any solid cells present just like fluid cells.
     The default is to discard them.
 

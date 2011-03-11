@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,9 +60,9 @@ template<class Type>
 typename Foam::IntegrationScheme<Type>::integrationResult
 Foam::IntegrationScheme<Type>::integrate
 (
-    const Type phi,
+    const Type& phi,
     const scalar dt,
-    const Type alpha,
+    const Type& alphaBeta,
     const scalar beta
 ) const
 {
@@ -71,9 +71,9 @@ Foam::IntegrationScheme<Type>::integrate
         "Foam::IntegrationScheme<Type>::integrationResult"
         "Foam::IntegrationScheme<Type>::integrate"
         "("
-            "const Type, "
+            "const Type&, "
             "const scalar, "
-            "const Type, "
+            "const Type&, "
             "const scalar"
         ") const"
     );

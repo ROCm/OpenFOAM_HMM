@@ -30,9 +30,11 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-//! @cond fileScope
+const Foam::SHA1Digest Foam::SHA1Digest::null;
+
+//! \cond fileScope
 static const char hexChars[] = "0123456789abcdef";
-//! @endcond
+//! \endcond
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -40,12 +42,18 @@ static const char hexChars[] = "0123456789abcdef";
 unsigned char Foam::SHA1Digest::readHexDigit(Istream& is)
 {
     // Takes into account that 'a' (or 'A') is 10
-    static const label alphaOffset = toupper('A') - 10;
+    static const int alphaOffset = toupper('A') - 10;
     // Takes into account that '0' is 0
-    static const label zeroOffset = int('0');
+    static const int zeroOffset = int('0');
 
+
+    // silently ignore leading or intermediate '_'
     char c = 0;
-    is.read(c);
+    do
+    {
+        is.read(c);
+    }
+    while (c == '_');
 
     if (!isxdigit(c))
     {
@@ -101,6 +109,49 @@ bool Foam::SHA1Digest::empty() const
 }
 
 
+std::string Foam::SHA1Digest::str(const bool prefixed) const
+{
+    std::string buf;
+    unsigned nChar = 0;
+
+    if (prefixed)
+    {
+        buf.resize(1 + length*2);
+        buf[nChar++] = '_';
+    }
+    else
+    {
+        buf.resize(length*2);
+    }
+
+    for (unsigned i = 0; i < length; ++i)
+    {
+        buf[nChar++] = hexChars[((v_[i] >> 4) & 0xF)];
+        buf[nChar++] = hexChars[(v_[i] & 0xF)];
+    }
+
+    return buf;
+}
+
+
+Foam::Ostream& Foam::SHA1Digest::write(Ostream& os, const bool prefixed) const
+{
+    if (prefixed)
+    {
+        os.write('_');
+    }
+
+    for (unsigned i = 0; i < length; ++i)
+    {
+        os.write(hexChars[((v_[i] >> 4) & 0xF)]);
+        os.write(hexChars[(v_[i] & 0xF)]);
+    }
+
+    os.check("SHA1Digest::write(Ostream&, const bool)");
+    return os;
+}
+
+
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
 bool Foam::SHA1Digest::operator==(const SHA1Digest& rhs) const
@@ -125,21 +176,26 @@ bool Foam::SHA1Digest::operator==(const std::string& hexdigits) const
         return empty();
     }
 
+    // skip possible '_' prefix
+    unsigned charI = 0;
+    if (hexdigits[0] == '_')
+    {
+        ++charI;
+    }
+
     // incorrect length - can never match
-    if (hexdigits.size() != length*2)
+    if (hexdigits.size() != charI + length*2)
     {
         return false;
     }
 
-    for (unsigned i = 0, charI = 0; i < length; ++i, charI += 2)
+    for (unsigned i = 0; i < length; ++i)
     {
         const char c1 = hexChars[((v_[i] >> 4) & 0xF)];
         const char c2 = hexChars[(v_[i] & 0xF)];
 
-        if (c1 != hexdigits[charI] || c2 != hexdigits[charI+1])
-        {
-            return false;
-        }
+        if (c1 != hexdigits[charI++]) return false;
+        if (c2 != hexdigits[charI++]) return false;
     }
 
     return true;
@@ -154,21 +210,26 @@ bool Foam::SHA1Digest::operator==(const char* hexdigits) const
         return empty();
     }
 
+    // skip possible '_' prefix
+    unsigned charI = 0;
+    if (hexdigits[0] == '_')
+    {
+        ++charI;
+    }
+
     // incorrect length - can never match
-    if (strlen(hexdigits) != length*2)
+    if (strlen(hexdigits) != charI + length*2)
     {
         return false;
     }
 
-    for (unsigned i = 0, charI = 0; i < length; ++i, charI += 2)
+    for (unsigned i = 0; i < length; ++i)
     {
         const char c1 = hexChars[((v_[i] >> 4) & 0xF)];
         const char c2 = hexChars[(v_[i] & 0xF)];
 
-        if (c1 != hexdigits[charI] || c2 != hexdigits[charI+1])
-        {
-            return false;
-        }
+        if (c1 != hexdigits[charI++]) return false;
+        if (c2 != hexdigits[charI++]) return false;
     }
 
     return true;
@@ -214,16 +275,7 @@ Foam::Istream& Foam::operator>>(Istream& is, SHA1Digest& dig)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const SHA1Digest& dig)
 {
-    const unsigned char *v = dig.v_;
-
-    for (unsigned i = 0; i < dig.length; ++i)
-    {
-        os.write(hexChars[((v[i] >> 4) & 0xF)]);
-        os.write(hexChars[(v[i] & 0xF)]);
-    }
-
-    os.check("Ostream& operator<<(Ostream&, const SHA1Digest&)");
-    return os;
+    return dig.write(os);
 }
 
 

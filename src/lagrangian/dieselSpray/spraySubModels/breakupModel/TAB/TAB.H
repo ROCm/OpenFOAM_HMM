@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,14 +27,14 @@ Class
 Description
     The TAB Method for Numerical Calculation of Spray Droplet Breakup.
 
-    @verbatim
+    \verbatim
         O'Rourke, P.J. and Amsden, A.A.,
         "The TAB Method for Numerical Calculation of Spray Droplet Breakup,"
         1987 SAE International Fuels and Lubricants Meeting and Exposition,
         Toronto, Ontario, November 2-5, 1987,
         Los Alamos National Laboratory document LA-UR-87-2105;
         SAE Technical Paper Series, Paper 872089.
-    @endverbatim
+    \endverbatim
 
     This implementation follows the kiva version.
 
@@ -108,7 +108,7 @@ public:
             parcel& parcel,
             const scalar deltaT,
             const vector& Ug,
-            const liquidMixture& fuels
+            const liquidMixtureProperties& fuels
         ) const;
 };
 

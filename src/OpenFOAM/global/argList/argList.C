@@ -32,6 +32,7 @@ License
 #include "JobInfo.H"
 #include "labelList.H"
 #include "regIOobject.H"
+#include "dynamicCode.H"
 
 #include <cctype>
 
@@ -507,12 +508,22 @@ Foam::argList::argList
     jobInfo.add("startTime", timeString);
     jobInfo.add("userName", userName());
     jobInfo.add("foamVersion", word(FOAMversion));
-    jobInfo.add("foamBuild", Foam::FOAMbuild);
     jobInfo.add("code", executable_);
     jobInfo.add("argList", argListString);
     jobInfo.add("currentDir", cwd());
     jobInfo.add("PPID", ppid());
     jobInfo.add("PGID", pgid());
+
+    // add build information - only use the first word
+    {
+        std::string build(Foam::FOAMbuild);
+        std::string::size_type found = build.find(' ');
+        if (found != std::string::npos)
+        {
+            build.resize(found);
+        }
+        jobInfo.add("foamBuild", build);
+    }
 
 
     // Case is a single processor run unless it is running parallel
@@ -777,6 +788,16 @@ Foam::argList::argList
                     regIOobject::fileModificationChecking
                 ]
             << endl;
+
+        Info<< "allowSystemOperations : ";
+        if (dynamicCode::allowSystemOperations)
+        {
+            Info<< "Allowing user-supplied system call operations" << endl;
+        }
+        else
+        {
+            Info<< "Disallowing user-supplied system call operations" << endl;
+        }
     }
 
     if (Pstream::master() && bannerEnabled)
@@ -883,9 +904,10 @@ void Foam::argList::printUsage() const
     printNotes();
 
     Info<< nl
-        <<"Using OpenFOAM-" << Foam::FOAMversion
-        <<" (build: " << Foam::FOAMbuild << ") - see www.OpenFOAM.com"
-        << nl << endl;
+        <<"Using: OpenFOAM-" << Foam::FOAMversion
+        << " (see www.OpenFOAM.com)" << nl
+        <<"Build: " << Foam::FOAMbuild << nl
+        << endl;
 }
 
 

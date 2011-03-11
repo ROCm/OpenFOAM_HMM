@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -415,6 +415,7 @@ public:
     // Check
 
         //- Calculate surface type formed by patch.
+        //  Types:
         //  - all edges have two neighbours (manifold)
         //  - some edges have more than two neighbours (illegal)
         //  - other (open)

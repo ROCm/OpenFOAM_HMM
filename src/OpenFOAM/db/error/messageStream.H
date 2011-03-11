@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,10 +34,10 @@ Description
     the messageStream class in the standard manner.
 
 Usage
-    @code
+    \code
         messageStream
             << "message1" << "message2" << FoamDataType << endl;
-    @endcode
+    \endcode
 
 SourceFiles
     messageStream.C
@@ -214,7 +214,7 @@ extern messageStream Info;
 // Convenience macros to add the file name and line number to the function name
 
 /**
- * @def SeriousErrorIn(functionName)
+ * \def SeriousErrorIn(functionName)
  * Report an error message using Foam::SeriousError for functionName in
  * file __FILE__ at line __LINE__
 */
@@ -222,7 +222,7 @@ extern messageStream Info;
     ::Foam::SeriousError((fn), __FILE__, __LINE__)
 
 /**
- * @def SeriousIOErrorIn(functionName, ios)
+ * \def SeriousIOErrorIn(functionName, ios)
  * Report an IO error message using Foam::SeriousError for functionName in
  * file __FILE__ at line __LINE__
  * for a particular IOstream
@@ -231,7 +231,7 @@ extern messageStream Info;
     ::Foam::SeriousError((fn), __FILE__, __LINE__, ios)
 
 /**
- * @def WarningIn(functionName)
+ * \def WarningIn(functionName)
  * Report a warning using Foam::Warning for functionName in
  * file __FILE__ at line __LINE__
 */
@@ -239,7 +239,7 @@ extern messageStream Info;
     ::Foam::Warning((fn), __FILE__, __LINE__)
 
 /**
- * @def IOWarningIn(functionName, ios)
+ * \def IOWarningIn(functionName, ios)
  * Report an IO warning using Foam::Warning for functionName in
  * file __FILE__ at line __LINE__
  * for a particular IOstream
@@ -248,7 +248,7 @@ extern messageStream Info;
     ::Foam::Warning((fn), __FILE__, __LINE__, (ios))
 
 /**
- * @def InfoIn(functionName)
+ * \def InfoIn(functionName)
  * Report a information message using Foam::Info for functionName in
  * file __FILE__ at line __LINE__
 */
@@ -256,7 +256,7 @@ extern messageStream Info;
     ::Foam::Info((fn), __FILE__, __LINE__)
 
 /**
- * @def IOInfoIn(functionName, ios)
+ * \def IOInfoIn(functionName, ios)
  * Report an IO information message using Foam::Info for functionName in
  * file __FILE__ at line __LINE__
  * for a particular IOstream

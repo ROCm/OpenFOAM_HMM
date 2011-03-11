@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ License
 
 #include "PatchInjection.H"
 #include "DataEntry.H"
-#include "pdf.H"
+#include "distributionModel.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -49,7 +49,10 @@ Foam::label Foam::PatchInjection<CloudType>::parcelsToInject
         if
         (
             nParcelsToInject > 0
-         && (nParcels - scalar(nParcelsToInject) > rnd.position(0.0, 1.0))
+         && (
+               nParcels - scalar(nParcelsToInject)
+             > rnd.position(scalar(0), scalar(1))
+            )
         )
         {
             ++nParcelsToInject;
@@ -104,9 +107,13 @@ Foam::PatchInjection<CloudType>::PatchInjection
     (
         DataEntry<scalar>::New("flowRateProfile", this->coeffDict())
     ),
-    parcelPDF_
+    sizeDistribution_
     (
-        pdfs::pdf::New(this->coeffDict().subDict("parcelPDF"), owner.rndGen())
+        distributionModels::distributionModel::New
+        (
+            this->coeffDict().subDict("sizeDistribution"),
+            owner.rndGen()
+        )
     ),
     cellOwners_(),
     fraction_(1.0)
@@ -153,7 +160,7 @@ Foam::PatchInjection<CloudType>::PatchInjection
     parcelsPerSecond_(im.parcelsPerSecond_),
     U0_(im.U0_),
     flowRateProfile_(im.flowRateProfile_().clone().ptr()),
-    parcelPDF_(im.parcelPDF_().clone().ptr()),
+    sizeDistribution_(im.sizeDistribution_().clone().ptr()),
     cellOwners_(im.cellOwners_),
     fraction_(im.fraction_)
 {}
@@ -236,7 +243,7 @@ void Foam::PatchInjection<CloudType>::setProperties
     parcel.U() = U0_;
 
     // set particle diameter
-    parcel.d() = parcelPDF_->sample();
+    parcel.d() = sizeDistribution_->sample();
 }
 
 

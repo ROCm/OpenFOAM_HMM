@@ -51,7 +51,7 @@ void Smagorinsky::updateSubGridScaleFields(const volTensorField& gradU)
     volScalarField b((2.0/3.0)*tr(D));
     volScalarField c(2*ck_*delta()*(dev(D) && D));
 
-    volScalarField k = sqr((-b + sqrt(sqr(b) + 4*a*c))/(2*a));
+    volScalarField k(sqr((-b + sqrt(sqr(b) + 4*a*c))/(2*a)));
 
     muSgs_ = ck_*rho()*delta()*sqrt(k);
     muSgs_.correctBoundaryConditions();

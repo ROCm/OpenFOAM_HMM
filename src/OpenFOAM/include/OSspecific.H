@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,7 +65,7 @@ bool env(const word&);
 string getEnv(const word&);
 
 //- Set an environment variable
-bool setEnv(const word& name, const string& value, const bool overwrite);
+bool setEnv(const word& name, const std::string& value, const bool overwrite);
 
 //- Return the system's host name, as per hostname(1)
 //  Optionally with the full name (as per the '-f' option)
@@ -76,6 +76,9 @@ word domainName();
 
 //- Return the user's login name
 word userName();
+
+//- Is user administrator
+bool isAdministrator();
 
 //- Return home directory path name for the current user
 fileName home();
@@ -90,7 +93,8 @@ fileName cwd();
 //  else return false
 bool chDir(const fileName& dir);
 
-//- Search for @em name in the following hierarchy:
+//- Search for \em name
+//  in the following hierarchy:
 //  -# personal settings:
 //    - ~/.OpenFOAM/\<VERSION\>/
 //      <em>for version-specific files</em>
@@ -104,7 +108,7 @@ bool chDir(const fileName& dir);
 //  -# shipped settings:
 //    - $WM_PROJECT_DIR/etc/
 //
-//  @return the full path name or fileName() if the name cannot be found
+//  \return the full path name or fileName() if the name cannot be found
 //  Optionally abort if the file cannot be found
 fileName findEtcFile(const fileName&, bool mandatory=false);
 
@@ -178,7 +182,20 @@ bool ping(const word&, const label port, const label timeOut);
 bool ping(const word&, const label timeOut=10);
 
 //- Execute the specified command
-int system(const string& command);
+int system(const std::string& command);
+
+//- open a shared library. Return handle to library
+void* dlOpen(const fileName& lib);
+
+//- Close a dlopened library using handle. Return true if successful
+bool dlClose(void*);
+
+//- Lookup a symbol in a dlopened library using handle to library
+void* dlSym(void* handle, const std::string& symbol);
+
+//- Report if symbol in a dlopened library could be found
+bool dlSymFound(void* handle, const std::string& symbol);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

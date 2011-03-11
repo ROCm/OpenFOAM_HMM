@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,9 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-@mainpage OpenFOAM&reg;: open source CFD
+\mainpage OpenFOAM&reg;: open source CFD
 
-@section about About OpenFOAM
+\section about About OpenFOAM
 
     OpenFOAM is a free, open source CFD software package produced by
     a commercial company,
@@ -35,7 +35,7 @@ License
     heat transfer, to solid dynamics and electromagnetics.
     <a href="http://www.openfoam.com/features">More ...</a>
 
-@section users Our commitment to the users
+\section users Our commitment to the users
 
     OpenFOAM comes with full commercial support from OpenCFD, including
     <a href="http://www.openfoam.com/support/software.php">
@@ -48,7 +48,7 @@ License
     These activities fund the development, maintenance and release of
     OpenFOAM to make it an extremely viable commercial open source product.
 
-@section opensource Our commitment to open source
+\section opensource Our commitment to open source
 
    OpenCFD is committed to open source software, continually developing and
    maintaining OpenFOAM under the

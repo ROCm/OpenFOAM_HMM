@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,13 +24,14 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "basicKinematicParcel.H"
-#include "createKinematicParcelTypes.H"
+#include "Cloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    createKinematicParcelTypes(basicKinematicParcel);
+    defineTemplateTypeNameAndDebug(basicKinematicParcel, 0);
+    defineTemplateTypeNameAndDebug(Cloud<basicKinematicParcel>, 0);
 }
 
 

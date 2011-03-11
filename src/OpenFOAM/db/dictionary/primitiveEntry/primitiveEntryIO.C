@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,7 +44,8 @@ void Foam::primitiveEntry::append
 
         if
         (
-            w.size() == 1
+            disableFunctionEntries
+         || w.size() == 1
          || (
                 !(w[0] == '$' && expandVariable(w, dict))
              && !(w[0] == '#' && expandFunction(w, dict, is))
@@ -209,21 +210,43 @@ Foam::primitiveEntry::primitiveEntry(const keyType& key, Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::primitiveEntry::write(Ostream& os) const
+void Foam::primitiveEntry::write(Ostream& os, const bool contentsOnly) const
 {
-    os.writeKeyword(keyword());
+    if (!contentsOnly)
+    {
+        os.writeKeyword(keyword());
+    }
 
     for (label i=0; i<size(); ++i)
     {
-        os << operator[](i);
+        const token& t = operator[](i);
+        if (t.type() == token::VERBATIMSTRING)
+        {
+            os  << token::HASH << token::BEGIN_BLOCK;
+            os.writeQuoted(t.stringToken(), false);
+            os  << token::HASH << token::END_BLOCK;
+        }
+        else
+        {
+            os  << t;
+        }
 
         if (i < size()-1)
         {
-            os << token::SPACE;
+            os  << token::SPACE;
         }
     }
 
-    os << token::END_STATEMENT << endl;
+    if (!contentsOnly)
+    {
+        os  << token::END_STATEMENT << endl;
+    }
+}
+
+
+void Foam::primitiveEntry::write(Ostream& os) const
+{
+    this->write(os, false);
 }
 
 

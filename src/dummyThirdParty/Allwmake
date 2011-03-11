@@ -1,11 +1,12 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
+makeType=${1:-libso}
 set -x
 
-wmake libso scotchDecomp
-wmake libso ptscotchDecomp
-wmake libso metisDecomp
-wmake libso MGridGen
+wmake $makeType scotchDecomp
+wmake $makeType ptscotchDecomp
+wmake $makeType metisDecomp
+wmake $makeType MGridGen
 
 
 # ----------------------------------------------------------------- end-of-file

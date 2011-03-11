@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------
+#-------------------------------*- makefile -*---------------------------------
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
@@ -106,7 +106,7 @@ SEXE            = a.out
 
 GENERAL_RULES = $(WM_DIR)/rules/General
 RULES         = $(WM_DIR)/rules/$(WM_ARCH)$(WM_COMPILER)
-BIN           = $(WM_DIR)/bin/$(WM_ARCH)$(WM_COMPILER)
+WMAKE_BIN     = $(WM_DIR)/platforms/$(WM_ARCH)$(WM_COMPILER)
 
 include $(GENERAL_RULES)/general
 include $(RULES)/general

@@ -1,6 +1,7 @@
 EXE_LIBS = \
     -lautoMesh \
     -lbarotropicCompressibilityModel \
+    -lbasicSolidThermo \
     -lbasicThermophysicalModels \
     -lblockMesh \
     -lchemistryModel \
@@ -11,15 +12,17 @@ EXE_LIBS = \
     -lconversion \
     -ldecompositionMethods \
     -ldieselSpray \
+    -ldistributed \
+    -ldistributionModels \
     -ldsmc \
     -ldynamicFvMesh \
     -ldynamicMesh \
     -ledgeMesh \
     -lengine \
-    -lerrorEstimation \
     -lfieldFunctionObjects \
     -lfileFormats \
     -lfiniteVolume \
+    -lfoamCalcFunctions \
     -lforces \
     -lfvMotionSolvers \
     -lgenericPatchFields \
@@ -29,30 +32,38 @@ EXE_LIBS = \
     -lincompressibleTurbulenceModel \
     -linterfaceProperties \
     -lIOFunctionObjects \
+    -ljobControl \
+    -lkineticTheoryModel \
     -llagrangian \
     -llagrangianIntermediate \
     -llaminarFlameSpeedModels \
     -lLESdeltas \
     -lLESfilters \
-    -lliquidMixture \
-    -lliquids \
+    -lliquidMixtureProperties \
+    -lliquidProperties \
     -lmeshTools \
     -lmolecularMeasurements \
     -lmolecule \
+    -lmultiphaseInterFoam \
     -lODE \
     -lOpenFOAM \
-    -lpdf \
+    -lphaseModel \
     -lpotential \
-    -lradiation \
+    -lradiationModels \
     -lrandomProcesses \
     -lreactionThermophysicalModels \
+    -lreconstruct \
     -lsampling \
-    -lpointSolidMixture \
+    -lSLGThermo \
+    -lsolidMixtureProperties \
     -lsolidParticle \
-    -lpointSolids \
+    -lsolidProperties \
+    -lsolid \
     -lspecie \
+    -lsurfaceFilmModels \
     -lsurfMesh \
     -lsystemCall \
+    -ltabulatedWallFunctions \
     -lthermalPorousZone \
     -lthermophysicalFunctions \
     -ltopoChangerFvMesh \

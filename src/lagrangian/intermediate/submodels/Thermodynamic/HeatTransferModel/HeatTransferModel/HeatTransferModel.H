@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,7 +64,7 @@ class HeatTransferModel
 public:
 
     //- Runtime type information
-    TypeName("HeatTransferModel");
+    TypeName("heatTransferModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable
@@ -164,13 +164,13 @@ public:
     );
 
 
-#define makeHeatTransferModelType(SS, CloudType, ParcelType)                  \
+#define makeHeatTransferModelType(SS, CloudType)                              \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
+    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
                                                                               \
-    HeatTransferModel<CloudType<ParcelType> >::                               \
-        adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
-            add##SS##CloudType##ParcelType##ConstructorToTable_;
+    HeatTransferModel<CloudType>::                                            \
+        adddictionaryConstructorToTable<SS<CloudType> >                       \
+            add##SS##CloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

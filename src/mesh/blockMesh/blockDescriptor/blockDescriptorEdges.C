@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,13 +33,13 @@ License
 
 namespace Foam
 {
-    //! @cond fileScope
+    //! \cond fileScope
     //  Calculate the geometric expension factor from the expansion ratio
     inline scalar calcGexp(const scalar expRatio, const label dim)
     {
         return dim > 1 ? pow(expRatio, 1.0/(dim - 1)) : 0.0;
     }
-    //! @endcond
+    //! \endcond
 
 } // End namespace Foam
 

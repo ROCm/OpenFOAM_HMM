@@ -1,5 +1,6 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
+makeType=${1:-libso}
 
 wmakeCheckPwd "$WM_PROJECT_DIR/src" || {
     echo "Error: Current directory is not \$WM_PROJECT_DIR/src"
@@ -17,57 +18,56 @@ wmakeCheckPwd "$WM_PROJECT_DIR/src" || {
 set -x
 
 # update OpenFOAM version strings if required
-wmakePrintBuild -check || /bin/rm -f OpenFOAM/Make/$WM_OPTIONS/global.? 2>/dev/null
+wmakePrintBuild -check || /bin/rm -f OpenFOAM/Make/*/global.? 2>/dev/null
 
 wmakeLnInclude OpenFOAM
-wmakeLnInclude OSspecific/$WM_OSTYPE
-Pstream/Allwmake
+wmakeLnInclude OSspecific/${WM_OSTYPE:-POSIX}
+Pstream/Allwmake $*
 
-OSspecific/$WM_OSTYPE/Allwmake
-wmake libso OpenFOAM
+OSspecific/${WM_OSTYPE:-POSIX}/Allwmake
+wmake $makeType OpenFOAM
 
-wmake libso fileFormats
-wmake libso triSurface
-wmake libso meshTools
-wmake libso edgeMesh
-wmake libso surfMesh
+wmake $makeType fileFormats
+wmake $makeType triSurface
+wmake $makeType meshTools
+wmake $makeType edgeMesh
+wmake $makeType surfMesh
 
 # Decomposition methods needed by dummyThirdParty
 parallel/decompose/AllwmakeLnInclude
 # dummyThirdParty (dummy metisDecomp, scotchDecomp etc) needed by e.g. meshTools
-dummyThirdParty/Allwmake
+dummyThirdParty/Allwmake $*
 
-wmake libso lagrangian/basic
-wmake libso finiteVolume
-wmake libso genericPatchFields
+wmake $makeType finiteVolume
+wmake $makeType lagrangian/basic
+wmake $makeType lagrangian/distributionModels
+wmake $makeType genericPatchFields
 
 # Build the proper scotchDecomp, metisDecomp etc.
-parallel/Allwmake
+parallel/Allwmake $*
 
-wmake libso conversion
+wmake $makeType conversion
 
-wmake libso sampling
+wmake $makeType sampling
 
-wmake libso dynamicMesh
-wmake libso dynamicFvMesh
-wmake libso topoChangerFvMesh
+wmake $makeType dynamicMesh
+wmake $makeType dynamicFvMesh
+wmake $makeType topoChangerFvMesh
 
-wmake libso ODE
-wmake libso randomProcesses
+wmake $makeType ODE
+wmake $makeType randomProcesses
 
-thermophysicalModels/Allwmake
-transportModels/Allwmake
-turbulenceModels/Allwmake
-regionModels/Allwmake
-lagrangian/Allwmake
-postProcessing/Allwmake
-mesh/Allwmake
+thermophysicalModels/Allwmake $*
+transportModels/Allwmake $*
+turbulenceModels/Allwmake $*
+regionModels/Allwmake $*
+lagrangian/Allwmake $*
+postProcessing/Allwmake $*
+mesh/Allwmake $*
 
-wmake libso errorEstimation
+fvAgglomerationMethods/Allwmake $*
 
-fvAgglomerationMethods/Allwmake
-
-wmake libso fvMotionSolver
-wmake libso engine
+wmake $makeType fvMotionSolver
+wmake $makeType engine
 
 # ----------------------------------------------------------------- end-of-file

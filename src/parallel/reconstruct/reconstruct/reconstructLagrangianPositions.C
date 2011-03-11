@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,8 +25,7 @@ License
 
 #include "reconstructLagrangian.H"
 #include "labelIOList.H"
-#include "Cloud.H"
-#include "passiveParticle.H"
+#include "passiveParticleCloud.H"
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
@@ -39,7 +38,7 @@ void Foam::reconstructLagrangianPositions
     const PtrList<labelIOList>& cellProcAddressing
 )
 {
-    Cloud<passiveParticle> lagrangianPositions
+    passiveParticleCloud lagrangianPositions
     (
         mesh,
         cloudName,
@@ -67,7 +66,7 @@ void Foam::reconstructLagrangianPositions
             (
                 new passiveParticle
                 (
-                    lagrangianPositions,
+                    mesh,
                     ppi.position(),
                     cellMap[ppi.cell()],
                     false
@@ -76,7 +75,7 @@ void Foam::reconstructLagrangianPositions
         }
     }
 
-    IOPosition<passiveParticle>(lagrangianPositions).write();
+    IOPosition<Cloud<passiveParticle> >(lagrangianPositions).write();
 }
 
 

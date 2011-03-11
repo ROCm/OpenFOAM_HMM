@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -67,7 +67,7 @@ class PairModel
 public:
 
     //- Runtime type information
-    TypeName("PairModel");
+    TypeName("pairModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable
@@ -155,27 +155,12 @@ public:
     );
 
 
-#define makePairModelType(SS, CloudType, ParcelType)                          \
+#define makePairModelType(SS, CloudType)                                      \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
+    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
                                                                               \
-    PairModel<CloudType<ParcelType> >::                                       \
-        adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
-            add##SS##CloudType##ParcelType##ConstructorToTable_;
-
-
-#define makePairModelThermoType(SS, CloudType, ParcelType, ThermoType)        \
-                                                                              \
-    defineNamedTemplateTypeNameAndDebug                                       \
-    (                                                                         \
-        SS<CloudType<ParcelType<ThermoType> > >,                              \
-        0                                                                     \
-    );                                                                        \
-                                                                              \
-    PairModel<CloudType<ParcelType<ThermoType> > >::                          \
-        adddictionaryConstructorToTable                                       \
-            <SS<CloudType<ParcelType<ThermoType> > > >                        \
-            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
+    PairModel<CloudType>::adddictionaryConstructorToTable<SS<CloudType> >     \
+        add##SS##CloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

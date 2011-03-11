@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,14 +64,14 @@ Ostream& operator<<
 template<class ParcelType>
 class ThermoParcel
 :
-    public KinematicParcel<ParcelType>
+    public ParcelType
 {
 public:
 
     //- Class to hold thermo particle constant properties
     class constantProperties
     :
-        public KinematicParcel<ParcelType>::constantProperties
+        public ParcelType::constantProperties
     {
 
         // Private data
@@ -140,16 +140,14 @@ public:
     };
 
 
-    //- Class used to pass thermo tracking data to the trackToFace function
-    class trackData
+    template<class CloudType>
+    class TrackingData
     :
-        public KinematicParcel<ParcelType>::trackData
+        public ParcelType::template TrackingData<CloudType>
     {
+    private:
 
         // Private data
-
-            //- Reference to the cloud containing this particle
-            ThermoCloud<ParcelType>& cloud_;
 
             //- Local copy of carrier specific heat field
             //  Cp not stored on acrrier thermo, but returned as tmp<...>
@@ -168,23 +166,24 @@ public:
                 autoPtr<interpolation<scalar> > GInterp_;
 
 
+
     public:
+
+        typedef typename ParcelType::template TrackingData<CloudType>::trackPart
+            trackPart;
 
         // Constructors
 
             //- Construct from components
-            inline trackData
+            inline TrackingData
             (
-                ThermoCloud<ParcelType>& cloud,
-                typename KinematicParcel<ParcelType>::trackData::trackPart
-                    part = KinematicParcel<ParcelType>::trackData::tpLinearTrack
+                CloudType& cloud,
+                trackPart part = ParcelType::template
+                    TrackingData<CloudType>::tpLinearTrack
             );
 
 
         // Member functions
-
-            //- Return access to the owner cloud
-            inline ThermoCloud<ParcelType>& cloud();
 
             //- Return access to the locally stored carrier Cp field
             inline const volScalarField& Cp() const;
@@ -259,16 +258,13 @@ public:
         TypeName("ThermoParcel");
 
 
-    friend class Cloud<ParcelType>;
-
-
     // Constructors
 
         //- Construct from owner, position, and cloud owner
         //  Other properties initialised as null
         inline ThermoParcel
         (
-            ThermoCloud<ParcelType>& owner,
+            const polyMesh& mesh,
             const vector& position,
             const label cellI,
             const label tetFaceI,
@@ -278,7 +274,7 @@ public:
         //- Construct from components
         inline ThermoParcel
         (
-            ThermoCloud<ParcelType>& owner,
+            const polyMesh& mesh,
             const vector& position,
             const label cellI,
             const label tetFaceI,
@@ -297,7 +293,7 @@ public:
         //- Construct from Istream
         ThermoParcel
         (
-            const Cloud<ParcelType>& c,
+            const polyMesh& mesh,
             Istream& is,
             bool readFields = true
         );
@@ -306,29 +302,41 @@ public:
         ThermoParcel(const ThermoParcel& p);
 
         //- Construct as a copy
-        ThermoParcel(const ThermoParcel& p, const ThermoCloud<ParcelType>& c);
+        ThermoParcel(const ThermoParcel& p, const polyMesh& mesh);
 
         //- Construct and return a (basic particle) clone
-        virtual autoPtr<Particle<ParcelType> > clone() const
+        virtual autoPtr<particle> clone() const
         {
-            return autoPtr<Particle<ParcelType> >(new ThermoParcel(*this));
+            return autoPtr<particle>(new ThermoParcel(*this));
         }
 
         //- Construct and return a (basic particle) clone
-        virtual autoPtr<Particle<ParcelType> > clone
-        (
-            const Cloud<ParcelType>& c
-        ) const
+        virtual autoPtr<particle> clone(const polyMesh& mesh) const
         {
-            return autoPtr<Particle<ParcelType> >
-            (
-                new ThermoParcel
+            return autoPtr<particle>(new ThermoParcel(*this, mesh));
+        }
+
+        //- Factory class to read-construct particles used for
+        //  parallel transfer
+        class iNew
+        {
+            const polyMesh& mesh_;
+
+        public:
+
+            iNew(const polyMesh& mesh)
+            :
+                mesh_(mesh)
+            {}
+
+            autoPtr<ThermoParcel<ParcelType> > operator()(Istream& is) const
+            {
+                return autoPtr<ThermoParcel<ParcelType> >
                 (
-                    *this,
-                    static_cast<const ThermoCloud<ParcelType>&>(c)
-                )
-            );
-        }
+                    new ThermoParcel<ParcelType>(mesh_, is, true)
+                );
+            }
+        };
 
 
     // Member Functions
@@ -343,6 +351,12 @@ public:
 
             //- Return the parcel sensible enthalpy
             inline scalar hs() const;
+
+            //- Return const access to carrier temperature
+            inline scalar Tc() const;
+
+            //- Return const access to carrier specific heat capacity
+            inline scalar Cpc() const;
 
 
         // Edit
@@ -401,10 +415,12 @@ public:
         // I-O
 
             //- Read
-            static void readFields(Cloud<ParcelType>& c);
+            template<class CloudType>
+            static void readFields(CloudType& c);
 
             //- Write
-            static void writeFields(const Cloud<ParcelType>& c);
+            template<class CloudType>
+            static void writeFields(const CloudType& c);
 
 
     // Ostream Operator
@@ -424,6 +440,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "ThermoParcelI.H"
+#include "ThermoParcelTrackingDataI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

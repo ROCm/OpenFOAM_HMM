@@ -33,12 +33,13 @@ packDir=$WM_PROJECT-$WM_PROJECT_VERSION
 toolsDir="${0%/*}/tools"  # this script is located in the tools/ parent dir
 
 usage() {
-    while [ $# -gt 0 ]; do echo "$1" 1>&2; shift; done
-cat <<USAGE 1>&2
+    exec 1>&2
+    while [ "$#" -gt 0 ]; do echo "$1"; shift; done
+cat <<USAGE
 Usage: ${0##*/} [OPTION]
 options:
-  -o <dir>          specify alternative output directory
-  -nogit            bypass using 'git archive'
+  -o, -output <dir>     specify alternative output directory
+  -nogit                bypass using 'git archive'
 
 * Pack and compress OpenFOAM directory for release
 
@@ -46,7 +47,7 @@ USAGE
     exit 1
 }
 
-unset prefix outputDir nogit
+unset outputDir nogit
 # parse options
 while [ "$#" -gt 0 ]
 do
@@ -104,7 +105,7 @@ echo $timeStamp 2>/dev/null > $packDir/.timeStamp
 if [ "$nogit" = true ]
 then
     echo "pack manually" 1>&2
-    $toolsDir/foamPackSource $packDir $packFile
+    foamPackSource $packDir $packFile
 else
     echo "pack with git-archive" 1>&2
     ( cd $packDir && git archive --format=tar --prefix=$packDir/ HEAD) > $packBase.tar

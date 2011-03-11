@@ -29,6 +29,7 @@ License
 #include "globalIndex.H"
 #include "treeDataCell.H"
 #include "treeDataFace.H"
+#include "meshTools.H"
 
 #include "addToRunTimeSelectionTable.H"
 
@@ -56,6 +57,7 @@ namespace Foam
 
 
     //- Private class for finding nearest
+    //  Comprising:
     //  - global index
     //  - sqr(distance)
     typedef Tuple2<scalar, label> nearInfo;
@@ -73,6 +75,63 @@ namespace Foam
             }
         }
     };
+}
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+const Foam::indexedOctree<Foam::treeDataFace>&
+Foam::sampledTriSurfaceMesh::nonCoupledboundaryTree() const
+{
+    // Variant of meshSearch::boundaryTree() that only does non-coupled
+    // boundary faces.
+
+    if (!boundaryTreePtr_.valid())
+    {
+        // all non-coupled boundary faces (not just walls)
+        const polyBoundaryMesh& patches = mesh().boundaryMesh();
+
+        labelList bndFaces(mesh().nFaces()-mesh().nInternalFaces());
+        label bndI = 0;
+        forAll(patches, patchI)
+        {
+            const polyPatch& pp = patches[patchI];
+            if (!pp.coupled())
+            {
+                forAll(pp, i)
+                {
+                    bndFaces[bndI++] = pp.start()+i;
+                }
+            }
+        }
+        bndFaces.setSize(bndI);
+
+
+        treeBoundBox overallBb(mesh().points());
+        Random rndGen(123456);
+        overallBb = overallBb.extend(rndGen, 1E-4);
+        overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+
+        boundaryTreePtr_.reset
+        (
+            new indexedOctree<treeDataFace>
+            (
+                treeDataFace    // all information needed to search faces
+                (
+                    false,                      // do not cache bb
+                    mesh(),
+                    bndFaces                    // boundary faces only
+                ),
+                overallBb,                      // overall search domain
+                8,                              // maxLevel
+                10,                             // leafsize
+                3.0                             // duplicity
+            )
+        );
+    }
+
+    return boundaryTreePtr_();
 }
 
 
@@ -159,6 +218,8 @@ bool Foam::sampledTriSurfaceMesh::expire()
 
     sampledSurface::clearGeom();
     MeshStorage::clear();
+
+    boundaryTreePtr_.clear();
     sampleElements_.clear();
     samplePoints_.clear();
 
@@ -224,7 +285,10 @@ bool Foam::sampledTriSurfaceMesh::update()
     {
         // Search for nearest boundaryFace
 
-        const indexedOctree<treeDataFace>& bTree = meshSearcher.boundaryTree();
+        ////- Search on all (including coupled) boundary faces
+        //const indexedOctree<treeDataFace>& bTree = meshSearcher.boundaryTree()
+        //- Search on all non-coupled boundary faces
+        const indexedOctree<treeDataFace>& bTree = nonCoupledboundaryTree();
 
         forAll(fc, triI)
         {

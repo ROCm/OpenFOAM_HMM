@@ -812,30 +812,14 @@ void Foam::mapDistribute::applyDummyInverseTransforms(List<T>& field) const
 
 
 // Calculate transformed elements.
-template<class T>   //, class CombineOp>
+template<class T, class TransformOp>   //, class CombineOp>
 void Foam::mapDistribute::applyTransforms
 (
     const globalIndexAndTransform& globalTransforms,
     List<T>& field,
-    const bool isPosition
-    //const CombineOp& cop
+    const TransformOp& top
 ) const
 {
-    if (isPosition)
-    {
-        FatalErrorIn
-        (
-            "mapDistribute::applyTransforms\n"
-            "(\n"
-            "    const globalIndexAndTransform&,\n"
-            "    List<T>&,\n"
-            "    const bool\n"
-            ") const\n"
-        )   << "It does not make sense to apply position transformation"
-            << " for anything else than pointFields."
-            << abort(FatalError);
-    }
-
     const List<vectorTensorTransform>& totalTransform =
         globalTransforms.transformPermutations();
 
@@ -846,7 +830,8 @@ void Foam::mapDistribute::applyTransforms
         label n = transformStart_[trafoI];
 
         // Could be optimised to avoid memory allocations
-        Field<T> transformFld(transform(vt.R(), Field<T>(field, elems)));
+        List<T> transformFld(UIndirectList<T>(field, elems));
+        top(vt, true, transformFld);
 
         forAll(transformFld, i)
         {
@@ -858,30 +843,14 @@ void Foam::mapDistribute::applyTransforms
 
 
 // Calculate transformed elements.
-template<class T>   //, class CombineOp>
+template<class T, class TransformOp>   //, class CombineOp>
 void Foam::mapDistribute::applyInverseTransforms
 (
     const globalIndexAndTransform& globalTransforms,
     List<T>& field,
-    const bool isPosition
-    //const CombineOp& cop
+    const TransformOp& top
 ) const
 {
-    if (isPosition)
-    {
-        FatalErrorIn
-        (
-            "mapDistribute::applyInverseTransforms\n"
-            "(\n"
-            "    const globalIndexAndTransform&,\n"
-            "    List<T>&,\n"
-            "    const bool\n"
-            ") const\n"
-        )   << "It does not make sense to apply position transformation"
-            << " for anything else than pointFields."
-            << abort(FatalError);
-    }
-
     const List<vectorTensorTransform>& totalTransform =
         globalTransforms.transformPermutations();
 
@@ -892,8 +861,8 @@ void Foam::mapDistribute::applyInverseTransforms
         label n = transformStart_[trafoI];
 
         // Could be optimised to avoid memory allocations
-        Field<T> transformFld(SubField<T>(field, elems.size(), n));
-        transform(transformFld, vt.R().T(), transformFld);
+        List<T> transformFld(SubList<T>(field, elems.size(), n));
+        top(vt, false, transformFld);
 
         forAll(transformFld, i)
         {
@@ -966,8 +935,6 @@ void Foam::mapDistribute::reverseDistribute
     const bool dummyTransform
 ) const
 {
-    fld.setSize(constructSize);
-
     if (dummyTransform)
     {
         applyDummyInverseTransforms(fld);
@@ -1024,8 +991,6 @@ void Foam::mapDistribute::reverseDistribute
     const bool dummyTransform
 ) const
 {
-    fld.setSize(constructSize);
-
     if (dummyTransform)
     {
         applyDummyInverseTransforms(fld);
@@ -1077,54 +1042,54 @@ void Foam::mapDistribute::reverseDistribute
 
 
 //- Distribute data using default commsType.
-template<class T>
+template<class T, class TransformOp>
 void Foam::mapDistribute::distribute
 (
     const globalIndexAndTransform& git,
     List<T>& fld,
-    const bool isPosition
+    const TransformOp& top
 ) const
 {
     // Distribute. Leave out dummy transforms since we're doing them ourselves
     distribute(fld, false);
     // Do transforms
-    applyTransforms(git, fld, isPosition);   //, eqOp<T>());
+    applyTransforms(git, fld, top);
 }
 
 
-template<class T>
+template<class T, class TransformOp>
 void Foam::mapDistribute::reverseDistribute
 (
     const globalIndexAndTransform& git,
     const label constructSize,
     List<T>& fld,
-    const bool isPosition
+    const TransformOp& top
 ) const
 {
     // Fill slots with reverse-transformed data. Note that it also copies
     // back into the non-remote part of fld even though these values are not
     // used.
-    applyInverseTransforms(git, fld, isPosition);   //, eqOp<T>());
+    applyInverseTransforms(git, fld, top);
 
     // And send back (the remote slots). Disable dummy transformations.
     reverseDistribute(constructSize, fld, false);
 }
 
 
-template<class T>
+template<class T, class TransformOp>
 void Foam::mapDistribute::reverseDistribute
 (
     const globalIndexAndTransform& git,
     const label constructSize,
     const T& nullValue,
     List<T>& fld,
-    const bool isPosition
+    const TransformOp& top
 ) const
 {
     // Fill slots with reverse-transformed data Note that it also copies
     // back into the non-remote part of fld even though these values are not
     // used.
-    applyInverseTransforms(git, fld, isPosition);   //, eqOp<T>());
+    applyInverseTransforms(git, fld, top);   //, eqOp<T>());
 
     // And send back (the remote slots) Disable dummy transformations.
     reverseDistribute(constructSize, nullValue, fld, false);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,7 +85,7 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("PatchInteractionModel");
+    TypeName("patchInteractionModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable
@@ -162,7 +162,7 @@ public:
             bool& keepParticle,
             const scalar trackFraction,
             const tetIndices& tetIs
-        ) const;
+        );
 
         //- Calculate the patch normal and velocity to interact with,
         //  accounting for patch motion if required.
@@ -175,6 +175,12 @@ public:
             vector& normal,
             vector& Up
         ) const;
+
+
+        // I-O
+
+            //- Write patch interaction info to stream
+            virtual void info(Ostream& os) const;
 };
 
 
@@ -195,13 +201,13 @@ public:
     );
 
 
-#define makePatchInteractionModelType(SS, CloudType, ParcelType)              \
+#define makePatchInteractionModelType(SS, CloudType)                          \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
+    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
                                                                               \
-    PatchInteractionModel<CloudType<ParcelType> >::                           \
-        adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
-            add##SS##CloudType##ParcelType##ConstructorToTable_;
+    PatchInteractionModel<CloudType>::                                        \
+        adddictionaryConstructorToTable<SS<CloudType> >                       \
+            add##SS##CloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

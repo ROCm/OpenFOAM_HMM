@@ -24,9 +24,9 @@ solution
 
     sourceTerms
     {
-        U
+        schemes
         {
-            semiImplicit    false;
+            U               explicit;
         }
     }
 
@@ -56,41 +56,38 @@ constantProperties
     poissonsRatio   0.35;
 }
 
-particleForces
-{
-    gravity             on;
-    virtualMass         off;
-    pressureGradient    off;
-    paramagnetic        off;
-}
-
 subModels
 {
-    InjectionModel  ManualInjection;
+    particleForces
+    {
+        activeForces
+        (
+            sphereDrag
+            gravity
+        );
+    }
 
-    DragModel       SphereDrag;
+    injectionModel  manualInjection;
 
-    DispersionModel StochasticDispersionRAS;
+    dispersionModel stochasticDispersionRAS;
 
-    PatchInteractionModel StandardWallInteraction;
+    patchInteractionModel standardWallInteraction;
 
-    PostProcessingModel none;
+    postProcessingModel none;
 
-    SurfaceFilmModel none;
+    surfaceFilmModel none;
 
-    CollisionModel none;
-
-    ManualInjectionCoeffs
+    manualInjectionCoeffs
     {
         massTotal       0.0002;
         parcelBasisType mass;
         SOI             0;
         positionsFile   "kinematicCloud1Positions";
         U0              ( 0 0 0 );
-        parcelPDF
+        sizeDistribution
         {
-            pdfType         RosinRammler;
-            RosinRammlerPDF
+            type        RosinRammler;
+            RosinRammlerDistribution
             {
                 minValue        5e-05;
                 maxValue        0.0001;
@@ -100,7 +97,7 @@ subModels
         }
     }
 
-    StandardWallInteractionCoeffs
+    standardWallInteractionCoeffs
     {
         type            rebound;
     }

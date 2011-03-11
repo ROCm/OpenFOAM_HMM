@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,30 +32,30 @@ Usage
 
     - decomposePar [OPTION]
 
-    @param -cellDist \n
+    \param -cellDist \n
     Write the cell distribution as a labelList, for use with 'manual'
     decomposition method or as a volScalarField for post-processing.
 
-    @param -region regionName \n
+    \param -region regionName \n
     Decompose named region. Does not check for existence of processor*.
 
-    @param -copyUniform \n
-    Copy any @a uniform directories too.
+    \param -copyUniform \n
+    Copy any \a uniform directories too.
 
-    @param -constant \n
+    \param -constant \n
     Override controlDict settings and use constant directory.
 
-    @param -fields \n
+    \param -fields \n
     Use existing geometry decomposition and convert fields only.
 
-    @param -force \n
-    Remove any existing @a processor subdirectories before decomposing the
+    \param -force \n
+    Remove any existing \a processor subdirectories before decomposing the
     geometry.
 
-    @param -ifRequired \n
+    \param -ifRequired \n
     Only decompose the geometry if the number of domains has changed from a
-    previous decomposition. No @a processor subdirectories will be removed
-    unless the @a -force option is also specified. This option can be used
+    previous decomposition. No \a processor subdirectories will be removed
+    unless the \a -force option is also specified. This option can be used
     to avoid redundant geometry decomposition (eg, in scripts), but should
     be used with caution when the underlying (serial) geometry or the
     decomposition method etc. have been changed between decompositions.

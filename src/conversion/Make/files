@@ -4,7 +4,6 @@ ensight/part/ensightPart.C
 ensight/part/ensightPartIO.C
 ensight/part/ensightPartCells.C
 ensight/part/ensightPartFaces.C
-ensight/part/ensightPartNonMeshFaces.C
 ensight/part/ensightParts.C
 
 meshTables/boundaryRegion.C
