@@ -102,6 +102,11 @@ setenv FOAM_SIGFPE
 # - remove anything under top-level directory.
 # NB: the WM_PROJECT_INST_DIR might not be identical between versions
 set foamOldDirs="$FOAM_INST_DIR $HOME/$WM_PROJECT/$LOGNAME"
+if ( $?WM_PROJECT_INST_DIR ) then
+    if ( "$WM_PROJECT_INST_DIR" != "$FOAM_INST_DIR" ) then
+        set foamOldDirs="$WM_PROJECT_INST_DIR $foamOldDirs"
+    endif
+endif
 
 
 # Location of installation
@@ -136,10 +141,12 @@ while ( $#argv > 0 )
     switch ($argv[1])
     case *=:
         # name=       -> unsetenv name
+        if ($?FOAM_VERBOSE && $?prompt) echo "unsetenv $argv[1]:s/=//"
         eval "unsetenv $argv[1]:s/=//"
         breaksw
     case *=*:
         # name=value  -> setenv name value
+        if ($?FOAM_VERBOSE && $?prompt) echo "setenv $argv[1]:s/=/ /"
         eval "setenv $argv[1]:s/=/ /"
         breaksw
     default:
