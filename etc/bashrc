@@ -108,15 +108,23 @@ then
 fi
 
 
-# Location of site/user files
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Location of installation
+# ~~~~~~~~~~~~~~~~~~~~~~~~
 export WM_PROJECT_INST_DIR=$FOAM_INST_DIR
 export WM_PROJECT_DIR=$WM_PROJECT_INST_DIR/$WM_PROJECT-$WM_PROJECT_VERSION
-export WM_PROJECT_USER_DIR=$HOME/$WM_PROJECT/$USER-$WM_PROJECT_VERSION
 
 # Location of third-party software
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 export WM_THIRD_PARTY_DIR=$WM_PROJECT_INST_DIR/ThirdParty-$WM_PROJECT_VERSION
+
+# Location of site-specific templates etc
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# unset is equivalent to $WM_PROJECT_INST_DIR/site
+unset WM_PROJECT_SITE
+
+# Location of user files
+# ~~~~~~~~~~~~~~~~~~~~~~
+export WM_PROJECT_USER_DIR=$HOME/$WM_PROJECT/$USER-$WM_PROJECT_VERSION
 
 
 # Source files, possibly with some verbosity
