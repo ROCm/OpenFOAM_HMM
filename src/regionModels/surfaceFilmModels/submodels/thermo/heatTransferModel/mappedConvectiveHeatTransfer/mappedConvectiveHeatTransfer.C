@@ -82,7 +82,7 @@ mappedConvectiveHeatTransfer::mappedConvectiveHeatTransfer
         ),
         owner.regionMesh(),
         dimensionedScalar("zero", dimMass/pow3(dimTime)/dimTemperature, 0.0),
-        refCast<const kinematicSingleLayer>(owner).pSp().boundaryField().types()
+        owner.mappedPushedFieldPatchTypes<scalar>()
     )
 {
     // Update the primary-side convective heat transfer coefficient
