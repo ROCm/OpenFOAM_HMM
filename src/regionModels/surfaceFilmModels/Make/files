@@ -34,12 +34,13 @@ $(THERMOMODELS)/filmRadiationModel/standardRadiation/standardRadiation.C
 
 
 /* Boundary conditions */
-derivedFvPatchFields/filmHeightInletVelocity/filmHeightInletVelocityFvPatchVectorField.C
-derivedFvPatchFields/htcConv/htcConvFvPatchScalarField.C
+PATCHFIELDS=derivedFvPatchFields
+$(PATCHFIELDS)/filmHeightInletVelocity/filmHeightInletVelocityFvPatchVectorField.C
 
 /* Wall functions for primary region */
-derivedFvPatchFields/wallFunctions/alphatFilmWallFunction/alphatFilmWallFunctionFvPatchScalarField.C
-derivedFvPatchFields/wallFunctions/mutkFilmWallFunction/mutkFilmWallFunctionFvPatchScalarField.C
+WALLFUNCS=$(PATCHFIELDS)/wallFunctions
+$(WALLFUNCS)/alphatFilmWallFunction/alphatFilmWallFunctionFvPatchScalarField.C
+$(WALLFUNCS)/mutkFilmWallFunction/mutkFilmWallFunctionFvPatchScalarField.C
 
 
 LIB = $(FOAM_LIBBIN)/libsurfaceFilmModels

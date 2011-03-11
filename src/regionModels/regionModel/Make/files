@@ -3,12 +3,5 @@ regionModel/regionModel.C
 singleLayerRegion/singleLayerRegion.C
 regionModel1D/regionModel1D.C
 
-/* Boundary conditions */
-derivedFvPatchFields/directMappedField/directMappedFieldFvPatchFields.C
-
-derivedFvPatchFields/directMappedFixedInternalValue/directMappedFixedInternalValueFvPatchFields.C
-derivedFvPatchFields/directMappedFixedPushedInternalValue/directMappedFixedPushedInternalValueFvPatchFields.C
-derivedFvPatchFields/directMappedNamedFixedValue/directMappedNamedFixedValueFvPatchFields.C
-
 
 LIB = $(FOAM_LIBBIN)/libregionModels
