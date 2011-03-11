@@ -169,6 +169,9 @@ export FOAM_LIBBIN=$WM_PROJECT_DIR/platforms/$WM_OPTIONS/lib
 # external (ThirdParty) libraries
 export FOAM_EXT_LIBBIN=$WM_THIRD_PARTY_DIR/platforms/$WM_OPTIONS/lib
 
+# default location of site-specific templates etc
+# export WM_PROJECT_SITE=$WM_PROJECT_INST_DIR/site
+
 # shared site executables/libraries
 # similar naming convention as ~OpenFOAM expansion
 export FOAM_SITE_APPBIN=$WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/bin

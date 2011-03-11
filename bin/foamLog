@@ -33,6 +33,8 @@
 #------------------------------------------------------------------------------
 Script=${0##*/}
 toolsDir=${0%/*}/tools
+siteDir=${WM_PROJECT_SITE:-${WM_PROJECT_INST_DIR:-<unknown>}/site}
+userDir=$HOME/.OpenFOAM
 
 usage() {
     exec 1>&2
@@ -84,10 +86,10 @@ The value taken will be the first (non-space)word after this column.
 The database ($Script.db) will taken from these locations:
 
     .
-    $HOME/.OpenFOAM/$WM_PROJECT_VERSION
-    $HOME/.OpenFOAM
-    $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION
-    $WM_PROJECT_INST_DIR/site
+    $userDir/$WM_PROJECT_VERSION
+    $userDir
+    $siteDir/$WM_PROJECT_VERSION
+    $siteDir
     $WM_PROJECT_DIR/etc
     $toolsDir
 
