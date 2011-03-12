@@ -141,7 +141,7 @@ Foam::vector Foam::ThermoSurfaceFilm<CloudType>::splashDirection
 template<class CloudType>
 void Foam::ThermoSurfaceFilm<CloudType>::absorbInteraction
 (
-    surfaceFilmModels::surfaceFilmModel& filmModel,
+    regionModels::surfaceFilmModels::surfaceFilmModel& filmModel,
     const parcelType& p,
     const polyPatch& pp,
     const label faceI,
@@ -218,7 +218,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::bounceInteraction
 template<class CloudType>
 void Foam::ThermoSurfaceFilm<CloudType>::drySplashInteraction
 (
-    surfaceFilmModels::surfaceFilmModel& filmModel,
+    regionModels::surfaceFilmModels::surfaceFilmModel& filmModel,
     const parcelType& p,
     const polyPatch& pp,
     const label faceI,
@@ -274,7 +274,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::drySplashInteraction
 template<class CloudType>
 void Foam::ThermoSurfaceFilm<CloudType>::wetSplashInteraction
 (
-    surfaceFilmModels::surfaceFilmModel& filmModel,
+    regionModels::surfaceFilmModels::surfaceFilmModel& filmModel,
     parcelType& p,
     const polyPatch& pp,
     const label faceI,
@@ -331,6 +331,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::wetSplashInteraction
         U = -epsilon*(Un) + 5/7*(Ut);
 
         keepParticle = true;
+        return;
     }
     else if ((We >= 20) && (We < Wec)) // spread - assume absorb
     {
@@ -350,7 +351,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::wetSplashInteraction
 template<class CloudType>
 void Foam::ThermoSurfaceFilm<CloudType>::splashInteraction
 (
-    surfaceFilmModels::surfaceFilmModel& filmModel,
+    regionModels::surfaceFilmModels::surfaceFilmModel& filmModel,
     const parcelType& p,
     const polyPatch& pp,
     const label faceI,
@@ -390,8 +391,8 @@ void Foam::ThermoSurfaceFilm<CloudType>::splashInteraction
     const scalar dBarSplash = 1/cbrt(6.0)*cbrt(mRatio/Ns)*d + ROOTVSMALL;
 
     // cumulative diameter splash distribution
-    const scalar dMin = 0.01*d;
-    const scalar dMax = d;
+    const scalar dMax = cbrt(mRatio)*d;
+    const scalar dMin = 0.001*dMax;
     const scalar K = exp(-dMin/dBarSplash) - exp(-dMax/dBarSplash);
 
     // surface energy of secondary parcels [J]
@@ -567,11 +568,11 @@ bool Foam::ThermoSurfaceFilm<CloudType>::transferParcel
 )
 {
     // Retrieve the film model from the owner database
-    surfaceFilmModels::surfaceFilmModel& filmModel =
-        const_cast<surfaceFilmModels::surfaceFilmModel&>
+    regionModels::surfaceFilmModels::surfaceFilmModel& filmModel =
+        const_cast<regionModels::surfaceFilmModels::surfaceFilmModel&>
         (
             this->owner().db().objectRegistry::template
-                lookupObject<surfaceFilmModels::surfaceFilmModel>
+                lookupObject<regionModels::surfaceFilmModels::surfaceFilmModel>
                 (
                     "surfaceFilmProperties"
                 )
@@ -579,7 +580,7 @@ bool Foam::ThermoSurfaceFilm<CloudType>::transferParcel
 
     const label patchI = pp.index();
 
-    if (filmModel.isFilmPatch(patchI))
+    if (filmModel.isRegionPatch(patchI))
     {
         const label faceI = pp.whichFace(p.face());
 
@@ -627,10 +628,11 @@ bool Foam::ThermoSurfaceFilm<CloudType>::transferParcel
             }
         }
 
+        // transfer parcel/parcel interactions complete
         return true;
     }
 
-    // do not transfer parcel
+    // parcel not interacting with film
     return false;
 }
 
@@ -641,7 +643,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::cacheFilmFields
     const label filmPatchI,
     const label primaryPatchI,
     const mapDistribute& distMap,
-    const surfaceFilmModels::surfaceFilmModel& filmModel
+    const regionModels::surfaceFilmModels::surfaceFilmModel& filmModel
 )
 {
     SurfaceFilmModel<CloudType>::cacheFilmFields
