@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,7 +63,15 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 
         volVectorField U(Uheader, mesh);
 
-        if (isFile(runTime.constantPath()/"thermophysicalProperties"))
+        if
+        (
+            IOobject
+            (
+                "thermophysicalProperties",
+                runTime.constant(),
+                mesh
+            ).headerOk()
+        )
         {
             // thermophysical Mach
             autoPtr<basicPsiThermo> thermo
