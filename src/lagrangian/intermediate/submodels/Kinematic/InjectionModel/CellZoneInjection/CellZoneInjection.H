@@ -117,7 +117,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("CellZoneInjection");
+    TypeName("cellZoneInjection");
 
 
     // Constructors
