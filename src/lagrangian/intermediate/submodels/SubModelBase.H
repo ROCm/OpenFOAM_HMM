@@ -90,6 +90,9 @@ public:
     //- Destructor
     virtual ~SubModelBase();
 
+    //- Type of cloud this model was instantiated for
+    typedef CloudType cloudType;
+
 
     // Member Functions
 
