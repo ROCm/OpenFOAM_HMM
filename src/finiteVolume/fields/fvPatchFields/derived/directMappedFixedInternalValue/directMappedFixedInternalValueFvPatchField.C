@@ -109,12 +109,9 @@ void Foam::directMappedFixedInternalValueFvPatchField<Type>::updateCoeffs()
     // Get the coupling information from the directMappedPatchBase
     const directMappedPatchBase& mpp =
         refCast<const directMappedPatchBase>(this->patch().patch());
-    const polyMesh& nbrMesh = mpp.sampleMesh();
-    const fvPatch& nbrPatch =
-        refCast<const fvMesh>
-        (
-            nbrMesh
-        ).boundary()[mpp.samplePolyPatch().index()];
+    const fvMesh& nbrMesh = refCast<const fvMesh>(mpp.sampleMesh());
+    const label samplePatchI = mpp.samplePolyPatch().index();
+    const fvPatch& nbrPatch = nbrMesh.boundary()[samplePatchI];
 
     // Force recalculation of mapping and schedule
     const mapDistribute& distMap = mpp.map();
@@ -127,7 +124,7 @@ void Foam::directMappedFixedInternalValueFvPatchField<Type>::updateCoeffs()
         );
 
     // Retrieve the neighbour patch internal field
-    Field<Type> nbrIntFld = nbrField.patchInternalField();
+    Field<Type> nbrIntFld(nbrField.patchInternalField());
     mapDistribute::distribute
     (
         Pstream::defaultCommsType,

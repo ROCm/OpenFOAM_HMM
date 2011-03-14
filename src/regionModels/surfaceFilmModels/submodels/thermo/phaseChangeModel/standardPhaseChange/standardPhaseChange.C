@@ -121,10 +121,10 @@ void standardPhaseChange::correct
     const scalarField& rhoInf = film.rhoPrimary();
     const scalarField& muInf = film.muPrimary();
     const scalarField& magSf = film.magSf();
-    const scalarField hInf = film.htcs().h();
-    const scalarField hFilm = film.htcw().h();
-    const vectorField dU = film.UPrimary() - film.Us();
-    const scalarField availableMass = (delta - deltaMin_)*rho*magSf;
+    const scalarField hInf(film.htcs().h());
+    const scalarField hFilm(film.htcw().h());
+    const vectorField dU(film.UPrimary() - film.Us());
+    const scalarField availableMass((delta - deltaMin_)*rho*magSf);
 
 
     forAll(dMass, cellI)
