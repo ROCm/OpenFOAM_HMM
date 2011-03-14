@@ -1,6 +1,7 @@
 Info<< "\nConstructing surface film model" << endl;
 
-autoPtr<surfaceFilmModels::surfaceFilmModel>
-    tsurfaceFilm(surfaceFilmModels::surfaceFilmModel::New(mesh, g));
-surfaceFilmModels::surfaceFilmModel& surfaceFilm = tsurfaceFilm();
+typedef regionModels::surfaceFilmModels::surfaceFilmModel filmModelType;
+
+autoPtr<filmModelType> tsurfaceFilm(filmModelType::New(mesh, g));
+filmModelType& surfaceFilm = tsurfaceFilm();
 

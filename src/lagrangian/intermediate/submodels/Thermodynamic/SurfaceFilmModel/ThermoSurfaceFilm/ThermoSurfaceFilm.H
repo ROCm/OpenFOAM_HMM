@@ -104,7 +104,7 @@ protected:
         const SLGThermo& thermo_;
 
 
-       // Cached injector fields per film patch
+        // Cached injector fields per film patch
 
             //- Film temperature / patch face
             scalarList TFilmPatch_;
@@ -168,7 +168,7 @@ protected:
             //- Absorb parcel into film
             void absorbInteraction
             (
-                surfaceFilmModels::surfaceFilmModel& filmModel,
+                regionModels::surfaceFilmModels::surfaceFilmModel& filmModel,
                 const parcelType& p,
                 const polyPatch& pp,
                 const label faceI,
@@ -188,7 +188,7 @@ protected:
             //- Parcel interaction with dry surface
             void drySplashInteraction
             (
-                surfaceFilmModels::surfaceFilmModel& filmModel,
+                regionModels::surfaceFilmModels::surfaceFilmModel& filmModel,
                 const parcelType& p,
                 const polyPatch& pp,
                 const label faceI,
@@ -198,7 +198,7 @@ protected:
             //- Parcel interaction with wetted surface
             void wetSplashInteraction
             (
-                surfaceFilmModels::surfaceFilmModel& filmModel,
+                regionModels::surfaceFilmModels::surfaceFilmModel& filmModel,
                 parcelType& p,
                 const polyPatch& pp,
                 const label faceI,
@@ -208,7 +208,7 @@ protected:
             //- Bai parcel splash interaction model
             void splashInteraction
             (
-                surfaceFilmModels::surfaceFilmModel& filmModel,
+                regionModels::surfaceFilmModels::surfaceFilmModel& filmModel,
                 const parcelType& p,
                 const polyPatch& pp,
                 const label faceI,
@@ -228,7 +228,8 @@ protected:
                 const label filmPatchI,
                 const label primaryPatchI,
                 const mapDistribute& distMap,
-                const surfaceFilmModels::surfaceFilmModel& filmModel
+                const regionModels::surfaceFilmModels::surfaceFilmModel&
+                    filmModel
             );
 
             //- Set the individual parcel properties
@@ -247,7 +248,7 @@ public:
 
     // Constructors
 
-         //- Construct from components
+        //- Construct from components
         ThermoSurfaceFilm
         (
             const dictionary& dict,
