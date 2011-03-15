@@ -490,13 +490,13 @@ void Foam::conformalVoronoiMesh::createFeaturePoints()
 {
     Info<< nl << "Creating bounding points" << endl;
 
-    pointField farPts = geometryToConformTo_.bounds().points();
+    pointField farPts = geometryToConformTo_.globalBounds().points();
 
     // Shift corners of bounds relative to origin
     farPts -= geometryToConformTo_.bounds().midpoint();
 
     // Scale the box up
-    farPts *= 10.0;
+    farPts *= 2.0;
 
     // Shift corners of bounds back to be relative to midpoint
     farPts += geometryToConformTo_.bounds().midpoint();
@@ -1096,7 +1096,6 @@ bool Foam::conformalVoronoiMesh::ownerAndNeighbour
     bool reverse = false;
 
     owner = -1;
-
     neighbour = -1;
 
     label dualCellIndexA = vA->index();

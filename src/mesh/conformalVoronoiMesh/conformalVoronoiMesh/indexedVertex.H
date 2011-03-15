@@ -64,8 +64,10 @@ class indexedVertex
         //                         Lowest numbered is inside one (master).
         int type_;
 
+        // Required alignment of the dual cell of this vertex
         Foam::tensor alignment_;
 
+        // Target size of the dual cell of this vertex
         Foam::scalar targetCellSize_;
 
 
@@ -202,6 +204,20 @@ public:
     inline bool referred() const
     {
         return type_ < 0 && type_ > ptFarPoint;
+    }
+
+
+    // is this a referred internal or boundary vertex
+    inline bool referredInternal() const
+    {
+        return referred() && index_ >= 0 ;
+    }
+
+
+    // is this a referred external (pair slave) vertex
+    inline bool referredExternal() const
+    {
+        return referred() && index_ == -1;
     }
 
 

@@ -29,7 +29,6 @@ License
 #include "zeroGradientPointPatchField.H"
 #include "pointMesh.H"
 #include "pointFields.H"
-#include "wallPolyPatch.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -210,9 +209,11 @@ void Foam::conformalVoronoiMesh::writeMesh
         faceList faces;
         labelList owner;
         labelList neighbour;
+        wordList patchTypes;
         wordList patchNames;
         labelList patchSizes;
         labelList patchStarts;
+        labelList procNeighbours;
         pointField cellCentres;
 
         calcDualMesh
@@ -221,9 +222,11 @@ void Foam::conformalVoronoiMesh::writeMesh
             faces,
             owner,
             neighbour,
+            patchTypes,
             patchNames,
             patchSizes,
             patchStarts,
+            procNeighbours,
             cellCentres,
             filterFaces
         );
@@ -238,9 +241,11 @@ void Foam::conformalVoronoiMesh::writeMesh
             faces,
             owner,
             neighbour,
+            patchTypes,
             patchNames,
             patchSizes,
             patchStarts,
+            procNeighbours,
             cellCentres
         );
     }
@@ -255,9 +260,11 @@ void Foam::conformalVoronoiMesh::writeMesh
     faceList& faces,
     labelList& owner,
     labelList& neighbour,
+    wordList& patchTypes,
     wordList& patchNames,
     labelList& patchSizes,
     labelList& patchStarts,
+    labelList& procNeighbours,
     const pointField& cellCentres
 ) const
 {
@@ -266,7 +273,7 @@ void Foam::conformalVoronoiMesh::writeMesh
         writeObjMesh(points, faces, word(meshName + ".obj"));
     }
 
-    fvMesh mesh
+    polyMesh mesh
     (
         IOobject
         (
@@ -282,22 +289,43 @@ void Foam::conformalVoronoiMesh::writeMesh
         xferMove(neighbour)
     );
 
+
     List<polyPatch*> patches(patchStarts.size());
 
-    forAll (patches, p)
+    forAll(patches, p)
     {
-        patches[p] = polyPatch::New
-        (
-            wallPolyPatch::typeName,
-            patchNames[p],
-            patchSizes[p],
-            patchStarts[p],
-            p,
-            mesh.boundaryMesh()
-        ).ptr();
+        if (patchTypes[p] == processorPolyPatch::typeName)
+        {
+            patches[p] = new processorPolyPatch
+            (
+                patchNames[p],
+                patchSizes[p],
+                patchStarts[p],
+                p,
+                mesh.boundaryMesh(),
+                Pstream::myProcNo(),
+                procNeighbours[p]
+            );
+        }
+        else
+        {
+            patches[p] = polyPatch::New
+            (
+                patchTypes[p],
+                patchNames[p],
+                patchSizes[p],
+                patchStarts[p],
+                p,
+                mesh.boundaryMesh()
+            ).ptr();
+        }
     }
 
-    mesh.addFvPatches(patches);
+    Info<< "addPatches(patches, false); FALSE REQUIRED TO AVOID MEMORY CRASH"
+        << endl;
+
+    // mesh.addPatches(patches);
+    mesh.addPatches(patches, false);
 
     if (!mesh.write())
     {
@@ -312,7 +340,7 @@ void Foam::conformalVoronoiMesh::writeMesh
     //     (
     //         "cellCentres",
     //         mesh.pointsInstance(),
-    //         fvMesh::meshSubDir,
+    //         polyMesh::meshSubDir,
     //         mesh,
     //         IOobject::NO_READ,
     //         IOobject::AUTO_WRITE
@@ -327,9 +355,12 @@ void Foam::conformalVoronoiMesh::writeMesh
 
     // cellCs.write();
 
-    writeCellSizes(mesh);
 
-    findRemainingProtrusionSet(mesh);
+    Info<< "DISABLED WRITING OF CELL SIZE AND PROTRUSION SET" << endl;
+
+    // writeCellSizes(mesh);
+
+    // findRemainingProtrusionSet(mesh);
 }
 
 

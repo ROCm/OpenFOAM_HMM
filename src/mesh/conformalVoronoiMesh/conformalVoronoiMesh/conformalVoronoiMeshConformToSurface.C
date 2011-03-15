@@ -257,6 +257,10 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                                 std::back_inserter(incidentVertices)
                             );
 
+                            // std::cout<< "incidentVertices.size() "
+                            //     << incidentVertices.size()
+                            //     << std::endl;
+
                             for
                             (
                                 std::list<Vertex_handle>::iterator ivit =
@@ -265,23 +269,146 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                                 ++ivit
                             )
                             {
-                                label ivIndex = (*ivit)->index();
+                                // std::cout<< "ivit i t m s "
+                                //     << (*ivit)->index() << " "
+                                //     << (*ivit)->type() << " "
+                                //     << (*ivit)->ppMaster() << " "
+                                //     << (*ivit)->ppSlave()
+                                //     << std::endl;
 
-                                DynamicList<label>& iVertexToProc =
-                                    verticesToProc[ivIndex];
-
-                                if (findIndex(iVertexToProc, toProc) == -1)
+                                if (!(*ivit)->farPoint())
                                 {
-                                    iVertexToProc.append(toProc);
+                                    label ivIndex = (*ivit)->index();
+
+                                    DynamicList<label>& iVertexToProc =
+                                        verticesToProc[ivIndex];
+
+                                    if (findIndex(iVertexToProc, toProc) == -1)
+                                    {
+                                        iVertexToProc.append(toProc);
+                                    }
+
+                                    // std::cout<< "    insert ivit i t m s "
+                                    //     << (*ivit)->index() << " "
+                                    //     << (*ivit)->type() << " "
+                                    //     << (*ivit)->ppMaster() << " "
+                                    //     << (*ivit)->ppSlave()
+                                    //     << std::endl;
+
+                                    // // Refer all incident-incident vertices
+                                    // // to neighbour processor too
+                                    // std::list<Vertex_handle>
+                                    //     incidentIncidentVertices;
+
+                                    // incident_vertices
+                                    // (
+                                    //     (*ivit),
+                                    //     std::back_inserter
+                                    //     (
+                                    //         incidentIncidentVertices
+                                    //     )
+                                    // );
+
+                                    // for
+                                    // (
+                                    //     std::list<Vertex_handle>::iterator
+                                    //         iivit =
+                                    //         incidentIncidentVertices.begin();
+                                    // iivit != incidentIncidentVertices.end();
+                                    //     ++iivit
+                                    // )
+                                    // {
+                                    //     if (!(*iivit)->farPoint())
+                                    //     {
+                                    //     label iivIndex = (*iivit)->index();
+
+                                    //     DynamicList<label>& iiVertexToProc =
+                                    //             verticesToProc[iivIndex];
+
+                                    //         if
+                                    //         (
+                                    //             findIndex
+                                    //             (
+                                    //                 iiVertexToProc,
+                                    //                 toProc
+                                    //             ) == -1
+                                    //         )
+                                    //         {
+                                    //         iiVertexToProc.append(toProc);
+                                    //         }
+                                    //     }
+                                    // }
                                 }
                             }
                         }
                     }
+
+                    // if (!toProcs.empty())
+                    // {
+                    //     for (label toProc = 0; toProc < 8; toProc++)
+                    //     {
+                    //         if (toProc == Pstream::myProcNo())
+                    //         {
+                    //             continue;
+                    //         }
+
+                    //         if (findIndex(vertexToProc, toProc) == -1)
+                    //         {
+                    //             vertexToProc.append(toProc);
+                    //         }
+
+                    //         // Refer all incident vertices to neighbour
+                    //         // processor too
+                    //         std::list<Vertex_handle> incidentVertices;
+
+                    //         incident_vertices
+                    //         (
+                    //             vit,
+                    //             std::back_inserter(incidentVertices)
+                    //         );
+
+                    //         // std::cout<< "incidentVertices.size() "
+                    //         //     << incidentVertices.size()
+                    //         //     << std::endl;
+
+                    //         for
+                    //         (
+                    //             std::list<Vertex_handle>::iterator ivit =
+                    //                 incidentVertices.begin();
+                    //             ivit != incidentVertices.end();
+                    //             ++ivit
+                    //         )
+                    //         {
+                    //             if (!(*ivit)->farPoint())
+                    //             {
+                    //                 label ivIndex = (*ivit)->index();
+
+                    //                 DynamicList<label>& iVertexToProc =
+                    //                     verticesToProc[ivIndex];
+
+                                    // if
+                                    // (
+                                    //     findIndex
+                                    //     (
+                                    //         iVertexToProc,
+                                    //         toProc
+                                    //     ) == -1
+                                    // )
+                                    // {
+                                    //     iVertexToProc.append(toProc);
+                                    // }
+                    //             }
+                    //         }
+                    //     }
+                    // }
                 }
             }
 
+            // Info<< "REFERRING ALL POINTS EVERYWHERE" << endl;
+
             DynamicList<Foam::point> parallelInterfacePoints;
             DynamicList<label> targetProcessor;
+            DynamicList<label> parallelInterfaceIndices;
 
             for
             (
@@ -291,29 +418,39 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                 vit++
             )
             {
-                if (vit->internalOrBoundaryPoint())
+                // If a vertex has been marked to go to another processor,
+                // then send it
+
+                label vIndex = vit->index();
+
+                const DynamicList<label>& vertexToProc =
+                verticesToProc[vIndex];
+
+                if (!verticesToProc.empty())
                 {
-                    label vIndex = vit->index();
-
-                    const DynamicList<label>& vertexToProc =
-                        verticesToProc[vIndex];
-
-                    if (!verticesToProc.empty())
+                    forAll(vertexToProc, vTPI)
                     {
-                        forAll(vertexToProc, vTPI)
-                        {
-                            parallelInterfacePoints.append
-                            (
-                                topoint(vit->point())
-                            );
+                        parallelInterfacePoints.append(topoint(vit->point()));
 
-                            targetProcessor.append(vertexToProc[vTPI]);
+                        targetProcessor.append(vertexToProc[vTPI]);
+
+                        if (vit->internalOrBoundaryPoint())
+                        {
+                            parallelInterfaceIndices.append(vit->index());
+                        }
+                        else
+                        {
+                            parallelInterfaceIndices.append(-1);
                         }
                     }
                 }
             }
 
-            writePoints("parallelInterfacePoints.obj", parallelInterfacePoints);
+            writePoints
+            (
+                "parallelInterfacePointsToSend.obj",
+                parallelInterfacePoints
+            );
 
             // Determine send map
             // ~~~~~~~~~~~~~~~~~~
@@ -396,6 +533,14 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
             pointMap.distribute(parallelInterfacePoints);
 
+            pointMap.distribute(parallelInterfaceIndices);
+
+            writePoints
+            (
+                "parallelInterfacePointsReceived.obj",
+                parallelInterfacePoints
+            );
+
             for (label domain = 0; domain < Pstream::nProcs(); domain++)
             {
                 const labelList& constructMap =
@@ -405,11 +550,26 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                 {
                     forAll(constructMap, i)
                     {
-                        insertPoint
-                        (
-                            parallelInterfacePoints[constructMap[i]],
-                           -(domain + 1)
-                        );
+                        label encodedDomain = -(domain + 1);
+
+                        if (parallelInterfaceIndices[constructMap[i]] >= 0)
+                        {
+                            insertPoint
+                            (
+                                parallelInterfacePoints[constructMap[i]],
+                                parallelInterfaceIndices[constructMap[i]],
+                                encodedDomain
+                            );
+                        }
+                        else
+                        {
+                            insertPoint
+                            (
+                                parallelInterfacePoints[constructMap[i]],
+                                -1,
+                                encodedDomain
+                            );
+                        }
                     }
                 }
             }
@@ -418,7 +578,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
             nIter++;
 
-        } while (totalInterfacePoints > 0 && nIter < 3);
+        } while (totalInterfacePoints > 0 && nIter < -1);
     }
 
     label iterationNo = 0;

@@ -65,6 +65,8 @@ SourceFiles
 #include "memInfo.H"
 #include "point.H"
 #include "cellSet.H"
+#include "wallPolyPatch.H"
+#include "processorPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -239,6 +241,14 @@ private:
         inline label insertPoint
         (
             const Foam::point& pt,
+            const label type
+        );
+
+        //- Insert point and return its index
+        inline void insertPoint
+        (
+            const Foam::point& pt,
+            const label index,
             const label type
         );
 
@@ -510,24 +520,26 @@ private:
             faceList& faces,
             labelList& owner,
             labelList& neighbour,
+            wordList& patchTypes,
             wordList& patchNames,
             labelList& patchSizes,
             labelList& patchStarts,
+            labelList& procNeighbours,
             pointField& cellCentres,
             bool filterFaces
         );
 
-        //- Tet mesh calculation
-        void calcTetMesh
-        (
-            pointField& points,
-            faceList& faces,
-            labelList& owner,
-            labelList& neighbour,
-            wordList& patchNames,
-            labelList& patchSizes,
-            labelList& patchStarts
-        );
+        // //- Tet mesh calculation
+        // void calcTetMesh
+        // (
+        //     pointField& points,
+        //     faceList& faces,
+        //     labelList& owner,
+        //     labelList& neighbour,
+        //     wordList& patchNames,
+        //     labelList& patchSizes,
+        //     labelList& patchStarts
+        // );
 
         //- Determines if the dual face constructed by the Delaunay
         //  edge is a boundary face
@@ -636,9 +648,11 @@ private:
             faceList& faces,
             labelList& owner,
             labelList& neighbour,
+            wordList& patchTypes,
             wordList& patchNames,
             labelList& patchSizes,
             labelList& patchStarts,
+            labelList& procNeighbours,
             bool includeEmptyPatches = false
         ) const;
 
@@ -658,6 +672,15 @@ private:
             labelList& neighbour
         ) const;
 
+        //- Sort the processor patches so that the faces are in the same order
+        //  on both processors
+        void sortProcPatches
+        (
+            List<DynamicList<face> >& patchFaces,
+            List<DynamicList<label> >& patchOwners,
+            const List<DynamicList<label> >& patchSortingIndices
+        ) const;
+
         //- Add the faces and owner information for the patches,
         //  optionally removing any zero-size patches
         void addPatches
@@ -665,9 +688,11 @@ private:
             const label nInternalFaces,
             faceList& faces,
             labelList& owner,
+            wordList& patchTypes,
             wordList& patchNames,
             labelList& patchSizes,
             labelList& patchStarts,
+            labelList& procNeighbours,
             List<DynamicList<face> >& patchFaces,
             List<DynamicList<label> >& patchOwners,
             bool includeEmptyPatches
@@ -792,9 +817,11 @@ public:
                 faceList& faces,
                 labelList& owner,
                 labelList& neighbour,
+                wordList& patchTypes,
                 wordList& patchNames,
                 labelList& patchSizes,
                 labelList& patchStarts,
+                labelList& procNeighbours,
                 const pointField& cellCentres
             ) const;
 

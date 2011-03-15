@@ -235,6 +235,30 @@ inline Foam::label Foam::conformalVoronoiMesh::insertPoint
 }
 
 
+inline void Foam::conformalVoronoiMesh::insertPoint
+(
+    const Foam::point& p,
+    const label index,
+    const label type
+)
+{
+    uint nVert = number_of_vertices();
+
+    Vertex_handle vh = insert(toPoint(p));
+
+    if (nVert == number_of_vertices())
+    {
+        WarningIn("Foam::conformalVoronoiMesh::insertPoint")
+            << "Failed to insert point " << p << endl;
+    }
+    else
+    {
+        vh->index() = index;
+        vh->type() = type;
+    }
+}
+
+
 inline void Foam::conformalVoronoiMesh::insertPoints
 (
     const std::vector<Point>& points
