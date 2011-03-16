@@ -153,6 +153,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                 );
 
                 // Pout<< "vert " << vert << endl;
+                // Pout<< "    surfHit " << surfHit << endl;
 
                 if (surfHit.hit())
                 {
@@ -178,8 +179,6 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                         );
                     }
                 }
-
-                // Pout<< "    surfHit " << surfHit << endl;
             }
         }
 
@@ -375,7 +374,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                     //         (
                     //             std::list<Vertex_handle>::iterator ivit =
                     //                 incidentVertices.begin();
-                    //             ivit != incidentVertices.end();
+                    //             ivit !=incidentVertices.end();
                     //             ++ivit
                     //         )
                     //         {
@@ -418,29 +417,35 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                 vit++
             )
             {
-                // If a vertex has been marked to go to another processor,
-                // then send it
-
-                label vIndex = vit->index();
-
-                const DynamicList<label>& vertexToProc =
-                verticesToProc[vIndex];
-
-                if (!verticesToProc.empty())
+                if (!vit->referred())
                 {
-                    forAll(vertexToProc, vTPI)
+                    // If a vertex has been marked to go to another processor,
+                    // then send it
+
+                    label vIndex = vit->index();
+
+                    const DynamicList<label>& vertexToProc =
+                        verticesToProc[vIndex];
+
+                    if (!verticesToProc.empty())
                     {
-                        parallelInterfacePoints.append(topoint(vit->point()));
-
-                        targetProcessor.append(vertexToProc[vTPI]);
-
-                        if (vit->internalOrBoundaryPoint())
+                        forAll(vertexToProc, vTPI)
                         {
-                            parallelInterfaceIndices.append(vit->index());
-                        }
-                        else
-                        {
-                            parallelInterfaceIndices.append(-1);
+                            parallelInterfacePoints.append
+                            (
+                                topoint(vit->point())
+                            );
+
+                            targetProcessor.append(vertexToProc[vTPI]);
+
+                            if (vit->internalOrBoundaryPoint())
+                            {
+                                parallelInterfaceIndices.append(vit->index());
+                            }
+                            else
+                            {
+                                parallelInterfaceIndices.append(-1);
+                            }
                         }
                     }
                 }
@@ -448,7 +453,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
             writePoints
             (
-                "parallelInterfacePointsToSend.obj",
+                "parallelInterfacePointsToSend_" + name(nIter) + ".obj",
                 parallelInterfacePoints
             );
 
@@ -537,7 +542,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
             writePoints
             (
-                "parallelInterfacePointsReceived.obj",
+                "parallelInterfacePointsReceived_"+ name(nIter) + ".obj",
                 parallelInterfacePoints
             );
 
@@ -872,7 +877,7 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAnyIntersection
          || is_infinite(fit->first->neighbor(fit->second))
         )
         {
-            return true;
+            continue;
         }
 
         Foam::point dE0 = topoint(dual(fit->first));
@@ -913,7 +918,7 @@ Foam::conformalVoronoiMesh::parallelInterfaceIntersection
          || is_infinite(fit->first->neighbor(fit->second))
         )
         {
-            return procs;
+            continue;
         }
 
         Foam::point dE0 = topoint(dual(fit->first));
@@ -957,7 +962,7 @@ Foam::conformalVoronoiMesh::parallelInterfaceIntersection
             // meshTools::writeOBJ(Pout, dE0);
             // meshTools::writeOBJ(Pout, dE1);
             // meshTools::writeOBJ(Pout, boxPt);
-            // Pout << "l 1 2" << endl;
+            // Pout << "l dE0 dE1" << endl;
         }
     }
 
@@ -1290,7 +1295,7 @@ void Foam::conformalVoronoiMesh::buildEdgeLocationTree
 {
     treeBoundBox overallBb
     (
-        treeBoundBox(geometryToConformTo_.bounds()).extend(rndGen_, 1E-4)
+        geometryToConformTo_.globalBounds().extend(rndGen_, 1E-4)
     );
 
     overallBb.min() -= Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
@@ -1314,7 +1319,7 @@ void Foam::conformalVoronoiMesh::buildSizeAndAlignmentTree() const
 {
     treeBoundBox overallBb
     (
-        treeBoundBox(geometryToConformTo_.bounds()).extend(rndGen_, 1E-4)
+        geometryToConformTo_.globalBounds().extend(rndGen_, 1E-4)
     );
 
     overallBb.min() -= Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);

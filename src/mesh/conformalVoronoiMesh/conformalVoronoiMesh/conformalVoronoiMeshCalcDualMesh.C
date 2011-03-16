@@ -1793,6 +1793,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 {
     patchNames = geometryToConformTo_.patchNames();
     patchTypes.setSize(patchNames.size(), wallPolyPatch::typeName);
+    procNeighbours.setSize(patchNames.size(), -1);
 
     label nProcPatches = 0;
 
@@ -1825,9 +1826,8 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
         label nNonProcPatches = patchNames.size();
 
         patchTypes.setSize(nNonProcPatches + nProcPatches);
+        procNeighbours.setSize(nNonProcPatches + nProcPatches, -1);
         patchNames.setSize(nNonProcPatches + nProcPatches);
-
-        procNeighbours.setSize(patchNames.size() + 1, -1);
 
         label procAddI = 0;
 
@@ -1852,11 +1852,13 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
     }
 
     patchTypes.setSize(patchNames.size() + 1);
+    procNeighbours.setSize(patchNames.size() + 1);
     patchNames.setSize(patchNames.size() + 1);
 
     label defaultPatchIndex = patchNames.size() - 1;
 
     patchTypes[defaultPatchIndex] = wallPolyPatch::typeName;
+    procNeighbours[defaultPatchIndex] = -1;
     patchNames[defaultPatchIndex] = "cvMesh_defaultPatch";
 
     Pout<< patchTypes << " " << patchNames << endl;
