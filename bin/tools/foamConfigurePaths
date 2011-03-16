@@ -37,6 +37,7 @@ usage() {
 usage: ${0##*/}
   --foamInstall dir         specify installation directory (e.g. /opt)
   --projectName name        specify project name (e.g. openfoam170)
+  --projectVersion ver      specify project version (e.g. 1.7.x)
   --archOption  arch        specify architecture option (only 32 or 64 applicable)
   --paraviewInstall dir     specify ParaView_DIR (e.g. /opt/paraviewopenfoam380)
 
@@ -76,7 +77,7 @@ _inlineSed()
 
 [ -f etc/bashrc ] || usage "Please run from top-level directory of installation"
 
-unset foamInstall projectName archOption paraviewInstall
+unset foamInstall projectName projectVersion archOption paraviewInstall
 
 # parse options
 while [ "$#" -gt 0 ]
@@ -102,7 +103,17 @@ do
         _inlineSed \
             etc/bashrc \
             '/^[^#]/s@WM_PROJECT_DIR=.*@WM_PROJECT_DIR=$WM_PROJECT_INST_DIR/'"$projectName@" \
-            "Replacing WM_PROJECT_DIR setting by '$projectName'"
+            "Replacing WM_PROJECT_DIR setting by $projectName"
+        shift 2
+        ;;
+   --projectVersion)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        projectVersion="$2"
+        # replace WM_PROJECT_VERSION=...
+        _inlineSed \
+            etc/bashrc \
+            '/^[^#]/s@WM_PROJECT_VERSION=.*@WM_PROJECT_VERSION='"$projectVersion@" \
+            "Replacing WM_PROJECT_VERSION setting by $projectVersion"
         shift 2
         ;;
     -archOption | --archOption)
@@ -142,10 +153,10 @@ _inlineSed \
     '/^[^#]/s@export WM_MPLIB=.*@export WM_MPLIB=SYSTEMOPENMPI@' \
     "Replacing WM_MPLIB setting by 'SYSTEMOPENMPI'"
 
-# set foamCompiler=system always
-_inlineSed \
-    etc/bashrc \
-    '/^[^#]/s@foamCompiler=.*@foamCompiler=system@' \
-    "Replacing foamCompiler setting by 'system'"
+## set foamCompiler=system always
+#_inlineSed \
+#    etc/bashrc \
+#    '/^[^#]/s@foamCompiler=.*@foamCompiler=system@' \
+#    "Replacing foamCompiler setting by 'system'"
 
 #------------------------------------------------------------------------------
