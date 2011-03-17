@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -231,28 +231,43 @@ void Foam::sampledSets::write()
 void Foam::sampledSets::read(const dictionary& dict)
 {
     dict_ = dict;
-    dict_.lookup("fields") >> fieldSelection_;
-    clearFieldGroups();
 
-    dict.lookup("interpolationScheme") >> interpolationScheme_;
-    dict.lookup("setFormat") >> writeFormat_;
+    bool setsFound = dict_.found("sets");
+    if (setsFound)
+    {
+        dict_.lookup("fields") >> fieldSelection_;
+        clearFieldGroups();
 
-    PtrList<sampledSet> newList
-    (
-        dict_.lookup("sets"),
-        sampledSet::iNew(mesh_, searchEngine_)
-    );
-    transfer(newList);
-    combineSampledSets(masterSampledSets_, indexSets_);
+        dict.lookup("interpolationScheme") >> interpolationScheme_;
+        dict.lookup("setFormat") >> writeFormat_;
+
+        PtrList<sampledSet> newList
+        (
+            dict_.lookup("sets"),
+            sampledSet::iNew(mesh_, searchEngine_)
+        );
+        transfer(newList);
+        combineSampledSets(masterSampledSets_, indexSets_);
+
+        if (this->size())
+        {
+            Info<< "Reading set description:" << nl;
+            forAll(*this, setI)
+            {
+                Info<< "    " << operator[](setI).name() << nl;
+            }
+            Info<< endl;
+        }
+    }
 
     if (Pstream::master() && debug)
     {
         Pout<< "sample fields:" << fieldSelection_ << nl
             << "sample sets:" << nl << "(" << nl;
 
-        forAll(*this, si)
+        forAll(*this, setI)
         {
-            Pout<< "  " << operator[](si) << endl;
+            Pout<< "  " << operator[](setI) << endl;
         }
         Pout<< ")" << endl;
     }
@@ -261,19 +276,23 @@ void Foam::sampledSets::read(const dictionary& dict)
 
 void Foam::sampledSets::correct()
 {
-    // reset interpolation
-    pointMesh::Delete(mesh_);
-    volPointInterpolation::Delete(mesh_);
+    bool setsFound = dict_.found("sets");
+    if (setsFound)
+    {
+        // reset interpolation
+        pointMesh::Delete(mesh_);
+        volPointInterpolation::Delete(mesh_);
 
-    searchEngine_.correct();
+        searchEngine_.correct();
 
-    PtrList<sampledSet> newList
-    (
-        dict_.lookup("sets"),
-        sampledSet::iNew(mesh_, searchEngine_)
-    );
-    transfer(newList);
-    combineSampledSets(masterSampledSets_, indexSets_);
+        PtrList<sampledSet> newList
+        (
+            dict_.lookup("sets"),
+            sampledSet::iNew(mesh_, searchEngine_)
+        );
+        transfer(newList);
+        combineSampledSets(masterSampledSets_, indexSets_);
+    }
 }
 
 
