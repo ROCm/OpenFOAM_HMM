@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,10 +35,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const char* Foam::meshReaders::STARCD::defaultBoundaryName =
+const char* const Foam::meshReaders::STARCD::defaultBoundaryName =
     "Default_Boundary_Region";
 
-const char* Foam::meshReaders::STARCD::defaultSolidBoundaryName =
+const char* const Foam::meshReaders::STARCD::defaultSolidBoundaryName =
     "Default_Boundary_Solid";
 
 bool Foam::meshReaders::STARCD::keepSolids = false;

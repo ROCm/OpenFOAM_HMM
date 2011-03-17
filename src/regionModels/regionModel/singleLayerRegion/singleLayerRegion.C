@@ -111,12 +111,14 @@ void Foam::regionModels::singleLayerRegion::initialise()
 
     if (nBoundaryFaces != regionMesh().nCells())
     {
+        /*
         FatalErrorIn("singleLayerRegion::initialise()")
             << "Number of primary region coupled boundary faces not equal to "
             << "the number of cells in the local region" << nl << nl
             << "Number of cells = " << regionMesh().nCells() << nl
             << "Boundary faces  = " << nBoundaryFaces << nl
             << abort(FatalError);
+        */
     }
 
     scalarField passiveMagSf(magSf.size(), 0.0);
@@ -176,11 +178,12 @@ Foam::regionModels::singleLayerRegion::singleLayerRegion
     bool readFields
 )
 :
-    regionModel(mesh, regionType, modelName, false),
+    regionModel(mesh, regionType, modelName, readFields),
     nHatPtr_(NULL),
     magSfPtr_(NULL),
     passivePatchIDs_()
 {
+    Info << "singleLayerRegion" << endl;
     if (active_)
     {
         constructMeshObjects();
