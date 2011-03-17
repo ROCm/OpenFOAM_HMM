@@ -130,7 +130,7 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
 )
 :
     PatchInteractionModel<CloudType>(dict, cloud, typeName),
-    patchData_(cloud.mesh(), this->coeffDict().lookup("patches")),
+    patchData_(cloud.mesh(), this->coeffDict()),
     patchIDs_(patchData_.size()),
     nEscape0_(patchData_.size(), 0),
     massEscape0_(patchData_.size(), 0.0),
