@@ -19,9 +19,6 @@ interpolationScheme cellPoint;
 
 setFormat       raw;
 
-surfaceFormat   dx;
-surfaces        ();
-
 sets
 (
     data
