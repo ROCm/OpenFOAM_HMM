@@ -491,10 +491,6 @@ public:
 
     // Transformations
 
-        //- Transform the position the particle
-        //  according to the given transformation tensor
-        virtual void transformPosition(const tensor& T);
-
         //- Transform the physical properties of the particle
         //  according to the given transformation tensor
         virtual void transformProperties(const tensor& T);

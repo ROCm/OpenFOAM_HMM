@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -93,12 +93,12 @@ protected:
         virtual void calcGeometry
         (
             const primitivePatch& referPatch,
-            const UList<point>& thisCtrs,
-            const UList<point>& thisAreas,
-            const UList<point>& thisCc,
-            const UList<point>& nbrCtrs,
-            const UList<point>& nbrAreas,
-            const UList<point>& nbrCc
+            const pointField& thisCtrs,
+            const vectorField& thisAreas,
+            const pointField& thisCc,
+            const pointField& nbrCtrs,
+            const vectorField& nbrAreas,
+            const pointField& nbrCc
         )
         {
             notImplemented("processorPolyPatch::calcGeometry(..)");
@@ -298,6 +298,10 @@ public:
 
         //- Transform a patch-based position from other side to this side
         virtual void transformPosition(pointField& l) const
+        {}
+
+        //- Transform a patch-based position from other side to this side
+        virtual void transformPosition(point&, const label facei) const
         {}
 
         //- Initialize ordering for primitivePatch. Does not
