@@ -8,14 +8,14 @@
 FoamFile
 {
     version     2.0;
-    format      binary;
+    format      ascii;
     class       dictionary;
     location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     rhoPorousSimpleFoam;
+application     rhoPorousMRFSimpleFoam;
 
 startFrom       startTime;
 
@@ -23,17 +23,17 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         100;
+endTime         1000;
 
 deltaT          1;
 
 writeControl    timeStep;
 
-writeInterval   10;
+writeInterval   100;
 
 purgeWrite      0;
 
-writeFormat     binary;
+writeFormat     ascii;
 
 writePrecision  6;
 
@@ -58,7 +58,7 @@ functions
 
         maxResiduals
         {
-            p       1e-3;
+            p       1e-2;
             U       1e-4;
             T       1e-3;
 

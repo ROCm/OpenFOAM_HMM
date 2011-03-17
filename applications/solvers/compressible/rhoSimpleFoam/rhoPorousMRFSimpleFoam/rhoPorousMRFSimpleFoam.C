@@ -26,13 +26,15 @@ Application
 
 Description
     Steady-state solver for turbulent flow of compressible fluids with
-    RANS turbulence modelling, and implicit or explicit porosity treatment
+    RANS turbulence modelling, implicit or explicit porosity treatment
+    and MRF for HVAC and similar applications.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "basicPsiThermo.H"
 #include "RASModel.H"
+#include "MRFZones.H"
 #include "thermalPorousZones.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -43,7 +45,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
     #include "createFields.H"
-    #include "createPorousZones.H"
+    #include "createZones.H"
     #include "initContinuityErrs.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

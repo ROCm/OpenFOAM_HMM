@@ -1,3 +1,6 @@
+    MRFZones mrfZones(mesh);
+    mrfZones.correctBoundaryVelocity(U);
+
     thermalPorousZones pZones(mesh);
     Switch pressureImplicitPorosity(false);
 
@@ -24,4 +27,3 @@
             Info<< "Using pressure explicit porosity" << endl;
         }
     }
-

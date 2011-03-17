@@ -8,6 +8,8 @@
 
     UEqn().relax();
 
+    mrfZones.addCoriolis(rho, UEqn());
+
     // Include the porous media resistance and solve the momentum equation
     // either implicit in the tensorial resistance or transport using by
     // including the spherical part of the resistance in the momentum diagonal
