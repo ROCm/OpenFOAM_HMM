@@ -1105,18 +1105,33 @@ int Foam::system(const std::string& command)
 
 void* Foam::dlOpen(const fileName& lib)
 {
+    if (POSIX::debug)
+    {
+        Info<< "dlOpen(const fileName&)"
+            << " : dlopen of " << lib << endl;
+    }
     return ::dlopen(lib.c_str(), RTLD_LAZY|RTLD_GLOBAL);
 }
 
 
 bool Foam::dlClose(void* handle)
 {
+    if (POSIX::debug)
+    {
+        Info<< "dlClose(void*)"
+            << " : dlclose" << endl;
+    }
     return ::dlclose(handle) == 0;
 }
 
 
 void* Foam::dlSym(void* handle, const std::string& symbol)
 {
+    if (POSIX::debug)
+    {
+        Info<< "dlSym(void*, const std::string&)"
+            << " : dlsym of " << symbol << endl;
+    }
     // clear any old errors - see manpage dlopen
     (void) ::dlerror();
 
@@ -1141,6 +1156,12 @@ bool Foam::dlSymFound(void* handle, const std::string& symbol)
 {
     if (handle && !symbol.empty())
     {
+        if (POSIX::debug)
+        {
+            Info<< "dlSymFound(void*, const std::string&)"
+                << " : dlsym of " << symbol << endl;
+        }
+
         // clear any old errors - see manpage dlopen
         (void) ::dlerror();
 

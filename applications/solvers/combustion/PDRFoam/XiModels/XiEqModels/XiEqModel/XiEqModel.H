@@ -62,13 +62,29 @@ protected:
 
     // Protected data
 
+        //- Dictionary
         dictionary XiEqModelCoeffs_;
 
+        //- Thermo
         const hhuCombustionThermo& thermo_;
+
+        //- Turbulence
         const compressible::RASModel& turbulence_;
+
+        //- Laminar burning velocity
         const volScalarField& Su_;
+
+        //- Volumetric obstacles number
         volScalarField Nv_;
+
+        //
         volSymmTensorField nsv_;
+
+        //- Schelkin effect Model constant
+        scalar uPrimeCoef_;
+
+        //- Use sub-grid Schelkin effect
+        bool subGridSchelkin_;
 
 
 private:
@@ -145,6 +161,15 @@ public:
         {
             return turbulence_.muEff();
         }
+
+        //- Return state of the sub-grid Schelkin effect
+        bool subGridSchelkin() const
+        {
+            return subGridSchelkin_;
+        }
+
+        //- Return the sub-grid Schelkin effect
+        tmp<volScalarField> calculateSchelkinEffect() const;
 
         //- Update properties from given dictionary
         virtual bool read(const dictionary& XiEqProperties) = 0;

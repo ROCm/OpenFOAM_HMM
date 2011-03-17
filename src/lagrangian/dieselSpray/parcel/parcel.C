@@ -281,7 +281,7 @@ bool Foam::parcel::move(trackingData& td, const scalar trackTime)
         sDB.shs()[cellI] += oTotMass*(oH + oPE) - m()*(nH + nPE);
 
         // Remove evaporated mass from stripped mass
-        ms() -= ms()*(oTotMass-m())/oTotMass;
+        ms() -= ms()*(oTotMass - m())/oTotMass;
 
         // remove parcel if it is 'small'
         if (m() < 1.0e-12)

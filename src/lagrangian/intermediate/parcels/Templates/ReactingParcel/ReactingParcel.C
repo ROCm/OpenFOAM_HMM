@@ -391,8 +391,6 @@ void Foam::ReactingParcel<ParcelType>::calc
         {
             label gid = td.cloud().composition().localToGlobalCarrierId(0, i);
             td.cloud().rhoTrans(gid)[cellI] += np0*dMassPC[i];
-            td.cloud().hsTrans()[cellI] +=
-                np0*dMassPC[i]*td.cloud().composition().carrier().Hs(gid, T0);
         }
 
         // Update momentum transfer

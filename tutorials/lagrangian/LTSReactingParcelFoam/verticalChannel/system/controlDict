@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     steadyReactingParcelFoam;
+application     LTSReactingParcelFoam;
 
 startFoam       latestTime;
 
@@ -23,7 +23,7 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         5000;
+endTime         300;
 
 deltaT          1;
 

@@ -32,7 +32,7 @@ Description
       - number of parcels to inject per injector
       - parcel velocities
       - inner and outer cone angles
-    - Parcel diameters obtained by distribution model model
+    - Parcel diameters obtained by distribution model
 
 SourceFiles
     ConeInjection.C
@@ -97,7 +97,7 @@ class ConeInjection
         //- Outer cone angle relative to SOI [deg]
         const autoPtr<DataEntry<scalar> > thetaOuter_;
 
-        //- Parcel size distribution model model
+        //- Parcel size distribution model
         const autoPtr<distributionModels::distributionModel> sizeDistribution_;
 
         //- Number of parcels per injector already injected
