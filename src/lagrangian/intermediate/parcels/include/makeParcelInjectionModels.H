@@ -28,6 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "CellZoneInjection.H"
 #include "ConeInjection.H"
 #include "FieldActivatedInjection.H"
 #include "InflationInjection.H"
@@ -43,6 +44,7 @@ License
                                                                               \
     makeInjectionModel(CloudType);                                            \
                                                                               \
+    makeInjectionModelType(CellZoneInjection, CloudType);                     \
     makeInjectionModelType(ConeInjection, CloudType);                         \
     makeInjectionModelType(FieldActivatedInjection, CloudType);               \
     makeInjectionModelType(InflationInjection, CloudType);                    \

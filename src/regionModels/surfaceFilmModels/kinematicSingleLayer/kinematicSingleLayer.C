@@ -899,9 +899,11 @@ scalar kinematicSingleLayer::CourantNumber() const
     {
         const scalar deltaT = time_.deltaTValue();
 
-        const surfaceScalarField SfUfbyDelta =
-            regionMesh().surfaceInterpolation::deltaCoeffs()*mag(phi_);
-        const surfaceScalarField rhoDelta = fvc::interpolate(rho_*delta_);
+        const surfaceScalarField SfUfbyDelta
+        (
+            regionMesh().surfaceInterpolation::deltaCoeffs()*mag(phi_)
+        );
+        const surfaceScalarField rhoDelta(fvc::interpolate(rho_*delta_));
         const surfaceScalarField& magSf = regionMesh().magSf();
 
         forAll(rhoDelta, i)

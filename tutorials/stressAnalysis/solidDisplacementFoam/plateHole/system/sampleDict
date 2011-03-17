@@ -17,8 +17,6 @@ FoamFile
 
 interpolationScheme cellPoint;
 
-setFormat       raw;
-
 sets
 (
     leftPatch
@@ -30,8 +28,6 @@ sets
         nPoints 100;
     }
 );
-
-surfaces        ();
 
 fields          ( sigmaxx );
 

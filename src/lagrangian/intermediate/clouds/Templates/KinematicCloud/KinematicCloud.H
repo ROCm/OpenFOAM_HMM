@@ -99,8 +99,14 @@ public:
 
     // Public typedefs
 
-        //- Redefine particle type as parcel type
+        //- Type of cloud this cloud was instantiated for
+        typedef CloudType cloudType;
+
+        //- Type of parcel the cloud was instantiated for
         typedef typename CloudType::particleType parcelType;
+
+        //- Convenience typedef for this cloud type
+        typedef KinematicCloud<CloudType> kinematicCloudType;
 
         //- Force type
         typedef ParticleForceList<KinematicCloud<CloudType> > forceType;
@@ -243,8 +249,6 @@ protected:
 
 
 public:
-
-    typedef CloudType cloudType;
 
     // Constructors
 

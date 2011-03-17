@@ -115,10 +115,10 @@ void htcConvFvPatchScalarField::updateCoeffs()
     const vectorField& Uc = rasModel.U();
     const vectorField& Uw = rasModel.U().boundaryField()[patchI];
     const scalarField& Tw = rasModel.thermo().T().boundaryField()[patchI];
-    const scalarField Cpw = rasModel.thermo().Cp(Tw, patchI);
+    const scalarField Cpw(rasModel.thermo().Cp(Tw, patchI));
 
-    const scalarField kappaw = Cpw*alphaEffw;
-    const scalarField Pr = muw*Cpw/kappaw;
+    const scalarField kappaw(Cpw*alphaEffw);
+    const scalarField Pr(muw*Cpw/kappaw);
 
     scalarField& htc = *this;
     forAll(htc, faceI)

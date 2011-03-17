@@ -33,7 +33,7 @@ Description
 #define LocalInteraction_H
 
 #include "PatchInteractionModel.H"
-#include "patchInteractionData.H"
+#include "patchInteractionDataList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,10 +51,10 @@ class LocalInteraction
     // Private data
 
         //- List of participating patches
-        const List<patchInteractionData> patchData_;
+        const patchInteractionDataList patchData_;
 
         //- List of participating patch ids
-        List<label> patchIds_;
+        List<label> patchIDs_;
 
 
         // Counters for initial particle fates

@@ -69,8 +69,16 @@ class ReactingMultiphaseCloud
 {
 public:
 
-    //- Type of parcel the cloud was instantiated for
-    typedef typename CloudType::particleType parcelType;
+    // Public typedefs
+
+        //- Type of cloud this cloud was instantiated for
+        typedef CloudType cloudType;
+
+        //- Type of parcel the cloud was instantiated for
+        typedef typename CloudType::particleType parcelType;
+
+        //- Convenience typedef for this cloud type
+        typedef ReactingMultiphaseCloud<CloudType> reactingMultiphaseCloudType;
 
 
 private:
@@ -140,8 +148,6 @@ protected:
 
 
 public:
-
-    typedef CloudType cloudType;
 
     // Constructors
 

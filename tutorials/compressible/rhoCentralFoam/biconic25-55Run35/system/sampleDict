@@ -19,8 +19,6 @@ interpolationScheme cellPointFace;
 
 setFormat       raw;
 
-surfaceFormat   vtk;
-
 sets
 (
     cone25
@@ -48,8 +46,6 @@ sets
         nPoints 40;
     }
 );
-
-surfaces        ( );
 
 fields          ( p wallHeatTransRate );
 
