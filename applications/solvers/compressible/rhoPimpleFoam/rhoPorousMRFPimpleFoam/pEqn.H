@@ -19,7 +19,7 @@ if (transonic)
         fvc::interpolate(psi)
        *(
             (fvc::interpolate(U) & mesh.Sf())
-          + fvc::ddtPhiCorr(rAU, rho, U, phi)
+        //+ fvc::ddtPhiCorr(rAU, rho, U, phi)
         )
     );
     mrfZones.relativeFlux(fvc::interpolate(psi), phid);

@@ -34,7 +34,7 @@ solvers
         agglomerator     faceAreaPair;
         mergeLevels      1;
 
-        maxIter          100;
+        maxIter          20;
     };
     pFinal
     {
