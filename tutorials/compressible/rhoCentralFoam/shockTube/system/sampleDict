@@ -19,8 +19,6 @@ interpolationScheme cellPoint;
 
 setFormat       raw;
 
-surfaceFormat   vtk;
-
 sets
 (
     line
@@ -32,8 +30,6 @@ sets
         nPoints 100;
     }
 );
-
-surfaces        ();
 
 fields          ( p U.component(0) T rho );
 
