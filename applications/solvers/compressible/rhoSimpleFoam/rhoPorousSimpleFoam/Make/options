@@ -1,16 +1,18 @@
 EXE_INC = \
-    -I../rhoPimpleFoam \
+    -I.. \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
-    -I$(LIB_SRC)/turbulenceModels/compressible/turbulenceModel \
+    -I$(LIB_SRC)/thermophysicalModels/thermalPorousZone/lnInclude \
+    -I$(LIB_SRC)/turbulenceModels \
+    -I$(LIB_SRC)/turbulenceModels/compressible/RAS/RASModel \
     -I$(LIB_SRC)/finiteVolume/cfdTools \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude
 
 EXE_LIBS = \
     -lbasicThermophysicalModels \
+    -lthermalPorousZone \
     -lspecie \
     -lcompressibleTurbulenceModel \
     -lcompressibleRASModels \
-    -lcompressibleLESModels \
     -lfiniteVolume \
     -lmeshTools
