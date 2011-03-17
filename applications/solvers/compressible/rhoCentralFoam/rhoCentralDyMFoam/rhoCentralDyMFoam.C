@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    rhoCentralFoam
+    rhoCentralDyMFoam
 
 Description
     Density-based compressible flow solver based on central-upwind schemes of
@@ -32,6 +32,7 @@ Description
 
 #include "fvCFD.H"
 #include "basicPsiThermo.H"
+#include "turbulenceModel.H"
 #include "zeroGradientFvPatchFields.H"
 #include "fixedRhoFvPatchScalarField.H"
 #include "motionSolver.H"
@@ -185,12 +186,11 @@ int main(int argc, char *argv[])
           + aSf*p_pos - aSf*p_neg
         );
 
-        volTensorField tauMC("tauMC", mu*dev2(Foam::T(fvc::grad(U))));
+        volScalarField muEff(turbulence->muEff());
+        volTensorField tauMC("tauMC", muEff*dev2(Foam::T(fvc::grad(U))));
 
         // --- Solve density
-        Info<< max(rho) << " " << min(rho) << endl;
         solve(fvm::ddt(rho) + fvc::div(phi));
-        Info<< max(rho) << " " << min(rho) << endl;
 
         // --- Solve momentum
         solve(fvm::ddt(rhoU) + fvc::div(phiUp));
@@ -206,7 +206,7 @@ int main(int argc, char *argv[])
             solve
             (
                 fvm::ddt(rho, U) - fvc::ddt(rho, U)
-              - fvm::laplacian(mu, U)
+              - fvm::laplacian(muEff, U)
               - fvc::div(tauMC)
             );
             rhoU = rho*U;
@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
         surfaceScalarField sigmaDotU
         (
             (
-                fvc::interpolate(mu)*mesh.magSf()*fvc::snGrad(U)
+                fvc::interpolate(muEff)*mesh.magSf()*fvc::snGrad(U)
               + (mesh.Sf() & fvc::interpolate(tauMC))
             )
             & (a_pos*U_pos + a_neg*U_neg)
@@ -240,12 +240,12 @@ int main(int argc, char *argv[])
 
         if (!inviscid)
         {
-            volScalarField k("k", thermo.Cp()*mu/Pr);
+            volScalarField k("k", thermo.Cp()*muEff/Pr);
             solve
             (
                 fvm::ddt(rho, e) - fvc::ddt(rho, e)
-              - fvm::laplacian(thermo.alpha(), e)
-              + fvc::laplacian(thermo.alpha(), e)
+              - fvm::laplacian(turbulence->alphaEff(), e)
+              + fvc::laplacian(turbulence->alpha(), e)
               - fvc::laplacian(k, T)
             );
             thermo.correct();
@@ -257,6 +257,8 @@ int main(int argc, char *argv[])
            /psi.dimensionedInternalField();
         p.correctBoundaryConditions();
         rho.boundaryField() = psi.boundaryField()*p.boundaryField();
+
+        turbulence->correct();
 
         runTime.write();
 

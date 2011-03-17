@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,15 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    sonicLiquidFoam
+    sonicDyMFoam
 
 Description
-    Transient solver for trans-sonic/supersonic, laminar flow of a
-    compressible liquid.
+    Transient solver for trans-sonic/supersonic, laminar or turbulent flow
+    of a compressible gas with mesh motion..
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "basicPsiThermo.H"
+#include "turbulenceModel.H"
+#include "motionSolver.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -39,14 +42,14 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
-    #include "readThermodynamicProperties.H"
-    #include "readTransportProperties.H"
     #include "createFields.H"
     #include "initContinuityErrs.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
+
+    autoPtr<motionSolver> motionPtr = motionSolver::New(mesh);
 
     while (runTime.loop())
     {
@@ -55,56 +58,25 @@ int main(int argc, char *argv[])
         #include "readPISOControls.H"
         #include "compressibleCourantNo.H"
 
+        mesh.movePoints(motionPtr->newPoints());
+
         #include "rhoEqn.H"
 
-        fvVectorMatrix UEqn
-        (
-            fvm::ddt(rho, U)
-          + fvm::div(phi, U)
-          - fvm::laplacian(mu, U)
-        );
+        #include "UEqn.H"
 
-        solve(UEqn == -fvc::grad(p));
+        #include "eEqn.H"
 
 
         // --- PISO loop
 
         for (int corr=0; corr<nCorr; corr++)
         {
-            volScalarField rAU(1.0/UEqn.A());
-            U = rAU*UEqn.H();
-
-            surfaceScalarField phid
-            (
-                "phid",
-                psi
-               *(
-                    (fvc::interpolate(U) & mesh.Sf())
-                  + fvc::ddtPhiCorr(rAU, rho, U, phi)
-                )
-            );
-
-            phi = (rhoO/psi)*phid;
-
-            fvScalarMatrix pEqn
-            (
-                fvm::ddt(psi, p)
-              + fvc::div(phi)
-              + fvm::div(phid, p)
-              - fvm::laplacian(rho*rAU, p)
-            );
-
-            pEqn.solve();
-
-            phi += pEqn.flux();
-
-            #include "compressibleContinuityErrs.H"
-
-            U -= rAU*fvc::grad(p);
-            U.correctBoundaryConditions();
+            #include "pEqn.H"
         }
 
-        rho = rhoO + psi*p;
+        turbulence->correct();
+
+        rho = thermo.rho();
 
         runTime.write();
 

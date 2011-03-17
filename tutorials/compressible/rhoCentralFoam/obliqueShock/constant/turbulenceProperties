@@ -10,26 +10,12 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
-    object      sampleSurfaceDict;
+    location    "constant";
+    object      turbulenceProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-interpolationScheme cellPoint;
-
-surfaceFormat   dx;
-
-surfaces
-(
-    constantPlane
-    {
-        name plate;
-        basePoint ( 0 0 0.25 );
-        normalVector ( 0 0 1 );
-    }
-);
-
-fields          ( sigmaxx );
+simulationType  laminar;
 
 
 // ************************************************************************* //
