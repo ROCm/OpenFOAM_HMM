@@ -11,57 +11,61 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "system";
-    object      fvSolution;
+    object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-solvers
+application     rhoPorousMRFSimpleFoam;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         1000;
+
+deltaT          1;
+
+writeControl    timeStep;
+
+writeInterval   100;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  6;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+graphFormat     raw;
+
+runTimeModifiable true;
+
+functions
 {
-    p
+    residualControl1
     {
-        solver          PCG;
-        preconditioner  DIC;
-        tolerance       1e-06;
-        relTol          0.01;
-    }
+        type            residualControl;
+        functionObjectLibs ( "libjobControl.so" );
+        outputControl   timeStep;
+        outputInterval  1;
 
-    pFinal
-    {
-        $p;
-        relTol          0;
-    }
+        maxResiduals
+        {
+            p       1e-2;
+            U       1e-4;
+            T       1e-3;
 
-    "rho.*"
-    {
-        $p;
-        tolerance       1e-05;
-        relTol          0;
-    }
-
-    "(U|h|R|k|epsilon|omega)"
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0.1;
-    }
-
-    "(U|h|R|k|epsilon|omega)Final"
-    {
-        $U;
-        relTol          0;
+            // possibly check turbulence fields
+            "(k|epsilon|omega)" 1e-3;
+        }
     }
 }
-
-PIMPLE
-{
-    momentumPredictor yes;
-    nOuterCorrectors 1;
-    nCorrectors     2;
-    nNonOrthogonalCorrectors 0;
-    rhoMin          rhoMin [ 1 -3 0 0 0 ] 0.5;
-    rhoMax          rhoMax [ 1 -3 0 0 0 ] 2.0;
-}
-
 
 // ************************************************************************* //

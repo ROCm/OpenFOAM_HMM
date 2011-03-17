@@ -22,17 +22,23 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    sonicFoam
+    rhoPorousMRFPimpleFoam
 
 Description
-    Transient solver for trans-sonic/supersonic, laminar or turbulent flow
-    of a compressible gas.
+    Transient solver for laminar or turbulent flow of compressible fluids
+    with support for porous media and MRF for HVAC and similar applications.
+
+    Uses the flexible PIMPLE (PISO-SIMPLE) solution for time-resolved and
+    pseudo-transient simulations.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "basicPsiThermo.H"
 #include "turbulenceModel.H"
+#include "bound.H"
+#include "MRFZones.H"
+#include "porousZones.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,36 +48,57 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
     #include "createFields.H"
+    #include "createZones.H"
     #include "initContinuityErrs.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
-    while (runTime.loop())
+    while (runTime.run())
     {
-        Info<< "Time = " << runTime.timeName() << nl << endl;
-
-        #include "readPISOControls.H"
+        #include "readTimeControls.H"
+        #include "readPIMPLEControls.H"
         #include "compressibleCourantNo.H"
+        #include "setDeltaT.H"
+
+        runTime++;
+
+        Info<< "Time = " << runTime.timeName() << nl << endl;
 
         #include "rhoEqn.H"
 
-        #include "UEqn.H"
-
-        #include "eEqn.H"
-
-
-        // --- PISO loop
-
-        for (int corr=0; corr<nCorr; corr++)
+        // --- Pressure-velocity PIMPLE corrector loop
+        for (int oCorr=0; oCorr<nOuterCorr; oCorr++)
         {
-            #include "pEqn.H"
+            bool finalIter = oCorr == nOuterCorr-1;
+            if (finalIter)
+            {
+                mesh.data::add("finalIteration", true);
+            }
+
+            if (nOuterCorr != 1)
+            {
+                p.storePrevIter();
+                rho.storePrevIter();
+            }
+
+            #include "UEqn.H"
+            #include "hEqn.H"
+
+            // --- PISO loop
+            for (int corr=0; corr<nCorr; corr++)
+            {
+                #include "pEqn.H"
+            }
+
+            turbulence->correct();
+
+            if (finalIter)
+            {
+                mesh.data::remove("finalIteration");
+            }
         }
-
-        turbulence->correct();
-
-        rho = thermo.rho();
 
         runTime.write();
 

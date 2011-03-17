@@ -22,17 +22,15 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    sonicFoam
+    sonicLiquidFoam
 
 Description
-    Transient solver for trans-sonic/supersonic, laminar or turbulent flow
-    of a compressible gas.
+    Transient solver for trans-sonic/supersonic, laminar flow of a
+    compressible liquid.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "basicPsiThermo.H"
-#include "turbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -41,6 +39,8 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
+    #include "readThermodynamicProperties.H"
+    #include "readTransportProperties.H"
     #include "createFields.H"
     #include "initContinuityErrs.H"
 
@@ -57,21 +57,54 @@ int main(int argc, char *argv[])
 
         #include "rhoEqn.H"
 
-        #include "UEqn.H"
+        fvVectorMatrix UEqn
+        (
+            fvm::ddt(rho, U)
+          + fvm::div(phi, U)
+          - fvm::laplacian(mu, U)
+        );
 
-        #include "eEqn.H"
+        solve(UEqn == -fvc::grad(p));
 
 
         // --- PISO loop
 
         for (int corr=0; corr<nCorr; corr++)
         {
-            #include "pEqn.H"
+            volScalarField rAU(1.0/UEqn.A());
+            U = rAU*UEqn.H();
+
+            surfaceScalarField phid
+            (
+                "phid",
+                psi
+               *(
+                    (fvc::interpolate(U) & mesh.Sf())
+                  + fvc::ddtPhiCorr(rAU, rho, U, phi)
+                )
+            );
+
+            phi = (rhoO/psi)*phid;
+
+            fvScalarMatrix pEqn
+            (
+                fvm::ddt(psi, p)
+              + fvc::div(phi)
+              + fvm::div(phid, p)
+              - fvm::laplacian(rho*rAU, p)
+            );
+
+            pEqn.solve();
+
+            phi += pEqn.flux();
+
+            #include "compressibleContinuityErrs.H"
+
+            U -= rAU*fvc::grad(p);
+            U.correctBoundaryConditions();
         }
 
-        turbulence->correct();
-
-        rho = thermo.rho();
+        rho = rhoO + psi*p;
 
         runTime.write();
 

@@ -22,17 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    sonicFoam
+    rhoPorousSimpleFoam
 
 Description
-    Transient solver for trans-sonic/supersonic, laminar or turbulent flow
-    of a compressible gas.
+    Steady-state solver for turbulent flow of compressible fluids with
+    RANS turbulence modelling, implicit or explicit porosity treatment
+    and MRF for HVAC and similar applications.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "basicPsiThermo.H"
-#include "turbulenceModel.H"
+#include "RASModel.H"
+#include "MRFZones.H"
+#include "thermalPorousZones.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,6 +45,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
     #include "createFields.H"
+    #include "createZones.H"
     #include "initContinuityErrs.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -52,29 +56,21 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        #include "readPISOControls.H"
-        #include "compressibleCourantNo.H"
+        #include "readSIMPLEControls.H"
 
-        #include "rhoEqn.H"
+        p.storePrevIter();
+        rho.storePrevIter();
 
-        #include "UEqn.H"
-
-        #include "eEqn.H"
-
-
-        // --- PISO loop
-
-        for (int corr=0; corr<nCorr; corr++)
+        // Pressure-velocity SIMPLE corrector
         {
+            #include "UEqn.H"
+            #include "hEqn.H"
             #include "pEqn.H"
         }
 
         turbulence->correct();
 
-        rho = thermo.rho();
-
         runTime.write();
-
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
             << nl << endl;

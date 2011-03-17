@@ -22,17 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    sonicFoam
+    sonicDyMFoam
 
 Description
     Transient solver for trans-sonic/supersonic, laminar or turbulent flow
-    of a compressible gas.
+    of a compressible gas with mesh motion..
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "basicPsiThermo.H"
 #include "turbulenceModel.H"
+#include "motionSolver.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,12 +49,16 @@ int main(int argc, char *argv[])
 
     Info<< "\nStarting time loop\n" << endl;
 
+    autoPtr<motionSolver> motionPtr = motionSolver::New(mesh);
+
     while (runTime.loop())
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
         #include "readPISOControls.H"
         #include "compressibleCourantNo.H"
+
+        mesh.movePoints(motionPtr->newPoints());
 
         #include "rhoEqn.H"
 

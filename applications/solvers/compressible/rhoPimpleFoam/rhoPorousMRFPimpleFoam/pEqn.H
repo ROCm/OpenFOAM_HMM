@@ -3,6 +3,7 @@ rho = max(rho, rhoMin);
 rho = min(rho, rhoMax);
 rho.relax();
 
+volScalarField rAU(1.0/UEqn().A());
 U = rAU*UEqn().H();
 
 if (nCorr <= 1)
@@ -18,9 +19,10 @@ if (transonic)
         fvc::interpolate(psi)
        *(
             (fvc::interpolate(U) & mesh.Sf())
-          + fvc::ddtPhiCorr(rAU, rho, U, phi)
+        //+ fvc::ddtPhiCorr(rAU, rho, U, phi)
         )
     );
+    mrfZones.relativeFlux(fvc::interpolate(psi), phid);
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
@@ -58,8 +60,9 @@ else
         fvc::interpolate(rho)*
         (
             (fvc::interpolate(U) & mesh.Sf())
-          + fvc::ddtPhiCorr(rAU, rho, U, phi)
+        //+ fvc::ddtPhiCorr(rAU, rho, U, phi)
         );
+    mrfZones.relativeFlux(fvc::interpolate(rho), phi);
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
@@ -99,7 +102,6 @@ else
 // Explicitly relax pressure for momentum corrector
 p.relax();
 
-// Recalculate density from the relaxed pressure
 rho = thermo.rho();
 rho = max(rho, rhoMin);
 rho = min(rho, rhoMax);
