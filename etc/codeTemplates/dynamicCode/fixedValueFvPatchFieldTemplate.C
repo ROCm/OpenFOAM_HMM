@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fixedValueFvPatchScalarFieldTemplate.H"
+#include "fixedValueFvPatchFieldTemplate.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
@@ -71,24 +71,25 @@ extern "C"
 
 makeRemovablePatchTypeField
 (
-    fvPatchScalarField,
-    ${typeName}FixedValueFvPatchScalarField
+    fvPatch${FieldType},
+    ${typeName}FixedValueFvPatch${FieldType}
 );
 
 
-const char* ${typeName}FixedValueFvPatchScalarField::SHA1sum = "${SHA1sum}";
+const char* const ${typeName}FixedValueFvPatch${FieldType}::SHA1sum =
+    "${SHA1sum}";
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-${typeName}FixedValueFvPatchScalarField::
-${typeName}FixedValueFvPatchScalarField
+${typeName}FixedValueFvPatch${FieldType}::
+${typeName}FixedValueFvPatch${FieldType}
 (
     const fvPatch& p,
-    const DimensionedField<scalar, volMesh>& iF
+    const DimensionedField<${TemplateType}, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(p, iF)
+    fixedValueFvPatchField<${TemplateType}>(p, iF)
 {
     if (${verbose:-false})
     {
@@ -98,16 +99,16 @@ ${typeName}FixedValueFvPatchScalarField
 }
 
 
-${typeName}FixedValueFvPatchScalarField::
-${typeName}FixedValueFvPatchScalarField
+${typeName}FixedValueFvPatch${FieldType}::
+${typeName}FixedValueFvPatch${FieldType}
 (
-    const ${typeName}FixedValueFvPatchScalarField& ptf,
+    const ${typeName}FixedValueFvPatch${FieldType}& ptf,
     const fvPatch& p,
-    const DimensionedField<scalar, volMesh>& iF,
+    const DimensionedField<${TemplateType}, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchScalarField(ptf, p, iF, mapper)
+    fixedValueFvPatchField<${TemplateType}>(ptf, p, iF, mapper)
 {
     if (${verbose:-false})
     {
@@ -117,15 +118,15 @@ ${typeName}FixedValueFvPatchScalarField
 }
 
 
-${typeName}FixedValueFvPatchScalarField::
-${typeName}FixedValueFvPatchScalarField
+${typeName}FixedValueFvPatch${FieldType}::
+${typeName}FixedValueFvPatch${FieldType}
 (
     const fvPatch& p,
-    const DimensionedField<scalar, volMesh>& iF,
+    const DimensionedField<${TemplateType}, volMesh>& iF,
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict)
+    fixedValueFvPatchField<${TemplateType}>(p, iF, dict)
 {
     if (${verbose:-false})
     {
@@ -135,13 +136,13 @@ ${typeName}FixedValueFvPatchScalarField
 }
 
 
-${typeName}FixedValueFvPatchScalarField::
-${typeName}FixedValueFvPatchScalarField
+${typeName}FixedValueFvPatch${FieldType}::
+${typeName}FixedValueFvPatch${FieldType}
 (
-    const ${typeName}FixedValueFvPatchScalarField& ptf
+    const ${typeName}FixedValueFvPatch${FieldType}& ptf
 )
 :
-    fixedValueFvPatchScalarField(ptf)
+    fixedValueFvPatchField<${TemplateType}>(ptf)
 {
     if (${verbose:-false})
     {
@@ -151,14 +152,14 @@ ${typeName}FixedValueFvPatchScalarField
 }
 
 
-${typeName}FixedValueFvPatchScalarField::
-${typeName}FixedValueFvPatchScalarField
+${typeName}FixedValueFvPatch${FieldType}::
+${typeName}FixedValueFvPatch${FieldType}
 (
-    const ${typeName}FixedValueFvPatchScalarField& ptf,
-    const DimensionedField<scalar, volMesh>& iF
+    const ${typeName}FixedValueFvPatch${FieldType}& ptf,
+    const DimensionedField<${TemplateType}, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(ptf, iF)
+    fixedValueFvPatchField<${TemplateType}>(ptf, iF)
 {
     if (${verbose:-false})
     {
@@ -170,8 +171,8 @@ ${typeName}FixedValueFvPatchScalarField
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-${typeName}FixedValueFvPatchScalarField::
-~${typeName}FixedValueFvPatchScalarField()
+${typeName}FixedValueFvPatch${FieldType}::
+~${typeName}FixedValueFvPatch${FieldType}()
 {
     if (${verbose:-false})
     {
@@ -182,7 +183,7 @@ ${typeName}FixedValueFvPatchScalarField::
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void ${typeName}FixedValueFvPatchScalarField::updateCoeffs()
+void ${typeName}FixedValueFvPatch${FieldType}::updateCoeffs()
 {
     if (this->updated())
     {
@@ -198,7 +199,7 @@ void ${typeName}FixedValueFvPatchScalarField::updateCoeffs()
     ${code}
 //}}} end code
 
-    fixedValueFvPatchScalarField::updateCoeffs();
+    this->fixedValueFvPatchField<${TemplateType}>::updateCoeffs();
 }
 
 

@@ -136,6 +136,11 @@ class codedFixedValueFvPatchScalarField
         );
 
 
+        //- Set TemplateType and FieldType filter variables
+        template<class Type>
+        static void setFieldTemplates(dynamicCode&);
+
+
         //- Create library based on the dynamicCodeContext
         void createLibrary(dynamicCode&, const dynamicCodeContext&) const;
 

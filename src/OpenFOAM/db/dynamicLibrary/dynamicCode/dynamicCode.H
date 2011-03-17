@@ -106,10 +106,10 @@ protected:
     // Static data members
 
         //- Root of the LIB target for Make/files
-        static const char* libTargetRoot;
+        static const char* const libTargetRoot;
 
         //- Top-level directory name for copy/compiling
-        static const char* topDirName;
+        static const char* const topDirName;
 
 
     // Protected Member Functions

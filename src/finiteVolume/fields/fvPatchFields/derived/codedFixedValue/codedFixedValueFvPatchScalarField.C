@@ -36,14 +36,16 @@ License
 #include "dynamicCode.H"
 #include "dynamicCodeContext.H"
 #include "stringOps.H"
+#include <cstring>
+
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const Foam::word Foam::codedFixedValueFvPatchScalarField::codeTemplateC
-    = "fixedValueFvPatchScalarFieldTemplate.C";
+    = "fixedValueFvPatchFieldTemplate.C";
 
 const Foam::word Foam::codedFixedValueFvPatchScalarField::codeTemplateH
-    = "fixedValueFvPatchScalarFieldTemplate.H";
+    = "fixedValueFvPatchFieldTemplate.H";
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -172,6 +174,24 @@ void Foam::codedFixedValueFvPatchScalarField::unloadLibrary
 }
 
 
+
+template<class Type>
+void Foam::codedFixedValueFvPatchScalarField::setFieldTemplates
+(
+    dynamicCode& dynCode
+)
+{
+    word fieldType(pTraits<Type>::typeName);
+
+    // template type for fvPatchField
+    dynCode.setFilterVariable("TemplateType", fieldType);
+
+    // Name for fvPatchField - eg, ScalarField, VectorField, ...
+    fieldType[0] = toupper(fieldType[0]);
+    dynCode.setFilterVariable("FieldType", fieldType + "Field");
+}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 const Foam::IOdictionary& Foam::codedFixedValueFvPatchScalarField::dict() const
@@ -216,19 +236,24 @@ void Foam::codedFixedValueFvPatchScalarField::createLibrary
             // filter with this context
             dynCode.reset(context);
 
+            // take no chances - typeName must be identical to redirectType_
+            dynCode.setFilterVariable("typeName", redirectType_);
+
+            // set TemplateType and FieldType filter variables
+            // (for fvPatchField)
+            setFieldTemplates<scalar>(dynCode);
+
             // compile filtered C template
             dynCode.addCompileFile(codeTemplateC);
 
             // copy filtered H template
             dynCode.addCopyFile(codeTemplateH);
 
-            // take no chances - typeName must be identical to redirectType_
-            dynCode.setFilterVariable("typeName", redirectType_);
 
             // debugging: make BC verbose
-            //         dynCode.setFilterVariable("verbose", "true");
-            //         Info<<"compile " << redirectType_ << " sha1: "
-            //             << context.sha1() << endl;
+            //  dynCode.setFilterVariable("verbose", "true");
+            //  Info<<"compile " << redirectType_ << " sha1: "
+            //      << context.sha1() << endl;
 
             // define Make/options
             dynCode.setMakeOptions

@@ -253,19 +253,20 @@ bool Foam::chDir(const fileName& dir)
 
 Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
 {
-    // Search user files:
-    // ~~~~~~~~~~~~~~~~~~
+    //
+    // search for user files in
+    // * ~/.OpenFOAM/VERSION
+    // * ~/.OpenFOAM
+    //
     fileName searchDir = home()/".OpenFOAM";
     if (isDir(searchDir))
     {
-        // Check for user file in ~/.OpenFOAM/VERSION
         fileName fullName = searchDir/FOAMversion/name;
         if (isFile(fullName))
         {
             return fullName;
         }
 
-        // Check for version-independent user file in ~/.OpenFOAM
         fullName = searchDir/name;
         if (isFile(fullName))
         {
@@ -274,32 +275,61 @@ Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
     }
 
 
-    // Search site files:
-    // ~~~~~~~~~~~~~~~~~~
-    searchDir = getEnv("WM_PROJECT_INST_DIR");
-    if (isDir(searchDir))
+    //
+    // search for group (site) files in
+    // * $WM_PROJECT_SITE/VERSION
+    // * $WM_PROJECT_SITE
+    //
+    searchDir = getEnv("WM_PROJECT_SITE");
+    if (searchDir.size())
     {
-        // Check for site file in $WM_PROJECT_INST_DIR/site/VERSION
-        fileName fullName = searchDir/"site"/FOAMversion/name;
-        if (isFile(fullName))
+        if (isDir(searchDir))
         {
-            return fullName;
-        }
+            fileName fullName = searchDir/FOAMversion/name;
+            if (isFile(fullName))
+            {
+                return fullName;
+            }
 
-        // Check for version-independent site file in $WM_PROJECT_INST_DIR/site
-        fullName = searchDir/"site"/name;
-        if (isFile(fullName))
+            fullName = searchDir/name;
+            if (isFile(fullName))
+            {
+                return fullName;
+            }
+        }
+    }
+    else
+    {
+        //
+        // OR search for group (site) files in
+        // * $WM_PROJECT_INST_DIR/site/VERSION
+        // * $WM_PROJECT_INST_DIR/site
+        //
+        searchDir = getEnv("WM_PROJECT_INST_DIR");
+        if (isDir(searchDir))
         {
-            return fullName;
+            fileName fullName = searchDir/"site"/FOAMversion/name;
+            if (isFile(fullName))
+            {
+                return fullName;
+            }
+
+            fullName = searchDir/"site"/name;
+            if (isFile(fullName))
+            {
+                return fullName;
+            }
         }
     }
 
-    // Search installation files:
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    //
+    // search for other (shipped) files in
+    // * $WM_PROJECT_DIR/etc
+    //
     searchDir = getEnv("WM_PROJECT_DIR");
     if (isDir(searchDir))
     {
-        // Check for shipped OpenFOAM file in $WM_PROJECT_DIR/etc
         fileName fullName = searchDir/"etc"/name;
         if (isFile(fullName))
         {
@@ -311,7 +341,8 @@ Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
     // abort if the file is mandatory, otherwise return null
     if (mandatory)
     {
-        std::cerr<< "--> FOAM FATAL ERROR in Foam::findEtcFile() :"
+        std::cerr
+            << "--> FOAM FATAL ERROR in Foam::findEtcFile() :"
                " could not find mandatory file\n    '"
             << name.c_str() << "'\n\n" << std::endl;
         ::exit(1);

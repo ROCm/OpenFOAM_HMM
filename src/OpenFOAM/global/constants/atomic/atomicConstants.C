@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,7 +32,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-const char* Foam::constant::atomic::group = "atomic";
+const char* const Foam::constant::atomic::group = "atomic";
 
 
 const Foam::dimensionedScalar Foam::constant::atomic::alpha
@@ -129,6 +129,3 @@ const Foam::dimensionedScalar Foam::constant::atomic::Eh
 
 
 // ************************************************************************* //
-
-
-

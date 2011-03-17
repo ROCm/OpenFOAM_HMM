@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,7 +32,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-const char* Foam::constant::electromagnetic::group = "electromagnetic";
+const char* const Foam::constant::electromagnetic::group = "electromagnetic";
 
 
 const Foam::dimensionedScalar Foam::constant::electromagnetic::mu0
@@ -164,5 +164,3 @@ const Foam::dimensionedScalar Foam::constant::electromagnetic::RK
 
 
 // ************************************************************************* //
-
-
