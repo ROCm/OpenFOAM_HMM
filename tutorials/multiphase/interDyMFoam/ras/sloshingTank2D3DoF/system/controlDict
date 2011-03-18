@@ -57,7 +57,7 @@ functions
     {
         type            probes;
         functionObjectLibs ("libsampling.so");
-        outputControl   timeStep;
+        outputControl   outputTime;
         outputInterval  1;
         probeLocations
         (
@@ -74,9 +74,10 @@ functions
     {
         type            surfaces;
         functionObjectLibs ("libsampling.so");
-        outputControl   timeStep;
+        outputControl   outputTime;
         outputInterval  10;
         surfaceFormat   raw;
+        interpolationScheme isThisNeeded;
         fields
         (
             p

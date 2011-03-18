@@ -36,9 +36,8 @@
             scalar start = readScalar(dict["startTime"]);
             scalar end = readScalar(dict["endTime"]);
             label nDumps = 5;
-            label interval = end-start
-            os  << ((start-end)/nDumps)
-        #}
+            os  << ((end-start)/nDumps);
+        #};
     };
   #+END_SRC
 
@@ -65,7 +64,7 @@
   #+BEGIN_SRC c++
   outlet
   {
-      type            codedFixedValue<scalar>;
+      type            codedFixedValue;
       value           uniform 0;
       redirectType    fixedValue10;
 
@@ -132,6 +131,10 @@
   };
   #+END_SRC
 
+  Note: above field initialisation has the problem that the boundary conditions
+  are not evaluated so e.g. processor boundaries will not hold the opposite cell
+  value.
+
 * Pitfalls
   The syntax of =#codeStream= can be quite hard to get right. These are some
   common pitfalls:
@@ -146,19 +149,18 @@
   + the =#codeStream= entry (itself a dictionary) has to end in a ';'
 
 * Exceptions
-  There are unfortunately some exceptions. Following applications read
+  There are unfortunately some exceptions to above field massaging.
+  Following applications read
   the field as a dictionary, not as an =IOdictionary=:
   - =foamFormatConvert=
   - =changeDictionaryDict=
   - =foamUpgradeCyclics=
-  These applications will usually switch off all '#' processing.
-
-
-  Note: above field initialisation has the problem that the boundary conditions
-  are not evaluated so e.g. processor boundaries will not hold the opposite cell
-  value.
+  These applications will usually switch off all '#' processing which
+  just preserves the entries as strings (including all formatting).
 
 * Other
-  - the implementation is still changing though the syntax is fixed
   - parallel running not tested a lot. What about distributed data
     (i.e. non-=NFS=) parallel?
+  - paraview has been patched so it will pass in RTLD_GLOBAL when loading
+    the OpenFOAM reader module. This is necessary for above dictionary
+    processing to work.

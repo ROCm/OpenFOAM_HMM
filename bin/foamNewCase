@@ -30,7 +30,7 @@
 #     - requires rsync
 #
 #------------------------------------------------------------------------------
-siteDir=${WM_PROJECT_INST_DIR:-unknown}/site
+siteDir=${WM_PROJECT_SITE:-${WM_PROJECT_INST_DIR:-<unknown>}/site}
 userDir=$HOME/.OpenFOAM
 version=${WM_PROJECT_VERSION:-unknown}
 templateDir="appTemplates"

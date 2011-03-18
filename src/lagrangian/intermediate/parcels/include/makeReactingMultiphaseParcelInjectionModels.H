@@ -28,6 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "CellZoneInjection.H"
 #include "ConeInjection.H"
 #include "FieldActivatedInjection.H"
 #include "ManualInjection.H"
@@ -40,6 +41,7 @@ License
 #define makeReactingMultiphaseParcelInjectionModels(CloudType)                \
                                                                               \
     makeInjectionModel(CloudType);                                            \
+    makeInjectionModelType(CellZoneInjection, CloudType);                     \
     makeInjectionModelType(ConeInjection, CloudType);                         \
     makeInjectionModelType(FieldActivatedInjection, CloudType);               \
     makeInjectionModelType(ManualInjection, CloudType);                       \

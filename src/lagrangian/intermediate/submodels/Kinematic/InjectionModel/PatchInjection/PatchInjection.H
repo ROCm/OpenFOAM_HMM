@@ -32,7 +32,7 @@ Description
       - Injection duration
       - Initial parcel velocity
       - Injection volume flow rate
-    - Parcel diameters obtained by distribution model model
+    - Parcel diameters obtained by distribution model
     - Parcels injected at cell centres adjacent to patch
 
 SourceFiles
@@ -84,7 +84,7 @@ class PatchInjection
         //- Flow rate profile relative to SOI []
         const autoPtr<DataEntry<scalar> > flowRateProfile_;
 
-        //- Parcel size distribution model model
+        //- Parcel size distribution model
         const autoPtr<distributionModels::distributionModel> sizeDistribution_;
 
         //- List of cell labels corresponding to injector positions

@@ -13,22 +13,14 @@ FoamFile
     location    "system";
     object      fvSolution;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 solvers
 {
-    rho
+    "(rho|rhoFinal)"
     {
         solver              PCG;
         preconditioner      DIC;
-        tolerance           1e-7;
-        relTol              0.1;
-    };
-
-    rhoFinal
-    {
-        $rho;
         tolerance           1e-7;
         relTol              0;
     };
@@ -68,7 +60,6 @@ solvers
         tolerance       1e-7;
         relTol          0;
     };
-
 
     Ii
     {

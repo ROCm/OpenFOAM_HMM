@@ -216,34 +216,49 @@ void Foam::sampledSurfaces::write()
 
 void Foam::sampledSurfaces::read(const dictionary& dict)
 {
-    dict.lookup("fields") >> fieldSelection_;
-    clearFieldGroups();
+    bool surfacesFound = dict.found("surfaces");
 
-    dict.lookup("interpolationScheme") >> interpolationScheme_;
-    const word writeType(dict.lookup("surfaceFormat"));
-
-    // define the surface formatter
-    // optionally defined extra controls for the output formats
-    formatter_ = surfaceWriter::New
-    (
-        writeType,
-        dict.subOrEmptyDict("formatOptions").subOrEmptyDict(writeType)
-    );
-
-    PtrList<sampledSurface> newList
-    (
-        dict.lookup("surfaces"),
-        sampledSurface::iNew(mesh_)
-    );
-    transfer(newList);
-
-    if (Pstream::parRun())
+    if (surfacesFound)
     {
-        mergeList_.setSize(size());
-    }
+        dict.lookup("fields") >> fieldSelection_;
+        clearFieldGroups();
 
-    // ensure all surfaces and merge information are expired
-    expire();
+        dict.lookup("interpolationScheme") >> interpolationScheme_;
+        const word writeType(dict.lookup("surfaceFormat"));
+
+        // define the surface formatter
+        // optionally defined extra controls for the output formats
+        formatter_ = surfaceWriter::New
+        (
+            writeType,
+            dict.subOrEmptyDict("formatOptions").subOrEmptyDict(writeType)
+        );
+
+        PtrList<sampledSurface> newList
+        (
+            dict.lookup("surfaces"),
+            sampledSurface::iNew(mesh_)
+        );
+        transfer(newList);
+
+        if (Pstream::parRun())
+        {
+            mergeList_.setSize(size());
+        }
+
+        // ensure all surfaces and merge information are expired
+        expire();
+
+        if (this->size())
+        {
+            Info<< "Reading surface description:" << nl;
+            forAll(*this, surfI)
+            {
+                Info<< "    " << operator[](surfI).name() << nl;
+            }
+            Info<< endl;
+        }
+    }
 
     if (Pstream::master() && debug)
     {

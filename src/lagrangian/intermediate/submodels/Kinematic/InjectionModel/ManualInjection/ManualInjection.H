@@ -30,7 +30,7 @@ Description
       - Total mass to inject
       - Parcel positions in file \c positionsFile
       - Initial parcel velocity
-    - Parcel diameters obtained by distribution model model
+    - Parcel diameters obtained by distribution model
     - All parcels introduced at SOI
 
 SourceFiles
@@ -81,7 +81,7 @@ class ManualInjection
         //- Initial parcel velocity
         const vector U0_;
 
-        //- Parcel size distribution model model
+        //- Parcel size distribution model
         const autoPtr<distributionModels::distributionModel> sizeDistribution_;
 
 

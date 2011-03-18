@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,6 +32,7 @@ Description
 
 #include "fvCFD.H"
 #include "basicPsiThermo.H"
+#include "turbulenceModel.H"
 #include "zeroGradientFvPatchFields.H"
 #include "fixedRhoFvPatchScalarField.H"
 
@@ -51,7 +52,7 @@ int main(int argc, char *argv[])
 
     #include "readFluxScheme.H"
 
-    dimensionedScalar v_zero("v_zero",dimVolume/dimTime, 0.0);
+    dimensionedScalar v_zero("v_zero", dimVolume/dimTime, 0.0);
 
     Info<< "\nStarting time loop\n" << endl;
 
@@ -128,14 +129,6 @@ int main(int argc, char *argv[])
 
         surfaceScalarField amaxSf("amaxSf", max(mag(am), mag(ap)));
 
-        #include "compressibleCourantNo.H"
-        #include "readTimeControls.H"
-        #include "setDeltaT.H"
-
-        runTime++;
-
-        Info<< "Time = " << runTime.timeName() << nl << endl;
-
         surfaceScalarField aSf(am*a_pos);
 
         if (fluxScheme == "Tadmor")
@@ -152,6 +145,18 @@ int main(int argc, char *argv[])
         surfaceScalarField aphiv_pos(phiv_pos - aSf);
         surfaceScalarField aphiv_neg(phiv_neg + aSf);
 
+        // Reuse amaxSf for the maximum positive and negative fluxes
+        // estimated by the central scheme
+        amaxSf = max(mag(aphiv_pos), mag(aphiv_neg));
+
+        #include "compressibleCourantNo.H"
+        #include "readTimeControls.H"
+        #include "setDeltaT.H"
+
+        runTime++;
+
+        Info<< "Time = " << runTime.timeName() << nl << endl;
+
         surfaceScalarField phi("phi", aphiv_pos*rho_pos + aphiv_neg*rho_neg);
 
         surfaceVectorField phiUp
@@ -167,7 +172,8 @@ int main(int argc, char *argv[])
           + aSf*p_pos - aSf*p_neg
         );
 
-        volTensorField tauMC("tauMC", mu*dev2(Foam::T(fvc::grad(U))));
+        volScalarField muEff(turbulence->muEff());
+        volTensorField tauMC("tauMC", muEff*dev2(Foam::T(fvc::grad(U))));
 
         // --- Solve density
         solve(fvm::ddt(rho) + fvc::div(phi));
@@ -188,7 +194,7 @@ int main(int argc, char *argv[])
             solve
             (
                 fvm::ddt(rho, U) - fvc::ddt(rho, U)
-              - fvm::laplacian(mu, U)
+              - fvm::laplacian(muEff, U)
               - fvc::div(tauMC)
             );
             rhoU = rho*U;
@@ -198,7 +204,7 @@ int main(int argc, char *argv[])
         surfaceScalarField sigmaDotU
         (
             (
-                fvc::interpolate(mu)*mesh.magSf()*fvc::snGrad(U)
+                fvc::interpolate(muEff)*mesh.magSf()*fvc::snGrad(U)
               + (mesh.Sf() & fvc::interpolate(tauMC))
             )
             & (a_pos*U_pos + a_neg*U_neg)
@@ -222,12 +228,12 @@ int main(int argc, char *argv[])
 
         if (!inviscid)
         {
-            volScalarField k("k", thermo.Cp()*mu/Pr);
+            volScalarField k("k", thermo.Cp()*muEff/Pr);
             solve
             (
                 fvm::ddt(rho, e) - fvc::ddt(rho, e)
-              - fvm::laplacian(thermo.alpha(), e)
-              + fvc::laplacian(thermo.alpha(), e)
+              - fvm::laplacian(turbulence->alphaEff(), e)
+              + fvc::laplacian(turbulence->alpha(), e)
               - fvc::laplacian(k, T)
             );
             thermo.correct();
@@ -239,6 +245,8 @@ int main(int argc, char *argv[])
            /psi.dimensionedInternalField();
         p.correctBoundaryConditions();
         rho.boundaryField() = psi.boundaryField()*p.boundaryField();
+
+        turbulence->correct();
 
         runTime.write();
 

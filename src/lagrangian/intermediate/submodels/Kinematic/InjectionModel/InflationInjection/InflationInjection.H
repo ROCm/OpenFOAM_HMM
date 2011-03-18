@@ -107,7 +107,7 @@ class InflationInjection
         //- Diameter with which to create new seed particles
         scalar dSeed_;
 
-        //- Parcel size distribution model model
+        //- Parcel size distribution model
         const autoPtr<distributionModels::distributionModel> sizeDistribution_;
 
 

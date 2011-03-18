@@ -72,6 +72,12 @@ alias foamSol='cd $FOAM_SOLVERS'
 alias foamTuts='cd $FOAM_TUTORIALS'
 alias foamUtils='cd $FOAM_UTILITIES'
 alias foam3rdParty='cd $WM_THIRD_PARTY_DIR'
-alias foamSite='cd $WM_PROJECT_INST_DIR/site'
+
+if [ -n "$WM_PROJECT_SITE" ]
+then
+    alias foamSite='cd $WM_PROJECT_SITE'
+else
+    alias foamSite='cd $WM_PROJECT_INST_DIR/site'
+fi
 
 # -----------------------------------------------------------------------------

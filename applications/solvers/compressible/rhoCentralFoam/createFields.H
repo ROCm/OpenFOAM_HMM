@@ -96,3 +96,18 @@ surfaceScalarField neg
     mesh,
     dimensionedScalar("neg", dimless, -1.0)
 );
+
+
+surfaceScalarField phi("phi", mesh.Sf() & fvc::interpolate(rhoU));
+
+Info<< "Creating turbulence model\n" << endl;
+autoPtr<compressible::turbulenceModel> turbulence
+(
+    compressible::turbulenceModel::New
+    (
+        rho,
+        U,
+        phi,
+        thermo
+    )
+);

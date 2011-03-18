@@ -254,7 +254,10 @@ public:
             }
 
             //- Transform a patch-based position from other side to this side
-            virtual void transformPosition(pointField& l) const = 0;
+            virtual void transformPosition(pointField&) const = 0;
+
+            //- Transform a patch-based position from other side to this side
+            virtual void transformPosition(point&, const label facei) const = 0;
 
             //- Are the planes separated.
             virtual bool separated() const
@@ -297,12 +300,12 @@ public:
         virtual void calcGeometry
         (
             const primitivePatch& referPatch,
-            const UList<point>& thisCtrs,
-            const UList<point>& thisAreas,
-            const UList<point>& thisCc,
-            const UList<point>& nbrCtrs,
-            const UList<point>& nbrAreas,
-            const UList<point>& nbrCc
+            const pointField& thisCtrs,
+            const vectorField& thisAreas,
+            const pointField& thisCc,
+            const pointField& nbrCtrs,
+            const vectorField& nbrAreas,
+            const pointField& nbrCc
         ) = 0;
 
         //- Initialize ordering for primitivePatch. Does not

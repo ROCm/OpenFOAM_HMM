@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,8 +68,8 @@ protected:
 
     // Protected Data
 
-        static const char* defaultBoundaryName;
-        static const char* defaultSolidBoundaryName;
+        static const char* const defaultBoundaryName;
+        static const char* const defaultSolidBoundaryName;
 
         //- Face addressing from pro-STAR faces -> OpenFOAM faces
         static const int starToFoamFaceAddr[4][6];

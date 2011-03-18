@@ -110,10 +110,10 @@ class cyclicPolyPatch
         void calcTransforms
         (
             const primitivePatch& half0,
-            const UList<point>& half0Ctrs,
-            const UList<point>& half0Areas,
-            const UList<point>& half1Ctrs,
-            const UList<point>& half1Areas
+            const pointField& half0Ctrs,
+            const vectorField& half0Areas,
+            const pointField& half1Ctrs,
+            const vectorField& half1Areas
         );
 
         // Face ordering
@@ -149,9 +149,9 @@ protected:
         virtual void initGeometry
         (
             const primitivePatch& referPatch,
-            UList<point>& nbrCtrs,
-            UList<point>& nbrAreas,
-            UList<point>& nbrCc
+            pointField& nbrCtrs,
+            vectorField& nbrAreas,
+            pointField& nbrCc
         );
 
         //- Calculate the patch geometry
@@ -161,12 +161,12 @@ protected:
         virtual void calcGeometry
         (
             const primitivePatch& referPatch,
-            const UList<point>& thisCtrs,
-            const UList<point>& thisAreas,
-            const UList<point>& thisCc,
-            const UList<point>& nbrCtrs,
-            const UList<point>& nbrAreas,
-            const UList<point>& nbrCc
+            const pointField& thisCtrs,
+            const vectorField& thisAreas,
+            const pointField& thisCc,
+            const pointField& nbrCtrs,
+            const vectorField& nbrAreas,
+            const pointField& nbrCc
         );
 
         //- Initialise the patches for moving points
@@ -341,6 +341,9 @@ public:
 
         //- Transform a patch-based position from other side to this side
         virtual void transformPosition(pointField& l) const;
+
+        //- Transform a patch-based position from other side to this side
+        virtual void transformPosition(point&, const label facei) const;
 
 
         // Transformation

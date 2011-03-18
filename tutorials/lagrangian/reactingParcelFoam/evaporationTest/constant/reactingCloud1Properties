@@ -26,10 +26,10 @@ solution
     {
         schemes
         {
-            rho             explicit;
-            U               explicit;
-            Yi              explicit;
-            hs              explicit;
+            rho             explicit 1;
+            U               explicit 1;
+            Yi              explicit 1;
+            hs              explicit 1;
         }
     }
 

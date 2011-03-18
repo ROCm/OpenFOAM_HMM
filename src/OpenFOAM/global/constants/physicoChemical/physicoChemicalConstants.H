@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ namespace physicoChemical
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     //- Group name for physico-chemical constants
-    extern const char* group;
+    extern const char* const group;
 
     //- Universal gas constant: default SI units: [J/mol/K]
     extern const dimensionedScalar R;
@@ -78,7 +78,3 @@ namespace physicoChemical
 #endif
 
 // ************************************************************************* //
-
-
-
-
