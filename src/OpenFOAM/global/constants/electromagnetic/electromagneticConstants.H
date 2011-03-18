@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ namespace electromagnetic
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     //- Group name for electromagnetic constants
-    extern const char* group;
+    extern const char* const group;
 
     //- Magnetic constant/permeability of free space: default SI units: [H/m]
     extern const dimensionedScalar mu0;
@@ -84,5 +84,3 @@ namespace electromagnetic
 #endif
 
 // ************************************************************************* //
-
-

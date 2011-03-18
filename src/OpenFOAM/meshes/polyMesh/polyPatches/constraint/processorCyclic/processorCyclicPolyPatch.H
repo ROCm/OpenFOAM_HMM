@@ -81,12 +81,12 @@ protected:
         virtual void calcGeometry
         (
             const primitivePatch& referPatch,
-            const UList<point>& thisCtrs,
-            const UList<point>& thisAreas,
-            const UList<point>& thisCc,
-            const UList<point>& nbrCtrs,
-            const UList<point>& nbrAreas,
-            const UList<point>& nbrCc
+            const pointField& thisCtrs,
+            const vectorField& thisAreas,
+            const pointField& thisCc,
+            const pointField& nbrCtrs,
+            const vectorField& nbrAreas,
+            const pointField& nbrCc
         )
         {
             notImplemented("processorCyclicPolyPatch::calcGeometry(..)");
@@ -277,6 +277,12 @@ public:
         virtual void transformPosition(pointField& l) const
         {
             referPatch().transformPosition(l);
+        }
+
+        //- Transform a patch-based position from other side to this side
+        virtual void transformPosition(point& l, const label facei) const
+        {
+            referPatch().transformPosition(l, facei);
         }
 
         //- Are the planes separated.

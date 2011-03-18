@@ -52,11 +52,15 @@ void Foam::particle::correctAfterParallelTransfer
     TrackData& td
 )
 {
-    const processorPolyPatch& ppp =
-        refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchI]);
+    const coupledPolyPatch& ppp =
+        refCast<const coupledPolyPatch>(mesh_.boundaryMesh()[patchI]);
 
     cellI_ = ppp.faceCells()[faceI_];
 
+    // Have patch transform the position
+    ppp.transformPosition(position_, faceI_);
+
+    // Transform the properties
     if (!ppp.parallel())
     {
         const tensor& T =
@@ -65,8 +69,6 @@ void Foam::particle::correctAfterParallelTransfer
           ? ppp.forwardT()[0]
           : ppp.forwardT()[faceI_]
         );
-
-        transformPosition(T);
         transformProperties(T);
     }
     else if (ppp.separated())
@@ -77,7 +79,6 @@ void Foam::particle::correctAfterParallelTransfer
           ? ppp.separation()[0]
           : ppp.separation()[faceI_]
         );
-        position_ -= s;
         transformProperties(-s);
     }
 
@@ -958,19 +959,22 @@ void Foam::particle::hitCyclicPatch
     tetPtI_ = mesh_.faces()[tetFaceI_].size() - 1 - tetPtI_;
 
     const cyclicPolyPatch& receiveCpp = cpp.neighbPatch();
+    label patchFacei = receiveCpp.whichFace(faceI_);
 
     // Now the particle is on the receiving side
 
+    // Have patch transform the position
+    receiveCpp.transformPosition(position_, patchFacei);
+
+    // Transform the properties
     if (!receiveCpp.parallel())
     {
         const tensor& T =
         (
             receiveCpp.forwardT().size() == 1
           ? receiveCpp.forwardT()[0]
-          : receiveCpp.forwardT()[receiveCpp.whichFace(faceI_)]
+          : receiveCpp.forwardT()[patchFacei]
         );
-
-        transformPosition(T);
         transformProperties(T);
     }
     else if (receiveCpp.separated())
@@ -979,9 +983,8 @@ void Foam::particle::hitCyclicPatch
         (
             (receiveCpp.separation().size() == 1)
           ? receiveCpp.separation()[0]
-          : receiveCpp.separation()[receiveCpp.whichFace(faceI_)]
+          : receiveCpp.separation()[patchFacei]
         );
-        position_ -= s;
         transformProperties(-s);
     }
 }
