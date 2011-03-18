@@ -196,7 +196,7 @@
     #+BEGIN_SRC c++
     outlet
     {
-        type            codedFixedValue<scalar>;
+        type            codedFixedValue;
         value           uniform 0;
         redirectType    fixedValue10;
 
