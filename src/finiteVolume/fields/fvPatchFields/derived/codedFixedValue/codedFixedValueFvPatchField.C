@@ -238,6 +238,10 @@ void Foam::codedFixedValueFvPatchField<Type>::createLibrary
         // Write files for new library
         if (!dynCode.upToDate(context))
         {
+            Info<< "Using dynamicCode for patch " << this->patch().name()
+                << " on field " << this->dimensionedInternalField().name()
+                << endl;
+
             // filter with this context
             dynCode.reset(context);
 

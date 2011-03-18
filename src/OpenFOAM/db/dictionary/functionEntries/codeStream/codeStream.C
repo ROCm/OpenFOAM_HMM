@@ -70,6 +70,9 @@ bool Foam::functionEntries::codeStream::execute
     Istream& is
 )
 {
+    Info<< "Using #codeStream at line " << is.lineNumber()
+        << " in file " <<  parentDict.name() << endl;
+
     dynamicCode::checkSecurity
     (
         "functionEntries::codeStream::execute(..)",
