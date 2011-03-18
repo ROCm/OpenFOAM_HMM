@@ -16,11 +16,11 @@ FoamFile
 
 solvers
 {
-    p
+    pcorr
     {
         solver           GAMG;
-        tolerance        1e-7;
-        relTol           0.01;
+        tolerance        0.02;
+        relTol           0;
         smoother         GaussSeidel;
         nPreSweeps       0;
         nPostSweeps      2;
@@ -28,6 +28,13 @@ solvers
         agglomerator     faceAreaPair;
         nCellsInCoarsestLevel 10;
         mergeLevels      1;
+    }
+
+    p
+    {
+        $pcorr
+        tolerance        1e-7;
+        relTol           0.01;
     }
 
     pFinal

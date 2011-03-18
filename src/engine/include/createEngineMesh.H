@@ -9,7 +9,8 @@
             (
                 engineMesh::defaultRegion,
                 runTime.timeName(),
-                runTime
+                runTime,
+                Foam::IOobject::MUST_READ
             )
         )
     );
