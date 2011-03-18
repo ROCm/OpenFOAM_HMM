@@ -60,7 +60,7 @@ laplacianSchemes
     laplacian(DepsilonEff,epsilon) Gauss linear limited 0.5;
     laplacian(DREff,R) Gauss linear limited 0.5;
     laplacian((rho*(1|A(U))),p) Gauss linear limited 0.5;
-    laplacian(muEff,b) Gauss linear limited 0.5;
+    laplacian(alphaEff,b) Gauss linear limited 0.5;
     laplacian(muEff,ft) Gauss linear limited 0.5;
     laplacian(alphaEff,h) Gauss linear limited 0.5;
     laplacian(alphaEff,hu) Gauss linear limited 0.5;
