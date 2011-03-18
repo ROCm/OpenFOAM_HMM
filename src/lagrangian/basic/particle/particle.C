@@ -116,12 +116,6 @@ Foam::particle::particle(const particle& p, const polyMesh& mesh)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::particle::transformPosition(const tensor& T)
-{
-    position_ = transform(T, position_);
-}
-
-
 void Foam::particle::transformProperties(const tensor&)
 {}
 

@@ -26,7 +26,9 @@ FoamFile
 // - specify where the faces should come from
 // - specify the type of cyclic. If a rotational specify the rotationAxis
 //   and centre to make matching easier
-// - pointSync true to guarantee points to line up.
+// - always create both halves in one invocation with correct 'neighbourPatch'
+//   setting.
+// - optionally pointSync true to guarantee points to line up.
 
 // 2. Correct incorrect cyclic:
 // This will usually fail upon loading:
@@ -45,24 +47,23 @@ matchTolerance 1E-3;
 // Do a synchronisation of coupled points after creation of any patches.
 // Note: this does not work with points that are on multiple coupled patches
 //       with transformations.
-pointSync true;
+pointSync false;
 
 // Patches to create.
 patches
 (
     {
         // Name of new patch
-        name sidePatches;
+        name cyc_half0;
 
-        // Type of new patch
+        // Dictionary to construct new patch from
         patchInfo
         {
             type cyclic;
+            neighbourPatch cyc_half1;
 
             // Optional: explicitly set transformation tensor.
             // Used when matching and synchronising points.
-            //transform translational;
-            //separationVector (-2289 0 0);
             transform rotational;
             rotationAxis (1 0 0);
             rotationCentre (0 0 0);
@@ -72,28 +73,37 @@ patches
         constructFrom patches;
 
         // If constructFrom = patches : names of patches. Wildcards allowed.
-        patches ("periodic.*");
+        patches (periodic1);
 
         // If constructFrom = set : name of faceSet
         set f0;
     }
-
     {
-        name bottom;
+        // Name of new patch
+        name cyc_half1;
 
-        // Type of new patch
-        dictionary
+        // Dictionary to construct new patch from
+        patchInfo
         {
-            type wall;
+            type cyclic;
+            neighbourPatch cyc_half0;
+
+            // Optional: explicitly set transformation tensor.
+            // Used when matching and synchronising points.
+            transform rotational;
+            rotationAxis    ( 0 0 1 );
+            rotationCentre  ( 0.3 0 0 );
         }
 
-        constructFrom set;
+        // How to construct: either from 'patches' or 'set'
+        constructFrom patches;
 
-        patches ();
+        // If constructFrom = patches : names of patches. Wildcards allowed.
+        patches (periodic2);
 
-        set bottomFaces;
+        // If constructFrom = set : name of faceSet
+        set f0;
     }
-
 );
 
 // ************************************************************************* //

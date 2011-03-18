@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -208,14 +208,7 @@ Foam::tmp<Foam::scalarField> Foam::constSolidThermo::K
     const label patchI
 ) const
 {
-     return tmp<scalarField>
-    (
-        new scalarField
-        (
-            T_.boundaryField()[patchI].size(),
-            constK_.value()
-        )
-    );
+    return (K_.boundaryField()[patchI]);
 }
 
 
