@@ -385,17 +385,17 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                     //                 DynamicList<label>& iVertexToProc =
                     //                     verticesToProc[ivIndex];
 
-                                    // if
-                                    // (
-                                    //     findIndex
-                                    //     (
-                                    //         iVertexToProc,
-                                    //         toProc
-                                    //     ) == -1
-                                    // )
-                                    // {
-                                    //     iVertexToProc.append(toProc);
-                                    // }
+                    //                 if
+                    //                 (
+                    //                     findIndex
+                    //                     (
+                    //                         iVertexToProc,
+                    //                         toProc
+                    //                     ) == -1
+                    //                 )
+                    //                 {
+                    //                     iVertexToProc.append(toProc);
+                    //                 }
                     //             }
                     //         }
                     //     }
@@ -451,11 +451,14 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                 }
             }
 
-            writePoints
-            (
-                "parallelInterfacePointsToSend_" + name(nIter) + ".obj",
-                parallelInterfacePoints
-            );
+            if (cvMeshControls().objOutput())
+            {
+                writePoints
+                (
+                    "parallelInterfacePointsToSend_" + name(nIter) + ".obj",
+                    parallelInterfacePoints
+                );
+            }
 
             // Determine send map
             // ~~~~~~~~~~~~~~~~~~
@@ -540,11 +543,14 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
             pointMap.distribute(parallelInterfaceIndices);
 
-            writePoints
-            (
-                "parallelInterfacePointsReceived_"+ name(nIter) + ".obj",
-                parallelInterfacePoints
-            );
+            if (cvMeshControls().objOutput())
+            {
+                writePoints
+                (
+                    "parallelInterfacePointsReceived_"+ name(nIter) + ".obj",
+                    parallelInterfacePoints
+                );
+            }
 
             for (label domain = 0; domain < Pstream::nProcs(); domain++)
             {
@@ -903,6 +909,12 @@ Foam::conformalVoronoiMesh::parallelInterfaceIntersection
     std::list<Facet> facets;
     incident_facets(vit, std::back_inserter(facets));
 
+    // Pout<< "# " << label(vit->index()) << " facets size "
+    //     << label(facets.size())
+    //     << endl;
+
+    // bool anyCuts = false;
+
     DynamicList<label> procs;
 
     for
@@ -927,20 +939,72 @@ Foam::conformalVoronoiMesh::parallelInterfaceIntersection
         Foam::point boxPt(vector::one*GREAT);
         direction ptOnFace = -1;
 
-        geometryToConformTo_.bounds().intersects
+        // bool cuts =
+        //     (
+        //         geometryToConformTo_.bounds().contains(dE0)
+        //      && !geometryToConformTo_.bounds().contains(dE1)
+        //     )
+        //  || (
+        //         !geometryToConformTo_.bounds().contains(dE0)
+        //      && geometryToConformTo_.bounds().contains(dE1)
+        //     );
+
+        // anyCuts =
+        //      !geometryToConformTo_.bounds().contains(dE1)
+        //   ||
+        //      !geometryToConformTo_.bounds().contains(dE0);
+
+        Foam::point start = dE0;
+        Foam::point end   = dE1;
+
+        bool intersects = geometryToConformTo_.bounds().intersects
         (
-            dE0,
-            dE1 - dE0,
-            dE0,
-            dE1,
+            start,
+            end - start,
+            start,
+            end,
             boxPt,
             ptOnFace
         );
 
+        if (intersects && ptOnFace == 0)
+        {
+            // If the box is intersected, but doesn't return the appropriate
+            // bits, then this means that the start point was inside the box,
+            // so reverse the direction of the query.
+
+            start = dE1;
+            end   = dE0;
+
+            geometryToConformTo_.bounds().intersects
+            (
+                start,
+                end - start,
+                start,
+                end,
+                boxPt,
+                ptOnFace
+            );
+        }
+
+        // Pout<< "# " << label(vit->index())
+        //     << " Dual edge cuts " << cuts
+        //     << " intersects " << intersects
+        //     << " ptOnFace " << ptOnFace
+        //     << endl;
+
+        // meshTools::writeOBJ(Pout, dE0);
+        // meshTools::writeOBJ(Pout, dE1);
+
+        // Pout << "l dE0 dE1" << endl;
+
+        // If an intersection with the box has been found, then it is the "end"
+        // point that is inside the box, so test the line from end to
+        // boxPt to see if the surface is in-between.
         if
         (
             ptOnFace > 0
-         && !geometryToConformTo_.findSurfaceAnyIntersection(dE0, dE1)
+         && !geometryToConformTo_.findSurfaceAnyIntersection(end, boxPt)
         )
         {
             // A surface penetration is not found, and a bounds penetration is
@@ -960,11 +1024,18 @@ Foam::conformalVoronoiMesh::parallelInterfaceIntersection
             // Pout<< "Parallel box penetration, face " << ptOnFace
             //     << " proc " << target << endl;
             // meshTools::writeOBJ(Pout, dE0);
-            // meshTools::writeOBJ(Pout, dE1);
             // meshTools::writeOBJ(Pout, boxPt);
-            // Pout << "l dE0 dE1" << endl;
+            // meshTools::writeOBJ(Pout, dE1);
+            // Pout << "l dE0 boxPt dE1" << endl;
         }
     }
+
+    // if (anyCuts && procs.empty())
+    // {
+    //     Pout<< "# " << label(vit->index())
+    //         << " anyCuts && procs.empty()"
+    //         << endl;
+    // }
 
     return procs;
 }
@@ -977,6 +1048,11 @@ Foam::label Foam::conformalVoronoiMesh::targetProc
 {
     // Hard coded to 8 proc, bound-box octant split:
 
+    if (ptOnFace == 0)
+    {
+        return -1;
+    }
+
     label faceIndex = 0;
 
     // From: http://graphics.stanford.edu/~seander/bithacks.html
@@ -987,10 +1063,10 @@ Foam::label Foam::conformalVoronoiMesh::targetProc
 
     label procArray[8][6] =
     {
-        {-1,  1, -1,  2, -1, 4},
-        { 0, -1, -1,  3, -1, 5},
-        {-1,  3,  0, -1, -1, 6},
-        { 2, -1,  1, -1, -1, 7},
+        {-1,  1, -1,  2, -1,  4},
+        { 0, -1, -1,  3, -1,  5},
+        {-1,  3,  0, -1, -1,  6},
+        { 2, -1,  1, -1, -1,  7},
         {-1,  5, -1,  6,  0, -1},
         { 4, -1, -1,  7,  1, -1},
         {-1,  7,  4, -1,  2, -1},

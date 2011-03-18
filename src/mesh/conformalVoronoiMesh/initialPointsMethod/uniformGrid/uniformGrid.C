@@ -100,9 +100,9 @@ std::vector<Vb::Point> uniformGrid::initialPoints() const
             {
                 point p
                 (
-                    x0 + i*delta.x(),
-                    y0 + j*delta.y(),
-                    z0 + k*delta.z()
+                    x0 + (i + 0.5)*delta.x(),
+                    y0 + (j + 0.5)*delta.y(),
+                    z0 + (k + 0.5)*delta.z()
                 );
 
                 if (randomiseInitialGrid_)

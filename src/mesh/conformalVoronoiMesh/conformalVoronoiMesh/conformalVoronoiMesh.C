@@ -493,13 +493,13 @@ void Foam::conformalVoronoiMesh::createFeaturePoints()
     pointField farPts = geometryToConformTo_.globalBounds().points();
 
     // Shift corners of bounds relative to origin
-    farPts -= geometryToConformTo_.bounds().midpoint();
+    farPts -= geometryToConformTo_.globalBounds().midpoint();
 
     // Scale the box up
     farPts *= 2.0;
 
     // Shift corners of bounds back to be relative to midpoint
-    farPts += geometryToConformTo_.bounds().midpoint();
+    farPts += geometryToConformTo_.globalBounds().midpoint();
 
     forAll(farPts, fPI)
     {
