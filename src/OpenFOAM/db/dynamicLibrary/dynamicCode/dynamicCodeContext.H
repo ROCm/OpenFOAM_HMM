@@ -66,6 +66,9 @@ class dynamicCodeContext
         //- Optional "codeOptions" entry
         string options_;
 
+        //- Optional "codeLib" entry
+        string libs_;
+
         //- Calculated SHA1Digest
         SHA1Digest sha1_;
 
@@ -94,6 +97,12 @@ public:
         const string& options() const
         {
             return options_;
+        }
+
+        //- Return the code-libs
+        const string& libs() const
+        {
+            return libs_;
         }
 
         //- Return the code

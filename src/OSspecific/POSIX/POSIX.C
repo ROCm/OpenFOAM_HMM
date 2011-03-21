@@ -37,6 +37,7 @@ Description
 #include "fileStat.H"
 #include "timer.H"
 #include "IFstream.H"
+#include "DynamicList.H"
 
 #include <fstream>
 #include <cstdlib>
@@ -52,6 +53,7 @@ Description
 #include <sys/socket.h>
 #include <netdb.h>
 #include <dlfcn.h>
+#include <link.h>
 
 #include <netinet/in.h>
 
@@ -1107,10 +1109,20 @@ void* Foam::dlOpen(const fileName& lib)
 {
     if (POSIX::debug)
     {
-        Info<< "dlOpen(const fileName&)"
-            << " : dlopen of " << lib << endl;
+        std::cout<< "dlOpen(const fileName&)"
+            << " : dlopen of " << lib << std::endl;
     }
-    return ::dlopen(lib.c_str(), RTLD_LAZY|RTLD_GLOBAL);
+    void* handle = ::dlopen(lib.c_str(), RTLD_LAZY|RTLD_GLOBAL);
+
+    if (POSIX::debug)
+    {
+        std::cout
+            << "dlOpen(const fileName&)"
+            << " : dlopen of " << lib
+            << " handle " << handle << std::endl;
+    }
+
+    return handle;
 }
 
 
@@ -1118,8 +1130,9 @@ bool Foam::dlClose(void* handle)
 {
     if (POSIX::debug)
     {
-        Info<< "dlClose(void*)"
-            << " : dlclose" << endl;
+        std::cout
+            << "dlClose(void*)"
+            << " : dlclose of handle " << handle << std::endl;
     }
     return ::dlclose(handle) == 0;
 }
@@ -1129,8 +1142,9 @@ void* Foam::dlSym(void* handle, const std::string& symbol)
 {
     if (POSIX::debug)
     {
-        Info<< "dlSym(void*, const std::string&)"
-            << " : dlsym of " << symbol << endl;
+        std::cout
+            << "dlSym(void*, const std::string&)"
+            << " : dlsym of " << symbol << std::endl;
     }
     // clear any old errors - see manpage dlopen
     (void) ::dlerror();
@@ -1158,8 +1172,9 @@ bool Foam::dlSymFound(void* handle, const std::string& symbol)
     {
         if (POSIX::debug)
         {
-            Info<< "dlSymFound(void*, const std::string&)"
-                << " : dlsym of " << symbol << endl;
+            std::cout
+                << "dlSymFound(void*, const std::string&)"
+                << " : dlsym of " << symbol << std::endl;
         }
 
         // clear any old errors - see manpage dlopen
@@ -1175,6 +1190,34 @@ bool Foam::dlSymFound(void* handle, const std::string& symbol)
     {
         return false;
     }
+}
+
+
+static int collectLibsCallback
+(
+    struct dl_phdr_info *info,
+    size_t size,
+    void *data
+)
+{
+    Foam::DynamicList<Foam::fileName>* ptr =
+        reinterpret_cast<Foam::DynamicList<Foam::fileName>*>(data);
+    ptr->append(info->dlpi_name);
+    return 0;
+}
+
+
+Foam::fileNameList Foam::dlLoaded()
+{
+    DynamicList<fileName> libs;
+    dl_iterate_phdr(collectLibsCallback, &libs);
+    if (POSIX::debug)
+    {
+        std::cout
+            << "dlLoaded()"
+            << " : determined loaded libraries :" << libs.size() << endl;
+    }
+    return libs;
 }
 
 

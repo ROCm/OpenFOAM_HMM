@@ -196,6 +196,9 @@ void* dlSym(void* handle, const std::string& symbol);
 //- Report if symbol in a dlopened library could be found
 bool dlSymFound(void* handle, const std::string& symbol);
 
+//- Return all loaded libraries
+fileNameList dlLoaded();
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

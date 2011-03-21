@@ -198,7 +198,7 @@
     {
         type            codedFixedValue;
         value           uniform 0;
-        redirectType    fixedValue10;
+        redirectType    ramped;
 
         code
         #{

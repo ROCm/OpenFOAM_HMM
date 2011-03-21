@@ -136,7 +136,9 @@ bool Foam::functionEntries::codeStream::execute
                 (
                     "EXE_INC = -g \\\n"
                   + context.options()
-                  + "\n\nLIB_LIBS ="
+                  + "\n\nLIB_LIBS = \\\n"
+                  + "    -lOpenFOAM \\\n"
+                  + context.libs()
                 );
 
                 if (!dynCode.copyOrCreateFiles(true))
@@ -172,6 +174,8 @@ bool Foam::functionEntries::codeStream::execute
                 "functionEntries::codeStream::execute(..)",
                 parentDict
             )   << "Failed loading library " << libPath << nl
+                << "Did you add all libraries to the 'libs' entry"
+                << " in system/controlDict?"
                 << exit(FatalIOError);
         }
 

@@ -37,7 +37,8 @@ Foam::dynamicCodeContext::dynamicCodeContext(const dictionary& dict)
     code_(stringOps::trim(dict["code"])),
     localCode_(),
     include_(),
-    options_()
+    options_(),
+    libs_()
 {
     // expand dictionary entries
     stringOps::inplaceExpand(code_, dict);
@@ -67,9 +68,16 @@ Foam::dynamicCodeContext::dynamicCodeContext(const dictionary& dict)
         stringOps::inplaceExpand(options_, dict);
     }
 
+    // optional
+    if (dict.found("codeLibs"))
+    {
+        libs_ = stringOps::trim(dict["codeLibs"]);
+        stringOps::inplaceExpand(libs_, dict);
+    }
+
     // calculate SHA1 digest from include, options, localCode, code
     OSHA1stream os;
-    os  << include_ << options_ << localCode_ << code_;
+    os  << include_ << options_ << libs_ << localCode_ << code_;
     sha1_ = os.digest();
 }
 

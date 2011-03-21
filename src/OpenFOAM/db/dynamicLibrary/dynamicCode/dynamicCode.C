@@ -31,8 +31,6 @@ License
 #include "OFstream.H"
 #include "OSspecific.H"
 #include "dictionary.H"
-#include "dlLibraryTable.H"
-
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -555,24 +553,6 @@ bool Foam::dynamicCode::upToDate(const dynamicCodeContext& context) const
 {
     return upToDate(context.sha1());
 }
-
-
-// bool Foam::dynamicCode::openLibrary() const
-// {
-//     return dlLibraryTable::openLibrary(this->libPath(), false);
-// }
-//
-//
-// bool Foam::dynamicCode::closeLibrary() const
-// {
-//     return dlLibraryTable::closeLibrary(this->libPath(), false);
-// }
-//
-//
-// void* Foam::dynamicCode::findLibrary() const
-// {
-//     return dlLibraryTable::findLibrary(this->libPath());
-// }
 
 
 // ************************************************************************* //

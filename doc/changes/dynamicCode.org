@@ -26,6 +26,10 @@
 
   Example: Look up dictionary entries and do some calculation
   #+BEGIN_SRC c++
+
+    // For paraFoam's sake re-load in OpenFOAM library with exported symbols
+    libs            ("libOpenFOAM.so");
+
     startTime       0;
     endTime         100;
     ..
@@ -46,7 +50,7 @@
     =code=, =codeInclude=, =codeOptions= sections (these are just strings) and
     calculates the SHA1 checksum of the contents.
   - it copies a template file
-    =(~OpenFOAM/codeTemplates/dynamicCode/codeStreamTemplate.C)= or
+    =(etc/codeTemplates/dynamicCode/codeStreamTemplate.C)= or
     =($FOAM_CODE_TEMPLATES/codeStreamTemplate.C)=, substituting all
     occurences of =code=, =codeInclude=, =codeOptions=.
   - it writes library source files to =dynamicCode/<SHA1>= and compiles
@@ -60,7 +64,7 @@
 
 * Boundary condition: =codedFixedValue=
   This uses the code from codeStream to have an in-line specialised
-  =fixedValueFvPatchScalarField=. For now only for scalars:
+  =fixedValueFvPatchField=.
   #+BEGIN_SRC c++
   outlet
   {
@@ -76,6 +80,11 @@
   #+END_SRC
   It by default always includes =fvCFD.H= and adds the =finiteVolume= library to
   the include search path.
+
+  When postprocessing using paraFoam it requires one to add the used libraries
+  to the libs entry so in the system/controlDict:
+
+    libs            ("libOpenFOAM.so" "libfiniteVolume.so");
 
   A special form is where the code is not supplied in-line but instead comes
   from the =codeDict= dictionary in the =system= directory. It should contain
@@ -159,6 +168,19 @@
   just preserves the entries as strings (including all formatting).
 
 * Other
+  - paraFoam: paraview does not export symbols on loaded libraries
+    (more specific : it does not add 'RTLD_GLOBAL' to the dlopen flags) so
+    one will have to add the used libraries (libOpenFOAM, libfiniteVolume,
+    lib..) to the 'libs' entry in system/controlDict to prevent getting
+    an error of the form
+
+        --> FOAM FATAL IO ERROR:
+        Failed loading library "libcodeStream_3cd388ceb070a2f8b0ae61782adbc21c5687ce6f.so"
+
+    This will force re-loading
+    these libraries, this time exporting the symbols so the generated library
+    can be loaded.
+
   - parallel running not tested a lot. What about distributed data
     (i.e. non-=NFS=) parallel?
   - paraview has been patched so it will pass in RTLD_GLOBAL when loading

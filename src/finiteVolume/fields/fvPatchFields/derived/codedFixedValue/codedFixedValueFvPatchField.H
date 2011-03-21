@@ -80,6 +80,9 @@ SourceFiles
 
 #include "fixedValueFvPatchFields.H"
 
+#include <dlfcn.h>
+#include <link.h>
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -118,6 +121,13 @@ class codedFixedValueFvPatchField
 
         //- Global loader/unloader function type
         typedef void (*loaderFunctionType)(bool);
+
+        static int collectLibsCallback
+        (
+            struct dl_phdr_info *info,
+            size_t size,
+            void *data
+        );
 
         //- Load specified library and execute globalFuncName(true)
         static void* loadLibrary
