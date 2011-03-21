@@ -90,7 +90,7 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
             mesh_.time().timeName(),
             mesh_,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            IOobject::NO_WRITE
         ),
         mesh_,
         dimensionedScalar("a", dimless/dimLength, 0.0)

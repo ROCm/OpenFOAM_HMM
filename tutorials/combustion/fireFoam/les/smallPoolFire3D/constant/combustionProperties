@@ -20,7 +20,7 @@ combustionModel    infinitelyFastChemistry;
 
 infinitelyFastChemistryCoeffs
 {
-    C       10.0;
+    C       5.0;
 }
 
 noCombustionCoeffs
