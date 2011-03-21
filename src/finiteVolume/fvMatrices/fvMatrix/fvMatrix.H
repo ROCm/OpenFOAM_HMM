@@ -460,6 +460,7 @@ public:
 
         void operator*=(const DimensionedField<scalar, volMesh>&);
         void operator*=(const tmp<DimensionedField<scalar, volMesh> >&);
+        void operator*=(const volScalarField&);
         void operator*=(const tmp<volScalarField>&);
 
         void operator*=(const dimensioned<scalar>&);
