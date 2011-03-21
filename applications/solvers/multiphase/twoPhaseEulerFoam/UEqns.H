@@ -3,7 +3,7 @@ fvVectorMatrix UbEqn(Ub, Ub.dimensions()*dimVol/dimTime);
 
 {
     {
-        volTensorField gradUaT(fvc::grad(Ua)().T());
+        volTensorField gradUaT(T(fvc::grad(Ua)));
 
         if (kineticTheory.on())
         {
@@ -58,7 +58,7 @@ fvVectorMatrix UbEqn(Ub, Ub.dimensions()*dimVol/dimTime);
     }
 
     {
-        volTensorField gradUbT(fvc::grad(Ub)().T());
+        volTensorField gradUbT(T(fvc::grad(Ub)));
         volTensorField Rcb
         (
             "Rcb",
