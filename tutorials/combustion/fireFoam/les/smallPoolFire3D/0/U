@@ -32,8 +32,8 @@ boundaryField
     sides
     {
         type            pressureInletOutletVelocity;
-        outletValue     uniform (0 0 0);
         value           uniform (0 0 0);
+        phi             phi;
     }
     base
     {
@@ -43,7 +43,7 @@ boundaryField
     inlet
     {
         type            fixedValue;
-        value           uniform (0 0.05 0);
+        value           uniform (0 0.01 0);
     }
 
 }
