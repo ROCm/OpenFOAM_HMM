@@ -474,6 +474,10 @@ private:
             label& hitSurfaceLargest
         ) const;
 
+        //- Write out debugging information about the surface conformation
+        //  quality
+        void reportSurfaceConformationQuality();
+
         //- Limit the displacement of a point so that it doesn't penetrate the
         //  surface to be meshed or come too close to it
         void limitDisplacement

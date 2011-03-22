@@ -368,115 +368,9 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
         }
     }
 
-    // Info<< nl << "After iterations, check penetrations" << endl;
+    //reportSurfaceConformationQuality();
 
-    // for
-    // (
-    //     Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-    //     vit != finite_vertices_end();
-    //     vit++
-    // )
-    // {
-    //     if (vit->internalOrBoundaryPoint())
-    //     {
-    //         Foam::point vert(topoint(vit->point()));
-    //         pointIndexHit surfHit;
-    //         label hitSurface;
-
-    //         dualCellLargestSurfaceProtrusion(vit, surfHit, hitSurface);
-
-    //         if (surfHit.hit())
-    //         {
-    //             Info<< nl << "Residual penetration: " << nl
-    //                 << vit->index() << nl
-    //                 << vit->type() << nl
-    //                 << vit->ppMaster() << nl
-    //                 << "nearFeaturePt "
-    //                 << nearFeaturePt(surfHit.hitPoint()) << nl
-    //                 << vert << nl
-    //                 << surfHit.hitPoint()
-    //                 << endl;
-    //         }
-    //     }
-    // }
-
-    // {
-    //     // TEST - ASSESS CLOSE SURFACE POINTS
-
-    //     setVertexSizeAndAlignment();
-
-    //     for
-    //     (
-    //         Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-    //         vit != finite_vertices_end();
-    //         vit++
-    //     )
-    //     {
-    //         if
-    //         (
-    //             vit->index() >= startOfSurfacePoints_
-    //          && vit->internalOrBoundaryPoint()
-    //         )
-    //         {
-    //             std::list<Vertex_handle> adjacentVertices;
-
-    //             adjacent_vertices(vit, std::back_inserter(adjacentVertices));
-
-    //             Foam::point pt = topoint(vit->point());
-
-    //             // Info<< nl << "vit: " << vit->index() << " "
-    //             //     << topoint(vit->point())
-    //             //     << endl;
-
-    //             // Info<< adjacentVertices.size() << endl;
-
-    //             for
-    //             (
-    //                 std::list<Vertex_handle>::iterator
-    //                 avit = adjacentVertices.begin();
-    //                 avit != adjacentVertices.end();
-    //                 ++avit
-    //             )
-    //             {
-    //                 Vertex_handle avh = *avit;
-
-    //                 // The lower indexed vertex will perform the assessment
-    //                 if
-    //                 (
-    //                     avh->index() >= startOfSurfacePoints_
-    //                  && avh->internalOrBoundaryPoint()
-    //                  && vit->index() < avh->index()
-    //                  && vit->type() != avh->type()
-    //                 )
-    //                 {
-    //                     scalar targetSize = 0.2*averageAnyCellSize(vit, avh);
-
-    //                     // Info<< "diff " << mag(pt - topoint(avh->point()))
-    //                     //     << " " << targetSize << endl;
-
-    //                     if
-    //                     (
-    //                         magSqr(pt - topoint(avh->point()))
-    //                       < sqr(targetSize)
-    //                     )
-    //                     {
-    //                         Info<< nl << "vit: " << vit->index() << " "
-    //                             << topoint(vit->point())
-    //                             << endl;
-
-    //                         Info<< "    adjacent too close: "
-    //                             << avh->index() << " "
-    //                             << topoint(avh->point())
-    //                             << endl;
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-
-    Pout<< "NOT STORING SURFACE CONFORMATION" << endl;
-    // storeSurfaceConformation();
+    storeSurfaceConformation();
 }
 
 
@@ -1287,6 +1181,117 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceIncursion
                     // meshTools::writeOBJ(Info, vert);
                     // meshTools::writeOBJ(Info, edgeMid);
                     // Info<< "l Na Nb" << endl;
+                }
+            }
+        }
+    }
+}
+
+
+void Foam::conformalVoronoiMesh::reportSurfaceConformationQuality()
+{
+    Info<< nl << "Check surface conformation quality" << endl;
+
+    for
+    (
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        vit++
+    )
+    {
+        if (vit->internalOrBoundaryPoint())
+        {
+            Foam::point vert(topoint(vit->point()));
+            pointIndexHit surfHit;
+            label hitSurface;
+
+            dualCellLargestSurfaceProtrusion(vit, surfHit, hitSurface);
+
+            if (surfHit.hit())
+            {
+                Pout<< nl << "Residual penetration: " << nl
+                    << vit->index() << nl
+                    << vit->type() << nl
+                    << vit->ppMaster() << nl
+                    << "nearFeaturePt "
+                    << nearFeaturePt(surfHit.hitPoint()) << nl
+                    << vert << nl
+                    << surfHit.hitPoint()
+                    << endl;
+            }
+        }
+    }
+
+    {
+        // Assess close surface points
+
+        setVertexSizeAndAlignment();
+
+        for
+        (
+            Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+            vit != finite_vertices_end();
+            vit++
+        )
+        {
+            if
+            (
+                vit->index() >= startOfSurfacePoints_
+             && vit->internalOrBoundaryPoint()
+            )
+            {
+                std::list<Vertex_handle> adjacentVertices;
+
+                adjacent_vertices(vit, std::back_inserter(adjacentVertices));
+
+                Foam::point pt = topoint(vit->point());
+
+                // Pout<< nl << "vit: " << vit->index() << " "
+                //     << topoint(vit->point())
+                //     << endl;
+
+                // Pout<< adjacentVertices.size() << endl;
+
+                for
+                (
+                    std::list<Vertex_handle>::iterator
+                    avit = adjacentVertices.begin();
+                    avit != adjacentVertices.end();
+                    ++avit
+                )
+                {
+                    Vertex_handle avh = *avit;
+
+                    // The lower indexed vertex will perform the assessment
+                    if
+                    (
+                        avh->index() >= startOfSurfacePoints_
+                     && avh->internalOrBoundaryPoint()
+                     && vit->index() < avh->index()
+                     && vit->type() != avh->type()
+                    )
+                    {
+                        scalar targetSize = 0.2*averageAnyCellSize(vit, avh);
+
+                        // Pout<< "diff " << mag(pt - topoint(avh->point()))
+                        //     << " " << targetSize << endl;
+
+                        if
+                        (
+                            magSqr(pt - topoint(avh->point()))
+                          < sqr(targetSize)
+                        )
+                        {
+                            Pout<< nl << "vit: " << vit->index() << " "
+                                << topoint(vit->point())
+                                << endl;
+
+                            Pout<< "    adjacent too close: "
+                                << avh->index() << " "
+                                << topoint(avh->point())
+                                << endl;
+                        }
+                    }
                 }
             }
         }
