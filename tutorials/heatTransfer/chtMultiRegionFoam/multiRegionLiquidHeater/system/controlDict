@@ -52,11 +52,4 @@ maxDi           10.0;
 
 adjustTimeStep  yes;
 
-libs
-(
-    "libOpenFOAM.so"
-    "libcompressibleTurbulenceModel.so"
-    "libcompressibleRASModels.so"
-);
-
 // ************************************************************************* //

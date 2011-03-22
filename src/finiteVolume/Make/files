@@ -114,7 +114,6 @@ derivedFvPatchFields = $(fvPatchFields)/derived
 $(derivedFvPatchFields)/activeBaffleVelocity/activeBaffleVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/activePressureForceBaffleVelocity/activePressureForceBaffleVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/advective/advectiveFvPatchFields.C
-/* $(derivedFvPatchFields)/codedFixedValue/codedFixedValueFvPatchScalarField.C */
 $(derivedFvPatchFields)/codedFixedValue/codedFixedValueFvPatchFields.C
 $(derivedFvPatchFields)/directMappedField/directMappedFieldFvPatchFields.C
 $(derivedFvPatchFields)/directMappedFixedInternalValue/directMappedFixedInternalValueFvPatchFields.C

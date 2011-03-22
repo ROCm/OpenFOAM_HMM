@@ -36,15 +36,12 @@ Foam::label Foam::PatchPostProcessing<CloudType>::applyToPatch
     const label globalPatchI
 ) const
 {
-    label patchI = 0;
-    forAllConstIter(labelHashSet, patchIDs_, iter)
+    forAll(patchIDs_, i)
     {
-        if (iter.key() == globalPatchI)
+        if (patchIDs_[i] == globalPatchI)
         {
-            return patchI;
+            return i;
         }
-
-        patchI++;
     }
 
     return -1;
@@ -105,7 +102,7 @@ void Foam::PatchPostProcessing<CloudType>::write()
             );
             sort(globalData);
 
-            patchOutFile<< "# Time " + parcelType::propHeader << nl;
+            patchOutFile<< "# Time currentProc " + parcelType::propHeader << nl;
 
             forAll(globalData, dataI)
             {
@@ -135,6 +132,7 @@ Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
     const wordList allPatchNames = owner.mesh().boundaryMesh().names();
     wordList patchName(this->coeffDict().lookup("patches"));
 
+    labelHashSet uniquePatchIDs;
     forAllReverse(patchName, i)
     {
         labelList patchIDs = findStrings(patchName[i], allPatchNames);
@@ -152,9 +150,18 @@ Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
                 << endl;
         }
 
-        forAll(patchIDs, j)
+        uniquePatchIDs.insert(patchIDs);
+    }
+
+    patchIDs_ = uniquePatchIDs.toc();
+
+    if (debug)
+    {
+        forAll(patchIDs_, i)
         {
-            patchIDs_.insert(patchIDs[j]);
+            const label patchI = patchIDs_[i];
+            const word& patchName = owner.mesh().boundaryMesh()[patchI].name();
+            Info<< "Post-process patch " << patchName << endl;
         }
     }
 
@@ -195,7 +202,8 @@ void Foam::PatchPostProcessing<CloudType>::postPatch
     if (localPatchI != -1 && patchData_[localPatchI].size() < maxStoredParcels_)
     {
         OStringStream data;
-        data<< this->owner().time().timeName() << ' ' << p;
+        data<< this->owner().time().timeName() << ' ' << Pstream::myProcNo()
+            << ' ' << p;
         patchData_[localPatchI].append(data.str());
     }
 }
