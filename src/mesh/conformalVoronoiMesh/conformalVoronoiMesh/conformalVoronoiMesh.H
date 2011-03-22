@@ -133,8 +133,9 @@ private:
         //- Keep track of the start of the internal points
         label startOfInternalPoints_;
 
-        //- Keep track of the start of the surface point-pairs
-        label startOfSurfacePointPairs_;
+        //- Keep track of the start of the surface conformation points
+        //  (including those referred for parallel conformation)
+        label startOfSurfacePoints_;
 
         //- Store the feature constraining points to be reinserted after a
         //  triangulation clear

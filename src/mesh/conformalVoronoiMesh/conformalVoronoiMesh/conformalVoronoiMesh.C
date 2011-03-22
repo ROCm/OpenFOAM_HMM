@@ -1204,7 +1204,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     ),
     cvMeshControls_(*this, cvMeshDict),
     startOfInternalPoints_(0),
-    startOfSurfacePointPairs_(0),
+    startOfSurfacePoints_(0),
     featureVertices_(),
     featurePointLocations_(),
     featurePointTreePtr_(),
@@ -1318,11 +1318,11 @@ void Foam::conformalVoronoiMesh::move()
 
     vectorField displacementAccumulator
     (
-        startOfSurfacePointPairs_,
+        startOfSurfacePoints_,
         vector::zero
     );
 
-    PackedBoolList pointToBeRetained(startOfSurfacePointPairs_, true);
+    PackedBoolList pointToBeRetained(startOfSurfacePoints_, true);
 
     std::vector<Point> pointsToInsert;
 
@@ -1621,7 +1621,7 @@ void Foam::conformalVoronoiMesh::move()
 
     insertPoints(pointsToInsert);
 
-    startOfSurfacePointPairs_ = number_of_vertices();
+    startOfSurfacePoints_ = number_of_vertices();
 
     label pointsRemoved =
         displacementAccumulator.size()
