@@ -203,7 +203,7 @@ public:
     // is this a referred vertex
     inline bool referred() const
     {
-        return type_ < 0 && type_ > ptFarPoint;
+        return (type_ < 0 && type_ > ptFarPoint);
     }
 
 
@@ -217,11 +217,11 @@ public:
     // is this a referred external (pair slave) vertex
     inline bool referredExternal() const
     {
-        return referred() && index_ == -1;
+        return referred() && index_ < 0;
     }
 
 
-    // For referred vertices, what is the processor index
+    // For referred vertices, what is the original processor index
     inline int procIndex() const
     {
         if (referred())
@@ -266,7 +266,7 @@ public:
     //- Master of a pointPair is the lowest numbered one.
     inline bool ppMaster() const
     {
-        if (type_ > index_)
+        if (index_ >= 0 && type_ > index_)
         {
             return true;
         }

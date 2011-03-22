@@ -1861,7 +1861,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
     procNeighbours[defaultPatchIndex] = -1;
     patchNames[defaultPatchIndex] = "cvMesh_defaultPatch";
 
-    Pout<< patchTypes << " " << patchNames << endl;
+    // Pout<< patchTypes << " " << patchNames << endl;
 
     label nPatches = patchNames.size();
 
@@ -1923,8 +1923,8 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 
                     if (vA->referredInternal() || vB->referredInternal())
                     {
-                        // One (and only one) of the points is from another
-                        // processor
+                        // One (and only one) of the points is an internal
+                        // point from another processor
 
                         label procIndex = max(vA->procIndex(), vB->procIndex());
 

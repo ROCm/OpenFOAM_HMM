@@ -426,6 +426,22 @@ private:
             const Delaunay::Finite_vertices_iterator& vit
         ) const;
 
+        //- Build the parallelInterfaces of the mesh
+        void buildParallelInterface();
+
+        //- Build map to refer vertices to target processors
+        mapDistribute buildReferringMap
+        (
+            const DynamicList<label>& targetProcessor
+        ) const;
+
+        void referVertices
+        (
+            const DynamicList<label>& targetProcessor,
+            DynamicList<Foam::point>& parallelInterfacePoints,
+            DynamicList<label>& parallelInterfaceIndices
+        );
+
         //- Check to see if dual cell specified by given vertex iterator
         //  intersects the parallel interface, hence needs referred.  Returns
         //  destination processor(s).
