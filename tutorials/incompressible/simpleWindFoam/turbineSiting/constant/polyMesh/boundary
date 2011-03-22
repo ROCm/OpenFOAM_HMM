@@ -15,31 +15,43 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-4
+6
 (
-    base
-    {
-        type            patch;
-        nFaces          3456;
-        startFace       637200;
-    }
     outlet
     {
         type            patch;
-        nFaces          3600;
-        startFace       640656;
+        nFaces          922;
+        startFace       364825;
     }
     sides
     {
         type            patch;
-        nFaces          14400;
-        startFace       644256;
+        nFaces          1834;
+        startFace       365747;
     }
     inlet
     {
         type            patch;
-        nFaces          144;
-        startFace       658656;
+        nFaces          923;
+        startFace       367581;
+    }
+    ground
+    {
+        type            wall;
+        nFaces          0;
+        startFace       368504;
+    }
+    top
+    {
+        type            patch;
+        nFaces          900;
+        startFace       368504;
+    }
+    terrain_patch0
+    {
+        type            wall;
+        nFaces          18201;
+        startFace       369404;
     }
 )
 

@@ -19,7 +19,7 @@ runParallel snappyHexMesh 2 -overwrite
 # Add wildcard entries for meshed patches since not preserved
 # by decomposePar. Notice -literalRE option to add wildcard itself
 # without evaluation.
-runParallel changeDictionary 2 -literalRE
+runParallel changeDictionary 2 -literalRE -enableFunctionEntries
 
 cp system/decomposeParDict-4proc system/decomposeParDict
 runParallel redistributeMeshPar 4 -overwrite

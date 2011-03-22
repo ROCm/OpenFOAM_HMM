@@ -59,7 +59,7 @@ class PatchPostProcessing
         label maxStoredParcels_;
 
         //- List of patch indices to post-process
-        labelHashSet patchIDs_;
+        labelList patchIDs_;
 
         //- List of output data per patch
         List<DynamicList<string> > patchData_;

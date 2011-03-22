@@ -32,9 +32,9 @@ boundaryField
         p0              $internalField;
         U               U;
         phi             phi;
-        rho             none;
+        rho             rho;
         psi             none;
-        gamma           1;
+        gamma           0;
         value           $internalField;
     }
     base

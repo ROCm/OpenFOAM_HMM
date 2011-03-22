@@ -40,7 +40,7 @@ solvers
     p_rghFinal
     {
         $p_rgh;
-        tolerance           1e-7;
+        tolerance           1e-8;
         relTol              0;
     };
 
@@ -57,7 +57,7 @@ solvers
     "(U|ft|fu|k|hs)Final"
     {
         $U;
-        tolerance       1e-7;
+        tolerance       1e-8;
         relTol          0;
     };
 
@@ -77,7 +77,7 @@ solvers
     {
         solver          PCG;
         preconditioner  DIC;
-        tolerance       1e-06;
+        tolerance       1e-04;
         relTol          0;
     }
 
@@ -85,9 +85,9 @@ solvers
 
 PISO
 {
-    momentumPredictor yes;
+    momentumPredictor no;
     nOuterCorrectors  1;
-    nCorrectors       2;
+    nCorrectors       1;
     nNonOrthogonalCorrectors 0;
 }
 

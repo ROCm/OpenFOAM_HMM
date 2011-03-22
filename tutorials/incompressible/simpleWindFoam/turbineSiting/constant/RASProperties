@@ -10,45 +10,25 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
-    object      controlDict;
+    object      RASProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     chtMultiRegionFoam;
+RASModel            kEpsilon;
 
-startFrom       latestTime;
+turbulence          on;
 
-startTime       0.001;
+printCoeffs         on;
 
-stopAt          endTime;
-
-endTime         75;
-
-deltaT          0.001;
-
-writeControl    adjustableRunTime;
-
-writeInterval   15;
-
-purgeWrite      0;
-
-writeFormat     ascii;
-
-writePrecision  7;
-
-writeCompression off;
-
-timeFormat      general;
-
-timePrecision   6;
-
-runTimeModifiable true;
-
-maxCo           0.3;
-
-maxDi           10.0;
-
-adjustTimeStep  yes;
+kEpsilonCoeffs
+{
+    Cmu         0.09;
+    C1          1.44;
+    C2          1.92;
+    C3          -0.33;
+    sigmak      1.0;
+    sigmaEps    1.11; //Original value:1.44
+    Prt         1.0;
+}
 
 // ************************************************************************* //
