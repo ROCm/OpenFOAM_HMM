@@ -1117,6 +1117,8 @@ Foam::label Foam::conformalVoronoiMesh::targetProc
 
     label faceIndex = 0;
 
+    // Taking log2 of the direction to deduce the face, i.e. reverse the
+    // encoding of faceId to faceBit in treeBoundBox.H
     // From: http://graphics.stanford.edu/~seander/bithacks.html
     while (ptOnFace >>= 1)
     {
