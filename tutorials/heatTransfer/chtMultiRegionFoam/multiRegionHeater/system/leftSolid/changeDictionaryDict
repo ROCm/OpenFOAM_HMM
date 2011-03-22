@@ -54,6 +54,7 @@ dictionaryReplacement
     {
         internalField   uniform 0.5;
 
+
         boundaryField
         {
             ".*"

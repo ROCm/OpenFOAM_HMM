@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.7                                   |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -16,12 +16,12 @@ FoamFile
 
 ddtSchemes
 {
-    default             steadyState;
+    default            steadyState;
 }
 
 gradSchemes
 {
-    default             Gauss linear;
+    default            Gauss linear;
     grad(p)             Gauss linear;
     grad(U)             Gauss linear;
 }

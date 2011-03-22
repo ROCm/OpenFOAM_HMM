@@ -1183,6 +1183,43 @@ void Foam::fvMatrix<Type>::operator*=
 template<class Type>
 void Foam::fvMatrix<Type>::operator*=
 (
+    const volScalarField& vsf
+)
+{
+    dimensions_ *= vsf.dimensions();
+    lduMatrix::operator*=(vsf.field());
+    source_ *= vsf.field();
+
+    forAll(vsf.boundaryField(), patchI)
+    {
+        const fvPatchScalarField& psf = vsf.boundaryField()[patchI];
+
+        if (psf.coupled())
+        {
+            internalCoeffs_[patchI] *= psf.patchInternalField();
+            boundaryCoeffs_[patchI] *= psf.patchNeighbourField();
+        }
+        else
+        {
+            internalCoeffs_[patchI] *= psf.patchInternalField();
+            boundaryCoeffs_[patchI] *= psf;
+        }
+    }
+
+    if (faceFluxCorrectionPtr_)
+    {
+        FatalErrorIn
+        (
+            "fvMatrix<Type>::operator*="
+            "(const DimensionedField<scalar, volMesh>&)"
+        )   << "cannot scale a matrix containing a faceFluxCorrection"
+            << abort(FatalError);
+    }
+}
+
+template<class Type>
+void Foam::fvMatrix<Type>::operator*=
+(
     const tmp<volScalarField>& tvsf
 )
 {
