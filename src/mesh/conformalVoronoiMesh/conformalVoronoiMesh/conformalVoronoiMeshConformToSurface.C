@@ -567,10 +567,6 @@ void Foam::conformalVoronoiMesh::buildParallelInterface()
                         std::back_inserter(incidentVertices)
                     );
 
-                    // std::cout<< "incidentVertices.size() "
-                    //     << incidentVertices.size()
-                    //     << std::endl;
-
                     for
                     (
                         std::list<Vertex_handle>::iterator ivit =
@@ -579,13 +575,6 @@ void Foam::conformalVoronoiMesh::buildParallelInterface()
                         ++ivit
                     )
                     {
-                        // std::cout<< "ivit i t m s "
-                        //     << (*ivit)->index() << " "
-                        //     << (*ivit)->type() << " "
-                        //     << (*ivit)->ppMaster() << " "
-                        //     << (*ivit)->ppSlave()
-                        //     << std::endl;
-
                         if (!(*ivit)->farPoint())
                         {
                             label ivIndex = (*ivit)->index();
@@ -597,124 +586,12 @@ void Foam::conformalVoronoiMesh::buildParallelInterface()
                             {
                                 iVertexToProc.append(toProc);
                             }
-
-                            // std::cout<< "    insert ivit i t m s "
-                            //     << (*ivit)->index() << " "
-                            //     << (*ivit)->type() << " "
-                            //     << (*ivit)->ppMaster() << " "
-                            //     << (*ivit)->ppSlave()
-                            //     << std::endl;
-
-                            // // Refer all incident-incident vertices
-                            // // to neighbour processor too
-                            // std::list<Vertex_handle>
-                            //     incidentIncidentVertices;
-
-                            // incident_vertices
-                            // (
-                            //     (*ivit),
-                            //     std::back_inserter
-                            //     (
-                            //         incidentIncidentVertices
-                            //     )
-                            // );
-
-                            // for
-                            // (
-                            //     std::list<Vertex_handle>::iterator
-                            //         iivit =
-                            //         incidentIncidentVertices.begin();
-                            // iivit != incidentIncidentVertices.end();
-                            //     ++iivit
-                            // )
-                            // {
-                            //     if (!(*iivit)->farPoint())
-                            //     {
-                            //     label iivIndex = (*iivit)->index();
-
-                            //     DynamicList<label>& iiVertexToProc =
-                            //             verticesToProc[iivIndex];
-
-                            //         if
-                            //         (
-                            //             findIndex
-                            //             (
-                            //                 iiVertexToProc,
-                            //                 toProc
-                            //             ) == -1
-                            //         )
-                            //         {
-                            //         iiVertexToProc.append(toProc);
-                            //         }
-                            //     }
-                            // }
                         }
                     }
                 }
             }
-
-            // if (!toProcs.empty())
-            // {
-            //     for (label toProc = 0; toProc < 8; toProc++)
-            //     {
-            //         if (toProc == Pstream::myProcNo())
-            //         {
-            //             continue;
-            //         }
-
-            //         if (findIndex(vertexToProc, toProc) == -1)
-            //         {
-            //             vertexToProc.append(toProc);
-            //         }
-
-            //         // Refer all incident vertices to neighbour
-            //         // processor too
-            //         std::list<Vertex_handle> incidentVertices;
-
-            //         incident_vertices
-            //         (
-            //             vit,
-            //             std::back_inserter(incidentVertices)
-            //         );
-
-            //         // std::cout<< "incidentVertices.size() "
-            //         //     << incidentVertices.size()
-            //         //     << std::endl;
-
-            //         for
-            //         (
-            //             std::list<Vertex_handle>::iterator ivit =
-            //                 incidentVertices.begin();
-            //             ivit !=incidentVertices.end();
-            //             ++ivit
-            //         )
-            //         {
-            //             if (!(*ivit)->farPoint())
-            //             {
-            //                 label ivIndex = (*ivit)->index();
-
-            //                 DynamicList<label>& iVertexToProc =
-            //                     verticesToProc[ivIndex];
-
-            //                 if
-            //                 (
-            //                     findIndex
-            //                     (
-            //                         iVertexToProc,
-            //                         toProc
-            //                     ) == -1
-            //                 )
-            //                 {
-            //                     iVertexToProc.append(toProc);
-            //                 }
-            //             }
-            //         }
-            //     }
-            // }
         }
     }
-
-    // Info<< "REFERRING ALL POINTS EVERYWHERE" << endl;
 
     // Store the vertices that have been received and added already so that
     // there is no attempt to add them more than once.
@@ -951,11 +828,6 @@ void Foam::conformalVoronoiMesh::buildParallelInterface()
         DynamicList<label> parallelInterfaceIndices;
         DynamicList<label> originalProcessor;
 
-        // parallelInterfacePoints.clearStorage();
-        // targetProcessor.clearStorage();
-        // parallelInterfaceIndices.clearStorage();
-        // originalProcessor.clearStorage();
-
         for
         (
             Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
@@ -1145,12 +1017,6 @@ Foam::conformalVoronoiMesh::parallelInterfaceIntersection
     std::list<Facet> facets;
     incident_facets(vit, std::back_inserter(facets));
 
-    // Pout<< "# " << label(vit->index()) << " facets size "
-    //     << label(facets.size())
-    //     << endl;
-
-    // bool anyCuts = false;
-
     DynamicList<label> procs;
 
     for
@@ -1174,21 +1040,6 @@ Foam::conformalVoronoiMesh::parallelInterfaceIntersection
 
         Foam::point boxPt(vector::one*GREAT);
         direction ptOnFace = -1;
-
-        // bool cuts =
-        //     (
-        //         geometryToConformTo_.bounds().contains(dE0)
-        //      && !geometryToConformTo_.bounds().contains(dE1)
-        //     )
-        //  || (
-        //         !geometryToConformTo_.bounds().contains(dE0)
-        //      && geometryToConformTo_.bounds().contains(dE1)
-        //     );
-
-        // anyCuts =
-        //      !geometryToConformTo_.bounds().contains(dE1)
-        //   ||
-        //      !geometryToConformTo_.bounds().contains(dE0);
 
         Foam::point start = dE0;
         Foam::point end   = dE1;
@@ -1223,17 +1074,6 @@ Foam::conformalVoronoiMesh::parallelInterfaceIntersection
             );
         }
 
-        // Pout<< "# " << label(vit->index())
-        //     << " Dual edge cuts " << cuts
-        //     << " intersects " << intersects
-        //     << " ptOnFace " << ptOnFace
-        //     << endl;
-
-        // meshTools::writeOBJ(Pout, dE0);
-        // meshTools::writeOBJ(Pout, dE1);
-
-        // Pout << "l dE0 dE1" << endl;
-
         // If an intersection with the box has been found, then it is the "end"
         // point that is inside the box, so test the line from end to
         // boxPt to see if the surface is in-between.
@@ -1256,22 +1096,8 @@ Foam::conformalVoronoiMesh::parallelInterfaceIntersection
             {
                 procs.append(target);
             }
-
-            // Pout<< "Parallel box penetration, face " << ptOnFace
-            //     << " proc " << target << endl;
-            // meshTools::writeOBJ(Pout, dE0);
-            // meshTools::writeOBJ(Pout, boxPt);
-            // meshTools::writeOBJ(Pout, dE1);
-            // Pout << "l dE0 boxPt dE1" << endl;
         }
     }
-
-    // if (anyCuts && procs.empty())
-    // {
-    //     Pout<< "# " << label(vit->index())
-    //         << " anyCuts && procs.empty()"
-    //         << endl;
-    // }
 
     return procs;
 }
@@ -1493,15 +1319,11 @@ void Foam::conformalVoronoiMesh::limitDisplacement
     {
         // If dispPt is outside bounding box then displacement cuts boundary
         limit = true;
-
-        // Info<< "bb limit" << endl;
     }
     else if (geometryToConformTo_.findSurfaceAnyIntersection(pt, dispPt))
     {
         // Full surface penetration test
         limit = true;
-
-        // Info<< "intersection limit" << endl;
     }
     else
     {
@@ -1525,15 +1347,11 @@ void Foam::conformalVoronoiMesh::limitDisplacement
 
         if (surfHit.hit())
         {
-            // Info<< "proximity limit" << endl;
-
             limit = true;
 
             if (magSqr(pt - surfHit.hitPoint()) <= searchDistanceSqr)
             {
-                // Info<< "Cannot limit displacement, point " << pt
-                //     << " closer than tolerance" << endl;
-
+                // Cannot limit displacement, point  closer than tolerance
                 return;
             }
         }
@@ -1545,8 +1363,6 @@ void Foam::conformalVoronoiMesh::limitDisplacement
         // recursively until the displacement is small enough.
 
         displacement *= 0.5;
-
-        // Info<< "Limiting displacement of point " << pt << endl;
 
         limitDisplacement(vit, displacement, callCount);
     }
