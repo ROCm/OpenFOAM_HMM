@@ -28,24 +28,6 @@ License
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::label Foam::LocalInteraction<CloudType>::applyToPatch
-(
-    const label globalPatchI
-) const
-{
-    forAll(patchIDs_, patchI)
-    {
-        if (patchIDs_[patchI] == globalPatchI)
-        {
-            return patchI;
-        }
-    }
-
-    return -1;
-}
-
-
-template<class CloudType>
 void Foam::LocalInteraction<CloudType>::readProps()
 {
     if (!this->owner().solution().transient())
@@ -131,7 +113,6 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
 :
     PatchInteractionModel<CloudType>(dict, cloud, typeName),
     patchData_(cloud.mesh(), this->coeffDict()),
-    patchIDs_(patchData_.size()),
     nEscape0_(patchData_.size(), 0),
     massEscape0_(patchData_.size(), 0.0),
     nStick0_(patchData_.size(), 0),
@@ -173,7 +154,6 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
 :
     PatchInteractionModel<CloudType>(pim),
     patchData_(pim.patchData_),
-    patchIDs_(pim.patchIDs_),
     nEscape0_(pim.nEscape0_),
     massEscape0_(pim.massEscape0_),
     nStick0_(pim.nStick0_),
@@ -208,7 +188,7 @@ bool Foam::LocalInteraction<CloudType>::correct
 
     bool& active = p.active();
 
-    label patchI = applyToPatch(pp.index());
+    label patchI = patchData_.applyToPatch(pp.index());
 
     if (patchI >= 0)
     {

@@ -53,9 +53,6 @@ class LocalInteraction
         //- List of participating patches
         const patchInteractionDataList patchData_;
 
-        //- List of participating patch ids
-        List<label> patchIDs_;
-
 
         // Counters for initial particle fates
 
@@ -88,9 +85,6 @@ class LocalInteraction
 
 
     // Private Member Functions
-
-        //- Returns local patchI if patch is in patchIds_ list
-        label applyToPatch(const label globalPatchI) const;
 
         //- Read interaction properties from file
         void readProps();
