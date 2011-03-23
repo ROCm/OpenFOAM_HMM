@@ -279,7 +279,7 @@ meshQualityControls
     //     <0 = inside out tet,
     //      0 = flat tet
     //      1 = regular tet
-    minTetQuality 1e-9;
+    minTetQuality 1e-30;
 
     //- Minimum face area. Set to <0 to disable.
     minArea -1;
