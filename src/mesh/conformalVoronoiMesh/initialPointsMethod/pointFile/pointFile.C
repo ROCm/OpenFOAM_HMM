@@ -115,6 +115,11 @@ std::vector<Vb::Point> pointFile::initialPoints() const
 
     label nPointsRejected = points.size() - initialPoints.size();
 
+    if (Pstream::parRun())
+    {
+        reduce(nPointsRejected, sumOp<label>());
+    }
+
     if (nPointsRejected)
     {
         Info<< "    " << nPointsRejected << " points rejected from "

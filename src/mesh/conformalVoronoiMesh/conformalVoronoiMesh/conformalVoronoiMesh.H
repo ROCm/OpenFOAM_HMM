@@ -428,7 +428,11 @@ private:
         ) const;
 
         //- Build the parallelInterfaces of the mesh
-        void buildParallelInterface();
+        void buildParallelInterface
+        (
+            List<HashSet<labelPair, labelPair::Hash<> > >& allReferralVertices,
+            HashSet<labelPair, labelPair::Hash<> >& receivedVertices
+        );
 
         //- Build map to refer vertices to target processors
         mapDistribute buildReferringMap

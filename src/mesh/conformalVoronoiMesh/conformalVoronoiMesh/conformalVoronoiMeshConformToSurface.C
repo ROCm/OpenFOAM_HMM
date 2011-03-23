@@ -218,8 +218,19 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
         initialTotalHits = nSurfHits + nFeatEdHits;
     }
 
+    // Store the vertices that have been received and added already so that
+    // there is no attempt to add them more than once.
+    HashSet<labelPair, labelPair::Hash<> > receivedVertices;
+
+    // Remember which vertices were referred from all iterations to each
+    // processor so only updates are sent.
+    List<HashSet<labelPair, labelPair::Hash<> > > allReferralVertices
+    (
+        Pstream::nProcs()
+    );
+
     // Build the parallel interface the initial surface conformation
-    buildParallelInterface();
+    buildParallelInterface(allReferralVertices, receivedVertices);
 
     label iterationNo = 0;
 
@@ -272,9 +283,14 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
         {
             // The initial surface conformation has already identified the
             // nearBoundary set of vertices.  Previously inserted boundary
-            // points can also generate protrusions and must be assessed too.
-
-            if (vit->nearBoundary() || vit->ppMaster())
+            // points and referred internal vertices from other processors can
+            // also generate protrusions and must be assessed too.
+            if
+            (
+                vit->nearBoundary()
+             || vit->ppMaster()
+             || vit->referredInternal()
+            )
             {
                 Foam::point vert(topoint(vit->point()));
                 pointIndexHit surfHit;
@@ -302,7 +318,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                     );
                 }
             }
-            else if (vit->ppSlave())
+            else if (vit->ppSlave() || vit->referredExternal())
             {
                 Foam::point vert(topoint(vit->point()));
                 pointIndexHit surfHit;
@@ -388,6 +404,9 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                 << ") less than limit (" << hitLimit
                 << "), stopping iterations" << endl;
         }
+
+        // Update the parallel interface
+        buildParallelInterface(allReferralVertices, receivedVertices);
     }
 
     //reportSurfaceConformationQuality();
@@ -434,7 +453,11 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAnyIntersection
 }
 
 
-void Foam::conformalVoronoiMesh::buildParallelInterface()
+void Foam::conformalVoronoiMesh::buildParallelInterface
+(
+    List<HashSet<labelPair, labelPair::Hash<> > >& allReferralVertices,
+    HashSet<labelPair, labelPair::Hash<> >& receivedVertices
+)
 {
     if (!Pstream::parRun())
     {
@@ -468,9 +491,20 @@ void Foam::conformalVoronoiMesh::buildParallelInterface()
 
                 if (toProc > -1)
                 {
-                    if (findIndex(vertexToProc, toProc) == -1)
+                    labelPair vPair
+                    (
+                        Pstream::myProcNo(),
+                        vIndex
+                    );
+
+                    if
+                    (
+                        findIndex(vertexToProc, toProc) == -1
+                     && !allReferralVertices[toProc].found(vPair)
+                    )
                     {
                         vertexToProc.append(toProc);
+                        allReferralVertices[toProc].insert(vPair);
                     }
 
                     // Refer all incident vertices to neighbour
@@ -491,16 +525,27 @@ void Foam::conformalVoronoiMesh::buildParallelInterface()
                         ++ivit
                     )
                     {
-                        if (!(*ivit)->farPoint())
+                        if (!(*ivit)->farPoint() && !(*ivit)->referred())
                         {
                             label ivIndex = (*ivit)->index();
 
                             DynamicList<label>& iVertexToProc =
-                            verticesToProc[ivIndex];
+                                verticesToProc[ivIndex];
 
-                            if (findIndex(iVertexToProc, toProc) == -1)
+                            labelPair ivPair
+                            (
+                                Pstream::myProcNo(),
+                                ivIndex
+                            );
+
+                            if
+                            (
+                                findIndex(iVertexToProc, toProc) == -1
+                             && !allReferralVertices[toProc].found(ivPair)
+                            )
                             {
                                 iVertexToProc.append(toProc);
+                                allReferralVertices[toProc].insert(ivPair);
                             }
                         }
                     }
@@ -508,10 +553,6 @@ void Foam::conformalVoronoiMesh::buildParallelInterface()
             }
         }
     }
-
-    // Store the vertices that have been received and added already so that
-    // there is no attempt to add them more than once.
-    HashSet<labelPair, labelPair ::Hash<> > receivedVertices;
 
     {
         DynamicList<Foam::point> parallelInterfacePoints;
@@ -598,18 +639,21 @@ void Foam::conformalVoronoiMesh::buildParallelInterface()
 
                     labelPair vPair(domain, origIndex);
 
-                    // For the initial referred vertices, the original processor
-                    // is the one that is sending it.
-                    label encodedDomain = -(domain + 1);
+                    if (!receivedVertices.found(vPair))
+                    {
+                        // For the initial referred vertices, the original
+                        // processor is the one that is sending it.
+                        label encodedDomain = -(domain + 1);
 
-                    insertPoint
-                    (
-                        parallelInterfacePoints[constructMap[i]],
-                        origIndex,
-                        encodedDomain
-                    );
+                        insertPoint
+                        (
+                            parallelInterfacePoints[constructMap[i]],
+                            origIndex,
+                            encodedDomain
+                        );
 
-                    receivedVertices.insert(vPair);
+                        receivedVertices.insert(vPair);
+                    }
                 }
             }
         }
@@ -632,13 +676,6 @@ void Foam::conformalVoronoiMesh::buildParallelInterface()
     // There may be multiple processors trying to supply 1x and 1y to
     // processor 2.
 
-    // Remember which vertices were re-referred from all iterations so only
-    // updates are sent.
-    List<HashSet<labelPair, labelPair ::Hash<> > > allReferralVertices
-    (
-        Pstream::nProcs()
-    );
-
     label totalRereferredVertices = 0;
 
     label nRereferIters = 0;
@@ -650,7 +687,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterface()
     {
         // For each processor (outer list), maintains a HashSet of label pairs
         // [origProc, origIndex] that are to be sent.
-        List<HashSet<labelPair, labelPair ::Hash<> > > referralVertices
+        List<HashSet<labelPair, labelPair::Hash<> > > referralVertices
         (
             Pstream::nProcs()
         );
@@ -1066,6 +1103,10 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
     label& hitSurfaceLargest
 ) const
 {
+    // Set no-hit data
+    surfHitLargest = pointIndexHit();
+    hitSurfaceLargest = -1;
+
     std::list<Facet> facets;
     incident_facets(vit, std::back_inserter(facets));
 
@@ -1129,6 +1170,21 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
             }
         }
     }
+
+    // Relying on short-circuit evaluation to not call for hitPoint when this
+    // is a miss
+    if
+    (
+        surfHitLargest.hit()
+     && !geometryToConformTo_.positionOnThisProc(surfHitLargest.hitPoint())
+    )
+    {
+        // A protrusion was identified, but not penetrating on this processor,
+        // so set no-hit data and allow the other that should have this point
+        // referred to generate it.
+        surfHitLargest = pointIndexHit();
+        hitSurfaceLargest = -1;
+    }
 }
 
 
@@ -1139,6 +1195,10 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceIncursion
     label& hitSurfaceLargest
 ) const
 {
+    // Set no-hit data
+    surfHitLargest = pointIndexHit();
+    hitSurfaceLargest = -1;
+
     std::list<Facet> facets;
     incident_facets(vit, std::back_inserter(facets));
 
@@ -1206,6 +1266,21 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceIncursion
                 }
             }
         }
+    }
+
+    // Relying on short-circuit evaluation to not call for hitPoint when this
+    // is a miss
+    if
+    (
+        surfHitLargest.hit()
+     && !geometryToConformTo_.positionOnThisProc(surfHitLargest.hitPoint())
+    )
+    {
+        // A protrusion was identified, but not penetrating on this processor,
+        // so set no-hit data and allow the other that should have this point
+        // referred to generate it.
+        surfHitLargest = pointIndexHit();
+        hitSurfaceLargest = -1;
     }
 }
 
