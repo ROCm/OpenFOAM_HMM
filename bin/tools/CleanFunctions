@@ -52,7 +52,7 @@ cleanTimeDirectories()
         rm -rf ./${timeDir} ./-${timeDir} > /dev/null 2>&1
         zeros="0$zeros"
     done
-    rm -rf ./[1-9]* ./-[1-9]* ./log ./log.* ./log-* ./logSummary.* ./.fxLock ./*.xml ./ParaView* ./paraFoam* ./*.OpenFOAM > /dev/null 2>&1
+    rm -rf ./[1-9]* ./-[1-9]* ./log ./log.* ./log-* ./logSummary.* ./.fxLock ./*.xml ./ParaView* ./paraFoam* ./*.OpenFOAM ./.setSet > /dev/null 2>&1
 }
 
 
