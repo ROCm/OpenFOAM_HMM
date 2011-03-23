@@ -220,12 +220,15 @@ Foam::scalar Foam::COxidationMurphyShaddix<CloudType>::calculate
     // Add to particle mass transfer
     dMassSolid[CsLocalId_] += dOmega*WC_;
 
-    const scalar HC = thermo.solids().properties()[CsLocalId_].H(T);
+    const scalar HsC = thermo.solids().properties()[CsLocalId_].Hs(T);
     const scalar HCO2 = thermo.carrier().H(CO2GlobalId_, T);
-    const scalar HO2 = thermo.carrier().H(O2GlobalId_, T);
+
+    // carrier enthalpy transfer handled by change in composition
+    // const scalar HsO2 = thermo.carrier().Hs(O2GlobalId_, T);
+    // dhsTrans -= dmO2*HsO2;
 
     // Heat of reaction
-    return dOmega*(WC_*HC + WO2_*HO2 - (WC_ + WO2_)*HCO2);
+    return dOmega*(WC_*HsC - (WC_ + WO2_)*HCO2);
 }
 
 
