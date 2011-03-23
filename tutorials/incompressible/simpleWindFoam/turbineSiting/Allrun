@@ -31,7 +31,7 @@ runParallel renumberMesh 4 -overwrite
 #runParallel changeDictionary 4 -literalRE
 
 runParallel setSet 4 -batch makeZones
-runParallel windSimpleFoam 4
+runParallel simpleWindFoam 4
 
 runApplication reconstructParMesh -constant
 runApplication reconstructPar
