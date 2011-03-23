@@ -2273,31 +2273,31 @@ void Foam::conformalVoronoiMesh::addPatches
         }
         else
         {
-            // Warn if a patch is empty and includeEmptyPatches is
-            // false, unless it is the default patch.
+            // // Warn if a patch is empty and includeEmptyPatches is
+            // // false, unless it is the default patch or a processor patch
 
-            if (p != nTotalPatches - 1)
-            {
-                WarningIn
-                (
-                    "void Foam::conformalVoronoiMesh::addPatches"
-                    "("
-                        "const label nInternalFaces,"
-                        "faceList& faces,"
-                        "labelList& owner,"
-                        "wordList& patchTypes,"
-                        "wordList& patchNames,"
-                        "labelList& patchSizes,"
-                        "labelList& patchStarts,"
-                        "labelList& procNeighbours,"
-                        "List<DynamicList<face> >& patchFaces,"
-                        "List<DynamicList<label> >& patchOwners,"
-                        "bool includeEmptyPatches"
-                    ") const"
-                )
-                    << "Patch " << patchNames[p]
-                    << " has no faces, not creating." << endl;
-            }
+            // if (p != nTotalPatches - 1 && procNeighbours[p] < 0)
+            // {
+            //     WarningIn
+            //     (
+            //         "void Foam::conformalVoronoiMesh::addPatches"
+            //         "("
+            //             "const label nInternalFaces,"
+            //             "faceList& faces,"
+            //             "labelList& owner,"
+            //             "wordList& patchTypes,"
+            //             "wordList& patchNames,"
+            //             "labelList& patchSizes,"
+            //             "labelList& patchStarts,"
+            //             "labelList& procNeighbours,"
+            //             "List<DynamicList<face> >& patchFaces,"
+            //             "List<DynamicList<label> >& patchOwners,"
+            //             "bool includeEmptyPatches"
+            //         ") const"
+            //     )
+            //         << "Patch " << patchNames[p]
+            //         << " has no faces, not creating." << endl;
+            // }
         }
     }
 

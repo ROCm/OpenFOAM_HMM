@@ -182,10 +182,21 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
             }
         }
 
-        Pout<< nl << "Initial conformation" << nl
-            << "    Number of vertices " << number_of_vertices() << nl
-            << "    Number of surface hits " << surfaceHits.size() << nl
-            << "    Number of edge hits " << featureEdgeHits.size()
+        label nVerts = number_of_vertices();
+        label nSurfHits = surfaceHits.size();
+        label nFeatEdHits = featureEdgeHits.size();
+
+        if (Pstream::parRun())
+        {
+            reduce(nVerts, sumOp<label>());
+            reduce(nSurfHits, sumOp<label>());
+            reduce(nFeatEdHits, sumOp<label>());
+        }
+
+        Info<< nl << "Initial conformation" << nl
+            << "    Number of vertices " << nVerts << nl
+            << "    Number of surface hits " << nSurfHits << nl
+            << "    Number of edge hits " << nFeatEdHits
             << endl;
 
         insertSurfacePointPairs
@@ -204,7 +215,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
         timeCheck("After initial conformation");
 
-        initialTotalHits = surfaceHits.size() + featureEdgeHits.size();
+        initialTotalHits = nSurfHits + nFeatEdHits;
     }
 
     // Build the parallel interface the initial surface conformation
@@ -220,7 +231,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
     label hitLimit = label(iterationToIntialHitRatioLimit*initialTotalHits);
 
-    Pout<< nl << "Stopping iterations when: " << nl
+    Info<< nl << "Stopping iterations when: " << nl
         <<"    total number of hits drops below "
         << iterationToIntialHitRatioLimit << " of initial hits ("
         << hitLimit << ")" << nl
@@ -321,13 +332,24 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
             }
         }
 
+        label nVerts = number_of_vertices();
+        label nSurfHits = surfaceHits.size();
+        label nFeatEdHits = featureEdgeHits.size();
+
+        if (Pstream::parRun())
+        {
+            reduce(nVerts, sumOp<label>());
+            reduce(nSurfHits, sumOp<label>());
+            reduce(nFeatEdHits, sumOp<label>());
+        }
+
         Info<< nl << "Conformation iteration " << iterationNo << nl
-            << "    Number of vertices " << number_of_vertices() << nl
-            << "    Number of surface hits " << surfaceHits.size() << nl
-            << "    Number of edge hits " << featureEdgeHits.size()
+            << "    Number of vertices " << nVerts << nl
+            << "    Number of surface hits " << nSurfHits << nl
+            << "    Number of edge hits " << nFeatEdHits
             << endl;
 
-        totalHits = surfaceHits.size() + featureEdgeHits.size();
+        totalHits = nSurfHits + nFeatEdHits;
 
         if (totalHits > 0)
         {

@@ -514,7 +514,17 @@ void Foam::conformalVoronoiMesh::createFeaturePoints()
 
     insertMixedFeaturePoints();
 
-    Pout<< "    Inserted " << number_of_vertices() << " vertices" << endl;
+    label nFeatureVertices = number_of_vertices() - 8;
+
+    if (Pstream::parRun())
+    {
+        reduce(nFeatureVertices, sumOp<label>());
+    }
+
+    if (nFeatureVertices > 0)
+    {
+        Info<< "    Inserted " << nFeatureVertices << " vertices" << endl;
+    }
 
     featureVertices_.setSize(number_of_vertices());
 

@@ -264,15 +264,28 @@ inline void Foam::conformalVoronoiMesh::insertPoints
     const std::vector<Point>& points
 )
 {
-    Pout<< "    " << points.size() << " points to insert..." << endl;
+    label nPoints = points.size();
+
+    if (Pstream::parRun())
+    {
+        reduce(nPoints, sumOp<label>());
+    }
+
+    Info<< "    " << nPoints << " points to insert..." << endl;
 
     label nVert = number_of_vertices();
 
     // using the range insert (faster than inserting points one by one)
     insert(points.begin(), points.end());
 
-    Pout<< "    " << number_of_vertices() - startOfInternalPoints_
-        << " points inserted" << endl;
+    label nInserted = number_of_vertices() - startOfInternalPoints_;
+
+    if (Pstream::parRun())
+    {
+        reduce(nInserted, sumOp<label>());
+    }
+
+    Info<< "    " << nInserted << " points inserted" << endl;
 
     for
     (

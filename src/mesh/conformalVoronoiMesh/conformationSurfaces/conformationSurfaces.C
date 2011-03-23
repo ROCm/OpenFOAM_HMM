@@ -268,10 +268,10 @@ Foam::conformationSurfaces::conformationSurfaces
         bounds_ = globalBounds_;
     }
 
-    Info<< "global bounds " << globalBounds_ << endl;
-
-    if (Pstream::parRun())
+    if (Pstream::parRun() && cvMesh_.cvMeshControls().objOutput())
     {
+        Info<< "global bounds " << globalBounds_ << endl;
+
         Pout<< " proc bounds " << bounds_ << endl;
 
         OFstream str

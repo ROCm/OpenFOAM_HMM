@@ -56,12 +56,26 @@ void Foam::conformalVoronoiMesh::timeCheck
 
         memInfo m;
 
-        Pout<< "--- [ "
-            << runTime_.elapsedCpuTime() << " s, "
-            << "mem size " << m.size() << " kB, "
-            << "mem peak " << m.peak() << " kB, "
-            << "mem rss " << m.rss() << " kB"
-            << " ] --- " << endl;
+        if (m.valid())
+        {
+            label mSize = m.size();
+            label mPeak = m.peak();
+            label mRss = m.rss();
+
+            if (Pstream::parRun())
+            {
+                reduce(mSize, sumOp<label>());
+                reduce(mPeak, sumOp<label>());
+                reduce(mRss, sumOp<label>());
+            }
+
+            Info<< "--- [ "
+                << runTime_.elapsedCpuTime() << " s, "
+                << "mem size " << mSize << " kB, "
+                << "mem peak " << mPeak << " kB, "
+                << "mem rss " << mRss << " kB"
+                << " ] --- " << endl;
+        }
     }
 }
 
@@ -149,7 +163,7 @@ void Foam::conformalVoronoiMesh::writeInternalDelaunayVertices
         internalDelaunayVertices
     );
 
-    Pout<< nl
+    Info<< nl
         << "Writing " << internalDVs.name()
         << " to " << internalDVs.instance()
         << endl;
@@ -231,7 +245,7 @@ void Foam::conformalVoronoiMesh::writeMesh
             filterFaces
         );
 
-        Pout<< nl << "Writing polyMesh to " << instance << endl;
+        Info<< nl << "Writing polyMesh to " << instance << endl;
 
         writeMesh
         (
