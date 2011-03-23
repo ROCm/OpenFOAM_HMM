@@ -41,11 +41,10 @@ Foam::NonSphereDragForce<CloudType>::NonSphereDragForce
 (
     CloudType& owner,
     const fvMesh& mesh,
-    const dictionary& dict,
-    const word& forceType
+    const dictionary& dict
 )
 :
-    ParticleForce<CloudType>(owner, mesh, dict, forceType),
+    ParticleForce<CloudType>(owner, mesh, dict, typeName, true),
     phi_(readScalar(this->coeffs().lookup("phi"))),
     a_(exp(2.3288 - 6.4581*phi_ + 2.4486*sqr(phi_))),
     b_(0.0964 + 0.5565*phi_),

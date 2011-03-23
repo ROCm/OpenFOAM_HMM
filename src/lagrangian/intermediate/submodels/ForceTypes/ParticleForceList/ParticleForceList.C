@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ParticleForceList.H"
+#include "entry.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -57,26 +58,46 @@ Foam::ParticleForceList<CloudType>::ParticleForceList
 {
     if (readFields)
     {
-        const wordList activeForces(dict.lookup("activeForces"));
-
-        wordHashSet models;
-        models.insert(activeForces);
+        wordList modelNames(dict.toc());
 
         Info<< "Constructing particle forces" << endl;
-        if (models.size() > 0)
+
+        if (modelNames.size() > 0)
         {
-            this->setSize(models.size());
+            this->setSize(modelNames.size());
 
             label i = 0;
-            forAllConstIter(wordHashSet, models, iter)
+            forAllConstIter(IDLList<entry>, dict, iter)
             {
-                const word& model = iter.key();
-                this->set
-                (
-                    i,
-                    ParticleForce<CloudType>::New(owner, mesh, dict, model)
-                );
-                i++;
+                const word& model = iter().keyword();
+                if (iter().isDict())
+                {
+                    this->set
+                    (
+                        i++,
+                        ParticleForce<CloudType>::New
+                        (
+                            owner,
+                            mesh,
+                            iter().dict(),
+                            model
+                        )
+                    );
+                }
+                else
+                {
+                    this->set
+                    (
+                        i++,
+                        ParticleForce<CloudType>::New
+                        (
+                            owner,
+                            mesh,
+                            dict,
+                            model
+                        )
+                    );
+                }
             }
         }
         else

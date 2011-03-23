@@ -61,9 +61,6 @@ class ParticleForce
         //- Reference to the mesh database
         const fvMesh& mesh_;
 
-        //- Forces dictionary
-        const dictionary dict_;
-
         //- Force coefficients dictaionary
         const dictionary coeffs_;
 
@@ -82,10 +79,9 @@ public:
         (
             CloudType& owner,
             const fvMesh& mesh,
-            const dictionary& dict,
-            const word& forceType
+            const dictionary& dict
         ),
-        (owner, mesh, dict, forceType)
+        (owner, mesh, dict)
     );
 
 
@@ -95,21 +91,14 @@ public:
 
     // Constructors
 
-        //- Construct null
-        ParticleForce
-        (
-            CloudType& owner,
-            const fvMesh& mesh,
-            const dictionary& dict
-        );
-
         //- Construct from mesh
         ParticleForce
         (
             CloudType& owner,
             const fvMesh& mesh,
             const dictionary& dict,
-            const word& forceType
+            const word& forceType,
+            const bool readCoeffs
         );
 
         //- Construct copy
@@ -151,9 +140,6 @@ public:
 
             //- Return the mesh database
             inline const fvMesh& mesh() const;
-
-            //- Return the forces dictionary
-            inline const dictionary& dict() const;
 
             //- Return the force coefficients dictionary
             inline const dictionary& coeffs() const;
