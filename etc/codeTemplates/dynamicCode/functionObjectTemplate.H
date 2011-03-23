@@ -67,6 +67,11 @@ class ${typeName}FunctionObject
 
     // Private Member Functions
 
+        const objectRegistry& obr() const
+        {
+            return obr_;
+        }
+
         //- Disallow default bitwise copy construct
         ${typeName}FunctionObject(const ${typeName}FunctionObject&);
 

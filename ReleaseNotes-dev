@@ -277,6 +277,26 @@
        triSurfaceMesh).
     + =nearWallFields=: constructs field with on selected patches interpolated
        internal field for further postprocessing.
+    + =coded=: uses the dynamic code compilation from =#codeStream=
+    to provide an in-line functionObject. E.g.
+    #+BEGIN_SRC c++
+    functions
+    (
+        pAverage
+        {
+            functionObjectLibs ("libutilityFunctionObjects.so");
+            type coded;
+            redirectType average;
+            code
+            #{
+                const volScalarField& p = obr().lookupObject<volScalarField>("p");
+                Info<<"p avg:" << average(p) << endl;
+            #};
+        }
+    );
+    #+END_SRC
+    See also [[./doc/changes/dynamicCode.org]]
+
 
 * New tutorials
   There is a large number of new tutorials for existing and new solvers in the

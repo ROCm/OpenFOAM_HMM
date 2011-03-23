@@ -25,7 +25,7 @@ License
 
 #include "functionObjectTemplate.H"
 #include "Time.H"
-//#include "pointFields.H"
+#include "fvCFD.H"
 
 //{{{ begin codeInclude
 ${codeInclude}
