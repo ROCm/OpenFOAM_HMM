@@ -289,7 +289,7 @@
             redirectType average;
             code
             #{
-                const volScalarField& p = obr().lookupObject<volScalarField>("p");
+                const volScalarField& p = mesh().lookupObject<volScalarField>("p");
                 Info<<"p avg:" << average(p) << endl;
             #};
         }

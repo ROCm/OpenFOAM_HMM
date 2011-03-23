@@ -45,6 +45,7 @@ namespace Foam
 class objectRegistry;
 class dictionary;
 class mapPolyMesh;
+class fvMesh;
 
 /*---------------------------------------------------------------------------*\
                          A templated functionObject
@@ -67,10 +68,9 @@ class ${typeName}FunctionObject
 
     // Private Member Functions
 
-        const objectRegistry& obr() const
-        {
-            return obr_;
-        }
+        const objectRegistry& obr() const;
+
+        const fvMesh& mesh() const;
 
         //- Disallow default bitwise copy construct
         ${typeName}FunctionObject(const ${typeName}FunctionObject&);

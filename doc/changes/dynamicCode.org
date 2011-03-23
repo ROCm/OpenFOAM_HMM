@@ -113,7 +113,7 @@
           outputControl outputTime;
           code
           #{
-              const volScalarField& p = obr().lookupObject<volScalarField>("p");
+              const volScalarField& p = mesh().lookupObject<volScalarField>("p");
               Info<<"p avg:" << average(p) << endl;
           #};
       }
@@ -229,3 +229,11 @@
 
   - parallel running not tested a lot. What about distributed data
     (i.e. non-=NFS=) parallel?
+
+  - codedFixedValue could be extended to provide local data however
+    in terms of complexity this is not really worthwhile.
+
+  - all templates come from
+    =etc/codeTemplates/dynamicCode=
+    =~/.OpenFOAM/dev/codeTemplates/dynamicCode=
+    =FOAM_TEMPLATE_DIR=

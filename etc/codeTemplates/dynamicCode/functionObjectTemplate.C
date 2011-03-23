@@ -48,6 +48,20 @@ ${localCode}
 //}}} end localCode
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+const objectRegistry& ${typeName}FunctionObject::obr() const
+{
+    return obr_;
+}
+
+
+const fvMesh& ${typeName}FunctionObject::mesh() const
+{
+    return refCast<const fvMesh>(obr_);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 ${typeName}FunctionObject::${typeName}FunctionObject
