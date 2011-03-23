@@ -55,8 +55,8 @@ class PatchPostProcessing
 
         typedef typename CloudType::particleType parcelType;
 
-        //- Maximum number of parcels to store
-        label maxStoredParcels_;
+        //- Maximum number of parcels to store - set as a scalar for I/O
+        scalar maxStoredParcels_;
 
         //- List of patch indices to post-process
         labelList patchIDs_;
