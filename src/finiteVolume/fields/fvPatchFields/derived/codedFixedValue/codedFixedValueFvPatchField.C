@@ -37,6 +37,9 @@ License
 #include "stringOps.H"
 #include "IOdictionary.H"
 
+#include <dlfcn.h>
+#include <link.h>
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template<class Type>
@@ -270,7 +273,10 @@ void Foam::codedFixedValueFvPatchField<Type>::createLibrary
                 "EXE_INC = -g \\\n"
                 "-I$(LIB_SRC)/finiteVolume/lnInclude\\\n"
               + context.options()
-              + "\n\nLIB_LIBS = "
+              + "\n\nLIB_LIBS = \\\n"
+              + "    -lOpenFOAM \\\n"
+              + "    -lfiniteVolume \\\n"
+              + context.libs()
             );
 
             if (!dynCode.copyOrCreateFiles(true))
