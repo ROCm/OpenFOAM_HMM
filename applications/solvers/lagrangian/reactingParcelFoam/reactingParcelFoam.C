@@ -98,6 +98,8 @@ int main(int argc, char *argv[])
 
             turbulence->correct();
 
+            rho = thermo.rho();
+
             if (finalIter)
             {
                 mesh.data::remove("finalIteration");

@@ -88,8 +88,6 @@ else
 #include "rhoEqn.H"
 #include "compressibleContinuityErrs.H"
 
-rho = thermo.rho();
-
 U -= rAU*fvc::grad(p);
 U.correctBoundaryConditions();
 
