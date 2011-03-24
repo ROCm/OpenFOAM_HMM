@@ -163,7 +163,7 @@ public:
     );                                                                        \
     defineTemplateRunTimeSelectionTable                                       \
     (                                                                         \
-        HeatTransferModel<thermoCloudType>,                                         \
+        HeatTransferModel<thermoCloudType>,                                   \
         dictionary                                                            \
     );
 
