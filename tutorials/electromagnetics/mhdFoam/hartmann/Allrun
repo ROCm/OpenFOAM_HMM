@@ -5,15 +5,11 @@ cd ${0%/*} || exit 1    # run from this directory
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 # Set application name
-application="mhdFoam"
+application=`getApplication`
 
-(
-    cd hartmann || exit
-
-    runApplication blockMesh
-    runApplication $application
-    runApplication foamCalc components U
-    runApplication sample
-)
+runApplication blockMesh
+runApplication $application
+runApplication foamCalc components U
+runApplication sample
 
 # ----------------------------------------------------------------- end-of-file
