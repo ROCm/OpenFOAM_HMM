@@ -8,4 +8,5 @@ EXE_LIBS = \
     -lfiniteVolume \
     -llagrangianIntermediate \
     -lradiationModels \
-    -lthermophysicalFunctions
+    -lthermophysicalFunctions \
+    -lregionModels
