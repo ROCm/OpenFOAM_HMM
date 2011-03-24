@@ -208,8 +208,8 @@ void Foam::ThermoParcel<ParcelType>::calc
     // Sum Ni*Cpi*Wi of emission species
     scalar NCpW = 0.0;
 
-    // Calculate new particle velocity
-    scalar Cuh = 0.0;
+    // Calculate new particle temperature
+    scalar Sph = 0.0;
     scalar T1 =
         this->calcHeatTransfer
         (
@@ -226,7 +226,7 @@ void Foam::ThermoParcel<ParcelType>::calc
             NCpW,
             Sh,
             dhsTrans,
-            Cuh
+            Sph
         );
 
 
@@ -267,7 +267,7 @@ void Foam::ThermoParcel<ParcelType>::calc
         td.cloud().hsTrans()[cellI] += np0*dhsTrans;
 
         // Update sensible enthalpy coefficient
-        td.cloud().hsCoeff()[cellI] += np0*Cuh*this->areaS();
+        td.cloud().hsCoeff()[cellI] += np0*Sph;
     }
 
     // Set new particle properties
@@ -294,7 +294,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     const scalar NCpW,
     const scalar Sh,
     scalar& dhsTrans,
-    scalar& Cuh
+    scalar& Sph
 )
 {
     if (!td.cloud().heatTransfer().active())
@@ -317,6 +317,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
 
     htc = max(htc, ROOTVSMALL);
     const scalar As = this->areaS(d);
+
     scalar ap = Tc_ + Sh/As/htc;
     scalar bp = 6.0*(Sh/As + htc*(Tc_ - T));
     if (td.cloud().radiation())
@@ -337,9 +338,9 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
 
     scalar Tnew = max(Tres.value(), td.cloud().constProps().TMin());
 
-    dhsTrans += dt*htc*As*(0.5*(T + Tnew) - Tc_);
+    Sph = dt*htc*As;
 
-    Cuh = dt*bp;
+    dhsTrans += Sph*(0.5*(T + Tnew) - Tc_);
 
     return Tnew;
 }

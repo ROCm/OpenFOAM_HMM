@@ -90,11 +90,8 @@ subModels
 {
     particleForces
     {
-        activeForces
-        (
-            sphereDrag
-            gravity
-        );
+        sphereDrag;
+        gravity;
     }
 
     injectionModel  patchInjection;

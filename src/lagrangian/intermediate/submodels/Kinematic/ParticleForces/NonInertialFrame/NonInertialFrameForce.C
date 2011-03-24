@@ -33,11 +33,10 @@ Foam::NonInertialFrameForce<CloudType>::NonInertialFrameForce
 (
     CloudType& owner,
     const fvMesh& mesh,
-    const dictionary& dict,
-    const word& forceType
+    const dictionary& dict
 )
 :
-    ParticleForce<CloudType>(owner, mesh, dict),
+    ParticleForce<CloudType>(owner, mesh, dict, typeName, true),
     WName_
     (
         this->coeffs().template lookupOrDefault<word>
