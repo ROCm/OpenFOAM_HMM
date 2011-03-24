@@ -48,29 +48,22 @@ License
 
 namespace Foam
 {
-    typedef basicReactingMultiphaseCloud::cloudType
-        basicReactingMultiphaseCloud_R;
-    typedef basicReactingMultiphaseCloud_R::cloudType
-        basicReactingMultiphaseCloud_T;
-    typedef basicReactingMultiphaseCloud_T::cloudType
-        basicReactingMultiphaseCloud_K;
-
     // Kinematic sub-models
-    makeThermoParcelForces(basicReactingMultiphaseCloud_K);
-    makeParcelDispersionModels(basicReactingMultiphaseCloud_K);
-    makeReactingMultiphaseParcelInjectionModels(basicReactingMultiphaseCloud_K);
-    makeParcelPatchInteractionModels(basicReactingMultiphaseCloud_K);
-    makeParcelPostProcessingModels(basicReactingMultiphaseCloud_K);
+    makeThermoParcelForces(basicReactingMultiphaseCloud);
+    makeParcelDispersionModels(basicReactingMultiphaseCloud);
+    makeReactingMultiphaseParcelInjectionModels(basicReactingMultiphaseCloud);
+    makeParcelPatchInteractionModels(basicReactingMultiphaseCloud);
+    makeParcelPostProcessingModels(basicReactingMultiphaseCloud);
 
     // Thermo sub-models
-    makeParcelHeatTransferModels(basicReactingMultiphaseCloud_T);
+    makeParcelHeatTransferModels(basicReactingMultiphaseCloud);
 
     // Reacting sub-models
     makeReactingMultiphaseParcelCompositionModels
     (
-        basicReactingMultiphaseCloud_R
+        basicReactingMultiphaseCloud
     );
-    makeReactingParcelPhaseChangeModels(basicReactingMultiphaseCloud_R);
+    makeReactingParcelPhaseChangeModels(basicReactingMultiphaseCloud);
 
     // Reacting multiphase sub-models
     makeReactingMultiphaseParcelDevolatilisationModels
@@ -79,7 +72,7 @@ namespace Foam
     );
     makeReactingParcelSurfaceFilmModels
     (
-        basicReactingMultiphaseCloud_K
+        basicReactingMultiphaseCloud
     );
     makeReactingMultiphaseParcelSurfaceReactionModels
     (

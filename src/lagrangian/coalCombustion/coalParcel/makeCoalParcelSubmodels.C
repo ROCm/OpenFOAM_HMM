@@ -50,27 +50,23 @@ License
 
 namespace Foam
 {
-    typedef coalCloud::cloudType coalCloud_R;
-    typedef coalCloud_R::cloudType coalCloud_T;
-    typedef coalCloud_T::cloudType coalCloud_K;
-
     // Kinematic sub-models
-    makeThermoParcelForces(coalCloud_K);
-    makeParcelDispersionModels(coalCloud_K);
-    makeReactingMultiphaseParcelInjectionModels(coalCloud_K);
-    makeParcelPatchInteractionModels(coalCloud_K);
-    makeParcelPostProcessingModels(coalCloud_K);
+    makeThermoParcelForces(coalCloud);
+    makeParcelDispersionModels(coalCloud);
+    makeReactingMultiphaseParcelInjectionModels(coalCloud);
+    makeParcelPatchInteractionModels(coalCloud);
+    makeParcelPostProcessingModels(coalCloud);
 
     // Thermo sub-models
-    makeParcelHeatTransferModels(coalCloud_T);
+    makeParcelHeatTransferModels(coalCloud);
 
     // Reacting sub-models
-    makeReactingMultiphaseParcelCompositionModels(coalCloud_R);
-    makeReactingParcelPhaseChangeModels(coalCloud_R);
+    makeReactingMultiphaseParcelCompositionModels(coalCloud);
+    makeReactingParcelPhaseChangeModels(coalCloud);
 
     // Reacting multiphase sub-models
     makeReactingMultiphaseParcelDevolatilisationModels(coalCloud);
-    makeReactingParcelSurfaceFilmModels(coalCloud_K);
+    makeReactingParcelSurfaceFilmModels(coalCloud);
     makeCoalParcelSurfaceReactionModels(coalCloud);
 }
 
