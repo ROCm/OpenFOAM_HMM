@@ -27,11 +27,9 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
         (
             p.select
             (
-                (
-                    finalIter
-                 && corr == nCorr-1
-                 && nonOrth == nNonOrthCorr
-                )
+                finalIter
+             && corr == nCorr-1
+             && nonOrth == nNonOrthCorr
             )
         )
     );
