@@ -192,22 +192,27 @@ public:
 
 #define makePatchInteractionModel(CloudType)                                  \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(PatchInteractionModel<CloudType>, 0); \
-                                                                              \
+    typedef CloudType::kinematicCloudType kinematicCloudType;                 \
+    defineNamedTemplateTypeNameAndDebug                                       \
+    (                                                                         \
+        PatchInteractionModel<kinematicCloudType>,                            \
+        0                                                                     \
+    );                                                                        \
     defineTemplateRunTimeSelectionTable                                       \
     (                                                                         \
-        PatchInteractionModel<CloudType>,                                     \
+        PatchInteractionModel<kinematicCloudType>,                            \
         dictionary                                                            \
     );
 
 
 #define makePatchInteractionModelType(SS, CloudType)                          \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
+    typedef CloudType::kinematicCloudType kinematicCloudType;                 \
+    defineNamedTemplateTypeNameAndDebug(SS<kinematicCloudType>, 0);           \
                                                                               \
-    PatchInteractionModel<CloudType>::                                        \
-        adddictionaryConstructorToTable<SS<CloudType> >                       \
-            add##SS##CloudType##ConstructorToTable_;
+    PatchInteractionModel<kinematicCloudType>::                               \
+        adddictionaryConstructorToTable<SS<kinematicCloudType> >              \
+            add##SS##CloudType##kinematicCloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

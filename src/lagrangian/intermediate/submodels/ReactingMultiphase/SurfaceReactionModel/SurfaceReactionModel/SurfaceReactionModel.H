@@ -149,22 +149,29 @@ public:
 
 #define makeSurfaceReactionModel(CloudType)                                   \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SurfaceReactionModel<CloudType>, 0);  \
-                                                                              \
+    typedef CloudType::reactingMultiphaseCloudType                            \
+        reactingMultiphaseCloudType;                                          \
+    defineNamedTemplateTypeNameAndDebug                                       \
+    (                                                                         \
+        SurfaceReactionModel<reactingMultiphaseCloudType>,                    \
+        0                                                                     \
+    );                                                                        \
     defineTemplateRunTimeSelectionTable                                       \
     (                                                                         \
-        SurfaceReactionModel<CloudType>,                                      \
+        SurfaceReactionModel<reactingMultiphaseCloudType>,                    \
         dictionary                                                            \
     );
 
 
 #define makeSurfaceReactionModelType(SS, CloudType)                           \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
+    typedef CloudType::reactingMultiphaseCloudType                            \
+        reactingMultiphaseCloudType;                                          \
+    defineNamedTemplateTypeNameAndDebug(SS<reactingMultiphaseCloudType>, 0);  \
                                                                               \
-    SurfaceReactionModel<CloudType>::                                         \
-        adddictionaryConstructorToTable<SS<CloudType> >                       \
-            add##SS##CloudType##ConstructorToTable_;
+    SurfaceReactionModel<reactingMultiphaseCloudType>::                       \
+        adddictionaryConstructorToTable<SS<reactingMultiphaseCloudType> >     \
+        add##SS##CloudType##reactingMultiphaseCloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
