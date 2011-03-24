@@ -32,11 +32,9 @@ if (transonic)
             (
                 p.select
                 (
-                    (
-                        finalIter
-                     && corr == nCorr-1
-                     && nonOrth == nNonOrthCorr
-                    )
+                    finalIter
+                 && corr == nCorr-1
+                 && nonOrth == nNonOrthCorr
                 )
             )
         );
@@ -73,11 +71,9 @@ else
             (
                 p.select
                 (
-                    (
-                        finalIter
-                     && corr == nCorr-1
-                     && nonOrth == nNonOrthCorr
-                    )
+                    finalIter
+                 && corr == nCorr-1
+                 && nonOrth == nNonOrthCorr
                 )
             )
         );
