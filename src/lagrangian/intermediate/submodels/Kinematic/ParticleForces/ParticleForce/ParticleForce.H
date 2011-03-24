@@ -188,16 +188,23 @@ public:
 
 #define makeParticleForceModel(CloudType)                                     \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(ParticleForce<CloudType>, 0);         \
-    defineTemplateRunTimeSelectionTable(ParticleForce<CloudType>, dictionary);
+    typedef CloudType::kinematicCloudType kinematicCloudType;                 \
+    defineNamedTemplateTypeNameAndDebug(ParticleForce<kinematicCloudType>, 0);\
+    defineTemplateRunTimeSelectionTable                                       \
+    (                                                                         \
+        ParticleForce<kinematicCloudType>,                                    \
+        dictionary                                                            \
+    );
 
 
 #define makeParticleForceModelType(SS, CloudType)                             \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
+    typedef CloudType::kinematicCloudType kinematicCloudType;                 \
+    defineNamedTemplateTypeNameAndDebug(SS<kinematicCloudType>, 0);           \
                                                                               \
-    ParticleForce<CloudType>::adddictionaryConstructorToTable<SS<CloudType> > \
-        add##SS##CloudType##ConstructorToTable_;
+    ParticleForce<kinematicCloudType>::                                       \
+        adddictionaryConstructorToTable<SS<kinematicCloudType> >              \
+        add##SS##CloudType##kinematicCloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -155,22 +155,27 @@ public:
 
 #define makeHeatTransferModel(CloudType)                                      \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(HeatTransferModel<CloudType>, 0);     \
-                                                                              \
+    typedef CloudType::thermoCloudType thermoCloudType;                       \
+    defineNamedTemplateTypeNameAndDebug                                       \
+    (                                                                         \
+        HeatTransferModel<thermoCloudType>,                                   \
+        0                                                                     \
+    );                                                                        \
     defineTemplateRunTimeSelectionTable                                       \
     (                                                                         \
-        HeatTransferModel<CloudType>,                                         \
+        HeatTransferModel<thermoCloudType>,                                         \
         dictionary                                                            \
     );
 
 
 #define makeHeatTransferModelType(SS, CloudType)                              \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
+    typedef CloudType::thermoCloudType thermoCloudType;                       \
+    defineNamedTemplateTypeNameAndDebug(SS<thermoCloudType>, 0);              \
                                                                               \
-    HeatTransferModel<CloudType>::                                            \
-        adddictionaryConstructorToTable<SS<CloudType> >                       \
-            add##SS##CloudType##ConstructorToTable_;
+    HeatTransferModel<thermoCloudType>::                                      \
+        adddictionaryConstructorToTable<SS<thermoCloudType> >                 \
+            add##SS##CloudType##thermoCloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
