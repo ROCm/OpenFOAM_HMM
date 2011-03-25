@@ -283,6 +283,13 @@ void Foam::meshRefinement::getBafflePatches
         }
     }
 
+    // Extend segments a bit
+    {
+        const vectorField smallVec(Foam::sqrt(SMALL)*(end-start));
+        start += smallVec;
+        end -= smallVec;
+    }
+
 
     // Do test for intersections
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2445,6 +2452,13 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
                 start[i] = cellCentres[faceOwner[faceI]];
                 end[i] = neiCc[faceI-mesh_.nInternalFaces()];
             }
+        }
+
+        // Extend segments a bit
+        {
+            const vectorField smallVec(Foam::sqrt(SMALL)*(end-start));
+            start += smallVec;
+            end -= smallVec;
         }
 
 
