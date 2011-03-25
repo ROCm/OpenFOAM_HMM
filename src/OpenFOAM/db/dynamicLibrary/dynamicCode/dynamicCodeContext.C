@@ -34,44 +34,57 @@ License
 Foam::dynamicCodeContext::dynamicCodeContext(const dictionary& dict)
 :
     dict_(dict),
-    code_(stringOps::trim(dict["code"])),
+    code_(),
     localCode_(),
     include_(),
     options_(),
     libs_()
 {
     // expand dictionary entries
-    stringOps::inplaceExpand(code_, dict);
+
+    {
+        const entry& codeEntry = dict.lookupEntry("code", false, false);
+        code_ = stringOps::trim(codeEntry.stream());
+        stringOps::inplaceExpand(code_, dict);
+        addLineDirective(code_, codeEntry.startLineNumber(), dict.name());
+    }
 
     // note: removes any leading/trailing whitespace
     // - necessary for compilation options, convenient for includes
     // and body.
 
     // optional
-    if (dict.found("localCode"))
+    const entry* includePtr = dict.lookupEntryPtr
+    (
+        "codeInclude",
+        false,
+        false
+    );
+    if (includePtr)
     {
-        localCode_ = stringOps::trim(dict["localCode"]);
-        stringOps::inplaceExpand(localCode_, dict);
-    }
-
-    // optional
-    if (dict.found("codeInclude"))
-    {
-        include_ = stringOps::trim(dict["codeInclude"]);
+        include_ = stringOps::trim(includePtr->stream());
         stringOps::inplaceExpand(include_, dict);
+        addLineDirective(include_, includePtr->startLineNumber(), dict.name());
     }
 
     // optional
-    if (dict.found("codeOptions"))
+    const entry* optionsPtr = dict.lookupEntryPtr
+    (
+        "codeOptions",
+        false,
+        false
+    );
+    if (optionsPtr)
     {
-        options_ = stringOps::trim(dict["codeOptions"]);
+        options_ = stringOps::trim(optionsPtr->stream());
         stringOps::inplaceExpand(options_, dict);
     }
 
     // optional
-    if (dict.found("codeLibs"))
+    const entry* libsPtr = dict.lookupEntryPtr("codeLibs", false, false);
+    if (libsPtr)
     {
-        libs_ = stringOps::trim(dict["codeLibs"]);
+        libs_ = stringOps::trim(libsPtr->stream());
         stringOps::inplaceExpand(libs_, dict);
     }
 
@@ -79,6 +92,19 @@ Foam::dynamicCodeContext::dynamicCodeContext(const dictionary& dict)
     OSHA1stream os;
     os  << include_ << options_ << libs_ << localCode_ << code_;
     sha1_ = os.digest();
+}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void Foam::dynamicCodeContext::addLineDirective
+(
+    string& code,
+    const label lineNum,
+    const fileName& name
+)
+{
+    code = "#line " + Foam::name(lineNum) + " \"" + name + "\"\n" + code;
 }
 
 

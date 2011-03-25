@@ -51,6 +51,7 @@ namespace Foam
 class dynamicCodeContext
 {
     // Private data
+
         //- The parent dictionary context
         const dictionary& dict_;
 
@@ -123,6 +124,13 @@ public:
             return sha1_;
         }
 
+        //- Helper: add #line directive
+        static void addLineDirective
+        (
+            string&,
+            const label lineNum,
+            const fileName& name
+        );
 
 };
 
