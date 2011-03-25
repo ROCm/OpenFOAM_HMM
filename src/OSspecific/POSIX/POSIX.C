@@ -1215,7 +1215,7 @@ Foam::fileNameList Foam::dlLoaded()
     {
         std::cout
             << "dlLoaded()"
-            << " : determined loaded libraries :" << libs.size() << endl;
+            << " : determined loaded libraries :" << libs.size() << std::endl;
     }
     return libs;
 }
