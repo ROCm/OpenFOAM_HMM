@@ -168,7 +168,6 @@ setenv FOAM_USER_LIBBIN $WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib
 
 # convenience
 setenv FOAM_APP $WM_PROJECT_DIR/applications
-#setenv FOAM_LIB $WM_PROJECT_DIR/lib
 setenv FOAM_SRC $WM_PROJECT_DIR/src
 setenv FOAM_TUTORIALS $WM_PROJECT_DIR/tutorials
 setenv FOAM_UTILITIES $FOAM_APP/utilities
@@ -361,8 +360,8 @@ unsetenv MPI_ARCH_PATH MPI_HOME FOAM_MPI_LIBBIN
 
 switch ("$WM_MPLIB")
 case OPENMPI:
-    #setenv FOAM_MPI openmpi-1.4.1
-    setenv FOAM_MPI openmpi-1.5.1
+    #setenv FOAM_MPI openmpi-1.4.3
+    setenv FOAM_MPI openmpi-1.5.3
     setenv MPI_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
 
     # Tell OpenMPI where to find its install directory
