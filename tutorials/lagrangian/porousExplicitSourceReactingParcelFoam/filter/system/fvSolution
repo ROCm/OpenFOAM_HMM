@@ -74,9 +74,8 @@ PISO
 
 additional
 {
-    dpdt            true;
-    hWork           true;
-    eWork           true;
+    pressureWork    true;
+    pressureWorkTimeDerivative true;
 }
 
 relaxationFactors
