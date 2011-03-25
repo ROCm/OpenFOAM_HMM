@@ -3,4 +3,4 @@
 
 ./Allrun.pre
 
-runApplication reactingParcelFilmFoam
+runApplication `getApplication`

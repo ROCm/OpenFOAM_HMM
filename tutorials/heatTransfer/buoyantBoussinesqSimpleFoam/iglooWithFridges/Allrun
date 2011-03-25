@@ -6,6 +6,6 @@ cd ${0%/*} || exit 1    # run from this directory
 
 runApplication blockMesh
 runApplication snappyHexMesh -overwrite
-runApplication buoyantBoussinesqSimpleFoam
+runApplication `getApplication`
 
 # ----------------------------------------------------------------- end-of-file
