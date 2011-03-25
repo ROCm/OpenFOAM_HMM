@@ -213,6 +213,14 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
         }
     }
 
+    // Extend segments a bit
+    {
+        const vectorField smallVec(Foam::sqrt(SMALL)*(end-start));
+        start += smallVec;
+        end -= smallVec;
+    }
+
+
     // Do tests in one go
     labelList surfaceHit;
     {
@@ -315,6 +323,14 @@ void Foam::meshRefinement::checkData()
                 end[faceI] = neiCc[faceI-mesh_.nInternalFaces()];
             }
         }
+
+        // Extend segments a bit
+        {
+            const vectorField smallVec(Foam::sqrt(SMALL)*(end-start));
+            start += smallVec;
+            end -= smallVec;
+        }
+
 
         // Do tests in one go
         labelList surfaceHit;
@@ -2246,6 +2262,14 @@ void Foam::meshRefinement::dumpIntersections(const fileName& prefix) const
                 end[i] = neiCc[faceI-mesh_.nInternalFaces()];
             }
         }
+
+        // Extend segments a bit
+        {
+            const vectorField smallVec(Foam::sqrt(SMALL)*(end-start));
+            start += smallVec;
+            end -= smallVec;
+        }
+
 
         // Do tests in one go
         labelList surfaceHit;

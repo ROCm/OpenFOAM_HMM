@@ -104,7 +104,7 @@
   =functionObject=.
   #+BEGIN_SRC c++
   functions
-  (
+  {
       pAverage
       {
           functionObjectLibs ("libutilityFunctionObjects.so");
@@ -117,7 +117,7 @@
               Info<<"p avg:" << average(p) << endl;
           #};
       }
-  );
+  }
   #+END_SRC
   This dynamic code framework uses the following entries
   + =codeData=: declaration (in .H file) of local (null-constructable) data
@@ -233,7 +233,11 @@
   - codedFixedValue could be extended to provide local data however
     in terms of complexity this is not really worthwhile.
 
-  - all templates come from
-    =etc/codeTemplates/dynamicCode=
-    =~/.OpenFOAM/dev/codeTemplates/dynamicCode=
+  - all templates come from (in order of preference)
     =FOAM_TEMPLATE_DIR=
+    =~/.OpenFOAM/dev/codeTemplates/dynamicCode=
+    =etc/codeTemplates/dynamicCode=
+
+  - any generated C++ code will display line numbers relative to the original
+    dictionary (using the '#line' directive) to ease finding compilation
+    errors.

@@ -12,4 +12,4 @@ sed -i 's/\(nNonOrthogonalCorrectors\).*;/\1 10;/g' system/fvSolution
 runApplication potentialFoam -writep
 sed -i 's/\(nNonOrthogonalCorrectors\).*;/\1 0;/g' system/fvSolution
 
-runApplication simpleFoam
+runApplication `getApplication`

@@ -6,6 +6,6 @@ cd ${0%/*} || exit 1    # run from this directory
 
 runApplication blockMesh
 runApplication dsmcInitialise
-runApplication dsmcFoam
+runApplication `getApplication`
 
 # ----------------------------------------------------------------- end-of-file
