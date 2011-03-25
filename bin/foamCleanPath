@@ -52,6 +52,11 @@ options:
     - elements whose start matches one of the wildcard(s)
     - inaccessible directories (with the -strip (at your option)
 
+  Exit status
+      0  on success
+      1  for miscellaneous errors.
+      2  initial value of 'path' is empty
+
 USAGE
     exit 1
 }
@@ -80,6 +85,9 @@ done
 
 dirList="$1"
 shift
+
+[ -n "$1" ] || exit 2    # quick exit on empty 'dirList'
+
 
 ##DEBUG echo "input>$dirList<" 1>&2
 
