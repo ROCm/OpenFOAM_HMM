@@ -281,7 +281,7 @@
     to provide an in-line functionObject. E.g.
     #+BEGIN_SRC c++
     functions
-    (
+    {
         pAverage
         {
             functionObjectLibs ("libutilityFunctionObjects.so");
@@ -293,7 +293,7 @@
                 Info<<"p avg:" << average(p) << endl;
             #};
         }
-    );
+    }
     #+END_SRC
     See also [[./doc/changes/dynamicCode.org]]
 

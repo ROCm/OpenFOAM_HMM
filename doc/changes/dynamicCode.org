@@ -104,7 +104,7 @@
   =functionObject=.
   #+BEGIN_SRC c++
   functions
-  (
+  {
       pAverage
       {
           functionObjectLibs ("libutilityFunctionObjects.so");
@@ -117,7 +117,7 @@
               Info<<"p avg:" << average(p) << endl;
           #};
       }
-  );
+  }
   #+END_SRC
   This dynamic code framework uses the following entries
   + =codeData=: declaration (in .H file) of local (null-constructable) data
