@@ -241,10 +241,6 @@ void Foam::codedFixedValueFvPatchField<Type>::createLibrary
         // Write files for new library
         if (!dynCode.upToDate(context))
         {
-            Info<< "Using dynamicCode for patch " << this->patch().name()
-                << " on field " << this->dimensionedInternalField().name()
-                << endl;
-
             // filter with this context
             dynCode.reset(context);
 
@@ -271,7 +267,7 @@ void Foam::codedFixedValueFvPatchField<Type>::createLibrary
             dynCode.setMakeOptions
             (
                 "EXE_INC = -g \\\n"
-                "-I$(LIB_SRC)/finiteVolume/lnInclude\\\n"
+                "-I$(LIB_SRC)/finiteVolume/lnInclude \\\n"
               + context.options()
               + "\n\nLIB_LIBS = \\\n"
               + "    -lOpenFOAM \\\n"
@@ -342,6 +338,12 @@ void Foam::codedFixedValueFvPatchField<Type>::updateLibrary() const
     {
         return;
     }
+
+    Info<< "Using dynamicCode for patch " << this->patch().name()
+        << " on field " << this->dimensionedInternalField().name() << nl
+        << "at line " << codeDict.startLineNumber()
+        << " in " << codeDict.name() << endl;
+
 
     // remove instantiation of fvPatchField provided by library
     redirectPatchFieldPtr_.clear();

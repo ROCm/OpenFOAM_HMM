@@ -188,9 +188,6 @@ void Foam::codedFunctionObject::createLibrary
         // Write files for new library
         if (!dynCode.upToDate(context))
         {
-            Info<< "Using dynamicCode for functionObject " << name()
-                << endl;
-
             // filter with this context
             dynCode.reset(context);
 
@@ -281,6 +278,11 @@ void Foam::codedFunctionObject::updateLibrary() const
     {
         return;
     }
+
+    Info<< "Using dynamicCode for functionObject " << name()
+        << " at line " << dict_.startLineNumber()
+        << " in " << dict_.name() << endl;
+
 
     // remove instantiation of fvPatchField provided by library
     redirectFunctionObjectPtr_.clear();
@@ -375,21 +377,60 @@ bool Foam::codedFunctionObject::read(const dictionary& dict)
 {
     dict.lookup("redirectType") >> redirectType_;
 
-    if (dict.found("codeRead"))
+    const entry* readPtr = dict.lookupEntryPtr
+    (
+        "codeRead",
+        false,
+        false
+    );
+    if (readPtr)
     {
-        codeRead_ = stringOps::trim(dict["codeRead"]);
+        codeRead_ = stringOps::trim(readPtr->stream());
         stringOps::inplaceExpand(codeRead_, dict);
+        dynamicCodeContext::addLineDirective
+        (
+            codeRead_,
+            readPtr->startLineNumber(),
+            dict.name()
+        );
     }
-    if (dict.found("codeExecute"))
+
+    const entry* execPtr = dict.lookupEntryPtr
+    (
+        "codeExecute",
+        false,
+        false
+    );
+    if (execPtr)
     {
-        codeExecute_ = stringOps::trim(dict["codeExecute"]);
+        codeExecute_ = stringOps::trim(execPtr->stream());
         stringOps::inplaceExpand(codeExecute_, dict);
+        dynamicCodeContext::addLineDirective
+        (
+            codeExecute_,
+            execPtr->startLineNumber(),
+            dict.name()
+        );
     }
-    if (dict.found("codeEnd"))
+
+    const entry* endPtr = dict.lookupEntryPtr
+    (
+        "codeEnd",
+        false,
+        false
+    );
+    if (execPtr)
     {
-        codeEnd_ = stringOps::trim(dict["codeEnd"]);
+        codeEnd_ = stringOps::trim(endPtr->stream());
         stringOps::inplaceExpand(codeEnd_, dict);
+        dynamicCodeContext::addLineDirective
+        (
+            codeEnd_,
+            endPtr->startLineNumber(),
+            dict.name()
+        );
     }
+
     updateLibrary();
     return redirectFunctionObject().read(dict);
 }
