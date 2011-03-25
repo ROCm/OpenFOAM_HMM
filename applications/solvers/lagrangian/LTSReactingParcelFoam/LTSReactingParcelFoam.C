@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-        #include "readPISOControls.H"
+        #include "readPIMPLEControls.H"
         #include "readChemistryProperties.H"
         #include "readAdditionalSolutionControls.H"
         #include "readTimeControls.H"
@@ -86,17 +86,27 @@ int main(int argc, char *argv[])
         #include "timeScales.H"
 
         #include "rhoEqn.H"
-        #include "UEqn.H"
-        #include "YEqn.H"
-        #include "hsEqn.H"
 
-        // --- PISO loop
-        for (int corr=0; corr<nCorr; corr++)
+        // --- PIMPLE loop
+        for (int oCorr=0; oCorr<nOuterCorr; oCorr++)
         {
-            #include "pEqn.H"
-        }
+            bool finalIter = oCorr == nOuterCorr-1;
+            #include "addFinalIter.H"
 
-        turbulence->correct();
+            turbulence->correct();
+
+            #include "UEqn.H"
+            #include "YEqn.H"
+            #include "hsEqn.H"
+
+            // --- PISO loop
+            for (int corr=0; corr<nCorr; corr++)
+            {
+                #include "pEqn.H"
+            }
+
+            #include "removeFinalIter.H"
+        }
 
         if (runTime.write())
         {

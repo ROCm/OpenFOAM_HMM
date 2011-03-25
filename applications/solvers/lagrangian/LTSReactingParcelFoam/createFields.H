@@ -73,12 +73,12 @@
 
     dimensionedScalar rhoMax
     (
-        mesh.solutionDict().subDict("PISO").lookup("rhoMax")
+        mesh.solutionDict().subDict("PIMPLE").lookup("rhoMax")
     );
 
     dimensionedScalar rhoMin
     (
-        mesh.solutionDict().subDict("PISO").lookup("rhoMin")
+        mesh.solutionDict().subDict("PIMPLE").lookup("rhoMin")
     );
 
     Info<< "Creating turbulence model\n" << endl;
@@ -116,11 +116,11 @@
         dimensionedScalar("chemistrySh", dimEnergy/dimTime/dimVolume, 0.0)
     );
 
-    volScalarField invTauFlow
+    volScalarField invTau
     (
         IOobject
         (
-            "invTauFlow",
+            "invTau",
             runTime.timeName(),
             mesh,
             IOobject::READ_IF_PRESENT,

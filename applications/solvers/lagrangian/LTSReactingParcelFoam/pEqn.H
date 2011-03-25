@@ -40,7 +40,20 @@
           - fvm::laplacian(rho*rAU, p)
         );
 
-        pEqn.solve();
+        pEqn.solve
+        (
+            mesh.solver
+            (
+                p.select
+                (
+                    (
+                        finalIter
+                     && corr == nCorr-1
+                     && nonOrth == nNonOrthCorr
+                    )
+                )
+            )
+        );
 
         if (nonOrth == nNonOrthCorr)
         {
