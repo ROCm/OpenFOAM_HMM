@@ -46,6 +46,7 @@ Description
 #include "interfaceProperties.H"
 #include "phaseChangeTwoPhaseMixture.H"
 #include "turbulenceModel.H"
+#include "pimpleLoop.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -83,10 +84,13 @@ int main(int argc, char *argv[])
         turbulence->correct();
 
         // --- Pressure-velocity PIMPLE corrector loop
-        for (int oCorr=0; oCorr<nOuterCorr; oCorr++)
+        for
+        (
+            pimpleLoop pimpleCorr(mesh, nOuterCorr);
+            pimpleCorr.loop();
+            pimpleCorr++
+        )
         {
-            bool finalIter = oCorr == nOuterCorr-1;
-
             #include "UEqn.H"
 
             // --- PISO loop

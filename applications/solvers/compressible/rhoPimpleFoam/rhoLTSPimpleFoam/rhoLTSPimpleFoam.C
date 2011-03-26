@@ -38,6 +38,7 @@ Description
 #include "basicPsiThermo.H"
 #include "turbulenceModel.H"
 #include "fvcSmooth.H"
+#include "pimpleLoop.H"
 #include "bound.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -70,19 +71,20 @@ int main(int argc, char *argv[])
         #include "rhoEqn.H"
 
         // --- Pressure-velocity PIMPLE corrector loop
-        for (int oCorr=0; oCorr<nOuterCorr; oCorr++)
+        for
+        (
+            pimpleLoop pimpleCorr(mesh, nOuterCorr);
+            pimpleCorr.loop();
+            pimpleCorr++
+        )
         {
-            bool finalIter = oCorr == nOuterCorr-1;
-            if (finalIter)
-            {
-                mesh.data::add("finalIteration", true);
-            }
-
             if (nOuterCorr != 1)
             {
                 p.storePrevIter();
                 rho.storePrevIter();
             }
+
+            turbulence->correct();
 
             #include "UEqn.H"
             #include "hEqn.H"
@@ -91,13 +93,6 @@ int main(int argc, char *argv[])
             for (int corr=0; corr<nCorr; corr++)
             {
                 #include "pEqn.H"
-            }
-
-            turbulence->correct();
-
-            if (finalIter)
-            {
-                mesh.data::remove("finalIteration");
             }
         }
 
