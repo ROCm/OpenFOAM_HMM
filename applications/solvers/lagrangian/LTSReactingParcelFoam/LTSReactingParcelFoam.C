@@ -93,6 +93,11 @@ int main(int argc, char *argv[])
             bool finalIter = oCorr == nOuterCorr-1;
             #include "addFinalIter.H"
 
+            if (nOuterCorr != 1)
+            {
+                p.storePrevIter();
+            }
+
             turbulence->correct();
 
             #include "UEqn.H"
