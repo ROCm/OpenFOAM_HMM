@@ -191,7 +191,7 @@ public:
             //  - point       : centre of sphere
             //  - distance    : radius of sphere
             //  - eligiblemiss: false
-            // Tol (small compared to 1, e.g. 1E-9) is used to determine
+            // Tol (small compared to 1, e.g. 1e-9) is used to determine
             // whether point is inside: mag(pt - ctr) < (1+tol)*radius.
             pointHit containmentSphere(const scalar tol) const;
 

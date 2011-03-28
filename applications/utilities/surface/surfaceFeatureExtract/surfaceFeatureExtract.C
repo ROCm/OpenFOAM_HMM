@@ -540,23 +540,18 @@ int main(int argc, char *argv[])
 
     extendedFeatureEdgeMesh feMesh
     (
-        IOobject
-        (
-            sFeatFileName + ".extendedFeatureEdgeMesh",
-            runTime.constant(),
-            "featureEdgeMesh",
-            runTime,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        newSet
+        newSet,
+        runTime,
+        sFeatFileName + ".extendedFeatureEdgeMesh"
     );
 
     Info<< nl << "Writing extendedFeatureEdgeMesh to " << feMesh.objectPath()
         << endl;
 
-
-    feMesh.writeObj(surfFileName.lessExt().name());
+    if (writeObj)
+    {
+        feMesh.writeObj(surfFileName.lessExt().name());
+    }
 
     feMesh.write();
 
