@@ -22,7 +22,7 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     etc/clearEnv.sh
+#     etc/unset.sh
 #
 # Description
 #     Clear as many OpenFOAM environment settings as possible
@@ -143,6 +143,8 @@ unalias wm64
 unalias wm32
 unalias wmSP
 unalias wmDP
+
+unalias wmUNSET
 
 unalias wmSchedON
 unalias wmSchedOFF
