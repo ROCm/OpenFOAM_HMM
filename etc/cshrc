@@ -107,6 +107,9 @@ if ( $?WM_PROJECT_INST_DIR ) then
         set foamOldDirs="$WM_PROJECT_INST_DIR $foamOldDirs"
     endif
 endif
+if ( $?WM_PROJECT_SITE ) then
+    set foamOldDirs="$WM_PROJECT_SITE $foamOldDirs"
+endif
 
 
 # Location of installation
