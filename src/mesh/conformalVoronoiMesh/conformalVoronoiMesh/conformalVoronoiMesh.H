@@ -117,6 +117,9 @@ private:
         //- Random number generator
         mutable Random rndGen_;
 
+        //- Controls for the conformal Voronoi meshing process
+        cvControls cvMeshControls_;
+
         //- All geometry of the meshing process, including surfaces to be
         //  conformed to and those to be used for refinement
         searchableSurfaces allGeometry_;
@@ -126,9 +129,6 @@ private:
 
         //- The cell size control object
         cellSizeControlSurfaces cellSizeControl_;
-
-        //- Controls for the conformal Voronoi meshing process
-        cvControls cvMeshControls_;
 
         //- Keep track of the start of the internal points
         label startOfInternalPoints_;
@@ -430,8 +430,8 @@ private:
         //- Build the parallelInterfaces of the mesh
         void buildParallelInterface
         (
-            List<HashSet<labelPair, labelPair::Hash<> > >& allReferralVertices,
-            HashSet<labelPair, labelPair::Hash<> >& receivedVertices
+            List<labelHashSet>& referralVertices,
+            List<labelHashSet>& receivedVertices
         );
 
         //- Build map to refer vertices to target processors
@@ -450,14 +450,11 @@ private:
         //- Check to see if dual cell specified by given vertex iterator
         //  intersects the parallel interface, hence needs referred.  Returns
         //  destination processor(s).
-        List<label> parallelInterfaceIntersection
+        void parallelInterfaceIntersection
         (
-            const Delaunay::Finite_vertices_iterator& vit
+            const Delaunay::Finite_cells_iterator& cit,
+            boolList& toProc
         ) const;
-
-        //- Which processor should a vertex generating the given dual edge be
-        //  referred to
-        label targetProc(direction ptOnFace) const;
 
         //- Find the "worst" protrusion of a dual cell through the surface,
         //  subject to the maxSurfaceProtrusion tolerance
@@ -809,6 +806,13 @@ public:
             void timeCheck
             (
                 const string& description = string::null
+            ) const;
+
+            //- Write the Delaunay cell
+            void drawDelaunayCell
+            (
+                Ostream& os,
+                const Delaunay::Finite_cells_iterator& cit
             ) const;
 
             //- Write Delaunay points to .obj file

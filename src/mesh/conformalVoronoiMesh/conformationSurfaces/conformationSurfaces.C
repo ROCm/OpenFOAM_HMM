@@ -48,6 +48,7 @@ Foam::conformationSurfaces::conformationSurfaces
     globalBounds_(),
     spanMag_(),
     spanMagSqr_(),
+    processorDomains_(),
     referenceVolumeTypes_(0)
 {
     const dictionary& surfacesDict
@@ -241,7 +242,9 @@ Foam::conformationSurfaces::conformationSurfaces
 
     if (Pstream::parRun())
     {
-        if (Pstream::nProcs() != 8)
+        label procLimit = 2;
+
+        if (Pstream::nProcs() != procLimit)
         {
             FatalErrorIn
             (
@@ -252,27 +255,50 @@ Foam::conformationSurfaces::conformationSurfaces
                     "const dictionary& surfaceConformationDict"
                 ")"
             )
-                << "Hard coded to 8 procs"
+                << "Hard coded to " << procLimit << " << procs"
                 << exit(FatalError);
         }
-        else
+
+        processorDomains_.setSize(Pstream::nProcs());
+
+        processorDomains_[Pstream::myProcNo()] = treeBoundBoxList(4);
+
+        forAll(processorDomains_[Pstream::myProcNo()], pDI)
         {
-            bounds_ = globalBounds_.subBbox
+            processorDomains_[Pstream::myProcNo()][pDI] = globalBounds_.subBbox
             (
-                direction(Pstream::myProcNo())
+                direction(Pstream::myProcNo()*4 + pDI)
             );
         }
+
+        Pstream::gatherList(processorDomains_);
+
+        Pstream::scatterList(processorDomains_);
+
+        DynamicList<Foam::point> allBbPoints;
+
+        forAll(processorDomains_[Pstream::myProcNo()], pDI)
+        {
+            allBbPoints.append
+            (
+                processorDomains_[Pstream::myProcNo()][pDI].points()
+            );
+        }
+
+        bounds_ = treeBoundBox(allBbPoints);
     }
     else
     {
         bounds_ = globalBounds_;
+
+        processorDomains_.setSize(0);
     }
 
     if (Pstream::parRun() && cvMesh_.cvMeshControls().objOutput())
     {
         Info<< "global bounds " << globalBounds_ << endl;
 
-        Pout<< " proc bounds " << bounds_ << endl;
+        Pout<< "processor bounds " << bounds_ << endl;
 
         OFstream str
         (
@@ -301,6 +327,7 @@ Foam::conformationSurfaces::conformationSurfaces
                 << nl;
         }
 
+        Info<< "processor domains " << processorDomains_ << endl;
     }
 
     spanMag_ = bounds_.mag();

@@ -218,19 +218,16 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
         initialTotalHits = nSurfHits + nFeatEdHits;
     }
 
-    // Store the vertices that have been received and added already so that
-    // there is no attempt to add them more than once.
-    HashSet<labelPair, labelPair::Hash<> > receivedVertices;
+    // Remember which vertices were referred to each processor so only updates
+    // are sent.
+    List<labelHashSet> referralVertices(Pstream::nProcs());
 
-    // Remember which vertices were referred from all iterations to each
-    // processor so only updates are sent.
-    List<HashSet<labelPair, labelPair::Hash<> > > allReferralVertices
-    (
-        Pstream::nProcs()
-    );
+    // Store the vertices that have been received and added from each processor
+    // already so that there is no attempt to add them more than once.
+    List<labelHashSet> receivedVertices(Pstream::nProcs());
 
     // Build the parallel interface the initial surface conformation
-    buildParallelInterface(allReferralVertices, receivedVertices);
+    buildParallelInterface(referralVertices, receivedVertices);
 
     label iterationNo = 0;
 
@@ -406,10 +403,10 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
         }
 
         // Update the parallel interface
-        buildParallelInterface(allReferralVertices, receivedVertices);
+        buildParallelInterface(referralVertices, receivedVertices);
     }
 
-    //reportSurfaceConformationQuality();
+    // reportSurfaceConformationQuality();
 
     storeSurfaceConformation();
 }
@@ -455,8 +452,8 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAnyIntersection
 
 void Foam::conformalVoronoiMesh::buildParallelInterface
 (
-    List<HashSet<labelPair, labelPair::Hash<> > >& allReferralVertices,
-    HashSet<labelPair, labelPair::Hash<> >& receivedVertices
+    List<labelHashSet>& referralVertices,
+    List<labelHashSet>& receivedVertices
 )
 {
     if (!Pstream::parRun())
@@ -464,89 +461,53 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
         return;
     }
 
-    label totalInterfaceVertices = 0;
+    boolList sendToProc(Pstream::nProcs(), false);
 
-    // Propagating vertices to other processors to form halo information
-
-    List<DynamicList<label> > verticesToProc(number_of_vertices());
+    DynamicList<Foam::point> parallelInterfacePoints;
+    DynamicList<label> targetProcessor;
+    DynamicList<label> parallelInterfaceIndices;
 
     for
     (
-        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-        vit != finite_vertices_end();
-        vit++
+        Delaunay::Finite_cells_iterator cit = finite_cells_begin();
+        cit != finite_cells_end();
+        ++cit
     )
     {
-        if (vit->internalOrBoundaryPoint())
+        parallelInterfaceIntersection(cit, sendToProc);
+
+        forAll(sendToProc, procI)
         {
-            List<label> toProcs = parallelInterfaceIntersection(vit);
-
-            label vIndex = vit->index();
-
-            DynamicList<label>& vertexToProc = verticesToProc[vIndex];
-
-            forAll(toProcs, tPI)
+            if (sendToProc[procI])
             {
-                label toProc = toProcs[tPI];
-
-                if (toProc > -1)
+                for (int i = 0; i < 4; i++)
                 {
-                    labelPair vPair
-                    (
-                        Pstream::myProcNo(),
-                        vIndex
-                    );
+                    Vertex_handle v = cit->vertex(i);
 
-                    if
-                    (
-                        findIndex(vertexToProc, toProc) == -1
-                     && !allReferralVertices[toProc].found(vPair)
-                    )
+                    label vIndex = v->index();
+
+                    if (v->farPoint())
                     {
-                        vertexToProc.append(toProc);
-                        allReferralVertices[toProc].insert(vPair);
+                        continue;
                     }
 
-                    // Refer all incident vertices to neighbour
-                    // processor too
-                    std::list<Vertex_handle> incidentVertices;
-
-                    incident_vertices
-                    (
-                        vit,
-                        std::back_inserter(incidentVertices)
-                    );
-
-                    for
-                    (
-                        std::list<Vertex_handle>::iterator ivit =
-                            incidentVertices.begin();
-                        ivit != incidentVertices.end();
-                        ++ivit
-                    )
+                    // Using the hashSet to ensure that each vertex is only
+                    // referred once to each processor
+                    if (!referralVertices[procI].found(vIndex))
                     {
-                        if (!(*ivit)->farPoint() && !(*ivit)->referred())
+                        referralVertices[procI].insert(vIndex);
+
+                        parallelInterfacePoints.append(topoint(v->point()));
+
+                        targetProcessor.append(procI);
+
+                        if (v->internalOrBoundaryPoint())
                         {
-                            label ivIndex = (*ivit)->index();
-
-                            DynamicList<label>& iVertexToProc =
-                                verticesToProc[ivIndex];
-
-                            labelPair ivPair
-                            (
-                                Pstream::myProcNo(),
-                                ivIndex
-                            );
-
-                            if
-                            (
-                                findIndex(iVertexToProc, toProc) == -1
-                             && !allReferralVertices[toProc].found(ivPair)
-                            )
-                            {
-                                iVertexToProc.append(toProc);
-                                allReferralVertices[toProc].insert(ivPair);
-                            }
+                            parallelInterfaceIndices.append(v->index());
+                        }
+                        else
+                        {
+                            parallelInterfaceIndices.append(-(v->index()));
                         }
                     }
                 }
@@ -554,328 +515,64 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
         }
     }
 
+    if (cvMeshControls().objOutput())
     {
-        DynamicList<Foam::point> parallelInterfacePoints;
-        DynamicList<label> targetProcessor;
-        DynamicList<label> parallelInterfaceIndices;
-
-        for
+        writePoints
         (
-            Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-            vit != finite_vertices_end();
-            vit++
-        )
+            "parallelInterfacePointsToSend.obj",
+            parallelInterfacePoints
+        );
+    }
+
+    mapDistribute pointMap = buildReferringMap(targetProcessor);
+
+    label totalInterfaceVertices = parallelInterfacePoints.size();
+
+    reduce(totalInterfaceVertices, sumOp<label>());
+
+    pointMap.distribute(parallelInterfacePoints);
+
+    pointMap.distribute(parallelInterfaceIndices);
+
+    if (cvMeshControls().objOutput())
+    {
+        writePoints
+        (
+            "parallelInterfacePointsReceived.obj",
+            parallelInterfacePoints
+        );
+    }
+
+    for (label procI = 0; procI < Pstream::nProcs(); procI++)
+    {
+        const labelList& constructMap = pointMap.constructMap()[procI];
+
+        if (constructMap.size())
         {
-            if (!vit->referred())
+            forAll(constructMap, i)
             {
-                // If a vertex has been marked to go to another processor,
-                // then send it
+                label origIndex = parallelInterfaceIndices[constructMap[i]];
 
-                label vIndex = vit->index();
-
-                const DynamicList<label>& vertexToProc = verticesToProc[vIndex];
-
-                if (!verticesToProc.empty())
+                if (!receivedVertices[procI].found(origIndex))
                 {
-                    forAll(vertexToProc, vTPI)
-                    {
-                        parallelInterfacePoints.append
-                        (
-                            topoint(vit->point())
-                        );
+                    // For the initial referred vertices, the original
+                    // processor is the one that is sending it.
+                    label encodedProcI = -(procI + 1);
 
-                        targetProcessor.append(vertexToProc[vTPI]);
+                    insertPoint
+                    (
+                        parallelInterfacePoints[constructMap[i]],
+                        origIndex,
+                        encodedProcI
+                    );
 
-                        if (vit->internalOrBoundaryPoint())
-                        {
-                            parallelInterfaceIndices.append(vit->index());
-                        }
-                        else
-                        {
-                            parallelInterfaceIndices.append(-vit->index());
-                        }
-                    }
-                }
-            }
-        }
-
-        if (cvMeshControls().objOutput())
-        {
-            writePoints
-            (
-                "parallelInterfacePointsToSend_initial.obj",
-                parallelInterfacePoints
-            );
-        }
-
-        mapDistribute pointMap = buildReferringMap(targetProcessor);
-
-        totalInterfaceVertices = parallelInterfacePoints.size();
-
-        reduce(totalInterfaceVertices, sumOp<label>());
-
-        pointMap.distribute(parallelInterfacePoints);
-
-        pointMap.distribute(parallelInterfaceIndices);
-
-        if (cvMeshControls().objOutput())
-        {
-            writePoints
-            (
-                "parallelInterfacePointsReceived_initial.obj",
-                parallelInterfacePoints
-            );
-        }
-
-        for (label domain = 0; domain < Pstream::nProcs(); domain++)
-        {
-            const labelList& constructMap = pointMap.constructMap()[domain];
-
-            if (constructMap.size())
-            {
-                forAll(constructMap, i)
-                {
-                    label origIndex = parallelInterfaceIndices[constructMap[i]];
-
-                    labelPair vPair(domain, origIndex);
-
-                    if (!receivedVertices.found(vPair))
-                    {
-                        // For the initial referred vertices, the original
-                        // processor is the one that is sending it.
-                        label encodedDomain = -(domain + 1);
-
-                        insertPoint
-                        (
-                            parallelInterfacePoints[constructMap[i]],
-                            origIndex,
-                            encodedDomain
-                        );
-
-                        receivedVertices.insert(vPair);
-                    }
+                    receivedVertices[procI].insert(origIndex);
                 }
             }
         }
     }
 
     Info<< "totalInterfaceVertices " << totalInterfaceVertices << endl;
-
-    // Re-refer vertices
-
-    // When a real vertex has referred vertices attached to it that originate
-    // on several processors, then refer all vertices to all processors, i.e.:
-
-    //     2x--|--0a--|--1x
-    //     2y--|      |--1y
-
-    // Vertex a on processor 0 (0a) has two vertices (x and y) from processors 1
-    // and 2 referred to it that are connected/incident.  We therefore say
-    // that 1x and 1y and need to be referred to processor 2, and vice versa.
-
-    // There may be multiple processors trying to supply 1x and 1y to
-    // processor 2.
-
-    label totalRereferredVertices = 0;
-
-    label nRereferIters = 0;
-
-    // Storage for which processors to refer to
-    DynamicList<label> toProcs;
-
-    do
-    {
-        // For each processor (outer list), maintains a HashSet of label pairs
-        // [origProc, origIndex] that are to be sent.
-        List<HashSet<labelPair, labelPair::Hash<> > > referralVertices
-        (
-            Pstream::nProcs()
-        );
-
-        for
-        (
-            Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-            vit != finite_vertices_end();
-            vit++
-        )
-        {
-            if (vit->internalOrBoundaryPoint() || vit->pairPoint())
-            {
-                toProcs.clear();
-
-                std::list<Vertex_handle> incidentVertices;
-
-                incident_vertices
-                (
-                    vit,
-                    std::back_inserter(incidentVertices)
-                );
-
-                // Determine all of the processors that referred vertices that
-                // are attached to
-                for
-                (
-                    std::list<Vertex_handle>::iterator ivit =
-                        incidentVertices.begin();
-                    ivit != incidentVertices.end();
-                    ++ivit
-                )
-                {
-                    if ((*ivit)->referred())
-                    {
-                        label rPI = (*ivit)->procIndex();
-
-                        if (rPI >= 0 && findIndex(toProcs, rPI) == -1)
-                        {
-                            toProcs.append(rPI);
-                        }
-                    }
-                }
-
-                // Re-refer all referred vertices to all other connected
-                // processors
-                for
-                (
-                    std::list<Vertex_handle>::iterator ivit =
-                        incidentVertices.begin();
-                    ivit != incidentVertices.end();
-                    ++ivit
-                )
-                {
-                    if ((*ivit)->referred())
-                    {
-                        forAll(toProcs, tPI)
-                        {
-                            label toProc = toProcs[tPI];
-
-                            if (toProc == (*ivit)->procIndex())
-                            {
-                                // There is no point referring a vertex back to
-                                // its original processor
-                                continue;
-                            }
-
-                            labelPair vPair
-                            (
-                                label((*ivit)->procIndex()),
-                                label((*ivit)->index())
-                            );
-
-                            if (!allReferralVertices[toProc].found(vPair))
-                            {
-                                referralVertices[toProc].insert(vPair);
-                                allReferralVertices[toProc].insert(vPair);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Re-declare the referring structure - cannot reuse the DynamicLists as
-        // they get manipulated by the mapDistribute in a way that causes
-        // segmentation faults.
-
-        DynamicList<Foam::point> parallelInterfacePoints;
-        DynamicList<label> targetProcessor;
-        DynamicList<label> parallelInterfaceIndices;
-        DynamicList<label> originalProcessor;
-
-        for
-        (
-            Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-            vit != finite_vertices_end();
-            vit++
-        )
-        {
-            if (vit->referred())
-            {
-                labelPair vPair(label(vit->procIndex()), label(vit->index()));
-
-                forAll(referralVertices, proc)
-                {
-                    if(referralVertices[proc].found(vPair))
-                    {
-                        targetProcessor.append(proc);
-                        parallelInterfacePoints.append(topoint(vit->point()));
-                        parallelInterfaceIndices.append(vit->index());
-                        originalProcessor.append(vit->procIndex());
-                    }
-                }
-            }
-        }
-
-        if (cvMeshControls().objOutput())
-        {
-            writePoints
-            (
-                "parallelInterfacePointsToSend_reRefer_"
-                  + name(nRereferIters) + ".obj",
-                parallelInterfacePoints
-            );
-        }
-
-        {
-            mapDistribute pointMap = buildReferringMap(targetProcessor);
-
-            totalRereferredVertices = 0;
-
-            pointMap.distribute(parallelInterfacePoints);
-            pointMap.distribute(parallelInterfaceIndices);
-            pointMap.distribute(originalProcessor);
-
-            if (cvMeshControls().objOutput())
-            {
-                writePoints
-                (
-                    "parallelInterfacePointsReceived_reRefer_"
-                      + name(nRereferIters) + ".obj",
-                    parallelInterfacePoints
-                );
-            }
-
-            for (label domain = 0; domain < Pstream::nProcs(); domain++)
-            {
-                const labelList& constructMap = pointMap.constructMap()[domain];
-
-                if (constructMap.size())
-                {
-                    forAll(constructMap, i)
-                    {
-                        label origProc = originalProcessor[constructMap[i]];
-
-                        label origIndex =
-                            parallelInterfaceIndices[constructMap[i]];
-
-                        labelPair vPair(origProc, origIndex);
-
-                        if (!receivedVertices.found(vPair))
-                        {
-                            label encodedDomain = -(origProc + 1);
-
-                            insertPoint
-                            (
-                                parallelInterfacePoints[constructMap[i]],
-                                origIndex,
-                                encodedDomain
-                            );
-
-                            receivedVertices.insert(vPair);
-
-                            totalRereferredVertices++;
-                        }
-                    }
-                }
-            }
-
-            reduce(totalRereferredVertices, sumOp<label>());
-        }
-
-        Info<< "Rerefer iteration " << nRereferIters
-            << " totalRereferredVertices " << totalRereferredVertices
-            << endl;
-
-    } while(++nRereferIters < 10 && totalRereferredVertices > 0);
 }
 
 
@@ -961,139 +658,73 @@ Foam::mapDistribute Foam::conformalVoronoiMesh::buildReferringMap
 }
 
 
-Foam::List<Foam::label>
-Foam::conformalVoronoiMesh::parallelInterfaceIntersection
+void Foam::conformalVoronoiMesh::parallelInterfaceIntersection
 (
-    const Delaunay::Finite_vertices_iterator& vit
+    const Delaunay::Finite_cells_iterator& cit,
+    boolList& toProc
 ) const
 {
-    std::list<Facet> facets;
-    incident_facets(vit, std::back_inserter(facets));
+    // Assess the intersection of the circumsphere of each Delaunay cell with
+    // the defining volumes for all processors.  Any processor touched by the
+    // circumsphere requires all points of the cell to be referred to it.
 
-    DynamicList<label> procs;
+    toProc = false;
 
-    for
+    // The Delaunay cells to assess have to be real, i.e. all vertices form
+    // part of the internal or boundary definition
+    if
     (
-        std::list<Facet>::iterator fit=facets.begin();
-        fit != facets.end();
-        ++fit
+        cit->vertex(0)->internalOrBoundaryPoint()
+     || cit->vertex(1)->internalOrBoundaryPoint()
+     || cit->vertex(2)->internalOrBoundaryPoint()
+     || cit->vertex(3)->internalOrBoundaryPoint()
     )
     {
-        if
+        Foam::point circumcentre = topoint(dual(cit));
+
+        scalar circumradiusSqr = magSqr
         (
-            is_infinite(fit->first)
-         || is_infinite(fit->first->neighbor(fit->second))
-        )
-        {
-            continue;
-        }
-
-        Foam::point dE0 = topoint(dual(fit->first));
-        Foam::point dE1 = topoint(dual(fit->first->neighbor(fit->second)));
-
-        Foam::point boxPt(vector::one*GREAT);
-        direction ptOnFace = -1;
-
-        Foam::point start = dE0;
-        Foam::point end   = dE1;
-
-        bool intersects = geometryToConformTo_.bounds().intersects
-        (
-            start,
-            end - start,
-            start,
-            end,
-            boxPt,
-            ptOnFace
+            circumcentre - topoint(cit->vertex(0)->point())
         );
 
-        if (intersects && ptOnFace == 0)
+        // Pout<< nl << "# circumradius " << sqrt(circumradiusSqr) << endl;
+
+        // drawDelaunayCell(Pout, cit);
+
+        // meshTools::writeOBJ(Pout, topoint(cit->vertex(0)->point()));
+        // meshTools::writeOBJ(Pout, circumcentre);
+
+        // Pout<< "l cr0 cr1" << endl;
+
+        forAll(geometryToConformTo_.processorDomains(), procI)
         {
-            // If the box is intersected, but doesn't return the appropriate
-            // bits, then this means that the start point was inside the box,
-            // so reverse the direction of the query.
-
-            start = dE1;
-            end   = dE0;
-
-            geometryToConformTo_.bounds().intersects
-            (
-                start,
-                end - start,
-                start,
-                end,
-                boxPt,
-                ptOnFace
-            );
-        }
-
-        // If an intersection with the box has been found, then it is the "end"
-        // point that is inside the box, so test the line from end to
-        // boxPt to see if the surface is in-between.
-        if
-        (
-            ptOnFace > 0
-         && !geometryToConformTo_.findSurfaceAnyIntersection(end, boxPt)
-        )
-        {
-            // A surface penetration is not found, and a bounds penetration is
-            // found, so the dual edge has crossed the parallel interface.
-
-            label target = targetProc(ptOnFace);
-
-            if
-            (
-                target > -1
-             && findIndex(procs, target) == -1
-            )
+            if (procI == Pstream::myProcNo())
             {
-                procs.append(target);
+                continue;
+            }
+
+            const treeBoundBoxList& procBbs =
+                geometryToConformTo_.processorDomains()[procI];
+
+            forAll(procBbs, pBI)
+            {
+                const treeBoundBox& procBb = procBbs[pBI];
+
+                if (procBb.overlaps(circumcentre, circumradiusSqr))
+                {
+                    toProc[procI] = true;
+
+                    break;
+                }
+            }
+
+            if (toProc[procI])
+            {
+                break;
             }
         }
     }
-
-    return procs;
 }
-
-
-Foam::label Foam::conformalVoronoiMesh::targetProc
-(
-     direction ptOnFace
-) const
-{
-    // Hard coded to 8 proc, bound-box octant split:
-
-    if (ptOnFace == 0)
-    {
-        return -1;
-    }
-
-    label faceIndex = 0;
-
-    // Taking log2 of the direction to deduce the face, i.e. reverse the
-    // encoding of faceId to faceBit in treeBoundBox.H
-    // From: http://graphics.stanford.edu/~seander/bithacks.html
-    while (ptOnFace >>= 1)
-    {
-        faceIndex++;
-    }
-
-    label procArray[8][6] =
-    {
-        {-1,  1, -1,  2, -1,  4},
-        { 0, -1, -1,  3, -1,  5},
-        {-1,  3,  0, -1, -1,  6},
-        { 2, -1,  1, -1, -1,  7},
-        {-1,  5, -1,  6,  0, -1},
-        { 4, -1, -1,  7,  1, -1},
-        {-1,  7,  4, -1,  2, -1},
-        { 6, -1,  5, -1,  3, -1}
-    };
-
-    return initListList<List<label>, label, 8, 6>(procArray)
-        [Pstream::myProcNo()][faceIndex];
-}
-
 
 
 void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion

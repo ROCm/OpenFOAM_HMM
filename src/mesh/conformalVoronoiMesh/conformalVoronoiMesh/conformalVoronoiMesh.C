@@ -1187,6 +1187,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     Delaunay(),
     runTime_(runTime),
     rndGen_(64293*Pstream::myProcNo()),
+    cvMeshControls_(*this, cvMeshDict),
     allGeometry_
     (
         IOobject
@@ -1212,7 +1213,6 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         allGeometry_,
         cvMeshDict.subDict("motionControl")
     ),
-    cvMeshControls_(*this, cvMeshDict),
     startOfInternalPoints_(0),
     startOfSurfacePoints_(0),
     featureVertices_(),

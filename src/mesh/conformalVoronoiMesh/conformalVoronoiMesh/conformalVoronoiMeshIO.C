@@ -79,6 +79,27 @@ void Foam::conformalVoronoiMesh::timeCheck
     }
 }
 
+void Foam::conformalVoronoiMesh::drawDelaunayCell
+(
+    Ostream& os,
+    const Delaunay::Finite_cells_iterator& cit
+) const
+{
+    meshTools::writeOBJ(os, topoint(cit->vertex(0)->point()));
+    meshTools::writeOBJ(os, topoint(cit->vertex(1)->point()));
+    meshTools::writeOBJ(os, topoint(cit->vertex(2)->point()));
+    meshTools::writeOBJ(os, topoint(cit->vertex(3)->point()));
+
+    os  << "f 1 3 2" << nl
+        << "f 2 3 4" << nl
+        << "f 1 4 3" << nl
+        << "f 1 2 4" << endl;
+
+    meshTools::writeOBJ(os, topoint(dual(cit)));
+
+    os  << "l 1 5" << endl;
+}
+
 
 void Foam::conformalVoronoiMesh::writePoints
 (

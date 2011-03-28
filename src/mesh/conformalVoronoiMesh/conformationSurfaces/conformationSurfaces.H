@@ -102,6 +102,9 @@ class conformationSurfaces
         //- Square of span_
         scalar spanMagSqr_;
 
+        //- All of the treeBoundBoxes representing volumes held by all
+        //  processors
+        List<treeBoundBoxList> processorDomains_;
 
         //- The pattern/signature of volumeTypes representing a point in the
         // domain to be meshed
@@ -162,6 +165,9 @@ public:
 
             //- Return spanSqr
             inline scalar spanMagSqr() const;
+
+            //- Return the processorDomains
+            inline const List<treeBoundBoxList>& processorDomains() const;
 
 
         // Query

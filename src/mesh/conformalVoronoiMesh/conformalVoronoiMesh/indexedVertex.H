@@ -221,6 +221,14 @@ public:
     }
 
 
+    // is this a "real" point on this processor, i.e. is it internal or part of
+    // the boundary description, and not a "far" or "referred" point
+    inline bool real() const
+    {
+        return internalPoint() || pairPoint();
+    }
+
+
     // For referred vertices, what is the original processor index
     inline int procIndex() const
     {
