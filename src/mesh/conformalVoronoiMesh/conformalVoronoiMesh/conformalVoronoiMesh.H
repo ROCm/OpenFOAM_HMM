@@ -447,10 +447,19 @@ private:
             DynamicList<label>& parallelInterfaceIndices
         );
 
+        //- Check to see if dual cell specified by given vertex iterator can
+        //  influence the parallel interface, hence needs referred.  Returns
+        //  destination processor(s).
+        void parallelInterfaceIntersection
+        (
+            const Delaunay::Finite_vertices_iterator& vit,
+            boolList& toProc
+        ) const;
+
         //- Check to see if dual cell specified by given vertex iterator
         //  intersects the parallel interface, hence needs referred.  Returns
         //  destination processor(s).
-        void parallelInterfaceIntersection
+        void parallelInterfaceInfluence
         (
             const Delaunay::Finite_cells_iterator& cit,
             boolList& toProc

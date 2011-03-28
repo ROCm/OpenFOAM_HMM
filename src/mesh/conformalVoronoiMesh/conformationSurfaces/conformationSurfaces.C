@@ -242,7 +242,7 @@ Foam::conformationSurfaces::conformationSurfaces
 
     if (Pstream::parRun())
     {
-        label procLimit = 2;
+        label procLimit = 8;
 
         if (Pstream::nProcs() != procLimit)
         {
@@ -259,33 +259,15 @@ Foam::conformationSurfaces::conformationSurfaces
                 << exit(FatalError);
         }
 
+        bounds_ = globalBounds_.subBbox(direction(Pstream::myProcNo()));
+
         processorDomains_.setSize(Pstream::nProcs());
 
-        processorDomains_[Pstream::myProcNo()] = treeBoundBoxList(4);
-
-        forAll(processorDomains_[Pstream::myProcNo()], pDI)
-        {
-            processorDomains_[Pstream::myProcNo()][pDI] = globalBounds_.subBbox
-            (
-                direction(Pstream::myProcNo()*4 + pDI)
-            );
-        }
+        processorDomains_[Pstream::myProcNo()] = treeBoundBoxList(1, bounds_);
 
         Pstream::gatherList(processorDomains_);
 
         Pstream::scatterList(processorDomains_);
-
-        DynamicList<Foam::point> allBbPoints;
-
-        forAll(processorDomains_[Pstream::myProcNo()], pDI)
-        {
-            allBbPoints.append
-            (
-                processorDomains_[Pstream::myProcNo()][pDI].points()
-            );
-        }
-
-        bounds_ = treeBoundBox(allBbPoints);
     }
     else
     {
