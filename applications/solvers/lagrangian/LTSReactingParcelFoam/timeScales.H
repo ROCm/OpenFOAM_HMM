@@ -28,129 +28,40 @@ Info<< "Time scales min/max:" << endl;
 
 {
     // Cache old time scale field
-    tmp<volScalarField> tinvTauFlow0
+    tmp<volScalarField> tinvTau0
     (
         new volScalarField
         (
             IOobject
             (
-                "invTauFlow0",
+                "invTau0",
                 runTime.timeName(),
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            invTauFlow
+            invTau
         )
     );
-    const volScalarField& invTauFlow0 = tinvTauFlow0();
+    const volScalarField& invTau0 = tinvTau0();
 
 
     // Flow time scale
     // ~~~~~~~~~~~~~~~
     {
-        invTauFlow =
+        invTau =
             fvc::surfaceSum
             (
                 mag(phi)*mesh.deltaCoeffs()/(maxCo*mesh.magSf())
             )
            /rho;
 
-        invTauFlow.max(1.0/maxDeltaT);
+        invTau.max(1.0/maxDeltaT);
 
         Info<< "    Flow        = "
-            << gMin(1/invTauFlow.internalField()) << ", "
-            << gMax(1/invTauFlow.internalField()) << endl;
-    }
-
-
-    // Mass source time scale
-    // ~~~~~~~~~~~~~~~~~~~~~~
-
-    {
-        scalarField tau
-        (
-            runTime.deltaTValue()*mag(parcels.Srho() + massSource.SuTot())
-        );
-
-        tau = alphaTauRho*rho/(tau + ROOTVSMALL);
-
-        Info<< "    Density     = "
-            << min(maxDeltaT, gMin(tau)) << ", "
-            << min(maxDeltaT, gMax(tau)) << endl;
-
-        invTauFlow.internalField() = max(invTauFlow.internalField(), 1/tau);
-    }
-
-
-    // Momentum source time scale
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    {
-/*
-        // Method 1 - mag(U) limit using 'small' nominal velocity
-        scalarField tau
-        (
-            runTime.deltaTValue()
-           *mag
-            (
-                rho.dimensionedInternalField()*g
-              + parcels.UTrans()/(mesh.V()*runTime.deltaT())
-              + momentumSource.Su()
-            )
-           /rho
-        );
-
-        const scalar nomMagU(dimensionedScalar("1", dimVelocity, 1));
-        tau = alphaTauU*(nomMagU + mag(U))/(tau + ROOTVSMALL);
-*/
-/*
-        // Method 2 - based on fluxes and Co-like limit
-        volVectorField UEqnRhs
-        (
-            IOobject
-            (
-                "UEqnRhs",
-                runTime.timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh,
-            dimensionedVector("zero", dimDensity*dimAcceleration, vector::zero),
-            zeroGradientFvPatchVectorField::typeName
-        );
-
-        UEqnRhs.internalField() =
-            rho.dimensionedInternalField()*g
-          + parcels.UTrans()/(mesh.V()*runTime.deltaT())
-          + momentumSource.Su();
-
-        surfaceScalarField phiSU
-        (
-            "phiSU",
-            fvc::interpolate(runTime.deltaT()*UEqnRhs) & mesh.Sf()
-        );
-
-        scalarField tau
-        (
-            alphaTauU*rho
-           /fvc::surfaceSum
-            (
-                mag(phi + phiSU)*mesh.deltaCoeffs()/mesh.magSf()
-              + dimensionedScalar("SMALL", dimDensity/dimTime, ROOTVSMALL)
-            )
-        );
-
-*/
-/*
-        Info<< "    Momentum    = " << min(maxDeltaT, gMin(tau)) << ", "
-            << min(maxDeltaT, gMax(tau)) << endl;
-
-        invTauFlow.internalField() = max(invTauFlow.internalField(), 1/tau);
-*/
+            << gMin(1/invTau.internalField()) << ", "
+            << gMax(1/invTau.internalField()) << endl;
     }
 
 
@@ -176,42 +87,7 @@ Info<< "Time scales min/max:" << endl;
         Info<< "    Temperature = " << min(maxDeltaT, gMin(tau)) << ", "
             << min(maxDeltaT, gMax(tau)) << endl;
 
-        invTauFlow.internalField() = max(invTauFlow.internalField(), 1/tau);
-    }
-
-
-    // Specie source time scale
-    // ~~~~~~~~~~~~~~~~~~~~~~~~
-
-    {
-        scalarField tau(mesh.nCells(), ROOTVGREAT);
-        forAll(Y, fieldI)
-        {
-            const volScalarField& Yi = Y[fieldI];
-            const scalarField deltaYi
-            (
-                runTime.deltaTValue()
-               *mag
-                (
-                    kappa*chemistry.RR(fieldI)()
-                  + massSource.Su(fieldI)
-                  + parcels.Srho(fieldI)
-                )
-               /rho
-            );
-            tau =
-                min
-                (
-                    tau,
-                    alphaTauSpecie
-                   /(deltaYi/(Yi + specieMaxUnbound) + ROOTVSMALL)
-                );
-        }
-
-        Info<< "    Specie      = " << min(maxDeltaT, gMin(tau)) << ", "
-            << min(maxDeltaT, gMax(tau)) << endl;
-
-        invTauFlow.internalField() = max(invTauFlow.internalField(), 1/tau);
+        invTau.internalField() = max(invTau.internalField(), 1/tau);
     }
 
 
@@ -219,21 +95,21 @@ Info<< "Time scales min/max:" << endl;
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // - reduce as much as required for flow, but limit source contributions
     const dimensionedScalar deltaTRamp("deltaTRamp", dimless, 1/(1 + 0.2));
-    invTauFlow = max(invTauFlow, invTauFlow0*deltaTRamp);
-    tinvTauFlow0.clear();
+    invTau = max(invTau, invTau0*deltaTRamp);
+    tinvTau0.clear();
 
 
     // Limit the largest time scale
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    invTauFlow.max(1/maxDeltaT);
+    invTau.max(1/maxDeltaT);
 
 
     // Spatially smooth the time scale field
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    fvc::smooth(invTauFlow, alphaTauSmooth);
+    fvc::smooth(invTau, alphaTauSmooth);
 
-    Info<< "    Overall     = " << min(1/invTauFlow).value()
-        << ", " << max(1/invTauFlow).value() << nl << endl;
+    Info<< "    Overall     = " << min(1/invTau).value()
+        << ", " << max(1/invTau).value() << nl << endl;
 }
 
 

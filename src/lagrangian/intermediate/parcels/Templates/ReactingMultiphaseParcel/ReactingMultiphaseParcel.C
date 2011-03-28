@@ -332,7 +332,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     // ~~~~~~~~~~~~~
 
     // Calculate new particle temperature
-    scalar Cuh = 0.0;
+    scalar Sph = 0.0;
     scalar T1 =
         this->calcHeatTransfer
         (
@@ -349,7 +349,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             NCpW,
             Sh,
             dhsTrans,
-            Cuh
+            Sph
         );
 
 
@@ -423,7 +423,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         td.cloud().hsTrans()[cellI] += np0*dhsTrans;
 
         // Update sensible enthalpy coefficient
-        td.cloud().hsCoeff()[cellI] += np0*Cuh*this->areaS();
+        td.cloud().hsCoeff()[cellI] += np0*Sph;
     }
 
 
