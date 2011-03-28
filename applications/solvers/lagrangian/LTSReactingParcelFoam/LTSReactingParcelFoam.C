@@ -96,6 +96,11 @@ int main(int argc, char *argv[])
             pimpleCorr++
         )
         {
+            if (nOuterCorr != 1)
+            {
+                p.storePrevIter();
+            }
+
             turbulence->correct();
 
             #include "UEqn.H"

@@ -3262,6 +3262,9 @@ void Foam::autoLayerDriver::addLayers
     // Apply the stored topo changes to the current mesh.
     autoPtr<mapPolyMesh> map = savedMeshMod.changeMesh(mesh, false);
 
+    // Hack to remove meshPhi - mapped incorrectly. TBD.
+    mesh.clearOut();
+
     // Update fields
     mesh.updateMesh(map);
 

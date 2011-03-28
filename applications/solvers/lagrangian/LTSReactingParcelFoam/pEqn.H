@@ -59,7 +59,7 @@
         }
     }
 
-    Info<< "p min/max = " << min(p).value() << ", " << max(p).value() << endl;
+    p.relax();
 
     // Second part of thermodynamic density update
     thermo.rho() += psi*p;
@@ -75,4 +75,6 @@
     rho = min(rho, rhoMax);
 
     #include "setPressureWork.H"
+
+    Info<< "p min/max = " << min(p).value() << ", " << max(p).value() << endl;
 }
