@@ -26,7 +26,7 @@
                 p_rgh.select
                 (
                     (
-                        finalIter
+                        pimpleCorr.finalIter()
                      && corr == nCorr-1
                      && nonOrth == nNonOrthCorr
                     )

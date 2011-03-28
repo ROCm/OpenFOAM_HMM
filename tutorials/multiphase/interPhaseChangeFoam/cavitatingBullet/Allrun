@@ -11,6 +11,6 @@ runApplication blockMesh
 runApplication snappyHexMesh -overwrite
 
 # Run the solver
-runApplication interPhaseChangeFoam
+runApplication `getApplication`
 
 # ----------------------------------------------------------------- end-of-file

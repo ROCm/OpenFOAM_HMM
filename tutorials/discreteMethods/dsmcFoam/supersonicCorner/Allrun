@@ -8,7 +8,6 @@ runApplication blockMesh
 runApplication decomposePar
 runParallel dsmcInitialise 4
 runParallel dsmcFoam 4
-runApplication reconstructPar -noLagrangian
-
+runApplication `getApplication` -noLagrangian
 
 # ----------------------------------------------------------------- end-of-file

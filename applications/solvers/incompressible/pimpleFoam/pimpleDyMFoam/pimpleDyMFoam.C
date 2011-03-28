@@ -36,6 +36,7 @@ Description
 #include "singlePhaseTransportModel.H"
 #include "turbulenceModel.H"
 #include "dynamicFvMesh.H"
+#include "pimpleLoop.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -83,15 +84,14 @@ int main(int argc, char *argv[])
             #include "meshCourantNo.H"
         }
 
-        // --- PIMPLE loop
-        for (int oCorr=0; oCorr<nOuterCorr; oCorr++)
+        // --- Pressure-velocity PIMPLE corrector loop
+        for
+        (
+            pimpleLoop pimpleCorr(mesh, nOuterCorr);
+            pimpleCorr.loop();
+            pimpleCorr++
+        )
         {
-            bool finalIter = oCorr == nOuterCorr-1;
-            if (finalIter)
-            {
-                mesh.data::add("finalIteration", true);
-            }
-
             if (nOuterCorr != 1)
             {
                 p.storePrevIter();
@@ -106,11 +106,6 @@ int main(int argc, char *argv[])
             }
 
             turbulence->correct();
-
-            if (finalIter)
-            {
-                mesh.data::remove("finalIteration");
-            }
         }
 
         runTime.write();

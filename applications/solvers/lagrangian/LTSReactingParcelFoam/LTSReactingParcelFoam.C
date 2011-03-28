@@ -46,6 +46,7 @@ Description
 #include "timeActivatedExplicitSource.H"
 #include "SLGThermo.H"
 #include "fvcSmooth.H"
+#include "pimpleLoop.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -71,7 +72,7 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-        #include "readPISOControls.H"
+        #include "readPIMPLEControls.H"
         #include "readChemistryProperties.H"
         #include "readAdditionalSolutionControls.H"
         #include "readTimeControls.H"
@@ -86,17 +87,27 @@ int main(int argc, char *argv[])
         #include "timeScales.H"
 
         #include "rhoEqn.H"
-        #include "UEqn.H"
-        #include "YEqn.H"
-        #include "hsEqn.H"
 
-        // --- PISO loop
-        for (int corr=0; corr<nCorr; corr++)
+        // --- Pressure-velocity PIMPLE corrector loop
+        for
+        (
+            pimpleLoop pimpleCorr(mesh, nOuterCorr);
+            pimpleCorr.loop();
+            pimpleCorr++
+        )
         {
-            #include "pEqn.H"
-        }
+            turbulence->correct();
 
-        turbulence->correct();
+            #include "UEqn.H"
+            #include "YEqn.H"
+            #include "hsEqn.H"
+
+            // --- PISO loop
+            for (int corr=0; corr<nCorr; corr++)
+            {
+                #include "pEqn.H"
+            }
+        }
 
         if (runTime.write())
         {

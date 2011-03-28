@@ -90,11 +90,8 @@ subModels
 {
     particleForces
     {
-        activeForces
-        (
-            sphereDrag
-            gravity
-        );
+        sphereDrag;
+        gravity;
     }
 
     injectionModel  patchInjection;
@@ -125,7 +122,7 @@ subModels
         massFlowRate    0.8e-03;
         parcelBasisType mass;
         patchName       inletCentral;
-        parcelsPerSecond 400;
+        parcelsPerSecond 100;
         duration        1; // NOTE: set to 1 for steady state
         U0              (0 40 0);
         flowRateProfile constant 1;

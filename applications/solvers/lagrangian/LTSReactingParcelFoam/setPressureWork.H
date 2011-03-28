@@ -1,10 +1,13 @@
 DpDt == dimensionedScalar("zero", DpDt.dimensions(), 0.0);
 
-if (eWork)
+if (pressureWork)
 {
-    DpDt += -p*fvc::div(phi/fvc::interpolate(rho));
-}
-if (hWork)
-{
-    DpDt += fvc::div(phi/fvc::interpolate(rho)*fvc::interpolate(p));
+    surfaceScalarField phiU("phiU", phi/fvc::interpolate(rho));
+
+    DpDt += fvc::div(phiU*fvc::interpolate(p)) - p*fvc::div(phiU);
+
+    if (pressureWorkTimeDerivative)
+    {
+        DpDt += fvc::ddt(p);
+    }
 }

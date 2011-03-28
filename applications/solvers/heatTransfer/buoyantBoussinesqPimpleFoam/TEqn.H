@@ -12,7 +12,7 @@
     );
 
     TEqn.relax();
-    TEqn.solve(mesh.solver(T.select(finalIter)));
+    TEqn.solve();
 
     rhok = 1.0 - beta*(T - TRef);
 }

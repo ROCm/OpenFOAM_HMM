@@ -21,7 +21,6 @@
                   - ghf*fvc::snGrad(rhok)
                   - fvc::snGrad(p_rgh)
                 )*mesh.magSf()
-            ),
-            mesh.solver(U.select(finalIter))
+            )
         );
     }

@@ -9,6 +9,6 @@ cp 0/alpha1.org 0/alpha1
 cp 0/alpha2.org 0/alpha2
 cp 0/alpha3.org 0/alpha3
 runApplication setFields
-runApplication interMixingFoam
+runApplication `getApplication`
 
 # ----------------------------------------------------------------- end-of-file

@@ -17,7 +17,7 @@ do
     sed "s/XXX/$e/g" constant/transportProperties.template \
         > constant/transportProperties
 
-    runApplication boundaryFoam
+    runApplication `getApplication`
 
     mv log.boundaryFoam log.boundaryFoam_$e
 

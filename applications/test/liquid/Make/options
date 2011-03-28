@@ -1,5 +1,5 @@
 EXE_INC = \
-    -I$(LIB_SRC)/thermophysicalModels/liquids/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/properties/liquidProperties/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/thermophysicalFunctions/lnInclude
 
-EXE_LIBS = -lliquids -lthermophysicalFunctions
+EXE_LIBS = -lliquidProperties -lthermophysicalFunctions

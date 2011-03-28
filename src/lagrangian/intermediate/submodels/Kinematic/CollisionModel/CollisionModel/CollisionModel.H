@@ -141,18 +141,27 @@ public:
 
 #define makeCollisionModel(CloudType)                                         \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(CollisionModel<CloudType>, 0);        \
-                                                                              \
-    defineTemplateRunTimeSelectionTable(CollisionModel<CloudType>, dictionary);
+    typedef CloudType::collidingCloudType collidingCloudType;                 \
+    defineNamedTemplateTypeNameAndDebug                                       \
+    (                                                                         \
+        CollisionModel<collidingCloudType>,                                   \
+        0                                                                     \
+    );                                                                        \
+    defineTemplateRunTimeSelectionTable                                       \
+    (                                                                         \
+        CollisionModel<collidingCloudType>,                                   \
+        dictionary                                                            \
+    );
 
 
 #define makeCollisionModelType(SS, CloudType)                                 \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
+    typedef CloudType::collidingCloudType collidingCloudType;                 \
+    defineNamedTemplateTypeNameAndDebug(SS<collidingCloudType>, 0);           \
                                                                               \
-    CollisionModel<CloudType>::                                               \
-        adddictionaryConstructorToTable<SS<CloudType> >                       \
-            add##SS##CloudType##ConstructorToTable_;
+    CollisionModel<collidingCloudType>::                                      \
+        adddictionaryConstructorToTable<SS<collidingCloudType> >              \
+            add##SS##CloudType##collidingCloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

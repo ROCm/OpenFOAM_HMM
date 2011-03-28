@@ -11,7 +11,7 @@ runApplication decomposePar
 #runApplication snappyHexMesh -overwrite
 #runApplication setSet -batch makeZones
 #runApplication setsToZones -noFlipMap
-#runApplication windSimpleFoam
+#runApplication `getApplication`
 
 cp system/decomposeParDict-par system/decomposeParDict
 runParallel snappyHexMesh 2 -overwrite
@@ -31,7 +31,7 @@ runParallel renumberMesh 4 -overwrite
 #runParallel changeDictionary 4 -literalRE
 
 runParallel setSet 4 -batch makeZones
-runParallel windSimpleFoam 4
+runParallel `getApplication` 4
 
 runApplication reconstructParMesh -constant
 runApplication reconstructPar

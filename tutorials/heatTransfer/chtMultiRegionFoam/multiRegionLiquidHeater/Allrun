@@ -37,7 +37,7 @@ do
 done
 
 # Run
-runParallel chtMultiRegionFoam 4
+runParallel `getApplication` 4
 
 # Reconstruct
 for i in bottomWater topAir heater leftSolid rightSolid

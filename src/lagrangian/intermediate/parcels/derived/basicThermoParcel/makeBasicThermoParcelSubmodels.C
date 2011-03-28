@@ -41,18 +41,15 @@ License
 namespace Foam
 {
     // Kinematic sub-models
-    typedef basicThermoCloud::cloudType basicThermoCloud_K;
-
-    // Kinematic sub-models
-    makeThermoParcelForces(basicThermoCloud_K);
-    makeParcelDispersionModels(basicThermoCloud_K);
-    makeParcelInjectionModels(basicThermoCloud_K);
-    makeParcelPatchInteractionModels(basicThermoCloud_K);
-    makeParcelPostProcessingModels(basicThermoCloud_K);
+    makeThermoParcelForces(basicThermoCloud);
+    makeParcelDispersionModels(basicThermoCloud);
+    makeParcelInjectionModels(basicThermoCloud);
+    makeParcelPatchInteractionModels(basicThermoCloud);
+    makeParcelPostProcessingModels(basicThermoCloud);
 
     // Thermo sub-models
     makeParcelHeatTransferModels(basicThermoCloud);
-    makeParcelSurfaceFilmModels(basicThermoCloud_K);
+    makeParcelSurfaceFilmModels(basicThermoCloud);
 }
 
 

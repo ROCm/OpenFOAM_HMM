@@ -11,7 +11,7 @@
 
     scalar rDeltaTSmoothingCoeff
     (
-        piso.lookupOrDefault<scalar>("rDeltaTSmoothingCoeff", 0.1)
+        piso.lookupOrDefault<scalar>("rDeltaTSmoothingCoeff", 0.02)
     );
 
     label nAlphaSpreadIter
