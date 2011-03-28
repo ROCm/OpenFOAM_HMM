@@ -39,16 +39,13 @@ License
 namespace Foam
 {
     // Kinematic sub-models
-    typedef basicKinematicCollidingCloud::cloudType
-        basicKinematicCollidingCloud_K;
-
-    makeParcelForces(basicKinematicCollidingCloud_K);
-    makeParcelDispersionModels(basicKinematicCollidingCloud_K);
-    makeParcelInjectionModels(basicKinematicCollidingCloud_K);
+    makeParcelForces(basicKinematicCollidingCloud);
+    makeParcelDispersionModels(basicKinematicCollidingCloud);
+    makeParcelInjectionModels(basicKinematicCollidingCloud);
     makeParcelCollisionModels(basicKinematicCollidingCloud);
-    makeParcelPatchInteractionModels(basicKinematicCollidingCloud_K);
-    makeParcelPostProcessingModels(basicKinematicCollidingCloud_K);
-    makeParcelSurfaceFilmModels(basicKinematicCollidingCloud_K);
+    makeParcelPatchInteractionModels(basicKinematicCollidingCloud);
+    makeParcelPostProcessingModels(basicKinematicCollidingCloud);
+    makeParcelSurfaceFilmModels(basicKinematicCollidingCloud);
 }
 
 

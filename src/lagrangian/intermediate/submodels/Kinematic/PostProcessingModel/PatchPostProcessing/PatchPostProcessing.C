@@ -102,7 +102,8 @@ void Foam::PatchPostProcessing<CloudType>::write()
             );
             sort(globalData);
 
-            patchOutFile<< "# Time currentProc " + parcelType::propHeader << nl;
+            string header("# Time currentProc " + parcelType::propHeader);
+            patchOutFile<< header.c_str() << nl;
 
             forAll(globalData, dataI)
             {
@@ -125,7 +126,7 @@ Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
 )
 :
     PostProcessingModel<CloudType>(dict, owner, typeName),
-    maxStoredParcels_(readLabel(this->coeffDict().lookup("maxStoredParcels"))),
+    maxStoredParcels_(readScalar(this->coeffDict().lookup("maxStoredParcels"))),
     patchIDs_(),
     patchData_()
 {

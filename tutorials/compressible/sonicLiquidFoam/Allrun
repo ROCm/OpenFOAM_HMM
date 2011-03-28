@@ -4,9 +4,6 @@ cd ${0%/*} || exit 1    # run from this directory
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
-# Set application name
-application="sonicLiquidFoam"
-
 setDecompressionTankFine()
 {
     blockMeshDict="constant/polyMesh/blockMeshDict"
@@ -42,7 +39,7 @@ cloneCase decompressionTank decompressionTankFine
 
     # And execute
     runApplication blockMesh
-    runApplication $application
+    runApplication `getApplication`
 )
 
 # ----------------------------------------------------------------- end-of-file

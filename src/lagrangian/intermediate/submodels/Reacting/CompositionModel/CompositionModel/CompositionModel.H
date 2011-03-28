@@ -267,26 +267,27 @@ public:
 
 #define makeCompositionModel(CloudType)                                       \
                                                                               \
+    typedef CloudType::reactingCloudType reactingCloudType;                   \
     defineNamedTemplateTypeNameAndDebug                                       \
     (                                                                         \
-        CompositionModel<CloudType>,                                          \
+        CompositionModel<reactingCloudType>,                                  \
         0                                                                     \
     );                                                                        \
-                                                                              \
     defineTemplateRunTimeSelectionTable                                       \
     (                                                                         \
-        CompositionModel<CloudType>,                                          \
+        CompositionModel<reactingCloudType>,                                  \
         dictionary                                                            \
     );
 
 
 #define makeCompositionModelType(SS, CloudType)                               \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
+    typedef CloudType::reactingCloudType reactingCloudType;                   \
+    defineNamedTemplateTypeNameAndDebug(SS<reactingCloudType>, 0);            \
                                                                               \
-    CompositionModel<CloudType>::                                             \
-        adddictionaryConstructorToTable<SS<CloudType> >                       \
-            add##SS##CloudType##ConstructorToTable_;
+    CompositionModel<reactingCloudType>::                                     \
+        adddictionaryConstructorToTable<SS<reactingCloudType> >               \
+            add##SS##CloudType##reactingCloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

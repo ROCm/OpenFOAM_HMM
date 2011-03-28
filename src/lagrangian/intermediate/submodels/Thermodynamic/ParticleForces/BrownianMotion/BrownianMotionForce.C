@@ -57,11 +57,10 @@ Foam::BrownianMotionForce<CloudType>::BrownianMotionForce
 (
     CloudType& owner,
     const fvMesh& mesh,
-    const dictionary& dict,
-    const word& forceType
+    const dictionary& dict
 )
 :
-    ParticleForce<CloudType>(owner, mesh, dict, forceType),
+    ParticleForce<CloudType>(owner, mesh, dict, typeName, true),
     rndGen_(owner.rndGen()),
     lambda_(readScalar(this->coeffs().lookup("lambda"))),
     turbulence_(readBool(this->coeffs().lookup("turbulence"))),

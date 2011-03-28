@@ -31,8 +31,6 @@ License
 #include "OFstream.H"
 #include "OSspecific.H"
 #include "dictionary.H"
-#include "dlLibraryTable.H"
-
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -524,7 +522,7 @@ bool Foam::dynamicCode::copyOrCreateFiles(const bool verbose) const
 
 bool Foam::dynamicCode::wmakeLibso() const
 {
-    const Foam::string wmakeCmd("wmake -s libso " + this->codeRelPath());
+    const Foam::string wmakeCmd("wmake -s libso " + this->codePath());
     Info<< "Invoking " << wmakeCmd << endl;
 
     if (Foam::system(wmakeCmd))
@@ -555,24 +553,6 @@ bool Foam::dynamicCode::upToDate(const dynamicCodeContext& context) const
 {
     return upToDate(context.sha1());
 }
-
-
-// bool Foam::dynamicCode::openLibrary() const
-// {
-//     return dlLibraryTable::openLibrary(this->libPath(), false);
-// }
-//
-//
-// bool Foam::dynamicCode::closeLibrary() const
-// {
-//     return dlLibraryTable::closeLibrary(this->libPath(), false);
-// }
-//
-//
-// void* Foam::dynamicCode::findLibrary() const
-// {
-//     return dlLibraryTable::findLibrary(this->libPath());
-// }
 
 
 // ************************************************************************* //

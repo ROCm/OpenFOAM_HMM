@@ -11,6 +11,7 @@ tmp<fv::convectionScheme<scalar> > mvConvection
 );
 
 
+if (solveSpecies)
 {
     label inertIndex = -1;
     volScalarField Yt(0.0*Y[0]);

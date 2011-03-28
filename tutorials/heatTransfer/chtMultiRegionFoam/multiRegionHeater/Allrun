@@ -28,7 +28,7 @@ done
 
 
 #-- Run on single processor
-#runApplication chtMultiRegionFoam
+#runApplication `getApplication`
 
 # Decompose
 for i in bottomAir topAir heater leftSolid rightSolid
@@ -37,7 +37,7 @@ do
 done
 
 # Run
-runParallel chtMultiRegionFoam 4
+runParallel `getApplication` 4
 
 # Reconstruct
 for i in bottomAir topAir heater leftSolid rightSolid

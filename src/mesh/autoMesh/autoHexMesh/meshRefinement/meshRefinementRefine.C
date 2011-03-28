@@ -626,6 +626,13 @@ Foam::label Foam::meshRefinement::markSurfaceRefinement
         }
     }
 
+    // Extend segments a bit
+    {
+        const vectorField smallVec(Foam::sqrt(SMALL)*(end-start));
+        start += smallVec;
+        end -= smallVec;
+    }
+
 
     // Do test for higher intersections
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -834,6 +841,14 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
             minLevel[i] = min(cellLevel[own], neiLevel[bFaceI]);
         }
     }
+
+    // Extend segments a bit
+    {
+        const vectorField smallVec(Foam::sqrt(SMALL)*(end-start));
+        start += smallVec;
+        end -= smallVec;
+    }
+
 
     // Test for all intersections (with surfaces of higher max level than
     // minLevel) and cache per cell the max surface level and the local normal
