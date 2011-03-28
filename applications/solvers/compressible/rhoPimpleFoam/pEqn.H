@@ -37,7 +37,7 @@ if (transonic)
             (
                 p.select
                 (
-                    finalIter
+                    pimpleCorr.finalIter()
                  && corr == nCorr-1
                  && nonOrth == nNonOrthCorr
                 )
@@ -75,7 +75,7 @@ else
             (
                 p.select
                 (
-                    finalIter
+                    pimpleCorr.finalIter()
                  && corr == nCorr-1
                  && nonOrth == nNonOrthCorr
                 )

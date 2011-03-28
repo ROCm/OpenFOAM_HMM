@@ -38,6 +38,7 @@ Description
 #include "chemistrySolver.H"
 #include "radiationModel.H"
 #include "SLGThermo.H"
+#include "pimpleLoop.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,15 +78,14 @@ int main(int argc, char *argv[])
         #include "chemistry.H"
         #include "rhoEqn.H"
 
-        // --- PIMPLE loop
-        for (int oCorr=0; oCorr<nOuterCorr; oCorr++)
+        // --- Pressure-velocity PIMPLE corrector loop
+        for
+        (
+            pimpleLoop pimpleCorr(mesh, nOuterCorr);
+            pimpleCorr.loop();
+            pimpleCorr++
+        )
         {
-            bool finalIter = oCorr == nOuterCorr-1;
-            if (finalIter)
-            {
-                mesh.data::add("finalIteration", true);
-            }
-
             #include "UEqn.H"
             #include "YEqn.H"
             #include "hsEqn.H"
@@ -99,11 +99,6 @@ int main(int argc, char *argv[])
             turbulence->correct();
 
             rho = thermo.rho();
-
-            if (finalIter)
-            {
-                mesh.data::remove("finalIteration");
-            }
         }
 
         if (runTime.write())

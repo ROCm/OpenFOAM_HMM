@@ -30,7 +30,7 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
             p.select
             (
                 (
-                    finalIter
+                    pimpleCorr.finalIter()
                  && corr == nCorr-1
                  && nonOrth == nNonOrthCorr
                 )

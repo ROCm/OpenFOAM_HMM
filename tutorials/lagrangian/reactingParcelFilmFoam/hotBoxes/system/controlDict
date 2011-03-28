@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     reactingParcelFoam;
+application     reactingParcelFilmFoam;
 
 startFrom       latestTime; // startTime;
 
