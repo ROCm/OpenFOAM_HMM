@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -32,7 +32,8 @@ geometry
     wigley-scaled-oriented.stl
     {
         type triSurfaceMesh;
-        name wigley;
+        name hull;
+
         patchInfo
         {
             type wall;
@@ -42,15 +43,22 @@ geometry
     box1
     {
         type searchableBox;
-        min (-10 -5 -7.1);
-        max ( 17  2 13.1);
+        min (-1 -0.5 -0.25);
+        max ( 1  0.5  1 );
     }
 
     box2
     {
         type searchableBox;
-        min (-10 -1 -2.1);
-        max ( 12  2 8.1);
+        min (-1    -0.2  -0.15);
+        max ( 0.75  0.2   1);
+    }
+
+    box3
+    {
+        type searchableBox;
+        min (-10    -10  -0.03);
+        max ( 10  10   1);
     }
 };
 
@@ -95,10 +103,10 @@ castellatedMeshControls
     // This is a featureEdgeMesh, read from constant/triSurface for now.
     features
     (
-        {
-            file "wigley-scaled.eMesh";
-            level 3;
-        }
+        // {
+        //     file "wigley-scaled.eMesh";
+        //     level 3;
+        // }
     );
 
 
@@ -114,7 +122,7 @@ castellatedMeshControls
 
     refinementSurfaces
     {
-        wigley
+        hull
         {
             // Surface-wise min and max refinement level
             level (3 3);
@@ -142,12 +150,17 @@ castellatedMeshControls
         box1
         {
             mode inside;
-            levels ((1E15 1));
+            levels ((1e15 1));
         }
         box2
         {
             mode inside;
-            levels ((1E15 2));
+            levels ((1e15 2));
+        }
+        box3
+        {
+            mode inside;
+            levels ((1e15 2));
         }
     }
 
@@ -160,7 +173,7 @@ castellatedMeshControls
     // section reachable from the locationInMesh is kept.
     // NOTE: This point should never be on a face, always inside a cell, even
     // after refinement.
-    locationInMesh (-9.71 -1.91 0.017);
+    locationInMesh (-0.7 0 0);
 
 
     // Whether any faceZones (as specified in the refinementSurfaces)
@@ -204,7 +217,7 @@ addLayersControls
     // Per final patch (so not geometry!) the layer information
     layers
     {
-        wigley_solid
+        hull
         {
             nSurfaceLayers 1;
 

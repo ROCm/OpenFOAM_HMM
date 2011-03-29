@@ -28,22 +28,27 @@ boundaryField
 
     outlet
     {
-        type            fixedValue;
-        value           uniform 0;
+        type            zeroGradient;
     }
 
     sides
     {
-        type            buoyantPressure;
-        value           uniform 0;
+        type            symmetryPlane;
     }
 
     atmosphere
     {
-        type            symmetryPlane;
+        type            totalPressure;
+        p0              uniform 0;
+        U               U;
+        phi             phi;
+        rho             rho;
+        psi             none;
+        gamma           1;
+        value           uniform 0;
     }
 
-    wigley_solid
+    hull_wall
     {
         type            buoyantPressure;
         value           uniform 0;
