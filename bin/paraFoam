@@ -168,17 +168,14 @@ builtin | OpenFOAM)
     ;;
 esac
 
-case "$ParaView_VERSION" in
-3* | git)
-    # only create/remove caseFile if it didn't already exist
-    [ -e $caseFile ] || {
-        trap "rm -f $caseFile 2>/dev/null; exit 0" EXIT TERM INT
-        touch "$caseFile"
-        echo "created temporary '$caseFile'"
-    }
 
-    paraview --data="$caseFile"
-    ;;
+# only create/remove caseFile if it didn't already exist
+[ -e $caseFile ] || {
+    trap "rm -f $caseFile 2>/dev/null; exit 0" EXIT TERM INT
+    touch "$caseFile"
+    echo "created temporary '$caseFile'"
+}
 
-esac
+paraview --data="$caseFile"
+
 #------------------------------------------------------------------------------

@@ -260,6 +260,10 @@ Foam::Time::Time
     readLibs_(controlDict_, "libs"),
     functionObjects_(*this)
 {
+    // Explicitly set read flags on objectRegistry so anything constructed
+    // from it reads as well (e.g. fvSolution).
+    readOpt() = IOobject::MUST_READ_IF_MODIFIED;
+
     setControls();
 
     // Time objects not registered so do like objectRegistry::checkIn ourselves.
@@ -342,9 +346,12 @@ Foam::Time::Time
     readLibs_(controlDict_, "libs"),
     functionObjects_(*this)
 {
+    // Explicitly set read flags on objectRegistry so anything constructed
+    // from it reads as well (e.g. fvSolution).
+    readOpt() = IOobject::MUST_READ_IF_MODIFIED;
+
     // Since could not construct regIOobject with setting:
     controlDict_.readOpt() = IOobject::MUST_READ_IF_MODIFIED;
-
 
     setControls();
 
