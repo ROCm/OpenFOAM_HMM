@@ -152,15 +152,16 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                     hitSurface
                 );
 
-                // Pout<< "vert " << vert << endl;
-                // Pout<< "    surfHit " << surfHit << endl;
-
                 if (surfHit.hit())
                 {
                     vit->setNearBoundary();
 
                     if (dualCellSurfaceAnyIntersection(vit))
                     {
+                        // meshTools::writeOBJ(Pout, vert);
+                        // meshTools::writeOBJ(Pout, surfHit.hitPoint());
+                        // Pout<< "l cr0 cr1" << endl;
+
                         addSurfaceAndEdgeHits
                         (
                             vit,
@@ -439,14 +440,106 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAnyIntersection
         Foam::point dE0 = topoint(dual(fit->first));
         Foam::point dE1 = topoint(dual(fit->first->neighbor(fit->second)));
 
-        // Check for the edge passing through a surface
-        if (geometryToConformTo_.findSurfaceAnyIntersection(dE0, dE1))
+        if (Pstream::parRun())
         {
-            return true;
+            const treeBoundBoxList& procBbs =
+                geometryToConformTo_.processorDomains()[Pstream::myProcNo()];
+
+            forAll(procBbs, pBI)
+            {
+                const treeBoundBox& procBb = procBbs[pBI];
+
+                Foam::point a = dE0;
+                Foam::point b = dE1;
+
+                bool inBox = clipLineToBox(a, b, procBb);
+
+                // Check for the edge passing through a surface
+                if
+                (
+                    inBox
+                 && geometryToConformTo_.findSurfaceAnyIntersection(a, b)
+                )
+                {
+                    // Pout<< "# findSurfaceAnyIntersection" << endl;
+                    // meshTools::writeOBJ(Pout, a);
+                    // meshTools::writeOBJ(Pout, b);
+                    // Pout<< "l cr0 cr1" << endl;
+
+                    return true;
+                }
+            }
+        }
+        else
+        {
+            if (geometryToConformTo_.findSurfaceAnyIntersection(dE0, dE1))
+            {
+                return true;
+            }
         }
     }
 
     return false;
+}
+
+
+bool Foam::conformalVoronoiMesh::clipLineToBox
+(
+    Foam::point& a,
+    Foam::point& b,
+    const treeBoundBox& box
+) const
+{
+    Foam::point boxPt = vector::one*GREAT;
+
+    bool intersects = false;
+
+    if (box.posBits(a) == 0)
+    {
+        // a is inside
+        if (box.posBits(b) == 0)
+        {
+            // both a and b inside.
+            intersects = true;
+        }
+        else
+        {
+            // b is outside, clip b to bounding box.
+
+            intersects = box.intersects(b, a, boxPt);
+
+            b = boxPt;
+        }
+    }
+    else
+    {
+        // a is outside
+        if (box.posBits(b) == 0)
+        {
+            // b is inside
+
+            intersects = box.intersects(a, b, boxPt);
+
+            a = boxPt;
+        }
+        else
+        {
+            // both a and b outside, but they can still intersect the box
+
+            intersects = box.intersects(a, b, boxPt);
+
+            if (intersects)
+            {
+                a = boxPt;
+
+                box.intersects(b, a, boxPt);
+
+                b = boxPt;
+            }
+        }
+    }
+
+    return intersects;
 }
 
 
@@ -462,6 +555,122 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
     }
 
     boolList sendToProc(Pstream::nProcs(), false);
+
+    // {
+    //     // Refer all points to all processors
+
+    //     DynamicList<Foam::point> parallelAllPoints;
+    //     DynamicList<label> targetProcessor;
+    //     DynamicList<label> parallelAllIndices;
+
+    //     for
+    //     (
+    //         Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+    //         vit != finite_vertices_end();
+    //         vit++
+    //     )
+    //     {
+    //         if (!vit->farPoint())
+    //         {
+    //             sendToProc = true;
+
+    //             sendToProc[Pstream::myProcNo()] = false;
+
+    //             forAll(sendToProc, procI)
+    //             {
+    //                 if (sendToProc[procI])
+    //                 {
+    //                     label vIndex = vit->index();
+
+    //                     // Using the hashSet to ensure that each vertex is
+    //                     // only referred once to each processor
+    //                     if (!referralVertices[procI].found(vIndex))
+    //                     {
+    //                         referralVertices[procI].insert(vIndex);
+
+    //                         parallelAllPoints.append
+    //                         (
+    //                             topoint(vit->point())
+    //                         );
+
+    //                         targetProcessor.append(procI);
+
+    //                         if (vit->internalOrBoundaryPoint())
+    //                         {
+    //                             parallelAllIndices.append(vIndex);
+    //                         }
+    //                         else
+    //                         {
+    //                             parallelAllIndices.append(-vIndex);
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     if (cvMeshControls().objOutput())
+    //     {
+    //         writePoints
+    //         (
+    //             "parallelAllPointsToSend.obj",
+    //             parallelAllPoints
+    //         );
+    //     }
+
+    //     mapDistribute pointMap = buildReferringMap(targetProcessor);
+
+    //     label totalAllVertices = parallelAllPoints.size();
+
+    //     reduce(totalAllVertices, sumOp<label>());
+
+    //     pointMap.distribute(parallelAllPoints);
+
+    //     pointMap.distribute(parallelAllIndices);
+
+    //     if (cvMeshControls().objOutput())
+    //     {
+    //         writePoints
+    //         (
+    //             "parallelAllPointsReceived.obj",
+    //             parallelAllPoints
+    //         );
+    //     }
+
+    //     for (label procI = 0; procI < Pstream::nProcs(); procI++)
+    //     {
+    //         const labelList& constructMap = pointMap.constructMap()[procI];
+
+    //         if (constructMap.size())
+    //         {
+    //             forAll(constructMap, i)
+    //             {
+    //                 label origIndex =
+    //                     parallelAllIndices[constructMap[i]];
+
+    //                 if (!receivedVertices[procI].found(origIndex))
+    //                 {
+    //                     // For the initial referred vertices, the original
+    //                     // processor is the one that is sending it.
+    //                     label encodedProcI = -(procI + 1);
+
+    //                     insertPoint
+    //                     (
+    //                         parallelAllPoints[constructMap[i]],
+    //                         origIndex,
+    //                         encodedProcI
+    //                     );
+
+    //                     receivedVertices[procI].insert(origIndex);
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     Info<< "totalAllVertices "
+    //         << totalAllVertices << endl;
+    // }
+
 
     {
         DynamicList<Foam::point> parallelIntersectionPoints;
@@ -781,6 +990,8 @@ void Foam::conformalVoronoiMesh::parallelInterfaceIntersection
 {
     toProc = false;
 
+    Foam::point vert(topoint(vit->point()));
+
     std::list<Facet> facets;
     incident_facets(vit, std::back_inserter(facets));
 
@@ -803,8 +1014,9 @@ void Foam::conformalVoronoiMesh::parallelInterfaceIntersection
         Foam::point dE0 = topoint(dual(fit->first));
         Foam::point dE1 = topoint(dual(fit->first->neighbor(fit->second)));
 
-        Foam::point boxPt(vector::one*GREAT);
-        direction ptOnFace = -1;
+        Foam::point boxPt = vector::one*GREAT;
+        scalar hitDistSqr = GREAT;
+        bool intersects = false;
 
         label closestHitProc = -1;
         scalar closestHitDistSqr = GREAT;
@@ -817,52 +1029,37 @@ void Foam::conformalVoronoiMesh::parallelInterfaceIntersection
             }
 
             const treeBoundBoxList& procBbs =
-            geometryToConformTo_.processorDomains()[procI];
+                geometryToConformTo_.processorDomains()[procI];
 
             forAll(procBbs, pBI)
             {
                 const treeBoundBox& procBb = procBbs[pBI];
 
-                Foam::point start = dE0;
-                Foam::point end   = dE1;
+                intersects = procBb.intersects(dE0, dE1, boxPt);
 
-                bool intersects = procBb.intersects
-                (
-                    start,
-                    end - start,
-                    start,
-                    end,
-                    boxPt,
-                    ptOnFace
-                );
-
-                if (intersects && ptOnFace == 0)
+                if (intersects)
                 {
-                    // If the box is intersected, but doesn't return the
-                    // appropriate bits, then this means that the start point
-                    // was inside the box, so reverse the direction of the
-                    // query.
+                    hitDistSqr = magSqr(vert - boxPt);
 
-                    start = dE1;
-                    end   = dE0;
-
-                    procBb.intersects
-                    (
-                        start,
-                        end - start,
-                        start,
-                        end,
-                        boxPt,
-                        ptOnFace
-                    );
+                    if (hitDistSqr < closestHitDistSqr)
+                    {
+                        closestHitProc = procI;
+                        closestHitDistSqr = hitDistSqr;
+                    }
                 }
 
-                scalar hitDistSqr = magSqr(start - boxPt);
+                // Perform the query in the opposite direction
+                intersects = procBb.intersects(dE1, dE0, boxPt);
 
-                if (intersects && hitDistSqr < closestHitDistSqr)
+                if (intersects)
                 {
-                    closestHitProc = procI;
-                    closestHitDistSqr = hitDistSqr;
+                    hitDistSqr = magSqr(vert - boxPt);
+
+                    if (hitDistSqr < closestHitDistSqr)
+                    {
+                        closestHitProc = procI;
+                        closestHitDistSqr = hitDistSqr;
+                    }
                 }
             }
         }
@@ -871,10 +1068,6 @@ void Foam::conformalVoronoiMesh::parallelInterfaceIntersection
         {
             toProc[closestHitProc] = true;
         }
-
-        // If an intersection with the box has been found, then it is the
-        // "start" point that is outside the box, so test the line from start to
-        // boxPt to see if the surface is in-between.
     }
 }
 
@@ -885,8 +1078,8 @@ void Foam::conformalVoronoiMesh::parallelInterfaceInfluence
     boolList& toProc
 ) const
 {
-    // Assess the influence of the circumsphere of each Delaunay cell with
-    // the defining volumes for all processors.  Any processor touched by the
+    // Assess the influence of the circumsphere of each Delaunay cell with the
+    // defining volumes for all processors.  Any processor touched by the
     // circumsphere requires all points of the cell to be referred to it.
 
     toProc = false;

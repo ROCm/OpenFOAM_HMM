@@ -427,6 +427,17 @@ private:
             const Delaunay::Finite_vertices_iterator& vit
         ) const;
 
+        //- Return false if the line is entirely outside the box, true is
+        //  either point is inside, or the box is intersected (i.e. the points
+        //  are box outside but the line cuts.  The points will be moved onto
+        //  the box where they intersect.
+        bool clipLineToBox
+        (
+            Foam::point& a,
+            Foam::point& b,
+            const treeBoundBox& box
+        ) const;
+
         //- Build the parallelInterfaces of the mesh
         void buildParallelInterface
         (
