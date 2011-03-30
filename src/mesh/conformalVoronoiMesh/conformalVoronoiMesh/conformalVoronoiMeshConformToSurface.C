@@ -228,7 +228,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
     List<labelHashSet> receivedVertices(Pstream::nProcs());
 
     // Build the parallel interface the initial surface conformation
-    buildParallelInterface(referralVertices, receivedVertices);
+    buildParallelInterface(referralVertices, receivedVertices, true, "initial");
 
     label iterationNo = 0;
 
@@ -387,6 +387,15 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
         timeCheck("Conformation iteration " + name(iterationNo));
 
+        // Update the parallel interface
+        buildParallelInterface
+        (
+            referralVertices,
+            receivedVertices,
+            false,
+            name(iterationNo)
+        );
+
         iterationNo++;
 
         if (iterationNo == maxIterations)
@@ -403,8 +412,6 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                 << "), stopping iterations" << endl;
         }
 
-        // Update the parallel interface
-        buildParallelInterface(referralVertices, receivedVertices);
     }
 
     // reportSurfaceConformationQuality();
@@ -546,7 +553,9 @@ bool Foam::conformalVoronoiMesh::clipLineToBox
 void Foam::conformalVoronoiMesh::buildParallelInterface
 (
     List<labelHashSet>& referralVertices,
-    List<labelHashSet>& receivedVertices
+    List<labelHashSet>& receivedVertices,
+    bool initialEdgeReferrral,
+    const word& outputName
 )
 {
     if (!Pstream::parRun())
@@ -632,7 +641,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
     //     {
     //         writePoints
     //         (
-    //             "parallelAllPointsReceived.obj",
+    //             "parallelAllPointsReceived_" + outputName + ".obj",
     //             parallelAllPoints
     //         );
     //     }
@@ -672,6 +681,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
     // }
 
 
+    if (initialEdgeReferrral)
     {
         DynamicList<Foam::point> parallelIntersectionPoints;
         DynamicList<label> targetProcessor;
@@ -728,7 +738,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
         {
             writePoints
             (
-                "parallelIntersectionPointsToSend.obj",
+                "parallelIntersectionPointsToSend_" + outputName + ".obj",
                 parallelIntersectionPoints
             );
         }
@@ -747,7 +757,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
         {
             writePoints
             (
-                "parallelIntersectionPointsReceived.obj",
+                "parallelIntersectionPointsReceived_" + outputName + ".obj",
                 parallelIntersectionPoints
             );
         }
@@ -843,7 +853,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
         {
             writePoints
             (
-                "parallelInfluencePointsToSend.obj",
+                "parallelInfluencePointsToSend_" + outputName + ".obj",
                 parallelInfluencePoints
             );
         }
@@ -862,7 +872,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
         {
             writePoints
             (
-                "parallelInfluencePointsReceived.obj",
+                "parallelInfluencePointsReceived_" + outputName + ".obj",
                 parallelInfluencePoints
             );
         }
@@ -1567,7 +1577,7 @@ void Foam::conformalVoronoiMesh::buildEdgeLocationTree
 {
     treeBoundBox overallBb
     (
-        geometryToConformTo_.globalBounds().extend(rndGen_, 1E-4)
+        geometryToConformTo_.globalBounds().extend(rndGen_, 1e-4)
     );
 
     overallBb.min() -= Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
@@ -1591,7 +1601,7 @@ void Foam::conformalVoronoiMesh::buildSizeAndAlignmentTree() const
 {
     treeBoundBox overallBb
     (
-        geometryToConformTo_.globalBounds().extend(rndGen_, 1E-4)
+        geometryToConformTo_.globalBounds().extend(rndGen_, 1e-4)
     );
 
     overallBb.min() -= Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);

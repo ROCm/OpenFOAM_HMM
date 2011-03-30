@@ -442,7 +442,9 @@ private:
         void buildParallelInterface
         (
             List<labelHashSet>& referralVertices,
-            List<labelHashSet>& receivedVertices
+            List<labelHashSet>& receivedVertices,
+            bool initialEdgeReferrral,
+            const word& outputName
         );
 
         //- Build map to refer vertices to target processors

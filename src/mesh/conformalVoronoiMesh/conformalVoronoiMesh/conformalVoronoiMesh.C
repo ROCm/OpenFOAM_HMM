@@ -793,7 +793,7 @@ Foam::conformalVoronoiMesh::featurePointTree() const
     {
         treeBoundBox overallBb
         (
-            geometryToConformTo_.globalBounds().extend(rndGen_, 1E-4)
+            geometryToConformTo_.globalBounds().extend(rndGen_, 1e-4)
         );
 
         overallBb.min() -= Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);

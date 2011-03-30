@@ -240,6 +240,10 @@ Foam::conformationSurfaces::conformationSurfaces
         searchableSurfacesQueries::bounds(allGeometry_, surfaces_)
     );
 
+    // Extend the global bounds to stop the bound box sitting on the surfaces
+    // to be conformed to
+    globalBounds_ = globalBounds_.extend(cvMesh_.rndGen(), 1e-4);
+
     if (Pstream::parRun())
     {
         label procLimit = 8;

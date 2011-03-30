@@ -222,8 +222,7 @@ inline Foam::label Foam::conformalVoronoiMesh::insertPoint
 
     if (nVert == number_of_vertices())
     {
-        WarningIn("Foam::conformalVoronoiMesh::insertPoint")
-            << "Failed to insert point " << p << endl;
+        Pout << "Failed to insert point " << p << endl;
     }
     else
     {
@@ -248,8 +247,7 @@ inline void Foam::conformalVoronoiMesh::insertPoint
 
     if (nVert == number_of_vertices())
     {
-        WarningIn("Foam::conformalVoronoiMesh::insertPoint")
-            << "Failed to insert point " << p << endl;
+        Pout << "Failed to insert point " << p << endl;
     }
     else
     {
