@@ -54,7 +54,7 @@ Foam::treeDataPoint::treeDataPoint
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::pointField Foam::treeDataPoint::points() const
+Foam::pointField Foam::treeDataPoint::shapePoints() const
 {
     if (pointLabels_.size())
     {

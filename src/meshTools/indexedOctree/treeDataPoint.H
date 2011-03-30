@@ -94,9 +94,14 @@ public:
                 return pointLabels_;
             }
 
+            const pointField& points() const
+            {
+                return points_;
+            }
+
             //- Get representative point cloud for all shapes inside
             //  (one point per shape)
-            pointField points() const;
+            pointField shapePoints() const;
 
 
         // Search
