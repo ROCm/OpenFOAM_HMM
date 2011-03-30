@@ -85,6 +85,7 @@ PISO
 
     maxCo           0.9;
     maxAlphaCo      0.2;
+    nAlphaSweepIter 1;
 
     rDeltaTSmoothingCoeff 0.1;
     rDeltaTDampingCoeff 1;
