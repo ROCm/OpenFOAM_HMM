@@ -83,9 +83,10 @@ PISO
     nAlphaSubCycles 1;
     cAlpha          1;
 
-    maxCo           0.8;
+    maxCo           0.9;
     maxAlphaCo      0.2;
-    rDeltaTSmoothingCoeff 0.02;
+
+    rDeltaTSmoothingCoeff 0.1;
     rDeltaTDampingCoeff 1;
     maxDeltaT       1;
 }
