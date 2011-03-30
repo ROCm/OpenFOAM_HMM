@@ -10,6 +10,7 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
+    location    "0";
     object      alpha;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -22,7 +23,7 @@ boundaryField
 {
     inlet
     {
-        type            fixedValue;
+        type            calculated;
         value           uniform 0;
     }
 
@@ -35,20 +36,19 @@ boundaryField
 
     sides
     {
+        type            symmetryPlane;
+    }
+
+    atmosphere
+    {
         type            inletOutlet;
         inletValue      uniform 0;
         value           uniform 0;
     }
 
-    atmosphere
+    hull_wall
     {
-        type            symmetryPlane;
-    }
-
-    wigley_solid
-    {
-        type            fixedValue;
-        value           uniform 0;
+        type            zeroGradient;
     }
 }
 

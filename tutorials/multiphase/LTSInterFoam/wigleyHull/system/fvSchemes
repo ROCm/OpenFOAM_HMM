@@ -17,7 +17,7 @@ FoamFile
 
 ddtSchemes
 {
-    default         Euler;
+    default         localEuler rDeltaT;
 }
 
 gradSchemes
@@ -27,9 +27,11 @@ gradSchemes
 
 divSchemes
 {
-    div(rho*phi,U)  Gauss limitedLinearV 1;
+    div(rho*phi,U)  Gauss linearUpwind Gauss linear;
     div(phi,alpha)  Gauss vanLeer;
     div(phirb,alpha) Gauss interfaceCompression;
+    div(phi,k)      Gauss upwind;
+    div(phi,omega)  Gauss upwind;
 }
 
 laplacianSchemes

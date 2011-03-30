@@ -24,7 +24,7 @@ regions
 (
     boxToCell
     {
-        box (-100 -100 -100) (100 0.75 100);
+        box (-100 -100 -100) (100 100 0);
         fieldValues
         (
             volScalarFieldValue alpha1 1
