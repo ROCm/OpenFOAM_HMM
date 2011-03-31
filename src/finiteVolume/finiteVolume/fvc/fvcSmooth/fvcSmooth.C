@@ -154,20 +154,13 @@ void Foam::fvc::spread
         const label own = owner[facei];
         const label nbr = neighbour[facei];
 
-        if
-        (
-            (alpha[own] > alphaMin && alpha[own] < alphaMax)
-         || (alpha[nbr] > alphaMin && alpha[nbr] < alphaMax)
-        )
+        if (mag(alpha[own] - alpha[nbr]) > alphaDiff)
         {
-            if (mag(alpha[own] - alpha[nbr]) > alphaDiff)
-            {
-                changedFaces.append(facei);
-                changedFacesInfo.append
-                (
-                    smoothData(max(field[own], field[nbr]))
-                );
-            }
+            changedFaces.append(facei);
+            changedFacesInfo.append
+            (
+                smoothData(max(field[own], field[nbr]))
+            );
         }
     }
 
@@ -188,20 +181,10 @@ void Foam::fvc::spread
                     alpha.boundaryField()[patchi].patchNeighbourField()
                 );
 
-                if
-                (
-                    (alpha[own] > alphaMin && alpha[own] < alphaMax)
-                 || (
-                        alphapn[patchFacei] > alphaMin
-                     && alphapn[patchFacei] < alphaMax
-                    )
-                )
+                if (mag(alpha[own] - alphapn[patchFacei]) > alphaDiff)
                 {
-                    if (mag(alpha[own] - alphapn[patchFacei]) > alphaDiff)
-                    {
-                        changedFaces.append(facei);
-                        changedFacesInfo.append(smoothData(field[own]));
-                    }
+                    changedFaces.append(facei);
+                    changedFacesInfo.append(smoothData(field[own]));
                 }
             }
         }

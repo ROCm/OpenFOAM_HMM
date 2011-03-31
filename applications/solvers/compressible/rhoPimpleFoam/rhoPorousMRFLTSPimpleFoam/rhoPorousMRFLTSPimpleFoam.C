@@ -22,11 +22,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    rhoLTSPimpleFoam
+    rhoLTSPorousMRFPimpleFoam
 
 Description
     Transient solver for laminar or turbulent flow of compressible fluids
-    for HVAC and similar applications.
+    with support for porous media and MRF for HVAC and similar applications.
 
     Uses the flexible PIMPLE (PISO-SIMPLE) solution for time-resolved and
     pseudo-transient simulations with support for local time-stepping for
@@ -37,6 +37,8 @@ Description
 #include "fvCFD.H"
 #include "basicPsiThermo.H"
 #include "turbulenceModel.H"
+#include "MRFZones.H"
+#include "porousZones.H"
 #include "fvcSmooth.H"
 #include "pimpleLoop.H"
 #include "bound.H"
@@ -51,6 +53,7 @@ int main(int argc, char *argv[])
     #include "readPIMPLEControls.H"
     #include "setInitialrDeltaT.H"
     #include "createFields.H"
+    #include "createZones.H"
     #include "initContinuityErrs.H"
 
     Info<< "\nStarting time loop\n" << endl;

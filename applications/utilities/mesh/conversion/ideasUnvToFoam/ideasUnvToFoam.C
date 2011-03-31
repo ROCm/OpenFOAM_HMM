@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -375,6 +375,37 @@ void readCells
                 >> cVerts[4] >> cVerts[5] >> cVerts[6] >> cVerts[7];
 
             cellVerts.append(cellShape(hex, cVerts, true));
+            cellMaterial.append(physProp);
+
+            if (cellVerts.last().size() != cVerts.size())
+            {
+                Pout<< "Line:" << is.lineNumber()
+                    << " element:" << cellI
+                    << " type:" << feID
+                    << " collapsed from " << cVerts << nl
+                    << " to:" << cellVerts.last()
+                    << endl;
+            }
+        }
+        else if (feID == 118)
+        {
+            // Parabolic Tet
+            is.getLine(line);
+
+            labelList cVerts(4);
+            label dummy;
+            {
+                IStringStream lineStr(line);
+                lineStr
+                    >> cVerts[0] >> dummy >> cVerts[1] >> dummy >> cVerts[2];
+            }
+            is.getLine(line);
+            {
+                IStringStream lineStr(line);
+                lineStr >> dummy>> cVerts[3];
+            }
+
+            cellVerts.append(cellShape(tet, cVerts, true));
             cellMaterial.append(physProp);
 
             if (cellVerts.last().size() != cVerts.size())

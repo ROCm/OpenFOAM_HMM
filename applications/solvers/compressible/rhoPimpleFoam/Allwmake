@@ -3,7 +3,7 @@ cd ${0%/*} || exit 1    # run from this directory
 set -x
 
 wmake
-wmake rhoLTSPimpleFoam
 wmake rhoPorousMRFPimpleFoam
+wmake rhoPorousMRFLTSPimpleFoam
 
 # ----------------------------------------------------------------- end-of-file
