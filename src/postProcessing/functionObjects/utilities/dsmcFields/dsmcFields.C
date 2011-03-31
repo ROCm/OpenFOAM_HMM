@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -143,7 +143,7 @@ void Foam::dsmcFields::write()
             iDofMeanName
         );
 
-        volVectorField fDMean =  obr_.lookupObject<volVectorField>
+        const volVectorField& fDMean = obr_.lookupObject<volVectorField>
         (
             fDMeanName
         );

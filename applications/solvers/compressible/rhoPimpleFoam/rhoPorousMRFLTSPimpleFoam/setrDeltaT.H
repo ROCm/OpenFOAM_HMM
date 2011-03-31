@@ -19,7 +19,7 @@
         pimple.lookupOrDefault<scalar>("maxDeltaT", GREAT)
     );
 
-    volScalarField rDeltaT0 = rDeltaT;
+    volScalarField rDeltaT0("rDeltaT0", rDeltaT);
 
     // Set the reciprocal time-step from the local Courant number
     rDeltaT.dimensionedInternalField() = max
@@ -70,7 +70,9 @@
      && runTime.timeIndex() > runTime.startTimeIndex() + 1
     )
     {
-        rDeltaT = rDeltaT0*max(rDeltaT/rDeltaT0, 1.0 - rDeltaTDampingCoeff);
+        rDeltaT =
+            rDeltaT0
+           *max(rDeltaT/rDeltaT0, scalar(1) - rDeltaTDampingCoeff);
 
         Info<< "Damped flow time scale min/max = "
             << gMin(1/rDeltaT.internalField())
