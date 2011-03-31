@@ -56,7 +56,14 @@ Foam::treeDataPoint::treeDataPoint
 
 Foam::pointField Foam::treeDataPoint::points() const
 {
-    return points_;
+    if (pointLabels_.size())
+    {
+        return pointField(points_, pointLabels_);
+    }
+    else
+    {
+        return points_;
+    }
 }
 
 

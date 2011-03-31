@@ -11,7 +11,7 @@
 
     scalar rDeltaTSmoothingCoeff
     (
-        piso.lookupOrDefault<scalar>("rDeltaTSmoothingCoeff", 0.02)
+        piso.lookupOrDefault<scalar>("rDeltaTSmoothingCoeff", 0.1)
     );
 
     label nAlphaSpreadIter
@@ -21,17 +21,17 @@
 
     scalar alphaSpreadDiff
     (
-        piso.lookupOrDefault<label>("alphaSpreadDiff", 0.2)
+        piso.lookupOrDefault<scalar>("alphaSpreadDiff", 0.2)
     );
 
     scalar alphaSpreadMax
     (
-        piso.lookupOrDefault<label>("alphaSpreadMax", 0.99)
+        piso.lookupOrDefault<scalar>("alphaSpreadMax", 0.99)
     );
 
     scalar alphaSpreadMin
     (
-        piso.lookupOrDefault<label>("alphaSpreadMin", 0.01)
+        piso.lookupOrDefault<scalar>("alphaSpreadMin", 0.01)
     );
 
     label nAlphaSweepIter
@@ -63,11 +63,14 @@
     {
         // Further limit the reciprocal time-step
         // in the vicinity of the interface
+
+        volScalarField alpha1Bar = fvc::average(alpha1);
+
         rDeltaT.dimensionedInternalField() = max
         (
             rDeltaT.dimensionedInternalField(),
-            pos(alpha1.dimensionedInternalField() - 0.01)
-           *pos(0.99 - alpha1.dimensionedInternalField())
+            pos(alpha1Bar.dimensionedInternalField() - alphaSpreadMin)
+           *pos(alphaSpreadMax - alpha1Bar.dimensionedInternalField())
            *fvc::surfaceSum(mag(phi))().dimensionedInternalField()
            /((2*maxAlphaCo)*mesh.V())
         );

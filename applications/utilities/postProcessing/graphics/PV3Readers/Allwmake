@@ -4,23 +4,17 @@ set -x
 
 if [ -d "$ParaView_DIR" -a -r "$ParaView_DIR" ]
 then
-    case "$ParaView_VERSION" in
-    3* | git)
+    [ -n "$PV_PLUGIN_PATH" ] || {
+        echo "$0 : PV_PLUGIN_PATH not valid - it is unset"
+        exit 1
+    }
 
-        if [ ! -n "${PV_PLUGIN_PATH}" ]
-        then
-            echo "$0 : PV_PLUGIN_PATH not a valid."
-            exit 1
-        fi
+    # ensure CMake gets the correct C++ compiler
+    [ -n "$WM_CXX" ] && export CXX="$WM_CXX"
 
-        # ensure CMake gets the correct C++ compiler
-        [ -n "$WM_CXX" ] && export CXX="$WM_CXX"
-
-        wmake libso vtkPV3Readers
-        PV3blockMeshReader/Allwmake
-        PV3FoamReader/Allwmake
-    ;;
-    esac
+    wmake libso vtkPV3Readers
+    PV3blockMeshReader/Allwmake
+    PV3FoamReader/Allwmake
 fi
 
 # ----------------------------------------------------------------- end-of-file
