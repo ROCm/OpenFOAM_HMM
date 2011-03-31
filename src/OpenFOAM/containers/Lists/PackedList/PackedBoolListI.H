@@ -73,7 +73,7 @@ inline Foam::PackedBoolList::PackedBoolList(const Xfer<PackedList<1> >& lst)
 {}
 
 
-inline Foam::PackedBoolList::PackedBoolList(const UList<bool>& lst)
+inline Foam::PackedBoolList::PackedBoolList(const Foam::UList<bool>& lst)
 :
     PackedList<1>()
 {

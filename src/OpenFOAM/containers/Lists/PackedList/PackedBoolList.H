@@ -115,7 +115,7 @@ public:
         inline PackedBoolList(const Xfer<PackedList<1> >&);
 
         //- Construct from a list of bools
-        explicit inline PackedBoolList(const UList<bool>&);
+        explicit inline PackedBoolList(const Foam::UList<bool>&);
 
         //- Construct from a list of labels
         //  using the labels as indices to indicate which bits are set
