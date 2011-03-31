@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,7 +33,6 @@ Description
 #define noThermalModel_H
 
 #include "thermalModel.H"
-#include "autoPtr.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -73,7 +72,7 @@ public:
         //- Add the thermal source to the enthalpy equation
         virtual void addEnthalpySource
         (
-            const basicThermo& thermo,
+            const basicThermo&,
             const volScalarField& rho,
             fvScalarMatrix& hEqn
         ) const;
