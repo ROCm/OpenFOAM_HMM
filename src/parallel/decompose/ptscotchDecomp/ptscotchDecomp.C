@@ -282,7 +282,10 @@ Foam::label Foam::ptscotchDecomp::decomposeZeroDomains
             <<
             (
                 cWeights.size()
-              ? static_cast<const scalarField&>(scalarField::subField(cWeights, nCells, startCell))
+              ? static_cast<const scalarField&>
+                (
+                    scalarField::subField(cWeights, nCells, startCell)
+                )
               : scalarField(0)
             );
 
