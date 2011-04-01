@@ -629,8 +629,8 @@ Foam::label Foam::meshRefinement::markSurfaceRefinement
     // Extend segments a bit
     {
         const vectorField smallVec(Foam::sqrt(SMALL)*(end-start));
-        start += smallVec;
-        end -= smallVec;
+        start -= smallVec;
+        end += smallVec;
     }
 
 
@@ -845,8 +845,8 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
     // Extend segments a bit
     {
         const vectorField smallVec(Foam::sqrt(SMALL)*(end-start));
-        start += smallVec;
-        end -= smallVec;
+        start -= smallVec;
+        end += smallVec;
     }
 
 
