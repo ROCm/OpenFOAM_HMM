@@ -86,7 +86,12 @@ public:
 
             inline label size() const
             {
-                return points_.size();
+                return
+                (
+                    pointLabels_.size()
+                  ? pointLabels_.size()
+                  : points_.size()
+                );
             }
 
             inline const labelList& pointLabels() const
