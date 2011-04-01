@@ -219,8 +219,8 @@ addLayersControls
     //- If points get not extruded do nGrow layers of connected faces that are
     //  also not grown. This helps convergence of the layer addition process
     //  close to features.
+    // Note: changed(corrected) w.r.t 17x! (didn't do anything in 17x)
     nGrow 0;
-
 
     // Advanced settings
 
