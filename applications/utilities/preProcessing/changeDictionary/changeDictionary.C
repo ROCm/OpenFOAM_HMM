@@ -305,6 +305,10 @@ int main(int argc, char *argv[])
         instance = args.options()["instance"];
     }
 
+    // Make sure we do not use the master-only reading.
+    regIOobject::fileModificationChecking = regIOobject::timeStamp;
+
+
     // Get the replacement rules from a dictionary
     IOdictionary dict
     (
