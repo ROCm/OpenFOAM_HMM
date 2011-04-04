@@ -124,16 +124,14 @@ Foam::IOdictionary::IOdictionary(const IOobject& io)
     regIOobject(io)
 {
     // Temporary warning
-    if (io.readOpt() == IOobject::MUST_READ)
+    if (debug && io.readOpt() == IOobject::MUST_READ)
     {
         WarningIn("IOdictionary::IOdictionary(const IOobject&)")
-        //FatalErrorIn("IOdictionary::IOdictionary(const IOobject&)")
             << "Dictionary " << name()
             << " constructed with IOobject::MUST_READ"
             " instead of IOobject::MUST_READ_IF_MODIFIED." << nl
             << "Use MUST_READ_IF_MODIFIED if you need automatic rereading."
             << endl;
-            //<< abort(FatalError);
     }
 
     // Everyone check or just master
@@ -182,7 +180,7 @@ Foam::IOdictionary::IOdictionary(const IOobject& io, const dictionary& dict)
     regIOobject(io)
 {
     // Temporary warning
-    if (io.readOpt() == IOobject::MUST_READ)
+    if (debug && io.readOpt() == IOobject::MUST_READ)
     {
         WarningIn
         (

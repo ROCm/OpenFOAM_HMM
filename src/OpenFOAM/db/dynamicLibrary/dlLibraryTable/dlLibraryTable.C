@@ -55,6 +55,10 @@ Foam::dlLibraryTable::~dlLibraryTable()
 {
     forAllConstIter(dlLibraryTable, *this, iter)
     {
+        // bug in dlclose - does not call static destructors of
+        // loaded library when actually unloading the library.
+        // See https://bugzilla.novell.com/show_bug.cgi?id=680125 and 657627.
+        // Seems related to using a non-system compiler!
         dlClose(iter.key());
     }
 }

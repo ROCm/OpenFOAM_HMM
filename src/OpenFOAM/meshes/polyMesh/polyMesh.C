@@ -34,6 +34,8 @@ License
 #include "OSspecific.H"
 #include "demandDrivenData.H"
 #include "polyMeshTetDecomposition.H"
+#include "indexedOctree.H"
+#include "treeDataCell.H"
 
 #include "pointMesh.H"
 

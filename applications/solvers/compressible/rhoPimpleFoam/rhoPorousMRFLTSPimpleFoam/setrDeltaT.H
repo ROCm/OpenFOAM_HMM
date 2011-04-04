@@ -19,7 +19,7 @@
         pimple.lookupOrDefault<scalar>("maxDeltaT", GREAT)
     );
 
-    volScalarField rDeltaT0 = rDeltaT;
+    volScalarField rDeltaT0("rDeltaT0", rDeltaT);
 
     // Set the reciprocal time-step from the local Courant number
     rDeltaT.dimensionedInternalField() = max
