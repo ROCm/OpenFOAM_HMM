@@ -85,6 +85,64 @@ std::vector<Vb::Point> pointFile::initialPoints() const
         );
     }
 
+    if (Pstream::parRun())
+    {
+        List<boolList> allProcPt(Pstream::nProcs());
+
+        allProcPt[Pstream::myProcNo()] = procPt;
+
+        Pstream::gatherList(allProcPt);
+
+        Pstream::scatterList(allProcPt);
+
+        // forAll(procPt, ptI)
+        // {
+        //     label nProcsTrue = 0;
+
+        //     forAll(allProcPt, procI)
+        //     {
+        //         if (allProcPt[procI][ptI])
+        //         {
+        //             nProcsTrue++;
+        //         }
+        //     }
+
+        //     if (nProcsTrue != 1)
+        //     {
+        //         Info<< points[ptI] << " " << nProcsTrue << " true" << endl;
+
+        //         if (nProcsTrue > 1)
+        //         {
+        //             forAll(allProcPt, procI)
+        //             {
+        //                 allProcPt[procI][ptI] = false;
+        //             }
+        //         }
+        //     }
+        // }
+
+        forAll(procPt, ptI)
+        {
+            bool foundAlready = false;
+
+            forAll(allProcPt, procI)
+            {
+                // If a processor with a lower index has found this point to
+                // insert already, defer to it and don't insert.
+                if (foundAlready)
+                {
+                    allProcPt[procI][ptI] = false;
+                }
+                else if (allProcPt[procI][ptI])
+                {
+                    foundAlready = true;
+                }
+            }
+        }
+
+        procPt = allProcPt[Pstream::myProcNo()];
+    }
+
     inplaceSubset(procPt, points);
 
     std::vector<Vb::Point> initialPoints;

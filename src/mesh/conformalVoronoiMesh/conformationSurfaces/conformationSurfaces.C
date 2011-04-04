@@ -246,9 +246,45 @@ Foam::conformationSurfaces::conformationSurfaces
 
     if (Pstream::parRun())
     {
-        label procLimit = 8;
+        processorDomains_.setSize(Pstream::nProcs());
 
-        if (Pstream::nProcs() != procLimit)
+        if (Pstream::nProcs() == 2)
+        {
+            processorDomains_[Pstream::myProcNo()] = treeBoundBoxList(4);
+
+            forAll(processorDomains_[Pstream::myProcNo()], pDI)
+            {
+                processorDomains_[Pstream::myProcNo()][pDI] =
+                    globalBounds_.subBbox
+                    (
+                        direction(Pstream::myProcNo()*4 + pDI)
+                    );
+            }
+
+            DynamicList<Foam::point> allBbPoints;
+
+            forAll(processorDomains_[Pstream::myProcNo()], pDI)
+            {
+                allBbPoints.append
+                (
+                    processorDomains_[Pstream::myProcNo()][pDI].points()
+                );
+            }
+
+            bounds_ = treeBoundBox(allBbPoints);
+
+            // Replace 4 bound boxes with one
+            processorDomains_[Pstream::myProcNo()] =
+                treeBoundBoxList(1, bounds_);
+        }
+        else if (Pstream::nProcs() == 8)
+        {
+            bounds_ = globalBounds_.subBbox(direction(Pstream::myProcNo()));
+
+            processorDomains_[Pstream::myProcNo()] =
+                treeBoundBoxList(1, bounds_);
+        }
+        else
         {
             FatalErrorIn
             (
@@ -259,15 +295,9 @@ Foam::conformationSurfaces::conformationSurfaces
                     "const dictionary& surfaceConformationDict"
                 ")"
             )
-                << "Hard coded to " << procLimit << " << procs"
+                << "Hard coded to " << "2 or 8" << " procs"
                 << exit(FatalError);
         }
-
-        bounds_ = globalBounds_.subBbox(direction(Pstream::myProcNo()));
-
-        processorDomains_.setSize(Pstream::nProcs());
-
-        processorDomains_[Pstream::myProcNo()] = treeBoundBoxList(1, bounds_);
 
         Pstream::gatherList(processorDomains_);
 
@@ -379,7 +409,27 @@ bool Foam::conformationSurfaces::positionOnThisProc(const point& pt) const
     // This is likely to give problems when a point is on the boundary between
     // two processors.
 
-    return bounds_.contains(pt);
+    if (Pstream::parRun())
+    {
+        const treeBoundBoxList& procBbs =
+            processorDomains_[Pstream::myProcNo()];
+
+        forAll(procBbs, pBI)
+        {
+            const treeBoundBox& procBb = procBbs[pBI];
+
+            if (procBb.contains(pt))
+            {
+                return true;
+            }
+        }
+    }
+    else
+    {
+        return bounds_.contains(pt);
+    }
+
+    return false;
 }
 
 

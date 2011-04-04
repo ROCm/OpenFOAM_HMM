@@ -166,6 +166,9 @@ public:
             //- Return spanSqr
             inline scalar spanMagSqr() const;
 
+            //- Return non-const access to the processorDomains
+            inline List<treeBoundBoxList>& processorDomains();
+
             //- Return the processorDomains
             inline const List<treeBoundBoxList>& processorDomains() const;
 

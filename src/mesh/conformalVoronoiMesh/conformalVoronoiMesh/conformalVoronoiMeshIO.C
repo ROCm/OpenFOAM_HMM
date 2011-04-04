@@ -85,10 +85,14 @@ void Foam::conformalVoronoiMesh::drawDelaunayCell
     const Delaunay::Finite_cells_iterator& cit
 ) const
 {
-    meshTools::writeOBJ(os, topoint(cit->vertex(0)->point()));
-    meshTools::writeOBJ(os, topoint(cit->vertex(1)->point()));
-    meshTools::writeOBJ(os, topoint(cit->vertex(2)->point()));
-    meshTools::writeOBJ(os, topoint(cit->vertex(3)->point()));
+    for (int i = 0; i < 4; i++)
+    {
+        os  << "# index type: "
+            << label(cit->vertex(i)->index()) << " "
+            << label(cit->vertex(i)->type()) << endl;
+
+        meshTools::writeOBJ(os, topoint(cit->vertex(i)->point()));
+    }
 
     os  << "f 1 3 2" << nl
         << "f 2 3 4" << nl
