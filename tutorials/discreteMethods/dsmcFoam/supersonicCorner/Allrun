@@ -7,7 +7,7 @@ cd ${0%/*} || exit 1    # run from this directory
 runApplication blockMesh
 runApplication decomposePar
 runParallel dsmcInitialise 4
-runParallel dsmcFoam 4
-runApplication `getApplication` -noLagrangian
+runParallel `getApplication` 4
+runApplication reconstructPar -noLagrangian
 
 # ----------------------------------------------------------------- end-of-file

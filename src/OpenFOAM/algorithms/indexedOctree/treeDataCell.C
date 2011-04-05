@@ -126,7 +126,7 @@ Foam::treeDataCell::treeDataCell
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::pointField Foam::treeDataCell::points() const
+Foam::pointField Foam::treeDataCell::shapePoints() const
 {
     pointField cc(cellLabels_.size());
 

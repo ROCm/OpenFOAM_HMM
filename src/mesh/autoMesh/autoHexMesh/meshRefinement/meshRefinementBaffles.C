@@ -286,8 +286,8 @@ void Foam::meshRefinement::getBafflePatches
     // Extend segments a bit
     {
         const vectorField smallVec(Foam::sqrt(SMALL)*(end-start));
-        start += smallVec;
-        end -= smallVec;
+        start -= smallVec;
+        end += smallVec;
     }
 
 
@@ -2457,8 +2457,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
         // Extend segments a bit
         {
             const vectorField smallVec(Foam::sqrt(SMALL)*(end-start));
-            start += smallVec;
-            end -= smallVec;
+            start -= smallVec;
+            end += smallVec;
         }
 
 
