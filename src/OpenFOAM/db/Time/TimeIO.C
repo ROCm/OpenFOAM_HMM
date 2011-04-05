@@ -168,6 +168,12 @@ void Foam::Time::readDict()
 
         Pout.precision(IOstream::defaultPrecision());
         Perr.precision(IOstream::defaultPrecision());
+
+        FatalError().precision(IOstream::defaultPrecision());
+        FatalIOError.error::operator()().precision
+        (
+            IOstream::defaultPrecision()
+        );
     }
 
     if (controlDict_.found("writeCompression"))

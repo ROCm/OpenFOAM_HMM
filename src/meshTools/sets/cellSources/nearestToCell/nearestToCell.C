@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,12 +55,9 @@ Foam::topoSetSource::addToUsageTable Foam::nearestToCell::usage_
 
 void Foam::nearestToCell::combine(topoSet& set, const bool add) const
 {
-    // Construct search engine withouth tet decomposition.
-    meshSearch queryMesh(mesh_, false);
-
     forAll(points_, pointI)
     {
-        addOrDelete(set, queryMesh.findNearestCell(points_[pointI]), add);
+        addOrDelete(set, mesh_.findNearestCell(points_[pointI]), add);
     }
 }
 

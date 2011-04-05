@@ -105,46 +105,6 @@ class autoLayerDriver
 
     // Private Member Functions
 
-
-        // Face merging
-
-            //- Merge patch faces. Undo until no checkMesh errors.
-            label mergePatchFacesUndo
-            (
-                const scalar minCos,
-                const scalar concaveCos,
-                const dictionary&
-            );
-
-            //- Remove points.
-            autoPtr<mapPolyMesh> doRemovePoints
-            (
-                removePoints& pointRemover,
-                const boolList& pointCanBeDeleted
-            );
-
-            //- Restore faces (which contain removed points)
-            autoPtr<mapPolyMesh> doRestorePoints
-            (
-                removePoints& pointRemover,
-                const labelList& facesToRestore
-            );
-
-            //- Return candidateFaces that are also in set.
-            labelList collectFaces
-            (
-                const labelList& candidateFaces,
-                const labelHashSet& set
-            ) const;
-
-            //- Pick up faces of cells of faces in set.
-            labelList growFaceCellFace(const labelHashSet&) const;
-
-            //- Remove points not used by any face or points used by only
-            //  two faces where the edges are in line
-            label mergeEdgesUndo(const scalar minCos, const dictionary&);
-
-
         // Layers
 
             //- For debugging: Dump displacement to .obj files

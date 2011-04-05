@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -147,6 +147,11 @@ int main(int argc, char *argv[])
 #   include "addRegionOption.H"
 #   include "setRootCase.H"
 #   include "createTime.H"
+
+    // Make sure we do not use the master-only reading since we read
+    // fields (different per processor) as dictionaries.
+    regIOobject::fileModificationChecking = regIOobject::timeStamp;
+
 
     fileName meshDir = polyMesh::meshSubDir;
     fileName regionPrefix = "";

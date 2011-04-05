@@ -95,6 +95,7 @@ cleanCase()
         > /dev/null 2>&1 \
     )
     rm -rf VTK > /dev/null 2>&1
+    rm -f 0/cellLevel 0/pointLevel
 
     if [ -e constant/polyMesh/blockMeshDict.m4 ]
     then

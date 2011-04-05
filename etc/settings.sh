@@ -227,6 +227,12 @@ OpenFOAM | ThirdParty)
         gmp_version=gmp-5.0.1
         mpfr_version=mpfr-2.4.2
         ;;
+    Gcc46 | Gcc46++0x)
+        gcc_version=gcc-4.6.0
+        gmp_version=gmp-5.0.1
+        mpfr_version=mpfr-2.4.2
+        mpc_version=mpc-0.8.1
+        ;;
     Gcc45 | Gcc45++0x)
         gcc_version=gcc-4.5.2
         gmp_version=gmp-5.0.1
@@ -401,6 +407,10 @@ SYSTEMOPENMPI)
     export PINC="`mpicc --showme:compile`"
     export PLIBS="`mpicc --showme:link`"
     libDir=`echo "$PLIBS" | sed -e 's/.*-L\([^ ]*\).*/\1/'`
+
+    # Bit of a hack: strip off 'lib' and hope this is the path to openmpi
+    # include files and libraries.
+    export MPI_ARCH_PATH="${libDir%/*}"
 
     if [ "$FOAM_VERBOSE" -a "$PS1" ]
     then

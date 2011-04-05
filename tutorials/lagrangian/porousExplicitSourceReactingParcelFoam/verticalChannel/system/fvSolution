@@ -74,7 +74,7 @@ PISO
     momentumPredictor yes;
 }
 
-SIMPLE
+potentialFlow
 {
     // used for potentialFoam initialisation
     nNonOrthogonalCorrectors 10;

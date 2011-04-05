@@ -49,6 +49,12 @@ Foam::regionModels::regionModel1D::boundaryFaceOppositeFace() const
 }
 
 
+inline Foam::label Foam::regionModels::regionModel1D::nLayers() const
+{
+    return nLayers_;
+}
+
+
 inline const Foam::surfaceScalarField&
 Foam::regionModels::regionModel1D::nMagSf() const
 {

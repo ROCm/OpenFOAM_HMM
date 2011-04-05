@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,6 +61,8 @@ class snapParameters
 
         const label nSnap_;
 
+        const label nFeatureSnap_;
+
 
     // Private Member Functions
 
@@ -75,10 +77,7 @@ public:
 
     // Constructors
 
-        //- Construct from dictionary - old syntax
-        snapParameters(const dictionary& dict, const label dummy);
-
-        //- Construct from dictionary - new syntax
+        //- Construct from dictionary
         snapParameters(const dictionary& dict);
 
 
@@ -114,6 +113,12 @@ public:
             {
                 return nSnap_;
             }
+
+            label nFeatureSnap() const
+            {
+                return nFeatureSnap_;
+            }
+
 };
 
 

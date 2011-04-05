@@ -11,7 +11,7 @@
     fvVectorMatrix UEqn
     (
         //pZones.ddt(rho, U)
-        fvc::ddt(rho, U)
+        fvm::ddt(rho, U)
       + fvm::div(rhoPhi, U)
       - fvm::laplacian(muEff, U)
       - (fvc::grad(U) & fvc::grad(muEff))
