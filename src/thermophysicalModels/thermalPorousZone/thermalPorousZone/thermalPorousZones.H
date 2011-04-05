@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,7 +32,8 @@ Description
     thermalPorousZone.
 
     The input file \c constant/thermalPorousZone is implemented as
-    IOPtrList\<thermalPorousZone\> and contains the following type of data:
+    IOPtrList\<thermalPorousZone\> (but written as a dictionary)
+    and contains the following type of data:
 
     \verbatim
     1
@@ -94,7 +95,7 @@ public:
         //- Add the thermal source to the enthalpy equation
         void addEnthalpySource
         (
-            const basicThermo& thermo,
+            const basicThermo&,
             const volScalarField& rho,
             fvScalarMatrix& hEqn
         ) const;

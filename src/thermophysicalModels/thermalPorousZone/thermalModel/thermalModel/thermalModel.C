@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,18 +42,18 @@ namespace porousMedia
 Foam::porousMedia::thermalModel::thermalModel(const porousZone& pZone)
 :
     pZone_(pZone),
-    coeffDict_(dictionary::null)
+    thermalCoeffs_(pZone.dict().subDictPtr("thermalModel"))
 {}
 
 
 Foam::porousMedia::thermalModel::thermalModel
 (
     const porousZone& pZone,
-    const word& modelType
+    const dictionary& thermalCoeffs
 )
 :
     pZone_(pZone),
-    coeffDict_(pZone_.dict().subDict(modelType + "Coeffs"))
+    thermalCoeffs_(thermalCoeffs)
 {}
 
 

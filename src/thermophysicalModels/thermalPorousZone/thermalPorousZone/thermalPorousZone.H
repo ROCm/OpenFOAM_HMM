@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -127,7 +127,7 @@ public:
         //- Add the thermal source to the enthalpy equation
         void addEnthalpySource
         (
-            const basicThermo& thermo,
+            const basicThermo&,
             const volScalarField& rho,
             fvScalarMatrix& hEqn
         ) const;
