@@ -240,11 +240,14 @@
     + =snappyHexMesh=:
       + extrude across multi-processor boundaries
       + preserve faceZones during layering
+      + combining patch faces after snapping
       + *Warning*:
             - minMedianAxisAngle angle fixed w.r.t. 17x. Set to
               90 to get same behaviour as 130 in 17x.
             - nGrow did not work in 17x. Set to 0
               to get same behaviour as 130 in 17x.
+            - nSolveIter reinstated to smooth internal mesh. Set to 0
+              to get same behaviour at 17x.
             - new minTetQuality setting (see tracking). Disable for 17x
               compatibility.
 * Post-processing
