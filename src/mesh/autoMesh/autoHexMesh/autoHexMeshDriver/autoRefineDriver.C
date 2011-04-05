@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,8 +30,8 @@ License
 #include "cellSet.H"
 #include "syncTools.H"
 #include "refinementParameters.H"
-#include "featureEdgeMesh.H"
 #include "refinementSurfaces.H"
+#include "refinementFeatures.H"
 #include "shellSurfaces.H"
 #include "mapDistributePolyMesh.H"
 #include "unitConversion.H"
@@ -47,62 +47,6 @@ defineTypeNameAndDebug(autoRefineDriver, 0);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-// Read explicit feature edges
-Foam::label Foam::autoRefineDriver::readFeatureEdges
-(
-    const PtrList<dictionary>& featDicts,
-    PtrList<featureEdgeMesh>& featureMeshes,
-    labelList& featureLevels
-) const
-{
-    Info<< "Reading external feature lines." << endl;
-
-    const fvMesh& mesh = meshRefiner_.mesh();
-
-    featureMeshes.setSize(featDicts.size());
-    featureLevels.setSize(featDicts.size());
-
-    forAll(featDicts, i)
-    {
-        const dictionary& dict = featDicts[i];
-
-        fileName featFileName(dict.lookup("file"));
-
-        featureMeshes.set
-        (
-            i,
-            new featureEdgeMesh
-            (
-                IOobject
-                (
-                    featFileName,                       // name
-                    //mesh.time().findInstance("triSurface", featFileName),
-                    //                                    // instance
-                    mesh.time().constant(),             // instance
-                    "triSurface",                       // local
-                    mesh.time(),                        // registry
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE,
-                    false
-                )
-            )
-        );
-
-        featureMeshes[i].mergePoints(meshRefiner_.mergeDistance());
-        featureLevels[i] = readLabel(dict.lookup("level"));
-
-        Info<< "Refinement level " << featureLevels[i]
-            << " for all cells crossed by feature " << featFileName
-            << " (" << featureMeshes[i].points().size() << " points, "
-            << featureMeshes[i].edges().size() << " edges)." << endl;
-    }
-
-    Info<< "Read feature lines in = "
-        << mesh.time().cpuTimeIncrement() << " s" << nl << endl;
-
-    return featureMeshes.size();
-}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -128,23 +72,15 @@ Foam::autoRefineDriver::autoRefineDriver
 Foam::label Foam::autoRefineDriver::featureEdgeRefine
 (
     const refinementParameters& refineParams,
-    const PtrList<dictionary>& featDicts,
     const label maxIter,
     const label minRefine
 )
 {
     const fvMesh& mesh = meshRefiner_.mesh();
 
-    // Read explicit feature edges
-    PtrList<featureEdgeMesh> featureMeshes;
-    // Per feature the refinement level
-    labelList featureLevels;
-    readFeatureEdges(featDicts, featureMeshes, featureLevels);
-
-
     label iter = 0;
 
-    if (featureMeshes.size() && maxIter > 0)
+    if (meshRefiner_.features().size() && maxIter > 0)
     {
         for (; iter < maxIter; iter++)
         {
@@ -159,9 +95,6 @@ Foam::label Foam::autoRefineDriver::featureEdgeRefine
                 (
                     refineParams.keepPoints()[0],    // For now only use one.
                     refineParams.curvature(),
-
-                    featureMeshes,
-                    featureLevels,
 
                     true,               // featureRefinement
                     false,              // internalRefinement
@@ -266,17 +199,12 @@ Foam::label Foam::autoRefineDriver::surfaceOnlyRefine
         // Only look at surface intersections (minLevel and surface curvature),
         // do not do internal refinement (refinementShells)
 
-        const PtrList<featureEdgeMesh> dummyFeatures;
-
         labelList candidateCells
         (
             meshRefiner_.refineCandidates
             (
                 refineParams.keepPoints()[0],
                 refineParams.curvature(),
-
-                dummyFeatures,      // dummy featureMeshes;
-                labelList(0),       // dummy featureLevels;
 
                 false,              // featureRefinement
                 false,              // internalRefinement
@@ -432,17 +360,12 @@ Foam::label Foam::autoRefineDriver::shellRefine
             << "----------------------------" << nl
             << endl;
 
-        const PtrList<featureEdgeMesh> dummyFeatures;
-
         labelList candidateCells
         (
             meshRefiner_.refineCandidates
             (
                 refineParams.keepPoints()[0],
                 refineParams.curvature(),
-
-                dummyFeatures,      // dummy featureMeshes;
-                labelList(0),       // dummy featureLevels;
 
                 false,              // featureRefinement
                 true,               // internalRefinement
@@ -459,7 +382,7 @@ Foam::label Foam::autoRefineDriver::shellRefine
                 << " cells to cellSet candidateCellsFromShells." << endl;
 
             cellSet c(mesh, "candidateCellsFromShells", candidateCells);
-            c.instance() = mesh.time().timeName();
+            c.instance() = meshRefiner_.timeName();
             c.write();
         }
 
@@ -677,6 +600,7 @@ void Foam::autoRefineDriver::splitAndMergeBaffles
         handleSnapProblems,                 // remove perp edge connected cells
         perpAngle,                          // perp angle
         false,                              // merge free standing baffles?
+        //true,                               // merge free standing baffles?
         motionDict,
         const_cast<Time&>(mesh.time()),
         globalToPatch_,
@@ -735,7 +659,8 @@ void Foam::autoRefineDriver::splitAndMergeBaffles
 
 void Foam::autoRefineDriver::mergePatchFaces
 (
-    const refinementParameters& refineParams
+    const refinementParameters& refineParams,
+    const dictionary& motionDict
 )
 {
     const fvMesh& mesh = meshRefiner_.mesh();
@@ -750,11 +675,12 @@ void Foam::autoRefineDriver::mergePatchFaces
         const_cast<Time&>(mesh.time())++;
     }
 
-    meshRefiner_.mergePatchFaces
+    meshRefiner_.mergePatchFacesUndo
     (
         Foam::cos(degToRad(45.0)),
         Foam::cos(degToRad(45.0)),
-        meshRefiner_.meshedPatches()
+        meshRefiner_.meshedPatches(),
+        motionDict
     );
 
     if (debug)
@@ -762,7 +688,7 @@ void Foam::autoRefineDriver::mergePatchFaces
         meshRefiner_.checkData();
     }
 
-    meshRefiner_.mergeEdges(Foam::cos(degToRad(45.0)));
+    meshRefiner_.mergeEdgesUndo(Foam::cos(degToRad(45.0)), motionDict);
 
     if (debug)
     {
@@ -789,13 +715,10 @@ void Foam::autoRefineDriver::doRefine
     // Check that all the keep points are inside the mesh.
     refineParams.findCells(mesh);
 
-    PtrList<dictionary> featDicts(refineDict.lookup("features"));
-
     // Refine around feature edges
     featureEdgeRefine
     (
         refineParams,
-        featDicts,
         100,    // maxIter
         0       // min cells to refine
     );
@@ -833,7 +756,7 @@ void Foam::autoRefineDriver::doRefine
     // Do something about cells with refined faces on the boundary
     if (prepareForSnapping)
     {
-        mergePatchFaces(refineParams);
+        mergePatchFaces(refineParams, motionDict);
     }
 
 
