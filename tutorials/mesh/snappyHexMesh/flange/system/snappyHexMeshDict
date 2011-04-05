@@ -32,14 +32,14 @@ geometry
     flange.stl
     {
         type triSurfaceMesh;
-        //name flange;
+        name flange;
     }
-    flange
+
+    refine
     {
-        type searchableSurfaceWithGaps;
-        gap 1E-6;
-        surface flange.stl;
-        //name flange;
+        type searchableSphere;
+        centre (0 0 -0.012);
+        radius 0.003;
     }
 };
 
@@ -128,6 +128,11 @@ castellatedMeshControls
 
     refinementRegions
     {
+        refine
+        {
+            mode inside;
+            levels ((1E15 3));
+        }
     }
 
 
