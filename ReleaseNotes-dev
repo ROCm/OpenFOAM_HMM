@@ -309,3 +309,8 @@
 * Other
   + compilable with =clang=
     In your prefs.sh set the WM_COMPILER to Clang
+  + dlclose error: upon exit of e.g. paraFoam you can get the error
+    Inconsistency detected by ld.so: dl-close.c: 731: _dl_close: Assertion
+    `map->l_init_called' failed!
+    This seems to happen with a mix of system libraries and a thirdParty
+    compiler.
