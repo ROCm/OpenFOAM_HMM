@@ -82,9 +82,8 @@ SIMPLE
 
 additional
 {
-    dpdt            false;
-    eWork           true;
-    hWork           true;
+    pressureWork    false;
+    pressureWorkTimeDerivative false;
 }
 
 

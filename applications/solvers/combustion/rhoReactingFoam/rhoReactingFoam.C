@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,6 +36,7 @@ Description
 #include "rhoChemistryModel.H"
 #include "chemistrySolver.H"
 #include "multivariateScheme.H"
+#include "pimpleLoop.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -69,14 +70,14 @@ int main(int argc, char *argv[])
         #include "chemistry.H"
         #include "rhoEqn.H"
 
-        for (label oCorr=1; oCorr <= nOuterCorr; oCorr++)
+        // --- Pressure-velocity PIMPLE corrector loop
+        for
+        (
+            pimpleLoop pimpleCorr(mesh, nOuterCorr);
+            pimpleCorr.loop();
+            pimpleCorr++
+        )
         {
-            bool finalIter = oCorr == nOuterCorr-1;
-            if (finalIter)
-            {
-                mesh.data::add("finalIteration", true);
-            }
-
             #include "UEqn.H"
             #include "YEqn.H"
             #include "hsEqn.H"
@@ -85,11 +86,6 @@ int main(int argc, char *argv[])
             for (int corr=1; corr<=nCorr; corr++)
             {
                 #include "pEqn.H"
-            }
-
-            if (finalIter)
-            {
-                mesh.data::remove("finalIteration");
             }
         }
 

@@ -2,13 +2,13 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
-    format      binary;
+    format      ascii;
     class       dictionary;
     location    "system";
     object      fvSolution;
@@ -23,6 +23,13 @@ solvers
         preconditioner  DIC;
         tolerance       0;
         relTol          0.1;
+    }
+    rhoFinal
+    {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-4;
+        relTol          0;
     }
     p
     {
@@ -44,6 +51,14 @@ solvers
         maxIter          50;
     };
 
+    pFinal
+    {
+        $p;
+
+        tolerance        1e-4;
+        relTol           0;
+    };
+
     "(U|Yi|hs|k|epsilon)"
     {
         solver          smoothSolver;
@@ -51,9 +66,17 @@ solvers
         tolerance       0;
         relTol          0.1;
     }
+
+    "(U|Yi|hs|k|epsilon)Final"
+    {
+        solver          smoothSolver;
+        smoother        GaussSeidel;
+        tolerance       1e-4;
+        relTol          0;
+    }
 }
 
-PISO
+PIMPLE
 {
     nCorrectors         2;
     nNonOrthogonalCorrectors 0;
@@ -64,8 +87,8 @@ PISO
 
 additional
 {
-    eWork           true;
-    hWork           true;
+    pressureWork    true;
+    pressureWorkTimeDerivative true;
     solveSpecies    true;
 }
 

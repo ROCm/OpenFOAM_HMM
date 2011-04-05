@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,9 +47,6 @@ SourceFiles
 namespace Foam
 {
 
-class Istream;
-class Ostream;
-
 // Forward declaration of friend functions and operators
 template<class T, class BaseType> class CompactIOField;
 
@@ -58,6 +55,7 @@ template<class T, class BaseType> Istream& operator>>
     Istream&,
     CompactIOField<T, BaseType>&
 );
+
 template<class T, class BaseType> Ostream& operator<<
 (
     Ostream&,
@@ -122,23 +120,6 @@ public:
         void operator=(const CompactIOField<T, BaseType>&);
 
         void operator=(const Field<T>&);
-
-
-    // IOstream operators
-
-        //- Read Field from Istream, discarding contents of existing Field.
-        friend Istream& operator>> <T, BaseType>
-        (
-            Istream&,
-            CompactIOField<T, BaseType>&
-        );
-
-        // Write Field to Ostream.
-        friend Ostream& operator<< <T, BaseType>
-        (
-            Ostream&,
-            const CompactIOField<T, BaseType>&
-        );
 };
 
 

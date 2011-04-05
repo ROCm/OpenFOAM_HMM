@@ -26,7 +26,18 @@ if (transonic)
             parcels.Srho()
         );
 
-        pEqn.solve();
+        pEqn.solve
+        (
+            mesh.solver
+            (
+                p.select
+                (
+                    pimpleCorr.finalIter()
+                 && corr == nCorr-1
+                 && nonOrth == nNonOrthCorr
+                )
+            )
+        );
 
         if (nonOrth == nNonOrthCorr)
         {
@@ -54,7 +65,18 @@ else
             parcels.Srho()
         );
 
-        pEqn.solve();
+        pEqn.solve
+        (
+            mesh.solver
+            (
+                p.select
+                (
+                    pimpleCorr.finalIter()
+                 && corr == nCorr-1
+                 && nonOrth == nNonOrthCorr
+                )
+            )
+        );
 
         if (nonOrth == nNonOrthCorr)
         {
@@ -68,5 +90,6 @@ else
 
 U -= rAU*fvc::grad(p);
 U.correctBoundaryConditions();
+
 
 DpDt = fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);

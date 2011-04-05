@@ -243,7 +243,7 @@ protected:
             const scalar NCpW,         // Sum of N*Cp*W of emission species
             const scalar Sh,           // explicit particle enthalpy source
             scalar& dhsTrans,          // sensible enthalpy transfer to carrier
-            scalar& Cuh                // linearised heat transfer coefficient
+            scalar& Sph                // linearised heat transfer coefficient
         );
 
 

@@ -67,13 +67,15 @@ SourceFiles
 #include "Map.H"
 #include "EdgeMap.H"
 #include "boundBox.H"
-#include "indexedOctree.H"
-#include "treeDataCell.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward declaration of classes
+class treeDataCell;
+template<class Type> class indexedOctree;
 
 /*---------------------------------------------------------------------------*\
                       Class primitiveMesh Declaration

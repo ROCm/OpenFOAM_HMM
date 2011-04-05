@@ -12,6 +12,6 @@ runApplication setSet -batch makeBlockedFaceSet.setSet
 runApplication PDRMesh
 
 # Run
-runApplication PDRFoam
+runApplication `getApplication`
 
 # ----------------------------------------------------------------- end-of-file

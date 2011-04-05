@@ -12,6 +12,6 @@ runApplication potentialFoam
 rm -f 0/phi
 
 # run the solver
-runApplication porousExplicitSourceReactingParcelFoam
+runApplication `getApplication`
 
 # ----------------------------------------------------------------- end-of-file

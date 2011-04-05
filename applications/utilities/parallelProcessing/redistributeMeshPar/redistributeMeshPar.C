@@ -641,14 +641,16 @@ int main(int argc, char *argv[])
     );
 #   include "setRootCase.H"
 
-    //- Not useful anymore. See above.
-    //// Create processor directory if non-existing
-    //if (!Pstream::master() && !isDir(args.path()))
-    //{
-    //    Pout<< "Creating case directory " << args.path() << endl;
-    //    mkDir(args.path());
-    //}
+    // Create processor directory if non-existing
+    if (!Pstream::master() && !isDir(args.path()))
+    {
+        Pout<< "Creating case directory " << args.path() << endl;
+        mkDir(args.path());
+    }
 
+
+    // Make sure we do not use the master-only reading.
+    regIOobject::fileModificationChecking = regIOobject::timeStamp;
 #   include "createTime.H"
 
     word regionName = polyMesh::defaultRegion;

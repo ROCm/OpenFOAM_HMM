@@ -44,23 +44,23 @@ License
 
 namespace Foam
 {
-    typedef basicReactingCloud::cloudType basicReactingCloud_T;
-    typedef basicReactingCloud_T::cloudType basicReactingCloud_K;
+    typedef basicReactingCloud::thermoCloudType thermoCloudType2;
+    typedef basicReactingCloud::kinematicCloudType kinematicCloudType2;
 
     // Kinematic sub-models
-    makeThermoParcelForces(basicReactingCloud_K);
-    makeParcelDispersionModels(basicReactingCloud_K);
-    makeReactingParcelInjectionModels(basicReactingCloud_K);
-    makeParcelPatchInteractionModels(basicReactingCloud_K);
-    makeParcelPostProcessingModels(basicReactingCloud_K);
+    makeThermoParcelForces(basicReactingCloud);
+    makeParcelDispersionModels(basicReactingCloud);
+    makeReactingParcelInjectionModels(basicReactingCloud);
+    makeParcelPatchInteractionModels(basicReactingCloud);
+    makeParcelPostProcessingModels(basicReactingCloud);
 
     // Thermo sub-models
-    makeParcelHeatTransferModels(basicReactingCloud_T);
+    makeParcelHeatTransferModels(basicReactingCloud);
 
     // Reacting sub-models
     makeReactingParcelCompositionModels(basicReactingCloud);
     makeReactingParcelPhaseChangeModels(basicReactingCloud);
-    makeReactingParcelSurfaceFilmModels(basicReactingCloud_K);
+    makeReactingParcelSurfaceFilmModels(basicReactingCloud);
 }
 
 

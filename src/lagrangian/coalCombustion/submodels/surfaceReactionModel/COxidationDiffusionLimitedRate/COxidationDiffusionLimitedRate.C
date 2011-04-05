@@ -157,12 +157,15 @@ Foam::scalar Foam::COxidationDiffusionLimitedRate<CloudType>::calculate
     dMassSRCarrier[O2GlobalId_] -= dmO2;
     dMassSRCarrier[CO2GlobalId_] += dmCO2;
 
-    const scalar HC = thermo.solids().properties()[CsLocalId_].H(T);
+    const scalar HsC = thermo.solids().properties()[CsLocalId_].Hs(T);
     const scalar HCO2 = thermo.carrier().H(CO2GlobalId_, T);
-    const scalar HO2 = thermo.carrier().H(O2GlobalId_, T);
+
+    // carrier enthalpy transfer handled by change in composition
+    // const scalar HsO2 = thermo.carrier().Hs(O2GlobalId_, T);
+    // dhsTrans -= dmO2*HsO2;
 
     // Heat of reaction [J]
-    return dmC*HC + dmO2*HO2 - dmCO2*HCO2;
+    return dmC*HsC - dmCO2*HCO2;
 }
 
 

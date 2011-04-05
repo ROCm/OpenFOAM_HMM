@@ -2,7 +2,8 @@
 
 tmp<fvVectorMatrix> UEqn
 (
-    pZones.ddt(rho, U)
+    //pZones.ddt(rho, U)
+    fvm::ddt(rho, U)
   + fvm::div(phi, U)
   + turbulence->divDevRhoReff(U)
 );

@@ -190,7 +190,6 @@ export FOAM_USER_LIBBIN=$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib
 
 # convenience
 export FOAM_APP=$WM_PROJECT_DIR/applications
-#export FOAM_LIB=$WM_PROJECT_DIR/lib
 export FOAM_SRC=$WM_PROJECT_DIR/src
 export FOAM_TUTORIALS=$WM_PROJECT_DIR/tutorials
 export FOAM_UTILITIES=$FOAM_APP/utilities
@@ -227,6 +226,12 @@ OpenFOAM | ThirdParty)
         gcc_version=gcc-4.4.3
         gmp_version=gmp-5.0.1
         mpfr_version=mpfr-2.4.2
+        ;;
+    Gcc46 | Gcc46++0x)
+        gcc_version=gcc-4.6.0
+        gmp_version=gmp-5.0.1
+        mpfr_version=mpfr-2.4.2
+        mpc_version=mpc-0.8.1
         ;;
     Gcc45 | Gcc45++0x)
         gcc_version=gcc-4.5.2
@@ -382,8 +387,8 @@ unset MPI_ARCH_PATH MPI_HOME FOAM_MPI_LIBBIN
 
 case "$WM_MPLIB" in
 OPENMPI)
-    #export FOAM_MPI=openmpi-1.4.1
-    export FOAM_MPI=openmpi-1.5.1
+    #export FOAM_MPI=openmpi-1.4.3
+    export FOAM_MPI=openmpi-1.5.3
     export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
 
     # Tell OpenMPI where to find its install directory

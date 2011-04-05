@@ -19,7 +19,7 @@ if (transonic)
         fvc::interpolate(psi)
        *(
             (fvc::interpolate(U) & mesh.Sf())
-        //+ fvc::ddtPhiCorr(rAU, rho, U, phi)
+          + fvc::ddtPhiCorr(rAU, rho, U, phi)
         )
     );
     mrfZones.relativeFlux(fvc::interpolate(psi), phid);
@@ -40,7 +40,7 @@ if (transonic)
                 p.select
                 (
                     (
-                        finalIter
+                       pimpleCorr.finalIter()
                      && corr == nCorr-1
                      && nonOrth == nNonOrthCorr
                     )
@@ -60,7 +60,7 @@ else
         fvc::interpolate(rho)*
         (
             (fvc::interpolate(U) & mesh.Sf())
-        //+ fvc::ddtPhiCorr(rAU, rho, U, phi)
+          + fvc::ddtPhiCorr(rAU, rho, U, phi)
         );
     mrfZones.relativeFlux(fvc::interpolate(rho), phi);
 
@@ -81,7 +81,7 @@ else
                 p.select
                 (
                     (
-                        finalIter
+                        pimpleCorr.finalIter()
                      && corr == nCorr-1
                      && nonOrth == nNonOrthCorr
                     )

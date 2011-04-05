@@ -168,7 +168,6 @@ setenv FOAM_USER_LIBBIN $WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib
 
 # convenience
 setenv FOAM_APP $WM_PROJECT_DIR/applications
-#setenv FOAM_LIB $WM_PROJECT_DIR/lib
 setenv FOAM_SRC $WM_PROJECT_DIR/src
 setenv FOAM_TUTORIALS $WM_PROJECT_DIR/tutorials
 setenv FOAM_UTILITIES $FOAM_APP/utilities
@@ -207,6 +206,13 @@ case ThirdParty:
         set gcc_version=gcc-4.4.3
         set gmp_version=gmp-5.0.1
         set mpfr_version=mpfr-2.4.2
+        breaksw
+    case Gcc46:
+    case Gcc46++0x:
+        set gcc_version=gcc-4.6.0
+        set gmp_version=gmp-5.0.1
+        set mpfr_version=mpfr-2.4.2
+        set mpc_version=mpc-0.8.1
         breaksw
     case Gcc45:
     case Gcc45++0x:
@@ -361,8 +367,8 @@ unsetenv MPI_ARCH_PATH MPI_HOME FOAM_MPI_LIBBIN
 
 switch ("$WM_MPLIB")
 case OPENMPI:
-    #setenv FOAM_MPI openmpi-1.4.1
-    setenv FOAM_MPI openmpi-1.5.1
+    #setenv FOAM_MPI openmpi-1.4.3
+    setenv FOAM_MPI openmpi-1.5.3
     setenv MPI_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
 
     # Tell OpenMPI where to find its install directory

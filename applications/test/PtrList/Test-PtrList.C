@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,7 +56,10 @@ public:
         Info<<"delete Scalar: " << data_ << endl;
     }
 
-    autoPtr<Scalar> clone() const;
+    autoPtr<Scalar> clone() const
+    {
+        return autoPtr<Scalar>(new Scalar(data_));
+    }
 
     friend Ostream& operator<<(Ostream& os, const Scalar& val)
     {

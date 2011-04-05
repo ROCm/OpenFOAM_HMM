@@ -7,6 +7,6 @@ cd ${0%/*} || exit 1    # run from this directory
 runApplication blockMesh
 cp 0/alpha1.org 0/alpha1
 runApplication setFields
-runApplication interDyMFoam
+runApplication `getApplication`
 
 # ----------------------------------------------------------------- end-of-file

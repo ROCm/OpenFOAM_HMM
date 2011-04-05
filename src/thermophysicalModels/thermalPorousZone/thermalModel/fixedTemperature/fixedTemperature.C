@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,8 +51,8 @@ namespace porousMedia
 
 Foam::porousMedia::fixedTemperature::fixedTemperature(const porousZone& pZone)
 :
-    thermalModel(pZone, typeName),
-    T_(readScalar(coeffDict_.lookup("T")))
+    thermalModel(pZone),
+    T_(readScalar(thermalCoeffs_.lookup("T")))
 {}
 
 
