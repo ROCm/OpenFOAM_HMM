@@ -39,8 +39,10 @@ correction
 {
     const fvMesh& mesh = this->mesh();
 
-    GeometricField<Type, pointPatchField, pointMesh> pvf =
-        volPointInterpolation::New(mesh).interpolate(vf);
+    GeometricField<Type, pointPatchField, pointMesh> pvf
+    (
+        volPointInterpolation::New(mesh).interpolate(vf)
+    );
 
     tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tsfCorr =
         linearInterpolate(vf);
