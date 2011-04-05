@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,8 +63,8 @@ protected:
         //- Reference to the porous zone
         const porousZone& pZone_;
 
-        //- Sub-model coefficients dictionary
-        const dictionary coeffDict_;
+        //- Thermal model coefficients dictionary
+        const dictionary thermalCoeffs_;
 
 
 public:
@@ -87,11 +87,11 @@ public:
 
     // Constructors
 
-        //- Construct null from porous zone
+        //- Construct from porous zone, coefficients from "thermalModel" entry
         thermalModel(const porousZone&);
 
-        //- Construct from porous zone and model type name
-        thermalModel(const porousZone&, const word& modelType);
+        //- Construct from porous zone and thermal model coefficients
+        thermalModel(const porousZone&, const dictionary& thermalCoeffs);
 
 
     //- Destructor
@@ -107,7 +107,7 @@ public:
         //- Add the thermal source to the enthalpy equation
         virtual void addEnthalpySource
         (
-            const basicThermo& thermo,
+            const basicThermo&,
             const volScalarField& rho,
             fvScalarMatrix& hEqn
         ) const = 0;

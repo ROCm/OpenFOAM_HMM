@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -442,6 +442,13 @@ void Foam::porousZone::writeDict(Ostream& os, bool subDict) const
     if (const dictionary* dictPtr = dict_.subDictPtr("Darcy"))
     {
         os  << indent << "Darcy";
+        dictPtr->write(os);
+    }
+
+    // thermalModel
+    if (const dictionary* dictPtr = dict_.subDictPtr("thermalModel"))
+    {
+        os  << indent << "thermalModel";
         dictPtr->write(os);
     }
 
