@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Class
     Foam::sampledPatch
 
 Description
-    A sampledSurface on a patch. Non-triangulated by default.
+    A sampledSurface on patches. Non-triangulated by default.
 
 SourceFiles
     sampledPatch.C
@@ -57,8 +57,11 @@ class sampledPatch
 
     // Private data
 
-        //- Name of patch
-        const word patchName_;
+        //- Name of patches
+        const wordReList patchNames_;
+
+        //- Corresponding patchIDs
+        mutable labelList patchIDs_;
 
         //- Triangulated faces or keep faces as is
         bool triangulate_;
@@ -66,11 +69,16 @@ class sampledPatch
         //- Track if the surface needs an update
         mutable bool needsUpdate_;
 
-        //- Local patch face labels
+        //- For every face (or triangle) the originating patch
+        labelList patchIndex_;
+
+        //- For every face (or triangle) the index in the originating patch
         labelList patchFaceLabels_;
 
-    // Private Member Functions
+        //- Start indices (in patchFaceLabels_) of patches
+        labelList patchStart_;
 
+    // Private Member Functions
 
         //- sample field on faces
         template <class Type>
@@ -79,14 +87,33 @@ class sampledPatch
             const GeometricField<Type, fvPatchField, volMesh>& vField
         ) const;
 
-
         template <class Type>
         tmp<Field<Type> >
         interpolateField(const interpolation<Type>&) const;
 
-
         //- remap action on triangulation or cleanup
         virtual void remapFaces(const labelUList& faceMap);
+
+
+protected:
+
+        const wordReList& patchNames() const
+        {
+            return patchNames_;
+        }
+
+        const labelList& patchIDs() const;
+
+        const labelList& patchStart() const
+        {
+            return patchStart_;
+        }
+
+        const labelList& patchFaceLabels() const
+        {
+            return patchFaceLabels_;
+        }
+
 
 public:
 
@@ -101,7 +128,7 @@ public:
         (
             const word& name,
             const polyMesh& mesh,
-            const word& patchName,
+            const wordReList& patchNames,
             const bool triangulate = false
         );
 
@@ -132,21 +159,6 @@ public:
         //  Do nothing (and return false) if no update was needed
         virtual bool update();
 
-
-        const word patchName() const
-        {
-            return patchName_;
-        }
-
-        label patchIndex() const
-        {
-            return mesh().boundaryMesh().findPatchID(patchName_);
-        }
-
-        const labelList& patchFaceLabels() const
-        {
-            return patchFaceLabels_;
-        }
 
         //- Points of surface
         virtual const pointField& points() const

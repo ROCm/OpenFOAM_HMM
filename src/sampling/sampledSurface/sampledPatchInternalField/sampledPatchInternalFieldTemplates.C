@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,20 +36,27 @@ Foam::sampledPatchInternalField::sampleField
     const GeometricField<Type, fvPatchField, volMesh>& vField
 ) const
 {
-    const mapDistribute& distMap = map();
-
     // One value per face
     tmp<Field<Type> > tvalues(new Field<Type>(patchFaceLabels().size()));
     Field<Type>& values = tvalues();
 
-    if (patchIndex() != -1)
+    forAll(patchStart(), i)
     {
+        // Get patchface wise data by sampling internal field
         Field<Type> interpVals = vField.internalField();
-        distMap.distribute(interpVals);
+        mappers_[i].map().distribute(interpVals);
 
-        forAll(patchFaceLabels(), elemI)
+        // Store at correct position in values
+        label end =
+        (
+            i < patchStart().size()-1
+          ? patchStart()[i+1]
+          : patchFaceLabels().size()
+        );
+
+        for (label triI = patchStart()[i]; triI < end; triI++)
         {
-            values[elemI] = interpVals[patchFaceLabels()[elemI]];
+            values[triI] = interpVals[patchFaceLabels()[triI]];
         }
     }
 
@@ -64,19 +71,24 @@ Foam::sampledPatchInternalField::interpolateField
     const interpolation<Type>& interpolator
 ) const
 {
-    // One value per vertex
+    label sz = 0;
+    forAll(patchIDs(), i)
+    {
+        sz += mesh().boundaryMesh()[patchIDs()[i]].size();
+    }
 
-    if (patchIndex() != -1)
+    Field<Type> allPatchVals(sz);
+    sz = 0;
+
+    forAll(patchIDs(), i)
     {
         // See directMappedFixedValueFvPatchField
-        const mapDistribute& distMap = map();
-
-        const polyPatch& pp = mesh().boundaryMesh()[patchIndex()];
+        const mapDistribute& distMap = mappers_[i].map();
 
         // Send back sample points to processor that holds the cell.
         // Mark cells with point::max so we know which ones we need
         // to interpolate (since expensive).
-        vectorField samples(samplePoints());
+        vectorField samples(mappers_[i].samplePoints());
         distMap.reverseDistribute(mesh().nCells(), point::max, samples);
 
         Field<Type> patchVals(mesh().nCells());
@@ -96,18 +108,35 @@ Foam::sampledPatchInternalField::interpolateField
         distMap.distribute(patchVals);
 
         // Now patchVals holds the interpolated data in patch face order.
-        // Interpolate to points. Note: points are patch.localPoints() so
-        // can use standard interpolation
+        // Collect.
+        SubList<Type>(allPatchVals, patchVals.size(), sz).assign(patchVals);
+        sz += patchVals.size();
+    }
 
-        return PrimitivePatchInterpolation<primitivePatch>
-        (
-           pp
-        ).faceToPointInterpolate(patchVals);
-    }
-    else
+    // Interpolate to points. Reconstruct the patch of all faces to aid
+    // interpolation.
+
+    labelList meshFaceLabels(allPatchVals.size());
+    sz = 0;
+    forAll(patchIDs(), i)
     {
-        return tmp<Field<Type> >(new Field<Type>(points().size()));
+        const polyPatch& pp = mesh().boundaryMesh()[patchIDs()[i]];
+        forAll(pp, i)
+        {
+            meshFaceLabels[sz++] = pp.start()+i;
+        }
     }
+
+    indirectPrimitivePatch allPatches
+    (
+        IndirectList<face>(mesh().faces(), meshFaceLabels),
+        mesh().points()
+    );
+
+    return PrimitivePatchInterpolation<indirectPrimitivePatch>
+    (
+        allPatches
+    ).faceToPointInterpolate(allPatchVals);
 }
 
 

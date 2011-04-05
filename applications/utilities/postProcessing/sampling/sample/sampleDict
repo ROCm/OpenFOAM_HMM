@@ -150,29 +150,29 @@ surfaces
         interpolate     true;
     }
 
-    movingWall_constant
+    walls_constant
     {
         type            patch;
-        patchName       movingWall;
+        patches         ( ".*Wall.*" );
         // Optional: whether to leave as faces (=default) or triangulate
         // triangulate     false;
     }
 
-    movingWall_interpolated
+    walls_interpolated
     {
         type            patch;
-        patchName       movingWall;
+        patches         ( ".*Wall.*" );
         interpolate     true;
         // Optional: whether to leave as faces (=default) or triangulate
         // triangulate     false;
     }
 
-    movingNearWall_interpolated
+    nearWalls_interpolated
     {
         // Sample cell values off patch. Does not need to be the near-wall
         // cell, can be arbitrarily far away.
         type            patchInternalField;
-        patchName       movingWall;
+        patches         ( ".*Wall.*" );
         distance        0.0001;
         interpolate     true;
         // Optional: whether to leave as faces (=default) or triangulate

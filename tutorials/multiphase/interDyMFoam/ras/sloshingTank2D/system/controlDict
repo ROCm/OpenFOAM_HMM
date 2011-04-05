@@ -89,7 +89,7 @@ functions
             walls
             {
                 type        patch;
-                patchName   walls;
+                patches     (walls);
                 triangulate false;
             }
         );
