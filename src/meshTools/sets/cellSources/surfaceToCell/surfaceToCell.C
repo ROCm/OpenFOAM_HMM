@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -175,7 +175,8 @@ void Foam::surfaceToCell::combine(topoSet& set, const bool add) const
             const point& outsidePoint = outsidePoints_[outsideI];
 
             // Find cell point is in. Linear search.
-            if (queryMesh.findCell(outsidePoint, -1, false) == -1)
+            label cellI = queryMesh.findCell(outsidePoint, -1, false);
+            if (returnReduce(cellI, maxOp<label>()) == -1)
             {
                 FatalErrorIn("surfaceToCell::combine(topoSet&, const bool)")
                     << "outsidePoint " << outsidePoint
