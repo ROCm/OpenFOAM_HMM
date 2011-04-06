@@ -31,11 +31,12 @@ FoamFile
             f   f [0 -1 0 0 0 0 0] (0 0 0);
         }
 
-        thermalModel none; // fixedTemperature;
-
-        fixedTemperatureCoeffs
+        thermalModel
         {
-            T              350;
+            type        none; // fixedTemperature;
+
+            // fixedTemperature coefficients
+            T           350;
         }
     }
 )

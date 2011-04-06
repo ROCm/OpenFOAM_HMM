@@ -64,7 +64,7 @@
         // Further limit the reciprocal time-step
         // in the vicinity of the interface
 
-        volScalarField alpha1Bar = fvc::average(alpha1);
+        volScalarField alpha1Bar(fvc::average(alpha1));
 
         rDeltaT.dimensionedInternalField() = max
         (

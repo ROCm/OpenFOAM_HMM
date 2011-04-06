@@ -40,6 +40,7 @@ Description
 #include "treeBoundBox.H"
 #include "meshTools.H"
 #include "OFstream.H"
+#include "unitConversion.H"
 
 using namespace Foam;
 
@@ -85,6 +86,55 @@ void deleteBox
         if (removeInside ? bb.contains(eMid) : !bb.contains(eMid))
         {
             edgeStat[edgeI] = surfaceFeatures::NONE;
+        }
+    }
+}
+
+
+// Unmark non-manifold edges if individual triangles are not features
+void unmarkBaffles
+(
+    const triSurface& surf,
+    const scalar includedAngle,
+    List<surfaceFeatures::edgeStatus>& edgeStat
+)
+{
+    scalar minCos = Foam::cos(degToRad(180.0 - includedAngle));
+
+    const labelListList& edgeFaces = surf.edgeFaces();
+
+    forAll(edgeFaces, edgeI)
+    {
+        const labelList& eFaces = edgeFaces[edgeI];
+
+        if (eFaces.size() > 2)
+        {
+            label i0 = eFaces[0];
+            //const labelledTri& f0 = surf[i0];
+            const vector& n0 = surf.faceNormals()[i0];
+
+            //Pout<< "edge:" << edgeI << " n0:" << n0 << endl;
+
+            bool same = true;
+
+            for (label i = 1; i < eFaces.size(); i++)
+            {
+                //const labelledTri& f = surf[i];
+                const vector& n = surf.faceNormals()[eFaces[i]];
+
+                //Pout<< "    mag(n&n0): " << mag(n&n0) << endl;
+
+                if (mag(n&n0) < minCos)
+                {
+                    same = false;
+                    break;
+                }
+            }
+
+            if (same)
+            {
+                edgeStat[edgeI] = surfaceFeatures::NONE;
+            }
         }
     }
 }
@@ -138,6 +188,11 @@ int main(int argc, char *argv[])
         "((x0 y0 z0)(x1 y1 z1))",
         "remove edges within specified bounding box"
     );
+    argList::addBoolOption
+    (
+        "writeObj",
+        "write extendedFeatureEdgeMesh obj files"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -145,6 +200,7 @@ int main(int argc, char *argv[])
     Info<< "Feature line extraction is only valid on closed manifold surfaces."
         << endl;
 
+    bool writeObj = args.optionFound("writeObj");
 
     const fileName surfFileName = args[1];
     const fileName outFileName  = args[2];
@@ -152,6 +208,8 @@ int main(int argc, char *argv[])
     Info<< "Surface            : " << surfFileName << nl
         << "Output feature set : " << outFileName << nl
         << endl;
+
+    fileName sFeatFileName = surfFileName.lessExt().name();
 
 
     // Read
@@ -162,7 +220,6 @@ int main(int argc, char *argv[])
     Info<< "Statistics:" << endl;
     surf.writeStats(Info);
     Info<< endl;
-
 
 
     // Either construct features from surface&featureangle or read set.
@@ -187,9 +244,9 @@ int main(int argc, char *argv[])
 
         set = surfaceFeatures(surf, includedAngle);
 
-        Info<< nl << "Writing initial features" << endl;
-        set.write("initial.fSet");
-        set.writeObj("initial");
+        // Info<< nl << "Writing initial features" << endl;
+        // set.write("initial.fSet");
+        // set.writeObj("initial");
     }
     else
     {
@@ -199,7 +256,6 @@ int main(int argc, char *argv[])
             << " or -includedAngle (to new set construct from angle)"
             << exit(FatalError);
     }
-
 
     Info<< nl
         << "Initial feature set:" << nl
@@ -281,11 +337,12 @@ int main(int argc, char *argv[])
     surfaceFeatures newSet(surf);
     newSet.setFromStatus(edgeStat);
 
-    Info<< endl << "Writing trimmed features to " << outFileName << endl;
-    newSet.write(outFileName);
+    Info<< endl << "Writing trimmed features to "
+        << runTime.constant()/"featureEdgeMesh"/outFileName << endl;
+    newSet.write(runTime.constant()/"featureEdgeMesh"/outFileName);
 
-    Info<< endl << "Writing edge objs." << endl;
-    newSet.writeObj("final");
+    // Info<< endl << "Writing edge objs." << endl;
+    // newSet.writeObj("final");
 
     Info<< nl
         << "Final feature set:" << nl
@@ -297,20 +354,22 @@ int main(int argc, char *argv[])
         << "        internal edges : " << newSet.nInternalEdges() << nl
         << endl;
 
-    // Extracting and writing a featureEdgeMesh
+    // Extracting and writing a extendedFeatureEdgeMesh
 
     extendedFeatureEdgeMesh feMesh
     (
         newSet,
         runTime,
-        surfFileName.lessExt().name() + ".featureEdgeMesh"
+        sFeatFileName + ".extendedFeatureEdgeMesh"
     );
 
     Info<< nl << "Writing extendedFeatureEdgeMesh to " << feMesh.objectPath()
         << endl;
 
-
-    feMesh.writeObj(surfFileName.lessExt().name());
+    if (writeObj)
+    {
+        feMesh.writeObj(surfFileName.lessExt().name());
+    }
 
     feMesh.write();
 

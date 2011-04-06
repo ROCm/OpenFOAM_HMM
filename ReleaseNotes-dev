@@ -240,11 +240,14 @@
     + =snappyHexMesh=:
       + extrude across multi-processor boundaries
       + preserve faceZones during layering
+      + combining patch faces after snapping
       + *Warning*:
             - minMedianAxisAngle angle fixed w.r.t. 17x. Set to
               90 to get same behaviour as 130 in 17x.
             - nGrow did not work in 17x. Set to 0
               to get same behaviour as 130 in 17x.
+            - nSolveIter reinstated to smooth internal mesh. Set to 0
+              to get same behaviour at 17x.
             - new minTetQuality setting (see tracking). Disable for 17x
               compatibility.
 * Post-processing
@@ -309,3 +312,8 @@
 * Other
   + compilable with =clang=
     In your prefs.sh set the WM_COMPILER to Clang
+  + dlclose error: upon exit of e.g. paraFoam you can get the error
+    Inconsistency detected by ld.so: dl-close.c: 731: _dl_close: Assertion
+    `map->l_init_called' failed!
+    This seems to happen with a mix of system libraries and a thirdParty
+    compiler.

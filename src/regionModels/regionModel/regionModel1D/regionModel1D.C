@@ -114,6 +114,8 @@ void Foam::regionModels::regionModel1D::initialise()
             boundaryFaceCells_[localPyrolysisFaceI].transfer(cellIDs);
 
             localPyrolysisFaceI++;
+
+            nLayers_ = nCells;
         }
     }
 
@@ -266,6 +268,7 @@ Foam::regionModels::regionModel1D::regionModel1D(const fvMesh& mesh)
     boundaryFaceFaces_(),
     boundaryFaceCells_(),
     boundaryFaceOppositeFace_(),
+    nLayers_(0),
     nMagSfPtr_(NULL),
     moveMesh_(false)
 {}
@@ -283,6 +286,7 @@ Foam::regionModels::regionModel1D::regionModel1D
     boundaryFaceFaces_(regionMesh().nCells()),
     boundaryFaceCells_(regionMesh().nCells()),
     boundaryFaceOppositeFace_(regionMesh().nCells()),
+    nLayers_(0),
     nMagSfPtr_(NULL),
     moveMesh_(true)
 {
