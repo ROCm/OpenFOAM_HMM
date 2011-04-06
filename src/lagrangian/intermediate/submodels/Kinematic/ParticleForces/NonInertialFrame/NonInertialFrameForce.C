@@ -163,13 +163,14 @@ void Foam::NonInertialFrameForce<CloudType>::cacheFields(const bool store)
             )
         )
         {
-            uniformDimensionedVectorField omegaDot = this->mesh().template
+            uniformDimensionedVectorField centreOfRotation =
+                this->mesh().template
                 lookupObject<uniformDimensionedVectorField>
                 (
                     centreOfRotationName_
                 );
 
-            centreOfRotation_ = omegaDot.value();
+            centreOfRotation_ = centreOfRotation.value();
         }
     }
 }
