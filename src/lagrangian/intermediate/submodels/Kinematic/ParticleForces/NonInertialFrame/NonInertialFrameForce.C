@@ -187,7 +187,7 @@ Foam::forceSuSp Foam::NonInertialFrameForce<CloudType>::calcNonCoupled
 {
     forceSuSp value(vector::zero, 0.0);
 
-    const vector& r = p.position() - centreOfRotation_;
+    const vector r = p.position() - centreOfRotation_;
 
     value.Su() =
         mass
