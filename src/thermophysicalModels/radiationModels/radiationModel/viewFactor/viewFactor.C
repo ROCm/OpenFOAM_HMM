@@ -102,7 +102,6 @@ Foam::radiation::viewFactor::viewFactor(const volScalarField& T)
     iterCounter_(0),
     pivotIndices_(0)
 {
-
     const polyBoundaryMesh& coarsePatches = coarseMesh_.boundaryMesh();
     const volScalarField::GeometricBoundaryField& Qrp = Qr_.boundaryField();
 
@@ -116,7 +115,7 @@ Foam::radiation::viewFactor::viewFactor(const volScalarField& T)
         {
             selectedPatches_[count] = QrPatchI.patch().index();
             nLocalCoarseFaces_ += coarsePatches[patchI].size();
-            count ++;
+            count++;
         }
     }
 
@@ -124,8 +123,8 @@ Foam::radiation::viewFactor::viewFactor(const volScalarField& T)
 
     if (debug)
     {
-        Pout << "SelectedPatches:" << selectedPatches_ << endl;
-        Pout << "Number of coarse faces:" << nLocalCoarseFaces_ << endl;
+        Pout<< "Selected patches:" << selectedPatches_ << endl;
+        Pout<< "Number of coarse faces:" << nLocalCoarseFaces_ << endl;
     }
 
     totalNCoarseFaces_ = nLocalCoarseFaces_;
@@ -133,7 +132,7 @@ Foam::radiation::viewFactor::viewFactor(const volScalarField& T)
 
     if (Pstream::master())
     {
-        Info << "Total number of clusters : " << totalNCoarseFaces_ << endl;
+        Info<< "Total number of clusters : " << totalNCoarseFaces_ << endl;
     }
 
     labelListIOList subMap
@@ -228,7 +227,7 @@ Foam::radiation::viewFactor::viewFactor(const volScalarField& T)
             new scalarSquareMatrix(totalNCoarseFaces_, totalNCoarseFaces_, 0.0)
         );
 
-        Info << "Insert elemets in the matrix.." << endl;
+        Info<< "Insert elements in the matrix..." << endl;
 
         for (label procI = 0; procI < Pstream::nProcs(); procI++)
         {
@@ -244,19 +243,19 @@ Foam::radiation::viewFactor::viewFactor(const volScalarField& T)
 
 
         bool smoothing = readBool(coeffs_.lookup("smoothing"));
-        if(smoothing)
+        if (smoothing)
         {
-            Info << "Smoothing the matrix..." << endl;
+            Info<< "Smoothing the matrix..." << endl;
 
-            for(label i=0; i<totalNCoarseFaces_; i++)
+            for (label i=0; i<totalNCoarseFaces_; i++)
             {
                 scalar sumF = 0.0;
-                for(label j=0; j<totalNCoarseFaces_; j++)
+                for (label j=0; j<totalNCoarseFaces_; j++)
                 {
                     sumF += Fmatrix_()[i][j];
                 }
                 scalar delta = 1.0 - sumF;
-                for(label j=0; j<totalNCoarseFaces_; j++)
+                for (label j=0; j<totalNCoarseFaces_; j++)
                 {
                     Fmatrix_()[i][j] *= (1.0 - delta/(sumF + 0.001));
                 }
@@ -342,7 +341,7 @@ void Foam::radiation::viewFactor::calculate()
     DynamicList<scalar> localCoarseEave(nLocalCoarseFaces_);
     DynamicList<scalar> localCoarseHoave(nLocalCoarseFaces_);
 
-    forAll (selectedPatches_, i)
+    forAll(selectedPatches_, i)
     {
         label patchID = selectedPatches_[i];
 
@@ -364,7 +363,7 @@ void Foam::radiation::viewFactor::calculate()
         const labelList& coarsePatchFace = coarseMesh_.patchFaceMap()[patchID];
 
         const labelList& agglom = finalAgglom_[patchID];
-        label nAgglom = max(agglom)+1;
+        label nAgglom = max(agglom) + 1;
 
         labelListList coarseToFine(invertOneToMany(nAgglom, agglom));
 
@@ -413,7 +412,7 @@ void Foam::radiation::viewFactor::calculate()
 
     labelList localGlobalIds(nLocalCoarseFaces_);
 
-    for (label k = 0; k < nLocalCoarseFaces_; k++)
+    for(label k = 0; k < nLocalCoarseFaces_; k++)
     {
         localGlobalIds[k] = globalNumbering.toGlobal(Pstream::myProcNo(), k);
     }
@@ -479,14 +478,14 @@ void Foam::radiation::viewFactor::calculate()
                 }
             }
 
-            Info<< "\nSolving view factor equations.." << endl;
+            Info<< "\nSolving view factor equations..." << endl;
             // Negative coming into the fluid
             LUsolve(C, q);
         }
         else //Constant emissivity
         {
             // Initial iter calculates CLU and chaches it
-            if(iterCounter_ == 0)
+            if (iterCounter_ == 0)
             {
                 for (label i=0; i<totalNCoarseFaces_; i++)
                 {
@@ -503,7 +502,7 @@ void Foam::radiation::viewFactor::calculate()
                         }
                     }
                 }
-                Info<< "\nDecomposing C matrix.." << endl;
+                Info<< "\nDecomposing C matrix..." << endl;
                 LUDecompose(CLU_(), pivotIndices_);
             }
 
@@ -538,7 +537,7 @@ void Foam::radiation::viewFactor::calculate()
 
 
     label globCoarseId = 0;
-    forAll (selectedPatches_, i)
+    forAll(selectedPatches_, i)
     {
         const label patchID = selectedPatches_[i];
         scalarField& Qrp = Qr_.boundaryField()[patchID];
@@ -575,9 +574,9 @@ void Foam::radiation::viewFactor::calculate()
             const scalarField& Qrp = Qr_.boundaryField()[patchID];
             const scalarField& magSf = mesh_.magSf().boundaryField()[patchID];
             scalar heatFlux = gSum(Qrp*magSf);
-            Info << "Total heat flux at patch: "
-                 << patchID << " "
-                 << heatFlux << " [W]" << endl;
+            Info<< "Total heat flux at patch: "
+                << patchID << " "
+                << heatFlux << " [W]" << endl;
         }
     }
 
@@ -616,13 +615,13 @@ Foam::tmp<Foam::volScalarField> Foam::radiation::viewFactor::Rp() const
 Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
 Foam::radiation::viewFactor::Ru() const
 {
-    tmp<DimensionedField<scalar, volMesh> > tRu
+    return tmp<DimensionedField<scalar, volMesh> >
     (
         new DimensionedField<scalar, volMesh>
         (
             IOobject
             (
-                "tRu",
+                "Ru",
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
@@ -633,8 +632,6 @@ Foam::radiation::viewFactor::Ru() const
             dimensionedScalar("zero", dimMass/dimLength/pow3(dimTime), 0.0)
         )
     );
-
-    return tRu;
 }
 
 
