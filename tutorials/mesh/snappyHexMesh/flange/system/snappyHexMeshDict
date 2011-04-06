@@ -35,11 +35,22 @@ geometry
         name flange;
     }
 
-    refine
+    //- Refine a bit extra around the small centre hole
+    refineHole
     {
         type searchableSphere;
         centre (0 0 -0.012);
         radius 0.003;
+    }
+
+    //- Refine a bit extra around the edge of the flange. With only two cells
+    //  across it might/might not mesh correctly.
+    refineCap
+    {
+        type searchableCylinder;
+        point1 (0 0.021 -0.01075);
+        point2 (0 0.025 -0.01075);
+        radius 0.013;
     }
 };
 
@@ -110,7 +121,7 @@ castellatedMeshControls
         }
     }
 
-    resolveFeatureAngle 45;
+    resolveFeatureAngle 30;
 
 
     // Region-wise refinement
@@ -128,7 +139,12 @@ castellatedMeshControls
 
     refinementRegions
     {
-        refine
+        refineHole
+        {
+            mode inside;
+            levels ((1E15 3));
+        }
+        refineCap
         {
             mode inside;
             levels ((1E15 3));
@@ -221,7 +237,7 @@ addLayersControls
 
     //- When not to extrude surface. 0 is flat surface, 90 is when two faces
     //  make straight angle.
-    featureAngle 45;
+    featureAngle 30;
 
     //- Maximum number of snapping relaxation iterations. Should stop
     //  before upon reaching a correct mesh.
