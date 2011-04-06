@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,15 +56,27 @@ Foam::sampledPatchInternalField::sampledPatchInternalField
 )
 :
     sampledPatch(name, mesh, dict),
-    directMappedPatchBase
-    (
-        mesh.boundaryMesh()[sampledPatch::patchIndex()],
-        mesh.name(),                        // sampleRegion
-        directMappedPatchBase::NEARESTCELL, // sampleMode
-        word::null,                         // samplePatch
-        -readScalar(dict.lookup("distance"))
-    )
-{}
+    mappers_(patchIDs().size())
+{
+    const scalar distance = readScalar(dict.lookup("distance"));
+
+    forAll(patchIDs(), i)
+    {
+        label patchI = patchIDs()[i];
+        mappers_.set
+        (
+            i,
+            new directMappedPatchBase
+            (
+                mesh.boundaryMesh()[patchI],
+                mesh.name(),                        // sampleRegion
+                directMappedPatchBase::NEARESTCELL, // sampleMode
+                word::null,                         // samplePatch
+                -distance                           // sample inside my domain
+            )
+        );
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -167,7 +179,7 @@ Foam::tmp<Foam::tensorField> Foam::sampledPatchInternalField::interpolate
 void Foam::sampledPatchInternalField::print(Ostream& os) const
 {
     os  << "sampledPatchInternalField: " << name() << " :"
-        << "  patch:" << patchName()
+        << "  patches:" << patchNames()
         << "  faces:" << faces().size()
         << "  points:" << points().size();
 }
