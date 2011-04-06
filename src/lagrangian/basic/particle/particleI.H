@@ -97,12 +97,19 @@ inline Foam::scalar Foam::particle::tetLambda
     scalar lambdaNumerator = (base - from) & n;
     scalar lambdaDenominator = (to - from) & n;
 
-    if (mag(lambdaDenominator) < SMALL)
+    // n carries the area of the tet faces, so the dot product with a
+    // delta-length has the units of volume.  Comparing the component of each
+    // delta-length in the direction of n times the face area to a fraction of
+    // the cell volume.
+
+    scalar tol = 1e3*SMALL*mesh_.cellVolumes()[cellI];
+
+    if (mag(lambdaDenominator) < tol)
     {
-        if (mag(lambdaNumerator) < SMALL)
+        if (mag(lambdaNumerator) < tol)
         {
             // Track starts on the face, and is potentially
-            // parallel to it.  +-SMALL/+-SMALL is not a good
+            // parallel to it.  +-tol/+-tol is not a good
             // comparison, return 0.0, in anticipation of tet
             // centre correction.
 
@@ -110,10 +117,11 @@ inline Foam::scalar Foam::particle::tetLambda
         }
         else
         {
-            if (mag((to - from)) < SMALL)
+            if (mag((to - from)) < tol/mag(n))
             {
-                // Zero length track, not along the face, face
-                // cannot be crossed.
+                // 'Zero' length track (compared to the tolerance, which is
+                // based on the cell volume, divided by the tet face area), not
+                // along the face, face cannot be crossed.
 
                 return GREAT;
             }
@@ -291,12 +299,14 @@ inline Foam::scalar Foam::particle::movingTetLambda
 
     }
 
-    if (mag(lambdaDenominator) < SMALL)
+    scalar tol = 1e3*SMALL*mesh_.cellVolumes()[cellI];
+
+    if (mag(lambdaDenominator) < tol)
     {
-        if (mag(lambdaNumerator) < SMALL)
+        if (mag(lambdaNumerator) < tol)
         {
             // Track starts on the face, and is potentially
-            // parallel to it.  +-SMALL)/+-SMALL is not a good
+            // parallel to it.  +-tol)/+-tol is not a good
             // comparison, return 0.0, in anticipation of tet
             // centre correction.
 
@@ -304,7 +314,7 @@ inline Foam::scalar Foam::particle::movingTetLambda
         }
         else
         {
-            if (mag((to - from)) < SMALL)
+            if (mag((to - from)) < tol/mag(n))
             {
                 // Zero length track, not along the face, face
                 // cannot be crossed.

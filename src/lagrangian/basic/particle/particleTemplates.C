@@ -30,6 +30,7 @@ License
 #include "symmetryPolyPatch.H"
 #include "wallPolyPatch.H"
 #include "wedgePolyPatch.H"
+#include "meshTools.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -463,7 +464,7 @@ Foam::scalar Foam::particle::trackToFace
         //     << origId_ << " " << origProc_<< nl
         //     << "# face: " << tetFaceI_ << nl
         //     << "# tetPtI: " << tetPtI_ << nl
-        //     << "# tetBasePtI: " << mesh.tetBasePtIs()[tetFaceI_] << nl
+        //     << "# tetBasePtI: " << mesh_.tetBasePtIs()[tetFaceI_] << nl
         //     << "# tet.mag(): " << tet.mag() << nl
         //     << "# tet.quality(): " << tet.quality()
         //     << endl;
