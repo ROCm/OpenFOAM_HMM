@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -225,8 +225,6 @@ void Foam::blockMesh::calcMergeInfo()
         }
 
 
-        bool found = false;
-
         // N-squared point search over all points of all faces of
         // master block over all point of all faces of slave block
         forAll(blockPfaceFaces, blockPfaceFaceLabel)
@@ -240,8 +238,6 @@ void Foam::blockMesh::calcMergeInfo()
 
             forAll(blockPfaceFacePoints, blockPfaceFacePointLabel)
             {
-                found = false;
-
                 forAll(blockNfaceFaces, blockNfaceFaceLabel)
                 {
                     const labelList& blockNfaceFacePoints
@@ -261,7 +257,6 @@ void Foam::blockMesh::calcMergeInfo()
                         )
                         {
                             // Found a new pair
-                            found = true;
 
                             cp[blockPfaceFacePointLabel] =
                                 blockNfaceFacePoints[blockNfaceFacePointLabel];
@@ -332,7 +327,6 @@ void Foam::blockMesh::calcMergeInfo()
 
             const labelListList& curPairs = glueMergePairs[blockFaceLabel];
 
-            bool foundFace = false;
             label blockPfaceLabel;
             for
             (
@@ -347,14 +341,12 @@ void Foam::blockMesh::calcMergeInfo()
                  == blockInternalFaces[blockFaceLabel]
                 )
                 {
-                    foundFace = true;
                     break;
                 }
             }
 
 // FIXME? - there seems to be some logic missing here
 
-            foundFace = false;
             label blockNfaceLabel;
             for
             (
@@ -369,7 +361,6 @@ void Foam::blockMesh::calcMergeInfo()
                  == blockInternalFaces[blockFaceLabel]
                 )
                 {
-                    foundFace = true;
                     break;
                 }
             }

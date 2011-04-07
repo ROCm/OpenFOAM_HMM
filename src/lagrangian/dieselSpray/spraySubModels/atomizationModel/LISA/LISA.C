@@ -112,11 +112,10 @@ void Foam::LISA::atomizeParcel
     vector uDir = p.U()/mag(p.U());
 
     scalar uGas = mag(vel & uDir);
-    vector Ug = uGas*uDir;
 
     // Might be the relative velocity between Liquid and Gas, but using the
     // absolute velocity of the parcel as suggested by the authors
-//    scalar U = mag(p.Urel(vel));
+    // scalar U = mag(p.Urel(vel));
     scalar U = mag(p.U());
 
     p.ct() += deltaT;

@@ -44,6 +44,7 @@ Description
 #include "labelIOList.H"
 #include "wedgePolyPatch.H"
 #include "plane.H"
+#include "SubField.H"
 
 using namespace Foam;
 

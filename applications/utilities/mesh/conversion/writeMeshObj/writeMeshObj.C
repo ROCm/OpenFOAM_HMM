@@ -44,6 +44,7 @@ Description
 #include "meshTools.H"
 #include "cellSet.H"
 #include "faceSet.H"
+#include "SubField.H"
 
 using namespace Foam;
 

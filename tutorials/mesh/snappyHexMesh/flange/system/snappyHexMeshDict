@@ -42,16 +42,6 @@ geometry
         centre (0 0 -0.012);
         radius 0.003;
     }
-
-    //- Refine a bit extra around the edge of the flange. With only two cells
-    //  across it might/might not mesh correctly.
-    refineCap
-    {
-        type searchableCylinder;
-        point1 (0 0.021 -0.01075);
-        point2 (0 0.025 -0.01075);
-        radius 0.013;
-    }
 };
 
 
@@ -140,11 +130,6 @@ castellatedMeshControls
     refinementRegions
     {
         refineHole
-        {
-            mode inside;
-            levels ((1E15 3));
-        }
-        refineCap
         {
             mode inside;
             levels ((1E15 3));
