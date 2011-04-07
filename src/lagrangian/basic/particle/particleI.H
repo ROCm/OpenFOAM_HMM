@@ -34,7 +34,8 @@ inline void Foam::particle::findTris
     DynamicList<label>& faceList,
     const tetPointRef& tet,
     const FixedList<vector, 4>& tetAreas,
-    const FixedList<label, 4>& tetPlaneBasePtIs
+    const FixedList<label, 4>& tetPlaneBasePtIs,
+    const scalar tol
 ) const
 {
     faceList.clear();
@@ -52,7 +53,8 @@ inline void Foam::particle::findTris
             tetPlaneBasePtIs[i],
             cellI_,
             tetFaceI_,
-            tetPtI_
+            tetPtI_,
+            tol
         );
 
         if ((lambda > 0.0) && (lambda < 1.0))
@@ -72,7 +74,8 @@ inline Foam::scalar Foam::particle::tetLambda
     const label tetPlaneBasePtI,
     const label cellI,
     const label tetFaceI,
-    const label tetPtI
+    const label tetPtI,
+    const scalar tol
 ) const
 {
     const pointField& pPts = mesh_.points();
@@ -88,7 +91,8 @@ inline Foam::scalar Foam::particle::tetLambda
             tetPlaneBasePtI,
             cellI,
             tetFaceI,
-            tetPtI
+            tetPtI,
+            tol
         );
     }
 
@@ -101,8 +105,6 @@ inline Foam::scalar Foam::particle::tetLambda
     // delta-length has the units of volume.  Comparing the component of each
     // delta-length in the direction of n times the face area to a fraction of
     // the cell volume.
-
-    scalar tol = 1e3*SMALL*mesh_.cellVolumes()[cellI];
 
     if (mag(lambdaDenominator) < tol)
     {
@@ -147,7 +149,8 @@ inline Foam::scalar Foam::particle::movingTetLambda
     const label tetPlaneBasePtI,
     const label cellI,
     const label tetFaceI,
-    const label tetPtI
+    const label tetPtI,
+    const scalar tol
 ) const
 {
     const pointField& pPts = mesh_.points();
@@ -298,8 +301,6 @@ inline Foam::scalar Foam::particle::movingTetLambda
         lambdaDenominator = ((dP - dB) & n0);
 
     }
-
-    scalar tol = 1e3*SMALL*mesh_.cellVolumes()[cellI];
 
     if (mag(lambdaDenominator) < tol)
     {
