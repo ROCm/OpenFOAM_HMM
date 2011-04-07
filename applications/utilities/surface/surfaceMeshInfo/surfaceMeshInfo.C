@@ -64,59 +64,6 @@ Note
 using namespace Foam;
 
 
-//
-// duplicates code from primitiveMeshFaceCentresAndAreas.C
-// should be refactored
-//
-Foam::vector faceArea(const face& fs, const pointField& p)
-{
-    const labelList& f = fs;
-    label nPoints = f.size();
-
-    point fCentre;
-    vector fArea;
-
-    // If the face is a triangle, do a direct calculation for efficiency
-    // and to avoid round-off error-related problems
-    if (nPoints == 3)
-    {
-        fCentre = (1.0/3.0)*(p[f[0]] + p[f[1]] + p[f[2]]);
-        fArea = 0.5*((p[f[1]] - p[f[0]])^(p[f[2]] - p[f[0]]));
-    }
-    else
-    {
-        fCentre = p[f[0]];
-        for (label pi = 1; pi < nPoints; ++pi)
-        {
-            fCentre += p[f[pi]];
-        }
-
-        fCentre /= nPoints;
-
-        vector sumN = vector::zero;
-        scalar sumA = 0.0;
-        vector sumAc = vector::zero;
-
-        for (label pi = 0; pi < nPoints; ++pi)
-        {
-            const point& nextPoint = p[f[(pi + 1) % nPoints]];
-
-            const vector c = p[f[pi]] + nextPoint + fCentre;
-            const vector n = (nextPoint - p[f[pi]])^(fCentre - p[f[pi]]);
-            const scalar a = mag(n);
-
-            sumN += n;
-            sumA += a;
-            sumAc += a*c;
-        }
-
-        fArea = 0.5*sumN;
-    }
-
-    return fArea;
-}
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
 
@@ -200,7 +147,7 @@ int main(int argc, char *argv[])
 
     forAll(surf, faceI)
     {
-        scalar fArea = mag(faceArea(surf[faceI], surf.points()));
+        const scalar fArea(Foam::mag(surf[faceI].area(surf.points())));
         areaTotal += fArea;
 
         if (writeAreas)
