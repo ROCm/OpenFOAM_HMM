@@ -337,9 +337,8 @@ int main(int argc, char *argv[])
     surfaceFeatures newSet(surf);
     newSet.setFromStatus(edgeStat);
 
-    Info<< endl << "Writing trimmed features to "
-        << runTime.constant()/"featureEdgeMesh"/outFileName << endl;
-    newSet.write(runTime.constant()/"featureEdgeMesh"/outFileName);
+    Info<< endl << "Writing trimmed features to " << outFileName << endl;
+    newSet.write(outFileName);
 
     // Info<< endl << "Writing edge objs." << endl;
     // newSet.writeObj("final");
