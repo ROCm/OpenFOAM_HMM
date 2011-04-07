@@ -35,6 +35,7 @@ License
 #include "Time.H"
 #include "diagTensor.H"
 #include "transformField.H"
+#include "SubField.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

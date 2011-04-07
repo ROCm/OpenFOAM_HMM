@@ -29,7 +29,7 @@ License
 #include "ListOps.H"
 #include "unitConversion.H"
 #include "SortableList.H"
-
+#include "EdgeMap.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

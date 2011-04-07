@@ -27,6 +27,7 @@ License
 #include "polyMesh.H"
 #include "wedgePolyPatch.H"
 #include "emptyPolyPatch.H"
+#include "SubField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

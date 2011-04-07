@@ -25,7 +25,8 @@ License
 
 #include "primitiveMesh.H"
 #include "demandDrivenData.H"
-
+#include "indexedOctree.H"
+#include "treeDataCell.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 

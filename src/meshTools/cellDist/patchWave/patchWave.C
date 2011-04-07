@@ -27,6 +27,7 @@ License
 #include "polyMesh.H"
 #include "wallPoint.H"
 #include "globalMeshData.H"
+#include "SubField.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
