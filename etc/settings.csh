@@ -207,6 +207,13 @@ case ThirdParty:
         set gmp_version=gmp-5.0.1
         set mpfr_version=mpfr-2.4.2
         breaksw
+    case Gcc46:
+    case Gcc46++0x:
+        set gcc_version=gcc-4.6.0
+        set gmp_version=gmp-5.0.1
+        set mpfr_version=mpfr-2.4.2
+        set mpc_version=mpc-0.8.1
+        breaksw
     case Gcc45:
     case Gcc45++0x:
         set gcc_version=gcc-4.5.2
@@ -380,6 +387,10 @@ case SYSTEMOPENMPI:
     setenv PINC "`mpicc --showme:compile`"
     setenv PLIBS "`mpicc --showme:link`"
     set libDir=`echo "$PLIBS" | sed -e 's/.*-L\([^ ]*\).*/\1/'`
+
+    # Bit of a hack: strip off 'lib' and hope this is the path to openmpi
+    # include files and libraries.
+    setenv MPI_ARCH_PATH "${libDir:h}"
 
     if ($?FOAM_VERBOSE && $?prompt) then
         echo "Using system installed MPI:"

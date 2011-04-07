@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -140,7 +140,7 @@ void faceSet::sync(const polyMesh& mesh)
     }
 
     reduce(nAdded, sumOp<label>());
-    if (nAdded > 0)
+    if (debug && nAdded > 0)
     {
         Info<< "Added an additional " << nAdded
             << " faces on coupled patches. "

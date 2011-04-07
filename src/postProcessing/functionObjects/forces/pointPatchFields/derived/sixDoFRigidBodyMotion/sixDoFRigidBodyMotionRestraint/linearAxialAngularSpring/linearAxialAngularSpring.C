@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -83,20 +83,15 @@ Foam::sixDoFRigidBodyMotionRestraints::linearAxialAngularSpring::restrain
 ) const
 {
     vector refDir = rotationTensor(vector(1, 0 ,0), axis_) & vector(0, 1, 0);
-
     vector oldDir = refQ_ & refDir;
-
     vector newDir = motion.orientation() & refDir;
 
     if (mag(oldDir & axis_) > 0.95 || mag(newDir & axis_) > 0.95)
     {
         // Directions getting close to the axis, change reference
-
         refDir = rotationTensor(vector(1, 0 ,0), axis_) & vector(0, 0, 1);
-
-        vector oldDir = refQ_ & refDir;
-
-        vector newDir = motion.orientation() & refDir;
+        oldDir = refQ_ & refDir;
+        newDir = motion.orientation() & refDir;
     }
 
     // Removing any axis component from oldDir and newDir and normalising

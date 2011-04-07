@@ -31,6 +31,7 @@ License
 #include "Time.H"
 #include "refinementHistory.H"
 #include "refinementSurfaces.H"
+#include "refinementFeatures.H"
 #include "decompositionMethod.H"
 #include "regionSplit.H"
 #include "fvMeshDistribute.H"
@@ -497,6 +498,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRemoveCells
         mesh_.clearOut();
     }
 
+    // Reset the instance for if in overwrite mode
+    mesh_.setInstance(timeName());
+    setInstance(mesh_.facesInstance());
+
     // Update local mesh data
     cellRemover.updateMesh(map);
 
@@ -857,6 +862,7 @@ Foam::meshRefinement::meshRefinement
     const scalar mergeDistance,
     const bool overwrite,
     const refinementSurfaces& surfaces,
+    const refinementFeatures& features,
     const shellSurfaces& shells
 )
 :
@@ -865,6 +871,7 @@ Foam::meshRefinement::meshRefinement
     overwrite_(overwrite),
     oldInstance_(mesh.pointsInstance()),
     surfaces_(surfaces),
+    features_(features),
     shells_(shells),
     meshCutter_
     (
@@ -1271,6 +1278,10 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
 
         // Update numbering of meshRefiner
         distribute(map);
+
+        // Set correct instance (for if overwrite)
+        mesh_.setInstance(timeName());
+        setInstance(mesh_.facesInstance());
     }
     return map;
 }
@@ -1449,6 +1460,8 @@ Foam::tmp<Foam::pointVectorField> Foam::meshRefinement::makeDisplacementField
         }
     }
 
+    // Note: time().timeName() instead of meshRefinement::timeName() since
+    // postprocessable field.
     tmp<pointVectorField> tfld
     (
         new pointVectorField
@@ -1456,7 +1469,7 @@ Foam::tmp<Foam::pointVectorField> Foam::meshRefinement::makeDisplacementField
             IOobject
             (
                 "pointDisplacement",
-                mesh.time().timeName(), //timeName(),
+                mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
                 IOobject::AUTO_WRITE
@@ -1930,10 +1943,6 @@ void Foam::meshRefinement::distribute(const mapDistributePolyMesh& map)
             pointMap.clear();
         }
     }
-
-    // If necessary reset the instance
-    mesh_.setInstance(timeName());
-    setInstance(mesh_.facesInstance());
 }
 
 
@@ -2059,10 +2068,6 @@ void Foam::meshRefinement::updateMesh
             data.transfer(newFaceData);
         }
     }
-
-    // If necessary reset the instance
-    mesh_.setInstance(timeName());
-    setInstance(mesh_.facesInstance());
 }
 
 
@@ -2118,12 +2123,32 @@ void Foam::meshRefinement::printMeshInfo(const bool debug, const string& msg)
             << "  points(local):" << mesh_.nPoints()
             << endl;
     }
-    else
+
     {
+        PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh_));
+        label nMasterFaces = 0;
+        forAll(isMasterFace, i)
+        {
+            if (isMasterFace[i])
+            {
+                nMasterFaces++;
+            }
+        }
+
+        PackedBoolList isMasterPoint(syncTools::getMasterPoints(mesh_));
+        label nMasterPoints = 0;
+        forAll(isMasterPoint, i)
+        {
+            if (isMasterPoint[i])
+            {
+                nMasterPoints++;
+            }
+        }
+
         Info<< msg.c_str()
             << " : cells:" << pData.nTotalCells()
-            << "  faces:" << pData.nTotalFaces()
-            << "  points:" << pData.nTotalPoints()
+            << "  faces:" << returnReduce(nMasterFaces, sumOp<label>())
+            << "  points:" << returnReduce(nMasterPoints, sumOp<label>())
             << endl;
     }
 
@@ -2168,12 +2193,14 @@ Foam::word Foam::meshRefinement::timeName() const
 
 void Foam::meshRefinement::dumpRefinementLevel() const
 {
+    // Note: use time().timeName(), not meshRefinement::timeName()
+    // so as to dump the fields to 0, not to constant.
     volScalarField volRefLevel
     (
         IOobject
         (
             "cellLevel",
-            mesh_.time().timeName(),// Dump to current time, not to mesh inst
+            mesh_.time().timeName(),
             mesh_,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE,
@@ -2201,7 +2228,7 @@ void Foam::meshRefinement::dumpRefinementLevel() const
         IOobject
         (
             "pointLevel",
-            mesh_.time().timeName(),// Dump to current time, not to mesh inst
+            mesh_.time().timeName(),
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,

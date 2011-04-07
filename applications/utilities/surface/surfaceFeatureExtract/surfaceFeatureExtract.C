@@ -46,6 +46,7 @@ Description
 #include "unitConversion.H"
 #include "indexedOctree.H"
 #include "treeDataEdge.H"
+#include "unitConversion.H"
 
 #include "buildCGALPolyhedron.H"
 #include "CGALPolyhedronRings.H"
@@ -297,6 +298,55 @@ scalarField curvature(const triSurface& surf)
 }
 
 
+// Unmark non-manifold edges if individual triangles are not features
+void unmarkBaffles
+(
+    const triSurface& surf,
+    const scalar includedAngle,
+    List<surfaceFeatures::edgeStatus>& edgeStat
+)
+{
+    scalar minCos = Foam::cos(degToRad(180.0 - includedAngle));
+
+    const labelListList& edgeFaces = surf.edgeFaces();
+
+    forAll(edgeFaces, edgeI)
+    {
+        const labelList& eFaces = edgeFaces[edgeI];
+
+        if (eFaces.size() > 2)
+        {
+            label i0 = eFaces[0];
+            //const labelledTri& f0 = surf[i0];
+            const vector& n0 = surf.faceNormals()[i0];
+
+            //Pout<< "edge:" << edgeI << " n0:" << n0 << endl;
+
+            bool same = true;
+
+            for (label i = 1; i < eFaces.size(); i++)
+            {
+                //const labelledTri& f = surf[i];
+                const vector& n = surf.faceNormals()[eFaces[i]];
+
+                //Pout<< "    mag(n&n0): " << mag(n&n0) << endl;
+
+                if (mag(n&n0) < minCos)
+                {
+                    same = false;
+                    break;
+                }
+            }
+
+            if (same)
+            {
+                edgeStat[edgeI] = surfaceFeatures::NONE;
+            }
+        }
+    }
+}
+
+
 // Main program:
 
 int main(int argc, char *argv[])
@@ -375,6 +425,7 @@ int main(int argc, char *argv[])
         << endl;
 
     bool writeVTK = args.optionFound("writeVTK");
+
     bool writeObj = args.optionFound("writeObj");
 
     const fileName surfFileName = args[1];
@@ -402,7 +453,6 @@ int main(int argc, char *argv[])
     {
         faces[fI] = surf[fI].triFaceFace();
     }
-
 
     // Either construct features from surface&featureangle or read set.
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -520,8 +570,8 @@ int main(int argc, char *argv[])
     newSet.setFromStatus(edgeStat);
 
     Info<< endl << "Writing trimmed features to "
-        << runTime.constant()/"featureEdgeMesh"/outFileName << endl;
-    newSet.write(runTime.constant()/"featureEdgeMesh"/outFileName);
+        << runTime.constant()/"extendedFeatureEdgeMesh"/outFileName << endl;
+    newSet.write(runTime.constant()/"extendedFeatureEdgeMesh"/outFileName);
 
     // Info<< endl << "Writing edge objs." << endl;
     // newSet.writeObj("final");
