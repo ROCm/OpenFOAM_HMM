@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -183,12 +183,14 @@ int main(int argc, char *argv[])
     );
     timeSelector::addOptions(true, false);
 
+#   include "addRegionOption.H"
+
 #   include "setRootCase.H"
 #   include "createTime.H"
 
     instantList timeDirs = timeSelector::select0(runTime, args);
 
-#   include "createMesh.H"
+#   include "createNamedMesh.H"
 
     // Initialize name mapping table
     FieldviewNames.insert("alpha", "aalpha");
@@ -260,9 +262,22 @@ int main(int argc, char *argv[])
     // make a directory called FieldView in the case
     fileName fvPath(runTime.path()/"Fieldview");
 
+    if (regionName != polyMesh::defaultRegion)
+    {
+        fvPath = fvPath/regionName;
+    }
+
     if (isDir(fvPath))
     {
-        rmDir(fvPath);
+        if (regionName != polyMesh::defaultRegion)
+        {
+            Info<< "Keeping old FieldView files in " << fvPath << nl << endl;
+        }
+        else
+        {
+            Info<< "Deleting old FieldView files in " << fvPath << nl << endl;
+            rmDir(fvPath);
+        }
     }
 
     mkDir(fvPath);
