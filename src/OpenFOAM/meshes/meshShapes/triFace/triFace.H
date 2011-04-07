@@ -103,7 +103,7 @@ public:
         inline void flip();
 
         //- Return the points corresponding to this face
-        inline pointField points(const pointField& meshPoints) const;
+        inline pointField points(const pointField&) const;
 
         //- Return triangle as a face
         inline face triFaceFace() const;
@@ -113,6 +113,13 @@ public:
 
         //- Return centre (centroid)
         inline point centre(const pointField&) const;
+
+        //- Area, optionally return centre point as well
+        inline point area
+        (
+            const pointField&,
+            point& centrePt = *reinterpret_cast<point*>(0)
+        ) const;
 
         //- Calculate average value at centroid of face
         template<class Type>

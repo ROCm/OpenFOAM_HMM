@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -167,6 +167,30 @@ inline Foam::point Foam::triFace::centre(const pointField& points) const
         points[operator[](0)]
       + points[operator[](1)]
       + points[operator[](2)]
+    );
+}
+
+
+inline Foam::point Foam::triFace::area
+(
+    const pointField& points,
+    point& centrePt
+) const
+{
+    // return centre point information?
+    if (&centrePt)
+    {
+        centrePt = this->centre(points);
+    }
+
+    return
+    (
+        0.5
+      *
+        (
+            (points[operator[](1)] - points[operator[](0)])
+          ^ (points[operator[](2)] - points[operator[](0)])
+        )
     );
 }
 
