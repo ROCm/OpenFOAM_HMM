@@ -286,6 +286,11 @@ Foam::scalar Foam::particle::trackToFace
     // be a different tet to the one that the particle occupies.
     tetIndices faceHitTetIs;
 
+    // What tolerance is appropriate the minimum lambda numerator and
+    // denominator for tracking in this cell.
+    scalar lambdaDistanceTolerance =
+        lambdaDistanceToleranceCoeff*mesh_.cellVolumes()[cellI_];
+
     do
     {
         if (triI != -1)
@@ -371,7 +376,15 @@ Foam::scalar Foam::particle::trackToFace
         tetPlaneBasePtIs[2] = basePtI;
         tetPlaneBasePtIs[3] = basePtI;
 
-        findTris(endPosition, tris, tet, tetAreas, tetPlaneBasePtIs);
+        findTris
+        (
+            endPosition,
+            tris,
+            tet,
+            tetAreas,
+            tetPlaneBasePtIs,
+            lambdaDistanceTolerance
+        );
 
         // Reset variables for new track
         triI = -1;
@@ -415,7 +428,8 @@ Foam::scalar Foam::particle::trackToFace
                     tetPlaneBasePtIs[tI],
                     cellI_,
                     tetFaceI_,
-                    tetPtI_
+                    tetPtI_,
+                    lambdaDistanceTolerance
                 );
 
                 if (lam < lambdaMin)
@@ -704,6 +718,9 @@ void Foam::particle::hitWallFaces
 
     const Foam::cell& thisCell = mesh_.cells()[cellI_];
 
+    scalar lambdaDistanceTolerance =
+        lambdaDistanceToleranceCoeff*mesh_.cellVolumes()[cellI_];
+
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
     forAll(thisCell, cFI)
@@ -755,7 +772,8 @@ void Foam::particle::hitWallFaces
                     f[tetIs.faceBasePt()],
                     cellI_,
                     fI,
-                    tetIs.tetPt()
+                    tetIs.tetPt(),
+                    lambdaDistanceTolerance
                 );
 
                 if ((tetClambda <= 0.0) || (tetClambda >= 1.0))
@@ -781,7 +799,8 @@ void Foam::particle::hitWallFaces
                     f[tetIs.faceBasePt()],
                     cellI_,
                     fI,
-                    tetIs.tetPt()
+                    tetIs.tetPt(),
+                    lambdaDistanceTolerance
                 );
 
                 pointHit hitInfo(vector::zero);
