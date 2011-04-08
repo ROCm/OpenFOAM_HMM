@@ -69,6 +69,17 @@ private:
         void operator=(const phaseChangeModel&);
 
 
+protected:
+
+    // Protected Member Functions
+
+        //- Latest mass transfer due to phase change
+        scalar latestMassPC_;
+
+        //- Total mass transfer due to phase change
+        scalar totalMassPC_;
+
+
 public:
 
     //- Runtime type information
@@ -125,9 +136,25 @@ public:
             virtual void correct
             (
                 const scalar dt,
+                scalarField& availableMass,
+                volScalarField& dMass,
+                volScalarField& dEnergy
+            );
+
+            //- Correct
+            virtual void correctModel
+            (
+                const scalar dt,
+                scalarField& availableMass,
                 scalarField& dMass,
                 scalarField& dEnergy
             ) = 0;
+
+
+        // I-O
+
+            //- Provide some feedback
+            virtual void info(Ostream& os) const;
 };
 
 

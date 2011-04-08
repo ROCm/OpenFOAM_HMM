@@ -24,13 +24,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "cloudInjection.H"
+#include "drippingInjection.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvMesh.H"
 #include "Time.H"
 #include "mathematicalConstants.H"
 #include "Random.H"
 #include "volFields.H"
+#include "kinematicSingleLayer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,18 +44,19 @@ namespace surfaceFilmModels
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(cloudInjection, 0);
-addToRunTimeSelectionTable(injectionModel, cloudInjection, dictionary);
+defineTypeNameAndDebug(drippingInjection, 0);
+addToRunTimeSelectionTable(injectionModel, drippingInjection, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-cloudInjection::cloudInjection
+drippingInjection::drippingInjection
 (
     const surfaceFilmModel& owner,
     const dictionary& dict
 )
 :
     injectionModel(type(), owner, dict),
+    deltaStable_(readScalar(coeffs_.lookup("deltaStable"))),
     particlesPerParcel_(readScalar(coeffs_.lookup("particlesPerParcel"))),
     rndGen_(label(0), -1),
     parcelDistribution_
@@ -76,31 +78,58 @@ cloudInjection::cloudInjection
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-cloudInjection::~cloudInjection()
+drippingInjection::~drippingInjection()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void cloudInjection::correct
+void drippingInjection::correct
 (
+    scalarField& availableMass,
     scalarField& massToInject,
     scalarField& diameterToInject
 )
 {
+    const kinematicSingleLayer& film =
+        refCast<const kinematicSingleLayer>(this->owner());
+
     const scalar pi = constant::mathematical::pi;
-    const scalarField& rhoFilm = owner().rho();
+
+    // calculate available dripping mass
+    tmp<volScalarField> tgNorm(film.gNorm());
+    const scalarField& gNorm = tgNorm();
+    const scalarField& magSf = film.magSf();
+
+    const scalarField& delta = film.delta();
+    const scalarField& rho = film.rho();
+
+    scalarField massDrip(film.regionMesh().nCells(), 0.0);
+
+    forAll(gNorm, i)
+    {
+        if (gNorm[i] > SMALL)
+        {
+            const scalar ddelta = max(0.0, delta[i] - deltaStable_);
+            massDrip[i] += min(availableMass[i], max(0.0, ddelta*rho[i]*magSf[i]));
+        }
+    }
+
 
     // Collect the data to be transferred
     forAll(massToInject, cellI)
     {
-        scalar rho = rhoFilm[cellI];
+        scalar rhoc = rho[cellI];
         scalar diam = diameter_[cellI];
-        scalar minMass = particlesPerParcel_*rho*pi/6*pow3(diam);
+        scalar minMass = particlesPerParcel_*rhoc*pi/6*pow3(diam);
 
-        if (massToInject[cellI] > minMass)
+        if (massDrip[cellI] > minMass)
         {
-            // All mass can be injected - set particle diameter
+            // All drip mass can be injected
+            massToInject[cellI] += massDrip[cellI];
+            availableMass[cellI] -= massDrip[cellI];
+
+            // Set particle diameter
             diameterToInject[cellI] = diameter_[cellI];
 
             // Retrieve new particle diameter sample

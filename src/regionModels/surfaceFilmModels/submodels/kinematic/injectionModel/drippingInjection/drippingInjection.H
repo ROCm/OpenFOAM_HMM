@@ -23,20 +23,27 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::noInjection
+    Foam::drippingInjection
 
 Description
-    Dummy injection model for 'none'
+    Film Dripping mass transfer model.
+
+    If the film mass exceeds that needed to generate a valid parcel, the
+    equivalent mass is removed from the film.
+
+    New parcel diameters are sampled from a PDF.
 
 SourceFiles
-    noInjection.C
+    drippingInjection.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef noInjection_H
-#define noInjection_H
+#ifndef drippingInjection_H
+#define drippingInjection_H
 
 #include "injectionModel.H"
+#include "distributionModel.H"
+#include "cachedRandom.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,10 +55,10 @@ namespace surfaceFilmModels
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class noInjection Declaration
+                    Class drippingInjection Declaration
 \*---------------------------------------------------------------------------*/
 
-class noInjection
+class drippingInjection
 :
     public injectionModel
 {
@@ -60,26 +67,52 @@ private:
     // Private member functions
 
         //- Disallow default bitwise copy construct
-        noInjection(const noInjection&);
+        drippingInjection(const drippingInjection&);
 
         //- Disallow default bitwise assignment
-        void operator=(const noInjection&);
+        void operator=(const drippingInjection&);
+
+
+protected:
+
+    // Protected data
+
+        //- Stable film thickness - drips only formed if thickness
+        //  execeeds this threhold value
+        scalar deltaStable_;
+
+        //- Number of particles per parcel
+        scalar particlesPerParcel_;
+
+        //- Random number generator
+        cachedRandom rndGen_;
+
+        //- Parcel size PDF model
+        const autoPtr<distributionModels::distributionModel>
+            parcelDistribution_;
+
+        //- Diameters of particles to inject into the dripping
+        scalarList diameter_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("none");
+    TypeName("drippingInjection");
 
 
     // Constructors
 
         //- Construct from surface film model
-        noInjection(const surfaceFilmModel& owner, const dictionary& dict);
+        drippingInjection
+        (
+            const surfaceFilmModel& owner,
+            const dictionary& dict
+        );
 
 
     //- Destructor
-    virtual ~noInjection();
+    virtual ~drippingInjection();
 
 
     // Member Functions
@@ -89,6 +122,7 @@ public:
             //- Correct
             virtual void correct
             (
+                scalarField& availableMass,
                 scalarField& massToInject,
                 scalarField& diameterToInject
             );

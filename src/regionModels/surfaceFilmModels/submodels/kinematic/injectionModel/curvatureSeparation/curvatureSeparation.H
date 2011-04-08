@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,22 +23,34 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::cloudInjection
+    Foam::curvatureSeparation
 
 Description
-    Cloud injection model
+    Curvature film separation model
+
+    Assesses film curvature via the mesh geometry and calculates a force
+    balance of the form:
+
+        F_sum = F_inertial + F_body + F_surface
+
+    If F_sum < 0, the film separates. Similarly, if F_sum > 0 the film will
+    remain attached.
+
+    Based on description given by
+        Owen and D. J. Ryley. The flow of thin liquid films around corners.
+        International Journal of Multiphase Flow, 11(1):51-62, 1985.
+
 
 SourceFiles
-    cloudInjection.C
+    curvatureSeparation.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cloudInjection_H
-#define cloudInjection_H
+#ifndef curvatureSeparation_H
+#define curvatureSeparation_H
 
 #include "injectionModel.H"
-#include "distributionModel.H"
-#include "cachedRandom.H"
+#include "surfaceFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,10 +62,10 @@ namespace surfaceFilmModels
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class cloudInjection Declaration
+                   Class curvatureSeparation Declaration
 \*---------------------------------------------------------------------------*/
 
-class cloudInjection
+class curvatureSeparation
 :
     public injectionModel
 {
@@ -62,44 +74,61 @@ private:
     // Private member functions
 
         //- Disallow default bitwise copy construct
-        cloudInjection(const cloudInjection&);
+        curvatureSeparation(const curvatureSeparation&);
 
         //- Disallow default bitwise assignment
-        void operator=(const cloudInjection&);
+        void operator=(const curvatureSeparation&);
 
 
 protected:
 
     // Protected data
 
-        //- Number of particles per parcel
-        scalar particlesPerParcel_;
+        //- Gradient of surface normals
+        volTensorField gradNHat_;
 
-        //- Random number generator
-        cachedRandom rndGen_;
+        //- Minimum gravity driven film thickness (non-dimensionalised delta/R1)
+        scalar deltaByR1Min_;
 
-        //- Parcel size PDF model
-        const autoPtr<distributionModels::distributionModel>
-            parcelDistribution_;
+        //- List of radii for patches - if patch not defined, radius
+        // calculated based on mesh geometry
+        List<Tuple2<label, scalar> > definedPatchRadii_;
 
-        //- Diameters of particles to inject into the cloud
-        scalarList diameter_;
+        //- Magnitude of gravity vector
+        scalar magG_;
+
+        //- Direction of gravity vector
+        vector gHat_;
+
+
+    // Protected Member Functions
+
+        //- Calculate local (inverse) radius of curvature
+        tmp<volScalarField> calcInvR1(const volVectorField& U) const;
+
+        //- Calculate the cosine of the angle between gravity vector and
+        //  cell out flow direction 
+        tmp<scalarField> calcCosAngle(const surfaceScalarField& phi) const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("cloudInjection");
+    TypeName("curvatureSeparation");
 
 
     // Constructors
 
         //- Construct from surface film model
-        cloudInjection(const surfaceFilmModel& owner, const dictionary& dict);
+        curvatureSeparation
+        (
+            const surfaceFilmModel& owner,
+            const dictionary& dict
+        );
 
 
     //- Destructor
-    virtual ~cloudInjection();
+    virtual ~curvatureSeparation();
 
 
     // Member Functions
@@ -109,6 +138,7 @@ public:
             //- Correct
             virtual void correct
             (
+                scalarField& availableMass,
                 scalarField& massToInject,
                 scalarField& diameterToInject
             );

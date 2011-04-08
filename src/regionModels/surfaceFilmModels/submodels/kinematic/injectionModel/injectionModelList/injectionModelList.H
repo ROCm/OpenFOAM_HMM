@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,20 +23,21 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::standardPhaseChange
+    Foam::injectionModelList
 
 Description
-    Standard phase change model with modification for boiling
+    List container for film injection models
 
 SourceFiles
-    standardPhaseChange.C
+    injectionModelList.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef standardPhaseChange_H
-#define standardPhaseChange_H
+#ifndef injectionModelList_H
+#define injectionModelList_H
 
-#include "phaseChangeModel.H"
+#include "PtrList.H"
+#include "injectionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,58 +49,45 @@ namespace surfaceFilmModels
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class standardPhaseChange Declaration
+                    Class injectionModelList Declaration
 \*---------------------------------------------------------------------------*/
 
-class standardPhaseChange
+class injectionModelList
 :
-    public phaseChangeModel
+    public PtrList<injectionModel>
 {
 private:
 
-    // Private member functions
+    // Private data
+
+        //- Reference to the owner surface film model
+        const surfaceFilmModel& owner_;
+
+        //- Dictionary
+        dictionary dict_;
+
+        //- Cumulative mass injected total
+        scalar injectedMassTotal_;
+
+
+    // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        standardPhaseChange(const standardPhaseChange&);
+        injectionModelList(const injectionModelList&);
 
         //- Disallow default bitwise assignment
-        void operator=(const standardPhaseChange&);
-
-
-protected:
-
-    // Protected data
-
-        //- Boiling temperature / [K]
-        const scalar Tb_;
-
-        //- Minimum film height for model to be active
-        const scalar deltaMin_;
-
-        //- Length scale / [m]
-        const scalar L_;
-
-        //- Boiling temperature factor / []
-        //  Used to set max limit on temperature to Tb*TbFactor
-        const scalar TbFactor_;
-
-
-    // Protected member functions
-
-        //- Return Sherwood number as a function of Reynolds and Schmidt numbers
-        scalar Sh(const scalar Re, const scalar Sc) const;
+        void operator=(const injectionModelList&);
 
 
 public:
 
-    //- Runtime type information
-    TypeName("standardPhaseChange");
-
-
     // Constructors
 
-        //- Construct from surface film model
-        standardPhaseChange
+        //- Construct null
+        injectionModelList(const surfaceFilmModel& owner);
+
+        //- Construct from type name, dictionary and surface film model
+        injectionModelList
         (
             const surfaceFilmModel& owner,
             const dictionary& dict
@@ -107,7 +95,7 @@ public:
 
 
     //- Destructor
-    virtual ~standardPhaseChange();
+    virtual ~injectionModelList();
 
 
     // Member Functions
@@ -115,13 +103,18 @@ public:
         // Evolution
 
             //- Correct
-            virtual void correctModel
+            virtual void correct
             (
-                const scalar dt,
                 scalarField& availableMass,
-                scalarField& dMass,
-                scalarField& dEnergy
+                volScalarField& massToInject,
+                volScalarField& diameterToInject
             );
+
+
+        // I-O
+
+            //- Provide some info
+            void info(Ostream& os) const;
 };
 
 

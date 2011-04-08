@@ -47,7 +47,9 @@ phaseChangeModel::phaseChangeModel
     const surfaceFilmModel& owner
 )
 :
-    subModelBase(owner)
+    subModelBase(owner),
+    latestMassPC_(0.0),
+    totalMassPC_(0.0)
 {}
 
 
@@ -58,7 +60,9 @@ phaseChangeModel::phaseChangeModel
     const dictionary& dict
 )
 :
-    subModelBase(type, owner, dict)
+    subModelBase(type, owner, dict),
+    latestMassPC_(0.0),
+    totalMassPC_(0.0)
 {}
 
 
@@ -66,6 +70,44 @@ phaseChangeModel::phaseChangeModel
 
 phaseChangeModel::~phaseChangeModel()
 {}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void phaseChangeModel::correct
+(
+    const scalar dt,
+    scalarField& availableMass,
+    volScalarField& dMass,
+    volScalarField& dEnergy
+)
+{
+    correctModel
+    (
+        dt,
+        availableMass,
+        dMass,
+        dEnergy
+    );
+
+    latestMassPC_ = sum(dMass.internalField());
+    totalMassPC_ += latestMassPC_; 
+
+    availableMass -= dMass;
+    dMass.correctBoundaryConditions();
+}
+
+
+void phaseChangeModel::info(Ostream& os) const
+{
+    const scalar massPCRate =
+        returnReduce(latestMassPC_, sumOp<scalar>())
+       /owner_.time().deltaTValue();
+
+    os  << indent << "mass phase change  = "
+        << returnReduce(totalMassPC_, sumOp<scalar>()) << nl
+        << indent << "vapourisation rate = " << massPCRate << nl;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

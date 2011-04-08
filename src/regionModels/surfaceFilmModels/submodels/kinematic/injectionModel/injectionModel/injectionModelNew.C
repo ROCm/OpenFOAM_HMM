@@ -40,12 +40,11 @@ namespace surfaceFilmModels
 autoPtr<injectionModel> injectionModel::New
 (
     const surfaceFilmModel& model,
-    const dictionary& dict
+    const dictionary& dict,
+    const word& modelType
 )
 {
-    word modelType(dict.lookup("injectionModel"));
-
-    Info<< "    Selecting injectionModel " << modelType << endl;
+    Info<< "        " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
