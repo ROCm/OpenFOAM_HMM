@@ -722,7 +722,7 @@ private:
         (
             List<DynamicList<face> >& patchFaces,
             List<DynamicList<label> >& patchOwners,
-            const List<DynamicList<label> >& patchSortingIndices
+            List<Pair<DynamicList<label> > >& patchSortingIndices
         ) const;
 
         //- Add the faces and owner information for the patches,

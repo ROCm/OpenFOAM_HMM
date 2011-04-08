@@ -811,6 +811,12 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
                             {
                                 parallelIntersectionIndices.append(-vIndex);
                             }
+
+                            // Pout<< "Refer "
+                            //     << parallelIntersectionPoints.last()
+                            //     << " " << parallelIntersectionIndices.last()
+                            //     << " " << procI
+                            //     << endl;
                         }
                     }
                 }

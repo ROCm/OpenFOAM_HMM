@@ -1844,11 +1844,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 
     neighbour.setSize(number_of_edges());
 
-    List<DynamicList<label> > procPatchOwnerIndex
-    (
-        nPatches,
-        DynamicList<label>(0)
-    );
+    List<Pair<DynamicList<label> > > procPatchSortingIndex(nPatches);
 
     label dualFaceI = 0;
 
@@ -1904,25 +1900,52 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 
                         if (Pstream::myProcNo() < procIndex)
                         {
-                            // Use this processor's vertex index for sorting
-                            procPatchOwnerIndex[patchIndex].append
-                            (
-                               vB->referredInternal()
-                             ? vA->index()
-                             : vB->index()
-                            );
+                            // Use this processor's vertex index as the master
+                            // for sorting
+
+                           Pair<DynamicList<label> >& sortingIndex =
+                               procPatchSortingIndex[patchIndex];
+
+                            if (vB->referredInternal())
+                            {
+                                sortingIndex.first().append(vA->index());
+                                sortingIndex.second().append(vB->index());
+                            }
+                            else
+                            {
+                                sortingIndex.first().append(vB->index());
+                                sortingIndex.second().append(vA->index());
+                            }
                         }
                         else
                         {
-                            // Use the other processor's vertex index for
-                            // sorting
-                            procPatchOwnerIndex[patchIndex].append
-                            (
-                               vA->referredInternal()
-                             ? vA->index()
-                             : vB->index()
-                            );
+                            // Use the other processor's vertex index as the
+                            // master for sorting
+
+                            Pair<DynamicList<label> >& sortingIndex =
+                                procPatchSortingIndex[patchIndex];
+
+                            if (vA->referredInternal())
+                            {
+                                sortingIndex.first().append(vA->index());
+                                sortingIndex.second().append(vB->index());
+                            }
+                            else
+                            {
+                                sortingIndex.first().append(vB->index());
+                                sortingIndex.second().append(vA->index());
+                            }
                         }
+
+                        // Pout<< ptA << " " << ptB
+                        //     << " proc indices "
+                        //     << vA->procIndex() << " " << vB->procIndex()
+                        //     << " indices " << vA->index()
+                        //     << " " << vB->index()
+                        //     << " my proc " << Pstream::myProcNo()
+                        //     << " addedIndex "
+                        //     << procPatchSortingIndex[patchIndex].last()
+                        //     << endl;
                     }
                     else
                     {
@@ -1978,7 +2001,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
     (
         patchFaces,
         patchOwners,
-        procPatchOwnerIndex
+        procPatchSortingIndex
     );
 
     timeCheck("faces, owner, neighbour sorted");
@@ -2073,17 +2096,17 @@ void Foam::conformalVoronoiMesh::sortFaces
 
     oldToNew = -1;
 
-    label ownerBlockStart = 0;
+    label blockStart = 0;
 
-    for (label o = 1; o < owner.size(); o++)
+    for (label i = 1; i < owner.size(); i++)
     {
         label blockLength = -1;
 
-        if (owner[o] > owner[o-1])
+        if (owner[i] > owner[i - 1])
         {
-            blockLength = o - ownerBlockStart;
+            blockLength = i - blockStart;
         }
-        else if (o == owner.size() - 1)
+        else if (i == owner.size() - 1)
         {
             // If the last element is not a jump in owner, then it
             // needs to trigger a sort of the last block, but with a
@@ -2093,19 +2116,18 @@ void Foam::conformalVoronoiMesh::sortFaces
             // If it is a jump in owner, then it will form a block of
             // length one, and so will not need sorted.
 
-            blockLength = o - ownerBlockStart + 1;
+            blockLength = i - blockStart + 1;
         }
 
         if (blockLength >= 1)
         {
-            labelList blockIndices =
-                identity(blockLength) + ownerBlockStart;
+            labelList blockIndices = identity(blockLength) + blockStart;
 
             SubList<label> neighbourBlock
             (
                 neighbour,
                 blockLength,
-                ownerBlockStart
+                blockStart
             );
 
             sortedOrder(neighbourBlock, blockIndices);
@@ -2114,11 +2136,10 @@ void Foam::conformalVoronoiMesh::sortFaces
 
             forAll(blockIndices, b)
             {
-                oldToNew[ownerBlockStart + b] =
-                blockIndices[b] + ownerBlockStart;
+                oldToNew[blockStart + b] = blockIndices[b] + blockStart;
             }
 
-            ownerBlockStart = o;
+            blockStart = i;
         }
     }
 
@@ -2132,7 +2153,7 @@ void Foam::conformalVoronoiMesh::sortProcPatches
 (
     List<DynamicList<face> >& patchFaces,
     List<DynamicList<label> >& patchOwners,
-    const List<DynamicList<label> >& patchSortingIndices
+    List<Pair<DynamicList<label> > >& patchSortingIndices
 ) const
 {
     if (!Pstream::parRun())
@@ -2147,14 +2168,18 @@ void Foam::conformalVoronoiMesh::sortProcPatches
     {
         faceList& faces = patchFaces[patchI];
         labelList& owner = patchOwners[patchI];
-        const labelList& sortingIndices = patchSortingIndices[patchI];
 
-        if (!sortingIndices.empty())
+        Pair<DynamicList<label> >& sortingIndices = patchSortingIndices[patchI];
+
+        List<label>& primary = sortingIndices.first();
+        List<label>& secondary = sortingIndices.second();
+
+        if (!primary.empty())
         {
             if
             (
-                faces.size() != sortingIndices.size()
-             || owner.size() != sortingIndices.size()
+                faces.size() != primary.size()
+             || owner.size() != primary.size()
             )
             {
                 FatalErrorIn
@@ -2170,15 +2195,78 @@ void Foam::conformalVoronoiMesh::sortProcPatches
                     << " for patch " << patchI << nl
                     << " faces.size() " << faces.size() << nl
                     << " owner.size() " << owner.size() << nl
-                    << " sortingIndices.size() " << sortingIndices.size()
+                    << " sortingIndices.first().size() "
+                    << sortingIndices.first().size()
                     << exit(FatalError) << endl;
             }
 
+            // Two stage sort:
+            // 1) sort by primary
+
             labelList oldToNew;
 
-            sortedOrder(sortingIndices, oldToNew);
+            sortedOrder(primary, oldToNew);
 
             oldToNew = invert(oldToNew.size(), oldToNew);
+
+            inplaceReorder(oldToNew, primary);
+            inplaceReorder(oldToNew, secondary);
+            inplaceReorder(oldToNew, faces);
+            inplaceReorder(oldToNew, owner);
+
+            // 2) in each block of primary sort by secondary
+
+            // Reset map.  Elements that are not sorted will retain their -1
+            // value, which will mean that they are ignored by inplaceReorder
+
+            oldToNew = -1;
+
+            label blockStart = 0;
+
+            for (label i = 1; i < primary.size(); i++)
+            {
+                label blockLength = -1;
+
+                if (primary[i] > primary[i - 1])
+                {
+                    blockLength = i - blockStart;
+                }
+                else if (i == primary.size() - 1)
+                {
+                    // If the last element is not a jump in index, then it
+                    // needs to trigger a sort of the last block, but with a
+                    // block length that is one element longer so that it
+                    // sorts itself.
+
+                    // If it is a jump in index, then it will form a block of
+                    // length one, and so will not need sorted.
+
+                    blockLength = i - blockStart + 1;
+                }
+
+                if (blockLength >= 1)
+                {
+                    labelList blockIndices = identity(blockLength) + blockStart;
+
+                    SubList<label> secondaryBlock
+                    (
+                        secondary,
+                        blockLength,
+                        blockStart
+                    );
+
+                    sortedOrder(secondaryBlock, blockIndices);
+
+                    blockIndices = invert(blockIndices.size(), blockIndices);
+
+                    forAll(blockIndices, b)
+                    {
+                        oldToNew[blockStart + b] = blockIndices[b] + blockStart;
+                    }
+
+                    blockStart = i;
+                }
+            }
 
             inplaceReorder(oldToNew, faces);
             inplaceReorder(oldToNew, owner);
