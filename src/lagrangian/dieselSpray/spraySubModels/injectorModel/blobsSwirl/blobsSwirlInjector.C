@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -246,9 +246,6 @@ void Foam::blobsSwirlInjector::calculateHX
             )
         );
 
-    scalar hOLD = -100.0;
-    scalar xOLD = -100.0;
-
     label i;
 
     for (i=0; i<20; i++)
@@ -267,10 +264,6 @@ void Foam::blobsSwirlInjector::calculateHX
             );
 
         x_ = sqr(1.0 - 2.0*h_/injectorDiameter);
-
-        hOLD = h_;
-        xOLD = x_;
-
     }
 
     x_ = sqr(1.0 - 2.0*h_/injectorDiameter);

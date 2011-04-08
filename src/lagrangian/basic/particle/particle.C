@@ -32,6 +32,8 @@ Foam::label Foam::particle::particleCount_ = 0;
 
 const Foam::scalar Foam::particle::trackingCorrectionTol = 1e-5;
 
+const Foam::scalar Foam::particle::lambdaDistanceToleranceCoeff = 1e3*SMALL;
+
 namespace Foam
 {
     defineTypeNameAndDebug(particle, 0);

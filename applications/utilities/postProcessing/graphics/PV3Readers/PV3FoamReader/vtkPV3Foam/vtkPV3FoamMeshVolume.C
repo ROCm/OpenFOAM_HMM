@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -383,16 +383,12 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
 
                 forAll(quadFcs, quadI)
                 {
-                    label thisCellI;
-
                     if (substituteCell)
                     {
-                        thisCellI = cellI;
                         substituteCell = false;
                     }
                     else
                     {
-                        thisCellI = mesh.nCells() + addCellI;
                         superCells[addCellI++] = cellI;
                     }
 
@@ -430,16 +426,12 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
 
                 forAll(triFcs, triI)
                 {
-                    label thisCellI;
-
                     if (substituteCell)
                     {
-                        thisCellI = cellI;
                         substituteCell = false;
                     }
                     else
                     {
-                        thisCellI = mesh.nCells() + addCellI;
                         superCells[addCellI++] = cellI;
                     }
 

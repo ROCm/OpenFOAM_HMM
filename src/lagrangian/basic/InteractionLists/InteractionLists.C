@@ -654,8 +654,6 @@ void Foam::InteractionLists<ParticleType>::findExtendedProcBbsInRange
     {
         List<label> permutationIndices(nTrans, 0);
 
-        vector s = vector::zero;
-
         if (nTrans == 0 && procI != Pstream::myProcNo())
         {
             treeBoundBox extendedReferredProcBb = allExtendedProcBbs[procI];
