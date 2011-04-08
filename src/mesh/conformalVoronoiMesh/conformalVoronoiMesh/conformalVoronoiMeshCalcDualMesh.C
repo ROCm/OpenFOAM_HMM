@@ -49,37 +49,6 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     timeCheck("After setVertexSizeAndAlignment");
 
-    // Dual cell indexing
-
-    // Assign an index to the Delaunay vertices which will be the dual cell
-    // index used for owner neighbour assignment.
-
-    // The indices of the points are reset *which **destroys** the point-pair
-    // matching*, so the type of each non-referred vertex is reset to avoid
-    // any ambiguity.
-
-    label dualCellI = 0;
-
-    for
-    (
-        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-        vit != finite_vertices_end();
-        ++vit
-    )
-    {
-        if (vit->internalOrBoundaryPoint())
-        {
-            vit->type() = Vb::ptInternalPoint;
-            vit->index() = dualCellI;
-            dualCellI++;
-        }
-        else if (!vit->referred())
-        {
-            vit->type() = Vb::ptFarPoint;
-            vit->index() = -1;
-        }
-    }
-
     // Make all filterCount values zero
 
     for
@@ -2390,7 +2359,7 @@ void Foam::conformalVoronoiMesh::removeUnusedCells
 {
     Info<< nl << "Removing unused cells" << endl;
 
-    PackedBoolList cellUsed(max(max(owner), max(neighbour)), false);
+    PackedBoolList cellUsed(number_of_vertices(), false);
 
     // Scan all faces to find all of the cells that are used
 
@@ -2406,7 +2375,7 @@ void Foam::conformalVoronoiMesh::removeUnusedCells
 
     label cellI = 0;
 
-    labelList oldToNew(cellCentres.size(), -1);
+    labelList oldToNew(cellUsed.size(), -1);
 
     // Move all of the used cellCentres to the start of the pointField and
     // truncate it
@@ -2439,8 +2408,8 @@ void Foam::conformalVoronoiMesh::removeUnusedCells
 
     if (unusedCells.size() > 0)
     {
-        Info<< "Removing " << unusedCells.size() <<  " unused cells "
-            << endl;
+        // Pout<< "Removing " << unusedCells.size() <<  " unused cell labels"
+        //     << endl;
 
         forAll(owner, oI)
         {
