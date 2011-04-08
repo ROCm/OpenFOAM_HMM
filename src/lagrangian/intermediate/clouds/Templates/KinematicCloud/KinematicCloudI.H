@@ -370,42 +370,22 @@ Foam::KinematicCloud<CloudType>::theta() const
                 false
             ),
             mesh_,
-            dimensionedScalar("zero", dimless, 0.0)
+            dimensionedScalar("zero", dimless, 0.0),
+            zeroGradientFvPatchScalarField::typeName
         )
     );
 
     volScalarField& theta = ttheta();
-    theta.boundaryField() == 0;
-
     forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
     {
         const parcelType& p = iter();
         const label cellI = p.cell();
 
-        if ((p.face() != -1))
-        {
-            const label patchI = p.patch(p.face());
-            if (patchI != -1)
-            {
-                scalarField& thetap = theta.boundaryField()[patchI];
-                const label faceI = p.patchFace(patchI, p.face());
-                thetap[faceI] += p.nParticle()*p.areaP();
-            }
-        }
-
         theta[cellI] += p.nParticle()*p.volume();
     }
 
     theta.internalField() /= mesh_.V();
-
-    forAll(theta.boundaryField(), patchI)
-    {
-        scalarField& thetap = theta.boundaryField()[patchI];
-        if (thetap.size() > 0)
-        {
-            thetap /= mesh_.magSf().boundaryField()[patchI];
-        }
-    }
+    theta.correctBoundaryConditions();
 
     return ttheta;
 }
