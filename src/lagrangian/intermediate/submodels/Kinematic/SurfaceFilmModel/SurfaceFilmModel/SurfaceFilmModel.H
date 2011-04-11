@@ -47,9 +47,12 @@ namespace Foam
 {
 
 // Forward declaration of classes
-namespace surfaceFilmModels
+namespace regionModels
 {
-    class surfaceFilmModel;
+    namespace surfaceFilmModels
+    {
+        class surfaceFilmModel;
+    }
 }
 
 class mapDistribute;
@@ -114,7 +117,7 @@ protected:
             const label filmPatchI,
             const label primaryPatchI,
             const mapDistribute& distMap,
-            const surfaceFilmModels::surfaceFilmModel& filmModel
+            const regionModels::surfaceFilmModels::surfaceFilmModel& filmModel
         );
 
         //- Set the individual parcel properties
@@ -240,22 +243,27 @@ public:
 
 #define makeSurfaceFilmModel(CloudType)                                       \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SurfaceFilmModel<CloudType>, 0);      \
-                                                                              \
+    typedef CloudType::kinematicCloudType kinematicCloudType;                 \
+    defineNamedTemplateTypeNameAndDebug                                       \
+    (                                                                         \
+        SurfaceFilmModel<kinematicCloudType>,                                 \
+        0                                                                     \
+    );                                                                        \
     defineTemplateRunTimeSelectionTable                                       \
     (                                                                         \
-        SurfaceFilmModel<CloudType>,                                          \
+        SurfaceFilmModel<kinematicCloudType>,                                 \
         dictionary                                                            \
     );
 
 
 #define makeSurfaceFilmModelType(SS, CloudType)                               \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
+    typedef CloudType::kinematicCloudType kinematicCloudType;                 \
+    defineNamedTemplateTypeNameAndDebug(SS<kinematicCloudType>, 0);           \
                                                                               \
-    SurfaceFilmModel<CloudType>::                                             \
-        adddictionaryConstructorToTable<SS<CloudType> >                       \
-            add##SS##CloudType##ConstructorToTable_;
+    SurfaceFilmModel<kinematicCloudType>::                                    \
+        adddictionaryConstructorToTable<SS<kinematicCloudType> >              \
+            add##SS##CloudType##kinematicCloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

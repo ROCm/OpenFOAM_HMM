@@ -35,6 +35,7 @@ License
 #include "Time.H"
 #include "diagTensor.H"
 #include "transformField.H"
+#include "SubField.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -77,7 +78,6 @@ void Foam::cyclicPolyPatch::calcTransforms()
     if (size())
     {
         // Half0
-
         const cyclicPolyPatch& half0 = *this;
         vectorField half0Areas(half0.size());
         forAll(half0, facei)
@@ -108,10 +108,10 @@ void Foam::cyclicPolyPatch::calcTransforms()
 void Foam::cyclicPolyPatch::calcTransforms
 (
     const primitivePatch& half0,
-    const UList<point>& half0Ctrs,
-    const UList<point>& half0Areas,
-    const UList<point>& half1Ctrs,
-    const UList<point>& half1Areas
+    const pointField& half0Ctrs,
+    const vectorField& half0Areas,
+    const pointField& half1Ctrs,
+    const vectorField& half1Areas
 )
 {
     if (debug && owner())
@@ -165,22 +165,8 @@ void Foam::cyclicPolyPatch::calcTransforms
 
     if (half0Ctrs.size() > 0)
     {
-        scalarField half0Tols
-        (
-            calcFaceTol
-            (
-                half0,
-                half0.points(),
-                static_cast<const pointField&>(half0Ctrs)
-            )
-        );
-
         vectorField half0Normals(half0Areas.size());
         vectorField half1Normals(half1Areas.size());
-
-        //- Additional warning about faces non-aligned with rotation axis
-        //scalar maxCos = -GREAT;
-        //label maxFacei = -1;
 
         forAll(half0, facei)
         {
@@ -221,75 +207,74 @@ void Foam::cyclicPolyPatch::calcTransforms
             {
                 half0Normals[facei] = half0Areas[facei] / magSf;
                 half1Normals[facei] = half1Areas[facei] / nbrMagSf;
-
-                //if (transform_ == ROTATIONAL)
-                //{
-                //    scalar cos = mag(half0Normals[facei] & rotationAxis_);
-                //    if (cos > maxCos)
-                //    {
-                //        maxCos = cos;
-                //        maxFacei = facei;
-                //    }
-                //}
             }
         }
 
-        //if (maxCos > sqrt(SMALL))
-        //{
-        //    WarningIn
-        //    (
-        //        "cyclicPolyPatch::calcTransforms()"
-        //    )   << "on patch " << name()
-        //        << " face:" << maxFacei << " fc:" << half0Ctrs[maxFacei]
-        //        << " is not perpendicular to the rotationAxis."  << endl
-        //        << "This will cause problems with topology changes." << endl
-        //        << "rotation axis   : " << rotationAxis_ << endl
-        //        << "face normal     : " << half0Normals[maxFacei] << endl
-        //        << "cosine of angle : " << maxCos << endl;
-        //}
 
         // Calculate transformation tensors
-        calcTransformTensors
-        (
-            static_cast<const pointField&>(half0Ctrs),
-            static_cast<const pointField&>(half1Ctrs),
-            half0Normals,
-            half1Normals,
-            half0Tols,
-            matchTol,
-            transform_
-        );
 
-        if (transform_ == ROTATIONAL && !parallel() && forwardT().size() > 1)
+        if (transform_ == ROTATIONAL)
         {
-            // Get index of maximum area face to minimise truncation errors.
-            label max0I = findMaxArea(half0.points(), half0);
+            // Calculate using the given rotation axis and centre. Do not
+            // use calculated normals.
+            label face0 = getConsistentRotationFace(half0Ctrs);
+            label face1 = face0;
 
-            const tensor fwdT = forwardT()[max0I];
-            const_cast<tensorField&>(forwardT()) = tensorField(1, fwdT);
-            const tensor revT = reverseT()[max0I];
-            const_cast<tensorField&>(reverseT()) = tensorField(1, revT);
-            const bool coll = collocated()[max0I];
-            const_cast<boolList&>(collocated()).setSize(1);
-            const_cast<boolList&>(collocated())[0] = coll;
+            vector n0 = ((half0Ctrs[face0] - rotationCentre_) ^ rotationAxis_);
+            vector n1 = ((half1Ctrs[face1] - rotationCentre_) ^ -rotationAxis_);
+            n0 /= mag(n0) + VSMALL;
+            n1 /= mag(n1) + VSMALL;
 
-            WarningIn
+            if (debug)
+            {
+                Pout<< "cyclicPolyPatch::calcTransforms :"
+                    << " Specified rotation :"
+                    << " n0:" << n0 << " n1:" << n1 << endl;
+            }
+
+            // Extended tensor from two local coordinate systems calculated
+            // using normal and rotation axis
+            const tensor E0
             (
-                "cyclicPolyPatch::calcTransforms\n"
-                "    (\n"
-                "        const primitivePatch&,\n"
-                "        const UList<point>&,\n"
-                "        const UList<point>&,\n"
-                "        const UList<point>&,\n"
-                "        const UList<point>&\n"
-                "    )"
-            )   << "For patch " << name()
-                << " calculated non-uniform transform tensor even though"
-                << " the transform type is " << transformTypeNames[transform_]
-                << "." << nl
-                << "    Setting the transformation tensor to be a uniform"
-                << " rotation calculated from face " << max0I
-                << endl;
+                rotationAxis_,
+                (n0 ^ rotationAxis_),
+                n0
+            );
+            const tensor E1
+            (
+                rotationAxis_,
+                (-n1 ^ rotationAxis_),
+                -n1
+            );
+            const tensor revT(E1.T() & E0);
+
+            const_cast<tensorField&>(forwardT()) = tensorField(1, revT.T());
+            const_cast<tensorField&>(reverseT()) = tensorField(1, revT);
+            const_cast<vectorField&>(separation()).setSize(0);
+            const_cast<boolList&>(collocated()) = boolList(1, false);
+        }
+        else
+        {
+            scalarField half0Tols
+            (
+                calcFaceTol
+                (
+                    half0,
+                    half0.points(),
+                    static_cast<const pointField&>(half0Ctrs)
+                )
+            );
+
+            calcTransformTensors
+            (
+                static_cast<const pointField&>(half0Ctrs),
+                static_cast<const pointField&>(half1Ctrs),
+                half0Normals,
+                half1Normals,
+                half0Tols,
+                matchTol,
+                transform_
+            );
         }
     }
 }
@@ -333,14 +318,39 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
                     << " n0:" << n0 << " n1:" << n1 << endl;
             }
 
-            // Rotation (around origin)
-            const tensor reverseT(rotationTensor(n0, -n1));
+            // Extended tensor from two local coordinate systems calculated
+            // using normal and rotation axis
+            const tensor E0
+            (
+                rotationAxis_,
+                (n0 ^ rotationAxis_),
+                n0
+            );
+            const tensor E1
+            (
+                rotationAxis_,
+                (-n1 ^ rotationAxis_),
+                -n1
+            );
+            const tensor revT(E1.T() & E0);
 
             // Rotation
             forAll(half0Ctrs, faceI)
             {
-                half0Ctrs[faceI] = Foam::transform(reverseT, half0Ctrs[faceI]);
-                anchors0[faceI] = Foam::transform(reverseT, anchors0[faceI]);
+                half0Ctrs[faceI] =
+                    Foam::transform
+                    (
+                        revT,
+                        half0Ctrs[faceI] - rotationCentre_
+                    )
+                  + rotationCentre_;
+                anchors0[faceI] =
+                    Foam::transform
+                    (
+                        revT,
+                        anchors0[faceI] - rotationCentre_
+                    )
+                  + rotationCentre_;
             }
 
             break;
@@ -387,19 +397,19 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
                 }
 
                 // Rotation (around origin)
-                const tensor reverseT(rotationTensor(n0, -n1));
+                const tensor revT(rotationTensor(n0, -n1));
 
                 // Rotation
                 forAll(half0Ctrs, faceI)
                 {
                     half0Ctrs[faceI] = Foam::transform
                     (
-                        reverseT,
+                        revT,
                         half0Ctrs[faceI]
                     );
                     anchors0[faceI] = Foam::transform
                     (
-                        reverseT,
+                        revT,
                         anchors0[faceI]
                     );
                 }
@@ -437,41 +447,20 @@ Foam::label Foam::cyclicPolyPatch::getConsistentRotationFace
     const pointField& faceCentres
 ) const
 {
-    const scalarField magRadSqr
-    (
-        magSqr((faceCentres - rotationCentre_) ^ rotationAxis_)
-    );
-    scalarField axisLen
-    (
-        (faceCentres - rotationCentre_) & rotationAxis_
-    );
-    axisLen -= min(axisLen);
-    const scalarField magLenSqr
-    (
-        magRadSqr + axisLen*axisLen
-    );
+    // Determine a face furthest away from the axis
 
-    label rotFace = -1;
-    scalar maxMagLenSqr = -GREAT;
-    scalar maxMagRadSqr = -GREAT;
-    forAll(faceCentres, i)
-    {
-        if (magLenSqr[i] >= maxMagLenSqr)
-        {
-            if (magRadSqr[i] > maxMagRadSqr)
-            {
-                rotFace = i;
-                maxMagLenSqr = magLenSqr[i];
-                maxMagRadSqr = magRadSqr[i];
-            }
-        }
-    }
+    const scalarField magRadSqr =
+        magSqr((faceCentres - rotationCentre_) ^ rotationAxis_);
+
+    label rotFace = findMax(magRadSqr);
 
     if (debug)
     {
-        Pout<< "getConsistentRotationFace(const pointField&)" << nl
-            << "    rotFace = " << rotFace << nl
-            << "    point =  " << faceCentres[rotFace] << endl;
+        Info<< "getConsistentRotationFace(const pointField&)" << nl
+            << "    rotFace  = " << rotFace << nl
+            << "    point    =  " << faceCentres[rotFace] << nl
+            << "    distance = " << Foam::sqrt(magRadSqr[rotFace])
+            << endl;
     }
 
     return rotFace;
@@ -586,6 +575,17 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
             {
                 dict.lookup("rotationAxis") >> rotationAxis_;
                 dict.lookup("rotationCentre") >> rotationCentre_;
+
+                scalar magRot = mag(rotationAxis_);
+                if (magRot < SMALL)
+                {
+                    FatalIOErrorIn("cyclicPolyPatch::cyclicPolyPatch(..)", dict)
+                        << "Illegal rotationAxis " << rotationAxis_ << endl
+                        << "Please supply a non-zero vector."
+                        << exit(FatalIOError);
+                }
+                rotationAxis_ /= magRot;
+
                 break;
             }
             case TRANSLATIONAL:
@@ -730,7 +730,16 @@ void Foam::cyclicPolyPatch::transformPosition(pointField& l) const
 {
     if (!parallel())
     {
-        l = Foam::transform(forwardT(), l);
+        if (transform_ == ROTATIONAL)
+        {
+            l =
+                Foam::transform(forwardT(), l-rotationCentre_)
+              + rotationCentre_;
+        }
+        else
+        {
+            l = Foam::transform(forwardT(), l);
+        }
     }
     else if (separated())
     {
@@ -750,6 +759,40 @@ void Foam::cyclicPolyPatch::transformPosition(pointField& l) const
 }
 
 
+void Foam::cyclicPolyPatch::transformPosition(point& l, const label facei) const
+{
+    if (!parallel())
+    {
+        const tensor& T =
+        (
+            forwardT().size() == 1
+          ? forwardT()[0]
+          : forwardT()[facei]
+        );
+
+        if (transform_ == ROTATIONAL)
+        {
+            l = Foam::transform(T, l-rotationCentre_) + rotationCentre_;
+        }
+        else
+        {
+            l = Foam::transform(T, l);
+        }
+    }
+    else if (separated())
+    {
+        const vector& s =
+        (
+            separation().size() == 1
+          ? separation()[0]
+          : separation()[facei]
+        );
+
+        l -= s;
+    }
+}
+
+
 void Foam::cyclicPolyPatch::initGeometry(PstreamBuffers& pBufs)
 {
     polyPatch::initGeometry(pBufs);
@@ -759,9 +802,9 @@ void Foam::cyclicPolyPatch::initGeometry(PstreamBuffers& pBufs)
 void Foam::cyclicPolyPatch::initGeometry
 (
     const primitivePatch& referPatch,
-    UList<point>& nbrCtrs,
-    UList<point>& nbrAreas,
-    UList<point>& nbrCc
+    pointField& nbrCtrs,
+    vectorField& nbrAreas,
+    pointField& nbrCc
 )
 {}
 
@@ -769,12 +812,12 @@ void Foam::cyclicPolyPatch::initGeometry
 void Foam::cyclicPolyPatch::calcGeometry
 (
     const primitivePatch& referPatch,
-    const UList<point>& thisCtrs,
-    const UList<point>& thisAreas,
-    const UList<point>& thisCc,
-    const UList<point>& nbrCtrs,
-    const UList<point>& nbrAreas,
-    const UList<point>& nbrCc
+    const pointField& thisCtrs,
+    const vectorField& thisAreas,
+    const pointField& thisCc,
+    const pointField& nbrCtrs,
+    const vectorField& nbrAreas,
+    const pointField& nbrCc
 )
 {
     calcTransforms

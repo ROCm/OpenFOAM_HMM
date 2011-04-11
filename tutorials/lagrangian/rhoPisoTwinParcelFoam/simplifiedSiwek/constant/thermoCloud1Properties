@@ -26,8 +26,8 @@ solution
     {
         schemes
         {
-            U               explicit;
-            hs              explicit;
+            U               explicit 1;
+            hs              explicit 1;
         }
     }
 
@@ -72,11 +72,8 @@ subModels
 {
     particleForces
     {
-        activeForces
-        (
-            sphereDrag
-            gravity
-        );
+        sphereDrag;
+        gravity;
     }
 
     injectionModel  manualInjection;

@@ -27,6 +27,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "SortableList.H"
 #include "globalIndex.H"
+#include "SubField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

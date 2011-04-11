@@ -29,8 +29,8 @@ License
 #include "triSurface.H"
 #include "vector2D.H"
 #include "OFstream.H"
-#include "long.H"
 #include "AverageIOField.H"
+#include "Random.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,6 +50,7 @@ timeVaryingMappedFixedValueFvPatchField
     fixedValueFvPatchField<Type>(p, iF),
     fieldTableName_(iF.name()),
     setAverage_(false),
+    perturb_(0),
     referenceCS_(NULL),
     nearestVertex_(0),
     nearestVertexWeight_(0),
@@ -76,6 +77,7 @@ timeVaryingMappedFixedValueFvPatchField
     fixedValueFvPatchField<Type>(ptf, p, iF, mapper),
     fieldTableName_(ptf.fieldTableName_),
     setAverage_(ptf.setAverage_),
+    perturb_(ptf.perturb_),
     referenceCS_(NULL),
     nearestVertex_(0),
     nearestVertexWeight_(0),
@@ -101,6 +103,7 @@ timeVaryingMappedFixedValueFvPatchField
     fixedValueFvPatchField<Type>(p, iF),
     fieldTableName_(iF.name()),
     setAverage_(readBool(dict.lookup("setAverage"))),
+    perturb_(dict.lookupOrDefault("perturb", 1E-5)),
     referenceCS_(NULL),
     nearestVertex_(0),
     nearestVertexWeight_(0),
@@ -135,6 +138,7 @@ timeVaryingMappedFixedValueFvPatchField
     fixedValueFvPatchField<Type>(ptf),
     fieldTableName_(ptf.fieldTableName_),
     setAverage_(ptf.setAverage_),
+    perturb_(ptf.perturb_),
     referenceCS_(ptf.referenceCS_),
     nearestVertex_(ptf.nearestVertex_),
     nearestVertexWeight_(ptf.nearestVertexWeight_),
@@ -160,6 +164,7 @@ timeVaryingMappedFixedValueFvPatchField
     fixedValueFvPatchField<Type>(ptf, iF),
     fieldTableName_(ptf.fieldTableName_),
     setAverage_(ptf.setAverage_),
+    perturb_(ptf.perturb_),
     referenceCS_(ptf.referenceCS_),
     nearestVertex_(ptf.nearestVertex_),
     nearestVertexWeight_(ptf.nearestVertexWeight_),
@@ -332,7 +337,27 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::readSamplePoints()
     (
         referenceCS().localPosition(samplePoints)
     );
-    const vectorField& localVertices = tlocalVertices();
+    vectorField& localVertices = tlocalVertices();
+
+    const boundBox bb(localVertices, true);
+    const point bbMid(bb.midpoint());
+
+    if (debug)
+    {
+        Info<< "timeVaryingMappedFixedValueFvPatchField :"
+            << " Perturbing points with " << perturb_
+            << " fraction of a random position inside " << bb
+            << " to break any ties on regular meshes."
+            << nl << endl;
+    }
+
+    Random rndGen(123456);
+    forAll(localVertices, i)
+    {
+        localVertices[i] +=
+            perturb_
+           *(rndGen.position(bb.min(), bb.max())-bbMid);
+    }
 
     // Determine triangulation
     List<vector2D> localVertices2D(localVertices.size());
@@ -342,33 +367,16 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::readSamplePoints()
         localVertices2D[i][1] = localVertices[i][1];
     }
 
-    tmp<pointField> localFaceCentres
+    triSurface s(triSurfaceTools::delaunay2D(localVertices2D));
+
+    tmp<pointField> tlocalFaceCentres
     (
         referenceCS().localPosition
         (
             this->patch().patch().faceCentres()
         )
     );
-
-    if (debug)
-    {
-        OFstream str
-        (
-            this->db().time().path()/this->patch().name()
-          + "_localFaceCentres.obj"
-        );
-        Pout<< "readSamplePoints :"
-            << " Dumping face centres to " << str.name() << endl;
-
-        forAll(localFaceCentres(), i)
-        {
-            const point& p = localFaceCentres()[i];
-            str<< "v " << p.x() << ' ' << p.y() << ' ' << p.z() << nl;
-        }
-    }
-
-
-    triSurface s(triSurfaceTools::delaunay2D(localVertices2D));
+    const pointField& localFaceCentres = tlocalFaceCentres();
 
     if (debug)
     {
@@ -380,9 +388,9 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::readSamplePoints()
         Pout<< "readSamplePoints :"
             << " Dumping face centres to " << str.name() << endl;
 
-        forAll(localFaceCentres(), i)
+        forAll(localFaceCentres, i)
         {
-            const point& p = localFaceCentres()[i];
+            const point& p = localFaceCentres[i];
             str<< "v " << p.x() << ' ' << p.y() << ' ' << p.z() << nl;
         }
     }
@@ -760,6 +768,7 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
     os.writeKeyword("setAverage") << setAverage_ << token::END_STATEMENT << nl;
+    os.writeKeyword("peturb") << perturb_ << token::END_STATEMENT << nl;
 
     if (fieldTableName_ != this->dimensionedInternalField().name())
     {

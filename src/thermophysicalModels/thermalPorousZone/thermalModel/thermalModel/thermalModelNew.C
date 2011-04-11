@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,7 +33,13 @@ Foam::porousMedia::thermalModel::New
     const porousZone& pZone
 )
 {
-    const word modelType(pZone.dict().lookup("thermalModel"));
+    // a missing thermalModel is the same as type "none"
+    word modelType("none");
+
+    if (const dictionary* dictPtr = pZone.dict().subDictPtr("thermalModel"))
+    {
+        dictPtr->lookup("type") >> modelType;
+    }
 
     Info<< "Selecting thermalModel " << modelType << endl;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -202,7 +202,7 @@ Foam::Map<Foam::label> Foam::meshRefinement::findEdgeConnectedProblemCells
     if (debug)
     {
         faceSet fSet(mesh_, "edgeConnectedFaces", candidateFaces);
-        fSet.instance() = mesh_.time().timeName();
+        fSet.instance() = timeName();
         Pout<< "Writing " << fSet.size()
             << " with problematic topology to faceSet "
             << fSet.objectPath() << endl;
@@ -265,7 +265,7 @@ Foam::Map<Foam::label> Foam::meshRefinement::findEdgeConnectedProblemCells
 
     if (debug)
     {
-        perpFaces.instance() = mesh_.time().timeName();
+        perpFaces.instance() = timeName();
         Pout<< "Writing " << perpFaces.size()
             << " faces that are perpendicular to the surface to set "
             << perpFaces.objectPath() << endl;
@@ -427,6 +427,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
 
     // Count of faces marked for baffling
     label nBaffleFaces = 0;
+    PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh_));
 
     // Count of faces not baffled since would not cause a collapse
     label nPrevented = 0;
@@ -483,7 +484,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
         if (debug)
         {
             cellSet problemCellSet(mesh_, "problemCells", problemCells.toc());
-            problemCellSet.instance() = mesh_.time().timeName();
+            problemCellSet.instance() = timeName();
             Pout<< "Writing " << problemCellSet.size()
                 << " cells that are edge connected to coarser cell to set "
                 << problemCellSet.objectPath() << endl;
@@ -918,7 +919,10 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
                         else
                         {
                             facePatch[faceI] = getBafflePatch(facePatch, faceI);
-                            nBaffleFaces++;
+                            if (isMasterFace[faceI])
+                            {
+                                nBaffleFaces++;
+                            }
 
                             // Do NOT update boundary data since this would grow
                             // blocked faces across gaps.

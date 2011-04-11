@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,7 @@ Description
 #include "basicPsiThermo.H"
 #include "turbulenceModel.H"
 #include "bound.H"
+#include "pimpleLoop.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,17 +65,17 @@ int main(int argc, char *argv[])
         #include "rhoEqn.H"
 
         // --- Pressure-velocity PIMPLE corrector loop
-        for (int oCorr=0; oCorr<nOuterCorr; oCorr++)
+        for
+        (
+            pimpleLoop pimpleCorr(mesh, nOuterCorr);
+            pimpleCorr.loop();
+            pimpleCorr++
+        )
         {
-            bool finalIter = oCorr == nOuterCorr-1;
-            if (finalIter)
-            {
-                mesh.data::add("finalIteration", true);
-            }
-
             if (nOuterCorr != 1)
             {
                 p.storePrevIter();
+                rho.storePrevIter();
             }
 
             #include "UEqn.H"
@@ -87,11 +88,6 @@ int main(int argc, char *argv[])
             }
 
             turbulence->correct();
-
-            if (finalIter)
-            {
-                mesh.data::remove("finalIteration");
-            }
         }
 
         runTime.write();

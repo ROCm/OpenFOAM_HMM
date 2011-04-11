@@ -59,622 +59,6 @@ defineTypeNameAndDebug(autoLayerDriver, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
-(
-    const scalar minCos,
-    const scalar concaveCos,
-    const dictionary& motionDict
-)
-{
-    fvMesh& mesh = meshRefiner_.mesh();
-
-    // Patch face merging engine
-    combineFaces faceCombiner(mesh, true);
-
-    // Pick up all candidate cells on boundary
-    labelHashSet boundaryCells(mesh.nFaces()-mesh.nInternalFaces());
-
-    {
-        labelList patchIDs(meshRefiner_.meshedPatches());
-
-        const polyBoundaryMesh& patches = mesh.boundaryMesh();
-
-        forAll(patchIDs, i)
-        {
-            label patchI = patchIDs[i];
-
-            const polyPatch& patch = patches[patchI];
-
-            if (!patch.coupled())
-            {
-                forAll(patch, i)
-                {
-                    boundaryCells.insert(mesh.faceOwner()[patch.start()+i]);
-                }
-            }
-        }
-    }
-
-    // Get all sets of faces that can be merged
-    labelListList allFaceSets
-    (
-        faceCombiner.getMergeSets
-        (
-            minCos,
-            concaveCos,
-            boundaryCells
-        )
-    );
-
-    label nFaceSets = returnReduce(allFaceSets.size(), sumOp<label>());
-
-    Info<< "Merging " << nFaceSets << " sets of faces." << nl << endl;
-
-    if (nFaceSets > 0)
-    {
-        if (debug)
-        {
-            faceSet allSets(mesh, "allFaceSets", allFaceSets.size());
-            forAll(allFaceSets, setI)
-            {
-                forAll(allFaceSets[setI], i)
-                {
-                    allSets.insert(allFaceSets[setI][i]);
-                }
-            }
-            Pout<< "Writing all faces to be merged to set "
-                << allSets.objectPath() << endl;
-            allSets.instance() = mesh.time().timeName();
-            allSets.write();
-        }
-
-
-        // Topology changes container
-        polyTopoChange meshMod(mesh);
-
-        // Merge all faces of a set into the first face of the set.
-        faceCombiner.setRefinement(allFaceSets, meshMod);
-
-        // Experimental: store data for all the points that have been deleted
-        meshRefiner_.storeData
-        (
-            faceCombiner.savedPointLabels(),    // points to store
-            labelList(0),                       // faces to store
-            labelList(0)                        // cells to store
-        );
-
-        // Change the mesh (no inflation)
-        autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false, true);
-
-        // Update fields
-        mesh.updateMesh(map);
-
-        // Move mesh (since morphing does not do this)
-        if (map().hasMotionPoints())
-        {
-            mesh.movePoints(map().preMotionPoints());
-        }
-        else
-        {
-            // Delete mesh volumes.
-            mesh.clearOut();
-        }
-
-        faceCombiner.updateMesh(map);
-
-        meshRefiner_.updateMesh(map, labelList(0));
-
-
-        for (label iteration = 0; iteration < 100; iteration++)
-        {
-            Info<< nl
-                << "Undo iteration " << iteration << nl
-                << "----------------" << endl;
-
-
-            // Check mesh for errors
-            // ~~~~~~~~~~~~~~~~~~~~~
-
-            faceSet errorFaces
-            (
-                mesh,
-                "errorFaces",
-                mesh.nFaces()-mesh.nInternalFaces()
-            );
-            bool hasErrors = motionSmoother::checkMesh
-            (
-                false,  // report
-                mesh,
-                motionDict,
-                errorFaces
-            );
-
-            //if (checkEdgeConnectivity)
-            //{
-            //    Info<< "Checking edge-face connectivity (duplicate faces"
-            //        << " or non-consecutive shared vertices)" << endl;
-            //
-            //    label nOldSize = errorFaces.size();
-            //
-            //    hasErrors =
-            //        mesh.checkFaceFaces
-            //        (
-            //            false,
-            //            &errorFaces
-            //        )
-            //     || hasErrors;
-            //
-            //    Info<< "Detected additional "
-            //        <<  returnReduce
-            //            (
-            //                errorFaces.size() - nOldSize,
-            //                sumOp<label>()
-            //            )
-            //        << " faces with illegal face-face connectivity"
-            //        << endl;
-            //}
-
-            if (!hasErrors)
-            {
-                break;
-            }
-
-
-            if (debug)
-            {
-                errorFaces.instance() = mesh.time().timeName();
-                Pout<< "Writing all faces in error to faceSet "
-                    << errorFaces.objectPath() << nl << endl;
-                errorFaces.write();
-            }
-
-
-            // Check any master cells for using any of the error faces
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-            DynamicList<label> mastersToRestore(allFaceSets.size());
-
-            forAll(allFaceSets, setI)
-            {
-                label masterFaceI = faceCombiner.masterFace()[setI];
-
-                if (masterFaceI != -1)
-                {
-                    label masterCellII = mesh.faceOwner()[masterFaceI];
-
-                    const cell& cFaces = mesh.cells()[masterCellII];
-
-                    forAll(cFaces, i)
-                    {
-                        if (errorFaces.found(cFaces[i]))
-                        {
-                            mastersToRestore.append(masterFaceI);
-                            break;
-                        }
-                    }
-                }
-            }
-            mastersToRestore.shrink();
-
-            label nRestore = returnReduce
-            (
-                mastersToRestore.size(),
-                sumOp<label>()
-            );
-
-            Info<< "Masters that need to be restored:"
-                << nRestore << endl;
-
-            if (debug)
-            {
-                faceSet restoreSet(mesh, "mastersToRestore", mastersToRestore);
-                restoreSet.instance() = mesh.time().timeName();
-                Pout<< "Writing all " << mastersToRestore.size()
-                    << " masterfaces to be restored to set "
-                    << restoreSet.objectPath() << endl;
-                restoreSet.write();
-            }
-
-
-            if (nRestore == 0)
-            {
-                break;
-            }
-
-
-            // Undo
-            // ~~~~
-
-            // Topology changes container
-            polyTopoChange meshMod(mesh);
-
-            // Merge all faces of a set into the first face of the set.
-            // Experimental:mark all points/faces/cells that have been restored.
-            Map<label> restoredPoints(0);
-            Map<label> restoredFaces(0);
-            Map<label> restoredCells(0);
-
-            faceCombiner.setUnrefinement
-            (
-                mastersToRestore,
-                meshMod,
-                restoredPoints,
-                restoredFaces,
-                restoredCells
-            );
-
-            // Change the mesh (no inflation)
-            autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false, true);
-
-            // Update fields
-            mesh.updateMesh(map);
-
-            // Move mesh (since morphing does not do this)
-            if (map().hasMotionPoints())
-            {
-                mesh.movePoints(map().preMotionPoints());
-            }
-            else
-            {
-                // Delete mesh volumes.
-                mesh.clearOut();
-            }
-
-            faceCombiner.updateMesh(map);
-
-            // Renumber restore maps
-            inplaceMapKey(map().reversePointMap(), restoredPoints);
-            inplaceMapKey(map().reverseFaceMap(), restoredFaces);
-            inplaceMapKey(map().reverseCellMap(), restoredCells);
-
-            // Experimental:restore all points/face/cells in maps
-            meshRefiner_.updateMesh
-            (
-                map,
-                labelList(0),       // changedFaces
-                restoredPoints,
-                restoredFaces,
-                restoredCells
-            );
-
-            Info<< endl;
-        }
-
-        if (debug)
-        {
-            Pout<< "Writing merged-faces mesh to time "
-                << meshRefiner_.timeName() << nl << endl;
-            mesh.write();
-        }
-    }
-    else
-    {
-        Info<< "No faces merged ..." << endl;
-    }
-
-    return nFaceSets;
-}
-
-
-// Remove points. pointCanBeDeleted is parallel synchronised.
-Foam::autoPtr<Foam::mapPolyMesh> Foam::autoLayerDriver::doRemovePoints
-(
-    removePoints& pointRemover,
-    const boolList& pointCanBeDeleted
-)
-{
-    fvMesh& mesh = meshRefiner_.mesh();
-
-    // Topology changes container
-    polyTopoChange meshMod(mesh);
-
-    pointRemover.setRefinement(pointCanBeDeleted, meshMod);
-
-    // Change the mesh (no inflation)
-    autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false, true);
-
-    // Update fields
-    mesh.updateMesh(map);
-
-    // Move mesh (since morphing does not do this)
-    if (map().hasMotionPoints())
-    {
-        mesh.movePoints(map().preMotionPoints());
-    }
-    else
-    {
-        // Delete mesh volumes.
-        mesh.clearOut();
-    }
-
-    pointRemover.updateMesh(map);
-    meshRefiner_.updateMesh(map, labelList(0));
-
-    return map;
-}
-
-
-// Restore faces (which contain removed points)
-Foam::autoPtr<Foam::mapPolyMesh> Foam::autoLayerDriver::doRestorePoints
-(
-    removePoints& pointRemover,
-    const labelList& facesToRestore
-)
-{
-    fvMesh& mesh = meshRefiner_.mesh();
-
-    // Topology changes container
-    polyTopoChange meshMod(mesh);
-
-    // Determine sets of points and faces to restore
-    labelList localFaces, localPoints;
-    pointRemover.getUnrefimentSet
-    (
-        facesToRestore,
-        localFaces,
-        localPoints
-    );
-
-    // Undo the changes on the faces that are in error.
-    pointRemover.setUnrefinement
-    (
-        localFaces,
-        localPoints,
-        meshMod
-    );
-
-    // Change the mesh (no inflation)
-    autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false, true);
-
-    // Update fields
-    mesh.updateMesh(map);
-
-    // Move mesh (since morphing does not do this)
-    if (map().hasMotionPoints())
-    {
-        mesh.movePoints(map().preMotionPoints());
-    }
-    else
-    {
-        // Delete mesh volumes.
-        mesh.clearOut();
-    }
-
-    pointRemover.updateMesh(map);
-    meshRefiner_.updateMesh(map, labelList(0));
-
-    return map;
-}
-
-
-// Collect all faces that are both in candidateFaces and in the set.
-// If coupled face also collects the coupled face.
-Foam::labelList Foam::autoLayerDriver::collectFaces
-(
-    const labelList& candidateFaces,
-    const labelHashSet& set
-) const
-{
-    const fvMesh& mesh = meshRefiner_.mesh();
-
-    // Has face been selected?
-    boolList selected(mesh.nFaces(), false);
-
-    forAll(candidateFaces, i)
-    {
-        label faceI = candidateFaces[i];
-
-        if (set.found(faceI))
-        {
-            selected[faceI] = true;
-        }
-    }
-    syncTools::syncFaceList
-    (
-        mesh,
-        selected,
-        orEqOp<bool>()      // combine operator
-    );
-
-    labelList selectedFaces(findIndices(selected, true));
-
-    return selectedFaces;
-}
-
-
-// Pick up faces of cells of faces in set.
-Foam::labelList Foam::autoLayerDriver::growFaceCellFace
-(
-    const labelHashSet& set
-) const
-{
-    const fvMesh& mesh = meshRefiner_.mesh();
-
-    boolList selected(mesh.nFaces(), false);
-
-    forAllConstIter(faceSet, set, iter)
-    {
-        label faceI = iter.key();
-
-        label own = mesh.faceOwner()[faceI];
-
-        const cell& ownFaces = mesh.cells()[own];
-        forAll(ownFaces, ownFaceI)
-        {
-            selected[ownFaces[ownFaceI]] = true;
-        }
-
-        if (mesh.isInternalFace(faceI))
-        {
-            label nbr = mesh.faceNeighbour()[faceI];
-
-            const cell& nbrFaces = mesh.cells()[nbr];
-            forAll(nbrFaces, nbrFaceI)
-            {
-                selected[nbrFaces[nbrFaceI]] = true;
-            }
-        }
-    }
-    syncTools::syncFaceList
-    (
-        mesh,
-        selected,
-        orEqOp<bool>()      // combine operator
-    );
-    return findIndices(selected, true);
-}
-
-
-// Remove points not used by any face or points used by only two faces where
-// the edges are in line
-Foam::label Foam::autoLayerDriver::mergeEdgesUndo
-(
-    const scalar minCos,
-    const dictionary& motionDict
-)
-{
-    fvMesh& mesh = meshRefiner_.mesh();
-
-    Info<< nl
-        << "Merging all points on surface that" << nl
-        << "- are used by only two boundary faces and" << nl
-        << "- make an angle with a cosine of more than " << minCos
-        << "." << nl << endl;
-
-    // Point removal analysis engine with undo
-    removePoints pointRemover(mesh, true);
-
-    // Count usage of points
-    boolList pointCanBeDeleted;
-    label nRemove = pointRemover.countPointUsage(minCos, pointCanBeDeleted);
-
-    if (nRemove > 0)
-    {
-        Info<< "Removing " << nRemove
-            << " straight edge points ..." << nl << endl;
-
-        // Remove points
-        // ~~~~~~~~~~~~~
-
-        doRemovePoints(pointRemover, pointCanBeDeleted);
-
-
-        for (label iteration = 0; iteration < 100; iteration++)
-        {
-            Info<< nl
-                << "Undo iteration " << iteration << nl
-                << "----------------" << endl;
-
-
-            // Check mesh for errors
-            // ~~~~~~~~~~~~~~~~~~~~~
-
-            faceSet errorFaces
-            (
-                mesh,
-                "errorFaces",
-                mesh.nFaces()-mesh.nInternalFaces()
-            );
-            bool hasErrors = motionSmoother::checkMesh
-            (
-                false,  // report
-                mesh,
-                motionDict,
-                errorFaces
-            );
-            //if (checkEdgeConnectivity)
-            //{
-            //    Info<< "Checking edge-face connectivity (duplicate faces"
-            //        << " or non-consecutive shared vertices)" << endl;
-            //
-            //    label nOldSize = errorFaces.size();
-            //
-            //    hasErrors =
-            //        mesh.checkFaceFaces
-            //        (
-            //            false,
-            //            &errorFaces
-            //        )
-            //     || hasErrors;
-            //
-            //    Info<< "Detected additional "
-            //        << returnReduce(errorFaces.size()-nOldSize,sumOp<label>())
-            //        << " faces with illegal face-face connectivity"
-            //        << endl;
-            //}
-
-            if (!hasErrors)
-            {
-                break;
-            }
-
-            if (debug)
-            {
-                errorFaces.instance() = mesh.time().timeName();
-                Pout<< "**Writing all faces in error to faceSet "
-                    << errorFaces.objectPath() << nl << endl;
-                errorFaces.write();
-            }
-
-            labelList masterErrorFaces
-            (
-                collectFaces
-                (
-                    pointRemover.savedFaceLabels(),
-                    errorFaces
-                )
-            );
-
-            label n = returnReduce(masterErrorFaces.size(), sumOp<label>());
-
-            Info<< "Detected " << n
-                << " error faces on boundaries that have been merged."
-                << " These will be restored to their original faces." << nl
-                << endl;
-
-            if (n == 0)
-            {
-                if (hasErrors)
-                {
-                    Info<< "Detected "
-                        << returnReduce(errorFaces.size(), sumOp<label>())
-                        << " error faces in mesh."
-                        << " Restoring neighbours of faces in error." << nl
-                        << endl;
-
-                    labelList expandedErrorFaces
-                    (
-                        growFaceCellFace
-                        (
-                            errorFaces
-                        )
-                    );
-
-                    doRestorePoints(pointRemover, expandedErrorFaces);
-                }
-
-                break;
-            }
-
-            doRestorePoints(pointRemover, masterErrorFaces);
-        }
-
-        if (debug)
-        {
-            Pout<< "Writing merged-edges mesh to time "
-                << meshRefiner_.timeName() << nl << endl;
-            mesh.write();
-        }
-    }
-    else
-    {
-        Info<< "No straight edges simplified and no points removed ..." << endl;
-    }
-
-    return nRemove;
-}
-
-
 // For debugging: Dump displacement to .obj files
 void Foam::autoLayerDriver::dumpDisplacement
 (
@@ -793,7 +177,7 @@ void Foam::autoLayerDriver::checkMeshManifold() const
             << " points where this happens to pointSet "
             << nonManifoldPoints.name() << endl;
 
-        nonManifoldPoints.instance() = mesh.time().timeName();
+        nonManifoldPoints.instance() = meshRefiner_.timeName();
         nonManifoldPoints.write();
     }
     Info<< endl;
@@ -1080,7 +464,6 @@ void Foam::autoLayerDriver::handleWarpedFaces
 }
 
 
-
 //// No extrusion on cells with multiple patch faces. There ususally is a reason
 //// why combinePatchFaces hasn't succeeded.
 //void Foam::autoLayerDriver::handleMultiplePatchFaces
@@ -1133,7 +516,7 @@ void Foam::autoLayerDriver::handleWarpedFaces
 //
 //    if (nMultiPatchCells > 0)
 //    {
-//        multiPatchCells.instance() = mesh.time().timeName();
+//        multiPatchCells.instance() = meshRefiner_.timeName();
 //        Info<< "Writing " << nMultiPatchCells
 //            << " cells with multiple (connected) patch faces to cellSet "
 //            << multiPatchCells.objectPath() << endl;
@@ -2547,9 +1930,15 @@ void Foam::autoLayerDriver::mergePatchFacesUndo
         << "      (0=straight, 180=fully concave)" << nl
         << endl;
 
-    label nChanged = mergePatchFacesUndo(minCos, concaveCos, motionDict);
+    label nChanged = meshRefiner_.mergePatchFacesUndo
+    (
+        minCos,
+        concaveCos,
+        meshRefiner_.meshedPatches(),
+        motionDict
+    );
 
-    nChanged += mergeEdgesUndo(minCos, motionDict);
+    nChanged += meshRefiner_.mergeEdgesUndo(minCos, motionDict);
 }
 
 
@@ -3191,6 +2580,7 @@ void Foam::autoLayerDriver::addLayers
                 "addedCells",
                 findIndices(flaggedCells, true)
             );
+            addedCellSet.instance() = meshRefiner_.timeName();
             Info<< "Writing "
                 << returnReduce(addedCellSet.size(), sumOp<label>())
                 << " added cells to cellSet "
@@ -3203,6 +2593,7 @@ void Foam::autoLayerDriver::addLayers
                 "layerFaces",
                 findIndices(flaggedCells, true)
             );
+            layerFacesSet.instance() = meshRefiner_.timeName();
             Info<< "Writing "
                 << returnReduce(layerFacesSet.size(), sumOp<label>())
                 << " faces inside added layer to faceSet "
@@ -3262,6 +2653,9 @@ void Foam::autoLayerDriver::addLayers
     // Apply the stored topo changes to the current mesh.
     autoPtr<mapPolyMesh> map = savedMeshMod.changeMesh(mesh, false);
 
+    // Hack to remove meshPhi - mapped incorrectly. TBD.
+    mesh.clearOut();
+
     // Update fields
     mesh.updateMesh(map);
 
@@ -3275,6 +2669,9 @@ void Foam::autoLayerDriver::addLayers
         // Delete mesh volumes.
         mesh.clearOut();
     }
+
+    // Reset the instance for if in overwrite mode
+    mesh.setInstance(meshRefiner_.timeName());
 
     meshRefiner_.updateMesh(map, labelList(0));
 
@@ -3342,6 +2739,7 @@ void Foam::autoLayerDriver::addLayers
     // ~~~~~~~~~~
 
     cellSet addedCellSet(mesh, "addedCells", findIndices(flaggedCells, true));
+    addedCellSet.instance() = meshRefiner_.timeName();
     Info<< "Writing "
         << returnReduce(addedCellSet.size(), sumOp<label>())
         << " added cells to cellSet "
@@ -3349,6 +2747,7 @@ void Foam::autoLayerDriver::addLayers
     addedCellSet.write();
 
     faceSet layerFacesSet(mesh, "layerFaces", findIndices(flaggedFaces, true));
+    layerFacesSet.instance() = meshRefiner_.timeName();
     Info<< "Writing "
         << returnReduce(layerFacesSet.size(), sumOp<label>())
         << " faces inside added layer to faceSet "

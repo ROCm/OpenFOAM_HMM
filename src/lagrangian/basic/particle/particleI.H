@@ -34,7 +34,8 @@ inline void Foam::particle::findTris
     DynamicList<label>& faceList,
     const tetPointRef& tet,
     const FixedList<vector, 4>& tetAreas,
-    const FixedList<label, 4>& tetPlaneBasePtIs
+    const FixedList<label, 4>& tetPlaneBasePtIs,
+    const scalar tol
 ) const
 {
     faceList.clear();
@@ -52,7 +53,8 @@ inline void Foam::particle::findTris
             tetPlaneBasePtIs[i],
             cellI_,
             tetFaceI_,
-            tetPtI_
+            tetPtI_,
+            tol
         );
 
         if ((lambda > 0.0) && (lambda < 1.0))
@@ -72,7 +74,8 @@ inline Foam::scalar Foam::particle::tetLambda
     const label tetPlaneBasePtI,
     const label cellI,
     const label tetFaceI,
-    const label tetPtI
+    const label tetPtI,
+    const scalar tol
 ) const
 {
     const pointField& pPts = mesh_.points();
@@ -88,7 +91,8 @@ inline Foam::scalar Foam::particle::tetLambda
             tetPlaneBasePtI,
             cellI,
             tetFaceI,
-            tetPtI
+            tetPtI,
+            tol
         );
     }
 
@@ -97,12 +101,17 @@ inline Foam::scalar Foam::particle::tetLambda
     scalar lambdaNumerator = (base - from) & n;
     scalar lambdaDenominator = (to - from) & n;
 
-    if (mag(lambdaDenominator) < SMALL)
+    // n carries the area of the tet faces, so the dot product with a
+    // delta-length has the units of volume.  Comparing the component of each
+    // delta-length in the direction of n times the face area to a fraction of
+    // the cell volume.
+
+    if (mag(lambdaDenominator) < tol)
     {
-        if (mag(lambdaNumerator) < SMALL)
+        if (mag(lambdaNumerator) < tol)
         {
             // Track starts on the face, and is potentially
-            // parallel to it.  +-SMALL/+-SMALL is not a good
+            // parallel to it.  +-tol/+-tol is not a good
             // comparison, return 0.0, in anticipation of tet
             // centre correction.
 
@@ -110,10 +119,11 @@ inline Foam::scalar Foam::particle::tetLambda
         }
         else
         {
-            if (mag((to - from)) < SMALL)
+            if (mag((to - from)) < tol/mag(n))
             {
-                // Zero length track, not along the face, face
-                // cannot be crossed.
+                // 'Zero' length track (compared to the tolerance, which is
+                // based on the cell volume, divided by the tet face area), not
+                // along the face, face cannot be crossed.
 
                 return GREAT;
             }
@@ -139,7 +149,8 @@ inline Foam::scalar Foam::particle::movingTetLambda
     const label tetPlaneBasePtI,
     const label cellI,
     const label tetFaceI,
-    const label tetPtI
+    const label tetPtI,
+    const scalar tol
 ) const
 {
     const pointField& pPts = mesh_.points();
@@ -291,12 +302,12 @@ inline Foam::scalar Foam::particle::movingTetLambda
 
     }
 
-    if (mag(lambdaDenominator) < SMALL)
+    if (mag(lambdaDenominator) < tol)
     {
-        if (mag(lambdaNumerator) < SMALL)
+        if (mag(lambdaNumerator) < tol)
         {
             // Track starts on the face, and is potentially
-            // parallel to it.  +-SMALL)/+-SMALL is not a good
+            // parallel to it.  +-tol)/+-tol is not a good
             // comparison, return 0.0, in anticipation of tet
             // centre correction.
 
@@ -304,7 +315,7 @@ inline Foam::scalar Foam::particle::movingTetLambda
         }
         else
         {
-            if (mag((to - from)) < SMALL)
+            if (mag((to - from)) < tol/mag(n))
             {
                 // Zero length track, not along the face, face
                 // cannot be crossed.
@@ -784,23 +795,26 @@ inline void Foam::particle::initCellFacePt()
                         << position_ << abort(FatalError);
                 }
 
-                WarningIn("void Foam::particle::initCellFacePt()")
-                    << "Particle moved from " << position_
-                    << " to " << newPosition
-                    << " in cell " << cellI_
-                    << " tetFace " << tetFaceI_
-                    << " tetPt " << tetPtI_ << nl
-                    << "    (A fraction of "
-                    << 1.0 - mag(cC - newPosition)/mag(cC - position_)
-                    << " of the distance to the cell centre)"
-                    << " because a decomposition tetFace and tetPt "
-                    << "could not be found."
-                    << endl;
+                if (debug)
+                {
+                    WarningIn("void Foam::particle::initCellFacePt()")
+                        << "Particle moved from " << position_
+                        << " to " << newPosition
+                        << " in cell " << cellI_
+                        << " tetFace " << tetFaceI_
+                        << " tetPt " << tetPtI_ << nl
+                        << "    (A fraction of "
+                        << 1.0 - mag(cC - newPosition)/mag(cC - position_)
+                        << " of the distance to the cell centre)"
+                        << " because a decomposition tetFace and tetPt "
+                        << "could not be found."
+                        << endl;
+                }
 
                 position_ = newPosition;
             }
 
-            if (cellI_ != oldCellI)
+            if (debug && cellI_ != oldCellI)
             {
                 WarningIn("void Foam::particle::initCellFacePt()")
                     << "Particle at position " << position_
@@ -888,7 +902,6 @@ bool Foam::particle::boundaryFace(const label faceI) const
 
 inline Foam::label Foam::particle::patch(const label faceI) const
 {
-//    return cloud_.facePatch(faceI);
     return mesh_.boundaryMesh().whichPatch(faceI);
 }
 
@@ -899,15 +912,7 @@ inline Foam::label Foam::particle::patchFace
     const label faceI
 ) const
 {
-//    return cloud_.patchFace(patchI, faceI);
     return mesh_.boundaryMesh()[patchI].whichFace(faceI);
-}
-
-
-inline Foam::scalar
-Foam::particle::wallImpactDistance(const vector&) const
-{
-    return 0.0;
 }
 
 

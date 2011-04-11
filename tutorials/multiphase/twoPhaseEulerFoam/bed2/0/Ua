@@ -8,7 +8,7 @@
 FoamFile
 {
     version     2.0;
-    format      binary;
+    format      ascii;
     class       volVectorField;
     object      Ua;
 }
@@ -17,8 +17,6 @@ FoamFile
 dimensions      [0 1 -1 0 0 0 0];
 
 internalField   uniform (0 0 0);
-
-referenceLevel      (0 0 0);
 
 boundaryField
 {

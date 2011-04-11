@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -449,9 +449,6 @@ public:
 
             // Member operators
 
-                //- Conversion to a const_iterator
-                inline operator const_iterator() const;
-
                 //- Return referenced hash value
                 inline T& operator*();
                 inline T& operator()();
@@ -500,6 +497,9 @@ public:
 
                 //- Construct null (end iterator)
                 inline const_iterator();
+
+                //- Construct from iterator
+                inline const_iterator(const iterator&);
 
                 //- Construct end iterator
                 inline const_iterator(const iteratorEnd& unused);

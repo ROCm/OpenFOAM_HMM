@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,15 +37,11 @@ Foam::sampledPatch::sampleField
     // One value per face
     tmp<Field<Type> > tvalues(new Field<Type>(patchFaceLabels_.size()));
     Field<Type>& values = tvalues();
-
-    if (patchIndex() != -1)
+    forAll(patchFaceLabels_, i)
     {
-        const Field<Type>& bField = vField.boundaryField()[patchIndex()];
-
-        forAll(patchFaceLabels_, elemI)
-        {
-            values[elemI] = bField[patchFaceLabels_[elemI]];
-        }
+        label patchI = patchIDs_[patchIndex_[i]];
+        const Field<Type>& bField = vField.boundaryField()[patchI];
+        values[i] = bField[patchFaceLabels_[i]];
     }
 
     return tvalues;
@@ -63,34 +59,33 @@ Foam::sampledPatch::interpolateField
     tmp<Field<Type> > tvalues(new Field<Type>(points().size()));
     Field<Type>& values = tvalues();
 
-    if (patchIndex() != -1)
+    const labelList& own = mesh().faceOwner();
+
+    boolList pointDone(points().size(), false);
+
+    forAll(faces(), cutFaceI)
     {
-        const polyPatch& patch = mesh().boundaryMesh()[patchIndex()];
-        const labelList& own = mesh().faceOwner();
+        label patchI = patchIDs_[patchIndex_[cutFaceI]];
+        const polyPatch& pp = mesh().boundaryMesh()[patchI];
+        label patchFaceI = patchFaceLabels()[cutFaceI];
+        const face& f = faces()[cutFaceI];
 
-        boolList pointDone(points().size(), false);
-
-        forAll(faces(), cutFaceI)
+        forAll(f, faceVertI)
         {
-            const face& f = faces()[cutFaceI];
+            label pointI = f[faceVertI];
 
-            forAll(f, faceVertI)
+            if (!pointDone[pointI])
             {
-                label pointI = f[faceVertI];
+                label faceI = patchFaceI + pp.start();
+                label cellI = own[faceI];
 
-                if (!pointDone[pointI])
-                {
-                    label faceI = patchFaceLabels()[cutFaceI] + patch.start();
-                    label cellI = own[faceI];
-
-                    values[pointI] = interpolator.interpolate
-                    (
-                        points()[pointI],
-                        cellI,
-                        faceI
-                    );
-                    pointDone[pointI] = true;
-                }
+                values[pointI] = interpolator.interpolate
+                (
+                    points()[pointI],
+                    cellI,
+                    faceI
+                );
+                pointDone[pointI] = true;
             }
         }
     }

@@ -1,4 +1,3 @@
-
 tmp<fv::convectionScheme<scalar> > mvConvection
 (
     fv::convectionScheme<scalar>::New
@@ -9,7 +8,6 @@ tmp<fv::convectionScheme<scalar> > mvConvection
         mesh.divScheme("div(phi,Yi_h)")
     )
 );
-
 
 if (solveSpecies)
 {

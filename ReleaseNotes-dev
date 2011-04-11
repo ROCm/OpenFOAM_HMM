@@ -196,9 +196,9 @@
     #+BEGIN_SRC c++
     outlet
     {
-        type            codedFixedValue<scalar>;
+        type            codedFixedValue;
         value           uniform 0;
-        redirectType    fixedValue10;
+        redirectType    ramped;
 
         code
         #{
@@ -240,6 +240,16 @@
     + =snappyHexMesh=:
       + extrude across multi-processor boundaries
       + preserve faceZones during layering
+      + combining patch faces after snapping
+      + *Warning*:
+            - minMedianAxisAngle angle fixed w.r.t. 17x. Set to
+              90 to get same behaviour as 130 in 17x.
+            - nGrow did not work in 17x. Set to 0
+              to get same behaviour as 130 in 17x.
+            - nSolveIter reinstated to smooth internal mesh. Set to 0
+              to get same behaviour at 17x.
+            - new minTetQuality setting (see tracking). Disable for 17x
+              compatibility.
 * Post-processing
   + =paraFoam=, =foamToVTK=: full support for polyhedral cell type in recent
      Paraview versions.
@@ -270,6 +280,26 @@
        triSurfaceMesh).
     + =nearWallFields=: constructs field with on selected patches interpolated
        internal field for further postprocessing.
+    + =coded=: uses the dynamic code compilation from =#codeStream=
+    to provide an in-line functionObject. E.g.
+    #+BEGIN_SRC c++
+    functions
+    {
+        pAverage
+        {
+            functionObjectLibs ("libutilityFunctionObjects.so");
+            type coded;
+            redirectType average;
+            code
+            #{
+                const volScalarField& p = mesh().lookupObject<volScalarField>("p");
+                Info<<"p avg:" << average(p) << endl;
+            #};
+        }
+    }
+    #+END_SRC
+    See also [[./doc/changes/dynamicCode.org]]
+
 
 * New tutorials
   There is a large number of new tutorials for existing and new solvers in the
@@ -282,3 +312,8 @@
 * Other
   + compilable with =clang=
     In your prefs.sh set the WM_COMPILER to Clang
+  + dlclose error: upon exit of e.g. paraFoam you can get the error
+    Inconsistency detected by ld.so: dl-close.c: 731: _dl_close: Assertion
+    `map->l_init_called' failed!
+    This seems to happen with a mix of system libraries and a thirdParty
+    compiler.

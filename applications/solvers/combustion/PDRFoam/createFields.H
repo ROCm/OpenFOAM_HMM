@@ -30,7 +30,6 @@
 
     //const volScalarField& T = thermo->T();
 
-
     Info<< "\nReading field U\n" << endl;
     volVectorField U
     (
@@ -94,8 +93,35 @@
         IOobject
         (
             "betav",
-            runTime.findInstance(polyMesh::meshSubDir, "betav"),
-            polyMesh::meshSubDir,
+            mesh.facesInstance(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh
+    );
+
+    Info<< "Reading field Lobs\n" << endl;
+    volScalarField Lobs
+    (
+        IOobject
+        (
+            "Lobs",
+            mesh.facesInstance(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh
+    );
+
+    Info<< "Reading field CT\n" << endl;
+    volSymmTensorField CT
+    (
+        IOobject
+        (
+            "CT",
+            mesh.facesInstance(),
             mesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE

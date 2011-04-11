@@ -62,13 +62,14 @@ class fvMesh;
 class mapDistributePolyMesh;
 class decompositionMethod;
 class refinementSurfaces;
+class refinementFeatures;
 class shellSurfaces;
 class removeCells;
-class featureEdgeMesh;
 class fvMeshDistribute;
 class searchableSurface;
 class regionSplit;
 class globalIndex;
+class removePoints;
 
 /*---------------------------------------------------------------------------*\
                            Class meshRefinement Declaration
@@ -117,6 +118,9 @@ private:
 
         //- All surface-intersection interaction
         const refinementSurfaces& surfaces_;
+
+        //- All feature-edge interaction
+        const refinementFeatures& features_;
 
         //- All shell-refinement interaction
         const shellSurfaces& shells_;
@@ -260,8 +264,6 @@ private:
             label markFeatureRefinement
             (
                 const point& keepPoint,
-                const PtrList<featureEdgeMesh>& featureMeshes,
-                const labelList& featureLevels,
                 const label nAllowRefine,
 
                 labelList& refineCell,
@@ -415,12 +417,6 @@ private:
                 const labelList& globalToPatch
             ) const;
 
-            ////- Initial test of marking faces using geometric information.
-            //labelList markFacesOnProblemCellsGeometric
-            //(
-            //    const dictionary& motionDict
-            //) const;
-
 
         // Baffle merging
 
@@ -501,6 +497,7 @@ public:
             const scalar mergeDistance,
             const bool overwrite,
             const refinementSurfaces&,
+            const refinementFeatures&,
             const shellSurfaces&
         );
 
@@ -540,6 +537,12 @@ public:
             const refinementSurfaces& surfaces() const
             {
                 return surfaces_;
+            }
+
+            //- reference to feature edge mesh
+            const refinementFeatures& features() const
+            {
+                return features_;
             }
 
             //- reference to refinement shells (regions)
@@ -647,9 +650,6 @@ public:
             (
                 const point& keepPoint,
                 const scalar curvature,
-
-                const PtrList<featureEdgeMesh>& featureMeshes,
-                const labelList& featureLevels,
 
                 const bool featureRefinement,
                 const bool internalRefinement,
@@ -803,19 +803,45 @@ public:
                     const Map<label>& cellsToRestore
                 );
 
+            // Merging coplanar faces and edges
 
-            //- Merge faces on the same patch (usually from exposing refinement)
-            //  Returns global number of faces merged.
-            label mergePatchFaces
-            (
-                const scalar minCos,
-                const scalar concaveCos,
-                const labelList& patchIDs
-            );
+                label mergePatchFacesUndo
+                (
+                    const scalar minCos,
+                    const scalar concaveCos,
+                    const labelList& patchIDs,
+                    const dictionary& motionDict
+                );
 
-            //- Remove points not used by any face or points used
-            // by only two faces where the edges are in line
-            autoPtr<mapPolyMesh> mergeEdges(const scalar minCos);
+                autoPtr<mapPolyMesh> doRemovePoints
+                (
+                    removePoints& pointRemover,
+                    const boolList& pointCanBeDeleted
+                );
+
+                autoPtr<mapPolyMesh> doRestorePoints
+                (
+                    removePoints& pointRemover,
+                    const labelList& facesToRestore
+                );
+
+                labelList collectFaces
+                (
+                    const labelList& candidateFaces,
+                    const labelHashSet& set
+                ) const;
+
+                // Pick up faces of cells of faces in set.
+                labelList growFaceCellFace
+                (
+                    const labelHashSet& set
+                ) const;
+
+                label mergeEdgesUndo
+                (
+                    const scalar minCos,
+                    const dictionary& motionDict
+                );
 
 
         // Debug/IO

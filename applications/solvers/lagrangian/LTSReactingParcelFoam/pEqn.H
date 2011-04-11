@@ -40,7 +40,18 @@
           - fvm::laplacian(rho*rAU, p)
         );
 
-        pEqn.solve();
+        pEqn.solve
+        (
+            mesh.solver
+            (
+                p.select
+                (
+                    pimpleCorr.finalIter()
+                 && corr == nCorr-1
+                 && nonOrth == nNonOrthCorr
+                )
+            )
+        );
 
         if (nonOrth == nNonOrthCorr)
         {
@@ -48,7 +59,7 @@
         }
     }
 
-    Info<< "p min/max = " << min(p).value() << ", " << max(p).value() << endl;
+    p.relax();
 
     // Second part of thermodynamic density update
     thermo.rho() += psi*p;
@@ -64,4 +75,6 @@
     rho = min(rho, rhoMax);
 
     #include "setPressureWork.H"
+
+    Info<< "p min/max = " << min(p).value() << ", " << max(p).value() << endl;
 }

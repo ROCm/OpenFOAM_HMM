@@ -22,5 +22,6 @@ runAnsysToFoam flange.ans 0.001
 runApplication $application
 runApplication foamToFieldview9
 runApplication foamToEnsight
+runApplication foamToVTK
 
 # ----------------------------------------------------------------- end-of-file

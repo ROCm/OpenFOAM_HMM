@@ -10,6 +10,6 @@ runApplication setSet -batch makeFaceSet.setSet
 runApplication createPatch -overwrite
 
 # Run
-runApplication fireFoam
+runApplication `getApplication`
 
 # ----------------------------------------------------------------- end-of-file

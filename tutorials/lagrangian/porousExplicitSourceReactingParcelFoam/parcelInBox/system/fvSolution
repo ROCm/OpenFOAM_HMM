@@ -34,7 +34,7 @@ solvers
         agglomerator     faceAreaPair;
         mergeLevels      1;
 
-        maxIter          100;
+        maxIter          20;
     };
     pFinal
     {
@@ -74,9 +74,8 @@ PISO
 
 additional
 {
-    dpdt            false;
-    eWork           true;
-    hWork           true;
+    pressureWork    true;
+    pressureWorkTimeDerivative true;
 }
 
 

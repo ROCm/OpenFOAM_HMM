@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,7 @@ void Foam::DimensionedField<Type, GeoMesh>::readIfPresent
 {
     if
     (
-        (this->headerOk() && this->readOpt() == IOobject::READ_IF_PRESENT)
+        (this->readOpt() == IOobject::READ_IF_PRESENT && this->headerOk())
      || this->readOpt() == IOobject::MUST_READ
      || this->readOpt() == IOobject::MUST_READ_IF_MODIFIED
     )

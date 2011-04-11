@@ -87,8 +87,6 @@ sets
     }
 );
 
-surfaces ();
-
 fields
 (
     T

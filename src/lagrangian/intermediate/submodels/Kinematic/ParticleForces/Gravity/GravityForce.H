@@ -73,8 +73,7 @@ public:
         (
             CloudType& owner,
             const fvMesh& mesh,
-            const dictionary& dict,
-            const word& forceType
+            const dictionary& dict
         );
 
         //- Construct copy
@@ -98,7 +97,7 @@ public:
 
         // Access
 
-            //- Return the the acceleration due to gravity
+            //- Return the acceleration due to gravity
             inline const vector& g() const;
 
 

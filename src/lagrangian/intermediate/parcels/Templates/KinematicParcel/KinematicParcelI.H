@@ -422,16 +422,6 @@ inline Foam::vector& Foam::KinematicParcel<ParcelType>::UTurb()
 
 
 template<class ParcelType>
-inline Foam::scalar Foam::KinematicParcel<ParcelType>::wallImpactDistance
-(
-    const vector&
-) const
-{
-    return 0.5*d_;
-}
-
-
-template<class ParcelType>
 inline Foam::label Foam::KinematicParcel<ParcelType>::faceInterpolation() const
 {
     // Use volume-based interpolation if dealing with external faces

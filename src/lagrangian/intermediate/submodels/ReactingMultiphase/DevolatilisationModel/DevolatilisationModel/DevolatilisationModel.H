@@ -136,22 +136,29 @@ public:
 
 #define makeDevolatilisationModel(CloudType)                                  \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(DevolatilisationModel<CloudType>, 0); \
-                                                                              \
+    typedef CloudType::reactingMultiphaseCloudType                            \
+        reactingMultiphaseCloudType;                                          \
+    defineNamedTemplateTypeNameAndDebug                                       \
+    (                                                                         \
+        DevolatilisationModel<reactingMultiphaseCloudType>,                   \
+        0                                                                     \
+    );                                                                        \
     defineTemplateRunTimeSelectionTable                                       \
     (                                                                         \
-        DevolatilisationModel<CloudType>,                                     \
+        DevolatilisationModel<reactingMultiphaseCloudType>,                   \
         dictionary                                                            \
     );
 
 
 #define makeDevolatilisationModelType(SS, CloudType)                          \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
+    typedef CloudType::reactingMultiphaseCloudType                            \
+        reactingMultiphaseCloudType;                                          \
+    defineNamedTemplateTypeNameAndDebug(SS<reactingMultiphaseCloudType>, 0);  \
                                                                               \
-    DevolatilisationModel<CloudType>::                                        \
-        adddictionaryConstructorToTable<SS<CloudType> >                       \
-            add##SS##CloudType##ConstructorToTable_;
+    DevolatilisationModel<reactingMultiphaseCloudType>::                      \
+        adddictionaryConstructorToTable<SS<reactingMultiphaseCloudType> >     \
+        add##SS##CloudType##reactingMultiphaseCloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

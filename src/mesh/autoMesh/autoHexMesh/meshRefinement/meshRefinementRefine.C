@@ -28,6 +28,7 @@ License
 #include "syncTools.H"
 #include "Time.H"
 #include "refinementSurfaces.H"
+#include "refinementFeatures.H"
 #include "shellSurfaces.H"
 #include "faceSet.H"
 #include "decompositionMethod.H"
@@ -53,6 +54,11 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
     const polyMesh& mesh = map.mesh();
 
     labelList changedFaces;
+
+    // For reporting: number of masterFaces changed
+    label nMasterChanged = 0;
+    PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh));
+
     {
         // Mark any face on a cell which has been added or changed
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -182,36 +188,26 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
         // Now we have in changedFace marked all affected faces. Pack.
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        label nChanged = 0;
+        changedFaces = findIndices(changedFace, true);
+
+        // Count changed master faces.
+        nMasterChanged = 0;
 
         forAll(changedFace, faceI)
         {
-            if (changedFace[faceI])
+            if (changedFace[faceI] && isMasterFace[faceI])
             {
-                nChanged++;
+                nMasterChanged++;
             }
         }
 
-        changedFaces.setSize(nChanged);
-        nChanged = 0;
-
-        forAll(changedFace, faceI)
-        {
-            if (changedFace[faceI])
-            {
-                changedFaces[nChanged++] = faceI;
-            }
-        }
     }
-
-    label nChangedFaces = changedFaces.size();
-    reduce(nChangedFaces, sumOp<label>());
 
     if (debug)
     {
         Pout<< "getChangedFaces : Detected "
             << " local:" << changedFaces.size()
-            << " global:" << nChangedFaces
+            << " global:" << returnReduce(nMasterChanged, sumOp<label>())
             << " changed faces out of " << mesh.globalData().nTotalFaces()
             << endl;
 
@@ -252,8 +248,6 @@ bool Foam::meshRefinement::markForRefine
 Foam::label Foam::meshRefinement::markFeatureRefinement
 (
     const point& keepPoint,
-    const PtrList<featureEdgeMesh>& featureMeshes,
-    const labelList& featureLevels,
     const label nAllowRefine,
 
     labelList& refineCell,
@@ -287,9 +281,11 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
 
     if (cellI != -1)
     {
-        forAll(featureMeshes, featI)
+        forAll(features_, featI)
         {
-            const featureEdgeMesh& featureMesh = featureMeshes[featI];
+            const featureEdgeMesh& featureMesh = features_[featI];
+            const label featureLevel = features_.levels()[featI];
+
             const labelListList& pointEdges = featureMesh.pointEdges();
 
             forAll(pointEdges, pointI)
@@ -315,7 +311,7 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
                             tetFaceI,
                             tetPtI,
                             featureMesh.points()[pointI],   // endpos
-                            featureLevels[featI],           // level
+                            featureLevel,                   // level
                             featI,                          // featureMesh
                             pointI                          // end point
                         )
@@ -339,11 +335,11 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
     maxFeatureLevel = -1;
 
     // Whether edge has been visited.
-    List<PackedBoolList> featureEdgeVisited(featureMeshes.size());
+    List<PackedBoolList> featureEdgeVisited(features_.size());
 
-    forAll(featureMeshes, featI)
+    forAll(features_, featI)
     {
-        featureEdgeVisited[featI].setSize(featureMeshes[featI].edges().size());
+        featureEdgeVisited[featI].setSize(features_[featI].edges().size());
         featureEdgeVisited[featI] = 0u;
     }
 
@@ -359,7 +355,7 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
             label featI = tp.i();
             label pointI = tp.j();
 
-            const featureEdgeMesh& featureMesh = featureMeshes[featI];
+            const featureEdgeMesh& featureMesh = features_[featI];
             const labelList& pEdges = featureMesh.pointEdges()[pointI];
 
             // Particle now at pointI. Check connected edges to see which one
@@ -626,6 +622,13 @@ Foam::label Foam::meshRefinement::markSurfaceRefinement
         }
     }
 
+    // Extend segments a bit
+    {
+        const vectorField smallVec(Foam::sqrt(SMALL)*(end-start));
+        start -= smallVec;
+        end += smallVec;
+    }
+
 
     // Do test for higher intersections
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -834,6 +837,14 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
             minLevel[i] = min(cellLevel[own], neiLevel[bFaceI]);
         }
     }
+
+    // Extend segments a bit
+    {
+        const vectorField smallVec(Foam::sqrt(SMALL)*(end-start));
+        start -= smallVec;
+        end += smallVec;
+    }
+
 
     // Test for all intersections (with surfaces of higher max level than
     // minLevel) and cache per cell the max surface level and the local normal
@@ -1053,9 +1064,6 @@ Foam::labelList Foam::meshRefinement::refineCandidates
     const point& keepPoint,
     const scalar curvature,
 
-    const PtrList<featureEdgeMesh>& featureMeshes,
-    const labelList& featureLevels,
-
     const bool featureRefinement,
     const bool internalRefinement,
     const bool surfaceRefinement,
@@ -1119,8 +1127,6 @@ Foam::labelList Foam::meshRefinement::refineCandidates
             label nFeatures = markFeatureRefinement
             (
                 keepPoint,
-                featureMeshes,
-                featureLevels,
                 nAllowRefine,
 
                 refineCell,
@@ -1235,6 +1241,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::refine
         // Delete mesh volumes.
         mesh_.clearOut();
     }
+
+    // Reset the instance for if in overwrite mode
+    mesh_.setInstance(timeName());
 
     // Update intersection info
     updateMesh(map, getChangedFaces(map, cellsToRefine));

@@ -37,10 +37,8 @@ SourceFiles
 #define dynamicCode_H
 
 #include "Tuple2.H"
-#include "SHA1Digest.H"
 #include "HashTable.H"
 #include "DynamicList.H"
-#include "dlLibraryTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,6 +49,7 @@ namespace Foam
 class dynamicCodeContext;
 class ISstream;
 class OSstream;
+class SHA1Digest;
 
 /*---------------------------------------------------------------------------*\
                         Class dynamicCode Declaration
@@ -106,10 +105,10 @@ protected:
     // Static data members
 
         //- Root of the LIB target for Make/files
-        static const char* libTargetRoot;
+        static const char* const libTargetRoot;
 
         //- Top-level directory name for copy/compiling
-        static const char* topDirName;
+        static const char* const topDirName;
 
 
     // Protected Member Functions
@@ -282,16 +281,6 @@ public:
 
         //- Compile a libso
         bool wmakeLibso() const;
-
-//        //- Open the libPath() library
-//        bool openLibrary() const;
-//
-//        //- Close the libPath() library
-//        bool closeLibrary() const;
-//
-//        //- Find the handle of the libPath() library
-//        void* findLibrary() const;
-
 
 };
 

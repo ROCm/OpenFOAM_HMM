@@ -117,6 +117,7 @@ License
 #include "Time.H"
 #include "OFstream.H"
 #include "globalIndex.H"
+#include "SubField.H"
 
 extern "C"
 {
@@ -282,7 +283,10 @@ Foam::label Foam::ptscotchDecomp::decomposeZeroDomains
             <<
             (
                 cWeights.size()
-              ? scalarField::subField(cWeights, nCells, startCell)
+              ? static_cast<const scalarField&>
+                (
+                    scalarField::subField(cWeights, nCells, startCell)
+                )
               : scalarField(0)
             );
 

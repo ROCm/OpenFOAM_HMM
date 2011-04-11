@@ -5,16 +5,14 @@
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
     version     2.0;
-    format      binary;
+    format      ascii;
     class       dictionary;
     location    "constant";
     object      LESProperties;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 LESModel       oneEqEddy;

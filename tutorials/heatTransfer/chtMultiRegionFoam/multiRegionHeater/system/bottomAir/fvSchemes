@@ -16,7 +16,7 @@ FoamFile
 
 ddtSchemes
 {
-    default Euler;
+    default         Euler;
 }
 
 gradSchemes
@@ -26,7 +26,7 @@ gradSchemes
 
 divSchemes
 {
-    default         none;
+    default        none;
     div(phi,U)      Gauss upwind;
     div(phiU,p)     Gauss linear;
     div(phi,h)      Gauss upwind;

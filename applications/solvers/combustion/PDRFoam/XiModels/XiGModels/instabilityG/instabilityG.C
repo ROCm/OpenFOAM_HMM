@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,8 +49,8 @@ Foam::XiGModels::instabilityG::instabilityG
 )
 :
     XiGModel(XiGProperties, thermo, turbulence, Su),
-    GIn(XiGModelCoeffs_.lookup("GIn")),
-    lambdaIn(XiGModelCoeffs_.lookup("lambdaIn")),
+    GIn_(XiGModelCoeffs_.lookup("GIn")),
+    lambdaIn_(XiGModelCoeffs_.lookup("lambdaIn")),
     XiGModel_(XiGModel::New(XiGModelCoeffs_, thermo, turbulence, Su))
 {}
 
@@ -66,7 +66,7 @@ Foam::XiGModels::instabilityG::~instabilityG()
 Foam::tmp<Foam::volScalarField> Foam::XiGModels::instabilityG::G() const
 {
     volScalarField turbXiG(XiGModel_->G());
-    return GIn*GIn/(GIn + turbXiG) + turbXiG;
+    return (GIn_*GIn_/(GIn_ + turbXiG) + turbXiG);
 }
 
 
@@ -78,7 +78,7 @@ Foam::tmp<Foam::volScalarField> Foam::XiGModels::instabilityG::Db() const
     const volScalarField& mgb = db.lookupObject<volScalarField>("mgb");
 
     return XiGModel_->Db()
-        + rho*Su_*(Xi - 1.0)*mgb*(0.5*lambdaIn)/(mgb + 1.0/lambdaIn);
+        + rho*Su_*(Xi - 1.0)*mgb*(0.5*lambdaIn_)/(mgb + 1.0/lambdaIn_);
 }
 
 
@@ -86,8 +86,8 @@ bool Foam::XiGModels::instabilityG::read(const dictionary& XiGProperties)
 {
     XiGModel::read(XiGProperties);
 
-    XiGModelCoeffs_.lookup("GIn") >> GIn;
-    XiGModelCoeffs_.lookup("lambdaIn") >> lambdaIn;
+    XiGModelCoeffs_.lookup("GIn") >> GIn_;
+    XiGModelCoeffs_.lookup("lambdaIn") >> lambdaIn_;
 
     return true;
 }

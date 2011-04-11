@@ -55,17 +55,14 @@ class PatchPostProcessing
 
         typedef typename CloudType::particleType parcelType;
 
-        //- Maximum number of parcels to store
-        label maxStoredParcels_;
+        //- Maximum number of parcels to store - set as a scalar for I/O
+        scalar maxStoredParcels_;
 
-        //- List of patch names
-        wordList patchNames_;
+        //- List of patch indices to post-process
+        labelList patchIDs_;
 
         //- List of output data per patch
         List<DynamicList<string> > patchData_;
-
-        //- Mapping from local to global patch ids
-        labelList patchIds_;
 
 
     // Private Member Functions
@@ -117,11 +114,8 @@ public:
             //- Return maximum number of parcels to store per patch
             inline label maxStoredParcels() const;
 
-            //- Return const access to the list of patch names
-            inline const wordList& patchNames() const;
-
             //- Return const mapping from local to global patch ids
-            inline const labelList& patchIds() const;
+            inline const labelList& patchIDs() const;
 
 
         // Evaluation

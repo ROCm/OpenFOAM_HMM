@@ -24,7 +24,7 @@
         }
     }
 
-#   include "continuityErrs.H"
+    #include "continuityErrs.H"
 
     // Explicitly relax pressure for momentum corrector
     p.relax();

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,7 +53,36 @@ Foam::XiEqModel::XiEqModel
     ),
     thermo_(thermo),
     turbulence_(turbulence),
-    Su_(Su)
+    Su_(Su),
+    Nv_
+    (
+        IOobject
+        (
+            "Nv",
+            Su.mesh().facesInstance(),
+            Su.mesh(),
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        ),
+        Su.mesh()
+    ),
+    nsv_
+    (
+        IOobject
+        (
+            "nsv",
+            Su.mesh().facesInstance(),
+            Su.mesh(),
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        ),
+        Su.mesh()
+    ),
+    uPrimeCoef_(XiEqModelCoeffs_.lookupOrDefault<scalar>("uPrimeCoef", 0.0)),
+    subGridSchelkin_
+    (
+        XiEqModelCoeffs_.lookupOrDefault<bool>("subGridSchelkin", false)
+    )
 {}
 
 
@@ -69,8 +98,105 @@ bool Foam::XiEqModel::read(const dictionary& XiEqProperties)
 {
     XiEqModelCoeffs_ = XiEqProperties.subDict(type() + "Coeffs");
 
+    uPrimeCoef_ = XiEqModelCoeffs_.lookupOrDefault<scalar>("uPrimeCoef", 0.0);
+    subGridSchelkin_ =
+        XiEqModelCoeffs_.lookupOrDefault<bool>("subGridSchelkin", false);
+
     return true;
 }
 
+
+void Foam::XiEqModel::writeFields() const
+{
+    Nv_.write();
+    nsv_.write();
+    if (Su_.mesh().foundObject<volSymmTensorField>("B"))
+    {
+        const volSymmTensorField& B =
+            Su_.mesh().lookupObject<volSymmTensorField>("B");
+        B.write();
+    }
+}
+
+Foam::tmp<Foam::volScalarField>
+Foam::XiEqModel::calculateSchelkinEffect() const
+{
+    const fvMesh& mesh = Su_.mesh();
+
+    const volVectorField& U = mesh.lookupObject<volVectorField>("U");
+
+    const volSymmTensorField& CT = mesh.lookupObject<volSymmTensorField>("CT");
+    const volScalarField& Nv = mesh.lookupObject<volScalarField>("Nv");
+    const volSymmTensorField& nsv =
+        mesh.lookupObject<volSymmTensorField>("nsv");
+
+    tmp<volScalarField> tN
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "tN",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh,
+            dimensionedScalar("zero", Nv.dimensions(), 0.0),
+            zeroGradientFvPatchVectorField::typeName
+        )
+    );
+
+    volScalarField& N = tN();
+
+    N.internalField() = Nv.internalField()*pow(mesh.V(), 2.0/3.0);
+
+    tmp<volSymmTensorField> tns
+    (
+        new volSymmTensorField
+        (
+            IOobject
+            (
+                "tns",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            dimensionedSymmTensor
+            (
+                "zero",
+                nsv.dimensions(),
+                pTraits<symmTensor>::zero
+            )
+        )
+    );
+
+    volSymmTensorField& ns = tns();
+
+    ns.internalField() = nsv.internalField()*pow(mesh.V(), 2.0/3.0);
+
+    const volVectorField Uhat
+    (
+        U/(mag(U) + dimensionedScalar("Usmall", U.dimensions(), 1e-4))
+    );
+
+    const volScalarField nr(sqrt(max(N - (Uhat & ns & Uhat), scalar(1e-4))));
+
+    const scalarField cellWidth(pow(mesh.V(), 1.0/3.0));
+
+    const scalarField upLocal(uPrimeCoef_*sqrt((U & CT & U)*cellWidth));
+
+    const scalarField deltaUp(upLocal*(max(scalar(1.0), pow(nr, 0.5)) - 1.0));
+
+    //Re use tN
+    N.internalField() = upLocal*(max(scalar(1.0), pow(nr, 0.5)) - 1.0);
+
+    return tN;
+
+}
 
 // ************************************************************************* //

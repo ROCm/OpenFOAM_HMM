@@ -204,15 +204,15 @@ fileName="${1#~OpenFOAM/}"
 unset dirList
 case "$mode" in
 *u*)  # user
-    dirList="$dirList $HOME/.${WM_PROJECT:-OpenFOAM}/$version"
-    dirList="$dirList $HOME/.${WM_PROJECT:-OpenFOAM}"
+    userDir="$HOME/.${WM_PROJECT:-OpenFOAM}"
+    dirList="$dirList $userDir/$version $userDir"
     ;;
 esac
 
 case "$mode" in
-*g*)  # group
-    dirList="$dirList $prefixDir/site/$version"
-    dirList="$dirList $prefixDir/site"
+*g*)  # group (site)
+    siteDir="${WM_PROJECT_SITE:-$prefixDir/site}"
+    dirList="$dirList $siteDir/$version $siteDir"
     ;;
 esac
 

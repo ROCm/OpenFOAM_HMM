@@ -33,11 +33,10 @@ Foam::PressureGradientForce<CloudType>::PressureGradientForce
 (
     CloudType& owner,
     const fvMesh& mesh,
-    const dictionary& dict,
-    const word& forceType
+    const dictionary& dict
 )
 :
-    ParticleForce<CloudType>(owner, mesh, dict, forceType),
+    ParticleForce<CloudType>(owner, mesh, dict, typeName, true),
     UName_(this->coeffs().lookup("U")),
     gradUPtr_(NULL)
 {}

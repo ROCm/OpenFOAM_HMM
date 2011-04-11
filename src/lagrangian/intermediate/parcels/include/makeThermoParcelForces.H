@@ -33,6 +33,7 @@ License
 
 #include "BrownianMotionForce.H"
 #include "GravityForce.H"
+#include "NonInertialFrameForce.H"
 #include "ParamagneticForce.H"
 #include "PressureGradientForce.H"
 #include "SRFForce.H"
@@ -46,6 +47,7 @@ License
     makeParticleForceModelType(NonSphereDragForce, CloudType);                \
     makeParticleForceModelType(BrownianMotionForce, CloudType);               \
     makeParticleForceModelType(GravityForce, CloudType);                      \
+    makeParticleForceModelType(NonInertialFrameForce, CloudType);             \
     makeParticleForceModelType(ParamagneticForce, CloudType);                 \
     makeParticleForceModelType(PressureGradientForce, CloudType);             \
     makeParticleForceModelType(SRFForce, CloudType);

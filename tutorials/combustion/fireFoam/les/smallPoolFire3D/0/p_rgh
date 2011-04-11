@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -26,10 +26,15 @@ boundaryField
         type            buoyantPressure;
         value           $internalField;
     }
-
     sides
     {
-        type            fixedValue;
+        type            totalPressure;
+        p0              $internalField;
+        U               U;
+        phi             phi;
+        rho             rho;
+        psi             none;
+        gamma           0;
         value           $internalField;
     }
     base

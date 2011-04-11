@@ -25,7 +25,7 @@ Class
     Foam::cloudSolution
 
 Description
-    - Stores all relevant solution info
+    Stores all relevant solution info for cloud
 
 SourceFiles
     cloudSolutionI.H
@@ -77,8 +77,8 @@ class cloudSolution
         //- Current cloud iteration
         label iter_;
 
-        //- Cloud solution time step
-        scalar deltaT_;
+        //- Particle track time
+        scalar trackTime_;
 
 
         // Run-time options
@@ -100,7 +100,7 @@ class cloudSolution
             Switch resetSourcesOnStartup_;
 
             //- List schemes, e.g. U semiImplicit 1
-            List<Tuple2<word, scalar> > schemes_;
+            List<Tuple2<word, Tuple2<bool, scalar> > > schemes_;
 
 
     // Private Member Functions
@@ -168,11 +168,8 @@ public:
             //- Increment and return iter counter
             inline label nextIter();
 
-            //- Return the time step
-            inline scalar deltaTValue() const;
-
-            //- Return the time step
-            inline const dimensionedScalar deltaT() const;
+            //- Return the particle track time
+            inline scalar trackTime() const;
 
             //- Return const access to the coupled flag
             inline const Switch coupled() const;

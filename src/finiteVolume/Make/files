@@ -112,9 +112,12 @@ $(constraintFvPatchFields)/wedge/wedgeFvPatchScalarField.C
 
 derivedFvPatchFields = $(fvPatchFields)/derived
 $(derivedFvPatchFields)/activeBaffleVelocity/activeBaffleVelocityFvPatchVectorField.C
+$(derivedFvPatchFields)/activePressureForceBaffleVelocity/activePressureForceBaffleVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/advective/advectiveFvPatchFields.C
-
-$(derivedFvPatchFields)/codedFixedValue/codedFixedValueFvPatchScalarField.C
+$(derivedFvPatchFields)/codedFixedValue/codedFixedValueFvPatchFields.C
+$(derivedFvPatchFields)/directMappedField/directMappedFieldFvPatchFields.C
+$(derivedFvPatchFields)/directMappedFixedInternalValue/directMappedFixedInternalValueFvPatchFields.C
+$(derivedFvPatchFields)/directMappedFixedPushedInternalValue/directMappedFixedPushedInternalValueFvPatchFields.C
 $(derivedFvPatchFields)/directMappedFixedValue/directMappedFixedValueFvPatchFields.C
 $(derivedFvPatchFields)/directMappedVelocityFluxFixedValue/directMappedVelocityFluxFixedValueFvPatchField.C
 $(derivedFvPatchFields)/fan/fanFvPatchFields.C
@@ -216,6 +219,7 @@ $(surfaceInterpolation)/surfaceInterpolationScheme/surfaceInterpolationSchemes.C
 
 schemes = $(surfaceInterpolation)/schemes
 $(schemes)/linear/linear.C
+$(schemes)/pointLinear/pointLinear.C
 $(schemes)/midPoint/midPoint.C
 $(schemes)/downwind/downwind.C
 $(schemes)/weighted/weighted.C

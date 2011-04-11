@@ -38,7 +38,6 @@ Description
 #include "labelList.H"
 #include "pointField.H"
 #include "faceList.H"
-//#include "typeInfo.H"
 #include "OFstream.H"
 #include "tetPointRef.H"
 #include "FixedList.H"
@@ -165,7 +164,8 @@ protected:
             DynamicList<label>& faceList,
             const tetPointRef& tet,
             const FixedList<vector, 4>& tetAreas,
-            const FixedList<label, 4>& tetPlaneBasePtIs
+            const FixedList<label, 4>& tetPlaneBasePtIs,
+            const scalar tol
         ) const;
 
         //- Find the lambda value for the line to-from across the
@@ -179,7 +179,8 @@ protected:
             const label tetPlaneBasePtI,
             const label cellI,
             const label tetFaceI,
-            const label tetPtI
+            const label tetPtI,
+            const scalar tol
         ) const;
 
         //- Find the lambda value for a moving tri face
@@ -192,7 +193,8 @@ protected:
             const label tetPlaneBasePtI,
             const label cellI,
             const label tetFaceI,
-            const label tetPtI
+            const label tetPtI,
+            const scalar tol
         ) const;
 
         //- Modify the tet owner data by crossing triI
@@ -291,6 +293,10 @@ public:
         //- Fraction of distance to tet centre to move a particle to
         // 'rescue' it from a tracking problem
         static const scalar trackingCorrectionTol;
+
+        //- Fraction of the cell volume to use in determining tolerance values
+        //  for the denominator and numerator of lambda
+        static const scalar lambdaDistanceToleranceCoeff;
 
 
     // Constructors
@@ -445,10 +451,6 @@ public:
                 const label faceI
             ) const;
 
-            //- The nearest distance to a wall that
-            //  the particle can be in the n direction
-            inline scalar wallImpactDistance(const vector& n) const;
-
             //- Return the fraction of time-step completed
             inline scalar& stepFraction();
 
@@ -496,10 +498,6 @@ public:
 
     // Transformations
 
-        //- Transform the position the particle
-        //  according to the given transformation tensor
-        virtual void transformPosition(const tensor& T);
-
         //- Transform the physical properties of the particle
         //  according to the given transformation tensor
         virtual void transformProperties(const tensor& T);
@@ -507,6 +505,10 @@ public:
         //- Transform the physical properties of the particle
         //  according to the given separation vector
         virtual void transformProperties(const vector& separation);
+
+        //- The nearest distance to a wall that
+        //  the particle can be in the n direction
+        virtual scalar wallImpactDistance(const vector& n) const;
 
 
     // Parallel transfer

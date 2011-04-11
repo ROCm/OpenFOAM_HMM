@@ -520,7 +520,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     }
 
     const scalar time = this->owner().db().time().value();
-    const scalar carrierDt = this->owner().solution().deltaTValue();
+    const scalar trackTime = this->owner().solution().trackTime();
     const polyMesh& mesh = this->owner().mesh();
 
     // Prepare for next time step
@@ -533,7 +533,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
 
     // Duration of injection period during this timestep
     const scalar deltaT =
-        max(0.0, min(carrierDt, min(time - SOI_, timeEnd() - time0_)));
+        max(0.0, min(trackTime, min(time - SOI_, timeEnd() - time0_)));
 
     // Pad injection time if injection starts during this timestep
     const scalar padTime = max(0.0, SOI_ - time0_);
@@ -607,11 +607,16 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                         pPtr->rho()
                     );
 
-                // Add the new parcel
-                td.cloud().addParticle(pPtr);
-
-                massAdded += pPtr->nParticle()*pPtr->mass();
-                parcelsAdded++;
+                if (pPtr->move(td, dt))
+                {
+                    td.cloud().addParticle(pPtr);
+                    massAdded += pPtr->nParticle()*pPtr->mass();
+                    parcelsAdded++;
+                }
+                else
+                {
+                    delete pPtr;
+                }
             }
         }
     }

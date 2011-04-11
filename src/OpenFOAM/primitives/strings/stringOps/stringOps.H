@@ -62,6 +62,13 @@ namespace stringOps
     //  If parameter is unset or null, the \c defValue is substituted.
     //  Otherwise, the value of parameter is substituted.
     //
+    //  Supports alternative values as per the Bourne/Korn shell.
+    //  \code
+    //      "${parameter:+altValue}"
+    //  \endcode
+    //  If parameter is unset or null, nothing is substituted.
+    //  Otherwise the \c altValue is substituted.
+    //
     //  Any unknown entries are removed silently.
     //
     //  Malformed entries (eg, brace mismatch, sigil followed by bad character)
@@ -88,6 +95,13 @@ namespace stringOps
     //  \endcode
     //  If parameter is unset or null, the \c defValue is substituted.
     //  Otherwise, the value of parameter is substituted.
+    //
+    //  Supports alternative values as per the Bourne/Korn shell.
+    //  \code
+    //      "${parameter:+altValue}"
+    //  \endcode
+    //  If parameter is unset or null, nothing is substituted.
+    //  Otherwise the \c altValue is substituted.
     //
     //  Any unknown entries are removed silently.
     //
@@ -155,6 +169,13 @@ namespace stringOps
     //  If parameter is unset or null, the \c defValue is substituted.
     //  Otherwise, the value of parameter is substituted.
     //
+    //  Supports alternative values as per the Bourne/Korn shell.
+    //  \code
+    //      "${parameter:+altValue}"
+    //  \endcode
+    //  If parameter is unset or null, nothing is substituted.
+    //  Otherwise the \c altValue is substituted.
+    //
     //  Any unknown entries are removed silently, if allowEmpty is true.
     //
     //  Malformed entries (eg, brace mismatch, sigil followed by bad character)
@@ -186,6 +207,13 @@ namespace stringOps
     //  \endcode
     //  If parameter is unset or null, the \c defValue is substituted.
     //  Otherwise, the value of parameter is substituted.
+    //
+    //  Supports alternative values as per the Bourne/Korn shell.
+    //  \code
+    //      "${parameter:+altValue}"
+    //  \endcode
+    //  If parameter is unset or null, nothing is substituted.
+    //  Otherwise the \c altValue is substituted.
     //
     //  Any unknown entries are removed silently, if allowEmpty is true.
     //

@@ -33,10 +33,20 @@ writeInterval   #codeStream
         -I$(LIB_SRC)/finiteVolume/lnInclude
     #};
 
+    localCode
+    #{
+        static int someCode()
+        {
+            Info<<"called someCode\n";
+            return 10;
+        }
+    #};
+
     code
     #{
         label interval = ($endIter - $begIter);
-        label nDumps = $nDumps;
+        // label nDumps = $nDumps;
+        label nDumps = someCode();
         os  << (interval / nDumps);
     #};
 };

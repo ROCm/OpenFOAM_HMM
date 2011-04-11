@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -363,17 +363,6 @@ inline Foam::HashTable<T, Key, Hash>::iterator::iterator
 
 
 template<class T, class Key, class Hash>
-inline Foam::HashTable<T, Key, Hash>::iterator::operator
-typename Foam::HashTable<T, Key, Hash>::const_iterator() const
-{
-    return *reinterpret_cast
-    <
-        const typename Foam::HashTable<T, Key, Hash>::const_iterator*
-    >(this);
-}
-
-
-template<class T, class Key, class Hash>
 inline T&
 Foam::HashTable<T, Key, Hash>::iterator::operator*()
 {
@@ -439,6 +428,16 @@ template<class T, class Key, class Hash>
 inline Foam::HashTable<T, Key, Hash>::const_iterator::const_iterator()
 :
     iteratorBase()
+{}
+
+
+template<class T, class Key, class Hash>
+inline Foam::HashTable<T, Key, Hash>::const_iterator::const_iterator
+(
+    const HashTable<T, Key, Hash>::iterator& iter
+)
+:
+    iteratorBase(iter)
 {}
 
 

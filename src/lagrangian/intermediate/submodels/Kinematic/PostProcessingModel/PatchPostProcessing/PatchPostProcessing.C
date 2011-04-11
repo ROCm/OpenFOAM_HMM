@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ License
 
 #include "PatchPostProcessing.H"
 #include "Pstream.H"
+#include "stringListOps.H"
 #include "ListListOps.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -35,11 +36,11 @@ Foam::label Foam::PatchPostProcessing<CloudType>::applyToPatch
     const label globalPatchI
 ) const
 {
-    forAll(patchIds_, patchI)
+    forAll(patchIDs_, i)
     {
-        if (patchIds_[patchI] == globalPatchI)
+        if (patchIDs_[i] == globalPatchI)
         {
-            return patchI;
+            return i;
         }
     }
 
@@ -52,16 +53,18 @@ Foam::label Foam::PatchPostProcessing<CloudType>::applyToPatch
 template<class CloudType>
 void Foam::PatchPostProcessing<CloudType>::write()
 {
-    forAll(patchData_, patchI)
+    forAll(patchData_, i)
     {
         List<List<string> > procData(Pstream::nProcs());
-        procData[Pstream::myProcNo()] = patchData_[patchI];
+        procData[Pstream::myProcNo()] = patchData_[i];
 
         Pstream::gatherList(procData);
 
         if (Pstream::master())
         {
-            fileName outputDir = this->owner().time().path();
+            const fvMesh& mesh = this->owner().mesh();
+
+            fileName outputDir = mesh.time().path();
 
             if (Pstream::parRun())
             {
@@ -69,24 +72,26 @@ void Foam::PatchPostProcessing<CloudType>::write()
                 // distributed data running)
                 outputDir =
                     outputDir/".."/"postProcessing"/cloud::prefix/
-                    this->owner().name()/this->owner().time().timeName();
+                    this->owner().name()/mesh.time().timeName();
             }
             else
             {
                 outputDir =
                     outputDir/"postProcessing"/cloud::prefix/
-                    this->owner().name()/this->owner().time().timeName();
+                    this->owner().name()/mesh.time().timeName();
             }
 
             // Create directory if it doesn't exist
             mkDir(outputDir);
 
+            const word& patchName = mesh.boundaryMesh()[patchIDs_[i]].name();
+
             OFstream patchOutFile
             (
-                outputDir/patchNames_[patchI] + ".post",
+                outputDir/patchName + ".post",
                 IOstream::ASCII,
                 IOstream::currentVersion,
-                this->owner().time().writeCompression()
+                mesh.time().writeCompression()
             );
 
             List<string> globalData;
@@ -97,15 +102,16 @@ void Foam::PatchPostProcessing<CloudType>::write()
             );
             sort(globalData);
 
-            patchOutFile<< "# Time " + parcelType::propHeader << nl;
+            string header("# Time currentProc " + parcelType::propHeader);
+            patchOutFile<< header.c_str() << nl;
 
-            forAll(globalData, i)
+            forAll(globalData, dataI)
             {
-                patchOutFile<< globalData[i].c_str() << nl;
+                patchOutFile<< globalData[dataI].c_str() << nl;
             }
         }
 
-        patchData_[patchI].clearStorage();
+        patchData_[i].clearStorage();
     }
 }
 
@@ -120,30 +126,47 @@ Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
 )
 :
     PostProcessingModel<CloudType>(dict, owner, typeName),
-    maxStoredParcels_(readLabel(this->coeffDict().lookup("maxStoredParcels"))),
-    patchNames_(this->coeffDict().lookup("patches")),
-    patchData_(patchNames_.size()),
-    patchIds_(patchNames_.size())
+    maxStoredParcels_(readScalar(this->coeffDict().lookup("maxStoredParcels"))),
+    patchIDs_(),
+    patchData_()
 {
-    const polyBoundaryMesh& bMesh = this->owner().mesh().boundaryMesh();
-    forAll(patchNames_, patchI)
+    const wordList allPatchNames = owner.mesh().boundaryMesh().names();
+    wordList patchName(this->coeffDict().lookup("patches"));
+
+    labelHashSet uniquePatchIDs;
+    forAllReverse(patchName, i)
     {
-        const label id = bMesh.findPatchID(patchNames_[patchI]);
-        if (id < 0)
+        labelList patchIDs = findStrings(patchName[i], allPatchNames);
+
+        if (patchIDs.empty())
         {
-            FatalErrorIn
+            WarningIn
             (
-                "PatchPostProcessing<CloudType>::PatchPostProcessing"
+                "Foam::PatchPostProcessing<CloudType>::PatchPostProcessing"
                 "("
                     "const dictionary&, "
-                    "CloudType& owner"
+                    "CloudType& "
                 ")"
-            )<< "Requested patch " << patchNames_[patchI] << " not found" << nl
-             << "Available patches are: " << bMesh.names() << nl
-             << exit(FatalError);
+            )   << "Cannot find any patch names matching " << patchName[i]
+                << endl;
         }
-        patchIds_[patchI] = id;
+
+        uniquePatchIDs.insert(patchIDs);
     }
+
+    patchIDs_ = uniquePatchIDs.toc();
+
+    if (debug)
+    {
+        forAll(patchIDs_, i)
+        {
+            const label patchI = patchIDs_[i];
+            const word& patchName = owner.mesh().boundaryMesh()[patchI].name();
+            Info<< "Post-process patch " << patchName << endl;
+        }
+    }
+
+    patchData_.setSize(patchIDs_.size());
 }
 
 
@@ -155,9 +178,8 @@ Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
 :
     PostProcessingModel<CloudType>(ppm),
     maxStoredParcels_(ppm.maxStoredParcels_),
-    patchNames_(ppm.patchNames_),
-    patchData_(ppm.patchData_),
-    patchIds_(ppm.patchIds_)
+    patchIDs_(ppm.patchIDs_),
+    patchData_(ppm.patchData_)
 {}
 
 
@@ -177,11 +199,12 @@ void Foam::PatchPostProcessing<CloudType>::postPatch
     const label patchI
 )
 {
-    label localPatchI = applyToPatch(patchI);
-    if (localPatchI >= 0 && patchData_[localPatchI].size() < maxStoredParcels_)
+    const label localPatchI = applyToPatch(patchI);
+    if (localPatchI != -1 && patchData_[localPatchI].size() < maxStoredParcels_)
     {
         OStringStream data;
-        data<< this->owner().time().timeName() << ' ' << p;
+        data<< this->owner().time().timeName() << ' ' << Pstream::myProcNo()
+            << ' ' << p;
         patchData_[localPatchI].append(data.str());
     }
 }

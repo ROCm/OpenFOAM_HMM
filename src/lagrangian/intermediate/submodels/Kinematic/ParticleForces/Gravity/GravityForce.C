@@ -32,11 +32,10 @@ Foam::GravityForce<CloudType>::GravityForce
 (
     CloudType& owner,
     const fvMesh& mesh,
-    const dictionary& dict,
-    const word& forceType
+    const dictionary& dict
 )
 :
-    ParticleForce<CloudType>(owner, mesh, dict),
+    ParticleForce<CloudType>(owner, mesh, dict, typeName, false),
     g_(owner.g().value())
 {}
 

@@ -30,6 +30,7 @@ License
 #include "symmetryPolyPatch.H"
 #include "wallPolyPatch.H"
 #include "wedgePolyPatch.H"
+#include "meshTools.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -52,11 +53,15 @@ void Foam::particle::correctAfterParallelTransfer
     TrackData& td
 )
 {
-    const processorPolyPatch& ppp =
-        refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchI]);
+    const coupledPolyPatch& ppp =
+        refCast<const coupledPolyPatch>(mesh_.boundaryMesh()[patchI]);
 
     cellI_ = ppp.faceCells()[faceI_];
 
+    // Have patch transform the position
+    ppp.transformPosition(position_, faceI_);
+
+    // Transform the properties
     if (!ppp.parallel())
     {
         const tensor& T =
@@ -65,8 +70,6 @@ void Foam::particle::correctAfterParallelTransfer
           ? ppp.forwardT()[0]
           : ppp.forwardT()[faceI_]
         );
-
-        transformPosition(T);
         transformProperties(T);
     }
     else if (ppp.separated())
@@ -77,7 +80,6 @@ void Foam::particle::correctAfterParallelTransfer
           ? ppp.separation()[0]
           : ppp.separation()[faceI_]
         );
-        position_ -= s;
         transformProperties(-s);
     }
 
@@ -284,6 +286,11 @@ Foam::scalar Foam::particle::trackToFace
     // be a different tet to the one that the particle occupies.
     tetIndices faceHitTetIs;
 
+    // What tolerance is appropriate the minimum lambda numerator and
+    // denominator for tracking in this cell.
+    scalar lambdaDistanceTolerance =
+        lambdaDistanceToleranceCoeff*mesh_.cellVolumes()[cellI_];
+
     do
     {
         if (triI != -1)
@@ -369,7 +376,15 @@ Foam::scalar Foam::particle::trackToFace
         tetPlaneBasePtIs[2] = basePtI;
         tetPlaneBasePtIs[3] = basePtI;
 
-        findTris(endPosition, tris, tet, tetAreas, tetPlaneBasePtIs);
+        findTris
+        (
+            endPosition,
+            tris,
+            tet,
+            tetAreas,
+            tetPlaneBasePtIs,
+            lambdaDistanceTolerance
+        );
 
         // Reset variables for new track
         triI = -1;
@@ -413,7 +428,8 @@ Foam::scalar Foam::particle::trackToFace
                     tetPlaneBasePtIs[tI],
                     cellI_,
                     tetFaceI_,
-                    tetPtI_
+                    tetPtI_,
+                    lambdaDistanceTolerance
                 );
 
                 if (lam < lambdaMin)
@@ -462,7 +478,7 @@ Foam::scalar Foam::particle::trackToFace
         //     << origId_ << " " << origProc_<< nl
         //     << "# face: " << tetFaceI_ << nl
         //     << "# tetPtI: " << tetPtI_ << nl
-        //     << "# tetBasePtI: " << mesh.tetBasePtIs()[tetFaceI_] << nl
+        //     << "# tetBasePtI: " << mesh_.tetBasePtIs()[tetFaceI_] << nl
         //     << "# tet.mag(): " << tet.mag() << nl
         //     << "# tet.quality(): " << tet.quality()
         //     << endl;
@@ -689,14 +705,21 @@ void Foam::particle::hitWallFaces
     tetIndices& closestTetIs
 )
 {
+    typedef typename CloudType::particleType particleType;
+
     if (!(cloud.hasWallImpactDistance() && cloud.cellHasWallFaces()[cellI_]))
     {
         return;
     }
 
+    particleType& p = static_cast<particleType&>(*this);
+
     const faceList& pFaces = mesh_.faces();
 
     const Foam::cell& thisCell = mesh_.cells()[cellI_];
+
+    scalar lambdaDistanceTolerance =
+        lambdaDistanceToleranceCoeff*mesh_.cellVolumes()[cellI_];
 
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
@@ -734,7 +757,7 @@ void Foam::particle::hitWallFaces
                 // triangle.  Assuming that the wallImpactDistance
                 // does not change as the particle or the mesh moves
                 // forward in time.
-                scalar r = wallImpactDistance(nHat);
+                scalar r = p.wallImpactDistance(nHat);
 
                 vector toPlusRNHat = to + r*nHat;
 
@@ -749,7 +772,8 @@ void Foam::particle::hitWallFaces
                     f[tetIs.faceBasePt()],
                     cellI_,
                     fI,
-                    tetIs.tetPt()
+                    tetIs.tetPt(),
+                    lambdaDistanceTolerance
                 );
 
                 if ((tetClambda <= 0.0) || (tetClambda >= 1.0))
@@ -775,7 +799,8 @@ void Foam::particle::hitWallFaces
                     f[tetIs.faceBasePt()],
                     cellI_,
                     fI,
-                    tetIs.tetPt()
+                    tetIs.tetPt(),
+                    lambdaDistanceTolerance
                 );
 
                 pointHit hitInfo(vector::zero);
@@ -954,19 +979,22 @@ void Foam::particle::hitCyclicPatch
     tetPtI_ = mesh_.faces()[tetFaceI_].size() - 1 - tetPtI_;
 
     const cyclicPolyPatch& receiveCpp = cpp.neighbPatch();
+    label patchFacei = receiveCpp.whichFace(faceI_);
 
     // Now the particle is on the receiving side
 
+    // Have patch transform the position
+    receiveCpp.transformPosition(position_, patchFacei);
+
+    // Transform the properties
     if (!receiveCpp.parallel())
     {
         const tensor& T =
         (
             receiveCpp.forwardT().size() == 1
           ? receiveCpp.forwardT()[0]
-          : receiveCpp.forwardT()[receiveCpp.whichFace(faceI_)]
+          : receiveCpp.forwardT()[patchFacei]
         );
-
-        transformPosition(T);
         transformProperties(T);
     }
     else if (receiveCpp.separated())
@@ -975,9 +1003,8 @@ void Foam::particle::hitCyclicPatch
         (
             (receiveCpp.separation().size() == 1)
           ? receiveCpp.separation()[0]
-          : receiveCpp.separation()[receiveCpp.whichFace(faceI_)]
+          : receiveCpp.separation()[patchFacei]
         );
-        position_ -= s;
         transformProperties(-s);
     }
 }

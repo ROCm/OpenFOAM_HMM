@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,8 +49,8 @@ Foam::XiEqModels::Gulder::Gulder
 )
 :
     XiEqModel(XiEqProperties, thermo, turbulence, Su),
-    XiEqCoef(readScalar(XiEqModelCoeffs_.lookup("XiEqCoef"))),
-    SuMin(0.01*Su.average())
+    XiEqCoef_(readScalar(XiEqModelCoeffs_.lookup("XiEqCoef"))),
+    SuMin_(0.01*Su.average())
 {}
 
 
@@ -67,6 +67,11 @@ Foam::tmp<Foam::volScalarField> Foam::XiEqModels::Gulder::XiEq() const
     volScalarField up(sqrt((2.0/3.0)*turbulence_.k()));
     const volScalarField& epsilon = turbulence_.epsilon();
 
+    if (subGridSchelkin())
+    {
+        up.internalField() += calculateSchelkinEffect();
+    }
+
     volScalarField tauEta(sqrt(mag(thermo_.muu()/(thermo_.rhou()*epsilon))));
 
     volScalarField Reta
@@ -78,7 +83,7 @@ Foam::tmp<Foam::volScalarField> Foam::XiEqModels::Gulder::XiEq() const
         )
     );
 
-    return 1.0 + XiEqCoef*sqrt(up/(Su_ + SuMin))*Reta;
+    return (1.0 + XiEqCoef_*sqrt(up/(Su_ + SuMin_))*Reta);
 }
 
 
@@ -86,7 +91,9 @@ bool Foam::XiEqModels::Gulder::read(const dictionary& XiEqProperties)
 {
     XiEqModel::read(XiEqProperties);
 
-    XiEqModelCoeffs_.lookup("XiEqCoef") >> XiEqCoef;
+    XiEqModelCoeffs_.lookup("XiEqCoef") >> XiEqCoef_;
+    XiEqModelCoeffs_.lookup("uPrimeCoef") >> uPrimeCoef_;
+    XiEqModelCoeffs_.lookup("subGridSchelkin") >> subGridSchelkin_;
 
     return true;
 }

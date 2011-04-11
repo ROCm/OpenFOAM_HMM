@@ -70,6 +70,9 @@ bool Foam::functionEntries::codeStream::execute
     Istream& is
 )
 {
+    Info<< "Using #codeStream at line " << is.lineNumber()
+        << " in file " <<  parentDict.name() << endl;
+
     dynamicCode::checkSecurity
     (
         "functionEntries::codeStream::execute(..)",
@@ -97,6 +100,13 @@ bool Foam::functionEntries::codeStream::execute
 
     // see if library is loaded
     void* lib = dlLibraryTable::findLibrary(libPath);
+
+
+    if (!lib)
+    {
+        Info<< "Using #codeStream with " << libPath << endl;
+    }
+
 
     // nothing loaded
     // avoid compilation if possible by loading an existing library
@@ -126,7 +136,9 @@ bool Foam::functionEntries::codeStream::execute
                 (
                     "EXE_INC = -g \\\n"
                   + context.options()
-                  + "\n\nLIB_LIBS ="
+                  + "\n\nLIB_LIBS = \\\n"
+                  + "    -lOpenFOAM \\\n"
+                  + context.libs()
                 );
 
                 if (!dynCode.copyOrCreateFiles(true))
@@ -162,6 +174,8 @@ bool Foam::functionEntries::codeStream::execute
                 "functionEntries::codeStream::execute(..)",
                 parentDict
             )   << "Failed loading library " << libPath << nl
+                << "Did you add all libraries to the 'libs' entry"
+                << " in system/controlDict?"
                 << exit(FatalIOError);
         }
 

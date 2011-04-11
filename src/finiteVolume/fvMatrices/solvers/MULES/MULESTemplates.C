@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -457,12 +457,20 @@ void Foam::MULES::limiter
         tmp<volScalarField::DimensionedInternalField> V0 = mesh.Vsc0();
 
         psiMaxn =
-            V*((rho.field()/deltaT - Sp.field())*psiMaxn - Su.field())
+            V
+           *(
+               (rho.field()/deltaT - Sp.field())*psiMaxn
+             - Su.field()
+            )
           - (V0().field()/deltaT)*rho.oldTime().field()*psi0
           + sumPhiBD;
 
         psiMinn =
-            V*(Su.field() - (rho.field()/deltaT - Sp.field())*psiMinn)
+            V
+           *(
+               Su.field()
+             - (rho.field()/deltaT - Sp.field())*psiMinn
+            )
           + (V0().field()/deltaT)*rho.oldTime().field()*psi0
           - sumPhiBD;
     }
@@ -472,16 +480,17 @@ void Foam::MULES::limiter
             V
            *(
                (rho.field()/deltaT - Sp.field())*psiMaxn
-             - (rho.oldTime().field()/deltaT)*psi0
              - Su.field()
+             - (rho.oldTime().field()/deltaT)*psi0
             )
           + sumPhiBD;
 
         psiMinn =
             V
            *(
-               (rho.field()/deltaT)*psi0
-             - (rho.oldTime().field()/deltaT - Sp.field())*psiMinn + Su.field()
+               Su.field()
+             - (rho.field()/deltaT - Sp.field())*psiMinn
+             + (rho.oldTime().field()/deltaT)*psi0
             )
           - sumPhiBD;
     }

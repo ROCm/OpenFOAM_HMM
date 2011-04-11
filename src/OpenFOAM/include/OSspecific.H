@@ -93,22 +93,22 @@ fileName cwd();
 //  else return false
 bool chDir(const fileName& dir);
 
-//- Search for \em name
-//  in the following hierarchy:
-//  -# personal settings:
-//    - ~/.OpenFOAM/\<VERSION\>/
-//      <em>for version-specific files</em>
+//- Search for a file from user/group/shipped directories.
+//  The search scheme allows for version-specific and
+//  version-independent files using the following hierarchy:
+//  - \b user settings:
+//    - ~/.OpenFOAM/\<VERSION\>
 //    - ~/.OpenFOAM/
-//      <em>for version-independent files</em>
-//  -# site-wide settings:
+//  - \b group (site) settings (when $WM_PROJECT_SITE is set):
+//    - $WM_PROJECT_SITE/\<VERSION\>
+//    - $WM_PROJECT_SITE
+//  - \b group (site) settings (when $WM_PROJECT_SITE is not set):
 //    - $WM_PROJECT_INST_DIR/site/\<VERSION\>
-//      <em>for version-specific files</em>
 //    - $WM_PROJECT_INST_DIR/site/
-//      <em>for version-independent files</em>
-//  -# shipped settings:
+//  - \b other (shipped) settings:
 //    - $WM_PROJECT_DIR/etc/
 //
-//  \return the full path name or fileName() if the name cannot be found
+//  \return The full path name or fileName() if the name cannot be found
 //  Optionally abort if the file cannot be found
 fileName findEtcFile(const fileName&, bool mandatory=false);
 
@@ -195,6 +195,9 @@ void* dlSym(void* handle, const std::string& symbol);
 
 //- Report if symbol in a dlopened library could be found
 bool dlSymFound(void* handle, const std::string& symbol);
+
+//- Return all loaded libraries
+fileNameList dlLoaded();
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

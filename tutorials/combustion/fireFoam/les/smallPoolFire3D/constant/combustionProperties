@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
@@ -20,7 +20,7 @@ combustionModel    infinitelyFastChemistry;
 
 infinitelyFastChemistryCoeffs
 {
-    C       10.0;
+    C       5.0;
 }
 
 noCombustionCoeffs

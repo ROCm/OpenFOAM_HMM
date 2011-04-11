@@ -27,20 +27,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class CloudType>
-Foam::ParticleForce<CloudType>::ParticleForce
-(
-    CloudType& owner,
-    const fvMesh& mesh,
-    const dictionary& dict
-)
-:
-    owner_(owner),
-    mesh_(mesh),
-    dict_(dict),
-    coeffs_(dictionary::null)
-{}
-
 
 template<class CloudType>
 Foam::ParticleForce<CloudType>::ParticleForce
@@ -48,14 +34,31 @@ Foam::ParticleForce<CloudType>::ParticleForce
     CloudType& owner,
     const fvMesh& mesh,
     const dictionary& dict,
-    const word& forceType
+    const word& forceType,
+    const bool readCoeffs
 )
 :
     owner_(owner),
     mesh_(mesh),
-    dict_(dict),
-    coeffs_(dict.subOrEmptyDict(forceType + "Coeffs"))
-{}
+    coeffs_(readCoeffs ? dict : dictionary::null)
+{
+    if (readCoeffs && (coeffs_.dictName() != forceType))
+    {
+        FatalIOErrorIn
+        (
+            "Foam::ParticleForce<CloudType>::ParticleForce"
+            "("
+                "CloudType&, "
+                "const fvMesh&, "
+                "const dictionary&, "
+                "const word&, "
+                "const bool"
+            ")",
+            dict
+        )   << "Force " << forceType << " must be specified as a dictionary"
+            << exit(FatalIOError);
+    }
+}
 
 
 template<class CloudType>
@@ -63,7 +66,6 @@ Foam::ParticleForce<CloudType>::ParticleForce(const ParticleForce& pf)
 :
     owner_(pf.owner_),
     mesh_(pf.mesh_),
-    dict_(pf.dict_),
     coeffs_(pf.coeffs_)
 {}
 

@@ -6,4 +6,3 @@
 
     const int nOuterCorr =
         pimple.lookupOrDefault<int>("nOuterCorrectors", 1);
-

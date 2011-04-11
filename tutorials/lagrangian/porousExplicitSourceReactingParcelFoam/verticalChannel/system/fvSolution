@@ -74,7 +74,7 @@ PISO
     momentumPredictor yes;
 }
 
-SIMPLE
+potentialFlow
 {
     // used for potentialFoam initialisation
     nNonOrthogonalCorrectors 10;
@@ -82,9 +82,8 @@ SIMPLE
 
 additional
 {
-    dpdt            false;
-    eWork           true;
-    hWork           true;
+    pressureWork    false;
+    pressureWorkTimeDerivative false;
 }
 
 

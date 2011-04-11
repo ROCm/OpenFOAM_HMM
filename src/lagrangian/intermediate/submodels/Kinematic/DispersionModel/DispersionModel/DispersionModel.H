@@ -132,22 +132,23 @@ public:
 
 #define makeDispersionModel(CloudType)                                        \
                                                                               \
-    defineTemplateTypeNameAndDebug(DispersionModel<CloudType>, 0);            \
-                                                                              \
+    typedef CloudType::kinematicCloudType kinematicCloudType;                 \
+    defineTemplateTypeNameAndDebug(DispersionModel<kinematicCloudType>, 0);   \
     defineTemplateRunTimeSelectionTable                                       \
     (                                                                         \
-        DispersionModel<CloudType>,                                           \
+        DispersionModel<kinematicCloudType>,                                  \
         dictionary                                                            \
     );
 
 
 #define makeDispersionModelType(SS, CloudType)                                \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
+    typedef CloudType::kinematicCloudType kinematicCloudType;                 \
+    defineNamedTemplateTypeNameAndDebug(SS<kinematicCloudType>, 0);           \
                                                                               \
-    DispersionModel<CloudType>::                                              \
-        adddictionaryConstructorToTable<SS<CloudType> >                       \
-            add##SS##CloudType##ConstructorToTable_;
+    DispersionModel<kinematicCloudType>::                                     \
+        adddictionaryConstructorToTable<SS<kinematicCloudType> >              \
+            add##SS##CloudType##kinematicCloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

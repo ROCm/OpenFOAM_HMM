@@ -99,8 +99,14 @@ public:
 
     // Public typedefs
 
-        //- Redefine particle type as parcel type
+        //- Type of cloud this cloud was instantiated for
+        typedef CloudType cloudType;
+
+        //- Type of parcel the cloud was instantiated for
         typedef typename CloudType::particleType parcelType;
+
+        //- Convenience typedef for this cloud type
+        typedef KinematicCloud<CloudType> kinematicCloudType;
 
         //- Force type
         typedef ParticleForceList<KinematicCloud<CloudType> > forceType;
@@ -244,8 +250,6 @@ protected:
 
 public:
 
-    typedef CloudType cloudType;
-
     // Constructors
 
         //- Construct given carrier gas fields
@@ -303,6 +307,10 @@ public:
 
             //- Return a reference to the cloud copy
             inline const KinematicCloud& cloudCopy() const;
+
+            //- Switch to specify if particles of the cloud can return
+            //  non-zero wall distance values - true for kinematic parcels
+            virtual bool hasWallImpactDistance() const;
 
 
             // References to the mesh and databases

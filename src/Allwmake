@@ -1,6 +1,6 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
-[ $# -ge 1 ] && makeOption=$1 || makeOption=libso
+makeType=${1:-libso}
 
 wmakeCheckPwd "$WM_PROJECT_DIR/src" || {
     echo "Error: Current directory is not \$WM_PROJECT_DIR/src"
@@ -25,49 +25,49 @@ wmakeLnInclude OSspecific/${WM_OSTYPE:-POSIX}
 Pstream/Allwmake $*
 
 OSspecific/${WM_OSTYPE:-POSIX}/Allwmake
-wmake $makeOption OpenFOAM
+wmake $makeType OpenFOAM
 
-wmake $makeOption fileFormats
-wmake $makeOption triSurface
-wmake $makeOption meshTools
-wmake $makeOption edgeMesh
-wmake $makeOption surfMesh
+wmake $makeType fileFormats
+wmake $makeType triSurface
+wmake $makeType meshTools
+wmake $makeType edgeMesh
+wmake $makeType surfMesh
 
 # Decomposition methods needed by dummyThirdParty
 parallel/decompose/AllwmakeLnInclude
 # dummyThirdParty (dummy metisDecomp, scotchDecomp etc) needed by e.g. meshTools
 dummyThirdParty/Allwmake $*
 
-wmake $makeOption finiteVolume
-wmake $makeOption lagrangian/basic
-wmake $makeOption lagrangian/distributionModels
-wmake $makeOption genericPatchFields
+wmake $makeType finiteVolume
+wmake $makeType lagrangian/basic
+wmake $makeType lagrangian/distributionModels
+wmake $makeType genericPatchFields
 
 # Build the proper scotchDecomp, metisDecomp etc.
 parallel/Allwmake $*
 
-wmake $makeOption conversion
+wmake $makeType conversion
 
-wmake $makeOption sampling
+wmake $makeType sampling
 
-wmake $makeOption dynamicMesh
-wmake $makeOption dynamicFvMesh
-wmake $makeOption topoChangerFvMesh
+wmake $makeType dynamicMesh
+wmake $makeType dynamicFvMesh
+wmake $makeType topoChangerFvMesh
 
-wmake $makeOption ODE
-wmake $makeOption randomProcesses
+wmake $makeType ODE
+wmake $makeType randomProcesses
 
 thermophysicalModels/Allwmake $*
 transportModels/Allwmake $*
 turbulenceModels/Allwmake $*
-wmake $makeOption surfaceFilmModels
+regionModels/Allwmake $*
 lagrangian/Allwmake $*
 postProcessing/Allwmake $*
 mesh/Allwmake $*
 
 fvAgglomerationMethods/Allwmake $*
 
-wmake $makeOption fvMotionSolver
-wmake $makeOption engine
+wmake $makeType fvMotionSolver
+wmake $makeType engine
 
 # ----------------------------------------------------------------- end-of-file

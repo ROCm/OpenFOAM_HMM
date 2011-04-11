@@ -28,7 +28,6 @@ Description
     Calculates particle SRF reference frame force
 
 SourceFiles
-    SRFForceI.H
     SRFForce.C
 
 \*---------------------------------------------------------------------------*/
@@ -74,8 +73,7 @@ public:
         (
             CloudType& owner,
             const fvMesh& mesh,
-            const dictionary& dict,
-            const word& forceType
+            const dictionary& dict
         );
 
         //- Construct copy

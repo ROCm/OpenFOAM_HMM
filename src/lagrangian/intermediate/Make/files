@@ -48,6 +48,7 @@ $(RADIATION)/absorptionEmission/cloudAbsorptionEmission/cloudAbsorptionEmission.
 $(RADIATION)/scatter/cloudScatter/cloudScatter.C
 
 submodels/Kinematic/PatchInteractionModel/LocalInteraction/patchInteractionData.C
+submodels/Kinematic/PatchInteractionModel/LocalInteraction/patchInteractionDataList.C
 
 KINEMATICINJECTION=submodels/Kinematic/InjectionModel
 $(KINEMATICINJECTION)/KinematicLookupTableInjection/kinematicParcelInjectionData.C

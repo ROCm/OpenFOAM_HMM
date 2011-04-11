@@ -1,6 +1,6 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
-[ $# -ge 1 ] && makeOption=$1 || makeOption=libso
+makeType=${1:-libso}
 
 # get SCOTCH_VERSION, SCOTCH_ARCH_PATH
 settings=`$WM_PROJECT_DIR/bin/foamEtcFile apps/scotch/bashrc`
@@ -17,17 +17,17 @@ set -x
 
 wmakeLnInclude decompositionMethods
 
-wmake $makeOption scotchDecomp
+wmake $makeType scotchDecomp
 
 if [ -d "$FOAM_LIBBIN/$FOAM_MPI" ]
 then
 (
     WM_OPTIONS=${WM_OPTIONS}$WM_MPLIB
-    wmake $makeOption ptscotchDecomp
+    wmake $makeType ptscotchDecomp
 )
 fi
 
-wmake $makeOption decompositionMethods
+wmake $makeType decompositionMethods
 
 
 # ----------------------------------------------------------------- end-of-file
