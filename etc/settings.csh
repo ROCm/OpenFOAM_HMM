@@ -38,6 +38,100 @@ alias _foamAddLib 'setenv LD_LIBRARY_PATH \!*\:${LD_LIBRARY_PATH}'
 alias _foamAddMan 'setenv MANPATH \!*\:${MANPATH}'
 
 #------------------------------------------------------------------------------
+# Set environment variables according to system type
+setenv WM_ARCH `uname -s`
+
+switch ($WM_ARCH)
+case Linux:
+    setenv WM_ARCH linux
+
+    switch (`uname -m`)
+    case i686:
+        breaksw
+
+    case x86_64:
+        switch ($WM_ARCH_OPTION)
+        case 32:
+            setenv WM_COMPILER_ARCH '-64'
+            setenv WM_CC 'gcc'
+            setenv WM_CXX 'g++'
+            setenv WM_CFLAGS '-m32 -fPIC'
+            setenv WM_CXXFLAGS '-m32 -fPIC'
+            setenv WM_LDFLAGS '-m32'
+            breaksw
+
+        case 64:
+            setenv WM_ARCH linux64
+            setenv WM_COMPILER_LIB_ARCH 64
+            setenv WM_CC 'gcc'
+            setenv WM_CXX 'g++'
+            setenv WM_CFLAGS '-m64 -fPIC'
+            setenv WM_CXXFLAGS '-m64 -fPIC'
+            setenv WM_LDFLAGS '-m64'
+            breaksw
+
+        default:
+            echo "Unknown WM_ARCH_OPTION '$WM_ARCH_OPTION', should be 32 or 64"
+            breaksw
+
+        endsw
+        breaksw
+
+    case ia64:
+        setenv WM_ARCH linuxIA64
+        setenv WM_COMPILER I64
+        breaksw
+
+    case mips64:
+        setenv WM_ARCH SiCortex64
+        setenv WM_MPLIB MPI
+        setenv WM_COMPILER_LIB_ARCH 64
+        setenv WM_CC 'gcc'
+        setenv WM_CXX 'g++'
+        setenv WM_CFLAGS '-mabi=64 -fPIC'
+        setenv WM_CXXFLAGS '-mabi=64 -fPIC'
+        setenv WM_LDFLAGS '-mabi=64 -G0'
+        breaksw
+
+    case ppc64:
+        setenv WM_ARCH linuxPPC64
+        setenv WM_COMPILER_LIB_ARCH 64
+        setenv WM_CC 'gcc'
+        setenv WM_CXX 'g++'
+        setenv WM_CFLAGS '-m64 -fPIC'
+        setenv WM_CXXFLAGS '-m64 -fPIC'
+        setenv WM_LDFLAGS '-m64'
+        breaksw
+
+    default:
+        echo Unknown processor type `uname -m` for Linux
+        breaksw
+
+    endsw
+    breaksw
+
+case SunOS:
+    setenv WM_ARCH SunOS64
+    setenv WM_MPLIB FJMPI
+    setenv WM_COMPILER_LIB_ARCH 64
+    setenv WM_CC 'gcc'
+    setenv WM_CXX 'g++'
+    setenv WM_CFLAGS '-mabi=64 -fPIC'
+    setenv WM_CXXFLAGS '-mabi=64 -fPIC'
+    setenv WM_LDFLAGS '-mabi=64 -G0'
+    breaksw
+
+default:
+    echo
+    echo "Your '$WM_ARCH' operating system is not supported by this release"
+    echo "of OpenFOAM. For further assistance, please contact www.OpenFOAM.com"
+    echo
+    breaksw
+
+endsw
+
+
+#------------------------------------------------------------------------------
 
 # location of the jobControl directory
 setenv FOAM_JOB_DIR $WM_PROJECT_INST_DIR/jobControl
@@ -56,8 +150,13 @@ setenv FOAM_EXT_LIBBIN $WM_THIRD_PARTY_DIR/platforms/$WM_OPTIONS/lib
 
 # shared site executables/libraries
 # similar naming convention as ~OpenFOAM expansion
-setenv FOAM_SITE_APPBIN $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/bin
-setenv FOAM_SITE_LIBBIN $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib
+if ( $?WM_PROJECT_SITE ) then
+    setenv FOAM_SITE_APPBIN $WM_PROJECT_SITE/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/bin
+    setenv FOAM_SITE_LIBBIN $WM_PROJECT_SITE/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib
+else
+    setenv FOAM_SITE_APPBIN $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/bin
+    setenv FOAM_SITE_LIBBIN $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib
+endif
 
 # user executables/libraries
 setenv FOAM_USER_APPBIN $WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/bin
@@ -69,7 +168,6 @@ setenv FOAM_USER_LIBBIN $WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib
 
 # convenience
 setenv FOAM_APP $WM_PROJECT_DIR/applications
-#setenv FOAM_LIB $WM_PROJECT_DIR/lib
 setenv FOAM_SRC $WM_PROJECT_DIR/src
 setenv FOAM_TUTORIALS $WM_PROJECT_DIR/tutorials
 setenv FOAM_UTILITIES $FOAM_APP/utilities
@@ -108,6 +206,13 @@ case ThirdParty:
         set gcc_version=gcc-4.4.3
         set gmp_version=gmp-5.0.1
         set mpfr_version=mpfr-2.4.2
+        breaksw
+    case Gcc46:
+    case Gcc46++0x:
+        set gcc_version=gcc-4.6.0
+        set gmp_version=gmp-5.0.1
+        set mpfr_version=mpfr-2.4.2
+        set mpc_version=mpc-0.8.1
         breaksw
     case Gcc45:
     case Gcc45++0x:
@@ -262,8 +367,8 @@ unsetenv MPI_ARCH_PATH MPI_HOME FOAM_MPI_LIBBIN
 
 switch ("$WM_MPLIB")
 case OPENMPI:
-    #setenv FOAM_MPI openmpi-1.4.1
-    setenv FOAM_MPI openmpi-1.5.1
+    #setenv FOAM_MPI openmpi-1.4.3
+    setenv FOAM_MPI openmpi-1.5.3
     setenv MPI_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
 
     # Tell OpenMPI where to find its install directory
@@ -282,6 +387,10 @@ case SYSTEMOPENMPI:
     setenv PINC "`mpicc --showme:compile`"
     setenv PLIBS "`mpicc --showme:link`"
     set libDir=`echo "$PLIBS" | sed -e 's/.*-L\([^ ]*\).*/\1/'`
+
+    # Bit of a hack: strip off 'lib' and hope this is the path to openmpi
+    # include files and libraries.
+    setenv MPI_ARCH_PATH "${libDir:h}"
 
     if ($?FOAM_VERBOSE && $?prompt) then
         echo "Using system installed MPI:"

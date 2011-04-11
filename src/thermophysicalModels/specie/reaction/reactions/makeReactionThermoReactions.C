@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,15 +27,18 @@ License
 #include "makeReactionThermo.H"
 
 #include "ArrheniusReactionRate.H"
-#include "thirdBodyArrheniusReactionRate.H"
-#include "FallOffReactionRate.H"
-#include "ChemicallyActivatedReactionRate.H"
-#include "LindemannFallOffFunction.H"
-#include "TroeFallOffFunction.H"
-#include "SRIFallOffFunction.H"
+#include "infiniteReactionRate.H"
 #include "LandauTellerReactionRate.H"
+#include "thirdBodyArrheniusReactionRate.H"
+
+#include "ChemicallyActivatedReactionRate.H"
 #include "JanevReactionRate.H"
 #include "powerSeriesReactionRate.H"
+
+#include "FallOffReactionRate.H"
+#include "LindemannFallOffFunction.H"
+#include "SRIFallOffFunction.H"
+#include "TroeFallOffFunction.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -53,8 +56,10 @@ defineTemplateRunTimeSelectionTable(icoPoly8Reaction, dictionary);
 // * * * * * * * * * * * * * Make CHEMKIN reactions  * * * * * * * * * * * * //
 
 makeIRNReactions(icoPoly8ThermoPhysics, ArrheniusReactionRate)
+makeIRNReactions(icoPoly8ThermoPhysics, infiniteReactionRate)
 makeIRNReactions(icoPoly8ThermoPhysics, LandauTellerReactionRate)
 makeIRNReactions(icoPoly8ThermoPhysics, thirdBodyArrheniusReactionRate)
+
 makeIRReactions(icoPoly8ThermoPhysics, JanevReactionRate)
 makeIRReactions(icoPoly8ThermoPhysics, powerSeriesReactionRate)
 

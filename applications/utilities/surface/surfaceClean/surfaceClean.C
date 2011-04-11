@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ Application
     surfaceClean
 
 Description
+    - removes baffles
     - collapses small edges, removing triangles.
     - converts sliver triangles into split edges by projecting point onto
       base of triangle.
@@ -50,6 +51,11 @@ int main(int argc, char *argv[])
     argList::validArgs.append("surfaceFile");
     argList::validArgs.append("min length");
     argList::validArgs.append("output surfaceFile");
+    argList::addBoolOption
+    (
+        "noClean",
+        "perform some surface checking/cleanup on the input surface"
+    );
     argList args(argc, argv);
 
     const fileName inFileName = args[1];
@@ -65,6 +71,11 @@ int main(int argc, char *argv[])
     triSurface surf(inFileName);
     surf.writeStats(Info);
 
+    if (!args.optionFound("noClean"))
+    {
+        Info<< "Removing duplicate and illegal triangles ..." << nl << endl;
+        surf.cleanup(true);
+    }
 
     Info<< "Collapsing triangles to edges ..." << nl << endl;
 

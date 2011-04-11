@@ -97,18 +97,16 @@ struct HashTableCore
         {}
     };
 
-    static const iteratorEnd endIter;
-
     //- iteratorEnd set to beyond the end of any HashTable
-    inline static const iteratorEnd& cend()
+    inline static iteratorEnd cend()
     {
-        return endIter;
+        return iteratorEnd();
     }
 
     //- iteratorEnd set to beyond the end of any HashTable
-    inline static const iteratorEnd& end()
+    inline static iteratorEnd end()
     {
-        return endIter;
+        return iteratorEnd();
     }
 };
 
@@ -451,9 +449,6 @@ public:
 
             // Member operators
 
-                //- Conversion to a const_iterator
-                inline operator const_iterator() const;
-
                 //- Return referenced hash value
                 inline T& operator*();
                 inline T& operator()();
@@ -502,6 +497,9 @@ public:
 
                 //- Construct null (end iterator)
                 inline const_iterator();
+
+                //- Construct from iterator
+                inline const_iterator(const iterator&);
 
                 //- Construct end iterator
                 inline const_iterator(const iteratorEnd& unused);

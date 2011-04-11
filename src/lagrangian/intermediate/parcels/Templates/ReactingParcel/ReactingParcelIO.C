@@ -30,7 +30,7 @@ License
 
 template<class ParcelType>
 Foam::string Foam::ReactingParcel<ParcelType>::propHeader =
-    ThermoParcel<ParcelType>::propHeader
+    ParcelType::propHeader
   + " mass0"
   + " nPhases(Y1..YN)";
 

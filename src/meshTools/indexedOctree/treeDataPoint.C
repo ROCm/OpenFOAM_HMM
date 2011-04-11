@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,6 @@ License
 #include "treeDataPoint.H"
 #include "treeBoundBox.H"
 #include "indexedOctree.H"
-#include "polyMesh.H"
 #include "triangleFuncs.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -42,11 +41,29 @@ Foam::treeDataPoint::treeDataPoint(const pointField& points)
 {}
 
 
+Foam::treeDataPoint::treeDataPoint
+(
+    const pointField& points,
+    const labelList& pointLabels
+)
+:
+    points_(points),
+    pointLabels_(pointLabels)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::pointField Foam::treeDataPoint::points() const
+Foam::pointField Foam::treeDataPoint::shapePoints() const
 {
-    return points_;
+    if (pointLabels_.size())
+    {
+        return pointField(points_, pointLabels_);
+    }
+    else
+    {
+        return points_;
+    }
 }
 
 
@@ -69,7 +86,8 @@ bool Foam::treeDataPoint::overlaps
     const treeBoundBox& cubeBb
 ) const
 {
-    return cubeBb.contains(points_[index]);
+    label pointI = (pointLabels_.size() ? pointLabels_[index] : index);
+    return cubeBb.contains(points_[pointI]);
 }
 
 
@@ -88,8 +106,9 @@ void Foam::treeDataPoint::findNearest
     forAll(indices, i)
     {
         const label index = indices[i];
+        label pointI = (pointLabels_.size() ? pointLabels_[index] : index);
 
-        const point& pt = points_[index];
+        const point& pt = points_[pointI];
 
         scalar distSqr = magSqr(pt - sample);
 
@@ -122,8 +141,9 @@ void Foam::treeDataPoint::findNearest
     forAll(indices, i)
     {
         const label index = indices[i];
+        label pointI = (pointLabels_.size() ? pointLabels_[index] : index);
 
-        const point& shapePt = points_[index];
+        const point& shapePt = points_[pointI];
 
         if (tightest.contains(shapePt))
         {

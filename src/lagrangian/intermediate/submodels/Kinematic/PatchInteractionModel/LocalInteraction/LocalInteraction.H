@@ -33,7 +33,7 @@ Description
 #define LocalInteraction_H
 
 #include "PatchInteractionModel.H"
-#include "patchInteractionData.H"
+#include "patchInteractionDataList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,10 +51,7 @@ class LocalInteraction
     // Private data
 
         //- List of participating patches
-        const List<patchInteractionData> patchData_;
-
-        //- List of participating patch ids
-        List<label> patchIds_;
+        const patchInteractionDataList patchData_;
 
 
         // Counters for initial particle fates
@@ -88,9 +85,6 @@ class LocalInteraction
 
 
     // Private Member Functions
-
-        //- Returns local patchI if patch is in patchIds_ list
-        label applyToPatch(const label globalPatchI) const;
 
         //- Read interaction properties from file
         void readProps();

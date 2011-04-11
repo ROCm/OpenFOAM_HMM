@@ -39,7 +39,6 @@
 #
 #     Checks for
 #     - illegal code, e.g. <TAB>
-#     - copyright is current, e.g. if present, contains XXX-<current-year>
 #     - columns greater than 80 for *.[CH] files
 #
 #------------------------------------------------------------------------------
@@ -101,8 +100,8 @@ checkIllegalCode()
 {
     echo "$hookName: check bad strings/characters etc ..." 1>&2
 
-    reBad="(N""abla|"$'\t'"|"$'\r\n'")"
-    msgBad="N""abla, <TAB> or DOS-line-endings"
+    reBad="("$'\t'"|"$'\r\n'")"
+    msgBad="<TAB> or DOS-line-endings"
 
     scope=$(gitScope $@)
 
@@ -127,40 +126,6 @@ checkIllegalCode()
     )
 
     dieOnBadFiles "Remove/correct bad '$msgBad' references"
-}
-
-
-#
-# check that OpenCFD copyright is current
-#
-checkCopyright()
-{
-    year=$(date +%Y)
-    echo "$hookName: check copyright ..." 1>&2
-
-    scope=$(gitScope $@)
-
-    badFiles=$(
-    for f in $fileList
-    do
-        # NB: need to have OpenCFD on a separate line to prevent
-        #     this check being caught by itself!
-        #
-        # parse line numbers from grep output:
-        #        <lineNr>:   contents
-        #
-        lines=$(git grep -F -hn -e Copyright \
-            --and -e OpenCFD \
-            --and --not -e "$year" \
-            $scope"$f" |
-            sed -e 's@:.*@@' |
-            tr '\n' ' '
-        )
-        [ -n "$lines" ] && echo "$Indent$f -- lines: $lines"
-    done
-    )
-
-    dieOnBadFiles "Update copyright year, e.g. XXXX-$year"
 }
 
 
@@ -296,9 +261,6 @@ do
 
     # check for illegal code, e.g. <TAB>, etc
     checkIllegalCode $newSHA1
-
-    # ensure OpenCFD copyright contains correct year
-    checkCopyright $newSHA1
 
     # ensure code conforms to 80 columns max
     checkLineLengthNonDirective $newSHA1

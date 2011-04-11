@@ -241,6 +241,42 @@ inline Point Foam::tetrahedron<Point, PointRef>::randomPoint
 
 
 template<class Point, class PointRef>
+inline Point Foam::tetrahedron<Point, PointRef>::randomPoint
+(
+    cachedRandom& rndGen
+) const
+{
+    // Adapted from
+    // http://vcg.isti.cnr.it/activities/geometryegraphics/pointintetraedro.html
+
+    scalar s = rndGen.sample01<scalar>();
+    scalar t = rndGen.sample01<scalar>();
+    scalar u = rndGen.sample01<scalar>();
+
+    if (s + t > 1.0)
+    {
+        s = 1.0 - s;
+        t = 1.0 - t;
+    }
+
+    if (t + u > 1.0)
+    {
+        scalar tmp = u;
+        u = 1.0 - s - t;
+        t = 1.0 - tmp;
+    }
+    else if (s + t + u > 1.0)
+    {
+        scalar tmp = u;
+        u = s + t + u - 1.0;
+        s = 1.0 - t - tmp;
+    }
+
+    return (1 - s - t - u)*a_ + s*b_ + t*c_ + u*d_;
+}
+
+
+template<class Point, class PointRef>
 Foam::scalar Foam::tetrahedron<Point, PointRef>::barycentric
 (
     const point& pt,

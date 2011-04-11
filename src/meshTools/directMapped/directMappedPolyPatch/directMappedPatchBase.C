@@ -36,6 +36,7 @@ License
 #include "polyPatch.H"
 #include "Time.H"
 #include "mapDistribute.H"
+#include "SubField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

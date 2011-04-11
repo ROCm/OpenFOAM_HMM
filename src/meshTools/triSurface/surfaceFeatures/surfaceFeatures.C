@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -263,6 +263,16 @@ Foam::surfaceFeatures::labelScalar Foam::surfaceFeatures::walkSegment
 
     label vertI = startPointI;
 
+    scalar visitedLength = 0.0;
+
+    label nVisited = 0;
+
+    if (findIndex(featurePoints_, startPointI) >= 0)
+    {
+        // Do not walk across feature points
+
+        return labelScalar(nVisited, visitedLength);
+    }
 
     //
     // Now we have:
@@ -283,11 +293,6 @@ Foam::surfaceFeatures::labelScalar Foam::surfaceFeatures::walkSegment
     {
         unsetVal = currentFeatI;
     }
-
-
-    scalar visitedLength = 0.0;
-
-    label nVisited = 0;
 
     do
     {
@@ -620,8 +625,13 @@ void Foam::surfaceFeatures::trimFeatures
 
         if
         (
-            (leftPath.len_ + rightPath.len_ < minLen)
-         || (leftPath.n_ + rightPath.n_ < minElems)
+            (
+                leftPath.len_
+              + rightPath.len_
+              + startEdge.mag(surf_.localPoints())
+              < minLen
+            )
+         || (leftPath.n_ + rightPath.n_ + 1 < minElems)
         )
         {
             // Rewalk same route (recognizable by featLines == featI)

@@ -34,11 +34,10 @@ Foam::ParamagneticForce<CloudType>::ParamagneticForce
 (
     CloudType& owner,
     const fvMesh& mesh,
-    const dictionary& dict,
-    const word& forceType
+    const dictionary& dict
 )
 :
-    ParticleForce<CloudType>(owner, mesh, dict, forceType),
+    ParticleForce<CloudType>(owner, mesh, dict, typeName, true),
     HdotGradHName_
     (
         this->coeffs().template lookupOrDefault<word>("HdotGradH", "HdotGradH")

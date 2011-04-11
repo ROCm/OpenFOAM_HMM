@@ -9,7 +9,7 @@
     );
 
     hEqn.relax();
-    hEqn.solve(mesh.solver(h.select(finalIter)));
+    hEqn.solve();
 
     thermo.correct();
 }

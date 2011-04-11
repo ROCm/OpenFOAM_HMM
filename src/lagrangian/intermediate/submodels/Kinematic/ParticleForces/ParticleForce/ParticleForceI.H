@@ -47,13 +47,6 @@ inline const Foam::fvMesh& Foam::ParticleForce<CloudType>::mesh() const
 
 
 template<class CloudType>
-inline const Foam::dictionary& Foam::ParticleForce<CloudType>::dict() const
-{
-    return dict_;
-}
-
-
-template<class CloudType>
 inline const Foam::dictionary& Foam::ParticleForce<CloudType>::coeffs() const
 {
     return coeffs_;

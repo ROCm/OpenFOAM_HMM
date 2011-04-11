@@ -328,17 +328,27 @@ public:
 
 #define makeInjectionModel(CloudType)                                         \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(InjectionModel<CloudType>, 0);        \
-                                                                              \
-    defineTemplateRunTimeSelectionTable(InjectionModel<CloudType>, dictionary);
+    typedef CloudType::kinematicCloudType kinematicCloudType;                 \
+    defineNamedTemplateTypeNameAndDebug                                       \
+    (                                                                         \
+        InjectionModel<kinematicCloudType>,                                   \
+        0                                                                     \
+    );                                                                        \
+    defineTemplateRunTimeSelectionTable                                       \
+    (                                                                         \
+        InjectionModel<kinematicCloudType>,                                   \
+        dictionary                                                            \
+    );
 
 
 #define makeInjectionModelType(SS, CloudType)                                 \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
+    typedef CloudType::kinematicCloudType kinematicCloudType;                 \
+    defineNamedTemplateTypeNameAndDebug(SS<kinematicCloudType>, 0);           \
                                                                               \
-    InjectionModel<CloudType>::adddictionaryConstructorToTable<SS<CloudType> >\
-        add##SS##CloudType##ConstructorToTable_;
+    InjectionModel<kinematicCloudType>::                                      \
+        adddictionaryConstructorToTable<SS<kinematicCloudType> >              \
+        add##SS##CloudType##kinematicCloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

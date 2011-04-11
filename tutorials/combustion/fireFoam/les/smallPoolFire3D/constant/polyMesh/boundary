@@ -20,26 +20,26 @@ FoamFile
     base
     {
         type            patch;
-        nFaces          4704;
-        startFace       1014300;
+        nFaces          3456;
+        startFace       637200;
     }
     outlet
     {
         type            patch;
-        nFaces          4900;
-        startFace       1019004;
+        nFaces          3600;
+        startFace       640656;
     }
     sides
     {
         type            patch;
-        nFaces          19600;
-        startFace       1023904;
+        nFaces          14400;
+        startFace       644256;
     }
     inlet
     {
         type            patch;
-        nFaces          196;
-        startFace       1043504;
+        nFaces          144;
+        startFace       658656;
     }
 )
 

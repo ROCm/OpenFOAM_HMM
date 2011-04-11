@@ -17,8 +17,6 @@ FoamFile
 thermoType constSolidThermo;
 //thermoType isotropicKSolidThermo;
 //thermoType directionalKSolidThermo;
-//thermoType solidMixtureThermo<multiComponentSolidMixture<exponentialSolidTransport<constSolidRad<exponentialSolidThermo<constRho>>>>>;
-
 
 constSolidThermoCoeffs
 {
@@ -28,12 +26,12 @@ constSolidThermoCoeffs
     K   K   [1  1 -3 -1 0 0 0] 80;
 
     //- radiative properties
-    kappa kappa [0 -1 0 0 0 0 0] 0;
-    sigmaS sigmaS [0 -1 0 0 0 0 0] 0;
-    emissivity  emissivity  [0 0 0 0 0 0 0] 1;
+    kappa kappa [0 -1 0 0 0 0 0]            0;
+    sigmaS sigmaS [0 -1 0 0 0 0 0]          0;
+    emissivity  emissivity  [0 0 0 0 0 0 0] 0;
 
     //- chemical properties
-    Hf  Hf  [0  2 -2  0 0 0 0] 1;
+    Hf  Hf  [0  2 -2  0 0 0 0] 0;
 }
 
 
@@ -52,7 +50,7 @@ isotropicKSolidThermoCoeffs
     sigmaSValues        (0 0);
 
     //- chemical properties
-    HfValues            (1 1);
+    HfValues            (0 0);
 
 }
 

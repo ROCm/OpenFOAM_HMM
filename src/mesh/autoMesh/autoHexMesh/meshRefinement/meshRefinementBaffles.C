@@ -283,6 +283,13 @@ void Foam::meshRefinement::getBafflePatches
         }
     }
 
+    // Extend segments a bit
+    {
+        const vectorField smallVec(Foam::sqrt(SMALL)*(end-start));
+        start -= smallVec;
+        end += smallVec;
+    }
+
 
     // Do test for intersections
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -517,6 +524,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createBaffles
         mesh_.clearOut();
     }
 
+
+    // Reset the instance for if in overwrite mode
+    mesh_.setInstance(timeName());
+
     //- Redo the intersections on the newly create baffle faces. Note that
     //  this changes also the cell centre positions.
     faceSet baffledFacesSet(mesh_, "baffledFacesSet", 2*nBaffles);
@@ -637,7 +648,7 @@ Foam::List<Foam::labelPair> Foam::meshRefinement::getDuplicateFaces
         }
         Pout<< "Writing duplicate faces (baffles) to faceSet "
             << duplicateFaceSet.name() << nl << endl;
-        duplicateFaceSet.instance() = mesh_.time().timeName();
+        duplicateFaceSet.instance() = timeName();
         duplicateFaceSet.write();
     }
 
@@ -717,9 +728,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createZoneBaffles
             if (debug)
             {
                 const_cast<Time&>(mesh_.time())++;
-                Pout<< "Writing baffled mesh to time "
-                    << mesh_.time().timeName() << endl;
-                mesh_.write();
+                Pout<< "Writing zone-baffled mesh to time " << timeName()
+                    << endl;
+                write(debug, mesh_.time().path()/"baffles");
             }
         }
         Info<< "Created " << nZoneFaces << " baffles in = "
@@ -739,14 +750,6 @@ Foam::List<Foam::labelPair> Foam::meshRefinement::filterDuplicateFaces
     const List<labelPair>& couples
 ) const
 {
-    // Construct addressing engine for all duplicate faces (only one
-    // for each pair)
-
-    // Duplicate faces in mesh labels (first face of each pair only)
-    // (reused later on to mark off filtered couples. see below)
-    labelList duplicateFaces(couples.size());
-
-
     // All duplicate faces on edge of the patch are to be merged.
     // So we count for all edges of duplicate faces how many duplicate
     // faces use them.
@@ -817,7 +820,8 @@ Foam::List<Foam::labelPair> Foam::meshRefinement::filterDuplicateFaces
 
 
     // Baffles which are not next to other boundaries and baffles will have
-    // value 2*1000000+2*1
+    // nBafflesPerEdge value 2*1000000+2*1 (from 2 boundary faces which are
+    // both baffle faces)
 
     List<labelPair> filteredCouples(couples.size());
     label filterI = 0;
@@ -959,6 +963,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
         // Delete mesh volumes.
         mesh_.clearOut();
     }
+
+    // Reset the instance for if in overwrite mode
+    mesh_.setInstance(timeName());
 
     // Update intersections. Recalculate intersections on merged faces since
     // this seems to give problems? Note: should not be nessecary since
@@ -1782,7 +1789,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
                     problemTopo.insert(faceI);
                 }
             }
-            problemTopo.instance() = mesh_.time().timeName();
+            problemTopo.instance() = timeName();
             Pout<< "Dumping " << problemTopo.size()
                 << " problem faces to " << problemTopo.objectPath() << endl;
             problemTopo.write();
@@ -2239,6 +2246,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::dupNonManifoldPoints()
         mesh_.clearOut();
     }
 
+    // Reset the instance for if in overwrite mode
+    mesh_.setInstance(timeName());
+
     // Update intersections. Is mapping only (no faces created, positions stay
     // same) so no need to recalculate intersections.
     updateMesh(map, labelList(0));
@@ -2445,6 +2455,13 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
                 start[i] = cellCentres[faceOwner[faceI]];
                 end[i] = neiCc[faceI-mesh_.nInternalFaces()];
             }
+        }
+
+        // Extend segments a bit
+        {
+            const vectorField smallVec(Foam::sqrt(SMALL)*(end-start));
+            start -= smallVec;
+            end += smallVec;
         }
 
 
@@ -2767,6 +2784,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
         // Delete mesh volumes.
         mesh_.clearOut();
     }
+
+    // Reset the instance for if in overwrite mode
+    mesh_.setInstance(timeName());
 
     // Print some stats (note: zones are synchronised)
     if (mesh_.cellZones().size() > 0)

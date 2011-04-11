@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -110,6 +110,7 @@ License
 #include "Time.H"
 #include "OFstream.H"
 #include "globalIndex.H"
+#include "SubField.H"
 
 extern "C"
 {

@@ -124,7 +124,7 @@ functions
             nearWall
             {
                 type            patchInternalField;
-                patchName       lowerWall;
+                patches         ( lowerWall );
                 distance        1E-6;
                 interpolate     true;
                 triangulate     false;

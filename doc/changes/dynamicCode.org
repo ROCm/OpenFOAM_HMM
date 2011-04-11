@@ -8,7 +8,7 @@
 # Copyright (c) 2011 OpenCFD Ltd.
 
 * Dictionary preprocessing directive: =#codeStream=
-  This is a dictionary preprocessing directive ('=functionEntry=') which
+  This is a dictionary preprocessing directive (=functionEntry=) which
   provides a snippet of OpenFOAM C++ code which gets compiled and executed to
   provide the actual dictionary entry. The snippet gets provided as three
   sections of C++ code which just gets inserted into a template:
@@ -17,8 +17,11 @@
     =dict.lookup= to find current dictionary values.
   - optional =codeInclude= section: any #include statements to include OpenFOAM
     files.
-  - optional 'codeOptions' section: any extra compilation flags to be added to
-    =EXE_INC= in =Make/options=
+  - optional =codeOptions= section: any extra compilation flags to be added to
+    =EXE_INC= in =Make/options=. These usually are =-I= include directory
+    options.
+  - optional =codeLibs= section: any extra compilation flags to be added to
+    =LIB_LIBS= in =Make/options=.
 
   To ease inputting mulit-line code there is the =#{ #}= syntax. Anything in
   between these two delimiters becomes a string with all newlines, quotes etc
@@ -26,6 +29,7 @@
 
   Example: Look up dictionary entries and do some calculation
   #+BEGIN_SRC c++
+
     startTime       0;
     endTime         100;
     ..
@@ -36,38 +40,37 @@
             scalar start = readScalar(dict["startTime"]);
             scalar end = readScalar(dict["endTime"]);
             label nDumps = 5;
-            label interval = end-start
-            os  << ((start-end)/nDumps)
-        #}
+            os  << ((end-start)/nDumps);
+        #};
     };
   #+END_SRC
 
 * Implementation
   - the =#codeStream= entry reads the dictionary following it, extracts the
-    =code=, =codeInclude=, =codeOptions= sections (these are just strings) and
+    =code=, =codeInclude=, =codeOptions=, =codeLibs= sections (these are just strings) and
     calculates the SHA1 checksum of the contents.
   - it copies a template file
-    =(~OpenFOAM/codeTemplates/dynamicCode/codeStreamTemplate.C)= or
+    =(etc/codeTemplates/dynamicCode/codeStreamTemplate.C)= or
     =($FOAM_CODE_TEMPLATES/codeStreamTemplate.C)=, substituting all
-    occurences of =code=, =codeInclude=, =codeOptions=.
+    occurences of =code=, =codeInclude=, =codeOptions=, =codeLibs=.
   - it writes library source files to =dynamicCode/<SHA1>= and compiles
     it using =wmake libso=.
   - the resulting library is generated under
     =dynamicCode/platforms/$WM_OPTIONS/lib= and is loaded (=dlopen=, =dlsym=)
-    and the function executed
+    and the function executed.
   - the function will have written its output into the Ostream which then gets
     used to construct the entry to replace the whole =#codeStream= section.
   - using the SHA1 means that same code will only be compiled and loaded once.
 
 * Boundary condition: =codedFixedValue=
-  This uses the code from codeStream to have an in-line specialised
-  =fixedValueFvPatchScalarField=. For now only for scalars:
+  This uses the same framework as codeStream to have an in-line specialised
+  =fixedValueFvPatchField=.
   #+BEGIN_SRC c++
   outlet
   {
-      type            codedFixedValue<scalar>;
+      type            codedFixedValue;
       value           uniform 0;
-      redirectType    fixedValue10;
+      redirectType    ramp;
 
       code
       #{
@@ -76,13 +79,16 @@
   }
   #+END_SRC
   It by default always includes =fvCFD.H= and adds the =finiteVolume= library to
-  the include search path.
+  the include search path and the linked libraries. Any other libraries will
+  need
+  to be added using the =codeInclude=, =codeLibs=, =codeOptions= section or provided through
+  the =libs= entry in the =system/controlDict=.
 
   A special form is where the code is not supplied in-line but instead comes
   from the =codeDict= dictionary in the =system= directory. It should contain
-  a =fixedValue10= entry:
+  a =ramp= entry:
   #+BEGIN_SRC c++
-  fixedValue10
+  ramp
   {
       code
       #{
@@ -91,7 +97,49 @@
   }
   #+END_SRC
   The advantage of using this indirect way is that it supports
-  runTimeModifiable so any change of the code will be picked up next iteration.
+  =runTimeModifiable= so any change of the code will be picked up next iteration.
+
+* Function object: =coded=
+  This uses the same framework as codeStream to have an in-line specialised
+  =functionObject=.
+  #+BEGIN_SRC c++
+  functions
+  {
+      pAverage
+      {
+          functionObjectLibs ("libutilityFunctionObjects.so");
+          type coded;
+          redirectType average;
+          outputControl outputTime;
+          code
+          #{
+              const volScalarField& p = mesh().lookupObject<volScalarField>("p");
+              Info<<"p avg:" << average(p) << endl;
+          #};
+      }
+  }
+  #+END_SRC
+  This dynamic code framework uses the following entries
+  + =codeData=: declaration (in .H file) of local (null-constructable) data
+  + =codeInclude=: (.C file) usual include section
+  + =codeRead=: (.C file) executed upon dictionary read
+  + =codeExecute=: (.C file) executed upon functionObject execute
+  + =codeEnd=: (.C file) executed upon functionObject end
+  + =code=: (.C file) executed upon functionObject write. This is the usual place
+  for simple functionObject.
+  + =codeLibs=, =codeOptions=: usual
+
+  =coded= by default always includes =fvCFD.H= and adds the =finiteVolume= library to
+  the include search path and the linked libraries. Any other libraries will
+  need to be added explicitly (see =codeInclude=, =codeLibs=, =codeOptions= sections) or provided through
+  the =libs= entry in the =system/controlDict=.
+
+  =coded= is an =OutputFilter= type =functionObject= so supports the usual
+  + =region=: non-default region
+  + =enabled=: enable/disable
+  + =outputControl=: =timeStep= or =outputTime=
+  + =outputInterval=: in case of =timeStep=
+  entries.
 
 * Security
   Allowing the case to execute C++ code does introduce security risks.  A
@@ -129,8 +177,17 @@
       #{
           -I$(LIB_SRC)/finiteVolume/lnInclude
       #};
+
+      codeLibs
+      #{
+          -lfiniteVolume
+      #};
   };
   #+END_SRC
+
+  Note: above field initialisation has the problem that the boundary conditions
+  are not evaluated so e.g. processor boundaries will not hold the opposite cell
+  value.
 
 * Pitfalls
   The syntax of =#codeStream= can be quite hard to get right. These are some
@@ -141,24 +198,46 @@
     prints 'uniform 12.34;'. Note the ';' at the end. It is advised to use the
     =writeEntry= as above to handle this and also e.g. binary streams (=codeStream=
     inherits the stream type from the dictionary)
-  + the =code=, =codeInclude=, =codeOptions= entries are just like any other
+  + the =code=, =codeInclude=, =codeOptions=, =codeLibs= entries are just like any other
     dictionary string entry so there has to be a ';' after the string
   + the =#codeStream= entry (itself a dictionary) has to end in a ';'
 
 * Exceptions
-  There are unfortunately some exceptions. Following applications read
+  There are unfortunately some exceptions to above field massaging.
+  Following applications read
   the field as a dictionary, not as an =IOdictionary=:
   - =foamFormatConvert=
-  - =changeDictionaryDict=
+  - =changeDictionary=
   - =foamUpgradeCyclics=
-  These applications will usually switch off all '#' processing.
-
-
-  Note: above field initialisation has the problem that the boundary conditions
-  are not evaluated so e.g. processor boundaries will not hold the opposite cell
-  value.
+  These applications will usually switch off all '#' processing which
+  just preserves the entries as strings (including all
+  formatting). =changeDictionary= has the =-enableFunctionEntries= option for if
+  one does want to evaluate any preprocessing in the changeDictionaryDict.
 
 * Other
-  - the implementation is still changing though the syntax is fixed
+  - paraFoam: paraview currently does not export symbols on loaded libraries
+    (more specific : it does not add 'RTLD_GLOBAL' to the dlopen flags) so
+    one will have to add the used additional libraries (libfiniteVolume,
+    lib..) either to the =codeLibs= linkage section (preferred) or to the 'libs' entry in system/controlDict to prevent getting
+    an error of the form
+
+        --> FOAM FATAL IO ERROR:
+        Failed loading library "libcodeStream_3cd388ceb070a2f8b0ae61782adbc21c5687ce6f.so"
+
+    By default =#codeStream= links in =libOpenFOAM= and =codedFixedValue= and =coded=
+    functionObject link in both =libOpenFOAM= and =libfiniteVolume=.
+
   - parallel running not tested a lot. What about distributed data
     (i.e. non-=NFS=) parallel?
+
+  - codedFixedValue could be extended to provide local data however
+    in terms of complexity this is not really worthwhile.
+
+  - all templates come from (in order of preference)
+    =FOAM_TEMPLATE_DIR=
+    =~/.OpenFOAM/dev/codeTemplates/dynamicCode=
+    =etc/codeTemplates/dynamicCode=
+
+  - any generated C++ code will display line numbers relative to the original
+    dictionary (using the '#line' directive) to ease finding compilation
+    errors.

@@ -80,8 +80,7 @@ public:
         (
             CloudType& owner,
             const fvMesh& mesh,
-            const dictionary& dict,
-            const word& forceType
+            const dictionary& dict
         );
 
         //- Construct copy

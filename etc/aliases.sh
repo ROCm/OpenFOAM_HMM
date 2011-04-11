@@ -22,7 +22,7 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     aliases.sh
+#     etc/aliases.sh
 #
 # Description
 #     Aliases for working with OpenFOAM
@@ -37,6 +37,9 @@ alias wm64='wmSET WM_ARCH_OPTION=64'
 alias wm32='wmSET WM_ARCH_OPTION=32'
 alias wmSP='wmSET WM_PRECISION_OPTION=SP'
 alias wmDP='wmSET WM_PRECISION_OPTION=DP'
+
+# clear env
+alias wmUNSET='. $WM_PROJECT_DIR/etc/unset.sh'
 
 # Toggle wmakeScheduler on/off
 #  - also need to set WM_HOSTS
@@ -72,6 +75,12 @@ alias foamSol='cd $FOAM_SOLVERS'
 alias foamTuts='cd $FOAM_TUTORIALS'
 alias foamUtils='cd $FOAM_UTILITIES'
 alias foam3rdParty='cd $WM_THIRD_PARTY_DIR'
-alias foamSite='cd $WM_PROJECT_INST_DIR/site'
+
+if [ -n "$WM_PROJECT_SITE" ]
+then
+    alias foamSite='cd $WM_PROJECT_SITE'
+else
+    alias foamSite='cd $WM_PROJECT_INST_DIR/site'
+fi
 
 # -----------------------------------------------------------------------------

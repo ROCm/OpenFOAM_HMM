@@ -50,8 +50,7 @@ Foam::ParticleForce<CloudType>::New
             "("
                 "CloudType&, "
                 "const fvMesh&, "
-                "const dictionary&, "
-                "const word&"
+                "const dictionary&"
             ")"
         )   << "Unknown particle force type "
             << forceType
@@ -67,8 +66,7 @@ Foam::ParticleForce<CloudType>::New
         (
             owner,
             mesh,
-            dict,
-            forceType
+            dict
         )
     );
 

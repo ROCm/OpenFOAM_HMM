@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
@@ -39,7 +39,7 @@ fvDOMCoeffs
 // Number of flow iterations per radiation iteration
 solverFreq 10;
 
-absorptionEmissionModel constantAbsorptionEmission;
+absorptionEmissionModel greyMeanAbsorptionEmission;
 
 constantAbsorptionEmissionCoeffs
 {
@@ -135,63 +135,6 @@ greyMeanAbsorptionEmissionCoeffs
             0
         );
     }
-
-    N2
-    {
-        Tcommon         300;
-        invTemp         false;
-        Tlow            200;
-        Thigh           2500;
-
-        loTcoeffs
-        (
-            0.01
-            0
-            0
-            0
-            0
-            0
-        );
-        hiTcoeffs
-        (
-            0.01
-            0
-            0
-            0
-            0
-            0
-        );
-
-    }
-
-    O2
-    {
-        Tcommon         300;
-        invTemp         false;
-        Tlow            200;
-        Thigh           2500;
-
-        loTcoeffs
-        (
-            0.01
-            0
-            0
-            0
-            0
-            0
-        );
-        hiTcoeffs
-        (
-            0.01
-            0
-            0
-            0
-            0
-            0
-        );
-
-    }
-
 }
 
 scatterModel    constantScatter;

@@ -607,11 +607,16 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                         pPtr->rho()
                     );
 
-                // Add the new parcel
-                td.cloud().addParticle(pPtr);
-
-                massAdded += pPtr->nParticle()*pPtr->mass();
-                parcelsAdded++;
+                if (pPtr->move(td, dt))
+                {
+                    td.cloud().addParticle(pPtr);
+                    massAdded += pPtr->nParticle()*pPtr->mass();
+                    parcelsAdded++;
+                }
+                else
+                {
+                    delete pPtr;
+                }
             }
         }
     }

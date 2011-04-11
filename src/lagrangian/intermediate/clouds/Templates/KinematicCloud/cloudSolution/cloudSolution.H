@@ -25,7 +25,7 @@ Class
     Foam::cloudSolution
 
 Description
-    - Stores all relevant solution info
+    Stores all relevant solution info for cloud
 
 SourceFiles
     cloudSolutionI.H
@@ -100,7 +100,7 @@ class cloudSolution
             Switch resetSourcesOnStartup_;
 
             //- List schemes, e.g. U semiImplicit 1
-            List<Tuple2<word, scalar> > schemes_;
+            List<Tuple2<word, Tuple2<bool, scalar> > > schemes_;
 
 
     // Private Member Functions

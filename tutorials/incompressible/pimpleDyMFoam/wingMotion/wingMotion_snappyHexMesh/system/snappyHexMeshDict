@@ -206,8 +206,8 @@ addLayersControls
     //- If points get not extruded do nGrow layers of connected faces that are
     //  also not grown. This helps convergence of the layer addition process
     //  close to features.
+    // Note: changed(corrected) w.r.t 17x! (didn't do anything in 17x)
     nGrow 0;
-
 
     // Advanced settings
 
@@ -279,7 +279,7 @@ meshQualityControls
     //     <0 = inside out tet,
     //      0 = flat tet
     //      1 = regular tet
-    minTetQuality 1e-9;
+    minTetQuality 1e-30;
 
     //- Minimum face area. Set to <0 to disable.
     minArea -1;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,7 @@ namespace mathematical
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    static word group = "mathematical";
+    static const char* const group = "mathematical";
 
     const scalar e(M_E);
     const scalar pi(M_PI);

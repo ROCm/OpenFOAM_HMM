@@ -33,11 +33,10 @@ Foam::NonInertialFrameForce<CloudType>::NonInertialFrameForce
 (
     CloudType& owner,
     const fvMesh& mesh,
-    const dictionary& dict,
-    const word& forceType
+    const dictionary& dict
 )
 :
-    ParticleForce<CloudType>(owner, mesh, dict),
+    ParticleForce<CloudType>(owner, mesh, dict, typeName, true),
     WName_
     (
         this->coeffs().template lookupOrDefault<word>
@@ -164,13 +163,14 @@ void Foam::NonInertialFrameForce<CloudType>::cacheFields(const bool store)
             )
         )
         {
-            uniformDimensionedVectorField omegaDot = this->mesh().template
+            uniformDimensionedVectorField centreOfRotation =
+                this->mesh().template
                 lookupObject<uniformDimensionedVectorField>
                 (
                     centreOfRotationName_
                 );
 
-            centreOfRotation_ = omegaDot.value();
+            centreOfRotation_ = centreOfRotation.value();
         }
     }
 }
@@ -188,7 +188,7 @@ Foam::forceSuSp Foam::NonInertialFrameForce<CloudType>::calcNonCoupled
 {
     forceSuSp value(vector::zero, 0.0);
 
-    const vector& r = p.position() - centreOfRotation_;
+    const vector r = p.position() - centreOfRotation_;
 
     value.Su() =
         mass

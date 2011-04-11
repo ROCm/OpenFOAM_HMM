@@ -125,7 +125,7 @@ public:
 
             //- Get representative point cloud for all shapes inside
             //  (one point per shape)
-            pointField points() const;
+            pointField shapePoints() const;
 
 
         // Search

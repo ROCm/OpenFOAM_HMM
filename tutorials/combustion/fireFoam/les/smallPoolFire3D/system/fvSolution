@@ -13,22 +13,14 @@ FoamFile
     location    "system";
     object      fvSolution;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 solvers
 {
-    rho
+    "(rho|rhoFinal)"
     {
         solver              PCG;
         preconditioner      DIC;
-        tolerance           1e-7;
-        relTol              0.1;
-    };
-
-    rhoFinal
-    {
-        $rho;
         tolerance           1e-7;
         relTol              0;
     };
@@ -48,7 +40,7 @@ solvers
     p_rghFinal
     {
         $p_rgh;
-        tolerance           1e-7;
+        tolerance           1e-8;
         relTol              0;
     };
 
@@ -65,10 +57,9 @@ solvers
     "(U|ft|fu|k|hs)Final"
     {
         $U;
-        tolerance       1e-7;
+        tolerance       1e-8;
         relTol          0;
     };
-
 
     Ii
     {
@@ -86,17 +77,17 @@ solvers
     {
         solver          PCG;
         preconditioner  DIC;
-        tolerance       1e-06;
+        tolerance       1e-04;
         relTol          0;
     }
 
 }
 
-PISO
+PIMPLE
 {
-    momentumPredictor yes;
+    momentumPredictor no;
     nOuterCorrectors  1;
-    nCorrectors       2;
+    nCorrectors       1;
     nNonOrthogonalCorrectors 0;
 }
 

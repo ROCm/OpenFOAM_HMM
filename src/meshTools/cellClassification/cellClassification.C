@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -281,7 +281,7 @@ void Foam::cellClassification::markCells
         // Use linear search for points.
         label cellI = queryMesh.findCell(outsidePts[outsidePtI], -1, false);
 
-        if (cellI == -1)
+        if (returnReduce(cellI, maxOp<label>()) == -1)
         {
             FatalErrorIn
             (
@@ -293,13 +293,16 @@ void Foam::cellClassification::markCells
                 << exit(FatalError);
         }
 
-        cellInfoList[cellI] = cellInfo(cellClassification::OUTSIDE);
-
-        // Mark faces of cellI
-        const labelList& myFaces = mesh_.cells()[cellI];
-        forAll(myFaces, myFaceI)
+        if (cellI >= 0)
         {
-            outsideFacesMap.insert(myFaces[myFaceI]);
+            cellInfoList[cellI] = cellInfo(cellClassification::OUTSIDE);
+
+            // Mark faces of cellI
+            const labelList& myFaces = mesh_.cells()[cellI];
+            forAll(myFaces, myFaceI)
+            {
+                outsideFacesMap.insert(myFaces[myFaceI]);
+            }
         }
     }
 

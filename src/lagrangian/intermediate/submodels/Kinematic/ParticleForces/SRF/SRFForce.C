@@ -32,11 +32,10 @@ Foam::SRFForce<CloudType>::SRFForce
 (
     CloudType& owner,
     const fvMesh& mesh,
-    const dictionary& dict,
-    const word& forceType
+    const dictionary& dict
 )
 :
-    ParticleForce<CloudType>(owner, mesh, dict),
+    ParticleForce<CloudType>(owner, mesh, dict, typeName, false),
     srfPtr_(NULL)
 {}
 

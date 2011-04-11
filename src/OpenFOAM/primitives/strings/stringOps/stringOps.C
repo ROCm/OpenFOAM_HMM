@@ -31,6 +31,45 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+//! \cond fileScope
+//  Find the type/position of the ":-" or ":+" alternative values
+//
+static inline int findParameterAlternative
+(
+    const std::string& s,
+    std::string::size_type& pos,
+    std::string::size_type endPos
+)
+{
+    while (pos != std::string::npos)
+    {
+        pos = s.find(':', pos);
+        if (pos != std::string::npos)
+        {
+            if (pos < endPos)
+            {
+                // in-range: check for '+' or '-' following the ':'
+                const int altType = s[pos+1];
+                if (altType == '+' || altType == '-')
+                {
+                    return altType;
+                }
+
+                ++pos;    // unknown/unsupported - continue at next position
+            }
+            else
+            {
+                // out-of-range: abort
+                pos = std::string::npos;
+            }
+        }
+    }
+
+    return 0;
+}
+//! \endcond
+
+
 Foam::string Foam::stringOps::expand
 (
     const string& original,
@@ -66,7 +105,8 @@ Foam::string& Foam::stringOps::inplaceExpand
             string::size_type endVar = begVar;
             string::size_type delim = 0;
 
-            // The position of the ":-" default value
+            // The type/position of the ":-" or ":+" alternative values
+            int altType = 0;
             string::size_type altPos = string::npos;
 
             if (s[begVar+1] == '{')
@@ -74,14 +114,11 @@ Foam::string& Foam::stringOps::inplaceExpand
                 endVar = s.find('}', begVar);
                 delim = 1;
 
-                // looks like ${parameter:-word}
+                // check for ${parameter:-word} or ${parameter:+word}
                 if (endVar != string::npos)
                 {
-                    altPos = s.find(":-", begVar);
-                    if (altPos != string::npos && altPos > endVar)
-                    {
-                        altPos = string::npos;
-                    }
+                    altPos = begVar;
+                    altType = findParameterAlternative(s, altPos, endVar);
                 }
             }
             else
@@ -134,7 +171,7 @@ Foam::string& Foam::stringOps::inplaceExpand
                 std::string altValue;
                 if (altPos != string::npos)
                 {
-                    // had ":-" default value
+                    // had ":-" or ":+" alternative value
                     altValue = s.substr
                     (
                         altPos + 2,
@@ -148,17 +185,32 @@ Foam::string& Foam::stringOps::inplaceExpand
 
                 if (fnd != HashTable<string, word, string::hash>::end())
                 {
-                    s.std::string::replace
-                    (
-                        begVar,
-                        endVar - begVar + 1,
-                        *fnd
-                    );
-                    begVar += (*fnd).size();
+                    if (altPos != string::npos && altType == '+')
+                    {
+                        // was found, use ":+" alternative
+                        s.std::string::replace
+                        (
+                            begVar,
+                            endVar - begVar + 1,
+                            altValue
+                        );
+                        begVar += altValue.size();
+                    }
+                    else
+                    {
+                        // was found, use value
+                        s.std::string::replace
+                        (
+                            begVar,
+                            endVar - begVar + 1,
+                            *fnd
+                        );
+                        begVar += (*fnd).size();
+                    }
                 }
-                else if (altPos != string::npos)
+                else if (altPos != string::npos && altType == '-')
                 {
-                    // use alternative provided
+                    // was not found, use ":-" alternative
                     s.std::string::replace
                     (
                         begVar,
@@ -169,12 +221,8 @@ Foam::string& Foam::stringOps::inplaceExpand
                 }
                 else
                 {
-                    s.std::string::replace
-                    (
-                        begVar,
-                        endVar - begVar + 1,
-                        ""
-                    );
+                    // substitute with nothing, also for ":+" alternative
+                    s.std::string::erase(begVar, endVar - begVar + 1);
                 }
             }
         }
@@ -351,7 +399,8 @@ Foam::string& Foam::stringOps::inplaceExpand
             string::size_type endVar = begVar;
             string::size_type delim = 0;
 
-            // The position of the ":-" default value
+            // The type/position of the ":-" or ":+" alternative values
+            int altType = 0;
             string::size_type altPos = string::npos;
 
             if (s[begVar+1] == '{')
@@ -359,14 +408,11 @@ Foam::string& Foam::stringOps::inplaceExpand
                 endVar = s.find('}', begVar);
                 delim = 1;
 
-                // looks like ${parameter:-word}
+                // check for ${parameter:-word} or ${parameter:+word}
                 if (endVar != string::npos)
                 {
-                    altPos = s.find(":-", begVar);
-                    if (altPos != string::npos && altPos > endVar)
-                    {
-                        altPos = string::npos;
-                    }
+                    altPos = begVar;
+                    altType = findParameterAlternative(s, altPos, endVar);
                 }
             }
             else
@@ -413,7 +459,7 @@ Foam::string& Foam::stringOps::inplaceExpand
                 std::string altValue;
                 if (altPos != string::npos)
                 {
-                    // had ":-" default value
+                    // had ":-" or ":+" alternative value
                     altValue = s.substr
                     (
                         altPos + 2,
@@ -424,34 +470,53 @@ Foam::string& Foam::stringOps::inplaceExpand
                 const string varValue = getEnv(varName);
                 if (varValue.size())
                 {
-                    // direct replacement
-                    s.std::string::replace
-                    (
-                        begVar,
-                        endVar - begVar + 1,
-                        varValue
-                    );
-                    begVar += varValue.size();
+                    if (altPos != string::npos && altType == '+')
+                    {
+                        // was found, use ":+" alternative
+                        s.std::string::replace
+                        (
+                            begVar,
+                            endVar - begVar + 1,
+                            altValue
+                        );
+                        begVar += altValue.size();
+                    }
+                    else
+                    {
+                        // was found, use value
+                        s.std::string::replace
+                        (
+                            begVar,
+                            endVar - begVar + 1,
+                            varValue
+                        );
+                        begVar += varValue.size();
+                    }
                 }
                 else if (altPos != string::npos)
                 {
-                    // use alternative provided
-                    s.std::string::replace
-                    (
-                        begVar,
-                        endVar - begVar + 1,
-                        altValue
-                    );
-                    begVar += altValue.size();
+                    // use ":-" or ":+" alternative values
+                    if (altType == '-')
+                    {
+                        // was not found, use ":-" alternative
+                        s.std::string::replace
+                        (
+                            begVar,
+                            endVar - begVar + 1,
+                            altValue
+                        );
+                        begVar += altValue.size();
+                    }
+                    else
+                    {
+                        // was not found, ":+" alternative implies
+                        // substitute with nothing
+                        s.std::string::erase(begVar, endVar - begVar + 1);
+                    }
                 }
                 else if (allowEmpty)
                 {
-                    s.std::string::replace
-                    (
-                        begVar,
-                        endVar - begVar + 1,
-                        ""
-                    );
+                    s.std::string::erase(begVar, endVar - begVar + 1);
                 }
                 else
                 {
@@ -459,7 +524,7 @@ Foam::string& Foam::stringOps::inplaceExpand
                     (
                         "stringOps::inplaceExpand(string&, const bool)"
                     )
-                        << "Unknown variable name " << varName << '.'
+                        << "Unknown variable name '" << varName << "'"
                         << exit(FatalError);
                 }
             }

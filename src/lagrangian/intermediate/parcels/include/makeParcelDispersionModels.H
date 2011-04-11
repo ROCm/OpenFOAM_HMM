@@ -38,7 +38,12 @@ License
                                                                               \
     makeDispersionModel(CloudType);                                           \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(DispersionRASModel<CloudType>, 0);    \
+    typedef CloudType::kinematicCloudType kinematicCloudType;                 \
+    defineNamedTemplateTypeNameAndDebug                                       \
+    (                                                                         \
+        DispersionRASModel<kinematicCloudType>,                               \
+        0                                                                     \
+    );                                                                        \
                                                                               \
     makeDispersionModelType(NoDispersion, CloudType);                         \
     makeDispersionModelType(GradientDispersionRAS, CloudType);                \

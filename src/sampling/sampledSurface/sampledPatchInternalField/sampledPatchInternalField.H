@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,9 +54,13 @@ namespace Foam
 
 class sampledPatchInternalField
 :
-    public sampledPatch,
-    public directMappedPatchBase
+    public sampledPatch
 {
+    // Private data
+
+        //- Mapping engines
+        PtrList<directMappedPatchBase> mappers_;
+
 
     // Private Member Functions
 

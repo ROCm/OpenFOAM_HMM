@@ -61,6 +61,98 @@ _foamAddMan()
 }
 
 #------------------------------------------------------------------------------
+# Set environment variables according to system type
+export WM_ARCH=`uname -s`
+
+case "$WM_ARCH" in
+Linux)
+    WM_ARCH=linux
+
+    # compiler specifics
+    case `uname -m` in
+    i686)
+        ;;
+
+    x86_64)
+        case "$WM_ARCH_OPTION" in
+        32)
+            export WM_COMPILER_ARCH='-64'
+            export WM_CC='gcc'
+            export WM_CXX='g++'
+            export WM_CFLAGS='-m32 -fPIC'
+            export WM_CXXFLAGS='-m32 -fPIC'
+            export WM_LDFLAGS='-m32'
+            ;;
+        64)
+            WM_ARCH=linux64
+            export WM_COMPILER_LIB_ARCH=64
+            export WM_CC='gcc'
+            export WM_CXX='g++'
+            export WM_CFLAGS='-m64 -fPIC'
+            export WM_CXXFLAGS='-m64 -fPIC'
+            export WM_LDFLAGS='-m64'
+            ;;
+        *)
+            echo "Unknown WM_ARCH_OPTION '$WM_ARCH_OPTION', should be 32 or 64"
+            ;;
+        esac
+        ;;
+
+    ia64)
+        WM_ARCH=linuxIA64
+        export WM_COMPILER=I64
+        ;;
+
+    mips64)
+        WM_ARCH=SiCortex64
+        WM_MPLIB=MPI
+        export WM_COMPILER_LIB_ARCH=64
+        export WM_CC='gcc'
+        export WM_CXX='g++'
+        export WM_CFLAGS='-mabi=64 -fPIC'
+        export WM_CXXFLAGS='-mabi=64 -fPIC'
+        export WM_LDFLAGS='-mabi=64 -G0'
+        ;;
+
+    ppc64)
+        WM_ARCH=linuxPPC64
+        export WM_COMPILER_LIB_ARCH=64
+        export WM_CC='gcc'
+        export WM_CXX='g++'
+        export WM_CFLAGS='-m64 -fPIC'
+        export WM_CXXFLAGS='-m64 -fPIC'
+        export WM_LDFLAGS='-m64'
+        ;;
+
+    *)
+        echo Unknown processor type `uname -m` for Linux
+        ;;
+    esac
+    ;;
+
+SunOS)
+    WM_ARCH=SunOS64
+    WM_MPLIB=FJMPI
+    export WM_COMPILER_LIB_ARCH=64
+    export WM_CC='gcc'
+    export WM_CXX='g++'
+    export WM_CFLAGS='-mabi=64 -fPIC'
+    export WM_CXXFLAGS='-mabi=64 -fPIC'
+    export WM_LDFLAGS='-mabi=64 -G0'
+    ;;
+
+*)    # an unsupported operating system
+    cat <<USAGE
+
+    Your "$WM_ARCH" operating system is not supported by this release
+    of OpenFOAM. For further assistance, please contact www.OpenFOAM.com
+
+USAGE
+    ;;
+esac
+
+
+#------------------------------------------------------------------------------
 
 # location of the jobControl directory
 export FOAM_JOB_DIR=$WM_PROJECT_INST_DIR/jobControl
@@ -79,8 +171,14 @@ export FOAM_EXT_LIBBIN=$WM_THIRD_PARTY_DIR/platforms/$WM_OPTIONS/lib
 
 # shared site executables/libraries
 # similar naming convention as ~OpenFOAM expansion
-export FOAM_SITE_APPBIN=$WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/bin
-export FOAM_SITE_LIBBIN=$WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib
+if [ -n "$WM_PROJECT_SITE" ]
+then
+    export FOAM_SITE_APPBIN=$WM_PROJECT_SITE/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/bin
+    export FOAM_SITE_LIBBIN=$WM_PROJECT_SITE/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib
+else
+    export FOAM_SITE_APPBIN=$WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/bin
+    export FOAM_SITE_LIBBIN=$WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib
+fi
 
 # user executables/libraries
 export FOAM_USER_APPBIN=$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/bin
@@ -92,7 +190,6 @@ export FOAM_USER_LIBBIN=$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib
 
 # convenience
 export FOAM_APP=$WM_PROJECT_DIR/applications
-#export FOAM_LIB=$WM_PROJECT_DIR/lib
 export FOAM_SRC=$WM_PROJECT_DIR/src
 export FOAM_TUTORIALS=$WM_PROJECT_DIR/tutorials
 export FOAM_UTILITIES=$FOAM_APP/utilities
@@ -129,6 +226,12 @@ OpenFOAM | ThirdParty)
         gcc_version=gcc-4.4.3
         gmp_version=gmp-5.0.1
         mpfr_version=mpfr-2.4.2
+        ;;
+    Gcc46 | Gcc46++0x)
+        gcc_version=gcc-4.6.0
+        gmp_version=gmp-5.0.1
+        mpfr_version=mpfr-2.4.2
+        mpc_version=mpc-0.8.1
         ;;
     Gcc45 | Gcc45++0x)
         gcc_version=gcc-4.5.2
@@ -284,8 +387,8 @@ unset MPI_ARCH_PATH MPI_HOME FOAM_MPI_LIBBIN
 
 case "$WM_MPLIB" in
 OPENMPI)
-    #export FOAM_MPI=openmpi-1.4.1
-    export FOAM_MPI=openmpi-1.5.1
+    #export FOAM_MPI=openmpi-1.4.3
+    export FOAM_MPI=openmpi-1.5.3
     export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
 
     # Tell OpenMPI where to find its install directory
@@ -304,6 +407,10 @@ SYSTEMOPENMPI)
     export PINC="`mpicc --showme:compile`"
     export PLIBS="`mpicc --showme:link`"
     libDir=`echo "$PLIBS" | sed -e 's/.*-L\([^ ]*\).*/\1/'`
+
+    # Bit of a hack: strip off 'lib' and hope this is the path to openmpi
+    # include files and libraries.
+    export MPI_ARCH_PATH="${libDir%/*}"
 
     if [ "$FOAM_VERBOSE" -a "$PS1" ]
     then

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -573,6 +573,9 @@ const Foam::indexedOctree<Foam::treeDataEdge>&
         bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
         bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
+        scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
+        indexedOctree<treeDataEdge>::perturbTol() = tolerance_;
+
         edgeTree_.reset
         (
             new indexedOctree<treeDataEdge>
@@ -590,6 +593,8 @@ const Foam::indexedOctree<Foam::treeDataEdge>&
                 3.0                 // duplicity
             )
         );
+
+        indexedOctree<treeDataEdge>::perturbTol() = oldTol;
     }
     return edgeTree_();
 }

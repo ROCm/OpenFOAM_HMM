@@ -43,6 +43,8 @@ int main(int argc, char *argv[])
         "  $HOME kjhkjhkjh \" \\$HOME/tyetyery $; ${FOAM_RUN} \n $; hkjh;"
         " $(DONOTSUBST) some other <${USER}> with '${__UNKNOWN:-some default}'"
         " value "
+        " or with '${HOME:+Home was set}' via :+ alternative"
+        " or with '${__UNKNOWN:+unknown}' empty"
     );
 
     dictionary dict;

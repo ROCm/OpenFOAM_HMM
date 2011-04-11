@@ -405,6 +405,12 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
 
+
+    // Make sure we do not use the master-only reading since we read
+    // fields (different per processor) as dictionaries.
+    regIOobject::fileModificationChecking = regIOobject::timeStamp;
+
+
     instantList timeDirs = timeSelector::select0(runTime, args);
 
     const bool isTestRun = args.optionFound("test");

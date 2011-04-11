@@ -28,24 +28,6 @@ License
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::label Foam::LocalInteraction<CloudType>::applyToPatch
-(
-    const label globalPatchI
-) const
-{
-    forAll(patchIds_, patchI)
-    {
-        if (patchIds_[patchI] == globalPatchI)
-        {
-            return patchI;
-        }
-    }
-
-    return -1;
-}
-
-
-template<class CloudType>
 void Foam::LocalInteraction<CloudType>::readProps()
 {
     if (!this->owner().solution().transient())
@@ -130,8 +112,7 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
 )
 :
     PatchInteractionModel<CloudType>(dict, cloud, typeName),
-    patchData_(this->coeffDict().lookup("patches")),
-    patchIds_(patchData_.size()),
+    patchData_(cloud.mesh(), this->coeffDict()),
     nEscape0_(patchData_.size(), 0),
     massEscape0_(patchData_.size(), 0.0),
     nStick0_(patchData_.size(), 0),
@@ -141,44 +122,6 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
     nStick_(patchData_.size(), 0),
     massStick_(patchData_.size(), 0.0)
 {
-    const polyMesh& mesh = cloud.mesh();
-    const polyBoundaryMesh& bMesh = mesh.boundaryMesh();
-
-    // check that user patches are valid region patches
-    forAll(patchData_, patchI)
-    {
-        const word& patchName = patchData_[patchI].patchName();
-        patchIds_[patchI] = bMesh.findPatchID(patchName);
-        if (patchIds_[patchI] < 0)
-        {
-            FatalErrorIn("LocalInteraction(const dictionary&, CloudType&)")
-                << "Patch " << patchName << " not found. Available patches "
-                << "are: " << bMesh.names() << nl << exit(FatalError);
-        }
-    }
-
-    // check that all walls are specified
-    DynamicList<word> badWalls;
-    forAll(bMesh, patchI)
-    {
-        if
-        (
-            isA<wallPolyPatch>(bMesh[patchI])
-         && applyToPatch(bMesh[patchI].index()) < 0
-        )
-        {
-            badWalls.append(bMesh[patchI].name());
-        }
-    }
-
-    if (badWalls.size() > 0)
-    {
-        FatalErrorIn("LocalInteraction(const dictionary&, CloudType&)")
-            << "All wall patches must be specified when employing local patch "
-            << "interaction. Please specify data for patches:" << nl
-            << badWalls << nl << exit(FatalError);
-    }
-
     // check that interactions are valid/specified
     forAll(patchData_, patchI)
     {
@@ -211,7 +154,6 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
 :
     PatchInteractionModel<CloudType>(pim),
     patchData_(pim.patchData_),
-    patchIds_(pim.patchIds_),
     nEscape0_(pim.nEscape0_),
     massEscape0_(pim.massEscape0_),
     nStick0_(pim.nStick0_),
@@ -246,7 +188,7 @@ bool Foam::LocalInteraction<CloudType>::correct
 
     bool& active = p.active();
 
-    label patchI = applyToPatch(pp.index());
+    label patchI = patchData_.applyToPatch(pp.index());
 
     if (patchI >= 0)
     {

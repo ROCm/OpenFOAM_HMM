@@ -1,4 +1,7 @@
 rho = thermo.rho();
+rho = max(rho, rhoMin);
+rho = min(rho, rhoMax);
+rho.relax();
 
 U = rAU*UEqn().H();
 
@@ -34,11 +37,9 @@ if (transonic)
             (
                 p.select
                 (
-                    (
-                        finalIter
-                     && corr == nCorr-1
-                     && nonOrth == nNonOrthCorr
-                    )
+                    pimpleCorr.finalIter()
+                 && corr == nCorr-1
+                 && nonOrth == nNonOrthCorr
                 )
             )
         );
@@ -74,11 +75,9 @@ else
             (
                 p.select
                 (
-                    (
-                        finalIter
-                     && corr == nCorr-1
-                     && nonOrth == nNonOrthCorr
-                    )
+                    pimpleCorr.finalIter()
+                 && corr == nCorr-1
+                 && nonOrth == nNonOrthCorr
                 )
             )
         );
@@ -98,6 +97,9 @@ p.relax();
 
 // Recalculate density from the relaxed pressure
 rho = thermo.rho();
+rho = max(rho, rhoMin);
+rho = min(rho, rhoMax);
+rho.relax();
 Info<< "rho max/min : " << max(rho).value()
     << " " << min(rho).value() << endl;
 
