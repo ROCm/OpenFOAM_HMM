@@ -100,13 +100,7 @@ template<class CloudType>
 template<class TrackData>
 void Foam::KinematicCloud<CloudType>::solve(TrackData& td)
 {
-    if (solution_.transient())
-    {
-        td.cloud().preEvolve();
-
-        evolveCloud(td);
-    }
-    else
+    if (solution_.steadyState())
     {
         td.cloud().storeState();
 
@@ -115,6 +109,14 @@ void Foam::KinematicCloud<CloudType>::solve(TrackData& td)
         evolveCloud(td);
 
         td.cloud().relaxSources(td.cloud().cloudCopy());
+    }
+    else
+    {
+        td.cloud().preEvolve();
+
+        evolveCloud(td);
+
+        td.cloud().scaleSources();
     }
 
     td.cloud().info();
@@ -258,6 +260,7 @@ void Foam::KinematicCloud<CloudType>::cloudReset(KinematicCloud<CloudType>& c)
     injectionModel_.reset(c.injectionModel_.ptr());
     patchInteractionModel_.reset(c.patchInteractionModel_.ptr());
     postProcessingModel_.reset(c.postProcessingModel_.ptr());
+    surfaceFilmModel_.reset(c.surfaceFilmModel_.ptr());
 
     UIntegrator_.reset(c.UIntegrator_.ptr());
 }
@@ -556,8 +559,20 @@ void Foam::KinematicCloud<CloudType>::relax
 ) const
 {
     const scalar coeff = solution_.relaxCoeff(name);
-
     field = field0 + coeff*(field - field0);
+}
+
+
+template<class CloudType>
+template<class Type>
+void Foam::KinematicCloud<CloudType>::scale
+(
+    DimensionedField<Type, volMesh>& field,
+    const word& name
+) const
+{
+    const scalar coeff = solution_.relaxCoeff(name);
+    field *= coeff;
 }
 
 
@@ -568,6 +583,15 @@ void Foam::KinematicCloud<CloudType>::relaxSources
 )
 {
     this->relax(UTrans_(), cloudOldTime.UTrans(), "U");
+    this->relax(UCoeff_(), cloudOldTime.UCoeff(), "U");
+}
+
+
+template<class CloudType>
+void Foam::KinematicCloud<CloudType>::scaleSources()
+{
+    this->scale(UTrans_(), "U");
+    this->scale(UCoeff_(), "U");
 }
 
 

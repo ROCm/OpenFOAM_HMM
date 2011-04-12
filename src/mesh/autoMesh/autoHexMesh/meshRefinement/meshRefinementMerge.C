@@ -349,10 +349,32 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
 
         faceCombiner.updateMesh(map);
 
-        updateMesh(map, labelList(0));
+        // Get the kept faces that need to be recalculated.
+        // Merging two boundary faces might shift the cell centre
+        // (unless the faces are absolutely planar)
+        labelHashSet retestFaces(6*allFaceSets.size());
+
+        forAll(allFaceSets, setI)
+        {
+            label oldMasterI = allFaceSets[setI][0];
+
+            label faceI = map().reverseFaceMap()[oldMasterI];
+
+            // faceI is always uncoupled boundary face
+            const cell& cFaces = mesh_.cells()[mesh_.faceOwner()[faceI]];
+
+            forAll(cFaces, i)
+            {
+                retestFaces.insert(cFaces[i]);
+            }
+        }
+        updateMesh(map, retestFaces.toc());
 
         if (debug)
         {
+            // Check sync
+            checkData();
+
             Pout<< "Writing initial merged-faces mesh to time "
                 << timeName() << nl << endl;
             write();
@@ -529,11 +551,30 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
             inplaceMapKey(map().reverseFaceMap(), restoredFaces);
             inplaceMapKey(map().reverseCellMap(), restoredCells);
 
+
+            // Get the kept faces that need to be recalculated.
+            // Merging two boundary faces might shift the cell centre
+            // (unless the faces are absolutely planar)
+            labelHashSet retestFaces(6*restoredFaces.size());
+
+            forAll(restoredFaces, setI)
+            {
+                label faceI = restoredFaces[setI];
+                // faceI is always uncoupled boundary face
+                const cell& cFaces = mesh_.cells()[mesh_.faceOwner()[faceI]];
+
+                forAll(cFaces, i)
+                {
+                    retestFaces.insert(cFaces[i]);
+                }
+            }
+
+
             // Experimental:restore all points/face/cells in maps
             updateMesh
             (
                 map,
-                labelList(0),       // changedFaces
+                retestFaces.toc(),
                 restoredPoints,
                 restoredFaces,
                 restoredCells
@@ -541,6 +582,9 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
 
             if (debug)
             {
+                // Check sync
+                checkData();
+
                 Pout<< "Writing merged-faces mesh to time "
                     << timeName() << nl << endl;
                 write();

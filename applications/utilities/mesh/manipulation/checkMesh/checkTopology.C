@@ -179,7 +179,7 @@ Foam::label Foam::checkTopology
         if (nTwoCells > 0)
         {
             Info<< "  <<Writing " << nTwoCells
-                << " cells with with single non-boundary face to set "
+                << " cells with with two non-boundary faces to set "
                 << twoCells.name()
                 << endl;
             twoCells.instance() = mesh.pointsInstance();

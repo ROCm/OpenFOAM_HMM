@@ -148,7 +148,8 @@ void Foam::SurfaceFilmModel<CloudType>::inject(TrackData& td)
     const labelList& filmPatches = filmModel.intCoupledPatchIDs();
     const labelList& primaryPatches = filmModel.primaryPatchIDs();
 
-    const polyBoundaryMesh& pbm = this->owner().mesh().boundaryMesh();
+    const fvMesh& mesh = this->owner().mesh();
+    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
 
     forAll(filmPatches, i)
     {
@@ -162,6 +163,10 @@ void Foam::SurfaceFilmModel<CloudType>::inject(TrackData& td)
         const labelList& injectorCellsPatch = pbm[primaryPatchI].faceCells();
 
         cacheFilmFields(filmPatchI, primaryPatchI, distMap, filmModel);
+
+        const vectorField& Cf = mesh.C().boundaryField()[primaryPatchI];
+        const vectorField& Sf = mesh.Sf().boundaryField()[primaryPatchI];
+        const scalarField& magSf = mesh.magSf().boundaryField()[primaryPatchI];
 
         forAll(injectorCellsPatch, j)
         {
@@ -179,7 +184,15 @@ void Foam::SurfaceFilmModel<CloudType>::inject(TrackData& td)
                 const label tetFaceI = this->owner().mesh().cells()[cellI][0];
                 const label tetPtI = 1;
 
-                const point& pos = this->owner().mesh().C()[cellI];
+//                const point& pos = this->owner().mesh().C()[cellI];
+
+                const scalar offset =
+                    max
+                    (
+                        diameterParcelPatch_[j],
+                        deltaFilmPatch_[primaryPatchI][j]
+                    );
+                const point pos = Cf[j] - 1.1*offset*Sf[j]/magSf[j];
 
                 // Create a new parcel
                 parcelType* pPtr =
@@ -217,11 +230,11 @@ void Foam::SurfaceFilmModel<CloudType>::cacheFilmFields
     const regionModels::surfaceFilmModels::surfaceFilmModel& filmModel
 )
 {
-    massParcelPatch_ = filmModel.massForPrimary().boundaryField()[filmPatchI];
+    massParcelPatch_ = filmModel.cloudMassTrans().boundaryField()[filmPatchI];
     distMap.distribute(massParcelPatch_);
 
     diameterParcelPatch_ =
-        filmModel.diametersForPrimary().boundaryField()[filmPatchI];
+        filmModel.cloudDiameterTrans().boundaryField()[filmPatchI];
     distMap.distribute(diameterParcelPatch_);
 
     UFilmPatch_ = filmModel.Us().boundaryField()[filmPatchI];

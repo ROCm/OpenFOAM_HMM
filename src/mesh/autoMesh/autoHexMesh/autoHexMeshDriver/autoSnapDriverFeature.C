@@ -135,63 +135,6 @@ void Foam::autoSnapDriver::smoothAndConstrain
 }
 
 
-void Foam::autoSnapDriver::calcNearest
-(
-    const pointField& points,
-    vectorField& disp,
-    vectorField& surfaceNormal
-) const
-{
-    const refinementSurfaces& surfaces = meshRefiner_.surfaces();
-
-    // Displacement and orientation per pp face.
-    disp.setSize(points.size());
-    disp = vector::zero;
-    surfaceNormal.setSize(points.size());
-    surfaceNormal = vector::zero;
-
-    {
-        // Divide surfaces into zoned and unzoned
-        labelList zonedSurfaces =
-            meshRefiner_.surfaces().getNamedSurfaces();
-        labelList unzonedSurfaces =
-            meshRefiner_.surfaces().getUnnamedSurfaces();
-
-        {
-            List<pointIndexHit> hitInfo;
-            labelList hitSurface;
-            labelList hitRegion;
-            surfaces.findNearestRegion
-            (
-                unzonedSurfaces,
-                points,
-                sqr(scalarField(points.size(), GREAT)),// sqr of attract dist
-                hitSurface,
-                hitInfo,
-                hitRegion,
-                surfaceNormal
-            );
-
-            forAll(hitInfo, i)
-            {
-                if (hitInfo[i].hit())
-                {
-                    disp[i] =
-                        hitInfo[i].hitPoint()
-                      - points[i];
-                }
-                else
-                {
-                    WarningIn("calcNearest(..)")
-                        << "Did not hit anything from face:" << i
-                        << " at:" << points[i] << endl;
-                }
-            }
-        }
-    }
-}
-
-
 void Foam::autoSnapDriver::calcNearestFace
 (
     const label iter,
@@ -202,6 +145,7 @@ void Foam::autoSnapDriver::calcNearestFace
 ) const
 {
     const fvMesh& mesh = meshRefiner_.mesh();
+    const refinementSurfaces& surfaces = meshRefiner_.surfaces();
 
     // Displacement and orientation per pp face.
     faceDisp.setSize(pp.size());
@@ -209,7 +153,148 @@ void Foam::autoSnapDriver::calcNearestFace
     faceSurfaceNormal.setSize(pp.size());
     faceSurfaceNormal = vector::zero;
 
-    calcNearest(pp.faceCentres(), faceDisp, faceSurfaceNormal);
+    // Divide surfaces into zoned and unzoned
+    labelList zonedSurfaces = surfaces.getNamedSurfaces();
+    labelList unzonedSurfaces = surfaces.getUnnamedSurfaces();
+
+    // Per pp face the current surface snapped to
+    labelList snapSurf(pp.size(), -1);
+
+
+    // Do zoned surfaces
+    // ~~~~~~~~~~~~~~~~~
+    // Zoned faces only attract to corresponding surface
+
+    // Extract faces per zone
+    const wordList& faceZoneNames = surfaces.faceZoneNames();
+
+    forAll(zonedSurfaces, i)
+    {
+        label zoneSurfI = zonedSurfaces[i];
+
+        // Get indices of faces on pp that are also in zone
+        label zoneI = mesh.faceZones().findZoneID(faceZoneNames[zoneSurfI]);
+        if (zoneI == -1)
+        {
+            FatalErrorIn
+            (
+                "autoSnapDriver::calcNearestFace(..)"
+            )   << "Problem. Cannot find zone " << faceZoneNames[zoneSurfI]
+                << exit(FatalError);
+        }
+        const faceZone& fZone = mesh.faceZones()[zoneI];
+        PackedBoolList isZonedFace(mesh.nFaces());
+        forAll(fZone, i)
+        {
+            isZonedFace[fZone[i]] = 1;
+        }
+
+        DynamicList<label> ppFaces(fZone.size());
+        DynamicList<label> meshFaces(fZone.size());
+        forAll(pp.addressing(), i)
+        {
+            if (isZonedFace[pp.addressing()[i]])
+            {
+                snapSurf[i] = zoneSurfI;
+                ppFaces.append(i);
+                meshFaces.append(pp.addressing()[i]);
+            }
+        }
+
+        //Pout<< "For faceZone " << fZone.name()
+        //    << " found " << ppFaces.size() << " out of " << pp.size()
+        //    << endl;
+
+        pointField fc
+        (
+            indirectPrimitivePatch
+            (
+                IndirectList<face>(mesh.faces(), meshFaces),
+                mesh.points()
+            ).faceCentres()
+        );
+
+        List<pointIndexHit> hitInfo;
+        labelList hitSurface;
+        labelList hitRegion;
+        vectorField hitNormal;
+        surfaces.findNearestRegion
+        (
+            labelList(1, zoneSurfI),
+            fc,
+            sqr(scalarField(fc.size(), GREAT)),// sqr of attract dist
+            hitSurface,
+            hitInfo,
+            hitRegion,
+            hitNormal
+        );
+
+        forAll(hitInfo, hitI)
+        {
+            if (hitInfo[hitI].hit())
+            {
+                label faceI = ppFaces[hitI];
+                faceDisp[faceI] = hitInfo[hitI].hitPoint() - fc[hitI];
+                faceSurfaceNormal[faceI] = hitNormal[hitI];
+            }
+        }
+    }
+
+
+    // Do unzoned surfaces
+    // ~~~~~~~~~~~~~~~~~~~
+    // Unzoned faces attract to any unzoned surface
+
+    DynamicList<label> ppFaces(pp.size());
+    DynamicList<label> meshFaces(pp.size());
+    forAll(pp.addressing(), i)
+    {
+        if (snapSurf[i] == -1)
+        {
+            ppFaces.append(i);
+            meshFaces.append(pp.addressing()[i]);
+        }
+    }
+    //Pout<< "Found " << ppFaces.size() << " unzoned faces out of " << pp.size()
+    //    << endl;
+
+    pointField fc
+    (
+        indirectPrimitivePatch
+        (
+            IndirectList<face>(mesh.faces(), meshFaces),
+            mesh.points()
+        ).faceCentres()
+    );
+
+    List<pointIndexHit> hitInfo;
+    labelList hitSurface;
+    labelList hitRegion;
+    vectorField hitNormal;
+    surfaces.findNearestRegion
+    (
+        unzonedSurfaces,
+        fc,
+        sqr(scalarField(fc.size(), GREAT)),// sqr of attract dist
+        hitSurface,
+        hitInfo,
+        hitRegion,
+        hitNormal
+    );
+
+    forAll(hitInfo, hitI)
+    {
+        if (hitInfo[hitI].hit())
+        {
+            label faceI = ppFaces[hitI];
+            faceDisp[faceI] = hitInfo[hitI].hitPoint() - fc[hitI];
+            faceSurfaceNormal[faceI] = hitNormal[hitI];
+        }
+    }
+
+
+    // Determine rotation
+    // ~~~~~~~~~~~~~~~~~~
 
     // Determine rotation axis
     faceRotation.setSize(pp.size());
@@ -238,104 +323,6 @@ void Foam::autoSnapDriver::calcNearestFace
           / "faceRotation_" + name(iter) + ".obj",
             pp.faceCentres(),
             pp.faceCentres() + faceRotation
-        );
-    }
-}
-
-
-void Foam::autoSnapDriver::interpolateFaceToPoint
-(
-    const label iter,
-    const indirectPrimitivePatch& pp,
-    const vectorField& faceSurfaceNormal,
-    const vectorField& faceDisp,
-    const vectorField& faceRotation,
-
-    vectorField& patchDisp,
-    vectorField& patchRotationDisp
-) const
-{
-    const fvMesh& mesh = meshRefiner_.mesh();
-
-    // Displacement due to normal snapping
-    patchDisp.setSize(pp.nPoints());
-    patchDisp = vector::zero;
-    // Displacement due to rotation
-    patchRotationDisp.setSize(pp.nPoints());
-    patchRotationDisp = vector::zero;
-
-
-    // Unweighted interpolation
-    // ~~~~~~~~~~~~~~~~~~~~~~~~
-
-    labelList nPatchDisp(pp.nPoints(), 0.0);
-
-    forAll(pp, faceI)
-    {
-        const face& f = pp.localFaces()[faceI];
-        const point& fc = pp.faceCentres()[faceI];
-
-        forAll(f, fp)
-        {
-            label pointI = f[fp];
-            const point& pt = pp.localPoints()[pointI];
-
-            patchDisp[pointI] += faceDisp[faceI];
-            patchRotationDisp[pointI] += (faceRotation[faceI]^(pt-fc));
-            nPatchDisp[pointI]++;
-        }
-    }
-
-    syncTools::syncPointList
-    (
-        mesh,
-        pp.meshPoints(),
-        patchDisp,
-        plusEqOp<vector>(),
-        vector::zero,
-        mapDistribute::transform()
-    );
-    syncTools::syncPointList
-    (
-        mesh,
-        pp.meshPoints(),
-        patchRotationDisp,
-        plusEqOp<vector>(),
-        vector::zero,
-        mapDistribute::transform()
-    );
-    syncTools::syncPointList
-    (
-        mesh,
-        pp.meshPoints(),
-        nPatchDisp,
-        plusEqOp<label>(),
-        0,
-        mapDistribute::transform()
-    );
-
-    forAll(patchDisp, pointI)
-    {
-        patchDisp[pointI] /= nPatchDisp[pointI];
-        patchRotationDisp[pointI] /= nPatchDisp[pointI];
-    }
-
-
-    if (debug&meshRefinement::OBJINTERSECTIONS)
-    {
-        dumpMove
-        (
-            mesh.time().path()
-          / "patchDisp_" + name(iter) + ".obj",
-            pp.localPoints(),
-            pp.localPoints() + patchDisp
-        );
-        dumpMove
-        (
-            mesh.time().path()
-          / "patchRotationDisp_" + name(iter) + ".obj",
-            pp.localPoints(),
-            pp.localPoints() + patchRotationDisp
         );
     }
 }
@@ -500,8 +487,6 @@ void Foam::autoSnapDriver::binFeatureFaces
 
     const label pointI,
 
-//    const vectorField& faceSurfaceNormal,
-//    const vectorField& faceDisp,
     const List<List<point> >& pointFaceNormals,
     const List<List<point> >& pointFaceDisp,
     const List<List<point> >& pointFaceCentres,
@@ -547,9 +532,6 @@ void Foam::autoSnapDriver::featureAttractionUsingReconstruction
     const indirectPrimitivePatch& pp,
     const scalarField& snapDist,
 
-    //const vectorField& faceSurfaceNormal,
-    //const vectorField& faceDisp,
-    //const vectorField& faceRotation,
     const List<List<point> >& pointFaceNormals,
     const List<List<point> >& pointFaceDisp,
     const List<List<point> >& pointFaceCentres,
@@ -609,8 +591,6 @@ void Foam::autoSnapDriver::featureAttractionUsingReconstruction
             snapDist,
             pointI,
 
-            //faceSurfaceNormal,
-            //faceDisp,
             pointFaceNormals,
             pointFaceDisp,
             pointFaceCentres,
@@ -741,9 +721,6 @@ void Foam::autoSnapDriver::determineAllFeatures
     const indirectPrimitivePatch& pp,
     const scalarField& snapDist,
 
-    //const vectorField& faceSurfaceNormal,
-    //const vectorField& faceDisp,
-    //const vectorField& faceRotation,
     const List<List<point> >& pointFaceNormals,
     const List<List<point> >& pointFaceDisp,
     const List<List<point> >& pointFaceCentres,
@@ -1778,33 +1755,8 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
         faceRotation
     );
 
-    //
-    // Interpolate face-wise data to points
-    //
-
-
-    // Displacement due to snapping of face centres
-    pointField patchDisp(localPoints.size(), vector::zero);
-    // Displacement due to rotation
-    pointField patchRotationDisp(localPoints.size(), vector::zero);
-
-    interpolateFaceToPoint
-    (
-        iter,
-        pp,
-        faceSurfaceNormal,
-        faceDisp,
-        faceRotation,
-
-        patchDisp,
-        patchRotationDisp
-    );
-
-    // Override patchDisp with exact nearest
-    {
-        pointField pointSurfaceNormal;
-        calcNearest(pp.localPoints(), patchDisp, pointSurfaceNormal);
-    }
+    // Start off with nearest point on surface.
+    vectorField patchDisp = nearestDisp;
 
 
     // Collect (possibly remote) face-wise data on coupled points.
@@ -1818,7 +1770,6 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
 
     List<List<point> > pointFaceNormals(pp.nPoints());
     List<List<point> > pointFaceDisp(pp.nPoints());
-    List<List<point> > pointFaceRotation(pp.nPoints());
     List<List<point> > pointFaceCentres(pp.nPoints());
 
     // Fill local data
@@ -1829,15 +1780,12 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
         pNormals.setSize(pFaces.size());
         List<point>& pDisp = pointFaceDisp[pointI];
         pDisp.setSize(pFaces.size());
-        List<point>& pRot = pointFaceRotation[pointI];
-        pRot.setSize(pFaces.size());
         List<point>& pFc = pointFaceCentres[pointI];
         pFc.setSize(pFaces.size());
         forAll(pFaces, i)
         {
             pNormals[i] = faceSurfaceNormal[pFaces[i]];
             pDisp[i] = faceDisp[pFaces[i]];
-            pRot[i] = faceRotation[pFaces[i]];
             pFc[i] = pp.faceCentres()[pFaces[i]];
         }
     }
@@ -1864,75 +1812,12 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
     (
         mesh,
         pp.meshPoints(),
-        pointFaceRotation,
-        listPlusEqOp(),
-        List<point>(),
-        listTransform()
-    );
-    syncTools::syncPointList
-    (
-        mesh,
-        pp.meshPoints(),
         pointFaceCentres,
         listPlusEqOp(),
         List<point>(),
         listTransform()
     );
 
-
-
-//XXXXXXX
-//    // Indices of pp points that are coupled
-//    labelList coupledPointLabels(pp.nPoints());
-//    // Corresponding coupled point index
-//    labelList coupledPointAddr(pp.nPoints());
-//    {
-//        label coupledI = 0;
-//        forAll(pp.meshPoints(), pointI)
-//        {
-//            label meshPointI = pp.meshPoints()[pointI];
-//            Map<label>::const_iterator fnd = coupledPatchMP.find(meshPointI);
-//            if (fnd != coupledPatchMP.end())
-//            {
-//                coupledPointLabels[coupledI] = pointI;
-//                coupledPointAddr[coupledI] = fnd();
-//                coupledI++;
-//            }
-//        }
-//        coupledPointLabels.setSize(coupledI);
-//        coupledPointAddr.setSize(coupledI);
-//    }
-//
-//    List<List<point> > pointFaceNormals(map.constructSize());
-//    List<List<point> > pointFaceDisp(map.constructSize());
-//    List<List<point> > pointFaceRotation(map.constructSize());
-//    List<List<point> > pointFaceCentres(map.constructSize());
-//
-//    // Collect local data.
-//    forAll(coupledPointLabels, coupledI)
-//    {
-//        label pointI = coupledPointLabels[coupledI];
-//        label coupledPointI = coupledPointAddr[coupledI];
-//        const labelList& pFaces = pp.pointFaces()[pointI];
-//        List<point>& pNormals = pointFaceNormals[coupledPointI];
-//        pNormals.setSize(pFaces.size());
-//        List<point>& pDisp = pointFaceDisp[coupledPointI];
-//        pDisp.setSize(pFaces.size());
-//        List<point>& pRot = pointFaceRotation[coupledPointI];
-//        pRot.setSize(pFaces.size());
-//        List<point>& pFc = pointFaceCentres[coupledPointI];
-//        pFc.setSize(pFaces.size());
-//        forAll(pFaces, i)
-//        {
-//            pNormals[i] = faceSurfaceNormal[pFaces[i]];
-//            pDisp[i] = pointFaceDisp[pFaces[i]];
-//            pRot[i] = pointFaceRotation[pFaces[i]];
-//            pFc[i] = pp.faceCentres()[pFaces[i]];
-//        }
-//    }
-//
-//    // Pull remote data into local slots
-//XXXXXXX
 
 
     // Nearest feature
@@ -1973,9 +1858,6 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
         << "     linear   : max:" << gMax(patchDisp)
         << " avg:" << gAverage(patchDisp)
         << endl
-        << "     rotation : max:" << gMax(patchRotationDisp)
-        << " avg:" << gAverage(patchRotationDisp)
-        << endl
         << "     feature  : max:" << gMax(patchAttraction)
         << " avg:" << gAverage(patchAttraction)
         << endl;
@@ -1985,19 +1867,12 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
     // - patchDisp          : point movement to go to nearest point on surface
     //                       (either direct or through interpolation of
     //                        face nearest)
-    // - patchRotationDisp  : point movement to align face normal with surface.
-    //
     // - patchAttraction    : direct attraction to features
     // - patchConstraints   : type of features
 
-    // Use any combination of patchDisp, patchRotationDisp and direct feature
+    // Use any combination of patchDisp and direct feature
     // attraction.
 
-
-    // Bit of patchRotation
-    //patchDisp = 0.3*patchRotationDisp+0.7*patchDisp;
-    // Disable patchRotationDisp
-    patchRotationDisp = vector::zero;
 
     // Mix with direct feature attraction
     forAll(patchConstraints, pointI)
@@ -2016,13 +1891,6 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
     //  / "linearPatchDisp_" + name(iter) + ".obj",
     //    pp.localPoints(),
     //    pp.localPoints() + patchDisp
-    //);
-    //dumpMove
-    //(
-    //    mesh.time().path()
-    //  / "rotationPatchDisp_" + name(iter) + ".obj",
-    //    pp.localPoints(),
-    //    pp.localPoints() + patchRotationDisp
     //);
 
 
@@ -2129,15 +1997,6 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
         minMagSqrEqOp<point>(),         // combine op
         vector(GREAT, GREAT, GREAT)     // null value (note: cannot use VGREAT)
     );
-
-
-    // Check for displacement being outwards.
-    outwardsDisplacement(pp, patchDisp);
-
-    // Set initial distribution of displacement field (on patches) from
-    // patchDisp and make displacement consistent with b.c. on displacement
-    // pointVectorField.
-    meshMover.setDisplacement(patchDisp);
 
     return patchDisp;
 }

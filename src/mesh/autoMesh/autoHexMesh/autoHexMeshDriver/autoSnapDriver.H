@@ -117,12 +117,12 @@ class autoSnapDriver
                     const List<pointConstraint>& constraints,
                     vectorField& disp
                 ) const;
-                void calcNearest
-                (
-                    const pointField& points,
-                    vectorField& disp,
-                    vectorField& surfaceNormal
-                ) const;
+                //void calcNearest
+                //(
+                //    const pointField& points,
+                //    vectorField& disp,
+                //    vectorField& surfaceNormal
+                //) const;
                 void calcNearestFace
                 (
                     const label iter,
