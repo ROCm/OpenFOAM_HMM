@@ -171,7 +171,7 @@ inline Foam::point Foam::triFace::centre(const pointField& points) const
 }
 
 
-inline Foam::point Foam::triFace::area
+inline Foam::vector Foam::triFace::area
 (
     const pointField& points,
     point& centrePt
@@ -183,15 +183,7 @@ inline Foam::point Foam::triFace::area
         centrePt = this->centre(points);
     }
 
-    return
-    (
-        0.5
-      *
-        (
-            (points[operator[](1)] - points[operator[](0)])
-          ^ (points[operator[](2)] - points[operator[](0)])
-        )
-    );
+    return this->normal(points);
 }
 
 

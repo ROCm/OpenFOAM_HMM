@@ -115,7 +115,7 @@ public:
         inline point centre(const pointField&) const;
 
         //- Area, optionally return centre point as well
-        inline point area
+        inline vector area
         (
             const pointField&,
             point& centrePt = *reinterpret_cast<point*>(0)
