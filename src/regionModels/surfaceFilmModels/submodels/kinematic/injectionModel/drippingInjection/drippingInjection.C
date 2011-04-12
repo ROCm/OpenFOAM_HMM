@@ -111,7 +111,8 @@ void drippingInjection::correct
         if (gNorm[i] > SMALL)
         {
             const scalar ddelta = max(0.0, delta[i] - deltaStable_);
-            massDrip[i] += min(availableMass[i], max(0.0, ddelta*rho[i]*magSf[i]));
+            massDrip[i] +=
+                min(availableMass[i], max(0.0, ddelta*rho[i]*magSf[i]));
         }
     }
 

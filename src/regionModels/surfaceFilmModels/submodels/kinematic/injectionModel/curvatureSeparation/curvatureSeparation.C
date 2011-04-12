@@ -57,7 +57,10 @@ addToRunTimeSelectionTable
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-tmp<volScalarField> curvatureSeparation::calcInvR1(const volVectorField& U) const
+tmp<volScalarField> curvatureSeparation::calcInvR1
+(
+    const volVectorField& U
+) const
 {
     // method 1
 /*
