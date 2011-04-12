@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
+|  \\    /   O peration     | Version:  dev.FMGlobal                          |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -31,6 +31,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube01_side1;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -301,6 +302,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube01_side2;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -571,6 +573,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube01_side3;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -841,6 +844,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube01_side4;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -1111,6 +1115,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube01_side5;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -1381,6 +1386,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube01_side6;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -1651,6 +1657,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube02_side1;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -1921,6 +1928,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube02_side2;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -2191,6 +2199,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube02_side3;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -2461,6 +2470,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube02_side4;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -2731,6 +2741,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube02_side5;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -3001,6 +3012,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube02_side6;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -3271,6 +3283,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube03_side1;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -3541,6 +3554,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube03_side2;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -3811,6 +3825,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube03_side3;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -4081,6 +4096,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube03_side4;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -4351,6 +4367,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube03_side5;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -4621,6 +4638,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube03_side6;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -4891,6 +4909,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube04_side1;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -5161,6 +5180,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube04_side2;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -5431,6 +5451,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube04_side3;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -5701,6 +5722,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube04_side4;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -5971,6 +5993,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube04_side5;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -6241,6 +6264,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_cube04_side6;
+        offsetMode      nonuniform;
         offsets         
 256
 (
@@ -6511,6 +6535,7 @@ FoamFile
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_floor;
+        offsetMode      nonuniform;
         offsets         
 6400
 (

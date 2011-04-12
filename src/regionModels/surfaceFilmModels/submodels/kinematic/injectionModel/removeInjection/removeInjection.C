@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,11 +63,13 @@ removeInjection::~removeInjection()
 
 void removeInjection::correct
 (
-    scalarField&,
+    scalarField& availableMass,
+    scalarField& massToInject,
     scalarField&
 )
 {
-    // do nothing - all mass available to be removed
+    massToInject = availableMass;
+    availableMass = 0.0;
 }
 
 

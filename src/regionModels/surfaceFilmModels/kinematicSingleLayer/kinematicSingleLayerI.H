@@ -24,7 +24,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "kinematicSingleLayer.H"
+#include "surfaceInterpolate.H"
+#include "fvcSurfaceIntegrate.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -163,9 +164,24 @@ inline const volScalarField& kinematicSingleLayer::muPrimary() const
 }
 
 
-inline injectionModel& kinematicSingleLayer::injection()
+inline injectionModelList& kinematicSingleLayer::injection()
 {
-    return injection_();
+    return injection_;
+}
+
+
+inline tmp<volScalarField> kinematicSingleLayer::mass() const
+{
+    return rho_*delta_*magSf();
+}
+
+
+inline tmp<volScalarField> kinematicSingleLayer::netMass() const
+{
+    dimensionedScalar d0("SMALL", dimLength, ROOTVSMALL);
+    return
+        fvc::surfaceSum(phi_/(fvc::interpolate(delta_) + d0))*time().deltaT()
+      + rho_*delta_*magSf();
 }
 
 
