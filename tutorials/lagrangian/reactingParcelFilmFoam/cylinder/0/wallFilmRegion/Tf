@@ -31,7 +31,12 @@ boundaryField
         type            zeroGradient;
     }
 
-    filmWalls
+    sides
+    {
+        type            zeroGradient;
+    }
+
+    frontAndBack
     {
         type            zeroGradient;
     }

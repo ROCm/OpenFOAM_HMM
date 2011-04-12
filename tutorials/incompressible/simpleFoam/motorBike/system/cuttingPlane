@@ -15,6 +15,8 @@ cuttingPlane
     surfaceFormat   vtk;
     fields          ( p U );
 
+    interpolationScheme cellPoint;
+
     surfaces
     (
         yNormal
