@@ -287,6 +287,9 @@ public:
             //- Apply relaxation to (steady state) cloud sources
             void relaxSources(const ReactingCloud<CloudType>& cloudOldTime);
 
+            //- Apply scaling to (transient) cloud sources
+            void scaleSources();
+
             //- Evolve the cloud
             void evolve();
 
