@@ -43,14 +43,11 @@ if (adjustTimeStep)
 
     const scalar dt0 = runTime.deltaTValue();
 
-    const scalar TFactorFluidLim =
-        min(min(TFactorFluid, 1.0 + 0.1*TFactorFluid), 1.2);
-
     runTime.setDeltaT
     (
         min
         (
-            dt0*min(TFactorFluidLim, TFactorFilm),
+            dt0*min(min(TFactorFluid, TFactorFilm), 1.2),
             maxDeltaT
         )
     );
