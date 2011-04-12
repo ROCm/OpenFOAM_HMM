@@ -55,6 +55,8 @@ Foam::label Foam::polyMeshTetDecomposition::findSharedBasePoint
 
     const point& oCc = pC[oCI];
 
+    List<scalar> tetQualities(2, 0.0);
+
     forAll(f, faceBasePtI)
     {
         scalar thisBaseMinTetQuality = VGREAT;
@@ -65,8 +67,6 @@ Foam::label Foam::polyMeshTetDecomposition::findSharedBasePoint
         {
             label facePtI = (tetPtI + faceBasePtI) % f.size();
             label otherFacePtI = f.fcIndex(facePtI);
-
-            List<scalar> tetQualities(2, 0.0);
 
             {
                 // owner cell tet

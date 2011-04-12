@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.7.1                                 |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -217,10 +217,10 @@ snapControls
     //  to surface
     nSmoothPatch 3;
 
-    //- Relative distance for points to be attracted by surface feature point
-    //  or edge. True distance is this factor times local
-    //  maximum edge length.
-    tolerance 4.0;
+    //- Maximum relative distance for points to be attracted by surface.
+    //  True distance is this factor times local maximum edge length.
+    // Note: changed(corrected) w.r.t 17x! (17x used 2* tolerance)
+    tolerance 2.0;
 
     //- Number of mesh displacement relaxation iterations.
     nSolveIter 30;

@@ -18,8 +18,6 @@ dimensions          [ 0 2 -2 0 0 0 0 ];
 
 internalField       uniform 1.0;
 
-referenceLevel      0;
-
 boundaryField
 {
     walls

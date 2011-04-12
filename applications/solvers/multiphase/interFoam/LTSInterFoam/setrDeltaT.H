@@ -49,7 +49,7 @@
         piso.lookupOrDefault<scalar>("maxDeltaT", GREAT)
     );
 
-    volScalarField rDeltaT0 = rDeltaT;
+    volScalarField rDeltaT0("rDeltaT0", rDeltaT);
 
     // Set the reciprocal time-step from the local Courant number
     rDeltaT.dimensionedInternalField() = max
@@ -64,7 +64,7 @@
         // Further limit the reciprocal time-step
         // in the vicinity of the interface
 
-        volScalarField alpha1Bar = fvc::average(alpha1);
+        volScalarField alpha1Bar(fvc::average(alpha1));
 
         rDeltaT.dimensionedInternalField() = max
         (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,6 @@ Description
 \*----------------------------------------------------------------------------*/
 
 #include "autoSnapDriver.H"
-#include "Time.H"
 #include "motionSmoother.H"
 #include "polyTopoChange.H"
 #include "OFstream.H"
@@ -36,13 +35,12 @@ Description
 #include "Time.H"
 #include "OFstream.H"
 #include "mapPolyMesh.H"
-#include "motionSmoother.H"
 #include "pointEdgePoint.H"
 #include "PointEdgeWave.H"
 #include "mergePoints.H"
 #include "snapParameters.H"
 #include "refinementSurfaces.H"
-
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -509,9 +507,7 @@ void Foam::autoSnapDriver::dumpMove
 )
 {
     // Dump direction of growth into file
-    Pout<< nl << "Dumping move direction to " << fName << nl
-        << "View this Lightwave-OBJ file with e.g. javaview" << nl
-        << endl;
+    Pout<< nl << "Dumping move direction to " << fName << endl;
 
     OFstream nearestStream(fName);
 
@@ -652,8 +648,7 @@ Foam::scalarField Foam::autoSnapDriver::calcSnapDistance
         -GREAT              // null value
     );
 
-    tmp<scalarField> tfld = snapParams.snapTol()*maxEdgeLen;
-    return tfld();
+    return snapParams.snapTol()*maxEdgeLen;
 }
 
 
@@ -688,6 +683,7 @@ void Foam::autoSnapDriver::preSmoothPatch
 
         // The current mesh is the starting mesh to smooth from.
         meshMover.setDisplacement(patchDisp);
+
         meshMover.correct();
 
         scalar oldErrorReduction = -1;
@@ -726,10 +722,15 @@ void Foam::autoSnapDriver::preSmoothPatch
     if (debug)
     {
         const_cast<Time&>(mesh.time())++;
-        Pout<< "Writing patch smoothed mesh to time " << meshRefiner_.timeName()
-            << endl;
-
-        mesh.write();
+        Pout<< "Writing patch smoothed mesh to time "
+            << meshRefiner_.timeName() << '.' << endl;
+        meshRefiner_.write
+        (
+            debug,
+            mesh.time().path()/meshRefiner_.timeName()
+        );
+        Pout<< "Dumped mesh in = "
+            << mesh.time().cpuTimeIncrement() << " s\n" << nl << endl;
     }
 
     Info<< "Patch points smoothed in = "
@@ -828,7 +829,7 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
             (
                 unzonedSurfaces,
                 localPoints,
-                sqr(4*snapDist),        // sqr of attract distance
+                sqr(snapDist),        // sqr of attract distance
                 hitSurface,
                 hitInfo
             );
@@ -880,7 +881,7 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
             (
                 labelList(1, zoneSurfI),
                 pointField(localPoints, zonePointIndices),
-                sqr(4*scalarField(minSnapDist, zonePointIndices)),
+                sqr(scalarField(minSnapDist, zonePointIndices)),
                 hitSurface,
                 hitInfo
             );
@@ -956,28 +957,9 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
         mesh,
         pp.meshPoints(),
         patchDisp,
-        minMagEqOp(),                   // combine op
-        vector(GREAT, GREAT, GREAT)     // null value
+        minMagSqrEqOp<point>(),         // combine op
+        vector(GREAT, GREAT, GREAT)     // null value (note: cannot use VGREAT)
     );
-
-
-    // Check for displacement being outwards.
-    outwardsDisplacement(pp, patchDisp);
-
-    // Set initial distribution of displacement field (on patches) from
-    // patchDisp and make displacement consistent with b.c. on displacement
-    // pointVectorField.
-    meshMover.setDisplacement(patchDisp);
-
-    if (debug)
-    {
-        dumpMove
-        (
-            mesh.time().path()/"patchDisplacement.obj",
-            pp.localPoints(),
-            pp.localPoints() + patchDisp
-        );
-    }
 
     return patchDisp;
 }
@@ -990,13 +972,12 @@ void Foam::autoSnapDriver::smoothDisplacement
 ) const
 {
     const fvMesh& mesh = meshRefiner_.mesh();
-    const pointMesh& pMesh = meshMover.pMesh();
     const indirectPrimitivePatch& pp = meshMover.patch();
 
     Info<< "Smoothing displacement ..." << endl;
 
     // Set edge diffusivity as inverse of distance to patch
-    scalarField edgeGamma(1.0/(edgePatchDist(pMesh, pp) + SMALL));
+    scalarField edgeGamma(1.0/(edgePatchDist(meshMover.pMesh(), pp) + SMALL));
     //scalarField edgeGamma(mesh.nEdges(), 1.0);
     //scalarField edgeGamma(wallGamma(mesh, pp, 10, 1));
 
@@ -1010,7 +991,6 @@ void Foam::autoSnapDriver::smoothDisplacement
             Info<< "Iteration " << iter << endl;
         }
         pointVectorField oldDisp(disp);
-
         meshMover.smooth(oldDisp, edgeGamma, disp);
     }
     Info<< "Displacement smoothed in = "
@@ -1045,7 +1025,7 @@ void Foam::autoSnapDriver::smoothDisplacement
 }
 
 
-void Foam::autoSnapDriver::scaleMesh
+bool Foam::autoSnapDriver::scaleMesh
 (
     const snapParameters& snapParams,
     const label nInitErrors,
@@ -1061,6 +1041,8 @@ void Foam::autoSnapDriver::scaleMesh
 
     scalar oldErrorReduction = -1;
 
+    bool meshOk = false;
+
     Info<< "Moving mesh ..." << endl;
     for (label iter = 0; iter < 2*snapParams.nSnap(); iter++)
     {
@@ -1072,10 +1054,11 @@ void Foam::autoSnapDriver::scaleMesh
             oldErrorReduction = meshMover.setErrorReduction(0.0);
         }
 
-        if (meshMover.scaleMesh(checkFaces, baffles, true, nInitErrors))
+        meshOk = meshMover.scaleMesh(checkFaces, baffles, true, nInitErrors);
+
+        if (meshOk)
         {
             Info<< "Successfully moved mesh" << endl;
-
             break;
         }
         if (debug)
@@ -1098,6 +1081,8 @@ void Foam::autoSnapDriver::scaleMesh
     }
     Info<< "Moved mesh in = "
         << mesh.time().cpuTimeIncrement() << " s\n" << nl << endl;
+
+    return meshOk;
 }
 
 
@@ -1129,8 +1114,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::repatchToSurface
     indirectPrimitivePatch& pp = ppPtr();
 
     // Divide surfaces into zoned and unzoned
-    labelList zonedSurfaces = meshRefiner_.surfaces().getNamedSurfaces();
-    labelList unzonedSurfaces = meshRefiner_.surfaces().getUnnamedSurfaces();
+    labelList zonedSurfaces = surfaces.getNamedSurfaces();
+    labelList unzonedSurfaces = surfaces.getUnnamedSurfaces();
 
 
     // Faces that do not move
@@ -1191,7 +1176,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::repatchToSurface
         (
             unzonedSurfaces,
             localFaceCentres,
-            sqr(4*faceSnapDist),    // sqr of attract distance
+            sqr(faceSnapDist),    // sqr of attract distance
             hitSurface,
             hitRegion
         );
@@ -1260,6 +1245,7 @@ void Foam::autoSnapDriver::doSnap
 (
     const dictionary& snapDict,
     const dictionary& motionDict,
+    const scalar featureCos,
     const snapParameters& snapParams
 )
 {
@@ -1278,6 +1264,21 @@ void Foam::autoSnapDriver::doSnap
     List<labelPair> baffles;
     meshRefiner_.createZoneBaffles(globalToPatch_, baffles);
 
+
+    bool doFeatures = false;
+    label nFeatIter = 1;
+    if (snapParams.nFeatureSnap() > 0)
+    {
+        doFeatures = true;
+        nFeatIter = snapParams.nFeatureSnap();
+
+        Info<< "Snapping to features in " << nFeatIter
+            << " iterations ..." << endl;
+    }
+
+
+    bool meshOk = false;
+
     {
         autoPtr<indirectPrimitivePatch> ppPtr
         (
@@ -1287,10 +1288,9 @@ void Foam::autoSnapDriver::doSnap
                 adaptPatchIDs
             )
         );
-        indirectPrimitivePatch& pp = ppPtr();
 
         // Distance to attract to nearest feature on surface
-        const scalarField snapDist(calcSnapDistance(snapParams, pp));
+        const scalarField snapDist(calcSnapDistance(snapParams, ppPtr()));
 
 
         // Construct iterative mesh mover.
@@ -1302,7 +1302,7 @@ void Foam::autoSnapDriver::doSnap
         motionSmoother meshMover
         (
             mesh,
-            pp,
+            ppPtr(),
             adaptPatchIDs,
             meshRefinement::makeDisplacementField(pMesh, adaptPatchIDs),
             motionDict
@@ -1330,19 +1330,93 @@ void Foam::autoSnapDriver::doSnap
         // Pre-smooth patch vertices (so before determining nearest)
         preSmoothPatch(snapParams, nInitErrors, baffles, meshMover);
 
-        // Calculate displacement at every patch point. Insert into
-        // meshMover.
-        calcNearestSurface(snapDist, meshMover);
 
-        //// Get smoothly varying internal displacement field.
-        //- 2009-12-16 : was not found to be beneficial. Keeping internal
-        // fields fixed slightly increases skewness (on boundary)
-        // but lowers non-orthogonality quite a bit (e.g. 65->59 degrees).
-        // Maybe if better smoother?
-        //smoothDisplacement(snapParams, meshMover);
+        for (label iter = 0; iter < nFeatIter; iter++)
+        {
+            Info<< nl
+                << "Morph iteration " << iter << nl
+                << "-----------------" << endl;
 
-        // Apply internal displacement to mesh.
-        scaleMesh(snapParams, nInitErrors, baffles, meshMover);
+            // Calculate displacement at every patch point. Insert into
+            // meshMover.
+            vectorField disp = calcNearestSurface(snapDist, meshMover);
+
+            // Override displacement with feature edge attempt
+            if (doFeatures)
+            {
+                disp = calcNearestSurfaceFeature
+                (
+                    iter,
+                    featureCos,
+                    scalar(iter+1)/nFeatIter,
+                    snapDist,
+                    disp,
+                    meshMover
+                );
+            }
+
+            // Check for displacement being outwards.
+            outwardsDisplacement(ppPtr(), disp);
+
+            // Set initial distribution of displacement field (on patches)
+            // from patchDisp and make displacement consistent with b.c.
+            // on displacement pointVectorField.
+            meshMover.setDisplacement(disp);
+
+
+            if (debug&meshRefinement::OBJINTERSECTIONS)
+            {
+                dumpMove
+                (
+                    mesh.time().path()
+                  / "patchDisplacement_" + name(iter) + ".obj",
+                    ppPtr().localPoints(),
+                    ppPtr().localPoints() + disp
+                );
+            }
+
+            // Get smoothly varying internal displacement field.
+            smoothDisplacement(snapParams, meshMover);
+
+            // Apply internal displacement to mesh.
+            meshOk = scaleMesh
+            (
+                snapParams,
+                nInitErrors,
+                baffles,
+                meshMover
+            );
+
+            if (!meshOk)
+            {
+                Info<< "Did not succesfully snap mesh. Giving up."
+                    << nl << endl;
+
+                // Use current mesh as base mesh
+                meshMover.correct();
+
+                break;
+            }
+
+            if (debug)
+            {
+                const_cast<Time&>(mesh.time())++;
+                Pout<< "Writing scaled mesh to time "
+                    << meshRefiner_.timeName() << endl;
+                meshRefiner_.write
+                (
+                    debug,
+                    mesh.time().path()/meshRefiner_.timeName()
+                );
+                Pout<< "Writing displacement field ..." << endl;
+                meshMover.displacement().write();
+                tmp<pointScalarField> magDisp(mag(meshMover.displacement()));
+                magDisp().write();
+            }
+
+            // Use current mesh as base mesh
+            meshMover.correct();
+        }
     }
 
     // Merge any introduced baffles.
@@ -1350,6 +1424,34 @@ void Foam::autoSnapDriver::doSnap
 
     // Repatch faces according to nearest.
     repatchToSurface(snapParams, adaptPatchIDs);
+
+    // Repatching might have caused faces to be on same patch and hence
+    // mergeable so try again to merge coplanar faces
+    label nChanged = meshRefiner_.mergePatchFacesUndo
+    (
+        featureCos,  // minCos
+        featureCos,  // concaveCos
+        meshRefiner_.meshedPatches(),
+        motionDict
+    );
+
+    nChanged += meshRefiner_.mergeEdgesUndo
+    (
+        featureCos,
+        motionDict
+    );
+
+    if (nChanged > 0 && debug)
+    {
+        const_cast<Time&>(mesh.time())++;
+        Pout<< "Writing patchFace merged mesh to time "
+            << meshRefiner_.timeName() << endl;
+        meshRefiner_.write
+        (
+            debug,
+            meshRefiner_.timeName()
+        );
+    }
 }
 
 

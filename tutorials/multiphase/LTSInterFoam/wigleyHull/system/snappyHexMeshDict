@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -241,6 +241,7 @@ addLayersControls
     //- If points get not extruded do nGrow layers of connected faces that are
     //  also not grown. This helps convergence of the layer addition process
     //  close to features.
+    // Note: changed(corrected) w.r.t 17x! (didn't do anything in 17x)
     nGrow 0;
 
 
@@ -271,6 +272,7 @@ addLayersControls
     maxThicknessToMedialRatio 0.3;
 
     // Angle used to pick up medial axis points
+    // Note: changed(corrected) w.r.t 17x! 90 degrees corresponds to 130 in 17x.
     minMedianAxisAngle 90;
 
     // Create buffer region for new layer terminations

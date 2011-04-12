@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,7 +42,6 @@ namespace Foam
 {
 
 // Forward declaration of classes
-class featureEdgeMesh;
 class refinementParameters;
 class meshRefinement;
 class decompositionMethod;
@@ -71,19 +70,10 @@ class autoRefineDriver
 
     // Private Member Functions
 
-        //- Read explicit feature edges
-        label readFeatureEdges
-        (
-            const PtrList<dictionary>& featDicts,
-            PtrList<featureEdgeMesh>& featureMeshes,
-            labelList& featureLevel
-        ) const;
-
         //- Refine all cells pierced by explicit feature edges
         label featureEdgeRefine
         (
             const refinementParameters& refineParams,
-            const PtrList<dictionary>& featDicts,
             const label maxIter,
             const label minRefine
         );
@@ -130,7 +120,8 @@ class autoRefineDriver
         //- Merge refined boundary faces (from exposing coarser cell)
         void mergePatchFaces
         (
-            const refinementParameters& refineParams
+            const refinementParameters& refineParams,
+            const dictionary& motionDict
         );
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,22 +28,13 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from dictionary
-Foam::snapParameters::snapParameters(const dictionary& dict, const label dummy)
-:
-    nSmoothPatch_(readLabel(dict.lookup("nSmoothPatch"))),
-    snapTol_(readScalar(dict.lookup("snapTol"))),
-    nSmoothDispl_(readLabel(dict.lookup("nSmoothDispl"))),
-    nSnap_(readLabel(dict.lookup("nSnap")))
-{}
-
-
-// Construct from dictionary
 Foam::snapParameters::snapParameters(const dictionary& dict)
 :
     nSmoothPatch_(readLabel(dict.lookup("nSmoothPatch"))),
     snapTol_(readScalar(dict.lookup("tolerance"))),
     nSmoothDispl_(readLabel(dict.lookup("nSolveIter"))),
-    nSnap_(readLabel(dict.lookup("nRelaxIter")))
+    nSnap_(readLabel(dict.lookup("nRelaxIter"))),
+    nFeatureSnap_(dict.lookupOrDefault("nFeatureSnapIter", -1))
 {}
 
 

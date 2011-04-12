@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,15 +46,14 @@ Foam::sampledPatch::sampledPatch
 (
     const word& name,
     const polyMesh& mesh,
-    const word& patchName,
+    const wordReList& patchNames,
     const bool triangulate
 )
 :
     sampledSurface(name, mesh),
-    patchName_(patchName),
+    patchNames_(patchNames),
     triangulate_(triangulate),
-    needsUpdate_(true),
-    patchFaceLabels_(0)
+    needsUpdate_(true)
 {}
 
 
@@ -66,10 +65,9 @@ Foam::sampledPatch::sampledPatch
 )
 :
     sampledSurface(name, mesh, dict),
-    patchName_(dict.lookup("patchName")),
+    patchNames_(dict.lookup("patches")),
     triangulate_(dict.lookupOrDefault("triangulate", false)),
-    needsUpdate_(true),
-    patchFaceLabels_(0)
+    needsUpdate_(true)
 {}
 
 
@@ -80,6 +78,20 @@ Foam::sampledPatch::~sampledPatch()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+const Foam::labelList& Foam::sampledPatch::patchIDs() const
+{
+    if (patchIDs_.empty())
+    {
+        patchIDs_ = mesh().boundaryMesh().patchSet
+        (
+            patchNames_,
+            false
+        ).sortedToc();
+    }
+    return patchIDs_;
+}
+
 
 bool Foam::sampledPatch::needsUpdate() const
 {
@@ -97,7 +109,10 @@ bool Foam::sampledPatch::expire()
 
     sampledSurface::clearGeom();
     MeshStorage::clear();
+    patchIDs_.clear();
+    patchIndex_.clear();
     patchFaceLabels_.clear();
+    patchStart_.clear();
 
     needsUpdate_ = true;
     return true;
@@ -111,29 +126,65 @@ bool Foam::sampledPatch::update()
         return false;
     }
 
-    const label patchI = mesh().boundaryMesh().findPatchID(patchName_);
-
-    if (patchI != -1)
+    label sz = 0;
+    forAll(patchIDs(), i)
     {
-        const polyPatch& p = mesh().boundaryMesh()[patchI];
-        this->storedPoints() = p.localPoints();
-        this->storedFaces()  = p.localFaces();
+        label patchI = patchIDs()[i];
+        const polyPatch& pp = mesh().boundaryMesh()[patchI];
 
-        // an identity map
-        patchFaceLabels_.setSize(faces().size());
-        forAll(patchFaceLabels_, i)
+        if (isA<emptyPolyPatch>(pp))
         {
-            patchFaceLabels_[i] = i;
+            FatalErrorIn("sampledPatch::update()")
+                << "Cannot sample an empty patch. Patch " << pp.name()
+                << exit(FatalError);
         }
 
-        // triangulate uses remapFaces()
-        // - this is somewhat less efficient since it recopies the faces
-        // that we just created, but we probably don't want to do this
-        // too often anyhow.
-        if (triangulate_)
+        sz += pp.size();
+    }
+
+    // For every face (or triangle) the originating patch and local face in the
+    // patch.
+    patchIndex_.setSize(sz);
+    patchFaceLabels_.setSize(sz);
+    patchStart_.setSize(patchIDs().size());
+    labelList meshFaceLabels(sz);
+
+    sz = 0;
+
+    forAll(patchIDs(), i)
+    {
+        label patchI = patchIDs()[i];
+
+        patchStart_[i] = sz;
+
+        const polyPatch& pp = mesh().boundaryMesh()[patchI];
+
+        forAll(pp, j)
         {
-            MeshStorage::triangulate();
+            patchIndex_[sz] = i;
+            patchFaceLabels_[sz] = j;
+            meshFaceLabels[sz] = pp.start()+j;
+            sz++;
         }
+    }
+
+    indirectPrimitivePatch allPatches
+    (
+        IndirectList<face>(mesh().faces(), meshFaceLabels),
+        mesh().points()
+    );
+
+    this->storedPoints() = allPatches.localPoints();
+    this->storedFaces()  = allPatches.localFaces();
+
+
+    // triangulate uses remapFaces()
+    // - this is somewhat less efficient since it recopies the faces
+    // that we just created, but we probably don't want to do this
+    // too often anyhow.
+    if (triangulate_)
+    {
+        MeshStorage::triangulate();
     }
 
     if (debug)
@@ -148,10 +199,7 @@ bool Foam::sampledPatch::update()
 
 
 // remap action on triangulation
-void Foam::sampledPatch::remapFaces
-(
-    const labelUList& faceMap
-)
+void Foam::sampledPatch::remapFaces(const labelUList& faceMap)
 {
     // recalculate the cells cut
     if (&faceMap && faceMap.size())
@@ -161,9 +209,25 @@ void Foam::sampledPatch::remapFaces
         (
             UIndirectList<label>(patchFaceLabels_, faceMap)
         );
+        patchIndex_ = labelList
+        (
+            UIndirectList<label>(patchIndex_, faceMap)
+        );
+
+        // Redo patchStart.
+        if (patchIndex_.size() > 0)
+        {
+            patchStart_[patchIndex_[0]] = 0;
+            for (label i = 1; i < patchIndex_.size(); i++)
+            {
+                if (patchIndex_[i] != patchIndex_[i-1])
+                {
+                    patchStart_[patchIndex_[i]] = i;
+                }
+            }
+        }
     }
 }
-
 
 
 Foam::tmp<Foam::scalarField> Foam::sampledPatch::sample
@@ -257,7 +321,7 @@ Foam::tmp<Foam::tensorField> Foam::sampledPatch::interpolate
 void Foam::sampledPatch::print(Ostream& os) const
 {
     os  << "sampledPatch: " << name() << " :"
-        << "  patch:" << patchName()
+        << "  patches:" << patchNames()
         << "  faces:" << faces().size()
         << "  points:" << points().size();
 }

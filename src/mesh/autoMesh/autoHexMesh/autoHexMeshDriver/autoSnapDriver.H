@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,6 +29,7 @@ Description
 
 SourceFiles
     autoSnapDriver.C
+    autoSnapDriverFeature.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -45,6 +46,7 @@ namespace Foam
 // Forward declaration of classes
 class motionSmoother;
 class snapParameters;
+class pointConstraint;
 
 /*---------------------------------------------------------------------------*\
                            Class autoSnapDriver Declaration
@@ -52,23 +54,6 @@ class snapParameters;
 
 class autoSnapDriver
 {
-    // Private classes
-
-        //- Combine operator class for equalizing displacements.
-        class minMagEqOp
-        {
-        public:
-
-            void operator()(vector& x, const vector& y) const
-            {
-                if (magSqr(y) < magSqr(x))
-                {
-                    x = y;
-                }
-            }
-        };
-
-
     // Private data
 
         //- Mesh+surface
@@ -123,6 +108,174 @@ class autoSnapDriver
                 const indirectPrimitivePatch&,
                 const vectorField&
             );
+
+            // Feature line snapping
+
+                void smoothAndConstrain
+                (
+                    const indirectPrimitivePatch& pp,
+                    const List<pointConstraint>& constraints,
+                    vectorField& disp
+                ) const;
+                //void calcNearest
+                //(
+                //    const pointField& points,
+                //    vectorField& disp,
+                //    vectorField& surfaceNormal
+                //) const;
+                void calcNearestFace
+                (
+                    const label iter,
+                    const indirectPrimitivePatch& pp,
+                    vectorField& faceDisp,
+                    vectorField& faceSurfaceNormal,
+                    vectorField& faceRotation
+                ) const;
+                void interpolateFaceToPoint
+                (
+                    const label iter,
+                    const indirectPrimitivePatch& pp,
+                    const vectorField& faceSurfaceNormal,
+
+                    const vectorField& faceDisp,
+                    const vectorField& faceRotation,
+
+                    vectorField& patchDisp,
+                    vectorField& patchRotationDisp
+                ) const;
+                void correctAttraction
+                (
+                    const DynamicList<point>& surfacePoints,
+                    const DynamicList<label>& surfaceCount,
+                    const point& edgePt,
+                    const vector& edgeNormal,   // normalised normal
+                    const point& pt,
+                    vector& edgeOffset  // offset from pt to point on edge
+                ) const;
+                void binFeatureFace
+                (
+                    const label iter,
+                    const scalar featureCos,
+
+                    const indirectPrimitivePatch& pp,
+                    const scalar snapDist,
+
+                    const point& fc,
+                    const vector& faceSurfaceNormal,
+                    const vector& faceDisp,
+
+                    DynamicList<point>& surfacePoints,
+                    DynamicList<vector>& surfaceNormals,
+                    DynamicList<label>& surfaceCount
+                ) const;
+                void binFeatureFaces
+                (
+                    const label iter,
+                    const scalar featureCos,
+
+                    const indirectPrimitivePatch& pp,
+                    const scalarField& snapDist,
+                    const label pointI,
+
+                    const List<List<point> >& pointFaceNormals,
+                    const List<List<point> >& pointFaceDisp,
+                    const List<List<point> >& pointFaceCentres,
+
+                    DynamicList<point>& surfacePoints,
+                    DynamicList<vector>& surfaceNormals,
+                    DynamicList<label>& surfaceCount
+                ) const;
+
+                void featureAttractionUsingReconstruction
+                (
+                    const label iter,
+                    const scalar featureCos,
+                    const indirectPrimitivePatch& pp,
+                    const scalarField& snapDist,
+
+                    const List<List<point> >& pointFaceNormals,
+                    const List<List<point> >& pointFaceDisp,
+                    const List<List<point> >& pointFaceCentres,
+
+                    vectorField& patchAttraction,
+                    List<pointConstraint>& patchConstraints
+                ) const;
+
+                void determineAllFeatures
+                (
+                    const label iter,
+                    const scalar featureCos,
+
+                    const indirectPrimitivePatch&,
+                    const scalarField&,
+
+                    const List<List<point> >& pointFaceNormals,
+                    const List<List<point> >& pointFaceDisp,
+                    const List<List<point> >& pointFaceCentres,
+
+                    List<labelList>& pointAttractor,
+                    List<List<pointConstraint> >& pointConstraints,
+                    // Feature-edge to pp point
+                    List<List<DynamicList<point> > >& edgeAttractors,
+                    List<List<DynamicList<pointConstraint> > >& edgeConstraints,
+                    vectorField& patchAttraction,
+                    List<pointConstraint>& patchConstraints
+                ) const;
+                void determineFeatures
+                (
+                    const label iter,
+                    const scalar featureCos,
+
+                    const indirectPrimitivePatch&,
+                    const scalarField&,
+
+                    const List<List<point> >& pointFaceNormals,
+                    const List<List<point> >& pointFaceDisp,
+                    const List<List<point> >& pointFaceCentres,
+
+                    List<labelList>& pointAttractor,
+                    List<List<pointConstraint> >& pointConstraints,
+                    // Feature-edge to pp point
+                    List<List<DynamicList<point> > >& edgeAttractors,
+                    List<List<DynamicList<pointConstraint> > >& edgeConstraints,
+                    vectorField& patchAttraction,
+                    List<pointConstraint>& patchConstraints
+                ) const;
+
+                void featureAttractionUsingFeatureEdges
+                (
+                    const label iter,
+                    const scalar featureCos,
+                    const indirectPrimitivePatch& pp,
+                    const scalarField& snapDist,
+
+                    const List<List<point> >& pointFaceNormals,
+                    const List<List<point> >& pointFaceDisp,
+                    const List<List<point> >& pointFaceCentres,
+
+                    vectorField& patchAttraction,
+                    List<pointConstraint>& patchConstraints
+                ) const;
+                void preventFaceSqueeze
+                (
+                    const label iter,
+                    const scalar featureCos,
+                    const indirectPrimitivePatch& pp,
+                    const scalarField& snapDist,
+
+                    vectorField& patchAttraction,
+                    List<pointConstraint>& patchConstraints
+                ) const;
+
+                vectorField calcNearestSurfaceFeature
+                (
+                    const label iter,
+                    const scalar featureCos,
+                    const scalar featureAttract,
+                    const scalarField& snapDist,
+                    const vectorField& nearestDisp,
+                    motionSmoother& meshMover
+                ) const;
 
 
         //- Disallow default bitwise copy construct
@@ -188,6 +341,7 @@ public:
                 motionSmoother& meshMover
             ) const;
 
+
             //- Smooth the displacement field to the internal.
             void smoothDisplacement
             (
@@ -196,8 +350,9 @@ public:
             ) const;
 
             //- Do the hard work: move the mesh according to displacement,
-            //  locally relax the displacement.
-            void scaleMesh
+            //  locally relax the displacement. Return true if ended up with
+            //  correct mesh, false if not.
+            bool scaleMesh
             (
                 const snapParameters& snapParams,
                 const label nInitErrors,
@@ -212,11 +367,11 @@ public:
                 const labelList& adaptPatchIDs
             );
 
-
             void doSnap
             (
                 const dictionary& snapDict,
                 const dictionary& motionDict,
+                const scalar featureCos,
                 const snapParameters& snapParams
             );
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,7 @@ Description
 #include "autoLayerDriver.H"
 #include "searchableSurfaces.H"
 #include "refinementSurfaces.H"
+#include "refinementFeatures.H"
 #include "shellSurfaces.H"
 #include "decompositionMethod.H"
 #include "fvMeshDistribute.H"
@@ -250,6 +251,20 @@ int main(int argc, char *argv[])
         << mesh.time().cpuTimeIncrement() << " s" << nl << endl;
 
 
+    // Read feature meshes
+    // ~~~~~~~~~~~~~~~~~~~
+
+    Info<< "Reading features." << endl;
+    refinementFeatures features
+    (
+        mesh,
+        refineDict.lookup("features")
+    );
+    Info<< "Read features in = "
+        << mesh.time().cpuTimeIncrement() << " s" << nl << endl;
+
+
+
     // Refinement engine
     // ~~~~~~~~~~~~~~~~~
 
@@ -265,6 +280,7 @@ int main(int argc, char *argv[])
         mergeDist,          // tolerance used in sorting coordinates
         overwrite,          // overwrite mesh files?
         surfaces,           // for surface intersection refinement
+        features,           // for feature edges/point based refinement
         shells              // for volume (inside/outside) refinement
     );
     Info<< "Calculated surface intersections in = "
@@ -429,13 +445,19 @@ int main(int argc, char *argv[])
 
         // Snap parameters
         snapParameters snapParams(snapDict);
+        // Temporary hack to get access to resolveFeatureAngle
+        scalar curvature;
+        {
+            refinementParameters refineParams(refineDict);
+            curvature = refineParams.curvature();
+        }
 
         if (!overwrite)
         {
             const_cast<Time&>(mesh.time())++;
         }
 
-        snapDriver.doSnap(snapDict, motionDict, snapParams);
+        snapDriver.doSnap(snapDict, motionDict, curvature, snapParams);
 
         writeMesh
         (
