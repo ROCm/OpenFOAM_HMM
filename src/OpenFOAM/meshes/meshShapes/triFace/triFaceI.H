@@ -171,26 +171,11 @@ inline Foam::point Foam::triFace::centre(const pointField& points) const
 }
 
 
-inline Foam::vector Foam::triFace::area
-(
-    const pointField& points,
-    point& centrePt
-) const
-{
-    // return centre point information?
-    if (&centrePt)
-    {
-        centrePt = this->centre(points);
-    }
-
-    return this->normal(points);
-}
-
-
 inline Foam::scalar Foam::triFace::mag(const pointField& points) const
 {
     return ::Foam::mag(normal(points));
 }
+
 
 // could also delegate to triPointRef(...).normal()
 inline Foam::vector Foam::triFace::normal(const pointField& points) const

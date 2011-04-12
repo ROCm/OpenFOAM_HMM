@@ -183,18 +183,11 @@ public:
         //- Centre point of face
         point centre(const pointField&) const;
 
-        //- Area of face, optionally return centre point as well
-        vector area
-        (
-            const pointField&,
-            point& centrePt = *reinterpret_cast<point*>(0)
-        ) const;
-
         //- Calculate average value at centroid of face
         template<class Type>
         Type average(const pointField&, const Field<Type>&) const;
 
-        //- Scalar magnitude
+        //- Magnitude of face area
         inline scalar mag(const pointField&) const;
 
         //- Vector normal; magnitude is equal to area of face

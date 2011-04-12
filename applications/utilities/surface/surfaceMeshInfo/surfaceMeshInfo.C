@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
 
     forAll(surf, faceI)
     {
-        const scalar fArea(Foam::mag(surf[faceI].area(surf.points())));
+        const scalar fArea(surf[faceI].mag(surf.points()));
         areaTotal += fArea;
 
         if (writeAreas)

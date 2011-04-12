@@ -114,21 +114,14 @@ public:
         //- Return centre (centroid)
         inline point centre(const pointField&) const;
 
-        //- Area, optionally return centre point as well
-        inline vector area
-        (
-            const pointField&,
-            point& centrePt = *reinterpret_cast<point*>(0)
-        ) const;
-
         //- Calculate average value at centroid of face
         template<class Type>
         Type average(const pointField&, const Field<Type>&) const;
 
-        //- Return scalar magnitude
+        //- Magnitude of face area
         inline scalar mag(const pointField&) const;
 
-        //- Return vector normal
+        //- Vector normal; magnitude is equal to area of face
         inline vector normal(const pointField&) const;
 
         //- Number of triangles after splitting
