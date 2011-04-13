@@ -36,7 +36,7 @@ Description
 #include "singlePhaseTransportModel.H"
 #include "turbulenceModel.H"
 #include "dynamicFvMesh.H"
-#include "pimpleLoop.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,10 +46,11 @@ int main(int argc, char *argv[])
 
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
-    #include "readPIMPLEControls.H"
     #include "initContinuityErrs.H"
     #include "createFields.H"
     #include "readTimeControls.H"
+
+    pimpleControl pimple(mesh);
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,6 +60,7 @@ int main(int argc, char *argv[])
     {
         #include "readControls.H"
         #include "CourantNo.H"
+        pimple.read();
 
         // Make the fluxes absolute
         fvc::makeAbsolute(phi, U);
@@ -85,12 +87,7 @@ int main(int argc, char *argv[])
         }
 
         // --- Pressure-velocity PIMPLE corrector loop
-        for
-        (
-            pimpleLoop pimpleCorr(mesh, nOuterCorr);
-            pimpleCorr.loop();
-            pimpleCorr++
-        )
+        for (pimple.start(); pimple.loop(); pimple++)
         {
             if (nOuterCorr != 1)
             {

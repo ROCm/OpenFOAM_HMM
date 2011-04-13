@@ -37,7 +37,7 @@ Description
 #include "basicPsiThermo.H"
 #include "turbulenceModel.H"
 #include "bound.H"
-#include "pimpleLoop.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,6 +49,8 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "initContinuityErrs.H"
 
+    pimpleControl pimple(mesh);
+
     Info<< "\nStarting time loop\n" << endl;
 
     while (runTime.run())
@@ -57,6 +59,7 @@ int main(int argc, char *argv[])
         #include "readPIMPLEControls.H"
         #include "compressibleCourantNo.H"
         #include "setDeltaT.H"
+        pimple.read();
 
         runTime++;
 
@@ -65,12 +68,7 @@ int main(int argc, char *argv[])
         #include "rhoEqn.H"
 
         // --- Pressure-velocity PIMPLE corrector loop
-        for
-        (
-            pimpleLoop pimpleCorr(mesh, nOuterCorr);
-            pimpleCorr.loop();
-            pimpleCorr++
-        )
+        for (pimple.start(); pimple.loop(); pimple++)
         {
             if (nOuterCorr != 1)
             {

@@ -35,7 +35,7 @@ Description
 #include "fvCFD.H"
 #include "singlePhaseTransportModel.H"
 #include "turbulenceModel.H"
-#include "pimpleLoop.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,6 +47,10 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "initContinuityErrs.H"
 
+    pimpleControl pimple(mesh);
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     Info<< "\nStarting time loop\n" << endl;
 
     while (runTime.run())
@@ -55,18 +59,14 @@ int main(int argc, char *argv[])
         #include "readPIMPLEControls.H"
         #include "CourantNo.H"
         #include "setDeltaT.H"
+        pimple.read();
 
         runTime++;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
         // --- Pressure-velocity PIMPLE corrector loop
-        for
-        (
-            pimpleLoop pimpleCorr(mesh, nOuterCorr);
-            pimpleCorr.loop();
-            pimpleCorr++
-        )
+        for (pimple.start(); pimple.loop(); pimple++)
         {
             if (nOuterCorr != 1)
             {

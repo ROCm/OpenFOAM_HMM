@@ -46,7 +46,7 @@
             (
                 p.select
                 (
-                    pimpleCorr.finalIter()
+                    pimple.finalIter()
                  && corr == nCorr-1
                  && nonOrth == nNonOrthCorr
                 )

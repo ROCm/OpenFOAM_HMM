@@ -39,7 +39,7 @@ Description
 #include "bound.H"
 #include "MRFZones.H"
 #include "porousZones.H"
-#include "pimpleLoop.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,6 +52,8 @@ int main(int argc, char *argv[])
     #include "createZones.H"
     #include "initContinuityErrs.H"
 
+    pimpleControl pimple(mesh);
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
@@ -62,6 +64,7 @@ int main(int argc, char *argv[])
         #include "readPIMPLEControls.H"
         #include "compressibleCourantNo.H"
         #include "setDeltaT.H"
+        pimple.read();
 
         runTime++;
 
@@ -70,12 +73,7 @@ int main(int argc, char *argv[])
         #include "rhoEqn.H"
 
         // --- Pressure-velocity PIMPLE corrector loop
-        for
-        (
-            pimpleLoop pimpleCorr(mesh, nOuterCorr);
-            pimpleCorr.loop();
-            pimpleCorr++
-        )
+        for (pimple.start(); pimple.loop(); pimple++)
         {
             if (nOuterCorr != 1)
             {

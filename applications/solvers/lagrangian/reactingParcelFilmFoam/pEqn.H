@@ -34,7 +34,7 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
         (
             p_rgh.select
             (
-                pimpleCorr.finalIter()
+                pimple.finalIter()
              && corr == nCorr-1
              && nonOrth == nNonOrthCorr
             )

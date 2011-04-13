@@ -39,11 +39,9 @@
             (
                 p_rgh.select
                 (
-                    (
-                        pimpleCorr.finalIter()
-                     && corr == nCorr-1
-                     && nonOrth == nNonOrthCorr
-                    )
+                    pimple.finalIter()
+                 && corr == nCorr-1
+                 && nonOrth == nNonOrthCorr
                 )
             )
         );

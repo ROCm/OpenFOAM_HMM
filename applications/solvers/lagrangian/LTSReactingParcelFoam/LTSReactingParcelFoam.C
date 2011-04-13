@@ -46,7 +46,7 @@ Description
 #include "timeActivatedExplicitSource.H"
 #include "SLGThermo.H"
 #include "fvcSmooth.H"
-#include "pimpleLoop.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -66,6 +66,8 @@ int main(int argc, char *argv[])
     #include "createPorousZones.H"
     #include "initContinuityErrs.H"
 
+    pimpleControl pimple(mesh);
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
@@ -76,6 +78,7 @@ int main(int argc, char *argv[])
         #include "readChemistryProperties.H"
         #include "readAdditionalSolutionControls.H"
         #include "readTimeControls.H"
+        pimple.read();
 
         runTime++;
 
@@ -89,12 +92,7 @@ int main(int argc, char *argv[])
         #include "rhoEqn.H"
 
         // --- Pressure-velocity PIMPLE corrector loop
-        for
-        (
-            pimpleLoop pimpleCorr(mesh, nOuterCorr);
-            pimpleCorr.loop();
-            pimpleCorr++
-        )
+        for (pimple.start(); pimple.loop(); pimple++)
         {
             if (nOuterCorr != 1)
             {

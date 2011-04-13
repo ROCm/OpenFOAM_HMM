@@ -46,7 +46,7 @@ Description
 #include "interfaceProperties.H"
 #include "phaseChangeTwoPhaseMixture.H"
 #include "turbulenceModel.H"
-#include "pimpleLoop.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,16 +64,19 @@ int main(int argc, char *argv[])
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
 
+    pimpleControl pimple(mesh);
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
     while (runTime.run())
     {
-        #include "readPISOControls.H"
+        #include "readPIMPLEControls.H"
         #include "readTimeControls.H"
         #include "CourantNo.H"
         #include "setDeltaT.H"
+        pimple.read();
 
         runTime++;
 
@@ -84,12 +87,7 @@ int main(int argc, char *argv[])
         turbulence->correct();
 
         // --- Pressure-velocity PIMPLE corrector loop
-        for
-        (
-            pimpleLoop pimpleCorr(mesh, nOuterCorr);
-            pimpleCorr.loop();
-            pimpleCorr++
-        )
+        for (pimple.start(); pimple.loop(); pimple++)
         {
             #include "UEqn.H"
 
