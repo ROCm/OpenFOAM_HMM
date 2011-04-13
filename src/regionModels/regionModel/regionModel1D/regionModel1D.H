@@ -88,9 +88,6 @@ protected:
             //- Global boundary face IDs oppossite coupled patch
             labelList boundaryFaceOppositeFace_;
 
-            //- Number of layers in the region
-            label nLayers_;
-
 
         // Geometry
 
@@ -154,9 +151,6 @@ public:
 
                 //- Return the global boundary face IDs oppossite coupled patch
                 inline const labelList& boundaryFaceOppositeFace() const;
-
-                //- Return the number of layers in the region
-                inline label nLayers() const;
 
 
             // Geometry

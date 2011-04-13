@@ -1,5 +1,0 @@
-# Create face zone 
-
-faceSet wallFilmFaces new patchToFace filmWalls
-cellSet wallFilmFacesCells new faceToCell wallFilmFaces owner
-faceZoneSet wallFilmFaces new setsToFaceZone wallFilmFaces wallFilmFacesCells

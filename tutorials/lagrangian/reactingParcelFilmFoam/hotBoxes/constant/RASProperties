@@ -19,7 +19,7 @@ RASModel        kEpsilon;
 
 turbulence      on;
 
-printCoeffs     on;
+printCoeffs     no;
 
 
 // ************************************************************************* //

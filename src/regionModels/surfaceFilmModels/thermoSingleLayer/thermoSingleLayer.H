@@ -115,6 +115,15 @@ protected:
                 volScalarField hs_;
 
 
+            // Transfer fields - to the primary region
+
+                //- Film mass evolved via phase change
+                volScalarField primaryMassPCTrans_;
+
+                //- Film energy evolved via phase change
+                volScalarField primaryEnergyPCTrans_;
+
+
         // Source term fields
 
             // Film region - registered to the film region mesh
@@ -157,11 +166,6 @@ protected:
             //- Radiation
             autoPtr<filmRadiationModel> radiation_;
 
-            //- Total mass transferred to primary region [kg]
-            scalar totalMassPhaseChange_;
-
-            //- Film energy evolved via phase change
-            volScalarField energyPhaseChangeForPrimary_;
 
 
     // Protected member functions
@@ -256,6 +260,13 @@ public:
                 virtual const volScalarField& hs() const;
 
 
+
+            // Transfer fields - to the primary region
+
+                //- Return mass transfer source - Eulerian phase only
+                virtual tmp<volScalarField> primaryMassTrans() const;
+
+
             // Helper functions
 
                 //- Return sensible enthalpy as a function of temperature
@@ -344,6 +355,9 @@ public:
         // Source fields
 
             // Mapped into primary region
+
+                //- Return total mass source - Eulerian phase only
+                virtual tmp<DimensionedField<scalar, volMesh> > Srho() const;
 
                 //- Return mass source for specie i - Eulerian phase only
                 virtual tmp<DimensionedField<scalar, volMesh> > Srho

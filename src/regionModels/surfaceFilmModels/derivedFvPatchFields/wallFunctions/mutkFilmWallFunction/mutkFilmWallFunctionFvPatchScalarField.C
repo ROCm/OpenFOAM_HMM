@@ -72,9 +72,9 @@ tmp<scalarField> mutkFilmWallFunctionFvPatchScalarField::calcUTau
 
     const mapDistribute& distMap = filmModel.mappedPatches()[filmPatchI].map();
 
-    scalarField mDotFilm =
-        filmModel.massPhaseChangeForPrimary().boundaryField()[filmPatchI];
-    distMap.distribute(mDotFilm);
+    tmp<volScalarField> mDotFilm(filmModel.primaryMassTrans());
+    scalarField mDotFilmp = mDotFilm().boundaryField()[filmPatchI];
+    distMap.distribute(mDotFilmp);
 
 
     // Retrieve RAS turbulence model
@@ -95,7 +95,7 @@ tmp<scalarField> mutkFilmWallFunctionFvPatchScalarField::calcUTau
 
         scalar yPlus = y[faceI]*ut/(muw[faceI]/rhow[faceI]);
 
-        scalar mStar = mDotFilm[faceI]/(y[faceI]*ut);
+        scalar mStar = mDotFilmp[faceI]/(y[faceI]*ut);
 
         scalar factor = 0.0;
         if (yPlus > yPlusCrit_)

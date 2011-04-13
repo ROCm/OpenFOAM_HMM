@@ -379,13 +379,12 @@ void Foam::ReactingParcel<ParcelType>::calc
             d0,
             U0,
             rho0,
-            mass0,
+            0.5*(mass0 + mass1),
             Su,
             dUTrans,
             Spu
         );
 
-    dUTrans += 0.5*(mass0 - mass1)*(U0 + U1);
 
     // Accumulate carrier phase source terms
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -396,8 +395,6 @@ void Foam::ReactingParcel<ParcelType>::calc
         {
             label gid = composition.localToGlobalCarrierId(0, i);
             td.cloud().rhoTrans(gid)[cellI] += np0*dMassPC[i];
-//            td.cloud().hsTrans()[cellI] +=
-//                np0*dMassPC[i]*composition.carrier().Hs(gid, T0);
         }
 
         // Update momentum transfer
@@ -429,8 +426,8 @@ void Foam::ReactingParcel<ParcelType>::calc
                 td.cloud().rhoTrans(gid)[cellI] += np0*mass1*Y_[i];
             }
             td.cloud().UTrans()[cellI] += np0*mass1*U1;
-            td.cloud().hsTrans()[cellI] +=
-                np0*mass1*composition.H(0, Y_, pc_, T1);
+
+            // enthalpy transfer accounted for via change in mass fractions
         }
     }
 

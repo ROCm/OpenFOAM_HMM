@@ -89,6 +89,7 @@ public:
             //- Correct
             virtual void correct
             (
+                scalarField& availableMass,
                 scalarField& massToInject,
                 scalarField& diameterToInject
             );

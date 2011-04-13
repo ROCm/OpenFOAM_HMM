@@ -83,12 +83,6 @@ protected:
         //  Used to set max limit on temperature to Tb*TbFactor
         const scalar TbFactor_;
 
-        //- Total mass evolved / [kg]
-        scalar totalMass_;
-
-        //- Vapouristaion rate / kg/s
-        scalar vapourRate_;
-
 
     // Protected member functions
 
@@ -121,18 +115,13 @@ public:
         // Evolution
 
             //- Correct
-            virtual void correct
+            virtual void correctModel
             (
                 const scalar dt,
+                scalarField& availableMass,
                 scalarField& dMass,
                 scalarField& dEnergy
             );
-
-
-        // Input/output
-
-            //- Output model statistics
-            virtual void info() const;
 };
 
 

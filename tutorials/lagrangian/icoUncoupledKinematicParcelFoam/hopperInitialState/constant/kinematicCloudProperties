@@ -22,13 +22,6 @@ solution
     transient       yes;
     cellValueSourceCorrection off;
 
-    sourceTerms
-    {
-        schemes
-        {
-        }
-    }
-
     interpolationSchemes
     {
         rho             cell;

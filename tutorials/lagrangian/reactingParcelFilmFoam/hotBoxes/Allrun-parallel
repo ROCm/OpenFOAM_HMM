@@ -1,5 +1,4 @@
 #!/bin/sh
-
 cd ${0%/*} || exit 1    # run from this directory
 
 # Source tutorial run functions
@@ -7,11 +6,17 @@ cd ${0%/*} || exit 1    # run from this directory
 
 ./Allrun.pre
 
-decomposePar -region wallFilmRegion > log.decomposePar.wallFilmRegion 2>&1
-decomposePar > log.decomposePar.primaryRegion 2>&1
+application=`getApplication`
 
-runParallel `getApplication` 4
+runApplication decomposePar -region wallFilmRegion
+mv log.decomposePar log.decomposePar.wallFilmRegion
+runApplication decomposePar
+mv log.decomposePar log.decomposePar.primaryRegion
 
-reconstructPar -region wallFilmRegion > log.reconstructPar.wallFilmRegion 2>&1
-reconstructPar > log.reconstructPar.primaryRegion 2>&1
+runParallel $application 4
+
+runApplication reconstructPar -region wallFilmRegion
+mv log.reconstructPar log.reconstructPar.wallFilmRegion
+runApplication reconstructPar
+mv log.reconstructPar log.reconstructPar.primaryRegion
 

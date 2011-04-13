@@ -87,9 +87,10 @@ public:
         // Evolution
 
             //- Correct
-            virtual void correct
+            virtual void correctModel
             (
                 const scalar dt,
+                scalarField& availableMass,
                 scalarField& dMass,
                 scalarField& dEnergy
             );

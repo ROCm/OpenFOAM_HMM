@@ -123,10 +123,10 @@ void Foam::filmHeightInletVelocityFvPatchVectorField::updateCoeffs()
     const fvPatchField<scalar>& deltafp =
         patch().lookupPatchField<volScalarField, scalar>(deltafName_);
 
-    const vectorField& n = patch().nf();
+    vectorField n(patch().nf());
     const scalarField& magSf = patch().magSf();
 
-    operator==(deltafp*n*phip/(rhop*magSf*sqr(deltafp) + ROOTVSMALL));
+    operator==(n*phip/(rhop*magSf*deltafp + ROOTVSMALL));
 
     fixedValueFvPatchVectorField::updateCoeffs();
 }
