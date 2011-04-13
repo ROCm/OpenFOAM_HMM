@@ -113,6 +113,12 @@ makeBasicPolyMixture
     3
 );
 
+makeBasicPolyMixture
+(
+    pureMixture,
+    8
+);
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
