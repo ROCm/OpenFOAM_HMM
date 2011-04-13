@@ -108,7 +108,10 @@ void Foam::KinematicCloud<CloudType>::solve(TrackData& td)
 
         evolveCloud(td);
 
-        td.cloud().relaxSources(td.cloud().cloudCopy());
+        if (solution_.coupled())
+        {
+            td.cloud().relaxSources(td.cloud().cloudCopy());
+        }
     }
     else
     {
@@ -116,7 +119,10 @@ void Foam::KinematicCloud<CloudType>::solve(TrackData& td)
 
         evolveCloud(td);
 
-        td.cloud().scaleSources();
+        if (solution_.coupled())
+        {
+            td.cloud().scaleSources();
+        }
     }
 
     td.cloud().info();
