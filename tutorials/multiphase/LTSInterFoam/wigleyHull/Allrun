@@ -6,6 +6,7 @@ cd ${0%/*} || exit 1    # run from this directory
 
 runApplication blockMesh
 runApplication snappyHexMesh -overwrite
+#runApplication transformPoints -scale '(2 1 1)'
 transformPoints -scale '(2 1 1)'
 cp 0/alpha1.org 0/alpha1
 runApplication setFields

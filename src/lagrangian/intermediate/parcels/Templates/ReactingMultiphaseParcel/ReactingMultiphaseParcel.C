@@ -327,7 +327,6 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
 
 
 
-
     // Heat transfer
     // ~~~~~~~~~~~~~
 
@@ -369,7 +368,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             d0,
             U0,
             rho0,
-            mass0,
+            0.5*(mass0 + mass1),
             Su,
             dUTrans,
             Spu
@@ -386,15 +385,11 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         {
             label gid = composition.localToGlobalCarrierId(GAS, i);
             td.cloud().rhoTrans(gid)[cellI] += np0*dMassGas[i];
-//            td.cloud().hsTrans()[cellI] +=
-//                np0*dMassGas[i]*composition.carrier().Hs(gid, T0);
         }
         forAll(YLiquid_, i)
         {
             label gid = composition.localToGlobalCarrierId(LIQ, i);
             td.cloud().rhoTrans(gid)[cellI] += np0*dMassLiquid[i];
-//            td.cloud().hsTrans()[cellI] +=
-//                np0*dMassLiquid[i]*composition.carrier().Hs(gid, T0);
         }
 /*
         // No mapping between solid components and carrier phase
@@ -402,15 +397,11 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         {
             label gid = composition.localToGlobalCarrierId(SLD, i);
             td.cloud().rhoTrans(gid)[cellI] += np0*dMassSolid[i];
-//            td.cloud().hsTrans()[cellI] +=
-//                np0*dMassSolid[i]*composition.carrier().Hs(gid, T0);
         }
 */
         forAll(dMassSRCarrier, i)
         {
             td.cloud().rhoTrans(i)[cellI] += np0*dMassSRCarrier[i];
-//            td.cloud().hsTrans()[cellI] +=
-//                np0*dMassSRCarrier[i]*composition.carrier().Hs(i, T0);
         }
 
         // Update momentum transfer
@@ -458,8 +449,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             }
 */
             td.cloud().UTrans()[cellI] += np0*mass1*U1;
-            td.cloud().hsTrans()[cellI] +=
-                np0*mass1*HEff(td, pc, T1, idG, idL, idS); // using total h
+
+            // enthalpy transfer accounted for via change in mass fractions
         }
     }
 

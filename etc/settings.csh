@@ -52,7 +52,7 @@ case Linux:
     case x86_64:
         switch ($WM_ARCH_OPTION)
         case 32:
-            setenv WM_COMPILER_ARCH '-64'
+            setenv WM_COMPILER_ARCH 64
             setenv WM_CC 'gcc'
             setenv WM_CXX 'g++'
             setenv WM_CFLAGS '-m32 -fPIC'

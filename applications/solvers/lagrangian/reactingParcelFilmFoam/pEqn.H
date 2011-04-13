@@ -1,74 +1,58 @@
 rho = thermo.rho();
 
 volScalarField rAU(1.0/UEqn.A());
+surfaceScalarField rhorAUf(rAU.name(), fvc::interpolate(rho*rAU));
 U = rAU*UEqn.H();
 
-if (transonic)
+surfaceScalarField phiU
+(
+    fvc::interpolate(rho)
+   *(
+        (fvc::interpolate(U) & mesh.Sf())
+      + fvc::ddtPhiCorr(rAU, rho, U, phi)
+    )
+);
+
+phi = phiU - rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf();
+
+for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 {
-    surfaceScalarField phid
+    fvScalarMatrix p_rghEqn
     (
-        "phid",
-        fvc::interpolate(psi)
-       *(
-            (fvc::interpolate(U) & mesh.Sf())
-          + fvc::ddtPhiCorr(rAU, rho, U, phi)
+        fvc::ddt(psi, rho)*gh
+      + fvc::div(phi)
+      + fvm::ddt(psi, p_rgh)
+      - fvm::laplacian(rhorAUf, p_rgh)
+     ==
+        parcels.Srho()
+      + surfaceFilm.Srho()
+    );
+
+    p_rghEqn.solve
+    (
+        mesh.solver
+        (
+            p_rgh.select
+            (
+                pimpleCorr.finalIter()
+             && corr == nCorr-1
+             && nonOrth == nNonOrthCorr
+            )
         )
     );
 
-    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    if (nonOrth == nNonOrthCorr)
     {
-        fvScalarMatrix pEqn
-        (
-            fvm::ddt(psi, p)
-          + fvm::div(phid, p)
-          - fvm::laplacian(rho*rAU, p)
-         ==
-            parcels.Srho()
-          + surfaceFilm.Srho()
-        );
-
-        pEqn.solve();
-
-        if (nonOrth == nNonOrthCorr)
-        {
-            phi == pEqn.flux();
-        }
+        phi += p_rghEqn.flux();
     }
 }
-else
-{
-    phi =
-        fvc::interpolate(rho)
-       *(
-            (fvc::interpolate(U) & mesh.Sf())
-          + fvc::ddtPhiCorr(rAU, rho, U, phi)
-        );
 
-    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
-    {
-        fvScalarMatrix pEqn
-        (
-            fvm::ddt(psi, p)
-          + fvc::div(phi)
-          - fvm::laplacian(rho*rAU, p)
-         ==
-            parcels.Srho()
-          + surfaceFilm.Srho()
-        );
-
-        pEqn.solve();
-
-        if (nonOrth == nNonOrthCorr)
-        {
-            phi += pEqn.flux();
-        }
-    }
-}
+p = p_rgh + rho*gh;
 
 #include "rhoEqn.H"
 #include "compressibleContinuityErrs.H"
 
-U -= rAU*fvc::grad(p);
+U += rAU*fvc::reconstruct((phi - phiU)/rhorAUf);
 U.correctBoundaryConditions();
 
 DpDt = fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);

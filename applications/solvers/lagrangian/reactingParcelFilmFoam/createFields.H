@@ -15,11 +15,6 @@
 
     const word inertSpecie(thermo.lookup("inertSpecie"));
 
-    volScalarField& p = thermo.p();
-    volScalarField& hs = thermo.hs();
-    const volScalarField& T = thermo.T();
-    const volScalarField& psi = thermo.psi();
-
     Info<< "Creating field rho\n" << endl;
     volScalarField rho
     (
@@ -33,6 +28,11 @@
         ),
         thermo.rho()
     );
+
+    volScalarField& p = thermo.p();
+    volScalarField& hs = thermo.hs();
+    const volScalarField& T = thermo.T();
+    const volScalarField& psi = thermo.psi();
 
     Info<< "\nReading field U\n" << endl;
     volVectorField U
@@ -83,6 +83,28 @@
         "DpDt",
         fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p)
     );
+
+
+    Info<< "Calculating field g.h\n" << endl;
+    volScalarField gh("gh", g & mesh.C());
+
+    surfaceScalarField ghf("gh", g & mesh.Cf());
+
+    volScalarField p_rgh
+    (
+        IOobject
+        (
+            "p_rgh",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
+
+    // Force p_rgh to be consistent with p
+    p_rgh = p - rho*gh;
 
     multivariateSurfaceInterpolationScheme<scalar>::fieldTable fields;
 

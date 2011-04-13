@@ -116,40 +116,47 @@ void Foam::cloudSolution::read()
         dict_.lookup("calcFrequency") >> calcFrequency_;
         dict_.lookup("maxCo") >> maxCo_;
         dict_.lookup("maxTrackTime") >> maxTrackTime_;
-        dict_.subDict("sourceTerms").lookup("resetOnStartup")
-            >> resetSourcesOnStartup_;
+
+        if (coupled_)
+        {
+            dict_.subDict("sourceTerms").lookup("resetOnStartup")
+                >> resetSourcesOnStartup_;
+        }
     }
 
-    const dictionary&
-        schemesDict(dict_.subDict("sourceTerms").subDict("schemes"));
-
-    wordList vars(schemesDict.toc());
-    schemes_.setSize(vars.size());
-    forAll(vars, i)
+    if (coupled_)
     {
-        // read solution variable name
-        schemes_[i].first() = vars[i];
+        const dictionary&
+            schemesDict(dict_.subDict("sourceTerms").subDict("schemes"));
 
-        // set semi-implicit (1) explicit (0) flag
-        Istream& is = schemesDict.lookup(vars[i]);
-        const word scheme(is);
-        if (scheme == "semiImplicit")
+        wordList vars(schemesDict.toc());
+        schemes_.setSize(vars.size());
+        forAll(vars, i)
         {
-            schemes_[i].second().first() = true;
-        }
-        else if (scheme == "explicit")
-        {
-            schemes_[i].second().first() = false;
-        }
-        else
-        {
-            FatalErrorIn("void cloudSolution::read()")
-                << "Invalid scheme " << scheme << ". Valid schemes are "
-                << "explicit and semiImplicit" << exit(FatalError);
-        }
+            // read solution variable name
+            schemes_[i].first() = vars[i];
 
-        // read under-relaxation factor
-        is  >> schemes_[i].second().second();
+            // set semi-implicit (1) explicit (0) flag
+            Istream& is = schemesDict.lookup(vars[i]);
+            const word scheme(is);
+            if (scheme == "semiImplicit")
+            {
+                schemes_[i].second().first() = true;
+            }
+            else if (scheme == "explicit")
+            {
+                schemes_[i].second().first() = false;
+            }
+            else
+            {
+                FatalErrorIn("void cloudSolution::read()")
+                    << "Invalid scheme " << scheme << ". Valid schemes are "
+                    << "explicit and semiImplicit" << exit(FatalError);
+            }
+
+            // read under-relaxation factor
+            is  >> schemes_[i].second().second();
+        }
     }
 }
 

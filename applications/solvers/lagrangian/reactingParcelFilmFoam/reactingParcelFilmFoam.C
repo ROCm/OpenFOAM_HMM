@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,6 +39,7 @@ Description
 #include "chemistrySolver.H"
 #include "radiationModel.H"
 #include "SLGThermo.H"
+#include "pimpleLoop.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -66,8 +67,9 @@ int main(int argc, char *argv[])
     while (runTime.run())
     {
         #include "readTimeControls.H"
-        #include "readPISOControls.H"
+        #include "readPIMPLEControls.H"
         #include "compressibleCourantNo.H"
+        #include "setMultiRegionDeltaT.H"
         #include "setDeltaT.H"
 
         runTime++;
@@ -84,20 +86,22 @@ int main(int argc, char *argv[])
             #include "rhoEqn.H"
 
             // --- PIMPLE loop
-            for (int ocorr=1; ocorr<=nOuterCorr; ocorr++)
+            for
+            (
+                pimpleLoop pimpleCorr(mesh, nOuterCorr);
+                pimpleCorr.loop();
+                pimpleCorr++
+            )
             {
                 #include "UEqn.H"
                 #include "YEqn.H"
+                #include "hsEqn.H"
 
                 // --- PISO loop
                 for (int corr=1; corr<=nCorr; corr++)
                 {
-                    #include "hsEqn.H"
                     #include "pEqn.H"
                 }
-
-                Info<< "T gas min/max   = " << min(T).value() << ", "
-                    << max(T).value() << endl;
             }
 
             turbulence->correct();
