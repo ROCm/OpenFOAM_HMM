@@ -116,7 +116,7 @@ void Foam::cloudSolution::read()
         dict_.lookup("calcFrequency") >> calcFrequency_;
         dict_.lookup("maxCo") >> maxCo_;
         dict_.lookup("maxTrackTime") >> maxTrackTime_;
-        
+
         if (coupled_)
         {
             dict_.subDict("sourceTerms").lookup("resetOnStartup")
