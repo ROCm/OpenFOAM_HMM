@@ -379,13 +379,12 @@ void Foam::ReactingParcel<ParcelType>::calc
             d0,
             U0,
             rho0,
-            mass0,
+            0.5*(mass0 + mass1),
             Su,
             dUTrans,
             Spu
         );
 
-    dUTrans += 0.5*(mass0 - mass1)*(U0 + U1);
 
     // Accumulate carrier phase source terms
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

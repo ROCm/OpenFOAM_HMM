@@ -327,7 +327,6 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
 
 
 
-
     // Heat transfer
     // ~~~~~~~~~~~~~
 
@@ -369,7 +368,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             d0,
             U0,
             rho0,
-            mass0,
+            0.5*(mass0 + mass1),
             Su,
             dUTrans,
             Spu
