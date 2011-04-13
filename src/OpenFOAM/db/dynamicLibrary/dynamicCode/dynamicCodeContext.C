@@ -46,7 +46,6 @@ Foam::dynamicCodeContext::dynamicCodeContext(const dictionary& dict)
         const entry& codeEntry = dict.lookupEntry("code", false, false);
         code_ = stringOps::trim(codeEntry.stream());
         stringOps::inplaceExpand(code_, dict);
-        addLineDirective(code_, codeEntry.startLineNumber(), dict.name());
     }
 
     // note: removes any leading/trailing whitespace
@@ -64,7 +63,6 @@ Foam::dynamicCodeContext::dynamicCodeContext(const dictionary& dict)
     {
         include_ = stringOps::trim(includePtr->stream());
         stringOps::inplaceExpand(include_, dict);
-        addLineDirective(include_, includePtr->startLineNumber(), dict.name());
     }
 
     // optional
@@ -92,6 +90,28 @@ Foam::dynamicCodeContext::dynamicCodeContext(const dictionary& dict)
     OSHA1stream os;
     os  << include_ << options_ << libs_ << localCode_ << code_;
     sha1_ = os.digest();
+
+
+
+    // Add line number after calculating sha1 since includes processorDDD
+    // in path which differs between processors.
+
+    {
+        const entry& codeEntry = dict.lookupEntry("code", false, false);
+        addLineDirective(code_, codeEntry.startLineNumber(), dict.name());
+    }
+    if (includePtr)
+    {
+        addLineDirective(include_, includePtr->startLineNumber(), dict.name());
+    }
+    if (optionsPtr)
+    {
+        addLineDirective(options_, optionsPtr->startLineNumber(), dict.name());
+    }
+    if (libsPtr)
+    {
+        addLineDirective(libs_, libsPtr->startLineNumber(), dict.name());
+    }
 }
 
 
