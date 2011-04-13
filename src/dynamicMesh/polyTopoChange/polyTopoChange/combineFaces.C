@@ -109,6 +109,12 @@ bool Foam::combineFaces::validFace
         return false;
     }
 
+    bool isNonManifold = bigFace.checkPointManifold(false, NULL);
+    if (isNonManifold)
+    {
+        return false;
+    }
+
     // Check for convexness
     face f(getOutsideFace(bigFace));
 
@@ -984,6 +990,7 @@ void Foam::combineFaces::setUnrefinement
                 zoneFlip                        // face flip in zone
             )
         );
+        restoredFaces.insert(masterFaceI, masterFaceI);
 
         // Add the previously removed faces
         for (label i = 1; i < faces.size(); i++)
@@ -991,7 +998,7 @@ void Foam::combineFaces::setUnrefinement
             //Pout<< "Restoring removed face with vertices " << faces[i]
             //    << endl;
 
-            meshMod.setAction
+            label faceI = meshMod.setAction
             (
                 polyAddFace
                 (
@@ -1007,6 +1014,7 @@ void Foam::combineFaces::setUnrefinement
                     zoneFlip                // zoneFlip
                 )
             );
+            restoredFaces.insert(faceI, masterFaceI);
         }
 
         // Clear out restored set
