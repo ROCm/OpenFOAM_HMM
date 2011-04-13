@@ -239,6 +239,12 @@ class polyTopoChange
             List<objectMap>& cellsFromCells
         );
 
+        //- Are all face vertices valid
+        bool hasValidPoints(const face&) const;
+
+        //- Return face points
+        pointField facePoints(const face& f) const;
+
         //- Check inputs to modFace or addFace
         void checkFace
         (

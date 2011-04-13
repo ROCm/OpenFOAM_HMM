@@ -302,6 +302,35 @@ void Foam::polyTopoChange::getMergeSets
 }
 
 
+bool Foam::polyTopoChange::hasValidPoints(const face& f) const
+{
+    forAll(f, fp)
+    {
+        if (f[fp] < 0 || f[fp] >= points_.size())
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+Foam::pointField Foam::polyTopoChange::facePoints(const face& f) const
+{
+    pointField points(f.size());
+    forAll(f, fp)
+    {
+        if (f[fp] < 0 && f[fp] >= points_.size())
+        {
+            FatalErrorIn("polyTopoChange::facePoints(const face&) const")
+                << "Problem." << abort(FatalError);
+        }
+        points[fp] = points_[f[fp]];
+    }
+    return points;
+}
+
+
 void Foam::polyTopoChange::checkFace
 (
     const face& f,
@@ -329,7 +358,14 @@ void Foam::polyTopoChange::checkFace
                 << "f:" << f
                 << " faceI(-1 if added face):" << faceI
                 << " own:" << own << " nei:" << nei
-                << " patchI:" << patchI << abort(FatalError);
+                << " patchI:" << patchI << nl;
+            if (hasValidPoints(f))
+            {
+                FatalError
+                        << "points (removed points marked with "
+                        << vector::max << ") " << facePoints(f);
+            }
+            FatalError << abort(FatalError);
         }
     }
     else
@@ -344,7 +380,14 @@ void Foam::polyTopoChange::checkFace
                 << "f:" << f
                 << " faceI(-1 if added face):" << faceI
                 << " own:" << own << " nei:" << nei
-                << " patchI:" << patchI << abort(FatalError);
+                << " patchI:" << patchI << nl;
+            if (hasValidPoints(f))
+            {
+                FatalError
+                        << "points (removed points marked with "
+                        << vector::max << ") : " << facePoints(f);
+            }
+            FatalError << abort(FatalError);
         }
 
         if (nei <= own)
@@ -358,7 +401,14 @@ void Foam::polyTopoChange::checkFace
                 << "f:" << f
                 << " faceI(-1 if added face):" << faceI
                 << " own:" << own << " nei:" << nei
-                << " patchI:" << patchI << abort(FatalError);
+                << " patchI:" << patchI << nl;
+            if (hasValidPoints(f))
+            {
+                FatalError
+                        << "points (removed points marked with "
+                        << vector::max << ") : " << facePoints(f);
+            }
+            FatalError << abort(FatalError);
         }
     }
 
@@ -373,7 +423,14 @@ void Foam::polyTopoChange::checkFace
             << "f:" << f
             << " faceI(-1 if added face):" << faceI
             << " own:" << own << " nei:" << nei
-            << " patchI:" << patchI << abort(FatalError);
+            << " patchI:" << patchI << nl;
+            if (hasValidPoints(f))
+            {
+                FatalError
+                        << "points (removed points marked with "
+                        << vector::max << ") : " << facePoints(f);
+            }
+            FatalError << abort(FatalError);
     }
     if (faceI >= 0 && faceI < faces_.size() && faceRemoved(faceI))
     {
@@ -386,7 +443,14 @@ void Foam::polyTopoChange::checkFace
             << "f:" << f
             << " faceI(-1 if added face):" << faceI
             << " own:" << own << " nei:" << nei
-            << " patchI:" << patchI << abort(FatalError);
+            << " patchI:" << patchI << nl;
+            if (hasValidPoints(f))
+            {
+                FatalError
+                        << "points (removed points marked with "
+                        << vector::max << ") : " << facePoints(f);
+            }
+            FatalError << abort(FatalError);
     }
     forAll(f, fp)
     {
@@ -401,7 +465,14 @@ void Foam::polyTopoChange::checkFace
                 << "f:" << f
                 << " faceI(-1 if added face):" << faceI
                 << " own:" << own << " nei:" << nei
-                << " patchI:" << patchI << abort(FatalError);
+                << " patchI:" << patchI << nl;
+            if (hasValidPoints(f))
+            {
+                FatalError
+                        << "points (removed points marked with "
+                        << vector::max << ") : " << facePoints(f);
+            }
+            FatalError << abort(FatalError);
         }
     }
 }
@@ -729,8 +800,16 @@ void Foam::polyTopoChange::getFaceOrder
                 << " neighbour " << faceNeighbour_[faceI]
                 << " region " << region_[faceI] << endl
                 << "This is usually caused by not specifying a patch for"
-                << " a boundary face."
-                << abort(FatalError);
+                << " a boundary face." << nl
+                << "Switch on the polyTopoChange::debug flag to catch"
+                << " this error earlier." << nl;
+            if (hasValidPoints(faces_[faceI]))
+            {
+                FatalError
+                        << "points (removed points marked with "
+                        << vector::max << ") " << facePoints(faces_[faceI]);
+            }
+            FatalError << abort(FatalError);
         }
     }
 }
