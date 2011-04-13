@@ -18,27 +18,18 @@ FoamFile
 solution
 {
     active          true;
-    coupled         true;
+    coupled         yes;
     transient       yes;
-    cellValueSourceCorrection on;
+    cellValueSourceCorrection yes;
 
     sourceTerms
     {
-        rho
+        schemes
         {
-            semiImplicit    false;
-        }
-        U
-        {
-            semiImplicit    false;
-        }
-        Yi
-        {
-            semiImplicit    false;
-        }
-        hs
-        {
-            semiImplicit    false;
+            rho             explicit 1;
+            U               explicit 1;
+            Yi              explicit 1;
+            hs              explicit 1;
         }
     }
 
@@ -55,7 +46,7 @@ solution
     integrationSchemes
     {
         U               Euler;
-        T               Analytical;
+        T               analytical;
     }
 }
 
@@ -72,8 +63,8 @@ constantProperties
     T0              300;
     Cp0             4187;
 
-    youngsModulus   0;
-    poissonsRatio   0;
+    youngsModulus   1e9;
+    poissonsRatio   0.35;
 
     epsilon0        1;
     f0              0.5;
@@ -84,47 +75,42 @@ constantProperties
     constantVolume  false;
 }
 
-particleForces
-{
-    gravity         on;
-    virtualMass     off;
-    pressureGradient off;
-    paramagnetic    off;
-}
-
 subModels
 {
-    InjectionModel  ConeInjectionMP;
+    particleForces
+    {
+        sphereDrag;
+        gravity;
+    }
 
-    DragModel       SphereDrag;
+    injectionModel  coneInjection;
 
-    DispersionModel none;
+    dispersionModel none;
 
-    CollisionModel  none;
+    patchInteractionModel standardWallInteraction;
 
-    PatchInteractionModel StandardWallInteraction;
+    heatTransferModel none;
 
-    HeatTransferModel none;
+    compositionModel singlePhaseMixture;
 
-    CompositionModel SinglePhaseMixture;
+    phaseChangeModel none;
 
-    PhaseChangeModel none;
+    postProcessingModel none;
 
-    PostProcessingModel none;
-
-    SurfaceFilmModel ThermoSurfaceFilm; // none;
+    surfaceFilmModel thermoSurfaceFilm;
 
     radiation       off;
 
-    ConeInjectionMPCoeffs
+    coneInjectionCoeffs
     {
         SOI             0.000;
         duration        20.000;
         positionAxis
         (
-            (0.3 0.35 1.45) (0 0 -1)
-            (0.6 0.35 1.45) (0 0 -1)
+            ((0.3 0.35 1.45) (0 0 -1))
+            ((0.6 0.35 1.45) (0 0 -1))
         );
+
         massTotal       10;
         parcelsPerInjector 20000;
         parcelsPerSecond 500;
@@ -136,7 +122,7 @@ subModels
 
         sizeDistribution
         {
-            pdfType         RosinRammler;
+            type         RosinRammler;
             RosinRammlerDistribution
             {
                 minValue        5e-04;
@@ -145,28 +131,32 @@ subModels
                 n               0.5;
             }
         }
-
     }
 
-
-    StandardWallInteractionCoeffs
+    standardWallInteractionCoeffs
     {
         type            rebound;
     }
 
-    SinglePhaseMixtureCoeffs
+    singlePhaseMixtureCoeffs
     {
         phases
         (
             liquid
             {
-                H2O 1;
+                H2O          1;
             }
         );
     }
 
-    ThermoSurfaceFilmCoeffs
-    {}
+    thermoSurfaceFilmCoeffs
+    {
+        interactionType splashBai;
+        deltaWet        0.0005;
+        Adry            2630;
+        Awet            1320;
+        Cf              0.6;
+    }
 }
 
 

@@ -63,11 +63,13 @@ removeInjection::~removeInjection()
 
 void removeInjection::correct
 (
-    scalarField&,
+    scalarField& availableMass,
+    scalarField& massToInject,
     scalarField&
 )
 {
-    // do nothing - all mass available to be removed
+    massToInject = availableMass;
+    availableMass = 0.0;
 }
 
 

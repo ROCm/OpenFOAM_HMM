@@ -498,8 +498,19 @@ public:
                 const word& name
             ) const;
 
+            //- Scale field
+            template<class Type>
+            void scale
+            (
+                DimensionedField<Type, volMesh>& field,
+                const word& name
+            ) const;
+
             //- Apply relaxation to (steady state) cloud sources
             void relaxSources(const KinematicCloud<CloudType>& cloudOldTime);
+
+            //- Apply scaling to (transient) cloud sources
+            void scaleSources();
 
             //- Evolve the cloud
             void evolve();

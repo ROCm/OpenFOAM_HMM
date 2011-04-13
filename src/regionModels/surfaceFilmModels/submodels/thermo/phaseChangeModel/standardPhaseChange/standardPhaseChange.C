@@ -81,9 +81,7 @@ standardPhaseChange::standardPhaseChange
     Tb_(readScalar(coeffs_.lookup("Tb"))),
     deltaMin_(readScalar(coeffs_.lookup("deltaMin"))),
     L_(readScalar(coeffs_.lookup("L"))),
-    TbFactor_(coeffs_.lookupOrDefault<scalar>("TbFactor", 1.1)),
-    totalMass_(0.0),
-    vapourRate_(0.0)
+    TbFactor_(coeffs_.lookupOrDefault<scalar>("TbFactor", 1.1))
 {}
 
 
@@ -95,9 +93,10 @@ standardPhaseChange::~standardPhaseChange()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void standardPhaseChange::correct
+void standardPhaseChange::correctModel
 (
     const scalar dt,
+    scalarField& availableMass,
     scalarField& dMass,
     scalarField& dEnergy
 )
@@ -124,8 +123,7 @@ void standardPhaseChange::correct
     const scalarField hInf(film.htcs().h());
     const scalarField hFilm(film.htcw().h());
     const vectorField dU(film.UPrimary() - film.Us());
-    const scalarField availableMass((delta - deltaMin_)*rho*magSf);
-
+    const scalarField limMass(max(0.0, availableMass - deltaMin_*rho*magSf));
 
     forAll(dMass, cellI)
     {
@@ -152,8 +150,7 @@ void standardPhaseChange::correct
 
                 const scalar Cp = liq.Cp(pc, Tloc);
                 const scalar Tcorr = max(0.0, T[cellI] - Tb_);
-                const scalar qCorr = availableMass[cellI]*Cp*(Tcorr);
-
+                const scalar qCorr = limMass[cellI]*Cp*(Tcorr);
                 dMass[cellI] =
                     dt*magSf[cellI]/hVap*(qDotInf + qDotFilm)
                   + qCorr/hVap;
@@ -195,23 +192,10 @@ void standardPhaseChange::correct
                     dt*magSf[cellI]*rhoInfc*hm*(Ys - YInf[cellI])/(1.0 - Ys);
             }
 
-            dMass[cellI] = min(availableMass[cellI], max(0.0, dMass[cellI]));
+            dMass[cellI] = min(limMass[cellI], max(0.0, dMass[cellI]));
             dEnergy[cellI] = dMass[cellI]*hVap;
         }
     }
-
-    const scalar sumdMass = sum(dMass);
-    totalMass_ += sumdMass;
-    vapourRate_ = sumdMass/owner().time().deltaTValue();
-}
-
-
-void standardPhaseChange::info() const
-{
-    Info<< indent << "mass phase change  = "
-        << returnReduce(totalMass_, sumOp<scalar>()) << nl
-        << indent << "vapourisation rate = "
-        << returnReduce(vapourRate_, sumOp<scalar>()) << nl;
 }
 
 

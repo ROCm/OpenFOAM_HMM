@@ -42,6 +42,8 @@ SourceFiles
 #include "surfaceFields.H"
 #include "fvMatrices.H"
 
+#include "injectionModelList.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -50,9 +52,6 @@ namespace regionModels
 {
 namespace surfaceFilmModels
 {
-
-// Forward declaration of classes
-class injectionModel;
 
 /*---------------------------------------------------------------------------*\
                    Class kinematicSingleLayer Declaration
@@ -100,9 +99,6 @@ protected:
             //- Skin frition coefficient for film/primary region interface
             scalar Cf_;
 
-            //- Stable film thickness
-            dimensionedScalar deltaStable_;
-
 
         // Thermo properties
 
@@ -139,16 +135,16 @@ protected:
             surfaceScalarField phi_;
 
 
-            // Transfer fields - to the primary region
+            // Transfer fields
 
-                //- Film mass available for transfer
-                volScalarField massForPrimary_;
+                //- Film mass available for transfer to the primary region
+                volScalarField primaryMassTrans_;
 
-                //- Parcel diameters originating from film
-                volScalarField diametersForPrimary_;
+                //- Film mass available for transfer to cloud
+                volScalarField cloudMassTrans_;
 
-                //- Film mass evolved via phase change
-                volScalarField massPhaseChangeForPrimary_;
+                //- Parcel diameters originating from film to cloud
+                volScalarField cloudDiameterTrans_;
 
 
         // Source term fields
@@ -198,20 +194,17 @@ protected:
 
         // Sub-models
 
-            //- Injection
-            autoPtr<injectionModel> injection_;
+            //- Available mass for transfer via sub-models
+            scalarField availableMass_;
+
+            //- Cloud injection
+            injectionModelList injection_;
 
 
        // Checks
 
            //- Cumulative mass added via sources [kg]
            scalar addedMassTotal_;
-
-
-       // Detached surface properties
-
-           //- Cumulative mass detached [kg]
-           scalar injectedMassTotal_;
 
 
     // Protected member functions
@@ -230,9 +223,6 @@ protected:
 
         //- Transfer source fields from the primary region to the film region
         virtual void transferPrimaryRegionSourceFields();
-
-        //- Correct the source terms for film that detaches from film region
-        virtual void correctDetachedFilm();
 
         // Explicit pressure source contribution
         virtual tmp<volScalarField> pu();
@@ -354,6 +344,9 @@ public:
             //- Return the film wall velocity [m/s]
             virtual const volVectorField& Uw() const;
 
+            //- Return the film flux [kg.m/s]
+            virtual const surfaceScalarField& phi() const;
+
             //- Return the film density [kg/m3]
             virtual const volScalarField& rho() const;
 
@@ -373,16 +366,16 @@ public:
             virtual const volScalarField& kappa() const;
 
 
-           // Transfer fields - to the primary region
+            // Transfer fields - to the primary region
 
-               //- Return the film mass available for transfer
-               virtual const volScalarField& massForPrimary() const;
+                //- Return mass transfer source - Eulerian phase only
+                virtual tmp<volScalarField> primaryMassTrans() const;
 
-               //- Return the parcel diameters originating from film
-               virtual const volScalarField& diametersForPrimary() const;
+                //- Return the film mass available for transfer to cloud
+                virtual const volScalarField& cloudMassTrans() const;
 
-               //- Return the film mass evolved via phase change
-               virtual const volScalarField& massPhaseChangeForPrimary() const;
+                //- Return the parcel diameters originating from film to cloud
+                virtual const volScalarField& cloudDiameterTrans() const;
 
 
         // External helper functions
@@ -452,13 +445,16 @@ public:
         // Sub-models
 
             //- Injection
-            inline injectionModel& injection();
+            inline injectionModelList& injection();
 
 
         // Helper functions
 
-            //- Return the gravity tangential component contributions
-            inline tmp<volVectorField> gTan() const;
+            //- Return the current film mass
+            inline tmp<volScalarField> mass() const;
+
+            //- Return the net film mass available over the next integration
+            inline tmp<volScalarField> netMass() const;
 
             //- Return the gravity normal-to-patch component contribution
             inline tmp<volScalarField> gNorm() const;
@@ -466,6 +462,9 @@ public:
             //- Return the gravity normal-to-patch component contribution
             //  Clipped so that only non-zero if g & nHat_ < 0
             inline tmp<volScalarField> gNormClipped() const;
+
+            //- Return the gravity tangential component contributions
+            inline tmp<volVectorField> gTan() const;
 
 
         // Evolution
@@ -494,7 +493,7 @@ public:
                 virtual tmp<DimensionedField<scalar, volMesh> > Sh() const;
 
 
-       // I-O
+        // I-O
 
             //- Provide some feedback
             virtual void info() const;
