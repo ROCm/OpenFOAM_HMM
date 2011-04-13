@@ -92,6 +92,13 @@ makeBasicRhoPolyThermo
     3
 );
 
+makeBasicRhoPolyThermo
+(
+    hRhoThermo,
+    pureMixture,
+    8
+);
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
