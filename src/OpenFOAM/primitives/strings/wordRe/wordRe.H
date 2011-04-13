@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -110,6 +110,7 @@ public:
         //- Test string for regular expression meta characters
         static inline bool isPattern(const string&);
 
+
     // Constructors
 
         //- Construct null
@@ -123,66 +124,75 @@ public:
 
         //- Construct as copy of character array
         //  Optionally specify how it should be treated.
-        inline wordRe(const char*, const compOption=LITERAL);
+        inline wordRe(const char*, const compOption = LITERAL);
 
         //- Construct as copy of string.
         //  Optionally specify how it should be treated.
-        inline wordRe(const string&, const compOption=LITERAL);
+        inline wordRe(const string&, const compOption = LITERAL);
 
         //- Construct as copy of std::string
         //  Optionally specify how it should be treated.
-        inline wordRe(const std::string&, const compOption=LITERAL);
+        inline wordRe(const std::string&, const compOption = LITERAL);
 
         //- Construct from Istream
         //  Words are treated as literals, strings with an auto-test
         wordRe(Istream&);
 
+
     // Member functions
 
-    //- Access
+        // Access
 
-        //- Should be treated as a match rather than a literal string?
-        inline bool isPattern() const;
+            //- Should be treated as a match rather than a literal string?
+            inline bool isPattern() const;
 
-    //- Infrastructure
 
-        //- Compile the regular expression
-        inline bool compile() const;
+        // Infrastructure
 
-        //- Possibly compile the regular expression, with greater control
-        inline bool compile(const compOption) const;
+            //- Compile the regular expression
+            inline bool compile() const;
 
-        //- Recompile an existing regular expression
-        inline bool recompile() const;
+            //- Possibly compile the regular expression, with greater control
+            inline bool compile(const compOption) const;
 
-        //- Frees precompiled regular expression, making wordRe a literal.
-        //  Optionally strips invalid word characters
-        inline void uncompile(const bool doStripInvalid=false) const;
+            //- Recompile an existing regular expression
+            inline bool recompile() const;
 
-    //- Editing
+            //- Frees precompiled regular expression, making wordRe a literal.
+            //  Optionally strips invalid word characters
+            inline void uncompile(const bool doStripInvalid = false) const;
 
-        //- Copy string, auto-test for regular expression or other options
-        inline void set(const std::string&, const compOption=DETECT);
 
-        //- Copy string, auto-test for regular expression or other options
-        inline void set(const char*, const compOption=DETECT);
+        // Editing
 
-        //- Clear string and precompiled regular expression
-        inline void clear();
+            //- Copy string, auto-test for regular expression or other options
+            inline void set(const std::string&, const compOption = DETECT);
 
-    //- Searching
+            //- Copy string, auto-test for regular expression or other options
+            inline void set(const char*, const compOption = DETECT);
 
-        //- Smart match as regular expression or as a string
-        //  Optionally force a literal match only
-        inline bool match(const std::string&, bool literalMatch=false) const;
+            //- Clear string and precompiled regular expression
+            inline void clear();
 
-    //- Miscellaneous
 
-        //- Return a string with quoted meta-characters
-        inline string quotemeta() const;
+        // Searching
 
-        //- Output some basic info
-        Ostream& info(Ostream&) const;
+            //- Smart match as regular expression or as a string
+            //  Optionally force a literal match only
+            inline bool match
+            (
+                const std::string&,
+                bool literalMatch = false
+            ) const;
+
+
+        // Miscellaneous
+
+            //- Return a string with quoted meta-characters
+            inline string quotemeta() const;
+
+            //- Output some basic info
+            Ostream& info(Ostream&) const;
 
 
     // Member operators
