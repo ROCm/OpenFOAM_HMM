@@ -352,6 +352,7 @@ general = cfdTools/general
 $(general)/findRefCell/findRefCell.C
 $(general)/adjustPhi/adjustPhi.C
 $(general)/bound/bound.C
+$(general)/pimpleControl/pimpleControl.C
 
 porousMedia = $(general)/porousMedia
 $(porousMedia)/porousZone.C
