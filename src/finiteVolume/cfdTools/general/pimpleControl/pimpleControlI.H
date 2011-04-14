@@ -25,6 +25,18 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+inline Foam::label Foam::pimpleControl::nOuterCorr() const
+{
+    return nOuterCorr_;
+}
+
+
+inline Foam::label Foam::pimpleControl::nCorr() const
+{
+    return nCorr_;
+}
+
+
 inline bool Foam::pimpleControl::start()
 {
     corr_ = 0;
@@ -35,9 +47,12 @@ inline bool Foam::pimpleControl::start()
 
 inline bool Foam::pimpleControl::loop()
 {
+    read();
+
     if (criteriaSatisfied())
     {
-        Info<< "PIMPLE loop converged in " << corr_ << " iterations" << endl;
+        Info<< dictName_ << "loop converged in " << corr_ << " iterations"
+            << endl;
         return false;
     }
     else
@@ -47,14 +62,14 @@ inline bool Foam::pimpleControl::loop()
             mesh_.data::add("finalIteration", true);
         }
 
-        if (corr_ < nCorr_)
+        if (corr_ < nOuterCorr_)
         {
-            Info<< "PIMPLE iteration " << corr_ + 1 << endl;
+            Info<< dictName_ << " iteration " << corr_ + 1 << endl;
             return true;
         }
         else
         {
-            Info<< "PIMPLE loop not converged within " << nCorr_
+            Info<< dictName_ << " loop not converged within " << nOuterCorr_
                 << " iterations" << endl;
             return false;
         }
@@ -64,7 +79,20 @@ inline bool Foam::pimpleControl::loop()
 
 inline bool Foam::pimpleControl::finalIter() const
 {
-    return corr_ == nCorr_-1;
+    return corr_ == nOuterCorr_-1;
+}
+
+
+inline bool Foam::pimpleControl::finalInnerIter
+(
+    const label corr,
+    const label nonOrth
+) const
+{
+    return
+        corr_ == nOuterCorr_-1
+     && corr == nCorr_-1
+     && nonOrth == nNonOrthCorr_;
 }
 
 

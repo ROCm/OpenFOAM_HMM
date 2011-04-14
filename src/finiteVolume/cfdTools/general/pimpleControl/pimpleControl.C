@@ -33,19 +33,16 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-Foam::label Foam::pimpleControl::applyToField(const word& fieldName) const
+void Foam::pimpleControl::read()
 {
-    forAll(residualControl_, i)
-    {
-        if (residualControl_[i].name.match(fieldName))
-        {
-            return i;
-        }
-    }
+    solutionControl::read(false);
 
-    return -1;
+    // Read solution controls
+    const dictionary& pimpleDict = dict();
+    nOuterCorr_ = pimpleDict.lookupOrDefault<label>("nOuterCorrectors", 1);
+    nCorr_ = pimpleDict.lookupOrDefault<label>("nCorrectors", 1);
 }
 
 
@@ -96,7 +93,7 @@ bool Foam::pimpleControl::criteriaSatisfied()
 
             if (debug)
             {
-                Info<< "PIMPLE loop statistics:" << endl;
+                Info<< dictName_ << "loop statistics:" << endl;
 
                 Info<< "    " << variableName << " iter " << corr_
                     << ": ini res = "
@@ -118,16 +115,16 @@ bool Foam::pimpleControl::criteriaSatisfied()
 
 Foam::pimpleControl::pimpleControl(fvMesh& mesh)
 :
-    mesh_(mesh),
+    solutionControl(mesh, "PIMPLE"),
+    nOuterCorr_(0),
     nCorr_(0),
-    corr_(0),
-    residualControl_()
+    corr_(0)
 {
     read();
 
     if (residualControl_.size() > 0)
     {
-        Info<< "PIMPLE: max iterations = " << nCorr_ << endl;
+        Info<< dictName_ << ": max iterations = " << nOuterCorr_ << endl;
         forAll(residualControl_, i)
         {
             Info<< "    field " << residualControl_[i].name << token::TAB
@@ -139,7 +136,7 @@ Foam::pimpleControl::pimpleControl(fvMesh& mesh)
     }
     else
     {
-        Info<< "No PIMPLE residual control data found. "
+        Info<< "No " << dictName_ << " residual control data found. "
             << "Calculations will employ a fixed number of corrector loops"
             << nl << endl;
     }
@@ -150,42 +147,6 @@ Foam::pimpleControl::pimpleControl(fvMesh& mesh)
 
 Foam::pimpleControl::~pimpleControl()
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::pimpleControl::read()
-{
-    const dictionary& dict = mesh_.solutionDict().subDict("PIMPLE");
-    nCorr_ = dict.lookupOrDefault<label>("nOuterCorrectors", 1);
-    const dictionary residualDict(dict.subOrEmptyDict("residualControl"));
-    DynamicList<fieldData> data(residualDict.toc().size());
-    wordHashSet fieldNames;
-    forAllConstIter(dictionary, residualDict, iter)
-    {
-        if (fieldNames.insert(iter().keyword()))
-        {
-            fieldData fd;
-            fd.name = iter().keyword().c_str();
-            if (iter().isDict())
-            {
-                const dictionary& fieldDict(iter().dict());
-                fd.relTol = readScalar(fieldDict.lookup("relTol"));
-                fd.absTol = readScalar(fieldDict.lookup("absTol"));
-                fd.initialResidual = 0.0;
-                data.append(fd);
-            }
-            else
-            {
-                FatalErrorIn("bool Foam::pimpleControl::read()")
-                    << "Residual data for " << iter().keyword()
-                    << " must be specified as a dictionary";
-            }
-        }
-    }
-
-    residualControl_.transfer(data);
-}
 
 
 // ************************************************************************* //
