@@ -23,7 +23,7 @@
     const volScalarField& vDotcP = vDotP[0]();
     const volScalarField& vDotvP = vDotP[1]();
 
-    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
     {
         fvScalarMatrix p_rghEqn
         (
@@ -35,18 +35,10 @@
 
         p_rghEqn.solve
         (
-            mesh.solver
-            (
-                p_rgh.select
-                (
-                    pimple.finalIter()
-                 && corr == nCorr-1
-                 && nonOrth == nNonOrthCorr
-                )
-            )
+            mesh.solver(p_rgh.select(pimple.finalInnerIter(corr, nonOrth)))
         );
 
-        if (nonOrth == nNonOrthCorr)
+        if (nonOrth == pimple.nNonOrthCorr())
         {
             phi += p_rghEqn.flux();
         }

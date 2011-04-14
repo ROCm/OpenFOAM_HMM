@@ -1,4 +1,6 @@
 {
+    const dictionary& pimpleDict = pimple.dict();
+
     scalar maxCo
     (
         pimpleDict.lookupOrDefault<scalar>("maxCo", 0.8)
@@ -29,7 +31,7 @@
        /((2*maxCo)*mesh.V()*rho.dimensionedInternalField())
     );
 
-    if (transonic)
+    if (pimple.transonic())
     {
         surfaceScalarField phid
         (

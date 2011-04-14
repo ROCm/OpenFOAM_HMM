@@ -1,6 +1,8 @@
-label nAlphaCorr(readLabel(piso.lookup("nAlphaCorr")));
+const dictionary& pimpleDict = pimple.dict();
 
-label nAlphaSubCycles(readLabel(piso.lookup("nAlphaSubCycles")));
+label nAlphaCorr(readLabel(pimpleDict.lookup("nAlphaCorr")));
+
+label nAlphaSubCycles(readLabel(pimpleDict.lookup("nAlphaSubCycles")));
 
 if (nAlphaSubCycles > 1)
 {

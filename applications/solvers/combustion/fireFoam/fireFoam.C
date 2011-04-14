@@ -59,11 +59,9 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-        #include "readPIMPLEControls.H"
         #include "readTimeControls.H"
         #include "compressibleCourantNo.H"
         #include "setDeltaT.H"
-        pimple.read();
 
         runTime++;
         Info<< "Time = " << runTime.timeName() << nl << endl;
@@ -79,7 +77,7 @@ int main(int argc, char *argv[])
             #include "fuhsEqn.H"
 
             // --- PISO loop
-            for (int corr=0; corr<nCorr; corr++)
+            for (int corr=0; corr<pimple.nCorr(); corr++)
             {
                 #include "pEqn.H"
             }

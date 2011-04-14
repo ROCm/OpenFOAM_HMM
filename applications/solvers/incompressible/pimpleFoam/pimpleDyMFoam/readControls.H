@@ -1,5 +1,6 @@
     #include "readTimeControls.H"
-    #include "readPIMPLEControls.H"
+
+    const dictionary& pimpleDict = pimple.dict();
 
     const bool correctPhi =
         pimpleDict.lookupOrDefault("correctPhi", false);

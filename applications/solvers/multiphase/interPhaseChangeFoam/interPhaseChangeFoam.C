@@ -56,15 +56,15 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
     #include "readGravitationalAcceleration.H"
-    #include "readPISOControls.H"
     #include "initContinuityErrs.H"
     #include "createFields.H"
     #include "readTimeControls.H"
+
+    pimpleControl pimple(mesh);
+
     #include "../interFoam/correctPhi.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
-
-    pimpleControl pimple(mesh);
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,11 +72,9 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-        #include "readPIMPLEControls.H"
         #include "readTimeControls.H"
         #include "CourantNo.H"
         #include "setDeltaT.H"
-        pimple.read();
 
         runTime++;
 
@@ -92,7 +90,7 @@ int main(int argc, char *argv[])
             #include "UEqn.H"
 
             // --- PISO loop
-            for (int corr=0; corr<nCorr; corr++)
+            for (int corr=0; corr<pimple.nCorr(); corr++)
             {
                 #include "pEqn.H"
             }

@@ -44,6 +44,7 @@ Description
 #include "interfaceProperties.H"
 #include "twoPhaseMixture.H"
 #include "turbulenceModel.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,6 +60,8 @@ int main(int argc, char *argv[])
     #include "createPcorrTypes.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
+
+    pimpleControl pimple(mesh);
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     Info<< "\nStarting time loop\n" << endl;
@@ -113,7 +116,7 @@ int main(int argc, char *argv[])
         turbulence->correct();
 
         // --- Outer-corrector loop
-        for (int oCorr=0; oCorr<nOuterCorr; oCorr++)
+        for (int oCorr=0; oCorr<pimple.nOuterCorr(); oCorr++)
         {
             #include "alphaEqnsSubCycle.H"
 
@@ -122,7 +125,7 @@ int main(int argc, char *argv[])
             #include "UEqn.H"
 
             // --- PISO loop
-            for (int corr=0; corr<nCorr; corr++)
+            for (int corr=0; corr<oimple.nCorr(); corr++)
             {
                 #include "pEqn.H"
             }
