@@ -67,7 +67,7 @@ protected:
         List<fieldData> residualControl_;
 
         //- The dictionary name, e.g. SIMPLE, PIMPLE
-        const word dictName_;
+        const word algorithmName_;
 
 
         // Solution controls
@@ -112,7 +112,7 @@ public:
     // Constructors
 
         //- Construct from mesh
-        solutionControl(fvMesh& mesh, const word& dictName);
+        solutionControl(fvMesh& mesh, const word& algorithmName);
 
 
     //- Destructor

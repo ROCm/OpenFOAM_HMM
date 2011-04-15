@@ -25,6 +25,12 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+inline Foam::label Foam::pimpleControl::corr() const
+{
+    return corr_;
+}
+
+
 inline Foam::label Foam::pimpleControl::nOuterCorr() const
 {
     return nOuterCorr_;
@@ -51,7 +57,7 @@ inline bool Foam::pimpleControl::loop()
 
     if (criteriaSatisfied())
     {
-        Info<< dictName_ << "loop converged in " << corr_ << " iterations"
+        Info<< algorithmName_ << ": converged in " << corr_ << " iterations"
             << endl;
         return false;
     }
@@ -64,13 +70,21 @@ inline bool Foam::pimpleControl::loop()
 
         if (corr_ < nOuterCorr_)
         {
-            Info<< dictName_ << " iteration " << corr_ + 1 << endl;
+            if (nOuterCorr_ != 1)
+            {
+                Info<< algorithmName_ << ": iteration " << corr_ + 1 << endl;
+            }
+
             return true;
         }
         else
         {
-            Info<< dictName_ << " loop not converged within " << nOuterCorr_
-                << " iterations" << endl;
+            if ((!residualControl_.empty()) && (nOuterCorr_ != 1))
+            {
+                Info<< algorithmName_ << ": not converged within "
+                    << nOuterCorr_ << " iterations" << endl;
+            }
+
             return false;
         }
     }

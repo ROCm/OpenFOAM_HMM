@@ -102,6 +102,9 @@ public:
 
         // Access
 
+            //- Current corrector index
+            inline label corr() const;
+
             //- Maximum number of PIMPLE correctors
             inline label nOuterCorr() const;
 

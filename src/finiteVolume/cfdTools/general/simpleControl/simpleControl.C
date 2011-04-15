@@ -66,7 +66,7 @@ bool Foam::simpleControl::criteriaSatisfied()
 
             if (debug)
             {
-                Info<< dictName_ << " solution statistics:" << endl;
+                Info<< algorithmName_ << " solution statistics:" << endl;
 
                 Info<< "    " << variableName << ": abs tol = " << residual
                     << " (" << residualControl_[fieldI].absTol << ")"
@@ -88,9 +88,11 @@ Foam::simpleControl::simpleControl(fvMesh& mesh)
 {
     read();
 
+    Info<< nl;
+
     if (residualControl_.size() > 0)
     {
-        Info<< dictName_ << " convergence criteria" << endl;
+        Info<< algorithmName_ << ": convergence criteria" << nl;
         forAll(residualControl_, i)
         {
             Info<< "    field " << residualControl_[i].name << token::TAB
@@ -101,7 +103,7 @@ Foam::simpleControl::simpleControl(fvMesh& mesh)
     }
     else
     {
-        Info<< "No " << dictName_ << " convergence criteria found. "
+        Info<< algorithmName_ << ": no convergence criteria found. "
             << "Calculations will run for " << mesh_.time().endTime().value()
             << " steps." << nl << endl;
     }

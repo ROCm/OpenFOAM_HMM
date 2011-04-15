@@ -93,7 +93,7 @@ bool Foam::pimpleControl::criteriaSatisfied()
 
             if (debug)
             {
-                Info<< dictName_ << "loop statistics:" << endl;
+                Info<< algorithmName_ << "loop statistics:" << endl;
 
                 Info<< "    " << variableName << " iter " << corr_
                     << ": ini res = "
@@ -122,23 +122,33 @@ Foam::pimpleControl::pimpleControl(fvMesh& mesh)
 {
     read();
 
-    if (residualControl_.size() > 0)
+    if (nOuterCorr_ > 1)
     {
-        Info<< dictName_ << ": max iterations = " << nOuterCorr_ << endl;
-        forAll(residualControl_, i)
+        Info<< nl;
+        if (!residualControl_.empty())
         {
-            Info<< "    field " << residualControl_[i].name << token::TAB
-                << ": relTol " << residualControl_[i].relTol
-                << ", absTol " << residualControl_[i].absTol
-                << nl;
+            Info<< algorithmName_ << ": max iterations = " << nOuterCorr_
+                << endl;
+            forAll(residualControl_, i)
+            {
+                Info<< "    field " << residualControl_[i].name << token::TAB
+                    << ": relTol " << residualControl_[i].relTol
+                    << ", absTol " << residualControl_[i].absTol
+                    << nl;
+            }
+            Info<< endl;
         }
-        Info<< endl;
+        else
+        {
+            Info<< algorithmName_ << ": no residual control data found. " << nl
+                << "Calculations will employ " << nOuterCorr_
+                << " corrector loops" << nl << endl;
+        }
     }
     else
     {
-        Info<< "No " << dictName_ << " residual control data found. "
-            << "Calculations will employ a fixed number of corrector loops"
-            << nl << endl;
+        Info<< nl << algorithmName_ << ": Operating solver in PISO mode" << nl
+            << endl;
     }
 }
 

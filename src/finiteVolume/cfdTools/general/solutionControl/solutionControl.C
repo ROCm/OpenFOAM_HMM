@@ -104,11 +104,11 @@ Foam::label Foam::solutionControl::applyToField(const word& fieldName) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::solutionControl::solutionControl(fvMesh& mesh, const word& dictName)
+Foam::solutionControl::solutionControl(fvMesh& mesh, const word& algorithmName)
 :
     mesh_(mesh),
     residualControl_(),
-    dictName_(dictName),
+    algorithmName_(algorithmName),
     nNonOrthCorr_(0),
     momentumPredictor_(true),
     transonic_(false)

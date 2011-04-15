@@ -37,8 +37,8 @@ inline bool Foam::simpleControl::loop()
     {
         if (criteriaSatisfied())
         {
-            Info<< dictName_ << " solution converged in " << time.timeName()
-                << " iterations" << nl << endl;
+            Info<< nl << algorithmName_ << " solution converged in "
+                << time.timeName() << " iterations" << nl << endl;
 
             // Set to finalise calculation
             time.writeAndEnd();
