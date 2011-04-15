@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
         #include "rhoEqn.H"
 
-        for (int oCorr=0; oCorr<pimple.nOuterCorr(); oCorr++)
+        for (pimple.start(); pimple.loop(); pimple++)
         {
             #include "calcVdj.H"
 

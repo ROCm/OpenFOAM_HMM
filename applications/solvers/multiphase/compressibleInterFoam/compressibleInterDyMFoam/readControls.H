@@ -4,7 +4,7 @@
 
     label nAlphaSubCycles(readLabel(pimple.dict().lookup("nAlphaSubCycles")));
 
-    if (nAlphaSubCycles > 1 && nOuterCorr != 1)
+    if (nAlphaSubCycles > 1 && pimple.nOuterCorr() != 1)
     {
         FatalErrorIn(args.executable())
             << "Sub-cycling alpha is only allowed for PISO, "

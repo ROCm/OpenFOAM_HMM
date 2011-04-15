@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,6 +33,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,6 +45,8 @@ int main(int argc, char *argv[])
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"
 
+    pimpleControl pimple(mesh);
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
@@ -52,10 +55,9 @@ int main(int argc, char *argv[])
     {
         Info<< "\n Time = " << runTime.timeName() << nl << endl;
 
-        #include "readPISOControls.H"
         #include "CourantNo.H"
 
-        for (int ucorr=0; ucorr<nOuterCorr; ucorr++)
+        for (pimple.start(); pimple.loop(); pimple++)
         {
             surfaceScalarField phiv("phiv", phi/fvc::interpolate(h));
 
@@ -67,7 +69,7 @@ int main(int argc, char *argv[])
 
             hUEqn.relax();
 
-            if (momentumPredictor)
+            if (pimple.momentumPredictor())
             {
                 if (rotating)
                 {
@@ -87,7 +89,7 @@ int main(int argc, char *argv[])
             }
 
             // --- PISO loop
-            for (int corr=0; corr<nCorr; corr++)
+            for (int corr=0; corr<pimple.nCorr(); corr++)
             {
                 volScalarField rAU(1.0/hUEqn.A());
                 surfaceScalarField ghrAUf(magg*fvc::interpolate(h*rAU));
@@ -107,7 +109,7 @@ int main(int argc, char *argv[])
                     + fvc::ddtPhiCorr(rAU, h, hU, phi)
                     - phih0;
 
-                for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+                for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
                 {
                     fvScalarMatrix hEqn
                     (
@@ -116,16 +118,15 @@ int main(int argc, char *argv[])
                       - fvm::laplacian(ghrAUf, h)
                     );
 
-                    if (ucorr < nOuterCorr-1 || corr < nCorr-1)
-                    {
-                        hEqn.solve();
-                    }
-                    else
-                    {
-                        hEqn.solve(mesh.solver(h.name() + "Final"));
-                    }
+                    hEqn.solve
+                    (
+                        mesh.solver
+                        (
+                            h.select(pimple.finalInnerIter(corr, nonOrth))
+                        )
+                    );
 
-                    if (nonOrth == nNonOrthCorr)
+                    if (nonOrth == pimple.nNonOrthCorr())
                     {
                         phi += hEqn.flux();
                     }

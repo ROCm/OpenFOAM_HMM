@@ -70,7 +70,6 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-        #include "readPISOControls.H"
         #include "readTimeControls.H"
         #include "CourantNo.H"
         #include "alphaCourantNo.H"

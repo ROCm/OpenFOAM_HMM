@@ -4,7 +4,7 @@
 
     tmp<fvScalarMatrix> p_rghEqnComp;
 
-    if (transonic)
+    if (pimple.transonic())
     {
         p_rghEqnComp =
         (

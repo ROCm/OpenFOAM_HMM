@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,6 +41,7 @@ Description
 #include "OFstream.H"
 #include "Switch.H"
 #include "mathematicalConstants.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,13 +59,14 @@ int main(int argc, char *argv[])
     #include "compressibleCourantNo.H"
     #include "setInitialDeltaT.H"
 
+    pimpleControl pimple(mesh);
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
     while (runTime.run())
     {
-        #include "readPISOControls.H"
         #include "compressibleCourantNo.H"
         #include "setDeltaT.H"
 
@@ -98,15 +100,15 @@ int main(int argc, char *argv[])
         chemistrySh = kappa*chemistry.Sh()();
 
         #include "rhoEqn.H"
-        #include "UEqn.H"
 
-        for (label ocorr=1; ocorr <= nOuterCorr; ocorr++)
+        for (pimple.start(); pimple.loop(); pimple++)
         {
+            #include "UEqn.H"
             #include "YEqn.H"
             #include "hsEqn.H"
 
             // --- PISO loop
-            for (int corr=1; corr<=nCorr; corr++)
+            for (int corr=0; corr<pimple.nCorr(); corr++)
             {
                 #include "pEqn.H"
             }
