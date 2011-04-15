@@ -34,7 +34,7 @@ divSchemes
     div(phi,epsilon) Gauss upwind;
     div(phi,R)      Gauss upwind;
     div(R)          Gauss linear;
-    div(Ji,Ii_h)    Gauss linearUpwind Gauss linear; //Gauss upwind;
+    div(Ji,Ii_h)    Gauss linearUpwind grad(U);
     div((muEff*dev2(T(grad(U))))) Gauss linear;
 }
 

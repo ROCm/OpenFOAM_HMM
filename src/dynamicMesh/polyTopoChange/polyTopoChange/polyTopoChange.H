@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -238,6 +238,12 @@ class polyTopoChange
             const labelList& cellMap,
             List<objectMap>& cellsFromCells
         );
+
+        //- Are all face vertices valid
+        bool hasValidPoints(const face&) const;
+
+        //- Return face points
+        pointField facePoints(const face& f) const;
 
         //- Check inputs to modFace or addFace
         void checkFace

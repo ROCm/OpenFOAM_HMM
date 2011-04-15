@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -105,6 +105,12 @@ bool Foam::combineFaces::validFace
     const labelListList& edgeLoops = bigFace.edgeLoops();
 
     if (edgeLoops.size() > 1)
+    {
+        return false;
+    }
+
+    bool isNonManifold = bigFace.checkPointManifold(false, NULL);
+    if (isNonManifold)
     {
         return false;
     }
@@ -984,6 +990,7 @@ void Foam::combineFaces::setUnrefinement
                 zoneFlip                        // face flip in zone
             )
         );
+        restoredFaces.insert(masterFaceI, masterFaceI);
 
         // Add the previously removed faces
         for (label i = 1; i < faces.size(); i++)
@@ -991,7 +998,7 @@ void Foam::combineFaces::setUnrefinement
             //Pout<< "Restoring removed face with vertices " << faces[i]
             //    << endl;
 
-            meshMod.setAction
+            label faceI = meshMod.setAction
             (
                 polyAddFace
                 (
@@ -1007,6 +1014,7 @@ void Foam::combineFaces::setUnrefinement
                     zoneFlip                // zoneFlip
                 )
             );
+            restoredFaces.insert(faceI, masterFaceI);
         }
 
         // Clear out restored set

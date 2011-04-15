@@ -52,6 +52,7 @@ SourceFiles
 
 #include "word.H"
 #include "regExp.H"
+#include "keyType.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,7 +61,6 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 class wordRe;
-
 class Istream;
 class Ostream;
 
@@ -118,6 +118,9 @@ public:
 
         //- Construct as copy
         inline wordRe(const wordRe&);
+
+        //- Construct from keyType
+        inline wordRe(const keyType&, const compOption=LITERAL);
 
         //- Construct as copy of word
         inline wordRe(const word&);
@@ -205,6 +208,10 @@ public:
 
             //- Copy word, never a regular expression
             inline const wordRe& operator=(const word&);
+
+            //- Copy keyType, auto-test for regular expression
+            //  Always case sensitive
+            inline const wordRe& operator=(const keyType&);
 
             //- Copy string, auto-test for regular expression
             //  Always case sensitive

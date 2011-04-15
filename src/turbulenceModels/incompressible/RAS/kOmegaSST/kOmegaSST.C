@@ -347,8 +347,8 @@ void kOmegaSST::correct()
         y_.correct();
     }
 
-    const volScalarField S2(magSqr(symm(fvc::grad(U_))));
-    volScalarField G("RASModel::G", nut_*2*S2);
+    const volScalarField S2(2*magSqr(symm(fvc::grad(U_))));
+    volScalarField G("RASModel::G", nut_*S2);
 
     // Update omega and G at the wall
     omega_.boundaryField().updateCoeffs();
@@ -368,7 +368,7 @@ void kOmegaSST::correct()
       - fvm::Sp(fvc::div(phi_), omega_)
       - fvm::laplacian(DomegaEff(F1), omega_)
      ==
-        gamma(F1)*2*S2
+        gamma(F1)*S2
       - fvm::Sp(beta(F1)*omega_, omega_)
       - fvm::SuSp
         (
@@ -402,7 +402,7 @@ void kOmegaSST::correct()
 
 
     // Re-calculate viscosity
-    nut_ = a1_*k_/max(a1_*omega_, F2()*sqrt(2*S2));
+    nut_ = a1_*k_/max(a1_*omega_, F2()*sqrt(S2));
     nut_.correctBoundaryConditions();
 }
 
