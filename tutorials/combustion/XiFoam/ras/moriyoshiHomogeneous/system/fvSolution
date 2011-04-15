@@ -17,22 +17,30 @@ FoamFile
 
 solvers
 {
-    p
+    "(p|rho)"
     {
         solver          PCG;
         preconditioner  DIC;
         tolerance       1e-06;
-        relTol          0;
+        relTol          0.1;
     }
 
-    rho
+    "(p|rho)Final"
     {
         $p;
-        tolerance       1e-05;
+        tolerance       1e-06;
         relTol          0;
     }
 
-    "(U|ft|fu|b|Xi|Su|h|hu|R|k|epsilon)"
+    "(U|b|Su|Xi|h|hu|k|epsilon)"
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-05;
+        relTol          0.1;
+    }
+
+    "(U|b|Su|Xi|h|hu|k|epsilon)Final"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -41,11 +49,11 @@ solvers
     }
 }
 
-PISO
+PIMPLE
 {
-    nCorrectors     2;
+    nOuterCorrectors 2;
+    nCorrectors     1;
     nNonOrthogonalCorrectors 0;
-    momentumPredictor yes;
 }
 
 

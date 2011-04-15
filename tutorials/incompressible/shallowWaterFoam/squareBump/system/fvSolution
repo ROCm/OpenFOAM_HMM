@@ -26,8 +26,7 @@ solvers
 
     hFinal
     {
-        solver          PCG;
-        preconditioner  DIC;
+        $h;
         tolerance       1e-8;
         relTol          0;
     }
@@ -37,11 +36,18 @@ solvers
         solver          PBiCG;
         preconditioner  DILU;
         tolerance       1e-6;
+        relTol          0.1;
+    }
+
+    hUFinal
+    {
+        $hU;
+        tolerance       1e-6;
         relTol          0;
     }
 }
 
-PISO
+PIMPLE
 {
     nOuterCorrectors 3;
     nCorrectors      1;
