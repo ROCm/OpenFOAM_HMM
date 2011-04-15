@@ -208,9 +208,6 @@ $(interpolation)/interpolationPoint/pointMVCWeight.C
 $(interpolation)/interpolationPoint/makeInterpolationPoint.C
 
 volPointInterpolation = interpolation/volPointInterpolation
-/*
-$(volPointInterpolation)/pointPatchInterpolation/pointPatchInterpolation.C
-*/
 $(volPointInterpolation)/volPointInterpolation.C
 
 surfaceInterpolation = interpolation/surfaceInterpolation
