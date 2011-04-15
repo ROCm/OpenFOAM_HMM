@@ -56,7 +56,7 @@ Foam::fv::correctedSnGrad<Type>::fullGradCorrection
             gradScheme<Type>::New
             (
                 mesh,
-                mesh.gradScheme(vf.name())
+                mesh.gradScheme("grad(" + vf.name() + ')')
             )().grad(vf, "grad(" + vf.name() + ')')
         );
     tssf().rename("snGradCorr(" + vf.name() + ')');
@@ -108,7 +108,7 @@ Foam::fv::correctedSnGrad<Type>::correction
                 gradScheme<typename pTraits<Type>::cmptType>::New
                 (
                     mesh,
-                    mesh.gradScheme(ssf.name())
+                    mesh.gradScheme("grad(" + ssf.name() + ')')
                 )()
                 //gaussGrad<typename pTraits<Type>::cmptType>(mesh)
                .grad(vf.component(cmpt))
