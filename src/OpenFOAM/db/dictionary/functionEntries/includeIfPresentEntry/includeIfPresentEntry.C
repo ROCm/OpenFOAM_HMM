@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,10 +69,15 @@ bool Foam::functionEntries::includeIfPresentEntry::execute
     Istream& is
 )
 {
-    IFstream ifs(includeFileName(is));
+    const fileName fName(includeFileName(is));
+    IFstream ifs(fName);
 
     if (ifs)
     {
+        if (Foam::functionEntries::includeEntry::report)
+        {
+            Info<< fName << endl;
+        }
         parentDict.read(ifs);
     }
 
@@ -87,10 +92,15 @@ bool Foam::functionEntries::includeIfPresentEntry::execute
     Istream& is
 )
 {
-    IFstream ifs(includeFileName(is));
+    const fileName fName(includeFileName(is));
+    IFstream ifs(fName);
 
     if (ifs)
     {
+        if (Foam::functionEntries::includeEntry::report)
+        {
+            Info<< fName << endl;
+        }
         entry.read(parentDict, ifs);
     }
 
