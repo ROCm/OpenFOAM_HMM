@@ -57,6 +57,9 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
     #include "readGravitationalAcceleration.H"
+
+    pimpleControl pimple(mesh);
+
     #include "readTimeControls.H"
     #include "readAdditionalSolutionControls.H"
     #include "createFields.H"
@@ -65,8 +68,6 @@ int main(int argc, char *argv[])
     #include "createExplicitSources.H"
     #include "createPorousZones.H"
     #include "initContinuityErrs.H"
-
-    pimpleControl pimple(mesh);
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
