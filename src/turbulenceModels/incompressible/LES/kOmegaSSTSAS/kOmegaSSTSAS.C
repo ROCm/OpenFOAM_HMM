@@ -328,7 +328,7 @@ kOmegaSSTSAS::kOmegaSSTSAS
     bound(k_, kMin_);
     bound(omega_, omegaMin_);
 
-    updateSubGridScaleFields(magSqr(2.0*symm(fvc::grad(U))));
+    updateSubGridScaleFields(2.0*magSqr(symm(fvc::grad(U))));
 
     printCoeffs();
 }
@@ -345,7 +345,7 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
         y_.correct();
     }
 
-    volScalarField S2(magSqr(2.0*symm(gradU())));
+    volScalarField S2(2.0*magSqr(symm(gradU())));
     gradU.clear();
 
     volVectorField gradK(fvc::grad(k_));

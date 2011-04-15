@@ -28,6 +28,12 @@ Description
     kOmegaSSTSAS LES turbulence model for incompressible flows
 
     References:
+    Evaluation of the SST-SAS model: Channel flow, asymmetric diffuser and axi-
+    symmetric hill
+    European Conference on Computational Fluid Dynamics
+    ECCOMAS CFD 2006
+    Lars Davison
+
     A Scale-Adaptive Simulation Model using Two-Equation Models
     AIAA 2005-1095
     F. R. Menter and Y. Egorov
