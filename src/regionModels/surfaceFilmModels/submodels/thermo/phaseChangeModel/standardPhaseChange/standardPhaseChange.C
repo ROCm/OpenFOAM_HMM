@@ -123,7 +123,7 @@ void standardPhaseChange::correctModel
     const scalarField hInf(film.htcs().h());
     const scalarField hFilm(film.htcw().h());
     const vectorField dU(film.UPrimary() - film.Us());
-    const scalarField limMass(max(0.0, availableMass - deltaMin_*rho*magSf));
+    const scalarField limMass(max(scalar(0.0), availableMass - deltaMin_*rho*magSf));
 
     forAll(dMass, cellI)
     {
