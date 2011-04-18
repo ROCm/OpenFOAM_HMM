@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -158,7 +158,7 @@ Foam::interfaceProperties::interfaceProperties
     (
         readScalar
         (
-            alpha1.mesh().solutionDict().subDict("PISO").lookup("cAlpha")
+            alpha1.mesh().solutionDict().subDict("PIMPLE").lookup("cAlpha")
         )
     ),
     sigma_(dict.lookup("sigma")),

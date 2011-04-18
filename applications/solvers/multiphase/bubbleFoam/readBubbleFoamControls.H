@@ -1,5 +1,5 @@
-#   include "readPISOControls.H"
+    #include "readPISOControls.H"
 
-    int nAlphaCorr(readInt(piso.lookup("nAlphaCorr")));
+    int nAlphaCorr(readInt(pisoDict.lookup("nAlphaCorr")));
 
-    Switch correctAlpha(piso.lookup("correctAlpha"));
+    Switch correctAlpha(pisoDict.lookup("correctAlpha"));

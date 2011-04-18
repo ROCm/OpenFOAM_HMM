@@ -366,7 +366,7 @@
     (
         p,
         p_rgh,
-        mesh.solutionDict().subDict("PISO"),
+        mesh.solutionDict().subDict("PIMPLE"),
         pRefCell,
         pRefValue
     );

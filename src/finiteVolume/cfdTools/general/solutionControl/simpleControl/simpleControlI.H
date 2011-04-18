@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,34 +21,36 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::residualControlFunctionObject
-
-Description
-    FunctionObject wrapper around residualControl to allow them to be created
-    via the functions entry within controlDict.
-
-SourceFiles
-    residualControlFunctionObject.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef residualControlFunctionObject_H
-#define residualControlFunctionObject_H
+#include "Time.H"
 
-#include "residualControl.H"
-#include "OutputFilterFunctionObject.H"
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+inline bool Foam::simpleControl::loop()
 {
-    typedef OutputFilterFunctionObject<residualControl>
-        residualControlFunctionObject;
+    read();
+
+    Time& time = const_cast<Time&>(mesh_.time());
+
+    if (initialised_)
+    {
+        if (criteriaSatisfied())
+        {
+            Info<< nl << algorithmName_ << " solution converged in "
+                << time.timeName() << " iterations" << nl << endl;
+
+            // Set to finalise calculation
+            time.writeAndEnd();
+        }
+    }
+    else
+    {
+        initialised_ = true;
+    }
+
+    return time.loop();
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

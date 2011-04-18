@@ -11,7 +11,7 @@ UEqn().relax();
 
 rAU = 1.0/UEqn().A();
 
-if (momentumPredictor)
+if (pimple.momentumPredictor())
 {
     solve(UEqn() == -fvc::grad(p));
 }

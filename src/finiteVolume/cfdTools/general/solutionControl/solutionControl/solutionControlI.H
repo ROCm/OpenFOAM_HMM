@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,20 +23,30 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "residualControlFunctionObject.H"
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
+inline const Foam::dictionary& Foam::solutionControl::dict() const
 {
-    defineNamedTemplateTypeNameAndDebug(residualControlFunctionObject, 0);
-
-    addToRunTimeSelectionTable
-    (
-        functionObject,
-        residualControlFunctionObject,
-        dictionary
-    );
+    return mesh_.solutionDict().subDict(algorithmName_);
 }
+
+
+inline Foam::label Foam::solutionControl::nNonOrthCorr() const
+{
+    return nNonOrthCorr_;
+}
+
+
+inline bool Foam::solutionControl::momentumPredictor() const
+{
+    return momentumPredictor_;
+}
+
+
+inline bool Foam::solutionControl::transonic() const
+{
+    return transonic_;
+}
+
 
 // ************************************************************************* //

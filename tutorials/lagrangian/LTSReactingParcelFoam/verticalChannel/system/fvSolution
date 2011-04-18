@@ -70,6 +70,11 @@ PIMPLE
     momentumPredictor yes;
     rhoMin rhoMin [1 -3 0 0 0] 0.1;
     rhoMax rhoMax [1 -3 0 0 0] 1.5;
+
+    maxCo           5;
+    alphaTauSmooth  1;
+    alphaTauTemp    1;
+    maxDeltaT       1;
 }
 
 additional

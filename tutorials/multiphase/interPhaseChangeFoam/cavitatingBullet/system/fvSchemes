@@ -27,9 +27,9 @@ interpolationSchemes
 divSchemes
 {
     default              none;
-    div(rhoPhi,U)        Gauss linearUpwind Gauss linear 1;
-    div(phi,omega)       Gauss linearUpwind Gauss linear 1;
-    div(phi,k)           Gauss linearUpwind Gauss linear 1;
+    div(rhoPhi,U)        Gauss linearUpwind grad(U);
+    div(phi,omega)       Gauss linearUpwind grad(omega);
+    div(phi,k)           Gauss linearUpwind grad(k);
 
     div(phi,alpha)       Gauss vanLeer;
     div(phirb,alpha)     Gauss interfaceCompression;

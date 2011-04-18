@@ -7,7 +7,7 @@
     adjustPhi(phi, U, p);
 
     // Non-orthogonal pressure corrector loop
-    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    for (int nonOrth=0; nonOrth<=simple.nNonOrthCorr(); nonOrth++)
     {
         fvScalarMatrix pEqn
         (
@@ -15,23 +15,15 @@
         );
 
         pEqn.setReference(pRefCell, pRefValue);
-        // retain the residual from the first iteration
-        if (nonOrth == 0)
-        {
-            pEqn.solve();
-        }
-        else
-        {
-            pEqn.solve();
-        }
+        pEqn.solve();
 
-        if (nonOrth == nNonOrthCorr)
+        if (nonOrth == simple.nNonOrthCorr())
         {
             phi -= pEqn.flux();
         }
     }
 
-#   include "continuityErrs.H"
+    #include "continuityErrs.H"
 
     // Explicitly relax pressure for momentum corrector
     p.relax();
