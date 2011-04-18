@@ -22,27 +22,33 @@ solvers
         solver          PCG;
         preconditioner  DIC;
         tolerance       1e-10;
+        relTol          0.1;
+    }
+
+    pFinal
+    {
+        $p;
+        tolerance       1e-10;
         relTol          0;
     }
 
-    "(Ua|Ub|k|epsilon)"
+    alpha
     {
         solver          PBiCG;
         preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
+        tolerance       1e-10;
+        relTol          0.1;
     }
 
-    "(alpha|beta)"
+    alphaFinal
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        $alpha;
         tolerance       1e-10;
         relTol          0;
     }
 }
 
-PISO
+PIMPLE
 {
     nCorrectors     2;
     nNonOrthogonalCorrectors 0;
