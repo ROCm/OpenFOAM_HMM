@@ -26,6 +26,8 @@
 #     foamJob
 #
 # Description
+#     Run an OpenFOAM job in background.
+#     Redirects the output to 'log' in the case directory.
 #
 #------------------------------------------------------------------------------
 usage() {
@@ -36,9 +38,9 @@ usage() {
 Usage: ${0##*/} [OPTION] <application> ...
 options:
   -case <dir>       specify alternative case directory, default is the cwd
-  -p                parallel run of processors
-  -s                also sends output to screen
-  -v <ver>          specify OpenFOAM version
+  -parallel         parallel run of processors
+  -screen           also sends output to screen
+  -version <ver>    specify an alternative OpenFOAM version
   -help             print the usage
 
 * run an OpenFOAM job in background.
@@ -95,23 +97,22 @@ do
       usage
       ;;
    -case)
-      [ "$#" -ge 2 ] || usage "'-case' option requires an argument"
-      caseDir=$2
+      [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+      cd "$2" 2>/dev/null || usage "directory does not exist:  '$2'"
       shift 2
-      cd "$caseDir" 2>/dev/null || usage "directory does not exist:  '$caseDir'"
       ;;
-   -p)
+   -p | -parallel)
       parallelOpt=true
       shift
       ;;
-   -s)
+   -s | -screen)
       screenOpt=true
       shift
       ;;
-   -v)
-      shift
-      version=$1
-      shift
+   -v | -version)
+      [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+      version="$2"
+      shift 2
       ;;
    --)
       shift
@@ -126,29 +127,32 @@ do
    esac
 done
 
-if [ "$#" -lt 1 ]
-then
-    usage "No application specified"
-fi
+[ "$#" -ge 1 ] || usage "No application specified"
 
-# use foamExec for a specified version and for remote (parallel) runs
+
+# use foamExec for a specified version
+# also need foamExec for remote (parallel) runs
 if [ -n "$version" -o "$parallelOpt" = true ]
 then
-    APPLICATION=`findExec foamExec`
-    if [ $? -ne 0 ]
+    # when possible, determine if application even exists
+    if [ -z "$version" ]
     then
-        usage "'foamExec' not found"
+        findExec $1 >/dev/null || usage "Application '$1' not found"
     fi
-    if [ -n "$version" ]
+
+    # use foamExec for dispatching
+    APPLICATION=`findExec foamExec` || usage "'foamExec' not found"
+
+    [ -n "$version" ] && APPLICATION="$APPLICATION -version $version"
+
+    # attempt to preserve the installation directory 'FOAM_INST_DIR'
+    if [ -d "$FOAM_INST_DIR" ]
     then
-        APPLICATION="$APPLICATION -v $version"
+        APPLICATION="$APPLICATION -prefix $FOAM_INST_DIR"
     fi
+
 else
-    APPLICATION=`findExec $1`
-    if [ $? -ne 0 ]
-    then
-        usage "Application '$1' executable not found"
-    fi
+    APPLICATION=`findExec $1` || usage "Application '$1' not found"
     echo "Application : $1"
     shift
 fi
@@ -182,11 +186,7 @@ then
     #
     # locate mpirun
     #
-    mpirun=`findExec mpirun`
-    if [ $? -ne 0 ]
-    then
-        usage "'mpirun' not found"
-    fi
+    mpirun=`findExec mpirun` || usage "'mpirun' not found"
     mpiopts="-np $NPROCS"
 
     #
@@ -217,10 +217,10 @@ then
     #
     if [ "$screenOpt" = true ]
     then
-        echo "Executing: mpirun $mpiopts $APPLICATION $@ -parallel | tee log"
-        $mpirun $mpiopts $APPLICATION $@ -parallel  | tee log
+        echo "Executing: $mpirun $mpiopts $APPLICATION $@ -parallel | tee log"
+        $mpirun $mpiopts $APPLICATION $@ -parallel | tee log
     else
-        echo "Executing: mpirun $mpiopts $APPLICATION $@ -parallel > log 2>&1"
+        echo "Executing: $mpirun $mpiopts $APPLICATION $@ -parallel > log 2>&1"
         $mpirun $mpiopts $APPLICATION $@ -parallel > log 2>&1 &
     fi
 
@@ -237,8 +237,6 @@ else
         echo "Executing: $APPLICATION $@ > log 2>&1 &"
         $APPLICATION $@ > log 2>&1 &
     fi
-else
-
 fi
 
 #------------------------------------------------------------------------------
