@@ -37,7 +37,8 @@ defineTypeNameAndDebug(Foam::treeDataPoint, 0);
 
 Foam::treeDataPoint::treeDataPoint(const pointField& points)
 :
-    points_(points)
+    points_(points),
+    useSubset_(false)
 {}
 
 
@@ -48,7 +49,8 @@ Foam::treeDataPoint::treeDataPoint
 )
 :
     points_(points),
-    pointLabels_(pointLabels)
+    pointLabels_(pointLabels),
+    useSubset_(true)
 {}
 
 
@@ -56,7 +58,7 @@ Foam::treeDataPoint::treeDataPoint
 
 Foam::pointField Foam::treeDataPoint::shapePoints() const
 {
-    if (pointLabels_.size())
+    if (useSubset_)
     {
         return pointField(points_, pointLabels_);
     }
@@ -86,7 +88,7 @@ bool Foam::treeDataPoint::overlaps
     const treeBoundBox& cubeBb
 ) const
 {
-    label pointI = (pointLabels_.size() ? pointLabels_[index] : index);
+    label pointI = (useSubset_ ? pointLabels_[index] : index);
     return cubeBb.contains(points_[pointI]);
 }
 
@@ -106,7 +108,7 @@ void Foam::treeDataPoint::findNearest
     forAll(indices, i)
     {
         const label index = indices[i];
-        label pointI = (pointLabels_.size() ? pointLabels_[index] : index);
+        label pointI = (useSubset_ ? pointLabels_[index] : index);
 
         const point& pt = points_[pointI];
 
@@ -141,7 +143,7 @@ void Foam::treeDataPoint::findNearest
     forAll(indices, i)
     {
         const label index = indices[i];
-        label pointI = (pointLabels_.size() ? pointLabels_[index] : index);
+        label pointI = (useSubset_ ? pointLabels_[index] : index);
 
         const point& shapePt = points_[pointI];
 
