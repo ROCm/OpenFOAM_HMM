@@ -47,7 +47,15 @@ solvers
         relTol           0.0;
     }
 
-    "(U|hs)"
+    "(U|hs||k|epsilon)"
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-06;
+        relTol          0.1;
+    }
+
+    "(U|hs||k|epsilon)Final"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -55,20 +63,9 @@ solvers
         relTol          0;
     }
 
-    "(U|hs)Final"
+    Yi
     {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-06;
-        relTol          0;
-    }
-
-    "(Yi|k|epsilon)"
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-06;
-        relTol          0;
+        $hsFinal;
     }
 }
 

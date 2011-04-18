@@ -91,21 +91,22 @@ solvers
         maxIter         20;
     }
 
-    U
+    "(U|k|epsilon)"
+    {
+        solver          smoothSolver;
+        smoother        GaussSeidel;
+        tolerance       1e-6;
+        relTol          0.1;
+        nSweeps         1;
+    }
+
+    "(U|k|epsilon)Final"
     {
         solver          smoothSolver;
         smoother        GaussSeidel;
         tolerance       1e-6;
         relTol          0;
         nSweeps         1;
-    }
-
-    "(k|epsilon|omega|R|nuTilda)"
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-8;
-        relTol          0;
     }
 }
 
