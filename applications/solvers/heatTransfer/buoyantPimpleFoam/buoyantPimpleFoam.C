@@ -88,10 +88,13 @@ int main(int argc, char *argv[])
                 #include "pEqn.H"
             }
 
-            turbulence->correct();
-
-            rho = thermo.rho();
+            if (pimple.turbCorr())
+            {
+                turbulence->correct();
+            }
         }
+
+        rho = thermo.rho();
 
         runTime.write();
 

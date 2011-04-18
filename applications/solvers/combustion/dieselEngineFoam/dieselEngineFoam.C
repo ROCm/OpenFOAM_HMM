@@ -79,10 +79,6 @@ int main(int argc, char *argv[])
         Info<< "Crank angle = " << runTime.theta() << " CA-deg" << endl;
 
         mesh.move();
-        const_cast<volPointInterpolation&>
-        (
-            volPointInterpolation::New(mesh)
-        ).updateMesh();
 
         dieselSpray.evolve();
 
@@ -122,9 +118,12 @@ int main(int argc, char *argv[])
             {
                 #include "pEqn.H"
             }
-        }
 
-        turbulence->correct();
+            if (pimple.turbCorr())
+            {
+                turbulence->correct();
+            }
+        }
 
         #include "logSummary.H"
         #include "spraySummary.H"

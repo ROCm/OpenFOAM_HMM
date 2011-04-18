@@ -88,10 +88,11 @@ int main(int argc, char *argv[])
         runTime++;
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
+        #include "rhoEqn.H"
+
         // --- Pressure-velocity PIMPLE corrector loop
         for (pimple.start(); pimple.loop(); pimple++)
         {
-            #include "rhoEqn.H"
             #include "UEqn.H"
 
             #include "ftEqn.H"
@@ -110,7 +111,10 @@ int main(int argc, char *argv[])
                 #include "pEqn.H"
             }
 
-            turbulence->correct();
+            if (pimple.turbCorr())
+            {
+                turbulence->correct();
+            }
         }
 
         rho = thermo.rho();

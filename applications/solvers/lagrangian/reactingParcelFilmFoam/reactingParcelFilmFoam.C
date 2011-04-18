@@ -98,9 +98,12 @@ int main(int argc, char *argv[])
                 {
                     #include "pEqn.H"
                 }
-            }
 
-            turbulence->correct();
+                if (pimple.turbCorr())
+                {
+                    turbulence->correct();
+                }
+            }
 
             rho = thermo.rho();
 

@@ -57,6 +57,7 @@ int main(int argc, char *argv[])
 
         #include "CourantNo.H"
 
+        // --- Pressure-velocity PIMPLE corrector loop
         for (pimple.start(); pimple.loop(); pimple++)
         {
             surfaceScalarField phiv("phiv", phi/fvc::interpolate(h));
