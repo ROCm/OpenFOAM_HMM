@@ -63,6 +63,9 @@ protected:
             //- Current PIMPLE corrector
             label corr_;
 
+            //- Flag to indicate whether to only solve turbulence on final iter
+            bool turbOnFinalIterOnly_;
+
 
     // Protected Member Functions
 
@@ -129,6 +132,9 @@ public:
                 const label corr,
                 const label nonOrth
             ) const;
+
+            //- Helper function to identify whether to solve for turbulence
+            inline bool turbCorr() const;
 
 
     // Member Operators
