@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,6 +49,7 @@ Description
 #include "porousZones.H"
 #include "timeActivatedExplicitSource.H"
 #include "SLGThermo.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,6 +71,8 @@ int main(int argc, char *argv[])
     #include "compressibleCourantNo.H"
     #include "setInitialDeltaT.H"
 
+    pimpleControl pimple(mesh);
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
@@ -77,7 +80,6 @@ int main(int argc, char *argv[])
     while (runTime.run())
     {
         #include "readTimeControls.H"
-        #include "readPISOControls.H"
         #include "readAdditionalSolutionControls.H"
         #include "compressibleCourantNo.H"
         #include "setDeltaT.H"
@@ -90,17 +92,25 @@ int main(int argc, char *argv[])
 
         #include "chemistry.H"
         #include "rhoEqn.H"
-        #include "UEqn.H"
-        #include "YEqn.H"
-        #include "hsEqn.H"
 
-        // --- PISO loop
-        for (int corr=0; corr<nCorr; corr++)
+        // --- Pressure-velocity PIMPLE corrector loop
+        for (pimple.start(); pimple.loop(); pimple++)
         {
-            #include "pEqn.H"
-        }
+            #include "UEqn.H"
+            #include "YEqn.H"
+            #include "hsEqn.H"
 
-        turbulence->correct();
+            // --- PISO loop
+            for (int corr=0; corr<pimple.nCorr(); corr++)
+            {
+                #include "pEqn.H"
+            }
+
+            if (pimple.turbCorr())
+            {
+                turbulence->correct();
+            }
+        }
 
         rho = thermo.rho();
 

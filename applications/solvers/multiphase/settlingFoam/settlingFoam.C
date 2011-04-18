@@ -81,7 +81,10 @@ int main(int argc, char *argv[])
                 #include "pEqn.H"
             }
 
-            #include "kEpsilon.H"
+            if (pimple.turbCorr())
+            {
+                #include "kEpsilon.H"
+            }
         }
 
         runTime.write();

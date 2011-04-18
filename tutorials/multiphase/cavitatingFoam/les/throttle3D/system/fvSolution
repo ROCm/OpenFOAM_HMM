@@ -53,7 +53,7 @@ solvers
         relTol          0;
     }
 
-    U
+    "(U|k|omega)"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -61,17 +61,9 @@ solvers
         relTol          0.1;
     }
 
-    UFinal
+    "(U|k|omega)Final"
     {
         $U;
-        tolerance       1e-08;
-        relTol          0;
-    }
-
-    "(k|omega)"
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
         tolerance       1e-08;
         relTol          0;
     }

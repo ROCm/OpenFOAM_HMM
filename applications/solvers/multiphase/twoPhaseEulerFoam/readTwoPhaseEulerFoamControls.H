@@ -1,6 +1,5 @@
     #include "readTimeControls.H"
-    #include "readPISOControls.H"
 
-    int nAlphaCorr(readInt(pisoDict.lookup("nAlphaCorr")));
+    int nAlphaCorr(readInt(pimple.dict().lookup("nAlphaCorr")));
 
-    Switch correctAlpha(pisoDict.lookup("correctAlpha"));
+    Switch correctAlpha(pimple.dict().lookup("correctAlpha"));

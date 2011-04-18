@@ -110,6 +110,12 @@ inline bool Foam::pimpleControl::finalInnerIter
 }
 
 
+inline bool Foam::pimpleControl::turbCorr() const
+{
+    return !turbOnFinalIterOnly_ || finalIter();
+}
+
+
 inline void Foam::pimpleControl::operator++(int)
 {
     if (finalIter())

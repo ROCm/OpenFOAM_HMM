@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,6 +34,7 @@ Description
 #include "nearWallDist.H"
 #include "wallFvPatch.H"
 #include "Switch.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,6 +48,8 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "initContinuityErrs.H"
 
+    pimpleControl pimple(mesh);
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
@@ -58,25 +61,31 @@ int main(int argc, char *argv[])
         #include "readBubbleFoamControls.H"
         #include "CourantNo.H"
 
-        #include "alphaEqn.H"
-        #include "liftDragCoeffs.H"
-        #include "UEqns.H"
-
-        // --- PISO loop
-
-        for (int corr=0; corr<nCorr; corr++)
+        // --- Pressure-velocity PIMPLE corrector loop
+        for (pimple.start(); pimple.loop(); pimple++)
         {
-            #include "pEqn.H"
+            #include "alphaEqn.H"
+            #include "liftDragCoeffs.H"
+            #include "UEqns.H"
 
-            if (correctAlpha)
+            // --- PISO loop
+            for (int corr=0; corr<pimple.nCorr(); corr++)
             {
-                #include "alphaEqn.H"
+                #include "pEqn.H"
+
+                if (correctAlpha)
+                {
+                    #include "alphaEqn.H"
+                }
+            }
+
+            #include "DDtU.H"
+
+            if (pimple.turbCorr())
+            {
+                #include "kEpsilon.H"
             }
         }
-
-        #include "DDtU.H"
-
-        #include "kEpsilon.H"
 
         #include "write.H"
 

@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "pimpleControl.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -43,6 +44,8 @@ void Foam::pimpleControl::read()
     const dictionary& pimpleDict = dict();
     nOuterCorr_ = pimpleDict.lookupOrDefault<label>("nOuterCorrectors", 1);
     nCorr_ = pimpleDict.lookupOrDefault<label>("nCorrectors", 1);
+    turbOnFinalIterOnly_ =
+        pimpleDict.lookupOrDefault<Switch>("turbOnFinalIterOnly", true);
 }
 
 
@@ -118,7 +121,8 @@ Foam::pimpleControl::pimpleControl(fvMesh& mesh)
     solutionControl(mesh, "PIMPLE"),
     nOuterCorr_(0),
     nCorr_(0),
-    corr_(0)
+    corr_(0),
+    turbOnFinalIterOnly_(true)
 {
     read();
 

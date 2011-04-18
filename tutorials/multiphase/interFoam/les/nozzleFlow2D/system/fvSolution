@@ -77,16 +77,16 @@ solvers
         maxIter         20;
     }
 
-    U
+    "(U|k)"
     {
         solver          smoothSolver;
         smoother        GaussSeidel;
         tolerance       1e-06;
-        relTol          0;
+        relTol          0.1;
         nSweeps         1;
     }
 
-    "(k|B|nuTilda)"
+    "(U|k)Final"
     {
         solver          PBiCG;
         preconditioner  DILU;

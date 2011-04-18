@@ -12,7 +12,7 @@
 
     pZones.addResistance(UEqn);
 
-    if (momentumPredictor)
+    if (pimple.momentumPredictor())
     {
         solve(UEqn == -fvc::grad(p));
     }

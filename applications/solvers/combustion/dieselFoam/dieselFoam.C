@@ -101,6 +101,7 @@ int main(int argc, char *argv[])
 
         #include "rhoEqn.H"
 
+        // --- Pressure-velocity PIMPLE corrector loop
         for (pimple.start(); pimple.loop(); pimple++)
         {
             #include "UEqn.H"
@@ -112,9 +113,12 @@ int main(int argc, char *argv[])
             {
                 #include "pEqn.H"
             }
-        }
 
-        turbulence->correct();
+            if (pimple.turbCorr())
+            {
+                turbulence->correct();
+            }
+        }
 
         #include "spraySummary.H"
 

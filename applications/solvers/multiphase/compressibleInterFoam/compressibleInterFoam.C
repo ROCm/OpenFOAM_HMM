@@ -88,11 +88,14 @@ int main(int argc, char *argv[])
             {
                 #include "pEqn.H"
             }
+
+            if (pimple.turbCorr())
+            {
+                turbulence->correct();
+            }
         }
 
         rho = alpha1*rho1 + alpha2*rho2;
-
-        turbulence->correct();
 
         runTime.write();
 
