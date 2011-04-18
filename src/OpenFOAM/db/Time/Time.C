@@ -257,7 +257,7 @@ Foam::Time::Time
     graphFormat_("raw"),
     runTimeModifiable_(true),
 
-    readLibs_(controlDict_, "libs"),
+    libs_(controlDict_, "libs"),
     functionObjects_(*this)
 {
     // Explicitly set read flags on objectRegistry so anything constructed
@@ -343,7 +343,7 @@ Foam::Time::Time
     graphFormat_("raw"),
     runTimeModifiable_(true),
 
-    readLibs_(controlDict_, "libs"),
+    libs_(controlDict_, "libs"),
     functionObjects_(*this)
 {
     // Explicitly set read flags on objectRegistry so anything constructed
@@ -430,7 +430,7 @@ Foam::Time::Time
     graphFormat_("raw"),
     runTimeModifiable_(true),
 
-    readLibs_(controlDict_, "libs"),
+    libs_(controlDict_, "libs"),
     functionObjects_(*this)
 {}
 
