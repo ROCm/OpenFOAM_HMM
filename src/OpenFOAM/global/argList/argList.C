@@ -548,7 +548,7 @@ Foam::argList::argList
 
             if (options_.found("roots"))
             {
-                source = "'-roots' option";
+                source = "-roots";
                 IStringStream is(options_["roots"]);
                 roots = readList<fileName>(is);
 
