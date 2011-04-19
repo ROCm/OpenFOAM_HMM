@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,19 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    rhoPisoTwinParcelFoam
+    MRFSimpleFoam
 
 Description
-    Transient solver for compressible, turbulent flow with two thermo-clouds.
+    Steady-state solver for incompressible, turbulent flow of non-Newtonian
+    fluids with MRF regions.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "basicPsiThermo.H"
-#include "turbulenceModel.H"
-
-#include "basicThermoCloud.H"
-#include "basicKinematicCloud.H"
+#include "singlePhaseTransportModel.H"
+#include "RASModel.H"
+#include "MRFZones.H"
+#include "simpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,53 +44,31 @@ int main(int argc, char *argv[])
 
     #include "createTime.H"
     #include "createMesh.H"
-    #include "readGravitationalAcceleration.H"
     #include "createFields.H"
-    #include "createClouds.H"
-    #include "readPISOControls.H"
     #include "initContinuityErrs.H"
-    #include "readTimeControls.H"
-    #include "compressibleCourantNo.H"
-    #include "setInitialDeltaT.H"
+
+    MRFZones mrfZones(mesh);
+    mrfZones.correctBoundaryVelocity(U);
+
+    simpleControl simple(mesh);
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
-    while (runTime.run())
+    while (simple.loop())
     {
-        #include "readTimeControls.H"
-        #include "readPISOControls.H"
-        #include "compressibleCourantNo.H"
-        #include "setDeltaT.H"
-
-        runTime++;
-
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        thermoCloud1.evolve();
+        p.storePrevIter();
 
-        kinematicCloud1.evolve();
-
-
-        #include "rhoEqn.H"
-
-        // --- PIMPLE loop
-        for (int ocorr=1; ocorr<=nOuterCorr; ocorr++)
+        // --- Pressure-velocity SIMPLE corrector
         {
             #include "UEqn.H"
-
-            // --- PISO loop
-            for (int corr=1; corr<=nCorr; corr++)
-            {
-                #include "hsEqn.H"
-                #include "pEqn.H"
-            }
+            #include "pEqn.H"
         }
 
         turbulence->correct();
-
-        rho = thermo.rho();
 
         runTime.write();
 
