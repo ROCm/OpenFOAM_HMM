@@ -81,30 +81,6 @@ void Foam::addPatchCellLayer::addVertex
             f[fp++] = pointI;
         }
     }
-
-    // Check for duplicates.
-    if (debug)
-    {
-        label n = 0;
-        for (label i = 0; i < fp; i++)
-        {
-            if (f[i] == pointI)
-            {
-                n++;
-
-                if (n == 2)
-                {
-                    f.setSize(fp);
-                    FatalErrorIn
-                    (
-                        "addPatchCellLayer::addVertex(const label, face&"
-                        ", label&)"
-                    )   << "Point " << pointI << " already present in face "
-                        << f << abort(FatalError);
-                }
-            }
-        }
-    }
 }
 
 
@@ -1641,11 +1617,11 @@ void Foam::addPatchCellLayer::setRefinement
                         {
                             label offset =
                                 addedPoints_[vStart].size() - numEdgeSideFaces;
-                            for (label ioff = offset; ioff > 0; ioff--)
+                            for (label ioff = offset-1; ioff >= 0; ioff--)
                             {
                                 addVertex
                                 (
-                                    addedPoints_[vStart][ioff-1],
+                                    addedPoints_[vStart][ioff],
                                     newFace,
                                     newFp
                                 );
@@ -1659,6 +1635,51 @@ void Foam::addPatchCellLayer::setRefinement
                         // (possibly -1 for external edges)
 
                         newFace.setSize(newFp);
+
+                        if (debug)
+                        {
+                            labelHashSet verts(2*newFace.size());
+                            forAll(newFace, fp)
+                            {
+                                if (!verts.insert(newFace[fp]))
+                                {
+                                    FatalErrorIn
+                                    (
+                                        "addPatchCellLayer::setRefinement(..)"
+                                    )   << "Duplicate vertex in face"
+                                        << " to be added." << nl
+                                        << "newFace:" << newFace << nl
+                                        << "points:"
+                                        <<  UIndirectList<point>
+                                            (
+                                                meshMod.points(),
+                                                newFace
+                                            ) << nl
+                                        << "Layer:" << i
+                                        << " out of:" << numEdgeSideFaces << nl
+                                        << "ExtrudeEdge:" << meshEdgeI
+                                        << " at:"
+                                        <<  mesh_.edges()[meshEdgeI].line
+                                            (
+                                                mesh_.points()
+                                            ) << nl
+                                        << "string:" << stringedVerts
+                                        << "stringpoints:"
+                                        << UIndirectList<point>
+                                            (
+                                                pp.localPoints(),
+                                                stringedVerts
+                                            ) << nl
+                                        << "stringNLayers:"
+                                        <<  UIndirectList<label>
+                                            (
+                                                nPointLayers,
+                                                stringedVerts
+                                            ) << nl
+                                        << abort(FatalError);
+                                }
+                            }
+                        }
 
                         label nbrFaceI = nbrFace
                         (
