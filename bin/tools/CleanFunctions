@@ -78,6 +78,8 @@ cleanCase()
     rm -rf forces* > /dev/null 2>&1
     rm -rf graphs* > /dev/null 2>&1
     rm -rf sets > /dev/null 2>&1
+    rm -rf surfaceSampling > /dev/null 2>&1
+    rm -rf cuttingPlane > /dev/null 2>&1
     rm -rf system/machines > /dev/null 2>&1
 
     if [ -d constant/polyMesh ]
