@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 
         p.storePrevIter();
 
-        // Pressure-velocity SIMPLE corrector
+        // --- Pressure-velocity SIMPLE corrector
         {
             #include "UEqn.H"
             #include "pEqn.H"

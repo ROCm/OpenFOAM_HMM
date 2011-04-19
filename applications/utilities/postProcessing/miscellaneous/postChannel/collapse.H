@@ -1,3 +1,6 @@
+    fileName path(UMean.rootPath()/UMean.caseName()/"graphs"/UMean.instance());
+    mkDir(path);
+
     scalarField UMeanXvalues
     (
         channelIndexing.collapse(UMean.component(vector::X)())
@@ -42,19 +45,19 @@
 
     const scalarField& y = channelIndexing.y();
 
-    makeGraph(y, UMeanXvalues, "Uf", UMean.path(), gFormat);
-    makeGraph(y, urmsValues, "u", UMean.path(), gFormat);
-    makeGraph(y, vrmsValues, "v", UMean.path(), gFormat);
-    makeGraph(y, wrmsValues, "w", UMean.path(), gFormat);
-    makeGraph(y, RxyValues, "uv", UMean.path(), gFormat);
-    makeGraph(y, kValues, "k", UMean.path(), gFormat);
+    makeGraph(y, UMeanXvalues, "Uf", path, gFormat);
+    makeGraph(y, urmsValues, "u", path, gFormat);
+    makeGraph(y, vrmsValues, "v", path, gFormat);
+    makeGraph(y, wrmsValues, "w", path, gFormat);
+    makeGraph(y, RxyValues, "uv", path, gFormat);
+    makeGraph(y, kValues, "k", path, gFormat);
 
-    makeGraph(y, pPrime2MeanValues, "pPrime2Mean", UMean.path(), gFormat);
+    makeGraph(y, pPrime2MeanValues, "pPrime2Mean", path, gFormat);
 
     /*
-    makeGraph(y, epsilonValues, "epsilon", UMean.path(), gFormat);
-    makeGraph(y, nuMeanValues, "nu", UMean.path(), gFormat);
-    makeGraph(y, nuPrimeValues, "nuPrime", UMean.path(), gFormat);
-    makeGraph(y, gammaDotMeanValues, "gammaDot", UMean.path(), gFormat);
-    makeGraph(y, gammaDotPrimeValues, "gammaDotPrime", UMean.path(), gFormat);
+    makeGraph(y, epsilonValues, "epsilon", path, gFormat);
+    makeGraph(y, nuMeanValues, "nu", path, gFormat);
+    makeGraph(y, nuPrimeValues, "nuPrime", path, gFormat);
+    makeGraph(y, gammaDotMeanValues, "gammaDot", path, gFormat);
+    makeGraph(y, gammaDotPrimeValues, "gammaDotPrime", path, gFormat);
     */
