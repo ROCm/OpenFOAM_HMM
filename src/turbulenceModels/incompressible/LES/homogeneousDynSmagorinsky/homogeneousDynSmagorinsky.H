@@ -22,46 +22,54 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::incompressible::LESModels::dynMixedSmagorinsky
+    Foam::incompressible::LESModels::homogeneousDynSmagorinsky
 
 Description
-    The Mixed Isochoric Smagorinsky Model for incompressible flows.
+    The Isochoric homogeneous dynamic Smagorinsky Model for incompressible flows.
 
-    The mixed model is a linear combination of an eddy viscosity model
-    with a scale similarity model.
+    Algebraic eddy viscosity SGS model founded on the assumption that
+    local equilibrium prevails.
+    Thus,
     \verbatim
-          B = (L + C) + R = (F(v*v) - F(v)*F(v)) + R
-    \endverbatim
+        B = 2/3*k*I - 2*nuSgs*dev(D)
+        Beff = 2/3*k*I - 2*nuEff*dev(D)
 
-    The algebraic eddy viscosity SGS model is founded on the assumption
-    that local equilibrium prevails, hence
-    \verbatim
-        R = 2/3*rho*k*I - 2*nuEff*dev(D)
     where
-        k = cI*delta^2*||D||^2
-        nuEff = ck*sqrt(k)*delta + nu
-    \endverbatim
 
-    The Leonard and cross contributions are incorporated
-    by adding,
-    \verbatim
-        + div(((filter(U*U) - filter(U)*filter(U)) -
-          0.333*I*tr(filter(U*U) - filter(U)*filter(U))))
-        + div((filter(U*epsilon) - filter(U)*filter(epsilon)))
+        k = cI*delta^2*||D||^2
+        nuSgs = cD*delta^2*||D||
+        nuEff = nuSgs + nu
+
+    In the dynamic version of the choric  Smagorinsky model
+    the coefficients cI and cD are calculated during the simulation,
+
+        cI=<K*m>/<m*m>
+
+    and
+
+        cD=<L.M>/<M.M>,
+
+    where
+
+        K = 0.5*(F(U.U) - F(U).F(U))
+        m = delta^2*(4*||F(D)||^2 - F(||D||^2))
+        L = dev(F(U*U) - F(U)*F(U))
+        M = delta^2*(F(||D||*dev(D)) - 4*||F(D)||*F(dev(D)))
+
+    The averaging <...> is over the whole domain, i.e. homogeneous turbulence
+    is assumed
     \endverbatim
-    to the rhs. of the equations.  This version implements filtering to
-    evaluate the coefficients in the model.
 
 SourceFiles
-    dynMixedSmagorinsky.C
+    homogeneousDynSmagorinsky.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dynMixedSmagorinsky_H
-#define dynMixedSmagorinsky_H
+#ifndef homogeneousDynSmagorinsky_H
+#define homogeneousDynSmagorinsky_H
 
-#include "dynSmagorinsky.H"
-#include "scaleSimilarity.H"
+#include "Smagorinsky.H"
+#include "LESfilter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,29 +81,44 @@ namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class dynMixedSmagorinsky Declaration
+                           Class homogeneousDynSmagorinsky Declaration
 \*---------------------------------------------------------------------------*/
 
-class dynMixedSmagorinsky
+class homogeneousDynSmagorinsky
 :
-    public scaleSimilarity,
-    public dynSmagorinsky
+    public GenEddyVisc
 {
+    // Private data
+
+        volScalarField k_;
+
+        autoPtr<LESfilter> filterPtr_;
+        LESfilter& filter_;
+
+
     // Private Member Functions
 
+        //- Update sub-grid scale fields
+        void updateSubGridScaleFields(const volSymmTensorField& D);
+
+        //- Calculate coefficients cD, cI from filtering velocity field
+        dimensionedScalar cD(const volSymmTensorField& D) const;
+        dimensionedScalar cI(const volSymmTensorField& D) const;
+
         // Disallow default bitwise copy construct and assignment
-        dynMixedSmagorinsky(const dynMixedSmagorinsky&);
-        dynMixedSmagorinsky& operator=(const dynMixedSmagorinsky&);
+        homogeneousDynSmagorinsky(const homogeneousDynSmagorinsky&);
+        homogeneousDynSmagorinsky& operator=(const homogeneousDynSmagorinsky&);
+
 
 public:
 
     //- Runtime type information
-    TypeName("dynMixedSmagorinsky");
+    TypeName("homogeneousDynSmagorinsky");
 
     // Constructors
 
-        //- Constructors from components
-        dynMixedSmagorinsky
+        //- Construct from components
+        homogeneousDynSmagorinsky
         (
             const volVectorField& U,
             const surfaceScalarField& phi,
@@ -106,34 +129,23 @@ public:
 
 
     //- Destructor
-    ~dynMixedSmagorinsky()
+    virtual ~homogeneousDynSmagorinsky()
     {}
 
 
     // Member Functions
 
         //- Return SGS kinetic energy
-        tmp<volScalarField> k() const;
-
-        //- Return sub-grid disipation rate
-        tmp<volScalarField> epsilon() const;
-
-        //- Return the sub-grid stress tensor.
-        tmp<volSymmTensorField> B() const;
-
-        //- Return the effective sub-grid turbulence stress tensor
-        //  including the laminar stress
-        tmp<volSymmTensorField> devBeff() const;
-
-        //- Returns div(B).
-        // This is the additional term due to the filtering of the NSE.
-        tmp<fvVectorMatrix> divDevBeff(volVectorField& U) const;
+        virtual tmp<volScalarField> k() const
+        {
+            return k_;
+        }
 
         //- Correct Eddy-Viscosity and related properties
-        void correct(const tmp<volTensorField>& gradU);
+        virtual void correct(const tmp<volTensorField>& gradU);
 
         //- Read LESProperties dictionary
-        bool read();
+        virtual bool read();
 };
 
 
