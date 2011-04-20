@@ -25,6 +25,8 @@ boundaryField
     {
         type            turbulentIntensityKineticEnergyInlet;
         intensity       0.05;
+        U               U;
+        phi             phi;
         value           uniform 1;
     }
     outlet1
@@ -42,7 +44,7 @@ boundaryField
     baffles
     {
         type            kqRWallFunction;
-        value           uniform 0;
+        value           uniform 1;
     }
     fan_half0
     {

@@ -54,60 +54,65 @@ void* Foam::codedFunctionObject::loadLibrary
     const fileName& libPath,
     const string& globalFuncName,
     const dictionary& contextDict
-)
+) const
 {
     void* lib = 0;
 
     // avoid compilation by loading an existing library
-    if (!libPath.empty() && dlLibraryTable::open(libPath, false))
+    if (!libPath.empty())
     {
-        lib = dlLibraryTable::findLibrary(libPath);
+        dlLibraryTable& libs = const_cast<Time&>(time_).libs();
 
-        // verify the loaded version and unload if needed
-        if (lib)
+        if (libs.open(libPath, false))
         {
-            // provision for manual execution of code after loading
-            if (dlSymFound(lib, globalFuncName))
-            {
-                loaderFunctionType function =
-                    reinterpret_cast<loaderFunctionType>
-                    (
-                        dlSym(lib, globalFuncName)
-                    );
+            lib = libs.findLibrary(libPath);
 
-                if (function)
+            // verify the loaded version and unload if needed
+            if (lib)
+            {
+                // provision for manual execution of code after loading
+                if (dlSymFound(lib, globalFuncName))
                 {
-                    (*function)(true);    // force load
+                    loaderFunctionType function =
+                        reinterpret_cast<loaderFunctionType>
+                        (
+                            dlSym(lib, globalFuncName)
+                        );
+
+                    if (function)
+                    {
+                        (*function)(true);    // force load
+                    }
+                    else
+                    {
+                        FatalIOErrorIn
+                        (
+                            "codedFunctionObject::updateLibrary()",
+                            contextDict
+                        )   << "Failed looking up symbol " << globalFuncName
+                            << nl << "from " << libPath << exit(FatalIOError);
+                    }
                 }
                 else
                 {
                     FatalIOErrorIn
                     (
-                        "codedFunctionObject::updateLibrary()",
+                        "codedFunctionObject::loadLibrary()",
                         contextDict
                     )   << "Failed looking up symbol " << globalFuncName << nl
                         << "from " << libPath << exit(FatalIOError);
-                }
-            }
-            else
-            {
-                FatalIOErrorIn
-                (
-                    "codedFunctionObject::loadLibrary()",
-                    contextDict
-                )   << "Failed looking up symbol " << globalFuncName << nl
-                    << "from " << libPath << exit(FatalIOError);
 
-                lib = 0;
-                if (!dlLibraryTable::close(libPath, false))
-                {
-                    FatalIOErrorIn
-                    (
-                        "codedFunctionObject::loadLibrary()",
-                        contextDict
-                    )   << "Failed unloading library "
-                        << libPath
-                        << exit(FatalIOError);
+                    lib = 0;
+                    if (!libs.close(libPath, false))
+                    {
+                        FatalIOErrorIn
+                        (
+                            "codedFunctionObject::loadLibrary()",
+                            contextDict
+                        )   << "Failed unloading library "
+                            << libPath
+                            << exit(FatalIOError);
+                    }
                 }
             }
         }
@@ -122,14 +127,18 @@ void Foam::codedFunctionObject::unloadLibrary
     const fileName& libPath,
     const string& globalFuncName,
     const dictionary& contextDict
-)
+) const
 {
     void* lib = 0;
 
-    if (!libPath.empty())
+    if (libPath.empty())
     {
-        lib = dlLibraryTable::findLibrary(libPath);
+        return;
     }
+
+    dlLibraryTable& libs = const_cast<Time&>(time_).libs();
+
+    lib = libs.findLibrary(libPath);
 
     if (!lib)
     {
@@ -160,7 +169,7 @@ void Foam::codedFunctionObject::unloadLibrary
         }
     }
 
-    if (!dlLibraryTable::close(libPath, false))
+    if (!libs.close(libPath, false))
     {
         FatalIOErrorIn
         (
@@ -274,7 +283,7 @@ void Foam::codedFunctionObject::updateLibrary() const
 
 
     // the correct library was already loaded => we are done
-    if (dlLibraryTable::findLibrary(libPath))
+    if (const_cast<Time&>(time_).libs().findLibrary(libPath))
     {
         return;
     }

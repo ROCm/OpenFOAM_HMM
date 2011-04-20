@@ -22,16 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    simpleFoam
+    MRFSimpleFoam
 
 Description
-    Steady-state solver for incompressible, turbulent flow
+    Steady-state solver for incompressible, turbulent flow of non-Newtonian
+    fluids with MRF regions.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "singlePhaseTransportModel.H"
 #include "RASModel.H"
+#include "MRFZones.H"
 #include "simpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -39,10 +41,14 @@ Description
 int main(int argc, char *argv[])
 {
     #include "setRootCase.H"
+
     #include "createTime.H"
     #include "createMesh.H"
     #include "createFields.H"
     #include "initContinuityErrs.H"
+
+    MRFZones mrfZones(mesh);
+    mrfZones.correctBoundaryVelocity(U);
 
     simpleControl simple(mesh);
 

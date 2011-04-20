@@ -22,16 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    simpleFoam
+    SRFSimpleFoam
 
 Description
-    Steady-state solver for incompressible, turbulent flow
+    Steady-state solver for incompressible, turbulent flow of non-Newtonian
+    fluids in a single rotating frame.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "singlePhaseTransportModel.H"
 #include "RASModel.H"
+#include "SRFModel.H"
 #include "simpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -58,13 +60,29 @@ int main(int argc, char *argv[])
 
         // --- Pressure-velocity SIMPLE corrector
         {
-            #include "UEqn.H"
+            #include "UrelEqn.H"
             #include "pEqn.H"
         }
 
         turbulence->correct();
 
-        runTime.write();
+        if (runTime.outputTime())
+        {
+            volVectorField Uabs
+            (
+                IOobject
+                (
+                    "Uabs",
+                    runTime.timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                Urel + SRF->U()
+            );
+
+            runTime.write();
+        }
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

@@ -8,7 +8,7 @@
 FoamFile
 {
     version     2.0;
-    format      binary;
+    format      ascii;
     class       polyBoundaryMesh;
     location    "constant/polyMesh";
     object      boundary;
@@ -17,41 +17,41 @@ FoamFile
 
 6
 (
-    front
+    outlet
     {
-        type            wall;
-        nFaces          700;
-        startFace       63400;
+        type            patch;
+        nFaces          922;
+        startFace       364825;
     }
-    back
+    sides
     {
-        type            wall;
-        nFaces          700;
-        startFace       64100;
-    }
-    wall
-    {
-        type            wall;
-        nFaces          1400;
-        startFace       64800;
-    }
-    porosityWall
-    {
-        type            wall;
-        nFaces          1600;
-        startFace       66200;
+        type            patch;
+        nFaces          1834;
+        startFace       365747;
     }
     inlet
     {
         type            patch;
-        nFaces          400;
-        startFace       67800;
+        nFaces          923;
+        startFace       367581;
     }
-    outlet
+    ground
+    {
+        type            wall;
+        nFaces          0;
+        startFace       368504;
+    }
+    top
     {
         type            patch;
-        nFaces          400;
-        startFace       68200;
+        nFaces          900;
+        startFace       368504;
+    }
+    terrain_patch0
+    {
+        type            wall;
+        nFaces          16037;
+        startFace       369404;
     }
 )
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,16 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    simpleFoam
+    windSimpleFoam
 
 Description
-    Steady-state solver for incompressible, turbulent flow
+    Steady-state solver for incompressible, turbulent flow with external
+    source in the momentum equation.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "singlePhaseTransportModel.H"
 #include "RASModel.H"
+#include "IObasicSourceList.H"
 #include "simpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -43,6 +45,8 @@ int main(int argc, char *argv[])
     #include "createMesh.H"
     #include "createFields.H"
     #include "initContinuityErrs.H"
+
+    IObasicSourceList actuationDisks(mesh);
 
     simpleControl simple(mesh);
 
@@ -56,7 +60,7 @@ int main(int argc, char *argv[])
 
         p.storePrevIter();
 
-        // --- Pressure-velocity SIMPLE corrector
+        // Pressure-velocity SIMPLE corrector
         {
             #include "UEqn.H"
             #include "pEqn.H"

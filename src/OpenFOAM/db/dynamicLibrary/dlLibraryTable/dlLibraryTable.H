@@ -63,29 +63,14 @@ class dlLibraryTable
 
 public:
 
-    // Static data members
-
-        //- Static data someStaticData
-        static dlLibraryTable loadedLibraries;
-
-
-    // Public classes
-
-        //- Class whose construction causes the reading of dynamic libraries
-        class readDlLibrary
-        {
-        public:
-
-            //- Read all the libraries listed in the 'libsEntry' entry in the
-            //  given dictionary if present
-            readDlLibrary(const dictionary&, const word& libsEntry);
-        };
-
-
     // Constructors
 
         //- Construct null
         dlLibraryTable();
+
+        //- Construct from dictionary and name of 'libs' entry giving
+        //  the libraries to load
+        dlLibraryTable(const dictionary&, const word&);
 
 
     //- Destructor
@@ -95,23 +80,23 @@ public:
     // Member Functions
 
         //- Open the named library, optionally with warnings if problems occur
-        static bool open(const fileName& name, const bool verbose = true);
+        bool open(const fileName& name, const bool verbose = true);
 
         //- Close the named library, optionally with warnings if problems occur
-        static bool close(const fileName& name, const bool verbose = true);
+        bool close(const fileName& name, const bool verbose = true);
 
         //- Find the handle of the named library
-        static void* findLibrary(const fileName& name);
+        void* findLibrary(const fileName& name);
 
         //- Open all the libraries listed in the 'libsEntry' entry in the
         //  given dictionary if present
-        static bool open(const dictionary&, const word& libsEntry);
+        bool open(const dictionary&, const word& libsEntry);
 
         //- Open all the libraries listed in the 'libsEntry' entry in the
         //  given dictionary if present and check the additions
         //  to the given constructor table
         template<class TablePtr>
-        static bool open
+        bool open
         (
             const dictionary&,
             const word& libsEntry,
