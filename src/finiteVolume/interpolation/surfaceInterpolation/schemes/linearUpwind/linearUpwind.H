@@ -111,7 +111,16 @@ public:
                     mesh.gradScheme(gradSchemeName_)
                 )
             )
-        {}
+        {
+            if (!schemeData.eof())
+            {
+                IOWarningIn("linearUpwind(const fvMesh&, Istream&)", schemeData)
+                    << "unexpected additional entries in stream." << nl
+                    << "    Only the name of the gradient scheme in the"
+                       " 'gradSchemes' dictionary should be specified."
+                    << endl;
+            }
+        }
 
         //- Construct from faceFlux and Istream
         linearUpwind
@@ -131,7 +140,16 @@ public:
                     mesh.gradScheme(gradSchemeName_)
                 )
             )
-        {}
+        {
+            if (!schemeData.eof())
+            {
+                IOWarningIn("linearUpwind(const fvMesh&, Istream&)", schemeData)
+                    << "unexpected additional entries in stream." << nl
+                    << "    Only the name of the gradient scheme in the"
+                       " 'gradSchemes' dictionary should be specified."
+                    << endl;
+            }
+        }
 
 
     // Member Functions

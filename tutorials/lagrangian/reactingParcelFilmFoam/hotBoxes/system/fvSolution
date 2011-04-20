@@ -32,7 +32,7 @@ solvers
         relTol          0;
     }
 
-    "(U|hs)"
+    "(U|hs|k|epsilon)"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -40,16 +40,11 @@ solvers
         relTol          0.1;
     }
 
-    "(U|hs)Final"
+    "(U|hs|k|epsilon)Final"
     {
         $U;
         relTol          0;
         tolerance       1e-05;
-    }
-
-    "(k|epsilon)"
-    {
-        $UFinal;
     }
 
     p_rgh

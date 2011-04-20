@@ -26,11 +26,6 @@ License
 #include "dlLibraryTable.H"
 #include "OSspecific.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-Foam::dlLibraryTable Foam::dlLibraryTable::loadedLibraries;
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::dlLibraryTable::dlLibraryTable()
@@ -39,11 +34,13 @@ Foam::dlLibraryTable::dlLibraryTable()
 {}
 
 
-Foam::dlLibraryTable::readDlLibrary::readDlLibrary
+Foam::dlLibraryTable::dlLibraryTable
 (
     const dictionary& dict,
     const word& libsEntry
 )
+:
+    HashTable<fileName, void*, Hash<void*> >()
 {
     open(dict, libsEntry);
 }
@@ -91,14 +88,7 @@ bool Foam::dlLibraryTable::open
         }
         else
         {
-            if (loadedLibraries.insert(functionLibPtr, functionLibName))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return insert(functionLibPtr, functionLibName);
         }
     }
     else
@@ -117,7 +107,7 @@ bool Foam::dlLibraryTable::close
     void* libPtr = findLibrary(functionLibName);
     if (libPtr)
     {
-        loadedLibraries.erase(libPtr);
+        erase(libPtr);
 
         if (!dlClose(libPtr))
         {
@@ -141,7 +131,7 @@ bool Foam::dlLibraryTable::close
 
 void* Foam::dlLibraryTable::findLibrary(const fileName& functionLibName)
 {
-    forAllConstIter(dlLibraryTable, loadedLibraries, iter)
+    forAllConstIter(dlLibraryTable, *this, iter)
     {
         if (iter() == functionLibName)
         {

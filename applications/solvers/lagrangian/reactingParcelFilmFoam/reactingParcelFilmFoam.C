@@ -39,7 +39,7 @@ Description
 #include "chemistrySolver.H"
 #include "radiationModel.H"
 #include "SLGThermo.H"
-#include "pimpleLoop.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,6 +60,8 @@ int main(int argc, char *argv[])
     #include "compressibleCourantNo.H"
     #include "setInitialDeltaT.H"
 
+    pimpleControl pimple(mesh);
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
@@ -67,7 +69,6 @@ int main(int argc, char *argv[])
     while (runTime.run())
     {
         #include "readTimeControls.H"
-        #include "readPIMPLEControls.H"
         #include "compressibleCourantNo.H"
         #include "setMultiRegionDeltaT.H"
         #include "setDeltaT.H"
@@ -86,25 +87,23 @@ int main(int argc, char *argv[])
             #include "rhoEqn.H"
 
             // --- PIMPLE loop
-            for
-            (
-                pimpleLoop pimpleCorr(mesh, nOuterCorr);
-                pimpleCorr.loop();
-                pimpleCorr++
-            )
+            for (pimple.start(); pimple.loop(); pimple++)
             {
                 #include "UEqn.H"
                 #include "YEqn.H"
                 #include "hsEqn.H"
 
                 // --- PISO loop
-                for (int corr=1; corr<=nCorr; corr++)
+                for (int corr=1; corr<=pimple.nCorr(); corr++)
                 {
                     #include "pEqn.H"
                 }
-            }
 
-            turbulence->correct();
+                if (pimple.turbCorr())
+                {
+                    turbulence->correct();
+                }
+            }
 
             rho = thermo.rho();
 

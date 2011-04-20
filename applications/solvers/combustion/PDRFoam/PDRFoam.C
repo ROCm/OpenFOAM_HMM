@@ -53,6 +53,18 @@ Description
     PDR (porosity/distributed resistance) modelling is included to handle
     regions containing blockages which cannot be resolved by the mesh.
 
+    The fields used by this solver are:
+
+    betav:  Volume porosity
+    Lobs:   Average diameter of obstacle in cell (m)
+    Aw:     Obstacle surface area per unit volume (1/m)
+    CR:     Drag tensor (1/m)
+    CT:     Turbulence generation parameter (1/m)
+    Nv:     Number of obstacles in cell per unit volume (m^-2)
+    nsv:    Tensor whose diagonal indicates the number to substract from
+            Nv to get the number of obstacles crossing the flow in each
+            direction.
+
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
@@ -64,6 +76,7 @@ Description
 #include "ignition.H"
 #include "Switch.H"
 #include "bound.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -81,6 +94,8 @@ int main(int argc, char *argv[])
     #include "compressibleCourantNo.H"
     #include "setInitialDeltaT.H"
 
+    pimpleControl pimple(mesh);
+
     scalar StCoNum = 0.0;
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -90,7 +105,6 @@ int main(int argc, char *argv[])
     while (runTime.run())
     {
         #include "readTimeControls.H"
-        #include "readPISOControls.H"
         #include "compressibleCourantNo.H"
         #include "setDeltaT.H"
 
@@ -98,25 +112,33 @@ int main(int argc, char *argv[])
         Info<< "\n\nTime = " << runTime.timeName() << endl;
 
         #include "rhoEqn.H"
-        #include "UEqn.H"
 
-        // --- PISO loop
-        for (int corr=1; corr<=nCorr; corr++)
+        // --- Pressure-velocity PIMPLE corrector loop
+        for (pimple.start(); pimple.loop(); pimple++)
         {
-            #include "bEqn.H"
-            #include "ftEqn.H"
-            #include "huEqn.H"
-            #include "hEqn.H"
+            #include "UEqn.H"
 
-            if (!ign.ignited())
+            // --- PISO loop
+            for (int corr=1; corr<=pimple.nCorr(); corr++)
             {
-                hu == h;
+                #include "bEqn.H"
+                #include "ftEqn.H"
+                #include "huEqn.H"
+                #include "hEqn.H"
+
+                if (!ign.ignited())
+                {
+                    hu == h;
+                }
+
+                #include "pEqn.H"
             }
 
-            #include "pEqn.H"
+            if (pimple.turbCorr())
+            {
+                turbulence->correct();
+            }
         }
-
-        turbulence->correct();
 
         runTime.write();
 

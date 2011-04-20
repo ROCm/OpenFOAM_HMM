@@ -390,7 +390,7 @@ void kOmegaSST::correct()
     }
 
     tmp<volTensorField> tgradU = fvc::grad(U_);
-    volScalarField S2(magSqr(symm(tgradU())));
+    volScalarField S2(2*magSqr(symm(tgradU())));
     volScalarField GbyMu((tgradU() && dev(twoSymm(tgradU()))));
     volScalarField G("RASModel::G", mut_*GbyMu);
     tgradU.clear();
@@ -448,7 +448,7 @@ void kOmegaSST::correct()
 
 
     // Re-calculate viscosity
-    mut_ = a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(2.0*S2));
+    mut_ = a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(S2));
     mut_.correctBoundaryConditions();
 
     // Re-calculate thermal diffusivity

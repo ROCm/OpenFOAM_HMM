@@ -39,7 +39,7 @@ solvers
         maxIter         100;
     }
 
-    rho
+    "(rho|rhoFinal)"
     {
         solver          diagonal;
     }
@@ -100,7 +100,7 @@ solvers
     }
 }
 
-PISO
+PIMPLE
 {
     momentumPredictor no;
     transSonic      no;

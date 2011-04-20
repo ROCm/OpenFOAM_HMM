@@ -17,7 +17,7 @@ phi =
 surfaceScalarField phiU("phiU", phi);
 phi -= ghf*fvc::snGrad(rho)*rAUf*mesh.magSf();
 
-for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
 {
     fvScalarMatrix p_rghEqn
     (
@@ -27,7 +27,7 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     p_rghEqn.setReference(pRefCell, getRefCellValue(p_rgh, pRefCell));
     p_rghEqn.solve();
 
-    if (nonOrth == nNonOrthCorr)
+    if (nonOrth == pimple.nNonOrthCorr())
     {
         phi -= p_rghEqn.flux();
     }

@@ -40,7 +40,7 @@ Description
 #include "MRFZones.H"
 #include "porousZones.H"
 #include "fvcSmooth.H"
-#include "pimpleLoop.H"
+#include "pimpleControl.H"
 #include "bound.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -50,18 +50,21 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
-    #include "readPIMPLEControls.H"
+
+    pimpleControl pimple(mesh);
+
     #include "setInitialrDeltaT.H"
     #include "createFields.H"
     #include "createZones.H"
     #include "initContinuityErrs.H"
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
     while (runTime.run())
     {
         #include "readTimeControls.H"
-        #include "readPIMPLEControls.H"
         #include "compressibleCourantNo.H"
         #include "setDeltaT.H"
 
@@ -74,14 +77,9 @@ int main(int argc, char *argv[])
         #include "rhoEqn.H"
 
         // --- Pressure-velocity PIMPLE corrector loop
-        for
-        (
-            pimpleLoop pimpleCorr(mesh, nOuterCorr);
-            pimpleCorr.loop();
-            pimpleCorr++
-        )
+        for (pimple.start(); pimple.loop(); pimple++)
         {
-            if (nOuterCorr != 1)
+            if (pimple.nOuterCorr() != 1)
             {
                 p.storePrevIter();
                 rho.storePrevIter();
@@ -93,7 +91,7 @@ int main(int argc, char *argv[])
             #include "hEqn.H"
 
             // --- PISO loop
-            for (int corr=0; corr<nCorr; corr++)
+            for (int corr=0; corr<pimple.nCorr(); corr++)
             {
                 #include "pEqn.H"
             }

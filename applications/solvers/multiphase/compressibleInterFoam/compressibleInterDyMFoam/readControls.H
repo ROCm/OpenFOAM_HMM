@@ -1,17 +1,10 @@
-   #include "readPISOControls.H"
-   #include "readTimeControls.H"
+    #include "readTimeControls.H"
 
-    label nAlphaCorr
-    (
-        readLabel(piso.lookup("nAlphaCorr"))
-    );
+    label nAlphaCorr(readLabel(pimple.dict().lookup("nAlphaCorr")));
 
-    label nAlphaSubCycles
-    (
-        readLabel(piso.lookup("nAlphaSubCycles"))
-    );
+    label nAlphaSubCycles(readLabel(pimple.dict().lookup("nAlphaSubCycles")));
 
-    if (nAlphaSubCycles > 1 && nOuterCorr != 1)
+    if (nAlphaSubCycles > 1 && pimple.nOuterCorr() != 1)
     {
         FatalErrorIn(args.executable())
             << "Sub-cycling alpha is only allowed for PISO, "
@@ -19,14 +12,8 @@
             << exit(FatalError);
     }
 
-    bool correctPhi = true;
-    if (piso.found("correctPhi"))
-    {
-        correctPhi = Switch(piso.lookup("correctPhi"));
-    }
+    bool correctPhi =
+        pimple.dict().lookupOrDefault<Switch>("correctPhi", true);
 
-    bool checkMeshCourantNo = false;
-    if (piso.found("checkMeshCourantNo"))
-    {
-        checkMeshCourantNo = Switch(piso.lookup("checkMeshCourantNo"));
-    }
+    bool checkMeshCourantNo =
+        pimple.dict().lookupOrDefault<Switch>("checkMeshCourantNo", false);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -245,28 +245,15 @@ void Foam::multiphaseMixture::solve()
 
     const Time& runTime = mesh_.time();
 
-    label nAlphaSubCycles
-    (
-        readLabel
-        (
-            mesh_.solutionDict().subDict("PISO").lookup("nAlphaSubCycles")
-        )
-    );
+    const dictionary& pimpleDict = mesh_.solutionDict().subDict("PIMPLE");
 
-    label nAlphaCorr
-    (
-        readLabel(mesh_.solutionDict().subDict("PISO").lookup("nAlphaCorr"))
-    );
+    label nAlphaSubCycles(readLabel(pimpleDict.lookup("nAlphaSubCycles")));
 
-    bool cycleAlpha
-    (
-        Switch(mesh_.solutionDict().subDict("PISO").lookup("cycleAlpha"))
-    );
+    label nAlphaCorr(readLabel(pimpleDict.lookup("nAlphaCorr")));
 
-    scalar cAlpha
-    (
-        readScalar(mesh_.solutionDict().subDict("PISO").lookup("cAlpha"))
-    );
+    bool cycleAlpha(Switch(pimpleDict.lookup("cycleAlpha")));
+
+    scalar cAlpha(readScalar(pimpleDict.lookup("cAlpha")));
 
 
     volScalarField& alpha = phases_.first();

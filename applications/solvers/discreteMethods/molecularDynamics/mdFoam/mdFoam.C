@@ -2,7 +2,7 @@
  =========                   |
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
-   \\  /     A nd            | Copyright (C) 2008-2010 OpenCFD Ltd.
+   \\  /     A nd            | Copyright (C) 2008-2011 OpenCFD Ltd.
     \\/      M anipulation   |
 -------------------------------------------------------------------------------
 License
@@ -34,10 +34,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createMesh.H"
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nReading field U\n" << endl;
     volVectorField U
@@ -57,7 +58,7 @@ int main(int argc, char *argv[])
 
     moleculeCloud molecules(mesh, pot);
 
-#   include "temperatureAndPressureVariables.H"
+    #include "temperatureAndPressureVariables.H"
 
     label nAveragingSteps = 0;
 
@@ -65,16 +66,15 @@ int main(int argc, char *argv[])
 
     while (runTime.loop())
     {
-
         nAveragingSteps++;
 
         Info<< "Time = " << runTime.timeName() << endl;
 
         molecules.evolve();
 
-#       include "meanMomentumEnergyAndNMols.H"
+        #include "meanMomentumEnergyAndNMols.H"
 
-#       include "temperatureAndPressure.H"
+        #include "temperatureAndPressure.H"
 
         runTime.write();
 
@@ -92,3 +92,6 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
+
+// ************************************************************************* //

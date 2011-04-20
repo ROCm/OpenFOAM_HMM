@@ -17,30 +17,58 @@ FoamFile
 
 solvers
 {
-    p
+    "(p|rho)"
     {
         solver          PCG;
         preconditioner  DIC;
         tolerance       1e-09;
+        relTol          0.1;
+    }
+
+    "(p|rho)Final"
+    {
+        $p;
+        tolerance       1e-09;
         relTol          0;
     }
 
-    rho
-    {
-        $p;
-        tolerance       1e-06;
-    }
-
-    "(U|Yi|hs|k|epsilon)"
+    "(k|epsilon)"
     {
         solver          PBiCG;
         preconditioner  DILU;
         tolerance       1e-06;
+        relTol          0.1;
+    }
+
+    "(k|epsilon)Final"
+    {
+        $k;
+        tolerance       1e-06;
         relTol          0;
+    }
+
+    "(U|hs)"
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-06;
+        relTol          0.1;
+    }
+
+    "(U|hs)Final"
+    {
+        $U;
+        tolerance       1e-06;
+        relTol          0;
+    }
+
+    Yi
+    {
+        $hsFinal;
     }
 }
 
-PISO
+PIMPLE
 {
     nCorrectors     2;
     nNonOrthogonalCorrectors 0;
