@@ -389,7 +389,7 @@ void Foam::ReactingParcel<ParcelType>::calc
             d0,
             U0,
             rho0,
-            0.5*(mass0 + mass1),
+            mass0,
             Su,
             dUTrans,
             Spu
@@ -405,9 +405,10 @@ void Foam::ReactingParcel<ParcelType>::calc
         {
             scalar dm = np0*dMass[i];
             label gid = composition.localToGlobalCarrierId(0, i);
-            scalar hs = composition.carrier().Hs(gid, 0.5*(T0 + T1));
+            scalar hs = composition.carrier().Hs(gid, T0);
 
             td.cloud().rhoTrans(gid)[cellI] += dm;
+            td.cloud().UTrans()[cellI] += dm*U0;
             td.cloud().hsTrans()[cellI] += dm*hs;
         }
 
