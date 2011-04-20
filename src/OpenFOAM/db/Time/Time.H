@@ -75,6 +75,10 @@ class Time
         //- file-change monitor for all registered files
         mutable autoPtr<fileMonitor> monitorPtr_;
 
+        //- Any loaded dynamic libraries. Make sure to construct before
+        //  reading controlDict.
+        dlLibraryTable libs_;
+
         //- The controlDict
         IOdictionary controlDict_;
 
@@ -165,9 +169,6 @@ private:
 
         //- Is runtime modification of dictionaries allowed?
         Switch runTimeModifiable_;
-
-        //- Any loaded dynamic libraries
-        dlLibraryTable libs_;
 
         //- Function objects executed at start and on ++, +=
         mutable functionObjectList functionObjects_;

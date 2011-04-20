@@ -63,6 +63,9 @@ class dlLibraryTable
 
 public:
 
+    // Declare name of the class and its debug switch
+    ClassName("dlLibraryTable");
+
     // Constructors
 
         //- Construct null
