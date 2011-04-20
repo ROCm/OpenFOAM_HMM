@@ -131,11 +131,7 @@ bool Foam::functionEntries::codeStream::execute
 
     // see if library is loaded
     void* lib = NULL;
-    if
-    (
-        isA<IOdictionary>(topDict(parentDict))
-     && parentDict.dictName() != Time::controlDictName
-    )
+    if (isA<IOdictionary>(topDict(parentDict)))
     {
         lib = libs(parentDict).findLibrary(libPath);
     }
@@ -150,11 +146,7 @@ bool Foam::functionEntries::codeStream::execute
     // avoid compilation if possible by loading an existing library
     if (!lib)
     {
-        if
-        (
-            isA<IOdictionary>(topDict(parentDict))
-         && parentDict.dictName() != Time::controlDictName
-        )
+        if (isA<IOdictionary>(topDict(parentDict)))
         {
             // Cached access to dl libs. Guarantees clean up upon destruction
             // of Time.
@@ -223,11 +215,7 @@ bool Foam::functionEntries::codeStream::execute
         // all processes must wait for compile to finish
         reduce(create, orOp<bool>());
 
-        if
-        (
-            isA<IOdictionary>(topDict(parentDict))
-         && parentDict.dictName() != Time::controlDictName
-        )
+        if (isA<IOdictionary>(topDict(parentDict)))
         {
             // Cached access to dl libs. Guarantees clean up upon destruction
             // of Time.

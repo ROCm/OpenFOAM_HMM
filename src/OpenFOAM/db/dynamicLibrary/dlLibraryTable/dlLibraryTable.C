@@ -25,6 +25,12 @@ License
 
 #include "dlLibraryTable.H"
 #include "OSspecific.H"
+#include "long.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameAndDebug(Foam::dlLibraryTable, 0);
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -55,7 +61,11 @@ Foam::dlLibraryTable::~dlLibraryTable()
         // bug in dlclose - does not call static destructors of
         // loaded library when actually unloading the library.
         // See https://bugzilla.novell.com/show_bug.cgi?id=680125 and 657627.
-        // Seems related to using a non-system compiler!
+        if (debug)
+        {
+            Info<< "dlLibraryTable::~dlLibraryTable() : closing " << iter()
+                << " with handle " << long(iter.key()) << endl;
+        }
         dlClose(iter.key());
     }
 }
@@ -72,6 +82,12 @@ bool Foam::dlLibraryTable::open
     if (functionLibName.size())
     {
         void* functionLibPtr = dlOpen(functionLibName);
+
+        if (debug)
+        {
+            Info<< "dlLibraryTable::open : opened " << functionLibName
+                << " resulting in handle " << long(functionLibPtr) << endl;
+        }
 
         if (!functionLibPtr)
         {
@@ -107,6 +123,12 @@ bool Foam::dlLibraryTable::close
     void* libPtr = findLibrary(functionLibName);
     if (libPtr)
     {
+        if (debug)
+        {
+            Info<< "dlLibraryTable::close : closing " << functionLibName
+                << " with handle " << long(libPtr) << endl;
+        }
+
         erase(libPtr);
 
         if (!dlClose(libPtr))

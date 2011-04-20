@@ -228,6 +228,8 @@ Foam::Time::Time
 
     objectRegistry(*this),
 
+    libs_(),
+
     controlDict_
     (
         IOobject
@@ -257,9 +259,10 @@ Foam::Time::Time
     graphFormat_("raw"),
     runTimeModifiable_(true),
 
-    libs_(controlDict_, "libs"),
     functionObjects_(*this)
 {
+    libs_.open(controlDict_, "libs");
+
     // Explicitly set read flags on objectRegistry so anything constructed
     // from it reads as well (e.g. fvSolution).
     readOpt() = IOobject::MUST_READ_IF_MODIFIED;
@@ -313,6 +316,8 @@ Foam::Time::Time
 
     objectRegistry(*this),
 
+    libs_(),
+
     controlDict_
     (
         IOobject
@@ -343,9 +348,11 @@ Foam::Time::Time
     graphFormat_("raw"),
     runTimeModifiable_(true),
 
-    libs_(controlDict_, "libs"),
     functionObjects_(*this)
 {
+    libs_.open(controlDict_, "libs");
+
+
     // Explicitly set read flags on objectRegistry so anything constructed
     // from it reads as well (e.g. fvSolution).
     readOpt() = IOobject::MUST_READ_IF_MODIFIED;
@@ -401,6 +408,8 @@ Foam::Time::Time
 
     objectRegistry(*this),
 
+    libs_(),
+
     controlDict_
     (
         IOobject
@@ -430,9 +439,10 @@ Foam::Time::Time
     graphFormat_("raw"),
     runTimeModifiable_(true),
 
-    libs_(controlDict_, "libs"),
     functionObjects_(*this)
-{}
+{
+    libs_.open(controlDict_, "libs");
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

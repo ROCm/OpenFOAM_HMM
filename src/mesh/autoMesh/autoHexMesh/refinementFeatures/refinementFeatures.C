@@ -129,7 +129,8 @@ Foam::refinementFeatures::refinementFeatures
         }
 
         Info<< "Detected " << featurePoints.size()
-            << " featurePoints out of " << points.size() << endl;
+            << " featurePoints out of " << points.size()
+            << " on feature " << eMesh.name() << endl;
 
         pointTrees_.set
         (
@@ -164,26 +165,30 @@ void Foam::refinementFeatures::findNearestEdge
     forAll(edgeTrees_, featI)
     {
         const indexedOctree<treeDataEdge>& tree = edgeTrees_[featI];
-        forAll(samples, sampleI)
+
+        if (tree.shapes().size() > 0)
         {
-            const point& sample = samples[sampleI];
-
-            scalar distSqr;
-            if (nearInfo[sampleI].hit())
+            forAll(samples, sampleI)
             {
-                distSqr = magSqr(nearInfo[sampleI].hitPoint()-sample);
-            }
-            else
-            {
-                distSqr = nearestDistSqr[sampleI];
-            }
+                const point& sample = samples[sampleI];
 
-            pointIndexHit info = tree.findNearest(sample, distSqr);
+                scalar distSqr;
+                if (nearInfo[sampleI].hit())
+                {
+                    distSqr = magSqr(nearInfo[sampleI].hitPoint()-sample);
+                }
+                else
+                {
+                    distSqr = nearestDistSqr[sampleI];
+                }
 
-            if (info.hit())
-            {
-                nearInfo[sampleI] = info;
-                nearFeature[sampleI] = featI;
+                pointIndexHit info = tree.findNearest(sample, distSqr);
+
+                if (info.hit())
+                {
+                    nearInfo[sampleI] = info;
+                    nearFeature[sampleI] = featI;
+                }
             }
         }
     }
@@ -206,33 +211,37 @@ void Foam::refinementFeatures::findNearestPoint
     forAll(pointTrees_, featI)
     {
         const indexedOctree<treeDataPoint>& tree = pointTrees_[featI];
-        forAll(samples, sampleI)
+
+        if (tree.shapes().pointLabels().size() > 0)
         {
-            const point& sample = samples[sampleI];
-
-            scalar distSqr;
-            if (nearFeature[sampleI] != -1)
+            forAll(samples, sampleI)
             {
-                label nearFeatI = nearFeature[sampleI];
-                const indexedOctree<treeDataPoint>& nearTree =
-                    pointTrees_[nearFeatI];
-                label featPointI =
-                    nearTree.shapes().pointLabels()[nearIndex[sampleI]];
-                const point& featPt =
-                    operator[](nearFeatI).points()[featPointI];
-                distSqr = magSqr(featPt-sample);
-            }
-            else
-            {
-                distSqr = nearestDistSqr[sampleI];
-            }
+                const point& sample = samples[sampleI];
 
-            pointIndexHit info = tree.findNearest(sample, distSqr);
+                scalar distSqr;
+                if (nearFeature[sampleI] != -1)
+                {
+                    label nearFeatI = nearFeature[sampleI];
+                    const indexedOctree<treeDataPoint>& nearTree =
+                        pointTrees_[nearFeatI];
+                    label featPointI =
+                        nearTree.shapes().pointLabels()[nearIndex[sampleI]];
+                    const point& featPt =
+                        operator[](nearFeatI).points()[featPointI];
+                    distSqr = magSqr(featPt-sample);
+                }
+                else
+                {
+                    distSqr = nearestDistSqr[sampleI];
+                }
 
-            if (info.hit())
-            {
-                nearFeature[sampleI] = featI;
-                nearIndex[sampleI] = info.index();
+                pointIndexHit info = tree.findNearest(sample, distSqr);
+
+                if (info.hit())
+                {
+                    nearFeature[sampleI] = featI;
+                    nearIndex[sampleI] = info.index();
+                }
             }
         }
     }

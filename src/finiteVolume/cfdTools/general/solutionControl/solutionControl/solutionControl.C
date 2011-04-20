@@ -68,7 +68,7 @@ void Foam::solutionControl::read(const bool absTolOnly)
                 if (iter().isDict())
                 {
                     const dictionary& fieldDict(iter().dict());
-                    fd.absTol = readScalar(fieldDict.lookup("absTol"));
+                    fd.absTol = readScalar(fieldDict.lookup("tolerance"));
                     fd.relTol = readScalar(fieldDict.lookup("relTol"));
                     fd.initialResidual = 0.0;
                 }

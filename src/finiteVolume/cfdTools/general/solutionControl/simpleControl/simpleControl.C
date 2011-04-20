@@ -68,7 +68,7 @@ bool Foam::simpleControl::criteriaSatisfied()
             {
                 Info<< algorithmName_ << " solution statistics:" << endl;
 
-                Info<< "    " << variableName << ": abs tol = " << residual
+                Info<< "    " << variableName << ": tolerance = " << residual
                     << " (" << residualControl_[fieldI].absTol << ")"
                     << endl;
             }
@@ -96,7 +96,7 @@ Foam::simpleControl::simpleControl(fvMesh& mesh)
         forAll(residualControl_, i)
         {
             Info<< "    field " << residualControl_[i].name << token::TAB
-                << " absTol " << residualControl_[i].absTol
+                << " tolerance " << residualControl_[i].absTol
                 << nl;
         }
         Info<< endl;

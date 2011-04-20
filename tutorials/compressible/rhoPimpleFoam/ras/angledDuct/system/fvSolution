@@ -63,7 +63,7 @@ PIMPLE
         "(U|k|epsilon)"
         {
             relTol          0;
-            absTol          0.0001;
+            tolerance       0.0001;
         }
     }
 }
