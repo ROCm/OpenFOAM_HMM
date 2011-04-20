@@ -42,14 +42,20 @@ addToRunTimeSelectionTable(LESModel, homogeneousDynSmagorinsky, dictionary);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void homogeneousDynSmagorinsky::updateSubGridScaleFields(const volSymmTensorField& D)
+void homogeneousDynSmagorinsky::updateSubGridScaleFields
+(
+    const volSymmTensorField& D
+)
 {
     nuSgs_ = cD(D)*sqr(delta())*sqrt(magSqr(D));
     nuSgs_.correctBoundaryConditions();
 }
 
 
-dimensionedScalar homogeneousDynSmagorinsky::cD(const volSymmTensorField& D) const
+dimensionedScalar homogeneousDynSmagorinsky::cD
+(
+    const volSymmTensorField& D
+) const
 {
     const volSymmTensorField MM
     (
@@ -72,7 +78,10 @@ dimensionedScalar homogeneousDynSmagorinsky::cD(const volSymmTensorField& D) con
 }
 
 
-dimensionedScalar homogeneousDynSmagorinsky::cI(const volSymmTensorField& D) const
+dimensionedScalar homogeneousDynSmagorinsky::cI
+(
+    const volSymmTensorField& D
+) const
 {
     const volScalarField mm
     (

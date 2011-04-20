@@ -25,7 +25,8 @@ Class
     Foam::incompressible::LESModels::homogeneousDynSmagorinsky
 
 Description
-    The Isochoric homogeneous dynamic Smagorinsky Model for incompressible flows.
+    The Isochoric homogeneous dynamic Smagorinsky Model for
+    incompressible flows.
 
     Algebraic eddy viscosity SGS model founded on the assumption that
     local equilibrium prevails.
