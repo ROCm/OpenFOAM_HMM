@@ -88,6 +88,9 @@ protected:
             //- Global boundary face IDs oppossite coupled patch
             labelList boundaryFaceOppositeFace_;
 
+            //- Number of layers in the region
+            label nLayers_;
+
 
         // Geometry
 
@@ -157,6 +160,9 @@ public:
 
                 //- Return the face area magnitudes / [m2]
                 inline const surfaceScalarField& nMagSf() const;
+
+                //- Return the number of layers in the region
+                inline label nLayers() const;
 };
 
 

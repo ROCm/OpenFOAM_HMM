@@ -65,4 +65,10 @@ Foam::regionModels::regionModel1D::nMagSf() const
 }
 
 
+inline Foam::label Foam::regionModels::regionModel1D::nLayers() const
+{
+    return nLayers_;
+}
+
+
 // ************************************************************************* //
