@@ -518,7 +518,7 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::Re
     const scalar muc
 ) const
 {
-    return rhoc*mag(U - Uc_)*d/muc;
+    return rhoc*mag(U - Uc_)*d/(muc + ROOTVSMALL);
 }
 
 

@@ -62,7 +62,17 @@ void makeGraph
     const word& graphFormat
 )
 {
-    makeGraph(x, vsf.internalField(), name, vsf.path(), graphFormat);
+    fileName path(vsf.rootPath()/vsf.caseName()/"graphs"/vsf.instance());
+    mkDir(path);
+
+    makeGraph
+    (
+        x,
+        vsf.internalField(),
+        name,
+        path,
+        graphFormat
+    );
 }
 
 

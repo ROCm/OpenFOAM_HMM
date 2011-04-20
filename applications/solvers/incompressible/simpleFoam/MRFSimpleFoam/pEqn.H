@@ -6,6 +6,7 @@
     UEqn.clear();
 
     phi = fvc::interpolate(U, "interpolate(HbyA)") & mesh.Sf();
+    mrfZones.relativeFlux(phi);
     adjustPhi(phi, U, p);
 
     // Non-orthogonal pressure corrector loop
@@ -17,7 +18,6 @@
         );
 
         pEqn.setReference(pRefCell, pRefValue);
-
         pEqn.solve();
 
         if (nonOrth == simple.nNonOrthCorr())
