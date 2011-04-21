@@ -58,6 +58,11 @@ class patchProbes
 :
     public probes
 {
+    // Private data
+
+        //- Patch name
+        word patchName_;
+
 
     // Private Member Functions
 
