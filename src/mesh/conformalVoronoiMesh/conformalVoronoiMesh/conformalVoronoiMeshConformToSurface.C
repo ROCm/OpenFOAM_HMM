@@ -411,7 +411,6 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                 << ") less than limit (" << hitLimit
                 << "), stopping iterations" << endl;
         }
-
     }
 
     // reportSurfaceConformationQuality();
@@ -554,7 +553,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
 (
     List<labelHashSet>& referralVertices,
     List<labelHashSet>& receivedVertices,
-    bool initialEdgeReferrral,
+    bool initialEdgeReferral,
     const word& outputName
 )
 {
@@ -764,7 +763,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
             << totalAllVertices << endl;
     }
 
-    if (initialEdgeReferrral)
+    if (initialEdgeReferral)
     {
         DynamicList<Foam::point> parallelIntersectionPoints;
         DynamicList<label> targetProcessor;

@@ -360,7 +360,11 @@ void Foam::conformalVoronoiMesh::writeMesh
         }
     }
 
-    mesh.addPatches(patches);
+    Info<< "addPatches(patches, false); FALSE REQUIRED TO AVOID MEMORY CRASH"
+        << endl;
+
+    // mesh.addPatches(patches);
+    mesh.addPatches(patches, false);
 
     if (!mesh.write())
     {
