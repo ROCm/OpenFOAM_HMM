@@ -137,7 +137,7 @@ Foam::pimpleControl::pimpleControl(fvMesh& mesh)
             {
                 Info<< "    field " << residualControl_[i].name << token::TAB
                     << ": relTol " << residualControl_[i].relTol
-                    << ", absTol " << residualControl_[i].absTol
+                    << ", tolerance " << residualControl_[i].absTol
                     << nl;
             }
             Info<< endl;
