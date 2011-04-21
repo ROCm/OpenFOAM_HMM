@@ -1,10 +1,10 @@
 #!/bin/bash
 #--------------------------------*- C++ -*----------------------------------
-# =========                 |                                               
-# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox         
-#  \\    /   O peration     | Version:  dev                                 
-#   \\  /    A nd           | Web:      www.OpenFOAM.com                    
-#    \\/     M anipulation  |                                               
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     | Version:  dev
+#   \\  /    A nd           | Web:      www.OpenFOAM.com
+#    \\/     M anipulation  |
 #---------------------------------------------------------------------------
 cd ${0%/*} || exit 1    # run from this directory
 
