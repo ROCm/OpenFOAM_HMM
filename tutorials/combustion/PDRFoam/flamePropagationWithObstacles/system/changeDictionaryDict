@@ -36,7 +36,6 @@ dictionaryReplacement
             {
                 type        cyclic;
             }
-
         }
     }
 
@@ -109,8 +108,8 @@ dictionaryReplacement
          }
             baffleWall
             {
-                type         compressible::kqRWallFunction;
-                value           uniform 1.5;
+                type        compressible::kqRWallFunction;
+                value       uniform 1.5;
             }
             baffleCyclic_half0
             {
@@ -153,6 +152,7 @@ dictionaryReplacement
             blockedFaces
             {
                 type        zeroGradient;
+                value       uniform 1;
             }
              baffleWall
             {
@@ -177,6 +177,7 @@ dictionaryReplacement
             blockedFaces
             {
                 type        zeroGradient;
+                value       uniform 300;
             }
             baffleWall
             {
@@ -201,6 +202,7 @@ dictionaryReplacement
             blockedFaces
             {
                 type        zeroGradient;
+                value       uniform 300;
             }
             baffleWall
             {
@@ -225,6 +227,7 @@ dictionaryReplacement
             blockedFaces
             {
                 type        zeroGradient;
+                value       uniform 1;
             }
             baffleWall
             {
@@ -273,8 +276,9 @@ dictionaryReplacement
             blockedFaces
             {
                 type        zeroGradient;
+                value       uniform 0.0;
             }
-             baffleWall
+            baffleWall
             {
                 type        zeroGradient;
                 value       uniform 0.0;
@@ -296,6 +300,7 @@ dictionaryReplacement
             blockedFaces
             {
                 type        zeroGradient;
+                value       uniform (0 0 0 0 0 0);
             }
             baffleWall
             {
@@ -319,6 +324,7 @@ dictionaryReplacement
             blockedFaces
             {
                 type        zeroGradient;
+                value       uniform 0;
             }
             baffleWall
             {
@@ -342,6 +348,7 @@ dictionaryReplacement
             blockedFaces
             {
                 type        zeroGradient;
+                value       uniform (0 0 0 0 0 0);
             }
             baffleWall
             {
@@ -365,6 +372,7 @@ dictionaryReplacement
             blockedFaces
             {
                 type        zeroGradient;
+                value       uniform (0 0 0 0 0 0);
             }
             baffleWall
             {
@@ -388,6 +396,7 @@ dictionaryReplacement
             blockedFaces
             {
                 type        zeroGradient;
+                value       uniform 0;
             }
             baffleWall
             {
@@ -411,6 +420,7 @@ dictionaryReplacement
             blockedFaces
             {
                 type        zeroGradient;
+                value       uniform (0 0 0 0 0 0);
             }
             baffleWall
             {
@@ -434,6 +444,7 @@ dictionaryReplacement
             blockedFaces
             {
                 type        zeroGradient;
+                value       uniform 0;
             }
             baffleWall
             {
