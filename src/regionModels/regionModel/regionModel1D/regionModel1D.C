@@ -114,7 +114,6 @@ void Foam::regionModels::regionModel1D::initialise()
             boundaryFaceCells_[localPyrolysisFaceI].transfer(cellIDs);
 
             localPyrolysisFaceI++;
-
             nLayers_ = nCells;
         }
     }

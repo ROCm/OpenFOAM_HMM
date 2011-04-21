@@ -5,7 +5,7 @@ tmp<fv::convectionScheme<scalar> > mvConvection
         mesh,
         fields,
         phi,
-        mesh.divScheme("div(phi,Yi_h)")
+        mesh.divScheme("div(phi,Yi_hs)")
     )
 );
 
@@ -23,7 +23,7 @@ tmp<fv::convectionScheme<scalar> > mvConvection
             (
                 fvm::ddt(rho, Yi)
               + mvConvection->fvmDiv(phi, Yi)
-              - fvm::laplacian(turbulence->muEff(), Yi)
+              - fvm::laplacian(turbulence->alphaEff(), Yi)
               ==
                 parcels.SYi(i, Yi)
               + surfaceFilm.Srho(i)

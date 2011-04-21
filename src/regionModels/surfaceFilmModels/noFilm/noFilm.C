@@ -103,6 +103,15 @@ const volScalarField& noFilm::delta() const
 }
 
 
+const volScalarField& noFilm::sigma() const
+{
+    FatalErrorIn("const volScalarField& noFilm::sigma() const")
+        << "sigma field not available for " << type() << abort(FatalError);
+
+    return volScalarField::null();
+}
+
+
 const volVectorField& noFilm::U() const
 {
     FatalErrorIn("const volVectorField& noFilm::U() const")
@@ -184,32 +193,42 @@ const volScalarField& noFilm::kappa() const
 }
 
 
-const volScalarField& noFilm::massForPrimary() const
+tmp<volScalarField> noFilm::primaryMassTrans() const
 {
-    FatalErrorIn("const volScalarField& noFilm::massForPrimary() const")
-        << "massForPrimary field not available for " << type()
-        << abort(FatalError);
-
-    return volScalarField::null();
-}
-
-
-const volScalarField& noFilm::diametersForPrimary() const
-{
-    FatalErrorIn("const volScalarField& noFilm::diametersForPrimary() const")
-        << "diametersForPrimary field not available for " << type()
-        << abort(FatalError);
-
-    return volScalarField::null();
-}
-
-
-const volScalarField& noFilm::massPhaseChangeForPrimary() const
-{
-    FatalErrorIn
+    return tmp<volScalarField>
     (
-        "const volScalarField& noFilm::massPhaseChangeForPrimary() const"
-    )   << "massPhaseChange field not available for " << type()
+        new volScalarField
+        (
+            IOobject
+            (
+                "noFilm::primaryMassTrans",
+                time().timeName(),
+                primaryMesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            primaryMesh(),
+            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
+        )
+    );
+}
+
+
+const volScalarField& noFilm::cloudMassTrans() const
+{
+    FatalErrorIn("const volScalarField& noFilm::cloudMassTrans() const")
+        << "cloudMassTrans field not available for " << type()
+        << abort(FatalError);
+
+    return volScalarField::null();
+}
+
+
+const volScalarField& noFilm::cloudDiameterTrans() const
+{
+    FatalErrorIn("const volScalarField& noFilm::cloudDiameterTrans() const")
+        << "cloudDiameterTrans field not available for " << type()
         << abort(FatalError);
 
     return volScalarField::null();
@@ -238,7 +257,7 @@ tmp<DimensionedField<scalar, volMesh> > noFilm::Srho() const
 }
 
 
-tmp<DimensionedField<scalar, volMesh> > noFilm::Srho(const label) const
+tmp<DimensionedField<scalar, volMesh> > noFilm::Srho(const label i) const
 {
     return tmp<DimensionedField<scalar, volMesh> >
     (
@@ -246,7 +265,7 @@ tmp<DimensionedField<scalar, volMesh> > noFilm::Srho(const label) const
         (
             IOobject
             (
-                "noFilm::Srho(i)",
+                "noFilm::Srho(" + Foam::name(i) + ")",
                 time().timeName(),
                 primaryMesh(),
                 IOobject::NO_READ,

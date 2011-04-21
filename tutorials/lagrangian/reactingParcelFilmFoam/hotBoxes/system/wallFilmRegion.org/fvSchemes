@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev.FMGlobal                          |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -26,10 +26,11 @@ ddtSchemes
 
 divSchemes
 {
-    default none;
-    div(phi,Uf) Gauss upwind;
+    default         none;
+    div(phi,Uf)     Gauss upwind;
     div(phid,deltaf) Gauss upwind;
-    div(phi,hsf) Gauss upwind;
+    div(phi,hsf)    Gauss upwind;
+    div(nHat)       Gauss linear;
 }
 
 gradSchemes
@@ -40,14 +41,16 @@ gradSchemes
     snGradCorr(deltaf) Gauss linear;
     snGradCorr(pp) Gauss linear;
     snGradCorr(pu) Gauss linear;
+    grad(nHat)  Gauss linear;
 }
 
 laplacianSchemes
 {
     default none;
     laplacian(sigmaf,deltaf) Gauss linear uncorrected;
-    laplacian((((interpolate(deltaf)*interpolate((deltaf*(1|A(Uf)))))*interpolate(rhof))*interpolate(pp)),deltaf) Gauss linear uncorrected;
+    laplacian(deltaCoeff,deltaf) Gauss linear uncorrected;
 }
+
 
 snGradSchemes
 {

@@ -17,13 +17,22 @@ FoamFile
 
 solvers
 {
-    "(rho|U|k|omega)"
+    rho
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-08;
+        relTol          0.1;
+    }
+
+    rhoFinal
     {
         solver          PBiCG;
         preconditioner  DILU;
         tolerance       1e-08;
         relTol          0;
     }
+
 
     p
     {
@@ -45,16 +54,28 @@ solvers
         tolerance       1e-08;
         relTol          0;
     }
+
+    "(U|k|omega)"
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-08;
+        relTol          0.1;
+    }
+
+    "(U|k|omega)Final"
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-08;
+        relTol          0;
+    }
 }
 
-PISO
+PIMPLE
 {
     nCorrectors     3;
     nNonOrthogonalCorrectors 0;
-}
-
-SIMPLE
-{
 }
 
 

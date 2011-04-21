@@ -56,8 +56,6 @@ SourceFiles
 #include "DynamicList.H"
 #include "edgeList.H"
 #include "pointField.H"
-#include "SubField.H"
-#include "SubList.H"
 #include "faceList.H"
 #include "cellList.H"
 #include "cellShapeList.H"
@@ -65,8 +63,6 @@ SourceFiles
 #include "boolList.H"
 #include "HashSet.H"
 #include "Map.H"
-#include "EdgeMap.H"
-#include "boundBox.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

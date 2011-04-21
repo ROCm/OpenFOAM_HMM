@@ -11,7 +11,7 @@ UEqn.clear();
 phi = fvc::interpolate(U) & mesh.Sf();
 adjustPhi(phi, U, p);
 
-for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+for (int nonOrth=0; nonOrth<=simple.nNonOrthCorr(); nonOrth++)
 {
     tmp<fvScalarMatrix> tpEqn;
 
@@ -35,7 +35,7 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
         tpEqn().solve();
     }
 
-    if (nonOrth == nNonOrthCorr)
+    if (nonOrth == simple.nNonOrthCorr())
     {
         phi -= tpEqn().flux();
     }

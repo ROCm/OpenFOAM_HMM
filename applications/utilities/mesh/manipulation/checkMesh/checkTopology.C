@@ -6,6 +6,7 @@
 #include "faceSet.H"
 #include "pointSet.H"
 #include "IOmanip.H"
+#include "emptyPolyPatch.H"
 
 Foam::label Foam::checkTopology
 (
@@ -20,6 +21,29 @@ Foam::label Foam::checkTopology
 
     // Check if the boundary definition is unique
     mesh.boundaryMesh().checkDefinition(true);
+
+    // Check that empty patches cover all sides of the mesh
+    {
+        label nEmpty = 0;
+        forAll(mesh.boundaryMesh(), patchI)
+        {
+            if (isA<emptyPolyPatch>(mesh.boundaryMesh()[patchI]))
+            {
+                nEmpty += mesh.boundaryMesh()[patchI].size();
+            }
+        }
+        reduce(nEmpty, sumOp<label>());
+        label nTotCells = returnReduce(mesh.cells().size(), sumOp<label>());
+
+        // These are actually warnings, not errors.
+        if (nEmpty % nTotCells)
+        {
+            Info<< " ***Total number of faces on empty patches"
+                << " is not divisible by the number of cells in the mesh."
+                << " Hence this mesh is not 1D or 2D."
+                << endl;
+        }
+    }
 
     // Check if the boundary processor patches are correct
     mesh.boundaryMesh().checkParallelSync(true);
@@ -40,6 +64,8 @@ Foam::label Foam::checkTopology
     {
         noFailedChecks++;
     }
+
+
 
     {
         pointSet points(mesh, "unusedPoints", mesh.nPoints()/100);
@@ -74,6 +100,22 @@ Foam::label Foam::checkTopology
         }
     }
 
+    {
+        faceSet faces(mesh, "outOfRangeFaces", mesh.nFaces()/100);
+        if (mesh.checkFaceVertices(true, &faces))
+        {
+            noFailedChecks++;
+
+            label nFaces = returnReduce(faces.size(), sumOp<label>());
+
+            Info<< "  <<Writing " << nFaces
+                << " faces with out-of-range or duplicate vertices to set "
+                << faces.name() << endl;
+            faces.instance() = mesh.pointsInstance();
+            faces.write();
+        }
+    }
+
     if (allTopology)
     {
         cellSet cells(mesh, "zipUpCells", mesh.nCells()/100);
@@ -88,22 +130,6 @@ Foam::label Foam::checkTopology
                 << endl;
             cells.instance() = mesh.pointsInstance();
             cells.write();
-        }
-    }
-
-    {
-        faceSet faces(mesh, "outOfRangeFaces", mesh.nFaces()/100);
-        if (mesh.checkFaceVertices(true, &faces))
-        {
-            noFailedChecks++;
-
-            label nFaces = returnReduce(faces.size(), sumOp<label>());
-
-            Info<< "  <<Writing " << nFaces
-                << " faces with out-of-range or duplicate vertices to set "
-                << faces.name() << endl;
-            faces.instance() = mesh.pointsInstance();
-            faces.write();
         }
     }
 

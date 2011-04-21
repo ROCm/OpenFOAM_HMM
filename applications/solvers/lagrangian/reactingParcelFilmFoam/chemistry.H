@@ -1,3 +1,4 @@
+if (chemistry.chemistry())
 {
     Info << "Solving chemistry" << endl;
 

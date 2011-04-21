@@ -90,7 +90,7 @@ solvers
     };
 }
 
-PISO
+PIMPLE
 {
     momentumPredictor          no;
     nOuterCorrectors           1;

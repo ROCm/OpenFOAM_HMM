@@ -25,10 +25,11 @@ License
 
 #include "dlLibraryTable.H"
 #include "OSspecific.H"
+#include "long.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Foam::dlLibraryTable Foam::dlLibraryTable::loadedLibraries;
+defineTypeNameAndDebug(Foam::dlLibraryTable, 0);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -39,11 +40,13 @@ Foam::dlLibraryTable::dlLibraryTable()
 {}
 
 
-Foam::dlLibraryTable::readDlLibrary::readDlLibrary
+Foam::dlLibraryTable::dlLibraryTable
 (
     const dictionary& dict,
     const word& libsEntry
 )
+:
+    HashTable<fileName, void*, Hash<void*> >()
 {
     open(dict, libsEntry);
 }
@@ -58,7 +61,11 @@ Foam::dlLibraryTable::~dlLibraryTable()
         // bug in dlclose - does not call static destructors of
         // loaded library when actually unloading the library.
         // See https://bugzilla.novell.com/show_bug.cgi?id=680125 and 657627.
-        // Seems related to using a non-system compiler!
+        if (debug)
+        {
+            Info<< "dlLibraryTable::~dlLibraryTable() : closing " << iter()
+                << " with handle " << long(iter.key()) << endl;
+        }
         dlClose(iter.key());
     }
 }
@@ -76,6 +83,12 @@ bool Foam::dlLibraryTable::open
     {
         void* functionLibPtr = dlOpen(functionLibName);
 
+        if (debug)
+        {
+            Info<< "dlLibraryTable::open : opened " << functionLibName
+                << " resulting in handle " << long(functionLibPtr) << endl;
+        }
+
         if (!functionLibPtr)
         {
             if (verbose)
@@ -91,14 +104,7 @@ bool Foam::dlLibraryTable::open
         }
         else
         {
-            if (loadedLibraries.insert(functionLibPtr, functionLibName))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return insert(functionLibPtr, functionLibName);
         }
     }
     else
@@ -117,7 +123,13 @@ bool Foam::dlLibraryTable::close
     void* libPtr = findLibrary(functionLibName);
     if (libPtr)
     {
-        loadedLibraries.erase(libPtr);
+        if (debug)
+        {
+            Info<< "dlLibraryTable::close : closing " << functionLibName
+                << " with handle " << long(libPtr) << endl;
+        }
+
+        erase(libPtr);
 
         if (!dlClose(libPtr))
         {
@@ -141,7 +153,7 @@ bool Foam::dlLibraryTable::close
 
 void* Foam::dlLibraryTable::findLibrary(const fileName& functionLibName)
 {
-    forAllConstIter(dlLibraryTable, loadedLibraries, iter)
+    forAllConstIter(dlLibraryTable, *this, iter)
     {
         if (iter() == functionLibName)
         {

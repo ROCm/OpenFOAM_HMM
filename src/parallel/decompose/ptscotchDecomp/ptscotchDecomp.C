@@ -117,6 +117,7 @@ License
 #include "Time.H"
 #include "OFstream.H"
 #include "globalIndex.H"
+#include "SubField.H"
 
 extern "C"
 {

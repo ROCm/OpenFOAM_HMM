@@ -2615,9 +2615,12 @@ void Foam::autoLayerDriver::addLayers
             extrudeStatus
         );
 
-        Info<< "Extruding " << countExtrusion(pp, extrudeStatus)
-            << " out of " << returnReduce(pp().size(), sumOp<label>())
-            << " faces. Removed extrusion at " << nTotChanged << " faces."
+        label nExtruded = countExtrusion(pp, extrudeStatus);
+        label nTotFaces = returnReduce(pp().size(), sumOp<label>());
+        Info<< "Extruding " << nExtruded
+            << " out of " << nTotFaces
+            << " faces (" << 100.0*nExtruded/nTotFaces << "%)."
+            << " Removed extrusion at " << nTotChanged << " faces."
             << endl;
 
         if (nTotChanged == 0)

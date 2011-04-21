@@ -1210,12 +1210,13 @@ int main(int argc, char *argv[])
         << endl;
 
     label nSide = 0;
+
     forAll(zoneSidePatch, zoneI)
     {
         if (oneD)
         {
-            // Always add empty patches, one per zone.
-            word patchName = faceZones[zoneI].name() + "_" + "side";
+            // Reuse single empty patch.
+            word patchName = "oneDEmptPatch";
 
             zoneSidePatch[zoneI] = addPatch<emptyPolyPatch>
             (

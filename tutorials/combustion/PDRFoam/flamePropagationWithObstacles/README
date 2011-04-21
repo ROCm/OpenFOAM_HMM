@@ -1,8 +1,5 @@
 PDR test case
 
-The folder 0.org contains the initial fields for the original
-blockMesh.
-
 Step to introduce the PDR fields:
 
 1) Create zero-size patches for wall or/and coupled baffles in

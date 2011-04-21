@@ -1,6 +1,6 @@
 U = rAU*UEqn().H();
 
-if (nCorr <= 1)
+if (pimple.nCorr() <= 1)
 {
     UEqn.clear();
 }
@@ -11,7 +11,7 @@ phi = (fvc::interpolate(U) & mesh.Sf())
 adjustPhi(phi, U, p);
 
 // Non-orthogonal pressure corrector loop
-for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
 {
     // Pressure corrector
     fvScalarMatrix pEqn
@@ -23,18 +23,10 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 
     pEqn.solve
     (
-        mesh.solver
-        (
-            p.select
-            (
-                pimpleCorr.finalIter()
-             && corr == nCorr-1
-             && nonOrth == nNonOrthCorr
-            )
-        )
+        mesh.solver(p.select(pimple.finalInnerIter(corr, nonOrth)))
     );
 
-    if (nonOrth == nNonOrthCorr)
+    if (nonOrth == pimple.nNonOrthCorr())
     {
         phi -= pEqn.flux();
     }

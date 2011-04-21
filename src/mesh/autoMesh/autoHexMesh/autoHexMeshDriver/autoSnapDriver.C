@@ -722,10 +722,15 @@ void Foam::autoSnapDriver::preSmoothPatch
     if (debug)
     {
         const_cast<Time&>(mesh.time())++;
-        Pout<< "Writing patch smoothed mesh to time " << meshRefiner_.timeName()
-            << endl;
-
-        mesh.write();
+        Pout<< "Writing patch smoothed mesh to time "
+            << meshRefiner_.timeName() << '.' << endl;
+        meshRefiner_.write
+        (
+            debug,
+            mesh.time().path()/meshRefiner_.timeName()
+        );
+        Pout<< "Dumped mesh in = "
+            << mesh.time().cpuTimeIncrement() << " s\n" << nl << endl;
     }
 
     Info<< "Patch points smoothed in = "
@@ -956,25 +961,6 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
         vector(GREAT, GREAT, GREAT)     // null value (note: cannot use VGREAT)
     );
 
-
-    // Check for displacement being outwards.
-    outwardsDisplacement(pp, patchDisp);
-
-    // Set initial distribution of displacement field (on patches) from
-    // patchDisp and make displacement consistent with b.c. on displacement
-    // pointVectorField.
-    meshMover.setDisplacement(patchDisp);
-
-    if (debug)
-    {
-        dumpMove
-        (
-            mesh.time().path()/"patchDisplacement.obj",
-            pp.localPoints(),
-            pp.localPoints() + patchDisp
-        );
-    }
-
     return patchDisp;
 }
 
@@ -1128,8 +1114,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::repatchToSurface
     indirectPrimitivePatch& pp = ppPtr();
 
     // Divide surfaces into zoned and unzoned
-    labelList zonedSurfaces = meshRefiner_.surfaces().getNamedSurfaces();
-    labelList unzonedSurfaces = meshRefiner_.surfaces().getUnnamedSurfaces();
+    labelList zonedSurfaces = surfaces.getNamedSurfaces();
+    labelList unzonedSurfaces = surfaces.getUnnamedSurfaces();
 
 
     // Faces that do not move
@@ -1344,19 +1330,6 @@ void Foam::autoSnapDriver::doSnap
         // Pre-smooth patch vertices (so before determining nearest)
         preSmoothPatch(snapParams, nInitErrors, baffles, meshMover);
 
-        if (debug)
-        {
-            Pout<< "Writing patch smoothed mesh to time "
-                << meshRefiner_.timeName() << '.' << endl;
-            meshRefiner_.write
-            (
-                debug,
-                mesh.time().path()/meshRefiner_.timeName()
-            );
-            Pout<< "Dumped mesh in = "
-                << mesh.time().cpuTimeIncrement() << " s\n" << nl << endl;
-        }
-
 
         for (label iter = 0; iter < nFeatIter; iter++)
         {
@@ -1381,6 +1354,15 @@ void Foam::autoSnapDriver::doSnap
                     meshMover
                 );
             }
+
+            // Check for displacement being outwards.
+            outwardsDisplacement(ppPtr(), disp);
+
+            // Set initial distribution of displacement field (on patches)
+            // from patchDisp and make displacement consistent with b.c.
+            // on displacement pointVectorField.
+            meshMover.setDisplacement(disp);
+
 
             if (debug&meshRefinement::OBJINTERSECTIONS)
             {
@@ -1467,7 +1449,7 @@ void Foam::autoSnapDriver::doSnap
         meshRefiner_.write
         (
             debug,
-            mesh.time().path()/meshRefiner_.timeName()
+            meshRefiner_.timeName()
         );
     }
 }

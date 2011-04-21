@@ -116,11 +116,11 @@
         dimensionedScalar("chemistrySh", dimEnergy/dimTime/dimVolume, 0.0)
     );
 
-    volScalarField invTau
+    volScalarField rDeltaT
     (
         IOobject
         (
-            "invTau",
+            "rDeltaT",
             runTime.timeName(),
             mesh,
             IOobject::READ_IF_PRESENT,

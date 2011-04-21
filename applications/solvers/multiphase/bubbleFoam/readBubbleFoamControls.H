@@ -1,5 +1,4 @@
-#   include "readPISOControls.H"
 
-    int nAlphaCorr(readInt(piso.lookup("nAlphaCorr")));
+    int nAlphaCorr(readInt(pimple.dict().lookup("nAlphaCorr")));
 
-    Switch correctAlpha(piso.lookup("correctAlpha"));
+    Switch correctAlpha(pimple.dict().lookup("correctAlpha"));

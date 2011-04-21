@@ -46,7 +46,7 @@ Description
 #include "timeActivatedExplicitSource.H"
 #include "SLGThermo.H"
 #include "fvcSmooth.H"
-#include "pimpleLoop.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,6 +57,9 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
     #include "readGravitationalAcceleration.H"
+
+    pimpleControl pimple(mesh);
+
     #include "readTimeControls.H"
     #include "readAdditionalSolutionControls.H"
     #include "createFields.H"
@@ -72,7 +75,6 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-        #include "readPIMPLEControls.H"
         #include "readChemistryProperties.H"
         #include "readAdditionalSolutionControls.H"
         #include "readTimeControls.H"
@@ -89,14 +91,9 @@ int main(int argc, char *argv[])
         #include "rhoEqn.H"
 
         // --- Pressure-velocity PIMPLE corrector loop
-        for
-        (
-            pimpleLoop pimpleCorr(mesh, nOuterCorr);
-            pimpleCorr.loop();
-            pimpleCorr++
-        )
+        for (pimple.start(); pimple.loop(); pimple++)
         {
-            if (nOuterCorr != 1)
+            if (pimple.nOuterCorr() != 1)
             {
                 p.storePrevIter();
             }
@@ -108,7 +105,7 @@ int main(int argc, char *argv[])
             #include "hsEqn.H"
 
             // --- PISO loop
-            for (int corr=0; corr<nCorr; corr++)
+            for (int corr=0; corr<pimple.nCorr(); corr++)
             {
                 #include "pEqn.H"
             }

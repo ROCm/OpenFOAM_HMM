@@ -45,7 +45,7 @@ multiLevelCoeffs
 
     level0
     {
-        numberOfSubdomains  2;
+        numberOfSubdomains  64;
         //method simple;
         //simpleCoeffs
         //{

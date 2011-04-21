@@ -91,6 +91,16 @@ inline const Foam::volScalarField& Foam::radiation::fvDOM::Qr() const
     return Qr_;
 }
 
+inline const Foam::volScalarField& Foam::radiation::fvDOM::Qin() const
+{
+    return Qin_;
+}
+
+
+inline const Foam::volScalarField& Foam::radiation::fvDOM::Qem() const
+{
+    return Qem_;
+}
 
 inline const Foam::radiation::blackBodyEmission&
 Foam::radiation::fvDOM::blackBody() const

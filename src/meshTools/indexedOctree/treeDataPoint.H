@@ -65,6 +65,8 @@ class treeDataPoint
         //- Subset of points to work on (or empty)
         const labelList pointLabels_;
 
+        const bool useSubset_;
+
 public:
 
     // Declare name of the class and its debug switch
@@ -88,7 +90,7 @@ public:
             {
                 return
                 (
-                    pointLabels_.size()
+                    useSubset_
                   ? pointLabels_.size()
                   : points_.size()
                 );

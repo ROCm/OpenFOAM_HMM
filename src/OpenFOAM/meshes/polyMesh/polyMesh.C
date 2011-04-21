@@ -36,6 +36,7 @@ License
 #include "polyMeshTetDecomposition.H"
 #include "indexedOctree.H"
 #include "treeDataCell.H"
+#include "SubField.H"
 
 #include "pointMesh.H"
 

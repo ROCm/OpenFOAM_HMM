@@ -17,7 +17,7 @@ FoamFile
 
 surfaceFilmModel thermoSingleLayer;
 
-filmRegionName  wallFilmRegion;
+regionName      wallFilmRegion;
 
 active          true;
 
@@ -29,14 +29,17 @@ thermoSingleLayerCoeffs
 
     Cf          0.005;
 
+    radiationModel  none;
+
     upperSurfaceModels
     {
-//        heatTransferModel constant;
-//        constantCoeffs
-//        {
-//            c0              1e-8;
-//        }
-
+/*
+        heatTransferModel constant;
+        constantCoeffs
+        {
+           c0              1e-8;
+        }
+*/
         heatTransferModel mappedConvectiveHeatTransfer;
     }
 
@@ -49,19 +52,30 @@ thermoSingleLayerCoeffs
         }
     }
 
-    injectionModel cloudInjection; // removeInjection; // none; // cloudInjection;
+    injectionModels
+    (
+        curvatureSeparation
+        drippingInjection
+    );
 
-    cloudInjectionCoeffs
+    curvatureSeparationCoeffs
+    {
+        definedPatchRadii
+        (
+            ("(cube[0-9][0-9]_side[0-9]_to_cube[0-9][0-9]_side[0-9])" 0)
+        );
+    }
+
+    drippingInjectionCoeffs
     {
         cloudName    reactingCloud1;
+        deltaStable  0;
 
-        deltaStable         0.0;
+        particlesPerParcel 100.0;
 
-        particlesPerParcel  100.0;
-
-        sizeDistribution
+        parcelDistribution
         {
-            pdfType         RosinRammler;
+            type         RosinRammler;
             RosinRammlerDistribution
             {
                 minValue        5e-04;
@@ -76,9 +90,11 @@ thermoSingleLayerCoeffs
 
     standardPhaseChangeCoeffs
     {
-        Tb              374.8;
+        Tb              373;
         deltaMin        1e-8;
         L               1.0;
     }
 }
 
+
+// ************************************************************************* //

@@ -36,6 +36,7 @@ License
 #include "Time.H"
 #include "PstreamReduceOps.H"
 
+#include "long.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -59,6 +60,36 @@ namespace functionEntries
 
 const Foam::word Foam::functionEntries::codeStream::codeTemplateC
     = "codeStreamTemplate.C";
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+const Foam::dictionary& Foam::functionEntries::codeStream::topDict
+(
+    const dictionary& dict
+)
+{
+    const dictionary& p = dict.parent();
+
+    if (&p != &dict && !p.name().empty())
+    {
+        return topDict(p);
+    }
+    else
+    {
+        return dict;
+    }
+}
+
+
+Foam::dlLibraryTable& Foam::functionEntries::codeStream::libs
+(
+    const dictionary& dict
+)
+{
+    const IOdictionary& d = static_cast<const IOdictionary&>(topDict(dict));
+    return const_cast<Time&>(d.time()).libs();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -99,8 +130,11 @@ bool Foam::functionEntries::codeStream::execute
     const fileName libPath = dynCode.libPath();
 
     // see if library is loaded
-    void* lib = dlLibraryTable::findLibrary(libPath);
-
+    void* lib = NULL;
+    if (isA<IOdictionary>(topDict(parentDict)))
+    {
+        lib = libs(parentDict).findLibrary(libPath);
+    }
 
     if (!lib)
     {
@@ -110,9 +144,23 @@ bool Foam::functionEntries::codeStream::execute
 
     // nothing loaded
     // avoid compilation if possible by loading an existing library
-    if (!lib && dlLibraryTable::open(libPath, false))
+    if (!lib)
     {
-        lib = dlLibraryTable::findLibrary(libPath);
+        if (isA<IOdictionary>(topDict(parentDict)))
+        {
+            // Cached access to dl libs. Guarantees clean up upon destruction
+            // of Time.
+            dlLibraryTable& dlLibs = libs(parentDict);
+            if (dlLibs.open(libPath, false))
+            {
+                lib = dlLibs.findLibrary(libPath);
+            }
+        }
+        else
+        {
+            // Uncached opening of libPath
+            lib = dlOpen(libPath);
+        }
     }
 
 
@@ -167,19 +215,30 @@ bool Foam::functionEntries::codeStream::execute
         // all processes must wait for compile to finish
         reduce(create, orOp<bool>());
 
-        if (!dlLibraryTable::open(libPath, false))
+        if (isA<IOdictionary>(topDict(parentDict)))
         {
-            FatalIOErrorIn
-            (
-                "functionEntries::codeStream::execute(..)",
-                parentDict
-            )   << "Failed loading library " << libPath << nl
-                << "Did you add all libraries to the 'libs' entry"
-                << " in system/controlDict?"
-                << exit(FatalIOError);
-        }
+            // Cached access to dl libs. Guarantees clean up upon destruction
+            // of Time.
+            dlLibraryTable& dlLibs = libs(parentDict);
+            if (!dlLibs.open(libPath, false))
+            {
+                FatalIOErrorIn
+                (
+                    "functionEntries::codeStream::execute(..)",
+                    parentDict
+                )   << "Failed loading library " << libPath << nl
+                    << "Did you add all libraries to the 'libs' entry"
+                    << " in system/controlDict?"
+                    << exit(FatalIOError);
+            }
 
-        lib = dlLibraryTable::findLibrary(libPath);
+            lib = dlLibs.findLibrary(libPath);
+        }
+        else
+        {
+            // Uncached opening of libPath
+            lib = dlOpen(libPath);
+        }
     }
 
 

@@ -208,9 +208,6 @@ $(interpolation)/interpolationPoint/pointMVCWeight.C
 $(interpolation)/interpolationPoint/makeInterpolationPoint.C
 
 volPointInterpolation = interpolation/volPointInterpolation
-/*
-$(volPointInterpolation)/pointPatchInterpolation/pointPatchInterpolation.C
-*/
 $(volPointInterpolation)/volPointInterpolation.C
 
 surfaceInterpolation = interpolation/surfaceInterpolation
@@ -352,6 +349,11 @@ general = cfdTools/general
 $(general)/findRefCell/findRefCell.C
 $(general)/adjustPhi/adjustPhi.C
 $(general)/bound/bound.C
+
+solutionControl = $(general)/solutionControl
+$(solutionControl)/solutionControl/solutionControl.C
+$(solutionControl)/simpleControl/simpleControl.C
+$(solutionControl)/pimpleControl/pimpleControl.C
 
 porousMedia = $(general)/porousMedia
 $(porousMedia)/porousZone.C

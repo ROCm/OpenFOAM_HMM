@@ -153,7 +153,10 @@ void Foam::ThermoParcel<ParcelType>::calcSurfaceValues
     mus = td.muInterp().interpolate(this->position(), tetIs)/TRatio;
 
     Pr = td.cloud().constProps().Pr();
+    Pr = max(ROOTVSMALL, Pr);
+
     kappas = Cpc_*mus/Pr;
+    kappas = max(ROOTVSMALL, kappas);
 }
 
 

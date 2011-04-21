@@ -48,6 +48,7 @@ Description
 #include "fvCFD.H"
 #include "singlePhaseTransportModel.H"
 #include "RASModel.H"
+#include "simpleControl.H"
 
 template<class Type>
 void zeroCells
@@ -74,15 +75,15 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "initContinuityErrs.H"
 
+    simpleControl simple(mesh);
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
-    while (runTime.loop())
+    while (simple.loop())
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
-
-        #include "readSIMPLEControls.H"
 
         p.storePrevIter();
 
@@ -121,7 +122,7 @@ int main(int argc, char *argv[])
             adjustPhi(phi, U, p);
 
             // Non-orthogonal pressure corrector loop
-            for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+            for (int nonOrth=0; nonOrth<=simple.nNonOrthCorr(); nonOrth++)
             {
                 fvScalarMatrix pEqn
                 (
@@ -131,7 +132,7 @@ int main(int argc, char *argv[])
                 pEqn.setReference(pRefCell, pRefValue);
                 pEqn.solve();
 
-                if (nonOrth == nNonOrthCorr)
+                if (nonOrth == simple.nNonOrthCorr())
                 {
                     phi -= pEqn.flux();
                 }
@@ -184,7 +185,7 @@ int main(int argc, char *argv[])
             adjustPhi(phia, Ua, pa);
 
             // Non-orthogonal pressure corrector loop
-            for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+            for (int nonOrth=0; nonOrth<=simple.nNonOrthCorr(); nonOrth++)
             {
                 fvScalarMatrix paEqn
                 (
@@ -194,7 +195,7 @@ int main(int argc, char *argv[])
                 paEqn.setReference(paRefCell, paRefValue);
                 paEqn.solve();
 
-                if (nonOrth == nNonOrthCorr)
+                if (nonOrth == simple.nNonOrthCorr())
                 {
                     phia -= paEqn.flux();
                 }
