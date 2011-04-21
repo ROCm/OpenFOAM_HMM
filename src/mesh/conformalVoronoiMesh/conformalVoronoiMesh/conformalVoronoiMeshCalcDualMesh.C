@@ -1421,7 +1421,6 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
     timeCheck("Start of checkPolyMeshQuality");
 
     Info<< nl << "Creating polyMesh to assess quality" << endl;
-    Info<< nl << "THIS NEEDS TO USE PARALLEL EVALUATION OF QUALITY" << endl;
 
     createFacesOwnerNeighbourAndPatches
     (
@@ -1458,21 +1457,38 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     List<polyPatch*> patches(patchStarts.size());
 
-    forAll (patches, p)
+    forAll(patches, p)
     {
-        patches[p] = new polyPatch
-        (
-            patchNames[p],
-            patchSizes[p],
-            patchStarts[p],
-            p,
-            pMesh.boundaryMesh()
-        );
+        if (patchTypes[p] == processorPolyPatch::typeName)
+        {
+            patches[p] = new processorPolyPatch
+            (
+                patchNames[p],
+                patchSizes[p],
+                patchStarts[p],
+                p,
+                pMesh.boundaryMesh(),
+                Pstream::myProcNo(),
+                procNeighbours[p]
+            );
+        }
+        else
+        {
+            patches[p] = polyPatch::New
+            (
+                patchTypes[p],
+                patchNames[p],
+                patchSizes[p],
+                patchStarts[p],
+                p,
+                pMesh.boundaryMesh()
+            ).ptr();
+        }
     }
 
     pMesh.addPatches(patches);
 
-    // mesh.overrideCellCentres(cellCentres);
+    // pMesh.overrideCellCentres(cellCentres);
 
     timeCheck("polyMesh created, checking quality");
 
@@ -2018,7 +2034,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
         procNeighbours,
         patchFaces,
         patchOwners,
-        false
+        includeEmptyPatches
     );
 }
 
@@ -2161,9 +2177,6 @@ void Foam::conformalVoronoiMesh::sortProcPatches
         return;
     }
 
-    Info<< "PROC PATCH SORT IS WRONG, OWNER PATCH CELL INDEX IS NOT UNIQUE"
-        << endl;
-
     forAll(patchSortingIndices, patchI)
     {
         faceList& faces = patchFaces[patchI];
@@ -2290,6 +2303,12 @@ void Foam::conformalVoronoiMesh::addPatches
     bool includeEmptyPatches
 ) const
 {
+    // Always write out all patches in parallel
+    if (Pstream::parRun())
+    {
+        includeEmptyPatches = true;
+    }
+
     label nTotalPatches = patchNames.size();
 
     label nValidPatches = 0;

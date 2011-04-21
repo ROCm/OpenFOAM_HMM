@@ -360,11 +360,7 @@ void Foam::conformalVoronoiMesh::writeMesh
         }
     }
 
-    Info<< "addPatches(patches, false); FALSE REQUIRED TO AVOID MEMORY CRASH"
-        << endl;
-
-    // mesh.addPatches(patches);
-    mesh.addPatches(patches, false);
+    mesh.addPatches(patches);
 
     if (!mesh.write())
     {
@@ -393,7 +389,6 @@ void Foam::conformalVoronoiMesh::writeMesh
     //     << endl;
 
     // cellCs.write();
-
 
     Info<< "DISABLED WRITING OF CELL SIZE AND PROTRUSION SET" << endl;
 
