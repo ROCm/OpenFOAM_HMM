@@ -45,7 +45,8 @@ COxidationKineticDiffusionLimitedRate
     O2GlobalId_(owner.composition().globalCarrierId("O2")),
     CO2GlobalId_(owner.composition().globalCarrierId("CO2")),
     WC_(0.0),
-    WO2_(0.0)
+    WO2_(0.0),
+    HcCO2_(0.0)
 {
     // Determine Cs ids
     label idSolid = owner.composition().idSolid();
@@ -55,6 +56,8 @@ COxidationKineticDiffusionLimitedRate
     WO2_ = owner.thermo().carrier().W(O2GlobalId_);
     const scalar WCO2 = owner.thermo().carrier().W(CO2GlobalId_);
     WC_ = WCO2 - WO2_;
+
+    HcCO2_ = owner.thermo().carrier().Hc(CO2GlobalId_);
 
     const scalar YCloc = owner.composition().Y0(idSolid)[CsLocalId_];
     const scalar YSolidTot = owner.composition().YMixture0()[idSolid];
@@ -161,14 +164,11 @@ Foam::scalar Foam::COxidationKineticDiffusionLimitedRate<CloudType>::calculate
     dMassSRCarrier[CO2GlobalId_] += dmCO2;
 
     const scalar HsC = thermo.solids().properties()[CsLocalId_].Hs(T);
-    const scalar HCO2 = thermo.carrier().H(CO2GlobalId_, T);
 
-    // carrier enthalpy transfer handled by change in composition
-    // const scalar HsO2 = thermo.carrier().Hs(O2GlobalId_, T);
-    // dhsTrans -= dmO2*HsO2;
+    // carrier sensible enthalpy exchange handled via change in mass
 
     // Heat of reaction [J]
-    return dmC*HsC - dmCO2*HCO2;
+    return dmC*HsC - dmCO2*HcCO2_;
 }
 
 
