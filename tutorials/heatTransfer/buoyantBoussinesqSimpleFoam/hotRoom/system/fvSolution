@@ -44,7 +44,7 @@ SIMPLE
     {
         p_rgh   1e-2;
         U       1e-4;
-        T       1e-3;
+        T       1e-2;
 
         // possibly check turbulence fields
         "(k|epsilon|omega)" 1e-3;
@@ -54,7 +54,7 @@ SIMPLE
 relaxationFactors
 {
     p_rgh           0.7;
-    U               0.2;
+    U               0.3;
     T               0.5;
     "(k|epsilon|R)" 0.7;
 }

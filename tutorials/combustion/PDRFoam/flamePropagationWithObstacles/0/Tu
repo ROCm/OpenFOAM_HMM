@@ -34,6 +34,7 @@ boundaryField
     blockedFaces
     {
         type            zeroGradient;
+        value           uniform 300;
     }
     baffleWall
     {
