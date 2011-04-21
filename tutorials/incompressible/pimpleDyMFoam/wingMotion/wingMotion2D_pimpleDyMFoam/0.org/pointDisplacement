@@ -35,7 +35,7 @@ boundaryField
         );
         velocity        (0 0 0);
         acceleration    (0 0 0);
-        angularMomentum (0 0 -0.5);
+        angularMomentum (0 0 -2.0);
         torque          (0 0 0);
         rhoName         rhoInf;
         rhoInf          1;
