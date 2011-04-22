@@ -251,6 +251,7 @@ void Foam::autoLayerDriver::handleNonManifolds
 (
     const indirectPrimitivePatch& pp,
     const labelList& meshEdges,
+    const labelListList& edgeGlobalFaces,
     pointField& patchDisp,
     labelList& patchNLayers,
     List<extrudeMode>& extrudeStatus
@@ -268,10 +269,52 @@ void Foam::autoLayerDriver::handleNonManifolds
     // 1. Local check
     checkManifold(pp, nonManifoldPoints);
 
+    // 2. Remote check for boundary edges on coupled boundaries
+    forAll(edgeGlobalFaces, edgeI)
+    {
+        if
+        (
+            pp.edgeFaces()[edgeI].size() == 1
+         && edgeGlobalFaces[edgeI].size() > 2
+        )
+        {
+            // So boundary edges that are connected to more than 2 processors
+            // i.e. a non-manifold edge which is exactly on a processor
+            // boundary.
+            const edge& e = pp.edges()[edgeI];
+            nonManifoldPoints.insert(pp.meshPoints()[e[0]]);
+            nonManifoldPoints.insert(pp.meshPoints()[e[1]]);
+        }
+    }
+
+
     label nNonManif = returnReduce(nonManifoldPoints.size(), sumOp<label>());
 
     Info<< "Outside of local patch is multiply connected across edges or"
         << " points at " << nNonManif << " points." << endl;
+
+    if (nNonManif > 0)
+    {
+        Info<< "Outside of patches is multiply connected across edges or"
+            << " points at " << nNonManif << " points." << endl;
+
+        const labelList& meshPoints = pp.meshPoints();
+
+        forAll(meshPoints, patchPointI)
+        {
+            if (nonManifoldPoints.found(meshPoints[patchPointI]))
+            {
+                unmarkExtrusion
+                (
+                    patchPointI,
+                    patchDisp,
+                    patchNLayers,
+                    extrudeStatus
+                );
+            }
+        }
+    }
+
 
     Info<< "Set displacement to zero for all " << nNonManif
         << " non-manifold points" << endl;
@@ -1309,11 +1352,109 @@ void Foam::autoLayerDriver::getPatchDisplacement
 }
 
 
+bool Foam::autoLayerDriver::sameEdgeNeighbour
+(
+    const labelListList& globalEdgeFaces,
+    const label myGlobalFaceI,
+    const label nbrGlobFaceI,
+    const label edgeI
+) const
+{
+    const labelList& eFaces = globalEdgeFaces[edgeI];
+    if (eFaces.size() == 2)
+    {
+        return edge(myGlobalFaceI, nbrGlobFaceI) == edge(eFaces[0], eFaces[1]);
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+void Foam::autoLayerDriver::getVertexString
+(
+    const indirectPrimitivePatch& pp,
+    const labelListList& globalEdgeFaces,
+    const label faceI,
+    const label edgeI,
+    const label myGlobFaceI,
+    const label nbrGlobFaceI,
+    DynamicList<label>& vertices
+) const
+{
+    const labelList& fEdges = pp.faceEdges()[faceI];
+    label fp = findIndex(fEdges, edgeI);
+
+    if (fp == -1)
+    {
+        FatalErrorIn("autoLayerDriver::getVertexString(..)")
+            << "problem." << abort(FatalError);
+    }
+
+    // Search back
+    label startFp = fp;
+
+    forAll(fEdges, i)
+    {
+        label prevFp = fEdges.rcIndex(startFp);
+        if
+        (
+           !sameEdgeNeighbour
+            (
+                globalEdgeFaces,
+                myGlobFaceI,
+                nbrGlobFaceI,
+                fEdges[prevFp]
+            )
+        )
+        {
+            break;
+        }
+        startFp = prevFp;
+    }
+
+    label endFp = fp;
+    forAll(fEdges, i)
+    {
+        label nextFp = fEdges.fcIndex(endFp);
+        if
+        (
+           !sameEdgeNeighbour
+            (
+                globalEdgeFaces,
+                myGlobFaceI,
+                nbrGlobFaceI,
+                fEdges[nextFp]
+            )
+        )
+        {
+            break;
+        }
+        endFp = nextFp;
+    }
+
+    const face& f = pp.localFaces()[faceI];
+    vertices.clear();
+    fp = startFp;
+    while (fp != endFp)
+    {
+        vertices.append(f[fp]);
+        fp = f.fcIndex(fp);
+    }
+    vertices.append(f[fp]);
+    fp = f.fcIndex(fp);
+    vertices.append(f[fp]);
+}
+
+
 // Truncates displacement
 // - for all patchFaces in the faceset displacement gets set to zero
 // - all displacement < minThickness gets set to zero
 Foam::label Foam::autoLayerDriver::truncateDisplacement
 (
+    const globalIndex& globalFaces,
+    const labelListList& edgeGlobalFaces,
     const motionSmoother& meshMover,
     const scalarField& minThickness,
     const faceSet& illegalPatchFaces,
@@ -1405,6 +1546,10 @@ Foam::label Foam::autoLayerDriver::truncateDisplacement
             extrudeStatus
         );
 
+
+        // Pinch
+        // ~~~~~
+
         // Make sure that a face doesn't have two non-consecutive areas
         // not extruded (e.g. quad where vertex 0 and 2 are not extruded
         // but 1 and 3 are) since this gives topological errors.
@@ -1457,6 +1602,112 @@ Foam::label Foam::autoLayerDriver::truncateDisplacement
             << " faces due to non-consecutive vertices being extruded." << endl;
 
 
+        // Butterfly
+        // ~~~~~~~~~
+
+        // Make sure that a string of edges becomes a single face so
+        // not a butterfly. Occassionally an 'edge' will have a single dangling
+        // vertex due to face combining. These get extruded as a single face
+        // (with a dangling vertex) so make sure this extrusion forms a single
+        // shape.
+        //  - continuous i.e. no butterfly:
+        //      +     +
+        //      |\   /|
+        //      | \ / |
+        //      +--+--+
+        //  - extrudes from all but the endpoints i.e. no partial
+        //    extrude
+        //            +
+        //           /|
+        //          / |
+        //      +--+--+
+        // The common error topology is a pinch somewhere in the middle
+        label nButterFly = 0;
+        {
+            DynamicList<label> stringedVerts;
+            forAll(pp.edges(), edgeI)
+            {
+                const labelList& globFaces = edgeGlobalFaces[edgeI];
+
+                if (globFaces.size() == 2)
+                {
+                    label myFaceI = pp.edgeFaces()[edgeI][0];
+                    label myGlobalFaceI = globalFaces.toGlobal
+                    (
+                        pp.addressing()[myFaceI]
+                    );
+                    label nbrGlobalFaceI =
+                    (
+                        globFaces[0] != myGlobalFaceI
+                      ? globFaces[0]
+                      : globFaces[1]
+                    );
+                    getVertexString
+                    (
+                        pp,
+                        edgeGlobalFaces,
+                        myFaceI,
+                        edgeI,
+                        myGlobalFaceI,
+                        nbrGlobalFaceI,
+                        stringedVerts
+                    );
+
+                    if
+                    (
+                        extrudeStatus[stringedVerts[0]] != NOEXTRUDE
+                     || extrudeStatus[stringedVerts.last()] != NOEXTRUDE
+                    )
+                    {
+                        // Any pinch in the middle
+                        bool pinch = false;
+                        for (label i = 1; i < stringedVerts.size()-1; i++)
+                        {
+                            if
+                            (
+                                extrudeStatus[stringedVerts[i]] == NOEXTRUDE
+                            )
+                            {
+                                pinch = true;
+                                break;
+                            }
+                        }
+                        if (pinch)
+                        {
+                            forAll(stringedVerts, i)
+                            {
+                                if
+                                (
+                                    unmarkExtrusion
+                                    (
+                                        stringedVerts[i],
+                                        patchDisp,
+                                        patchNLayers,
+                                        extrudeStatus
+                                    )
+                                )
+                                {
+                                    nButterFly++;
+                                    nChanged++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        reduce(nButterFly, sumOp<label>());
+
+        Info<< "truncateDisplacement : Unextruded " << nButterFly
+            << " faces due to stringed edges with inconsistent extrusion."
+            << endl;
+
+
+
+        // Consistent number of layers
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
         // Make sure that a face has consistent number of layers for all
         // its vertices.
 
@@ -1504,7 +1755,7 @@ Foam::label Foam::autoLayerDriver::truncateDisplacement
         //Info<< "truncateDisplacement : Unextruded " << nDiffering
         //    << " faces due to having differing number of layers." << endl;
 
-        if (nPinched+nDiffering == 0)
+        if (nPinched+nButterFly+nDiffering == 0)
         {
             break;
         }
@@ -1536,7 +1787,7 @@ void Foam::autoLayerDriver::setupLayerInfoTruncation
         Info<< nl << "Performing no layer truncation."
             << " nBufferCellsNoExtrude set to less than 0  ..." << endl;
 
-        // Face layers if any point get extruded
+        // Face layers if any point gets extruded
         forAll(pp.localFaces(), patchFaceI)
         {
             const face& f = pp.localFaces()[patchFaceI];
@@ -2066,6 +2317,7 @@ void Foam::autoLayerDriver::addLayers
         (
             pp,
             meshEdges,
+            edgeGlobalFaces,
 
             patchDisp,
             patchNLayers,
@@ -2408,10 +2660,13 @@ void Foam::autoLayerDriver::addLayers
         }
 
         // Truncate displacements that are too small (this will do internal
-        // ones, coupled ones have already been truncated by syncPatch)
+        // ones, coupled ones have already been truncated by
+        // syncPatchDisplacement)
         faceSet dummySet(mesh, "wrongPatchFaces", 0);
         truncateDisplacement
         (
+            globalFaces,
+            edgeGlobalFaces,
             meshMover(),
             minThickness,
             dummySet,
@@ -2467,9 +2722,9 @@ void Foam::autoLayerDriver::addLayers
         // (first layer = layer of cells next to the original mesh)
         vectorField firstDisp(patchNLayers.size(), vector::zero);
 
-        forAll(patchNLayers, i)
+        forAll(nPatchPointLayers, i)
         {
-            if (patchNLayers[i] > 0)
+            if (nPatchPointLayers[i] > 0)
             {
                 if (expansionRatio[i] == 1.0)
                 {
