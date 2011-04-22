@@ -295,9 +295,6 @@ void Foam::autoLayerDriver::handleNonManifolds
 
     if (nNonManif > 0)
     {
-        Info<< "Outside of patches is multiply connected across edges or"
-            << " points at " << nNonManif << " points." << endl;
-
         const labelList& meshPoints = pp.meshPoints();
 
         forAll(meshPoints, patchPointI)
