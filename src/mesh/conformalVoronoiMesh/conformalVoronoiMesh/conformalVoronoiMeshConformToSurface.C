@@ -511,9 +511,7 @@ bool Foam::conformalVoronoiMesh::clipLineToBox
         else
         {
             // b is outside, clip b to bounding box.
-
             intersects = box.intersects(b, a, boxPt);
-
             b = boxPt;
         }
     }
@@ -523,9 +521,7 @@ bool Foam::conformalVoronoiMesh::clipLineToBox
         if (box.posBits(b) == 0)
         {
             // b is inside
-
             intersects = box.intersects(a, b, boxPt);
-
             a = boxPt;
         }
         else
@@ -537,9 +533,7 @@ bool Foam::conformalVoronoiMesh::clipLineToBox
             if (intersects)
             {
                 a = boxPt;
-
                 box.intersects(b, a, boxPt);
-
                 b = boxPt;
             }
         }
@@ -563,16 +557,14 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
     }
 
     {
-        // Update the bounds of the domain
-
-        Info<< "USING SINGLE PROCESSOR PER DOMAIN" << endl;
+        // Update the processorMeshBounds
 
         DynamicList<Foam::point> parallelAllPoints;
         DynamicList<label> targetProcessor;
         DynamicList<label> parallelAllIndices;
 
-        Foam::point minPt(VGREAT, VGREAT, VGREAT);
-        Foam::point maxPt(-VGREAT, -VGREAT, -VGREAT);
+        Foam::point minPt = geometryToConformTo_.bounds().min();
+        Foam::point maxPt = geometryToConformTo_.bounds().max();
 
         for
         (
@@ -590,35 +582,27 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
             }
         }
 
-        Pout<< "Before processorDomains update"
-            << geometryToConformTo_.processorDomains()[Pstream::myProcNo()]
-            << endl;
+        treeBoundBox& procMeshBb =
+            geometryToConformTo_.processorMeshBounds()[Pstream::myProcNo()];
 
-        geometryToConformTo_.processorDomains()[Pstream::myProcNo()][0] =
-            treeBoundBox(minPt, maxPt);
+        Pout<< "Before processorMeshBounds update" << procMeshBb << endl;
 
-        Pout<< "After processorDomains update"
-            << geometryToConformTo_.processorDomains()[Pstream::myProcNo()]
-            << endl;
+        procMeshBb = treeBoundBox(minPt, maxPt);
+
+        Pout<< "After processorMeshBounds update" << procMeshBb << endl;
 
         {
             OFstream str
             (
                 runTime_.path()
-                /"procDomainUpdated_"
+                /"processorMeshBoundsUpdated_"
               + name(Pstream::myProcNo())
               + "_bounds.obj"
             );
 
             Pout<< "Writing " << str.name() << endl;
 
-            pointField bbPoints
-            (
-                geometryToConformTo_.processorDomains()
-                [
-                    Pstream::myProcNo()
-                ][0].points()
-            );
+            pointField bbPoints(procMeshBb.points());
 
             forAll(bbPoints, i)
             {
@@ -638,9 +622,9 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
             }
         }
 
-        Pstream::gatherList(geometryToConformTo_.processorDomains());
+        Pstream::gatherList(geometryToConformTo_.processorMeshBounds());
 
-        Pstream::scatterList(geometryToConformTo_.processorDomains());
+        Pstream::scatterList(geometryToConformTo_.processorMeshBounds());
     }
 
     boolList sendToProc(Pstream::nProcs(), false);
@@ -1214,26 +1198,21 @@ void Foam::conformalVoronoiMesh::parallelInterfaceInfluence
         // Pout<< nl << "# circumradius " << sqrt(circumradiusSqr) << endl;
         // drawDelaunayCell(Pout, cit);
 
-        forAll(geometryToConformTo_.processorDomains(), procI)
+        forAll(geometryToConformTo_.processorMeshBounds(), procI)
         {
             if (procI == Pstream::myProcNo())
             {
                 continue;
             }
 
-            const treeBoundBoxList& procBbs =
-                geometryToConformTo_.processorDomains()[procI];
+            const treeBoundBox& procBb =
+                geometryToConformTo_.processorMeshBounds()[procI];
 
-            forAll(procBbs, pBI)
+            if (procBb.overlaps(circumcentre, circumradiusSqr))
             {
-                const treeBoundBox& procBb = procBbs[pBI];
+                toProc[procI] = true;
 
-                if (procBb.overlaps(circumcentre, circumradiusSqr))
-                {
-                    toProc[procI] = true;
-
-                    break;
-                }
+                break;
             }
         }
     }
@@ -1599,7 +1578,7 @@ void Foam::conformalVoronoiMesh::limitDisplacement
 
             if (magSqr(pt - surfHit.hitPoint()) <= searchDistanceSqr)
             {
-                // Cannot limit displacement, point  closer than tolerance
+                // Cannot limit displacement, point closer than tolerance
                 return;
             }
         }
@@ -1774,6 +1753,11 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
 
         if (edHit.hit())
         {
+            if(!geometryToConformTo_.positionOnThisProc(edHit.hitPoint()))
+            {
+                continue;
+            }
+
             if (!nearFeaturePt(edHit.hitPoint()))
             {
                 if

@@ -49,6 +49,7 @@ Foam::conformationSurfaces::conformationSurfaces
     spanMag_(),
     spanMagSqr_(),
     processorDomains_(),
+    processorMeshBounds_(),
     referenceVolumeTypes_(0)
 {
     const dictionary& surfacesDict
@@ -248,6 +249,8 @@ Foam::conformationSurfaces::conformationSurfaces
     {
         processorDomains_.setSize(Pstream::nProcs());
 
+        processorMeshBounds_.setSize(Pstream::nProcs());
+
         if (Pstream::nProcs() == 2)
         {
             processorDomains_[Pstream::myProcNo()] = treeBoundBoxList(4);
@@ -273,9 +276,7 @@ Foam::conformationSurfaces::conformationSurfaces
 
             bounds_ = treeBoundBox(allBbPoints);
 
-            // Replace 4 bound boxes with one
-            processorDomains_[Pstream::myProcNo()] =
-                treeBoundBoxList(1, bounds_);
+
         }
         else if (Pstream::nProcs() == 8)
         {
@@ -299,9 +300,13 @@ Foam::conformationSurfaces::conformationSurfaces
                 << exit(FatalError);
         }
 
-        Pstream::gatherList(processorDomains_);
+        processorMeshBounds_[Pstream::myProcNo()] = bounds_;
 
+        Pstream::gatherList(processorDomains_);
         Pstream::scatterList(processorDomains_);
+
+        Pstream::gatherList(processorMeshBounds_);
+        Pstream::scatterList(processorMeshBounds_);
     }
     else
     {

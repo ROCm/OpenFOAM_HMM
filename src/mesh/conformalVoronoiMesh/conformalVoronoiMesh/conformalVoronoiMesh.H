@@ -725,21 +725,16 @@ private:
             List<Pair<DynamicList<label> > >& patchSortingIndices
         ) const;
 
-        //- Add the faces and owner information for the patches,
-        //  optionally removing any zero-size patches
+        //- Add the faces and owner information for the patches
         void addPatches
         (
             const label nInternalFaces,
             faceList& faces,
             labelList& owner,
-            wordList& patchTypes,
-            wordList& patchNames,
             labelList& patchSizes,
             labelList& patchStarts,
-            labelList& procNeighbours,
             List<DynamicList<face> >& patchFaces,
-            List<DynamicList<label> >& patchOwners,
-            bool includeEmptyPatches
+            List<DynamicList<label> >& patchOwners
         ) const;
 
         //- Remove points that are no longer used by any faces

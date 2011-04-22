@@ -1777,8 +1777,16 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 ) const
 {
     patchNames = geometryToConformTo_.patchNames();
-    patchTypes.setSize(patchNames.size(), wallPolyPatch::typeName);
-    procNeighbours.setSize(patchNames.size(), -1);
+    patchTypes.setSize(patchNames.size() + 1, wallPolyPatch::typeName);
+    procNeighbours.setSize(patchNames.size() + 1, -1);
+
+    patchNames.setSize(patchNames.size() + 1);
+
+    label defaultPatchIndex = patchNames.size() - 1;
+
+    patchTypes[defaultPatchIndex] = wallPolyPatch::typeName;
+    procNeighbours[defaultPatchIndex] = -1;
+    patchNames[defaultPatchIndex] = "cvMesh_defaultPatch";
 
     label nProcPatches = 0;
 
@@ -1835,16 +1843,6 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
             }
         }
     }
-
-    patchTypes.setSize(patchNames.size() + 1);
-    procNeighbours.setSize(patchNames.size() + 1);
-    patchNames.setSize(patchNames.size() + 1);
-
-    label defaultPatchIndex = patchNames.size() - 1;
-
-    patchTypes[defaultPatchIndex] = wallPolyPatch::typeName;
-    procNeighbours[defaultPatchIndex] = -1;
-    patchNames[defaultPatchIndex] = "cvMesh_defaultPatch";
 
     // Pout<< patchTypes << " " << patchNames << endl;
 
@@ -1996,7 +1994,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 
     if (!patchFaces[defaultPatchIndex].empty())
     {
-        Info<< nl << patchFaces[defaultPatchIndex].size()
+        Pout<< nl << patchFaces[defaultPatchIndex].size()
             << " faces were not able to have their patch determined from "
             << "the surface. "
             << nl <<  "Adding to patch " << patchNames[defaultPatchIndex]
@@ -2027,14 +2025,10 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
         nInternalFaces,
         faces,
         owner,
-        patchTypes,
-        patchNames,
         patchSizes,
         patchStarts,
-        procNeighbours,
         patchFaces,
-        patchOwners,
-        includeEmptyPatches
+        patchOwners
     );
 }
 
@@ -2293,95 +2287,26 @@ void Foam::conformalVoronoiMesh::addPatches
     const label nInternalFaces,
     faceList& faces,
     labelList& owner,
-    wordList& patchTypes,
-    wordList& patchNames,
     labelList& patchSizes,
     labelList& patchStarts,
-    labelList& procNeighbours,
     List<DynamicList<face> >& patchFaces,
-    List<DynamicList<label> >& patchOwners,
-    bool includeEmptyPatches
+    List<DynamicList<label> >& patchOwners
 ) const
 {
-    // Always write out all patches in parallel
-    if (Pstream::parRun())
-    {
-        includeEmptyPatches = true;
-    }
+    label nPatches = patchFaces.size();
 
-    label nTotalPatches = patchNames.size();
-
-    label nValidPatches = 0;
-
-    PackedBoolList validPatch(nTotalPatches, false);
-
-    wordList allPatchTypes = patchTypes;
-    wordList allPatchNames = patchNames;
-    labelList allProcNeighbours = procNeighbours;
-
-    patchSizes.setSize(nTotalPatches, -1);
-    patchStarts.setSize(nTotalPatches, -1);
+    patchSizes.setSize(nPatches, -1);
+    patchStarts.setSize(nPatches, -1);
 
     label nBoundaryFaces = 0;
 
     forAll(patchFaces, p)
     {
-        // Check if the patch has any faces.  Never create an empty
-        // default patch.
+        patchSizes[p] = patchFaces[p].size();
+        patchStarts[p] = nInternalFaces + nBoundaryFaces;
 
-        if
-        (
-            patchFaces[p].size()
-         || (includeEmptyPatches && (p != nTotalPatches - 1))
-        )
-        {
-            patchTypes[nValidPatches] = allPatchTypes[p];
-            patchNames[nValidPatches] = allPatchNames[p];
-            procNeighbours[nValidPatches] = allProcNeighbours[p];
-            patchSizes[nValidPatches] = patchFaces[p].size();
-            patchStarts[nValidPatches] = nInternalFaces + nBoundaryFaces;
-
-            nBoundaryFaces += patchSizes[nValidPatches];
-
-            nValidPatches++;
-
-            validPatch[p] = 1;
-        }
-        else
-        {
-            // // Warn if a patch is empty and includeEmptyPatches is
-            // // false, unless it is the default patch or a processor patch
-
-            // if (p != nTotalPatches - 1 && procNeighbours[p] < 0)
-            // {
-            //     WarningIn
-            //     (
-            //         "void Foam::conformalVoronoiMesh::addPatches"
-            //         "("
-            //             "const label nInternalFaces,"
-            //             "faceList& faces,"
-            //             "labelList& owner,"
-            //             "wordList& patchTypes,"
-            //             "wordList& patchNames,"
-            //             "labelList& patchSizes,"
-            //             "labelList& patchStarts,"
-            //             "labelList& procNeighbours,"
-            //             "List<DynamicList<face> >& patchFaces,"
-            //             "List<DynamicList<label> >& patchOwners,"
-            //             "bool includeEmptyPatches"
-            //         ") const"
-            //     )
-            //         << "Patch " << patchNames[p]
-            //         << " has no faces, not creating." << endl;
-            // }
-        }
+        nBoundaryFaces += patchSizes[p];
     }
-
-    patchTypes.setSize(nValidPatches);
-    patchNames.setSize(nValidPatches);
-    procNeighbours.setSize(nValidPatches);
-    patchSizes.setSize(nValidPatches);
-    patchStarts.setSize(nValidPatches);
 
     faces.setSize(nInternalFaces + nBoundaryFaces);
     owner.setSize(nInternalFaces + nBoundaryFaces);
@@ -2390,15 +2315,12 @@ void Foam::conformalVoronoiMesh::addPatches
 
     forAll(patchFaces, p)
     {
-        if (validPatch[p])
+        forAll(patchFaces[p], f)
         {
-            forAll(patchFaces[p], f)
-            {
-                faces[faceI] = patchFaces[p][f];
-                owner[faceI] = patchOwners[p][f];
+            faces[faceI] = patchFaces[p][f];
+            owner[faceI] = patchOwners[p][f];
 
-                faceI++;
-            }
+            faceI++;
         }
     }
 }

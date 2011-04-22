@@ -74,17 +74,23 @@ inline Foam::scalar Foam::conformationSurfaces::spanMagSqr() const
 }
 
 
-inline Foam::List<Foam::treeBoundBoxList>&
-Foam::conformationSurfaces::processorDomains()
+inline const Foam::List<Foam::treeBoundBoxList>&
+Foam::conformationSurfaces::processorDomains() const
 {
     return processorDomains_;
 }
 
 
-inline const Foam::List<Foam::treeBoundBoxList>&
-Foam::conformationSurfaces::processorDomains() const
+inline const Foam::treeBoundBoxList&
+Foam::conformationSurfaces::processorMeshBounds() const
 {
-    return processorDomains_;
+    return processorMeshBounds_;
+}
+
+
+inline Foam::treeBoundBoxList& Foam::conformationSurfaces::processorMeshBounds()
+{
+    return processorMeshBounds_;
 }
 
 

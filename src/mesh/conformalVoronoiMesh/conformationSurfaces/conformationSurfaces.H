@@ -103,8 +103,12 @@ class conformationSurfaces
         scalar spanMagSqr_;
 
         //- All of the treeBoundBoxes representing volumes held by all
-        //  processors
+        //  processors.  A non-overlapping set of volumes.
         List<treeBoundBoxList> processorDomains_;
+
+        //- The bounds of the mesh on each processor - can overlap as the mesh
+        //  is generated, used to determine which vertices to refer.
+        treeBoundBoxList processorMeshBounds_;
 
         //- The pattern/signature of volumeTypes representing a point in the
         // domain to be meshed
@@ -166,11 +170,14 @@ public:
             //- Return spanSqr
             inline scalar spanMagSqr() const;
 
-            //- Return non-const access to the processorDomains
-            inline List<treeBoundBoxList>& processorDomains();
-
             //- Return the processorDomains
             inline const List<treeBoundBoxList>& processorDomains() const;
+
+            //- Return the processorMeshBounds
+            inline const treeBoundBoxList& processorMeshBounds() const;
+
+            //- Return non-const access to the processorMeshBounds
+            inline treeBoundBoxList& processorMeshBounds();
 
 
         // Query
