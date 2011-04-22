@@ -4,4 +4,3 @@ scalar maxAcousticCo
 (
     readScalar(runTime.controlDict().lookup("maxAcousticCo"))
 );
-

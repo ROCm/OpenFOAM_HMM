@@ -8063,6 +8063,7 @@ boundaryField
     blockedFaces
     {
         type            zeroGradient;
+        value           uniform ( 0 0 0 0 0 0 );
     }
     baffleWall
     {

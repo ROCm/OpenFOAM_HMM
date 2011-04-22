@@ -25,9 +25,9 @@ pointSync false;
 // Patches to create.
 patches
 (
-    {                
+    {
         // Name of new patch
-        name side1;   
+        name side1;
 
         // Type of new patch
         patchInfo

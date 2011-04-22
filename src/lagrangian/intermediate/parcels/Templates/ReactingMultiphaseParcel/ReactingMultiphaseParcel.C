@@ -367,7 +367,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             d0,
             U0,
             rho0,
-            0.5*(mass0 + mass1),
+            mass0,
             Su,
             dUTrans,
             Spu
@@ -384,16 +384,18 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         {
             scalar dm = np0*dMassGas[i];
             label gid = composition.localToGlobalCarrierId(GAS, i);
-            scalar hs = composition.carrier().Hs(gid, 0.5*(T0 + T1));
+            scalar hs = composition.carrier().Hs(gid, T0);
             td.cloud().rhoTrans(gid)[cellI] += dm;
+            td.cloud().UTrans()[cellI] += dm*U0;
             td.cloud().hsTrans()[cellI] += dm*hs;
         }
         forAll(YLiquid_, i)
         {
             scalar dm = np0*dMassLiquid[i];
             label gid = composition.localToGlobalCarrierId(LIQ, i);
-            scalar hs = composition.carrier().Hs(gid, 0.5*(T0 + T1));
+            scalar hs = composition.carrier().Hs(gid, T0);
             td.cloud().rhoTrans(gid)[cellI] += dm;
+            td.cloud().UTrans()[cellI] += dm*U0;
             td.cloud().hsTrans()[cellI] += dm*hs;
         }
 /*
@@ -402,16 +404,18 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         {
             scalar dm = np0*dMassSolid[i];
             label gid = composition.localToGlobalCarrierId(SLD, i);
-            scalar hs = composition.carrier().Hs(gid, 0.5*(T0 + T1));
+            scalar hs = composition.carrier().Hs(gid, T0);
             td.cloud().rhoTrans(gid)[cellI] += dm;
+            td.cloud().UTrans()[cellI] += dm*U0;
             td.cloud().hsTrans()[cellI] += dm*hs;
         }
 */
         forAll(dMassSRCarrier, i)
         {
             scalar dm = np0*dMassSRCarrier[i];
-            scalar hs = composition.carrier().Hs(i, 0.5*(T0 + T1));
+            scalar hs = composition.carrier().Hs(i, T0);
             td.cloud().rhoTrans(i)[cellI] += dm;
+            td.cloud().UTrans()[cellI] += dm*U0;
             td.cloud().hsTrans()[cellI] += dm*hs;
         }
 
