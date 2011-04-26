@@ -150,6 +150,7 @@ void Foam::cyclicPolyPatch::calcTransforms
     }
 
 
+    // Some sanity checks
 
     if (half0Ctrs.size() != half1Ctrs.size())
     {
@@ -162,6 +163,22 @@ void Foam::cyclicPolyPatch::calcTransforms
             << " there are " << half1Ctrs.size()
             << exit(FatalError);
     }
+
+    if (transform_ != neighbPatch().transform_)
+    {
+        FatalErrorIn
+        (
+            "cyclicPolyPatch::calcTransforms()"
+        )   << "Patch " << name()
+            << " has transform type " << transformTypeNames[transform_]
+            << ", neighbour patch " << neighbPatchName_
+            << " has transform type "
+            << neighbPatch().transformTypeNames[transform_]
+            << exit(FatalError);
+    }
+
+
+    // Calculate transformation tensors
 
     if (half0Ctrs.size() > 0)
     {
@@ -275,6 +292,71 @@ void Foam::cyclicPolyPatch::calcTransforms
                 matchTol,
                 transform_
             );
+
+
+            if (transform_ == TRANSLATIONAL)
+            {
+                if (debug)
+                {
+                    Pout<< "cyclicPolyPatch::calcTransforms :"
+                        << " Specified separation vector : "
+                        << separationVector_ << endl;
+                }
+
+                // Check that separation vectors are same.
+                const scalar avgTol = average(half0Tols);
+                if
+                (
+                    mag(separationVector_ + neighbPatch().separationVector_)
+                  > avgTol
+                )
+                {
+                    WarningIn
+                    (
+                        "cyclicPolyPatch::calcTransforms()"
+                    )   << "Specified separation vector " << separationVector_
+                        << " differs by that of neighbouring patch "
+                        << neighbPatch().separationVector_
+                        << " by more than tolerance " << avgTol << endl
+                        << "patch:" << name()
+                        << " neighbour:" << neighbPatchName_
+                        << endl;
+                }
+
+
+                // Override computed transform with specified.
+                if
+                (
+                    separation().size() != 1
+                 || mag(separation()[0] - separationVector_) > avgTol
+                )
+                {
+                    WarningIn
+                    (
+                        "cyclicPolyPatch::calcTransforms()"
+                    )   << "Specified separationVector " << separationVector_
+                        << " differs from computed separation vector "
+                        << separation() << endl
+                        << "This probably means your geometry is not consistent"
+                        << " with the specified separation and might lead"
+                        << " to problems." << endl
+                        << "Continuing with specified separation vector "
+                        << separationVector_ << endl
+                        << "patch:" << name()
+                        << " neighbour:" << neighbPatchName_
+                        << endl;
+                }
+
+                // Set tensors
+                const_cast<tensorField&>(forwardT()).clear();
+                const_cast<tensorField&>(reverseT()).clear();
+                const_cast<vectorField&>(separation()) = vectorField
+                (
+                    1,
+                    separationVector_
+                );
+                const_cast<boolList&>(collocated()) = boolList(1, false);
+            }
         }
     }
 }
@@ -298,6 +380,16 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
     half0Ctrs = pp0.faceCentres();
     anchors0 = getAnchorPoints(pp0, pp0.points());
     half1Ctrs = pp1.faceCentres();
+
+    if (debug)
+    {
+        Pout<< "cyclicPolyPatch::getCentresAndAnchors :"
+            << " patch:" << name() << nl
+            << "half0 untransformed faceCentres (avg) : "
+            << gAverage(half0Ctrs) << nl
+            << "half1 untransformed faceCentres (avg) : "
+            << gAverage(half1Ctrs) << endl;
+    }
 
     switch (transform_)
     {
@@ -355,23 +447,21 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
 
             break;
         }
-        //- Problem: usually specified translation is not accurate enough
-        //- to get proper match so keep automatic determination over here.
-        //case TRANSLATIONAL:
-        //{
-        //    // Transform 0 points.
-        //
-        //    if (debug)
-        //    {
-        //        Pout<< "cyclicPolyPatch::getCentresAndAnchors :"
-        //            << "Specified translation : " << separationVector_
-        //            << endl;
-        //    }
-        //
-        //    half0Ctrs += separationVector_;
-        //    anchors0 += separationVector_;
-        //    break;
-        //}
+        case TRANSLATIONAL:
+        {
+            // Transform 0 points.
+
+            if (debug)
+            {
+                Pout<< "cyclicPolyPatch::getCentresAndAnchors :"
+                    << "Specified translation : " << separationVector_
+                    << endl;
+            }
+
+            half0Ctrs -= separationVector_;
+            anchors0 -= separationVector_;
+            break;
+        }
         default:
         {
             // Assumes that cyclic is planar. This is also the initial
@@ -1132,6 +1222,13 @@ bool Foam::cyclicPolyPatch::order
     labelList& rotation
 ) const
 {
+    if (debug)
+    {
+        Pout<< "order : of " << pp.size()
+            << " faces of patch:" << name()
+            << " neighbour:" << neighbPatchName_
+            << endl;
+    }
     faceMap.setSize(pp.size());
     faceMap = -1;
 
@@ -1173,6 +1270,14 @@ bool Foam::cyclicPolyPatch::order
             anchors0,
             tols
         );
+
+        if (debug)
+        {
+            Pout<< "half0 transformed faceCentres (avg)   : "
+                << gAverage(half0Ctrs) << nl
+                << "half1 untransformed faceCentres (avg) : "
+                << gAverage(half1Ctrs) << endl;
+        }
 
         // Geometric match of face centre vectors
         bool matchedAll = matchPoints
