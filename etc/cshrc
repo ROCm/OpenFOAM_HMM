@@ -157,7 +157,7 @@ while ( $#argv > 0 )
         if ( -f "$1" ) then
             _foamSource "$1"
         else
-            _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile "$1"`
+            _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile -silent "$1"`
         endif
         breaksw
     endsw

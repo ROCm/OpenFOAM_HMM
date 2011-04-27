@@ -40,7 +40,7 @@
 #
 #-------------------------------------------------------------------------------
 usage() {
-    [ "$quietOpt" = true ] && exit 1
+    [ "${quietOpt:-$silentOpt}" = true ] && exit 1
 
     exec 1>&2
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
@@ -53,6 +53,7 @@ options:
   -mode <mode>      any combination of u(user), g(group), o(other)
   -prefix <dir>     specify an alternative installation prefix
   -quiet            suppress all normal output
+  -silent           suppress all stderr output
   -version <ver>    specify an alternative OpenFOAM version
                     in the form Maj.Min.Rev (eg, 1.7.0)
   -help             print the usage
@@ -128,7 +129,7 @@ esac
 
 # default mode is 'ugo'
 mode=ugo
-unset listOpt quietOpt
+unset listOpt quietOpt silentOpt
 
 # parse options
 while [ "$#" -gt 0 ]
@@ -161,6 +162,9 @@ do
         ;;
     -q | -quiet)
         quietOpt=true
+        ;;
+    -s | -silent)
+        silentOpt=true
         ;;
     -v | -version)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
@@ -241,7 +245,7 @@ then
     # list directories, or potential file locations
     [ "$nArgs" -le 1 ] || usage
 
-    # a silly combination, but -quiet has precedence
+    # a silly combination, but -quiet does have precedence
     [ "$quietOpt" = true ] && exit 0
 
     for dir
