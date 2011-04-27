@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,9 @@ Class
     Foam::timeVaryingUniformTotalPressureFvPatchScalarField
 
 Description
-    A time-varying form of a uniform total pressure boundary condition.
+    A time-varying form of a uniform total pressure boundary condition. The
+    variation is specified as an interpolationTable (see
+    Foam::interpolationTable).
 
 See Also
     Foam::timeVaryingUniformFixedValueFvPatchField
