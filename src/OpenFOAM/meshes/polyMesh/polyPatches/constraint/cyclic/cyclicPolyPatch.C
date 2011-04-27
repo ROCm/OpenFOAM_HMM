@@ -185,6 +185,9 @@ void Foam::cyclicPolyPatch::calcTransforms
         vectorField half0Normals(half0Areas.size());
         vectorField half1Normals(half1Areas.size());
 
+        scalar maxAreaDiff = -GREAT;
+        label maxAreaFacei = -1;
+
         forAll(half0, facei)
         {
             scalar magSf = mag(half0Areas[facei]);
@@ -199,32 +202,55 @@ void Foam::cyclicPolyPatch::calcTransforms
                 half0Normals[facei] = point(1, 0, 0);
                 half1Normals[facei] = half0Normals[facei];
             }
-            else if (mag(magSf - nbrMagSf)/avSf > coupledPolyPatch::matchTol)
-            {
-                FatalErrorIn
-                (
-                    "cyclicPolyPatch::calcTransforms()"
-                )   << "face " << facei << " area does not match neighbour by "
-                    << 100*mag(magSf - nbrMagSf)/avSf
-                    << "% -- possible face ordering problem." << endl
-                    << "patch:" << name()
-                    << " my area:" << magSf
-                    << " neighbour area:" << nbrMagSf
-                    << " matching tolerance:" << coupledPolyPatch::matchTol
-                     << endl
-                    << "Mesh face:" << start()+facei
-                    << " fc:" << half0Ctrs[facei]
-                    << endl
-                    << "Neighbour fc:" << half1Ctrs[facei]
-                    << endl
-                    << "Rerun with cyclic debug flag set"
-                    << " for more information." << exit(FatalError);
-            }
             else
             {
-                half0Normals[facei] = half0Areas[facei] / magSf;
-                half1Normals[facei] = half1Areas[facei] / nbrMagSf;
+                scalar areaDiff = mag(magSf - nbrMagSf)/avSf;
+
+                if (areaDiff > maxAreaDiff)
+                {
+                    maxAreaDiff = areaDiff;
+                    maxAreaFacei = facei;
+                }
+
+                if (areaDiff > coupledPolyPatch::matchTol)
+                {
+                    FatalErrorIn
+                    (
+                        "cyclicPolyPatch::calcTransforms()"
+                    )   << "face " << facei
+                        << " area does not match neighbour by "
+                        << 100*areaDiff
+                        << "% -- possible face ordering problem." << endl
+                        << "patch:" << name()
+                        << " my area:" << magSf
+                        << " neighbour area:" << nbrMagSf
+                        << " matching tolerance:" << coupledPolyPatch::matchTol
+                         << endl
+                        << "Mesh face:" << start()+facei
+                        << " fc:" << half0Ctrs[facei]
+                        << endl
+                        << "Neighbour fc:" << half1Ctrs[facei]
+                        << endl
+                        << "Rerun with cyclic debug flag set"
+                        << " for more information." << exit(FatalError);
+                }
+                else
+                {
+                    half0Normals[facei] = half0Areas[facei] / magSf;
+                    half1Normals[facei] = half1Areas[facei] / nbrMagSf;
+                }
             }
+        }
+
+
+        // Print area match
+        if (debug)
+        {
+            Pout<< "cyclicPolyPatch::calcTransforms :"
+                << " Max area error:" << 100*maxAreaDiff << "% at face:"
+                << maxAreaFacei << " at:" << half0Ctrs[maxAreaFacei]
+                << " coupled face at:" << half1Ctrs[maxAreaFacei]
+                << endl;
         }
 
 
@@ -457,6 +483,9 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
                     << "Specified translation : " << separationVector_
                     << endl;
             }
+
+            // Note: getCentresAndAnchors gets called on the slave side
+            // so separationVector is owner-slave points.
 
             half0Ctrs -= separationVector_;
             anchors0 -= separationVector_;
@@ -833,6 +862,9 @@ void Foam::cyclicPolyPatch::transformPosition(pointField& l) const
     }
     else if (separated())
     {
+        // transformPosition gets called on the receiving side,
+        // separation gets calculated on the sending side so subtract.
+
         const vectorField& s = separation();
         if (s.size() == 1)
         {
