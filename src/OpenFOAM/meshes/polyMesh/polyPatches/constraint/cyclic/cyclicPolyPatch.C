@@ -212,7 +212,7 @@ void Foam::cyclicPolyPatch::calcTransforms
                     maxAreaFacei = facei;
                 }
 
-                if (areaDiff > coupledPolyPatch::matchTol)
+                if (areaDiff > matchTolerance())
                 {
                     FatalErrorIn
                     (
@@ -224,12 +224,16 @@ void Foam::cyclicPolyPatch::calcTransforms
                         << "patch:" << name()
                         << " my area:" << magSf
                         << " neighbour area:" << nbrMagSf
-                        << " matching tolerance:" << coupledPolyPatch::matchTol
+                        << " matching tolerance:" << matchTolerance()
                          << endl
                         << "Mesh face:" << start()+facei
                         << " fc:" << half0Ctrs[facei]
                         << endl
                         << "Neighbour fc:" << half1Ctrs[facei]
+                        << endl
+                        << "If you are certain your matching is correct"
+                        << " you can increase the 'matchTolerance' setting"
+                        << " in the patch dictionary in the boundary file."
                         << endl
                         << "Rerun with cyclic debug flag set"
                         << " for more information." << exit(FatalError);
@@ -302,6 +306,7 @@ void Foam::cyclicPolyPatch::calcTransforms
             (
                 calcFaceTol
                 (
+                    matchTolerance(),
                     half0,
                     half0.points(),
                     static_cast<const pointField&>(half0Ctrs)
@@ -315,7 +320,7 @@ void Foam::cyclicPolyPatch::calcTransforms
                 half0Normals,
                 half1Normals,
                 half0Tols,
-                matchTol,
+                matchTolerance(),
                 transform_
             );
 
@@ -506,7 +511,7 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
             vector n1 = pp1[max1I].normal(pp1.points());
             n1 /= mag(n1) + VSMALL;
 
-            if (mag(n0 & n1) < 1-coupledPolyPatch::matchTol)
+            if (mag(n0 & n1) < 1-matchTolerance())
             {
                 if (debug)
                 {
@@ -557,7 +562,7 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
 
 
     // Calculate typical distance per face
-    tols = calcFaceTol(pp1, pp1.points(), half1Ctrs);
+    tols = calcFaceTol(matchTolerance(), pp1, pp1.points(), half1Ctrs);
 }
 
 
@@ -1445,7 +1450,7 @@ bool Foam::cyclicPolyPatch::order
 
 void Foam::cyclicPolyPatch::write(Ostream& os) const
 {
-    polyPatch::write(os);
+    coupledPolyPatch::write(os);
     os.writeKeyword("neighbourPatch") << neighbPatchName_
         << token::END_STATEMENT << nl;
     switch (transform_)
