@@ -248,6 +248,9 @@ case ThirdParty:
         breaksw
     endsw
 
+    # optional configuration tweaks:
+    _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config/compiler.csh`
+
     if ( $?gcc_version ) then
         set gccDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$gcc_version
         set gmpDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$gmp_version
@@ -367,8 +370,10 @@ unsetenv MPI_ARCH_PATH MPI_HOME FOAM_MPI_LIBBIN
 
 switch ("$WM_MPLIB")
 case OPENMPI:
-    #setenv FOAM_MPI openmpi-1.4.3
     setenv FOAM_MPI openmpi-1.5.3
+    # optional configuration tweaks:
+    _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config/openmpi.csh`
+
     setenv MPI_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
 
     # Tell OpenMPI where to find its install directory
