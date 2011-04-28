@@ -144,6 +144,10 @@ _foamEval()
     while [ $# -gt 0 ]
     do
         case "$1" in
+        -*)
+            # stray option (not meant for us here) -> get out
+            break
+            ;;
         *=)
             # name=       -> unset name
             [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "unset ${1%=}"

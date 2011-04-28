@@ -142,6 +142,10 @@ _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile prefs.csh`
 setenv FOAM_SETTINGS "${*}"
 while ( $#argv > 0 )
     switch ($argv[1])
+    case -*:
+        # stray option (not meant for us here) -> get out
+        break
+        breaksw
     case *=:
         # name=       -> unsetenv name
         if ($?FOAM_VERBOSE && $?prompt) echo "unsetenv $argv[1]:s/=//"
