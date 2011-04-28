@@ -25,7 +25,9 @@ Class
     Foam::timeVaryingUniformFixedValueFvPatchField
 
 Description
-    A time-varying form of a uniform fixed value boundary condition.
+    A time-varying form of a uniform fixed value boundary condition. The
+    variation is specified as an interpolationTable (see
+    Foam::interpolationTable for read options).
 
     Example of the boundary condition specification:
     \verbatim

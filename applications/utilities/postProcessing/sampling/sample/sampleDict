@@ -23,6 +23,7 @@ FoamFile
 //      gnuplot
 //      raw
 //      vtk
+//      csv
 setFormat raw;
 
 // Surface output format. Choice of

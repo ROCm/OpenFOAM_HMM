@@ -107,7 +107,7 @@ protected:
         tmp<volScalarField> calcInvR1(const volVectorField& U) const;
 
         //- Calculate the cosine of the angle between gravity vector and
-        //  cell out flow direction 
+        //  cell out flow direction
         tmp<scalarField> calcCosAngle(const surfaceScalarField& phi) const;
 
 

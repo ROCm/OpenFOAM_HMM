@@ -32,7 +32,7 @@ FoamFile
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_wallFilmFaces;
         offsetMode      nonuniform;
-        offsets         
+        offsets
 200
 (
 (4.33680869e-19 4.33680869e-19 -0)

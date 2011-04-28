@@ -69,6 +69,12 @@ private:
 
     // Private data
 
+        //- default matching tolerance
+        static const scalar defaultMatchTol_;
+
+        //- local matching tolerance
+        const scalar matchTolerance_;
+
         //- offset (distance) vector from one side of the couple to the other
         mutable vectorField separation_;
 
@@ -80,14 +86,6 @@ private:
 
         //- Are faces collocated. Either size 0,1 or length of patch.
         mutable boolList collocated_;
-
-public:
-
-    // Static data members
-
-        //- Relative tolerance (for geometric matching).
-        static scalar matchTol;
-
 
 protected:
 
@@ -105,7 +103,7 @@ protected:
             const vectorField& nf,
             const vectorField& nr,
             const scalarField& smallDist,
-            const scalar absTol = matchTol,
+            const scalar absTol,
             const transformType = UNKNOWN
         ) const;
 
@@ -162,6 +160,7 @@ protected:
         //  from face centre to any of the face vertices.
         static scalarField calcFaceTol
         (
+            const scalar matchTol,
             const UList<face>& faces,
             const pointField& points,
             const pointField& faceCentres
@@ -295,6 +294,11 @@ public:
                 return collocated_;
             }
 
+            scalar matchTolerance() const
+            {
+                return matchTolerance_;
+            }
+
 
         //- Calculate the patch geometry
         virtual void calcGeometry
@@ -328,6 +332,9 @@ public:
             labelList& faceMap,
             labelList& rotation
         ) const = 0;
+
+        //- Write the polyPatch data as a dictionary
+        virtual void write(Ostream&) const;
 };
 
 

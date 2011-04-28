@@ -20,35 +20,12 @@ internalField   uniform 0;
 
 boundaryField
 {
-    floor
+    ".*"
     {
         type            MarshakRadiation;
         T               T;
-        emissivity      1;
-        value           uniform 0;
-    }
-
-    fixedWalls
-    {
-        type            MarshakRadiation;
-        T               T;
-        emissivity      1;
-        value           uniform 0;
-    }
-
-    ceiling
-    {
-        type            MarshakRadiation;
-        T               T;
-        emissivity      1;
-        value           uniform 0;
-    }
-
-    box
-    {
-        type            MarshakRadiation;
-        T               T;
-        emissivity      1;
+        emissivityMode  lookup;
+        emissivity      uniform 1.0;
         value           uniform 0;
     }
 }
