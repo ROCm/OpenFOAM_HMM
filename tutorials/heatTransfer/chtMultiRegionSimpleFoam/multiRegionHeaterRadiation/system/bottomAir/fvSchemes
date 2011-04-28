@@ -16,7 +16,7 @@ FoamFile
 
 ddtSchemes
 {
-    default steadyState;
+    default     steadyState;
 }
 
 gradSchemes
@@ -41,13 +41,13 @@ divSchemes
 laplacianSchemes
 {
     default         none;
-    laplacian(muEff,U) Gauss linear corrected;
-    laplacian((rho*(1|A(U))),p_rgh) Gauss linear corrected;
-    laplacian(alphaEff,h) Gauss linear corrected;
-    laplacian(DkEff,k) Gauss linear corrected;
-    laplacian(DepsilonEff,epsilon) Gauss linear corrected;
-    laplacian(DREff,R) Gauss linear corrected;
-    laplacian(gammaRad,G) Gauss linear corrected;
+    laplacian(muEff,U) Gauss linear uncorrected;
+    laplacian((rho*(1|A(U))),p_rgh) Gauss linear uncorrected;
+    laplacian(alphaEff,h) Gauss linear uncorrected;
+    laplacian(DkEff,k) Gauss linear uncorrected;
+    laplacian(DepsilonEff,epsilon) Gauss linear uncorrected;
+    laplacian(DREff,R) Gauss linear uncorrected;
+    laplacian(gammaRad,G) Gauss linear uncorrected;
 }
 
 interpolationSchemes
@@ -57,7 +57,7 @@ interpolationSchemes
 
 snGradSchemes
 {
-    default         corrected;
+    default         uncorrected;
 }
 
 fluxRequired
