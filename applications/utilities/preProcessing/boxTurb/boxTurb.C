@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,15 +43,15 @@ Description
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-#   include "setRootCase.H"
+    #include "setRootCase.H"
 
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "createFields.H"
-#   include "readBoxTurbDict.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "createFields.H"
+    #include "readBoxTurbDict.H"
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Kmesh K(mesh);
 
@@ -67,7 +67,12 @@ int main(int argc, char *argv[])
 
     U.write();
 
-    calcEk(U, K).write(runTime.timePath()/"Ek", runTime.graphFormat());
+    calcEk(U, K).write
+    (
+        runTime.path()/"graphs"/runTime.timeName(),
+        "Ek",
+        runTime.graphFormat()
+    );
 
     Info<< "end" << endl;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ License
 #include "OFstream.H"
 #include "IOmanip.H"
 #include "Pair.H"
+#include "OSspecific.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -211,11 +212,11 @@ void Foam::graph::write(Ostream& os, const word& format) const
 }
 
 
-void Foam::graph::write(const fileName& fName, const word& format) const
+void Foam::graph::write(const fileName& pName, const word& format) const
 {
     autoPtr<writer> graphWriter(writer::New(format));
 
-    OFstream graphFile(fName + '.' + graphWriter().ext());
+    OFstream graphFile(pName + '.' + graphWriter().ext());
 
     if (graphFile.good())
     {
@@ -227,6 +228,18 @@ void Foam::graph::write(const fileName& fName, const word& format) const
             << "Could not open graph file " << graphFile.name()
             << endl;
     }
+}
+
+
+void Foam::graph::write
+(
+    const fileName& path,
+    const word& name,
+    const word& format
+) const
+{
+    mkDir(path);
+    write(path/name, format);
 }
 
 
