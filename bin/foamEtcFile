@@ -38,6 +38,10 @@
 #            && _foamSource $foamPrefs
 #     \endcode
 #
+# Note
+#     This script must exist in <foamInstall>/OpenFOAM-<VERSION>/bin/
+#     or <foamInstall>/openfoam<VERSION>/bin/ (for the debian version)
+#
 #-------------------------------------------------------------------------------
 usage() {
     [ "${quietOpt:-$silentOpt}" = true ] && exit 1
@@ -73,13 +77,9 @@ USAGE
     exit 1
 }
 
-#
-# This script must exist in <foamInstall>/OpenFOAM-<VERSION>/bin/
-# or <foamInstall>/openfoam<VERSION>/bin/ (for the debian version)
-#
 #-------------------------------------------------------------------------------
 
-# the bindir:
+# the bin dir:
 binDir="${0%/*}"
 
 # the project dir:
