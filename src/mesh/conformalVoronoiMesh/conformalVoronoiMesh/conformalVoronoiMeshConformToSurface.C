@@ -1212,7 +1212,6 @@ void Foam::conformalVoronoiMesh::parallelInterfaceInfluence
             {
                 toProc[procI] = true;
 
-                break;
             }
         }
     }
