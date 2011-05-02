@@ -328,37 +328,49 @@ void Foam::conformalVoronoiMesh::writeMesh
         xferMove(neighbour)
     );
 
-
     List<polyPatch*> patches(patchStarts.size());
+
+    label nValidPatches = 0;
 
     forAll(patches, p)
     {
         if (patchTypes[p] == processorPolyPatch::typeName)
         {
-            patches[p] = new processorPolyPatch
-            (
-                patchNames[p],
-                patchSizes[p],
-                patchStarts[p],
-                p,
-                mesh.boundaryMesh(),
-                Pstream::myProcNo(),
-                procNeighbours[p]
-            );
+            // Do not create empty processor patches
+
+            if (patchSizes[p] > 0)
+            {
+                patches[nValidPatches] = new processorPolyPatch
+                (
+                    patchNames[p],
+                    patchSizes[p],
+                    patchStarts[p],
+                    nValidPatches,
+                    mesh.boundaryMesh(),
+                    Pstream::myProcNo(),
+                    procNeighbours[p]
+                );
+
+                nValidPatches++;
+            }
         }
         else
         {
-            patches[p] = polyPatch::New
+            patches[nValidPatches] = polyPatch::New
             (
                 patchTypes[p],
                 patchNames[p],
                 patchSizes[p],
                 patchStarts[p],
-                p,
+                nValidPatches,
                 mesh.boundaryMesh()
             ).ptr();
+
+            nValidPatches++;
         }
     }
+
+    patches.setSize(nValidPatches);
 
     mesh.addPatches(patches);
 
