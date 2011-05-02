@@ -22,15 +22,15 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     config/openmpi.sh
+#     config/example/openmpi.csh
 #
 # Description
-#     Fine tuning of openmpi settings for OpenFOAM
-#     Sourced from OpenFOAM-<VERSION>/etc/settings.sh
+#     Example of fine tuning openmpi settings for OpenFOAM
+#     Sourced from OpenFOAM-<VERSION>/etc/settings.csh
 #
 #------------------------------------------------------------------------------
 
 # Modified openmpi settings
-export FOAM_MPI=openmpi-1.4.3
+setenv FOAM_MPI openmpi-1.4.3
 
 # ----------------------------------------------------------------- end-of-file

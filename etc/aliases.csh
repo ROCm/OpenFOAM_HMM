@@ -49,7 +49,7 @@ alias wmSchedOFF 'unsetenv WM_SCHEDULER'
 
 # Change ParaView version
 # ~~~~~~~~~~~~~~~~~~~~~~~
-alias foamPV 'source `$WM_PROJECT_DIR/etc/apps/paraview3/cshrc` ParaView_VERSION=\!*; echo paraview-$ParaView_VERSION'
+alias foamPV 'source `$WM_PROJECT_DIR/etc/config/paraview.csh` ParaView_VERSION=\!*; echo paraview-$ParaView_VERSION'
 
 
 # Change directory aliases

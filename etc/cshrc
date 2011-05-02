@@ -199,8 +199,8 @@ _foamSource $WM_PROJECT_DIR/etc/aliases.csh
 
 # Source user setup files for optional packages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile apps/paraview3/cshrc`
-_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile apps/ensight/cshrc`
+_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config/paraview.csh`
+_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config/ensight.csh`
 
 
 # Clean environment paths again. Only remove duplicates

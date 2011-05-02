@@ -22,10 +22,10 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     paraview3/bashrc-EXAMPLE
+#     config/example/paraview.csh
 #
 # Description
-#     Example of chaining to the standard paraview3/bashrc with a
+#     Example of chaining to the standard config/paraview.csh with a
 #     different ParaView_VERSION
 #
 # Note
@@ -35,11 +35,11 @@
 #------------------------------------------------------------------------------
 
 #
-# Use other (shipped) bashrc with a different ParaView_VERSION
+# Use other (shipped) paraview.csh with a different ParaView_VERSION
 #
 
-foamFile=$($WM_PROJECT_DIR/bin/foamEtcFile -mode o apps/paraview3/bashrc 2>/dev/null)
-[ $? -eq 0 ] && . $foamFile ParaView_VERSION=3.9.0
+set foamFile=`$WM_PROJECT_DIR/bin/foamEtcFile -mode o config/paraview.csh`
+if ( $status == 0 ) source $foamFile ParaView_VERSION=3.9.0
 
 unset foamFile
 

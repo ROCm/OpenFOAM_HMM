@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -22,28 +22,18 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     config/compiler.sh
+#     config/scotch.sh
 #
 # Description
-#     Fine tuning of ThirdParty compiler settings for OpenFOAM
-#     Sourced from OpenFOAM-<VERSION>/etc/settings.sh
+#     Setup file for scotch include/libraries.
+#     Sourced during wmake process only.
 #
+# Note
+#     A csh version is not needed, since the values here are only sourced
+#     during the wmake process
 #------------------------------------------------------------------------------
 
-# Modified compiler settings
-case "$WM_COMPILER" in
-Gcc46 | Gcc46++0x)
-    gcc_version=gcc-4.6.0
-    gmp_version=gmp-5.0.1
-    mpfr_version=mpfr-2.4.2
-    mpc_version=mpc-0.8.1
-    ;;
-Gcc45 | Gcc45++0x)
-    gcc_version=gcc-4.5.2
-    gmp_version=gmp-5.0.1
-    mpfr_version=mpfr-2.4.2
-    mpc_version=mpc-0.8.1
-    ;;
-esac
+export SCOTCH_VERSION=scotch_5.1.11
+export SCOTCH_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$SCOTCH_VERSION
 
-# ----------------------------------------------------------------- end-of-file
+# -----------------------------------------------------------------------------

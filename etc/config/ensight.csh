@@ -2,9 +2,9 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -22,15 +22,33 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     config/openmpi.csh
+#     config/ensight.csh
 #
 # Description
-#     Fine tuning of openmpi settings for OpenFOAM
-#     Sourced from OpenFOAM-<VERSION>/etc/settings.csh
+#     Setup file for Ensight
+#     Sourced from OpenFOAM-*/etc/cshrc
 #
 #------------------------------------------------------------------------------
 
-# Modified openmpi settings
-setenv FOAM_MPI openmpi-1.4.3
+# fallback value
+if (! $?CEI_HOME) then
+    setenv CEI_HOME /usr/local/ensight/CEI
+endif
 
-# ----------------------------------------------------------------- end-of-file
+if ( -r $CEI_HOME ) then
+
+    # special treatment for 32bit OpenFOAM and 64bit Ensight
+    if ($WM_ARCH == linux && `uname -m` == x86_64) then
+        setenv CEI_ARCH linux_2.6_32
+    endif
+
+    # add to path
+    setenv PATH ${CEI_HOME}/bin:${PATH}
+
+    setenv ENSIGHT9_INPUT dummy
+    setenv ENSIGHT9_READER $FOAM_LIBBIN
+else
+    unsetenv CEI_HOME
+endif
+
+# -----------------------------------------------------------------------------
