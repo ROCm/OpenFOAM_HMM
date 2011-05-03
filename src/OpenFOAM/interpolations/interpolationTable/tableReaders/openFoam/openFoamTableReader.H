@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::tableReader
+    Foam::openFoamTableReader
 
 Description
     Reads an interpolation table from a file - OpenFOAM-format
@@ -32,7 +32,7 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef openFoamTableReader_H
+#ifndef TTableReader_H
 #define openFoamTableReader_H
 
 #include "tableReader.H"
@@ -43,7 +43,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class openFoamTableReader Declaration
+                     Class openFoamTableReader Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -56,6 +56,7 @@ public:
 
     //- Runtime type information
     TypeName("openFoam");
+
 
     // Constructors
 
@@ -76,15 +77,13 @@ public:
 
 
     //- Destructor
-
-        virtual ~openFoamTableReader();
+    virtual ~openFoamTableReader();
 
 
     // Member functions
 
         //- Read the table
         virtual void operator()(const fileName&, List<Tuple2<scalar, Type> > &);
-
 };
 
 
