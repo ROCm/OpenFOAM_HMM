@@ -22,7 +22,7 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     etc/prefs.sh
+#     config/example/prefs.sh
 #
 # Description
 #     Preset variables for the OpenFOAM configuration - POSIX shell syntax.

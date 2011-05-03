@@ -22,7 +22,7 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     etc/prefs.csh
+#     config/example/prefs.csh
 #
 # Description
 #     Preset variables for the OpenFOAM configuration - C-Shell shell syntax.

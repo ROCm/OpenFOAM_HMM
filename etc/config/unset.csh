@@ -22,7 +22,7 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     etc/unset.csh
+#     etc/config/unset.csh
 #
 # Description
 #     Clear as many OpenFOAM environment settings as possible
