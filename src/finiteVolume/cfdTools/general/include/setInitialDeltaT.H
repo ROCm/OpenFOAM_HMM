@@ -26,7 +26,7 @@ Global
 
 Description
     Set the initial timestep corresponding to the timestep adjustment
-    algorithm in setDeltaT
+    algorithm in setDeltaT but only if it would reduce the timestep.
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,7 +39,7 @@ if (adjustTimeStep)
             min
             (
                 maxCo*runTime.deltaTValue()/CoNum,
-                maxDeltaT
+                runTime.deltaTValue()
             )
         );
     }

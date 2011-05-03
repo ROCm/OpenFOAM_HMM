@@ -11,12 +11,15 @@ refineMeshByCellSet()
 {
    while [ $# -ge 1 ]
    do
-      echo "creating cell set for primary zone - $1"
-      cp system/topoSetDict.$1 system/topoSetDict
-      topoSet > log.topoSet.$1 2>&1
+      if [ ! -e log.refineMesh.$1 ]
+      then
+          echo "creating cell set for primary zone - $1"
+          cp system/topoSetDict.$1 system/topoSetDict
+          topoSet > log.topoSet.$1 2>&1
 
-      echo "refining primary zone - $1"
-      refineMesh -dict -overwrite > log.refineMesh.$1 2>&1
+          echo "refining primary zone - $1"
+          refineMesh -dict -overwrite > log.refineMesh.$1 2>&1
+      fi
       shift
    done
 }
@@ -27,7 +30,7 @@ runApplication blockMesh
 refineMeshByCellSet 1 2 3
 
 echo "mapping fields from 2D throttle case"
-mapFields ../throttle -sourceTime latestTime > log.mapFields 2>&1
+runApplication mapFields ../throttle -sourceTime latestTime
 
 runApplication decomposePar
 runParallel $application 4

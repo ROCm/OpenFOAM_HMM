@@ -153,6 +153,7 @@ class autoLayerDriver
                 (
                     const indirectPrimitivePatch& pp,
                     const labelList& meshEdges,
+                    const labelListList& edgeGlobalFaces,
                     pointField& patchDisp,
                     labelList& patchNLayers,
                     List<extrudeMode>& extrudeStatus
@@ -261,12 +262,36 @@ class autoLayerDriver
                     List<extrudeMode>& extrudeStatus
                 ) const;
 
+                //- for truncateDisplacement: find strings of edges
+                bool sameEdgeNeighbour
+                (
+                    const labelListList& globalEdgeFaces,
+                    const label myGlobalFaceI,
+                    const label nbrGlobFaceI,
+                    const label edgeI
+                ) const;
+
+                //- for truncateDisplacement: find strings of edges
+                void getVertexString
+                (
+                    const indirectPrimitivePatch& pp,
+                    const labelListList& globalEdgeFaces,
+                    const label faceI,
+                    const label edgeI,
+                    const label myGlobFaceI,
+                    const label nbrGlobFaceI,
+                    DynamicList<label>& vertices
+                ) const;
+
                 //- Truncates displacement
                 // - for all patchFaces in the faceset displacement gets set
                 //   to zero
                 // - all displacement < minThickness gets set to zero
+                // - all non-consecutive extrusions get set to 0
                 label truncateDisplacement
                 (
+                    const globalIndex& globalFaces,
+                    const labelListList& edgeGlobalFaces,
                     const motionSmoother& meshMover,
                     const scalarField& minThickness,
                     const faceSet& illegalPatchFaces,
