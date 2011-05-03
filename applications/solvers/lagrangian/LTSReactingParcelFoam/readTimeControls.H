@@ -27,13 +27,16 @@ License
 scalar maxCo(readScalar(pimple.dict().lookup("maxCo")));
 
 // Maximum time scale
-scalar maxDeltaT = readScalar(pimple.dict().lookup("maxDeltaT"));
+scalar maxDeltaT(pimple.dict().lookupOrDefault<scalar>("maxDeltaT", GREAT));
 
 // Smoothing parameter (0-1) when smoothing iterations > 0
-scalar alphaTauSmooth(pimple.dict().lookupOrDefault("alphaTauSmooth", 0.1));
+scalar rDeltaTSmoothingCoeff
+(
+    pimple.dict().lookupOrDefault<scalar>("rDeltaTSmoothingCoeff", 0.1)
+);
 
 // Maximum change in cell temperature per iteration (relative to previous value)
-scalar alphaTauTemp(pimple.dict().lookupOrDefault("alphaTauTemp", 0.05));
+scalar alphaTemp(pimple.dict().lookupOrDefault("alphaTemp", 0.05));
 
 
 // ************************************************************************* //
