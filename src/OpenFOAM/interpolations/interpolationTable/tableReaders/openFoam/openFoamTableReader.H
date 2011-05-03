@@ -28,11 +28,11 @@ Description
     Reads an interpolation table from a file - OpenFOAM-format
 
 SourceFiles
-    tableReader.C
+    openFoamTableReader.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef TTableReader_H
+#ifndef openFoamTableReader_H
 #define openFoamTableReader_H
 
 #include "tableReader.H"
