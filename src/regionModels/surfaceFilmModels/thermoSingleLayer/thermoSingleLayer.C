@@ -273,15 +273,12 @@ void thermoSingleLayer::solveEnergy()
 
     updateSurfaceTemperatures();
 
-    dimensionedScalar hs0("SMALL", hs_.dimensions(), SMALL);
-
     solve
     (
         fvm::ddt(deltaRho_, hs_)
       + fvm::div(phi_, hs_)
      ==
-//      - hsSp_
-      - fvm::Sp(hsSp_/(hs_ + hs0), hs_)
+      - hsSp_
       + q(hs_)
       + radiation_->Shs()
       - fvm::SuSp(rhoSp_, hs_)
