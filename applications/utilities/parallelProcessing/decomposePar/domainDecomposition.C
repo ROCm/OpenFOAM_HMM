@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -160,8 +160,10 @@ bool Foam::domainDecomposition::writeDecomposition()
     }
 
 
+    label maxProcCells = 0;
     label totProcFaces = 0;
     label maxProcPatches = 0;
+    label totProcPatches = 0;
     label maxProcFaces = 0;
 
 
@@ -749,6 +751,8 @@ bool Foam::domainDecomposition::writeDecomposition()
             << "    Number of cells = " << procMesh.nCells()
             << endl;
 
+        maxProcCells = max(maxProcCells, procMesh.nCells());
+
         label nBoundaryFaces = 0;
         label nProcPatches = 0;
         label nProcFaces = 0;
@@ -780,6 +784,7 @@ bool Foam::domainDecomposition::writeDecomposition()
             << "    Number of boundary faces = " << nBoundaryFaces << endl;
 
         totProcFaces += nProcFaces;
+        totProcPatches += nProcPatches;
         maxProcPatches = max(maxProcPatches, nProcPatches);
         maxProcFaces = max(maxProcFaces, nProcFaces);
 
@@ -851,10 +856,21 @@ bool Foam::domainDecomposition::writeDecomposition()
         boundaryProcAddressing.write();
     }
 
+    scalar avgProcCells = scalar(nCells())/nProcs_;
+    scalar avgProcPatches = scalar(totProcPatches)/nProcs_;
+    scalar avgProcFaces = scalar(totProcFaces)/nProcs_;
+
     Info<< nl
         << "Number of processor faces = " << totProcFaces/2 << nl
-        << "Max number of processor patches = " << maxProcPatches << nl
+        << "Max number of cells = " << maxProcCells
+        << " (" << 100.0*(maxProcCells-avgProcCells)/avgProcCells
+        << "% above average " << avgProcCells << ")" << nl
+        << "Max number of processor patches = " << maxProcPatches
+        << " (" << 100.0*(maxProcPatches-avgProcPatches)/avgProcPatches
+        << "% above average " << avgProcPatches << ")" << nl
         << "Max number of faces between processors = " << maxProcFaces
+        << " (" << 100.0*(maxProcFaces-avgProcFaces)/avgProcFaces
+        << "% above average " << avgProcFaces << ")" << nl
         << endl;
 
     return true;

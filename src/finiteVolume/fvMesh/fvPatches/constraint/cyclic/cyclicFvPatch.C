@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,17 +52,6 @@ void Foam::cyclicFvPatch::makeWeights(scalarField& w) const
 
     forAll(magFa, facei)
     {
-        scalar avFa = (magFa[facei] + nbrMagFa[facei])/2.0;
-
-        if (mag(magFa[facei] - nbrMagFa[facei])/avFa > 1e-4)
-        {
-            FatalErrorIn("cyclicFvPatch::makeWeights(scalarField&) const")
-                << "face " << facei << " areas do not match by "
-                << 100*mag(magFa[facei] - nbrMagFa[facei])/avFa
-                << "% -- possible face ordering problem"
-                << abort(FatalError);
-        }
-
         scalar di = deltas[facei];
         scalar dni = nbrDeltas[facei];
 

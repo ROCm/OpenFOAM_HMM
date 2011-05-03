@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -194,7 +194,7 @@ void Foam::processorPolyPatch::calcGeometry(PstreamBuffers& pBufs)
                 faceNormals[facei] = point(1, 0, 0);
                 nbrFaceNormals[facei] = faceNormals[facei];
             }
-            else if (mag(magSf - nbrMagSf)/avSf > coupledPolyPatch::matchTol)
+            else if (mag(magSf - nbrMagSf)/avSf > matchTolerance())
             {
                 fileName nm
                 (
@@ -238,11 +238,15 @@ void Foam::processorPolyPatch::calcGeometry(PstreamBuffers& pBufs)
                     << "patch:" << name()
                     << " my area:" << magSf
                     << " neighbour area:" << nbrMagSf
-                    << " matching tolerance:" << coupledPolyPatch::matchTol
+                    << " matching tolerance:" << matchTolerance()
                     << endl
                     << "Mesh face:" << start()+facei
                     << " vertices:"
                     << UIndirectList<point>(points(), operator[](facei))()
+                    << endl
+                    << "If you are certain your matching is correct"
+                    << " you can increase the 'matchTolerance' setting"
+                    << " in the patch dictionary in the boundary file."
                     << endl
                     << "Rerun with processor debug flag set for"
                     << " more information." << exit(FatalError);
@@ -260,7 +264,8 @@ void Foam::processorPolyPatch::calcGeometry(PstreamBuffers& pBufs)
             neighbFaceCentres_,
             faceNormals,
             nbrFaceNormals,
-            calcFaceTol(*this, points(), faceCentres())
+            calcFaceTol(matchTolerance(), *this, points(), faceCentres()),
+            matchTolerance()
         );
     }
 }
@@ -562,7 +567,10 @@ bool Foam::processorPolyPatch::order
         }
 
         // Calculate typical distance from face centre
-        scalarField tols(calcFaceTol(pp, pp.points(), pp.faceCentres()));
+        scalarField tols
+        (
+            calcFaceTol(matchTolerance(), pp, pp.points(), pp.faceCentres())
+        );
 
         if (debug || masterCtrs.size() != pp.size())
         {
@@ -721,7 +729,7 @@ bool Foam::processorPolyPatch::order
 
 void Foam::processorPolyPatch::write(Ostream& os) const
 {
-    polyPatch::write(os);
+    coupledPolyPatch::write(os);
     os.writeKeyword("myProcNo") << myProcNo_
         << token::END_STATEMENT << nl;
     os.writeKeyword("neighbProcNo") << neighbProcNo_

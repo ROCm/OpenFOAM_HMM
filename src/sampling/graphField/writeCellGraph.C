@@ -16,6 +16,9 @@ void writeCellGraph
     const word& graphFormat
 )
 {
+    fileName path(vsf.time().path()/"graphs"/vsf.time().timeName());
+    mkDir(path);
+
     graph
     (
         vsf.name(),
@@ -23,7 +26,7 @@ void writeCellGraph
         vsf.name(),
         vsf.mesh().C().internalField().component(vector::X),
         vsf.internalField()
-    ).write(vsf.time().timePath()/vsf.name(), graphFormat);
+    ).write(path/vsf.name(), graphFormat);
 }
 
 

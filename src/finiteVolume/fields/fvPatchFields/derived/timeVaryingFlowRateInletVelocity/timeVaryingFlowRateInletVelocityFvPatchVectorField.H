@@ -25,7 +25,9 @@ Class
     Foam::timeVaryingFlowRateInletVelocityFvPatchVectorField
 
 Description
-    A time-varying form of a flow normal vector boundary condition.
+    A time-varying form of a flow normal vector boundary condition. The
+    variation is specified as an interpolationTable (see
+    Foam::interpolationTable).
 
     Example of the boundary condition specification:
     \verbatim

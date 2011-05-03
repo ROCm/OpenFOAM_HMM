@@ -107,6 +107,8 @@ protected:
         Ostream& os
     ) const;
 
+    //- Writes a separator. Used by write functions.
+    virtual void writeSeparator(Ostream& os) const;
 
 public:
 
