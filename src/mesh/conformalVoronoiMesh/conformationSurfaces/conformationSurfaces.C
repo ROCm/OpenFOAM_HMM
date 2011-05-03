@@ -114,9 +114,12 @@ Foam::conformationSurfaces::conformationSurfaces
             word("none")
         );
 
-        if (featureMethod == "featureEdgeMesh")
+        if (featureMethod == "extendedFeatureEdgeMesh")
         {
-            fileName feMeshName(surfaceSubDict.lookup("featureEdgeMesh"));
+            fileName feMeshName
+            (
+                surfaceSubDict.lookup("extendedFeatureEdgeMesh")
+            );
 
             Info<< "    features: " << feMeshName<< endl;
 
@@ -130,10 +133,10 @@ Foam::conformationSurfaces::conformationSurfaces
                         feMeshName,
                         cvMesh_.time().findInstance
                         (
-                            "featureEdgeMesh",
+                            "extendedFeatureEdgeMesh",
                             feMeshName
                         ),
-                        "featureEdgeMesh",
+                        "extendedFeatureEdgeMesh",
                         cvMesh_.time(),
                         IOobject::MUST_READ,
                         IOobject::NO_WRITE
@@ -151,31 +154,14 @@ Foam::conformationSurfaces::conformationSurfaces
         }
         else if (featureMethod == "none")
         {
-            // fileName feMeshName(surfaceName + "_noFeatures");
-
-            // features_.set
-            // (
-            //     featureI++,
-            //     new extendedFeatureEdgeMesh
-            //     (
-            //         IOobject
-            //         (
-            //             feMeshName,
-            //             cvMesh_.time().constant(),
-            //             "featureEdgeMesh",
-            //             cvMesh_.time(),
-            //             IOobject::NO_READ,
-            //             IOobject::NO_WRITE,
-            //             false
-            //         )
-            //     )
-            // );
+            // Currently nothing to do
         }
         else
         {
             FatalErrorIn("Foam::conformationSurfaces::conformationSurfaces")
                 << "No valid featureMethod found for surface " << surfaceName
-                << nl << "Use \"featureEdgeMesh\" or \"extractFeatures\"."
+                << nl << "Use \"extendedFeatureEdgeMesh\" "
+                << "or \"extractFeatures\"."
                 << exit(FatalError);
         }
 
@@ -204,9 +190,12 @@ Foam::conformationSurfaces::conformationSurfaces
             word("none")
         );
 
-        if (featureMethod == "featureEdgeMesh")
+        if (featureMethod == "extendedFeatureEdgeMesh")
         {
-            fileName feMeshName(featureSubDict.lookup("featureEdgeMesh"));
+            fileName feMeshName
+            (
+                featureSubDict.lookup("extendedFeatureEdgeMesh")
+            );
 
             Info<< "    features: " << feMeshName << endl;
 
@@ -220,10 +209,10 @@ Foam::conformationSurfaces::conformationSurfaces
                         feMeshName,
                         cvMesh_.time().findInstance
                         (
-                            "featureEdgeMesh",
+                            "extendedFeatureEdgeMesh",
                             feMeshName
                         ),
-                        "featureEdgeMesh",
+                        "extendedFeatureEdgeMesh",
                         cvMesh_.time(),
                         IOobject::MUST_READ,
                         IOobject::NO_WRITE

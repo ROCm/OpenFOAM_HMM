@@ -318,7 +318,7 @@ void unmarkBaffles
         {
             label i0 = eFaces[0];
             //const labelledTri& f0 = surf[i0];
-            const vector& n0 = surf.faceNormals()[i0];
+            const Foam::vector& n0 = surf.faceNormals()[i0];
 
             //Pout<< "edge:" << edgeI << " n0:" << n0 << endl;
 
@@ -327,7 +327,7 @@ void unmarkBaffles
             for (label i = 1; i < eFaces.size(); i++)
             {
                 //const labelledTri& f = surf[i];
-                const vector& n = surf.faceNormals()[eFaces[i]];
+                const Foam::vector& n = surf.faceNormals()[eFaces[i]];
 
                 //Pout<< "    mag(n&n0): " << mag(n&n0) << endl;
 
@@ -569,9 +569,8 @@ int main(int argc, char *argv[])
     surfaceFeatures newSet(surf);
     newSet.setFromStatus(edgeStat);
 
-    Info<< endl << "Writing trimmed features to "
-        << runTime.constant()/"extendedFeatureEdgeMesh"/outFileName << endl;
-    newSet.write(runTime.constant()/"extendedFeatureEdgeMesh"/outFileName);
+    Info<< endl << "Writing trimmed features to " << outFileName << endl;
+    newSet.write(outFileName);
 
     // Info<< endl << "Writing edge objs." << endl;
     // newSet.writeObj("final");
@@ -636,7 +635,7 @@ int main(int argc, char *argv[])
         (
             sFeatFileName + ".closeness",
             runTime.constant(),
-            "featureEdgeMesh",
+            "extendedFeatureEdgeMesh",
             runTime,
             IOobject::NO_READ,
             IOobject::NO_WRITE
@@ -875,7 +874,7 @@ int main(int argc, char *argv[])
         (
             sFeatFileName + ".internalCloseness",
             runTime.constant(),
-            "featureEdgeMesh",
+            "extendedFeatureEdgeMesh",
             runTime,
             IOobject::NO_READ,
             IOobject::NO_WRITE
@@ -893,7 +892,7 @@ int main(int argc, char *argv[])
         (
             sFeatFileName + ".externalCloseness",
             runTime.constant(),
-            "featureEdgeMesh",
+            "extendedFeatureEdgeMesh",
             runTime,
             IOobject::NO_READ,
             IOobject::NO_WRITE
@@ -923,7 +922,7 @@ int main(int argc, char *argv[])
         (
             sFeatFileName + ".curvature",
             runTime.constant(),
-            "featureEdgeMesh",
+            "extendedFeatureEdgeMesh",
             runTime,
             IOobject::NO_READ,
             IOobject::NO_WRITE
