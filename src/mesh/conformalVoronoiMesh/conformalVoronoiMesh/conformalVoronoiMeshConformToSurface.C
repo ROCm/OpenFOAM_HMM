@@ -629,6 +629,8 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
 
     boolList sendToProc(Pstream::nProcs(), false);
 
+    // Hard coded switch, can be turned on for debugging purposes and all
+    // vertices will be referred to all processors.
     bool allPointReferral = false;
 
     if (allPointReferral)
