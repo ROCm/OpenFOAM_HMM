@@ -1457,63 +1457,63 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     List<polyPatch*> patches(patchStarts.size());
 
-    label nValidPatches = 0;
-
-    forAll(patches, p)
-    {
-        if (patchTypes[p] == processorPolyPatch::typeName)
-        {
-            // Do not create empty processor patches
-
-            if (patchSizes[p] > 0)
-            {
-                patches[nValidPatches] = new processorPolyPatch
-                (
-                    patchNames[p],
-                    patchSizes[p],
-                    patchStarts[p],
-                    nValidPatches,
-                    pMesh.boundaryMesh(),
-                    Pstream::myProcNo(),
-                    procNeighbours[p]
-                );
-
-                nValidPatches++;
-            }
-        }
-        else
-        {
-            patches[nValidPatches] = polyPatch::New
-            (
-                patchTypes[p],
-                patchNames[p],
-                patchSizes[p],
-                patchStarts[p],
-                nValidPatches,
-                pMesh.boundaryMesh()
-            ).ptr();
-
-            nValidPatches++;
-        }
-    }
-
-    patches.setSize(nValidPatches);
-
-    pMesh.addPatches(patches);
+    // label nValidPatches = 0;
 
     // forAll(patches, p)
     // {
-    //     patches[p] = new polyPatch
-    //     (
-    //         patchNames[p],
-    //         patchSizes[p],
-    //         patchStarts[p],
-    //         p,
-    //         pMesh.boundaryMesh()
-    //     );
+    //     if (patchTypes[p] == processorPolyPatch::typeName)
+    //     {
+    //         // Do not create empty processor patches
+
+    //         if (patchSizes[p] > 0)
+    //         {
+    //             patches[nValidPatches] = new processorPolyPatch
+    //             (
+    //                 patchNames[p],
+    //                 patchSizes[p],
+    //                 patchStarts[p],
+    //                 nValidPatches,
+    //                 pMesh.boundaryMesh(),
+    //                 Pstream::myProcNo(),
+    //                 procNeighbours[p]
+    //             );
+
+    //             nValidPatches++;
+    //         }
+    //     }
+    //     else
+    //     {
+    //         patches[nValidPatches] = polyPatch::New
+    //         (
+    //             patchTypes[p],
+    //             patchNames[p],
+    //             patchSizes[p],
+    //             patchStarts[p],
+    //             nValidPatches,
+    //             pMesh.boundaryMesh()
+    //         ).ptr();
+
+    //         nValidPatches++;
+    //     }
     // }
 
-    // pMesh.addPatches(patches, false);
+    // patches.setSize(nValidPatches);
+
+    // pMesh.addPatches(patches);
+
+    forAll(patches, p)
+    {
+        patches[p] = new polyPatch
+        (
+            patchNames[p],
+            patchSizes[p],
+            patchStarts[p],
+            p,
+            pMesh.boundaryMesh()
+        );
+    }
+
+    pMesh.addPatches(patches, false);
 
     // pMesh.overrideCellCentres(cellCentres);
 

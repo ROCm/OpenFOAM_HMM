@@ -372,7 +372,8 @@ void Foam::conformalVoronoiMesh::writeMesh
 
     patches.setSize(nValidPatches);
 
-    mesh.addPatches(patches);
+    // mesh.addPatches(patches);
+    mesh.addPatches(patches, false);
 
     if (!mesh.write())
     {
