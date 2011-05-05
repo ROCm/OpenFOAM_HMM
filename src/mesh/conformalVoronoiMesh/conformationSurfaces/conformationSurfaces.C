@@ -131,11 +131,7 @@ Foam::conformationSurfaces::conformationSurfaces
                     IOobject
                     (
                         feMeshName,
-                        cvMesh_.time().findInstance
-                        (
-                            "extendedFeatureEdgeMesh",
-                            feMeshName
-                        ),
+                        cvMesh_.time().constant(),
                         "extendedFeatureEdgeMesh",
                         cvMesh_.time(),
                         IOobject::MUST_READ,
@@ -207,11 +203,7 @@ Foam::conformationSurfaces::conformationSurfaces
                     IOobject
                     (
                         feMeshName,
-                        cvMesh_.time().findInstance
-                        (
-                            "extendedFeatureEdgeMesh",
-                            feMeshName
-                        ),
+                        cvMesh_.time().constant(),
                         "extendedFeatureEdgeMesh",
                         cvMesh_.time(),
                         IOobject::MUST_READ,
