@@ -104,13 +104,10 @@ void Foam::KinematicParcel<ParcelType>::calc
     // Define local properties at beginning of time step
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     const scalar np0 = nParticle_;
-    const scalar d0 = d_;
-    const vector U0 = U_;
-    const scalar rho0 = rho_;
     const scalar mass0 = mass();
 
     // Reynolds number
-    const scalar Re = this->Re(U0, d0, rhoc_, muc_);
+    const scalar Re = this->Re(U_, d_, rhoc_, muc_);
 
 
     // Sources
@@ -118,6 +115,9 @@ void Foam::KinematicParcel<ParcelType>::calc
 
     // Explicit momentum source for particle
     vector Su = vector::zero;
+
+    // Linearised momentum source coefficient
+    scalar Spu = 0.0;
 
     // Momentum transfer from the particle to the carrier phase
     vector dUTrans = vector::zero;
@@ -127,23 +127,7 @@ void Foam::KinematicParcel<ParcelType>::calc
     // ~~~~~~
 
     // Calculate new particle velocity
-    scalar Spu = 0.0;
-    vector U1 =
-        calcVelocity
-        (
-            td,
-            dt,
-            cellI,
-            Re,
-            muc_,
-            d0,
-            U0,
-            rho0,
-            mass0,
-            Su,
-            dUTrans,
-            Spu
-        );
+    this->U_ = calcVelocity(td, dt, cellI, Re, muc_, mass0, Su, dUTrans, Spu);
 
 
     // Accumulate carrier phase source terms
@@ -156,11 +140,6 @@ void Foam::KinematicParcel<ParcelType>::calc
         // Update momentum transfer coefficient
         td.cloud().UCoeff()[cellI] += np0*Spu;
     }
-
-
-    // Set new particle properties
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    U_ = U1;
 }
 
 
@@ -173,9 +152,6 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     const label cellI,
     const scalar Re,
     const scalar mu,
-    const scalar d,
-    const vector& U,
-    const scalar rho,
     const scalar mass,
     const vector& Su,
     vector& dUTrans,
@@ -205,7 +181,7 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     Spu = dt*Feff.Sp();
 
     IntegrationScheme<vector>::integrationResult Ures =
-        td.cloud().UIntegrator().integrate(U, dt, abp, bp);
+        td.cloud().UIntegrator().integrate(U_, dt, abp, bp);
 
     vector Unew = Ures.value();
 
