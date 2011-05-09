@@ -50,6 +50,7 @@ solution
     }
 }
 
+
 constantProperties
 {
     parcelTypeId    1;
@@ -78,6 +79,7 @@ constantProperties
     constantVolume  false;
 }
 
+
 subModels
 {
     particleForces
@@ -101,8 +103,6 @@ subModels
     devolatilisationModel none;
 
     surfaceReactionModel none;
-
-    postProcessingModel none;
 
     surfaceFilmModel none;
 
@@ -163,6 +163,10 @@ subModels
         activeLiquids   ( H2O );
     }
 }
+
+
+clousFunctions
+{}
 
 
 // ************************************************************************* //

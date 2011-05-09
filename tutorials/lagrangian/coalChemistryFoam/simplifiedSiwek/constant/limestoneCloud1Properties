@@ -85,8 +85,6 @@ subModels
 
     heatTransferModel RanzMarshall;
 
-    postProcessingModel none;
-
     surfaceFilmModel none;
 
     radiation       on;
@@ -123,6 +121,10 @@ subModels
         BirdCorrection  false;
     }
 }
+
+
+cloudFunctions
+{}
 
 
 // ************************************************************************* //
