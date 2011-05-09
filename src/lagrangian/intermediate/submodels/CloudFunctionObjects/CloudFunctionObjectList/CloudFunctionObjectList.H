@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,20 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::NoPostProcessing
+    Foam::CloudFunctionObjectList
 
 Description
-    Place holder for 'none' option
+    List of cloud function objects
 
 SourceFiles
-    NoPostProcessing.C
+    CloudFunctionObjectListI.H
+    CloudFunctionObjectList.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef NoPostProcessing_H
-#define NoPostProcessing_H
+#ifndef CloudFunctionObjectList_H
+#define CloudFunctionObjectList_H
 
-#include "PostProcessingModel.H"
+#include "PtrList.H"
+#include "CloudFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,65 +45,75 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class NoPostProcessing Declaration
+                   Class CloudFunctionObjectList Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class NoPostProcessing
+class CloudFunctionObjectList
 :
-    public PostProcessingModel<CloudType>
+    public PtrList<CloudFunctionObject<CloudType> >
 {
 protected:
 
-    // Protected Member Functions
+    // Protected Data
 
-        //- Write post-processing info
-        void write();
+        //- Reference to the owner cloud
+        const CloudType& owner_;
+
+        //- Dictionary
+        const dictionary dict_;
 
 
 public:
 
-    //- Runtime type information
-    TypeName("none");
-
-
     // Constructors
 
-        //- Construct from components
-        NoPostProcessing(const dictionary&, CloudType&);
+        //- Null constructor
+        CloudFunctionObjectList(CloudType& owner);
+
+        //- Construct from mesh
+        CloudFunctionObjectList
+        (
+            CloudType& owner,
+            const dictionary& dict,
+            const bool readFields
+        );
 
         //- Construct copy
-        NoPostProcessing(const NoPostProcessing<CloudType>& ppm);
-
-        //- Construct and return a clone
-        virtual autoPtr<PostProcessingModel<CloudType> > clone() const
-        {
-            return autoPtr<PostProcessingModel<CloudType> >
-            (
-                new NoPostProcessing<CloudType>(*this)
-            );
-        }
+        CloudFunctionObjectList(const CloudFunctionObjectList& ppml);
 
 
     //- Destructor
-    virtual ~NoPostProcessing();
+    virtual ~CloudFunctionObjectList();
 
 
     // Member Functions
 
+        // Access
+
+            //- Return const access to the cloud owner
+            inline const CloudType& owner() const;
+
+            //- Return refernce to the cloud owner
+            inline CloudType& owner();
+
+            //- Return the forces dictionary
+            inline const dictionary& dict() const;
+
+
         // Evaluation
 
-            //- Flag to indicate whether model activates post-processing model
-            virtual bool active() const;
+            //- Post-evolve hook
+            virtual void postEvolve();
 
-            //- Gather post-processing info on patch
+            //- Post-patch hook
             virtual void postPatch
             (
                 const typename CloudType::parcelType& p,
                 const label patchI
             );
 
-            //- Gather particle data when hit face
+            //- Post-face hook
             virtual void postFace(const typename CloudType::parcelType& p);
 };
 
@@ -112,8 +124,10 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "CloudFunctionObjectListI.H"
+
 #ifdef NoRepository
-#   include "NoPostProcessing.C"
+    #include "CloudFunctionObjectList.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

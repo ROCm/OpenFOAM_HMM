@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,19 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::PostProcessingModel
+    Foam::CloudFunctionObject
 
 Description
-    Templated post-processing model class
+    Templated cloud function object base class
 
 SourceFiles
-    PostProcessingModel.C
-    PostProcessingModelNew.C
+    CloudFunctionObject.C
+    CloudFunctionObjectNew.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PostProcessingModel_H
-#define PostProcessingModel_H
+#ifndef CloudFunctionObject_H
+#define CloudFunctionObject_H
 
 #include "IOdictionary.H"
 #include "autoPtr.H"
@@ -47,11 +47,11 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class PostProcessingModel Declaration
+                    Class CloudFunctionObject Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class PostProcessingModel
+class CloudFunctionObject
 :
     public SubModelBase<CloudType>
 {
@@ -70,7 +70,7 @@ public:
     declareRunTimeSelectionTable
     (
         autoPtr,
-        PostProcessingModel,
+        CloudFunctionObject,
         dictionary,
         (
             const dictionary& dict,
@@ -83,38 +83,39 @@ public:
     // Constructors
 
         //- Construct null from owner
-        PostProcessingModel(CloudType& owner);
+        CloudFunctionObject(CloudType& owner);
 
         //- Construct from dictionary
-        PostProcessingModel
+        CloudFunctionObject
         (
             const dictionary& dict,
             CloudType& owner,
-            const word& type
+            const word& modelType
         );
 
         //- Construct copy
-        PostProcessingModel(const PostProcessingModel<CloudType>& ppm);
+        CloudFunctionObject(const CloudFunctionObject<CloudType>& ppm);
 
         //- Construct and return a clone
-        virtual autoPtr<PostProcessingModel<CloudType> > clone() const
+        virtual autoPtr<CloudFunctionObject<CloudType> > clone() const
         {
-            return autoPtr<PostProcessingModel<CloudType> >
+            return autoPtr<CloudFunctionObject<CloudType> >
             (
-                new PostProcessingModel<CloudType>(*this)
+                new CloudFunctionObject<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~PostProcessingModel();
+    virtual ~CloudFunctionObject();
 
 
     //- Selector
-    static autoPtr<PostProcessingModel<CloudType> > New
+    static autoPtr<CloudFunctionObject<CloudType> > New
     (
         const dictionary& dict,
-        CloudType& owner
+        CloudType& owner,
+        const word& modelType
     );
 
 
@@ -122,17 +123,17 @@ public:
 
         // Evaluation
 
-            //- Main post-processing function
-            virtual void post();
+            //- Post-evolve hook
+            virtual void postEvolve();
 
-            //- Gather post-processing info on patch
+            //- Post-patch hook
             virtual void postPatch
             (
                 const typename CloudType::parcelType& p,
                 const label patchI
             );
 
-            //- Gather post-processing info on a face
+            //- Post-face hook
             virtual void postFace(const typename CloudType::parcelType& p);
 };
 
@@ -143,27 +144,27 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makePostProcessingModel(CloudType)                                    \
+#define makeCloudFunctionObject(CloudType)                                    \
                                                                               \
     typedef CloudType::kinematicCloudType kinematicCloudType;                 \
     defineNamedTemplateTypeNameAndDebug                                       \
     (                                                                         \
-        PostProcessingModel<kinematicCloudType>,                              \
+        CloudFunctionObject<kinematicCloudType>,                              \
         0                                                                     \
     );                                                                        \
     defineTemplateRunTimeSelectionTable                                       \
     (                                                                         \
-        PostProcessingModel<kinematicCloudType>,                              \
+        CloudFunctionObject<kinematicCloudType>,                              \
         dictionary                                                            \
     );
 
 
-#define makePostProcessingModelType(SS, CloudType)                            \
+#define makeCloudFunctionObjectType(SS, CloudType)                            \
                                                                               \
     typedef CloudType::kinematicCloudType kinematicCloudType;                 \
     defineNamedTemplateTypeNameAndDebug(SS<kinematicCloudType>, 0);           \
                                                                               \
-    PostProcessingModel<kinematicCloudType>::                                 \
+    CloudFunctionObject<kinematicCloudType>::                                 \
         adddictionaryConstructorToTable<SS<kinematicCloudType> >              \
             add##SS##CloudType##kinematicCloudType##ConstructorToTable_;
 
@@ -171,7 +172,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "PostProcessingModel.C"
+#   include "CloudFunctionObject.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -27,17 +27,18 @@ Class
 Description
     Templated base class for kinematic cloud
 
+    - cloud function objects
+
     - particle forces
       - buoyancy
       - drag
       - pressure gradient
 
     - sub-models:
-      - Dispersion model
-      - Injection model
-      - Patch interaction model
-      - Post-processing model
-      - Surface film model
+      - dispersion model
+      - injection model
+      - patch interaction model
+      - surface film model
 
 SourceFiles
     KinematicCloudI.H
@@ -61,6 +62,7 @@ SourceFiles
 #include "cloudSolution.H"
 
 #include "ParticleForceList.H"
+#include "CloudFunctionObjectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,9 +79,6 @@ class InjectionModel;
 
 template<class CloudType>
 class PatchInteractionModel;
-
-template<class CloudType>
-class PostProcessingModel;
 
 template<class CloudType>
 class SurfaceFilmModel;
@@ -108,8 +107,12 @@ public:
         //- Convenience typedef for this cloud type
         typedef KinematicCloud<CloudType> kinematicCloudType;
 
-        //- Force type
+        //- Force models type
         typedef ParticleForceList<KinematicCloud<CloudType> > forceType;
+
+        //- Function object type
+        typedef CloudFunctionObjectList<KinematicCloud<CloudType> >
+            functionType;
 
 
 private:
@@ -176,6 +179,9 @@ protected:
         //- Optional particle forces
         forceType forces_;
 
+        //- Optional cloud function objects
+        functionType functions_;
+
 
         // References to the cloud sub-models
 
@@ -190,10 +196,6 @@ protected:
             //- Patch interaction model
             autoPtr<PatchInteractionModel<KinematicCloud<CloudType> > >
                 patchInteractionModel_;
-
-            //- Post-processing model
-            autoPtr<PostProcessingModel<KinematicCloud<CloudType> > >
-                postProcessingModel_;
 
             //- Surface film model
             autoPtr<SurfaceFilmModel<KinematicCloud<CloudType> > >
@@ -369,6 +371,9 @@ public:
 //            inline const typename parcelType::forceType& forces() const;
             inline const forceType& forces() const;
 
+            //- Optional cloud function objects
+            inline functionType& functions();
+
 
             // Sub-models
 
@@ -395,10 +400,6 @@ public:
                 //- Return reference to the patch interaction model
                 inline PatchInteractionModel<KinematicCloud<CloudType> >&
                     patchInteraction();
-
-                //- Return reference to post-processing model
-                inline PostProcessingModel<KinematicCloud<CloudType> >&
-                    postProcessing();
 
                 //- Return const-access to the surface film model
                 inline const SurfaceFilmModel<KinematicCloud<CloudType> >&

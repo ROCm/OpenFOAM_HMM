@@ -125,7 +125,7 @@ Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
     CloudType& owner
 )
 :
-    PostProcessingModel<CloudType>(dict, owner, typeName),
+    CloudFunctionObject<CloudType>(dict, owner, typeName),
     maxStoredParcels_(readScalar(this->coeffDict().lookup("maxStoredParcels"))),
     patchIDs_(),
     patchData_()
@@ -176,7 +176,7 @@ Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
     const PatchPostProcessing<CloudType>& ppm
 )
 :
-    PostProcessingModel<CloudType>(ppm),
+    CloudFunctionObject<CloudType>(ppm),
     maxStoredParcels_(ppm.maxStoredParcels_),
     patchIDs_(ppm.patchIDs_),
     patchData_(ppm.patchData_)

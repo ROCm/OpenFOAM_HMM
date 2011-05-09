@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,43 +23,26 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PostProcessingModel.H"
+#ifndef makeParcelCloudFunctionObjects_H
+#define makeParcelCloudFunctionObjects_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class CloudType>
-Foam::autoPtr<Foam::PostProcessingModel<CloudType> >
-Foam::PostProcessingModel<CloudType>::New
-(
-    const dictionary& dict,
-    CloudType& owner
-)
-{
-    const word modelType(dict.lookup("postProcessingModel"));
+#include "ParticleTracks.H"
+#include "PatchPostProcessing.H"
 
-    Info<< "Selecting post-processing model " << modelType << endl;
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+#define makeParcelCloudFunctionObjects(CloudType)                             \
+                                                                              \
+    makeCloudFunctionObject(CloudType);                                       \
+                                                                              \
+    makeCloudFunctionObjectType(ParticleTracks, CloudType);                   \
+    makeCloudFunctionObjectType(PatchPostProcessing, CloudType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
-    {
-        FatalErrorIn
-        (
-            "PostProcessingModel<CloudType>::New"
-            "("
-                "const dictionary&, "
-                "CloudType&"
-            ")"
-        )   << "Unknown post-processing model type "
-            << modelType << nl << nl
-            << "Valid post-processing model types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
-    }
 
-    return autoPtr<PostProcessingModel<CloudType> >(cstrIter()(dict, owner));
-}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#endif
 
 // ************************************************************************* //

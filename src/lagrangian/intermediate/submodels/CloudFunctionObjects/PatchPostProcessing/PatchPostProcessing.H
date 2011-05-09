@@ -35,7 +35,7 @@ SourceFiles
 #ifndef PatchPostProcessing_H
 #define PatchPostProcessing_H
 
-#include "PostProcessingModel.H"
+#include "CloudFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +49,7 @@ namespace Foam
 template<class CloudType>
 class PatchPostProcessing
 :
-    public PostProcessingModel<CloudType>
+    public CloudFunctionObject<CloudType>
 {
     // Private data
 
@@ -94,9 +94,9 @@ public:
         PatchPostProcessing(const PatchPostProcessing<CloudType>& ppm);
 
         //- Construct and return a clone
-        virtual autoPtr<PostProcessingModel<CloudType> > clone() const
+        virtual autoPtr<CloudFunctionObject<CloudType> > clone() const
         {
-            return autoPtr<PostProcessingModel<CloudType> >
+            return autoPtr<CloudFunctionObject<CloudType> >
             (
                 new PatchPostProcessing<CloudType>(*this)
             );
@@ -120,10 +120,10 @@ public:
 
         // Evaluation
 
-            //- Gather post-processing info on patch
+            //- Post-patch hook
             virtual void postPatch(const parcelType& p, const label patchI);
 
-            //- Gather particle data when hit face - not used
+            //- Post-face hook
             virtual void postFace(const parcelType& p);
 };
 

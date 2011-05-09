@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,75 +23,103 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "NoPostProcessing.H"
+#include "CloudFunctionObject.H"
 
-// * * * * * * * * * * * * * protected Member Functions  * * * * * * * * * * //
+// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 template<class CloudType>
-void Foam::NoPostProcessing<CloudType>::write()
+void Foam::CloudFunctionObject<CloudType>::write()
 {
-    // do nothing
+    notImplemented("void Foam::CloudFunctionObject<CloudType>::write()");
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::NoPostProcessing<CloudType>::NoPostProcessing
-(
-    const dictionary&,
-    CloudType& owner
-)
+Foam::CloudFunctionObject<CloudType>::CloudFunctionObject(CloudType& owner)
 :
-    PostProcessingModel<CloudType>(owner)
+    SubModelBase<CloudType>(owner)
 {}
 
 
 template<class CloudType>
-Foam::NoPostProcessing<CloudType>::NoPostProcessing
+Foam::CloudFunctionObject<CloudType>::CloudFunctionObject
 (
-    const NoPostProcessing<CloudType>& ppm
+    const dictionary& dict,
+    CloudType& owner,
+    const word& type
 )
 :
-    PostProcessingModel<CloudType>(ppm.owner_)
+    SubModelBase<CloudType>(owner, dict, type, "")
+{}
+
+
+template<class CloudType>
+Foam::CloudFunctionObject<CloudType>::CloudFunctionObject
+(
+    const CloudFunctionObject<CloudType>& ppm
+)
+:
+    SubModelBase<CloudType>(ppm)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::NoPostProcessing<CloudType>::~NoPostProcessing()
+Foam::CloudFunctionObject<CloudType>::~CloudFunctionObject()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::NoPostProcessing<CloudType>::active() const
+void Foam::CloudFunctionObject<CloudType>::postEvolve()
 {
-    return false;
+    if (this->owner().time().outputTime())
+    {
+        this->write();
+    }
 }
 
 
 template<class CloudType>
-void Foam::NoPostProcessing<CloudType>::postPatch
+void Foam::CloudFunctionObject<CloudType>::postPatch
 (
     const typename CloudType::parcelType&,
     const label
 )
 {
-    // do nothing
+    notImplemented
+    (
+        "void Foam::CloudFunctionObject<CloudType>::postPatch"
+        "("
+            "const typename CloudType::parcelType&,"
+            "const label"
+        ")"
+    );
 }
 
 
 template<class CloudType>
-void Foam::NoPostProcessing<CloudType>::postFace
+void Foam::CloudFunctionObject<CloudType>::postFace
 (
     const typename CloudType::parcelType&
 )
 {
-    // do nothing
+    notImplemented
+    (
+        "void Foam::CloudFunctionObject<CloudType>::postFace"
+        "("
+            "const typename CloudType::parcelType&"
+        ")"
+    );
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "CloudFunctionObjectNew.C"
 
 // ************************************************************************* //

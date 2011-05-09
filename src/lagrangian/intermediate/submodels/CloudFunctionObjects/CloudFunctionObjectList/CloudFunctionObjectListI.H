@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,28 +23,26 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeParcelPostProcessingModels_H
-#define makeParcelPostProcessingModels_H
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "NoPostProcessing.H"
-#include "ParticleTracks.H"
-#include "PatchPostProcessing.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#define makeParcelPostProcessingModels(CloudType)                             \
-                                                                              \
-    makePostProcessingModel(CloudType);                                       \
-                                                                              \
-    makePostProcessingModelType(NoPostProcessing, CloudType);                 \
-    makePostProcessingModelType(ParticleTracks, CloudType);                   \
-    makePostProcessingModelType(PatchPostProcessing, CloudType);
+template<class CloudType>
+inline const CloudType& Foam::CloudFunctionObjectList<CloudType>::owner() const
+{
+    return owner_;
+}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class CloudType>
+inline CloudType& Foam::CloudFunctionObjectList<CloudType>::owner()
+{
+    return owner_;
+}
 
-#endif
+
+template<class CloudType>
+inline const Foam::dictionary&
+Foam::CloudFunctionObjectList<CloudType>::dict() const
+{
+    return dict_;
+}
+
 
 // ************************************************************************* //

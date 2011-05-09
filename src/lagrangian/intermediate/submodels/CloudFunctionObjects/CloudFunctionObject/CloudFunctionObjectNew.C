@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,44 +23,41 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ParticleTracks.H"
+#include "CloudFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-inline Foam::label Foam::ParticleTracks<CloudType>::trackInterval() const
+Foam::autoPtr<Foam::CloudFunctionObject<CloudType> >
+Foam::CloudFunctionObject<CloudType>::New
+(
+    const dictionary& dict,
+    CloudType& owner,
+    const word& modelType
+)
 {
-    return trackInterval_;
-}
+    Info<< "    Selecting cloud function " << modelType << endl;
 
+    typename dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(modelType);
 
-template<class CloudType>
-inline Foam::label Foam::ParticleTracks<CloudType>::maxSamples() const
-{
-    return maxSamples_;
-}
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "CloudFunctionObject<CloudType>::New"
+            "("
+                "const dictionary&, "
+                "CloudType&"
+            ")"
+        )   << "Unknown cloud function type "
+            << modelType << nl << nl
+            << "Valid cloud function types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
 
-
-template<class CloudType>
-inline const Foam::Switch& Foam::ParticleTracks<CloudType>::resetOnWrite() const
-{
-    return resetOnWrite_;
-}
-
-
-template<class CloudType>
-inline const typename Foam::ParticleTracks<CloudType>::hitTableType&
-Foam::ParticleTracks<CloudType>::faceHitCounter() const
-{
-    return faceHitCounter_;
-}
-
-
-template<class CloudType>
-inline const Foam::Cloud<typename CloudType::parcelType>&
-Foam::ParticleTracks<CloudType>::cloud() const
-{
-    return cloudPtr_();
+    return autoPtr<CloudFunctionObject<CloudType> >(cstrIter()(dict, owner));
 }
 
 

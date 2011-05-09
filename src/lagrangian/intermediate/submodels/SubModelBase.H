@@ -80,7 +80,8 @@ public:
         (
             CloudType& owner,
             const dictionary& dict,
-            const word& name
+            const word& name,
+            const word& dictExt = "Coeffs"
         );
 
         //- Construct as copy
