@@ -37,6 +37,12 @@ namespace surfaceFilmModels
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+inline const Foam::dimensionedVector& surfaceFilmModel::g() const
+{
+    return g_;
+}
+
+
 inline const surfaceFilmModel::thermoModelType&
 surfaceFilmModel::thermoModel() const
 {

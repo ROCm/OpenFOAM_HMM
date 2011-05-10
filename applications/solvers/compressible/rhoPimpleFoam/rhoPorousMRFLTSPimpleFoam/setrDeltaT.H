@@ -1,22 +1,24 @@
 {
+    const dictionary& pimpleDict = pimple.dict();
+
     scalar maxCo
     (
-        pimple.lookupOrDefault<scalar>("maxCo", 0.8)
+        pimpleDict.lookupOrDefault<scalar>("maxCo", 0.8)
     );
 
     scalar rDeltaTSmoothingCoeff
     (
-        pimple.lookupOrDefault<scalar>("rDeltaTSmoothingCoeff", 0.02)
+        pimpleDict.lookupOrDefault<scalar>("rDeltaTSmoothingCoeff", 0.02)
     );
 
     scalar rDeltaTDampingCoeff
     (
-        pimple.lookupOrDefault<scalar>("rDeltaTDampingCoeff", 1.0)
+        pimpleDict.lookupOrDefault<scalar>("rDeltaTDampingCoeff", 1.0)
     );
 
     scalar maxDeltaT
     (
-        pimple.lookupOrDefault<scalar>("maxDeltaT", GREAT)
+        pimpleDict.lookupOrDefault<scalar>("maxDeltaT", GREAT)
     );
 
     volScalarField rDeltaT0("rDeltaT0", rDeltaT);
@@ -29,7 +31,7 @@
        /((2*maxCo)*mesh.V()*rho.dimensionedInternalField())
     );
 
-    if (transonic)
+    if (pimple.transonic())
     {
         surfaceScalarField phid
         (

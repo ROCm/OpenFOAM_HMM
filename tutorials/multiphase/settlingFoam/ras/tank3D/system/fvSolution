@@ -22,29 +22,27 @@ solvers
         solver          PCG;
         preconditioner  DIC;
         tolerance       1e-07;
-        relTol          0;
+        relTol          0.1;
     }
 
-    "U.*"
+    p_rghFinal
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        $p_rgh;
         tolerance       1e-07;
         relTol          0;
     }
 
-    k
+    "(U|Alpha|k|epsilon)"
     {
         solver          PBiCG;
         preconditioner  DILU;
         tolerance       1e-07;
-        relTol          0;
+        relTol          0.1;
     }
 
-    epsilon
+    "(U|Alpha|k|epsilon)Final"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        $k;
         tolerance       1e-07;
         relTol          0;
     }
@@ -54,31 +52,29 @@ solvers
         solver          PCG;
         preconditioner  DIC;
         tolerance       1e-07;
-        relTol          0;
+        relTol          0.1;
     }
 
-    Alpha
+    rhoFinal
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        $rho;
         tolerance       1e-07;
         relTol          0;
     }
 }
 
-PISO
+PIMPLE
 {
-    momentumPredictor yes;
-    nOuterCorrectors  1;
-    nCorrectors       2;
-    nNonOrthogonalCorrectors 1;
+    nCorrectors     2;
+    nNonOrthogonalCorrectors 0;
 }
 
 relaxationFactors
 {
-    U               1;
-    k               1;
-    epsilon         1;
+    "U.*"           1;
+    "k.*"           1;
+    "epsilon.*"     1;
 }
+
 
 // ************************************************************************* //

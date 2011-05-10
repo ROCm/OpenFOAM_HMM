@@ -236,10 +236,6 @@ protected:
             const scalar Re,           // Reynolds number
             const scalar Pr,           // Prandtl number - surface
             const scalar kappa,        // Thermal conductivity - surface
-            const scalar d,            // diameter
-            const scalar rho,          // density
-            const scalar T,            // temperature
-            const scalar Cp,           // specific heat capacity
             const scalar NCpW,         // Sum of N*Cp*W of emission species
             const scalar Sh,           // explicit particle enthalpy source
             scalar& dhsTrans,          // sensible enthalpy transfer to carrier

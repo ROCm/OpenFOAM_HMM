@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -104,7 +104,7 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
     {
         const word agglomeratorType(controlDict.lookup("agglomerator"));
 
-        dlLibraryTable::open
+        const_cast<Time&>(mesh.thisDb().time()).libs().open
         (
             controlDict,
             "geometricGAMGAgglomerationLibs",
@@ -159,7 +159,7 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
     {
         const word agglomeratorType(controlDict.lookup("agglomerator"));
 
-        dlLibraryTable::open
+        const_cast<Time&>(mesh.thisDb().time()).libs().open
         (
             controlDict,
             "algebraicGAMGAgglomerationLibs",

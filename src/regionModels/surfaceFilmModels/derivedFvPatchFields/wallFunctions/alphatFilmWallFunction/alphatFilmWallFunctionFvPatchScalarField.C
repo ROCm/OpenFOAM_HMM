@@ -156,9 +156,9 @@ void alphatFilmWallFunctionFvPatchScalarField::updateCoeffs()
 
     const mapDistribute& distMap = filmModel.mappedPatches()[filmPatchI].map();
 
-    scalarField mDotFilm =
-        filmModel.massPhaseChangeForPrimary().boundaryField()[filmPatchI];
-    distMap.distribute(mDotFilm);
+    tmp<volScalarField> mDotFilm(filmModel.primaryMassTrans());
+    scalarField mDotFilmp = mDotFilm().boundaryField()[filmPatchI];
+    distMap.distribute(mDotFilmp);
 
     // Retrieve RAS turbulence model
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
@@ -185,7 +185,7 @@ void alphatFilmWallFunctionFvPatchScalarField::updateCoeffs()
         scalar Pr = muw[faceI]/alphaw[faceI];
 
         scalar factor = 0.0;
-        scalar mStar = mDotFilm[faceI]/(y[faceI]*uTau);
+        scalar mStar = mDotFilmp[faceI]/(y[faceI]*uTau);
         if (yPlus > yPlusCrit_)
         {
             scalar expTerm = exp(min(50.0, yPlusCrit_*mStar*Pr));
@@ -207,6 +207,7 @@ void alphatFilmWallFunctionFvPatchScalarField::updateCoeffs()
         alphat[faceI] = max(alphaEff - alphaw[faceI], 0.0);
     }
 }
+
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

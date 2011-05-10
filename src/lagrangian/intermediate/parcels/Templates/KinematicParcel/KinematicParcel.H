@@ -297,9 +297,6 @@ protected:
             const label cellI,         // owner cell
             const scalar Re,           // Reynolds number
             const scalar mu,           // local carrier viscosity
-            const scalar d,            // diameter
-            const vector& U,           // velocity
-            const scalar rho,          // density
             const scalar mass,         // mass
             const vector& Su,          // explicit particle momentum source
             vector& dUTrans,           // momentum transfer to carrier

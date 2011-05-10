@@ -23,11 +23,13 @@ boundaryField
 {
     walls
     {
-        type            zeroGradient;
+        type            calculated;
+        value           $internalField;
     }
     wallFilm
     {
-        type            zeroGradient;
+        type            calculated;
+        value           $internalField;
     }
 }
 

@@ -4,7 +4,7 @@
 
     tmp<fvScalarMatrix> p_rghEqnComp;
 
-    if (transonic)
+    if (pimple.transonic())
     {
         p_rghEqnComp =
         (
@@ -39,7 +39,7 @@
           - ghf*fvc::snGrad(rho)
         )*rAUf*mesh.magSf();
 
-    for(int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
     {
         fvScalarMatrix p_rghEqnIncomp
         (
@@ -55,18 +55,10 @@
             )
            *p_rghEqnComp()
           + p_rghEqnIncomp,
-            mesh.solver
-            (
-                p_rgh.select
-                (
-                    oCorr == nOuterCorr-1
-                 && corr == nCorr-1
-                 && nonOrth == nNonOrthCorr
-                )
-            )
+            mesh.solver(p_rgh.select(pimple.finalInnerIter(corr, nonOrth)))
         );
 
-        if (nonOrth == nNonOrthCorr)
+        if (nonOrth == pimple.nNonOrthCorr())
         {
             dgdt =
                 (pos(alpha2)*(psi2/rho2) - pos(alpha1)*(psi1/rho1))

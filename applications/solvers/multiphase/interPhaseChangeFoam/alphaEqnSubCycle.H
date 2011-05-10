@@ -11,15 +11,11 @@ surfaceScalarField rhoPhi
 );
 
 {
-    label nAlphaCorr
-    (
-        readLabel(piso.lookup("nAlphaCorr"))
-    );
+    const dictionary& pimpleDict = pimple.dict();
 
-    label nAlphaSubCycles
-    (
-        readLabel(piso.lookup("nAlphaSubCycles"))
-    );
+    label nAlphaCorr(readLabel(pimpleDict.lookup("nAlphaCorr")));
+
+    label nAlphaSubCycles(readLabel(pimpleDict.lookup("nAlphaSubCycles")));
 
     surfaceScalarField phic(mag(phi/mesh.magSf()));
     phic = min(interface.cAlpha()*phic, max(phic));
@@ -44,7 +40,7 @@ surfaceScalarField rhoPhi
         #include "alphaEqn.H"
     }
 
-    if (nOuterCorr == 1)
+    if (pimple.nOuterCorr() == 1)
     {
         interface.correct();
     }

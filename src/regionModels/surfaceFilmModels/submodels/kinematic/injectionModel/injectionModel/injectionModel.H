@@ -26,12 +26,12 @@ Class
     Foam::injectionModel
 
 Description
-    Base class for film injection models
+    Base class for film injection models, handling mass transfer from the
+    film.
 
 SourceFiles
     injectionModel.C
     injectionModelNew.C
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef injectionModel_H
@@ -109,7 +109,8 @@ public:
         static autoPtr<injectionModel> New
         (
             const surfaceFilmModel& owner,
-            const dictionary& dict
+            const dictionary& dict,
+            const word& mdoelType
         );
 
 
@@ -124,6 +125,7 @@ public:
             //- Correct
             virtual void correct
             (
+                scalarField& availableMass,
                 scalarField& massToInject,
                 scalarField& diameterToInject
             ) = 0;

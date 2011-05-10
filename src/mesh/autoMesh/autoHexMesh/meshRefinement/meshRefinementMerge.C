@@ -277,7 +277,11 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
         }
     }
 
-    // Get all sets of faces that can be merged
+    // Get all sets of faces that can be merged. Since only faces on the same
+    // patch get merged there is no risk of e.g. patchID faces getting merged
+    // with original patches (or even processor patches). There is a risk
+    // though of original patchfaces getting merged if they make a small
+    // angle. Would be pretty weird starting mesh though.
     labelListList allFaceSets
     (
         faceCombiner.getMergeSets
@@ -352,27 +356,20 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
         // Get the kept faces that need to be recalculated.
         // Merging two boundary faces might shift the cell centre
         // (unless the faces are absolutely planar)
-        labelHashSet retestFaces(6*allFaceSets.size());
+        labelHashSet retestFaces(2*allFaceSets.size());
 
         forAll(allFaceSets, setI)
         {
             label oldMasterI = allFaceSets[setI][0];
-
-            label faceI = map().reverseFaceMap()[oldMasterI];
-
-            // faceI is always uncoupled boundary face
-            const cell& cFaces = mesh_.cells()[mesh_.faceOwner()[faceI]];
-
-            forAll(cFaces, i)
-            {
-                retestFaces.insert(cFaces[i]);
-            }
+            retestFaces.insert(map().reverseFaceMap()[oldMasterI]);
         }
-        updateMesh(map, retestFaces.toc());
+        updateMesh(map, growFaceCellFace(retestFaces));
 
         if (debug)
         {
             // Check sync
+            Pout<< "Checking sync after initial merging " << nFaceSets
+                << " faces." << endl;
             checkData();
 
             Pout<< "Writing initial merged-faces mesh to time "
@@ -555,26 +552,18 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
             // Get the kept faces that need to be recalculated.
             // Merging two boundary faces might shift the cell centre
             // (unless the faces are absolutely planar)
-            labelHashSet retestFaces(6*restoredFaces.size());
+            labelHashSet retestFaces(2*restoredFaces.size());
 
-            forAll(restoredFaces, setI)
+            forAllConstIter(Map<label>, restoredFaces, iter)
             {
-                label faceI = restoredFaces[setI];
-                // faceI is always uncoupled boundary face
-                const cell& cFaces = mesh_.cells()[mesh_.faceOwner()[faceI]];
-
-                forAll(cFaces, i)
-                {
-                    retestFaces.insert(cFaces[i]);
-                }
+                retestFaces.insert(iter.key());
             }
-
 
             // Experimental:restore all points/face/cells in maps
             updateMesh
             (
                 map,
-                retestFaces.toc(),
+                growFaceCellFace(retestFaces),
                 restoredPoints,
                 restoredFaces,
                 restoredCells
@@ -583,6 +572,8 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
             if (debug)
             {
                 // Check sync
+                Pout<< "Checking sync after restoring " << retestFaces.size()
+                    << " faces." << endl;
                 checkData();
 
                 Pout<< "Writing merged-faces mesh to time "
@@ -635,7 +626,26 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRemovePoints
     mesh_.setInstance(timeName());
 
     pointRemover.updateMesh(map);
-    updateMesh(map, labelList(0));
+
+
+    // Retest all affected faces and all the cells using them
+    labelHashSet retestFaces(pointRemover.savedFaceLabels().size());
+    forAll(pointRemover.savedFaceLabels(), i)
+    {
+        label faceI = pointRemover.savedFaceLabels()[i];
+        if (faceI >= 0)
+        {
+            retestFaces.insert(faceI);
+        }
+    }
+    updateMesh(map, growFaceCellFace(retestFaces));
+
+    if (debug)
+    {
+        // Check sync
+        Pout<< "Checking sync after removing points." << endl;
+        checkData();
+    }
 
     return map;
 }
@@ -689,7 +699,25 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRestorePoints
     mesh_.setInstance(timeName());
 
     pointRemover.updateMesh(map);
-    updateMesh(map, labelList(0));
+
+    labelHashSet retestFaces(2*facesToRestore.size());
+    forAll(facesToRestore, i)
+    {
+        label faceI = map().reverseFaceMap()[facesToRestore[i]];
+        if (faceI >= 0)
+        {
+            retestFaces.insert(faceI);
+        }
+    }
+    updateMesh(map, growFaceCellFace(retestFaces));
+
+    if (debug)
+    {
+        // Check sync
+        Pout<< "Checking sync after restoring points on "
+            << facesToRestore.size() << " faces." << endl;
+        checkData();
+    }
 
     return map;
 }

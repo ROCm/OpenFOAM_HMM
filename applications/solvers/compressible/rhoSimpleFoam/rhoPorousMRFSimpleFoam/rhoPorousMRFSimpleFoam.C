@@ -36,6 +36,7 @@ Description
 #include "RASModel.H"
 #include "MRFZones.H"
 #include "thermalPorousZones.H"
+#include "simpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,15 +49,15 @@ int main(int argc, char *argv[])
     #include "createZones.H"
     #include "initContinuityErrs.H"
 
+    simpleControl simple(mesh);
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
-    while (runTime.loop())
+    while (simple.loop())
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
-
-        #include "readSIMPLEControls.H"
 
         p.storePrevIter();
         rho.storePrevIter();

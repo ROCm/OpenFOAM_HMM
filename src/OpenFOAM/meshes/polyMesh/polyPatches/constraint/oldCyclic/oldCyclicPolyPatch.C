@@ -386,7 +386,7 @@ void Foam::oldCyclicPolyPatch::getCentresAndAnchors
             vector n1 = half1Faces[max1I].normal(pp.points());
             n1 /= mag(n1) + VSMALL;
 
-            if (mag(n0 & n1) < 1-coupledPolyPatch::matchTol)
+            if (mag(n0 & n1) < 1-matchTolerance())
             {
                 if (debug)
                 {
@@ -444,7 +444,7 @@ void Foam::oldCyclicPolyPatch::getCentresAndAnchors
 
 
     // Calculate typical distance per face
-    tols = calcFaceTol(half1Faces, pp.points(), half1Ctrs);
+    tols = calcFaceTol(matchTolerance(), half1Faces, pp.points(), half1Ctrs);
 }
 
 

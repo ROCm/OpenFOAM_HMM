@@ -52,7 +52,7 @@ case Linux:
     case x86_64:
         switch ($WM_ARCH_OPTION)
         case 32:
-            setenv WM_COMPILER_ARCH '-64'
+            setenv WM_COMPILER_ARCH 64
             setenv WM_CC 'gcc'
             setenv WM_CXX 'g++'
             setenv WM_CFLAGS '-m32 -fPIC'
@@ -343,7 +343,7 @@ endif
 # ~~~~~~~~~~~~~~
 
 set boost_version=boost_1_45_0
-set cgal_version=CGAL-3.7
+set cgal_version=CGAL-3.8
 
 setenv BOOST_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$boost_version
 setenv CGAL_ARCH_PATH  $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cgal_version

@@ -9,7 +9,7 @@ UEqn.clear();
 
 bool closedVolume = false;
 
-if (transonic)
+if (simple.transonic())
 {
     surfaceScalarField phid
     (
@@ -17,7 +17,7 @@ if (transonic)
         fvc::interpolate(psi)*(fvc::interpolate(U) & mesh.Sf())
     );
 
-    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    for (int nonOrth=0; nonOrth<=simple.nNonOrthCorr(); nonOrth++)
     {
         fvScalarMatrix pEqn
         (
@@ -32,7 +32,7 @@ if (transonic)
 
         pEqn.solve();
 
-        if (nonOrth == nNonOrthCorr)
+        if (nonOrth == simple.nNonOrthCorr())
         {
             phi == pEqn.flux();
         }
@@ -43,7 +43,7 @@ else
     phi = fvc::interpolate(rho)*(fvc::interpolate(U) & mesh.Sf());
     closedVolume = adjustPhi(phi, U, p);
 
-    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    for (int nonOrth=0; nonOrth<=simple.nNonOrthCorr(); nonOrth++)
     {
         fvScalarMatrix pEqn
         (
@@ -54,7 +54,7 @@ else
 
         pEqn.solve();
 
-        if (nonOrth == nNonOrthCorr)
+        if (nonOrth == simple.nNonOrthCorr())
         {
             phi -= pEqn.flux();
         }

@@ -153,7 +153,10 @@ void Foam::ThermoParcel<ParcelType>::calcSurfaceValues
     mus = td.muInterp().interpolate(this->position(), tetIs)/TRatio;
 
     Pr = td.cloud().constProps().Pr();
+    Pr = max(ROOTVSMALL, Pr);
+
     kappas = Cpc_*mus/Pr;
+    kappas = max(ROOTVSMALL, kappas);
 }
 
 
@@ -169,21 +172,16 @@ void Foam::ThermoParcel<ParcelType>::calc
     // Define local properties at beginning of time step
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     const scalar np0 = this->nParticle_;
-    const scalar d0 = this->d_;
-    const vector U0 = this->U_;
-    const scalar rho0 = this->rho_;
-    const scalar T0 = this->T_;
-    const scalar Cp0 = this->Cp_;
     const scalar mass0 = this->mass();
 
 
     // Calc surface values
     // ~~~~~~~~~~~~~~~~~~~
     scalar Ts, rhos, mus, Pr, kappas;
-    calcSurfaceValues(td, cellI, T0, Ts, rhos, mus, Pr, kappas);
+    calcSurfaceValues(td, cellI, this->T_, Ts, rhos, mus, Pr, kappas);
 
     // Reynolds number
-    scalar Re = this->Re(U0, d0, rhos, mus);
+    scalar Re = this->Re(this->U_, this->d_, rhos, mus);
 
 
     // Sources
@@ -192,11 +190,17 @@ void Foam::ThermoParcel<ParcelType>::calc
     // Explicit momentum source for particle
     vector Su = vector::zero;
 
+    // Linearised momentum source coefficient
+    scalar Spu = 0.0;
+
     // Momentum transfer from the particle to the carrier phase
     vector dUTrans = vector::zero;
 
     // Explicit enthalpy source for particle
     scalar Sh = 0.0;
+
+    // Linearised enthalpy source coefficient
+    scalar Sph = 0.0;
 
     // Sensible enthalpy transfer from the particle to the carrier phase
     scalar dhsTrans = 0.0;
@@ -209,8 +213,7 @@ void Foam::ThermoParcel<ParcelType>::calc
     scalar NCpW = 0.0;
 
     // Calculate new particle temperature
-    scalar Sph = 0.0;
-    scalar T1 =
+    this->T_ =
         this->calcHeatTransfer
         (
             td,
@@ -219,10 +222,6 @@ void Foam::ThermoParcel<ParcelType>::calc
             Re,
             Pr,
             kappas,
-            d0,
-            rho0,
-            T0,
-            Cp0,
             NCpW,
             Sh,
             dhsTrans,
@@ -234,23 +233,8 @@ void Foam::ThermoParcel<ParcelType>::calc
     // ~~~~~~
 
     // Calculate new particle velocity
-    scalar Spu = 0.0;
-    vector U1 =
-        this->calcVelocity
-        (
-            td,
-            dt,
-            cellI,
-            Re,
-            mus,
-            d0,
-            U0,
-            rho0,
-            mass0,
-            Su,
-            dUTrans,
-            Spu
-        );
+    this->U_ =
+        this->calcVelocity(td, dt, cellI, Re, mus, mass0, Su, dUTrans, Spu);
 
 
     //  Accumulate carrier phase source terms
@@ -269,11 +253,6 @@ void Foam::ThermoParcel<ParcelType>::calc
         // Update sensible enthalpy coefficient
         td.cloud().hsCoeff()[cellI] += np0*Sph;
     }
-
-    // Set new particle properties
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    this->U_ = U1;
-    T_ = T1;
 }
 
 
@@ -287,10 +266,6 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     const scalar Re,
     const scalar Pr,
     const scalar kappa,
-    const scalar d,
-    const scalar rho,
-    const scalar T,
-    const scalar Cp,
     const scalar NCpW,
     const scalar Sh,
     scalar& dhsTrans,
@@ -299,8 +274,11 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
 {
     if (!td.cloud().heatTransfer().active())
     {
-        return T;
+        return T_;
     }
+
+    const scalar d = this->d();
+    const scalar rho = this->rho();
 
     // Calc heat transfer coefficient
     scalar htc = td.cloud().heatTransfer().htc(d, Re, Pr, kappa, NCpW);
@@ -310,7 +288,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
         return
             max
             (
-                T + dt*Sh/(this->volume(d)*rho*Cp),
+                T_ + dt*Sh/(this->volume(d)*rho*Cp_),
                 td.cloud().constProps().TMin()
             );
     }
@@ -319,7 +297,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     const scalar As = this->areaS(d);
 
     scalar ap = Tc_ + Sh/As/htc;
-    scalar bp = 6.0*(Sh/As + htc*(Tc_ - T));
+    scalar bp = 6.0*(Sh/As + htc*(Tc_ - T_));
     if (td.cloud().radiation())
     {
         tetIndices tetIs = this->currentTetIndices();
@@ -327,20 +305,20 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
         const scalar sigma = physicoChemical::sigma.value();
         const scalar epsilon = td.cloud().constProps().epsilon0();
 
-        ap = (ap + epsilon*Gc/(4.0*htc))/(1.0 + epsilon*sigma*pow3(T)/htc);
-        bp += 6.0*(epsilon*(Gc/4.0 - sigma*pow4(T)));
+        ap = (ap + epsilon*Gc/(4.0*htc))/(1.0 + epsilon*sigma*pow3(T_)/htc);
+        bp += 6.0*(epsilon*(Gc/4.0 - sigma*pow4(T_)));
     }
-    bp /= rho*d*Cp*(ap - T) + ROOTVSMALL;
+    bp /= rho*d*Cp_*(ap - T_) + ROOTVSMALL;
 
     // Integrate to find the new parcel temperature
     IntegrationScheme<scalar>::integrationResult Tres =
-        td.cloud().TIntegrator().integrate(T, dt, ap*bp, bp);
+        td.cloud().TIntegrator().integrate(T_, dt, ap*bp, bp);
 
     scalar Tnew = max(Tres.value(), td.cloud().constProps().TMin());
 
     Sph = dt*htc*As;
 
-    dhsTrans += Sph*(0.5*(T + Tnew) - Tc_);
+    dhsTrans += Sph*(0.5*(T_ + Tnew) - Tc_);
 
     return Tnew;
 }

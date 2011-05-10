@@ -1,5 +1,5 @@
 {
-    if (nOuterCorr == 1)
+    if (pimple.nOuterCorr() == 1)
     {
         p =
         (
@@ -26,7 +26,7 @@
 
     #include "resetPhivPatches.H"
 
-    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
     {
         fvScalarMatrix pEqn
         (
@@ -37,16 +37,12 @@
           - fvm::laplacian(rAUf, p)
         );
 
-        if (corr == nCorr-1 && nonOrth == nNonOrthCorr)
-        {
-            pEqn.solve(mesh.solver(p.name() + "Final"));
-        }
-        else
-        {
-            pEqn.solve(mesh.solver(p.name()));
-        }
+        pEqn.solve
+        (
+            mesh.solver(p.select(pimple.finalInnerIter(corr, nonOrth)))
+        );
 
-        if (nonOrth == nNonOrthCorr)
+        if (nonOrth == pimple.nNonOrthCorr())
         {
             phiv += (phiGradp + pEqn.flux())/rhof;
         }
@@ -82,9 +78,9 @@
     U = HbyA - rAU*fvc::grad(p);
 
     // Remove the swirl component of velocity for "wedge" cases
-    if (piso.found("removeSwirl"))
+    if (pimple.dict().found("removeSwirl"))
     {
-        label swirlCmpt(readLabel(piso.lookup("removeSwirl")));
+        label swirlCmpt(readLabel(pimple.dict().lookup("removeSwirl")));
 
         Info<< "Removing swirl component-" << swirlCmpt << " of U" << endl;
         U.field().replace(swirlCmpt, 0.0);

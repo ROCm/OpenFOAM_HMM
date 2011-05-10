@@ -25,6 +25,8 @@ boundaryField
     {
         type            turbulentMixingLengthDissipationRateInlet;
         mixingLength    0.01;
+        phi             phi;
+        k               k;
         value           uniform 1;
     }
     outlet1
@@ -45,7 +47,7 @@ boundaryField
         Cmu             0.09;
         kappa           0.41;
         E               9.8;
-        value           uniform 0;
+        value           uniform 1;
     }
     fan_half0
     {

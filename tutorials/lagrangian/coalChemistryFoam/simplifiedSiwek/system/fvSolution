@@ -86,7 +86,7 @@ solvers
     }
 }
 
-PISO
+PIMPLE
 {
     transonic       yes;
     nCorrectors     3;

@@ -94,6 +94,9 @@ class COxidationKineticDiffusionLimitedRate
             //- Molecular weight of O2 [kg/kmol]
             scalar WO2_;
 
+            //- Formation enthalpy for CO2 [J/kg]
+            scalar HcCO2_;
+
 
 public:
 

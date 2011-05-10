@@ -61,9 +61,10 @@ noPhaseChange::~noPhaseChange()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void noPhaseChange::correct
+void noPhaseChange::correctModel
 (
     const scalar,
+    scalarField&,
     scalarField&,
     scalarField&
 )

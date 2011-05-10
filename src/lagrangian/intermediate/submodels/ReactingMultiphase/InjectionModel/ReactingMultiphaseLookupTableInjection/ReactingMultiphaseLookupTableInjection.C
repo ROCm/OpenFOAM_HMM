@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,7 @@ Foam::ReactingMultiphaseLookupTableInjection<CloudType>::parcelsToInject
 {
     if ((time0 >= 0.0) && (time0 < duration_))
     {
-        return round(injectorCells_.size()*(time1 - time0)*nParcelsPerSecond_);
+        return floor(injectorCells_.size()*(time1 - time0)*parcelsPerSecond_);
     }
     else
     {
@@ -80,7 +80,7 @@ ReactingMultiphaseLookupTableInjection
     InjectionModel<CloudType>(dict, owner, typeName),
     inputFileName_(this->coeffDict().lookup("inputFile")),
     duration_(readScalar(this->coeffDict().lookup("duration"))),
-    nParcelsPerSecond_
+    parcelsPerSecond_
     (
         readScalar(this->coeffDict().lookup("parcelsPerSecond"))
     ),
@@ -135,7 +135,7 @@ ReactingMultiphaseLookupTableInjection
     InjectionModel<CloudType>(im),
     inputFileName_(im.inputFileName_),
     duration_(im.duration_),
-    nParcelsPerSecond_(im.nParcelsPerSecond_),
+    parcelsPerSecond_(im.parcelsPerSecond_),
     injectors_(im.injectors_),
     injectorCells_(im.injectorCells_),
     injectorTetFaces_(im.injectorTetFaces_),

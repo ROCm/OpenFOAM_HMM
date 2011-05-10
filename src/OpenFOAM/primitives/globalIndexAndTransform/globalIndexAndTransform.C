@@ -125,6 +125,7 @@ void Foam::globalIndexAndTransform::determineTransforms()
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
     transforms_ = List<vectorTensorTransform>(6);
+    scalarField maxTol(6);
 
     label nextTrans = 0;
 
@@ -148,8 +149,6 @@ void Foam::globalIndexAndTransform::determineTransforms()
 
                     if (mag(sepVec) > SMALL)
                     {
-                        scalar tol = coupledPolyPatch::matchTol;
-
                         vectorTensorTransform transform(sepVec);
 
                         if
@@ -159,12 +158,13 @@ void Foam::globalIndexAndTransform::determineTransforms()
                                 transforms_,
                                 dummyMatch,
                                 transform,
-                                tol,
+                                cpp.matchTolerance(),
                                 false
                             ) == 0
                         )
                         {
-                            transforms_[nextTrans++] = transform;
+                            transforms_[nextTrans] = transform;
+                            maxTol[nextTrans++] = cpp.matchTolerance();
                         }
 
                         if (nextTrans > 6)
@@ -191,8 +191,6 @@ void Foam::globalIndexAndTransform::determineTransforms()
 
                     if (mag(transT - I) > SMALL)
                     {
-                        scalar tol = coupledPolyPatch::matchTol;
-
                         vectorTensorTransform transform(transT);
 
                         if
@@ -202,12 +200,13 @@ void Foam::globalIndexAndTransform::determineTransforms()
                                 transforms_,
                                 dummyMatch,
                                 transform,
-                                tol,
+                                cpp.matchTolerance(),
                                 false
                             ) == 0
                         )
                         {
-                            transforms_[nextTrans++] = transform;
+                            transforms_[nextTrans] = transform;
+                            maxTol[nextTrans++] = cpp.matchTolerance();
                         }
 
                         if (nextTrans > 6)
@@ -227,11 +226,17 @@ void Foam::globalIndexAndTransform::determineTransforms()
         }
     }
 
+
+    // Collect transforms on master
+
     List<List<vectorTensorTransform> > allTransforms(Pstream::nProcs());
-
     allTransforms[Pstream::myProcNo()] = transforms_;
-
     Pstream::gatherList(allTransforms);
+
+    // Collect matching tolerance on master
+    List<scalarField> allTols(Pstream::nProcs());
+    allTols[Pstream::myProcNo()] = maxTol;
+    Pstream::gatherList(allTols);
 
     if (Pstream::master())
     {
@@ -250,8 +255,6 @@ void Foam::globalIndexAndTransform::determineTransforms()
 
                 if (mag(transform.t()) > SMALL || transform.hasR())
                 {
-                    scalar tol = coupledPolyPatch::matchTol;
-
                     if
                     (
                         matchTransform
@@ -259,7 +262,7 @@ void Foam::globalIndexAndTransform::determineTransforms()
                             transforms_,
                             dummyMatch,
                             transform,
-                            tol,
+                            allTols[procI][pSVI],
                             true
                         ) ==  0
                     )
@@ -378,8 +381,6 @@ void Foam::globalIndexAndTransform::determinePatchTransformSign()
 
                     if (mag(sepVec) > SMALL)
                     {
-                        scalar tol = coupledPolyPatch::matchTol;
-
                         vectorTensorTransform t(sepVec);
 
                         label sign = matchTransform
@@ -387,7 +388,7 @@ void Foam::globalIndexAndTransform::determinePatchTransformSign()
                             transforms_,
                             matchTransI,
                             t,
-                            tol,
+                            cpp.matchTolerance(),
                             true
                         );
 
@@ -424,8 +425,6 @@ void Foam::globalIndexAndTransform::determinePatchTransformSign()
 
                     if (mag(transT - I) > SMALL)
                     {
-                        scalar tol = coupledPolyPatch::matchTol;
-
                         vectorTensorTransform t(transT);
 
                         label sign = matchTransform
@@ -433,7 +432,7 @@ void Foam::globalIndexAndTransform::determinePatchTransformSign()
                             transforms_,
                             matchTransI,
                             t,
-                            tol,
+                            cpp.matchTolerance(),
                             true
                         );
 

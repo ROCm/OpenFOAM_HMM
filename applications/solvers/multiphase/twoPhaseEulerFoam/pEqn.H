@@ -58,7 +58,7 @@
         alphaf*rUaAf/rhoa + betaf*rUbAf/rhob
     );
 
-    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
     {
         fvScalarMatrix pEqn
         (
@@ -66,9 +66,13 @@
         );
 
         pEqn.setReference(pRefCell, pRefValue);
-        pEqn.solve();
 
-        if (nonOrth == nNonOrthCorr)
+        pEqn.solve
+        (
+            mesh.solver(p.select(pimple.finalInnerIter(corr, nonOrth)))
+        );
+
+        if (nonOrth == pimple.nNonOrthCorr())
         {
             surfaceScalarField SfGradp(pEqn.flux()/Dp);
 

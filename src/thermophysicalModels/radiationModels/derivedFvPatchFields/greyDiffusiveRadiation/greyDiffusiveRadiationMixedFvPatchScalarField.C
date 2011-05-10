@@ -221,6 +221,10 @@ updateCoeffs()
                   + emissivity()()[faceI]*physicoChemical::sigma.value()
                   * pow4(Tp[faceI])
                 )/pi;
+
+             // Emmited heat flux from this ray direction
+            ray.Qem().boundaryField()[patchI][faceI] =
+                refValue()[faceI]*(n[faceI] & ray.dAve());
         }
         else
         {
@@ -228,6 +232,10 @@ updateCoeffs()
             valueFraction()[faceI] = 0.0;
             refGrad()[faceI] = 0.0;
             refValue()[faceI] = 0.0; //not used
+
+             // Incident heat flux on this ray direction
+            ray.Qin().boundaryField()[patchI][faceI] =
+                Iw[faceI]*(n[faceI] & ray.dAve());
         }
     }
 

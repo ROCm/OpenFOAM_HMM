@@ -98,6 +98,8 @@ SourceFiles
 
 namespace Foam
 {
+class dlLibraryTable;
+
 namespace functionEntries
 {
 
@@ -113,8 +115,13 @@ class codeStream
         //- Interpreter function type
         typedef void (*streamingFunctionType)(Ostream&, const dictionary&);
 
-
     // Private Member Functions
+
+        //- Helper function: parent (of parent etc.) of dictionary up to the top
+        static const dictionary& topDict(const dictionary&);
+
+        //- Helper function: access to dlLibraryTable of Time
+        static dlLibraryTable& libs(const dictionary& dict);
 
         //- Disallow default bitwise copy construct
         codeStream(const codeStream&);

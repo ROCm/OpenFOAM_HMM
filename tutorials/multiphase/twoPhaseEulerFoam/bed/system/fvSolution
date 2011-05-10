@@ -21,7 +21,7 @@ solvers
     {
         solver          GAMG;
         tolerance       1e-08;
-        relTol          0;
+        relTol          0.1;
         smoother        DIC;
         nPreSweeps      0;
         nPostSweeps     2;
@@ -32,7 +32,22 @@ solvers
         mergeLevels     1;
     }
 
-    "(Ua|Ub|Theta|k|epsilon)"
+    pFinal
+    {
+        $p;
+        tolerance       1e-08;
+        relTol          0;
+    }
+
+    "(k|epsilon)"
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-05;
+        relTol          0.1;
+    }
+
+    "(k|epsilon)Final"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -40,7 +55,15 @@ solvers
         relTol          0;
     }
 
-    "(alpha|beta)"
+    alpha
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-10;
+        relTol          0.1;
+    }
+
+    alphaFinal
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -49,7 +72,7 @@ solvers
     }
 }
 
-PISO
+PIMPLE
 {
     nCorrectors     2;
     nNonOrthogonalCorrectors 0;

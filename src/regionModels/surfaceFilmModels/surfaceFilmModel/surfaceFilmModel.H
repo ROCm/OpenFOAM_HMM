@@ -161,6 +161,9 @@ public:
 
         // Access
 
+            //- Return the accleration due to gravity
+            inline const dimensionedVector& g() const;
+
             //- Return the thermo type
             inline const thermoModelType& thermoModel() const;
 
@@ -176,7 +179,7 @@ public:
             ) = 0;
 
 
-       // Solution parameters
+        // Solution parameters
 
             //- Courant number evaluation
             virtual scalar CourantNumber() const;
@@ -184,48 +187,50 @@ public:
 
         // Fields
 
-           //- Return the film thickness [m]
-           virtual const volScalarField& delta() const = 0;
+            //- Return the film thickness [m]
+            virtual const volScalarField& delta() const = 0;
 
-           //- Return the film velocity [m/s]
-           virtual const volVectorField& U() const = 0;
+            //- Return the film velocity [m/s]
+            virtual const volVectorField& U() const = 0;
 
-           //- Return the film surface velocity [m/s]
-           virtual const volVectorField& Us() const = 0;
+            //- Return the film surface velocity [m/s]
+            virtual const volVectorField& Us() const = 0;
 
-           //- Return the film wall velocity [m/s]
-           virtual const volVectorField& Uw() const = 0;
+            //- Return the film wall velocity [m/s]
+            virtual const volVectorField& Uw() const = 0;
 
-           //- Return the film density [kg/m3]
-           virtual const volScalarField& rho() const = 0;
+            //- Return the film density [kg/m3]
+            virtual const volScalarField& rho() const = 0;
 
-           //- Return the film mean temperature [K]
-           virtual const volScalarField& T() const = 0;
+            //- Return the film mean temperature [K]
+            virtual const volScalarField& T() const = 0;
 
-           //- Return the film surface temperature [K]
-           virtual const volScalarField& Ts() const = 0;
+            //- Return the film surface temperature [K]
+            virtual const volScalarField& Ts() const = 0;
 
-           //- Return the film wall temperature [K]
-           virtual const volScalarField& Tw() const = 0;
+            //- Return the film wall temperature [K]
+            virtual const volScalarField& Tw() const = 0;
 
             //- Return the film specific heat capacity [J/kg/K]
-           virtual const volScalarField& Cp() const = 0;
+            virtual const volScalarField& Cp() const = 0;
 
-           //- Return the film thermal conductivity [W/m/K]
-           virtual const volScalarField& kappa() const = 0;
+            //- Return the film thermal conductivity [W/m/K]
+            virtual const volScalarField& kappa() const = 0;
+
+            //- Return the film surface tension [N/m]
+            virtual const volScalarField& sigma() const = 0;
 
 
-           // Transfer fields - to the primary region
+            // Transfer fields - to the primary region
 
-               //- Return the film mass available for transfer
-               virtual const volScalarField& massForPrimary() const = 0;
+                //- Return mass transfer source - Eulerian phase only
+                virtual tmp<volScalarField> primaryMassTrans() const = 0;
 
-               //- Return the parcel diameters originating from film
-               virtual const volScalarField& diametersForPrimary() const = 0;
+                //- Return the film mass available for transfer
+                virtual const volScalarField& cloudMassTrans() const = 0;
 
-               //- Return the film mass evolved via phase change
-               virtual const volScalarField& massPhaseChangeForPrimary()
-                   const = 0;
+                //- Return the parcel diameters originating from film
+                virtual const volScalarField& cloudDiameterTrans() const = 0;
 
 
         // Source fields

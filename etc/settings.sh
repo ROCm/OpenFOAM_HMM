@@ -76,7 +76,7 @@ Linux)
     x86_64)
         case "$WM_ARCH_OPTION" in
         32)
-            export WM_COMPILER_ARCH='-64'
+            export WM_COMPILER_ARCH=64
             export WM_CC='gcc'
             export WM_CXX='g++'
             export WM_CFLAGS='-m32 -fPIC'
@@ -361,7 +361,7 @@ fi
 # ~~~~~~~~~~~~~~
 
 boost_version=boost_1_45_0
-cgal_version=CGAL-3.7
+cgal_version=CGAL-3.8
 
 export BOOST_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$boost_version
 export CGAL_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cgal_version
