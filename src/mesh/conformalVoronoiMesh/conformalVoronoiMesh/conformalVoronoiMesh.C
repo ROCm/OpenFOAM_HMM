@@ -664,6 +664,10 @@ void Foam::conformalVoronoiMesh::insertConcaveFeaturePoints()
 
 void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
 {
+    Info<< "SKIP MIXED FEATURE POINTS" << endl;
+
+    return;
+
     const PtrList<extendedFeatureEdgeMesh>& feMeshes
     (
         geometryToConformTo_.features()
