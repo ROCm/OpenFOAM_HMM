@@ -585,13 +585,17 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
         treeBoundBox& procMeshBb =
             geometryToConformTo_.processorMeshBounds()[Pstream::myProcNo()];
 
-        Pout<< "Before processorMeshBounds update" << procMeshBb << endl;
+        if (cvMeshControls().objOutput())
+        {
+            Pout<< "Before processorMeshBounds update" << procMeshBb << endl;
+        }
 
         procMeshBb = treeBoundBox(minPt, maxPt);
 
-        Pout<< "After processorMeshBounds update" << procMeshBb << endl;
-
+        if (cvMeshControls().objOutput())
         {
+            Pout<< "After processorMeshBounds update" << procMeshBb << endl;
+
             OFstream str
             (
                 runTime_.path()

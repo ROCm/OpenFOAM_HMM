@@ -473,6 +473,13 @@ inline Foam::Random& Foam::conformalVoronoiMesh::rndGen() const
 }
 
 
+inline const Foam::searchableSurfaces&
+Foam::conformalVoronoiMesh::allGeometry() const
+{
+    return allGeometry_;
+}
+
+
 inline const Foam::conformationSurfaces&
 Foam::conformalVoronoiMesh::geometryToConformTo() const
 {

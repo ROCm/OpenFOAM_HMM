@@ -806,6 +806,9 @@ public:
             //- Return the random number generator
             inline Random& rndGen() const;
 
+            //- Return the allGeometry object
+            inline const searchableSurfaces& allGeometry() const;
+
             //- Return the conformationSurfaces object
             inline const conformationSurfaces& geometryToConformTo() const;
 
