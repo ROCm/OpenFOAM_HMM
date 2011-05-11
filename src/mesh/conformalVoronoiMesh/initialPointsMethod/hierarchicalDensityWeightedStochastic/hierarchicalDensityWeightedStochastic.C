@@ -53,25 +53,18 @@ void Foam::hierarchicalDensityWeightedStochastic::writeOBJ
 
     Pout<< "Writing " << str.name() << endl;
 
-    label vertI = 0;
-
     pointField bbPoints(bb.points());
-
-    label pointVertI = vertI;
 
     forAll(bbPoints, i)
     {
         meshTools::writeOBJ(str, bbPoints[i]);
-        vertI++;
     }
 
     forAll(treeBoundBox::edges, i)
     {
         const edge& e = treeBoundBox::edges[i];
 
-        str << "l " << e[0] + pointVertI + 1
-            << ' ' << e[1] + pointVertI + 1
-            << nl;
+        str << "l " << e[0] + 1 << ' ' << e[1] + 1 << nl;
     }
 }
 
