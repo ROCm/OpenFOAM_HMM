@@ -29,10 +29,11 @@ Description
 
     - cloud function objects
 
-    - particle forces
+    - particle forces, e.g.
       - buoyancy
       - drag
       - pressure gradient
+      - ...
 
     - sub-models:
       - dispersion model

@@ -23,28 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeParcelCloudFunctionObjects_H
-#define makeParcelCloudFunctionObjects_H
+template<class CloudType>
+inline const Foam::Switch&
+Foam::FacePostProcessing<CloudType>::resetOnWrite() const
+{
+    return resetOnWrite_;
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "FacePostProcessing.H"
-#include "ParticleTracks.H"
-#include "PatchPostProcessing.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#define makeParcelCloudFunctionObjects(CloudType)                             \
-                                                                              \
-    makeCloudFunctionObject(CloudType);                                       \
-                                                                              \
-    makeCloudFunctionObjectType(FacePostProcessing, CloudType);               \
-    makeCloudFunctionObjectType(ParticleTracks, CloudType);                   \
-    makeCloudFunctionObjectType(PatchPostProcessing, CloudType);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //
