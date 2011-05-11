@@ -324,11 +324,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     functions_
     (
         *this,
-        particleProperties_.subOrEmptyDict
-        (
-            "cloudFunctions",
-            solution_.active()
-        ),
+        particleProperties_.subOrEmptyDict("cloudFunctions"),
         solution_.active()
     ),
     dispersionModel_(NULL),
