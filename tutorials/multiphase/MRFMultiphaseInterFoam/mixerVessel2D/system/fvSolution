@@ -50,7 +50,7 @@ solvers
     }
 }
 
-PISO
+PIMPLE
 {
     momentumPredictor no;
     nCorrectors     4;
@@ -65,7 +65,7 @@ PISO
 
 relaxationFactors
 {
-    U 1;
+    "U.*"           1;
 }
 
 // ************************************************************************* //

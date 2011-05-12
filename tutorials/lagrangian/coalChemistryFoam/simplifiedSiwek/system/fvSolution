@@ -86,7 +86,7 @@ solvers
     }
 }
 
-PISO
+PIMPLE
 {
     transonic       yes;
     nCorrectors     3;
@@ -94,5 +94,10 @@ PISO
     momentumPredictor yes;
 }
 
+
+relaxationFactors
+{
+    ".*Final"       1;
+}
 
 // ************************************************************************* //

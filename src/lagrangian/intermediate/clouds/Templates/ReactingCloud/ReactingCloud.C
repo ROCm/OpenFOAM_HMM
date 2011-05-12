@@ -295,15 +295,30 @@ void Foam::ReactingCloud<CloudType>::relaxSources
     const ReactingCloud<CloudType>& cloudOldTime
 )
 {
-    typedef DimensionedField<scalar, volMesh> dsfType;
-
     CloudType::relaxSources(cloudOldTime);
+
+    typedef DimensionedField<scalar, volMesh> dsfType;
 
     forAll(rhoTrans_, fieldI)
     {
         dsfType& rhoT = rhoTrans_[fieldI];
         const dsfType& rhoT0 = cloudOldTime.rhoTrans()[fieldI];
         this->relax(rhoT, rhoT0, "rho");
+    }
+}
+
+
+template<class CloudType>
+void Foam::ReactingCloud<CloudType>::scaleSources()
+{
+    CloudType::scaleSources();
+
+    typedef DimensionedField<scalar, volMesh> dsfType;
+
+    forAll(rhoTrans_, fieldI)
+    {
+        dsfType& rhoT = rhoTrans_[fieldI];
+        this->scale(rhoT, "rho");
     }
 }
 

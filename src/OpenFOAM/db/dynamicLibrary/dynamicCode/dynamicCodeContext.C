@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -46,7 +45,6 @@ Foam::dynamicCodeContext::dynamicCodeContext(const dictionary& dict)
         const entry& codeEntry = dict.lookupEntry("code", false, false);
         code_ = stringOps::trim(codeEntry.stream());
         stringOps::inplaceExpand(code_, dict);
-        addLineDirective(code_, codeEntry.startLineNumber(), dict.name());
     }
 
     // note: removes any leading/trailing whitespace
@@ -64,7 +62,6 @@ Foam::dynamicCodeContext::dynamicCodeContext(const dictionary& dict)
     {
         include_ = stringOps::trim(includePtr->stream());
         stringOps::inplaceExpand(include_, dict);
-        addLineDirective(include_, includePtr->startLineNumber(), dict.name());
     }
 
     // optional
@@ -92,6 +89,28 @@ Foam::dynamicCodeContext::dynamicCodeContext(const dictionary& dict)
     OSHA1stream os;
     os  << include_ << options_ << libs_ << localCode_ << code_;
     sha1_ = os.digest();
+
+
+
+    // Add line number after calculating sha1 since includes processorDDD
+    // in path which differs between processors.
+
+    {
+        const entry& codeEntry = dict.lookupEntry("code", false, false);
+        addLineDirective(code_, codeEntry.startLineNumber(), dict.name());
+    }
+    if (includePtr)
+    {
+        addLineDirective(include_, includePtr->startLineNumber(), dict.name());
+    }
+    if (optionsPtr)
+    {
+        addLineDirective(options_, optionsPtr->startLineNumber(), dict.name());
+    }
+    if (libsPtr)
+    {
+        addLineDirective(libs_, libsPtr->startLineNumber(), dict.name());
+    }
 }
 
 

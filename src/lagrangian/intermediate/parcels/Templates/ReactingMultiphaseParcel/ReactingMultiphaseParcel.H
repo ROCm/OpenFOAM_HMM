@@ -134,9 +134,9 @@ private:
             const label idS
         ) const;
 
-        //- Return the mixture effective enthalpy
+        //- Return the mixture effective sensible enthalpy
         template<class TrackData>
-        scalar HEff
+        scalar HsEff
         (
             TrackData& td,
             const scalar p,

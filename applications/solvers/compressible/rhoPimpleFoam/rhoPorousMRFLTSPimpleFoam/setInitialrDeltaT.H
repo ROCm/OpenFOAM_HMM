@@ -1,6 +1,6 @@
 scalar maxDeltaT
 (
-    pimple.lookupOrDefault<scalar>("maxDeltaT", GREAT)
+    pimple.dict().lookupOrDefault<scalar>("maxDeltaT", GREAT)
 );
 
 volScalarField rDeltaT

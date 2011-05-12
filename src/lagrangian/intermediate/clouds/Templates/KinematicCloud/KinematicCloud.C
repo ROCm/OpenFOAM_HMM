@@ -31,7 +31,6 @@ License
 #include "DispersionModel.H"
 #include "InjectionModel.H"
 #include "PatchInteractionModel.H"
-#include "PostProcessingModel.H"
 #include "SurfaceFilmModel.H"
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
@@ -66,15 +65,6 @@ void Foam::KinematicCloud<CloudType>::setModels()
         ).ptr()
     );
 
-    postProcessingModel_.reset
-    (
-        PostProcessingModel<KinematicCloud<CloudType> >::New
-        (
-            subModelProperties_,
-            *this
-        ).ptr()
-    );
-
     surfaceFilmModel_.reset
     (
         SurfaceFilmModel<KinematicCloud<CloudType> >::New
@@ -100,13 +90,7 @@ template<class CloudType>
 template<class TrackData>
 void Foam::KinematicCloud<CloudType>::solve(TrackData& td)
 {
-    if (solution_.transient())
-    {
-        td.cloud().preEvolve();
-
-        evolveCloud(td);
-    }
-    else
+    if (solution_.steadyState())
     {
         td.cloud().storeState();
 
@@ -114,7 +98,21 @@ void Foam::KinematicCloud<CloudType>::solve(TrackData& td)
 
         evolveCloud(td);
 
-        td.cloud().relaxSources(td.cloud().cloudCopy());
+        if (solution_.coupled())
+        {
+            td.cloud().relaxSources(td.cloud().cloudCopy());
+        }
+    }
+    else
+    {
+        td.cloud().preEvolve();
+
+        evolveCloud(td);
+
+        if (solution_.coupled())
+        {
+            td.cloud().scaleSources();
+        }
     }
 
     td.cloud().info();
@@ -237,9 +235,10 @@ void Foam::KinematicCloud<CloudType>::postEvolve()
     }
 
     this->dispersion().cacheFields(false);
+
     forces_.cacheFields(false);
 
-    this->postProcessing().post();
+    functions_.postEvolve();
 
     solution_.nextIter();
 }
@@ -254,10 +253,12 @@ void Foam::KinematicCloud<CloudType>::cloudReset(KinematicCloud<CloudType>& c)
 
     forces_.transfer(c.forces_);
 
+    functions_.transfer(c.functions_);
+
     dispersionModel_.reset(c.dispersionModel_.ptr());
     injectionModel_.reset(c.injectionModel_.ptr());
     patchInteractionModel_.reset(c.patchInteractionModel_.ptr());
-    postProcessingModel_.reset(c.postProcessingModel_.ptr());
+    surfaceFilmModel_.reset(c.surfaceFilmModel_.ptr());
 
     UIntegrator_.reset(c.UIntegrator_.ptr());
 }
@@ -300,7 +301,9 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     rndGen_
     (
         label(0),
+        solution_.steadyState() ?
         particleProperties_.lookupOrDefault<label>("randomSampleSize", 100000)
+      : -1
     ),
     cellOccupancyPtr_(),
     rho_(rho),
@@ -318,10 +321,15 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
         ),
         solution_.active()
     ),
+    functions_
+    (
+        *this,
+        particleProperties_.subOrEmptyDict("cloudFunctions"),
+        solution_.active()
+    ),
     dispersionModel_(NULL),
     injectionModel_(NULL),
     patchInteractionModel_(NULL),
-    postProcessingModel_(NULL),
     surfaceFilmModel_(NULL),
     UIntegrator_(NULL),
     UTrans_
@@ -396,10 +404,10 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     mu_(c.mu_),
     g_(c.g_),
     forces_(c.forces_),
+    functions_(c.functions_),
     dispersionModel_(c.dispersionModel_->clone()),
     injectionModel_(c.injectionModel_->clone()),
     patchInteractionModel_(c.patchInteractionModel_->clone()),
-    postProcessingModel_(c.postProcessingModel_->clone()),
     surfaceFilmModel_(c.surfaceFilmModel_->clone()),
     UIntegrator_(c.UIntegrator_->clone()),
     UTrans_
@@ -471,10 +479,10 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     mu_(c.mu_),
     g_(c.g_),
     forces_(*this, mesh),
+    functions_(*this),
     dispersionModel_(NULL),
     injectionModel_(NULL),
     patchInteractionModel_(NULL),
-    postProcessingModel_(NULL),
     surfaceFilmModel_(NULL),
     UIntegrator_(NULL),
     UTrans_(NULL),
@@ -556,8 +564,20 @@ void Foam::KinematicCloud<CloudType>::relax
 ) const
 {
     const scalar coeff = solution_.relaxCoeff(name);
-
     field = field0 + coeff*(field - field0);
+}
+
+
+template<class CloudType>
+template<class Type>
+void Foam::KinematicCloud<CloudType>::scale
+(
+    DimensionedField<Type, volMesh>& field,
+    const word& name
+) const
+{
+    const scalar coeff = solution_.relaxCoeff(name);
+    field *= coeff;
 }
 
 
@@ -568,6 +588,15 @@ void Foam::KinematicCloud<CloudType>::relaxSources
 )
 {
     this->relax(UTrans_(), cloudOldTime.UTrans(), "U");
+    this->relax(UCoeff_(), cloudOldTime.UCoeff(), "U");
+}
+
+
+template<class CloudType>
+void Foam::KinematicCloud<CloudType>::scaleSources()
+{
+    this->scale(UTrans_(), "U");
+    this->scale(UCoeff_(), "U");
 }
 
 

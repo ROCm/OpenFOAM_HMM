@@ -21,55 +21,55 @@ FoamFile
     {
         type            empty;
         nFaces          0;
-        startFace       60336;
+        startFace       61295;
     }
     minX
     {
         type            empty;
         nFaces          0;
-        startFace       60336;
+        startFace       61295;
     }
     maxX
     {
         type            empty;
         nFaces          0;
-        startFace       60336;
+        startFace       61295;
     }
     minY
     {
         type            empty;
         nFaces          0;
-        startFace       60336;
+        startFace       61295;
     }
     ground
     {
         type            wall;
         nFaces          590;
-        startFace       60336;
+        startFace       61295;
     }
     maxZ
     {
         type            empty;
         nFaces          0;
-        startFace       60926;
+        startFace       61885;
     }
     igloo_region0
     {
         type            wall;
         nFaces          2260;
-        startFace       60926;
+        startFace       61885;
     }
     twoFridgeFreezers_seal_0
     {
         type            wall;
         nFaces          1344;
-        startFace       63186;
+        startFace       64145;
     }
     twoFridgeFreezers_herring_1
     {
         type            wall;
         nFaces          1116;
-        startFace       64530;
+        startFace       65489;
     }
 )
 

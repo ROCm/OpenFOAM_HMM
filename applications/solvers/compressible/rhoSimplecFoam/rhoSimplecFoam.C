@@ -35,6 +35,7 @@ Description
 #include "RASModel.H"
 #include "mixedFvPatchFields.H"
 #include "bound.H"
+#include "simpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,20 +47,20 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "initContinuityErrs.H"
 
+    simpleControl simple(mesh);
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
-    while (runTime.loop())
+    while (simple.loop())
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
-
-        #include "readSIMPLEControls.H"
 
         p.storePrevIter();
         rho.storePrevIter();
 
-        if (!transonic)
+        if (!simple.transonic())
         {
             rho.storePrevIter();
         }

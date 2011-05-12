@@ -75,6 +75,10 @@ class Time
         //- file-change monitor for all registered files
         mutable autoPtr<fileMonitor> monitorPtr_;
 
+        //- Any loaded dynamic libraries. Make sure to construct before
+        //  reading controlDict.
+        dlLibraryTable libs_;
+
         //- The controlDict
         IOdictionary controlDict_;
 
@@ -165,9 +169,6 @@ private:
 
         //- Is runtime modification of dictionaries allowed?
         Switch runTimeModifiable_;
-
-        //- Instantiate a dummy class to cause the reading of dynamic libraries
-        dlLibraryTable::readDlLibrary readLibs_;
 
         //- Function objects executed at start and on ++, +=
         mutable functionObjectList functionObjects_;
@@ -373,6 +374,12 @@ public:
             const functionObjectList& functionObjects() const
             {
                 return functionObjects_;
+            }
+
+            //- External access to the loaded libraries
+            dlLibraryTable& libs()
+            {
+                return libs_;
             }
 
             //- Return true if time currently being sub-cycled, otherwise false

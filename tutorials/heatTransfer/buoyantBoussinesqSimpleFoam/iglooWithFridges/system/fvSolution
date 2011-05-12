@@ -29,16 +29,26 @@ solvers
     {
         solver          PBiCG;
         preconditioner  DILU;
-        tolerance       1e-05;
+        tolerance       1e-07;
         relTol          0.1;
     }
 }
 
 SIMPLE
 {
-    nNonOrthogonalCorrectors 0;
+    nNonOrthogonalCorrectors 2;
     pRefCell        0;
     pRefValue       0;
+
+    residualControl
+    {
+        p_rgh           1e-2;
+        U               1e-4;
+        T               1e-3;
+
+        // possibly check turbulence fields
+        "(k|epsilon|omega)" 1e-3;
+    }
 }
 
 relaxationFactors

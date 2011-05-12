@@ -78,7 +78,7 @@ class ThermoLookupTableInjection
         const scalar duration_;
 
         //- Number of parcels per injector - common to all injection sources
-        const label nParcelsPerSecond_;
+        const scalar parcelsPerSecond_;
 
         //- List of injectors
         kinematicParcelInjectionDataIOList injectors_;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,12 +41,13 @@ Foam::SubModelBase<CloudType>::SubModelBase
 (
     CloudType& owner,
     const dictionary& dict,
-    const word& name
+    const word& name,
+    const word& dictExt
 )
 :
     owner_(owner),
     dict_(dict),
-    coeffDict_(dict.subDict(name + "Coeffs"))
+    coeffDict_(dict.subDict(name + dictExt))
 {}
 
 

@@ -8,7 +8,7 @@
 
     UEqn().relax();
 
-    if (momentumPredictor)
+    if (simple.momentumPredictor())
     {
         solve
         (

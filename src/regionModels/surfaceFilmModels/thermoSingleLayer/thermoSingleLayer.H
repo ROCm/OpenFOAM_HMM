@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
     Foam::thermoSingleLayer
@@ -115,6 +114,15 @@ protected:
                 volScalarField hs_;
 
 
+            // Transfer fields - to the primary region
+
+                //- Film mass evolved via phase change
+                volScalarField primaryMassPCTrans_;
+
+                //- Film energy evolved via phase change
+                volScalarField primaryEnergyPCTrans_;
+
+
         // Source term fields
 
             // Film region - registered to the film region mesh
@@ -157,11 +165,6 @@ protected:
             //- Radiation
             autoPtr<filmRadiationModel> radiation_;
 
-            //- Total mass transferred to primary region [kg]
-            scalar totalMassPhaseChange_;
-
-            //- Film energy evolved via phase change
-            volScalarField energyPhaseChangeForPrimary_;
 
 
     // Protected member functions
@@ -256,6 +259,13 @@ public:
                 virtual const volScalarField& hs() const;
 
 
+
+            // Transfer fields - to the primary region
+
+                //- Return mass transfer source - Eulerian phase only
+                virtual tmp<volScalarField> primaryMassTrans() const;
+
+
             // Helper functions
 
                 //- Return sensible enthalpy as a function of temperature
@@ -344,6 +354,9 @@ public:
         // Source fields
 
             // Mapped into primary region
+
+                //- Return total mass source - Eulerian phase only
+                virtual tmp<DimensionedField<scalar, volMesh> > Srho() const;
 
                 //- Return mass source for specie i - Eulerian phase only
                 virtual tmp<DimensionedField<scalar, volMesh> > Srho

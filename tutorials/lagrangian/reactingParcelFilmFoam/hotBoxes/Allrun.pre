@@ -1,4 +1,6 @@
 #!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
@@ -17,25 +19,14 @@ echo "running patchifyObstacles"
 ./patchifyObstacles > log.patchifyObstacles 2>&1
 
 # Create the wall film region via extrusion
-runApplication extrudeToRegionMesh \
-    wallFilmRegion \
-    '(
-        cube01_side1 cube01_side2 cube01_side3 cube01_side4 cube01_side5 cube01_side6
-        cube02_side1 cube02_side2 cube02_side3 cube02_side4 cube02_side5 cube02_side6
-        cube03_side1 cube03_side2 cube03_side3 cube03_side4 cube03_side5 cube03_side6
-        cube04_side1 cube04_side2 cube04_side3 cube04_side4 cube04_side5 cube04_side6
-        floor
-)' \
-    0.001 \
-    -overwrite
+runApplication extrudeToRegionMesh -overwrite
+
+# Fine tuning of U and T boundary conditions
+runApplication changeDictionary
 
 # Copy the system settings over to the wall film region
 rm -rf system/wallFilmRegion
 cp -r system/wallFilmRegion.org system/wallFilmRegion
-
-# Convert the primary region to film patches to direct mapped
-# - primary region walls map values from the film surface
-runApplication changeDictionary
 
 find ./0 -maxdepth 1 -type f -exec \
     sed -i "s/wallFilm/\"(region0_to.*)\"/g" {} \;

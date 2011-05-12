@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -81,9 +80,7 @@ standardPhaseChange::standardPhaseChange
     Tb_(readScalar(coeffs_.lookup("Tb"))),
     deltaMin_(readScalar(coeffs_.lookup("deltaMin"))),
     L_(readScalar(coeffs_.lookup("L"))),
-    TbFactor_(coeffs_.lookupOrDefault<scalar>("TbFactor", 1.1)),
-    totalMass_(0.0),
-    vapourRate_(0.0)
+    TbFactor_(coeffs_.lookupOrDefault<scalar>("TbFactor", 1.1))
 {}
 
 
@@ -95,9 +92,10 @@ standardPhaseChange::~standardPhaseChange()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void standardPhaseChange::correct
+void standardPhaseChange::correctModel
 (
     const scalar dt,
+    scalarField& availableMass,
     scalarField& dMass,
     scalarField& dEnergy
 )
@@ -124,8 +122,10 @@ void standardPhaseChange::correct
     const scalarField hInf(film.htcs().h());
     const scalarField hFilm(film.htcw().h());
     const vectorField dU(film.UPrimary() - film.Us());
-    const scalarField availableMass((delta - deltaMin_)*rho*magSf);
-
+    const scalarField limMass
+    (
+        max(scalar(0.0), availableMass - deltaMin_*rho*magSf)
+    );
 
     forAll(dMass, cellI)
     {
@@ -152,8 +152,7 @@ void standardPhaseChange::correct
 
                 const scalar Cp = liq.Cp(pc, Tloc);
                 const scalar Tcorr = max(0.0, T[cellI] - Tb_);
-                const scalar qCorr = availableMass[cellI]*Cp*(Tcorr);
-
+                const scalar qCorr = limMass[cellI]*Cp*(Tcorr);
                 dMass[cellI] =
                     dt*magSf[cellI]/hVap*(qDotInf + qDotFilm)
                   + qCorr/hVap;
@@ -195,23 +194,10 @@ void standardPhaseChange::correct
                     dt*magSf[cellI]*rhoInfc*hm*(Ys - YInf[cellI])/(1.0 - Ys);
             }
 
-            dMass[cellI] = min(availableMass[cellI], max(0.0, dMass[cellI]));
+            dMass[cellI] = min(limMass[cellI], max(0.0, dMass[cellI]));
             dEnergy[cellI] = dMass[cellI]*hVap;
         }
     }
-
-    const scalar sumdMass = sum(dMass);
-    totalMass_ += sumdMass;
-    vapourRate_ = sumdMass/owner().time().deltaTValue();
-}
-
-
-void standardPhaseChange::info() const
-{
-    Info<< indent << "mass phase change  = "
-        << returnReduce(totalMass_, sumOp<scalar>()) << nl
-        << indent << "vapourisation rate = "
-        << returnReduce(vapourRate_, sumOp<scalar>()) << nl;
 }
 
 

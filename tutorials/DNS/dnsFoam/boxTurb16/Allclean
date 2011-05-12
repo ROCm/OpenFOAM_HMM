@@ -5,7 +5,6 @@ cd ${0%/*} || exit 1    # run from this directory
 . $WM_PROJECT_DIR/bin/tools/CleanFunctions
 
 cleanCase
-rm -rf 0
-cp -r 0.org 0
+rm -f 0/enstrophy
 
 # ----------------------------------------------------------------- end-of-file

@@ -11,5 +11,5 @@ LIB_LIBS = \
     -lmeshTools \
     -lsurfMesh \
     -ltriSurface \
-    -lconversion \
-    -llagrangian
+    -llagrangian \
+    -lconversion

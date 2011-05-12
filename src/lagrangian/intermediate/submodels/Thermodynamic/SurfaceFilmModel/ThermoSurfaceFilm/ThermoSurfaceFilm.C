@@ -391,8 +391,8 @@ void Foam::ThermoSurfaceFilm<CloudType>::splashInteraction
     const scalar dBarSplash = 1/cbrt(6.0)*cbrt(mRatio/Ns)*d + ROOTVSMALL;
 
     // cumulative diameter splash distribution
-    const scalar dMax = cbrt(mRatio)*d;
-    const scalar dMin = 0.001*dMax;
+    const scalar dMax = 0.9*cbrt(mRatio)*d;
+    const scalar dMin = 0.1*dMax;
     const scalar K = exp(-dMin/dBarSplash) - exp(-dMax/dBarSplash);
 
     // surface energy of secondary parcels [J]
@@ -437,7 +437,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::splashInteraction
 
     // magnitude of the normal velocity of the first splashed parcel
     const scalar magUns0 =
-        sqrt(2.0*parcelsPerSplash_*EKs/mSplash/(1 + coeff1/sqr(coeff2)));
+        sqrt(2.0*parcelsPerSplash_*EKs/mSplash/(1.0 + coeff1/sqr(coeff2)));
 
     // Set splashed parcel properties
     forAll(dNew, i)

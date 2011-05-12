@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -98,6 +97,15 @@ const volScalarField& noFilm::delta() const
 {
     FatalErrorIn("const volScalarField& noFilm::delta() const")
         << "delta field not available for " << type() << abort(FatalError);
+
+    return volScalarField::null();
+}
+
+
+const volScalarField& noFilm::sigma() const
+{
+    FatalErrorIn("const volScalarField& noFilm::sigma() const")
+        << "sigma field not available for " << type() << abort(FatalError);
 
     return volScalarField::null();
 }
@@ -184,32 +192,42 @@ const volScalarField& noFilm::kappa() const
 }
 
 
-const volScalarField& noFilm::massForPrimary() const
+tmp<volScalarField> noFilm::primaryMassTrans() const
 {
-    FatalErrorIn("const volScalarField& noFilm::massForPrimary() const")
-        << "massForPrimary field not available for " << type()
-        << abort(FatalError);
-
-    return volScalarField::null();
-}
-
-
-const volScalarField& noFilm::diametersForPrimary() const
-{
-    FatalErrorIn("const volScalarField& noFilm::diametersForPrimary() const")
-        << "diametersForPrimary field not available for " << type()
-        << abort(FatalError);
-
-    return volScalarField::null();
-}
-
-
-const volScalarField& noFilm::massPhaseChangeForPrimary() const
-{
-    FatalErrorIn
+    return tmp<volScalarField>
     (
-        "const volScalarField& noFilm::massPhaseChangeForPrimary() const"
-    )   << "massPhaseChange field not available for " << type()
+        new volScalarField
+        (
+            IOobject
+            (
+                "noFilm::primaryMassTrans",
+                time().timeName(),
+                primaryMesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            primaryMesh(),
+            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
+        )
+    );
+}
+
+
+const volScalarField& noFilm::cloudMassTrans() const
+{
+    FatalErrorIn("const volScalarField& noFilm::cloudMassTrans() const")
+        << "cloudMassTrans field not available for " << type()
+        << abort(FatalError);
+
+    return volScalarField::null();
+}
+
+
+const volScalarField& noFilm::cloudDiameterTrans() const
+{
+    FatalErrorIn("const volScalarField& noFilm::cloudDiameterTrans() const")
+        << "cloudDiameterTrans field not available for " << type()
         << abort(FatalError);
 
     return volScalarField::null();
@@ -238,7 +256,7 @@ tmp<DimensionedField<scalar, volMesh> > noFilm::Srho() const
 }
 
 
-tmp<DimensionedField<scalar, volMesh> > noFilm::Srho(const label) const
+tmp<DimensionedField<scalar, volMesh> > noFilm::Srho(const label i) const
 {
     return tmp<DimensionedField<scalar, volMesh> >
     (
@@ -246,7 +264,7 @@ tmp<DimensionedField<scalar, volMesh> > noFilm::Srho(const label) const
         (
             IOobject
             (
-                "noFilm::Srho(i)",
+                "noFilm::Srho(" + Foam::name(i) + ")",
                 time().timeName(),
                 primaryMesh(),
                 IOobject::NO_READ,

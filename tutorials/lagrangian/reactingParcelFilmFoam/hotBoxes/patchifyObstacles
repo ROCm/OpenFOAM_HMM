@@ -1,4 +1,12 @@
 #!/bin/bash
+#--------------------------------*- C++ -*----------------------------------#
+# =========                 |                                               #
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox         #
+#  \\    /   O peration     | Version:  dev                                 #
+#   \\  /    A nd           | Web:      www.OpenFOAM.com                    #
+#    \\/     M anipulation  |                                               #
+#---------------------------------------------------------------------------#
+cd ${0%/*} || exit 1    # run from this directory
 
 x0=0.4
 y0=0.1
@@ -24,11 +32,9 @@ createSetsAndZone()
     z1=$6
     z2=$7
 
-#    echo "# ${name}" >> $tmpSetSet
     echo "faceSet ${name} new boxToFace ($x1 $y1 $z1) ($x2 $y2 $z2)" >> $tmpSetSet
     echo "cellSet ${name}Cells new faceToCell ${name} owner" >> $tmpSetSet
     echo "faceZoneSet ${name} new setsToFaceZone ${name} ${name}Cells" >> $tmpSetSet
-#    echo "" >> $tmpSetSet
 
     echo "   $name: (x1=$x1 y1=$y1 z1=$z1) (x2=$x2 y2=$y2 z2=$z2)"
 }
@@ -126,4 +132,7 @@ createSetsAndZone floor -$tol $floorMax -$tol $floorMax -$tol $tol
 
 setSet -batch $tmpSetSet >> log.setSet.patchifyObstacles
 rm -f $tmpSetSet
+
+
+# *************************************************************************
 

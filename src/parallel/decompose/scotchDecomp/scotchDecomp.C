@@ -65,7 +65,7 @@ License
     The current default mapping strategy in Scotch can be seen by using the
     "-vs" option of program gmap. It is, to date:
 
-    b
+    r
     {
         job=t,
         map=t,
@@ -76,11 +76,17 @@ License
             {
                 asc=b
                 {
-                    bnd=d{pass=40,dif=1,rem=1}f{move=80,pass=-1,bal=0.005},
-                    org=f{move=80,pass=-1,bal=0.005},
+                    bnd=
+                    (
+                        d{pass=40,dif=1,rem=1}
+                     |
+                    )
+                    f{move=80,pass=-1,bal=0.002491},
+                    org=f{move=80,pass=-1,bal=0.002491},
                     width=3
                 },
-                low=h{pass=10}f{move=80,pass=-1,bal=0.0005},
+                low=h{pass=10}
+                f{move=80,pass=-1,bal=0.002491},
                 type=h,
                 vert=80,
                 rat=0.8
@@ -89,11 +95,17 @@ License
             {
                 asc=b
                 {
-                    bnd=d{pass=40,dif=1,rem=1}f{move=80,pass=-1,bal=0.005},
-                    org=f{move=80,pass=-1,bal=0.005},
+                    bnd=
+                    (
+                        d{pass=40,dif=1,rem=1}
+                      |
+                    )
+                    f{move=80,pass=-1,bal=0.002491},
+                    org=f{move=80,pass=-1,bal=0.002491},
                     width=3
                 },
-                low=h{pass=10}f{move=80,pass=-1,bal=0.0005},
+                low=h{pass=10}
+                f{move=80,pass=-1,bal=0.002491},
                 type=h,
                 vert=80,
                 rat=0.8
@@ -101,6 +113,9 @@ License
         )
     }
 
+
+    Note: instead of gmap run gpart <nProcs> -vs <grfFile>
+    where <grfFile> can be obtained by running with 'writeGraph=true'
 
 \*---------------------------------------------------------------------------*/
 

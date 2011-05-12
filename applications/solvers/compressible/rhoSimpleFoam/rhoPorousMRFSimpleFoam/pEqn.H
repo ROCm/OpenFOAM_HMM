@@ -11,7 +11,7 @@ UEqn.clear();
 
 bool closedVolume = false;
 
-if (transonic)
+if (simple.transonic())
 {
     surfaceScalarField phid
     (
@@ -20,7 +20,7 @@ if (transonic)
     );
     mrfZones.relativeFlux(fvc::interpolate(psi), phid);
 
-    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    for (int nonOrth=0; nonOrth<=simple.nNonOrthCorr(); nonOrth++)
     {
         tmp<fvScalarMatrix> tpEqn;
 
@@ -37,7 +37,7 @@ if (transonic)
 
         tpEqn().solve();
 
-        if (nonOrth == nNonOrthCorr)
+        if (nonOrth == simple.nNonOrthCorr())
         {
             phi == tpEqn().flux();
         }
@@ -50,7 +50,7 @@ else
 
     closedVolume = adjustPhi(phi, U, p);
 
-    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    for (int nonOrth=0; nonOrth<=simple.nNonOrthCorr(); nonOrth++)
     {
         tmp<fvScalarMatrix> tpEqn;
 
@@ -67,7 +67,7 @@ else
 
         tpEqn().solve();
 
-        if (nonOrth == nNonOrthCorr)
+        if (nonOrth == simple.nNonOrthCorr())
         {
             phi -= tpEqn().flux();
         }

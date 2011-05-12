@@ -130,20 +130,20 @@ class codedFixedValueFvPatchField
         );
 
         //- Load specified library and execute globalFuncName(true)
-        static void* loadLibrary
+        void* loadLibrary
         (
             const fileName& libPath,
             const string& globalFuncName,
             const dictionary& contextDict
-        );
+        ) const;
 
         //- Execute globalFuncName(false) and unload specified library
-        static void unloadLibrary
+        void unloadLibrary
         (
             const fileName& libPath,
             const string& globalFuncName,
             const dictionary& contextDict
-        );
+        ) const;
 
         //- Set the rewrite vars controlling the Type
         static void setFieldTemplates(dynamicCode& dynCode);

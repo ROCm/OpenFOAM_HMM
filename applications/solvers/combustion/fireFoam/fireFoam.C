@@ -34,7 +34,7 @@ Description
 #include "turbulenceModel.H"
 #include "combustionModel.H"
 #include "radiationModel.H"
-#include "pimpleLoop.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,13 +51,14 @@ int main(int argc, char *argv[])
     #include "compressibleCourantNo.H"
     #include "setInitialDeltaT.H"
 
+    pimpleControl pimple(mesh);
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
     while (runTime.run())
     {
-        #include "readPIMPLEControls.H"
         #include "readTimeControls.H"
         #include "compressibleCourantNo.H"
         #include "setDeltaT.H"
@@ -68,12 +69,7 @@ int main(int argc, char *argv[])
         #include "rhoEqn.H"
 
         // --- Pressure-velocity PIMPLE corrector loop
-        for
-        (
-            pimpleLoop pimpleCorr(mesh, nOuterCorr);
-            pimpleCorr.loop();
-            pimpleCorr++
-        )
+        for (pimple.start(); pimple.loop(); pimple++)
         {
             #include "UEqn.H"
 
@@ -81,13 +77,16 @@ int main(int argc, char *argv[])
             #include "fuhsEqn.H"
 
             // --- PISO loop
-            for (int corr=0; corr<nCorr; corr++)
+            for (int corr=0; corr<pimple.nCorr(); corr++)
             {
                 #include "pEqn.H"
             }
-        }
 
-        turbulence->correct();
+            if (pimple.turbCorr())
+            {
+                turbulence->correct();
+            }
+        }
 
         rho = thermo.rho();
 

@@ -1,12 +1,6 @@
-label nAlphaCorr
-(
-    readLabel(piso.lookup("nAlphaCorr"))
-);
-
-label nAlphaSubCycles
-(
-    readLabel(piso.lookup("nAlphaSubCycles"))
-);
+const dictionary& pimpleDict = pimple.dict();
+label nAlphaCorr(readLabel(pimpleDict.lookup("nAlphaCorr")));
+label nAlphaSubCycles(readLabel(pimpleDict.lookup("nAlphaSubCycles")));
 
 if (nAlphaSubCycles > 1)
 {
@@ -19,7 +13,7 @@ if (nAlphaSubCycles > 1)
         !(++alphaSubCycle).end();
     )
     {
-#       include "alphaEqns.H"
+        #include "alphaEqns.H"
         rhoPhiSum += (runTime.deltaT()/totalDeltaT)*rhoPhi;
     }
 
@@ -27,7 +21,7 @@ if (nAlphaSubCycles > 1)
 }
 else
 {
-#       include "alphaEqns.H"
+    #include "alphaEqns.H"
 }
 
 interface.correct();

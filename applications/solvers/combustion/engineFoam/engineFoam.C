@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,6 +58,7 @@ Description
 #include "Switch.H"
 #include "OFstream.H"
 #include "mathematicalConstants.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,13 +76,14 @@ int main(int argc, char *argv[])
     #include "setInitialDeltaT.H"
     #include "startSummary.H"
 
+    pimpleControl pimple(mesh);
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
     while (runTime.run())
     {
-        #include "readPISOControls.H"
         #include "readEngineTimeControls.H"
         #include "compressibleCourantNo.H"
         #include "setDeltaT.H"
@@ -94,11 +96,11 @@ int main(int argc, char *argv[])
 
         #include "rhoEqn.H"
 
-        #include "UEqn.H"
-
-        // --- PISO loop
-        for (int corr=1; corr<=nCorr; corr++)
+        // --- Pressure-velocity PIMPLE corrector loop
+        for (pimple.start(); pimple.loop(); pimple++)
         {
+            #include "UEqn.H"
+
             #include "ftEqn.H"
             #include "bEqn.H"
             #include "huEqn.H"
@@ -109,10 +111,17 @@ int main(int argc, char *argv[])
                 hu == h;
             }
 
-            #include "pEqn.H"
-        }
+            // --- PISO loop
+            for (int corr=1; corr<=pimple.nCorr(); corr++)
+            {
+                #include "pEqn.H"
+            }
 
-        turbulence->correct();
+            if (pimple.turbCorr())
+            {
+                turbulence->correct();
+            }
+        }
 
         #include "logSummary.H"
 

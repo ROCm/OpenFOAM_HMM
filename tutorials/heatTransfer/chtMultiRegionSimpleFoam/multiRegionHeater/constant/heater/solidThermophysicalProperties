@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                  |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -139,7 +139,7 @@ charCoeffs
     thermoProperties
     {
         Hf      0;
-        C0      611.0;; // Cp = C0*(T/Tref)^n0
+        C0      611.0; // Cp = C0*(T/Tref)^n0
         Tref    300;
         n0      1.31;
     }

@@ -120,6 +120,8 @@
     + reuses tracking state in interpolation - improves consistency and speed
 *** *Updated* split cyclics into two separate patches.
     See [[./doc/changes/splitCyclic.txt]]
+  * *New* cyclics (and all coupled patches) have optional
+    matchTolerance entry to allow looser area matching tolerance.
   * *Updated* interpolation (volPointInterpolation) now works without the
     globalPointPatch. Moving mesh cases can now be run non-parallel and
     continued in parallel and reconstructed without any limitation.
@@ -264,8 +266,6 @@
     internal field instead of boundary field.
     + =ensight=: new output format for all sampledSurfaces.
   + Function objects:
-    + =residualControl=: new function object to allow users to terminate steady
-    state calculations when the defined residual levels are achieved
     + =abortCalculation=: watches for presence of the named file in the
     $FOAM_CASE directory and aborts the calculation if it is present
     + =timeActivatedFileUpdate=: performs a file copy/replacement once a
@@ -312,8 +312,3 @@
 * Other
   + compilable with =clang=
     In your prefs.sh set the WM_COMPILER to Clang
-  + dlclose error: upon exit of e.g. paraFoam you can get the error
-    Inconsistency detected by ld.so: dl-close.c: 731: _dl_close: Assertion
-    `map->l_init_called' failed!
-    This seems to happen with a mix of system libraries and a thirdParty
-    compiler.

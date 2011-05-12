@@ -28,40 +28,40 @@ Info<< "Time scales min/max:" << endl;
 
 {
     // Cache old time scale field
-    tmp<volScalarField> tinvTau0
+    tmp<volScalarField> trDeltaT
     (
         new volScalarField
         (
             IOobject
             (
-                "invTau0",
+                "rDeltaT0",
                 runTime.timeName(),
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            invTau
+            rDeltaT
         )
     );
-    const volScalarField& invTau0 = tinvTau0();
+    const volScalarField& rDeltaT0 = trDeltaT();
 
 
     // Flow time scale
     // ~~~~~~~~~~~~~~~
     {
-        invTau =
+        rDeltaT =
             fvc::surfaceSum
             (
                 mag(phi)*mesh.deltaCoeffs()/(maxCo*mesh.magSf())
             )
            /rho;
 
-        invTau.max(1.0/maxDeltaT);
+        rDeltaT.max(1.0/maxDeltaT);
 
         Info<< "    Flow        = "
-            << gMin(1/invTau.internalField()) << ", "
-            << gMax(1/invTau.internalField()) << endl;
+            << gMin(1/rDeltaT.internalField()) << ", "
+            << gMax(1/rDeltaT.internalField()) << endl;
     }
 
 
@@ -82,12 +82,12 @@ Info<< "Time scales min/max:" << endl;
            /rho
         );
 
-        tau = alphaTauTemp*thermo.Cp()*T/(tau + ROOTVSMALL);
+        tau = alphaTemp*thermo.Cp()*T/(tau + ROOTVSMALL);
 
         Info<< "    Temperature = " << min(maxDeltaT, gMin(tau)) << ", "
             << min(maxDeltaT, gMax(tau)) << endl;
 
-        invTau.internalField() = max(invTau.internalField(), 1/tau);
+        rDeltaT.internalField() = max(rDeltaT.internalField(), 1/tau);
     }
 
 
@@ -95,21 +95,20 @@ Info<< "Time scales min/max:" << endl;
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // - reduce as much as required for flow, but limit source contributions
     const dimensionedScalar deltaTRamp("deltaTRamp", dimless, 1/(1 + 0.2));
-    invTau = max(invTau, invTau0*deltaTRamp);
-    tinvTau0.clear();
+    rDeltaT = max(rDeltaT, rDeltaT0*deltaTRamp);
 
 
     // Limit the largest time scale
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    invTau.max(1/maxDeltaT);
+    rDeltaT.max(1/maxDeltaT);
 
 
     // Spatially smooth the time scale field
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    fvc::smooth(invTau, alphaTauSmooth);
+    fvc::smooth(rDeltaT, rDeltaTSmoothingCoeff);
 
-    Info<< "    Overall     = " << min(1/invTau).value()
-        << ", " << max(1/invTau).value() << nl << endl;
+    Info<< "    Overall     = " << min(1/rDeltaT).value()
+        << ", " << max(1/rDeltaT).value() << nl << endl;
 }
 
 

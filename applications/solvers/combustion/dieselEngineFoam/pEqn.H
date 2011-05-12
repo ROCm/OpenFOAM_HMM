@@ -3,7 +3,7 @@ rho = thermo.rho();
 volScalarField A(UEqn.A());
 U = UEqn.H()/A;
 
-if (transonic)
+if (pimple.transonic())
 {
     surfaceScalarField phid
     (
@@ -12,7 +12,7 @@ if (transonic)
        *((fvc::interpolate(U) & mesh.Sf()) - fvc::meshPhi(rho, U))
     );
 
-    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
     {
         fvScalarMatrix pEqn
         (
@@ -23,9 +23,12 @@ if (transonic)
             Sevap
         );
 
-        pEqn.solve();
+        pEqn.solve
+        (
+            mesh.solver(p.select(pimple.finalInnerIter(corr, nonOrth)))
+        );
 
-        if (nonOrth == nNonOrthCorr)
+        if (nonOrth == pimple.nNonOrthCorr())
         {
             phi == pEqn.flux();
         }
@@ -36,7 +39,7 @@ else
     phi = fvc::interpolate(rho)
          *((fvc::interpolate(U) & mesh.Sf()) - fvc::meshPhi(rho, U));
 
-    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
     {
         fvScalarMatrix pEqn
         (
@@ -47,9 +50,12 @@ else
             Sevap
         );
 
-        pEqn.solve();
+        pEqn.solve
+        (
+            mesh.solver(p.select(pimple.finalInnerIter(corr, nonOrth)))
+        );
 
-        if (nonOrth == nNonOrthCorr)
+        if (nonOrth == pimple.nNonOrthCorr())
         {
             phi += pEqn.flux();
         }

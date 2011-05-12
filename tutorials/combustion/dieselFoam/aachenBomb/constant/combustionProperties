@@ -19,7 +19,7 @@ Cmix            Cmix [ 0 0 0 0 0 0 0 ] 1;
 
 ignitionProperties1
 {
-    ignite          off;
+    ignite          on;
     ignitionPoint   ignitionPoint [ 0 1 0 0 0 0 0 ] ( 0.2 0 0.02 );
     timing          timing [ 0 0 1 0 0 0 0 ] 0;
     duration        duration [ 0 0 1 0 0 0 0 ] 1;

@@ -39,6 +39,16 @@ SIMPLE
     nNonOrthogonalCorrectors 0;
     pRefCell        0;
     pRefValue       0;
+
+    residualControl
+    {
+        p_rgh           1e-2;
+        U               1e-3;
+        h               1e-3;
+
+        // possibly check turbulence fields
+        "(k|epsilon|omega)" 1e-3;
+    }
 }
 
 relaxationFactors

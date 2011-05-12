@@ -34,7 +34,7 @@ namespace Foam
 {
     defineTypeNameAndDebug(coupledPolyPatch, 0);
 
-    scalar coupledPolyPatch::matchTol = 1E-3;
+    const scalar coupledPolyPatch::defaultMatchTol_ = 1E-4;
 
     template<>
     const char* NamedEnum<coupledPolyPatch::transformType, 4>::names[] =
@@ -145,6 +145,7 @@ Foam::pointField Foam::coupledPolyPatch::getAnchorPoints
 
 Foam::scalarField Foam::coupledPolyPatch::calcFaceTol
 (
+    const scalar matchTol,
     const UList<face>& faces,
     const pointField& points,
     const pointField& faceCentres
@@ -313,7 +314,7 @@ void Foam::coupledPolyPatch::calcTransformTensors
             forwardT_.setSize(0);
             reverseT_.setSize(0);
 
-            separation_ = (nf&(Cr - Cf))*nf;
+            separation_ = Cr - Cf;
 
             collocated_.setSize(separation_.size());
 
@@ -401,7 +402,8 @@ Foam::coupledPolyPatch::coupledPolyPatch
     const polyBoundaryMesh& bm
 )
 :
-    polyPatch(name, size, start, index, bm)
+    polyPatch(name, size, start, index, bm),
+    matchTolerance_(defaultMatchTol_)
 {}
 
 
@@ -413,7 +415,8 @@ Foam::coupledPolyPatch::coupledPolyPatch
     const polyBoundaryMesh& bm
 )
 :
-    polyPatch(name, dict, index, bm)
+    polyPatch(name, dict, index, bm),
+    matchTolerance_(dict.lookupOrDefault("matchTolerance", defaultMatchTol_))
 {}
 
 
@@ -423,7 +426,8 @@ Foam::coupledPolyPatch::coupledPolyPatch
     const polyBoundaryMesh& bm
 )
 :
-    polyPatch(pp, bm)
+    polyPatch(pp, bm),
+    matchTolerance_(pp.matchTolerance_)
 {}
 
 
@@ -436,7 +440,8 @@ Foam::coupledPolyPatch::coupledPolyPatch
     const label newStart
 )
 :
-    polyPatch(pp, bm, index, newSize, newStart)
+    polyPatch(pp, bm, index, newSize, newStart),
+    matchTolerance_(pp.matchTolerance_)
 {}
 
 
@@ -449,7 +454,8 @@ Foam::coupledPolyPatch::coupledPolyPatch
     const label newStart
 )
 :
-    polyPatch(pp, bm, index, mapAddressing, newStart)
+    polyPatch(pp, bm, index, mapAddressing, newStart),
+    matchTolerance_(pp.matchTolerance_)
 {}
 
 
@@ -457,6 +463,19 @@ Foam::coupledPolyPatch::coupledPolyPatch
 
 Foam::coupledPolyPatch::~coupledPolyPatch()
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::coupledPolyPatch::write(Ostream& os) const
+{
+    polyPatch::write(os);
+    //if (matchTolerance_ != defaultMatchTol_)
+    {
+        os.writeKeyword("matchTolerance") << matchTolerance_
+            << token::END_STATEMENT << nl;
+    }
+}
 
 
 // ************************************************************************* //

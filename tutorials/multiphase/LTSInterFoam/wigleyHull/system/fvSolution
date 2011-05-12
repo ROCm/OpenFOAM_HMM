@@ -60,7 +60,7 @@ solvers
         relTol          0;
     }
 
-    "(U|k|omega)"
+    "(U|k|omega).*"
     {
         solver          smoothSolver;
 
@@ -72,7 +72,7 @@ solvers
     };
 }
 
-PISO
+PIMPLE
 {
     momentumPredictor yes;
 
@@ -94,8 +94,8 @@ PISO
 
 relaxationFactors
 {
-    p_rgh       0.3;
-    p_rghFinal  0.3;
+    p_rgh           0.3;
+    p_rghFinal      0.3;
 }
 
 

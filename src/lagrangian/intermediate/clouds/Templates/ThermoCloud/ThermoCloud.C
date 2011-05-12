@@ -290,6 +290,17 @@ void Foam::ThermoCloud<CloudType>::relaxSources
     CloudType::relaxSources(cloudOldTime);
 
     this->relax(hsTrans_(), cloudOldTime.hsTrans(), "hs");
+    this->relax(hsCoeff_(), cloudOldTime.hsCoeff(), "hs");
+}
+
+
+template<class CloudType>
+void Foam::ThermoCloud<CloudType>::scaleSources()
+{
+    CloudType::scaleSources();
+
+    this->scale(hsTrans_(), "hs");
+    this->scale(hsCoeff_(), "hs");
 }
 
 

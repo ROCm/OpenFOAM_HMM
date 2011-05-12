@@ -526,13 +526,6 @@ int main(int argc, char *argv[])
     // Whether to synchronise points
     const Switch pointSync(dict.lookup("pointSync"));
 
-
-    // Set the matching tolerance so we can read illegal meshes
-    scalar tol = readScalar(dict.lookup("matchTolerance"));
-    Info<< "Using relative tolerance " << tol
-        << " to match up faces and points" << nl << endl;
-    coupledPolyPatch::matchTol = tol;
-
 #   include "createNamedPolyMesh.H"
 
     const word oldInstance = mesh.pointsInstance();

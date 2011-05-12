@@ -67,6 +67,7 @@ then
     done
 
 elif [ -d $packDir/platforms ]
+then
 
     # obtain archOptions types from platforms/<archOptions>/lib
     for archOptions in $packDir/platforms/*/lib

@@ -5,12 +5,12 @@ rho.relax();
 
 U = rAU*UEqn().H();
 
-if (nCorr <= 1)
+if (pimple.nCorr() <= 1)
 {
     UEqn.clear();
 }
 
-if (transonic)
+if (pimple.transonic())
 {
     surfaceScalarField phid
     (
@@ -22,7 +22,7 @@ if (transonic)
         )
     );
 
-    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
     {
         fvScalarMatrix pEqn
         (
@@ -33,18 +33,10 @@ if (transonic)
 
         pEqn.solve
         (
-            mesh.solver
-            (
-                p.select
-                (
-                    pimpleCorr.finalIter()
-                 && corr == nCorr-1
-                 && nonOrth == nNonOrthCorr
-                )
-            )
+            mesh.solver(p.select(pimple.finalInnerIter(corr, nonOrth)))
         );
 
-        if (nonOrth == nNonOrthCorr)
+        if (nonOrth == pimple.nNonOrthCorr())
         {
             phi == pEqn.flux();
         }
@@ -59,7 +51,7 @@ else
           + fvc::ddtPhiCorr(rAU, rho, U, phi)
         );
 
-    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
     {
         // Pressure corrector
         fvScalarMatrix pEqn
@@ -71,18 +63,10 @@ else
 
         pEqn.solve
         (
-            mesh.solver
-            (
-                p.select
-                (
-                    pimpleCorr.finalIter()
-                 && corr == nCorr-1
-                 && nonOrth == nNonOrthCorr
-                )
-            )
+            mesh.solver(p.select(pimple.finalInnerIter(corr, nonOrth)))
         );
 
-        if (nonOrth == nNonOrthCorr)
+        if (nonOrth == pimple.nNonOrthCorr())
         {
             phi += pEqn.flux();
         }

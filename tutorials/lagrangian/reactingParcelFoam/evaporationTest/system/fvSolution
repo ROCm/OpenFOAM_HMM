@@ -17,20 +17,27 @@ FoamFile
 
 solvers
 {
-    "(rho|G)"
+    rho
     {
         solver          PCG;
         preconditioner  DIC;
         tolerance       1e-05;
+        relTol          0.1;
+    }
+
+    rhoFinal
+    {
+        $rho;
+        tolerance       1e-05;
         relTol          0;
     }
 
-    "(U|hs|k|epsilon)"
+    "(U|hs)"
     {
         solver          PBiCG;
         preconditioner  DILU;
         tolerance       1e-05;
-        relTol          0;
+        relTol          0.1;
     }
 
     p
@@ -38,19 +45,35 @@ solvers
         solver          PCG;
         preconditioner  DIC;
         tolerance       1e-06;
+        relTol          0.1;
+    }
+
+    pFinal
+    {
+        $p;
+        tolerance       1e-06;
         relTol          0;
+    }
+
+    "(U|hs)Final"
+    {
+        $U;
+        tolerance       1e-05;
+        relTol          0;
+    }
+
+    "(k|epsilon)"
+    {
+        $UFinal;
     }
 
     "(Yi|O2|N2|H2O)"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-06;
-        relTol          0;
+        $UFinal;
     }
 }
 
-PISO
+PIMPLE
 {
     transonic       no;
     nCorrectors     2;
@@ -58,5 +81,9 @@ PISO
     momentumPredictor yes;
 }
 
+relaxationFactors
+{
+    ".*Final"       1;
+}
 
 // ************************************************************************* //

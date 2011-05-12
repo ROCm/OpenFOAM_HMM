@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,6 +44,7 @@ Description
 #include "interfaceProperties.H"
 #include "twoPhaseMixture.H"
 #include "turbulenceModel.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,6 +54,9 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
     #include "readGravitationalAcceleration.H"
+
+    pimpleControl pimple(mesh);
+
     #include "readControls.H"
     #include "initContinuityErrs.H"
     #include "createFields.H"
@@ -113,7 +117,7 @@ int main(int argc, char *argv[])
         turbulence->correct();
 
         // --- Outer-corrector loop
-        for (int oCorr=0; oCorr<nOuterCorr; oCorr++)
+        for (pimple.start(); pimple.loop(); pimple++)
         {
             #include "alphaEqnsSubCycle.H"
 
@@ -122,7 +126,7 @@ int main(int argc, char *argv[])
             #include "UEqn.H"
 
             // --- PISO loop
-            for (int corr=0; corr<nCorr; corr++)
+            for (int corr=0; corr<pimple.nCorr(); corr++)
             {
                 #include "pEqn.H"
             }

@@ -12,9 +12,10 @@ submodels/subModelBase.C
 KINEMATICMODELS=submodels/kinematic
 $(KINEMATICMODELS)/injectionModel/injectionModel/injectionModel.C
 $(KINEMATICMODELS)/injectionModel/injectionModel/injectionModelNew.C
-$(KINEMATICMODELS)/injectionModel/noInjection/noInjection.C
-$(KINEMATICMODELS)/injectionModel/cloudInjection/cloudInjection.C
+$(KINEMATICMODELS)/injectionModel/injectionModelList/injectionModelList.C
+$(KINEMATICMODELS)/injectionModel/drippingInjection/drippingInjection.C
 $(KINEMATICMODELS)/injectionModel/removeInjection/removeInjection.C
+$(KINEMATICMODELS)/injectionModel/curvatureSeparation/curvatureSeparation.C
 
 THERMOMODELS=submodels/thermo
 $(THERMOMODELS)/phaseChangeModel/phaseChangeModel/phaseChangeModel.C

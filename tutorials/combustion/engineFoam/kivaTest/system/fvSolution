@@ -22,26 +22,47 @@ solvers
         solver          PCG;
         preconditioner  DIC;
         tolerance       1e-06;
+        relTol          0.1;
+    }
+
+    pFinal
+    {
+        $p;
+        tolerance       1e-06;
         relTol          0;
     }
 
     rho
     {
-        $p;
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-05;
+        relTol          0.1;
+    }
+
+    rhoFinal
+    {
+        $rho;
         tolerance       1e-05;
         relTol          0;
     }
 
-    "(U|ft|fu|b|Xi|Su|h|hu|R|k|epsilon)"
+    "(U|Xi|hu|ft|b|h|k|epsilon)"
     {
         solver          PBiCG;
         preconditioner  DILU;
+        tolerance       1e-05;
+        relTol          0.1;
+    }
+    "(U|ft|Xi|hu|b|h|k|epsilon)Final"
+    {
+        $U;
         tolerance       1e-05;
         relTol          0;
     }
 }
 
-PISO
+PIMPLE
 {
     nCorrectors     2;
     nNonOrthogonalCorrectors 1;

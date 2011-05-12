@@ -1,52 +1,54 @@
 {
+    const dictionary& pimpleDict = pimple.dict();
+
     scalar maxCo
     (
-        piso.lookupOrDefault<scalar>("maxCo", 0.9)
+        pimpleDict.lookupOrDefault<scalar>("maxCo", 0.9)
     );
 
     scalar maxAlphaCo
     (
-        piso.lookupOrDefault<scalar>("maxAlphaCo", 0.2)
+        pimpleDict.lookupOrDefault<scalar>("maxAlphaCo", 0.2)
     );
 
     scalar rDeltaTSmoothingCoeff
     (
-        piso.lookupOrDefault<scalar>("rDeltaTSmoothingCoeff", 0.1)
+        pimpleDict.lookupOrDefault<scalar>("rDeltaTSmoothingCoeff", 0.1)
     );
 
     label nAlphaSpreadIter
     (
-        piso.lookupOrDefault<label>("nAlphaSpreadIter", 1)
+        pimpleDict.lookupOrDefault<label>("nAlphaSpreadIter", 1)
     );
 
     scalar alphaSpreadDiff
     (
-        piso.lookupOrDefault<scalar>("alphaSpreadDiff", 0.2)
+        pimpleDict.lookupOrDefault<scalar>("alphaSpreadDiff", 0.2)
     );
 
     scalar alphaSpreadMax
     (
-        piso.lookupOrDefault<scalar>("alphaSpreadMax", 0.99)
+        pimpleDict.lookupOrDefault<scalar>("alphaSpreadMax", 0.99)
     );
 
     scalar alphaSpreadMin
     (
-        piso.lookupOrDefault<scalar>("alphaSpreadMin", 0.01)
+        pimpleDict.lookupOrDefault<scalar>("alphaSpreadMin", 0.01)
     );
 
     label nAlphaSweepIter
     (
-        piso.lookupOrDefault<label>("nAlphaSweepIter", 5)
+        pimpleDict.lookupOrDefault<label>("nAlphaSweepIter", 5)
     );
 
     scalar rDeltaTDampingCoeff
     (
-        piso.lookupOrDefault<scalar>("rDeltaTDampingCoeff", 1.0)
+        pimpleDict.lookupOrDefault<scalar>("rDeltaTDampingCoeff", 1.0)
     );
 
     scalar maxDeltaT
     (
-        piso.lookupOrDefault<scalar>("maxDeltaT", GREAT)
+        pimpleDict.lookupOrDefault<scalar>("maxDeltaT", GREAT)
     );
 
     volScalarField rDeltaT0("rDeltaT0", rDeltaT);
@@ -130,7 +132,7 @@
 
     label nAlphaSubCycles
     (
-        readLabel(piso.lookup("nAlphaSubCycles"))
+        readLabel(pimpleDict.lookup("nAlphaSubCycles"))
     );
 
     rSubDeltaT = rDeltaT*nAlphaSubCycles;

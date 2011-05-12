@@ -1,0 +1,9 @@
+#!/bin/sh
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+runApplication blockMesh
+
+runApplication setSet -batch wallFilmRegion.setSet
+mv log.setSet log.wallFilmRegion.setSet
+
+runApplication extrudeToRegionMesh -overwrite

@@ -17,22 +17,30 @@ FoamFile
 
 solvers
 {
-    p
+    "(p|rho)"
     {
         solver          PCG;
         preconditioner  DIC;
         tolerance       1e-06;
-        relTol          0;
+        relTol          0.1;
     }
 
-    rho
+    "(p|rho)Final"
     {
         $p;
-        tolerance       1e-05;
+        tolerance       1e-06;
         relTol          0;
     }
 
-    "(U|ft|fu|b|Xi|Su|h|hu|R|k|epsilon)"
+    "(U|b|Su|Xi|h|hu|k)"
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-06;
+        relTol          0.1;
+    }
+
+    "(U|b|Su|Xi|h|hu|k)Final"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -41,7 +49,7 @@ solvers
     }
 }
 
-PISO
+PIMPLE
 {
     nOuterCorrectors 2;
     nCorrectors     1;
@@ -50,7 +58,8 @@ PISO
 
 relaxationFactors
 {
-    "(Xi|Su)"     1;
+    "(Xi|Su)"       1;
 }
+
 
 // ************************************************************************* //
