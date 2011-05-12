@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -175,6 +175,7 @@ inline Foam::scalar Foam::triFace::mag(const pointField& points) const
 {
     return ::Foam::mag(normal(points));
 }
+
 
 // could also delegate to triPointRef(...).normal()
 inline Foam::vector Foam::triFace::normal(const pointField& points) const

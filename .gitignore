@@ -60,6 +60,8 @@ doc/[Dd]oxygen/man
 # untracked configuration files
 /etc/prefs.csh
 /etc/prefs.sh
+/etc/config/*.csh
+/etc/config/*.sh
 
 # source packages - anywhere
 *.tar.bz2

@@ -103,7 +103,7 @@ public:
         inline void flip();
 
         //- Return the points corresponding to this face
-        inline pointField points(const pointField& meshPoints) const;
+        inline pointField points(const pointField&) const;
 
         //- Return triangle as a face
         inline face triFaceFace() const;
@@ -118,10 +118,10 @@ public:
         template<class Type>
         Type average(const pointField&, const Field<Type>&) const;
 
-        //- Return scalar magnitude
+        //- Magnitude of face area
         inline scalar mag(const pointField&) const;
 
-        //- Return vector normal
+        //- Vector normal; magnitude is equal to area of face
         inline vector normal(const pointField&) const;
 
         //- Number of triangles after splitting

@@ -265,6 +265,9 @@ OpenFOAM | ThirdParty)
         ;;
     esac
 
+    # optional configuration tweaks:
+    _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config/compiler.sh`
+
     if [ -n "$gcc_version" ]
     then
         gccDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$gcc_version
@@ -387,8 +390,10 @@ unset MPI_ARCH_PATH MPI_HOME FOAM_MPI_LIBBIN
 
 case "$WM_MPLIB" in
 OPENMPI)
-    #export FOAM_MPI=openmpi-1.4.3
     export FOAM_MPI=openmpi-1.5.3
+    # optional configuration tweaks:
+    _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config/openmpi.sh`
+
     export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
 
     # Tell OpenMPI where to find its install directory

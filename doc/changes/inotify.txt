@@ -55,15 +55,25 @@ timestamps as before or the (linux-specific) 'inotify' system framework
         - the slave processor directories have no system directory and the
           constant directory only contains the mesh.
     - start the job in distributed mode by specifying the slave roots
-      (so one less than the number of processors) with
-      the -roots command line option:
+      (so one fewer than the number of processors) with
+      the -roots command-line option:
 
-        mpirun -np 2 icoFoam -roots '("/tmp")' -parallel
+        mpirun -np 4 icoFoam -roots '("/tmp" "/tmp" "/tmp")' -parallel
 
     - the alternative to the -roots option is to have a
       cavity/system/decomposeParDict on the master with
             distributed     yes;
-            roots           ("/tmp");
+            roots           ("/tmp" "/tmp" "/tmp");
+
+    - as a convenience for cases when the slave roots are identical,
+      a single root entry is interpreted as being the same for all slaves.
+      With the -roots command-line option, this can take one of two forms:
+
+        mpirun -np 4 icoFoam -roots '("/tmp")' -parallel
+
+      or simply
+
+        mpirun -np 4 icoFoam -roots '"/tmp"' -parallel
 
 
 Details:
