@@ -76,6 +76,7 @@ Description
 #include "OFstream.H"
 #include "booleanSurface.H"
 #include "edgeIntersections.H"
+#include "meshTools.H"
 
 using namespace Foam;
 
