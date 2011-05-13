@@ -212,7 +212,7 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
             hitSurface
         );
 
-        if (surfHit.hit())
+        if (!surfHit.hit())
         {
             // Pout<< "box wellInside, no need to sample surface." << endl;
 
@@ -723,7 +723,7 @@ hierarchicalDensityWeightedStochastic::hierarchicalDensityWeightedStochastic
     (
         detailsDict().lookupOrDefault<scalar>("minCellSizeLimit", 0.0)
     ),
-    maxLevels_(readLabel(detailsDict().lookup("maxLevels"))),
+    minLevels_(readLabel(detailsDict().lookup("minLevels"))),
     maxSizeRatio_(readScalar(detailsDict().lookup("maxSizeRatio"))),
     volRes_(readLabel(detailsDict().lookup("sampleResolution"))),
     surfRes_
@@ -773,7 +773,7 @@ hierarchicalDensityWeightedStochastic::initialPoints() const
     (
         initialPoints,
         hierBB,
-        maxLevels_ - 1,
+        minLevels_ - 1,
         "recursionBox"
     );
 

@@ -66,7 +66,7 @@ private:
 
         //- Maximum normal level of recursion, can be more if a high density
         //  ratio is detected
-        label maxLevels_;
+        label minLevels_;
 
         //- Maximum allowed ratio of cell size in a box
         scalar maxSizeRatio_;

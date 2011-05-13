@@ -419,6 +419,33 @@ bool Foam::conformationSurfaces::positionOnThisProc(const point& pt) const
 }
 
 
+Foam::label Foam::conformationSurfaces::positionProc(const point& pt) const
+{
+    // This is likely to give problems when a point is on the boundary between
+    // two processors.
+
+    if (Pstream::parRun())
+    {
+        forAll(processorDomains_, procI)
+        {
+            const treeBoundBoxList& procBbs = processorDomains_[procI];
+
+            forAll(procBbs, pBI)
+            {
+                const treeBoundBox& procBb = procBbs[pBI];
+
+                if (procBb.contains(pt))
+                {
+                    return procI;
+                }
+            }
+        }
+    }
+
+    return -1;
+}
+
+
 Foam::Field<bool> Foam::conformationSurfaces::inside
 (
     const pointField& samplePts

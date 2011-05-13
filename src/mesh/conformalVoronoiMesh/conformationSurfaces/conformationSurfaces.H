@@ -189,6 +189,9 @@ public:
             //- Check if the point is in the domain handled by this processor
             bool positionOnThisProc(const point& pt) const;
 
+            //- Which processor's domain handles this point
+            label positionProc(const point& pt) const;
+
             //- Check if points are inside surfaces to conform to
             Field<bool> inside(const pointField& samplePts) const;
 

@@ -11,6 +11,7 @@ EXE_INC = \
     -I$(LIB_SRC)/mesh/conformalVoronoiMesh/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/parallel/decompose/decompositionMethods/lnInclude \
     -I$(LIB_SRC)/edgeMesh/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/triSurface/lnInclude
@@ -19,6 +20,7 @@ EXE_LIBS = \
     $(CGAL_LIBS) \
     -lconformalVoronoiMesh \
     -lmeshTools \
+    -ldecompositionMethods -L$(FOAM_LIBBIN)/dummy -lscotchDecomp \
     -ledgeMesh \
     -ltriSurface \
     -ldynamicMesh
