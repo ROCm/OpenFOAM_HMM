@@ -42,16 +42,6 @@ SourceFiles
     fvMesh.C
     fvMeshGeometry.C
 
-See Also
-    hmm
-
-Usage
-    oeuoeuoeu
-
-ToDo
-    oeuoeuoeu
-    oeueouoeu
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef fvMesh_H

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class tableReader Declaration
+                         Class tableReader Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -91,8 +91,7 @@ public:
 
 
     //- Destructor
-
-        virtual ~tableReader();
+    virtual ~tableReader();
 
 
     // Member functions
@@ -106,7 +105,6 @@ public:
 
         //- Write additional information
         virtual void write(Ostream& os) const;
-
 };
 
 

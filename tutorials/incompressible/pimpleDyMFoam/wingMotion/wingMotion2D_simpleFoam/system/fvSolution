@@ -66,9 +66,8 @@ SIMPLE
 relaxationFactors
 {
     p               0.3;
-    U               0.7;
-    k               0.7;
-    omega           0.7;
+    "(U|k|omega)"   0.7;
+    "(U|k|omega)Final" 1.0;
 }
 
 cache

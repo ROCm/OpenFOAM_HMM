@@ -82,6 +82,12 @@ protected:
 
 public:
 
+    // Static data members
+
+        //- Report which file is included to stdout
+        static bool report;
+
+
     //- Runtime type information
     ClassName("include");
 

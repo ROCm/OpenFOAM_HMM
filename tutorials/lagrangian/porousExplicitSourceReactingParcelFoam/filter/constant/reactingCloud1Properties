@@ -50,6 +50,7 @@ solution
     }
 }
 
+
 constantProperties
 {
     parcelTypeId    1;
@@ -78,6 +79,7 @@ constantProperties
     constantVolume  false;
 }
 
+
 subModels
 {
     particleForces
@@ -97,8 +99,6 @@ subModels
     compositionModel singleMixtureFraction;
 
     phaseChangeModel liquidEvaporation;
-
-    postProcessingModel patchPostProcessing;
 
     devolatilisationModel none;
 
@@ -160,8 +160,12 @@ subModels
 
         activeLiquids   ( H2O );
     }
+}
 
-    patchPostProcessingCoeffs
+
+cloudFunctions
+{
+    patchPostProcessing
     {
         maxStoredParcels 20;
 

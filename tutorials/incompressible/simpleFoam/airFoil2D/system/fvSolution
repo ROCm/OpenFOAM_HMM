@@ -55,6 +55,13 @@ SIMPLE
     nNonOrthogonalCorrectors 0;
     pRefCell        0;
     pRefValue       0;
+
+    residualControl
+    {
+        p               1e-5;
+        U               1e-5;
+        nuTilda         1e-5;
+    }
 }
 
 relaxationFactors

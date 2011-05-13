@@ -467,7 +467,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::splashInteraction
 
         // Apply correction to velocity for 2-D cases
         meshTools::constrainDirection(mesh, mesh.solutionD(), pPtr->U());
-Info<< "NEW PARTICLE: " << *pPtr << endl;
+
         // Add the new parcel
         this->owner().addParticle(pPtr);
 

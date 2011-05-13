@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::tableReader
+    Foam::csvTableReader
 
 Description
     Reads an interpolation table from a file - CSV-format
@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class csvTableReader Declaration
+                        Class csvTableReader Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -52,25 +52,29 @@ class csvTableReader
 :
     public tableReader<Type>
 {
-    //- does the file have a header line?
-    const bool headerLine_;
+    // Private data
 
-    //- column of the time
-    const label timeColumn_;
+        //- Does the file have a header line?
+        const bool headerLine_;
 
-    //- labels of the components
-    const labelList componentColumns_;
+        //- Column of the time
+        const label timeColumn_;
 
-    //- read the next value from the splitted string
-    Type readValue(const List<string>&);
+        //- Labels of the components
+        const labelList componentColumns_;
 
-    //- separator character
-    const char separator_;
+        //- Read the next value from the splitted string
+        Type readValue(const List<string>&);
+
+        //- Separator character
+        const char separator_;
+
 
 public:
 
     //- Runtime type information
     TypeName("csv");
+
 
     // Constructors
 
@@ -91,8 +95,7 @@ public:
 
 
     //- Destructor
-
-        virtual ~csvTableReader();
+    virtual ~csvTableReader();
 
 
     // Member Functions
@@ -102,7 +105,6 @@ public:
 
         //- write the remaining parameters
         virtual void write(Ostream& os) const;
-
 };
 
 

@@ -95,8 +95,6 @@ subModels
 
     phaseChangeModel none;
 
-    postProcessingModel none;
-
     surfaceFilmModel thermoSurfaceFilm;
 
     radiation       off;
@@ -132,6 +130,10 @@ subModels
         interactionType absorb;
     }
 }
+
+
+cloudFunctions
+{}
 
 
 // ************************************************************************* //

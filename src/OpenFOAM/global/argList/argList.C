@@ -548,10 +548,14 @@ Foam::argList::argList
 
             if (options_.found("roots"))
             {
-                source = "'-roots' option";
-                IStringStream str(options_["roots"]);
-                str >> roots;
-                dictNProcs = roots.size()+1;
+                source = "-roots";
+                IStringStream is(options_["roots"]);
+                roots = readList<fileName>(is);
+
+                if (roots.size() != 1)
+                {
+                    dictNProcs = roots.size()+1;
+                }
             }
             else
             {
@@ -579,6 +583,21 @@ Foam::argList::argList
                 }
             }
 
+            // convenience:
+            // when a single root is specified, use it for all processes
+            if (roots.size() == 1)
+            {
+                const fileName rootName(roots[0]);
+                roots.setSize(Pstream::nProcs()-1, rootName);
+
+                // adjust dictNProcs for command-line '-roots' option
+                if (dictNProcs < 0)
+                {
+                    dictNProcs = roots.size()+1;
+                }
+            }
+
+
             // Check number of processors.
             // nProcs     => number of actual procs
             // dictNProcs => number of procs specified in decompositionDict
@@ -602,11 +621,6 @@ Foam::argList::argList
             // distributed data
             if (roots.size())
             {
-                forAll(roots, i)
-                {
-                    roots[i].expand();
-                }
-
                 if (roots.size() != Pstream::nProcs()-1)
                 {
                     FatalError
@@ -615,6 +629,11 @@ Foam::argList::argList
                         << " is not equal to the number of slaves "
                         << Pstream::nProcs()-1
                         << exit(FatalError);
+                }
+
+                forAll(roots, i)
+                {
+                    roots[i].expand();
                 }
 
                 // Distribute the master's argument list (with new root)
@@ -626,11 +645,7 @@ Foam::argList::argList
                     slave++
                 )
                 {
-                    options_.set
-                    (
-                        "case",
-                        fileName(roots[slave-1])/globalCase_
-                    );
+                    options_.set("case", roots[slave-1]/globalCase_);
 
                     OPstream toSlave(Pstream::scheduled, slave);
                     toSlave << args_ << options_;

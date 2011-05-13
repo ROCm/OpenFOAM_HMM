@@ -60,16 +60,22 @@ solvers
 
 SIMPLE
 {
-    nNonOrthogonalCorrectors     0;
-    convergence                  1e-3;
+    nNonOrthogonalCorrectors 0;
+
+    residualControl
+    {
+        p               1e-2;
+        U               1e-3;
+        "(k|epsilon)"   1e-3;
+    }
 }
 
 relaxationFactors
 {
-    p           0.3;
-    U           0.7;
-    k           0.7;
-    epsilon     0.7;
+    p               0.3;
+    U               0.7;
+    k               0.7;
+    epsilon         0.7;
 }
 
 cache

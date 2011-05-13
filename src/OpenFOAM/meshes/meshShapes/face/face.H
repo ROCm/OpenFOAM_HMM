@@ -178,7 +178,7 @@ public:
         void flip();
 
         //- Return the points corresponding to this face
-        inline pointField points(const pointField& meshPoints) const;
+        inline pointField points(const pointField&) const;
 
         //- Centre point of face
         point centre(const pointField&) const;
@@ -187,7 +187,7 @@ public:
         template<class Type>
         Type average(const pointField&, const Field<Type>&) const;
 
-        //- Scalar magnitude
+        //- Magnitude of face area
         inline scalar mag(const pointField&) const;
 
         //- Vector normal; magnitude is equal to area of face
@@ -228,8 +228,8 @@ public:
 
         //- Return potential intersection with face with a ray starting
         //  at p, direction n (does not need to be normalized)
-        //  Does face-center decomposition and returns triangle intersection
-        //  point closest to p. Face-center is calculated from point average.
+        //  Does face-centre decomposition and returns triangle intersection
+        //  point closest to p. Face-centre is calculated from point average.
         //  For a hit, the distance is signed.  Positive number
         //  represents the point in front of triangle
         //  In case of miss the point is the nearest point on the face
@@ -242,20 +242,20 @@ public:
         (
             const point& p,
             const vector& n,
-            const pointField& meshPoints,
+            const pointField&,
             const intersection::algorithm alg = intersection::FULL_RAY,
             const intersection::direction dir = intersection::VECTOR
         ) const;
 
         //- Fast intersection with a ray.
-        //  Does face-center decomposition and returns triangle intersection
+        //  Does face-centre decomposition and returns triangle intersection
         //  point closest to p. See triangle::intersection for details.
         pointHit intersection
         (
             const point& p,
             const vector& q,
             const point& ctr,
-            const pointField& meshPoints,
+            const pointField&,
             const intersection::algorithm alg,
             const scalar tol = 0.0
         ) const;
@@ -264,7 +264,7 @@ public:
         pointHit nearestPoint
         (
             const point& p,
-            const pointField& meshPoints
+            const pointField&
         ) const;
 
         //- Return nearest point to face and classify it:
@@ -276,7 +276,7 @@ public:
         pointHit nearestPointClassify
         (
             const point& p,
-            const pointField& meshPoints,
+            const pointField&,
             label& nearType,
             label& nearLabel
         ) const;
@@ -286,13 +286,13 @@ public:
         (
             const point& p,
             const vector& n,
-            const pointField& meshPoints
+            const pointField&
         ) const;
 
         //- Return area in contact, given the displacement in vertices
         scalar areaInContact
         (
-            const pointField& points,
+            const pointField&,
             const scalarField& v
         ) const;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,6 +38,9 @@ const Foam::word Foam::functionEntries::includeEntry::typeName
 // Don't lookup the debug switch here as the debug switch dictionary
 // might include includeEntry
 int Foam::functionEntries::includeEntry::debug(0);
+
+bool Foam::functionEntries::includeEntry::report(false);
+
 
 namespace Foam
 {
@@ -89,10 +92,15 @@ bool Foam::functionEntries::includeEntry::execute
     Istream& is
 )
 {
-    IFstream ifs(includeFileName(is));
+    const fileName fName(includeFileName(is));
+    IFstream ifs(fName);
 
     if (ifs)
     {
+        if (Foam::functionEntries::includeEntry::report)
+        {
+            Info<< fName << endl;
+        }
         parentDict.read(ifs);
         return true;
     }
@@ -119,10 +127,15 @@ bool Foam::functionEntries::includeEntry::execute
     Istream& is
 )
 {
-    IFstream ifs(includeFileName(is));
+    const fileName fName(includeFileName(is));
+    IFstream ifs(fName);
 
     if (ifs)
     {
+        if (Foam::functionEntries::includeEntry::report)
+        {
+            Info<< fName << endl;
+        }
         entry.read(parentDict, ifs);
         return true;
     }

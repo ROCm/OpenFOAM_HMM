@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ Class
     Foam::csvSetWriter
 
 Description
+    Write set in csv format
 
 SourceFiles
     csvSetWriter.C
@@ -57,9 +58,11 @@ class csvSetWriter
 
         void writeHeader(const coordSet&, const wordList&, Ostream&) const;
 
+
 protected:
 
     virtual void writeSeparator(Ostream&) const;
+
 
 public:
 
@@ -74,8 +77,7 @@ public:
 
 
     //- Destructor
-
-        virtual ~csvSetWriter();
+    virtual ~csvSetWriter();
 
 
     // Member Functions

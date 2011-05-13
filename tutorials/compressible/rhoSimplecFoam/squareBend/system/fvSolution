@@ -172,29 +172,29 @@ solvers
 SIMPLE
 {
     nNonOrthogonalCorrectors 0;
-    rhoMin      rhoMin [1 -3 0 0 0] 0.1;
-    rhoMax      rhoMax [1 -3 0 0 0] 1.0;
-    transonic   yes;
+    rhoMin          rhoMin [1 -3 0 0 0] 0.1;
+    rhoMax          rhoMax [1 -3 0 0 0] 1.0;
+    transonic       yes;
 }
 
 relaxationFactors
 {
-    p           1;
-    rho         1; //0.1;
-    U           0.9;
-    h           0.95;
-    k           0.9;
-    epsilon     0.9;
+    p               1;
+    rho             1; //0.1;
+    U               0.9;
+    h               0.95;
+    k               0.9;
+    epsilon         0.9;
 }
 
 relaxationFactors0
 {
-    p           0.3;
-    rho         0.1;
-    U           0.7;
-    h           0.7;
-    k           0.7;
-    epsilon     0.7;
+    p               0.3;
+    rho             0.1;
+    U               0.7;
+    h               0.7;
+    k               0.7;
+    epsilon         0.7;
 }
 
 // ************************************************************************* //
