@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -252,8 +252,16 @@ public:
             //- Write graph to stream in given format
             void write(Ostream&, const word& format) const;
 
-            //- Write graph to file in given format
-            void write(const fileName& fName, const word& format) const;
+            //- Write graph to file in given path-name and format
+            void write(const fileName& pName, const word& format) const;
+
+            //- Write graph to file in given path, name and format
+            void write
+            (
+                const fileName& path,
+                const word& name,
+                const word& format
+            ) const;
 
 
     // Friend operators

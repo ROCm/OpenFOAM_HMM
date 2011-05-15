@@ -25,12 +25,13 @@ License
 
 #include "basicReactingMultiphaseCloud.H"
 
+#include "makeParcelCloudFunctionObjects.H"
+
 // Kinematic
 #include "makeThermoParcelForces.H" // thermo variant
 #include "makeParcelDispersionModels.H"
 #include "makeReactingMultiphaseParcelInjectionModels.H" // MP variant
 #include "makeParcelPatchInteractionModels.H"
-#include "makeParcelPostProcessingModels.H"
 
 // Thermodynamic
 #include "makeParcelHeatTransferModels.H"
@@ -48,12 +49,13 @@ License
 
 namespace Foam
 {
+    makeParcelCloudFunctionObjects(basicReactingMultiphaseCloud);
+
     // Kinematic sub-models
     makeThermoParcelForces(basicReactingMultiphaseCloud);
     makeParcelDispersionModels(basicReactingMultiphaseCloud);
     makeReactingMultiphaseParcelInjectionModels(basicReactingMultiphaseCloud);
     makeParcelPatchInteractionModels(basicReactingMultiphaseCloud);
-    makeParcelPostProcessingModels(basicReactingMultiphaseCloud);
 
     // Thermo sub-models
     makeParcelHeatTransferModels(basicReactingMultiphaseCloud);

@@ -11,12 +11,15 @@ refineMeshByCellSet()
 {
    while [ $# -ge 1 ]
    do
-      echo "creating cell set for primary zone - $1"
-      cp system/topoSetDict.$1 system/topoSetDict
-      topoSet > log.topoSet.$1 2>&1
+      if [ ! -e log.refineMesh.$1 ]
+      then
+          echo "creating cell set for primary zone - $1"
+          cp system/topoSetDict.$1 system/topoSetDict
+          topoSet > log.topoSet.$1 2>&1
 
-      echo "refining primary zone - $1"
-      refineMesh -dict -overwrite > log.refineMesh.$1 2>&1
+          echo "refining primary zone - $1"
+          refineMesh -dict -overwrite > log.refineMesh.$1 2>&1
+      fi
       shift
    done
 }

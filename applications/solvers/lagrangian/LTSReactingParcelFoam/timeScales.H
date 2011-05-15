@@ -82,7 +82,7 @@ Info<< "Time scales min/max:" << endl;
            /rho
         );
 
-        tau = alphaTauTemp*thermo.Cp()*T/(tau + ROOTVSMALL);
+        tau = alphaTemp*thermo.Cp()*T/(tau + ROOTVSMALL);
 
         Info<< "    Temperature = " << min(maxDeltaT, gMin(tau)) << ", "
             << min(maxDeltaT, gMax(tau)) << endl;
@@ -105,7 +105,7 @@ Info<< "Time scales min/max:" << endl;
 
     // Spatially smooth the time scale field
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    fvc::smooth(rDeltaT, alphaTauSmooth);
+    fvc::smooth(rDeltaT, rDeltaTSmoothingCoeff);
 
     Info<< "    Overall     = " << min(1/rDeltaT).value()
         << ", " << max(1/rDeltaT).value() << nl << endl;

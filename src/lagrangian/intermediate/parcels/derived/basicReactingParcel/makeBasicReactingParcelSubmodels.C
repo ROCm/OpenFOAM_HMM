@@ -25,12 +25,13 @@ License
 
 #include "basicReactingCloud.H"
 
+#include "makeParcelCloudFunctionObjects.H"
+
 // Kinematic
 #include "makeThermoParcelForces.H" // thermo variant
 #include "makeParcelDispersionModels.H"
 #include "makeReactingParcelInjectionModels.H" // Reacting variant
 #include "makeParcelPatchInteractionModels.H"
-#include "makeParcelPostProcessingModels.H"
 
 // Thermodynamic
 #include "makeParcelHeatTransferModels.H"
@@ -47,12 +48,13 @@ namespace Foam
     typedef basicReactingCloud::thermoCloudType thermoCloudType2;
     typedef basicReactingCloud::kinematicCloudType kinematicCloudType2;
 
+    makeParcelCloudFunctionObjects(basicReactingCloud);
+
     // Kinematic sub-models
     makeThermoParcelForces(basicReactingCloud);
     makeParcelDispersionModels(basicReactingCloud);
     makeReactingParcelInjectionModels(basicReactingCloud);
     makeParcelPatchInteractionModels(basicReactingCloud);
-    makeParcelPostProcessingModels(basicReactingCloud);
 
     // Thermo sub-models
     makeParcelHeatTransferModels(basicReactingCloud);

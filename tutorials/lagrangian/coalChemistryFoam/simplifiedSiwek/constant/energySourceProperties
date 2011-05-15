@@ -23,7 +23,7 @@ FoamFile
         duration        0.2;
         selectionMode   cellSet;
         volumeMode      absolute;
-        fieldData       15000;
+        fieldData       20000;
         cellSet         ignitionCells;
     }
 );

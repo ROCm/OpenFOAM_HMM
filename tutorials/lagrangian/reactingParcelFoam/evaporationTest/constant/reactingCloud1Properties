@@ -50,6 +50,7 @@ solution
     }
 }
 
+
 constantProperties
 {
     parcelTypeId    1;
@@ -75,6 +76,7 @@ constantProperties
     constantVolume  false;
 }
 
+
 subModels
 {
     particleForces
@@ -94,8 +96,6 @@ subModels
     compositionModel singlePhaseMixture;
 
     phaseChangeModel liquidEvaporation;
-
-    postProcessingModel none;
 
     surfaceFilmModel none;
 
@@ -147,6 +147,10 @@ subModels
         activeLiquids    ( H2O );
     }
 }
+
+
+cloudFunctions
+{}
 
 
 // ************************************************************************* //

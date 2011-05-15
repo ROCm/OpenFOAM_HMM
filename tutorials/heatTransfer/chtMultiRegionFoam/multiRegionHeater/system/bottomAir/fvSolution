@@ -70,15 +70,15 @@ solvers
 
 PIMPLE
 {
-    momentumPredictor   on;
-    nCorrectors         2;
+    momentumPredictor on;
+    nCorrectors      2;
     nNonOrthogonalCorrectors 0;
 }
 
 relaxationFactors
 {
-    h               1;
-    U               1;
+    "h.*"           1;
+    "U.*"           1;
 }
 
 // ************************************************************************* //

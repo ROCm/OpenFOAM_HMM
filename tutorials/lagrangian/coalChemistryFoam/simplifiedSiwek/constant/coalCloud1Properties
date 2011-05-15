@@ -103,8 +103,6 @@ subModels
 
     surfaceReactionModel COxidationKineticDiffusionLimitedRate;
 
-    postProcessingModel none;
-
     surfaceFilmModel none;
 
     radiation       on;
@@ -193,6 +191,10 @@ subModels
         E               7.9E+07;
     }
 }
+
+
+cloudFunctions
+{}
 
 
 // ************************************************************************* //

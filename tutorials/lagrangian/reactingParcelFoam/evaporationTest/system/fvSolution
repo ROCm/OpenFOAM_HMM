@@ -81,5 +81,9 @@ PIMPLE
     momentumPredictor yes;
 }
 
+relaxationFactors
+{
+    ".*Final"       1;
+}
 
 // ************************************************************************* //

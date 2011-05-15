@@ -38,7 +38,7 @@ FoamFile
     bullet
     {
         type            wall;
-        nFaces          37896;
+        nFaces          37743;
         startFace       1133431;
     }
 )

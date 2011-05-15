@@ -232,20 +232,20 @@ void Foam::parcel::setRelaxationTimes
                         tBoilingSurface
                     );
                     scalar dp = pBoil - pressure;
-                    if ( (dp > 0.0) && (dp0 > 0.0) )
+                    if ((dp > 0.0) && (dp0 > 0.0))
                     {
                         tBoilingSurface -= deltaT;
                     }
                     else
                     {
-                        if ( (dp < 0.0) && (dp0 < 0.0) )
+                        if ((dp < 0.0) && (dp0 < 0.0))
                         {
                             tBoilingSurface += deltaT;
                         }
                         else
                         {
                             deltaT *= 0.5;
-                            if ( (dp > 0.0) && (dp0 < 0.0) )
+                            if ((dp > 0.0) && (dp0 < 0.0))
                             {
                                 tBoilingSurface -= deltaT;
                             }

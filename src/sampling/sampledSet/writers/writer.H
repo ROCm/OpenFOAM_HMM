@@ -110,6 +110,7 @@ protected:
     //- Writes a separator. Used by write functions.
     virtual void writeSeparator(Ostream& os) const;
 
+
 public:
 
     //- Runtime type information

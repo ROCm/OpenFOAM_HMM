@@ -266,8 +266,6 @@
     internal field instead of boundary field.
     + =ensight=: new output format for all sampledSurfaces.
   + Function objects:
-    + =residualControl=: new function object to allow users to terminate steady
-    state calculations when the defined residual levels are achieved
     + =abortCalculation=: watches for presence of the named file in the
     $FOAM_CASE directory and aborts the calculation if it is present
     + =timeActivatedFileUpdate=: performs a file copy/replacement once a

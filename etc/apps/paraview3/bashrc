@@ -56,16 +56,22 @@ export ParaView_MAJOR=detect
 
 
 # Evaluate command-line parameters for ParaView
-while [ $# -gt 0 ]
-do
-    case "$1" in
-    ParaView*=*)
-        # name=value  -> export name=value
-        eval "export $1"
-        ;;
-    esac
-    shift
-done
+_foamParaviewEval()
+{
+    while [ $# -gt 0 ]
+    do
+        case "$1" in
+        ParaView*=*)
+            # name=value  -> export name=value
+            eval "export $1"
+            ;;
+        esac
+        shift
+    done
+}
+
+# Evaluate command-line parameters
+_foamParaviewEval $@
 
 
 # set MAJOR version to correspond to VERSION
@@ -108,6 +114,7 @@ else
 fi
 
 
+unset _foamParaviewEval
 unset cleaned cmake paraviewInstDir paraviewPython
 
 # -----------------------------------------------------------------------------
