@@ -39,8 +39,6 @@ Description
       + massSource.SuTot()
     );
 
-    rhoEqn.relax();
-
     rhoEqn.solve();
 }
 
