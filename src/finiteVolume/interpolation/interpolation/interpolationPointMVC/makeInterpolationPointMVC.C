@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,26 +23,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "pointFields.H"
+#include "interpolationPointMVC.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-inline Type Foam::pointMVCWeight::interpolate
-(
-    const GeometricField<Type, pointPatchField, pointMesh>& psip
-) const
+namespace Foam
 {
-    const labelList& vertices = psip.mesh()().cellPoints()[cellIndex_];
-
-    Type t = pTraits<Type>::zero;
-    forAll(vertices, i)
-    {
-        t += psip[vertices[i]]*weights_[i];
-    }
-
-    return t;
+    makeInterpolation(interpolationPointMVC);
 }
-
 
 // ************************************************************************* //

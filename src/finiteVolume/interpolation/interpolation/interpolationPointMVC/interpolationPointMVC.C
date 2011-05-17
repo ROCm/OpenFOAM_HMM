@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,31 +23,20 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "interpolationPointMVC.H"
+#include "volPointInterpolation.H"
+
+// * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
 template<class Type>
-inline Type Foam::interpolationPoint<Type>::interpolate
+Foam::interpolationPointMVC<Type>::interpolationPointMVC
 (
-    const pointMVCWeight& cpw
-) const
-{
-    return cpw.interpolate(psip_);
-}
-
-
-template<class Type>
-inline Type Foam::interpolationPoint<Type>::interpolate
-(
-    const vector& position,
-    const label cellI,
-    const label faceI
-) const
-{
-    return interpolate
-    (
-        pointMVCWeight(this->pMesh_, position, cellI, faceI)
-    );
-}
+    const GeometricField<Type, fvPatchField, volMesh>& psi
+)
+:
+    interpolation<Type>(psi),
+    psip_(volPointInterpolation::New(psi.mesh()).interpolate(psi))
+{}
 
 
 // ************************************************************************* //
