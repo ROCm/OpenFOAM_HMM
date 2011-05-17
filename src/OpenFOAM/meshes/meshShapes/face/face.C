@@ -499,7 +499,7 @@ Foam::point Foam::face::centre(const pointField& points) const
     const label nPoints = size();
 
     // If the face is a triangle, do a direct calculation
-    if (nPoints)
+    if (nPoints == 3)
     {
         return
             (1.0/3.0)
