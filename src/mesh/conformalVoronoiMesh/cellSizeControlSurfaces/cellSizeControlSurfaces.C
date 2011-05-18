@@ -284,6 +284,11 @@ Foam::scalar Foam::cellSizeControlSurfaces::cellSize
     bool isSurfacePoint
 ) const
 {
+    if (isSurfacePoint)
+    {
+        Pout<< "WARNING: isSurfacePoint is broken!" << endl;
+    }
+
     scalar size = defaultCellSize_;
 
     bool anyFunctionFound = evalCellSizeFunctions(pt, size, isSurfacePoint);
@@ -321,6 +326,18 @@ Foam::scalar Foam::cellSizeControlSurfaces::cellSize
             }
             else
             {
+                FatalErrorIn
+                (
+                    "Foam::scalar Foam::cellSizeControlSurfaces::cellSize"
+                    "("
+                        "const point& pt, "
+                        "bool isSurfacePoint"
+                    ") const"
+                )
+                    << "Point " << pt
+                    << " Cannot use isSurfacePoint here, or at all!"
+                    << nl << exit(FatalError) << endl;
+
                 // Evaluating the cell size at the nearest surface
                 evalCellSizeFunctions(surfHit.hitPoint(), size, true);
             }
