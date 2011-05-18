@@ -10,6 +10,8 @@ cvControls/cvControls.C
 
 conformationSurfaces/conformationSurfaces.C
 
+backgroundMeshDecomposition/backgroundMeshDecomposition.C
+
 cellSizeControlSurfaces/cellSizeControlSurfaces.C
 
 cellSiseFunctions = cellSizeControlSurfaces/cellSizeFunction
