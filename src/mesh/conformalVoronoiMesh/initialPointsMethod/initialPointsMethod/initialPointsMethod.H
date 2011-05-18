@@ -61,7 +61,7 @@ protected:
 
     // Protected data
 
-        //- Reference to the conformalVoronoiMesh holding this cvControls object
+        //- Reference to the conformalVoronoiMesh holding this object
         const conformalVoronoiMesh& cvMesh_;
 
         //- Method details dictionary

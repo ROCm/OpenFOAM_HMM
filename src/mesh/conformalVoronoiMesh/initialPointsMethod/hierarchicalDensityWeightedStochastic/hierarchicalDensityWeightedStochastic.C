@@ -246,7 +246,7 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
         forAll(insideCorners, i)
         {
             // Use the sizes to improve the min/max cell size estimate
-            scalar& s = cornerSizes[i];
+            scalar s = cornerSizes[i];
 
             if (s > maxCellSize)
             {
@@ -357,7 +357,7 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
                 forAll(insideLines, i)
                 {
                     // Use the sizes to improve the min/max cell size estimate
-                    scalar& s = lineSizes[i];
+                    scalar s = lineSizes[i];
 
                     if (s > maxCellSize)
                     {
@@ -459,7 +459,7 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
             {
                 nInside++;
 
-                scalar& s = sampleSizes[i];
+                scalar s = sampleSizes[i];
 
                 if (s > maxCellSize)
                 {

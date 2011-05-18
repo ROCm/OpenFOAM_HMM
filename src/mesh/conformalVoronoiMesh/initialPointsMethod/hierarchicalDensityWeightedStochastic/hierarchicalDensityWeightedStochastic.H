@@ -64,7 +64,7 @@ private:
         //  population of areas of small size
         scalar minCellSizeLimit_;
 
-        //- Maximum normal level of recursion, can be more if a high density
+        //- Minimum normal level of recursion, can be more if a high density
         //  ratio is detected
         label minLevels_;
 
@@ -72,12 +72,15 @@ private:
         scalar maxSizeRatio_;
 
         //- How fine should the initial sample of the volume a box be to
-        //  investigate it cell sizes and volume fraction
+        //  investigate its cell sizes and volume fraction
         label volRes_;
 
         //- How fine should the initial sample of the surface of a box be to
         //  investigate if it is near to a the geometry.
         label surfRes_;
+
+
+    // Private Member Functions
 
         //- Write boundBox as obj
         void writeOBJ
