@@ -44,12 +44,7 @@ Foam::conformationSurfaces::conformationSurfaces
     baffleSurfaces_(),
     patchNames_(0),
     patchOffsets_(),
-    bounds_(),
     globalBounds_(),
-    spanMag_(),
-    spanMagSqr_(),
-    processorDomains_(),
-    processorMeshBounds_(),
     referenceVolumeTypes_(0)
 {
     const dictionary& surfacesDict
@@ -226,116 +221,6 @@ Foam::conformationSurfaces::conformationSurfaces
     // to be conformed to
     globalBounds_ = globalBounds_.extend(cvMesh_.rndGen(), 1e-4);
 
-    if (Pstream::parRun())
-    {
-        processorDomains_.setSize(Pstream::nProcs());
-
-        processorMeshBounds_.setSize(Pstream::nProcs());
-
-        if (Pstream::nProcs() == 2)
-        {
-            processorDomains_[Pstream::myProcNo()] = treeBoundBoxList(4);
-
-            forAll(processorDomains_[Pstream::myProcNo()], pDI)
-            {
-                processorDomains_[Pstream::myProcNo()][pDI] =
-                    globalBounds_.subBbox
-                    (
-                        direction(Pstream::myProcNo()*4 + pDI)
-                    );
-            }
-
-            DynamicList<Foam::point> allBbPoints;
-
-            forAll(processorDomains_[Pstream::myProcNo()], pDI)
-            {
-                allBbPoints.append
-                (
-                    processorDomains_[Pstream::myProcNo()][pDI].points()
-                );
-            }
-
-            bounds_ = treeBoundBox(allBbPoints);
-
-
-        }
-        else if (Pstream::nProcs() == 8)
-        {
-            bounds_ = globalBounds_.subBbox(direction(Pstream::myProcNo()));
-
-            processorDomains_[Pstream::myProcNo()] =
-                treeBoundBoxList(1, bounds_);
-        }
-        else
-        {
-            FatalErrorIn
-            (
-                "Foam::conformationSurfaces::conformationSurfaces"
-                "("
-                    "const conformalVoronoiMesh& cvMesh, "
-                    "const searchableSurfaces& allGeometry, "
-                    "const dictionary& surfaceConformationDict"
-                ")"
-            )
-                << "Hard coded to " << "2 or 8" << " procs"
-                << exit(FatalError);
-        }
-
-        processorMeshBounds_[Pstream::myProcNo()] = bounds_;
-
-        Pstream::gatherList(processorDomains_);
-        Pstream::scatterList(processorDomains_);
-
-        Pstream::gatherList(processorMeshBounds_);
-        Pstream::scatterList(processorMeshBounds_);
-    }
-    else
-    {
-        bounds_ = globalBounds_;
-
-        processorDomains_.setSize(0);
-    }
-
-    if (Pstream::parRun() && cvMesh_.cvMeshControls().objOutput())
-    {
-        Info<< "global bounds " << globalBounds_ << endl;
-
-        Pout<< "processor bounds " << bounds_ << endl;
-
-        OFstream str
-        (
-            cvMesh_.time().path()
-           /"proc_" + name(Pstream::myProcNo()) + "_bounds.obj"
-        );
-
-        Pout<< "Writing " << str.name() << endl;
-
-        pointField bbPoints(bounds_.points());
-
-        forAll(bbPoints, i)
-        {
-            meshTools::writeOBJ(str, bbPoints[i]);
-        }
-
-        forAll(treeBoundBox::faces, i)
-        {
-            const face& f = treeBoundBox::faces[i];
-
-            str << "f"
-                << ' ' << f[0] + 1
-                << ' ' << f[1] + 1
-                << ' ' << f[2] + 1
-                << ' ' << f[3] + 1
-                << nl;
-        }
-
-        Info<< "processor domains " << processorDomains_ << endl;
-    }
-
-    spanMag_ = bounds_.mag();
-
-    spanMagSqr_ = sqr(spanMag_);
-
     // Look at all surfaces at determine whether the locationInMesh point is
     // inside or outside each, to establish a signature for the domain to be
     // meshed.
@@ -387,62 +272,6 @@ bool Foam::conformationSurfaces::overlaps(const treeBoundBox& bb) const
     }
 
     return false;
-}
-
-
-bool Foam::conformationSurfaces::positionOnThisProc(const point& pt) const
-{
-    // This is likely to give problems when a point is on the boundary between
-    // two processors.
-
-    if (Pstream::parRun())
-    {
-        const treeBoundBoxList& procBbs =
-            processorDomains_[Pstream::myProcNo()];
-
-        forAll(procBbs, pBI)
-        {
-            const treeBoundBox& procBb = procBbs[pBI];
-
-            if (procBb.contains(pt))
-            {
-                return true;
-            }
-        }
-    }
-    else
-    {
-        return bounds_.contains(pt);
-    }
-
-    return false;
-}
-
-
-Foam::label Foam::conformationSurfaces::positionProc(const point& pt) const
-{
-    // This is likely to give problems when a point is on the boundary between
-    // two processors.
-
-    if (Pstream::parRun())
-    {
-        forAll(processorDomains_, procI)
-        {
-            const treeBoundBoxList& procBbs = processorDomains_[procI];
-
-            forAll(procBbs, pBI)
-            {
-                const treeBoundBox& procBb = procBbs[pBI];
-
-                if (procBb.contains(pt))
-                {
-                    return procI;
-                }
-            }
-        }
-    }
-
-    return -1;
 }
 
 

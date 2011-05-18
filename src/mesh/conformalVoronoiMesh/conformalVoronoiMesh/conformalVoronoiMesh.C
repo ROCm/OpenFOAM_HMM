@@ -27,6 +27,7 @@ License
 #include "initialPointsMethod.H"
 #include "relaxationModel.H"
 #include "faceAreaWeightModel.H"
+#include "backgroundMeshDecomposition.H"
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -1250,8 +1251,21 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
             cvMeshDict.subDict("motionControl"),
             *this
         )
-    )
+    ),
+    decomposition_()
 {
+    if (Pstream::parRun())
+    {
+        decomposition_.reset
+        (
+            new backgroundMeshDecomposition
+            (
+                cvMeshDict.subDict("backgroundMeshDecomposition"),
+                *this
+            )
+        );
+    }
+
     createFeaturePoints();
 
     if (cvMeshControls().objOutput())

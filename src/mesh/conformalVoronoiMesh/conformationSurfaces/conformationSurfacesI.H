@@ -50,47 +50,9 @@ const Foam::List<Foam::word>& Foam::conformationSurfaces::patchNames() const
 }
 
 
-const Foam::treeBoundBox& Foam::conformationSurfaces::bounds() const
-{
-    return bounds_;
-}
-
-
 const Foam::treeBoundBox& Foam::conformationSurfaces::globalBounds() const
 {
     return globalBounds_;
-}
-
-
-inline Foam::scalar Foam::conformationSurfaces::spanMag() const
-{
-    return spanMag_;
-}
-
-
-inline Foam::scalar Foam::conformationSurfaces::spanMagSqr() const
-{
-    return spanMagSqr_;
-}
-
-
-inline const Foam::List<Foam::treeBoundBoxList>&
-Foam::conformationSurfaces::processorDomains() const
-{
-    return processorDomains_;
-}
-
-
-inline const Foam::treeBoundBoxList&
-Foam::conformationSurfaces::processorMeshBounds() const
-{
-    return processorMeshBounds_;
-}
-
-
-inline Foam::treeBoundBoxList& Foam::conformationSurfaces::processorMeshBounds()
-{
-    return processorMeshBounds_;
 }
 
 

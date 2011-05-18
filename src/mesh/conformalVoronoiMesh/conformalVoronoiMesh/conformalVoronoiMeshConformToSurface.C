@@ -556,80 +556,80 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
         return;
     }
 
-    {
-        // Update the processorMeshBounds
+    // {
+    //     // Update the processorMeshBounds
 
-        DynamicList<Foam::point> parallelAllPoints;
-        DynamicList<label> targetProcessor;
-        DynamicList<label> parallelAllIndices;
+    //     DynamicList<Foam::point> parallelAllPoints;
+    //     DynamicList<label> targetProcessor;
+    //     DynamicList<label> parallelAllIndices;
 
-        Foam::point minPt = geometryToConformTo_.bounds().min();
-        Foam::point maxPt = geometryToConformTo_.bounds().max();
+    //     Foam::point minPt = geometryToConformTo_.bounds().min();
+    //     Foam::point maxPt = geometryToConformTo_.bounds().max();
 
-        for
-        (
-            Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-            vit != finite_vertices_end();
-            vit++
-        )
-        {
-            if (vit->real())
-            {
-                Foam::point v = topoint(vit->point());
+    //     for
+    //     (
+    //         Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+    //         vit != finite_vertices_end();
+    //         vit++
+    //     )
+    //     {
+    //         if (vit->real())
+    //         {
+    //             Foam::point v = topoint(vit->point());
 
-                minPt = Foam::min(minPt, v);
-                maxPt = Foam::max(maxPt, v);
-            }
-        }
+    //             minPt = Foam::min(minPt, v);
+    //             maxPt = Foam::max(maxPt, v);
+    //         }
+    //     }
 
-        treeBoundBox& procMeshBb =
-            geometryToConformTo_.processorMeshBounds()[Pstream::myProcNo()];
+    //     treeBoundBox& procMeshBb =
+    //         geometryToConformTo_.processorMeshBounds()[Pstream::myProcNo()];
 
-        if (cvMeshControls().objOutput())
-        {
-            Pout<< "Before processorMeshBounds update" << procMeshBb << endl;
-        }
+    //     if (cvMeshControls().objOutput())
+    //     {
+    //         Pout<< "Before processorMeshBounds update" << procMeshBb << endl;
+    //     }
 
-        procMeshBb = treeBoundBox(minPt, maxPt);
+    //     procMeshBb = treeBoundBox(minPt, maxPt);
 
-        if (cvMeshControls().objOutput())
-        {
-            Pout<< "After processorMeshBounds update" << procMeshBb << endl;
+    //     if (cvMeshControls().objOutput())
+    //     {
+    //         Pout<< "After processorMeshBounds update" << procMeshBb << endl;
 
-            OFstream str
-            (
-                runTime_.path()
-                /"processorMeshBoundsUpdated_"
-              + name(Pstream::myProcNo())
-              + "_bounds.obj"
-            );
+    //         OFstream str
+    //         (
+    //             runTime_.path()
+    //             /"processorMeshBoundsUpdated_"
+    //           + name(Pstream::myProcNo())
+    //           + "_bounds.obj"
+    //         );
 
-            Pout<< "Writing " << str.name() << endl;
+    //         Pout<< "Writing " << str.name() << endl;
 
-            pointField bbPoints(procMeshBb.points());
+    //         pointField bbPoints(procMeshBb.points());
 
-            forAll(bbPoints, i)
-            {
-                meshTools::writeOBJ(str, bbPoints[i]);
-            }
+    //         forAll(bbPoints, i)
+    //         {
+    //             meshTools::writeOBJ(str, bbPoints[i]);
+    //         }
 
-            forAll(treeBoundBox::faces, i)
-            {
-                const face& f = treeBoundBox::faces[i];
+    //         forAll(treeBoundBox::faces, i)
+    //         {
+    //             const face& f = treeBoundBox::faces[i];
 
-                str << "f"
-                    << ' ' << f[0] + 1
-                    << ' ' << f[1] + 1
-                    << ' ' << f[2] + 1
-                    << ' ' << f[3] + 1
-                    << nl;
-            }
-        }
+    //             str << "f"
+    //                 << ' ' << f[0] + 1
+    //                 << ' ' << f[1] + 1
+    //                 << ' ' << f[2] + 1
+    //                 << ' ' << f[3] + 1
+    //                 << nl;
+    //         }
+    //     }
 
-        Pstream::gatherList(geometryToConformTo_.processorMeshBounds());
+    //     Pstream::gatherList(geometryToConformTo_.processorMeshBounds());
 
-        Pstream::scatterList(geometryToConformTo_.processorMeshBounds());
-    }
+    //     Pstream::scatterList(geometryToConformTo_.processorMeshBounds());
+    // }
 
     boolList sendToProc(Pstream::nProcs(), false);
 
@@ -1217,7 +1217,6 @@ void Foam::conformalVoronoiMesh::parallelInterfaceInfluence
             if (procBb.overlaps(circumcentre, circumradiusSqr))
             {
                 toProc[procI] = true;
-
             }
         }
     }

@@ -80,6 +80,8 @@ class relaxationModel;
 
 class faceAreaWeightModel;
 
+class backgroundMeshDecomposition;
+
 
 /*---------------------------------------------------------------------------*\
                     Class conformalVoronoiMesh Declaration
@@ -173,6 +175,9 @@ private:
 
         //-  Face area weight function.  Runtime selectable.
         autoPtr<faceAreaWeightModel> faceAreaWeightModel_;
+
+        //- Background mesh decomposition, only available in parallel.
+        autoPtr<backgroundMeshDecomposition> decomposition_;
 
 
     // Private Member Functions

@@ -48,7 +48,6 @@ namespace Foam
 // Forward declaration of classes
 class conformalVoronoiMesh;
 
-
 /*---------------------------------------------------------------------------*\
                      Class conformationSurfaces Declaration
 \*---------------------------------------------------------------------------*/
@@ -90,25 +89,8 @@ class conformationSurfaces
         //  the entry in the overall patch list
         labelList patchOffsets_;
 
-        //- The boundBox of volume to be conformed to on this processor
-        treeBoundBox bounds_;
-
         //- The overall boundBox of all of the surfaces to be conformed to
         treeBoundBox globalBounds_;
-
-        //- Magnitude of the span of the domain
-        scalar spanMag_;
-
-        //- Square of span_
-        scalar spanMagSqr_;
-
-        //- All of the treeBoundBoxes representing volumes held by all
-        //  processors.  A non-overlapping set of volumes.
-        List<treeBoundBoxList> processorDomains_;
-
-        //- The bounds of the mesh on each processor - can overlap as the mesh
-        //  is generated, used to determine which vertices to refer.
-        treeBoundBoxList processorMeshBounds_;
 
         //- The pattern/signature of volumeTypes representing a point in the
         // domain to be meshed
@@ -158,26 +140,8 @@ public:
             //- Return the patch names
             inline const List<word>& patchNames() const;
 
-            //- Return the bounds
-            inline const treeBoundBox& bounds() const;
-
             //- Return the global bounds
             inline const treeBoundBox& globalBounds() const;
-
-            //- Return the spanMag
-            inline scalar spanMag() const;
-
-            //- Return spanSqr
-            inline scalar spanMagSqr() const;
-
-            //- Return the processorDomains
-            inline const List<treeBoundBoxList>& processorDomains() const;
-
-            //- Return the processorMeshBounds
-            inline const treeBoundBoxList& processorMeshBounds() const;
-
-            //- Return non-const access to the processorMeshBounds
-            inline treeBoundBoxList& processorMeshBounds();
 
 
         // Query
@@ -185,12 +149,6 @@ public:
             //- Check if the supplied bound box overlaps any part of any of
             //  the surfaces
             bool overlaps(const treeBoundBox& bb) const;
-
-            //- Check if the point is in the domain handled by this processor
-            bool positionOnThisProc(const point& pt) const;
-
-            //- Which processor's domain handles this point
-            label positionProc(const point& pt) const;
 
             //- Check if points are inside surfaces to conform to
             Field<bool> inside(const pointField& samplePts) const;
