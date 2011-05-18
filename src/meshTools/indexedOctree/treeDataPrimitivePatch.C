@@ -307,7 +307,7 @@ getVolumeType
 
             forAll(eFaces, i)
             {
-                edgeNormal += patch_.faceNormal()[eFaces[i]];
+                edgeNormal += patch_.faceNormals()[eFaces[i]];
             }
 
             if (debug & 2)
