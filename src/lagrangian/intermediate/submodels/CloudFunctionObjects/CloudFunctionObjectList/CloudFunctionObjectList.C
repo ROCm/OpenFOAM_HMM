@@ -89,12 +89,12 @@ Foam::CloudFunctionObjectList<CloudType>::CloudFunctionObjectList
 template<class CloudType>
 Foam::CloudFunctionObjectList<CloudType>::CloudFunctionObjectList
 (
-    const CloudFunctionObjectList& ppm
+    const CloudFunctionObjectList& cfol
 )
 :
-    PtrList<CloudFunctionObject<CloudType> >(ppm),
-    owner_(ppm.owner_),
-    dict_(ppm.dict_)
+    PtrList<CloudFunctionObject<CloudType> >(cfol),
+    owner_(cfol.owner_),
+    dict_(cfol.dict_)
 {}
 
 
