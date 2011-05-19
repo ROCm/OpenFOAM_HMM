@@ -200,7 +200,7 @@ export PATH LD_LIBRARY_PATH MANPATH
 
 # Source project setup files
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamSource $WM_PROJECT_DIR/etc/settings.sh
+_foamSource $WM_PROJECT_DIR/etc/config/settings.sh
 _foamSource $WM_PROJECT_DIR/etc/config/aliases.sh
 
 

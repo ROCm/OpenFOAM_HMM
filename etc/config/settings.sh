@@ -22,7 +22,7 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     etc/settings.sh
+#     etc/config/settings.sh
 #
 # Description
 #     Startup file for OpenFOAM
@@ -215,7 +215,7 @@ unset MPFR_ARCH_PATH GMP_ARCH_PATH
 if [ -z "$foamCompiler" ]
 then
     foamCompiler=system
-    echo "Warning in $WM_PROJECT_DIR/etc/settings.sh:" 1>&2
+    echo "Warning in $WM_PROJECT_DIR/etc/config/settings.sh:" 1>&2
     echo "    foamCompiler not set, using '$foamCompiler'" 1>&2
 fi
 
@@ -258,7 +258,7 @@ OpenFOAM | ThirdParty)
         ;;
     *)
         echo
-        echo "Warning in $WM_PROJECT_DIR/etc/settings.sh:"
+        echo "Warning in $WM_PROJECT_DIR/etc/config/settings.sh:"
         echo "    Unknown OpenFOAM compiler type '$WM_COMPILER'"
         echo "    Please check your settings"
         echo
@@ -278,7 +278,7 @@ OpenFOAM | ThirdParty)
         # Check that the compiler directory can be found
         [ -d "$gccDir" ] || {
             echo
-            echo "Warning in $WM_PROJECT_DIR/etc/settings.sh:"
+            echo "Warning in $WM_PROJECT_DIR/etc/config/settings.sh:"
             echo "    Cannot find $gccDir installation."
             echo "    Please install this compiler version or if you wish to use the system compiler,"
             echo "    change the 'foamCompiler' setting to 'system'"
@@ -322,7 +322,7 @@ OpenFOAM | ThirdParty)
         # Check that the compiler directory can be found
         [ -d "$clangDir" ] || {
             echo
-            echo "Warning in $WM_PROJECT_DIR/etc/settings.sh:"
+            echo "Warning in $WM_PROJECT_DIR/etc/config/settings.sh:"
             echo "    Cannot find $clangDir installation."
             echo "    Please install this compiler version or if you wish to use the system compiler,"
             echo "    change the 'foamCompiler' setting to 'system'"
