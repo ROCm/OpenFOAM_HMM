@@ -107,9 +107,6 @@ if ( $?WM_PROJECT_INST_DIR ) then
         set foamOldDirs="$WM_PROJECT_INST_DIR $foamOldDirs"
     endif
 endif
-if ( $?WM_PROJECT_SITE ) then
-    set foamOldDirs="$WM_PROJECT_SITE $foamOldDirs"
-endif
 
 
 # Location of installation
@@ -124,7 +121,12 @@ setenv WM_THIRD_PARTY_DIR $WM_PROJECT_INST_DIR/ThirdParty-$WM_PROJECT_VERSION
 # Location of site-specific templates etc
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # unset is equivalent to $WM_PROJECT_INST_DIR/site
-unsetenv WM_PROJECT_SITE
+if ( $?WM_PROJECT_SITE ) then
+    set foamOldDirs="$WM_PROJECT_SITE $foamOldDirs"
+    if ( ! -d "$WM_PROJECT_SITE" ) unsetenv WM_PROJECT_SITE
+else
+    unsetenv WM_PROJECT_SITE
+endif
 
 # Location of user files
 # ~~~~~~~~~~~~~~~~~~~~~~
