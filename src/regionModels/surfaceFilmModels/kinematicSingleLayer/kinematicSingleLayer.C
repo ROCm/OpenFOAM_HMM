@@ -34,6 +34,10 @@ License
 #include "directMappedWallPolyPatch.H"
 #include "mapDistribute.H"
 
+#include "cachedRandom.H"
+#include "normal.H"
+#include "mathematicalConstants.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -61,8 +65,6 @@ bool kinematicSingleLayer::read()
         solution.lookup("nCorr") >> nCorr_;
         solution.lookup("nNonOrthCorr") >> nNonOrthCorr_;
 
-        coeffs_.lookup("Cf") >> Cf_;
-
         return true;
     }
     else
@@ -76,9 +78,10 @@ void kinematicSingleLayer::correctThermoFields()
 {
     if (thermoModel_ == tmConstant)
     {
-        rho_ == dimensionedScalar(coeffs_.lookup("rho0"));
-        mu_ == dimensionedScalar(coeffs_.lookup("mu0"));
-        sigma_ == dimensionedScalar(coeffs_.lookup("sigma0"));
+        const dictionary& constDict(coeffs_.subDict("constantThermoCoeffs"));
+        rho_ == dimensionedScalar(constDict.lookup("rho0"));
+        mu_ == dimensionedScalar(constDict.lookup("mu0"));
+        sigma_ == dimensionedScalar(constDict.lookup("sigma0"));
     }
     else
     {
@@ -273,25 +276,6 @@ void kinematicSingleLayer::updateSurfaceVelocities()
 }
 
 
-tmp<fvVectorMatrix> kinematicSingleLayer::tau(volVectorField& U) const
-{
-    // Calculate shear stress
-    volScalarField Cs("Cs", rho_*Cf_*mag(Us_ - U));
-    volScalarField Cw
-    (
-        "Cw",
-        mu_/(0.3333*(delta_ + dimensionedScalar("SMALL", dimLength, SMALL)))
-    );
-    Cw.min(1.0e+06);
-
-    return
-    (
-       - fvm::Sp(Cs, U) + Cs*Us_ // surface contribution
-       - fvm::Sp(Cw, U) + Cw*Uw_ // wall contribution
-    );
-}
-
-
 tmp<Foam::fvVectorMatrix> kinematicSingleLayer::solveMomentum
 (
     const volScalarField& pu,
@@ -312,9 +296,8 @@ tmp<Foam::fvVectorMatrix> kinematicSingleLayer::solveMomentum
       + fvm::div(phi_, U_)
      ==
       - USp_
-      + tau(U_)
-      + fvc::grad(sigma_)
       - fvm::SuSp(rhoSp_, U_)
+      + forces_.correct(U_)
     );
 
     fvVectorMatrix& UEqn = tUEqn();
@@ -458,8 +441,6 @@ kinematicSingleLayer::kinematicSingleLayer
     ),
 
     cumulativeContErr_(0.0),
-
-    Cf_(readScalar(coeffs().lookup("Cf"))),
 
     rho_
     (
@@ -772,6 +753,8 @@ kinematicSingleLayer::kinematicSingleLayer
     availableMass_(regionMesh().nCells(), 0.0),
 
     injection_(*this, coeffs_),
+
+    forces_(*this, coeffs_),
 
     addedMassTotal_(0.0)
 {

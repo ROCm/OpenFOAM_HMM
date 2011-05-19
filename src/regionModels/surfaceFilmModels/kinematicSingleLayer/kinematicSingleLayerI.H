@@ -61,12 +61,6 @@ inline label kinematicSingleLayer::nNonOrthCorr() const
 }
 
 
-inline scalar kinematicSingleLayer::Cf() const
-{
-    return Cf_;
-}
-
-
 inline const volScalarField& kinematicSingleLayer::mu() const
 {
     return mu_;
