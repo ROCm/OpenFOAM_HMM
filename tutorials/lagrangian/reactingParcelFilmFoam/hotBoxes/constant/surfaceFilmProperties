@@ -25,9 +25,8 @@ active          true;
 thermoSingleLayerCoeffs
 {
     thermoModel singleComponent; // constant
-    liquid      H2O;
 
-    Cf          0.005;
+    liquid      H2O;
 
     radiationModel  none;
 
@@ -49,6 +48,35 @@ thermoSingleLayerCoeffs
         constantCoeffs
         {
             c0              50;
+        }
+    }
+
+    forces
+    (
+        surfaceShear
+        thermocapillary
+        contactAngle
+    );
+
+    surfaceShearCoeffs
+    {
+        Cf          0.005;
+    }
+
+    contactAngleCoeffs
+    {
+        deltaWet        1e-4;
+        Ccf             0.085;
+        contactAngleDistribution
+        {
+            type            normal;
+            normalDistribution
+            {
+                minValue        50;
+                maxValue        100;
+                expectation     75;
+                variance        100;
+            }
         }
     }
 
