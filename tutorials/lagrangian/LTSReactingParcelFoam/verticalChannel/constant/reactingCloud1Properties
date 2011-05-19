@@ -110,12 +110,9 @@ subModels
 
     surfaceReactionModel none;
 
-    postProcessingModel particleTracks;
-
     surfaceFilmModel none;
 
     radiation       off;
-
 
     patchInjectionCoeffs
     {
@@ -190,14 +187,18 @@ subModels
         enthalpyTransfer enthalpyDifference;
         activeLiquids   ( H2O );
     }
+}
 
-    patchPostProcessingCoeffs
+
+cloudFunctions
+{
+    patchPostProcessing
     {
         maxStoredParcels 100;
         patches         ( outlet );
     }
 
-    particleTracksCoeffs
+    particleTracks
     {
         trackInterval   5;
         maxSamples      1000000;

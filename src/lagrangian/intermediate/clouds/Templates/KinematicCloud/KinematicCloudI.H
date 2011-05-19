@@ -119,6 +119,14 @@ Foam::KinematicCloud<CloudType>::forces() const
 
 
 template<class CloudType>
+inline typename Foam::KinematicCloud<CloudType>::functionType&
+Foam::KinematicCloud<CloudType>::functions()
+{
+    return functions_;
+}
+
+
+template<class CloudType>
 inline const Foam::DispersionModel<Foam::KinematicCloud<CloudType> >&
 Foam::KinematicCloud<CloudType>::dispersion() const
 {
@@ -163,14 +171,6 @@ inline Foam::InjectionModel<Foam::KinematicCloud<CloudType> >&
 Foam::KinematicCloud<CloudType>::injection()
 {
     return injectionModel_();
-}
-
-
-template<class CloudType>
-inline Foam::PostProcessingModel<Foam::KinematicCloud<CloudType> >&
-Foam::KinematicCloud<CloudType>::postProcessing()
-{
-    return postProcessingModel_();
 }
 
 

@@ -337,7 +337,7 @@ void Foam::KinematicParcel<ParcelType>::hitFace(TrackData& td)
     typename TrackData::cloudType::parcelType& p =
         static_cast<typename TrackData::cloudType::parcelType&>(*this);
 
-    td.cloud().postProcessing().postFace(p);
+    td.cloud().functions().postFace(p);
 }
 
 
@@ -361,7 +361,7 @@ bool Foam::KinematicParcel<ParcelType>::hitPatch
         static_cast<typename TrackData::cloudType::parcelType&>(*this);
 
     // Invoke post-processing model
-    td.cloud().postProcessing().postPatch(p, patchI);
+    td.cloud().functions().postPatch(p, patchI);
 
     // Invoke surface film model
     if (td.cloud().surfaceFilm().transferParcel(p, pp, td.keepParticle))

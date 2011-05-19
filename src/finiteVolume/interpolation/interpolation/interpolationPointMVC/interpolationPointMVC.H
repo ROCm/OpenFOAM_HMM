@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::interpolationPoint
+    Foam::interpolationPointMVC
 
 Description
     Given cell centre values interpolates to vertices and uses these to
@@ -30,8 +30,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef interpolationPoint_H
-#define interpolationPoint_H
+#ifndef interpolationPointMVC_H
+#define interpolationPointMVC_H
 
 #include "interpolation.H"
 #include "pointMVCWeight.H"
@@ -42,11 +42,11 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class interpolationPoint Declaration
+                   Class interpolationPointMVC Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class interpolationPoint
+class interpolationPointMVC
 :
     public interpolation<Type>
 {
@@ -57,16 +57,17 @@ protected:
         //- Interpolated volfield
         const GeometricField<Type, pointPatchField, pointMesh> psip_;
 
+
 public:
 
     //- Runtime type information
-    TypeName("point");
+    TypeName("pointMVC");
 
 
     // Constructors
 
         //- Construct from components
-        interpolationPoint
+        interpolationPointMVC
         (
             const GeometricField<Type, fvPatchField, volMesh>& psi
         );
@@ -93,12 +94,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "interpolationPointI.H"
+#include "interpolationPointMVCI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "interpolationPoint.C"
+#   include "interpolationPointMVC.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

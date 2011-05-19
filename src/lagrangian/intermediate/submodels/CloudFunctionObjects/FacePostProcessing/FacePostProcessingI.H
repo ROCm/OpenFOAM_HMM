@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,42 +23,11 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PostProcessingModel.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 template<class CloudType>
-Foam::autoPtr<Foam::PostProcessingModel<CloudType> >
-Foam::PostProcessingModel<CloudType>::New
-(
-    const dictionary& dict,
-    CloudType& owner
-)
+inline const Foam::Switch&
+Foam::FacePostProcessing<CloudType>::resetOnWrite() const
 {
-    const word modelType(dict.lookup("postProcessingModel"));
-
-    Info<< "Selecting post-processing model " << modelType << endl;
-
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
-
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
-    {
-        FatalErrorIn
-        (
-            "PostProcessingModel<CloudType>::New"
-            "("
-                "const dictionary&, "
-                "CloudType&"
-            ")"
-        )   << "Unknown post-processing model type "
-            << modelType << nl << nl
-            << "Valid post-processing model types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
-    }
-
-    return autoPtr<PostProcessingModel<CloudType> >(cstrIter()(dict, owner));
+    return resetOnWrite_;
 }
 
 

@@ -35,7 +35,7 @@ SourceFiles
 #ifndef ParticleTracks_H
 #define ParticleTracks_H
 
-#include "PostProcessingModel.H"
+#include "CloudFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +49,7 @@ namespace Foam
 template<class CloudType>
 class ParticleTracks
 :
-    public PostProcessingModel<CloudType>
+    public CloudFunctionObject<CloudType>
 {
     // Private data
 
@@ -101,9 +101,9 @@ public:
         ParticleTracks(const ParticleTracks<CloudType>& ppm);
 
         //- Construct and return a clone
-        virtual autoPtr<PostProcessingModel<CloudType> > clone() const
+        virtual autoPtr<CloudFunctionObject<CloudType> > clone() const
         {
-            return autoPtr<PostProcessingModel<CloudType> >
+            return autoPtr<CloudFunctionObject<CloudType> >
             (
                 new ParticleTracks<CloudType>(*this)
             );
@@ -136,10 +136,10 @@ public:
 
         // Evaluation
 
-            //- Gather post-processing info on patch - not used
+            //- Post-patch hook
             virtual void postPatch(const parcelType& p, const label patchI);
 
-            //- Gather particle data when hit face
+            //- Post-face hook
             virtual void postFace(const parcelType& p);
 };
 

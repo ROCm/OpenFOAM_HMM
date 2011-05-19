@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,30 +23,25 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-inline Type Foam::interpolationPoint<Type>::interpolate
-(
-    const pointMVCWeight& cpw
-) const
+template<class CloudType>
+inline const CloudType& Foam::CloudFunctionObjectList<CloudType>::owner() const
 {
-    return cpw.interpolate(psip_);
+    return owner_;
 }
 
 
-template<class Type>
-inline Type Foam::interpolationPoint<Type>::interpolate
-(
-    const vector& position,
-    const label cellI,
-    const label faceI
-) const
+template<class CloudType>
+inline CloudType& Foam::CloudFunctionObjectList<CloudType>::owner()
 {
-    return interpolate
-    (
-        pointMVCWeight(this->pMesh_, position, cellI, faceI)
-    );
+    return owner_;
+}
+
+
+template<class CloudType>
+inline const Foam::dictionary&
+Foam::CloudFunctionObjectList<CloudType>::dict() const
+{
+    return dict_;
 }
 
 

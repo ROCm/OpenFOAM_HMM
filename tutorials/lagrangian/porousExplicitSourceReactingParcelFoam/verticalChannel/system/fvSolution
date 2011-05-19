@@ -93,5 +93,9 @@ additional
     pressureWorkTimeDerivative false;
 }
 
+relaxationFactors
+{
+    ".*Final"       1;
+}
 
 // ************************************************************************* //

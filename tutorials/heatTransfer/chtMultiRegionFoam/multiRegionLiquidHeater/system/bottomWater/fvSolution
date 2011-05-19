@@ -77,7 +77,7 @@ PIMPLE
 
 relaxationFactors
 {
-    "h.*            1;
+    "h.*"           1;
     "U.*"           1;
 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,45 +23,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ParticleTracks.H"
+#include "interpolationPointMVC.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class CloudType>
-inline Foam::label Foam::ParticleTracks<CloudType>::trackInterval() const
+namespace Foam
 {
-    return trackInterval_;
+    makeInterpolation(interpolationPointMVC);
 }
-
-
-template<class CloudType>
-inline Foam::label Foam::ParticleTracks<CloudType>::maxSamples() const
-{
-    return maxSamples_;
-}
-
-
-template<class CloudType>
-inline const Foam::Switch& Foam::ParticleTracks<CloudType>::resetOnWrite() const
-{
-    return resetOnWrite_;
-}
-
-
-template<class CloudType>
-inline const typename Foam::ParticleTracks<CloudType>::hitTableType&
-Foam::ParticleTracks<CloudType>::faceHitCounter() const
-{
-    return faceHitCounter_;
-}
-
-
-template<class CloudType>
-inline const Foam::Cloud<typename CloudType::parcelType>&
-Foam::ParticleTracks<CloudType>::cloud() const
-{
-    return cloudPtr_();
-}
-
 
 // ************************************************************************* //

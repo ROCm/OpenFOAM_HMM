@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,20 +23,28 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "interpolationPoint.H"
-#include "volPointInterpolation.H"
+#ifndef makeParcelCloudFunctionObjects_H
+#define makeParcelCloudFunctionObjects_H
 
-// * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::interpolationPoint<Type>::interpolationPoint
-(
-    const GeometricField<Type, fvPatchField, volMesh>& psi
-)
-:
-    interpolation<Type>(psi),
-    psip_(volPointInterpolation::New(psi.mesh()).interpolate(psi))
-{}
+#include "FacePostProcessing.H"
+#include "ParticleTracks.H"
+#include "PatchPostProcessing.H"
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#define makeParcelCloudFunctionObjects(CloudType)                             \
+                                                                              \
+    makeCloudFunctionObject(CloudType);                                       \
+                                                                              \
+    makeCloudFunctionObjectType(FacePostProcessing, CloudType);               \
+    makeCloudFunctionObjectType(ParticleTracks, CloudType);                   \
+    makeCloudFunctionObjectType(PatchPostProcessing, CloudType);
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

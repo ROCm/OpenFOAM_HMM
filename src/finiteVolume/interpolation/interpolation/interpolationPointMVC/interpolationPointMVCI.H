@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,28 +23,31 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeParcelPostProcessingModels_H
-#define makeParcelPostProcessingModels_H
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "NoPostProcessing.H"
-#include "ParticleTracks.H"
-#include "PatchPostProcessing.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#define makeParcelPostProcessingModels(CloudType)                             \
-                                                                              \
-    makePostProcessingModel(CloudType);                                       \
-                                                                              \
-    makePostProcessingModelType(NoPostProcessing, CloudType);                 \
-    makePostProcessingModelType(ParticleTracks, CloudType);                   \
-    makePostProcessingModelType(PatchPostProcessing, CloudType);
+template<class Type>
+inline Type Foam::interpolationPointMVC<Type>::interpolate
+(
+    const pointMVCWeight& cpw
+) const
+{
+    return cpw.interpolate(psip_);
+}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class Type>
+inline Type Foam::interpolationPointMVC<Type>::interpolate
+(
+    const vector& position,
+    const label cellI,
+    const label faceI
+) const
+{
+    return interpolate
+    (
+        pointMVCWeight(this->pMesh_, position, cellI, faceI)
+    );
+}
 
-#endif
 
 // ************************************************************************* //

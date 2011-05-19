@@ -95,8 +95,6 @@ subModels
 
     phaseChangeModel none;
 
-    postProcessingModel none;
-
     surfaceFilmModel thermoSurfaceFilm;
 
     radiation       off;
@@ -158,6 +156,10 @@ subModels
         Cf              0.6;
     }
 }
+
+
+cloudFunctions
+{}
 
 
 // ************************************************************************* //

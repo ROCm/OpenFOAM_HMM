@@ -65,8 +65,6 @@ subModels
 
     heatTransferModel none;
 
-    postProcessingModel none;
-
     surfaceFilmModel none;
 
     collisionModel pairCollision;
@@ -138,6 +136,10 @@ subModels
         type            rebound;
     }
 }
+
+
+cloudFunctions
+{}
 
 
 // ************************************************************************* //
