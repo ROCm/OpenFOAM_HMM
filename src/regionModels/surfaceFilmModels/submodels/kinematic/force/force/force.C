@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,31 +23,51 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "force.H"
 
-template<class Type>
-inline Type Foam::interpolationPoint<Type>::interpolate
-(
-    const pointMVCWeight& cpw
-) const
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    return cpw.interpolate(psip_);
-}
-
-
-template<class Type>
-inline Type Foam::interpolationPoint<Type>::interpolate
-(
-    const vector& position,
-    const label cellI,
-    const label faceI
-) const
+namespace regionModels
 {
-    return interpolate
-    (
-        pointMVCWeight(this->pMesh_, position, cellI, faceI)
-    );
-}
+namespace surfaceFilmModels
+{
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameAndDebug(force, 0);
+defineRunTimeSelectionTable(force, dictionary);
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+force::force(const surfaceFilmModel& owner)
+:
+    subModelBase(owner)
+{}
+
+
+force::force
+(
+    const word& type,
+    const surfaceFilmModel& owner,
+    const dictionary& dict
+)
+:
+    subModelBase(type, owner, dict)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+force::~force()
+{}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace surfaceFilmModels
+} // End namespace regionModels
+} // End namespace Foam
 
 // ************************************************************************* //

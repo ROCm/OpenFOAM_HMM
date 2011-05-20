@@ -42,6 +42,7 @@ SourceFiles
 #include "fvMatrices.H"
 
 #include "injectionModelList.H"
+#include "forceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -91,12 +92,6 @@ protected:
 
             //- Cumulative continuity error
             scalar cumulativeContErr_;
-
-
-        // Model parameters
-
-            //- Skin frition coefficient for film/primary region interface
-            scalar Cf_;
 
 
         // Thermo properties
@@ -199,6 +194,9 @@ protected:
             //- Cloud injection
             injectionModelList injection_;
 
+            //- List of film forces
+            forceList forces_;
+
 
        // Checks
 
@@ -237,9 +235,6 @@ protected:
 
         //- Update film surface velocities
         virtual void updateSurfaceVelocities();
-
-        //- Return the stress term for the momentum equation
-        virtual tmp<fvVectorMatrix> tau(volVectorField& dU) const;
 
         //- Constrain a film region master/slave boundaries of a field to a
         //  given value
@@ -312,12 +307,6 @@ public:
 
             //- Return the number of non-orthogonal correctors
             inline label nNonOrthCorr() const;
-
-
-        // Model parameters
-
-            //- Return the skin friction coefficient
-            inline scalar Cf() const;
 
 
         // Thermo properties
