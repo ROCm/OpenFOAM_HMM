@@ -44,7 +44,6 @@ Foam::writeRegisteredObject::writeRegisteredObject
 :
     name_(name),
     obr_(obr),
-    active_(true),
     objectNames_()
 {
     read(dict);
@@ -61,10 +60,7 @@ Foam::writeRegisteredObject::~writeRegisteredObject()
 
 void Foam::writeRegisteredObject::read(const dictionary& dict)
 {
-    if (active_)
-    {
-        dict.lookup("objectNames") >> objectNames_;
-    }
+    dict.lookup("objectNames") >> objectNames_;
 }
 
 
@@ -82,32 +78,29 @@ void Foam::writeRegisteredObject::end()
 
 void Foam::writeRegisteredObject::write()
 {
-    if (active_)
+    forAll(objectNames_, i)
     {
-        forAll(objectNames_, i)
+        if (obr_.foundObject<regIOobject>(objectNames_[i]))
         {
-            if (obr_.foundObject<regIOobject>(objectNames_[i]))
-            {
-                regIOobject& obj =
-                    const_cast<regIOobject&>
-                    (
-                        obr_.lookupObject<regIOobject>(objectNames_[i])
-                    );
-                // Switch off automatic writing to prevent double write
-                obj.writeOpt() = IOobject::NO_WRITE;
-                obj.write();
-            }
-            else
-            {
-                WarningIn
+            regIOobject& obj =
+                const_cast<regIOobject&>
                 (
-                    "Foam::writeRegisteredObject::read(const dictionary&)"
-                )   << "Object " << objectNames_[i] << " not found in "
-                    << "database. Available objects:" << nl << obr_.sortedToc()
-                    << endl;
-            }
-
+                    obr_.lookupObject<regIOobject>(objectNames_[i])
+                );
+            // Switch off automatic writing to prevent double write
+            obj.writeOpt() = IOobject::NO_WRITE;
+            obj.write();
         }
+        else
+        {
+            WarningIn
+            (
+                "Foam::writeRegisteredObject::read(const dictionary&)"
+            )   << "Object " << objectNames_[i] << " not found in "
+                << "database. Available objects:" << nl << obr_.sortedToc()
+                << endl;
+        }
+
     }
 }
 
