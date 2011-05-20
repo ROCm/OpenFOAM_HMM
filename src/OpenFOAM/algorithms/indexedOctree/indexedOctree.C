@@ -2055,6 +2055,54 @@ void Foam::indexedOctree<Type>::findBox
 
 
 template <class Type>
+void Foam::indexedOctree<Type>::findSphere
+(
+    const label nodeI,
+    const point& centre,
+    const scalar radiusSqr,
+    labelHashSet& elements
+) const
+{
+    const node& nod = nodes_[nodeI];
+    const treeBoundBox& nodeBb = nod.bb_;
+
+    for (direction octant = 0; octant < nod.subNodes_.size(); octant++)
+    {
+        labelBits index = nod.subNodes_[octant];
+
+        if (isNode(index))
+        {
+            const treeBoundBox& subBb = nodes_[getNode(index)].bb_;
+
+            if (subBb.overlaps(centre, radiusSqr))
+            {
+                findBox(getNode(index), centre, radiusSqr, elements);
+            }
+        }
+        else if (isContent(index))
+        {
+            const treeBoundBox subBb(nodeBb.subBbox(octant));
+
+            if (subBb.overlaps(centre, radiusSqr))
+            {
+                const labelList& indices = contents_[getContent(index)];
+
+                forAll(indices, i)
+                {
+                    label shapeI = indices[i];
+
+                    if (shapes_.overlaps(shapeI, centre, radiusSqr))
+                    {
+                        elements.insert(shapeI);
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+template <class Type>
 template <class CompareOp>
 void Foam::indexedOctree<Type>::findNear
 (
@@ -2612,6 +2660,25 @@ Foam::labelList Foam::indexedOctree<Type>::findBox
     if (nodes_.size())
     {
         findBox(0, searchBox, elements);
+    }
+
+    return elements.toc();
+}
+
+
+template <class Type>
+Foam::labelList Foam::indexedOctree<Type>::findSphere
+(
+    const point& centre,
+    const scalar radiusSqr
+) const
+{
+    // Storage for labels of shapes inside bb. Size estimate.
+    labelHashSet elements(shapes_.size() / 100);
+
+    if (nodes_.size())
+    {
+        findSphere(0, centre, radiusSqr, elements);
     }
 
     return elements.toc();
