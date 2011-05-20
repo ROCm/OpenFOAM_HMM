@@ -94,7 +94,7 @@ bool Foam::conformalVoronoiMesh::insertSpecialisedFeaturePoint
 
     if (nExternal == 2 && nInternal == 1)
     {
-        // if (!geometryToConformTo_.positionOnThisProc(pt))
+        // if (!positionOnThisProc(pt))
         // {
         //     continue;
         // }

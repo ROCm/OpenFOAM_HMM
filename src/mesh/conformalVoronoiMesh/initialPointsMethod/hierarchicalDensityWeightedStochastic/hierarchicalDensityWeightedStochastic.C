@@ -758,7 +758,10 @@ hierarchicalDensityWeightedStochastic::initialPoints() const
 {
     const conformationSurfaces& geometry = cvMesh_.geometryToConformTo();
 
-    treeBoundBox hierBB = geometry.bounds().extend(cvMesh_.rndGen(), 1e-6);
+    treeBoundBox hierBB = geometry.globalBounds().extend
+    (
+        cvMesh_.rndGen(), 1e-6
+    );
 
     std::vector<Vb::Point> initialPoints;
 

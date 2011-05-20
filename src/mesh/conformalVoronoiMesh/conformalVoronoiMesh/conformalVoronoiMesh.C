@@ -28,6 +28,7 @@ License
 #include "relaxationModel.H"
 #include "faceAreaWeightModel.H"
 #include "backgroundMeshDecomposition.H"
+#include "meshSearch.H"
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -576,7 +577,7 @@ void Foam::conformalVoronoiMesh::insertConvexFeaturePoints()
         {
             const Foam::point& featPt = feMesh.points()[ptI];
 
-            if (!geometryToConformTo_.positionOnThisProc(featPt))
+            if (!positionOnThisProc(featPt))
             {
                 continue;
             }
@@ -628,7 +629,7 @@ void Foam::conformalVoronoiMesh::insertConcaveFeaturePoints()
         {
             const Foam::point& featPt = feMesh.points()[ptI];
 
-            if (!geometryToConformTo_.positionOnThisProc(featPt))
+            if (!positionOnThisProc(featPt))
             {
                 continue;
             }
@@ -728,7 +729,7 @@ void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
 
                 const Foam::point& pt(feMesh.points()[ptI]);
 
-                if (!geometryToConformTo_.positionOnThisProc(pt))
+                if (!positionOnThisProc(pt))
                 {
                     continue;
                 }
@@ -853,6 +854,116 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
     }
 
     storeSizesAndAlignments(initPts);
+}
+
+
+void Foam::conformalVoronoiMesh::distribute()
+{
+    Info<< nl << "Redistributing points" << endl;
+
+    timeCheck("Before distribute");
+
+    const fvMesh& bMesh = decomposition_().mesh();
+
+    volScalarField cellWeights
+    (
+        IOobject
+        (
+            "cellWeights",
+            bMesh.time().timeName(),
+            bMesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        bMesh,
+        dimensionedScalar("weight", dimless, 0),
+        zeroGradientFvPatchScalarField::typeName
+    );
+
+    meshSearch cellSearch(bMesh);
+
+    List<DynamicList<Foam::point> > cellVertices(bMesh.nCells());
+
+    for
+    (
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        vit++
+    )
+    {
+        if (vit->real())
+        {
+            Foam::point v = topoint(vit->point());
+
+            label cellI = cellSearch.findCell(v);
+
+            if (cellI == -1)
+            {
+                Pout<< "findCell "
+                    << vit->type() << " "
+                    << vit->index() << " "
+                    << v << " "
+                    << cellI << endl;
+            }
+            else
+            {
+                cellVertices[cellI].append(topoint(vit->point()));
+            }
+        }
+    }
+
+    forAll(cellVertices, cI)
+    {
+        cellWeights.internalField()[cI] = min
+        (
+            max(cellVertices[cI].size(), 1e-3),
+            100
+        );
+    }
+
+    autoPtr<mapDistributePolyMesh> mapDist = decomposition_().distribute
+    (
+        cellWeights
+    );
+
+    Pout<< "number_of_vertices() before distribution "
+        << label(number_of_vertices()) << endl;
+
+    mapDist().distributeCellData(cellVertices);
+
+    // Remove the entire tessellation
+    this->clear();
+
+    // Info<< "NEED TO MAP FEATURE POINTS" << endl;
+    // reinsertFeaturePoints();
+
+    startOfInternalPoints_ = number_of_vertices();
+
+    timeCheck("Distribution performed");
+
+    Info<< nl << "Inserting distributed tessellation" << endl;
+
+    std::vector<Point> pointsToInsert;
+
+    forAll(cellVertices, cI)
+    {
+        forAll(cellVertices[cI], cVPI)
+        {
+            pointsToInsert.push_back(toPoint(cellVertices[cI][cVPI]));
+        }
+    }
+
+    insertPoints(pointsToInsert);
+
+    Pout<< "number_of_vertices() after distribution "
+        << label(number_of_vertices()) << endl;
+
+    if(cvMeshControls().objOutput())
+    {
+        writePoints("distributedPoints.obj", true);
+    }
+
+    timeCheck("After distribute");
 }
 
 
@@ -1266,7 +1377,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         );
     }
 
-    createFeaturePoints();
+    // createFeaturePoints();
 
     if (cvMeshControls().objOutput())
     {
@@ -1274,6 +1385,10 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     }
 
     insertInitialPoints();
+
+    distribute();
+
+    createFeaturePoints();
 
     buildSurfaceConformation(rmCoarse);
 
@@ -1672,6 +1787,38 @@ void Foam::conformalVoronoiMesh::move()
         << endl;
 
     timeCheck("Updated sizes and alignments (if required), end of move");
+}
+
+
+bool Foam::conformalVoronoiMesh::positionOnThisProc
+(
+    const Foam::point& pt
+) const
+{
+    if (Pstream::parRun())
+    {
+        return decomposition_().positionInThisDomain(pt);
+    }
+
+    return true;
+}
+
+
+Foam::label Foam::conformalVoronoiMesh::positionProc
+(
+    const Foam::point& pt
+) const
+{
+    Pout<< "Dummy positionProc" << endl;
+
+    if (!Pstream::parRun())
+    {
+        return -1;
+    }
+    else
+    {
+        return Pstream::myProcNo();
+    }
 }
 
 

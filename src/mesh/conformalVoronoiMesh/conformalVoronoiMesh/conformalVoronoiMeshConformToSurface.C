@@ -446,43 +446,43 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAnyIntersection
         Foam::point dE0 = topoint(dual(fit->first));
         Foam::point dE1 = topoint(dual(fit->first->neighbor(fit->second)));
 
-        if (Pstream::parRun())
-        {
-            const treeBoundBoxList& procBbs =
-                geometryToConformTo_.processorDomains()[Pstream::myProcNo()];
+        // if (Pstream::parRun())
+        // {
+        //     const treeBoundBoxList& procBbs =
+        //         geometryToConformTo_.processorDomains()[Pstream::myProcNo()];
 
-            forAll(procBbs, pBI)
-            {
-                const treeBoundBox& procBb = procBbs[pBI];
+        //     forAll(procBbs, pBI)
+        //     {
+        //         const treeBoundBox& procBb = procBbs[pBI];
 
-                Foam::point a = dE0;
-                Foam::point b = dE1;
+        //         Foam::point a = dE0;
+        //         Foam::point b = dE1;
 
-                bool inBox = clipLineToBox(a, b, procBb);
+        //         bool inBox = clipLineToBox(a, b, procBb);
 
-                // Check for the edge passing through a surface
-                if
-                (
-                    inBox
-                 && geometryToConformTo_.findSurfaceAnyIntersection(a, b)
-                )
-                {
-                    // Pout<< "# findSurfaceAnyIntersection" << endl;
-                    // meshTools::writeOBJ(Pout, a);
-                    // meshTools::writeOBJ(Pout, b);
-                    // Pout<< "l cr0 cr1" << endl;
+        //         // Check for the edge passing through a surface
+        //         if
+        //         (
+        //             inBox
+        //          && geometryToConformTo_.findSurfaceAnyIntersection(a, b)
+        //         )
+        //         {
+        //             // Pout<< "# findSurfaceAnyIntersection" << endl;
+        //             // meshTools::writeOBJ(Pout, a);
+        //             // meshTools::writeOBJ(Pout, b);
+        //             // Pout<< "l cr0 cr1" << endl;
 
-                    return true;
-                }
-            }
-        }
-        else
-        {
+        //             return true;
+        //         }
+        //     }
+        // }
+        // else
+        // {
             if (geometryToConformTo_.findSurfaceAnyIntersection(dE0, dE1))
             {
                 return true;
             }
-        }
+        // }
     }
 
     return false;
@@ -635,7 +635,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
 
     // Hard coded switch, can be turned on for debugging purposes and all
     // vertices will be referred to all processors.
-    bool allPointReferral = false;
+    bool allPointReferral = true;
 
     if (allPointReferral)
     {
@@ -1121,48 +1121,48 @@ void Foam::conformalVoronoiMesh::parallelInterfaceIntersection
         label closestHitProc = -1;
         scalar closestHitDistSqr = GREAT;
 
-        forAll(geometryToConformTo_.processorDomains(), procI)
-        {
-            if (procI == Pstream::myProcNo())
-            {
-                continue;
-            }
+        // forAll(geometryToConformTo_.processorDomains(), procI)
+        // {
+        //     if (procI == Pstream::myProcNo())
+        //     {
+        //         continue;
+        //     }
 
-            const treeBoundBoxList& procBbs =
-                geometryToConformTo_.processorDomains()[procI];
+        //     const treeBoundBoxList& procBbs =
+        //         geometryToConformTo_.processorDomains()[procI];
 
-            forAll(procBbs, pBI)
-            {
-                const treeBoundBox& procBb = procBbs[pBI];
+        //     forAll(procBbs, pBI)
+        //     {
+        //         const treeBoundBox& procBb = procBbs[pBI];
 
-                intersects = procBb.intersects(dE0, dE1, boxPt);
+        //         intersects = procBb.intersects(dE0, dE1, boxPt);
 
-                if (intersects)
-                {
-                    hitDistSqr = magSqr(vert - boxPt);
+        //         if (intersects)
+        //         {
+        //             hitDistSqr = magSqr(vert - boxPt);
 
-                    if (hitDistSqr < closestHitDistSqr)
-                    {
-                        closestHitProc = procI;
-                        closestHitDistSqr = hitDistSqr;
-                    }
-                }
+        //             if (hitDistSqr < closestHitDistSqr)
+        //             {
+        //                 closestHitProc = procI;
+        //                 closestHitDistSqr = hitDistSqr;
+        //             }
+        //         }
 
-                // Perform the query in the opposite direction
-                intersects = procBb.intersects(dE1, dE0, boxPt);
+        //         // Perform the query in the opposite direction
+        //         intersects = procBb.intersects(dE1, dE0, boxPt);
 
-                if (intersects)
-                {
-                    hitDistSqr = magSqr(vert - boxPt);
+        //         if (intersects)
+        //         {
+        //             hitDistSqr = magSqr(vert - boxPt);
 
-                    if (hitDistSqr < closestHitDistSqr)
-                    {
-                        closestHitProc = procI;
-                        closestHitDistSqr = hitDistSqr;
-                    }
-                }
-            }
-        }
+        //             if (hitDistSqr < closestHitDistSqr)
+        //             {
+        //                 closestHitProc = procI;
+        //                 closestHitDistSqr = hitDistSqr;
+        //             }
+        //         }
+        //     }
+        // }
 
         if (closestHitProc >= 0)
         {
@@ -1204,21 +1204,21 @@ void Foam::conformalVoronoiMesh::parallelInterfaceInfluence
         // Pout<< nl << "# circumradius " << sqrt(circumradiusSqr) << endl;
         // drawDelaunayCell(Pout, cit);
 
-        forAll(geometryToConformTo_.processorMeshBounds(), procI)
-        {
-            if (procI == Pstream::myProcNo())
-            {
-                continue;
-            }
+        // forAll(geometryToConformTo_.processorMeshBounds(), procI)
+        // {
+        //     if (procI == Pstream::myProcNo())
+        //     {
+        //         continue;
+        //     }
 
-            const treeBoundBox& procBb =
-                geometryToConformTo_.processorMeshBounds()[procI];
+        //     const treeBoundBox& procBb =
+        //         geometryToConformTo_.processorMeshBounds()[procI];
 
-            if (procBb.overlaps(circumcentre, circumradiusSqr))
-            {
-                toProc[procI] = true;
-            }
-        }
+        //     if (procBb.overlaps(circumcentre, circumradiusSqr))
+        //     {
+        //         toProc[procI] = true;
+        //     }
+        // }
     }
 }
 
@@ -1303,7 +1303,7 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
     if
     (
         surfHitLargest.hit()
-     && !geometryToConformTo_.positionOnThisProc(surfHitLargest.hitPoint())
+     && !positionOnThisProc(surfHitLargest.hitPoint())
     )
     {
         // A protrusion was identified, but not penetrating on this processor,
@@ -1400,7 +1400,7 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceIncursion
     if
     (
         surfHitLargest.hit()
-     && !geometryToConformTo_.positionOnThisProc(surfHitLargest.hitPoint())
+     && !positionOnThisProc(surfHitLargest.hitPoint())
     )
     {
         // A protrusion was identified, but not penetrating on this processor,
@@ -1757,7 +1757,7 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
 
         if (edHit.hit())
         {
-            if(!geometryToConformTo_.positionOnThisProc(edHit.hitPoint()))
+            if(!positionOnThisProc(edHit.hitPoint()))
             {
                 continue;
             }

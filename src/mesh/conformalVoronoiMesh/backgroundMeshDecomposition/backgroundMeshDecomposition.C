@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "backgroundMeshDecomposition.H"
-#include "zeroGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -40,21 +39,6 @@ defineTypeNameAndDebug(backgroundMeshDecomposition, 0);
 
 void Foam::backgroundMeshDecomposition::initialRefinement()
 {
-    //Read decomposePar dictionary
-    IOdictionary decomposeDict
-    (
-        IOobject
-        (
-            "decomposeParDict",
-            cvMesh_.time().system(),
-            cvMesh_.time(),
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE
-        )
-    );
-
-    scalar mergeDist = 1e-6*mesh_.bounds().mag();
-
     volScalarField cellWeights
     (
         IOobject
@@ -72,25 +56,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
 
     const conformationSurfaces& geometry = cvMesh_.geometryToConformTo();
 
-    // Decomposition
-    autoPtr<decompositionMethod> decomposerPtr
-    (
-        decompositionMethod::New(decomposeDict)
-    );
-
-    decompositionMethod& decomposer = decomposerPtr();
-
-    if (!decomposer.parallelAware())
-    {
-        FatalErrorIn
-        (
-            "void Foam::backgroundMeshDecomposition::initialRefinement() const"
-        )
-            << "You have selected decomposition method "
-            << decomposer.typeName
-            << " which is not parallel aware." << endl
-            << exit(FatalError);
-    }
+    decompositionMethod& decomposer = decomposerPtr_();
 
     hexRef8 meshCutter
     (
@@ -369,7 +335,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                 cellWeights
             );
 
-            fvMeshDistribute distributor(mesh_, mergeDist);
+            fvMeshDistribute distributor(mesh_, mergeDist_);
 
             autoPtr<mapDistributePolyMesh> mapDist =
                 distributor.distribute(newDecomp);
@@ -625,6 +591,88 @@ Foam::labelList Foam::backgroundMeshDecomposition::selectRefinementCells
 }
 
 
+void Foam::backgroundMeshDecomposition::buildPatchAndTree()
+{
+    primitivePatch tmpBoundaryFaces
+    (
+        SubList<face>
+        (
+            mesh_.faces(),
+            mesh_.nFaces() - mesh_.nInternalFaces(),
+            mesh_.nInternalFaces()
+        ),
+        mesh_.points()
+    );
+
+    boundaryFacesPtr_.reset
+    (
+        new bPatch
+        (
+            tmpBoundaryFaces.localFaces(),
+            tmpBoundaryFaces.localPoints()
+        )
+    );
+
+    // Overall bb
+    treeBoundBox overallBb(boundaryFacesPtr_().localPoints());
+
+    Random& rnd = cvMesh_.rndGen();
+
+    bFTreePtr_.reset
+    (
+        new indexedOctree<treeDataBPatch>
+        (
+            treeDataBPatch(false, boundaryFacesPtr_()),
+            overallBb.extend(rnd, 1e-4),
+            10, // maxLevel
+            10, // leafSize
+            3.0 // duplicity
+        )
+    );
+
+    if (debug)
+    {
+        OFstream fStr
+        (
+            cvMesh_.time().path()
+           /"backgroundMeshDecomposition_proc_"
+          + name(Pstream::myProcNo())
+          + "_boundaryFaces.obj"
+        );
+
+        const faceList& faces = boundaryFacesPtr_().localFaces();
+        const pointField& points = boundaryFacesPtr_().localPoints();
+
+        Map<label> foamToObj(points.size());
+
+        label vertI = 0;
+
+        forAll(faces, i)
+        {
+            const face& f = faces[i];
+
+            forAll(f, fPI)
+            {
+                if (foamToObj.insert(f[fPI], vertI))
+                {
+                    meshTools::writeOBJ(fStr, points[f[fPI]]);
+                    vertI++;
+                }
+            }
+
+            fStr<< 'f';
+
+            forAll(f, fPI)
+            {
+                fStr<< ' ' << foamToObj[f[fPI]] + 1;
+            }
+
+            fStr<< nl;
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
@@ -645,6 +693,21 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
             IOobject::MUST_READ
         )
     ),
+    boundaryFacesPtr_(),
+    bFTreePtr_(),
+    decomposeDict_
+    (
+        IOobject
+        (
+            "decomposeParDict",
+            cvMesh_.time().system(),
+            cvMesh_.time(),
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE
+        )
+    ),
+    decomposerPtr_(decompositionMethod::New(decomposeDict_)),
+    mergeDist_(1e-6*mesh_.bounds().mag()),
     spanScale_(readScalar(coeffsDict_.lookup("spanScale"))),
     minCellSizeLimit_
     (
@@ -667,9 +730,23 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
             << exit(FatalError);
     }
 
+    if (!decomposerPtr_().parallelAware())
+    {
+        FatalErrorIn
+        (
+            "void Foam::backgroundMeshDecomposition::initialRefinement() const"
+        )
+            << "You have selected decomposition method "
+            << decomposerPtr_().typeName
+            << " which is not parallel aware." << endl
+            << exit(FatalError);
+    }
+
     Info<< nl << "Building initial background mesh decomposition" << endl;
 
     initialRefinement();
+
+    buildPatchAndTree();
 }
 
 
@@ -681,17 +758,54 @@ Foam::backgroundMeshDecomposition::~backgroundMeshDecomposition()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::conformationSurfaces::positionOnThisProc(const point& pt) const
+Foam::autoPtr<Foam::mapDistributePolyMesh>
+Foam::backgroundMeshDecomposition::distribute
+(
+    volScalarField& cellWeights
+)
 {
+    if (debug)
+    {
+        const_cast<Time&>(mesh_.time())++;
+        cellWeights.write();
+        mesh_.write();
+    }
 
+    labelList newDecomp = decomposerPtr_().decompose
+    (
+        mesh_,
+        mesh_.cellCentres(),
+        cellWeights
+    );
+
+    fvMeshDistribute distributor(mesh_, mergeDist_);
+
+    autoPtr<mapDistributePolyMesh> mapDist =
+        distributor.distribute(newDecomp);
+
+    if (debug)
+    {
+        printMeshData(mesh_);
+
+        const_cast<Time&>(mesh_.time())++;
+        mesh_.write();
+        cellWeights.write();
+    }
+
+    buildPatchAndTree();
+
+    return mapDist;
 }
 
 
-Foam::label Foam::conformationSurfaces::positionProc(const point& pt) const
+bool Foam::backgroundMeshDecomposition::positionInThisDomain
+(
+    const point& pt
+) const
 {
-
-
-    return -1;
+    return
+        bFTreePtr_().getVolumeType(pt)
+     == indexedOctree<treeDataBPatch>::INSIDE;
 }
 
 

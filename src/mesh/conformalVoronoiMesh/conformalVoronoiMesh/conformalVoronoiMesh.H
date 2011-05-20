@@ -67,6 +67,7 @@ SourceFiles
 #include "cellSet.H"
 #include "wallPolyPatch.H"
 #include "processorPolyPatch.H"
+#include "zeroGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -81,7 +82,6 @@ class relaxationModel;
 class faceAreaWeightModel;
 
 class backgroundMeshDecomposition;
-
 
 /*---------------------------------------------------------------------------*\
                     Class conformalVoronoiMesh Declaration
@@ -371,6 +371,10 @@ private:
         //- Insert the initial points into the triangulation, based on the
         //  initialPointsMethod
         void insertInitialPoints();
+
+        //- In parallel redistribute the backgroundMeshDecomposition and
+        //- vertices to balance the number of vertices on each processor
+        void distribute();
 
         //- Store data for sizeAndAlignmentLocations_, storedSizes_ and
         //  storedAlignments_ and initialise the sizeAndAlignmentTreePtr_
@@ -785,6 +789,12 @@ public:
         //- Move the vertices according to the controller, re-conforming to the
         //  surface as required
         void move();
+
+        //- Check if the point is in the domain handled by this processor
+        bool positionOnThisProc(const Foam::point& pt) const;
+
+        //- Which processor's domain handles this point
+        label positionProc(const Foam::point& pt) const;
 
         //- Conversion functions between point (OpenFOAM) and Point (CGAL)
 

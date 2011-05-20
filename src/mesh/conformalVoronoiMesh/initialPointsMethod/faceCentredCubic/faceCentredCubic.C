@@ -58,7 +58,7 @@ faceCentredCubic::faceCentredCubic
 
 std::vector<Vb::Point> faceCentredCubic::initialPoints() const
 {
-    const boundBox& bb = cvMesh_.geometryToConformTo().bounds();
+    const boundBox& bb = cvMesh_.geometryToConformTo().globalBounds();
 
     scalar x0 = bb.min().x();
     scalar xR = bb.max().x() - x0;

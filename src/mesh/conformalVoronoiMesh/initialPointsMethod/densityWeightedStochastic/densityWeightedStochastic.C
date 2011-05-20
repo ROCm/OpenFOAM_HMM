@@ -66,7 +66,7 @@ densityWeightedStochastic::densityWeightedStochastic
 
 std::vector<Vb::Point> densityWeightedStochastic::initialPoints() const
 {
-    const boundBox& bb = cvMesh_.geometryToConformTo().bounds();
+    const boundBox& bb = cvMesh_.geometryToConformTo().globalBounds();
 
     Random& rndGen = cvMesh_.rndGen();
 

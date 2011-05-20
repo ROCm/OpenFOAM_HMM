@@ -771,7 +771,7 @@ Foam::label Foam::conformationSurfaces::findPatch(const point& pt) const
     findSurfaceNearest
     (
         pt,
-        spanMagSqr_,
+        sqr(GREAT),
         surfHit,
         hitSurface
     );

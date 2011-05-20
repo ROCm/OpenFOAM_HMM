@@ -66,12 +66,22 @@ SourceFiles
 #include "mapDistributePolyMesh.H"
 #include "globalIndex.H"
 #include "treeBoundBox.H"
-
+#include "primitivePatch.H"
+#include "face.H"
+#include "List.H"
+#include "pointField.H"
+#include "indexedOctree.H"
+#include "treeDataPrimitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+typedef treeDataPrimitivePatch<face, List, const pointField, point>
+    treeDataBPatch;
+
+typedef PrimitivePatch<face, List, const pointField, point> bPatch;
 
 /*---------------------------------------------------------------------------*\
                   Class backgroundMeshDecomposition Declaration
@@ -90,6 +100,22 @@ class backgroundMeshDecomposition
         //- Mesh stored on for this processor, specifiying the domain that it
         //  is responsible for.
         fvMesh mesh_;
+
+        //- Patch containing an independent representation of the surface of the
+        //  mesh of this processor
+        autoPtr<bPatch> boundaryFacesPtr_;
+
+        //- Search tree for the boundaryFaces_ patch
+        autoPtr<indexedOctree<treeDataBPatch> > bFTreePtr_;
+
+        //- Decomposition dictionary
+        IOdictionary decomposeDict_;
+
+        //- Decomposition method
+        autoPtr<decompositionMethod> decomposerPtr_;
+
+        //- merge distance required by fvMeshDistribute
+        scalar mergeDist_;
 
         //- Scale of a cell span vs cell size used to decide to refine a cell
         scalar spanScale_;
@@ -133,6 +159,9 @@ class backgroundMeshDecomposition
             volScalarField& cellWeights
         ) const;
 
+        //- Build the surface patch and search tree
+        void buildPatchAndTree();
+
         //- Disallow default bitwise copy construct
         backgroundMeshDecomposition(const backgroundMeshDecomposition&);
 
@@ -162,23 +191,20 @@ public:
 
     // Member Functions
 
-    void distribute() const;
+        //- Redistribute the background mesh based on a supplied weight field,
+        //  returning a map to use to redistribute vertices.
+        autoPtr<mapDistributePolyMesh> distribute
+        (
+            volScalarField& cellWeights
+        );
 
-    //- Check if the point is in the domain handled by this processor
-    bool positionOnThisProc(const point& pt) const;
-
-    //- Which processor's domain handles this point
-    label positionProc(const point& pt) const;
-
+        //- Is the given position inside the domain of this decomposition
+        bool positionInThisDomain(const point& pt) const;
 
         // Access
 
-        // Check
-
-        // Edit
-
-        // Write
-
+            //- Return access to the underlying mesh
+            inline const fvMesh& mesh() const;
 };
 
 

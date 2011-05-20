@@ -79,10 +79,7 @@ std::vector<Vb::Point> pointFile::initialPoints() const
 
     forAll(points, ptI)
     {
-        procPt[ptI] = cvMesh_.geometryToConformTo().positionOnThisProc
-        (
-            points[ptI]
-        );
+        procPt[ptI] = cvMesh_.positionOnThisProc(points[ptI]);
     }
 
     if (Pstream::parRun())
@@ -94,32 +91,6 @@ std::vector<Vb::Point> pointFile::initialPoints() const
         Pstream::gatherList(allProcPt);
 
         Pstream::scatterList(allProcPt);
-
-        // forAll(procPt, ptI)
-        // {
-        //     label nProcsTrue = 0;
-
-        //     forAll(allProcPt, procI)
-        //     {
-        //         if (allProcPt[procI][ptI])
-        //         {
-        //             nProcsTrue++;
-        //         }
-        //     }
-
-        //     if (nProcsTrue != 1)
-        //     {
-        //         Info<< points[ptI] << " " << nProcsTrue << " true" << endl;
-
-        //         if (nProcsTrue > 1)
-        //         {
-        //             forAll(allProcPt, procI)
-        //             {
-        //                 allProcPt[procI][ptI] = false;
-        //             }
-        //         }
-        //     }
-        // }
 
         forAll(procPt, ptI)
         {
