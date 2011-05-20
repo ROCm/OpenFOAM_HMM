@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -453,6 +453,7 @@ void Foam::createShellMesh::setRefinement
             label region0 = pointRegions_[eFaces[0]][fp0];
             label region1 = pointRegions_[eFaces[0]][fp1];
 
+            // Pick up points with correct normal
             if (layerI == 0)
             {
                 newF[0] = f[fp0];
@@ -467,6 +468,22 @@ void Foam::createShellMesh::setRefinement
                 newF[2] = addedPoints[nLayers*region1+layerI];
                 newF[3] = addedPoints[nLayers*region0+layerI];
             }
+
+            // Optionally rotate so e[0] is always 0th vertex. Note that
+            // this normally is automatically done by coupled face ordering
+            // but with NOORDERING we have to do it ourselves.
+            if (f[fp0] != e[0])
+            {
+                // rotate one back to get newF[1] (originating from e[0])
+                // into newF[0]
+                label v0 = newF[0];
+                for (label i = 0; i < newF.size()-1; i++)
+                {
+                    newF[i] = newF[newF.fcIndex(i)];
+                }
+                newF.last() = v0;
+            }
+
 
             label minCellI = addedCells[nLayers*eFaces[0]+layerI];
             label maxCellI;
@@ -569,6 +586,21 @@ void Foam::createShellMesh::setRefinement
                         newF[3] = addedPoints[nLayers*region0+layerI];
                     }
 
+
+                    // Optionally rotate so e[0] is always 0th vertex. Note that
+                    // this normally is automatically done by coupled face
+                    // ordering but with NOORDERING we have to do it ourselves.
+                    if (f[fp0] != e[0])
+                    {
+                        // rotate one back to get newF[1] (originating
+                        // from e[0]) into newF[0].
+                        label v0 = newF[0];
+                        for (label i = 0; i < newF.size()-1; i++)
+                        {
+                            newF[i] = newF[newF.fcIndex(i)];
+                        }
+                        newF.last() = v0;
+                    }
                     ////if (ePatches.size() == 0)
                     //{
                     //    Pout<< "Adding from MULTI face:"
