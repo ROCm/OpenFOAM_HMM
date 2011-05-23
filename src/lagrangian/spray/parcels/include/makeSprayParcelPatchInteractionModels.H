@@ -1,0 +1,92 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
+#ifndef makeSprayParcelPatchInteractionModels_H
+#define makeSprayParcelPatchInteractionModels_H
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "thermoPhysicsTypes.H"
+#include "KinematicCloud.H"
+
+#include "LocalInteraction.H"
+#include "Rebound.H"
+#include "StandardWallInteraction.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#define makeSprayPatchInteractionModels(ParcelType)                           \
+                                                                              \
+    makeSprayPatchInteractionModelThermoType                                  \
+    (                                                                         \
+        ParcelType,                                                           \
+        constGasThermoPhysics                                                 \
+    );                                                                        \
+                                                                              \
+    makeSprayPatchInteractionModelThermoType                                  \
+    (                                                                         \
+        ParcelType,                                                           \
+        gasThermoPhysics                                                      \
+    );                                                                        \
+                                                                              \
+    makeSprayPatchInteractionModelThermoType                                  \
+    (                                                                         \
+        ParcelType,                                                           \
+        icoPoly8ThermoPhysics                                                 \
+    );
+
+
+#define makeSprayPatchInteractionModelThermoType(ParcelType, ThermoType)      \
+                                                                              \
+    makePatchInteractionModel(KinematicCloud<ParcelType<ThermoType> >);       \
+                                                                              \
+    makePatchInteractionModelThermoType                                       \
+    (                                                                         \
+        LocalInteraction,                                                     \
+        KinematicCloud,                                                       \
+        ParcelType,                                                           \
+        ThermoType                                                            \
+    );                                                                        \
+    makePatchInteractionModelThermoType                                       \
+    (                                                                         \
+        Rebound,                                                              \
+        KinematicCloud,                                                       \
+        ParcelType,                                                           \
+        ThermoType                                                            \
+    );                                                                        \
+    makePatchInteractionModelThermoType                                       \
+    (                                                                         \
+        StandardWallInteraction,                                              \
+        KinematicCloud,                                                       \
+        ParcelType,                                                           \
+        ThermoType                                                            \
+    );
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //
