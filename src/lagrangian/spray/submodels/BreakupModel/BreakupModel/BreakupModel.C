@@ -1,0 +1,166 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
+#include "BreakupModel.H"
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::BreakupModel<CloudType>::BreakupModel
+(
+    CloudType& owner
+)
+:
+    SubModelBase<CloudType>(owner),
+    solveOscillationEq_(false),
+    y0_(0.0),
+    yDot0_(0.0),
+    TABComega_(0.0),
+    TABCmu_(0.0),
+    TABWeCrit_(0.0)
+{}
+
+
+template<class CloudType>
+Foam::BreakupModel<CloudType>::BreakupModel
+(
+    const BreakupModel<CloudType>& bum
+)
+:
+    SubModelBase<CloudType>(bum),
+    solveOscillationEq_(bum.solveOscillationEq_),
+    y0_(bum.y0_),
+    yDot0_(bum.yDot0_),
+    TABComega_(bum.TABComega_),
+    TABCmu_(bum.TABCmu_),
+    TABWeCrit_(bum.TABWeCrit_)
+{}
+
+
+template<class CloudType>
+Foam::BreakupModel<CloudType>::BreakupModel
+(
+    const dictionary& dict,
+    CloudType& owner,
+    const word& type
+)
+:
+    SubModelBase<CloudType>(owner, dict, type),
+    solveOscillationEq_(this->coeffDict().lookup("solveOscillationEq")),
+    y0_(0.0),
+    yDot0_(0.0),
+    TABComega_(0.0),
+    TABCmu_(0.0),
+    TABWeCrit_(0.0)
+{
+    if (solveOscillationEq_)
+    {
+        const dictionary TABcoeffsDict(this->coeffDict().subDict("TABCoeffs"));
+        y0_ = readScalar(TABcoeffsDict.lookup("y0"));
+        yDot0_ = readScalar(TABcoeffsDict.lookup("yDot0"));
+        TABComega_ = readScalar(TABcoeffsDict.lookup("Comega"));
+        TABCmu_ = readScalar(TABcoeffsDict.lookup("Cmu"));
+        TABWeCrit_ = readScalar(TABcoeffsDict.lookup("WeCrit"));
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::BreakupModel<CloudType>::~BreakupModel()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+bool Foam::BreakupModel<CloudType>::update
+(
+    const scalar dt,
+    const vector& g,
+    scalar& d,
+    scalar& tc,
+    scalar& ms,
+    scalar& nParticle,
+    scalar& KHindex,
+    scalar& y,
+    scalar& yDot,
+    const scalar d0,
+    const scalar rho,
+    const scalar mu,
+    const scalar sigma,
+    const vector& U,
+    const scalar rhoc,
+    const scalar muc,
+    const vector& Urel,
+    const scalar Urmag,
+    const scalar tMom,
+    const scalar averageParcelMass,
+    scalar& dChild,
+    scalar& massChild,
+    cachedRandom& rndGen
+) const
+{
+    notImplemented
+    (
+        "bool Foam::BreakupModel<CloudType>::update"
+        "("
+            "const scalar, "
+            "const vector&, "
+            "scalar&, "
+            "scalar&, "
+            "scalar&, "
+            "scalar&, "
+            "scalar&, "
+            "scalar&, "
+            "scalar&, "
+            "const scalar, "
+            "const scalar, "
+            "const scalar, "
+            "const scalar, "
+            "const vector&, "
+            "const scalar, "
+            "const scalar, "
+            "const vector&, "
+            "const scalar, "
+            "const scalar, "
+            "const scalar, "
+            "scalar&, "
+            "scalar&, "
+            "cachedRandom&"
+        ") const;"
+    );
+
+    return false;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "BreakupModelNew.C"
+
+// ************************************************************************* //
+

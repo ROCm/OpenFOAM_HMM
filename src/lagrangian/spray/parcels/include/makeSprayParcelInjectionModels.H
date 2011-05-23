@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,119 +28,30 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "thermoPhysicsTypes.H"
-#include "KinematicCloud.H"
-
 #include "ConeInjection.H"
-#include "ConeInjectionMP.H"
 #include "FieldActivatedInjection.H"
 #include "ManualInjection.H"
 #include "NoInjection.H"
 #include "PatchInjection.H"
-#include "UnitInjection.H"
-#include "CommonRailInjection.H"
-#include "MultiHoleInjection.H"
-//#include "ReactingLookupTableInjection.H"
+//#include "UnitInjection.H"
+//#include "CommonRailInjection.H"
+//#include "MultiHoleInjection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeSprayInjectionModels(ParcelType)                                  \
+#define makeSprayParcelInjectionModels(CloudType)                             \
                                                                               \
-    makeSprayInjectionModelThermoType                                         \
-    (                                                                         \
-        ParcelType,                                                           \
-        constGasThermoPhysics                                                 \
-    );                                                                        \
-                                                                              \
-    makeSprayInjectionModelThermoType                                         \
-    (                                                                         \
-        ParcelType,                                                           \
-        gasThermoPhysics                                                      \
-    );                                                                        \
-                                                                              \
-    makeSprayInjectionModelThermoType                                         \
-    (                                                                         \
-        ParcelType,                                                           \
-        icoPoly8ThermoPhysics                                                 \
-    );
+    makeInjectionModel(CloudType);                                            \
+    makeInjectionModelType(ConeInjection, CloudType);                         \
+    makeInjectionModelType(FieldActivatedInjection, CloudType);               \
+    makeInjectionModelType(ManualInjection, CloudType);                       \
+    makeInjectionModelType(NoInjection, CloudType);                           \
+    makeInjectionModelType(PatchInjection, CloudType);                        \
 
+//    makeSprayInjectionModelType(UnitInjection, CloudType);                    \
+//    makeSprayInjectionModelType(CommonRailInjection, CloudType);              \
+//    makeSprayInjectionModelType(MultiHoleInjection, CloudType);
 
-#define makeSprayInjectionModelThermoType(ParcelType, ThermoType)             \
-                                                                              \
-    makeInjectionModel(KinematicCloud<ParcelType<ThermoType> >);              \
-                                                                              \
-    makeInjectionModelThermoType                                              \
-    (                                                                         \
-        ConeInjection,                                                        \
-        KinematicCloud,                                                       \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-    makeInjectionModelThermoType                                              \
-    (                                                                         \
-        ConeInjectionMP,                                                      \
-        KinematicCloud,                                                       \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-    makeInjectionModelThermoType                                              \
-    (                                                                         \
-        FieldActivatedInjection,                                              \
-        KinematicCloud,                                                       \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-    makeInjectionModelThermoType                                              \
-    (                                                                         \
-        ManualInjection,                                                      \
-        KinematicCloud,                                                       \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-    makeInjectionModelThermoType                                              \
-    (                                                                         \
-        NoInjection,                                                          \
-        KinematicCloud,                                                       \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-    makeInjectionModelThermoType                                              \
-    (                                                                         \
-        PatchInjection,                                                       \
-        KinematicCloud,                                                       \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-    makeInjectionModelThermoType                                              \
-    (                                                                         \
-        CommonRailInjection,                                                  \
-        KinematicCloud,                                                       \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-    makeInjectionModelThermoType                                              \
-    (                                                                         \
-        MultiHoleInjection,                                                   \
-        KinematicCloud,                                                       \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-    makeInjectionModelThermoType                                              \
-    (                                                                         \
-        UnitInjection,                                                        \
-        KinematicCloud,                                                       \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );
-/*
-    makeInjectionModelThermoType                                              \
-    (                                                                         \
-        SprayLookupTableInjection,                                            \
-        KinematicCloud,                                                       \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );
-*/
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

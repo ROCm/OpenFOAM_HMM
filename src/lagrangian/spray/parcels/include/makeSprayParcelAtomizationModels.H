@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,59 +28,18 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "thermoPhysicsTypes.H"
-#include "SprayCloud.H"
-
 #include "NoAtomization.H"
 #include "BlobsSheetAtomization.H"
 #include "LISAAtomization.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeSprayAtomizationModels(ParcelType)                                \
+#define makeSprayParcelAtomizationModels(CloudType)                           \
                                                                               \
-    makeSprayAtomizationModelThermoType                                       \
-    (                                                                         \
-        ParcelType,                                                           \
-        constGasThermoPhysics                                                 \
-    );                                                                        \
-    makeSprayAtomizationModelThermoType                                       \
-    (                                                                         \
-        ParcelType,                                                           \
-        gasThermoPhysics                                                      \
-    );                                                                        \
-    makeSprayAtomizationModelThermoType                                       \
-    (                                                                         \
-        ParcelType,                                                           \
-        icoPoly8ThermoPhysics                                                 \
-    );
-
-#define makeSprayAtomizationModelThermoType(ParcelType, ThermoType)           \
-                                                                              \
-    makeAtomizationModel(SprayCloud<ParcelType<ThermoType> >);                \
-                                                                              \
-    makeAtomizationModelThermoType                                            \
-    (                                                                         \
-        NoAtomization,                                                        \
-        SprayCloud,                                                           \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-    makeAtomizationModelThermoType                                            \
-    (                                                                         \
-        BlobsSheetAtomization,                                                \
-        SprayCloud,                                                           \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-                                                                              \
-    makeAtomizationModelThermoType                                            \
-    (                                                                         \
-        LISAAtomization,                                                      \
-        SprayCloud,                                                           \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );
+    makeAtomizationModel(CloudType);                                          \
+    makeAtomizationModelType(NoAtomization, CloudType);                       \
+    makeAtomizationModelType(BlobsSheetAtomization, CloudType);               \
+    makeAtomizationModelType(LISAAtomization, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

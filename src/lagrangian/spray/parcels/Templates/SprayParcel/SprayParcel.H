@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,16 +25,14 @@ Class
     Foam::SprayParcel
 
 Description
-    Derived from ReacingParcel, with added functionality
-    for atomization and breakup
+    Reacing spray parcel, with added functionality for atomization and breakup
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef SprayParcel_H
 #define SprayParcel_H
 
-#include "ReactingParcel.H"
-#include "SprayCloud.H"
+#include "particle.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,13 +56,14 @@ Ostream& operator<<
 template<class ParcelType>
 class SprayParcel
 :
-    public ReactingParcel<ParcelType>
+    public ParcelType
 {
+
 protected:
 
-    // protected properties
+    // Protected data
 
-        // spray parcel properties
+        // Spray parcel properties
 
             //- initial droplet diameter
             scalar d0_;
@@ -99,66 +98,8 @@ protected:
             //- passive scalar (extra variable to be defined by user)
             scalar user_;
 
+
 public:
-
-    //- Class to hold reacting particle constant properties
-    class constantProperties
-    :
-        public ReactingParcel<ParcelType>::constantProperties
-    {
-    public:
-
-        //- Constructor
-        constantProperties(const dictionary& parentDict);
-   };
-
-
-    //- Class used to pass reacting tracking data to the trackToFace function
-    class trackData
-    :
-        public ReactingParcel<ParcelType>::trackData
-    {
-
-        // Private data
-
-            //- Reference to the cloud containing this particle
-            SprayCloud<ParcelType>& cloud_;
-
-            //- Particle constant properties
-            const constantProperties& constProps_;
-
-    public:
-
-        typedef SprayCloud<ParcelType> cloudType;
-
-
-        // Constructors
-
-            //- Construct from components
-            inline trackData
-            (
-                SprayCloud<ParcelType>& cloud,
-                const constantProperties& constProps,
-                const interpolation<scalar>& rhoInterp,
-                const interpolation<vector>& UInterp,
-                const interpolation<scalar>& muInterp,
-                const interpolation<scalar>& TInterp,
-                const interpolation<scalar>& CpInterp,
-                const interpolation<scalar>& pInterp,
-                const vector& g
-            );
-
-
-        // Member functions
-
-            //- Return access to the owner cloud
-            inline SprayCloud<ParcelType>& cloud();
-
-            //- Return const access to the constant properties
-            inline const constantProperties& constProps() const;
-
-    };
-
 
     // Static data members
 
@@ -169,97 +110,141 @@ public:
         TypeName("SprayParcel");
 
 
-    friend class Cloud<ParcelType>;
-
-
     // Constructors
 
         //- Construct from owner, position, and cloud owner
         //  Other properties initialised as null
         inline SprayParcel
         (
-            SprayCloud<ParcelType>& owner,
+            const polyMesh& mesh,
             const vector& position,
-            const label cellI
+            const label cellI,
+            const label tetFaceI,
+            const label tetPtI
         );
 
         //- Construct from components
         inline SprayParcel
         (
-            SprayCloud<ParcelType>& owner,
+            const polyMesh& mesh,
             const vector& position,
             const label cellI,
+            const label tetFaceI,
+            const label tetPtI,
             const label typeId,
             const scalar nParticle0,
             const scalar d0,
+            const scalar dTarget0,
             const vector& U0,
+            const vector& f0,
+            const vector& angularMomentum0,
+            const vector& torque0,
             const scalarField& Y0,
-            const scalar& dInit,
-            const scalar& liquidCore,
-            const scalar& KHindex,
-            const scalar& y,
-            const scalar& yDot,
-            const scalar& tc,
-            const scalar& ms,
-            const scalar& injector,
-            const scalar& tMom,
-            const scalar& user,
-            const constantProperties& constProps
+            const scalar liquidCore,
+            const scalar KHindex,
+            const scalar y,
+            const scalar yDot,
+            const scalar tc,
+            const scalar ms,
+            const scalar injector,
+            const scalar tMom,
+            const scalar user,
+            const typename ParcelType::constantProperties& constProps
         );
 
         //- Construct from Istream
         SprayParcel
         (
-            const Cloud<ParcelType>& c,
+            const polyMesh& mesh,
             Istream& is,
             bool readFields = true
         );
 
         //- Construct as a copy
+        SprayParcel
+        (
+            const SprayParcel& p,
+            const polyMesh& mesh
+        );
+
+        //- Construct as a copy
         SprayParcel(const SprayParcel& p);
 
-        //- Construct and return a clone
-        autoPtr<SprayParcel> clone() const
+        //- Construct and return a (basic particle) clone
+        virtual autoPtr<particle> clone() const
         {
-            return autoPtr<SprayParcel>(new SprayParcel(*this));
+            return autoPtr<particle>(new SprayParcel<ParcelType>(*this));
         }
+
+        //- Construct and return a (basic particle) clone
+        virtual autoPtr<particle> clone(const polyMesh& mesh) const
+        {
+            return autoPtr<particle>
+            (
+                new SprayParcel<ParcelType>(*this, mesh)
+            );
+        }
+
+        //- Factory class to read-construct particles used for
+        //  parallel transfer
+        class iNew
+        {
+            const polyMesh& mesh_;
+
+        public:
+
+            iNew(const polyMesh& mesh)
+            :
+                mesh_(mesh)
+            {}
+
+            autoPtr<SprayParcel<ParcelType> > operator()(Istream& is) const
+            {
+                return autoPtr<SprayParcel<ParcelType> >
+                (
+                    new SprayParcel<ParcelType>(mesh_, is, true)
+                );
+            }
+        };
+
 
     // Member Functions
 
         // Access
 
             //- Return const access to initial droplet diameter
-            inline const scalar& d0() const;
+            inline scalar d0() const;
 
             //- Return const access to initial droplet position
             inline const vector& position0() const;
 
             //- Return const access to liquid core
-            inline const scalar& liquidCore() const;
+            inline scalar liquidCore() const;
 
             //- Return const access to Kelvin-Helmholtz breakup index
-            inline const scalar& KHindex() const;
+            inline scalar KHindex() const;
 
             //- Return const access to spherical deviation
-            inline const scalar& y() const;
+            inline scalar y() const;
 
             //- Return const access to rate of change of spherical deviation
-            inline const scalar& yDot() const;
+            inline scalar yDot() const;
 
             //- Return const access to atomization characteristic time
-            inline const scalar& tc() const;
+            inline scalar tc() const;
 
             //- Return const access to stripped parcel mass
-            inline const scalar& ms() const;
+            inline scalar ms() const;
 
             //- Return const access to injector id
-            inline const scalar& injector() const;
+            inline scalar injector() const;
 
             //- Return const access to momentum relaxation time
-            inline const scalar& tMom() const;
+            inline scalar tMom() const;
 
             //- Return const access to passive user scalar
-            inline const scalar& user() const;
+            inline scalar user() const;
+
 
         // Edit
 
@@ -358,7 +343,8 @@ public:
                 const label cellI
             );
 
-            //- Calculate the chi-factor for flash-boiling for the atomization model
+            //- Calculate the chi-factor for flash-boiling for the
+            //  atomization model
             template<class TrackData>
             scalar chi
             (
@@ -366,22 +352,40 @@ public:
                 const scalarField& X
             ) const;
 
-
             //- Solve the TAB equation
             template<class TrackData>
             void solveTABEq
             (
                 TrackData& td,
-                const scalar& dt
+                const scalar dt
             );
+
 
         // I-O
 
             //- Read
-            static void readFields(Cloud<ParcelType>& c);
+            template<class CloudType, class CompositionType>
+            static void readFields
+            (
+                CloudType& c,
+                const CompositionType& compModel
+            );
+
+            //- Read - no composition
+            template<class CloudType>
+            static void readFields(CloudType& c);
 
             //- Write
-            static void writeFields(const Cloud<ParcelType>& c);
+            template<class CloudType, class CompositionType>
+            static void writeFields
+            (
+                const CloudType& c,
+                const CompositionType& compModel
+            );
+
+            //- Write - composition supplied
+            template<class CloudType>
+            static void writeFields(const CloudType& c);
 
 
     // Ostream Operator

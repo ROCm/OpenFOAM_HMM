@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,60 +28,19 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "thermoPhysicsTypes.H"
-#include "SprayCloud.H"
-
 #include "NoCollision.H"
 #include "ORourkeCollision.H"
 #include "TrajectoryCollision.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeSprayCollisionModels(ParcelType)                                  \
+#define makeSprayParcelCollisionModels(CloudType)                             \
                                                                               \
-    makeSprayCollisionModelThermoType                                         \
-    (                                                                         \
-        ParcelType,                                                           \
-        constGasThermoPhysics                                                 \
-    );                                                                        \
-    makeSprayCollisionModelThermoType                                         \
-    (                                                                         \
-        ParcelType,                                                           \
-        gasThermoPhysics                                                      \
-    );                                                                        \
-    makeSprayCollisionModelThermoType                                         \
-    (                                                                         \
-        ParcelType,                                                           \
-        icoPoly8ThermoPhysics                                                 \
-    );
+    makeCollisionModel(CloudType);                                            \
+    makeCollisionModelType(NoCollision, CloudType);                           \
+    makeCollisionModelType(ORourkeCollision, CloudType);                      \
+    makeCollisionModelType(TrajectoryCollision, CloudType);
 
-#define makeSprayCollisionModelThermoType(ParcelType, ThermoType)             \
-                                                                              \
-    makeCollisionModel(SprayCloud<ParcelType<ThermoType> >);                  \
-                                                                              \
-    makeCollisionModelThermoType                                              \
-    (                                                                         \
-        NoCollision,                                                          \
-        SprayCloud,                                                           \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-                                                                              \
-    makeCollisionModelThermoType                                              \
-    (                                                                         \
-        ORourkeCollision,                                                     \
-        SprayCloud,                                                           \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-                                                                              \
-    makeCollisionModelThermoType                                              \
-    (                                                                         \
-        TrajectoryCollision,                                                  \
-        SprayCloud,                                                           \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,15 +25,14 @@ Class
     Foam::SprayCloud
 
 Description
+    Templated base class for spray cloud
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef SprayCloud_H
 #define SprayCloud_H
 
-#include "ReactingCloud.H"
 #include "sprayCloud.H"
-#include "thermoPhysicsTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,25 +53,36 @@ class CollisionModel;
                       Class SprayCloud Declaration
 \*---------------------------------------------------------------------------*/
 
-
-template<class ParcelType>
+template<class CloudType>
 class SprayCloud
 :
-    public ReactingCloud<ParcelType>,
+    public CloudType,
     public sprayCloud
 {
-private:
-
-    //- Average parcel mass
-        scalar averageParcelMass_;
-
 public:
 
-    //- Type of thermodynamics the cloud was instantiated for
-        typedef typename ParcelType::thermoType thermoType;
+    // Public typedefs
+
+        //- Type of cloud this cloud was instantiated for
+        typedef CloudType cloudType;
+
+        //- Type of parcel the cloud was instantiated for
+        typedef typename CloudType::particleType parcelType;
+
+        //- Convenience typedef for this cloud type
+        typedef SprayCloud<CloudType> sprayCloudType;
 
 
 private:
+
+    // Private data
+
+        //- Cloud copy pointer
+        autoPtr<SprayCloud<CloudType> > cloudCopyPtr_;
+
+        //- Average parcel mass
+        scalar averageParcelMass_;
+
 
     // Private Member Functions
 
@@ -85,26 +95,33 @@ private:
 
 protected:
 
-        //- Parcel constant properties
-        typename ParcelType::constantProperties constProps_;
+    // Protected data
 
-        // Reference to the cloud sub-models
-            autoPtr<AtomizationModel<SprayCloud<ParcelType> > > atomizationModel_;
+        // References to the cloud sub-models
 
-            autoPtr<BreakupModel<SprayCloud<ParcelType> > > breakupModel_;
+            //- Atomization model
+            autoPtr<AtomizationModel<SprayCloud<CloudType> > >
+                atomizationModel_;
 
-            autoPtr<CollisionModel<SprayCloud<ParcelType> > > collisionModel_;
+            //- Break-up model
+            autoPtr<BreakupModel<SprayCloud<CloudType> > > breakupModel_;
+
+            //- Collision model
+            autoPtr<CollisionModel<SprayCloud<CloudType> > > collisionModel_;
+
+
+    // Protected Member Functions
+
+        // Initialisation
+
+            //- Set cloud sub-models
+            void setModels();
+
 
         // Cloud evolution functions
 
-            //- Pre-evolve
-            void preEvolve();
-
-            //- Evolve the cloud
-            void evolveCloud();
-
-            //- Post-evolve
-            void postEvolve();
+            //- Reset state of cloud
+            void cloudReset(SprayCloud<CloudType>& c);
 
 
 public:
@@ -118,68 +135,108 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const dimensionedVector& g,
-            basicThermo& thermo,
+            const SLGThermo& thermo,
             bool readFields = true
         );
+
+        //- Copy constructor with new name
+        SprayCloud(SprayCloud<CloudType>& c, const word& name);
+
+        //- Copy constructor with new name - creates bare cloud
+        SprayCloud
+        (
+            const fvMesh& mesh,
+            const word& name,
+            const SprayCloud<CloudType>& c
+        );
+
+
+        //- Construct and return clone based on (this) with new name
+        virtual autoPtr<Cloud<parcelType> > clone(const word& name)
+        {
+            return autoPtr<Cloud<parcelType> >
+            (
+                new SprayCloud(*this, name)
+            );
+        }
+
+        //- Construct and return bare clone based on (this) with new name
+        virtual autoPtr<Cloud<parcelType> > cloneBare(const word& name) const
+        {
+            return autoPtr<Cloud<parcelType> >
+            (
+                new SprayCloud(this->mesh(), name, *this)
+            );
+        }
 
 
     //- Destructor
     virtual ~SprayCloud();
 
 
-    //- Type of parcel the cloud was instantiated for
-    typedef ParcelType parcelType;
-
     // Member Functions
 
         // Access
 
-            //- Return the constant properties
-            inline const typename ParcelType::constantProperties&
-                constProps() const;
+            //- Return a reference to the cloud copy
+            inline const SprayCloud& cloudCopy() const;
+
+            //- Return const-access to the average parcel mass
+            inline scalar averageParcelMass() const;
+
+
+            // Sub-models
+
+                //- Return const-access to the atomization model
+                inline const AtomizationModel<SprayCloud<CloudType> >&
+                    atomization() const;
+
+                //- Return const-access to the breakup model
+                inline const BreakupModel<SprayCloud<CloudType> >&
+                    breakup() const;
+
+                //- Return const-access to the breakup model
+                inline const CollisionModel<SprayCloud<CloudType> >&
+                    collision() const;
+
 
         // Check
 
+            //- Calculate the liquid penetration for prc % of the mass
+            scalar liquidPenetration(const scalar& prc) const;
+
+            //- Calculate the diameter Dij
+            scalar D(const label i, const label j) const;
+
             //- Print cloud information
             void info() const;
+
 
         // Cloud evolution functions
 
             //- Check parcel properties
             void checkParcelProperties
             (
-                ParcelType& parcel,
+                parcelType& parcel,
                 const scalar lagrangianDt,
                 const bool fullyDescribed
             );
+
+            //- Store the current cloud state
+            void storeState();
+
+            //- Reset the current cloud to the previously stored state
+            void restoreState();
 
             //- Reset the spray source terms
             void resetSourceTerms();
 
             //- Evolve the spray (inject, move)
             void evolve();
+            //- Particle motion
 
-            //- Return const-access to the atomization model
-            inline const AtomizationModel<SprayCloud<ParcelType> >&
-                atomization() const;
-
-            //- Return const-access to the breakup model
-            inline const BreakupModel<SprayCloud<ParcelType> >&
-                breakup() const;
-
-            //- Return const-access to the breakup model
-            inline const CollisionModel<SprayCloud<ParcelType> >&
-                collision() const;
-
-            //- Return const-access to the average parcel mass
-            inline const scalar& averageParcelMass() const;
-
-            //- Calculate the diameter Dij
-            scalar D(const label i, const label j) const;
-
-            //- Calculate the liquid penetration for prc % of the mass
-            scalar liquidPenetration(const scalar& prc) const;
-
+            template<class TrackData>
+            void motion(TrackData& td);
 };
 
 

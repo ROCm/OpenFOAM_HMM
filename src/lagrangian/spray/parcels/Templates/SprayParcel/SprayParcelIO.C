@@ -30,18 +30,18 @@ License
 
 template <class ParcelType>
 Foam::string Foam::SprayParcel<ParcelType>::propHeader =
-    ReactingParcel<ParcelType>::propHeader
-        + " d0"
-        + " position0"
-        + " liquidCore"
-        + " KHindex"
-        + " y"
-        + " yDot"
-        + " tc"
-        + " ms"
-        + " injector"
-        + " tMom"
-        + " user";
+    ParcelType::propHeader
+  + " d0"
+  + " position0"
+  + " liquidCore"
+  + " KHindex"
+  + " y"
+  + " yDot"
+  + " tc"
+  + " ms"
+  + " injector"
+  + " tMom"
+  + " user";
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -49,12 +49,12 @@ Foam::string Foam::SprayParcel<ParcelType>::propHeader =
 template<class ParcelType>
 Foam::SprayParcel<ParcelType>::SprayParcel
 (
-    const Cloud<ParcelType>& cloud,
+    const polyMesh& mesh,
     Istream& is,
     bool readFields
 )
 :
-    ReactingParcel<ParcelType>(cloud, is, readFields),
+    ParcelType(mesh, is, readFields),
     d0_(0.0),
     position0_(vector::zero),
     liquidCore_(0.0),
@@ -109,7 +109,7 @@ Foam::SprayParcel<ParcelType>::SprayParcel
     (
         "SprayParcel<ParcelType>::SprayParcel"
         "("
-            "const Cloud<ParcelType>&, "
+            "const polyMesh, "
             "Istream&, "
             "bool"
         ")"
@@ -118,25 +118,46 @@ Foam::SprayParcel<ParcelType>::SprayParcel
 
 
 template<class ParcelType>
-void Foam::SprayParcel<ParcelType>::readFields(Cloud<ParcelType>& cIn)
+template<class CloudType>
+void Foam::SprayParcel<ParcelType>::readFields(CloudType& c)
 {
-    if (!cIn.size())
+    if (!c.size())
     {
         return;
     }
 
-    SprayCloud<ParcelType>& c =
-        dynamic_cast<SprayCloud<ParcelType>&>(cIn);
+    ParcelType::readFields(c);
+}
 
-    ReactingParcel<ParcelType>::readFields(c);
+
+template<class ParcelType>
+template<class CloudType, class CompositionType>
+void Foam::SprayParcel<ParcelType>::readFields
+(
+    CloudType& c,
+    const CompositionType& compModel
+)
+{
+    if (!c.size())
+    {
+        return;
+    }
+
+    ParcelType::readFields(c, compModel);
 
     IOField<scalar> d0(c.fieldIOobject("d0", IOobject::MUST_READ));
     c.checkFieldIOobject(c, d0);
 
-    IOField<vector> position0(c.fieldIOobject("position0", IOobject::MUST_READ));
+    IOField<vector> position0
+    (
+        c.fieldIOobject("position0", IOobject::MUST_READ)
+    );
     c.checkFieldIOobject(c, position0);
 
-    IOField<scalar> liquidCore(c.fieldIOobject("liquidCore", IOobject::MUST_READ));
+    IOField<scalar> liquidCore(c.fieldIOobject
+    (
+        "liquidCore", IOobject::MUST_READ)
+    );
     c.checkFieldIOobject(c, liquidCore);
 
     IOField<scalar> KHindex(c.fieldIOobject("KHindex", IOobject::MUST_READ));
@@ -164,7 +185,7 @@ void Foam::SprayParcel<ParcelType>::readFields(Cloud<ParcelType>& cIn)
     c.checkFieldIOobject(c, user);
 
     label i = 0;
-    forAllIter(typename Cloud<ParcelType>, c, iter)
+    forAllIter(typename Cloud<SprayParcel<ParcelType> >, c, iter)
     {
         SprayParcel<ParcelType>& p = iter();
         p.d0_ = d0[i];
@@ -184,32 +205,51 @@ void Foam::SprayParcel<ParcelType>::readFields(Cloud<ParcelType>& cIn)
 
 
 template<class ParcelType>
+template<class CloudType>
+void Foam::SprayParcel<ParcelType>::writeFields(const CloudType& c)
+{
+    ParcelType::writeFields(c);
+}
+
+
+template<class ParcelType>
+template<class CloudType, class CompositionType>
 void Foam::SprayParcel<ParcelType>::writeFields
 (
-    const Cloud<ParcelType>& cIn
+    const CloudType& c,
+    const CompositionType& compModel
 )
 {
-    const SprayCloud<ParcelType>& c =
-        dynamic_cast<const SprayCloud<ParcelType>&>(cIn);
-
-    ReactingParcel<ParcelType>::writeFields(c);
+    ParcelType::writeFields(c, compModel);
 
     label np = c.size();
 
     IOField<scalar> d0(c.fieldIOobject("d0", IOobject::NO_READ), np);
-    IOField<vector> position0(c.fieldIOobject("position0", IOobject::NO_READ), np);
-    IOField<scalar> liquidCore(c.fieldIOobject("liquidCore", IOobject::NO_READ), np);
+    IOField<vector> position0
+    (
+        c.fieldIOobject("position0", IOobject::NO_READ),
+        np
+    );
+    IOField<scalar> liquidCore
+    (
+        c.fieldIOobject("liquidCore", IOobject::NO_READ),
+        np
+    );
     IOField<scalar> KHindex(c.fieldIOobject("KHindex", IOobject::NO_READ), np);
     IOField<scalar> y(c.fieldIOobject("y", IOobject::NO_READ), np);
     IOField<scalar> yDot(c.fieldIOobject("yDot", IOobject::NO_READ), np);
     IOField<scalar> tc(c.fieldIOobject("tc", IOobject::NO_READ), np);
     IOField<scalar> ms(c.fieldIOobject("ms", IOobject::NO_READ), np);
-    IOField<scalar> injector(c.fieldIOobject("injector", IOobject::NO_READ), np);
+    IOField<scalar> injector
+    (
+        c.fieldIOobject("injector", IOobject::NO_READ),
+        np
+    );
     IOField<scalar> tMom(c.fieldIOobject("tMom", IOobject::NO_READ), np);
     IOField<scalar> user(c.fieldIOobject("user", IOobject::NO_READ), np);
 
     label i = 0;
-    forAllConstIter(typename Cloud<ParcelType>, c, iter)
+    forAllConstIter(typename Cloud<SprayParcel<ParcelType> >, c, iter)
     {
         const SprayParcel<ParcelType>& p = iter();
         d0[i] = p.d0_;
@@ -251,7 +291,7 @@ Foam::Ostream& Foam::operator<<
 {
     if (os.format() == IOstream::ASCII)
     {
-        os  << static_cast<const ReactingParcel<ParcelType>&>(p)
+        os  << static_cast<const ParcelType&>(p)
         << token::SPACE << p.d0()
         << token::SPACE << p.position0()
         << token::SPACE << p.liquidCore()
@@ -266,13 +306,21 @@ Foam::Ostream& Foam::operator<<
     }
     else
     {
-        os  << static_cast<const ReactingParcel<ParcelType>&>(p);
-    os.write
-    (
+        os  << static_cast<const ParcelType&>(p);
+        os.write
+        (
             reinterpret_cast<const char*>(&p.d0_),
-            sizeof(p.d0()) + sizeof(p.position0()) + sizeof(p.liquidCore()) + sizeof(p.KHindex())
-          + sizeof(p.y()) + sizeof(p.yDot()) + sizeof(p.tc()) + sizeof(p.ms())
-          + sizeof(p.injector()) + sizeof(p.tMom()) + sizeof(p.user())
+            sizeof(p.d0())
+          + sizeof(p.position0())
+          + sizeof(p.liquidCore())
+          + sizeof(p.KHindex())
+          + sizeof(p.y())
+          + sizeof(p.yDot())
+          + sizeof(p.tc())
+          + sizeof(p.ms())
+          + sizeof(p.injector())
+          + sizeof(p.tMom())
+          + sizeof(p.user())
         );
     }
 

@@ -25,35 +25,40 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class ParcelType>
-inline const typename ParcelType::constantProperties&
-Foam::SprayCloud<ParcelType>::constProps() const
+template<class CloudType>
+inline const Foam::SprayCloud<CloudType>&
+Foam::SprayCloud<CloudType>::cloudCopy() const
 {
-    return constProps_;
+    return cloudCopyPtr_();
 }
 
-template<class ParcelType>
-inline const Foam::AtomizationModel<Foam::SprayCloud<ParcelType> >& Foam::SprayCloud<ParcelType>::atomization() const
+
+template<class CloudType>
+inline const Foam::AtomizationModel<Foam::SprayCloud<CloudType> >&
+Foam::SprayCloud<CloudType>::atomization() const
 {
     return atomizationModel_;
 }
 
-template<class ParcelType>
-inline const Foam::BreakupModel<Foam::SprayCloud<ParcelType> >&
-Foam::SprayCloud<ParcelType>::breakup() const
+
+template<class CloudType>
+inline const Foam::BreakupModel<Foam::SprayCloud<CloudType> >&
+Foam::SprayCloud<CloudType>::breakup() const
 {
     return breakupModel_;
 }
 
-template<class ParcelType>
-inline const Foam::CollisionModel<Foam::SprayCloud<ParcelType> >&
-Foam::SprayCloud<ParcelType>::collision() const
+
+template<class CloudType>
+inline const Foam::CollisionModel<Foam::SprayCloud<CloudType> >&
+Foam::SprayCloud<CloudType>::collision() const
 {
     return collisionModel_;
 }
 
-template<class ParcelType>
-inline const Foam::scalar& Foam::SprayCloud<ParcelType>::averageParcelMass() const
+
+template<class CloudType>
+inline Foam::scalar Foam::SprayCloud<CloudType>::averageParcelMass() const
 {
     return averageParcelMass_;
 }

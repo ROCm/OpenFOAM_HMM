@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,96 +27,254 @@ License
 #include "AtomizationModel.H"
 #include "BreakupModel.H"
 #include "CollisionModel.H"
-#include "PtrList.H"
 
-template<class ParcelType>
-void Foam::SprayCloud<ParcelType>::preEvolve()
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+template<class CloudType>
+void Foam::SprayCloud<CloudType>::setModels()
 {
-    ReactingCloud<ParcelType>::preEvolve();
+    atomizationModel_.reset
+    (
+        AtomizationModel<SprayCloud<CloudType> >::New
+        (
+            this->subModelProperties(),
+            *this
+        ).ptr()
+    );
+
+    breakupModel_.reset
+    (
+        BreakupModel<SprayCloud<CloudType> >::New
+        (
+            this->subModelProperties(),
+            *this
+        ).ptr()
+    );
+
+    collisionModel_.reset
+    (
+        CollisionModel<SprayCloud<CloudType> >::New
+        (
+            this->subModelProperties(),
+            *this
+        ).ptr()
+    );
 }
 
 
-template<class ParcelType>
-void Foam::SprayCloud<ParcelType>::evolveCloud()
+template<class CloudType>
+void Foam::SprayCloud<CloudType>::cloudReset
+(
+    SprayCloud<CloudType>& c
+)
 {
-    const volScalarField& T = this->carrierThermo().T();
-    const volScalarField cp = this->carrierThermo().Cp();
-    const volScalarField& p = this->carrierThermo().p();
+    CloudType::cloudReset(c);
 
-    autoPtr<interpolation<scalar> > rhoInterp = interpolation<scalar>::New
+    atomizationModel_.reset(c.atomizationModel_.ptr());
+    breakupModel_.reset(c.breakupModel_.ptr());
+    collisionModel_.reset(c.collisionModel_.ptr());
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::SprayCloud<CloudType>::SprayCloud
+(
+    const word& cloudName,
+    const volScalarField& rho,
+    const volVectorField& U,
+    const dimensionedVector& g,
+    const SLGThermo& thermo,
+    bool readFields
+)
+:
+    CloudType(cloudName, rho, U, g, thermo, false),
+    sprayCloud(),
+    cloudCopyPtr_(NULL),
+    averageParcelMass_(this->injection().averageParcelMass()),
+    atomizationModel_
     (
-        this->interpolationSchemes(),
-        this->rho()
-    );
-
-    autoPtr<interpolation<vector> > UInterp = interpolation<vector>::New
+        AtomizationModel<SprayCloud<CloudType> >::New
+        (
+            this->particleProperties(),
+            *this
+        )
+    ),
+    breakupModel_
     (
-        this->interpolationSchemes(),
-        this->U()
-    );
-
-    autoPtr<interpolation<scalar> > muInterp = interpolation<scalar>::New
+        BreakupModel<SprayCloud<CloudType> >::New
+        (
+            this->particleProperties(),
+            *this
+        )
+    ),
+    collisionModel_
     (
-        this->interpolationSchemes(),
-        this->mu()
-    );
+        CollisionModel<SprayCloud<CloudType> >::New
+        (
+            this->particleProperties(),
+            *this
+        )
+    )
+{
+    if (this->solution().active())
+    {
+        setModels();
 
-    autoPtr<interpolation<scalar> > TInterp = interpolation<scalar>::New
-    (
-        this->interpolationSchemes(),
-        T
-    );
+        if (readFields)
+        {
+            parcelType::readFields(*this, this->composition());
+        }
+    }
 
-    autoPtr<interpolation<scalar> > cpInterp = interpolation<scalar>::New
-    (
-        this->interpolationSchemes(),
-        cp
-    );
-
-    autoPtr<interpolation<scalar> > pInterp = interpolation<scalar>::New
-    (
-        this->interpolationSchemes(),
-        p
-    );
-
-    typename ParcelType::trackData td
-    (
-        *this,
-        constProps_,
-        rhoInterp(),
-        UInterp(),
-        muInterp(),
-        TInterp(),
-        cpInterp(),
-        pInterp(),
-        this->g().value()
-    );
-
-    if (this->coupled())
+    if (this->solution().resetSourcesOnStartup())
     {
         resetSourceTerms();
     }
 
+    Info << "    Average parcel mass: " << averageParcelMass_ << endl;
+}
+
+
+template<class CloudType>
+Foam::SprayCloud<CloudType>::SprayCloud
+(
+    SprayCloud<CloudType>& c,
+    const word& name
+)
+:
+    CloudType(c, name),
+    sprayCloud(),
+    cloudCopyPtr_(NULL),
+    averageParcelMass_(c.averageParcelMass_),
+    atomizationModel_(c.atomizationModel_->clone()),
+    breakupModel_(c.breakupModel_->clone()),
+    collisionModel_(c.collisionModel_->clone())
+{}
+
+
+template<class CloudType>
+Foam::SprayCloud<CloudType>::SprayCloud
+(
+    const fvMesh& mesh,
+    const word& name,
+    const SprayCloud<CloudType>& c
+)
+:
+    CloudType(mesh, name, c),
+    sprayCloud(),
+    cloudCopyPtr_(NULL),
+    averageParcelMass_(0.0),
+    atomizationModel_(NULL),
+    breakupModel_(NULL),
+    collisionModel_(NULL)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::SprayCloud<CloudType>::~SprayCloud()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+void Foam::SprayCloud<CloudType>::checkParcelProperties
+(
+    parcelType& parcel,
+    const scalar lagrangianDt,
+    const bool fullyDescribed
+)
+{
+    CloudType::checkParcelProperties
+    (
+        parcel,
+        lagrangianDt,
+        fullyDescribed
+    );
+
+    const scalarField& Y(parcel.Y());
+    scalarField X(this->composition().liquids().X(Y));
+
+    // override rho and cp from constantProperties
+    parcel.Cp() = this->composition().liquids().Cp(parcel.pc(), parcel.T(), X);
+    parcel.rho() = this->composition().liquids().rho(parcel.pc(), parcel.T(), X);
+
+    // store the injection position and initial drop size
+    parcel.position0() = parcel.position();
+    parcel.d0() = parcel.d();
+
+    parcel.y() = breakup().y0();
+    parcel.yDot() = breakup().yDot0();
+}
+
+
+template<class CloudType>
+void Foam::SprayCloud<CloudType>::storeState()
+{
+    cloudCopyPtr_.reset
+    (
+        static_cast<SprayCloud<CloudType>*>
+        (
+            clone(this->name() + "Copy").ptr()
+        )
+    );
+}
+
+
+template<class CloudType>
+void Foam::SprayCloud<CloudType>::restoreState()
+{
+    cloudReset(cloudCopyPtr_());
+    cloudCopyPtr_.clear();
+}
+
+
+template<class CloudType>
+void Foam::SprayCloud<CloudType>::evolve()
+{
+    if (this->solution().canEvolve())
+    {
+        typename parcelType::template
+            TrackingData<SprayCloud<CloudType> > td(*this);
+
+        this->solve(td);
+    }
+}
+
+
+template<class CloudType>
+template<class TrackData>
+void Foam::SprayCloud<CloudType>::motion(TrackData& td)
+{
+    const scalar dt = this->solution().trackTime();
+
+    td.part() = TrackData::tpLinearTrack;
+    CloudType::move(td, dt);
+
+    this->updateCellOccupancy();
+
+
     if (collision().active())
     {
-
         label i = 0;
-        scalar dt = this->db().time().deltaTValue();
-        forAllIter(typename Cloud<ParcelType>, *this, iter)
+        forAllIter(typename SprayCloud<CloudType>, *this, iter)
         {
-
             label j = 0;
-            forAllIter(typename Cloud<ParcelType>, *this, jter)
+            forAllIter(typename SprayCloud<CloudType>, *this, jter)
             {
                 if (j > i)
                 {
-                    ParcelType& p = iter();
+                    parcelType& p = iter();
                     scalar Vi = this->mesh().V()[p.cell()];
                     scalarField X1(this->composition().liquids().X(p.Y()));
                     scalar sigma1 = this->composition().liquids().sigma(p.pc(), p.T(), X1);
                     scalar mp = p.mass()*p.nParticle();
 
-                    ParcelType& q = jter();
+                    parcelType& q = jter();
                     scalar Vj = this->mesh().V()[q.cell()];
                     scalarField X2(this->composition().liquids().X(q.Y()));
                     scalar sigma2 = this->composition().liquids().sigma(q.pc(), q.T(), X2);
@@ -158,8 +316,8 @@ void Foam::SprayCloud<ParcelType>::evolveCloud()
                         {
                             scalarField Xp(this->composition().liquids().X(p.Y()));
                             p.rho() = this->composition().liquids().rho(p.pc(), p.T(), Xp);
-                            p.cp() = this->composition().liquids().cp(p.pc(), p.T(), Xp);
-                            scalar rhs = 6.0*mp/(p.nParticle()*p.rho()*mathematicalConstant::pi);
+                            p.Cp() = this->composition().liquids().Cp(p.pc(), p.T(), Xp);
+                            scalar rhs = 6.0*mp/(p.nParticle()*p.rho()*constant::mathematical::pi);
                             p.d() = pow(rhs, 1.0/3.0);
                         }
 
@@ -167,140 +325,42 @@ void Foam::SprayCloud<ParcelType>::evolveCloud()
                         {
                             scalarField Xq(this->composition().liquids().X(q.Y()));
                             q.rho() = this->composition().liquids().rho(q.pc(), q.T(), Xq);
-                            q.cp() = this->composition().liquids().cp(q.pc(), q.T(), Xq);
-                            scalar rhs = 6.0*mq/(q.nParticle()*q.rho()*mathematicalConstant::pi);
+                            q.Cp() = this->composition().liquids().Cp(q.pc(), q.T(), Xq);
+                            scalar rhs = 6.0*mq/(q.nParticle()*q.rho()*constant::mathematical::pi);
                             q.d() = pow(rhs, 1.0/3.0);
                         }
-
                     }
                 }
                 j++;
             }
-
             i++;
         }
 
         // remove coalesced particles (diameter set to 0)
-        forAllIter(typename Cloud<ParcelType>, *this, iter)
+        forAllIter(typename SprayCloud<CloudType>, *this, iter)
         {
-            ParcelType& p = iter();
+            parcelType& p = iter();
             if (p.mass() < VSMALL)
             {
                 deleteParticle(p);
             }
         }
     }
-
-    Cloud<ParcelType>::move(td);
-    this->injection().inject(td);
 }
 
 
-template<class ParcelType>
-void Foam::SprayCloud<ParcelType>::postEvolve()
-{
-    ReactingCloud<ParcelType>::postEvolve();
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class ParcelType>
-Foam::SprayCloud<ParcelType>::SprayCloud
+template<class CloudType>
+Foam::scalar Foam::SprayCloud<CloudType>::D
 (
-    const word& cloudName,
-    const volScalarField& rho,
-    const volVectorField& U,
-    const dimensionedVector& g,
-    basicThermo& thermo,
-    bool readFields
-)
-:
-    ReactingCloud<ParcelType>(cloudName, rho, U, g, thermo, false),
-    sprayCloud(),
-    averageParcelMass_(this->injection().averageParcelMass()),
-    constProps_(this->particleProperties()),
-    atomizationModel_
-    (
-        AtomizationModel<SprayCloud<ParcelType> >::New
-        (
-            this->particleProperties(),
-            *this
-        )
-    ),
-    breakupModel_
-    (
-        BreakupModel<SprayCloud<ParcelType> >::New
-        (
-            this->particleProperties(),
-            *this
-        )
-    ),
-    collisionModel_
-    (
-        CollisionModel<SprayCloud<ParcelType> >::New
-        (
-            this->particleProperties(),
-            *this
-        )
-    )
-{
-    if (readFields)
-    {
-        ParcelType::readFields(*this);
-    }
-
-    Info << "    Average parcel mass: " << averageParcelMass_ << endl;
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class ParcelType>
-Foam::SprayCloud<ParcelType>::~SprayCloud()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class ParcelType>
-void Foam::SprayCloud<ParcelType>::checkParcelProperties
-(
-    ParcelType& parcel,
-    const scalar lagrangianDt,
-    const bool fullyDescribed
-)
-{
-    ReactingCloud<ParcelType>::checkParcelProperties
-    (
-        parcel,
-        lagrangianDt,
-        fullyDescribed
-    );
-
-    const scalarField& Y(parcel.Y());
-    scalarField X(this->composition().liquids().X(Y));
-
-    // override rho and cp from constantProperties
-    parcel.cp() = this->composition().liquids().cp(parcel.pc(), parcel.T(), X);
-    parcel.rho() = this->composition().liquids().rho(parcel.pc(), parcel.T(), X);
-
-    // store the injection position and initial drop size
-    parcel.position0() = parcel.position();
-    parcel.d0() = parcel.d();
-
-    parcel.y() = breakup().y0();
-    parcel.yDot() = breakup().yDot0();
-}
-
-template<class ParcelType>
-Foam::scalar Foam::SprayCloud<ParcelType>::D(const label i, const label j) const
+    const label i,
+    const label j
+) const
 {
     scalar si = 0.0;
     scalar sj = 0.0;
-    forAllConstIter(typename Cloud<ParcelType>, *this, iter)
+    forAllConstIter(typename SprayCloud<CloudType>, *this, iter)
     {
-        const ParcelType& p = iter();
+        const parcelType& p = iter();
         si += p.nParticle()*pow(p.d(), i);
         sj += p.nParticle()*pow(p.d(), j);
     }
@@ -313,30 +373,32 @@ Foam::scalar Foam::SprayCloud<ParcelType>::D(const label i, const label j) const
 }
 
 
-template<class ParcelType>
-Foam::scalar Foam::SprayCloud<ParcelType>::liquidPenetration(const scalar& prc) const
+template<class CloudType>
+Foam::scalar Foam::SprayCloud<CloudType>::liquidPenetration
+(
+    const scalar& prc
+) const
 {
-
     scalar distance = 0.0;
     scalar mTot = 0.0;
 
-    label Np = this->size();
+    label np = this->size();
 
     // arrays containing the parcels mass and
     // distance from injector in ascending order
-    scalarField mass(Np);
-    scalarField dist(Np);
+    scalarField mass(np);
+    scalarField dist(np);
 
-    if (Np > 0)
+    if (np > 0)
     {
         label n = 0;
 
         // first arrange the parcels in ascending order
         // the first parcel is closest to its injection position
         // and the last one is most far away.
-        forAllConstIter(typename Cloud<ParcelType>, *this, iter)
+        forAllConstIter(typename SprayCloud<CloudType>, *this, iter)
         {
-            const ParcelType& p = iter();
+            const parcelType& p = iter();
             scalar mi = p.nParticle()*p.mass();
             scalar di = mag(p.position() - p.position0());
             mTot += mi;
@@ -350,12 +412,12 @@ Foam::scalar Foam::SprayCloud<ParcelType>::liquidPenetration(const scalar& prc) 
 
             // insert the parcel in the correct place
             // and move the others
-            while ( ( i < n ) && ( !found ) )
+            while (( i < n ) && (!found))
             {
                 if (di < dist[i])
                 {
                     found = true;
-                    for(label j=n; j>i; j--)
+                    for (label j=n; j>i; j--)
                     {
                         mass[j] = mass[j-1];
                         dist[j] = dist[j-1];
@@ -371,32 +433,33 @@ Foam::scalar Foam::SprayCloud<ParcelType>::liquidPenetration(const scalar& prc) 
 
     reduce(mTot, sumOp<scalar>());
 
-    if (Np > 0)
+    if (np > 0)
     {
-
         scalar mLimit = prc*mTot;
         scalar mOff = (1.0 - prc)*mTot;
 
-        if (Np > 1)
+        if (np > 1)
         {
-
             // 'prc' is large enough that the parcel most far
             // away will be used, no need to loop...
-            if (mLimit > mTot - mass[Np-1])
+            if (mLimit > mTot - mass[np-1])
             {
-                distance = dist[Np-1];
+                distance = dist[np-1];
             }
             else
             {
                 scalar mOffSum = 0.0;
-                label i = Np;
+                label i = np;
 
                 while ((mOffSum < mOff) && (i>0))
                 {
                     i--;
                     mOffSum += mass[i];
                 }
-                distance = dist[i+1] + (dist[i]-dist[i+1])*(mOffSum - mOff)/mass[i+1] ;
+                distance =
+                    dist[i+1]
+                  + (dist[i] - dist[i+1])*(mOffSum - mOff)
+                   /mass[i+1] ;
             }
         }
         else
@@ -410,35 +473,12 @@ Foam::scalar Foam::SprayCloud<ParcelType>::liquidPenetration(const scalar& prc) 
     return distance;
 }
 
-template<class ParcelType>
-void Foam::SprayCloud<ParcelType>::resetSourceTerms()
+
+template<class CloudType>
+void Foam::SprayCloud<CloudType>::info() const
 {
-    ReactingCloud<ParcelType>::resetSourceTerms();
-}
-
-
-template<class ParcelType>
-void Foam::SprayCloud<ParcelType>::evolve()
-{
-    if (this->active())
-    {
-        preEvolve();
-
-        evolveCloud();
-
-        postEvolve();
-
-        info();
-        Info<< endl;
-    }
-}
-
-
-template<class ParcelType>
-void Foam::SprayCloud<ParcelType>::info() const
-{
-    ReactingCloud<ParcelType>::info();
-    scalar d32 = 1.0e+6*D(3,2);
+    CloudType::info();
+    scalar d32 = 1.0e+6*D(3, 2);
     scalar pen = liquidPenetration(0.95);
 
     Info << "    D32 (mu)                        = " << d32 << endl;

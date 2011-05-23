@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,98 +28,27 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "thermoPhysicsTypes.H"
-#include "SprayCloud.H"
-
 #include "NoBreakup.H"
+#include "PilchErdman.H"
 #include "ReitzDiwakar.H"
 #include "ReitzKHRT.H"
 #include "TAB.H"
 #include "ETAB.H"
 #include "SHF.H"
-#include "PilchErdman.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeSprayBreakupModels(ParcelType)                                    \
+#define makeSprayParcelBreakupModels(CloudType)                               \
                                                                               \
-    makeSprayBreakupModelThermoType                                           \
-    (                                                                         \
-        ParcelType,                                                           \
-        constGasThermoPhysics                                                 \
-    );                                                                        \
-                                                                              \
-    makeSprayBreakupModelThermoType                                           \
-    (                                                                         \
-        ParcelType,                                                           \
-        gasThermoPhysics                                                      \
-    );                                                                        \
-                                                                              \
-    makeSprayBreakupModelThermoType                                           \
-    (                                                                         \
-        ParcelType,                                                           \
-        icoPoly8ThermoPhysics                                                 \
-    );
+    makeBreakupModel(CloudType)                                               \
+    makeBreakupModelType(NoBreakup, CloudType);                               \
+    makeBreakupModelType(PilchErdman, CloudType);                             \
+    makeBreakupModelType(ReitzDiwakar, CloudType);                            \
+    makeBreakupModelType(ReitzKHRT, CloudType);                               \
+    makeBreakupModelType(TAB, CloudType);                                     \
+    makeBreakupModelType(ETAB, CloudType);                                    \
+    makeBreakupModelType(SHF, CloudType);
 
-#define makeSprayBreakupModelThermoType(ParcelType, ThermoType)               \
-                                                                              \
-    makeBreakupModel(SprayCloud<ParcelType<ThermoType> >);                    \
-                                                                              \
-    makeBreakupModelThermoType                                                \
-    (                                                                         \
-        NoBreakup,                                                            \
-        SprayCloud,                                                           \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-                                                                              \
-    makeBreakupModelThermoType                                                \
-    (                                                                         \
-        PilchErdman,                                                          \
-        SprayCloud,                                                           \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-                                                                              \
-    makeBreakupModelThermoType                                                \
-    (                                                                         \
-        SHF,                                                                  \
-        SprayCloud,                                                           \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-                                                                              \
-    makeBreakupModelThermoType                                                \
-    (                                                                         \
-        ETAB,                                                                 \
-        SprayCloud,                                                           \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-                                                                              \
-    makeBreakupModelThermoType                                                \
-    (                                                                         \
-        TAB,                                                                  \
-        SprayCloud,                                                           \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-                                                                              \
-    makeBreakupModelThermoType                                                \
-    (                                                                         \
-        ReitzKHRT,                                                            \
-        SprayCloud,                                                           \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-                                                                              \
-    makeBreakupModelThermoType                                                \
-    (                                                                         \
-        ReitzDiwakar,                                                         \
-        SprayCloud,                                                           \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
