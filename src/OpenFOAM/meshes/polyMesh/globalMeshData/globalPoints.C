@@ -613,80 +613,83 @@ void Foam::globalPoints::receivePatchPoints
                 label meshPointA = meshPoints[i];
                 label meshPointB = coupledMeshPoints[i];
 
-                //Pout<< "Connection between point " << meshPointA
-                //    << " at " << mesh_.points()[meshPointA]
-                //    << " and " << meshPointB
-                //    << " at " << mesh_.points()[meshPointB] << endl;
-
-                label localA = meshToLocalPoint
-                (
-                    meshToPatchPoint,
-                    meshPointA
-                );
-                label localB = meshToLocalPoint
-                (
-                    meshToPatchPoint,
-                    meshPointB
-                );
-
-
-                // Do we have information on pointA?
-                Map<label>::iterator procPointA =
-                    meshToProcPoint_.find(localA);
-
-                labelPairList infoA;
-                if (procPointA != meshToProcPoint_.end())
+                if (meshPointA != meshPointB)
                 {
-                    infoA = addSendTransform
+                    //Pout<< "Connection between point " << meshPointA
+                    //    << " at " << mesh_.points()[meshPointA]
+                    //    << " and " << meshPointB
+                    //    << " at " << mesh_.points()[meshPointB] << endl;
+
+                    label localA = meshToLocalPoint
                     (
-                        cycPatch.index(),
-                        procPoints_[procPointA()]
+                        meshToPatchPoint,
+                        meshPointA
                     );
-                }
-
-                // Same for info on pointB
-                Map<label>::iterator procPointB =
-                    meshToProcPoint_.find(localB);
-
-                labelPairList infoB;
-                if (procPointB != meshToProcPoint_.end())
-                {
-                    infoB = addSendTransform
+                    label localB = meshToLocalPoint
                     (
-                        cycPatch.neighbPatchID(),
-                        procPoints_[procPointB()]
+                        meshToPatchPoint,
+                        meshPointB
                     );
-                }
 
 
-                if (infoA.size())
-                {
-                    if (mergeInfo(infoA, localB))
+                    // Do we have information on pointA?
+                    Map<label>::iterator procPointA =
+                        meshToProcPoint_.find(localA);
+
+                    labelPairList infoA;
+                    if (procPointA != meshToProcPoint_.end())
                     {
-                        //Pout<< "  Combined info at point "
-                        //    << mesh_.points()[meshPointB]
-                        //    << " now " << endl;
-                        //printProcPoints
-                        //(
-                        //    patchToMeshPoint,
-                        //    procPoints_[meshToProcPoint_[localB]]
-                        //);
-                        changedPoints.insert(localB);
+                        infoA = addSendTransform
+                        (
+                            cycPatch.index(),
+                            procPoints_[procPointA()]
+                        );
                     }
-                }
-                if (infoB.size())
-                {
-                    if (mergeInfo(infoB, localA))
+
+                    // Same for info on pointB
+                    Map<label>::iterator procPointB =
+                        meshToProcPoint_.find(localB);
+
+                    labelPairList infoB;
+                    if (procPointB != meshToProcPoint_.end())
                     {
-                        //Pout<< "  Combined info at point "
-                        //    << mesh_.points()[meshPointA]
-                        //    << " now " << endl;
-                        //printProcPoints
-                        //(
-                        //    patchToMeshPoint,
-                        //    procPoints_[meshToProcPoint_[localA]]
-                        //);
-                        changedPoints.insert(localA);
+                        infoB = addSendTransform
+                        (
+                            cycPatch.neighbPatchID(),
+                            procPoints_[procPointB()]
+                        );
+                    }
+
+
+                    if (infoA.size())
+                    {
+                        if (mergeInfo(infoA, localB))
+                        {
+                            //Pout<< "  Combined info at point "
+                            //    << mesh_.points()[meshPointB]
+                            //    << " now " << endl;
+                            //printProcPoints
+                            //(
+                            //    patchToMeshPoint,
+                            //    procPoints_[meshToProcPoint_[localB]]
+                            //);
+                            changedPoints.insert(localB);
+                        }
+                    }
+                    if (infoB.size())
+                    {
+                        if (mergeInfo(infoB, localA))
+                        {
+                            //Pout<< "  Combined info at point "
+                            //    << mesh_.points()[meshPointA]
+                            //    << " now " << endl;
+                            //printProcPoints
+                            //(
+                            //    patchToMeshPoint,
+                            //    procPoints_[meshToProcPoint_[localA]]
+                            //);
+                            changedPoints.insert(localA);
+                        }
                     }
                 }
             }
