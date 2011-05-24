@@ -26,7 +26,7 @@
 #
 # Description
 #     Example of fine tuning openmpi settings for OpenFOAM
-#     Sourced from OpenFOAM-<VERSION>/etc/settings.sh
+#     Sourced from OpenFOAM-<VERSION>/etc/config/settings.sh
 #
 #------------------------------------------------------------------------------
 
