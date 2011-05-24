@@ -22,7 +22,7 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     paraview3/cshrc
+#     config/paraview.csh
 #
 # Description
 #     Setup file for paraview-3.x

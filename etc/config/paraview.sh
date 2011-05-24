@@ -22,7 +22,7 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     paraview3/bashrc
+#     config/paraview.sh
 #
 # Description
 #     Setup file for paraview-3.x
@@ -112,7 +112,6 @@ then
 else
     unset PV_PLUGIN_PATH
 fi
-
 
 unset _foamParaviewEval
 unset cleaned cmake paraviewInstDir paraviewPython

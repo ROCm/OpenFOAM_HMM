@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -22,25 +22,27 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     paraview3/bashrc-EXAMPLE
+#     config/example/prefs.csh
 #
 # Description
-#     Example of chaining to the standard paraview3/bashrc with a
-#     different ParaView_VERSION
+#     Preset variables for the OpenFOAM configuration - C-Shell shell syntax.
 #
-# Note
-#     This file could be copied to a user or site location, but should never
-#     replace the default shipped version as this will cause an infinite loop
+#     The prefs.csh file will be sourced by the OpenFOAM etc/cshrc when it is
+#     found by foamEtcFile.
+#
+# See Also
+#     'foamEtcFile -help' or 'foamEtcFile -list' for information about the
+#     paths searched
 #
 #------------------------------------------------------------------------------
 
-#
-# Use other (shipped) bashrc with a different ParaView_VERSION
-#
+## Specify OpenFOAM ThirdParty compiler
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# set foamCompiler=ThirdParty
 
-foamFile=$($WM_PROJECT_DIR/bin/foamEtcFile -mode o apps/paraview3/bashrc 2>/dev/null)
-[ $? -eq 0 ] && . $foamFile ParaView_VERSION=3.9.0
+## Specify system openmpi
+## ~~~~~~~~~~~~~~~~~~~~~~
+# setenv WM_MPLIB SYSTEMOPENMPI
 
-unset foamFile
 
-# -----------------------------------------------------------------------------
+# ----------------------------------------------------------------- end-of-file

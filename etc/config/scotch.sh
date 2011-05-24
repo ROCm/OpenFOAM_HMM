@@ -22,27 +22,18 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     etc/prefs.sh
+#     config/scotch.sh
 #
 # Description
-#     Preset variables for the OpenFOAM configuration - POSIX shell syntax.
+#     Setup file for scotch include/libraries.
+#     Sourced during wmake process only.
 #
-#     The prefs.sh file will be sourced by the OpenFOAM etc/bashrc when it is
-#     found by foamEtcFile.
-#
-# See Also
-#     'foamEtcFile -help' or 'foamEtcFile -list' for information about the
-#     paths searched
-#
+# Note
+#     A csh version is not needed, since the values here are only sourced
+#     during the wmake process
 #------------------------------------------------------------------------------
 
-## Specify OpenFOAM ThirdParty compiler
-## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# foamCompiler=ThirdParty
+export SCOTCH_VERSION=scotch_5.1.11
+export SCOTCH_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$SCOTCH_VERSION
 
-## Specify system openmpi
-## ~~~~~~~~~~~~~~~~~~~~~~
-# export WM_MPLIB=SYSTEMOPENMPI
-
-
-# ----------------------------------------------------------------- end-of-file
+# -----------------------------------------------------------------------------
