@@ -6,10 +6,9 @@ cd ${0%/*} || exit 1    # run from this directory
 
 application=`getApplication`
 
+cp -r 0.org 0 > /dev/null 2>&1
 runApplication blockMesh
 runApplication $application
-compileApplication analyticalCylinder
-runApplication analyticalCylinder
 runApplication streamFunction
 
 # ----------------------------------------------------------------- end-of-file
