@@ -22,62 +22,100 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::NoCollision
+    Foam::TrajectoryCollision
 
 Description
-    Dummy collision model for 'none'
+    Trajectory collision model by N. Nordin.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef NoCollision_H
-#define NoCollision_H
+#ifndef TrajectoryCollision_H
+#define TrajectoryCollision_H
 
-#include "CollisionModel.H"
+#include "StochasticCollisionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                       Class NoCollision Declaration
+                       Class TrajectoryCollision Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class NoCollision
+class TrajectoryCollision
 :
-    public CollisionModel<CloudType>
+    public StochasticCollisionModel<CloudType>
 {
+private:
+
+    // Private data
+
+        scalar cSpace_;
+        scalar cTime_;
+        Switch coalescence_;
+
+
 public:
 
     //- Runtime type information
-    TypeName("none");
+    TypeName("trajectory");
 
 
     // Constructors
 
         //- Construct from dictionary
-        NoCollision(const dictionary& dict, CloudType& cloud);
+        TrajectoryCollision(const dictionary& dict, CloudType& cloud);
 
         //- Construct copy
-        NoCollision(const NoCollision<CloudType>& cm);
+        TrajectoryCollision(const TrajectoryCollision<CloudType>& cm);
 
         //- Construct and return a clone
-        virtual autoPtr<CollisionModel<CloudType> > clone() const
+        virtual autoPtr<StochasticCollisionModel<CloudType> > clone() const
         {
-            return autoPtr<CollisionModel<CloudType> >
+            return autoPtr<StochasticCollisionModel<CloudType> >
             (
-                new NoCollision<CloudType>(*this)
+                new TrajectoryCollision<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~NoCollision();
+    virtual ~TrajectoryCollision();
 
 
     // Member Functions
 
         virtual bool update
+        (
+            const scalar dt,
+            cachedRandom& rndGen,
+            vector& pos1,
+            scalar& m1,
+            scalar& d1,
+            scalar& N1,
+            vector& U,
+            scalar& rho1,
+            scalar& T1,
+            scalarField& Y1,
+            const scalar sigma1,
+            const label celli,
+            const scalar voli,
+            vector& pos2,
+            scalar& m2,
+            scalar& d2,
+            scalar& N2,
+            vector& U2,
+            scalar& rho2,
+            scalar& T2,
+            scalarField& Y2,
+            const scalar sigma2,
+            const label cellj,
+            const scalar volj
+        ) const;
+
+        // 1 is the larger drop and 2 is the smaller
+        bool collideSorted
         (
             const scalar dt,
             cachedRandom& rndGen,
@@ -114,7 +152,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "NoCollision.C"
+#   include "TrajectoryCollision.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

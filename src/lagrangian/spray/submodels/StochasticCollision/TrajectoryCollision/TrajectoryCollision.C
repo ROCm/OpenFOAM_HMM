@@ -34,7 +34,7 @@ Foam::TrajectoryCollision<CloudType>::TrajectoryCollision
     CloudType& owner
 )
 :
-    CollisionModel<CloudType>(dict, owner, typeName),
+    StochasticCollisionModel<CloudType>(dict, owner, typeName),
     cSpace_(readScalar(this->coeffDict().lookup("cSpace"))),
     cTime_(readScalar(this->coeffDict().lookup("cTime"))),
     coalescence_(this->coeffDict().lookup("coalescence"))
@@ -47,7 +47,7 @@ Foam::TrajectoryCollision<CloudType>::TrajectoryCollision
     const TrajectoryCollision<CloudType>& cm
 )
 :
-    CollisionModel<CloudType>(cm),
+    StochasticCollisionModel<CloudType>(cm),
     cSpace_(cm.cSpace_),
     cTime_(cm.cTime_),
     coalescence_(cm.coalescence_)

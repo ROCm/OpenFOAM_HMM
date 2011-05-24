@@ -47,7 +47,7 @@ template<class CloudType>
 class BreakupModel;
 
 template<class CloudType>
-class CollisionModel;
+class StochasticCollisionModel;
 
 /*---------------------------------------------------------------------------*\
                       Class SprayCloud Declaration
@@ -107,7 +107,8 @@ protected:
             autoPtr<BreakupModel<SprayCloud<CloudType> > > breakupModel_;
 
             //- Collision model
-            autoPtr<CollisionModel<SprayCloud<CloudType> > > collisionModel_;
+            autoPtr<StochasticCollisionModel<SprayCloud<CloudType> > >
+                stochasticCollisionModel_;
 
 
     // Protected Member Functions
@@ -196,8 +197,8 @@ public:
                     breakup() const;
 
                 //- Return const-access to the breakup model
-                inline const CollisionModel<SprayCloud<CloudType> >&
-                    collision() const;
+                inline const StochasticCollisionModel<SprayCloud<CloudType> >&
+                    stochasticCollision() const;
 
 
         // Check
@@ -227,9 +228,6 @@ public:
 
             //- Reset the current cloud to the previously stored state
             void restoreState();
-
-            //- Reset the spray source terms
-            void resetSourceTerms();
 
             //- Evolve the spray (inject, move)
             void evolve();

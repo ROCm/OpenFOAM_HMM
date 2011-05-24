@@ -28,7 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NoCollision.H"
+#include "NoStochasticCollision.H"
 #include "ORourkeCollision.H"
 #include "TrajectoryCollision.H"
 
@@ -36,10 +36,10 @@ License
 
 #define makeSprayParcelCollisionModels(CloudType)                             \
                                                                               \
-    makeCollisionModel(CloudType);                                            \
-    makeCollisionModelType(NoCollision, CloudType);                           \
-    makeCollisionModelType(ORourkeCollision, CloudType);                      \
-    makeCollisionModelType(TrajectoryCollision, CloudType);
+    makeStochasticCollisionModel(CloudType);                                  \
+    makeStochasticCollisionModelType(NoStochasticCollision, CloudType);       \
+    makeStochasticCollisionModelType(ORourkeCollision, CloudType);            \
+    makeStochasticCollisionModelType(TrajectoryCollision, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

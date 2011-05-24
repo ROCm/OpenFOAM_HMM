@@ -23,81 +23,78 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "NoAtomization.H"
+#include "NoStochasticCollision.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
-Foam::NoAtomization<CloudType>::NoAtomization
+template<class CloudType>
+Foam::NoStochasticCollision<CloudType>::NoStochasticCollision
 (
     const dictionary& dict,
     CloudType& owner
 )
 :
-    AtomizationModel<CloudType>(owner)
+    StochasticCollisionModel<CloudType>(owner)
 {}
 
 
-template <class CloudType>
-Foam::NoAtomization<CloudType>::NoAtomization
+template<class CloudType>
+Foam::NoStochasticCollision<CloudType>::NoStochasticCollision
 (
-    const NoAtomization<CloudType>& am
+    const NoStochasticCollision<CloudType>& cm
 )
 :
-    AtomizationModel<CloudType>(am)
+    StochasticCollisionModel<CloudType>(cm)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
-Foam::NoAtomization<CloudType>::~NoAtomization()
+template<class CloudType>
+Foam::NoStochasticCollision<CloudType>::~NoStochasticCollision()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::NoAtomization<CloudType>::active() const
+bool Foam::NoStochasticCollision<CloudType>::active() const
 {
     return false;
 }
 
 
 template<class CloudType>
-Foam::scalar Foam::NoAtomization<CloudType>::initLiquidCore() const
-{
-    return 0.0;
-}
-
-
-template<class CloudType>
-bool Foam::NoAtomization<CloudType>::calcChi() const
-{
-    return false;
-}
-
-
-template<class CloudType>
-void Foam::NoAtomization<CloudType>::update
+bool Foam::NoStochasticCollision<CloudType>::update
 (
     const scalar dt,
-    scalar& d,
-    scalar& liquidCore,
-    scalar& tc,
-    const scalar rho,
-    const scalar mu,
-    const scalar sigma,
-    const scalar volFlowRate,
-    const scalar rhoAv,
-    const scalar Urel,
-    const vector& pos,
-    const vector& injectionPos,
-    const scalar pAmbient,
-    const scalar chi,
-    cachedRandom& rndGen
+    cachedRandom& rndGen,
+    vector& pos1,
+    scalar& m1,
+    scalar& d1,
+    scalar& N1,
+    vector& U,
+    scalar& rho1,
+    scalar& T1,
+    scalarField& Y1,
+    const scalar sigma1,
+    const label celli,
+    const scalar voli,
+    vector& pos2,
+    scalar& m2,
+    scalar& d2,
+    scalar& N2,
+    vector& U2,
+    scalar& rho2,
+    scalar& T2,
+    scalarField& Y2,
+    const scalar sigma2,
+    const label cellj,
+    const scalar volj
 ) const
-{}
+{
+    return false;
+}
 
 
 // ************************************************************************* //

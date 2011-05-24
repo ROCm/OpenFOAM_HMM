@@ -39,6 +39,7 @@ License
 // Reacting
 #include "makeReactingParcelCompositionModels.H"
 #include "makeReactingParcelPhaseChangeModels.H"
+#include "makeReactingParcelSurfaceFilmModels.H"
 
 // Spray
 #include "makeSprayParcelAtomizationModels.H"
@@ -63,11 +64,12 @@ namespace Foam
     // Reacting sub-models
     makeReactingParcelCompositionModels(basicSprayCloud);
     makeReactingParcelPhaseChangeModels(basicSprayCloud);
+    makeReactingParcelSurfaceFilmModels(basicSprayCloud);
 
     // Spray sub-models
     makeSprayParcelAtomizationModels(basicSprayCloud);
     makeSprayParcelBreakupModels(basicSprayCloud);
-//    makeSprayParcelCollisionModels(basicSprayCloud);
+    makeSprayParcelCollisionModels(basicSprayCloud);
 };
 
 

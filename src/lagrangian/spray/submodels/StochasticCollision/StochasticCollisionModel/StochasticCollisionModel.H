@@ -22,19 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::CollisionModel
+    Foam::StochasticCollisionModel
 
 Description
-    Templated collision model class
+    Templated stochastic collision model class
 
 SourceFiles
-    CollisionModel.C
-    CollisionModelNew.C
+    StochasticCollisionModel.C
+    StochasticCollisionModelNew.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef CollisionModel_H
-#define CollisionModel_H
+#ifndef StochasticCollisionModel_H
+#define StochasticCollisionModel_H
 
 #include "IOdictionary.H"
 #include "autoPtr.H"
@@ -47,11 +47,11 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class CollisionModel Declaration
+                  Class StochasticCollisionModel Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class CollisionModel
+class StochasticCollisionModel
 :
     public SubModelBase<CloudType>
 {
@@ -64,7 +64,7 @@ public:
     declareRunTimeSelectionTable
     (
         autoPtr,
-        CollisionModel,
+        StochasticCollisionModel,
         dictionary,
         (
             const dictionary& dict,
@@ -77,10 +77,10 @@ public:
     // Constructors
 
         //- Construct null from owner
-        CollisionModel(CloudType& owner);
+        StochasticCollisionModel(CloudType& owner);
 
         //- Construct from dictionary
-        CollisionModel
+        StochasticCollisionModel
         (
             const dictionary& dict,
             CloudType& owner,
@@ -88,24 +88,24 @@ public:
         );
 
         //- Construct copy
-        CollisionModel(const CollisionModel<CloudType>& cm);
+        StochasticCollisionModel(const StochasticCollisionModel<CloudType>& cm);
 
         //- Construct and return a clone
-        virtual autoPtr<CollisionModel<CloudType> > clone() const
+        virtual autoPtr<StochasticCollisionModel<CloudType> > clone() const
         {
-            return autoPtr<CollisionModel<CloudType> >
+            return autoPtr<StochasticCollisionModel<CloudType> >
             (
-                new CollisionModel<CloudType>(*this)
+                new StochasticCollisionModel<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~CollisionModel();
+    virtual ~StochasticCollisionModel();
 
 
     //- Selector
-    static autoPtr<CollisionModel<CloudType> > New
+    static autoPtr<StochasticCollisionModel<CloudType> > New
     (
         const dictionary& dict,
         CloudType& owner
@@ -150,27 +150,27 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeCollisionModel(CloudType)                                         \
+#define makeStochasticCollisionModel(CloudType)                                         \
                                                                               \
     typedef CloudType::sprayCloudType sprayCloudType;                         \
     defineNamedTemplateTypeNameAndDebug                                       \
     (                                                                         \
-        CollisionModel<sprayCloudType>,                                       \
+        StochasticCollisionModel<sprayCloudType>,                             \
         0                                                                     \
     );                                                                        \
     defineTemplateRunTimeSelectionTable                                       \
     (                                                                         \
-        CollisionModel<sprayCloudType>,                                       \
+        StochasticCollisionModel<sprayCloudType>,                             \
         dictionary                                                            \
     );
 
 
-#define makeCollisionModelType(SS, CloudType)                                 \
+#define makeStochasticCollisionModelType(SS, CloudType)                       \
                                                                               \
     typedef CloudType::sprayCloudType sprayCloudType;                         \
     defineNamedTemplateTypeNameAndDebug(SS<sprayCloudType>, 0);               \
                                                                               \
-    CollisionModel<reactingCloudType>::                                       \
+    StochasticCollisionModel<sprayCloudType>::                                \
         adddictionaryConstructorToTable<SS<sprayCloudType> >                  \
             add##SS##CloudType##sprayCloudType##ConstructorToTable_;
 
@@ -179,7 +179,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "CollisionModel.C"
+#   include "StochasticCollisionModel.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

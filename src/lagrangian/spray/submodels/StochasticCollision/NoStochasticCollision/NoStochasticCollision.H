@@ -22,98 +22,65 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::ORourkeCollision
+    Foam::NoStochasticCollision
 
 Description
-    Collision model by P.J. O'Rourke.
-
+    Dummy collision model for 'none'
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ORourkeCollision_H
-#define ORourkeCollision_H
+#ifndef NoStochasticCollision_H
+#define NoStochasticCollision_H
 
-#include "CollisionModel.H"
+#include "StochasticCollisionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                       Class ORourkeCollision Declaration
+                       Class NoStochasticCollision Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class ORourkeCollision
+class NoStochasticCollision
 :
-    public CollisionModel<CloudType>
+    public StochasticCollisionModel<CloudType>
 {
-private:
-
-    dictionary coeffsDict_;
-    Switch coalescence_;
-
 public:
 
     //- Runtime type information
-    TypeName("ORourke");
+    TypeName("none");
 
 
     // Constructors
 
         //- Construct from dictionary
-        ORourkeCollision(const dictionary& dict, CloudType& cloud);
+        NoStochasticCollision(const dictionary& dict, CloudType& owner);
 
         //- Construct copy
-        ORourkeCollision(const ORourkeCollision<CloudType>& cm);
+        NoStochasticCollision(const NoStochasticCollision<CloudType>& cm);
 
         //- Construct and return a clone
-        virtual autoPtr<CollisionModel<CloudType> > clone() const
+        virtual autoPtr<StochasticCollisionModel<CloudType> > clone() const
         {
-            return autoPtr<CollisionModel<CloudType> >
+            return autoPtr<StochasticCollisionModel<CloudType> >
             (
-                new ORourkeCollision<CloudType>(*this)
+                new NoStochasticCollision<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~ORourkeCollision();
+    virtual ~NoStochasticCollision();
 
 
     // Member Functions
 
+        //- Flag to indicate whether model activates collision model
+        virtual bool active() const;
+
         virtual bool update
-        (
-            const scalar dt,
-            cachedRandom& rndGen,
-            vector& pos1,
-            scalar& m1,
-            scalar& d1,
-            scalar& N1,
-            vector& U,
-            scalar& rho1,
-            scalar& T1,
-            scalarField& Y1,
-            const scalar sigma1,
-            const label celli,
-            const scalar voli,
-            vector& pos2,
-            scalar& m2,
-            scalar& d2,
-            scalar& N2,
-            vector& U2,
-            scalar& rho2,
-            scalar& T2,
-            scalarField& Y2,
-            const scalar sigma2,
-            const label cellj,
-            const scalar volj
-        ) const;
-
-
-        // 1 is the larger drop and 2 is the smaller
-        bool collideSorted
         (
             const scalar dt,
             cachedRandom& rndGen,
@@ -150,7 +117,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "ORourkeCollision.C"
+#   include "NoStochasticCollision.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

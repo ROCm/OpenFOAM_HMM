@@ -34,7 +34,7 @@ Foam::ORourkeCollision<CloudType>::ORourkeCollision
     CloudType& owner
 )
 :
-    CollisionModel<CloudType>(dict, owner),
+    StochasticCollisionModel<CloudType>(dict, owner, typeName),
     coalescence_(this->coeffDict().lookup("coalescence"))
 {}
 
@@ -45,7 +45,7 @@ Foam::ORourkeCollision<CloudType>::ORourkeCollision
     const ORourkeCollision<CloudType>& cm
 )
 :
-    CollisionModel<CloudType>(cm),
+    StochasticCollisionModel<CloudType>(cm),
     coalescence_(cm.coalescence_)
 {}
 

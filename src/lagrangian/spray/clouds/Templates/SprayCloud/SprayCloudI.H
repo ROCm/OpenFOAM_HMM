@@ -50,10 +50,10 @@ Foam::SprayCloud<CloudType>::breakup() const
 
 
 template<class CloudType>
-inline const Foam::CollisionModel<Foam::SprayCloud<CloudType> >&
-Foam::SprayCloud<CloudType>::collision() const
+inline const Foam::StochasticCollisionModel<Foam::SprayCloud<CloudType> >&
+Foam::SprayCloud<CloudType>::stochasticCollision() const
 {
-    return collisionModel_;
+    return stochasticCollisionModel_;
 }
 
 

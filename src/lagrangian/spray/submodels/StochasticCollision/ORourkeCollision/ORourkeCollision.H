@@ -22,66 +22,63 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::TrajectoryCollision
+    Foam::ORourkeCollision
 
 Description
-    Trajectory collision model by N. Nordin.
+    Collision model by P.J. O'Rourke.
+
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef TrajectoryCollision_H
-#define TrajectoryCollision_H
+#ifndef ORourkeCollision_H
+#define ORourkeCollision_H
 
-#include "CollisionModel.H"
+#include "StochasticCollisionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                       Class TrajectoryCollision Declaration
+                       Class ORourkeCollision Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class TrajectoryCollision
+class ORourkeCollision
 :
-    public CollisionModel<CloudType>
+    public StochasticCollisionModel<CloudType>
 {
 private:
 
-    // Private data
-
-        scalar cSpace_;
-        scalar cTime_;
-        Switch coalescence_;
-
+    dictionary coeffsDict_;
+    Switch coalescence_;
 
 public:
 
     //- Runtime type information
-    TypeName("trajectory");
+    TypeName("ORourke");
 
 
     // Constructors
 
         //- Construct from dictionary
-        TrajectoryCollision(const dictionary& dict, CloudType& cloud);
+        ORourkeCollision(const dictionary& dict, CloudType& cloud);
 
         //- Construct copy
-        TrajectoryCollision(const TrajectoryCollision<CloudType>& cm);
+        ORourkeCollision(const ORourkeCollision<CloudType>& cm);
 
         //- Construct and return a clone
-        virtual autoPtr<CollisionModel<CloudType> > clone() const
+        virtual autoPtr<StochasticCollisionModel<CloudType> > clone() const
         {
-            return autoPtr<CollisionModel<CloudType> >
+            return autoPtr<StochasticCollisionModel<CloudType> >
             (
-                new TrajectoryCollision<CloudType>(*this)
+                new ORourkeCollision<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~TrajectoryCollision();
+    virtual ~ORourkeCollision();
 
 
     // Member Functions
@@ -113,6 +110,7 @@ public:
             const label cellj,
             const scalar volj
         ) const;
+
 
         // 1 is the larger drop and 2 is the smaller
         bool collideSorted
@@ -152,7 +150,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "TrajectoryCollision.C"
+#   include "ORourkeCollision.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

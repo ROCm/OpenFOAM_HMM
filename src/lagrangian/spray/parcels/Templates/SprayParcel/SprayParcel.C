@@ -210,6 +210,13 @@ void Foam::SprayParcel<ParcelType>::calcBreakup
     const CompositionModel<reactingCloudType>& composition =
         td.cloud().composition();
 
+    typedef typename TrackData::cloudType cloudType;
+    typedef typename cloudType::parcelType parcelType;
+    typedef typename cloudType::forceType forceType;
+
+    const parcelType& p = static_cast<const parcelType&>(*this);
+    const forceType& forces = td.cloud().forces();
+
     if (td.cloud().breakup().solveOscillationEq())
     {
         solveTABEq(td, dt);
@@ -233,11 +240,12 @@ void Foam::SprayParcel<ParcelType>::calcBreakup
     scalar muAv = this->muc();
     vector Urel = this->U() - this->Uc();
     scalar Urmag = mag(Urel);
-    scalar As = this->areaS(this->d());
-    scalar Re = rhoAv*Urmag*this->d()/muAv;
+    scalar Re = this->Re(this->U(), this->d(), rhoAv, muAv);
 
-    scalar utc = td.cloud().drag().utc(Re, this->d(), muAv) + ROOTVSMALL;
-    scalar tMom = 1.0/(As*utc);
+    const scalar mass = p.mass();
+    const forceSuSp Fcp = forces.calcCoupled(p, dt, mass, Re, muAv);
+    const forceSuSp Fncp = forces.calcNonCoupled(p, dt, mass, Re, muAv);
+    scalar tMom = 1.0/(Fcp.Sp() + Fncp.Sp());
 
     const vector g = td.cloud().g().value();
 
@@ -273,17 +281,20 @@ void Foam::SprayParcel<ParcelType>::calcBreakup
         )
     )
     {
-        scalar As = this->areaS(dChild);
         scalar Re = rhoAv*Urmag*dChild/muAv;
-        scalar utc = td.cloud().drag().utc(Re, dChild, muAv) + ROOTVSMALL;
         this->mass0() -= massChild;
 
         // Add child parcel as copy of parent
         SprayParcel<ParcelType>* child = new SprayParcel<ParcelType>(*this);
-        scalar massDrop = rho*constant::mathematical::pi*pow(dChild, 3.0)/6.0;
         child->mass0() = massChild;
         child->d() = dChild;
-        child->nParticle() = massChild/massDrop;
+        child->nParticle() = massChild/rho*this->volume(dChild);
+
+        const forceSuSp Fcp =
+            forces.calcCoupled(*child, dt, massChild, Re, muAv);
+        const forceSuSp Fncp =
+            forces.calcNonCoupled(*child, dt, massChild, Re, muAv);
+
         child->liquidCore() = 0.0;
         child->KHindex() = 1.0;
         child->y() = td.cloud().breakup().y0();
@@ -291,7 +302,7 @@ void Foam::SprayParcel<ParcelType>::calcBreakup
         child->tc() = -GREAT;
         child->ms() = 0.0;
         child->injector() = this->injector();
-        child->tMom() = 1.0/(As*utc);
+        child->tMom() = 1.0/(Fcp.Sp() + Fncp.Sp());
         child->user() = 0.0;
         child->setCellValues(td, dt, cellI);
 
@@ -322,7 +333,7 @@ Foam::scalar Foam::SprayParcel<ParcelType>::chi
     scalar p0 = this->pc();
     scalar pAmb = td.cloud().pAmbient();
 
-    scalar pv = composition.liquids().sigma(p0, T0, X);
+    scalar pv = composition.liquids().pv(p0, T0, X);
 
     forAll(composition.liquids(), i)
     {
@@ -377,16 +388,16 @@ void Foam::SprayParcel<ParcelType>::solveTABEq
     const scalar& TABWeCrit = td.cloud().breakup().TABWeCrit();
     const scalar& TABComega = td.cloud().breakup().TABComega();
 
-    scalar r = 0.5*this->d_;
+    scalar r = 0.5*this->d();
     scalar r2 = r*r;
     scalar r3 = r*r2;
 
     const scalarField& Y(this->Y());
     scalarField X(composition.liquids().X(Y));
 
-    scalar rho = composition.liquids().rho(this->pc_, this->T(), X);
-    scalar mu = composition.liquids().mu(this->pc_, this->T(), X);
-    scalar sigma = composition.liquids().sigma(this->pc_, this->T(), X);
+    scalar rho = composition.liquids().rho(this->pc(), this->T(), X);
+    scalar mu = composition.liquids().mu(this->pc(), this->T(), X);
+    scalar sigma = composition.liquids().sigma(this->pc(), this->T(), X);
 
     // inverse of characteristic viscous damping time
     scalar rtd = 0.5*TABCmu*mu/(rho*r2);
@@ -397,11 +408,8 @@ void Foam::SprayParcel<ParcelType>::solveTABEq
     if(omega2 > 0)
     {
         scalar omega = sqrt(omega2);
-        scalar rhoc = this->rhoc_; //spray_.rho()[p.cell()];
-        scalar We = rhoc*pow(mag(this->Uc_ - this->U()), 2.0)*r/sigma;
-
-        //scalar We = p.We(Ug, rhog, sigma);
-        scalar Wetmp = We/TABWeCrit;
+        scalar rhoc = this->rhoc();
+        scalar Wetmp = this->We(this->U(), r, rhoc, sigma)/TABWeCrit;
 
         scalar y1 = this->y() - Wetmp;
         scalar y2 = this->yDot()/omega;
@@ -435,12 +443,31 @@ void Foam::SprayParcel<ParcelType>::solveTABEq
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class ParcelType>
-Foam::SprayParcel<ParcelType>::SprayParcel
-(
-    const SprayParcel<ParcelType>& p
-)
+Foam::SprayParcel<ParcelType>::SprayParcel(const SprayParcel<ParcelType>& p)
 :
     ParcelType(p),
+    d0_(p.d0_),
+    position0_(p.position0_),
+    liquidCore_(p.liquidCore_),
+    KHindex_(p.KHindex_),
+    y_(p.y_),
+    yDot_(p.yDot_),
+    tc_(p.tc_),
+    ms_(p.ms_),
+    injector_(p.injector_),
+    tMom_(p.tMom_),
+    user_(p.user_)
+{}
+
+
+template <class ParcelType>
+Foam::SprayParcel<ParcelType>::SprayParcel
+(
+    const SprayParcel<ParcelType>& p,
+    const polyMesh& mesh
+)
+:
+    ParcelType(p, mesh),
     d0_(p.d0_),
     position0_(p.position0_),
     liquidCore_(p.liquidCore_),

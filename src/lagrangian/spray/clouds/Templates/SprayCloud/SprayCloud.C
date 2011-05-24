@@ -26,7 +26,7 @@ License
 #include "SprayCloud.H"
 #include "AtomizationModel.H"
 #include "BreakupModel.H"
-#include "CollisionModel.H"
+#include "StochasticCollisionModel.H"
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
@@ -51,9 +51,9 @@ void Foam::SprayCloud<CloudType>::setModels()
         ).ptr()
     );
 
-    collisionModel_.reset
+    stochasticCollisionModel_.reset
     (
-        CollisionModel<SprayCloud<CloudType> >::New
+        StochasticCollisionModel<SprayCloud<CloudType> >::New
         (
             this->subModelProperties(),
             *this
@@ -72,7 +72,7 @@ void Foam::SprayCloud<CloudType>::cloudReset
 
     atomizationModel_.reset(c.atomizationModel_.ptr());
     breakupModel_.reset(c.breakupModel_.ptr());
-    collisionModel_.reset(c.collisionModel_.ptr());
+    stochasticCollisionModel_.reset(c.stochasticCollisionModel_.ptr());
 }
 
 
@@ -92,45 +92,21 @@ Foam::SprayCloud<CloudType>::SprayCloud
     CloudType(cloudName, rho, U, g, thermo, false),
     sprayCloud(),
     cloudCopyPtr_(NULL),
-    averageParcelMass_(this->injection().averageParcelMass()),
-    atomizationModel_
-    (
-        AtomizationModel<SprayCloud<CloudType> >::New
-        (
-            this->particleProperties(),
-            *this
-        )
-    ),
-    breakupModel_
-    (
-        BreakupModel<SprayCloud<CloudType> >::New
-        (
-            this->particleProperties(),
-            *this
-        )
-    ),
-    collisionModel_
-    (
-        CollisionModel<SprayCloud<CloudType> >::New
-        (
-            this->particleProperties(),
-            *this
-        )
-    )
+    averageParcelMass_(0.0),
+    atomizationModel_(NULL),
+    breakupModel_(NULL),
+    stochasticCollisionModel_(NULL)
 {
     if (this->solution().active())
     {
         setModels();
 
+        averageParcelMass_ = this->injection().averageParcelMass();
+
         if (readFields)
         {
             parcelType::readFields(*this, this->composition());
         }
-    }
-
-    if (this->solution().resetSourcesOnStartup())
-    {
-        resetSourceTerms();
     }
 
     Info << "    Average parcel mass: " << averageParcelMass_ << endl;
@@ -150,7 +126,7 @@ Foam::SprayCloud<CloudType>::SprayCloud
     averageParcelMass_(c.averageParcelMass_),
     atomizationModel_(c.atomizationModel_->clone()),
     breakupModel_(c.breakupModel_->clone()),
-    collisionModel_(c.collisionModel_->clone())
+    stochasticCollisionModel_(c.stochasticCollisionModel_->clone())
 {}
 
 
@@ -168,7 +144,7 @@ Foam::SprayCloud<CloudType>::SprayCloud
     averageParcelMass_(0.0),
     atomizationModel_(NULL),
     breakupModel_(NULL),
-    collisionModel_(NULL)
+    stochasticCollisionModel_(NULL)
 {}
 
 
@@ -257,9 +233,10 @@ void Foam::SprayCloud<CloudType>::motion(TrackData& td)
 
     this->updateCellOccupancy();
 
-
-    if (collision().active())
+    if (stochasticCollision().active())
     {
+        const liquidMixtureProperties& liqMix = this->composition().liquids();
+
         label i = 0;
         forAllIter(typename SprayCloud<CloudType>, *this, iter)
         {
@@ -270,17 +247,17 @@ void Foam::SprayCloud<CloudType>::motion(TrackData& td)
                 {
                     parcelType& p = iter();
                     scalar Vi = this->mesh().V()[p.cell()];
-                    scalarField X1(this->composition().liquids().X(p.Y()));
-                    scalar sigma1 = this->composition().liquids().sigma(p.pc(), p.T(), X1);
+                    scalarField X1(liqMix.X(p.Y()));
+                    scalar sigma1 = liqMix.sigma(p.pc(), p.T(), X1);
                     scalar mp = p.mass()*p.nParticle();
 
                     parcelType& q = jter();
                     scalar Vj = this->mesh().V()[q.cell()];
-                    scalarField X2(this->composition().liquids().X(q.Y()));
-                    scalar sigma2 = this->composition().liquids().sigma(q.pc(), q.T(), X2);
+                    scalarField X2(liqMix.X(q.Y()));
+                    scalar sigma2 = liqMix.sigma(q.pc(), q.T(), X2);
                     scalar mq = q.mass()*q.nParticle();
 
-                    bool updateProperties = collision().update
+                    bool updateProperties = stochasticCollision().update
                     (
                         dt,
                         this->rndGen(),
@@ -314,18 +291,26 @@ void Foam::SprayCloud<CloudType>::motion(TrackData& td)
                     {
                         if (mp > VSMALL)
                         {
-                            scalarField Xp(this->composition().liquids().X(p.Y()));
-                            p.rho() = this->composition().liquids().rho(p.pc(), p.T(), Xp);
-                            p.Cp() = this->composition().liquids().Cp(p.pc(), p.T(), Xp);
-                            scalar rhs = 6.0*mp/(p.nParticle()*p.rho()*constant::mathematical::pi);
-                            p.d() = pow(rhs, 1.0/3.0);
+                            scalarField Xp(liqMix.X(p.Y()));
+                            p.rho() = liqMix.rho(p.pc(), p.T(), Xp);
+                            p.Cp() = liqMix.Cp(p.pc(), p.T(), Xp);
+                            p.d() =
+                                cbrt
+                                (
+                                    6.0*mp
+                                   /(
+                                        p.nParticle()
+                                       *p.rho()
+                                       *constant::mathematical::pi
+                                    )
+                                );
                         }
 
                         if (mq > VSMALL)
                         {
-                            scalarField Xq(this->composition().liquids().X(q.Y()));
-                            q.rho() = this->composition().liquids().rho(q.pc(), q.T(), Xq);
-                            q.Cp() = this->composition().liquids().Cp(q.pc(), q.T(), Xq);
+                            scalarField Xq(liqMix.X(q.Y()));
+                            q.rho() = liqMix.rho(q.pc(), q.T(), Xq);
+                            q.Cp() = liqMix.Cp(q.pc(), q.T(), Xq);
                             scalar rhs = 6.0*mq/(q.nParticle()*q.rho()*constant::mathematical::pi);
                             q.d() = pow(rhs, 1.0/3.0);
                         }

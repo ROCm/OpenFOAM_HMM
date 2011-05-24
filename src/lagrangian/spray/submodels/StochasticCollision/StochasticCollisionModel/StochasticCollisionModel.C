@@ -23,12 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "CollisionModel.H"
+#include "StochasticCollisionModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::CollisionModel<CloudType>::CollisionModel
+Foam::StochasticCollisionModel<CloudType>::StochasticCollisionModel
 (
     CloudType& owner
 )
@@ -38,9 +38,9 @@ Foam::CollisionModel<CloudType>::CollisionModel
 
 
 template<class CloudType>
-Foam::CollisionModel<CloudType>::CollisionModel
+Foam::StochasticCollisionModel<CloudType>::StochasticCollisionModel
 (
-    const CollisionModel<CloudType>& cm
+    const StochasticCollisionModel<CloudType>& cm
 )
 :
     SubModelBase<CloudType>(cm)
@@ -48,7 +48,7 @@ Foam::CollisionModel<CloudType>::CollisionModel
 
 
 template<class CloudType>
-Foam::CollisionModel<CloudType>::CollisionModel
+Foam::StochasticCollisionModel<CloudType>::StochasticCollisionModel
 (
     const dictionary& dict,
     CloudType& owner,
@@ -62,14 +62,14 @@ Foam::CollisionModel<CloudType>::CollisionModel
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::CollisionModel<CloudType>::~CollisionModel()
+Foam::StochasticCollisionModel<CloudType>::~StochasticCollisionModel()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::CollisionModel<CloudType>::update
+bool Foam::StochasticCollisionModel<CloudType>::update
 (
     const scalar dt,
     cachedRandom& rndGen,
@@ -99,7 +99,7 @@ bool Foam::CollisionModel<CloudType>::update
 {
     notImplemented
     (
-        "bool Foam::CollisionModel<CloudType>::update"
+        "bool Foam::StochasticCollisionModel<CloudType>::update"
         "("
             "const scalar, "
             "cachedRandom&, "
@@ -134,7 +134,7 @@ bool Foam::CollisionModel<CloudType>::update
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "CollisionModelNew.C"
+#include "StochasticCollisionModelNew.C"
 
 // ************************************************************************* //
 

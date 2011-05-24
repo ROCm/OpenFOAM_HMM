@@ -77,12 +77,14 @@ Foam::BreakupModel<CloudType>::BreakupModel
 {
     if (solveOscillationEq_)
     {
-        const dictionary TABcoeffsDict(this->coeffDict().subDict("TABCoeffs"));
-        y0_ = readScalar(TABcoeffsDict.lookup("y0"));
-        yDot0_ = readScalar(TABcoeffsDict.lookup("yDot0"));
-        TABComega_ = readScalar(TABcoeffsDict.lookup("Comega"));
-        TABCmu_ = readScalar(TABcoeffsDict.lookup("Cmu"));
-        TABWeCrit_ = readScalar(TABcoeffsDict.lookup("WeCrit"));
+        const dictionary TABcoeffsDict(dict.subDict("TABCoeffs"));
+        y0_ = TABcoeffsDict.template lookupOrDefault<scalar>("y0", 0.0);
+        yDot0_ = TABcoeffsDict.template lookupOrDefault<scalar>("yDot0", 0.0);
+        TABComega_ =
+            TABcoeffsDict.template lookupOrDefault<scalar>("Comega", 8.0);
+        TABCmu_ = TABcoeffsDict.template lookupOrDefault<scalar>("Cmu", 10.0);
+        TABWeCrit_ =
+            TABcoeffsDict.template lookupOrDefault<scalar>("WeCrit", 12.0);
     }
 }
 

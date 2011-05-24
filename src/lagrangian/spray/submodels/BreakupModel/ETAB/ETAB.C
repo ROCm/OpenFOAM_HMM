@@ -35,12 +35,22 @@ Foam::ETAB<CloudType>::ETAB
 )
 :
     BreakupModel<CloudType>(dict, owner, typeName),
-    Cmu_(readScalar(this->coeffDict().lookup("Cmu"))),
-    Comega_(readScalar(this->coeffDict().lookup("Comega"))),
-    k1_(readScalar(this->coeffDict().lookup("k1"))),
-    k2_(readScalar(this->coeffDict().lookup("k2"))),
-    WeCrit_(readScalar(this->coeffDict().lookup("WeCrit"))),
-    WeTransition_(readScalar(this->coeffDict().lookup("WeTransition"))),
+    Cmu_(this->coeffDict().template lookupOrDefault<scalar>("Cmu", 10.0)),
+    Comega_(this->coeffDict().template lookupOrDefault<scalar>("Comega", 8.0)),
+    k1_(this->coeffDict().template lookupOrDefault<scalar>("k1", 0.2)),
+    k2_(this->coeffDict().template lookupOrDefault<scalar>("k2", 0.2)),
+    WeCrit_
+(
+    this->coeffDict().template lookupOrDefault<scalar>("WeCrit", 12.0)
+),
+    WeTransition_
+    (
+        this->coeffDict().template lookupOrDefault<scalar>
+        (
+            "WeTransition",
+            100.0
+        )
+    ),
     AWe_(0.0)
 {
     scalar k21 = k2_/k1_;
