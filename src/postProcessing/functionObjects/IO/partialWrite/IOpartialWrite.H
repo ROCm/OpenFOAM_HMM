@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,25 +21,29 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Global
-    rhoEqn
+Typedef
+    Foam::IOpartialWrite
 
 Description
-    Solve the continuity for density.
+    Instance of the generic IOOutputFilter for partialWrite.
 
 \*---------------------------------------------------------------------------*/
 
-{
-    fvScalarMatrix rhoEqn
-    (
-        fvm::ddt(rho)
-      + fvc::div(phi)
-      ==
-        parcels.Srho(rho)
-      + massSource.SuTot()
-    );
+#ifndef IOpartialWrite_H
+#define IOpartialWrite_H
 
-    rhoEqn.solve();
+#include "partialWrite.H"
+#include "IOOutputFilter.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    typedef IOOutputFilter<partialWrite> IOpartialWrite;
 }
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

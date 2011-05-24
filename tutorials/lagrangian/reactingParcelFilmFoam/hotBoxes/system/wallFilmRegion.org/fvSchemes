@@ -42,6 +42,7 @@ gradSchemes
     snGradCorr(pp) Gauss linear;
     snGradCorr(pu) Gauss linear;
     grad(nHat)  Gauss linear;
+    grad(alpha) Gauss linear;
 }
 
 laplacianSchemes

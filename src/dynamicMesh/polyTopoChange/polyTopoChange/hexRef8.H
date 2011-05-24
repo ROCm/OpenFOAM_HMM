@@ -344,6 +344,11 @@ public:
 
         // Access
 
+            const polyMesh& mesh() const
+            {
+                return mesh_;
+            }
+
             const labelIOList& cellLevel() const
             {
                 return cellLevel_;

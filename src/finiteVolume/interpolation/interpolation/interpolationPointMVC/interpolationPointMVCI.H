@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,25 +21,33 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Global
-    rhoEqn
-
-Description
-    Solve the continuity for density.
-
 \*---------------------------------------------------------------------------*/
 
-{
-    fvScalarMatrix rhoEqn
-    (
-        fvm::ddt(rho)
-      + fvc::div(phi)
-      ==
-        parcels.Srho(rho)
-      + massSource.SuTot()
-    );
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-    rhoEqn.solve();
+template<class Type>
+inline Type Foam::interpolationPointMVC<Type>::interpolate
+(
+    const pointMVCWeight& cpw
+) const
+{
+    return cpw.interpolate(psip_);
 }
+
+
+template<class Type>
+inline Type Foam::interpolationPointMVC<Type>::interpolate
+(
+    const vector& position,
+    const label cellI,
+    const label faceI
+) const
+{
+    return interpolate
+    (
+        pointMVCWeight(this->pMesh_, position, cellI, faceI)
+    );
+}
+
 
 // ************************************************************************* //

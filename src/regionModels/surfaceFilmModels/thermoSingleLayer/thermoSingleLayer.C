@@ -97,11 +97,13 @@ void thermoSingleLayer::correctThermoFields()
     {
         case tmConstant:
         {
-            rho_ == dimensionedScalar(coeffs_.lookup("rho0"));
-            mu_ == dimensionedScalar(coeffs_.lookup("mu0"));
-            sigma_ == dimensionedScalar(coeffs_.lookup("sigma0"));
-            Cp_ == dimensionedScalar(coeffs_.lookup("Cp0"));
-            kappa_ == dimensionedScalar(coeffs_.lookup("kappa0"));
+            const dictionary&
+                constDict(coeffs_.subDict("constantThermoCoeffs"));
+            rho_ == dimensionedScalar(constDict.lookup("rho0"));
+            mu_ == dimensionedScalar(constDict.lookup("mu0"));
+            sigma_ == dimensionedScalar(constDict.lookup("sigma0"));
+            Cp_ == dimensionedScalar(constDict.lookup("Cp0"));
+            kappa_ == dimensionedScalar(constDict.lookup("kappa0"));
 
             break;
         }

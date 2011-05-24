@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,13 +23,51 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "interpolationPoint.H"
+#include "force.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeInterpolation(interpolationPoint);
-}
+namespace regionModels
+{
+namespace surfaceFilmModels
+{
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameAndDebug(force, 0);
+defineRunTimeSelectionTable(force, dictionary);
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+force::force(const surfaceFilmModel& owner)
+:
+    subModelBase(owner)
+{}
+
+
+force::force
+(
+    const word& type,
+    const surfaceFilmModel& owner,
+    const dictionary& dict
+)
+:
+    subModelBase(type, owner, dict)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+force::~force()
+{}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace surfaceFilmModels
+} // End namespace regionModels
+} // End namespace Foam
 
 // ************************************************************************* //

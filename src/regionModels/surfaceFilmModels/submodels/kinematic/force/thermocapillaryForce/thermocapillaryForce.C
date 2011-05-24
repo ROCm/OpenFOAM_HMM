@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,50 +23,61 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "viscosityModel.H"
-#include "volFields.H"
+#include "thermocapillaryForce.H"
+#include "addToRunTimeSelectionTable.H"
 #include "fvcGrad.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(viscosityModel, 0);
-    defineRunTimeSelectionTable(viscosityModel, dictionary);
-}
+namespace regionModels
+{
+namespace surfaceFilmModels
+{
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameAndDebug(thermocapillaryForce, 0);
+addToRunTimeSelectionTable(force, thermocapillaryForce, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::viscosityModel::viscosityModel
+thermocapillaryForce::thermocapillaryForce
 (
-    const word& name,
-    const dictionary& viscosityProperties,
-    const volVectorField& U,
-    const surfaceScalarField& phi
+    const surfaceFilmModel& owner,
+    const dictionary& dict
 )
 :
-    name_(name),
-    viscosityProperties_(viscosityProperties),
-    U_(U),
-    phi_(phi)
+    force(owner)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+thermocapillaryForce::~thermocapillaryForce()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::viscosityModel::strainRate() const
+tmp<fvVectorMatrix> thermocapillaryForce::correct(volVectorField& U)
 {
-    return sqrt(2.0)*mag(symm(fvc::grad(U_)));
+    const volScalarField& sigma = owner_.sigma();
+
+    tmp<fvVectorMatrix>
+        tfvm(new fvVectorMatrix(U, dimForce/dimArea*dimVolume));
+
+    tfvm() += fvc::grad(sigma);
+
+    return tfvm;
 }
 
 
-bool Foam::viscosityModel::read(const dictionary& viscosityProperties)
-{
-    viscosityProperties_ = viscosityProperties;
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    return true;
-}
-
+} // End namespace surfaceFilmModels
+} // End namespace regionModels
+} // End namespace Foam
 
 // ************************************************************************* //

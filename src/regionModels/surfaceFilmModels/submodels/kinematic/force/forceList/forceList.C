@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,50 +23,79 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "viscosityModel.H"
-#include "volFields.H"
-#include "fvcGrad.H"
+#include "forceList.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(viscosityModel, 0);
-    defineRunTimeSelectionTable(viscosityModel, dictionary);
-}
-
+namespace regionModels
+{
+namespace surfaceFilmModels
+{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::viscosityModel::viscosityModel
-(
-    const word& name,
-    const dictionary& viscosityProperties,
-    const volVectorField& U,
-    const surfaceScalarField& phi
-)
+forceList::forceList(const surfaceFilmModel& owner)
 :
-    name_(name),
-    viscosityProperties_(viscosityProperties),
-    U_(U),
-    phi_(phi)
+    PtrList<force>()
 {}
 
 
+forceList::forceList
+(
+    const surfaceFilmModel& owner,
+    const dictionary& dict
+)
+:
+    PtrList<force>()
+{
+    const wordList models(dict.lookup("forces"));
+
+    Info<< "    Selecting film force models" << endl;
+    if (models.size() > 0)
+    {
+        this->setSize(models.size());
+
+        forAll(models, i)
+        {
+            set(i, force::New(owner, dict, models[i]));
+        }
+    }
+    else
+    {
+        Info<< "        none" << endl;
+    }
+}
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+forceList::~forceList()
+{}
+
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::viscosityModel::strainRate() const
+tmp<fvVectorMatrix> forceList::correct(volVectorField& U)
 {
-    return sqrt(2.0)*mag(symm(fvc::grad(U_)));
+    tmp<fvVectorMatrix> tResult
+    (
+        new fvVectorMatrix(U, dimForce/dimArea*dimVolume)
+    );
+    fvVectorMatrix& result = tResult();
+
+    forAll(*this, i)
+    {
+        result += this->operator[](i).correct(U);
+    }
+
+    return tResult;
 }
 
 
-bool Foam::viscosityModel::read(const dictionary& viscosityProperties)
-{
-    viscosityProperties_ = viscosityProperties;
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    return true;
-}
-
+} // End namespace surfaceFilmModels
+} // End namespace regionModels
+} // End namespace Foam
 
 // ************************************************************************* //

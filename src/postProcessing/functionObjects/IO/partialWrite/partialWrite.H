@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,22 +22,26 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::writeRegisteredObject
+    Foam::partialWrite
 
 Description
-    Takes over the writing of registered IO objects
+    Allows some fields/registered objects to be written more often than others.
+
+    Works in the opposite way: deletes at intermediate times all
+    but selected fields.
 
 SourceFiles
-    writeRegisteredObject.C
-    IOwriteRegisteredObject.H
+    partialWrite.C
+    IOpartialWrite.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef writeRegisteredObject_H
-#define writeRegisteredObject_H
+#ifndef partialWrite_H
+#define partialWrite_H
 
 #include "pointFieldFwd.H"
-#include "wordList.H"
+#include "HashSet.H"
+#include "DynamicList.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -51,47 +55,54 @@ class dictionary;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                   Class writeRegisteredObject Declaration
+                   Class partialWrite Declaration
 \*---------------------------------------------------------------------------*/
 
-class writeRegisteredObject
+class partialWrite
 {
 protected:
 
     // Private data
 
-        //- Name of this set of writeRegisteredObject
+        //- Name of this set of partialWrite
         word name_;
 
         const objectRegistry& obr_;
 
+
         // Read from dictionary
 
-            //- Names of objects to control
-            wordList objectNames_;
+            //- Names of objects to dump always
+            HashSet<word> objectNames_;
+
+            //- Write interval for restart dump
+            label writeInterval_;
+
+
+        //- Current dump instance. If reaches writeInterval do a full write.
+        label writeInstance_;
 
 
     // Private Member Functions
 
-
         //- Disallow default bitwise copy construct
-        writeRegisteredObject(const writeRegisteredObject&);
+        partialWrite(const partialWrite&);
 
         //- Disallow default bitwise assignment
-        void operator=(const writeRegisteredObject&);
+        void operator=(const partialWrite&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("writeRegisteredObject");
+    TypeName("partialWrite");
 
 
     // Constructors
 
         //- Construct for given objectRegistry and dictionary.
         //  Allow the possibility to load fields from files
-        writeRegisteredObject
+        partialWrite
         (
             const word& name,
             const objectRegistry&,
@@ -101,18 +112,18 @@ public:
 
 
     //- Destructor
-    virtual ~writeRegisteredObject();
+    virtual ~partialWrite();
 
 
     // Member Functions
 
-        //- Return name of the writeRegisteredObject
+        //- Return name of the partialWrite
         virtual const word& name() const
         {
             return name_;
         }
 
-        //- Read the writeRegisteredObject data
+        //- Read the partialWrite data
         virtual void read(const dictionary&);
 
         //- Execute, currently does nothing
@@ -121,7 +132,7 @@ public:
         //- Execute at the final time-loop, currently does nothing
         virtual void end();
 
-        //- Write the writeRegisteredObject
+        //- Write the partialWrite
         virtual void write();
 
         //- Update for changes of mesh

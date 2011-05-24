@@ -24,10 +24,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "globalIndexAndTransform.H"
-#include "coupledPolyPatch.H"
 #include "cyclicPolyPatch.H"
 
 // * * * * * * * * * * * * Private Static Data Members * * * * * * * * * * * //
+
+defineTypeNameAndDebug(Foam::globalIndexAndTransform, 0);
 
 const Foam::label Foam::globalIndexAndTransform::base_ = 32;
 
@@ -478,6 +479,41 @@ Foam::globalIndexAndTransform::globalIndexAndTransform
     determineTransformPermutations();
 
     determinePatchTransformSign();
+
+    if (debug && transforms_.size() > 1)
+    {
+        Info<< "Determined global transforms :" << endl;
+        Info<< "\t\ttranslation\trotation" << endl;
+        forAll(transforms_, i)
+        {
+            Info<< '\t' << i << '\t';
+            if (transforms_[i].hasR())
+            {
+                 Info<< transforms_[i].t() << '\t' << transforms_[i].R();
+            }
+            else
+            {
+                 Info<< transforms_[i].t() << '\t' << "---";
+            }
+            Info<< endl;
+        }
+        Info<< endl;
+
+        const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+        Info<< "\tpatch\ttransform\tsign" << endl;
+        forAll(patchTransformSign_, patchI)
+        {
+            if (patchTransformSign_[patchI].first() != -1)
+            {
+                Info<< '\t' << patches[patchI].name()
+                    << '\t' << patchTransformSign_[patchI].first()
+                    << '\t' << patchTransformSign_[patchI].second()
+                    << endl;
+            }
+        }
+        Info<< endl;
+    }
 }
 
 

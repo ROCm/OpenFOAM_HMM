@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,84 +22,90 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::interpolationPoint
+    Foam::surfaceShearForce
 
 Description
-    Given cell centre values interpolates to vertices and uses these to
-    do a Mean Value Coordinates interpolation.
+    Film surface shear force
+
+SourceFiles
+    surfaceShearForce.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef interpolationPoint_H
-#define interpolationPoint_H
+#ifndef surfaceShearForce_H
+#define surfaceShearForce_H
 
-#include "interpolation.H"
-#include "pointMVCWeight.H"
+#include "force.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace regionModels
+{
+namespace surfaceFilmModels
+{
 
 /*---------------------------------------------------------------------------*\
-                   Class interpolationPoint Declaration
+                      Class surfaceShearForce Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type>
-class interpolationPoint
+class surfaceShearForce
 :
-    public interpolation<Type>
+    public force
 {
-protected:
+private:
 
-    // Protected data
+    // Private Data
 
-        //- Interpolated volfield
-        const GeometricField<Type, pointPatchField, pointMesh> psip_;
+        //- Surface roughness coefficient
+        scalar Cf_;
+
+
+
+    // Private member functions
+
+        //- Disallow default bitwise copy construct
+        surfaceShearForce(const surfaceShearForce&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const surfaceShearForce&);
+
 
 public:
 
     //- Runtime type information
-    TypeName("point");
+    TypeName("surfaceShear");
 
 
     // Constructors
 
-        //- Construct from components
-        interpolationPoint
+        //- Construct from surface film model
+        surfaceShearForce
         (
-            const GeometricField<Type, fvPatchField, volMesh>& psi
+            const surfaceFilmModel& owner,
+            const dictionary& dict
         );
+
+
+    //- Destructor
+    virtual ~surfaceShearForce();
 
 
     // Member Functions
 
-        //- Interpolate field for the given cellPointWeight
-        inline Type interpolate(const pointMVCWeight& cpw) const;
+        // Evolution
 
-        //- Interpolate field to the given point in the given cell
-        inline Type interpolate
-        (
-            const vector& position,
-            const label cellI,
-            const label faceI = -1
-        ) const;
+            //- Correct
+            virtual tmp<fvVectorMatrix> correct(volVectorField& U);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace surfaceFilmModels
+} // End namespace regionModels
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "interpolationPointI.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "interpolationPoint.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

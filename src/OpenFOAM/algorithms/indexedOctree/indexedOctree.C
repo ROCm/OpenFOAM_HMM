@@ -2282,7 +2282,7 @@ void Foam::indexedOctree<Type>::writeOBJ
     {
         subBb = nodes_[getNode(index)].bb_;
     }
-    else if (isContent(index))
+    else if (isContent(index) || isEmpty(index))
     {
         subBb = nodes_[nodeI].bb_.subBbox(octant);
     }
@@ -2290,17 +2290,21 @@ void Foam::indexedOctree<Type>::writeOBJ
     Pout<< "dumpContentNode : writing node:" << nodeI << " octant:" << octant
         << " to " << str.name() << endl;
 
-    label vertI = 0;
-
     // Dump bounding box
     pointField bbPoints(subBb.points());
 
-    label pointVertI = vertI;
+    forAll(bbPoints, i)
+    {
+        const point& pt = bbPoints[i];
+
+        str<< "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
+    }
+
     forAll(treeBoundBox::edges, i)
     {
         const edge& e = treeBoundBox::edges[i];
 
-        str<< "l " << e[0]+pointVertI+1 << ' ' << e[1]+pointVertI+1 << nl;
+        str<< "l " << e[0] + 1 << ' ' << e[1] + 1 << nl;
     }
 }
 
@@ -2852,6 +2856,11 @@ void Foam::indexedOctree<Type>::print
         {
             const labelList& indices = contents_[getContent(index)];
 
+            if (debug)
+            {
+                writeOBJ(nodeI, octant);
+            }
+
             os  << "octant:" << octant
                 << " content: n:" << indices.size()
                 << " bb:" << subBb;
@@ -2868,6 +2877,11 @@ void Foam::indexedOctree<Type>::print
         }
         else
         {
+            if (debug)
+            {
+                writeOBJ(nodeI, octant);
+            }
+
             os  << "octant:" << octant << " empty:" << subBb << endl;
         }
     }

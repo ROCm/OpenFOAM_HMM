@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,7 +56,7 @@ void Foam::pointMVCWeight::calcWeights
     forAll(f, j)
     {
         label jPlus1 = f.fcIndex(j);
-        scalar l = mag(u[j]-u[jPlus1]);
+        scalar l = mag(u[j] - u[jPlus1]);
         theta[j] = 2.0*Foam::asin(l/2.0);
     }
 
@@ -68,7 +68,7 @@ void Foam::pointMVCWeight::calcWeights
         weights[pid] =
             1.0
           / dist[pid]
-          * (Foam::tan(theta[jMin1]/2.0)+Foam::tan(theta[j]/2.0));
+          * (Foam::tan(theta[jMin1]/2.0) + Foam::tan(theta[j]/2.0));
         sumWeight += weights[pid];
     }
 
@@ -132,11 +132,10 @@ void Foam::pointMVCWeight::calcWeights
             //Pout<< "    uj:" << u[j] << " ujPlus1:" << u[jPlus1]
             //    << " temp:" << temp << endl;
 
-            scalar l = mag(u[j]-u[jPlus1]);
+            scalar l = min(mag(u[j] - u[jPlus1]), 2.0);
             scalar angle = 2.0*Foam::asin(l/2.0);
 
-            //Pout<< "    j:" << j << " l:" << l
-            //    << " angle:" << angle << endl;
+            //Pout<< "    j:" << j << " l:" << l << " angle:" << angle << endl;
 
             v += 0.5*angle*temp;
         }
@@ -145,14 +144,14 @@ void Foam::pointMVCWeight::calcWeights
         v /= vNorm;
 
         // Make sure v points towards the polygon
-//if (((v&u[0]) < 0) != (mesh.faceOwner()[faceI] != cellIndex_))
-//{
-//    FatalErrorIn("pointMVCWeight::calcWeights(..)")
-//        << "v:" << v << " u[0]:" << u[0]
-//        << exit(FatalError);
-//}
+        //if (((v&u[0]) < 0) != (mesh.faceOwner()[faceI] != cellIndex_))
+        //{
+        //    FatalErrorIn("pointMVCWeight::calcWeights(..)")
+        //        << "v:" << v << " u[0]:" << u[0]
+        //        << exit(FatalError);
+        //}
 
-        if ((v&u[0]) < 0)
+        if ((v & u[0]) < 0)
         {
             v = -v;
         }
@@ -165,22 +164,22 @@ void Foam::pointMVCWeight::calcWeights
             label jPlus1 = f.fcIndex(j);
             //Pout<< "    uj:" << u[j] << " ujPlus1:" << u[jPlus1] << endl;
 
-            vector n0 = u[j] ^ v;
+            vector n0 = u[j]^v;
             n0 /= mag(n0);
-            vector n1 = u[jPlus1] ^ v;
+            vector n1 = u[jPlus1]^v;
             n1 /= mag(n1);
 
-            scalar l = mag(n0-n1);
+            scalar l = min(mag(n0 - n1), 2.0);
             //Pout<< "    l:" << l << endl;
             alpha(j) = 2.0*Foam::asin(l/2.0);
 
-            vector temp = n0 ^ n1;
+            vector temp = n0^n1;
             if ((temp&v) < 0.0)
             {
                 alpha[j] = -alpha[j];
             }
 
-            l = mag(u[j]-v);
+            l = min(mag(u[j] - v), 2.0);
             //Pout<< "    l:" << l << endl;
             theta(j) = 2.0*Foam::asin(l/2.0);
         }
@@ -211,7 +210,7 @@ void Foam::pointMVCWeight::calcWeights
             sum +=
                 1.0
               / Foam::tan(theta[j])
-              * (Foam::tan(alpha[j]/2.0)+Foam::tan(alpha[jMin1]/2.0));
+              * (Foam::tan(alpha[j]/2.0) + Foam::tan(alpha[jMin1]/2.0));
         }
 
         // The special case when x lies on the polygon, handle it using 2D mvc.
@@ -234,7 +233,7 @@ void Foam::pointMVCWeight::calcWeights
               / sum
               / dist[pid]
               / Foam::sin(theta[j])
-              * (Foam::tan(alpha[j]/2.0)+Foam::tan(alpha[jMin1]/2.0));
+              * (Foam::tan(alpha[j]/2.0) + Foam::tan(alpha[jMin1]/2.0));
         }
     }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,22 +21,34 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::partialWriteFunctionObject
+
+Description
+    FunctionObject wrapper around partialWrite to allow them to be
+    created via the functions list within controlDict.
+
+SourceFiles
+    partialWriteFunctionObject.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "interpolationPoint.H"
-#include "volPointInterpolation.H"
+#ifndef partialWriteFunctionObject_H
+#define partialWriteFunctionObject_H
 
-// * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
+#include "partialWrite.H"
+#include "OutputFilterFunctionObject.H"
 
-template<class Type>
-Foam::interpolationPoint<Type>::interpolationPoint
-(
-    const GeometricField<Type, fvPatchField, volMesh>& psi
-)
-:
-    interpolation<Type>(psi),
-    psip_(volPointInterpolation::New(psi.mesh()).interpolate(psi))
-{}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+namespace Foam
+{
+    typedef OutputFilterFunctionObject<partialWrite>
+        partialWriteFunctionObject;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //
