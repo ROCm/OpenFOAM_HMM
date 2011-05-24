@@ -547,6 +547,15 @@ public:
                 const scalar muc        // carrier dynamic viscosity
             ) const;
 
+            //- Weber number
+            inline scalar We
+            (
+                const vector& U,        // particle velocity
+                const scalar d,         // particle diameter
+                const scalar rhoc,      // carrier density
+                const scalar sigma      // particle surface tension
+            ) const;
+
 
         // Main calculation loop
 
