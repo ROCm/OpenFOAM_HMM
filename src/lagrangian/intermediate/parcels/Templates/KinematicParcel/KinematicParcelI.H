@@ -85,6 +85,26 @@ inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
     }
 }
 
+template<class ParcelType>
+inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
+(
+    const label parcelTypeId,
+    const scalar rhoMin,
+    const scalar rho0,
+    const scalar minParticleMass,
+    const scalar youngsModulus,
+    const scalar poissonsRatio
+)
+:
+    dict_(dictionary::null),
+    parcelTypeId_(parcelTypeId),
+    rhoMin_(rhoMin),
+    rho0_(rho0),
+    minParticleMass_(minParticleMass),
+    youngsModulus_(youngsModulus),
+    poissonsRatio_(poissonsRatio)
+{}
+
 
 template<class ParcelType>
 inline Foam::KinematicParcel<ParcelType>::KinematicParcel

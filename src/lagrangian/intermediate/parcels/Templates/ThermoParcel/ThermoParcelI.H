@@ -82,6 +82,41 @@ inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
 
 
 template<class ParcelType>
+inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
+(
+    const label parcelTypeId,
+    const scalar rhoMin,
+    const scalar rho0,
+    const scalar minParticleMass,
+    const scalar youngsModulus,
+    const scalar poissonsRatio,
+    const scalar T0,
+    const scalar TMin,
+    const scalar Cp0,
+    const scalar epsilon0,
+    const scalar f0,
+    const scalar Pr
+)
+:
+    ParcelType::constantProperties
+    (
+        parcelTypeId,
+        rhoMin,
+        rho0,
+        minParticleMass,
+        youngsModulus,
+        poissonsRatio
+    ),
+    T0_(T0),
+    TMin_(TMin),
+    Cp0_(Cp0),
+    epsilon0_(epsilon0),
+    f0_(f0),
+    Pr_(Pr)
+{}
+
+
+template<class ParcelType>
 inline Foam::ThermoParcel<ParcelType>::ThermoParcel
 (
     const polyMesh& mesh,
