@@ -177,7 +177,7 @@ _foamEval()
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile prefs.sh`
 
 # Evaluate command-line parameters and record settings for later
-# these can be used to set/unset values, or specify prefs files
+# these can be used to set/unset values, or specify alternative pref files
 export FOAM_SETTINGS="$@"
 _foamEval $@
 
@@ -201,13 +201,13 @@ export PATH LD_LIBRARY_PATH MANPATH
 # Source project setup files
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 _foamSource $WM_PROJECT_DIR/etc/settings.sh
-_foamSource $WM_PROJECT_DIR/etc/aliases.sh
+_foamSource $WM_PROJECT_DIR/etc/config/aliases.sh
 
 
 # Source user setup files for optional packages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile apps/paraview3/bashrc`
-_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile apps/ensight/bashrc`
+_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config/paraview.sh`
+_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config/ensight.sh`
 
 
 # Clean environment paths again. Only remove duplicates

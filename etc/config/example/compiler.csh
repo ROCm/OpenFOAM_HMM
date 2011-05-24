@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -22,27 +22,30 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     etc/prefs.csh
+#     config/example/compiler.csh
 #
 # Description
-#     Preset variables for the OpenFOAM configuration - C-Shell shell syntax.
-#
-#     The prefs.csh file will be sourced by the OpenFOAM etc/cshrc when it is
-#     found by foamEtcFile.
-#
-# See Also
-#     'foamEtcFile -help' or 'foamEtcFile -list' for information about the
-#     paths searched
+#     Example of fine tuning ThirdParty compiler settings for OpenFOAM
+#     Sourced from OpenFOAM-<VERSION>/etc/settings.csh
 #
 #------------------------------------------------------------------------------
 
-## Specify OpenFOAM ThirdParty compiler
-## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# set foamCompiler=ThirdParty
-
-## Specify system openmpi
-## ~~~~~~~~~~~~~~~~~~~~~~
-# setenv WM_MPLIB SYSTEMOPENMPI
-
+# Modified compiler settings
+switch ("$WM_COMPILER")
+case Gcc46:
+case Gcc46++0x:
+    set gcc_version=gcc-4.6.0
+    set gmp_version=gmp-5.0.1
+    set mpfr_version=mpfr-2.4.2
+    set mpc_version=mpc-0.8.1
+    breaksw
+case Gcc45:
+case Gcc45++0x:
+    set gcc_version=gcc-4.5.2
+    set gmp_version=gmp-5.0.1
+    set mpfr_version=mpfr-2.4.2
+    set mpc_version=mpc-0.8.1
+    breaksw
+endsw
 
 # ----------------------------------------------------------------- end-of-file
