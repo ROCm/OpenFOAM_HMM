@@ -49,6 +49,10 @@ int main(int argc, char *argv[])
 
     Info<< nl << "Calculating potential flow" << endl;
 
+    // Since solver contains no time loop it would never execute
+    // function objects so do it ourselves.
+    runTime.functionObjects().start();
+
     adjustPhi(phi, U, p);
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
@@ -98,6 +102,9 @@ int main(int argc, char *argv[])
     {
         p.write();
     }
+
+    runTime.functionObjects().end();
+
 
     Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
         << "  ClockTime = " << runTime.elapsedClockTime() << " s"
