@@ -27,64 +27,6 @@ License
 #include "DataEntry.H"
 #include "distributionModel.H"
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::label Foam::PatchInjection<CloudType>::parcelsToInject
-(
-    const scalar time0,
-    const scalar time1
-)
-{
-    if ((time0 >= 0.0) && (time0 < duration_))
-    {
-        scalar nParcels =fraction_*(time1 - time0)*parcelsPerSecond_;
-
-        cachedRandom& rnd = this->owner().rndGen();
-
-        label nParcelsToInject = floor(nParcels);
-
-        // Inject an additional parcel with a probability based on the
-        // remainder after the floor function
-        if
-        (
-            nParcelsToInject > 0
-         && (
-               nParcels - scalar(nParcelsToInject)
-             > rnd.position(scalar(0), scalar(1))
-            )
-        )
-        {
-            ++nParcelsToInject;
-        }
-
-        return nParcelsToInject;
-    }
-    else
-    {
-        return 0;
-    }
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::PatchInjection<CloudType>::volumeToInject
-(
-    const scalar time0,
-    const scalar time1
-)
-{
-    if ((time0 >= 0.0) && (time0 < duration_))
-    {
-        return fraction_*flowRateProfile_().integrate(time0, time1);
-    }
-    else
-    {
-        return 0.0;
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -179,6 +121,62 @@ template<class CloudType>
 Foam::scalar Foam::PatchInjection<CloudType>::timeEnd() const
 {
     return this->SOI_ + duration_;
+}
+
+
+template<class CloudType>
+Foam::label Foam::PatchInjection<CloudType>::parcelsToInject
+(
+    const scalar time0,
+    const scalar time1
+)
+{
+    if ((time0 >= 0.0) && (time0 < duration_))
+    {
+        scalar nParcels =fraction_*(time1 - time0)*parcelsPerSecond_;
+
+        cachedRandom& rnd = this->owner().rndGen();
+
+        label nParcelsToInject = floor(nParcels);
+
+        // Inject an additional parcel with a probability based on the
+        // remainder after the floor function
+        if
+        (
+            nParcelsToInject > 0
+         && (
+               nParcels - scalar(nParcelsToInject)
+             > rnd.position(scalar(0), scalar(1))
+            )
+        )
+        {
+            ++nParcelsToInject;
+        }
+
+        return nParcelsToInject;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+
+template<class CloudType>
+Foam::scalar Foam::PatchInjection<CloudType>::volumeToInject
+(
+    const scalar time0,
+    const scalar time1
+)
+{
+    if ((time0 >= 0.0) && (time0 < duration_))
+    {
+        return fraction_*flowRateProfile_().integrate(time0, time1);
+    }
+    else
+    {
+        return 0.0;
+    }
 }
 
 

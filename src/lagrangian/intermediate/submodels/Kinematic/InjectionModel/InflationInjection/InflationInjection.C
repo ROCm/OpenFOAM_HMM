@@ -31,7 +31,129 @@ License
 
 using namespace Foam::constant::mathematical;
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::InflationInjection<CloudType>::InflationInjection
+(
+    const dictionary& dict,
+    CloudType& owner
+)
+:
+    InjectionModel<CloudType>(dict, owner, typeName),
+    generationSetName_(this->coeffDict().lookup("generationCellSet")),
+    inflationSetName_(this->coeffDict().lookup("inflationCellSet")),
+    generationCells_(),
+    inflationCells_(),
+    duration_(readScalar(this->coeffDict().lookup("duration"))),
+    flowRateProfile_
+    (
+        DataEntry<scalar>::New
+        (
+            "flowRateProfile",
+            this->coeffDict()
+        )
+    ),
+    growthRate_
+    (
+        DataEntry<scalar>::New
+        (
+            "growthRate",
+            this->coeffDict()
+        )
+    ),
+    newParticles_(),
+    volumeAccumulator_(0.0),
+    fraction_(1.0),
+    selfSeed_(this->coeffDict().lookupOrDefault("selfSeed", false)),
+    dSeed_(SMALL),
+    sizeDistribution_
+    (
+        distributionModels::distributionModel::New
+        (
+            this->coeffDict().subDict("sizeDistribution"),
+            owner.rndGen()
+        )
+    )
+{
+    if (selfSeed_)
+    {
+        dSeed_ = readScalar(this->coeffDict().lookup("dSeed"));
+    }
+
+    cellSet generationCells(this->owner().mesh(), generationSetName_);
+
+    generationCells_ = generationCells.toc();
+
+    cellSet inflationCells(this->owner().mesh(), inflationSetName_);
+
+    // Union of cellSets
+    inflationCells |= generationCells;
+
+    inflationCells_ = inflationCells.toc();
+
+    if (Pstream::parRun())
+    {
+        scalar generationVolume = 0.0;
+
+        forAll(generationCells_, gCI)
+        {
+            label cI = generationCells_[gCI];
+
+            generationVolume += this->owner().mesh().cellVolumes()[cI];
+        }
+
+        scalar totalGenerationVolume = generationVolume;
+
+        reduce(totalGenerationVolume, sumOp<scalar>());
+
+        fraction_ = generationVolume/totalGenerationVolume;
+    }
+
+    // Set total volume/mass to inject
+    this->volumeTotal_ = fraction_*flowRateProfile_().integrate(0.0, duration_);
+    this->massTotal_ *= fraction_;
+}
+
+
+template<class CloudType>
+Foam::InflationInjection<CloudType>::InflationInjection
+(
+    const Foam::InflationInjection<CloudType>& im
+)
+:
+    InjectionModel<CloudType>(im),
+    generationSetName_(im.generationSetName_),
+    inflationSetName_(im.inflationSetName_),
+    generationCells_(im.generationCells_),
+    inflationCells_(im.inflationCells_),
+    duration_(im.duration_),
+    flowRateProfile_(im.flowRateProfile_().clone().ptr()),
+    growthRate_(im.growthRate_().clone().ptr()),
+    newParticles_(im.newParticles_),
+    volumeAccumulator_(im.volumeAccumulator_),
+    fraction_(im.fraction_),
+    selfSeed_(im.selfSeed_),
+    dSeed_(im.dSeed_),
+    sizeDistribution_(im.sizeDistribution_().clone().ptr())
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::InflationInjection<CloudType>::~InflationInjection()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::scalar Foam::InflationInjection<CloudType>::timeEnd() const
+{
+    return this->SOI_ + duration_;
+}
+
 
 template<class CloudType>
 Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
@@ -302,130 +424,6 @@ Foam::scalar Foam::InflationInjection<CloudType>::volumeToInject
     {
         return 0.0;
     }
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::InflationInjection<CloudType>::InflationInjection
-(
-    const dictionary& dict,
-    CloudType& owner
-)
-:
-    InjectionModel<CloudType>(dict, owner, typeName),
-    generationSetName_(this->coeffDict().lookup("generationCellSet")),
-    inflationSetName_(this->coeffDict().lookup("inflationCellSet")),
-    generationCells_(),
-    inflationCells_(),
-    duration_(readScalar(this->coeffDict().lookup("duration"))),
-    flowRateProfile_
-    (
-        DataEntry<scalar>::New
-        (
-            "flowRateProfile",
-            this->coeffDict()
-        )
-    ),
-    growthRate_
-    (
-        DataEntry<scalar>::New
-        (
-            "growthRate",
-            this->coeffDict()
-        )
-    ),
-    newParticles_(),
-    volumeAccumulator_(0.0),
-    fraction_(1.0),
-    selfSeed_(this->coeffDict().lookupOrDefault("selfSeed", false)),
-    dSeed_(SMALL),
-    sizeDistribution_
-    (
-        distributionModels::distributionModel::New
-        (
-            this->coeffDict().subDict("sizeDistribution"),
-            owner.rndGen()
-        )
-    )
-{
-    if (selfSeed_)
-    {
-        dSeed_ = readScalar(this->coeffDict().lookup("dSeed"));
-    }
-
-    cellSet generationCells(this->owner().mesh(), generationSetName_);
-
-    generationCells_ = generationCells.toc();
-
-    cellSet inflationCells(this->owner().mesh(), inflationSetName_);
-
-    // Union of cellSets
-    inflationCells |= generationCells;
-
-    inflationCells_ = inflationCells.toc();
-
-    if (Pstream::parRun())
-    {
-        scalar generationVolume = 0.0;
-
-        forAll(generationCells_, gCI)
-        {
-            label cI = generationCells_[gCI];
-
-            generationVolume += this->owner().mesh().cellVolumes()[cI];
-        }
-
-        scalar totalGenerationVolume = generationVolume;
-
-        reduce(totalGenerationVolume, sumOp<scalar>());
-
-        fraction_ = generationVolume/totalGenerationVolume;
-    }
-
-    // Set total volume/mass to inject
-    this->volumeTotal_ = fraction_*flowRateProfile_().integrate(0.0, duration_);
-    this->massTotal_ *= fraction_;
-}
-
-
-template<class CloudType>
-Foam::InflationInjection<CloudType>::InflationInjection
-(
-    const Foam::InflationInjection<CloudType>& im
-)
-:
-    InjectionModel<CloudType>(im),
-    generationSetName_(im.generationSetName_),
-    inflationSetName_(im.inflationSetName_),
-    generationCells_(im.generationCells_),
-    inflationCells_(im.inflationCells_),
-    duration_(im.duration_),
-    flowRateProfile_(im.flowRateProfile_().clone().ptr()),
-    growthRate_(im.growthRate_().clone().ptr()),
-    newParticles_(im.newParticles_),
-    volumeAccumulator_(im.volumeAccumulator_),
-    fraction_(im.fraction_),
-    selfSeed_(im.selfSeed_),
-    dSeed_(im.dSeed_),
-    sizeDistribution_(im.sizeDistribution_().clone().ptr())
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::InflationInjection<CloudType>::~InflationInjection()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::scalar Foam::InflationInjection<CloudType>::timeEnd() const
-{
-    return this->SOI_ + duration_;
 }
 
 

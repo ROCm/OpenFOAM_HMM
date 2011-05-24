@@ -102,46 +102,6 @@ void Foam::InjectionModel<CloudType>::writeProps()
 
 
 template<class CloudType>
-Foam::label Foam::InjectionModel<CloudType>::parcelsToInject
-(
-    const scalar time0,
-    const scalar time1
-)
-{
-    notImplemented
-    (
-        "Foam::label Foam::InjectionModel<CloudType>::parcelsToInject"
-        "("
-            "const scalar, "
-            "const scalar"
-        ") const"
-    );
-
-    return 0;
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::InjectionModel<CloudType>::volumeToInject
-(
-    const scalar time0,
-    const scalar time1
-)
-{
-    notImplemented
-    (
-        "Foam::scalar Foam::InjectionModel<CloudType>::volumeToInject"
-        "("
-            "const scalar, "
-            "const scalar"
-        ") const"
-    );
-
-    return 0.0;
-}
-
-
-template<class CloudType>
 bool Foam::InjectionModel<CloudType>::validInjection(const label parcelI)
 {
     notImplemented
@@ -507,6 +467,54 @@ Foam::scalar Foam::InjectionModel<CloudType>::timeEnd() const
     );
 
     return 0.0;
+}
+
+
+template<class CloudType>
+Foam::label Foam::InjectionModel<CloudType>::parcelsToInject
+(
+    const scalar time0,
+    const scalar time1
+)
+{
+    notImplemented
+    (
+        "Foam::label Foam::InjectionModel<CloudType>::parcelsToInject"
+        "("
+            "const scalar, "
+            "const scalar"
+        ") const"
+    );
+
+    return 0;
+}
+
+
+template<class CloudType>
+Foam::scalar Foam::InjectionModel<CloudType>::volumeToInject
+(
+    const scalar time0,
+    const scalar time1
+)
+{
+    notImplemented
+    (
+        "Foam::scalar Foam::InjectionModel<CloudType>::volumeToInject"
+        "("
+            "const scalar, "
+            "const scalar"
+        ") const"
+    );
+
+    return 0.0;
+}
+
+
+template<class CloudType>
+Foam::scalar Foam::InjectionModel<CloudType>::averageParcelMass()
+{
+    label nTotal = parcelsToInject(0.0, timeEnd() - timeStart());
+    return massTotal_/nTotal;
 }
 
 
