@@ -174,6 +174,9 @@ public:
             //- Return const access to the coupled flag
             inline const Switch coupled() const;
 
+            //- Return non-const access to the coupled flag
+            inline Switch& coupled();
+
             //- Return const access to the cell value correction flag
             inline const Switch cellValueSourceCorrection() const;
 
