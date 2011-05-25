@@ -107,9 +107,9 @@ Foam::SprayCloud<CloudType>::SprayCloud
         {
             parcelType::readFields(*this, this->composition());
         }
-    }
 
-    Info << "    Average parcel mass: " << averageParcelMass_ << endl;
+        Info << "Average parcel mass: " << averageParcelMass_ << endl;
+    }
 }
 
 
@@ -172,16 +172,19 @@ void Foam::SprayCloud<CloudType>::checkParcelProperties
         fullyDescribed
     );
 
-    const scalarField& Y(parcel.Y());
-    scalarField X(this->composition().liquids().X(Y));
+    const liquidMixtureProperties& liqMix = this->composition().liquids();
 
-    // override rho and cp from constantProperties
-    parcel.Cp() = this->composition().liquids().Cp(parcel.pc(), parcel.T(), X);
-    parcel.rho() = this->composition().liquids().rho(parcel.pc(), parcel.T(), X);
+    const scalarField& Y(parcel.Y());
+    scalarField X(liqMix.X(Y));
+
+    // override rho and Cp from constantProperties
+    parcel.Cp() = liqMix.Cp(parcel.pc(), parcel.T(), X);
+    parcel.rho() = liqMix.rho(parcel.pc(), parcel.T(), X);
 
     // store the injection position and initial drop size
     parcel.position0() = parcel.position();
     parcel.d0() = parcel.d();
+
 
     parcel.y() = breakup().y0();
     parcel.yDot() = breakup().yDot0();
