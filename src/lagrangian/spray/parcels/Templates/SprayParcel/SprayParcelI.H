@@ -38,7 +38,6 @@ inline Foam::SprayParcel<ParcelType>::SprayParcel
     ParcelType(mesh, position, cellI, tetFaceI, tetPtI),
     d0_(this->d()),
     position0_(position),
-//    liquidCore_(owner.atomization().initLiquidCore()),
     liquidCore_(0.0),
     KHindex_(0.0),
     y_(0.0),

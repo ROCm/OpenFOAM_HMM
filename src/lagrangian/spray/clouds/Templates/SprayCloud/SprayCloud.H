@@ -203,12 +203,6 @@ public:
 
         // Check
 
-            //- Calculate the liquid penetration for prc % of the mass
-            scalar liquidPenetration(const scalar& prc) const;
-
-            //- Calculate the diameter Dij
-            scalar D(const label i, const label j) const;
-
             //- Print cloud information
             void info() const;
 
