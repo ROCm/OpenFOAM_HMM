@@ -35,7 +35,7 @@ Foam::StochasticCollisionModel<CloudType>::New
     CloudType& owner
 )
 {
-    word modelType(dict.lookup("StochasticCollisionModel"));
+    word modelType(dict.lookup("stochasticCollisionModel"));
 
     Info<< "Selecting StochasticCollisionModel " << modelType << endl;
 

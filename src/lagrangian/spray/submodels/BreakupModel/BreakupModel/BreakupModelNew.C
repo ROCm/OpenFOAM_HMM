@@ -35,7 +35,7 @@ Foam::BreakupModel<CloudType>::New
     CloudType& owner
 )
 {
-    word BreakupModelType(dict.lookup("BreakupModel"));
+    word BreakupModelType(dict.lookup("breakupModel"));
 
     Info<< "Selecting BreakupModel " << BreakupModelType << endl;
 
