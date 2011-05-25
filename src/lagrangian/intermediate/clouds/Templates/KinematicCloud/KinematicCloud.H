@@ -176,6 +176,9 @@ protected:
             //- Gravity
             const dimensionedVector& g_;
 
+            //- Averaged ambient domain pressure
+            scalar pAmbient_;
+
 
         //- Optional particle forces
         forceType forces_;
@@ -229,9 +232,6 @@ protected:
             //- Solve the cloud - calls all evolution functions
             template<class TrackData>
             void solve(TrackData& td);
-
-            //- Pre-evolve
-            void preEvolve();
 
             //- Build the cellOccupancy
             void buildCellOccupancy();
@@ -366,6 +366,12 @@ public:
 
                 //- Gravity
                 inline const dimensionedVector& g() const;
+
+                //- Return const-access to the ambient pressure
+                inline scalar pAmbient() const;
+
+                //- Return reference to the ambient pressure
+                inline scalar& pAmbient();
 
 
             //- Optional particle forces
@@ -513,6 +519,9 @@ public:
 
             //- Apply scaling to (transient) cloud sources
             void scaleSources();
+
+            //- Pre-evolve
+            void preEvolve();
 
             //- Evolve the cloud
             void evolve();

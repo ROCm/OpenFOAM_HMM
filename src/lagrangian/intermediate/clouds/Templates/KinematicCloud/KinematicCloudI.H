@@ -110,6 +110,20 @@ inline const Foam::dimensionedVector& Foam::KinematicCloud<CloudType>::g() const
 
 
 template<class CloudType>
+inline Foam::scalar Foam::KinematicCloud<CloudType>::pAmbient() const
+{
+    return pAmbient_;
+}
+
+
+template<class CloudType>
+inline Foam::scalar& Foam::KinematicCloud<CloudType>::pAmbient()
+{
+    return pAmbient_;
+}
+
+
+template<class CloudType>
 //inline const typename CloudType::parcelType::forceType&
 inline const typename Foam::KinematicCloud<CloudType>::forceType&
 Foam::KinematicCloud<CloudType>::forces() const

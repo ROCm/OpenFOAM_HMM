@@ -305,6 +305,15 @@ void Foam::ThermoCloud<CloudType>::scaleSources()
 
 
 template<class CloudType>
+void Foam::ThermoCloud<CloudType>::preEvolve()
+{
+    CloudType::preEvolve();
+
+    this->pAmbient() = thermo_.thermo().p().average().value();
+}
+
+
+template<class CloudType>
 void Foam::ThermoCloud<CloudType>::evolve()
 {
     if (this->solution().canEvolve())

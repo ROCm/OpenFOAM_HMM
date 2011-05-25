@@ -304,6 +304,9 @@ public:
             //- Apply scaling to (transient) cloud sources
             void scaleSources();
 
+            //- Pre-evolve
+            void preEvolve();
+
             //- Evolve the cloud
             void evolve();
 
