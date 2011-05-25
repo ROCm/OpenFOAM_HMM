@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -124,7 +124,7 @@ bool Foam::matchPoints
                 {
                     label faceI = pts1MagSqr.indices()[j];
 
-                    Pout<< "Compared coord:" << pts1[faceI]
+                    Pout<< "    Compared coord:" << pts1[faceI]
                         << " with difference to point "
                         << mag(pts1[faceI] - pts0[face0I]) << endl;
                 }
