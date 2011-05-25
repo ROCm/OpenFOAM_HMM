@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -87,7 +87,7 @@ public:
         //  this model this will always be 1.
         virtual label nSubCycles() const;
 
-        //- Flag to indicate whether model activates injection model
+        //- Flag to indicate whether model activates collision model
         virtual bool active() const;
 
         //- Indicates whether model determines wall collisions or not,
