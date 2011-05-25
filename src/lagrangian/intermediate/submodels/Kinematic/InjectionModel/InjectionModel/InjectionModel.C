@@ -594,7 +594,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                 // Assign new parcel properties in injection model
                 setProperties(parcelI, newParcels, timeInj, *pPtr);
 
-                // Check new parcel properties
+                // Check/set new parcel properties
                 td.cloud().checkParcelProperties(*pPtr, dt, fullyDescribed());
 
                 // Apply correction to velocity for 2-D cases

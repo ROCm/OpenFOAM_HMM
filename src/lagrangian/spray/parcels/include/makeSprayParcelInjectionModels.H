@@ -29,11 +29,11 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "ConeInjection.H"
+#include "ConeNozzleInjection.H"
 #include "FieldActivatedInjection.H"
 #include "ManualInjection.H"
 #include "NoInjection.H"
 #include "PatchInjection.H"
-//#include "UnitInjection.H"
 //#include "CommonRailInjection.H"
 //#include "MultiHoleInjection.H"
 
@@ -43,6 +43,7 @@ License
                                                                               \
     makeInjectionModel(CloudType);                                            \
     makeInjectionModelType(ConeInjection, CloudType);                         \
+    makeInjectionModelType(ConeNozzleInjection, CloudType);                   \
     makeInjectionModelType(FieldActivatedInjection, CloudType);               \
     makeInjectionModelType(ManualInjection, CloudType);                       \
     makeInjectionModelType(NoInjection, CloudType);                           \
