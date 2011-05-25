@@ -143,10 +143,29 @@ bool writeZones(const word& name, const fileName& meshDir, Time& runTime)
 
 int main(int argc, char *argv[])
 {
-    timeSelector::addOptions();
+    timeSelector::addOptions(false, false);
+    argList::addBoolOption
+    (
+        "noConstant",
+        "exclude the 'constant/' dir in the times list"
+    );
+
 #   include "addRegionOption.H"
 #   include "setRootCase.H"
+
+    // Hack to enable noConstant
+    if (!args.optionFound("noConstant"))
+    {
+        const_cast<HashTable<string>&>(args.options()).insert
+        (
+            "constant",
+            ""
+        );
+    }
+
+
 #   include "createTime.H"
+
 
     // Make sure we do not use the master-only reading since we read
     // fields (different per processor) as dictionaries.
