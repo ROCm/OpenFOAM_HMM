@@ -71,6 +71,27 @@ void Foam::dynamicCode::checkSecurity
             << "using dlopen)"
             << exit(FatalIOError);
     }
+
+    if (!allowSystemOperations)
+    {
+        FatalIOErrorIn
+        (
+            title,
+            dict
+        )   << "Loading a shared library using case-supplied code is not"
+            << " enabled by default" << nl
+            << "because of security issues. If you trust the code you can"
+            << " enable this" << nl
+            << "facility be adding to the InfoSwitches setting in the system"
+            << " controlDict:" << nl << nl
+            << "    allowSystemOperations 1" << nl << nl
+            << "The system controlDict is either" << nl << nl
+            << "    ~/.OpenFOAM/$WM_PROJECT_VERSION/controlDict" << nl << nl
+            << "or" << nl << nl
+            << "    $WM_PROJECT_DIR/etc/controlDict" << nl
+            << endl
+            << exit(FatalIOError);
+    }
 }
 
 
@@ -398,26 +419,6 @@ bool Foam::dynamicCode::copyOrCreateFiles(const bool verbose) const
     if (verbose)
     {
         Info<< "Creating new library in " << this->libRelPath() << endl;
-    }
-
-    if (!allowSystemOperations)
-    {
-        FatalErrorIn
-        (
-            "dynamicCode::copyOrCreateFiles() const"
-        )   <<  "Loading a shared library using case-supplied code is not"
-            << " enabled by default" << nl
-            << "because of security issues. If you trust the code you can"
-            << " enable this" << nl
-            << "facility be adding to the InfoSwitches setting in the system"
-            << " controlDict:" << nl << nl
-            << "    allowSystemOperations 1" << nl << nl
-            << "The system controlDict is either" << nl << nl
-            << "    ~/.OpenFOAM/$WM_PROJECT_VERSION/controlDict" << nl << nl
-            << "or" << nl << nl
-            << "    $WM_PROJECT_DIR/etc/controlDict" << nl
-            << endl
-            << exit(FatalError);
     }
 
     const label nFiles = compileFiles_.size() + copyFiles_.size();
