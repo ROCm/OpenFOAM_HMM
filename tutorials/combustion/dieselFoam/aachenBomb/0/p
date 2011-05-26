@@ -22,18 +22,7 @@ boundaryField
 {
     walls
     {
-        type            buoyantPressure;
-        value           uniform 5e+06;
-    }
-
-    front
-    {
-        type            wedge;
-    }
-
-    back
-    {
-        type            wedge;
+        type            zeroGradient;
     }
 }
 
