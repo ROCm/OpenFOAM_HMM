@@ -46,6 +46,7 @@ FoamFile
         type            cyclic;
         nFaces          1600;
         startFace       101720;
+        matchTolerance  0.0001;
         neighbourPatch  cyclic_half1;
         transform       rotational;
         rotationAxis    (0 0 1);
@@ -56,6 +57,7 @@ FoamFile
         type            cyclic;
         nFaces          1600;
         startFace       103320;
+        matchTolerance  0.0001;
         neighbourPatch  cyclic_half0;
         transform       rotational;
         rotationAxis    (0 0 1);

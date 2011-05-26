@@ -44,11 +44,11 @@ boundaryField
         type            fixedValue;
         value           uniform ( 0 0 0 );
     }
-    frontAndBack_half0
+    front
     {
         type            cyclic;
     }
-    frontAndBack_half1
+    back
     {
         type            cyclic;
     }

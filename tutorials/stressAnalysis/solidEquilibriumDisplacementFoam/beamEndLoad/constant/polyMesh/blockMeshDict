@@ -35,38 +35,50 @@ blocks
     hex (0 1 2 3 4 5 6 7) (6 2 1) simpleGrading (1.0 1.0 1.0)
 );
 
-edges           
+edges
 (
 );
 
-patches
+boundary
 (
-    patch
     topSurface
-    (
-        (3 7 6 2)
-    )
-    
-    patch
+    {
+        type patch;
+        faces
+        (
+            (3 7 6 2)
+        );
+    }
+
     bottomSurface
-    (
-        (4 0 1 5)
-    )
+    {
+        type patch;
+        faces
+        (
+            (4 0 1 5)
+        );
+    }
 
-    patch
     fixedEnd
-    (
-        (0 4 7 3)
-    )
+    {
+        type patch;
+        faces
+        (
+            (0 4 7 3)
+        );
+    }
 
-    patch
     tractionEnd
-    (
-        (1 2 6 5)
-    )
+    {
+        type patch;
+        faces
+        (
+            (1 2 6 5)
+        );
+    }
 );
 
-mergePatchPairs 
+mergePatchPairs
 (
 );
 

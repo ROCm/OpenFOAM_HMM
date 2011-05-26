@@ -20,35 +20,30 @@ FoamFile
     inlet
     {
         type            patch;
-        physicalType    inlet;
         nFaces          30;
         startFace       24170;
     }
     outlet
     {
         type            patch;
-        physicalType    outlet;
         nFaces          57;
         startFace       24200;
     }
     upperWall
     {
         type            wall;
-        physicalType    wallFunctions;
         nFaces          223;
         startFace       24257;
     }
     lowerWall
     {
         type            wall;
-        physicalType    wallFunctions;
         nFaces          250;
         startFace       24480;
     }
     frontAndBack
     {
         type            empty;
-        physicalType    empty;
         nFaces          24450;
         startFace       24730;
     }

@@ -15,55 +15,83 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-6
+10
 (
-    patch0_half0
+    bottomWall
     {
-        type            cyclic;
-        nFaces          256;
-        startFace       11520;
-        matchTolerance  0.0001;
-        neighbourPatch  patch0_half1;
+        type            wall;
+        nFaces          1200;
+        startFace       175300;
     }
-    patch0_half1
+    topWall
     {
-        type            cyclic;
-        nFaces          256;
-        startFace       11776;
-        matchTolerance  0.0001;
-        neighbourPatch  patch0_half0;
+        type            wall;
+        nFaces          1200;
+        startFace       176500;
     }
-    patch1_half0
+    sides1_half0
     {
         type            cyclic;
-        nFaces          256;
-        startFace       12032;
+        nFaces          1000;
+        startFace       177700;
         matchTolerance  0.0001;
-        neighbourPatch  patch1_half1;
+        neighbourPatch  sides1_half1;
     }
-    patch1_half1
+    sides1_half1
     {
         type            cyclic;
-        nFaces          256;
-        startFace       12288;
+        nFaces          1000;
+        startFace       178700;
         matchTolerance  0.0001;
-        neighbourPatch  patch1_half0;
+        neighbourPatch  sides1_half0;
     }
-    patch2_half0
+    sides2_half0
     {
         type            cyclic;
-        nFaces          256;
-        startFace       12544;
+        nFaces          1000;
+        startFace       179700;
         matchTolerance  0.0001;
-        neighbourPatch  patch2_half1;
+        neighbourPatch  sides2_half1;
     }
-    patch2_half1
+    sides2_half1
     {
         type            cyclic;
-        nFaces          256;
-        startFace       12800;
+        nFaces          1000;
+        startFace       180700;
         matchTolerance  0.0001;
-        neighbourPatch  patch2_half0;
+        neighbourPatch  sides2_half0;
+    }
+    inout1_half0
+    {
+        type            cyclic;
+        nFaces          750;
+        startFace       181700;
+        matchTolerance  0.0001;
+        neighbourPatch  inout1_half1;
+    }
+    inout1_half1
+    {
+        type            cyclic;
+        nFaces          750;
+        startFace       182450;
+        matchTolerance  0.0001;
+        neighbourPatch  inout1_half0;
+    }
+    inout2_half0
+    {
+        type            cyclic;
+        nFaces          750;
+        startFace       183200;
+        matchTolerance  0.0001;
+        neighbourPatch  inout2_half1;
+    }
+    inout2_half1
+    {
+        type            cyclic;
+        nFaces          750;
+        startFace       183950;
+        matchTolerance  0.0001;
+        neighbourPatch  inout2_half0;
     }
 )
 

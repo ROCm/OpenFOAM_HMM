@@ -29,19 +29,21 @@ FoamFile
         nFaces          1;
         startFace       80;
     }
-    frontBack_half0
+    front
     {
         type            cyclic;
         nFaces          80;
         startFace       81;
-        neighbourPatch  frontBack_half1;
+        matchTolerance  0.0001;
+        neighbourPatch  back;
     }
-    frontBack_half1
+    back
     {
         type            cyclic;
         nFaces          80;
         startFace       161;
-        neighbourPatch  frontBack_half0;
+        matchTolerance  0.0001;
+        neighbourPatch  front;
     }
     defaultFaces
     {

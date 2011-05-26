@@ -37,29 +37,45 @@ edges
 (
 );
 
-patches
+boundary
 (
-    patch inlet
-    (
-        (0 4 7 3)
-    )
+    inlet
+    {
+        type patch;
+        faces
+        (
+            (0 4 7 3)
+        );
+    }
 
-    patch outlet
-    (
-        (2 6 5 1)
-    )
+    outlet
+    {
+        type patch;
+        faces
+        (
+            (2 6 5 1)
+        );
+    }
 
-    patch atmosphere
-    (
-        (4 5 6 7)
-    )
+    atmosphere
+    {
+        type patch;
+        faces
+        (
+            (4 5 6 7)
+        );
+    }
 
-    symmetryPlane sides
-    (
-        (1 5 4 0)
-        (3 7 6 2)
-        (0 3 2 1)
-    )
+    sides
+    {
+        type symmetryPlane;
+        faces
+        (
+            (1 5 4 0)
+            (3 7 6 2)
+            (0 3 2 1)
+        );
+    }
 );
 
 

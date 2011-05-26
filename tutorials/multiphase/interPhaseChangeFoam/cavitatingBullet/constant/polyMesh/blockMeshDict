@@ -34,23 +34,35 @@ blocks
     hex (0 1 2 3 4 5 6 7) (15 15 50) simpleGrading (1 1 1)
 );
 
-patches
+boundary
 (
-    patch inlet
-    (
-        (0 3 2 1)
-    )
-    patch outlet
-    (
-        (4 5 6 7)
-    )
-    symmetryPlane walls
-    (
-        (0 4 7 3)
-        (2 6 5 1)
-        (1 5 4 0)
-        (3 7 6 2)
-    )
+    inlet
+    {
+        type patch;
+        faces
+        (
+            (0 3 2 1)
+        );
+    }
+    outlet
+    {
+        type patch;
+        faces
+        (
+            (4 5 6 7)
+        );
+    }
+    walls
+    {
+        type symmetryPlane;
+        faces
+        (
+            (0 4 7 3)
+            (2 6 5 1)
+            (1 5 4 0)
+            (3 7 6 2)
+        );
+    }
 );
 
 

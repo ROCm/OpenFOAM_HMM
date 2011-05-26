@@ -31,17 +31,17 @@ boundaryField
         type            fixedValue;
         value           uniform 1e-08;
     }
-    frontBack_half0
+    front
+    {
+        type            cyclic;
+    }
+    back
     {
         type            cyclic;
     }
     defaultFaces
     {
         type            empty;
-    }
-    frontBack_half1
-    {
-        type            cyclic;
     }
 }
 
