@@ -143,7 +143,7 @@ bool writeZones(const word& name, const fileName& meshDir, Time& runTime)
 
 int main(int argc, char *argv[])
 {
-    timeSelector::addOptions(false, false);
+    timeSelector::addOptions();
     argList::addBoolOption
     (
         "noConstant",
@@ -153,14 +153,15 @@ int main(int argc, char *argv[])
 #   include "addRegionOption.H"
 #   include "setRootCase.H"
 
-    // Hack to enable noConstant
+    // enable noConstant by switching
     if (!args.optionFound("noConstant"))
     {
-        const_cast<HashTable<string>&>(args.options()).insert
-        (
-            "constant",
-            ""
-        );
+        args.setOption("constant", "");
+    }
+    else
+    {
+        args.unsetOption("constant");
+        Info<< "Excluding the constant directory." << nl << endl;
     }
 
 
