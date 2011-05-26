@@ -26,7 +26,7 @@
 #
 # Description
 #     Example of fine tuning ThirdParty compiler settings for OpenFOAM
-#     Sourced from OpenFOAM-<VERSION>/etc/settings.sh
+#     Sourced from OpenFOAM-<VERSION>/etc/config/settings.sh
 #
 #------------------------------------------------------------------------------
 
