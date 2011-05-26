@@ -349,9 +349,7 @@ void Foam::ConeNozzleInjection<CloudType>::setProperties
     scalar massFlowRate =
         this->massTotal()*volumeFlowRate_().value(t)/this->volumeTotal();
 
-    scalar rho = this->owner().constProps().rho0();
-//    scalar Umag = massFlowRate/(parcel.rho()*Cd_().value(t)*(Ao - Ai));
-    scalar Umag = massFlowRate/(rho*Cd_().value(t)*(Ao - Ai));
+    scalar Umag = massFlowRate/(parcel.rho()*Cd_().value(t)*(Ao - Ai));
     parcel.U() = Umag*dirVec;
 
     // set particle diameter
