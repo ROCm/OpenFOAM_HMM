@@ -45,5 +45,74 @@ timePrecision   6;
 
 runTimeModifiable true;
 
+functions
+{
+    difference
+    {
+        functionObjectLibs ("libutilityFunctionObjects.so");
+        type coded;
+        redirectType error;
+        code
+        #{
+            // Lookup U
+            Info<< "Looking up field U\n" << endl;
+            const volVectorField& U = mesh().lookupObject<volVectorField>("U");
+
+            Info<< "Reading inlet velocity  uInfX\n" << endl;
+
+            dimensionedScalar uInfX
+            (
+                "uInfx",
+                dimensionSet(0, 1, -1, 0, 0),
+                U.boundaryField()[3][0].x()
+            );
+            Info << "U at inlet = " << uInfX.value() << " m/s" << endl;
+
+            dimensionedScalar radius
+            (
+                "radius",
+                dimensionSet(0, 1, 0, 0, 0),
+                mag(U.mesh().boundary()[4].Cf()[0])
+            );
+
+            Info << "Cylinder radius = " << radius.value() << " m" << endl;
+
+            volVectorField UA
+            (
+                IOobject
+                (
+                    "UA",
+                    mesh().time().timeName(),
+                    U.mesh(),
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                U
+            );
+
+            Info<< "\nEvaluating analytical solution" << endl;
+
+            volVectorField centres = UA.mesh().C();
+            volScalarField magCentres = mag(centres);
+            volScalarField theta = acos((centres & vector(1,0,0))/magCentres);
+
+            volVectorField cs2theta =
+                cos(2*theta)*vector(1,0,0)
+              + sin(2*theta)*vector(0,1,0);
+
+            UA = uInfX*(dimensionedVector(vector(1,0,0))
+              - pow((radius/magCentres),2)*cs2theta);
+
+            // Force writing of UA (since time has not changed)
+            UA.write();
+
+            volScalarField error("error", mag(U-UA)/mag(UA));
+            Info<<"Writing relative error in U to " << error.objectPath()
+                << endl;
+            error.write();
+        #};
+    }
+}
+
 
 // ************************************************************************* //

@@ -492,6 +492,7 @@ DebugSwitches
     geomCellLooper      0;
     geometricSurfacePatch   0;
     global              0;
+    globalIndexAndTransform 0;
     globalMeshData      0;
     globalPoints        0;
     gnuplot             0;

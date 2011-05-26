@@ -180,6 +180,11 @@ snapControls
     //- Maximum number of snapping relaxation iterations. Should stop
     //  before upon reaching a correct mesh.
     nRelaxIter 5;
+
+    //- Highly experimental and wip: number of feature edge snapping
+    //  iterations. Leave out altogether to disable.
+    //  Do not use here since mesh resolution too low and baffles present
+    //nFeatureSnapIter 10;
 }
 
 
@@ -249,14 +254,17 @@ addLayersControls
     maxThicknessToMedialRatio 0.3;
 
     // Angle used to pick up medial axis points
-    // Note: changed(corrected) w.r.t 16x! 90 degrees corresponds to 130 in 16x.
+    // Note: changed(corrected) w.r.t 17x! 90 degrees corresponds to 130 in 17x.
     minMedianAxisAngle 90;
 
 
     // Create buffer region for new layer terminations
     nBufferCellsNoExtrude 0;
 
-    // Overall max number of layer addition iterations
+
+    // Overall max number of layer addition iterations. The mesher will exit
+    // if it reaches this number of iterations; possibly with an illegal
+    // mesh.
     nLayerIter 50;
 }
 
@@ -285,7 +293,8 @@ meshQualityControls
 
     //- Minimum quality of the tet formed by the face-centre
     //  and variable base point minimum decomposition triangles and
-    //  the cell centre.  Set to very negative number (e.g. -1E30) to
+    //  the cell centre. This has to be a positive number for tracking
+    //  to work. Set to very negative number (e.g. -1E30) to
     //  disable.
     //     <0 = inside out tet,
     //      0 = flat tet

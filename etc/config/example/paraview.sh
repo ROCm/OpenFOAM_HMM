@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -22,39 +22,25 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     ensight/bashrc
+#     config/example/paraview.sh
 #
 # Description
-#     Setup file for Ensight
-#     Sourced from OpenFOAM-*/etc/bashrc
+#     Example of chaining to the standard config/paraview.sh with a
+#     different ParaView_VERSION
+#
+# Note
+#     This file could be copied to a user or site location, but should never
+#     replace the default shipped version as this will cause an infinite loop
 #
 #------------------------------------------------------------------------------
 
-# fallback value
-if [ ! -d "$CEI_HOME" ]
-then
-    export CEI_HOME=/usr/local/ensight/CEI
-fi
+#
+# Use other (shipped) paraview.sh with a different ParaView_VERSION
+#
 
-if [ -r $CEI_HOME ]
-then
+foamFile=$($WM_PROJECT_DIR/bin/foamEtcFile -mode o config/paraview.sh 2>/dev/null)
+[ $? -eq 0 ] && . $foamFile ParaView_VERSION=3.9.0
 
-    # special treatment for 32bit OpenFOAM and 64bit Ensight
-    if [ "$WM_ARCH" = linux -a `uname -m` = x86_64 ]
-    then
-        export CEI_ARCH=linux_2.6_32
-    fi
-
-    # add to path if required
-    if [ "$CEI_HOME/bin/ensight" != "`which ensight 2>/dev/null`" ]
-    then
-        export PATH=$CEI_HOME/bin:$PATH
-    fi
-
-    export ENSIGHT9_INPUT=dummy
-    export ENSIGHT9_READER=$FOAM_LIBBIN
-else
-    unset CEI_HOME
-fi
+unset foamFile
 
 # -----------------------------------------------------------------------------

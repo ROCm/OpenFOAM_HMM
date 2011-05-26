@@ -22,15 +22,25 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     config/openmpi.csh
+#     config/example/paraview.csh
 #
 # Description
-#     Fine tuning of openmpi settings for OpenFOAM
-#     Sourced from OpenFOAM-<VERSION>/etc/settings.csh
+#     Example of chaining to the standard config/paraview.csh with a
+#     different ParaView_VERSION
+#
+# Note
+#     This file could be copied to a user or site location, but should never
+#     replace the default shipped version as this will cause an infinite loop
 #
 #------------------------------------------------------------------------------
 
-# Modified openmpi settings
-setenv FOAM_MPI openmpi-1.4.3
+#
+# Use other (shipped) paraview.csh with a different ParaView_VERSION
+#
 
-# ----------------------------------------------------------------- end-of-file
+set foamFile=`$WM_PROJECT_DIR/bin/foamEtcFile -mode o config/paraview.csh`
+if ( $status == 0 ) source $foamFile ParaView_VERSION=3.9.0
+
+unset foamFile
+
+# -----------------------------------------------------------------------------

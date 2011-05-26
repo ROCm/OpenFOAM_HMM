@@ -2,9 +2,9 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -22,19 +22,33 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     scotch/bashrc
+#     config/ensight.csh
 #
 # Description
-#     Setup file for scotch include/libraries.
-#     Sourced during wmake process only.
+#     Setup file for Ensight
+#     Sourced from OpenFOAM-*/etc/cshrc
 #
-# Note
-#     A csh version is not needed, since the values here are only sourced
-#     during the wmake process
 #------------------------------------------------------------------------------
 
-export SCOTCH_VERSION=scotch_5.1.11
-export SCOTCH_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$SCOTCH_VERSION
+# fallback value
+if (! $?CEI_HOME) then
+    setenv CEI_HOME /usr/local/ensight/CEI
+endif
 
+if ( -r $CEI_HOME ) then
+
+    # special treatment for 32bit OpenFOAM and 64bit Ensight
+    if ($WM_ARCH == linux && `uname -m` == x86_64) then
+        setenv CEI_ARCH linux_2.6_32
+    endif
+
+    # add to path
+    setenv PATH ${CEI_HOME}/bin:${PATH}
+
+    setenv ENSIGHT9_INPUT dummy
+    setenv ENSIGHT9_READER $FOAM_LIBBIN
+else
+    unsetenv CEI_HOME
+endif
 
 # -----------------------------------------------------------------------------

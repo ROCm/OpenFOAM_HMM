@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -22,15 +22,27 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     config/openmpi.sh
+#     config/example/prefs.sh
 #
 # Description
-#     Fine tuning of openmpi settings for OpenFOAM
-#     Sourced from OpenFOAM-<VERSION>/etc/settings.sh
+#     Preset variables for the OpenFOAM configuration - POSIX shell syntax.
+#
+#     The prefs.sh file will be sourced by the OpenFOAM etc/bashrc when it is
+#     found by foamEtcFile.
+#
+# See Also
+#     'foamEtcFile -help' or 'foamEtcFile -list' for information about the
+#     paths searched
 #
 #------------------------------------------------------------------------------
 
-# Modified openmpi settings
-export FOAM_MPI=openmpi-1.4.3
+## Specify OpenFOAM ThirdParty compiler
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# foamCompiler=ThirdParty
+
+## Specify system openmpi
+## ~~~~~~~~~~~~~~~~~~~~~~
+# export WM_MPLIB=SYSTEMOPENMPI
+
 
 # ----------------------------------------------------------------- end-of-file
