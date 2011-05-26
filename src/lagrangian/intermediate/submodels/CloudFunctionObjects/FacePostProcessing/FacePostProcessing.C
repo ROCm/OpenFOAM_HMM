@@ -66,10 +66,9 @@ void Foam::FacePostProcessing<CloudType>::write()
     const label procI = Pstream::myProcNo();
 
     scalarListList allProcMass(Pstream::nProcs());
-    allProcMass[procI].setSize(massTotal_.size());
     allProcMass[procI] = massTotal_;
     Pstream::gatherList(allProcMass);
-    scalarList allMass
+    scalarField allMass
     (
         ListListOps::combine<scalarList>
         (
@@ -78,10 +77,9 @@ void Foam::FacePostProcessing<CloudType>::write()
     );
 
     scalarListList allProcMassFlux(Pstream::nProcs());
-    allProcMassFlux[procI].setSize(massFlux_.size());
     allProcMassFlux[procI] = massFlux_;
     Pstream::gatherList(allProcMassFlux);
-    scalarList allMassFlux
+    scalarField allMassFlux
     (
         ListListOps::combine<scalarList>
         (
@@ -109,16 +107,8 @@ void Foam::FacePostProcessing<CloudType>::write()
 
         pointField uniquePoints(mesh.points(), uniqueMeshPointLabels);
         List<pointField> allProcPoints(Pstream::nProcs());
-        allProcPoints[procI].setSize(uniquePoints.size());
         allProcPoints[procI] = uniquePoints;
         Pstream::gatherList(allProcPoints);
-        pointField allPoints
-        (
-            ListListOps::combine<pointField>
-            (
-                allProcPoints, accessOp<pointField>()
-            )
-        );
 
         faceList faces(fZone_().localFaces());
         forAll(faces, i)
@@ -126,20 +116,27 @@ void Foam::FacePostProcessing<CloudType>::write()
             inplaceRenumber(pointToGlobal, faces[i]);
         }
         List<faceList> allProcFaces(Pstream::nProcs());
-        allProcFaces[procI].setSize(faces.size());
         allProcFaces[procI] = faces;
         Pstream::gatherList(allProcFaces);
-        faceList allFaces
-        (
-            ListListOps::combine<faceList>
-            (
-                allProcFaces, accessOp<faceList>()
-            )
-        );
-
 
         if (Pstream::master())
         {
+            pointField allPoints
+            (
+                ListListOps::combine<pointField>
+                (
+                    allProcPoints, accessOp<pointField>()
+                )
+            );
+
+            faceList allFaces
+            (
+                ListListOps::combine<faceList>
+                (
+                    allProcFaces, accessOp<faceList>()
+                )
+            );
+
             fileName outputDir = mesh.time().path();
 
             if (Pstream::parRun())
@@ -165,7 +162,7 @@ void Foam::FacePostProcessing<CloudType>::write()
                 allPoints,
                 allFaces,
                 "massTotal",
-                massTotal_,
+                allMass,
                 false
             );
             writer->write
@@ -175,7 +172,7 @@ void Foam::FacePostProcessing<CloudType>::write()
                 allPoints,
                 allFaces,
                 "massFlux",
-                massFlux_,
+                allMassFlux,
                 false
             );
         }

@@ -334,6 +334,19 @@ public:
             static void noParallel();
 
 
+            //- Set option directly (use with caution)
+            //  An option with an empty param is a bool option.
+            //  Not all valid options can also be set: eg, -case, -roots, ...
+            //  Return true if the existing option value needed changing,
+            //  or if the option did not previously exist.
+            bool setOption(const word& opt, const string& param = "");
+
+            //- Unset option directly (use with caution)
+            //  Not all valid options can also be unset: eg, -case, -roots ...
+            //  Return true if the option existed before being unset.
+            bool unsetOption(const word& opt);
+
+
         // Print
 
             //- Print notes (if any)

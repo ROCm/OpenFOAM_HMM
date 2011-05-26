@@ -164,6 +164,10 @@ public:
         friend class globalPoints;
 
 
+    // Declare name of the class and its debug switch
+    ClassName("globalIndexAndTransform");
+
+
     // Constructors
 
         //- Construct from components

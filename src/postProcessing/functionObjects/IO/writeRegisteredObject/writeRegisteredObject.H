@@ -65,10 +65,6 @@ protected:
 
         const objectRegistry& obr_;
 
-        //- On/off switch
-        bool active_;
-
-
         // Read from dictionary
 
             //- Names of objects to control

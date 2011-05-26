@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,48 @@ defineRunTimeSelectionTable(Foam::dynamicFvMesh, IOobject);
 Foam::dynamicFvMesh::dynamicFvMesh(const IOobject& io)
 :
     fvMesh(io)
+{}
+
+
+Foam::dynamicFvMesh::dynamicFvMesh
+(
+    const IOobject& io,
+    const Xfer<pointField>& points,
+    const Xfer<faceList>& faces,
+    const Xfer<labelList>& allOwner,
+    const Xfer<labelList>& allNeighbour,
+    const bool syncPar
+)
+:
+    fvMesh
+    (
+        io,
+        points,
+        faces,
+        allOwner,
+        allNeighbour,
+        syncPar
+    )
+{}
+
+
+Foam::dynamicFvMesh::dynamicFvMesh
+(
+    const IOobject& io,
+    const Xfer<pointField>& points,
+    const Xfer<faceList>& faces,
+    const Xfer<cellList>& cells,
+    const bool syncPar
+)
+:
+    fvMesh
+    (
+        io,
+        points,
+        faces,
+        cells,
+        syncPar
+    )
 {}
 
 
