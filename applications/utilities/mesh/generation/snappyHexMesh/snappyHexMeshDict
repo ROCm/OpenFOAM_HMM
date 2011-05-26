@@ -220,7 +220,7 @@ snapControls
     //- Maximum relative distance for points to be attracted by surface.
     //  True distance is this factor times local maximum edge length.
     // Note: changed(corrected) w.r.t 17x! (17x used 2* tolerance)
-    tolerance 2.0;
+    tolerance 1.0;
 
     //- Number of mesh displacement relaxation iterations.
     nSolveIter 30;
@@ -228,6 +228,10 @@ snapControls
     //- Maximum number of snapping relaxation iterations. Should stop
     //  before upon reaching a correct mesh.
     nRelaxIter 5;
+
+    //- Highly experimental and wip: number of feature edge snapping
+    //  iterations. Leave out altogether to disable.
+    //nFeatureSnapIter 10;
 }
 
 
@@ -258,6 +262,9 @@ addLayersControls
 
 
     //- Wanted thickness of final added cell layer. If multiple layers
+    //  is the
+    //  thickness of the layer furthest away from the wall.
+    //  Relative to undistorted size of cell outside layer.
     //  is the thickness of the layer furthest away from the wall.
     //  See relativeSizes parameter.
     finalLayerThickness 0.3;
@@ -410,7 +417,7 @@ debug 0;
 
 // Merge tolerance. Is fraction of overall bounding box of initial mesh.
 // Note: the write tolerance needs to be higher than this.
-mergeTolerance 1E-6;
+mergeTolerance 1e-6;
 
 
 // ************************************************************************* //
