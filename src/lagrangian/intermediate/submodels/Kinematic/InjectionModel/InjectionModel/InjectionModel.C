@@ -591,11 +591,11 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                     tetPtI
                 );
 
-                // Assign new parcel properties in injection model
-                setProperties(parcelI, newParcels, timeInj, *pPtr);
-
                 // Check/set new parcel properties
                 td.cloud().checkParcelProperties(*pPtr, dt, fullyDescribed());
+
+                // Assign new parcel properties in injection model
+                setProperties(parcelI, newParcels, timeInj, *pPtr);
 
                 // Apply correction to velocity for 2-D cases
                 meshTools::constrainDirection
@@ -696,11 +696,11 @@ void Foam::InjectionModel<CloudType>::injectSteadyState
                 tetPtI
             );
 
-            // Assign new parcel properties in injection model
-            setProperties(parcelI, newParcels, 0.0, *pPtr);
-
             // Check new parcel properties
             td.cloud().checkParcelProperties(*pPtr, 0.0, fullyDescribed());
+
+            // Assign new parcel properties in injection model
+            setProperties(parcelI, newParcels, 0.0, *pPtr);
 
             // Apply correction to velocity for 2-D cases
             meshTools::constrainDirection
