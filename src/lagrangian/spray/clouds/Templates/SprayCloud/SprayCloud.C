@@ -315,8 +315,16 @@ void Foam::SprayCloud<CloudType>::motion(TrackData& td)
                             scalarField Xq(liqMix.X(q.Y()));
                             q.rho() = liqMix.rho(q.pc(), q.T(), Xq);
                             q.Cp() = liqMix.Cp(q.pc(), q.T(), Xq);
-                            scalar rhs = 6.0*mq/(q.nParticle()*q.rho()*constant::mathematical::pi);
-                            q.d() = pow(rhs, 1.0/3.0);
+                            q.d() =
+                                cbrt
+                                (
+                                    6.0*mq
+                                   /(
+                                        q.nParticle()
+                                       *q.rho()
+                                       *constant::mathematical::pi
+                                    )
+                                );
                         }
                     }
                 }
