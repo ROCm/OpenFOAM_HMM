@@ -27,22 +27,12 @@ Class
 Description
     kOmegaSSTSAS LES turbulence model for incompressible flows
 
-    References:
-    Evaluation of the SST-SAS model: Channel flow, asymmetric diffuser and axi-
-    symmetric hill
-    European Conference on Computational Fluid Dynamics
-    ECCOMAS CFD 2006
-    Lars Davison
-
-    A Scale-Adaptive Simulation Model using Two-Equation Models
-    AIAA 2005-1095
-    F. R. Menter and Y. Egorov
 
     DESider A European Effort on Hybrid RANS-LES Modelling:
     Results of the European-Union Funded Project, 2004 - 2007
     (Notes on Numerical Fluid Mechanics and Multidisciplinary Design).
     Chapter 8 Formulation of the Scale-Adaptive Simulation (SAS) Model during
-    the DESIDER Project.
+    the DESIDER Project. Published in Springer-Verlag Berlin Heidelberg 2009.
     F. R. Menter and Y. Egorov.
 
 SourceFiles
