@@ -155,19 +155,14 @@ Foam::ReactingMultiphaseCloud<CloudType>::~ReactingMultiphaseCloud()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-void Foam::ReactingMultiphaseCloud<CloudType>::checkParcelProperties
+void Foam::ReactingMultiphaseCloud<CloudType>::setParcelThermoProperties
 (
     parcelType& parcel,
     const scalar lagrangianDt,
     const bool fullyDescribed
 )
 {
-    CloudType::checkParcelProperties
-    (
-        parcel,
-        lagrangianDt,
-        fullyDescribed
-    );
+    CloudType::setParcelThermoProperties(parcel, lagrangianDt, fullyDescribed);
 
     label idGas = this->composition().idGas();
     label idLiquid = this->composition().idLiquid();
@@ -200,6 +195,18 @@ void Foam::ReactingMultiphaseCloud<CloudType>::checkParcelProperties
             "YSolid"
         );
     }
+}
+
+
+template<class CloudType>
+void Foam::ReactingMultiphaseCloud<CloudType>::checkParcelProperties
+(
+    parcelType& parcel,
+    const scalar lagrangianDt,
+    const bool fullyDescribed
+)
+{
+    CloudType::checkParcelProperties(parcel, lagrangianDt, fullyDescribed);
 }
 
 

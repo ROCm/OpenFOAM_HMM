@@ -499,7 +499,7 @@ bool Foam::KinematicCloud<CloudType>::hasWallImpactDistance() const
 
 
 template<class CloudType>
-void Foam::KinematicCloud<CloudType>::checkParcelProperties
+void Foam::KinematicCloud<CloudType>::setParcelThermoProperties
 (
     parcelType& parcel,
     const scalar lagrangianDt,
@@ -510,7 +510,17 @@ void Foam::KinematicCloud<CloudType>::checkParcelProperties
     {
         parcel.rho() = constProps_.rho0();
     }
+}
 
+
+template<class CloudType>
+void Foam::KinematicCloud<CloudType>::checkParcelProperties
+(
+    parcelType& parcel,
+    const scalar lagrangianDt,
+    const bool fullyDescribed
+)
+{
     const scalar carrierDt = mesh_.time().deltaTValue();
     parcel.stepFraction() = (carrierDt - lagrangianDt)/carrierDt;
     parcel.typeId() = constProps_.parcelTypeId();

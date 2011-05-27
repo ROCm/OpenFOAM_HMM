@@ -530,6 +530,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     const scalar time = this->owner().db().time().value();
     const scalar trackTime = this->owner().solution().trackTime();
     const polyMesh& mesh = this->owner().mesh();
+    typename TrackData::cloudType& cloud = td.cloud();
 
     // Prepare for next time step
     label parcelsAdded = 0;
@@ -592,10 +593,13 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                 );
 
                 // Check/set new parcel properties
-                td.cloud().checkParcelProperties(*pPtr, dt, fullyDescribed());
+                cloud.setParcelThermoProperties(*pPtr, dt, fullyDescribed());
 
                 // Assign new parcel properties in injection model
                 setProperties(parcelI, newParcels, timeInj, *pPtr);
+
+                // Check/set new parcel properties
+                cloud.checkParcelProperties(*pPtr, dt, fullyDescribed());
 
                 // Apply correction to velocity for 2-D cases
                 meshTools::constrainDirection
@@ -647,6 +651,7 @@ void Foam::InjectionModel<CloudType>::injectSteadyState
     }
 
     const polyMesh& mesh = this->owner().mesh();
+    typename TrackData::cloudType& cloud = td.cloud();
 
     // Reset counters
     time0_ = 0.0;
@@ -696,11 +701,14 @@ void Foam::InjectionModel<CloudType>::injectSteadyState
                 tetPtI
             );
 
-            // Check new parcel properties
-            td.cloud().checkParcelProperties(*pPtr, 0.0, fullyDescribed());
+            // Check/set new parcel properties
+            cloud.setParcelThermoProperties(*pPtr, 0.0, fullyDescribed());
 
             // Assign new parcel properties in injection model
             setProperties(parcelI, newParcels, 0.0, *pPtr);
+
+            // Check/set new parcel properties
+            cloud.checkParcelProperties(*pPtr, 0.0, fullyDescribed());
 
             // Apply correction to velocity for 2-D cases
             meshTools::constrainDirection

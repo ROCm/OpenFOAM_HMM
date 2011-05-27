@@ -158,6 +158,30 @@ Foam::SprayCloud<CloudType>::~SprayCloud()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
+void Foam::SprayCloud<CloudType>::setParcelThermoProperties
+(
+    parcelType& parcel,
+    const scalar lagrangianDt,
+    const bool fullyDescribed
+)
+{
+    CloudType::setParcelThermoProperties(parcel, lagrangianDt, fullyDescribed);
+
+    if (!fullyDescribed)
+    {
+        const liquidMixtureProperties& liqMix = this->composition().liquids();
+
+        const scalarField& Y(parcel.Y());
+        scalarField X(liqMix.X(Y));
+
+        // override rho and Cp from constantProperties
+        parcel.Cp() = liqMix.Cp(parcel.pc(), parcel.T(), X);
+        parcel.rho() = liqMix.rho(parcel.pc(), parcel.T(), X);
+    }
+}
+
+
+template<class CloudType>
 void Foam::SprayCloud<CloudType>::checkParcelProperties
 (
     parcelType& parcel,
@@ -165,21 +189,7 @@ void Foam::SprayCloud<CloudType>::checkParcelProperties
     const bool fullyDescribed
 )
 {
-    CloudType::checkParcelProperties
-    (
-        parcel,
-        lagrangianDt,
-        fullyDescribed
-    );
-
-    const liquidMixtureProperties& liqMix = this->composition().liquids();
-
-    const scalarField& Y(parcel.Y());
-    scalarField X(liqMix.X(Y));
-
-    // override rho and Cp from constantProperties
-    parcel.Cp() = liqMix.Cp(parcel.pc(), parcel.T(), X);
-    parcel.rho() = liqMix.rho(parcel.pc(), parcel.T(), X);
+    CloudType::checkParcelProperties(parcel, lagrangianDt, fullyDescribed);
 
     // store the injection position and initial drop size
     parcel.position0() = parcel.position();
