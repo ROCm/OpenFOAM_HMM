@@ -32,7 +32,7 @@ EXE_LIBS = \
     -lcompressibleLESModels \
     -llagrangian \
     -llagrangianIntermediate \
-    -lspray \
+    -llagrangianSpray \
     -lspecie \
     -lbasicThermophysicalModels \
     -lliquidProperties \
