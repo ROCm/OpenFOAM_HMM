@@ -65,37 +65,38 @@ protected:
 
         // Spray parcel properties
 
-            //- initial droplet diameter
+            //- Initial droplet diameter
             scalar d0_;
 
-            //- injection position
+            //- Injection position
             vector position0_;
 
-            //- part of liquid core ( > 0.5-liquid, < 0.5-droplet )
+            //- Part of liquid core ( >0.5=liquid, <0.5=droplet )
             scalar liquidCore_;
 
-            //- index for KH Breakup
+            //- Index for KH Breakup
             scalar KHindex_;
 
-            //- spherical deviation
+            //- Spherical deviation
             scalar y_;
 
-            //- rate of change of spherical deviation
+            //- Rate of change of spherical deviation
             scalar yDot_;
 
-            //- characteristic time (used in atomization and/or breakup model)
+            //- Characteristic time (used in atomization and/or breakup model)
             scalar tc_;
 
-            //- stripped parcel mass due to breakup
+            //- Stripped parcel mass due to breakup
             scalar ms_;
 
-            //- injected from injector (needed for ex. for calculating distance from injector)
+            //- Injected from injector (needed e.g. for calculating distance
+            //  from injector)
             scalar injector_;
 
-            //- momentum relaxation time (needed for calculating parcel acc.)
+            //- Momentum relaxation time (needed for calculating parcel acc.)
             scalar tMom_;
 
-            //- passive scalar (extra variable to be defined by user)
+            //- Passive scalar (extra variable to be defined by user)
             scalar user_;
 
 
