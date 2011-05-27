@@ -57,6 +57,30 @@ Foam::label Foam::globalPoints::countPatchPoints
 }
 
 
+Foam::label Foam::globalPoints::findSamePoint
+(
+    const labelPairList& allInfo,
+    const labelPair& info
+) const
+{
+    const label procI = globalIndexAndTransform::processor(info);
+    const label index = globalIndexAndTransform::index(info);
+
+    forAll(allInfo, i)
+    {
+        if
+        (
+            globalIndexAndTransform::processor(allInfo[i]) == procI
+         && globalIndexAndTransform::index(allInfo[i]) == index
+        )
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+
 Foam::labelPairList Foam::globalPoints::addSendTransform
 (
     const label patchI,
@@ -67,6 +91,15 @@ Foam::labelPairList Foam::globalPoints::addSendTransform
 
     forAll(info, i)
     {
+        //Pout<< "    adding send transform to" << nl
+        //    << "    proc:" << globalIndexAndTransform::processor(info[i])
+        //    << nl
+        //    << "    index:" << globalIndexAndTransform::index(info[i]) << nl
+        //    << "    trafo:"
+        //    <<  globalTransforms_.decodeTransformIndex
+        //        (globalIndexAndTransform::transformIndex(info[i]))
+        //    << endl;
+
         sendInfo[i] = globalIndexAndTransform::encode
         (
             globalIndexAndTransform::processor(info[i]),
@@ -129,71 +162,62 @@ bool Foam::globalPoints::mergeInfo
 {
     bool anyChanged = false;
 
+    // Extend to make space for the nbrInfo (trimmed later)
     labelPairList newInfo(myInfo);
     label newI = newInfo.size();
     newInfo.setSize(newI + nbrInfo.size());
 
     forAll(nbrInfo, i)
     {
-        const labelPair& info = nbrInfo[i];
-        label nbrProcI = globalIndexAndTransform::processor(info);
-        label nbrIndex = globalIndexAndTransform::index(info);
-        label nbrTransform = globalIndexAndTransform::transformIndex(info);
-
         // Check if already have information about nbr point. There are two
         // possibilities:
         // - information found about same point but different transform.
         //   Combine transforms
         // - information not found.
 
-        label myIndex = -1;
-        forAll(myInfo, myI)
-        {
-            if (myInfo[myI] == info)
-            {
-                // Fully identical. We already have nbrInfo.
-                myIndex = myI;
-            }
-            else if
-            (
-                globalIndexAndTransform::processor(myInfo[myI]) == nbrProcI
-             && globalIndexAndTransform::index(myInfo[myI]) == nbrIndex
-            )
-            {
-                // Only differing is the transform.
-                label myTransform = globalIndexAndTransform::transformIndex
-                (
-                    myInfo[myI]
-                );
+        label index = findSamePoint(myInfo, nbrInfo[i]);
 
-                // Combine mine and nbr transform
-                label t = globalTransforms_.mergeTransformIndex
-                (
-                    nbrTransform,
-                    myTransform
-                );
-                myIndex = myI;
-
-                if (t != myTransform)
-                {
-                    // Same point but different transformation
-                    newInfo[myI] = globalIndexAndTransform::encode
-                    (
-                        nbrProcI,
-                        nbrIndex,
-                        t
-                    );
-                    anyChanged = true;
-                    break;
-                }
-            }
-        }
-
-        if (myIndex == -1)
+        if (index == -1)
         {
             // New point
             newInfo[newI++] = nbrInfo[i];
             anyChanged = true;
+        }
+        else
+        {
+            // Same point. So we already have a connection between localPointI
+            // and the nbrIndex. Two situations:
+            // - same transform
+            // - one transform takes two steps, the other just a single.
+            if (myInfo[index] == nbrInfo[i])
+            {
+                // Everything same (so also transform). Nothing changed.
+            }
+            else
+            {
+                label myTransform = globalIndexAndTransform::transformIndex
+                (
+                    myInfo[index]
+                );
+                label nbrTransform = globalIndexAndTransform::transformIndex
+                (
+                    nbrInfo[i]
+                );
+
+                // Different transform. See which is 'simplest'.
+                label minTransform = globalTransforms_.minimumTransformIndex
+                (
+                    myTransform,
+                    nbrTransform
+                );
+
+                if (minTransform != myTransform)
+                {
+                    // Use nbr info.
+                    newInfo[index] = nbrInfo[i];
+                    anyChanged = true;
+                }
+            }
         }
     }
 
@@ -327,7 +351,7 @@ void Foam::globalPoints::printProcPoints
         label index = globalIndexAndTransform::index(pointInfo[i]);
         label trafoI = globalIndexAndTransform::transformIndex(pointInfo[i]);
 
-        Pout<< "proc:" << procI;
+        Pout<< "    proc:" << procI;
         Pout<< " localpoint:";
         Pout<< index;
         Pout<< " through transform:"
@@ -385,6 +409,10 @@ void Foam::globalPoints::initOwnPoints
                             globalTransforms_.nullTransformIndex()
                         )
                     );
+
+                    //Pout<< "For point "<< pp.points()[meshPointI]
+                    //    << " inserting info " << knownInfo
+                    //    << endl;
 
                     // Update changedpoints info.
                     if (storeInitialInfo(knownInfo, localPointI))
@@ -636,58 +664,34 @@ void Foam::globalPoints::receivePatchPoints
                     Map<label>::iterator procPointA =
                         meshToProcPoint_.find(localA);
 
-                    labelPairList infoA;
                     if (procPointA != meshToProcPoint_.end())
                     {
-                        infoA = addSendTransform
+                        const labelPairList infoA = addSendTransform
                         (
                             cycPatch.index(),
                             procPoints_[procPointA()]
                         );
+
+                        if (mergeInfo(infoA, localB))
+                        {
+                            changedPoints.insert(localB);
+                        }
                     }
 
                     // Same for info on pointB
                     Map<label>::iterator procPointB =
                         meshToProcPoint_.find(localB);
 
-                    labelPairList infoB;
                     if (procPointB != meshToProcPoint_.end())
                     {
-                        infoB = addSendTransform
+                        const labelPairList infoB = addSendTransform
                         (
                             cycPatch.neighbPatchID(),
                             procPoints_[procPointB()]
                         );
-                    }
 
-
-                    if (infoA.size())
-                    {
-                        if (mergeInfo(infoA, localB))
-                        {
-                            //Pout<< "  Combined info at point "
-                            //    << mesh_.points()[meshPointB]
-                            //    << " now " << endl;
-                            //printProcPoints
-                            //(
-                            //    patchToMeshPoint,
-                            //    procPoints_[meshToProcPoint_[localB]]
-                            //);
-                            changedPoints.insert(localB);
-                        }
-                    }
-                    if (infoB.size())
-                    {
                         if (mergeInfo(infoB, localA))
                         {
-                            //Pout<< "  Combined info at point "
-                            //    << mesh_.points()[meshPointA]
-                            //    << " now " << endl;
-                            //printProcPoints
-                            //(
-                            //    patchToMeshPoint,
-                            //    procPoints_[meshToProcPoint_[localA]]
-                            //);
                             changedPoints.insert(localA);
                         }
                     }
@@ -845,6 +849,9 @@ void Foam::globalPoints::calculateSharedPoints
     {
         Pout<< "globalPoints::calculateSharedPoints(..) : "
             << "doing processor to processor communication to get sharedPoints"
+            << endl
+            << "    keepAllPoints :" << keepAllPoints << endl
+            << "    mergeSeparated:" << mergeSeparated << endl
             << endl;
     }
 
@@ -951,7 +958,7 @@ void Foam::globalPoints::calculateSharedPoints
     //    printProcPoints(patchToMeshPoint, pointInfo);
     //    Pout<< endl;
     //}
-    //
+
 
     // Remove direct neighbours from point equivalences.
     if (!keepAllPoints)
