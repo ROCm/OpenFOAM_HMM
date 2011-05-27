@@ -592,13 +592,13 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                     tetPtI
                 );
 
-                // Check/set new parcel properties
+                // Check/set new parcel thermo properties
                 cloud.setParcelThermoProperties(*pPtr, dt, fullyDescribed());
 
                 // Assign new parcel properties in injection model
                 setProperties(parcelI, newParcels, timeInj, *pPtr);
 
-                // Check/set new parcel properties
+                // Check/set new parcel injection properties
                 cloud.checkParcelProperties(*pPtr, dt, fullyDescribed());
 
                 // Apply correction to velocity for 2-D cases
@@ -701,13 +701,13 @@ void Foam::InjectionModel<CloudType>::injectSteadyState
                 tetPtI
             );
 
-            // Check/set new parcel properties
+            // Check/set new parcel thermo properties
             cloud.setParcelThermoProperties(*pPtr, 0.0, fullyDescribed());
 
             // Assign new parcel properties in injection model
             setProperties(parcelI, newParcels, 0.0, *pPtr);
 
-            // Check/set new parcel properties
+            // Check/set new parcel injection properties
             cloud.checkParcelProperties(*pPtr, 0.0, fullyDescribed());
 
             // Apply correction to velocity for 2-D cases
