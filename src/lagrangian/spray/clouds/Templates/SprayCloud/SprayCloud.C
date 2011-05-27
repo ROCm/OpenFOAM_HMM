@@ -161,23 +161,19 @@ template<class CloudType>
 void Foam::SprayCloud<CloudType>::setParcelThermoProperties
 (
     parcelType& parcel,
-    const scalar lagrangianDt,
-    const bool fullyDescribed
+    const scalar lagrangianDt
 )
 {
-    CloudType::setParcelThermoProperties(parcel, lagrangianDt, fullyDescribed);
+    CloudType::setParcelThermoProperties(parcel, lagrangianDt);
 
-    if (!fullyDescribed)
-    {
-        const liquidMixtureProperties& liqMix = this->composition().liquids();
+    const liquidMixtureProperties& liqMix = this->composition().liquids();
 
-        const scalarField& Y(parcel.Y());
-        scalarField X(liqMix.X(Y));
+    const scalarField& Y(parcel.Y());
+    scalarField X(liqMix.X(Y));
 
-        // override rho and Cp from constantProperties
-        parcel.Cp() = liqMix.Cp(parcel.pc(), parcel.T(), X);
-        parcel.rho() = liqMix.rho(parcel.pc(), parcel.T(), X);
-    }
+    // override rho and Cp from constantProperties
+    parcel.Cp() = liqMix.Cp(parcel.pc(), parcel.T(), X);
+    parcel.rho() = liqMix.rho(parcel.pc(), parcel.T(), X);
 }
 
 

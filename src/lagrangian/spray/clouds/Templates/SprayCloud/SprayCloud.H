@@ -213,8 +213,7 @@ public:
             void setParcelThermoProperties
             (
                 parcelType& parcel,
-                const scalar lagrangianDt,
-                const bool fullyDescribed
+                const scalar lagrangianDt
             );
 
             //- Check parcel properties

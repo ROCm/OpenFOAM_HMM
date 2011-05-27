@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,8 +47,20 @@ Foam::polynomialTransport<Thermo, PolySize>::polynomialTransport
 )
 :
     Thermo(dict),
-    muCoeffs_(dict.lookup("muCoeffs<" + Foam::name(PolySize) + '>')),
-    kappaCoeffs_(dict.lookup("kappaCoeffs<" + Foam::name(PolySize) + '>'))
+    muCoeffs_
+    (
+        dict.subDict("transport").lookup
+        (
+            "muCoeffs<" + Foam::name(PolySize) + '>'
+        )
+    ),
+    kappaCoeffs_
+    (
+        dict.subDict("transport").lookup
+        (
+            "kappaCoeffs<" + Foam::name(PolySize) + '>'
+        )
+    )
 {
     muCoeffs_ *= this->W();
     kappaCoeffs_ *= this->W();
@@ -62,11 +74,22 @@ void Foam::polynomialTransport<Thermo, PolySize>::write(Ostream& os) const
 {
     os  << this->name() << endl;
     os  << token::BEGIN_BLOCK << incrIndent << nl;
+
     Thermo::write(os);
-    os.writeKeyword(word("muCoeffs<" + Foam::name(PolySize) + '>'))
-        << muCoeffs_/this->W() << token::END_STATEMENT << nl;
-    os.writeKeyword(word("kappaCoeffs<" + Foam::name(PolySize) + '>'))
-        << kappaCoeffs_/this->W() << token::END_STATEMENT << nl;
+
+    dictionary dict("transport");
+    dict.add
+    (
+        word("muCoeffs<" + Foam::name(PolySize) + '>'),
+        muCoeffs_/this->W()
+    );
+    dict.add
+    (
+        word("kappaCoeffs<" + Foam::name(PolySize) + '>'),
+        kappaCoeffs_/this->W()
+    );
+    os  << dict;
+
     os  << decrIndent << token::END_BLOCK << nl;
 }
 

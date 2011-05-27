@@ -19,12 +19,21 @@ thermoType      ePsiThermo<pureMixture<constTransport<specieThermo<hConstThermo<
 
 mixture
 {
-    nMoles          1;
-    molWeight       28.96;
-    Cp              1004.5;
-    Hf              2.544e+06;
-    mu              0;
-    Pr              1;
+    specie
+    {
+        nMoles          1;
+        molWeight       28.96;
+    }
+    thermodynamics
+    {
+        Cp              1004.5;
+        Hf              2.544e+06;
+    }
+    transport
+    {
+        mu              0;
+        Pr              1;
+    }
 }
 
 
