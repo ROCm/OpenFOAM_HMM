@@ -27,6 +27,7 @@ License
 #include "Pstream.H"
 #include "ListListOps.H"
 #include "surfaceWriter.H"
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

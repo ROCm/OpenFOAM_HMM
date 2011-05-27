@@ -115,17 +115,6 @@ class FieldActivatedInjection
                 sizeDistribution_;
 
 
-protected:
-
-    // Protected Member Functions
-
-        //- Number of parcels to introduce over the time step relative to SOI
-        virtual label parcelsToInject(const scalar time0, const scalar time1);
-
-        //- Volume of parcels to introduce over the time step relative to SOI
-        virtual scalar volumeToInject(const scalar time0, const scalar time1);
-
-
 public:
 
     //- Runtime type information
@@ -156,11 +145,14 @@ public:
 
     // Member Functions
 
-        //- Flag to indicate whether model activates injection model
-        bool active() const;
-
         //- Return the end-of-injection time
         scalar timeEnd() const;
+
+        //- Number of parcels to introduce relative to SOI
+        virtual label parcelsToInject(const scalar time0, const scalar time1);
+
+        //- Volume of parcels to introduce relative to SOI
+        virtual scalar volumeToInject(const scalar time0, const scalar time1);
 
 
         // Injection geometry

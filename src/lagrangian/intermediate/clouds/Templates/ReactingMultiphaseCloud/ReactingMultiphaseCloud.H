@@ -41,7 +41,6 @@ SourceFiles
 #ifndef ReactingMultiphaseCloud_H
 #define ReactingMultiphaseCloud_H
 
-#include "ReactingCloud.H"
 #include "reactingMultiphaseCloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -240,6 +239,14 @@ public:
 
 
         // Cloud evolution functions
+
+            //- Set parcel thermo properties
+            void setParcelThermoProperties
+            (
+                parcelType& parcel,
+                const scalar lagrangianDt,
+                const bool fullyDescribed
+            );
 
             //- Check parcel properties
             void checkParcelProperties

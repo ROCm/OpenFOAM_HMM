@@ -158,45 +158,6 @@ void Foam::CellZoneInjection<CloudType>::setPositions
 }
 
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::label Foam::CellZoneInjection<CloudType>::parcelsToInject
-(
-    const scalar time0,
-    const scalar time1
-)
-{
-    if ((0.0 >= time0) && (0.0 < time1))
-    {
-        return positions_.size();
-    }
-    else
-    {
-        return 0;
-    }
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::CellZoneInjection<CloudType>::volumeToInject
-(
-    const scalar time0,
-    const scalar time1
-)
-{
-    // All parcels introduced at SOI
-    if ((0.0 >= time0) && (0.0 < time1))
-    {
-        return this->volumeTotal_;
-    }
-    else
-    {
-        return 0.0;
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -313,6 +274,43 @@ Foam::scalar Foam::CellZoneInjection<CloudType>::timeEnd() const
 {
     // Not used
     return this->SOI_;
+}
+
+
+template<class CloudType>
+Foam::label Foam::CellZoneInjection<CloudType>::parcelsToInject
+(
+    const scalar time0,
+    const scalar time1
+)
+{
+    if ((0.0 >= time0) && (0.0 < time1))
+    {
+        return positions_.size();
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+
+template<class CloudType>
+Foam::scalar Foam::CellZoneInjection<CloudType>::volumeToInject
+(
+    const scalar time0,
+    const scalar time1
+)
+{
+    // All parcels introduced at SOI
+    if ((0.0 >= time0) && (0.0 < time1))
+    {
+        return this->volumeTotal_;
+    }
+    else
+    {
+        return 0.0;
+    }
 }
 
 

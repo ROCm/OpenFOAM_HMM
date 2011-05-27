@@ -29,44 +29,6 @@ License
 
 using namespace Foam::constant::mathematical;
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::label Foam::FieldActivatedInjection<CloudType>::parcelsToInject
-(
-    const scalar time0,
-    const scalar time1
-)
-{
-    if (sum(nParcelsInjected_) < nParcelsPerInjector_*positions_.size())
-    {
-        return positions_.size();
-    }
-    else
-    {
-        return 0;
-    }
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::FieldActivatedInjection<CloudType>::volumeToInject
-(
-    const scalar time0,
-    const scalar time1
-)
-{
-    if (sum(nParcelsInjected_) < nParcelsPerInjector_*positions_.size())
-    {
-        return this->volumeTotal_/nParcelsPerInjector_;
-    }
-    else
-    {
-        return 0;
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -180,16 +142,45 @@ Foam::FieldActivatedInjection<CloudType>::~FieldActivatedInjection()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::FieldActivatedInjection<CloudType>::active() const
+Foam::scalar Foam::FieldActivatedInjection<CloudType>::timeEnd() const
 {
-    return true;
+    return GREAT;
 }
 
 
 template<class CloudType>
-Foam::scalar Foam::FieldActivatedInjection<CloudType>::timeEnd() const
+Foam::label Foam::FieldActivatedInjection<CloudType>::parcelsToInject
+(
+    const scalar time0,
+    const scalar time1
+)
 {
-    return GREAT;
+    if (sum(nParcelsInjected_) < nParcelsPerInjector_*positions_.size())
+    {
+        return positions_.size();
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+
+template<class CloudType>
+Foam::scalar Foam::FieldActivatedInjection<CloudType>::volumeToInject
+(
+    const scalar time0,
+    const scalar time1
+)
+{
+    if (sum(nParcelsInjected_) < nParcelsPerInjector_*positions_.size())
+    {
+        return this->volumeTotal_/nParcelsPerInjector_;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 

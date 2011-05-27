@@ -281,6 +281,14 @@ public:
 
         // Cloud evolution functions
 
+            //- Set parcel thermo properties
+            void setParcelThermoProperties
+            (
+                parcelType& parcel,
+                const scalar lagrangianDt,
+                const bool fullyDescribed
+            );
+
             //- Check parcel properties
             void checkParcelProperties
             (
@@ -303,6 +311,9 @@ public:
 
             //- Apply scaling to (transient) cloud sources
             void scaleSources();
+
+            //- Pre-evolve
+            void preEvolve();
 
             //- Evolve the cloud
             void evolve();

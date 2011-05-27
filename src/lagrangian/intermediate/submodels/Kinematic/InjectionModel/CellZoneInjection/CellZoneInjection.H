@@ -95,25 +95,6 @@ class CellZoneInjection
         void setPositions(const labelList& cellZoneCells);
 
 
-protected:
-
-    // Protected member functions
-
-        //- Number of parcels to introduce over the time step relative to SOI
-        label parcelsToInject
-        (
-            const scalar time0,
-            const scalar time1
-        );
-
-        //- Volume of parcels to introduce over the time step relative to SOI
-        scalar volumeToInject
-        (
-            const scalar time0,
-            const scalar time1
-        );
-
-
 public:
 
     //- Runtime type information
@@ -146,6 +127,12 @@ public:
 
         //- Return the end-of-injection time
         scalar timeEnd() const;
+
+        //- Number of parcels to introduce relative to SOI
+        label parcelsToInject(const scalar time0, const scalar time1);
+
+        //- Volume of parcels to introduce relative to SOI
+        scalar volumeToInject(const scalar time0, const scalar time1);
 
 
         // Injection geometry

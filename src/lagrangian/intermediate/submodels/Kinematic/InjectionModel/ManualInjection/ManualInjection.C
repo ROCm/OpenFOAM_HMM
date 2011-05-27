@@ -30,45 +30,6 @@ License
 
 using namespace Foam::constant::mathematical;
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::label Foam::ManualInjection<CloudType>::parcelsToInject
-(
-    const scalar time0,
-    const scalar time1
-)
-{
-    if ((0.0 >= time0) && (0.0 < time1))
-    {
-        return positions_.size();
-    }
-    else
-    {
-        return 0;
-    }
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::ManualInjection<CloudType>::volumeToInject
-(
-    const scalar time0,
-    const scalar time1
-)
-{
-    // All parcels introduced at SOI
-    if ((0.0 >= time0) && (0.0 < time1))
-    {
-        return this->volumeTotal_;
-    }
-    else
-    {
-        return 0.0;
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -189,6 +150,43 @@ Foam::scalar Foam::ManualInjection<CloudType>::timeEnd() const
 {
     // Not used
     return this->SOI_;
+}
+
+
+template<class CloudType>
+Foam::label Foam::ManualInjection<CloudType>::parcelsToInject
+(
+    const scalar time0,
+    const scalar time1
+)
+{
+    if ((0.0 >= time0) && (0.0 < time1))
+    {
+        return positions_.size();
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+
+template<class CloudType>
+Foam::scalar Foam::ManualInjection<CloudType>::volumeToInject
+(
+    const scalar time0,
+    const scalar time1
+)
+{
+    // All parcels introduced at SOI
+    if ((0.0 >= time0) && (0.0 < time1))
+    {
+        return this->volumeTotal_;
+    }
+    else
+    {
+        return 0.0;
+    }
 }
 
 

@@ -38,6 +38,7 @@ SourceFiles
 #ifndef CompositionModel_H
 #define CompositionModel_H
 
+#include "SubModelBase.H"
 #include "IOdictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"

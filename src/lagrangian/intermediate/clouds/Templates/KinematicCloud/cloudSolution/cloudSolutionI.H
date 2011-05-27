@@ -101,6 +101,12 @@ inline Foam::scalar Foam::cloudSolution::trackTime() const
 }
 
 
+inline Foam::Switch& Foam::cloudSolution::coupled()
+{
+    return coupled_;
+}
+
+
 inline const Foam::Switch Foam::cloudSolution::coupled() const
 {
     return coupled_;

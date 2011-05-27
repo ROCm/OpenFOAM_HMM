@@ -30,6 +30,7 @@ License
 
 #include "CellZoneInjection.H"
 #include "ConeInjection.H"
+#include "ConeNozzleInjection.H"
 #include "FieldActivatedInjection.H"
 #include "ManualInjection.H"
 #include "NoInjection.H"

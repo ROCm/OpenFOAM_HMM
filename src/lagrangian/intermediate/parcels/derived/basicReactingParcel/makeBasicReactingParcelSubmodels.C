@@ -45,9 +45,6 @@ License
 
 namespace Foam
 {
-    typedef basicReactingCloud::thermoCloudType thermoCloudType2;
-    typedef basicReactingCloud::kinematicCloudType kinematicCloudType2;
-
     makeParcelCloudFunctionObjects(basicReactingCloud);
 
     // Kinematic sub-models

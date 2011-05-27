@@ -124,6 +124,17 @@ public:
                 const bool readFields = true
             );
 
+            //- Construct from components
+            constantProperties
+            (
+                const label parcelTypeId,
+                const scalar rhoMin,
+                const scalar rho0,
+                const scalar minParticleMass,
+                const scalar youngsModulus,
+                const scalar poissonsRatio
+            );
+
 
         // Member functions
 
@@ -534,6 +545,15 @@ public:
                 const scalar d,         // particle diameter
                 const scalar rhoc,      // carrier density
                 const scalar muc        // carrier dynamic viscosity
+            ) const;
+
+            //- Weber number
+            inline scalar We
+            (
+                const vector& U,        // particle velocity
+                const scalar d,         // particle diameter
+                const scalar rhoc,      // carrier density
+                const scalar sigma      // particle surface tension
             ) const;
 
 

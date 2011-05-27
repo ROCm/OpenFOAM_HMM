@@ -51,16 +51,6 @@ class NoInjection
 :
     public InjectionModel<CloudType>
 {
-protected:
-
-    // Protected Member Functions
-
-        //- Number of parcels to introduce over the time step relative to SOI
-        virtual label parcelsToInject(const scalar time0, const scalar time1);
-
-        //- Volume of parcels to introduce over the time step relative to SOI
-        virtual scalar volumeToInject(const scalar time0, const scalar time1);
-
 
 public:
 
@@ -97,6 +87,12 @@ public:
 
         //- Return the end-of-injection time
         scalar timeEnd() const;
+
+        //- Number of parcels to introduce relative to SOI
+        virtual label parcelsToInject(const scalar time0, const scalar time1);
+
+        //- Volume of parcels to introduce relative to SOI
+        virtual scalar volumeToInject(const scalar time0, const scalar time1);
 
 
         // Injection geometry

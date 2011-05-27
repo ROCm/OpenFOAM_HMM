@@ -110,6 +110,20 @@ inline const Foam::dimensionedVector& Foam::KinematicCloud<CloudType>::g() const
 
 
 template<class CloudType>
+inline Foam::scalar Foam::KinematicCloud<CloudType>::pAmbient() const
+{
+    return pAmbient_;
+}
+
+
+template<class CloudType>
+inline Foam::scalar& Foam::KinematicCloud<CloudType>::pAmbient()
+{
+    return pAmbient_;
+}
+
+
+template<class CloudType>
 //inline const typename CloudType::parcelType::forceType&
 inline const typename Foam::KinematicCloud<CloudType>::forceType&
 Foam::KinematicCloud<CloudType>::forces() const
@@ -261,6 +275,131 @@ Foam::KinematicCloud<CloudType>::rotationalKineticEnergyOfSystem() const
     }
 
     return rotationalKineticEnergy;
+}
+
+
+template<class CloudType>
+inline Foam::scalar Foam::KinematicCloud<CloudType>::Dij
+(
+    const label i,
+    const label j
+) const
+{
+    scalar si = 0.0;
+    scalar sj = 0.0;
+    forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
+    {
+        const parcelType& p = iter();
+        si += p.nParticle()*pow(p.d(), i);
+        sj += p.nParticle()*pow(p.d(), j);
+    }
+
+    reduce(si, sumOp<scalar>());
+    reduce(sj, sumOp<scalar>());
+    sj = max(sj, VSMALL);
+
+    return si/sj;
+}
+
+
+template<class CloudType>
+inline Foam::scalar Foam::KinematicCloud<CloudType>::penetration
+(
+    const scalar& prc
+) const
+{
+    scalar distance = 0.0;
+    scalar mTot = 0.0;
+
+    label np = this->size();
+
+    // arrays containing the parcels mass and
+    // distance from injector in ascending order
+    scalarField mass(np);
+    scalarField dist(np);
+
+    if (np > 0)
+    {
+        label n = 0;
+
+        // first arrange the parcels in ascending order
+        // the first parcel is closest to its injection position
+        // and the last one is most far away.
+        forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
+        {
+            const parcelType& p = iter();
+            scalar mi = p.nParticle()*p.mass();
+            scalar di = mag(p.position() - p.position0());
+            mTot += mi;
+
+            // insert at the last place
+            mass[n] = mi;
+            dist[n] = di;
+
+            label i = 0;
+            bool found = false;
+
+            // insert the parcel in the correct place
+            // and move the others
+            while ((i < n) && (!found))
+            {
+                if (di < dist[i])
+                {
+                    found = true;
+                    for (label j=n; j>i; j--)
+                    {
+                        mass[j] = mass[j-1];
+                        dist[j] = dist[j-1];
+                    }
+                    mass[i] = mi;
+                    dist[i] = di;
+                }
+                i++;
+            }
+            n++;
+        }
+    }
+
+    reduce(mTot, sumOp<scalar>());
+
+    if (np > 0)
+    {
+        scalar mLimit = prc*mTot;
+        scalar mOff = (1.0 - prc)*mTot;
+
+        if (np > 1)
+        {
+            // 'prc' is large enough that the parcel most far
+            // away will be used, no need to loop...
+            if (mLimit > mTot - mass[np-1])
+            {
+                distance = dist[np-1];
+            }
+            else
+            {
+                scalar mOffSum = 0.0;
+                label i = np;
+
+                while ((mOffSum < mOff) && (i>0))
+                {
+                    i--;
+                    mOffSum += mass[i];
+                }
+                distance =
+                    dist[i+1]
+                  + (dist[i] - dist[i+1])*(mOffSum - mOff)
+                   /mass[i+1] ;
+            }
+        }
+        else
+        {
+            distance = dist[0];
+        }
+    }
+
+    reduce(distance, maxOp<scalar>());
+
+    return distance;
 }
 
 
