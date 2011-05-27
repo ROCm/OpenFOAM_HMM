@@ -21,12 +21,21 @@ pRef            100000;
 
 mixture
 {
-    nMoles          1;
-    molWeight       28.9;
-    Cp              1000;
-    Hf              0;
-    mu              1.8e-05;
-    Pr              0.7;
+    specie
+    {
+        nMoles          1;
+        molWeight       28.9;
+    }
+    thermodynamics
+    {
+        Cp              1000;
+        Hf              0;
+    }
+    transport
+    {
+        mu              1.8e-05;
+        Pr              0.7;
+    }
 }
 
 
