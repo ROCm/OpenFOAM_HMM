@@ -248,7 +248,6 @@ bool Foam::TrajectoryCollision<CloudType>::collideSorted
     bool coalescence = false;
 
     vector vRel = U1 - U2;
-    scalar magVRel = mag(vRel);
 
     scalar mdMin = m2/N2;
 
@@ -274,7 +273,7 @@ bool Foam::TrajectoryCollision<CloudType>::collideSorted
     scalar rho = mTot/Vtot;
 
     scalar dMean = sqrt(d1*d2);
-    scalar WeColl = max(1.0e-12, 0.5*rho*magVRel*magVRel*dMean/sigma);
+    scalar WeColl = max(1.0e-12, 0.5*rho*magSqr(vRel)*dMean/sigma);
 
     scalar coalesceProb = min(1.0, 2.4*f/WeColl);
 
@@ -308,7 +307,8 @@ bool Foam::TrajectoryCollision<CloudType>::collideSorted
     {
         scalar gf = sqrt(prob) - sqrt(coalesceProb);
         scalar denom = 1.0 - sqrt(coalesceProb);
-        if (denom < 1.0e-5) {
+        if (denom < 1.0e-5)
+        {
             denom = 1.0;
         }
         gf /= denom;
@@ -318,20 +318,20 @@ bool Foam::TrajectoryCollision<CloudType>::collideSorted
         gf = max(0.0, gf);
 
         // gf -> 1 => v1p -> p1().U() ...
-        // gf -> 0 => v1p -> momentum/(m1+m2)
+        // gf -> 0 => v1p -> momentum/(m1 + m2)
 
         vector mr = m1*U1 + m2*U2;
-        vector v1p = (mr + m2*gf*vRel)/(m1+m2);
-        vector v2p = (mr - m1*gf*vRel)/(m1+m2);
+        vector v1p = (mr + m2*gf*vRel)/(m1 + m2);
+        vector v2p = (mr - m1*gf*vRel)/(m1 + m2);
 
         if (N1 < N2)
         {
             U1 = v1p;
-            U2 = (N1*v2p + (N2-N1)*U2)/N2;
+            U2 = (N1*v2p + (N2 - N1)*U2)/N2;
         }
         else
         {
-            U1 = (N2*v1p + (N1-N2)*U1)/N1;
+            U1 = (N2*v1p + (N1 - N2)*U1)/N1;
             U2 = v2p;
         }
     }
