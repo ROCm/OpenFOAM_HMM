@@ -99,7 +99,7 @@ void Foam::SprayParcel<ParcelType>::calc
 
         scalar rho1 = td.cloud().composition().liquids().rho(this->pc_, T1, X1);
         this->rho() = rho1;
-        scalar d1 = this->d()*pow(rho0/rho1, 1.0/3.0);
+        scalar d1 = this->d()*cbrt(rho0/rho1);
         this->d() = d1;
 
         if (liquidCore() > 0.5)

@@ -189,7 +189,7 @@ bool Foam::ReitzKHRT<CloudType>::update
             d = (fraction*dc + d)/(1.0 + fraction);
 
             //scalar ms0 = rho*pow3(dc)*mathematicalConstant::pi/6.0;
-            scalar ms0 = mass0*(1.0 - pow(d/d0,3.0));
+            scalar ms0 = mass0*(1.0 - pow3(d/d0));
             ms += ms0;
 
             if (ms/averageParcelMass > msLimit_)
@@ -200,10 +200,10 @@ bool Foam::ReitzKHRT<CloudType>::update
                 // drops after breakup, see Eq. 18 in
                 // Patterson & Reitz, SAE 980131
                 bool br3 = true;
-                scalar ae3 = 1.;
+                scalar ae3 = 1.0;
                 scalar be3 = -dc;
-                scalar ce3 = 0.;
-                scalar de3 = d*d*(dc-d);
+                scalar ce3 = 0.0;
+                scalar de3 = d*d*(dc - d);
                 scalar qe3 =
                     pow3(be3/(3.0*ae3)) - be3*ce3/(6.0*ae3*ae3) + de3/(2.0*ae3);
                 scalar pe3 = (3.0*ae3*ce3 - be3*be3)/(9.0*ae3*ae3);
@@ -214,8 +214,8 @@ bool Foam::ReitzKHRT<CloudType>::update
                 if (br3)
                 {
                     D3 = sqrt(D3);
-                    scalar ue3 = cbrt(-qe3+D3);
-                    scalar ve3 = cbrt(-qe3-D3);
+                    scalar ue3 = cbrt(-qe3 + D3);
+                    scalar ve3 = cbrt(-qe3 - D3);
                     scalar dParenDrops = ue3 + ve3 - be3/3.;
                     scalar mc = nParticle*(pow3(d) - pow3(dParenDrops));
                     scalar nChildDrops = mc/pow3(dc);
