@@ -3,13 +3,13 @@ cd ${0%/*} || exit 1    # run from this directory
 makeType=${1:-libso}
 
 # get SCOTCH_VERSION, SCOTCH_ARCH_PATH
-if settings=`$WM_PROJECT_DIR/bin/foamEtcFile apps/scotch/bashrc`
+if settings=`$WM_PROJECT_DIR/bin/foamEtcFile config/scotch.sh`
 then
     . $settings
     echo "using SCOTCH_ARCH_PATH=$SCOTCH_ARCH_PATH"
 else
     echo
-    echo "Error: no apps/scotch/bashrc settings"
+    echo "Error: no config/scotch.sh settings"
     echo
 fi
 

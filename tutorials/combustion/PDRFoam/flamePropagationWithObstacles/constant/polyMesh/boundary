@@ -46,6 +46,7 @@ FoamFile
         type            cyclic;
         nFaces          0;
         startFace       24810;
+        matchTolerance  0.0001;
         neighbourPatch  baffleCyclic_half1;
     }
     baffleCyclic_half1
@@ -53,6 +54,7 @@ FoamFile
         type            cyclic;
         nFaces          0;
         startFace       24810;
+        matchTolerance  0.0001;
         neighbourPatch  baffleCyclic_half0;
     }
 )

@@ -44,40 +44,56 @@ blocks
     hex (10 11 12 9 2 3 4 1) (24 6 1) simpleGrading (1 1 1)
 );
 
-patches
+boundary
 (
 
-    wall walls
-    (
-        //side walls
-        (0 7 15 8)
-        (1 0 8 9)
-        (13 14 6 5)
-        (12 13 5 4)
-        (2 1 9 10)
-        (11 12 4 3)
-    )
+    walls
+    {
+        type wall;
+        faces
+        (
+            //side walls
+            (0 7 15 8)
+            (1 0 8 9)
+            (13 14 6 5)
+            (12 13 5 4)
+            (2 1 9 10)
+            (11 12 4 3)
+        );
+    }
 
-    wall frontAndBack
-    (
-        //front and back walls
-        (4 5 0 1)
-        (5 6 7 0)
-        (15 14 13 8)
-        (8 13 12 9)
-        (3 4 1 2)
-        (12 11 10 9)
-    )
+    frontAndBack
+    {
+        type wall;
+        faces
+        (
+            //front and back walls
+            (4 5 0 1)
+            (5 6 7 0)
+            (15 14 13 8)
+            (8 13 12 9)
+            (3 4 1 2)
+            (12 11 10 9)
+        );
+    }
 
-    patch inlet
-    (
-        (15 7 6 14)
-    )
+    inlet
+    {
+        type patch;
+        faces
+        (
+            (15 7 6 14)
+        );
+    }
 
-    patch outlet
-    (
-        (3 2 10 11)
-    )
+    outlet
+    {
+        type patch;
+        faces
+        (
+            (3 2 10 11)
+        );
+    }
 
 );
 

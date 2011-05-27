@@ -37,29 +37,45 @@ blocks
     hex (0 1 2 3 4 5 6 7) (35 150 15) simpleGrading (1 1 1)
 );
 
-patches
+boundary
 (
-    wall frontAndBack
-    (
-        (0 1 5 4)
-        (2 3 7 6)
-    )
+    frontAndBack
+    {
+        type wall;
+        faces
+        (
+            (0 1 5 4)
+            (2 3 7 6)
+        );
+    }
 
-    wall topAndBottom
-    (
-        (4 5 6 7)
-        (3 2 1 0)
-    )
+    topAndBottom
+    {
+        type wall;
+        faces
+        (
+            (4 5 6 7)
+            (3 2 1 0)
+        );
+    }
 
-    wall hot
-    (
-        (6 5 1 2)
-    )
+    hot
+    {
+        type wall;
+        faces
+        (
+            (6 5 1 2)
+        );
+    }
 
-    wall cold
-    (
-        (4 7 3 0)
-    )
+    cold
+    {
+        type wall;
+        faces
+        (
+            (4 7 3 0)
+        );
+    }
 );
 
 mergePatchPairs

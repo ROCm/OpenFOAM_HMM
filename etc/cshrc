@@ -107,9 +107,6 @@ if ( $?WM_PROJECT_INST_DIR ) then
         set foamOldDirs="$WM_PROJECT_INST_DIR $foamOldDirs"
     endif
 endif
-if ( $?WM_PROJECT_SITE ) then
-    set foamOldDirs="$WM_PROJECT_SITE $foamOldDirs"
-endif
 
 
 # Location of installation
@@ -124,7 +121,12 @@ setenv WM_THIRD_PARTY_DIR $WM_PROJECT_INST_DIR/ThirdParty-$WM_PROJECT_VERSION
 # Location of site-specific templates etc
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # unset is equivalent to $WM_PROJECT_INST_DIR/site
-unsetenv WM_PROJECT_SITE
+if ( $?WM_PROJECT_SITE ) then
+    set foamOldDirs="$WM_PROJECT_SITE $foamOldDirs"
+    if ( ! -d "$WM_PROJECT_SITE" ) unsetenv WM_PROJECT_SITE
+else
+    unsetenv WM_PROJECT_SITE
+endif
 
 # Location of user files
 # ~~~~~~~~~~~~~~~~~~~~~~
@@ -138,7 +140,7 @@ alias _foamSource 'if ($?FOAM_VERBOSE && $?prompt) echo "Sourcing: \!*"; if (\!*
 _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile prefs.csh`
 
 # Evaluate command-line parameters and record settings for later
-# these can be used to set/unset values, or specify prefs files
+# these can be used to set/unset values, or specify alternative pref files
 setenv FOAM_SETTINGS "${*}"
 while ( $#argv > 0 )
     switch ($argv[1])
@@ -194,13 +196,13 @@ if ( $status == 0 ) setenv MANPATH $cleaned
 
 # Source project setup files
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamSource $WM_PROJECT_DIR/etc/settings.csh
-_foamSource $WM_PROJECT_DIR/etc/aliases.csh
+_foamSource $WM_PROJECT_DIR/etc/config/settings.csh
+_foamSource $WM_PROJECT_DIR/etc/config/aliases.csh
 
 # Source user setup files for optional packages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile apps/paraview3/cshrc`
-_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile apps/ensight/cshrc`
+_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config/paraview.csh`
+_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config/ensight.csh`
 
 
 # Clean environment paths again. Only remove duplicates

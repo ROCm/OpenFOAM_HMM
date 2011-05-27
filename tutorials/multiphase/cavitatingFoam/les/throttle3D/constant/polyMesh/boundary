@@ -21,25 +21,25 @@ FoamFile
     {
         type            patch;
         nFaces          510;
-        startFace       4413730;
+        startFace       220900;
     }
     outlet
     {
         type            patch;
         nFaces          510;
-        startFace       4414240;
+        startFace       221410;
     }
     walls
     {
         type            wall;
-        nFaces          37840;
-        startFace       4414750;
+        nFaces          4360;
+        startFace       221920;
     }
     frontBack
     {
         type            wall;
-        nFaces          57540;
-        startFace       4452590;
+        nFaces          15420;
+        startFace       226280;
     }
 )
 

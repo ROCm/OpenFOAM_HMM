@@ -31,17 +31,17 @@ boundaryField
         type            omegaWallFunction;
         value           uniform 1111.11;
     }
-    frontBack_half0
+    front
+    {
+        type            cyclic;
+    }
+    back
     {
         type            cyclic;
     }
     defaultFaces
     {
         type            empty;
-    }
-    frontBack_half1
-    {
-        type            cyclic;
     }
 }
 

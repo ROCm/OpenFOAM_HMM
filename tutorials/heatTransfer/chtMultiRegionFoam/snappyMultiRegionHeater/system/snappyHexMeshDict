@@ -109,6 +109,26 @@ castellatedMeshControls
     // This is a featureEdgeMesh, read from constant/triSurface for now.
     features
     (
+        {
+            file "bottomAir.eMesh";
+            level 1;
+        }
+        {
+            file "heater.eMesh";
+            level 1;
+        }
+        {
+            file "leftSolid.eMesh";
+            level 1;
+        }
+        {
+            file "rightSolid.eMesh";
+            level 1;
+        }
+        {
+            file "topAir.eMesh";
+            level 1;
+        }
     );
 
 
@@ -231,7 +251,7 @@ snapControls
     //- Relative distance for points to be attracted by surface feature point
     //  or edge. True distance is this factor times local
     //  maximum edge length.
-    tolerance 4.0;
+    tolerance 1.0;
 
     //- Number of mesh displacement relaxation iterations.
     nSolveIter 30;
@@ -239,6 +259,11 @@ snapControls
     //- Maximum number of snapping relaxation iterations. Should stop
     //  before upon reaching a correct mesh.
     nRelaxIter 5;
+
+    //- Highly experimental and wip: number of feature edge snapping
+    //  iterations. Leave out altogether to disable.
+    //  Of limited use in this case since faceZone faces not handled.
+    nFeatureSnapIter 10;
 }
 
 
@@ -251,28 +276,20 @@ addLayersControls
     // Per final patch (so not geometry!) the layer information
     layers
     {
-        //flowAirDuctReagent_flowAirDuctReagent
-        //{
-        //    nSurfaceLayers 1;
-        //}
-        //flowAirDuctReagent_inlet1
-        //{
-        //    nSurfaceLayers 1;
-        //}
-        //flowAirDuctReagent_inlet2
-        //{
-        //    nSurfaceLayers 1;
-        //}
+        maxY
+        {
+            nSurfaceLayers 3;
+        }
     }
 
     // Expansion factor for layer mesh
-    expansionRatio 1.0;
+    expansionRatio 1.3;
 
     //- Wanted thickness of final added cell layer. If multiple layers
     //  is the
     //  thickness of the layer furthest away from the wall.
     //  Relative to undistorted size of cell outside layer.
-    finalLayerThickness 0.3;
+    finalLayerThickness 1;
 
     //- Minimum thickness of cell layer. If for any reason layer
     //  cannot be above minThickness do not add layer.
@@ -302,14 +319,14 @@ addLayersControls
     nSmoothNormals 3;
 
     // Smooth layer thickness over surface patches
-    nSmoothThickness 10;
+    nSmoothThickness 2;
 
     // Stop layer growth on highly warped cells
     maxFaceThicknessRatio 0.5;
 
     // Reduce layer growth where ratio thickness to medial
     // distance is large
-    maxThicknessToMedialRatio 0.3;
+    maxThicknessToMedialRatio 1;
 
     // Angle used to pick up medial axis points
     // Note: changed(corrected) w.r.t 17x! 90 degrees corresponds to 130 in 17x.
@@ -317,6 +334,11 @@ addLayersControls
 
     // Create buffer region for new layer terminations
     nBufferCellsNoExtrude 0;
+
+    // Overall max number of layer addition iterations. The mesher will exit
+    // if it reaches this number of iterations; possibly with an illegal
+    // mesh.
+    nLayerIter 50;
 }
 
 

@@ -143,6 +143,13 @@ class globalPoints
         //  information is collected.
         static label countPatchPoints(const polyBoundaryMesh&);
 
+        //- Find index of same processor+index
+        label findSamePoint
+        (
+            const labelPairList& allInfo,
+            const labelPair& info
+        ) const;
+
         labelPairList addSendTransform
         (
             const label patchI,

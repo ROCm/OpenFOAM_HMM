@@ -42,11 +42,11 @@ boundaryField
         type            zeroGradient;
         value           uniform 2e-05;
     }
-    frontAndBack_half0
+    front
     {
         type            cyclic;
     }
-    frontAndBack_half1
+    back
     {
         type            cyclic;
     }

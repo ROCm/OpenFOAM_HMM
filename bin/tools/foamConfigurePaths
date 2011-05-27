@@ -131,7 +131,7 @@ do
         paraviewInstall="$2"
         # replace ParaView_DIR=...
         _inlineSed \
-            etc/apps/paraview3/bashrc \
+            etc/config/paraview.sh \
             '/^[^#]/s@ParaView_DIR=.*@ParaView_DIR='"$paraviewInstall@" \
              "Replacing ParaView_DIR setting by '$paraviewInstall'"
         shift 2
