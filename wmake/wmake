@@ -193,12 +193,12 @@ fi
 #------------------------------------------------------------------------------
 
 [ -d $MakeDir ] || {
-    echo "$Script error: '$MakeDir' directory does not exist" 1>&2
+    echo "$Script error: '$MakeDir' directory does not exist in $PWD" 1>&2
     exit 1
 }
 
 [ -r $MakeDir/files ] || {
-    echo "$Script error: file '$MakeDir/files' does not exist" 1>&2
+    echo "$Script error: file '$MakeDir/files' does not exist in $PWD" 1>&2
     exit 1
 }
 
@@ -232,7 +232,7 @@ fi
 OBJECTS_DIR=$MakeDir/$WM_OPTIONS
 
 [ -r $OBJECTS_DIR/objectFiles ] || {
-    echo "$Script error: file '$OBJECTS_DIR/objectFiles' could not be created" 1>&2
+    echo "$Script error: file '$OBJECTS_DIR/objectFiles' could not be created in $PWD" 1>&2
     exit 1
 }
 
