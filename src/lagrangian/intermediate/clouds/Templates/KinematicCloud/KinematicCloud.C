@@ -502,14 +502,10 @@ template<class CloudType>
 void Foam::KinematicCloud<CloudType>::setParcelThermoProperties
 (
     parcelType& parcel,
-    const scalar lagrangianDt,
-    const bool fullyDescribed
+    const scalar lagrangianDt
 )
 {
-    if (!fullyDescribed)
-    {
-        parcel.rho() = constProps_.rho0();
-    }
+    parcel.rho() = constProps_.rho0();
 }
 
 

@@ -237,17 +237,13 @@ template<class CloudType>
 void Foam::ThermoCloud<CloudType>::setParcelThermoProperties
 (
     parcelType& parcel,
-    const scalar lagrangianDt,
-    const bool fullyDescribed
+    const scalar lagrangianDt
 )
 {
-    CloudType::setParcelThermoProperties(parcel, lagrangianDt, fullyDescribed);
+    CloudType::setParcelThermoProperties(parcel, lagrangianDt);
 
-    if (!fullyDescribed)
-    {
-        parcel.T() = constProps_.T0();
-        parcel.Cp() = constProps_.Cp0();
-    }
+    parcel.T() = constProps_.T0();
+    parcel.Cp() = constProps_.Cp0();
 }
 
 

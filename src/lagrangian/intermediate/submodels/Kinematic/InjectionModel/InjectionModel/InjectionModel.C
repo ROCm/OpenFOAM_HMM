@@ -593,7 +593,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                 );
 
                 // Check/set new parcel thermo properties
-                cloud.setParcelThermoProperties(*pPtr, dt, fullyDescribed());
+                cloud.setParcelThermoProperties(*pPtr, dt);
 
                 // Assign new parcel properties in injection model
                 setProperties(parcelI, newParcels, timeInj, *pPtr);
@@ -702,7 +702,7 @@ void Foam::InjectionModel<CloudType>::injectSteadyState
             );
 
             // Check/set new parcel thermo properties
-            cloud.setParcelThermoProperties(*pPtr, 0.0, fullyDescribed());
+            cloud.setParcelThermoProperties(*pPtr, 0.0);
 
             // Assign new parcel properties in injection model
             setProperties(parcelI, newParcels, 0.0, *pPtr);
