@@ -103,7 +103,7 @@ else
     #    fi
     #done
     FOAM_TARGETS=$(for d in *; do [ -d "$d" ] && echo "$d"; done | xargs)
-    $make -k -f $WM_PROJECT_DIR/bin/tools/MakefileDirs FOAM_TARGETS="$FOAM_TARGETS" FOAM_APP=$thisScript
+    $make -k -f $WM_PROJECT_DIR/bin/tools/MakefileDirs FOAM_TARGETS="$FOAM_TARGETS" FOAM_APP="$WM_SCHEDULER $thisScript"
 fi
 
 #------------------------------------------------------------------------------
