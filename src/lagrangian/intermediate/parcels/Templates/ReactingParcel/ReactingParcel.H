@@ -347,6 +347,9 @@ public:
             //- Return the owner cell pressure
             inline scalar pc() const;
 
+            //- Return reference to the owner cell pressure
+            inline scalar& pc();
+
 
         // Edit
 

@@ -238,6 +238,13 @@ inline Foam::scalar Foam::ReactingParcel<ParcelType>::pc() const
 
 
 template<class ParcelType>
+inline Foam::scalar& Foam::ReactingParcel<ParcelType>::pc()
+{
+    return pc_;
+}
+
+
+template<class ParcelType>
 inline Foam::scalar& Foam::ReactingParcel<ParcelType>::mass0()
 {
     return mass0_;
