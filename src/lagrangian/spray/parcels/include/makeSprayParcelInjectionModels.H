@@ -28,30 +28,29 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "CellZoneInjection.H"
 #include "ConeInjection.H"
 #include "ConeNozzleInjection.H"
 #include "FieldActivatedInjection.H"
+#include "InflationInjection.H"
 #include "ManualInjection.H"
 #include "NoInjection.H"
 #include "PatchInjection.H"
-//#include "CommonRailInjection.H"
-//#include "MultiHoleInjection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #define makeSprayParcelInjectionModels(CloudType)                             \
                                                                               \
     makeInjectionModel(CloudType);                                            \
+                                                                              \
+    makeInjectionModelType(CellZoneInjection, CloudType);                     \
     makeInjectionModelType(ConeInjection, CloudType);                         \
     makeInjectionModelType(ConeNozzleInjection, CloudType);                   \
     makeInjectionModelType(FieldActivatedInjection, CloudType);               \
+    makeInjectionModelType(InflationInjection, CloudType);                    \
     makeInjectionModelType(ManualInjection, CloudType);                       \
     makeInjectionModelType(NoInjection, CloudType);                           \
-    makeInjectionModelType(PatchInjection, CloudType);                        \
-
-//    makeSprayInjectionModelType(UnitInjection, CloudType);                    \
-//    makeSprayInjectionModelType(CommonRailInjection, CloudType);              \
-//    makeSprayInjectionModelType(MultiHoleInjection, CloudType);
+    makeInjectionModelType(PatchInjection, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
