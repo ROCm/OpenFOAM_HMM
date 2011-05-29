@@ -35,8 +35,8 @@ Foam::constSolidThermo<rhoType>::constSolidThermo
 )
 :
     rhoType(dict),
-    Cp_(readScalar(dict.subDict("thermoProperties").lookup("Cp"))),
-    Hf_(readScalar(dict.subDict("thermoProperties").lookup("Hf")))
+    Cp_(readScalar(dict.subDict("thermodynamics").lookup("Cp"))),
+    Hf_(readScalar(dict.subDict("thermodynamics").lookup("Hf")))
 {}
 
 

@@ -37,18 +37,9 @@ template<class thermo>
 constSolidRad<thermo>::constSolidRad(const dictionary& dict)
 :
     thermo(dict),
-    kappa_(readScalar(dict.subDict("radiativeProperties").lookup("kappa"))),
-    sigmaS_
-    (
-        readScalar
-        (
-            dict.subDict("radiativeProperties").lookup("sigmaS")
-        )
-    ),
-    emissivity_
-    (
-        readScalar(dict.subDict("radiativeProperties").lookup("emissivity"))
-    )
+    kappa_(readScalar(dict.subDict("radiation").lookup("kappa"))),
+    sigmaS_(readScalar(dict.subDict("radiation").lookup("sigmaS"))),
+    emissivity_(readScalar(dict.subDict("radiation").lookup("emissivity")))
 {}
 
 

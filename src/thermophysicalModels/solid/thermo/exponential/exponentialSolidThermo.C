@@ -35,10 +35,10 @@ Foam::exponentialSolidThermo<rhoType>::exponentialSolidThermo
 )
 :
     rhoType(dict),
-    c0_(readScalar(dict.subDict("thermoProperties").lookup("C0"))),
-    n0_(readScalar(dict.subDict("thermoProperties").lookup("n0"))),
-    Tref_(readScalar(dict.subDict("thermoProperties").lookup("Tref"))),
-    Hf_(readScalar(dict.subDict("thermoProperties").lookup("Hf")))
+    c0_(readScalar(dict.subDict("thermodynamics").lookup("C0"))),
+    n0_(readScalar(dict.subDict("thermodynamics").lookup("n0"))),
+    Tref_(readScalar(dict.subDict("thermodynamics").lookup("Tref"))),
+    Hf_(readScalar(dict.subDict("thermodynamics").lookup("Hf")))
 {}
 
 

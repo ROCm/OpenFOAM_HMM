@@ -29,7 +29,7 @@ License
 
 Foam::constRho::constRho(const dictionary& dict)
 :
-    rho_(readScalar(dict.subDict("densityProperties").lookup("rho")))
+    rho_(readScalar(dict.subDict("density").lookup("rho")))
 {}
 
 

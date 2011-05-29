@@ -32,7 +32,7 @@ template<class thermo>
 Foam::constSolidTransport<thermo>::constSolidTransport(const dictionary& dict)
 :
     thermo(dict),
-    K_(readScalar(dict.subDict("transportProperties").lookup("K")))
+    K_(readScalar(dict.subDict("transport").lookup("K")))
 {}
 
 
