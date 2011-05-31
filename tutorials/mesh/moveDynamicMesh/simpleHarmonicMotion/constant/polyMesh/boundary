@@ -19,15 +19,15 @@ FoamFile
 (
     stationaryWalls
     {
-        type            wall;
+        type            patch;
         nFaces          666;
-        startFace       2994;
+        startFace       3069;
     }
     movingBlock
     {
         type            patch;
-        nFaces          42;
-        startFace       3660;
+        nFaces          0;
+        startFace       3735;
     }
 )
 

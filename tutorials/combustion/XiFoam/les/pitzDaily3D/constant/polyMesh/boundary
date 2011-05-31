@@ -41,19 +41,21 @@ FoamFile
         nFaces          5000;
         startFace       721875;
     }
-    frontAndBack_half0
+    front
     {
         type            cyclic;
         nFaces          12225;
         startFace       726875;
-        neighbourPatch  frontAndBack_half1;
+        matchTolerance  0.0001;
+        neighbourPatch  back;
     }
-    frontAndBack_half1
+    back
     {
         type            cyclic;
         nFaces          12225;
         startFace       739100;
-        neighbourPatch  frontAndBack_half0;
+        matchTolerance  0.0001;
+        neighbourPatch  front;
     }
 )
 

@@ -26,8 +26,7 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
-inline
-Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
+inline Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
 constantProperties()
 :
     ParcelType::constantProperties(),
@@ -37,8 +36,7 @@ constantProperties()
 
 
 template<class ParcelType>
-inline
-Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
+inline Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
 constantProperties
 (
     const constantProperties& cp
@@ -226,5 +224,6 @@ inline bool& Foam::ReactingMultiphaseParcel<ParcelType>::canCombust()
 {
     return canCombust_;
 }
+
 
 // ************************************************************************* //

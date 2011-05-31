@@ -63,9 +63,15 @@ Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
 )
 :
     EquationOfState(dict),
-    Hf_(readScalar(dict.lookup("Hf"))),
-    Sf_(readScalar(dict.lookup("Sf"))),
-    CpCoeffs_(dict.lookup("CpCoeffs<" + Foam::name(PolySize) + '>')),
+    Hf_(readScalar(dict.subDict("thermodynamics").lookup("Hf"))),
+    Sf_(readScalar(dict.subDict("thermodynamics").lookup("Sf"))),
+    CpCoeffs_
+    (
+        dict.subDict("thermodynamics").lookup
+        (
+            "CpCoeffs<" + Foam::name(PolySize) + '>'
+        )
+    ),
     hCoeffs_(),
     sCoeffs_()
 {
@@ -93,10 +99,16 @@ void Foam::hPolynomialThermo<EquationOfState, PolySize>::write
 ) const
 {
     EquationOfState::write(os);
-    os.writeKeyword("Hf") << Hf_/this->W() << token::END_STATEMENT << nl;
-    os.writeKeyword("Sf") << Sf_/this->W() << token::END_STATEMENT << nl;
-    os.writeKeyword(word("CpCoeffs<" + Foam::name(PolySize) + '>'))
-        << CpCoeffs_/this->W() << token::END_STATEMENT << nl;
+
+    dictionary dict("thermodynamics");
+    dict.add("Hf", Hf_);
+    dict.add("Sf", Sf_);
+    dict.add
+    (
+        word("CpCoeffs<" + Foam::name(PolySize) + '>'),
+        CpCoeffs_/this->W()
+    );
+    os  << dict;
 }
 
 

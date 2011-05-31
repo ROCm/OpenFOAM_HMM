@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,8 +43,8 @@ template<class Thermo>
 Foam::constTransport<Thermo>::constTransport(const dictionary& dict)
 :
     Thermo(dict),
-    mu_(readScalar(dict.lookup("mu"))),
-    rPr_(1.0/readScalar(dict.lookup("Pr")))
+    mu_(readScalar(dict.subDict("transport").lookup("mu"))),
+    rPr_(1.0/readScalar(dict.subDict("transport").lookup("Pr")))
 {}
 
 
@@ -55,9 +55,14 @@ void Foam::constTransport<Thermo>::constTransport::write(Ostream& os) const
 {
     os  << this->name() << endl;
     os  << token::BEGIN_BLOCK  << incrIndent << nl;
+
     Thermo::write(os);
-    os.writeKeyword("mu") << mu_ << token::END_STATEMENT << nl;
-    os.writeKeyword("Pr") << 1.0/rPr_ << token::END_STATEMENT << nl;
+
+    dictionary dict("transport");
+    dict.add("mu", mu_);
+    dict.add("Pr", 1.0/rPr_);
+    os  << dict;
+
     os  << decrIndent << token::END_BLOCK << nl;
 }
 

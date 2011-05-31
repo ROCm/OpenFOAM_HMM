@@ -105,9 +105,11 @@ public:
         //- Evaluate the function and return the result
         scalar f(scalar, scalar T) const
         {
-            scalar t = 1.0 - T/Tc_;
+            scalar Tdash = min(T, Tc_ - ROOTVSMALL);
+
+            scalar t = 1.0 - Tdash/Tc_;
             return
-                a_*a_/t + b_ - t
+                a_*a_/(t + ROOTVSMALL) + b_ - t
                *(
                    2.0*a_*c_
                  + t*(a_*d_ + t*(c_*c_/3.0 + t*(0.5*c_*d_ + 0.2*d_*d_*t)))

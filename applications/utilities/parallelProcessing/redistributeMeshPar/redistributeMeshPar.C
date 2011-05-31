@@ -98,6 +98,44 @@ autoPtr<fvMesh> createMesh
             xferCopy(labelList()),
             false
         );
+        // Add some dummy zones so upon reading it does not read them
+        // from the undecomposed case. Should be done as extra argument to
+        // regIOobject::readStream?
+        List<pointZone*> pz
+        (
+            1,
+            new pointZone
+            (
+                "dummyPointZone",
+                labelList(0),
+                0,
+                dummyMesh.pointZones()
+            )
+        );
+        List<faceZone*> fz
+        (
+            1,
+            new faceZone
+            (
+                "dummyFaceZone",
+                labelList(0),
+                boolList(0),
+                0,
+                dummyMesh.faceZones()
+            )
+        );
+        List<cellZone*> cz
+        (
+            1,
+            new cellZone
+            (
+                "dummyCellZone",
+                labelList(0),
+                0,
+                dummyMesh.cellZones()
+            )
+        );
+        dummyMesh.addZones(pz, fz, cz);
         //Pout<< "Writing dummy mesh to " << dummyMesh.polyMesh::objectPath()
         //    << endl;
         dummyMesh.write();
@@ -239,7 +277,11 @@ autoPtr<fvMesh> createMesh
 
     if (!haveMesh)
     {
-        // Add the zones
+        // Add the zones. Make sure to remove the old dummy ones first
+        mesh.pointZones().clear();
+        mesh.faceZones().clear();
+        mesh.cellZones().clear();
+
         List<pointZone*> pz(pointZoneNames.size());
         forAll(pointZoneNames, i)
         {
@@ -389,6 +431,12 @@ void printMeshData(const polyMesh& mesh)
 
     globalIndex globalBoundaryFaces(mesh.nFaces()-mesh.nInternalFaces());
 
+    label maxProcCells = 0;
+    label totProcFaces = 0;
+    label maxProcPatches = 0;
+    label totProcPatches = 0;
+    label maxProcFaces = 0;
+
     for (label procI = 0; procI < Pstream::nProcs(); procI++)
     {
         Info<< endl
@@ -413,7 +461,32 @@ void printMeshData(const polyMesh& mesh)
             << "    Number of processor faces = " << nProcFaces << nl
             << "    Number of boundary faces = "
             << globalBoundaryFaces.localSize(procI) << endl;
+
+        maxProcCells = max(maxProcCells, globalCells.localSize(procI));
+        totProcFaces += nProcFaces;
+        totProcPatches += nei.size();
+        maxProcPatches = max(maxProcPatches, nei.size());
+        maxProcFaces = max(maxProcFaces, nProcFaces);
     }
+
+    // Stats
+
+    scalar avgProcCells = scalar(globalCells.size())/Pstream::nProcs();
+    scalar avgProcPatches = scalar(totProcPatches)/Pstream::nProcs();
+    scalar avgProcFaces = scalar(totProcFaces)/Pstream::nProcs();
+
+    Info<< nl
+        << "Number of processor faces = " << totProcFaces/2 << nl
+        << "Max number of cells = " << maxProcCells
+        << " (" << 100.0*(maxProcCells-avgProcCells)/avgProcCells
+        << "% above average " << avgProcCells << ")" << nl
+        << "Max number of processor patches = " << maxProcPatches
+        << " (" << 100.0*(maxProcPatches-avgProcPatches)/avgProcPatches
+        << "% above average " << avgProcPatches << ")" << nl
+        << "Max number of faces between processors = " << maxProcFaces
+        << " (" << 100.0*(maxProcFaces-avgProcFaces)/avgProcFaces
+        << "% above average " << avgProcFaces << ")" << nl
+        << endl;
 }
 
 
@@ -640,6 +713,16 @@ int main(int argc, char *argv[])
         "(default 1E-6)"
     );
 #   include "setRootCase.H"
+
+    if (env("FOAM_SIGFPE"))
+    {
+        WarningIn(args.executable())
+            << "Detected floating point exception trapping (FOAM_SIGFPE)."
+            << " This might give" << nl
+            << "    problems when mapping fields. Switch it off in case"
+            << " of problems." << endl;
+    }
+
 
     // Create processor directory if non-existing
     if (!Pstream::master() && !isDir(args.path()))
@@ -906,7 +989,7 @@ int main(int argc, char *argv[])
 
     // Debugging: Create additional volField that will be mapped.
     // Used to test correctness of mapping
-    volVectorField mapCc("mapCc", 1*mesh.C());
+    //volVectorField mapCc("mapCc", 1*mesh.C());
 
     // Global matching tolerance
     const scalar tolDim = getMergeDistance
@@ -948,7 +1031,7 @@ int main(int argc, char *argv[])
 
 
     // Debugging: test mapped cellcentre field.
-    compareFields(tolDim, mesh.C(), mapCc);
+    //compareFields(tolDim, mesh.C(), mapCc);
 
     // Print nice message
     // ~~~~~~~~~~~~~~~~~~

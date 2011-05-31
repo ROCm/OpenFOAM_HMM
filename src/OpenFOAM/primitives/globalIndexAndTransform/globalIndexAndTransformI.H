@@ -267,85 +267,47 @@ Foam::label Foam::globalIndexAndTransform::addToTransformIndex
 }
 
 
-Foam::label Foam::globalIndexAndTransform::mergeTransformIndex
-(
-    const label transformIndex0,
-    const label transformIndex1
-) const
-{
-    FixedList<label, 3> permutation0 = decodeTransformIndex(transformIndex0);
-    FixedList<label, 3> permutation1 = decodeTransformIndex(transformIndex1);
-
-    forAll(permutation0, i)
-    {
-        if (permutation0[i] == 0)
-        {
-            // Take over whatever sign 1 has
-            permutation0[i] = permutation1[i];
-        }
-        else if (permutation1[i] != 0 && permutation0[i] != permutation1[i])
-        {
-            FatalErrorIn
-            (
-                "Foam::label "
-                "Foam::globalIndexAndTransform::addToTransformIndex\n"
-                "(\n"
-                    "const label,\n"
-                    "const label\n"
-                ") const\n"
-            )   << "More than one patch accessing the same transform "
-                << "but not of the same sign." << endl
-                << "Trying to combine two transforms " << transformIndex0
-                << " with signs " << permutation0
-                << " and " << transformIndex1
-                << " with signs " << permutation1
-                << exit(FatalError);
-        }
-    }
-    return encodeTransformIndex(permutation0);
-}
-
-
 Foam::label Foam::globalIndexAndTransform::minimumTransformIndex
 (
     const label transformIndex0,
     const label transformIndex1
 ) const
 {
-    FixedList<label, 3> permutation0 = decodeTransformIndex(transformIndex0);
-    FixedList<label, 3> permutation1 = decodeTransformIndex(transformIndex1);
+    if (transformIndex0 == transformIndex1)
+    {
+        return transformIndex0;
+    }
 
+
+    // Count number of transforms
+    FixedList<label, 3> permutation0 = decodeTransformIndex(transformIndex0);
+    label n0 = 0;
     forAll(permutation0, i)
     {
-        if (permutation0[i] == 0)
+        if (permutation0[i] != 0)
         {
-            // 0 wins.
-        }
-        else if (permutation1[i] == 0)
-        {
-            // 0 wins.
-            permutation0[i] = permutation1[i];
-        }
-        else if (permutation0[i] != permutation1[i])
-        {
-            FatalErrorIn
-            (
-                "Foam::label "
-                "Foam::globalIndexAndTransform::minimumTransformIndex\n"
-                "(\n"
-                    "const label,\n"
-                    "const label\n"
-                ") const\n"
-            )   << "More than one patch accessing the same transform "
-                << "but not of the same sign." << endl
-                << "Trying to combine two transforms " << transformIndex0
-                << " with signs " << permutation0
-                << " and " << transformIndex1
-                << " with signs " << permutation1
-                << exit(FatalError);
+            n0++;
         }
     }
-    return encodeTransformIndex(permutation0);
+
+    FixedList<label, 3> permutation1 = decodeTransformIndex(transformIndex1);
+    label n1 = 0;
+    forAll(permutation1, i)
+    {
+        if (permutation1[i] != 0)
+        {
+            n1++;
+        }
+    }
+
+    if (n0 <= n1)
+    {
+        return transformIndex0;
+    }
+    else
+    {
+        return transformIndex1;
+    }
 }
 
 

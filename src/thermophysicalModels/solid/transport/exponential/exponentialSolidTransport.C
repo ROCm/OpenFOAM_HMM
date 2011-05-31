@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,7 @@ Foam::exponentialSolidTransport<thermo>::exponentialSolidTransport
     n0_(0.0),
     Tref_(0.0)
 {
-    const dictionary& subDict = dict.subDict("transportProperties");
+    const dictionary& subDict = dict.subDict("transport");
     K0_ = readScalar(subDict.lookup("K0"));
     n0_ = readScalar(subDict.lookup("n0"));
     Tref_ = readScalar(subDict.lookup("Tref"));

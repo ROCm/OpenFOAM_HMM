@@ -155,6 +155,25 @@ Foam::ReactingMultiphaseCloud<CloudType>::~ReactingMultiphaseCloud()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
+void Foam::ReactingMultiphaseCloud<CloudType>::setParcelThermoProperties
+(
+    parcelType& parcel,
+    const scalar lagrangianDt
+)
+{
+    CloudType::setParcelThermoProperties(parcel, lagrangianDt);
+
+    label idGas = this->composition().idGas();
+    label idLiquid = this->composition().idLiquid();
+    label idSolid = this->composition().idSolid();
+
+    parcel.YGas() = this->composition().Y0(idGas);
+    parcel.YLiquid() = this->composition().Y0(idLiquid);
+    parcel.YSolid() = this->composition().Y0(idSolid);
+}
+
+
+template<class CloudType>
 void Foam::ReactingMultiphaseCloud<CloudType>::checkParcelProperties
 (
     parcelType& parcel,
@@ -162,25 +181,14 @@ void Foam::ReactingMultiphaseCloud<CloudType>::checkParcelProperties
     const bool fullyDescribed
 )
 {
-    CloudType::checkParcelProperties
-    (
-        parcel,
-        lagrangianDt,
-        fullyDescribed
-    );
+    CloudType::checkParcelProperties(parcel, lagrangianDt, fullyDescribed);
 
-    label idGas = this->composition().idGas();
-    label idLiquid = this->composition().idLiquid();
-    label idSolid = this->composition().idSolid();
+    if (fullyDescribed)
+    {
+        label idGas = this->composition().idGas();
+        label idLiquid = this->composition().idLiquid();
+        label idSolid = this->composition().idSolid();
 
-    if (!fullyDescribed)
-    {
-        parcel.YGas() = this->composition().Y0(idGas);
-        parcel.YLiquid() = this->composition().Y0(idLiquid);
-        parcel.YSolid() = this->composition().Y0(idSolid);
-    }
-    else
-    {
         this->checkSuppliedComposition
         (
             parcel.YGas(),

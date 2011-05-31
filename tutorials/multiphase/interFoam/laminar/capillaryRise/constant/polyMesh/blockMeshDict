@@ -37,26 +37,42 @@ edges
 (
 );
 
-patches
+boundary
 (
-    patch inlet
-    (
-        (1 5 4 0)
-    )
-    patch atmosphere
-    (
-        (3 7 6 2)
-    )
-    wall walls
-    (
-        (0 4 7 3)
-        (2 6 5 1)
-    )
-    empty frontAndBack
-    (
-        (0 3 2 1)
-        (4 5 6 7)
-    )
+    inlet
+    {
+        type patch;
+        faces
+        (
+            (1 5 4 0)
+        );
+    }
+    atmosphere
+    {
+        type patch;
+        faces
+        (
+            (3 7 6 2)
+        );
+    }
+    walls
+    {
+        type wall;
+        faces
+        (
+            (0 4 7 3)
+            (2 6 5 1)
+        );
+    }
+    frontAndBack
+    {
+        type empty;
+        faces
+        (
+            (0 3 2 1)
+            (4 5 6 7)
+        );
+    }
 );
 
 mergePatchPairs

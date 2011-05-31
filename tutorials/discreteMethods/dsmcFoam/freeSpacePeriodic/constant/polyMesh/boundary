@@ -22,6 +22,7 @@ FoamFile
         type            cyclic;
         nFaces          256;
         startFace       14464;
+        matchTolerance  0.0001;
         neighbourPatch  xPeriodic_half1;
     }
     xPeriodic_half1
@@ -29,6 +30,7 @@ FoamFile
         type            cyclic;
         nFaces          256;
         startFace       14720;
+        matchTolerance  0.0001;
         neighbourPatch  xPeriodic_half0;
     }
     yPeriodic_half0
@@ -36,6 +38,7 @@ FoamFile
         type            cyclic;
         nFaces          320;
         startFace       14976;
+        matchTolerance  0.0001;
         neighbourPatch  yPeriodic_half1;
     }
     yPeriodic_half1
@@ -43,6 +46,7 @@ FoamFile
         type            cyclic;
         nFaces          320;
         startFace       15296;
+        matchTolerance  0.0001;
         neighbourPatch  yPeriodic_half0;
     }
     zPeriodic_half0
@@ -50,6 +54,7 @@ FoamFile
         type            cyclic;
         nFaces          320;
         startFace       15616;
+        matchTolerance  0.0001;
         neighbourPatch  zPeriodic_half1;
     }
     zPeriodic_half1
@@ -57,6 +62,7 @@ FoamFile
         type            cyclic;
         nFaces          320;
         startFace       15936;
+        matchTolerance  0.0001;
         neighbourPatch  zPeriodic_half0;
     }
 )

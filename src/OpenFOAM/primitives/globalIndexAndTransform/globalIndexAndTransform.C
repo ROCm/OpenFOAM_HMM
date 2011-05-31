@@ -24,10 +24,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "globalIndexAndTransform.H"
-#include "coupledPolyPatch.H"
 #include "cyclicPolyPatch.H"
 
 // * * * * * * * * * * * * Private Static Data Members * * * * * * * * * * * //
+
+defineTypeNameAndDebug(Foam::globalIndexAndTransform, 0);
 
 const Foam::label Foam::globalIndexAndTransform::base_ = 32;
 
@@ -135,7 +136,19 @@ void Foam::globalIndexAndTransform::determineTransforms()
     {
         const polyPatch& pp = patches[patchI];
 
-        if (isA<coupledPolyPatch>(pp))
+        // Note: special check for unordered cyclics. These are in fact
+        // transform bcs and should probably be split off.
+        if
+        (
+            isA<coupledPolyPatch>(pp)
+        && !(
+                isA<cyclicPolyPatch>(pp)
+             && (
+                    refCast<const cyclicPolyPatch>(pp).transform()
+                 == cyclicPolyPatch::NOORDERING
+                )
+            )
+        )
         {
             const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>(pp);
 
@@ -163,20 +176,18 @@ void Foam::globalIndexAndTransform::determineTransforms()
                             ) == 0
                         )
                         {
+                            if (nextTrans == 6)
+                            {
+                                FatalErrorIn
+                                (
+                                     "void Foam::globalIndexAndTransform::"
+                                     "determineTransforms()"
+                                )   << "More than six unsigned transforms"
+                                    << " detected:" << nl << transforms_
+                                    << exit(FatalError);
+                            }
                             transforms_[nextTrans] = transform;
                             maxTol[nextTrans++] = cpp.matchTolerance();
-                        }
-
-                        if (nextTrans > 6)
-                        {
-                            FatalErrorIn
-                            (
-                                 "void Foam::globalIndexAndTransform::"
-                                 "determineTransforms()"
-                            )
-                                << "More than six unsigned transforms detected:"
-                                << nl << transforms_
-                                << exit(FatalError);
                         }
                     }
                 }
@@ -205,20 +216,18 @@ void Foam::globalIndexAndTransform::determineTransforms()
                             ) == 0
                         )
                         {
+                            if (nextTrans == 6)
+                            {
+                                FatalErrorIn
+                                (
+                                    "void Foam::globalIndexAndTransform::"
+                                    "determineTransforms()"
+                                )   << "More than six unsigned transforms"
+                                    << " detected:" << nl << transforms_
+                                    << exit(FatalError);
+                            }
                             transforms_[nextTrans] = transform;
                             maxTol[nextTrans++] = cpp.matchTolerance();
-                        }
-
-                        if (nextTrans > 6)
-                        {
-                            FatalErrorIn
-                            (
-                                "void Foam::globalIndexAndTransform::"
-                                "determineTransforms()"
-                            )
-                                << "More than six unsigned transforms detected:"
-                                << nl << transforms_
-                                << exit(FatalError);
                         }
                     }
                 }
@@ -362,7 +371,19 @@ void Foam::globalIndexAndTransform::determinePatchTransformSign()
 
         // Pout<< nl << patchI << " " << pp.name() << endl;
 
-        if (isA<coupledPolyPatch>(pp))
+        // Note: special check for unordered cyclics. These are in fact
+        // transform bcs and should probably be split off.
+        if
+        (
+            isA<coupledPolyPatch>(pp)
+        && !(
+                isA<cyclicPolyPatch>(pp)
+             && (
+                    refCast<const cyclicPolyPatch>(pp).transform()
+                 == cyclicPolyPatch::NOORDERING
+                )
+            )
+        )
         {
             const coupledPolyPatch& cpp =
             refCast<const coupledPolyPatch>(pp);
@@ -478,6 +499,63 @@ Foam::globalIndexAndTransform::globalIndexAndTransform
     determineTransformPermutations();
 
     determinePatchTransformSign();
+
+    if (debug && transforms_.size() > 0)
+    {
+        const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+        Info<< "Determined global transforms :" << endl;
+        Info<< "\t\ttranslation\trotation" << endl;
+        forAll(transforms_, i)
+        {
+            Info<< '\t' << i << '\t';
+            const vectorTensorTransform& trafo = transforms_[i];
+            if (trafo.hasR())
+            {
+                 Info<< trafo.t() << '\t' << trafo.R();
+            }
+            else
+            {
+                 Info<< trafo.t() << '\t' << "---";
+            }
+            Info<< endl;
+        }
+        Info<< endl;
+
+
+        Info<< "\tpatch\ttransform\tsign" << endl;
+        forAll(patchTransformSign_, patchI)
+        {
+            if (patchTransformSign_[patchI].first() != -1)
+            {
+                Info<< '\t' << patches[patchI].name()
+                    << '\t' << patchTransformSign_[patchI].first()
+                    << '\t' << patchTransformSign_[patchI].second()
+                    << endl;
+            }
+        }
+        Info<< endl;
+
+
+        Info<< "Permutations of transformations:" << endl
+            << "\t\ttranslation\trotation" << endl;
+        forAll(transformPermutations_, i)
+        {
+            Info<< '\t' << i << '\t';
+            const vectorTensorTransform& trafo = transformPermutations_[i];
+            if (trafo.hasR())
+            {
+                 Info<< trafo.t() << '\t' << trafo.R();
+            }
+            else
+            {
+                 Info<< trafo.t() << '\t' << "---";
+            }
+            Info<< endl;
+        }
+        Info<< "nullTransformIndex:" << nullTransformIndex() << endl
+            << endl;
+    }
 }
 
 

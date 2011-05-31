@@ -37,7 +37,7 @@ usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
-Usage: ${0##*/} [OPTION]
+Usage: ${0##*/} [OPTION] [PARAVIEW_OPTION]
 options:
   -block            use blockMesh reader  (uses .blockMesh extension)
   -builtin          use VTK builtin OpenFOAM reader  (uses .foam extension)
@@ -46,6 +46,9 @@ options:
   -touch            only create the file  (eg, .blockMesh, .OpenFOAM, etc)
   -touchAll         create .blockMesh, .OpenFOAM files (and for all regions)
   -help             print the usage
+
+
+paraview options start with a double dashes
 
 * start paraview $ParaView_VERSION with the OpenFOAM libraries
 
@@ -57,7 +60,7 @@ USAGE
 # to clean up
 unset FOAM_ABORT
 
-unset regionName touchOpt
+unset regionName optTouch
 
 # reader extension
 extension=OpenFOAM
@@ -88,18 +91,47 @@ do
         shift 2
         ;;
     -touch)
-        touchOpt=true
+        optTouch=true
         shift
         ;;
     -touchAll)
-        touchOpt=all
+        optTouch=all
         shift
+        ;;
+    --)
+        shift
+        break    # stop here, treat balance as paraview options
+        ;;
+    --*)
+        break    # stop here, treat this and balance as paraview options
         ;;
     *)
         usage "unknown option/argument: '$*'"
         ;;
     esac
 done
+
+
+#
+# check for --data=... argument
+#
+hasDataArg()
+{
+    hasData=false
+    while [ "$#" -gt 0 ]
+    do
+        case "$1" in
+        (--data=*)
+            hasData=true
+            break
+            ;;
+        esac
+        shift
+    done
+}
+
+hasDataArg $@
+
 
 # get a sensible caseName from the directory name
 caseName=${PWD##*/}
@@ -112,7 +144,7 @@ then
     fvControls="$fvControls/$regionName"
 fi
 
-case "${touchOpt:-false}" in
+case "${optTouch:-false}" in
 all)
     extension=OpenFOAM
     if [ -f constant/polyMesh/blockMeshDict ]
@@ -149,33 +181,56 @@ case "$caseName" in
 esac
 
 
-#
-# check existence of essential files
-#
-case $extension in
-blockMesh)
-    for check in system/controlDict constant/polyMesh/blockMeshDict
-    do
-        [ -s "$parentDir/$check" ] || usage "file does not exist:  '$parentDir/$check'"
-    done
-    ;;
+if [ "${hasData:-false}" = true ]
+then
 
-builtin | OpenFOAM)
-    for check in system/controlDict $fvControls/fvSchemes $fvControls/fvSolution
-    do
-        [ -s "$parentDir/$check" ] || usage "file does not exist:  '$parentDir/$check'"
-    done
-    ;;
-esac
+    # has --data=.., send directly to paraview
+    exec paraview "$@"
 
+else
 
-# only create/remove caseFile if it didn't already exist
-[ -e $caseFile ] || {
-    trap "rm -f $caseFile 2>/dev/null; exit 0" EXIT TERM INT
-    touch "$caseFile"
-    echo "created temporary '$caseFile'"
-}
+    # check existence of essential files
+    warn="WARN file does not exist:"
+    case $extension in
+    blockMesh)
+        for check in \
+            system/controlDict \
+            constant/polyMesh/blockMeshDict \
+            ;
+        do
+            [ -s "$parentDir/$check" ] || {
+                [ -n "$warn" ] && echo "$warn" 1>&2
+                echo "    $parentDir/$check" 1>&2
+                unset warn
+            }
+        done
+        ;;
 
-paraview --data="$caseFile"
+    builtin | OpenFOAM)
+        for check in \
+            system/controlDict \
+            $fvControls/fvSchemes \
+            $fvControls/fvSolution \
+            ;
+        do
+            [ -s "$parentDir/$check" ] || {
+                [ -n "$warn" ] && echo "$warn" 1>&2
+                echo "    $parentDir/$check" 1>&2
+                unset warn
+            }
+        done
+        ;;
+    esac
+
+    # only create/remove caseFile if it didn't already exist
+    [ -e $caseFile ] || {
+        trap "rm -f $caseFile 2>/dev/null; exit 0" EXIT TERM INT
+        touch "$caseFile"
+        echo "created temporary '$caseFile'"
+    }
+
+    paraview --data="$caseFile" "$@"
+fi
+
 
 #------------------------------------------------------------------------------

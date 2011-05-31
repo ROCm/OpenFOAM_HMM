@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,13 @@ template<int PolySize>
 icoPolynomial<PolySize>::icoPolynomial(const dictionary& dict)
 :
     specie(dict),
-    rhoCoeffs_(dict.lookup("rhoCoeffs<" + Foam::name(PolySize) + '>'))
+    rhoCoeffs_
+(
+    dict.subDict("equationOfState").lookup
+    (
+        "rhoCoeffs<" + Foam::name(PolySize) + '>'
+    )
+)
 {
     rhoCoeffs_ *= this->W();
 }
@@ -59,8 +65,15 @@ template<int PolySize>
 void icoPolynomial<PolySize>::write(Ostream& os) const
 {
     specie::write(os);
-    os.writeKeyword(word("rhoCoeffs<" + Foam::name(PolySize) + '>'))
-        << rhoCoeffs_/this->W() << token::END_STATEMENT << nl;
+
+    dictionary dict("equationOfState");
+    dict.add
+    (
+        word("rhoCoeffs<" + Foam::name(PolySize) + '>'),
+        rhoCoeffs_/this->W()
+    );
+
+    os  << dict;
 }
 
 

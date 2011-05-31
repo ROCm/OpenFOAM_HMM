@@ -25,48 +25,6 @@ License
 
 #include "ReactingMultiphaseLookupTableInjection.H"
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::label
-Foam::ReactingMultiphaseLookupTableInjection<CloudType>::parcelsToInject
-(
-    const scalar time0,
-    const scalar time1
-)
-{
-    if ((time0 >= 0.0) && (time0 < duration_))
-    {
-        return floor(injectorCells_.size()*(time1 - time0)*parcelsPerSecond_);
-    }
-    else
-    {
-        return 0;
-    }
-}
-
-
-template<class CloudType>
-Foam::scalar
-Foam::ReactingMultiphaseLookupTableInjection<CloudType>::volumeToInject
-(
-    const scalar time0,
-    const scalar time1
-)
-{
-    scalar volume = 0.0;
-    if ((time0 >= 0.0) && (time0 < duration_))
-    {
-        forAll(injectors_, i)
-        {
-            volume += injectors_[i].mDot()/injectors_[i].rho()*(time1 - time0);
-        }
-    }
-
-    return volume;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -158,6 +116,46 @@ Foam::scalar
 Foam::ReactingMultiphaseLookupTableInjection<CloudType>::timeEnd() const
 {
     return this->SOI_ + duration_;
+}
+
+
+template<class CloudType>
+Foam::label
+Foam::ReactingMultiphaseLookupTableInjection<CloudType>::parcelsToInject
+(
+    const scalar time0,
+    const scalar time1
+)
+{
+    if ((time0 >= 0.0) && (time0 < duration_))
+    {
+        return floor(injectorCells_.size()*(time1 - time0)*parcelsPerSecond_);
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+
+template<class CloudType>
+Foam::scalar
+Foam::ReactingMultiphaseLookupTableInjection<CloudType>::volumeToInject
+(
+    const scalar time0,
+    const scalar time1
+)
+{
+    scalar volume = 0.0;
+    if ((time0 >= 0.0) && (time0 < duration_))
+    {
+        forAll(injectors_, i)
+        {
+            volume += injectors_[i].mDot()/injectors_[i].rho()*(time1 - time0);
+        }
+    }
+
+    return volume;
 }
 
 

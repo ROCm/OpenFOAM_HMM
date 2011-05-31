@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,18 +37,9 @@ template<class thermo>
 constSolidRad<thermo>::constSolidRad(const dictionary& dict)
 :
     thermo(dict),
-    kappa_(readScalar(dict.subDict("radiativeProperties").lookup("kappa"))),
-    sigmaS_
-    (
-        readScalar
-        (
-            dict.subDict("radiativeProperties").lookup("sigmaS")
-        )
-    ),
-    emissivity_
-    (
-        readScalar(dict.subDict("radiativeProperties").lookup("emissivity"))
-    )
+    kappa_(readScalar(dict.subDict("radiation").lookup("kappa"))),
+    sigmaS_(readScalar(dict.subDict("radiation").lookup("sigmaS"))),
+    emissivity_(readScalar(dict.subDict("radiation").lookup("emissivity")))
 {}
 
 

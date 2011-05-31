@@ -24,8 +24,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ReactingParcel.H"
-#include "mathematicalConstants.H"
 #include "specie.H"
+#include "CompositionModel.H"
+#include "mathematicalConstants.H"
 
 using namespace Foam::constant::mathematical;
 

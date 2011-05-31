@@ -127,17 +127,6 @@ void Foam::KinematicCloud<CloudType>::solve(TrackData& td)
 
 
 template<class CloudType>
-void Foam::KinematicCloud<CloudType>::preEvolve()
-{
-    Info<< "\nSolving cloud " << this->name() << endl;
-
-    this->dispersion().cacheFields(true);
-    forces_.cacheFields(true);
-    updateCellOccupancy();
-}
-
-
-template<class CloudType>
 void Foam::KinematicCloud<CloudType>::buildCellOccupancy()
 {
     if (cellOccupancyPtr_.empty())
@@ -310,6 +299,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     U_(U),
     mu_(mu),
     g_(g),
+    pAmbient_(0.0),
     forces_
     (
         *this,
@@ -403,6 +393,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     U_(c.U_),
     mu_(c.mu_),
     g_(c.g_),
+    pAmbient_(c.pAmbient_),
     forces_(c.forces_),
     functions_(c.functions_),
     dispersionModel_(c.dispersionModel_->clone()),
@@ -478,6 +469,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     U_(c.U_),
     mu_(c.mu_),
     g_(c.g_),
+    pAmbient_(c.pAmbient_),
     forces_(*this, mesh),
     functions_(*this),
     dispersionModel_(NULL),
@@ -507,6 +499,17 @@ bool Foam::KinematicCloud<CloudType>::hasWallImpactDistance() const
 
 
 template<class CloudType>
+void Foam::KinematicCloud<CloudType>::setParcelThermoProperties
+(
+    parcelType& parcel,
+    const scalar lagrangianDt
+)
+{
+    parcel.rho() = constProps_.rho0();
+}
+
+
+template<class CloudType>
 void Foam::KinematicCloud<CloudType>::checkParcelProperties
 (
     parcelType& parcel,
@@ -514,11 +517,6 @@ void Foam::KinematicCloud<CloudType>::checkParcelProperties
     const bool fullyDescribed
 )
 {
-    if (!fullyDescribed)
-    {
-        parcel.rho() = constProps_.rho0();
-    }
-
     const scalar carrierDt = mesh_.time().deltaTValue();
     parcel.stepFraction() = (carrierDt - lagrangianDt)/carrierDt;
     parcel.typeId() = constProps_.parcelTypeId();
@@ -597,6 +595,20 @@ void Foam::KinematicCloud<CloudType>::scaleSources()
 {
     this->scale(UTrans_(), "U");
     this->scale(UCoeff_(), "U");
+}
+
+
+template<class CloudType>
+void Foam::KinematicCloud<CloudType>::preEvolve()
+{
+    Info<< "\nSolving cloud " << this->name() << endl;
+
+    this->dispersion().cacheFields(true);
+    forces_.cacheFields(true);
+    updateCellOccupancy();
+
+    pAmbient_ = constProps_.dict().template
+        lookupOrDefault<scalar>("pAmbient", pAmbient_);
 }
 
 

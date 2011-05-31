@@ -176,6 +176,9 @@ protected:
             //- Gravity
             const dimensionedVector& g_;
 
+            //- Averaged ambient domain pressure
+            scalar pAmbient_;
+
 
         //- Optional particle forces
         forceType forces_;
@@ -229,9 +232,6 @@ protected:
             //- Solve the cloud - calls all evolution functions
             template<class TrackData>
             void solve(TrackData& td);
-
-            //- Pre-evolve
-            void preEvolve();
 
             //- Build the cellOccupancy
             void buildCellOccupancy();
@@ -367,6 +367,12 @@ public:
                 //- Gravity
                 inline const dimensionedVector& g() const;
 
+                //- Return const-access to the ambient pressure
+                inline scalar pAmbient() const;
+
+                //- Return reference to the ambient pressure
+                inline scalar& pAmbient();
+
 
             //- Optional particle forces
 //            inline const typename parcelType::forceType& forces() const;
@@ -456,6 +462,12 @@ public:
             //- Total rotational kinetic energy in the system
             inline scalar rotationalKineticEnergyOfSystem() const;
 
+            //- Penetration for percentage of the current total mass
+            inline scalar penetration(const scalar& prc) const;
+
+            //- Mean diameter Dij
+            inline scalar Dij(const label i, const label j) const;
+
 
             // Fields
 
@@ -473,6 +485,13 @@ public:
 
 
         // Cloud evolution functions
+
+            //- Set parcel thermo properties
+            void setParcelThermoProperties
+            (
+                parcelType& parcel,
+                const scalar lagrangianDt
+            );
 
             //- Check parcel properties
             void checkParcelProperties
@@ -513,6 +532,9 @@ public:
 
             //- Apply scaling to (transient) cloud sources
             void scaleSources();
+
+            //- Pre-evolve
+            void preEvolve();
 
             //- Evolve the cloud
             void evolve();

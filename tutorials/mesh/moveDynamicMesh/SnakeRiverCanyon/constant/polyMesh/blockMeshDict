@@ -38,32 +38,56 @@ edges
 (
 );
 
-patches
+boundary
 (
-    patch maxX
-    (
-        (3 7 6 2)
-    )
-    patch minZ
-    (
-        (0 4 7 3)
-    )
-    patch maxZ
-    (
-        (2 6 5 1)
-    )
-    patch minX
-    (
-        (1 5 4 0)
-    )
-    patch minY
-    (
-        (0 3 2 1)
-    )
-    patch maxY
-    (
-        (4 5 6 7)
-    )
+    maxX
+    {
+        type patch;
+        faces
+        (
+            (3 7 6 2)
+        );
+    }
+    minZ
+    {
+        type patch;
+        faces
+        (
+            (0 4 7 3)
+        );
+    }
+    maxZ
+    {
+        type patch;
+        faces
+        (
+            (2 6 5 1)
+        );
+    }
+    minX
+    {
+        type patch;
+        faces
+        (
+            (1 5 4 0)
+        );
+    }
+    minY
+    {
+        type patch;
+        faces
+        (
+            (0 3 2 1)
+        );
+    }
+    maxY
+    {
+        type patch;
+        faces
+        (
+            (4 5 6 7)
+        );
+    }
 );
 
 mergePatchPairs

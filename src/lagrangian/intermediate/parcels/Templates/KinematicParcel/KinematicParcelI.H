@@ -85,6 +85,26 @@ inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
     }
 }
 
+template<class ParcelType>
+inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
+(
+    const label parcelTypeId,
+    const scalar rhoMin,
+    const scalar rho0,
+    const scalar minParticleMass,
+    const scalar youngsModulus,
+    const scalar poissonsRatio
+)
+:
+    dict_(dictionary::null),
+    parcelTypeId_(parcelTypeId),
+    rhoMin_(rhoMin),
+    rho0_(rho0),
+    minParticleMass_(minParticleMass),
+    youngsModulus_(youngsModulus),
+    poissonsRatio_(poissonsRatio)
+{}
+
 
 template<class ParcelType>
 inline Foam::KinematicParcel<ParcelType>::KinematicParcel
@@ -519,6 +539,19 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::Re
 ) const
 {
     return rhoc*mag(U - Uc_)*d/(muc + ROOTVSMALL);
+}
+
+
+template<class ParcelType>
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::We
+(
+    const vector& U,
+    const scalar d,
+    const scalar rhoc,
+    const scalar sigma
+) const
+{
+    return rhoc*magSqr(U - Uc_)*d/(sigma + ROOTVSMALL);
 }
 
 

@@ -414,11 +414,11 @@ Foam::argList::argList
             (
                 (
                     validOptions.found(optionName)
-                 && validOptions[optionName] != ""
+                 && !validOptions[optionName].empty()
                 )
              || (
                     validParOptions.found(optionName)
-                 && validParOptions[optionName] != ""
+                 && !validParOptions[optionName].empty()
                 )
             )
             {
@@ -832,6 +832,116 @@ Foam::argList::~argList()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::argList::setOption(const word& opt, const string& param)
+{
+    bool changed = false;
+
+    // only allow valid options
+    if (validOptions.found(opt))
+    {
+        // some options are to be protected
+        if
+        (
+            opt == "case"
+         || opt == "parallel"
+         || opt == "roots"
+        )
+        {
+            FatalError
+                <<"used argList::setOption on a protected option: '"
+                << opt << "'" << endl;
+            FatalError.exit();
+        }
+
+        if (validOptions[opt].empty())
+        {
+            // bool option
+            if (!param.empty())
+            {
+                // disallow change of type
+                FatalError
+                    <<"used argList::setOption to change bool to non-bool: '"
+                    << opt << "'" << endl;
+                FatalError.exit();
+            }
+            else
+            {
+                // did not previously exist
+                changed = !options_.found(opt);
+            }
+        }
+        else
+        {
+            // non-bool option
+            if (param.empty())
+            {
+                // disallow change of type
+                FatalError
+                    <<"used argList::setOption to change non-bool to bool: '"
+                    << opt << "'" << endl;
+                FatalError.exit();
+            }
+            else
+            {
+                // existing value needs changing, or did not previously exist
+                changed = options_.found(opt) ? options_[opt] != param : true;
+            }
+        }
+    }
+    else
+    {
+        FatalError
+            <<"used argList::setOption on an invalid option: '"
+            << opt << "'" << nl << "allowed are the following:"
+            << validOptions << endl;
+        FatalError.exit();
+    }
+
+    // set/change the option as required
+    if (changed)
+    {
+        options_.set(opt, param);
+    }
+
+    return changed;
+}
+
+
+bool Foam::argList::unsetOption(const word& opt)
+{
+    // only allow valid options
+    if (validOptions.found(opt))
+    {
+        // some options are to be protected
+        if
+        (
+            opt == "case"
+         || opt == "parallel"
+         || opt == "roots"
+        )
+        {
+            FatalError
+                <<"used argList::unsetOption on a protected option: '"
+                << opt << "'" << endl;
+            FatalError.exit();
+        }
+
+        // remove the option, return true if state changed
+        return options_.erase(opt);
+    }
+    else
+    {
+        FatalError
+            <<"used argList::unsetOption on an invalid option: '"
+            << opt << "'" << nl << "allowed are the following:"
+            << validOptions << endl;
+        FatalError.exit();
+    }
+
+    return false;
+}
+
 
 void Foam::argList::printNotes() const
 {

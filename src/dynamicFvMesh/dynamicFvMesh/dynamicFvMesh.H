@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,6 +84,29 @@ public:
 
         //- Construct from objectRegistry, and read/write options
         explicit dynamicFvMesh(const IOobject& io);
+
+        //- Construct from components without boundary.
+        //  Boundary is added using addFvPatches() member function
+        dynamicFvMesh
+        (
+            const IOobject& io,
+            const Xfer<pointField>& points,
+            const Xfer<faceList>& faces,
+            const Xfer<labelList>& allOwner,
+            const Xfer<labelList>& allNeighbour,
+            const bool syncPar = true
+        );
+
+        //- Construct without boundary from cells rather than owner/neighbour.
+        //  Boundary is added using addPatches() member function
+        dynamicFvMesh
+        (
+            const IOobject& io,
+            const Xfer<pointField>& points,
+            const Xfer<faceList>& faces,
+            const Xfer<cellList>& cells,
+            const bool syncPar = true
+        );
 
 
     // Selectors

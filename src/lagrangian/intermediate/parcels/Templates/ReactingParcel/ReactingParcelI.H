@@ -75,6 +75,49 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
 
 
 template<class ParcelType>
+inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
+(
+    const label parcelTypeId,
+    const scalar rhoMin,
+    const scalar rho0,
+    const scalar minParticleMass,
+    const scalar youngsModulus,
+    const scalar poissonsRatio,
+    const scalar T0,
+    const scalar TMin,
+    const scalar Cp0,
+    const scalar epsilon0,
+    const scalar f0,
+    const scalar Pr,
+    const scalar pMin,
+    const Switch& constantVolume,
+    const scalar Tvap,
+    const scalar Tbp
+)
+:
+    ParcelType::constantProperties
+    (
+        parcelTypeId,
+        rhoMin,
+        rho0,
+        minParticleMass,
+        youngsModulus,
+        poissonsRatio,
+        T0,
+        TMin,
+        Cp0,
+        epsilon0,
+        f0,
+        Pr
+    ),
+    pMin_(pMin),
+    constantVolume_(constantVolume),
+    Tvap_(Tvap),
+    Tbp_(Tbp)
+{}
+
+
+template<class ParcelType>
 inline Foam::ReactingParcel<ParcelType>::ReactingParcel
 (
     const polyMesh& mesh,
@@ -189,6 +232,13 @@ inline const Foam::scalarField& Foam::ReactingParcel<ParcelType>::Y() const
 
 template<class ParcelType>
 inline Foam::scalar Foam::ReactingParcel<ParcelType>::pc() const
+{
+    return pc_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar& Foam::ReactingParcel<ParcelType>::pc()
 {
     return pc_;
 }

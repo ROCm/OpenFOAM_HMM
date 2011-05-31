@@ -38,8 +38,8 @@ SourceFiles
 #ifndef ReactingParcel_H
 #define ReactingParcel_H
 
-#include "ThermoParcel.H"
-#include "ReactingCloud.H"
+#include "particle.H"
+#include "SLGThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -104,6 +104,27 @@ public:
                 const bool readFields = true
             );
 
+            //- Construct from components
+            constantProperties
+            (
+                const label parcelTypeId,
+                const scalar rhoMin,
+                const scalar rho0,
+                const scalar minParticleMass,
+                const scalar youngsModulus,
+                const scalar poissonsRatio,
+                const scalar T0,
+                const scalar TMin,
+                const scalar Cp0,
+                const scalar epsilon0,
+                const scalar f0,
+                const scalar Pr,
+                const scalar pMin,
+                const Switch& constantVolume,
+                const scalar Tvap,
+                const scalar Tbp
+            );
+
 
         // Access
 
@@ -134,7 +155,6 @@ public:
 
                 //- Interpolator for continuous phase pressure field
                 autoPtr<interpolation<scalar> > pInterp_;
-
 
 
     public:
@@ -327,6 +347,9 @@ public:
             //- Return the owner cell pressure
             inline scalar pc() const;
 
+            //- Return reference to the owner cell pressure
+            inline scalar& pc();
+
 
         // Edit
 
@@ -403,7 +426,7 @@ public:
                 const CompositionType& compModel
             );
 
-            //- Read - composition supplied
+            //- Write - composition supplied
             template<class CloudType>
             static void writeFields(const CloudType& c);
 

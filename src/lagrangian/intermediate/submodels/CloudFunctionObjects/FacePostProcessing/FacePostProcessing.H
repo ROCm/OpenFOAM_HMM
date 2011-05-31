@@ -64,8 +64,8 @@ class FacePostProcessing
             typedef typename CloudType::parcelType parcelType;
 
 
-        //- Face zone
-        const faceZone& fZone_;
+        //- Face zone IDs
+        labelList faceZoneIDs_;
 
         //- Surface output format
         const word surfaceFormat_;
@@ -77,19 +77,24 @@ class FacePostProcessing
         scalar totalTime_;
 
         //- Mass storage
-        scalarField mass_;
+        List<scalarField> mass_;
 
         //- Mass total storage
-        scalarField massTotal_;
+        List<scalarField> massTotal_;
 
         //- Mass flux storage
-        scalarField massFlux_;
+        List<scalarField> massFlux_;
 
 
     // Private Member Functions
 
-        //- Return index into massFlux_ list if valid face, else -1
-        label applyToFace(const label faceI) const;
+        //- Return index into storage lists if valid zone and face
+        void applyToFace
+        (
+            const label faceIn,
+            label& zoneI, label&
+            faceI
+        ) const;
 
 
 protected:

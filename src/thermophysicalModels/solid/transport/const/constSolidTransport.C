@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,7 +32,7 @@ template<class thermo>
 Foam::constSolidTransport<thermo>::constSolidTransport(const dictionary& dict)
 :
     thermo(dict),
-    K_(readScalar(dict.subDict("transportProperties").lookup("K")))
+    K_(readScalar(dict.subDict("transport").lookup("K")))
 {}
 
 

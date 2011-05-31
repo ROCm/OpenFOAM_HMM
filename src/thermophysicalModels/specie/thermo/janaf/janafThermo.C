@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,11 +85,11 @@ template<class EquationOfState>
 Foam::janafThermo<EquationOfState>::janafThermo(const dictionary& dict)
 :
     EquationOfState(dict),
-    Tlow_(readScalar(dict.lookup("Tlow"))),
-    Thigh_(readScalar(dict.lookup("Thigh"))),
-    Tcommon_(readScalar(dict.lookup("Tcommon"))),
-    highCpCoeffs_(dict.lookup("highCpCoeffs")),
-    lowCpCoeffs_(dict.lookup("lowCpCoeffs"))
+    Tlow_(readScalar(dict.subDict("thermodynamics").lookup("Tlow"))),
+    Thigh_(readScalar(dict.subDict("thermodynamics").lookup("Thigh"))),
+    Tcommon_(readScalar(dict.subDict("thermodynamics").lookup("Tcommon"))),
+    highCpCoeffs_(dict.subDict("thermodynamics").lookup("highCpCoeffs")),
+    lowCpCoeffs_(dict.subDict("thermodynamics").lookup("lowCpCoeffs"))
 {
     checkInputData();
 }
@@ -101,13 +101,14 @@ template<class EquationOfState>
 void Foam::janafThermo<EquationOfState>::write(Ostream& os) const
 {
     EquationOfState::write(os);
-    os.writeKeyword("Tlow") << Tlow_ << token::END_STATEMENT << endl;
-    os.writeKeyword("Thigh") << Thigh_ << token::END_STATEMENT << endl;
-    os.writeKeyword("Tcommon") << Tcommon_ << token::END_STATEMENT << endl;
-    os.writeKeyword("highCpCoeffs") << highCpCoeffs_ << token::END_STATEMENT
-        << endl;
-    os.writeKeyword("lowCpCoeffs") << lowCpCoeffs_ << token::END_STATEMENT
-        << endl;
+
+    dictionary dict("thermodynamics");
+    dict.add("Tlow", Tlow_);
+    dict.add("Thigh", Thigh_);
+    dict.add("Tcommon", Tcommon_);
+    dict.add("highCpCoeffs", highCpCoeffs_);
+    dict.add("lowCpCoeffs", lowCpCoeffs_);
+    os  << dict;
 }
 
 

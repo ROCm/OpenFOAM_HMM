@@ -267,6 +267,13 @@ public:
 
         // Cloud evolution functions
 
+            //- Set parcel thermo properties
+            void setParcelThermoProperties
+            (
+                parcelType& parcel,
+                const scalar lagrangianDt
+            );
+
             //- Check parcel properties
             void checkParcelProperties
             (

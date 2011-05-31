@@ -234,6 +234,20 @@ Foam::ThermoCloud<CloudType>::~ThermoCloud()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
+void Foam::ThermoCloud<CloudType>::setParcelThermoProperties
+(
+    parcelType& parcel,
+    const scalar lagrangianDt
+)
+{
+    CloudType::setParcelThermoProperties(parcel, lagrangianDt);
+
+    parcel.T() = constProps_.T0();
+    parcel.Cp() = constProps_.Cp0();
+}
+
+
+template<class CloudType>
 void Foam::ThermoCloud<CloudType>::checkParcelProperties
 (
     parcelType& parcel,
@@ -242,12 +256,6 @@ void Foam::ThermoCloud<CloudType>::checkParcelProperties
 )
 {
     CloudType::checkParcelProperties(parcel, lagrangianDt, fullyDescribed);
-
-    if (!fullyDescribed)
-    {
-        parcel.T() = constProps_.T0();
-        parcel.Cp() = constProps_.Cp0();
-    }
 }
 
 
@@ -301,6 +309,15 @@ void Foam::ThermoCloud<CloudType>::scaleSources()
 
     this->scale(hsTrans_(), "hs");
     this->scale(hsCoeff_(), "hs");
+}
+
+
+template<class CloudType>
+void Foam::ThermoCloud<CloudType>::preEvolve()
+{
+    CloudType::preEvolve();
+
+    this->pAmbient() = thermo_.thermo().p().average().value();
 }
 
 

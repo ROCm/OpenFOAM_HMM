@@ -26,30 +26,6 @@ License
 #include "NoInjection.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::label Foam::NoInjection<CloudType>::parcelsToInject
-(
-    const scalar,
-    const scalar
-)
-{
-    return 0;
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::NoInjection<CloudType>::volumeToInject
-(
-    const scalar,
-    const scalar
-)
-{
-    return 0.0;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -84,6 +60,28 @@ bool Foam::NoInjection<CloudType>::active() const
 
 template<class CloudType>
 Foam::scalar Foam::NoInjection<CloudType>::timeEnd() const
+{
+    return 0.0;
+}
+
+
+template<class CloudType>
+Foam::label Foam::NoInjection<CloudType>::parcelsToInject
+(
+    const scalar,
+    const scalar
+)
+{
+    return 0;
+}
+
+
+template<class CloudType>
+Foam::scalar Foam::NoInjection<CloudType>::volumeToInject
+(
+    const scalar,
+    const scalar
+)
 {
     return 0.0;
 }

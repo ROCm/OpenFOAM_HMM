@@ -30,53 +30,6 @@ License
 
 using namespace Foam::constant::mathematical;
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::label Foam::ConeInjection<CloudType>::parcelsToInject
-(
-    const scalar time0,
-    const scalar time1
-)
-{
-    if ((time0 >= 0.0) && (time0 < duration_))
-    {
-        const scalar targetVolume = flowRateProfile_().integrate(0, time1);
-
-        const label targetParcels =
-            parcelsPerInjector_*targetVolume/this->volumeTotal_;
-
-        const label nToInject = targetParcels - nInjected_;
-
-        nInjected_ += nToInject;
-
-        return positionAxis_.size()*nToInject;
-    }
-    else
-    {
-        return 0;
-    }
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::ConeInjection<CloudType>::volumeToInject
-(
-    const scalar time0,
-    const scalar time1
-)
-{
-    if ((time0 >= 0.0) && (time0 < duration_))
-    {
-        return flowRateProfile_().integrate(time0, time1);
-    }
-    else
-    {
-        return 0.0;
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -192,6 +145,51 @@ template<class CloudType>
 Foam::scalar Foam::ConeInjection<CloudType>::timeEnd() const
 {
     return this->SOI_ + duration_;
+}
+
+
+template<class CloudType>
+Foam::label Foam::ConeInjection<CloudType>::parcelsToInject
+(
+    const scalar time0,
+    const scalar time1
+)
+{
+    if ((time0 >= 0.0) && (time0 < duration_))
+    {
+        const scalar targetVolume = flowRateProfile_().integrate(0, time1);
+
+        const label targetParcels =
+            parcelsPerInjector_*targetVolume/this->volumeTotal_;
+
+        const label nToInject = targetParcels - nInjected_;
+
+        nInjected_ += nToInject;
+
+        return positionAxis_.size()*nToInject;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+
+template<class CloudType>
+Foam::scalar Foam::ConeInjection<CloudType>::volumeToInject
+(
+    const scalar time0,
+    const scalar time1
+)
+{
+    if ((time0 >= 0.0) && (time0 < duration_))
+    {
+        return flowRateProfile_().integrate(time0, time1);
+    }
+    else
+    {
+        return 0.0;
+    }
 }
 
 

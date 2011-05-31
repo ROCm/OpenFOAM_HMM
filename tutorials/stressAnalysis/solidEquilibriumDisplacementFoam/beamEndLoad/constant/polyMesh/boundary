@@ -31,7 +31,7 @@ FoamFile
     }
     fixedEnd
     {
-        type            wall;
+        type            patch;
         nFaces          2;
         startFace       28;
     }

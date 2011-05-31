@@ -39,25 +39,33 @@ blocks
     hex (7 8 9 6 1 2 3 0) (20 8 1) simpleGrading (1 1 1)
 );
 
-patches
+boundary
 (
-    wall walls
-    (
-        (1 7 8 2)
-        (0 6 7 1)
-        (2 8 9 3)
-        (0 5 11 6)
-        (3 4 10 9)
-        (4 10 11 5)
-    )
+    walls
+    {
+        type wall;
+        faces
+        (
+            (1 7 8 2)
+            (0 6 7 1)
+            (2 8 9 3)
+            (0 5 11 6)
+            (3 4 10 9)
+            (4 10 11 5)
+        );
+    }
 
-    wall frontAndBack
-    (
-        (0 3 4 5)
-        (1 2 3 0)
-        (6 11 10 9)
-        (6 9 8 7)
-    )
+    frontAndBack
+    {
+        type wall;
+        faces
+        (
+            (0 3 4 5)
+            (1 2 3 0)
+            (6 11 10 9)
+            (6 9 8 7)
+        );
+    }
 );
 
 
