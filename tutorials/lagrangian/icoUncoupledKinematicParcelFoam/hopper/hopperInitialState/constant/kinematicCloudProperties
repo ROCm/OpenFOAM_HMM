@@ -91,6 +91,7 @@ subModels
 
     pairCollisionCoeffs
     {
+        // Maximum possible particle diameter expected at any time
         maxInteractionDistance  0.006;
 
         writeReferredParticleCloud no;
@@ -103,6 +104,7 @@ subModels
             alpha               0.12;
             b                   1.5;
             mu                  0.52;
+            cohesionEnergyDensity 0;
             collisionResolutionSteps 12;
         };
 
