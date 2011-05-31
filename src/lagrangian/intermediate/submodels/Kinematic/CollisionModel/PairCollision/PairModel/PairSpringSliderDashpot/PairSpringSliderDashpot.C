@@ -92,12 +92,14 @@ Foam::PairSpringSliderDashpot<CloudType>::PairSpringSliderDashpot
     alpha_(readScalar(this->coeffDict().lookup("alpha"))),
     b_(readScalar(this->coeffDict().lookup("b"))),
     mu_(readScalar(this->coeffDict().lookup("mu"))),
+    cohesionEnergyDensity_
+    (
+        readScalar(this->coeffDict().lookup("cohesionEnergyDensity"))
+    ),
+    cohesion_(false),
     collisionResolutionSteps_
     (
-        readScalar
-        (
-            this->coeffDict().lookup("collisionResolutionSteps")
-        )
+        readScalar(this->coeffDict().lookup("collisionResolutionSteps"))
     ),
     volumeFactor_(1.0),
     useEquivalentSize_(Switch(this->coeffDict().lookup("useEquivalentSize")))
@@ -116,6 +118,8 @@ Foam::PairSpringSliderDashpot<CloudType>::PairSpringSliderDashpot
     scalar G = E/(2.0*(1.0 + nu));
 
     Gstar_ = G/(2.0*(2.0 - nu));
+
+    cohesion_ = (mag(cohesionEnergyDensity_) > VSMALL);
 }
 
 
@@ -183,13 +187,15 @@ void Foam::PairSpringSliderDashpot<CloudType>::evaluatePair
         dBEff *= cbrt(pB.nParticle()*volumeFactor_);
     }
 
-    scalar normalOverlapMag = 0.5*(dAEff + dBEff) - mag(r_AB);
+    scalar r_AB_mag = mag(r_AB);
+
+    scalar normalOverlapMag = 0.5*(dAEff + dBEff) - r_AB_mag;
 
     if (normalOverlapMag > 0)
     {
         //Particles in collision
 
-        vector rHat_AB = r_AB/(mag(r_AB) + VSMALL);
+        vector rHat_AB = r_AB/(r_AB_mag + VSMALL);
 
         vector U_AB = pA.U() - pB.U();
 
@@ -207,6 +213,15 @@ void Foam::PairSpringSliderDashpot<CloudType>::evaluatePair
         vector fN_AB =
             rHat_AB
            *(kN*pow(normalOverlapMag, b_) - etaN*(U_AB & rHat_AB));
+
+        // Cohesion force
+        if (cohesion_)
+        {
+            fN_AB +=
+                -cohesionEnergyDensity_
+                *overlapArea(dAEff/2.0, dBEff/2.0, r_AB_mag)
+                *rHat_AB;
+        }
 
         pA.f() += fN_AB;
         pB.f() += -fN_AB;
