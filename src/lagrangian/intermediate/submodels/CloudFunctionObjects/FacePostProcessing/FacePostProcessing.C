@@ -182,7 +182,11 @@ void Foam::FacePostProcessing<CloudType>::write()
                     )
                 );
 
-                autoPtr<surfaceWriter> writer(surfaceWriter::New(surfaceFormat_));
+                autoPtr<surfaceWriter> writer
+                (
+                    surfaceWriter::New(surfaceFormat_)
+                );
+
                 writer->write
                 (
                     outputDir,
