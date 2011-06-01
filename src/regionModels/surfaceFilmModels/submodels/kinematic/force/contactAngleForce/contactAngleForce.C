@@ -27,6 +27,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvcGrad.H"
 #include "unitConversion.H"
+#include "fvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -109,7 +110,8 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
     );
     volVectorField gradAlpha(fvc::grad(alpha));
 
-    scalarField nHits(force.size(), 0.0);
+
+    scalarField nHits(owner_.regionMesh().nCells(), 0.0);
 
     forAll(nbr, faceI)
     {
@@ -129,6 +131,7 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
         if (cellI != -1)
         {
 //            const scalar dx = Foam::sqrt(magSf[cellI]);
+            // bit of a cheat, but ok for regular meshes
             const scalar dx = owner_.regionMesh().deltaCoeffs()[faceI];
             const vector n =
                 gradAlpha[cellI]/(mag(gradAlpha[cellI]) + ROOTVSMALL);
@@ -138,8 +141,29 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
         }
     }
 
-    nHits = max(nHits, 1.0);
-    force /= (nHits*magSf);
+    forAll(delta.boundaryField(), patchI)
+    {
+        const fvPatchField<scalar>& df = delta.boundaryField()[patchI];
+        const scalarField& dx = df.patch().deltaCoeffs();
+        const labelUList& faceCells = df.patch().faceCells();
+
+        forAll(df, faceI)
+        {
+            label cellO = faceCells[faceI];
+
+            if ((delta[cellO] > deltaWet_) && (df[faceI] < deltaWet_))
+            {
+                const vector n =
+                    gradAlpha[cellO]/(mag(gradAlpha[cellO]) + ROOTVSMALL);
+                scalar theta = cos(degToRad(distribution_->sample()));
+                force[cellO] += Ccf_*n*sigma[cellO]*(1.0 - theta)/dx[faceI];
+                nHits[cellO]++;
+            }
+        }
+    }
+
+    force /= (max(nHits, 1.0)*magSf);
+    tForce().correctBoundaryConditions();
 
     if (owner_.regionMesh().time().outputTime())
     {
