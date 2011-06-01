@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,40 +23,51 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "readFields.H"
+#include "directMappedVariableThicknessWallFvPatch.H"
+#include "addToRunTimeSelectionTable.H"
+#include "regionModel1D.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Mesh, class GeoField>
-void Foam::readFields
-(
-    const Mesh& mesh,
-    const IOobjectList& objects,
-    PtrList<GeoField>& fields
-)
+namespace Foam
 {
-    // Search list of objects for fields of type GeomField
-    IOobjectList fieldObjects(objects.lookupClass(GeoField::typeName));
+    defineTypeNameAndDebug(directMappedVariableThicknessWallFvPatch, 0);
+    addToRunTimeSelectionTable
+    (
+        fvPatch,
+        directMappedVariableThicknessWallFvPatch,
+        polyPatch
+    );
+}
 
-    // Remove the cellDist field
-    IOobjectList::iterator celDistIter = fieldObjects.find("cellDist");
-    if (celDistIter != fieldObjects.end())
-    {
-        fieldObjects.erase(celDistIter);
-    }
 
-    // Construct the fields
-    fields.setSize(fieldObjects.size());
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-    label fieldI = 0;
-    forAllIter(IOobjectList, fieldObjects, iter)
-    {
-        fields.set
+void Foam::directMappedVariableThicknessWallFvPatch::
+makeDeltaCoeffs(scalarField& dc) const
+{
+    const directMappedVariableThicknessWallPolyPatch& pp =
+        refCast<const directMappedVariableThicknessWallPolyPatch>
         (
-            fieldI++,
-            new GeoField(*iter(), mesh)
+            patch()
         );
-    }
+
+    const directMappedPatchBase& mpp = refCast<const directMappedPatchBase>
+    (
+        patch()
+    );
+
+    const polyMesh& nbrMesh = mpp.sampleMesh();
+
+    typedef regionModels::regionModel1D modelType;
+
+    const modelType& region1D =
+        nbrMesh.objectRegistry::lookupObject<modelType>
+        (
+            "thermoBaffleProperties"
+        );
+
+    dc = 2.0/(pp.thickness()/region1D.nLayers());
 }
 
 

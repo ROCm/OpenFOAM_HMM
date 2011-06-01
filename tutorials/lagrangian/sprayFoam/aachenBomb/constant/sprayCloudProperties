@@ -112,8 +112,9 @@ subModels
         massTotal       6.0e-6;
         parcelBasisType mass;
         injectionMethod disc;
-        outerNozzleDiameter 1.9e-4;
-        innerNozzleDiameter 0;
+        flowType        flowRateAndDischarge;
+        outerDiameter   1.9e-4;
+        innerDiameter   0;
         duration        1.25e-3;
         position        ( 0 0.0995 0 );
         direction       ( 0 -1 0 );

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,41 +23,30 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "readFields.H"
+#include "dimFieldDecomposer.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Mesh, class GeoField>
-void Foam::readFields
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::dimFieldDecomposer::dimFieldDecomposer
 (
-    const Mesh& mesh,
-    const IOobjectList& objects,
-    PtrList<GeoField>& fields
+    const fvMesh& completeMesh,
+    const fvMesh& procMesh,
+    const labelList& faceAddressing,
+    const labelList& cellAddressing
 )
-{
-    // Search list of objects for fields of type GeomField
-    IOobjectList fieldObjects(objects.lookupClass(GeoField::typeName));
+:
+    completeMesh_(completeMesh),
+    procMesh_(procMesh),
+    faceAddressing_(faceAddressing),
+    cellAddressing_(cellAddressing)
+{}
 
-    // Remove the cellDist field
-    IOobjectList::iterator celDistIter = fieldObjects.find("cellDist");
-    if (celDistIter != fieldObjects.end())
-    {
-        fieldObjects.erase(celDistIter);
-    }
 
-    // Construct the fields
-    fields.setSize(fieldObjects.size());
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-    label fieldI = 0;
-    forAllIter(IOobjectList, fieldObjects, iter)
-    {
-        fields.set
-        (
-            fieldI++,
-            new GeoField(*iter(), mesh)
-        );
-    }
-}
+Foam::dimFieldDecomposer::~dimFieldDecomposer()
+{}
 
 
 // ************************************************************************* //

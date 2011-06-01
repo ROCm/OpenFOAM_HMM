@@ -175,6 +175,18 @@ cloudFunctions
             cycLeft_half1
         );
     }
+
+    facePostProcessing
+    {
+        surfaceFormat   vtk;
+        resetOnWrite    no;
+        log             yes;
+
+        faceZones
+        (
+            cycLeft
+        );
+    }
 }
 
 

@@ -76,14 +76,16 @@ void Foam::FacePostProcessing<CloudType>::makeLogFile
 
         if (Pstream::master())
         {
+            const fileName logDir = outputDir_/this->owner().time().timeName();
+
             // Create directory if does not exist
-            mkDir(outputDir_);
+            mkDir(logDir);
 
             // Open new file at start up
             outputFilePtr_.set
             (
                 zoneI,
-                new OFstream(outputDir_/(type() + '_' + zoneName + ".dat"))
+                new OFstream(logDir/(type() + '_' + zoneName + ".dat"))
             );
 
             outputFilePtr_[zoneI]
@@ -164,21 +166,6 @@ void Foam::FacePostProcessing<CloudType>::write()
 
     if (surfaceFormat_ != "none")
     {
-        fileName outputDir = mesh.time().path();
-
-        if (Pstream::parRun())
-        {
-            // Put in undecomposed case (Note: gives problems for
-            // distributed data running)
-            outputDir =
-                outputDir/".."/"postProcessing"/cloud::prefix/time.timeName();
-        }
-        else
-        {
-            outputDir =
-                outputDir/"postProcessing"/cloud::prefix/time.timeName();
-        }
-
         forAll(faceZoneIDs_, zoneI)
         {
             const faceZone& fZone = fzm[faceZoneIDs_[zoneI]];
@@ -233,7 +220,7 @@ void Foam::FacePostProcessing<CloudType>::write()
 
                 writer->write
                 (
-                    outputDir,
+                    outputDir_/time.timeName(),
                     fZone.name(),
                     allPoints,
                     allFaces,
@@ -244,7 +231,7 @@ void Foam::FacePostProcessing<CloudType>::write()
 
                 writer->write
                 (
-                    outputDir,
+                    outputDir_/time.timeName(),
                     fZone.name(),
                     allPoints,
                     allFaces,
@@ -308,14 +295,12 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
         // Put in undecomposed case (Note: gives problems for
         // distributed data running)
         outputDir_ =
-            outputDir_/".."/"postProcessing"/cloud::prefix/
-            owner.name()/owner.mesh().time().timeName();
+            outputDir_/".."/"postProcessing"/cloud::prefix/owner.name();
     }
     else
     {
         outputDir_ =
-            outputDir_/"postProcessing"/cloud::prefix/
-            owner.name()/owner.mesh().time().timeName();
+            outputDir_/"postProcessing"/cloud::prefix/owner.name();
     }
 
     DynamicList<label> zoneIDs;
@@ -333,7 +318,7 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
             mass_[i].setSize(nFaces, 0.0);
             massTotal_[i].setSize(nFaces, 0.0);
             massFlux_[i].setSize(nFaces, 0.0);
-            Info<< "        " << zoneName << " faces: " << nFaces;
+            Info<< "        " << zoneName << " faces: " << nFaces << nl;
 
             scalar totArea = 0.0;
             forAll(fz, j)

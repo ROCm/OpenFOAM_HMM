@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,39 +23,50 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "readFields.H"
+#include "dimFieldDecomposer.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Mesh, class GeoField>
-void Foam::readFields
+template<class Type>
+Foam::tmp<Foam::DimensionedField<Type, Foam::volMesh> >
+Foam::dimFieldDecomposer::decomposeField
 (
-    const Mesh& mesh,
-    const IOobjectList& objects,
-    PtrList<GeoField>& fields
-)
+    const DimensionedField<Type, volMesh>& field
+) const
 {
-    // Search list of objects for fields of type GeomField
-    IOobjectList fieldObjects(objects.lookupClass(GeoField::typeName));
+    // Create and map the internal field values
+    Field<Type> mappedField(field, cellAddressing_);
 
-    // Remove the cellDist field
-    IOobjectList::iterator celDistIter = fieldObjects.find("cellDist");
-    if (celDistIter != fieldObjects.end())
-    {
-        fieldObjects.erase(celDistIter);
-    }
-
-    // Construct the fields
-    fields.setSize(fieldObjects.size());
-
-    label fieldI = 0;
-    forAllIter(IOobjectList, fieldObjects, iter)
-    {
-        fields.set
+    // Create the field for the processor
+    return tmp<DimensionedField<Type, volMesh> >
+    (
+        new DimensionedField<Type, volMesh>
         (
-            fieldI++,
-            new GeoField(*iter(), mesh)
-        );
+            IOobject
+            (
+                field.name(),
+                procMesh_.time().timeName(),
+                procMesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            procMesh_,
+            field.dimensions(),
+            mappedField
+        )
+    );
+}
+
+
+template<class GeoField>
+void Foam::dimFieldDecomposer::decomposeFields
+(
+    const PtrList<GeoField>& fields
+) const
+{
+    forAll(fields, fieldI)
+    {
+        decomposeField(fields[fieldI])().write();
     }
 }
 

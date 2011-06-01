@@ -32,16 +32,18 @@ Description
       - injector position
       - direction (along injection axis)
       - parcel flow rate
-      - discharge coefficient, Cd
       - inner and outer cone angles
 
     - Parcel diameters obtained by size distribution model
 
     - Parcel velocity is calculated as:
 
-        U = V_dot/(A * Cd), where V_dot is the volume flow rate
-
-    Based on the old 'unitInjection' model
+        - Constant velocity
+            U = <specified by user>
+        - Pressure driven velocity
+            U = sqrt(2*(Pinj - Pamb)/rho)
+        - Flow rate and discharge
+            U = V_dot/(A*Cd)
 
 SourceFiles
     ConeNozzleInjection.C
@@ -83,19 +85,30 @@ public:
         imDisc
     };
 
+    //- Flow type enumeration
+    enum flowType
+    {
+        ftConstantVelocity,
+        ftPressureDrivenVelocity,
+        ftFlowRateAndDischarge
+    };
+
 
 private:
 
     // Private data
 
-        //- point/disc injection method
+        //- Point/disc injection method
         injectionMethod injectionMethod_;
 
+        //- Flow type
+        flowType flowType_;
+
         //- Outer nozzle diameter [m]
-        const scalar outerNozzleDiameter_;
+        const scalar outerDiameter_;
 
         //- Inner nozzle diameter [m]
-        const scalar innerNozzleDiameter_;
+        const scalar innerDiameter_;
 
         //- Injection duration [s]
         const scalar duration_;
@@ -121,9 +134,6 @@ private:
         //- Volume flow rate of parcels to introduce relative to SOI [m^3/s]
         const autoPtr<DataEntry<scalar> > volumeFlowRate_;
 
-        //- Discharge coefficient, relative to SOI [m/s]
-        const autoPtr<DataEntry<scalar> > Cd_;
-
         //- Inner cone angle relative to SOI [deg]
         const autoPtr<DataEntry<scalar> > thetaInner_;
 
@@ -144,6 +154,27 @@ private:
 
             //- injection vector orthogonal to direction
             vector normal_;
+
+
+        // Velocity model coefficients
+
+            //- Constant velocity [m/s]
+            scalar UMag_;
+
+            //- Discharge coefficient, relative to SOI [m/s]
+            autoPtr<DataEntry<scalar> > Cd_;
+
+            //- Injection pressure [Pa]
+            autoPtr<DataEntry<scalar> > Pinj_;
+
+
+    // Private Member Functions
+
+        //- Set the injection type
+        void setInjectionMethod();
+
+        //- Set the injection flow type
+        void setFlowType();
 
 
 public:

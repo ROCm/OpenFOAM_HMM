@@ -81,6 +81,7 @@ Usage
 #include "pointFields.H"
 
 #include "readFields.H"
+#include "dimFieldDecomposer.H"
 #include "fvFieldDecomposer.H"
 #include "pointFieldDecomposer.H"
 #include "lagrangianFieldDecomposer.H"
@@ -352,6 +353,25 @@ int main(int argc, char *argv[])
 
     PtrList<volTensorField> volTensorFields;
     readFields(mesh, objects, volTensorFields);
+
+
+    // Construct the dimensioned fields
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    PtrList<DimensionedField<scalar, volMesh> > dimScalarFields;
+    readFields(mesh, objects, dimScalarFields);
+
+    PtrList<DimensionedField<vector, volMesh> > dimVectorFields;
+    readFields(mesh, objects, dimVectorFields);
+
+    PtrList<DimensionedField<sphericalTensor, volMesh> >
+        dimSphericalTensorFields;
+    readFields(mesh, objects, dimSphericalTensorFields);
+
+    PtrList<DimensionedField<symmTensor, volMesh> > dimSymmTensorFields;
+    readFields(mesh, objects, dimSymmTensorFields);
+
+    PtrList<DimensionedField<tensor, volMesh> > dimTensorFields;
+    readFields(mesh, objects, dimTensorFields);
 
 
     // Construct the surface fields
@@ -727,19 +747,6 @@ int main(int argc, char *argv[])
         );
 
         // FV fields
-        if
-        (
-            volScalarFields.size()
-         || volVectorFields.size()
-         || volSphericalTensorFields.size()
-         || volSymmTensorFields.size()
-         || volTensorFields.size()
-         || surfaceScalarFields.size()
-         || surfaceVectorFields.size()
-         || surfaceSphericalTensorFields.size()
-         || surfaceSymmTensorFields.size()
-         || surfaceTensorFields.size()
-        )
         {
             fvFieldDecomposer fieldDecomposer
             (
@@ -763,16 +770,25 @@ int main(int argc, char *argv[])
             fieldDecomposer.decomposeFields(surfaceTensorFields);
         }
 
+        // Dimensioned fields
+        {
+            dimFieldDecomposer fieldDecomposer
+            (
+                mesh,
+                procMesh,
+                faceProcAddressing,
+                cellProcAddressing
+            );
+
+            fieldDecomposer.decomposeFields(dimScalarFields);
+            fieldDecomposer.decomposeFields(dimVectorFields);
+            fieldDecomposer.decomposeFields(dimSphericalTensorFields);
+            fieldDecomposer.decomposeFields(dimSymmTensorFields);
+            fieldDecomposer.decomposeFields(dimTensorFields);
+        }
+
 
         // Point fields
-        if
-        (
-            pointScalarFields.size()
-         || pointVectorFields.size()
-         || pointSphericalTensorFields.size()
-         || pointSymmTensorFields.size()
-         || pointTensorFields.size()
-        )
         {
             labelIOList pointProcAddressing
             (
@@ -822,21 +838,6 @@ int main(int argc, char *argv[])
                 );
 
                 // Lagrangian fields
-                if
-                (
-                    lagrangianLabelFields[cloudI].size()
-                 || lagrangianLabelFieldFields[cloudI].size()
-                 || lagrangianScalarFields[cloudI].size()
-                 || lagrangianScalarFieldFields[cloudI].size()
-                 || lagrangianVectorFields[cloudI].size()
-                 || lagrangianVectorFieldFields[cloudI].size()
-                 || lagrangianSphericalTensorFields[cloudI].size()
-                 || lagrangianSphericalTensorFieldFields[cloudI].size()
-                 || lagrangianSymmTensorFields[cloudI].size()
-                 || lagrangianSymmTensorFieldFields[cloudI].size()
-                 || lagrangianTensorFields[cloudI].size()
-                 || lagrangianTensorFieldFields[cloudI].size()
-                )
                 {
                     fieldDecomposer.decomposeFields
                     (
