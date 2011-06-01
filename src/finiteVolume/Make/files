@@ -29,6 +29,7 @@ derivedFvPatches = $(fvPatches)/derived
 $(derivedFvPatches)/wall/wallFvPatch.C
 $(derivedFvPatches)/directMapped/directMappedFvPatch.C
 $(derivedFvPatches)/directMapped/directMappedWallFvPatch.C
+$(derivedFvPatches)/directMapped/directMappedVariableThicknessWallFvPatch.C
 
 wallDist = fvMesh/wallDist
 $(wallDist)/wallPointYPlus/wallPointYPlus.C
