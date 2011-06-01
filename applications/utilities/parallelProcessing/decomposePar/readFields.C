@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,7 +35,7 @@ void Foam::readFields
     PtrList<GeoField>& fields
 )
 {
-    // Search list of objects for volScalarFields
+    // Search list of objects for fields of type GeomField
     IOobjectList fieldObjects(objects.lookupClass(GeoField::typeName));
 
     // Remove the cellDist field
@@ -45,7 +45,7 @@ void Foam::readFields
         fieldObjects.erase(celDistIter);
     }
 
-    // Construct the vol scalar fields
+    // Construct the fields
     fields.setSize(fieldObjects.size());
 
     label fieldI = 0;
