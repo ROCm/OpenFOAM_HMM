@@ -34,6 +34,7 @@ Description
 
 #include "PairModel.H"
 #include "CollisionRecordList.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -66,6 +67,12 @@ class PairSpringSliderDashpot
 
         //- Coefficient of friction in for tangential sliding
         scalar mu_;
+
+        //- Cohesion energy density [J/m^3]
+        scalar cohesionEnergyDensity_;
+
+        // Switch cohesion on and off
+        bool cohesion_;
 
         //- The number of steps over which to resolve the minimum
         //  harmonic approximation of the collision period
@@ -127,6 +134,23 @@ public:
         inline scalar volumeFactor() const
         {
             return volumeFactor_;
+        }
+
+        // Return the area of overlap between two spheres of radii rA and rB,
+        // centres separated by a distance rAB.  Assumes rAB < (rA + rB).
+        inline scalar overlapArea(scalar rA, scalar rB, scalar rAB) const
+        {
+            // From:
+            // http://mathworld.wolfram.com/Sphere-SphereIntersection.html
+            return
+                mathematical::pi/4.0
+               /sqr(rAB)
+               *(
+                    (-rAB + rA - rB)
+                   *(-rAB - rA + rB)
+                   *(-rAB + rA + rB)
+                   *( rAB + rA + rA)
+                );
         }
 
         //- Whether the PairModel has a timestep limit that will

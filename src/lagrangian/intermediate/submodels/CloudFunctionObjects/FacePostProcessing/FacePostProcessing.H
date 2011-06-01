@@ -85,8 +85,26 @@ class FacePostProcessing
         //- Mass flux storage
         List<scalarField> massFlux_;
 
+        //- Flag to indicate whether data should be written to file
+        Switch log_;
+
+        //- Output file pointer per zone
+        PtrList<OFstream> outputFilePtr_;
+
+        //- Output directory
+        fileName outputDir_;
+
 
     // Private Member Functions
+
+        //- Helper function to create log files
+        void makeLogFile
+        (
+            const word& zoneName,
+            const label zoneI,
+            const label nFaces,
+            const scalar totArea
+        );
 
         //- Return index into storage lists if valid zone and face
         void applyToFace
