@@ -533,7 +533,7 @@ void Foam::globalPoints::sendPatchPoints
             // Send to neighbour
             if (debug)
             {
-                Pout<< " Sending to "
+                Pout<< " Sending from " << pp.name() << " to "
                     << procPatch.neighbProcNo() << "   point information:"
                     << patchFaces.size() << endl;
             }
@@ -589,7 +589,8 @@ void Foam::globalPoints::receivePatchPoints
 
             if (debug)
             {
-                Pout<< " Received from "
+                Pout<< " On " << pp.name()
+                    << " Received from "
                     << procPatch.neighbProcNo() << "   point information:"
                     << patchFaces.size() << endl;
             }
