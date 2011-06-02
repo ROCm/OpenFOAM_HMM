@@ -198,7 +198,10 @@ void Foam::flowRateInletVelocityCoupledFvPatchVectorField::updateCoeffs()
 }
 
 
-void Foam::flowRateInletVelocityCoupledFvPatchVectorField::write(Ostream& os) const
+void Foam::flowRateInletVelocityCoupledFvPatchVectorField::write
+(
+    Ostream& os
+) const
 {
     fvPatchField<vector>::write(os);
     writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,21 +31,11 @@ inline Foam::basicSolidThermo& Foam::solidChemistryModel::solidThermo()
 }
 
 
-inline const Foam::basicSolidThermo& Foam::solidChemistryModel::solidThermo() const
+inline const Foam::basicSolidThermo&
+Foam::solidChemistryModel::solidThermo() const
 {
     return solidThermo_();
 }
 
-
-// inline Foam::hsReactionThermo& Foam::solidChemistryModel::gasThermo()
-// {
-//     return gasThermo_();
-// }
-//
-//
-// inline const Foam::hsReactionThermo& Foam::solidChemistryModel::gasThermo() const
-// {
-//     return gasThermo_();
-// }
 
 // ************************************************************************* //

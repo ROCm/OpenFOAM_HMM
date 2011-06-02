@@ -162,7 +162,8 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new turbulentTemperatureRadiationCoupledMixedSTFvPatchScalarField
+                new
+                turbulentTemperatureRadiationCoupledMixedSTFvPatchScalarField
                 (
                     *this
                 )
@@ -172,7 +173,8 @@ public:
         //- Construct as copy setting internal field reference
         turbulentTemperatureRadiationCoupledMixedSTFvPatchScalarField
         (
-            const turbulentTemperatureRadiationCoupledMixedSTFvPatchScalarField&,
+            const 
+                turbulentTemperatureRadiationCoupledMixedSTFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -184,7 +186,8 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new turbulentTemperatureRadiationCoupledMixedSTFvPatchScalarField
+                new 
+                turbulentTemperatureRadiationCoupledMixedSTFvPatchScalarField
                 (
                     *this,
                     iF

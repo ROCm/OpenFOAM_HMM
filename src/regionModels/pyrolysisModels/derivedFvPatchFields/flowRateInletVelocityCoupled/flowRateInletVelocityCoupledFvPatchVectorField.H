@@ -44,7 +44,8 @@ Description
         type            flowRateInletVelocityCoupled;
         phi             phi;
         rho             rho;
-        neigPhi         neigPhiName_;    // Volumetric/mass flow rate [m3/s or kg/s]
+        neigPhi         neigPhiName_;    // Volumetric/mass flow rate
+                                         // [m3/s or kg/s]
         value           uniform (0 0 0); // placeholder
     }
     @endverbatim
