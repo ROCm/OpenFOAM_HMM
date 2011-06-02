@@ -25,7 +25,7 @@ chemistrySolver ode;
 
 odeCoeffs
 {
-    ODESolver       SIBS;
+    solver          SIBS;
     eps             1e-04;
 }
 
