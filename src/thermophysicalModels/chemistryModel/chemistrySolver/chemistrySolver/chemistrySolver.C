@@ -27,22 +27,23 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class CompType, class ThermoType>
-Foam::chemistrySolver<CompType, ThermoType>::chemistrySolver
+template<class ODEChemistryType>
+Foam::chemistrySolver<ODEChemistryType>::chemistrySolver
 (
-    ODEChemistryModel<CompType, ThermoType>& model,
-    const word& modelName
+    const fvMesh& mesh,
+    const word& ODEModelName,
+    const word& thermoType
 )
 :
-    model_(model),
-    name_(modelName)
+    ODEChemistryType(mesh, ODEModelName, thermoType),
+    name_(ODEModelName)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class CompType, class ThermoType>
-Foam::chemistrySolver<CompType, ThermoType>::~chemistrySolver()
+template<class ODEChemistryType>
+Foam::chemistrySolver<ODEChemistryType>::~chemistrySolver()
 {}
 
 

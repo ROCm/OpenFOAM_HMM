@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,17 +21,14 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InClass
-    Foam::psiChemistryModel
-
 Description
-    Macros for instantiating chemistry models based on compressibility and
-    transport types
+    Macros for instantiating solid chemistry models based on compressibility
+    and transport types
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeChemistryModel_H
-#define makeChemistryModel_H
+#ifndef makeSolidChemistrySolverType_H
+#define makeSolidChemistrySolverType_H
 
 #include "addToRunTimeSelectionTable.H"
 
@@ -42,23 +39,25 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeChemistryModel(SS, Comp, Thermo)                                  \
+#define makeSolidChemistrySolverType(SS, ODEChem, Comp, SThermo, GThermo)     \
                                                                               \
-typedef SS<Comp, Thermo> SS##Comp##Thermo;                                    \
+    typedef SS<ODEChem<Comp, SThermo, GThermo> >                              \
+        SS##ODEChem##Comp##SThermo##GThermo;                                  \
                                                                               \
-defineTemplateTypeNameAndDebugWithName                                        \
-(                                                                             \
-    SS##Comp##Thermo,                                                         \
-    #SS"<"#Comp","#Thermo">",                                                 \
-    0                                                                         \
-);                                                                            \
+    defineTemplateTypeNameAndDebugWithName                                    \
+    (                                                                         \
+        SS##ODEChem##Comp##SThermo##GThermo,                                  \
+        #SS"<"#ODEChem"<"#Comp","#SThermo","#GThermo">>",                     \
+        0                                                                     \
+    );                                                                        \
                                                                               \
-addToRunTimeSelectionTable                                                    \
-(                                                                             \
-    Comp,                                                                     \
-    SS##Comp##Thermo,                                                         \
-    fvMesh                                                                    \
-);
+    addToRunTimeSelectionTable                                                \
+    (                                                                         \
+        Comp,                                                                 \
+        SS##ODEChem##Comp##SThermo##GThermo,                                  \
+        fvMesh                                                                \
+    );
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

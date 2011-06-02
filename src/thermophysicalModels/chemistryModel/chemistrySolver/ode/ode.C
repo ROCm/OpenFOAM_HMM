@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,32 +28,33 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class CompType, class ThermoType>
-Foam::ode<CompType, ThermoType>::ode
+template<class ODEChemistryType>
+Foam::ode<ODEChemistryType>::ode
 (
-    ODEChemistryModel<CompType, ThermoType>& model,
-    const word& modelName
+    const fvMesh& mesh,
+    const word& ODEModelName,
+    const word& thermoType
 )
 :
-    chemistrySolver<CompType, ThermoType>(model, modelName),
-    coeffsDict_(model.subDict(modelName + "Coeffs")),
+    chemistrySolver<ODEChemistryType>(mesh, ODEModelName, thermoType),
+    coeffsDict_(this->subDict(ODEModelName + "Coeffs")),
     solverName_(coeffsDict_.lookup("ODESolver")),
-    odeSolver_(ODESolver::New(solverName_, model)),
+    odeSolver_(ODESolver::New(solverName_, *this)),
     eps_(readScalar(coeffsDict_.lookup("eps")))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class CompType, class ThermoType>
-Foam::ode<CompType, ThermoType>::~ode()
+template<class ODEChemistryType>
+Foam::ode<ODEChemistryType>::~ode()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class CompType, class ThermoType>
-Foam::scalar Foam::ode<CompType, ThermoType>::solve
+template<class ODEChemistryType>
+Foam::scalar Foam::ode<ODEChemistryType>::solve
 (
     scalarField& c,
     const scalar T,
@@ -62,8 +63,8 @@ Foam::scalar Foam::ode<CompType, ThermoType>::solve
     const scalar dt
 ) const
 {
-    label nSpecie = this->model_.nSpecie();
-    scalarField c1(this->model_.nEqns(), 0.0);
+    label nSpecie = this->nSpecie();
+    scalarField c1(this->nEqns(), 0.0);
 
     // copy the concentration, T and P to the total solve-vector
     for (label i = 0; i < nSpecie; i++)
@@ -77,7 +78,7 @@ Foam::scalar Foam::ode<CompType, ThermoType>::solve
 
     odeSolver_->solve
     (
-        this->model_,
+        *this,
         t0,
         t0 + dt,
         c1,

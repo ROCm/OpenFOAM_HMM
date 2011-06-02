@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,18 +43,14 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-template<class CompType, class ThermoType>
-class ode;
-
 /*---------------------------------------------------------------------------*\
                             Class ode Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CompType, class ThermoType>
+template<class ODEChemistryType>
 class ode
 :
-    public chemistrySolver<CompType, ThermoType>
+    public chemistrySolver<ODEChemistryType>
 {
     // Private data
 
@@ -78,8 +74,9 @@ public:
         //- Construct from components
         ode
         (
-            ODEChemistryModel<CompType, ThermoType>& model,
-            const word& modelName
+            const fvMesh& mesh,
+            const word& ODEModeNewlName,
+            const word& thermoType
         );
 
 
@@ -89,7 +86,7 @@ public:
 
     // Member Functions
 
-        scalar solve
+        virtual scalar solve
         (
             scalarField& c,
             const scalar T,

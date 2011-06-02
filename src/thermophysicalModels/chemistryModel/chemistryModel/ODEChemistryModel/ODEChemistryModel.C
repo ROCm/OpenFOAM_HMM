@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,7 +33,7 @@ template<class CompType, class ThermoType>
 Foam::ODEChemistryModel<CompType, ThermoType>::ODEChemistryModel
 (
     const fvMesh& mesh,
-    const word& compTypeName,
+    const word& ODEModelName,
     const word& thermoTypeName
 )
 :
@@ -55,16 +55,6 @@ Foam::ODEChemistryModel<CompType, ThermoType>::ODEChemistryModel
 
     nSpecie_(Y_.size()),
     nReaction_(reactions_.size()),
-
-    solver_
-    (
-        chemistrySolver<CompType, ThermoType>::New
-        (
-            *this,
-            compTypeName,
-            thermoTypeName
-        )
-    ),
 
     RR_(nSpecie_)
 {
@@ -132,6 +122,88 @@ Foam::ODEChemistryModel<CompType, ThermoType>::omega
     }
 
     return tom;
+}
+
+
+template<class CompType, class ThermoType>
+Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::omegaI
+(
+    const label index,
+    const scalarField& c,
+    const scalar T,
+    const scalar p,
+    scalar& pf,
+    scalar& cf,
+    label& lRef,
+    scalar& pr,
+    scalar& cr,
+    label& rRef
+) const
+{
+
+    const Reaction<ThermoType>& R = reactions_[index];
+    scalar w = omega(R, c, T, p, pf, cf, lRef, pr, cr, rRef);
+    return(w);
+}
+
+
+template<class CompType, class ThermoType>
+void Foam::ODEChemistryModel<CompType, ThermoType>::updateConcsInReactionI
+(
+    const label index,
+    const scalar dt,
+    const scalar omeg,
+    scalarField& c
+) const
+{
+     // update species
+    const Reaction<ThermoType>& R = reactions_[index];
+    forAll(R.lhs(), s)
+    {
+        label si = R.lhs()[s].index;
+        scalar sl = R.lhs()[s].stoichCoeff;
+        c[si] -= dt*sl*omeg;
+        c[si] = max(0.0, c[si]);
+    }
+
+    forAll(R.rhs(), s)
+    {
+        label si = R.rhs()[s].index;
+        scalar sr = R.rhs()[s].stoichCoeff;
+        c[si] += dt*sr*omeg;
+        c[si] = max(0.0, c[si]);
+    }
+}
+
+
+template<class CompType, class ThermoType>
+void Foam::ODEChemistryModel<CompType, ThermoType>::updateRRInReactionI
+(
+    const label index,
+    const scalar pr,
+    const scalar pf,
+    const scalar corr,
+    const label lRef,
+    const label rRef,
+    simpleMatrix<scalar>& RR
+) const
+{
+    const Reaction<ThermoType>& R = reactions_[index];
+    forAll(R.lhs(), s)
+    {
+        label si = R.lhs()[s].index;
+        scalar sl = R.lhs()[s].stoichCoeff;
+        RR[si][rRef] -= sl*pr*corr;
+        RR[si][lRef] += sl*pf*corr;
+    }
+
+    forAll(R.rhs(), s)
+    {
+        label si = R.rhs()[s].index;
+        scalar sr = R.rhs()[s].stoichCoeff;
+        RR[si][lRef] -= sr*pf*corr;
+        RR[si][rRef] += sr*pr*corr;
+    }
 }
 
 
@@ -731,7 +803,7 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::solve
         // calculate the chemical source terms
         while (timeLeft > SMALL)
         {
-            tauC = solver().solve(c, Ti, pi, t, dt);
+            tauC = this->solve(c, Ti, pi, t, dt);
             t += dt;
 
             // update the temperature
@@ -760,6 +832,30 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::solve
     deltaTMin = min(deltaTMin, 2*deltaT);
 
     return deltaTMin;
+}
+
+
+template<class CompType, class ThermoType>
+Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::solve
+(
+    scalarField &c,
+    const scalar T,
+    const scalar p,
+    const scalar t0,
+    const scalar dt
+) const
+{
+    notImplemented
+    (
+        "ODEChemistryModel::solve"
+        "scalarField&, "
+        "const scalar, "
+        "const scalar, "
+        "const scalar, "
+        "const scalar"
+    );
+
+    return (0);
 }
 
 

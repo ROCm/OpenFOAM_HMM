@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,6 +41,7 @@ SourceFiles
 #include "Reaction.H"
 #include "ODE.H"
 #include "volFieldsFwd.H"
+#include "simpleMatrix.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,9 +50,6 @@ namespace Foam
 
 // Forward declaration of classes
 class fvMesh;
-
-template<class CompType, class ThermoType>
-class chemistrySolver;
 
 /*---------------------------------------------------------------------------*\
                       Class ODEChemistryModel Declaration
@@ -64,6 +62,9 @@ class ODEChemistryModel
     public ODE
 {
     // Private Member Functions
+
+        //- Disallow copy constructor
+        ODEChemistryModel(const ODEChemistryModel&);
 
         //- Disallow default bitwise assignment
         void operator=(const ODEChemistryModel&);
@@ -88,9 +89,6 @@ protected:
         //- Number of reactions
         label nReaction_;
 
-        //- Chemistry solver
-        autoPtr<chemistrySolver<CompType, ThermoType> > solver_;
-
         //- List of reaction rate per specie [kg/m3/s]
         PtrList<scalarField> RR_;
 
@@ -114,7 +112,7 @@ public:
         ODEChemistryModel
         (
             const fvMesh& mesh,
-            const word& compTypeName,
+            const word& ODEModelName,
             const word& thermoTypeName
         );
 
@@ -136,9 +134,6 @@ public:
 
         //- The number of reactions
         inline label nReaction() const;
-
-        //- Return the chemisty solver
-        inline const chemistrySolver<CompType, ThermoType>& solver() const;
 
         //- dc/dt = omega, rate of change in concentration, for each species
         virtual tmp<scalarField> omega
@@ -164,8 +159,47 @@ public:
             label& rRef
         ) const;
 
+
+        //- Return the reaction rate for iReaction and the reference
+        //  species and charateristic times
+        virtual scalar omegaI
+        (
+            label iReaction,
+            const scalarField& c,
+            const scalar T,
+            const scalar p,
+            scalar& pf,
+            scalar& cf,
+            label& lRef,
+            scalar& pr,
+            scalar& cr,
+            label& rRef
+        ) const;
+
         //- Calculates the reaction rates
         virtual void calculate();
+
+        //- Update concentrations in reaction i given dt and reaction rate omega
+        // used by sequential solver
+        void updateConcsInReactionI
+        (
+            const label i,
+            const scalar dt,
+            const scalar omega,
+            scalarField& c
+        ) const;
+
+        //- Update matrix RR for reaction i. Used by EulerImplicit
+        void updateRRInReactionI
+        (
+            const label i,
+            const scalar pr,
+            const scalar pf,
+            const scalar corr,
+            const label lRef,
+            const label rRef,
+            simpleMatrix<scalar>& RR
+        ) const;
 
 
         // Chemistry model functions (overriding abstract functions in
@@ -206,6 +240,15 @@ public:
                 const scalarField& c,
                 scalarField& dcdt,
                 scalarSquareMatrix& dfdc
+            ) const;
+
+            virtual scalar solve
+            (
+                scalarField &c,
+                const scalar T,
+                const scalar p,
+                const scalar t0,
+                const scalar dt
             ) const;
 };
 

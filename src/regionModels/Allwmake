@@ -4,7 +4,7 @@ makeType=${1:-libso}
 set -x
 
 wmake $makeType regionModel
-#wmake $makeType pyrolysisModels
+wmake $makeType pyrolysisModels
 wmake $makeType surfaceFilmModels
 wmake $makeType thermoBaffleModels
 #wmake $makeType regionCoupling
