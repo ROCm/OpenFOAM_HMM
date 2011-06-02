@@ -448,8 +448,8 @@ void Foam::decompositionMethod::calcCellCells
     // Count number of faces (internal + coupled)
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // Number of faces per cell
-    labelList nFacesPerCell(mesh.nCells(), 0);
+    // Number of faces per coarse cell
+    labelList nFacesPerCell(nCoarse, 0);
 
     for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
     {
@@ -481,7 +481,11 @@ void Foam::decompositionMethod::calcCellCells
             {
                 label own = agglom[faceOwner[faceI]];
                 label globalNei = globalNeighbour[bFaceI];
-                if (cellPair.insert(labelPair(own, globalNei)))
+                if
+                (
+                    globalAgglom.toGlobal(own) != globalNei
+                 && cellPair.insert(labelPair(own, globalNei))
+                )
                 {
                     nFacesPerCell[own]++;
                 }

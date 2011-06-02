@@ -860,6 +860,16 @@ bool Foam::domainDecomposition::writeDecomposition()
     scalar avgProcPatches = scalar(totProcPatches)/nProcs_;
     scalar avgProcFaces = scalar(totProcFaces)/nProcs_;
 
+    // In case of all faces on one processor. Just to avoid division by 0.
+    if (totProcPatches == 0)
+    {
+        avgProcPatches = 1;
+    }
+    if (totProcFaces == 0)
+    {
+        avgProcFaces = 1;
+    }
+
     Info<< nl
         << "Number of processor faces = " << totProcFaces/2 << nl
         << "Max number of cells = " << maxProcCells

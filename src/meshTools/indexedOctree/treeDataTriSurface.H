@@ -55,8 +55,11 @@ class treeDataTriSurface
 {
     // Private data
 
+        //- Reference to triSurface
         const triSurface& surface_;
 
+        //- Tolerance to use for intersection tests
+        const scalar planarTol_;
 
     // Private Member Functions
 
@@ -83,8 +86,9 @@ public:
 
     // Constructors
 
-        //- Construct from triSurface. Holds reference.
-        treeDataTriSurface(const triSurface&);
+        //- Construct from triSurface and tolerance for intersection
+        //  tests. Holds reference.
+        treeDataTriSurface(const triSurface&, const scalar planarTol);
 
 
     // Member Functions
