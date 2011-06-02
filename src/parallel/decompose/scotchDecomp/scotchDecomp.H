@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -107,9 +107,9 @@ public:
 
         //- Return for every coordinate the wanted processor number. Use the
         //  mesh connectivity (if needed)
-        //  Weights get truncated to convert into integer
-        //  so e.g. 3.5 is seen as 3. The overall sum of weights
-        //  might otherwise overflow.
+        //  Weights get normalised with minimum weight and truncated to
+        //  convert into integer so e.g. 3.5 is seen as 3. The overall sum
+        //  of weights might otherwise overflow.
         virtual labelList decompose
         (
             const polyMesh& mesh,
