@@ -1,0 +1,3 @@
+reactingParcelFilmPyrolysisFoam.C
+
+EXE = $(FOAM_APPBIN)/reactingParcelFilmPyrolysisFoam
