@@ -492,7 +492,7 @@ void Foam::triSurfaceMesh::movePoints(const pointField& newPoints)
 
 
 const Foam::indexedOctree<Foam::treeDataTriSurface>&
-    Foam::triSurfaceMesh::tree() const
+Foam::triSurfaceMesh::tree() const
 {
     if (tree_.empty())
     {
@@ -528,7 +528,7 @@ const Foam::indexedOctree<Foam::treeDataTriSurface>&
         (
             new indexedOctree<treeDataTriSurface>
             (
-                treeDataTriSurface(*this),
+                treeDataTriSurface(*this, tolerance_),
                 bb,
                 maxTreeDepth_,  // maxLevel
                 10,             // leafsize
@@ -544,7 +544,7 @@ const Foam::indexedOctree<Foam::treeDataTriSurface>&
 
 
 const Foam::indexedOctree<Foam::treeDataEdge>&
- Foam::triSurfaceMesh::edgeTree() const
+Foam::triSurfaceMesh::edgeTree() const
 {
     if (edgeTree_.empty())
     {

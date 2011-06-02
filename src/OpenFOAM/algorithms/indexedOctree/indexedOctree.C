@@ -714,7 +714,7 @@ Foam::point Foam::indexedOctree<Type>::pushPoint
 )
 {
     // Get local length scale.
-    const vector perturbVec = perturbTol_*(bb.span());
+    const vector perturbVec = perturbTol_*bb.span();
 
     point perturbedPt(pt);
 

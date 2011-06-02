@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,7 +64,11 @@ Foam::triSurfaceSearch::triSurfaceSearch(const triSurface& surface)
     (
         new indexedOctree<treeDataTriSurface>
         (
-            treeDataTriSurface(surface_),
+            treeDataTriSurface
+            (
+                surface_,
+                indexedOctree<treeDataTriSurface>::perturbTol()
+            ),
             treeBb,
             8,      // maxLevel
             10,     // leafsize

@@ -179,9 +179,14 @@ defineTypeNameAndDebug(Foam::treeDataTriSurface, 0);
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
-Foam::treeDataTriSurface::treeDataTriSurface(const triSurface& surface)
+Foam::treeDataTriSurface::treeDataTriSurface
+(
+    const triSurface& surface,
+    const scalar planarTol
+)
 :
-    surface_(surface)
+    surface_(surface),
+    planarTol_(planarTol)
 {}
 
 
@@ -437,7 +442,7 @@ bool Foam::treeDataTriSurface::intersects
         dir,
         points,
         intersection::HALF_RAY,
-        indexedOctree<treeDataTriSurface>::perturbTol()
+        planarTol_
     );
 
     if (inter.hit() && inter.distance() <= 1)
