@@ -76,10 +76,10 @@ class temperatureThermoBaffle1DFvPatchScalarField
         solidThermoData(const dictionary& dict)
         :
             solidPtr_(new solidType(dict)),
-            transportDict_(dict.subDict("transportProperties")),
-            radiationDict_(dict.subDict("radiativeProperties")),
-            thermoDict_(dict.subDict("thermoProperties")),
-            densityDict_(dict.subDict("densityProperties"))
+            transportDict_(dict.subDict("transport")),
+            radiationDict_(dict.subDict("radiation")),
+            thermoDict_(dict.subDict("thermodynamics")),
+            densityDict_(dict.subDict("density"))
         {}
 
 
@@ -103,13 +103,13 @@ class temperatureThermoBaffle1DFvPatchScalarField
 
             void write(Ostream& os) const
             {
-                os.writeKeyword("transportProperties");
+                os.writeKeyword("transport");
                 os << transportDict_  << nl;
-                os.writeKeyword("radiativeProperties");
+                os.writeKeyword("radiation");
                 os << radiationDict_ <<  nl;
-                os.writeKeyword("thermoProperties");
+                os.writeKeyword("thermodynamics");
                 os << thermoDict_ << nl;
-                os.writeKeyword("densityProperties");
+                os.writeKeyword("density");
                 os << densityDict_ << nl;
             }
 
