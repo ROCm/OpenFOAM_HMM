@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,85 +23,20 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "thermoPhysicsTypes.H"
-#include "chemistrySolver.H"
+#include "makeChemistrySolverTypes.H"
 
+#include "thermoPhysicsTypes.H"
 #include "psiChemistryModel.H"
 #include "rhoChemistryModel.H"
-
-#include "noChemistrySolver.H"
-
-#include "EulerImplicit.H"
-#include "ode.H"
-#include "sequential.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeChemistrySolver(psiChemistryModel, gasThermoPhysics)
-    makeChemistrySolverType
-    (
-        noChemistrySolver,
-        psiChemistryModel,
-        gasThermoPhysics
-    )
-    makeChemistrySolverType(EulerImplicit, psiChemistryModel, gasThermoPhysics)
-    makeChemistrySolverType(ode, psiChemistryModel, gasThermoPhysics)
-    makeChemistrySolverType(sequential, psiChemistryModel, gasThermoPhysics)
-
-    makeChemistrySolver(psiChemistryModel, icoPoly8ThermoPhysics)
-    makeChemistrySolverType
-    (
-        noChemistrySolver,
-        psiChemistryModel,
-        icoPoly8ThermoPhysics
-    )
-    makeChemistrySolverType
-    (
-        EulerImplicit,
-        psiChemistryModel,
-        icoPoly8ThermoPhysics
-    )
-    makeChemistrySolverType(ode, psiChemistryModel, icoPoly8ThermoPhysics)
-    makeChemistrySolverType
-    (
-        sequential,
-        psiChemistryModel,
-        icoPoly8ThermoPhysics
-    )
-
-    makeChemistrySolver(rhoChemistryModel, gasThermoPhysics)
-    makeChemistrySolverType
-    (
-        noChemistrySolver,
-        rhoChemistryModel,
-        gasThermoPhysics
-    )
-    makeChemistrySolverType(EulerImplicit, rhoChemistryModel, gasThermoPhysics)
-    makeChemistrySolverType(ode, rhoChemistryModel, gasThermoPhysics)
-    makeChemistrySolverType(sequential, rhoChemistryModel, gasThermoPhysics)
-
-    makeChemistrySolver(rhoChemistryModel, icoPoly8ThermoPhysics)
-    makeChemistrySolverType
-    (
-        noChemistrySolver,
-        rhoChemistryModel,
-        icoPoly8ThermoPhysics
-    )
-    makeChemistrySolverType
-    (
-        EulerImplicit,
-        rhoChemistryModel,
-        icoPoly8ThermoPhysics
-    )
-    makeChemistrySolverType(ode, rhoChemistryModel, icoPoly8ThermoPhysics)
-    makeChemistrySolverType
-    (
-        sequential,
-        rhoChemistryModel,
-        icoPoly8ThermoPhysics
-    )
+    makeChemistrySolverTypes(psiChemistryModel, gasThermoPhysics);
+    makeChemistrySolverTypes(psiChemistryModel, icoPoly8ThermoPhysics);
+    makeChemistrySolverTypes(rhoChemistryModel, gasThermoPhysics);
+    makeChemistrySolverTypes(rhoChemistryModel, icoPoly8ThermoPhysics);
 }
 
 

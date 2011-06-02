@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,6 +43,7 @@ License
 #include "dieselMixture.H"
 #include "multiComponentMixture.H"
 #include "reactingMixture.H"
+#include "singleStepReactingMixture.H"
 
 #include "thermoPhysicsTypes.H"
 
@@ -132,6 +133,14 @@ makeReactionMixtureThermo
     hReactionThermo,
     hRhoMixtureThermo,
     multiComponentMixture,
+    constGasThermoPhysics
+);
+
+makeReactionMixtureThermo
+(
+    hReactionThermo,
+    hRhoMixtureThermo,
+    multiComponentMixture,
     icoPoly8ThermoPhysics
 );
 
@@ -151,6 +160,14 @@ makeReactionMixtureThermo
     hReactionThermo,
     hRhoMixtureThermo,
     reactingMixture,
+    constGasThermoPhysics
+);
+
+makeReactionMixtureThermo
+(
+    hReactionThermo,
+    hRhoMixtureThermo,
+    reactingMixture,
     icoPoly8ThermoPhysics
 );
 
@@ -159,6 +176,14 @@ makeReactionMixtureThermo
     hReactionThermo,
     hRhoMixtureThermo,
     reactingMixture,
+    gasThermoPhysics
+);
+
+makeReactionMixtureThermo
+(
+    hReactionThermo,
+    hRhoMixtureThermo,
+    singleStepReactingMixture,
     gasThermoPhysics
 );
 

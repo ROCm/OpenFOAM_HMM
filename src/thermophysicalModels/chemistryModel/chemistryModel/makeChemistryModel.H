@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -20,9 +20,6 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
-
-InClass
-    Foam::psiChemistryModel
 
 Description
     Macros for instantiating chemistry models based on compressibility and
@@ -44,21 +41,27 @@ namespace Foam
 
 #define makeChemistryModel(SS, Comp, Thermo)                                  \
                                                                               \
-typedef SS<Comp, Thermo> SS##Comp##Thermo;                                    \
+    typedef SS<Comp, Thermo> SS##Comp##Thermo;                                \
                                                                               \
-defineTemplateTypeNameAndDebugWithName                                        \
-(                                                                             \
-    SS##Comp##Thermo,                                                         \
-    #SS"<"#Comp","#Thermo">",                                                 \
-    0                                                                         \
-);                                                                            \
+    defineTemplateTypeNameAndDebugWithName                                    \
+    (                                                                         \
+        SS##Comp##Thermo,                                                     \
+        #SS"<"#Comp","#Thermo">",                                             \
+        0                                                                     \
+    );
+
+
+#define makeSolidChemistryModel(SS, Comp, SThermo, GThermo)                   \
                                                                               \
-addToRunTimeSelectionTable                                                    \
-(                                                                             \
-    Comp,                                                                     \
-    SS##Comp##Thermo,                                                         \
-    fvMesh                                                                    \
-);
+    typedef SS<Comp, SThermo, GThermo> SS##Comp##SThermo##GThermo;            \
+                                                                              \
+    defineTemplateTypeNameAndDebugWithName                                    \
+    (                                                                         \
+        SS##Comp##SThermo##GThermo,                                           \
+        #SS"<"#Comp","#SThermo","#GThermo">",                                 \
+        0                                                                     \
+    );
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

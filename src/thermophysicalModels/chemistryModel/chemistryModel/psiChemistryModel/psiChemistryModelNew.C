@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,23 +32,39 @@ Foam::autoPtr<Foam::psiChemistryModel> Foam::psiChemistryModel::New
     const fvMesh& mesh
 )
 {
-    // get model name, but do not register the dictionary
-    // otherwise it is registered in the database twice
-    const word userModel
+    IOdictionary chemistryPropertiesDict
     (
-        IOdictionary
+        IOobject
         (
-            IOobject
-            (
-                "chemistryProperties",
-                mesh.time().constant(),
-                mesh,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE,
-                false
-            )
-        ).lookup("psiChemistryModel")
+            "chemistryProperties",
+            mesh.time().constant(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        )
     );
+
+    const word solver(chemistryPropertiesDict.lookup("chemistrySolver"));
+
+    wordList models = fvMeshConstructorTablePtr_->sortedToc();
+    wordHashSet validModels;
+    forAll(models, i)
+    {
+        label delim = models[i].find('<');
+        validModels.insert(models[i](0, delim));
+    }
+
+    wordHashSet::iterator solverIter = validModels.find(solver);
+    if (solverIter == validModels.end())
+    {
+        FatalErrorIn("psiChemistryModel::New(const fvMesh&)")
+            << "Valid chemistrySolver types are:" << validModels
+            << exit(FatalError);
+    }
+
+
+    const word userModel(chemistryPropertiesDict.lookup("psiChemistryModel"));
 
     // construct chemistry model type name by inserting first template argument
     const label tempOpen = userModel.find('<');
@@ -59,7 +75,7 @@ Foam::autoPtr<Foam::psiChemistryModel> Foam::psiChemistryModel::New
         userModel(tempOpen + 1, tempClose - tempOpen - 1);
 
     const word modelType =
-        className + '<' + typeName + ',' + thermoTypeName + '>';
+        solver + '<' + className + '<' + typeName + ',' + thermoTypeName + ">>";
 
     if (debug)
     {
@@ -77,7 +93,7 @@ Foam::autoPtr<Foam::psiChemistryModel> Foam::psiChemistryModel::New
     {
         if (debug)
         {
-            FatalErrorIn("psiChemistryModelBase::New(const mesh&)")
+            FatalErrorIn("psiChemistryModel::New(const mesh&)")
                 << "Unknown psiChemistryModel type "
                 << modelType << nl << nl
                 << "Valid psiChemistryModel types are:" << nl
@@ -86,16 +102,22 @@ Foam::autoPtr<Foam::psiChemistryModel> Foam::psiChemistryModel::New
         }
         else
         {
-            wordList models = fvMeshConstructorTablePtr_->sortedToc();
-            forAll(models, i)
+            wordList allModels(fvMeshConstructorTablePtr_->sortedToc());
+            wordHashSet models;
+            forAll(allModels, i)
             {
-                models[i] = models[i].replace(typeName + ',', "");
+                const label tempOpen = allModels[i].find('<');
+                const label tempClose = allModels[i].rfind('>');
+                word modelName =
+                    allModels[i](tempOpen + 1, tempClose - tempOpen - 1);
+                modelName = modelName.replace(typeName + ',', "");
+                models.insert(modelName);
             }
 
-            FatalErrorIn("psiChemistryModelBase::New(const mesh&)")
+            FatalErrorIn("psiChemistryModel::New(const mesh&)")
                 << "Unknown psiChemistryModel type " << userModel
-                << nl << nl << "Valid psiChemistryModel types are:" << nl
-                << models << nl << exit(FatalError);
+                << nl << nl << "Valid psiChemistryModel types are:"
+                << models << exit(FatalError);
         }
     }
 

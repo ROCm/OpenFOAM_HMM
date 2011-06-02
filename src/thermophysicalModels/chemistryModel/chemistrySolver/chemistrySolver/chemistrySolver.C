@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,22 +27,23 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class CompType, class ThermoType>
-Foam::chemistrySolver<CompType, ThermoType>::chemistrySolver
+template<class ODEChemistryType>
+Foam::chemistrySolver<ODEChemistryType>::chemistrySolver
 (
-    ODEChemistryModel<CompType, ThermoType>& model,
-    const word& modelName
+    const fvMesh& mesh,
+    const word& ODEModelName,
+    const word& thermoType
 )
 :
-    model_(model),
-    name_(modelName)
+    ODEChemistryType(mesh, ODEModelName, thermoType),
+    name_(ODEModelName)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class CompType, class ThermoType>
-Foam::chemistrySolver<CompType, ThermoType>::~chemistrySolver()
+template<class ODEChemistryType>
+Foam::chemistrySolver<ODEChemistryType>::~chemistrySolver()
 {}
 
 

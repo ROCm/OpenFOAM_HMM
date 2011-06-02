@@ -18,6 +18,9 @@ wmake $makeType SLGThermo
 
 # Should be combined with solids&solidMixture
 wmake $makeType basicSolidThermo
+wmake $makeType solidChemistryModel
+
+wmake $makeType combustionModels
 
 wmake $makeType radiationModels
 
