@@ -48,13 +48,6 @@ namespace Foam
         SS##Comp##Thermo,                                                     \
         #SS"<"#Comp","#Thermo">",                                             \
         0                                                                     \
-    );                                                                        \
-                                                                              \
-    addToRunTimeSelectionTable                                                \
-    (                                                                         \
-        Comp,                                                                 \
-        SS##Comp##Thermo,                                                     \
-        fvMesh                                                                \
     );
 
 
@@ -67,13 +60,6 @@ namespace Foam
         SS##Comp##SThermo##GThermo,                                           \
         #SS"<"#Comp","#SThermo","#GThermo">",                                 \
         0                                                                     \
-    );                                                                        \
-                                                                              \
-    addToRunTimeSelectionTable                                                \
-    (                                                                         \
-        Comp,                                                                 \
-        SS##Comp##SThermo##GThermo,                                           \
-        fvMesh                                                                \
     );
 
 

@@ -38,7 +38,7 @@ Foam::EulerImplicit<ODEChemistryType>::EulerImplicit
 )
 :
     chemistrySolver<ODEChemistryType>(mesh, ODEModelName, thermoType),
-    coeffsDict_(this->subDict(ODEModelName + "Coeffs")),
+    coeffsDict_(this->subDict("EulerImplicitCoeffs")),
     cTauChem_(readScalar(coeffsDict_.lookup("cTauChem"))),
     eqRateLimiter_(coeffsDict_.lookup("equilibriumRateLimiter"))
 {}

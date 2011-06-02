@@ -848,11 +848,13 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::solve
     notImplemented
     (
         "ODEChemistryModel::solve"
-        "scalarField&, "
-        "const scalar, "
-        "const scalar, "
-        "const scalar, "
-        "const scalar"
+        "("
+            "scalarField&, "
+            "const scalar, "
+            "const scalar, "
+            "const scalar, "
+            "const scalar"
+        ")"
     );
 
     return (0);

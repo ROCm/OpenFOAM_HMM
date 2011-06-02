@@ -37,8 +37,8 @@ Foam::ode<ODEChemistryType>::ode
 )
 :
     chemistrySolver<ODEChemistryType>(mesh, ODEModelName, thermoType),
-    coeffsDict_(this->subDict(ODEModelName + "Coeffs")),
-    solverName_(coeffsDict_.lookup("ODESolver")),
+    coeffsDict_(this->subDict("odeCoeffs")),
+    solverName_(coeffsDict_.lookup("solver")),
     odeSolver_(ODESolver::New(solverName_, *this)),
     eps_(readScalar(coeffsDict_.lookup("eps")))
 {}

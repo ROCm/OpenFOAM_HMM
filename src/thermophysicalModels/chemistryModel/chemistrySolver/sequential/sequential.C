@@ -37,7 +37,7 @@ Foam::sequential<ODEChemistryType>::sequential
 )
 :
     chemistrySolver<ODEChemistryType>(mesh, ODEModelName, thermoType),
-    coeffsDict_(this->subDict(ODEModelName + "Coeffs")),
+    coeffsDict_(this->subDict("sequentialCoeffs")),
     cTauChem_(readScalar(coeffsDict_.lookup("cTauChem"))),
     eqRateLimiter_(coeffsDict_.lookup("equilibriumRateLimiter"))
 {}
