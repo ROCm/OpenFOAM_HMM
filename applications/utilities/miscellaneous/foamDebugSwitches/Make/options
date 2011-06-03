@@ -43,10 +43,10 @@ EXE_LIBS = \
     -lmeshTools \
     -lmolecularMeasurements \
     -lmolecule \
-    -lmultiphaseInterFoam \
+/*    -lmultiphaseInterFoam  */ \
     -lODE \
     -lOpenFOAM \
-    -lphaseModel \
+/*    -lphaseModel  */ \
     -lpotential \
     -lradiationModels \
     -lrandomProcesses \

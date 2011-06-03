@@ -64,13 +64,12 @@ noThermo::~noThermo()
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 void noThermo::preEvolveRegion()
-{
-}
+{}
 
 
 void noThermo::evolveRegion()
-{
-}
+{}
+
 
 const tmp<volScalarField> noThermo::Cp() const
 {
@@ -103,6 +102,7 @@ const volScalarField& noThermo::kappa() const
     return volScalarField::null();
 }
 
+
 const volScalarField& noThermo::rho() const
 {
     FatalErrorIn("const volScalarField& noThermo::rho() const")
@@ -110,12 +110,14 @@ const volScalarField& noThermo::rho() const
     return volScalarField::null();
 }
 
+
 const volScalarField& noThermo::K() const
 {
    FatalErrorIn("const volScalarField& noThermo::K() const")
         << "K field not available for " << type() << abort(FatalError);
     return volScalarField::null();
 }
+
 
 const volScalarField& noThermo::T() const
 {

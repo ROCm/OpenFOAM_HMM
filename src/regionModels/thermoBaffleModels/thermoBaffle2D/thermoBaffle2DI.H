@@ -50,7 +50,7 @@ inline tmp<scalarField> thermoBaffle2D::hs
     const label patchI
 ) const
 {
-    const scalarField& Cp = thermo_->Cp()().boundaryField()[patchI];
+    const scalarField Cp(thermo_->Cp(patchI));
     return Cp*(T - 298.15);
 }
 
