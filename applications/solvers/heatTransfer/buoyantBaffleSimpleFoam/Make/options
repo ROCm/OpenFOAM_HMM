@@ -16,4 +16,5 @@ EXE_LIBS = \
     -lcompressibleRASModels \
     -lfiniteVolume \
     -lmeshTools \
-    -lthermoBaffleModels
+    -lthermoBaffleModels \
+    -lregionModels
