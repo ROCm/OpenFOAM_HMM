@@ -101,6 +101,9 @@ class backgroundMeshDecomposition
         //  is responsible for.
         fvMesh mesh_;
 
+        //- Refinement object
+        hexRef8 meshCutter_;
+
         //- Patch containing an independent representation of the surface of the
         //  mesh of this processor
         autoPtr<bPatch> boundaryFacesPtr_;
@@ -131,6 +134,10 @@ class backgroundMeshDecomposition
         //  investigate the local cell size
         label volRes_;
 
+        //- Allowed factor above the average cell weight before a background
+        //  cell needs to be split
+        scalar maxCellWeightCoeff_;
+
 
     // Private Member Functions
 
@@ -144,7 +151,6 @@ class backgroundMeshDecomposition
         //  it
         bool refineCell
         (
-            const polyMesh& mesh,
             label cellI,
             label volType,
             scalar& weightEstimate
@@ -154,7 +160,6 @@ class backgroundMeshDecomposition
         //  meshed
         labelList selectRefinementCells
         (
-            const hexRef8& meshCutter,
             labelList& volumeStatus,
             volScalarField& cellWeights
         ) const;
@@ -195,7 +200,8 @@ public:
         //  returning a map to use to redistribute vertices.
         autoPtr<mapDistributePolyMesh> distribute
         (
-            volScalarField& cellWeights
+            volScalarField& cellWeights,
+            List<DynamicList<point> >& cellVertices
         );
 
         //- Is the given position inside the domain of this decomposition

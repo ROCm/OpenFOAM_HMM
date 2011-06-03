@@ -859,111 +859,150 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
 
 void Foam::conformalVoronoiMesh::distribute()
 {
+    if (!Pstream::parRun())
+    {
+        return;
+    }
+
     Info<< nl << "Redistributing points" << endl;
 
     timeCheck("Before distribute");
 
-    const fvMesh& bMesh = decomposition_().mesh();
-
-    volScalarField cellWeights
-    (
-        IOobject
-        (
-            "cellWeights",
-            bMesh.time().timeName(),
-            bMesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        bMesh,
-        dimensionedScalar("weight", dimless, 0),
-        zeroGradientFvPatchScalarField::typeName
-    );
-
-    meshSearch cellSearch(bMesh);
-
-    List<DynamicList<Foam::point> > cellVertices(bMesh.nCells());
-
-    for
-    (
-        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-        vit != finite_vertices_end();
-        vit++
-    )
+    while (true)
     {
-        if (vit->real())
-        {
-            Foam::point v = topoint(vit->point());
-
-            label cellI = cellSearch.findCell(v);
-
-            if (cellI == -1)
-            {
-                Pout<< "findCell "
-                    << vit->type() << " "
-                    << vit->index() << " "
-                    << v << " "
-                    << cellI << endl;
-            }
-            else
-            {
-                cellVertices[cellI].append(topoint(vit->point()));
-            }
-        }
-    }
-
-    forAll(cellVertices, cI)
-    {
-        cellWeights.internalField()[cI] = min
+        scalar globalNumberOfVertices = returnReduce
         (
-            max(cellVertices[cI].size(), 1e-3),
-            100
+            label(number_of_vertices()),
+            sumOp<label>()
         );
-    }
 
-    autoPtr<mapDistributePolyMesh> mapDist = decomposition_().distribute
-    (
-        cellWeights
-    );
+        scalar unbalance = returnReduce
+        (
+            mag
+            (
+                1.0
+              - label(number_of_vertices())
+               /(globalNumberOfVertices/Pstream::nProcs())
+            ),
+            maxOp<scalar>()
+        );
 
-    Pout<< "number_of_vertices() before distribution "
-        << label(number_of_vertices()) << endl;
+        Info<< "    Processor unbalance " << unbalance << endl;
 
-    mapDist().distributeCellData(cellVertices);
-
-    // Remove the entire tessellation
-    this->clear();
-
-    // Info<< "NEED TO MAP FEATURE POINTS" << endl;
-    // reinsertFeaturePoints();
-
-    startOfInternalPoints_ = number_of_vertices();
-
-    timeCheck("Distribution performed");
-
-    Info<< nl << "Inserting distributed tessellation" << endl;
-
-    std::vector<Point> pointsToInsert;
-
-    forAll(cellVertices, cI)
-    {
-        forAll(cellVertices[cI], cVPI)
+        if (unbalance <= cvMeshControls().maxLoadUnbalance())
         {
-            pointsToInsert.push_back(toPoint(cellVertices[cI][cVPI]));
+            break;
         }
+
+        Info<< "    Total number of vertices before redistribution "
+            << globalNumberOfVertices
+            << endl;
+
+        // Pout<< "    number_of_vertices() before distribution "
+        //     << label(number_of_vertices()) << endl;
+
+        const fvMesh& bMesh = decomposition_().mesh();
+
+        volScalarField cellWeights
+        (
+            IOobject
+            (
+                "cellWeights",
+                bMesh.time().timeName(),
+                bMesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            bMesh,
+            dimensionedScalar("weight", dimless, 1e-3),
+            zeroGradientFvPatchScalarField::typeName
+        );
+
+        meshSearch cellSearch(bMesh);
+
+        List<DynamicList<Foam::point> > cellVertices(bMesh.nCells());
+
+        for
+        (
+            Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+            vit != finite_vertices_end();
+            vit++
+        )
+        {
+            if (vit->real())
+            {
+                Foam::point v = topoint(vit->point());
+
+                label cellI = cellSearch.findCell(v);
+
+                if (cellI == -1)
+                {
+                    Pout<< "findCell conformalVoronoiMesh::distribute findCell "
+                        << vit->type() << " "
+                        << vit->index() << " "
+                        << v << " "
+                        << cellI << endl;
+                }
+                else
+                {
+                    cellVertices[cellI].append(topoint(vit->point()));
+                }
+            }
+        }
+
+        forAll(cellVertices, cI)
+        {
+            cellWeights.internalField()[cI] = max
+            (
+                cellVertices[cI].size(),
+                1e-2       // Small but finite weight for empty cells
+            );
+        }
+
+        autoPtr<mapDistributePolyMesh> mapDist = decomposition_().distribute
+        (
+            cellWeights,
+            cellVertices
+        );
+
+        // Remove the entire tessellation
+        this->clear();
+
+        Info<< "NEED TO MAP FEATURE POINTS" << endl;
+        // reinsertFeaturePoints();
+
+        startOfInternalPoints_ = number_of_vertices();
+
+        timeCheck("Distribution performed");
+
+        Info<< nl << "    Inserting distributed tessellation" << endl;
+
+        std::vector<Point> pointsToInsert;
+
+        forAll(cellVertices, cI)
+        {
+            forAll(cellVertices[cI], cVPI)
+            {
+                pointsToInsert.push_back(toPoint(cellVertices[cI][cVPI]));
+            }
+        }
+
+        insertPoints(pointsToInsert);
+
+        Info<< "    Total number of vertices after redistribution "
+            << returnReduce(label(number_of_vertices()), sumOp<label>())
+            << endl;
+
+        // Pout<< "    number_of_vertices() after distribution "
+        //     << label(number_of_vertices()) << endl;
+
+        if(cvMeshControls().objOutput())
+        {
+            writePoints("distributedPoints.obj", true);
+        }
+
+        timeCheck("After distribute");
     }
-
-    insertPoints(pointsToInsert);
-
-    Pout<< "number_of_vertices() after distribution "
-        << label(number_of_vertices()) << endl;
-
-    if(cvMeshControls().objOutput())
-    {
-        writePoints("distributedPoints.obj", true);
-    }
-
-    timeCheck("After distribute");
 }
 
 
@@ -1377,6 +1416,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         );
     }
 
+    Info<< "CREATEFEATUREPOINTS MOVED" << endl;
     // createFeaturePoints();
 
     if (cvMeshControls().objOutput())

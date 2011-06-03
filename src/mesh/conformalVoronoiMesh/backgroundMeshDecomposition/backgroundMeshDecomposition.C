@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "backgroundMeshDecomposition.H"
+#include "meshSearch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -57,13 +58,6 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
     const conformationSurfaces& geometry = cvMesh_.geometryToConformTo();
 
     decompositionMethod& decomposer = decomposerPtr_();
-
-    hexRef8 meshCutter
-    (
-        mesh_,
-        labelList(mesh_.nCells(), 0),
-        labelList(mesh_.nPoints(), 0)
-    );
 
     // For each cell in the mesh has it been determined if it is fully
     // inside, outside, or overlaps the surface
@@ -110,7 +104,6 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
             {
                 labelList refCells = selectRefinementCells
                 (
-                    meshCutter,
                     volumeStatus,
                     cellWeights
                 );
@@ -118,7 +111,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                 // Maintain 2:1 ratio
                 labelList newCellsToRefine
                 (
-                    meshCutter.consistentRefinement
+                    meshCutter_.consistentRefinement
                     (
                         refCells,
                         true                  // extend set
@@ -141,12 +134,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                     );
                 }
 
-
-                if
-                (
-                    returnReduce(newCellsToRefine.size(), sumOp<label>())
-                 == 0
-                )
+                if (returnReduce(newCellsToRefine.size(), sumOp<label>()) == 0)
                 {
                     break;
                 }
@@ -155,7 +143,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                 polyTopoChange meshMod(mesh_);
 
                 // Play refinement commands into mesh changer.
-                meshCutter.setRefinement(newCellsToRefine, meshMod);
+                meshCutter_.setRefinement(newCellsToRefine, meshMod);
 
                 // Create mesh, return map from old to new mesh.
                 autoPtr<mapPolyMesh> map = meshMod.changeMesh
@@ -163,7 +151,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                     mesh_,
                     false,  // inflate
                     true,   // syncParallel
-                    true,   // orderCells (to reduce cell motion in scotch)
+                    true,   // orderCells (to reduce cell transfers)
                     false   // orderPoints
                 );
 
@@ -171,7 +159,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                 mesh_.updateMesh(map);
 
                 // Update numbering of cells/vertices.
-                meshCutter.updateMesh(map);
+                meshCutter_.updateMesh(map);
 
                 {
                     // Map volumeStatus
@@ -187,12 +175,11 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                         if (oldCellI == -1)
                         {
                             newVolumeStatus[newCellI] =
-                            searchableSurface::UNKNOWN;;
+                                searchableSurface::UNKNOWN;
                         }
                         else
                         {
-                            newVolumeStatus[newCellI] =
-                            volumeStatus[oldCellI];
+                            newVolumeStatus[newCellI] = volumeStatus[oldCellI];
                         }
                     }
 
@@ -201,7 +188,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
 
                 if (debug)
                 {
-                    Info<< "Refined from "
+                    Info<< "    Background mesh refined from "
                         << returnReduce(map().nOldCells(), sumOp<label>())
                         << " to " << mesh_.globalData().nTotalCells()
                         << " cells." << endl;
@@ -238,6 +225,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                 }
             }
 
+            // Hard code switch for this stage for testing
             bool removeOutsideCells = false;
 
             if (removeOutsideCells)
@@ -277,7 +265,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                     mesh_,
                     false,  // inflate
                     true,   // syncParallel
-                    true,   // orderCells (to reduce cell motion in scotch)
+                    true,   // orderCells (to reduce cell transfers)
                     false   // orderPoints
                 );
 
@@ -285,7 +273,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                 mesh_.updateMesh(map);
 
                 // Update numbering of cells/vertices.
-                meshCutter.updateMesh(map);
+                meshCutter_.updateMesh(map);
                 cellRemover.updateMesh(map);
 
                 {
@@ -323,7 +311,8 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
             if (debug)
             {
                 const_cast<Time&>(mesh_.time())++;
-                meshCutter.write();
+                Info<< "Time " << mesh_.time().timeName() << endl;
+                meshCutter_.write();
                 mesh_.write();
                 cellWeights.write();
             }
@@ -340,7 +329,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
             autoPtr<mapDistributePolyMesh> mapDist =
                 distributor.distribute(newDecomp);
 
-            meshCutter.distribute(mapDist);
+            meshCutter_.distribute(mapDist);
 
             mapDist().distributeCellData(volumeStatus);
 
@@ -349,7 +338,8 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                 printMeshData(mesh_);
 
                 const_cast<Time&>(mesh_.time())++;
-                meshCutter.write();
+                Info<< "Time " << mesh_.time().timeName() << endl;
+                meshCutter_.write();
                 mesh_.write();
                 cellWeights.write();
             }
@@ -359,6 +349,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
     if (debug)
     {
         const_cast<Time&>(mesh_.time())++;
+        Info<< "Time " << mesh_.time().timeName() << endl;
         cellWeights.write();
         mesh_.write();
     }
@@ -424,7 +415,6 @@ void Foam::backgroundMeshDecomposition::printMeshData
 
 bool Foam::backgroundMeshDecomposition::refineCell
 (
-    const polyMesh& mesh,
     label cellI,
     label volType,
     scalar& weightEstimate
@@ -437,10 +427,10 @@ bool Foam::backgroundMeshDecomposition::refineCell
 
     treeBoundBox cellBb
     (
-        mesh.cells()[cellI].points
+        mesh_.cells()[cellI].points
         (
-            mesh.faces(),
-            mesh.points()
+            mesh_.faces(),
+            mesh_.points()
         )
     );
 
@@ -549,21 +539,18 @@ bool Foam::backgroundMeshDecomposition::refineCell
 
 Foam::labelList Foam::backgroundMeshDecomposition::selectRefinementCells
 (
-    const hexRef8& meshCutter,
     labelList& volumeStatus,
     volScalarField& cellWeights
 ) const
 {
     labelHashSet cellsToRefine;
 
-    const polyMesh& mesh = meshCutter.mesh();
-
     // Determine/update the status of each cell
     forAll(volumeStatus, cellI)
     {
         if (volumeStatus[cellI] == searchableSurface::MIXED)
         {
-            if (meshCutter.cellLevel()[cellI] < minLevels_)
+            if (meshCutter_.cellLevel()[cellI] < minLevels_)
             {
                 cellsToRefine.insert(cellI);
             }
@@ -575,7 +562,6 @@ Foam::labelList Foam::backgroundMeshDecomposition::selectRefinementCells
             (
                 refineCell
                 (
-                    mesh,
                     cellI,
                     volumeStatus[cellI],
                     cellWeights.internalField()[cellI]
@@ -693,6 +679,12 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
             IOobject::MUST_READ
         )
     ),
+    meshCutter_
+    (
+        mesh_,
+        labelList(mesh_.nCells(), 0),
+        labelList(mesh_.nPoints(), 0)
+    ),
     boundaryFacesPtr_(),
     bFTreePtr_(),
     decomposeDict_
@@ -714,7 +706,8 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
         coeffsDict_.lookupOrDefault<scalar>("minCellSizeLimit", 0.0)
     ),
     minLevels_(readLabel(coeffsDict_.lookup("minLevels"))),
-    volRes_(readLabel(coeffsDict_.lookup("sampleResolution")))
+    volRes_(readLabel(coeffsDict_.lookup("sampleResolution"))),
+    maxCellWeightCoeff_(readScalar(coeffsDict_.lookup("maxCellWeightCoeff")))
 {
     if (!Pstream::parRun())
     {
@@ -761,14 +754,174 @@ Foam::backgroundMeshDecomposition::~backgroundMeshDecomposition()
 Foam::autoPtr<Foam::mapDistributePolyMesh>
 Foam::backgroundMeshDecomposition::distribute
 (
-    volScalarField& cellWeights
+    volScalarField& cellWeights,
+    List<DynamicList<point> >& cellVertices
 )
 {
     if (debug)
     {
         const_cast<Time&>(mesh_.time())++;
+        Info<< "Time " << mesh_.time().timeName() << endl;
         cellWeights.write();
         mesh_.write();
+    }
+
+    while (true)
+    {
+        // Refine large cells if necessary
+
+        scalar cellWeightLimit =
+            maxCellWeightCoeff_
+           *sum(cellWeights).value()
+           /mesh_.globalData().nTotalCells();
+
+        if (debug)
+        {
+            Info<< "    cellWeightLimit " << cellWeightLimit << endl;
+
+            Pout<< "    sum(cellWeights) "
+                << sum(cellWeights.internalField())
+                << " max(cellWeights) "
+                << max(cellWeights.internalField())
+                << endl;
+        }
+
+        labelHashSet cellsToRefine;
+
+        forAll(cellWeights, cWI)
+        {
+            if (cellWeights.internalField()[cWI] > cellWeightLimit)
+            {
+                cellsToRefine.insert(cWI);
+            }
+        }
+
+        if (returnReduce(cellsToRefine.size(), sumOp<label>()) == 0)
+        {
+            break;
+        }
+
+        // Maintain 2:1 ratio
+        labelList newCellsToRefine
+        (
+            meshCutter_.consistentRefinement
+            (
+                cellsToRefine.toc(),
+                true                  // extend set
+            )
+        );
+
+        if (debug && !cellsToRefine.empty())
+        {
+            Pout<< "    cellWeights too large in " << cellsToRefine.size()
+                << " cells" << endl;
+        }
+
+        forAll(newCellsToRefine, nCTRI)
+        {
+            label cellI = newCellsToRefine[nCTRI];
+
+            cellWeights.internalField()[cellI] /= 8.0;
+        }
+
+        // Mesh changing engine.
+        polyTopoChange meshMod(mesh_);
+
+        // Play refinement commands into mesh changer.
+        meshCutter_.setRefinement(newCellsToRefine, meshMod);
+
+        // Create mesh, return map from old to new mesh.
+        autoPtr<mapPolyMesh> map = meshMod.changeMesh
+        (
+            mesh_,
+            false,  // inflate
+            true,   // syncParallel
+            true,   // orderCells (to reduce cell motion)
+            false   // orderPoints
+        );
+
+        // Update fields
+        mesh_.updateMesh(map);
+
+        // Update numbering of cells/vertices.
+        meshCutter_.updateMesh(map);
+
+        {
+            // Map cellVertices
+
+            meshSearch cellSearch(mesh_);
+
+            const labelList& reverseCellMap = map().reverseCellMap();
+
+            List<DynamicList<point> > newCellVertices(mesh_.nCells());
+
+            forAll(cellVertices, oldCellI)
+            {
+                DynamicList<point>& oldCellVertices =
+                    cellVertices[oldCellI];
+
+                if (findIndex(newCellsToRefine, oldCellI) >= 0)
+                {
+                    // This old cell was refined so the cell for the vertices
+                    // in the new mesh needs to be searched for.
+
+                    forAll (oldCellVertices, oPI)
+                    {
+                        const point& v = oldCellVertices[oPI];
+
+                        label newCellI = cellSearch.findCell(v);
+
+                        if (newCellI == -1)
+                        {
+                            Pout<< "findCell backgroundMeshDecomposition "
+                                << v << " "
+                                << oldCellI
+                                << newCellI
+                                << endl;
+                        }
+
+                        newCellVertices[newCellI].append(v);
+                    }
+                }
+                else
+                {
+                    label newCellI = reverseCellMap[oldCellI];
+
+                    forAll(oldCellVertices, oPI)
+                    {
+                        const point& v = oldCellVertices[oPI];
+
+                        newCellVertices[newCellI].append(v);
+                    }
+                }
+            }
+
+            cellVertices.transfer(newCellVertices);
+        }
+
+        if (debug)
+        {
+            Info<< "    Background mesh refined from "
+                << returnReduce(map().nOldCells(), sumOp<label>())
+                << " to " << mesh_.globalData().nTotalCells()
+                << " cells." << endl;
+
+            const_cast<Time&>(mesh_.time())++;
+            Info<< "Time " << mesh_.time().timeName() << endl;
+            cellWeights.write();
+            mesh_.write();
+        }
+    }
+
+    if (debug)
+    {
+        printMeshData(mesh_);
+
+        Pout<< "    Pre distribute sum(cellWeights) "
+            << sum(cellWeights.internalField())
+            << " max(cellWeights) "
+            << max(cellWeights.internalField())
+            << endl;
     }
 
     labelList newDecomp = decomposerPtr_().decompose
@@ -778,19 +931,31 @@ Foam::backgroundMeshDecomposition::distribute
         cellWeights
     );
 
+    Info<< "    Redistributing background mesh cells" << endl;
+
     fvMeshDistribute distributor(mesh_, mergeDist_);
 
-    autoPtr<mapDistributePolyMesh> mapDist =
-        distributor.distribute(newDecomp);
+    autoPtr<mapDistributePolyMesh> mapDist = distributor.distribute(newDecomp);
+
+    meshCutter_.distribute(mapDist);
 
     if (debug)
     {
         printMeshData(mesh_);
 
+        Pout<< "    Post distribute sum(cellWeights) "
+            << sum(cellWeights.internalField())
+            << " max(cellWeights) "
+            << max(cellWeights.internalField())
+            << endl;
+
         const_cast<Time&>(mesh_.time())++;
+        Info<< "Time " << mesh_.time().timeName() << endl;
         mesh_.write();
         cellWeights.write();
     }
+
+    mapDist().distributeCellData(cellVertices);
 
     buildPatchAndTree();
 
