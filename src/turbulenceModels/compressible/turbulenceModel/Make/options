@@ -13,5 +13,6 @@ LIB_LIBS = \
     -lspecie \
     -lfiniteVolume \
     -lmeshTools \
-    -lsolid
+    -lsolid \
+    -lradiationModels
 

@@ -80,6 +80,7 @@ protected:
             //- Number of non orthogonal correctors
             label nNonOrthCorr_;
 
+
         // Thermo properties
 
             //- Solid thermo
@@ -87,6 +88,7 @@ protected:
 
             //- Temperature / [K]
             volScalarField& T_;
+
 
         // Source term fields
 

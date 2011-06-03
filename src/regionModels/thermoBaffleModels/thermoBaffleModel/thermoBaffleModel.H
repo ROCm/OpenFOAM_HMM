@@ -173,7 +173,6 @@ public:
 
             //- Pre-evolve region
             virtual void preEvolveRegion();
-
 };
 
 

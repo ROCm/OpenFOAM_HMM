@@ -3,5 +3,7 @@ regionModel/regionModel.C
 singleLayerRegion/singleLayerRegion.C
 regionModel1D/regionModel1D.C
 
+/* Boundary conditions */
+derivedFvPatches/directMappedVariableThicknessWall/directMappedVariableThicknessWallFvPatch.C
 
 LIB = $(FOAM_LIBBIN)/libregionModels

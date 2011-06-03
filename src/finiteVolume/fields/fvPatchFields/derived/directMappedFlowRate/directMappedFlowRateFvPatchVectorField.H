@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::flowRateInletVelocityCoupledFvPatchVectorField
+    Foam::directMappedFlowRateFvPatchVectorField
 
 Description
     Describes a volumetric/mass flow normal vector boundary condition by its
@@ -41,7 +41,7 @@ Description
     @verbatim
     inlet
     {
-        type            flowRateInletVelocityCoupled;
+        type            directMappedFlowRate;
         phi             phi;
         rho             rho;
         neigPhi         neigPhiName_;    // Volumetric/mass flow rate
@@ -50,18 +50,13 @@ Description
     }
     @endverbatim
 
-Note
-    - The value is positive inwards
-    - May not work correctly for transonic inlets
-    - Strange behaviour with potentialFoam since the U equation is not solved
-
 SourceFiles
-    flowRateInletVelocityCoupledFvPatchVectorField.C
+    directMappedFlowRateFvPatchVectorField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef flowRateInletVelocityCoupledFvPatchVectorField_H
-#define flowRateInletVelocityCoupledFvPatchVectorField_H
+#ifndef directMappedFlowRateFvPatchVectorField_H
+#define directMappedFlowRateFvPatchVectorField_H
 
 #include "fixedValueFvPatchFields.H"
 
@@ -73,7 +68,7 @@ namespace Foam
                Class flowRateInletVelocityFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
-class flowRateInletVelocityCoupledFvPatchVectorField
+class directMappedFlowRateFvPatchVectorField
 :
     public fixedValueFvPatchVectorField
 {
@@ -92,20 +87,20 @@ class flowRateInletVelocityCoupledFvPatchVectorField
 public:
 
    //- Runtime type information
-   TypeName("flowRateInletVelocityCoupled");
+   TypeName("directMappedFlowRate");
 
 
    // Constructors
 
         //- Construct from patch and internal field
-        flowRateInletVelocityCoupledFvPatchVectorField
+        directMappedFlowRateFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        flowRateInletVelocityCoupledFvPatchVectorField
+        directMappedFlowRateFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
@@ -113,20 +108,20 @@ public:
         );
 
         //- Construct by mapping given
-        //  flowRateInletVelocityCoupledFvPatchVectorField
+        //  directMappedFlowRateFvPatchVectorField
         //  onto a new patch
-        flowRateInletVelocityCoupledFvPatchVectorField
+        directMappedFlowRateFvPatchVectorField
         (
-            const flowRateInletVelocityCoupledFvPatchVectorField&,
+            const directMappedFlowRateFvPatchVectorField&,
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        flowRateInletVelocityCoupledFvPatchVectorField
+        directMappedFlowRateFvPatchVectorField
         (
-            const flowRateInletVelocityCoupledFvPatchVectorField&
+            const directMappedFlowRateFvPatchVectorField&
         );
 
         //- Construct and return a clone
@@ -134,14 +129,14 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new flowRateInletVelocityCoupledFvPatchVectorField(*this)
+                new directMappedFlowRateFvPatchVectorField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        flowRateInletVelocityCoupledFvPatchVectorField
+        directMappedFlowRateFvPatchVectorField
         (
-            const flowRateInletVelocityCoupledFvPatchVectorField&,
+            const directMappedFlowRateFvPatchVectorField&,
             const DimensionedField<vector, volMesh>&
         );
 
@@ -153,7 +148,7 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new flowRateInletVelocityCoupledFvPatchVectorField(*this, iF)
+                new directMappedFlowRateFvPatchVectorField(*this, iF)
             );
         }
 
