@@ -461,6 +461,55 @@ overlaps
 }
 
 
+// Check if any point on shape is inside sphere.
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+bool
+Foam::treeDataPrimitivePatch<Face, FaceList, PointField, PointType>::
+overlaps
+(
+    const label index,
+    const point& centre,
+    const scalar radiusSqr
+) const
+{
+    // 1. Quick rejection: sphere does not intersect face bb at all
+    if (cacheBb_)
+    {
+        if (!bbs_[index].overlaps(centre, radiusSqr))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        if (!calcBb(patch_.points(), patch_[index]).overlaps(centre, radiusSqr))
+        {
+            return false;
+        }
+    }
+
+    const pointField& points = patch_.points();
+    const face& f = patch_[index];
+
+    pointHit nearHit = f.nearestPoint(centre, points);
+
+    // If the distance to the nearest point on the face from the sphere centres
+    // is within the radius, then the sphere touches the face.
+    if (sqr(nearHit.distance()) < radiusSqr)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
 // Calculate nearest point to sample. Updates (if any) nearestDistSqr, minIndex,
 // nearestPoint.
 template

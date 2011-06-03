@@ -120,6 +120,13 @@ public:
             //  (one point per shape)
             pointField shapePoints() const;
 
+            //- Return access to the underlying patch
+            const PrimitivePatch<Face, FaceList, PointField, PointType>&
+            patch() const
+            {
+                return patch_;
+            }
+
 
         // Search
 
@@ -140,11 +147,19 @@ public:
                 const point&
             ) const;
 
-            //- Does (bb of) shape at index overlap bb
+            //- Does shape at index overlap bb
             bool overlaps
             (
                 const label index,
                 const treeBoundBox& sampleBb
+            ) const;
+
+            //- Does shape at index overlap sphere
+            bool overlaps
+            (
+                const label index,
+                const point& centre,
+                const scalar radiusSqr
             ) const;
 
             //- Calculates nearest (to sample) point in shape.

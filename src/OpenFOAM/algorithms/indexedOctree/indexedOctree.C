@@ -2076,7 +2076,7 @@ void Foam::indexedOctree<Type>::findSphere
 
             if (subBb.overlaps(centre, radiusSqr))
             {
-                findBox(getNode(index), centre, radiusSqr, elements);
+                findSphere(getNode(index), centre, radiusSqr, elements);
             }
         }
         else if (isContent(index))
