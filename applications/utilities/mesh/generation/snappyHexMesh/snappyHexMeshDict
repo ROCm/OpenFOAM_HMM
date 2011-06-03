@@ -144,6 +144,13 @@ castellatedMeshControls
                 }
             }
 
+            // Optional specification of patch type (default is wall). No
+            // constraint types (cyclic, symmetry) etc. are allowed.
+            patchInfo
+            {
+                type patch;
+            }
+
             //- Optional angle to detect small-large cell situation
             //  perpendicular to the surface. Is the angle of face w.r.t.
             //  the local surface normal. Use on flat(ish) surfaces only.
