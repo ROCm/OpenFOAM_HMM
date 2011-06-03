@@ -38,8 +38,6 @@ SourceFiles
 #include "ODEChemistryModel.H"
 #include "IOdictionary.H"
 #include "scalarField.H"
-#include "autoPtr.H"
-#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,21 +65,6 @@ public:
 
         //- Runtime type information
         TypeName("chemistrySolver");
-
-
-        // Declare runtime constructor selection table
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            chemistrySolver,
-            dictionary,
-            (
-                const fvMesh& mesh,
-                const word& ODEModelName,
-                const word& thermoType
-            ),
-            (mesh, ODEModelName, thermoType)
-        );
 
 
     // Constructors
