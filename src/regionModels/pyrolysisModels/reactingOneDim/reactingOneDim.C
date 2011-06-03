@@ -85,7 +85,7 @@ void reactingOneDim::updateQr()
 
         // Qr is negative going out the solid
         // If the surface is emitting the radiative flux is set to zero
-        Qrp = max(Qrp, 0.0);
+        Qrp = max(Qrp, scalar(0.0));
     }
 
     // Propagate Qr through 1-D regions
