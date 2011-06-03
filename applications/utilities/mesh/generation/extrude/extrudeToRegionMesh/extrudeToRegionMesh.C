@@ -1302,13 +1302,32 @@ int main(int argc, char *argv[])
         if (oneD)
         {
             // Reuse single empty patch.
-            word patchName = "oneDWedgePatch";
-
-            zoneSidePatch[zoneI] = addPatch<wedgePolyPatch>
-            (
-                mesh,
-                patchName
-            );
+            word patchType = dict.lookup("oneDPolyPatchType");
+            word patchName;
+            if (patchType == "emptyPolyPatch")
+            {
+                patchName = "oneDEmptyPatch";
+                zoneSidePatch[zoneI] = addPatch<emptyPolyPatch>
+                (
+                    mesh,
+                    patchName
+                );
+            }
+            else if (patchType == "wedgePolyPatch")
+            {
+                patchName = "oneDWedgePatch";
+                zoneSidePatch[zoneI] = addPatch<wedgePolyPatch>
+                (
+                    mesh,
+                    patchName
+                );
+            }
+            else
+            {
+                FatalErrorIn(args.executable())
+                << "Type " << patchType << " does not exist "
+                << exit(FatalError);
+            }
 
             Info<< zoneSidePatch[zoneI] << '\t' << patchName << nl;
 
@@ -1426,6 +1445,10 @@ int main(int argc, char *argv[])
             forAll(eFaces, i)
             {
                 ePatches[i] = zoneSidePatch[zoneID[eFaces[i]]];
+            }
+            if (eFaces.size() != 2)
+            {
+                nonManifoldEdge[edgeI] = 1;
             }
         }
         else if (eFaces.size() == 2)
