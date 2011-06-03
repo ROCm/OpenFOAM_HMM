@@ -162,7 +162,7 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
         }
     }
 
-    force /= (max(nHits, 1.0)*magSf);
+    force /= (max(nHits, scalar(1.0))*magSf);
     tForce().correctBoundaryConditions();
 
     if (owner_.regionMesh().time().outputTime())

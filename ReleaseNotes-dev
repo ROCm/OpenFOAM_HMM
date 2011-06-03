@@ -220,7 +220,8 @@
     }
     #+END_SRC
     See also [[./doc/changes/dynamicCode.org]]
-
+  + cyclicSlip: cyclic with point motion constrained to tangential plane.
+    Can be used with any mesh movement, e.g. snapping in snappyHexMesh.
 * Utilities
   There have been some utilities added and updated in this release.
 *** *New* utilities
@@ -253,6 +254,8 @@
       - works in parallel
     + =snappyHexMesh=:
       + extrude across multi-processor boundaries
+      + specify type of patches created during meshing
+      + handle cyclics in initial mesh (non parallel meshing only)
       + preserve faceZones shape during layering
       + combining coincident patch faces is now default after snapping
       + *Warning*:

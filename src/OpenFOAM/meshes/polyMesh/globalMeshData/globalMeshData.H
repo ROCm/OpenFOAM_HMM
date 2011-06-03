@@ -202,7 +202,7 @@ class globalMeshData
                 globalPointTransformedBoundaryFacesPtr_;
             mutable autoPtr<mapDistribute> globalPointBoundaryFacesMapPtr_;
 
-            // Coupled point to collocated boundary cells
+            // Coupled point to boundary cells
 
             mutable autoPtr<labelList> boundaryCellsPtr_;
             mutable autoPtr<globalIndex> globalBoundaryCellNumberingPtr_;
@@ -210,6 +210,12 @@ class globalMeshData
             mutable autoPtr<labelListList>
                 globalPointTransformedBoundaryCellsPtr_;
             mutable autoPtr<mapDistribute> globalPointBoundaryCellsMapPtr_;
+
+
+            // Other: coupled point to coupled COLLOCATED points
+            mutable autoPtr<labelListList> globalCoPointSlavesPtr_;
+            mutable autoPtr<mapDistribute> globalCoPointSlavesMapPtr_;
+
 
 
         // Globally shared point addressing
@@ -302,6 +308,18 @@ class globalMeshData
 
             //- Calculate global point to global boundary cell addressing.
             void calcGlobalPointBoundaryCells() const;
+
+        // Other
+
+            // Point to collocated points. Note that not all points on
+            // coupled patches now have a master! (since points on either
+            // side of a cyclic are not connected). So check whether the map
+            // reaches all points and decide who is master, slave and who is
+            // its own master. Maybe store as well?
+
+            void calcGlobalCoPointSlaves() const;
+            const labelListList& globalCoPointSlaves() const;
+            const mapDistribute& globalCoPointSlavesMap() const;
 
 
         //- Disallow default bitwise copy construct
@@ -547,7 +565,7 @@ public:
 
             // Other
 
-                //- Helper for merging mesh point data.
+                //- Helper for merging (collocated!) mesh point data.
                 //  Determines:
                 //  - my unique indices
                 //  - global numbering over all unique indices
@@ -559,11 +577,11 @@ public:
                     labelList& uniquePoints
                 ) const;
 
-                //- Helper for merging patch point data.
+                //- Helper for merging (collocated!) patch point data.
                 //  Takes maps from:
                 //  local points to/from mesh. Determines
-                //  - my unique points. These are mesh points, not patch points
-                //    since the master might not be on the patch.
+                //  - my unique points. These are mesh point indices, not patch
+                //    point indices.
                 //  - global numbering over all unique indices.
                 //  - the global number for all local points.
                 autoPtr<globalIndex> mergePoints
