@@ -409,11 +409,32 @@ Foam::label Foam::scotchDecomp::decomposeOneProc
                 << exit(FatalError);
         }
 
+        scalar velotabSum = sum(cWeights)/minWeights;
+
+        scalar rangeScale(1.0);
+
+        if (velotabSum > scalar(INT_MAX - 1))
+        {
+            // 0.9 factor of safety to avoid floating point round-off in
+            // rangeScale tipping the subsequent sum over the integer limit.
+            rangeScale = 0.9*scalar(INT_MAX - 1)/velotabSum;
+
+            WarningIn
+            (
+                "scotchDecomp::decompose"
+                "(const pointField&, const scalarField&)"
+            )   << "Sum of weights has overflowed integer: " << velotabSum
+                << ", compressing weight scale by a factor of " << rangeScale
+                << endl;
+        }
+
         // Convert to integers.
         velotab.setSize(cWeights.size());
+
         forAll(velotab, i)
         {
-            velotab[i] = int(cWeights[i]/minWeights);
+            velotab[i] =
+                int((cWeights[i]/minWeights - 1)*rangeScale) + 1;
         }
     }
 
