@@ -131,7 +131,6 @@ void thermoBaffle2D::solveEnergy()
     TEqn.solve();
 
     thermo_->correct();
-
 }
 
 
@@ -217,8 +216,7 @@ thermoBaffle2D::~thermoBaffle2D()
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 void thermoBaffle2D::preEvolveRegion()
-{
-}
+{}
 
 
 void thermoBaffle2D::evolveRegion()
@@ -229,30 +227,36 @@ void thermoBaffle2D::evolveRegion()
     }
 }
 
+
 const tmp<volScalarField> thermoBaffle2D::Cp() const
 {
     return thermo_->Cp();
 }
+
 
 const volScalarField& thermoBaffle2D::kappa() const
 {
     return thermo_->kappa();
 }
 
+
 const volScalarField& thermoBaffle2D::rho() const
 {
     return thermo_->rho();
 }
+
 
 const volScalarField& thermoBaffle2D::K() const
 {
     return thermo_->K();
 }
 
+
 const volScalarField& thermoBaffle2D::T() const
 {
     return T_;
 }
+
 
 void thermoBaffle2D::info() const
 {
@@ -274,6 +278,7 @@ void thermoBaffle2D::info() const
             ) << endl;
     }
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

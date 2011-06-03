@@ -74,7 +74,7 @@ thermoBaffleModel::thermoBaffleModel(const word& modelType, const fvMesh& mesh)
     {
         const polyBoundaryMesh& rbm = regionMesh().boundaryMesh();
 
-        // Check if region mesh in oneD
+        // Check if region mesh in 1-D
         label nTotalEdges = 0;
         const label patchi = intCoupledPatchIDs_[0];
         nTotalEdges = 2*nLayers_*rbm[patchi].nInternalEdges();
@@ -113,10 +113,10 @@ thermoBaffleModel::thermoBaffleModel(const word& modelType, const fvMesh& mesh)
                 FatalErrorIn
                 (
                     "thermoBaffleModel::thermoBaffleModel"
-                    "(\n"
-                    "   const word& modelType,"
-                    "   const fvMesh& mesh"
-                    ")\n"
+                    "("
+                    "   const word&,"
+                    "   const fvMesh&"
+                    ")"
                 )   << "\n    patch type '" << pp.type()
                     << "' not type '"
                     << directMappedVariableThicknessWallPolyPatch::typeName
@@ -129,10 +129,10 @@ thermoBaffleModel::thermoBaffleModel(const word& modelType, const fvMesh& mesh)
                 FatalErrorIn
                 (
                     "thermoBaffleModel::thermoBaffleModel"
-                    "(\n"
-                    "   const word& modelType,"
-                    "   const fvMesh& mesh"
-                    ")\n"
+                    "("
+                    "   const word&,"
+                    "   const fvMesh&"
+                    ")"
                 )   << "\n    patch type '" << pp.type()
                     << "' not type '"
                     << directMappedWallPolyPatch::typeName
@@ -161,8 +161,8 @@ thermoBaffleModel::thermoBaffleModel(const word& modelType, const fvMesh& mesh)
                 (
                     "thermoBaffleModel::thermoBaffleModel"
                     "("
-                    "   const word& modelType,"
-                    "   const fvMesh& mesh"
+                    "   const word&,"
+                    "   const fvMesh&"
                     ")"
                 )   << " coupled patches in thermoBaffle are " << nl
                     << " different sizes from list thickness" << nl
@@ -188,7 +188,6 @@ thermoBaffleModel::thermoBaffleModel(const word& modelType, const fvMesh& mesh)
                 }
             }
         }
-
     }
 }
 
@@ -202,8 +201,7 @@ thermoBaffleModel::~thermoBaffleModel()
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 void thermoBaffleModel::preEvolveRegion()
-{
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
