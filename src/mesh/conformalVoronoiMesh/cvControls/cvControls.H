@@ -179,6 +179,9 @@ class cvControls
         //- Switch to control the reporting of detailed timeChecks
         Switch timeChecks_;
 
+        //- Allowed relative load unbalance
+        scalar maxLoadUnbalance_;
+
         //- Number of "spokes" to use to search for secondary alignment
         //  direction
         label alignmentSearchSpokes_;
@@ -355,6 +358,9 @@ public:
 
             //- Return the timeChecks Switch
             inline Switch timeChecks() const;
+
+            //- Return the maxLoadUnbalance
+            inline scalar maxLoadUnbalance() const;
 
             //- Return the number of alignmentSearchSpokes to use
             inline label alignmentSearchSpokes() const;

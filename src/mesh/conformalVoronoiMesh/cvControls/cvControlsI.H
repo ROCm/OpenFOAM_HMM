@@ -91,6 +91,12 @@ inline Foam::Switch Foam::cvControls::timeChecks() const
 }
 
 
+inline Foam::scalar Foam::cvControls::maxLoadUnbalance() const
+{
+    return maxLoadUnbalance_;
+}
+
+
 inline Foam::label Foam::cvControls::alignmentSearchSpokes() const
 {
     return alignmentSearchSpokes_;

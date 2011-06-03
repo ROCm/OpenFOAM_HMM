@@ -208,6 +208,15 @@ Foam::cvControls::cvControls
         motionDict.lookupOrDefault<Switch>("timeChecks", false)
     );
 
+    if (Pstream::parRun())
+    {
+        maxLoadUnbalance_ = readScalar(motionDict.lookup("maxLoadUnbalance"));
+    }
+    else
+    {
+        maxLoadUnbalance_ = -1;
+    }
+
     alignmentSearchSpokes_ = readLabel
     (
         motionDict.lookup("alignmentSearchSpokes")
