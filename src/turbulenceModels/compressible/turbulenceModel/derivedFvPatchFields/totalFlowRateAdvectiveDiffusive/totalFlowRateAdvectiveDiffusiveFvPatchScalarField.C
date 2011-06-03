@@ -29,7 +29,7 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "IOobjectList.H"
-#include "LESModel.H"
+#include "turbulenceModel.H"
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -149,10 +149,10 @@ void Foam::totalFlowRateAdvectiveDiffusiveFvPatchScalarField::updateCoeffs()
 
     const label patchI = patch().index();
 
-    const compressible::LESModel& turbulence =
-        db().lookupObject<compressible::LESModel>
+    const compressible::turbulenceModel& turbulence =
+        db().lookupObject<compressible::turbulenceModel>
         (
-            "LESProperties"
+            "turbulenceModel"
         );
 
     const fvsPatchField<scalar>& phip =
@@ -175,7 +175,7 @@ void Foam::totalFlowRateAdvectiveDiffusiveFvPatchScalarField::updateCoeffs()
 
     if (debug)
     {
-        scalar phi = gSum(-phip*(*this));// + alphap*snGrad());
+        scalar phi = gSum(-phip*(*this));
 
         Info<< patch().boundaryMesh().mesh().name() << ':'
             << patch().name() << ':'

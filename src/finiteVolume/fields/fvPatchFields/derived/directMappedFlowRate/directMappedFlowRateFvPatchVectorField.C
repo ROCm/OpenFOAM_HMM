@@ -23,20 +23,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "flowRateInletVelocityCoupledFvPatchVectorField.H"
+#include "directMappedFlowRateFvPatchVectorField.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "directMappedPatchBase.H"
 #include "mapDistribute.H"
-#include "regionProperties.H"
-#include "basicThermo.H"
 #include "surfaceFields.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::flowRateInletVelocityCoupledFvPatchVectorField::
-flowRateInletVelocityCoupledFvPatchVectorField
+Foam::directMappedFlowRateFvPatchVectorField::
+directMappedFlowRateFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF
@@ -49,10 +47,10 @@ flowRateInletVelocityCoupledFvPatchVectorField
 {}
 
 
-Foam::flowRateInletVelocityCoupledFvPatchVectorField::
-flowRateInletVelocityCoupledFvPatchVectorField
+Foam::directMappedFlowRateFvPatchVectorField::
+directMappedFlowRateFvPatchVectorField
 (
-    const flowRateInletVelocityCoupledFvPatchVectorField& ptf,
+    const directMappedFlowRateFvPatchVectorField& ptf,
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -65,8 +63,8 @@ flowRateInletVelocityCoupledFvPatchVectorField
 {}
 
 
-Foam::flowRateInletVelocityCoupledFvPatchVectorField::
-flowRateInletVelocityCoupledFvPatchVectorField
+Foam::directMappedFlowRateFvPatchVectorField::
+directMappedFlowRateFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
@@ -80,10 +78,10 @@ flowRateInletVelocityCoupledFvPatchVectorField
 {}
 
 
-Foam::flowRateInletVelocityCoupledFvPatchVectorField::
-flowRateInletVelocityCoupledFvPatchVectorField
+Foam::directMappedFlowRateFvPatchVectorField::
+directMappedFlowRateFvPatchVectorField
 (
-    const flowRateInletVelocityCoupledFvPatchVectorField& ptf
+    const directMappedFlowRateFvPatchVectorField& ptf
 )
 :
     fixedValueFvPatchField<vector>(ptf),
@@ -93,10 +91,10 @@ flowRateInletVelocityCoupledFvPatchVectorField
 {}
 
 
-Foam::flowRateInletVelocityCoupledFvPatchVectorField::
-flowRateInletVelocityCoupledFvPatchVectorField
+Foam::directMappedFlowRateFvPatchVectorField::
+directMappedFlowRateFvPatchVectorField
 (
-    const flowRateInletVelocityCoupledFvPatchVectorField& ptf,
+    const directMappedFlowRateFvPatchVectorField& ptf,
     const DimensionedField<vector, volMesh>& iF
 )
 :
@@ -109,7 +107,7 @@ flowRateInletVelocityCoupledFvPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::flowRateInletVelocityCoupledFvPatchVectorField::updateCoeffs()
+void Foam::directMappedFlowRateFvPatchVectorField::updateCoeffs()
 {
     if (updated())
     {
@@ -127,34 +125,18 @@ void Foam::flowRateInletVelocityCoupledFvPatchVectorField::updateCoeffs()
         nbrMesh
     ).boundary()[mpp.samplePolyPatch().index()];
 
-    // Force recalculation of mapping and schedule
-    const mapDistribute& distMap = mpp.map();
-
     scalarList phi =
         nbrPatch.lookupPatchField<surfaceScalarField, scalar>(nbrPhiName_);
 
-    mapDistribute::distribute
-    (
-        Pstream::defaultCommsType,
-        distMap.schedule(),
-        distMap.constructSize(),
-        distMap.subMap(),           // what to send
-        distMap.constructMap(),     // what to receive
-        phi
-    );
+    mpp.map().distribute(phi);
+
 
     const surfaceScalarField& phiName =
         db().lookupObject<surfaceScalarField>(phiName_);
 
-
-    // a simpler way of doing this would be nice
-    //scalar avgU = -flowRate_/gSum(patch().magSf());
     scalarField U = -phi/patch().magSf();
 
     vectorField n = patch().nf();
-
-//    const surfaceScalarField& phi =
-//        db().lookupObject<surfaceScalarField>(phiName_);
 
     if (phiName.dimensions() == dimVelocity*dimArea)
     {
@@ -186,7 +168,7 @@ void Foam::flowRateInletVelocityCoupledFvPatchVectorField::updateCoeffs()
     {
         FatalErrorIn
         (
-            "flowRateInletVelocityCoupledFvPatchVectorField::updateCoeffs()"
+            "directMappedFlowRateFvPatchVectorField::updateCoeffs()"
         )   << "dimensions of " << phiName_ << " are incorrect" << nl
             << "    on patch " << this->patch().name()
             << " of field " << this->dimensionedInternalField().name()
@@ -198,7 +180,7 @@ void Foam::flowRateInletVelocityCoupledFvPatchVectorField::updateCoeffs()
 }
 
 
-void Foam::flowRateInletVelocityCoupledFvPatchVectorField::write
+void Foam::directMappedFlowRateFvPatchVectorField::write
 (
     Ostream& os
 ) const
@@ -218,7 +200,7 @@ namespace Foam
    makePatchTypeField
    (
        fvPatchVectorField,
-       flowRateInletVelocityCoupledFvPatchVectorField
+       directMappedFlowRateFvPatchVectorField
    );
 }
 

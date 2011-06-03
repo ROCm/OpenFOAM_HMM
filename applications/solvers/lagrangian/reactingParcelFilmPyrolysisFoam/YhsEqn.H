@@ -21,7 +21,7 @@ tmp<fv::convectionScheme<scalar> > mvConvection
             volScalarField& Yi = Y[i];
             fvScalarMatrix R = combustion->R(Yi);
 
-            solve
+            fvScalarMatrix YiEqn
             (
                 fvm::ddt(rho, Yi)
               + mvConvection->fvmDiv(phi, Yi)
@@ -29,9 +29,11 @@ tmp<fv::convectionScheme<scalar> > mvConvection
               ==
                 parcels.SYi(i, Yi)
               + surfaceFilm.Srho(i)
-              + R,
-                mesh.solver("Yi")
+              + R
             );
+
+            YiEqn.relax();
+            YiEqn.solve(mesh.solver("Yi"));
 
             Yi.max(0.0);
             Yt += Yi;

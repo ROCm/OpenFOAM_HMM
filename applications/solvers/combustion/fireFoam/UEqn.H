@@ -7,15 +7,18 @@ fvVectorMatrix UEqn
 
 UEqn.relax();
 
-solve
-(
-    UEqn
-  ==
-    fvc::reconstruct
+if (pimple.momentumPredictor())
+{
+    solve
     (
+        UEqn
+    ==
+        fvc::reconstruct
         (
-          - ghf*fvc::snGrad(rho)
-          - fvc::snGrad(p_rgh)
-        )*mesh.magSf()
-    )
-);
+            (
+            - ghf*fvc::snGrad(rho)
+            - fvc::snGrad(p_rgh)
+            )*mesh.magSf()
+        )
+    );
+}
