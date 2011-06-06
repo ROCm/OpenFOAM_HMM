@@ -62,7 +62,6 @@ EXE_LIBS = \
     -lsurfaceFilmModels \
     -lsurfMesh \
     -lsystemCall \
-    -ltabulatedWallFunctions \
     -lthermalPorousZone \
     -lthermophysicalFunctions \
     -ltopoChangerFvMesh \
