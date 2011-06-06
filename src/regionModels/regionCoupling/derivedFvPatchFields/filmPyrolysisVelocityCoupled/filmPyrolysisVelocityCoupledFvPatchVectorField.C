@@ -199,7 +199,7 @@ void Foam::filmPyrolysisVelocityCoupledFvPatchVectorField::updateCoeffs()
             << exit(FatalError);
     }
 
-    const scalarField UAvePyr = -phiPyr/patch().magSf();
+    const scalarField UAvePyr(-phiPyr/patch().magSf());
     const vectorField& nf = patch().nf();
 
     forAll(deltaFilm, i)

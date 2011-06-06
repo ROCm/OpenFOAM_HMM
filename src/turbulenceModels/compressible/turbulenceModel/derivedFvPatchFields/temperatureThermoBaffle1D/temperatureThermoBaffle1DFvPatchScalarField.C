@@ -230,7 +230,7 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
 
         const scalarField Cpw(model.thermo().Cp(Ti, patchI));
 
-        scalarField myh = patch().deltaCoeffs()*alphaw*Cpw;
+        scalarField myh(patch().deltaCoeffs()*alphaw*Cpw);
 
         scalarField alphawCp(alphaw*Cpw);
 
@@ -265,15 +265,16 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
         scalarField nbrTi(nbrField.patchInternalField());
         mpp.map().distribute(nbrTi);
 
-        const scalarField nbrCpw = model.thermo().Cp
+        const scalarField nbrCpw
         (
-            nbrField.patchInternalField(),
-            nbrPatchI
+            model.thermo().Cp(nbrField.patchInternalField(), nbrPatchI)
         );
 
-        scalarField nbrh =
+        scalarField nbrh
+        (
             nbrPatch.deltaCoeffs()*nbrCpw
-           *model.alphaEff()().boundaryField()[nbrPatchI];
+           *model.alphaEff()().boundaryField()[nbrPatchI]
+        );
 
         mpp.map().distribute(nbrh);
 
@@ -290,8 +291,11 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
             KDeltaw[i] = solid_().K((Tp[i] + nbrTp[i])/2.0)/thickness_[i];
         }
 
-        const scalarField q =
-            (Ti() - nbrTi)/(1.0/KDeltaw + 1.0/nbrh + 1.0/myh);
+        const scalarField q
+        (
+            (Ti() - nbrTi)/(1.0/KDeltaw + 1.0/nbrh + 1.0/myh)
+        );
+
 
         forAll(qDot, i)
         {

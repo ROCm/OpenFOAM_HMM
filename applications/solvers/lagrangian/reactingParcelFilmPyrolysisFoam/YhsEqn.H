@@ -13,14 +13,14 @@ tmp<fv::convectionScheme<scalar> > mvConvection
     combustion->correct();
     dQ = combustion->dQ();
     label inertIndex = -1;
-    volScalarField Yt = 0.0*Y[0];
+    volScalarField Yt(0.0*Y[0]);
 
     forAll(Y, i)
     {
         if (Y[i].name() != inertSpecie)
         {
             volScalarField& Yi = Y[i];
-            fvScalarMatrix R = combustion->R(Yi);
+            fvScalarMatrix R(combustion->R(Yi));
 
             fvScalarMatrix YiEqn
             (
@@ -65,8 +65,6 @@ tmp<fv::convectionScheme<scalar> > mvConvection
     hsEqn.solve();
 
     thermo.correct();
-
-    //radiation->correct();
 
     Info<< "min/max(T) = " << min(T).value() << ", " << max(T).value() << endl;
 }

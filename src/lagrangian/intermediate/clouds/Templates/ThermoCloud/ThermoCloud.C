@@ -130,7 +130,6 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
             dimensionedScalar("zero", dimEnergy/dimTemperature, 0.0)
         )
     )
-
 {
     if (this->solution().active())
     {
