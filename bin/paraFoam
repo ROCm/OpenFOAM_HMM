@@ -229,7 +229,8 @@ else
         echo "created temporary '$caseFile'"
     }
 
-    paraview --data="$caseFile" "$@"
+    # For now filter out any ld.so errors. Caused by non-system compiler?
+    paraview --data="$caseFile" "$@" 2>&1 | fgrep -v 'Inconsistency detected by ld.so'
 fi
 
 
