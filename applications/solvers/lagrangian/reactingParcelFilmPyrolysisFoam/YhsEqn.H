@@ -9,6 +9,7 @@ tmp<fv::convectionScheme<scalar> > mvConvection
     )
 );
 {
+    radiation->correct();
     combustion->correct();
     dQ = combustion->dQ();
     label inertIndex = -1;
@@ -65,7 +66,7 @@ tmp<fv::convectionScheme<scalar> > mvConvection
 
     thermo.correct();
 
-    radiation->correct();
+    //radiation->correct();
 
     Info<< "min/max(T) = " << min(T).value() << ", " << max(T).value() << endl;
 }

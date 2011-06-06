@@ -127,7 +127,7 @@ Foam::radiationCoupledBase::radiationCoupledBase
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::scalarField> Foam::radiationCoupledBase::emissivity() const
+Foam::scalarField Foam::radiationCoupledBase::emissivity() const
 {
     switch (method_)
     {
@@ -141,6 +141,9 @@ Foam::tmp<Foam::scalarField> Foam::radiationCoupledBase::emissivity() const
                 );
 
             const polyMesh& nbrMesh = mpp.sampleMesh();
+
+            // Force recalculation of mapping and schedule
+            const mapDistribute& distMap = mpp.map();
 
             const fvPatch& nbrPatch = refCast<const fvMesh>
             (
@@ -160,12 +163,11 @@ Foam::tmp<Foam::scalarField> Foam::radiationCoupledBase::emissivity() const
                     )
                 );
 
-                scalarField& emissivity = temissivity();
-
+                scalarField emissivity(temissivity);
                 // Use direct map mapping to exchange data
-                mpp.map().distribute(emissivity);
-
-                return temissivity;
+                distMap.distribute(emissivity);
+                //Pout << emissivity << endl;
+                return emissivity;
             }
             else
             {

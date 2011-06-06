@@ -30,6 +30,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+#include "mapDistribute.H"
 #include "fvCFD.H"
 #include "turbulenceModel.H"
 #include "basicReactingCloud.H"
@@ -54,9 +55,9 @@ int main(int argc, char *argv[])
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"
     #include "createClouds.H"
-    #include "createRadiationModel.H"
     #include "createSurfaceFilmModel.H"
     #include "createPyrolysisModel.H"
+    #include "createRadiationModel.H"
     #include "initContinuityErrs.H"
     #include "readTimeControls.H"
     #include "compressibleCourantNo.H"
@@ -111,10 +112,8 @@ int main(int argc, char *argv[])
 
             rho = thermo.rho();
         }
-        else
-        {
-            runTime.write();
-        }
+
+        runTime.write();
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

@@ -189,6 +189,8 @@ updateCoeffs()
         dom.blackBody().bLambda(lambdaId).boundaryField()[patchI]
     );
 
+    scalarList temissivity = emissivity();
+
     forAll(Iw, faceI)
     {
         scalar Ir = 0.0;
@@ -215,8 +217,8 @@ updateCoeffs()
             valueFraction()[faceI] = 1.0;
             refValue()[faceI] =
                 (
-                    Ir*(1.0 - emissivity()()[faceI])
-                  + emissivity()()[faceI]*Eb[faceI]
+                    Ir*(1.0 - temissivity[faceI])
+                  + temissivity[faceI]*Eb[faceI]
                 )/pi;
         }
         else
