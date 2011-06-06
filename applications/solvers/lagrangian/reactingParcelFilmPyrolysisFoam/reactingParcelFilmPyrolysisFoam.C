@@ -25,7 +25,7 @@ Application
     reactingParcelFilmPyrolysisFoam
 
 Description
-    Transient PISO solver for compressible, laminar or turbulent flow with
+    Transient PIMPLE solver for Fires and turbulent diffusion flames with
     reacting Lagrangian parcels, surface film and pyrolysis modelling.
 
 \*---------------------------------------------------------------------------*/

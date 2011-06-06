@@ -49,8 +49,10 @@ functions
 {
     difference
     {
+        // Load the library containing the 'coded' functionObject
         functionObjectLibs ("libutilityFunctionObjects.so");
         type coded;
+        // Name of on-the-fly generated functionObject
         redirectType error;
         code
         #{

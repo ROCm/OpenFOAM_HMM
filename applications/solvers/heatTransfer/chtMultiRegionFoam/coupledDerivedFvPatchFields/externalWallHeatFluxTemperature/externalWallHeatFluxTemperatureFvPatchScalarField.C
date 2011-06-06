@@ -202,7 +202,7 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    if(oldMode_ == fixedHeatFlux)
+    if (oldMode_ == fixedHeatFlux)
     {
         this->refGrad() = q_/K(*this);
         this->refValue() = 0.0;

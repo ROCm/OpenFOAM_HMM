@@ -54,8 +54,6 @@ SourceFiles
 #ifndef solidWallHeatFluxTemperatureFvPatchScalarField_H
 #define solidWallHeatFluxTemperatureFvPatchScalarField_H
 
-//#include "fixedGradientFvPatchFields.H"
-
 #include "mixedFvPatchFields.H"
 #include "temperatureCoupledBase.H"
 
