@@ -60,6 +60,7 @@ wmake $makeType randomProcesses
 thermophysicalModels/Allwmake $*
 transportModels/Allwmake $*
 turbulenceModels/Allwmake $*
+wmake $makeType combustionModels
 regionModels/Allwmake $*
 lagrangian/Allwmake $*
 postProcessing/Allwmake $*

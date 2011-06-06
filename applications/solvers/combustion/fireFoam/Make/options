@@ -9,7 +9,7 @@ EXE_INC = \
 
 
 EXE_LIBS = \
-    -lcombustionModels \
+    -lfireFoamCombustionModels \
     -lspecie \
     -lreactionThermophysicalModels \
     -lbasicThermophysicalModels \
