@@ -9,29 +9,43 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      thermophysicalProperties;
+    class       volScalarField;
+    location    "0";
+    object      Ydefault;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType hsPsiMixtureThermo<singleStepReactingMixture<gasThermoPhysics>>;
+dimensions      [0 0 0 0 0 0 0];
 
-inertSpecie N2;
-fuel        CH4;
+internalField   uniform 0;
 
-chemistryReader foamChemistryReader;
-
-foamChemistryFile "$FOAM_CASE/constant/reactions";
-
-foamChemistryThermoFile "$FOAM_CASE/constant/thermo.compressibleGas";
-
-liquids
+boundaryField
 {
-    liquidComponents
-    ();
+    base
+    {
+        type            zeroGradient;
+    }
 
-    H2O             H2O defaultCoeffs;
+    outlet
+    {
+        type            inletOutlet;
+        inletValue      $internalField;
+        value           $internalField;
+    }
+
+    inlet
+    {
+        type            fixedValue;
+        value           uniform 0;
+    }
+
+    sides
+    {
+        type            inletOutlet;
+        inletValue      $internalField;
+        value           $internalField;
+    }
 }
+
 
 // ************************************************************************* //

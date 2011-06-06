@@ -11,27 +11,19 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      thermophysicalProperties;
+    object      chemistryProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType hsPsiMixtureThermo<singleStepReactingMixture<gasThermoPhysics>>;
+psiChemistryModel ODEChemistryModel<gasThermoPhysics>;
 
-inertSpecie N2;
-fuel        CH4;
+chemistry       off;
 
-chemistryReader foamChemistryReader;
+turbulentReaction off;
 
-foamChemistryFile "$FOAM_CASE/constant/reactions";
+chemistrySolver noChemistrySolver;
 
-foamChemistryThermoFile "$FOAM_CASE/constant/thermo.compressibleGas";
+initialChemicalTimeStep 1e-07;
 
-liquids
-{
-    liquidComponents
-    ();
-
-    H2O             H2O defaultCoeffs;
-}
 
 // ************************************************************************* //

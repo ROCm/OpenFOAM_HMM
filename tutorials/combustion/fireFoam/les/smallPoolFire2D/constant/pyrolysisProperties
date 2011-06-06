@@ -1,4 +1,4 @@
-/*--------------------------------*- C++ -*----------------------------------*\
+/*---------------------------------------------------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
@@ -8,42 +8,30 @@
 FoamFile
 {
     version     2.0;
-    format      ascii;
-    class       volScalarField;
-    location    "0";
-    object      fu;
+    format      binary;
+    class       dictionary;
+    location    "constant";
+    object      pyrolysisProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 0 0 0 0 0 0];
+active          false;
 
-internalField   uniform 0;
+pyrolysisModel  none;
 
-boundaryField
+regionName      panelRegion;
+
+reactingOneDimCoeffs
 {
-    outlet
-    {
-        type            inletOutlet;
-        inletValue      uniform 0;
-        value           uniform 0;
-    }
-    sides
-    {
-        type            inletOutlet;
-        inletValue      uniform 0;
-        value           uniform 0;
-    }
-    base
-    {
-        type            zeroGradient;
-    }
-    inlet
-    {
-        type            fixedValue;
-        value           uniform 1.0;
-    }
+    filmCoupled     false;
 
+    radFluxName     Qr;
+
+    minimumDelta    1e-8;
+
+    moveMesh        false;
 }
 
+infoOutput      false;
 
 // ************************************************************************* //
