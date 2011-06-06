@@ -18,11 +18,8 @@ region          wallFilmRegion;
 
 faceZones
 (
-    cube01_side1 cube01_side2 cube01_side3 cube01_side4 cube01_side5 cube01_side6
-    cube02_side1 cube02_side2 cube02_side3 cube02_side4 cube02_side5 cube02_side6
-    cube03_side1 cube03_side2 cube03_side3 cube03_side4 cube03_side5 cube03_side6
-    cube04_side1 cube04_side2 cube04_side3 cube04_side4 cube04_side5 cube04_side6
-    floor
+    cubeFaces
+    floorFaces
 );
 
 oneD            false;
