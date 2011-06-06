@@ -205,6 +205,9 @@ void Foam::SurfaceFilmModel<CloudType>::inject(TrackData& td)
                         tetPtI
                     );
 
+                // Check/set new parcel thermo properties
+                td.cloud().setParcelThermoProperties(*pPtr, 0.0);
+
                 setParcelProperties(*pPtr, j);
 
                 // Check new parcel properties

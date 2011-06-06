@@ -109,11 +109,13 @@ Foam::combustionModels::infinitelyFastChemistry::R(volScalarField& Y) const
 
     const label fNorm = singleMixture_.specieProd()[specieI];
 
-    const volScalarField fres = singleMixture_.fres(specieI);
+    const volScalarField fres(singleMixture_.fres(specieI));
 
-    const volScalarField wSpecie =
+    const volScalarField wSpecie
+    (
         wFuelNorm_*singleMixture_.specieStoichCoeffs()[specieI]
-      / max(fNorm*(Y - fres), scalar(0.001));
+      / max(fNorm*(Y - fres), scalar(0.001))
+    );
 
     return -fNorm*wSpecie*fres + fNorm*fvm::Sp(wSpecie, Y);
 }

@@ -21,6 +21,27 @@ nz=2
 
 
 tmpSetSet='patchify.setSet'
+rm -f patchify.setSet >/dev/null 2>&1
+
+
+initialiseFaceSet()
+{
+    echo "faceSet cubeFaces clear" >> $tmpSetSet;
+}
+
+addToFaceSet()
+{
+    name=$1
+    x1=$2
+    x2=$3
+    y1=$4
+    y2=$5
+    z1=$6
+    z2=$7
+
+    echo "faceSet cubeFaces add boxToFace ($x1 $y1 $z1) ($x2 $y2 $z2)" >> $tmpSetSet
+    echo "   $name: (x1=$x1 y1=$y1 z1=$z1) (x2=$x2 y2=$y2 z2=$z2)"
+}
 
 createSetsAndZone()
 {
@@ -32,12 +53,11 @@ createSetsAndZone()
     z1=$6
     z2=$7
 
-    echo "faceSet ${name} new boxToFace ($x1 $y1 $z1) ($x2 $y2 $z2)" >> $tmpSetSet
-    echo "cellSet ${name}Cells new faceToCell ${name} owner" >> $tmpSetSet
-    echo "faceZoneSet ${name} new setsToFaceZone ${name} ${name}Cells" >> $tmpSetSet
-
+    echo "faceSet ${name}Faces new boxToFace ($x1 $y1 $z1) ($x2 $y2 $z2)" >> $tmpSetSet
     echo "   $name: (x1=$x1 y1=$y1 z1=$z1) (x2=$x2 y2=$y2 z2=$z2)"
 }
+
+initialiseFaceSet
 
 
 # loop over cubes
@@ -63,7 +83,7 @@ for xi in $(seq 1 1 $nx); do
            y2=`echo $y $l $tol | awk '{print $1 + $2 + $3}'`
            z1=`echo $z $l $tol | awk '{print $1 + $2 - $3}'`
            z2=`echo $z $l $tol | awk '{print $1 + $2 + $3}'`
-           createSetsAndZone cube${pad}${n}_side${side} $x1 $x2 $y1 $y2 $z1 $z2
+           addToFaceSet cube${pad}${n}_side${side} $x1 $x2 $y1 $y2 $z1 $z2
 
            #  side 2
            side=2
@@ -73,7 +93,7 @@ for xi in $(seq 1 1 $nx); do
            y2=`echo $y $l $tol | awk '{print $1 + $2 + $3}'`
            z1=`echo $z $tol  | awk '{print $1 - $2}'`
            z2=`echo $z $l $tol | awk '{print $1 + $2 + $3}'`
-           createSetsAndZone cube${pad}${n}_side${side} $x1 $x2 $y1 $y2 $z1 $z2
+           addToFaceSet cube${pad}${n}_side${side} $x1 $x2 $y1 $y2 $z1 $z2
 
            # side 3
            side=3
@@ -83,7 +103,7 @@ for xi in $(seq 1 1 $nx); do
            y2=`echo $y $l $tol | awk '{print $1 + $2 + $3}'`
            z1=`echo $z $tol | awk '{print $1 - $2}'`
            z2=`echo $z $tol | awk '{print $1 + $2}'`
-           createSetsAndZone cube${pad}${n}_side${side} $x1 $x2 $y1 $y2 $z1 $z2
+           addToFaceSet cube${pad}${n}_side${side} $x1 $x2 $y1 $y2 $z1 $z2
 
            # side 4
            side=4
@@ -93,7 +113,7 @@ for xi in $(seq 1 1 $nx); do
            y2=`echo $y $l $tol | awk '{print $1 + $2 + $3}'`
            z1=`echo $z $tol | awk '{print $1 - $2}'`
            z2=`echo $z $l $tol | awk '{print $1 + $2 + $3}'`
-           createSetsAndZone cube${pad}${n}_side${side} $x1 $x2 $y1 $y2 $z1 $z2
+           addToFaceSet cube${pad}${n}_side${side} $x1 $x2 $y1 $y2 $z1 $z2
 
            # side 5
            side=5
@@ -103,7 +123,7 @@ for xi in $(seq 1 1 $nx); do
            y2=`echo $y $l $tol | awk '{print $1 + $2 + $3}'`
            z1=`echo $z $tol | awk '{print $1 - $2}'`
            z2=`echo $z $l $tol | awk '{print $1 + $2 + $3}'`
-           createSetsAndZone cube${pad}${n}_side${side} $x1 $x2 $y1 $y2 $z1 $z2
+           addToFaceSet cube${pad}${n}_side${side} $x1 $x2 $y1 $y2 $z1 $z2
 
            # side 6
            side=6
@@ -113,7 +133,7 @@ for xi in $(seq 1 1 $nx); do
            y2=`echo $y $tol | awk '{print $1 + $2}'`
            z1=`echo $z $tol | awk '{print $1 - $2}'`
            z2=`echo $z $l $tol | awk '{print $1 + $2 + $3}'`
-           createSetsAndZone cube${pad}${n}_side${side} $x1 $x2 $y1 $y2 $z1 $z2
+           addToFaceSet cube${pad}${n}_side${side} $x1 $x2 $y1 $y2 $z1 $z2
 
            let n+=1
 
@@ -126,12 +146,16 @@ for xi in $(seq 1 1 $nx); do
    x=`echo $x $offset | awk '{print $1 + $2}'`
 done
 
+echo "cellSet cubeFacesCells new faceToCell cubeFaces owner" >> $tmpSetSet
+echo "faceZoneSet cubeFaces new setsToFaceZone cubeFaces cubeFacesCells" >> $tmpSetSet
+
 echo "processing floor"
 floorMax=`echo 1 $tol | awk '{print $1 + $2}'`
 createSetsAndZone floor -$tol $floorMax -$tol $floorMax -$tol $tol
+echo "cellSet floorCells new faceToCell floorFaces owner" >> $tmpSetSet
+echo "faceZoneSet floorFaces new setsToFaceZone floorFaces floorCells" >> $tmpSetSet
 
-setSet -batch $tmpSetSet >> log.setSet.patchifyObstacles
-rm -f $tmpSetSet
+setSet -batch $tmpSetSet > log.setSet.patchifyObstacles >/dev/null 2>&1
 
 
 # *************************************************************************

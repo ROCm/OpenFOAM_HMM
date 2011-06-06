@@ -773,7 +773,7 @@ void Foam::autoSnapDriver::determineAllFeatures
     labelList nearPointFeat;
     labelList nearPointIndex;
     {
-        scalarField snapDistSqr = sqr(snapDist);
+        scalarField snapDistSqr(sqr(snapDist));
         features.findNearestEdge
         (
             pp.localPoints(),

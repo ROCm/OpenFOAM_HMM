@@ -134,9 +134,9 @@ void Foam::directMappedFlowRateFvPatchVectorField::updateCoeffs()
     const surfaceScalarField& phiName =
         db().lookupObject<surfaceScalarField>(phiName_);
 
-    scalarField U = -phi/patch().magSf();
+    scalarField U(-phi/patch().magSf());
 
-    vectorField n = patch().nf();
+    vectorField n(patch().nf());
 
     if (phiName.dimensions() == dimVelocity*dimArea)
     {

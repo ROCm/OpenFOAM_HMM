@@ -133,8 +133,8 @@ void reactingOneDim::updatePhiGas()
         const volScalarField& HsiGas = tHsiGas();
         const volScalarField& RRiGas = tRRiGas();
 
-        const surfaceScalarField HsiGasf = fvc::interpolate(HsiGas);
-        const surfaceScalarField RRiGasf = fvc::interpolate(RRiGas);
+        const surfaceScalarField HsiGasf(fvc::interpolate(HsiGas));
+        const surfaceScalarField RRiGasf(fvc::interpolate(RRiGas));
 
         forAll(intCoupledPatchIDs_, i)
         {
@@ -185,7 +185,7 @@ void reactingOneDim::updateMesh(const scalarField& mass0)
         return;
     }
 
-    const scalarField newV = mass0/rho_;
+    const scalarField newV(mass0/rho_);
 
     Info<< "Initial/final volumes = " << gSum(regionMesh().V()) << ", "
         << gSum(newV) << " [m3]" << endl;
@@ -227,7 +227,7 @@ void reactingOneDim::solveSpeciesMass()
         Info<< "reactingOneDim::solveSpeciesMass()" << endl;
     }
 
-    volScalarField Yt = 0.0*Ys_[0];
+    volScalarField Yt(0.0*Ys_[0]);
 
     for (label i=0; i<Ys_.size()-1; i++)
     {
@@ -242,8 +242,10 @@ void reactingOneDim::solveSpeciesMass()
 
         if (moveMesh_)
         {
-            surfaceScalarField phiRhoMesh =
-                fvc::interpolate(Yi*rho_)*regionMesh().phi();
+            surfaceScalarField phiRhoMesh
+            (
+                fvc::interpolate(Yi*rho_)*regionMesh().phi()
+            );
 
             YiEqn -= fvc::div(phiRhoMesh);
         }
@@ -264,11 +266,11 @@ void reactingOneDim::solveEnergy()
         Info<< "reactingOneDim::solveEnergy()" << endl;
     }
 
-    const volScalarField rhoCp = rho_*solidThermo_.Cp();
+    const volScalarField rhoCp(rho_*solidThermo_.Cp());
 
-    const surfaceScalarField phiQr = fvc::interpolate(Qr_)*nMagSf();
+    const surfaceScalarField phiQr(fvc::interpolate(Qr_)*nMagSf());
 
-    const surfaceScalarField phiGas = fvc::interpolate(phiHsGas_);
+    const surfaceScalarField phiGas(fvc::interpolate(phiHsGas_));
 
     fvScalarMatrix TEqn
     (
@@ -282,8 +284,10 @@ void reactingOneDim::solveEnergy()
 
     if (moveMesh_)
     {
-        surfaceScalarField phiMesh =
-            fvc::interpolate(rhoCp*T_)*regionMesh().phi();
+        surfaceScalarField phiMesh
+        (
+            fvc::interpolate(rhoCp*T_)*regionMesh().phi()
+        );
 
         TEqn -= fvc::div(phiMesh);
     }
@@ -456,10 +460,12 @@ scalar reactingOneDim::solidRegionDiffNo() const
     scalar meanDiNum = 0.0;
     if (regionMesh().nInternalFaces() > 0)
     {
-        surfaceScalarField KrhoCpbyDelta =
+        surfaceScalarField KrhoCpbyDelta
+        (
             regionMesh().surfaceInterpolation::deltaCoeffs()
           * fvc::interpolate(K_)
-          / fvc::interpolate(Cp()*rho_);
+          / fvc::interpolate(Cp()*rho_)
+        );
 
         DiNum = max(KrhoCpbyDelta.internalField())*time_.deltaTValue();
 
