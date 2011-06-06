@@ -62,13 +62,13 @@ runParallel()
         shift
         echo "Running $APP_RUN in parallel on $PWD using $nProcs processes"
 
-        if [ "$WM_SCHEDULER" ]
-        then
-            echo "$PWD: $WM_SCHEDULER -np $nProcs" 1>&2
-            $WM_SCHEDULER -np $nProcs "( mpirun -np $nProcs $APP_RUN -parallel $* < /dev/null > log.$APP_NAME 2>&1 )"
-        else
+        #if [ "$WM_SCHEDULER" ]
+        #then
+        #    echo "$PWD: $WM_SCHEDULER -np $nProcs" 1>&2
+        #    $WM_SCHEDULER -np $nProcs "( mpirun -np $nProcs $APP_RUN -parallel $* < /dev/null > log.$APP_NAME 2>&1 )"
+        #else
             ( mpirun -np $nProcs $APP_RUN -parallel $* < /dev/null > log.$APP_NAME 2>&1 )
-        fi
+        #fi
     fi
 }
 
