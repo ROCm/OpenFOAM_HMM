@@ -20,8 +20,6 @@ wmake $makeType SLGThermo
 wmake $makeType basicSolidThermo
 wmake $makeType solidChemistryModel
 
-wmake $makeType combustionModels
-
 wmake $makeType radiationModels
 
 # ----------------------------------------------------------------- end-of-file

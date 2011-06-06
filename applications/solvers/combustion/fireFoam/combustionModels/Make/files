@@ -5,5 +5,5 @@ infinitelyFastChemistry/infinitelyFastChemistry.C
 
 noCombustion/noCombustion.C
 
-LIB = $(FOAM_LIBBIN)/libcombustionModels
+LIB = $(FOAM_LIBBIN)/libfireFoamCombustionModels
 

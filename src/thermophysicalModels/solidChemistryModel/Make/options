@@ -10,6 +10,6 @@ EXE_INC = \
 
 
 LIB_LIBS = \
-    -chemistryModel \
+    -lchemistryModel \
     -lfiniteVolume \
     -lODE
