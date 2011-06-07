@@ -108,8 +108,6 @@ void Foam::singleStepReactingMixture<ThermoType>::calculateMaxProducts()
         Yprod0_[specieI] =  this->speciesData()[specieI].W()/Wm*Xi[i];
     }
 
-    Info << "Max products: " << Yprod0_ << endl;
-
     // Normalize the stoichiometric coeff to mass
     forAll(specieStoichCoeffs_, i)
     {
@@ -208,7 +206,7 @@ Foam::singleStepReactingMixture<ThermoType>::singleStepReactingMixture
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE
+                IOobject::NO_WRITE
             );
 
             fres_.set

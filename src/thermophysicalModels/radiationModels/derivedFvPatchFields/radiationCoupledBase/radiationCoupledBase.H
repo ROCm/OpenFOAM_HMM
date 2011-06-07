@@ -114,7 +114,7 @@ public:
 
 
         //- Calculate corresponding emissivity field
-        tmp<scalarField> emissivity() const;
+        scalarField emissivity() const;
 
         //- Write
         void write(Ostream&) const;

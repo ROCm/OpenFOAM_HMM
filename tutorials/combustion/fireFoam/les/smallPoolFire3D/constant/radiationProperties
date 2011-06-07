@@ -50,7 +50,7 @@ constantAbsorptionEmissionCoeffs
 
 greyMeanAbsorptionEmissionCoeffs
 {
-    lookUpTableFileName     "SpeciesTable";
+    lookUpTableFileName      none;
 
     EhrrCoeff                0.0;
 
