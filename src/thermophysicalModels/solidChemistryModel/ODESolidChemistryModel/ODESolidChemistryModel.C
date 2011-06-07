@@ -139,7 +139,6 @@ ODESolidChemistryModel
 
         // Calculate inital values of Ysi0 = rho*delta*Yi
         Ys0_[fieldI].internalField() =
-            //this->solidThermo().rho()*Ys_[fieldI]*mesh.V();
             this->solidThermo().rho()*max(Ys_[fieldI],scalar(0.001))*mesh.V();
    }
 
@@ -148,15 +147,18 @@ ODESolidChemistryModel
         RRg_.set(fieldI, new scalarField(mesh.nCells(), 0.0));
     }
 
-    dictionary thermoDict =
-        mesh.lookupObject<dictionary>("chemistryProperties");
-
     forAll(gasThermo_, gasI)
     {
+        dictionary thermoDict =
+            mesh.lookupObject<dictionary>
+            (
+                "chemistryProperties"
+            ).subDict(pyrolisisGases_[gasI]);
+
         gasThermo_.set
         (
             gasI,
-            new GasThermo(thermoDict.lookup(pyrolisisGases_[gasI]))
+            new GasThermo(thermoDict)
         );
     }
 
@@ -275,7 +277,6 @@ Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::omega
         label si = R.slhs()[s];
 
         kf *=
-//            pow(c1[si]/max(Ys0_[si][cellI], 0.001), exponent)
             pow(c1[si]/Ys0_[si][cellI], exponent)
            *(Ys0_[si][cellI]);
     }
@@ -312,7 +313,6 @@ void Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::derivatives
         scalar dYidt = dcdt[i]/cTot;
         scalar Yi = c[i]/cTot;
         newCp += Yi*solidThermo_[i].Cp(T);
-        //newhi += dYidt*solidThermo_[i].hf();
         newhi -= dYidt*solidThermo_[i].hf();
     }
 
@@ -465,7 +465,6 @@ Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::Sh() const
             forAll(Sh, cellI)
             {
                 scalar hf = solidThermo_[i].hf();
-                //Sh[cellI] += hf*RRs_[i][cellI];
                 Sh[cellI] -= hf*RRs_[i][cellI];
             }
         }
@@ -695,7 +694,6 @@ Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::solve
                     scalar dYi = dcdt[i]/cTot;
                     scalar Yi = c[i]/cTot;
                     newCp += Yi*solidThermo_[i].Cp(Ti);
-                    //newhi += dYi*solidThermo_[i].hf();
                     newhi -= dYi*solidThermo_[i].hf();
                     invRho += Yi/solidThermo_[i].rho(Ti);
                 }

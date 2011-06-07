@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,15 +25,22 @@ Application
     fireFoam
 
 Description
-    Transient Solver for Fires and turbulent diffusion flames
+    Transient PIMPLE solver for Fires and turbulent diffusion flames with
+    reacting Lagrangian parcels, surface film and pyrolysis modelling.
 
 \*---------------------------------------------------------------------------*/
 
+#include "mapDistribute.H"
 #include "fvCFD.H"
-#include "hsCombustionThermo.H"
 #include "turbulenceModel.H"
-#include "combustionModel.H"
+#include "basicReactingCloud.H"
+#include "surfaceFilmModel.H"
+#include "pyrolysisModel.H"
 #include "radiationModel.H"
+#include "SLGThermo.H"
+#include "hsCombustionThermo.H"
+#include "solidChemistryModel.H"
+#include "combustionModel.H"
 #include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -41,19 +48,25 @@ Description
 int main(int argc, char *argv[])
 {
     #include "setRootCase.H"
+
     #include "createTime.H"
     #include "createMesh.H"
+    #include "readChemistryProperties.H"
     #include "readGravitationalAcceleration.H"
-    #include "initContinuityErrs.H"
     #include "createFields.H"
+    #include "createClouds.H"
+    #include "createSurfaceFilmModel.H"
+    #include "createPyrolysisModel.H"
     #include "createRadiationModel.H"
+    #include "initContinuityErrs.H"
     #include "readTimeControls.H"
     #include "compressibleCourantNo.H"
     #include "setInitialDeltaT.H"
+    #include "readPyrolysisTimeControls.H"
 
     pimpleControl pimple(mesh);
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
@@ -61,46 +74,56 @@ int main(int argc, char *argv[])
     {
         #include "readTimeControls.H"
         #include "compressibleCourantNo.H"
+        #include "solidRegionDiffusionNo.H"
+        #include "setMultiRegionDeltaT.H"
         #include "setDeltaT.H"
 
         runTime++;
+
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        #include "rhoEqn.H"
+        parcels.evolve();
 
-        // --- Pressure-velocity PIMPLE corrector loop
-        for (pimple.start(); pimple.loop(); pimple++)
+        surfaceFilm.evolve();
+
+        pyrolysis->evolve();
+
+        if (solvePrimaryRegion)
         {
-            #include "UEqn.H"
+            #include "rhoEqn.H"
 
-            #include "ftEqn.H"
-            #include "fuhsEqn.H"
-
-            // --- PISO loop
-            for (int corr=0; corr<pimple.nCorr(); corr++)
+            // --- PIMPLE loop
+            for (pimple.start(); pimple.loop(); pimple++)
             {
-                #include "pEqn.H"
+                #include "UEqn.H"
+                #include "YhsEqn.H"
+
+                // --- PISO loop
+                for (int corr=1; corr<=pimple.nCorr(); corr++)
+                {
+                    #include "pEqn.H"
+                }
+
+                if (pimple.turbCorr())
+                {
+                    turbulence->correct();
+                }
             }
 
-            if (pimple.turbCorr())
-            {
-                turbulence->correct();
-            }
+            rho = thermo.rho();
         }
-
-        rho = thermo.rho();
 
         runTime.write();
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
             << nl << endl;
-
     }
 
-    Info<< "End\n" << endl;
+    Info<< "End" << endl;
 
-    return 0;
+    return(0);
 }
+
 
 // ************************************************************************* //

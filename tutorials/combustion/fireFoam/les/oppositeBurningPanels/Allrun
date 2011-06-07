@@ -1,0 +1,32 @@
+#!/bin/sh
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+# Set application name
+application=`getApplication`
+
+runApplication blockMesh
+
+runApplication setSet -batch cRefine.setSet
+runApplication refineMesh -overwrite -dict
+
+rm log.setSet
+runApplication setSet -batch f.setSet
+rm log.setSet
+runApplication setSet -batch fZone.setSet
+
+# create the pyrolysis region.
+runApplication extrudeToRegionMesh -overwrite
+
+
+rm log.setSet
+runApplication setSet -batch fBurner.setSet
+
+runApplication createPatch -overwrite
+
+decomposePar -force > log.decomposePar.log 2>&1
+
+decomposePar -region panelRegion > log.decomposParPanelRegion.log 2>&1
+
+runParallel `getApplication` 6

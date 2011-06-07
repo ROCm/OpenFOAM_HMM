@@ -158,6 +158,9 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
     const fvPatch& nbrPatch =
         refCast<const fvMesh>(nbrMesh).boundary()[samplePatchI];
 
+    // Force recalculation of mapping and schedule
+    const mapDistribute& distMap = mpp.map();
+
     scalarField Tc(patchInternalField());
     scalarField& Tp = *this;
 
@@ -170,13 +173,13 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
 
     // Swap to obtain full local values of neighbour internal field
     scalarField TcNbr(nbrField.patchInternalField());
+    distMap.distribute(TcNbr);
 
-    mpp.map().distribute(TcNbr);
 
     // Swap to obtain full local values of neighbour K*delta
-    scalarField KDeltaNbr(nbrField.K(TcNbr)*nbrPatch.deltaCoeffs());
+    scalarField KDeltaNbr(nbrField.K(nbrField)*nbrPatch.deltaCoeffs());
+    distMap.distribute(KDeltaNbr);
 
-    mpp.map().distribute(KDeltaNbr);
 
     scalarField KDelta(K(*this)*patch().deltaCoeffs());
 
@@ -190,7 +193,7 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
     if (QrNbrName_ != "none")
     {
         QrNbr = nbrPatch.lookupPatchField<volScalarField, scalar>(QrNbrName_);
-        mpp.map().distribute(QrNbr);
+        distMap.distribute(QrNbr);
     }
 
     scalarField alpha(KDeltaNbr - (Qr + QrNbr)/Tp);

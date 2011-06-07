@@ -1,2 +1,0 @@
-scalar DiNum =  pyrolysis->solidRegionDiffNo();
-
