@@ -219,7 +219,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve()
 template<class Type>
 Foam::tmp<Foam::Field<Type> > Foam::fvMatrix<Type>::residual() const
 {
-    tmp<Field<Type> > tres(source_);
+    tmp<Field<Type> > tres(new Field<Type>(source_));
     Field<Type>& res = tres();
 
     addBoundarySource(res);
