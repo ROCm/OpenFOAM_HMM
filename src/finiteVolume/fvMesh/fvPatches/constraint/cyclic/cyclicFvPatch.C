@@ -44,13 +44,10 @@ void Foam::cyclicFvPatch::makeWeights(scalarField& w) const
 {
     const cyclicFvPatch& nbrPatch = neighbFvPatch();
 
-    const scalarField& magFa = magSf();
-    const scalarField& nbrMagFa = nbrPatch.magSf();
-
     const scalarField deltas(nf() & fvPatch::delta());
     const scalarField nbrDeltas(nbrPatch.nf() & nbrPatch.fvPatch::delta());
 
-    forAll(magFa, facei)
+    forAll(deltas, facei)
     {
         scalar di = deltas[facei];
         scalar dni = nbrDeltas[facei];

@@ -189,6 +189,8 @@ updateCoeffs()
 
     ray.Qr().boundaryField()[patchI] += Iw*(n & ray.dAve());
 
+    scalarList temissivity = emissivity();
+
     forAll(Iw, faceI)
     {
         scalar Ir = 0.0;
@@ -217,8 +219,8 @@ updateCoeffs()
             valueFraction()[faceI] = 1.0;
             refValue()[faceI] =
                 (
-                    Ir*(scalar(1.0) - emissivity()()[faceI])
-                  + emissivity()()[faceI]*physicoChemical::sigma.value()
+                    Ir*(scalar(1.0) - temissivity[faceI])
+                  + temissivity[faceI]*physicoChemical::sigma.value()
                   * pow4(Tp[faceI])
                 )/pi;
 
@@ -238,7 +240,6 @@ updateCoeffs()
                 Iw[faceI]*(n[faceI] & ray.dAve());
         }
     }
-
     mixedFvPatchScalarField::updateCoeffs();
 }
 

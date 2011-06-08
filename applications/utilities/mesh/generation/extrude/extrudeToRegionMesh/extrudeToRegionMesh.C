@@ -132,6 +132,7 @@ Usage
 #include "surfaceFields.H"
 #include "syncTools.H"
 #include "cyclicPolyPatch.H"
+#include "wedgePolyPatch.H"
 #include "nonuniformTransformCyclicPolyPatch.H"
 #include "extrudeModel.H"
 
@@ -951,6 +952,12 @@ int main(int argc, char *argv[])
     // Region
     const word shellRegionName(dict.lookup("region"));
     const wordList zoneNames(dict.lookup("faceZones"));
+    wordList zoneShadowNames(0);
+    if (dict.found("faceZonesShadow"))
+    {
+        dict.lookup("faceZonesShadow") >> zoneShadowNames;
+    }
+
     const Switch oneD(dict.lookup("oneD"));
     const Switch adaptMesh(dict.lookup("adaptMesh"));
 
@@ -1007,6 +1014,47 @@ int main(int argc, char *argv[])
         }
     }
 
+    labelList zoneShadowIDs;
+    if (zoneShadowNames.size())
+    {
+        zoneShadowIDs.setSize(zoneShadowNames.size());
+        forAll(zoneShadowNames, i)
+        {
+            zoneShadowIDs[i] = faceZones.findZoneID(zoneShadowNames[i]);
+            if (zoneShadowIDs[i] == -1)
+            {
+                FatalErrorIn(args.executable())
+                    << "Cannot find zone " << zoneShadowNames[i] << endl
+                    << "Valid zones are " << faceZones.names()
+                    << exit(FatalError);
+            }
+        }
+    }
+
+    label nShadowFaces = 0;
+    forAll(zoneShadowIDs, i)
+    {
+        nShadowFaces += faceZones[zoneShadowIDs[i]].size();
+    }
+
+    labelList extrudeMeshShadowFaces(nShadowFaces);
+    boolList zoneShadowFlipMap(nShadowFaces);
+    labelList zoneShadowID(nShadowFaces);
+
+    nShadowFaces = 0;
+    forAll(zoneShadowIDs, i)
+    {
+        const faceZone& fz = faceZones[zoneShadowIDs[i]];
+        forAll(fz, j)
+        {
+            extrudeMeshShadowFaces[nShadowFaces] = fz[j];
+            zoneShadowFlipMap[nShadowFaces] = fz.flipMap()[j];
+            zoneShadowID[nShadowFaces] = zoneShadowIDs[i];
+            nShadowFaces++;
+        }
+    }
+
+
 
     // Collect faces to extrude and per-face information
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1046,6 +1094,19 @@ int main(int argc, char *argv[])
         << " edges:" << extrudePatch.nEdges()
         << nl
         << endl;
+
+     // Check nExtrudeFaces = nShadowFaces
+    if (zoneShadowNames.size())
+    {
+        if (nExtrudeFaces != nShadowFaces)
+        {
+            FatalErrorIn(args.executable())
+                << "Extruded faces " << nExtrudeFaces << endl
+                << "is different from shadow faces. " << nShadowFaces
+                << "This is not permitted " << endl
+                << exit(FatalError);
+        }
+    }
 
 
     // Determine corresponding mesh edges
@@ -1135,7 +1196,7 @@ int main(int argc, char *argv[])
                 << '\t' << patches[interRegionBottomPatch[i]].type()
                 << nl;
         }
-        else
+        else if (zoneShadowNames.size() == 0)
         {
             interRegionTopPatch[i] = addPatch<polyPatch>
             (
@@ -1159,6 +1220,31 @@ int main(int argc, char *argv[])
                 << '\t' << patches[interRegionBottomPatch[i]].type()
                 << nl;
         }
+        else if (zoneShadowNames.size() > 0) //patch using shadow face zones.
+        {
+            interRegionTopPatch[i] = addPatch<directMappedWallPolyPatch>
+            (
+                mesh,
+                zoneShadowNames[i] + "_top"
+            );
+            nCoupled++;
+            Info<< interRegionTopPatch[i]
+                << '\t' << patches[interRegionTopPatch[i]].name()
+                << '\t' << patches[interRegionTopPatch[i]].type()
+                << nl;
+
+            interRegionBottomPatch[i] = addPatch<directMappedWallPolyPatch>
+            (
+                mesh,
+                interName
+            );
+            nCoupled++;
+            Info<< interRegionBottomPatch[i]
+                << '\t' << patches[interRegionBottomPatch[i]].name()
+                << '\t' << patches[interRegionBottomPatch[i]].type()
+                << nl;
+        }
+
     }
     Info<< "Added " << nCoupled << " inter-region patches." << nl
         << endl;
@@ -1216,13 +1302,32 @@ int main(int argc, char *argv[])
         if (oneD)
         {
             // Reuse single empty patch.
-            word patchName = "oneDEmptPatch";
-
-            zoneSidePatch[zoneI] = addPatch<emptyPolyPatch>
-            (
-                mesh,
-                patchName
-            );
+            word patchType = dict.lookup("oneDPolyPatchType");
+            word patchName;
+            if (patchType == "emptyPolyPatch")
+            {
+                patchName = "oneDEmptyPatch";
+                zoneSidePatch[zoneI] = addPatch<emptyPolyPatch>
+                (
+                    mesh,
+                    patchName
+                );
+            }
+            else if (patchType == "wedgePolyPatch")
+            {
+                patchName = "oneDWedgePatch";
+                zoneSidePatch[zoneI] = addPatch<wedgePolyPatch>
+                (
+                    mesh,
+                    patchName
+                );
+            }
+            else
+            {
+                FatalErrorIn(args.executable())
+                << "Type " << patchType << " does not exist "
+                << exit(FatalError);
+            }
 
             Info<< zoneSidePatch[zoneI] << '\t' << patchName << nl;
 
@@ -1335,11 +1440,15 @@ int main(int argc, char *argv[])
 
         if (oneD)
         {
-            nonManifoldEdge[edgeI] = 1;
+            //nonManifoldEdge[edgeI] = 1; //To fill the space
             ePatches.setSize(eFaces.size());
             forAll(eFaces, i)
             {
                 ePatches[i] = zoneSidePatch[zoneID[eFaces[i]]];
+            }
+            if (eFaces.size() != 2)
+            {
+                nonManifoldEdge[edgeI] = 1;
             }
         }
         else if (eFaces.size() == 2)
@@ -1754,47 +1863,90 @@ int main(int argc, char *argv[])
             }
         }
 
-        // Add faces (using same points) to be in top patch
-        forAll(extrudeMeshFaces, zoneFaceI)
+        if (zoneShadowNames.size() > 0) //if there is a top faceZone specified
         {
-            label meshFaceI = extrudeMeshFaces[zoneFaceI];
-            bool flip = zoneFlipMap[zoneFaceI];
-            const face& f = mesh.faces()[meshFaceI];
-
-            if (!flip)
+            forAll(extrudeMeshFaces, zoneFaceI)
             {
-                if (mesh.isInternalFace(meshFaceI))
+                label meshFaceI = extrudeMeshShadowFaces[zoneFaceI];
+                label zoneI = zoneShadowID[zoneFaceI];
+                bool flip = zoneShadowFlipMap[zoneFaceI];
+                const face& f = mesh.faces()[meshFaceI];
+
+                if (!flip)
+                {
+                    meshMod.modifyFace
+                    (
+                        f,                          // modified face
+                        meshFaceI,                  // face being modified
+                        mesh.faceOwner()[meshFaceI],// owner
+                        -1,                         // neighbour
+                        false,                      // face flip
+                        extrudeTopPatchID[zoneFaceI],// patch for face
+                        zoneI,                      // zone for face
+                        flip                        // face flip in zone
+                    );
+                }
+                else if (mesh.isInternalFace(meshFaceI))
+                {
+                    meshMod.modifyFace
+                    (
+                        f.reverseFace(),                // modified face
+                        meshFaceI,                      // label modified face
+                        mesh.faceNeighbour()[meshFaceI],// owner
+                        -1,                             // neighbour
+                        true,                           // face flip
+                        extrudeTopPatchID[zoneFaceI],   // patch for face
+                        zoneI,                          // zone for face
+                        !flip                           // face flip in zone
+                    );
+                }
+            }
+
+        }
+        else
+        {
+            // Add faces (using same points) to be in top patch
+            forAll(extrudeMeshFaces, zoneFaceI)
+            {
+                label meshFaceI = extrudeMeshFaces[zoneFaceI];
+                bool flip = zoneFlipMap[zoneFaceI];
+                const face& f = mesh.faces()[meshFaceI];
+
+                if (!flip)
+                {
+                    if (mesh.isInternalFace(meshFaceI))
+                    {
+                        meshMod.addFace
+                        (
+                            f.reverseFace(),                // modified face
+                            mesh.faceNeighbour()[meshFaceI],// owner
+                            -1,                             // neighbour
+                            -1,                             // master point
+                            -1,                             // master edge
+                            meshFaceI,                      // master face
+                            true,                           // flip flux
+                            extrudeTopPatchID[zoneFaceI],   // patch for face
+                            -1,                             // zone for face
+                            false                           //face flip in zone
+                        );
+                    }
+                }
+                else
                 {
                     meshMod.addFace
                     (
-                        f.reverseFace(),                // modified face
-                        mesh.faceNeighbour()[meshFaceI],// owner
+                        f,                              // face
+                        mesh.faceOwner()[meshFaceI],    // owner
                         -1,                             // neighbour
                         -1,                             // master point
                         -1,                             // master edge
                         meshFaceI,                      // master face
-                        true,                           // flip flux
+                        false,                          // flip flux
                         extrudeTopPatchID[zoneFaceI],   // patch for face
                         -1,                             // zone for face
-                        false                           // face flip in zone
+                        false                           // zone flip
                     );
                 }
-            }
-            else
-            {
-                meshMod.addFace
-                (
-                    f,                              // face
-                    mesh.faceOwner()[meshFaceI],    // owner
-                    -1,                             // neighbour
-                    -1,                             // master point
-                    -1,                             // master edge
-                    meshFaceI,                      // master face
-                    false,                          // flip flux
-                    extrudeTopPatchID[zoneFaceI],   // patch for face
-                    -1,                             // zone for face
-                    false                           // zone flip
-                );
             }
         }
 

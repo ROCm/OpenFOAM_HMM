@@ -52,7 +52,49 @@ void Foam::FacePostProcessing<CloudType>::applyToFace
                 faceI = j;
                 return;
             }
-        }        
+        }
+    }
+}
+
+
+template<class CloudType>
+void Foam::FacePostProcessing<CloudType>::makeLogFile
+(
+    const word& zoneName,
+    const label zoneI,
+    const label nFaces,
+    const scalar totArea
+)
+{
+    // Create the output file if not already created
+    if (log_)
+    {
+        if (debug)
+        {
+            Info<< "Creating output file." << endl;
+        }
+
+        if (Pstream::master())
+        {
+            const fileName logDir = outputDir_/this->owner().time().timeName();
+
+            // Create directory if does not exist
+            mkDir(logDir);
+
+            // Open new file at start up
+            outputFilePtr_.set
+            (
+                zoneI,
+                new OFstream(logDir/(type() + '_' + zoneName + ".dat"))
+            );
+
+            outputFilePtr_[zoneI]
+                << "# Source    : " << type() << nl
+                << "# Face zone : " << zoneName << nl
+                << "# Faces     : " << nFaces << nl
+                << "# Area      : " << totArea << nl
+                << "# Time" << tab << "mass" << tab << "massFlux" << endl;
+        }
     }
 }
 
@@ -61,8 +103,9 @@ template<class CloudType>
 void Foam::FacePostProcessing<CloudType>::write()
 {
     const fvMesh& mesh = this->owner().mesh();
-    const faceZoneMesh& fzm = this->owner().mesh().faceZones();
-    const scalar dt = this->owner().time().deltaTValue();
+    const Time& time = mesh.time();
+    const faceZoneMesh& fzm = mesh.faceZones();
+    const scalar dt = time.deltaTValue();
 
     totalTime_ += dt;
 
@@ -80,8 +123,11 @@ void Foam::FacePostProcessing<CloudType>::write()
     Info<< "particleFaceFlux output:" << nl;
 
     List<scalarField> zoneMassTotal(mass_.size());
-    forAll(zoneMassTotal, zoneI)
+    List<scalarField> zoneMassFlux(massFlux_.size());
+    forAll(faceZoneIDs_, zoneI)
     {
+        const word& zoneName = fzm[faceZoneIDs_[zoneI]].name();
+
         scalarListList allProcMass(Pstream::nProcs());
         allProcMass[procI] = massTotal_[zoneI];
         Pstream::gatherList(allProcMass);
@@ -90,15 +136,8 @@ void Foam::FacePostProcessing<CloudType>::write()
             (
                 allProcMass, accessOp<scalarList>()
             );
+        const scalar sumMassTotal = sum(zoneMassTotal[zoneI]);
 
-        const word& zoneName = fzm[faceZoneIDs_[zoneI]].name();
-        Info<< "    " << zoneName << " total mass      = "
-            << sum(zoneMassTotal[zoneI]) << nl;
-    }
-
-    List<scalarField> zoneMassFlux(massFlux_.size());
-    forAll(zoneMassFlux, zoneI)
-    {
         scalarListList allProcMassFlux(Pstream::nProcs());
         allProcMassFlux[procI] = massFlux_[zoneI];
         Pstream::gatherList(allProcMassFlux);
@@ -107,10 +146,19 @@ void Foam::FacePostProcessing<CloudType>::write()
             (
                 allProcMassFlux, accessOp<scalarList>()
             );
+        const scalar sumMassFlux = sum(zoneMassFlux[zoneI]);
 
-        const word& zoneName = fzm[faceZoneIDs_[zoneI]].name();
-        Info<< "    " << zoneName << " average mass flux = "
-            << sum(zoneMassFlux[zoneI]) << nl;
+        Info<< "    " << zoneName
+            << ": total mass = " << sumMassTotal
+            << "; average mass flux = " << sumMassFlux
+            << nl;
+
+        if (outputFilePtr_.set(zoneI))
+        {
+            OFstream& os = outputFilePtr_[zoneI];
+            os  << time.timeName() << token::TAB << sumMassTotal << token::TAB
+                <<  sumMassFlux<< endl;
+        }
     }
 
     Info<< endl;
@@ -118,23 +166,6 @@ void Foam::FacePostProcessing<CloudType>::write()
 
     if (surfaceFormat_ != "none")
     {
-        fileName outputDir = mesh.time().path();
-
-        if (Pstream::parRun())
-        {
-            // Put in undecomposed case (Note: gives problems for
-            // distributed data running)
-            outputDir =
-                outputDir/".."/"postProcessing"/cloud::prefix/
-                this->owner().name()/mesh.time().timeName();
-        }
-        else
-        {
-            outputDir =
-                outputDir/"postProcessing"/cloud::prefix/
-                this->owner().name()/mesh.time().timeName();
-        }
-
         forAll(faceZoneIDs_, zoneI)
         {
             const faceZone& fZone = fzm[faceZoneIDs_[zoneI]];
@@ -189,7 +220,7 @@ void Foam::FacePostProcessing<CloudType>::write()
 
                 writer->write
                 (
-                    outputDir,
+                    outputDir_/time.timeName(),
                     fZone.name(),
                     allPoints,
                     allFaces,
@@ -200,7 +231,7 @@ void Foam::FacePostProcessing<CloudType>::write()
 
                 writer->write
                 (
-                    outputDir,
+                    outputDir_/time.timeName(),
                     fZone.name(),
                     allPoints,
                     allFaces,
@@ -247,15 +278,34 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
     totalTime_(0.0),
     mass_(),
     massTotal_(),
-    massFlux_()
+    massFlux_(),
+    log_(this->coeffDict().lookup("log")),
+    outputFilePtr_(),
+    outputDir_(owner.mesh().time().path())
 {
     wordList faceZoneNames(this->coeffDict().lookup("faceZones"));
     mass_.setSize(faceZoneNames.size());
     massTotal_.setSize(faceZoneNames.size());
     massFlux_.setSize(faceZoneNames.size());
 
+    outputFilePtr_.setSize(faceZoneNames.size());
+
+    if (Pstream::parRun())
+    {
+        // Put in undecomposed case (Note: gives problems for
+        // distributed data running)
+        outputDir_ =
+            outputDir_/".."/"postProcessing"/cloud::prefix/owner.name();
+    }
+    else
+    {
+        outputDir_ =
+            outputDir_/"postProcessing"/cloud::prefix/owner.name();
+    }
+
     DynamicList<label> zoneIDs;
     const faceZoneMesh& fzm = owner.mesh().faceZones();
+    const surfaceScalarField& magSf = owner.mesh().magSf();
     forAll(faceZoneNames, i)
     {
         const word& zoneName = faceZoneNames[i];
@@ -268,7 +318,16 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
             mass_[i].setSize(nFaces, 0.0);
             massTotal_[i].setSize(nFaces, 0.0);
             massFlux_[i].setSize(nFaces, 0.0);
-            Info<< "        " << zoneName << " faces: " << nFaces;
+            Info<< "        " << zoneName << " faces: " << nFaces << nl;
+
+            scalar totArea = 0.0;
+            forAll(fz, j)
+            {
+                totArea += magSf[fz[j]];
+            }
+            totArea = returnReduce(totArea, sumOp<scalar>());
+
+            makeLogFile(zoneName, i, nFaces, totArea);
         }
     }
 
@@ -291,7 +350,10 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
     totalTime_(pff.totalTime_),
     mass_(pff.mass_),
     massTotal_(pff.massTotal_),
-    massFlux_(pff.massFlux_)
+    massFlux_(pff.massFlux_),
+    log_(pff.log_),
+    outputFilePtr_(),
+    outputDir_(pff.outputDir_)
 {}
 
 

@@ -1,0 +1,7 @@
+thermoBaffleModel/thermoBaffleModel.C
+thermoBaffleModel/thermoBaffleModelNew.C
+thermoBaffle2D/thermoBaffle2D.C
+noThermo/noThermo.C
+
+
+LIB = $(FOAM_LIBBIN)/libthermoBaffleModels

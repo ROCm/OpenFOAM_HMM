@@ -1,0 +1,38 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      extrudeToRegionMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+region          panelRegion;
+
+faceZones       (fRight_zone fLeft_zone);
+
+oneD            true;
+
+oneDPolyPatchType emptyPolyPatch; //wedgePolyPatch
+
+extrudeModel    linearNormal;
+
+nLayers         5;
+
+expansionRatio  1;
+
+adaptMesh       true; // directMapped for both
+
+linearNormalCoeffs
+{
+    thickness       0.01;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

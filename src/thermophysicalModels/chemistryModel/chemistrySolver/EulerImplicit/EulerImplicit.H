@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,18 +42,14 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-template<class CompType, class ThermoType>
-class EulerImplicit;
-
 /*---------------------------------------------------------------------------*\
                        Class EulerImplicit Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CompType, class ThermoType>
+template<class ODEChemistryType>
 class EulerImplicit
 :
-    public chemistrySolver<CompType, ThermoType>
+    public chemistrySolver<ODEChemistryType>
 {
     // Private data
 
@@ -81,8 +77,9 @@ public:
         //- Construct from components
         EulerImplicit
         (
-            ODEChemistryModel<CompType, ThermoType>& model,
-            const word& modelName
+            const fvMesh& mesh,
+            const word& ODEmodelName,
+            const word& thermoType
         );
 
 
@@ -93,7 +90,7 @@ public:
     // Member Functions
 
         //- Update the concentrations and return the chemical time
-        scalar solve
+        virtual scalar solve
         (
             scalarField &c,
             const scalar T,

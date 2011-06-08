@@ -1,21 +1,26 @@
-fvVectorMatrix UEqn
-(
-    fvm::ddt(rho, U)
-  + fvm::div(phi, U)
-  + turbulence->divDevRhoReff(U)
-);
-
-UEqn.relax();
-
-solve
-(
-    UEqn
-  ==
-    fvc::reconstruct
+    fvVectorMatrix UEqn
     (
+        fvm::ddt(rho, U)
+      + fvm::div(phi, U)
+      + turbulence->divDevRhoReff(U)
+     ==
+        parcels.SU(U)
+    );
+
+    UEqn.relax();
+
+    if (pimple.momentumPredictor())
+    {
+        solve
         (
-          - ghf*fvc::snGrad(rho)
-          - fvc::snGrad(p_rgh)
-        )*mesh.magSf()
-    )
-);
+            UEqn
+          ==
+            fvc::reconstruct
+            (
+                (
+                  - ghf*fvc::snGrad(rho)
+                  - fvc::snGrad(p_rgh)
+                )*mesh.magSf()
+            )
+        );
+    }

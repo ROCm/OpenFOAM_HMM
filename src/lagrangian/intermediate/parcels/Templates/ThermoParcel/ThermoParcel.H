@@ -167,7 +167,7 @@ public:
         // Private data
 
             //- Local copy of carrier specific heat field
-            //  Cp not stored on acrrier thermo, but returned as tmp<...>
+            //  Cp not stored on carrier thermo, but returned as tmp<...>
             const volScalarField Cp_;
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,6 +54,7 @@ Foam::fvm::Su
     return tfvm;
 }
 
+
 template<class Type>
 Foam::tmp<Foam::fvMatrix<Type> >
 Foam::fvm::Su
@@ -67,6 +68,7 @@ Foam::fvm::Su
     return tfvm;
 }
 
+
 template<class Type>
 Foam::tmp<Foam::fvMatrix<Type> >
 Foam::fvm::Su
@@ -79,6 +81,7 @@ Foam::fvm::Su
     tsu.clear();
     return tfvm;
 }
+
 
 template<class Type>
 Foam::zeroField
@@ -117,6 +120,7 @@ Foam::fvm::Sp
     return tfvm;
 }
 
+
 template<class Type>
 Foam::tmp<Foam::fvMatrix<Type> >
 Foam::fvm::Sp
@@ -129,6 +133,7 @@ Foam::fvm::Sp
     tsp.clear();
     return tfvm;
 }
+
 
 template<class Type>
 Foam::tmp<Foam::fvMatrix<Type> >
@@ -168,6 +173,7 @@ Foam::fvm::Sp
 
     return tfvm;
 }
+
 
 template<class Type>
 Foam::zeroField
@@ -209,6 +215,7 @@ Foam::fvm::SuSp
     return tfvm;
 }
 
+
 template<class Type>
 Foam::tmp<Foam::fvMatrix<Type> >
 Foam::fvm::SuSp
@@ -222,6 +229,7 @@ Foam::fvm::SuSp
     return tfvm;
 }
 
+
 template<class Type>
 Foam::tmp<Foam::fvMatrix<Type> >
 Foam::fvm::SuSp
@@ -234,6 +242,7 @@ Foam::fvm::SuSp
     tsusp.clear();
     return tfvm;
 }
+
 
 template<class Type>
 Foam::zeroField

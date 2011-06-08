@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,28 +28,29 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class CompType, class ThermoType>
-Foam::noChemistrySolver<CompType, ThermoType>::noChemistrySolver
+template<class ODEChemistryType>
+Foam::noChemistrySolver<ODEChemistryType>::noChemistrySolver
 (
-    ODEChemistryModel<CompType, ThermoType>& model,
-    const word& modelName
+    const fvMesh& mesh,
+    const word& ODEModelName,
+    const word& thermoType
 )
 :
-    chemistrySolver<CompType, ThermoType>(model, modelName)
+    chemistrySolver<ODEChemistryType>(mesh, ODEModelName, thermoType)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class CompType, class ThermoType>
-Foam::noChemistrySolver<CompType, ThermoType>::~noChemistrySolver()
+template<class ODEChemistryType>
+Foam::noChemistrySolver<ODEChemistryType>::~noChemistrySolver()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class CompType, class ThermoType>
-Foam::scalar Foam::noChemistrySolver<CompType, ThermoType>::solve
+template<class ODEChemistryType>
+Foam::scalar Foam::noChemistrySolver<ODEChemistryType>::solve
 (
     scalarField&,
     const scalar,

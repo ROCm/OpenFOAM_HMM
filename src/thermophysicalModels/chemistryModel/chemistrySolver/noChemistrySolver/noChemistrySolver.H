@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,18 +43,14 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-template<class CompType, class ThermoType>
-class noChemistrySolver;
-
 /*---------------------------------------------------------------------------*\
-                      Class noChemistrySolver Declaration
+                     Class noChemistrySolver Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CompType, class ThermoType>
+template<class ODEChemistryType>
 class noChemistrySolver
 :
-    public chemistrySolver<CompType, ThermoType>
+    public chemistrySolver<ODEChemistryType>
 {
 
 public:
@@ -69,8 +65,9 @@ public:
         //- Construct from components
         noChemistrySolver
         (
-            ODEChemistryModel<CompType, ThermoType>& model,
-            const word& modelName
+            const fvMesh& mesh,
+            const word& ODEModelName,
+            const word& thermoType
         );
 
 
@@ -81,7 +78,7 @@ public:
     // Member Functions
 
         //- Update the concentrations and return the chemical time
-        scalar solve
+        virtual scalar solve
         (
             scalarField &c,
             const scalar T,

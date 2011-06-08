@@ -1,7 +1,7 @@
 rho = thermo.rho();
 
 volScalarField rAU(1.0/UEqn.A());
-surfaceScalarField rhorAUf("(rho*(1|A(U)))", fvc::interpolate(rho*rAU));
+surfaceScalarField rhorAUf(rAU.name() + 'f', fvc::interpolate(rho*rAU));
 U = rAU*UEqn.H();
 
 surfaceScalarField phiU
@@ -17,13 +17,15 @@ phi = phiU - rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf();
 
 for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
 {
-    surfaceScalarField rhorAUf(fvc::interpolate(rho*rAU));
-
     fvScalarMatrix p_rghEqn
     (
-        fvm::ddt(psi, p_rgh) + fvc::ddt(psi, rho)*gh
+        fvc::ddt(psi, rho)*gh
       + fvc::div(phi)
+      + fvm::ddt(psi, p_rgh)
       - fvm::laplacian(rhorAUf, p_rgh)
+     ==
+        parcels.Srho()
+      + surfaceFilm.Srho()
     );
 
     p_rghEqn.solve

@@ -648,7 +648,7 @@ Foam::scalarField Foam::autoSnapDriver::calcSnapDistance
         -GREAT              // null value
     );
 
-    return snapParams.snapTol()*maxEdgeLen;
+    return scalarField(snapParams.snapTol()*maxEdgeLen);
 }
 
 

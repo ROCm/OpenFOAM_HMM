@@ -37,6 +37,7 @@ method          scotch;
 // method          metis;
 // method          manual;
 // method          multiLevel;
+// method          structured;  // does 2D decomposition of structured mesh
 
 multiLevelCoeffs
 {
@@ -106,6 +107,15 @@ manualCoeffs
 {
     dataFile    "decompositionData";
 }
+
+
+structuredCoeffs
+{
+    // Patches to do 2D decomposition on. Structured mesh only; cells have
+    // to be in 'columns' on top of patches.
+    patches     (bottomPatch);
+}
+
 
 
 //// Is the case distributed

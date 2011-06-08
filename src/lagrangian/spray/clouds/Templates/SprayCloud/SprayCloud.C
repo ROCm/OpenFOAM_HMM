@@ -345,7 +345,7 @@ void Foam::SprayCloud<CloudType>::motion(TrackData& td)
             parcelType& p = iter();
             if (p.mass() < VSMALL)
             {
-                deleteParticle(p);
+                this->deleteParticle(p);
             }
         }
     }

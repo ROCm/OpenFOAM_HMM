@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -219,7 +219,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve()
 template<class Type>
 Foam::tmp<Foam::Field<Type> > Foam::fvMatrix<Type>::residual() const
 {
-    tmp<Field<Type> > tres(source_);
+    tmp<Field<Type> > tres(new Field<Type>(source_));
     Field<Type>& res = tres();
 
     addBoundarySource(res);

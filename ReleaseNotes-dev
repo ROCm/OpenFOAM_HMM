@@ -105,7 +105,15 @@
     + Additional wall functions for primary region momentum and temperature
       taking film into account
     + Parallel aware
-*** *New* ptscotch decomposition method
+*** *New* ptscotch decomposition method.
+*** *New* multiLevel decomposition method.
+    Decomposes in levels, e.g. first decompose onto number of nodes and
+    then onto number of cores per node. This will minimise off-node
+    communication. Each level can use any of the other decomposition methods
+*** *New* structured decomposition method.
+    Does a 2D decomposition of a mesh. Valid only for an 'extruded' mesh, i.e.
+    columns of cells originating from a patch. Bases decomposition on this
+    patch and assigns the cells according to the patch decomposition.
 *** *Updated* scotch decomposition method to run in parallel by doing
     decomposition on the master. Unfortunately scotch and ptscotch cannot
     be linked in to the same executable.
@@ -212,7 +220,8 @@
     }
     #+END_SRC
     See also [[./doc/changes/dynamicCode.org]]
-
+  + cyclicSlip: cyclic with point motion constrained to tangential plane.
+    Can be used with any mesh movement, e.g. snapping in snappyHexMesh.
 * Utilities
   There have been some utilities added and updated in this release.
 *** *New* utilities
@@ -229,7 +238,8 @@
         (nonuniformTransform)cyclic <zoneA>_<zoneB>
       + extrudes into master direction (i.e. away from the owner cell
         if flipMap is false)
-    + =topoSet=: replacement of cellSet,faceSet,pointSet utilities.
+    + =topoSet=: replacement of cellSet,faceSet,pointSet utilities. Multiple
+      commands operating on different sets.
       Comparable to a dictionary driven =setSet= utility.
 *** Updated utilities
     + =setFields=: optionally use faceSets to set patch values (see
@@ -244,6 +254,8 @@
       - works in parallel
     + =snappyHexMesh=:
       + extrude across multi-processor boundaries
+      + specify type of patches created during meshing
+      + handle cyclics in initial mesh (non parallel meshing only)
       + preserve faceZones shape during layering
       + combining coincident patch faces is now default after snapping
       + *Warning*:

@@ -45,16 +45,16 @@ solvers
     };
 
 
-    "(U|ft|fu|k|hs)"
+    "(U|Yi|k|hs)"
     {
-        solver          smoothSolver;
-        smoother        GaussSeidel;
+        solver          PBiCG;
+        preconditioner  DILU;
         tolerance       1e-7;
         relTol          0.1;
         nSweeps         1;
     };
 
-    "(U|ft|fu|k|hs)Final"
+    "(U|Yi|k|hs)Final"
     {
         $U;
         tolerance       1e-8;
@@ -85,10 +85,16 @@ solvers
 
 PIMPLE
 {
-    momentumPredictor no;
+    momentumPredictor yes;
     nOuterCorrectors  1;
     nCorrectors       1;
     nNonOrthogonalCorrectors 0;
+}
+
+relaxationFactors
+{
+    "(U|k).*"                   1;
+    "(C3H8|O2|H2O|CO2|hs).*"    0.9;
 }
 
 // ************************************************************************* //

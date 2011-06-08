@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,31 +38,24 @@ SourceFiles
 #include "ODEChemistryModel.H"
 #include "IOdictionary.H"
 #include "scalarField.H"
-#include "autoPtr.H"
-#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
-template<class CompType, class ThermoType>
-class chemistrySolver;
-
 /*---------------------------------------------------------------------------*\
                       Class chemistrySolver Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CompType, class ThermoType>
+template<class ODEChemistryType>
 class chemistrySolver
+:
+    public ODEChemistryType
 {
 protected:
 
     // Protected data
-
-        //- Reference to the chemistry model
-        ODEChemistryModel<CompType, ThermoType>& model_;
 
         //- Name of the chemistry solver
         const word name_;
@@ -74,37 +67,15 @@ public:
         TypeName("chemistrySolver");
 
 
-        // Declare runtime constructor selection table
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            chemistrySolver,
-            dictionary,
-            (
-                ODEChemistryModel<CompType, ThermoType>& model,
-                const word& modelName
-            ),
-            (model, modelName)
-        );
-
-
     // Constructors
 
         //- Construct from components
         chemistrySolver
         (
-            ODEChemistryModel<CompType, ThermoType>& model,
-            const word& modelName
+            const fvMesh& mesh,
+            const word& ODEModelName,
+            const word& thermoType
         );
-
-
-    //- Selector
-    static autoPtr<chemistrySolver> New
-    (
-        ODEChemistryModel<CompType, ThermoType>& model,
-        const word& compTypeName,
-        const word& thermoTypeName
-    );
 
 
     //- Destructor
@@ -131,46 +102,60 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeChemistrySolver(Comp, Thermo)                                     \
-                                                                              \
-    typedef chemistrySolver<Comp, Thermo>                                     \
-        chemistrySolver##Comp##Thermo;                                        \
+#define makeChemistrySolver(ODEChem)                                          \
                                                                               \
     defineTemplateTypeNameAndDebugWithName                                    \
     (                                                                         \
-        chemistrySolver##Comp##Thermo,                                        \
-        "chemistryModel<"#Comp","#Thermo">",                                  \
+        chemistrySolver<ODEChem>,                                             \
+        "chemistrySolver<"#ODEChem">",                                        \
         0                                                                     \
-    );                                                                        \
-                                                                              \
-    defineTemplateRunTimeSelectionTable                                       \
-    (                                                                         \
-        chemistrySolver##Comp##Thermo,                                        \
-        dictionary                                                            \
     );
 
 
-#define makeChemistrySolverType(SS, Comp, Thermo)                             \
+
+#define makeChemistrySolverType(SS, ODEChem, Comp, Thermo)                    \
                                                                               \
-    typedef SS<Comp, Thermo> SS##Comp##Thermo;                                \
+    typedef SS<ODEChem<Comp, Thermo> > SS##ODEChem##Comp##Thermo;             \
                                                                               \
     defineTemplateTypeNameAndDebugWithName                                    \
     (                                                                         \
-        SS##Comp##Thermo,                                                     \
-        #SS"<"#Comp","#Thermo">",                                             \
+        SS##ODEChem##Comp##Thermo,                                            \
+        #SS"<"#ODEChem"<"#Comp","#Thermo">>",                                 \
         0                                                                     \
     );                                                                        \
                                                                               \
-    chemistrySolver<Comp, Thermo>::                                           \
-        adddictionaryConstructorToTable<SS<Comp, Thermo> >                    \
-            add##SS##Comp##Thermo##ConstructorToTable_;
+    addToRunTimeSelectionTable                                                \
+    (                                                                         \
+        Comp,                                                                 \
+        SS##ODEChem##Comp##Thermo,                                            \
+        fvMesh                                                                \
+    );
+
+
+#define makeSolidChemistrySolverType(SS, ODEChem, Comp, SThermo, GThermo)     \
+                                                                              \
+    typedef SS<ODEChem<Comp, SThermo, GThermo> >                              \
+        SS##ODEChem##Comp##SThermo##GThermo;                                  \
+                                                                              \
+    defineTemplateTypeNameAndDebugWithName                                    \
+    (                                                                         \
+        SS##ODEChem##Comp##SThermo##GThermo,                                  \
+        #SS"<"#ODEChem"<"#Comp","#SThermo","#GThermo">>",                     \
+        0                                                                     \
+    );                                                                        \
+                                                                              \
+    addToRunTimeSelectionTable                                                \
+    (                                                                         \
+        Comp,                                                                 \
+        SS##ODEChem##Comp##SThermo##GThermo,                                  \
+        fvMesh                                                                \
+    );
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
 #   include "chemistrySolver.C"
-#   include "chemistrySolverNew.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

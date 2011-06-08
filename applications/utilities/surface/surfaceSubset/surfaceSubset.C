@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -249,7 +249,11 @@ int main(int argc, char *argv[])
         // search engine
         indexedOctree<treeDataTriSurface> selectTree
         (
-            treeDataTriSurface(selectSurf),
+            treeDataTriSurface
+            (
+                selectSurf,
+                indexedOctree<treeDataTriSurface>::perturbTol()
+            ),
             bb.extend(rndGen, 1E-4),    // slightly randomize bb
             8,      // maxLevel
             10,     // leafsize

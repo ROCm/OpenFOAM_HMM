@@ -2,6 +2,7 @@ decomposePar.C
 domainDecomposition.C
 domainDecompositionMesh.C
 domainDecompositionDistribute.C
+dimFieldDecomposer.C
 fvFieldDecomposer.C
 pointFieldDecomposer.C
 lagrangianFieldDecomposer.C

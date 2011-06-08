@@ -45,6 +45,7 @@ License
 #include "slipPointPatchFields.H"
 #include "fixedValuePointPatchFields.H"
 #include "calculatedPointPatchFields.H"
+#include "cyclicSlipPointPatchFields.H"
 #include "processorPointPatch.H"
 #include "globalIndex.H"
 #include "meshTools.H"
@@ -1457,6 +1458,10 @@ Foam::tmp<Foam::pointVectorField> Foam::meshRefinement::makeDisplacementField
         if (isA<processorPointPatch>(pointPatches[patchI]))
         {
             patchFieldTypes[patchI] = calculatedPointPatchVectorField::typeName;
+        }
+        else if (isA<cyclicPointPatch>(pointPatches[patchI]))
+        {
+            patchFieldTypes[patchI] = cyclicSlipPointPatchVectorField::typeName;
         }
     }
 
