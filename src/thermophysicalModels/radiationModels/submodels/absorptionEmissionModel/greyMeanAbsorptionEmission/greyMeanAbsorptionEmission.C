@@ -206,7 +206,7 @@ Foam::radiation::greyMeanAbsorptionEmission::aCont(const label bandI) const
         (
             IOobject
             (
-                "a",
+                "aCont" + name(bandI),
                 mesh().time().timeName(),
                 mesh(),
                 IOobject::NO_READ,
@@ -280,7 +280,7 @@ Foam::radiation::greyMeanAbsorptionEmission::eCont(const label bandI) const
         (
             IOobject
             (
-                "e",
+                "eCont" + name(bandI),
                 mesh().time().timeName(),
                 mesh(),
                 IOobject::NO_READ,
@@ -304,7 +304,7 @@ Foam::radiation::greyMeanAbsorptionEmission::ECont(const label bandI) const
         (
             IOobject
             (
-                "E",
+                "ECont" + name(bandI),
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
