@@ -37,7 +37,6 @@ do
         ;;
 
     biconic25-55Run35)
-        wmake datToFoam
         runApplication datToFoam grid256.dat
 
         CONST="constant"
