@@ -27,6 +27,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "unitConversion.H"
 #include "zeroGradientFvPatchFields.H"
+#include "basicMultiComponentMixture.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -59,17 +60,24 @@ Foam::radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission
     speciesNames_(0),
     specieIndex_(0),
     lookUpTablePtr_(),
-    thermo_
-    (
-        mesh,
-        const_cast<basicThermo&>
-        (
-            mesh.lookupObject<basicThermo>("thermophysicalProperties")
-        )
-    ),
+    thermo_(mesh.lookupObject<basicThermo>("thermophysicalProperties")),
     EhrrCoeff_(readScalar(coeffsDict_.lookup("EhrrCoeff"))),
     Yj_(nSpecies_)
 {
+    if (!isA<basicMultiComponentMixture>(thermo_))
+    {
+        FatalErrorIn
+        (
+            "radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission"
+            "("
+                "const dictionary&, "
+                "const fvMesh&"
+            ")"
+        )   << "Model requires a multi-component thermo package"
+            << abort(FatalError);
+    }
+
+
     label nFunc = 0;
     const dictionary& functionDicts = dict.subDict(typeName + "Coeffs");
 
@@ -195,10 +203,12 @@ Foam::radiation::greyMeanAbsorptionEmission::~greyMeanAbsorptionEmission()
 Foam::tmp<Foam::volScalarField>
 Foam::radiation::greyMeanAbsorptionEmission::aCont(const label bandI) const
 {
-    const volScalarField& T = thermo_.thermo().T();
-    const volScalarField& p = thermo_.thermo().p();
+    const basicMultiComponentMixture& mixture =
+        dynamic_cast<const basicMultiComponentMixture&>(thermo_);
 
-    const basicMultiComponentMixture& mixture = thermo_.carrier();
+    const volScalarField& T = thermo_.T();
+    const volScalarField& p = thermo_.p();
+
 
     tmp<volScalarField> ta
     (
@@ -206,7 +216,7 @@ Foam::radiation::greyMeanAbsorptionEmission::aCont(const label bandI) const
         (
             IOobject
             (
-                "a",
+                "aCont" + name(bandI),
                 mesh().time().timeName(),
                 mesh(),
                 IOobject::NO_READ,
@@ -280,7 +290,7 @@ Foam::radiation::greyMeanAbsorptionEmission::eCont(const label bandI) const
         (
             IOobject
             (
-                "e",
+                "eCont" + name(bandI),
                 mesh().time().timeName(),
                 mesh(),
                 IOobject::NO_READ,
@@ -304,7 +314,7 @@ Foam::radiation::greyMeanAbsorptionEmission::ECont(const label bandI) const
         (
             IOobject
             (
-                "E",
+                "ECont" + name(bandI),
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
