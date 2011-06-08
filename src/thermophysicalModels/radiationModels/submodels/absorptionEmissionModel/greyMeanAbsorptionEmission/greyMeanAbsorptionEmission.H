@@ -89,8 +89,7 @@ SourceFiles
 #include "absorptionEmissionModel.H"
 #include "HashTable.H"
 #include "absorptionCoeffs.H"
-#include "SLGThermo.H"
-//#include "basicThermo.H"
+#include "basicThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -135,7 +134,7 @@ private:
         mutable autoPtr<interpolationLookUpTable<scalar> > lookUpTablePtr_;
 
         //- SLG thermo package
-        SLGThermo thermo_;
+        const basicThermo& thermo_;
 
         //- Emission constant coefficient
         const scalar EhrrCoeff_;
