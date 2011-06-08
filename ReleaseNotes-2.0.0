@@ -1,6 +1,6 @@
 #                            -*- mode: org; -*-
 #
-#+TITLE:  OpenFOAM release notes for version dev
+#+TITLE:  OpenFOAM release notes for version 2.0.0
 #+AUTHOR:                      OpenCFD Ltd.
 #+DATE:                            TBA
 #+LINK:                  http://www.openfoam.com
@@ -8,7 +8,7 @@
 # Copyright (c) 2011 OpenCFD Ltd.
 
 * Overview
-  OpenFOAM-dev is the latest major release of OpenFOAM including many new
+  OpenFOAM-2.0.0 is the latest major release of OpenFOAM including many new
   developments a number of bug-fixes.  This release passes our standard tests
   and the tutorials have been broadly checked.  Please report any bugs by
   following the link: http://www.openfoam.com/bugs.
@@ -25,8 +25,8 @@
   To use the source version from the SourceForge repository, we provide a source
   pack of third-party packages that can be compiled on the user's system.  This
   does not include =gcc=, since the system installed version is typically
-  sufficient, but includes =paraview-3.8.0=, =openmpi-1.4.1=, =scotch_5.1=,
-  =metis-5.0pre2=, =ParMetis-3.1= and =ParMGridGen-1.0=.
+  sufficient, but includes =paraview-3.10.1=, =openmpi-1.5.3=, and
+  =scotch_5.1.11=
 
 * Library developments
 
