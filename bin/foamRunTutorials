@@ -38,29 +38,29 @@
 # normally use "make"
 make="make"
 
-# set WM_NCOMPPROCS automatically when both WM_HOSTS and WM_SCHEDULER are set
-if [ -z "$WM_NCOMPPROCS" -a -n "$WM_HOSTS" -a -n "$WM_SCHEDULER" ]
-then
-    WM_NCOMPPROCS=$(wmakeScheduler -count)
-    [ $? -eq 0 ] || unset WM_NCOMPPROCS
-fi
-
-if [ "$WM_NCOMPPROCS" ]
-then
-    if [ "$WM_NCOMPPROCS" -gt 1 -a ! "$MAKEFLAGS" ]
-    then
-        lockDir=$HOME/.$WM_PROJECT/.wmake
-
-        if [ -d $lockDir ]
-        then
-            rm -f $lockDir/*
-        else
-            mkdir -p $lockDir
-        fi
-
-        make="make --no-print-directory -j "$WM_NCOMPPROCS
-    fi
-fi
+## set WM_NCOMPPROCS automatically when both WM_HOSTS and WM_SCHEDULER are set
+#if [ -z "$WM_NCOMPPROCS" -a -n "$WM_HOSTS" -a -n "$WM_SCHEDULER" ]
+#then
+#    WM_NCOMPPROCS=$(wmakeScheduler -count)
+#    [ $? -eq 0 ] || unset WM_NCOMPPROCS
+#fi
+#
+#if [ "$WM_NCOMPPROCS" ]
+#then
+#    if [ "$WM_NCOMPPROCS" -gt 1 -a ! "$MAKEFLAGS" ]
+#    then
+#        lockDir=$HOME/.$WM_PROJECT/.wmake
+#
+#        if [ -d $lockDir ]
+#        then
+#            rm -f $lockDir/*
+#        else
+#            mkdir -p $lockDir
+#        fi
+#
+#        make="make --no-print-directory -j "$WM_NCOMPPROCS
+#    fi
+#fi
 
 
 
@@ -103,7 +103,8 @@ else
     #    fi
     #done
     FOAM_TARGETS=$(for d in *; do [ -d "$d" ] && echo "$d"; done | xargs)
-    $make -k -f $WM_PROJECT_DIR/bin/tools/MakefileDirs FOAM_TARGETS="$FOAM_TARGETS" FOAM_APP="$WM_SCHEDULER $thisScript"
+    #$make -k -f $WM_PROJECT_DIR/bin/tools/MakefileDirs FOAM_TARGETS="$FOAM_TARGETS" FOAM_APP="$WM_SCHEDULER $thisScript"
+    $make -k -f $WM_PROJECT_DIR/bin/tools/MakefileDirs FOAM_TARGETS="$FOAM_TARGETS" FOAM_APP="$thisScript"
 fi
 
 #------------------------------------------------------------------------------
