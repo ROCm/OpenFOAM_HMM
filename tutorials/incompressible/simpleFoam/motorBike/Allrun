@@ -7,5 +7,5 @@ cp -r 0.org 0 > /dev/null 2>&1
 runApplication blockMesh
 runApplication snappyHexMesh -overwrite
 
-runApplication potentialFoam -writep
+runApplication potentialFoam -noFunctionObjects -writep
 runApplication `getApplication`
