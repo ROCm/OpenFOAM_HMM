@@ -64,6 +64,12 @@ Foam::argList::initValidTables::initValidTables()
     );
     validParOptions.set("roots", "(dir1 .. dirN)");
 
+    argList::addBoolOption
+    (
+        "noFunctionObjects",
+        "do not execute functionObjects"
+    );
+
     Pstream::addValidParOptions(validParOptions);
 }
 

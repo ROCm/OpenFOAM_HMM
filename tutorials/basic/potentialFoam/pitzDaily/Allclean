@@ -4,22 +4,8 @@ cd ${0%/*} || exit 1    # run from this directory
 # Source tutorial clean functions
 . $WM_PROJECT_DIR/bin/tools/CleanFunctions
 
-(
-    cd cylinder || exit
+rm -rf 0 > /dev/null 2>&1
 
-    cleanCase
-    rm -rf 0 > /dev/null 2>&1
-    cp -r 0.org 0
-    wclean analyticalCylinder
-)
-
-
-(
-    cd pitzDaily || exit
-
-    cleanCase
-    rm -rf 0 > /dev/null 2>&1
-    cp -r 0.org 0
-)
+cleanCase
 
 # ----------------------------------------------------------------- end-of-file

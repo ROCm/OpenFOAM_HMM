@@ -88,7 +88,7 @@ case "$ParaView_VERSION" in
 esac
 export ParaView_VERSION ParaView_MAJOR
 
-paraviewInstDir=$WM_THIRD_PARTY_DIR/paraview-$ParaView_VERSION
+paraviewInstDir=$WM_THIRD_PARTY_DIR/ParaView-$ParaView_VERSION
 export ParaView_DIR=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/paraview-$ParaView_VERSION
 
 # set paths if binaries or source are present

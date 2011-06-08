@@ -80,7 +80,7 @@ case [0-9]*:
 endsw
 
 
-set paraviewInstDir=$WM_THIRD_PARTY_DIR/paraview-${ParaView_VERSION}
+set paraviewInstDir=$WM_THIRD_PARTY_DIR/ParaView-${ParaView_VERSION}
 setenv ParaView_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/paraview-${ParaView_VERSION}
 
 # set paths if binaries or source are present
