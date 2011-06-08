@@ -39,12 +39,6 @@ int main(int argc, char *argv[])
 {
     argList::addBoolOption("writep", "write the final pressure field");
 
-    argList::addBoolOption
-    (
-        "noFunctionObjects",
-        "do not execute functionObjects"
-    );
-
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
@@ -57,10 +51,7 @@ int main(int argc, char *argv[])
 
     // Since solver contains no time loop it would never execute
     // function objects so do it ourselves.
-    if (!args.optionFound("noFunctionObjects"))
-    {
-        runTime.functionObjects().start();
-    }
+    runTime.functionObjects().start();
 
     adjustPhi(phi, U, p);
 
@@ -112,10 +103,7 @@ int main(int argc, char *argv[])
         p.write();
     }
 
-    if (!args.optionFound("noFunctionObjects"))
-    {
-        runTime.functionObjects().end();
-    }
+    runTime.functionObjects().end();
 
     Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
         << "  ClockTime = " << runTime.elapsedClockTime() << " s"

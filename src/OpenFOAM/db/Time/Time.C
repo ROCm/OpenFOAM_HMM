@@ -25,6 +25,7 @@ License
 
 #include "Time.H"
 #include "PstreamReduceOps.H"
+#include "argList.H"
 
 #include <sstream>
 
@@ -215,7 +216,8 @@ Foam::Time::Time
     const fileName& rootPath,
     const fileName& caseName,
     const word& systemName,
-    const word& constantName
+    const word& constantName,
+    const bool enableFunctionObjects
 )
 :
     TimePaths
@@ -259,7 +261,94 @@ Foam::Time::Time
     graphFormat_("raw"),
     runTimeModifiable_(true),
 
-    functionObjects_(*this)
+    functionObjects_(*this, enableFunctionObjects)
+{
+    libs_.open(controlDict_, "libs");
+
+    // Explicitly set read flags on objectRegistry so anything constructed
+    // from it reads as well (e.g. fvSolution).
+    readOpt() = IOobject::MUST_READ_IF_MODIFIED;
+
+    setControls();
+
+    // Time objects not registered so do like objectRegistry::checkIn ourselves.
+    if (runTimeModifiable_)
+    {
+        monitorPtr_.reset
+        (
+            new fileMonitor
+            (
+                regIOobject::fileModificationChecking == inotify
+             || regIOobject::fileModificationChecking == inotifyMaster
+            )
+        );
+
+        // File might not exist yet.
+        fileName f(controlDict_.filePath());
+
+        if (!f.size())
+        {
+            // We don't have this file but would like to re-read it.
+            // Possibly if in master-only reading mode. Use a non-existing
+            // file to keep fileMonitor synced.
+            f = controlDict_.objectPath();
+        }
+
+        controlDict_.watchIndex() = addWatch(f);
+    }
+}
+
+
+Foam::Time::Time
+(
+    const word& controlDictName,
+    const argList& args,
+    const word& systemName,
+    const word& constantName
+)
+:
+    TimePaths
+    (
+        args.rootPath(),
+        args.caseName(),
+        systemName,
+        constantName
+    ),
+
+    objectRegistry(*this),
+
+    libs_(),
+
+    controlDict_
+    (
+        IOobject
+        (
+            controlDictName,
+            system(),
+            *this,
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE,
+            false
+        )
+    ),
+
+    startTimeIndex_(0),
+    startTime_(0),
+    endTime_(0),
+
+    stopAt_(saEndTime),
+    writeControl_(wcTimeStep),
+    writeInterval_(GREAT),
+    purgeWrite_(0),
+    subCycling_(false),
+
+    writeFormat_(IOstream::ASCII),
+    writeVersion_(IOstream::currentVersion),
+    writeCompression_(IOstream::UNCOMPRESSED),
+    graphFormat_("raw"),
+    runTimeModifiable_(true),
+
+    functionObjects_(*this, !args.optionFound("noFunctionObjects"))
 {
     libs_.open(controlDict_, "libs");
 
@@ -303,7 +392,8 @@ Foam::Time::Time
     const fileName& rootPath,
     const fileName& caseName,
     const word& systemName,
-    const word& constantName
+    const word& constantName,
+    const bool enableFunctionObjects
 )
 :
     TimePaths
@@ -348,7 +438,7 @@ Foam::Time::Time
     graphFormat_("raw"),
     runTimeModifiable_(true),
 
-    functionObjects_(*this)
+    functionObjects_(*this, enableFunctionObjects)
 {
     libs_.open(controlDict_, "libs");
 
@@ -395,7 +485,8 @@ Foam::Time::Time
     const fileName& rootPath,
     const fileName& caseName,
     const word& systemName,
-    const word& constantName
+    const word& constantName,
+    const bool enableFunctionObjects
 )
 :
     TimePaths
@@ -439,7 +530,7 @@ Foam::Time::Time
     graphFormat_("raw"),
     runTimeModifiable_(true),
 
-    functionObjects_(*this)
+    functionObjects_(*this, enableFunctionObjects)
 {
     libs_.open(controlDict_, "libs");
 }
