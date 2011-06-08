@@ -30,7 +30,7 @@ License
 template<class ThermoSolidType>
 void Foam::multiComponentSolidMixture<ThermoSolidType>::correctMassFractions()
 {
-    volScalarField Yt = Y_[0];
+    volScalarField Yt("Yt", Y_[0]);
 
     for (label n=1; n<Y_.size(); n++)
     {
