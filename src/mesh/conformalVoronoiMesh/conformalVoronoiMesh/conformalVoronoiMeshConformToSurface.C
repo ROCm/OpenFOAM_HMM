@@ -1214,7 +1214,10 @@ void Foam::conformalVoronoiMesh::parallelInterfaceInfluence
         //     const treeBoundBox& procBb =
         //         geometryToConformTo_.processorMeshBounds()[procI];
 
-        //     if (procBb.overlaps(circumcentre, circumradiusSqr))
+        //     // Extend the circumsphere slightly to ensure that any floating
+        //     // point error in its calculation or the definition of the bounds
+        //     // of each processor are masked.
+        //     if (procBb.overlaps(circumcentre, sqr(1.01)*circumradiusSqr))
         //     {
         //         toProc[procI] = true;
         //     }

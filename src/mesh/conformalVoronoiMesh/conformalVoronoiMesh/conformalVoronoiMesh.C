@@ -1837,28 +1837,62 @@ bool Foam::conformalVoronoiMesh::positionOnThisProc
 {
     if (Pstream::parRun())
     {
-        return decomposition_().positionInThisDomain(pt);
+        return decomposition_().positionOnThisProcessor(pt);
     }
 
     return true;
 }
 
 
-Foam::label Foam::conformalVoronoiMesh::positionProc
+Foam::labelList Foam::conformalVoronoiMesh::positionProc
 (
-    const Foam::point& pt
+    const Foam::pointField& pts
 ) const
 {
-    Pout<< "Dummy positionProc" << endl;
-
     if (!Pstream::parRun())
     {
-        return -1;
+        return labelList(pts.size(), -1);
     }
-    else
+
+    List<List<pointIndexHit> > inter = decomposition_().intersectsProcessors
+    (
+        pts,
+        pts + vector::one,
+        false
+    );
+
+    return decomposition_().processorPosition(pts);
+}
+
+
+Foam::List<Foam::List<Foam::pointIndexHit> >
+Foam::conformalVoronoiMesh::intersectsProc
+(
+    const pointField& starts,
+    const pointField& ends
+) const
+{
+    if (!Pstream::parRun())
     {
-        return Pstream::myProcNo();
+        return List<List<pointIndexHit> >(starts.size());
     }
+
+    return decomposition_().intersectsProcessors(starts, ends, false);
+}
+
+
+Foam::labelListList Foam::conformalVoronoiMesh::overlapsProc
+(
+    const pointField& centres,
+    const scalarField& radiusSqrs
+) const
+{
+    if (!Pstream::parRun())
+    {
+        return labelListList(centres.size(), labelList(0));
+    }
+
+    return decomposition_().overlapsProcessors(centres, radiusSqrs, false);
 }
 
 

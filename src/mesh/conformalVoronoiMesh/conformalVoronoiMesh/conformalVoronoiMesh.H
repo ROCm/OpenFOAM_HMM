@@ -794,7 +794,21 @@ public:
         bool positionOnThisProc(const Foam::point& pt) const;
 
         //- Which processor's domain handles this point
-        label positionProc(const Foam::point& pt) const;
+        labelList positionProc(const Foam::pointField& pts) const;
+
+        //- Which other processors does each line segment intersect
+        List<List<pointIndexHit> > intersectsProc
+        (
+            const pointField& starts,
+            const pointField& ends
+        ) const;
+
+        //- Which other processors does each sphere overlap
+        labelListList overlapsProc
+        (
+            const pointField& centres,
+            const scalarField& radiusSqrs
+        ) const;
 
         //- Conversion functions between point (OpenFOAM) and Point (CGAL)
 

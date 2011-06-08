@@ -68,7 +68,7 @@ SourceFiles
 #include "treeBoundBox.H"
 #include "primitivePatch.H"
 #include "face.H"
-#include "List.H"
+#include "labelList.H"
 #include "pointField.H"
 #include "indexedOctree.H"
 #include "treeDataPrimitivePatch.H"
@@ -110,6 +110,9 @@ class backgroundMeshDecomposition
 
         //- Search tree for the boundaryFaces_ patch
         autoPtr<indexedOctree<treeDataBPatch> > bFTreePtr_;
+
+        //- The bounds of all background meshes on all processors
+        treeBoundBoxList allBackgroundMeshBounds_;
 
         //- Decomposition dictionary
         IOdictionary decomposeDict_;
@@ -167,6 +170,9 @@ class backgroundMeshDecomposition
         //- Build the surface patch and search tree
         void buildPatchAndTree();
 
+        //- Build a mapDistribute for the supplied destination processor data
+        autoPtr<mapDistribute> buildMap(const List<label>& toProc) const;
+
         //- Disallow default bitwise copy construct
         backgroundMeshDecomposition(const backgroundMeshDecomposition&);
 
@@ -205,7 +211,35 @@ public:
         );
 
         //- Is the given position inside the domain of this decomposition
-        bool positionInThisDomain(const point& pt) const;
+        bool positionOnThisProcessor(const point& pt) const;
+
+        //- What processor is the given position on?
+        labelList processorPosition(const pointField& pts) const;
+
+        //- Which processors are intersected by the line segment, returns all
+        //  processors whose boundary patch is intersected by the sphere.  By
+        //  default this does not return the processor that the query is
+        //  launched from, it is assumed that the point is on that processor.
+        //  The index data member of the pointIndexHit is replaced with the
+        //  processor index.
+        List<List<pointIndexHit> > intersectsProcessors
+        (
+            const pointField& starts,
+            const pointField& ends,
+            bool includeOwnProcessor = false
+        ) const;
+
+        //- Which processors overlap the given sphere, returns all processors
+        //  whose boundary patch is touched by the sphere or whom the sphere is
+        //  inside.  By default this does not return the processor that the
+        //  query is launched from, it is assumed that the point is on that
+        //  processor.
+        labelListList overlapsProcessors
+        (
+            const pointField& centres,
+            const scalarField& radiusSqrs,
+            bool includeOwnProcessor = false
+        ) const;
 
         // Access
 

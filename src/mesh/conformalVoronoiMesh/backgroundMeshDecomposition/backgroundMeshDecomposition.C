@@ -353,6 +353,8 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
         cellWeights.write();
         mesh_.write();
     }
+
+    buildPatchAndTree();
 }
 
 
@@ -616,6 +618,12 @@ void Foam::backgroundMeshDecomposition::buildPatchAndTree()
         )
     );
 
+    // Give the bounds of every processor to every other processor
+    allBackgroundMeshBounds_[Pstream::myProcNo()] = overallBb;
+
+    Pstream::gatherList(allBackgroundMeshBounds_);
+    Pstream::scatterList(allBackgroundMeshBounds_);
+
     if (debug)
     {
         OFstream fStr
@@ -659,6 +667,92 @@ void Foam::backgroundMeshDecomposition::buildPatchAndTree()
 }
 
 
+Foam::autoPtr<Foam::mapDistribute> Foam::backgroundMeshDecomposition::buildMap
+(
+    const List<label>& toProc
+) const
+{
+    // Determine send map
+    // ~~~~~~~~~~~~~~~~~~
+
+    // 1. Count
+    labelList nSend(Pstream::nProcs(), 0);
+
+    forAll(toProc, i)
+    {
+        label procI = toProc[i];
+
+        nSend[procI]++;
+    }
+
+    // Send over how many I need to receive
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    labelListList sendSizes(Pstream::nProcs());
+
+    sendSizes[Pstream::myProcNo()] = nSend;
+
+    combineReduce(sendSizes, UPstream::listEq());
+
+    // 2. Size sendMap
+    labelListList sendMap(Pstream::nProcs());
+
+    forAll(nSend, procI)
+    {
+        sendMap[procI].setSize(nSend[procI]);
+
+        nSend[procI] = 0;
+    }
+
+    // 3. Fill sendMap
+    forAll(toProc, i)
+    {
+        label procI = toProc[i];
+
+        sendMap[procI][nSend[procI]++] = i;
+    }
+
+    // Determine receive map
+    // ~~~~~~~~~~~~~~~~~~~~~
+
+    labelListList constructMap(Pstream::nProcs());
+
+    // Local transfers first
+    constructMap[Pstream::myProcNo()] = identity
+    (
+        sendMap[Pstream::myProcNo()].size()
+    );
+
+    label constructSize = constructMap[Pstream::myProcNo()].size();
+
+    forAll(constructMap, procI)
+    {
+        if (procI != Pstream::myProcNo())
+        {
+            label nRecv = sendSizes[procI][Pstream::myProcNo()];
+
+            constructMap[procI].setSize(nRecv);
+
+            for (label i = 0; i < nRecv; i++)
+            {
+                constructMap[procI][i] = constructSize++;
+            }
+        }
+    }
+
+    return autoPtr<mapDistribute>
+    (
+        new mapDistribute
+        (
+            constructSize,
+            sendMap.xfer(),
+            constructMap.xfer()
+        )
+    );
+}
+
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
@@ -687,6 +781,7 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
     ),
     boundaryFacesPtr_(),
     bFTreePtr_(),
+    allBackgroundMeshBounds_(Pstream::nProcs()),
     decomposeDict_
     (
         IOobject
@@ -738,8 +833,6 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
     Info<< nl << "Building initial background mesh decomposition" << endl;
 
     initialRefinement();
-
-    buildPatchAndTree();
 }
 
 
@@ -963,7 +1056,7 @@ Foam::backgroundMeshDecomposition::distribute
 }
 
 
-bool Foam::backgroundMeshDecomposition::positionInThisDomain
+bool Foam::backgroundMeshDecomposition::positionOnThisProcessor
 (
     const point& pt
 ) const
@@ -971,6 +1064,325 @@ bool Foam::backgroundMeshDecomposition::positionInThisDomain
     return
         bFTreePtr_().getVolumeType(pt)
      == indexedOctree<treeDataBPatch>::INSIDE;
+}
+
+
+Foam::labelList Foam::backgroundMeshDecomposition::processorPosition
+(
+    const pointField& pts
+) const
+{
+    DynamicList<label> toCandidateProc;
+    DynamicList<point> testPoints;
+    labelList ptBlockStart(pts.size(), -1);
+    labelList ptBlockSize(pts.size(), -1);
+
+    label nTotalCandidates = 0;
+
+    forAll(pts, pI)
+    {
+        const point& pt = pts[pI];
+
+        label nCandidates = 0;
+
+        forAll(allBackgroundMeshBounds_, procI)
+        {
+            if (allBackgroundMeshBounds_[procI].contains(pt))
+            {
+                toCandidateProc.append(procI);
+                testPoints.append(pt);
+
+                nCandidates++;
+            }
+        }
+
+        ptBlockStart[pI] = nTotalCandidates;
+        ptBlockSize[pI] = nCandidates;
+
+        nTotalCandidates += nCandidates;
+    }
+
+    // Needed for reverseDistribute
+    label preDistributionToCandidateProcSize = toCandidateProc.size();
+
+    autoPtr<mapDistribute> map(buildMap(toCandidateProc));
+
+    map().distribute(testPoints);
+
+    List<bool> pointOnCandidate(testPoints.size(), false);
+
+    // Test candidate points on candidate processors
+    forAll(testPoints, tPI)
+    {
+        pointOnCandidate[tPI] = positionOnThisProcessor(testPoints[tPI]);
+    }
+
+    map().reverseDistribute
+    (
+        preDistributionToCandidateProcSize,
+        pointOnCandidate
+    );
+
+    labelList ptProc(pts.size(), -1);
+
+    forAll(pts, pI)
+    {
+        // Extract the sub list of results for this point
+
+        SubList<bool> ptProcResults
+        (
+            pointOnCandidate,
+            ptBlockSize[pI],
+            ptBlockStart[pI]
+        );
+
+        forAll(ptProcResults, pPRI)
+        {
+            if (ptProcResults[pPRI])
+            {
+                ptProc[pI] = toCandidateProc[ptBlockStart[pI] + pPRI];
+
+                break;
+            }
+        }
+
+        if (ptProc[pI] < 0)
+        {
+            // No processor was found
+            FatalErrorIn
+            (
+                "Foam::labelList"
+                "Foam::backgroundMeshDecomposition::processorPosition"
+                "("
+                    "const pointField& pts"
+                ") const"
+            )
+                << "The position " << pts[pI]
+                << " was not found in any part of the background mesh."
+                << exit(FatalError);
+        }
+    }
+
+    return ptProc;
+}
+
+
+Foam::List<Foam::List<Foam::pointIndexHit> >
+Foam::backgroundMeshDecomposition::intersectsProcessors
+(
+    const pointField& starts,
+    const pointField& ends,
+    bool includeOwnProcessor
+) const
+{
+    DynamicList<label> toCandidateProc;
+    DynamicList<point> testStarts;
+    DynamicList<point> testEnds;
+    labelList segmentBlockStart(starts.size(), -1);
+    labelList segmentBlockSize(starts.size(), -1);
+
+    label nTotalCandidates = 0;
+
+    forAll(starts, sI)
+    {
+        const point& s = starts[sI];
+        const point& e = ends[sI];
+
+        // Dummy point for treeBoundBox::intersects
+        point p(vector::zero);
+
+        label nCandidates = 0;
+
+        forAll(allBackgroundMeshBounds_, procI)
+        {
+            // It is assumed that the sphere in question overlaps the source
+            // processor, so don't test it, unless includeOwnProcessor is true
+            if
+            (
+                (includeOwnProcessor || procI != Pstream::myProcNo())
+              && allBackgroundMeshBounds_[procI].intersects(s, e, p)
+            )
+            {
+                toCandidateProc.append(procI);
+                testStarts.append(s);
+                testEnds.append(e);
+
+                nCandidates++;
+            }
+        }
+
+        segmentBlockStart[sI] = nTotalCandidates;
+        segmentBlockSize[sI] = nCandidates;
+
+        nTotalCandidates += nCandidates;
+    }
+
+    // Needed for reverseDistribute
+    label preDistributionToCandidateProcSize = toCandidateProc.size();
+
+    autoPtr<mapDistribute> map(buildMap(toCandidateProc));
+
+    map().distribute(testStarts);
+    map().distribute(testEnds);
+
+    List<pointIndexHit> segmentIntersectsCandidate(testStarts.size());
+
+    // Test candidate segments on candidate processors
+    forAll(testStarts, sI)
+    {
+        const point& s = testStarts[sI];
+        const point& e = testEnds[sI];
+
+        // If the sphere finds some elements of the patch, then it overlaps
+        segmentIntersectsCandidate[sI] = bFTreePtr_().findLine(s, e);
+    }
+
+    map().reverseDistribute
+    (
+        preDistributionToCandidateProcSize,
+        segmentIntersectsCandidate
+    );
+
+    List<List<pointIndexHit> > segmentHitProcs(starts.size());
+
+    // Working storage for assessing processors
+    DynamicList<pointIndexHit> tmpProcHits;
+
+    forAll(starts, sI)
+    {
+        tmpProcHits.clear();
+
+        // Extract the sub list of results for this point
+
+        SubList<pointIndexHit> segmentProcResults
+        (
+            segmentIntersectsCandidate,
+            segmentBlockSize[sI],
+            segmentBlockStart[sI]
+        );
+
+        forAll(segmentProcResults, sPRI)
+        {
+            if (segmentProcResults[sPRI].hit())
+            {
+                tmpProcHits.append(segmentProcResults[sPRI]);
+
+                tmpProcHits.last().setIndex
+                (
+                    toCandidateProc[segmentBlockStart[sI] + sPRI]
+                );
+            }
+        }
+
+        segmentHitProcs[sI] = tmpProcHits;
+    }
+
+    return segmentHitProcs;
+}
+
+
+Foam::labelListList Foam::backgroundMeshDecomposition::overlapsProcessors
+(
+    const pointField& centres,
+    const scalarField& radiusSqrs,
+    bool includeOwnProcessor
+) const
+{
+    DynamicList<label> toCandidateProc;
+    DynamicList<point> testCentres;
+    DynamicList<scalar> testRadiusSqrs;
+    labelList sphereBlockStart(centres.size(), -1);
+    labelList sphereBlockSize(centres.size(), -1);
+
+    label nTotalCandidates = 0;
+
+    forAll(centres, sI)
+    {
+        const point& c = centres[sI];
+        scalar rSqr = radiusSqrs[sI];
+
+        label nCandidates = 0;
+
+        forAll(allBackgroundMeshBounds_, procI)
+        {
+            // It is assumed that the sphere in question overlaps the source
+            // processor, so don't test it, unless includeOwnProcessor is true
+            if
+            (
+                (includeOwnProcessor || procI != Pstream::myProcNo())
+             && allBackgroundMeshBounds_[procI].overlaps(c, rSqr)
+            )
+            {
+                toCandidateProc.append(procI);
+                testCentres.append(c);
+                testRadiusSqrs.append(rSqr);
+
+                nCandidates++;
+            }
+        }
+
+        sphereBlockStart[sI] = nTotalCandidates;
+        sphereBlockSize[sI] = nCandidates;
+
+        nTotalCandidates += nCandidates;
+    }
+
+    // Needed for reverseDistribute
+    label preDistributionToCandidateProcSize = toCandidateProc.size();
+
+    autoPtr<mapDistribute> map(buildMap(toCandidateProc));
+
+    map().distribute(testCentres);
+    map().distribute(testRadiusSqrs);
+
+    List<bool> sphereOverlapsCandidate(testCentres.size(), false);
+
+    // Test candidate spheres on candidate processors
+    forAll(testCentres, sI)
+    {
+        const point& c = testCentres[sI];
+        scalar rSqr = testRadiusSqrs[sI];
+
+        // If the sphere finds some elements of the patch, then it overlaps
+        sphereOverlapsCandidate[sI] = !bFTreePtr_().findSphere(c, rSqr).empty();
+    }
+
+    map().reverseDistribute
+    (
+        preDistributionToCandidateProcSize,
+        sphereOverlapsCandidate
+    );
+
+    labelListList sphereProcs(centres.size());
+
+    // Working storage for assessing processors
+    DynamicList<label> tmpProcs;
+
+    forAll(centres, sI)
+    {
+        tmpProcs.clear();
+
+        // Extract the sub list of results for this point
+
+        SubList<bool> sphereProcResults
+        (
+            sphereOverlapsCandidate,
+            sphereBlockSize[sI],
+            sphereBlockStart[sI]
+        );
+
+        forAll(sphereProcResults, sPRI)
+        {
+            if (sphereProcResults[sPRI])
+            {
+                tmpProcs.append(toCandidateProc[sphereBlockStart[sI] + sPRI]);
+            }
+        }
+
+        sphereProcs[sI] = tmpProcs;
+    }
+
+    return sphereProcs;
 }
 
 
