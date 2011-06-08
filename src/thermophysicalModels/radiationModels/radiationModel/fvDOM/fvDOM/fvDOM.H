@@ -92,12 +92,6 @@ class fvDOM
         //- Total absorption coefficient [1/m]
         volScalarField a_;
 
-        //- Total emission coefficient [1/m]
-        volScalarField e_;
-
-        //- Emission contribution [Kg/m/s^3]
-        volScalarField E_;
-
         //- Number of solid angles in theta
         label nTheta_;
 
