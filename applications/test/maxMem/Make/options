@@ -1,1 +1,1 @@
-EXE_LIBS = $(FOAM_EXT_LIBBIN)/libfbsdmalloc.o
+EXE_LIBS = /* $(FOAM_EXT_LIBBIN)/libfbsdmalloc.o */
