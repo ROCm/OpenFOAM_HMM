@@ -6,5 +6,6 @@ cd ${0%/*} || exit 1    # run from this directory
 
 cleanCase
 
-rm -r constant/panelRegion/polyMesh
+rm -rf constant/panelRegion/polyMesh
+
 # ----------------------------------------------------------------- end-of-file

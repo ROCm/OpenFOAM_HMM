@@ -20,7 +20,7 @@ startFrom       latestTime;
 
 startTime       0;
 
-stopAt          endTime;
+stopAt          nextWrite;
 
 endTime         500;
 
@@ -28,7 +28,7 @@ deltaT          1;
 
 writeControl    timeStep;
 
-writeInterval   100;
+writeInterval   1;
 
 purgeWrite      0;
 
@@ -47,6 +47,7 @@ runTimeModifiable true;
 libs
 (
     "libOpenFOAM.so"
+    "libcompressibleTurbulenceModels.so"
     "libincompressibleRASModels.so"
 );
 
