@@ -1,0 +1,43 @@
+polyMeshGeometry:
+    - disabled tetquality check on face-center decomp tet.
+      Check only minTetDecomp tet.
+
+indexedOctree:
+    - findSphere routine
+
+closedTriSurfaceMesh :
+    triSurface which is defined closed even though topologically it isn't.
+
+searchableSurface  :
+    - bounds_ member data
+    - bool overlaps() const routine
+searchableSurfaces, searhcableSurfacesQueries  :
+    - findNearestIntersection routine
+
+surfaceFeatures:
+    - trimFeatures function returns trimmed bits
+
+triSurfaceTools:
+    - surfaceSide
+
+indexedOctree:
+    - findSphere
+
+polyMeshTetDecomposition:
+    - disabled face-centre tet quality check (but kept minTetDecomp)
+
+polyMesh.C:
+    - read cell centres if present
+
+primitiveMesh:
+    - overrideCellCentres
+
+triangleI.H:
+    - stabilised triangle quality
+
+memInfo:
+    - added I/O operators
+
+distributedTrisurfaceMesh:
+    - additional reduce on boundBox?
+
