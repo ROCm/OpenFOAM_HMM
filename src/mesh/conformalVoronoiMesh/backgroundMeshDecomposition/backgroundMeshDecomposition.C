@@ -1067,6 +1067,16 @@ bool Foam::backgroundMeshDecomposition::positionOnThisProcessor
 }
 
 
+Foam::pointIndexHit Foam::backgroundMeshDecomposition::findLine
+(
+    const point& start,
+    const point& end
+) const
+{
+    return bFTreePtr_().findLine(start, end);
+}
+
+
 Foam::labelList Foam::backgroundMeshDecomposition::processorPosition
 (
     const pointField& pts

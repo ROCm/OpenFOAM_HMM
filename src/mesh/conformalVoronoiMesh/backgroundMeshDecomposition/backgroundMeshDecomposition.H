@@ -213,6 +213,14 @@ public:
         //- Is the given position inside the domain of this decomposition
         bool positionOnThisProcessor(const point& pt) const;
 
+        //- Find nearest intersection of line between start and end, (exposing
+        //  underlying indexedOctree)
+        pointIndexHit findLine
+        (
+            const point& start,
+            const point& end
+        ) const;
+
         //- What processor is the given position on?
         labelList processorPosition(const pointField& pts) const;
 

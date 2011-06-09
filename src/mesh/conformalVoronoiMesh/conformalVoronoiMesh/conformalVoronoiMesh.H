@@ -436,15 +436,15 @@ private:
             const Delaunay::Finite_vertices_iterator& vit
         ) const;
 
-        //- Return false if the line is entirely outside the box, true is
-        //  either point is inside, or the box is intersected (i.e. the points
-        //  are box outside but the line cuts.  The points will be moved onto
-        //  the box where they intersect.
-        bool clipLineToBox
+        //- Return false if the line is entirely outside the current processor
+        //  domain, true is either point is inside, or the processor domain
+        //  bounadry is intersected (i.e. the points are box outside but the
+        //  line cuts.  The points will be moved onto the box where they
+        //  intersect.
+        bool clipLineToProc
         (
             Foam::point& a,
-            Foam::point& b,
-            const treeBoundBox& box
+            Foam::point& b
         ) const;
 
         //- Build the parallelInterfaces of the mesh

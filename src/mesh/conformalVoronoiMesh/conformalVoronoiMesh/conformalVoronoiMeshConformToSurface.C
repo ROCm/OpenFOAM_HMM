@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "conformalVoronoiMesh.H"
+#include "backgroundMeshDecomposition.H"
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -446,95 +447,104 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAnyIntersection
         Foam::point dE0 = topoint(dual(fit->first));
         Foam::point dE1 = topoint(dual(fit->first->neighbor(fit->second)));
 
-        // if (Pstream::parRun())
-        // {
-        //     const treeBoundBoxList& procBbs =
-        //         geometryToConformTo_.processorDomains()[Pstream::myProcNo()];
+        if (Pstream::parRun())
+        {
+            Foam::point a = dE0;
+            Foam::point b = dE1;
 
-        //     forAll(procBbs, pBI)
-        //     {
-        //         const treeBoundBox& procBb = procBbs[pBI];
+            bool inProc = clipLineToProc(a, b);
 
-        //         Foam::point a = dE0;
-        //         Foam::point b = dE1;
+            // Check for the edge passing through a surface
+            if
+            (
+                inProc
+             && geometryToConformTo_.findSurfaceAnyIntersection(a, b)
+            )
+            {
+                // Pout<< "# findSurfaceAnyIntersection" << endl;
+                // meshTools::writeOBJ(Pout, a);
+                // meshTools::writeOBJ(Pout, b);
+                // Pout<< "l cr0 cr1" << endl;
 
-        //         bool inBox = clipLineToBox(a, b, procBb);
-
-        //         // Check for the edge passing through a surface
-        //         if
-        //         (
-        //             inBox
-        //          && geometryToConformTo_.findSurfaceAnyIntersection(a, b)
-        //         )
-        //         {
-        //             // Pout<< "# findSurfaceAnyIntersection" << endl;
-        //             // meshTools::writeOBJ(Pout, a);
-        //             // meshTools::writeOBJ(Pout, b);
-        //             // Pout<< "l cr0 cr1" << endl;
-
-        //             return true;
-        //         }
-        //     }
-        // }
-        // else
-        // {
+                return true;
+            }
+        }
+        else
+        {
             if (geometryToConformTo_.findSurfaceAnyIntersection(dE0, dE1))
             {
                 return true;
             }
-        // }
+        }
     }
 
     return false;
 }
 
 
-bool Foam::conformalVoronoiMesh::clipLineToBox
+bool Foam::conformalVoronoiMesh::clipLineToProc
 (
     Foam::point& a,
-    Foam::point& b,
-    const treeBoundBox& box
+    Foam::point& b
 ) const
 {
-    Foam::point boxPt = vector::one*GREAT;
-
     bool intersects = false;
 
-    if (box.posBits(a) == 0)
+    if (decomposition_().positionOnThisProcessor(a))
     {
-        // a is inside
-        if (box.posBits(b) == 0)
+        // a is inside this processor
+
+        if (decomposition_().positionOnThisProcessor(b))
         {
-            // both a and b inside.
+            // both a and b inside, no clip required
             intersects = true;
         }
         else
         {
             // b is outside, clip b to bounding box.
-            intersects = box.intersects(b, a, boxPt);
-            b = boxPt;
+
+            pointIndexHit info = decomposition_().findLine(b, a);
+
+            if (info.hit())
+            {
+                intersects = true;
+                b = info.hitPoint();
+            }
         }
     }
     else
     {
-        // a is outside
-        if (box.posBits(b) == 0)
+        // a is outside this processor
+
+        if (decomposition_().positionOnThisProcessor(b))
         {
-            // b is inside
-            intersects = box.intersects(a, b, boxPt);
-            a = boxPt;
+            // b is inside this processor, clip a to processor
+
+            pointIndexHit info = decomposition_().findLine(a, b);
+
+            if (info.hit())
+            {
+                intersects = true;
+                a = info.hitPoint();
+            }
         }
         else
         {
-            // both a and b outside, but they can still intersect the box
+            // both a and b outside, but they can still intersect the processor
 
-            intersects = box.intersects(a, b, boxPt);
+            pointIndexHit info = decomposition_().findLine(a, b);
 
-            if (intersects)
+            if (info.hit())
             {
-                a = boxPt;
-                box.intersects(b, a, boxPt);
-                b = boxPt;
+                intersects = true;
+                a = info.hitPoint();
+
+                info = decomposition_().findLine(b, a);
+
+                if (info.hit())
+                {
+                    b = info.hitPoint();
+                }
             }
         }
     }
