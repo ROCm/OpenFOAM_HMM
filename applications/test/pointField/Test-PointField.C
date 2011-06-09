@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
         pointPatchVectorField::calculatedType()
     );
 
-    pointVectorField V = U + 2*U;
+    pointVectorField V(U + 2*U);
 
     Info<< "End\n" << endl;
 

@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
     {
         const label cellI = args.optionLookupOrDefault("cell", 0);
 
-        tensorField mI = momentOfInertia::meshInertia(mesh);
+        tensorField mI(momentOfInertia::meshInertia(mesh));
 
         tensor& J = mI[cellI];
 

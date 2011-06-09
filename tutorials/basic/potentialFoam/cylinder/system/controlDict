@@ -94,13 +94,15 @@ functions
 
             Info<< "\nEvaluating analytical solution" << endl;
 
-            volVectorField centres = UA.mesh().C();
-            volScalarField magCentres = mag(centres);
-            volScalarField theta = acos((centres & vector(1,0,0))/magCentres);
+            const volVectorField& centres = UA.mesh().C();
+            volScalarField magCentres(mag(centres));
+            volScalarField theta(acos((centres & vector(1,0,0))/magCentres));
 
-            volVectorField cs2theta =
+            volVectorField cs2theta
+            (
                 cos(2*theta)*vector(1,0,0)
-              + sin(2*theta)*vector(0,1,0);
+              + sin(2*theta)*vector(0,1,0)
+            );
 
             UA = uInfX*(dimensionedVector(vector(1,0,0))
               - pow((radius/magCentres),2)*cs2theta);
@@ -109,8 +111,10 @@ functions
             UA.write();
 
             volScalarField error("error", mag(U-UA)/mag(UA));
+
             Info<<"Writing relative error in U to " << error.objectPath()
                 << endl;
+
             error.write();
         #};
     }
