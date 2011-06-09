@@ -1,6 +1,14 @@
+src/
+
+mesh/conformalVoronoiMesh
+    - all the meshing.
+
 polyMeshGeometry:
     - disabled tetquality check on face-center decomp tet.
       Check only minTetDecomp tet.
+
+      limits face filtering if enabled. So cv3d can generate neg.
+      (face-centre decomp) tets but pyramid volumes are still positive!
 
 indexedOctree:
     - findSphere routine
@@ -13,13 +21,16 @@ searchableSurface  :
     - bool overlaps() const routine
 searchableSurfaces, searhcableSurfacesQueries  :
     - findNearestIntersection routine
+    - bounds routines
 
 surfaceFeatures:
     - trimFeatures function returns trimmed bits
 
 triSurfaceTools:
-    - surfaceSide
+    - surfaceSide.
 
+    the edge code is irrelevant. Use dev bits.
+    
 indexedOctree:
     - findSphere
 
@@ -27,17 +38,59 @@ polyMeshTetDecomposition:
     - disabled face-centre tet quality check (but kept minTetDecomp)
 
 polyMesh.C:
-    - read cell centres if present
+    - read cell centres if present.
+
+    Can be scrapped. Not useful. Does not write cell centres, does not
+    do decomposition, reconstruction, moving meshes.
 
 primitiveMesh:
     - overrideCellCentres
 
 triangleI.H:
-    - stabilised triangle quality
+    - stabilised triangle quality. Ok.
 
 memInfo:
-    - added I/O operators
+    - added I/O operators. Useful.
 
 distributedTrisurfaceMesh:
-    - additional reduce on boundBox?
+    - additional reduce on boundBox. Can be removed only on the one
+    constructed from boundBox (line 2300)
+
+
+Utilities/
+
+cvMesh:
+    - top level mesher
+
+checkMesh:
+    - override cellCentres. Remove if the polyMesh stuff gets removed.
+
+surfaceCheck:
+    - moved triSurface quality into triangle. Use cvm.
+
+surfaceBooleanFeatures:
+    - new application. Determines features straight from intersection.
+    More stable than surfaceBooleanOp. Used to e.g. get the features
+    between the wheels and wind tunnel.
+    So if surfaceBooleanOp fails:
+    - use this to extract features
+    - use snappyHexMesh to defeature
+    - use cvMesh with extracted features
+    This does not work very well! Since there might still be overlapping
+    bits of triSurface that will be meshed.
+ 
+surfaceFeatureExtract:
+    - uses cgal only for curvature calculation. See cgal.
+    - writes a triSurfaceField of 'curvature' and 'internal closeness'
+    and 'external closeness'. This is just a normal intersection, not
+    a nearest point. These fields get used by cvMesh.
+    - detects features that are near?
+
+surfaceSplitByTopology:
+    - for fuel tank of Brawn. Detects baffles (markZones) and splits
+    it accordingly.
+
+
+
+
 
