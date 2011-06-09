@@ -372,6 +372,7 @@ void Foam::conformalVoronoiMesh::writeMesh
 
     patches.setSize(nValidPatches);
 
+    Info<< "ADDPATCHES NOT IN PARALLEL" << endl;
     // mesh.addPatches(patches);
     mesh.addPatches(patches, false);
 

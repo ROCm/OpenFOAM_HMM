@@ -853,6 +853,9 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
         writePoints("initialPoints.obj", true);
     }
 
+    Info<< "NEED TO CHANGE storeSizesAndAlignments AFTER DISTRIBUTE" << endl;
+    Info<< "NEED TO MAP FEATURE POINTS AFTER DISTRIBUTE" << endl;
+
     storeSizesAndAlignments(initPts);
 }
 

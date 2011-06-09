@@ -1501,6 +1501,8 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     // pMesh.addPatches(patches);
 
+    Info<< "ADDPATCHES NOT IN PARALLEL" << endl;
+
     forAll(patches, p)
     {
         patches[p] = new polyPatch
