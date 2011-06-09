@@ -452,7 +452,32 @@ private:
         (
             List<labelHashSet>& referralVertices,
             List<labelHashSet>& receivedVertices,
-            bool initialEdgeReferrral,
+            bool initialEdgeReferral,
+            const word& outputName
+        );
+
+        //- Refer all vertices to all processors
+        void buildParallelInterfaceAll
+        (
+            List<labelHashSet>& referralVertices,
+            List<labelHashSet>& receivedVertices,
+            const word& outputName
+        );
+
+        //- Refer vertices where there dual edge pierces other processors
+        void buildParallelInterfaceIntersection
+        (
+            List<labelHashSet>& referralVertices,
+            List<labelHashSet>& receivedVertices,
+            const word& outputName
+        );
+
+        //- Refer vertices that are attached to Delaunay tets whose
+        //  circumspheres touch other processors
+        void buildParallelInterfaceInfluence
+        (
+            List<labelHashSet>& referralVertices,
+            List<labelHashSet>& receivedVertices,
             const word& outputName
         );
 
@@ -462,11 +487,15 @@ private:
             const DynamicList<label>& targetProcessor
         ) const;
 
+        //- Refer vertices to their required processors
         void referVertices
         (
             const DynamicList<label>& targetProcessor,
-            DynamicList<Foam::point>& parallelInterfacePoints,
-            DynamicList<label>& parallelInterfaceIndices
+            DynamicList<Foam::point>& parallelPoints,
+            DynamicList<label>& parallelIndices,
+            List<labelHashSet>& receivedVertices,
+            const word& stageName,
+            const word& outputName
         );
 
         //- Check to see if dual cell specified by given vertex iterator can
@@ -475,15 +504,6 @@ private:
         void parallelInterfaceIntersection
         (
             const Delaunay::Finite_vertices_iterator& vit,
-            boolList& toProc
-        ) const;
-
-        //- Check to see if dual cell specified by given vertex iterator
-        //  intersects the parallel interface, hence needs referred.  Returns
-        //  destination processor(s).
-        void parallelInterfaceInfluence
-        (
-            const Delaunay::Finite_cells_iterator& cit,
             boolList& toProc
         ) const;
 
