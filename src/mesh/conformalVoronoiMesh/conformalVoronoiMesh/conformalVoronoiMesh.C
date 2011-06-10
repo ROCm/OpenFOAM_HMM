@@ -242,13 +242,6 @@ void Foam::conformalVoronoiMesh::insertPoints
             }
         }
 
-        nPoints = points.size();
-
-        reduce(nPoints, sumOp<label>());
-
-        Info<< "    " << nPoints
-            << " points to insert after erasure..." << endl;
-
         // Send the points that are not on this processor to the appropriate
         // place
         decomposition_().distributePoints(transferPoints);
@@ -1107,7 +1100,9 @@ void Foam::conformalVoronoiMesh::distribute()
             }
         }
 
-        insertPoints(pointsToInsert);
+        // Assume that the distribution made the correct decision for which
+        // processor each point should be on, so give distribute = false
+        insertPoints(pointsToInsert, false);
 
         Info<< "    Total number of vertices after redistribution "
             << returnReduce(label(number_of_vertices()), sumOp<label>())
