@@ -802,9 +802,11 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
     circumcentre.setSize(cI);
     circumradiusSqr.setSize(cI);
 
+    // Increasing the circumspheres to increase the overlaps and compensate for
+    // floating point errors missing some referrals
     labelListList circumsphereOverlaps
     (
-        overlapsProc(circumcentre, circumradiusSqr)
+        overlapsProc(circumcentre, sqr(1.01)*circumradiusSqr)
     );
 
     cI = 0;

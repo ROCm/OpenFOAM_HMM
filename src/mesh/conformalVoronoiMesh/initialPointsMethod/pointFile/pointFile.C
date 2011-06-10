@@ -75,12 +75,7 @@ std::list<Vb::Point> pointFile::initialPoints() const
     }
 
     // Filter the points to be only those on this processor
-    boolList procPt(points.size(), false);
-
-    forAll(points, ptI)
-    {
-        procPt[ptI] = cvMesh_.positionOnThisProc(points[ptI]);
-    }
+    boolList procPt(cvMesh_.positionOnThisProc(points));
 
     if (Pstream::parRun())
     {

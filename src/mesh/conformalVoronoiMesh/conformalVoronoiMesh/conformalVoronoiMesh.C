@@ -198,6 +198,121 @@ Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
 }
 
 
+void Foam::conformalVoronoiMesh::insertPoints
+(
+    std::list<Point>& points,
+    bool distribute
+)
+{
+    label preInsertionSize(number_of_vertices());
+
+    label nPoints = points.size();
+
+    if (Pstream::parRun())
+    {
+        reduce(nPoints, sumOp<label>());
+    }
+
+    Info<< "    " << nPoints << " points to insert..." << endl;
+
+    if (Pstream::parRun() && distribute)
+    {
+        label preDistributionSize(points.size());
+
+        DynamicList<Foam::point> transferPoints;
+
+        for
+        (
+            std::list<Point>::iterator pit=points.begin();
+            pit != points.end();
+            // No action
+        )
+        {
+            Foam::point p(topoint(*pit));
+
+            if (!positionOnThisProc(p))
+            {
+                transferPoints.append(p);
+
+                pit = points.erase(pit);
+            }
+            else
+            {
+                ++pit;
+            }
+        }
+
+        nPoints = points.size();
+
+        reduce(nPoints, sumOp<label>());
+
+        Info<< "    " << nPoints
+            << " points to insert after erasure..." << endl;
+
+        // Send the points that are not on this processor to the appropriate
+        // place
+        decomposition_().distributePoints(transferPoints);
+
+        forAll(transferPoints, tPI)
+        {
+            points.push_back(toPoint(transferPoints[tPI]));
+        }
+
+        label sizeChange = preDistributionSize - label(points.size());
+
+        if (mag(sizeChange) > 0)
+        {
+            Pout<< "    distribution points size change " << sizeChange
+                << endl;
+        }
+
+        nPoints = points.size();
+
+        reduce(nPoints, sumOp<label>());
+
+        Info<< "    " << nPoints
+            << " points to insert after distribution..." << endl;
+    }
+
+    label nVert = number_of_vertices();
+
+    Info<< "TEMPORARILY USING INDIVIDUAL INSERTION" << endl;
+    // using the range insert (faster than inserting points one by one)
+    // insert(points.begin(), points.end());
+    for
+    (
+        std::list<Point>::iterator pit=points.begin();
+        pit != points.end();
+        ++pit
+    )
+    {
+        insertVb(*pit);
+    }
+
+    label nInserted(number_of_vertices() - preInsertionSize);
+
+    if (Pstream::parRun())
+    {
+        reduce(nInserted, sumOp<label>());
+    }
+
+    Info<< "    " << nInserted << " points inserted" << endl;
+
+    for
+    (
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
+    {
+        if (vit->uninitialised())
+        {
+            vit->index() = nVert++;
+        }
+    }
+}
+
+
 void Foam::conformalVoronoiMesh::insertSurfacePointPairs
 (
     const List<pointIndexHit>& surfaceHits,
@@ -846,7 +961,9 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
 
     timeCheck("After initial points call");
 
-    insertPoints(initPts);
+    // Assume that the initial points method made the correct decision for
+    // which processor each point should be on, so give distribute = false
+    insertPoints(initPts, false);
 
     if(cvMeshControls().objOutput())
     {
@@ -1024,9 +1141,16 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments
 
     storedAlignments_.setSize(sizeAndAlignmentLocations_.size());
 
-    forAll(sizeAndAlignmentLocations_, i)
+    label i = 0;
+
+    for
+    (
+        std::list<Point>::const_iterator pit=storePts.begin();
+        pit != storePts.end();
+        ++pit
+    )
     {
-        sizeAndAlignmentLocations_[i] = topoint(storePts[i]);
+        sizeAndAlignmentLocations_[i] = topoint(*pit);
 
         storedSizes_[i] = cellSizeControl().cellSize
         (
@@ -1035,6 +1159,8 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments
         );
 
         storedAlignments_[i] = requiredAlignment(sizeAndAlignmentLocations_[i]);
+
+        i++;
     }
 
     timeCheck("Sizes and alignments calculated, build tree");
@@ -1844,6 +1970,20 @@ bool Foam::conformalVoronoiMesh::positionOnThisProc
     }
 
     return true;
+}
+
+
+Foam::boolList Foam::conformalVoronoiMesh::positionOnThisProc
+(
+    const Foam::pointField& pts
+) const
+{
+    if (Pstream::parRun())
+    {
+        return decomposition_().positionOnThisProcessor(pts);
+    }
+
+    return boolList(pts.size(), true);
 }
 
 

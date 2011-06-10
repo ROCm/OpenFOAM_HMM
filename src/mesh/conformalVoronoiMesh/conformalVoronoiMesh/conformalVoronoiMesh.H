@@ -258,9 +258,14 @@ private:
             const label type
         );
 
-        //- Insert a std::vector of CGAL Points using the CGAL range insertion
-        //  method
-        inline void insertPoints(const std::vector<Point>& points);
+        //- Insert CGAL Points using the CGAL range insertion method,
+        //  optionally check processor occupancy and distribute to other
+        //  processors
+        void insertPoints
+        (
+            std::list<Point>& points,
+            bool distribute = true
+        );
 
         //- Insert a point-pair at a ppDist distance either side of
         //  surface point surfPt, in the direction n
@@ -812,6 +817,9 @@ public:
 
         //- Check if the point is in the domain handled by this processor
         bool positionOnThisProc(const Foam::point& pt) const;
+
+        //- Check if the point is in the domain handled by this processor
+        boolList positionOnThisProc(const Foam::pointField& pts) const;
 
         //- Which processor's domain handles this point
         labelList positionProc(const Foam::pointField& pts) const;

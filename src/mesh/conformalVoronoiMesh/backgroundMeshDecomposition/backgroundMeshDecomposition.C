@@ -1055,6 +1055,18 @@ Foam::backgroundMeshDecomposition::distribute
     return mapDist;
 }
 
+void Foam::backgroundMeshDecomposition::distributePoints
+(
+    List<point>& points
+) const
+{
+    labelList toProc(processorPosition(points));
+
+    autoPtr<mapDistribute> map(buildMap(toProc));
+
+    map().distribute(points);
+}
+
 
 bool Foam::backgroundMeshDecomposition::positionOnThisProcessor
 (
@@ -1064,6 +1076,22 @@ bool Foam::backgroundMeshDecomposition::positionOnThisProcessor
     return
         bFTreePtr_().getVolumeType(pt)
      == indexedOctree<treeDataBPatch>::INSIDE;
+}
+
+
+Foam::boolList Foam::backgroundMeshDecomposition::positionOnThisProcessor
+(
+    const List<point>& pts
+) const
+{
+    boolList posProc(pts.size(), true);
+
+    forAll(pts, pI)
+    {
+        posProc[pI] = positionOnThisProcessor(pts[pI]);
+    }
+
+    return posProc;
 }
 
 

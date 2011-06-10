@@ -210,8 +210,14 @@ public:
             List<DynamicList<point> >& cellVertices
         );
 
+        //- Distribute supplied the points to the appropriate processor
+        void distributePoints(List<point>& points) const;
+
         //- Is the given position inside the domain of this decomposition
         bool positionOnThisProcessor(const point& pt) const;
+
+        //- Are the given positions inside the domain of this decomposition
+        boolList positionOnThisProcessor(const List<point>& pts) const;
 
         //- Find nearest intersection of line between start and end, (exposing
         //  underlying indexedOctree)
