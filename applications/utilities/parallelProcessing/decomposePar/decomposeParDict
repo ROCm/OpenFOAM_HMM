@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
+|  \\    /   O peration     | Version:  2.0.0                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -11,10 +11,8 @@ FoamFile
     format      ascii;
     class       dictionary;
     note        "mesh decomposition control dictionary";
-    location    "system";
     object      decomposeParDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 numberOfSubdomains  8;
@@ -108,15 +106,12 @@ manualCoeffs
     dataFile    "decompositionData";
 }
 
-
 structuredCoeffs
 {
     // Patches to do 2D decomposition on. Structured mesh only; cells have
     // to be in 'columns' on top of patches.
     patches     (bottomPatch);
 }
-
-
 
 //// Is the case distributed
 //distributed     yes;
@@ -126,6 +121,5 @@ structuredCoeffs
 //    "/tmp"
 //    "/tmp"
 //);
-
 
 // ************************************************************************* //

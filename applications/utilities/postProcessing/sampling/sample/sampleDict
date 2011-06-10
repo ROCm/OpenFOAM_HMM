@@ -1,20 +1,17 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
+|  \\    /   O peration     | Version:  2.0.0                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-    class           dictionary;
-    location        system;
-    object          sampleDict;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      sampleDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Set output format : choice of
@@ -48,7 +45,6 @@ formatOptions
     }
 }
 
-
 // interpolationScheme. choice of
 //      cell          : use cell-centre value only; constant over cells (default)
 //      cellPoint     : use cell-centre and vertex values
@@ -64,7 +60,6 @@ fields
     p
     U
 );
-
 
 // Set sampling definition: choice of
 //      uniform             evenly distributed points on line
@@ -119,7 +114,6 @@ sets
     }
 
 );
-
 
 // Surface sampling definition
 //
@@ -246,6 +240,5 @@ surfaces
         interpolate true;
     }
 );
-
 
 // *********************************************************************** //
