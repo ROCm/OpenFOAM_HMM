@@ -327,17 +327,6 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define defineParcelTypeNameAndDebug(Type, DebugSwitch)                       \
-    template<>                                                                \
-    const Foam::word DsmcParcel<Type>::typeName(#Type);                       \
-    template<>                                                                \
-    int DsmcParcel<Type>::debug                                               \
-    (                                                                         \
-        Foam::debug::debugSwitch(#Type, DebugSwitch)                          \
-    );
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #ifdef NoRepository
     #include "DsmcParcel.C"
 #endif
