@@ -687,17 +687,6 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define defineParcelTypeNameAndDebug(Type, DebugSwitch)                       \
-    template<>                                                                \
-    const Foam::word KinematicParcel<Type>::typeName(#Type);                  \
-    template<>                                                                \
-    int KinematicParcel<Type>::debug                                          \
-    (                                                                         \
-        Foam::debug::debugSwitch(#Type, DebugSwitch)                          \
-    );
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #ifdef NoRepository
     #include "KinematicParcel.C"
 #endif

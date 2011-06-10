@@ -24,51 +24,12 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "coalCloud.H"
-
-#include "makeParcelCloudFunctionObjects.H"
-
-// Kinematic
-#include "makeThermoParcelForces.H" // thermo variant
-#include "makeParcelDispersionModels.H"
-#include "makeReactingMultiphaseParcelInjectionModels.H" // MP variant
-#include "makeParcelPatchInteractionModels.H"
-
-// Thermodynamic
-#include "makeParcelHeatTransferModels.H"
-
-// Reacting
-#include "makeReactingMultiphaseParcelCompositionModels.H" // MP variant
-#include "makeReactingParcelPhaseChangeModels.H"
-#include "makeReactingParcelSurfaceFilmModels.H"
-
-// Reacting multiphase
-#include "makeReactingMultiphaseParcelDevolatilisationModels.H"
-
-// Coal specific
 #include "makeCoalParcelSurfaceReactionModels.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeParcelCloudFunctionObjects(coalCloud);
-
-    // Kinematic sub-models
-    makeThermoParcelForces(coalCloud);
-    makeParcelDispersionModels(coalCloud);
-    makeReactingMultiphaseParcelInjectionModels(coalCloud);
-    makeParcelPatchInteractionModels(coalCloud);
-
-    // Thermo sub-models
-    makeParcelHeatTransferModels(coalCloud);
-
-    // Reacting sub-models
-    makeReactingMultiphaseParcelCompositionModels(coalCloud);
-    makeReactingParcelPhaseChangeModels(coalCloud);
-
-    // Reacting multiphase sub-models
-    makeReactingMultiphaseParcelDevolatilisationModels(coalCloud);
-    makeReactingParcelSurfaceFilmModels(coalCloud);
     makeCoalParcelSurfaceReactionModels(coalCloud);
 }
 
