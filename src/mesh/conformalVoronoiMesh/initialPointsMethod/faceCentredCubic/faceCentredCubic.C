@@ -56,7 +56,7 @@ faceCentredCubic::faceCentredCubic
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-std::vector<Vb::Point> faceCentredCubic::initialPoints() const
+std::list<Vb::Point> faceCentredCubic::initialPoints() const
 {
     const boundBox& bb = cvMesh_.geometryToConformTo().globalBounds();
 
@@ -80,7 +80,7 @@ std::vector<Vb::Point> faceCentredCubic::initialPoints() const
 
     scalar pert = randomPerturbationCoeff_*cmptMin(delta);
 
-    std::vector<Vb::Point> initialPoints;
+    std::list<Vb::Point> initialPoints;
 
     List<bool> isSurfacePoint(4*nk, false);
 

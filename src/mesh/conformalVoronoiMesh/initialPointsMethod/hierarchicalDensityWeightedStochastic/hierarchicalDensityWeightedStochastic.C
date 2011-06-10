@@ -71,7 +71,7 @@ void Foam::hierarchicalDensityWeightedStochastic::writeOBJ
 
 void Foam::hierarchicalDensityWeightedStochastic::recurseAndFill
 (
-    std::vector<Vb::Point>& initialPoints,
+    std::list<Vb::Point>& initialPoints,
     const treeBoundBox& bb,
     label levelLimit,
     word recursionName
@@ -165,7 +165,7 @@ void Foam::hierarchicalDensityWeightedStochastic::recurseAndFill
 
 bool Foam::hierarchicalDensityWeightedStochastic::fillBox
 (
-    std::vector<Vb::Point>& initialPoints,
+    std::list<Vb::Point>& initialPoints,
     const treeBoundBox& bb,
     bool overlapping
 ) const
@@ -753,7 +753,7 @@ hierarchicalDensityWeightedStochastic::hierarchicalDensityWeightedStochastic
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-std::vector<Vb::Point>
+std::list<Vb::Point>
 hierarchicalDensityWeightedStochastic::initialPoints() const
 {
     const conformationSurfaces& geometry = cvMesh_.geometryToConformTo();
@@ -763,7 +763,7 @@ hierarchicalDensityWeightedStochastic::initialPoints() const
         cvMesh_.rndGen(), 1e-6
     );
 
-    std::vector<Vb::Point> initialPoints;
+    std::list<Vb::Point> initialPoints;
 
     Info<< nl << "    " << typeName << endl;
 

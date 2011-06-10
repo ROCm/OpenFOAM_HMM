@@ -222,7 +222,7 @@ public:
         ) const;
 
         //- What processor is the given position on?
-        labelList processorPosition(const pointField& pts) const;
+        labelList processorPosition(const List<point>& pts) const;
 
         //- Which processors are intersected by the line segment, returns all
         //  processors whose boundary patch is intersected by the sphere.  By
@@ -232,8 +232,8 @@ public:
         //  processor index.
         List<List<pointIndexHit> > intersectsProcessors
         (
-            const pointField& starts,
-            const pointField& ends,
+            const List<point>& starts,
+            const List<point>& ends,
             bool includeOwnProcessor = false
         ) const;
 
@@ -244,8 +244,8 @@ public:
         //  processor.
         labelListList overlapsProcessors
         (
-            const pointField& centres,
-            const scalarField& radiusSqrs,
+            const List<point>& centres,
+            const List<scalar>& radiusSqrs,
             bool includeOwnProcessor = false
         ) const;
 

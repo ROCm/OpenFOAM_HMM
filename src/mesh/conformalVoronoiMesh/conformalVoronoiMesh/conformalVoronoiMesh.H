@@ -378,10 +378,10 @@ private:
 
         //- Store data for sizeAndAlignmentLocations_, storedSizes_ and
         //  storedAlignments_ and initialise the sizeAndAlignmentTreePtr_
-        void storeSizesAndAlignments(const std::vector<Point>& storePts);
+        void storeSizesAndAlignments(const std::list<Point>& storePts);
 
         //- Restore the sizes and alignments if required
-        void updateSizesAndAlignments(const std::vector<Point>& storePts);
+        void updateSizesAndAlignments(const std::list<Point>& storePts);
 
         //- Demand driven construction of octree for and alignment points
         const indexedOctree<treeDataPoint>& sizeAndAlignmentTree() const;

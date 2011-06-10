@@ -51,7 +51,7 @@ pointFile::pointFile
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-std::vector<Vb::Point> pointFile::initialPoints() const
+std::list<Vb::Point> pointFile::initialPoints() const
 {
     pointIOField points
     (
@@ -69,7 +69,7 @@ std::vector<Vb::Point> pointFile::initialPoints() const
 
     if (points.empty())
     {
-        FatalErrorIn("std::vector<Vb::Point> pointFile::initialPoints() const")
+        FatalErrorIn("std::list<Vb::Point> pointFile::initialPoints() const")
             << "Point file contain no points"
             << exit(FatalError) << endl;
     }
@@ -116,7 +116,7 @@ std::vector<Vb::Point> pointFile::initialPoints() const
 
     inplaceSubset(procPt, points);
 
-    std::vector<Vb::Point> initialPoints;
+    std::list<Vb::Point> initialPoints;
 
     Field<bool> insidePoints = cvMesh_.geometryToConformTo().wellInside
     (

@@ -56,7 +56,7 @@ uniformGrid::uniformGrid
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-std::vector<Vb::Point> uniformGrid::initialPoints() const
+std::list<Vb::Point> uniformGrid::initialPoints() const
 {
     const boundBox& bb = cvMesh_.geometryToConformTo().globalBounds();
 
@@ -80,7 +80,7 @@ std::vector<Vb::Point> uniformGrid::initialPoints() const
 
     scalar pert = randomPerturbationCoeff_*cmptMin(delta);
 
-    std::vector<Vb::Point> initialPoints;
+    std::list<Vb::Point> initialPoints;
 
     List<bool> isSurfacePoint(nk, false);
 

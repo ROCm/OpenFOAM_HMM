@@ -85,7 +85,7 @@ public:
     // Member Functions
 
         //- Return the initial points for the conformalVoronoiMesh
-        virtual std::vector<Vb::Point> initialPoints() const;
+        virtual std::list<Vb::Point> initialPoints() const;
 };
 
 

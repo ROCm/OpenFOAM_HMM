@@ -64,13 +64,13 @@ densityWeightedStochastic::densityWeightedStochastic
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-std::vector<Vb::Point> densityWeightedStochastic::initialPoints() const
+std::list<Vb::Point> densityWeightedStochastic::initialPoints() const
 {
     const boundBox& bb = cvMesh_.geometryToConformTo().globalBounds();
 
     Random& rndGen = cvMesh_.rndGen();
 
-    std::vector<Vb::Point> initialPoints;
+    std::list<Vb::Point> initialPoints;
 
     scalar volumeAdded = 0.0;
 

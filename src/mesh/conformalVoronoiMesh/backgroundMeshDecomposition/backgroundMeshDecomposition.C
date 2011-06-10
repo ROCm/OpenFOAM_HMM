@@ -635,7 +635,7 @@ void Foam::backgroundMeshDecomposition::buildPatchAndTree()
         );
 
         const faceList& faces = boundaryFacesPtr_().localFaces();
-        const pointField& points = boundaryFacesPtr_().localPoints();
+        const List<point>& points = boundaryFacesPtr_().localPoints();
 
         Map<label> foamToObj(points.size());
 
@@ -1079,7 +1079,7 @@ Foam::pointIndexHit Foam::backgroundMeshDecomposition::findLine
 
 Foam::labelList Foam::backgroundMeshDecomposition::processorPosition
 (
-    const pointField& pts
+    const List<point>& pts
 ) const
 {
     DynamicList<label> toCandidateProc;
@@ -1164,7 +1164,7 @@ Foam::labelList Foam::backgroundMeshDecomposition::processorPosition
                 "Foam::labelList"
                 "Foam::backgroundMeshDecomposition::processorPosition"
                 "("
-                    "const pointField& pts"
+                    "const List<point>& pts"
                 ") const"
             )
                 << "The position " << pts[pI]
@@ -1180,8 +1180,8 @@ Foam::labelList Foam::backgroundMeshDecomposition::processorPosition
 Foam::List<Foam::List<Foam::pointIndexHit> >
 Foam::backgroundMeshDecomposition::intersectsProcessors
 (
-    const pointField& starts,
-    const pointField& ends,
+    const List<point>& starts,
+    const List<point>& ends,
     bool includeOwnProcessor
 ) const
 {
@@ -1293,8 +1293,8 @@ Foam::backgroundMeshDecomposition::intersectsProcessors
 
 Foam::labelListList Foam::backgroundMeshDecomposition::overlapsProcessors
 (
-    const pointField& centres,
-    const scalarField& radiusSqrs,
+    const List<point>& centres,
+    const List<scalar>& radiusSqrs,
     bool includeOwnProcessor
 ) const
 {

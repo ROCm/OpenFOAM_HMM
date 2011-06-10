@@ -842,7 +842,7 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
 
     timeCheck("Before initial points call");
 
-    std::vector<Point> initPts = initialPointsMethod_->initialPoints();
+    std::list<Point> initPts = initialPointsMethod_->initialPoints();
 
     timeCheck("After initial points call");
 
@@ -980,7 +980,7 @@ void Foam::conformalVoronoiMesh::distribute()
 
         Info<< nl << "    Inserting distributed tessellation" << endl;
 
-        std::vector<Point> pointsToInsert;
+        std::list<Point> pointsToInsert;
 
         forAll(cellVertices, cI)
         {
@@ -1011,7 +1011,7 @@ void Foam::conformalVoronoiMesh::distribute()
 
 void Foam::conformalVoronoiMesh::storeSizesAndAlignments
 (
-    const std::vector<Point>& storePts
+    const std::list<Point>& storePts
 )
 {
     timeCheck("Start of storeSizesAndAlignments");
@@ -1047,7 +1047,7 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments
 
 void Foam::conformalVoronoiMesh::updateSizesAndAlignments
 (
-    const std::vector<Point>& storePts
+    const std::list<Point>& storePts
 )
 {
     if
@@ -1510,7 +1510,7 @@ void Foam::conformalVoronoiMesh::move()
 
     PackedBoolList pointToBeRetained(startOfSurfacePoints_, true);
 
-    std::vector<Point> pointsToInsert;
+    std::list<Point> pointsToInsert;
 
     label pointsAdded = 0;
 

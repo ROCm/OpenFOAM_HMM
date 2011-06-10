@@ -138,7 +138,7 @@ public:
         }
 
         //- Return the initial points for the conformalVoronoiMesh
-        virtual std::vector<Vb::Point> initialPoints() const = 0;
+        virtual std::list<Vb::Point> initialPoints() const = 0;
 };
 
 

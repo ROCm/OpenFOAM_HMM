@@ -56,7 +56,7 @@ bodyCentredCubic::bodyCentredCubic
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-std::vector<Vb::Point> bodyCentredCubic::initialPoints() const
+std::list<Vb::Point> bodyCentredCubic::initialPoints() const
 {
     const boundBox& bb = cvMesh_.geometryToConformTo().globalBounds();
 
@@ -80,7 +80,7 @@ std::vector<Vb::Point> bodyCentredCubic::initialPoints() const
 
     scalar pert = randomPerturbationCoeff_*cmptMin(delta);
 
-    std::vector<Vb::Point> initialPoints;
+    std::list<Vb::Point> initialPoints;
 
     List<bool> isSurfacePoint(2*nk, false);
 
