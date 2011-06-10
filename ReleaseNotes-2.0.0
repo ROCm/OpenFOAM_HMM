@@ -297,6 +297,8 @@
        triSurfaceMesh).
     + =nearWallFields=: constructs field with on selected patches interpolated
        internal field for further postprocessing.
+    + =partialWrite=: write some fields every time step (e.g. for
+       postprocessing) and others only every so often (for restart)
     + =coded=: uses the dynamic code compilation from =#codeStream=
     to provide an in-line functionObject. E.g.
     #+BEGIN_SRC c++
