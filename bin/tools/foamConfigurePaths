@@ -107,13 +107,13 @@ do
         shift 2
         ;;
    --projectVersion)
-        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-        projectVersion="$2"
-        # replace WM_PROJECT_VERSION=...
-        _inlineSed \
-            etc/bashrc \
-            '/^[^#]/s@WM_PROJECT_VERSION=.*@WM_PROJECT_VERSION='"$projectVersion@" \
-            "Replacing WM_PROJECT_VERSION setting by $projectVersion"
+#        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+#        projectVersion="$2"
+#        # replace WM_PROJECT_VERSION=...
+#        _inlineSed \
+#            etc/bashrc \
+#            '/^[^#]/s@WM_PROJECT_VERSION=.*@WM_PROJECT_VERSION='"$projectVersion@" \
+#            "Replacing WM_PROJECT_VERSION setting by $projectVersion"
         shift 2
         ;;
     -archOption | --archOption)
