@@ -170,9 +170,6 @@ class backgroundMeshDecomposition
         //- Build the surface patch and search tree
         void buildPatchAndTree();
 
-        //- Build a mapDistribute for the supplied destination processor data
-        autoPtr<mapDistribute> buildMap(const List<label>& toProc) const;
-
         //- Disallow default bitwise copy construct
         backgroundMeshDecomposition(const backgroundMeshDecomposition&);
 
@@ -202,6 +199,9 @@ public:
 
     // Member Functions
 
+        //- Build a mapDistribute for the supplied destination processor data
+        static autoPtr<mapDistribute> buildMap(const List<label>& toProc);
+
         //- Redistribute the background mesh based on a supplied weight field,
         //  returning a map to use to redistribute vertices.
         autoPtr<mapDistributePolyMesh> distribute
@@ -211,7 +211,7 @@ public:
         );
 
         //- Distribute supplied the points to the appropriate processor
-        void distributePoints(List<point>& points) const;
+        autoPtr<mapDistribute> distributePoints(List<point>& points) const;
 
         //- Is the given position inside the domain of this decomposition
         bool positionOnThisProcessor(const point& pt) const;

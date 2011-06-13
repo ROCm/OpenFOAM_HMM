@@ -36,6 +36,93 @@ defineTypeNameAndDebug(backgroundMeshDecomposition, 0);
 }
 
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::mapDistribute> Foam::backgroundMeshDecomposition::buildMap
+(
+    const List<label>& toProc
+)
+{
+    // Determine send map
+    // ~~~~~~~~~~~~~~~~~~
+
+    // 1. Count
+    labelList nSend(Pstream::nProcs(), 0);
+
+    forAll(toProc, i)
+    {
+        label procI = toProc[i];
+
+        nSend[procI]++;
+    }
+
+    // Send over how many I need to receive
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    labelListList sendSizes(Pstream::nProcs());
+
+    sendSizes[Pstream::myProcNo()] = nSend;
+
+    combineReduce(sendSizes, UPstream::listEq());
+
+    // 2. Size sendMap
+    labelListList sendMap(Pstream::nProcs());
+
+    forAll(nSend, procI)
+    {
+        sendMap[procI].setSize(nSend[procI]);
+
+        nSend[procI] = 0;
+    }
+
+    // 3. Fill sendMap
+    forAll(toProc, i)
+    {
+        label procI = toProc[i];
+
+        sendMap[procI][nSend[procI]++] = i;
+    }
+
+    // Determine receive map
+    // ~~~~~~~~~~~~~~~~~~~~~
+
+    labelListList constructMap(Pstream::nProcs());
+
+    // Local transfers first
+    constructMap[Pstream::myProcNo()] = identity
+    (
+        sendMap[Pstream::myProcNo()].size()
+    );
+
+    label constructSize = constructMap[Pstream::myProcNo()].size();
+
+    forAll(constructMap, procI)
+    {
+        if (procI != Pstream::myProcNo())
+        {
+            label nRecv = sendSizes[procI][Pstream::myProcNo()];
+
+            constructMap[procI].setSize(nRecv);
+
+            for (label i = 0; i < nRecv; i++)
+            {
+                constructMap[procI][i] = constructSize++;
+            }
+        }
+    }
+
+    return autoPtr<mapDistribute>
+    (
+        new mapDistribute
+        (
+            constructSize,
+            sendMap.xfer(),
+            constructMap.xfer()
+        )
+    );
+}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::backgroundMeshDecomposition::initialRefinement()
@@ -667,92 +754,6 @@ void Foam::backgroundMeshDecomposition::buildPatchAndTree()
 }
 
 
-Foam::autoPtr<Foam::mapDistribute> Foam::backgroundMeshDecomposition::buildMap
-(
-    const List<label>& toProc
-) const
-{
-    // Determine send map
-    // ~~~~~~~~~~~~~~~~~~
-
-    // 1. Count
-    labelList nSend(Pstream::nProcs(), 0);
-
-    forAll(toProc, i)
-    {
-        label procI = toProc[i];
-
-        nSend[procI]++;
-    }
-
-    // Send over how many I need to receive
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    labelListList sendSizes(Pstream::nProcs());
-
-    sendSizes[Pstream::myProcNo()] = nSend;
-
-    combineReduce(sendSizes, UPstream::listEq());
-
-    // 2. Size sendMap
-    labelListList sendMap(Pstream::nProcs());
-
-    forAll(nSend, procI)
-    {
-        sendMap[procI].setSize(nSend[procI]);
-
-        nSend[procI] = 0;
-    }
-
-    // 3. Fill sendMap
-    forAll(toProc, i)
-    {
-        label procI = toProc[i];
-
-        sendMap[procI][nSend[procI]++] = i;
-    }
-
-    // Determine receive map
-    // ~~~~~~~~~~~~~~~~~~~~~
-
-    labelListList constructMap(Pstream::nProcs());
-
-    // Local transfers first
-    constructMap[Pstream::myProcNo()] = identity
-    (
-        sendMap[Pstream::myProcNo()].size()
-    );
-
-    label constructSize = constructMap[Pstream::myProcNo()].size();
-
-    forAll(constructMap, procI)
-    {
-        if (procI != Pstream::myProcNo())
-        {
-            label nRecv = sendSizes[procI][Pstream::myProcNo()];
-
-            constructMap[procI].setSize(nRecv);
-
-            for (label i = 0; i < nRecv; i++)
-            {
-                constructMap[procI][i] = constructSize++;
-            }
-        }
-    }
-
-    return autoPtr<mapDistribute>
-    (
-        new mapDistribute
-        (
-            constructSize,
-            sendMap.xfer(),
-            constructMap.xfer()
-        )
-    );
-}
-
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
@@ -1055,7 +1056,8 @@ Foam::backgroundMeshDecomposition::distribute
     return mapDist;
 }
 
-void Foam::backgroundMeshDecomposition::distributePoints
+Foam::autoPtr<Foam::mapDistribute>
+Foam::backgroundMeshDecomposition::distributePoints
 (
     List<point>& points
 ) const
@@ -1065,6 +1067,8 @@ void Foam::backgroundMeshDecomposition::distributePoints
     autoPtr<mapDistribute> map(buildMap(toProc));
 
     map().distribute(points);
+
+    return map;
 }
 
 

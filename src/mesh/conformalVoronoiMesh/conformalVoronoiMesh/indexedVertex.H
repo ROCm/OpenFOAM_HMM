@@ -52,7 +52,9 @@ class indexedVertex
 {
     // Private data
 
-        //- The index for this Delaunay vertex
+        //- The index for this Delaunay vertex.  For referred vertices, the
+        //  index is negative for vertices that are the outer (slave) of point
+        //  pairs
         int index_;
 
         //- type of pair-point   :
