@@ -72,8 +72,7 @@ relaxationFactors
 {
     "p.*"           0.3;
     "rho.*"         1;
-    "(U|h|k|epsilon|omega)" 0.7;
-    "(U|h|k|epsilon|omega)Final" 1;
+    "(U|h|k|epsilon|omega).*" 0.7;
 }
 
 
