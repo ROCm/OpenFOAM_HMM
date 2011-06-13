@@ -365,7 +365,9 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
         // Each of points generated in this process are pair points, so there
         // is no risk of underflowing type.
 
-        Pout<< "Suface point pair points before " << pts.size() << endl;
+        // Pout<< "Suface point pair points before "
+        //     << pts.size() << " " << indices.size() << " " << types.size()
+        //     << endl;
 
         // Distribute points to their appropriate processor
         autoPtr<mapDistribute> map
@@ -373,11 +375,18 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
             decomposition_().distributePoints(pts)
         );
 
-        Pout<< "Suface point pair points after " << pts.size() << endl;
-
         map().distribute(indices);
         map().distribute(types);
+
+        // Pout<< "Suface point pair points after "
+        //     << pts.size() << " " << indices.size() << " " << types.size()
+        //     << endl;
+
+        // Info<< returnReduce(pts.size(), sumOp<label>())
+        //     << " points generated" << endl;
     }
+
+    Info<< "USING INDEX IS POINTLESS, IT IS ALWAYS ZERO" << endl;
 
     forAll(pts, pI)
     {

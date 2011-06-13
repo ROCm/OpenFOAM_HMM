@@ -267,6 +267,15 @@ private:
             bool distribute = true
         );
 
+        //- Insert a point-pair at a ppDist distance either side of
+        //  surface point surfPt, in the direction n
+        inline void insertPointPair
+        (
+            const scalar ppDist,
+            const Foam::point& surfPt,
+            const vector& n
+        );
+
         //- Create a point-pair at a ppDist distance either side of
         //  surface point surfPt, in the direction n
         inline void createPointPair

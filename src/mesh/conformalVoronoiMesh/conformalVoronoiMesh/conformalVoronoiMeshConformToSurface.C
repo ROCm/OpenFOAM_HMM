@@ -616,8 +616,6 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceAll
 {
     // Refer all points to all processors
 
-    boolList sendToProc(Pstream::nProcs(), false);
-
     DynamicList<Foam::point> parallelAllPoints;
     DynamicList<label> targetProcessor;
     DynamicList<label> parallelAllIndices;
@@ -684,8 +682,6 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceIntersection
     const word& outputName
 )
 {
-    boolList sendToProc(Pstream::nProcs(), false);
-
     DynamicList<Foam::point> parallelIntersectionPoints;
     DynamicList<label> targetProcessor;
     DynamicList<label> parallelIntersectionIndices;
@@ -1141,7 +1137,7 @@ void Foam::conformalVoronoiMesh::referVertices
         }
     }
 
-    Info<< "    total " << stageName << " vertices " << totalVertices << endl;
+    Info<< "    Total " << stageName << " vertices " << totalVertices << endl;
 }
 
 
