@@ -267,13 +267,16 @@ private:
             bool distribute = true
         );
 
-        //- Insert a point-pair at a ppDist distance either side of
+        //- Create a point-pair at a ppDist distance either side of
         //  surface point surfPt, in the direction n
-        inline void insertPointPair
+        inline void createPointPair
         (
             const scalar ppDist,
             const Foam::point& surfPt,
-            const vector& n
+            const vector& n,
+            DynamicList<Foam::point>& pts,
+            DynamicList<label>& indices,
+            DynamicList<label>& types
         );
 
         //- Insert a Vb (a typedef of CGAL::indexedVertex<K>) with the
@@ -823,7 +826,7 @@ public:
             const scalarField& radiusSqrs
         ) const;
 
-        //- Conversion functions between point (OpenFOAM) and Point (CGAL)
+        //- Conversion functions between point (FOAM::) and Point (CGAL)
 
 #       ifdef CGAL_INEXACT
             typedef const Foam::point& pointFromPoint;

@@ -252,6 +252,12 @@ public:
     }
 
 
+    inline static int encodeProcIndex(int procI)
+    {
+        return -(procI + 1);
+    }
+
+
     //- Set the point to be internal
     inline void setInternal()
     {

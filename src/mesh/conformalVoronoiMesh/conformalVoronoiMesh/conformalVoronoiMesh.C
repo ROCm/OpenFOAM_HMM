@@ -244,7 +244,10 @@ void Foam::conformalVoronoiMesh::insertPoints
 
         // Send the points that are not on this processor to the appropriate
         // place
-        decomposition_().distributePoints(transferPoints);
+        Foam::autoPtr<Foam::mapDistribute> map
+        (
+            decomposition_().distributePoints(transferPoints)
+        );
 
         forAll(transferPoints, tPI)
         {
@@ -269,7 +272,7 @@ void Foam::conformalVoronoiMesh::insertPoints
 
     label nVert = number_of_vertices();
 
-    Info<< "TEMPORARILY USING INDIVIDUAL INSERTION" << endl;
+    Info<< "TEMPORARILY USING INDIVIDUAL INSERTION TO DETECT FAILURE" << endl;
     // using the range insert (faster than inserting points one by one)
     // insert(points.begin(), points.end());
     for
@@ -322,6 +325,10 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
             << exit(FatalError);
     }
 
+    DynamicList<Foam::point> pts;
+    DynamicList<label> indices;
+    DynamicList<label> types;
+
     forAll(surfaceHits, i)
     {
         vectorField norm(1);
@@ -336,24 +343,58 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
 
         const Foam::point& surfacePt(surfaceHits[i].hitPoint());
 
-        insertPointPair
+        createPointPair
         (
             pointPairDistance(surfacePt),
             surfacePt,
-            normal
+            normal,
+            pts,
+            indices,
+            types
+        );
+    }
+
+    if (Pstream::parRun())
+    {
+        // The link between vertices that form the boundary via pairs cannot be
+        // strict because both points may end up on different processors.  The
+        // only important thing is that each vertex knows its own role.
+        // Therefore, index and type are set to 0 or 1, then on the destination
+        // processor add back the new index to both.
+
+        // Each of points generated in this process are pair points, so there
+        // is no risk of underflowing type.
+
+        Pout<< "Suface point pair points before " << pts.size() << endl;
+
+        // Distribute points to their appropriate processor
+        autoPtr<mapDistribute> map
+        (
+            decomposition_().distributePoints(pts)
+        );
+
+        Pout<< "Suface point pair points after " << pts.size() << endl;
+
+        map().distribute(indices);
+        map().distribute(types);
+    }
+
+    forAll(pts, pI)
+    {
+        // creation of points and indices is done assuming that it will be
+        // relative to the instantaneous number_of_vertices() at insertion.
+
+        insertPoint
+        (
+            pts[pI],
+            indices[pI] + number_of_vertices(),
+            types[pI] + number_of_vertices()
         );
     }
 
     if(cvMeshControls().objOutput() && fName != fileName::null)
     {
-        List<Foam::point> surfacePts(surfaceHits.size());
-
-        forAll(surfacePts, i)
-        {
-            surfacePts[i] = surfaceHits[i].hitPoint();
-        }
-
-        writePoints(fName, surfacePts);
+        writePoints(fName, pts);
     }
 }
 
@@ -965,6 +1006,8 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
 
     Info<< "NEED TO CHANGE storeSizesAndAlignments AFTER DISTRIBUTE" << endl;
     Info<< "NEED TO MAP FEATURE POINTS AFTER DISTRIBUTE" << endl;
+    Info<< "NEED TO ENSURE THAT FEATURE POINTS ARE INSERTED ON THE "
+        << "CORRECT PRCOESSOR" << endl;
 
     storeSizesAndAlignments(initPts);
 }
@@ -1065,10 +1108,13 @@ void Foam::conformalVoronoiMesh::distribute()
 
         forAll(cellVertices, cI)
         {
+            // Give a small but finite weight for empty cells.  Some
+            // decomposition methods have difficulty with integer overflows in
+            // the sum of the normalised weight field.
             cellWeights.internalField()[cI] = max
             (
                 cellVertices[cI].size(),
-                1e-2       // Small but finite weight for empty cells
+                1e-2
             );
         }
 

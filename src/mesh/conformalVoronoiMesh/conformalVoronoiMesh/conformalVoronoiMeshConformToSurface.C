@@ -1120,7 +1120,7 @@ void Foam::conformalVoronoiMesh::referVertices
                 {
                     // For the initial referred vertices, the original
                     // processor is the one that is sending it.
-                    label encodedProcI = -(procI + 1);
+                    label encodedProcI = Vb::encodeProcIndex(procI);
 
                     // Pout<< "Insert "
                     //     << parallelPoints[constructMap[i]]

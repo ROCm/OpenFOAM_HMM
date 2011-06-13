@@ -257,22 +257,27 @@ inline void Foam::conformalVoronoiMesh::insertPoint
 }
 
 
-inline void Foam::conformalVoronoiMesh::insertPointPair
+inline void Foam::conformalVoronoiMesh::createPointPair
 (
     const scalar ppDist,
     const Foam::point& surfPt,
-    const vector& n
+    const vector& n,
+    DynamicList<Foam::point>& pts,
+    DynamicList<label>& indices,
+    DynamicList<label>& types
 )
 {
     vector ppDistn = ppDist*n;
 
-    label master = insertPoint
-    (
-        surfPt - ppDistn,
-        number_of_vertices() + 1
-    );
+    // Master
+    pts.append(surfPt - ppDistn);
+    indices.append(0);
+    types.append(1);
 
-    insertPoint(surfPt + ppDistn, master);
+    // Slave
+    pts.append(surfPt + ppDistn);
+    types.append(1);
+    types.append(0);
 }
 
 
