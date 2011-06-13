@@ -198,7 +198,14 @@ public:
     //- Is point internal, i.e. not on boundary
     inline bool internalPoint() const
     {
-        return type_ <= ptInternalPoint;
+        return internalPoint(type_);
+    }
+
+
+    //- Is point internal, i.e. not on boundary, external query.
+    inline static bool internalPoint(int type)
+    {
+        return type <= ptInternalPoint;
     }
 
 
@@ -276,14 +283,19 @@ public:
     //- Master of a pointPair is the lowest numbered one.
     inline bool ppMaster() const
     {
-        if (index_ >= 0 && type_ > index_)
+        return ppMaster(index_, type_);
+    }
+
+
+    //- Master of a pointPair is the lowest numbered one, external query.
+    inline static bool ppMaster(int index, int type)
+    {
+        if (index >= 0 && type > index)
         {
             return true;
         }
-        else
-        {
-            return false;
-        }
+
+        return false;
     }
 
 
@@ -304,9 +316,15 @@ public:
     //- Either original internal point or master of pointPair.
     inline bool internalOrBoundaryPoint() const
     {
-        return internalPoint() || ppMaster();
+        return internalOrBoundaryPoint(index_, type_);
     }
 
+
+    //- Either original internal point or master of pointPair, external query.
+    inline static bool internalOrBoundaryPoint(int index, int type)
+    {
+        return internalPoint(type) || ppMaster(index, type);
+    }
 
     //- Is point near the boundary or part of the boundary definition
     inline bool nearOrOnBoundary() const
