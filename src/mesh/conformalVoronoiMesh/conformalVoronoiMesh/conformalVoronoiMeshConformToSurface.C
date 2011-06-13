@@ -236,14 +236,14 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
     label maxIterations =
         cvMeshControls().maxConformationIterations(reconfMode);
 
-    scalar iterationToIntialHitRatioLimit =
-        cvMeshControls().iterationToIntialHitRatioLimit(reconfMode);
+    scalar iterationToInitialHitRatioLimit =
+        cvMeshControls().iterationToInitialHitRatioLimit(reconfMode);
 
-    label hitLimit = label(iterationToIntialHitRatioLimit*initialTotalHits);
+    label hitLimit = label(iterationToInitialHitRatioLimit*initialTotalHits);
 
     Info<< nl << "Stopping iterations when: " << nl
         <<"    total number of hits drops below "
-        << iterationToIntialHitRatioLimit << " of initial hits ("
+        << iterationToInitialHitRatioLimit << " of initial hits ("
         << hitLimit << ")" << nl
         << " or " << nl
         << "    maximum number of iterations ("
@@ -568,8 +568,9 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
 
     Info<< nl << "Parallel interface construction" << endl;
 
-    // Hard coded switch, can be turned on for debugging purposes and all
-    // vertices will be referred to all processors.
+    // Hard coded switch, can be turned on for testing and debugging purposes -
+    // all vertices will be referred to all processors, use with caution for
+    // big cases.
     bool allPointReferral = false;
 
     if (allPointReferral)
@@ -584,6 +585,11 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
 
     if (initialEdgeReferral)
     {
+        // Used as an initial pass to localise the vertex referring - find
+        // vertices whose dual edges pierce nearby processor volumes and refer
+        // them to establish a sensible boundary interface region before
+        // running a circumsphere assessment.
+
         buildParallelInterfaceIntersection
         (
             referralVertices,
@@ -684,40 +690,175 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceIntersection
     DynamicList<label> targetProcessor;
     DynamicList<label> parallelIntersectionIndices;
 
-    // Initial pass - find vertices whose dual edges pierce nearby
-    // processor volumes and refer them to establish a sensible boundary
-    // interface region before running a circumsphere assessment.
+    // End points of dual edges.  Some of these values will not be used,
+    // i.e. for edges with non-real vertices.
+    pointField dE0(number_of_facets(), vector::zero);
+    pointField dE1(number_of_facets(), vector::zero);
+
+    label fI = 0;
+
     for
     (
-        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-        vit != finite_vertices_end();
-        vit++
+        Delaunay::Finite_facets_iterator fit = finite_facets_begin();
+        fit != finite_facets_end();
+        ++fit
     )
     {
-        if (vit->internalOrBoundaryPoint())
-        {
-            parallelInterfaceIntersection(vit, sendToProc);
+        const Cell_handle c1(fit->first);
+        // oppositeVertex number
+        const int oV = fit->second;
+        const Cell_handle c2(c1->neighbor(oV));
 
-            forAll(sendToProc, procI)
+        // If either Delaunay cell at the end of the Dual edge is infinite,
+        // skip.
+        if (is_infinite(c1) || is_infinite(c2))
+        {
+            continue;
+        }
+
+        // The Delaunauy cells at either end of the dual edge need to be real,
+        // i.e. all vertices form part of the internal or boundary definition
+        if
+        (
+            (
+            c1->vertex(oV)->internalOrBoundaryPoint()
+         || c1->vertex(vertex_triple_index(oV, 0))->internalOrBoundaryPoint()
+         || c1->vertex(vertex_triple_index(oV, 1))->internalOrBoundaryPoint()
+         || c1->vertex(vertex_triple_index(oV, 2))->internalOrBoundaryPoint()
+            )
+         && (
+            c2->vertex(oV)->internalOrBoundaryPoint()
+         || c2->vertex(vertex_triple_index(oV, 0))->internalOrBoundaryPoint()
+         || c2->vertex(vertex_triple_index(oV, 1))->internalOrBoundaryPoint()
+         || c2->vertex(vertex_triple_index(oV, 2))->internalOrBoundaryPoint()
+            )
+        )
+        {
+            dE0[fI] = topoint(dual(c1));
+            dE1[fI] = topoint(dual(c2));
+
+            fI++;
+        }
+    }
+
+    dE0.setSize(fI);
+    dE1.setSize(fI);
+
+    // Preform intersections in both directions, as there is no sense
+    // associated with the Dual edge
+    List<List<pointIndexHit> > intersectionForward(intersectsProc(dE0, dE1));
+    List<List<pointIndexHit> > intersectionReverse(intersectsProc(dE1, dE0));
+
+    fI = 0;
+
+    // Relying on the order of iteration of facets being the same as before
+    for
+    (
+        Delaunay::Finite_facets_iterator fit = finite_facets_begin();
+        fit != finite_facets_end();
+        ++fit
+    )
+    {
+        const Cell_handle c1(fit->first);
+        // oppositeVertex number
+        const int oV = fit->second;
+        const Cell_handle c2(c1->neighbor(oV));
+
+        // If either Delaunay cell at the end of the Dual edge is infinite,
+        // skip.
+        if (is_infinite(c1) || is_infinite(c2))
+        {
+            continue;
+        }
+
+        // The Delaunauy cells at either end of the dual edge need to be real,
+        // i.e. all vertices form part of the internal or boundary definition
+        if
+        (
+            (
+            c1->vertex(oV)->internalOrBoundaryPoint()
+         || c1->vertex(vertex_triple_index(oV, 0))->internalOrBoundaryPoint()
+         || c1->vertex(vertex_triple_index(oV, 1))->internalOrBoundaryPoint()
+         || c1->vertex(vertex_triple_index(oV, 2))->internalOrBoundaryPoint()
+            )
+         && (
+            c2->vertex(oV)->internalOrBoundaryPoint()
+         || c2->vertex(vertex_triple_index(oV, 0))->internalOrBoundaryPoint()
+         || c2->vertex(vertex_triple_index(oV, 1))->internalOrBoundaryPoint()
+         || c2->vertex(vertex_triple_index(oV, 2))->internalOrBoundaryPoint()
+            )
+        )
+        {
+            const Foam::point a = dE0[fI];
+            const Foam::point b = dE1[fI];
+
+            scalar hitDistSqr = GREAT;
+            label closestHitProc = -1;
+            scalar closestHitDistSqr = GREAT;
+
+            // Find the closest intersection with the other background meshes
+            // of the other processors in each direction, finding the closest.
+            forAll(intersectionForward[fI], iFI)
             {
-                if (sendToProc[procI])
+                const pointIndexHit& info = intersectionForward[fI][iFI];
+
+                if (info.hit())
                 {
-                    label vIndex = vit->index();
+                    // Line was a -> hit
+                    hitDistSqr = magSqr(a - info.hitPoint());
+                }
+
+                if (hitDistSqr < closestHitDistSqr)
+                {
+                    closestHitProc = info.index();
+                    closestHitDistSqr = hitDistSqr;
+                }
+            }
+
+            forAll(intersectionReverse[fI], iRI)
+            {
+                const pointIndexHit& info = intersectionReverse[fI][iRI];
+
+                if (info.hit())
+                {
+                    // Line was b -> hit
+                    hitDistSqr = magSqr(b - info.hitPoint());
+                }
+
+                if (hitDistSqr < closestHitDistSqr)
+                {
+                    closestHitProc = info.index();
+                    closestHitDistSqr = hitDistSqr;
+                }
+            }
+
+            if (closestHitProc >= 0)
+            {
+                // This dual edge pierces a processor, refer all vertices from
+                // both Delaunauy cells to it.
+
+                for (int i = 0; i < 4; i++)
+                {
+                    Vertex_handle v = c1->vertex(i);
+
+                    label vIndex = v->index();
+
+                    if (v->farPoint() || v->referred())
+                    {
+                        continue;
+                    }
 
                     // Using the hashSet to ensure that each vertex is only
                     // referred once to each processor
-                    if (!referralVertices[procI].found(vIndex))
+                    if (!referralVertices[closestHitProc].found(vIndex))
                     {
-                        referralVertices[procI].insert(vIndex);
+                        referralVertices[closestHitProc].insert(vIndex);
 
-                        parallelIntersectionPoints.append
-                        (
-                            topoint(vit->point())
-                        );
+                        parallelIntersectionPoints.append(topoint(v->point()));
 
-                        targetProcessor.append(procI);
+                        targetProcessor.append(closestHitProc);
 
-                        if (vit->internalOrBoundaryPoint())
+                        if (v->internalOrBoundaryPoint())
                         {
                             parallelIntersectionIndices.append(vIndex);
                         }
@@ -729,11 +870,51 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceIntersection
                         // Pout<< "Refer "
                         //     << parallelIntersectionPoints.last()
                         //     << " " << parallelIntersectionIndices.last()
-                        //     << " " << procI
+                        //     << " " << closestHitProc
+                        //     << endl;
+                    }
+                }
+
+                for (int i = 0; i < 4; i++)
+                {
+                    Vertex_handle v = c2->vertex(i);
+
+                    label vIndex = v->index();
+
+                    if (v->farPoint() || v->referred())
+                    {
+                        continue;
+                    }
+
+                    // Using the hashSet to ensure that each vertex is only
+                    // referred once to each processor
+                    if (!referralVertices[closestHitProc].found(vIndex))
+                    {
+                        referralVertices[closestHitProc].insert(vIndex);
+
+                        parallelIntersectionPoints.append(topoint(v->point()));
+
+                        targetProcessor.append(closestHitProc);
+
+                        if (v->internalOrBoundaryPoint())
+                        {
+                            parallelIntersectionIndices.append(vIndex);
+                        }
+                        else
+                        {
+                            parallelIntersectionIndices.append(-vIndex);
+                        }
+
+                        // Pout<< "Refer "
+                        //     << parallelIntersectionPoints.last()
+                        //     << " " << parallelIntersectionIndices.last()
+                        //     << " " << closestHitProc
                         //     << endl;
                     }
                 }
             }
+
+            fI++;
         }
     }
 
@@ -1040,96 +1221,6 @@ void Foam::conformalVoronoiMesh::referVertices
     }
 
     Info<< "    total " << stageName << " vertices " << totalVertices << endl;
-}
-
-
-void Foam::conformalVoronoiMesh::parallelInterfaceIntersection
-(
-    const Delaunay::Finite_vertices_iterator& vit,
-    boolList& toProc
-) const
-{
-    toProc = false;
-
-    Foam::point vert(topoint(vit->point()));
-
-    std::list<Facet> facets;
-    incident_facets(vit, std::back_inserter(facets));
-
-    for
-    (
-        std::list<Facet>::iterator fit=facets.begin();
-        fit != facets.end();
-        ++fit
-    )
-    {
-        if
-        (
-            is_infinite(fit->first)
-         || is_infinite(fit->first->neighbor(fit->second))
-        )
-        {
-            continue;
-        }
-
-        Foam::point dE0 = topoint(dual(fit->first));
-        Foam::point dE1 = topoint(dual(fit->first->neighbor(fit->second)));
-
-        Foam::point boxPt = vector::one*GREAT;
-        scalar hitDistSqr = GREAT;
-        bool intersects = false;
-
-        label closestHitProc = -1;
-        scalar closestHitDistSqr = GREAT;
-
-        // forAll(geometryToConformTo_.processorDomains(), procI)
-        // {
-        //     if (procI == Pstream::myProcNo())
-        //     {
-        //         continue;
-        //     }
-
-        //     const treeBoundBoxList& procBbs =
-        //         geometryToConformTo_.processorDomains()[procI];
-
-        //     forAll(procBbs, pBI)
-        //     {
-        //         const treeBoundBox& procBb = procBbs[pBI];
-
-        //         intersects = procBb.intersects(dE0, dE1, boxPt);
-
-        //         if (intersects)
-        //         {
-        //             hitDistSqr = magSqr(vert - boxPt);
-
-        //             if (hitDistSqr < closestHitDistSqr)
-        //             {
-        //                 closestHitProc = procI;
-        //                 closestHitDistSqr = hitDistSqr;
-        //             }
-        //         }
-
-        //         // Perform the query in the opposite direction
-        //         intersects = procBb.intersects(dE1, dE0, boxPt);
-
-        //         if (intersects)
-        //         {
-        //             hitDistSqr = magSqr(vert - boxPt);
-
-        //             if (hitDistSqr < closestHitDistSqr)
-        //             {
-        //                 closestHitProc = procI;
-        //                 closestHitDistSqr = hitDistSqr;
-        //             }
-        //         }
-        //     }
-        // }
-
-        if (closestHitProc >= 0)
-        {
-            toProc[closestHitProc] = true;
-        }
-    }
 }
 
 

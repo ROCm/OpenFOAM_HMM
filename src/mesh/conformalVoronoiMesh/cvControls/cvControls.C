@@ -133,9 +133,9 @@ Foam::cvControls::cvControls
         coarseDict.lookup("maxIterations")
     );
 
-    iterationToIntialHitRatioLimit_coarse_ = readScalar
+    iterationToInitialHitRatioLimit_coarse_ = readScalar
     (
-        coarseDict.lookup("iterationToIntialHitRatioLimit")
+        coarseDict.lookup("iterationToInitialHitRatioLimit")
     );
 
     // Controls for fine surface conformation
@@ -192,9 +192,9 @@ Foam::cvControls::cvControls
         fineDict.lookup("maxIterations")
     );
 
-    iterationToIntialHitRatioLimit_fine_ = readScalar
+    iterationToInitialHitRatioLimit_fine_ = readScalar
     (
-        fineDict.lookup("iterationToIntialHitRatioLimit")
+        fineDict.lookup("iterationToInitialHitRatioLimit")
     );
 
     // Motion control controls
@@ -479,25 +479,25 @@ Foam::label Foam::cvControls::maxConformationIterations
 }
 
 
-Foam::scalar Foam::cvControls::iterationToIntialHitRatioLimit
+Foam::scalar Foam::cvControls::iterationToInitialHitRatioLimit
 (
     int reconfMode
 ) const
 {
     if (reconfMode == conformalVoronoiMesh::rmCoarse)
     {
-        return iterationToIntialHitRatioLimit_coarse_;
+        return iterationToInitialHitRatioLimit_coarse_;
     }
 
     else if (reconfMode == conformalVoronoiMesh::rmFine)
     {
-        return iterationToIntialHitRatioLimit_fine_;
+        return iterationToInitialHitRatioLimit_fine_;
     }
     else
     {
         FatalErrorIn
         (
-            "Foam::cvControls::iterationToIntialHitRatioLimit"
+            "Foam::cvControls::iterationToInitialHitRatioLimit"
             "("
                 "int reconfMode"
             ") const"

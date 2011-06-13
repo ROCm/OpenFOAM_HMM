@@ -503,15 +503,6 @@ private:
             const word& outputName
         );
 
-        //- Check to see if dual cell specified by given vertex iterator can
-        //  influence the parallel interface, hence needs referred.  Returns
-        //  destination processor(s).
-        void parallelInterfaceIntersection
-        (
-            const Delaunay::Finite_vertices_iterator& vit,
-            boolList& toProc
-        ) const;
-
         //- Find the "worst" protrusion of a dual cell through the surface,
         //  subject to the maxSurfaceProtrusion tolerance
         void dualCellLargestSurfaceProtrusion

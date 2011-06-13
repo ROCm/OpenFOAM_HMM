@@ -131,7 +131,7 @@ class cvControls
                 //  conformation iterations.  When the number of
                 //  surface protrusions drops below this ratio of the
                 //  initial number of protrusions.
-                scalar iterationToIntialHitRatioLimit_coarse_;
+                scalar iterationToInitialHitRatioLimit_coarse_;
 
 
             // Controls for fine surface conformation
@@ -168,7 +168,7 @@ class cvControls
                 //  iterations.  When the number of surface protrusions
                 //  drops below this ratio of the initial number of
                 //  protrusions.
-                scalar iterationToIntialHitRatioLimit_fine_;
+                scalar iterationToInitialHitRatioLimit_fine_;
 
 
     // Motion control controls
@@ -349,9 +349,9 @@ public:
             //  reconformationMode.
             label maxConformationIterations(int reconfMode) const;
 
-            //- Return the iterationToIntialHitRatioLimit for the
+            //- Return the iterationToInitialHitRatioLimit for the
             //  given reconformationMode.
-            scalar iterationToIntialHitRatioLimit(int reconfMode) const;
+            scalar iterationToInitialHitRatioLimit(int reconfMode) const;
 
             //- Return the objOutput Switch
             inline Switch objOutput() const;
