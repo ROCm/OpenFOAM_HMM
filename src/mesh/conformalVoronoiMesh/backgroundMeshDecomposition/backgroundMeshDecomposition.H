@@ -114,6 +114,10 @@ class backgroundMeshDecomposition
         //- The bounds of all background meshes on all processors
         treeBoundBoxList allBackgroundMeshBounds_;
 
+        //- The overall bounds of all of the background meshes, used to test if
+        //  a point that is not found on any processor is in the domain at all
+        treeBoundBox globalBackgroundBounds_;
+
         //- Decomposition dictionary
         IOdictionary decomposeDict_;
 
@@ -229,6 +233,9 @@ public:
 
         //- What processor is the given position on?
         labelList processorPosition(const List<point>& pts) const;
+
+        //- What is the nearest processor to the given position?
+        labelList processorNearestPosition(const List<point>& pts) const;
 
         //- Which processors are intersected by the line segment, returns all
         //  processors whose boundary patch is intersected by the sphere.  By

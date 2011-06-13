@@ -486,12 +486,6 @@ private:
             const word& outputName
         );
 
-        //- Build map to refer vertices to target processors
-        mapDistribute buildReferringMap
-        (
-            const DynamicList<label>& targetProcessor
-        ) const;
-
         //- Refer vertices to their required processors
         void referVertices
         (
@@ -673,7 +667,7 @@ private:
         ) const;
 
         //- Collapse a face to an edge, updating the point and point
-        //- map.  Returns the collapse mode that was applied.
+        // map.  Returns the collapse mode that was applied.
         faceCollapseMode collapseFace
         (
             const face& f,

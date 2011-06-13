@@ -1992,13 +1992,6 @@ Foam::labelList Foam::conformalVoronoiMesh::positionProc
         return labelList(pts.size(), -1);
     }
 
-    List<List<pointIndexHit> > inter = decomposition_().intersectsProcessors
-    (
-        pts,
-        pts + vector::one,
-        false
-    );
-
     return decomposition_().processorPosition(pts);
 }
 

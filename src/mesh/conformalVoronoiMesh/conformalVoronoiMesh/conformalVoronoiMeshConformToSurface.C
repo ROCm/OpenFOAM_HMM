@@ -1065,88 +1065,6 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
 }
 
 
-Foam::mapDistribute Foam::conformalVoronoiMesh::buildReferringMap
-(
-    const DynamicList<label>& targetProcessor
-) const
-{
-    // Determine send map
-    // ~~~~~~~~~~~~~~~~~~
-
-    // 1. Count
-    labelList nSend(Pstream::nProcs(), 0);
-
-    forAll(targetProcessor, i)
-    {
-        label procI = targetProcessor[i];
-
-        nSend[procI]++;
-    }
-
-    // Send over how many I need to receive
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    labelListList sendSizes(Pstream::nProcs());
-
-    sendSizes[Pstream::myProcNo()] = nSend;
-
-    combineReduce(sendSizes, UPstream::listEq());
-
-    // 2. Size sendMap
-    labelListList sendMap(Pstream::nProcs());
-
-    forAll(nSend, procI)
-    {
-        sendMap[procI].setSize(nSend[procI]);
-
-        nSend[procI] = 0;
-    }
-
-    // 3. Fill sendMap
-    forAll(targetProcessor, i)
-    {
-        label procI = targetProcessor[i];
-
-        sendMap[procI][nSend[procI]++] = i;
-    }
-
-    // Determine receive map
-    // ~~~~~~~~~~~~~~~~~~~~~
-
-    labelListList constructMap(Pstream::nProcs());
-
-    // Local transfers first
-    constructMap[Pstream::myProcNo()] = identity
-    (
-        sendMap[Pstream::myProcNo()].size()
-    );
-
-    label constructSize = constructMap[Pstream::myProcNo()].size();
-
-    forAll(constructMap, procI)
-    {
-        if (procI != Pstream::myProcNo())
-        {
-            label nRecv = sendSizes[procI][Pstream::myProcNo()];
-
-            constructMap[procI].setSize(nRecv);
-
-            for (label i = 0; i < nRecv; i++)
-            {
-                constructMap[procI][i] = constructSize++;
-            }
-        }
-    }
-
-    return mapDistribute
-    (
-        constructSize,
-        sendMap.xfer(),
-        constructMap.xfer()
-    );
-}
-
-
 void Foam::conformalVoronoiMesh::referVertices
 (
     const DynamicList<label>& targetProcessor,
@@ -1166,7 +1084,10 @@ void Foam::conformalVoronoiMesh::referVertices
         );
     }
 
-    mapDistribute pointMap = buildReferringMap(targetProcessor);
+    mapDistribute pointMap = backgroundMeshDecomposition::buildMap
+    (
+        targetProcessor
+    );
 
     label totalVertices = parallelPoints.size();
 

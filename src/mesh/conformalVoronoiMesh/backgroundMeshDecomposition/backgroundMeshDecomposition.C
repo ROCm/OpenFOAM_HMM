@@ -711,6 +711,17 @@ void Foam::backgroundMeshDecomposition::buildPatchAndTree()
     Pstream::gatherList(allBackgroundMeshBounds_);
     Pstream::scatterList(allBackgroundMeshBounds_);
 
+    point bbMin(GREAT, GREAT, GREAT);
+    point bbMax(-GREAT, -GREAT, -GREAT);
+
+    forAll(allBackgroundMeshBounds_, procI)
+    {
+        bbMin = min(bbMin, allBackgroundMeshBounds_[procI].min());
+        bbMax = max(bbMax, allBackgroundMeshBounds_[procI].max());
+    }
+
+    globalBackgroundBounds_ = treeBoundBox(bbMin, bbMax);
+
     if (debug)
     {
         OFstream fStr
@@ -783,6 +794,7 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
     boundaryFacesPtr_(),
     bFTreePtr_(),
     allBackgroundMeshBounds_(Pstream::nProcs()),
+    globalBackgroundBounds_(),
     decomposeDict_
     (
         IOobject
@@ -1167,6 +1179,9 @@ Foam::labelList Foam::backgroundMeshDecomposition::processorPosition
 
     labelList ptProc(pts.size(), -1);
 
+    DynamicList<label> failedPointIndices;
+    DynamicList<point> failedPoints;
+
     forAll(pts, pI)
     {
         // Extract the sub list of results for this point
@@ -1190,23 +1205,176 @@ Foam::labelList Foam::backgroundMeshDecomposition::processorPosition
 
         if (ptProc[pI] < 0)
         {
-            // No processor was found
+            if (!globalBackgroundBounds_.contains(pts[pI]))
+            {
+                FatalErrorIn
+                (
+                    "Foam::labelList"
+                    "Foam::backgroundMeshDecomposition::processorPosition"
+                    "("
+                        "const List<point>& pts"
+                    ") const"
+                )
+                    << "The position " << pts[pI]
+                    << " is not in any part of the background mesh.  "
+                    << "A background mesh with a wider margin around "
+                    << "the geometry may help."
+                    << exit(FatalError);
+            }
+
+            if (debug)
+            {
+                WarningIn
+                (
+                    "Foam::labelList"
+                    "Foam::backgroundMeshDecomposition::processorPosition"
+                    "("
+                        "const List<point>& pts"
+                    ") const"
+                )
+                    << "The position " << pts[pI]
+                    << " was not found in the background mesh, finding nearest."
+                    << endl;
+            }
+
+            failedPointIndices.append(pI);
+            failedPoints.append(pts[pI]);
+        }
+    }
+
+    labelList ptNearestProc(processorNearestPosition(failedPoints));
+
+    forAll(failedPoints, fPI)
+    {
+        label pI = failedPointIndices[fPI];
+
+        ptProc[pI] = ptNearestProc[fPI];
+    }
+
+    return ptProc;
+}
+
+
+Foam::labelList Foam::backgroundMeshDecomposition::processorNearestPosition
+(
+    const List<point>& pts
+) const
+{
+    DynamicList<label> toCandidateProc;
+    DynamicList<point> testPoints;
+    labelList ptBlockStart(pts.size(), -1);
+    labelList ptBlockSize(pts.size(), -1);
+
+    label nTotalCandidates = 0;
+
+    forAll(pts, pI)
+    {
+        const point& pt = pts[pI];
+
+        label nCandidates = 0;
+
+        forAll(allBackgroundMeshBounds_, procI)
+        {
+            // Candidate points may lie just outside a processor box, increase
+            // test range by using overlaps rather than contains
+            if (allBackgroundMeshBounds_[procI].overlaps(pt, sqr(SMALL*100)))
+            {
+                toCandidateProc.append(procI);
+                testPoints.append(pt);
+
+                nCandidates++;
+            }
+        }
+
+        ptBlockStart[pI] = nTotalCandidates;
+        ptBlockSize[pI] = nCandidates;
+
+        nTotalCandidates += nCandidates;
+    }
+
+    // Needed for reverseDistribute
+    label preDistributionToCandidateProcSize = toCandidateProc.size();
+
+    autoPtr<mapDistribute> map(buildMap(toCandidateProc));
+
+    map().distribute(testPoints);
+
+    List<scalar> distanceSqrToCandidate(testPoints.size(), sqr(GREAT));
+
+    // Test candidate points on candidate processors
+    forAll(testPoints, tPI)
+    {
+        pointIndexHit info = bFTreePtr_().findNearest
+        (
+            testPoints[tPI],
+            sqr(GREAT)
+        );
+
+        if (info.hit())
+        {
+            distanceSqrToCandidate[tPI] = magSqr
+            (
+                testPoints[tPI] - info.hitPoint()
+            );
+        }
+    }
+
+    map().reverseDistribute
+    (
+        preDistributionToCandidateProcSize,
+        distanceSqrToCandidate
+    );
+
+    labelList ptNearestProc(pts.size(), -1);
+
+    forAll(pts, pI)
+    {
+        // Extract the sub list of results for this point
+
+        SubList<scalar> ptNearestProcResults
+        (
+            distanceSqrToCandidate,
+            ptBlockSize[pI],
+            ptBlockStart[pI]
+        );
+
+        scalar nearestProcDistSqr = GREAT;
+
+        forAll(ptNearestProcResults, pPRI)
+        {
+            if (ptNearestProcResults[pPRI] < nearestProcDistSqr)
+            {
+                nearestProcDistSqr = ptNearestProcResults[pPRI];
+
+                ptNearestProc[pI] = toCandidateProc[ptBlockStart[pI] + pPRI];
+            }
+        }
+
+        if (debug)
+        {
+            Pout<< pts[pI] << " nearestProcDistSqr " << nearestProcDistSqr
+                << " ptNearestProc[pI] " << ptNearestProc[pI] << endl;
+        }
+
+        if (ptNearestProc[pI] < 0)
+        {
             FatalErrorIn
             (
                 "Foam::labelList"
-                "Foam::backgroundMeshDecomposition::processorPosition"
+                "Foam::backgroundMeshDecomposition::processorNearestPosition"
                 "("
                     "const List<point>& pts"
                 ") const"
             )
                 << "The position " << pts[pI]
-                << " was not found in any part of the background mesh."
+                << " did not find a nearest point on the background mesh."
                 << exit(FatalError);
         }
     }
 
-    return ptProc;
+    return ptNearestProc;
 }
+
 
 
 Foam::List<Foam::List<Foam::pointIndexHit> >
