@@ -1391,7 +1391,7 @@ void Foam::conformalVoronoiMesh::deferredCollapseFaceSet
 {
     DynamicList<label> faceLabels;
 
-    forAll (neighbour, nI)
+    forAll(neighbour, nI)
     {
         if (deferredCollapseFaces.found(Pair<label>(owner[nI], neighbour[nI])))
         {

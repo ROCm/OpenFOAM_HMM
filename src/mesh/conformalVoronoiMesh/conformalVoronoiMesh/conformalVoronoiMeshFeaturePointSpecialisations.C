@@ -27,10 +27,13 @@ License
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-bool Foam::conformalVoronoiMesh::insertSpecialisedFeaturePoint
+bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
 (
     const extendedFeatureEdgeMesh& feMesh,
-    label ptI
+    label ptI,
+    DynamicList<Foam::point>& pts,
+    DynamicList<label>& indices,
+    DynamicList<label>& types
 )
 {
     const labelList& pEds(feMesh.pointEdges()[ptI]);

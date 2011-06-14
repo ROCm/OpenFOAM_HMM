@@ -255,12 +255,22 @@ private:
             const label type
         );
 
-        //- Insert CGAL Points using the CGAL range insertion method,
+        //- Insert Delaunay vertices using the CGAL range insertion method,
         //  optionally check processor occupancy and distribute to other
         //  processors
         void insertPoints
         (
             std::list<Point>& points,
+            bool distribute = true
+        );
+
+        //- Insert indexed and typed Delaunay vertices, optionally check
+        //  processor occupancy and distribute to other processors
+        void insertPoints
+        (
+            DynamicList<Foam::point>& pts,
+            DynamicList<label>& indices,
+            DynamicList<label>& types,
             bool distribute = true
         );
 
@@ -371,21 +381,39 @@ private:
         //- Determine and insert point groups at the feature points
         void insertFeaturePoints();
 
-        //- Insert point groups at convex feature points
-        void insertConvexFeaturePoints();
+        //- Create point groups at convex feature points
+        void createConvexFeaturePoints
+        (
+            DynamicList<Foam::point>& pts,
+            DynamicList<label>& indices,
+            DynamicList<label>& types
+        );
 
-        //- Insert point groups at concave feature points
-        void insertConcaveFeaturePoints();
+        //- Create point groups at concave feature points
+        void createConcaveFeaturePoints
+        (
+            DynamicList<Foam::point>& pts,
+            DynamicList<label>& indices,
+            DynamicList<label>& types
+        );
 
-        //- Insert point groups at mixed feature points
-        void insertMixedFeaturePoints();
+        //- Create point groups at mixed feature points
+        void createMixedFeaturePoints
+        (
+            DynamicList<Foam::point>& pts,
+            DynamicList<label>& indices,
+            DynamicList<label>& types
+        );
 
-        //- Insert feature point groups if a specialisation exists for the
+        //- Create feature point groups if a specialisation exists for the
         //  structure
-        bool insertSpecialisedFeaturePoint
+        bool createSpecialisedFeaturePoint
         (
             const extendedFeatureEdgeMesh& feMesh,
-            label ptI
+            label ptI,
+            DynamicList<Foam::point>& pts,
+            DynamicList<label>& indices,
+            DynamicList<label>& types
         );
 
         //- Store the locations of all of the features to be conformed to

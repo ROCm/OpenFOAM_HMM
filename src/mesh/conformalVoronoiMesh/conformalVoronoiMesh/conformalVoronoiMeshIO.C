@@ -428,7 +428,7 @@ void Foam::conformalVoronoiMesh::writeObjMesh
         meshTools::writeOBJ(str, points[p]);
     }
 
-    forAll (faces, f)
+    forAll(faces, f)
     {
         str<< 'f';
 

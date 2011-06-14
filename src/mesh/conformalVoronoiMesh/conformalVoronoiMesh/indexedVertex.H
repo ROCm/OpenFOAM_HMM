@@ -395,8 +395,6 @@ public:
     //     this->index_ = vit->index();
 
     //     this->type_ = vit->type();
-
-    //     this->displacementSum_ = vit->displacementSum();
     // }
 };
 

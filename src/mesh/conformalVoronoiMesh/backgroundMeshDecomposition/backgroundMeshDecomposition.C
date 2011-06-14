@@ -971,7 +971,7 @@ Foam::backgroundMeshDecomposition::distribute
                     // This old cell was refined so the cell for the vertices
                     // in the new mesh needs to be searched for.
 
-                    forAll (oldCellVertices, oPI)
+                    forAll(oldCellVertices, oPI)
                     {
                         const point& v = oldCellVertices[oPI];
 

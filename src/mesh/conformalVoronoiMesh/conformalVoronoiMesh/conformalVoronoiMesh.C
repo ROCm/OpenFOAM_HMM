@@ -309,6 +309,64 @@ void Foam::conformalVoronoiMesh::insertPoints
 }
 
 
+void Foam::conformalVoronoiMesh::insertPoints
+(
+    DynamicList<Foam::point>& pts,
+    DynamicList<label>& indices,
+    DynamicList<label>& types,
+    bool distribute
+)
+{
+    if (Pstream::parRun() && distribute)
+    {
+        // The link between vertices that form the boundary via pairs cannot be
+        // strict because both points may end up on different processors.  The
+        // only important thing is that each vertex knows its own role.
+        // Therefore, index and type are set to 0 or 1, then on the destination
+        // processor add back the new index to both.
+
+        // Each of points generated in this process are pair points, so there
+        // is no risk of underflowing "type".
+
+        // Pout<< "Points before "
+        //     << pts.size() << " " << indices.size() << " " << types.size()
+        //     << endl;
+
+        // Distribute points to their appropriate processor
+        autoPtr<mapDistribute> map
+        (
+            decomposition_().distributePoints(pts)
+        );
+
+        map().distribute(indices);
+        map().distribute(types);
+
+        // Pout<< "Points after "
+        //     << pts.size() << " " << indices.size() << " " << types.size()
+        //     << endl;
+
+        // Info<< returnReduce(pts.size(), sumOp<label>())
+        //     << " points in total" << endl;
+    }
+
+    // Using index is actually pointless, it is always zero.  Keep for clarity
+    // of code.
+
+    forAll(pts, pI)
+    {
+        // creation of points and indices is done assuming that it will be
+        // relative to the instantaneous number_of_vertices() at insertion.
+
+        insertPoint
+        (
+            pts[pI],
+            indices[pI] + number_of_vertices(),
+            types[pI] + number_of_vertices()
+        );
+    }
+}
+
+
 void Foam::conformalVoronoiMesh::insertSurfacePointPairs
 (
     const List<pointIndexHit>& surfaceHits,
@@ -354,53 +412,7 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
         );
     }
 
-    if (Pstream::parRun())
-    {
-        // The link between vertices that form the boundary via pairs cannot be
-        // strict because both points may end up on different processors.  The
-        // only important thing is that each vertex knows its own role.
-        // Therefore, index and type are set to 0 or 1, then on the destination
-        // processor add back the new index to both.
-
-        // Each of points generated in this process are pair points, so there
-        // is no risk of underflowing "type".
-
-        // Pout<< "Suface point pair points before "
-        //     << pts.size() << " " << indices.size() << " " << types.size()
-        //     << endl;
-
-        // Distribute points to their appropriate processor
-        autoPtr<mapDistribute> map
-        (
-            decomposition_().distributePoints(pts)
-        );
-
-        map().distribute(indices);
-        map().distribute(types);
-
-        // Pout<< "Suface point pair points after "
-        //     << pts.size() << " " << indices.size() << " " << types.size()
-        //     << endl;
-
-        // Info<< returnReduce(pts.size(), sumOp<label>())
-        //     << " points generated" << endl;
-    }
-
-    // Using index is actually pointless, it is always zero.  Keep for clarity
-    // of code.
-
-    forAll(pts, pI)
-    {
-        // creation of points and indices is done assuming that it will be
-        // relative to the instantaneous number_of_vertices() at insertion.
-
-        insertPoint
-        (
-            pts[pI],
-            indices[pI] + number_of_vertices(),
-            types[pI] + number_of_vertices()
-        );
-    }
+    insertPoints(pts, indices, types, true);
 
     if(cvMeshControls().objOutput() && fName != fileName::null)
     {
@@ -439,42 +451,7 @@ void Foam::conformalVoronoiMesh::insertEdgePointGroups
         createEdgePointGroup(feMesh, edgeHits[i], pts, indices, types);
     }
 
-    if (Pstream::parRun())
-    {
-        // The link between vertices that form the edge via pairs cannot be
-        // strict because both points may end up on different processors.  The
-        // only important thing is that each vertex knows its own role.
-        // Therefore, index and type are set to 0 or +/-1, then on the
-        // destination processor add back the new index to both.
-
-        // Each of points generated in this process are pair points, so there
-        // is no risk of underflowing "type".
-
-        // Distribute points to their appropriate processor
-        autoPtr<mapDistribute> map
-        (
-            decomposition_().distributePoints(pts)
-        );
-
-        map().distribute(indices);
-        map().distribute(types);
-    }
-
-    // Using index is actually pointless, it is always zero.  Keep for clarity
-    // of code.
-
-    forAll(pts, pI)
-    {
-        // creation of points and indices is done assuming that it will be
-        // relative to the instantaneous number_of_vertices() at insertion.
-
-        insertPoint
-        (
-            pts[pI],
-            indices[pI] + number_of_vertices(),
-            types[pI] + number_of_vertices()
-        );
-    }
+    insertPoints(pts, indices, types, true);
 
     if(cvMeshControls().objOutput() && fName != fileName::null)
     {
@@ -769,11 +746,22 @@ void Foam::conformalVoronoiMesh::insertFeaturePoints()
 
     Info<< nl << "Conforming to feature points" << endl;
 
-    insertConvexFeaturePoints();
+    DynamicList<Foam::point> pts;
+    DynamicList<label> indices;
+    DynamicList<label> types;
 
-    insertConcaveFeaturePoints();
+    createConvexFeaturePoints(pts, indices, types);
 
-    insertMixedFeaturePoints();
+    createConcaveFeaturePoints(pts, indices, types);
+
+    createMixedFeaturePoints(pts, indices, types);
+
+    insertPoints(pts, indices, types, true);
+
+    if(cvMeshControls().objOutput())
+    {
+        writePoints("featureVertices.obj", pts);
+    }
 
     label nFeatureVertices = number_of_vertices() - 8;
 
@@ -808,15 +796,15 @@ void Foam::conformalVoronoiMesh::insertFeaturePoints()
     }
 
     constructFeaturePointLocations();
-
-    if(cvMeshControls().objOutput())
-    {
-        writePoints("featureVertices.obj", false);
-    }
 }
 
 
-void Foam::conformalVoronoiMesh::insertConvexFeaturePoints()
+void Foam::conformalVoronoiMesh::createConvexFeaturePoints
+(
+    DynamicList<Foam::point>& pts,
+    DynamicList<label>& indices,
+    DynamicList<label>& types
+)
 {
     const PtrList<extendedFeatureEdgeMesh>& feMeshes
     (
@@ -849,10 +837,30 @@ void Foam::conformalVoronoiMesh::insertConvexFeaturePoints()
             Foam::point internalPt =
                 featPt - pointPairDistance(featPt)*cornerNormal;
 
-            label internalPtIndex =
-                insertPoint(internalPt, number_of_vertices() + 1);
+            // Result when the points are eventually inserted (example n = 4)
+            // Add number_of_vertices() at insertion of first vertex to all
+            // numbers:
+            // pt           index type
+            // internalPt   0     1
+            // externalPt0  1     0
+            // externalPt1  2     0
+            // externalPt2  3     0
+            // externalPt3  4     0
 
-            forAll (featPtNormals, nI)
+            // Pout<< nl << "Convex " << featPtNormals.size() << endl;
+
+            pts.append(internalPt);
+            indices.append(0);
+            types.append(1);
+
+            // Pout<< pts.last() << " "
+            //     << indices.last() + 0 << " "
+            //     << types.last() + 0
+            //     << endl;
+
+            label internalPtIndex = -1;
+
+            forAll(featPtNormals, nI)
             {
                 const vector& n = featPtNormals[nI];
 
@@ -861,14 +869,26 @@ void Foam::conformalVoronoiMesh::insertConvexFeaturePoints()
                 Foam::point externalPt =
                     internalPt + 2.0 * planeN.distance(internalPt) * n;
 
-                insertPoint(externalPt, internalPtIndex);
+                pts.append(externalPt);
+                indices.append(0);
+                types.append(internalPtIndex--);
+
+                // Pout<< pts.last() << " "
+                //     << indices.last() + nI + 1 << " "
+                //     << types.last() + nI + 1
+                //     << endl;
             }
         }
     }
 }
 
 
-void Foam::conformalVoronoiMesh::insertConcaveFeaturePoints()
+void Foam::conformalVoronoiMesh::createConcaveFeaturePoints
+(
+    DynamicList<Foam::point>& pts,
+    DynamicList<label>& indices,
+    DynamicList<label>& types
+)
 {
     const PtrList<extendedFeatureEdgeMesh>& feMeshes
     (
@@ -901,11 +921,22 @@ void Foam::conformalVoronoiMesh::insertConcaveFeaturePoints()
             Foam::point externalPt =
                 featPt + pointPairDistance(featPt)*cornerNormal;
 
-            label externalPtIndex = number_of_vertices() + featPtNormals.size();
+            label externalPtIndex = featPtNormals.size();
 
-            label internalPtIndex = -1;
+            // Result when the points are eventually inserted (example n = 5)
+            // Add number_of_vertices() at insertion of first vertex to all
+            // numbers:
+            // pt           index type
+            // internalPt0  0     5
+            // internalPt1  1     5
+            // internalPt2  2     5
+            // internalPt3  3     5
+            // internalPt4  4     5
+            // externalPt   5     4
 
-            forAll (featPtNormals, nI)
+            // Pout<< nl << "Concave " << featPtNormals.size() << endl;
+
+            forAll(featPtNormals, nI)
             {
                 const vector& n = featPtNormals[nI];
 
@@ -914,16 +945,35 @@ void Foam::conformalVoronoiMesh::insertConcaveFeaturePoints()
                 Foam::point internalPt =
                     externalPt - 2.0 * planeN.distance(externalPt) * n;
 
-                internalPtIndex = insertPoint(internalPt, externalPtIndex);
+                pts.append(internalPt);
+                indices.append(0);
+                types.append(externalPtIndex--);
+
+                // Pout<< pts.last() << " "
+                //     << indices.last() + nI << " "
+                //     << types.last() + nI
+                //     << endl;
             }
 
-            insertPoint(externalPt, internalPtIndex);
+            pts.append(externalPt);
+            indices.append(0);
+            types.append(-1);
+
+            // Pout<< pts.last() << " "
+            //     << indices.last() + featPtNormals.size() << " "
+            //     << types.last() + featPtNormals.size()
+            //     << endl;
         }
     }
 }
 
 
-void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
+void Foam::conformalVoronoiMesh::createMixedFeaturePoints
+(
+    DynamicList<Foam::point>& pts,
+    DynamicList<label>& indices,
+    DynamicList<label>& types
+)
 {
     Info<< "SKIP MIXED FEATURE POINTS" << endl;
 
@@ -945,7 +995,10 @@ void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
             ptI++
         )
         {
-            if (!insertSpecialisedFeaturePoint(feMesh, ptI))
+            if
+            (
+                !createSpecialisedFeaturePoint(feMesh, ptI, pts, indices, types)
+            )
             {
                 // Specialisations available for some mixed feature points.  For
                 // non-specialised feature points, inserting mixed internal and
@@ -1004,7 +1057,7 @@ void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
 
                     pointIndexHit edgeHit(true, edgePt, edgeI);
 
-                    insertEdgePointGroup(feMesh, edgeHit);
+                    createEdgePointGroup(feMesh, edgeHit, pts, indices, types);
                 }
             }
         }
