@@ -775,6 +775,8 @@ void Foam::conformalVoronoiMesh::insertFeaturePoints()
         Info<< "    Inserted " << nFeatureVertices << " vertices" << endl;
     }
 
+    Info<< "SORT OUT FEATURE POINT DISTRIBUTION AND STORAGE" << endl;
+
     featureVertices_.setSize(number_of_vertices());
 
     label featPtI = 0;

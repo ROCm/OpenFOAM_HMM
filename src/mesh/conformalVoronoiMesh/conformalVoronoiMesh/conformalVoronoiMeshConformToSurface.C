@@ -1632,6 +1632,8 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
     {
         keepSurfacePoint = false;
 
+        // If the triggering Vertex is part of a feature point, allow it to
+        // conform to the surface
         if (vit->index() < startOfInternalPoints_)
         {
             surfaceHits.append(surfHit);
