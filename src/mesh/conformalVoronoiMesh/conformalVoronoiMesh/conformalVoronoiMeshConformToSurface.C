@@ -103,8 +103,6 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
         return;
     }
 
-    startOfSurfacePoints_ = number_of_vertices();
-
     // Initialise containers to store the edge conformation locations
     DynamicList<Foam::point> newEdgeLocations;
 
@@ -1376,11 +1374,7 @@ void Foam::conformalVoronoiMesh::reportSurfaceConformationQuality()
             vit++
         )
         {
-            if
-            (
-                vit->index() >= startOfSurfacePoints_
-             && vit->internalOrBoundaryPoint()
-            )
+            if (vit->ppMaster())
             {
                 std::list<Vertex_handle> adjacentVertices;
 
@@ -1407,8 +1401,7 @@ void Foam::conformalVoronoiMesh::reportSurfaceConformationQuality()
                     // The lower indexed vertex will perform the assessment
                     if
                     (
-                        avh->index() >= startOfSurfacePoints_
-                     && avh->internalOrBoundaryPoint()
+                        avh->ppMaster()
                      && vit->index() < avh->index()
                      && vit->type() != avh->type()
                     )
@@ -1733,12 +1726,7 @@ void Foam::conformalVoronoiMesh::storeSurfaceConformation()
 {
     Info<< nl << "Storing surface conformation" << endl;
 
-    surfaceConformationVertices_.setSize
-    (
-        number_of_vertices() - startOfSurfacePoints_
-    );
-
-    label surfPtI = 0;
+    surfaceConformationVertices_.clear();
 
     for
     (
@@ -1747,28 +1735,26 @@ void Foam::conformalVoronoiMesh::storeSurfaceConformation()
         vit++
     )
     {
-        if (!vit->referred() && vit->index() >= startOfSurfacePoints_)
+        if (!vit->referred() && vit->pairPoint())
         {
-            if (!vit->pairPoint())
-            {
-                FatalErrorIn("storeSurfaceConformation()")
-                    << "Trying to store a vertex that is not a surface point"
-                    << exit(FatalError);
-            }
-
-            surfaceConformationVertices_[surfPtI] = Vb(vit->point());
-
-            surfaceConformationVertices_[surfPtI].index() =
-                vit->index() - startOfSurfacePoints_;
-
-            surfaceConformationVertices_[surfPtI].type() =
-                vit->type() - startOfSurfacePoints_;
-
-            surfPtI++;
+            surfaceConformationVertices_.push_back
+            (
+                Vb
+                (
+                    vit->point(),
+                    0,                          // index, reset to zero
+                    vit->type() - vit->index()  // type, relative to index
+                )
+            );
         }
     }
 
-    Info<< "    Stored " << surfaceConformationVertices_.size()
+    Info<< "    Stored "
+        << returnReduce
+        (
+            label(surfaceConformationVertices_.size()),
+            sumOp<label>()
+        )
         << " vertices" << endl;
 }
 
@@ -1777,14 +1763,24 @@ void Foam::conformalVoronoiMesh::reinsertSurfaceConformation()
 {
     Info<< nl << "Reinserting stored surface conformation" << endl;
 
-    startOfSurfacePoints_ = number_of_vertices();
+    label preReinsertionSize(number_of_vertices());
 
-    forAll(surfaceConformationVertices_, v)
+    for
+    (
+        std::list<Vb>::iterator vit=surfaceConformationVertices_.begin();
+        vit != surfaceConformationVertices_.end();
+        ++vit
+    )
     {
-        insertVb(surfaceConformationVertices_[v], startOfSurfacePoints_);
+        insertVb(*vit, number_of_vertices());
     }
 
-    Info<< "    Reinserted " << number_of_vertices() - startOfSurfacePoints_
+    Info<< "    Reinserted "
+        << returnReduce
+        (
+            label(number_of_vertices()) - preReinsertionSize,
+            sumOp<label>()
+        )
         << " vertices" << endl;
 }
 

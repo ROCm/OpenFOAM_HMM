@@ -114,6 +114,16 @@ public:
     {}
 
 
+    indexedVertex(const Point& p, int index, int type)
+    :
+        Vb(p),
+        index_(index),
+        type_(type),
+        alignment_(),
+        targetCellSize_(0.0)
+    {}
+
+
     indexedVertex(const Point& p, Cell_handle f)
     :
         Vb(f, p),

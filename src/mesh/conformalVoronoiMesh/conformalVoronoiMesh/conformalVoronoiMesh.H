@@ -136,11 +136,6 @@ private:
         //  careful bookkeeping within several functions.
         label startOfInternalPoints_;
 
-        //- Keep track of the start of the surface conformation points
-        //  (including those referred for parallel conformation).  Needs -
-        //  careful bookkeeping within several functions.
-        label startOfSurfacePoints_;
-
         //- Store the feature constraining points to be reinserted after a
         //  triangulation clear
         List<Vb> featureVertices_;
@@ -167,7 +162,7 @@ private:
 
         //- Store the surface and feature edge conformation locations to be
         //  reinserted
-        List<Vb> surfaceConformationVertices_;
+        std::list<Vb> surfaceConformationVertices_;
 
         //- Method for inserting initial points.  Runtime selectable.
         autoPtr<initialPointsMethod> initialPointsMethod_;

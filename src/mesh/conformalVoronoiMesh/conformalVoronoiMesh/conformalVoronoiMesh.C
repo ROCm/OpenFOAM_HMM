@@ -1649,7 +1649,6 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         cvMeshDict.subDict("motionControl")
     ),
     startOfInternalPoints_(0),
-    startOfSurfacePoints_(0),
     featureVertices_(),
     featurePointLocations_(),
     featurePointTreePtr_(),
@@ -1781,11 +1780,11 @@ void Foam::conformalVoronoiMesh::move()
 
     vectorField displacementAccumulator
     (
-        startOfSurfacePoints_,
+        number_of_vertices(),
         vector::zero
     );
 
-    PackedBoolList pointToBeRetained(startOfSurfacePoints_, true);
+    PackedBoolList pointToBeRetained(number_of_vertices(), true);
 
     std::list<Point> pointsToInsert;
 
@@ -2083,8 +2082,6 @@ void Foam::conformalVoronoiMesh::move()
     Info<< nl << "Inserting displaced tessellation" << endl;
 
     insertPoints(pointsToInsert);
-
-    startOfSurfacePoints_ = number_of_vertices();
 
     label pointsRemoved =
         displacementAccumulator.size()
