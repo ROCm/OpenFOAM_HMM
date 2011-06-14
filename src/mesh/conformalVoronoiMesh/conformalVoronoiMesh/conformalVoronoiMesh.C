@@ -847,16 +847,9 @@ void Foam::conformalVoronoiMesh::createConvexFeaturePoints
             // externalPt2  3     0
             // externalPt3  4     0
 
-            // Pout<< nl << "Convex " << featPtNormals.size() << endl;
-
             pts.append(internalPt);
             indices.append(0);
             types.append(1);
-
-            // Pout<< pts.last() << " "
-            //     << indices.last() + 0 << " "
-            //     << types.last() + 0
-            //     << endl;
 
             label internalPtIndex = -1;
 
@@ -872,11 +865,6 @@ void Foam::conformalVoronoiMesh::createConvexFeaturePoints
                 pts.append(externalPt);
                 indices.append(0);
                 types.append(internalPtIndex--);
-
-                // Pout<< pts.last() << " "
-                //     << indices.last() + nI + 1 << " "
-                //     << types.last() + nI + 1
-                //     << endl;
             }
         }
     }
@@ -934,8 +922,6 @@ void Foam::conformalVoronoiMesh::createConcaveFeaturePoints
             // internalPt4  4     5
             // externalPt   5     4
 
-            // Pout<< nl << "Concave " << featPtNormals.size() << endl;
-
             forAll(featPtNormals, nI)
             {
                 const vector& n = featPtNormals[nI];
@@ -948,21 +934,11 @@ void Foam::conformalVoronoiMesh::createConcaveFeaturePoints
                 pts.append(internalPt);
                 indices.append(0);
                 types.append(externalPtIndex--);
-
-                // Pout<< pts.last() << " "
-                //     << indices.last() + nI << " "
-                //     << types.last() + nI
-                //     << endl;
             }
 
             pts.append(externalPt);
             indices.append(0);
             types.append(-1);
-
-            // Pout<< pts.last() << " "
-            //     << indices.last() + featPtNormals.size() << " "
-            //     << types.last() + featPtNormals.size()
-            //     << endl;
         }
     }
 }
