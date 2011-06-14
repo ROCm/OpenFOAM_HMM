@@ -43,15 +43,25 @@ Description
 
 using namespace Foam;
 
-// Main program:
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
-
     #include "addRegionOption.H"
+    argList::addOption
+    (
+        "dict",
+        "word",
+        "name of dictionary to provide patch agglomeration controls"
+    );
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedMesh.H"
+
+    word agglomDictName
+    (
+        args.optionLookupOrDefault<word>("dict", "faceAgglomerateDict")
+    );
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
@@ -70,12 +80,12 @@ int main(int argc, char *argv[])
     );
 
 
-    // Read view factor dictionary
-    IOdictionary viewFactorDict
+    // Read control dictionary
+    IOdictionary agglomDict
     (
         IOobject
         (
-            "viewFactorsDict",
+            agglomDictName,
             runTime.constant(),
             mesh,
             IOobject::MUST_READ,
@@ -83,8 +93,7 @@ int main(int argc, char *argv[])
         )
     );
 
-    bool writeAgglo =
-        readBool(viewFactorDict.lookup("writeFacesAgglomeration"));
+    bool writeAgglom = readBool(agglomDict.lookup("writeFacesAgglomeration"));
 
     const polyBoundaryMesh& boundary = mesh.boundaryMesh();
 
@@ -97,13 +106,13 @@ int main(int argc, char *argv[])
 
         if (pp.size() > 0 && !pp.coupled())
         {
-            if (viewFactorDict.found(pp.name()))
+            if (agglomDict.found(pp.name()))
             {
-                Info << "\nAgglomerating name : " << pp.name() << endl;
+                Info << "\nAgglomerating patch : " << pp.name() << endl;
                 pairPatchAgglomeration agglomObject
                 (
                     pp,
-                    viewFactorDict.subDict(pp.name())
+                    agglomDict.subDict(pp.name())
                 );
                 agglomObject.agglomerate();
                 finalAgglom[patchI] =
@@ -111,19 +120,15 @@ int main(int argc, char *argv[])
             }
             else
             {
-                FatalErrorIn
-                (
-                    "main(int argc, char *argv[])"
-                ) << pp.name()
-                << " not found in dictionary : "
-                << viewFactorDict.name()
-                << exit(FatalError);
+                FatalErrorIn(args.executable())
+                    << "Patch " << pp.name() << " not found in dictionary: "
+                    << agglomDict.name() << exit(FatalError);
             }
         }
     }
 
     // Sync agglomeration across coupled patches
-    labelList nbrAgglom(mesh.nFaces()-mesh.nInternalFaces(), -1);
+    labelList nbrAgglom(mesh.nFaces() - mesh.nInternalFaces(), -1);
 
     forAll(boundary, patchId)
     {
@@ -133,7 +138,7 @@ int main(int argc, char *argv[])
             finalAgglom[patchId] = identity(pp.size());
             forAll(pp, i)
             {
-                nbrAgglom[pp.start()-mesh.nInternalFaces()+i] =
+                nbrAgglom[pp.start() - mesh.nInternalFaces() + i] =
                     finalAgglom[patchId][i];
             }
         }
@@ -148,14 +153,14 @@ int main(int argc, char *argv[])
             forAll(pp, i)
             {
                 finalAgglom[patchId][i] =
-                    nbrAgglom[pp.start()-mesh.nInternalFaces()+i];
+                    nbrAgglom[pp.start() - mesh.nInternalFaces() + i];
             }
         }
     }
 
     finalAgglom.write();
 
-    if (writeAgglo)
+    if (writeAgglom)
     {
         volScalarField facesAgglomeration
         (
@@ -183,10 +188,13 @@ int main(int argc, char *argv[])
             }
         }
 
-        Info << "\nWriting  facesAgglomeration..." << endl;
+        Info << "\nWriting  facesAgglomeration" << endl;
         facesAgglomeration.write();
     }
 
     Info<< "End\n" << endl;
     return 0;
 }
+
+
+// ************************************************************************* //

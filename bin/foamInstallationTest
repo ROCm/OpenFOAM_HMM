@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -32,8 +32,6 @@
 #------------------------------------------------------------------------------
 
 # Base settings
-FOAM_VERSION=1.6
-SUPPLIED_VERSION_GCC=4.4.3
 MIN_VERSION_GCC=4.3.3
 
 # General
@@ -247,19 +245,54 @@ reportExecutable()
         VERSION=`$1 -case /dev/null 2>&1      \
             | sed -ne 's/^.*Version: *\([^ ][^ ]*\).*/\1/p'`
         ;;
+    flex)
+        VERSION=`$1 --version /dev/null 2>&1      \
+            | sed -ne 's/flex \([0-9][0-9.]*\).*/\1/p' `
+        ;;
     gcc)
-         VERSION=`$1 -v 2>&1 \
+        VERSION=`$1 -v 2>&1 \
             | sed -ne 's/^gcc version \([0-9][0-9.]*\).*/\1/p' `
 
-        if [ "$VERSION" != "$SUPPLIED_VERSION_GCC" ]
-        then
-            echo "WARNING: gcc version does not match gcc supplied" \
-                 "with this release of OpenFOAM"
-            echo "         Supplied version: $SUPPLIED_VERSION_GCC"
-            echo "         User version    : $VERSION"
-            echo "         Minimum required: $MIN_VERSION_GCC"
-            echo ""
+        MINV1=`echo $MIN_VERSION_GCC | cut -d. -f1`
+        MINV2=`echo $MIN_VERSION_GCC | cut -d. -f2`
+        MINV3=`echo $MIN_VERSION_GCC | cut -d. -f3`
+
+        V1=`echo $VERSION | cut -d. -f1`
+        V2=`echo $VERSION | cut -d. -f2`
+        V3=`echo $VERSION | cut -d. -f3`
+
+
+        gccOK=""
+        pass=""
+        if [ $V1 -lt $MINV1 ]; then
+            gccOk="ERROR"
+        elif [ $V1 -gt $MINV1 ]; then
+            pass="yes"
         fi
+
+        if [ "$pass" == "" ] && [ "$gccOk" == "" ]; then
+            if [ $V2 -lt $MINV2 ]; then
+                gccOk="ERROR"
+            elif [ $V2 -gt $MINV2 ]; then
+                pass="yes"
+            fi
+        fi
+
+        if [ "$pass" == "" ] && [ "$gccOk" == "" ] && [ $V3 != "" ] && [ $MINV3 != "" ]; then
+            if [ $V3 -lt $MINV3 ]; then
+                gccOk="ERROR"
+            fi
+        fi
+
+        if [ "$gccOk" != "" ]; then
+            echo "ERROR: gcc version is too old for this release of OpenFOAM"
+            echo "    User version    : $VERSION"
+            echo "    Minimum required: $MIN_VERSION_GCC"
+            echo ""
+            fatalError=`expr $fatalError + 1`
+        fi
+ 
+
         ;;
     gtar)
         VERSION=`$APP_PATH --version | head -1`
@@ -304,7 +337,7 @@ checkOpenFOAMEnvironment()
         echo "FATAL ERROR: OpenFOAM environment not configured."
         echo ""
         echo "    Please refer to the installation section of the README file:"
-        echo "    <OpenFOAM installation dir>/OpenFOAM-${FOAM_VERSION}/README"
+        echo "    <OpenFOAM installation dir>/OpenFOAM-${WM_PROJECT_VERSION}/README"
         echo "    to source the OpenFOAM environment."
         echo ""
         exit 1
@@ -320,7 +353,7 @@ checkUserShell()
         ;;
     *)
         echo "FATAL ERROR: Cannot identify the shell you are running."
-        echo "             OpenFOAM ${FOAM_VERSION} is compatible with "
+        echo "             OpenFOAM ${WM_PROJECT_VERSION} is compatible with "
         echo "             csh, tcsh, ksh and bash."
         echo
         fatalError=`expr $fatalError + 1`
@@ -336,7 +369,7 @@ checkHostName()
     then
         echo "FATAL ERROR: Cannot stat hostname."
         echo "             Contact your system administrator, "
-        echo "             OpenFOAM ${FOAM_VERSION} needs a valid "
+        echo "             OpenFOAM ${WM_PROJECT_VERSION} needs a valid "
         echo "             hostname to function."
         echo
         fatalError=`expr $fatalError + 1`
@@ -352,7 +385,7 @@ checkOS()
         ;;
     *)
         echo "FATAL ERROR: Incompatible operating system \"$OSTYPE\"."
-        echo "             OpenFOAM $FOAM_VERSION is currently "
+        echo "             OpenFOAM ${FWM_PROJECT_VERSION} is currently "
         echo "             available for Linux and SunOS only."
         echo
         fatalError=`expr $fatalError + 1`
@@ -423,6 +456,7 @@ COL3=`fixlen Location 10`
 hline
 echo "$COL1 $COL2 $COL3"
 hline
+reportExecutable flex
 reportExecutable gcc
 reportExecutable gzip
 if [ "$OSTYPE" = Linux ]
