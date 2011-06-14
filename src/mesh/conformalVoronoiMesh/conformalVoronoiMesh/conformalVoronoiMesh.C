@@ -567,13 +567,6 @@ void Foam::conformalVoronoiMesh::createExternalEdgePointGroup
     indices.append(0);
     types.append(1);
 
-    // Pout<< nl << "External " << endl;
-
-    // Pout<< pts.last() << " "
-    //     << indices.last() << " "
-    //     << types.last()
-    //     << endl;
-
     // Insert the slave points by reflecting refPt in both faces.
     // with each slave refering to the master
 
@@ -582,20 +575,10 @@ void Foam::conformalVoronoiMesh::createExternalEdgePointGroup
     indices.append(0);
     types.append(-1);
 
-    // Pout<< pts.last() << " "
-    //     << indices.last() + 1 << " "
-    //     << types.last() + 1
-    //     << endl;
-
     Foam::point reflectedB = refPt + 2*ppDist*nB;
     pts.append(reflectedB);
     indices.append(0);
     types.append(-2);
-
-    // Pout<< pts.last() << " "
-    //     << indices.last() + 2 << " "
-    //     << types.last() + 2
-    //     << endl;
 }
 
 
@@ -670,22 +653,10 @@ void Foam::conformalVoronoiMesh::createInternalEdgePointGroup
     indices.append(0);
     types.append(reflectedMaster--);
 
-    // Pout<< nl << "Internal nAddPoints " << nAddPoints << endl;
-
-    // Pout<< pts.last() << " "
-    //     << indices.last() << " "
-    //     << types.last()
-    //     << endl;
-
     // Master B is inside.
     pts.append(reflectedB);
     indices.append(0);
     types.append(reflectedMaster--);
-
-    // Pout<< pts.last() << " "
-    //     << indices.last() + 1 << " "
-    //     << types.last() + 1
-    //     << endl;
 
     if (nAddPoints == 1)
     {
@@ -694,11 +665,6 @@ void Foam::conformalVoronoiMesh::createInternalEdgePointGroup
         pts.append(refPt);
         indices.append(0);
         types.append(reflectedMaster--);
-
-        // Pout<< pts.last() << " "
-        //     << indices.last() + 2 << " "
-        //     << types.last() + 2
-        //     << endl;
     }
     else if (nAddPoints == 2)
     {
@@ -707,31 +673,16 @@ void Foam::conformalVoronoiMesh::createInternalEdgePointGroup
         indices.append(0);
         types.append(reflectedMaster--);
 
-        // Pout<< pts.last() << " "
-        //     << indices.last() + 2 << " "
-        //     << types.last() + 2
-        //     << endl;
-
         Foam::point reflectedBb = refPt + ppDist*nA;
         pts.append(reflectedBb);
         indices.append(0);
         types.append(reflectedMaster--);
-
-        // Pout<< pts.last() << " "
-        //     << indices.last() + 3 << " "
-        //     << types.last() + 3
-        //     << endl;
     }
 
     // Slave is outside.
     pts.append(reflMasterPt);
     indices.append(0);
     types.append(-(nAddPoints + 2));
-
-    // Pout<< pts.last() << " "
-    //     << indices.last() + nAddPoints + 2 << " "
-    //     << types.last() + nAddPoints + 2
-    //     << endl;
 }
 
 
