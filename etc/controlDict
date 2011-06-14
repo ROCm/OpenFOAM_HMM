@@ -307,7 +307,7 @@ DebugSwitches
     autoRefineDriver    0;
     autoSnapDriver      0;
     bC11H10             0;
-    backgroundMeshDecomposition 1;
+    backgroundMeshDecomposition 0;
     backward            0;
     basePatch           0;
     basicKinematicCloud 0;
