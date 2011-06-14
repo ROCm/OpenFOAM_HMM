@@ -24,47 +24,18 @@
 <div class="page-container">
   <div class="header">
     <div class="header-top">
-      <div class="round-border-topleft"></div>
-      <div class="round-border-topright"></div>
-      <a class="sitelogo" href="http://www.openfoam.com" title="Home"></a>
+      <a class="sitelogo" href="http://www.openfoam.com" title="Home">
+        <img class=left src="../css/img/OpenFOAMlogo.png">
+      </a>
       <div class="sitename">
-        <h1><a
-          href="http://foam.sourceforge.net/doc/Doxygen/html/"
-          title="Source Guide">Programmer's C++ documentation</a></h1>
+        <h1>
+          <a href="http://foam.sourceforge.net/doc/Doxygen/html/"
+             title="Source Guide">OpenFOAM C++ Documentation
+          </a>
+        </h1>
+        <img class=right src="../css/img/OpenCFDlogo.png">
       </div>
     </div>  <!-- header-top -->
-    <div class="header-bottom">
-      <!-- navigation -->
-      <div class="nav2">
-        <ul>
-          <li>
-          <a href="http://foam.sourceforge.net/doc/Doxygen/html">Source&nbsp;Guide</a>
-          </li>
-        </ul>
-        <ul>
-          <li>
-          <a href="http://www.openfoam.com/features/">Features</a>
-          </li>
-        </ul>
-        <ul>
-          <li>
-          <a href="http://www.openfoam.com/">OpenFOAM</a>
-          </li>
-        </ul>
-        <ul>
-          <li>
-          <a href="http://www.openfoam.com/contact/">Contact</a>
-          </li>
-        </ul>
-        <ul>
-          <li>
-          <a href="http://www.openfoam.com/about/">OpenCFD</a>
-          </li>
-        </ul>
-        </ul>
-
-      </div>  <!-- nav2 -->
-    </div>  <!-- header-bottom -->
   </div>  <!-- header -->
 
   <div class="main">
