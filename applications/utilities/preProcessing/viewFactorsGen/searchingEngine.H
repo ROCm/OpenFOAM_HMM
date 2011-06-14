@@ -24,7 +24,7 @@ dict.add
 dict.add("mergeDistance", SMALL);
 
 labelHashSet includePatches;
-forAll(patches, patchI) //
+forAll(patches, patchI)
 {
     if (!isA<processorPolyPatch>(patches[patchI]))
     {

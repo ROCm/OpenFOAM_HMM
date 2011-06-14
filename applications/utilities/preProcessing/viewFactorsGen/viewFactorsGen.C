@@ -125,7 +125,6 @@ scalar calculateViewFactorFij
         (cosThetaI*cosThetaJ*dAjMag*dAiMag)
        /(sqr(rMag)*constant::mathematical::pi)
     );
-
 }
 
 
@@ -152,7 +151,7 @@ void insertMatrixElements
 }
 
 
-// Main program:
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
@@ -161,7 +160,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createNamedMesh.H"
 
- // Read view factor dictionary
+    // Read view factor dictionary
     IOdictionary viewFactorDict
     (
        IOobject
@@ -180,8 +179,6 @@ int main(int argc, char *argv[])
     const bool dumpRays =
         viewFactorDict.lookupOrDefault<bool>("dumpRays", false);
 
-    // Debug
-    // ~~~~~
     const label debug = viewFactorDict.lookupOrDefault<label>("debug", 0);
 
     volScalarField Qr
@@ -197,7 +194,7 @@ int main(int argc, char *argv[])
         mesh
     );
 
- // Read agglomeration map
+    // Read agglomeration map
     labelListIOList finalAgglom
     (
         IOobject
@@ -211,8 +208,8 @@ int main(int argc, char *argv[])
         )
     );
 
-    // - Create the coarse mesh  using agglomeration //
-    //-----------------------------------------------//
+    // Create the coarse mesh  using agglomeration
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     if (debug)
     {
@@ -234,8 +231,8 @@ int main(int argc, char *argv[])
     );
 
 
-    // - Calculate total number of fine and coarse faces //
-    //---------------------------------------------------//
+    // Calculate total number of fine and coarse faces
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     label nCoarseFaces = 0;      //total number of coarse faces
     label nFineFaces = 0;        //total number of fine faces
@@ -264,7 +261,7 @@ int main(int argc, char *argv[])
 
     viewFactorsPatches.resize(count--);
 
-    //total number of coarse faces
+    // total number of coarse faces
     label totalNCoarseFaces = nCoarseFaces;
 
     reduce(totalNCoarseFaces, sumOp<label>());
@@ -280,8 +277,8 @@ int main(int argc, char *argv[])
              << viewFactorsPatches << endl;
     }
 
-    // - Collect local Cf and Sf on coarse mesh //.
-    //------------------------------------------//
+    // Collect local Cf and Sf on coarse mesh
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     DynamicList<point> localCoarseCf(nCoarseFaces);
     DynamicList<point> localCoarseSf(nCoarseFaces);
@@ -348,8 +345,8 @@ int main(int argc, char *argv[])
         }
     }
 
-    // - Collect remote Cf and Sf on coarse mesh //.
-    //------------------------------------------//
+    // Collect remote Cf and Sf on coarse mesh
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     List<pointField> remoteCoarseCf(Pstream::nProcs());
     List<pointField> remoteCoarseSf(Pstream::nProcs());
@@ -357,8 +354,8 @@ int main(int argc, char *argv[])
     remoteCoarseCf[Pstream::myProcNo()] = localCoarseCf;
     remoteCoarseSf[Pstream::myProcNo()] = localCoarseSf;
 
-    // - Collect remote Cf and Sf on fine mesh //.
-    //------------------------------------------//
+    // Collect remote Cf and Sf on fine mesh
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     List<pointField> remoteFineCf(Pstream::nProcs());
     List<pointField> remoteFineSf(Pstream::nProcs());
@@ -366,8 +363,8 @@ int main(int argc, char *argv[])
     remoteCoarseCf[Pstream::myProcNo()] = localCoarseCf;
     remoteCoarseSf[Pstream::myProcNo()] = localCoarseSf;
 
-    //  Distribute local coarse Cf and Sf for shooting rays
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Distribute local coarse Cf and Sf for shooting rays
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Pstream::gatherList(remoteCoarseCf);
     Pstream::scatterList(remoteCoarseCf);
@@ -377,43 +374,39 @@ int main(int argc, char *argv[])
 
     // Set up searching engine for obstacles
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #   include   "searchingEngine.H"
+    #include "searchingEngine.H"
 
 
     // Determine rays between coarse face centres
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      DynamicList<label> rayStartFace
-      (
-          nCoarseFaces
-          + 0.01*nCoarseFaces
-      );
+    DynamicList<label> rayStartFace(nCoarseFaces + 0.01*nCoarseFaces);
 
-      DynamicList<label> rayEndFace(rayStartFace.size());
+    DynamicList<label> rayEndFace(rayStartFace.size());
 
-      globalIndex globalNumbering(nCoarseFaces);
+    globalIndex globalNumbering(nCoarseFaces);
 
 
-    //- Return rayStartFace in local index andrayEndFace in global index //
-    // ------------------------------------------------------------------//
+    // Return rayStartFace in local index andrayEndFace in global index
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-      #   include   "shootRays.H"
+    #include "shootRays.H"
 
-      // Calculate number of visible faces from local index
-      labelList nVisibleFaceFaces(nCoarseFaces, 0);
+    // Calculate number of visible faces from local index
+    labelList nVisibleFaceFaces(nCoarseFaces, 0);
 
-      forAll(rayStartFace, i)
-      {
-          nVisibleFaceFaces[rayStartFace[i]]++;
-      }
+    forAll(rayStartFace, i)
+    {
+        nVisibleFaceFaces[rayStartFace[i]]++;
+    }
 
-      labelListList visibleFaceFaces(nCoarseFaces);
+    labelListList visibleFaceFaces(nCoarseFaces);
 
-      label nViewFactors = 0;
-      forAll(nVisibleFaceFaces, faceI)
-      {
-          visibleFaceFaces[faceI].setSize(nVisibleFaceFaces[faceI]);
-          nViewFactors += nVisibleFaceFaces[faceI];
-      }
+    label nViewFactors = 0;
+    forAll(nVisibleFaceFaces, faceI)
+    {
+        visibleFaceFaces[faceI].setSize(nVisibleFaceFaces[faceI]);
+        nViewFactors += nVisibleFaceFaces[faceI];
+    }
 
 
     // - Construct compact numbering
@@ -474,9 +467,9 @@ int main(int argc, char *argv[])
     consMapDim.write();
 
 
-    //  visibleFaceFaces has:
-    //  (local face, local viewed face) = compact viewed face
-    //------------------------------------------------------------//
+    // visibleFaceFaces has:
+    //    (local face, local viewed face) = compact viewed face
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     nVisibleFaceFaces = 0;
     forAll(rayStartFace, i)
@@ -489,7 +482,7 @@ int main(int argc, char *argv[])
 
     // Construct data in compact addressing
     // I need coarse Sf (Ai), fine Sf (dAi) and fine Cf(r) to calculate Fij
-    // --------------------------------------------------------------------//
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     pointField compactCoarseCf(map.constructSize(), pTraits<vector>::zero);
     pointField compactCoarseSf(map.constructSize(), pTraits<vector>::zero);
@@ -560,7 +553,7 @@ int main(int argc, char *argv[])
 
 
     // Fill local view factor matrix
-    //-----------------------------
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     scalarListIOList F
     (
@@ -591,7 +584,7 @@ int main(int argc, char *argv[])
 
     if (Pstream::master())
     {
-        Info << "\nCalculating view factors..." << endl;
+        Info<< "\nCalculating view factors..." << endl;
     }
 
     if (mesh.nSolutionD() == 3)
@@ -606,7 +599,7 @@ int main(int argc, char *argv[])
 
             const labelList& visCoarseFaces = visibleFaceFaces[coarseFaceI];
 
-            forAll (visCoarseFaces, visCoarseFaceI)
+            forAll(visCoarseFaces, visCoarseFaceI)
             {
                 F[coarseFaceI].setSize(visCoarseFaces.size());
                 label compactJ = visCoarseFaces[visCoarseFaceI];
@@ -647,7 +640,7 @@ int main(int argc, char *argv[])
         const boundBox& box = mesh.bounds();
         const Vector<label>& dirs = mesh.geometricD();
         vector emptyDir = vector::zero;
-        forAll (dirs, i)
+        forAll(dirs, i)
         {
             if (dirs[i] == -1)
             {
@@ -657,7 +650,7 @@ int main(int argc, char *argv[])
 
         scalar wideBy2 = (box.span() & emptyDir)*2.0;
 
-        forAll (localCoarseSf, coarseFaceI)
+        forAll(localCoarseSf, coarseFaceI)
         {
             const vector& Ai = localCoarseSf[coarseFaceI];
             const vector& Ci = localCoarseCf[coarseFaceI];
@@ -709,10 +702,10 @@ int main(int argc, char *argv[])
 
     if (Pstream::master() && debug)
     {
-        forAll (viewFactorsPatches, i)
+        forAll(viewFactorsPatches, i)
         {
             label patchI =  viewFactorsPatches[i];
-            forAll (viewFactorsPatches, i)
+            forAll(viewFactorsPatches, i)
             {
                 label patchJ =  viewFactorsPatches[i];
                 Info << "F" << patchI << patchJ << ": "
@@ -749,7 +742,7 @@ int main(int argc, char *argv[])
             const labelList& coarsePatchFace =
                 coarseMesh.patchFaceMap()[patchID];
 
-            forAll (coarseToFine, coarseI)
+            forAll(coarseToFine, coarseI)
             {
                 const scalar Fij = sum(F[compactI]);
                 const label coarseFaceID = coarsePatchFace[coarseI];
@@ -857,5 +850,6 @@ int main(int argc, char *argv[])
     Info<< "End\n" << endl;
     return 0;
 }
+
 
 // ************************************************************************* //
