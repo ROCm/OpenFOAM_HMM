@@ -264,6 +264,9 @@ inline void Foam::conformalVoronoiMesh::insertPointPair
     const vector& n
 )
 {
+    Pout<< "insertPointPair is depricated, "
+        << " it does not check parallel insertion." << endl;
+
     vector ppDistn = ppDist*n;
 
     label master = insertPoint
@@ -288,12 +291,20 @@ inline void Foam::conformalVoronoiMesh::createPointPair
 {
     vector ppDistn = ppDist*n;
 
-    // Master
+    // Result when the points are eventually inserted.
+    // Add number_of_vertices() at insertion of first vertex to all numbers:
+    // pt               index type
+    // surfPt - ppDistn 0     1
+    // surfPt + ppDistn 1     0
+
+    // Master, index = number_of_vertices(), type = number_of_vertices() + 1
     pts.append(surfPt - ppDistn);
     indices.append(0);
     types.append(1);
 
-    // Slave
+    // Slave, index = number_of_vertices()(new) + 1, type = index of master.
+    // This will be inserted after the master, so number_of_vertices() will
+    // have increased
     pts.append(surfPt + ppDistn);
     indices.append(0);
     types.append(-1);

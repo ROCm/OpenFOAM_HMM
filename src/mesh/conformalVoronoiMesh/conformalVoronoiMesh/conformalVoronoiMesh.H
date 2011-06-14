@@ -132,11 +132,13 @@ private:
         //- The cell size control object
         cellSizeControlSurfaces cellSizeControl_;
 
-        //- Keep track of the start of the internal points
+        //- Keep track of the start index of the internal points.  Needs
+        //  careful bookkeeping within several functions.
         label startOfInternalPoints_;
 
         //- Keep track of the start of the surface conformation points
-        //  (including those referred for parallel conformation)
+        //  (including those referred for parallel conformation).  Needs -
+        //  careful bookkeeping within several functions.
         label startOfSurfacePoints_;
 
         //- Store the feature constraining points to be reinserted after a
@@ -312,49 +314,67 @@ private:
         );
 
         //- Call the appropriate function to conform to an edge
-        void insertEdgePointGroup
+        void createEdgePointGroup
         (
             const extendedFeatureEdgeMesh& feMesh,
-            const pointIndexHit& edHit
+            const pointIndexHit& edHit,
+            DynamicList<Foam::point>& pts,
+            DynamicList<label>& indices,
+            DynamicList<label>& types
         );
 
-        //- Insert points to conform to an external edge
-        void insertExternalEdgePointGroup
+        //- Create points to conform to an external edge
+        void createExternalEdgePointGroup
         (
             const extendedFeatureEdgeMesh& feMesh,
-            const pointIndexHit& edHit
+            const pointIndexHit& edHit,
+            DynamicList<Foam::point>& pts,
+            DynamicList<label>& indices,
+            DynamicList<label>& types
         );
 
-        //- Insert points to conform to an internal edge
-        void insertInternalEdgePointGroup
+        //- Create points to conform to an internal edge
+        void createInternalEdgePointGroup
         (
             const extendedFeatureEdgeMesh& feMesh,
-            const pointIndexHit& edHit
+            const pointIndexHit& edHit,
+            DynamicList<Foam::point>& pts,
+            DynamicList<label>& indices,
+            DynamicList<label>& types
         );
 
-        //- Insert points to conform to a flat edge
-        void insertFlatEdgePointGroup
+        //- Create points to conform to a flat edge
+        void createFlatEdgePointGroup
         (
             const extendedFeatureEdgeMesh& feMesh,
-            const pointIndexHit& edHit
+            const pointIndexHit& edHit,
+            DynamicList<Foam::point>& pts,
+            DynamicList<label>& indices,
+            DynamicList<label>& types
         );
 
-        //- Insert points to conform to an open edge
-        void insertOpenEdgePointGroup
+        //- Create points to conform to an open edge
+        void createOpenEdgePointGroup
         (
             const extendedFeatureEdgeMesh& feMesh,
-            const pointIndexHit& edHit
+            const pointIndexHit& edHit,
+            DynamicList<Foam::point>& pts,
+            DynamicList<label>& indices,
+            DynamicList<label>& types
         );
 
-        //- Insert points to conform to multiply connected edge
-        void insertMultipleEdgePointGroup
+        //- Create points to conform to multiply connected edge
+        void createMultipleEdgePointGroup
         (
             const extendedFeatureEdgeMesh& feMesh,
-            const pointIndexHit& edHit
+            const pointIndexHit& edHit,
+            DynamicList<Foam::point>& pts,
+            DynamicList<label>& indices,
+            DynamicList<label>& types
         );
 
         //- Determine and insert point groups at the feature points
-        void createFeaturePoints();
+        void insertFeaturePoints();
 
         //- Insert point groups at convex feature points
         void insertConvexFeaturePoints();

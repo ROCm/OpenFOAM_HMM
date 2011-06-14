@@ -722,7 +722,7 @@ void Foam::backgroundMeshDecomposition::buildPatchAndTree()
 
     globalBackgroundBounds_ = treeBoundBox(bbMin, bbMax);
 
-    if (debug)
+    if (cvMesh_.cvMeshControls().objOutput())
     {
         OFstream fStr
         (
