@@ -33,8 +33,6 @@
 
 # STATIC VARIABLES
 # ~~~~~~~~~~~~~~~~
-FOAM_VERSION=1.6
-
 HLINE="-----------------------------------------------------------------------"
 WIDTH=16
 unset fatalError
@@ -92,7 +90,7 @@ case "$SHELL" in
     ;;
 *)
     echo "ERROR: Cannot identify the current shell."
-    echo "       OpenFOAM $FOAM_VERSION is compatible"
+    echo "       OpenFOAM $WM_PROJECT_VERSION is compatible"
     echo "       with csh, tcsh, ksh and bash."
     echo
     fatalError=true
@@ -105,8 +103,8 @@ echo "$(fixlen Host: $WIDTH) $HOST"
 if [ $(length $HOST) -eq 0 ]
 then
     echo "ERROR: Cannot stat hostname."
-    echo "       OpenFOAM $FOAM_VERSION needs a valid hostname to function."
-    echo "       Contact your system administrator. "
+    echo "       OpenFOAM $WM_PROJECT_VERSION needs a valid hostname to"
+    echo "       function. Contact your system administrator."
     echo
     fatalError=true
 fi
@@ -119,7 +117,7 @@ Linux | LinuxAMD64 | SunOS )
     ;;
 *)
     echo "ERROR: Incompatible operating system \"$OSTYPE\"."
-    echo "       OpenFOAM $FOAM_VERSION is currently available for "
+    echo "       OpenFOAM $WM_PROJECT_VERSION is currently available for "
     echo "       Linux, LinuxAMD64 and SunOS only."
     echo
     fatalError=true
@@ -138,7 +136,7 @@ echo "$(fixlen User: $WIDTH) ${USER_NAME}"
 if [ $(length $USER_NAME) -eq 0 ]
 then
     echo "ERROR: Cannot stat user name $USER_NAME."
-    echo "       OpenFOAM $FOAM_VERSION needs a valid user name."
+    echo "       OpenFOAM $WM_PROJECT_VERSION needs a valid user name."
     echo "       Contact your system administrator. "
     echo
     fatalError=true
