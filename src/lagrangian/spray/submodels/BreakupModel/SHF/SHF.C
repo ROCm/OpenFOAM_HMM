@@ -142,7 +142,7 @@ bool Foam::SHF<CloudType>::update
 {
     bool addChild = false;
 
-    scalar d03 = pow(d, 3);
+    scalar d03 = pow3(d);
     scalar rhopi6 = rho*constant::mathematical::pi/6.0;
     scalar mass0 = nParticle*rhopi6*d03;
     scalar mass = mass0;

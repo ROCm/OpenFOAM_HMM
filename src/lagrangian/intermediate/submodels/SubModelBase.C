@@ -91,6 +91,21 @@ const Foam::dictionary& Foam::SubModelBase<CloudType>::coeffDict() const
 
 
 template<class CloudType>
+bool Foam::SubModelBase<CloudType>::defaultCoeffs(const bool printMsg) const
+{
+    bool def = coeffDict_.lookupOrDefault<bool>("defaultCoeffs", false);
+    if (printMsg && def)
+    {
+        Info<< incrIndent;
+        Info<< indent << "Employing default coefficients" << endl;
+        Info<< decrIndent;
+    }
+
+    return def;
+}
+
+
+template<class CloudType>
 CloudType& Foam::SubModelBase<CloudType>::owner()
 {
     return owner_;
@@ -105,7 +120,7 @@ bool Foam::SubModelBase<CloudType>::active() const
 
 
 template<class CloudType>
-void  Foam::SubModelBase<CloudType>::cacheFields(const bool)
+void Foam::SubModelBase<CloudType>::cacheFields(const bool)
 {
     // do nothing
 }
