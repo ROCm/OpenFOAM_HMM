@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -92,12 +92,6 @@ inline const Foam::labelList& Foam::basicSource::cells() const
 }
 
 
-inline Foam::word& Foam::basicSource::name()
-{
-    return name_;
-}
-
-
 inline bool& Foam::basicSource::active()
 {
     return active_;
@@ -113,31 +107,6 @@ inline Foam::scalar& Foam::basicSource::timeStart()
 inline Foam::scalar& Foam::basicSource::duration()
 {
     return duration_;
-}
-
-
-inline Foam::word& Foam::basicSource::cellSetName()
-{
-    return cellSetName_;
-}
-
-
-inline Foam::basicSource::selectionModeType&
-Foam::basicSource::selectionMode()
-{
-    return selectionMode_;
-}
-
-
-inline Foam::scalar& Foam::basicSource::V()
-{
-    return V_;
-}
-
-
-inline Foam::labelList& Foam::basicSource::cells()
-{
-    return cells_;
 }
 
 

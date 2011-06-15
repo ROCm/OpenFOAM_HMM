@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -90,56 +90,15 @@ void Foam::basicSourceList::addSu(fvMatrix<vector>& Eqn)
 }
 
 
-void Foam::basicSourceList::addExplicitSources()
-{
-
-    forAll(*this, i)
-    {
-        if (this->operator[](i).isActive())
-        {
-            this->operator[](i).addExplicitSources();
-        }
-    }
-}
-
-
-void Foam::basicSourceList::addSu
-(
-    DimensionedField<scalar, volMesh>& field
-)
-{
-    forAll(*this, i)
-    {
-        if (this->operator[](i).isActive())
-        {
-            this->operator[](i).addSu(field);
-        }
-    }
-}
-
-
-void Foam::basicSourceList::addSu
-(
-    DimensionedField<vector, volMesh>& field
-)
-{
-    forAll(*this, i)
-    {
-        if (this->operator[](i).isActive())
-        {
-            this->operator[](i).addSu(field);
-        }
-    }
-}
-
-
 bool Foam::basicSourceList::read(const dictionary& dict)
 {
+    bool allOk = true;
     forAll(*this, i)
     {
-        this->operator[](i).read(dict);
+        bool ok = this->operator[](i).read(dict);
+        allOk = (allOk && ok);
     }
-    return true;
+    return allOk;
 }
 
 
@@ -162,7 +121,7 @@ bool Foam::basicSourceList::writeData(Ostream& os) const
     os << token::END_LIST << token::END_STATEMENT << nl;
 
     // Check state of IOstream
-     return os.good();
+    return os.good();
 }
 
 

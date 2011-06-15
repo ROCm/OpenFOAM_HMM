@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,57 +39,24 @@ namespace Foam
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
-const Foam::wordList Foam::basicSource::selectionModeTypeNames_
-(
-    IStringStream("(points cellSet cellZone all)")()
-);
+template<> const char* Foam::NamedEnum
+<
+    Foam::basicSource::selectionModeType,
+    4
+>::names[] =
+{
+    "points",
+    "cellSet",
+    "cellZone",
+    "all"
+};
+
+
+const Foam::NamedEnum<Foam::basicSource::selectionModeType, 4>
+    Foam::basicSource::selectionModeTypeNames_;
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-Foam::basicSource::selectionModeType Foam::basicSource::wordToSelectionModeType
-(
-    const word& smtName
-) const
-{
-    forAll(selectionModeTypeNames_, i)
-    {
-        if (smtName == selectionModeTypeNames_[i])
-        {
-            return selectionModeType(i);
-        }
-    }
-
-    FatalErrorIn
-    (
-        "basicSource::selectionModeType"
-        "basicSource::wordToSelectionModeType"
-        "("
-            "const word&"
-        ")"
-    )   << "Unknown selectionMode type " << smtName
-        << ". Valid selectionMode types are:" << nl << selectionModeTypeNames_
-        << exit(FatalError);
-
-    return selectionModeType(0);
-}
-
-
-Foam::word Foam::basicSource::selectionModeTypeToWord
-(
-    const selectionModeType& smtType
-) const
-{
-    if (smtType > selectionModeTypeNames_.size())
-    {
-        return "UNKNOWN";
-    }
-    else
-    {
-        return selectionModeTypeNames_[smtType];
-    }
-}
-
 
 void Foam::basicSource::setSelection(const dictionary& dict)
 {
@@ -97,7 +64,7 @@ void Foam::basicSource::setSelection(const dictionary& dict)
     {
         case smPoints:
         {
-            // Do nothing. It should be sorted out by derived class
+            dict.lookup("points") >> points_;
             break;
         }
         case smCellSet:
@@ -135,6 +102,29 @@ void Foam::basicSource::setCellSet()
     {
         case smPoints:
         {
+            Info<< indent << "- selecting cells using points" << endl;
+
+            labelHashSet selectedCells;
+
+            forAll(points_, i)
+            {
+                label cellI = mesh_.findCell(points_[i]);
+                if (cellI >= 0)
+                {
+                    selectedCells.insert(cellI);
+                }
+
+                label globalCellI = returnReduce(cellI, maxOp<label>());
+                if (globalCellI < 0)
+                {
+                    WarningIn("TimeActivatedExplicitSource<Type>::setCellIds()")
+                        << "Unable to find owner cell for point " << points_[i]
+                        << endl;
+                }
+            }
+
+            cells_ = selectedCells.toc();
+
             break;
         }
         case smCellSet:
@@ -181,19 +171,16 @@ void Foam::basicSource::setCellSet()
     }
 
     // Set volume information
-    if (selectionMode_ != smPoints)
+    V_ = 0.0;
+    forAll(cells_, i)
     {
-        V_ = 0.0;
-        forAll(cells_, i)
-        {
-            V_ += mesh_.V()[cells_[i]];
-        }
-        reduce(V_, sumOp<scalar>());
-
-        Info<< indent << "- selected "
-            << returnReduce(cells_.size(), sumOp<label>())
-            << " cell(s) with volume " << V_ << nl << decrIndent << endl;
+        V_ += mesh_.V()[cells_[i]];
     }
+    reduce(V_, sumOp<scalar>());
+
+    Info<< indent << "- selected "
+        << returnReduce(cells_.size(), sumOp<label>())
+        << " cell(s) with volume " << V_ << nl << decrIndent << endl;
 }
 
 
@@ -212,9 +199,9 @@ Foam::basicSource::basicSource
     active_(readBool(dict_.lookup("active"))),
     timeStart_(readScalar(dict_.lookup("timeStart"))),
     duration_(readScalar(dict_.lookup("duration"))),
-    selectionMode_(wordToSelectionModeType(dict_.lookup("selectionMode"))),
+    selectionMode_(selectionModeTypeNames_.read(dict_.lookup("selectionMode"))),
     cellSetName_("none"),
-    V_(1.0)
+    V_(0.0)
 {
     setSelection(dict_);
 
@@ -231,12 +218,12 @@ Foam::autoPtr<Foam::basicSource> Foam::basicSource::New
     const fvMesh& mesh
 )
 {
-    word typeModel(dict.lookup("typeModel"));
+    word modelType(dict.lookup("type"));
 
-    Info<< "Selecting model type " << typeModel << endl;
+    Info<< "Selecting model type " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(typeModel);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -244,7 +231,7 @@ Foam::autoPtr<Foam::basicSource> Foam::basicSource::New
         (
             "basicSource::New(const volVectorField&, "
             "const surfaceScalarField&, transportModel&)"
-        )   << "Unknown Model type " << typeModel
+        )   << "Unknown Model type " << modelType
             << nl << nl
             << "Valid model types are :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
