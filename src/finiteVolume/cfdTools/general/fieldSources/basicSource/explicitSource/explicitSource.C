@@ -40,21 +40,23 @@ namespace Foam
         explicitSource,
         dictionary
     );
+
+
+    // * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
+
+    template<> const char* NamedEnum
+    <
+        explicitSource::volumeModeType,
+        2
+        >::names[] =
+    {
+        "absolute",
+        "specific"
+    };
+
+    const NamedEnum<explicitSource::volumeModeType, 2>
+        explicitSource::volumeModeTypeNames_;
 }
-
-template<> const char* Foam::NamedEnum
-<
-    Foam::explicitSource::volumeModeType,
-    2
->::names[] =
-{
-    "absolute",
-    "specific"
-};
-
-
-const Foam::NamedEnum<Foam::explicitSource::volumeModeType, 2>
-    Foam::explicitSource::volumeModeTypeNames_;
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //

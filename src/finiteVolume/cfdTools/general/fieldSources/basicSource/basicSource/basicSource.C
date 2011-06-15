@@ -34,26 +34,25 @@ namespace Foam
 {
     defineTypeNameAndDebug(basicSource, 0);
     defineRunTimeSelectionTable(basicSource, dictionary);
+
+
+    // * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
+
+    template<> const char* NamedEnum
+    <
+        basicSource::selectionModeType,
+        4
+        >::names[] =
+    {
+        "points",
+        "cellSet",
+        "cellZone",
+        "all"
+    };
+
+    const NamedEnum<basicSource::selectionModeType, 4>
+        basicSource::selectionModeTypeNames_;
 }
-
-
-// * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
-
-template<> const char* Foam::NamedEnum
-<
-    Foam::basicSource::selectionModeType,
-    4
->::names[] =
-{
-    "points",
-    "cellSet",
-    "cellZone",
-    "all"
-};
-
-
-const Foam::NamedEnum<Foam::basicSource::selectionModeType, 4>
-    Foam::basicSource::selectionModeTypeNames_;
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
