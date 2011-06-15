@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -165,7 +165,7 @@ scalar RASModel::yPlusLam(const scalar kappa, const scalar E) const
 
     for (int i=0; i<10; i++)
     {
-        ypl = log(E*ypl)/kappa;
+        ypl = log(max(E*ypl, 1))/kappa;
     }
 
     return ypl;

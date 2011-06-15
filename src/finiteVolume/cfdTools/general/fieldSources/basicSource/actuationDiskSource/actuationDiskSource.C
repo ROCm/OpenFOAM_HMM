@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,7 +41,7 @@ namespace Foam
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::actuationDiskSource::checkData()
+void Foam::actuationDiskSource::checkData() const
 {
     if (magSqr(diskArea_) <= VSMALL)
     {
@@ -74,7 +74,6 @@ Foam::actuationDiskSource::actuationDiskSource
 )
 :
     basicSource(name, dict, mesh),
-    cellZoneID_(mesh.cellZones().findZoneID(this->cellSetName())),
     dict_(dict.subDict(typeName + "Coeffs")),
     diskDir_(dict_.lookup("diskDir")),
     Cp_(readScalar(dict_.lookup("Cp"))),
@@ -84,20 +83,6 @@ Foam::actuationDiskSource::actuationDiskSource
     Info<< "    - creating actuation disk zone: "
         << this->name() << endl;
 
-    bool foundZone = (cellZoneID_ != -1);
-
-    reduce(foundZone, orOp<bool>());
-
-    if (!foundZone && Pstream::master())
-    {
-        FatalErrorIn
-        (
-            "Foam::actuationDiskSource::actuationDiskSource"
-            "(const word&, const dictionary&, const fvMesh&)"
-        )   << "cannot find porous cellZone " << this->name()
-            << exit(FatalError);
-    }
-
     checkData();
 }
 
@@ -106,18 +91,12 @@ Foam::actuationDiskSource::actuationDiskSource
 
 void Foam::actuationDiskSource::addSu(fvMatrix<vector>& UEqn)
 {
-    if (cellZoneID_ == -1)
-    {
-        return;
-    }
-
     bool compressible = false;
     if (UEqn.dimensions() == dimensionSet(1, 1, -2, 0, 0))
     {
         compressible = true;
     }
 
-    const labelList& cells = mesh_.cellZones()[cellZoneID_];
     const scalarField& V = this->mesh().V();
     vectorField& Usource = UEqn.source();
     const vectorField& U = UEqn.psi();
@@ -127,7 +106,7 @@ void Foam::actuationDiskSource::addSu(fvMatrix<vector>& UEqn)
         addActuationDiskAxialInertialResistance
         (
             Usource,
-            cells,
+            cells_,
             V,
             this->mesh().lookupObject<volScalarField>("rho"),
             U
@@ -138,7 +117,7 @@ void Foam::actuationDiskSource::addSu(fvMatrix<vector>& UEqn)
         addActuationDiskAxialInertialResistance
         (
             Usource,
-            cells,
+            cells_,
             V,
             geometricOneField(),
             U
@@ -149,7 +128,6 @@ void Foam::actuationDiskSource::addSu(fvMatrix<vector>& UEqn)
 
 void Foam::actuationDiskSource::writeData(Ostream& os) const
 {
-
     os  << indent << token::BEGIN_BLOCK << incrIndent << nl;
     os.writeKeyword("name") << this->name() << token::END_STATEMENT << nl;
 

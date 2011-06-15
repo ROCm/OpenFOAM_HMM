@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,7 @@ Description
 
     source1
     {
-        typeModel       actuationDiskSource; // explicitSource
+        type            actuationDiskSource; // explicitSource
         active          on;            // on/off switch
         timeStart       0.0;           // start time
         duration        1000.0;        // duration
@@ -49,7 +49,7 @@ Description
 
     source2
     {
-        typeModel       explicitSource;
+        type            explicitSource;
         active          on;
         timeStart       0.0;
         duration        1000.0;
@@ -115,7 +115,7 @@ public:
         };
 
         //- Word list of selection mode type names
-        static const wordList selectionModeTypeNames_;
+        static const NamedEnum<selectionModeType, 4> selectionModeTypeNames_;
 
 
 protected:
@@ -146,6 +146,9 @@ protected:
         //- Name of cell set for "cellSet" and "cellZone" selectionMode
         word cellSetName_;
 
+        //- List of points for "points" selectionMode
+        List<point> points_;
+
         //- Set of cells to apply source to
         labelList cells_;
 
@@ -154,12 +157,6 @@ protected:
 
 
     // Protected functions
-
-        //- Helper function to convert from a word to a selectionModeType
-        selectionModeType wordToSelectionModeType(const word& smtName) const;
-
-        //- Helper function to convert from a selectionModeType to a word
-        word selectionModeTypeToWord(const selectionModeType& smtType) const;
 
         //- Set the cellSet or points selection
         void setSelection(const dictionary& dict);
@@ -305,9 +302,6 @@ public:
 
         // Edit
 
-            //- Return access to the source name
-            inline word& name();
-
             //- Return access to the source active flag
             inline bool& active();
 
@@ -317,22 +311,6 @@ public:
             //- Return access to the duration
             inline scalar& duration();
 
-            //- Return access to the cell selection mode
-            inline selectionModeType& selectionMode();
-
-            //- Return access to the list of points for "points" selectionMode
-            inline List<point>& points();
-
-            //- Return access to the name of cell set for "cellSet"
-            //  selectionMode
-            inline word& cellSetName();
-
-            //- Return access to the total cell volume
-            inline scalar& V();
-
-            //- Return access to the cell set
-            inline labelList& cells();
-
 
         // Checks
 
@@ -341,15 +319,6 @@ public:
 
 
         // Evaluation
-
-            //- Add all explicit sources
-            virtual void addExplicitSources() = 0;
-
-            //- Add source to scalar field
-            virtual void addSu(DimensionedField<scalar, volMesh>& field) = 0;
-
-            //- Add source to vector field
-            virtual void addSu(DimensionedField<vector, volMesh>& field) = 0;
 
             //- Add source term to vector fvMatrix
             virtual void addSu(fvMatrix<vector>& Eqn) = 0;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,83 +42,22 @@ namespace Foam
     );
 }
 
-const Foam::wordList Foam::explicitSource::volumeModeTypeNames_
-(
-    IStringStream("(absolute specific)")()
-);
-
-
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::explicitSource::setSelectedCellsFromPoints()
+template<> const char* Foam::NamedEnum
+<
+    Foam::explicitSource::volumeModeType,
+    2
+>::names[] =
 {
-    labelHashSet selectedCells;
+    "absolute",
+    "specific"
+};
 
-    forAll(points_, i)
-    {
-        label cellI = this->mesh().findCell(points_[i]);
-        if (cellI >= 0)
-        {
-            selectedCells.insert(cellI);
-        }
 
-        label globalCellI = returnReduce(cellI, maxOp<label>());
-
-        if (globalCellI < 0)
-        {
-            WarningIn("explicitSource::setSelectedCellsFromPoints()")
-                << "Unable to find owner cell for point " << points_[i]
-                << endl;
-        }
-    }
-
-    this->cells() = selectedCells.toc();
-}
+const Foam::NamedEnum<Foam::explicitSource::volumeModeType, 2>
+    Foam::explicitSource::volumeModeTypeNames_;
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-Foam::explicitSource::volumeModeType
-Foam::explicitSource::wordToVolumeModeType
-(
-    const word& vmtName
-) const
-{
-    forAll(volumeModeTypeNames_, i)
-    {
-        if (vmtName == volumeModeTypeNames_[i])
-        {
-            return volumeModeType(i);
-        }
-    }
-
-    FatalErrorIn
-    (
-        "explicitSource<Type>::volumeModeType"
-        "explicitSource<Type>::wordToVolumeModeType(const word&)"
-    )   << "Unknown volumeMode type " << vmtName
-        << ". Valid volumeMode types are:" << nl << volumeModeTypeNames_
-        << exit(FatalError);
-
-    return volumeModeType(0);
-}
-
-
-Foam::word Foam::explicitSource::volumeModeTypeToWord
-(
-    const volumeModeType& vmtType
-) const
-{
-    if (vmtType > volumeModeTypeNames_.size())
-    {
-        return "UNKNOWN";
-    }
-    else
-    {
-        return volumeModeTypeNames_[vmtType];
-    }
-}
-
 
 void Foam::explicitSource::setFieldData(const dictionary& dict)
 {
@@ -170,83 +109,22 @@ Foam::explicitSource::explicitSource
 )
 :
     basicSource(name, dict, mesh),
-    scalarFields_(0, *this),
-    vectorFields_(0, *this),
     dict_(dict.subDict(typeName + "Coeffs")),
-    volumeMode_(wordToVolumeModeType(dict_.lookup("volumeMode"))),
-    points_(),
-    volSource_(this->cells().size(), 1.0)
+    volumeMode_(volumeModeTypeNames_.read(dict_.lookup("volumeMode")))
 {
     setFieldData(dict_.subDict("fieldData"));
-
-    // Set points if selectionMode is smPoints
-    if (this->selectionMode() == smPoints)
-    {
-        dict_.lookup("points") >> points_;
-        setSelectedCellsFromPoints();
-        volSource_.setSize(points_.size(), 1.0);
-    }
-
-    const labelList& cellList = this->cells();
-    scalar V = 0.0;
-    if (volumeMode_ == vmAbsolute)
-    {
-        forAll(cellList, cellI)
-        {
-            volSource_[cellI] = mesh.V()[cellList[cellI]];
-            V += volSource_[cellI];
-        }
-    }
-    else
-    {
-        forAll(cellList, cellI)
-        {
-            V += mesh.V()[cellList[cellI]];
-        }
-    }
-
-    reduce(V, sumOp<scalar>());
-
-    Info<< "- selected " << returnReduce(cellList.size(), sumOp<label>())
-        << " cell(s) with Volume: " << V << " in time activated sources "
-        <<  endl;
 }
 
 
 void Foam::explicitSource::addSu(fvMatrix<scalar>& Eqn)
 {
-    Field<scalar>& source = Eqn.source();
-    scalar data = scalarFields_[Eqn.psi().name()];
-    addSources<scalar>(source, data);
+    addSource(Eqn, scalarFields_[Eqn.psi().name()]);
 }
 
 
 void Foam::explicitSource::addSu(fvMatrix<vector>& Eqn)
 {
-    Field<vector>& source = Eqn.source();
-    vector data = vectorFields_[Eqn.psi().name()];
-    addSources<vector>(source, data);
-}
-
-
-void Foam::explicitSource::addSu(DimensionedField<scalar, volMesh>& field)
-{
-    scalar data = scalarFields_[field.name()];
-    addSources<scalar>(field, data);
-}
-
-
-void Foam::explicitSource::addSu(DimensionedField<vector, volMesh>& field)
-{
-    vector data = vectorFields_[field.name()];
-    addSources<vector>(field, data);
-}
-
-
-void Foam::explicitSource::addExplicitSources()
-{
-    scalarFields_.applySources();
-    vectorFields_.applySources();
+    addSource(Eqn, vectorFields_[Eqn.psi().name()]);
 }
 
 
