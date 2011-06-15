@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
@@ -70,7 +70,7 @@ surfaceConformation
 
         maxIterations 15;
 
-        iterationToIntialHitRatioLimit 0.001;
+        iterationToInitialHitRatioLimit 0.001;
     }
 
     fineConformationControls
@@ -89,22 +89,19 @@ surfaceConformation
 
         maxIterations 15;
 
-        iterationToIntialHitRatioLimit 0.001;
+        iterationToInitialHitRatioLimit 0.001;
     }
 
     geometryToConformTo
     {
         flange.obj
         {
-            featureMethod    featureEdgeMesh;
-            featureEdgeMesh  "flange.featureEdgeMesh";
+            featureMethod extendedFeatureEdgeMesh;
+            extendedFeatureEdgeMesh "flange.extendedFeatureEdgeMesh";
         }
     }
 
-    additionalFeatures
-    {
-
-    }
+    additionalFeatures {}
 }
 
 
@@ -155,21 +152,11 @@ motionControl
     }
 
     relaxationModel     adaptiveLinear;
-    // relaxationModel     rampHoldFall;
 
     adaptiveLinearCoeffs
     {
         relaxationStart 1.0;
         relaxationEnd   0.0;
-    }
-
-    rampHoldFallCoeffs
-    {
-        rampStartRelaxation     0.5;
-        holdRelaxation          0.9;
-        fallEndRelaxation       0.01;
-        rampEndFraction         0.1;
-        fallStartFraction       0.7;
     }
 
     objOutput                   no;
@@ -225,7 +212,7 @@ meshQualityControls
     maxBoundarySkewness 50;
     maxInternalSkewness 10;
     maxConcave 80;
-    minTetQuality 1e-45;
+    minTetQuality 1e-30;
     minVol 0;
     minArea -1;
     minTwist 0.02;

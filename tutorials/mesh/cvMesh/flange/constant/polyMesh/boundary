@@ -9,19 +9,44 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      thermalProperties;
+    class       polyBoundaryMesh;
+    location    "constant/polyMesh";
+    object      boundary;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-C               C [ 0 2 -2 -1 0 0 0 ] 434;
-
-k               k [ 1 1 -3 -1 0 0 0 ] 60.5;
-
-alpha           alpha [ 0 0 0 -1 0 0 0 ] 1.1e-05;
-
-thermalStress   no;
-
+5
+(
+    flange.obj_patch1
+    {
+        type            wall;
+        nFaces          9298;
+        startFace       95552;
+    }
+    flange.obj_patch2
+    {
+        type            wall;
+        nFaces          1107;
+        startFace       104850;
+    }
+    flange.obj_patch3
+    {
+        type            wall;
+        nFaces          329;
+        startFace       105957;
+    }
+    flange.obj_patch4
+    {
+        type            wall;
+        nFaces          1473;
+        startFace       106286;
+    }
+    cvMesh_defaultPatch
+    {
+        type            wall;
+        nFaces          41;
+        startFace       107759;
+    }
+)
 
 // ************************************************************************* //
