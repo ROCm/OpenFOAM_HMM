@@ -272,18 +272,19 @@ void Foam::conformalVoronoiMesh::insertPoints
 
     label nVert = number_of_vertices();
 
-    Info<< "TEMPORARILY USING INDIVIDUAL INSERTION TO DETECT FAILURE" << endl;
     // using the range insert (faster than inserting points one by one)
-    // insert(points.begin(), points.end());
-    for
-    (
-        std::list<Point>::iterator pit=points.begin();
-        pit != points.end();
-        ++pit
-    )
-    {
-        insertVb(*pit);
-    }
+    insert(points.begin(), points.end());
+
+    // Info<< "USING INDIVIDUAL INSERTION TO DETECT FAILURE" << endl;
+    // for
+    // (
+    //     std::list<Point>::iterator pit=points.begin();
+    //     pit != points.end();
+    //     ++pit
+    // )
+    // {
+    //     insertVb(*pit);
+    // }
 
     label nInserted(number_of_vertices() - preInsertionSize);
 
@@ -1167,12 +1168,6 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
         writePoints("initialPoints.obj", true);
     }
 
-    Info<< "NEED TO CHANGE storeSizesAndAlignments AFTER DISTRIBUTE" << endl;
-    Info<< "NEED TO MAP FEATURE POINTS AFTER DISTRIBUTE" << endl;
-    Info<< "NEED TO ENSURE THAT FEATURE POINTS ARE INSERTED ON THE "
-        << "CORRECT PRCOESSOR" << endl;
-
-    storeSizesAndAlignments(initPts);
 }
 
 
@@ -1807,6 +1802,13 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     distributeBackground();
 
     insertFeaturePoints();
+
+    Info<< "NEED TO MAP FEATURE POINTS AFTER DISTRIBUTE" << endl;
+    Info<< "NEED TO ENSURE THAT FEATURE POINTS ARE INSERTED ON THE "
+        << "CORRECT PROCESSOR" << endl;
+
+    Info<< "NEED TO CHANGE storeSizesAndAlignments AFTER DISTRIBUTE" << endl;
+    // storeSizesAndAlignments(initPts);
 
     buildSurfaceConformation(rmCoarse);
 
