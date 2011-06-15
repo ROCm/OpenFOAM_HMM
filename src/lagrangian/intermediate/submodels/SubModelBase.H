@@ -63,9 +63,8 @@ protected:
         //- Reference to the cloud dictionary
         const dictionary& dict_;
 
-        //- Reference to the coefficients dictionary
+        //- Coefficients dictionary
         const dictionary& coeffDict_;
-
 
 
 public:
@@ -107,6 +106,9 @@ public:
 
             //- Return const access to the coefficients dictionary
             const dictionary& coeffDict() const;
+
+            //- Returns true if defaultCoeffs is true and outputs on printMsg
+            bool defaultCoeffs(const bool printMsg) const;
 
             //- Return the model 'active' status - default active = true
             virtual bool active() const;

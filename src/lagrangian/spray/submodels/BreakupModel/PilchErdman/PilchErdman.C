@@ -35,9 +35,15 @@ Foam::PilchErdman<CloudType>::PilchErdman
 )
 :
     BreakupModel<CloudType>(dict, owner, typeName),
-    B1_(this->coeffDict().template lookupOrDefault<scalar>("B1", 0.375)),
-    B2_(this->coeffDict().template lookupOrDefault<scalar>("B2", 0.236))
-{}
+    B1_(0.375),
+    B2_(0.236)
+{
+    if (!this->defaultCoeffs(true))
+    {
+        this->coeffDict().lookup("B1") >> B1_;
+        this->coeffDict().lookup("B2") >> B2_;
+    }
+}
 
 
 template <class CloudType>

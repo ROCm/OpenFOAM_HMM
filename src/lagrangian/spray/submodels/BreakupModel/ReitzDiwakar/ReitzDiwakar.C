@@ -35,11 +35,19 @@ Foam::ReitzDiwakar<CloudType>::ReitzDiwakar
 )
 :
     BreakupModel<CloudType>(dict, owner, typeName),
-    Cbag_(this->coeffDict().template lookupOrDefault<scalar>("Cbag", 6.0)),
-    Cb_(this->coeffDict().template lookupOrDefault<scalar>("Cb", 0.785)),
-    Cstrip_(this->coeffDict().template lookupOrDefault<scalar>("Cstrip", 0.5)),
-    Cs_(this->coeffDict().template lookupOrDefault<scalar>("Cs", 10.0))
-{}
+    Cbag_(6.0),
+    Cb_(0.785),
+    Cstrip_(0.5),
+    Cs_(10.0)
+{
+    if (!this->defaultCoeffs(true))
+    {
+        this->coeffDict().lookup("Cbag") >> Cbag_;
+        this->coeffDict().lookup("Cb") >> Cb_;
+        this->coeffDict().lookup("Cstrip") >> Cstrip_;
+        this->coeffDict().lookup("Cs") >> Cs_;
+    }
+}
 
 
 template <class CloudType>

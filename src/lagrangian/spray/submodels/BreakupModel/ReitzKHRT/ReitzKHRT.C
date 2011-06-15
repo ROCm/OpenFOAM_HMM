@@ -35,20 +35,23 @@ Foam::ReitzKHRT<CloudType>::ReitzKHRT
 )
 :
     BreakupModel<CloudType>(dict, owner, typeName),
-    b0_(this->coeffDict().template lookupOrDefault<scalar>("B0", 0.61)),
-    b1_(this->coeffDict().template lookupOrDefault<scalar>("B1", 40.0)),
-    cTau_(this->coeffDict().template lookupOrDefault<scalar>("Ctau", 1.0)),
-    cRT_(this->coeffDict().template lookupOrDefault<scalar>("CRT", 0.1)),
-    msLimit_
-    (
-        this->coeffDict().template lookupOrDefault<scalar>
-        (
-            "msLimit",
-            0.03
-        )
-    ),
-    weberLimit_(readScalar(this->coeffDict().lookup("WeberLimit")))
-{}
+    b0_(0.61),
+    b1_(40.0),
+    cTau_(1.0),
+    cRT_(0.1),
+    msLimit_(0.03),
+    weberLimit_(6.0)
+{
+    if (!this->defaultCoeffs(true))
+    {
+        this->coeffDict().lookup("B0") >> b0_;
+        this->coeffDict().lookup("B1") >> b1_;
+        this->coeffDict().lookup("Ctau") >> cTau_;
+        this->coeffDict().lookup("CRT") >> cRT_;
+        this->coeffDict().lookup("msLimit") >> msLimit_;
+        this->coeffDict().lookup("WeberLimit") >> weberLimit_;
+    }
+}
 
 
 template <class CloudType>
