@@ -861,7 +861,9 @@ Foam::autoPtr<Foam::mapDistributePolyMesh>
 Foam::backgroundMeshDecomposition::distribute
 (
     volScalarField& cellWeights,
-    List<DynamicList<point> >& cellVertices
+    List<DynamicList<point> >& cellVertices,
+    List<DynamicList<label> >& cellVertexIndices,
+    List<DynamicList<label> >& cellVertexTypes
 )
 {
     if (debug)
@@ -953,18 +955,26 @@ Foam::backgroundMeshDecomposition::distribute
         meshCutter_.updateMesh(map);
 
         {
-            // Map cellVertices
+            // Map cellVertices, cellVertexIndices and cellVertexTypes
 
             meshSearch cellSearch(mesh_);
 
             const labelList& reverseCellMap = map().reverseCellMap();
 
             List<DynamicList<point> > newCellVertices(mesh_.nCells());
+            List<DynamicList<label> > newCellVertexIndices(mesh_.nCells());
+            List<DynamicList<label> > newCellVertexTypes(mesh_.nCells());
 
             forAll(cellVertices, oldCellI)
             {
                 DynamicList<point>& oldCellVertices =
                     cellVertices[oldCellI];
+
+                DynamicList<label>& oldCellVertexIndices =
+                    cellVertexIndices[oldCellI];
+
+                DynamicList<label>& oldCellVertexTypes =
+                    cellVertexTypes[oldCellI];
 
                 if (findIndex(newCellsToRefine, oldCellI) >= 0)
                 {
@@ -983,10 +993,24 @@ Foam::backgroundMeshDecomposition::distribute
                                 << v << " "
                                 << oldCellI
                                 << newCellI
-                                << endl;
+                                << " find nearest cellI ";
+
+                            newCellI = cellSearch.findNearestCell(v);
+
+                            Pout<< newCellI << endl;
                         }
 
                         newCellVertices[newCellI].append(v);
+
+                        newCellVertexIndices[newCellI].append
+                        (
+                            oldCellVertexIndices[oPI]
+                        );
+
+                        newCellVertexTypes[newCellI].append
+                        (
+                            oldCellVertexTypes[oPI]
+                        );
                     }
                 }
                 else
@@ -995,14 +1019,27 @@ Foam::backgroundMeshDecomposition::distribute
 
                     forAll(oldCellVertices, oPI)
                     {
-                        const point& v = oldCellVertices[oPI];
+                        newCellVertices[newCellI].append
+                        (
+                            oldCellVertices[oPI]
+                        );
 
-                        newCellVertices[newCellI].append(v);
+                        newCellVertexIndices[newCellI].append
+                        (
+                            oldCellVertexIndices[oPI]
+                        );
+
+                        newCellVertexTypes[newCellI].append
+                        (
+                            oldCellVertexTypes[oPI]
+                        );
                     }
                 }
             }
 
             cellVertices.transfer(newCellVertices);
+            cellVertexIndices.transfer(newCellVertexIndices);
+            cellVertexTypes.transfer(newCellVertexTypes);
         }
 
         if (debug)
@@ -1062,11 +1099,14 @@ Foam::backgroundMeshDecomposition::distribute
     }
 
     mapDist().distributeCellData(cellVertices);
+    mapDist().distributeCellData(cellVertexIndices);
+    mapDist().distributeCellData(cellVertexTypes);
 
     buildPatchAndTree();
 
     return mapDist;
 }
+
 
 Foam::autoPtr<Foam::mapDistribute>
 Foam::backgroundMeshDecomposition::distributePoints

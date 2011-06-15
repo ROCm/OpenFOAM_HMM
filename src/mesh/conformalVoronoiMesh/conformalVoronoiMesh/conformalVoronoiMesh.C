@@ -357,11 +357,20 @@ void Foam::conformalVoronoiMesh::insertPoints
         // creation of points and indices is done assuming that it will be
         // relative to the instantaneous number_of_vertices() at insertion.
 
+        label type = types[pI];
+
+        if (type > Vb::ptFarPoint)
+        {
+            // This is a member of a point pair, don't use the type directly
+
+            type += number_of_vertices();
+        }
+
         insertPoint
         (
             pts[pI],
             indices[pI] + number_of_vertices(),
-            types[pI] + number_of_vertices()
+            type
         );
     }
 }
@@ -726,29 +735,13 @@ void Foam::conformalVoronoiMesh::createMultipleEdgePointGroup
 
 void Foam::conformalVoronoiMesh::insertFeaturePoints()
 {
-    Info<< nl << "Creating bounding points" << endl;
-
-    pointField farPts = geometryToConformTo_.globalBounds().points();
-
-    // Shift corners of bounds relative to origin
-    farPts -= geometryToConformTo_.globalBounds().midpoint();
-
-    // Scale the box up
-    farPts *= 2.0;
-
-    // Shift corners of bounds back to be relative to midpoint
-    farPts += geometryToConformTo_.globalBounds().midpoint();
-
-    forAll(farPts, fPI)
-    {
-        insertPoint(farPts[fPI], Vb::ptFarPoint);
-    }
-
     Info<< nl << "Conforming to feature points" << endl;
 
     DynamicList<Foam::point> pts;
     DynamicList<label> indices;
     DynamicList<label> types;
+
+    label preFeaturePointSize = number_of_vertices();
 
     createConvexFeaturePoints(pts, indices, types);
 
@@ -763,7 +756,7 @@ void Foam::conformalVoronoiMesh::insertFeaturePoints()
         writePoints("featureVertices.obj", pts);
     }
 
-    label nFeatureVertices = number_of_vertices() - 8;
+    label nFeatureVertices = number_of_vertices() - preFeaturePointSize;
 
     if (Pstream::parRun())
     {
@@ -772,30 +765,31 @@ void Foam::conformalVoronoiMesh::insertFeaturePoints()
 
     if (nFeatureVertices > 0)
     {
-        Info<< "    Inserted " << nFeatureVertices << " vertices" << endl;
+        Info<< "    Inserted " << nFeatureVertices
+            << " feature vertices" << endl;
     }
 
     Info<< "SORT OUT FEATURE POINT DISTRIBUTION AND STORAGE" << endl;
 
-    featureVertices_.setSize(number_of_vertices());
+    // featureVertices_.setSize(number_of_vertices());
 
-    label featPtI = 0;
+    // label featPtI = 0;
 
-    for
-    (
-        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-        vit != finite_vertices_end();
-        vit++
-    )
-    {
-        featureVertices_[featPtI] = Vb(vit->point());
+    // for
+    // (
+    //     Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+    //     vit != finite_vertices_end();
+    //     vit++
+    // )
+    // {
+    //     featureVertices_[featPtI] = Vb(vit->point());
 
-        featureVertices_[featPtI].index() = vit->index();
+    //     featureVertices_[featPtI].index() = vit->index();
 
-        featureVertices_[featPtI].type() = vit->type();
+    //     featureVertices_[featPtI].type() = vit->type();
 
-        featPtI++;
-    }
+    //     featPtI++;
+    // }
 
     constructFeaturePointLocations();
 }
@@ -1124,6 +1118,34 @@ bool Foam::conformalVoronoiMesh::nearFeaturePt(const Foam::point& pt) const
 }
 
 
+void Foam::conformalVoronoiMesh::reset()
+{
+    this->clear();
+
+    insertBoundingPoints();
+}
+
+
+void Foam::conformalVoronoiMesh::insertBoundingPoints()
+{
+    pointField farPts = geometryToConformTo_.globalBounds().points();
+
+    // Shift corners of bounds relative to origin
+    farPts -= geometryToConformTo_.globalBounds().midpoint();
+
+    // Scale the box up
+    farPts *= 2.0;
+
+    // Shift corners of bounds back to be relative to midpoint
+    farPts += geometryToConformTo_.globalBounds().midpoint();
+
+    forAll(farPts, fPI)
+    {
+        insertPoint(farPts[fPI], Vb::ptFarPoint);
+    }
+}
+
+
 void Foam::conformalVoronoiMesh::insertInitialPoints()
 {
     startOfInternalPoints_ = number_of_vertices();
@@ -1154,33 +1176,45 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
 }
 
 
-void Foam::conformalVoronoiMesh::distribute()
+bool Foam::conformalVoronoiMesh::distributeBackground()
 {
     if (!Pstream::parRun())
     {
-        return;
+        return false;
     }
 
     Info<< nl << "Redistributing points" << endl;
 
     timeCheck("Before distribute");
 
+    label iteration = 0;
+
     while (true)
     {
-        scalar globalNumberOfVertices = returnReduce
+        label nRealVertices = 0;
+
+        for
         (
-            label(number_of_vertices()),
+            Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+            vit != finite_vertices_end();
+            vit++
+        )
+        {
+            if (vit->real())
+            {
+                nRealVertices++;
+            }
+        }
+
+        scalar globalNRealVertices = returnReduce
+        (
+            nRealVertices,
             sumOp<label>()
         );
 
         scalar unbalance = returnReduce
         (
-            mag
-            (
-                1.0
-              - label(number_of_vertices())
-               /(globalNumberOfVertices/Pstream::nProcs())
-            ),
+            mag(1.0 - nRealVertices/(globalNRealVertices/Pstream::nProcs())),
             maxOp<scalar>()
         );
 
@@ -1188,15 +1222,17 @@ void Foam::conformalVoronoiMesh::distribute()
 
         if (unbalance <= cvMeshControls().maxLoadUnbalance())
         {
-            break;
+            // If this is the first iteration, return false, if it was a
+            // subsequent one, return true;
+            return iteration != 0;
         }
 
         Info<< "    Total number of vertices before redistribution "
-            << globalNumberOfVertices
+            << globalNRealVertices
             << endl;
 
-        // Pout<< "    number_of_vertices() before distribution "
-        //     << label(number_of_vertices()) << endl;
+        // Pout<< "    Real vertices before distribution "
+        //     << nRealVertices << endl;
 
         const fvMesh& bMesh = decomposition_().mesh();
 
@@ -1218,6 +1254,8 @@ void Foam::conformalVoronoiMesh::distribute()
         meshSearch cellSearch(bMesh);
 
         List<DynamicList<Foam::point> > cellVertices(bMesh.nCells());
+        List<DynamicList<label> > cellVertexIndices(bMesh.nCells());
+        List<DynamicList<label> > cellVertexTypes(bMesh.nCells());
 
         for
         (
@@ -1238,12 +1276,17 @@ void Foam::conformalVoronoiMesh::distribute()
                         << vit->type() << " "
                         << vit->index() << " "
                         << v << " "
-                        << cellI << endl;
+                        << cellI
+                        << " find nearest cellI ";
+
+                    cellI = cellSearch.findNearestCell(v);
+
+                    Pout<< cellI << endl;
                 }
-                else
-                {
-                    cellVertices[cellI].append(topoint(vit->point()));
-                }
+
+                cellVertices[cellI].append(topoint(vit->point()));
+                cellVertexIndices[cellI].append(vit->index());
+                cellVertexTypes[cellI].append(vit->type());
             }
         }
 
@@ -1262,11 +1305,13 @@ void Foam::conformalVoronoiMesh::distribute()
         autoPtr<mapDistributePolyMesh> mapDist = decomposition_().distribute
         (
             cellWeights,
-            cellVertices
+            cellVertices,
+            cellVertexIndices,
+            cellVertexTypes
         );
 
         // Remove the entire tessellation
-        this->clear();
+        reset();
 
         Info<< "NEED TO MAP FEATURE POINTS" << endl;
         // reinsertFeaturePoints();
@@ -1277,26 +1322,43 @@ void Foam::conformalVoronoiMesh::distribute()
 
         Info<< nl << "    Inserting distributed tessellation" << endl;
 
-        std::list<Point> pointsToInsert;
+        DynamicList<Foam::point> pointsToInsert;
+        DynamicList<label> indices;
+        DynamicList<label> types;
 
         forAll(cellVertices, cI)
         {
             forAll(cellVertices[cI], cVPI)
             {
-                pointsToInsert.push_back(toPoint(cellVertices[cI][cVPI]));
+                pointsToInsert.append(cellVertices[cI][cVPI]);
+                indices.append(0);
+
+                label type = cellVertexTypes[cI][cVPI];
+
+                if (type > Vb::ptFarPoint)
+                {
+                    // This is a member of a point pair, don't use the type
+                    // directly, make type relative to the index in preparation
+                    // for insertion.
+
+                    type -= cellVertexIndices[cI][cVPI];
+                }
+
+                types.append(type);
             }
         }
 
         // Assume that the distribution made the correct decision for which
         // processor each point should be on, so give distribute = false
-        insertPoints(pointsToInsert, false);
+        insertPoints(pointsToInsert, indices, types, false);
 
+        // Adjust by 8 because of insertion of bounding points by reset
         Info<< "    Total number of vertices after redistribution "
-            << returnReduce(label(number_of_vertices()), sumOp<label>())
+            << returnReduce(label(number_of_vertices() - 8), sumOp<label>())
             << endl;
 
-        // Pout<< "    number_of_vertices() after distribution "
-        //     << label(number_of_vertices()) << endl;
+        // Pout<< "    Real vertices after distribution "
+        //     << label(number_of_vertices() - 8) << endl;
 
         if(cvMeshControls().objOutput())
         {
@@ -1304,7 +1366,11 @@ void Foam::conformalVoronoiMesh::distribute()
         }
 
         timeCheck("After distribute");
+
+        iteration++;
     }
+
+    return true;
 }
 
 
@@ -1726,21 +1792,33 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         );
     }
 
-    Info<< "INSERTFEATUREPOINTS MOVED" << endl;
-    // insertFeaturePoints();
-
     if (cvMeshControls().objOutput())
     {
         geometryToConformTo_.writeFeatureObj("cvMesh");
     }
 
+    insertBoundingPoints();
+
     insertInitialPoints();
 
-    distribute();
+    // Improve the guess that the backgroundMeshDecomposition makes with the
+    // initial positions.  Use before building the surface conformation to
+    // better balance the surface conformation load.
+    distributeBackground();
 
     insertFeaturePoints();
 
     buildSurfaceConformation(rmCoarse);
+
+    // The introduction of the surface conformation may have distorted the
+    // balance of vertices, distribute if necessary.
+    if (distributeBackground())
+    {
+        // distributeBackground has destroyed all referred vertices, so the
+        // parallel interface needs to be rebuilt.
+
+        buildParallelInterface("rebuild");
+    }
 
     if(cvMeshControls().objOutput())
     {
@@ -2102,7 +2180,7 @@ void Foam::conformalVoronoiMesh::move()
     }
 
     // Remove the entire tessellation
-    this->clear();
+    reset();
 
     reinsertFeaturePoints();
 

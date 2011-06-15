@@ -428,13 +428,22 @@ private:
         //- Check if a location is in exclusion range around a feature point
         bool nearFeaturePt(const Foam::point& pt) const;
 
+        //- Clear the entire tesselation and insert bounding points
+        void reset();
+
+        //- Insert far points in a large bounding box to avoid dual edges
+        //  spanning huge distances
+        void insertBoundingPoints();
+
         //- Insert the initial points into the triangulation, based on the
         //  initialPointsMethod
         void insertInitialPoints();
 
         //- In parallel redistribute the backgroundMeshDecomposition and
-        //- vertices to balance the number of vertices on each processor
-        void distribute();
+        //  vertices to balance the number of vertices on each processor.
+        //  Returns true if the background mesh changes as this removes all
+        //  referred vertices, so the parallel interface may need rebuilt.
+        bool distributeBackground();
 
         //- Store data for sizeAndAlignmentLocations_, storedSizes_ and
         //  storedAlignments_ and initialise the sizeAndAlignmentTreePtr_
@@ -508,6 +517,13 @@ private:
         ) const;
 
         //- Build the parallelInterfaces of the mesh
+        void buildParallelInterface
+        (
+            const word& outputName
+        );
+
+        //- Build the parallelInterfaces of the mesh, supply hash sets
+        //  externally to allow updates
         void buildParallelInterface
         (
             List<labelHashSet>& referralVertices,

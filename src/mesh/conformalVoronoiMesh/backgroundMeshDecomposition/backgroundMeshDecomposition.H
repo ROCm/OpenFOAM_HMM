@@ -211,7 +211,9 @@ public:
         autoPtr<mapDistributePolyMesh> distribute
         (
             volScalarField& cellWeights,
-            List<DynamicList<point> >& cellVertices
+            List<DynamicList<point> >& cellVertices,
+            List<DynamicList<label> >& cellVertexIndices,
+            List<DynamicList<label> >& cellVertexTypes
         );
 
         //- Distribute supplied the points to the appropriate processor

@@ -553,6 +553,24 @@ bool Foam::conformalVoronoiMesh::clipLineToProc
 
 void Foam::conformalVoronoiMesh::buildParallelInterface
 (
+    const word& outputName
+)
+{
+    List<labelHashSet> referralVertices(Pstream::nProcs());
+    List<labelHashSet> receivedVertices(Pstream::nProcs());
+
+    buildParallelInterface
+    (
+        referralVertices,
+        receivedVertices,
+        true,
+        outputName
+    );
+}
+
+
+void Foam::conformalVoronoiMesh::buildParallelInterface
+(
     List<labelHashSet>& referralVertices,
     List<labelHashSet>& receivedVertices,
     bool initialEdgeReferral,
