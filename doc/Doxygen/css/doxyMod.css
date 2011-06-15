@@ -52,3 +52,12 @@ tr.memlist
     background-color: #F0F0F0;
 }
 
+
+#searchli {
+    padding: 0px;
+}
+
+#MSearchBox {
+    margin-top: 0px;
+    width: 200px;
+}
