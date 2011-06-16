@@ -80,7 +80,7 @@ class cvControls
             //  fraction of the local target cell size
             scalar featureEdgeExclusionDistanceCoeff_;
 
-            //- Surface search distance coefficient - faction of the local
+            //- Surface search distance coefficient - fraction of the local
             //  target cell size
             scalar surfaceSearchDistanceCoeff_;
 
