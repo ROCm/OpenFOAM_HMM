@@ -262,6 +262,18 @@ void Foam::conformalVoronoiMesh::insertPoints
                 << endl;
         }
 
+        label totalMagSizeChange = returnReduce
+        (
+            mag(sizeChange), sumOp<label>()
+        );
+
+        if (totalMagSizeChange > 0)
+        {
+            Info<< "    distribution points size change total "
+                << totalMagSizeChange/2
+                << endl;
+        }
+
         nPoints = points.size();
 
         reduce(nPoints, sumOp<label>());
