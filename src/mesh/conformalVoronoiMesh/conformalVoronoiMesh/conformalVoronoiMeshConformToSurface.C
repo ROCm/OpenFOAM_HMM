@@ -36,6 +36,8 @@ void Foam::conformalVoronoiMesh::conformToSurface()
     {
         // Reinsert stored surface conformation
         reinsertSurfaceConformation();
+
+        buildParallelInterface("move_" + runTime_.timeName());
     }
     else
     {
@@ -1786,7 +1788,14 @@ void Foam::conformalVoronoiMesh::storeSurfaceConformation()
         vit++
     )
     {
-        if (!vit->referred() && vit->pairPoint())
+        // Store points that are not referred, part of a pair, but not feature
+        // points
+        if
+        (
+            !vit->referred()
+         && vit->pairPoint()
+         && vit->index() >= startOfInternalPoints_
+        )
         {
             surfaceConformationVertices_.push_back
             (

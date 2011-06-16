@@ -2285,8 +2285,6 @@ void Foam::conformalVoronoiMesh::move()
 
     updateSizesAndAlignments(pointsToInsert);
 
-    buildParallelInterface("move_" + runTime_.timeName());
-
     // Write the intermediate mesh, do not filter the dual faces.
     if (runTime_.outputTime())
     {
