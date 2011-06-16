@@ -23,8 +23,8 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
-// Impoprtant:
-// -----------
+// Important:
+// ----------
 // Any scalar with a name <name>Coeff specifies a value that will be implemented
 // as a faction of the local target cell size
 // Any scalar with a name <name>Size specifies an absolute size.
@@ -41,8 +41,18 @@ geometry
     // Internal shape
     coneAndSphere.obj
     {
+        name coneAndSphere;
         type triSurfaceMesh;
+        tolerance 0.00001;
     }
+
+//    // Internal shape
+//    coneAndSphere
+//    {
+//        type searchableSurfaceWithGaps;
+//        surface coneAndSphere.obj;
+//        gap 0.001;
+//    }
 
     // Bounds of domain
     domain.stl
@@ -119,7 +129,7 @@ surfaceConformation
 
     geometryToConformTo
     {
-        coneAndSphere.obj
+        coneAndSphere
         {
             featureMethod extendedFeatureEdgeMesh;
             extendedFeatureEdgeMesh "coneAndSphere.extendedFeatureEdgeMesh";
@@ -161,7 +171,7 @@ initialPoints
         maxSizeRatio 5.0;
         // Per box sample 3x3x3 internally
         sampleResolution 3;
-        // Additionally per face of the box sample 5x5
+        // Additionally per face of the box sample 3
         surfaceSampleResolution 3;
     }
 
