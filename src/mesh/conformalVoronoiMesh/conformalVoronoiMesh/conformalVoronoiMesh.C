@@ -1996,8 +1996,6 @@ void Foam::conformalVoronoiMesh::move()
 
     std::list<Point> pointsToInsert;
 
-    label pointsAdded = 0;
-
     for
     (
         Delaunay::Finite_edges_iterator eit = finite_edges_begin();
@@ -2005,17 +2003,17 @@ void Foam::conformalVoronoiMesh::move()
         ++eit
     )
     {
+        Cell_handle c = eit->first;
+        Vertex_handle vA = c->vertex(eit->second);
+        Vertex_handle vB = c->vertex(eit->third);
+
         if
         (
-            eit->first->vertex(eit->second)->internalOrBoundaryPoint()
-         && eit->first->vertex(eit->third)->internalOrBoundaryPoint()
+            vA->internalOrBoundaryPoint()
+         && vB->internalOrBoundaryPoint()
         )
         {
             face dualFace = buildDualFace(eit);
-
-            Cell_handle c = eit->first;
-            Vertex_handle vA = c->vertex(eit->second);
-            Vertex_handle vB = c->vertex(eit->third);
 
             Foam::point dVA = topoint(vA->point());
             Foam::point dVB = topoint(vB->point());
@@ -2155,7 +2153,6 @@ void Foam::conformalVoronoiMesh::move()
                                 toPoint(0.5*(dVA + dVB))
                             );
 
-                            pointsAdded++;
                         }
                     }
                     else if
@@ -2232,8 +2229,8 @@ void Foam::conformalVoronoiMesh::move()
         }
     }
 
-    vector totalDisp = sum(displacementAccumulator);
-    scalar totalDist = sum(mag(displacementAccumulator));
+    vector totalDisp = gSum(displacementAccumulator);
+    scalar totalDist = gSum(mag(displacementAccumulator));
 
     // Relax the calculated displacement
     displacementAccumulator *= relaxation;
@@ -2284,11 +2281,6 @@ void Foam::conformalVoronoiMesh::move()
 
     insertPoints(pointsToInsert);
 
-    label pointsRemoved =
-        displacementAccumulator.size()
-      - number_of_vertices()
-      + pointsAdded;
-
     timeCheck("Internal points inserted");
 
     conformToSurface();
@@ -2306,8 +2298,6 @@ void Foam::conformalVoronoiMesh::move()
     Info<< nl
         << "Total displacement = " << totalDisp << nl
         << "Total distance = " << totalDist << nl
-        << "Points added = " << pointsAdded << nl
-        << "Points removed = " << pointsRemoved
         << endl;
 }
 
