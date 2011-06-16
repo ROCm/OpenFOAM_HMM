@@ -8,7 +8,7 @@ cd ${0%/*} || exit 1    # run from this directory
 # mesh from that.
 cp system/controlDict-generatePoints system/controlDict
 cp system/cvMeshDict-generatePoints system/cvMeshDict
-runApplication surfaceFeatureExtract constant/triSurface/flange.obj flange -includedAngle 125
+runApplication surfaceFeatureExtract constant/triSurface/flange.obj flange -includedAngle 150
 runApplication cvMesh
 
 # Use pre-generated aligned points (constant/internalDelaunayVertices)

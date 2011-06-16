@@ -26,7 +26,6 @@ License
 #include "conformalVoronoiMesh.H"
 #include "IOstreams.H"
 #include "OFstream.H"
-#include "zeroGradientPointPatchField.H"
 #include "pointMesh.H"
 #include "pointFields.H"
 
@@ -312,7 +311,7 @@ void Foam::conformalVoronoiMesh::writeMesh
         writeObjMesh(points, faces, word(meshName + ".obj"));
     }
 
-    polyMesh mesh
+    fvMesh mesh
     (
         IOobject
         (
@@ -372,9 +371,10 @@ void Foam::conformalVoronoiMesh::writeMesh
 
     patches.setSize(nValidPatches);
 
-    Info<< "ADDPATCHES NOT IN PARALLEL" << endl;
-    // mesh.addPatches(patches);
-    mesh.addPatches(patches, false);
+    mesh.addFvPatches(patches);
+
+    // Info<< "ADDPATCHES NOT IN PARALLEL" << endl;
+    // mesh.addPatches(patches, false);
 
     if (!mesh.write())
     {
@@ -404,11 +404,9 @@ void Foam::conformalVoronoiMesh::writeMesh
 
     // cellCs.write();
 
-    Info<< "DISABLED WRITING OF CELL SIZE AND PROTRUSION SET" << endl;
+    writeCellSizes(mesh);
 
-    // writeCellSizes(mesh);
-
-    // findRemainingProtrusionSet(mesh);
+    findRemainingProtrusionSet(mesh);
 }
 
 
@@ -466,7 +464,7 @@ void Foam::conformalVoronoiMesh::writeCellSizes
             ),
             mesh,
             dimensionedScalar("cellSize", dimLength, 0),
-            zeroGradientPointPatchField<scalar>::typeName
+            zeroGradientFvPatchScalarField::typeName
         );
 
         scalarField& cellSize = targetCellSize.internalField();
@@ -492,7 +490,7 @@ void Foam::conformalVoronoiMesh::writeCellSizes
         //     ),
         //     mesh,
         //     dimensionedScalar("cellVolume", dimLength, 0),
-        //     zeroGradientPointPatchField<scalar>::typeName
+        //     zeroGradientFvPatchScalarField::typeName
         // );
 
         // targetCellVolume.internalField() = pow3(cellSize);
@@ -511,7 +509,7 @@ void Foam::conformalVoronoiMesh::writeCellSizes
         //     ),
         //     mesh,
         //     dimensionedScalar("cellVolume", dimVolume, 0),
-        //     zeroGradientPointPatchField<scalar>::typeName
+        //     zeroGradientFvPatchScalarField::typeName
         // );
 
         // actualCellVolume.internalField() = mesh.cellVolumes();
@@ -530,7 +528,7 @@ void Foam::conformalVoronoiMesh::writeCellSizes
         //     ),
         //     mesh,
         //     dimensionedScalar("cellSize", dimLength, 0),
-        //     zeroGradientPointPatchField<scalar>::typeName
+        //     zeroGradientFvPatchScalarField::typeName
         // );
 
         // equivalentCellSize.internalField() = pow

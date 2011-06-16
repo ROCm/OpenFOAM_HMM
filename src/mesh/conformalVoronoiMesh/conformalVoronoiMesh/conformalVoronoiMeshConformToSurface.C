@@ -36,12 +36,18 @@ void Foam::conformalVoronoiMesh::conformToSurface()
     {
         // Reinsert stored surface conformation
         reinsertSurfaceConformation();
+
+        buildParallelInterface("move_" + runTime_.timeName());
     }
     else
     {
         // Rebuild, insert and store new surface conformation
         buildSurfaceConformation(reconfMode);
+
+        storeSurfaceConformation();
     }
+
+    // reportSurfaceConformationQuality();
 }
 
 
@@ -411,10 +417,6 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                 << "), stopping iterations" << endl;
         }
     }
-
-    // reportSurfaceConformationQuality();
-
-    storeSurfaceConformation();
 }
 
 
@@ -620,6 +622,8 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
         receivedVertices,
         outputName
     );
+
+    timeCheck("After buildParallelInterface");
 }
 
 
@@ -1346,6 +1350,27 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceIncursion
 }
 
 
+void Foam::conformalVoronoiMesh::reportProcessorOccupancy()
+{
+    for
+    (
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        vit++
+    )
+    {
+        if (vit->real())
+        {
+            if (!positionOnThisProc(topoint(vit->point())))
+            {
+                Pout<< topoint(vit->point()) << " is not on this processor "
+                    << endl;
+            }
+        }
+    }
+}
+
+
 void Foam::conformalVoronoiMesh::reportSurfaceConformationQuality()
 {
     Info<< nl << "Check surface conformation quality" << endl;
@@ -1605,6 +1630,14 @@ void Foam::conformalVoronoiMesh::buildEdgeLocationTree
 
 void Foam::conformalVoronoiMesh::buildSizeAndAlignmentTree() const
 {
+    if (sizeAndAlignmentLocations_.empty())
+    {
+        FatalErrorIn("buildSizeAndAlignmentTree()")
+            << "sizeAndAlignmentLocations empty, must be populated before "
+            << "sizeAndAlignmentTree can be built."
+            << exit(FatalError);
+    }
+
     treeBoundBox overallBb
     (
         geometryToConformTo_.globalBounds().extend(rndGen_, 1e-4)
@@ -1755,7 +1788,14 @@ void Foam::conformalVoronoiMesh::storeSurfaceConformation()
         vit++
     )
     {
-        if (!vit->referred() && vit->pairPoint())
+        // Store points that are not referred, part of a pair, but not feature
+        // points
+        if
+        (
+            !vit->referred()
+         && vit->pairPoint()
+         && vit->index() >= startOfInternalPoints_
+        )
         {
             surfaceConformationVertices_.push_back
             (
@@ -1785,6 +1825,9 @@ void Foam::conformalVoronoiMesh::reinsertSurfaceConformation()
 
     label preReinsertionSize(number_of_vertices());
 
+    // It is assumed that the stored surface conformation is on the correct
+    // processor and does not need distributed
+
     for
     (
         std::list<Vb>::iterator vit=surfaceConformationVertices_.begin();
@@ -1792,7 +1835,14 @@ void Foam::conformalVoronoiMesh::reinsertSurfaceConformation()
         ++vit
     )
     {
-        insertVb(*vit, number_of_vertices());
+        // Assuming that all of the reinsertions are pair points, and that the
+        // index and type are relative, i.e. index 0 and type relative to it.
+        insertPoint
+        (
+            vit->point(),
+            vit->index() + number_of_vertices(),
+            vit->type() + number_of_vertices()
+        );
     }
 
     Info<< "    Reinserted "
