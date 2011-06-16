@@ -216,13 +216,23 @@ inline Foam::label Foam::conformalVoronoiMesh::insertPoint
     const label type
 )
 {
+    return insertPoint(toPoint(p), type);
+}
+
+
+inline Foam::label Foam::conformalVoronoiMesh::insertPoint
+(
+    const Point& P,
+    const label type
+)
+{
     uint nVert = number_of_vertices();
 
-    Vertex_handle vh = insert(toPoint(p));
+    Vertex_handle vh = insert(P);
 
     if (nVert == number_of_vertices())
     {
-        Pout << "Failed to insert point " << p << endl;
+        Pout << "Failed to insert point " << topoint(P) << endl;
     }
     else
     {
@@ -241,13 +251,24 @@ inline void Foam::conformalVoronoiMesh::insertPoint
     const label type
 )
 {
+    insertPoint(toPoint(p), index, type);
+}
+
+
+inline void Foam::conformalVoronoiMesh::insertPoint
+(
+    const Point& P,
+    const label index,
+    const label type
+)
+{
     uint nVert = number_of_vertices();
 
-    Vertex_handle vh = insert(toPoint(p));
+    Vertex_handle vh = insert(P);
 
     if (nVert == number_of_vertices())
     {
-        Pout << "Failed to insert point " << p << endl;
+        Pout << "Failed to insert point " << topoint(P) << endl;
     }
     else
     {
@@ -308,37 +329,6 @@ inline void Foam::conformalVoronoiMesh::createPointPair
     pts.append(surfPt + ppDistn);
     indices.append(0);
     types.append(-1);
-}
-
-
-inline void Foam::conformalVoronoiMesh::insertVb(const Vb& v, label offset)
-{
-    const Point& Pt(v.point());
-
-    uint nVert = number_of_vertices();
-
-    Vertex_handle vh = insert(Pt);
-
-    if (nVert == number_of_vertices())
-    {
-        FatalErrorIn("Foam::conformalVoronoiMesh::insertVb(const Vb& v")
-            << "Failed to reinsert Vb at " << topoint(Pt)
-            << nl
-            << exit(FatalError);
-    }
-    else
-    {
-        vh->index() = v.index() + offset;
-
-        if (v.pairPoint())
-        {
-            vh->type() = v.type() + offset;
-        }
-        else
-        {
-            vh->type() = v.type();
-        }
-    }
 }
 
 

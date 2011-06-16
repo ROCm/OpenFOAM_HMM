@@ -283,7 +283,7 @@ void Foam::conformalVoronoiMesh::insertPoints
     //     ++pit
     // )
     // {
-    //     insertVb(*pit);
+    //     insertPoint(topoint(*pit), Vb::ptInternalPoint);
     // }
 
     label nInserted(number_of_vertices() - preInsertionSize);
@@ -318,6 +318,10 @@ void Foam::conformalVoronoiMesh::insertPoints
     bool distribute
 )
 {
+    // The pts, indices and types lists must be intact and up-to-date at the
+    // end of this function as they may also be used by other functions
+    // subsequently.
+
     if (Pstream::parRun() && distribute)
     {
         // The link between vertices that form the boundary via pairs cannot be
@@ -363,7 +367,6 @@ void Foam::conformalVoronoiMesh::insertPoints
         if (type > Vb::ptFarPoint)
         {
             // This is a member of a point pair, don't use the type directly
-
             type += number_of_vertices();
         }
 
@@ -750,6 +753,7 @@ void Foam::conformalVoronoiMesh::insertFeaturePoints()
 
     createMixedFeaturePoints(pts, indices, types);
 
+    // Insert the created points, distributing to the appropriate processor
     insertPoints(pts, indices, types, true);
 
     if(cvMeshControls().objOutput())
@@ -770,27 +774,15 @@ void Foam::conformalVoronoiMesh::insertFeaturePoints()
             << " feature vertices" << endl;
     }
 
-    Info<< "SORT OUT FEATURE POINT DISTRIBUTION AND STORAGE" << endl;
+    featureVertices_.clear();
 
-    // featureVertices_.setSize(number_of_vertices());
-
-    // label featPtI = 0;
-
-    // for
-    // (
-    //     Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-    //     vit != finite_vertices_end();
-    //     vit++
-    // )
-    // {
-    //     featureVertices_[featPtI] = Vb(vit->point());
-
-    //     featureVertices_[featPtI].index() = vit->index();
-
-    //     featureVertices_[featPtI].type() = vit->type();
-
-    //     featPtI++;
-    // }
+    forAll(pts, pI)
+    {
+        featureVertices_.push_back
+        (
+            Vb(toPoint(pts[pI]), indices[pI], types[pI])
+        );
+    }
 
     constructFeaturePointLocations();
 }
@@ -1066,14 +1058,72 @@ void Foam::conformalVoronoiMesh::constructFeaturePointLocations()
 }
 
 
-void Foam::conformalVoronoiMesh::reinsertFeaturePoints()
+void Foam::conformalVoronoiMesh::reinsertFeaturePoints(bool distribute)
 {
     Info<< nl << "Reinserting stored feature points" << endl;
 
-    forAll(featureVertices_, f)
+    label preReinsertionSize(number_of_vertices());
+
+    if (distribute)
     {
-        insertVb(featureVertices_[f]);
+        DynamicList<Foam::point> pointsToInsert;
+        DynamicList<label> indices;
+        DynamicList<label> types;
+
+        for
+        (
+            std::list<Vb>::iterator vit=featureVertices_.begin();
+            vit != featureVertices_.end();
+            ++vit
+        )
+        {
+            pointsToInsert.append(topoint(vit->point()));
+            indices.append(vit->index());
+            types.append(vit->type());
+        }
+
+        // Insert distributed points
+        insertPoints(pointsToInsert, indices, types, true);
+
+        // Save points in new distribution
+        featureVertices_.clear();
+
+        forAll(pointsToInsert, pI)
+        {
+            featureVertices_.push_back
+            (
+                Vb(toPoint(pointsToInsert[pI]), indices[pI], types[pI])
+            );
+        }
     }
+    else
+    {
+        for
+        (
+            std::list<Vb>::iterator vit=featureVertices_.begin();
+            vit != featureVertices_.end();
+            ++vit
+        )
+        {
+            // Assuming that all of the reinsertions are pair points, and that
+            // the index and type are relative, i.e. index 0 and type relative
+            // to it.
+            insertPoint
+            (
+                vit->point(),
+                vit->index() + number_of_vertices(),
+                vit->type() + number_of_vertices()
+            );
+        }
+    }
+
+    Info<< "    Reinserted "
+        << returnReduce
+        (
+            label(number_of_vertices()) - preReinsertionSize,
+            sumOp<label>()
+        )
+        << " vertices" << endl;
 }
 
 
@@ -1195,7 +1245,8 @@ bool Foam::conformalVoronoiMesh::distributeBackground()
             vit++
         )
         {
-            if (vit->real())
+            // Only store real vertices that are not feature vertices
+            if (vit->real() && vit->index() >= startOfInternalPoints_)
             {
                 nRealVertices++;
             }
@@ -1259,7 +1310,8 @@ bool Foam::conformalVoronoiMesh::distributeBackground()
             vit++
         )
         {
-            if (vit->real())
+            // Only store real vertices that are not feature vertices
+            if (vit->real() && vit->index() >= startOfInternalPoints_)
             {
                 Foam::point v = topoint(vit->point());
 
@@ -1308,8 +1360,8 @@ bool Foam::conformalVoronoiMesh::distributeBackground()
         // Remove the entire tessellation
         reset();
 
-        Info<< "NEED TO MAP FEATURE POINTS" << endl;
-        // reinsertFeaturePoints();
+        // Reinsert feature points, distributing them as necessary.
+        reinsertFeaturePoints(true);
 
         startOfInternalPoints_ = number_of_vertices();
 
@@ -1326,6 +1378,8 @@ bool Foam::conformalVoronoiMesh::distributeBackground()
             forAll(cellVertices[cI], cVPI)
             {
                 pointsToInsert.append(cellVertices[cI][cVPI]);
+
+                // All insertions relative to index of zero
                 indices.append(0);
 
                 label type = cellVertexTypes[cI][cVPI];
@@ -1366,6 +1420,27 @@ bool Foam::conformalVoronoiMesh::distributeBackground()
     }
 
     return true;
+}
+
+
+void Foam::conformalVoronoiMesh::storeSizesAndAlignments()
+{
+    std::list<Point> storePts;
+
+    for
+    (
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        vit++
+    )
+    {
+        if (vit->internalPoint())
+        {
+            storePts.push_back(vit->point());
+        }
+    }
+
+    storeSizesAndAlignments(storePts);
 }
 
 
@@ -1427,6 +1502,8 @@ void Foam::conformalVoronoiMesh::updateSizesAndAlignments
     )
     {
         storeSizesAndAlignments(storePts);
+
+        timeCheck("Updated sizes and alignments");
     }
 }
 
@@ -1794,21 +1871,14 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 
     insertBoundingPoints();
 
+    insertFeaturePoints();
+
     insertInitialPoints();
 
     // Improve the guess that the backgroundMeshDecomposition makes with the
     // initial positions.  Use before building the surface conformation to
     // better balance the surface conformation load.
     distributeBackground();
-
-    insertFeaturePoints();
-
-    Info<< "NEED TO MAP FEATURE POINTS AFTER DISTRIBUTE" << endl;
-    Info<< "NEED TO ENSURE THAT FEATURE POINTS ARE INSERTED ON THE "
-        << "CORRECT PROCESSOR" << endl;
-
-    Info<< "NEED TO CHANGE storeSizesAndAlignments AFTER DISTRIBUTE" << endl;
-    // storeSizesAndAlignments(initPts);
 
     buildSurfaceConformation(rmCoarse);
 
@@ -1821,6 +1891,21 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 
         buildParallelInterface("rebuild");
     }
+
+    // Do not store the surface conformation until after it has been
+    // (potentially) redistributed.
+    storeSurfaceConformation();
+
+    // Use storeSizesAndAlignments with no feed points because all background
+    // points may have been distributed.  It is a requirement that none of the
+    // preceding functions requires look up of sizes or alignments from the
+    // Delaunay vertices, i.e. setVertexSizeAndAlignment cannot be called
+    // before this point.
+    storeSizesAndAlignments();
+
+    // Report any Delaunay vertices that do not think that they are in the
+    // domain the processor they are on.
+    reportProcessorOccupancy();
 
     if(cvMeshControls().objOutput())
     {
@@ -2174,13 +2259,6 @@ void Foam::conformalVoronoiMesh::move()
         }
     }
 
-    // Write the mesh before clearing it.  Beware that writeMesh destroys the
-    // indexing of the tessellation.  Do not filter the dual faces.
-    if (runTime_.outputTime())
-    {
-        writeMesh(runTime_.timeName(), false);
-    }
-
     // Remove the entire tessellation
     reset();
 
@@ -2207,14 +2285,20 @@ void Foam::conformalVoronoiMesh::move()
 
     updateSizesAndAlignments(pointsToInsert);
 
+    buildParallelInterface("move_" + runTime_.timeName());
+
+    // Write the intermediate mesh, do not filter the dual faces.
+    if (runTime_.outputTime())
+    {
+        writeMesh(runTime_.timeName(), false);
+    }
+
     Info<< nl
         << "Total displacement = " << totalDisp << nl
         << "Total distance = " << totalDist << nl
         << "Points added = " << pointsAdded << nl
         << "Points removed = " << pointsRemoved
         << endl;
-
-    timeCheck("Updated sizes and alignments (if required), end of move");
 }
 
 

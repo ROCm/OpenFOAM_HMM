@@ -342,6 +342,7 @@ public:
         return internalPoint(type) || ppMaster(index, type);
     }
 
+
     //- Is point near the boundary or part of the boundary definition
     inline bool nearOrOnBoundary() const
     {
@@ -349,43 +350,43 @@ public:
     }
 
 
-    //- Do the two given vertices consitute a boundary point-pair
-    inline friend bool pointPair
-    (
-        const indexedVertex& v0,
-        const indexedVertex& v1
-    )
-    {
-        return v0.index_ == v1.type_ || v1.index_ == v0.type_;
-    }
+    // //- Do the two given vertices consitute a boundary point-pair
+    // inline friend bool pointPair
+    // (
+    //     const indexedVertex& v0,
+    //     const indexedVertex& v1
+    // )
+    // {
+    //     return v0.index_ == v1.type_ || v1.index_ == v0.type_;
+    // }
 
 
-    //- Do the three given vertices consitute a boundary triangle
-    inline friend bool boundaryTriangle
-    (
-        const indexedVertex& v0,
-        const indexedVertex& v1,
-        const indexedVertex& v2
-    )
-    {
-        return (v0.pairPoint() && pointPair(v1, v2))
-            || (v1.pairPoint() && pointPair(v2, v0))
-            || (v2.pairPoint() && pointPair(v0, v1));
-    }
+    // //- Do the three given vertices consitute a boundary triangle
+    // inline friend bool boundaryTriangle
+    // (
+    //     const indexedVertex& v0,
+    //     const indexedVertex& v1,
+    //     const indexedVertex& v2
+    // )
+    // {
+    //     return (v0.pairPoint() && pointPair(v1, v2))
+    //         || (v1.pairPoint() && pointPair(v2, v0))
+    //         || (v2.pairPoint() && pointPair(v0, v1));
+    // }
 
 
-    //- Do the three given vertices consitute an outside triangle
-    inline friend bool outsideTriangle
-    (
-        const indexedVertex& v0,
-        const indexedVertex& v1,
-        const indexedVertex& v2
-    )
-    {
-        return (v0.farPoint() || v0.ppSlave())
-            || (v1.farPoint() || v1.ppSlave())
-            || (v2.farPoint() || v2.ppSlave());
-    }
+    // //- Do the three given vertices consitute an outside triangle
+    // inline friend bool outsideTriangle
+    // (
+    //     const indexedVertex& v0,
+    //     const indexedVertex& v1,
+    //     const indexedVertex& v2
+    // )
+    // {
+    //     return (v0.farPoint() || v0.ppSlave())
+    //         || (v1.farPoint() || v1.ppSlave())
+    //         || (v2.farPoint() || v2.ppSlave());
+    // }
 
 
     // inline void operator=(const Delaunay::Finite_vertices_iterator vit)

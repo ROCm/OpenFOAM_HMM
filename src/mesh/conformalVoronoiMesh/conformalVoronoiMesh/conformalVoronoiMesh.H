@@ -138,7 +138,7 @@ private:
 
         //- Store the feature constraining points to be reinserted after a
         //  triangulation clear
-        List<Vb> featureVertices_;
+        std::list<Vb> featureVertices_;
 
         //- Storing the locations of all of the features to be conformed to.
         //  Single pointField required by the featurePointTree.
@@ -240,17 +240,32 @@ private:
         //- Return the required alignment directions at the given location
         tensor requiredAlignment(const Foam::point& pt) const;
 
-        //- Insert point and return its index
+        //- Insert Foam::point and return its auto-generated index
         inline label insertPoint
         (
-            const Foam::point& pt,
+            const Foam::point& p,
             const label type
         );
 
-        //- Insert point and return its index
+        //- Insert Point and return its auto-generated index
+        inline label insertPoint
+        (
+            const Point& P,
+            const label type
+        );
+
+        //- Insert Foam::point with specified index and type
         inline void insertPoint
         (
-            const Foam::point& pt,
+            const Foam::point& p,
+            const label index,
+            const label type
+        );
+
+        //- Insert Point with specified index and type
+        inline void insertPoint
+        (
+            const Point& P,
             const label index,
             const label type
         );
@@ -294,10 +309,6 @@ private:
             DynamicList<label>& indices,
             DynamicList<label>& types
         );
-
-        //- Insert a Vb (a typedef of CGAL::indexedVertex<K>) with the
-        //  possibility of an offset for the index and the type
-        inline void insertVb(const Vb& v, label offset = 0);
 
         //- Insert pairs of points on the surface with the given normals, at the
         //  specified spacing
@@ -420,7 +431,7 @@ private:
         void constructFeaturePointLocations();
 
         //- Reinsert stored feature point defining points
-        void reinsertFeaturePoints();
+        void reinsertFeaturePoints(bool distribute = false);
 
         //- Demand driven construction of octree for feature points
         const indexedOctree<treeDataPoint>& featurePointTree() const;
@@ -444,6 +455,12 @@ private:
         //  Returns true if the background mesh changes as this removes all
         //  referred vertices, so the parallel interface may need rebuilt.
         bool distributeBackground();
+
+        //- Store data for sizeAndAlignmentLocations_, storedSizes_ and
+        //  storedAlignments_ and initialise the sizeAndAlignmentTreePtr_,
+        //  determining the appropriate sizeAndAlignmentLocations_
+        //  automatically
+        void storeSizesAndAlignments();
 
         //- Store data for sizeAndAlignmentLocations_, storedSizes_ and
         //  storedAlignments_ and initialise the sizeAndAlignmentTreePtr_
@@ -586,6 +603,9 @@ private:
             pointIndexHit& surfHitLargest,
             label& hitSurfaceLargest
         ) const;
+
+        //- Write out vertex-processor occupancy information for debugging
+        void reportProcessorOccupancy();
 
         //- Write out debugging information about the surface conformation
         //  quality
