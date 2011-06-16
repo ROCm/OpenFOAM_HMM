@@ -1,0 +1,362 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version         2.0;
+    format          ascii;
+    class           dictionary;
+    object          cvMeshDict;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Impoprtant:
+// -----------
+// Any scalar with a name <name>Coeff specifies a value that will be implemented
+// as a faction of the local target cell size
+// Any scalar with a name <name>Size specifies an absolute size.
+
+
+// Geometry. Definition of all surfaces. All surfaces are of class
+// searchableSurface.
+// Surfaces need to be (almost) closed - use closedTriSurfaceMesh
+// if they are not topologically closed. Surfaces need to be oriented so
+// the space to be meshed is always on the inside of all surfaces. Use e.g.
+// surfaceOrient.
+geometry
+{
+    flange.obj
+    {
+        type triSurfaceMesh;
+    }
+}
+
+
+// See cvControls.H
+surfaceConformation
+{
+    // Volume of surfaces that is inside mesh.
+    locationInMesh (0 0 0);
+
+    // Balance this between
+    // - very low distance: little chance of interference from other
+    //   surfaces
+    // - largish distance: less non-orthogonality in final cell
+    //   (circumcentre far away from centroid)
+    pointPairDistanceCoeff      0.1;
+
+    // Mixed feature edges - both inside and outside edges. Recreated
+    // by inserting triplets of points to recreate a single edge. Done for
+    // all edges emanating from point. triplets of points get inserted
+    // mixedFeaturePointPPDistanceCoeff distance away from feature point.
+    mixedFeaturePointPPDistanceCoeff    5.0;
+
+    // See cvControls.H
+    featurePointExclusionDistanceCoeff  0.4;
+
+    // See cvControls.H
+    featureEdgeExclusionDistanceCoeff   0.2;
+
+    // Optimisation: do not check for surface intersection (of dual edges)
+    // for points near to surface.
+    surfaceSearchDistanceCoeff  2.5;
+
+    // Do not conform to small protrusions. These get done by mesh filtering
+    // instead.
+    maxSurfaceProtrusionCoeff   0.1;
+
+    // If feature edge with large angle (so more than 125 degrees) introduce
+    // additional points to create two half angled cells.
+    maxQuadAngle 125;
+
+    // Frequency to redo surface conformation (expensive).
+    surfaceConformationRebuildFrequency 10;
+
+    // Initial and intermediate controls
+    coarseConformationControls
+    {
+        // Initial conformation
+        initial
+        {
+            // We've got a point poking through the surface. Don't do
+            // if near to feature edge.
+            edgeSearchDistCoeff         1.1;
+            surfacePtReplaceDistCoeff   0.5;
+        }
+
+        iteration
+        {
+            edgeSearchDistCoeff         1.25;
+            surfacePtReplaceDistCoeff   0.7;
+        }
+
+        // Stop either at maxIterations or if the number of surface pokes
+        // is very small (iterationToInitialHitRatioLimit * initial number)
+        maxIterations 15;
+
+        iterationToInitialHitRatioLimit 0.001;
+    }
+
+    // Final (at endTime) controls
+    fineConformationControls
+    {
+        initial
+        {
+            edgeSearchDistCoeff         1.1;
+            surfacePtReplaceDistCoeff   0.5;
+        }
+
+        iteration
+        {
+            edgeSearchDistCoeff         1.25;
+            surfacePtReplaceDistCoeff   0.7;
+        }
+
+        maxIterations 15;
+
+        iterationToInitialHitRatioLimit 0.001;
+    }
+
+    // Geometry to mesh to
+    geometryToConformTo
+    {
+        flange.obj
+        {
+            featureMethod extendedFeatureEdgeMesh;
+            extendedFeatureEdgeMesh "flange.extendedFeatureEdgeMesh";
+        }
+    }
+
+    // Independent features
+    additionalFeatures {}
+}
+
+
+initialPoints
+{
+    // Do not place point closer than minimumSurfaceDistanceCoeff
+    // to the surface. Is fraction of local target cell size (see below)
+    minimumSurfaceDistanceCoeff 0.55;
+
+    //initialPointsMethod         densityWeightedStochastic;
+    initialPointsMethod             hierarchicalDensityWeightedStochastic;
+    // initialPointsMethod         uniformGrid;
+    // initialPointsMethod         bodyCentredCubic;
+    // initialPointsMethod         pointFile;
+
+    // Take boundbox of all geometry. Samples with this box. If too much
+    // samples (due to target cell size) in box split box.
+    hierarchicalDensityWeightedStochasticDetails
+    {
+        // Number of refinement levels. Needs to be enough to pick up features
+        // due to size ratio.
+        minLevels 4;
+        // Split box if ratio of min to max size larger than maxSizeRatio
+        maxSizeRatio 5.0;
+        // Per box sample 7x7x7 internally
+        sampleResolution 7;
+        // Additionally per face of the box sample 5x5
+        surfaceSampleResolution 5;
+    }
+
+    densityWeightedStochasticDetails
+    {
+        // Volume of space to be meshed. Use surfaceInertia.
+        totalVolume     1.56e-05;
+    }
+
+    uniformGridDetails
+    {
+        // Absolute cell size.
+        initialCellSize         0.0015;
+        randomiseInitialGrid    yes;
+        randomPerturbationCoeff 0.02;
+    }
+
+    bodyCentredCubicDetails
+    {
+        initialCellSize         0.0015;
+        randomiseInitialGrid    no;
+        randomPerturbationCoeff 0.1;
+    }
+
+    pointFileDetails
+    {
+        // Reads points from file. Still rejects points that are too
+        // close to the surface (minimumSurfaceDistanceCoeff) or on the
+        // wrong side of the surfaces.
+        pointFile              "constant/internalDelaunayVertices";
+    }
+}
+
+
+// Control size of voronoi cells i.e. distance between points. This
+// determines the target cell size which is used everywhere.
+// It determines the cell size given a location. It then uses all
+// the rules
+// - defaultCellSize
+// - cellSizeControlGeometry
+// to determine target cell size. Rule with highest priority wins. If same
+// priority smallest cell size wins.
+motionControl
+{
+    // Absolute cell size of back ground mesh
+    defaultCellSize     0.00075;
+
+    // Assign a priority to all requests for cell sizes, the highest overrules.
+    defaultPriority     0;
+
+    cellSizeControlGeometry
+    {
+        ref7_outside
+        {
+            // optional name of geometry
+            surface             ref7;
+            priority            1;
+            mode                outside;//inside/bothSides
+            cellSizeFunction    linearDistance;
+
+            // Vary from surfaceCellSize (close to the surface) to
+            // distanceCellSize (further than 'distance')
+            linearDistanceCoeffs
+            {
+                surfaceCellSize     1e-5;    // absolute size
+                distanceCellSize    $defaultCellSize;
+                distance            1.0;
+            }
+        }
+
+        tunnel_APPROACH_INLET.obj
+        {
+            priority            1;
+            mode                bothSides;
+            cellSizeFunction    surfaceOffsetLinearDistance;
+            // Constant within a certain distance then linear fade away.
+            // Good for layers.
+            surfaceOffsetLinearDistanceCoeffs
+            {
+                surfaceCellSize     $ref4_size;
+                distanceCellSize    $defaultCellSize;
+                surfaceOffset       0.512;
+                totalDistance       $tunnel_totalDistance;
+            }
+        }
+    }
+
+    // Underrelaxation for point motion. Simulated annealing: starts off at 1
+    // and lowers to 0 (and simulation endTime) to converge points.
+    // adaptiveLinear is preferred choice.
+    // Points move by e.g. 10% of tet size.
+    relaxationModel     adaptiveLinear;
+
+    adaptiveLinearCoeffs
+    {
+        relaxationStart 1.0;
+        relaxationEnd   0.0;
+    }
+
+    // Lots and lots of .obj files
+    objOutput                   no;
+
+    // Timing and memory usage.
+    timeChecks                  yes;
+
+    // Number of rays in plane parallel to nearest surface. Used to detect
+    // next closest surfaces. Used to work out alignment (three vectors)
+    // to surface.
+    // Note that only the initial points (from the seeding) calculate this
+    // information so if these are not fine enough the alignment will
+    // not be correct. (any points added during the running will lookup
+    // this information from the nearest initial point since it is
+    // expensive)
+    alignmentSearchSpokes       36;
+
+    // For each delaunay edge (between two vertices, becomes
+    // the Voronoi face normal) snap to the alignment direction if within
+    // alignmentAcceptanceAngle. Keep at 48.
+    alignmentAcceptanceAngle    48;
+
+    // How often to rebuild the alignment info
+    sizeAndAlignmentRebuildFrequency 20;
+
+    // When to insert points. If edge larger than 1.75 target cell size
+    // (so tets too large/stretched) insert point. Do not change these
+    // settings.
+    pointInsertionCriteria
+    {
+        cellCentreDistCoeff     1.75;
+        // Do not insert point if voronoi face (on edge) very small.
+        faceAreaRatioCoeff      0.0025;
+        // Insert point only if edge closely aligned to local alignment
+        // direction.
+        acceptanceAngle         21.5;
+    }
+
+    // Opposite: remove point if mesh too compressed. Do not change these
+    // settings.
+    pointRemovalCriteria
+    {
+        cellCentreDistCoeff  0.65;
+    }
+
+    // How to determine the point motion. All edges got some direction.
+    // Sum all edge contributions to determine point motion. Weight by
+    // face area so motion is preferentially determined by large faces
+    // (more importantly ignore contribution from small faces).
+    // Do not change these settings.
+    faceAreaWeightModel piecewiseLinearRamp;
+
+    piecewiseLinearRampCoeffs
+    {
+        lowerAreaFraction       0.5;
+        upperAreaFraction       1.0;
+    }
+}
+
+
+// After simulation. Do not change. See cvControls.H
+polyMeshFiltering
+{
+    filterSizeCoeff                         0.2;
+    mergeClosenessCoeff                     1e-4;
+
+    // To not filter: set maxNonOrtho to 1 (so check fails) and then
+    // set continueFilteringOnBadInitialPolyMesh to false.
+    continueFilteringOnBadInitialPolyMesh   true;
+    filterErrorReductionCoeff               0.5;
+    filterCountSkipThreshold                4;
+    maxCollapseIterations                   25;
+    maxConsecutiveEqualFaceSets             5;
+    // Remove little steps (almost perp to surface) by collapsing face.
+    surfaceStepFaceAngle                    80;
+    // Do not collapse face to edge if should become edges
+    edgeCollapseGuardFraction               0.3;
+    // Only collapse face to point if high aspect ratio
+    maxCollapseFaceToPointSideLengthCoeff   0.35;
+}
+
+
+meshQualityControls
+{
+    maxNonOrtho 65;
+    maxBoundarySkewness 50;
+    maxInternalSkewness 10;
+    maxConcave 80;
+    minTetQuality 1e-30;
+    minVol 0;
+    minArea -1;
+    minTwist 0.02;
+    minDeterminant 0.001;
+    minFaceWeight 0.02;
+    minVolRatio 0.01;
+    minTriangleTwist -1;
+}
+
+
+// ************************************************************************* //
