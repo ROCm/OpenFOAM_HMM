@@ -83,7 +83,8 @@ surfaceFeatureExtract:
     - uses cgal only for curvature calculation. See cgal.
     - writes a triSurfaceField of 'curvature' and 'internal closeness'
     and 'external closeness'. This is just a normal intersection, not
-    a nearest point. These fields get used by cvMesh.
+    a nearest point. These fields get used by cvMesh. Or not yet - is part
+    of proposal to seed points according to curvature.
     - detects features that are near?
 
 surfaceSplitByTopology:
