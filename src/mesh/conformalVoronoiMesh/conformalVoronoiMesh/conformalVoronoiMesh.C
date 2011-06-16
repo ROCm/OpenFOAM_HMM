@@ -256,11 +256,11 @@ void Foam::conformalVoronoiMesh::insertPoints
 
         label sizeChange = preDistributionSize - label(points.size());
 
-        if (mag(sizeChange) > 0)
-        {
-            Pout<< "    distribution points size change " << sizeChange
-                << endl;
-        }
+        // if (mag(sizeChange) > 0)
+        // {
+        //     Pout<< "    distribution points size change " << sizeChange
+        //         << endl;
+        // }
 
         label totalMagSizeChange = returnReduce
         (
