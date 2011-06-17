@@ -2,7 +2,7 @@
  =========                   |
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
-   \\  /     A nd            | Copyright (C) 2009-2010 OpenCFD Ltd.
+   \\  /     A nd            | Copyright (C) 2009-2011 OpenCFD Ltd.
     \\/      M anipulation   |
 -------------------------------------------------------------------------------
 License
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
     {
         const label cellI = args.optionLookupOrDefault("cell", 0);
 
-        tensorField mI = momentOfInertia::meshInertia(mesh);
+        tensorField mI(momentOfInertia::meshInertia(mesh));
 
         tensor& J = mI[cellI];
 

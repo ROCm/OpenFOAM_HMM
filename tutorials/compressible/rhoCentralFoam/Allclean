@@ -29,7 +29,6 @@ do
     if [ "$caseName" = "biconic25-55Run35" ]
     then
         rm -rf constant/polyMesh/boundary
-        wclean datToFoam
     fi
 )
 done

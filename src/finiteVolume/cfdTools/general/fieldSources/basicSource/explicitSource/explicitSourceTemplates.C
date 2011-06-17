@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,17 +23,42 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-template<class Type>
-void Foam::explicitSource::addSources
+template <class Type>
+void Foam::explicitSource::addSource
 (
-    Field<Type>& fieldSource,
-    Type& data
+    fvMatrix<Type>& Eqn,
+    const Type& sourceData
 ) const
 {
-    forAll(this->cells(), i)
+    Type data = sourceData;
+    if (volumeMode_ == vmAbsolute)
     {
-        fieldSource[this->cells()[i]] = data/volSource_[i];
+        // Convert to specific quantity
+        data /= V_;
     }
+
+    DimensionedField<Type, volMesh> rhs
+    (
+        IOobject
+        (
+            "rhs",
+            Eqn.psi().mesh().time().timeName(),
+            Eqn.psi().mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        Eqn.psi().mesh(),
+        dimensioned<Type>
+        (
+            "zero",
+            Eqn.dimensions()/dimVolume,
+            pTraits<Type>::zero
+        )
+    );
+    UIndirectList<Type>(rhs, this->cells()) = data;    
+
+    Eqn -= rhs;
 }
 
 

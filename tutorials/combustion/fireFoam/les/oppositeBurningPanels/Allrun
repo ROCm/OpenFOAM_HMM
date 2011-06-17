@@ -1,4 +1,5 @@
 #!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
 
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
@@ -30,3 +31,5 @@ decomposePar -force > log.decomposePar.log 2>&1
 decomposePar -region panelRegion > log.decomposParPanelRegion.log 2>&1
 
 runParallel `getApplication` 6
+
+# ----------------------------------------------------------------- end-of-file

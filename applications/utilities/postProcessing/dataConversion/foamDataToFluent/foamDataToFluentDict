@@ -13,7 +13,6 @@ FoamFile
     class       dictionary;
     object      foamDataToFluentDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 p               1;

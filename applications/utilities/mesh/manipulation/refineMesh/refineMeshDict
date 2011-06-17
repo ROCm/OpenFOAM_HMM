@@ -12,7 +12,6 @@ FoamFile
     class       dictionary;
     object      refineMeshDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Cells to refine; name of cell set
@@ -25,7 +24,6 @@ set c0;
 //   patchLocalCoeffs section below.
 coordinateSystem global;
 //coordinateSystem patchLocal;
-
 
 // .. and its coefficients. x,y in this case. (normal direction is calculated
 // as tan1^tan2)

@@ -945,6 +945,9 @@ public:
             //- Return the conformationSurfaces object
             inline const conformationSurfaces& geometryToConformTo() const;
 
+            //- Return the backgroundMeshDecomposition
+            inline const backgroundMeshDecomposition& decomposition() const;
+
             //- Return the cellSizeControlSurfaces object
             inline const cellSizeControlSurfaces& cellSizeControl() const;
 

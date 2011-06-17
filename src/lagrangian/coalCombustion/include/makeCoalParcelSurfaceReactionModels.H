@@ -37,8 +37,6 @@ License
 
 #define makeCoalParcelSurfaceReactionModels(CloudType)                        \
                                                                               \
-    makeSurfaceReactionModel(CloudType);                                      \
-    makeSurfaceReactionModelType(NoSurfaceReaction, CloudType);               \
     makeSurfaceReactionModelType(COxidationDiffusionLimitedRate, CloudType);  \
     makeSurfaceReactionModelType                                              \
     (                                                                         \

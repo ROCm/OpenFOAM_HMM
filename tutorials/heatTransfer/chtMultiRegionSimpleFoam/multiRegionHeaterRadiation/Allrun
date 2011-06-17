@@ -29,7 +29,7 @@ done
 
 for i in bottomAir topAir
 do
-    faceAgglomerate -region $i > log.faceAgglomerate.$i 2>&1
+    faceAgglomerate -region $i -dict viewFactorsDict > log.faceAgglomerate.$i 2>&1
 done
 
 for i in bottomAir topAir

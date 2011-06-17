@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ License
 template<class ThermoSolidType>
 void Foam::multiComponentSolidMixture<ThermoSolidType>::correctMassFractions()
 {
-    volScalarField Yt = Y_[0];
+    volScalarField Yt("Yt", Y_[0]);
 
     for (label n=1; n<Y_.size(); n++)
     {

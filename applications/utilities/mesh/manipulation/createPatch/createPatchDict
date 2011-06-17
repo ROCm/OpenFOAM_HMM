@@ -12,7 +12,6 @@ FoamFile
     class       dictionary;
     object      createPatchDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // This application/dictionary controls:
@@ -38,7 +37,6 @@ FoamFile
 //      - loosen matchTolerance of all cyclics to get case to load
 //      - or change patch type from 'cyclic' to 'patch'
 //        and regenerate cyclic as above
-
 
 // Do a synchronisation of coupled points after creation of any patches.
 // Note: this does not work with points that are on multiple coupled patches

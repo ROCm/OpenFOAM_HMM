@@ -32,18 +32,7 @@ inline Foam::ThermoParcel<ParcelType>::TrackingData<CloudType>::TrackingData
 )
 :
     ParcelType::template TrackingData<CloudType>(cloud, part),
-    Cp_
-    (
-        IOobject
-        (
-            "Cp",
-            cloud.db().time().timeName(),
-            cloud.db(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        cloud.thermo().thermo().Cp()
-    ),
+    Cp_(cloud.thermo().thermo().Cp()),
     TInterp_
     (
         interpolation<scalar>::New

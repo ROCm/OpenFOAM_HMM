@@ -105,7 +105,6 @@ int main(int argc, char *argv[])
 
     runTime.functionObjects().end();
 
-
     Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
         << "  ClockTime = " << runTime.elapsedClockTime() << " s"
         << nl << endl;

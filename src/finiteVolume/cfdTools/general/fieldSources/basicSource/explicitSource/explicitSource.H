@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,60 +70,15 @@ class explicitSource
 :
     public basicSource
 {
-    // Private classes
-
-        template<class Type>
-        class fieldList
-        :
-            public HashTable<Type>
-        {
-
-            explicitSource& OwnerPtr_;
-
-        public:
-
-            //- null Constructor
-            fieldList()
-            :
-                HashTable<Type>(0),
-                OwnerPtr_(*reinterpret_cast<explicitSource*>(0))
-            {}
-
-
-            //- Constructor
-            fieldList(label size, explicitSource& ownerPtr)
-            :
-                HashTable<Type>(size),
-                OwnerPtr_(ownerPtr)
-            {}
-
-
-            void applySources()
-            {
-                typedef GeometricField<Type, fvPatchField, volMesh>
-                    geometricField;
-
-                forAll(this->toc(), i)
-                {
-                    geometricField& field = const_cast<geometricField&>
-                    (
-                        OwnerPtr_.mesh().template lookupObject<geometricField>
-                            (this->toc()[i])
-                    );
-
-                    Type data = this->operator[](field.name());
-                    OwnerPtr_.addSources<Type>(field.internalField(), data);
-                }
-            }
-        };
-
-private:
-
-    // Private cdata
+    // Private data
 
         //- List of field types
-        fieldList<scalar> scalarFields_;
-        fieldList<vector> vectorFields_;
+        HashTable<scalar> scalarFields_;
+        HashTable<vector> vectorFields_;
+
+        //- Add source to matrix
+        template<class Type>
+        void addSource(fvMatrix<Type>&, const Type&) const;
 
         //- Add field names and values to field table for types.
         template<class Type>
@@ -132,21 +87,11 @@ private:
             HashTable<Type>& fields,
             const wordList& fieldTypes,
             const wordList& fieldNames,
-            const dictionary& dict_
+            const dictionary& dict
         );
 
 
-        //- Add data to field source
-        template<class Type>
-        void addSources
-        (
-            Field<Type>& fieldSource,
-            Type& data
-        ) const;
-
-
 public:
-
 
     // Public data
 
@@ -158,7 +103,7 @@ public:
         };
 
         //- Word list of volume mode type names
-        static const wordList volumeModeTypeNames_;
+        static const NamedEnum<volumeModeType, 2> volumeModeTypeNames_;
 
 
 protected:
@@ -171,26 +116,11 @@ protected:
         //- Volume mode
         volumeModeType volumeMode_;
 
-        //- List of points for "points" selectionMode
-        List<point> points_;
-
-        //- Volume of the explicit source
-        scalarList volSource_;
-
 
     // Protected functions
 
-        //- Helper function to convert from a word to a volumeModeType
-        volumeModeType wordToVolumeModeType(const word& vtName) const;
-
-        //- Helper function to convert from a volumeModeType to a word
-        word volumeModeTypeToWord(const volumeModeType& vtType) const;
-
         //- Set the local field data
         void setFieldData(const dictionary& dict);
-
-        //- Set selected cells when smPoint is used
-        void setSelectedCellsFromPoints();
 
 
 public:
@@ -245,15 +175,6 @@ public:
 
             //-Source term to fvMatrix<scalar>
             virtual void addSu(fvMatrix<scalar>& UEqn);
-
-            //- Add all explicit source
-            virtual void addExplicitSources();
-
-            //- Add source to scalar field
-            virtual void addSu(DimensionedField<vector, volMesh>& field);
-
-            //- Add source to vector field
-            virtual void addSu(DimensionedField<scalar, volMesh>& field);
 
 
         // I-O

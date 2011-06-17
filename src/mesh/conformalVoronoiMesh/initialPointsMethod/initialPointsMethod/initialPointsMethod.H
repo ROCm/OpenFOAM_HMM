@@ -37,6 +37,7 @@ SourceFiles
 
 #include "point.H"
 #include "conformalVoronoiMesh.H"
+#include "backgroundMeshDecomposition.H"
 #include "dictionary.H"
 #include "Random.H"
 #include "Switch.H"

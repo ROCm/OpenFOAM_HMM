@@ -6,9 +6,9 @@
       + turbulence->divDevReff(U)
     );
 
-    UEqn().relax();
-
     // Add resistance on the actuation disks
     actuationDisks.addSu(UEqn());
+
+    UEqn().relax();
 
     solve(UEqn() == -fvc::grad(p));
