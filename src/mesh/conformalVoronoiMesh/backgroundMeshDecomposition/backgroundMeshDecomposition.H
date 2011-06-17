@@ -268,6 +268,9 @@ public:
 
             //- Return access to the underlying mesh
             inline const fvMesh& mesh() const;
+
+            //- Return the boundBox of this processor
+            inline const treeBoundBox& procBounds() const;
 };
 
 

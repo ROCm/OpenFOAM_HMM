@@ -469,6 +469,13 @@ Foam::conformalVoronoiMesh::geometryToConformTo() const
 }
 
 
+inline const Foam::backgroundMeshDecomposition&
+Foam::conformalVoronoiMesh::decomposition() const
+{
+    return decomposition_();
+}
+
+
 inline const Foam::cellSizeControlSurfaces&
 Foam::conformalVoronoiMesh::cellSizeControl() const
 {

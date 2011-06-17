@@ -30,4 +30,10 @@ const Foam::fvMesh& Foam::backgroundMeshDecomposition::mesh() const
     return mesh_;
 }
 
+
+const Foam::treeBoundBox& Foam::backgroundMeshDecomposition::procBounds() const
+{
+    return allBackgroundMeshBounds_[Pstream::myProcNo()];
+}
+
 // ************************************************************************* //

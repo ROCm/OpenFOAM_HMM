@@ -58,7 +58,18 @@ uniformGrid::uniformGrid
 
 std::list<Vb::Point> uniformGrid::initialPoints() const
 {
-    const boundBox& bb = cvMesh_.geometryToConformTo().globalBounds();
+    boundBox bb;
+
+    // Pick up the bounds of this processor, or the whole geometry, depending
+    // on whether this is a parallel run.
+    if (Pstream::parRun())
+    {
+        bb = cvMesh_.decomposition().procBounds();
+    }
+    else
+    {
+        bb = cvMesh_.geometryToConformTo().globalBounds();
+    }
 
     scalar x0 = bb.min().x();
     scalar xR = bb.max().x() - x0;
@@ -81,8 +92,6 @@ std::list<Vb::Point> uniformGrid::initialPoints() const
     scalar pert = randomPerturbationCoeff_*cmptMin(delta);
 
     std::list<Vb::Point> initialPoints;
-
-    List<bool> isSurfacePoint(nk, false);
 
     for (label i = 0; i < ni; i++)
     {
@@ -112,14 +121,34 @@ std::list<Vb::Point> uniformGrid::initialPoints() const
                     p.z() += pert*(rndGen.scalar01() - 0.5);
                 }
 
+                if
+                (
+                    Pstream::parRun()
+                 && !cvMesh_.decomposition().positionOnThisProcessor(p)
+                )
+                {
+                    // Skip this point if, in parallel, this position is not on
+                    // this processor.
+                    continue;
+                }
+
                 points[pI++] = p;
             }
+
+            points.setSize(pI);
 
             Field<bool> insidePoints = cvMesh_.geometryToConformTo().wellInside
             (
                 points,
                 minimumSurfaceDistanceCoeffSqr_
-               *sqr(cvMesh_.cellSizeControl().cellSize(points, isSurfacePoint))
+               *sqr
+                (
+                    cvMesh_.cellSizeControl().cellSize
+                    (
+                        points,
+                        List<bool>(pI, false)
+                    )
+                )
             );
 
             forAll(insidePoints, i)
