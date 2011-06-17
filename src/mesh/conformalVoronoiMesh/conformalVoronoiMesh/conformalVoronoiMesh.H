@@ -52,7 +52,6 @@ SourceFiles
 #include "plane.H"
 #include "SortableList.H"
 #include "meshTools.H"
-#include "triSurfaceTools.H"
 #include "indexedOctree.H"
 #include "treeDataPoint.H"
 #include "unitConversion.H"
@@ -683,17 +682,18 @@ private:
             bool filterFaces
         );
 
-        // //- Tet mesh calculation
-        // void calcTetMesh
-        // (
-        //     pointField& points,
-        //     faceList& faces,
-        //     labelList& owner,
-        //     labelList& neighbour,
-        //     wordList& patchNames,
-        //     labelList& patchSizes,
-        //     labelList& patchStarts
-        // );
+        //- Tet mesh calculation
+        void calcTetMesh
+        (
+            pointField& points,
+            faceList& faces,
+            labelList& owner,
+            labelList& neighbour,
+            wordList& patchTypes,
+            wordList& patchNames,
+            labelList& patchSizes,
+            labelList& patchStarts
+        );
 
         //- Determines if the dual face constructed by the Delaunay
         //  edge is a boundary face
