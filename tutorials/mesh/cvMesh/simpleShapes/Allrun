@@ -6,17 +6,9 @@ cd ${0%/*} || exit 1    # run from this directory
 
 # Generate aligned points (in constant/internalDelaunayVertices) and a
 # mesh from that.
-#cp system/controlDict-generatePoints system/controlDict
-#cp system/cvMeshDict-generatePoints system/cvMeshDict
 runApplication surfaceFeatureExtract constant/triSurface/coneAndSphere.obj coneAndSphere -includedAngle 125
 runApplication surfaceFeatureExtract constant/triSurface/domain.stl domain -includedAngle 125
 runApplication cvMesh
-
-# Use pre-generated aligned points (constant/internalDelaunayVertices)
-# to generate a mesh
-# cp system/controlDict-usePoints system/controlDict
-# cp system/cvMeshDict-usePoints system/cvMeshDict
-# runApplication cvMesh
 
 # Generate some sets for a bit of mesh inspection
 runApplication topoSet

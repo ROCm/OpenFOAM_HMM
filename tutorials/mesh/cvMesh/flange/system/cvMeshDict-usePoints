@@ -109,29 +109,7 @@ initialPoints
 {
     minimumSurfaceDistanceCoeff 0.55;
 
-    // initialPointsMethod         densityWeightedStochastic;
-    // initialPointsMethod         uniformGrid;
-    // initialPointsMethod         bodyCentredCubic;
     initialPointsMethod         pointFile;
-
-    densityWeightedStochasticDetails
-    {
-        totalVolume     1.56e-05;
-    }
-
-    uniformGridDetails
-    {
-        initialCellSize         0.0015;
-        randomiseInitialGrid    yes;
-        randomPerturbationCoeff 0.02;
-    }
-
-    bodyCentredCubicDetails
-    {
-        initialCellSize         0.0015;
-        randomiseInitialGrid    no;
-        randomPerturbationCoeff 0.1;
-    }
 
     pointFileDetails
     {
