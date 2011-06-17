@@ -44,6 +44,19 @@ void Foam::conformalVoronoiMesh::conformToSurface()
         // Rebuild, insert and store new surface conformation
         buildSurfaceConformation(reconfMode);
 
+        if (distributeBackground())
+        {
+            // distributeBackground has destroyed all referred vertices, so the
+            // parallel interface needs to be rebuilt.
+            buildParallelInterface("rebuild");
+
+            // Use storeSizesAndAlignments with no feed points because all
+            // background points may have been distributed.
+            storeSizesAndAlignments();
+        }
+
+        // Do not store the surface conformation until after it has been
+        // (potentially) redistributed.
         storeSurfaceConformation();
     }
 

@@ -1900,7 +1900,6 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     {
         // distributeBackground has destroyed all referred vertices, so the
         // parallel interface needs to be rebuilt.
-
         buildParallelInterface("rebuild");
     }
 
