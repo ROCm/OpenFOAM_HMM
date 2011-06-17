@@ -12,9 +12,7 @@ FoamFile
     class       dictionary;
     object      selectCellsDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 // Whether to use surface. If false no surface will be read and only
 // outsidePoints/selectOutside will be used to determine cells to keep.
@@ -25,7 +23,6 @@ surface         "plexi.obj";
 
 // What is outside
 outsidePoints   ((-1 -1 -1));
-
 
 //
 // Selection of final set

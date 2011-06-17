@@ -121,32 +121,6 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
         mesh_,
         dimensionedScalar("a", dimless/dimLength, 0.0)
     ),
-    e_
-    (
-        IOobject
-        (
-            "e",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar("a", dimless/dimLength, 0.0)
-    ),
-    E_
-    (
-        IOobject
-        (
-            "E",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar("E", dimMass/dimLength/pow3(dimTime), 0.0)
-    ),
     nTheta_(readLabel(coeffs_.lookup("nTheta"))),
     nPhi_(readLabel(coeffs_.lookup("nPhi"))),
     nRay_(0),

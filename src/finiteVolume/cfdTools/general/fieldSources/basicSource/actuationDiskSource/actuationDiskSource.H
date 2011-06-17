@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,9 +71,6 @@ class actuationDiskSource
 {
     // Private data
 
-        //- Cell zone ID
-        label cellZoneID_;
-
         //- Sub dictionary with actuationDisk information
         const dictionary& dict_;
 
@@ -93,7 +90,7 @@ class actuationDiskSource
     // Private Member Functions
 
         //- Check data
-        void checkData();
+        void checkData() const;
 
         //- Add resistance to the UEqn
         template<class RhoFieldType>
@@ -139,12 +136,6 @@ public:
 
         // Access
 
-            //- cellZone number
-            label zoneId() const
-            {
-                return cellZoneID_;
-            }
-
             //- Return Cp
             scalar Cp() const
             {
@@ -177,15 +168,6 @@ public:
 
             //-Source term to fvMatrix<scalar>
             virtual void addSu(fvMatrix<scalar>& UEqn){}
-
-            //- Add all explicit source
-            virtual void addExplicitSources(){}
-
-            //- Add source to scalar field
-            virtual void addSu(DimensionedField<scalar, volMesh>& field){}
-
-            //- Add source to vector field
-            virtual void addSu(DimensionedField<vector, volMesh>& field){}
 
 
         // I-O

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,15 +85,6 @@ public:
     // Member Functions
 
         // Evaluation
-
-            //- Add all explicit sources
-            void addExplicitSources();
-
-             //- Add source to scalar field
-            void addSu(DimensionedField<scalar, volMesh>& field);
-
-            //- Add source to vector field
-            void addSu(DimensionedField<vector, volMesh>& field);
 
             //- Add source terms to scalar fvMatrix
             void addSu(fvMatrix<scalar>& Eq);

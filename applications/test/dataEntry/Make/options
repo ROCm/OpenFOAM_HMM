@@ -9,4 +9,5 @@ EXE_LIBS = \
     -llagrangianIntermediate \
     -lradiationModels \
     -lthermophysicalFunctions \
-    -lregionModels
+    -lregionModels \
+    -lsampling

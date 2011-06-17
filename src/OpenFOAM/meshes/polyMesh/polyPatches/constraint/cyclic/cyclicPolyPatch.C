@@ -573,8 +573,10 @@ Foam::label Foam::cyclicPolyPatch::getConsistentRotationFace
 {
     // Determine a face furthest away from the axis
 
-    const scalarField magRadSqr =
-        magSqr((faceCentres - rotationCentre_) ^ rotationAxis_);
+    const scalarField magRadSqr
+    (
+        magSqr((faceCentres - rotationCentre_) ^ rotationAxis_)
+    );
 
     label rotFace = findMax(magRadSqr);
 

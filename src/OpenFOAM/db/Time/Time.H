@@ -57,6 +57,8 @@ SourceFiles
 
 namespace Foam
 {
+// Forward declaration of classes
+class argList;
 
 /*---------------------------------------------------------------------------*\
                              Class Time Declaration
@@ -184,14 +186,24 @@ public:
 
     // Constructors
 
-        //- Construct given name, rootPath and casePath
+        //- Construct given name of dictionary to read and argument list
+        Time
+        (
+            const word& name,
+            const argList& args,
+            const word& systemName = "system",
+            const word& constantName = "constant"
+        );
+
+        //- Construct given name of dictionary to read, rootPath and casePath
         Time
         (
             const word& name,
             const fileName& rootPath,
             const fileName& caseName,
             const word& systemName = "system",
-            const word& constantName = "constant"
+            const word& constantName = "constant",
+            const bool enableFunctionObjects = true
         );
 
         //- Construct given dictionary, rootPath and casePath
@@ -201,7 +213,8 @@ public:
             const fileName& rootPath,
             const fileName& caseName,
             const word& systemName = "system",
-            const word& constantName = "constant"
+            const word& constantName = "constant",
+            const bool enableFunctionObjects = true
         );
 
         //- Construct given endTime, rootPath and casePath
@@ -210,7 +223,8 @@ public:
             const fileName& rootPath,
             const fileName& caseName,
             const word& systemName = "system",
-            const word& constantName = "constant"
+            const word& constantName = "constant",
+            const bool enableFunctionObjects = true
         );
 
 

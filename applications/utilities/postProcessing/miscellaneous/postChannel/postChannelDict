@@ -12,7 +12,6 @@ FoamFile
     class       dictionary;
     object      postChannelDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Seed patches to start layering from

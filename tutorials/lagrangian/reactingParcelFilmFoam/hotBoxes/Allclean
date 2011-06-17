@@ -9,7 +9,6 @@ cleanCase
 rm -rf system/wallFilmRegion
 rm -rf constant/wallFilmRegion
 rm -rf 0
-cp -rf 0.org 0
-
 rm -f *.obj
 
+# ----------------------------------------------------------------- end-of-file

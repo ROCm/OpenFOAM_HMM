@@ -12,7 +12,6 @@ FoamFile
     class       dictionary;
     object      mapFieldsDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // List of pairs of source/target patches for mapping

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,7 +32,7 @@ void Foam::explicitSource::writeData(Ostream& os) const
     os  << indent << name_ << nl
         << indent << token::BEGIN_BLOCK << incrIndent << nl;
 
-    os.writeKeyword("volumeMode") << volumeModeTypeToWord(volumeMode_)
+    os.writeKeyword("volumeMode") << volumeModeTypeNames_[volumeMode_]
         << token::END_STATEMENT << nl;
 
     if (scalarFields_.size() > 0)

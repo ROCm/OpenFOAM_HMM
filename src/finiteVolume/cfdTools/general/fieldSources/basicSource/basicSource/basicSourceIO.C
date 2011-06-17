@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,12 +36,14 @@ void Foam::basicSource::writeData(Ostream& os) const
     os.writeKeyword("timeStart") << timeStart_ << token::END_STATEMENT << nl;
     os.writeKeyword("duration") << duration_ << token::END_STATEMENT << nl;
     os.writeKeyword("selectionMode")
-        << selectionModeTypeToWord(selectionMode_) << nl;
+        << selectionModeTypeNames_[selectionMode_] << nl;
 
     switch (selectionMode_)
     {
         case smPoints:
         {
+            os.writeKeyword("points") << points_
+                << token::END_STATEMENT << nl;
             break;
         }
         case smCellSet:
@@ -50,17 +52,21 @@ void Foam::basicSource::writeData(Ostream& os) const
                 << token::END_STATEMENT << nl;
             break;
         }
+        case smCellZone:
+        {
+            os.writeKeyword("cellZone") << cellSetName_
+                << token::END_STATEMENT << nl;
+            break;
+        }
+        case smAll:
+        {
+            break;
+        }
         default:
         {
-            FatalErrorIn
-            (
-                "basicSource::writeData"
-                "("
-                    "Ostream&, "
-                    "bool"
-                ") const"
-            )   << "Unknown selectionMode "
-                << selectionModeTypeToWord(selectionMode_)
+            FatalErrorIn("basicSource::writeData(Ostream&) const")
+                << "Unknown selectionMode "
+                << selectionMode_
                 << abort(FatalError);
         }
     }

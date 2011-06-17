@@ -7,10 +7,10 @@
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-    class           dictionary;
-    object          testDictRegex;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      testDictRegex;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #inputMode  merge

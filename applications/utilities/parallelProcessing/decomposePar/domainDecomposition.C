@@ -265,8 +265,8 @@ bool Foam::domainDecomposition::writeDecomposition()
             Time::controlDictName,
             time().rootPath(),
             processorCasePath,
-            "system",
-            "constant"
+            word("system"),
+            word("constant")
         );
         processorDb.setTime(time());
 

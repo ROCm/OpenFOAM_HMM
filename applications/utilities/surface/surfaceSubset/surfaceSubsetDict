@@ -12,7 +12,6 @@ FoamFile
     class       dictionary;
     object      surfaceSubsetDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Select triangles by label
