@@ -1150,6 +1150,14 @@ Foam::boolList Foam::backgroundMeshDecomposition::positionOnThisProcessor
     return posProc;
 }
 
+bool Foam::backgroundMeshDecomposition::overlapsThisProcessor
+(
+    const treeBoundBox& box
+) const
+{
+    return !bFTreePtr_().findBox(box).empty();
+}
+
 
 Foam::pointIndexHit Foam::backgroundMeshDecomposition::findLine
 (

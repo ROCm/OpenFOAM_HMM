@@ -472,6 +472,17 @@ Foam::conformalVoronoiMesh::geometryToConformTo() const
 inline const Foam::backgroundMeshDecomposition&
 Foam::conformalVoronoiMesh::decomposition() const
 {
+    if (!Pstream::parRun())
+    {
+        FatalErrorIn
+        (
+            "inline const Foam::backgroundMeshDecomposition& "
+            "Foam::conformalVoronoiMesh::decomposition() const"
+        )
+            << "The backgroundMeshDecomposition cannot be asked for in serial."
+            << exit(FatalError) << endl;
+    }
+
     return decomposition_();
 }
 

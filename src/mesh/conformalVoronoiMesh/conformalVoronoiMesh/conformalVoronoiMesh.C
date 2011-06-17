@@ -1917,7 +1917,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 
     // Report any Delaunay vertices that do not think that they are in the
     // domain the processor they are on.
-    reportProcessorOccupancy();
+    // reportProcessorOccupancy();
 
     if(cvMeshControls().objOutput())
     {

@@ -70,17 +70,108 @@ void Foam::autoDensity::writeOBJ
 
 bool Foam::autoDensity::combinedOverlaps(const treeBoundBox& box) const
 {
-    const conformationSurfaces& geometry = cvMesh_.geometryToConformTo();
+    if (Pstream::parRun())
+    {
+        return
+            cvMesh_.decomposition().overlapsThisProcessor(box)
+         || cvMesh_.geometryToConformTo().overlaps(box);
+    }
 
-    return geometry.overlaps(box);
+    return cvMesh_.geometryToConformTo().overlaps(box);
 }
 
 
 bool Foam::autoDensity::combinedInside(const point& p) const
 {
-    const conformationSurfaces& geometry = cvMesh_.geometryToConformTo();
+    if (Pstream::parRun())
+    {
+        return
+            cvMesh_.decomposition().positionOnThisProcessor(p)
+         && cvMesh_.geometryToConformTo().inside(p);
+    }
 
-    return geometry.inside(p);
+    return cvMesh_.geometryToConformTo().inside(p);
+}
+
+
+Foam::Field<bool> Foam::autoDensity::combinedWellInside
+(
+    const pointField& pts,
+    const scalarField& sizes
+) const
+{
+    if (!Pstream::parRun())
+    {
+        return cvMesh_.geometryToConformTo().wellInside
+        (
+            pts,
+            minimumSurfaceDistanceCoeffSqr_*sqr(sizes)
+        );
+    }
+
+    Field<bool> inside(pts.size(), true);
+
+    // Perform AND operation between testing the surfaces and the previous
+    // field, i.e the parallel result, or in serial, with true.
+
+    Field<bool> insideA
+    (
+        cvMesh_.geometryToConformTo().wellInside
+        (
+            pts,
+            minimumSurfaceDistanceCoeffSqr_*sqr(sizes)
+        )
+    );
+
+    Field<bool> insideB(cvMesh_.decomposition().positionOnThisProcessor(pts));
+
+    // inside = insideA && insideB;
+
+    // Pout<< insideA << nl << insideB << endl;
+
+    forAll(inside, i)
+    {
+        // if (inside[i] != (insideA[i] && insideB[i]))
+        // {
+        //     Pout<< i << " not equal " << " "
+        //         << pts[i] << " " << sizes[i] << " "
+        //         << insideA[i] << " "
+        //         << insideB[i] << " "
+        //         << inside[i]
+        //         << endl;
+        // }
+
+        inside[i] = (insideA[i] && insideB[i]);
+    }
+
+    return inside;
+}
+
+
+bool Foam::autoDensity::combinedWellInside
+(
+    const point& p,
+    scalar size
+) const
+{
+    bool inside = true;
+
+    if (Pstream::parRun())
+    {
+        inside = cvMesh_.decomposition().positionOnThisProcessor(p);
+    }
+
+    // Perform AND operation between testing the surfaces and the previous
+    // result, i.e the parallel result, or in serial, with true.
+    inside =
+        inside
+     && cvMesh_.geometryToConformTo().wellInside
+        (
+            p,
+            minimumSurfaceDistanceCoeffSqr_*sqr(size)
+        );
+
+    return inside;
 }
 
 
@@ -117,14 +208,14 @@ void Foam::autoDensity::recurseAndFill
             }
             else
             {
-                // writeOBJ
-                // (
-                //     subBB,
-                //     word(newName + "_overlap")
-                // );
-
                 if (debug)
                 {
+                    writeOBJ
+                    (
+                        subBB,
+                        word(newName + "_overlap")
+                    );
+
                     Pout<< newName + "_overlap " << subBB << endl;
                 }
 
@@ -142,14 +233,14 @@ void Foam::autoDensity::recurseAndFill
         }
         else if (combinedInside(subBB.midpoint()))
         {
-            // writeOBJ
-            // (
-            //     subBB,
-            //     newName + "_inside"
-            // );
-
             if (debug)
             {
+                writeOBJ
+                (
+                    subBB,
+                    newName + "_inside"
+                );
+
                 Pout<< newName + "_inside " << subBB << endl;
             }
 
@@ -166,11 +257,14 @@ void Foam::autoDensity::recurseAndFill
         }
         else
         {
-            // writeOBJ
-            // (
-            //     subBB,
-            //     newName + "_outside"
-            // );
+            if (debug)
+            {
+                writeOBJ
+                (
+                    subBB,
+                    newName + "_outside"
+                );
+            }
         }
     }
 }
@@ -183,7 +277,7 @@ bool Foam::autoDensity::fillBox
     bool overlapping
 ) const
 {
-    const conformationSurfaces& geometry = cvMesh_.geometryToConformTo();
+    const conformationSurfaces& geometry(cvMesh_.geometryToConformTo());
 
     Random& rnd = cvMesh_.rndGen();
 
@@ -227,7 +321,10 @@ bool Foam::autoDensity::fillBox
 
         if (!surfHit.hit())
         {
-            // Pout<< "box wellInside, no need to sample surface." << endl;
+            if (debug)
+            {
+                Pout<< "box wellInside, no need to sample surface." << endl;
+            }
 
             wellInside = true;
         }
@@ -248,11 +345,7 @@ bool Foam::autoDensity::fillBox
             List<bool>(8, false)
         );
 
-        Field<bool> insideCorners = geometry.wellInside
-        (
-            corners,
-            minimumSurfaceDistanceCoeffSqr_*sqr(cornerSizes)
-        );
+        Field<bool> insideCorners = combinedWellInside(corners, cornerSizes);
 
         // Pout<< corners << nl << cornerSizes << nl << insideCorners << endl;
 
@@ -273,11 +366,14 @@ bool Foam::autoDensity::fillBox
 
             if (maxCellSize/minCellSize > maxSizeRatio_)
             {
-                // Pout<< "Abort fill at corner sample stage,"
-                //     << " minCellSize " << minCellSize
-                //     << " maxCellSize " << maxCellSize
-                //     << " maxSizeRatio " << maxCellSize/minCellSize
-                //     << endl;
+                if (debug)
+                {
+                    Pout<< "Abort fill at corner sample stage,"
+                        << " minCellSize " << minCellSize
+                        << " maxCellSize " << maxCellSize
+                        << " maxSizeRatio " << maxCellSize/minCellSize
+                        << endl;
+                }
 
                 return false;
             }
@@ -287,9 +383,12 @@ bool Foam::autoDensity::fillBox
                 // If one or more corners is not "wellInside", then treat this
                 // as an overlapping box.
 
-                // Pout<< "Inside box found to have some non-wellInside "
-                //     << "corners, using overlapping fill."
-                //     << endl;
+                if (debug)
+                {
+                    Pout<< "Inside box found to have some non-wellInside "
+                        << "corners, using overlapping fill."
+                        << endl;
+                }
 
                 overlapping = true;
 
@@ -306,8 +405,6 @@ bool Foam::autoDensity::fillBox
             pointField linePoints(nLine, vector::zero);
 
             scalarField lineSizes(nLine, 0.0);
-
-            Field<bool> insideLines(nLine, true);
 
             for (label i = 0; i < surfRes_; i++)
             {
@@ -361,10 +458,10 @@ bool Foam::autoDensity::fillBox
                     List<bool>(nLine, false)
                 );
 
-                insideLines = geometry.wellInside
+                Field<bool> insideLines = combinedWellInside
                 (
                     linePoints,
-                    minimumSurfaceDistanceCoeffSqr_*sqr(lineSizes)
+                    lineSizes
                 );
 
                 forAll(insideLines, i)
@@ -384,11 +481,14 @@ bool Foam::autoDensity::fillBox
 
                     if (maxCellSize/minCellSize > maxSizeRatio_)
                     {
-                        // Pout<< "Abort fill at surface sample stage, "
-                        //     << " minCellSize " << minCellSize
-                        //     << " maxCellSize " << maxCellSize
-                        //     << " maxSizeRatio " << maxCellSize/minCellSize
-                        //     << endl;
+                        if (debug)
+                        {
+                            Pout<< "Abort fill at surface sample stage, "
+                                << " minCellSize " << minCellSize
+                                << " maxCellSize " << maxCellSize
+                                << " maxSizeRatio " << maxCellSize/minCellSize
+                                << endl;
+                        }
 
                         return false;
                     }
@@ -399,10 +499,13 @@ bool Foam::autoDensity::fillBox
                         // then treat this as an overlapping box.
                         overlapping = true;
 
-                        // Pout<< "Inside box found to have some non-"
-                        //     << "wellInside surface points, using "
-                        //     << "overlapping fill."
-                        //     << endl;
+                        if (debug)
+                        {
+                            Pout<< "Inside box found to have some non-"
+                                << "wellInside surface points, using "
+                                << "overlapping fill."
+                                << endl;
+                        }
 
                         break;
                     }
@@ -458,10 +561,10 @@ bool Foam::autoDensity::fillBox
             List<bool>(samplePoints.size(), false)
         );
 
-        Field<bool> insidePoints = geometry.wellInside
+        Field<bool> insidePoints = combinedWellInside
         (
             samplePoints,
-            minimumSurfaceDistanceCoeffSqr_*sqr(sampleSizes)
+            sampleSizes
         );
 
         label nInside = 0;
@@ -486,11 +589,14 @@ bool Foam::autoDensity::fillBox
 
                 if (maxCellSize/minCellSize > maxSizeRatio_)
                 {
-                    // Pout<< "Abort fill at sample stage,"
-                    //     << " minCellSize " << minCellSize
-                    //     << " maxCellSize " << maxCellSize
-                    //     << " maxSizeRatio " << maxCellSize/minCellSize
-                    //     << endl;
+                    if (debug)
+                    {
+                        Pout<< "Abort fill at sample stage,"
+                            << " minCellSize " << minCellSize
+                            << " maxCellSize " << maxCellSize
+                            << " maxSizeRatio " << maxCellSize/minCellSize
+                            << endl;
+                    }
 
                     return false;
                 }
@@ -499,17 +605,26 @@ bool Foam::autoDensity::fillBox
 
         if (nInside == 0)
         {
-            // Pout<< "No sample points found inside box" << endl;
+            if (debug)
+            {
+                Pout<< "No sample points found inside box" << endl;
+            }
 
             return true;
         }
 
-        // Pout<< scalar(nInside)/scalar(samplePoints.size())
-        //     << " full overlapping box" << endl;
+        if (debug)
+        {
+            Pout<< scalar(nInside)/scalar(samplePoints.size())
+                << " full overlapping box" << endl;
+        }
 
         totalVolume *= scalar(nInside)/scalar(samplePoints.size());
 
-        // Pout<< "Total volume to fill = " << totalVolume << endl;
+        if (debug)
+        {
+            Pout<< "Total volume to fill = " << totalVolume << endl;
+        }
 
         // Using the sampledPoints as the first test locations as they are
         // randomly shuffled, but unfiormly sampling space and have wellInside
@@ -553,12 +668,15 @@ bool Foam::autoDensity::fillBox
 
                         scalar r = rnd.scalar01();
 
-                        // Pout<< "totalVolume " << totalVolume << nl
-                        //     << "volumeAdded " << volumeAdded << nl
-                        //     << "localVolume " << localVolume << nl
-                        //     << "addProbability " << addProbability << nl
-                        //     << "random " << r
-                        //     << endl;
+                        if (debug)
+                        {
+                            Pout<< "totalVolume " << totalVolume << nl
+                                << "volumeAdded " << volumeAdded << nl
+                                << "localVolume " << localVolume << nl
+                                << "addProbability " << addProbability << nl
+                                << "random " << r
+                                << endl;
+                        }
 
                         if (addProbability > r)
                         {
@@ -589,9 +707,12 @@ bool Foam::autoDensity::fillBox
 
     if (volumeAdded < totalVolume)
     {
-        // Pout<< "Adding random points, remaining volume "
-        //     << totalVolume - volumeAdded
-        //     << endl;
+        if (debug)
+        {
+            Pout<< "Adding random points, remaining volume "
+                << totalVolume - volumeAdded
+                << endl;
+        }
 
         maxDensity = 1/pow3(max(minCellSize, SMALL));
 
@@ -612,11 +733,7 @@ bool Foam::autoDensity::fillBox
             else
             {
                 // Determine if the point is "wellInside" the domain
-                insidePoint = geometry.wellInside
-                (
-                    p,
-                    minimumSurfaceDistanceCoeffSqr_*sqr(localSize)
-                );
+                insidePoint = combinedWellInside(p, localSize);
             }
 
             if (insidePoint)
@@ -639,11 +756,14 @@ bool Foam::autoDensity::fillBox
 
                 if (maxCellSize/minCellSize > maxSizeRatio_)
                 {
-                    // Pout<< "Abort fill at random fill stage,"
-                    //     << " minCellSize " << minCellSize
-                    //     << " maxCellSize " << maxCellSize
-                    //     << " maxSizeRatio " << maxCellSize/minCellSize
-                    //     << endl;
+                    if (debug)
+                    {
+                        Pout<< "Abort fill at random fill stage,"
+                            << " minCellSize " << minCellSize
+                            << " maxCellSize " << maxCellSize
+                            << " maxSizeRatio " << maxCellSize/minCellSize
+                            << endl;
+                    }
 
                     // Discard any points already filled into this box by
                     // setting size of initialPoints back to its starting value
@@ -671,12 +791,15 @@ bool Foam::autoDensity::fillBox
 
                         scalar r = rnd.scalar01();
 
-                        // Pout<< "totalVolume " << totalVolume << nl
-                        //     << "volumeAdded " << volumeAdded << nl
-                        //     << "localVolume " << localVolume << nl
-                        //     << "addProbability " << addProbability << nl
-                        //     << "random " << r
-                        //     << endl;
+                        if (debug)
+                        {
+                            Pout<< "totalVolume " << totalVolume << nl
+                                << "volumeAdded " << volumeAdded << nl
+                                << "localVolume " << localVolume << nl
+                                << "addProbability " << addProbability << nl
+                                << "random " << r
+                                << endl;
+                        }
 
                         if (addProbability > r)
                         {
@@ -707,16 +830,19 @@ bool Foam::autoDensity::fillBox
 
     globalTrialPoints_ += trialPoints;
 
-    // Pout<< trialPoints
-    //     << " locations queried, " << initialPoints.size() - initialSize
-    //     << " points placed, ("
-    //     << scalar(initialPoints.size() - initialSize)
-    //       /scalar(max(trialPoints, 1))
-    //     << " success rate)." << nl
-    //     << "minCellSize " << minCellSize
-    //     << ", maxCellSize " << maxCellSize
-    //     << ", ratio " << maxCellSize/minCellSize
-    //     << nl << endl;
+    if (debug)
+    {
+        Pout<< trialPoints
+            << " locations queried, " << initialPoints.size() - initialSize
+            << " points placed, ("
+            << scalar(initialPoints.size() - initialSize)
+              /scalar(max(trialPoints, 1))
+            << " success rate)." << nl
+            << "minCellSize " << minCellSize
+            << ", maxCellSize " << maxCellSize
+            << ", ratio " << maxCellSize/minCellSize
+            << nl << endl;
+    }
 
     return true;
 }

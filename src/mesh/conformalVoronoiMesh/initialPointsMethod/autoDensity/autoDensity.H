@@ -90,6 +90,22 @@ private:
         //  the backgroundMeshDecomposition
         bool combinedInside(const point& p) const;
 
+        //- Check if the given points are wellInside the geometry and, in
+        //  parallel, inside the backgroundMeshDecomposition
+        Field<bool> combinedWellInside
+        (
+            const pointField& pts,
+            const scalarField& sizes
+        ) const;
+
+        //- Check if the given points are wellInside the geometry and, in
+        //  parallel, inside the backgroundMeshDecomposition
+        bool combinedWellInside
+        (
+            const point& p,
+            scalar size
+        ) const;
+
         //- Write boundBox as obj
         void writeOBJ
         (
