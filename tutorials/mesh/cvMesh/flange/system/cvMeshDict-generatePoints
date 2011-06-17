@@ -109,14 +109,17 @@ initialPoints
 {
     minimumSurfaceDistanceCoeff 0.55;
 
-    initialPointsMethod         densityWeightedStochastic;
+    initialPointsMethod         autoDensity;
     // initialPointsMethod         uniformGrid;
     // initialPointsMethod         bodyCentredCubic;
     // initialPointsMethod         pointFile;
 
-    densityWeightedStochasticDetails
+    autoDensityDetails
     {
-        totalVolume     1.56e-05;
+        minLevels 1;
+        maxSizeRatio 2.0;
+        sampleResolution 5;
+        surfaceSampleResolution 5;
     }
 
     uniformGridDetails

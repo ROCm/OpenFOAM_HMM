@@ -989,11 +989,11 @@ Foam::backgroundMeshDecomposition::distribute
 
                         if (newCellI == -1)
                         {
-                            Pout<< "findCell backgroundMeshDecomposition "
-                                << v << " "
-                                << oldCellI
-                                << newCellI
-                                << " find nearest cellI ";
+                            // Pout<< "findCell backgroundMeshDecomposition "
+                            //     << v << " "
+                            //     << oldCellI
+                            //     << newCellI
+                            //     << " find nearest cellI ";
 
                             newCellI = cellSearch.findNearestCell(v);
 
@@ -1148,6 +1148,14 @@ Foam::boolList Foam::backgroundMeshDecomposition::positionOnThisProcessor
     }
 
     return posProc;
+}
+
+bool Foam::backgroundMeshDecomposition::overlapsThisProcessor
+(
+    const treeBoundBox& box
+) const
+{
+    return !bFTreePtr_().findBox(box).empty();
 }
 
 

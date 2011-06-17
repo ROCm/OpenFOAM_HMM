@@ -146,7 +146,7 @@ std::list<Vb::Point> uniformGrid::initialPoints() const
                     cvMesh_.cellSizeControl().cellSize
                     (
                         points,
-                        List<bool>(pI, false)
+                        List<bool>(points.size(), false)
                     )
                 )
             );

@@ -1331,12 +1331,13 @@ bool Foam::conformalVoronoiMesh::distributeBackground()
 
                 if (cellI == -1)
                 {
-                    Pout<< "findCell conformalVoronoiMesh::distribute findCell "
-                        << vit->type() << " "
-                        << vit->index() << " "
-                        << v << " "
-                        << cellI
-                        << " find nearest cellI ";
+                    // Pout<< "findCell conformalVoronoiMesh::distribute "
+                    //     << "findCell "
+                    //     << vit->type() << " "
+                    //     << vit->index() << " "
+                    //     << v << " "
+                    //     << cellI
+                    //     << " find nearest cellI ";
 
                     cellI = cellSearch.findNearestCell(v);
 
@@ -1916,7 +1917,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 
     // Report any Delaunay vertices that do not think that they are in the
     // domain the processor they are on.
-    reportProcessorOccupancy();
+    // reportProcessorOccupancy();
 
     if(cvMeshControls().objOutput())
     {

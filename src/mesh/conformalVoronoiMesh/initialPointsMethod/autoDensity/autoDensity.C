@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "hierarchicalDensityWeightedStochastic.H"
+#include "autoDensity.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -33,17 +33,17 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(hierarchicalDensityWeightedStochastic, 0);
+defineTypeNameAndDebug(autoDensity, 0);
 addToRunTimeSelectionTable
 (
     initialPointsMethod,
-    hierarchicalDensityWeightedStochastic,
+    autoDensity,
     dictionary
 );
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::hierarchicalDensityWeightedStochastic::writeOBJ
+void Foam::autoDensity::writeOBJ
 (
     const treeBoundBox& bb,
     fileName name
@@ -68,8 +68,114 @@ void Foam::hierarchicalDensityWeightedStochastic::writeOBJ
     }
 }
 
+bool Foam::autoDensity::combinedOverlaps(const treeBoundBox& box) const
+{
+    if (Pstream::parRun())
+    {
+        return
+            cvMesh_.decomposition().overlapsThisProcessor(box)
+         || cvMesh_.geometryToConformTo().overlaps(box);
+    }
 
-void Foam::hierarchicalDensityWeightedStochastic::recurseAndFill
+    return cvMesh_.geometryToConformTo().overlaps(box);
+}
+
+
+bool Foam::autoDensity::combinedInside(const point& p) const
+{
+    if (Pstream::parRun())
+    {
+        return
+            cvMesh_.decomposition().positionOnThisProcessor(p)
+         && cvMesh_.geometryToConformTo().inside(p);
+    }
+
+    return cvMesh_.geometryToConformTo().inside(p);
+}
+
+
+Foam::Field<bool> Foam::autoDensity::combinedWellInside
+(
+    const pointField& pts,
+    const scalarField& sizes
+) const
+{
+    if (!Pstream::parRun())
+    {
+        return cvMesh_.geometryToConformTo().wellInside
+        (
+            pts,
+            minimumSurfaceDistanceCoeffSqr_*sqr(sizes)
+        );
+    }
+
+    Field<bool> inside(pts.size(), true);
+
+    // Perform AND operation between testing the surfaces and the previous
+    // field, i.e the parallel result, or in serial, with true.
+
+    Field<bool> insideA
+    (
+        cvMesh_.geometryToConformTo().wellInside
+        (
+            pts,
+            minimumSurfaceDistanceCoeffSqr_*sqr(sizes)
+        )
+    );
+
+    Field<bool> insideB(cvMesh_.decomposition().positionOnThisProcessor(pts));
+
+    // inside = insideA && insideB;
+
+    // Pout<< insideA << nl << insideB << endl;
+
+    forAll(inside, i)
+    {
+        // if (inside[i] != (insideA[i] && insideB[i]))
+        // {
+        //     Pout<< i << " not equal " << " "
+        //         << pts[i] << " " << sizes[i] << " "
+        //         << insideA[i] << " "
+        //         << insideB[i] << " "
+        //         << inside[i]
+        //         << endl;
+        // }
+
+        inside[i] = (insideA[i] && insideB[i]);
+    }
+
+    return inside;
+}
+
+
+bool Foam::autoDensity::combinedWellInside
+(
+    const point& p,
+    scalar size
+) const
+{
+    bool inside = true;
+
+    if (Pstream::parRun())
+    {
+        inside = cvMesh_.decomposition().positionOnThisProcessor(p);
+    }
+
+    // Perform AND operation between testing the surfaces and the previous
+    // result, i.e the parallel result, or in serial, with true.
+    inside =
+        inside
+     && cvMesh_.geometryToConformTo().wellInside
+        (
+            p,
+            minimumSurfaceDistanceCoeffSqr_*sqr(size)
+        );
+
+    return inside;
+}
+
+
+void Foam::autoDensity::recurseAndFill
 (
     std::list<Vb::Point>& initialPoints,
     const treeBoundBox& bb,
@@ -77,8 +183,6 @@ void Foam::hierarchicalDensityWeightedStochastic::recurseAndFill
     word recursionName
 ) const
 {
-    const conformationSurfaces& geometry = cvMesh_.geometryToConformTo();
-
     for (direction i = 0; i < 8; i++)
     {
         treeBoundBox subBB = bb.subBbox(i);
@@ -90,7 +194,7 @@ void Foam::hierarchicalDensityWeightedStochastic::recurseAndFill
             cvMesh_.timeCheck(newName);
         }
 
-        if (geometry.overlaps(subBB))
+        if (combinedOverlaps(subBB))
         {
             if (levelLimit > 0)
             {
@@ -104,14 +208,14 @@ void Foam::hierarchicalDensityWeightedStochastic::recurseAndFill
             }
             else
             {
-                // writeOBJ
-                // (
-                //     subBB,
-                //     word(newName + "_overlap")
-                // );
-
                 if (debug)
                 {
+                    writeOBJ
+                    (
+                        subBB,
+                        word(newName + "_overlap")
+                    );
+
                     Pout<< newName + "_overlap " << subBB << endl;
                 }
 
@@ -127,16 +231,16 @@ void Foam::hierarchicalDensityWeightedStochastic::recurseAndFill
                 }
             }
         }
-        else if (geometry.inside(subBB.midpoint()))
+        else if (combinedInside(subBB.midpoint()))
         {
-            // writeOBJ
-            // (
-            //     subBB,
-            //     newName + "_inside"
-            // );
-
             if (debug)
             {
+                writeOBJ
+                (
+                    subBB,
+                    newName + "_inside"
+                );
+
                 Pout<< newName + "_inside " << subBB << endl;
             }
 
@@ -153,24 +257,27 @@ void Foam::hierarchicalDensityWeightedStochastic::recurseAndFill
         }
         else
         {
-            // writeOBJ
-            // (
-            //     subBB,
-            //     newName + "_outside"
-            // );
+            if (debug)
+            {
+                writeOBJ
+                (
+                    subBB,
+                    newName + "_outside"
+                );
+            }
         }
     }
 }
 
 
-bool Foam::hierarchicalDensityWeightedStochastic::fillBox
+bool Foam::autoDensity::fillBox
 (
     std::list<Vb::Point>& initialPoints,
     const treeBoundBox& bb,
     bool overlapping
 ) const
 {
-    const conformationSurfaces& geometry = cvMesh_.geometryToConformTo();
+    const conformationSurfaces& geometry(cvMesh_.geometryToConformTo());
 
     Random& rnd = cvMesh_.rndGen();
 
@@ -214,7 +321,10 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
 
         if (!surfHit.hit())
         {
-            // Pout<< "box wellInside, no need to sample surface." << endl;
+            if (debug)
+            {
+                Pout<< "box wellInside, no need to sample surface." << endl;
+            }
 
             wellInside = true;
         }
@@ -235,11 +345,7 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
             List<bool>(8, false)
         );
 
-        Field<bool> insideCorners = geometry.wellInside
-        (
-            corners,
-            minimumSurfaceDistanceCoeffSqr_*sqr(cornerSizes)
-        );
+        Field<bool> insideCorners = combinedWellInside(corners, cornerSizes);
 
         // Pout<< corners << nl << cornerSizes << nl << insideCorners << endl;
 
@@ -260,11 +366,14 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
 
             if (maxCellSize/minCellSize > maxSizeRatio_)
             {
-                // Pout<< "Abort fill at corner sample stage,"
-                //     << " minCellSize " << minCellSize
-                //     << " maxCellSize " << maxCellSize
-                //     << " maxSizeRatio " << maxCellSize/minCellSize
-                //     << endl;
+                if (debug)
+                {
+                    Pout<< "Abort fill at corner sample stage,"
+                        << " minCellSize " << minCellSize
+                        << " maxCellSize " << maxCellSize
+                        << " maxSizeRatio " << maxCellSize/minCellSize
+                        << endl;
+                }
 
                 return false;
             }
@@ -274,9 +383,12 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
                 // If one or more corners is not "wellInside", then treat this
                 // as an overlapping box.
 
-                // Pout<< "Inside box found to have some non-wellInside "
-                //     << "corners, using overlapping fill."
-                //     << endl;
+                if (debug)
+                {
+                    Pout<< "Inside box found to have some non-wellInside "
+                        << "corners, using overlapping fill."
+                        << endl;
+                }
 
                 overlapping = true;
 
@@ -293,8 +405,6 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
             pointField linePoints(nLine, vector::zero);
 
             scalarField lineSizes(nLine, 0.0);
-
-            Field<bool> insideLines(nLine, true);
 
             for (label i = 0; i < surfRes_; i++)
             {
@@ -348,10 +458,10 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
                     List<bool>(nLine, false)
                 );
 
-                insideLines = geometry.wellInside
+                Field<bool> insideLines = combinedWellInside
                 (
                     linePoints,
-                    minimumSurfaceDistanceCoeffSqr_*sqr(lineSizes)
+                    lineSizes
                 );
 
                 forAll(insideLines, i)
@@ -371,11 +481,14 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
 
                     if (maxCellSize/minCellSize > maxSizeRatio_)
                     {
-                        // Pout<< "Abort fill at surface sample stage, "
-                        //     << " minCellSize " << minCellSize
-                        //     << " maxCellSize " << maxCellSize
-                        //     << " maxSizeRatio " << maxCellSize/minCellSize
-                        //     << endl;
+                        if (debug)
+                        {
+                            Pout<< "Abort fill at surface sample stage, "
+                                << " minCellSize " << minCellSize
+                                << " maxCellSize " << maxCellSize
+                                << " maxSizeRatio " << maxCellSize/minCellSize
+                                << endl;
+                        }
 
                         return false;
                     }
@@ -386,10 +499,13 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
                         // then treat this as an overlapping box.
                         overlapping = true;
 
-                        // Pout<< "Inside box found to have some non-"
-                        //     << "wellInside surface points, using "
-                        //     << "overlapping fill."
-                        //     << endl;
+                        if (debug)
+                        {
+                            Pout<< "Inside box found to have some non-"
+                                << "wellInside surface points, using "
+                                << "overlapping fill."
+                                << endl;
+                        }
 
                         break;
                     }
@@ -445,10 +561,10 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
             List<bool>(samplePoints.size(), false)
         );
 
-        Field<bool> insidePoints = geometry.wellInside
+        Field<bool> insidePoints = combinedWellInside
         (
             samplePoints,
-            minimumSurfaceDistanceCoeffSqr_*sqr(sampleSizes)
+            sampleSizes
         );
 
         label nInside = 0;
@@ -473,11 +589,14 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
 
                 if (maxCellSize/minCellSize > maxSizeRatio_)
                 {
-                    // Pout<< "Abort fill at sample stage,"
-                    //     << " minCellSize " << minCellSize
-                    //     << " maxCellSize " << maxCellSize
-                    //     << " maxSizeRatio " << maxCellSize/minCellSize
-                    //     << endl;
+                    if (debug)
+                    {
+                        Pout<< "Abort fill at sample stage,"
+                            << " minCellSize " << minCellSize
+                            << " maxCellSize " << maxCellSize
+                            << " maxSizeRatio " << maxCellSize/minCellSize
+                            << endl;
+                    }
 
                     return false;
                 }
@@ -486,17 +605,26 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
 
         if (nInside == 0)
         {
-            // Pout<< "No sample points found inside box" << endl;
+            if (debug)
+            {
+                Pout<< "No sample points found inside box" << endl;
+            }
 
             return true;
         }
 
-        // Pout<< scalar(nInside)/scalar(samplePoints.size())
-        //     << " full overlapping box" << endl;
+        if (debug)
+        {
+            Pout<< scalar(nInside)/scalar(samplePoints.size())
+                << " full overlapping box" << endl;
+        }
 
         totalVolume *= scalar(nInside)/scalar(samplePoints.size());
 
-        // Pout<< "Total volume to fill = " << totalVolume << endl;
+        if (debug)
+        {
+            Pout<< "Total volume to fill = " << totalVolume << endl;
+        }
 
         // Using the sampledPoints as the first test locations as they are
         // randomly shuffled, but unfiormly sampling space and have wellInside
@@ -540,12 +668,15 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
 
                         scalar r = rnd.scalar01();
 
-                        // Pout<< "totalVolume " << totalVolume << nl
-                        //     << "volumeAdded " << volumeAdded << nl
-                        //     << "localVolume " << localVolume << nl
-                        //     << "addProbability " << addProbability << nl
-                        //     << "random " << r
-                        //     << endl;
+                        if (debug)
+                        {
+                            Pout<< "totalVolume " << totalVolume << nl
+                                << "volumeAdded " << volumeAdded << nl
+                                << "localVolume " << localVolume << nl
+                                << "addProbability " << addProbability << nl
+                                << "random " << r
+                                << endl;
+                        }
 
                         if (addProbability > r)
                         {
@@ -576,9 +707,12 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
 
     if (volumeAdded < totalVolume)
     {
-        // Pout<< "Adding random points, remaining volume "
-        //     << totalVolume - volumeAdded
-        //     << endl;
+        if (debug)
+        {
+            Pout<< "Adding random points, remaining volume "
+                << totalVolume - volumeAdded
+                << endl;
+        }
 
         maxDensity = 1/pow3(max(minCellSize, SMALL));
 
@@ -599,11 +733,7 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
             else
             {
                 // Determine if the point is "wellInside" the domain
-                insidePoint = geometry.wellInside
-                (
-                    p,
-                    minimumSurfaceDistanceCoeffSqr_*sqr(localSize)
-                );
+                insidePoint = combinedWellInside(p, localSize);
             }
 
             if (insidePoint)
@@ -626,11 +756,14 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
 
                 if (maxCellSize/minCellSize > maxSizeRatio_)
                 {
-                    // Pout<< "Abort fill at random fill stage,"
-                    //     << " minCellSize " << minCellSize
-                    //     << " maxCellSize " << maxCellSize
-                    //     << " maxSizeRatio " << maxCellSize/minCellSize
-                    //     << endl;
+                    if (debug)
+                    {
+                        Pout<< "Abort fill at random fill stage,"
+                            << " minCellSize " << minCellSize
+                            << " maxCellSize " << maxCellSize
+                            << " maxSizeRatio " << maxCellSize/minCellSize
+                            << endl;
+                    }
 
                     // Discard any points already filled into this box by
                     // setting size of initialPoints back to its starting value
@@ -658,12 +791,15 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
 
                         scalar r = rnd.scalar01();
 
-                        // Pout<< "totalVolume " << totalVolume << nl
-                        //     << "volumeAdded " << volumeAdded << nl
-                        //     << "localVolume " << localVolume << nl
-                        //     << "addProbability " << addProbability << nl
-                        //     << "random " << r
-                        //     << endl;
+                        if (debug)
+                        {
+                            Pout<< "totalVolume " << totalVolume << nl
+                                << "volumeAdded " << volumeAdded << nl
+                                << "localVolume " << localVolume << nl
+                                << "addProbability " << addProbability << nl
+                                << "random " << r
+                                << endl;
+                        }
 
                         if (addProbability > r)
                         {
@@ -694,16 +830,19 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
 
     globalTrialPoints_ += trialPoints;
 
-    // Pout<< trialPoints
-    //     << " locations queried, " << initialPoints.size() - initialSize
-    //     << " points placed, ("
-    //     << scalar(initialPoints.size() - initialSize)
-    //       /scalar(max(trialPoints, 1))
-    //     << " success rate)." << nl
-    //     << "minCellSize " << minCellSize
-    //     << ", maxCellSize " << maxCellSize
-    //     << ", ratio " << maxCellSize/minCellSize
-    //     << nl << endl;
+    if (debug)
+    {
+        Pout<< trialPoints
+            << " locations queried, " << initialPoints.size() - initialSize
+            << " points placed, ("
+            << scalar(initialPoints.size() - initialSize)
+              /scalar(max(trialPoints, 1))
+            << " success rate)." << nl
+            << "minCellSize " << minCellSize
+            << ", maxCellSize " << maxCellSize
+            << ", ratio " << maxCellSize/minCellSize
+            << nl << endl;
+    }
 
     return true;
 }
@@ -711,7 +850,7 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-hierarchicalDensityWeightedStochastic::hierarchicalDensityWeightedStochastic
+autoDensity::autoDensity
 (
     const dictionary& initialPointsDict,
     const conformalVoronoiMesh& cvMesh
@@ -737,8 +876,7 @@ hierarchicalDensityWeightedStochastic::hierarchicalDensityWeightedStochastic
 
         WarningIn
         (
-            "hierarchicalDensityWeightedStochastic::"
-            "hierarchicalDensityWeightedStochastic"
+            "autoDensity::autoDensity"
             "("
                 "const dictionary& initialPointsDict,"
                 "const conformalVoronoiMesh& cvMesh"
@@ -753,15 +891,25 @@ hierarchicalDensityWeightedStochastic::hierarchicalDensityWeightedStochastic
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-std::list<Vb::Point>
-hierarchicalDensityWeightedStochastic::initialPoints() const
+std::list<Vb::Point> autoDensity::initialPoints() const
 {
-    const conformationSurfaces& geometry = cvMesh_.geometryToConformTo();
+    treeBoundBox hierBB;
 
-    treeBoundBox hierBB = geometry.globalBounds().extend
-    (
-        cvMesh_.rndGen(), 1e-6
-    );
+    // Pick up the bounds of this processor, or the whole geometry, depending
+    // on whether this is a parallel run.
+    if (Pstream::parRun())
+    {
+        hierBB = cvMesh_.decomposition().procBounds();
+    }
+    else
+    {
+        // Extend the global box to move it off large plane surfaces
+        hierBB = cvMesh_.geometryToConformTo().globalBounds().extend
+        (
+            cvMesh_.rndGen(),
+            1e-6
+        );
+    }
 
     std::list<Vb::Point> initialPoints;
 

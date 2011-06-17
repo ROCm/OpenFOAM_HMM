@@ -225,6 +225,10 @@ public:
         //- Are the given positions inside the domain of this decomposition
         boolList positionOnThisProcessor(const List<point>& pts) const;
 
+        //- Does the given box overlap the faces of the bounday of this
+        //  processor
+        bool overlapsThisProcessor(const treeBoundBox& box) const;
+
         //- Find nearest intersection of line between start and end, (exposing
         //  underlying indexedOctree)
         pointIndexHit findLine
