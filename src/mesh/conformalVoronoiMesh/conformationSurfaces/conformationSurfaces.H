@@ -38,7 +38,7 @@ SourceFiles
 #include "searchableSurfaces.H"
 #include "searchableSurfacesQueries.H"
 #include "extendedFeatureEdgeMesh.H"
-#include "triSurface.H"
+#include "boolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
