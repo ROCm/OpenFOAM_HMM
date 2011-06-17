@@ -1331,12 +1331,13 @@ bool Foam::conformalVoronoiMesh::distributeBackground()
 
                 if (cellI == -1)
                 {
-                    Pout<< "findCell conformalVoronoiMesh::distribute findCell "
-                        << vit->type() << " "
-                        << vit->index() << " "
-                        << v << " "
-                        << cellI
-                        << " find nearest cellI ";
+                    // Pout<< "findCell conformalVoronoiMesh::distribute "
+                    //     << "findCell "
+                    //     << vit->type() << " "
+                    //     << vit->index() << " "
+                    //     << v << " "
+                    //     << cellI
+                    //     << " find nearest cellI ";
 
                     cellI = cellSearch.findNearestCell(v);
 

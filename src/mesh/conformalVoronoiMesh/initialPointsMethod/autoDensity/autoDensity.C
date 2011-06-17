@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "hierarchicalDensityWeightedStochastic.H"
+#include "autoDensity.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -33,17 +33,17 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(hierarchicalDensityWeightedStochastic, 0);
+defineTypeNameAndDebug(autoDensity, 0);
 addToRunTimeSelectionTable
 (
     initialPointsMethod,
-    hierarchicalDensityWeightedStochastic,
+    autoDensity,
     dictionary
 );
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::hierarchicalDensityWeightedStochastic::writeOBJ
+void Foam::autoDensity::writeOBJ
 (
     const treeBoundBox& bb,
     fileName name
@@ -68,8 +68,23 @@ void Foam::hierarchicalDensityWeightedStochastic::writeOBJ
     }
 }
 
+bool Foam::autoDensity::combinedOverlaps(const treeBoundBox& box) const
+{
+    const conformationSurfaces& geometry = cvMesh_.geometryToConformTo();
 
-void Foam::hierarchicalDensityWeightedStochastic::recurseAndFill
+    return geometry.overlaps(box);
+}
+
+
+bool Foam::autoDensity::combinedInside(const point& p) const
+{
+    const conformationSurfaces& geometry = cvMesh_.geometryToConformTo();
+
+    return geometry.inside(p);
+}
+
+
+void Foam::autoDensity::recurseAndFill
 (
     std::list<Vb::Point>& initialPoints,
     const treeBoundBox& bb,
@@ -77,8 +92,6 @@ void Foam::hierarchicalDensityWeightedStochastic::recurseAndFill
     word recursionName
 ) const
 {
-    const conformationSurfaces& geometry = cvMesh_.geometryToConformTo();
-
     for (direction i = 0; i < 8; i++)
     {
         treeBoundBox subBB = bb.subBbox(i);
@@ -90,7 +103,7 @@ void Foam::hierarchicalDensityWeightedStochastic::recurseAndFill
             cvMesh_.timeCheck(newName);
         }
 
-        if (geometry.overlaps(subBB))
+        if (combinedOverlaps(subBB))
         {
             if (levelLimit > 0)
             {
@@ -127,7 +140,7 @@ void Foam::hierarchicalDensityWeightedStochastic::recurseAndFill
                 }
             }
         }
-        else if (geometry.inside(subBB.midpoint()))
+        else if (combinedInside(subBB.midpoint()))
         {
             // writeOBJ
             // (
@@ -163,7 +176,7 @@ void Foam::hierarchicalDensityWeightedStochastic::recurseAndFill
 }
 
 
-bool Foam::hierarchicalDensityWeightedStochastic::fillBox
+bool Foam::autoDensity::fillBox
 (
     std::list<Vb::Point>& initialPoints,
     const treeBoundBox& bb,
@@ -711,7 +724,7 @@ bool Foam::hierarchicalDensityWeightedStochastic::fillBox
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-hierarchicalDensityWeightedStochastic::hierarchicalDensityWeightedStochastic
+autoDensity::autoDensity
 (
     const dictionary& initialPointsDict,
     const conformalVoronoiMesh& cvMesh
@@ -737,8 +750,7 @@ hierarchicalDensityWeightedStochastic::hierarchicalDensityWeightedStochastic
 
         WarningIn
         (
-            "hierarchicalDensityWeightedStochastic::"
-            "hierarchicalDensityWeightedStochastic"
+            "autoDensity::autoDensity"
             "("
                 "const dictionary& initialPointsDict,"
                 "const conformalVoronoiMesh& cvMesh"
@@ -753,15 +765,25 @@ hierarchicalDensityWeightedStochastic::hierarchicalDensityWeightedStochastic
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-std::list<Vb::Point>
-hierarchicalDensityWeightedStochastic::initialPoints() const
+std::list<Vb::Point> autoDensity::initialPoints() const
 {
-    const conformationSurfaces& geometry = cvMesh_.geometryToConformTo();
+    treeBoundBox hierBB;
 
-    treeBoundBox hierBB = geometry.globalBounds().extend
-    (
-        cvMesh_.rndGen(), 1e-6
-    );
+    // Pick up the bounds of this processor, or the whole geometry, depending
+    // on whether this is a parallel run.
+    if (Pstream::parRun())
+    {
+        hierBB = cvMesh_.decomposition().procBounds();
+    }
+    else
+    {
+        // Extend the global box to move it off large plane surfaces
+        hierBB = cvMesh_.geometryToConformTo().globalBounds().extend
+        (
+            cvMesh_.rndGen(),
+            1e-6
+        );
+    }
 
     std::list<Vb::Point> initialPoints;
 

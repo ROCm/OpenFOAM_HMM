@@ -27,8 +27,7 @@ initialPointsMethod/uniformGrid/uniformGrid.C
 initialPointsMethod/bodyCentredCubic/bodyCentredCubic.C
 initialPointsMethod/faceCentredCubic/faceCentredCubic.C
 initialPointsMethod/pointFile/pointFile.C
-initialPointsMethod/densityWeightedStochastic/densityWeightedStochastic.C
-initialPointsMethod/hierarchicalDensityWeightedStochastic/hierarchicalDensityWeightedStochastic.C
+initialPointsMethod/autoDensity/autoDensity.C
 
 relaxationModel/relaxationModel/relaxationModel.C
 relaxationModel/adaptiveLinear/adaptiveLinear.C

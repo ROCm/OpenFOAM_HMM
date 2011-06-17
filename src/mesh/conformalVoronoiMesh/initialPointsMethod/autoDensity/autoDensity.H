@@ -22,19 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::hierarchicalDensityWeightedStochastic
+    Foam::autoDensity
 
 Description
     Choose random points inside the domain and place them with a probability
     proportional to the target density of points.
 
 SourceFiles
-    hierarchicalDensityWeightedStochastic.C
+    autoDensity.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef hierarchicalDensityWeightedStochastic_H
-#define hierarchicalDensityWeightedStochastic_H
+#ifndef autoDensity_H
+#define autoDensity_H
 
 #include "initialPointsMethod.H"
 #include "treeBoundBox.H"
@@ -45,10 +45,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-            Class hierarchicalDensityWeightedStochastic Declaration
+            Class autoDensity Declaration
 \*---------------------------------------------------------------------------*/
 
-class hierarchicalDensityWeightedStochastic
+class autoDensity
 :
     public initialPointsMethod
 {
@@ -82,6 +82,14 @@ private:
 
     // Private Member Functions
 
+        //- Check if the given box overlaps the geometry or, in parallel, the
+        //  backgroundMeshDecomposition
+        bool combinedOverlaps(const treeBoundBox& box) const;
+
+        //- Check if the given point is inside the geometry and, in parallel,
+        //  the backgroundMeshDecomposition
+        bool combinedInside(const point& p) const;
+
         //- Write boundBox as obj
         void writeOBJ
         (
@@ -112,12 +120,12 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("hierarchicalDensityWeightedStochastic");
+    TypeName("autoDensity");
 
     // Constructors
 
         //- Construct from components
-        hierarchicalDensityWeightedStochastic
+        autoDensity
         (
             const dictionary& initialPointsDict,
             const conformalVoronoiMesh& cvMesh
@@ -125,7 +133,7 @@ public:
 
 
     //- Destructor
-    virtual ~hierarchicalDensityWeightedStochastic()
+    virtual ~autoDensity()
     {}
 
 

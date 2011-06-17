@@ -58,19 +58,30 @@ faceCentredCubic::faceCentredCubic
 
 std::list<Vb::Point> faceCentredCubic::initialPoints() const
 {
-    const boundBox& bb = cvMesh_.geometryToConformTo().globalBounds();
+    boundBox bb;
+
+    // Pick up the bounds of this processor, or the whole geometry, depending
+    // on whether this is a parallel run.
+    if (Pstream::parRun())
+    {
+        bb = cvMesh_.decomposition().procBounds();
+    }
+    else
+    {
+        bb = cvMesh_.geometryToConformTo().globalBounds();
+    }
 
     scalar x0 = bb.min().x();
     scalar xR = bb.max().x() - x0;
-    label ni = label(xR/initialCellSize_) + 1;
+    label ni = label(xR/initialCellSize_);
 
     scalar y0 = bb.min().y();
     scalar yR = bb.max().y() - y0;
-    label nj = label(yR/initialCellSize_) + 1;
+    label nj = label(yR/initialCellSize_);
 
     scalar z0 = bb.min().z();
     scalar zR = bb.max().z() - z0;
-    label nk = label(zR/initialCellSize_) + 1;
+    label nk = label(zR/initialCellSize_);
 
     vector delta(xR/ni, yR/nj, zR/nk);
 
@@ -81,8 +92,6 @@ std::list<Vb::Point> faceCentredCubic::initialPoints() const
     scalar pert = randomPerturbationCoeff_*cmptMin(delta);
 
     std::list<Vb::Point> initialPoints;
-
-    List<bool> isSurfacePoint(4*nk, false);
 
     for (label i = 0; i < ni; i++)
     {
@@ -112,7 +121,19 @@ std::list<Vb::Point> faceCentredCubic::initialPoints() const
                     p.z() += pert*(rndGen.scalar01() - 0.5);
                 }
 
-                points[pI++] = p;
+                if (Pstream::parRun())
+                {
+                    if (cvMesh_.decomposition().positionOnThisProcessor(p))
+                    {
+                        // Add this point in parallel only if this position is
+                        // on this processor.
+                        points[pI++] = p;
+                    }
+                }
+                else
+                {
+                    points[pI++] = p;
+                }
 
                 p = point
                 (
@@ -128,7 +149,19 @@ std::list<Vb::Point> faceCentredCubic::initialPoints() const
                     p.z() += pert*(rndGen.scalar01() - 0.5);
                 }
 
-                points[pI++] = p;
+                if (Pstream::parRun())
+                {
+                    if (cvMesh_.decomposition().positionOnThisProcessor(p))
+                    {
+                        // Add this point in parallel only if this position is
+                        // on this processor.
+                        points[pI++] = p;
+                    }
+                }
+                else
+                {
+                    points[pI++] = p;
+                }
 
                 p = point
                 (
@@ -144,7 +177,19 @@ std::list<Vb::Point> faceCentredCubic::initialPoints() const
                     p.z() += pert*(rndGen.scalar01() - 0.5);
                 }
 
-                points[pI++] = p;
+                if (Pstream::parRun())
+                {
+                    if (cvMesh_.decomposition().positionOnThisProcessor(p))
+                    {
+                        // Add this point in parallel only if this position is
+                        // on this processor.
+                        points[pI++] = p;
+                    }
+                }
+                else
+                {
+                    points[pI++] = p;
+                }
 
                 p = point
                 (
@@ -160,14 +205,35 @@ std::list<Vb::Point> faceCentredCubic::initialPoints() const
                     p.z() += pert*(rndGen.scalar01() - 0.5);
                 }
 
-                points[pI++] = p;
+                if (Pstream::parRun())
+                {
+                    if (cvMesh_.decomposition().positionOnThisProcessor(p))
+                    {
+                        // Add this point in parallel only if this position is
+                        // on this processor.
+                        points[pI++] = p;
+                    }
+                }
+                else
+                {
+                    points[pI++] = p;
+                }
             }
+
+            points.setSize(pI);
 
             Field<bool> insidePoints = cvMesh_.geometryToConformTo().wellInside
             (
                 points,
                 minimumSurfaceDistanceCoeffSqr_
-               *sqr(cvMesh_.cellSizeControl().cellSize(points, isSurfacePoint))
+               *sqr
+                (
+                    cvMesh_.cellSizeControl().cellSize
+                    (
+                        points,
+                        List<bool>(points.size(), false)
+                    )
+                )
             );
 
             forAll(insidePoints, i)

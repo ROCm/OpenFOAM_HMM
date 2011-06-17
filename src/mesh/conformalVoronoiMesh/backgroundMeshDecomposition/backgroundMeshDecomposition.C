@@ -989,11 +989,11 @@ Foam::backgroundMeshDecomposition::distribute
 
                         if (newCellI == -1)
                         {
-                            Pout<< "findCell backgroundMeshDecomposition "
-                                << v << " "
-                                << oldCellI
-                                << newCellI
-                                << " find nearest cellI ";
+                            // Pout<< "findCell backgroundMeshDecomposition "
+                            //     << v << " "
+                            //     << oldCellI
+                            //     << newCellI
+                            //     << " find nearest cellI ";
 
                             newCellI = cellSearch.findNearestCell(v);
 
