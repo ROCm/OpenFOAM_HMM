@@ -210,16 +210,15 @@ initialPoints
     // to the surface. Is fraction of local target cell size (see below)
     minimumSurfaceDistanceCoeff 0.55;
 
-    initialPointsMethod             hierarchicalDensityWeightedStochastic;
+    initialPointsMethod             autoDensity;
     // initialPointsMethod          uniformGrid;
     // initialPointsMethod          bodyCentredCubic;
     // initialPointsMethod          pointFile;
-    // initialPointsMethod          densityWeightedStochastic;
 
 
     // Take boundbox of all geometry. Sample with this box. If too much
     // samples in box (due to target cell size) split box.
-    hierarchicalDensityWeightedStochasticDetails
+    autoDensityDetails
     {
         // Initial number of refinement levels. Needs to be enough to pick
         // up features due to size ratio. If not enough it will take longer
@@ -231,12 +230,6 @@ initialPoints
         sampleResolution 5;
         // Additionally per face of the box sample 5x5
         surfaceSampleResolution 5;
-    }
-
-    densityWeightedStochasticDetails
-    {
-        // Volume of space to be meshed. Use e.g. surfaceInertia to find this.
-        totalVolume     1.56e-05;
     }
 
     uniformGridDetails
