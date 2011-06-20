@@ -1507,9 +1507,13 @@ void Foam::conformalVoronoiMesh::updateSizesAndAlignments
     const std::list<Point>& storePts
 )
 {
+    // This function is only used in serial, the background redistribution
+    // triggers this when unbalance is detected in parallel.
+
     if
     (
-        runTime_.run()
+        !Pstream::parRun()
+     && runTime_.run()
      && runTime_.timeIndex()
       % cvMeshControls().sizeAndAlignmentRebuildFrequency() == 0
     )
@@ -1546,7 +1550,11 @@ void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
         vit++
     )
     {
-        if (vit->internalOrBoundaryPoint())
+        if
+        (
+            vit->internalOrBoundaryPoint()
+         || vit->referredInternalOrBoundaryPoint()
+        )
         {
             Foam::point pt(topoint(vit->point()));
 
@@ -1958,10 +1966,10 @@ void Foam::conformalVoronoiMesh::move()
 
         if
         (
-            cit->vertex(0)->internalOrBoundaryPoint()
-         || cit->vertex(1)->internalOrBoundaryPoint()
-         || cit->vertex(2)->internalOrBoundaryPoint()
-         || cit->vertex(3)->internalOrBoundaryPoint()
+            cit->vertex(0)->anyInternalOrBoundaryPoint()
+         || cit->vertex(1)->anyInternalOrBoundaryPoint()
+         || cit->vertex(2)->anyInternalOrBoundaryPoint()
+         || cit->vertex(3)->anyInternalOrBoundaryPoint()
         )
         {
             cit->cellIndex() = dualVertI;
@@ -1992,7 +2000,11 @@ void Foam::conformalVoronoiMesh::move()
         vector::zero
     );
 
-    PackedBoolList pointToBeRetained(number_of_vertices(), true);
+    PackedBoolList pointToBeRetained
+    (
+        number_of_vertices(),
+        true
+    );
 
     std::list<Point> pointsToInsert;
 
@@ -2007,10 +2019,16 @@ void Foam::conformalVoronoiMesh::move()
         Vertex_handle vA = c->vertex(eit->second);
         Vertex_handle vB = c->vertex(eit->third);
 
+        if (!vA->internalOrBoundaryPoint() && !vB->internalOrBoundaryPoint())
+        {
+            // At least one vertex has to be a real internalOrBoundaryPoint
+            continue;
+        }
+
         if
         (
-            vA->internalOrBoundaryPoint()
-         && vB->internalOrBoundaryPoint()
+            vA->anyInternalOrBoundaryPoint()
+         && vB->anyInternalOrBoundaryPoint()
         )
         {
             face dualFace = buildDualFace(eit);

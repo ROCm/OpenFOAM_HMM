@@ -227,9 +227,9 @@ public:
 
 
     // is this a referred internal or boundary vertex
-    inline bool referredInternal() const
+    inline bool referredInternalOrBoundaryPoint() const
     {
-        return referred() && index_ >= 0 ;
+        return referred() && index_ >= 0;
     }
 
 
@@ -350,43 +350,11 @@ public:
     }
 
 
-    // //- Do the two given vertices consitute a boundary point-pair
-    // inline friend bool pointPair
-    // (
-    //     const indexedVertex& v0,
-    //     const indexedVertex& v1
-    // )
-    // {
-    //     return v0.index_ == v1.type_ || v1.index_ == v0.type_;
-    // }
-
-
-    // //- Do the three given vertices consitute a boundary triangle
-    // inline friend bool boundaryTriangle
-    // (
-    //     const indexedVertex& v0,
-    //     const indexedVertex& v1,
-    //     const indexedVertex& v2
-    // )
-    // {
-    //     return (v0.pairPoint() && pointPair(v1, v2))
-    //         || (v1.pairPoint() && pointPair(v2, v0))
-    //         || (v2.pairPoint() && pointPair(v0, v1));
-    // }
-
-
-    // //- Do the three given vertices consitute an outside triangle
-    // inline friend bool outsideTriangle
-    // (
-    //     const indexedVertex& v0,
-    //     const indexedVertex& v1,
-    //     const indexedVertex& v2
-    // )
-    // {
-    //     return (v0.farPoint() || v0.ppSlave())
-    //         || (v1.farPoint() || v1.ppSlave())
-    //         || (v2.farPoint() || v2.ppSlave());
-    // }
+    //- Either a real or referred internal or boundary point
+    inline bool anyInternalOrBoundaryPoint() const
+    {
+        return internalOrBoundaryPoint() || referredInternalOrBoundaryPoint();
+    }
 
 
     // inline void operator=(const Delaunay::Finite_vertices_iterator vit)
