@@ -764,7 +764,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceIntersection
                 Foam::point b = topoint(dual(c2));
 
                 // Only if the dual edge cuts the boundary of this processor is
-                // it going to tbe counted.
+                // it going to be counted.
                 if (decomposition_().findLineAny(a, b).hit())
                 {
                     dE0.append(a);
@@ -778,14 +778,10 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceIntersection
         fIOuter++;
     }
 
-    timeCheck("buildParallelInterfaceIntersection before intersectsProc");
-
     // Preform intersections in both directions, as there is no sense
     // associated with the Dual edge
     List<List<pointIndexHit> > intersectionForward(intersectsProc(dE0, dE1));
     List<List<pointIndexHit> > intersectionReverse(intersectsProc(dE1, dE0));
-
-    timeCheck("buildParallelInterfaceIntersection after intersectsProc");
 
     // Reset counter
     fIOuter = 0;
@@ -994,7 +990,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
 
             // Only if the circumsphere overlaps the boundary of this processor
             // is there a chance of it overlapping others
-            if (decomposition_().overlapsThisProcessor(cc, crSqr))
+            if (decomposition_().overlapsThisProcessor(cc, sqr(1.01)*crSqr))
             {
                 circumcentre.append(cc);
                 circumradiusSqr.append(crSqr);
