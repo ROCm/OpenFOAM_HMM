@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -121,8 +121,8 @@ label collapseEdge(triSurface& surf, const scalar minLen)
                         pointMap[v1] = v;
                         newPoints[v] = 0.5*(localPoints[v1] + localPoints[v]);
 
-                        Pout<< "Collapsing triange " << faceI << " to edge mid "
-                            << newPoints[v] << endl;
+                        //Pout<< "Collapsing triange " << faceI
+                        //    << " to edge mid " << newPoints[v] << endl;
 
                         nCollapsed++;
                         okToCollapse[faceI] = false;
@@ -136,7 +136,8 @@ label collapseEdge(triSurface& surf, const scalar minLen)
             }
         }
 
-        Pout<< "collapseEdge : collapsing " << nCollapsed << " triangles"
+        Info<< "collapseEdge : collapsing " << nCollapsed
+            << " triangles to a single edge."
             << endl;
 
         nTotalCollapsed += nCollapsed;

@@ -51,8 +51,8 @@ void Foam::buildCGALPolyhedron::operator()
     HalfedgeDS& hds
 )
 {
-    typedef typename HalfedgeDS::Traits     Traits;
-    typedef typename Traits::Point_3        Point;
+    typedef HalfedgeDS::Traits     Traits;
+    typedef Traits::Point_3        Point;
 
     // Postcondition: `hds' is a valid polyhedral surface.
     CGAL::Polyhedron_incremental_builder_3<HalfedgeDS> B(hds, false);

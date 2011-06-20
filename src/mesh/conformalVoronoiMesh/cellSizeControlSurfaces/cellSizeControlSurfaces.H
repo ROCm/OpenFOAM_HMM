@@ -37,7 +37,6 @@ SourceFiles
 
 #include "searchableSurfaces.H"
 #include "searchableSurfacesQueries.H"
-#include "triSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

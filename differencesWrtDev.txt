@@ -1,7 +1,7 @@
 src/
 
 mesh/conformalVoronoiMesh
-    - all the meshing.
+    - all the meshing. See separate section below.
 
 polyMeshGeometry:
     - disabled tetquality check on face-center decomp tet.
@@ -91,6 +91,44 @@ surfaceSplitByTopology:
     - for fuel tank of Brawn. Detects baffles (markZones) and splits
     it accordingly.
 
+
+
+conformalVoronoiMesh/
+--------------------
+- Make sure the surface does not have any sliver triangles. These are
+hard to get the surface normal correct for so might cause bleeding.
+- Use surfaceCheck to find out triangle quality and size of smallest edges
+- Use surfaceClean .. 1e-5 .. to get rid of any edges < 1e-5m.
+
+- If you get bleeding you might see in face filtering:
+
+    ...
+    cells with with zero or one non-boundary face          : 1
+    ...
+    Initial check before face collapse, found 48 bad quality faces
+
+but this was real - the cell that got created inside the cone and sphere by the 
+bad triangle was actually attached to a lot of faces.  This screwed up the 
+subsequent filtering as it stopped too early.
+
+I ran:
+
+    surfaceClean coneAndSphere.obj 1e-5 coneAndSphere_clean.obj
+
+and re-ran with that surface and got
+
+    ...
+    cells with with zero or one non-boundary face          : 0
+    ...
+    Initial check before face collapse, found 0 bad quality faces
+
+and the bad cells inside are gone.
+
+That group of cells would be picked up at the end of the meshing as the
+
+    cvMesh_remainingProtrusions
+
+cellSet which can be deleted.
 
 
 

@@ -331,6 +331,7 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const triSurface& s)
     ),
     triSurface(s),
     tolerance_(indexedOctree<treeDataTriSurface>::perturbTol()),
+    minQuality_(-1),
     maxTreeDepth_(10),
     surfaceClosed_(-1)
 {
@@ -377,6 +378,7 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io)
         )
     ),
     tolerance_(indexedOctree<treeDataTriSurface>::perturbTol()),
+    minQuality_(-1),
     maxTreeDepth_(10),
     surfaceClosed_(-1)
 {
@@ -426,6 +428,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
         )
     ),
     tolerance_(indexedOctree<treeDataTriSurface>::perturbTol()),
+    minQuality_(-1),
     maxTreeDepth_(10),
     surfaceClosed_(-1)
 {
@@ -449,6 +452,13 @@ Foam::triSurfaceMesh::triSurfaceMesh
             << tolerance_ << endl;
     }
 
+    // Have optional minimum quality for normal calculation
+    if (dict.readIfPresent("minQuality", minQuality_) && minQuality_ > 0)
+    {
+        Info<< searchableSurface::name()
+            << " : ignoring triangles with quality < "
+            << minQuality_ << " for normals calculation." << endl;
+    }
 
     // Have optional non-standard tree-depth to limit storage.
     if (dict.readIfPresent("maxTreeDepth", maxTreeDepth_) && maxTreeDepth_ > 0)
@@ -820,22 +830,70 @@ void Foam::triSurfaceMesh::getNormal
 {
     normal.setSize(info.size());
 
-    forAll(info, i)
+    if (minQuality_ >= 0)
     {
-        if (info[i].hit())
-        {
-            label faceI = info[i].index();
-            //- Cached:
-            //normal[i] = faceNormals()[faceI];
+        // Make sure we don't use triangles with low quality since
+        // normal is not reliable.
 
-            //- Uncached
-            normal[i] = triSurface::operator[](faceI).normal(points());
-            normal[i] /= mag(normal[i]) + VSMALL;
-        }
-        else
+        const triSurface& s = static_cast<const triSurface&>(*this);
+        const labelListList& faceFaces = s.faceFaces();
+
+        forAll(info, i)
         {
-            // Set to what?
-            normal[i] = vector::zero;
+            if (info[i].hit())
+            {
+                label faceI = info[i].index();
+
+                scalar qual = s[faceI].tri(points()).quality();
+
+                if (qual < minQuality_)
+                {
+                    // Search neighbouring triangles
+                    const labelList& fFaces = faceFaces[faceI];
+
+                    forAll(fFaces, j)
+                    {
+                        label nbrI = fFaces[j];
+                        scalar nbrQual = s[nbrI].tri(points()).quality();
+                        if (nbrQual > qual)
+                        {
+                            qual = nbrQual;
+                            normal[i] = s[nbrI].normal(points());
+                        }
+                    }
+                }
+                else
+                {
+                    normal[i] = s[faceI].normal(points());
+                }
+                normal[i] /= mag(normal[i]);
+            }
+            else
+            {
+                // Set to what?
+                normal[i] = vector::zero;
+            }
+        }
+    }
+    else
+    {
+        forAll(info, i)
+        {
+            if (info[i].hit())
+            {
+                label faceI = info[i].index();
+                //- Cached:
+                //normal[i] = faceNormals()[faceI];
+
+                //- Uncached
+                normal[i] = triSurface::operator[](faceI).normal(points());
+                normal[i] /= mag(normal[i]) + VSMALL;
+            }
+            else
+            {
+                // Set to what?
+                normal[i] = vector::zero;
+            }
         }
     }
 }

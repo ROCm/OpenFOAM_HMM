@@ -1,0 +1,166 @@
+#                            -*- mode: org; -*-
+#
+#+TITLE:                 cvMesh usage
+#+AUTHOR:                      OpenCFD Ltd.
+#+DATE:                         June 2011
+#+LINK:                  http://www.OpenFOAM.com
+#+OPTIONS: author:nil ^:{}
+#+STARTUP: hidestars
+#+STARTUP: odd
+
+* Method
+  + initial point seeding. These are the background points to
+    - start the triangulation from (a subset)
+    - do cellsize and alignment queries on
+  + mesh movement based on cell size and alignment
+  + surface conformation by introducing duplicate points
+  + do final simplification by face filtering
+
+
+* Typical work flow
+  + clean surfaces (surfaceClean, surfaceOrient)
+  + set in system/controlDict
+    - startTime to latestTime
+    - endTime to number of meshing iterations
+    - writeInterval to large value
+  + select defaultCellSize [m]
+  + select refinement patterns based on e.g. surface
+    (cellSizeControlGeometry)
+  + select autoDensity initial point seeding
+  + force output of unfiltered mesh (to save time) by specifying unobtainable
+    mesh quality:
+      continueFilteringOnBadInitialPolyMesh   false;
+      maxNonOrtho 1;
+  + check visually
+    - features resolved?
+    - cell size ok? Load in targetCellSize volScalarField.
+    - if any surface protusions that are unacceptable
+        - lower targetCellSize
+        - lower maxSurfaceProtrusionCoeff (usually 0.1 of targetCellSize)
+  + restart. Repeat until surface good enough.
+  + produce final mesh
+    - set initialPointsMethod to pointFile so it reuses the Delaunay vertices
+    - re-enable mesh filtering
+        continueFilteringOnBadInitialPolyMesh   true;
+        maxNonOrtho 65; //or whatever;
+
+
+* Debugging
+  + run surfaceFeatureExtract with -writeObj to dump all features
+  + set initialPointsMethod to pointFile
+  + set writeInterval to 1
+  + run e.g. topoSet to create slices
+
+
+* Annotated output
+#+BEGIN_EXAMPLE
+Create time
+
+Reading geometryToConformTo
+
+Reading cellSizeControlGeometry
+
+Selecting initialPointsMethod autoDensity
+
+Selecting relaxationModel adaptiveLinear
+
+Selecting faceAreaWeightModel piecewiseLinearRamp
+
+Conforming to feature points
+    Inserted 32 feature vertices
+
+#+END_EXAMPLE
+In this particular case there are 8 straight corners so these can be recreated
+with a triplet each.
+
+#+BEGIN_EXAMPLE
+Inserting initial points
+
+    autoDensity
+        6922 points placed
+        9139 locations queried
+        0.7574132837 success rate
+#+END_EXAMPLE
+The initial points get created by the =autoDensity= method. It will accept only
+part (75% in this cae) of the initial points to create randomly distributed locations.
+#+BEGIN_EXAMPLE
+
+    6922 points to insert...
+    6922 points inserted
+
+Build coarse surface conformation
+
+Initial conformation
+    Number of vertices 6962
+    Number of surface hits 2245
+    Number of edge hits 238
+#+END_EXAMPLE
+The initial points get inserted into the triangulation and it detects the number
+of surface pierces (surface hits) and the number of XXX (edge hits).
+#+BEGIN_EXAMPLE
+
+Stopping iterations when:
+    total number of hits drops below 0.001 of initial hits (2)
+ or
+    maximum number of iterations (15) is reached
+#+END_EXAMPLE
+It will introduce additional duplicate vertices on either side of the surface
+pierce to conform to the geometry. This needs to repeated until the number of
+pierces is low enough.
+#+BEGIN_EXAMPLE
+
+Conformation iteration 0
+    Number of vertices 12166
+    Number of surface hits 234
+    Number of edge hits 38
+
+..
+
+Conformation iteration 4
+    Number of vertices 12908
+    Number of surface hits 0
+    Number of edge hits 0
+
+--- [ cpuTime 5.46 s, delta 0.8 s, "Conformation iteration 4" ] ---
+--- [ 5.46 s, mem size 114228 kB, mem peak 114228 kB, mem rss 28712 kB ] ---
+
+Total hits (0) less than limit (2), stopping iterations
+
+Storing surface conformation
+    Stored 5946 vertices
+Store size and alignment
+
+#+END_EXAMPLE
+The vertices needed to create the conformation are stored together with the size
+and alignment.
+#+BEGIN_EXAMPLE
+Time = 1
+
+Relaxation = 1
+
+Looking up target cell alignment and size
+
+Determining vertex displacements
+
+Reinserting stored feature points
+    Reinserted 32 vertices
+
+Inserting displaced tessellation
+    4328 points to insert...
+    4328 points inserted
+
+Reinserting stored surface conformation
+    Reinserted 5946 vertices
+
+Total displacement = (0.03629314022 0.1324815449 -0.2774017193)
+Total distance = 159.3482907
+
+ExecutionTime = 8.16 s  ClockTime = 8 s
+
+
+Time = 2
+
+Relaxation = 0.9875
+
+#+END_EXAMPLE
+

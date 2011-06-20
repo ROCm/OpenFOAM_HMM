@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,8 +66,8 @@ static void writeRegionOBJ
 
     triSurface regionSurf(surf.subsetMesh(include, pointMap, faceMap));
 
-    //Pout<< "Region " << regionI << " surface:" << nl;
-    //regionSurf.writeStats(Pout);
+    Pout<< "Region " << regionI << " surface:" << nl;
+    regionSurf.writeStats(Pout);
 
     regionSurf.write(regionName);
 
@@ -97,7 +97,7 @@ static void splitTri
     DynamicList<labelledTri>& tris
 )
 {
-    label oldNTris = tris.size();
+    //label oldNTris = tris.size();
 
     label fp = findIndex(f, e[0]);
     label fp1 = f.fcIndex(fp);
@@ -175,7 +175,7 @@ static void splitTri
     }
     else
     {
-        FatalErrorIn("splitTri")
+        FatalErrorIn("splitTri(..)")
             << "Edge " << e << " not part of triangle " << f
             << " fp:" << fp
             << " fp1:" << fp1
@@ -183,13 +183,13 @@ static void splitTri
             << abort(FatalError);
     }
 
-    Pout<< "Split face " << f << " along edge " << e
-        << " into triangles:" << endl;
-
-    for (label i = oldNTris; i < tris.size(); i++)
-    {
-        Pout<< "   " << tris[i] << nl;
-    }
+    //Pout<< "Split face " << f << " along edge " << e
+    //    << " into triangles:" << endl;
+    //
+    //for (label i = oldNTris; i < tris.size(); i++)
+    //{
+    //    Pout<< "   " << tris[i] << nl;
+    //}
 }
 
 
@@ -206,14 +206,14 @@ static bool insertSorted
 {
     if (findIndex(sortedVerts, vertI) != -1)
     {
-        FatalErrorIn("insertSorted") << "Trying to insert vertex " << vertI
+        FatalErrorIn("insertSorted(..)") << "Trying to insert vertex " << vertI
             << " which is already in list of sorted vertices "
             << sortedVerts << abort(FatalError);
     }
 
     if (weight <= 0 || weight >= 1)
     {
-        FatalErrorIn("insertSorted") << "Trying to insert vertex " << vertI
+        FatalErrorIn("insertSorted(..)") << "Trying to insert vertex " << vertI
             << " with illegal weight " << weight
             << " into list of sorted vertices "
             << sortedVerts << abort(FatalError);
@@ -228,7 +228,7 @@ static bool insertSorted
 
         if (mag(w - weight) < SMALL)
         {
-            WarningIn("insertSorted")
+            WarningIn("insertSorted(..)")
                 << "Trying to insert weight " << weight << " which is close to"
                 << " existing weight " << w << " in " << sortedWeights
                 << endl;
@@ -263,64 +263,103 @@ static bool insertSorted
 }
 
 
+// Is triangle candidate for collapse? Small height or small quality
+bool isSliver
+(
+    const triSurface& surf,
+    const scalar minLen,
+    const scalar minQuality,
+    const label faceI,
+    const label edgeI
+)
+{
+    const pointField& localPoints = surf.localPoints();
+
+    // Check
+    // - opposite vertex projects onto base edge
+    // - normal distance is small
+    // - or triangle quality is small
+
+    label opposite0 =
+        triSurfaceTools::oppositeVertex
+        (
+            surf,
+            faceI,
+            edgeI
+        );
+
+    const edge& e = surf.edges()[edgeI];
+    const labelledTri& f = surf[faceI];
+
+    pointHit pHit =
+        e.line(localPoints).nearestDist
+        (
+            localPoints[opposite0]
+        );
+
+    if
+    (
+        pHit.hit()
+     && (
+            pHit.distance() < minLen
+         || f.tri(surf.points()).quality() < minQuality
+        )
+    )
+    {
+        // Remove faceI and split all other faces using this
+        // edge. This is done by 'replacing' the edgeI with the
+        // opposite0 vertex
+        //Pout<< "Splitting face " << faceI << " since distance "
+        //    << pHit.distance()
+        //    << " from vertex " << opposite0
+        //    << " to edge " << edgeI
+        //    << "  points "
+        //    << localPoints[e[0]]
+        //    << localPoints[e[1]]
+        //    << " is too small or triangle quality "
+        //    << f.tri(surf.points()).quality()
+        //    << " too small." << endl;
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
 // Mark all faces that are going to be collapsed.
 // faceToEdge: per face -1 or the base edge of the face.
 static void markCollapsedFaces
 (
     const triSurface& surf,
     const scalar minLen,
+    const scalar minQuality,
     labelList& faceToEdge
 )
 {
     faceToEdge.setSize(surf.size());
     faceToEdge = -1;
 
-    const pointField& localPoints = surf.localPoints();
     const labelListList& edgeFaces = surf.edgeFaces();
 
     forAll(edgeFaces, edgeI)
     {
-        const edge& e = surf.edges()[edgeI];
-
         const labelList& eFaces = surf.edgeFaces()[edgeI];
 
         forAll(eFaces, i)
         {
             label faceI = eFaces[i];
 
-            // Check distance of vertex to edge.
-            label opposite0 =
-                triSurfaceTools::oppositeVertex
-                (
-                    surf,
-                    faceI,
-                    edgeI
-                );
+            bool isCandidate = isSliver(surf, minLen, minQuality, faceI, edgeI);
 
-            pointHit pHit =
-                e.line(localPoints).nearestDist
-                (
-                    localPoints[opposite0]
-                );
-
-            if (pHit.hit() && pHit.distance() < minLen)
+            if (isCandidate)
             {
-                // Remove faceI and split all other faces using this
-                // edge. This is done by 'replacing' the edgeI with the
-                // opposite0 vertex
-                Pout<< "Splitting face " << faceI << " since distance "
-                    << pHit.distance()
-                    << " from vertex " << opposite0
-                    << " to edge " << edgeI
-                    << "  points "
-                    << localPoints[e[0]]
-                    << localPoints[e[1]]
-                    << " is too small" << endl;
-
                 // Mark face as being collapsed
                 if (faceToEdge[faceI] != -1)
                 {
-                    FatalErrorIn("markCollapsedFaces")
+                    FatalErrorIn("markCollapsedFaces(..)")
                         << "Cannot collapse face " << faceI << " since "
                         << " is marked to be collapsed both to edge "
                         << faceToEdge[faceI] << " and " << edgeI
@@ -347,7 +386,7 @@ static void markRegion
 {
     if (faceToEdge[faceI] == -1 || collapseRegion[faceI] != -1)
     {
-        FatalErrorIn("markRegion")
+        FatalErrorIn("markRegion(..)")
             << "Problem : crossed into uncollapsed/regionized face"
             << abort(FatalError);
     }
@@ -383,7 +422,7 @@ static void markRegion
                 }
                 else if (collapseRegion[nbrFaceI] != regionI)
                 {
-                    FatalErrorIn("markRegion")
+                    FatalErrorIn("markRegion(..)")
                         << "Edge:" << edgeI << " between face " << faceI
                         << " with region " << regionI
                         << " and face " << nbrFaceI
@@ -411,8 +450,8 @@ static label markRegions
     {
         if (collapseRegion[faceI] == -1 && faceToEdge[faceI] != -1)
         {
-            Pout<< "markRegions : Marking region:" << regionI
-                << " starting from face " << faceI << endl;
+            //Pout<< "markRegions : Marking region:" << regionI
+            //    << " starting from face " << faceI << endl;
 
             // Collapsed face. Mark connected region with current region number
             markRegion(surf, faceToEdge, regionI++, faceI, collapseRegion);
@@ -728,7 +767,12 @@ static void getSplitVerts
 }
 
 
-label collapseBase(triSurface& surf, const scalar minLen)
+label collapseBase
+(
+    triSurface& surf,
+    const scalar minLen,
+    const scalar minQuality
+)
 {
     label nTotalSplit = 0;
 
@@ -743,7 +787,7 @@ label collapseBase(triSurface& surf, const scalar minLen)
         labelList faceToEdge(surf.size(), -1);
 
         // Calculate faceToEdge (face collapses)
-        markCollapsedFaces(surf, minLen, faceToEdge);
+        markCollapsedFaces(surf, minLen, minQuality, faceToEdge);
 
 
         // Find regions of connected collapsed faces
@@ -754,8 +798,8 @@ label collapseBase(triSurface& surf, const scalar minLen)
 
         label nRegions = markRegions(surf, faceToEdge, collapseRegion);
 
-        Pout<< "Detected " << nRegions << " regions of faces to be collapsed"
-            << nl << endl;
+        //Pout<< "Detected " << nRegions << " regions of faces to be collapsed"
+        //    << nl << endl;
 
         // Pick up all vertices on outside of region
         labelListList outsideVerts
@@ -772,10 +816,10 @@ label collapseBase(triSurface& surf, const scalar minLen)
         {
             spanPoints[regionI] = getSpanPoints(surf, outsideVerts[regionI]);
 
-            Pout<< "For region " << regionI << " found extrema at points "
-                << surf.localPoints()[spanPoints[regionI][0]]
-                << surf.localPoints()[spanPoints[regionI][1]]
-                << endl;
+            //Pout<< "For region " << regionI << " found extrema at points "
+            //    << surf.localPoints()[spanPoints[regionI][0]]
+            //    << surf.localPoints()[spanPoints[regionI][1]]
+            //    << endl;
 
             // Project all non-span points onto the span edge.
             projectNonSpanPoints
@@ -787,21 +831,21 @@ label collapseBase(triSurface& surf, const scalar minLen)
                 orderedWeights[regionI]
             );
 
-            Pout<< "For region:" << regionI
-                << " span:" << spanPoints[regionI]
-                << " orderedVerts:" << orderedVertices[regionI]
-                << " orderedWeights:" << orderedWeights[regionI]
-                << endl;
+            //Pout<< "For region:" << regionI
+            //    << " span:" << spanPoints[regionI]
+            //    << " orderedVerts:" << orderedVertices[regionI]
+            //    << " orderedWeights:" << orderedWeights[regionI]
+            //    << endl;
 
-            writeRegionOBJ
-            (
-                surf,
-                regionI,
-                collapseRegion,
-                outsideVerts[regionI]
-            );
+            //writeRegionOBJ
+            //(
+            //    surf,
+            //    regionI,
+            //    collapseRegion,
+            //    outsideVerts[regionI]
+            //);
 
-            Pout<< endl;
+            //Pout<< endl;
         }
 
 
@@ -864,20 +908,19 @@ label collapseBase(triSurface& surf, const scalar minLen)
                     // Split edge using splitVerts. All non-collapsed triangles
                     // using edge will get split.
 
-
-                    {
-                        const pointField& localPoints = surf.localPoints();
-                        Pout<< "edge " << edgeI << ' ' << e
-                            << "  points "
-                            << localPoints[e[0]] << ' ' << localPoints[e[1]]
-                            << " split into edges with extra points:"
-                            << endl;
-                        forAll(splitVerts, i)
-                        {
-                            Pout<< "    " << splitVerts[i] << " weight "
-                                << splitWeights[i] << nl;
-                        }
-                    }
+                    //{
+                    //    const pointField& localPoints = surf.localPoints();
+                    //    Pout<< "edge " << edgeI << ' ' << e
+                    //        << "  points "
+                    //        << localPoints[e[0]] << ' ' << localPoints[e[1]]
+                    //        << " split into edges with extra points:"
+                    //        << endl;
+                    //    forAll(splitVerts, i)
+                    //    {
+                    //        Pout<< "    " << splitVerts[i] << " weight "
+                    //            << splitWeights[i] << nl;
+                    //    }
+                    //}
 
                     const labelList& eFaces = surf.edgeFaces()[edgeI];
 
@@ -914,7 +957,8 @@ label collapseBase(triSurface& surf, const scalar minLen)
             }
         }
 
-        Pout<< "collapseBase : splitting " << nSplit << " triangles"
+        Info<< "collapseBase : collapsing " << nSplit
+            << " triangles by splitting their base edge."
             << endl;
 
         nTotalSplit += nSplit;
@@ -927,15 +971,15 @@ label collapseBase(triSurface& surf, const scalar minLen)
         // Pack the triangles
         newTris.shrink();
 
-        Pout<< "Resetting surface from " << surf.size() << " to "
-            << newTris.size() << " triangles" << endl;
+        //Pout<< "Resetting surface from " << surf.size() << " to "
+        //    << newTris.size() << " triangles" << endl;
         surf = triSurface(newTris, surf.patches(), surf.localPoints());
 
-        {
-            fileName fName("bla" + name(iter) + ".obj");
-            Pout<< "Writing surf to " << fName << endl;
-            surf.write(fName);
-        }
+        //{
+        //    fileName fName("bla" + name(iter) + ".obj");
+        //    Pout<< "Writing surf to " << fName << endl;
+        //    surf.write(fName);
+        //}
 
         iter++;
     }
