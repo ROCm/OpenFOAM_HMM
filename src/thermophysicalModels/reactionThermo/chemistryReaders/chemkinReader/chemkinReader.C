@@ -889,12 +889,12 @@ Foam::chemkinReader::chemkinReader(const dictionary& thermoDict)
     fileName relPath = thermoDict.name().path();
     if (relPath.size())
     {
-        if (chemkinFile.size() && chemkinFile[0] != '/')
+        if (!chemkinFile.isAbsolute())
         {
             chemkinFile = relPath/chemkinFile;
         }
 
-        if (thermoFile.size() && thermoFile[0] != '/')
+        if (!thermoFile.isAbsolute())
         {
             thermoFile = relPath/thermoFile;
         }
