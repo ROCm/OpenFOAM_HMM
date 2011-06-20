@@ -254,13 +254,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 //         ++cit
 //     )
 //     {
-//         if
-//         (
-//             cit->vertex(0)->internalOrBoundaryPoint()
-//          || cit->vertex(1)->internalOrBoundaryPoint()
-//          || cit->vertex(2)->internalOrBoundaryPoint()
-//          || cit->vertex(3)->internalOrBoundaryPoint()
-//         )
+//         if (cit->internalOrBoundaryDualVertex())
 //         {
 //              cit->cellIndex() = cellI++;
 //         }
@@ -420,6 +414,7 @@ void Foam::conformalVoronoiMesh::mergeCloseDualVertices
     // Assess close points to be merged
 
     label nPtsMerged = 0;
+    label nPtsMergedSum = 0;
 
     do
     {
@@ -427,14 +422,20 @@ void Foam::conformalVoronoiMesh::mergeCloseDualVertices
 
         nPtsMerged = mergeCloseDualVertices(pts, boundaryPts, dualPtIndexMap);
 
-        if (nPtsMerged > 0)
-        {
-            Pout<< "    Merged " << nPtsMerged << " points " << endl;
-        }
+        // if (nPtsMerged > 0)
+        // {
+        //     Pout<< "    Merged " << nPtsMerged << " points " << endl;
+        // }
+
+        nPtsMergedSum += nPtsMerged;
 
         reindexDualVertices(dualPtIndexMap);
 
     } while (nPtsMerged > 0);
+
+    Info<< "    Merged "
+        << returnReduce(nPtsMergedSum, sumOp<label>())
+        << " points " << endl;
 }
 
 
@@ -1733,13 +1734,7 @@ void Foam::conformalVoronoiMesh::indexDualVertices
         ++cit
     )
     {
-        if
-        (
-            cit->vertex(0)->internalOrBoundaryPoint()
-         || cit->vertex(1)->internalOrBoundaryPoint()
-         || cit->vertex(2)->internalOrBoundaryPoint()
-         || cit->vertex(3)->internalOrBoundaryPoint()
-        )
+        if (cit->internalOrBoundaryDualVertex())
         {
             cit->cellIndex() = dualVertI;
 

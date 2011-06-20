@@ -1159,6 +1159,16 @@ bool Foam::backgroundMeshDecomposition::overlapsThisProcessor
 }
 
 
+bool Foam::backgroundMeshDecomposition::overlapsThisProcessor
+(
+    const point& centre,
+    scalar radiusSqr
+) const
+{
+    return bFTreePtr_().findNearest(centre, radiusSqr).hit();
+}
+
+
 Foam::pointIndexHit Foam::backgroundMeshDecomposition::findLine
 (
     const point& start,
@@ -1166,6 +1176,16 @@ Foam::pointIndexHit Foam::backgroundMeshDecomposition::findLine
 ) const
 {
     return bFTreePtr_().findLine(start, end);
+}
+
+
+Foam::pointIndexHit Foam::backgroundMeshDecomposition::findLineAny
+(
+    const point& start,
+    const point& end
+) const
+{
+    return bFTreePtr_().findLineAny(start, end);
 }
 
 
@@ -1601,8 +1621,8 @@ Foam::labelListList Foam::backgroundMeshDecomposition::overlapsProcessors
         const point& c = testCentres[sI];
         scalar rSqr = testRadiusSqrs[sI];
 
-        // If the sphere finds some elements of the patch, then it overlaps
-        sphereOverlapsCandidate[sI] = !bFTreePtr_().findSphere(c, rSqr).empty();
+        // If the sphere finds a nearest element of the patch, then it overlaps
+        sphereOverlapsCandidate[sI] = bFTreePtr_().findNearest(c, rSqr).hit();
     }
 
     map().reverseDistribute

@@ -702,13 +702,6 @@ private:
             const Delaunay::Finite_edges_iterator& eit
         ) const;
 
-        //- Determines if the dual vertex constructed by the Delaunay
-        //  cell is a boundary vertex
-        inline bool isBoundaryDualVertex
-        (
-            const Delaunay::Finite_cells_iterator& cit
-        ) const;
-
         //- Merge vertices that are very close together
         void mergeCloseDualVertices
         (
@@ -895,23 +888,23 @@ public:
         bool positionOnThisProc(const Foam::point& pt) const;
 
         //- Check if the point is in the domain handled by this processor
-        boolList positionOnThisProc(const Foam::pointField& pts) const;
+        boolList positionOnThisProc(const Foam::List<Foam::point>& pts) const;
 
         //- Which processor's domain handles this point
-        labelList positionProc(const Foam::pointField& pts) const;
+        labelList positionProc(const Foam::List<Foam::point>& pts) const;
 
         //- Which other processors does each line segment intersect
         List<List<pointIndexHit> > intersectsProc
         (
-            const pointField& starts,
-            const pointField& ends
+            const List<Foam::point>& starts,
+            const List<Foam::point>& ends
         ) const;
 
         //- Which other processors does each sphere overlap
         labelListList overlapsProc
         (
-            const pointField& centres,
-            const scalarField& radiusSqrs
+            const List<Foam::point>& centres,
+            const List<scalar>& radiusSqrs
         ) const;
 
         //- Conversion functions between point (FOAM::) and Point (CGAL)

@@ -137,6 +137,56 @@ public:
     {
         return filterCount_;
     }
+
+
+    // Is the Delaunay cell real, i.e. all vertices form part of the internal
+    // or boundary definition
+    inline int internalOrBoundaryDualVertex() const
+    {
+        return
+        (
+            this->vertex(0)->internalOrBoundaryPoint()
+         || this->vertex(1)->internalOrBoundaryPoint()
+         || this->vertex(2)->internalOrBoundaryPoint()
+         || this->vertex(3)->internalOrBoundaryPoint()
+        );
+    }
+
+
+    // Is the Delaunay cell real or referred (or mixed), i.e. all vertices form
+    // part of the real or referred internal or boundary definition
+    inline int anyInternalOrBoundaryDualVertex() const
+    {
+        return
+        (
+            this->vertex(0)->anyInternalOrBoundaryPoint()
+         || this->vertex(1)->anyInternalOrBoundaryPoint()
+         || this->vertex(2)->anyInternalOrBoundaryPoint()
+         || this->vertex(3)->anyInternalOrBoundaryPoint()
+        );
+    }
+
+
+    // A dual vertex on the boundary will result from a Delaunay cell with
+    // least one Delaunay vertex outside and at least one inside
+    inline bool boundaryDualVertex() const
+    {
+        return
+        (
+            (
+               this->vertex(0)->internalOrBoundaryPoint()
+            || this->vertex(1)->internalOrBoundaryPoint()
+            || this->vertex(2)->internalOrBoundaryPoint()
+            || this->vertex(3)->internalOrBoundaryPoint()
+            )
+         && (
+               !this->vertex(0)->internalOrBoundaryPoint()
+            || !this->vertex(1)->internalOrBoundaryPoint()
+            || !this->vertex(2)->internalOrBoundaryPoint()
+            || !this->vertex(3)->internalOrBoundaryPoint()
+            )
+        );
+    }
 };
 
 

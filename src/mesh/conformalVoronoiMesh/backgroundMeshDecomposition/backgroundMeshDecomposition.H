@@ -229,9 +229,25 @@ public:
         //  processor
         bool overlapsThisProcessor(const treeBoundBox& box) const;
 
+        //- Does the given sphere overlap the faces of the bounday of this
+        //  processor
+        bool overlapsThisProcessor
+        (
+            const point& centre,
+            scalar radiusSqr
+        ) const;
+
         //- Find nearest intersection of line between start and end, (exposing
         //  underlying indexedOctree)
         pointIndexHit findLine
+        (
+            const point& start,
+            const point& end
+        ) const;
+
+        //- Find any intersection of line between start and end, (exposing
+        //  underlying indexedOctree)
+        pointIndexHit findLineAny
         (
             const point& start,
             const point& end

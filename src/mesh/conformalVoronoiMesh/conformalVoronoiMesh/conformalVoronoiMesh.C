@@ -1964,13 +1964,7 @@ void Foam::conformalVoronoiMesh::move()
     {
         cit->cellIndex() = -1;
 
-        if
-        (
-            cit->vertex(0)->anyInternalOrBoundaryPoint()
-         || cit->vertex(1)->anyInternalOrBoundaryPoint()
-         || cit->vertex(2)->anyInternalOrBoundaryPoint()
-         || cit->vertex(3)->anyInternalOrBoundaryPoint()
-        )
+        if (cit->anyInternalOrBoundaryDualVertex())
         {
             cit->cellIndex() = dualVertI;
 
@@ -2336,7 +2330,7 @@ bool Foam::conformalVoronoiMesh::positionOnThisProc
 
 Foam::boolList Foam::conformalVoronoiMesh::positionOnThisProc
 (
-    const Foam::pointField& pts
+    const Foam::List<Foam::point>& pts
 ) const
 {
     if (Pstream::parRun())
@@ -2350,7 +2344,7 @@ Foam::boolList Foam::conformalVoronoiMesh::positionOnThisProc
 
 Foam::labelList Foam::conformalVoronoiMesh::positionProc
 (
-    const Foam::pointField& pts
+    const Foam::List<Foam::point>& pts
 ) const
 {
     if (!Pstream::parRun())
@@ -2365,8 +2359,8 @@ Foam::labelList Foam::conformalVoronoiMesh::positionProc
 Foam::List<Foam::List<Foam::pointIndexHit> >
 Foam::conformalVoronoiMesh::intersectsProc
 (
-    const pointField& starts,
-    const pointField& ends
+    const List<Foam::point>& starts,
+    const List<Foam::point>& ends
 ) const
 {
     if (!Pstream::parRun())
@@ -2380,8 +2374,8 @@ Foam::conformalVoronoiMesh::intersectsProc
 
 Foam::labelListList Foam::conformalVoronoiMesh::overlapsProc
 (
-    const pointField& centres,
-    const scalarField& radiusSqrs
+    const List<Foam::point>& centres,
+    const List<scalar>& radiusSqrs
 ) const
 {
     if (!Pstream::parRun())

@@ -740,9 +740,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceIntersection
     )
     {
         const Cell_handle c1(fit->first);
-        // oppositeVertex number
-        const int oV = fit->second;
-        const Cell_handle c2(c1->neighbor(oV));
+        const Cell_handle c2(c1->neighbor(fit->second));
 
         // If either Delaunay cell at the end of the Dual edge is infinite,
         // skip.
@@ -755,18 +753,8 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceIntersection
         // i.e. all vertices form part of the internal or boundary definition
         if
         (
-            (
-            c1->vertex(oV)->internalOrBoundaryPoint()
-         || c1->vertex(vertex_triple_index(oV, 0))->internalOrBoundaryPoint()
-         || c1->vertex(vertex_triple_index(oV, 1))->internalOrBoundaryPoint()
-         || c1->vertex(vertex_triple_index(oV, 2))->internalOrBoundaryPoint()
-            )
-         && (
-            c2->vertex(oV)->internalOrBoundaryPoint()
-         || c2->vertex(vertex_triple_index(oV, 0))->internalOrBoundaryPoint()
-         || c2->vertex(vertex_triple_index(oV, 1))->internalOrBoundaryPoint()
-         || c2->vertex(vertex_triple_index(oV, 2))->internalOrBoundaryPoint()
-            )
+            c1->internalOrBoundaryDualVertex()
+         && c2->internalOrBoundaryDualVertex()
         )
         {
             dE0[fI] = topoint(dual(c1));
@@ -799,9 +787,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceIntersection
     )
     {
         const Cell_handle c1(fit->first);
-        // oppositeVertex number
-        const int oV = fit->second;
-        const Cell_handle c2(c1->neighbor(oV));
+        const Cell_handle c2(c1->neighbor(fit->second));
 
         // If either Delaunay cell at the end of the Dual edge is infinite,
         // skip.
@@ -814,18 +800,8 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceIntersection
         // i.e. all vertices form part of the internal or boundary definition
         if
         (
-            (
-            c1->vertex(oV)->internalOrBoundaryPoint()
-         || c1->vertex(vertex_triple_index(oV, 0))->internalOrBoundaryPoint()
-         || c1->vertex(vertex_triple_index(oV, 1))->internalOrBoundaryPoint()
-         || c1->vertex(vertex_triple_index(oV, 2))->internalOrBoundaryPoint()
-            )
-         && (
-            c2->vertex(oV)->internalOrBoundaryPoint()
-         || c2->vertex(vertex_triple_index(oV, 0))->internalOrBoundaryPoint()
-         || c2->vertex(vertex_triple_index(oV, 1))->internalOrBoundaryPoint()
-         || c2->vertex(vertex_triple_index(oV, 2))->internalOrBoundaryPoint()
-            )
+            c1->internalOrBoundaryDualVertex()
+         && c2->internalOrBoundaryDualVertex()
         )
         {
             const Foam::point a = dE0[fI];
@@ -957,8 +933,6 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceIntersection
         }
     }
 
-    timeCheck("buildParallelInterfaceIntersection before referVertices");
-
     referVertices
     (
         targetProcessor,
@@ -983,10 +957,15 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
     DynamicList<label> parallelInfluenceIndices;
 
     // Some of these values will not be used, i.e. for non-real cells
-    pointField circumcentre(number_of_cells(), vector::one*GREAT);
-    scalarField circumradiusSqr(number_of_cells(), scalar(0.0));
+    DynamicList<Foam::point> circumcentre;
+    DynamicList<scalar> circumradiusSqr;
 
-    label cI = 0;
+    PackedBoolList testCellInfluence(number_of_cells(), false);
+
+    // Index outer (all) Delaunauy cells for whether they are potential
+    // overlaps, index (inner) the list of tests an results.
+    label cIInner = 0;
+    label cIOuter = 0;
 
     for
     (
@@ -1002,27 +981,28 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
 
         // The Delaunay cells to assess have to be real, i.e. all vertices form
         // part of the internal or boundary definition
-        if
-        (
-               cit->vertex(0)->internalOrBoundaryPoint()
-            || cit->vertex(1)->internalOrBoundaryPoint()
-            || cit->vertex(2)->internalOrBoundaryPoint()
-            || cit->vertex(3)->internalOrBoundaryPoint()
-        )
+        if (cit->internalOrBoundaryDualVertex())
         {
-            circumcentre[cI] = topoint(dual(cit));
+            Foam::point cc(topoint(dual(cit)));
 
-            circumradiusSqr[cI] = magSqr
+            scalar crSqr
             (
-                circumcentre[cI] - topoint(cit->vertex(0)->point())
+                magSqr(cc - topoint(cit->vertex(0)->point()))
             );
 
-            cI++;
-        }
-    }
+            // Only if the circumsphere overlaps the boundary of this processor
+            // is there a chance of it overlapping others
+            if (decomposition_().overlapsThisProcessor(cc, crSqr))
+            {
+                circumcentre.append(cc);
+                circumradiusSqr.append(crSqr);
 
-    circumcentre.setSize(cI);
-    circumradiusSqr.setSize(cI);
+                testCellInfluence[cIOuter] = true;
+            }
+        }
+
+        cIOuter++;
+    }
 
     // Increasing the circumspheres to increase the overlaps and compensate for
     // floating point errors missing some referrals
@@ -1031,7 +1011,9 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
         overlapsProc(circumcentre, sqr(1.01)*circumradiusSqr)
     );
 
-    cI = 0;
+    // Reset counters
+    cIInner = 0;
+    cIOuter = 0;
 
     // Relying on the order of iteration of cells being the same as before
     for
@@ -1041,17 +1023,10 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
         ++cit
     )
     {
-        // The Delaunay cells to assess have to be real, i.e. all vertices form
-        // part of the internal or boundary definition
-        if
-        (
-            cit->vertex(0)->internalOrBoundaryPoint()
-         || cit->vertex(1)->internalOrBoundaryPoint()
-         || cit->vertex(2)->internalOrBoundaryPoint()
-         || cit->vertex(3)->internalOrBoundaryPoint()
-        )
+        // Pre-tested circumsphere potential influence
+        if (testCellInfluence[cIOuter])
         {
-            const labelList& citOverlaps = circumsphereOverlaps[cI];
+            const labelList& citOverlaps = circumsphereOverlaps[cIInner];
 
             forAll(citOverlaps, cOI)
             {
@@ -1090,8 +1065,10 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
                 }
             }
 
-            cI++;
+            cIInner++;
         }
+
+        cIOuter++;
     }
 
     referVertices
@@ -1116,6 +1093,8 @@ void Foam::conformalVoronoiMesh::referVertices
     const word& outputName
 )
 {
+    timeCheck("Start of referVertices " + stageName);
+
     if (cvMeshControls().objOutput())
     {
         writePoints
@@ -1183,6 +1162,8 @@ void Foam::conformalVoronoiMesh::referVertices
     }
 
     Info<< "    Total " << stageName << " vertices " << totalVertices << endl;
+
+    timeCheck("End of referVertices " + stageName);
 }
 
 
