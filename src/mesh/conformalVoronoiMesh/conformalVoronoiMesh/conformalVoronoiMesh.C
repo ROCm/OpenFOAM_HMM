@@ -1507,9 +1507,13 @@ void Foam::conformalVoronoiMesh::updateSizesAndAlignments
     const std::list<Point>& storePts
 )
 {
+    // This function is only used in serial, the background redistribution
+    // triggers this when unbalance is detected in parallel.
+
     if
     (
-        runTime_.run()
+        !Pstream::parRun()
+     && runTime_.run()
      && runTime_.timeIndex()
       % cvMeshControls().sizeAndAlignmentRebuildFrequency() == 0
     )
