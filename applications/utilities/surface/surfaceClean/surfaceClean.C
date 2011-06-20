@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::validArgs.append("surfaceFile");
     argList::validArgs.append("min length");
+    argList::validArgs.append("min quality");
     argList::validArgs.append("output surfaceFile");
     argList::addBoolOption
     (
@@ -60,10 +61,13 @@ int main(int argc, char *argv[])
 
     const fileName inFileName = args[1];
     const scalar minLen = args.argRead<scalar>(2);
-    const fileName outFileName = args[3];
+    const scalar minQuality = args.argRead<scalar>(3);
+    const fileName outFileName = args[4];
 
     Info<< "Reading surface " << inFileName << nl
-        << "Collapsing all triangles with edges or heights < " << minLen << nl
+        << "Collapsing all triangles with" << nl
+        << "    edges or heights < " << minLen << nl
+        << "    quality          < " << minQuality << nl
         << "Writing result to " << outFileName << nl << endl;
 
 
@@ -90,7 +94,7 @@ int main(int argc, char *argv[])
     }
     while (true)
     {
-        label nSplitEdge = collapseBase(surf, minLen);
+        label nSplitEdge = collapseBase(surf, minLen, minQuality);
 
         if (nSplitEdge == 0)
         {

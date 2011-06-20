@@ -121,8 +121,8 @@ label collapseEdge(triSurface& surf, const scalar minLen)
                         pointMap[v1] = v;
                         newPoints[v] = 0.5*(localPoints[v1] + localPoints[v]);
 
-                        Pout<< "Collapsing triange " << faceI << " to edge mid "
-                            << newPoints[v] << endl;
+                        //Pout<< "Collapsing triange " << faceI
+                        //    << " to edge mid " << newPoints[v] << endl;
 
                         nCollapsed++;
                         okToCollapse[faceI] = false;
@@ -136,7 +136,8 @@ label collapseEdge(triSurface& surf, const scalar minLen)
             }
         }
 
-        Pout<< "collapseEdge : collapsing " << nCollapsed << " triangles"
+        Info<< "collapseEdge : collapsing " << nCollapsed
+            << " triangles to a single edge."
             << endl;
 
         nTotalCollapsed += nCollapsed;

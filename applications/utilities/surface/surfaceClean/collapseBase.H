@@ -41,9 +41,14 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Keep collapsing all triangles whose height is < minLen.
+//- Keep collapsing all triangles whose height is < minLen or quality < minQ.
 //  Returns number of triangles collapsed.
-label collapseBase(triSurface& surf, const scalar minLen);
+label collapseBase
+(
+    triSurface& surf,
+    const scalar minLen,
+    const scalar minQuality
+);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
