@@ -1929,7 +1929,11 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 
                     label patchIndex = -1;
 
-                    if (vA->referredInternal() || vB->referredInternal())
+                    if
+                    (
+                        vA->referredInternalOrBoundaryPoint()
+                     || vB->referredInternalOrBoundaryPoint()
+                    )
                     {
                         // One (and only one) of the points is an internal
                         // point from another processor
@@ -1949,7 +1953,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                            Pair<DynamicList<label> >& sortingIndex =
                                procPatchSortingIndex[patchIndex];
 
-                            if (vB->referredInternal())
+                            if (vB->referredInternalOrBoundaryPoint())
                             {
                                 sortingIndex.first().append(vA->index());
                                 sortingIndex.second().append(vB->index());
@@ -1968,7 +1972,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                             Pair<DynamicList<label> >& sortingIndex =
                                 procPatchSortingIndex[patchIndex];
 
-                            if (vA->referredInternal())
+                            if (vA->referredInternalOrBoundaryPoint())
                             {
                                 sortingIndex.first().append(vA->index());
                                 sortingIndex.second().append(vB->index());

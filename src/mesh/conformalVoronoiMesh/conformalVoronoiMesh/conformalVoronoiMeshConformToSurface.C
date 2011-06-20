@@ -305,7 +305,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
             (
                 vit->nearBoundary()
              || vit->ppMaster()
-             || vit->referredInternal()
+             || vit->referredInternalOrBoundaryPoint()
             )
             {
                 Foam::point vert(topoint(vit->point()));
