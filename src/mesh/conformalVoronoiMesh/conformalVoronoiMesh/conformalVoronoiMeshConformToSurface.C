@@ -727,10 +727,15 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceIntersection
 
     // End points of dual edges.  Some of these values will not be used,
     // i.e. for edges with non-real vertices.
-    pointField dE0(number_of_facets(), vector::zero);
-    pointField dE1(number_of_facets(), vector::zero);
+    DynamicList<Foam::point> dE0;
+    DynamicList<Foam::point> dE1;
 
-    label fI = 0;
+    PackedBoolList testFacetIntersection(number_of_facets(), false);
+
+    // Index outer (all) Delaunauy facets for whether they are potential
+    // intersections, index (inner) the list of tests an results.
+    label fIInner = 0;
+    label fIOuter = 0;
 
     for
     (
@@ -744,28 +749,34 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceIntersection
 
         // If either Delaunay cell at the end of the Dual edge is infinite,
         // skip.
-        if (is_infinite(c1) || is_infinite(c2))
+        if (!is_infinite(c1) && !is_infinite(c2))
         {
-            continue;
+            // The Delaunauy cells at either end of the dual edge need to be
+            // real, i.e. all vertices form part of the internal or boundary
+            // definition
+            if
+            (
+                c1->internalOrBoundaryDualVertex()
+             && c2->internalOrBoundaryDualVertex()
+            )
+            {
+                Foam::point a = topoint(dual(c1));
+                Foam::point b = topoint(dual(c2));
+
+                // Only if the dual edge cuts the boundary of this processor is
+                // it going to tbe counted.
+                if (decomposition_().findLineAny(a, b).hit())
+                {
+                    dE0.append(a);
+                    dE1.append(b);
+
+                    testFacetIntersection[fIOuter] = true;
+                }
+            }
         }
 
-        // The Delaunauy cells at either end of the dual edge need to be real,
-        // i.e. all vertices form part of the internal or boundary definition
-        if
-        (
-            c1->internalOrBoundaryDualVertex()
-         && c2->internalOrBoundaryDualVertex()
-        )
-        {
-            dE0[fI] = topoint(dual(c1));
-            dE1[fI] = topoint(dual(c2));
-
-            fI++;
-        }
+        fIOuter++;
     }
-
-    dE0.setSize(fI);
-    dE1.setSize(fI);
 
     timeCheck("buildParallelInterfaceIntersection before intersectsProc");
 
@@ -776,7 +787,8 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceIntersection
 
     timeCheck("buildParallelInterfaceIntersection after intersectsProc");
 
-    fI = 0;
+    // Reset counter
+    fIOuter = 0;
 
     // Relying on the order of iteration of facets being the same as before
     for
@@ -789,23 +801,11 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceIntersection
         const Cell_handle c1(fit->first);
         const Cell_handle c2(c1->neighbor(fit->second));
 
-        // If either Delaunay cell at the end of the Dual edge is infinite,
-        // skip.
-        if (is_infinite(c1) || is_infinite(c2))
+        // Pre-tested facet intersection potential
+        if (testFacetIntersection[fIOuter])
         {
-            continue;
-        }
-
-        // The Delaunauy cells at either end of the dual edge need to be real,
-        // i.e. all vertices form part of the internal or boundary definition
-        if
-        (
-            c1->internalOrBoundaryDualVertex()
-         && c2->internalOrBoundaryDualVertex()
-        )
-        {
-            const Foam::point a = dE0[fI];
-            const Foam::point b = dE1[fI];
+            const Foam::point a = dE0[fIInner];
+            const Foam::point b = dE1[fIInner];
 
             scalar hitDistSqr = GREAT;
             label closestHitProc = -1;
@@ -813,9 +813,9 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceIntersection
 
             // Find the closest intersection with the other background meshes
             // of the other processors in each direction, finding the closest.
-            forAll(intersectionForward[fI], iFI)
+            forAll(intersectionForward[fIInner], iFI)
             {
-                const pointIndexHit& info = intersectionForward[fI][iFI];
+                const pointIndexHit& info = intersectionForward[fIInner][iFI];
 
                 if (info.hit())
                 {
@@ -830,9 +830,9 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceIntersection
                 }
             }
 
-            forAll(intersectionReverse[fI], iRI)
+            forAll(intersectionReverse[fIInner], iRI)
             {
-                const pointIndexHit& info = intersectionReverse[fI][iRI];
+                const pointIndexHit& info = intersectionReverse[fIInner][iRI];
 
                 if (info.hit())
                 {
@@ -929,8 +929,10 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceIntersection
                 }
             }
 
-            fI++;
+            fIInner++;
         }
+
+        fIOuter++;
     }
 
     referVertices
@@ -1012,7 +1014,6 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
     );
 
     // Reset counters
-    cIInner = 0;
     cIOuter = 0;
 
     // Relying on the order of iteration of cells being the same as before
