@@ -63,17 +63,51 @@ void Foam::conformalVoronoiMesh::timeCheck
 
             if (Pstream::parRun())
             {
-                reduce(mSize, sumOp<label>());
-                reduce(mPeak, sumOp<label>());
-                reduce(mRss, sumOp<label>());
-            }
+                labelList allMSize(Pstream::nProcs());
+                labelList allMPeak(Pstream::nProcs());
+                labelList allMRss(Pstream::nProcs());
 
-            Info<< "--- [ "
-                << runTime_.elapsedCpuTime() << " s, "
-                << "mem size " << mSize << " kB, "
-                << "mem peak " << mPeak << " kB, "
-                << "mem rss " << mRss << " kB"
-                << " ] --- " << endl;
+                allMSize[Pstream::myProcNo()] = mSize;
+                allMPeak[Pstream::myProcNo()] = mPeak;
+                allMRss[Pstream::myProcNo()] = mRss;
+
+                Pstream::gatherList(allMSize);
+                Pstream::gatherList(allMPeak);
+                Pstream::gatherList(allMRss);
+
+                Info<< "--- [ "
+                    << "mem (kB) " << tab
+                    << "size" << tab
+                    << "peak" << tab
+                    << "rss"
+                    << " ] --- " << endl;
+
+                forAll(allMSize, procI)
+                {
+                    Info<< "--- [ "
+                        << procI << " " << tab
+                        << allMSize[procI] << tab
+                        << allMPeak[procI] << tab
+                        << allMRss[procI]
+                        << " ] --- " << endl;
+                }
+
+                Info<< "--- [ "
+                    << "sum " << tab
+                    << sum(allMSize) << tab
+                    << sum(allMPeak) << tab
+                    << sum(allMRss)
+                    << " ] --- " << endl;
+
+            }
+            else
+            {
+                Info<< "--- [ "
+                    << "mem size " << mSize << " kB, "
+                    << "mem peak " << mPeak << " kB, "
+                    << "mem rss " << mRss << " kB"
+                    << " ] --- " << endl;
+            }
         }
     }
 }

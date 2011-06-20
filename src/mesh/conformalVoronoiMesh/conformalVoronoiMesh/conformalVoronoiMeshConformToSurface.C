@@ -599,6 +599,8 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
 
     Info<< nl << "Parallel interface construction" << endl;
 
+    timeCheck("Before buildParallelInterface");
+
     // Hard coded switch, can be turned on for testing and debugging purposes -
     // all vertices will be referred to all processors, use with caution for
     // big cases.
@@ -612,6 +614,8 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
             receivedVertices,
             outputName
         );
+
+        timeCheck("After buildParallelInterfaceAll");
     }
 
     if (initialEdgeReferral)
@@ -627,6 +631,8 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
             receivedVertices,
             outputName
         );
+
+        timeCheck("After buildParallelInterfaceIntersection");
     }
 
     buildParallelInterfaceInfluence
@@ -773,10 +779,14 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceIntersection
     dE0.setSize(fI);
     dE1.setSize(fI);
 
+    timeCheck("buildParallelInterfaceIntersection before intersectsProc");
+
     // Preform intersections in both directions, as there is no sense
     // associated with the Dual edge
     List<List<pointIndexHit> > intersectionForward(intersectsProc(dE0, dE1));
     List<List<pointIndexHit> > intersectionReverse(intersectsProc(dE1, dE0));
+
+    timeCheck("buildParallelInterfaceIntersection after intersectsProc");
 
     fI = 0;
 
@@ -946,6 +956,8 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceIntersection
             fI++;
         }
     }
+
+    timeCheck("buildParallelInterfaceIntersection before referVertices");
 
     referVertices
     (
