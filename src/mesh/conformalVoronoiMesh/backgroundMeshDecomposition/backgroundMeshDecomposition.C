@@ -1014,7 +1014,7 @@ Foam::backgroundMeshDecomposition::distribute
 
                             newCellI = cellSearch.findNearestCell(v);
 
-                            Pout<< newCellI << endl;
+                            // Pout<< newCellI << endl;
                         }
 
                         newCellVertices[newCellI].append(v);

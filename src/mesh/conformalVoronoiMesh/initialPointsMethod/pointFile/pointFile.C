@@ -74,42 +74,55 @@ std::list<Vb::Point> pointFile::initialPoints() const
             << exit(FatalError) << endl;
     }
 
-    // Filter the points to be only those on this processor
-    boolList procPt(cvMesh_.positionOnThisProc(points));
-
     if (Pstream::parRun())
     {
-        List<boolList> allProcPt(Pstream::nProcs());
-
-        allProcPt[Pstream::myProcNo()] = procPt;
-
-        Pstream::gatherList(allProcPt);
-
-        Pstream::scatterList(allProcPt);
-
-        forAll(procPt, ptI)
+        if (points.path().find("processor") != string::npos)
         {
-            bool foundAlready = false;
+            // Testing filePath to see if the file originated in a processor
+            // directory, if so, assume that the points in each processor file
+            // are unique.  They are unlikely to belong on the current
+            // processor as the background mesh is unlikely to be the same.
 
-            forAll(allProcPt, procI)
+            cvMesh_.decomposition().distributePoints(points);
+        }
+        else
+        {
+            // Otherwise, this is assumed to be points covering the whole
+            // domain, so filter the points to be only those on this processor
+            boolList procPt(cvMesh_.positionOnThisProc(points));
+
+            List<boolList> allProcPt(Pstream::nProcs());
+
+            allProcPt[Pstream::myProcNo()] = procPt;
+
+            Pstream::gatherList(allProcPt);
+
+            Pstream::scatterList(allProcPt);
+
+            forAll(procPt, ptI)
             {
-                // If a processor with a lower index has found this point to
-                // insert already, defer to it and don't insert.
-                if (foundAlready)
+                bool foundAlready = false;
+
+                forAll(allProcPt, procI)
                 {
-                    allProcPt[procI][ptI] = false;
-                }
-                else if (allProcPt[procI][ptI])
-                {
-                    foundAlready = true;
+                    // If a processor with a lower index has found this point
+                    // to insert already, defer to it and don't insert.
+                    if (foundAlready)
+                    {
+                        allProcPt[procI][ptI] = false;
+                    }
+                    else if (allProcPt[procI][ptI])
+                    {
+                        foundAlready = true;
+                    }
                 }
             }
+
+            procPt = allProcPt[Pstream::myProcNo()];
+
+            inplaceSubset(procPt, points);
         }
-
-        procPt = allProcPt[Pstream::myProcNo()];
     }
-
-    inplaceSubset(procPt, points);
 
     std::list<Vb::Point> initialPoints;
 
