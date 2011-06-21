@@ -12,11 +12,11 @@ runApplication surfaceClean \
     constant/triSurface/coneAndSphere_clean.obj
 mv log.surfaceClean log.surfaceClean.coneAndSphere
 # Orient so point to be meshed is inside surface
-runApplication surfaceOrient \
+surfaceOrient \
     constant/triSurface/coneAndSphere_clean.obj \
     -inside '(0 -0.5 0)' \
-    constant/triSurface/coneAndSphere_clean_orient.obj
-mv log.surfaceOrient log.surfaceOrient.coneAndSphere
+    constant/triSurface/coneAndSphere_clean_orient.obj \
+    > log.surfaceOrient.coneAndSphere 2>&1
 
 # Same for outside
 runApplication surfaceClean \
@@ -24,11 +24,11 @@ runApplication surfaceClean \
     1e-4 1e-6 \
     constant/triSurface/domain_clean.stl
 mv log.surfaceClean log.surfaceClean.domain
-runApplication surfaceOrient \
+surfaceOrient \
     constant/triSurface/domain_clean.stl \
     -inside '(0 -0.5 0)' \
     constant/triSurface/domain_clean_orient.stl
-mv log.surfaceOrient log.surfaceOrient.domain
+    > log.surfaceOrient.domain 2>&1
 
 runApplication surfaceFeatureExtract \
     constant/triSurface/coneAndSphere_clean_orient.obj \
