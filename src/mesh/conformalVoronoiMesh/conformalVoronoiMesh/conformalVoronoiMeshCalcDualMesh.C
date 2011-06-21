@@ -472,7 +472,7 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
             continue;
         }
 
-        if(c1I != -1 && c2I != -1 && (c1I != c2I))
+        if (c1I != -1 && c2I != -1 && (c1I != c2I))
         {
             if
             (
