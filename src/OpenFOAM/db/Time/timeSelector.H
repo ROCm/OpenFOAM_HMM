@@ -72,7 +72,7 @@ SourceFiles
 #define timeSelector_H
 
 #include "scalarRanges.H"
-#include "instant.H"
+#include "instantList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -109,13 +109,13 @@ public:
 
         //- Return the set of selected instants in the given list that are
         //  within the ranges
-        List<bool> selected(const List<instant>&) const;
+        List<bool> selected(const instantList&) const;
 
         //- Select a list of Time values that are within the ranges
-        List<instant> select(const List<instant>&) const;
+        instantList select(const instantList&) const;
 
         //- Select a list of Time values that are within the ranges
-        void inplaceSelect(List<instant>&) const;
+        void inplaceSelect(instantList&) const;
 
         //- Add the options handled by timeSelector to argList::validOptions
         //
@@ -135,15 +135,24 @@ public:
         );
 
         //- Return the set of times selected based on the argList options
-        static List<instant> select
+        static instantList select
         (
-            const List<instant>&,
+            const instantList&,
             const argList& args
         );
 
         //- Return the set of times selected based on the argList options
         //  also set the runTime to the first instance
-        static List<instant> select0
+        static instantList select0
+        (
+            Time& runTime,
+            const argList& args
+        );
+
+        //- If any time option provided return the set of times (as select0)
+        //  otherwise return just the current time.
+        //  Also set the runTime to the first instance
+        static instantList selectIfPresent
         (
             Time& runTime,
             const argList& args
