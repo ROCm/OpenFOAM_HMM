@@ -48,7 +48,7 @@ initialPointsMethod::initialPointsMethod
 :
     dictionary(initialPointsDict),
     cvMesh_(cvMesh),
-    detailsDict_(subDict(type + "Details")),
+    detailsDict_(subDict(type + "Coeffs")),
     minimumSurfaceDistanceCoeffSqr_
     (
         sqr

@@ -1724,7 +1724,7 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
 
         if (edHit.hit())
         {
-            if(!positionOnThisProc(edHit.hitPoint()))
+            if (!positionOnThisProc(edHit.hitPoint()))
             {
                 continue;
             }

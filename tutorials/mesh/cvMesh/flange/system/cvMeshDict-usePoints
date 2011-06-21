@@ -111,7 +111,7 @@ initialPoints
 
     initialPointsMethod         pointFile;
 
-    pointFileDetails
+    pointFileCoeffs
     {
         pointFile              "constant/internalDelaunayVertices";
     }

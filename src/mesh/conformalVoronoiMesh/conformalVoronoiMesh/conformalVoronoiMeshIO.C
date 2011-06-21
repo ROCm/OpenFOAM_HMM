@@ -340,7 +340,7 @@ void Foam::conformalVoronoiMesh::writeMesh
     const pointField& cellCentres
 ) const
 {
-    if(cvMeshControls().objOutput())
+    if (cvMeshControls().objOutput())
     {
         writeObjMesh(points, faces, word(meshName + ".obj"));
     }

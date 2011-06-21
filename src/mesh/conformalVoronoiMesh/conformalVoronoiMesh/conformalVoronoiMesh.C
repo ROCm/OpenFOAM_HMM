@@ -88,7 +88,7 @@ Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
 
     scalar spanMag = geometryToConformTo_.globalBounds().mag();
 
-    for(label i = 0; i < s; i++)
+    for (label i = 0; i < s; i++)
     {
         vector spoke
         (
@@ -439,7 +439,7 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
 
     insertPoints(pts, indices, types, true);
 
-    if(cvMeshControls().objOutput() && fName != fileName::null)
+    if (cvMeshControls().objOutput() && fName != fileName::null)
     {
         writePoints(fName, pts);
     }
@@ -478,7 +478,7 @@ void Foam::conformalVoronoiMesh::insertEdgePointGroups
 
     insertPoints(pts, indices, types, true);
 
-    if(cvMeshControls().objOutput() && fName != fileName::null)
+    if (cvMeshControls().objOutput() && fName != fileName::null)
     {
         writePoints(fName, pts);
     }
@@ -768,7 +768,7 @@ void Foam::conformalVoronoiMesh::insertFeaturePoints()
     // Insert the created points, distributing to the appropriate processor
     insertPoints(pts, indices, types, true);
 
-    if(cvMeshControls().objOutput())
+    if (cvMeshControls().objOutput())
     {
         writePoints("featureVertices.obj", pts);
     }
@@ -1009,7 +1009,7 @@ void Foam::conformalVoronoiMesh::createMixedFeaturePoints
                     }
                 }
 
-                if(skipEdge)
+                if (skipEdge)
                 {
                     Info<< "Skipping point " << ptI << nl << endl;
 
@@ -1225,7 +1225,7 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
     // which processor each point should be on, so give distribute = false
     insertPoints(initPts, false);
 
-    if(cvMeshControls().objOutput())
+    if (cvMeshControls().objOutput())
     {
         writePoints("initialPoints.obj", true);
     }
@@ -1358,7 +1358,7 @@ bool Foam::conformalVoronoiMesh::distributeBackground()
             cellWeights.internalField()[cI] = max
             (
                 cellVertices[cI].size(),
-                1e-2
+                1e-3
             );
         }
 
@@ -1422,7 +1422,7 @@ bool Foam::conformalVoronoiMesh::distributeBackground()
         // Pout<< "    Real vertices after distribution "
         //     << label(number_of_vertices() - 8) << endl;
 
-        if(cvMeshControls().objOutput())
+        if (cvMeshControls().objOutput())
         {
             writePoints("distributedPoints.obj", true);
         }
@@ -1927,7 +1927,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     // domain the processor they are on.
     // reportProcessorOccupancy();
 
-    if(cvMeshControls().objOutput())
+    if (cvMeshControls().objOutput())
     {
         writePoints("allInitialPoints.obj", false);
     }

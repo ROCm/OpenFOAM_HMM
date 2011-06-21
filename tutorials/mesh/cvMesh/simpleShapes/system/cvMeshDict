@@ -209,10 +209,9 @@ initialPoints
     // initialPointsMethod          bodyCentredCubic;
     // initialPointsMethod          pointFile;
 
-
-    // Take boundbox of all geometry. Sample with this box. If too much
-    // samples in box (due to target cell size) split box.
-    autoDensityDetails
+    // Take boundbox of all geometry. Samples with this box. If too much
+    // samples (due to target cell size) in box split box.
+    autoDensityCoeffs
     {
         // Initial number of refinement levels. Needs to be enough to pick
         // up features due to size ratio. If not enough it will take longer
@@ -226,7 +225,7 @@ initialPoints
         surfaceSampleResolution 3;
     }
 
-    uniformGridDetails
+    uniformGridCoeffs
     {
         // Absolute cell size.
         initialCellSize         0.0015;
@@ -234,14 +233,14 @@ initialPoints
         randomPerturbationCoeff 0.02;
     }
 
-    bodyCentredCubicDetails
+    bodyCentredCubicCoeffs
     {
         initialCellSize         0.0015;
         randomiseInitialGrid    no;
         randomPerturbationCoeff 0.1;
     }
 
-    pointFileDetails
+    pointFileCoeffs
     {
         // Reads points from file. Still rejects points that are too
         // close to the surface (minimumSurfaceDistanceCoeff) or on the
