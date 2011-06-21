@@ -114,7 +114,7 @@ initialPoints
     // initialPointsMethod         bodyCentredCubic;
     // initialPointsMethod         pointFile;
 
-    autoDensityDetails
+    autoDensityCoeffs
     {
         minLevels 1;
         maxSizeRatio 2.0;
@@ -122,21 +122,21 @@ initialPoints
         surfaceSampleResolution 5;
     }
 
-    uniformGridDetails
+    uniformGridCoeffs
     {
         initialCellSize         0.0015;
         randomiseInitialGrid    yes;
         randomPerturbationCoeff 0.02;
     }
 
-    bodyCentredCubicDetails
+    bodyCentredCubicCoeffs
     {
         initialCellSize         0.0015;
         randomiseInitialGrid    no;
         randomPerturbationCoeff 0.1;
     }
 
-    pointFileDetails
+    pointFileCoeffs
     {
         pointFile              "constant/internalDelaunayVertices";
     }
