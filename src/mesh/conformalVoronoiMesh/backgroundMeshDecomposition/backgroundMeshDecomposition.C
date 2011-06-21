@@ -397,8 +397,8 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
 
             if (debug)
             {
-                const_cast<Time&>(mesh_.time())++;
-                Info<< "Time " << mesh_.time().timeName() << endl;
+                // const_cast<Time&>(mesh_.time())++;
+                // Info<< "Time " << mesh_.time().timeName() << endl;
                 meshCutter_.write();
                 mesh_.write();
                 cellWeights.write();
@@ -424,8 +424,8 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
             {
                 printMeshData(mesh_);
 
-                const_cast<Time&>(mesh_.time())++;
-                Info<< "Time " << mesh_.time().timeName() << endl;
+                // const_cast<Time&>(mesh_.time())++;
+                // Info<< "Time " << mesh_.time().timeName() << endl;
                 meshCutter_.write();
                 mesh_.write();
                 cellWeights.write();
@@ -435,8 +435,8 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
 
     if (debug)
     {
-        const_cast<Time&>(mesh_.time())++;
-        Info<< "Time " << mesh_.time().timeName() << endl;
+        // const_cast<Time&>(mesh_.time())++;
+        // Info<< "Time " << mesh_.time().timeName() << endl;
         cellWeights.write();
         mesh_.write();
     }
@@ -868,8 +868,8 @@ Foam::backgroundMeshDecomposition::distribute
 {
     if (debug)
     {
-        const_cast<Time&>(mesh_.time())++;
-        Info<< "Time " << mesh_.time().timeName() << endl;
+        // const_cast<Time&>(mesh_.time())++;
+        // Info<< "Time " << mesh_.time().timeName() << endl;
         cellWeights.write();
         mesh_.write();
     }
@@ -878,10 +878,27 @@ Foam::backgroundMeshDecomposition::distribute
     {
         // Refine large cells if necessary
 
-        scalar cellWeightLimit =
+        label nOccupiedCells = 0;
+
+        forAll(cellWeights.internalField(), cI)
+        {
+            if (cellWeights.internalField()[cI] > 1 - SMALL)
+            {
+                nOccupiedCells++;
+            }
+        }
+
+        // Only look at occupied cells, as there is a possibility of runaway
+        // refinement if the number of cells grows too fast.  Also, clip the
+        // minimum cellWeightLimit at maxCellWeightCoeff_
+
+        scalar cellWeightLimit = max
+        (
             maxCellWeightCoeff_
            *sum(cellWeights).value()
-           /mesh_.globalData().nTotalCells();
+           /returnReduce(nOccupiedCells, sumOp<label>()),
+            maxCellWeightCoeff_
+        );
 
         if (debug)
         {
@@ -1049,8 +1066,8 @@ Foam::backgroundMeshDecomposition::distribute
                 << " to " << mesh_.globalData().nTotalCells()
                 << " cells." << endl;
 
-            const_cast<Time&>(mesh_.time())++;
-            Info<< "Time " << mesh_.time().timeName() << endl;
+            // const_cast<Time&>(mesh_.time())++;
+            // Info<< "Time " << mesh_.time().timeName() << endl;
             cellWeights.write();
             mesh_.write();
         }
@@ -1092,8 +1109,8 @@ Foam::backgroundMeshDecomposition::distribute
             << max(cellWeights.internalField())
             << endl;
 
-        const_cast<Time&>(mesh_.time())++;
-        Info<< "Time " << mesh_.time().timeName() << endl;
+        // const_cast<Time&>(mesh_.time())++;
+        // Info<< "Time " << mesh_.time().timeName() << endl;
         mesh_.write();
         cellWeights.write();
     }

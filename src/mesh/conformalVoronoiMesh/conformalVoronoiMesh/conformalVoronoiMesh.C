@@ -1358,7 +1358,7 @@ bool Foam::conformalVoronoiMesh::distributeBackground()
             cellWeights.internalField()[cI] = max
             (
                 cellVertices[cI].size(),
-                1e-2
+                1e-3
             );
         }
 
