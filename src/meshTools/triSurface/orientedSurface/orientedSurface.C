@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -102,7 +102,7 @@ Foam::labelList Foam::orientedSurface::edgeToFace
             {
                 if (flip[face1] == UNVISITED)
                 {
-                    FatalErrorIn("orientedSurface::edgeToFace") << "Problem"
+                    FatalErrorIn("orientedSurface::edgeToFace(..)") << "Problem"
                         << abort(FatalError);
                 }
                 else
@@ -283,8 +283,10 @@ bool Foam::orientedSurface::flipSurface
         }
     }
     // Recalculate normals
-    s.clearOut();
-
+    if (hasFlipped)
+    {
+        s.clearOut();
+    }
     return hasFlipped;
 }
 
@@ -352,8 +354,28 @@ bool Foam::orientedSurface::orient
         //      FLIP: need to flip
         labelList flipState(s.size(), UNVISITED);
 
-        flipState[0] = NOFLIP;
-        walkSurface(s, 0, flipState);
+        label faceI = 0;
+        while (true)
+        {
+            label startFaceI = -1;
+            while (faceI < s.size())
+            {
+                if (flipState[faceI] == UNVISITED)
+                {
+                    startFaceI = faceI;
+                    break;
+                }
+                faceI++;
+            }
+
+            if (startFaceI == -1)
+            {
+                break;
+            }
+
+            flipState[startFaceI] = NOFLIP;
+            walkSurface(s, startFaceI, flipState);
+        }
 
         anyFlipped = flipSurface(s, flipState);
     }
