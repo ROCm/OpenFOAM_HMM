@@ -978,8 +978,8 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
         // it.
 
         // The Delaunay cells to assess have to be real, i.e. all vertices form
-        // part of the internal or boundary definition
-        if (cit->internalOrBoundaryDualVertex())
+        // part of the internal or any part of the boundary definition
+        if (cit->real())
         {
             Foam::point cc(topoint(dual(cit)));
 

@@ -139,8 +139,21 @@ public:
     }
 
 
-    // Is the Delaunay cell real, i.e. all vertices form part of the internal
-    // or boundary definition
+    // Is the Delaunay cell real, i.e. any real vertex
+    inline int real() const
+    {
+        return
+        (
+            this->vertex(0)->real()
+         || this->vertex(1)->real()
+         || this->vertex(2)->real()
+         || this->vertex(3)->real()
+        );
+    }
+
+
+    // Is the Delaunay cell part of the final dual mesj, i.e. any vertex form
+    // part of the internal or boundary definition
     inline int internalOrBoundaryDualVertex() const
     {
         return

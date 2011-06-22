@@ -61,9 +61,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         cit->filterCount() = 0;
     }
 
-    PackedBoolList boundaryPts;
-
-    boundaryPts.reserve(number_of_cells());
+    PackedBoolList boundaryPts(number_of_cells(), false);
 
     indexDualVertices(points, boundaryPts);
 
@@ -1723,9 +1721,9 @@ void Foam::conformalVoronoiMesh::indexDualVertices
 
     pts.setSize(number_of_cells());
 
-    boundaryPts.clear();
-
     boundaryPts.setSize(number_of_cells(), false);
+
+    boundaryPts = false;
 
     for
     (

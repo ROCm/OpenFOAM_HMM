@@ -1305,7 +1305,7 @@ bool Foam::conformalVoronoiMesh::distributeBackground()
                 IOobject::NO_WRITE
             ),
             bMesh,
-            dimensionedScalar("weight", dimless, 1e-3),
+            dimensionedScalar("weight", dimless, 1e-2),
             zeroGradientFvPatchScalarField::typeName
         );
 
@@ -1358,7 +1358,7 @@ bool Foam::conformalVoronoiMesh::distributeBackground()
             cellWeights.internalField()[cI] = max
             (
                 cellVertices[cI].size(),
-                1e-3
+                1e-2
             );
         }
 
