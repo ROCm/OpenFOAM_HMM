@@ -273,13 +273,10 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                     volumeStatus.transfer(newVolumeStatus);
                 }
 
-                if (debug)
-                {
-                    Info<< "    Background mesh refined from "
-                        << returnReduce(map().nOldCells(), sumOp<label>())
-                        << " to " << mesh_.globalData().nTotalCells()
-                        << " cells." << endl;
-                }
+                Info<< "    Background mesh refined from "
+                    << returnReduce(map().nOldCells(), sumOp<label>())
+                    << " to " << mesh_.globalData().nTotalCells()
+                    << " cells." << endl;
             }
 
             // Determine/update the status of each cell
@@ -1059,13 +1056,13 @@ Foam::backgroundMeshDecomposition::distribute
             cellVertexTypes.transfer(newCellVertexTypes);
         }
 
+        Info<< "    Background mesh refined from "
+            << returnReduce(map().nOldCells(), sumOp<label>())
+            << " to " << mesh_.globalData().nTotalCells()
+            << " cells." << endl;
+
         if (debug)
         {
-            Info<< "    Background mesh refined from "
-                << returnReduce(map().nOldCells(), sumOp<label>())
-                << " to " << mesh_.globalData().nTotalCells()
-                << " cells." << endl;
-
             // const_cast<Time&>(mesh_.time())++;
             // Info<< "Time " << mesh_.time().timeName() << endl;
             cellWeights.write();
