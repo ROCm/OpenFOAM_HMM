@@ -94,4 +94,12 @@ Foam::singleStepReactingMixture<ThermoType>::specieProd() const
 }
 
 
+template<class ThermoType>
+inline const Foam::scalarList&
+Foam::singleStepReactingMixture<ThermoType>::Yprod0() const
+{
+    return Yprod0_;
+}
+
+
 // ************************************************************************* //
