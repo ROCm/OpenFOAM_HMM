@@ -1458,8 +1458,6 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     label nValidPatches = 0;
 
-    // coupledPolyPatch::defaultMatchTol = 1e-3;
-
     forAll(patches, p)
     {
         if (patchTypes[p] == processorPolyPatch::typeName)
