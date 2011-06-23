@@ -26,7 +26,6 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "timeSelector.H"
 #include "argList.H"
 #include "Time.H"
 #include "polyMesh.H"
@@ -35,6 +34,7 @@ Description
 #include "faceSet.H"
 #include "pointSet.H"
 #include "globalMeshData.H"
+#include "timeSelector.H"
 
 using namespace Foam;
 
@@ -114,13 +114,8 @@ int main(int argc, char *argv[])
 
 #   include "setRootCase.H"
 #   include "createTime.H"
-    instantList timeDirs = timeSelector::select0
-    (
-        runTime,
-        args,
-        false       // not override runTime if no time options
-    );
 
+    instantList timeDirs = timeSelector::selectIfPresent(runTime, args);
 
 #   include "createNamedPolyMesh.H"
 
@@ -159,13 +154,12 @@ int main(int argc, char *argv[])
                 IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE
             )
-        ) 
+        )
     );
 
 
     // Read set construct info from dictionary
     PtrList<dictionary> actions(topoSetDict.lookup("actions"));
-
 
     forAll(timeDirs, timeI)
     {
