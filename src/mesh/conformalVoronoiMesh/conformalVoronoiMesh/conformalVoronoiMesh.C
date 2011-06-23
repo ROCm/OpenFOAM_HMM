@@ -1211,8 +1211,6 @@ void Foam::conformalVoronoiMesh::insertBoundingPoints()
 
 void Foam::conformalVoronoiMesh::insertInitialPoints()
 {
-    startOfInternalPoints_ = number_of_vertices();
-
     Info<< nl << "Inserting initial points" << endl;
 
     timeCheck("Before initial points call");
@@ -1893,6 +1891,8 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     insertBoundingPoints();
 
     insertFeaturePoints();
+
+    startOfInternalPoints_ = number_of_vertices();
 
     insertInitialPoints();
 
