@@ -1997,9 +1997,9 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                         // Did not find a surface patch between
                         // between Dv pair, finding nearest patch
 
-                        Pout<< "Did not find a surface patch between "
-                            << "for face, finding nearest patch to"
-                            << 0.5*(ptA + ptB) << endl;
+                        // Pout<< "Did not find a surface patch between "
+                        //     << "for face, finding nearest patch to"
+                        //     << 0.5*(ptA + ptB) << endl;
 
                         patchIndex = geometryToConformTo_.findPatch
                         (

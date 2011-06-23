@@ -34,8 +34,10 @@ License
 namespace Foam
 {
     makeChemistrySolverTypes(psiChemistryModel, gasThermoPhysics);
+    makeChemistrySolverTypes(psiChemistryModel, constGasThermoPhysics);
     makeChemistrySolverTypes(psiChemistryModel, icoPoly8ThermoPhysics);
     makeChemistrySolverTypes(rhoChemistryModel, gasThermoPhysics);
+    makeChemistrySolverTypes(rhoChemistryModel, constGasThermoPhysics);
     makeChemistrySolverTypes(rhoChemistryModel, icoPoly8ThermoPhysics);
 }
 
