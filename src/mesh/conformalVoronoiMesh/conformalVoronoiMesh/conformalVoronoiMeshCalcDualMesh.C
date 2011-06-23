@@ -1995,10 +1995,16 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                     if (patchIndex == -1)
                     {
                         // Did not find a surface patch between
-                        // between Dv pair, adding face to default
-                        // patch
+                        // between Dv pair, finding nearest patch
 
-                        patchIndex = defaultPatchIndex;
+                        Pout<< "Did not find a surface patch between "
+                            << "for face, finding nearest patch to"
+                            << 0.5*(ptA + ptB) << endl;
+
+                        patchIndex = geometryToConformTo_.findPatch
+                        (
+                            0.5*(ptA + ptB)
+                        );
                     }
 
                     patchFaces[patchIndex].append(newDualFace);
