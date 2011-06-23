@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,12 +28,12 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "triSurfaceSearch.H"
 #include "orientedSurface.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 // Main program:
 
@@ -53,6 +53,11 @@ int main(int argc, char *argv[])
         "inside",
         "treat provided point as being inside"
     );
+    argList::addBoolOption
+    (
+        "usePierceTest",
+        "determine orientation by counting number of intersections"
+    );
 
     argList args(argc, argv);
 
@@ -61,9 +66,9 @@ int main(int argc, char *argv[])
     const fileName outFileName  = args[3];
 
     const bool orientInside = args.optionFound("inside");
+    const bool usePierceTest = args.optionFound("usePierceTest");
 
     Info<< "Reading surface from " << surfFileName << nl
-        << "Visible point " << visiblePoint << nl
         << "Orienting surface such that visiblePoint " << visiblePoint
         << " is ";
 
@@ -76,19 +81,35 @@ int main(int argc, char *argv[])
         Info<< "outside" << endl;
     }
 
-    Info<< "Writing surface to " << outFileName << endl;
 
 
     // Load surface
     triSurface surf(surfFileName);
 
-    //orientedSurface normalSurf(surf, visiblePoint, !orientInside);
-    bool anyFlipped = orientedSurface::orient
-    (
-        surf,
-        visiblePoint,
-       !orientInside
-    );
+
+    bool anyFlipped = false;
+
+    if (usePierceTest)
+    {
+        triSurfaceSearch surfSearches(surf);
+
+        anyFlipped = orientedSurface::orient
+        (
+            surf,
+            surfSearches,
+            visiblePoint,
+           !orientInside
+        );
+    }
+    else
+    {
+        anyFlipped = orientedSurface::orient
+        (
+            surf,
+            visiblePoint,
+           !orientInside
+        );
+    }
 
     if (anyFlipped)
     {

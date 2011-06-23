@@ -25,6 +25,7 @@ License
 
 #include "orientedSurface.H"
 #include "triSurfaceTools.H"
+#include "triSurfaceSearch.H"
 #include "treeBoundBox.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -165,26 +166,12 @@ void Foam::orientedSurface::walkSurface
     {
         changedEdges = faceToEdge(s, changedFaces);
 
-        if (debug)
-        {
-            Pout<< "From changedFaces:" << changedFaces.size()
-                << " to changedEdges:" << changedEdges.size()
-                << endl;
-        }
-
         if (changedEdges.empty())
         {
             break;
         }
 
         changedFaces = edgeToFace(s, changedEdges, flipState);
-
-        if (debug)
-        {
-            Pout<< "From changedEdges:" << changedEdges.size()
-                << " to changedFaces:" << changedFaces.size()
-                << endl;
-        }
 
         if (changedFaces.empty())
         {
@@ -248,6 +235,82 @@ void Foam::orientedSurface::propagateOrientation
 
     // Walk the surface from nearestFaceI, changing the flipstate.
     walkSurface(s, nearestFaceI, flipState);
+}
+
+
+// Find side for zoneI only by counting the number of intersections. Determines
+// if face is oriented consistent with outwards pointing normals.
+void Foam::orientedSurface::findZoneSide
+(
+    const triSurfaceSearch& surfSearches,
+    const labelList& faceZone,
+    const label zoneI,
+    const point& outsidePoint,
+    label& zoneFaceI,
+    bool& isOutside
+)
+{
+    const triSurface& s = surfSearches.surface();
+
+    zoneFaceI = -1;
+    isOutside = false;
+
+
+    List<pointIndexHit> hits;
+
+    forAll(faceZone, faceI)
+    {
+        if (faceZone[faceI] == zoneI)
+        {
+            const point& fc = s.faceCentres()[faceI];
+            const vector& n = s.faceNormals()[faceI];
+
+            const vector d = fc - outsidePoint;
+            const scalar magD = mag(d);
+
+            // Check if normal different enough to decide upon
+            if (magD > SMALL && (mag(n & d/magD) > 1e-6))
+            {
+                point end = fc + d;
+
+                //Info<< "Zone " << zoneI << " : Shooting ray"
+                //    << " from " << outsidePoint
+                //    << " to " << end
+                //    << " to pierce triangle " << faceI
+                //    << " with centre " << fc << endl;
+
+                surfSearches.findLineAll(outsidePoint, end, hits);
+
+                label zoneIndex = -1;
+                forAll(hits, i)
+                {
+                    if (hits[i].index() == faceI)
+                    {
+                        zoneIndex = i;
+                        break;
+                    }
+                }
+
+                if (zoneIndex != -1)
+                {
+                    zoneFaceI = faceI;
+
+                    if ((zoneIndex%2) == 0)
+                    {
+                        // Odd number of intersections. Check if normal points
+                        // in direction of ray
+                        isOutside = ((n & d) < 0);
+                    }
+                    else
+                    {
+                        isOutside = ((n & d) > 0);
+                    }
+
+                    break;
+                }
+            }
+        }
+    }
 }
 
 
@@ -435,6 +498,58 @@ bool Foam::orientedSurface::orient
     bool geomFlipped = flipSurface(s, flipState);
 
     return anyFlipped || geomFlipped;
+}
+
+
+bool Foam::orientedSurface::orient
+(
+    triSurface& s,
+    const triSurfaceSearch& querySurf,
+    const point& samplePoint,
+    const bool orientOutside
+)
+{
+    // Determine disconnected parts of surface
+    boolList borderEdge(s.nEdges(), false);
+    forAll(s.edgeFaces(), edgeI)
+    {
+        if (s.edgeFaces()[edgeI].size() != 2)
+        {
+            borderEdge[edgeI] = true;
+        }
+    }
+    labelList faceZone;
+    label nZones = s.markZones(borderEdge, faceZone);
+
+    // Check intersection with one face per zone.
+
+    labelList flipState(s.size(), UNVISITED);
+    for (label zoneI = 0; zoneI < nZones; zoneI++)
+    {
+        label zoneFaceI = -1;
+        bool isOutside;
+        findZoneSide
+        (
+            querySurf,
+            faceZone,
+            zoneI,
+            samplePoint,
+
+            zoneFaceI,
+            isOutside
+        );
+
+        if (isOutside == orientOutside)
+        {
+            flipState[zoneFaceI] = NOFLIP;
+        }
+        else
+        {
+            flipState[zoneFaceI] = FLIP;
+        }
+        walkSurface(s, zoneFaceI, flipState);
+    }
+    return flipSurface(s, flipState);
 }
 
 
