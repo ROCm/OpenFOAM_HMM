@@ -58,7 +58,7 @@ std::list<Vb::Point> pointFile::initialPoints() const
         IOobject
         (
             pointFileName_.name(),
-            pointFileName_.path(),
+            cvMesh_.time().constant(),
             cvMesh_.time(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE
@@ -76,13 +76,15 @@ std::list<Vb::Point> pointFile::initialPoints() const
 
     if (Pstream::parRun())
     {
-        if (points.path().find("processor") != string::npos)
-        {
-            // Testing filePath to see if the file originated in a processor
-            // directory, if so, assume that the points in each processor file
-            // are unique.  They are unlikely to belong on the current
-            // processor as the background mesh is unlikely to be the same.
+        // Testing filePath to see if the file originated in a processor
+        // directory, if so, assume that the points in each processor file
+        // are unique.  They are unlikely to belong on the current
+        // processor as the background mesh is unlikely to be the same.
 
+        const bool isParentFile = (points.objectPath() != points.filePath());
+
+        if (!isParentFile)
+        {
             cvMesh_.decomposition().distributePoints(points);
         }
         else
