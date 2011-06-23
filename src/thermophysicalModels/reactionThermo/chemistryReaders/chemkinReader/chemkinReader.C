@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -889,12 +889,12 @@ Foam::chemkinReader::chemkinReader(const dictionary& thermoDict)
     fileName relPath = thermoDict.name().path();
     if (relPath.size())
     {
-        if (chemkinFile.size() && chemkinFile[0] != '/')
+        if (!chemkinFile.isAbsolute())
         {
             chemkinFile = relPath/chemkinFile;
         }
 
-        if (thermoFile.size() && thermoFile[0] != '/')
+        if (!thermoFile.isAbsolute())
         {
             thermoFile = relPath/thermoFile;
         }
