@@ -401,7 +401,7 @@ polyMeshFiltering
 
     // Upper limit on how close two dual vertices can be before
     // being merged, fraction of the local target cell size
-    mergeClosenessCoeff                     1e-4;
+    mergeClosenessCoeff                     1e-9;
 
     // To not filter: set maxNonOrtho to 1 (so check fails) and then
     // set continueFilteringOnBadInitialPolyMesh to false.
@@ -450,6 +450,11 @@ meshQualityControls
     //  is allowed. 0 is straight face, <0 would be convex face.
     //  Set to 180 to disable.
     maxConcave 80;
+
+    //- Minimum pyramid volume. Is absolute volume of cell pyramid.
+    //  Set to a sensible fraction of the smallest cell volume expected.
+    //  Set to very negative number (e.g. -1E30) to disable.
+    minVol -1E30;
 
     //- Minimum quality of the tet formed by the
     //  variable base point minimum decomposition triangles and
