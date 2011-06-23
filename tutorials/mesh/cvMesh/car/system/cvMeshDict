@@ -58,18 +58,18 @@ See also cvControls.H in the conformalVoronoiMesh library
 geometry
 {
     // Internal shape
-    m_car01_orient.obj
+    m_car01_merge_orient.obj
     {
-        //name m_car01;
-        type triSurfaceMesh;
+        name m_car01;
+        type closedTriSurfaceMesh;
     }
 
-    m_car01
-    {
-        type searchableSurfaceWithGaps;
-        surface m_car01_orient.obj;
-        gap 1e-2;
-    }
+    // m_car01
+    // {
+    //     type searchableSurfaceWithGaps;
+    //     surface m_car01_orient.obj;
+    //     gap 1e-2;
+    // }
 
     // Outside of domain
     domain_orient.stl
@@ -189,7 +189,7 @@ surfaceConformation
         m_car01
         {
             featureMethod extendedFeatureEdgeMesh;
-            extendedFeatureEdgeMesh "m_car01_orient.extendedFeatureEdgeMesh";
+            extendedFeatureEdgeMesh "m_car01_merge_orient.extendedFeatureEdgeMesh";
         }
 
         domain
@@ -223,7 +223,7 @@ initialPoints
         // Initial number of refinement levels. Needs to be enough to pick
         // up features due to size ratio. If not enough it will take longer
         // to determine point seeding.
-        minLevels 4;
+        minLevels 1;
         // Split box if ratio of min to max cell size larger than maxSizeRatio
         maxSizeRatio 5.0;
         // Per box sample 3x3x3 internally

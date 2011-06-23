@@ -24,7 +24,7 @@ actions
         source  boxToCell;
         sourceInfo
         {
-            box (-100 -100 0)(100 100 100);
+            box (-100000 -100000 50)(100000 100000 100000);
         }
     }
 
@@ -67,7 +67,7 @@ actions
         source  boxToCell;
         sourceInfo
         {
-            box (-100 0.1 -100)(100 100 100);
+            box (-100000 0 -100000)(100000 100000 100000);
         }
     }
 
@@ -110,7 +110,7 @@ actions
         source  boxToCell;
         sourceInfo
         {
-            box (0.3 -100 -100)(100 100 100);
+            box (0 -100000 -100000)(100000 100000 100000);
         }
     }
 

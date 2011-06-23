@@ -28,7 +28,7 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         1;  //80;
+endTime         0;  //80;
 
 deltaT          1;
 
