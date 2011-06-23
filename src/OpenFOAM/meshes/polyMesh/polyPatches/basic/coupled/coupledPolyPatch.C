@@ -34,7 +34,7 @@ namespace Foam
 {
     defineTypeNameAndDebug(coupledPolyPatch, 0);
 
-    const scalar coupledPolyPatch::defaultMatchTol_ = 1E-4;
+    scalar coupledPolyPatch::defaultMatchTol = 1E-4;
 
     template<>
     const char* NamedEnum<coupledPolyPatch::transformType, 4>::names[] =
@@ -403,7 +403,7 @@ Foam::coupledPolyPatch::coupledPolyPatch
 )
 :
     polyPatch(name, size, start, index, bm),
-    matchTolerance_(defaultMatchTol_)
+    matchTolerance_(defaultMatchTol)
 {}
 
 
@@ -416,7 +416,7 @@ Foam::coupledPolyPatch::coupledPolyPatch
 )
 :
     polyPatch(name, dict, index, bm),
-    matchTolerance_(dict.lookupOrDefault("matchTolerance", defaultMatchTol_))
+    matchTolerance_(dict.lookupOrDefault("matchTolerance", defaultMatchTol))
 {}
 
 
@@ -470,7 +470,7 @@ Foam::coupledPolyPatch::~coupledPolyPatch()
 void Foam::coupledPolyPatch::write(Ostream& os) const
 {
     polyPatch::write(os);
-    //if (matchTolerance_ != defaultMatchTol_)
+    //if (matchTolerance_ != defaultMatchTol)
     {
         os.writeKeyword("matchTolerance") << matchTolerance_
             << token::END_STATEMENT << nl;

@@ -69,9 +69,6 @@ private:
 
     // Private data
 
-        //- default matching tolerance
-        static const scalar defaultMatchTol_;
-
         //- local matching tolerance
         const scalar matchTolerance_;
 
@@ -182,6 +179,8 @@ public:
     //- Runtime type information
     TypeName("coupled");
 
+    //- default matching tolerance
+    static scalar defaultMatchTol;
 
     // Constructors
 
