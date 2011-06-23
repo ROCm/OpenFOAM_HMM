@@ -188,4 +188,86 @@ const
 }
 
 
+void Foam::triSurfaceSearch::findLineAll
+(
+    const point& start,
+    const point& end,
+    List<pointIndexHit>& hits
+)
+const
+{
+    // See if any intersection between pt and end
+    pointIndexHit inter = tree().findLine(start, end);
+
+    if (inter.hit())
+    {
+        label sz = hits.size();
+        hits.setSize(sz+1);
+        hits[sz] = inter;
+
+        const vector dirVec(end-start);
+        const scalar magSqrDirVec(magSqr(dirVec));
+        const vector smallVec
+        (
+            indexedOctree<treeDataTriSurface>::perturbTol()*dirVec
+          + vector(ROOTVSMALL,ROOTVSMALL,ROOTVSMALL)
+        );
+
+
+        // Initial perturbation amount
+        vector perturbVec(smallVec);
+
+        while (true)
+        {
+            // Start tracking from last hit.
+            point pt = hits.last().hitPoint() + perturbVec;
+
+            if (((pt-start)&dirVec) > magSqrDirVec)
+            {
+                return;
+            }
+
+            // See if any intersection between pt and end
+            pointIndexHit inter = tree().findLine(pt, end);
+
+            if (!inter.hit())
+            {
+                return;
+            }
+
+            // Check if already found this intersection
+            bool duplicateHit = false;
+            forAllReverse(hits, i)
+            {
+                if (hits[i].index() == inter.index())
+                {
+                    duplicateHit = true;
+                    break;
+                }
+            }
+
+
+            if (duplicateHit)
+            {
+                // Hit same triangle again. Increase perturbVec and try again.
+                perturbVec *= 2;
+            }
+            else
+            {
+                // Proper hit
+                label sz = hits.size();
+                hits.setSize(sz+1);
+                hits[sz] = inter;
+                // Restore perturbVec
+                perturbVec = smallVec;
+            }
+        }
+    }
+    else
+    {
+        hits.clear();
+    }
+}
+
+
 // ************************************************************************* //
