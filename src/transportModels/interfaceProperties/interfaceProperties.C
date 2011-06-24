@@ -100,6 +100,7 @@ void Foam::interfaceProperties::correctContactAngle
             nHatp /= (mag(nHatp) + deltaN_.value());
 
             acap.gradient() = (nf & nHatp)*mag(gradAlphaf[patchi]);
+            acap.evaluate();
         }
     }
 }
