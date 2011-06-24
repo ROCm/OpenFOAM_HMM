@@ -395,6 +395,9 @@ motionControl
 // Do not change. See cvControls.H
 polyMeshFiltering
 {
+    // Write the underlying Delaunay tet mesh at output time
+    writeTetMesh                            true;
+
     // Upper limit on the size of faces to be filtered.
     // fraction of the local target cell size
     filterSizeCoeff                         0.2;
