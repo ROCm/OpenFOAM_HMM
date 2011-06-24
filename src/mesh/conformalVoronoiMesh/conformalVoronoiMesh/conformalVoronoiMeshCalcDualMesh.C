@@ -209,198 +209,198 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 }
 
 
-// void Foam::conformalVoronoiMesh::calcTetMesh
-// (
-//     pointField& points,
-//     faceList& faces,
-//     labelList& owner,
-//     labelList& neighbour,
-//     wordList& patchNames,
-//     labelList& patchSizes,
-//     labelList& patchStarts
-// )
-// {
-//     labelList vertexMap(number_of_vertices());
+void Foam::conformalVoronoiMesh::calcTetMesh
+(
+    pointField& points,
+    faceList& faces,
+    labelList& owner,
+    labelList& neighbour,
+    wordList& patchTypes,
+    wordList& patchNames,
+    labelList& patchSizes,
+    labelList& patchStarts
+)
+{
+    labelList vertexMap(number_of_vertices());
 
-//     label vertI = 0;
+    label vertI = 0;
 
-//     points.setSize(number_of_vertices());
+    points.setSize(number_of_vertices());
 
-//     for
-//     (
-//         Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-//         vit != finite_vertices_end();
-//         ++vit
-//     )
-//     {
-//         if (vit->internalPoint() || vit->pairPoint())
-//         {
-//             vertexMap[vit->index()] = vertI;
-//             points[vertI] = topoint(vit->point());
-//             vertI++;
-//         }
-//     }
+    for
+    (
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
+    {
+        if (vit->internalPoint() || vit->pairPoint())
+        {
+            vertexMap[vit->index()] = vertI;
+            points[vertI] = topoint(vit->point());
+            vertI++;
+        }
+    }
 
-//     points.setSize(vertI);
+    points.setSize(vertI);
 
-//     label cellI = 0;
+    label cellI = 0;
 
-//     for
-//     (
-//         Delaunay::Finite_cells_iterator cit = finite_cells_begin();
-//         cit != finite_cells_end();
-//         ++cit
-//     )
-//     {
-//         if (cit->internalOrBoundaryDualVertex())
-//         {
-//              cit->cellIndex() = cellI++;
-//         }
-//         else
-//         {
-//             cit->cellIndex() = -1;
-//         }
-//     }
+    for
+    (
+        Delaunay::Finite_cells_iterator cit = finite_cells_begin();
+        cit != finite_cells_end();
+        ++cit
+    )
+    {
+        if (cit->internalOrBoundaryDualVertex())
+        {
+             cit->cellIndex() = cellI++;
+        }
+        else
+        {
+            cit->cellIndex() = -1;
+        }
+    }
 
-//     patchNames = geometryToConformTo_.patchNames();
+    patchNames = geometryToConformTo_.patchNames();
 
-//     patchNames.setSize(patchNames.size() + 1);
+    patchNames.setSize(patchNames.size() + 1);
 
-//     patchNames[patchNames.size() - 1] = "cvMesh_defaultPatch";
+    patchNames[patchNames.size() - 1] = "cvMesh_defaultPatch";
+    patchTypes.setSize(patchNames.size(), wallPolyPatch::typeName);
 
-//     label nPatches = patchNames.size();
+    label nPatches = patchNames.size();
 
-//     List<DynamicList<face> > patchFaces(nPatches, DynamicList<face>(0));
+    List<DynamicList<face> > patchFaces(nPatches, DynamicList<face>(0));
 
-//     List<DynamicList<label> > patchOwners(nPatches, DynamicList<label>(0));
+    List<DynamicList<label> > patchOwners(nPatches, DynamicList<label>(0));
 
-//     faces.setSize(number_of_facets());
+    faces.setSize(number_of_facets());
 
-//     owner.setSize(number_of_facets());
+    owner.setSize(number_of_facets());
 
-//     neighbour.setSize(number_of_facets());
+    neighbour.setSize(number_of_facets());
 
-//     label faceI = 0;
+    label faceI = 0;
 
-//     labelList verticesOnTriFace(3, -1);
+    labelList verticesOnTriFace(3, -1);
 
-//     face newFace(verticesOnTriFace);
+    face newFace(verticesOnTriFace);
 
-//     for
-//     (
-//         Delaunay::Finite_facets_iterator fit = finite_facets_begin();
-//         fit != finite_facets_end();
-//         ++fit
-//     )
-//     {
-//         const Cell_handle c1(fit->first);
-//         const int oppositeVertex = fit->second;
-//         const Cell_handle c2(c1->neighbor(oppositeVertex));
+    for
+    (
+        Delaunay::Finite_facets_iterator fit = finite_facets_begin();
+        fit != finite_facets_end();
+        ++fit
+    )
+    {
+        const Cell_handle c1(fit->first);
+        const int oppositeVertex = fit->second;
+        const Cell_handle c2(c1->neighbor(oppositeVertex));
 
-//         label c1I = c1->cellIndex();
-//         label c2I = c2->cellIndex();
+        label c1I = c1->cellIndex();
+        label c2I = c2->cellIndex();
 
-//         label ownerCell = -1;
-//         label neighbourCell = -1;
+        label ownerCell = -1;
+        label neighbourCell = -1;
 
-//         if (c1I == -1 && c2I == -1)
-//         {
-//             // Both tets are outside, skip
-//             continue;
-//         }
+        if (c1I == -1 && c2I == -1)
+        {
+            // Both tets are outside, skip
+            continue;
+        }
 
-//         for (label i = 0; i < 3; i++)
-//         {
-//             verticesOnTriFace[i] = vertexMap
-//             [
-//                 c1->vertex(vertex_triple_index(oppositeVertex, i))->index()
-//             ];
-//         }
+        for (label i = 0; i < 3; i++)
+        {
+            verticesOnTriFace[i] = vertexMap
+            [
+                c1->vertex(vertex_triple_index(oppositeVertex, i))->index()
+            ];
+        }
 
-//         newFace = face(verticesOnTriFace);
+        newFace = face(verticesOnTriFace);
 
-//         if (c1I == -1 || c2I == -1)
-//         {
-//             // Boundary face...
-//             if (c1I == -1)
-//             {
-//                 //... with c1 outside
-//                 ownerCell = c2I;
-//             }
-//             else
-//             {
-//                 // ... with c2 outside
-//                 ownerCell = c1I;
+        if (c1I == -1 || c2I == -1)
+        {
+            // Boundary face...
+            if (c1I == -1)
+            {
+                //... with c1 outside
+                ownerCell = c2I;
+            }
+            else
+            {
+                // ... with c2 outside
+                ownerCell = c1I;
 
-//                 reverse(newFace);
-//             }
+                reverse(newFace);
+            }
 
-//             label patchIndex = geometryToConformTo_.findPatch
-//             (
-//                 newFace.centre(points)
-//             );
+            label patchIndex = geometryToConformTo_.findPatch
+            (
+                newFace.centre(points)
+            );
 
-//             if (patchIndex == -1)
-//             {
-//                 patchIndex = patchNames.size() - 1;
+            if (patchIndex == -1)
+            {
+                patchIndex = patchNames.size() - 1;
 
-//                 WarningIn("Foam::conformalVoronoiMesh::calcTetMesh")
-//                     << "Tet face centre at  " << nl
-//                     << newFace.centre(points) << nl
-//                     << "did not find a surface patch. Adding to "
-//                     << patchNames[patchIndex]
-//                     << endl;
-//             }
+                WarningIn("Foam::conformalVoronoiMesh::calcTetMesh")
+                    << "Tet face centre at  " << nl
+                    << newFace.centre(points) << nl
+                    << "did not find a surface patch. Adding to "
+                    << patchNames[patchIndex]
+                    << endl;
+            }
 
-//             patchFaces[patchIndex].append(newFace);
-//             patchOwners[patchIndex].append(ownerCell);
-//         }
-//         else
-//         {
-//             // Internal face...
-//             if (c1I < c2I)
-//             {
-//                 // ...with c1 as the ownerCell
-//                 ownerCell = c1I;
-//                 neighbourCell = c2I;
+            patchFaces[patchIndex].append(newFace);
+            patchOwners[patchIndex].append(ownerCell);
+        }
+        else
+        {
+            // Internal face...
+            if (c1I < c2I)
+            {
+                // ...with c1 as the ownerCell
+                ownerCell = c1I;
+                neighbourCell = c2I;
 
-//                 reverse(newFace);
-//             }
-//             else
-//             {
-//                 // ...with c2 as the ownerCell
-//                 ownerCell = c2I;
-//                 neighbourCell = c1I;
-//             }
+                reverse(newFace);
+            }
+            else
+            {
+                // ...with c2 as the ownerCell
+                ownerCell = c2I;
+                neighbourCell = c1I;
+            }
 
-//             faces[faceI] = newFace;
-//             owner[faceI] = ownerCell;
-//             neighbour[faceI] = neighbourCell;
-//             faceI++;
-//         }
-//     }
+            faces[faceI] = newFace;
+            owner[faceI] = ownerCell;
+            neighbour[faceI] = neighbourCell;
+            faceI++;
+        }
+    }
 
-//     label nInternalFaces = faceI;
+    label nInternalFaces = faceI;
 
-//     faces.setSize(nInternalFaces);
-//     owner.setSize(nInternalFaces);
-//     neighbour.setSize(nInternalFaces);
+    faces.setSize(nInternalFaces);
+    owner.setSize(nInternalFaces);
+    neighbour.setSize(nInternalFaces);
 
-//     sortFaces(faces, owner, neighbour);
+    sortFaces(faces, owner, neighbour);
 
-//     addPatches
-//     (
-//         nInternalFaces,
-//         faces,
-//         owner,
-//         patchNames,
-//         patchSizes,
-//         patchStarts,
-//         patchFaces,
-//         patchOwners,
-//         false
-//     );
-// }
+    addPatches
+    (
+        nInternalFaces,
+        faces,
+        owner,
+        patchSizes,
+        patchStarts,
+        patchFaces,
+        patchOwners
+    );
+}
 
 
 void Foam::conformalVoronoiMesh::mergeCloseDualVertices

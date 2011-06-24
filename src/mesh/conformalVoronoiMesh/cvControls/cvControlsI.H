@@ -139,6 +139,12 @@ inline Foam::scalar Foam::cvControls::removalDistCoeff() const
 }
 
 
+inline Foam::Switch Foam::cvControls::writeTetMesh() const
+{
+    return writeTetMesh_;
+}
+
+
 inline Foam::scalar Foam::cvControls::filterSizeCoeff() const
 {
     return filterSizeCoeff_;

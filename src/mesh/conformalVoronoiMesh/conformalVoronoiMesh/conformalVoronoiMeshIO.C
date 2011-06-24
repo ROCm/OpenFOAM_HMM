@@ -238,43 +238,49 @@ void Foam::conformalVoronoiMesh::writeMesh
 {
     writeInternalDelaunayVertices(instance);
 
-    // {
-    //     pointField points;
-    //     faceList faces;
-    //     labelList owner;
-    //     labelList neighbour;
-    //     wordList patchNames;
-    //     labelList patchSizes;
-    //     labelList patchStarts;
-    //     pointField cellCentres;
+    if (cvMeshControls().writeTetMesh())
+    {
+        pointField points;
+        faceList faces;
+        labelList owner;
+        labelList neighbour;
+        wordList patchTypes;
+        wordList patchNames;
+        labelList patchSizes;
+        labelList patchStarts;
+        pointField cellCentres;
 
-    //     calcTetMesh
-    //     (
-    //         points,
-    //         faces,
-    //         owner,
-    //         neighbour,
-    //         patchNames,
-    //         patchSizes,
-    //         patchStarts
-    //     );
+        calcTetMesh
+        (
+            points,
+            faces,
+            owner,
+            neighbour,
+            patchTypes,
+            patchNames,
+            patchSizes,
+            patchStarts
+        );
+        labelList procNeighbours(patchNames.size(), -1);
 
-    //     Info<< nl << "Writing tetDualMesh to " << instance << endl;
+        Info<< nl << "Writing tetDualMesh to " << instance << endl;
 
-    //     writeMesh
-    //     (
-    //         "tetDualMesh",
-    //         instance,
-    //         points,
-    //         faces,
-    //         owner,
-    //         neighbour,
-    //         patchNames,
-    //         patchSizes,
-    //         patchStarts,
-    //         cellCentres
-    //     );
-    // }
+        writeMesh
+        (
+            "tetDualMesh",
+            instance,
+            points,
+            faces,
+            owner,
+            neighbour,
+            patchTypes,
+            patchNames,
+            patchSizes,
+            patchStarts,
+            procNeighbours,
+            cellCentres
+        );
+    }
 
     {
         pointField points;

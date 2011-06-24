@@ -271,6 +271,8 @@ Foam::cvControls::cvControls
 
     const dictionary& filteringDict(cvMeshDict_.subDict("polyMeshFiltering"));
 
+    writeTetMesh_ = Switch(filteringDict.lookup("writeTetMesh"));
+
     filterSizeCoeff_ = readScalar
     (
         filteringDict.lookup("filterSizeCoeff")

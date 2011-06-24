@@ -218,6 +218,9 @@ class cvControls
 
     // polyMesh filtering controls
 
+        //- Write tet mesh at output time (it always writes the Voronoi)
+        Switch writeTetMesh_;
+
         //- Upper limit on the size of faces to be filtered from,
         //  fraction of the local target cell size
         scalar filterSizeCoeff_;
@@ -382,6 +385,9 @@ public:
 
             //- Return removalDistCoeff
             inline scalar removalDistCoeff() const;
+
+            //- Write tetMesh at output time
+            inline Switch writeTetMesh() const;
 
             //- Return the filterSizeCoeff
             inline scalar filterSizeCoeff() const;
