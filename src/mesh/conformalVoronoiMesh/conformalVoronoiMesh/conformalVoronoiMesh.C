@@ -379,6 +379,8 @@ void Foam::conformalVoronoiMesh::insertPoints
         if (type > Vb::ptFarPoint)
         {
             // This is a member of a point pair, don't use the type directly
+            // (note that this routine never gets called for referredPoints
+            //  so type will never be -procI)
             type += number_of_vertices();
         }
 
