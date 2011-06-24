@@ -1483,8 +1483,7 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments
 
         storedSizes_[i] = cellSizeControl().cellSize
         (
-            sizeAndAlignmentLocations_[i],
-            false
+            sizeAndAlignmentLocations_[i]
         );
 
         storedAlignments_[i] = requiredAlignment(sizeAndAlignmentLocations_[i]);
@@ -1576,7 +1575,7 @@ void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
 
                 vit->alignment() = requiredAlignment(pt);
 
-                vit->targetCellSize() = cellSizeControl().cellSize(pt, false);
+                vit->targetCellSize() = cellSizeControl().cellSize(pt);
             }
         }
     }

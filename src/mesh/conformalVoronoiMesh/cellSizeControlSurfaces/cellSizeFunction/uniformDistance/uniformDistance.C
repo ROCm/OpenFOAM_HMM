@@ -57,17 +57,9 @@ uniformDistance::uniformDistance
 bool uniformDistance::cellSize
 (
     const point& pt,
-    scalar& size,
-    bool isSurfacePoint
+    scalar& size
 ) const
 {
-    if (isSurfacePoint)
-    {
-        size = cellSize_;
-
-        return true;
-    }
-
     size = 0;
 
     List<pointIndexHit> hits;

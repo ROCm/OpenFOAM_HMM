@@ -84,8 +84,7 @@ class cellSizeControlSurfaces
         bool evalCellSizeFunctions
         (
             const point& pt,
-            scalar& minSize,
-            bool isSurfacePoint
+            scalar& minSize
         ) const;
 
         //- Disallow default bitwise copy construct
@@ -130,18 +129,10 @@ public:
         // Query
 
             //- Return the cell size at the given location
-            scalar cellSize
-            (
-                const point& pt,
-                bool isSurfacePoint = false
-            ) const;
+            scalar cellSize(const point& pt) const;
 
             //- Return the cell size at the given locations
-            scalarField cellSize
-            (
-                const pointField& pts,
-                const List<bool>& isSurfacePoint
-            ) const;
+            scalarField cellSize(const pointField& pts) const;
 };
 
 

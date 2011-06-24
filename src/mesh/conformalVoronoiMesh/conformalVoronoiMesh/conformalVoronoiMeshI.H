@@ -27,11 +27,10 @@ License
 
 inline Foam::scalar Foam::conformalVoronoiMesh::targetCellSize
 (
-    const Foam::point& pt,
-    bool isSurfacePoint
+    const Foam::point& pt
 ) const
 {
-    return cellSizeControl().cellSize(pt, isSurfacePoint);
+    return cellSizeControl().cellSize(pt);
 }
 
 
@@ -139,10 +138,7 @@ inline Foam::scalar Foam::conformalVoronoiMesh::pointPairDistance
     const Foam::point& pt
 ) const
 {
-    // Point pair distances are always going to be at the surface, so the
-    // targetCellSize can be told to do a quick, surface only check.
-
-    return targetCellSize(pt, true)*cvMeshControls().pointPairDistanceCoeff();
+    return targetCellSize(pt)*cvMeshControls().pointPairDistanceCoeff();
 }
 
 
@@ -162,13 +158,10 @@ inline Foam::scalar Foam::conformalVoronoiMesh::featurePointExclusionDistanceSqr
     const Foam::point& pt
 ) const
 {
-    // Exclusion distance tests are always going to be at the surface, so the
-    // targetCellSize can be told to do a quick, surface only check.
-
     return
         sqr
         (
-            targetCellSize(pt, true)
+            targetCellSize(pt)
            *cvMeshControls().featurePointExclusionDistanceCoeff()
         );
 }
@@ -179,13 +172,10 @@ inline Foam::scalar Foam::conformalVoronoiMesh::featureEdgeExclusionDistanceSqr
     const Foam::point& pt
 ) const
 {
-    // Exclusion distance tests are always going to be at the surface, so the
-    // targetCellSize can be told to do a quick, surface only check.
-
     return
         sqr
         (
-            targetCellSize(pt, true)
+            targetCellSize(pt)
            *cvMeshControls().featureEdgeExclusionDistanceCoeff()
         );
 }

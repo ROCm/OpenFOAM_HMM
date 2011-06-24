@@ -139,17 +139,9 @@ scalar surfaceOffsetLinearDistance::sizeFunction(scalar d) const
 bool surfaceOffsetLinearDistance::cellSize
 (
     const point& pt,
-    scalar& size,
-    bool isSurfacePoint
+    scalar& size
 ) const
 {
-    if (isSurfacePoint)
-    {
-        size = surfaceCellSize_;
-
-        return true;
-    }
-
     size = 0;
 
     List<pointIndexHit> hits;

@@ -55,11 +55,10 @@ uniform::uniform
 bool uniform::cellSize
 (
     const point& pt,
-    scalar& size,
-    bool isSurfacePoint
+    scalar& size
 ) const
 {
-    if (sideMode_ == rmBothsides || isSurfacePoint)
+    if (sideMode_ == rmBothsides)
     {
         size = cellSize_;
 

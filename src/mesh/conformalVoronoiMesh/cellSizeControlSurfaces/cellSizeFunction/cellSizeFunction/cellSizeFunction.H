@@ -174,8 +174,7 @@ public:
         virtual bool cellSize
         (
             const point& pt,
-            scalar& size,
-            bool isSurfacePoint = false
+            scalar& size
         ) const = 0;
 };
 
