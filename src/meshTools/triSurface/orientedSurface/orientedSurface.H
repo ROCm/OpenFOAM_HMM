@@ -128,6 +128,9 @@ class orientedSurface
         //  anything flipped.
         static bool flipSurface(triSurface& s, const labelList& flipState);
 
+        //- Make surface surface has consistent orientation across connected
+        //  triangles.
+        static bool orientConsistent(triSurface& s);
 public:
 
     ClassName("orientedSurface");

@@ -255,7 +255,6 @@ void Foam::orientedSurface::findZoneSide
     zoneFaceI = -1;
     isOutside = false;
 
-
     List<pointIndexHit> hits;
 
     forAll(faceZone, faceI)
@@ -305,7 +304,6 @@ void Foam::orientedSurface::findZoneSide
                     {
                         isOutside = ((n & d) > 0);
                     }
-
                     break;
                 }
             }
@@ -351,6 +349,50 @@ bool Foam::orientedSurface::flipSurface
         s.clearOut();
     }
     return hasFlipped;
+}
+
+
+bool Foam::orientedSurface::orientConsistent(triSurface& s)
+{
+    bool anyFlipped = false;
+
+    // Do initial flipping to make triangles consistent. Otherwise if the
+    // nearest is e.g. on an edge inbetween inconsistent triangles it might
+    // make the wrong decision.
+    if (s.size() > 0)
+    {
+        // Whether face has to be flipped.
+        //      UNVISITED: unvisited
+        //      NOFLIP: no need to flip
+        //      FLIP: need to flip
+        labelList flipState(s.size(), UNVISITED);
+
+        label faceI = 0;
+        while (true)
+        {
+            label startFaceI = -1;
+            while (faceI < s.size())
+            {
+                if (flipState[faceI] == UNVISITED)
+                {
+                    startFaceI = faceI;
+                    break;
+                }
+                faceI++;
+            }
+
+            if (startFaceI == -1)
+            {
+                break;
+            }
+
+            flipState[startFaceI] = NOFLIP;
+            walkSurface(s, startFaceI, flipState);
+        }
+
+        anyFlipped = flipSurface(s, flipState);
+    }
+    return anyFlipped;
 }
 
 
@@ -404,44 +446,10 @@ bool Foam::orientedSurface::orient
     const bool orientOutside
 )
 {
-    bool anyFlipped = false;
-
     // Do initial flipping to make triangles consistent. Otherwise if the
     // nearest is e.g. on an edge inbetween inconsistent triangles it might
     // make the wrong decision.
-    if (s.size() > 0)
-    {
-        // Whether face has to be flipped.
-        //      UNVISITED: unvisited
-        //      NOFLIP: no need to flip
-        //      FLIP: need to flip
-        labelList flipState(s.size(), UNVISITED);
-
-        label faceI = 0;
-        while (true)
-        {
-            label startFaceI = -1;
-            while (faceI < s.size())
-            {
-                if (flipState[faceI] == UNVISITED)
-                {
-                    startFaceI = faceI;
-                    break;
-                }
-                faceI++;
-            }
-
-            if (startFaceI == -1)
-            {
-                break;
-            }
-
-            flipState[startFaceI] = NOFLIP;
-            walkSurface(s, startFaceI, flipState);
-        }
-
-        anyFlipped = flipSurface(s, flipState);
-    }
+    bool topoFlipped = orientConsistent(s);
 
 
     // Whether face has to be flipped.
@@ -497,7 +505,7 @@ bool Foam::orientedSurface::orient
     // Now finally flip triangles according to flipState.
     bool geomFlipped = flipSurface(s, flipState);
 
-    return anyFlipped || geomFlipped;
+    return topoFlipped || geomFlipped;
 }
 
 
@@ -509,6 +517,11 @@ bool Foam::orientedSurface::orient
     const bool orientOutside
 )
 {
+    // Do initial flipping to make triangles consistent. Otherwise if the
+    // nearest is e.g. on an edge inbetween inconsistent triangles it might
+    // make the wrong decision.
+    bool topoFlipped = orientConsistent(s);
+
     // Determine disconnected parts of surface
     boolList borderEdge(s.nEdges(), false);
     forAll(s.edgeFaces(), edgeI)
@@ -549,7 +562,11 @@ bool Foam::orientedSurface::orient
         }
         walkSurface(s, zoneFaceI, flipState);
     }
-    return flipSurface(s, flipState);
+
+    // Now finally flip triangles according to flipState.
+    bool geomFlipped = flipSurface(s, flipState);
+
+    return topoFlipped || geomFlipped;
 }
 
 
