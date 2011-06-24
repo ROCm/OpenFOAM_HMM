@@ -82,6 +82,8 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     {
         label nInitialBadQualityFaces = checkPolyMeshQuality(points).size();
 
+        reduce(nInitialBadQualityFaces, sumOp<label>());
+
         Info<< nl << "Initial check before face collapse, found "
             << nInitialBadQualityFaces << " bad quality faces"
             << endl;
@@ -145,10 +147,16 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
                 nBadQualityFaces = wrongFaces.size();
 
+                reduce(nBadQualityFaces, sumOp<label>());
+
                 Info<< nl << "Found " << nBadQualityFaces
                     << " bad quality faces" << endl;
 
-                if (lastWrongFaces == wrongFaces)
+                bool sameFacesAsLastTime(lastWrongFaces == wrongFaces);
+
+                reduce(sameFacesAsLastTime, andOp<bool>());
+
+                if (sameFacesAsLastTime)
                 {
                     Info<< nl << "Consecutive iterations found the same set "
                         << "of bad quality faces." << endl;
@@ -523,6 +531,8 @@ void Foam::conformalVoronoiMesh::smoothSurface
             dualPtIndexMap
         );
 
+        reduce(nCollapsedFaces, sumOp<label>());
+
         reindexDualVertices(dualPtIndexMap);
 
         mergeCloseDualVertices(pts, boundaryPts);
@@ -758,6 +768,8 @@ void Foam::conformalVoronoiMesh::collapseFaces
             dualPtIndexMap,
             deferredCollapseFaces
         );
+
+        reduce(nCollapsedFaces, sumOp<label>());
 
         reindexDualVertices(dualPtIndexMap);
 
