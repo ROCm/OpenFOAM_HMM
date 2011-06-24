@@ -58,8 +58,69 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         ++cit
     )
     {
-        cit->filterCount() = 0;
+        if
+        (
+               !cit->vertex(0)->real()
+            || !cit->vertex(1)->real()
+            || !cit->vertex(2)->real()
+            || !cit->vertex(3)->real()
+        )
+        {
+            cit->filterCount() = 100;
+        }
+        else
+        {
+            cit->filterCount() = 0;
+        }
     }
+
+    for
+    (
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        vit++
+    )
+    {
+        std::list<Cell_handle> cells;
+        incident_cells(vit, std::back_inserter(cells));
+
+        bool hasProcPt = false;
+
+        for
+        (
+            std::list<Cell_handle>::iterator cit=cells.begin();
+            cit != cells.end();
+            ++cit
+        )
+        {
+            if
+            (
+                !(*cit)->vertex(0)->real()
+             || !(*cit)->vertex(1)->real()
+             || !(*cit)->vertex(2)->real()
+             || !(*cit)->vertex(3)->real()
+            )
+            {
+                hasProcPt = true;
+
+                break;
+            }
+        }
+
+        if (hasProcPt)
+        {
+            for
+            (
+                std::list<Cell_handle>::iterator cit=cells.begin();
+                cit != cells.end();
+                ++cit
+            )
+            {
+                (*cit)->filterCount() = 100;
+            }
+        }
+    }
+
 
     PackedBoolList boundaryPts(number_of_cells(), false);
 
