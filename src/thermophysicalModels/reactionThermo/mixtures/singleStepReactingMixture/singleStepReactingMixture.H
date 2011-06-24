@@ -152,6 +152,9 @@ public:
             //- Return the list to indicate if specie is produced/consumed
             inline const List<int>& specieProd() const;
 
+            //- Return the list of products mass concentrations
+            inline const scalarList& Yprod0() const;
+
 
         // I-O
 

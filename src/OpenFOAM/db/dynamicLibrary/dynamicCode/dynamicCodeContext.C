@@ -85,6 +85,14 @@ Foam::dynamicCodeContext::dynamicCodeContext(const dictionary& dict)
         stringOps::inplaceExpand(libs_, dict);
     }
 
+    // optional
+    const entry* localPtr = dict.lookupEntryPtr("localCode", false, false);
+    if (localPtr)
+    {
+        localCode_ = stringOps::trim(localPtr->stream());
+        stringOps::inplaceExpand(localCode_, dict);
+    }
+
     // calculate SHA1 digest from include, options, localCode, code
     OSHA1stream os;
     os  << include_ << options_ << libs_ << localCode_ << code_;
@@ -103,13 +111,17 @@ Foam::dynamicCodeContext::dynamicCodeContext(const dictionary& dict)
     {
         addLineDirective(include_, includePtr->startLineNumber(), dict.name());
     }
-    if (optionsPtr)
-    {
-        addLineDirective(options_, optionsPtr->startLineNumber(), dict.name());
-    }
+
+    // Do not add line directive to options_ (Make/options) since at it is a
+    // single line at this point. Can be fixed.
+
     if (libsPtr)
     {
         addLineDirective(libs_, libsPtr->startLineNumber(), dict.name());
+    }
+    if (localPtr)
+    {
+        addLineDirective(localCode_, localPtr->startLineNumber(), dict.name());
     }
 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,7 @@ bool Foam::timeSelector::selected(const instant& value) const
 }
 
 
-Foam::List<bool> Foam::timeSelector::selected(const List<instant>& Times) const
+Foam::List<bool> Foam::timeSelector::selected(const instantList& Times) const
 {
     List<bool> lst(Times.size(), false);
 
@@ -97,19 +97,14 @@ Foam::List<bool> Foam::timeSelector::selected(const List<instant>& Times) const
 }
 
 
-Foam::List<Foam::instant> Foam::timeSelector::select
-(
-    const List<instant>& Times
-) const
+Foam::List<Foam::instant> Foam::timeSelector::select(const instantList& Times)
+const
 {
     return subset(selected(Times), Times);
 }
 
 
-void Foam::timeSelector::inplaceSelect
-(
-    List<instant>& Times
-) const
+void Foam::timeSelector::inplaceSelect(instantList& Times) const
 {
     inplaceSubset(selected(Times), Times);
 }
@@ -159,7 +154,7 @@ void Foam::timeSelector::addOptions
 
 Foam::List<Foam::instant> Foam::timeSelector::select
 (
-    const List<instant>& timeDirs,
+    const instantList& timeDirs,
     const argList& args
 )
 {
@@ -267,6 +262,31 @@ Foam::List<Foam::instant> Foam::timeSelector::select0
     runTime.setTime(timeDirs[0], 0);
 
     return timeDirs;
+}
+
+
+Foam::List<Foam::instant> Foam::timeSelector::selectIfPresent
+(
+    Time& runTime,
+    const argList& args
+)
+{
+    if
+    (
+        args.optionFound("latestTime")
+     || args.optionFound("time")
+     || args.optionFound("constant")
+     || args.optionFound("noZero")
+     || args.optionFound("zeroTime")
+    )
+    {
+        return select0(runTime, args);
+    }
+    else
+    {
+        // No timeSelector option specified. Do not change runTime.
+        return instantList(1, instant(runTime.value(), runTime.timeName()));
+    }
 }
 
 

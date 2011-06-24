@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -128,6 +128,15 @@ public:
         //  - hitPoint() : coordinate of nearest point
         //  - index()    : surface triangle label
         pointIndexHit nearest(const point&, const vector& span) const;
+
+        //- Calculate all intersections from start to end
+        void findLineAll
+        (
+            const point& start,
+            const point& end,
+            List<pointIndexHit>&
+        ) const;
+
 };
 
 
