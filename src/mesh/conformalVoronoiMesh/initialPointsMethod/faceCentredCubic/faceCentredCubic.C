@@ -228,11 +228,7 @@ std::list<Vb::Point> faceCentredCubic::initialPoints() const
                 minimumSurfaceDistanceCoeffSqr_
                *sqr
                 (
-                    cvMesh_.cellSizeControl().cellSize
-                    (
-                        points,
-                        List<bool>(points.size(), false)
-                    )
+                    cvMesh_.cellSizeControl().cellSize(points)
                 )
             );
 

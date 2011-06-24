@@ -1213,8 +1213,6 @@ void Foam::conformalVoronoiMesh::insertBoundingPoints()
 
 void Foam::conformalVoronoiMesh::insertInitialPoints()
 {
-    startOfInternalPoints_ = number_of_vertices();
-
     Info<< nl << "Inserting initial points" << endl;
 
     timeCheck("Before initial points call");
@@ -1487,8 +1485,7 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments
 
         storedSizes_[i] = cellSizeControl().cellSize
         (
-            sizeAndAlignmentLocations_[i],
-            false
+            sizeAndAlignmentLocations_[i]
         );
 
         storedAlignments_[i] = requiredAlignment(sizeAndAlignmentLocations_[i]);
@@ -1580,7 +1577,7 @@ void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
 
                 vit->alignment() = requiredAlignment(pt);
 
-                vit->targetCellSize() = cellSizeControl().cellSize(pt, false);
+                vit->targetCellSize() = cellSizeControl().cellSize(pt);
             }
         }
     }
@@ -1895,6 +1892,8 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     insertBoundingPoints();
 
     insertFeaturePoints();
+
+    startOfInternalPoints_ = number_of_vertices();
 
     insertInitialPoints();
 

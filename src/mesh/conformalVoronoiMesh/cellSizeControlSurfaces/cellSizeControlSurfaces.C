@@ -42,8 +42,7 @@ defineTypeNameAndDebug(cellSizeControlSurfaces, 0);
 bool Foam::cellSizeControlSurfaces::evalCellSizeFunctions
 (
     const point& pt,
-    scalar& minSize,
-    bool isSurfacePoint
+    scalar& minSize
 ) const
 {
     bool anyFunctionFound = false;
@@ -71,7 +70,7 @@ bool Foam::cellSizeControlSurfaces::evalCellSizeFunctions
 
     //         scalar sizeI;
 
-    //         if (cSF.cellSize(pt, sizeI, isSurfacePoint))
+    //         if (cSF.cellSize(pt, sizeI))
     //         {
     //             anyFunctionFound = true;
 
@@ -119,7 +118,7 @@ bool Foam::cellSizeControlSurfaces::evalCellSizeFunctions
 
             scalar sizeI;
 
-            if (cSF.cellSize(pt, sizeI, isSurfacePoint))
+            if (cSF.cellSize(pt, sizeI))
             {
                 anyFunctionFound = true;
 
@@ -280,18 +279,12 @@ Foam::cellSizeControlSurfaces::~cellSizeControlSurfaces()
 
 Foam::scalar Foam::cellSizeControlSurfaces::cellSize
 (
-    const point& pt,
-    bool isSurfacePoint
+    const point& pt
 ) const
 {
-    if (isSurfacePoint)
-    {
-        // Pout<< "WARNING: isSurfacePoint is broken!" << endl;
-    }
-
     scalar size = defaultCellSize_;
 
-    bool anyFunctionFound = evalCellSizeFunctions(pt, size, isSurfacePoint);
+    bool anyFunctionFound = evalCellSizeFunctions(pt, size);
 
     if (!anyFunctionFound)
     {
@@ -317,29 +310,11 @@ Foam::scalar Foam::cellSizeControlSurfaces::cellSize
                 (
                     "Foam::scalar Foam::cellSizeControlSurfaces::cellSize"
                     "("
-                        "const point& pt, "
-                        "bool isSurfacePoint"
+                        "const point& pt"
                     ") const"
                 )
                     << "Point " << pt << " did not find a nearest surface point"
                     << nl << exit(FatalError) << endl;
-            }
-            else
-            {
-                // FatalErrorIn
-                // (
-                //     "Foam::scalar Foam::cellSizeControlSurfaces::cellSize"
-                //     "("
-                //         "const point& pt, "
-                //         "bool isSurfacePoint"
-                //     ") const"
-                // )
-                //     << "Point " << pt
-                //     << " Cannot use isSurfacePoint here, or at all!"
-                //     << nl << exit(FatalError) << endl;
-
-                // Evaluating the cell size at the nearest surface
-                evalCellSizeFunctions(surfHit.hitPoint(), size, true);
             }
         }
     }
@@ -350,31 +325,14 @@ Foam::scalar Foam::cellSizeControlSurfaces::cellSize
 
 Foam::scalarField Foam::cellSizeControlSurfaces::cellSize
 (
-    const pointField& pts,
-    const List<bool>& isSurfacePoint
+    const pointField& pts
 ) const
 {
-    if (pts.size() != isSurfacePoint.size())
-    {
-        FatalErrorIn
-        (
-            "Foam::cellSizeControlSurfaces::cellSizeControlSurfaces \
-             ( \
-                 const pointField& pts, \
-                 const List<bool>& isSurfacePoint \
-             ) \
-             const"
-        )   << "Size of pointField (" << pts.size()
-            << ") and List<bool> (" << isSurfacePoint.size()
-            << ") do not match." << nl
-            << exit(FatalError);
-    }
-
     scalarField cellSizes(pts.size());
 
     forAll(pts, i)
     {
-        cellSizes[i] = cellSize(pts[i], isSurfacePoint[i]);
+        cellSizes[i] = cellSize(pts[i]);
     }
 
     return cellSizes;

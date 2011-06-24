@@ -71,11 +71,10 @@ scalar linearSpatial::sizeFunction(const point& pt) const
 bool linearSpatial::cellSize
 (
     const point& pt,
-    scalar& size,
-    bool isSurfacePoint
+    scalar& size
 ) const
 {
-    if (sideMode_ == rmBothsides || isSurfacePoint)
+    if (sideMode_ == rmBothsides)
     {
         size = sizeFunction(pt);
 
