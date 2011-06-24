@@ -414,12 +414,24 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
-        "writeVTK",
-        "write surface property VTK files"
+        "manifoldEdgesOnly",
+        "remove any non-manifold (open or more than two connected faces) edges"
     );
+
 
 #   include "setRootCase.H"
 #   include "createTime.H"
+
+    if (env("FOAM_SIGFPE"))
+    {
+        WarningIn(args.executable())
+            << "Detected floating point exception trapping (FOAM_SIGFPE)."
+            << " This might give" << nl
+            << "    problems when calculating curvature on straight angles"
+            << " (infinite curvature)" << nl
+            << "    Switch it off in case of problems." << endl;
+    }
+
 
     Info<< "Feature line extraction is only valid on closed manifold surfaces."
         << endl;
@@ -565,6 +577,20 @@ int main(int argc, char *argv[])
             edgeStat
         );
     }
+
+    if (args.optionFound("manifoldEdgesOnly"))
+    {
+        Info<< "Removing all non-manifold edges" << endl;
+
+        forAll(edgeStat, edgeI)
+        {
+            if (surf.edgeFaces()[edgeI].size() != 2)
+            {
+                edgeStat[edgeI] = surfaceFeatures::NONE;
+            }
+        }
+    }
+
 
     surfaceFeatures newSet(surf);
     newSet.setFromStatus(edgeStat);
