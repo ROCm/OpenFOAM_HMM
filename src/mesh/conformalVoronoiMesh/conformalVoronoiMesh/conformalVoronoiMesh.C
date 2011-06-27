@@ -295,7 +295,7 @@ void Foam::conformalVoronoiMesh::insertPoints
     //     ++pit
     // )
     // {
-    //     insertPoint(topoint(*pit), Vb::ptInternalPoint);
+    //     insertPoint(topoint(*pit), Vb::vtInternal);
     // }
 
     label nInserted(number_of_vertices() - preInsertionSize);
@@ -376,7 +376,7 @@ void Foam::conformalVoronoiMesh::insertPoints
 
         label type = types[pI];
 
-        if (type > Vb::ptFarPoint)
+        if (type > Vb::vtFar)
         {
             // This is a member of a point pair, don't use the type directly
             // (note that this routine never gets called for referredPoints
@@ -1206,7 +1206,7 @@ void Foam::conformalVoronoiMesh::insertBoundingPoints()
 
     forAll(farPts, fPI)
     {
-        insertPoint(farPts[fPI], Vb::ptFarPoint);
+        insertPoint(farPts[fPI], Vb::vtFar);
     }
 }
 
@@ -1397,7 +1397,7 @@ bool Foam::conformalVoronoiMesh::distributeBackground()
 
                 label type = cellVertexTypes[cI][cVPI];
 
-                if (type > Vb::ptFarPoint)
+                if (type > Vb::vtFar)
                 {
                     // This is a member of a point pair, don't use the type
                     // directly, make type relative to the index in preparation

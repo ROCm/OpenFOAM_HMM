@@ -58,10 +58,10 @@ class indexedVertex
         int index_;
 
         //- type of pair-point   :
-        //  ptNearBoundaryPoint  : internal near boundary point.
-        //  ptInternalPoint      : internal point.
-        //  ptFarPoint           : far-point.
-        //  > ptFarPoint, < 0    : referred point from processor -(type_ + 1)
+        //  vtNearBoundary       : internal near boundary point.
+        //  vtInternal           : internal point.
+        //  vtFar                : far-point.
+        //  > vtFar, < 0         : referred point from processor -(type_ + 1)
         //  >= 0                 : part of point-pair. Index of other point.
         //                         Lowest numbered is inside one (master).
         int type_;
@@ -75,11 +75,11 @@ class indexedVertex
 
 public:
 
-    enum pointTypes
+    enum vertexTypes
     {
-        ptNearBoundaryPoint  = INT_MIN,
-        ptInternalPoint      = INT_MIN + 1,
-        ptFarPoint           = INT_MIN + 2
+        vtNearBoundary  = INT_MIN,
+        vtInternal      = INT_MIN + 1,
+        vtFar           = INT_MIN + 2
     };
 
     typedef typename Vb::Vertex_handle      Vertex_handle;
@@ -97,8 +97,8 @@ public:
     indexedVertex()
     :
         Vb(),
-        index_(ptInternalPoint),
-        type_(ptInternalPoint),
+        index_(vtInternal),
+        type_(vtInternal),
         alignment_(),
         targetCellSize_(0.0)
     {}
@@ -107,8 +107,8 @@ public:
     indexedVertex(const Point& p)
     :
         Vb(p),
-        index_(ptInternalPoint),
-        type_(ptInternalPoint),
+        index_(vtInternal),
+        type_(vtInternal),
         alignment_(),
         targetCellSize_(0.0)
     {}
@@ -127,8 +127,8 @@ public:
     indexedVertex(const Point& p, Cell_handle f)
     :
         Vb(f, p),
-        index_(ptInternalPoint),
-        type_(ptInternalPoint),
+        index_(vtInternal),
+        type_(vtInternal),
         alignment_(),
         targetCellSize_(0.0)
     {}
@@ -137,8 +137,8 @@ public:
     indexedVertex(Cell_handle f)
     :
         Vb(f),
-        index_(ptInternalPoint),
-        type_(ptInternalPoint),
+        index_(vtInternal),
+        type_(vtInternal),
         alignment_(),
         targetCellSize_(0.0)
     {}
@@ -194,14 +194,14 @@ public:
 
     inline bool uninitialised() const
     {
-        return type_ == ptInternalPoint && index_ == ptInternalPoint;
+        return type_ == vtInternal && index_ == vtInternal;
     }
 
 
     //- Is point a far-point
     inline bool farPoint() const
     {
-        return type_ == ptFarPoint;
+        return type_ == vtFar;
     }
 
 
@@ -215,14 +215,14 @@ public:
     //- Is point internal, i.e. not on boundary, external query.
     inline static bool internalPoint(int type)
     {
-        return type <= ptInternalPoint;
+        return type <= vtInternal;
     }
 
 
     // is this a referred vertex
     inline bool referred() const
     {
-        return (type_ < 0 && type_ > ptFarPoint);
+        return (type_ < 0 && type_ > vtFar);
     }
 
 
@@ -271,21 +271,21 @@ public:
     //- Set the point to be internal
     inline void setInternal()
     {
-        type_ = ptInternalPoint;
+        type_ = vtInternal;
     }
 
 
     //- Is point internal and near the boundary
     inline bool nearBoundary() const
     {
-        return type_ == ptNearBoundaryPoint;
+        return type_ == vtNearBoundary;
     }
 
 
     //- Set the point to be near the boundary
     inline void setNearBoundary()
     {
-        type_ = ptNearBoundaryPoint;
+        type_ = vtNearBoundary;
     }
 
 
