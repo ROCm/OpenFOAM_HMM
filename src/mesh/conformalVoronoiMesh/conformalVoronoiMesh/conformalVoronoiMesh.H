@@ -957,7 +957,8 @@ public:
             void drawDelaunayCell
             (
                 Ostream& os,
-                const Delaunay::Finite_cells_iterator& cit
+                const Delaunay::Finite_cells_iterator& cit,
+                label offset = 0
             ) const;
 
             //- Write Delaunay points to .obj file

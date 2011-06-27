@@ -36,6 +36,7 @@ Description
 #include <CGAL/Triangulation_3.h>
 #include <CGAL/Triangulation_cell_base_with_circumcenter_3.h>
 #include "indexedVertex.H"
+#include "Pstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -157,8 +158,8 @@ public:
     }
 
 
-    // Is the Delaunay cell real, i.e. any real vertex
-    inline int real() const
+    //- Is the Delaunay cell real, i.e. any real vertex
+    inline bool real() const
     {
         return
         (
@@ -170,9 +171,50 @@ public:
     }
 
 
+    //- Does the Dual vertex form part of a processor patch
+    inline int parallelDualVertex() const
+    {
+        return
+        (
+            this->vertex(0)->referred()
+         || this->vertex(1)->referred()
+         || this->vertex(2)->referred()
+         || this->vertex(3)->referred()
+        );
+    }
+
+
+    //- Does the Dual vertex form part of a processor patch
+    inline Foam::label dualVertexMasterProc() const
+    {
+        if (!parallelDualVertex)
+        {
+            return -1;
+        }
+
+        // The master processor is the lowest numbered of the four on this tet.
+
+        int masterProc = Foam::Pstream::nProcs() + 1;
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (this->vertex(i)->referred())
+            {
+                masterProc = min(masterProc, this->vertex(i)->procIndex());
+            }
+            else
+            {
+                masterProc = min(masterProc, Foam::Pstream::myProcNo());
+            }
+        }
+
+        return masterProc;
+    }
+
+
     // Is the Delaunay cell part of the final dual mesj, i.e. any vertex form
     // part of the internal or boundary definition
-    inline int internalOrBoundaryDualVertex() const
+    inline bool internalOrBoundaryDualVertex() const
     {
         return
         (
@@ -186,7 +228,7 @@ public:
 
     // Is the Delaunay cell real or referred (or mixed), i.e. all vertices form
     // part of the real or referred internal or boundary definition
-    inline int anyInternalOrBoundaryDualVertex() const
+    inline bool anyInternalOrBoundaryDualVertex() const
     {
         return
         (

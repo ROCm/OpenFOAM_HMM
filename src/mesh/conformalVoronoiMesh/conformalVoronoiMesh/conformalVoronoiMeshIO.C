@@ -115,9 +115,19 @@ void Foam::conformalVoronoiMesh::timeCheck
 void Foam::conformalVoronoiMesh::drawDelaunayCell
 (
     Ostream& os,
-    const Delaunay::Finite_cells_iterator& cit
+    const Delaunay::Finite_cells_iterator& cit,
+    label offset
 ) const
 {
+    // Supply offset as tet number
+    offset *= 5;
+
+    os  << "# cell index: " << label(cit->cellIndex()) << endl;
+
+    os  << "# circumradius "
+        << mag(topoint(dual(cit)) - topoint(cit->vertex(0)->point()))
+        << endl;
+
     for (int i = 0; i < 4; i++)
     {
         os  << "# index type: "
@@ -127,14 +137,16 @@ void Foam::conformalVoronoiMesh::drawDelaunayCell
         meshTools::writeOBJ(os, topoint(cit->vertex(i)->point()));
     }
 
-    os  << "f 1 3 2" << nl
-        << "f 2 3 4" << nl
-        << "f 1 4 3" << nl
-        << "f 1 2 4" << endl;
+    os  << "f " << 1 + offset << " " << 3 + offset << " " << 2 + offset << nl
+        << "f " << 2 + offset << " " << 3 + offset << " " << 4 + offset << nl
+        << "f " << 1 + offset << " " << 4 + offset << " " << 3 + offset << nl
+        << "f " << 1 + offset << " " << 2 + offset << " " << 4 + offset << endl;
+
+    os  << "# cicumcentre " << endl;
 
     meshTools::writeOBJ(os, topoint(dual(cit)));
 
-    os  << "l 1 5" << endl;
+    os  << "l " << 1 + offset << " " << 5 + offset << endl;
 }
 
 
