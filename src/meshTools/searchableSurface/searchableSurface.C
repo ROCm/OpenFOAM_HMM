@@ -32,7 +32,23 @@ namespace Foam
 {
     defineTypeNameAndDebug(searchableSurface, 0);
     defineRunTimeSelectionTable(searchableSurface, dict);
+
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::searchableSurface::volumeType,
+        4
+    >::names[] =
+    {
+        "unknown",
+        "mixed",
+        "inside",
+        "outside"
+    };
 }
+
+const Foam::NamedEnum<Foam::searchableSurface::volumeType, 4>
+    Foam::searchableSurface::volumeTypeNames;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
