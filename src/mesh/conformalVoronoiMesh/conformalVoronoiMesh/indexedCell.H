@@ -57,7 +57,15 @@ class indexedCell
 {
     // Private data
 
-        //- The index for this Delaunay tetrahedral cell
+        //- The index for this Delaunay tetrahedral cell.  Type information is
+        //- also carried:
+
+        //  ctFar : the dual point of this cell does not form part of the
+        //          internal or boundary of the dual mesh
+        //  >=0   : the (local) index of an internal or boundary dual point,
+        //           not on a processor face
+        //  < 0 && > ctFar : the (global) index of a dual point on a processor
+        //                   face
         int index_;
 
         //- The number of times that this Delaunay cell has been limited
@@ -66,6 +74,12 @@ class indexedCell
 
 
 public:
+
+    enum cellTypes
+    {
+        ctFar = INT_MIN
+    };
+
 
     typedef typename Cb::Vertex_handle                   Vertex_handle;
     typedef typename Cb::Cell_handle                     Cell_handle;
@@ -81,7 +95,7 @@ public:
     indexedCell()
     :
         Cb(),
-        index_(-1),
+        index_(ctFar),
         filterCount_(0)
     {}
 
@@ -92,7 +106,7 @@ public:
     )
     :
         Cb(v0, v1, v2, v3),
-        index_(-1),
+        index_(ctFar),
         filterCount_(0)
     {}
 
@@ -110,7 +124,7 @@ public:
     )
     :
         Cb(v0, v1, v2, v3, n0, n1, n2, n3),
-        index_(-1),
+        index_(ctFar),
         filterCount_(0)
     {}
 
@@ -126,6 +140,10 @@ public:
         return index_;
     }
 
+    inline bool farCell() const
+    {
+        return index_ == ctFar;
+    }
 
     inline int& filterCount()
     {

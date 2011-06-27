@@ -328,7 +328,7 @@ void Foam::conformalVoronoiMesh::calcTetMesh
         }
         else
         {
-            cit->cellIndex() = -1;
+            cit->cellIndex() = Cb::ctFar;
         }
     }
 
@@ -368,17 +368,17 @@ void Foam::conformalVoronoiMesh::calcTetMesh
         const int oppositeVertex = fit->second;
         const Cell_handle c2(c1->neighbor(oppositeVertex));
 
+        if (c1->farCell() && c2->farCell())
+        {
+            // Both tets are outside, skip
+            continue;
+        }
+
         label c1I = c1->cellIndex();
         label c2I = c2->cellIndex();
 
         label ownerCell = -1;
         label neighbourCell = -1;
-
-        if (c1I == -1 && c2I == -1)
-        {
-            // Both tets are outside, skip
-            continue;
-        }
 
         for (label i = 0; i < 3; i++)
         {
@@ -390,10 +390,10 @@ void Foam::conformalVoronoiMesh::calcTetMesh
 
         newFace = face(verticesOnTriFace);
 
-        if (c1I == -1 || c2I == -1)
+        if (c1->farCell() || c2->farCell())
         {
             // Boundary face...
-            if (c1I == -1)
+            if (c1->farCell())
             {
                 //... with c1 outside
                 ownerCell = c2I;
@@ -539,7 +539,7 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
             continue;
         }
 
-        if (c1I != -1 && c2I != -1 && (c1I != c2I))
+        if (!c1->farCell() && !c2->farCell() && (c1I != c2I))
         {
             if
             (
@@ -1828,7 +1828,7 @@ void Foam::conformalVoronoiMesh::indexDualVertices
         }
         else
         {
-            cit->cellIndex() = -1;
+            cit->cellIndex() = Cb::ctFar;
         }
     }
 
