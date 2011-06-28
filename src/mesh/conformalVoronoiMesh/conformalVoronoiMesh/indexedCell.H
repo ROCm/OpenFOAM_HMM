@@ -36,6 +36,7 @@ Description
 #include <CGAL/Triangulation_3.h>
 #include <CGAL/Triangulation_cell_base_with_circumcenter_3.h>
 #include "indexedVertex.H"
+#include "Pstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,7 +58,15 @@ class indexedCell
 {
     // Private data
 
-        //- The index for this Delaunay tetrahedral cell
+        //- The index for this Delaunay tetrahedral cell.  Type information is
+        //- also carried:
+
+        //  ctFar : the dual point of this cell does not form part of the
+        //          internal or boundary of the dual mesh
+        //  >=0   : the (local) index of an internal or boundary dual point,
+        //           not on a processor face
+        //  < 0 && > ctFar : the (global) index of a dual point on a processor
+        //                   face
         int index_;
 
         //- The number of times that this Delaunay cell has been limited
@@ -66,6 +75,12 @@ class indexedCell
 
 
 public:
+
+    enum cellTypes
+    {
+        ctFar = INT_MIN
+    };
+
 
     typedef typename Cb::Vertex_handle                   Vertex_handle;
     typedef typename Cb::Cell_handle                     Cell_handle;
@@ -81,7 +96,7 @@ public:
     indexedCell()
     :
         Cb(),
-        index_(-1),
+        index_(ctFar),
         filterCount_(0)
     {}
 
@@ -92,7 +107,7 @@ public:
     )
     :
         Cb(v0, v1, v2, v3),
-        index_(-1),
+        index_(ctFar),
         filterCount_(0)
     {}
 
@@ -110,7 +125,7 @@ public:
     )
     :
         Cb(v0, v1, v2, v3, n0, n1, n2, n3),
-        index_(-1),
+        index_(ctFar),
         filterCount_(0)
     {}
 
@@ -126,6 +141,10 @@ public:
         return index_;
     }
 
+    inline bool farCell() const
+    {
+        return index_ == ctFar;
+    }
 
     inline int& filterCount()
     {
@@ -139,8 +158,8 @@ public:
     }
 
 
-    // Is the Delaunay cell real, i.e. any real vertex
-    inline int real() const
+    //- Is the Delaunay cell real, i.e. any real vertex
+    inline bool real() const
     {
         return
         (
@@ -152,9 +171,50 @@ public:
     }
 
 
+    //- Does the Dual vertex form part of a processor patch
+    inline int parallelDualVertex() const
+    {
+        return
+        (
+            this->vertex(0)->referred()
+         || this->vertex(1)->referred()
+         || this->vertex(2)->referred()
+         || this->vertex(3)->referred()
+        );
+    }
+
+
+    //- Does the Dual vertex form part of a processor patch
+    inline Foam::label dualVertexMasterProc() const
+    {
+        if (!parallelDualVertex)
+        {
+            return -1;
+        }
+
+        // The master processor is the lowest numbered of the four on this tet.
+
+        int masterProc = Foam::Pstream::nProcs() + 1;
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (this->vertex(i)->referred())
+            {
+                masterProc = min(masterProc, this->vertex(i)->procIndex());
+            }
+            else
+            {
+                masterProc = min(masterProc, Foam::Pstream::myProcNo());
+            }
+        }
+
+        return masterProc;
+    }
+
+
     // Is the Delaunay cell part of the final dual mesj, i.e. any vertex form
     // part of the internal or boundary definition
-    inline int internalOrBoundaryDualVertex() const
+    inline bool internalOrBoundaryDualVertex() const
     {
         return
         (
@@ -168,7 +228,7 @@ public:
 
     // Is the Delaunay cell real or referred (or mixed), i.e. all vertices form
     // part of the real or referred internal or boundary definition
-    inline int anyInternalOrBoundaryDualVertex() const
+    inline bool anyInternalOrBoundaryDualVertex() const
     {
         return
         (

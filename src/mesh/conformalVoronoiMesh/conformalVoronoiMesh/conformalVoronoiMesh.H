@@ -67,6 +67,7 @@ SourceFiles
 #include "wallPolyPatch.H"
 #include "processorPolyPatch.H"
 #include "zeroGradientFvPatchFields.H"
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -779,7 +780,8 @@ private:
         void indexDualVertices
         (
             pointField& pts,
-            PackedBoolList& boundaryPts
+            PackedBoolList& boundaryPts,
+            const globalIndex& globalParallelPointIndices
         );
 
         //- Re-index all of the the Delaunay cells
@@ -957,7 +959,8 @@ public:
             void drawDelaunayCell
             (
                 Ostream& os,
-                const Delaunay::Finite_cells_iterator& cit
+                const Delaunay::Finite_cells_iterator& cit,
+                label offset = 0
             ) const;
 
             //- Write Delaunay points to .obj file

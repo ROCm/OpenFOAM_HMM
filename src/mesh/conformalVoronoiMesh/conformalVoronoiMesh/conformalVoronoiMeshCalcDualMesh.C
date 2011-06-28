@@ -58,73 +58,90 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         ++cit
     )
     {
-        if
-        (
-               !cit->vertex(0)->real()
-            || !cit->vertex(1)->real()
-            || !cit->vertex(2)->real()
-            || !cit->vertex(3)->real()
-        )
-        {
-            cit->filterCount() = 100;
-        }
-        else
-        {
             cit->filterCount() = 0;
-        }
     }
 
-    for
-    (
-        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-        vit != finite_vertices_end();
-        vit++
-    )
-    {
-        std::list<Cell_handle> cells;
-        incident_cells(vit, std::back_inserter(cells));
+    // for
+    // (
+    //     Delaunay::Finite_cells_iterator cit = finite_cells_begin();
+    //     cit != finite_cells_end();
+    //     ++cit
+    // )
+    // {
+    //     if
+    //     (
+    //            !cit->vertex(0)->real()
+    //         || !cit->vertex(1)->real()
+    //         || !cit->vertex(2)->real()
+    //         || !cit->vertex(3)->real()
+    //     )
+    //     {
+    //         cit->filterCount() = 100;
+    //     }
+    //     else
+    //     {
+    //         cit->filterCount() = 0;
+    //     }
+    // }
 
-        bool hasProcPt = false;
+    // for
+    // (
+    //     Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+    //     vit != finite_vertices_end();
+    //     vit++
+    // )
+    // {
+    //     std::list<Cell_handle> cells;
+    //     incident_cells(vit, std::back_inserter(cells));
 
-        for
-        (
-            std::list<Cell_handle>::iterator cit=cells.begin();
-            cit != cells.end();
-            ++cit
-        )
-        {
-            if
-            (
-                !(*cit)->vertex(0)->real()
-             || !(*cit)->vertex(1)->real()
-             || !(*cit)->vertex(2)->real()
-             || !(*cit)->vertex(3)->real()
-            )
-            {
-                hasProcPt = true;
+    //     bool hasProcPt = false;
 
-                break;
-            }
-        }
+    //     for
+    //     (
+    //         std::list<Cell_handle>::iterator cit=cells.begin();
+    //         cit != cells.end();
+    //         ++cit
+    //     )
+    //     {
+    //         if
+    //         (
+    //             !(*cit)->vertex(0)->real()
+    //          || !(*cit)->vertex(1)->real()
+    //          || !(*cit)->vertex(2)->real()
+    //          || !(*cit)->vertex(3)->real()
+    //         )
+    //         {
+    //             hasProcPt = true;
 
-        if (hasProcPt)
-        {
-            for
-            (
-                std::list<Cell_handle>::iterator cit=cells.begin();
-                cit != cells.end();
-                ++cit
-            )
-            {
-                (*cit)->filterCount() = 100;
-            }
-        }
-    }
+    //             break;
+    //         }
+    //     }
+
+    //     if (hasProcPt)
+    //     {
+    //         for
+    //         (
+    //             std::list<Cell_handle>::iterator cit=cells.begin();
+    //             cit != cells.end();
+    //             ++cit
+    //         )
+    //         {
+    //             (*cit)->filterCount() = 100;
+    //         }
+    //     }
+    // }
 
 
     PackedBoolList boundaryPts(number_of_cells(), false);
 
-    indexDualVertices(points, boundaryPts);
+    globalIndex globalParallelPointIndices(number_of_cells());
+
+    indexDualVertices
+    (
+        points,
+        boundaryPts,
+        globalParallelPointIndices
+    );
 
     {
         // Ideally requires a no-risk face filtering to get rid of zero area
@@ -182,7 +199,12 @@ void Foam::conformalVoronoiMesh::calcDualMesh
                 // Reindexing the Delaunay cells and regenerating the
                 // points resets the mesh to the starting condition.
 
-                indexDualVertices(points, boundaryPts);
+                indexDualVertices
+                (
+                    points,
+                    boundaryPts,
+                    globalParallelPointIndices
+                );
 
                 {
                     Info<< nl << "Merging close points" << endl;
@@ -328,7 +350,7 @@ void Foam::conformalVoronoiMesh::calcTetMesh
         }
         else
         {
-            cit->cellIndex() = -1;
+            cit->cellIndex() = Cb::ctFar;
         }
     }
 
@@ -368,17 +390,17 @@ void Foam::conformalVoronoiMesh::calcTetMesh
         const int oppositeVertex = fit->second;
         const Cell_handle c2(c1->neighbor(oppositeVertex));
 
+        if (c1->farCell() && c2->farCell())
+        {
+            // Both tets are outside, skip
+            continue;
+        }
+
         label c1I = c1->cellIndex();
         label c2I = c2->cellIndex();
 
         label ownerCell = -1;
         label neighbourCell = -1;
-
-        if (c1I == -1 && c2I == -1)
-        {
-            // Both tets are outside, skip
-            continue;
-        }
 
         for (label i = 0; i < 3; i++)
         {
@@ -390,10 +412,10 @@ void Foam::conformalVoronoiMesh::calcTetMesh
 
         newFace = face(verticesOnTriFace);
 
-        if (c1I == -1 || c2I == -1)
+        if (c1->farCell() || c2->farCell())
         {
             // Boundary face...
-            if (c1I == -1)
+            if (c1->farCell())
             {
                 //... with c1 outside
                 ownerCell = c2I;
@@ -539,7 +561,7 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
             continue;
         }
 
-        if (c1I != -1 && c2I != -1 && (c1I != c2I))
+        if (!c1->farCell() && !c2->farCell() && (c1I != c2I))
         {
             if
             (
@@ -1529,65 +1551,65 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     List<polyPatch*> patches(patchStarts.size());
 
-    label nValidPatches = 0;
-
-    forAll(patches, p)
-    {
-        if (patchTypes[p] == processorPolyPatch::typeName)
-        {
-            // Do not create empty processor patches
-
-            if (patchSizes[p] > 0)
-            {
-                patches[nValidPatches] = new processorPolyPatch
-                (
-                    patchNames[p],
-                    patchSizes[p],
-                    patchStarts[p],
-                    nValidPatches,
-                    pMesh.boundaryMesh(),
-                    Pstream::myProcNo(),
-                    procNeighbours[p]
-                );
-
-                nValidPatches++;
-            }
-        }
-        else
-        {
-            patches[nValidPatches] = polyPatch::New
-            (
-                patchTypes[p],
-                patchNames[p],
-                patchSizes[p],
-                patchStarts[p],
-                nValidPatches,
-                pMesh.boundaryMesh()
-            ).ptr();
-
-            nValidPatches++;
-        }
-    }
-
-    patches.setSize(nValidPatches);
-
-    pMesh.addPatches(patches);
-
-    // Info<< "ADDPATCHES NOT IN PARALLEL" << endl;
+    // label nValidPatches = 0;
 
     // forAll(patches, p)
     // {
-    //     patches[p] = new polyPatch
-    //     (
-    //         patchNames[p],
-    //         patchSizes[p],
-    //         patchStarts[p],
-    //         p,
-    //         pMesh.boundaryMesh()
-    //     );
+    //     if (patchTypes[p] == processorPolyPatch::typeName)
+    //     {
+    //         // Do not create empty processor patches
+
+    //         if (patchSizes[p] > 0)
+    //         {
+    //             patches[nValidPatches] = new processorPolyPatch
+    //             (
+    //                 patchNames[p],
+    //                 patchSizes[p],
+    //                 patchStarts[p],
+    //                 nValidPatches,
+    //                 pMesh.boundaryMesh(),
+    //                 Pstream::myProcNo(),
+    //                 procNeighbours[p]
+    //             );
+
+    //             nValidPatches++;
+    //         }
+    //     }
+    //     else
+    //     {
+    //         patches[nValidPatches] = polyPatch::New
+    //         (
+    //             patchTypes[p],
+    //             patchNames[p],
+    //             patchSizes[p],
+    //             patchStarts[p],
+    //             nValidPatches,
+    //             pMesh.boundaryMesh()
+    //         ).ptr();
+
+    //         nValidPatches++;
+    //     }
     // }
 
-    // pMesh.addPatches(patches, false);
+    // patches.setSize(nValidPatches);
+
+    // pMesh.addPatches(patches);
+
+    Info<< "ADDPATCHES NOT IN PARALLEL" << endl;
+
+    forAll(patches, p)
+    {
+        patches[p] = new polyPatch
+        (
+            patchNames[p],
+            patchSizes[p],
+            patchStarts[p],
+            p,
+            pMesh.boundaryMesh()
+        );
+    }
+
+    pMesh.addPatches(patches, false);
 
     // pMesh.overrideCellCentres(cellCentres);
 
@@ -1785,7 +1807,8 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 void Foam::conformalVoronoiMesh::indexDualVertices
 (
     pointField& pts,
-    PackedBoolList& boundaryPts
+    PackedBoolList& boundaryPts,
+    const globalIndex& globalParallelPointIndices
 )
 {
     // Indexing Delaunay cells, which are the dual vertices
@@ -1798,6 +1821,16 @@ void Foam::conformalVoronoiMesh::indexDualVertices
 
     boundaryPts = false;
 
+    OFstream tetStr
+    (
+        runTime_.path()
+       /"processor_"
+      + name(Pstream::myProcNo())
+      + "_parallelTets.obj"
+    );
+
+    label pTetI = 0;
+
     for
     (
         Delaunay::Finite_cells_iterator cit = finite_cells_begin();
@@ -1807,28 +1840,40 @@ void Foam::conformalVoronoiMesh::indexDualVertices
     {
         if (cit->internalOrBoundaryDualVertex())
         {
-            cit->cellIndex() = dualVertI;
+            if (cit->parallelDualVertex())
+            {
+                cit->cellIndex() = globalParallelPointIndices.toGlobal
+                (
+                    dualVertI
+                );
+
+                drawDelaunayCell(tetStr, cit, pTetI++);
+            }
+            else
+            {
+                cit->cellIndex() = dualVertI;
+
+                if
+                (
+                    !cit->vertex(0)->internalOrBoundaryPoint()
+                 || !cit->vertex(1)->internalOrBoundaryPoint()
+                 || !cit->vertex(2)->internalOrBoundaryPoint()
+                 || !cit->vertex(3)->internalOrBoundaryPoint()
+                )
+                {
+                    // This is a boundary dual vertex
+
+                    boundaryPts[dualVertI] = true;
+                }
+            }
 
             pts[dualVertI] = topoint(dual(cit));
-
-            if
-            (
-                !cit->vertex(0)->internalOrBoundaryPoint()
-             || !cit->vertex(1)->internalOrBoundaryPoint()
-             || !cit->vertex(2)->internalOrBoundaryPoint()
-             || !cit->vertex(3)->internalOrBoundaryPoint()
-            )
-            {
-                // This is a boundary dual vertex
-
-                boundaryPts[dualVertI] = true;
-            }
 
             dualVertI++;
         }
         else
         {
-            cit->cellIndex() = -1;
+            cit->cellIndex() = Cb::ctFar;
         }
     }
 

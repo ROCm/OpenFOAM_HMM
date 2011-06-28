@@ -295,7 +295,7 @@ void Foam::conformalVoronoiMesh::insertPoints
     //     ++pit
     // )
     // {
-    //     insertPoint(topoint(*pit), Vb::ptInternalPoint);
+    //     insertPoint(topoint(*pit), Vb::vtInternal);
     // }
 
     label nInserted(number_of_vertices() - preInsertionSize);
@@ -376,7 +376,7 @@ void Foam::conformalVoronoiMesh::insertPoints
 
         label type = types[pI];
 
-        if (type > Vb::ptFarPoint)
+        if (type > Vb::vtFar)
         {
             // This is a member of a point pair, don't use the type directly
             // (note that this routine never gets called for referredPoints
@@ -1209,7 +1209,7 @@ void Foam::conformalVoronoiMesh::insertBoundingPoints()
 
     forAll(farPts, fPI)
     {
-        insertPoint(farPts[fPI], Vb::ptFarPoint);
+        insertPoint(farPts[fPI], Vb::vtFar);
     }
 }
 
@@ -1400,7 +1400,7 @@ bool Foam::conformalVoronoiMesh::distributeBackground()
 
                 label type = cellVertexTypes[cI][cVPI];
 
-                if (type > Vb::ptFarPoint)
+                if (type > Vb::vtFar)
                 {
                     // This is a member of a point pair, don't use the type
                     // directly, make type relative to the index in preparation
@@ -1625,11 +1625,7 @@ Foam::face Foam::conformalVoronoiMesh::buildDualFace
 
     do
     {
-        label cc1I = cc1->cellIndex();
-
-        label cc2I = cc2->cellIndex();
-
-        if (cc1I < 0 || cc2I < 0)
+        if (cc1->farCell() || cc2->farCell())
         {
             Cell_handle c = eit->first;
             Vertex_handle vA = c->vertex(eit->second);
@@ -1643,6 +1639,10 @@ Foam::face Foam::conformalVoronoiMesh::buildDualFace
                 << topoint(vB->point()) << nl
                 << exit(FatalError);
         }
+
+        label cc1I = cc1->cellIndex();
+
+        label cc2I = cc2->cellIndex();
 
         if (cc1I != cc2I)
         {
@@ -1694,7 +1694,7 @@ Foam::label Foam::conformalVoronoiMesh::maxFilterCount
 
     do
     {
-        if (cc->cellIndex() < 0)
+        if (cc->farCell())
         {
             Cell_handle c = eit->first;
             Vertex_handle vA = c->vertex(eit->second);
@@ -1966,7 +1966,7 @@ void Foam::conformalVoronoiMesh::move()
         ++cit
     )
     {
-        cit->cellIndex() = -1;
+        cit->cellIndex() = Cb::ctFar;
 
         if (cit->anyInternalOrBoundaryDualVertex())
         {
