@@ -47,105 +47,102 @@ inline void Foam::polyatomicCloud::evaluatePair
 
     const polyatomic::constantProperties& constPropJ(constProps(idJ));
 
-    List<label> siteIdsI = constPropI.siteIds();
-
-    List<label> siteIdsJ = constPropJ.siteIds();
-
-    List<bool> pairPotentialSitesI = constPropI.pairPotentialSites();
-
-    List<bool> electrostaticSitesI = constPropI.electrostaticSites();
-
-    List<bool> pairPotentialSitesJ = constPropJ.pairPotentialSites();
-
-    List<bool> electrostaticSitesJ = constPropJ.electrostaticSites();
-
-    forAll(siteIdsI, sI)
+    forAll(constPropI.pairPotSites(), pI)
     {
-        label idsI(siteIdsI[sI]);
+        label sI = constPropI.pairPotSites()[pI];
 
-        forAll(siteIdsJ, sJ)
+        label idsI = constPropI.sites()[sI].siteId();
+
+        forAll(constPropJ.pairPotSites(), pJ)
         {
-            label idsJ(siteIdsJ[sJ]);
+            label sJ = constPropJ.pairPotSites()[pJ];
 
-            if (pairPotentialSitesI[sI] && pairPotentialSitesJ[sJ])
-            {
-                vector rsIsJ =
-                    molI.sitePositions()[sI] - molJ.sitePositions()[sJ];
+            label idsJ = constPropJ.sites()[sJ].siteId();
 
-                scalar rsIsJMagSq = magSqr(rsIsJ);
-
-                if (pairPot.rCutSqr(idsI, idsJ, rsIsJMagSq))
-                {
-                    scalar rsIsJMag = mag(rsIsJ);
-
-                    vector fsIsJ =
-                        (rsIsJ/rsIsJMag)
-                       *pairPot.force(idsI, idsJ, rsIsJMag);
-
-                    molI.siteForces()[sI] += fsIsJ;
-
-                    molJ.siteForces()[sJ] += -fsIsJ;
-
-                    scalar potentialEnergy
-                    (
-                        pairPot.energy(idsI, idsJ, rsIsJMag)
-                    );
-
-                    molI.potentialEnergy() += 0.5*potentialEnergy;
-
-                    molJ.potentialEnergy() += 0.5*potentialEnergy;
-
-                    vector rIJ = molI.position() - molJ.position();
-
-                    tensor virialContribution =
-                        (rsIsJ*fsIsJ)*(rsIsJ & rIJ)/rsIsJMagSq;
-
-                    molI.rf() += virialContribution;
-
-                    molJ.rf() += virialContribution;
-                }
-            }
-
-            if (electrostaticSitesI[sI] && electrostaticSitesJ[sJ])
-            {
-                vector rsIsJ =
+            vector rsIsJ =
                 molI.sitePositions()[sI] - molJ.sitePositions()[sJ];
 
-                scalar rsIsJMagSq = magSqr(rsIsJ);
+            scalar rsIsJMagSq = magSqr(rsIsJ);
 
-                if (rsIsJMagSq <= electrostatic.rCutSqr())
-                {
-                    scalar rsIsJMag = mag(rsIsJ);
+            if (pairPot.rCutSqr(idsI, idsJ, rsIsJMagSq))
+            {
+                scalar rsIsJMag = mag(rsIsJ);
 
-                    scalar chargeI = constPropI.siteCharges()[sI];
+                vector fsIsJ =
+                (rsIsJ/rsIsJMag)
+               *pairPot.force(idsI, idsJ, rsIsJMag);
 
-                    scalar chargeJ = constPropJ.siteCharges()[sJ];
+                molI.siteForces()[sI] += fsIsJ;
 
-                    vector fsIsJ =
-                        (rsIsJ/rsIsJMag)
-                       *chargeI*chargeJ*electrostatic.force(rsIsJMag);
+                molJ.siteForces()[sJ] += -fsIsJ;
 
-                    molI.siteForces()[sI] += fsIsJ;
+                scalar potentialEnergy
+                (
+                    pairPot.energy(idsI, idsJ, rsIsJMag)
+                );
 
-                    molJ.siteForces()[sJ] += -fsIsJ;
+                molI.potentialEnergy() += 0.5*potentialEnergy;
 
-                    scalar potentialEnergy =
-                        chargeI*chargeJ
-                       *electrostatic.energy(rsIsJMag);
+                molJ.potentialEnergy() += 0.5*potentialEnergy;
 
-                    molI.potentialEnergy() += 0.5*potentialEnergy;
+                vector rIJ = molI.position() - molJ.position();
 
-                    molJ.potentialEnergy() += 0.5*potentialEnergy;
+                tensor virialContribution =
+                (rsIsJ*fsIsJ)*(rsIsJ & rIJ)/rsIsJMagSq;
 
-                    vector rIJ = molI.position() - molJ.position();
+                molI.rf() += virialContribution;
 
-                    tensor virialContribution =
-                        (rsIsJ*fsIsJ)*(rsIsJ & rIJ)/rsIsJMagSq;
+                molJ.rf() += virialContribution;
+            }
+        }
+    }
 
-                    molI.rf() += virialContribution;
 
-                    molJ.rf() += virialContribution;
-                }
+    forAll(constPropI.electrostaticSites(), pI)
+    {
+        label sI = constPropI.electrostaticSites()[pI];
+
+        forAll(constPropJ.electrostaticSites(), pJ)
+        {
+            label sJ = constPropJ.electrostaticSites()[pJ];
+
+            vector rsIsJ =
+                molI.sitePositions()[sI] - molJ.sitePositions()[sJ];
+
+            scalar rsIsJMagSq = magSqr(rsIsJ);
+
+            if (rsIsJMagSq <= electrostatic.rCutSqr())
+            {
+                scalar rsIsJMag = mag(rsIsJ);
+
+                scalar chargeI = constPropI.sites()[sI].siteCharge();
+
+                scalar chargeJ = constPropJ.sites()[sJ].siteCharge();
+
+                vector fsIsJ =
+                    (rsIsJ/rsIsJMag)
+                   *chargeI*chargeJ*electrostatic.force(rsIsJMag);
+
+                molI.siteForces()[sI] += fsIsJ;
+
+                molJ.siteForces()[sJ] += -fsIsJ;
+
+                scalar potentialEnergy =
+                    chargeI*chargeJ
+                   *electrostatic.energy(rsIsJMag);
+
+                molI.potentialEnergy() += 0.5*potentialEnergy;
+
+                molJ.potentialEnergy() += 0.5*potentialEnergy;
+
+                vector rIJ = molI.position() - molJ.position();
+
+                tensor virialContribution =
+                    (rsIsJ*fsIsJ)*(rsIsJ & rIJ)/rsIsJMagSq;
+
+                molI.rf() += virialContribution;
+
+                molJ.rf() += virialContribution;
             }
         }
     }
@@ -170,123 +167,119 @@ inline bool Foam::polyatomicCloud::evaluatePotentialLimit
 
     const polyatomic::constantProperties& constPropJ(constProps(idJ));
 
-    List<label> siteIdsI = constPropI.siteIds();
-
-    List<label> siteIdsJ = constPropJ.siteIds();
-
-    List<bool> pairPotentialSitesI = constPropI.pairPotentialSites();
-
-    List<bool> electrostaticSitesI = constPropI.electrostaticSites();
-
-    List<bool> pairPotentialSitesJ = constPropJ.pairPotentialSites();
-
-    List<bool> electrostaticSitesJ = constPropJ.electrostaticSites();
-
-    forAll(siteIdsI, sI)
+    forAll(constPropI.pairPotSites(), pI)
     {
-        label idsI(siteIdsI[sI]);
+        label sI = constPropI.pairPotSites()[pI];
 
-        forAll(siteIdsJ, sJ)
+        label idsI = constPropI.sites()[sI].siteId();
+
+        forAll(constPropJ.pairPotSites(), pJ)
         {
-            label idsJ(siteIdsJ[sJ]);
+            label sJ = constPropJ.pairPotSites()[pJ];
 
-            if (pairPotentialSitesI[sI] && pairPotentialSitesJ[sJ])
+            label idsJ = constPropJ.sites()[sJ].siteId();
+
+            vector rsIsJ =
+                molI.sitePositions()[sI] - molJ.sitePositions()[sJ];
+
+            scalar rsIsJMagSq = magSqr(rsIsJ);
+
+            if (pairPot.rCutSqr(idsI, idsJ, rsIsJMagSq))
             {
-                vector rsIsJ =
-                    molI.sitePositions()[sI] - molJ.sitePositions()[sJ];
+                scalar rsIsJMag = mag(rsIsJ);
 
-                scalar rsIsJMagSq = magSqr(rsIsJ);
+                // Guard against pairPot.energy being evaluated
+                // if rIJMag < SMALL. A floating point exception will
+                // happen otherwise.
 
-                if (pairPot.rCutSqr(idsI, idsJ, rsIsJMagSq))
+                if (rsIsJMag < SMALL)
                 {
-                    scalar rsIsJMag = mag(rsIsJ);
+                    WarningIn("polyatomicCloud::removeHighEnergyOverlaps()")
+                        << "Molecule site pair closer than "
+                        << SMALL
+                        << ": mag separation = " << rsIsJMag
+                        << ". These may have been placed on top of each"
+                        << " other by a rounding error in mdInitialise in"
+                        << " parallel or a block filled with polyatomics"
+                        << " twice. Removing one of the polyatomics."
+                        << endl;
 
-                    // Guard against pairPot.energy being evaluated
-                    // if rIJMag < SMALL. A floating point exception will
-                    // happen otherwise.
-
-                    if (rsIsJMag < SMALL)
-                    {
-                        WarningIn("polyatomicCloud::removeHighEnergyOverlaps()")
-                            << "Molecule site pair closer than "
-                            << SMALL
-                            << ": mag separation = " << rsIsJMag
-                            << ". These may have been placed on top of each"
-                            << " other by a rounding error in mdInitialise in"
-                            << " parallel or a block filled with polyatomics"
-                            << " twice. Removing one of the polyatomics."
-                            << endl;
-
-                        return true;
-                    }
-
-                    // Guard against pairPot.energy being evaluated if rIJMag <
-                    // rMin.  A tabulation lookup error will occur otherwise.
-
-                    if (rsIsJMag < pairPot.rMin(idsI, idsJ))
-                    {
-                        return true;
-                    }
-
-                    if
-                    (
-                        mag(pairPot.energy(idsI, idsJ, rsIsJMag))
-                      > pot_.potentialEnergyLimit()
-                    )
-                    {
-                        return true;
-                    };
+                    return true;
                 }
+
+                // Guard against pairPot.energy being evaluated if rIJMag <
+                // rMin.  A tabulation lookup error will occur otherwise.
+
+                if (rsIsJMag < pairPot.rMin(idsI, idsJ))
+                {
+                    return true;
+                }
+
+                if
+                (
+                    mag(pairPot.energy(idsI, idsJ, rsIsJMag))
+                  > pot_.potentialEnergyLimit()
+                )
+                {
+                    return true;
+                };
             }
+        }
+    }
 
-            if (electrostaticSitesI[sI] && electrostaticSitesJ[sJ])
+    forAll(constPropI.electrostaticSites(), pI)
+    {
+        label sI = constPropI.electrostaticSites()[pI];
+
+        forAll(constPropJ.electrostaticSites(), pJ)
+        {
+            label sJ = constPropJ.electrostaticSites()[pJ];
+
+            vector rsIsJ =
+                molI.sitePositions()[sI] - molJ.sitePositions()[sJ];
+
+            scalar rsIsJMagSq = magSqr(rsIsJ);
+
+            if (pairPot.rCutMaxSqr(rsIsJMagSq))
             {
-                vector rsIsJ =
-                    molI.sitePositions()[sI] - molJ.sitePositions()[sJ];
+                scalar rsIsJMag = mag(rsIsJ);
 
-                scalar rsIsJMagSq = magSqr(rsIsJ);
+                // Guard against pairPot.energy being evaluated
+                // if rIJMag < SMALL. A floating point exception will
+                // happen otherwise.
 
-                if (pairPot.rCutMaxSqr(rsIsJMagSq))
+                if (rsIsJMag < SMALL)
                 {
-                    scalar rsIsJMag = mag(rsIsJ);
+                    WarningIn("polyatomicCloud::removeHighEnergyOverlaps()")
+                        << "Molecule site pair closer than "
+                        << SMALL
+                        << ": mag separation = " << rsIsJMag
+                        << ". These may have been placed on top of each"
+                        << " other by a rounding error in mdInitialise in"
+                        << " parallel or a block filled with polyatomics"
+                        << " twice. Removing one of the polyatomics."
+                        << endl;
 
-                    // Guard against pairPot.energy being evaluated
-                    // if rIJMag < SMALL. A floating point exception will
-                    // happen otherwise.
-
-                    if (rsIsJMag < SMALL)
-                    {
-                        WarningIn("polyatomicCloud::removeHighEnergyOverlaps()")
-                            << "Molecule site pair closer than "
-                            << SMALL
-                            << ": mag separation = " << rsIsJMag
-                            << ". These may have been placed on top of each"
-                            << " other by a rounding error in mdInitialise in"
-                            << " parallel or a block filled with polyatomics"
-                            << " twice. Removing one of the polyatomics."
-                            << endl;
-
-                        return true;
-                    }
-
-                    if (rsIsJMag < electrostatic.rMin())
-                    {
-                        return true;
-                    }
-
-                    scalar chargeI = constPropI.siteCharges()[sI];
-
-                    scalar chargeJ = constPropJ.siteCharges()[sJ];
-
-                    if
-                    (
-                        mag(chargeI*chargeJ*electrostatic.energy(rsIsJMag))
-                      > pot_.potentialEnergyLimit()
-                    )
-                    {
-                        return true;
-                    };
+                    return true;
                 }
+
+                if (rsIsJMag < electrostatic.rMin())
+                {
+                    return true;
+                }
+
+                scalar chargeI = constPropI.sites()[sI].siteCharge();
+
+                scalar chargeJ = constPropJ.sites()[sJ].siteCharge();
+
+                if
+                (
+                    mag(chargeI*chargeJ*electrostatic.energy(rsIsJMag))
+                  > pot_.potentialEnergyLimit()
+                )
+                {
+                    return true;
+                };
             }
         }
     }

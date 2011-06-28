@@ -156,13 +156,15 @@ bool Foam::polyatomic::move(polyatomic::trackingData& td, const scalar trackTime
 
         tau_ = vector::zero;
 
-        forAll(siteForces_, s)
+        forAll(siteForces_, sI)
         {
-            const vector& f = siteForces_[s];
+            const vector& f = siteForces_[sI];
 
             a_ += f/m;
 
-            tau_ += (constProps.siteReferencePositions()[s] ^ (Q_.T() & f));
+            tau_ +=
+                constProps.sites()[sI].siteReferencePosition()
+              ^ (Q_.T() & f);
         }
 
         v_ += 0.5*trackTime*a_;
@@ -231,7 +233,12 @@ void Foam::polyatomic::transformProperties(const vector& separation)
 
 void Foam::polyatomic::setSitePositions(const constantProperties& constProps)
 {
-    sitePositions_ = position_ + (Q_ & constProps.siteReferencePositions());
+    forAll(constProps.sites(), sI)
+    {
+        sitePositions_[sI] =
+            position_
+          + (Q_ & constProps.sites()[sI].siteReferencePosition());
+    }
 }
 
 

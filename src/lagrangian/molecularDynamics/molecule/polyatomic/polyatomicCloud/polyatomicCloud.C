@@ -64,7 +64,8 @@ void Foam::polyatomicCloud::buildConstProps()
     forAll(idList, i)
     {
         const word& id = idList[i];
-        const dictionary& molDict = polyatomicPropertiesDict.subDict(id);
+
+        const dictionary& molDict(polyatomicPropertiesDict.subDict(id));
 
         List<word> siteIdNames = molDict.lookup("siteIds");
 
@@ -78,17 +79,23 @@ void Foam::polyatomicCloud::buildConstProps()
 
             if (siteIds[sI] == -1)
             {
-                FatalErrorIn("polyatomicCloud::buildConstProps()")
+                FatalErrorIn
+                (
+                    "Foam::polyatomic::constantProperties::constantProperties"
+                    "("
+                    "const dictionary& dict"
+                    ")"
+                )
                     << siteId << " site not found."
                     << nl << abort(FatalError);
             }
         }
 
-        polyatomic::constantProperties& constProp = constPropList_[i];
-
-        constProp = polyatomic::constantProperties(molDict);
-
-        constProp.siteIds() = siteIds;
+        constPropList_[i] = polyatomic::constantProperties
+        (
+            molDict,
+            siteIds
+        );
     }
 }
 
@@ -1237,7 +1244,7 @@ void Foam::polyatomicCloud::writeXYZ(const fileName& fName) const
         {
             const point& sP = mol().sitePositions()[i];
 
-            os  << pot_.siteIdList()[cP.siteIds()[i]]
+            os  << pot_.siteIdList()[cP.sites()[i].siteId()]
                 << ' ' << sP.x()*1e10
                 << ' ' << sP.y()*1e10
                 << ' ' << sP.z()*1e10

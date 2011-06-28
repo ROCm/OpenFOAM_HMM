@@ -27,12 +27,9 @@ License
 
 inline Foam::polyatomic::constantProperties::constantProperties()
 :
-    siteReferencePositions_(Field<vector>(0)),
-    siteMasses_(List<scalar>(0)),
-    siteCharges_(List<scalar>(0)),
-    siteIds_(List<label>(0)),
-    pairPotentialSites_(List<bool>(false)),
-    electrostaticSites_(List<bool>(false)),
+    sites_(),
+    electrostaticSites_(),
+    pairPotSites_(),
     momentOfInertia_(diagTensor(0, 0, 0)),
     mass_(0)
 {}
@@ -40,47 +37,117 @@ inline Foam::polyatomic::constantProperties::constantProperties()
 
 inline Foam::polyatomic::constantProperties::constantProperties
 (
-    const dictionary& dict
+    const dictionary& dict,
+    const labelList& siteIds
 )
 :
-    siteReferencePositions_(dict.lookup("siteReferencePositions")),
-    siteMasses_(dict.lookup("siteMasses")),
-    siteCharges_(dict.lookup("siteCharges")),
-    siteIds_(List<word>(dict.lookup("siteIds")).size(), -1),
-    pairPotentialSites_(),
+    sites_(),
     electrostaticSites_(),
+    pairPotSites_(),
     momentOfInertia_(),
-    mass_()
+    mass_(0)
 {
-    checkSiteListSizes();
+    List<word> siteIdNames = dict.lookup("siteIds");
 
-    setInteracionSiteBools
+    List<vector> siteReferencePositions(dict.lookup("siteReferencePositions"));
+
+    List<scalar> siteMasses(dict.lookup("siteMasses"));
+
+    List<scalar> siteCharges(dict.lookup("siteCharges"));
+
+    List<word> pairPotentialIds(dict.lookup("pairPotentialSiteIds"));
+
+    if
     (
-        List<word>(dict.lookup("siteIds")),
-        List<word>(dict.lookup("pairPotentialSiteIds"))
-    );
+        ( siteIdNames.size() != sites_.size() )
+     || ( siteReferencePositions.size() != sites_.size() )
+     || ( siteCharges.size() != sites_.size() )
+    )
+    {
+            FatalErrorIn
+            (
+                "Foam::polyatomic::constantProperties::constantProperties"
+                "("
+                    "const dictionary& dict"
+                ")"
+            )
+            << "Sizes of site id, charge and "
+            << "referencePositions are not the same: " << sites_.size()
+            << nl << abort(FatalError);
+    }
 
-    mass_ = sum(siteMasses_);
+    sites_.setSize(siteIdNames.size());
 
-    vector centreOfMass(vector::zero);
+    electrostaticSites_.setSize(sites_.size(), -1);
+    pairPotSites_.setSize(sites_.size(), -1);
+
+    label pairI = 0;
+    label electrostaticI = 0;
+
+    forAll(sites_, sI)
+    {
+        sites_[sI] = constPropSite
+        (
+            siteReferencePositions[sI],
+            siteMasses[sI],
+            siteCharges[sI],
+            siteIds[sI],
+            siteIdNames[sI],
+            (findIndex(pairPotentialIds, siteIdNames[sI]) != -1),   // pair
+            (mag(siteCharges[sI]) > VSMALL)                         // charge
+        );
+
+        if (sites_[sI].pairPotentialSite())
+        {
+            pairPotSites_[pairI++] = sI;
+        }
+
+        if (sites_[sI].electrostaticSite())
+        {
+            electrostaticSites_[electrostaticI++] = sI;
+        }
+
+        if (sites_[sI].pairPotentialSite() && !sites_[sI].electrostaticSite())
+        {
+            WarningIn
+            (
+                "Foam::polyatomic::constantProperties::constantProperties"
+                "("
+                    "const dictionary& dict"
+                ")"
+            )
+                << siteIdNames[sI] << " is a non-interacting site." << endl;
+        }
+    }
+
+    pairPotSites_.setSize(pairI);
+    electrostaticSites_.setSize(electrostaticI);
 
     // Calculate the centre of mass of the body and subtract it from each
     // position
 
-    forAll(siteReferencePositions_, i)
+    vector centreOfMass(vector::zero);
+
+    forAll(sites_, sI)
     {
-        centreOfMass += siteReferencePositions_[i]*siteMasses_[i];
+        mass_ += sites_[sI].siteMass();
+
+        centreOfMass +=
+            sites_[sI].siteReferencePosition()*sites_[sI].siteMass();
     }
 
     centreOfMass /= mass_;
 
-    siteReferencePositions_ -= centreOfMass;
+    forAll(sites_, sI)
+    {
+        sites_[sI].siteReferencePosition() -= centreOfMass;
+    }
 
-    if (siteIds_.size() == 1)
+    if (sites_.size() == 1)
     {
         // Single site polyatomic - no rotational motion.
 
-        siteReferencePositions_[0] = vector::zero;
+        sites_[0].siteReferencePosition() = vector::zero;
 
         momentOfInertia_ = diagTensor(-1, -1, -1);
     }
@@ -90,36 +157,46 @@ inline Foam::polyatomic::constantProperties::constantProperties
 
         Info<< nl << "Linear polyatomic." << endl;
 
-        vector dir = siteReferencePositions_[1] - siteReferencePositions_[0];
+        vector dir =
+            sites_[1].siteReferencePosition()
+          - sites_[0].siteReferencePosition();
 
         dir /= mag(dir);
 
         tensor Q = rotationTensor(dir, vector(1,0,0));
 
-        siteReferencePositions_ = (Q & siteReferencePositions_);
+        forAll(sites_, sI)
+        {
+            sites_[sI].siteReferencePosition() =
+                (Q & sites_[sI].siteReferencePosition());
+        }
 
         // The rotation was around the centre of mass but remove any
         // components that have crept in due to floating point errors
 
         centreOfMass = vector::zero;
 
-        forAll(siteReferencePositions_, i)
+        forAll(sites_, sI)
         {
-            centreOfMass += siteReferencePositions_[i]*siteMasses_[i];
+            centreOfMass +=
+                sites_[sI].siteReferencePosition()*sites_[sI].siteMass();
         }
 
         centreOfMass /= mass_;
 
-        siteReferencePositions_ -= centreOfMass;
+        forAll(sites_, sI)
+        {
+            sites_[sI].siteReferencePosition() -= centreOfMass;
+        }
 
         diagTensor momOfInertia = diagTensor::zero;
 
-        forAll(siteReferencePositions_, i)
+        forAll(sites_, sI)
         {
-            const vector& p(siteReferencePositions_[i]);
+            const vector& p(sites_[sI].siteReferencePosition());
 
             momOfInertia +=
-                siteMasses_[i]*diagTensor(0, p.x()*p.x(), p.x()*p.x());
+                sites_[sI].siteMass()*diagTensor(0, p.x()*p.x(), p.x()*p.x());
         }
 
         momentOfInertia_ = diagTensor
@@ -137,11 +214,11 @@ inline Foam::polyatomic::constantProperties::constantProperties
 
         tensor momOfInertia(tensor::zero);
 
-        forAll(siteReferencePositions_, i)
+        forAll(sites_, sI)
         {
-            const vector& p(siteReferencePositions_[i]);
+            const vector& p(sites_[sI].siteReferencePosition());
 
-            momOfInertia += siteMasses_[i]*tensor
+            momOfInertia += sites_[sI].siteMass()*tensor
             (
                 p.y()*p.y() + p.z()*p.z(), -p.x()*p.y(), -p.x()*p.z(),
                 -p.y()*p.x(), p.x()*p.x() + p.z()*p.z(), -p.y()*p.z(),
@@ -152,8 +229,8 @@ inline Foam::polyatomic::constantProperties::constantProperties
         if (eigenValues(momOfInertia).x() < VSMALL)
         {
             FatalErrorIn("polyatomic::constantProperties::constantProperties")
-                << "An eigenvalue of the inertia tensor is zero, the polyatomic "
-                << dict.name() << " is not a valid 6DOF shape."
+                << "An eigenvalue of the inertia tensor is zero, the "
+                << "polyatomic " << dict.name() << " is not a valid 6DOF shape."
                 << nl << abort(FatalError);
         }
 
@@ -172,7 +249,11 @@ inline Foam::polyatomic::constantProperties::constantProperties
 
         // Transform the site positions
 
-        siteReferencePositions_ = (Q & siteReferencePositions_);
+        forAll(sites_, sI)
+        {
+            sites_[sI].siteReferencePosition() =
+                (Q & sites_[sI].siteReferencePosition());
+        }
 
         // Recalculating the moment of inertia with the new site positions
 
@@ -181,25 +262,29 @@ inline Foam::polyatomic::constantProperties::constantProperties
 
         centreOfMass = vector::zero;
 
-        forAll(siteReferencePositions_, i)
+        forAll(sites_, sI)
         {
-            centreOfMass += siteReferencePositions_[i]*siteMasses_[i];
+            centreOfMass +=
+                sites_[sI].siteReferencePosition()*sites_[sI].siteMass();
         }
 
         centreOfMass /= mass_;
 
-        siteReferencePositions_ -= centreOfMass;
+        forAll(sites_, sI)
+        {
+            sites_[sI].siteReferencePosition() -= centreOfMass;
+        }
 
         // Calculate the moment of inertia in the principle component
         // reference frame
 
         momOfInertia = tensor::zero;
 
-        forAll(siteReferencePositions_, i)
+        forAll(sites_, sI)
         {
-            const vector& p(siteReferencePositions_[i]);
+            const vector& p(sites_[sI].siteReferencePosition());
 
-            momOfInertia += siteMasses_[i]*tensor
+            momOfInertia += sites_[sI].siteMass()*tensor
             (
                 p.y()*p.y() + p.z()*p.z(), -p.x()*p.y(), -p.x()*p.z(),
                 -p.y()*p.x(), p.x()*p.x() + p.z()*p.z(), -p.y()*p.z(),
@@ -256,62 +341,29 @@ inline Foam::polyatomic::polyatomic
 
 // * * * * * * * constantProperties Private Member Functions * * * * * * * * //
 
-inline void Foam::polyatomic::constantProperties::checkSiteListSizes() const
-{
-    if
-    (
-        siteIds_.size() != siteReferencePositions_.size()
-     || siteIds_.size() != siteCharges_.size()
-    )
-    {
-        FatalErrorIn("polyatomic::constantProperties::checkSiteListSizes")
-            << "Sizes of site id, charge and "
-            << "referencePositions are not the same. "
-            << nl << abort(FatalError);
-    }
-}
-
-
-inline void Foam::polyatomic::constantProperties::setInteracionSiteBools
-(
-    const List<word>& siteIds,
-    const List<word>& pairPotSiteIds
-)
-{
-    pairPotentialSites_.setSize(siteIds_.size());
-
-    electrostaticSites_.setSize(siteIds_.size());
-
-    forAll(siteIds_, i)
-    {
-        const word& id(siteIds[i]);
-
-        pairPotentialSites_[i] = (findIndex(pairPotSiteIds, id) > -1);
-
-        electrostaticSites_[i] = (mag(siteCharges_[i]) > VSMALL);
-    }
-}
-
-
 inline bool Foam::polyatomic::constantProperties::linearMoleculeTest() const
 {
-    if (siteIds_.size() == 2)
+    if (sites_.size() == 2)
     {
         return true;
     }
 
-    vector refDir = siteReferencePositions_[1] - siteReferencePositions_[0];
+    vector refDir =
+        sites_[1].siteReferencePosition()
+      - sites_[0].siteReferencePosition();
 
     refDir /= mag(refDir);
 
     for
     (
         label i = 2;
-        i < siteReferencePositions_.size();
+        i < sites_.size();
         i++
     )
     {
-        vector dir = siteReferencePositions_[i] - siteReferencePositions_[i-1];
+        vector dir =
+            sites_[i].siteReferencePosition()
+          - sites_[i - 1].siteReferencePosition();
 
         dir /= mag(dir);
 
@@ -327,90 +379,24 @@ inline bool Foam::polyatomic::constantProperties::linearMoleculeTest() const
 
 // * * * * * * * constantProperties Member Functions * * * * * * * * * * * * //
 
-inline const Foam::Field<Foam::vector>&
-Foam::polyatomic::constantProperties::siteReferencePositions() const
+inline const Foam::List<Foam::constPropSite>&
+Foam::polyatomic::constantProperties::sites() const
 {
-    return siteReferencePositions_;
-}
-
-
-inline const Foam::List<Foam::scalar>&
-Foam::polyatomic::constantProperties::siteMasses() const
-{
-    return siteMasses_;
-}
-
-
-inline const Foam::List<Foam::scalar>&
-Foam::polyatomic::constantProperties::siteCharges() const
-{
-    return siteCharges_;
+    return sites_;
 }
 
 
 inline const Foam::List<Foam::label>&
-Foam::polyatomic::constantProperties::siteIds() const
+Foam::polyatomic::constantProperties::pairPotSites() const
 {
-    return siteIds_;
+    return pairPotSites_;
 }
 
 
-inline Foam::List<Foam::label>&
-Foam::polyatomic::constantProperties::siteIds()
-{
-    return siteIds_;
-}
-
-
-inline const Foam::List<bool>&
-Foam::polyatomic::constantProperties::pairPotentialSites() const
-{
-    return pairPotentialSites_;
-}
-
-
-inline bool Foam::polyatomic::constantProperties::pairPotentialSite
-(
-    label sId
-) const
-{
-    label s = findIndex(siteIds_, sId);
-
-    if (s == -1)
-    {
-        FatalErrorIn("polyatomicI.H") << nl
-            << sId << " site not found."
-            << nl << abort(FatalError);
-    }
-
-    return pairPotentialSites_[s];
-}
-
-
-inline const Foam::List<bool>&
+inline const Foam::List<Foam::label>&
 Foam::polyatomic::constantProperties::electrostaticSites() const
 {
     return electrostaticSites_;
-}
-
-
-inline bool Foam::polyatomic::constantProperties::electrostaticSite
-(
-    label sId
-) const
-{
-    label s = findIndex(siteIds_, sId);
-
-    if (s == -1)
-    {
-        FatalErrorIn
-        (
-            "polyatomic::constantProperties::electrostaticSite(label)"
-        )   << sId << " site not found."
-            << nl << abort(FatalError);
-    }
-
-    return electrostaticSites_[s];
 }
 
 
@@ -433,7 +419,8 @@ inline bool Foam::polyatomic::constantProperties::pointMolecule() const
 }
 
 
-inline Foam::label Foam::polyatomic::constantProperties::degreesOfFreedom() const
+inline Foam::label
+Foam::polyatomic::constantProperties::degreesOfFreedom() const
 {
     if (linearMolecule())
     {
@@ -458,8 +445,7 @@ inline Foam::scalar Foam::polyatomic::constantProperties::mass() const
 
 inline Foam::label Foam::polyatomic::constantProperties::nSites() const
 {
-    return siteIds_.size();
-
+    return sites_.size();
 }
 
 

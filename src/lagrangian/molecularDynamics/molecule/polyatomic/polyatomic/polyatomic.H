@@ -41,6 +41,7 @@ SourceFiles
 #include "IOstream.H"
 #include "autoPtr.H"
 #include "diagTensor.H"
+#include "constPropSite.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -78,26 +79,22 @@ public:
     {
         // Private data
 
-            Field<vector> siteReferencePositions_;
+            //- Sites of mass, charge or interaction
+            List<constPropSite> sites_;
 
-            List<scalar> siteMasses_;
+            //- Which sites require electrostatic interactions
+            List<label> electrostaticSites_;
 
-            List<scalar> siteCharges_;
+            //- Which sites require pair interactions
+            List<label> pairPotSites_;
 
-            List<label> siteIds_;
-
-            List<bool> pairPotentialSites_;
-
-            List<bool> electrostaticSites_;
-
+            //- Moment of intertia (in principal axis configiration)
             diagTensor momentOfInertia_;
 
             scalar mass_;
 
 
         // Private Member Functions
-
-            void checkSiteListSizes() const;
 
             void setInteracionSiteBools
             (
@@ -113,27 +110,19 @@ public:
         inline constantProperties();
 
         //- Construct from dictionary
-        inline constantProperties(const dictionary& dict);
+        inline constantProperties
+        (
+            const dictionary& dict,
+            const labelList& siteIds
+        );
 
         // Member functions
 
-        inline const Field<vector>& siteReferencePositions() const;
+        inline const List<constPropSite>& sites() const;
 
-        inline const List<scalar>& siteMasses() const;
+        inline const List<label>& pairPotSites() const;
 
-        inline const List<scalar>& siteCharges() const;
-
-        inline const List<label>& siteIds() const;
-
-        inline List<label>& siteIds();
-
-        inline const List<bool>& pairPotentialSites() const;
-
-        inline bool pairPotentialSite(label sId) const;
-
-        inline const List<bool>& electrostaticSites() const;
-
-        inline bool electrostaticSite(label sId) const;
+        inline const List<label>& electrostaticSites() const;
 
         inline const diagTensor& momentOfInertia() const;
 
@@ -181,14 +170,22 @@ private:
 
     // Private data
 
+        //- Orientation, stored as the rotation tensor to transform
+        //  from the polyatomic to the global reference frame, i.e.:
+        //  globalVector = Q_ & bodyLocalVector
+        //  bodyLocalVector = Q_.T() & globalVector
         tensor Q_;
 
+        // Linear velocity of polyatomic
         vector v_;
 
+        // Total linear acceleration of polyatomic
         vector a_;
 
+        //- Angular momentum of polyatomic, in body local reference frame
         vector pi_;
 
+        //- Total torque on polyatomic, in body local reference frame
         vector tau_;
 
         vector specialPosition_;
@@ -197,6 +194,9 @@ private:
 
         // - r_ij f_ij, stress dyad
         tensor rf_;
+
+//         // - r_ij outer product f_ij: virial contribution
+//         tensor rDotf_;
 
         label special_;
 
