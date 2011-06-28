@@ -103,6 +103,19 @@ Foam::conformationSurfaces::conformationSurfaces
             surfaceSubDict.lookupOrDefault("baffleSurface", false)
         );
 
+        if (!baffleSurfaces_[surfI])
+        {
+            if (!allGeometry_[surfaces_[surfI]].hasVolumeType())
+            {
+                WarningIn("conformationSurfaces::conformationSurfaces(..)")
+                    << "Non-baffle surface "
+                    << allGeometry_[surfaces_[surfI]].name()
+                    << " does not allow inside/outside queries."
+                    << " This usually is an error." << endl;
+            }
+        }
+
+
         word featureMethod = surfaceSubDict.lookupOrDefault
         (
             "featureMethod",
@@ -231,6 +244,9 @@ Foam::conformationSurfaces::conformationSurfaces
         searchableSurface::UNKNOWN
     );
 
+
+    Info<< endl
+        << "Testing for locationInMesh " << locationInMesh_ << endl;
     forAll(surfaces_, s)
     {
         const searchableSurface& surface(allGeometry_[surfaces_[s]]);
@@ -248,6 +264,12 @@ Foam::conformationSurfaces::conformationSurfaces
             surface.getVolumeType(pts, vTypes);
 
             referenceVolumeTypes_[s] = vTypes[0];
+
+
+            Info<< "    is "
+                << searchableSurface::volumeTypeNames[referenceVolumeTypes_[s]]
+                << " surface " << surface.name()
+                << endl;
         }
     }
 }

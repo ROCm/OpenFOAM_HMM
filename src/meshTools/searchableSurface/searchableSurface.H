@@ -81,6 +81,8 @@ public:
             OUTSIDE = 3
         };
 
+        static const NamedEnum<volumeType, 4> volumeTypeNames;
+
 private:
 
     // Private data
@@ -88,7 +90,6 @@ private:
         const word name_;
 
         boundBox bounds_;
-
 
     // Private Member Functions
 
