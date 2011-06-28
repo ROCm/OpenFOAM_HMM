@@ -23,14 +23,14 @@ License
 
 \*----------------------------------------------------------------------------*/
 
-#include "moleculeCloud.H"
-#include "molecule.H"
+#include "polyatomicCloud.H"
+#include "polyatomic.H"
 #include "Random.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::tensor Foam::molecule::rotationTensorX(scalar phi) const
+Foam::tensor Foam::polyatomic::rotationTensorX(scalar phi) const
 {
     return tensor
     (
@@ -41,7 +41,7 @@ Foam::tensor Foam::molecule::rotationTensorX(scalar phi) const
 }
 
 
-Foam::tensor Foam::molecule::rotationTensorY(scalar phi) const
+Foam::tensor Foam::polyatomic::rotationTensorY(scalar phi) const
 {
     return tensor
     (
@@ -52,7 +52,7 @@ Foam::tensor Foam::molecule::rotationTensorY(scalar phi) const
 }
 
 
-Foam::tensor Foam::molecule::rotationTensorZ(scalar phi) const
+Foam::tensor Foam::polyatomic::rotationTensorZ(scalar phi) const
 {
     return tensor
     (
@@ -65,10 +65,15 @@ Foam::tensor Foam::molecule::rotationTensorZ(scalar phi) const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::molecule::move(molecule::trackingData& td, const scalar trackTime)
+bool Foam::polyatomic::move(polyatomic::trackingData& td, const scalar trackTime)
 {
     td.switchProcessor = false;
     td.keepParticle = true;
+
+    if (special_ != SPECIAL_FROZEN)
+    {
+        return td.keepParticle;
+    }
 
     const constantProperties& constProps(td.cloud().constProps(id_));
 
@@ -180,7 +185,7 @@ bool Foam::molecule::move(molecule::trackingData& td, const scalar trackTime)
     }
     else
     {
-        FatalErrorIn("molecule::move(trackingData&, const scalar)") << nl
+        FatalErrorIn("polyatomic::move(trackingData&, const scalar)") << nl
             << td.part() << " is an invalid part of the integration method."
             << abort(FatalError);
     }
@@ -189,7 +194,7 @@ bool Foam::molecule::move(molecule::trackingData& td, const scalar trackTime)
 }
 
 
-void Foam::molecule::transformProperties(const tensor& T)
+void Foam::polyatomic::transformProperties(const tensor& T)
 {
     particle::transformProperties(T);
 
@@ -211,7 +216,7 @@ void Foam::molecule::transformProperties(const tensor& T)
 }
 
 
-void Foam::molecule::transformProperties(const vector& separation)
+void Foam::polyatomic::transformProperties(const vector& separation)
 {
     particle::transformProperties(separation);
 
@@ -224,13 +229,13 @@ void Foam::molecule::transformProperties(const vector& separation)
 }
 
 
-void Foam::molecule::setSitePositions(const constantProperties& constProps)
+void Foam::polyatomic::setSitePositions(const constantProperties& constProps)
 {
     sitePositions_ = position_ + (Q_ & constProps.siteReferencePositions());
 }
 
 
-void Foam::molecule::setSiteSizes(label size)
+void Foam::polyatomic::setSiteSizes(label size)
 {
     sitePositions_.setSize(size);
 
@@ -238,7 +243,7 @@ void Foam::molecule::setSiteSizes(label size)
 }
 
 
-bool Foam::molecule::hitPatch
+bool Foam::polyatomic::hitPatch
 (
     const polyPatch&,
     trackingData&,
@@ -251,7 +256,7 @@ bool Foam::molecule::hitPatch
 }
 
 
-void Foam::molecule::hitProcessorPatch
+void Foam::polyatomic::hitProcessorPatch
 (
     const processorPolyPatch&,
     trackingData& td
@@ -261,7 +266,7 @@ void Foam::molecule::hitProcessorPatch
 }
 
 
-void Foam::molecule::hitWallPatch
+void Foam::polyatomic::hitWallPatch
 (
     const wallPolyPatch& wpp,
     trackingData& td,
@@ -269,7 +274,7 @@ void Foam::molecule::hitWallPatch
 )
 {
     // Use of the normal from tetIs is not required as
-    // hasWallImpactDistance for a moleculeCloud is false.
+    // hasWallImpactDistance for a polyatomicCloud is false.
     vector nw = normal();
     nw /= mag(nw);
 
@@ -283,7 +288,7 @@ void Foam::molecule::hitWallPatch
 }
 
 
-void Foam::molecule::hitPatch
+void Foam::polyatomic::hitPatch
 (
     const polyPatch&,
     trackingData& td

@@ -23,7 +23,7 @@ License
 
 \*----------------------------------------------------------------------------*/
 
-#include "moleculeCloud.H"
+#include "polyatomicCloud.H"
 #include "fvMesh.H"
 #include "mathematicalConstants.H"
 
@@ -33,14 +33,14 @@ using namespace Foam::constant::mathematical;
 
 namespace Foam
 {
-    defineTemplateTypeNameAndDebug(Cloud<molecule>, 0);
+    defineTemplateTypeNameAndDebug(Cloud<polyatomic>, 0);
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::moleculeCloud::buildConstProps()
+void Foam::polyatomicCloud::buildConstProps()
 {
-    Info<< nl << "Reading moleculeProperties dictionary." << endl;
+    Info<< nl << "Reading polyatomicProperties dictionary." << endl;
 
     const List<word>& idList(pot_.idList());
 
@@ -48,11 +48,11 @@ void Foam::moleculeCloud::buildConstProps()
 
     const List<word>& siteIdList(pot_.siteIdList());
 
-    IOdictionary moleculePropertiesDict
+    IOdictionary polyatomicPropertiesDict
     (
         IOobject
         (
-            "moleculeProperties",
+            "polyatomicProperties",
             mesh_.time().constant(),
             mesh_,
             IOobject::MUST_READ_IF_MODIFIED,
@@ -64,7 +64,7 @@ void Foam::moleculeCloud::buildConstProps()
     forAll(idList, i)
     {
         const word& id = idList[i];
-        const dictionary& molDict = moleculePropertiesDict.subDict(id);
+        const dictionary& molDict = polyatomicPropertiesDict.subDict(id);
 
         List<word> siteIdNames = molDict.lookup("siteIds");
 
@@ -78,26 +78,26 @@ void Foam::moleculeCloud::buildConstProps()
 
             if (siteIds[sI] == -1)
             {
-                FatalErrorIn("moleculeCloud::buildConstProps()")
+                FatalErrorIn("polyatomicCloud::buildConstProps()")
                     << siteId << " site not found."
                     << nl << abort(FatalError);
             }
         }
 
-        molecule::constantProperties& constProp = constPropList_[i];
+        polyatomic::constantProperties& constProp = constPropList_[i];
 
-        constProp = molecule::constantProperties(molDict);
+        constProp = polyatomic::constantProperties(molDict);
 
         constProp.siteIds() = siteIds;
     }
 }
 
 
-void Foam::moleculeCloud::setSiteSizesAndPositions()
+void Foam::polyatomicCloud::setSiteSizesAndPositions()
 {
-    forAllIter(moleculeCloud, *this, mol)
+    forAllIter(polyatomicCloud, *this, mol)
     {
-        const molecule::constantProperties& cP = constProps(mol().id());
+        const polyatomic::constantProperties& cP = constProps(mol().id());
 
         mol().setSiteSizes(cP.nSites());
 
@@ -106,14 +106,14 @@ void Foam::moleculeCloud::setSiteSizesAndPositions()
 }
 
 
-void Foam::moleculeCloud::buildCellOccupancy()
+void Foam::polyatomicCloud::buildCellOccupancy()
 {
     forAll(cellOccupancy_, cO)
     {
         cellOccupancy_[cO].clear();
     }
 
-    forAllIter(moleculeCloud, *this, mol)
+    forAllIter(polyatomicCloud, *this, mol)
     {
         cellOccupancy_[mol().cell()].append(&mol());
     }
@@ -125,15 +125,15 @@ void Foam::moleculeCloud::buildCellOccupancy()
 }
 
 
-void Foam::moleculeCloud::calculatePairForce()
+void Foam::polyatomicCloud::calculatePairForce()
 {
     PstreamBuffers pBufs(Pstream::nonBlocking);
 
     // Start sending referred data
     il_.sendReferredData(cellOccupancy(), pBufs);
 
-    molecule* molI = NULL;
-    molecule* molJ = NULL;
+    polyatomic* molI = NULL;
+    polyatomic* molJ = NULL;
 
     {
         // Real-Real interactions
@@ -148,7 +148,7 @@ void Foam::moleculeCloud::calculatePairForce()
 
                 forAll(dil[d], interactingCells)
                 {
-                    List<molecule*> cellJ =
+                    List<polyatomic*> cellJ =
                         cellOccupancy_[dil[d][interactingCells]];
 
                     forAll(cellJ, cellJMols)
@@ -180,24 +180,24 @@ void Foam::moleculeCloud::calculatePairForce()
 
         const labelListList& ril = il_.ril();
 
-        List<IDLList<molecule> >& referredMols = il_.referredParticles();
+        List<IDLList<polyatomic> >& referredMols = il_.referredParticles();
 
         forAll(ril, r)
         {
             const List<label>& realCells = ril[r];
 
-            IDLList<molecule>& refMols = referredMols[r];
+            IDLList<polyatomic>& refMols = referredMols[r];
 
             forAllIter
             (
-                IDLList<molecule>,
+                IDLList<polyatomic>,
                 refMols,
                 refMol
             )
             {
                 forAll(realCells, rC)
                 {
-                    List<molecule*> cellI = cellOccupancy_[realCells[rC]];
+                    List<polyatomic*> cellI = cellOccupancy_[realCells[rC]];
 
                     forAll(cellI, cellIMols)
                     {
@@ -212,11 +212,11 @@ void Foam::moleculeCloud::calculatePairForce()
 }
 
 
-void Foam::moleculeCloud::calculateTetherForce()
+void Foam::polyatomicCloud::calculateTetherForce()
 {
     const tetherPotentialList& tetherPot(pot_.tetherPotentials());
 
-    forAllIter(moleculeCloud, *this, mol)
+    forAllIter(polyatomicCloud, *this, mol)
     {
         if (mol().tethered())
         {
@@ -239,16 +239,16 @@ void Foam::moleculeCloud::calculateTetherForce()
 }
 
 
-void Foam::moleculeCloud::calculateExternalForce()
+void Foam::polyatomicCloud::calculateExternalForce()
 {
-    forAllIter(moleculeCloud, *this, mol)
+    forAllIter(polyatomicCloud, *this, mol)
     {
         mol().a() += pot_.gravity();
     }
 }
 
 
-void Foam::moleculeCloud::removeHighEnergyOverlaps()
+void Foam::polyatomicCloud::removeHighEnergyOverlaps()
 {
     Info<< nl << "Removing high energy overlaps, limit = "
         << pot_.potentialEnergyLimit()
@@ -267,11 +267,11 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
 
     // Real-Real interaction
 
-    molecule* molI = NULL;
-    molecule* molJ = NULL;
+    polyatomic* molI = NULL;
+    polyatomic* molJ = NULL;
 
     {
-        DynamicList<molecule*> molsToDelete;
+        DynamicList<polyatomic*> molsToDelete;
 
         const labelListList& dil(il_.dil());
 
@@ -283,7 +283,7 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
 
                 forAll(dil[d], interactingCells)
                 {
-                    List<molecule*> cellJ =
+                    List<polyatomic*> cellJ =
                         cellOccupancy_[dil[d][interactingCells]];
 
                     forAll(cellJ, cellJMols)
@@ -369,19 +369,19 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
     // Real-Referred interaction
 
     {
-        DynamicList<molecule*> molsToDelete;
+        DynamicList<polyatomic*> molsToDelete;
 
         const labelListList& ril(il_.ril());
 
-        List<IDLList<molecule> >& referredMols = il_.referredParticles();
+        List<IDLList<polyatomic> >& referredMols = il_.referredParticles();
 
         forAll(ril, r)
         {
-            IDLList<molecule>& refMols = referredMols[r];
+            IDLList<polyatomic>& refMols = referredMols[r];
 
             forAllIter
             (
-                IDLList<molecule>,
+                IDLList<polyatomic>,
                 refMols,
                 refMol
             )
@@ -394,7 +394,7 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
                 {
                     label cellI = realCells[rC];
 
-                    List<molecule*> cellIMols = cellOccupancy_[cellI];
+                    List<polyatomic*> cellIMols = cellOccupancy_[cellI];
 
                     forAll(cellIMols, cIM)
                     {
@@ -423,7 +423,7 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
                              == findIndex(pot_.removalOrder(), idJ)
                             )
                             {
-                                // Remove one of the molecules
+                                // Remove one of the polyatomics
                                 // arbitrarily, assuring that a
                                 // consistent decision is made for
                                 // both real-referred pairs.
@@ -463,24 +463,24 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
         reduce(molsRemoved, sumOp<label>());
     }
 
-    Info<< tab << molsRemoved << " molecules removed" << endl;
+    Info<< tab << molsRemoved << " polyatomics removed" << endl;
 }
 
 
-void Foam::moleculeCloud::initialiseMolecules
+void Foam::polyatomicCloud::initialiseMolecules
 (
     const IOdictionary& mdInitialiseDict
 )
 {
     Info<< nl
-        << "Initialising molecules in each zone specified in mdInitialiseDict."
+        << "Initialising polyatomics in each zone specified in mdInitialiseDict."
         << endl;
 
     const cellZoneMesh& cellZones = mesh_.cellZones();
 
     if (!cellZones.size())
     {
-        FatalErrorIn("void Foam::moleculeCloud::initialiseMolecules")
+        FatalErrorIn("void Foam::polyatomicCloud::initialiseMolecules")
             << "No cellZones found in the mesh."
             << abort(FatalError);
     }
@@ -520,7 +520,7 @@ void Foam::moleculeCloud::initialiseMolecules
 
                 if (latticeIds.size() != latticePositions.size())
                 {
-                    FatalErrorIn("Foam::moleculeCloud::initialiseMolecules")
+                    FatalErrorIn("Foam::polyatomicCloud::initialiseMolecules")
                         << "latticeIds and latticePositions must be the same "
                         << " size." << nl
                         << abort(FatalError);
@@ -542,7 +542,7 @@ void Foam::moleculeCloud::initialiseMolecules
 
                     if (numberDensity < VSMALL)
                     {
-                        WarningIn("moleculeCloud::initialiseMolecules")
+                        WarningIn("polyatomicCloud::initialiseMolecules")
                             << "numberDensity too small, not filling zone "
                             << zone.name() << endl;
 
@@ -563,7 +563,7 @@ void Foam::moleculeCloud::initialiseMolecules
                     {
                         label id = findIndex(pot_.idList(), latticeIds[i]);
 
-                        const molecule::constantProperties& cP(constProps(id));
+                        const polyatomic::constantProperties& cP(constProps(id));
 
                         unitCellMass += cP.mass();
                     }
@@ -575,7 +575,7 @@ void Foam::moleculeCloud::initialiseMolecules
 
                     if (massDensity < VSMALL)
                     {
-                        WarningIn("moleculeCloud::initialiseMolecules")
+                        WarningIn("polyatomicCloud::initialiseMolecules")
                             << "massDensity too small, not filling zone "
                             << zone.name() << endl;
 
@@ -591,7 +591,7 @@ void Foam::moleculeCloud::initialiseMolecules
                 }
                 else
                 {
-                    FatalErrorIn("Foam::moleculeCloud::initialiseMolecules")
+                    FatalErrorIn("Foam::polyatomicCloud::initialiseMolecules")
                         << "massDensity or numberDensity not specified " << nl
                         << abort(FatalError);
                 }
@@ -686,8 +686,8 @@ void Foam::moleculeCloud::initialiseMolecules
 
                 anchor += (R & (latticeCellShape & latticeAnchor));
 
-                // Continue trying to place molecules as long as at
-                // least one molecule is placed in each iteration.
+                // Continue trying to place polyatomics as long as at
+                // least one polyatomic is placed in each iteration.
                 // The "|| totalZoneMols == 0" condition means that the
                 // algorithm will continue if the origin is outside the
                 // zone.
@@ -709,7 +709,7 @@ void Foam::moleculeCloud::initialiseMolecules
                     bool partOfLayerInBounds = false;
 
                     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                    // start of placement of molecules
+                    // start of placement of polyatomics
                     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
                     if (n == 0)
@@ -949,7 +949,7 @@ void Foam::moleculeCloud::initialiseMolecules
                     }
 
                     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                    // end of placement of molecules
+                    // end of placement of polyatomics
                     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
                     if
@@ -958,10 +958,10 @@ void Foam::moleculeCloud::initialiseMolecules
                      && !partOfLayerInBounds
                     )
                     {
-                        WarningIn("Foam::moleculeCloud::initialiseMolecules()")
+                        WarningIn("Foam::polyatomicCloud::initialiseMolecules()")
                             << "A whole layer of unit cells was placed "
                             << "outside the bounds of the mesh, but no "
-                            << "molecules have been placed in zone '"
+                            << "polyatomics have been placed in zone '"
                             << zone.name()
                             << "'.  This is likely to be because the zone "
                             << "has few cells ("
@@ -987,7 +987,7 @@ void Foam::moleculeCloud::initialiseMolecules
 }
 
 
-void Foam::moleculeCloud::createMolecule
+void Foam::polyatomicCloud::createMolecule
 (
     const point& position,
     label cell,
@@ -1006,7 +1006,7 @@ void Foam::moleculeCloud::createMolecule
 
     if (cell == -1)
     {
-        FatalErrorIn("Foam::moleculeCloud::createMolecule")
+        FatalErrorIn("Foam::polyatomicCloud::createMolecule")
             << "Position specified does not correspond to a mesh cell." << nl
             << abort(FatalError);
     }
@@ -1019,10 +1019,10 @@ void Foam::moleculeCloud::createMolecule
     {
         specialPosition = position;
 
-        special = molecule::SPECIAL_TETHERED;
+        special = polyatomic::SPECIAL_TETHERED;
     }
 
-    const molecule::constantProperties& cP(constProps(id));
+    const polyatomic::constantProperties& cP(constProps(id));
 
     vector v = equipartitionLinearVelocity(temperature, cP.mass());
 
@@ -1058,7 +1058,7 @@ void Foam::moleculeCloud::createMolecule
 
     addParticle
     (
-        new molecule
+        new polyatomic
         (
             mesh_,
             position,
@@ -1079,11 +1079,11 @@ void Foam::moleculeCloud::createMolecule
 }
 
 
-Foam::label Foam::moleculeCloud::nSites() const
+Foam::label Foam::polyatomicCloud::nSites() const
 {
     label n = 0;
 
-    forAllConstIter(moleculeCloud, *this, mol)
+    forAllConstIter(polyatomicCloud, *this, mol)
     {
         n += constProps(mol().id()).nSites();
     }
@@ -1094,14 +1094,14 @@ Foam::label Foam::moleculeCloud::nSites() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::moleculeCloud::moleculeCloud
+Foam::polyatomicCloud::polyatomicCloud
 (
     const polyMesh& mesh,
     const potential& pot,
     bool readFields
 )
 :
-    Cloud<molecule>(mesh, "moleculeCloud", false),
+    Cloud<polyatomic>(mesh, "polyatomicCloud", false),
     mesh_(mesh),
     pot_(pot),
     cellOccupancy_(mesh_.nCells()),
@@ -1111,7 +1111,7 @@ Foam::moleculeCloud::moleculeCloud
 {
     if (readFields)
     {
-        molecule::readFields(*this);
+        polyatomic::readFields(*this);
     }
 
     buildConstProps();
@@ -1124,7 +1124,7 @@ Foam::moleculeCloud::moleculeCloud
 }
 
 
-Foam::moleculeCloud::moleculeCloud
+Foam::polyatomicCloud::polyatomicCloud
 (
     const polyMesh& mesh,
     const potential& pot,
@@ -1132,7 +1132,7 @@ Foam::moleculeCloud::moleculeCloud
     bool readFields
 )
 :
-    Cloud<molecule>(mesh, "moleculeCloud", false),
+    Cloud<polyatomic>(mesh, "polyatomicCloud", false),
     mesh_(mesh),
     pot_(pot),
     il_(mesh_, 0.0, false),
@@ -1141,7 +1141,7 @@ Foam::moleculeCloud::moleculeCloud
 {
     if (readFields)
     {
-        molecule::readFields(*this);
+        polyatomic::readFields(*this);
     }
 
     clear();
@@ -1154,30 +1154,30 @@ Foam::moleculeCloud::moleculeCloud
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::moleculeCloud::evolve()
+void Foam::polyatomicCloud::evolve()
 {
-    molecule::trackingData td0(*this, 0);
-    Cloud<molecule>::move(td0, mesh_.time().deltaTValue());
+    polyatomic::trackingData td0(*this, 0);
+    Cloud<polyatomic>::move(td0, mesh_.time().deltaTValue());
 
-    molecule::trackingData td1(*this, 1);
-    Cloud<molecule>::move(td1, mesh_.time().deltaTValue());
+    polyatomic::trackingData td1(*this, 1);
+    Cloud<polyatomic>::move(td1, mesh_.time().deltaTValue());
 
-    molecule::trackingData td2(*this, 2);
-    Cloud<molecule>::move(td2, mesh_.time().deltaTValue());
+    polyatomic::trackingData td2(*this, 2);
+    Cloud<polyatomic>::move(td2, mesh_.time().deltaTValue());
 
     calculateForce();
 
-    molecule::trackingData td3(*this, 3);
-    Cloud<molecule>::move(td3, mesh_.time().deltaTValue());
+    polyatomic::trackingData td3(*this, 3);
+    Cloud<polyatomic>::move(td3, mesh_.time().deltaTValue());
 }
 
 
-void Foam::moleculeCloud::calculateForce()
+void Foam::polyatomicCloud::calculateForce()
 {
     buildCellOccupancy();
 
     // Set accumulated quantities to zero
-    forAllIter(moleculeCloud, *this, mol)
+    forAllIter(polyatomicCloud, *this, mol)
     {
         mol().siteForces() = vector::zero;
 
@@ -1194,7 +1194,7 @@ void Foam::moleculeCloud::calculateForce()
 }
 
 
-void Foam::moleculeCloud::applyConstraintsAndThermostats
+void Foam::polyatomicCloud::applyConstraintsAndThermostats
 (
     const scalar targetTemperature,
     const scalar measuredTemperature
@@ -1214,7 +1214,7 @@ void Foam::moleculeCloud::applyConstraintsAndThermostats
         << "----------------------------------------"
         << endl;
 
-    forAllIter(moleculeCloud, *this, mol)
+    forAllIter(polyatomicCloud, *this, mol)
     {
         mol().v() *= temperatureCorrectionFactor;
 
@@ -1223,15 +1223,15 @@ void Foam::moleculeCloud::applyConstraintsAndThermostats
 }
 
 
-void Foam::moleculeCloud::writeXYZ(const fileName& fName) const
+void Foam::polyatomicCloud::writeXYZ(const fileName& fName) const
 {
     OFstream os(fName);
 
-    os  << nSites() << nl << "moleculeCloud site positions in angstroms" << nl;
+    os  << nSites() << nl << "polyatomicCloud site positions in angstroms" << nl;
 
-    forAllConstIter(moleculeCloud, *this, mol)
+    forAllConstIter(polyatomicCloud, *this, mol)
     {
-        const molecule::constantProperties& cP = constProps(mol().id());
+        const polyatomic::constantProperties& cP = constProps(mol().id());
 
         forAll(mol().sitePositions(), i)
         {

@@ -25,7 +25,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::molecule::constantProperties::constantProperties()
+inline Foam::polyatomic::constantProperties::constantProperties()
 :
     siteReferencePositions_(Field<vector>(0)),
     siteMasses_(List<scalar>(0)),
@@ -38,7 +38,7 @@ inline Foam::molecule::constantProperties::constantProperties()
 {}
 
 
-inline Foam::molecule::constantProperties::constantProperties
+inline Foam::polyatomic::constantProperties::constantProperties
 (
     const dictionary& dict
 )
@@ -78,7 +78,7 @@ inline Foam::molecule::constantProperties::constantProperties
 
     if (siteIds_.size() == 1)
     {
-        // Single site molecule - no rotational motion.
+        // Single site polyatomic - no rotational motion.
 
         siteReferencePositions_[0] = vector::zero;
 
@@ -86,9 +86,9 @@ inline Foam::molecule::constantProperties::constantProperties
     }
     else if (linearMoleculeTest())
     {
-        // Linear molecule.
+        // Linear polyatomic.
 
-        Info<< nl << "Linear molecule." << endl;
+        Info<< nl << "Linear polyatomic." << endl;
 
         vector dir = siteReferencePositions_[1] - siteReferencePositions_[0];
 
@@ -131,7 +131,7 @@ inline Foam::molecule::constantProperties::constantProperties
     }
     else
     {
-        // Fully 6DOF molecule
+        // Fully 6DOF polyatomic
 
         // Calculate the inertia tensor in the current orientation
 
@@ -151,8 +151,8 @@ inline Foam::molecule::constantProperties::constantProperties
 
         if (eigenValues(momOfInertia).x() < VSMALL)
         {
-            FatalErrorIn("molecule::constantProperties::constantProperties")
-                << "An eigenvalue of the inertia tensor is zero, the molecule "
+            FatalErrorIn("polyatomic::constantProperties::constantProperties")
+                << "An eigenvalue of the inertia tensor is zero, the polyatomic "
                 << dict.name() << " is not a valid 6DOF shape."
                 << nl << abort(FatalError);
         }
@@ -217,7 +217,7 @@ inline Foam::molecule::constantProperties::constantProperties
 }
 
 
-inline Foam::molecule::molecule
+inline Foam::polyatomic::polyatomic
 (
     const polyMesh& mesh,
     const vector& position,
@@ -256,7 +256,7 @@ inline Foam::molecule::molecule
 
 // * * * * * * * constantProperties Private Member Functions * * * * * * * * //
 
-inline void Foam::molecule::constantProperties::checkSiteListSizes() const
+inline void Foam::polyatomic::constantProperties::checkSiteListSizes() const
 {
     if
     (
@@ -264,7 +264,7 @@ inline void Foam::molecule::constantProperties::checkSiteListSizes() const
      || siteIds_.size() != siteCharges_.size()
     )
     {
-        FatalErrorIn("molecule::constantProperties::checkSiteListSizes")
+        FatalErrorIn("polyatomic::constantProperties::checkSiteListSizes")
             << "Sizes of site id, charge and "
             << "referencePositions are not the same. "
             << nl << abort(FatalError);
@@ -272,7 +272,7 @@ inline void Foam::molecule::constantProperties::checkSiteListSizes() const
 }
 
 
-inline void Foam::molecule::constantProperties::setInteracionSiteBools
+inline void Foam::polyatomic::constantProperties::setInteracionSiteBools
 (
     const List<word>& siteIds,
     const List<word>& pairPotSiteIds
@@ -293,7 +293,7 @@ inline void Foam::molecule::constantProperties::setInteracionSiteBools
 }
 
 
-inline bool Foam::molecule::constantProperties::linearMoleculeTest() const
+inline bool Foam::polyatomic::constantProperties::linearMoleculeTest() const
 {
     if (siteIds_.size() == 2)
     {
@@ -328,48 +328,48 @@ inline bool Foam::molecule::constantProperties::linearMoleculeTest() const
 // * * * * * * * constantProperties Member Functions * * * * * * * * * * * * //
 
 inline const Foam::Field<Foam::vector>&
-Foam::molecule::constantProperties::siteReferencePositions() const
+Foam::polyatomic::constantProperties::siteReferencePositions() const
 {
     return siteReferencePositions_;
 }
 
 
 inline const Foam::List<Foam::scalar>&
-Foam::molecule::constantProperties::siteMasses() const
+Foam::polyatomic::constantProperties::siteMasses() const
 {
     return siteMasses_;
 }
 
 
 inline const Foam::List<Foam::scalar>&
-Foam::molecule::constantProperties::siteCharges() const
+Foam::polyatomic::constantProperties::siteCharges() const
 {
     return siteCharges_;
 }
 
 
 inline const Foam::List<Foam::label>&
-Foam::molecule::constantProperties::siteIds() const
+Foam::polyatomic::constantProperties::siteIds() const
 {
     return siteIds_;
 }
 
 
 inline Foam::List<Foam::label>&
-Foam::molecule::constantProperties::siteIds()
+Foam::polyatomic::constantProperties::siteIds()
 {
     return siteIds_;
 }
 
 
 inline const Foam::List<bool>&
-Foam::molecule::constantProperties::pairPotentialSites() const
+Foam::polyatomic::constantProperties::pairPotentialSites() const
 {
     return pairPotentialSites_;
 }
 
 
-inline bool Foam::molecule::constantProperties::pairPotentialSite
+inline bool Foam::polyatomic::constantProperties::pairPotentialSite
 (
     label sId
 ) const
@@ -378,7 +378,7 @@ inline bool Foam::molecule::constantProperties::pairPotentialSite
 
     if (s == -1)
     {
-        FatalErrorIn("moleculeI.H") << nl
+        FatalErrorIn("polyatomicI.H") << nl
             << sId << " site not found."
             << nl << abort(FatalError);
     }
@@ -388,13 +388,13 @@ inline bool Foam::molecule::constantProperties::pairPotentialSite
 
 
 inline const Foam::List<bool>&
-Foam::molecule::constantProperties::electrostaticSites() const
+Foam::polyatomic::constantProperties::electrostaticSites() const
 {
     return electrostaticSites_;
 }
 
 
-inline bool Foam::molecule::constantProperties::electrostaticSite
+inline bool Foam::polyatomic::constantProperties::electrostaticSite
 (
     label sId
 ) const
@@ -405,7 +405,7 @@ inline bool Foam::molecule::constantProperties::electrostaticSite
     {
         FatalErrorIn
         (
-            "molecule::constantProperties::electrostaticSite(label)"
+            "polyatomic::constantProperties::electrostaticSite(label)"
         )   << sId << " site not found."
             << nl << abort(FatalError);
     }
@@ -415,25 +415,25 @@ inline bool Foam::molecule::constantProperties::electrostaticSite
 
 
 inline const Foam::diagTensor&
-Foam::molecule::constantProperties::momentOfInertia() const
+Foam::polyatomic::constantProperties::momentOfInertia() const
 {
     return momentOfInertia_;
 }
 
 
-inline bool Foam::molecule::constantProperties::linearMolecule() const
+inline bool Foam::polyatomic::constantProperties::linearMolecule() const
 {
     return ((momentOfInertia_.xx() < 0) && (momentOfInertia_.yy() > 0));
 }
 
 
-inline bool Foam::molecule::constantProperties::pointMolecule() const
+inline bool Foam::polyatomic::constantProperties::pointMolecule() const
 {
     return (momentOfInertia_.zz() < 0);
 }
 
 
-inline Foam::label Foam::molecule::constantProperties::degreesOfFreedom() const
+inline Foam::label Foam::polyatomic::constantProperties::degreesOfFreedom() const
 {
     if (linearMolecule())
     {
@@ -450,154 +450,154 @@ inline Foam::label Foam::molecule::constantProperties::degreesOfFreedom() const
 }
 
 
-inline Foam::scalar Foam::molecule::constantProperties::mass() const
+inline Foam::scalar Foam::polyatomic::constantProperties::mass() const
 {
     return mass_;
 }
 
 
-inline Foam::label Foam::molecule::constantProperties::nSites() const
+inline Foam::label Foam::polyatomic::constantProperties::nSites() const
 {
     return siteIds_.size();
 
 }
 
 
-// * * * * * * * * * * * * molecule Member Functions * * * * * * * * * * * * //
+// * * * * * * * * * * * * polyatomic Member Functions * * * * * * * * * * * * //
 
-inline const Foam::tensor& Foam::molecule::Q() const
+inline const Foam::tensor& Foam::polyatomic::Q() const
 {
     return Q_;
 }
 
 
-inline Foam::tensor& Foam::molecule::Q()
+inline Foam::tensor& Foam::polyatomic::Q()
 {
     return Q_;
 }
 
 
-inline const Foam::vector& Foam::molecule::v() const
+inline const Foam::vector& Foam::polyatomic::v() const
 {
     return v_;
 }
 
 
-inline Foam::vector& Foam::molecule::v()
+inline Foam::vector& Foam::polyatomic::v()
 {
     return v_;
 }
 
 
-inline const Foam::vector& Foam::molecule::a() const
+inline const Foam::vector& Foam::polyatomic::a() const
 {
     return a_;
 }
 
 
-inline Foam::vector& Foam::molecule::a()
+inline Foam::vector& Foam::polyatomic::a()
 {
     return a_;
 }
 
 
-inline const Foam::vector& Foam::molecule::pi() const
+inline const Foam::vector& Foam::polyatomic::pi() const
 {
     return pi_;
 }
 
 
-inline Foam::vector& Foam::molecule::pi()
+inline Foam::vector& Foam::polyatomic::pi()
 {
     return pi_;
 }
 
 
-inline const Foam::vector& Foam::molecule::tau() const
+inline const Foam::vector& Foam::polyatomic::tau() const
 {
     return tau_;
 }
 
 
-inline Foam::vector& Foam::molecule::tau()
+inline Foam::vector& Foam::polyatomic::tau()
 {
     return tau_;
 }
 
 
-inline const Foam::List<Foam::vector>& Foam::molecule::siteForces() const
+inline const Foam::List<Foam::vector>& Foam::polyatomic::siteForces() const
 {
     return siteForces_;
 }
 
 
-inline Foam::List<Foam::vector>& Foam::molecule::siteForces()
+inline Foam::List<Foam::vector>& Foam::polyatomic::siteForces()
 {
     return siteForces_;
 }
 
 
-inline const Foam::List<Foam::vector>& Foam::molecule::sitePositions() const
+inline const Foam::List<Foam::vector>& Foam::polyatomic::sitePositions() const
 {
     return sitePositions_;
 }
 
 
-inline Foam::List<Foam::vector>& Foam::molecule::sitePositions()
+inline Foam::List<Foam::vector>& Foam::polyatomic::sitePositions()
 {
     return sitePositions_;
 }
 
 
-inline const Foam::vector& Foam::molecule::specialPosition() const
+inline const Foam::vector& Foam::polyatomic::specialPosition() const
 {
     return specialPosition_;
 }
 
 
-inline Foam::vector& Foam::molecule::specialPosition()
+inline Foam::vector& Foam::polyatomic::specialPosition()
 {
     return specialPosition_;
 }
 
 
-inline Foam::scalar Foam::molecule::potentialEnergy() const
+inline Foam::scalar Foam::polyatomic::potentialEnergy() const
 {
     return potentialEnergy_;
 }
 
 
-inline Foam::scalar& Foam::molecule::potentialEnergy()
+inline Foam::scalar& Foam::polyatomic::potentialEnergy()
 {
     return potentialEnergy_;
 }
 
 
-inline const Foam::tensor& Foam::molecule::rf() const
+inline const Foam::tensor& Foam::polyatomic::rf() const
 {
     return rf_;
 }
 
 
-inline Foam::tensor& Foam::molecule::rf()
+inline Foam::tensor& Foam::polyatomic::rf()
 {
     return rf_;
 }
 
 
-inline Foam::label Foam::molecule::special() const
+inline Foam::label Foam::polyatomic::special() const
 {
     return special_;
 }
 
 
-inline bool Foam::molecule::tethered() const
+inline bool Foam::polyatomic::tethered() const
 {
     return special_ == SPECIAL_TETHERED;
 }
 
 
-inline Foam::label Foam::molecule::id() const
+inline Foam::label Foam::polyatomic::id() const
 {
     return id_;
 }

@@ -23,13 +23,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "molecule.H"
+#include "polyatomic.H"
 #include "IOstreams.H"
-#include "moleculeCloud.H"
+#include "polyatomicCloud.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::molecule::molecule
+Foam::polyatomic::polyatomic
 (
     const polyMesh& mesh,
     Istream& is,
@@ -91,13 +91,13 @@ Foam::molecule::molecule
     // Check state of Istream
     is.check
     (
-        "Foam::molecule::molecule"
-        "(const Cloud<molecule>& cloud, Foam::Istream&), bool"
+        "Foam::polyatomic::polyatomic"
+        "(const Cloud<polyatomic>& cloud, Foam::Istream&), bool"
     );
 }
 
 
-void Foam::molecule::readFields(Cloud<molecule>& mC)
+void Foam::polyatomic::readFields(Cloud<polyatomic>& mC)
 {
     if (!mC.size())
     {
@@ -134,9 +134,9 @@ void Foam::molecule::readFields(Cloud<molecule>& mC)
     mC.checkFieldIOobject(mC, id);
 
     label i = 0;
-    forAllIter(moleculeCloud, mC, iter)
+    forAllIter(polyatomicCloud, mC, iter)
     {
-        molecule& mol = iter();
+        polyatomic& mol = iter();
 
         mol.Q_ = Q[i];
         mol.v_ = v[i];
@@ -151,7 +151,7 @@ void Foam::molecule::readFields(Cloud<molecule>& mC)
 }
 
 
-void Foam::molecule::writeFields(const Cloud<molecule>& mC)
+void Foam::polyatomic::writeFields(const Cloud<polyatomic>& mC)
 {
     particle::writeFields(mC);
 
@@ -203,9 +203,9 @@ void Foam::molecule::writeFields(const Cloud<molecule>& mC)
     );
 
     label i = 0;
-    forAllConstIter(moleculeCloud, mC, iter)
+    forAllConstIter(polyatomicCloud, mC, iter)
     {
-        const molecule& mol = iter();
+        const polyatomic& mol = iter();
 
         Q[i] = mol.Q_;
         v[i] = mol.v_;
@@ -244,13 +244,13 @@ void Foam::molecule::writeFields(const Cloud<molecule>& mC)
 
     Info<< "writeFields " << mC.name() << endl;
 
-    if (isA<moleculeCloud>(mC))
+    if (isA<polyatomicCloud>(mC))
     {
-        const moleculeCloud& m = dynamic_cast<const moleculeCloud&>(mC);
+        const polyatomicCloud& m = dynamic_cast<const polyatomicCloud&>(mC);
 
         m.writeXYZ
         (
-            m.mesh().time().timePath()/cloud::prefix/"moleculeCloud.xmol"
+            m.mesh().time().timePath()/cloud::prefix/"polyatomicCloud.xmol"
         );
     }
 }
@@ -258,7 +258,7 @@ void Foam::molecule::writeFields(const Cloud<molecule>& mC)
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const molecule& mol)
+Foam::Ostream& Foam::operator<<(Ostream& os, const polyatomic& mol)
 {
     if (os.format() == IOstream::ASCII)
     {
@@ -302,7 +302,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const molecule& mol)
     os.check
     (
         "Foam::Ostream& Foam::operator<<"
-        "(Foam::Ostream&, const Foam::molecule&)"
+        "(Foam::Ostream&, const Foam::polyatomic&)"
     );
 
     return os;

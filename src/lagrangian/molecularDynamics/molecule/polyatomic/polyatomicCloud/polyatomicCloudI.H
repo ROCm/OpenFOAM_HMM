@@ -29,10 +29,10 @@ using namespace Foam::constant;
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-inline void Foam::moleculeCloud::evaluatePair
+inline void Foam::polyatomicCloud::evaluatePair
 (
-    molecule& molI,
-    molecule& molJ
+    polyatomic& molI,
+    polyatomic& molJ
 )
 {
     const pairPotentialList& pairPot = pot_.pairPotentials();
@@ -43,9 +43,9 @@ inline void Foam::moleculeCloud::evaluatePair
 
     label idJ = molJ.id();
 
-    const molecule::constantProperties& constPropI(constProps(idI));
+    const polyatomic::constantProperties& constPropI(constProps(idI));
 
-    const molecule::constantProperties& constPropJ(constProps(idJ));
+    const polyatomic::constantProperties& constPropJ(constProps(idJ));
 
     List<label> siteIdsI = constPropI.siteIds();
 
@@ -152,10 +152,10 @@ inline void Foam::moleculeCloud::evaluatePair
 }
 
 
-inline bool Foam::moleculeCloud::evaluatePotentialLimit
+inline bool Foam::polyatomicCloud::evaluatePotentialLimit
 (
-    molecule& molI,
-    molecule& molJ
+    polyatomic& molI,
+    polyatomic& molJ
 ) const
 {
     const pairPotentialList& pairPot = pot_.pairPotentials();
@@ -166,9 +166,9 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
 
     label idJ = molJ.id();
 
-    const molecule::constantProperties& constPropI(constProps(idI));
+    const polyatomic::constantProperties& constPropI(constProps(idI));
 
-    const molecule::constantProperties& constPropJ(constProps(idJ));
+    const polyatomic::constantProperties& constPropJ(constProps(idJ));
 
     List<label> siteIdsI = constPropI.siteIds();
 
@@ -207,14 +207,14 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
 
                     if (rsIsJMag < SMALL)
                     {
-                        WarningIn("moleculeCloud::removeHighEnergyOverlaps()")
+                        WarningIn("polyatomicCloud::removeHighEnergyOverlaps()")
                             << "Molecule site pair closer than "
                             << SMALL
                             << ": mag separation = " << rsIsJMag
                             << ". These may have been placed on top of each"
                             << " other by a rounding error in mdInitialise in"
-                            << " parallel or a block filled with molecules"
-                            << " twice. Removing one of the molecules."
+                            << " parallel or a block filled with polyatomics"
+                            << " twice. Removing one of the polyatomics."
                             << endl;
 
                         return true;
@@ -256,14 +256,14 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
 
                     if (rsIsJMag < SMALL)
                     {
-                        WarningIn("moleculeCloud::removeHighEnergyOverlaps()")
+                        WarningIn("polyatomicCloud::removeHighEnergyOverlaps()")
                             << "Molecule site pair closer than "
                             << SMALL
                             << ": mag separation = " << rsIsJMag
                             << ". These may have been placed on top of each"
                             << " other by a rounding error in mdInitialise in"
-                            << " parallel or a block filled with molecules"
-                            << " twice. Removing one of the molecules."
+                            << " parallel or a block filled with polyatomics"
+                            << " twice. Removing one of the polyatomics."
                             << endl;
 
                         return true;
@@ -295,7 +295,7 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
 }
 
 
-inline Foam::vector Foam::moleculeCloud::equipartitionLinearVelocity
+inline Foam::vector Foam::polyatomicCloud::equipartitionLinearVelocity
 (
     scalar temperature,
     scalar mass
@@ -310,10 +310,10 @@ inline Foam::vector Foam::moleculeCloud::equipartitionLinearVelocity
 }
 
 
-inline Foam::vector Foam::moleculeCloud::equipartitionAngularMomentum
+inline Foam::vector Foam::polyatomicCloud::equipartitionAngularMomentum
 (
     scalar temperature,
-    const molecule::constantProperties& cP
+    const polyatomic::constantProperties& cP
 )
 {
     scalar sqrtKbT = sqrt(physicoChemical::k.value()*temperature);
@@ -341,47 +341,47 @@ inline Foam::vector Foam::moleculeCloud::equipartitionAngularMomentum
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::polyMesh& Foam::moleculeCloud::mesh() const
+inline const Foam::polyMesh& Foam::polyatomicCloud::mesh() const
 {
     return mesh_;
 }
 
 
-inline const Foam::potential& Foam::moleculeCloud::pot() const
+inline const Foam::potential& Foam::polyatomicCloud::pot() const
 {
     return pot_;
 }
 
 
-inline const Foam::List<Foam::DynamicList<Foam::molecule*> >&
-    Foam::moleculeCloud::cellOccupancy() const
+inline const Foam::List<Foam::DynamicList<Foam::polyatomic*> >&
+    Foam::polyatomicCloud::cellOccupancy() const
 {
     return cellOccupancy_;
 }
 
 
-inline const Foam::InteractionLists<Foam::molecule>&
-    Foam::moleculeCloud::il() const
+inline const Foam::InteractionLists<Foam::polyatomic>&
+    Foam::polyatomicCloud::il() const
 {
     return il_;
 }
 
 
-inline const Foam::List<Foam::molecule::constantProperties>
-    Foam::moleculeCloud::constProps() const
+inline const Foam::List<Foam::polyatomic::constantProperties>
+    Foam::polyatomicCloud::constProps() const
 {
     return constPropList_;
 }
 
 
-inline const Foam::molecule::constantProperties&
-    Foam::moleculeCloud::constProps(label id) const
+inline const Foam::polyatomic::constantProperties&
+    Foam::polyatomicCloud::constProps(label id) const
 {
     return constPropList_[id];
 }
 
 
-inline Foam::Random& Foam::moleculeCloud::rndGen()
+inline Foam::Random& Foam::polyatomicCloud::rndGen()
 {
     return rndGen_;
 }

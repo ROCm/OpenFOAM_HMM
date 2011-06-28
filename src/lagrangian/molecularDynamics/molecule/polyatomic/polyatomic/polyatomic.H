@@ -22,20 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::molecule
+    Foam::polyatomic
 
 Description
-    Foam::molecule
+    Foam::polyatomic
 
 SourceFiles
-    moleculeI.H
-    molecule.C
-    moleculeIO.C
+    polyatomicI.H
+    polyatomic.C
+    polyatomicIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef molecule_H
-#define molecule_H
+#ifndef polyatomic_H
+#define polyatomic_H
 
 #include "particle.H"
 #include "IOstream.H"
@@ -48,13 +48,13 @@ namespace Foam
 {
 
 // Class forward declarations
-class moleculeCloud;
+class polyatomicCloud;
 
 /*---------------------------------------------------------------------------*\
-                           Class molecule Declaration
+                           Class polyatomic Declaration
 \*---------------------------------------------------------------------------*/
 
-class molecule
+class polyatomic
 :
     public particle
 {
@@ -73,7 +73,7 @@ public:
         SPECIAL_USER     = 1
     };
 
-    //- Class to hold molecule constant properties
+    //- Class to hold polyatomic constant properties
     class constantProperties
     {
         // Private data
@@ -152,7 +152,7 @@ public:
     //- Class used to pass tracking data to the trackToFace function
     class trackingData
     :
-        public particle::TrackingData<moleculeCloud>
+        public particle::TrackingData<polyatomicCloud>
     {
         // label specifying which part of the integration algorithm is taking
         label part_;
@@ -162,9 +162,9 @@ public:
 
         // Constructors
 
-            trackingData(moleculeCloud& cloud, label part)
+            trackingData(polyatomicCloud& cloud, label part)
             :
-                particle::TrackingData<moleculeCloud>(cloud),
+                particle::TrackingData<polyatomicCloud>(cloud),
                 part_(part)
             {}
 
@@ -218,12 +218,12 @@ private:
 
 public:
 
-    friend class Cloud<molecule>;
+    friend class Cloud<polyatomic>;
 
     // Constructors
 
         //- Construct from components
-        inline molecule
+        inline polyatomic
         (
             const polyMesh& mesh,
             const vector& position,
@@ -242,7 +242,7 @@ public:
         );
 
         //- Construct from Istream
-        molecule
+        polyatomic
         (
             const polyMesh& mesh,
             Istream& is,
@@ -252,7 +252,7 @@ public:
         //- Construct and return a clone
         autoPtr<particle> clone() const
         {
-            return autoPtr<particle>(new molecule(*this));
+            return autoPtr<particle>(new polyatomic(*this));
         }
 
         //- Factory class to read-construct particles used for
@@ -268,9 +268,9 @@ public:
                 mesh_(mesh)
             {}
 
-            autoPtr<molecule> operator()(Istream& is) const
+            autoPtr<polyatomic> operator()(Istream& is) const
             {
-                return autoPtr<molecule>(new molecule(mesh_, is, true));
+                return autoPtr<polyatomic>(new polyatomic(mesh_, is, true));
             }
         };
 
@@ -367,14 +367,14 @@ public:
 
     // I-O
 
-        static void readFields(Cloud<molecule>& mC);
+        static void readFields(Cloud<polyatomic>& mC);
 
-        static void writeFields(const Cloud<molecule>& mC);
+        static void writeFields(const Cloud<polyatomic>& mC);
 
 
     // IOstream Operators
 
-        friend Ostream& operator<<(Ostream&, const molecule&);
+        friend Ostream& operator<<(Ostream&, const polyatomic&);
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -383,7 +383,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "moleculeI.H"
+#include "polyatomicI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

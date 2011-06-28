@@ -1,9 +1,8 @@
-reducedUnits/reducedUnits.C
-reducedUnits/reducedUnitsIO.C
+constPropSite/constPropSite.C
 
-molecule/molecule.C
-molecule/moleculeIO.C
+polyatomic/polyatomic/polyatomic.C
+polyatomic/polyatomic/polyatomicIO.C
 
-moleculeCloud/moleculeCloud.C
+polyatomic/polyatomicCloud/polyatomicCloud.C
 
 LIB = $(FOAM_LIBBIN)/libmolecule

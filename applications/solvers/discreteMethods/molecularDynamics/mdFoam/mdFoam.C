@@ -30,58 +30,24 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "md.H"
+#include "polyatomicCloud.H"
 
 int main(int argc, char *argv[])
 {
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
+    #include "createFields.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    Info<< "\nReading field U\n" << endl;
-    volVectorField U
-    (
-        IOobject
-        (
-            "U",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
-
-    potential pot(mesh);
-
-    moleculeCloud molecules(mesh, pot);
-
-    #include "temperatureAndPressureVariables.H"
-
-    label nAveragingSteps = 0;
 
     Info<< "\nStarting time loop\n" << endl;
 
     while (runTime.loop())
     {
-        nAveragingSteps++;
-
         Info<< "Time = " << runTime.timeName() << endl;
 
         molecules.evolve();
-
-        #include "meanMomentumEnergyAndNMols.H"
-
-        #include "temperatureAndPressure.H"
-
-        runTime.write();
-
-        if (runTime.outputTime())
-        {
-            nAveragingSteps = 0;
-        }
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

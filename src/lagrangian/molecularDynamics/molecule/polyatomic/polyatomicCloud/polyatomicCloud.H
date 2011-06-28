@@ -22,22 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::moleculeCloud
+    Foam::polyatomicCloud
 
 Description
 
 SourceFiles
-    moleculeCloudI.H
-    moleculeCloud.C
+    polyatomicCloudI.H
+    polyatomicCloud.C
 
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef moleculeCloud_H
-#define moleculeCloud_H
+#ifndef polyatomicCloud_H
+#define polyatomicCloud_H
 
 #include "Cloud.H"
-#include "molecule.H"
+#include "polyatomic.H"
 #include "IOdictionary.H"
 #include "potential.H"
 #include "InteractionLists.H"
@@ -51,12 +51,12 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class moleculeCloud Declaration
+                       Class polyatomicCloud Declaration
 \*---------------------------------------------------------------------------*/
 
-class moleculeCloud
+class polyatomicCloud
 :
-    public Cloud<molecule>
+    public Cloud<polyatomic>
 {
 
 private:
@@ -67,11 +67,11 @@ private:
 
         const potential& pot_;
 
-        List<DynamicList<molecule*> > cellOccupancy_;
+        List<DynamicList<polyatomic*> > cellOccupancy_;
 
-        InteractionLists<molecule> il_;
+        InteractionLists<polyatomic> il_;
 
-        List<molecule::constantProperties> constPropList_;
+        List<polyatomic::constantProperties> constPropList_;
 
         Random rndGen_;
 
@@ -82,21 +82,21 @@ private:
 
         void setSiteSizesAndPositions();
 
-        //- Determine which molecules are in which cells
+        //- Determine which polyatomics are in which cells
         void buildCellOccupancy();
 
         void calculatePairForce();
 
         inline void evaluatePair
         (
-            molecule& molI,
-            molecule& molJ
+            polyatomic& molI,
+            polyatomic& molJ
         );
 
         inline bool evaluatePotentialLimit
         (
-            molecule& molI,
-            molecule& molJ
+            polyatomic& molI,
+            polyatomic& molJ
         ) const;
 
         void calculateTetherForce();
@@ -133,14 +133,14 @@ private:
         inline vector equipartitionAngularMomentum
         (
             scalar temperature,
-            const molecule::constantProperties& cP
+            const polyatomic::constantProperties& cP
         );
 
         //- Disallow default bitwise copy construct
-        moleculeCloud(const moleculeCloud&);
+        polyatomicCloud(const polyatomicCloud&);
 
         //- Disallow default bitwise assignment
-        void operator=(const moleculeCloud&);
+        void operator=(const polyatomicCloud&);
 
 
 public:
@@ -148,7 +148,7 @@ public:
     // Constructors
 
         //- Construct given mesh and potential references
-        moleculeCloud
+        polyatomicCloud
         (
             const polyMesh& mesh,
             const potential& pot,
@@ -156,7 +156,7 @@ public:
         );
 
         //- Construct given mesh, potential and mdInitialiseDict
-        moleculeCloud
+        polyatomicCloud
         (
             const polyMesh& mesh,
             const potential& pot,
@@ -167,7 +167,7 @@ public:
 
     // Member Functions
 
-        //- Evolve the molecules (move, calculate forces, control state etc)
+        //- Evolve the polyatomics (move, calculate forces, control state etc)
         void evolve();
 
         void calculateForce();
@@ -185,13 +185,13 @@ public:
 
             inline const potential& pot() const;
 
-            inline const List<DynamicList<molecule*> >& cellOccupancy() const;
+            inline const List<DynamicList<polyatomic*> >& cellOccupancy() const;
 
-            inline const InteractionLists<molecule>& il() const;
+            inline const InteractionLists<polyatomic>& il() const;
 
-            inline const List<molecule::constantProperties> constProps() const;
+            inline const List<polyatomic::constantProperties> constProps() const;
 
-            inline const molecule::constantProperties&
+            inline const polyatomic::constantProperties&
                 constProps(label id) const;
 
             inline Random& rndGen();
@@ -199,7 +199,7 @@ public:
 
     // Member Operators
 
-        //- Write molecule sites in XYZ format
+        //- Write polyatomic sites in XYZ format
         void writeXYZ(const fileName& fName) const;
 };
 
@@ -210,7 +210,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "moleculeCloudI.H"
+#include "polyatomicCloudI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
