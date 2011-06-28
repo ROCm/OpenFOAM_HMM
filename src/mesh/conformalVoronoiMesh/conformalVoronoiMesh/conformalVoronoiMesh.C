@@ -954,9 +954,12 @@ void Foam::conformalVoronoiMesh::createMixedFeaturePoints
     DynamicList<label>& types
 )
 {
-    Info<< "SKIP MIXED FEATURE POINTS" << endl;
-
-    return;
+    if (cvMeshControls().mixedFeaturePointPPDistanceCoeff() < 0)
+    {
+        Info<<nl << "Skipping specialised handling for mixed feature points"
+            << endl;
+        return;
+    }
 
     const PtrList<extendedFeatureEdgeMesh>& feMeshes
     (
