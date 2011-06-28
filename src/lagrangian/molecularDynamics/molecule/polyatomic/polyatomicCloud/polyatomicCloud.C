@@ -480,7 +480,8 @@ void Foam::polyatomicCloud::initialiseMolecules
 )
 {
     Info<< nl
-        << "Initialising polyatomics in each zone specified in mdInitialiseDict."
+        << "Initialising polyatomics in each zone specified in "
+        << mdInitialiseDict.name()
         << endl;
 
     const cellZoneMesh& cellZones = mesh_.cellZones();
@@ -570,7 +571,10 @@ void Foam::polyatomicCloud::initialiseMolecules
                     {
                         label id = findIndex(pot_.idList(), latticeIds[i]);
 
-                        const polyatomic::constantProperties& cP(constProps(id));
+                        const polyatomic::constantProperties& cP
+                        (
+                            constProps(id)
+                        );
 
                         unitCellMass += cP.mass();
                     }
@@ -965,7 +969,10 @@ void Foam::polyatomicCloud::initialiseMolecules
                      && !partOfLayerInBounds
                     )
                     {
-                        WarningIn("Foam::polyatomicCloud::initialiseMolecules()")
+                        WarningIn
+                        (
+                            "Foam::polyatomicCloud::initialiseMolecules()"
+                        )
                             << "A whole layer of unit cells was placed "
                             << "outside the bounds of the mesh, but no "
                             << "polyatomics have been placed in zone '"
@@ -1234,7 +1241,8 @@ void Foam::polyatomicCloud::writeXYZ(const fileName& fName) const
 {
     OFstream os(fName);
 
-    os  << nSites() << nl << "polyatomicCloud site positions in angstroms" << nl;
+    os  << nSites() << nl
+        << "polyatomicCloud site positions in angstroms" << nl;
 
     forAllConstIter(polyatomicCloud, *this, mol)
     {

@@ -449,7 +449,7 @@ inline Foam::label Foam::polyatomic::constantProperties::nSites() const
 }
 
 
-// * * * * * * * * * * * * polyatomic Member Functions * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 inline const Foam::tensor& Foam::polyatomic::Q() const
 {

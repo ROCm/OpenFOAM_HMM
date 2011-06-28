@@ -189,7 +189,8 @@ public:
 
             inline const InteractionLists<polyatomic>& il() const;
 
-            inline const List<polyatomic::constantProperties> constProps() const;
+            inline const List<polyatomic::constantProperties>
+            constProps() const;
 
             inline const polyatomic::constantProperties&
                 constProps(label id) const;

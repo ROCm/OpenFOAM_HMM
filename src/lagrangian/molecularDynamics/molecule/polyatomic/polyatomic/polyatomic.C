@@ -65,7 +65,11 @@ Foam::tensor Foam::polyatomic::rotationTensorZ(scalar phi) const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::polyatomic::move(polyatomic::trackingData& td, const scalar trackTime)
+bool Foam::polyatomic::move
+(
+    polyatomic::trackingData& td,
+    const scalar trackTime
+)
 {
     td.switchProcessor = false;
     td.keepParticle = true;
