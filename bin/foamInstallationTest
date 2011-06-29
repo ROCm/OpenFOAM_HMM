@@ -32,7 +32,7 @@
 #------------------------------------------------------------------------------
 
 # Base settings
-MIN_VERSION_GCC=4.3.3
+MIN_VERSION_GCC=4.3.2
 
 # General
 WIDTH=20
@@ -270,7 +270,7 @@ reportExecutable()
             pass="yes"
         fi
 
-        if [ "$pass" == "" ] && [ "$gccOk" == "" ]; then
+        if [ "$pass" = "" ] && [ "$gccOk" = "" ]; then
             if [ $V2 -lt $MINV2 ]; then
                 gccOk="ERROR"
             elif [ $V2 -gt $MINV2 ]; then
@@ -278,7 +278,7 @@ reportExecutable()
             fi
         fi
 
-        if [ "$pass" == "" ] && [ "$gccOk" == "" ] && [ $V3 != "" ] && [ $MINV3 != "" ]; then
+        if [ "$pass" = "" ] && [ "$gccOk" = "" ] && [ $V3 != "" ] && [ $MINV3 != "" ]; then
             if [ $V3 -lt $MINV3 ]; then
                 gccOk="ERROR"
             fi
@@ -291,7 +291,7 @@ reportExecutable()
             echo ""
             fatalError=`expr $fatalError + 1`
         fi
- 
+
 
         ;;
     gtar)
