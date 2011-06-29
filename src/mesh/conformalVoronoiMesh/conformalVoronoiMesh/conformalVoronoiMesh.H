@@ -67,7 +67,6 @@ SourceFiles
 #include "wallPolyPatch.H"
 #include "processorPolyPatch.H"
 #include "zeroGradientFvPatchFields.H"
-#include "globalIndex.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -780,8 +779,7 @@ private:
         void indexDualVertices
         (
             pointField& pts,
-            PackedBoolList& boundaryPts,
-            const globalIndex& globalParallelPointIndices
+            PackedBoolList& boundaryPts
         );
 
         //- Re-index all of the the Delaunay cells
