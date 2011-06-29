@@ -1060,14 +1060,31 @@ void Foam::conformalVoronoiMesh::constructFeaturePointLocations()
     {
         const extendedFeatureEdgeMesh& feMesh(feMeshes[i]);
 
-        for
-        (
-            label ptI = feMesh.convexStart();
-            ptI < feMesh.nonFeatureStart();
-            ptI++
-        )
+
+        if (cvMeshControls().mixedFeaturePointPPDistanceCoeff() < 0)
         {
-            ftPtLocs.append(feMesh.points()[ptI]);
+            // Ignoring mixed feature points
+            for
+            (
+                label ptI = feMesh.convexStart();
+                ptI < feMesh.mixedStart();
+                ptI++
+            )
+            {
+                ftPtLocs.append(feMesh.points()[ptI]);
+            }
+        }
+        else
+        {
+            for
+            (
+                label ptI = feMesh.convexStart();
+                ptI < feMesh.nonFeatureStart();
+                ptI++
+            )
+            {
+                ftPtLocs.append(feMesh.points()[ptI]);
+            }
         }
     }
 
