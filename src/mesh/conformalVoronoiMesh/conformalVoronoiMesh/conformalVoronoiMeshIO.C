@@ -423,10 +423,10 @@ void Foam::conformalVoronoiMesh::writeMesh
 
     patches.setSize(nValidPatches);
 
-    // mesh.addFvPatches(patches);
+    mesh.addFvPatches(patches);
 
-    Info<< "ADDPATCHES NOT IN PARALLEL" << endl;
-    mesh.addFvPatches(patches, false);
+    // Info<< "ADDPATCHES NOT IN PARALLEL" << endl;
+    // mesh.addFvPatches(patches, false);
 
     if (!mesh.write())
     {
@@ -456,7 +456,7 @@ void Foam::conformalVoronoiMesh::writeMesh
 
     // cellCs.write();
 
-    // writeCellSizes(mesh);
+    writeCellSizes(mesh);
 
     findRemainingProtrusionSet(mesh);
 }
