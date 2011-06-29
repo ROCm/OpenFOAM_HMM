@@ -135,6 +135,9 @@ private:
         //  careful bookkeeping within several functions.
         label startOfInternalPoints_;
 
+        //- Limiting bound box before infinity begins
+        treeBoundBox limitBounds_;
+
         //- Store the feature constraining points to be reinserted after a
         //  triangulation clear
         std::list<Vb> featureVertices_;

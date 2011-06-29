@@ -172,7 +172,7 @@ public:
 
 
     //- Does the Dual vertex form part of a processor patch
-    inline int parallelDualVertex() const
+    inline bool parallelDualVertex() const
     {
         return
         (
@@ -212,7 +212,7 @@ public:
     }
 
 
-    // Is the Delaunay cell part of the final dual mesj, i.e. any vertex form
+    // Is the Delaunay cell part of the final dual mesh, i.e. any vertex form
     // part of the internal or boundary definition
     inline bool internalOrBoundaryDualVertex() const
     {

@@ -1219,10 +1219,12 @@ void Foam::conformalVoronoiMesh::insertBoundingPoints()
     farPts -= geometryToConformTo_.globalBounds().midpoint();
 
     // Scale the box up
-    farPts *= 2.0;
+    farPts *= 10.0;
 
     // Shift corners of bounds back to be relative to midpoint
     farPts += geometryToConformTo_.globalBounds().midpoint();
+
+    limitBounds_ = treeBoundBox(farPts);
 
     forAll(farPts, fPI)
     {
@@ -1858,6 +1860,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         cvMeshDict.subDict("motionControl")
     ),
     startOfInternalPoints_(0),
+    limitBounds_(),
     featureVertices_(),
     featurePointLocations_(),
     featurePointTreePtr_(),
