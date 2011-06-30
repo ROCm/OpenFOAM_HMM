@@ -25,6 +25,7 @@ License
 
 #include "conformalVoronoiMesh.H"
 #include "motionSmoother.H"
+#include "backgroundMeshDecomposition.H"
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -76,7 +77,8 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     //         || !cit->vertex(3)->real()
     //     )
     //     {
-    //         cit->filterCount() = 100;
+    //         cit->filterCount() =
+    //              cvMeshControls().filterCountSkipThreshold() + 1;
     //     }
     //     else
     //     {
@@ -126,7 +128,8 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     //             ++cit
     //         )
     //         {
-    //             (*cit)->filterCount() = 100;
+    //             (*cit)->filterCount() =
+    //                  cvMeshControls().filterCountSkipThreshold() + 1;
     //         }
     //     }
     // }
@@ -134,13 +137,10 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     PackedBoolList boundaryPts(number_of_cells(), false);
 
-    globalIndex globalParallelPointIndices(number_of_cells());
-
     indexDualVertices
     (
         points,
-        boundaryPts,
-        globalParallelPointIndices
+        boundaryPts
     );
 
     {
@@ -202,8 +202,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
                 indexDualVertices
                 (
                     points,
-                    boundaryPts,
-                    globalParallelPointIndices
+                    boundaryPts
                 );
 
                 {
@@ -509,7 +508,12 @@ void Foam::conformalVoronoiMesh::mergeCloseDualVertices
     {
         Map<label> dualPtIndexMap;
 
-        nPtsMerged = mergeCloseDualVertices(pts, boundaryPts, dualPtIndexMap);
+        nPtsMerged = mergeCloseDualVertices
+        (
+            pts,
+            boundaryPts,
+            dualPtIndexMap
+        );
 
         // if (nPtsMerged > 0)
         // {
@@ -522,9 +526,12 @@ void Foam::conformalVoronoiMesh::mergeCloseDualVertices
 
     } while (nPtsMerged > 0);
 
-    Info<< "    Merged "
-        << returnReduce(nPtsMergedSum, sumOp<label>())
-        << " points " << endl;
+    reduce(nPtsMergedSum, sumOp<label>());
+
+    if (nPtsMergedSum > 0)
+    {
+        Info<< "    Merged " << nPtsMergedSum << " points " << endl;
+    }
 }
 
 
@@ -538,6 +545,35 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
     label nPtsMerged = 0;
 
     scalar closenessTolerance = cvMeshControls().mergeClosenessCoeff();
+
+    globalIndex globalDelaunayVertexIndices(number_of_vertices());
+
+    HashTableGlobalTetIndices dualVertexGlobalTetIndices;
+
+    for
+    (
+        Delaunay::Finite_cells_iterator cit = finite_cells_begin();
+        cit != finite_cells_end();
+        ++cit
+    )
+    {
+        if
+        (
+            cit->internalOrBoundaryDualVertex()
+         && cit->parallelDualVertex()
+        )
+        {
+            dualVertexGlobalTetIndices.insert
+            (
+                cit->vertexGlobalIndices(globalDelaunayVertexIndices),
+                cit->cellIndex()
+            );
+        }
+    }
+
+    DynamicList<label> toProc;
+    DynamicList<globalTetIndices> globalToMapFirst;
+    DynamicList<globalTetIndices> globalToMapSecond;
 
     for
     (
@@ -569,25 +605,133 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
               < sqr(averageAnyCellSize(fit)*closenessTolerance)
             )
             {
-                if (boundaryPts[c2I] == true)
+                if (c1->parallelDualVertex() && c2->parallelDualVertex())
                 {
-                    // If c2I is a boundary point, then it is kept.
-                    // If both are boundary points then c2I is chosen
-                    // arbitrarily to be kept.
+                    // Both dual vertices are on a processor patch face
+                    // The collapse is actioned by the master processor
 
-                    dualPtIndexMap.insert(c1I, c2I);
-                    dualPtIndexMap.insert(c2I, c2I);
+                    label masterProc = min
+                    (
+                        c1->dualVertexMasterProc(),
+                        c2->dualVertexMasterProc()
+                    );
+
+                    if (masterProc == Pstream::myProcNo())
+                    {
+                        // perform the collapse and insert values to notify
+                        // everyone else
+
+                        labelList attachedProcs(processorsAttached(fit));
+
+                        forAll(attachedProcs, aPI)
+                        {
+                            toProc.append(attachedProcs[aPI]);
+
+                            if (boundaryPts[c2I] == true)
+                            {
+                                // If c2I is a boundary point, then it is kept.
+                                // If both are boundary points then c2I is
+                                // chosen arbitrarily to be kept.
+
+                                globalToMapFirst.append
+                                (
+                                    c2->vertexGlobalIndices
+                                    (
+                                        globalDelaunayVertexIndices
+                                    )
+                                );
+
+                                globalToMapSecond.append
+                                (
+                                    c1->vertexGlobalIndices
+                                    (
+                                        globalDelaunayVertexIndices
+                                    )
+                                );
+                            }
+                            else
+                            {
+                                globalToMapFirst.append
+                                (
+                                    c1->vertexGlobalIndices
+                                    (
+                                        globalDelaunayVertexIndices
+                                    )
+                                );
+
+                                globalToMapSecond.append
+                                (
+                                    c2->vertexGlobalIndices
+                                    (
+                                        globalDelaunayVertexIndices
+                                    )
+                                );
+                            }
+                        }
+
+                        nPtsMerged++;
+                    }
+                }
+                else if (c1->parallelDualVertex() || c2->parallelDualVertex())
+                {
+
                 }
                 else
                 {
-                    dualPtIndexMap.insert(c1I, c1I);
-                    dualPtIndexMap.insert(c2I, c1I);
+
                 }
 
-                nPtsMerged++;
+                // nPtsMerged++;
             }
         }
     }
+
+    mapDistribute map = backgroundMeshDecomposition::buildMap(toProc);
+
+    map.distribute(globalToMapFirst);
+
+    map.distribute(globalToMapSecond);
+
+    forAll(globalToMapFirst, gTMI)
+    {
+        label c1I = dualVertexGlobalTetIndices.find(globalToMapFirst[gTMI])();
+        label c2I = dualVertexGlobalTetIndices.find(globalToMapSecond[gTMI])();
+
+        Pout<< globalToMapFirst[gTMI] << " " << c1I << endl;
+        Pout<< globalToMapSecond[gTMI] << " " << c2I << endl;
+
+        dualPtIndexMap.insert(c1I, c1I);
+        dualPtIndexMap.insert(c2I, c1I);
+
+        Pout<< dualPtIndexMap << endl;
+    }
+
+        // if (!c1->farCell() && !c2->farCell() && (c1I != c2I))
+        // {
+        //     if
+        //     (
+        //         magSqr(pts[c1I] - pts[c2I])
+        //       < sqr(averageAnyCellSize(fit)*closenessTolerance)
+        //     )
+        //     {
+        //         if (boundaryPts[c2I] == true)
+        //         {
+        //             // If c2I is a boundary point, then it is kept.
+        //             // If both are boundary points then c2I is chosen
+        //             // arbitrarily to be kept.
+
+        //             dualPtIndexMap.insert(c1I, c2I);
+        //             dualPtIndexMap.insert(c2I, c2I);
+        //         }
+        //         else
+        //         {
+        //             dualPtIndexMap.insert(c1I, c1I);
+        //             dualPtIndexMap.insert(c2I, c1I);
+        //         }
+
+        //         nPtsMerged++;
+        //     }
+        // }
 
     return nPtsMerged;
 }
@@ -1551,65 +1695,65 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     List<polyPatch*> patches(patchStarts.size());
 
-    // label nValidPatches = 0;
-
-    // forAll(patches, p)
-    // {
-    //     if (patchTypes[p] == processorPolyPatch::typeName)
-    //     {
-    //         // Do not create empty processor patches
-
-    //         if (patchSizes[p] > 0)
-    //         {
-    //             patches[nValidPatches] = new processorPolyPatch
-    //             (
-    //                 patchNames[p],
-    //                 patchSizes[p],
-    //                 patchStarts[p],
-    //                 nValidPatches,
-    //                 pMesh.boundaryMesh(),
-    //                 Pstream::myProcNo(),
-    //                 procNeighbours[p]
-    //             );
-
-    //             nValidPatches++;
-    //         }
-    //     }
-    //     else
-    //     {
-    //         patches[nValidPatches] = polyPatch::New
-    //         (
-    //             patchTypes[p],
-    //             patchNames[p],
-    //             patchSizes[p],
-    //             patchStarts[p],
-    //             nValidPatches,
-    //             pMesh.boundaryMesh()
-    //         ).ptr();
-
-    //         nValidPatches++;
-    //     }
-    // }
-
-    // patches.setSize(nValidPatches);
-
-    // pMesh.addPatches(patches);
-
-    Info<< "ADDPATCHES NOT IN PARALLEL" << endl;
+    label nValidPatches = 0;
 
     forAll(patches, p)
     {
-        patches[p] = new polyPatch
-        (
-            patchNames[p],
-            patchSizes[p],
-            patchStarts[p],
-            p,
-            pMesh.boundaryMesh()
-        );
+        if (patchTypes[p] == processorPolyPatch::typeName)
+        {
+            // Do not create empty processor patches
+
+            if (patchSizes[p] > 0)
+            {
+                patches[nValidPatches] = new processorPolyPatch
+                (
+                    patchNames[p],
+                    patchSizes[p],
+                    patchStarts[p],
+                    nValidPatches,
+                    pMesh.boundaryMesh(),
+                    Pstream::myProcNo(),
+                    procNeighbours[p]
+                );
+
+                nValidPatches++;
+            }
+        }
+        else
+        {
+            patches[nValidPatches] = polyPatch::New
+            (
+                patchTypes[p],
+                patchNames[p],
+                patchSizes[p],
+                patchStarts[p],
+                nValidPatches,
+                pMesh.boundaryMesh()
+            ).ptr();
+
+            nValidPatches++;
+        }
     }
 
-    pMesh.addPatches(patches, false);
+    patches.setSize(nValidPatches);
+
+    pMesh.addPatches(patches);
+
+    // Info<< "ADDPATCHES NOT IN PARALLEL" << endl;
+
+    // forAll(patches, p)
+    // {
+    //     patches[p] = new polyPatch
+    //     (
+    //         patchNames[p],
+    //         patchSizes[p],
+    //         patchStarts[p],
+    //         p,
+    //         pMesh.boundaryMesh()
+    //     );
+    // }
+
+    // pMesh.addPatches(patches, false);
 
     // pMesh.overrideCellCentres(cellCentres);
 
@@ -1807,8 +1951,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 void Foam::conformalVoronoiMesh::indexDualVertices
 (
     pointField& pts,
-    PackedBoolList& boundaryPts,
-    const globalIndex& globalParallelPointIndices
+    PackedBoolList& boundaryPts
 )
 {
     // Indexing Delaunay cells, which are the dual vertices
@@ -1821,16 +1964,6 @@ void Foam::conformalVoronoiMesh::indexDualVertices
 
     boundaryPts = false;
 
-    OFstream tetStr
-    (
-        runTime_.path()
-       /"processor_"
-      + name(Pstream::myProcNo())
-      + "_parallelTets.obj"
-    );
-
-    label pTetI = 0;
-
     for
     (
         Delaunay::Finite_cells_iterator cit = finite_cells_begin();
@@ -1840,34 +1973,22 @@ void Foam::conformalVoronoiMesh::indexDualVertices
     {
         if (cit->internalOrBoundaryDualVertex())
         {
-            if (cit->parallelDualVertex())
-            {
-                cit->cellIndex() = globalParallelPointIndices.toGlobal
-                (
-                    dualVertI
-                );
-
-                drawDelaunayCell(tetStr, cit, pTetI++);
-            }
-            else
-            {
-                cit->cellIndex() = dualVertI;
-
-                if
-                (
-                    !cit->vertex(0)->internalOrBoundaryPoint()
-                 || !cit->vertex(1)->internalOrBoundaryPoint()
-                 || !cit->vertex(2)->internalOrBoundaryPoint()
-                 || !cit->vertex(3)->internalOrBoundaryPoint()
-                )
-                {
-                    // This is a boundary dual vertex
-
-                    boundaryPts[dualVertI] = true;
-                }
-            }
+            cit->cellIndex() = dualVertI;
 
             pts[dualVertI] = topoint(dual(cit));
+
+            if
+            (
+                !cit->vertex(0)->internalOrBoundaryPoint()
+             || !cit->vertex(1)->internalOrBoundaryPoint()
+             || !cit->vertex(2)->internalOrBoundaryPoint()
+             || !cit->vertex(3)->internalOrBoundaryPoint()
+            )
+            {
+                // This is a boundary dual vertex
+
+                boundaryPts[dualVertI] = true;
+            }
 
             dualVertI++;
         }
