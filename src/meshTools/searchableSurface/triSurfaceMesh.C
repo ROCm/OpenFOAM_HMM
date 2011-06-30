@@ -763,7 +763,6 @@ void Foam::triSurfaceMesh::findLineAll
     //   we need something bigger since we're doing calculations)
     // - if the start-end vector is zero we still progress
     const vectorField dirVec(end-start);
-    const scalarField magSqrDirVec(magSqr(dirVec));
     const vectorField smallVec
     (
         indexedOctree<treeDataTriSurface>::perturbTol()*dirVec

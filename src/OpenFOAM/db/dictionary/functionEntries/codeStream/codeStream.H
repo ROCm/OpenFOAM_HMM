@@ -103,6 +103,9 @@ class dlLibraryTable;
 namespace functionEntries
 {
 
+// Forward declaration of friend classes
+class calcEntry;
+
 /*---------------------------------------------------------------------------*\
                          Class codeStream Declaration
 \*---------------------------------------------------------------------------*/
@@ -123,6 +126,14 @@ class codeStream
         //- Helper function: access to dlLibraryTable of Time
         static dlLibraryTable& libs(const dictionary& dict);
 
+        //- Construct, compile, load and return streaming function
+        static streamingFunctionType getFunction
+        (
+            const dictionary& parentDict,
+            const dictionary& codeDict
+        );
+
+
         //- Disallow default bitwise copy construct
         codeStream(const codeStream&);
 
@@ -136,6 +147,11 @@ public:
 
         //- Name of the C code template to be used
         static const word codeTemplateC;
+
+    // Related types
+
+        //- Declare friendship with the calcEntry class
+        friend class calcEntry;
 
 
     //- Runtime type information
