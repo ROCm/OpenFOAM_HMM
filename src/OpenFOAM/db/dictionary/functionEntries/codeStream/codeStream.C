@@ -92,28 +92,13 @@ Foam::dlLibraryTable& Foam::functionEntries::codeStream::libs
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-bool Foam::functionEntries::codeStream::execute
+Foam::functionEntries::codeStream::streamingFunctionType
+Foam::functionEntries::codeStream::getFunction
 (
     const dictionary& parentDict,
-    primitiveEntry& entry,
-    Istream& is
+    const dictionary& codeDict
 )
 {
-    Info<< "Using #codeStream at line " << is.lineNumber()
-        << " in file " <<  parentDict.name() << endl;
-
-    dynamicCode::checkSecurity
-    (
-        "functionEntries::codeStream::execute(..)",
-        parentDict
-    );
-
-    // get code dictionary
-    // must reference parent for stringOps::expand to work nicely
-    dictionary codeDict("#codeStream", parentDict, is);
-
     // get code, codeInclude, codeOptions
     dynamicCodeContext context(codeDict);
 
@@ -260,6 +245,34 @@ bool Foam::functionEntries::codeStream::execute
             << " in library " << lib << exit(FatalIOError);
     }
 
+    return function;
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::functionEntries::codeStream::execute
+(
+    const dictionary& parentDict,
+    primitiveEntry& entry,
+    Istream& is
+)
+{
+    Info<< "Using #codeStream at line " << is.lineNumber()
+        << " in file " <<  parentDict.name() << endl;
+
+    dynamicCode::checkSecurity
+    (
+        "functionEntries::codeStream::execute(..)",
+        parentDict
+    );
+
+    // get code dictionary
+    // must reference parent for stringOps::expand to work nicely
+    dictionary codeDict("#codeStream", parentDict, is);
+
+    streamingFunctionType function = getFunction(parentDict, codeDict);
+
     // use function to write stream
     OStringStream os(is.format());
     (*function)(os, parentDict);
@@ -267,6 +280,7 @@ bool Foam::functionEntries::codeStream::execute
     // get the entry from this stream
     IStringStream resultStream(os.str());
     entry.read(parentDict, resultStream);
+
 
     return true;
 }

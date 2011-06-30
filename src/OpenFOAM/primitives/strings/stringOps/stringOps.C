@@ -328,6 +328,10 @@ Foam::string& Foam::stringOps::inplaceExpand
                 if (ePtr)
                 {
                     OStringStream buf;
+                    // Force floating point numbers to be printed with at least
+                    // some decimal digits.
+                    buf << fixed;
+                    buf.precision(IOstream::defaultPrecision());
                     if (ePtr->isDict())
                     {
                         ePtr->dict().write(buf, false);

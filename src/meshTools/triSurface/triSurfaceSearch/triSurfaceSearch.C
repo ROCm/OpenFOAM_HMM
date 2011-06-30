@@ -201,9 +201,8 @@ const
 
     if (inter.hit())
     {
-        label sz = hits.size();
-        hits.setSize(sz+1);
-        hits[sz] = inter;
+        hits.setSize(1);
+        hits[0] = inter;
 
         const vector dirVec(end-start);
         const scalar magSqrDirVec(magSqr(dirVec));
