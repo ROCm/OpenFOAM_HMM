@@ -2568,7 +2568,7 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
 {
     scalar nearestDistSqr = startDistSqr;
     label nearestShapeI = -1;
-    point nearestPoint;
+    point nearestPoint = vector::zero;
 
     if (nodes_.size())
     {
@@ -2581,10 +2581,6 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
             nearestShapeI,
             nearestPoint
         );
-    }
-    else
-    {
-        nearestPoint = vector::zero;
     }
 
     return pointIndexHit(nearestShapeI != -1, nearestPoint, nearestShapeI);
