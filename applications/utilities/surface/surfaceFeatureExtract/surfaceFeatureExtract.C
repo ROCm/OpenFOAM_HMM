@@ -414,6 +414,11 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
+        "writeVTK",
+        "write surface property VTK files"
+    );
+    argList::addBoolOption
+    (
         "manifoldEdgesOnly",
         "remove any non-manifold (open or more than two connected faces) edges"
     );
@@ -595,8 +600,8 @@ int main(int argc, char *argv[])
     surfaceFeatures newSet(surf);
     newSet.setFromStatus(edgeStat);
 
-    Info<< endl << "Writing trimmed features to " << outFileName << endl;
-    newSet.write(outFileName);
+    //Info<< endl << "Writing trimmed features to " << outFileName << endl;
+    //newSet.write(outFileName);
 
     // Info<< endl << "Writing edge objs." << endl;
     // newSet.writeObj("final");
