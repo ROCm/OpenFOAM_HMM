@@ -140,7 +140,7 @@ private:
         treeBoundBox limitBounds_;
 
         //- Store the feature constraining points to be reinserted after a
-        //  triangulation clear
+        //  triangulation clear. Maintained with relative types and indices.
         std::list<Vb> featureVertices_;
 
         //- Storing the locations of all of the features to be conformed to.

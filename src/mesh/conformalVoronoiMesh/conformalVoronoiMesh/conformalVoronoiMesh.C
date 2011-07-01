@@ -2150,6 +2150,9 @@ void Foam::conformalVoronoiMesh::move()
 
                     alignmentDir *= 0.5*targetCellSize;
 
+                    // Vector to move end points around middle of vector
+                    // to align edge (i.e. dual face normal) with alignment
+                    // directions.
                     vector delta = alignmentDir - 0.5*rAB;
 
                     scalar faceArea = dualFace.mag(dualVertices);

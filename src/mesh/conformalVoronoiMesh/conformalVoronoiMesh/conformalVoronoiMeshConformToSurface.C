@@ -134,6 +134,37 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
     label initialTotalHits = 0;
 
+
+    // Surface protrusion conformation is done in two steps.
+    // 1. the dual edges (of all internal vertices) can stretch to 
+    //    'infinity' so any intersection would be badly behaved. So
+    //    just find the nearest point on the geometry and insert point
+    //    pairs.
+    // Now most of the surface conformation will be done with some
+    // residual protrusions / incursions.
+    // 2. find any segments of dual edges outside the geometry. Shoot
+    //    ray from Delaunay vertex to middle of this segment and introduce
+    //    point pairs. This will handle e.g.
+
+    // protruding section of face:
+    //
+    //     internal
+    // \             /
+    // -+-----------+-- boundary
+    //   \         /
+    //     --------
+    //
+    // Shoot ray and find intersection with outside segment (x) and
+    // introduce pointpair (..)
+    //
+    //        |
+    // \      .      /
+    // -+-----|-----+-- boundary
+    //   \    .    /
+    //     ---x----
+
+
+
     // Initial surface protrusion conformation - nearest surface point
     {
         scalar edgeSearchDistCoeffSqr =
@@ -312,6 +343,8 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                 pointIndexHit surfHit;
                 label hitSurface;
 
+                // Find segments of dual face outside the geometry and find the
+                // the middle of this
                 dualCellLargestSurfaceProtrusion(vit, surfHit, hitSurface);
 
                 if (surfHit.hit())
@@ -340,6 +373,8 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                 pointIndexHit surfHit;
                 label hitSurface;
 
+                // Detect slave (external vertices) whose dual face incurs
+                // into nearby (other than originating) geometry
                 dualCellLargestSurfaceIncursion(vit, surfHit, hitSurface);
 
                 if (surfHit.hit())
