@@ -91,11 +91,12 @@ surfaceConformation
     //   (circumcentre far away from centroid)
     pointPairDistanceCoeff      0.1;
 
-    // Mixed feature edges - both inside and outside edges. Recreated
-    // by inserting triplets of points to recreate a single edge. Done for
-    // all edges emanating from point. triplets of points get inserted
+    // Mixed feature points - connected to both inside and outside edges.
+    // Recreated by inserting triplets of points to recreate a single edge.
+    // Done for all edges emanating from point. triplets of points get inserted
     // mixedFeaturePointPPDistanceCoeff distance away from feature point.
-    mixedFeaturePointPPDistanceCoeff    5.0;
+    // Set to a negative number to disable.
+    mixedFeaturePointPPDistanceCoeff    5.0; //-1;
 
     // Distance to a feature point within which surface and edge
     // conformation points are excluded - fraction of the local target
