@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "Random.H"
+#include "OSspecific.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -37,11 +38,6 @@ namespace Foam
 #    error "The random number generator may not work!"
 #endif
 
-#ifdef USE_RANDOM
-#   include <climits>
-#else
-#   include <cstdlib>
-#endif
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -57,22 +53,13 @@ Random::Random(const label seed)
         Seed = 1;
     }
 
-#   ifdef USE_RANDOM
-        srandom((unsigned int)Seed);
-#   else
-        srand48(Seed);
-#   endif
-
+    osRandomSeed(Seed);
 }
 
 
 int Random::bit()
 {
-#   ifdef USE_RANDOM
-    if (random() > INT_MAX/2)
-#   else
-    if (lrand48() > INT_MAX/2)
-#   endif
+    if (osRandomInteger() > INT_MAX/2)
     {
         return 1;
     }
@@ -85,11 +72,7 @@ int Random::bit()
 
 scalar Random::scalar01()
 {
-#   ifdef USE_RANDOM
-        return (scalar)random()/INT_MAX;
-#   else
-        return drand48();
-#   endif
+    return osRandomDouble();
 }
 
 
@@ -140,11 +123,7 @@ tensor Random::tensor01()
 
 label Random::integer(const label lower, const label upper)
 {
-#   ifdef USE_RANDOM
-        return lower + (random() % (upper+1-lower));
-#   else
-        return lower + (lrand48() % (upper+1-lower));
-#   endif
+    return lower + (osRandomInteger() % (upper+1-lower));
 }
 
 

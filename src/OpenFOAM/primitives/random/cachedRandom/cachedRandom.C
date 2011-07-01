@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cachedRandom.H"
-#include <cstdlib>
+#include "OSspecific.H"
 
 #if INT_MAX    != 2147483647
 #    error "INT_MAX    != 2147483647"
@@ -37,7 +37,7 @@ Foam::scalar Foam::cachedRandom::scalar01()
 {
     if (sampleI_ < 0)
     {
-        return drand48();
+        return osRandomDouble();
     }
 
     if (sampleI_ == samples_.size() - 1)
@@ -76,7 +76,7 @@ Foam::cachedRandom::cachedRandom(const label seed, const label count)
     }
 
     // Initialise samples
-    srand48(seed_);
+    osRandomSeed(seed_);
     forAll(samples_, i)
     {
         samples_[i] = drand48();
@@ -98,7 +98,7 @@ Foam::cachedRandom::cachedRandom(const cachedRandom& cr, const bool reset)
         )   << "Copy constructor called, but samples not being cached. "
             << "This may lead to non-repeatable behaviour" << endl;
 
-        srand48(seed_);
+        osRandomSeed(seed_);
     }
     else if (reset)
     {
