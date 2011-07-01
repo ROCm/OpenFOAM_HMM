@@ -178,6 +178,9 @@ public:
             const scalar measuredTemperature
         );
 
+        //- Print cloud information
+        void info() const;
+
 
         // Access
 

@@ -57,11 +57,12 @@ inline Foam::polyatomic::constantProperties::constantProperties
 
     List<word> pairPotentialIds(dict.lookup("pairPotentialSiteIds"));
 
+    sites_.setSize(siteReferencePositions.size());
+
     if
     (
-        ( siteIdNames.size() != sites_.size() )
-     || ( siteReferencePositions.size() != sites_.size() )
-     || ( siteCharges.size() != sites_.size() )
+        (siteIdNames.size() != sites_.size())
+     || (siteCharges.size() != sites_.size())
     )
     {
             FatalErrorIn
@@ -72,11 +73,12 @@ inline Foam::polyatomic::constantProperties::constantProperties
                 ")"
             )
             << "Sizes of site id, charge and "
-            << "referencePositions are not the same: " << sites_.size()
-            << nl << abort(FatalError);
+            << "referencePositions are not the same: " << nl
+            << siteIdNames  << nl
+            << siteReferencePositions << nl
+            << siteCharges << nl
+            << abort(FatalError);
     }
-
-    sites_.setSize(siteIdNames.size());
 
     electrostaticSites_.setSize(sites_.size(), -1);
     pairPotSites_.setSize(sites_.size(), -1);
@@ -107,7 +109,7 @@ inline Foam::polyatomic::constantProperties::constantProperties
             electrostaticSites_[electrostaticI++] = sI;
         }
 
-        if (sites_[sI].pairPotentialSite() && !sites_[sI].electrostaticSite())
+        if (!sites_[sI].pairPotentialSite() && !sites_[sI].electrostaticSite())
         {
             WarningIn
             (

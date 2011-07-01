@@ -26,8 +26,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "md.H"
 #include "fvCFD.H"
+#include "polyatomicCloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,7 +64,9 @@ int main(int argc, char *argv[])
 
     potential pot(mesh, mdInitialiseDict, idListDict);
 
-    moleculeCloud molecules(mesh, pot, mdInitialiseDict);
+    polyatomicCloud molecules(mesh, pot, mdInitialiseDict);
+
+    Info<< "Cloud is called " << molecules.name() << endl;
 
     label totalMolecules = molecules.size();
 
@@ -81,7 +83,7 @@ int main(int argc, char *argv[])
     if (!mesh.write())
     {
         FatalErrorIn(args.executable())
-            << "Failed writing moleculeCloud."
+            << "Failed writing polyatomicCloud."
             << nl << exit(FatalError);
     }
 

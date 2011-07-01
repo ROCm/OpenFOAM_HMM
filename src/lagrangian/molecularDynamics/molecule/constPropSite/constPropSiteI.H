@@ -114,4 +114,31 @@ inline bool& Foam::constPropSite::electrostaticSite()
 }
 
 
+// * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
+
+bool Foam::constPropSite::operator==
+(
+    const constPropSite& rhs
+) const
+{
+    return
+       siteReferencePosition_ == rhs.siteReferencePosition_
+    && siteMass_ == rhs.siteMass_
+    && siteCharge_ == rhs.siteCharge_
+    && siteId_ == rhs.siteId_
+    && name_ == rhs.name_
+    && pairPotentialSite_ == rhs.pairPotentialSite_
+    && electrostaticSite_ == rhs.electrostaticSite_;
+}
+
+
+bool Foam::constPropSite::operator!=
+(
+    const constPropSite& rhs
+) const
+{
+    return !(*this == rhs);
+}
+
+
 // ************************************************************************* //

@@ -76,7 +76,7 @@ class potential
 
     // Private Member Functions
 
-        void setSiteIdList(const dictionary& moleculePropertiesDict);
+        void setSiteIdList(const dictionary& mdPropertiesDict);
 
         void readPotentialDict();
 
