@@ -25,14 +25,23 @@ Class
     Foam::incompressible::LESModels::kOmegaSSTSAS
 
 Description
-    kOmegaSSTSAS LES turbulence model for incompressible flows
+     kOmegaSSTSAS LES turbulence model for incompressible flows
+    based on:
 
+    "Evaluation of the SST-SAS model: channel flow, asymmetric diffuser
+    and axi-symmetric hill".
+    European Conference on Computational Fluid Dynamics ECCOMAS CFD 2006.
+    Lars Davidson
+
+
+    The first term of the Qsas expression is corrected following:
 
     DESider A European Effort on Hybrid RANS-LES Modelling:
     Results of the European-Union Funded Project, 2004 - 2007
     (Notes on Numerical Fluid Mechanics and Multidisciplinary Design).
-    Chapter 8 Formulation of the Scale-Adaptive Simulation (SAS) Model during
-    the DESIDER Project. Published in Springer-Verlag Berlin Heidelberg 2009.
+    Chapter 2, section 8 Formulation of the Scale-Adaptive Simulation (SAS)
+    Model during the DESIDER Project. Published in Springer-Verlag Berlin
+    Heidelberg 2009.
     F. R. Menter and Y. Egorov.
 
 SourceFiles

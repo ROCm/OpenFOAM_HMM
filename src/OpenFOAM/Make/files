@@ -160,6 +160,7 @@ $(dictionaryEntry)/dictionaryEntry.C
 $(dictionaryEntry)/dictionaryEntryIO.C
 
 functionEntries = $(dictionary)/functionEntries
+$(functionEntries)/calcEntry/calcEntry.C
 $(functionEntries)/codeStream/codeStream.C
 $(functionEntries)/functionEntry/functionEntry.C
 $(functionEntries)/includeEntry/includeEntry.C
