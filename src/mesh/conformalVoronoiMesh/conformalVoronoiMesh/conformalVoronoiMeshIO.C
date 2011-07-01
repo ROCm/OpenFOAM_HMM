@@ -115,26 +115,26 @@ void Foam::conformalVoronoiMesh::timeCheck
 void Foam::conformalVoronoiMesh::drawDelaunayCell
 (
     Ostream& os,
-    const Delaunay::Finite_cells_iterator& cit,
+    const Cell_handle& c,
     label offset
 ) const
 {
     // Supply offset as tet number
     offset *= 5;
 
-    os  << "# cell index: " << label(cit->cellIndex()) << endl;
+    os  << "# cell index: " << label(c->cellIndex()) << endl;
 
     os  << "# circumradius "
-        << mag(topoint(dual(cit)) - topoint(cit->vertex(0)->point()))
+        << mag(topoint(dual(c)) - topoint(c->vertex(0)->point()))
         << endl;
 
     for (int i = 0; i < 4; i++)
     {
         os  << "# index type: "
-            << label(cit->vertex(i)->index()) << " "
-            << label(cit->vertex(i)->type()) << endl;
+            << label(c->vertex(i)->index()) << " "
+            << label(c->vertex(i)->type()) << endl;
 
-        meshTools::writeOBJ(os, topoint(cit->vertex(i)->point()));
+        meshTools::writeOBJ(os, topoint(c->vertex(i)->point()));
     }
 
     os  << "f " << 1 + offset << " " << 3 + offset << " " << 2 + offset << nl
@@ -144,7 +144,7 @@ void Foam::conformalVoronoiMesh::drawDelaunayCell
 
     os  << "# cicumcentre " << endl;
 
-    meshTools::writeOBJ(os, topoint(dual(cit)));
+    meshTools::writeOBJ(os, topoint(dual(c)));
 
     os  << "l " << 1 + offset << " " << 5 + offset << endl;
 }
@@ -423,10 +423,10 @@ void Foam::conformalVoronoiMesh::writeMesh
 
     patches.setSize(nValidPatches);
 
-    // mesh.addFvPatches(patches);
+    mesh.addFvPatches(patches);
 
-    Info<< "ADDPATCHES NOT IN PARALLEL" << endl;
-    mesh.addFvPatches(patches, false);
+    // Info<< "ADDPATCHES NOT IN PARALLEL" << endl;
+    // mesh.addFvPatches(patches, false);
 
     if (!mesh.write())
     {
@@ -456,7 +456,7 @@ void Foam::conformalVoronoiMesh::writeMesh
 
     // cellCs.write();
 
-    // writeCellSizes(mesh);
+    writeCellSizes(mesh);
 
     findRemainingProtrusionSet(mesh);
 }

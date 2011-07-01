@@ -1650,6 +1650,9 @@ Foam::face Foam::conformalVoronoiMesh::buildDualFace
             Vertex_handle vA = c->vertex(eit->second);
             Vertex_handle vB = c->vertex(eit->third);
 
+            drawDelaunayCell(Pout, cc1);
+            drawDelaunayCell(Pout, cc2);
+
             FatalErrorIn("Foam::conformalVoronoiMesh::buildDualFace")
                 << "Dual face uses circumcenter defined by a "
                 << "Delaunay tetrahedron with no internal "

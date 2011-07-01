@@ -83,6 +83,11 @@ class faceAreaWeightModel;
 
 class backgroundMeshDecomposition;
 
+typedef FixedList<label, 4>globalTetIndices;
+
+typedef HashTable<label, globalTetIndices, Hash<globalTetIndices> >
+    HashTableGlobalTetIndices;
+
 /*---------------------------------------------------------------------------*\
                     Class conformalVoronoiMesh Declaration
 \*---------------------------------------------------------------------------*/
@@ -702,6 +707,13 @@ private:
             const Delaunay::Finite_edges_iterator& eit
         ) const;
 
+        //- Which processors are attached to the dual edge represented by this
+        //  Delaunay facet
+        inline List<label> processorsAttached
+        (
+            const Delaunay::Finite_facets_iterator& fit
+        ) const;
+
         //- Merge vertices that are very close together
         void mergeCloseDualVertices
         (
@@ -783,8 +795,7 @@ private:
         void indexDualVertices
         (
             pointField& pts,
-            PackedBoolList& boundaryPts,
-            const globalIndex& globalParallelPointIndices
+            PackedBoolList& boundaryPts
         );
 
         //- Re-index all of the the Delaunay cells
@@ -962,7 +973,7 @@ public:
             void drawDelaunayCell
             (
                 Ostream& os,
-                const Delaunay::Finite_cells_iterator& cit,
+                const Cell_handle& c,
                 label offset = 0
             ) const;
 

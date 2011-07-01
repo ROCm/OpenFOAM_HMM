@@ -347,6 +347,38 @@ inline bool Foam::conformalVoronoiMesh::isBoundaryDualFace
 }
 
 
+inline Foam::List<Foam::label> Foam::conformalVoronoiMesh::processorsAttached
+(
+    const Delaunay::Finite_facets_iterator& fit
+) const
+{
+    DynamicList<label> procsAttached(8);
+
+    const Cell_handle c1(fit->first);
+    const int oppositeVertex = fit->second;
+    const Cell_handle c2(c1->neighbor(oppositeVertex));
+
+    FixedList<label, 4> c1Procs(c1->processorsAttached());
+
+    FixedList<label, 4> c2Procs(c2->processorsAttached());
+
+    forAll(c1Procs, aPI)
+    {
+        if (findIndex(procsAttached, c1Procs[aPI] == -1))
+        {
+            procsAttached.append(c1Procs[aPI]);
+        }
+
+        if (findIndex(procsAttached, c2Procs[aPI] == -1))
+        {
+            procsAttached.append(c2Procs[aPI]);
+        }
+    }
+
+    return List<label>(procsAttached);
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 #ifdef CGAL_INEXACT

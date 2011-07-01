@@ -36,7 +36,10 @@ Description
 #include <CGAL/Triangulation_3.h>
 #include <CGAL/Triangulation_cell_base_with_circumcenter_3.h>
 #include "indexedVertex.H"
+#include "List.H"
+#include "globalIndex.H"
 #include "Pstream.H"
+#include "Swap.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -187,7 +190,7 @@ public:
     //- Does the Dual vertex form part of a processor patch
     inline Foam::label dualVertexMasterProc() const
     {
-        if (!parallelDualVertex)
+        if (!parallelDualVertex())
         {
             return -1;
         }
@@ -209,6 +212,82 @@ public:
         }
 
         return masterProc;
+    }
+
+
+    inline Foam::FixedList<Foam::label, 4> processorsAttached() const
+    {
+        if (!parallelDualVertex())
+        {
+            return Foam::FixedList<Foam::label, 4>(Foam::Pstream::myProcNo());
+        }
+
+        Foam::FixedList<Foam::label, 4> procsAttached
+        (
+            Foam::Pstream::myProcNo()
+        );
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (this->vertex(i)->referred())
+            {
+                procsAttached[i] = this->vertex(i)->procIndex();
+            }
+        }
+
+        return procsAttached;
+    }
+
+
+    // Using the globalIndex object, return a list of four (sorted) global
+    // Delaunay vertex indices that uniquely identify this tet in parallel
+    inline Foam::FixedList<Foam::label, 4> vertexGlobalIndices
+    (
+        const Foam::globalIndex& globalDelaunayVertexIndices
+    ) const
+    {
+        // tetVertexGlobalIndices
+        Foam::FixedList<Foam::label, 4> tVGI(-1);
+
+        for (int i = 0; i < 4; i++)
+        {
+            Vertex_handle v = this->vertex(i);
+
+            // Finding the global index of each Delaunay vertex
+
+            if (v->referred())
+            {
+                // Referred vertices may have negative indices
+
+                tVGI[i] = globalDelaunayVertexIndices.toGlobal
+                (
+                    v->procIndex(),
+                    Foam::mag(v->index())
+                );
+            }
+            else
+            {
+                tVGI[i] = globalDelaunayVertexIndices.toGlobal
+                (
+                    Foam::Pstream::myProcNo(),
+                    v->index()
+                );
+            }
+        }
+
+        // bubble sort
+        for (int i = 0; i < tVGI.size(); i++)
+        {
+            for (int j = tVGI.size() - 1 ; j > i; j--)
+            {
+                if (tVGI[j - 1] > tVGI[j])
+                {
+                    Foam::Swap(tVGI[j - 1], tVGI[j]);
+                }
+            }
+        }
+
+        return tVGI;
     }
 
 
