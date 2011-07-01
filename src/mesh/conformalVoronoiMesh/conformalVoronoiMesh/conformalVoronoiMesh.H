@@ -973,7 +973,7 @@ public:
             void drawDelaunayCell
             (
                 Ostream& os,
-                const Delaunay::Finite_cells_iterator& cit,
+                const Cell_handle& c,
                 label offset = 0
             ) const;
 
