@@ -284,7 +284,7 @@ void Foam::polyatomicCloud::removeHighEnergyOverlaps()
 
         forAll(dil, d)
         {
-            forAll(cellOccupancy_[d],cellIMols)
+            forAll(cellOccupancy_[d], cellIMols)
             {
                 molI = cellOccupancy_[d][cellIMols];
 
@@ -322,35 +322,35 @@ void Foam::polyatomicCloud::removeHighEnergyOverlaps()
                         }
                     }
                 }
-            }
 
-            forAll(cellOccupancy_[d], cellIOtherMols)
-            {
-                molJ = cellOccupancy_[d][cellIOtherMols];
-
-                if (molJ > molI)
+                forAll(cellOccupancy_[d], cellIOtherMols)
                 {
-                    if (evaluatePotentialLimit(*molI, *molJ))
+                    molJ = cellOccupancy_[d][cellIOtherMols];
+
+                    if (molJ > molI)
                     {
-                        label idI = molI->id();
-
-                        label idJ = molJ->id();
-
-                        if
-                        (
-                            idI == idJ
-                         || findIndex(pot_.removalOrder(), idJ)
-                          < findIndex(pot_.removalOrder(), idI)
-                        )
+                        if (evaluatePotentialLimit(*molI, *molJ))
                         {
-                            if (findIndex(molsToDelete, molJ) == -1)
+                            label idI = molI->id();
+
+                            label idJ = molJ->id();
+
+                            if
+                            (
+                                idI == idJ
+                             || findIndex(pot_.removalOrder(), idJ)
+                              < findIndex(pot_.removalOrder(), idI)
+                            )
                             {
-                                molsToDelete.append(molJ);
+                                if (findIndex(molsToDelete, molJ) == -1)
+                                {
+                                    molsToDelete.append(molJ);
+                                }
                             }
-                        }
-                        else if (findIndex(molsToDelete, molI) == -1)
-                        {
-                            molsToDelete.append(molI);
+                            else if (findIndex(molsToDelete, molI) == -1)
+                            {
+                                molsToDelete.append(molI);
+                            }
                         }
                     }
                 }
