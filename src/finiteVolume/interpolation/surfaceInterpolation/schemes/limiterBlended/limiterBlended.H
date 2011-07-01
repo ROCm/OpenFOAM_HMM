@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,9 @@ Description
     limitedSurfaceInterpolationScheme.
 
     The limited scheme is specified first followed by the scheme to be scaled
-    by the limiter and then the scheme scaled by 1 - limiter.
+    by the limiter and then the scheme scaled by 1 - limiter e.g.
+
+    div(phi,U)      Gauss limiterBlended vanLeer linear linearUpwind grad(U);
 
 SourceFiles
     limiterBlended.C
