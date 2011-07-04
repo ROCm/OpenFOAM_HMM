@@ -14,3 +14,6 @@ runApplication setSet -region wallFilmRegion -batch createWallFilmRegionPatches.
 mv log.setSet log.createWallFilmRegionPatches.setSet
 
 runApplication createPatch -region wallFilmRegion -overwrite
+
+paraFoam -touch
+paraFoam -touch -region wallFilmRegion

@@ -214,7 +214,8 @@ void Foam::PairSpringSliderDashpot<CloudType>::evaluatePair
             rHat_AB
            *(kN*pow(normalOverlapMag, b_) - etaN*(U_AB & rHat_AB));
 
-        // Cohesion force
+        // Cohesion force, energy density multiplied by the area of
+        // particle-particle overlap
         if (cohesion_)
         {
             fN_AB +=

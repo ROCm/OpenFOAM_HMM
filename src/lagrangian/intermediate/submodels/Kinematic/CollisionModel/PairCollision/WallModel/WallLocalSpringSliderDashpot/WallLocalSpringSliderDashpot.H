@@ -65,6 +65,12 @@ class WallLocalSpringSliderDashpot
         //- Coefficient of friction in for tangential sliding
         scalarList mu_;
 
+        //- Cohesion energy density [J/m^3]
+        scalarList cohesionEnergyDensity_;
+
+        // Switch cohesion on and off
+        boolList cohesion_;
+
         //- Mapping the patch index to the model data
         labelList patchMap_;
 
@@ -115,7 +121,8 @@ class WallLocalSpringSliderDashpot
             typename CloudType::parcelType& p,
             const point& site,
             const WallSiteData<vector>& data,
-            scalar pREff
+            scalar pREff,
+            bool cohesion
         ) const;
 
 

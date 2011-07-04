@@ -8,3 +8,6 @@ runApplication setSet -batch wallFilmRegion.setSet
 mv log.setSet log.wallFilmRegion.setSet
 
 runApplication extrudeToRegionMesh -overwrite
+
+paraFoam -touch
+paraFoam -touch -region wallFilmRegion
