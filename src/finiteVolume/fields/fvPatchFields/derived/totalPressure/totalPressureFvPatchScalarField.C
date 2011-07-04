@@ -153,7 +153,11 @@ void Foam::totalPressureFvPatchScalarField::rmap
 }
 
 
-void Foam::totalPressureFvPatchScalarField::updateCoeffs(const vectorField& Up)
+void Foam::totalPressureFvPatchScalarField::updateCoeffs
+(
+    const scalarField& p0p,
+    const vectorField& Up
+)
 {
     if (updated())
     {
@@ -165,7 +169,7 @@ void Foam::totalPressureFvPatchScalarField::updateCoeffs(const vectorField& Up)
 
     if (psiName_ == "none" && rhoName_ == "none")
     {
-        operator==(p0_ - 0.5*(1.0 - pos(phip))*magSqr(Up));
+        operator==(p0p - 0.5*(1.0 - pos(phip))*magSqr(Up));
     }
     else if (rhoName_ == "none")
     {
@@ -178,7 +182,7 @@ void Foam::totalPressureFvPatchScalarField::updateCoeffs(const vectorField& Up)
 
             operator==
             (
-                p0_
+                p0p
                /pow
                 (
                     (1.0 + 0.5*psip*gM1ByG*(1.0 - pos(phip))*magSqr(Up)),
@@ -188,7 +192,7 @@ void Foam::totalPressureFvPatchScalarField::updateCoeffs(const vectorField& Up)
         }
         else
         {
-            operator==(p0_/(1.0 + 0.5*psip*(1.0 - pos(phip))*magSqr(Up)));
+            operator==(p0p/(1.0 + 0.5*psip*(1.0 - pos(phip))*magSqr(Up)));
         }
     }
     else if (psiName_ == "none")
@@ -196,7 +200,7 @@ void Foam::totalPressureFvPatchScalarField::updateCoeffs(const vectorField& Up)
         const fvPatchField<scalar>& rho =
             patch().lookupPatchField<volScalarField, scalar>(rhoName_);
 
-        operator==(p0_ - 0.5*rho*(1.0 - pos(phip))*magSqr(Up));
+        operator==(p0p - 0.5*rho*(1.0 - pos(phip))*magSqr(Up));
     }
     else
     {
@@ -220,7 +224,11 @@ void Foam::totalPressureFvPatchScalarField::updateCoeffs(const vectorField& Up)
 
 void Foam::totalPressureFvPatchScalarField::updateCoeffs()
 {
-    updateCoeffs(patch().lookupPatchField<volVectorField, vector>(UName_));
+    updateCoeffs
+    (
+        p0(),
+        patch().lookupPatchField<volVectorField, vector>(UName())
+    );
 }
 
 

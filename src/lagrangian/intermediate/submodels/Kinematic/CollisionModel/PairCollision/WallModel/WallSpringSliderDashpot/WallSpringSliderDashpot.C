@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -77,22 +77,35 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
     const point& site,
     const WallSiteData<vector>& data,
     scalar pREff,
-    scalar kN
+    scalar kN,
+    bool cohesion
 ) const
 {
     vector r_PW = p.position() - site;
 
     vector U_PW = p.U() - data.wallData();
 
-    scalar normalOverlapMag = max(pREff - mag(r_PW), 0.0);
+    scalar r_PW_mag = mag(r_PW);
 
-    vector rHat_PW = r_PW/(mag(r_PW) + VSMALL);
+    scalar normalOverlapMag = max(pREff - r_PW_mag, 0.0);
+
+    vector rHat_PW = r_PW/(r_PW_mag + VSMALL);
 
     scalar etaN = alpha_*sqrt(p.mass()*kN)*pow025(normalOverlapMag);
 
     vector fN_PW =
         rHat_PW
        *(kN*pow(normalOverlapMag, b_) - etaN*(U_PW & rHat_PW));
+
+    // Cohesion force, energy density multiplied by the area of wall/particle
+    // overlap
+    if (cohesion)
+    {
+        fN_PW +=
+           -cohesionEnergyDensity_
+           *mathematical::pi*(sqr(pREff) - sqr(r_PW_mag))
+           *rHat_PW;
+    }
 
     p.f() += fN_PW;
 
@@ -157,6 +170,11 @@ Foam::WallSpringSliderDashpot<CloudType>::WallSpringSliderDashpot
     alpha_(readScalar(this->coeffDict().lookup("alpha"))),
     b_(readScalar(this->coeffDict().lookup("b"))),
     mu_(readScalar(this->coeffDict().lookup("mu"))),
+    cohesionEnergyDensity_
+    (
+        readScalar(this->coeffDict().lookup("cohesionEnergyDensity"))
+    ),
+    cohesion_(false),
     collisionResolutionSteps_
     (
         readScalar
@@ -183,6 +201,8 @@ Foam::WallSpringSliderDashpot<CloudType>::WallSpringSliderDashpot
     Estar_ = 1/((1 - sqr(pNu))/pE + (1 - sqr(nu))/E);
 
     Gstar_ = 1/(2*((2 + pNu - sqr(pNu))/pE + (2 + nu - sqr(nu))/E));
+
+    cohesion_ = (mag(cohesionEnergyDensity_) > VSMALL);
 }
 
 
@@ -266,13 +286,14 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
             flatSitePoints[siteI],
             flatSiteData[siteI],
             pREff,
-            kN
+            kN,
+            cohesion_
         );
     }
 
     forAll(sharpSitePoints, siteI)
     {
-        // Treating sharp sites like flat sites
+        // Treating sharp sites like flat sites, except suppress cohesion
 
         evaluateWall
         (
@@ -280,7 +301,8 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
             sharpSitePoints[siteI],
             sharpSiteData[siteI],
             pREff,
-            kN
+            kN,
+            false
         );
     }
 }
