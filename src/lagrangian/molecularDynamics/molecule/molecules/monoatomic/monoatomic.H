@@ -22,20 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::polyatomic
+    Foam::monoatomic
 
 Description
-    Foam::polyatomic
+    Foam::monoatomic
 
 SourceFiles
-    polyatomicI.H
-    polyatomic.C
-    polyatomicIO.C
+    monoatomicI.H
+    monoatomic.C
+    monoatomicIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef polyatomic_H
-#define polyatomic_H
+#ifndef monoatomic_H
+#define monoatomic_H
 
 #include "particle.H"
 #include "IOstream.H"
@@ -50,10 +50,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class polyatomic Declaration
+                           Class monoatomic Declaration
 \*---------------------------------------------------------------------------*/
 
-class polyatomic
+class monoatomic
 :
     public particle
 {
@@ -72,31 +72,22 @@ public:
         SPECIAL_USER     = 1
     };
 
-    //- Class to hold polyatomic constant properties
+    //- Class to hold monoatomic constant properties
     class constantProperties
     {
         // Private data
 
             //- Sites of mass, charge or interaction
-            List<constPropSite> sites_;
+            FixedList<constPropSite, 1> sites_;
 
             //- Which sites require electrostatic interactions
-            List<label> electrostaticSites_;
+            FixedList<label, 1> electrostaticSites_;
 
             //- Which sites require pair interactions
-            List<label> pairPotSites_;
-
-            //- Moment of intertia (in principal axis configiration)
-            diagTensor momentOfInertia_;
+            FixedList<label, 1> pairPotSites_;
 
             //-
             scalar mass_;
-
-
-        // Private Member Functions
-
-            //-
-            bool linearMoleculeTest() const;
 
 
     public:
@@ -108,28 +99,19 @@ public:
         inline constantProperties
         (
             const dictionary& dict,
-            const labelList& siteIds
+            const List<label>& siteIds
         );
 
         // Member functions
 
         //-
-        inline const List<constPropSite>& sites() const;
+        inline const FixedList<constPropSite, 1>& sites() const;
 
         //-
-        inline const List<label>& pairPotSites() const;
+        inline const FixedList<label, 1>& pairPotSites() const;
 
         //-
-        inline const List<label>& electrostaticSites() const;
-
-        //-
-        inline const diagTensor& momentOfInertia() const;
-
-        //-
-        inline bool linearMolecule() const;
-
-        //-
-        inline bool pointMolecule() const;
+        inline const FixedList<label, 1>& electrostaticSites() const;
 
         //-
         inline label degreesOfFreedom() const;
@@ -145,7 +127,7 @@ public:
     //- Class used to pass tracking data to the trackToFace function
     class trackingData
     :
-        public particle::TrackingData<MoleculeCloud<polyatomic> >
+        public particle::TrackingData<MoleculeCloud<monoatomic> >
     {
     public:
 
@@ -158,7 +140,6 @@ public:
             tpAccess
         };
 
-
     private:
 
         // label specifying which part of the integration algorithm is taking
@@ -169,9 +150,9 @@ public:
 
         // Constructors
 
-            trackingData(MoleculeCloud<polyatomic>& cloud, trackPart part)
+            trackingData(MoleculeCloud<monoatomic>& cloud, trackPart part)
             :
-                particle::TrackingData<MoleculeCloud<polyatomic> >(cloud),
+                particle::TrackingData<MoleculeCloud<monoatomic> >(cloud),
                 part_(part)
             {}
 
@@ -188,25 +169,13 @@ private:
 
     // Private data
 
-        //- Orientation, stored as the rotation tensor to transform
-        //  from the polyatomic to the global reference frame, i.e.:
-        //  globalVector = Q_ & bodyLocalVector
-        //  bodyLocalVector = Q_.T() & globalVector
-        tensor Q_;
-
-        //- Linear velocity of polyatomic
+          //- Linear velocity of monoatomic
         vector v_;
 
-        //- Total linear acceleration of polyatomic
+        //- Total linear acceleration of monoatomic
         vector a_;
 
-        //- Angular momentum of polyatomic, in body local reference frame
-        vector pi_;
-
-        //- Total torque on polyatomic, in body local reference frame
-        vector tau_;
-
-        //-
+            //-
         vector specialPosition_;
 
         //-
@@ -225,36 +194,23 @@ private:
         label id_;
 
         //-
-        List<vector> siteForces_;
+        FixedList<vector, 1> siteForces_;
 
         //-
-        List<vector> sitePositions_;
-
-
-    // Private Member Functions
-
-
-        //-
-        tensor rotationTensorX(scalar deltaT) const;
-
-        //-
-        tensor rotationTensorY(scalar deltaT) const;
-
-        //-
-        tensor rotationTensorZ(scalar deltaT) const;
+        FixedList<vector, 1> sitePositions_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("polyatomic");
+    TypeName("monoatomic");
 
-    friend class Cloud<polyatomic>;
+    friend class Cloud<monoatomic>;
 
     // Constructors
 
         //- Construct with macroscopic description
-        inline polyatomic
+        inline monoatomic
         (
             const polyMesh& mesh,
             const vector& position,
@@ -265,24 +221,21 @@ public:
             const vector& bulkVelocity,
             const vector& specialPosition,
             const constantProperties& constProps,
-            polyatomic::trackingData& td,
+            trackingData& td,
             const label special,
             const label id
         );
 
         //- Construct from all components
-        inline polyatomic
+        inline monoatomic
         (
             const polyMesh& mesh,
             const vector& position,
             const label cellI,
             const label tetFaceI,
             const label tetPtI,
-            const tensor& Q,
             const vector& v,
             const vector& a,
-            const vector& pi,
-            const vector& tau,
             const vector& specialPosition,
             const constantProperties& constProps,
             const label special,
@@ -290,7 +243,7 @@ public:
         );
 
         //- Construct from Istream
-        polyatomic
+        monoatomic
         (
             const polyMesh& mesh,
             Istream& is,
@@ -300,7 +253,7 @@ public:
         //- Construct and return a clone
         autoPtr<particle> clone() const
         {
-            return autoPtr<particle>(new polyatomic(*this));
+            return autoPtr<particle>(new monoatomic(*this));
         }
 
         //- Factory class to read-construct particles used for
@@ -316,9 +269,9 @@ public:
                 mesh_(mesh)
             {}
 
-            autoPtr<polyatomic> operator()(Istream& is) const
+            autoPtr<monoatomic> operator()(Istream& is) const
             {
-                return autoPtr<polyatomic>(new polyatomic(mesh_, is, true));
+                return autoPtr<monoatomic>(new monoatomic(mesh_, is, true));
             }
         };
 
@@ -346,12 +299,6 @@ public:
         // Access
 
             //-
-            inline const tensor& Q() const;
-
-            //-
-            inline tensor& Q();
-
-            //-
             inline const vector& v() const;
 
             //-
@@ -364,28 +311,16 @@ public:
             inline vector& a();
 
             //-
-            inline const vector& pi() const;
+            inline const FixedList<vector, 1>& siteForces() const;
 
             //-
-            inline vector& pi();
+            inline FixedList<vector, 1>& siteForces();
 
             //-
-            inline const vector& tau() const;
+            inline const FixedList<vector, 1>& sitePositions() const;
 
             //-
-            inline vector& tau();
-
-            //-
-            inline const List<vector>& siteForces() const;
-
-            //-
-            inline List<vector>& siteForces();
-
-            //-
-            inline const List<vector>& sitePositions() const;
-
-            //-
-            inline List<vector>& sitePositions();
+            inline FixedList<vector, 1>& sitePositions();
 
             //-
             inline const vector& specialPosition() const;
@@ -454,10 +389,10 @@ public:
     // I-O
 
         //- Read
-        static void readFields(Cloud<polyatomic>& mC);
+        static void readFields(Cloud<monoatomic>& mC);
 
         //- Write
-        static void writeFields(const Cloud<polyatomic>& mC);
+        static void writeFields(const Cloud<monoatomic>& mC);
 
         //- Show info
         static void info(trackingData& td);
@@ -465,7 +400,7 @@ public:
 
     // IOstream Operators
 
-        friend Ostream& operator<<(Ostream&, const polyatomic&);
+        friend Ostream& operator<<(Ostream&, const monoatomic&);
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -474,7 +409,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "polyatomicI.H"
+#include "monoatomicI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

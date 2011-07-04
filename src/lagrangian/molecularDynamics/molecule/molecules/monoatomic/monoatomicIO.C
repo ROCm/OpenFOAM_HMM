@@ -23,13 +23,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "polyatomic.H"
+#include "monoatomic.H"
 #include "IOstreams.H"
 #include "Cloud.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::polyatomic::polyatomic
+Foam::monoatomic::monoatomic
 (
     const polyMesh& mesh,
     Istream& is,
@@ -37,28 +37,22 @@ Foam::polyatomic::polyatomic
 )
 :
     particle(mesh, is, readFields),
-    Q_(tensor::zero),
     v_(vector::zero),
     a_(vector::zero),
-    pi_(vector::zero),
-    tau_(vector::zero),
     specialPosition_(vector::zero),
     potentialEnergy_(0.0),
     rf_(tensor::zero),
     special_(0),
     id_(0),
-    siteForces_(0),
-    sitePositions_(0)
+    siteForces_(),
+    sitePositions_()
 {
     if (readFields)
     {
         if (is.format() == IOstream::ASCII)
         {
-            is  >> Q_;
             is  >> v_;
             is  >> a_;
-            is  >> pi_;
-            is  >> tau_;
             is  >> siteForces_;
             potentialEnergy_ = readScalar(is);
             is  >> rf_;
@@ -71,12 +65,9 @@ Foam::polyatomic::polyatomic
         {
             is.read
             (
-                reinterpret_cast<char*>(&Q_),
-                sizeof(Q_)
-              + sizeof(v_)
+                reinterpret_cast<char*>(&v_),
+                sizeof(v_)
               + sizeof(a_)
-              + sizeof(pi_)
-              + sizeof(tau_)
               + sizeof(specialPosition_)
               + sizeof(potentialEnergy_)
               + sizeof(rf_)
@@ -91,7 +82,7 @@ Foam::polyatomic::polyatomic
     // Check state of Istream
     is.check
     (
-        "Foam::polyatomic::polyatomic"
+        "Foam::monoatomic::monoatomic"
         "("
             "const polyMesh& mesh,"
             "Istream& is,"
@@ -101,7 +92,7 @@ Foam::polyatomic::polyatomic
 }
 
 
-void Foam::polyatomic::readFields(Cloud<polyatomic>& mC)
+void Foam::monoatomic::readFields(Cloud<monoatomic>& mC)
 {
     if (!mC.size())
     {
@@ -110,20 +101,11 @@ void Foam::polyatomic::readFields(Cloud<polyatomic>& mC)
 
     particle::readFields(mC);
 
-    IOField<tensor> Q(mC.fieldIOobject("Q", IOobject::MUST_READ));
-    mC.checkFieldIOobject(mC, Q);
-
     IOField<vector> v(mC.fieldIOobject("v", IOobject::MUST_READ));
     mC.checkFieldIOobject(mC, v);
 
     IOField<vector> a(mC.fieldIOobject("a", IOobject::MUST_READ));
     mC.checkFieldIOobject(mC, a);
-
-    IOField<vector> pi(mC.fieldIOobject("pi", IOobject::MUST_READ));
-    mC.checkFieldIOobject(mC, pi);
-
-    IOField<vector> tau(mC.fieldIOobject("tau", IOobject::MUST_READ));
-    mC.checkFieldIOobject(mC, tau);
 
     IOField<vector> specialPosition
     (
@@ -139,15 +121,12 @@ void Foam::polyatomic::readFields(Cloud<polyatomic>& mC)
 
     label i = 0;
 
-    forAllIter(typename Cloud<polyatomic>, mC, iter)
+    forAllIter(typename Cloud<monoatomic>, mC, iter)
     {
-        polyatomic& mol = iter();
+        monoatomic& mol = iter();
 
-        mol.Q_ = Q[i];
         mol.v_ = v[i];
         mol.a_ = a[i];
-        mol.pi_ = pi[i];
-        mol.tau_ = tau[i];
         mol.specialPosition_ = specialPosition[i];
         mol.special_ = special[i];
         mol.id_ = id[i];
@@ -156,17 +135,14 @@ void Foam::polyatomic::readFields(Cloud<polyatomic>& mC)
 }
 
 
-void Foam::polyatomic::writeFields(const Cloud<polyatomic>& mC)
+void Foam::monoatomic::writeFields(const Cloud<monoatomic>& mC)
 {
     particle::writeFields(mC);
 
     label np = mC.size();
 
-    IOField<tensor> Q(mC.fieldIOobject("Q", IOobject::NO_READ), np);
     IOField<vector> v(mC.fieldIOobject("v", IOobject::NO_READ), np);
     IOField<vector> a(mC.fieldIOobject("a", IOobject::NO_READ), np);
-    IOField<vector> pi(mC.fieldIOobject("pi", IOobject::NO_READ), np);
-    IOField<vector> tau(mC.fieldIOobject("tau", IOobject::NO_READ), np);
     IOField<vector> specialPosition
     (
         mC.fieldIOobject("specialPosition", IOobject::NO_READ),
@@ -175,131 +151,61 @@ void Foam::polyatomic::writeFields(const Cloud<polyatomic>& mC)
     IOField<label> special(mC.fieldIOobject("special", IOobject::NO_READ), np);
     IOField<label> id(mC.fieldIOobject("id", IOobject::NO_READ), np);
 
-    // Post processing fields
-
-    IOField<vector> piGlobal
-    (
-        mC.fieldIOobject("piGlobal", IOobject::NO_READ),
-        np
-    );
-
-    IOField<vector> tauGlobal
-    (
-        mC.fieldIOobject("tauGlobal", IOobject::NO_READ),
-        np
-    );
-
-    IOField<vector> orientation1
-    (
-        mC.fieldIOobject("orientation1", IOobject::NO_READ),
-        np
-    );
-
-    IOField<vector> orientation2
-    (
-        mC.fieldIOobject("orientation2", IOobject::NO_READ),
-        np
-    );
-
-    IOField<vector> orientation3
-    (
-        mC.fieldIOobject("orientation3", IOobject::NO_READ),
-        np
-    );
-
     label i = 0;
-    forAllConstIter(typename Cloud<polyatomic>, mC, iter)
+    forAllConstIter(typename Cloud<monoatomic>, mC, iter)
     {
-        const polyatomic& mol = iter();
+        const monoatomic& mol = iter();
 
-        Q[i] = mol.Q_;
         v[i] = mol.v_;
         a[i] = mol.a_;
-        pi[i] = mol.pi_;
-        tau[i] = mol.tau_;
         specialPosition[i] = mol.specialPosition_;
         special[i] = mol.special_;
         id[i] = mol.id_;
-
-        piGlobal[i] = mol.Q_ & mol.pi_;
-        tauGlobal[i] = mol.Q_ & mol.tau_;
-
-        orientation1[i] = mol.Q_ & vector(1,0,0);
-        orientation2[i] = mol.Q_ & vector(0,1,0);
-        orientation3[i] = mol.Q_ & vector(0,0,1);
-
         i++;
     }
 
-    Q.write();
     v.write();
     a.write();
-    pi.write();
-    tau.write();
     specialPosition.write();
     special.write();
     id.write();
-
-    piGlobal.write();
-    tauGlobal.write();
-
-    orientation1.write();
-    orientation2.write();
-    orientation3.write();
 }
 
 
-void Foam::polyatomic::info(polyatomic::trackingData& td)
+void Foam::monoatomic::info(monoatomic::trackingData& td)
 {
     vector totalLinearMomentum(vector::zero);
-    vector totalAngularMomentum(vector::zero);
     scalar maxVelocityMag = 0.0;
     scalar totalMass = 0.0;
     scalar totalLinearKE = 0.0;
-    scalar totalAngularKE = 0.0;
     scalar totalPE = 0.0;
     scalar totalrDotf = 0.0;
-    //vector CentreOfMass(vector::zero);
     label nMols = td.cloud().size();
-    label dofs = 0;
 
-    forAllConstIter(typename Cloud<polyatomic>, td.cloud(), mol)
+    forAllConstIter(typename Cloud<monoatomic>, td.cloud(), mol)
     {
         const label molId = mol().id();
         scalar molMass(td.cloud().constProps(molId).mass());
         totalMass += molMass;
-        //CentreOfMass += mol().position()*molMass;
     }
 
-    // if (nMols)
-    // {
-    //     CentreOfMass /= totalMass;
-    // }
-
-    forAllConstIter(typename Cloud<polyatomic>, td.cloud(), mol)
+    forAllConstIter(typename Cloud<monoatomic>, td.cloud(), mol)
     {
         const label molId = mol().id();
-        const polyatomic::constantProperties cP
+        const monoatomic::constantProperties cP
         (
             td.cloud().constProps(molId)
         );
         scalar molMass(cP.mass());
-        const diagTensor& molMoI(cP.momentOfInertia());
         const vector& molV(mol().v());
-        const vector& molOmega(inv(molMoI) & mol().pi());
-        vector molPiGlobal = mol().Q() & mol().pi();
         totalLinearMomentum += molV * molMass;
-        totalAngularMomentum += molPiGlobal;
-            //+((mol().position() - CentreOfMass) ^ (molV * molMass));
         if (mag(molV) > maxVelocityMag)
         {
             maxVelocityMag = mag(molV);
         }
         totalLinearKE += 0.5*molMass*magSqr(molV);
-        totalAngularKE += 0.5*(molOmega & molMoI & molOmega);
         totalPE += mol().potentialEnergy();
         totalrDotf += tr(mol().rf());
-        dofs += cP.degreesOfFreedom();
     }
 
     scalar meshVolume = sum(td.cloud().mesh().cellVolumes());
@@ -307,15 +213,12 @@ void Foam::polyatomic::info(polyatomic::trackingData& td)
     if (Pstream::parRun())
     {
         reduce(totalLinearMomentum, sumOp<vector>());
-        reduce(totalAngularMomentum, sumOp<vector>());
         reduce(maxVelocityMag, maxOp<scalar>());
         reduce(totalMass, sumOp<scalar>());
         reduce(totalLinearKE, sumOp<scalar>());
-        reduce(totalAngularKE, sumOp<scalar>());
         reduce(totalPE, sumOp<scalar>());
         reduce(totalrDotf, sumOp<scalar>());
         reduce(nMols, sumOp<label>());
-        reduce(dofs, sumOp<label>());
         reduce(meshVolume, sumOp<scalar>());
     }
 
@@ -330,22 +233,16 @@ void Foam::polyatomic::info(polyatomic::trackingData& td)
             << "    Average linear momentum per molecule = "
             << totalLinearMomentum/nMols << ' '
             << mag(totalLinearMomentum)/nMols << nl
-            << "    Average angular momentum per molecule = "
-            << totalAngularMomentum << ' '
-            << mag(totalAngularMomentum)/nMols << nl
             << "    maximum |velocity| = "
             << maxVelocityMag << nl
             << "    Average linear KE per molecule = "
             << totalLinearKE/nMols << nl
             << "    Average angular KE per molecule = "
-            << totalAngularKE/nMols << nl
-            << "    Average PE per molecule = "
             << totalPE/nMols << nl
             << "    Average TE per molecule = "
             <<
             (
                   totalLinearKE
-                + totalAngularKE
                 + totalPE
             )
             /nMols
@@ -360,18 +257,15 @@ void Foam::polyatomic::info(polyatomic::trackingData& td)
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const polyatomic& mol)
+Foam::Ostream& Foam::operator<<(Ostream& os, const monoatomic& mol)
 {
     if (os.format() == IOstream::ASCII)
     {
         os  << token::SPACE << static_cast<const particle&>(mol)
             << token::SPACE << mol.face()
             << token::SPACE << mol.stepFraction()
-            << token::SPACE << mol.Q_
             << token::SPACE << mol.v_
             << token::SPACE << mol.a_
-            << token::SPACE << mol.pi_
-            << token::SPACE << mol.tau_
             << token::SPACE << mol.specialPosition_
             << token::SPACE << mol.potentialEnergy_
             << token::SPACE << mol.rf_
@@ -385,12 +279,9 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const polyatomic& mol)
         os  << static_cast<const particle&>(mol);
         os.write
         (
-            reinterpret_cast<const char*>(&mol.Q_),
-            sizeof(mol.Q_)
-          + sizeof(mol.v_)
+            reinterpret_cast<const char*>(&mol.v_),
+            sizeof(mol.v_)
           + sizeof(mol.a_)
-          + sizeof(mol.pi_)
-          + sizeof(mol.tau_)
           + sizeof(mol.specialPosition_)
           + sizeof(mol.potentialEnergy_)
           + sizeof(mol.rf_)
@@ -404,7 +295,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const polyatomic& mol)
     os.check
     (
         "Foam::Ostream& Foam::operator<<"
-        "(Foam::Ostream&, const Foam::polyatomic&)"
+        "(Foam::Ostream&, const Foam::monoatomic&)"
     );
 
     return os;

@@ -28,6 +28,7 @@ Description
 
 #include "fvCFD.H"
 #include "polyatomicCloud.H"
+#include "monoatomicCloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,11 +51,15 @@ int main(int argc, char *argv[])
         )
     );
 
-    IOdictionary idListDict
+    word polyCloudName("polyatomicCloud");
+
+    const dictionary& polyDict(mdInitialiseDict.subDict(polyCloudName));
+
+    IOdictionary polyIdListDict
     (
         IOobject
         (
-            "idList",
+            polyCloudName + "_idList",
             mesh.time().constant(),
             mesh,
             IOobject::NO_READ,
@@ -62,17 +67,15 @@ int main(int argc, char *argv[])
         )
     );
 
-    word cloudName("polyatomicCloud");
-
-    potential pot
+    potential polyPot
     (
         mesh,
-        mdInitialiseDict,
+        polyDict,
         IOdictionary
         (
             IOobject
             (
-                cloudName +  "Properties",
+                polyCloudName +  "Properties",
                 mesh.time().constant(),
                 mesh,
                 IOobject::MUST_READ_IF_MODIFIED,
@@ -80,27 +83,72 @@ int main(int argc, char *argv[])
                 false
             )
         ),
-        idListDict
+        polyIdListDict
     );
 
-    polyatomicCloud molecules(cloudName, mesh, pot, mdInitialiseDict);
+    polyatomicCloud poly
+    (
+        polyCloudName,
+        mesh,
+        polyPot,
+        polyDict
+    );
 
-    label totalMolecules = molecules.size();
-
-    if (Pstream::parRun())
-    {
-        reduce(totalMolecules, sumOp<label>());
-    }
-
-    Info<< nl << "Total number of molecules added: " << totalMolecules
+    Info<< nl << returnReduce(poly.size(), sumOp<label>()) << " added to "
+        << poly.name()
         << nl << endl;
 
-    IOstream::defaultPrecision(15);
+    word monoCloudName("monoatomicCloud");
+
+    const dictionary& monoDict(mdInitialiseDict.subDict(monoCloudName));
+
+    IOdictionary monoIdListDict
+    (
+        IOobject
+        (
+            monoCloudName + "_idList",
+            mesh.time().constant(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        )
+    );
+
+    potential monoPot
+    (
+        mesh,
+        monoDict,
+        IOdictionary
+        (
+            IOobject
+            (
+                monoCloudName +  "Properties",
+                mesh.time().constant(),
+                mesh,
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE,
+                false
+            )
+        ),
+        monoIdListDict
+    );
+
+    monoatomicCloud mono
+    (
+        monoCloudName,
+        mesh,
+        monoPot,
+        monoDict
+    );
+
+    Info<< nl << returnReduce(mono.size(), sumOp<label>()) << " added to "
+        << mono.name()
+        << nl << endl;
 
     if (!mesh.write())
     {
         FatalErrorIn(args.executable())
-            << "Failed writing polyatomicCloud."
+            << "Failed writing."
             << nl << exit(FatalError);
     }
 

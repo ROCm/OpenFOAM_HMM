@@ -478,7 +478,7 @@ void Foam::MoleculeCloud<MoleculeType>::removeHighEnergyOverlaps()
 template<class MoleculeType>
 void Foam::MoleculeCloud<MoleculeType>::initialiseMolecules
 (
-    const IOdictionary& mdInitialiseDict
+    const dictionary& mdInitialiseDict
 )
 {
     Info<< nl
@@ -606,7 +606,6 @@ void Foam::MoleculeCloud<MoleculeType>::initialiseMolecules
 
                         continue;
                     }
-
 
                     latticeCellScale = pow
                     (
@@ -1049,37 +1048,11 @@ void Foam::MoleculeCloud<MoleculeType>::createMolecule
 
     const typename MoleculeType::constantProperties& cP(constProps(id));
 
-    vector v = equipartitionLinearVelocity(temperature, cP.mass());
-
-    v += bulkVelocity;
-
-    vector pi = vector::zero;
-
-    tensor Q = I;
-
-    if (!cP.pointMolecule())
-    {
-        pi = equipartitionAngularMomentum(temperature, cP);
-
-        scalar phi(rndGen_.scalar01()*twoPi);
-
-        scalar theta(rndGen_.scalar01()*twoPi);
-
-        scalar psi(rndGen_.scalar01()*twoPi);
-
-        Q = tensor
-        (
-            cos(psi)*cos(phi) - cos(theta)*sin(phi)*sin(psi),
-            cos(psi)*sin(phi) + cos(theta)*cos(phi)*sin(psi),
-            sin(psi)*sin(theta),
-            - sin(psi)*cos(phi) - cos(theta)*sin(phi)*cos(psi),
-            - sin(psi)*sin(phi) + cos(theta)*cos(phi)*cos(psi),
-            cos(psi)*sin(theta),
-            sin(theta)*sin(phi),
-            - sin(theta)*cos(phi),
-            cos(theta)
-        );
-    }
+    typename MoleculeType::trackingData td
+    (
+        *this,
+        MoleculeType::trackingData::tpAccess
+    );
 
     addParticle
     (
@@ -1090,13 +1063,11 @@ void Foam::MoleculeCloud<MoleculeType>::createMolecule
             cell,
             tetFace,
             tetPt,
-            Q,
-            v,
-            vector::zero,
-            pi,
-            vector::zero,
+            temperature,
+            bulkVelocity,
             specialPosition,
-            constProps(id),
+            cP,
+            td,
             special,
             id
         )
@@ -1136,7 +1107,7 @@ Foam::MoleculeCloud<MoleculeType>::MoleculeCloud
     cellOccupancy_(mesh_.nCells()),
     il_(mesh_, pot_.pairPotentials().rCutMax(), false),
     constPropList_(),
-    rndGen_(clock::getTime())
+    rndGen_(label(971501) + 1526*Pstream::myProcNo())
 {
     if (readFields)
     {
@@ -1159,7 +1130,7 @@ Foam::MoleculeCloud<MoleculeType>::MoleculeCloud
     const word& cloudName,
     const polyMesh& mesh,
     const potential& pot,
-    const IOdictionary& mdInitialiseDict,
+    const dictionary& mdInitialiseDict,
     bool readFields
 )
 :
@@ -1167,9 +1138,9 @@ Foam::MoleculeCloud<MoleculeType>::MoleculeCloud
     moleculeCloud(),
     mesh_(mesh),
     pot_(pot),
-    il_(mesh_, 0.0, false),
+    il_(mesh_),
     constPropList_(),
-    rndGen_(clock::getTime())
+    rndGen_(label(971501) + 1526*Pstream::myProcNo())
 {
     if (readFields)
     {
@@ -1189,18 +1160,34 @@ Foam::MoleculeCloud<MoleculeType>::MoleculeCloud
 template<class MoleculeType>
 void Foam::MoleculeCloud<MoleculeType>::evolve()
 {
-    typename MoleculeType::trackingData td0(*this, 0);
+    typename MoleculeType::trackingData td0
+    (
+        *this,
+        MoleculeType::trackingData::tpFirstVelocityHalfStep
+    );
     Cloud<MoleculeType>::move(td0, mesh_.time().deltaTValue());
 
-    typename MoleculeType::trackingData td1(*this, 1);
+    typename MoleculeType::trackingData td1
+    (
+        *this,
+        MoleculeType::trackingData::tpLinearTrack
+    );
     Cloud<MoleculeType>::move(td1, mesh_.time().deltaTValue());
 
-    typename MoleculeType::trackingData td2(*this, 2);
+    typename MoleculeType::trackingData td2
+    (
+        *this,
+        MoleculeType::trackingData::tpRotationalTrack
+    );
     Cloud<MoleculeType>::move(td2, mesh_.time().deltaTValue());
 
     calculateForce();
 
-    typename MoleculeType::trackingData td3(*this, 3);
+    typename MoleculeType::trackingData td3
+    (
+        *this,
+        MoleculeType::trackingData::tpSecondVelocityHalfStep
+    );
     Cloud<MoleculeType>::move(td3, mesh_.time().deltaTValue());
 
     info();
@@ -1231,144 +1218,18 @@ void Foam::MoleculeCloud<MoleculeType>::calculateForce()
 
 
 template<class MoleculeType>
-void Foam::MoleculeCloud<MoleculeType>::info() const
+void Foam::MoleculeCloud<MoleculeType>::info()
 {
     // Calculates and prints the mean momentum and energy in the system
     // and the number of molecules.
 
-    vector totalLinearMomentum(vector::zero);
+    typename MoleculeType::trackingData td
+    (
+        *this,
+        MoleculeType::trackingData::tpAccess
+    );
 
-    vector totalAngularMomentum(vector::zero);
-
-    scalar maxVelocityMag = 0.0;
-
-    scalar totalMass = 0.0;
-
-    scalar totalLinearKE = 0.0;
-
-    scalar totalAngularKE = 0.0;
-
-    scalar totalPE = 0.0;
-
-    scalar totalrDotf = 0.0;
-
-    //vector CentreOfMass(vector::zero);
-
-    label nMols = this->size();
-
-    label dofs = 0;
-
-    {
-        forAllConstIter(typename MoleculeCloud<MoleculeType>, *this, mol)
-        {
-            const label molId = mol().id();
-
-            scalar molMass(this->constProps(molId).mass());
-
-            totalMass += molMass;
-
-            //CentreOfMass += mol().position()*molMass;
-        }
-
-        // if (nMols)
-        // {
-        //     CentreOfMass /= totalMass;
-        // }
-
-        forAllConstIter(typename MoleculeCloud<MoleculeType>, *this, mol)
-        {
-            const label molId = mol().id();
-
-            const typename MoleculeType::constantProperties cP
-            (
-                this->constProps(molId)
-            );
-
-            scalar molMass(cP.mass());
-
-            const diagTensor& molMoI(cP.momentOfInertia());
-
-            const vector& molV(mol().v());
-
-            const vector& molOmega(inv(molMoI) & mol().pi());
-
-            vector molPiGlobal = mol().Q() & mol().pi();
-
-            totalLinearMomentum += molV * molMass;
-
-            totalAngularMomentum += molPiGlobal;
-            //+((mol().position() - CentreOfMass) ^ (molV * molMass));
-
-            if (mag(molV) > maxVelocityMag)
-            {
-                maxVelocityMag = mag(molV);
-            }
-
-            totalLinearKE += 0.5*molMass*magSqr(molV);
-
-            totalAngularKE += 0.5*(molOmega & molMoI & molOmega);
-
-            totalPE += mol().potentialEnergy();
-
-            totalrDotf += tr(mol().rf());
-
-            dofs += cP.degreesOfFreedom();
-        }
-    }
-
-    scalar meshVolume = sum(mesh_.cellVolumes());
-
-    if (Pstream::parRun())
-    {
-        reduce(totalLinearMomentum, sumOp<vector>());
-        reduce(totalAngularMomentum, sumOp<vector>());
-        reduce(maxVelocityMag, maxOp<scalar>());
-        reduce(totalMass, sumOp<scalar>());
-        reduce(totalLinearKE, sumOp<scalar>());
-        reduce(totalAngularKE, sumOp<scalar>());
-        reduce(totalPE, sumOp<scalar>());
-        reduce(totalrDotf, sumOp<scalar>());
-        reduce(nMols, sumOp<label>());
-        reduce(dofs, sumOp<label>());
-        reduce(meshVolume, sumOp<scalar>());
-    }
-
-    if (nMols)
-    {
-        Info<< nl << "Number of molecules in " << this->name() << " = "
-            << nMols << nl
-            << "    Overall number density = "
-            << nMols/meshVolume << nl
-            << "    Overall mass density = "
-            << totalMass/meshVolume << nl
-            << "    Average linear momentum per molecule = "
-            << totalLinearMomentum/nMols << ' '
-            << mag(totalLinearMomentum)/nMols << nl
-            << "    Average angular momentum per molecule = "
-            << totalAngularMomentum << ' '
-            << mag(totalAngularMomentum)/nMols << nl
-            << "    maximum |velocity| = "
-            << maxVelocityMag << nl
-            << "    Average linear KE per molecule = "
-            << totalLinearKE/nMols << nl
-            << "    Average angular KE per molecule = "
-            << totalAngularKE/nMols << nl
-            << "    Average PE per molecule = "
-            << totalPE/nMols << nl
-            << "    Average TE per molecule = "
-            <<
-            (
-                  totalLinearKE
-                + totalAngularKE
-                + totalPE
-            )
-            /nMols
-            << nl << endl;
-    }
-    else
-    {
-        Info<< nl << "No molecules in " << this->name() << nl << endl;
-    }
+    MoleculeType::info(td);
 }
 
 

@@ -122,10 +122,7 @@ private:
         void removeHighEnergyOverlaps();
 
         //-
-        void initialiseMolecules
-        (
-            const IOdictionary& mdInitialiseDict
-        );
+        void initialiseMolecules(const dictionary& mdInitialiseDict);
 
         //-
         void createMolecule
@@ -142,20 +139,6 @@ private:
 
         //-
         label nSites() const;
-
-        //-
-        inline vector equipartitionLinearVelocity
-        (
-            scalar temperature,
-            scalar mass
-        );
-
-        //-
-        inline vector equipartitionAngularMomentum
-        (
-            scalar temperature,
-            const typename MoleculeType::constantProperties& cP
-        );
 
         //- Disallow default bitwise copy construct
         MoleculeCloud(const MoleculeCloud&);
@@ -183,7 +166,7 @@ public:
             const word& cloudName,
             const polyMesh& mesh,
             const potential& pot,
-            const IOdictionary& mdInitialiseDict,
+            const dictionary& mdInitialiseDict,
             bool readFields = true
         );
 
@@ -197,7 +180,7 @@ public:
         void calculateForce();
 
         //- Print cloud information
-        void info() const;
+        void info();
 
 
         // Access
@@ -225,6 +208,20 @@ public:
 
             //-
             inline Random& rndGen();
+
+            //-
+            inline vector equipartitionLinearVelocity
+            (
+                scalar temperature,
+                scalar mass
+            );
+
+            //-
+            inline vector equipartitionAngularMomentum
+            (
+                scalar temperature,
+                const typename MoleculeType::constantProperties& cP
+            );
 
 
     // Member Operators

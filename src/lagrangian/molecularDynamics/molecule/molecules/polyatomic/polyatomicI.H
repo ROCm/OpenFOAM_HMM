@@ -311,16 +311,75 @@ inline Foam::polyatomic::polyatomic
     const label cellI,
     const label tetFaceI,
     const label tetPtI,
+    const scalar temperature,
+    const vector& bulkVelocity,
+    const vector& specialPosition,
+    const constantProperties& cP,
+    polyatomic::trackingData& td,
+    const label special,
+    const label id
+)
+:
+    particle(mesh, position, cellI, tetFaceI, tetPtI),
+    Q_(I),
+    v_(bulkVelocity),
+    a_(vector::zero),
+    pi_(vector::zero),
+    tau_(vector::zero),
+    specialPosition_(specialPosition),
+    potentialEnergy_(0.0),
+    rf_(tensor::zero),
+    special_(special),
+    id_(id),
+    siteForces_(cP.nSites(), vector::zero),
+    sitePositions_(cP.nSites())
+{
+    setSitePositions(cP);
+
+    v_ += td.cloud().equipartitionLinearVelocity(temperature, cP.mass());
+
+    if (!cP.pointMolecule())
+    {
+        pi_ = td.cloud().equipartitionAngularMomentum(temperature, cP);
+
+        scalar phi(td.cloud().rndGen().scalar01()*twoPi);
+
+        scalar theta(td.cloud().rndGen().scalar01()*twoPi);
+
+        scalar psi(td.cloud().rndGen().scalar01()*twoPi);
+
+        Q_ = tensor
+        (
+            cos(psi)*cos(phi) - cos(theta)*sin(phi)*sin(psi),
+            cos(psi)*sin(phi) + cos(theta)*cos(phi)*sin(psi),
+            sin(psi)*sin(theta),
+            - sin(psi)*cos(phi) - cos(theta)*sin(phi)*cos(psi),
+            - sin(psi)*sin(phi) + cos(theta)*cos(phi)*cos(psi),
+            cos(psi)*sin(theta),
+            sin(theta)*sin(phi),
+            - sin(theta)*cos(phi),
+            cos(theta)
+        );
+    }
+}
+
+
+Foam::polyatomic::polyatomic
+(
+    const polyMesh& mesh,
+    const vector& position,
+    const label cellI,
+    const label tetFaceI,
+    const label tetPtI,
     const tensor& Q,
     const vector& v,
     const vector& a,
     const vector& pi,
     const vector& tau,
     const vector& specialPosition,
-    const constantProperties& constProps,
+    const constantProperties& cP,
     const label special,
     const label id
-
 )
 :
     particle(mesh, position, cellI, tetFaceI, tetPtI),
@@ -334,10 +393,10 @@ inline Foam::polyatomic::polyatomic
     rf_(tensor::zero),
     special_(special),
     id_(id),
-    siteForces_(constProps.nSites(), vector::zero),
-    sitePositions_(constProps.nSites())
+    siteForces_(cP.nSites(), vector::zero),
+    sitePositions_(cP.nSites())
 {
-    setSitePositions(constProps);
+    setSitePositions(cP);
 }
 
 
@@ -415,7 +474,7 @@ inline bool Foam::polyatomic::constantProperties::linearMolecule() const
 }
 
 
-inline bool Foam::polyatomic::constantProperties::pointMolecule() const
+inline  bool Foam::polyatomic::constantProperties::pointMolecule() const
 {
     return (momentOfInertia_.zz() < 0);
 }

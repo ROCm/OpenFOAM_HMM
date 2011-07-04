@@ -30,7 +30,7 @@ using namespace Foam::constant;
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class MoleculeType>
-void Foam::MoleculeCloud<MoleculeType>::evaluatePair
+inline void Foam::MoleculeCloud<MoleculeType>::evaluatePair
 (
     MoleculeType& molI,
     MoleculeType& molJ
@@ -157,7 +157,7 @@ void Foam::MoleculeCloud<MoleculeType>::evaluatePair
 
 
 template<class MoleculeType>
-bool Foam::MoleculeCloud<MoleculeType>::evaluatePotentialLimit
+inline bool Foam::MoleculeCloud<MoleculeType>::evaluatePotentialLimit
 (
     MoleculeType& molI,
     MoleculeType& molJ
@@ -310,8 +310,63 @@ bool Foam::MoleculeCloud<MoleculeType>::evaluatePotentialLimit
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 template<class MoleculeType>
-Foam::vector
+inline const Foam::polyMesh& Foam::MoleculeCloud<MoleculeType>::mesh() const
+{
+    return mesh_;
+}
+
+
+template<class MoleculeType>
+inline const Foam::potential& Foam::MoleculeCloud<MoleculeType>::pot() const
+{
+    return pot_;
+}
+
+
+template<class MoleculeType>
+inline const Foam::List<Foam::DynamicList<MoleculeType*> >&
+Foam::MoleculeCloud<MoleculeType>::cellOccupancy() const
+{
+    return cellOccupancy_;
+}
+
+
+template<class MoleculeType>
+inline const Foam::InteractionLists<MoleculeType>&
+Foam::MoleculeCloud<MoleculeType>::il() const
+{
+    return il_;
+}
+
+
+template<class MoleculeType>
+inline const Foam::List<typename MoleculeType::constantProperties>
+Foam::MoleculeCloud<MoleculeType>::constProps() const
+{
+    return constPropList_;
+}
+
+
+template<class MoleculeType>
+inline const typename MoleculeType::constantProperties&
+Foam::MoleculeCloud<MoleculeType>::constProps(label id) const
+{
+    return constPropList_[id];
+}
+
+
+template<class MoleculeType>
+inline Foam::Random& Foam::MoleculeCloud<MoleculeType>::rndGen()
+{
+    return rndGen_;
+}
+
+
+template<class MoleculeType>
+inline Foam::vector
 Foam::MoleculeCloud<MoleculeType>::equipartitionLinearVelocity
 (
     scalar temperature,
@@ -328,7 +383,7 @@ Foam::MoleculeCloud<MoleculeType>::equipartitionLinearVelocity
 
 
 template<class MoleculeType>
-Foam::vector
+inline Foam::vector
 Foam::MoleculeCloud<MoleculeType>::equipartitionAngularMomentum
 (
     scalar temperature,
@@ -355,61 +410,6 @@ Foam::MoleculeCloud<MoleculeType>::equipartitionAngularMomentum
             sqrt(cP.momentOfInertia().zz())*rndGen_.GaussNormal()
         );
     }
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class MoleculeType>
-const Foam::polyMesh& Foam::MoleculeCloud<MoleculeType>::mesh() const
-{
-    return mesh_;
-}
-
-
-template<class MoleculeType>
-const Foam::potential& Foam::MoleculeCloud<MoleculeType>::pot() const
-{
-    return pot_;
-}
-
-
-template<class MoleculeType>
-const Foam::List<Foam::DynamicList<MoleculeType*> >&
-Foam::MoleculeCloud<MoleculeType>::cellOccupancy() const
-{
-    return cellOccupancy_;
-}
-
-
-template<class MoleculeType>
-const Foam::InteractionLists<MoleculeType>&
-Foam::MoleculeCloud<MoleculeType>::il() const
-{
-    return il_;
-}
-
-
-template<class MoleculeType>
-const Foam::List<typename MoleculeType::constantProperties>
-Foam::MoleculeCloud<MoleculeType>::constProps() const
-{
-    return constPropList_;
-}
-
-
-template<class MoleculeType>
-const typename MoleculeType::constantProperties&
-Foam::MoleculeCloud<MoleculeType>::constProps(label id) const
-{
-    return constPropList_[id];
-}
-
-
-template<class MoleculeType>
-Foam::Random& Foam::MoleculeCloud<MoleculeType>::rndGen()
-{
-    return rndGen_;
 }
 
 

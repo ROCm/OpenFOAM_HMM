@@ -243,9 +243,9 @@ void Foam::potential::potential::readPotentialDict
 
 void Foam::potential::potential::readMdInitialiseDict
 (
-    const IOdictionary& mdInitialiseDict,
+    const dictionary& mdInitialiseDict,
     const dictionary& moleculePropertiesDict,
-    IOdictionary& idListDict
+    dictionary& idListDict
 )
 {
     DynamicList<word> idList;
@@ -274,11 +274,12 @@ void Foam::potential::potential::readMdInitialiseDict
                 (
                     "potential::readMdInitialiseDict"
                     "("
-                        "const IOdictionary&, "
-                        "IOdictionary&"
+                        "const dictionary&, "
+                        "dictionary&"
                     ")"
                 )   << "Molecule type " << id
-                    << " not found in mdProperties dictionary." << nl
+                    << " not found in " << moleculePropertiesDict.name()
+                    << " dictionary." << nl
                     << abort(FatalError);
             }
 
@@ -329,8 +330,8 @@ void Foam::potential::potential::readMdInitialiseDict
                 (
                     "potential::readMdInitialiseDict"
                     "("
-                        "const IOdictionary&, "
-                        "IOdictionary&"
+                        "const dictionary&, "
+                        "dictionary&"
                     ")"
                 )   << "Tether id  " << tetherSiteId
                     << " not found as a site of any molecule in zone." << nl
@@ -367,9 +368,9 @@ Foam::potential::potential
 Foam::potential::potential
 (
     const polyMesh& mesh,
-    const IOdictionary& mdInitialiseDict,
+    const dictionary& mdInitialiseDict,
     const dictionary& moleculePropertiesDict,
-    IOdictionary& idListDict
+    dictionary& idListDict
 )
 :
     mesh_(mesh)

@@ -2,6 +2,8 @@ clouds/baseClasses/moleculeCloud/moleculeCloud.C
 
 molecules/constPropSite/constPropSite.C
 
+molecules/monoatomic/monoatomic.C
+molecules/monoatomic/monoatomicIO.C
 molecules/polyatomic/polyatomic.C
 molecules/polyatomic/polyatomicIO.C
 

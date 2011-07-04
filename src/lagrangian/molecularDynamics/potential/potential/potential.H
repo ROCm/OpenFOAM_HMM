@@ -95,9 +95,9 @@ class potential
         //-
         void readMdInitialiseDict
         (
-            const IOdictionary& mdInitialiseDict,
+            const dictionary& mdInitialiseDict,
             const dictionary& moleculePropertiesDict,
-            IOdictionary& idListDict
+            dictionary& idListDict
         );
 
         //- Disallow default bitwise copy construct
@@ -122,9 +122,9 @@ public:
         potential
         (
             const polyMesh& mesh,
-            const IOdictionary& mdInitialiseDict,
+            const dictionary& mdInitialiseDict,
             const dictionary& moleculePropertiesDict,
-            IOdictionary& idListDict
+            dictionary& idListDict
         );
 
 

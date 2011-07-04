@@ -89,7 +89,7 @@ bool Foam::polyatomic::move
 
     const constantProperties& constProps(td.cloud().constProps(id_));
 
-    if (td.part() == 0)
+    if (td.part() == trackingData::tpFirstVelocityHalfStep)
     {
         // First leapfrog velocity adjust part, required before tracking+force
         // part
@@ -98,7 +98,7 @@ bool Foam::polyatomic::move
 
         pi_ += 0.5*trackTime*tau_;
     }
-    else if (td.part() == 1)
+    else if (td.part() == trackingData::tpLinearTrack)
     {
         // Leapfrog tracking part
 
@@ -116,7 +116,7 @@ bool Foam::polyatomic::move
             stepFraction() = 1.0 - tEnd/trackTime;
         }
     }
-    else if (td.part() == 2)
+    else if (td.part() == trackingData::tpRotationalTrack)
     {
         // Leapfrog orientation adjustment, carried out before force calculation
         // but after tracking stage, i.e. rotation carried once linear motion
@@ -157,7 +157,7 @@ bool Foam::polyatomic::move
 
         setSitePositions(constProps);
     }
-    else if (td.part() == 3)
+    else if (td.part() == trackingData::tpSecondVelocityHalfStep)
     {
         // Second leapfrog velocity adjust part, required after tracking+force
         // part
