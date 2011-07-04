@@ -42,14 +42,15 @@ SourceFiles
 #include "autoPtr.H"
 #include "diagTensor.H"
 #include "constPropSite.H"
+#include "MoleculeCloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Class forward declarations
-class polyatomicCloud;
+template<class ParcelType>
+class DsmcParcel;
 
 /*---------------------------------------------------------------------------*\
                            Class polyatomic Declaration
@@ -91,22 +92,19 @@ public:
             //- Moment of intertia (in principal axis configiration)
             diagTensor momentOfInertia_;
 
+            //-
             scalar mass_;
 
 
         // Private Member Functions
 
-            void setInteracionSiteBools
-            (
-                const List<word>& siteIds,
-                const List<word>& pairPotSiteIds
-            );
-
+            //-
             bool linearMoleculeTest() const;
 
 
     public:
 
+        //-
         inline constantProperties();
 
         //- Construct from dictionary
@@ -118,22 +116,31 @@ public:
 
         // Member functions
 
+        //-
         inline const List<constPropSite>& sites() const;
 
+        //-
         inline const List<label>& pairPotSites() const;
 
+        //-
         inline const List<label>& electrostaticSites() const;
 
+        //-
         inline const diagTensor& momentOfInertia() const;
 
+        //-
         inline bool linearMolecule() const;
 
+        //-
         inline bool pointMolecule() const;
 
+        //-
         inline label degreesOfFreedom() const;
 
+        //-
         inline scalar mass() const;
 
+        //-
         inline label nSites() const;
     };
 
@@ -141,7 +148,7 @@ public:
     //- Class used to pass tracking data to the trackToFace function
     class trackingData
     :
-        public particle::TrackingData<polyatomicCloud>
+        public particle::TrackingData<MoleculeCloud<polyatomic> >
     {
         // label specifying which part of the integration algorithm is taking
         label part_;
@@ -151,9 +158,9 @@ public:
 
         // Constructors
 
-            trackingData(polyatomicCloud& cloud, label part)
+            trackingData(MoleculeCloud<polyatomic>& cloud, label part)
             :
-                particle::TrackingData<polyatomicCloud>(cloud),
+                particle::TrackingData<MoleculeCloud<polyatomic> >(cloud),
                 part_(part)
             {}
 
@@ -176,10 +183,10 @@ private:
         //  bodyLocalVector = Q_.T() & globalVector
         tensor Q_;
 
-        // Linear velocity of polyatomic
+        //- Linear velocity of polyatomic
         vector v_;
 
-        // Total linear acceleration of polyatomic
+        //- Total linear acceleration of polyatomic
         vector a_;
 
         //- Angular momentum of polyatomic, in body local reference frame
@@ -188,8 +195,10 @@ private:
         //- Total torque on polyatomic, in body local reference frame
         vector tau_;
 
+        //-
         vector specialPosition_;
 
+        //-
         scalar potentialEnergy_;
 
         // - r_ij f_ij, stress dyad
@@ -198,31 +207,42 @@ private:
 //         // - r_ij outer product f_ij: virial contribution
 //         tensor rDotf_;
 
+        //-
         label special_;
 
+        //-
         label id_;
 
+        //-
         List<vector> siteForces_;
 
+        //-
         List<vector> sitePositions_;
 
 
     // Private Member Functions
 
+
+        //-
         tensor rotationTensorX(scalar deltaT) const;
 
+        //-
         tensor rotationTensorY(scalar deltaT) const;
 
+        //-
         tensor rotationTensorZ(scalar deltaT) const;
 
 
 public:
 
+    //- Runtime type information
+    TypeName("polyatomic");
+
     friend class Cloud<polyatomic>;
 
     // Constructors
 
-        //- Construct from components
+        //- Construct from all components
         inline polyatomic
         (
             const polyMesh& mesh,
@@ -279,53 +299,91 @@ public:
 
         // Tracking
 
+            //-
             bool move(trackingData&, const scalar trackTime);
 
+            //-
             virtual void transformProperties(const tensor& T);
 
+            //-
             virtual void transformProperties(const vector& separation);
 
+            //-
             void setSitePositions(const constantProperties& constProps);
 
+            //-
             void setSiteSizes(label size);
 
 
         // Access
 
+            //-
             inline const tensor& Q() const;
+
+            //-
             inline tensor& Q();
 
+            //-
             inline const vector& v() const;
+
+            //-
             inline vector& v();
 
+            //-
             inline const vector& a() const;
+
+            //-
             inline vector& a();
 
+            //-
             inline const vector& pi() const;
+
+            //-
             inline vector& pi();
 
+            //-
             inline const vector& tau() const;
+
+            //-
             inline vector& tau();
 
+            //-
             inline const List<vector>& siteForces() const;
+
+            //-
             inline List<vector>& siteForces();
 
+            //-
             inline const List<vector>& sitePositions() const;
+
+            //-
             inline List<vector>& sitePositions();
 
+            //-
             inline const vector& specialPosition() const;
+
+            //-
             inline vector& specialPosition();
 
+            //-
             inline scalar potentialEnergy() const;
+
+            //-
             inline scalar& potentialEnergy();
 
+            //-
             inline const tensor& rf() const;
+
+            //-
             inline tensor& rf();
 
+            //-
             inline label special() const;
 
+            //-
             inline bool tethered() const;
 
+            //-
             inline label id() const;
 
 
@@ -367,8 +425,10 @@ public:
 
     // I-O
 
+        //- Read
         static void readFields(Cloud<polyatomic>& mC);
 
+        //- Write
         static void writeFields(const Cloud<polyatomic>& mC);
 
 

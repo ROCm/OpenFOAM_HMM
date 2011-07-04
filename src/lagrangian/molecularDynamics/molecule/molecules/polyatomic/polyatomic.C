@@ -23,10 +23,18 @@ License
 
 \*----------------------------------------------------------------------------*/
 
-#include "polyatomicCloud.H"
 #include "polyatomic.H"
 #include "Random.H"
 #include "Time.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(polyatomic, 0);
+    defineTemplateTypeNameAndDebug(Cloud<polyatomic>, 0);
+}
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -285,7 +293,7 @@ void Foam::polyatomic::hitWallPatch
 )
 {
     // Use of the normal from tetIs is not required as
-    // hasWallImpactDistance for a polyatomicCloud is false.
+    // hasWallImpactDistance is false.
     vector nw = normal();
     nw /= mag(nw);
 

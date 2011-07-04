@@ -29,10 +29,11 @@ using namespace Foam::constant;
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-inline void Foam::polyatomicCloud::evaluatePair
+template<class MoleculeType>
+void Foam::MoleculeCloud<MoleculeType>::evaluatePair
 (
-    polyatomic& molI,
-    polyatomic& molJ
+    MoleculeType& molI,
+    MoleculeType& molJ
 )
 {
     const pairPotentialList& pairPot = pot_.pairPotentials();
@@ -43,9 +44,15 @@ inline void Foam::polyatomicCloud::evaluatePair
 
     label idJ = molJ.id();
 
-    const polyatomic::constantProperties& constPropI(constProps(idI));
+    const typename MoleculeType::constantProperties& constPropI
+    (
+        constProps(idI)
+    );
 
-    const polyatomic::constantProperties& constPropJ(constProps(idJ));
+    const typename MoleculeType::constantProperties& constPropJ
+    (
+        constProps(idJ)
+    );
 
     forAll(constPropI.pairPotSites(), pI)
     {
@@ -149,10 +156,11 @@ inline void Foam::polyatomicCloud::evaluatePair
 }
 
 
-inline bool Foam::polyatomicCloud::evaluatePotentialLimit
+template<class MoleculeType>
+bool Foam::MoleculeCloud<MoleculeType>::evaluatePotentialLimit
 (
-    polyatomic& molI,
-    polyatomic& molJ
+    MoleculeType& molI,
+    MoleculeType& molJ
 ) const
 {
     const pairPotentialList& pairPot = pot_.pairPotentials();
@@ -163,9 +171,15 @@ inline bool Foam::polyatomicCloud::evaluatePotentialLimit
 
     label idJ = molJ.id();
 
-    const polyatomic::constantProperties& constPropI(constProps(idI));
+    const typename MoleculeType::constantProperties& constPropI
+    (
+        constProps(idI)
+    );
 
-    const polyatomic::constantProperties& constPropJ(constProps(idJ));
+    const typename MoleculeType::constantProperties& constPropJ
+    (
+        constProps(idJ)
+    );
 
     forAll(constPropI.pairPotSites(), pI)
     {
@@ -194,14 +208,18 @@ inline bool Foam::polyatomicCloud::evaluatePotentialLimit
 
                 if (rsIsJMag < SMALL)
                 {
-                    WarningIn("polyatomicCloud::removeHighEnergyOverlaps()")
+                    WarningIn
+                    (
+                        "MoleculeCloud<MoleculeType>::"
+                        "removeHighEnergyOverlaps()"
+                    )
                         << "Molecule site pair closer than "
                         << SMALL
                         << ": mag separation = " << rsIsJMag
                         << ". These may have been placed on top of each"
                         << " other by a rounding error in mdInitialise in"
-                        << " parallel or a block filled with polyatomics"
-                        << " twice. Removing one of the polyatomics."
+                        << " parallel or a block filled with moleculess"
+                        << " twice. Removing one of the molecules."
                         << endl;
 
                     return true;
@@ -250,14 +268,18 @@ inline bool Foam::polyatomicCloud::evaluatePotentialLimit
 
                 if (rsIsJMag < SMALL)
                 {
-                    WarningIn("polyatomicCloud::removeHighEnergyOverlaps()")
+                    WarningIn
+                    (
+                        "MoleculeCloud<MoleculeType>::"
+                        "removeHighEnergyOverlaps()"
+                    )
                         << "Molecule site pair closer than "
                         << SMALL
                         << ": mag separation = " << rsIsJMag
                         << ". These may have been placed on top of each"
                         << " other by a rounding error in mdInitialise in"
-                        << " parallel or a block filled with polyatomics"
-                        << " twice. Removing one of the polyatomics."
+                        << " parallel or a block filled with molecules"
+                        << " twice. Removing one of the molecules."
                         << endl;
 
                     return true;
@@ -288,7 +310,9 @@ inline bool Foam::polyatomicCloud::evaluatePotentialLimit
 }
 
 
-inline Foam::vector Foam::polyatomicCloud::equipartitionLinearVelocity
+template<class MoleculeType>
+Foam::vector
+Foam::MoleculeCloud<MoleculeType>::equipartitionLinearVelocity
 (
     scalar temperature,
     scalar mass
@@ -303,10 +327,12 @@ inline Foam::vector Foam::polyatomicCloud::equipartitionLinearVelocity
 }
 
 
-inline Foam::vector Foam::polyatomicCloud::equipartitionAngularMomentum
+template<class MoleculeType>
+Foam::vector
+Foam::MoleculeCloud<MoleculeType>::equipartitionAngularMomentum
 (
     scalar temperature,
-    const polyatomic::constantProperties& cP
+    const typename MoleculeType::constantProperties& cP
 )
 {
     scalar sqrtKbT = sqrt(physicoChemical::k.value()*temperature);
@@ -334,47 +360,54 @@ inline Foam::vector Foam::polyatomicCloud::equipartitionAngularMomentum
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::polyMesh& Foam::polyatomicCloud::mesh() const
+template<class MoleculeType>
+const Foam::polyMesh& Foam::MoleculeCloud<MoleculeType>::mesh() const
 {
     return mesh_;
 }
 
 
-inline const Foam::potential& Foam::polyatomicCloud::pot() const
+template<class MoleculeType>
+const Foam::potential& Foam::MoleculeCloud<MoleculeType>::pot() const
 {
     return pot_;
 }
 
 
-inline const Foam::List<Foam::DynamicList<Foam::polyatomic*> >&
-    Foam::polyatomicCloud::cellOccupancy() const
+template<class MoleculeType>
+const Foam::List<Foam::DynamicList<MoleculeType*> >&
+Foam::MoleculeCloud<MoleculeType>::cellOccupancy() const
 {
     return cellOccupancy_;
 }
 
 
-inline const Foam::InteractionLists<Foam::polyatomic>&
-    Foam::polyatomicCloud::il() const
+template<class MoleculeType>
+const Foam::InteractionLists<MoleculeType>&
+Foam::MoleculeCloud<MoleculeType>::il() const
 {
     return il_;
 }
 
 
-inline const Foam::List<Foam::polyatomic::constantProperties>
-    Foam::polyatomicCloud::constProps() const
+template<class MoleculeType>
+const Foam::List<typename MoleculeType::constantProperties>
+Foam::MoleculeCloud<MoleculeType>::constProps() const
 {
     return constPropList_;
 }
 
 
-inline const Foam::polyatomic::constantProperties&
-    Foam::polyatomicCloud::constProps(label id) const
+template<class MoleculeType>
+const typename MoleculeType::constantProperties&
+Foam::MoleculeCloud<MoleculeType>::constProps(label id) const
 {
     return constPropList_[id];
 }
 
 
-inline Foam::Random& Foam::polyatomicCloud::rndGen()
+template<class MoleculeType>
+Foam::Random& Foam::MoleculeCloud<MoleculeType>::rndGen()
 {
     return rndGen_;
 }

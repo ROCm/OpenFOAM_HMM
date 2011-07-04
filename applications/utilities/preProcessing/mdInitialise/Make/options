@@ -3,7 +3,6 @@ EXE_INC = \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/lagrangian/molecularDynamics/molecule/lnInclude \
     -I$(LIB_SRC)/lagrangian/molecularDynamics/potential/lnInclude \
-    -I$(LIB_SRC)/lagrangian/molecularDynamics/molecularMeasurements/lnInclude \
     -I$(LIB_SRC)/lagrangian/basic/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude
 
@@ -13,6 +12,5 @@ EXE_LIBS = \
     -lfiniteVolume \
     -llagrangian \
     -lmolecule \
-    -lpotential \
-    -lmolecularMeasurements
+    -lpotential
 

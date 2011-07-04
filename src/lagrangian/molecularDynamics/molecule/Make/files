@@ -1,9 +1,9 @@
-constPropSite/constPropSite.C
+clouds/baseClasses/moleculeCloud/moleculeCloud.C
 
-polyatomic/polyatomic/polyatomic.C
-polyatomic/polyatomic/polyatomicIO.C
+molecules/constPropSite/constPropSite.C
 
-polyatomic/polyatomicCloud/polyatomicCloud.C
+molecules/polyatomic/polyatomic.C
+molecules/polyatomic/polyatomicIO.C
 
 /* controllers/basic/controllers/controllers.C
 controllers/basic/stateController/stateController.C

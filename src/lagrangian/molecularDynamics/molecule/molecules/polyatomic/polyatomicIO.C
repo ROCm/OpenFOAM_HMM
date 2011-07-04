@@ -25,7 +25,7 @@ License
 
 #include "polyatomic.H"
 #include "IOstreams.H"
-#include "polyatomicCloud.H"
+#include "Cloud.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -92,7 +92,11 @@ Foam::polyatomic::polyatomic
     is.check
     (
         "Foam::polyatomic::polyatomic"
-        "(const Cloud<polyatomic>& cloud, Foam::Istream&), bool"
+        "("
+            "const polyMesh& mesh,"
+            "Istream& is,"
+            "bool readFields"
+        ")"
     );
 }
 
@@ -134,7 +138,8 @@ void Foam::polyatomic::readFields(Cloud<polyatomic>& mC)
     mC.checkFieldIOobject(mC, id);
 
     label i = 0;
-    forAllIter(polyatomicCloud, mC, iter)
+
+    forAllIter(typename Cloud<polyatomic>, mC, iter)
     {
         polyatomic& mol = iter();
 
@@ -203,7 +208,7 @@ void Foam::polyatomic::writeFields(const Cloud<polyatomic>& mC)
     );
 
     label i = 0;
-    forAllConstIter(polyatomicCloud, mC, iter)
+    forAllConstIter(typename Cloud<polyatomic>, mC, iter)
     {
         const polyatomic& mol = iter();
 
@@ -241,18 +246,6 @@ void Foam::polyatomic::writeFields(const Cloud<polyatomic>& mC)
     orientation1.write();
     orientation2.write();
     orientation3.write();
-
-    Info<< "writeFields " << mC.name() << endl;
-
-    if (isA<polyatomicCloud>(mC))
-    {
-        const polyatomicCloud& m = dynamic_cast<const polyatomicCloud&>(mC);
-
-        m.writeXYZ
-        (
-            m.mesh().time().timePath()/cloud::prefix/"polyatomicCloud.xmol"
-        );
-    }
 }
 
 

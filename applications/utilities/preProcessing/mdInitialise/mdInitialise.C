@@ -62,11 +62,28 @@ int main(int argc, char *argv[])
         )
     );
 
-    potential pot(mesh, mdInitialiseDict, idListDict);
+    word cloudName("polyatomicCloud");
 
-    polyatomicCloud molecules(mesh, pot, mdInitialiseDict);
+    potential pot
+    (
+        mesh,
+        mdInitialiseDict,
+        IOdictionary
+        (
+            IOobject
+            (
+                cloudName +  "Properties",
+                mesh.time().constant(),
+                mesh,
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE,
+                false
+            )
+        ),
+        idListDict
+    );
 
-    Info<< "Cloud is called " << molecules.name() << endl;
+    polyatomicCloud molecules(cloudName, mesh, pot, mdInitialiseDict);
 
     label totalMolecules = molecules.size();
 

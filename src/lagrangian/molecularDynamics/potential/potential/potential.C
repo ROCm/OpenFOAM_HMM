@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::potential::setSiteIdList(const dictionary& mdPropertiesDict)
+void Foam::potential::setSiteIdList(const dictionary& moleculePropertiesDict)
 {
     DynamicList<word> siteIdList;
     DynamicList<word> pairPotentialSiteIdList;
@@ -36,14 +36,14 @@ void Foam::potential::setSiteIdList(const dictionary& mdPropertiesDict)
     {
         const word& id(idList_[i]);
 
-        if (!mdPropertiesDict.found(id))
+        if (!moleculePropertiesDict.found(id))
         {
             FatalErrorIn("potential::setSiteIdList(const dictionary&)")
                 << id << " molecule subDict not found"
                 << nl << abort(FatalError);
         }
 
-        const dictionary& molDict(mdPropertiesDict.subDict(id));
+        const dictionary& molDict(moleculePropertiesDict.subDict(id));
 
         List<word> siteIdNames = molDict.lookup("siteIds");
 
@@ -93,7 +93,10 @@ void Foam::potential::setSiteIdList(const dictionary& mdPropertiesDict)
 }
 
 
-void Foam::potential::potential::readPotentialDict()
+void Foam::potential::potential::readPotentialDict
+(
+    const dictionary& moleculePropertiesDict
+)
 {
     Info<< nl <<  "Reading potential dictionary:" << endl;
 
@@ -111,31 +114,28 @@ void Foam::potential::potential::readPotentialDict()
 
     idList_ = List<word>(idListDict.lookup("idList"));
 
-    setSiteIdList
-    (
-        IOdictionary
-        (
-            IOobject
-            (
-                "mdProperties",
-                mesh_.time().constant(),
-                mesh_,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE,
-                false
-            )
-        )
-    );
+    setSiteIdList(moleculePropertiesDict);
 
     List<word> pairPotentialSiteIdList
     (
         SubList<word>(siteIdList_, nPairPotIds_)
     );
 
-    Info<< nl << "Unique site ids found: " << siteIdList_
-        << nl << "Site Ids requiring a pair potential: "
-        << pairPotentialSiteIdList
-        << endl;
+    Info<< nl << "Unique site ids found:";
+
+    forAll(siteIdList_, i)
+    {
+        Info<< " " << siteIdList_[i];
+    }
+
+    Info << nl << "Site Ids requiring a pair potential:";
+
+    forAll(pairPotentialSiteIdList, i)
+    {
+        Info<< " " << pairPotentialSiteIdList[i];
+    }
+
+    Info<< nl;
 
     List<word> tetherSiteIdList(0);
 
@@ -229,37 +229,25 @@ void Foam::potential::potential::readPotentialDict()
 
     if (potentialDict.found("external"))
     {
-        Info<< nl << "Reading external forces:" << endl;
+        Info<< nl << "Reading external forces: ";
 
         const dictionary& externalDict = potentialDict.subDict("external");
 
         // gravity
         externalDict.readIfPresent("gravity", gravity_);
-    }
 
-    Info<< nl << tab << "gravity = " << gravity_ << endl;
+        Info<< "gravity = " << gravity_ << nl << endl;
+    }
 }
 
 
 void Foam::potential::potential::readMdInitialiseDict
 (
     const IOdictionary& mdInitialiseDict,
+    const dictionary& moleculePropertiesDict,
     IOdictionary& idListDict
 )
 {
-    IOdictionary mdPropertiesDict
-    (
-        IOobject
-        (
-            "mdProperties",
-            mesh_.time().constant(),
-            mesh_,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE,
-            false
-        )
-    );
-
     DynamicList<word> idList;
 
     DynamicList<word> tetherSiteIdList;
@@ -280,7 +268,7 @@ void Foam::potential::potential::readMdInitialiseDict
         {
             const word& id = latticeIds[i];
 
-            if (!mdPropertiesDict.found(id))
+            if (!moleculePropertiesDict.found(id))
             {
                 FatalErrorIn
                 (
@@ -322,7 +310,7 @@ void Foam::potential::potential::readMdInitialiseDict
 
                 List<word> siteIds
                 (
-                    mdPropertiesDict.subDict(id).lookup("siteIds")
+                    moleculePropertiesDict.subDict(id).lookup("siteIds")
                 );
 
                 if (findIndex(siteIds, tetherSiteId) != -1)
@@ -359,16 +347,20 @@ void Foam::potential::potential::readMdInitialiseDict
 
     idListDict.add("tetherSiteIdList", tetherSiteIdList);
 
-    setSiteIdList(mdPropertiesDict);
+    setSiteIdList(moleculePropertiesDict);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::potential::potential(const polyMesh& mesh)
+Foam::potential::potential
+(
+    const polyMesh& mesh,
+    const dictionary& moleculePropertiesDict
+)
 :
     mesh_(mesh)
 {
-    readPotentialDict();
+    readPotentialDict(moleculePropertiesDict);
 }
 
 
@@ -376,12 +368,18 @@ Foam::potential::potential
 (
     const polyMesh& mesh,
     const IOdictionary& mdInitialiseDict,
+    const dictionary& moleculePropertiesDict,
     IOdictionary& idListDict
 )
 :
     mesh_(mesh)
 {
-    readMdInitialiseDict(mdInitialiseDict, idListDict);
+    readMdInitialiseDict
+    (
+        mdInitialiseDict,
+        moleculePropertiesDict,
+        idListDict
+    );
 }
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
