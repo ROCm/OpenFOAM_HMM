@@ -25,7 +25,7 @@ Class
     Foam::fanPressureFvPatchScalarField
 
 Description
-    Assigns pressure inlet or outlet condition for a fan.
+    Assigns pressure inlet or outlet total pressure condition for a fan.
 
     User specifies:
     - pressure drop vs volumetric flow rate table (fan curve) file name;
@@ -56,8 +56,8 @@ Description
     \endverbatim
 
 See Also
-    Foam::interpolationTable and
-    Foam::timeVaryingFlowRateInletVelocityFvPatchVectorField
+    Foam::totalPressureFvPatchScalarField and
+    Foam::interpolationTable
 
 SourceFiles
     fanPressureFvPatchScalarField.C
@@ -67,8 +67,7 @@ SourceFiles
 #ifndef fanPressureFvPatchScalarField_H
 #define fanPressureFvPatchScalarField_H
 
-#include "fvPatchFields.H"
-#include "fixedValueFvPatchFields.H"
+#include "totalPressureFvPatchScalarField.H"
 #include "interpolationTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -82,18 +81,9 @@ namespace Foam
 
 class fanPressureFvPatchScalarField
 :
-    public fixedValueFvPatchScalarField
+    public totalPressureFvPatchScalarField
 {
     // Private data
-
-        //- Name of the flux transporting the field
-        word phiName_;
-
-        //- Name of the density field
-        word rhoName_;
-
-        //- Total pressure
-        scalarField p0_;
 
         //- Tabulated fan curve
         interpolationTable<scalar> fanCurve_;
