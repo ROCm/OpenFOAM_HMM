@@ -5,4 +5,8 @@ polyatomic/polyatomic/polyatomicIO.C
 
 polyatomic/polyatomicCloud/polyatomicCloud.C
 
+/* controllers/basic/controllers/controllers.C
+controllers/basic/stateController/stateController.C
+controllers/basic/fluxController/fluxController.C */
+
 LIB = $(FOAM_LIBBIN)/libmolecule

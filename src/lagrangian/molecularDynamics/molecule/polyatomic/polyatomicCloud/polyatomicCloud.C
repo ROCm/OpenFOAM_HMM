@@ -1340,7 +1340,7 @@ void Foam::polyatomicCloud::info() const
 
     if (nMols)
     {
-        Info<< "Number of molecules in " << this->name() << "  = "
+        Info<< "Number of molecules in " << this->name() << " = "
             << nMols << nl
             << "Overall number density = "
             << nMols/meshVolume << nl
