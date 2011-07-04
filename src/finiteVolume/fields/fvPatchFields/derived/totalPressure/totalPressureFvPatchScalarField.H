@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -157,6 +157,45 @@ public:
                 return UName_;
             }
 
+            //- Return the name of the flux field
+            const word& phiName() const
+            {
+                return phiName_;
+            }
+
+            //- Return reference to the name of the flux field
+            //  to allow adjustment
+            word& phiName()
+            {
+                return phiName_;
+            }
+
+            //- Return the name of the density field
+            const word& rhoName() const
+            {
+                return rhoName_;
+            }
+
+            //- Return reference to the name of the density field
+            //  to allow adjustment
+            word& rhoName()
+            {
+                return rhoName_;
+            }
+
+            //- Return the name of the compressibility field
+            const word& psiName() const
+            {
+                return psiName_;
+            }
+
+            //- Return reference to the name of the compressibility field
+            //  to allow adjustment
+            word& psiName()
+            {
+                return psiName_;
+            }
+
             //- Return the heat capacity ratio
             scalar gamma() const
             {
@@ -201,8 +240,12 @@ public:
         // Evaluation functions
 
             //- Update the coefficients associated with the patch field
-            //  using the given patch velocity field
-            virtual void updateCoeffs(const vectorField& Up);
+            //  using the given patch total pressure and velocity fields
+            virtual void updateCoeffs
+            (
+                const scalarField& p0p,
+                const vectorField& Up
+            );
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
