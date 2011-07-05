@@ -1110,7 +1110,7 @@ Foam::conformalVoronoiMesh::collapseFace
 
         // Output face and collapse axis for visualisation
 
-        Info<< "# Aspect ratio = " << aspectRatio << nl
+        Pout<< "# Aspect ratio = " << aspectRatio << nl
             << "# inertia = " << J << nl
             << "# determinant = " << detJ << nl
             << "# eigenvalues = " << eigenValues(J) << nl
@@ -1120,17 +1120,17 @@ Foam::conformalVoronoiMesh::collapseFace
 
         forAll(f, fPtI)
         {
-            meshTools::writeOBJ(Info, pts[f[fPtI]]);
+            meshTools::writeOBJ(Pout, pts[f[fPtI]]);
         }
 
-        Info<< "f";
+        Pout<< "f";
 
         forAll(f, fPtI)
         {
-            Info << " " << fPtI + 1;
+            Pout << " " << fPtI + 1;
         }
 
-        Info<< endl;
+        Pout<< endl;
 
         return fcmNone;
     }
@@ -1402,7 +1402,7 @@ Foam::conformalVoronoiMesh::collapseFace
     // {
     //     // Output face and collapse axis for visualisation
 
-    //     Info<< "# Aspect ratio = " << aspectRatio << nl
+    //     Pout<< "# Aspect ratio = " << aspectRatio << nl
     //         << "# determinant = " << detJ << nl
     //         << "# collapseAxis = " << collapseAxis << nl
     //         << "# mode = " << mode << nl
@@ -1412,33 +1412,33 @@ Foam::conformalVoronoiMesh::collapseFace
 
     //     scalar scale = 2.0*mag(fC - pts[f[0]]);
 
-    //     meshTools::writeOBJ(Info, fC);
-    //     meshTools::writeOBJ(Info, fC + scale*collapseAxis);
+    //     meshTools::writeOBJ(Pout, fC);
+    //     meshTools::writeOBJ(Pout, fC + scale*collapseAxis);
 
-    //     Info<< "f 1 2" << endl;
-
-    //     forAll(f, fPtI)
-    //     {
-    //         meshTools::writeOBJ(Info, pts[f[fPtI]]);
-    //     }
-
-    //     Info<< "f";
+    //     Pout<< "f 1 2" << endl;
 
     //     forAll(f, fPtI)
     //     {
-    //         Info << " " << fPtI + 3;
+    //         meshTools::writeOBJ(Pout, pts[f[fPtI]]);
     //     }
 
-    //     Info<< nl << "# " << d << endl;
+    //     Pout<< "f";
 
-    //     Info<< "# " << d.first() << " " << d.last() << endl;
+    //     forAll(f, fPtI)
+    //     {
+    //         Pout << " " << fPtI + 3;
+    //     }
+
+    //     Pout<< nl << "# " << d << endl;
+
+    //     Pout<< "# " << d.first() << " " << d.last() << endl;
 
     //     forAll(d, dI)
     //     {
-    //         meshTools::writeOBJ(Info, fC + (d[dI] - dShift)*collapseAxis);
+    //         meshTools::writeOBJ(Pout, fC + (d[dI] - dShift)*collapseAxis);
     //     }
 
-    //     Info<< endl;
+    //     Pout<< endl;
     // }
 
     return mode;
@@ -1490,7 +1490,7 @@ void Foam::conformalVoronoiMesh::deferredCollapseFaceSet
         }
     }
 
-    Info<< "facesToCollapse" << nl << faceLabels << endl;
+    Pout<< "facesToCollapse" << nl << faceLabels << endl;
 }
 
 
@@ -1632,7 +1632,8 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     if (checkFaces.size() < fAreas.size())
     {
-        Info<< "Excluding " << fAreas.size() - checkFaces.size()
+        Info<< "Excluding "
+            << returnReduce(fAreas.size() - checkFaces.size(), sumOp<label>())
             << " faces from check, < " << faceAreaLimit << " area" << endl;
     }
 
@@ -1655,7 +1656,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
         {
             if (cells[cI].size() < 4 && cells[cI].size() > 0)
             {
-                // Info<< "cell " << cI << " " << cells[cI]
+                // Pout<< "cell " << cI << " " << cells[cI]
                 //     << " has " << cells[cI].size() << " faces."
                 //     << endl;
 
@@ -1669,7 +1670,8 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
         }
 
         Info<< "    cells with more than 1 but fewer than 4 faces          : "
-            << nInvalidPolyhedra << endl;
+            << returnReduce(nInvalidPolyhedra, sumOp<label>())
+            << endl;
 
         // Check for cells with one internal face only
 
@@ -1712,7 +1714,8 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
         }
 
         Info<< "    cells with with zero or one non-boundary face          : "
-            << oneInternalFaceCells << endl;
+            << returnReduce(oneInternalFaceCells, sumOp<label>())
+            << endl;
     }
 
 
@@ -1795,7 +1798,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
     }
 
     Info<< nl << "Maximum number of filter limits applied: "
-        << maxFilterCount << endl;
+        << returnReduce(maxFilterCount, maxOp<label>()) << endl;
 
     return wrongFaces;
 }
@@ -2489,7 +2492,9 @@ void Foam::conformalVoronoiMesh::removeUnusedPoints
 
     inplaceReorder(oldToNew, pts);
 
-    Info<< "    Removing " << pts.size() - pointI << " unused points"
+    Info<< "    Removing "
+        << returnReduce(pts.size() - pointI, sumOp<label>())
+        << " unused points"
         << endl;
 
     pts.setSize(pointI);
