@@ -208,7 +208,8 @@ int main(int argc, char *argv[])
                     IOobject::MUST_READ
                 );
                 Info<< "Read set " << setName << " with size "
-                    << currentSet().size() << endl;
+                    << returnReduce(currentSet().size(), sumOp<label>())
+                    << endl;
             }
 
 
@@ -292,7 +293,8 @@ int main(int argc, char *argv[])
             if (currentSet.valid())
             {
                 Info<< "    Set " << currentSet().name()
-                    << " now size " << currentSet().size()
+                    << " now size "
+                    << returnReduce(currentSet().size(), sumOp<label>())
                     << endl;
             }
         }
