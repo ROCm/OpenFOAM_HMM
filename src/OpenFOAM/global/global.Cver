@@ -66,6 +66,22 @@ bool Foam::JobInfo::constructed(false);
 #include "debug.C"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Read file modification checking switches
+
+#include "regIOobject.C"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Read parallel communication switches
+
+#include "UPstream.C"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Read constants
+
+#include "constants.C"
+#include "dimensionedConstants.C"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Read and set cell models
 
 #include "globalCellModeller.C"
