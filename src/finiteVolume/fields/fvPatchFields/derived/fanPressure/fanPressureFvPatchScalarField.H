@@ -83,10 +83,8 @@ class fanPressureFvPatchScalarField
 :
     public totalPressureFvPatchScalarField
 {
-    // Private data
 
-        //- Tabulated fan curve
-        interpolationTable<scalar> fanCurve_;
+public:
 
         //- Fan flow direction
         enum fanFlowDirection
@@ -96,6 +94,13 @@ class fanPressureFvPatchScalarField
         };
 
         static const NamedEnum<fanFlowDirection, 2> fanFlowDirectionNames_;
+
+private:
+
+    // Private data
+
+        //- Tabulated fan curve
+        interpolationTable<scalar> fanCurve_;
 
         //- Direction of flow through the fan relative to patch
         fanFlowDirection direction_;

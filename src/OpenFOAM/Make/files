@@ -1,6 +1,6 @@
 global/global.Cver
-global/constants/constants.C
-global/constants/dimensionedConstants.C
+/* global/constants/constants.C in global.Cver */
+/* global/constants/dimensionedConstants.C in global.Cver */
 global/argList/argList.C
 global/clock/clock.C
 
@@ -136,7 +136,7 @@ $(StringStreams)/StringStreamsPrint.C
 Pstreams = $(Streams)/Pstreams
 $(Pstreams)/UIPstream.C
 $(Pstreams)/IPstream.C
-$(Pstreams)/UPstream.C
+/* $(Pstreams)/UPstream.C in global.Cver */
 $(Pstreams)/UPstreamCommsStruct.C
 $(Pstreams)/Pstream.C
 $(Pstreams)/UOPstream.C
@@ -181,7 +181,7 @@ $(IOobject)/IOobjectReadHeader.C
 $(IOobject)/IOobjectWriteHeader.C
 
 regIOobject = db/regIOobject
-$(regIOobject)/regIOobject.C
+/* $(regIOobject)/regIOobject.C in global.Cver */
 $(regIOobject)/regIOobjectRead.C
 $(regIOobject)/regIOobjectWrite.C
 

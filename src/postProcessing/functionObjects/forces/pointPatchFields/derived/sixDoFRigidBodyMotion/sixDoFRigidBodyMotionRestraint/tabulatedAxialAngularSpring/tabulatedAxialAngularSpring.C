@@ -87,6 +87,7 @@ Foam::sixDoFRigidBodyMotionRestraints::tabulatedAxialAngularSpring::restrain
     vector refDir = rotationTensor(vector(1, 0 ,0), axis_) & vector(0, 1, 0);
 
     vector oldDir = refQ_ & refDir;
+
     vector newDir = motion.orientation() & refDir;
 
     if (mag(oldDir & axis_) > 0.95 || mag(newDir & axis_) > 0.95)
@@ -95,8 +96,9 @@ Foam::sixDoFRigidBodyMotionRestraints::tabulatedAxialAngularSpring::restrain
 
         refDir = rotationTensor(vector(1, 0 ,0), axis_) & vector(0, 0, 1);
 
-        oldDir = refQ_ & refDir;
-        newDir = motion.orientation() & refDir;
+        vector oldDir = refQ_ & refDir;
+
+        vector newDir = motion.orientation() & refDir;
     }
 
     // Removing any axis component from oldDir and newDir and normalising
