@@ -62,6 +62,7 @@ $(searchableSurface)/searchableSurfaces.C
 $(searchableSurface)/searchableSurfacesQueries.C
 $(searchableSurface)/searchableSurfaceWithGaps.C
 $(searchableSurface)/triSurfaceMesh.C
+$(searchableSurface)/closedTriSurfaceMesh.C
 
 topoSets = sets/topoSets
 $(topoSets)/cellSet.C
