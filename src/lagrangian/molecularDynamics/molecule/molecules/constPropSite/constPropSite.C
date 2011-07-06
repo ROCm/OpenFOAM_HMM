@@ -21,12 +21,7 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    constPropSite
-
-Description
-
-\*----------------------------------------------------------------------------*/
+\*---------------------------------------------------------------------------*/
 
 #include "constPropSite.H"
 
@@ -71,6 +66,49 @@ Foam::constPropSite::~constPropSite()
 {}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+Foam::Istream& Foam::operator>>(Istream& is, constPropSite& cPS)
+{
+    is  >> cPS.siteReferencePosition_
+        >> cPS.siteMass_
+        >> cPS.siteCharge_
+        >> cPS.siteId_
+        >> cPS.name_
+        >> cPS.pairPotentialSite_
+        >> cPS.electrostaticSite_;
+
+    // Check state of Istream
+    is.check
+    (
+        "Foam::Istream& Foam::operator>>"
+        "(Foam::Istream&, Foam::constPropSite&)"
+    );
+
+    return is;
+}
+
+
+Foam::Ostream& Foam::operator<<(Ostream& os, const constPropSite& cPS)
+{
+
+    os  << token::SPACE << cPS.siteReferencePosition()
+        << token::SPACE << cPS.siteMass()
+        << token::SPACE << cPS.siteCharge()
+        << token::SPACE << cPS.siteId()
+        << token::SPACE << cPS.name()
+        << token::SPACE << cPS.pairPotentialSite()
+        << token::SPACE << cPS.electrostaticSite();
+
+    // Check state of Ostream
+    os.check
+    (
+        "Foam::Ostream& Foam::operator<<(Foam::Ostream&, "
+        "const Foam::constPropSite&)"
+    );
+
+    return os;
+}
+
 
 // ************************************************************************* //

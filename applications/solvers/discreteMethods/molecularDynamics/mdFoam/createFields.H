@@ -12,6 +12,44 @@
         mesh
     );
 
-    potential pot(mesh);
+    word polyatomicCloudName("polyatomicCloud");
 
-    polyatomicCloud molecules(mesh, pot);
+    potential polyPot
+    (
+        mesh,
+        IOdictionary
+        (
+            IOobject
+            (
+                polyatomicCloudName +  "Properties",
+                mesh.time().constant(),
+                mesh,
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE,
+                false
+            )
+        )
+    );
+
+    polyatomicCloud polyatomics(polyatomicCloudName, mesh, polyPot);
+
+    word monoatomicCloudName("monoatomicCloud");
+
+    potential monoPot
+    (
+        mesh,
+        IOdictionary
+        (
+            IOobject
+            (
+                monoatomicCloudName +  "Properties",
+                mesh.time().constant(),
+                mesh,
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE,
+                false
+            )
+        )
+    );
+
+    monoatomicCloud monoatomics(monoatomicCloudName, mesh, monoPot);

@@ -20,98 +20,45 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
-
-Class
-
-
-Description
-
 \*---------------------------------------------------------------------------*/
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::vector& Foam::constPropSite::siteReferencePosition() const
+Foam::List<Foam::autoPtr<Foam::stateController> >&
+Foam::controllers::stateControllers()
 {
-    return siteReferencePosition_;
+    return stateControllers_;
 }
 
 
-inline Foam::vector& Foam::constPropSite::siteReferencePosition()
+const Foam::List<Foam::autoPtr<Foam::stateController> >&
+Foam::controllers::stateControllers() const
 {
-    return siteReferencePosition_;
+    return stateControllers_;
 }
 
 
-inline const Foam::scalar& Foam::constPropSite::siteMass() const
+Foam::List<Foam::autoPtr<Foam::fluxController> >&
+Foam::controllers::fluxControllers()
 {
-    return siteMass_;
+    return fluxControllers_;
 }
 
 
-inline Foam::scalar& Foam::constPropSite::siteMass()
+const Foam::List< autoPtr<fluxController> >&
+Foam::controllers::fluxControllers() const
 {
-    return siteMass_;
+    return fluxControllers_;
 }
 
 
-inline const Foam::scalar& Foam::constPropSite::siteCharge() const
+const Foam::List<Foam::word>& Foam::controllers::stateControllersNames() const
 {
-    return siteCharge_;
+    return sCNames_;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline Foam::scalar& Foam::constPropSite::siteCharge()
-{
-    return siteCharge_;
-}
-
-
-inline const Foam::label& Foam::constPropSite::siteId() const
-{
-    return siteId_;
-}
-
-
-inline Foam::label& Foam::constPropSite::siteId()
-{
-    return siteId_;
-}
-
-
-inline const Foam::word& Foam::constPropSite::name() const
-{
-    return name_;
-}
-
-
-inline Foam::word& Foam::constPropSite::name()
-{
-    return name_;
-}
-
-
-inline const bool& Foam::constPropSite::pairPotentialSite() const
-{
-    return pairPotentialSite_;
-}
-
-
-inline bool& Foam::constPropSite::pairPotentialSite()
-{
-    return pairPotentialSite_;
-}
-
-
-inline const bool& Foam::constPropSite::electrostaticSite() const
-{
-    return electrostaticSite_;
-}
-
-
-inline bool& Foam::constPropSite::electrostaticSite()
-{
-    return electrostaticSite_;
-}
-
+} // End namespace Foam
 
 // ************************************************************************* //

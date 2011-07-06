@@ -30,6 +30,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "monoatomicCloud.H"
 #include "polyatomicCloud.H"
 
 int main(int argc, char *argv[])
@@ -47,9 +48,13 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << endl;
 
-        molecules.evolve();
+        monoatomics.evolve();
 
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+        polyatomics.evolve();
+
+        runTime.write();
+
+        Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
             << nl << endl;
     }

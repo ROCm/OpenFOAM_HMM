@@ -25,7 +25,7 @@ License
 
 #include "polyatomic.H"
 #include "IOstreams.H"
-#include "polyatomicCloud.H"
+#include "Cloud.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -92,7 +92,11 @@ Foam::polyatomic::polyatomic
     is.check
     (
         "Foam::polyatomic::polyatomic"
-        "(const Cloud<polyatomic>& cloud, Foam::Istream&), bool"
+        "("
+            "const polyMesh& mesh,"
+            "Istream& is,"
+            "bool readFields"
+        ")"
     );
 }
 
@@ -134,7 +138,8 @@ void Foam::polyatomic::readFields(Cloud<polyatomic>& mC)
     mC.checkFieldIOobject(mC, id);
 
     label i = 0;
-    forAllIter(polyatomicCloud, mC, iter)
+
+    forAllIter(typename Cloud<polyatomic>, mC, iter)
     {
         polyatomic& mol = iter();
 
@@ -203,7 +208,7 @@ void Foam::polyatomic::writeFields(const Cloud<polyatomic>& mC)
     );
 
     label i = 0;
-    forAllConstIter(polyatomicCloud, mC, iter)
+    forAllConstIter(typename Cloud<polyatomic>, mC, iter)
     {
         const polyatomic& mol = iter();
 
@@ -241,17 +246,114 @@ void Foam::polyatomic::writeFields(const Cloud<polyatomic>& mC)
     orientation1.write();
     orientation2.write();
     orientation3.write();
+}
 
-    Info<< "writeFields " << mC.name() << endl;
 
-    if (isA<polyatomicCloud>(mC))
+void Foam::polyatomic::info(polyatomic::trackingData& td)
+{
+    vector totalLinearMomentum(vector::zero);
+    vector totalAngularMomentum(vector::zero);
+    scalar maxVelocityMag = 0.0;
+    scalar totalMass = 0.0;
+    scalar totalLinearKE = 0.0;
+    scalar totalAngularKE = 0.0;
+    scalar totalPE = 0.0;
+    scalar totalrDotf = 0.0;
+    //vector CentreOfMass(vector::zero);
+    label nMols = td.cloud().size();
+    label dofs = 0;
+
+    forAllConstIter(typename Cloud<polyatomic>, td.cloud(), mol)
     {
-        const polyatomicCloud& m = dynamic_cast<const polyatomicCloud&>(mC);
+        const label molId = mol().id();
+        scalar molMass(td.cloud().constProps(molId).mass());
+        totalMass += molMass;
+        //CentreOfMass += mol().position()*molMass;
+    }
 
-        m.writeXYZ
+    // if (nMols)
+    // {
+    //     CentreOfMass /= totalMass;
+    // }
+
+    forAllConstIter(typename Cloud<polyatomic>, td.cloud(), mol)
+    {
+        const label molId = mol().id();
+        const polyatomic::constantProperties cP
         (
-            m.mesh().time().timePath()/cloud::prefix/"polyatomicCloud.xmol"
+            td.cloud().constProps(molId)
         );
+        scalar molMass(cP.mass());
+        const diagTensor& molMoI(cP.momentOfInertia());
+        const vector& molV(mol().v());
+        const vector& molOmega(inv(molMoI) & mol().pi());
+        vector molPiGlobal = mol().Q() & mol().pi();
+        totalLinearMomentum += molV * molMass;
+        totalAngularMomentum += molPiGlobal;
+            //+((mol().position() - CentreOfMass) ^ (molV * molMass));
+        if (mag(molV) > maxVelocityMag)
+        {
+            maxVelocityMag = mag(molV);
+        }
+        totalLinearKE += 0.5*molMass*magSqr(molV);
+        totalAngularKE += 0.5*(molOmega & molMoI & molOmega);
+        totalPE += mol().potentialEnergy();
+        totalrDotf += tr(mol().rf());
+        dofs += cP.degreesOfFreedom();
+    }
+
+    scalar meshVolume = sum(td.cloud().mesh().cellVolumes());
+
+    if (Pstream::parRun())
+    {
+        reduce(totalLinearMomentum, sumOp<vector>());
+        reduce(totalAngularMomentum, sumOp<vector>());
+        reduce(maxVelocityMag, maxOp<scalar>());
+        reduce(totalMass, sumOp<scalar>());
+        reduce(totalLinearKE, sumOp<scalar>());
+        reduce(totalAngularKE, sumOp<scalar>());
+        reduce(totalPE, sumOp<scalar>());
+        reduce(totalrDotf, sumOp<scalar>());
+        reduce(nMols, sumOp<label>());
+        reduce(dofs, sumOp<label>());
+        reduce(meshVolume, sumOp<scalar>());
+    }
+
+    if (nMols)
+    {
+        Info<< nl << "Number of molecules in " << td.cloud().name() << " = "
+            << nMols << nl
+            << "    Overall number density = "
+            << nMols/meshVolume << nl
+            << "    Overall mass density = "
+            << totalMass/meshVolume << nl
+            << "    Average linear momentum per molecule = "
+            << totalLinearMomentum/nMols << ' '
+            << mag(totalLinearMomentum)/nMols << nl
+            << "    Average angular momentum per molecule = "
+            << totalAngularMomentum << ' '
+            << mag(totalAngularMomentum)/nMols << nl
+            << "    maximum |velocity| = "
+            << maxVelocityMag << nl
+            << "    Average linear KE per molecule = "
+            << totalLinearKE/nMols << nl
+            << "    Average angular KE per molecule = "
+            << totalAngularKE/nMols << nl
+            << "    Average PE per molecule = "
+            << totalPE/nMols << nl
+            << "    Average TE per molecule = "
+            <<
+            (
+                  totalLinearKE
+                + totalAngularKE
+                + totalPE
+            )
+            /nMols
+            << nl << endl;
+    }
+    else
+    {
+        Info<< nl << "No molecules in " << td.cloud().name() << endl;
     }
 }
 

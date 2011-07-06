@@ -20,10 +20,12 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
 Class
 
 
 Description
+
 
 SourceFiles
     constPropSiteI.H
@@ -35,13 +37,22 @@ SourceFiles
 #define constPropSite_H
 
 #include "vector.H"
-#include "IFstream.H"
-#include "OFstream.H"
+#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward declaration of classes
+class Istream;
+class Ostream;
+
+// Forward declaration of friend functions and operators
+class constPropSite;
+Istream& operator>>(Istream&, constPropSite&);
+Ostream& operator<<(Ostream&, const constPropSite&);
+
 
 /*---------------------------------------------------------------------------*\
                          Class constPropSite Declaration
@@ -144,6 +155,18 @@ public:
 
             //-
             inline bool& electrostaticSite();
+
+
+    // Member Operators
+
+        inline bool operator==(const constPropSite&) const;
+        inline bool operator!=(const constPropSite&) const;
+
+
+    // IOstream Operators
+
+        friend Istream& operator>>(Istream&, constPropSite&);
+        friend Ostream& operator<<(Ostream&, const constPropSite&);
 };
 
 

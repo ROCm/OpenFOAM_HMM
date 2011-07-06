@@ -93,7 +93,10 @@ void Foam::potential::setSiteIdList(const dictionary& moleculePropertiesDict)
 }
 
 
-void Foam::potential::potential::readPotentialDict()
+void Foam::potential::potential::readPotentialDict
+(
+    const dictionary& moleculePropertiesDict
+)
 {
     Info<< nl <<  "Reading potential dictionary:" << endl;
 
@@ -111,31 +114,28 @@ void Foam::potential::potential::readPotentialDict()
 
     idList_ = List<word>(idListDict.lookup("idList"));
 
-    setSiteIdList
-    (
-        IOdictionary
-        (
-            IOobject
-            (
-                "moleculeProperties",
-                mesh_.time().constant(),
-                mesh_,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE,
-                false
-            )
-        )
-    );
+    setSiteIdList(moleculePropertiesDict);
 
     List<word> pairPotentialSiteIdList
     (
         SubList<word>(siteIdList_, nPairPotIds_)
     );
 
-    Info<< nl << "Unique site ids found: " << siteIdList_
-        << nl << "Site Ids requiring a pair potential: "
-        << pairPotentialSiteIdList
-        << endl;
+    Info<< nl << "Unique site ids found:";
+
+    forAll(siteIdList_, i)
+    {
+        Info<< " " << siteIdList_[i];
+    }
+
+    Info << nl << "Site Ids requiring a pair potential:";
+
+    forAll(pairPotentialSiteIdList, i)
+    {
+        Info<< " " << pairPotentialSiteIdList[i];
+    }
+
+    Info<< nl;
 
     List<word> tetherSiteIdList(0);
 
@@ -229,37 +229,25 @@ void Foam::potential::potential::readPotentialDict()
 
     if (potentialDict.found("external"))
     {
-        Info<< nl << "Reading external forces:" << endl;
+        Info<< nl << "Reading external forces: ";
 
         const dictionary& externalDict = potentialDict.subDict("external");
 
         // gravity
         externalDict.readIfPresent("gravity", gravity_);
-    }
 
-    Info<< nl << tab << "gravity = " << gravity_ << endl;
+        Info<< "gravity = " << gravity_ << nl << endl;
+    }
 }
 
 
 void Foam::potential::potential::readMdInitialiseDict
 (
-    const IOdictionary& mdInitialiseDict,
-    IOdictionary& idListDict
+    const dictionary& mdInitialiseDict,
+    const dictionary& moleculePropertiesDict,
+    dictionary& idListDict
 )
 {
-    IOdictionary moleculePropertiesDict
-    (
-        IOobject
-        (
-            "moleculeProperties",
-            mesh_.time().constant(),
-            mesh_,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE,
-            false
-        )
-    );
-
     DynamicList<word> idList;
 
     DynamicList<word> tetherSiteIdList;
@@ -286,11 +274,12 @@ void Foam::potential::potential::readMdInitialiseDict
                 (
                     "potential::readMdInitialiseDict"
                     "("
-                        "const IOdictionary&, "
-                        "IOdictionary&"
+                        "const dictionary&, "
+                        "dictionary&"
                     ")"
                 )   << "Molecule type " << id
-                    << " not found in moleculeProperties dictionary." << nl
+                    << " not found in " << moleculePropertiesDict.name()
+                    << " dictionary." << nl
                     << abort(FatalError);
             }
 
@@ -341,8 +330,8 @@ void Foam::potential::potential::readMdInitialiseDict
                 (
                     "potential::readMdInitialiseDict"
                     "("
-                        "const IOdictionary&, "
-                        "IOdictionary&"
+                        "const dictionary&, "
+                        "dictionary&"
                     ")"
                 )   << "Tether id  " << tetherSiteId
                     << " not found as a site of any molecule in zone." << nl
@@ -364,24 +353,34 @@ void Foam::potential::potential::readMdInitialiseDict
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::potential::potential(const polyMesh& mesh)
+Foam::potential::potential
+(
+    const polyMesh& mesh,
+    const dictionary& moleculePropertiesDict
+)
 :
     mesh_(mesh)
 {
-    readPotentialDict();
+    readPotentialDict(moleculePropertiesDict);
 }
 
 
 Foam::potential::potential
 (
     const polyMesh& mesh,
-    const IOdictionary& mdInitialiseDict,
-    IOdictionary& idListDict
+    const dictionary& mdInitialiseDict,
+    const dictionary& moleculePropertiesDict,
+    dictionary& idListDict
 )
 :
     mesh_(mesh)
 {
-    readMdInitialiseDict(mdInitialiseDict, idListDict);
+    readMdInitialiseDict
+    (
+        mdInitialiseDict,
+        moleculePropertiesDict,
+        idListDict
+    );
 }
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

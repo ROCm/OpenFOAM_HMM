@@ -23,10 +23,18 @@ License
 
 \*----------------------------------------------------------------------------*/
 
-#include "polyatomicCloud.H"
 #include "polyatomic.H"
 #include "Random.H"
 #include "Time.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(polyatomic, 0);
+    defineTemplateTypeNameAndDebug(Cloud<polyatomic>, 0);
+}
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -81,7 +89,7 @@ bool Foam::polyatomic::move
 
     const constantProperties& constProps(td.cloud().constProps(id_));
 
-    if (td.part() == 0)
+    if (td.part() == trackingData::tpFirstVelocityHalfStep)
     {
         // First leapfrog velocity adjust part, required before tracking+force
         // part
@@ -90,7 +98,7 @@ bool Foam::polyatomic::move
 
         pi_ += 0.5*trackTime*tau_;
     }
-    else if (td.part() == 1)
+    else if (td.part() == trackingData::tpLinearTrack)
     {
         // Leapfrog tracking part
 
@@ -108,7 +116,7 @@ bool Foam::polyatomic::move
             stepFraction() = 1.0 - tEnd/trackTime;
         }
     }
-    else if (td.part() == 2)
+    else if (td.part() == trackingData::tpRotationalTrack)
     {
         // Leapfrog orientation adjustment, carried out before force calculation
         // but after tracking stage, i.e. rotation carried once linear motion
@@ -149,7 +157,7 @@ bool Foam::polyatomic::move
 
         setSitePositions(constProps);
     }
-    else if (td.part() == 3)
+    else if (td.part() == trackingData::tpSecondVelocityHalfStep)
     {
         // Second leapfrog velocity adjust part, required after tracking+force
         // part
@@ -285,7 +293,7 @@ void Foam::polyatomic::hitWallPatch
 )
 {
     // Use of the normal from tetIs is not required as
-    // hasWallImpactDistance for a polyatomicCloud is false.
+    // hasWallImpactDistance is false.
     vector nw = normal();
     nw /= mag(nw);
 
