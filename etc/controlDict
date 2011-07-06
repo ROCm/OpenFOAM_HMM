@@ -24,7 +24,6 @@ Documentation
         "$WM_PROJECT_USER_DIR/html"
         "~OpenFOAM/html"
         "$WM_PROJECT_DIR/doc/Doxygen/html"
-        "$WM_PROJECT_DIR/doc/doxygen/html"
     );
     doxySourceFileExts
     (

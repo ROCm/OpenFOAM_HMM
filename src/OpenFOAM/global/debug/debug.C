@@ -75,10 +75,15 @@ Foam::dictionary& Foam::debug::controlDict()
 {
     if (!controlDictPtr_)
     {
-        controlDictPtr_ = new dictionary
-        (
-            IFstream(findEtcFile("controlDict", true))()
-        );
+        fileNameList controlDictFiles = findEtcFiles("controlDict", true);
+        controlDictPtr_ = new dictionary();
+        forAllReverse(controlDictFiles, cdfi)
+        {
+            controlDictPtr_->merge
+            (
+                dictionary(IFstream(controlDictFiles[cdfi])())
+            );
+        }
     }
 
     return *controlDictPtr_;
