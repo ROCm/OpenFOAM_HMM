@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -115,6 +115,15 @@ class sixDoFRigidBodyMotion
 
         //- Mass of the body
         scalar mass_;
+
+        //- Acceleration damping coefficient.  Modify applied acceleration:
+        //  v1 = v0 + a*dt - cDamp*a*dt
+        //     = v0 + dt*f*(1 - cDamp)/m
+        //  Increases effective mass by 1/(1 - cDamp).
+        scalar cDamp_;
+
+        //- Acceleration magnitude limit - clips large accelerations
+        scalar aLim_;
 
         //- Switch to turn reporting of motion data on and off
         Switch report_;
@@ -235,6 +244,8 @@ public:
             const point& initialCentreOfMass,
             const tensor& initialQ,
             const diagTensor& momentOfInertia,
+            scalar cDamp = 0.0,
+            scalar aLim = VGREAT,
             bool report = false
         );
 
@@ -260,10 +271,12 @@ public:
         void addConstraints(const dictionary& dict);
 
         //- First leapfrog velocity adjust and motion part, required
-        // before force calculation
+        //  before force calculation.  Takes old timestep for variable
+        //  timestep cases.
         void updatePosition
         (
-            scalar deltaT
+            scalar deltaT,
+            scalar deltaT0
         );
 
         //- Second leapfrog velocity adjust part, required after motion and
