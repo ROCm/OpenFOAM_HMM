@@ -696,10 +696,13 @@ void Foam::conformalVoronoiMesh::findRemainingProtrusionSet
         }
     }
 
-    if (returnReduce(protrudingCells.size(), sumOp<label>()) > 0)
+    label protrudingCellsSize = protrudingCells.size();
+
+    reduce(protrudingCellsSize, sumOp<label>());
+
+    if (protrudingCellsSize > 0)
     {
-        Info<< nl << "Found "
-            << returnReduce(protrudingCells.size(), sumOp<label>())
+        Info<< nl << "Found " << protrudingCellsSize
             << " cells protruding from the surface, writing cellSet "
             << protrudingCells.name()
             << endl;
