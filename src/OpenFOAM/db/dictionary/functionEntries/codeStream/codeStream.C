@@ -197,22 +197,25 @@ Foam::functionEntries::codeStream::getFunction
             }
         }
 
-        // all processes must wait for compile to finish - except if this
-        // file is only read on the master
-        bool masterOnly =
-            (
-                regIOobject::fileModificationChecking
-             == regIOobject::timeStampMaster
-            )
-         || (
-                regIOobject::fileModificationChecking
-             == regIOobject::inotifyMaster
-            );
-
-        if (!masterOnly)
-        {
+        //- We don't know whether this code was from IOdictionary
+        //  (possibly read on master only) or from e.g. Field so cannot
+        //  decide here.
+        //// all processes must wait for compile to finish - except if this
+        //// file is only read on the master
+        //bool masterOnly =
+        //    (
+        //        regIOobject::fileModificationChecking
+        //     == regIOobject::timeStampMaster
+        //    )
+        // || (
+        //        regIOobject::fileModificationChecking
+        //     == regIOobject::inotifyMaster
+        //    );
+        //
+        //if (!masterOnly)
+        //{
             reduce(create, orOp<bool>());
-        }
+        //}
 
         if (isA<IOdictionary>(topDict(parentDict)))
         {
