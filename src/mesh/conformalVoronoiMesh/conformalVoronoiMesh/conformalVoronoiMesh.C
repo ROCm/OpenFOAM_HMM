@@ -565,8 +565,35 @@ void Foam::conformalVoronoiMesh::createExternalEdgePointGroup
     const vector& nA = feNormals[edNormalIs[0]];
     const vector& nB = feNormals[edNormalIs[1]];
 
+    if (mag(nA & nB) > 1 - SMALL)
+    {
+        // The normals are nearly parallel, so this is too sharp a feature to
+        // conform to.
+
+        return;
+    }
+
+    // Normalised distance of reference point from edge point
+    vector refVec((nA + nB)/(1 + (nA & nB)));
+
+    if (magSqr(refVec) > sqr(5.0))
+    {
+        // Limit the size of the conformation
+        ppDist *= 5.0/mag(refVec);
+
+        // Pout<< nl << "createExternalEdgePointGroup limit "
+        //     << "edgePt " << edgePt << nl
+        //     << "refVec " << refVec << nl
+        //     << "mag(refVec) " << mag(refVec) << nl
+        //     << "ppDist " << ppDist << nl
+        //     << "nA " << nA << nl
+        //     << "nB " << nB << nl
+        //     << "(nA & nB) " << (nA & nB) << nl
+        //     << endl;
+    }
+
     // Convex. So refPt will be inside domain and hence a master point
-    Foam::point refPt = edgePt - ppDist*(nA + nB)/(1 + (nA & nB) + VSMALL);
+    Foam::point refPt = edgePt - ppDist*refVec;
 
     // Result when the points are eventually inserted.
     // Add number_of_vertices() at insertion of first vertex to all numbers:
@@ -616,8 +643,35 @@ void Foam::conformalVoronoiMesh::createInternalEdgePointGroup
     const vector& nA = feNormals[edNormalIs[0]];
     const vector& nB = feNormals[edNormalIs[1]];
 
+    if (mag(nA & nB) > 1 - SMALL)
+    {
+        // The normals are nearly parallel, so this is too sharp a feature to
+        // conform to.
+
+        return;
+    }
+
+    // Normalised distance of reference point from edge point
+    vector refVec((nA + nB)/(1 + (nA & nB)));
+
+    if (magSqr(refVec) > sqr(5.0))
+    {
+        // Limit the size of the conformation
+        ppDist *= 5.0/mag(refVec);
+
+        // Pout<< nl << "createInternalEdgePointGroup limit "
+        //     << "edgePt " << edgePt << nl
+        //     << "refVec " << refVec << nl
+        //     << "mag(refVec) " << mag(refVec) << nl
+        //     << "ppDist " << ppDist << nl
+        //     << "nA " << nA << nl
+        //     << "nB " << nB << nl
+        //     << "(nA & nB) " << (nA & nB) << nl
+        //     << endl;
+    }
+
     // Concave. master and reflected points inside the domain.
-    Foam::point refPt = edgePt - ppDist*(nA + nB)/(1 + (nA & nB) + VSMALL);
+    Foam::point refPt = edgePt - ppDist*refVec;
 
     // Generate reflected master to be outside.
     Foam::point reflMasterPt = refPt + 2*(edgePt - refPt);
@@ -628,7 +682,7 @@ void Foam::conformalVoronoiMesh::createInternalEdgePointGroup
     Foam::point reflectedB = reflMasterPt - 2*ppDist*nB;
 
     scalar totalAngle =
-        radToDeg(constant::mathematical::pi + acos(mag(nA & nB)));
+        radToDeg(constant::mathematical::pi + acos(nA & nB));
 
     // Number of quadrants the angle should be split into
     int nQuads = int(totalAngle/cvMeshControls().maxQuadAngle()) + 1;
