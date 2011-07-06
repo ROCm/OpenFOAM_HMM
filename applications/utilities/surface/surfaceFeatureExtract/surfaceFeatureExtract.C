@@ -150,7 +150,7 @@ void drawHitProblem
 }
 
 
-scalarField curvature(const triSurface& surf)
+scalarField calcCurvature(const triSurface& surf)
 {
     scalarField k(surf.points().size(), 0);
 
@@ -400,6 +400,16 @@ int main(int argc, char *argv[])
         "writeObj",
         "write extendedFeatureEdgeMesh obj files"
     );
+    argList::addBoolOption
+    (
+        "writeVTK",
+        "write extendedFeatureEdgeMesh vtk files"
+    );
+    argList::addBoolOption
+    (
+        "calcCurvature",
+        "calculate curvature and closeness fields"
+    );
     argList::addOption
     (
         "closeness",
@@ -422,7 +432,13 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    if (env("FOAM_SIGFPE"))
+    bool writeVTK = args.optionFound("writeVTK");
+
+    bool writeObj = args.optionFound("writeObj");
+
+    bool curvature = args.optionFound("curvature");
+
+    if (curvature && env("FOAM_SIGFPE"))
     {
         WarningIn(args.executable())
             << "Detected floating point exception trapping (FOAM_SIGFPE)."
@@ -435,10 +451,6 @@ int main(int argc, char *argv[])
 
     Info<< "Feature line extraction is only valid on closed manifold surfaces."
         << endl;
-
-    bool writeVTK = args.optionFound("writeVTK");
-
-    bool writeObj = args.optionFound("writeObj");
 
     const fileName surfFileName = args[1];
     const fileName outFileName  = args[2];
@@ -669,6 +681,13 @@ int main(int argc, char *argv[])
         surf
     );
 
+    if (!curvature)
+    {
+        Info<< "End\n" << endl;
+
+        return 0;
+    }
+
     // Find close features
 
     // // Dummy trim operation to mark features
@@ -736,7 +755,8 @@ int main(int argc, char *argv[])
     //     )
     // );
 
-    // Examine curvature, feature proximity and internal and external closeness.
+    Info<< "Examine curvature, feature proximity and internal and "
+        << "external closeness." << endl;
 
     // Internal and external closeness
 
@@ -930,7 +950,7 @@ int main(int argc, char *argv[])
 
     externalClosenessField.write();
 
-    scalarField k = curvature(surf);
+    scalarField k = calcCurvature(surf);
 
     // Modify the curvature values on feature edges and points to be zero.
 
