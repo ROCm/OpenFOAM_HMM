@@ -93,7 +93,7 @@ fileName cwd();
 //  else return false
 bool chDir(const fileName& dir);
 
-//- Search for a file from user/group/shipped directories.
+//- Search for files from user/group/shipped directories.
 //  The search scheme allows for version-specific and
 //  version-independent files using the following hierarchy:
 //  - \b user settings:
@@ -108,7 +108,14 @@ bool chDir(const fileName& dir);
 //  - \b other (shipped) settings:
 //    - $WM_PROJECT_DIR/etc/
 //
-//  \return The full path name or fileName() if the name cannot be found
+//  \return The list of full paths of all the matching files or
+//  an empty list if the name cannot be found.
+//  Optionally abort if the file cannot be found
+fileNameList findEtcFiles(const fileName&, bool mandatory=false);
+
+//- Search for a file using findEtcFiles.
+//  \return The full path name of the first file found which in the
+//  search hierarchy or an empty fileName if the name cannot be found.
 //  Optionally abort if the file cannot be found
 fileName findEtcFile(const fileName&, bool mandatory=false);
 
