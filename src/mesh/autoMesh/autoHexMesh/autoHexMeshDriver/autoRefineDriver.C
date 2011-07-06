@@ -744,7 +744,8 @@ void Foam::autoRefineDriver::doRefine
         100    // maxIter
     );
 
-    // Introduce baffles at surface intersections
+    // Introduce baffles at surface intersections. Remove sections unreachable
+    // from keepPoint.
     baffleAndSplitMesh(refineParams, prepareForSnapping, motionDict);
 
     // Mesh is at its finest. Do optional zoning.
