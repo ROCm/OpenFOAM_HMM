@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -147,7 +147,7 @@ void uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
     const polyMesh& mesh = this->dimensionedInternalField().mesh()();
     const Time& t = mesh.time();
 
-    motion_.updatePosition(t.deltaTValue());
+    motion_.updatePosition(t.deltaTValue(), t.deltaT0Value());
 
     vector gravity = vector::zero;
 

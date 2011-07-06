@@ -59,6 +59,10 @@ Description
 
 #ifdef USE_RANDOM
 #   include <climits>
+#   if INT_MAX    != 2147483647
+#       error "INT_MAX    != 2147483647"
+#       error "The random number generator may not work!"
+#   endif
 #endif
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -1250,7 +1254,7 @@ Foam::label Foam::osRandomInteger()
 Foam::scalar Foam::osRandomDouble()
 {
 #ifdef USE_RANDOM
-    return (scalar)random();
+    return (scalar)random()/INT_MAX;
 #else
     return drand48();
 #endif

@@ -1318,7 +1318,7 @@ bool Foam::conformalVoronoiMesh::distributeBackground()
         }
 
         Info<< "    Total number of vertices before redistribution "
-            << globalNRealVertices
+            << returnReduce(label(number_of_vertices()), sumOp<label>())
             << endl;
 
         // Pout<< "    Real vertices before distribution "
@@ -1446,9 +1446,8 @@ bool Foam::conformalVoronoiMesh::distributeBackground()
         // processor each point should be on, so give distribute = false
         insertPoints(pointsToInsert, indices, types, false);
 
-        // Adjust by 8 because of insertion of bounding points by reset
         Info<< "    Total number of vertices after redistribution "
-            << returnReduce(label(number_of_vertices() - 8), sumOp<label>())
+            << returnReduce(label(number_of_vertices()), sumOp<label>())
             << endl;
 
         // Pout<< "    Real vertices after distribution "
