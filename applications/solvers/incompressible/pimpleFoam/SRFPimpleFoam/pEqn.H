@@ -1,4 +1,4 @@
-volScalarField rAUrel = 1.0/UrelEqn().A();
+volScalarField rAUrel(1.0/UrelEqn().A());
 Urel = rAUrel*UrelEqn().H();
 
 if (pimple.nCorr() <= 1)

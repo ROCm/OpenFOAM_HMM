@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,6 +31,7 @@ Description
         - scale     : scaling factor.
         - tolerance : relative tolerance for doing intersections
                       (see triangle::intersection)
+        - minQuality: discard triangles with low quality when getting normal
 
 SourceFiles
     triSurfaceMesh.C
@@ -69,6 +70,10 @@ private:
 
         //- Optional tolerance to use in searches
         scalar tolerance_;
+
+        //- Optional min triangle quality. Triangles below this get
+        //  ignored for normal calculation
+        scalar minQuality_;
 
         //- Optional max tree depth of octree
         label maxTreeDepth_;

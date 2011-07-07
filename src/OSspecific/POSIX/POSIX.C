@@ -57,6 +57,14 @@ Description
 
 #include <netinet/in.h>
 
+#ifdef USE_RANDOM
+#   include <climits>
+#   if INT_MAX    != 2147483647
+#       error "INT_MAX    != 2147483647"
+#       error "The random number generator may not work!"
+#   endif
+#endif
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(Foam::POSIX, 0);
@@ -68,15 +76,18 @@ pid_t Foam::pid()
     return ::getpid();
 }
 
+
 pid_t Foam::ppid()
 {
     return ::getppid();
 }
 
+
 pid_t Foam::pgid()
 {
     return ::getpgrp();
 }
+
 
 bool Foam::env(const word& envName)
 {
@@ -253,10 +264,11 @@ bool Foam::chDir(const fileName& dir)
 }
 
 
-Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
+Foam::fileNameList Foam::findEtcFiles(const fileName& name, bool mandatory)
 {
-    //
-    // search for user files in
+    fileNameList results;
+
+    // Search for user files in
     // * ~/.OpenFOAM/VERSION
     // * ~/.OpenFOAM
     //
@@ -266,19 +278,17 @@ Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
         fileName fullName = searchDir/FOAMversion/name;
         if (isFile(fullName))
         {
-            return fullName;
+            results.append(fullName);
         }
 
         fullName = searchDir/name;
         if (isFile(fullName))
         {
-            return fullName;
+            results.append(fullName);
         }
     }
 
-
-    //
-    // search for group (site) files in
+    // Search for group (site) files in
     // * $WM_PROJECT_SITE/VERSION
     // * $WM_PROJECT_SITE
     //
@@ -290,19 +300,18 @@ Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
             fileName fullName = searchDir/FOAMversion/name;
             if (isFile(fullName))
             {
-                return fullName;
+                results.append(fullName);
             }
 
             fullName = searchDir/name;
             if (isFile(fullName))
             {
-                return fullName;
+                results.append(fullName);
             }
         }
     }
     else
     {
-        //
         // OR search for group (site) files in
         // * $WM_PROJECT_INST_DIR/site/VERSION
         // * $WM_PROJECT_INST_DIR/site
@@ -313,20 +322,18 @@ Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
             fileName fullName = searchDir/"site"/FOAMversion/name;
             if (isFile(fullName))
             {
-                return fullName;
+                results.append(fullName);
             }
 
             fullName = searchDir/"site"/name;
             if (isFile(fullName))
             {
-                return fullName;
+                results.append(fullName);
             }
         }
     }
 
-
-    //
-    // search for other (shipped) files in
+    // Search for other (shipped) files in
     // * $WM_PROJECT_DIR/etc
     //
     searchDir = getEnv("WM_PROJECT_DIR");
@@ -335,24 +342,41 @@ Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
         fileName fullName = searchDir/"etc"/name;
         if (isFile(fullName))
         {
-            return fullName;
+            results.append(fullName);
         }
     }
 
     // Not found
-    // abort if the file is mandatory, otherwise return null
-    if (mandatory)
+    if (results.empty())
     {
-        std::cerr
-            << "--> FOAM FATAL ERROR in Foam::findEtcFile() :"
-               " could not find mandatory file\n    '"
-            << name.c_str() << "'\n\n" << std::endl;
-        ::exit(1);
+        // Abort if the file is mandatory, otherwise return null
+        if (mandatory)
+        {
+            std::cerr
+                << "--> FOAM FATAL ERROR in Foam::findEtcFiles() :"
+                   " could not find mandatory file\n    '"
+                << name.c_str() << "'\n\n" << std::endl;
+            ::exit(1);
+        }
     }
 
-    // Return null-constructed fileName rather than fileName::null
-    // to avoid cyclic dependencies in the construction of globals
-    return fileName();
+    // Return list of matching paths or empty list if none found
+    return results;
+}
+
+
+Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
+{
+    fileNameList results(findEtcFiles(name, mandatory));
+
+    if (results.size())
+    {
+        return results[0];
+    }
+    else
+    {
+        return fileName();
+    }
 }
 
 
@@ -890,7 +914,6 @@ bool Foam::mvBak(const fileName& src, const std::string& ext)
 }
 
 
-
 // Remove a file, returning true if successful otherwise false
 bool Foam::rm(const fileName& file)
 {
@@ -1218,6 +1241,36 @@ Foam::fileNameList Foam::dlLoaded()
             << " : determined loaded libraries :" << libs.size() << std::endl;
     }
     return libs;
+}
+
+
+void Foam::osRandomSeed(const label seed)
+{
+#ifdef USE_RANDOM
+    srandom((unsigned int)seed);
+#else
+    srand48(seed);
+#endif
+}
+
+
+Foam::label Foam::osRandomInteger()
+{
+#ifdef USE_RANDOM
+    return random();
+#else
+    return lrand48();
+#endif
+}
+
+
+Foam::scalar Foam::osRandomDouble()
+{
+#ifdef USE_RANDOM
+    return (scalar)random()/INT_MAX;
+#else
+    return drand48();
+#endif
 }
 
 

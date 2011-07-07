@@ -112,7 +112,7 @@ void Foam::rotatingTotalPressureFvPatchScalarField::updateCoeffs()
       + rotationVelocity
     );
 
-    totalPressureFvPatchScalarField::updateCoeffs(Up);
+    totalPressureFvPatchScalarField::updateCoeffs(p0(), Up);
 }
 
 

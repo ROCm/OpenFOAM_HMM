@@ -65,6 +65,12 @@ class WallSpringSliderDashpot
         //- Coefficient of friction in for tangential sliding
         scalar mu_;
 
+        //- Cohesion energy density [J/m^3]
+        scalar cohesionEnergyDensity_;
+
+        // Switch cohesion on and off
+        bool cohesion_;
+
         //- The number of steps over which to resolve the minimum
         //  harmonic approximation of the collision period
         scalar collisionResolutionSteps_;
@@ -110,7 +116,8 @@ class WallSpringSliderDashpot
             const point& site,
             const WallSiteData<vector>& data,
             scalar pREff,
-            scalar kN
+            scalar kN,
+            bool cohesion
         ) const;
 
 
