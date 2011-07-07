@@ -118,6 +118,24 @@ done
 
 
 #
+# check that reader module has been built
+#
+if [ ! -f $PV_PLUGIN_PATH/libPV3FoamReader_SM.so ]
+then
+    cat<< BUILDREADER
+
+FATAL ERROR: ParaView reader module libraries do not exist
+
+Please build the reader module before continuing:
+cd \$FOAM_UTILITIES/postProcessing/graphics/PV3Readers
+./Allwclean
+./Allwmake
+
+BUILDREADER
+    exit 1
+fi
+
+#
 # check for --data=... argument
 #
 hasDataArg()
