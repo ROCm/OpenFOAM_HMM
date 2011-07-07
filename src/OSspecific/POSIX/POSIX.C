@@ -264,7 +264,12 @@ bool Foam::chDir(const fileName& dir)
 }
 
 
-Foam::fileNameList Foam::findEtcFiles(const fileName& name, bool mandatory)
+Foam::fileNameList Foam::findEtcFiles
+(
+    const fileName& name,
+    bool mandatory,
+    bool findFirst
+)
 {
     fileNameList results;
 
@@ -279,12 +284,20 @@ Foam::fileNameList Foam::findEtcFiles(const fileName& name, bool mandatory)
         if (isFile(fullName))
         {
             results.append(fullName);
+            if (findFirst)
+            {
+                goto DONE;
+            }
         }
 
         fullName = searchDir/name;
         if (isFile(fullName))
         {
             results.append(fullName);
+            if (findFirst)
+            {
+                goto DONE;
+            }
         }
     }
 
@@ -301,12 +314,20 @@ Foam::fileNameList Foam::findEtcFiles(const fileName& name, bool mandatory)
             if (isFile(fullName))
             {
                 results.append(fullName);
+                if (findFirst)
+                {
+                    goto DONE;
+                }
             }
 
             fullName = searchDir/name;
             if (isFile(fullName))
             {
                 results.append(fullName);
+                if (findFirst)
+                {
+                    goto DONE;
+                }
             }
         }
     }
@@ -323,12 +344,20 @@ Foam::fileNameList Foam::findEtcFiles(const fileName& name, bool mandatory)
             if (isFile(fullName))
             {
                 results.append(fullName);
+                if (findFirst)
+                {
+                    goto DONE;
+                }
             }
 
             fullName = searchDir/"site"/name;
             if (isFile(fullName))
             {
                 results.append(fullName);
+                if (findFirst)
+                {
+                    goto DONE;
+                }
             }
         }
     }
@@ -343,6 +372,10 @@ Foam::fileNameList Foam::findEtcFiles(const fileName& name, bool mandatory)
         if (isFile(fullName))
         {
             results.append(fullName);
+            if (findFirst)
+            {
+                goto DONE;
+            }
         }
     }
 
@@ -360,6 +393,7 @@ Foam::fileNameList Foam::findEtcFiles(const fileName& name, bool mandatory)
         }
     }
 
+DONE:
     // Return list of matching paths or empty list if none found
     return results;
 }
@@ -367,7 +401,7 @@ Foam::fileNameList Foam::findEtcFiles(const fileName& name, bool mandatory)
 
 Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
 {
-    fileNameList results(findEtcFiles(name, mandatory));
+    fileNameList results(findEtcFiles(name, mandatory, true));
 
     if (results.size())
     {
