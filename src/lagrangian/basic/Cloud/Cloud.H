@@ -44,7 +44,6 @@ SourceFiles
 #include "indexedOctree.H"
 #include "treeDataCell.H"
 #include "tetPointRef.H"
-#include "polyMeshTetDecomposition.H"
 #include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
