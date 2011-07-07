@@ -738,7 +738,7 @@ void Foam::particle::hitWallFaces
         {
             // Get the decomposition of this wall face
 
-            const List<tetIndices>& faceTetIs =
+            const List<tetIndices> faceTetIs =
                 polyMeshTetDecomposition::faceTetIndices(mesh_, fI, cellI_);
 
             const Foam::face& f = pFaces[fI];
