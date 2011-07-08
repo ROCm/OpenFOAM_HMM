@@ -110,13 +110,19 @@ bool chDir(const fileName& dir);
 //
 //  \return The list of full paths of all the matching files or
 //  an empty list if the name cannot be found.
-//  Optionally abort if the file cannot be found
-fileNameList findEtcFiles(const fileName&, bool mandatory=false);
+//  Optionally abort if the file cannot be found.
+//  Optionally stop search after the first file has been found.
+fileNameList findEtcFiles
+(
+    const fileName&,
+    bool mandatory=false,
+    bool findFirst=false
+);
 
 //- Search for a file using findEtcFiles.
-//  \return The full path name of the first file found which in the
+//  \return The full path name of the first file found in the
 //  search hierarchy or an empty fileName if the name cannot be found.
-//  Optionally abort if the file cannot be found
+//  Optionally abort if the file cannot be found.
 fileName findEtcFile(const fileName&, bool mandatory=false);
 
 //- Make a directory and return an error if it could not be created
