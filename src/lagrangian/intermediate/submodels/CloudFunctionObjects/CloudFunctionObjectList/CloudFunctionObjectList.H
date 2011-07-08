@@ -103,6 +103,9 @@ public:
 
         // Evaluation
 
+            //- Pre-evolve hook
+            virtual void preEvolve();
+
             //- Post-evolve hook
             virtual void postEvolve();
 
