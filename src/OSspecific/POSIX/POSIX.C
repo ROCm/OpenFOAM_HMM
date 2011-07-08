@@ -286,7 +286,7 @@ Foam::fileNameList Foam::findEtcFiles
             results.append(fullName);
             if (findFirst)
             {
-                goto DONE;
+                return results;
             }
         }
 
@@ -296,7 +296,7 @@ Foam::fileNameList Foam::findEtcFiles
             results.append(fullName);
             if (findFirst)
             {
-                goto DONE;
+                return results;
             }
         }
     }
@@ -316,7 +316,7 @@ Foam::fileNameList Foam::findEtcFiles
                 results.append(fullName);
                 if (findFirst)
                 {
-                    goto DONE;
+                    return results;
                 }
             }
 
@@ -326,7 +326,7 @@ Foam::fileNameList Foam::findEtcFiles
                 results.append(fullName);
                 if (findFirst)
                 {
-                    goto DONE;
+                    return results;
                 }
             }
         }
@@ -346,7 +346,7 @@ Foam::fileNameList Foam::findEtcFiles
                 results.append(fullName);
                 if (findFirst)
                 {
-                    goto DONE;
+                    return results;
                 }
             }
 
@@ -356,7 +356,7 @@ Foam::fileNameList Foam::findEtcFiles
                 results.append(fullName);
                 if (findFirst)
                 {
-                    goto DONE;
+                    return results;
                 }
             }
         }
@@ -374,7 +374,7 @@ Foam::fileNameList Foam::findEtcFiles
             results.append(fullName);
             if (findFirst)
             {
-                goto DONE;
+                return results;
             }
         }
     }
@@ -393,7 +393,6 @@ Foam::fileNameList Foam::findEtcFiles
         }
     }
 
-DONE:
     // Return list of matching paths or empty list if none found
     return results;
 }
