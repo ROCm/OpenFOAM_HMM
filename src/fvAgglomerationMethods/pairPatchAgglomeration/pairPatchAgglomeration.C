@@ -351,7 +351,7 @@ void Foam::pairPatchAgglomeration:: agglomerate()
         tmp<labelField> finalAgglomPtr(new labelField(patch.size()));
 
         bool agglomOK = false;
-        while (!agglomOK)
+        while (!agglomOK && patch.size())
         {
             finalAgglomPtr = agglomerateOneLevel
             (
