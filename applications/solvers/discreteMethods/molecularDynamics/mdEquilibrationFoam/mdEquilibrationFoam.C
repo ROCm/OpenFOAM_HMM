@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    mdFoam
+    mdEquilibrationFoam
 
 Description
-    Molecular dynamics solver for fluid dynamics
+    Equilibrates and/or preconditions molecular dynamics systems
 
 \*---------------------------------------------------------------------------*/
 
@@ -60,6 +60,8 @@ int main(int argc, char *argv[])
 
     #include "temperatureAndPressureVariables.H"
 
+    #include "readmdEquilibrationDict.H"
+
     label nAveragingSteps = 0;
 
     Info<< "\nStarting time loop\n" << endl;
@@ -75,6 +77,8 @@ int main(int argc, char *argv[])
         #include "meanMomentumEnergyAndNMols.H"
 
         #include "temperatureAndPressure.H"
+
+        #include "temperatureEquilibration.H"
 
         runTime.write();
 

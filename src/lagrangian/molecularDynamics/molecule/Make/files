@@ -1,14 +1,9 @@
-clouds/baseClasses/moleculeCloud/moleculeCloud.C
+reducedUnits/reducedUnits.C
+reducedUnits/reducedUnitsIO.C
 
-molecules/constPropSite/constPropSite.C
+molecule/molecule.C
+molecule/moleculeIO.C
 
-molecules/monoatomic/monoatomic.C
-molecules/monoatomic/monoatomicIO.C
-molecules/polyatomic/polyatomic.C
-molecules/polyatomic/polyatomicIO.C
-
-/* controllers/basic/controllers/controllers.C
-controllers/basic/stateController/stateController.C
-controllers/basic/fluxController/fluxController.C */
+moleculeCloud/moleculeCloud.C
 
 LIB = $(FOAM_LIBBIN)/libmolecule

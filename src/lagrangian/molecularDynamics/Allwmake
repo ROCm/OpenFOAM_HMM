@@ -4,6 +4,7 @@ makeType=${1:-libso}
 set -x
 
 wmake $makeType potential
+wmake $makeType molecularMeasurements
 wmake $makeType molecule
 
 # ----------------------------------------------------------------- end-of-file

@@ -1630,12 +1630,9 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
         }
     }
 
-    if (checkFaces.size() < fAreas.size())
-    {
-        Info<< "Excluding "
-            << returnReduce(fAreas.size() - checkFaces.size(), sumOp<label>())
-            << " faces from check, < " << faceAreaLimit << " area" << endl;
-    }
+    Info<< "Excluding "
+        << returnReduce(fAreas.size() - checkFaces.size(), sumOp<label>())
+        << " faces from check, < " << faceAreaLimit << " area" << endl;
 
     motionSmoother::checkMesh
     (

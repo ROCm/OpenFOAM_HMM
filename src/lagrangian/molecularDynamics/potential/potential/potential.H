@@ -55,49 +55,35 @@ class potential
 {
     // Private data
 
-        //-
         const polyMesh& mesh_;
 
-        //-
         List<word> idList_;
 
-        //-
         List<word> siteIdList_;
 
-        //-
         label nPairPotIds_;
 
-        //-
         scalar potentialEnergyLimit_;
 
-        //-
         labelList removalOrder_;
 
-        //-
         pairPotentialList pairPotentials_;
 
-        //-
         tetherPotentialList tetherPotentials_;
 
-        //-
         vector gravity_;
 
 
     // Private Member Functions
 
-
-        //-
         void setSiteIdList(const dictionary& moleculePropertiesDict);
 
-        //-
-        void readPotentialDict(const dictionary& moleculePropertiesDict);
+        void readPotentialDict();
 
-        //-
         void readMdInitialiseDict
         (
-            const dictionary& mdInitialiseDict,
-            const dictionary& moleculePropertiesDict,
-            dictionary& idListDict
+            const IOdictionary& mdInitialiseDict,
+            IOdictionary& idListDict
         );
 
         //- Disallow default bitwise copy construct
@@ -112,19 +98,14 @@ public:
     // Constructors
 
         //- Construct from mesh reference
-        potential
-        (
-            const polyMesh& mesh,
-            const dictionary& moleculePropertiesDict
-        );
+        potential(const polyMesh& mesh);
 
         //- Construct from mdInitialiseDict
         potential
         (
             const polyMesh& mesh,
-            const dictionary& mdInitialiseDict,
-            const dictionary& moleculePropertiesDict,
-            dictionary& idListDict
+            const IOdictionary& mdInitialiseDict,
+            IOdictionary& idListDict
         );
 
 
@@ -136,31 +117,22 @@ public:
 
         // Access
 
-            //-
             inline label nIds() const;
 
-            //-
             inline const List<word>& idList() const;
 
-            //-
             inline const List<word>& siteIdList() const;
 
-            //-
             inline scalar potentialEnergyLimit() const;
 
-            //-
             inline label nPairPotentials() const;
 
-            //-
             inline const labelList& removalOrder() const;
 
-            //-
             inline const pairPotentialList& pairPotentials() const;
 
-            //-
             inline const tetherPotentialList& tetherPotentials() const;
 
-            //-
             inline const vector& gravity() const;
 };
 
