@@ -2,8 +2,7 @@
 // Pre-size by assuming a certain percentage is visible.
 
 // Maximum lenght for dynamicList
-const label maxDynListLenght = 10000;
-//label lenghtCount = 0;
+const label maxDynListLength = 10000;
 
 for (label procI = 0; procI < Pstream::nProcs(); procI++)
 {
@@ -22,69 +21,51 @@ for (label procI = 0; procI < Pstream::nProcs(); procI++)
     const pointField& remoteArea = remoteCoarseSf[procI];
     const pointField& remoteFc = remoteCoarseCf[procI];
 
-    if (myFc.size()*remoteFc.size() > 0)
+    label i = 0;
+    label j = 0;
+    do
     {
-        forAll(myFc, i)
+        for (; i < myFc.size(); i++)
         {
             const point& fc = myFc[i];
             const vector& fA = myArea[i];
 
-            forAll(remoteFc, j)
+            for (; j < remoteFc.size(); j++)//
             {
                 if (procI != Pstream::myProcNo() || i != j)
                 {
                     const point& remFc = remoteFc[j];
                     const vector& remA = remoteArea[j];
-                    const vector& d = remFc-fc;
+                    const vector& d = remFc - fc;
 
                     if (((d & fA) < 0.) && ((d & remA) > 0))
                     {
-                        //lenghtCount ++;
                         start.append(fc + 0.0001*d);
                         startIndex.append(i);
                         end.append(fc + 0.9999*d);
                         label globalI = globalNumbering.toGlobal(procI, j);
                         endIndex.append(globalI);
-
-                        if (startIndex.size() > maxDynListLenght)
+                        if (startIndex.size() > maxDynListLength)
                         {
-                            List<pointIndexHit> hitInfo(startIndex.size());
-                            surfacesMesh.findLine
-                            (
-                                start,
-                                end,
-                                hitInfo
-                            );
-                            surfacesMesh.findLine(start, end, hitInfo);
-                            forAll (hitInfo, rayI)
-                            {
-                                if (!hitInfo[rayI].hit())
-                                {
-                                    rayStartFace.append(startIndex[rayI]);
-                                    rayEndFace.append(endIndex[rayI]);
-                                }
-                            }
-                            //lenghtCount = 0;
-                            start.clear();
-                            startIndex.clear();
-                            end.clear();
-                            endIndex.clear();
+                            break;
                         }
                     }
                 }
             }
+            if (startIndex.size() > maxDynListLength)
+            {
+                break;
+            }
+
+            if (j == remoteFc.size())
+            {
+                j = 0;
+            }
         }
-    }
-    if (!start.empty())
-    {
+
         List<pointIndexHit> hitInfo(startIndex.size());
-        surfacesMesh.findLine
-        (
-            start,
-            end,
-            hitInfo
-        );
         surfacesMesh.findLine(start, end, hitInfo);
+
         forAll (hitInfo, rayI)
         {
             if (!hitInfo[rayI].hit())
@@ -93,5 +74,12 @@ for (label procI = 0; procI < Pstream::nProcs(); procI++)
                 rayEndFace.append(endIndex[rayI]);
             }
         }
-    }
+
+        start.clear();
+        startIndex.clear();
+        end.clear();
+        endIndex.clear();
+
+    }while (returnReduce(i < myFc.size(), orOp<bool>()));
+
 }

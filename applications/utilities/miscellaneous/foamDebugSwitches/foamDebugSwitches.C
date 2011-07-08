@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 
     if (args.optionFound("old") || args.optionFound("new"))
     {
-        fileNameList controlDictFiles = findEtcFile("controlDict", true);
+        fileNameList controlDictFiles = findEtcFiles("controlDict", true);
         dictionary controlDict;
         forAllReverse(controlDictFiles, cdfi)
         {

@@ -514,6 +514,16 @@ inline void Foam::particle::crossEdgeConnectedFace
         {
             continue;
         }
+        else if (f == pFaces[fI])
+        {
+            // This is a necessary condition if using duplicate baffles
+            // (so coincident faces). We need to make sure we don't cross into
+            // the face with the same vertices since we might enter a tracking
+            // loop where it never exits. This test should be cheap
+            // for most meshes so can be left in for 'normal' meshes.
+
+            continue;
+        }
         else
         {
             //Found edge on other face
