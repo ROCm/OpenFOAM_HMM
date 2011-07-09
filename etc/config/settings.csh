@@ -236,8 +236,8 @@ case ThirdParty:
         # using clang - not gcc
         setenv WM_CC 'clang'
         setenv WM_CXX 'clang++'
-        set clang_version=llvm-2.9
-        #set clang_version=llvm-svn
+        #set clang_version=llvm-2.9
+        set clang_version=llvm-svn
         breaksw
     default:
         echo

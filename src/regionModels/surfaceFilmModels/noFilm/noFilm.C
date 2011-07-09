@@ -62,12 +62,12 @@ bool noFilm::read()
 
 noFilm::noFilm
 (
-    const word&,
+    const word& modelType,
     const fvMesh& mesh,
-    const dimensionedVector&
+    const dimensionedVector& g
 )
 :
-    surfaceFilmModel(mesh)
+    surfaceFilmModel(modelType, mesh, g)
 {}
 
 
