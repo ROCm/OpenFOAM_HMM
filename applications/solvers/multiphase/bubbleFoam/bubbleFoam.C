@@ -34,6 +34,7 @@ Description
 #include "nearWallDist.H"
 #include "wallFvPatch.H"
 #include "Switch.H"
+
 #include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -47,6 +48,9 @@ int main(int argc, char *argv[])
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"
     #include "initContinuityErrs.H"
+    #include "readTimeControls.H"
+    #include "CourantNo.H"
+    #include "setInitialDeltaT.H"
 
     pimpleControl pimple(mesh);
 
@@ -54,16 +58,23 @@ int main(int argc, char *argv[])
 
     Info<< "\nStarting time loop\n" << endl;
 
-    while (runTime.loop())
+    while (runTime.run())
     {
-        Info<< "Time = " << runTime.timeName() << nl << endl;
-
         #include "readBubbleFoamControls.H"
         #include "CourantNo.H"
+        #include "setDeltaT.H"
+
+        runTime++;
+        Info<< "Time = " << runTime.timeName() << nl << endl;
 
         // --- Pressure-velocity PIMPLE corrector loop
         for (pimple.start(); pimple.loop(); pimple++)
         {
+            if (pimple.nOuterCorr() != 1)
+            {
+                p.storePrevIter();
+            }
+
             #include "alphaEqn.H"
             #include "liftDragCoeffs.H"
             #include "UEqns.H"
@@ -73,7 +84,7 @@ int main(int argc, char *argv[])
             {
                 #include "pEqn.H"
 
-                if (correctAlpha)
+                if (correctAlpha && !pimple.finalIter())
                 {
                     #include "alphaEqn.H"
                 }
