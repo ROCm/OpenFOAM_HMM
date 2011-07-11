@@ -130,9 +130,6 @@ public:
 
     // Constructors
 
-        //- Construct null
-        surfaceFilmModel(const fvMesh& mesh);
-
         //- Construct from type name, mesh and gravity vector
         surfaceFilmModel
         (

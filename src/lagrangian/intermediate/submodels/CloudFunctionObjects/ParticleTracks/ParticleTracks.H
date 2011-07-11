@@ -136,6 +136,9 @@ public:
 
         // Evaluation
 
+            //- Pre-evolve hook
+            virtual void preEvolve();
+
             //- Post-patch hook
             virtual void postPatch(const parcelType& p, const label patchI);
 

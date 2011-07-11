@@ -28,17 +28,19 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<>
-const char* Foam::NamedEnum
-<
-    Foam::regionModels::surfaceFilmModels::surfaceFilmModel::thermoModelType,
-    2
->::names[] =
+namespace Foam
 {
-    "constant",
-    "singleComponent"
-};
-
+    template<>
+    const char* NamedEnum
+    <
+        regionModels::surfaceFilmModels::surfaceFilmModel::thermoModelType,
+        2
+    >::names[] =
+    {
+        "constant",
+        "singleComponent"
+    };
+}
 
 const Foam::NamedEnum
 <
@@ -48,7 +50,7 @@ const Foam::NamedEnum
 Foam::regionModels::surfaceFilmModels::surfaceFilmModel::thermoModelTypeNames_;
 
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
@@ -80,14 +82,6 @@ bool surfaceFilmModel::read()
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-surfaceFilmModel::surfaceFilmModel(const fvMesh& mesh)
-:
-    singleLayerRegion(mesh),
-    g_(vector::zero),
-    thermoModel_(tmConstant)
-{}
-
 
 surfaceFilmModel::surfaceFilmModel
 (

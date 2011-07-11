@@ -96,6 +96,19 @@ Foam::ParticleTracks<CloudType>::~ParticleTracks()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
+void Foam::ParticleTracks<CloudType>::preEvolve()
+{
+    if (!cloudPtr_.valid())
+    {
+        cloudPtr_.reset
+        (
+            this->owner().cloneBare(this->owner().name() + "Tracks").ptr()
+        );
+    }
+}
+
+
+template<class CloudType>
 void Foam::ParticleTracks<CloudType>::postPatch(const parcelType&, const label)
 {}
 
@@ -111,10 +124,10 @@ void Foam::ParticleTracks<CloudType>::postFace(const parcelType& p)
     {
         if (!cloudPtr_.valid())
         {
-            cloudPtr_.reset
+            FatalErrorIn
             (
-                this->owner().cloneBare(this->owner().name() + "Tracks").ptr()
-            );
+                "Foam::ParticleTracks<CloudType>::postFace(const parcelType&)"
+            )<< "Cloud storage not allocated" << abort(FatalError);
         }
 
         hitTableType::iterator iter =

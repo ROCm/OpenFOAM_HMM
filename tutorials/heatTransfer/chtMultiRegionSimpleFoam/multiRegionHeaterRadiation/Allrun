@@ -42,12 +42,23 @@ done
 #-- Run on single processor
 runApplication `getApplication`
 
+## Run in parallel
 ## Decompose
 #for i in bottomAir topAir heater leftSolid rightSolid
 #do
 #   decomposePar -region $i > log.decomposePar.$i 2>&1
 #done
 #
+#for i in bottomAir topAir
+#do
+#    mpirun -np 4 faceAgglomerate -region $i -dict viewFactorsDict -parallel>   log.faceAgglomerate.$i 2>&1
+#done
+
+#for i in bottomAir topAir
+#do
+#    mpirun -np 4 viewFactorsGen -region $i -parallel > log.viewFactorsGen.$i 2>&1
+#done
+
 ## Run
 #runParallel `getApplication` 4
 #
@@ -61,9 +72,6 @@ runApplication `getApplication`
 echo
 echo "creating files for paraview post-processing"
 echo
-for i in bottomAir topAir heater leftSolid rightSolid
-do
-    paraFoam -touch -region $i
-done
+paraFoam -touchAll
 
 # ----------------------------------------------------------------- end-of-file

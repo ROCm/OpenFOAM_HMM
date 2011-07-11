@@ -25,6 +25,7 @@ License
 
 #include "pairPatchAgglomeration.H"
 #include "meshTools.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -53,7 +54,7 @@ void Foam::pairPatchAgglomeration::setBasedEdgeWeights()
     const bPatch& coarsePatch = patchLevels_[0];
     forAll(coarsePatch.edges(), i)
     {
-        if(coarsePatch.isInternalEdge(i))
+        if (coarsePatch.isInternalEdge(i))
         {
             scalar edgeLength =
                 coarsePatch.edges()[i].mag(coarsePatch.localPoints());
@@ -63,12 +64,12 @@ void Foam::pairPatchAgglomeration::setBasedEdgeWeights()
             if (eFaces.size() == 2)
             {
                 scalar cosI =
-                        coarsePatch.faceNormals()[eFaces[0]] &
-                        coarsePatch.faceNormals()[eFaces[1]];
+                    coarsePatch.faceNormals()[eFaces[0]]
+                  & coarsePatch.faceNormals()[eFaces[1]];
 
                 const edge edgeCommon = edge(eFaces[0], eFaces[1]);
 
-                if(facePairWeight_.found(edgeCommon))
+                if (facePairWeight_.found(edgeCommon))
                 {
                     facePairWeight_[edgeCommon] += edgeLength;
                 }
@@ -77,14 +78,7 @@ void Foam::pairPatchAgglomeration::setBasedEdgeWeights()
                     facePairWeight_.insert(edgeCommon, edgeLength);
                 }
 
-                if
-                (
-                    cosI <
-                    Foam::cos
-                    (
-                        featureAngle_*constant::mathematical::pi/180.0
-                    )
-                )
+                if (cosI < Foam::cos(degToRad(featureAngle_)))
                 {
                     facePairWeight_[edgeCommon] = -1.0;
                 }
@@ -109,11 +103,8 @@ void Foam::pairPatchAgglomeration::setEdgeWeights
     const bPatch& coarsePatch = patchLevels_[fineLevelIndex];
 
     const labelList& fineToCoarse = restrictAddressing_[fineLevelIndex];
-    const label nCoarseI =  max(fineToCoarse)+1;
-    labelListList coarseToFine
-    (
-        invertOneToMany(nCoarseI, fineToCoarse)
-    );
+    const label nCoarseI =  max(fineToCoarse) + 1;
+    labelListList coarseToFine(invertOneToMany(nCoarseI, fineToCoarse));
 
     HashSet<edge, Hash<edge> > fineFeaturedFaces(coarsePatch.nEdges()/10);
 
@@ -138,7 +129,7 @@ void Foam::pairPatchAgglomeration::setEdgeWeights
 
     forAll(coarsePatch.edges(), i)
     {
-        if(coarsePatch.isInternalEdge(i))
+        if (coarsePatch.isInternalEdge(i))
         {
             scalar edgeLength =
                 coarsePatch.edges()[i].mag(coarsePatch.localPoints());
@@ -148,7 +139,7 @@ void Foam::pairPatchAgglomeration::setEdgeWeights
             if (eFaces.size() == 2)
             {
                 const edge edgeCommon = edge(eFaces[0], eFaces[1]);
-                if(facePairWeight_.found(edgeCommon))
+                if (facePairWeight_.found(edgeCommon))
                 {
                     facePairWeight_[edgeCommon] += edgeLength;
                 }
@@ -220,10 +211,12 @@ Foam::pairPatchAgglomeration::pairPatchAgglomeration
     setBasedEdgeWeights();
 }
 
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::pairPatchAgglomeration::~pairPatchAgglomeration()
 {}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -259,8 +252,15 @@ bool Foam::pairPatchAgglomeration::agglomeratePatch
 {
     if (min(fineToCoarse) == -1)
     {
-        FatalErrorIn("pairPatchAgglomeration::agglomeratePatch")
-            << "min(fineToCoarse) == -1" << exit(FatalError);
+        FatalErrorIn
+        (
+            "pairPatchAgglomeration::agglomeratePatch"
+            "("
+                "const bPatch&, "
+                "const labelList&, "
+                "const label"
+            ")"
+        )   << "min(fineToCoarse) == -1" << exit(FatalError);
     }
 
     if (fineToCoarse.size() != patch.size())
@@ -268,7 +268,11 @@ bool Foam::pairPatchAgglomeration::agglomeratePatch
         FatalErrorIn
         (
             "pairPatchAgglomeration::agglomeratePatch"
-            "(const label fineLevelIndex)"
+            "("
+                "const bPatch&, "
+                "const labelList&, "
+                "const label"
+            ")"
         )   << "restrict map does not correspond to fine level. " << endl
             << " Sizes: restrictMap: " << fineToCoarse.size()
             << " nEqns: " << patch.size()
@@ -279,10 +283,7 @@ bool Foam::pairPatchAgglomeration::agglomeratePatch
     List<face> patchFaces(nCoarseI);
 
     // Patch faces per agglomeration
-    labelListList coarseToFine
-    (
-        invertOneToMany(nCoarseI, fineToCoarse)
-    );
+    labelListList coarseToFine(invertOneToMany(nCoarseI, fineToCoarse));
 
     for (label coarseI = 0; coarseI < nCoarseI; coarseI++)
     {
@@ -351,7 +352,7 @@ void Foam::pairPatchAgglomeration:: agglomerate()
         tmp<labelField> finalAgglomPtr(new labelField(patch.size()));
 
         bool agglomOK = false;
-        while (!agglomOK)
+        while (!agglomOK && patch.size())
         {
             finalAgglomPtr = agglomerateOneLevel
             (
@@ -371,7 +372,7 @@ void Foam::pairPatchAgglomeration:: agglomerate()
         restrictAddressing_.set(nCreatedLevels, finalAgglomPtr);
         mapBaseToTopAgglom(nCreatedLevels);
 
-        if(!continueAgglomerating(nCoarseCells))
+        if (!continueAgglomerating(nCoarseCells))
         {
             break;
         }
@@ -407,7 +408,7 @@ Foam::tmp<Foam::labelField> Foam::pairPatchAgglomeration::agglomerateOneLevel
 
     nCoarseCells = 0;
 
-    forAll (faceFaces, facei)
+    forAll(faceFaces, facei)
     {
         const labelList& fFaces = faceFaces[facei];
 
@@ -425,8 +426,8 @@ Foam::tmp<Foam::labelField> Foam::pairPatchAgglomeration::agglomerateOneLevel
                 if
                 (
                     facePairWeight_[edgeCommon] > maxFaceWeight
-                    && coarseCellMap[faceNeig] < 0
-                    && facePairWeight_[edgeCommon] != -1.0
+                 && coarseCellMap[faceNeig] < 0
+                 && facePairWeight_[edgeCommon] != -1.0
                 )
                 {
                     // Match found. Pick up all the necessary data
@@ -472,7 +473,8 @@ Foam::tmp<Foam::labelField> Foam::pairPatchAgglomeration::agglomerateOneLevel
                     coarseCellMap[facei] = coarseCellMap[clusterMatchFaceNo];
                 }
                 else
-                {// if not create single-cell "clusters" for each
+                {
+                    // if not create single-cell "clusters" for each
                     coarseCellMap[facei] = nCoarseCells;
                     nCoarseCells ++;
                 }
@@ -499,6 +501,7 @@ Foam::tmp<Foam::labelField> Foam::pairPatchAgglomeration::agglomerateOneLevel
     return tcoarseCellMap;
 }
 
+
 void Foam::pairPatchAgglomeration::combineLevels(const label curLevel)
 {
     label prevLevel = curLevel - 1;
@@ -522,4 +525,6 @@ void Foam::pairPatchAgglomeration::combineLevels(const label curLevel)
 
     patchLevels_.set(prevLevel, patchLevels_.set(curLevel, NULL));
 }
+
+
 // ************************************************************************* //

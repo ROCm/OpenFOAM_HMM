@@ -130,11 +130,11 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     (
         readScalar(this->coeffDict().lookup("parcelsPerSecond"))
     ),
-    volumeFlowRate_
+    flowRateProfile_
     (
         DataEntry<scalar>::New
         (
-            "volumeFlowRate",
+            "flowRateProfile",
             this->coeffDict()
         )
     ),
@@ -208,7 +208,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     tanVec2_ = direction_^tanVec1_;
 
     // Set total volume to inject
-    this->volumeTotal_ = volumeFlowRate_().integrate(0.0, duration_);
+    this->volumeTotal_ = flowRateProfile_().integrate(0.0, duration_);
 }
 
 
@@ -227,7 +227,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     injectorCell_(im.injectorCell_),
     direction_(im.direction_),
     parcelsPerSecond_(im.parcelsPerSecond_),
-    volumeFlowRate_(im.volumeFlowRate_().clone().ptr()),
+    flowRateProfile_(im.flowRateProfile_().clone().ptr()),
     thetaInner_(im.thetaInner_().clone().ptr()),
     thetaOuter_(im.thetaOuter_().clone().ptr()),
     sizeDistribution_(im.sizeDistribution_().clone().ptr()),
@@ -283,7 +283,7 @@ Foam::scalar Foam::ConeNozzleInjection<CloudType>::volumeToInject
 {
     if ((time0 >= 0.0) && (time0 < duration_))
     {
-        return volumeFlowRate_().integrate(time0, time1);
+        return flowRateProfile_().integrate(time0, time1);
     }
     else
     {
@@ -405,7 +405,7 @@ void Foam::ConeNozzleInjection<CloudType>::setProperties
             scalar Ai = 0.25*mathematical::pi*innerDiameter_*innerDiameter_;
             scalar massFlowRate =
                 this->massTotal()
-               *volumeFlowRate_().value(t)
+               *flowRateProfile_().value(t)
                /this->volumeTotal();
 
             scalar Umag = massFlowRate/(parcel.rho()*Cd_().value(t)*(Ao - Ai));

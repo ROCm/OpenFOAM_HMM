@@ -101,8 +101,6 @@ inline Foam::scalar Foam::aC10H7CH3::D(scalar p, scalar T) const
 }
 
 
-
-
 inline Foam::scalar Foam::aC10H7CH3::D(scalar p, scalar T, scalar Wb) const
 {
     return D_.f(p, T, Wb);

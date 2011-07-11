@@ -609,6 +609,8 @@ void Foam::KinematicCloud<CloudType>::preEvolve()
 
     pAmbient_ = constProps_.dict().template
         lookupOrDefault<scalar>("pAmbient", pAmbient_);
+
+    functions_.preEvolve();
 }
 
 

@@ -148,13 +148,13 @@ public:
 
 
     // Destructor
-        ~pairPatchAgglomeration();
+    ~pairPatchAgglomeration();
 
 
     // Member Functions
 
         //- Agglomerate patch
-            void agglomerate();
+        void agglomerate();
 
 
         // Access
@@ -200,7 +200,6 @@ public:
                 const Field<Type>& cf,
                 const label coarseLevelIndex
             ) const;
-
 };
 
 
