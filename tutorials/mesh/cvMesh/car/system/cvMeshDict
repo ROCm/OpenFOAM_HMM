@@ -58,18 +58,11 @@ See also cvControls.H in the conformalVoronoiMesh library
 geometry
 {
     // Internal shape
-    m_car01_merge_orient.obj
+    m_car01_wheels_merge_orient.obj
     {
         name m_car01;
         type closedTriSurfaceMesh;
     }
-
-    // m_car01
-    // {
-    //     type searchableSurfaceWithGaps;
-    //     surface m_car01_orient.obj;
-    //     gap 1e-2;
-    // }
 
     // Outside of domain
     domain_orient.stl
@@ -211,10 +204,10 @@ initialPoints
     // to the surface. Is fraction of local target cell size (see below)
     minimumSurfaceDistanceCoeff 0.55;
 
-    initialPointsMethod             autoDensity;
+    //initialPointsMethod             autoDensity;
     // initialPointsMethod          uniformGrid;
     // initialPointsMethod          bodyCentredCubic;
-    // initialPointsMethod          pointFile;
+    initialPointsMethod          pointFile;
 
     // Take boundbox of all geometry. Samples with this box. If too much
     // samples (due to target cell size) in box split box.
@@ -380,6 +373,9 @@ motionControl
 // Do not change. See cvControls.H
 polyMeshFiltering
 {
+    // Write the underlying Delaunay tet mesh at output time
+    writeTetMesh                            true;
+
     // Upper limit on the size of faces to be filtered.
     // fraction of the local target cell size
     filterSizeCoeff                         0.2;
@@ -425,7 +421,7 @@ polyMeshFiltering
 meshQualityControls
 {
     //- Maximum non-orthogonality allowed. Set to 180 to disable.
-    maxNonOrtho 1;  //65;
+    maxNonOrtho 65;
 
     //- Max skewness allowed. Set to <0 to disable.
     maxBoundarySkewness 50;

@@ -87,10 +87,11 @@ surfaceConformation
     //   (circumcentre far away from centroid)
     pointPairDistanceCoeff      0.1;
 
-    // Mixed feature edges - both inside and outside edges. Recreated
-    // by inserting triplets of points to recreate a single edge. Done for
-    // all edges emanating from point. triplets of points get inserted
+    // Mixed feature points - connected to both inside and outside edges.
+    // Recreated by inserting triplets of points to recreate a single edge.
+    // Done for all edges emanating from point. triplets of points get inserted
     // mixedFeaturePointPPDistanceCoeff distance away from feature point.
+    // Set to a positive number to enable.
     mixedFeaturePointPPDistanceCoeff    5.0;
 
     // Distance to a feature point within which surface and edge
@@ -386,7 +387,7 @@ polyMeshFiltering
 
     // To not filter: set maxNonOrtho to 1 (so check fails) and then
     // set continueFilteringOnBadInitialPolyMesh to false.
-    continueFilteringOnBadInitialPolyMesh   false;  //true;
+    continueFilteringOnBadInitialPolyMesh   true;
 
     // When a face is "bad", what fraction should the filterSizeCoeff be
     // reduced by.  Recursive, so for a filterCount value of fC, the
@@ -421,7 +422,7 @@ polyMeshFiltering
 meshQualityControls
 {
     //- Maximum non-orthogonality allowed. Set to 180 to disable.
-    maxNonOrtho 1;
+    maxNonOrtho 65;
 
     //- Max skewness allowed. Set to <0 to disable.
     maxBoundarySkewness 50;
