@@ -86,10 +86,13 @@ bool Foam::interpolateSolid::writeData(Ostream& os) const
     os.writeKeyword("rhoValues") << rhoValues_ << token::END_STATEMENT << nl;
     os.writeKeyword("cpValues") << cpValues_ << token::END_STATEMENT << nl;
     os.writeKeyword("HfValues") << HfValues_ << token::END_STATEMENT << nl;
-    os.writeKeyword("emissivityValues") << emissivityValues_ << nl;
-    os.writeKeyword("kappaValues") << kappaValues_ << nl;
+    os.writeKeyword("emissivityValues") << emissivityValues_ <<
+         token::END_STATEMENT << nl;
+    os.writeKeyword("kappaValues") << kappaValues_
+        << token::END_STATEMENT << nl;
     os.writeKeyword("sigmaSValues") << sigmaSValues_
         << token::END_STATEMENT << nl;
+
 
     return os.good();
 }

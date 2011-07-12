@@ -79,6 +79,9 @@ public:
         //- Construct from mesh
         solidMixtureThermo(const fvMesh&);
 
+        //- Construct from mesh and dictionary
+        solidMixtureThermo(const fvMesh&, const dictionary&);
+
 
     //- Destructor
     virtual ~solidMixtureThermo();

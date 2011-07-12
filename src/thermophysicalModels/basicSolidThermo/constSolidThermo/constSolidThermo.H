@@ -93,6 +93,10 @@ public:
         //- Construct from mesh
         constSolidThermo(const fvMesh& mesh);
 
+         //- Construct from mesh and dict
+        constSolidThermo(const fvMesh& mesh, const dictionary& dict);
+
+
     //- Destructor
     virtual ~constSolidThermo();
 

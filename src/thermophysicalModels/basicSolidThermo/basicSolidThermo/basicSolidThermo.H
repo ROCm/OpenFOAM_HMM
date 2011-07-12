@@ -98,14 +98,32 @@ public:
     );
 
 
+     // Declare run-time constructor selection tables
+    declareRunTimeSelectionTable
+    (
+        autoPtr,
+        basicSolidThermo,
+        dictionary,
+        (const fvMesh& mesh, const dictionary& dict),
+        (mesh, dict)
+    );
+
+
     // Constructors
 
         //- Construct from mesh
         basicSolidThermo(const fvMesh&);
 
+        //- Construct from mesh and dict
+        basicSolidThermo(const fvMesh&, const dictionary& dict);
+
         //- Return a pointer to a new basicSolidThermo created from
         //  the solidThermophysicalProperties dictionary
         static autoPtr<basicSolidThermo> New(const fvMesh&);
+
+        //- Return a pointer to a new basicSolidThermo created from
+        //  local dictionary
+        static autoPtr<basicSolidThermo> New(const fvMesh&, const dictionary&);
 
 
     //- Destructor

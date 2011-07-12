@@ -20,6 +20,9 @@ region  liquidFilm;
 // FaceZones to extrude
 faceZones (f0);
 
+// FaceZone shadow
+//faceZonesShadow (fBaffleShadow);
+
 // Adapt the original mesh to have directMapped patches at where the
 // faceZones are?
 // If true:
@@ -31,6 +34,10 @@ adaptMesh true;
 
 // Extrude 1D-columns of cells?
 oneD false;
+
+// If oneD is true. Specify which boundary is wanted between the layers
+//oneDPolyPatchType emptyPolyPatch; //wedgePolyPatch
+
 
 //- Extrusion model to use. The only logical choice is linearNormal?
 

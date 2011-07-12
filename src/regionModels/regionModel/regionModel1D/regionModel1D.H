@@ -105,6 +105,9 @@ protected:
         //- Read control parameters from dictionary
         virtual bool read();
 
+        //- Read control parameters from dictionary
+        virtual bool read(const dictionary& dict);
+
         //- Move mesh points according to change in cell volumes
         //  Returns map ordered by cell where 1 = cell moved, 0 = cell unchanged
         tmp<labelField> moveMesh
@@ -133,6 +136,17 @@ public:
             const word& modelName,
             bool readFields = true
         );
+
+        //- Construct from mesh, region type and name and dict
+        regionModel1D
+        (
+            const fvMesh& mesh,
+            const word& regionType,
+            const word& modelName,
+            const dictionary& dict,
+            bool readFields = true
+        );
+
 
 
     //- Destructor

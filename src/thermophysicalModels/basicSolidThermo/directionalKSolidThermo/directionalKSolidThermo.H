@@ -86,6 +86,9 @@ class directionalKSolidThermo
         //- Calculate properties
         void calculate();
 
+        //- Initialize thermo
+        void init();
+
 
 public:
 
@@ -97,6 +100,9 @@ public:
 
         //- Construct from mesh
         directionalKSolidThermo(const fvMesh& mesh);
+
+         //- Construct from mesh and dictionary
+        directionalKSolidThermo(const fvMesh& mesh, const dictionary& dict);
 
 
     //- Destructor

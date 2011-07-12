@@ -87,6 +87,32 @@ Foam::solidMixtureThermo<MixtureType>::solidMixtureThermo
 }
 
 
+template<class MixtureType>
+Foam::solidMixtureThermo<MixtureType>::solidMixtureThermo
+(
+    const fvMesh& mesh,
+    const dictionary& dict
+)
+:
+    basicSolidThermo(mesh, dict),
+    MixtureType(*this, mesh),
+    K_
+    (
+        IOobject
+        (
+            "K",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimEnergy/dimTime/(dimLength*dimTemperature)
+    )
+{
+    calculate();
+}
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class MixtureType>

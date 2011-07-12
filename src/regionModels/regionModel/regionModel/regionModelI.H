@@ -46,6 +46,12 @@ inline const Foam::Switch& Foam::regionModels::regionModel::active() const
 }
 
 
+inline const Foam::Switch& Foam::regionModels::regionModel::infoOutput() const
+{
+    return infoOutput_;
+}
+
+
 inline const Foam::word& Foam::regionModels::regionModel::modelName() const
 {
     return modelName_;

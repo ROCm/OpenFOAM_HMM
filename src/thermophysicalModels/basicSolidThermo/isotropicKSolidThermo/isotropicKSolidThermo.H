@@ -70,6 +70,10 @@ public:
         //- Construct from mesh
         isotropicKSolidThermo(const fvMesh& mesh);
 
+        //- Construct from mesh and dicionary
+        isotropicKSolidThermo(const fvMesh& mesh, const dictionary& dict);
+
+
 
     //- Destructor
     virtual ~isotropicKSolidThermo();

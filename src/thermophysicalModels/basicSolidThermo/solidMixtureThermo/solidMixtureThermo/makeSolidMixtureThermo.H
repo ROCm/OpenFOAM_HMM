@@ -54,6 +54,12 @@ addToRunTimeSelectionTable                                                    \
     mesh                                                                      \
 );                                                                            \
                                                                               \
+addToRunTimeSelectionTable                                                    \
+(                                                                             \
+    CThermo,                                                                  \
+    MixtureThermo##Mixture##Transport##Radiation##Thermo##Rho,                \
+    dictionary                                                                \
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

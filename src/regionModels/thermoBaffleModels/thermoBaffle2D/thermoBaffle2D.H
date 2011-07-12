@@ -37,7 +37,6 @@ SourceFiles
 #define thermoBaffle2D_H
 
 #include "thermoBaffleModel.H"
-#include "basicSolidThermo.H"
 #include "volFieldsFwd.H"
 
 
@@ -68,6 +67,9 @@ private:
 
         //- Disallow default bitwise assignment
         void operator=(const thermoBaffle2D&);
+
+        //- Initialize thermoBaffle2D
+        void init();
 
 
 protected:
@@ -106,7 +108,7 @@ protected:
         // Equations
 
             //- Solve energy equation
-            virtual void solveEnergy();
+            void solveEnergy();
 
 
 public:
@@ -120,6 +122,16 @@ public:
         //- Construct from components
         thermoBaffle2D(const word& modelType, const fvMesh& mesh);
 
+        //- Construct from components and dict
+        thermoBaffle2D
+        (
+            const word& modelType,
+            const fvMesh& mesh,
+            const dictionary& dict
+
+        );
+
+
 
     //- Destructor
     virtual ~thermoBaffle2D();
@@ -130,7 +142,7 @@ public:
         // Thermo properties
 
             //- Return const reference to the basicSolidThermo
-            inline const basicSolidThermo& thermo() const;
+            virtual const basicSolidThermo& thermo() const;
 
 
             // Fields
@@ -176,10 +188,10 @@ public:
 
         // Evolution
 
-            //- Pre-evolve film
+            //- Pre-evolve  thermal baffle
             virtual void preEvolveRegion();
 
-            //- Evolve the film equations
+            //- Evolve the thermal baffle
             virtual void evolveRegion();
 
 

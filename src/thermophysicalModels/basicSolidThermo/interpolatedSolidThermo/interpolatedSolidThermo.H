@@ -67,6 +67,15 @@ public:
         //- Construct from mesh
         interpolatedSolidThermo(const fvMesh& mesh, const word);
 
+        //- Construct from mesh and dictionary
+        interpolatedSolidThermo
+        (
+            const fvMesh& mesh,
+            const word,
+            const dictionary& dict
+        );
+
+
 
     //- Destructor
     virtual ~interpolatedSolidThermo();

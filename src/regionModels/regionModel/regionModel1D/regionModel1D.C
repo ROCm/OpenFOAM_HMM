@@ -159,6 +159,21 @@ bool Foam::regionModels::regionModel1D::read()
 }
 
 
+bool Foam::regionModels::regionModel1D::read(const dictionary& dict)
+{
+    if (regionModel::read(dict))
+    {
+        moveMesh_.readIfPresent("moveMesh", dict);
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
 Foam::tmp<Foam::labelField> Foam::regionModels::regionModel1D::moveMesh
 (
     const scalarList& deltaV,
@@ -300,6 +315,35 @@ Foam::regionModels::regionModel1D::regionModel1D
     }
 }
 
+
+Foam::regionModels::regionModel1D::regionModel1D
+(
+    const fvMesh& mesh,
+    const word& regionType,
+    const word& modelName,
+    const dictionary& dict,
+    bool readFields
+)
+:
+    regionModel(mesh, regionType, modelName, dict, readFields),
+    boundaryFaceFaces_(regionMesh().nCells()),
+    boundaryFaceCells_(regionMesh().nCells()),
+    boundaryFaceOppositeFace_(regionMesh().nCells()),
+    nLayers_(0),
+    nMagSfPtr_(NULL),
+    moveMesh_(false)
+{
+    if (active_)
+    {
+        constructMeshObjects();
+        initialise();
+
+        if (readFields)
+        {
+            read(dict);
+        }
+    }
+}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
