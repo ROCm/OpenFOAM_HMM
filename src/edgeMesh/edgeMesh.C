@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -148,6 +148,7 @@ void Foam::edgeMesh::calcPointEdges() const
 
 Foam::edgeMesh::edgeMesh()
 :
+    fileFormats::edgeFormatsCore(),
     points_(0),
     edges_(0),
     pointEdgesPtr_(NULL)
@@ -160,6 +161,7 @@ Foam::edgeMesh::edgeMesh
     const edgeList& edges
 )
 :
+    fileFormats::edgeFormatsCore(),
     points_(points),
     edges_(edges),
     pointEdgesPtr_(NULL)
@@ -172,6 +174,7 @@ Foam::edgeMesh::edgeMesh
     const Xfer<edgeList>& edgeLst
 )
 :
+    fileFormats::edgeFormatsCore(),
     points_(0),
     edges_(0),
     pointEdgesPtr_(NULL)
