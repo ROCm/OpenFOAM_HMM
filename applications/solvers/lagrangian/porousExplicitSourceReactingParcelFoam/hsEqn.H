@@ -39,7 +39,7 @@
           + parcels.Sh(hs)
           + radiation->Shs(thermo)
           + energySource.Su()
-          + chemistrySh
+          + combustion->Sh()
         );
 
         thermo.correct();

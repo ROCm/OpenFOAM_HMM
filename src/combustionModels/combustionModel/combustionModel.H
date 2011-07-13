@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,7 @@ Class
     Foam::combustionModel
 
 Description
-    Base class for all non-premixed combustion models based on single step
-    chemistry
+    Base class for combustion models
 
 SourceFiles
     combustionModel.C
@@ -36,9 +35,7 @@ SourceFiles
 #define combustionModel_H
 
 #include "IOdictionary.H"
-#include "hsCombustionThermo.H"
 #include "turbulenceModel.H"
-#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,29 +47,28 @@ namespace Foam
 \*---------------------------------------------------------------------------*/
 
 class combustionModel
+:
+    public IOdictionary
 {
 
 protected:
 
     // Protected data
 
-        //- Dictionary of coefficients for the particular model
-        dictionary coeffs_;
-
-        //- Reference to the thermodynamics
-        hsCombustionThermo& thermo_;
-
         //- Reference to the turbulence model
-        const compressible::turbulenceModel& turbulence_;
+        compressible::turbulenceModel* turbulencePtr_;
 
         //- Reference to the mesh database
         const fvMesh& mesh_;
 
-        //- Reference to mass-flux field
-        const surfaceScalarField& phi_;
+        //- Active
+        Switch active_;
 
-        //- Reference to the density field
-        const volScalarField& rho_;
+        //- Dictionary of the model
+        dictionary coeffs_;
+
+        //- Model name
+        const word modelType_;
 
 
 private:
@@ -92,65 +88,11 @@ public:
     TypeName("combustionModel");
 
 
-    // Declare run-time constructor selection table
-
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            combustionModel,
-            dictionary,
-            (
-                const dictionary& combustionProperties,
-                hsCombustionThermo& thermo,
-                const compressible::turbulenceModel& turbulence,
-                const surfaceScalarField& phi,
-                const volScalarField& rho
-            ),
-            (
-                combustionProperties,
-                thermo,
-                turbulence,
-                phi,
-                rho
-            )
-        );
-
-
-    // Selectors
-
-        //- Return a reference to the selected combustion model
-        static autoPtr<combustionModel> New
-        (
-            const dictionary& combustionProperties,
-            hsCombustionThermo& thermo,
-            const compressible::turbulenceModel& turbulence,
-            const surfaceScalarField& phi,
-            const volScalarField& rho
-        );
-
-
     // Constructors
 
-        //- Construct null from components
-        combustionModel
-        (
-            const dictionary& combustionProps,
-            hsCombustionThermo& thermo,
-            const compressible::turbulenceModel& turbulence,
-            const surfaceScalarField& phi,
-            const volScalarField& rho
-        );
 
         //- Construct from components
-        combustionModel
-        (
-            const word& modelType,
-            const dictionary& combustionProperties,
-            hsCombustionThermo& thermo,
-            const compressible::turbulenceModel& turbulence,
-            const surfaceScalarField& phi,
-            const volScalarField& rho
-        );
+        combustionModel(const word& modelType, const fvMesh& mesh);
 
 
     //- Destructor
@@ -159,40 +101,63 @@ public:
 
     // Member Functions
 
-        // Access functions
+        // Access
 
-            //- Access combustion dictionary
-            const dictionary coeffs() const
-            {
-                return coeffs_;
-            }
+
+            //- Return const access to the mesh database
+            inline const fvMesh& mesh() const;
+
+            //- Return const access to phi
+            inline const surfaceScalarField& phi() const;
+
+            //- Return const access to rho
+            virtual tmp<volScalarField> rho() const = 0;
+
+            //- Return access to turbulence
+            inline const compressible::turbulenceModel& turbulence() const;
+
+            //- Set turbulence
+            inline void setTurbulence
+            (
+                compressible::turbulenceModel& turbModel
+            );
+
+            //- Is combustion active?
+            inline const Switch& active() const;
+
+            //- Return const dictionary of the model
+            inline const dictionary& coeffs() const;
 
 
     // Evolution
 
         //- Correct combustion rate
-        virtual void correct();
+        virtual void correct() = 0;
 
         //- Fuel consumption rate matrix, i.e. source term for fuel equation
-        virtual tmp<fvScalarMatrix> R(volScalarField& Y) const;
+        virtual tmp<fvScalarMatrix> R(const volScalarField& Y) const = 0;
 
         //- Heat release rate calculated from fuel consumption rate matrix
-        virtual tmp<volScalarField> dQ() const;
+        virtual tmp<volScalarField> dQ() const = 0;
 
-        //- Return normalised consumption rate of (fu - fres)
-        virtual tmp<Foam::volScalarField> wFuelNorm() const;
+        //-  Return source for enthalpy equation [kg/m/s3]
+        virtual tmp<volScalarField> Sh() const;
 
 
     // I-O
 
         //- Update properties from given dictionary
-        virtual bool read(const dictionary& combustionProps);
+        virtual bool read();
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "combustionModelI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

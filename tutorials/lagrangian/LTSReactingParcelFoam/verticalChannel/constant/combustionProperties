@@ -11,19 +11,20 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      chemistryProperties;
+    object      combustionProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-psiChemistryModel ODEChemistryModel<gasThermoPhysics>;
+combustionModel  PaSR<rhoChemistryCombustionModel>;
 
-chemistry       off;
+active  false;
 
-turbulentReaction off;
-
-chemistrySolver noChemistrySolver;
-
-initialChemicalTimeStep 1e-07;
+PaSRCoeffs
+{
+    Cmix                Cmix [ 0 0 0 0 0 0 0 ] 0.1;
+    turbulentReaction   off;
+    useReactionRate     true;
+}
 
 
 // ************************************************************************* //

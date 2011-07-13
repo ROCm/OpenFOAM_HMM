@@ -1,10 +1,14 @@
-    Info<< "Reading thermophysical properties\n" << endl;
+    Info<< "Creating combustion model\n" << endl;
 
-    autoPtr<psiChemistryModel> pChemistry
+    autoPtr<combustionModels::psiChemistryCombustionModel> combustion
     (
-        psiChemistryModel::New(mesh)
+        combustionModels::psiChemistryCombustionModel::New
+        (
+            mesh
+        )
     );
-    psiChemistryModel& chemistry = pChemistry();
+
+    psiChemistryModel& chemistry = combustion->pChemistry();
 
     hsCombustionThermo& thermo = chemistry.thermo();
 
@@ -50,21 +54,6 @@
 
     #include "compressibleCreatePhi.H"
 
-    Info<< "Creating field kappa\n" << endl;
-    DimensionedField<scalar, volMesh> kappa
-    (
-        IOobject
-        (
-            "kappa",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh,
-        dimensionedScalar("zero", dimless, 0.0)
-    );
-
     Info<< "Creating turbulence model\n" << endl;
     autoPtr<compressible::turbulenceModel> turbulence
     (
@@ -76,6 +65,9 @@
             thermo
         )
     );
+
+    // Set the turbulence into the combustion model
+    combustion->setTurbulence(turbulence());
 
     Info<< "Creating field DpDt\n" << endl;
     volScalarField DpDt
@@ -131,16 +123,16 @@
         additionalControlsDict.lookup("solvePrimaryRegion")
     );
 
-    DimensionedField<scalar, volMesh> chemistrySh
+    volScalarField dQ
     (
         IOobject
         (
-            "chemistry::Sh",
+            "dQ",
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar("chemistrySh", dimEnergy/dimTime/dimVolume, 0.0)
+        dimensionedScalar("dQ", dimEnergy/dimTime, 0.0)
     );

@@ -9,7 +9,7 @@
       + parcels.Sh(hs)
       + radiation->Shs(thermo)
       + energySource.Su()
-      + chemistrySh
+      + combustion->Sh()
     );
 
     hsEqn.solve();

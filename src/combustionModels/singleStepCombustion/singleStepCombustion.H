@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,20 +21,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::combustionModel::noCombustion
+    Foam::combustionModels::singleStepCombustion
 
 Description
-    Dummy combustion model for 'none' option
+    Base class for combustion models using singleStepReactingMixture.
 
 SourceFiles
-    noCombustion.C
+    singleStepCombustion.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef noCombustion_H
-#define noCombustion_H
+#ifndef singleStepCombustion_H
+#define singleStepCombustion_H
 
-#include "combustionModel.H"
+#include "singleStepReactingMixture.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,43 +44,72 @@ namespace combustionModels
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class noCombustion Declaration
+                  Class singleStepCombustion Declaration
 \*---------------------------------------------------------------------------*/
 
-class noCombustion
+template<class CombThermoType, class ThermoType>
+class singleStepCombustion
 :
-    public combustionModel
+    public CombThermoType
 {
+
+protected:
+
+    // Protected data
+
+        //- Reference to singleStepReactingMixture mixture
+        singleStepReactingMixture<ThermoType>& singleMixture_;
+
+        //- Fuel consumption rate
+        volScalarField wFuel_;
+
+
+private:
+
     // Private Member Functions
 
         //- Disallow copy construct
-        noCombustion(const noCombustion&);
+        singleStepCombustion(const singleStepCombustion&);
 
         //- Disallow default bitwise assignment
-        void operator=(const noCombustion&);
+        void operator=(const singleStepCombustion&);
 
 
 public:
-
-    //- Runtime type information
-    TypeName("none");
 
 
     // Constructors
 
         //- Construct from components
-        noCombustion
+        singleStepCombustion
         (
-            const dictionary& combustionProperties,
-            hsCombustionThermo& thermo,
-            const compressible::turbulenceModel& turbulence,
-            const surfaceScalarField& phi,
-            const volScalarField& rho
+            const word& modelType, const fvMesh& mesh
         );
 
 
     //- Destructor
-    virtual ~noCombustion();
+    virtual ~singleStepCombustion();
+
+
+    // Member Functions
+
+        // Evolution
+
+
+            //- Fuel consumption rate matrix
+            virtual tmp<fvScalarMatrix> R(const volScalarField& Y) const;
+
+            //- Heat release rate calculated from fuel consumption rate matrix
+            virtual tmp<volScalarField> dQ() const;
+
+            //- Sensible enthalpy source term
+            virtual tmp<volScalarField> Sh() const;
+
+
+    // I-O
+
+            //- Update properties from given dictionary
+            virtual bool read();
 };
 
 
@@ -88,6 +117,13 @@ public:
 
 } // End namespace combustionModels
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+#ifdef NoRepository
+#   include "singleStepCombustion.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

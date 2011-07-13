@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,131 +23,80 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "infinitelyFastChemistry.H"
-#include "addToRunTimeSelectionTable.H"
-#include "fvmSup.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
 namespace combustionModels
 {
-    defineTypeNameAndDebug(infinitelyFastChemistry, 0);
-    addToRunTimeSelectionTable
-    (
-        combustionModel,
-        infinitelyFastChemistry,
-        dictionary
-    );
-};
-};
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::combustionModels::infinitelyFastChemistry::infinitelyFastChemistry
+template<class CombThermoType, class ThermoType>
+infinitelyFastChemistry<CombThermoType, ThermoType>::infinitelyFastChemistry
 (
-    const dictionary& combustionProps,
-    hsCombustionThermo& thermo,
-    const compressible::turbulenceModel& turbulence,
-    const surfaceScalarField& phi,
-    const volScalarField& rho
+    const word& modelType, const fvMesh& mesh
 )
 :
-    combustionModel(typeName, combustionProps, thermo, turbulence, phi, rho),
-    C_(readScalar(coeffs_.lookup("C"))),
-    singleMixture_
-    (
-        dynamic_cast<singleStepReactingMixture<gasThermoPhysics>&>(thermo)
-    ),
-    wFuelNorm_
-    (
-        IOobject
-        (
-            "wFuelNorm",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar("zero", dimMass/pow3(dimLength)/dimTime, 0.0)
-    )
+    singleStepCombustion<CombThermoType, ThermoType>(modelType, mesh),
+    C_(readScalar(this->coeffs().lookup("C")))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-Foam::combustionModels::infinitelyFastChemistry::~infinitelyFastChemistry()
+template<class CombThermoType, class ThermoType>
+infinitelyFastChemistry<CombThermoType, ThermoType>::~infinitelyFastChemistry()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::combustionModels::infinitelyFastChemistry::correct()
+template<class CombThermoType, class ThermoType>
+void infinitelyFastChemistry<CombThermoType, ThermoType>::correct()
 {
-    singleMixture_.fresCorrect();
+    this->wFuel_ ==
+        dimensionedScalar("zero", dimMass/pow3(dimLength)/dimTime, 0.0);
 
-    const label fuelI = singleMixture_.fuelIndex();
-
-    const volScalarField& YFuel = thermo_.composition().Y()[fuelI];
-
-    const dimensionedScalar s = singleMixture_.s();
-
-    if (thermo_.composition().contains("O2"))
+    if (this->active())
     {
-        const volScalarField& YO2 = thermo_.composition().Y("O2");
-        wFuelNorm_ == rho_/(mesh_.time().deltaT()*C_)*min(YFuel, YO2/s.value());
+        this->singleMixture_.fresCorrect();
+
+        const label fuelI = this->singleMixture_.fuelIndex();
+
+        const volScalarField& YFuel = this->thermo_->composition().Y()[fuelI];
+
+        const dimensionedScalar s = this->singleMixture_.s();
+
+        if (this->thermo_->composition().contains("O2"))
+        {
+            const volScalarField& YO2 = this->thermo_->composition().Y("O2");
+
+            this->wFuel_ ==
+                 this->rho()/(this->mesh().time().deltaT()*C_)
+                *min(YFuel, YO2/s.value());
+        }
     }
 }
 
 
-Foam::tmp<Foam::fvScalarMatrix>
-Foam::combustionModels::infinitelyFastChemistry::R(volScalarField& Y) const
+template<class CombThermoType, class ThermoType>
+bool infinitelyFastChemistry<CombThermoType, ThermoType>::read()
 {
-    const label specieI = thermo_.composition().species()[Y.name()];
-
-    const label fNorm = singleMixture_.specieProd()[specieI];
-
-    const volScalarField fres(singleMixture_.fres(specieI));
-
-    const volScalarField wSpecie
-    (
-        wFuelNorm_*singleMixture_.specieStoichCoeffs()[specieI]
-      / max(fNorm*(Y - fres), scalar(0.001))
-    );
-
-    return -fNorm*wSpecie*fres + fNorm*fvm::Sp(wSpecie, Y);
+    if (singleStepCombustion<CombThermoType, ThermoType>::read())
+    {
+        this->coeffs().lookup("C") >> C_ ;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 
-Foam::tmp<Foam::volScalarField>
-Foam::combustionModels::infinitelyFastChemistry::dQ() const
-{
-    const label fuelI = singleMixture_.fuelIndex();
-    volScalarField& YFuel = thermo_.composition().Y(fuelI);
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    return -singleMixture_.qFuel()*(R(YFuel) & YFuel);
-}
+} // End namespace combustionModels
+} // End namespace Foam
 
-
-Foam::tmp<Foam::volScalarField>
-Foam::combustionModels::infinitelyFastChemistry::wFuelNorm() const
-{
-    return wFuelNorm_;
-}
-
-
-bool Foam::combustionModels::infinitelyFastChemistry::read
-(
-    const dictionary& combustionProps
-)
-{
-    combustionModel::read(combustionProps);
-    coeffs_.lookup("C") >> C_ ;
-
-    return true;
-}
-
-
-// ************************************************************************* //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

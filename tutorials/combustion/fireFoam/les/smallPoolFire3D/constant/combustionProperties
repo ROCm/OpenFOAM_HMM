@@ -16,15 +16,13 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-combustionModel    infinitelyFastChemistry;
+//combustionModel  infinitelyFastChemistry<psiCombustionModel,gasThermoPhysics>;
+
+active  on;
 
 infinitelyFastChemistryCoeffs
 {
     C       5.0;
-}
-
-noCombustionCoeffs
-{
 }
 
 

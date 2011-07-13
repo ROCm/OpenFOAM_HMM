@@ -19,9 +19,6 @@ rhoChemistryModel  ODEChemistryModel<icoPoly8ThermoPhysics>;
 
 chemistry       off;
 
-
-turbulentReaction off;
-
 chemistrySolver noChemistrySolver;
 
 initialChemicalTimeStep 1e-07;  // NOT USED

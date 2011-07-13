@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,84 +23,71 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "combustionModel.H"
-#include "surfaceFields.H"
-#include "fvScalarMatrix.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
     defineTypeNameAndDebug(combustionModel, 0);
-    defineRunTimeSelectionTable(combustionModel, dictionary);
-};
-
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::combustionModel::combustionModel
 (
-    const dictionary& combustionProps,
-    hsCombustionThermo& thermo,
-    const compressible::turbulenceModel& turbulence,
-    const surfaceScalarField& phi,
-    const volScalarField& rho
-)
-:
-    coeffs_(dictionary::null),
-    thermo_(thermo),
-    turbulence_(turbulence),
-    mesh_(phi.mesh()),
-    phi_(phi),
-    rho_(rho)
-{}
-
-
-Foam::combustionModel::combustionModel
-(
     const word& modelType,
-    const dictionary& combustionProps,
-    hsCombustionThermo& thermo,
-    const compressible::turbulenceModel& turbulence,
-    const surfaceScalarField& phi,
-    const volScalarField& rho
+    const fvMesh& mesh
 )
 :
-    coeffs_(combustionProps.subDict(modelType + "Coeffs")),
-    thermo_(thermo),
-    turbulence_(turbulence),
-    mesh_(phi.mesh()),
-    phi_(phi),
-    rho_(rho)
+    IOdictionary
+    (
+        IOobject
+        (
+            "combustionProperties",
+            mesh.time().constant(),
+            mesh,
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE
+        )
+    ),
+    turbulencePtr_(),
+    mesh_(mesh),
+    active_(lookupOrDefault<Switch>("active", true)),
+    coeffs_(subDict(modelType + "Coeffs")),
+    modelType_(modelType)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
 Foam::combustionModel::~combustionModel()
-{}
+{
+    if (turbulencePtr_)
+    {
+        turbulencePtr_ = 0;
+    }
+}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::combustionModel::correct()
+
+bool Foam::combustionModel::read()
 {
-    // do nothing
+    if (regIOobject::read())
+    {
+        this->lookup("active") >> active_;
+        coeffs_ = subDict(modelType_ + "Coeffs");
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 
-Foam::tmp<Foam::fvScalarMatrix> Foam::combustionModel::R
-(
-    volScalarField& Y
-) const
-{
-    return tmp<fvScalarMatrix>
-    (
-        new fvScalarMatrix(Y, dimMass/dimTime*Y.dimensions())
-    );
-}
-
-
-Foam::tmp<Foam::volScalarField> Foam::combustionModel::dQ() const
+Foam::tmp<Foam::volScalarField> Foam::combustionModel::Sh() const
 {
     return tmp<Foam::volScalarField>
     (
@@ -108,7 +95,7 @@ Foam::tmp<Foam::volScalarField> Foam::combustionModel::dQ() const
         (
             IOobject
             (
-                "dQ",
+                "Sh",
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
@@ -118,35 +105,6 @@ Foam::tmp<Foam::volScalarField> Foam::combustionModel::dQ() const
             dimensionedScalar("zero", dimEnergy/dimVolume/dimTime, 0.0)
         )
     );
-}
-
-
-Foam::tmp<Foam::volScalarField> Foam::combustionModel::wFuelNorm() const
-{
-    return tmp<Foam::volScalarField>
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "wFuelNorm",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh_,
-            dimensionedScalar("zero", dimMass/dimTime/pow3(dimLength), 0.0)
-        )
-    );
-}
-
-
-bool Foam::combustionModel::read(const dictionary& combustionProps)
-{
-    coeffs_ = combustionProps.subDict(type() + "Coeffs");
-
-    return true;
 }
 
 

@@ -2,10 +2,11 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
+    This file is part of OpenFOAM.
 
     OpenFOAM is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by
@@ -22,45 +23,37 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "noCombustion.H"
-#include "addToRunTimeSelectionTable.H"
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
+inline Foam::psiChemistryModel&
+Foam::combustionModels::psiChemistryCombustionModel::pChemistry()
 {
-namespace combustionModels
+    return pChemistry_();
+}
+
+inline const Foam::psiChemistryModel&
+Foam::combustionModels::psiChemistryCombustionModel::
+pChemistry() const
 {
-    defineTypeNameAndDebug(noCombustion, 0);
-    addToRunTimeSelectionTable
-    (
-        combustionModel,
-        noCombustion,
-        dictionary
-    );
-};
-};
+    return pChemistry_();
+}
 
+inline Foam::tmp<Foam::volScalarField>
+Foam::combustionModels::psiChemistryCombustionModel::rho() const
+{
+    return pChemistry_->thermo().rho();
+}
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+inline const Foam::hsCombustionThermo&
+Foam::combustionModels::psiChemistryCombustionModel::thermo() const
+{
+    return pChemistry_->thermo();
+}
 
-Foam::combustionModels::noCombustion::noCombustion
-(
-    const dictionary& combustionProps,
-    hsCombustionThermo& thermo,
-    const compressible::turbulenceModel& turbulence,
-    const surfaceScalarField& phi,
-    const volScalarField& rho
-)
-:
-    combustionModel(combustionProps, thermo, turbulence, phi, rho)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
-
-Foam::combustionModels::noCombustion::~noCombustion()
-{}
-
+inline Foam::hsCombustionThermo&
+Foam::combustionModels::psiChemistryCombustionModel::thermo()
+{
+    return pChemistry_->thermo();
+}
 
 // ************************************************************************* //

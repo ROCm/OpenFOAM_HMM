@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,10 +35,7 @@ SourceFiles
 
 #ifndef infinitelyFastChemistry_H
 #define infinitelyFastChemistry_H
-
-#include "combustionModel.H"
-#include "singleStepReactingMixture.H"
-#include "thermoPhysicsTypes.H"
+#include "singleStepCombustion.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,20 +48,15 @@ namespace combustionModels
                   Class infinitelyFastChemistry Declaration
 \*---------------------------------------------------------------------------*/
 
+template<class CombThermoType, class ThermoType>
 class infinitelyFastChemistry
 :
-    public combustionModel
+    public singleStepCombustion <CombThermoType, ThermoType>
 {
     // Private data
 
         //- Model constant
         scalar C_;
-
-        //- Reference to singleStepReactingMixture mixture
-        singleStepReactingMixture<gasThermoPhysics>& singleMixture_;
-
-        //- Normalised consumption rate of (fu - fres)
-        volScalarField wFuelNorm_;
 
 
     // Private Member Functions
@@ -87,11 +79,7 @@ public:
         //- Construct from components
         infinitelyFastChemistry
         (
-            const dictionary& combustionProps,
-            hsCombustionThermo& thermo,
-            const compressible::turbulenceModel& turbulence,
-            const surfaceScalarField& phi,
-            const volScalarField& rho
+            const word& modelType, const fvMesh& mesh
         );
 
 
@@ -106,20 +94,11 @@ public:
             //- Correct combustion rate
             virtual void correct();
 
-            //- Fuel consumption rate matrix, i.e. source term for fuel equation
-            virtual tmp<fvScalarMatrix> R(volScalarField& Y) const;
-
-            //- Heat release rate calculated from fuel consumption rate matrix
-            virtual tmp<volScalarField> dQ() const;
-
-            //- Return normalised consumption rate of (fu - fres)
-            virtual tmp<volScalarField> wFuelNorm() const;
-
 
     // I-O
 
-            //- Update properties from given dictionary
-            virtual bool read(const dictionary& combustionProperties);
+            //- Update properties
+            virtual bool read();
 };
 
 
@@ -127,6 +106,13 @@ public:
 
 } // End namespace combustionModels
 } // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "infinitelyFastChemistry.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

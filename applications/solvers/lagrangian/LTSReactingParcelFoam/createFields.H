@@ -1,10 +1,14 @@
-    Info<< "Reading thermophysical properties\n" << endl;
+    Info<< "Creating combustion model\n" << endl;
 
-    autoPtr<rhoChemistryModel> pChemistry
+    autoPtr<combustionModels::rhoChemistryCombustionModel> combustion
     (
-        rhoChemistryModel::New(mesh)
+        combustionModels::rhoChemistryCombustionModel::New
+        (
+            mesh
+        )
     );
-    rhoChemistryModel& chemistry = pChemistry();
+
+    rhoChemistryModel& chemistry = combustion->pChemistry();
 
     hsReactionThermo& thermo = chemistry.thermo();
 
@@ -57,20 +61,6 @@
 
     #include "compressibleCreatePhi.H"
 
-    DimensionedField<scalar, volMesh> kappa
-    (
-        IOobject
-        (
-            "kappa",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh,
-        dimensionedScalar("zero", dimless, 0.0)
-    );
-
     dimensionedScalar rhoMax
     (
         mesh.solutionDict().subDict("PIMPLE").lookup("rhoMax")
@@ -93,6 +83,9 @@
         )
     );
 
+    // Set the turbulence into the combustion model
+    combustion->setTurbulence(turbulence());
+
     Info<< "Creating multi-variate interpolation scheme\n" << endl;
     multivariateSurfaceInterpolationScheme<scalar>::fieldTable fields;
 
@@ -102,19 +95,20 @@
     }
     fields.add(hs);
 
-    DimensionedField<scalar, volMesh> chemistrySh
+    volScalarField dQ
     (
         IOobject
         (
-            "chemistry::Sh",
+            "dQ",
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar("chemistrySh", dimEnergy/dimTime/dimVolume, 0.0)
+        dimensionedScalar("dQ", dimEnergy/dimTime, 0.0)
     );
+
 
     volScalarField rDeltaT
     (
