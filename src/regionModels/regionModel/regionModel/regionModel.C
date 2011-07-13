@@ -60,6 +60,28 @@ void Foam::regionModels::regionModel::constructMeshObjects()
 }
 
 
+void Foam::regionModels::regionModel::constructMeshObjects
+(
+    const dictionary& dict
+)
+{
+    // construct region mesh
+    regionMeshPtr_.reset
+    (
+        new fvMesh
+        (
+            IOobject
+            (
+                dict.lookup("regionName"),
+                time_.timeName(),
+                time_,
+                IOobject::MUST_READ
+            )
+        )
+    );
+}
+
+
 void Foam::regionModels::regionModel::initialise()
 {
     if (debug)
@@ -148,6 +170,26 @@ bool Foam::regionModels::regionModel::read()
 }
 
 
+bool Foam::regionModels::regionModel::read(const dictionary& dict)
+{
+    if (active_)
+    {
+        if (const dictionary* dictPtr = dict.subDictPtr(modelName_ + "Coeffs"))
+        {
+            coeffs_ <<= *dictPtr;
+        }
+
+        infoOutput_.readIfPresent("infoOutput", dict);
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::regionModels::regionModel::regionModel(const fvMesh& mesh)
@@ -219,6 +261,52 @@ Foam::regionModels::regionModel::regionModel
 }
 
 
+Foam::regionModels::regionModel::regionModel
+(
+    const fvMesh& mesh,
+    const word& regionType,
+    const word& modelName,
+    const dictionary& dict,
+    bool readFields
+)
+:
+    IOdictionary
+    (
+        IOobject
+        (
+            regionType,
+            mesh.time().constant(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            true
+        ),
+        dict
+    ),
+    primaryMesh_(mesh),
+    time_(mesh.time()),
+    active_(dict.lookup("active")),
+    infoOutput_(false),
+    modelName_(modelName),
+    regionMeshPtr_(NULL),
+    coeffs_(dict.subOrEmptyDict(modelName + "Coeffs")),
+    primaryPatchIDs_(),
+    intCoupledPatchIDs_(),
+    mappedPatches_()
+{
+    if (active_)
+    {
+        constructMeshObjects(dict);
+        initialise();
+
+        if (readFields)
+        {
+            read(dict);
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::regionModels::regionModel::~regionModel()
@@ -254,7 +342,7 @@ void Foam::regionModels::regionModel::evolve()
             << regionMesh().name() << endl;
 
         // Update any input information
-        read();
+        //read();
 
         // Pre-evolve
         preEvolveRegion();

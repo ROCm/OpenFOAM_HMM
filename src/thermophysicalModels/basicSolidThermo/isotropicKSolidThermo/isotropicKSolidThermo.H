@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,6 +69,10 @@ public:
 
         //- Construct from mesh
         isotropicKSolidThermo(const fvMesh& mesh);
+
+        //- Construct from mesh and dicionary
+        isotropicKSolidThermo(const fvMesh& mesh, const dictionary& dict);
+
 
 
     //- Destructor

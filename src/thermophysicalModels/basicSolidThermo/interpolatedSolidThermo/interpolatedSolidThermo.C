@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "interpolatedSolidThermo.H"
-#include "addToRunTimeSelectionTable.H"
 #include "interpolateXY.H"
 
 
@@ -43,6 +42,20 @@ Foam::interpolatedSolidThermo::interpolatedSolidThermo
     calculate();
 }
 
+
+Foam::interpolatedSolidThermo::interpolatedSolidThermo
+(
+    const fvMesh& mesh,
+    const word dictName,
+    const dictionary& dict
+ )
+:
+    basicSolidThermo(mesh, dict),
+    interpolateSolid(subDict(dictName)),
+    dict_(subDict(dictName))
+{
+    calculate();
+}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 

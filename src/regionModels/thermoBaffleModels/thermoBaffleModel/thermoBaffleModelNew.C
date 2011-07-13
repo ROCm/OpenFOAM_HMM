@@ -76,6 +76,35 @@ autoPtr<thermoBaffleModel> thermoBaffleModel::New(const fvMesh& mesh)
 }
 
 
+autoPtr<thermoBaffleModel> thermoBaffleModel::New
+(
+    const fvMesh& mesh,
+    const dictionary& dict
+)
+{
+
+    word modelType = dict.lookup("thermoBaffleModel");
+
+    Info<< "Selecting baffle model " << modelType << endl;
+
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(modelType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+
+        FatalErrorIn("thermoBaffleModel::New(const fvMesh&,const dictionary&)")
+            << "Unknown thermoBaffleModel type " << modelType
+            << nl << nl
+            <<  "Valid thermoBaffleModel types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<thermoBaffleModel>(cstrIter()(modelType, mesh, dict));
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace thermoBaffleModels

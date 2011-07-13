@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,10 +37,44 @@ namespace Foam
         isotropicKSolidThermo,
         mesh
     );
+
+    addToRunTimeSelectionTable
+    (
+        basicSolidThermo,
+        isotropicKSolidThermo,
+        dictionary
+    );
+
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::isotropicKSolidThermo::isotropicKSolidThermo
+(
+    const fvMesh& mesh,
+    const dictionary& dict
+)
+:
+    interpolatedSolidThermo(mesh, typeName + "Coeffs", dict),
+    K_
+    (
+        IOobject
+        (
+            "K",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimEnergy/dimTime/(dimLength*dimTemperature)
+    ),
+    KValues_ (Field<scalar>(subDict(typeName + "Coeffs").lookup("KValues")))
+{
+    correct();
+}
+
 
 Foam::isotropicKSolidThermo::isotropicKSolidThermo(const fvMesh& mesh)
 :

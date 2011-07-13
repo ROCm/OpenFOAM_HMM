@@ -127,6 +127,14 @@ const volScalarField& noThermo::T() const
 }
 
 
+const basicSolidThermo& noThermo::thermo() const
+{
+    FatalErrorIn("const volScalarField& noThermo::T() const")
+        << "T field not available for " << type() << abort(FatalError);
+    return reinterpret_cast<const basicSolidThermo&>(null);
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace thermoBaffleModels

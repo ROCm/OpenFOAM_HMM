@@ -76,6 +76,9 @@ private:
         //- Construct region mesh and fields
         void constructMeshObjects();
 
+        //- Construct region mesh and dictionary
+        void constructMeshObjects(const dictionary& dict);
+
         //- Initialise the region
         void initialise();
 
@@ -123,6 +126,9 @@ protected:
         //- Read control parameters from dictionary
         virtual bool read();
 
+        //- Read control parameters from dictionary
+        virtual bool read(const dictionary& dict);
+
 
 public:
 
@@ -144,6 +150,17 @@ public:
             bool readFields = true
         );
 
+        //- Construct from mesh and name and dict
+        regionModel
+        (
+            const fvMesh& mesh,
+            const word& regionType,
+            const word& modelName,
+            const dictionary& dict,
+            bool readFields = true
+        );
+
+
 
     //- Destructor
     virtual ~regionModel();
@@ -161,6 +178,9 @@ public:
 
             //- Return the active flag
             inline const Switch& active() const;
+
+            //- Return the information flag
+            inline const Switch& infoOutput() const;
 
             //- Return the model name
             inline const word& modelName() const;

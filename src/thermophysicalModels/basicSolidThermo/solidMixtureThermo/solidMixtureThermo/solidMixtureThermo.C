@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -86,6 +86,32 @@ Foam::solidMixtureThermo<MixtureType>::solidMixtureThermo
     calculate();
 }
 
+
+template<class MixtureType>
+Foam::solidMixtureThermo<MixtureType>::solidMixtureThermo
+(
+    const fvMesh& mesh,
+    const dictionary& dict
+)
+:
+    basicSolidThermo(mesh, dict),
+    MixtureType(*this, mesh),
+    K_
+    (
+        IOobject
+        (
+            "K",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimEnergy/dimTime/(dimLength*dimTemperature)
+    )
+{
+    calculate();
+}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 

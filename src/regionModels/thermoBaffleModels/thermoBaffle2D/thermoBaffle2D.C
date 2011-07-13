@@ -46,6 +46,7 @@ namespace thermoBaffleModels
 defineTypeNameAndDebug(thermoBaffle2D, 0);
 
 addToRunTimeSelectionTable(thermoBaffleModel, thermoBaffle2D, mesh);
+addToRunTimeSelectionTable(thermoBaffleModel, thermoBaffle2D, dictionary);
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -90,8 +91,8 @@ void thermoBaffle2D::solveEnergy()
     volScalarField K("K", thermo_->K());
 
 
-    //If region is one-dimension variable thickness can be used.
-    if (oneD_)
+    //If region is one-dimension variable thickness
+    if (oneD_ && !constantThickness_)
     {
         // Scale K and rhoCp and fill Q in the internal baffle region.
         const label patchI = intCoupledPatchIDs_[0];
@@ -135,6 +136,60 @@ void thermoBaffle2D::solveEnergy()
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+
+thermoBaffle2D::thermoBaffle2D
+(
+    const word& modelType,
+    const fvMesh& mesh,
+    const dictionary& dict
+)
+:
+    thermoBaffleModel(modelType, mesh, dict),
+    nNonOrthCorr_(readLabel(solution().lookup("nNonOrthCorr"))),
+    thermo_(basicSolidThermo::New(regionMesh(), dict)),
+    T_(thermo_->T()),
+    Qs_
+    (
+        IOobject
+        (
+            "Qs",
+            regionMesh().time().timeName(),
+            regionMesh(),
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        regionMesh(),
+        dimensionedScalar
+        (
+            "zero",
+            dimEnergy/dimArea/dimTime,
+            pTraits<scalar>::zero
+        )
+    ),
+    Q_
+    (
+        IOobject
+        (
+            "Q",
+            regionMesh().time().timeName(),
+            regionMesh(),
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        regionMesh(),
+        dimensionedScalar
+        (
+            "zero",
+            dimEnergy/dimVolume/dimTime,
+            pTraits<scalar>::zero
+        )
+    )
+{
+    init();
+    thermo_->correct();
+}
+
 
 thermoBaffle2D::thermoBaffle2D
 (
@@ -183,26 +238,7 @@ thermoBaffle2D::thermoBaffle2D
         )
     )
 {
-    if (oneD_)
-    {
-        label patchI = intCoupledPatchIDs_[0];
-        const label Qsb = Qs_.boundaryField()[patchI].size();
-        if (Qsb!= thickness_.size())
-        {
-            FatalErrorIn
-            (
-                "thermoBaffle2D::thermoBaffle2D"
-                "("
-                "   const word& modelType,"
-                "   const fvMesh& mesh"
-                ")"
-            )   << "the boundary field of Qs is "
-                << Qsb << " and " << nl
-                << "the field 'thickness' is " << thickness_.size() << nl
-                << exit(FatalError);
-        }
-    }
-
+    init();
     thermo_->correct();
 }
 
@@ -214,6 +250,31 @@ thermoBaffle2D::~thermoBaffle2D()
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void thermoBaffle2D::init()
+{
+    if (oneD_ && !constantThickness_)
+    {
+        label patchI = intCoupledPatchIDs_[0];
+        const label Qsb = Qs_.boundaryField()[patchI].size();
+        if (Qsb!= thickness_.size())
+        {
+            FatalErrorIn
+            (
+                "thermoBaffle2D::thermoBaffle2D"
+                "("
+                "   const word& modelType,"
+                "   const fvMesh& mesh,"
+                "   const dictionary& dict"
+                ")"
+            )   << "the boundary field of Qs is "
+                << Qsb << " and " << nl
+                << "the field 'thickness' is " << thickness_.size() << nl
+                << exit(FatalError);
+        }
+    }
+}
+
 
 void thermoBaffle2D::preEvolveRegion()
 {}
@@ -255,6 +316,12 @@ const volScalarField& thermoBaffle2D::K() const
 const volScalarField& thermoBaffle2D::T() const
 {
     return T_;
+}
+
+
+const basicSolidThermo& thermoBaffle2D::thermo() const
+{
+    return thermo_;
 }
 
 
