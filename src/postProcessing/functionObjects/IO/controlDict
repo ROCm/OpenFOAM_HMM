@@ -14,6 +14,10 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// So we get a decent warning if we have multiple functionObject entries
+// with the same name.
+#inputMode error;
+
 application     icoFoam;
 
 startFrom       startTime;
@@ -56,11 +60,16 @@ functions
         // Where to load it from
         functionObjectLibs ("libIOFunctionObjects.so");
 
+        // Optional mesh region to operate on. Only one partialWrite per
+        // region allowed.
+        region wallFilmRegion;
+
         // Execute upon outputTime
         outputControl   outputTime;
 
-        // Objects to write every outputTime
-        objectNames    (p);
+        // Objects (fields or lagrangian fields in any of the clouds)
+        // to write every outputTime
+        objectNames    (p positions nParticle);
         // Write as normal every writeInterval'th outputTime.
         writeInterval   3;
     }

@@ -193,7 +193,7 @@ public:
             void trackingRescue() const
             {
                 nTrackingRescues_++;
-                if (cloud::debug && nTrackingRescues_ % size() == 0)
+                if (cloud::debug && size() && (nTrackingRescues_ % size() == 0))
                 {
                     Pout<< "    " << nTrackingRescues_
                         << " tracking rescues " << endl;

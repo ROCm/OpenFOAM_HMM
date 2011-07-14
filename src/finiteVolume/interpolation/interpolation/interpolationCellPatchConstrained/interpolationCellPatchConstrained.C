@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,32 +23,54 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeParcelPatchInteractionModels_H
-#define makeParcelPatchInteractionModels_H
+#include "interpolationCellPatchConstrained.H"
+#include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "LocalInteraction.H"
-#include "NoInteraction.H"
-#include "Rebound.H"
-#include "StandardWallInteraction.H"
-#include "MultiInteraction.H"
+namespace Foam
+{
+
+// * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
+
+template<class Type>
+interpolationCellPatchConstrained<Type>::interpolationCellPatchConstrained
+(
+    const GeometricField<Type, fvPatchField, volMesh>& psi
+)
+:
+    interpolation<Type>(psi)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+Type interpolationCellPatchConstrained<Type>::interpolate
+(
+    const vector& pt,
+    const label cellI,
+    const label faceI
+) const
+{
+    if (faceI >= 0 && faceI >= this->psi_.mesh().nInternalFaces())
+    {
+        // Use boundary value
+        const polyBoundaryMesh& pbm = this->psi_.mesh().boundaryMesh();
+        label patchI = pbm.patchID()[faceI-this->psi_.mesh().nInternalFaces()];
+        label patchFaceI = pbm[patchI].whichFace(faceI);
+
+        return this->psi_.boundaryField()[patchI][patchFaceI];
+    }
+    else
+    {
+        return this->psi_[cellI];
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelPatchInteractionModels(CloudType)                           \
-                                                                              \
-    makePatchInteractionModel(CloudType);                                     \
-                                                                              \
-    makePatchInteractionModelType(LocalInteraction, CloudType);               \
-    makePatchInteractionModelType(NoInteraction, CloudType);                  \
-    makePatchInteractionModelType(Rebound, CloudType);                        \
-    makePatchInteractionModelType(StandardWallInteraction, CloudType);        \
-    makePatchInteractionModelType(MultiInteraction, CloudType);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
+} // End namespace Foam
 
 // ************************************************************************* //

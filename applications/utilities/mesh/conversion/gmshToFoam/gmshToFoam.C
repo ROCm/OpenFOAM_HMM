@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -757,8 +757,22 @@ int main(int argc, char *argv[])
         "retain raw orientation for prisms/hexs"
     );
 
+#   include "addRegionOption.H"
+
 #   include "setRootCase.H"
 #   include "createTime.H"
+
+    Foam::word regionName;
+
+    if (args.optionReadIfPresent("region", regionName))
+    {
+        Foam::Info
+            << "Creating polyMesh for region " << regionName << endl;
+    }
+    else
+    {
+        regionName = Foam::polyMesh::defaultRegion;
+    }
 
     const bool keepOrientation = args.optionFound("keepOrientation");
     IFstream inFile(args[1]);
@@ -894,7 +908,7 @@ int main(int argc, char *argv[])
     (
         IOobject
         (
-            polyMesh::defaultRegion,
+            regionName,
             runTime.constant(),
             runTime
         ),
@@ -984,6 +998,7 @@ int main(int argc, char *argv[])
 
 
     //Get polyMesh to write to constant
+
     runTime.setTime(instant(runTime.constant()), 0);
 
     repatcher.repatch();
@@ -1077,6 +1092,32 @@ int main(int argc, char *argv[])
     if (cz.size() || fz.size())
     {
         mesh.addZones(List<pointZone*>(0), fz, cz);
+    }
+
+    // Remove empty defaultFaces
+    label defaultPatchID = mesh.boundaryMesh().findPatchID(defaultFacesName);
+    if (mesh.boundaryMesh()[defaultPatchID].size() == 0)
+    {
+        List<polyPatch*> newPatchPtrList((mesh.boundaryMesh().size() - 1));
+        label newPatchI = 0;
+        forAll(mesh.boundaryMesh(), patchI)
+        {
+            if (patchI != defaultPatchID)
+            {
+                const polyPatch& patch = mesh.boundaryMesh()[patchI];
+
+                newPatchPtrList[newPatchI] = patch.clone
+                (
+                    mesh.boundaryMesh(),
+                    newPatchI,
+                    patch.size(),
+                    patch.start()
+                ).ptr();
+
+                newPatchI++;
+            }
+        }
+        repatcher.changePatches(newPatchPtrList);
     }
 
     mesh.write();

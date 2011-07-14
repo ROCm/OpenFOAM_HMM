@@ -5,6 +5,7 @@ probes/probesFunctionObject/probesFunctionObject.C
 
 sampledSet/cloud/cloudSet.C
 sampledSet/coordSet/coordSet.C
+sampledSet/patchCloud/patchCloudSet.C
 sampledSet/polyLine/polyLineSet.C
 sampledSet/face/faceOnlySet.C
 sampledSet/midPoint/midPointSet.C

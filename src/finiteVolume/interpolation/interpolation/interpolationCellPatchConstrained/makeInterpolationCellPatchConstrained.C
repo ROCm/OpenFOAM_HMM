@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,61 +23,19 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+#include "interpolationCellPatchConstrained.H"
 
-inline Foam::edgeMesh::edgeMesh(const edgeMesh& em)
-:
-    fileFormats::edgeFormatsCore(),
-    points_(em.points_),
-    edges_(em.edges_),
-    pointEdgesPtr_(NULL)
-{}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline const Foam::pointField& Foam::edgeMesh::points() const
+namespace Foam
 {
-    return points_;
-}
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline const Foam::edgeList& Foam::edgeMesh::edges() const
-{
-    return edges_;
-}
+makeInterpolation(interpolationCellPatchConstrained);
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline const Foam::labelListList& Foam::edgeMesh::pointEdges() const
-{
-    if (pointEdgesPtr_.empty())
-    {
-        calcPointEdges();
-    }
-    return pointEdgesPtr_();
-}
-
-
-inline Foam::pointField& Foam::edgeMesh::storedPoints()
-{
-    return points_;
-}
-
-
-inline Foam::edgeList& Foam::edgeMesh::storedEdges()
-{
-    return edges_;
-}
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-void Foam::edgeMesh::operator=(const edgeMesh& rhs)
-{
-    points_ = rhs.points_;
-    edges_ = rhs.edges_;
-    pointEdgesPtr_.clear();
-}
-
+} // End namespace Foam
 
 // ************************************************************************* //
