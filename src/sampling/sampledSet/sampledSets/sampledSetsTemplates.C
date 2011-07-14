@@ -51,18 +51,26 @@ Foam::sampledSets::volFieldSampler<Type>::volFieldSampler
         const sampledSet& samples = samplers[setI];
 
         values.setSize(samples.size());
-        forAll(samples, samplei)
+        forAll(samples, sampleI)
         {
-            const point& samplePt = samples[samplei];
-            label celli = samples.cells()[samplei];
-            label facei = samples.faces()[samplei];
+            const point& samplePt = samples[sampleI];
+            label cellI = samples.cells()[sampleI];
+            label faceI = samples.faces()[sampleI];
 
-            values[samplei] = interpolator().interpolate
-            (
-                samplePt,
-                celli,
-                facei
-            );
+            if (cellI == -1 && faceI == -1)
+            {
+                // Special condition for illegal sampling points
+                values[sampleI] = pTraits<Type>::max;
+            }
+            else
+            {
+                values[sampleI] = interpolator().interpolate
+                (
+                    samplePt,
+                    cellI,
+                    faceI
+                );
+            }
         }
     }
 }
@@ -84,9 +92,18 @@ Foam::sampledSets::volFieldSampler<Type>::volFieldSampler
         const sampledSet& samples = samplers[setI];
 
         values.setSize(samples.size());
-        forAll(samples, samplei)
+        forAll(samples, sampleI)
         {
-            values[samplei] = field[samples.cells()[samplei]];
+            label cellI = samples.cells()[sampleI];
+
+            if (cellI ==-1)
+            {
+                values[sampleI] = pTraits<Type>::max;
+            }
+            else
+            {
+                values[sampleI] = field[cellI];
+            }
         }
     }
 }
