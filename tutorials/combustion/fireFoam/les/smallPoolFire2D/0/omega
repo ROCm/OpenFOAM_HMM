@@ -5,25 +5,49 @@
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      combustionProperties;
+    class       volScalarField;
+    location    "0";
+    object      omega;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-combustionModel  infinitelyFastChemistry<psiCombustionModel,gasThermoPhysics>;
 
-active  on;
+dimensions      [1 -2 -1 0 0 0 0];
 
-infinitelyFastChemistryCoeffs
+internalField   uniform 0;
+
+boundaryField
 {
-    C       5.0;
-}
+    outlet
+    {
+        type            inletOutlet;
+        inletValue      uniform 0;
+        value           uniform 0;
+    }
+    sides
+    {
+        type            inletOutlet;
+        inletValue      uniform 0;
+        value           uniform 0;
+    }
+    base
+    {
+        type            zeroGradient;
+    }
+    inlet
+    {
+        type            fixedValue;
+        value           uniform 0.0;
+    }
+    frontBack
+    {
+        type            empty;
+    }
 
+}
 
 // ************************************************************************* //

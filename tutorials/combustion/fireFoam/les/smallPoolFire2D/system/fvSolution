@@ -53,7 +53,7 @@ solvers
     };
 
 
-    "(U|Yi|k|hs)"
+    "(U|Yi|k|hs|omega)"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -62,7 +62,7 @@ solvers
         nSweeps         1;
     };
 
-    "(U|Yi|k|hs)Final"
+    "(U|Yi|k|hs|omega)Final"
     {
         $U;
         tolerance       1e-7;
