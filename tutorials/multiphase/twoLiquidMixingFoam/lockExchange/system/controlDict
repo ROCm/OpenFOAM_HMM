@@ -10,66 +10,44 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      blockMeshDict;
+    location    "system";
+    object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-convertToMeters 0.1;
+application     twoLiquidMixingFoam;
 
-vertices
-(
-    (0 0 0)
-    (1 0 0)
-    (1 1 0)
-    (0 1 0)
-    (0 0 0.1)
-    (1 0 0.1)
-    (1 1 0.1)
-    (0 1 0.1)
-);
+startFrom       startTime;
 
-blocks
-(
-    hex (0 1 2 3 4 5 6 7) (20 20 1) simpleGrading (1 1 1)
-);
+startTime       0;
 
-edges
-(
-);
+stopAt          endTime;
 
-boundary
-(
-    movingWall
-    {
-        type wall;
-        faces
-        (
-            (3 7 6 2)
-        );
-    }
-    fixedWalls
-    {
-        type wall;
-        faces
-        (
-            (0 4 7 3)
-            (2 6 5 1)
-            (1 5 4 0)
-        );
-    }
-    frontAndBack
-    {
-        type empty;
-        faces
-        (
-            (0 3 2 1)
-            (4 5 6 7)
-        );
-    }
-);
+endTime         100;
 
-mergePatchPairs
-(
-);
+deltaT          0.05;
+
+writeControl    adjustableRunTime;
+
+writeInterval   1;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  6;
+
+writeCompression uncompressed;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable yes;
+
+adjustTimeStep  on;
+
+maxCo           0.5;
+maxDeltaT       1;
 
 // ************************************************************************* //
