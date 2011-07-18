@@ -70,6 +70,8 @@ export LC_ALL=C
 # reader extension
 extension=OpenFOAM
 
+requirePV=1
+
 # parse options
 while [ "$#" -gt 0 ]
 do
@@ -97,10 +99,12 @@ do
         ;;
     -touch)
         optTouch=true
+        requirePV=0
         shift
         ;;
     -touchAll)
         optTouch=all
+        requirePV=0
         shift
         ;;
     --)
@@ -120,7 +124,7 @@ done
 #
 # check that reader module has been built
 #
-if [ ! -f $PV_PLUGIN_PATH/libPV3FoamReader_SM.so ]
+if [ $requirePV -eq 1 -a ! -f $PV_PLUGIN_PATH/libPV3FoamReader_SM.so ]
 then
     cat<< BUILDREADER
 
