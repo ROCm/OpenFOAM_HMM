@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -159,6 +159,13 @@ public:
 
             //- Return corner points in an order corresponding to a 'hex' cell
             tmp<pointField> points() const;
+
+
+        // Manipulate
+
+            //- Inflate box by factor*mag(span) in all dimensions
+            void inflate(const scalar s);
+
 
         // Query
 

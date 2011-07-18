@@ -1,0 +1,4 @@
+AMIInterpolationName.C
+faceAreaIntersect/faceAreaIntersect.C
+
+LIB = $(FOAM_USER_LIBBIN)/libAMIInterpolation
