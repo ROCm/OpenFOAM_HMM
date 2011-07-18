@@ -100,7 +100,7 @@ void Foam::hPolynomialThermo<EquationOfState, PolySize>::write
 {
     EquationOfState::write(os);
 
-    dictionary dict("thermodynamics");
+    dictionaryEntry dict("thermodynamics");
     dict.add("Hf", Hf_);
     dict.add("Sf", Sf_);
     dict.add

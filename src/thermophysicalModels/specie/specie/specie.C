@@ -63,7 +63,7 @@ Foam::specie::specie(const dictionary& dict)
 
 void Foam::specie::write(Ostream& os) const
 {
-    dictionary dict("specie");
+    dictionaryEntry dict("specie");
     dict.add("nMoles", nMoles_);
     dict.add("molWeight", molWeight_);
     os  << dict;

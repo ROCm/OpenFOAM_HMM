@@ -77,7 +77,7 @@ void Foam::polynomialTransport<Thermo, PolySize>::write(Ostream& os) const
 
     Thermo::write(os);
 
-    dictionary dict("transport");
+    dictionaryEntry dict("transport");
     dict.add
     (
         word("muCoeffs<" + Foam::name(PolySize) + '>'),

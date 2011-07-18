@@ -66,7 +66,7 @@ void icoPolynomial<PolySize>::write(Ostream& os) const
 {
     specie::write(os);
 
-    dictionary dict("equationOfState");
+    dictionaryEntry dict("equationOfState");
     dict.add
     (
         word("rhoCoeffs<" + Foam::name(PolySize) + '>'),

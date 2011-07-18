@@ -58,7 +58,7 @@ void Foam::sutherlandTransport<Thermo>::write(Ostream& os) const
 
     Thermo::write(os);
 
-    dictionary dict("transport");
+    dictionaryEnrtry dict("transport");
     dict.add("As", As_);
     dict.add("Ts", Ts_);
     os  << dict;

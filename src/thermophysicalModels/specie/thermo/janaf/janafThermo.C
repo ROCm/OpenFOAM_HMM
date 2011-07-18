@@ -102,7 +102,7 @@ void Foam::janafThermo<EquationOfState>::write(Ostream& os) const
 {
     EquationOfState::write(os);
 
-    dictionary dict("thermodynamics");
+    dictionaryEntry dict("thermodynamics");
     dict.add("Tlow", Tlow_);
     dict.add("Thigh", Thigh_);
     dict.add("Tcommon", Tcommon_);
