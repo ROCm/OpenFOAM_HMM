@@ -71,7 +71,7 @@ public:
 
     // Data types
 
-        //- volume types
+        //- Volume types
         enum volumeType
         {
             UNKNOWN = 0,
@@ -82,6 +82,7 @@ public:
         };
 
         static const NamedEnum<volumeType, 4> volumeTypeNames;
+
 
 private:
 
@@ -188,16 +189,16 @@ public:
             return bounds_;
         }
 
-        //- Names of regions.
+        //- Names of regions
         virtual const wordList& regions() const = 0;
 
-        //- Whether supports volume type below.
+        //- Whether supports volume type below
         virtual bool hasVolumeType() const = 0;
 
-        //- Range of local indices that can be returned.
+        //- Range of local indices that can be returned
         virtual label size() const = 0;
 
-        //- Range of global indices that can be returned.
+        //- Range of global indices that can be returned
         virtual label globalSize() const
         {
             return size();
@@ -350,7 +351,6 @@ public:
             {
                 values.clear();
             }
-
 };
 
 
