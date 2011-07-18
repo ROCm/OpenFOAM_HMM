@@ -50,10 +50,10 @@ void Foam::incompressible::write(Ostream& os) const
 {
     specie::write(os);
 
-    dictionaryEntry dict("equationOfState");
+    dictionary dict("equationOfState");
     dict.add("rho", rho_);
 
-    os  << dict;
+    os  << dict.dictName() << nl << dict;
 }
 
 

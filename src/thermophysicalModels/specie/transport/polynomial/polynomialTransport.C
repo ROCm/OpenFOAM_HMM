@@ -77,7 +77,7 @@ void Foam::polynomialTransport<Thermo, PolySize>::write(Ostream& os) const
 
     Thermo::write(os);
 
-    dictionaryEntry dict("transport");
+    dictionary dict("transport");
     dict.add
     (
         word("muCoeffs<" + Foam::name(PolySize) + '>'),
@@ -88,7 +88,7 @@ void Foam::polynomialTransport<Thermo, PolySize>::write(Ostream& os) const
         word("kappaCoeffs<" + Foam::name(PolySize) + '>'),
         kappaCoeffs_/this->W()
     );
-    os  << dict;
+    os  << dict.dictName() << nl << dict;
 
     os  << decrIndent << token::END_BLOCK << nl;
 }

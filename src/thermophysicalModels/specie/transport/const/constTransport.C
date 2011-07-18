@@ -58,10 +58,10 @@ void Foam::constTransport<Thermo>::constTransport::write(Ostream& os) const
 
     Thermo::write(os);
 
-    dictionaryEntry dict("transport");
+    dictionary dict("transport");
     dict.add("mu", mu_);
     dict.add("Pr", 1.0/rPr_);
-    os  << dict;
+    os  << dict.dictName() << nl << dict;
 
     os  << decrIndent << token::END_BLOCK << nl;
 }
