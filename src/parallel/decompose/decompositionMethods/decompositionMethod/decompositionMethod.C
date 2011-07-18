@@ -153,240 +153,6 @@ Foam::labelList Foam::decompositionMethod::decompose
 }
 
 
-// Return the minimum face between two cells. Only relevant for
-// cells with multiple faces inbetween.
-Foam::label Foam::decompositionMethod::masterFace
-(
-    const polyMesh& mesh,
-    const label own,
-    const label nei
-)
-{
-    label minFaceI = labelMax;
-
-    // Count multiple faces between own and nei only once
-    const cell& ownFaces = mesh.cells()[own];
-    forAll(ownFaces, i)
-    {
-        label otherFaceI = ownFaces[i];
-
-        if (mesh.isInternalFace(otherFaceI))
-        {
-            label nbrCellI =
-            (
-                mesh.faceNeighbour()[otherFaceI] != own
-              ? mesh.faceNeighbour()[otherFaceI]
-              : mesh.faceOwner()[otherFaceI]
-            );
-
-            if (nbrCellI == nei)
-            {
-                minFaceI = min(minFaceI, otherFaceI);
-            }
-        }
-    }
-
-    return minFaceI;
-}
-
-
-//void Foam::decompositionMethod::calcCSR
-//(
-//    const polyMesh& mesh,
-//    List<int>& adjncy,
-//    List<int>& xadj
-//)
-//{
-//    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
-//
-//    // Make Metis CSR (Compressed Storage Format) storage
-//    //   adjncy      : contains neighbours (= edges in graph)
-//    //   xadj(celli) : start of information in adjncy for celli
-//
-//
-//    // Count unique faces between cells
-//    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
-//    labelList nFacesPerCell(mesh.nCells(), 0);
-//
-//    // Internal faces
-//    for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
-//    {
-//        label own = mesh.faceOwner()[faceI];
-//        label nei = mesh.faceNeighbour()[faceI];
-//
-//        if (faceI == masterFace(mesh, own, nei))
-//        {
-//            nFacesPerCell[own]++;
-//            nFacesPerCell[nei]++;
-//        }
-//    }
-//
-//    // Coupled faces. Only cyclics done.
-//    HashSet<edge, Hash<edge> > cellPair(mesh.nFaces()-mesh.nInternalFaces());
-//
-//    forAll(pbm, patchI)
-//    {
-//        if
-//        (
-//            isA<cyclicPolyPatch>(pbm[patchI])
-//         && refCast<const cyclicPolyPatch>(pbm[patchI]).owner()
-//        )
-//        {
-//            const cyclicPolyPatch& cycPatch = refCast<const cyclicPolyPatch>
-//            (
-//                pbm[patchI]
-//            );
-//
-//            const labelUList& faceCells = cycPatch.faceCells();
-//            const labelUList& nbrCells =
-//                cycPatch.neighbPatch().faceCells();
-//
-//            forAll(faceCells, facei)
-//            {
-//                label own = faceCells[facei];
-//                label nei = nbrCells[facei];
-//
-//                if (cellPair.insert(edge(own, nei)))
-//                {
-//                    nFacesPerCell[own]++;
-//                    nFacesPerCell[nei]++;
-//                }
-//            }
-//        }
-//    }
-//
-//
-//    // Size tables
-//    // ~~~~~~~~~~~
-//
-//    // Sum nFacesPerCell
-//    xadj.setSize(mesh.nCells()+1);
-//
-//    label nConnections = 0;
-//
-//    for (label cellI = 0; cellI < mesh.nCells(); cellI++)
-//    {
-//        xadj[cellI] = nConnections;
-//        nConnections += nFacesPerCell[cellI];
-//    }
-//    xadj[mesh.nCells()] = nConnections;
-//    adjncy.setSize(nConnections);
-//
-//
-//
-//    // Fill tables
-//    // ~~~~~~~~~~~
-//
-//    nFacesPerCell = 0;
-//
-//    // Internal faces
-//    for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
-//    {
-//        label own = mesh.faceOwner()[faceI];
-//        label nei = mesh.faceNeighbour()[faceI];
-//
-//        if (faceI == masterFace(mesh, own, nei))
-//        {
-//            adjncy[xadj[own] + nFacesPerCell[own]++] = nei;
-//            adjncy[xadj[nei] + nFacesPerCell[nei]++] = own;
-//        }
-//    }
-//
-//    // Coupled faces. Only cyclics done.
-//    cellPair.clear();
-//    forAll(pbm, patchI)
-//    {
-//        if
-//        (
-//            isA<cyclicPolyPatch>(pbm[patchI])
-//         && refCast<const cyclicPolyPatch>(pbm[patchI]).owner()
-//        )
-//        {
-//            const cyclicPolyPatch& cycPatch = refCast<const cyclicPolyPatch>
-//            (
-//                pbm[patchI]
-//            );
-//
-//            const labelUList& faceCells = cycPatch.faceCells();
-//            const labelUList& nbrCells =
-//                cycPatch.neighbPatch().faceCells();
-//
-//            forAll(faceCells, facei)
-//            {
-//                label own = faceCells[facei];
-//                label nei = nbrCells[facei];
-//
-//                if (cellPair.insert(edge(own, nei)))
-//                {
-//                    adjncy[xadj[own] + nFacesPerCell[own]++] = nei;
-//                    adjncy[xadj[nei] + nFacesPerCell[nei]++] = own;
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//
-//// From cell-cell connections to Metis format (like CompactListList)
-//void Foam::decompositionMethod::calcCSR
-//(
-//    const labelListList& cellCells,
-//    List<int>& adjncy,
-//    List<int>& xadj
-//)
-//{
-//    labelHashSet nbrCells;
-//
-//    // Count number of internal faces
-//    label nConnections = 0;
-//
-//    forAll(cellCells, coarseI)
-//    {
-//        nbrCells.clear();
-//
-//        const labelList& cCells = cellCells[coarseI];
-//
-//        forAll(cCells, i)
-//        {
-//            if (nbrCells.insert(cCells[i]))
-//            {
-//                nConnections++;
-//            }
-//        }
-//    }
-//
-//    // Create the adjncy array as twice the size of the total number of
-//    // internal faces
-//    adjncy.setSize(nConnections);
-//
-//    xadj.setSize(cellCells.size()+1);
-//
-//
-//    // Fill in xadj
-//    // ~~~~~~~~~~~~
-//    label freeAdj = 0;
-//
-//    forAll(cellCells, coarseI)
-//    {
-//        xadj[coarseI] = freeAdj;
-//
-//        nbrCells.clear();
-//
-//        const labelList& cCells = cellCells[coarseI];
-//
-//        forAll(cCells, i)
-//        {
-//            if (nbrCells.insert(cCells[i]))
-//            {
-//                adjncy[freeAdj++] = cCells[i];
-//            }
-//        }
-//    }
-//    xadj[cellCells.size()] = freeAdj;
-//}
-
-
 void Foam::decompositionMethod::calcCellCells
 (
     const polyMesh& mesh,
@@ -395,23 +161,15 @@ void Foam::decompositionMethod::calcCellCells
     CompactListList<label>& cellCells
 )
 {
-    // Create global cell numbers
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    label nAgglom;
-    if (agglom.size())
-    {
-        nAgglom = max(agglom)+1;
-    }
-    else
-    {
-        nAgglom = 0;
-    }
-    globalIndex globalAgglom(nAgglom);
-
     const labelList& faceOwner = mesh.faceOwner();
     const labelList& faceNeighbour = mesh.faceNeighbour();
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+
+    // Create global cell numbers
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    globalIndex globalAgglom(nCoarse);
 
 
     // Get agglomerate owner on other side of coupled faces
@@ -445,6 +203,77 @@ void Foam::decompositionMethod::calcCellCells
     syncTools::swapBoundaryFaceList(mesh, globalNeighbour);
 
 
+
+    //// Determine the cellCells (in agglomeration numbering) on coupled faces
+    //// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //
+    //labelListList globalCellCells(mesh.nFaces()-mesh.nInternalFaces());
+    //
+    //// Current set of face neighbours for the current cell
+    //labelHashSet cCells;
+    //
+    //forAll(patches, patchI)
+    //{
+    //    const polyPatch& pp = patches[patchI];
+    //
+    //    if (pp.coupled())
+    //    {
+    //        label faceI = pp.start();
+    //        label bFaceI = pp.start() - mesh.nInternalFaces();
+    //
+    //        forAll(pp, i)
+    //        {
+    //            label cellI = faceOwner[faceI];
+    //            label globalCellI = globalAgglom.toGlobal(agglom[cellI]);
+    //
+    //            // First check if agglomerated across coupled patches at all
+    //            // so we don't use memory if not needed
+    //            if (globalNeighbour[bFaceI] == globalCellI)
+    //            {
+    //                cCells.clear();
+    //
+    //                const cell& cFaces = mesh.cells()[cellI];
+    //
+    //                forAll(cFaces, i)
+    //                {
+    //                    if (mesh.isInternalFace(cFaces[i]))
+    //                    {
+    //                        label otherCellI = faceOwner[cFaces[i]];
+    //                        if (otherCellI == cellI)
+    //                        {
+    //                            otherCellI = faceNeighbour[cFaces[i]];
+    //                        }
+    //
+    //                        cCells.insert
+    //                        (
+    //                            globalAgglom.toGlobal
+    //                            (
+    //                                agglom[otherCellI]
+    //                            )
+    //                        );
+    //                    }
+    //                }
+    //                globalCellCells[bFaceI] = cCells.toc();
+    //            }
+    //
+    //            bFaceI++;
+    //            faceI++;
+    //        }
+    //    }
+    //}
+    //
+    //// Get the cell on the other side of coupled patches
+    //syncTools::syncBoundaryFaceList
+    //(
+    //    mesh,
+    //    globalCellCells,
+    //    eqOp<labelList>(),
+    //    dummyTransform()
+    //);
+
+
+
+
     // Count number of faces (internal + coupled)
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -460,14 +289,6 @@ void Foam::decompositionMethod::calcCellCells
         nFacesPerCell[nei]++;
     }
 
-    // Handle coupled faces. In case of agglomeration you might end up
-    // with multiple connections ('faces') between the same two agglomerations.
-    // This is illegal so mark.
-    HashSet<labelPair, Hash<labelPair> > cellPair
-    (
-        mesh.nFaces()-mesh.nInternalFaces()
-    );
-
     forAll(patches, patchI)
     {
         const polyPatch& pp = patches[patchI];
@@ -480,15 +301,29 @@ void Foam::decompositionMethod::calcCellCells
             forAll(pp, i)
             {
                 label own = agglom[faceOwner[faceI]];
+
+                //const labelList& cCells = globalCellCells[bFaceI];
+                //
+                //forAll(cCells, i)
+                //{
+                //    label globalNei = cCells[i];
+                //
+                //    // Allow only processor-local agglomeration
+                //    if (globalAgglom.isLocal(globalNei))
+                //    {
+                //        nFacesPerCell[own]++;
+                //    }
+                //}
                 label globalNei = globalNeighbour[bFaceI];
                 if
                 (
-                    globalAgglom.toGlobal(own) != globalNei
-                 && cellPair.insert(labelPair(own, globalNei))
+                    globalAgglom.isLocal(globalNei)
+                 && globalAgglom.toLocal(globalNei) != own
                 )
                 {
                     nFacesPerCell[own]++;
                 }
+
                 faceI++;
                 bFaceI++;
             }
@@ -517,7 +352,6 @@ void Foam::decompositionMethod::calcCellCells
     }
 
     // For boundary faces is offsetted coupled neighbour
-    cellPair.clear();
     forAll(patches, patchI)
     {
         const polyPatch& pp = patches[patchI];
@@ -530,11 +364,29 @@ void Foam::decompositionMethod::calcCellCells
             forAll(pp, i)
             {
                 label own = agglom[faceOwner[faceI]];
+
+                //const labelList& cCells = globalCellCells[bFaceI];
+                //
+                //forAll(cCells, i)
+                //{
+                //    label globalNei = cCells[i];
+                //
+                //    // Allow only processor-local agglomeration
+                //    if (globalAgglom.isLocal(globalNei))
+                //    {
+                //        m[offsets[own] + nFacesPerCell[own]++] = globalNei;
+                //    }
+                //}
                 label globalNei = globalNeighbour[bFaceI];
-                if (cellPair.insert(labelPair(own, globalNei)))
+                if
+                (
+                    globalAgglom.isLocal(globalNei)
+                 && globalAgglom.toLocal(globalNei) != own
+                )
                 {
                     m[offsets[own] + nFacesPerCell[own]++] = globalNei;
                 }
+
                 faceI++;
                 bFaceI++;
             }
@@ -542,8 +394,9 @@ void Foam::decompositionMethod::calcCellCells
     }
 
 
-    // Check for duplicates connections between cells as a postprocessing step
-    // (since quite rare)
+    // Check for duplicates connections between cells
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Done as postprocessing step since we now have cellCells.
     label startIndex = 0;
     label newIndex = 0;
     labelHashSet nbrCells;
@@ -564,6 +417,19 @@ void Foam::decompositionMethod::calcCellCells
         startIndex = endIndex;
         endIndex = newIndex;
     }
+
+    cellCells.m().setSize(newIndex);
+
+
+    //forAll(cellCells, cellI)
+    //{
+    //    const labelUList cCells = cellCells[cellI];
+    //    Pout<< "Compacted: Coarse cell " << cellI << endl;
+    //    forAll(cCells, i)
+    //    {
+    //        Pout<< "    nbr:" << cCells[i] << endl;
+    //    }
+    //}
 }
 
 
