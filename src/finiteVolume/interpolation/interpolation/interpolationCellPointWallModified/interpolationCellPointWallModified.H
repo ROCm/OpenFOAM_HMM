@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::interpolationCellPoint
+    Foam::interpolationCellPointWallModified
 
 Description
     Same as interpolationCellPoint, but if interpolating a wall face, uses

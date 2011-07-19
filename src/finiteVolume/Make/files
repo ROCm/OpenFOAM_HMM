@@ -250,7 +250,7 @@ $(schemes)/quadraticLinearPureUpwindFit/quadraticLinearPureUpwindFit.C
 $(schemes)/linearPureUpwindFit/linearPureUpwindFit.C
 $(schemes)/linearUpwind/linearUpwind.C
 $(schemes)/linearUpwind/linearUpwindV.C
-$(schemes)/quadraticUpwind/quadraticUpwind.C
+$(schemes)/LUST/LUST.C
 
 limitedSchemes = $(surfaceInterpolation)/limitedSchemes
 $(limitedSchemes)/limitedSurfaceInterpolationScheme/limitedSurfaceInterpolationSchemes.C

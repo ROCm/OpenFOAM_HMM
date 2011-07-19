@@ -20,7 +20,6 @@ tmp<fv::convectionScheme<scalar> > mvConvection
         if (Y[i].name() != inertSpecie)
         {
             volScalarField& Yi = Y[i];
-            fvScalarMatrix R(combustion->R(Yi));
 
             fvScalarMatrix YiEqn
             (
@@ -30,7 +29,7 @@ tmp<fv::convectionScheme<scalar> > mvConvection
               ==
                 parcels.SYi(i, Yi)
               + surfaceFilm.Srho(i)
-              + R
+              + combustion->R(Yi)
             );
 
             YiEqn.relax();
@@ -55,7 +54,7 @@ tmp<fv::convectionScheme<scalar> > mvConvection
       - fvm::laplacian(turbulence->alphaEff(), hs)
      ==
         DpDt
-      + dQ
+      + combustion->Sh()
       + radiation->Shs(thermo)
       + parcels.Sh(hs)
       + surfaceFilm.Sh()
@@ -66,5 +65,6 @@ tmp<fv::convectionScheme<scalar> > mvConvection
 
     thermo.correct();
 
-    Info<< "min/max(T) = " << min(T).value() << ", " << max(T).value() << endl;
+    Info<< "min/max(T) = "
+        << min(T).value() << ", " << max(T).value() << endl;
 }

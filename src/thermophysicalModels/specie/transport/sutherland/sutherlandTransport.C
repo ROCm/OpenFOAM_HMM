@@ -61,7 +61,7 @@ void Foam::sutherlandTransport<Thermo>::write(Ostream& os) const
     dictionary dict("transport");
     dict.add("As", As_);
     dict.add("Ts", Ts_);
-    os  << dict;
+    os  << indent << dict.dictName() << dict;
 
     os  << decrIndent << token::END_BLOCK << nl;
 }
@@ -71,7 +71,8 @@ void Foam::sutherlandTransport<Thermo>::write(Ostream& os) const
 template<class Thermo>
 Foam::Ostream& Foam::operator<<
 (
-    Ostream& os, const sutherlandTransport<Thermo>& st
+    Ostream& os,
+    const sutherlandTransport<Thermo>& st
 )
 {
     os << static_cast<const Thermo&>(st) << tab << st.As_ << tab << st.Ts_;

@@ -23,10 +23,6 @@ chemistrySolver ode;
 
 initialChemicalTimeStep 1e-07;
 
-turbulentReaction yes;
-
-Cmix Cmix [0 0 0 0 0] 1;
-
 odeCoeffs
 {
     solver          SIBS;

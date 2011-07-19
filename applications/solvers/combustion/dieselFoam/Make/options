@@ -14,7 +14,8 @@ EXE_INC = \
     -I$(LIB_SRC)/thermophysicalModels/laminarFlameSpeed/lnInclude \
     -I$(LIB_SRC)/../applications/solvers/reactionThermo/XiFoam \
     -I$(LIB_SRC)/thermophysicalModels/chemistryModel/lnInclude \
-    -I$(LIB_SRC)/ODE/lnInclude
+    -I$(LIB_SRC)/ODE/lnInclude \
+    -I$(LIB_SRC)/combustionModels/lnInclude
 
 EXE_LIBS = \
     -lcompressibleTurbulenceModel \
@@ -33,4 +34,5 @@ EXE_LIBS = \
     -lchemistryModel \
     -lODE \
     -ldistributionModels \
-    -lfiniteVolume
+    -lfiniteVolume \
+    -lcombustionModels

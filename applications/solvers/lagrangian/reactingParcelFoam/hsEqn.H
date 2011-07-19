@@ -8,7 +8,7 @@
         DpDt
      +  parcels.Sh(hs)
      +  radiation->Shs(thermo)
-     +  chemistrySh
+     +  combustion->Sh()
     );
 
     hEqn.relax();

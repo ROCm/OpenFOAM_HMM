@@ -66,7 +66,7 @@ void Foam::specie::write(Ostream& os) const
     dictionary dict("specie");
     dict.add("nMoles", nMoles_);
     dict.add("molWeight", molWeight_);
-    os  << dict;
+    os  << indent << dict.dictName() << dict;
 }
 
 

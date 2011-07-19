@@ -21,6 +21,7 @@ EXE_INC = \
     -I$(LIB_SRC)/regionModels/regionModel/lnInclude \
     -I$(LIB_SRC)/regionModels/surfaceFilmModels/lnInclude \
     -I$(LIB_SRC)/sampling/lnInclude \
+    -I$(LIB_SRC)/combustionModels/lnInclude \
     -I$(FOAM_SOLVERS)/combustion/reactingFoam
 
 
@@ -46,4 +47,5 @@ EXE_LIBS = \
     -lODE \
     -lregionModels \
     -lsurfaceFilmModels \
-    -lsampling
+    -lsampling \
+    -lcombustionModels

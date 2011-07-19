@@ -108,7 +108,7 @@ void Foam::hPolynomialThermo<EquationOfState, PolySize>::write
         word("CpCoeffs<" + Foam::name(PolySize) + '>'),
         CpCoeffs_/this->W()
     );
-    os  << dict;
+    os  << indent << dict.dictName() << dict;
 }
 
 

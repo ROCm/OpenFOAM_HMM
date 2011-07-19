@@ -9,7 +9,7 @@
       + parcels.Sh(hs)
       + surfaceFilm.Sh()
       + radiation->Shs(thermo)
-      + chemistrySh
+      + combustion->Sh()
     );
 
     hsEqn.relax();

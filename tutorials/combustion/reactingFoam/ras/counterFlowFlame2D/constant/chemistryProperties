@@ -23,8 +23,6 @@ chemistrySolver     ode;
 
 initialChemicalTimeStep 1e-07;
 
-turbulentReaction   on;
-
 sequentialCoeffs
 {
     cTauChem        0.001;
@@ -42,7 +40,5 @@ odeCoeffs
     eps             0.05;
     scale           1;
 }
-
-Cmix            Cmix [ 0 0 0 0 0 0 0 ] 0.1;
 
 // ************************************************************************* //

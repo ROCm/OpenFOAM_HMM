@@ -31,11 +31,9 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "hCombustionThermo.H"
 #include "turbulenceModel.H"
 #include "basicReactingCloud.H"
-#include "psiChemistryModel.H"
-#include "chemistrySolver.H"
+#include "psiChemistryCombustionModel.H"
 #include "radiationModel.H"
 #include "SLGThermo.H"
 #include "pimpleControl.H"
@@ -48,7 +46,6 @@ int main(int argc, char *argv[])
 
     #include "createTime.H"
     #include "createMesh.H"
-    #include "readChemistryProperties.H"
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"
     #include "createClouds.H"
@@ -76,7 +73,6 @@ int main(int argc, char *argv[])
 
         parcels.evolve();
 
-        #include "chemistry.H"
         #include "rhoEqn.H"
 
         // --- Pressure-velocity PIMPLE corrector loop
@@ -100,10 +96,7 @@ int main(int argc, char *argv[])
 
         rho = thermo.rho();
 
-        if (runTime.write())
-        {
-            chemistry.dQ()().write();
-        }
+        runTime.write();
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

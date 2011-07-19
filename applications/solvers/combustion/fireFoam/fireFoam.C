@@ -38,9 +38,8 @@ Description
 #include "pyrolysisModel.H"
 #include "radiationModel.H"
 #include "SLGThermo.H"
-#include "hsCombustionThermo.H"
 #include "solidChemistryModel.H"
-#include "combustionModel.H"
+#include "psiCombustionModel.H"
 #include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -51,7 +50,6 @@ int main(int argc, char *argv[])
 
     #include "createTime.H"
     #include "createMesh.H"
-    #include "readChemistryProperties.H"
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"
     #include "createClouds.H"

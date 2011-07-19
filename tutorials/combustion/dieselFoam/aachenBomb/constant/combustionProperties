@@ -15,15 +15,16 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Cmix            Cmix [ 0 0 0 0 0 0 0 ] 1;
+combustionModel  PaSR<psiChemistryCombustionModel>;
 
-ignitionProperties1
+active  true;
+
+PaSRCoeffs
 {
-    ignite          on;
-    ignitionPoint   ignitionPoint [ 0 1 0 0 0 0 0 ] ( 0.2 0 0.02 );
-    timing          timing [ 0 0 1 0 0 0 0 ] 0;
-    duration        duration [ 0 0 1 0 0 0 0 ] 1;
+    Cmix                Cmix [ 0 0 0 0 0 0 0 ] 1;
+    turbulentReaction   on;
 }
+
 
 
 // ************************************************************************* //

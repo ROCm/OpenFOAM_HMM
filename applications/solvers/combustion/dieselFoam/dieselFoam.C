@@ -30,12 +30,11 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "hCombustionThermo.H"
+#include "psiChemistryCombustionModel.H"
 #include "turbulenceModel.H"
-#include "spray.H"
 #include "psiChemistryModel.H"
 #include "chemistrySolver.H"
-
+#include "spray.H"
 #include "multivariateScheme.H"
 #include "IFstream.H"
 #include "OFstream.H"
@@ -52,7 +51,6 @@ int main(int argc, char *argv[])
     #include "createMesh.H"
     #include "createFields.H"
     #include "readGravitationalAcceleration.H"
-    #include "readCombustionProperties.H"
     #include "createSpray.H"
     #include "initContinuityErrs.H"
     #include "readTimeControls.H"
@@ -79,26 +77,6 @@ int main(int argc, char *argv[])
 
         Info<< "Solving chemistry" << endl;
 
-        chemistry.solve
-        (
-            runTime.value() - runTime.deltaTValue(),
-            runTime.deltaTValue()
-        );
-
-        // turbulent time scale
-        {
-            volScalarField tk
-            (
-                Cmix*sqrt(turbulence->muEff()/rho/turbulence->epsilon())
-            );
-            volScalarField tc(chemistry.tc());
-
-            // Chalmers PaSR model
-            kappa = (runTime.deltaT() + tc)/(runTime.deltaT()+tc+tk);
-        }
-
-        chemistrySh = kappa*chemistry.Sh()();
-
         #include "rhoEqn.H"
 
         // --- Pressure-velocity PIMPLE corrector loop
@@ -124,10 +102,7 @@ int main(int argc, char *argv[])
 
         rho = thermo.rho();
 
-        if (runTime.write())
-        {
-            chemistry.dQ()().write();
-        }
+        runTime.write();
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
