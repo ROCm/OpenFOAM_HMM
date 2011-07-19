@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::GeometricField
+    Foam::geometricOneField
 
 Description
     A class representing the concept of a GeometricField of 1 used to avoid

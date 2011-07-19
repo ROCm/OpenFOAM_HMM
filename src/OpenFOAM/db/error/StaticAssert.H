@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::StaticAssertFailed
+    Foam::StaticAssertionFailed
 
 Description
     Macros and classes to provide static (compile-time) assertions.

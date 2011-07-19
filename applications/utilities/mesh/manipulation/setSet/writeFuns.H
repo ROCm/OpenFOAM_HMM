@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,18 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::writeFunctions
+    Foam::writeFuns
 
 Description
     Various functions for collecting and writing binary data.
 
 SourceFiles
-    writeFunctions.C
+    writeFuns.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef writeFunctions_H
-#define writeFunctions_H
+#ifndef writeFuns_H
+#define writeFuns_H
 
 #include "labelList.H"
 #include "floatScalar.H"

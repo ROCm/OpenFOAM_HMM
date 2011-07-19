@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::NonSphereDrag
+    Foam::NonSphereDragForce
 
 Description
     Drag model for non-spherical particles.
