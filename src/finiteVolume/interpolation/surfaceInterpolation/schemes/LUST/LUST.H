@@ -22,20 +22,24 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    quadraticUpwind
+    Foam::LUST
 
 Description
-    quadraticUpwind interpolation scheme class derived from linearUpwind and
-    returns blended linear/upwind weighting factors and also applies a explicit
-    gradient-based correction obtained from the linearUpwind scheme.
+    LUST: Linear-upwind stabilised transport.
+
+    Interpolation scheme class derived from linearUpwind which returns blended
+    linear/linear-upwind weighting factors and also applies a explicit
+    gradient-based correction obtained from the linearUpwind scheme.  The
+    blending-factor is set to 0.75 linear which optimises the balance between
+    accuracy and stability on a range of LES cases with a range of mesh quality.
 
 SourceFiles
-    quadraticUpwind.C
+    LUST.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef quadraticUpwind_H
-#define quadraticUpwind_H
+#ifndef LUST_H
+#define LUST_H
 
 #include "linearUpwind.H"
 
@@ -45,33 +49,33 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class quadraticUpwind Declaration
+                           Class LUST Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class quadraticUpwind
+class LUST
 :
     public linearUpwind<Type>
 {
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        quadraticUpwind(const quadraticUpwind&);
+        LUST(const LUST&);
 
         //- Disallow default bitwise assignment
-        void operator=(const quadraticUpwind&);
+        void operator=(const LUST&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("quadraticUpwind");
+    TypeName("LUST");
 
 
     // Constructors
 
         //- Construct from mesh and Istream
-        quadraticUpwind
+        LUST
         (
             const fvMesh& mesh,
             Istream& schemeData
@@ -81,7 +85,7 @@ public:
         {}
 
         //- Construct from mesh, faceFlux and Istream
-        quadraticUpwind
+        LUST
         (
             const fvMesh& mesh,
             const surfaceScalarField& faceFlux,

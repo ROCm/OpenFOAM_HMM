@@ -23,15 +23,15 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "quadraticUpwind.H"
+#include "LUST.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    //makeSurfaceInterpolationScheme(quadraticUpwind);
-    makeSurfaceInterpolationTypeScheme(quadraticUpwind, scalar);
-    makeSurfaceInterpolationTypeScheme(quadraticUpwind, vector);
+    //makeSurfaceInterpolationScheme(LUST);
+    makeSurfaceInterpolationTypeScheme(LUST, scalar);
+    makeSurfaceInterpolationTypeScheme(LUST, vector);
 }
 
 // ************************************************************************* //
