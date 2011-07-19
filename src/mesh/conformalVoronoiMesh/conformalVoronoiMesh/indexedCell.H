@@ -40,8 +40,25 @@ Description
 #include "globalIndex.H"
 #include "Pstream.H"
 #include "Swap.H"
+#include "InfoProxy.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace CGAL
+{
+template<class Gt, class Cb> class indexedCell;
+}
+
+namespace Foam
+{
+class Ostream;
+template<class Gt, class Cb> Ostream& operator<<
+(
+    Ostream&,
+    const Foam::InfoProxy<CGAL::indexedCell<Gt, Cb> >&
+);
+}
+
 
 namespace CGAL
 {
@@ -339,12 +356,35 @@ public:
             )
         );
     }
+
+
+    // Info
+
+        //- Return info proxy.
+        //  Used to print indexedCell information to a stream
+        Foam::InfoProxy<indexedCell<Gt, Cb> > info() const
+        {
+            return *this;
+        }
+
+        friend Foam::Ostream& Foam::operator<< <Gt, Cb>
+        (
+            Foam::Ostream&,
+            const Foam::InfoProxy<indexedCell<Gt, Cb> >&
+        );
+
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace CGAL
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "indexedCell.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

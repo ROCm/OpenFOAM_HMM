@@ -35,8 +35,25 @@ Description
 
 #include <CGAL/Triangulation_3.h>
 #include "tensor.H"
+#include "InfoProxy.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace CGAL
+{
+template<class Gt, class Vb> class indexedVertex;
+}
+
+namespace Foam
+{
+class Ostream;
+template<class Gt, class Vb> Ostream& operator<<
+(
+    Ostream&,
+    const Foam::InfoProxy<CGAL::indexedVertex<Gt, Vb> >&
+);
+}
+
 
 namespace CGAL
 {
@@ -365,6 +382,24 @@ public:
 
     //     this->type_ = vit->type();
     // }
+
+
+
+    // Info
+
+        //- Return info proxy.
+        //  Used to print indexedVertex information to a stream
+        Foam::InfoProxy<indexedVertex<Gt, Vb> > info() const
+        {
+            return *this;
+        }
+
+        friend Foam::Ostream& Foam::operator<< <Gt, Vb>
+        (
+            Foam::Ostream&,
+            const Foam::InfoProxy<indexedVertex<Gt, Vb> >&
+        );
+
 };
 
 
@@ -372,6 +407,11 @@ public:
 
 } // End namespace CGAL
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "indexedVertex.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
