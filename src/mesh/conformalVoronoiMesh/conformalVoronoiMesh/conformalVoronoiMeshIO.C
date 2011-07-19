@@ -250,7 +250,7 @@ void Foam::conformalVoronoiMesh::writeMesh
 {
     writeInternalDelaunayVertices(instance);
 
-    if (cvMeshControls().writeTetMesh())
+    if (cvMeshControls().writeTetDualMesh())
     {
         pointField points;
         faceList faces;

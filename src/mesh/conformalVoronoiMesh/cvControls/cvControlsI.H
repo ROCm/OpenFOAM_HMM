@@ -139,9 +139,9 @@ inline Foam::scalar Foam::cvControls::removalDistCoeff() const
 }
 
 
-inline Foam::Switch Foam::cvControls::writeTetMesh() const
+inline Foam::Switch Foam::cvControls::writeTetDualMesh() const
 {
-    return writeTetMesh_;
+    return writeTetDualMesh_;
 }
 
 

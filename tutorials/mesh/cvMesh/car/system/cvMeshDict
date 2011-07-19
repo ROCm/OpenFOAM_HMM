@@ -374,7 +374,7 @@ motionControl
 polyMeshFiltering
 {
     // Write the underlying Delaunay tet mesh at output time
-    writeTetMesh                            true;
+    writeTetDualMesh                        true;
 
     // Upper limit on the size of faces to be filtered.
     // fraction of the local target cell size

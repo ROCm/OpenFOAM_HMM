@@ -109,16 +109,22 @@ void ReadAndMapFields
             {
                 label faceI = -index-1;
                 label bFaceI = faceI - mesh.nInternalFaces();
-                if (bFaceI < 0)
+                if (bFaceI >= 0)
                 {
-                    FatalErrorIn("ReadAndMapFields(..)")
-                        << "Face " << faceI << " from index " << index
-                        << " is not a boundary face." << abort(FatalError);
+                    label patchI = mesh.boundaryMesh().patchID()[bFaceI];
+                    label localFaceI = mesh.boundaryMesh()[patchI].whichFace
+                    (
+                        faceI
+                    );
+                    fld[pointI] = readField.boundaryField()[patchI][localFaceI];
                 }
+                //else
+                //{
+                //    FatalErrorIn("ReadAndMapFields(..)")
+                //        << "Face " << faceI << " from index " << index
+                //        << " is not a boundary face." << abort(FatalError);
+                //}
 
-                label patchI = mesh.boundaryMesh().patchID()[bFaceI];
-                label localFaceI = mesh.boundaryMesh()[patchI].whichFace(faceI);
-                fld[pointI] = readField.boundaryField()[patchI][localFaceI];
             }
             //else
             //{
@@ -211,12 +217,12 @@ int main(int argc, char *argv[])
         else
         {
             label faceI = -index-1;
-            if (faceI < tetDualMesh.nInternalFaces())
+            if (faceI < mesh.nInternalFaces())
             {
                 FatalErrorIn(args.executable())
                     << "Face " << faceI << " from index " << index
                     << " is not a boundary face."
-                    << " nInternalFaces:" << tetDualMesh.nInternalFaces()
+                    << " nInternalFaces:" << mesh.nInternalFaces()
                     << exit(FatalError);
             }
             else
