@@ -98,7 +98,7 @@ Foam::Istream& Foam::regIOobject::readStream()
         }
     }
 
-    // Mark as uptodate if read succesfully
+    // Mark as uptodate if read successfully
     if (watchIndex_ != -1)
     {
         time().setUnmodified(watchIndex_);
@@ -173,7 +173,7 @@ bool Foam::regIOobject::read()
     // Note: cannot do anything in readStream itself since this is used by
     // e.g. GeometricField.
 
-    bool masterOnly = 
+    bool masterOnly =
         regIOobject::fileModificationChecking == timeStampMaster
      || regIOobject::fileModificationChecking == inotifyMaster;
 
