@@ -1,4 +1,12 @@
 AMIInterpolationName.C
 faceAreaIntersect/faceAreaIntersect.C
 
+patches/cyclicAMILduInterfaceField/cyclicAMILduInterface.C
+patches/cyclicAMILduInterfaceField/cyclicAMILduInterfaceField.C
+
+patches/cyclicAMIPolyPatch/cyclicAMIPolyPatch.C
+patches/cyclicAMIFvPatch/cyclicAMIFvPatch.C
+patches/cyclicAMIFvPatchField/cyclicAMIFvPatchFields.C
+patches/cyclicAMIFvsPatchField/cyclicAMIFvsPatchFields.C
+
 LIB = $(FOAM_USER_LIBBIN)/libAMIInterpolation
