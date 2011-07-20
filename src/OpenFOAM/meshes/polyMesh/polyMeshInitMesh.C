@@ -60,12 +60,26 @@ void Foam::polyMesh::initMesh()
 
     forAll(owner_, facei)
     {
+        if (owner_[facei] < 0)
+        {
+            FatalErrorIn("polyMesh::initMesh()")
+                << "Illegal cell label " << owner_[facei]
+                << " in neighbour addressing for face " << facei
+                << exit(FatalError);
+        }
         nCells = max(nCells, owner_[facei]);
     }
 
     // The neighbour array may or may not be the same length as the owner
     forAll(neighbour_, facei)
     {
+        if (neighbour_[facei] < 0)
+        {
+            FatalErrorIn("polyMesh::initMesh()")
+                << "Illegal cell label " << neighbour_[facei]
+                << " in neighbour addressing for face " << facei
+                << exit(FatalError);
+        }
         nCells = max(nCells, neighbour_[facei]);
     }
 
@@ -113,6 +127,14 @@ void Foam::polyMesh::initMesh(cellList& c)
 
         forAll(cellfaces, faceI)
         {
+            if (cellfaces[faceI] < 0)
+            {
+                FatalErrorIn("polyMesh::initMesh(cellList&)")
+                    << "Illegal face label " << cellfaces[faceI]
+                    << " in cell " << cellI
+                    << exit(FatalError);
+            }
+
             if (!markedFaces[cellfaces[faceI]])
             {
                 // First visit: owner
