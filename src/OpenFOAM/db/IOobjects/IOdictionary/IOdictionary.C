@@ -21,12 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    IOdictionary is derived from dictionary and IOobject to give the
-    dictionary automatic IO functionality via the objectRegistry.  To facilitate
-    IO, IOdictioanry is provided with a constructor from IOobject and writeData
-    and write functions.
-
 \*---------------------------------------------------------------------------*/
 
 #include "IOdictionary.H"
@@ -37,84 +31,10 @@ Description
 
 defineTypeNameAndDebug(Foam::IOdictionary, 0);
 
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-// Parallel aware reading, using non-virtual type information (typeName instead
-// of type()) because of use in constructor.
-void Foam::IOdictionary::readFile(const bool masterOnly)
-{
-    if (Pstream::master() || !masterOnly)
-    {
-        if (debug)
-        {
-            Pout<< "IOdictionary : Reading " << objectPath()
-                << " from file " << endl;
-        }
-        readStream(typeName) >> *this;
-        close();
-    }
-
-    if (masterOnly && Pstream::parRun())
-    {
-        // Scatter master data using communication scheme
-
-        const List<Pstream::commsStruct>& comms =
-        (
-            (Pstream::nProcs() < Pstream::nProcsSimpleSum)
-          ? Pstream::linearCommunication()
-          : Pstream::treeCommunication()
-        );
-
-        // Master reads headerclassname from file. Make sure this gets
-        // transfered as well as contents.
-        Pstream::scatter(comms, const_cast<word&>(headerClassName()));
-        Pstream::scatter(comms, note());
-
-        // Get my communication order
-        const Pstream::commsStruct& myComm = comms[Pstream::myProcNo()];
-
-        // Reveive from up
-        if (myComm.above() != -1)
-        {
-            if (debug)
-            {
-                Pout<< "IOdictionary : Reading " << objectPath()
-                    << " from processor " << myComm.above() << endl;
-            }
-
-            // Note: use ASCII for now - binary IO of dictionaries is
-            // not currently supported
-            IPstream fromAbove
-            (
-                Pstream::scheduled,
-                myComm.above(),
-                0,
-                IOstream::ASCII
-            );
-            IOdictionary::readData(fromAbove);
-        }
-
-        // Send to my downstairs neighbours
-        forAll(myComm.below(), belowI)
-        {
-            if (debug)
-            {
-                Pout<< "IOdictionary : Sending " << objectPath()
-                    << " to processor " << myComm.below()[belowI] << endl;
-            }
-            OPstream toBelow
-            (
-                Pstream::scheduled,
-                myComm.below()[belowI],
-                0,
-                Pstream::msgType(),
-                IOstream::ASCII
-            );
-            IOdictionary::writeData(toBelow);
-        }
-    }
-}
+bool Foam::IOdictionary::writeDictionaries
+(
+    Foam::debug::infoSwitch("writeDictionaries", 0)
+);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
