@@ -105,13 +105,13 @@ void FSD<CombThermoType, ThermoType>::calculateSourceNorm()
         (s*YFuel - (YO2 - YO2OxiStream_))/(s*YFuelFuelStream_ + YO2OxiStream_);
 
 
-    volVectorField nft = fvc::grad(ft_);
+    volVectorField nft(fvc::grad(ft_));
 
-    volScalarField mgft = mag(nft);
+    volScalarField mgft(mag(nft));
 
-    surfaceVectorField SfHat = this->mesh().Sf()/this->mesh().magSf();
+    surfaceVectorField SfHat(this->mesh().Sf()/this->mesh().magSf());
 
-    volScalarField cAux = scalar(1) - ft_;
+    volScalarField cAux(scalar(1) - ft_);
 
     dimensionedScalar dMgft = 1.0e-3*
         (ft_*cAux*mgft)().weightedAverage(this->mesh().V())
@@ -124,8 +124,10 @@ void FSD<CombThermoType, ThermoType>::calculateSourceNorm()
 
     const volVectorField& U = YO2.db().lookupObject<volVectorField>("U");
 
-    const volScalarField sigma =
-        (nft & nft)*fvc::div(U) - (nft & fvc::grad(U) & nft);
+    const volScalarField sigma
+    (
+        (nft & nft)*fvc::div(U) - (nft & fvc::grad(U) & nft)
+    );
 
     reactionRateFlameArea_->correct(sigma);
 
@@ -186,16 +188,18 @@ void FSD<CombThermoType, ThermoType>::calculateSourceNorm()
         YO2.db().lookupObject<compressible::LESModel>("LESProperties");
 
     const volScalarField& delta = lesModel.delta();
-    const volScalarField ftVar = Cv_*sqr(delta)*sqr(mgft);
+    const volScalarField ftVar(Cv_*sqr(delta)*sqr(mgft));
 
     // Thickened flame (average flame thickness for counterflow configuration
     // is 1.5 mm)
 
-    volScalarField  deltaF =
-        lesModel.delta()/dimensionedScalar("flame",dimLength, 1.5e-3);
+    volScalarField  deltaF
+    (
+        lesModel.delta()/dimensionedScalar("flame",dimLength, 1.5e-3)
+    );
 
     // Linear correlation between delta and flame thickness
-    volScalarField omegaF = max(deltaF*(4.0/3.0) + (2.0/3.0), 1.0);
+    volScalarField omegaF(max(deltaF*(4.0/3.0) + (2.0/3.0), 1.0));
 
     scalar deltaFt = 1.0/ftDim_;
 
@@ -315,11 +319,11 @@ void FSD<CombThermoType, ThermoType>::calculateSourceNorm()
         products += Yp;
     }
 
-    volScalarField c = max(scalar(1.0) - products/max(pc, 1e-5), 0.0);
+    volScalarField c(max(scalar(1.0) - products/max(pc, 1e-5), 0.0));
 
     pc = min(C_*c, scalar(1.0));
 
-    const volScalarField fres = this->singleMixture_.fres(fuelI);
+    const volScalarField fres(this->singleMixture_.fres(fuelI));
 
     this->wFuel_ == mgft*pc*omegaFuelBar;
 }
