@@ -98,47 +98,25 @@ bool Foam::fileStat::sameINode(const label iNode) const
 
 Foam::Istream& Foam::operator>>(Istream& is, fileStat& fStat)
 {
-    // Read beginning of machine info list
-    is.readBegin("fileStat");
+    FixedList<label, 13> stat(is);
 
-    label
-        devMaj, devMin,
-        ino, mode, uid, gid,
-        rdevMaj, rdevMin,
-        size, atime, mtime, ctime;
+    fStat.isValid_ = stat[0];
 
-    is  >> fStat.isValid_
-        >> devMaj
-        >> devMin
-        >> ino
-        >> mode
-        >> uid
-        >> gid
-        >> rdevMaj
-        >> rdevMin
-        >> size
-        >> atime
-        >> mtime
-        >> ctime;
-
-    dev_t st_dev = makedev(devMaj, devMin);
+    dev_t st_dev = makedev(stat[1], stat[2]);
     fStat.status_.st_dev = st_dev;
 
-    fStat.status_.st_ino = ino;
-    fStat.status_.st_mode = mode;
-    fStat.status_.st_uid = uid;
-    fStat.status_.st_gid = gid;
+    fStat.status_.st_ino = stat[3];
+    fStat.status_.st_mode = stat[4];
+    fStat.status_.st_uid = stat[5];
+    fStat.status_.st_gid = stat[6];
 
-    dev_t st_rdev = makedev(rdevMaj, rdevMin);
+    dev_t st_rdev = makedev(stat[7], stat[8]);
     fStat.status_.st_rdev = st_rdev;
 
-    fStat.status_.st_size = size;
-    fStat.status_.st_atime = atime;
-    fStat.status_.st_mtime = mtime;
-    fStat.status_.st_ctime = ctime;
-
-    // Read end of machine info list
-    is.readEnd("fileStat");
+    fStat.status_.st_size = stat[9];
+    fStat.status_.st_atime = stat[10];
+    fStat.status_.st_mtime = stat[11];
+    fStat.status_.st_ctime = stat[12];
 
     // Check state of Istream
     is.check("Istream& operator>>(Istream&, fileStat&)");
@@ -149,28 +127,23 @@ Foam::Istream& Foam::operator>>(Istream& is, fileStat& fStat)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const fileStat& fStat)
 {
-    // Set precision so 32bit unsigned int can be printed
-    // int oldPrecision = os.precision();
-    int oldPrecision = 0;
-    os.precision(10);
+    FixedList<label, 13> stat;
 
-    os  << token::BEGIN_LIST << fStat.isValid_
-        << token::SPACE << label(major(fStat.status_.st_dev))
-        << token::SPACE << label(minor(fStat.status_.st_dev))
-        << token::SPACE << label(fStat.status_.st_ino)
-        << token::SPACE << label(fStat.status_.st_mode)
-        << token::SPACE << label(fStat.status_.st_uid)
-        << token::SPACE << label(fStat.status_.st_gid)
-        << token::SPACE << label(major(fStat.status_.st_rdev))
-        << token::SPACE << label(minor(fStat.status_.st_rdev))
-        << token::SPACE << label(fStat.status_.st_size)
-        << token::SPACE << label(fStat.status_.st_atime)
-        << token::SPACE << label(fStat.status_.st_mtime)
-        << token::SPACE << label(fStat.status_.st_ctime)
-        << token::END_LIST;
+    stat[0] = label(fStat.isValid_);
+    stat[1] = label(major(fStat.status_.st_dev));
+    stat[2] = label(minor(fStat.status_.st_dev));
+    stat[3] = label(fStat.status_.st_ino);
+    stat[4] = label(fStat.status_.st_mode);
+    stat[5] = label(fStat.status_.st_uid);
+    stat[6] = label(fStat.status_.st_gid);
+    stat[7] = label(major(fStat.status_.st_rdev));
+    stat[8] = label(minor(fStat.status_.st_rdev));
+    stat[9] = label(fStat.status_.st_size);
+    stat[10] = label(fStat.status_.st_atime);
+    stat[11] = label(fStat.status_.st_mtime);
+    stat[12] = label(fStat.status_.st_ctime);
 
-    os.precision(oldPrecision);
-    return os;
+    return os << stat;
 }
 
 
