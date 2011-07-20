@@ -11,6 +11,8 @@ tmp<fv::convectionScheme<scalar> > mvConvection
 
 
 {
+    combustion->correct();
+    dQ = combustion->dQ();
     label inertIndex = -1;
     volScalarField Yt(0.0*Y[0]);
 
@@ -19,6 +21,7 @@ tmp<fv::convectionScheme<scalar> > mvConvection
         if (Y[i].name() != inertSpecie)
         {
             volScalarField& Yi = Y[i];
+
             solve
             (
                 fvm::ddt(rho, Yi)
@@ -27,7 +30,7 @@ tmp<fv::convectionScheme<scalar> > mvConvection
               ==
                 parcels.SYi(i, Yi)
               + surfaceFilm.Srho(i)
-              + kappa*chemistry.RR(i)().dimensionedInternalField(),
+              + combustion->R(Yi),
                 mesh.solver("Yi")
             );
 

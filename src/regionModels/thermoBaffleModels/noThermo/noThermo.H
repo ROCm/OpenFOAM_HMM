@@ -92,6 +92,13 @@ public:
 
     // Member Functions
 
+
+         // Thermo properties
+
+            //- Return const reference to the basicSolidThermo
+            virtual const basicSolidThermo& thermo() const;
+
+
         // Fields
 
             //- Return the film specific heat capacity [J/kg/K]

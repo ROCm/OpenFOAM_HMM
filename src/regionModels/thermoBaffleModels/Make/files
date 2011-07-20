@@ -3,5 +3,7 @@ thermoBaffleModel/thermoBaffleModelNew.C
 thermoBaffle2D/thermoBaffle2D.C
 noThermo/noThermo.C
 
+derivedFvPatchFields/temperatureThermoBaffle/temperatureThermoBaffleFvPatchScalarField.C
+
 
 LIB = $(FOAM_LIBBIN)/libthermoBaffleModels

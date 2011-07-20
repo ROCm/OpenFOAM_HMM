@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,6 +66,15 @@ public:
 
         //- Construct from mesh
         interpolatedSolidThermo(const fvMesh& mesh, const word);
+
+        //- Construct from mesh and dictionary
+        interpolatedSolidThermo
+        (
+            const fvMesh& mesh,
+            const word,
+            const dictionary& dict
+        );
+
 
 
     //- Destructor

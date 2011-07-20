@@ -108,10 +108,10 @@ Foam::radiation::viewFactor::viewFactor(const volScalarField& T)
     label count = 0;
     forAll(Qrp, patchI)
     {
-        const polyPatch& pp = mesh_.boundaryMesh()[patchI];
+        //const polyPatch& pp = mesh_.boundaryMesh()[patchI];
         const fvPatchScalarField& QrPatchI = Qrp[patchI];
 
-        if ((isA<fixedValueFvPatchScalarField>(QrPatchI)) && (pp.size() > 0))
+        if ((isA<fixedValueFvPatchScalarField>(QrPatchI)))
         {
             selectedPatches_[count] = QrPatchI.patch().index();
             nLocalCoarseFaces_ += coarsePatches[patchI].size();
@@ -362,38 +362,49 @@ void Foam::radiation::viewFactor::calculate()
         const polyPatch& pp = coarseMesh_.boundaryMesh()[patchID];
         const labelList& coarsePatchFace = coarseMesh_.patchFaceMap()[patchID];
 
-        const labelList& agglom = finalAgglom_[patchID];
-        label nAgglom = max(agglom) + 1;
-
-        labelListList coarseToFine(invertOneToMany(nAgglom, agglom));
-
         scalarList Tave(pp.size(), 0.0);
         scalarList Eave(Tave.size(), 0.0);
         scalarList Hoiave(Tave.size(), 0.0);
 
-        forAll(coarseToFine, coarseI)
+        if (pp.size() > 0)
         {
-            const label coarseFaceID = coarsePatchFace[coarseI];
-            const labelList& fineFaces = coarseToFine[coarseFaceID];
-            UIndirectList<scalar> fineSf
-            (
-                sf,
-                fineFaces
-            );
-            scalar area = sum(fineSf());
-            // Temperature, emissivity and external flux area weighting
-            forAll(fineFaces, j)
-            {
-                label faceI = fineFaces[j];
-                Tave[coarseI] += (Tp[faceI]*sf[faceI])/area;
-                Eave[coarseI] += (eb[faceI]*sf[faceI])/area;
-                Hoiave[coarseI] += (Hoi[faceI]*sf[faceI])/area;
-            }
+            const labelList& agglom = finalAgglom_[patchID];
+            label nAgglom = max(agglom) + 1;
 
-            localCoarseTave.append(Tave[coarseI]);
-            localCoarseEave.append(Eave[coarseI]);
-            localCoarseHoave.append(Hoiave[coarseI]);
+            labelListList coarseToFine(invertOneToMany(nAgglom, agglom));
+
+            //scalarList Tave(pp.size(), 0.0);
+            //scalarList Eave(Tave.size(), 0.0);
+            //scalarList Hoiave(Tave.size(), 0.0);
+
+            forAll(coarseToFine, coarseI)
+            {
+                const label coarseFaceID = coarsePatchFace[coarseI];
+                const labelList& fineFaces = coarseToFine[coarseFaceID];
+                UIndirectList<scalar> fineSf
+                (
+                    sf,
+                    fineFaces
+                );
+                scalar area = sum(fineSf());
+                // Temperature, emissivity and external flux area weighting
+                forAll(fineFaces, j)
+                {
+                    label faceI = fineFaces[j];
+                    Tave[coarseI] += (Tp[faceI]*sf[faceI])/area;
+                    Eave[coarseI] += (eb[faceI]*sf[faceI])/area;
+                    Hoiave[coarseI] += (Hoi[faceI]*sf[faceI])/area;
+                }
+
+                //localCoarseTave.append(Tave[coarseI]);
+                //localCoarseEave.append(Eave[coarseI]);
+                //localCoarseHoave.append(Hoiave[coarseI]);
+            }
         }
+
+        localCoarseTave.append(Tave);
+        localCoarseEave.append(Eave);
+        localCoarseHoave.append(Hoiave);
     }
 
     // Fill the local values to distribute
@@ -494,7 +505,7 @@ void Foam::radiation::viewFactor::calculate()
                         scalar invEj = 1.0/E[j];
                         if (i==j)
                         {
-                            CLU_()[i][j] = invEj - (invEj-1.0)*Fmatrix_()[i][j];
+                            CLU_()[i][j] = invEj-(invEj-1.0)*Fmatrix_()[i][j];
                         }
                         else
                         {
@@ -540,30 +551,35 @@ void Foam::radiation::viewFactor::calculate()
     forAll(selectedPatches_, i)
     {
         const label patchID = selectedPatches_[i];
-        scalarField& Qrp = Qr_.boundaryField()[patchID];
-        const scalarField& sf = mesh_.magSf().boundaryField()[patchID];
-        const labelList& agglom = finalAgglom_[patchID];
-        label nAgglom = max(agglom)+1;
-
-        labelListList coarseToFine(invertOneToMany(nAgglom, agglom));
-
-        const labelList& coarsePatchFace = coarseMesh_.patchFaceMap()[patchID];
-
-        scalar heatFlux = 0.0;
-        forAll(coarseToFine, coarseI)
+        const polyPatch& pp = mesh_.boundaryMesh()[patchID];
+        if (pp.size() > 0)
         {
-            label globalCoarse =
-                globalNumbering.toGlobal(Pstream::myProcNo(), globCoarseId);
-            const label coarseFaceID = coarsePatchFace[coarseI];
-            const labelList& fineFaces = coarseToFine[coarseFaceID];
-            forAll(fineFaces, k)
-            {
-                label faceI = fineFaces[k];
+            scalarField& Qrp = Qr_.boundaryField()[patchID];
+            const scalarField& sf = mesh_.magSf().boundaryField()[patchID];
+            const labelList& agglom = finalAgglom_[patchID];
+            label nAgglom = max(agglom)+1;
 
-                Qrp[faceI] = q[globalCoarse];
-                heatFlux += Qrp[faceI]*sf[faceI];
+            labelListList coarseToFine(invertOneToMany(nAgglom, agglom));
+
+            const labelList& coarsePatchFace =
+                coarseMesh_.patchFaceMap()[patchID];
+
+            scalar heatFlux = 0.0;
+            forAll(coarseToFine, coarseI)
+            {
+                label globalCoarse =
+                    globalNumbering.toGlobal(Pstream::myProcNo(), globCoarseId);
+                const label coarseFaceID = coarsePatchFace[coarseI];
+                const labelList& fineFaces = coarseToFine[coarseFaceID];
+                forAll(fineFaces, k)
+                {
+                    label faceI = fineFaces[k];
+
+                    Qrp[faceI] = q[globalCoarse];
+                    heatFlux += Qrp[faceI]*sf[faceI];
+                }
+                globCoarseId ++;
             }
-            globCoarseId ++;
         }
     }
 
@@ -633,6 +649,5 @@ Foam::radiation::viewFactor::Ru() const
         )
     );
 }
-
 
 // ************************************************************************* //

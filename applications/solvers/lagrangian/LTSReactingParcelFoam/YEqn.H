@@ -9,6 +9,9 @@ tmp<fv::convectionScheme<scalar> > mvConvection
     )
 );
 
+combustion->correct();
+dQ = combustion->dQ();
+
 if (solveSpecies)
 {
     label inertIndex = -1;
@@ -19,14 +22,15 @@ if (solveSpecies)
         if (Y[i].name() != inertSpecie)
         {
             volScalarField& Yi = Y[i];
+
             solve
             (
                 fvm::ddt(rho, Yi)
               + mvConvection->fvmDiv(phi, Yi)
               - fvm::laplacian(turbulence->muEff(), Yi)
-              ==
+             ==
                 parcels.SYi(i, Yi)
-              + kappa*chemistry.RR(i)().dimensionedInternalField()
+              + combustion->R(Yi)
               + massSource.Su(i),
                 mesh.solver("Yi")
             );

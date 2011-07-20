@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -233,7 +233,7 @@ tmp<volScalarField> SpalartAllmaras::DnuTildaEff() const
 {
     return tmp<volScalarField>
     (
-        new volScalarField("DnuTildaEff", nuTilda_/sigmaNut_ + nu())
+        new volScalarField("DnuTildaEff", (nuTilda_ + nu())/sigmaNut_)
     );
 }
 

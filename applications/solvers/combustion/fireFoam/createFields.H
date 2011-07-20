@@ -1,10 +1,16 @@
+    Info<< "Creating combustion model\n" << endl;
+
+    autoPtr<combustionModels::psiCombustionModel> combustion
+    (
+        combustionModels::psiCombustionModel::New
+        (
+            mesh
+        )
+    );
+
     Info<< "Reading thermophysical properties\n" << endl;
 
-    autoPtr<hsCombustionThermo> pThermo
-    (
-        hsCombustionThermo::New(mesh)
-    );
-    hsCombustionThermo& thermo = pThermo();
+    hsCombustionThermo& thermo = combustion->thermo();
 
     SLGThermo slgThermo(mesh, thermo);
 
@@ -60,30 +66,8 @@
         )
     );
 
-    IOdictionary combustionProperties
-    (
-        IOobject
-        (
-            "combustionProperties",
-            runTime.constant(),
-            mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE
-        )
-    );
-
-    Info<< "Creating combustion model\n" << endl;
-    autoPtr<combustionModel> combustion
-    (
-        combustionModel::combustionModel::New
-        (
-            combustionProperties,
-            thermo,
-            turbulence(),
-            phi,
-            rho
-        )
-    );
+    // Set the turbulence into the combustion model
+    combustion->setTurbulence(turbulence());
 
     volScalarField dQ
     (
@@ -96,7 +80,7 @@
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar("dQ", dimMass/pow3(dimTime)/dimLength, 0.0)
+        dimensionedScalar("dQ", dimEnergy/dimTime, 0.0)
     );
 
     Info<< "Creating field DpDt\n" << endl;

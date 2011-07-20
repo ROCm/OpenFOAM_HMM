@@ -73,7 +73,7 @@ void icoPolynomial<PolySize>::write(Ostream& os) const
         rhoCoeffs_/this->W()
     );
 
-    os  << dict;
+    os  << indent << dict.dictName() << dict;
 }
 
 

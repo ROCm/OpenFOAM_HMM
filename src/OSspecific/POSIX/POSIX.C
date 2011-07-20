@@ -264,10 +264,16 @@ bool Foam::chDir(const fileName& dir)
 }
 
 
-Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
+Foam::fileNameList Foam::findEtcFiles
+(
+    const fileName& name,
+    bool mandatory,
+    bool findFirst
+)
 {
-    //
-    // search for user files in
+    fileNameList results;
+
+    // Search for user files in
     // * ~/.OpenFOAM/VERSION
     // * ~/.OpenFOAM
     //
@@ -277,19 +283,25 @@ Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
         fileName fullName = searchDir/FOAMversion/name;
         if (isFile(fullName))
         {
-            return fullName;
+            results.append(fullName);
+            if (findFirst)
+            {
+                return results;
+            }
         }
 
         fullName = searchDir/name;
         if (isFile(fullName))
         {
-            return fullName;
+            results.append(fullName);
+            if (findFirst)
+            {
+                return results;
+            }
         }
     }
 
-
-    //
-    // search for group (site) files in
+    // Search for group (site) files in
     // * $WM_PROJECT_SITE/VERSION
     // * $WM_PROJECT_SITE
     //
@@ -301,19 +313,26 @@ Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
             fileName fullName = searchDir/FOAMversion/name;
             if (isFile(fullName))
             {
-                return fullName;
+                results.append(fullName);
+                if (findFirst)
+                {
+                    return results;
+                }
             }
 
             fullName = searchDir/name;
             if (isFile(fullName))
             {
-                return fullName;
+                results.append(fullName);
+                if (findFirst)
+                {
+                    return results;
+                }
             }
         }
     }
     else
     {
-        //
         // OR search for group (site) files in
         // * $WM_PROJECT_INST_DIR/site/VERSION
         // * $WM_PROJECT_INST_DIR/site
@@ -324,20 +343,26 @@ Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
             fileName fullName = searchDir/"site"/FOAMversion/name;
             if (isFile(fullName))
             {
-                return fullName;
+                results.append(fullName);
+                if (findFirst)
+                {
+                    return results;
+                }
             }
 
             fullName = searchDir/"site"/name;
             if (isFile(fullName))
             {
-                return fullName;
+                results.append(fullName);
+                if (findFirst)
+                {
+                    return results;
+                }
             }
         }
     }
 
-
-    //
-    // search for other (shipped) files in
+    // Search for other (shipped) files in
     // * $WM_PROJECT_DIR/etc
     //
     searchDir = getEnv("WM_PROJECT_DIR");
@@ -346,24 +371,45 @@ Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
         fileName fullName = searchDir/"etc"/name;
         if (isFile(fullName))
         {
-            return fullName;
+            results.append(fullName);
+            if (findFirst)
+            {
+                return results;
+            }
         }
     }
 
     // Not found
-    // abort if the file is mandatory, otherwise return null
-    if (mandatory)
+    if (results.empty())
     {
-        std::cerr
-            << "--> FOAM FATAL ERROR in Foam::findEtcFile() :"
-               " could not find mandatory file\n    '"
-            << name.c_str() << "'\n\n" << std::endl;
-        ::exit(1);
+        // Abort if the file is mandatory, otherwise return null
+        if (mandatory)
+        {
+            std::cerr
+                << "--> FOAM FATAL ERROR in Foam::findEtcFiles() :"
+                   " could not find mandatory file\n    '"
+                << name.c_str() << "'\n\n" << std::endl;
+            ::exit(1);
+        }
     }
 
-    // Return null-constructed fileName rather than fileName::null
-    // to avoid cyclic dependencies in the construction of globals
-    return fileName();
+    // Return list of matching paths or empty list if none found
+    return results;
+}
+
+
+Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
+{
+    fileNameList results(findEtcFiles(name, mandatory, true));
+
+    if (results.size())
+    {
+        return results[0];
+    }
+    else
+    {
+        return fileName();
+    }
 }
 
 

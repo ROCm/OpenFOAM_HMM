@@ -25,10 +25,10 @@ Class
     Foam::IOdictionary
 
 Description
-    IOdictionary is derived from dictionary and IOobject to give the
-    dictionary automatic IO functionality via the objectRegistry.  To facilitate
-    IO, IOdictioanry is provided with a constructor from IOobject and writeData
-    and write functions.
+    IOdictionary is derived from dictionary and IOobject to give the dictionary
+    automatic IO functionality via the objectRegistry.  To facilitate IO,
+    IOdictioanry is provided with a constructor from IOobject and writeData and
+    write functions.
 
 SourceFiles
     IOdictionary.C
@@ -56,11 +56,16 @@ class IOdictionary
     public regIOobject,
     public dictionary
 {
+    // Private data
+
+        static bool writeDictionaries;
+
 
     // Private Member Functions
 
-        //- read dictionary from file
+        //- Read dictionary from file
         void readFile(const bool);
+
 
 public:
 

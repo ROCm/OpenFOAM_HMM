@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
         label patchI = pp.index();
         finalAgglom[patchI].setSize(pp.size(), 0);
 
-        if (pp.size() > 0 && !pp.coupled())
+        if (!pp.coupled())
         {
             if (agglomDict.found(pp.name()))
             {

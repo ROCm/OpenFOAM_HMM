@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,14 +21,8 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::fvMatrix
-
 Description
-    A special matrix type and solver, designed for finite volume
-    solutions of scalar equations.
-    Face addressing is used to make all matrix assembly
-    and solution loops vectorise.
+    Forward declarations of fvMatrix specializations.
 
 \*---------------------------------------------------------------------------*/
 

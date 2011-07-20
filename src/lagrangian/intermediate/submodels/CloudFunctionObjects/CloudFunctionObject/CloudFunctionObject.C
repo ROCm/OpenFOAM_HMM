@@ -75,6 +75,13 @@ Foam::CloudFunctionObject<CloudType>::~CloudFunctionObject()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
+void Foam::CloudFunctionObject<CloudType>::preEvolve()
+{
+    // do nothing
+}
+
+
+template<class CloudType>
 void Foam::CloudFunctionObject<CloudType>::postEvolve()
 {
     if (this->owner().time().outputTime())

@@ -70,6 +70,8 @@ export LC_ALL=C
 # reader extension
 extension=OpenFOAM
 
+requirePV=1
+
 # parse options
 while [ "$#" -gt 0 ]
 do
@@ -97,10 +99,12 @@ do
         ;;
     -touch)
         optTouch=true
+        requirePV=0
         shift
         ;;
     -touchAll)
         optTouch=all
+        requirePV=0
         shift
         ;;
     --)
@@ -116,6 +120,24 @@ do
     esac
 done
 
+
+#
+# check that reader module has been built
+#
+if [ $requirePV -eq 1 -a ! -f $PV_PLUGIN_PATH/libPV3FoamReader_SM.so ]
+then
+    cat<< BUILDREADER
+
+FATAL ERROR: ParaView reader module libraries do not exist
+
+Please build the reader module before continuing:
+cd \$FOAM_UTILITIES/postProcessing/graphics/PV3Readers
+./Allwclean
+./Allwmake
+
+BUILDREADER
+    exit 1
+fi
 
 #
 # check for --data=... argument

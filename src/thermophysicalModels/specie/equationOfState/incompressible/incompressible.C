@@ -53,7 +53,7 @@ void Foam::incompressible::write(Ostream& os) const
     dictionary dict("equationOfState");
     dict.add("rho", rho_);
 
-    os  << dict;
+    os  << indent << dict.dictName() << dict;
 }
 
 

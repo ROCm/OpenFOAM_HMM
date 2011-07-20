@@ -19,8 +19,6 @@ psiChemistryModel ODEChemistryModel<gasThermoPhysics>;
 
 chemistry       off;
 
-turbulentReaction off;
-
 chemistrySolver noChemistrySolver;
 
 initialChemicalTimeStep 1e-07;

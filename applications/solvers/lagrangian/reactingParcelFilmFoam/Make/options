@@ -20,6 +20,7 @@ EXE_INC = \
     -I$(LIB_SRC)/lagrangian/intermediate/lnInclude \
     -I$(LIB_SRC)/ODE/lnInclude \
     -I$(LIB_SRC)/sampling/lnInclude \
+    -I$(LIB_SRC)/combustionModels/lnInclude \
     -I$(FOAM_SOLVERS)/combustion/reactingFoam
 
 
@@ -41,4 +42,5 @@ EXE_LIBS = \
     -lsurfaceFilmModels \
     -llagrangianIntermediate \
     -lODE \
-    -lsampling
+    -lsampling \
+    -lcombustionModels

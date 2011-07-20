@@ -41,6 +41,7 @@ namespace thermoBaffleModels
 
 defineTypeNameAndDebug(thermoBaffleModel, 0);
 defineRunTimeSelectionTable(thermoBaffleModel, mesh);
+defineRunTimeSelectionTable(thermoBaffleModel, dictionary);
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -52,23 +53,7 @@ bool thermoBaffleModel::read()
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-thermoBaffleModel::thermoBaffleModel(const fvMesh& mesh)
-:
-    regionModel1D(mesh),
-    thickness_(),
-    delta_("delta", dimLength, 0.0),
-    oneD_(false)
-{}
-
-
-thermoBaffleModel::thermoBaffleModel(const word& modelType, const fvMesh& mesh)
-:
-    regionModel1D(mesh, "thermoBaffle", modelType),
-    thickness_(),
-    delta_("delta", dimLength, 0.0),
-    oneD_(false)
+void thermoBaffleModel::init()
 {
     if (active_)
     {
@@ -86,7 +71,14 @@ thermoBaffleModel::thermoBaffleModel(const word& modelType, const fvMesh& mesh)
         label nFaces = 0;
         forAll (rbm, patchi)
         {
-            if (rbm[patchi].size() && isA<wedgePolyPatch>(rbm[patchi]))
+            if (
+                   rbm[patchi].size()
+                &&
+                   (
+                       isA<wedgePolyPatch>(rbm[patchi])
+                    || isA<emptyPolyPatch>(rbm[patchi])
+                   )
+                )
             {
                 nFaces += rbm[patchi].size();
             }
@@ -108,7 +100,11 @@ thermoBaffleModel::thermoBaffleModel(const word& modelType, const fvMesh& mesh)
             const label patchI = intCoupledPatchIDs_[i];
             const polyPatch& pp = rbm[patchI];
 
-            if (!isA<directMappedVariableThicknessWallPolyPatch>(pp) && oneD_)
+            if  (
+                    !isA<directMappedVariableThicknessWallPolyPatch>(pp)
+                 && oneD_
+                 && !constantThickness_
+                )
             {
                 FatalErrorIn
                 (
@@ -120,7 +116,8 @@ thermoBaffleModel::thermoBaffleModel(const word& modelType, const fvMesh& mesh)
                 )   << "\n    patch type '" << pp.type()
                     << "' not type '"
                     << directMappedVariableThicknessWallPolyPatch::typeName
-                    << "'. This is necessary for 1D solution"
+                    << "'. This is necessary for 1D solution "
+                    << " and variable thickness"
                     << "\n    for patch. " << pp.name()
                     << exit(FatalError);
             }
@@ -142,7 +139,7 @@ thermoBaffleModel::thermoBaffleModel(const word& modelType, const fvMesh& mesh)
             }
         }
 
-        if (oneD_)
+        if (oneD_ && !constantThickness_)
         {
             const label patchI = intCoupledPatchIDs_[0];
             const polyPatch& pp = rbm[patchI];
@@ -189,6 +186,48 @@ thermoBaffleModel::thermoBaffleModel(const word& modelType, const fvMesh& mesh)
             }
         }
     }
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+thermoBaffleModel::thermoBaffleModel(const fvMesh& mesh)
+:
+    regionModel1D(mesh),
+    thickness_(),
+    delta_("delta", dimLength, 0.0),
+    oneD_(false),
+    constantThickness_(true)
+{}
+
+
+thermoBaffleModel::thermoBaffleModel
+(
+    const word& modelType,
+    const fvMesh& mesh,
+    const dictionary& dict
+
+)
+:
+    regionModel1D(mesh, "thermoBaffle", modelType, dict, true),
+    thickness_(),
+    delta_("delta", dimLength, 0.0),
+    oneD_(false),
+    constantThickness_(dict.lookupOrDefault<bool>("constantThickness", true))
+{
+    init();
+}
+
+
+thermoBaffleModel::thermoBaffleModel(const word& modelType, const fvMesh& mesh)
+:
+    regionModel1D(mesh, "thermoBaffle", modelType),
+    thickness_(),
+    delta_("delta", dimLength, 0.0),
+    oneD_(false),
+    constantThickness_(lookupOrDefault<bool>("constantThickness", true))
+{
+    init();
 }
 
 

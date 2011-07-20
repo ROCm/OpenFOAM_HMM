@@ -108,6 +108,16 @@ Foam::CloudFunctionObjectList<CloudType>::~CloudFunctionObjectList()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
+void Foam::CloudFunctionObjectList<CloudType>::preEvolve()
+{
+    forAll(*this, i)
+    {
+        this->operator[](i).preEvolve();
+    }
+}
+
+
+template<class CloudType>
 void Foam::CloudFunctionObjectList<CloudType>::postEvolve()
 {
     forAll(*this, i)

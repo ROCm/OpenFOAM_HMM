@@ -38,11 +38,6 @@ namespace thermoBaffleModels
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline const basicSolidThermo& thermoBaffle2D::thermo() const
-{
-    return thermo_;
-}
-
 
 inline tmp<scalarField> thermoBaffle2D::hs
 (

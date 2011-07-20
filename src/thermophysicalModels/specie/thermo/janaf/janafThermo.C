@@ -108,7 +108,7 @@ void Foam::janafThermo<EquationOfState>::write(Ostream& os) const
     dict.add("Tcommon", Tcommon_);
     dict.add("highCpCoeffs", highCpCoeffs_);
     dict.add("lowCpCoeffs", lowCpCoeffs_);
-    os  << dict;
+    os  << indent << dict.dictName() << dict;
 }
 
 

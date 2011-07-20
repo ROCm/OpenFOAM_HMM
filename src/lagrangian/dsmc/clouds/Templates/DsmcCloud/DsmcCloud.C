@@ -29,6 +29,7 @@ License
 #include "InflowBoundaryModel.H"
 #include "constants.H"
 #include "zeroGradientFvPatchFields.H"
+#include "polyMeshTetDecomposition.H"
 
 using namespace Foam::constant;
 

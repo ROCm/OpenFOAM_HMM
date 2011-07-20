@@ -131,8 +131,8 @@ private:
         //- Number of parcels to introduce per second []
         const label parcelsPerSecond_;
 
-        //- Volume flow rate of parcels to introduce relative to SOI [m^3/s]
-        const autoPtr<DataEntry<scalar> > volumeFlowRate_;
+        //- Flow rate profile relative to SOI []
+        const autoPtr<DataEntry<scalar> > flowRateProfile_;
 
         //- Inner cone angle relative to SOI [deg]
         const autoPtr<DataEntry<scalar> > thetaInner_;

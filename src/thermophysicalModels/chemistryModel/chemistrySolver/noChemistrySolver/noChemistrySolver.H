@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::noChemistry
+    Foam::noChemistrySolver
 
 Description
     Dummy chemistry solver for 'none' option

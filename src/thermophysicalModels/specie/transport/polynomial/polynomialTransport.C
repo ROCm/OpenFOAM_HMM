@@ -88,7 +88,7 @@ void Foam::polynomialTransport<Thermo, PolySize>::write(Ostream& os) const
         word("kappaCoeffs<" + Foam::name(PolySize) + '>'),
         kappaCoeffs_/this->W()
     );
-    os  << dict;
+    os  << indent << dict.dictName() << dict;
 
     os  << decrIndent << token::END_BLOCK << nl;
 }

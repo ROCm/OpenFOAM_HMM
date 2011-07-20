@@ -512,7 +512,7 @@ Foam::labelList Foam::globalIndexAndTransform::transformIndicesForPatches
         }
     }
 
-    label nUsedTrans = sum(mag(permutation));
+    label nUsedTrans = round(sum(mag(permutation)));
 
     if (nUsedTrans == 0)
     {

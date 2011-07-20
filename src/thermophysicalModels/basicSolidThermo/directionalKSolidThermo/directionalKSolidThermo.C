@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,10 +39,56 @@ namespace Foam
         directionalKSolidThermo,
         mesh
     );
+
+    addToRunTimeSelectionTable
+    (
+        basicSolidThermo,
+        directionalKSolidThermo,
+        dictionary
+    );
+
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::directionalKSolidThermo::directionalKSolidThermo
+(
+    const fvMesh& mesh,
+    const dictionary& dict
+)
+:
+    interpolatedSolidThermo(mesh, typeName + "Coeffs", dict),
+    directionalK_
+    (
+        IOobject
+        (
+            "K",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimEnergy/dimTime/(dimLength*dimTemperature)
+    ),
+    ccTransforms_
+    (
+        IOobject
+        (
+            "ccTransforms",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimLength
+    )
+{
+    init();
+}
+
 
 Foam::directionalKSolidThermo::directionalKSolidThermo(const fvMesh& mesh)
 :
@@ -74,7 +120,23 @@ Foam::directionalKSolidThermo::directionalKSolidThermo(const fvMesh& mesh)
         dimLength
     )
 {
+    init();
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::directionalKSolidThermo::~directionalKSolidThermo()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::directionalKSolidThermo::init()
+{
     KValues_ = Field<vector>(subDict(typeName + "Coeffs").lookup("KValues"));
+
+    const fvMesh& mesh = K().mesh();
 
     // Determine transforms for cell centres
     forAll(mesh.C(), cellI)
@@ -243,14 +305,6 @@ Foam::directionalKSolidThermo::directionalKSolidThermo(const fvMesh& mesh)
     correct();
 }
 
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::directionalKSolidThermo::~directionalKSolidThermo()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::symmTensor Foam::directionalKSolidThermo::transformPrincipal
 (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,7 +62,7 @@ Foam::autoPtr<Foam::basicSolidThermo> Foam::basicSolidThermo::New
     {
         FatalErrorIn
         (
-            "basicSolidThermo::New(const fvMesh&, const word&)"
+            "basicSolidThermo::New(const fvMesh&)"
         )   << "Unknown solidThermo type " << thermoType
             << endl << endl
             << "Valid solidThermo types are :" << endl
@@ -73,5 +73,37 @@ Foam::autoPtr<Foam::basicSolidThermo> Foam::basicSolidThermo::New
     return autoPtr<basicSolidThermo>(cstrIter()(mesh));
 }
 
+
+Foam::autoPtr<Foam::basicSolidThermo> Foam::basicSolidThermo::New
+(
+    const fvMesh& mesh, const dictionary& dict
+)
+{
+    if (debug)
+    {
+        Info<< "basicSolidThermo::New(const fvMesh&, const dictionary&): "
+            << "constructing basicSolidThermo"
+            << endl;
+    }
+
+    const word thermoType = dict.lookup("thermoType");
+
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(thermoType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "basicSolidThermo::New(const fvMesh&, const dictionary&)"
+        )   << "Unknown solidThermo type " << thermoType
+            << endl << endl
+            << "Valid solidThermo types are :" << endl
+            << dictionaryConstructorTablePtr_->toc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<basicSolidThermo>(cstrIter()(mesh, dict));
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

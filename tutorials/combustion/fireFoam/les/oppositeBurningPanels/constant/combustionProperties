@@ -15,7 +15,9 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-combustionModel    infinitelyFastChemistry;
+combustionModel  infinitelyFastChemistry<psiCombustionModel,gasThermoPhysics>;
+
+active true;
 
 infinitelyFastChemistryCoeffs
 {

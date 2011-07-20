@@ -228,10 +228,11 @@ OpenFOAM | ThirdParty)
         mpfr_version=mpfr-2.4.2
         ;;
     Gcc46 | Gcc46++0x)
-        gcc_version=gcc-4.6.0
-        gmp_version=gmp-5.0.1
-        mpfr_version=mpfr-2.4.2
-        mpc_version=mpc-0.8.1
+        gcc_version=gcc-4.6.1
+        gmp_version=gmp-5.0.2
+        mpfr_version=mpfr-3.0.1
+        mpc_version=mpc-0.9
+        gmpPACKAGE=gmp-5.0.2
         ;;
     Gcc45 | Gcc45++0x)
         gcc_version=gcc-4.5.2
@@ -253,8 +254,8 @@ OpenFOAM | ThirdParty)
         # using clang - not gcc
         export WM_CC='clang'
         export WM_CXX='clang++'
-        clang_version=llvm-2.9
-        #clang_version=llvm-svn
+        #clang_version=llvm-2.9
+        clang_version=llvm-svn
         ;;
     *)
         echo

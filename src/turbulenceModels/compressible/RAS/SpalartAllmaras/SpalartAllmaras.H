@@ -170,7 +170,7 @@ public:
                 new volScalarField
                 (
                     "DnuTildaEff",
-                    rho_*nuTilda_/sigmaNut_ + mu()
+                    (rho_*nuTilda_ + mu())/sigmaNut_
                 )
             );
         }

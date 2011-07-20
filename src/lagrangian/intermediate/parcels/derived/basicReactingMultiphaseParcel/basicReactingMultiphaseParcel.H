@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::BasicReactingMultiphaseParcel
+    Foam::basicReactingMultiphaseParcel
 
 Description
     Definition of basic reacting parcel

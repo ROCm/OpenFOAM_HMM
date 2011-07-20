@@ -36,11 +36,9 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "hReactionThermo.H"
 #include "turbulenceModel.H"
 #include "basicReactingMultiphaseCloud.H"
-#include "rhoChemistryModel.H"
-#include "chemistrySolver.H"
+#include "rhoChemistryCombustionModel.H"
 #include "radiationModel.H"
 #include "porousZones.H"
 #include "timeActivatedExplicitSource.H"
@@ -75,7 +73,6 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-        #include "readChemistryProperties.H"
         #include "readAdditionalSolutionControls.H"
         #include "readTimeControls.H"
 
@@ -85,7 +82,6 @@ int main(int argc, char *argv[])
 
         parcels.evolve();
 
-        #include "chemistry.H"
         #include "timeScales.H"
 
         #include "rhoEqn.H"
@@ -111,10 +107,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        if (runTime.write())
-        {
-            chemistry.dQ()().write();
-        }
+        runTime.write();
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

@@ -58,7 +58,7 @@ void Foam::eConstThermo<EquationOfState>::write(Ostream& os) const
     dictionary dict("thermodynamics");
     dict.add("Cv", Cv_);
     dict.add("Hf", Hf_);
-    os  << dict;
+    os  << indent << dict.dictName() << dict;
 }
 
 

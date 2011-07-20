@@ -33,9 +33,9 @@ License
 namespace Foam
 {
     template<>
-    const char* Foam::NamedEnum
+    const char* NamedEnum
     <
-        Foam::fanPressureFvPatchScalarField::fanFlowDirection,
+        fanPressureFvPatchScalarField::fanFlowDirection,
         2
     >::names[] =
     {
