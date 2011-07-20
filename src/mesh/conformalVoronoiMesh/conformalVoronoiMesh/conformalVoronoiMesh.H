@@ -684,6 +684,8 @@ private:
             labelList& patchStarts,
             labelList& procNeighbours,
             pointField& cellCentres,
+            labelList& cellToDelaunayVertex,
+            labelListList& patchToDelaunayVertex,
             bool filterFaces
         );
 
@@ -691,6 +693,7 @@ private:
         void calcTetMesh
         (
             pointField& points,
+            labelList& pointToDelaunayVertex,
             faceList& faces,
             labelList& owner,
             labelList& neighbour,
@@ -812,14 +815,15 @@ private:
             labelList& patchSizes,
             labelList& patchStarts,
             labelList& procNeighbours,
+            labelListList& patchPointPairSlaves,
             bool includeEmptyPatches = false
         ) const;
 
         //- Create the cell centres to use for the mesh
-        void createCellCentres
-        (
-            pointField& cellCentres
-        ) const;
+        void createCellCentres(pointField& cellCentres) const;
+
+        //- Extract all points in vertex-index order
+        tmp<pointField> allPoints() const;
 
         //- Sort the faces, owner and neighbour lists into
         //  upper-triangular order.  For internal faces only, use
@@ -837,6 +841,7 @@ private:
         (
             List<DynamicList<face> >& patchFaces,
             List<DynamicList<label> >& patchOwners,
+            List<DynamicList<label> >& patchPointPairSlaves,
             List<Pair<DynamicList<label> > >& patchSortingIndices
         ) const;
 
@@ -859,12 +864,12 @@ private:
             pointField& pts
         ) const;
 
-        //- Remove dual cells that are not used by any faces
-        void removeUnusedCells
+        //- Remove dual cells that are not used by any faces. Return compaction
+        //  map.
+        labelList removeUnusedCells
         (
             labelList& owner,
-            labelList& neighbour,
-            pointField& cellCentres
+            labelList& neighbour
         ) const;
 
         //- Disallow default bitwise copy construct
@@ -1008,11 +1013,11 @@ public:
                 faceList& faces,
                 labelList& owner,
                 labelList& neighbour,
-                wordList& patchTypes,
-                wordList& patchNames,
-                labelList& patchSizes,
-                labelList& patchStarts,
-                labelList& procNeighbours,
+                const wordList& patchTypes,
+                const wordList& patchNames,
+                const labelList& patchSizes,
+                const labelList& patchStarts,
+                const labelList& procNeighbours,
                 const pointField& cellCentres
             ) const;
 

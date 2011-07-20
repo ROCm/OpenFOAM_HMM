@@ -41,6 +41,8 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     labelList& patchStarts,
     labelList& procNeighbours,
     pointField& cellCentres,
+    labelList& cellToDelaunayVertex,
+    labelListList& patchToDelaunayVertex,
     bool filterFaces
 )
 {
@@ -274,14 +276,17 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         patchSizes,
         patchStarts,
         procNeighbours,
+        patchToDelaunayVertex,  // from patch face to Delaunay vertex (slavePp)
         false
     );
 
     // deferredCollapseFaceSet(owner, neighbour, deferredCollapseFaces);
 
-    createCellCentres(cellCentres);
+    cellCentres = allPoints();
 
-    removeUnusedCells(owner, neighbour, cellCentres);
+    cellToDelaunayVertex = removeUnusedCells(owner, neighbour);
+
+    cellCentres = pointField(cellCentres, cellToDelaunayVertex);
 
     removeUnusedPoints(faces, points);
 
@@ -292,6 +297,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 void Foam::conformalVoronoiMesh::calcTetMesh
 (
     pointField& points,
+    labelList& pointToDelaunayVertex,
     faceList& faces,
     labelList& owner,
     labelList& neighbour,
@@ -306,6 +312,7 @@ void Foam::conformalVoronoiMesh::calcTetMesh
     label vertI = 0;
 
     points.setSize(number_of_vertices());
+    pointToDelaunayVertex.setSize(number_of_vertices());
 
     for
     (
@@ -318,11 +325,13 @@ void Foam::conformalVoronoiMesh::calcTetMesh
         {
             vertexMap[vit->index()] = vertI;
             points[vertI] = topoint(vit->point());
+            pointToDelaunayVertex[vertI] = vit->index();
             vertI++;
         }
     }
 
     points.setSize(vertI);
+    pointToDelaunayVertex.setSize(vertI);
 
     label cellI = 0;
 
@@ -1508,6 +1517,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
     labelList patchStarts;
     labelList procNeighbours;
     pointField cellCentres;
+    labelListList patchToDelaunayVertex;
 
     timeCheck("Start of checkPolyMeshQuality");
 
@@ -1523,12 +1533,15 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
         patchSizes,
         patchStarts,
         procNeighbours,
+        patchToDelaunayVertex,
         false
     );
 
-    createCellCentres(cellCentres);
+    //createCellCentres(cellCentres);
+    cellCentres = allPoints();
 
-    removeUnusedCells(owner, neighbour, cellCentres);
+    labelList cellToDelaunayVertex(removeUnusedCells(owner, neighbour));
+    cellCentres = pointField(cellCentres, cellToDelaunayVertex);
 
     polyMesh pMesh
     (
@@ -1887,6 +1900,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
     labelList& patchSizes,
     labelList& patchStarts,
     labelList& procNeighbours,
+    labelListList& patchPointPairSlaves,
     bool includeEmptyPatches
 ) const
 {
@@ -1965,6 +1979,10 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
     List<DynamicList<face> > patchFaces(nPatches, DynamicList<face>(0));
 
     List<DynamicList<label> > patchOwners(nPatches, DynamicList<label>(0));
+
+    // Per patch face the index of the slave node of the point pair
+    List<DynamicList<label> > patchPPSlaves(nPatches, DynamicList<label>(0));
+
 
     faces.setSize(number_of_edges());
 
@@ -2101,6 +2119,16 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 
                     patchFaces[patchIndex].append(newDualFace);
                     patchOwners[patchIndex].append(own);
+
+                    // Store the non-internal or boundary point
+                    if (vA->internalOrBoundaryPoint())
+                    {
+                        patchPPSlaves[patchIndex].append(vB->index());
+                    }
+                    else
+                    {
+                        patchPPSlaves[patchIndex].append(vA->index());
+                    }
                 }
                 else
                 {
@@ -2139,6 +2167,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
     (
         patchFaces,
         patchOwners,
+        patchPPSlaves,
         procPatchSortingIndex
     );
 
@@ -2154,6 +2183,13 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
         patchFaces,
         patchOwners
     );
+
+    // Return     patchPointPairSlaves.setSize(nPatches);
+    patchPointPairSlaves.setSize(nPatches);
+    forAll(patchPPSlaves, patchI)
+    {
+        patchPointPairSlaves[patchI].transfer(patchPPSlaves[patchI]);
+    }
 }
 
 
@@ -2162,7 +2198,7 @@ void Foam::conformalVoronoiMesh::createCellCentres
     pointField& cellCentres
 ) const
 {
-    cellCentres.setSize(number_of_vertices());
+    cellCentres.setSize(number_of_vertices(), point::max);
 
     label vertI = 0;
 
@@ -2182,6 +2218,28 @@ void Foam::conformalVoronoiMesh::createCellCentres
     }
 
     cellCentres.setSize(vertI);
+}
+
+
+Foam::tmp<Foam::pointField> Foam::conformalVoronoiMesh::allPoints() const
+{
+    tmp<pointField> tpts(new pointField(number_of_vertices(), point::max));
+    pointField& pts = tpts();
+
+    for
+    (
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
+    {
+        if (vit->internalOrBoundaryPoint())
+        {
+            pts[vit->index()] = topoint(vit->point());
+        }
+    }
+
+    return tpts;
 }
 
 
@@ -2287,6 +2345,7 @@ void Foam::conformalVoronoiMesh::sortProcPatches
 (
     List<DynamicList<face> >& patchFaces,
     List<DynamicList<label> >& patchOwners,
+    List<DynamicList<label> >& patchPointPairSlaves,
     List<Pair<DynamicList<label> > >& patchSortingIndices
 ) const
 {
@@ -2299,6 +2358,7 @@ void Foam::conformalVoronoiMesh::sortProcPatches
     {
         faceList& faces = patchFaces[patchI];
         labelList& owner = patchOwners[patchI];
+        DynamicList<label>& slaves = patchPointPairSlaves[patchI];
 
         Pair<DynamicList<label> >& sortingIndices = patchSortingIndices[patchI];
 
@@ -2311,6 +2371,7 @@ void Foam::conformalVoronoiMesh::sortProcPatches
             (
                 faces.size() != primary.size()
              || owner.size() != primary.size()
+             || slaves.size() != primary.size()
             )
             {
                 FatalErrorIn
@@ -2326,6 +2387,7 @@ void Foam::conformalVoronoiMesh::sortProcPatches
                     << " for patch " << patchI << nl
                     << " faces.size() " << faces.size() << nl
                     << " owner.size() " << owner.size() << nl
+                    << " slaves.size() " << slaves.size() << nl
                     << " sortingIndices.first().size() "
                     << sortingIndices.first().size()
                     << exit(FatalError) << endl;
@@ -2344,6 +2406,7 @@ void Foam::conformalVoronoiMesh::sortProcPatches
             inplaceReorder(oldToNew, secondary);
             inplaceReorder(oldToNew, faces);
             inplaceReorder(oldToNew, owner);
+            inplaceReorder(oldToNew, slaves);
 
             // 2) in each block of primary sort by secondary
 
@@ -2401,6 +2464,7 @@ void Foam::conformalVoronoiMesh::sortProcPatches
 
             inplaceReorder(oldToNew, faces);
             inplaceReorder(oldToNew, owner);
+            inplaceReorder(oldToNew, slaves);
         }
     }
 }
@@ -2505,11 +2569,10 @@ void Foam::conformalVoronoiMesh::removeUnusedPoints
 }
 
 
-void Foam::conformalVoronoiMesh::removeUnusedCells
+Foam::labelList Foam::conformalVoronoiMesh::removeUnusedCells
 (
     labelList& owner,
-    labelList& neighbour,
-    pointField& cellCentres
+    labelList& neighbour
 ) const
 {
     Info<< nl << "Removing unused cells" << endl;
@@ -2543,9 +2606,7 @@ void Foam::conformalVoronoiMesh::removeUnusedCells
         }
     }
 
-    inplaceReorder(oldToNew, cellCentres);
-
-    cellCentres.setSize(cellI);
+    labelList newToOld(invert(cellI, oldToNew));
 
     // Find all of the unused cells, create a list of them, then
     // subtract one from each owner and neighbour entry for each of
@@ -2580,6 +2641,8 @@ void Foam::conformalVoronoiMesh::removeUnusedCells
             n -= findLower(unusedCells, n) + 1;
         }
     }
+
+    return newToOld;
 }
 
 
