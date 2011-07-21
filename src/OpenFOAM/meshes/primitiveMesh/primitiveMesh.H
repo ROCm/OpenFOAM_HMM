@@ -496,12 +496,6 @@ public:
                 const scalarField& cellVolumes() const;
                 const vectorField& faceAreas() const;
 
-                // Override cell centres with supplied positions
-                void overrideCellCentres
-                (
-                    const vectorField& cellCtrs
-                ) const;
-
 
             // Mesh motion
 
