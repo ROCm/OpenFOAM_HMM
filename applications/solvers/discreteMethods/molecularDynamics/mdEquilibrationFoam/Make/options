@@ -13,4 +13,3 @@ EXE_LIBS = \
     -lmolecule \
     -lpotential \
     -lmolecularMeasurements
-

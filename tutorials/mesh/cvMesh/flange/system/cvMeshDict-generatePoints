@@ -1,0 +1,231 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version         2.0;
+    format          ascii;
+
+    root            "";
+    case            "";
+    instance        "";
+    local           "";
+
+    class           dictionary;
+    object          cvMeshDict;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Any scalar with a name <name>Coeff specifies a value that will be implemented
+// as a faction of the local target cell size
+
+geometry
+{
+    flange.obj
+    {
+        type triSurfaceMesh;
+    }
+}
+
+
+surfaceConformation
+{
+    locationInMesh (0 0 0);
+
+    pointPairDistanceCoeff      0.1;
+
+    mixedFeaturePointPPDistanceCoeff    5.0;
+
+    featurePointExclusionDistanceCoeff  0.4;
+
+    featureEdgeExclusionDistanceCoeff   0.2;
+
+    surfaceSearchDistanceCoeff  2.5;
+
+    maxSurfaceProtrusionCoeff   0.1;
+
+    maxQuadAngle 125;
+
+    surfaceConformationRebuildFrequency 10;
+
+    coarseConformationControls
+    {
+        initial
+        {
+            edgeSearchDistCoeff         1.1;
+            surfacePtReplaceDistCoeff   0.5;
+        }
+
+        iteration
+        {
+            edgeSearchDistCoeff         1.25;
+            surfacePtReplaceDistCoeff   0.7;
+        }
+
+        maxIterations 15;
+
+        iterationToInitialHitRatioLimit 0.001;
+    }
+
+    fineConformationControls
+    {
+        initial
+        {
+            edgeSearchDistCoeff         1.1;
+            surfacePtReplaceDistCoeff   0.5;
+        }
+
+        iteration
+        {
+            edgeSearchDistCoeff         1.25;
+            surfacePtReplaceDistCoeff   0.7;
+        }
+
+        maxIterations 15;
+
+        iterationToInitialHitRatioLimit 0.001;
+    }
+
+    geometryToConformTo
+    {
+        flange.obj
+        {
+            featureMethod extendedFeatureEdgeMesh;
+            extendedFeatureEdgeMesh "flange.extendedFeatureEdgeMesh";
+        }
+    }
+
+    additionalFeatures {}
+}
+
+
+initialPoints
+{
+    minimumSurfaceDistanceCoeff 0.55;
+
+    initialPointsMethod         autoDensity;
+    // initialPointsMethod         uniformGrid;
+    // initialPointsMethod         bodyCentredCubic;
+    // initialPointsMethod         pointFile;
+
+    autoDensityCoeffs
+    {
+        minLevels 1;
+        maxSizeRatio 2.0;
+        sampleResolution 5;
+        surfaceSampleResolution 5;
+    }
+
+    uniformGridCoeffs
+    {
+        initialCellSize         0.0015;
+        randomiseInitialGrid    yes;
+        randomPerturbationCoeff 0.02;
+    }
+
+    bodyCentredCubicCoeffs
+    {
+        initialCellSize         0.0015;
+        randomiseInitialGrid    no;
+        randomPerturbationCoeff 0.1;
+    }
+
+    pointFileCoeffs
+    {
+        pointFile              "constant/internalDelaunayVertices";
+    }
+}
+
+
+motionControl
+{
+    defaultCellSize     0.00075;
+
+    // Assign a priority to all requests for cell sizes, the highest overrules.
+    defaultPriority     0;
+
+    cellSizeControlGeometry
+    {
+    }
+
+    relaxationModel     adaptiveLinear;
+
+    adaptiveLinearCoeffs
+    {
+        relaxationStart 1.0;
+        relaxationEnd   0.0;
+    }
+
+    objOutput                   no;
+
+    timeChecks                  yes;
+
+    alignmentSearchSpokes       36;
+
+    alignmentAcceptanceAngle    48;
+
+    sizeAndAlignmentRebuildFrequency 20;
+
+    pointInsertionCriteria
+    {
+        cellCentreDistCoeff     1.75;
+        faceAreaRatioCoeff      0.0025;
+        acceptanceAngle         21.5;
+    }
+
+    pointRemovalCriteria
+    {
+        cellCentreDistCoeff  0.65;
+    }
+
+    faceAreaWeightModel piecewiseLinearRamp;
+
+    piecewiseLinearRampCoeffs
+    {
+        lowerAreaFraction       0.5;
+        upperAreaFraction       1.0;
+    }
+}
+
+
+polyMeshFiltering
+{
+    // Write the underlying Delaunay tet mesh at output time
+    writeTetDualMesh                        true;
+    filterSizeCoeff                         0.2;
+    mergeClosenessCoeff                     1e-4;
+    continueFilteringOnBadInitialPolyMesh   true;
+    filterErrorReductionCoeff               0.5;
+    filterCountSkipThreshold                4;
+    maxCollapseIterations                   25;
+    maxConsecutiveEqualFaceSets             5;
+    surfaceStepFaceAngle                    80;
+    edgeCollapseGuardFraction               0.3;
+    maxCollapseFaceToPointSideLengthCoeff   0.35;
+}
+
+
+meshQualityControls
+{
+    maxNonOrtho 65;
+    maxBoundarySkewness 50;
+    maxInternalSkewness 10;
+    maxConcave 80;
+    minTetQuality 1e-30;
+    minVol 0;
+    minArea -1;
+    minTwist 0.02;
+    minDeterminant 0.001;
+    minFaceWeight 0.02;
+    minVolRatio 0.01;
+    minTriangleTwist -1;
+}
+
+
+// ************************************************************************* //

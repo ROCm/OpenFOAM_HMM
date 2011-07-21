@@ -1300,6 +1300,9 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
 {
     read();
 
+    reduce(bounds().min(), minOp<point>());
+    reduce(bounds().max(), maxOp<point>());
+
     if (debug)
     {
         Info<< "Constructed from triSurface:" << endl;
@@ -1352,6 +1355,9 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh(const IOobject& io)
     )
 {
     read();
+
+    reduce(bounds().min(), minOp<point>());
+    reduce(bounds().max(), maxOp<point>());
 
     if (debug)
     {
@@ -1411,6 +1417,9 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
     )
 {
     read();
+
+    reduce(bounds().min(), minOp<point>());
+    reduce(bounds().max(), maxOp<point>());
 
     if (debug)
     {
@@ -2288,6 +2297,12 @@ void Foam::distributedTriSurfaceMesh::distribute
     triSurface::operator=(triSurface(allTris, patches(), allPoints, true));
 
     clearOut();
+
+    // Set the bounds() value to the boundBox of the undecomposed surface
+    triSurfaceMesh::bounds() = boundBox(points());
+
+    reduce(bounds().min(), minOp<point>());
+    reduce(bounds().max(), maxOp<point>());
 
     // Regions stays same
     // Volume type stays same.

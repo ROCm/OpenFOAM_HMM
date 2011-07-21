@@ -3,4 +3,3 @@
 
     const int nNonOrthCorr =
         potentialFlow.lookupOrDefault<int>("nNonOrthogonalCorrectors", 0);
-

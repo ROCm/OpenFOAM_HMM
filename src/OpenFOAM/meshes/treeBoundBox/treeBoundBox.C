@@ -174,7 +174,6 @@ Foam::tmp<Foam::pointField> Foam::treeBoundBox::points() const
     forAll(points, octant)
     {
         points[octant] = corner(octant);
-
     }
 
     return tPts;

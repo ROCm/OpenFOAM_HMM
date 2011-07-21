@@ -68,7 +68,7 @@ inline bool contiguous<segment>() {return contiguous<point>();}
 
 
 /*---------------------------------------------------------------------------*\
-                           Class distributedTriSurfaceMesh Declaration
+                   Class distributedTriSurfaceMesh Declaration
 \*---------------------------------------------------------------------------*/
 
 class distributedTriSurfaceMesh

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,9 +41,14 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Keep collapsing all triangles whose height is < minLen.
+//- Keep collapsing all triangles whose height is < minLen or quality < minQ.
 //  Returns number of triangles collapsed.
-label collapseBase(triSurface& surf, const scalar minLen);
+label collapseBase
+(
+    triSurface& surf,
+    const scalar minLen,
+    const scalar minQuality
+);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

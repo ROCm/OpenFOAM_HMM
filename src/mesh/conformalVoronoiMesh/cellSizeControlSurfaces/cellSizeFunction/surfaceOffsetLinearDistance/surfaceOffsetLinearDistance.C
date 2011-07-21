@@ -1,0 +1,215 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
+#include "surfaceOffsetLinearDistance.H"
+#include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameAndDebug(surfaceOffsetLinearDistance, 0);
+addToRunTimeSelectionTable
+(
+    cellSizeFunction,
+    surfaceOffsetLinearDistance,
+    dictionary
+);
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+surfaceOffsetLinearDistance::surfaceOffsetLinearDistance
+(
+    const dictionary& initialPointsDict,
+    const conformalVoronoiMesh& cvMesh,
+    const searchableSurface& surface
+)
+:
+    cellSizeFunction(typeName, initialPointsDict, cvMesh, surface),
+    surfaceCellSize_(readScalar(coeffsDict().lookup("surfaceCellSize"))),
+    distanceCellSize_(readScalar(coeffsDict().lookup("distanceCellSize"))),
+    surfaceOffset_(readScalar(coeffsDict().lookup("surfaceOffset"))),
+    totalDistance_(),
+    totalDistanceSqr_(),
+    gradient_(),
+    intercept_()
+{
+    if
+    (
+        coeffsDict().found("totalDistance")
+     || coeffsDict().found("linearDistance")
+    )
+    {
+        if
+        (
+            coeffsDict().found("totalDistance")
+         && coeffsDict().found("linearDistance")
+        )
+        {
+            FatalErrorIn
+            (
+                "surfaceOffsetLinearDistance::surfaceOffsetLinearDistance"
+                "("
+                    "const dictionary& initialPointsDict, "
+                    "const conformalVoronoiMesh& cvMesh, "
+                    "const searchableSurface& surface"
+                ")"
+            )
+                << "totalDistance and linearDistance found, "
+                << "specify one or other, not both."
+                << nl << exit(FatalError) << endl;
+        }
+
+        if (coeffsDict().found("totalDistance"))
+        {
+            totalDistance_ = readScalar(coeffsDict().lookup("totalDistance"));
+        }
+        else
+        {
+            totalDistance_ =
+                readScalar(coeffsDict().lookup("linearDistance"))
+              + surfaceOffset_;
+        }
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "surfaceOffsetLinearDistance::surfaceOffsetLinearDistance"
+            "("
+                "const dictionary& initialPointsDict, "
+                "const conformalVoronoiMesh& cvMesh, "
+                "const searchableSurface& surface"
+            ")"
+        )
+            << "totalDistance or linearDistance not found."
+            << nl << exit(FatalError) << endl;
+    }
+
+    totalDistanceSqr_ = sqr(totalDistance_);
+
+    gradient_ =
+        (distanceCellSize_ - surfaceCellSize_)
+       /(totalDistance_ - surfaceOffset_);
+
+    intercept_ = surfaceCellSize_ - gradient_*surfaceOffset_;
+}
+
+
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+scalar surfaceOffsetLinearDistance::sizeFunction(scalar d) const
+{
+    if (d <= surfaceOffset_)
+    {
+        return surfaceCellSize_;
+    }
+
+    return gradient_*d + intercept_;
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool surfaceOffsetLinearDistance::cellSize
+(
+    const point& pt,
+    scalar& size
+) const
+{
+    size = 0;
+
+    List<pointIndexHit> hits;
+
+    surface_.findNearest
+    (
+        pointField(1, pt),
+        scalarField(1, totalDistanceSqr_),
+        hits
+    );
+
+    const pointIndexHit& hitInfo = hits[0];
+
+    if (hitInfo.hit())
+    {
+        if (sideMode_ == rmBothsides)
+        {
+            size = sizeFunction(mag(pt - hitInfo.hitPoint()));
+
+            return true;
+        }
+
+        // If the nearest point is essentially on the surface, do not do a
+        // getVolumeType calculation, as it will be prone to error.
+        if (mag(pt  - hitInfo.hitPoint()) < snapToSurfaceTol_)
+        {
+            size = sizeFunction(0);
+
+            return true;
+        }
+
+        pointField ptF(1, pt);
+        List<searchableSurface::volumeType> vTL;
+
+        surface_.getVolumeType(ptF, vTL);
+
+        bool functionApplied = false;
+
+        if
+        (
+            sideMode_ == smInside
+         && vTL[0] == searchableSurface::INSIDE
+        )
+        {
+            size = sizeFunction(mag(pt - hitInfo.hitPoint()));
+
+            functionApplied = true;
+        }
+        else if
+        (
+            sideMode_ == smOutside
+         && vTL[0] == searchableSurface::OUTSIDE
+        )
+        {
+            size = sizeFunction(mag(pt - hitInfo.hitPoint()));
+
+            functionApplied = true;
+        }
+
+        return functionApplied;
+    }
+
+    return false;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// ************************************************************************* //

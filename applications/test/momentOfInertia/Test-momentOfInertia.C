@@ -26,7 +26,7 @@ Application
 
 Description
     Calculates the inertia tensor and principal axes and moments of a
-    test face, tetrahedron and mesh.
+    test face, tetrahedron and cell.
 
 \*---------------------------------------------------------------------------*/
 

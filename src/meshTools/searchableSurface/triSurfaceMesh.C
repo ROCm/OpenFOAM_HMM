@@ -334,7 +334,9 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const triSurface& s)
     minQuality_(-1),
     maxTreeDepth_(10),
     surfaceClosed_(-1)
-{}
+{
+    bounds() = boundBox(points());
+}
 
 
 Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io)
@@ -379,7 +381,9 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io)
     minQuality_(-1),
     maxTreeDepth_(10),
     surfaceClosed_(-1)
-{}
+{
+    bounds() = boundBox(points());
+}
 
 
 Foam::triSurfaceMesh::triSurfaceMesh
@@ -439,6 +443,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
         triSurface::scalePoints(scaleFactor);
     }
 
+    bounds() = boundBox(points());
 
     // Have optional non-standard search tolerance for gappy surfaces.
     if (dict.readIfPresent("tolerance", tolerance_) && tolerance_ > 0)
@@ -490,6 +495,16 @@ Foam::pointField Foam::triSurfaceMesh::coordinates() const
         SubList<triSurface::FaceType>(*this, triSurface::size()),
         triSurface::points()
     ).faceCentres();
+}
+
+
+bool Foam::triSurfaceMesh::overlaps(const boundBox& bb) const
+{
+     const indexedOctree<treeDataTriSurface>& octree = tree();
+
+     labelList indices = octree.findBox(treeBoundBox(bb));
+
+     return !indices.empty();
 }
 
 

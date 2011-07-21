@@ -28,6 +28,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "primitiveMesh.H"
+#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -165,6 +166,68 @@ const Foam::scalarField& Foam::primitiveMesh::cellVolumes() const
     }
 
     return *cellVolumesPtr_;
+}
+
+
+void Foam::primitiveMesh::overrideCellCentres
+(
+    const vectorField& newCellCtrs
+) const
+{
+    if (newCellCtrs.size() != nCells())
+    {
+        FatalErrorIn
+        (
+            "void Foam::primitiveMesh::overrideCellCentres"
+            "("
+                "const vectorField& newCellCtrs"
+            ") const"
+        )
+            << "Size of new cell centres for override " << newCellCtrs.size()
+            << " not equal to the number of cells in the mesh " << nCells()
+            << abort(FatalError);
+    }
+
+    if (debug)
+    {
+        Pout<< "void Foam::primitiveMesh::overrideCellCentres"
+            << "(const vectorField& newCellCtrs) const : "
+            << "overriding cell centres." << endl;
+    }
+
+    deleteDemandDrivenData(cellCentresPtr_);
+    deleteDemandDrivenData(cellVolumesPtr_);
+
+    // Calculate the cell volumes - these are invariant with respect
+    // to the centre.
+    calcCellCentresAndVols();
+
+    *cellCentresPtr_ = newCellCtrs;
+
+    // Set internal face centres to the midpoint of the cell-centre delta vector
+
+    // if (debug)
+    // {
+    //     Pout<< "void Foam::primitiveMesh::overrideCellCentres"
+    //         << "(const vectorField& newCellCtrs) const : "
+    //         << "overriding internal face centres." << endl;
+    // }
+
+    // deleteDemandDrivenData(faceCentresPtr_);
+    // deleteDemandDrivenData(faceAreasPtr_);
+
+    // calcFaceCentresAndAreas();
+
+    // vectorField& fCtrs = *faceCentresPtr_;
+
+    // const vectorField& C = cellCentres();
+    // const labelUList& owner = faceOwner();
+    // const labelUList& neighbour = faceNeighbour();
+
+    // forAll(neighbour, faceI)
+    // {
+    //     fCtrs[faceI] = 0.5*(C[neighbour[faceI]] + C[owner[faceI]]);
+    // }
 }
 
 

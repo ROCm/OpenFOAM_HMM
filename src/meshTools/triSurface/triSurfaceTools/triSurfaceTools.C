@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -2212,34 +2212,40 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
         // Nearest to face interior. Use faceNormal to determine side
         scalar c = sampleNearestVec & surf.faceNormals()[nearestFaceI];
 
-        // // If the sample is essentially on the face, do not check for
-        // // it being perpendicular.
+        // If the sample is essentially on the face, do not check for
+        // it being perpendicular.
 
-        // scalar magSampleNearestVec = mag(sampleNearestVec);
-
-        // if (magSampleNearestVec > SMALL)
+        // if (debug)
         // {
-        //     c /= magSampleNearestVec*mag(surf.faceNormals()[nearestFaceI]);
+        //     scalar magSampleNearestVec = mag(sampleNearestVec);
 
-        //     if (mag(c) < 0.99)
+        //     if (magSampleNearestVec > SMALL)
         //     {
-        //         FatalErrorIn("triSurfaceTools::surfaceSide")
-        //             << "nearestPoint identified as being on triangle face "
-        //             << "but vector from nearestPoint to sample is not "
-        //             << "perpendicular to the normal." << nl
-        //             << "sample: " << sample << nl
-        //             << "nearestPoint: " << nearestPoint << nl
-        //             << "sample - nearestPoint: "
-        //             << sample - nearestPoint << nl
-        //             << "normal: " << surf.faceNormals()[nearestFaceI] << nl
-        //             << "mag(sample - nearestPoint): "
-        //             << mag(sample - nearestPoint) << nl
-        //             << "normalised dot product: " << c << nl
-        //             << "triangle vertices: " << nl
-        //             << "    " << points[f[0]] << nl
-        //             << "    " << points[f[1]] << nl
-        //             << "    " << points[f[2]] << nl
-        //             << abort(FatalError);
+        //         c /=
+        //             magSampleNearestVec
+        //            *mag(surf.faceNormals()[nearestFaceI]);
+
+        //         if (mag(c) < 0.99)
+        //         {
+        //             WarningIn("triSurfaceTools::surfaceSide")
+        //                 << "nearestPoint identified as being on triangle "
+        //                 << "face but vector from nearestPoint to sample is "
+        //                 << "not perpendicular to the normal." << nl
+        //                 << "sample: " << sample << nl
+        //                 << "nearestPoint: " << nearestPoint << nl
+        //                 << "sample - nearestPoint: "
+        //                 << sample - nearestPoint << nl
+        //                 << "normal: "
+        //                 << surf.faceNormals()[nearestFaceI] << nl
+        //                 << "mag(sample - nearestPoint): "
+        //                 << mag(sample - nearestPoint) << nl
+        //                 << "normalised dot product: " << c << nl
+        //                 << "triangle vertices: " << nl
+        //                 << "    " << points[f[0]] << nl
+        //                 << "    " << points[f[1]] << nl
+        //                 << "    " << points[f[2]] << nl
+        //                 << endl;;
+        //         }
         //     }
         // }
 
@@ -2261,26 +2267,26 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
         label edgeI = surf.faceEdges()[nearestFaceI][nearLabel];
 
         // if (debug)
-        // {
-        //    // Check order of faceEdges same as face vertices.
-        //    const edge& e = surf.edges()[edgeI];
-        //    const labelList& meshPoints = surf.meshPoints();
-        //    const edge meshEdge(meshPoints[e[0]], meshPoints[e[1]]);
+        {
+           // Check order of faceEdges same as face vertices.
+           const edge& e = surf.edges()[edgeI];
+           const labelList& meshPoints = surf.meshPoints();
+           const edge meshEdge(meshPoints[e[0]], meshPoints[e[1]]);
 
-        //    if
-        //    (
-        //        meshEdge
-        //     != edge(f[nearLabel], f[f.fcIndex(nearLabel)])
-        //    )
-        //    {
-        //        FatalErrorIn("triSurfaceTools::surfaceSide")
-        //            << "Edge:" << edgeI << " local vertices:" << e
-        //            << " mesh vertices:" << meshEdge
-        //            << " not at position " << nearLabel
-        //            << " in face " << f
-        //            << abort(FatalError);
-        //    }
-        // }
+           if
+           (
+               meshEdge
+            != edge(f[nearLabel], f[f.fcIndex(nearLabel)])
+           )
+           {
+               FatalErrorIn("triSurfaceTools::surfaceSide")
+                   << "Edge:" << edgeI << " local vertices:" << e
+                   << " mesh vertices:" << meshEdge
+                   << " not at position " << nearLabel
+                   << " in face " << f
+                   << abort(FatalError);
+           }
+        }
 
         return edgeSide(surf, sample, nearestPoint, edgeI);
     }

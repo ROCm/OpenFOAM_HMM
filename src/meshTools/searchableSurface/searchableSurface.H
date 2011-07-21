@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,6 +42,7 @@ SourceFiles
 #define searchableSurface_H
 
 #include "pointField.H"
+#include "boundBox.H"
 #include "typeInfo.H"
 #include "runTimeSelectionTables.H"
 #include "pointIndexHit.H"
@@ -80,12 +81,15 @@ public:
             OUTSIDE = 3
         };
 
+        static const NamedEnum<volumeType, 4> volumeTypeNames;
+
 private:
 
     // Private data
 
         const word name_;
 
+        boundBox bounds_;
 
     // Private Member Functions
 
@@ -172,6 +176,17 @@ public:
 
     // Member Functions
 
+        //- Return const reference to boundBox
+        const boundBox& bounds() const
+        {
+            return bounds_;
+        }
+
+        //- Return non-const access to the boundBox to allow it to be set.
+        boundBox& bounds()
+        {
+            return bounds_;
+        }
 
         //- Names of regions.
         virtual const wordList& regions() const = 0;
@@ -192,6 +207,8 @@ public:
         //  Usually the element centres (should be of length size()).
         virtual pointField coordinates() const = 0;
 
+        //- Does any part of the surface overlap the supplied bound box?
+        virtual bool overlaps(const boundBox& bb) const = 0;
 
         // Single point queries.
 

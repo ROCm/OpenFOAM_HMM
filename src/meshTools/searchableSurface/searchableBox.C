@@ -182,6 +182,8 @@ Foam::searchableBox::searchableBox
         )   << "Illegal bounding box specification : "
             << static_cast<const treeBoundBox>(*this) << exit(FatalError);
     }
+
+    bounds() = static_cast<boundBox>(*this);
 }
 
 
@@ -206,6 +208,8 @@ Foam::searchableBox::searchableBox
         )   << "Illegal bounding box specification : "
             << static_cast<const treeBoundBox>(*this) << exit(FatalError);
     }
+
+    bounds() = static_cast<boundBox>(*this);
 }
 
 

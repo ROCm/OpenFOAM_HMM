@@ -1,0 +1,154 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+Class
+    Foam::initialPointsMethod
+
+Description
+    Abstract base class for generating initial points for a conformalVoronoiMesh
+
+SourceFiles
+    initialPointsMethod.C
+
+\*---------------------------------------------------------------------------*/
+
+#ifndef initialPointsMethod_H
+#define initialPointsMethod_H
+
+#include "point.H"
+#include "conformalVoronoiMesh.H"
+#include "backgroundMeshDecomposition.H"
+#include "dictionary.H"
+#include "Random.H"
+#include "Switch.H"
+#include "autoPtr.H"
+#include "runTimeSelectionTables.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+/*---------------------------------------------------------------------------*\
+                       Class initialPointsMethod Declaration
+\*---------------------------------------------------------------------------*/
+
+class initialPointsMethod
+:
+    public dictionary
+{
+
+protected:
+
+    // Protected data
+
+        //- Reference to the conformalVoronoiMesh holding this object
+        const conformalVoronoiMesh& cvMesh_;
+
+        //- Method details dictionary
+        dictionary detailsDict_;
+
+        //- Only allow the placement of initial points that are within the
+        //  surfaces to be meshed by minimumSurfaceDistanceCoeff multiplied by
+        //  the local target cell size.  Store square of value.
+        scalar minimumSurfaceDistanceCoeffSqr_;
+
+private:
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        initialPointsMethod(const initialPointsMethod&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const initialPointsMethod&);
+
+
+public:
+
+    //- Runtime type information
+    TypeName("initialPointsMethod");
+
+
+    // Declare run-time constructor selection table
+
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            initialPointsMethod,
+            dictionary,
+            (
+                const dictionary& initialPointsDict,
+                const conformalVoronoiMesh& cvMesh
+            ),
+            (initialPointsDict, cvMesh)
+        );
+
+
+    // Constructors
+
+        //- Construct from components
+        initialPointsMethod
+        (
+            const word& type,
+            const dictionary& initialPointsDict,
+            const conformalVoronoiMesh& cvMesh
+        );
+
+
+    // Selectors
+
+        //- Return a reference to the selected initialPointsMethod
+        static autoPtr<initialPointsMethod> New
+        (
+            const dictionary& initialPointsDict,
+            const conformalVoronoiMesh& cvMesh
+        );
+
+
+    //- Destructor
+    virtual ~initialPointsMethod();
+
+
+    // Member Functions
+
+        //- Const access to the details dictionary
+        const dictionary& detailsDict() const
+        {
+            return detailsDict_;
+        }
+
+        //- Return the initial points for the conformalVoronoiMesh
+        virtual std::list<Vb::Point> initialPoints() const = 0;
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //

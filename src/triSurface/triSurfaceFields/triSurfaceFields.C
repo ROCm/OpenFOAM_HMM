@@ -52,6 +52,28 @@ const word triSurfaceSymmTensorField::typeName
 template<>
 const word triSurfaceTensorField::typeName("triSurfaceTensorField");
 
+
+template<>
+const word triSurfacePointLabelField::typeName("triSurfacePointLabelField");
+
+template<>
+const word triSurfacePointScalarField::typeName("triSurfacePointScalarField");
+
+template<>
+const word triSurfacePointVectorField::typeName("triSurfacePointVectorField");
+
+template<>
+const word triSurfacePointSphericalTensorField::typeName
+("triSurfacePointSphericalTensorField");
+
+template<>
+const word triSurfacePointSymmTensorField::typeName
+("triSurfacePointSymmTensorField");
+
+template<>
+const word triSurfacePointTensorField::typeName("triSurfacePointTensorField");
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

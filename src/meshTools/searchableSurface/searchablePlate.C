@@ -226,6 +226,8 @@ Foam::searchablePlate::searchablePlate
             << " normal:" << vector::componentNames[normalDir_]
             << endl;
     }
+
+    bounds() = boundBox(origin_, origin_ + span_);
 }
 
 
@@ -248,6 +250,8 @@ Foam::searchablePlate::searchablePlate
             << " normal:" << vector::componentNames[normalDir_]
             << endl;
     }
+
+    bounds() = boundBox(origin_, origin_ + span_);
 }
 
 

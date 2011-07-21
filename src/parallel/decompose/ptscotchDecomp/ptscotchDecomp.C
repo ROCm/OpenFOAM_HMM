@@ -483,8 +483,10 @@ if (debug)
 
 
     // Check for externally provided cellweights and if so initialise weights
+
     scalar minWeights = gMin(cWeights);
-    if (cWeights.size() > 0)
+
+    if (!cWeights.empty())
     {
         if (minWeights <= 0)
         {
@@ -504,12 +506,39 @@ if (debug)
                 << " does not equal number of cells " << xadj.size()-1
                 << exit(FatalError);
         }
+    }
 
+    scalar velotabSum = gSum(cWeights)/minWeights;
+
+    scalar rangeScale(1.0);
+
+    if (Pstream::master())
+    {
+        if (velotabSum > scalar(INT_MAX - 1))
+        {
+            // 0.9 factor of safety to avoid floating point round-off in
+            // rangeScale tipping the subsequent sum over the integer limit.
+            rangeScale = 0.9*scalar(INT_MAX - 1)/velotabSum;
+
+            WarningIn
+            (
+                "ptscotchDecomp::decompose(...)"
+            )   << "Sum of weights has overflowed integer: " << velotabSum
+                << ", compressing weight scale by a factor of " << rangeScale
+                << endl;
+        }
+    }
+
+    Pstream::scatter(rangeScale);
+
+    if (!cWeights.empty())
+    {
         // Convert to integers.
         velotab.setSize(cWeights.size());
+
         forAll(velotab, i)
         {
-            velotab[i] = int(cWeights[i]/minWeights);
+            velotab[i] = int((cWeights[i]/minWeights - 1)*rangeScale) + 1;
         }
     }
 

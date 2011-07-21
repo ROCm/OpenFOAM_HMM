@@ -337,6 +337,16 @@ private:
             ) const;
 
 
+            //- Find all elements intersecting sphere.
+            void findSphere
+            (
+                const label nodeI,
+                const point& centre,
+                const scalar radiusSqr,
+                labelHashSet& elements
+            ) const;
+
+
             template <class CompareOp>
             static void findNear
             (
@@ -564,6 +574,15 @@ public:
             //- Find (in no particular order) indices of all shapes inside or
             //  overlapping bounding box (i.e. all shapes not outside box)
             labelList findBox(const treeBoundBox& bb) const;
+
+            //- Find (in no particular order) indices of all shapes inside or
+            //  overlapping a bounding sphere (i.e. all shapes not outside
+            //  sphere)
+            labelList findSphere
+            (
+                const point& centre,
+                const scalar radiusSqr
+            ) const;
 
             //- Find deepest node (as parent+octant) containing point. Starts
             //  off from starting index in nodes_ (use 0 to start from top)

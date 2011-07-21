@@ -309,7 +309,6 @@ Foam::scalar Foam::polyMeshGeometry::calcSkewness
 }
 
 
-// Create the neighbour pyramid - it will have positive volume
 bool Foam::polyMeshGeometry::checkFaceTet
 (
     const polyMesh& mesh,
@@ -788,7 +787,7 @@ bool Foam::polyMeshGeometry::checkFaceTets
     // check whether decomposing each cell into tets results in
     // positive volume, non-flat tets
     const labelList& own = mesh.faceOwner();
-    const labelList& nei = mesh.faceNeighbour();
+    // const labelList& nei = mesh.faceNeighbour();
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
     // Calculate coupled cell centre
@@ -803,48 +802,50 @@ bool Foam::polyMeshGeometry::checkFaceTets
 
     label nErrorTets = 0;
 
+    // bool tetError = false
+
     forAll(checkFaces, i)
     {
         label faceI = checkFaces[i];
 
         // Create the owner pyramid - note: exchange cell and face centre
         // to get positive volume.
-        bool tetError = checkFaceTet
-        (
-            mesh,
-            report,
-            minTetQuality,
-            p,
-            faceI,
-            cellCentres[own[faceI]],    // face centre
-            faceCentres[faceI],         // cell centre
-            setPtr
-        );
+        // tetError = checkFaceTet
+        // (
+        //     mesh,
+        //     report,
+        //     minTetQuality,
+        //     p,
+        //     faceI,
+        //     cellCentres[own[faceI]],    // face centre
+        //     faceCentres[faceI],         // cell centre
+        //     setPtr
+        // );
 
-        if (tetError)
-        {
-            nErrorTets++;
-        }
+        // if (tetError)
+        // {
+        //     nErrorTets++;
+        // }
 
         if (mesh.isInternalFace(faceI))
         {
             // Create the neighbour tets - they will have positive volume
-            bool tetError = checkFaceTet
-            (
-                mesh,
-                report,
-                minTetQuality,
-                p,
-                faceI,
-                faceCentres[faceI],         // face centre
-                cellCentres[nei[faceI]],    // cell centre
-                setPtr
-            );
+            // tetError = checkFaceTet
+            // (
+            //     mesh,
+            //     report,
+            //     minTetQuality,
+            //     p,
+            //     faceI,
+            //     faceCentres[faceI],         // face centre
+            //     cellCentres[nei[faceI]],    // cell centre
+            //     setPtr
+            // );
 
-            if (tetError)
-            {
-                nErrorTets++;
-            }
+            // if (tetError)
+            // {
+            //     nErrorTets++;
+            // }
 
             if
             (
@@ -920,40 +921,40 @@ bool Foam::polyMeshGeometry::checkFaceTets
         label face0 = baffles[i].first();
         label face1 = baffles[i].second();
 
-        bool tetError = checkFaceTet
-        (
-            mesh,
-            report,
-            minTetQuality,
-            p,
-            face0,
-            cellCentres[own[face0]],    // face centre
-            faceCentres[face0],         // cell centre
-            setPtr
-        );
+        // tetError = checkFaceTet
+        // (
+        //     mesh,
+        //     report,
+        //     minTetQuality,
+        //     p,
+        //     face0,
+        //     cellCentres[own[face0]],    // face centre
+        //     faceCentres[face0],         // cell centre
+        //     setPtr
+        // );
 
-        if (tetError)
-        {
-            nErrorTets++;
-        }
+        // if (tetError)
+        // {
+        //     nErrorTets++;
+        // }
 
-        // Create the neighbour tets - they will have positive volume
-        tetError = checkFaceTet
-        (
-            mesh,
-            report,
-            minTetQuality,
-            p,
-            face0,
-            faceCentres[face0],         // face centre
-            cellCentres[own[face1]],    // cell centre
-            setPtr
-        );
+        // // Create the neighbour tets - they will have positive volume
+        // tetError = checkFaceTet
+        // (
+        //     mesh,
+        //     report,
+        //     minTetQuality,
+        //     p,
+        //     face0,
+        //     faceCentres[face0],         // face centre
+        //     cellCentres[own[face1]],    // cell centre
+        //     setPtr
+        // );
 
-        if (tetError)
-        {
-            nErrorTets++;
-        }
+        // if (tetError)
+        // {
+        //     nErrorTets++;
+        // }
 
         if
         (

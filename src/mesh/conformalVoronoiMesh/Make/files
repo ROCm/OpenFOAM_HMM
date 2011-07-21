@@ -1,0 +1,39 @@
+#include CGAL_FILES
+
+conformalVoronoiMesh/conformalVoronoiMesh.C
+conformalVoronoiMesh/conformalVoronoiMeshCalcDualMesh.C
+conformalVoronoiMesh/conformalVoronoiMeshConformToSurface.C
+conformalVoronoiMesh/conformalVoronoiMeshIO.C
+conformalVoronoiMesh/conformalVoronoiMeshFeaturePointSpecialisations.C
+
+cvControls/cvControls.C
+
+conformationSurfaces/conformationSurfaces.C
+
+backgroundMeshDecomposition/backgroundMeshDecomposition.C
+
+cellSizeControlSurfaces/cellSizeControlSurfaces.C
+
+cellSiseFunctions = cellSizeControlSurfaces/cellSizeFunction
+$(cellSiseFunctions)/cellSizeFunction/cellSizeFunction.C
+$(cellSiseFunctions)/uniform/uniform.C
+$(cellSiseFunctions)/uniformDistance/uniformDistance.C
+$(cellSiseFunctions)/linearDistance/linearDistance.C
+$(cellSiseFunctions)/surfaceOffsetLinearDistance/surfaceOffsetLinearDistance.C
+$(cellSiseFunctions)/linearSpatial/linearSpatial.C
+
+initialPointsMethod/initialPointsMethod/initialPointsMethod.C
+initialPointsMethod/uniformGrid/uniformGrid.C
+initialPointsMethod/bodyCentredCubic/bodyCentredCubic.C
+initialPointsMethod/faceCentredCubic/faceCentredCubic.C
+initialPointsMethod/pointFile/pointFile.C
+initialPointsMethod/autoDensity/autoDensity.C
+
+relaxationModel/relaxationModel/relaxationModel.C
+relaxationModel/adaptiveLinear/adaptiveLinear.C
+relaxationModel/rampHoldFall/rampHoldFall.C
+
+faceAreaWeightModel/faceAreaWeightModel/faceAreaWeightModel.C
+faceAreaWeightModel/piecewiseLinearRamp/piecewiseLinearRamp.C
+
+LIB = $(FOAM_LIBBIN)/libconformalVoronoiMesh

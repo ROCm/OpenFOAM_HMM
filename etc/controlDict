@@ -302,11 +302,13 @@ DebugSwitches
     ash                 0;
     atomizationModel    0;
     attachDetach        0;
+    autoDensity         0;
     autoHexMeshDriver   0;
     autoLayerDriver     0;
     autoRefineDriver    0;
     autoSnapDriver      0;
     bC11H10             0;
+    backgroundMeshDecomposition 0;
     backward            0;
     basePatch           0;
     basicKinematicCloud 0;
@@ -345,6 +347,7 @@ DebugSwitches
     cellPointFace       0;
     cellPointWeight     0;
     cellSet             0;
+    cellSizeControlSurfaces 0;
     cellToCell          0;
     cellToFace          0;
     cellToPoint         0;
@@ -406,7 +409,7 @@ DebugSwitches
     displacementLaplacian 0;
     displacementSBRStress 0;
     distanceSurface     0;
-    distribution        0;
+    Distribution        0;
     downwind            0;
     dragModel           0;
     duplicatePoints     0;

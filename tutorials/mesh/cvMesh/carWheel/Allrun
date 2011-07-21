@@ -1,0 +1,48 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+surfacePointMerge constant/triSurface/m_car01_wheel.obj \
+    1e-2 constant/triSurface/m_car01_wheel_merge.obj \
+    > log.surfacePointMerge 2>&1
+
+# Orient so point to be meshed is inside surface
+surfaceOrient \
+    constant/triSurface/m_car01_wheel_merge.obj \
+    -inside -usePierceTest '(-100 0 170)' \
+    constant/triSurface/m_car01_wheel_merge_orient.obj \
+    > log.surfaceOrient.m_car01 2>&1
+
+# Same for outside
+surfaceOrient \
+    constant/triSurface/small.stl \
+    -inside -usePierceTest '(-100 0 170)' \
+    constant/triSurface/small_orient.stl \
+    > log.surfaceOrient.small 2>&1
+
+# Extract feature edges and points
+runApplication surfaceFeatureExtract \
+    constant/triSurface/m_car01_wheel_merge_orient.obj  \
+    m_car01 -includedAngle 165 -writeObj
+mv log.surfaceFeatureExtract log.surfaceFeatureExtract.m_car01
+
+unset FOAM_SIGFPE
+runApplication surfaceFeatureExtract \
+    constant/triSurface/small_orient.stl \
+    small -includedAngle 125 -writeObj
+mv log.surfaceFeatureExtract log.surfaceFeatureExtract.small
+
+# Generate aligned points (in constant/internalDelaunayVertices) and a
+# mesh from that.
+runApplication cvMesh
+
+# Generate some sets for a bit of mesh inspection
+runApplication topoSet -constant -time 0:100
+
+# And a field for thresholding
+writeCellCentres -constant
+
+
+# ----------------------------------------------------------------- end-of-file

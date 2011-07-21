@@ -386,14 +386,13 @@ Foam::label Foam::scotchDecomp::decomposeOneProc
     // Check for externally provided cellweights and if so initialise weights
     // Note: min, not gMin since routine runs on master only.
     scalar minWeights = min(cWeights);
-    if (cWeights.size() > 0)
+    if (!cWeights.empty())
     {
         if (minWeights <= 0)
         {
             WarningIn
             (
-                "scotchDecomp::decompose"
-                "(const pointField&, const scalarField&)"
+                "scotchDecomp::decompose(...)"
             )   << "Illegal minimum weight " << minWeights
                 << endl;
         }
@@ -402,8 +401,7 @@ Foam::label Foam::scotchDecomp::decomposeOneProc
         {
             FatalErrorIn
             (
-                "scotchDecomp::decompose"
-                "(const pointField&, const scalarField&)"
+                "scotchDecomp::decompose(...)"
             )   << "Number of cell weights " << cWeights.size()
                 << " does not equal number of cells " << xadj.size()-1
                 << exit(FatalError);
@@ -421,8 +419,7 @@ Foam::label Foam::scotchDecomp::decomposeOneProc
 
             WarningIn
             (
-                "scotchDecomp::decompose"
-                "(const pointField&, const scalarField&)"
+                "scotchDecomp::decompose(...)"
             )   << "Sum of weights has overflowed integer: " << velotabSum
                 << ", compressing weight scale by a factor of " << rangeScale
                 << endl;
@@ -433,8 +430,7 @@ Foam::label Foam::scotchDecomp::decomposeOneProc
 
         forAll(velotab, i)
         {
-            velotab[i] =
-                int((cWeights[i]/minWeights - 1)*rangeScale) + 1;
+            velotab[i] = int((cWeights[i]/minWeights - 1)*rangeScale) + 1;
         }
     }
 
