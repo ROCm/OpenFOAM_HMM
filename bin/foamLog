@@ -45,6 +45,7 @@ Usage: $Script [OPTIONS] <log>
   -list             lists but does not extract
   -n                create single column files with the extracted data only
   -quiet            quiet operation
+  -localDB          only use the local database file
   -help             print the usage
 
 $Script - extracts xy files from OpenFOAM logs.
@@ -103,7 +104,7 @@ usage
 
 
 timeName=Time
-unset listOpt quietOpt
+unset listOpt quietOpt localDB
 
 # parse options
 while [ "$#" -gt 0 ]
@@ -123,6 +124,10 @@ do
         ;;
     -q | -quiet | -s | -silent)
         quietOpt=true
+        shift
+        ;;
+    -localDB)
+        localDB=true
         shift
         ;;
     -*)
@@ -219,7 +224,7 @@ getSolveQueryList()
 getAllQueries()
 {
     #-- All solved for queries from log file
-    queries=`getSolveQueryList $2`
+    [ "$localDB" = true ] || queries=`getSolveQueryList $2`
 
     #-- Add ones from database, present in log file
     # Note: just like awk, line selected with regular expression,
@@ -369,29 +374,30 @@ AWK_CONTENTS
 #
 # Code for extracting solved for quantities
 #
-cat << AWK_CONTENTS >> $AWKFILE
-# Extraction of any solved for variable
-/Solving for/ {
-    extract(\$0, "Solving for ", varNameVal)
+[ "$localDB" = true ] ||
+    cat << AWK_CONTENTS >> $AWKFILE
+    # Extraction of any solved for variable
+    /Solving for/ {
+        extract(\$0, "Solving for ", varNameVal)
 
-    varName=varNameVal[1]
-    file=varName "_" subIter[varName]++
-    file="$outputDir/" file
-    extract(\$0, "Initial residual = ", val)
-    print $timeName "\t" val[1] > file
+        varName=varNameVal[1]
+        file=varName "_" subIter[varName]++
+        file="$outputDir/" file
+        extract(\$0, "Initial residual = ", val)
+        print $timeName "\t" val[1] > file
 
-    varName=varNameVal[1] "FinalRes"
-    file=varName "_" subIter[varName]++
-    file="$outputDir/" file
-    extract(\$0, "Final residual = ", val)
-    print $timeName "\t" val[1] > file
+        varName=varNameVal[1] "FinalRes"
+        file=varName "_" subIter[varName]++
+        file="$outputDir/" file
+        extract(\$0, "Final residual = ", val)
+        print $timeName "\t" val[1] > file
 
-    varName=varNameVal[1] "Iters"
-    file=varName "_" subIter[varName]++
-    file="$outputDir/" file
-    extract(\$0, "No Iterations ", val)
-    print $timeName "\t" val[1] > file
-}
+        varName=varNameVal[1] "Iters"
+        file=varName "_" subIter[varName]++
+        file="$outputDir/" file
+        extract(\$0, "No Iterations ", val)
+        print $timeName "\t" val[1] > file
+    }
 
 AWK_CONTENTS
 # ----------
@@ -432,7 +438,7 @@ done
 # Print found
 #-----------------------------
 myEcho "Generated XY files for:"
-getAllQueries $DBFILE $LOG
+[ "$quietOpt" = true ] || getAllQueries $DBFILE $LOG
 myEcho "End"
 
 #------------------------------------------------------------------------------
