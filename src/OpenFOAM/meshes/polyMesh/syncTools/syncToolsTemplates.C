@@ -1352,10 +1352,10 @@ void Foam::syncTools::syncBoundaryFaceList
                 label sz = cycPatch.size();
 
                 // Transform (copy of) data on both sides
-                Field<T> ownVals = SubField<T>(faceValues, sz, ownStart);
+                Field<T> ownVals(SubField<T>(faceValues, sz, ownStart));
                 top(nbrPatch, ownVals);
 
-                Field<T> nbrVals = SubField<T>(faceValues, sz, nbrStart);
+                Field<T> nbrVals(SubField<T>(faceValues, sz, nbrStart));
                 top(cycPatch, nbrVals);
 
                 label i0 = ownStart;
