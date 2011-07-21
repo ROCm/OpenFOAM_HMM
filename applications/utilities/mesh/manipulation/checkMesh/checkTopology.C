@@ -66,6 +66,45 @@ Foam::label Foam::checkTopology
     }
 
 
+    {
+        cellSet cells(mesh, "illegalCells", mesh.nCells()/100);
+
+        forAll(mesh.cells(), cellI)
+        {
+            const cell& cFaces = mesh.cells()[cellI];
+
+            if (cFaces.size() <= 3)
+            {
+                cells.insert(cellI);
+            }
+            forAll(cFaces, i)
+            {
+                if (cFaces[i] < 0 || cFaces[i] >= mesh.nFaces())
+                {
+                    cells.insert(cellI);
+                    break;  
+                }
+            }
+        }
+        label nCells = returnReduce(cells.size(), sumOp<label>());
+
+        if (nCells > 0)
+        {
+            Info<< "    Illegal cells (less than 4 faces or out of range faces)"
+                << " found,  number of cells: " << nCells << endl;
+            noFailedChecks++;
+
+            Info<< "  <<Writing " << nCells
+                << " illegal cells to set " << cells.name() << endl;
+            cells.instance() = mesh.pointsInstance();
+            cells.write();
+        }
+        else
+        {
+            Info<< "    Cell to face addressing OK." << endl;
+        }
+    }
+
 
     {
         pointSet points(mesh, "unusedPoints", mesh.nPoints()/100);
