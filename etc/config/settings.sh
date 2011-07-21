@@ -368,6 +368,13 @@ export BOOST_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$boost
 export CGAL_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cgal_version
 
 # enabled if CGAL is available
+if [ "$FOAM_VERBOSE" -a "$PS1" ]
+then
+    echo "Checking for"
+    echo "    $cgal_version at $CGAL_ARCH_PATH"
+    echo "    $boost_version at $BOOST_ARCH_PATH"
+fi
+
 if [ -d "$CGAL_ARCH_PATH" ]
 then
     if [ -d "$BOOST_ARCH_PATH" ]
