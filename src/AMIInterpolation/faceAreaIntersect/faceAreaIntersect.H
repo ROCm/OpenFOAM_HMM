@@ -53,7 +53,18 @@ namespace Foam
 
 class faceAreaIntersect
 {
+public:
+
     typedef FixedList<point, 3> triPoints;
+
+    enum triangulationMode
+    {
+        tmFan,
+        tmMesh
+    };
+
+
+private:
 
     // Private data
 
@@ -110,7 +121,8 @@ class faceAreaIntersect
             const triPoints& tri,
             const plane& p,
             FixedList<triPoints, 10>& tris,
-            label& nTris
+            label& nTris,
+            const scalar len
         );
 
         //- Return area of intersection of triangles src and tgt
@@ -141,7 +153,8 @@ public:
         (
             const face& faceA,
             const face& faceB,
-            const vector& n
+            const vector& n,
+            const triangulationMode& triMode
         );
 };
 

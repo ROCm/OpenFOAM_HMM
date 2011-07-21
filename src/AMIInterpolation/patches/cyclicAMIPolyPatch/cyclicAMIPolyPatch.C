@@ -29,6 +29,7 @@ License
 #include "polyMesh.H"
 #include "Time.H"
 #include "addToRunTimeSelectionTable.H"
+#include "faceAreaIntersect.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -71,7 +72,6 @@ Foam::label Foam::cyclicAMIPolyPatch::findFaceMaxRadius
 
 
 // * * * * * * * * * * * Protecetd Member Functions  * * * * * * * * * * * * //
-
 
 void Foam::cyclicAMIPolyPatch::calcTransforms()
 {
@@ -121,7 +121,7 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
             << " has transform type " << transformTypeNames[transform_]
             << ", neighbour patch " << nbrPatchName_
             << " has transform type "
-            << nbrPatch().transformTypeNames[transform_]
+            << nbrPatch().transformTypeNames[nbrPatch().transform_]
             << exit(FatalError);
     }
 
@@ -176,8 +176,7 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
         }
         case TRANSLATIONAL:
         {
-            // Transform 0 points.
-
+            // Transform 0 points
             if (debug)
             {
                 Pout<< "cyclicAMIPolyPatch::calcTransforms :"
@@ -185,64 +184,33 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
                     << endl;
             }
 
-                const_cast<tensorField&>(forwardT()).clear();
-                const_cast<tensorField&>(reverseT()).clear();
-                const_cast<vectorField&>(separation()) = vectorField
-                (
-                    1,
-                    separationVector_
-                );
-                const_cast<boolList&>(collocated()) = boolList(1, false);
+            const_cast<tensorField&>(forwardT()).clear();
+            const_cast<tensorField&>(reverseT()).clear();
+            const_cast<vectorField&>(separation()) = vectorField
+            (
+                1,
+                separationVector_
+            );
+            const_cast<boolList&>(collocated()) = boolList(1, false);
+
             break;
         }
         default:
         {
-/*
-            // Assumes that cyclic is planar. This is also the initial
-            // condition for patches without faces.
-
-            // Determine the face with max area on both halves. These
-            // two faces are used to determine the transformation tensors
-            label max0I = findMaxArea(pp0.points(), pp0);
-            vector n0 = pp0[max0I].normal(pp0.points());
-            n0 /= mag(n0) + VSMALL;
-
-            label max1I = findMaxArea(pp1.points(), pp1);
-            vector n1 = pp1[max1I].normal(pp1.points());
-            n1 /= mag(n1) + VSMALL;
-
-            if (mag(n0 & n1) < 1 - matchTolerance())
+            if (debug)
             {
-                if (debug)
-                {
-                    Pout<< "cyclicAMIPolyPatch::calcTransforms :"
-                        << " Detected rotation :"
-                        << " n0:" << n0 << " n1:" << n1 << endl;
-                }
-
-                // Rotation (around origin)
-                const tensor revT(rotationTensor(n0, -n1));
-                const_cast<tensorField&>(forwardT()) = tensorField(1, revT.T());
-                const_cast<tensorField&>(reverseT()) = tensorField(1, revT);
-                const_cast<vectorField&>(separation()).setSize(0);
-                const_cast<boolList&>(collocated()) = boolList(1, false);
+                Pout<< "Assuming cyclic AMI pairs are colocated" << endl;
             }
-            else
-            {
-                // Parallel translation
-                const_cast<tensorField&>(forwardT()).clear();
-                const_cast<tensorField&>(reverseT()).clear();
-                const_cast<vectorField&>(separation()) = vectorField
-                (
-                    1,
-                    separationVector_
-                );
-                const_cast<boolList&>(collocated()) = boolList(1, false);
 
-            }
-*/
+            const_cast<tensorField&>(forwardT()).clear();
+            const_cast<tensorField&>(reverseT()).clear();
+            const_cast<vectorField&>(separation()) = vectorField
+            (
+                1,
+                vector::zero
+            );
+            const_cast<boolList&>(collocated()) = boolList(1, true);
 
-            notImplemented("calcTransforms - unknown transform clause");
             break;
         }
     }
@@ -253,19 +221,49 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
 }
 
 
+const Foam::searchableSurface& Foam::cyclicAMIPolyPatch::surf()
+{
+    if (projectionSurfaceType_ == "patch")
+    {
+        notImplemented("projectionSurfaceType_ == patch")
+    }
+    else
+    {
+        surfPtr_ =
+            searchableSurface::New
+            (
+                projectionSurfaceType_,
+                IOobject
+                (
+                    projectionName_,
+                    boundaryMesh().mesh().time().constant(),
+                    "triSurface",
+                    boundaryMesh().mesh(),
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                ),
+                dict_
+            );
+    }
+
+    return surfPtr_();
+}
+
+
 const Foam::AMIPatchToPatchInterpolation& Foam::cyclicAMIPolyPatch::AMI()
 {
-    if (!AMIPtr_)
+    if (!AMIPtr_.valid() && owner())
     {
         const polyPatch& nbr = nbrPatch();
         pointField nbrPoints = nbrPatch().localPoints();
 
+        if (debug)
+        {
+            OFstream os(name() + "_neighbourPatch-org.obj");
+            meshTools::writeOBJ(os, nbrPatch().localFaces(), nbrPoints);
+        }
 
-const word myName = nbrPatch().nbrPatch().nbrPatchName();
-
-OFstream osNorg(myName + "_neighbourPatch-org.obj");
-meshTools::writeOBJ(osNorg, nbrPatch().localFaces(), nbrPoints);
-
+        // transform neighbour patch to local system
         transformPosition(nbrPoints);
         primitivePatch nbrPatch0
         (
@@ -277,31 +275,30 @@ meshTools::writeOBJ(osNorg, nbrPatch().localFaces(), nbrPoints);
             nbrPoints
         );
 
-OFstream osN(myName + "_neighbourPatch-trans.obj");
-meshTools::writeOBJ(osN, nbrPatch0.localFaces(), nbrPoints);
+        if (debug)
+        {
+            OFstream osN(name() + "_neighbourPatch-trans.obj");
+            meshTools::writeOBJ(osN, nbrPatch0.localFaces(), nbrPoints);
 
-OFstream osO(myName + "_ownerPatch.obj");
-meshTools::writeOBJ(osO, this->localFaces(), localPoints());
+            OFstream osO(name() + "_ownerPatch.obj");
+            meshTools::writeOBJ(osO, this->localFaces(), localPoints());
+        }
 
         // Construct/apply AMI interpolation to determine addressing and weights
-        AMIPtr_ = new AMIPatchToPatchInterpolation
+        AMIPtr_.reset
         (
-            *this,
-            nbrPatch0,
-            surfPtr_()
+            new AMIPatchToPatchInterpolation
+            (
+                *this,
+                nbrPatch0,
+                surf(),
+                faceAreaIntersect::tmMesh,
+                projectPoints_
+            )
         );
-
-
-        vectorField nbrPatchNf
-        (
-            nbrPatch().faceAreas()/mag(nbrPatch().faceAreas())
-        );
-        nbrPatchDelta_ =
-            nbrPatch0.faceCentres() - nbrPatch().faceCellCentres();
-        nbrPatchDelta_ = nbrPatchNf*(nbrPatchNf & nbrPatchDelta_);
     }
 
-    return *AMIPtr_;
+    return AMIPtr_();
 }
 
 
@@ -348,9 +345,11 @@ void Foam::cyclicAMIPolyPatch::movePoints
 
     calcTransforms();
 
-    deleteDemandDrivenData(AMIPtr_);
-
-    AMI();
+    if (owner())
+    {
+        AMIPtr_.clear();
+        AMI();
+    }
 }
 
 
@@ -363,8 +362,6 @@ void Foam::cyclicAMIPolyPatch::initUpdateMesh(PstreamBuffers& pBufs)
 void Foam::cyclicAMIPolyPatch::updateMesh(PstreamBuffers& pBufs)
 {
     polyPatch::updateMesh(pBufs);
-    deleteDemandDrivenData(AMIPtr_);
-//    deleteDemandDrivenData(surfPtr_);
 }
 
 
@@ -380,6 +377,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
 )
 :
     coupledPolyPatch(name, size, start, index, bm),
+    dict_(dictionary::null),
     nbrPatchName_(word::null),
     nbrPatchID_(-1),
     transform_(UNKNOWN),
@@ -387,7 +385,10 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationCentre_(point::zero),
     separationVector_(vector::zero),
     AMIPtr_(NULL),
-    surfPtr_(NULL)
+    surfPtr_(NULL),
+    projectionSurfaceType_(word::null),
+    projectPoints_(false),
+    projectionName_(word::null)
 {
     // Neighbour patch might not be valid yet so no transformation
     // calculation possible
@@ -403,6 +404,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
 )
 :
     coupledPolyPatch(name, dict, index, bm),
+    dict_(dict),
     nbrPatchName_(dict.lookup("neighbourPatch")),
     nbrPatchID_(-1),
     transform_(UNKNOWN),
@@ -410,23 +412,10 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationCentre_(point::zero),
     separationVector_(vector::zero),
     AMIPtr_(NULL),
-    surfPtr_
-    (
-        searchableSurface::New
-        (
-            dict.lookup("projectionSurfaceType"),
-            IOobject
-            (
-                dict.lookup("projectionSurfaceName"),
-                bm.mesh().time().constant(),
-                "triSurface",
-                bm.mesh(),
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
-            ),
-            dict
-        )
-    )
+    surfPtr_(NULL),
+    projectionSurfaceType_(dict.lookup("projectionSurfaceType")),
+    projectPoints_(readBool(dict.lookup("projectPoints"))),
+    projectionName_(dict.lookupOrDefault("surfaceName", name))
 {
     if (nbrPatchName_ == name)
     {
@@ -500,6 +489,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
 )
 :
     coupledPolyPatch(pp, bm),
+    dict_(dictionary::null),
     nbrPatchName_(pp.nbrPatchName_),
     nbrPatchID_(-1),
     transform_(UNKNOWN),
@@ -507,7 +497,10 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationCentre_(point::zero),
     separationVector_(vector::zero),
     AMIPtr_(NULL),
-    surfPtr_(NULL)
+    surfPtr_(NULL),
+    projectionSurfaceType_(word::null),
+    projectPoints_(false),
+    projectionName_(word::null)
 {
     // Neighbour patch might not be valid yet so no transformation
     // calculation possible
@@ -525,6 +518,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
 )
 :
     coupledPolyPatch(pp, bm, index, newSize, newStart),
+    dict_(dictionary::null),
     nbrPatchName_(nbrPatchName),
     nbrPatchID_(-1),
     transform_(UNKNOWN),
@@ -532,7 +526,10 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationCentre_(point::zero),
     separationVector_(vector::zero),
     AMIPtr_(NULL),
-    surfPtr_(NULL)
+    surfPtr_(NULL),
+    projectionSurfaceType_(word::null),
+    projectPoints_(false),
+    projectionName_(word::null)
 {
     if (nbrPatchName_ == name())
     {
@@ -564,6 +561,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
 )
 :
     coupledPolyPatch(pp, bm, index, mapAddressing, newStart),
+    dict_(pp.dict_),
     nbrPatchName_(pp.nbrPatchName_),
     nbrPatchID_(-1),
     transform_(pp.transform_),
@@ -571,7 +569,10 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationCentre_(pp.rotationCentre_),
     separationVector_(pp.separationVector_),
     AMIPtr_(NULL),
-    surfPtr_(NULL)
+    surfPtr_(NULL),
+    projectionSurfaceType_(pp.projectionSurfaceType_),
+    projectPoints_(pp.projectPoints_),
+    projectionName_(pp.projectionName_)
 {}
 
 
@@ -616,6 +617,12 @@ Foam::label Foam::cyclicAMIPolyPatch::nbrPatchID() const
     }
 
     return nbrPatchID_;
+}
+
+
+bool Foam::cyclicAMIPolyPatch::owner() const
+{
+    return index() < nbrPatchID();
 }
 
 
@@ -712,9 +719,11 @@ void Foam::cyclicAMIPolyPatch::calcGeometry
         nbrAreas
     );
 
-    deleteDemandDrivenData(AMIPtr_);
-
-    AMI();
+    if (owner())
+    {
+        AMIPtr_.clear();
+        AMI();
+    }
 }
 
 
@@ -748,6 +757,45 @@ bool Foam::cyclicAMIPolyPatch::order
 void Foam::cyclicAMIPolyPatch::write(Ostream& os) const
 {
     coupledPolyPatch::write(os);
+    os.writeKeyword("neighbourPatch") << nbrPatchName_
+        << token::END_STATEMENT << nl;
+    os.writeKeyword("projectPoints") << projectPoints_
+        << token::END_STATEMENT << nl;
+    os.writeKeyword("projectionSurfaceType") << projectionSurfaceType_
+        << token::END_STATEMENT << nl;
+    os.writeKeyword("surfaceName") << projectionName_
+        << token::END_STATEMENT << nl;
+    switch (transform_)
+    {
+        case ROTATIONAL:
+        {
+            os.writeKeyword("transform") << transformTypeNames[transform_]
+                << token::END_STATEMENT << nl;
+            os.writeKeyword("rotationAxis") << rotationAxis_
+                << token::END_STATEMENT << nl;
+            os.writeKeyword("rotationCentre") << rotationCentre_
+                << token::END_STATEMENT << nl;
+            break;
+        }
+        case TRANSLATIONAL:
+        {
+            os.writeKeyword("transform") << transformTypeNames[transform_]
+                << token::END_STATEMENT << nl;
+            os.writeKeyword("separationVector") << separationVector_
+                << token::END_STATEMENT << nl;
+            break;
+        }
+        case NOORDERING:
+        {
+            os.writeKeyword("transform") << transformTypeNames[transform_]
+                << token::END_STATEMENT << nl;
+            break;
+        }
+        default:
+        {
+            // no additional info to write
+        }
+    }
 }
 
 

@@ -165,16 +165,10 @@ Foam::tmp<Foam::pointField> Foam::boundBox::points() const
 
 void Foam::boundBox::inflate(const scalar s)
 {
-    boundBox bb(*this);
+    vector ext = vector::one*s*mag();
 
-    vector dir = bb.span();
-    scalar magDir = Foam::mag(dir);
-    dir /= magDir;
-
-    scalar ext = s*magDir;
-
-    min_ -= dir*ext;
-    max_ += dir*ext;
+    min_ -= ext;
+    max_ += ext;
 }
 
 

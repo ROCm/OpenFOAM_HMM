@@ -26,7 +26,14 @@ Class
 
 Description
     Interpolation class dealing with transfer of data between two
-    primitive patches with an arbitrary mesh interface (AMI)
+    primitive patches with an arbitrary mesh interface (AMI).
+
+    Based on the algorithm given in:
+
+        Conservative interpolation between volume meshes by local Galerkin
+        projection, Farrell PE and Maddison JR, 2011, Comput. Methods Appl.
+        Mech Engrg, Volume 200, Issues 1-4, pp 89-100
+
 
 SourceFiles
     AMIInterpolation.C
@@ -42,6 +49,7 @@ SourceFiles
 #include "searchableSurface.H"
 #include "boolList.H"
 #include "primitivePatch.H"
+#include "faceAreaIntersect.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -84,6 +92,16 @@ class AMIInterpolation
             scalarListList tgtWeights_;
 
 
+        //- Starting face seed index
+        label startSeedI_;
+
+        //- Face triangulation mode
+        const faceAreaIntersect::triangulationMode triMode_;
+
+        //- Flag to indicate whether or not to project points
+        const bool projectPoints_;
+
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -92,70 +110,94 @@ class AMIInterpolation
         //- Disallow default bitwise assignment
         void operator=(const AMIInterpolation&);
 
-        //- Write triangle intersection to OBJ file
-        void writeIntersectionOBJ
-        (
-            const scalar area,
-            const face& f1,
-            const face& f2,
-            const pointField& f1Points,
-            const pointField& f2Points
-        ) const;
 
-        void checkPatches
-        (
-            const primitivePatch& srcPatch,
-            const primitivePatch& tgtPatch
-        );
+        // Helper functions
 
-        void projectPointsToSurface
-        (
-            const searchableSurface& surf,
-            pointField& pts
-        ) const;
+            //- Write triangle intersection to OBJ file
+            void writeIntersectionOBJ
+            (
+                const scalar area,
+                const face& f1,
+                const face& f2,
+                const pointField& f1Points,
+                const pointField& f2Points
+            ) const;
 
-        label findTargetFace
-        (
-            const label srcFaceI,
-            const primitivePatch& srcPatch,
-            const primitivePatch& tgtPatch
-        ) const;
+            //- Check that patches are valid
+            void checkPatches
+            (
+                const primitivePatch& srcPatch,
+                const primitivePatch& tgtPatch
+            );
 
-        void appendNbrFaces
-        (
-            const label faceI,
-            const primitivePatch& patch,
-            const DynamicList<label>& visitedFaces,
-            DynamicList<label>& faceIDs
-        ) const;
 
-        void setNextFaces
-        (
-            label& srcFaceI,
-            label& tgtFaceI,
-            const primitivePatch& srcPatch0,
-            const primitivePatch& tgtPatch0,
-            const boolList& mapFlag,
-            labelList& seedFaces,
-            const DynamicList<label>& visitedFaces
-        ) const;
+        // Initialisation
 
-        scalar interArea
-        (
-            const label srcFaceI,
-            const label tgtFaceI,
-            const primitivePatch& srcPatch,
-            const primitivePatch& tgtPatch
-        ) const;
+            //- Project points to surface
+            void projectPointsToSurface
+            (
+                const searchableSurface& surf,
+                pointField& pts
+            ) const;
 
-        void normaliseWeights
-        (
-            const word& patchType,
-            const primitivePatch& patch,
-            const pointField& points,
-            const List<DynamicList<label> >& addr,
-            List<DynamicList<scalar> >& wght
-        );
+
+        // Marching front
+
+            //- Find face on target patch that overlaps source face
+            label findTargetFace
+            (
+                const label srcFaceI,
+                const primitivePatch& srcPatch,
+                const primitivePatch& tgtPatch
+            ) const;
+
+            //- Add faces neighbouring faceI to the ID list
+            void appendNbrFaces
+            (
+                const label faceI,
+                const primitivePatch& patch,
+                const DynamicList<label>& visitedFaces,
+                DynamicList<label>& faceIDs
+            ) const;
+
+            //- Set the source and target seed faces
+            void setNextFaces
+            (
+                label& srcFaceI,
+                label& tgtFaceI,
+                const primitivePatch& srcPatch0,
+                const primitivePatch& tgtPatch0,
+                const boolList& mapFlag,
+                labelList& seedFaces,
+                const DynamicList<label>& visitedFaces
+            );
+
+
+        // Evaluation
+
+            //- Area of intersection between source and target faces
+            scalar interArea
+            (
+                const label srcFaceI,
+                const label tgtFaceI,
+                const primitivePatch& srcPatch,
+                const primitivePatch& tgtPatch
+            ) const;
+
+            //- Normalise the (area) weights - suppresses numerical error in
+            //  weights calculation
+            //  NOTE: if area weights are incorrect by 'a significant amount'
+            //     normalisation may stabilise the solution, but will introduce
+            //     numerical error!
+            void normaliseWeights
+            (
+                const word& patchType,
+                const primitivePatch& patch,
+                const pointField& points,
+                const List<DynamicList<label> >& addr,
+                List<DynamicList<scalar> >& wght,
+                const bool output
+            );
 
 
 public:
@@ -167,7 +209,9 @@ public:
         (
             const SourcePatch& srcPatch,
             const TargetPatch& tgtPatch,
-            const searchableSurface& surf
+            const searchableSurface& surf,
+            const faceAreaIntersect::triangulationMode& triMode,
+            const bool projectPoints
         );
 
 
@@ -233,6 +277,16 @@ public:
             tmp<Field<Type> > interpolateToTarget
             (
                 const tmp<Field<Type> >& tFld
+            ) const;
+
+
+        // Checks
+
+            //- Write face connectivity as OBJ file
+            void writeFaceConnectivity
+            (
+                const primitivePatch& srcPatch,
+                const primitivePatch& tgtPatch
             ) const;
 };
 

@@ -158,11 +158,6 @@ public:
                 return cyclicAMIPolyPatch_.interpolateToSource(tFld);
             }
 
-            const vectorField& nbrPatchDelta() const
-            {
-                return cyclicAMIPolyPatch_.nbrPatchDelta();
-            }
-
 
         // Interface transfer functions
 

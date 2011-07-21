@@ -47,7 +47,7 @@ void Foam::cyclicAMIFvPatch::makeWeights(scalarField& w) const
 
     const scalarField nbrDeltas
     (
-        interpolateToSource(nbrPatch.nf() & nbrPatchDelta())
+        interpolateToSource(nbrPatch.nf() & nbrPatch.fvPatch::delta())
     );
 
     forAll(deltas, faceI)
@@ -68,7 +68,7 @@ void Foam::cyclicAMIFvPatch::makeDeltaCoeffs(scalarField& dc) const
 
     const scalarField nbrDeltas
     (
-        interpolateToSource(nbrPatch.nf() & nbrPatchDelta())
+        interpolateToSource(nbrPatch.nf() & nbrPatch.fvPatch::delta())
     );
 
     forAll(deltas, faceI)
@@ -85,7 +85,8 @@ Foam::tmp<Foam::vectorField> Foam::cyclicAMIFvPatch::delta() const
 {
     const vectorField patchD(fvPatch::delta());
 
-    const vectorField& nbrPatchD(interpolateToSource(nbrPatchDelta()));
+    const cyclicAMIFvPatch& nbrPatch = neighbFvPatch();
+    const vectorField nbrPatchD(interpolateToSource(nbrPatch.fvPatch::delta()));
 
     tmp<vectorField> tpdv(new vectorField(patchD.size()));
     vectorField& pdv = tpdv();

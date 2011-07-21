@@ -57,14 +57,14 @@ private:
 
     // Private data
 
+        //- Dictionary used during construction
+        const dictionary dict_;
+
         //- Name of other half
         const word nbrPatchName_;
 
         //- Index of other half
         mutable label nbrPatchID_;
-
-        //- Neighbour delta field to *this patch
-        vectorField nbrPatchDelta_;
 
 
         // Transformations
@@ -89,10 +89,19 @@ private:
 
 
         //- AMI interpolation class
-        AMIPatchToPatchInterpolation* AMIPtr_;
+        autoPtr<AMIPatchToPatchInterpolation> AMIPtr_;
 
         //- Projection surface
         autoPtr<searchableSurface> surfPtr_;
+
+        //- Projection surface type
+        word projectionSurfaceType_;
+
+        //- Flag to activate projection
+        bool projectPoints_;
+
+        //- Name of projection object (if read)
+        const word projectionName_;
 
 
     // Private Member Functions
@@ -137,9 +146,6 @@ protected:
 
 
 public:
-
-//    //- Declare friendship with processorCyclicPolyPatch
-//    friend class processorCyclicPolyPatch;
 
     //- Runtime type information
     TypeName("cyclicAMI");
@@ -255,60 +261,37 @@ public:
         // Access
 
             //- Neighbour patch name
-            const word& nbrPatchName() const
-            {
-                return nbrPatchName_;
-            }
+            inline const word& nbrPatchName() const;
 
             //- Neighbour patch ID
             virtual label nbrPatchID() const;
 
-            //- Does this side own the patch ?
-            virtual bool owner() const
-            {
-                return index() < nbrPatchID();
-            }
+            //- Does this side own the patch?
+            virtual bool owner() const;
 
-            const cyclicAMIPolyPatch& nbrPatch() const
-            {
-                const polyPatch& pp = this->boundaryMesh()[nbrPatchID()];
-                return refCast<const cyclicAMIPolyPatch>(pp);
-            }
+            //- Return a reference to the neihgjbour patch
+            inline const cyclicAMIPolyPatch& nbrPatch() const;
 
+            //- Return a reference to the projection surface
+            const searchableSurface& surf();
 
-            const vectorField& nbrPatchDelta() const
-            {
-                return nbrPatchDelta_;
-            }
-
+            //- Return a reference to the AMI interpolator
             const AMIPatchToPatchInterpolation& AMI();
 
 
             // Transformations
 
                 //- Type of transform
-                transformType transform() const
-                {
-                    return transform_;
-                }
+                inline transformType transform() const;
 
                 //- Axis of rotation for rotational cyclic AMI
-                const vector& rotationAxis() const
-                {
-                    return rotationAxis_;
-                }
+                inline const vector& rotationAxis() const;
 
                 //- point on axis of rotation for rotational cyclic AMI
-                const point& rotationCentre() const
-                {
-                    return rotationCentre_;
-                }
+                inline const point& rotationCentre() const;
 
                 //- Translation vector for translational cyclic AMI
-                const vector& separationVector() const
-                {
-                    return separationVector_;
-                }
+                inline const vector& separationVector() const;
 
                 //- Transform patch-based positions from nbr side to this side
                 virtual void transformPosition(pointField&) const;
@@ -320,17 +303,22 @@ public:
                     const label faceI
                 ) const;
 
-                template<class Type>
-                tmp<Field<Type> > interpolateToSource(const Field<Type>& fld) const
-                {
-                    return AMIPtr_->interpolateToSource(fld);
-                }
 
+            // Interpolations
+
+                //- Interpolate from target field to source
                 template<class Type>
-                tmp<Field<Type> > interpolateToSource(const tmp<Field<Type> >& tFld) const
-                {
-                    return AMIPtr_->interpolateToSource(tFld);
-                }
+                tmp<Field<Type> > interpolateToSource
+                (
+                    const Field<Type>& fld
+                ) const;
+
+                //- Interpolate from target tmp field to source
+                template<class Type>
+                tmp<Field<Type> > interpolateToSource
+                (
+                    const tmp<Field<Type> >& tFld
+                ) const;
 
 
         //- Calculate the patch geometry
@@ -374,6 +362,16 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "cyclicAMIPolyPatchI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "cyclicAMIPolyPatchTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

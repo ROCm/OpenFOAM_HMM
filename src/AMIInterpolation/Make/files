@@ -8,5 +8,6 @@ patches/cyclicAMIPolyPatch/cyclicAMIPolyPatch.C
 patches/cyclicAMIFvPatch/cyclicAMIFvPatch.C
 patches/cyclicAMIFvPatchField/cyclicAMIFvPatchFields.C
 patches/cyclicAMIFvsPatchField/cyclicAMIFvsPatchFields.C
+patches/cyclicAMIPointPatch/cyclicAMIPointPatch.C
 
 LIB = $(FOAM_USER_LIBBIN)/libAMIInterpolation
