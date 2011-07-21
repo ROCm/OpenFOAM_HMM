@@ -22,6 +22,9 @@ runParallel snappyHexMesh 2 -overwrite
 runParallel changeDictionary 2 -literalRE -enableFunctionEntries
 
 cp system/decomposeParDict-4proc system/decomposeParDict
+# Unset floating point trapping since creating processor directories
+unset FOAM_SIGFPE
+unset FOAM_SETNAN
 runParallel redistributeMeshPar 4 -overwrite
 runParallel renumberMesh 4 -overwrite
 

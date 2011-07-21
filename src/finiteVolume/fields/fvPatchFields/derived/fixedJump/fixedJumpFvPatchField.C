@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,108 +23,107 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fanFvPatchField.H"
-#include "IOmanip.H"
+#include "fixedJumpFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::fanFvPatchField<Type>::fanFvPatchField
+Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    fixedJumpFvPatchField<Type>(p, iF),
-    f_(0)
+    jumpCyclicFvPatchField<Type>(p, iF),
+    jump_(this->size(), pTraits<Type>::zero)
 {}
 
 
 template<class Type>
-Foam::fanFvPatchField<Type>::fanFvPatchField
+Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
 (
-    const fanFvPatchField<Type>& ptf,
+    const fixedJumpFvPatchField<Type>& ptf,
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedJumpFvPatchField<Type>(ptf, p, iF, mapper),
-    f_(ptf.f_)
+    jumpCyclicFvPatchField<Type>(ptf, p, iF, mapper),
+    jump_(ptf.jump_, mapper)
 {}
 
 
 template<class Type>
-Foam::fanFvPatchField<Type>::fanFvPatchField
+Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
     const dictionary& dict
 )
 :
-    fixedJumpFvPatchField<Type>(p, iF),
-    f_()
-{
-    {
-        Istream& is = dict.lookup("f");
-        is.format(IOstream::ASCII);
-        is >> f_;
-
-        // Check that f_ table is same on both sides.?
-    }
-
-    if (dict.found("value"))
-    {
-        fvPatchField<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else
-    {
-        this->evaluate(Pstream::blocking);
-    }
-}
-
-
-template<class Type>
-Foam::fanFvPatchField<Type>::fanFvPatchField
-(
-    const fanFvPatchField<Type>& ptf
-)
-:
-    cyclicLduInterfaceField(),
-    fixedJumpFvPatchField<Type>(ptf),
-    f_(ptf.f_)
+    jumpCyclicFvPatchField<Type>(p, iF),
+    jump_("jump", dict, p.size())
 {}
 
 
 template<class Type>
-Foam::fanFvPatchField<Type>::fanFvPatchField
+Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
 (
-    const fanFvPatchField<Type>& ptf,
+    const fixedJumpFvPatchField<Type>& ptf
+)
+:
+    cyclicLduInterfaceField(),
+    jumpCyclicFvPatchField<Type>(ptf),
+    jump_(ptf.jump_)
+{}
+
+
+template<class Type>
+Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
+(
+    const fixedJumpFvPatchField<Type>& ptf,
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    fixedJumpFvPatchField<Type>(ptf, iF),
-    f_(ptf.f_)
+    jumpCyclicFvPatchField<Type>(ptf, iF),
+    jump_(ptf.jump_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+template<class Type>
+void Foam::fixedJumpFvPatchField<Type>::autoMap
+(
+    const fvPatchFieldMapper& m
+)
+{
+    jumpCyclicFvPatchField<Type>::autoMap(m);
+    jump_.autoMap(m);
+}
+
 
 template<class Type>
-void Foam::fanFvPatchField<Type>::write(Ostream& os) const
+void Foam::fixedJumpFvPatchField<Type>::rmap
+(
+    const fvPatchField<Type>& ptf,
+    const labelList& addr
+)
 {
+    jumpCyclicFvPatchField<Type>::rmap(ptf, addr);
 
-    fixedJumpFvPatchField<Type>::write(os);
+    const fixedJumpFvPatchField<Type>& tiptf =
+        refCast<const fixedJumpFvPatchField<Type> >(ptf);
+    jump_.rmap(tiptf.jump_, addr);
+}
 
-    IOstream::streamFormat fmt0 = os.format(IOstream::ASCII);
-    os.writeKeyword("f") << f_ << token::END_STATEMENT << nl;
-    os.format(fmt0);
 
-    this->writeEntry("value", os);
+template<class Type>
+void Foam::fixedJumpFvPatchField<Type>::write(Ostream& os) const
+{
+    fvPatchField<Type>::write(os);
+    os.writeKeyword("patchType") << "cyclic" << token::END_STATEMENT << nl;
+    jump_.writeEntry("jump", os);
 }
 
 

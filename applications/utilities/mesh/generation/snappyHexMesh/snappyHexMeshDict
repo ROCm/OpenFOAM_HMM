@@ -223,7 +223,7 @@ snapControls
 
     //- Highly experimental and wip: number of feature edge snapping
     //  iterations. Leave out altogether to disable.
-    //nFeatureSnapIter 10;
+    //nFeatureSnapIter 20;
 }
 
 // Settings for the layer addition.

@@ -26,13 +26,12 @@ License
 #include "patchCloudSet.H"
 #include "polyMesh.H"
 #include "addToRunTimeSelectionTable.H"
-#include "pointIndexHit.H"
-#include "Tuple2.H"
 #include "treeBoundBox.H"
-#include "indexedOctree.H"
 #include "treeDataFace.H"
 #include "Time.H"
 #include "meshTools.H"
+// For 'nearInfo' helper class only
+#include "directMappedPatchBase.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -40,35 +39,6 @@ namespace Foam
 {
     defineTypeNameAndDebug(patchCloudSet, 0);
     addToRunTimeSelectionTable(sampledSet, patchCloudSet, word);
-
-
-    //- Helper class for finding nearest
-    // Nearest:
-    //  - point+local index
-    //  - sqr(distance)
-    //  - processor
-    typedef Tuple2<pointIndexHit, Tuple2<scalar, label> > nearInfo;
-
-    class nearestEqOp
-    {
-
-    public:
-
-        void operator()(nearInfo& x, const nearInfo& y) const
-        {
-            if (y.first().hit())
-            {
-                if (!x.first().hit())
-                {
-                    x = y;
-                }
-                else if (y.second().first() < x.second().first())
-                {
-                    x = y;
-                }
-            }
-        }
-    };
 }
 
 
@@ -114,7 +84,8 @@ void Foam::patchCloudSet::calcSamples
             patchFaces[sz++] = pp.start()+i;
         }
 
-        const boundBox patchBb(pp.points(), pp.meshPoints());
+        // Do not do reduction.
+        const boundBox patchBb(pp.points(), pp.meshPoints(), false);
 
         bb.min() = min(bb.min(), patchBb.min());
         bb.max() = max(bb.max(), patchBb.max());
@@ -125,6 +96,7 @@ void Foam::patchCloudSet::calcSamples
     // Make bb asymetric just to avoid problems on symmetric meshes
     bb = bb.extend(rndGen, 1E-4);
 
+    // Make sure bb is 3D.
     bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
     bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
@@ -146,7 +118,7 @@ void Foam::patchCloudSet::calcSamples
 
 
     // All the info for nearest. Construct to miss
-    List<nearInfo> nearest(sampleCoords_.size());
+    List<directMappedPatchBase::nearInfo> nearest(sampleCoords_.size());
 
     forAll(sampleCoords_, sampleI)
     {
@@ -155,7 +127,15 @@ void Foam::patchCloudSet::calcSamples
         pointIndexHit& nearInfo = nearest[sampleI].first();
 
         // Find the nearest locally
-        nearInfo = patchTree.findNearest(sample, magSqr(bb.span()));
+        if (patchFaces.size())
+        {
+            nearInfo = patchTree.findNearest(sample, sqr(searchDist_));
+        }
+        else
+        {
+            nearInfo.setMiss();
+        }
+
 
         // Fill in the distance field and the processor field
         if (!nearInfo.hit())
@@ -179,7 +159,7 @@ void Foam::patchCloudSet::calcSamples
 
 
     // Find nearest.
-    Pstream::listCombineGather(nearest, nearestEqOp());
+    Pstream::listCombineGather(nearest, directMappedPatchBase::nearestEqOp());
     Pstream::listCombineScatter(nearest);
 
 
@@ -198,11 +178,14 @@ void Foam::patchCloudSet::calcSamples
 
         forAll(nearest, i)
         {
-            meshTools::writeOBJ(str, sampleCoords_[i]);
-            vertI++;
-            meshTools::writeOBJ(str, nearest[i].first().hitPoint());
-            vertI++;
-            str << "l " << vertI-1 << ' ' << vertI << nl;
+            if (nearest[i].first().hit())
+            {
+                meshTools::writeOBJ(str, sampleCoords_[i]);
+                vertI++;
+                meshTools::writeOBJ(str, nearest[i].first().hitPoint());
+                vertI++;
+                str << "l " << vertI-1 << ' ' << vertI << nl;
+            }
         }
     }
 
@@ -210,17 +193,33 @@ void Foam::patchCloudSet::calcSamples
     // Store the sampling locations on the nearest processor
     forAll(nearest, sampleI)
     {
-        if (nearest[sampleI].second().second() == Pstream::myProcNo())
+        const pointIndexHit& nearInfo = nearest[sampleI].first();
+
+        if (nearInfo.hit())
         {
-            const pointIndexHit& nearInfo = nearest[sampleI].first();
+            if (nearest[sampleI].second().second() == Pstream::myProcNo())
+            {
+                label faceI = nearInfo.index();
 
-            label faceI = nearInfo.index();
-
-            samplingPts.append(nearInfo.hitPoint());
-            samplingCells.append(mesh().faceOwner()[faceI]);
-            samplingFaces.append(faceI);
-            samplingSegments.append(0);
-            samplingCurveDist.append(1.0 * sampleI);
+                samplingPts.append(nearInfo.hitPoint());
+                samplingCells.append(mesh().faceOwner()[faceI]);
+                samplingFaces.append(faceI);
+                samplingSegments.append(0);
+                samplingCurveDist.append(1.0 * sampleI);
+            }
+        }
+        else
+        {
+            // No processor found point near enough. Mark with special value
+            // which is intercepted when interpolating
+            if (Pstream::master())
+            {
+                samplingPts.append(sampleCoords_[sampleI]);
+                samplingCells.append(-1);
+                samplingFaces.append(-1);
+                samplingSegments.append(0);
+                samplingCurveDist.append(1.0 * sampleI);
+            }
         }
     }
 }
@@ -270,12 +269,14 @@ Foam::patchCloudSet::patchCloudSet
     meshSearch& searchEngine,
     const word& axis,
     const List<point>& sampleCoords,
-    const labelHashSet& patchSet
+    const labelHashSet& patchSet,
+    const scalar searchDist
 )
 :
     sampledSet(name, mesh, searchEngine, axis),
     sampleCoords_(sampleCoords),
-    patchSet_(patchSet)
+    patchSet_(patchSet),
+    searchDist_(searchDist)
 {
     genSamples();
 
@@ -302,7 +303,8 @@ Foam::patchCloudSet::patchCloudSet
         (
             wordReList(dict.lookup("patches"))
         )
-    )
+    ),
+    searchDist_(readScalar(dict.lookup("maxDistance")))
 {
     genSamples();
 

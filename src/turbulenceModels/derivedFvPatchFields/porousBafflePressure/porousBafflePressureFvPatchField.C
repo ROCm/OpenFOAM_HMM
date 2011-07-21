@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,39 +23,42 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fanFvPatchField.H"
-#include "IOmanip.H"
+#include "porousBafflePressureFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::fanFvPatchField<Type>::fanFvPatchField
+Foam::porousBafflePressureFvPatchField<Type>::porousBafflePressureFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
 )
 :
     fixedJumpFvPatchField<Type>(p, iF),
-    f_(0)
+    D_(0),
+    I_(0),
+    length_(0)
 {}
 
 
 template<class Type>
-Foam::fanFvPatchField<Type>::fanFvPatchField
+Foam::porousBafflePressureFvPatchField<Type>::porousBafflePressureFvPatchField
 (
-    const fanFvPatchField<Type>& ptf,
+    const porousBafflePressureFvPatchField<Type>& ptf,
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
     fixedJumpFvPatchField<Type>(ptf, p, iF, mapper),
-    f_(ptf.f_)
+    D_(ptf.D_),
+    I_(ptf.I_),
+    length_(ptf.length_)
 {}
 
 
 template<class Type>
-Foam::fanFvPatchField<Type>::fanFvPatchField
+Foam::porousBafflePressureFvPatchField<Type>::porousBafflePressureFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -63,16 +66,10 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
 )
 :
     fixedJumpFvPatchField<Type>(p, iF),
-    f_()
+    D_(readScalar(dict.lookup("D"))),
+    I_(readScalar(dict.lookup("I"))),
+    length_(readScalar(dict.lookup("length")))
 {
-    {
-        Istream& is = dict.lookup("f");
-        is.format(IOstream::ASCII);
-        is >> f_;
-
-        // Check that f_ table is same on both sides.?
-    }
-
     if (dict.found("value"))
     {
         fvPatchField<Type>::operator=
@@ -88,26 +85,30 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
 
 
 template<class Type>
-Foam::fanFvPatchField<Type>::fanFvPatchField
+Foam::porousBafflePressureFvPatchField<Type>::porousBafflePressureFvPatchField
 (
-    const fanFvPatchField<Type>& ptf
+    const porousBafflePressureFvPatchField<Type>& ptf
 )
 :
     cyclicLduInterfaceField(),
     fixedJumpFvPatchField<Type>(ptf),
-    f_(ptf.f_)
+    D_(ptf.D_),
+    I_(ptf.I_),
+    length_(ptf.length_)
 {}
 
 
 template<class Type>
-Foam::fanFvPatchField<Type>::fanFvPatchField
+Foam::porousBafflePressureFvPatchField<Type>::porousBafflePressureFvPatchField
 (
-    const fanFvPatchField<Type>& ptf,
+    const porousBafflePressureFvPatchField<Type>& ptf,
     const DimensionedField<Type, volMesh>& iF
 )
 :
     fixedJumpFvPatchField<Type>(ptf, iF),
-    f_(ptf.f_)
+    D_(ptf.D_),
+    I_(ptf.I_),
+    length_(ptf.length_)
 {}
 
 
@@ -115,14 +116,14 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
 
 
 template<class Type>
-void Foam::fanFvPatchField<Type>::write(Ostream& os) const
+void Foam::porousBafflePressureFvPatchField<Type>::write(Ostream& os) const
 {
 
     fixedJumpFvPatchField<Type>::write(os);
 
-    IOstream::streamFormat fmt0 = os.format(IOstream::ASCII);
-    os.writeKeyword("f") << f_ << token::END_STATEMENT << nl;
-    os.format(fmt0);
+    os.writeKeyword("D") << D_ << token::END_STATEMENT << nl;
+    os.writeKeyword("I") << I_ << token::END_STATEMENT << nl;
+    os.writeKeyword("length") << length_ << token::END_STATEMENT << nl;
 
     this->writeEntry("value", os);
 }

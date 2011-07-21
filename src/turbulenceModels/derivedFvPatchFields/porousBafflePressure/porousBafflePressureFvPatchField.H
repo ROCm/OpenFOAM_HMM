@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,18 +22,28 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fanFvPatchField
+    Foam::porousBafflePressureFvPatchField
 
 Description
-    Foam::fanFvPatchField
+    Foam::porousBafflePressureFvPatchField
+    the porous baffle operates on a cyclic patch and introduce a jump on the p
+    field as follow:
+
+    deltaP = -(I*mu*U + 0.5*D*rho*magSqr(U)*L)
+
+    where:
+
+    I is the inertial coefficient
+    D is the darcy coeafficient
+    L is the porous media lenght in the flow direction
 
 SourceFiles
-    fanFvPatchField.C
+    porousBafflePressureFvPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fanFvPatchField_H
-#define fanFvPatchField_H
+#ifndef porousBafflePressureFvPatchField_H
+#define porousBafflePressureFvPatchField_H
 
 #include "fixedJumpFvPatchField.H"
 
@@ -43,56 +53,63 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class fanFvPatchField Declaration
+                Class porousBafflePressureFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class fanFvPatchField
+class porousBafflePressureFvPatchField
 :
     public fixedJumpFvPatchField<Type>
 {
     // Private data
 
-        //- Fan pressure rise polynomial coefficients
-        List<scalar> f_;
+        //- Darcy pressure lost coefficient
+        scalar D_;
+
+        //- Inertia pressure lost coefficient
+        scalar I_;
+
+        //- Porous media length
+        scalar length_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("fan");
+    TypeName("porousBafflePressure");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        fanFvPatchField
+        porousBafflePressureFvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        fanFvPatchField
+        porousBafflePressureFvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given fanFvPatchField onto a new patch
-        fanFvPatchField
+        //- Construct by mapping given porousBafflePressureFvPatchField
+        // onto a new patch
+        porousBafflePressureFvPatchField
         (
-            const fanFvPatchField<Type>&,
+            const porousBafflePressureFvPatchField<Type>&,
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        fanFvPatchField
+        porousBafflePressureFvPatchField
         (
-            const fanFvPatchField<Type>&
+            const porousBafflePressureFvPatchField<Type>&
         );
 
         //- Construct and return a clone
@@ -100,14 +117,14 @@ public:
         {
             return tmp<fvPatchField<Type> >
             (
-                new fanFvPatchField<Type>(*this)
+                new porousBafflePressureFvPatchField<Type>(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        fanFvPatchField
+        porousBafflePressureFvPatchField
         (
-            const fanFvPatchField<Type>&,
+            const porousBafflePressureFvPatchField<Type>&,
             const DimensionedField<Type, volMesh>&
         );
 
@@ -119,20 +136,12 @@ public:
         {
             return tmp<fvPatchField<Type> >
             (
-                new fanFvPatchField<Type>(*this, iF)
+                new porousBafflePressureFvPatchField<Type>(*this, iF)
             );
         }
 
 
     // Member functions
-
-        // Access
-
-            //- Return the polynomial coefficients
-            const List<scalar>& f() const
-            {
-                return f_;
-            }
 
 
         // Evaluation functions
@@ -148,7 +157,7 @@ public:
 
 //- Specialisation of the jump-condition for the pressure
 template<>
-void fanFvPatchField<scalar>::updateCoeffs();
+void porousBafflePressureFvPatchField<scalar>::updateCoeffs();
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -158,7 +167,7 @@ void fanFvPatchField<scalar>::updateCoeffs();
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "fanFvPatchField.C"
+#   include "porousBafflePressureFvPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
