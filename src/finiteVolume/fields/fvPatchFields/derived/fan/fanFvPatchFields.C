@@ -52,6 +52,9 @@ void Foam::fanFvPatchField<Foam::scalar>::updateCoeffs()
         return;
     }
 
+    // Note that the neighbour side jump_ data is never actually used; the
+    // jump() function just calls the owner side jump().
+
     // Constant
     jump_ = f_[0];
 
@@ -78,7 +81,7 @@ void Foam::fanFvPatchField<Foam::scalar>::updateCoeffs()
         jump_ = max(jump_, scalar(0));
     }
 
-    jumpCyclicFvPatchField<scalar>::updateCoeffs();
+    fixedJumpFvPatchField<scalar>::updateCoeffs();
 }
 
 
