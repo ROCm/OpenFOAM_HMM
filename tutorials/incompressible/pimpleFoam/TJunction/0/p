@@ -16,17 +16,17 @@ FoamFile
 
 dimensions      [0 2 -2 0 0 0 0];
 
-internalField   uniform 100000;
+internalField   uniform 0;
 
 boundaryField
 {
     inlet      
     {
         //type            totalPressure;
-        //p0              uniform 100040;
+        //p0              uniform 40;
 
         type            timeVaryingTotalPressure;
-        p0              100040; // only used for restarts
+        p0              40; // only used for restarts
         outOfBounds     clamp;
         fileName        "$FOAM_CASE/constant/p0vsTime";
 
@@ -35,19 +35,19 @@ boundaryField
         rho             none;
         psi             none;
         gamma           1;
-        value           uniform 100040;
+        value           uniform 40;
     }
 
     outlet1     
     {
         type            fixedValue;
-        value           uniform 100010;
+        value           uniform 10;
     }
 
     outlet2    
     {
         type            fixedValue;
-        value           uniform 100000;
+        value           uniform 0;
     }
 
     defaultFaces

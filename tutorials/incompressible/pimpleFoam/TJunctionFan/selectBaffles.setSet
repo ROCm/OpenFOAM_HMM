@@ -1,4 +1,0 @@
-faceSet baffleFaces new boxToFace (0.099 -10 -10)(0.101 10 10)
-# Remove the centre faces that become fan
-faceSet baffleFaces delete boxToFace (0.099 -0.006 0.004)(0.101 0.006 0.016)
-faceZoneSet baffleFaces new setToFaceZone baffleFaces
