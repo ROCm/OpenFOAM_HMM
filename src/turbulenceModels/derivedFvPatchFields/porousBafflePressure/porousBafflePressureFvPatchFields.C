@@ -66,6 +66,8 @@ void Foam::porousBafflePressureFvPatchField<Foam::scalar>::updateCoeffs()
 
     scalarField Un(phip/patch().magSf());
 
+    scalarField magUn(mag(Un));
+
     if (phi.dimensions() == dimensionSet(0, 3, -1, 0, 0))
     {
         const incompressible::turbulenceModel& model =
@@ -76,7 +78,7 @@ void Foam::porousBafflePressureFvPatchField<Foam::scalar>::updateCoeffs()
 
         const scalarField nuEffw = model.nuEff()().boundaryField()[patchI];
 
-        jump_ = -(I_*nuEffw*mag(Un) + D_*0.5*magSqr(Un)*length_);
+        jump_ = -sign(Un)*(I_*nuEffw + D_*0.5*magUn*length_)*magUn;
     }
     else
     {
@@ -93,7 +95,7 @@ void Foam::porousBafflePressureFvPatchField<Foam::scalar>::updateCoeffs()
 
         Un /= rhow;
 
-        jump_ = -(I_*muEffw*mag(Un) + D_*0.5*rhow*magSqr(Un)*length_);
+        jump_ = -sign(Un)*(I_*muEffw + D_*0.5*rhow*magUn*length_)*magUn;
     }
 
     if (debug)
