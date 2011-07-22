@@ -1,4 +1,4 @@
 surfaceFeatureExtract.C
-CGALPolyhedron/buildCGALPolyhedron.C
+/* CGALPolyhedron/buildCGALPolyhedron.C */
 
 EXE = $(FOAM_APPBIN)/surfaceFeatureExtract
