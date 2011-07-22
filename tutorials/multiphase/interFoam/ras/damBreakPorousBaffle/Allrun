@@ -13,8 +13,8 @@ runApplication setFields
 unset FOAM_SIGFPE
 unset FOAM_SETNAN
 
-# Add cyclic baffles for fan
-runApplication setSet -batch selectCyclics.setSet
+# Create faceZones for porous baffles
+runApplication topoSet
 
 createBaffles cyclicZoneFaces '(porous_half0 porous_half1)' -overwrite > log.createBaffles 2>&1
 
