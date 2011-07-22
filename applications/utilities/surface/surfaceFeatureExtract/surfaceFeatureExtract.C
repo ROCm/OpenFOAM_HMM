@@ -29,11 +29,9 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-
-#include "triangle.H"
-#include "triSurface.H"
 #include "argList.H"
 #include "Time.H"
+#include "triSurface.H"
 #include "surfaceFeatures.H"
 #include "featureEdgeMesh.H"
 #include "extendedFeatureEdgeMesh.H"
@@ -43,16 +41,17 @@ Description
 #include "triSurfaceMesh.H"
 #include "vtkSurfaceWriter.H"
 #include "triSurfaceFields.H"
-#include "unitConversion.H"
 #include "indexedOctree.H"
 #include "treeDataEdge.H"
 #include "unitConversion.H"
 
+#ifdef ENABLE_CURVATURE
 #include "buildCGALPolyhedron.H"
 #include "CGALPolyhedronRings.H"
 #include <CGAL/Monge_via_jet_fitting.h>
 #include <CGAL/Lapack/Linear_algebra_lapack.h>
 #include <CGAL/property_map.h>
+#endif
 
 using namespace Foam;
 
@@ -150,6 +149,7 @@ void drawHitProblem
 }
 
 
+#ifdef ENABLE_CURVATURE
 scalarField calcCurvature(const triSurface& surf)
 {
     scalarField k(surf.points().size(), 0);
@@ -296,7 +296,7 @@ scalarField calcCurvature(const triSurface& surf)
 
     return k;
 }
-
+#endif
 
 // Unmark non-manifold edges if individual triangles are not features
 void unmarkBaffles
@@ -405,11 +405,6 @@ int main(int argc, char *argv[])
         "writeVTK",
         "write extendedFeatureEdgeMesh vtk files"
     );
-    argList::addBoolOption
-    (
-        "calcCurvature",
-        "calculate curvature and closeness fields"
-    );
     argList::addOption
     (
         "closeness",
@@ -432,6 +427,14 @@ int main(int argc, char *argv[])
         "manifoldEdgesOnly",
         "remove any non-manifold (open or more than two connected faces) edges"
     );
+
+#   ifdef ENABLE_CURVATURE
+    argList::addBoolOption
+    (
+        "calcCurvature",
+        "calculate curvature and closeness fields"
+    );
+#   endif
 
 
 #   include "setRootCase.H"
@@ -955,6 +958,8 @@ int main(int argc, char *argv[])
 
     externalClosenessField.write();
 
+
+#ifdef ENABLE_CURVATURE
     scalarField k = calcCurvature(surf);
 
     // Modify the curvature values on feature edges and points to be zero.
@@ -984,6 +989,7 @@ int main(int argc, char *argv[])
     );
 
     kField.write();
+#endif
 
     if (writeVTK)
     {
@@ -1011,6 +1017,7 @@ int main(int argc, char *argv[])
             true                                // verbose
         );
 
+#       ifdef ENABLE_CURVATURE
         vtkSurfaceWriter().write
         (
             runTime.constant()/"triSurface",    // outputDir
@@ -1022,6 +1029,7 @@ int main(int argc, char *argv[])
             true,                               // isNodeValues
             true                                // verbose
         );
+#       endif
     }
 
     Info<< "End\n" << endl;
