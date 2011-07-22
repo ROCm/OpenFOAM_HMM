@@ -23,6 +23,9 @@ setDamBreakFine ()
     mv temp.$$ $controlDict
 }
 
+# Do damBreakPorousBaffle
+(cd damBreakPorousBaffle && foamRunTutorials)
+
 # Do damBreak
 (cd damBreak && foamRunTutorials)
 
