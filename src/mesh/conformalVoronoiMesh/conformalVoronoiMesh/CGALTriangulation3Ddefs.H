@@ -21,6 +21,11 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+    As a special exception, you have permission to link this program with the
+    CGAL library and distribute executables, as long as you follow the
+    requirements of the GNU GPL in regard to all of the software in the
+    executable aside from CGAL.
+
 Typedefs
     CGALTriangulation3Ddefs
 
