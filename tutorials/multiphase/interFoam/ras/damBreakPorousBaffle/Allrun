@@ -10,6 +10,9 @@ application=`getApplication`
 runApplication blockMesh
 runApplication setFields
 
+unset FOAM_SIGFPE
+unset FOAM_SETNAN
+
 # Create faceZones for porous baffles
 runApplication topoSet
 
