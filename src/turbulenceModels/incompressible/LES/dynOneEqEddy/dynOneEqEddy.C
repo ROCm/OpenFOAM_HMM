@@ -42,68 +42,61 @@ addToRunTimeSelectionTable(LESModel, dynOneEqEddy, dictionary);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void dynOneEqEddy::updateSubGridScaleFields(const volSymmTensorField& D)
+void dynOneEqEddy::updateSubGridScaleFields
+(
+    const volSymmTensorField& D,
+    const volScalarField& KK
+)
 {
-    nuSgs_ = ck(D)*sqrt(k_)*delta();
+    nuSgs_ = ck(D, KK)*sqrt(k_)*delta();
     nuSgs_.correctBoundaryConditions();
 }
 
 
-dimensionedScalar dynOneEqEddy::ck(const volSymmTensorField& D) const
+volScalarField dynOneEqEddy::ck
+(
+    const volSymmTensorField& D,
+    const volScalarField& KK
+) const
 {
-    tmp<volScalarField> KK = 0.5*(filter_(magSqr(U())) - magSqr(filter_(U())));
+    const volSymmTensorField LL
+    (
+        simpleFilter_(dev(filter_(sqr(U())) - (sqr(filter_(U())))))
+    );
 
     const volSymmTensorField MM
     (
-        delta()*(filter_(sqrt(k_)*D) - 2*sqrt(KK + filter_(k_))*filter_(D))
+        simpleFilter_(-2.0*delta()*pow(KK, 0.5)*filter_(D))
     );
 
-    dimensionedScalar MMMM = average(magSqr(MM));
+    const volScalarField ck
+    (
+        simpleFilter_(0.5*(LL && MM))
+       /(
+            simpleFilter_(magSqr(MM))
+          + dimensionedScalar("small", sqr(MM.dimensions()), VSMALL)
+        )
+    );
 
-    if (MMMM.value() > VSMALL)
-    {
-        tmp<volSymmTensorField> LL = dev(filter_(sqr(U())) - sqr(filter_(U())));
-
-        return average(LL && MM)/MMMM;
-    }
-    else
-    {
-        return 0.0;
-    }
+    tmp<volScalarField> tfld = 0.5*(mag(ck) + ck);
+    return tfld();
 }
 
 
-dimensionedScalar dynOneEqEddy::ce(const volSymmTensorField& D) const
+volScalarField dynOneEqEddy::ce
+(
+    const volSymmTensorField& D,
+    const volScalarField& KK
+) const
 {
-    const volScalarField KK
+    const volScalarField ce
     (
-        0.5*(filter_(magSqr(U())) - magSqr(filter_(U())))
+        simpleFilter_(nuEff()*(filter_(magSqr(D)) - magSqr(filter_(D))))
+       /simpleFilter_(pow(KK, 1.5)/(2.0*delta()))
     );
 
-    const volScalarField mm
-    (
-        pow(KK + filter_(k_), 1.5)/(2*delta()) - filter_(pow(k_, 1.5))/delta()
-    );
-
-    dimensionedScalar mmmm = average(magSqr(mm));
-
-    if (mmmm.value() > VSMALL)
-    {
-        tmp<volScalarField> ee =
-        (
-            2*delta()*ck(D)
-          * (
-                filter_(sqrt(k_)*magSqr(D))
-              - 2*sqrt(KK + filter_(k_))*magSqr(filter_(D))
-            )
-        );
-
-        return average(ee*mm)/mmmm;
-    }
-    else
-    {
-        return 0.0;
-    }
+    tmp<volScalarField> tfld = 0.5*(mag(ce) + ce);
+    return tfld();
 }
 
 
@@ -134,12 +127,14 @@ dynOneEqEddy::dynOneEqEddy
         mesh_
     ),
 
+    simpleFilter_(U.mesh()),
     filterPtr_(LESfilter::New(U.mesh(), coeffDict())),
     filter_(filterPtr_())
 {
     bound(k_, kMin_);
 
-    updateSubGridScaleFields(symm(fvc::grad(U)));
+    const volScalarField KK(0.5*(filter_(magSqr(U)) - magSqr(filter_(U))));
+    updateSubGridScaleFields(symm(fvc::grad(U)), KK);
 
     printCoeffs();
 }
@@ -147,13 +142,14 @@ dynOneEqEddy::dynOneEqEddy
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void dynOneEqEddy::correct(const tmp<volTensorField>& tgradU)
+void dynOneEqEddy::correct(const tmp<volTensorField>& gradU)
 {
-    const volTensorField& gradU = tgradU();
-
-    GenEddyVisc::correct(gradU);
+    LESModel::correct(gradU);
 
     const volSymmTensorField D(symm(gradU));
+
+    volScalarField KK(0.5*(filter_(magSqr(U())) - magSqr(filter_(U()))));
+    KK.max(dimensionedScalar("small", KK.dimensions(), SMALL));
 
     const volScalarField P(2.0*nuSgs_*magSqr(D));
 
@@ -164,7 +160,7 @@ void dynOneEqEddy::correct(const tmp<volTensorField>& tgradU)
      - fvm::laplacian(DkEff(), k_)
     ==
        P
-     - fvm::Sp(ce(D)*sqrt(k_)/delta(), k_)
+     - fvm::Sp(ce(D, KK)*sqrt(k_)/delta(), k_)
     );
 
     kEqn().relax();
@@ -172,7 +168,7 @@ void dynOneEqEddy::correct(const tmp<volTensorField>& tgradU)
 
     bound(k_, kMin_);
 
-    updateSubGridScaleFields(D);
+    updateSubGridScaleFields(D, KK);
 }
 
 

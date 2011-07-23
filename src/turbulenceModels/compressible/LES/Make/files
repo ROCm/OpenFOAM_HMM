@@ -5,7 +5,7 @@ GenSGSStress/GenSGSStress.C
 Smagorinsky/Smagorinsky.C
 oneEqEddy/oneEqEddy.C
 lowReOneEqEddy/lowReOneEqEddy.C
-dynOneEqEddy/dynOneEqEddy.C
+homogeneousDynOneEqEddy/homogeneousDynOneEqEddy.C
 DeardorffDiffStress/DeardorffDiffStress.C
 SpalartAllmaras/SpalartAllmaras.C
 

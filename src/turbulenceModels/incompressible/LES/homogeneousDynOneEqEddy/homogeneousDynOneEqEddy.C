@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,86 +23,103 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "dynOneEqEddy.H"
+#include "homogeneousDynOneEqEddy.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace compressible
+namespace incompressible
 {
 namespace LESModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(dynOneEqEddy, 0);
-addToRunTimeSelectionTable(LESModel, dynOneEqEddy, dictionary);
+defineTypeNameAndDebug(homogeneousDynOneEqEddy, 0);
+addToRunTimeSelectionTable(LESModel, homogeneousDynOneEqEddy, dictionary);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void dynOneEqEddy::updateSubGridScaleFields(const volSymmTensorField& D)
+void homogeneousDynOneEqEddy::updateSubGridScaleFields(const volSymmTensorField& D)
 {
-    muSgs_ = ck_(D)*rho()*sqrt(k_)*delta();
-    muSgs_.correctBoundaryConditions();
-
-    alphaSgs_ = muSgs_/Prt_;
-    alphaSgs_.correctBoundaryConditions();
+    nuSgs_ = ck(D)*sqrt(k_)*delta();
+    nuSgs_.correctBoundaryConditions();
 }
 
 
-dimensionedScalar dynOneEqEddy::ck_(const volSymmTensorField& D) const
+dimensionedScalar homogeneousDynOneEqEddy::ck(const volSymmTensorField& D) const
 {
-    volScalarField KK(0.5*(filter_(magSqr(U())) - magSqr(filter_(U()))));
+    tmp<volScalarField> KK = 0.5*(filter_(magSqr(U())) - magSqr(filter_(U())));
 
-    volSymmTensorField LL(dev(filter_(sqr(U())) - (sqr(filter_(U())))));
-
-    volSymmTensorField MM
+    const volSymmTensorField MM
     (
         delta()*(filter_(sqrt(k_)*D) - 2*sqrt(KK + filter_(k_))*filter_(D))
     );
 
-    return average(LL && MM)/average(magSqr(MM));
+    dimensionedScalar MMMM = average(magSqr(MM));
+
+    if (MMMM.value() > VSMALL)
+    {
+        tmp<volSymmTensorField> LL = dev(filter_(sqr(U())) - sqr(filter_(U())));
+
+        return average(LL && MM)/MMMM;
+    }
+    else
+    {
+        return 0.0;
+    }
 }
 
 
-dimensionedScalar dynOneEqEddy::ce_(const volSymmTensorField& D) const
+dimensionedScalar homogeneousDynOneEqEddy::ce(const volSymmTensorField& D) const
 {
-    volScalarField KK(0.5*(filter_(magSqr(U())) - magSqr(filter_(U()))));
+    const volScalarField KK
+    (
+        0.5*(filter_(magSqr(U())) - magSqr(filter_(U())))
+    );
 
-    volScalarField mm
+    const volScalarField mm
     (
         pow(KK + filter_(k_), 1.5)/(2*delta()) - filter_(pow(k_, 1.5))/delta()
     );
 
-    volScalarField ee
-    (
-        2*delta()*ck_(D)
-       *(
-            filter_(sqrt(k_)*magSqr(D))
-          - 2*sqrt(KK + filter_(k_))*magSqr(filter_(D))
-        )
-    );
+    dimensionedScalar mmmm = average(magSqr(mm));
 
-    return average(ee*mm)/average(mm*mm);
+    if (mmmm.value() > VSMALL)
+    {
+        tmp<volScalarField> ee =
+        (
+            2*delta()*ck(D)
+          * (
+                filter_(sqrt(k_)*magSqr(D))
+              - 2*sqrt(KK + filter_(k_))*magSqr(filter_(D))
+            )
+        );
+
+        return average(ee*mm)/mmmm;
+    }
+    else
+    {
+        return 0.0;
+    }
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-dynOneEqEddy::dynOneEqEddy
+homogeneousDynOneEqEddy::homogeneousDynOneEqEddy
 (
-    const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    const basicThermo& thermoPhysicalModel,
+    transportModel& transport,
     const word& turbulenceModelName,
     const word& modelName
 )
 :
-    LESModel(modelName, rho, U, phi, thermoPhysicalModel, turbulenceModelName),
-    GenEddyVisc(rho, U, phi, thermoPhysicalModel),
+    LESModel(modelName, U, phi, transport, turbulenceModelName),
+    GenEddyVisc(U, phi, transport),
 
     k_
     (
@@ -120,7 +137,9 @@ dynOneEqEddy::dynOneEqEddy
     filterPtr_(LESfilter::New(U.mesh(), coeffDict())),
     filter_(filterPtr_())
 {
-    updateSubGridScaleFields(dev(symm(fvc::grad(U))));
+    bound(k_, kMin_);
+
+    updateSubGridScaleFields(symm(fvc::grad(U)));
 
     printCoeffs();
 }
@@ -128,25 +147,24 @@ dynOneEqEddy::dynOneEqEddy
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void dynOneEqEddy::correct(const tmp<volTensorField>& tgradU)
+void homogeneousDynOneEqEddy::correct(const tmp<volTensorField>& tgradU)
 {
     const volTensorField& gradU = tgradU();
 
     GenEddyVisc::correct(gradU);
 
-    volSymmTensorField D(dev(symm(gradU)));
-    volScalarField divU(fvc::div(phi()/fvc::interpolate(rho())));
-    volScalarField G(2*muSgs_*(gradU && D));
+    const volSymmTensorField D(symm(gradU));
+
+    const volScalarField P(2.0*nuSgs_*magSqr(D));
 
     tmp<fvScalarMatrix> kEqn
     (
-        fvm::ddt(rho(), k_)
-      + fvm::div(phi(), k_)
-      - fvm::laplacian(DkEff(), k_)
-     ==
-        G
-      - fvm::SuSp(2.0/3.0*rho()*divU, k_)
-      - fvm::Sp(ce_(D)*rho()*sqrt(k_)/delta(), k_)
+       fvm::ddt(k_)
+     + fvm::div(phi(), k_)
+     - fvm::laplacian(DkEff(), k_)
+    ==
+       P
+     - fvm::Sp(ce(D)*sqrt(k_)/delta(), k_)
     );
 
     kEqn().relax();
@@ -158,7 +176,7 @@ void dynOneEqEddy::correct(const tmp<volTensorField>& tgradU)
 }
 
 
-bool dynOneEqEddy::read()
+bool homogeneousDynOneEqEddy::read()
 {
     if (GenEddyVisc::read())
     {
@@ -176,7 +194,7 @@ bool dynOneEqEddy::read()
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace LESModels
-} // End namespace compressible
+} // End namespace incompressible
 } // End namespace Foam
 
 // ************************************************************************* //

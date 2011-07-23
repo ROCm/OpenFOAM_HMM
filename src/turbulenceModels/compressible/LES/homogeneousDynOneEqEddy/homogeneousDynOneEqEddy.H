@@ -22,65 +22,54 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::incompressible::LESModels::locDynOneEqEddy
+    Foam::compressible::LESModels::homogeneousDynOneEqEddy
 
 Description
-    Localised Dynamic One Equation Eddy Viscosity Model for incompressible
-    flows
+    One Equation Eddy Viscosity Model for compressible flows.
 
     Eddy viscosity SGS model using a modeled balance equation to simulate
-    the behaviour of k, hence
+    the behaviour of k.
+    Thus
     \verbatim
         d/dt(k) + div(U*k) - div(nuSgs*grad(k))
         =
-        -B*L - ce*rho*k^3/2/delta
-    and
-        B = 2/3*k*I - 2*nuSgs*dev(D)
-        Beff = 2/3*k*I - 2*nuEff*dev(D)
-    where
-        nuSgs = cD*delta^2*||D||
-        nuEff = nuSgs + nu
-    \endverbatim
+        -rho*B*L - ce*rho*k^3/2/delta
 
-    A dynamic procedure is here applied to evaluate ck and ce
-    \verbatim
-        ck=<L.M>/<M.M>
     and
-        ce=<e*m>/<m*m>
+
+        B = 2/3*k*I - 2*nuSgs*dev(D)
+
     where
-       K = 0.5*(F(U.U) - F(U).F(U))
-       L = (F(U*U) - F(U)*F(U) - 0.33*K*I)
-       M = delta*(F(sqrt(k)*D) - 2*sqrt(K + filter(k))*F(D))
-       m = pow(K + F(k), 3.0/2.0)/(2*delta) - F(pow(k, 3.0/2.0))/delta
-       e = 2*delta*ck*(F(sqrt(k)*(D && D)) - 2*sqrt(K + F(k))*(F(D) && F(D)))/
+
+        D = symm(grad(U));
+        nuSgs = ck*sqrt(k)*delta
     \endverbatim
 
 SourceFiles
-    locDynOneEqEddy.C
+    homogeneousDynOneEqEddy.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef locDynOneEqEddy_H
-#define locDynOneEqEddy_H
+#ifndef compressibleHomogeneousDynOneEqEddy_H
+#define compressibleHomogeneousDynOneEqEddy_H
 
 #include "GenEddyVisc.H"
-#include "simpleFilter.H"
 #include "LESfilter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace incompressible
+namespace compressible
 {
 namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class locDynOneEqEddy Declaration
+                           Class homogeneousDynOneEqEddy Declaration
 \*---------------------------------------------------------------------------*/
 
-class locDynOneEqEddy
+class homogeneousDynOneEqEddy
 :
     public GenEddyVisc
 {
@@ -88,7 +77,6 @@ class locDynOneEqEddy
 
         volScalarField k_;
 
-        simpleFilter simpleFilter_;
         autoPtr<LESfilter> filterPtr_;
         LESfilter& filter_;
 
@@ -96,50 +84,39 @@ class locDynOneEqEddy
     // Private Member Functions
 
         //- Update sub-grid scale fields
-        void updateSubGridScaleFields
-        (
-            const volSymmTensorField& D,
-            const volScalarField& KK
-        );
+        void updateSubGridScaleFields(const volSymmTensorField& D);
 
         //- Calculate ck, ce by filtering the velocity field U.
-        volScalarField ck
-        (
-            const volSymmTensorField&,
-            const volScalarField&
-        ) const;
-
-        volScalarField ce
-        (
-            const volSymmTensorField&,
-            const volScalarField&
-        ) const;
+        dimensionedScalar ck_(const volSymmTensorField& D) const;
+        dimensionedScalar ce_(const volSymmTensorField& D) const;
 
         // Disallow default bitwise copy construct and assignment
-        locDynOneEqEddy(const locDynOneEqEddy&);
-        locDynOneEqEddy& operator=(const locDynOneEqEddy&);
+        homogeneousDynOneEqEddy(const homogeneousDynOneEqEddy&);
+        homogeneousDynOneEqEddy& operator=(const homogeneousDynOneEqEddy&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("locDynOneEqEddy");
+    TypeName("homogeneousDynOneEqEddy");
+
 
     // Constructors
 
-        //- Construct from components
-        locDynOneEqEddy
+        //- Constructor from components
+        homogeneousDynOneEqEddy
         (
+            const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            transportModel& transport,
+            const basicThermo& thermoPhysicalModel,
             const word& turbulenceModelName = turbulenceModel::typeName,
             const word& modelName = typeName
         );
 
 
     //- Destructor
-    virtual ~locDynOneEqEddy()
+    virtual ~homogeneousDynOneEqEddy()
     {}
 
 
@@ -156,7 +133,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DkEff", nuSgs_ + nu())
+                new volScalarField("DkEff", muSgs_ + mu())
             );
         }
 
@@ -171,7 +148,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace LESModels
-} // End namespace incompressible
+} // End namespace compressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
