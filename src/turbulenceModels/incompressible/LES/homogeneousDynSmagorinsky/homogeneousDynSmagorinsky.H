@@ -48,7 +48,7 @@ Description
 
     and
 
-        cD=<L.M>/<M.M>,
+        cD=1/2*<L.M>/<M.M>,
 
     where
 
