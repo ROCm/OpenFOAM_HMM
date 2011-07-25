@@ -22,49 +22,41 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::incompressible::LESModels::dynOneEqEddy
+    Foam::incompressible::LESModels::homogeneousDynOneEqEddy
 
 Description
-    Localised Dynamic One Equation Eddy Viscosity Model for incompressible
-    flows
+    One Equation Eddy Viscosity Model for incompressible flows.
 
     Eddy viscosity SGS model using a modeled balance equation to simulate
-    the behaviour of k, hence
+    the behaviour of k.
+
+    Thus
     \verbatim
         d/dt(k) + div(U*k) - div(nuSgs*grad(k))
         =
-        -B*L - ce*rho*k^3/2/delta
+        -B*L - ce*k^3/2/delta
+
     and
+
         B = 2/3*k*I - 2*nuSgs*dev(D)
         Beff = 2/3*k*I - 2*nuEff*dev(D)
+
     where
-        nuSgs = cD*delta^2*||D||
+
+        D = symm(grad(U));
+        nuSgs = ck*sqrt(k)*delta
         nuEff = nuSgs + nu
     \endverbatim
 
-    A dynamic procedure is here applied to evaluate ck and ce
-    \verbatim
-        ck=<L.M>/<M.M>
-    and
-        ce=<e*m>/<m*m>
-    where
-       K = 0.5*(F(U.U) - F(U).F(U))
-       L = (F(U*U) - F(U)*F(U) - 0.33*K*I)
-       M = delta*(F(sqrt(k)*D) - 2*sqrt(K + filter(k))*F(D))
-       m = pow(K + F(k), 3.0/2.0)/(2*delta) - F(pow(k, 3.0/2.0))/delta
-       e = 2*delta*ck*(F(sqrt(k)*(D && D)) - 2*sqrt(K + F(k))*(F(D) && F(D)))/
-    \endverbatim
-
 SourceFiles
-    dynOneEqEddy.C
+    homogeneousDynOneEqEddy.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dynOneEqEddy_H
-#define dynOneEqEddy_H
+#ifndef homogeneousDynOneEqEddy_H
+#define homogeneousDynOneEqEddy_H
 
 #include "GenEddyVisc.H"
-#include "simpleFilter.H"
 #include "LESfilter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -77,10 +69,10 @@ namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class dynOneEqEddy Declaration
+                           Class homogeneousDynOneEqEddy Declaration
 \*---------------------------------------------------------------------------*/
 
-class dynOneEqEddy
+class homogeneousDynOneEqEddy
 :
     public GenEddyVisc
 {
@@ -88,7 +80,6 @@ class dynOneEqEddy
 
         volScalarField k_;
 
-        simpleFilter simpleFilter_;
         autoPtr<LESfilter> filterPtr_;
         LESfilter& filter_;
 
@@ -96,39 +87,26 @@ class dynOneEqEddy
     // Private Member Functions
 
         //- Update sub-grid scale fields
-        void updateSubGridScaleFields
-        (
-            const volSymmTensorField& D,
-            const volScalarField& KK
-        );
+        void updateSubGridScaleFields(const volSymmTensorField& D);
 
         //- Calculate ck, ce by filtering the velocity field U.
-        volScalarField ck
-        (
-            const volSymmTensorField&,
-            const volScalarField&
-        ) const;
-
-        volScalarField ce
-        (
-            const volSymmTensorField&,
-            const volScalarField&
-        ) const;
+        dimensionedScalar ck(const volSymmTensorField& D) const;
+        dimensionedScalar ce(const volSymmTensorField& D) const;
 
         // Disallow default bitwise copy construct and assignment
-        dynOneEqEddy(const dynOneEqEddy&);
-        dynOneEqEddy& operator=(const dynOneEqEddy&);
+        homogeneousDynOneEqEddy(const homogeneousDynOneEqEddy&);
+        homogeneousDynOneEqEddy& operator=(const homogeneousDynOneEqEddy&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("dynOneEqEddy");
+    TypeName("homogeneousDynOneEqEddy");
 
     // Constructors
 
         //- Construct from components
-        dynOneEqEddy
+        homogeneousDynOneEqEddy
         (
             const volVectorField& U,
             const surfaceScalarField& phi,
@@ -139,7 +117,7 @@ public:
 
 
     //- Destructor
-    virtual ~dynOneEqEddy()
+    virtual ~homogeneousDynOneEqEddy()
     {}
 
 

@@ -4,7 +4,7 @@ cd ${0%/*} || exit 1    # run from this directory
 # Source tutorial clean functions
 . $WM_PROJECT_DIR/bin/tools/CleanFunctions
 
-keepCases="damBreak"
+keepCases="damBreak damBreakPorousBaffle"
 loseCases="damBreakFine"
 
 for case in $keepCases
@@ -15,6 +15,12 @@ do
     then
         cp $case/0/alpha1.org $case/0/alpha1
     fi
+
+    if [ "$case" = "damBreakPorousBaffle" ]
+    then
+        cp $case/0/alpha1.org $case/0/alpha1
+    fi
+
 done
 
 for case in $loseCases

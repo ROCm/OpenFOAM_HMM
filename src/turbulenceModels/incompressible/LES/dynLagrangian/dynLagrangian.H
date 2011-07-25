@@ -25,8 +25,8 @@ Class
     Foam::incompressible::LESModels::dynLagrangian
 
 Description
-    Lagrangian Two Equations Eddy Viscosity Model for incompressible
-    flows
+    Dynamic eddy-viscosity model with Lagrangian averaging for incompressible
+    flow
 
     \verbatim
         B = 2/3*k*I - 2*nuSgs*dev(D)
@@ -57,9 +57,13 @@ Description
     \endverbatim
 
     Reference:
-    1. Charles Meneveau, Thomas Lund and William Cabot
-    "A Lagrangian dynamic subgrid-scale model of turbulence"
-    J. Fluid Mech (1996), vol 319, pp. 353-385
+    \verbatim
+        "A Lagrangian dynamic subgrid-scale model of turbulence"
+        Charles Meneveau,
+        Thomas Lund,
+        William Cabot,
+        J. Fluid Mech (1996), vol 319, pp. 353-385
+    \endverbatim
 
 SourceFiles
     dynLagrangian.C

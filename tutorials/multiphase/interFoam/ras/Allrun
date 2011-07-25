@@ -23,6 +23,9 @@ setDamBreakFine ()
     mv temp.$$ $controlDict
 }
 
+# Do damBreakPorousBaffle
+(cd damBreakPorousBaffle && foamRunTutorials)
+
 # Do damBreak
 (cd damBreak && foamRunTutorials)
 
@@ -42,5 +45,8 @@ cloneCase damBreak damBreakFine
     runParallel `getApplication` 4
     runApplication reconstructPar
 )
+
+# Do damBreakPorousBaffle
+(cd damBreakPorousBaffle && foamRunTutorials)
 
 # ----------------------------------------------------------------- end-of-file

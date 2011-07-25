@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "homogeneousDynSmagorinsky.H"
+#include "homogeneousDynOneEqEddy.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -37,39 +37,40 @@ namespace LESModels
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(homogeneousDynSmagorinsky, 0);
-addToRunTimeSelectionTable(LESModel, homogeneousDynSmagorinsky, dictionary);
+defineTypeNameAndDebug(homogeneousDynOneEqEddy, 0);
+addToRunTimeSelectionTable(LESModel, homogeneousDynOneEqEddy, dictionary);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void homogeneousDynSmagorinsky::updateSubGridScaleFields
+void homogeneousDynOneEqEddy::updateSubGridScaleFields
 (
     const volSymmTensorField& D
 )
 {
-    nuSgs_ = cD(D)*sqr(delta())*sqrt(magSqr(D));
+    nuSgs_ = ck(D)*sqrt(k_)*delta();
     nuSgs_.correctBoundaryConditions();
 }
 
 
-dimensionedScalar homogeneousDynSmagorinsky::cD
+dimensionedScalar homogeneousDynOneEqEddy::ck
 (
     const volSymmTensorField& D
 ) const
 {
+    tmp<volScalarField> KK = 0.5*(filter_(magSqr(U())) - magSqr(filter_(U())));
+
     const volSymmTensorField MM
     (
-        sqr(delta())*(filter_(mag(D)*(D)) - 4*mag(filter_(D))*filter_(D))
+        delta()*(filter_(sqrt(k_)*D) - 2*sqrt(KK + filter_(k_))*filter_(D))
     );
 
     dimensionedScalar MMMM = average(magSqr(MM));
 
     if (MMMM.value() > VSMALL)
     {
-        tmp<volSymmTensorField> LL =
-            dev(filter_(sqr(U())) - (sqr(filter_(U()))));
+        tmp<volSymmTensorField> LL = dev(filter_(sqr(U())) - sqr(filter_(U())));
 
-        return 0.5*average(LL && MM)/MMMM;
+        return average(LL && MM)/MMMM;
     }
     else
     {
@@ -78,24 +79,35 @@ dimensionedScalar homogeneousDynSmagorinsky::cD
 }
 
 
-dimensionedScalar homogeneousDynSmagorinsky::cI
+dimensionedScalar homogeneousDynOneEqEddy::ce
 (
     const volSymmTensorField& D
 ) const
 {
+    const volScalarField KK
+    (
+        0.5*(filter_(magSqr(U())) - magSqr(filter_(U())))
+    );
+
     const volScalarField mm
     (
-        sqr(delta())*(4*sqr(mag(filter_(D))) - filter_(sqr(mag(D))))
+        pow(KK + filter_(k_), 1.5)/(2*delta()) - filter_(pow(k_, 1.5))/delta()
     );
 
     dimensionedScalar mmmm = average(magSqr(mm));
 
     if (mmmm.value() > VSMALL)
     {
-        tmp<volScalarField> KK =
-            0.5*(filter_(magSqr(U())) - magSqr(filter_(U())));
+        tmp<volScalarField> ee =
+        (
+            2*delta()*ck(D)
+          * (
+                filter_(sqrt(k_)*magSqr(D))
+              - 2*sqrt(KK + filter_(k_))*magSqr(filter_(D))
+            )
+        );
 
-        return average(KK*mm)/mmmm;
+        return average(ee*mm)/mmmm;
     }
     else
     {
@@ -106,7 +118,7 @@ dimensionedScalar homogeneousDynSmagorinsky::cI
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-homogeneousDynSmagorinsky::homogeneousDynSmagorinsky
+homogeneousDynOneEqEddy::homogeneousDynOneEqEddy
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
@@ -134,9 +146,9 @@ homogeneousDynSmagorinsky::homogeneousDynSmagorinsky
     filterPtr_(LESfilter::New(U.mesh(), coeffDict())),
     filter_(filterPtr_())
 {
-    bound(k_,  kMin_);
+    bound(k_, kMin_);
 
-    updateSubGridScaleFields(dev(symm(fvc::grad(U))));
+    updateSubGridScaleFields(symm(fvc::grad(U)));
 
     printCoeffs();
 }
@@ -144,20 +156,36 @@ homogeneousDynSmagorinsky::homogeneousDynSmagorinsky
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void homogeneousDynSmagorinsky::correct(const tmp<volTensorField>& gradU)
+void homogeneousDynOneEqEddy::correct(const tmp<volTensorField>& tgradU)
 {
-    LESModel::correct(gradU);
+    const volTensorField& gradU = tgradU();
 
-    const volSymmTensorField D(dev(symm(gradU)));
+    GenEddyVisc::correct(gradU);
 
-    k_ = cI(D)*sqr(delta())*magSqr(D);
-    bound(k_,  kMin_);
+    const volSymmTensorField D(symm(gradU));
+
+    const volScalarField P(2.0*nuSgs_*magSqr(D));
+
+    tmp<fvScalarMatrix> kEqn
+    (
+       fvm::ddt(k_)
+     + fvm::div(phi(), k_)
+     - fvm::laplacian(DkEff(), k_)
+    ==
+       P
+     - fvm::Sp(ce(D)*sqrt(k_)/delta(), k_)
+    );
+
+    kEqn().relax();
+    kEqn().solve();
+
+    bound(k_, kMin_);
 
     updateSubGridScaleFields(D);
 }
 
 
-bool homogeneousDynSmagorinsky::read()
+bool homogeneousDynOneEqEddy::read()
 {
     if (GenEddyVisc::read())
     {
