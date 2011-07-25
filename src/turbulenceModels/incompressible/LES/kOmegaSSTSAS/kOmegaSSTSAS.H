@@ -25,7 +25,7 @@ Class
     Foam::incompressible::LESModels::kOmegaSSTSAS
 
 Description
-     kOmegaSSTSAS LES turbulence model for incompressible flows
+    kOmegaSSTSAS LES turbulence model for incompressible flows
     based on:
 
     "Evaluation of the SST-SAS model: channel flow, asymmetric diffuser
@@ -43,6 +43,7 @@ Description
     Model during the DESIDER Project. Published in Springer-Verlag Berlin
     Heidelberg 2009.
     F. R. Menter and Y. Egorov.
+
 
 SourceFiles
     kOmegaSSTSAS.C

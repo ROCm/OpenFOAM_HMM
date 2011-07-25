@@ -69,7 +69,7 @@ dimensionedScalar homogeneousDynSmagorinsky::cD
         tmp<volSymmTensorField> LL =
             dev(filter_(sqr(U())) - (sqr(filter_(U()))));
 
-        return average(LL && MM)/MMMM;
+        return 0.5*average(LL && MM)/MMMM;
     }
     else
     {

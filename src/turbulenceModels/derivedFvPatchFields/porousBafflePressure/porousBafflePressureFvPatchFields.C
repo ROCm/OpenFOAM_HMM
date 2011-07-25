@@ -110,7 +110,7 @@ void Foam::porousBafflePressureFvPatchField<Foam::scalar>::updateCoeffs()
             << endl;
     }
 
-    jumpCyclicFvPatchField<scalar>::updateCoeffs();
+    fixedJumpFvPatchField<scalar>::updateCoeffs();
 }
 
 

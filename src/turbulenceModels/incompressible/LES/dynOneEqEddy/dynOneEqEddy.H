@@ -25,27 +25,34 @@ Class
     Foam::incompressible::LESModels::dynOneEqEddy
 
 Description
-    One Equation Eddy Viscosity Model for incompressible flows.
+    Localised Dynamic One Equation Eddy Viscosity Model for incompressible
+    flows
 
     Eddy viscosity SGS model using a modeled balance equation to simulate
-    the behaviour of k.
-
-    Thus
+    the behaviour of k, hence
     \verbatim
         d/dt(k) + div(U*k) - div(nuSgs*grad(k))
         =
-        -B*L - ce*k^3/2/delta
-
+        -B*L - ce*rho*k^3/2/delta
     and
-
         B = 2/3*k*I - 2*nuSgs*dev(D)
         Beff = 2/3*k*I - 2*nuEff*dev(D)
-
     where
-
-        D = symm(grad(U));
-        nuSgs = ck*sqrt(k)*delta
+        nuSgs = cD*delta^2*||D||
         nuEff = nuSgs + nu
+    \endverbatim
+
+    A dynamic procedure is here applied to evaluate ck and ce
+    \verbatim
+        ck=<L.M>/<M.M>
+    and
+        ce=<e*m>/<m*m>
+    where
+       K = 0.5*(F(U.U) - F(U).F(U))
+       L = (F(U*U) - F(U)*F(U) - 0.33*K*I)
+       M = delta*(F(sqrt(k)*D) - 2*sqrt(K + filter(k))*F(D))
+       m = pow(K + F(k), 3.0/2.0)/(2*delta) - F(pow(k, 3.0/2.0))/delta
+       e = 2*delta*ck*(F(sqrt(k)*(D && D)) - 2*sqrt(K + F(k))*(F(D) && F(D)))/
     \endverbatim
 
 SourceFiles
@@ -57,6 +64,7 @@ SourceFiles
 #define dynOneEqEddy_H
 
 #include "GenEddyVisc.H"
+#include "simpleFilter.H"
 #include "LESfilter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -80,6 +88,7 @@ class dynOneEqEddy
 
         volScalarField k_;
 
+        simpleFilter simpleFilter_;
         autoPtr<LESfilter> filterPtr_;
         LESfilter& filter_;
 
@@ -87,11 +96,24 @@ class dynOneEqEddy
     // Private Member Functions
 
         //- Update sub-grid scale fields
-        void updateSubGridScaleFields(const volSymmTensorField& D);
+        void updateSubGridScaleFields
+        (
+            const volSymmTensorField& D,
+            const volScalarField& KK
+        );
 
         //- Calculate ck, ce by filtering the velocity field U.
-        dimensionedScalar ck(const volSymmTensorField& D) const;
-        dimensionedScalar ce(const volSymmTensorField& D) const;
+        volScalarField ck
+        (
+            const volSymmTensorField&,
+            const volScalarField&
+        ) const;
+
+        volScalarField ce
+        (
+            const volSymmTensorField&,
+            const volScalarField&
+        ) const;
 
         // Disallow default bitwise copy construct and assignment
         dynOneEqEddy(const dynOneEqEddy&);
