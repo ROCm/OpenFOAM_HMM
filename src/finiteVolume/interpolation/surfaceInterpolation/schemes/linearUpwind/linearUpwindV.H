@@ -113,8 +113,11 @@ public:
         {
             if (!schemeData.eof())
             {
-                IOWarningIn("linearUpwindV(const fvMesh&, Istream&)", schemeData)
-                    << "unexpected additional entries in stream." << nl
+                IOWarningIn
+                (
+                    "linearUpwindV(const fvMesh&, Istream&)",
+                    schemeData
+                )   << "unexpected additional entries in stream." << nl
                     << "    Only the name of the gradient scheme in the"
                        " 'gradSchemes' dictionary should be specified."
                     << endl;
