@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,7 @@ Class
 Description
     A surface formed by the iso value.
     After "Polygonising A Scalar Field Using Tetrahedrons", Paul Bourke
-    and
+    (http://paulbourke.net/geometry/polygonise) and
     "Regularised Marching Tetrahedra: improved iso-surface extraction",
     G.M. Treece, R.W. Prager and A.H. Gee.
 
@@ -116,7 +116,12 @@ class isoSurfaceCell
             const scalar s1
         ) const;
 
-        //List<triFace> triangulate(const face& f) const;
+        //- Does any edge of triangle cross iso value?
+        bool isTriCut
+        (
+            const triFace& tri,
+            const scalarField& pointValues
+        ) const;
 
         //- Determine whether cell is cut
         cellCutType calcCutType
@@ -142,11 +147,12 @@ class isoSurfaceCell
 
         static point calcCentre(const triSurface&);
 
-        static pointIndexHit collapseSurface
+        pointIndexHit collapseSurface
         (
+            const label cellI,
             pointField& localPoints,
             DynamicList<labelledTri, 64>& localTris
-        );
+        ) const;
 
         //- Determine per cc whether all near cuts can be snapped to single
         //  point.
@@ -165,7 +171,7 @@ class isoSurfaceCell
             const scalarField& cellValues,
             const scalarField& pointValues,
             const label pointI,
-            const face& f,
+            const label faceI,
             const label cellI,
             DynamicList<point, 64>& localTriPoints
         ) const;
@@ -175,6 +181,7 @@ class isoSurfaceCell
         (
             const scalarField& pointValues,
             const label pointI,
+            const label faceI,
             const label cellI,
             DynamicList<point, 64>& localTriPoints
         ) const;
@@ -183,7 +190,6 @@ class isoSurfaceCell
         //  point.
         void calcSnappedPoint
         (
-            const PackedBoolList& isBoundaryPoint,
             const PackedBoolList& isTet,
             const scalarField& cVals,
             const scalarField& pVals,
