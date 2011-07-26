@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -194,8 +194,6 @@ void Foam::fvMeshSubset::doCoupledPatches
     {
         Info<< "Uncoupled " << nUncoupled << " faces on coupled patches. "
             << "(processorPolyPatch, cyclicPolyPatch)" << nl
-            << "You might need to run couplePatches to restore the patch face"
-            << " ordering." << nl << endl;
     }
 }
 
