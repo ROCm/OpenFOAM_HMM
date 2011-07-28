@@ -55,7 +55,6 @@ Description
     this if you don't mind having disconnected domains in a single region.
     This option requires all cells to be in one (and one only) cellZone.
 
-
     - Should work in parallel.
     cellZones can differ on either side of processor boundaries in which case
     the faces get moved from processor patch to directMapped patch. Not
@@ -65,6 +64,13 @@ Description
     the largest matching region (-sloppyCellZones). This will accept any
     region that covers more than 50% of the zone. It has to be a subset
     so cannot have any cells in any other zone.
+
+    - If explicitly a single region has been selected (-largestOnly or
+      -insidePoint) its region name will be either
+        - name of a cellZone it matches to or
+        - "largestOnly" respectively "insidePoint" or
+        - polyMesh::defaultRegion if additionally -overwrite
+          (so it will overwrite the input mesh!)
 
     - writes maps like decomposePar back to original mesh:
         - pointRegionAddressing : for every point in this region the point in
@@ -1866,6 +1872,29 @@ int main(int argc, char *argv[])
             regionNames,
             zoneToRegion
         );
+
+        // Override any default region names if single region selected
+        if (largestOnly || insidePoint)
+        {
+            forAll(regionToZone, regionI)
+            {
+                if (regionToZone[regionI] == -1)
+                {
+                    if (overwrite)
+                    {
+                        regionNames[regionI] = polyMesh::defaultRegion;
+                    }
+                    else if (insidePoint)
+                    {
+                        regionNames[regionI] = "insidePoint";
+                    }
+                    else if (largestOnly)
+                    {
+                        regionNames[regionI] = "largestOnly";
+                    }
+                }
+            }
+        }
     }
 
     Info<< endl << "Number of regions:" << nCellRegions << nl << endl;
@@ -2173,7 +2202,8 @@ int main(int argc, char *argv[])
 
             Info<< nl
                 << "Subsetting region " << regionI
-                << " of size " << regionSizes[regionI] << endl;
+                << " of size " << regionSizes[regionI]
+                << " as named region " << regionNames[regionI] << endl;
 
             createAndWriteRegion
             (
