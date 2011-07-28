@@ -208,7 +208,6 @@ public:
         );
     }
 
-
     //- Does the Dual vertex form part of a processor patch
     inline Foam::label dualVertexMasterProc() const
     {
