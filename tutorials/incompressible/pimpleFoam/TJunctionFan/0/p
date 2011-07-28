@@ -17,7 +17,7 @@ FoamFile
 
 dimensions      [0 2 -2 0 0 0 0];
 
-internalField   uniform 100000;
+internalField   uniform 0;
 
 boundaryField
 {
@@ -27,20 +27,20 @@ boundaryField
         rho             none;
         psi             none;
         gamma           1;
-        p0              100040;
+        p0              40;
         fileName        "$FOAM_CASE/constant/p0vsTime";
         outOfBounds     clamp;
-        value           uniform 100040;
+        value           uniform 40;
     }
     outlet1
     {
         type            fixedValue;
-        value           uniform 100010;
+        value           uniform 10;
     }
     outlet2
     {
         type            fixedValue;
-        value           uniform 100000;
+        value           uniform 0;
     }
     baffles
     {
@@ -50,6 +50,7 @@ boundaryField
     {
         type            fan;
         patchType       cyclic;
+        jump            uniform 0;
         f               2(100 -0.1);
         value           uniform 0;
     }
@@ -57,6 +58,7 @@ boundaryField
     {
         type            fan;
         patchType       cyclic;
+        jump            uniform 0;
         f               2(100 -0.1);
         value           uniform 0;
     }

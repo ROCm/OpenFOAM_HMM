@@ -111,11 +111,17 @@ public:
                 )
             )
         {
-            IOWarningIn("linearUpwindV(const fvMesh&, Istream&)", schemeData)
-                << "unexpected additional entries in stream." << nl
-                << "    Only the name of the gradient scheme in the"
-                   " 'gradSchemes' dictionary should be specified."
-                << endl;
+            if (!schemeData.eof())
+            {
+                IOWarningIn
+                (
+                    "linearUpwindV(const fvMesh&, Istream&)",
+                    schemeData
+                )   << "unexpected additional entries in stream." << nl
+                    << "    Only the name of the gradient scheme in the"
+                       " 'gradSchemes' dictionary should be specified."
+                    << endl;
+            }
         }
 
         //- Construct from faceFlux and Istream
@@ -137,11 +143,18 @@ public:
                 )
             )
         {
-            IOWarningIn("linearUpwindV(const fvMesh&, Istream&)", schemeData)
-                << "unexpected additional entries in stream." << nl
-                << "    Only the name of the gradient scheme in the"
-                   " 'gradSchemes' dictionary should be specified."
-                << endl;
+            if (!schemeData.eof())
+            {
+                IOWarningIn
+                (
+                    "linearUpwindV(const fvMesh&, "
+                    "const surfaceScalarField& faceFlux, Istream&)",
+                    schemeData
+                )   << "unexpected additional entries in stream." << nl
+                    << "    Only the name of the gradient scheme in the"
+                       " 'gradSchemes' dictionary should be specified."
+                    << endl;
+            }
         }
 
 

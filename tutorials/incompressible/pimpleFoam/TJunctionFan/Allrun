@@ -9,21 +9,16 @@ application=`getApplication`
 runApplication blockMesh
 
 
-# Creating patches 'out of nothing' so willl get undefined value which
+# Creating patches 'out of nothing' so will get undefined value which
 # might cause floating point error
 unset FOAM_SIGFPE
 unset FOAM_SETNAN
 
-# Add cyclic baffles for fan
-runApplication setSet -batch selectCyclics.setSet
-#runApplication createBaffles cyclicFaces '(fan_half0 fan_half1)' -overwrite
+# Create faceZones for fan and baffles
+runApplication topoSet
+# Create fan cyclics
 createBaffles cyclicFaces '(fan_half0 fan_half1)' -overwrite > log.createBaffles 2>&1
-
-# Add wall baffles
-rm log.setSet
-runApplication setSet -batch selectBaffles.setSet
-rm log.createBaffles
-#runApplication createBaffles baffleFaces '(baffles baffles)' -overwrite
+# Create wall baffles
 createBaffles baffleFaces '(baffles baffles)' -overwrite > log.createBaffles 2>&1
 
 runApplication $application

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -245,27 +245,56 @@ void Foam::isoSurfaceCell::generateTriPoints
                     }
                 }
 
-                generateTriPoints
-                (
-                    snappedPoints,
-                    pVals[f0[0]],
-                    pCoords[f0[0]],
-                    snappedPoint[f0[0]],
+                // Start off from positive volume tet to make sure we
+                // generate outwards pointing tets
+                if (mesh_.faceOwner()[cFaces[0]] == cellI)
+                {
+                    generateTriPoints
+                    (
+                        snappedPoints,
+                        pVals[f0[1]],
+                        pCoords[f0[1]],
+                        snappedPoint[f0[1]],
 
-                    pVals[f0[1]],
-                    pCoords[f0[1]],
-                    snappedPoint[f0[1]],
+                        pVals[f0[0]],
+                        pCoords[f0[0]],
+                        snappedPoint[f0[0]],
 
-                    pVals[f0[2]],
-                    pCoords[f0[2]],
-                    snappedPoint[f0[2]],
+                        pVals[f0[2]],
+                        pCoords[f0[2]],
+                        snappedPoint[f0[2]],
 
-                    pVals[oppositeI],
-                    pCoords[oppositeI],
-                    snappedPoint[oppositeI],
+                        pVals[oppositeI],
+                        pCoords[oppositeI],
+                        snappedPoint[oppositeI],
 
-                    triPoints
-                );
+                        triPoints
+                    );
+                }
+                else
+                {
+                    generateTriPoints
+                    (
+                        snappedPoints,
+                        pVals[f0[0]],
+                        pCoords[f0[0]],
+                        snappedPoint[f0[0]],
+
+                        pVals[f0[1]],
+                        pCoords[f0[1]],
+                        snappedPoint[f0[1]],
+
+                        pVals[f0[2]],
+                        pCoords[f0[2]],
+                        snappedPoint[f0[2]],
+
+                        pVals[oppositeI],
+                        pCoords[oppositeI],
+                        snappedPoint[oppositeI],
+
+                        triPoints
+                    );
+                }
             }
             else
             {
@@ -276,37 +305,68 @@ void Foam::isoSurfaceCell::generateTriPoints
                     label faceI = cFaces[cFaceI];
                     const face& f = mesh_.faces()[faceI];
 
-                    for (label fp = 1; fp < f.size() - 1; fp++)
+                    const label fp0 = mesh_.tetBasePtIs()[faceI];
+
+                    label fp = f.fcIndex(fp0);
+                    for (label i = 2; i < f.size(); i++)
                     {
-                        triFace tri(f[0], f[fp], f[f.fcIndex(fp)]);
-                    //List<triFace> tris(triangulate(f));
-                    //forAll(tris, i)
-                    //{
-                    //    const triFace& tri = tris[i];
+                        label nextFp = f.fcIndex(fp);
+                        triFace tri(f[fp0], f[fp], f[nextFp]);
 
+                        // Start off from positive volume tet to make sure we
+                        // generate outwards pointing tets
+                        if (mesh_.faceOwner()[faceI] == cellI)
+                        {
+                            generateTriPoints
+                            (
+                                snappedPoints,
 
-                        generateTriPoints
-                        (
-                            snappedPoints,
+                                pVals[tri[1]],
+                                pCoords[tri[1]],
+                                snappedPoint[tri[1]],
 
-                            pVals[tri[0]],
-                            pCoords[tri[0]],
-                            snappedPoint[tri[0]],
+                                pVals[tri[0]],
+                                pCoords[tri[0]],
+                                snappedPoint[tri[0]],
 
-                            pVals[tri[1]],
-                            pCoords[tri[1]],
-                            snappedPoint[tri[1]],
+                                pVals[tri[2]],
+                                pCoords[tri[2]],
+                                snappedPoint[tri[2]],
 
-                            pVals[tri[2]],
-                            pCoords[tri[2]],
-                            snappedPoint[tri[2]],
+                                cVals[cellI],
+                                cCoords[cellI],
+                                snappedCc[cellI],
 
-                            cVals[cellI],
-                            cCoords[cellI],
-                            snappedCc[cellI],
+                                triPoints
+                            );
+                        }
+                        else
+                        {
+                            generateTriPoints
+                            (
+                                snappedPoints,
 
-                            triPoints
-                        );
+                                pVals[tri[0]],
+                                pCoords[tri[0]],
+                                snappedPoint[tri[0]],
+
+                                pVals[tri[1]],
+                                pCoords[tri[1]],
+                                snappedPoint[tri[1]],
+
+                                pVals[tri[2]],
+                                pCoords[tri[2]],
+                                snappedPoint[tri[2]],
+
+                                cVals[cellI],
+                                cCoords[cellI],
+                                snappedCc[cellI],
+
+                                triPoints
+                            );
+                        }
+
+                        fp = nextFp;
                     }
                 }
             }

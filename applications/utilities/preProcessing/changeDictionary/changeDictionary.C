@@ -248,6 +248,12 @@ int main(int argc, char *argv[])
 {
     argList::addOption
     (
+        "dict",
+        "file",
+        "specify an alternative to system/changeDictionaryDict"
+    );
+    argList::addOption
+    (
         "instance",
         "name",
         "specify alternate time instance - default is latest time"
@@ -267,6 +273,18 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedMesh.H"
+
+    const word dictName("changeDictionaryDict");
+
+    fileName dictPath = dictName;
+    if (args.optionFound("dict"))
+    {
+        dictPath = args["dict"];
+        if (isDir(dictPath))
+        {
+            dictPath = dictPath / dictName;
+        }
+    }
 
     const bool literalRE = args.optionFound("literalRE");
 
@@ -313,15 +331,26 @@ int main(int argc, char *argv[])
     // Get the replacement rules from a dictionary
     IOdictionary dict
     (
-        IOobject
         (
-            "changeDictionaryDict",
-            runTime.system(),
-            mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE
+            args.optionFound("dict")
+          ? IOobject
+            (
+                dictPath,
+                mesh,
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE
+            )
+          : IOobject
+            (
+                dictName,
+                runTime.system(),
+                mesh,
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE
+            )
         )
     );
+
     const dictionary& replaceDicts = dict.subDict("dictionaryReplacement");
     Info<< "Read dictionary " << dict.name()
         << " with replacements for dictionaries "

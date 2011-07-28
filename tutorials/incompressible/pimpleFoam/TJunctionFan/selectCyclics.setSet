@@ -1,3 +1,0 @@
-faceSet cyclicFaces new boxToFace (0.099 -0.006 0.004)(0.101 0.006 0.016)
-cellSet cyclicFacesSlaveCells new boxToCell (-10 -10 -10)(0.1 10 10)
-faceZoneSet cyclicFaces new setsToFaceZone cyclicFaces cyclicFacesSlaveCells
