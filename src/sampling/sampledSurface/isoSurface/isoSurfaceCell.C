@@ -955,13 +955,6 @@ Foam::triSurface Foam::isoSurfaceCell::stitchTriPoints
 
         for (label oldTriI = 0; oldTriI < nTris; oldTriI++)
         {
-            labelledTri oldTri
-            (
-                rawPointI,
-                rawPointI+1,
-                rawPointI+2,
-                0
-            );
             labelledTri tri
             (
                 triPointReverseMap[rawPointI],
