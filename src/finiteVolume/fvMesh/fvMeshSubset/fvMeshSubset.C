@@ -193,7 +193,7 @@ void Foam::fvMeshSubset::doCoupledPatches
     if (nUncoupled > 0)
     {
         Info<< "Uncoupled " << nUncoupled << " faces on coupled patches. "
-            << "(processorPolyPatch, cyclicPolyPatch)" << nl
+            << "(processorPolyPatch, cyclicPolyPatch)" << endl;
     }
 }
 
