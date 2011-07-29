@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,14 +27,14 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::globalIndex::globalIndex(const label localSize)
+Foam::globalIndex::globalIndex(const label localSize, const int tag)
 :
     offsets_(Pstream::nProcs()+1)
 {
     labelList localSizes(Pstream::nProcs());
     localSizes[Pstream::myProcNo()] = localSize;
-    Pstream::gatherList(localSizes);
-    Pstream::scatterList(localSizes);
+    Pstream::gatherList(localSizes, tag);
+    Pstream::scatterList(localSizes, tag);
 
     label offset = 0;
     offsets_[0] = 0;

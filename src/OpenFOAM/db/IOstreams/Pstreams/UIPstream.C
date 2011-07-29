@@ -84,12 +84,16 @@ Foam::UIPstream::~UIPstream()
     {
         if (debug)
         {
-            Pout<< "UIPstream::~UIPstream() : clearing externalBuf_ of size "
-                << externalBuf_.size() << endl;
+            Pout<< "UIPstream::~UIPstream() : tag:" << tag_
+                << " fromProcNo:" << fromProcNo_
+                << " clearing externalBuf_ of size "
+                << externalBuf_.size()
+                << " messageSize_:" << messageSize_ << endl;
         }
         externalBuf_.clearStorage();
     }
 }
+
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 

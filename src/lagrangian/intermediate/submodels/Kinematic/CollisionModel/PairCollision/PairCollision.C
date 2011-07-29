@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,11 +59,13 @@ void Foam::PairCollision<CloudType>::parcelInteraction()
 {
     PstreamBuffers pBufs(Pstream::nonBlocking);
 
+    label startOfRequests = Pstream::nRequests();
+
     il_.sendReferredData(this->owner().cellOccupancy(), pBufs);
 
     realRealInteraction();
 
-    il_.receiveReferredData(pBufs);
+    il_.receiveReferredData(pBufs, startOfRequests);
 
     realReferredInteraction();
 }

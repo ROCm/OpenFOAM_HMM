@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -262,14 +262,23 @@ public:
         //  Spawns slave processes and initialises inter-communication
         static bool init(int& argc, char**& argv);
 
-        //- Non-blocking comms: wait until all have finished.
-        static void waitRequests();
+        // Non-blocking comms
 
-        //- Non-blocking comms: has request i finished?
-        static bool finishedRequest(const label i);
+            //- Get number of outstanding requests
+            static label nRequests();
+
+            //- Truncate number of outstanding requests
+            static void resetRequests(const label sz);
+
+            //- Wait until all requests (from start onwards) have finished.
+            static void waitRequests(const label start = 0);
+
+            //- Non-blocking comms: has request i finished?
+            static bool finishedRequest(const label i);
+
 
         //- Is this a parallel run?
-        static bool parRun()
+        static bool& parRun()
         {
             return parRun_;
         }
