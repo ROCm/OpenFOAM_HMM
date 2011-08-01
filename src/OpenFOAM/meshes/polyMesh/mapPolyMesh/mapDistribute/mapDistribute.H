@@ -201,6 +201,7 @@ class mapDistribute
 
         void exchangeAddressing
         (
+            const int tag,
             const globalIndex& globalNumbering,
             labelList& elements,
             List<Map<label> >& compactMap,
@@ -208,6 +209,7 @@ class mapDistribute
         );
         void exchangeAddressing
         (
+            const int tag,
             const globalIndex& globalNumbering,
             labelListList& elements,
             List<Map<label> >& compactMap,
@@ -380,7 +382,8 @@ public:
         (
             const globalIndex&,
             labelList& elements,
-            List<Map<label> >& compactMap
+            List<Map<label> >& compactMap,
+            const int tag = Pstream::msgType()
         );
 
         //- Special variant that works with the info sorted into bins
@@ -390,7 +393,8 @@ public:
         (
             const globalIndex&,
             labelListList& cellCells,
-            List<Map<label> >& compactMap
+            List<Map<label> >& compactMap,
+            const int tag = Pstream::msgType()
         );
 
         //- Construct from list of (possibly remote) untransformed elements
@@ -406,7 +410,8 @@ public:
             const globalIndexAndTransform&,
             const labelPairList& transformedElements,
             labelList& transformedIndices,
-            List<Map<label> >& compactMap
+            List<Map<label> >& compactMap,
+            const int tag = Pstream::msgType()
         );
 
         //- As above but with ListLists.
@@ -417,7 +422,8 @@ public:
             const globalIndexAndTransform&,
             const List<labelPairList>& transformedElements,
             labelListList& transformedIndices,
-            List<Map<label> >& compactMap
+            List<Map<label> >& compactMap,
+            const int tag = Pstream::msgType()
         );
 
         //- Construct by transferring parameter content
@@ -487,7 +493,8 @@ public:
             static List<labelPair> schedule
             (
                 const labelListList& subMap,
-                const labelListList& constructMap
+                const labelListList& constructMap,
+                const int tag
             );
 
             //- Return a schedule. Demand driven. See above.
@@ -514,7 +521,7 @@ public:
             //- Compact maps. Gets per field a bool whether it is used (locally)
             //  and works out itself what this side and sender side can remove
             //  from maps.
-            void compact(const boolList& elemIsUsed);
+            void compact(const boolList& elemIsUsed, const int tag);
 
 
             //- Distribute data. Note:schedule only used for Pstream::scheduled
@@ -527,7 +534,8 @@ public:
                 const label constructSize,
                 const labelListList& subMap,
                 const labelListList& constructMap,
-                List<T>&
+                List<T>&,
+                const int tag = UPstream::msgType()
             );
 
             //- Distribute data. If multiple processors writing to same
@@ -542,13 +550,18 @@ public:
                 const labelListList& constructMap,
                 List<T>&,
                 const CombineOp& cop,
-                const T& nullValue
+                const T& nullValue,
+                const int tag = UPstream::msgType()
             );
 
             //- Distribute data using default commsType.
             template<class T>
-            void distribute(List<T>& fld, const bool dummyTransform = true)
-            const;
+            void distribute
+            (
+                List<T>& fld,
+                const bool dummyTransform = true,
+                const int tag = UPstream::msgType()
+            ) const;
 
             //- Same but with transforms
             template<class T, class TransformOp>
@@ -556,7 +569,8 @@ public:
             (
                 const globalIndexAndTransform&,
                 List<T>& fld,
-                const TransformOp& top
+                const TransformOp& top,
+                const int tag = UPstream::msgType()
             ) const;
 
             //- Reverse distribute data using default commsType.
@@ -565,7 +579,8 @@ public:
             (
                 const label constructSize,
                 List<T>&,
-                const bool dummyTransform = true
+                const bool dummyTransform = true,
+                const int tag = UPstream::msgType()
             ) const;
 
             //- Same but with transforms
@@ -575,7 +590,8 @@ public:
                 const globalIndexAndTransform&,
                 const label constructSize,
                 List<T>& fld,
-                const TransformOp& top
+                const TransformOp& top,
+                const int tag = UPstream::msgType()
             ) const;
 
             //- Reverse distribute data using default commsType.
@@ -587,7 +603,8 @@ public:
                 const label constructSize,
                 const T& nullValue,
                 List<T>& fld,
-                const bool dummyTransform = true
+                const bool dummyTransform = true,
+                const int tag = UPstream::msgType()
             ) const;
 
             //- Same but with transforms
@@ -598,7 +615,8 @@ public:
                 const label constructSize,
                 const T& nullValue,
                 List<T>& fld,
-                const TransformOp& top
+                const TransformOp& top,
+                const int tag = UPstream::msgType()
             ) const;
 
             //- Do all sends using PstreamBuffers

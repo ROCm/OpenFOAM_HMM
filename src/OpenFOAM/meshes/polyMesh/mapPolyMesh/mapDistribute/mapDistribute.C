@@ -133,7 +133,8 @@ void Foam::mapDistribute::transform::operator()
 Foam::List<Foam::labelPair> Foam::mapDistribute::schedule
 (
     const labelListList& subMap,
-    const labelListList& constructMap
+    const labelListList& constructMap,
+    const int tag
 )
 {
     // Communications: send and receive processor
@@ -174,7 +175,7 @@ Foam::List<Foam::labelPair> Foam::mapDistribute::schedule
             slave++
         )
         {
-            IPstream fromSlave(Pstream::scheduled, slave);
+            IPstream fromSlave(Pstream::scheduled, slave, 0, tag);
             List<labelPair> nbrData(fromSlave);
 
             forAll(nbrData, i)
@@ -195,18 +196,24 @@ Foam::List<Foam::labelPair> Foam::mapDistribute::schedule
             slave++
         )
         {
-            OPstream toSlave(Pstream::scheduled, slave);
+            OPstream toSlave(Pstream::scheduled, slave, 0, tag);
             toSlave << allComms;
         }
     }
     else
     {
         {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
+            OPstream toMaster(Pstream::scheduled, Pstream::masterNo(), 0, tag);
             toMaster << allComms;
         }
         {
-            IPstream fromMaster(Pstream::scheduled, Pstream::masterNo());
+            IPstream fromMaster
+            (
+                Pstream::scheduled,
+                Pstream::masterNo(),
+                0,
+                tag
+            );
             fromMaster >> allComms;
         }
     }
@@ -257,7 +264,7 @@ const Foam::List<Foam::labelPair>& Foam::mapDistribute::schedule() const
         (
             new List<labelPair>
             (
-                schedule(subMap_, constructMap_)
+                schedule(subMap_, constructMap_, Pstream::msgType())
             )
         );
     }
@@ -471,6 +478,7 @@ void Foam::mapDistribute::calcCompactAddressing
 
 void Foam::mapDistribute::exchangeAddressing
 (
+    const int tag,
     const globalIndex& globalNumbering,
     labelList& elements,
     List<Map<label> >& compactMap,
@@ -535,7 +543,8 @@ void Foam::mapDistribute::exchangeAddressing
     (
         wantedRemoteElements,
         subMap_,
-        sendSizes
+        sendSizes,
+        tag
     );
 
     // Renumber elements
@@ -548,6 +557,7 @@ void Foam::mapDistribute::exchangeAddressing
 
 void Foam::mapDistribute::exchangeAddressing
 (
+    const int tag,
     const globalIndex& globalNumbering,
     labelListList& cellCells,
     List<Map<label> >& compactMap,
@@ -612,7 +622,8 @@ void Foam::mapDistribute::exchangeAddressing
     (
         wantedRemoteElements,
         subMap_,
-        sendSizes
+        sendSizes,
+        tag
     );
 
     // Renumber elements
@@ -750,7 +761,8 @@ Foam::mapDistribute::mapDistribute
 (
     const globalIndex& globalNumbering,
     labelList& elements,
-    List<Map<label> >& compactMap
+    List<Map<label> >& compactMap,
+    const int tag
 )
 :
     constructSize_(0),
@@ -789,6 +801,7 @@ Foam::mapDistribute::mapDistribute
     labelList compactStart;
     exchangeAddressing
     (
+        tag,
         globalNumbering,
         elements,
         compactMap,
@@ -806,7 +819,8 @@ Foam::mapDistribute::mapDistribute
 (
     const globalIndex& globalNumbering,
     labelListList& cellCells,
-    List<Map<label> >& compactMap
+    List<Map<label> >& compactMap,
+    const int tag
 )
 :
     constructSize_(0),
@@ -845,6 +859,7 @@ Foam::mapDistribute::mapDistribute
     labelList compactStart;
     exchangeAddressing
     (
+        tag,
         globalNumbering,
         cellCells,
         compactMap,
@@ -865,7 +880,8 @@ Foam::mapDistribute::mapDistribute
     const globalIndexAndTransform& globalTransforms,
     const labelPairList& transformedElements,
     labelList& transformedIndices,
-    List<Map<label> >& compactMap
+    List<Map<label> >& compactMap,
+    const int tag
 )
 :
     constructSize_(0),
@@ -900,6 +916,7 @@ Foam::mapDistribute::mapDistribute
     labelList compactStart;
     exchangeAddressing
     (
+        tag,
         globalNumbering,
         elements,
         compactMap,
@@ -969,7 +986,8 @@ Foam::mapDistribute::mapDistribute
     const globalIndexAndTransform& globalTransforms,
     const List<labelPairList>& transformedElements,
     labelListList& transformedIndices,
-    List<Map<label> >& compactMap
+    List<Map<label> >& compactMap,
+    const int tag
 )
 :
     constructSize_(0),
@@ -1008,6 +1026,7 @@ Foam::mapDistribute::mapDistribute
     labelList compactStart;
     exchangeAddressing
     (
+        tag,
         globalNumbering,
         cellCells,
         compactMap,
@@ -1150,7 +1169,7 @@ Foam::label Foam::mapDistribute::renumber
 }
 
 
-void Foam::mapDistribute::compact(const boolList& elemIsUsed)
+void Foam::mapDistribute::compact(const boolList& elemIsUsed, const int tag)
 {
     // 1. send back to sender. Have sender delete the corresponding element
     //    from the submap and do the same to the constructMap locally
@@ -1160,6 +1179,31 @@ void Foam::mapDistribute::compact(const boolList& elemIsUsed)
     // mapDistribute but in reverse order.
     if (Pstream::parRun())
     {
+        label startOfRequests = Pstream::nRequests();
+
+        // Set up receives from neighbours
+
+        List<boolList> recvFields(Pstream::nProcs());
+
+        for (label domain = 0; domain < Pstream::nProcs(); domain++)
+        {
+            const labelList& map = subMap_[domain];
+
+            if (domain != Pstream::myProcNo() && map.size())
+            {
+                recvFields[domain].setSize(map.size());
+                IPstream::read
+                (
+                    Pstream::nonBlocking,
+                    domain,
+                    reinterpret_cast<char*>(recvFields[domain].begin()),
+                    recvFields[domain].size()*sizeof(bool),
+                    tag
+                );
+            }
+        }
+
+
         List<boolList> sendFields(Pstream::nProcs());
 
         for (label domain = 0; domain < Pstream::nProcs(); domain++)
@@ -1180,31 +1224,12 @@ void Foam::mapDistribute::compact(const boolList& elemIsUsed)
                     Pstream::nonBlocking,
                     domain,
                     reinterpret_cast<const char*>(subField.begin()),
-                    subField.size()*sizeof(bool)
+                    subField.size()*sizeof(bool),
+                    tag
                 );
             }
         }
 
-        // Set up receives from neighbours
-
-        List<boolList> recvFields(Pstream::nProcs());
-
-        for (label domain = 0; domain < Pstream::nProcs(); domain++)
-        {
-            const labelList& map = subMap_[domain];
-
-            if (domain != Pstream::myProcNo() && map.size())
-            {
-                recvFields[domain].setSize(map.size());
-                IPstream::read
-                (
-                    Pstream::nonBlocking,
-                    domain,
-                    reinterpret_cast<char*>(recvFields[domain].begin()),
-                    recvFields[domain].size()*sizeof(bool)
-                );
-            }
-        }
 
 
         // Set up 'send' to myself - write directly into recvFields
@@ -1222,7 +1247,7 @@ void Foam::mapDistribute::compact(const boolList& elemIsUsed)
 
         // Wait for all to finish
 
-        Pstream::waitRequests();
+        Pstream::waitRequests(startOfRequests);
 
 
         // Compact out all submap entries that are referring to unused elements

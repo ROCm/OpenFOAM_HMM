@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -136,6 +136,11 @@ public:
 
 
     // Member functions
+
+        int tag() const
+        {
+            return tag_;
+        }
 
         //- Mark all sends as having been done. This will start receives
         //  in non-blocking mode. If block will wait for all transfers to

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,26 +52,38 @@ void combineReduce
 (
     const List<UPstream::commsStruct>& comms,
     T& Value,
-    const CombineOp& cop
+    const CombineOp& cop,
+    const int tag
 )
 {
-    Pstream::combineGather(comms, Value, cop);
-    Pstream::combineScatter(comms, Value);
+    Pstream::combineGather(comms, Value, cop, tag);
+    Pstream::combineScatter(comms, Value, tag);
 }
 
 
 template <class T, class CombineOp>
-void combineReduce(T& Value, const CombineOp& cop)
+void combineReduce
+(
+    T& Value,
+    const CombineOp& cop,
+    const int tag = Pstream::msgType()
+)
 {
     if (UPstream::nProcs() < UPstream::nProcsSimpleSum)
     {
-        Pstream::combineGather(UPstream::linearCommunication(), Value, cop);
-        Pstream::combineScatter(UPstream::linearCommunication(), Value);
+        Pstream::combineGather
+        (
+            UPstream::linearCommunication(),
+            Value,
+            cop,
+            tag
+        );
+        Pstream::combineScatter(UPstream::linearCommunication(), Value, tag);
     }
     else
     {
-        Pstream::combineGather(UPstream::treeCommunication(), Value, cop);
-        Pstream::combineScatter(UPstream::treeCommunication(), Value);
+        Pstream::combineGather(UPstream::treeCommunication(), Value, cop, tag);
+        Pstream::combineScatter(UPstream::treeCommunication(), Value, tag);
     }
 }
 

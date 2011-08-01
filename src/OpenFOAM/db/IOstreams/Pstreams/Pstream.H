@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -97,20 +97,31 @@ public:
             (
                 const List<commsStruct>& comms,
                 T& Value,
-                const BinaryOp& bop
+                const BinaryOp& bop,
+                const int tag
             );
 
             //- Like above but switches between linear/tree communication
             template <class T, class BinaryOp>
-            static void gather(T& Value, const BinaryOp& bop);
+            static void gather
+            (
+                T& Value,
+                const BinaryOp& bop,
+                const int tag = Pstream::msgType()
+            );
 
             //- Scatter data. Distribute without modification. Reverse of gather
             template <class T>
-            static void scatter(const List<commsStruct>& comms, T& Value);
+            static void scatter
+            (
+                const List<commsStruct>& comms,
+                T& Value,
+                const int tag
+            );
 
             //- Like above but switches between linear/tree communication
             template <class T>
-            static void scatter(T& Value);
+            static void scatter(T& Value, const int tag = Pstream::msgType());
 
 
         // Combine variants. Inplace combine values from processors.
@@ -121,24 +132,35 @@ public:
             (
                 const List<commsStruct>& comms,
                 T& Value,
-                const CombineOp& cop
+                const CombineOp& cop,
+                const int tag
             );
 
             //- Like above but switches between linear/tree communication
             template <class T, class CombineOp>
-            static void combineGather(T& Value, const CombineOp& cop);
+            static void combineGather
+            (
+                T& Value,
+                const CombineOp& cop,
+                const int tag = Pstream::msgType()
+            );
 
             //- Scatter data. Reverse of combineGather
             template <class T>
             static void combineScatter
             (
                 const List<commsStruct>& comms,
-                T& Value
+                T& Value,
+                const int tag
             );
 
             //- Like above but switches between linear/tree communication
             template <class T>
-            static void combineScatter(T& Value);
+            static void combineScatter
+            (
+                T& Value,
+                const int tag = Pstream::msgType()
+            );
 
         // Combine variants working on whole List at a time.
 
@@ -147,24 +169,35 @@ public:
             (
                 const List<commsStruct>& comms,
                 List<T>& Value,
-                const CombineOp& cop
+                const CombineOp& cop,
+                const int tag
             );
 
             //- Like above but switches between linear/tree communication
             template <class T, class CombineOp>
-            static void listCombineGather(List<T>& Value, const CombineOp& cop);
+            static void listCombineGather
+            (
+                List<T>& Value,
+                const CombineOp& cop,
+                const int tag = Pstream::msgType()
+            );
 
             //- Scatter data. Reverse of combineGather
             template <class T>
             static void listCombineScatter
             (
                 const List<commsStruct>& comms,
-                List<T>& Value
+                List<T>& Value,
+                const int tag
             );
 
             //- Like above but switches between linear/tree communication
             template <class T>
-            static void listCombineScatter(List<T>& Value);
+            static void listCombineScatter
+            (
+                List<T>& Value,
+                const int tag = Pstream::msgType()
+            );
 
         // Combine variants working on whole map at a time. Container needs to
         // have iterators and find() defined.
@@ -174,7 +207,8 @@ public:
             (
                 const List<commsStruct>& comms,
                 Container& Values,
-                const CombineOp& cop
+                const CombineOp& cop,
+                const int tag
             );
 
             //- Like above but switches between linear/tree communication
@@ -182,7 +216,8 @@ public:
             static void mapCombineGather
             (
                 Container& Values,
-                const CombineOp& cop
+                const CombineOp& cop,
+                const int tag = Pstream::msgType()
             );
 
             //- Scatter data. Reverse of combineGather
@@ -190,12 +225,17 @@ public:
             static void mapCombineScatter
             (
                 const List<commsStruct>& comms,
-                Container& Values
+                Container& Values,
+                const int tag
             );
 
             //- Like above but switches between linear/tree communication
             template <class Container>
-            static void mapCombineScatter(Container& Values);
+            static void mapCombineScatter
+            (
+                Container& Values,
+                const int tag = Pstream::msgType()
+            );
 
 
 
@@ -208,24 +248,34 @@ public:
             static void gatherList
             (
                 const List<commsStruct>& comms,
-                List<T>& Values
+                List<T>& Values,
+                const int tag
             );
 
             //- Like above but switches between linear/tree communication
             template <class T>
-            static void gatherList(List<T>& Values);
+            static void gatherList
+            (
+                List<T>& Values,
+                const int tag = Pstream::msgType()
+            );
 
             //- Scatter data. Reverse of gatherList
             template <class T>
             static void scatterList
             (
                 const List<commsStruct>& comms,
-                List<T>& Values
+                List<T>& Values,
+                const int tag
             );
 
             //- Like above but switches between linear/tree communication
             template <class T>
-            static void scatterList(List<T>& Values);
+            static void scatterList
+            (
+                List<T>& Values,
+                const int tag = Pstream::msgType()
+            );
 
 
         // Exchange
