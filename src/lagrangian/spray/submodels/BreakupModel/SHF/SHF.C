@@ -154,9 +154,6 @@ bool Foam::SHF<CloudType>::update
     scalar reLiquid   = 0.5*Urmag*d/mu;
     scalar ohnesorge  = sqrt(weLiquid)/(reLiquid + VSMALL);
 
-    vector acceleration = Urel/tMom;
-    vector trajectory = U/mag(U);
-
     scalar weGasCorr = weGas/(1.0 + weCorrCoeff_*ohnesorge);
 
     // droplet deformation characteristic time
