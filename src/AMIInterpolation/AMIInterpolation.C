@@ -27,8 +27,9 @@ License
 #include "Random.H"
 #include "treeDataPrimitivePatch.H"
 #include "indexedOctree.H"
-#include "primitivePatch.H"
 #include "meshTools.H"
+#include "mergePoints.H"
+#include "globalIndex.H"
 
 #include "vtkSurfaceWriter.H"
 
@@ -95,44 +96,10 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::checkPatches
 {
     const scalar maxBoundsError = 0.05;
 
-    // sanity checks
+    // check bounds of source and target
     boundBox bbSrc(srcPatch.points(), srcPatch.meshPoints());
     boundBox bbTgt(tgtPatch.points(), tgtPatch.meshPoints());
-    boundBox bbSurf(bbTgt); // USE POINTS OF SURFACE!!!!!!!!!!!!!!!!!!
 
-
-    // projection surface bounds - check against bounds of source and target
-
-    bbSurf.inflate(maxBoundsError);
-
-    if (!bbSurf.contains(bbSrc))
-    {
-        WarningIn
-        (
-            "AMIInterpolation<SourcePatch, TargetPatch>::checkPatches"
-            "("
-                "const primitivePatch&, "
-                "const primitivePatch&"
-            ")"
-        )   << "Source patch is larger than, or misaligned with the "
-            << "projection surface" << endl;
-    }
-
-    if (!bbSurf.contains(bbTgt))
-    {
-        WarningIn
-        (
-            "AMIInterpolation<SourcePatch, TargetPatch>::checkPatches"
-            "("
-                "const primitivePatch&, "
-                "const primitivePatch&"
-            ")"
-        )   << "Target patch is larger than, or misaligned with the "
-            << "projection surface" << endl;
-    }
-
-
-    // check bounds of source and target
     bbTgt.inflate(maxBoundsError);
 
     if (!bbTgt.contains(bbSrc))
@@ -150,6 +117,354 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::checkPatches
             << "    source: " << bbSrc << nl
             << "    target: " << bbTgt << endl;
     }
+}
+
+
+template<class SourcePatch, class TargetPatch>
+Foam::label
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcOverlappingProcs
+(
+    const List<treeBoundBoxList>& procBb,
+    const treeBoundBox& bb,
+    boolList& overlaps
+)
+{
+    overlaps.setSize(procBb.size());
+    overlaps = false;
+
+    label nOverlaps = 0;
+
+    forAll(procBb, procI)
+    {
+        const List<treeBoundBox>& bbs = procBb[procI];
+
+        forAll(bbs, bbI)
+        {
+            if (bbs[bbI].overlaps(bb))
+            {
+                overlaps[procI] = true;
+                nOverlaps++;
+                break;
+            }
+        }
+    }
+    return nOverlaps;
+}
+
+
+template<class SourcePatch, class TargetPatch>
+void Foam::AMIInterpolation<SourcePatch, TargetPatch>::distributePatches
+(
+    const mapDistribute& map,
+    const primitivePatch& pp,
+    List<faceList>& faces,
+    List<pointField>& points
+)
+{
+    PstreamBuffers pBufs(Pstream::nonBlocking);
+
+    for (label domain = 0; domain < Pstream::nProcs(); domain++)
+    {
+        const labelList& sendElems = map.subMap()[domain];
+
+        if (domain != Pstream::myProcNo() && sendElems.size())
+        {
+            faceList subFaces(UIndirectList<face>(pp, sendElems));
+            primitivePatch subPatch
+            (
+                SubList<face>(subFaces, subFaces.size()),
+                pp.points()
+            );
+
+            if (debug)
+            {
+                Pout<< "distributePatches: to processor " << domain
+                    << " sending faces " << subPatch.faceCentres() << endl;
+            }
+
+            UOPstream toDomain(domain, pBufs);
+            toDomain << subPatch.localFaces() << subPatch.localPoints();
+        }
+    }
+
+    // Start receiving
+    pBufs.finishedSends();
+
+    faces.setSize(Pstream::nProcs());
+    points.setSize(Pstream::nProcs());
+
+    {
+        // Set up 'send' to myself
+        const labelList& sendElems = map.subMap()[Pstream::myProcNo()];
+        faceList subFaces(UIndirectList<face>(pp, sendElems));
+        primitivePatch subPatch
+        (
+            SubList<face>(subFaces, subFaces.size()),
+            pp.points()
+        );
+
+        // Receive
+        if (debug)
+        {
+            Pout<< "distributePatches: to processor " << Pstream::myProcNo()
+                << " sending faces " << subPatch.faceCentres() << endl;
+        }
+
+        faces[Pstream::myProcNo()] = subPatch.localFaces();
+        points[Pstream::myProcNo()] = subPatch.localPoints();
+    }
+
+    // Consume
+    for (label domain = 0; domain < Pstream::nProcs(); domain++)
+    {
+        const labelList& recvElems = map.constructMap()[domain];
+
+        if (domain != Pstream::myProcNo() && recvElems.size())
+        {
+            UIPstream str(domain, pBufs);
+            faceList localFaces(str);
+            pointField localPoints(str);
+
+            faces[domain] = localFaces;
+            points[domain] = localPoints;
+        }
+    }
+}
+
+
+template<class SourcePatch, class TargetPatch>
+void Foam::AMIInterpolation<SourcePatch, TargetPatch>::
+distributeAndMergePatches
+(
+    const mapDistribute& map,
+    const primitivePatch& tgtPatch,
+    faceList& tgtFaces,
+    pointField& tgtPoints
+)
+{
+    // Exchange per-processor data
+    List<faceList> allFaces;
+    List<pointField> allPoints;
+    distributePatches(map, tgtPatch, allFaces, allPoints);
+
+    // Renumber and flatten
+    label nFaces = 0;
+    label nPoints = 0;
+    forAll(allFaces, procI)
+    {
+        nFaces += allFaces[procI].size();
+        nPoints += allPoints[procI].size();
+    }
+    tgtFaces.setSize(nFaces);
+    nFaces = 0;
+    tgtPoints.setSize(nPoints);
+    nPoints = 0;
+
+    // My own data first
+    {
+        const faceList& fcs = allFaces[Pstream::myProcNo()];
+        forAll(fcs, i)
+        {
+            const face& f = fcs[i];
+            face& newF = tgtFaces[nFaces++];
+            newF.setSize(f.size());
+            forAll(f, fp)
+            {
+                newF[fp] = f[fp] + nPoints;
+            }
+        }
+        const pointField& pts = allPoints[Pstream::myProcNo()];
+        forAll(pts, i)
+        {
+            tgtPoints[nPoints++] = pts[i];
+        }
+    }
+
+    // Other proc data first
+    forAll(allFaces, procI)
+    {
+        if (procI != Pstream::myProcNo())
+        {
+            const faceList& fcs = allFaces[procI];
+            forAll(fcs, i)
+            {
+                const face& f = fcs[i];
+                face& newF = tgtFaces[nFaces++];
+                newF.setSize(f.size());
+                forAll(f, fp)
+                {
+                    newF[fp] = f[fp] + nPoints;
+                }
+            }
+            const pointField& pts = allPoints[procI];
+            forAll(pts, i)
+            {
+                tgtPoints[nPoints++] = pts[i];
+            }
+        }
+    }
+
+    // Merge
+    labelList oldToNew;
+    pointField newTgtPoints;
+    bool hasMerged = mergePoints
+    (
+        tgtPoints,
+        SMALL,
+        false,
+        oldToNew,
+        newTgtPoints
+    );
+
+    if (hasMerged)
+    {
+        if (debug)
+        {
+            Pout<< "Merged from " << tgtPoints.size()
+                << " down to " << newTgtPoints.size() << " points" << endl;
+        }
+
+        tgtPoints.transfer(newTgtPoints);
+        forAll(tgtFaces, i)
+        {
+            inplaceRenumber(oldToNew, tgtFaces[i]);
+        }
+    }
+}
+
+
+template<class SourcePatch, class TargetPatch>
+Foam::autoPtr<Foam::mapDistribute>
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcProcMap
+(
+    const primitivePatch& srcPatch,
+    const primitivePatch& tgtPatch
+)
+{
+    // Get decomposition of patch
+    List<treeBoundBoxList> procBb(Pstream::nProcs());
+
+    if (srcPatch.size())
+    {
+        procBb[Pstream::myProcNo()] = treeBoundBoxList
+        (
+            1,  // For now single bounding box per proc
+            treeBoundBox
+            (
+                srcPatch.points(),
+                srcPatch.meshPoints()
+            )
+        );
+    }
+    else
+    {
+        procBb[Pstream::myProcNo()] = treeBoundBoxList();
+    }
+
+    forAll(procBb[Pstream::myProcNo()], bbI)
+    {
+        treeBoundBox& bb = procBb[Pstream::myProcNo()][bbI];
+        for (direction dir = 0; dir < vector::nComponents; dir++)
+        {
+            if (mag(bb.max()[dir] - bb.max()[dir]) < SMALL)
+            {
+                bb.min()[dir] -= 1E-6;
+                bb.max()[dir] += 1E-6;
+            }
+        }
+    }
+
+    Pstream::gatherList(procBb);
+    Pstream::scatterList(procBb);
+
+    // Determine which faces of tgtPatch overlaps srcPatch per proc
+    const faceList& faces = tgtPatch.localFaces();
+    const pointField& points = tgtPatch.localPoints();
+
+    labelListList sendMap;
+
+    {
+        // Per processor indices into all segments to send
+        List<DynamicList<label> > dynSendMap(Pstream::nProcs());
+
+        // Work array - whether processor bb overlaps the face bounds
+        boolList procBbOverlaps(Pstream::nProcs());
+
+        forAll(faces, faceI)
+        {
+            if (faces[faceI].size())
+            {
+                treeBoundBox faceBb(points, faces[faceI]);
+
+                // Find the processor this face overlaps
+                calcOverlappingProcs(procBb, faceBb, procBbOverlaps);
+
+                forAll(procBbOverlaps, procI)
+                {
+                    if (procBbOverlaps[procI])
+                    {
+                        dynSendMap[procI].append(faceI);
+                    }
+                }
+            }
+        }
+
+        // Convert dynamicList to labelList
+        sendMap.setSize(Pstream::nProcs());
+        forAll(sendMap, procI)
+        {
+            sendMap[procI].transfer(dynSendMap[procI]);
+        }
+    }
+
+
+    // Send over how many faces I need to receive
+    labelListList sendSizes(Pstream::nProcs());
+    sendSizes[Pstream::myProcNo()].setSize(Pstream::nProcs());
+    forAll(sendMap, procI)
+    {
+        sendSizes[Pstream::myProcNo()][procI] = sendMap[procI].size();
+    }
+    Pstream::gatherList(sendSizes);
+    Pstream::scatterList(sendSizes);
+
+
+    // Determine order of receiving
+    labelListList constructMap(Pstream::nProcs());
+
+    // My local segment first
+    constructMap[Pstream::myProcNo()] = identity
+    (
+        sendMap[Pstream::myProcNo()].size()
+    );
+
+    label segmentI = constructMap[Pstream::myProcNo()].size();
+    forAll(constructMap, procI)
+    {
+        if (procI != Pstream::myProcNo())
+        {
+            // What I need to receive is what other processor is sending to me
+            label nRecv = sendSizes[procI][Pstream::myProcNo()];
+            constructMap[procI].setSize(nRecv);
+
+            for (label i = 0; i < nRecv; i++)
+            {
+                constructMap[procI][i] = segmentI++;
+            }
+        }
+    }
+
+    autoPtr<mapDistribute> mapPtr
+    (
+        new mapDistribute
+        (
+            segmentI,       // size after construction
+            sendMap.xfer(),
+            constructMap.xfer()
+        )
+    );
+
+    return mapPtr;
 }
 
 
@@ -251,19 +566,6 @@ Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::findTargetFace
     if (sample.hit())
     {
         targetFaceI = sample.index();
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "Foam::label Foam::cyclicAMIPolyPatch::findTargetFace"
-            "("
-                "const label, "
-                "const primitivePatch&"
-                "const primitivePatch&"
-            ") const"
-        )   << "Unable to find target face for source face" << srcFaceI
-            << abort(FatalError);
     }
 
     return targetFaceI;
@@ -397,16 +699,24 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::setNextFaces
                 << "target face" << endl;
         }
 
+//        foundNextSeed = false;
         for (label faceI = startSeedI_; faceI < mapFlag.size(); faceI++)
         {
             if (mapFlag[faceI])
             {
-                startSeedI_ = faceI + 1;
+                if (!foundNextSeed)
+                {
+                    startSeedI_ = faceI + 1;
+                    foundNextSeed = true;
+                }
 
                 srcFaceI = faceI;
                 tgtFaceI = findTargetFace(srcFaceI, srcPatch0, tgtPatch0);
 
-                return;
+                if (tgtFaceI >= 0)
+                {
+                    return;
+                }
             }
         }
 
@@ -466,115 +776,28 @@ Foam::scalar Foam::AMIInterpolation<SourcePatch, TargetPatch>::interArea
 
 
 template<class SourcePatch, class TargetPatch>
-void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
-(
-    const word& patchType,
-    const primitivePatch& patch,
-    const pointField& points,
-    const List<DynamicList<label> >& addr,
-    List<DynamicList<scalar> >& wght,
-    const bool output
-)
-{
-    scalarField wghtSum(patch.size(), 0.0);
-
-    // normalise weights by face areas
-    forAll(wght, faceI)
-    {
-        const DynamicList<label>& addressing = addr[faceI];
-        forAll(addressing, addrI)
-        {
-            const scalar faceArea = patch[faceI].mag(points);
-            wght[faceI][addrI] /= faceArea;
-            wghtSum[faceI] += wght[faceI][addrI];
-        }
-    }
-
-//    if (debug)
-    {
-        vtkSurfaceWriter writer;
-
-        writer.write
-        (
-            "VTK",
-            patchType,
-            patch.localPoints(),
-            patch.localFaces(),
-            "weights",
-            wghtSum,
-            false
-        );
-    }
-
-    if (output)
-    {
-        Info<< "AMI: Patch " << patchType << " weights min/max = "
-            << min(wghtSum) << ", " << max(wghtSum) << endl;
-    }
-
-
-    forAll(wght, faceI)
-    {
-        const DynamicList<label>& addressing = addr[faceI];
-        forAll(addressing, addrI)
-        {
-            wght[faceI][addrI] /= wghtSum[faceI];
-        }
-    }
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class SourcePatch, class TargetPatch>
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
-(
-    const SourcePatch& srcPatch,
-    const TargetPatch& tgtPatch,
-    const searchableSurface& surf,
-    const faceAreaIntersect::triangulationMode& triMode,
-    const bool projectPoints
-)
-:
-    srcAddress_(),
-    srcWeights_(),
-    tgtAddress_(),
-    tgtWeights_(),
-    startSeedI_(0),
-    triMode_(triMode),
-    projectPoints_(projectPoints)
-{
-    if (srcPatch.size() && tgtPatch.size())
-    {
-        checkPatches(srcPatch, tgtPatch);
-
-        Info<< "AMI: Creating interpolation addressing and weights" << nl
-            << "    Source faces = " << srcPatch.size() << nl
-            << "    Target faces = " << tgtPatch.size() << endl;
-
-        calcAddressing(srcPatch, tgtPatch, surf);
-    }
-}
-
-
-
-// * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
-
-template<class SourcePatch, class TargetPatch>
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::~AMIInterpolation()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class SourcePatch, class TargetPatch>
 void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
 (
     const primitivePatch& srcPatch,
     const primitivePatch& tgtPatch,
-    const searchableSurface& surf
+    const searchableSurface& surf,
+    label srcFaceI,
+    label tgtFaceI
 )
 {
+    if (!srcPatch.size() || !tgtPatch.size())
+    {
+        if (debug)
+        {
+            Pout<< "AMI: Patches not on processor: Source faces = "
+                << srcPatch.size() << ", target faces = " << tgtPatch.size()
+                << endl;
+        }
+
+        return;
+    }
+
+
     if (debug)
     {
         Info<< "AMI: calcAddressing" << endl;
@@ -640,8 +863,38 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
 
     // find initial face match using brute force/octree search
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    label srcFaceI = 0;
-    label tgtFaceI = findTargetFace(srcFaceI, srcPatch0, tgtPatch0);
+    if ((srcFaceI == -1) || (tgtFaceI == -1))
+    {
+        srcFaceI = 0;
+        tgtFaceI = 0;
+        bool foundFace = false;
+        forAll(srcPatch0, faceI)
+        {
+            tgtFaceI = findTargetFace(srcFaceI, srcPatch0, tgtPatch0);
+            if (tgtFaceI >= 0)
+            {
+                srcFaceI = faceI;
+                foundFace = true;
+                break;
+            }
+        }
+
+        if (!foundFace)
+        {
+            FatalErrorIn
+            (
+                "void Foam::AMIInterpolation<SourcePatch, TargetPatch>::"
+                "calcAddressing"
+                "("
+                    "const primitivePatch&, "
+                    "const primitivePatch&, "
+                    "const searchableSurface&, "
+                    "label, "
+                    "label"
+                ")"
+            )   << "Unable to find initial target face" << abort(FatalError);
+        }
+    }
 
     if (debug)
     {
@@ -666,8 +919,10 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
     // list to keep track of whether src face can be mapped
     boolList mapFlag(nFacesRemaining, true);
 
-    label nFail = 0;
+    // reset starting seed
+    startSeedI_ = 0;
 
+    label nNonOverlap = 0;
     do
     {
         nbrFaces.clear();
@@ -702,20 +957,13 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
 
         } while (nbrFaces.size() > 0);
 
-        if (faceProcessed)
-        {
-            mapFlag[srcFaceI] = false;
+        mapFlag[srcFaceI] = false;
 
-            nFacesRemaining--;
-        }
-        else
-        {
-            nFail++;
+        nFacesRemaining--;
 
-            if (nFail > 1000)
-            {
-                Info<< "nFail = " << nFail << endl;
-            }
+        if (!faceProcessed)
+        {
+            nNonOverlap++;
         }
 
         // choose new src face from current src face neighbour
@@ -734,53 +982,249 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
         }
     } while (nFacesRemaining > 0);
 
+    if (nNonOverlap != 0)
+    {
+        Pout<< "AMI: " << nNonOverlap << " non-overlap faces identified"
+            << endl;
+    }
 
-    // weights normalisation
-    normaliseWeights("source", srcPatch0, srcPoints, srcAddr, srcWght, true);
-    normaliseWeights("target", tgtPatch0, tgtPoints, tgtAddr, tgtWght, true);
+    // normalise weights by face areas
+    forAll(srcAddr, faceI)
+    {
+        const DynamicList<label>& addressing = srcAddr[faceI];
+        forAll(addressing, addrI)
+        {
+            const scalar faceArea = srcPatch0[faceI].mag(srcPoints);
+            srcWght[faceI][addrI] /= faceArea;
+        }
+    }
+
+    forAll(tgtAddr, faceI)
+    {
+        const DynamicList<label>& addressing = tgtAddr[faceI];
+        forAll(addressing, addrI)
+        {
+            const scalar faceArea = tgtPatch0[faceI].mag(tgtPoints);
+            tgtWght[faceI][addrI] /= faceArea;
+        }
+    }
 
     // transfer data to persistent storage
-    srcAddress_.setSize(srcAddr.size());
-    srcWeights_.setSize(srcWght.size());
+    srcAddress_.setSize(srcPatch.size());
+    srcWeights_.setSize(srcPatch.size());
     forAll(srcAddr, i)
     {
         srcAddress_[i].transfer(srcAddr[i]);
         srcWeights_[i].transfer(srcWght[i]);
     }
 
-    tgtAddress_.setSize(tgtAddr.size());
-    tgtWeights_.setSize(tgtWght.size());
+    tgtAddress_.setSize(tgtPatch.size());
+    tgtWeights_.setSize(tgtPatch.size());
     forAll(tgtAddr, i)
     {
         tgtAddress_[i].transfer(tgtAddr[i]);
         tgtWeights_[i].transfer(tgtWght[i]);
     }
+}
 
-// ADD PARALLEL BITS
-/*
+
+
+template<class SourcePatch, class TargetPatch>
+void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
+(
+    const word& patchType,
+    const labelListList& addr,
+    scalarListList& wght,
+    const bool output
+)
+{
+    scalarList wghtSum(wght.size(), 0.0);
+
+    // Normalise the weights
+    forAll(wght, faceI)
+    {
+        scalar s = sum(wght[faceI]);
+        wghtSum[faceI] = s;
+
+        forAll(addr[faceI], i)
+        {
+            wght[faceI][i] /= s;
+        }
+    }
+
+    if (output)
+    {
+        Info<< "AMI: Patch " << patchType << " weights min/max = "
+            << gMin(wghtSum) << ", " << gMax(wghtSum) << endl;
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class SourcePatch, class TargetPatch>
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
+(
+    const SourcePatch& srcPatch,
+    const TargetPatch& tgtPatch,
+    const searchableSurface& surf,
+    const faceAreaIntersect::triangulationMode& triMode,
+    const bool projectPoints
+)
+:
+    srcAddress_(),
+    srcWeights_(),
+    tgtAddress_(),
+    tgtWeights_(),
+    startSeedI_(0),
+    triMode_(triMode),
+    projectPoints_(projectPoints),
+    srcMapPtr_(NULL),
+    tgtMapPtr_(NULL)
+{
+    label srcSize = returnReduce(srcPatch.size(), sumOp<label>());
+    label tgtSize = returnReduce(tgtPatch.size(), sumOp<label>());
+
+    Info<< "AMI: Creating interpolation addressing and weights" << nl
+        << "    Source faces = " << srcSize << nl
+        << "    Target faces = " << tgtSize << endl;
+
+    if (debug)
+    {
+        writePatch(srcPatch, "VTK", "source");
+        writePatch(tgtPatch, "VTK", "target");
+    }
+
+    update(srcPatch, tgtPatch, surf);
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
+
+template<class SourcePatch, class TargetPatch>
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::~AMIInterpolation()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class SourcePatch, class TargetPatch>
+void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
+(
+    const primitivePatch& srcPatch,
+    const primitivePatch& tgtPatch,
+    const searchableSurface& surf
+)
+{
+    static label patchI = 0;
+
     if (Pstream::parRun())
     {
-        // Source fields - addesses and weights
-        const label nSrc = srcAddess.size();
-        const globalIndex globalSrcFaces(nSrc);
+        // create processor map of overlapping faces
+        autoPtr<mapDistribute> mapPtr = calcProcMap(srcPatch, tgtPatch);
+        const mapDistribute& map = mapPtr();
 
-        List<Map<label> > compactMapSrcAddress;
-        labelListList transSrcAddress;
+        // create new target patch that fully encompasses source patch
+        faceList newTgtFaces;
+        pointField newTgtPoints;
+        distributeAndMergePatches(map, tgtPatch, newTgtFaces, newTgtPoints);
 
-        mapDistribute srcMapDist
+        primitivePatch
+            newTgtPatch
+            (
+                SubList<face>
+                (
+                    newTgtFaces,
+                    newTgtFaces.size()
+                ),
+                newTgtPoints
+            );
+
+//        checkPatches(srcPatch, newTgtPatch);
+
+
+        // calculate AMI interpolation
+        calcAddressing(srcPatch, newTgtPatch, surf);
+
+
+        // convert local addressing to global addressing
+        globalIndex globalSrcFaces(srcAddress_.size());
+        forAll(tgtAddress_, i)
+        {
+            labelList& addressing = tgtAddress_[i];
+            forAll(addressing, addrI)
+            {
+                addressing[addrI] = globalSrcFaces.toGlobal(addressing[addrI]);
+            }
+        }
+        globalIndex globalTgtFaces(tgtAddress_.size());
+        forAll(srcAddress_, i)
+        {
+            labelList& addressing = srcAddress_[i];
+            forAll(addressing, addrI)
+            {
+                addressing[addrI] = globalTgtFaces.toGlobal(addressing[addrI]);
+            }
+        }
+
+        if (debug)
+        {
+            writeWeights(srcWeights_, srcPatch, "VTK", "source");
+            writeWeights(tgtWeights_, newTgtPatch, "VTK", "target");
+        }
+
+        // send maps
+        mapDistribute::distribute
         (
-            globalSrcFaces,
-            srcAddress_,
-            globalIndexAndTransform(mesh), // mesh not available!!!!!!!!
-            transSrcAddress,
-            compactMapSrcAddress
+            Pstream::nonBlocking,
+            List<labelPair>(),
+            tgtPatch.size(),
+            map.constructMap(),
+            map.subMap(),
+            tgtAddress_,
+            ListPlusEqOp<label>(),
+            labelList()
         );
 
+        mapDistribute::distribute
+        (
+            Pstream::nonBlocking,
+            List<labelPair>(),
+            tgtPatch.size(),
+            map.constructMap(),
+            map.subMap(),
+            tgtWeights_,
+            ListPlusEqOp<scalar>(),
+            scalarList()
+        );
 
+        // weights normalisation
+        normaliseWeights("source", srcAddress_, srcWeights_, true);
+        normaliseWeights("target", tgtAddress_, tgtWeights_, true);
+
+
+        // cache maps
+        List<Map<label> > cMap;
+        srcMapPtr_.reset(new mapDistribute(globalSrcFaces, tgtAddress_, cMap));
+        tgtMapPtr_.reset(new mapDistribute(globalTgtFaces, srcAddress_, cMap));
     }
-*/
-    // reset starting seed
-    startSeedI_ = 0;
+    else
+    {
+        checkPatches(srcPatch, tgtPatch);
+
+        calcAddressing(srcPatch, tgtPatch, surf);
+
+        if (debug)
+        {
+            writeWeights(srcWeights_, srcPatch, "VTK", "source");
+            writeWeights(tgtWeights_, tgtPatch, "VTK", "target");
+        }
+
+        normaliseWeights("source", srcAddress_, srcWeights_, true);
+        normaliseWeights("target", tgtAddress_, tgtWeights_, true);
+    }
+
+    patchI++;
 }
 
 
@@ -803,27 +1247,55 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
     {
         FatalErrorIn
         (
-            "AMIInterpolation::interpolateToSource(const Field<Type>)"
+            "AMIInterpolation::interpolateToSource(const Field<Type>) const"
         )   << "Supplied field size is not equal to target patch size. "
-            << "Target patch = " << tgtAddress_.size() << ", supplied field: "
+            << "Target patch = " << tgtAddress_.size() << ", supplied field = "
             << fld.size() << abort(FatalError);
     }
 
     tmp<Field<Type> > tresult
     (
-        new Field<Type>(srcAddress_.size(), pTraits<Type>::zero)
+        new Field<Type>
+        (
+            srcAddress_.size(),
+            pTraits<Type>::zero
+        )
     );
 
     Field<Type>& result = tresult();
 
-    forAll(result, faceI)
+    if (Pstream::parRun())
     {
-        const labelList& faces = srcAddress_[faceI];
-        const scalarList& weights = srcWeights_[faceI];
+        const mapDistribute& map = tgtMapPtr_();
 
-        forAll(faces, i)
+        Field<Type> work(map.constructSize());
+
+        SubList<Type>(work, fld.size()).assign(fld);
+
+        map.distribute(work);
+
+        forAll(result, faceI)
         {
-            result[faceI] += fld[faces[i]]*weights[i];
+            const labelList& faces = srcAddress_[faceI];
+            const scalarList& weights = srcWeights_[faceI];
+
+            forAll(faces, i)
+            {
+                result[faceI] += work[faces[i]]*weights[i];
+            }
+        }
+    }
+    else
+    {
+        forAll(result, faceI)
+        {
+            const labelList& faces = srcAddress_[faceI];
+            const scalarList& weights = srcWeights_[faceI];
+
+            forAll(faces, i)
+            {
+                result[faceI] += fld[faces[i]]*weights[i];
+            }
         }
     }
 
@@ -856,27 +1328,55 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
     {
         FatalErrorIn
         (
-            "AMIInterpolation::interpolateToSource(const Field<Type>)"
+            "AMIInterpolation::interpolateToSource(const Field<Type>) const"
         )   << "Supplied field size is not equal to source patch size. "
-            << "Source patch = " << srcAddress_.size() << ", supplied field: "
+            << "Source patch = " << srcAddress_.size() << ", supplied field = "
             << fld.size() << abort(FatalError);
     }
 
     tmp<Field<Type> > tresult
     (
-        new Field<Type>(tgtAddress_.size(), pTraits<Type>::zero)
+        new Field<Type>
+        (
+            tgtAddress_.size(),
+            pTraits<Type>::zero
+        )
     );
 
     Field<Type>& result = tresult();
 
-    forAll(result, faceI)
+    if (Pstream::parRun())
     {
-        const labelList& faces = tgtAddress_[faceI];
-        const scalarList& weights = tgtWeights_[faceI];
+        const mapDistribute& map = srcMapPtr_();
 
-        forAll(faces, i)
+        Field<Type> work(map.constructSize());
+
+        SubList<Type>(work, fld.size()).assign(fld);
+
+        map.distribute(work);
+
+        forAll(result, faceI)
         {
-            result[faceI] += fld[faces[i]]*weights[i];
+            const labelList& faces = tgtAddress_[faceI];
+            const scalarList& weights = tgtWeights_[faceI];
+
+            forAll(faces, i)
+            {
+                result[faceI] += work[faces[i]]*weights[i];
+            }
+        }
+    }
+    else
+    {
+        forAll(result, faceI)
+        {
+            const labelList& faces = tgtAddress_[faceI];
+            const scalarList& weights = tgtWeights_[faceI];
+
+            forAll(faces, i)
+            {
+                result[faceI] += fld[faces[i]]*weights[i];
+            }
         }
     }
 
@@ -925,6 +1425,70 @@ const
             ptI += 2;
         }
     }
+}
+
+
+template<class SourcePatch, class TargetPatch>
+void Foam::AMIInterpolation<SourcePatch, TargetPatch>::writeWeights
+(
+    const scalarListList& weights,
+    const primitivePatch& patch,
+    const word& folder,
+    const word& prefix
+)
+const
+{
+    static label i = 0;
+
+    scalarField wghtSum(weights.size(), 0.0);
+
+    forAll(weights, faceI)
+    {
+        scalar s = sum(weights[faceI]);
+        wghtSum[faceI] = s;
+    }
+
+    vtkSurfaceWriter writer;
+
+    writer.write
+    (
+        folder,
+        prefix + '_' + Foam::name(i) + '_' + Foam::name(Pstream::myProcNo()),
+        patch.localPoints(),
+        patch.localFaces(),
+        "weights",
+        wghtSum,
+        false
+    );
+
+    i++;
+}
+
+
+template<class SourcePatch, class TargetPatch>
+void Foam::AMIInterpolation<SourcePatch, TargetPatch>::writePatch
+(
+    const primitivePatch& patch,
+    const word& folder,
+    const word& prefix
+)
+const
+{
+    static label i = 0;
+
+    vtkSurfaceWriter writer;
+    writer.write
+    (
+        folder,
+        prefix + '_' + Foam::name(i) + '_' + Foam::name(Pstream::myProcNo()),
+        patch.localPoints(),
+        patch.localFaces(),
+        "AMIPatch",
+        scalarField(patch.size(), Pstream::myProcNo()),
+        false
+    );
+
+    i++;
 }
 
 

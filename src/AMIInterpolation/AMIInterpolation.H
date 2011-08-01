@@ -50,6 +50,8 @@ SourceFiles
 #include "boolList.H"
 #include "primitivePatch.H"
 #include "faceAreaIntersect.H"
+#include "treeBoundBox.H"
+#include "treeBoundBoxList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,23 +74,51 @@ class AMIInterpolation
 :
     public AMIInterpolationName
 {
-    // Static data
+
+    //- Helper class for list
+    template<class T>
+    class ListPlusEqOp
+    {
+        public:
+        void operator()(List<T>& x, const List<T> y) const
+        {
+            if (y.size())
+            {
+                if (x.size())
+                {
+                    label sz = x.size();
+                    x.setSize(sz + y.size());
+                    forAll(y, i)
+                    {
+                        x[sz++] = y[i];
+                    }
+                }
+                else
+                {
+                    x = y;
+                }
+            }
+        }
+    };
+
+
+    // Private data
 
         // Source patch
 
-            //- Addressing
+            //- Addresses of target faces per source face
             labelListList srcAddress_;
 
-            //- Weighting factors
+            //- Weights of target faces per source face
             scalarListList srcWeights_;
 
 
         // Target patch
 
-            //- Addressing
+            //- Addresses of source faces per target face
             labelListList tgtAddress_;
 
-            //- Weighting factors
+            //- Weights of wource faces per target face
             scalarListList tgtWeights_;
 
 
@@ -100,6 +130,10 @@ class AMIInterpolation
 
         //- Flag to indicate whether or not to project points
         const bool projectPoints_;
+
+        autoPtr<mapDistribute> srcMapPtr_;
+
+        autoPtr<mapDistribute> tgtMapPtr_;
 
 
     // Private Member Functions
@@ -125,6 +159,38 @@ class AMIInterpolation
 
             //- Check that patches are valid
             void checkPatches
+            (
+                const primitivePatch& srcPatch,
+                const primitivePatch& tgtPatch
+            );
+
+
+        // Parallel functionality
+
+            label calcOverlappingProcs
+            (
+                const List<treeBoundBoxList>& procBb,
+                const treeBoundBox& bb,
+                boolList& overlaps
+            );
+
+            void distributePatches
+            (
+                const mapDistribute& map,
+                const primitivePatch& pp,
+                List<faceList>& faces,
+                List<pointField>& points
+            );
+
+            void distributeAndMergePatches
+            (
+                const mapDistribute& map,
+                const primitivePatch& tgtPatch,
+                faceList& tgtFaces,
+                pointField& tgtPoints
+            );
+
+            autoPtr<mapDistribute> calcProcMap
             (
                 const primitivePatch& srcPatch,
                 const primitivePatch& tgtPatch
@@ -184,6 +250,16 @@ class AMIInterpolation
                 const primitivePatch& tgtPatch
             ) const;
 
+            //- Calculate addressing
+            void calcAddressing
+            (
+                const primitivePatch& srcPatch,
+                const primitivePatch& tgtPatch,
+                const searchableSurface& surf,
+                label srcFaceI = -1,
+                label tgtFaceI = -1
+            );
+
             //- Normalise the (area) weights - suppresses numerical error in
             //  weights calculation
             //  NOTE: if area weights are incorrect by 'a significant amount'
@@ -192,10 +268,8 @@ class AMIInterpolation
             void normaliseWeights
             (
                 const word& patchType,
-                const primitivePatch& patch,
-                const pointField& points,
-                const List<DynamicList<label> >& addr,
-                List<DynamicList<scalar> >& wght,
+                const labelListList& addr,
+                scalarListList& wght,
                 const bool output
             );
 
@@ -243,8 +317,8 @@ public:
 
         // Manipulation
 
-            //- Calculate addressing
-            void calcAddressing
+            //- Update addressing and weights
+            void update
             (
                 const primitivePatch& srcPatch,
                 const primitivePatch& tgtPatch,
@@ -288,6 +362,25 @@ public:
                 const primitivePatch& srcPatch,
                 const primitivePatch& tgtPatch
             ) const;
+
+            //- Write weights to VTK file
+            void writeWeights
+            (
+                const scalarListList& weights,
+                const primitivePatch& patch,
+                const word& folder,
+                const word& prefix
+            )
+            const;
+
+            //- Write patch
+            void writePatch
+            (
+                const primitivePatch& patch,
+                const word& folder,
+                const word& prefix
+            )
+            const;
 };
 
 
