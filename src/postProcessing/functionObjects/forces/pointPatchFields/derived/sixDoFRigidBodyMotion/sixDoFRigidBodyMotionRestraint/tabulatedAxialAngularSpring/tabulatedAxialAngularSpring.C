@@ -95,10 +95,8 @@ Foam::sixDoFRigidBodyMotionRestraints::tabulatedAxialAngularSpring::restrain
         // Directions getting close to the axis, change reference
 
         refDir = rotationTensor(vector(1, 0 ,0), axis_) & vector(0, 0, 1);
-
-        vector oldDir = refQ_ & refDir;
-
-        vector newDir = motion.orientation() & refDir;
+        oldDir = refQ_ & refDir;
+        newDir = motion.orientation() & refDir;
     }
 
     // Removing any axis component from oldDir and newDir and normalising

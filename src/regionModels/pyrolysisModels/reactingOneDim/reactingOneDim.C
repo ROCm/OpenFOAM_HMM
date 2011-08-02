@@ -457,7 +457,7 @@ scalar reactingOneDim::addMassSources(const label patchI, const label faceI)
 scalar reactingOneDim::solidRegionDiffNo() const
 {
     scalar DiNum = 0.0;
-    scalar meanDiNum = 0.0;
+
     if (regionMesh().nInternalFaces() > 0)
     {
         surfaceScalarField KrhoCpbyDelta
@@ -468,8 +468,6 @@ scalar reactingOneDim::solidRegionDiffNo() const
         );
 
         DiNum = max(KrhoCpbyDelta.internalField())*time_.deltaTValue();
-
-        meanDiNum = average(KrhoCpbyDelta.internalField())*time().deltaTValue();
     }
 
     return DiNum;

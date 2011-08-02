@@ -57,7 +57,17 @@ bool Foam::dlLibraryTable::open
             bool opened = dlLibraryTable::open(libName);
             allOpened = opened && allOpened;
 
-            if (opened && (!tablePtr || tablePtr->size() <= nEntries))
+            if (!opened)
+            {
+                WarningIn
+                (
+                    "dlLibraryTable::open"
+                    "(const dictionary&, const word&, "
+                    "const TablePtr&)"
+                )   << "Could not open library " << libName
+                    << endl << endl;
+            }
+            else if (debug && (!tablePtr || tablePtr->size() <= nEntries))
             {
                 WarningIn
                 (
