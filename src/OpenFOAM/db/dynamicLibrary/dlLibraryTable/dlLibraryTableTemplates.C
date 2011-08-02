@@ -62,8 +62,8 @@ bool Foam::dlLibraryTable::open
                 WarningIn
                 (
                     "dlLibraryTable::open"
-                    "(const dictionary& dict, const word& libsEntry, "
-                    "const TablePtr tablePtr)"
+                    "(const dictionary&, const word&, "
+                    "const TablePtr&)"
                 )   << "library " << libName
                     << " did not introduce any new entries"
                     << endl << endl;
