@@ -844,16 +844,16 @@ int main(int argc, char *argv[])
 
     List<faceList> patchFaceVerts;
 
-    labelList nrFaceCells(boundaryFaces.size(),0);
-    HashTable<label,label> faceToCell[2];
+    labelList own(boundaryFaces.size(), -1);
+    labelList nei(boundaryFaces.size(), -1);
+    HashTable<label, label> faceToCell[2];
 
     {
         HashTable<label, face, Hash<face> > faceToFaceID(boundaryFaces.size());
         forAll(boundaryFaces, faceI)
         {
-            SortableList<label> foo(boundaryFaces[faceI]);
-            face theFace(foo);
-            faceToFaceID.insert(theFace,faceI);
+            SortableList<label> sortedVerts(boundaryFaces[faceI]);
+            faceToFaceID.insert(face(sortedVerts), faceI);
         }
 
         forAll(cellVerts, cellI)
@@ -861,31 +861,57 @@ int main(int argc, char *argv[])
             faceList faces = cellVerts[cellI].faces();
             forAll(faces, i)
             {
-                SortableList<label> foo(faces[i]);
-                face theFace(foo);
-                if (faceToFaceID.found(theFace))
+                SortableList<label> sortedVerts(faces[i]);
+                HashTable<label, face, Hash<face> >::const_iterator fnd =
+                    faceToFaceID.find(face(sortedVerts));
+
+                if (fnd != faceToFaceID.end())
                 {
-                    label faceI = faceToFaceID[theFace];
-                    if (nrFaceCells[faceI] < 2)
+                    label faceI = fnd();
+                    int stat = face::compare(faces[i], boundaryFaces[faceI]);
+
+                    if (stat == 1)
                     {
-                        faceToCell[nrFaceCells[faceI]].insert(faceI,cellI);
+                        // Same orientation. Cell is owner.
+                        own[faceI] = cellI;
                     }
-                    nrFaceCells[faceI]++;
+                    else if (stat == -1)
+                    {
+                        // Opposite orientation. Cell is neighbour.
+                        nei[faceI] = cellI;
+                    }
                 }
             }
         }
 
-        label cnt = 0;
-        forAll(nrFaceCells, faceI)
+        label nReverse = 0;
+        forAll(own, faceI)
         {
-            assert(nrFaceCells[faceI] == 1 || nrFaceCells[faceI] == 2);
-            if (nrFaceCells[faceI]>1)
+            if (own[faceI] == -1 && nei[faceI] != -1)
+            {
+                // Boundary face with incorrect orientation
+                boundaryFaces[faceI] = boundaryFaces[faceI].reverseFace();
+                Swap(own[faceI], nei[faceI]);
+                nReverse++;
+            }
+        }
+        if (nReverse > 0)
+        {
+            Info << "Found " << nReverse << " reversed boundary faces out of "
+                << boundaryFaces.size() << endl;
+        }
+
+
+        label cnt = 0;
+        forAll(own, faceI)
+        {
+            if (own[faceI] != -1 && nei[faceI] != -1)
             {
                 cnt++;
             }
         }
 
-        if (cnt>0)
+        if (cnt > 0)
         {
             Info << "Of " << boundaryFaces.size() << " so-called"
                 << " boundary faces " << cnt << " belong to two cells "
@@ -994,7 +1020,8 @@ int main(int argc, char *argv[])
                 if (boundaryFaceToIndex.found(faceIndices[i]))
                 {
                     label bFaceI = boundaryFaceToIndex[faceIndices[i]];
-                    if (nrFaceCells[bFaceI] == 1)
+
+                    if (own[bFaceI] != -1 && nei[bFaceI] == -1)
                     {
                         patchFaces[cnt] = boundaryFaces[bFaceI];
                         cnt++;
