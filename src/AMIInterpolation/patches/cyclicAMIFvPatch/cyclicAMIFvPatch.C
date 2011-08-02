@@ -47,7 +47,7 @@ void Foam::cyclicAMIFvPatch::makeWeights(scalarField& w) const
 
     const scalarField nbrDeltas
     (
-        interpolateToSource(nbrPatch.nf() & nbrPatch.fvPatch::delta())
+        interpolate(nbrPatch.nf() & nbrPatch.fvPatch::delta())
     );
 
     forAll(deltas, faceI)
@@ -68,7 +68,7 @@ void Foam::cyclicAMIFvPatch::makeDeltaCoeffs(scalarField& dc) const
 
     const scalarField nbrDeltas
     (
-        interpolateToSource(nbrPatch.nf() & nbrPatch.fvPatch::delta())
+        interpolate(nbrPatch.nf() & nbrPatch.fvPatch::delta())
     );
 
     forAll(deltas, faceI)
@@ -86,12 +86,12 @@ Foam::tmp<Foam::vectorField> Foam::cyclicAMIFvPatch::delta() const
     const vectorField patchD(fvPatch::delta());
 
     const cyclicAMIFvPatch& nbrPatch = neighbFvPatch();
-    const vectorField nbrPatchD(interpolateToSource(nbrPatch.fvPatch::delta()));
+    const vectorField nbrPatchD(interpolate(nbrPatch.fvPatch::delta()));
 
     tmp<vectorField> tpdv(new vectorField(patchD.size()));
     vectorField& pdv = tpdv();
 
-    // To the transformation if necessary
+    // do the transformation if necessary
     if (parallel())
     {
         forAll(patchD, faceI)
@@ -132,12 +132,7 @@ Foam::tmp<Foam::labelField> Foam::cyclicAMIFvPatch::internalFieldTransfer
     const labelUList& iF
 ) const
 {
-    tmp<labelField> tnpif(neighbFvPatch().patchInternalField(iF));
-    labelField& npif = tnpif();
-
-    interpolateToSource(npif);
-
-    return tnpif;
+    return interpolate(neighbFvPatch().patchInternalField(iF));
 }
 
 

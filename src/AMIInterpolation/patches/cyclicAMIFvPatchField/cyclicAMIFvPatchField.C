@@ -167,7 +167,7 @@ Foam::cyclicAMIFvPatchField<Type>::patchNeighbourField() const
         }
     }
 
-    return cyclicAMIPatch_.interpolateToSource(pnf);
+    return cyclicAMIPatch_.interpolate(pnf);
 }
 
 
@@ -209,10 +209,10 @@ void Foam::cyclicAMIFvPatchField<Type>::updateInterfaceMatrix
         pnf[faceI] = psiInternal[nbrFaceCells[faceI]];
     }
 
+    pnf = cyclicAMIPatch_.interpolate(pnf);
+
     // Transform according to the transformation tensors
     transformCoupleField(pnf, cmpt);
-
-    pnf = cyclicAMIPatch_.interpolateToSource(pnf);
 
     // Multiply the field by coefficients and add into the result
     const labelUList& faceCells = cyclicAMIPatch_.faceCells();

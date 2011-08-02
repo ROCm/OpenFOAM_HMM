@@ -147,15 +147,15 @@ public:
             virtual tmp<vectorField> delta() const;
 
             template<class Type>
-            tmp<Field<Type> > interpolateToSource(const Field<Type>& fld) const
+            tmp<Field<Type> > interpolate(const Field<Type>& fld) const
             {
-                return cyclicAMIPolyPatch_.interpolateToSource(fld);
+                return cyclicAMIPolyPatch_.interpolate(fld);
             }
 
             template<class Type>
-            tmp<Field<Type> > interpolateToSource(const tmp<Field<Type> >& tFld) const
+            tmp<Field<Type> > interpolate(const tmp<Field<Type> >& tFld) const
             {
-                return cyclicAMIPolyPatch_.interpolateToSource(tFld);
+                return cyclicAMIPolyPatch_.interpolate(tFld);
             }
 
 

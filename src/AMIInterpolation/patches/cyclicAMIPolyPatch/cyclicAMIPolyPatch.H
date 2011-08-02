@@ -306,16 +306,13 @@ public:
 
             // Interpolations
 
-                //- Interpolate from target field to source
+                //- Interpolate field
                 template<class Type>
-                tmp<Field<Type> > interpolateToSource
-                (
-                    const Field<Type>& fld
-                ) const;
+                tmp<Field<Type> > interpolate(const Field<Type>& fld) const;
 
-                //- Interpolate from target tmp field to source
+                //- Interpolate tmp field
                 template<class Type>
-                tmp<Field<Type> > interpolateToSource
+                tmp<Field<Type> > interpolate
                 (
                     const tmp<Field<Type> >& tFld
                 ) const;

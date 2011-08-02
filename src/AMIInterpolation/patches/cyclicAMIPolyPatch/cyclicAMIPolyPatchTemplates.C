@@ -28,7 +28,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::cyclicAMIPolyPatch::interpolateToSource
+Foam::tmp<Foam::Field<Type> > Foam::cyclicAMIPolyPatch::interpolate
 (
     const Field<Type>& fld
 ) const
@@ -45,7 +45,7 @@ Foam::tmp<Foam::Field<Type> > Foam::cyclicAMIPolyPatch::interpolateToSource
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::cyclicAMIPolyPatch::interpolateToSource
+Foam::tmp<Foam::Field<Type> > Foam::cyclicAMIPolyPatch::interpolate
 (
     const tmp<Field<Type> >& tFld
 ) const
