@@ -70,7 +70,8 @@ Foam::solidBodyMotionFvMesh::solidBodyMotionFvMesh(const IOobject& io)
             meshSubDir,
             *this,
             IOobject::MUST_READ,
-            IOobject::NO_WRITE
+            IOobject::NO_WRITE,
+            false
         )
     ),
     pointIDs_()
