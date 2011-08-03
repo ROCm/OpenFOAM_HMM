@@ -132,7 +132,7 @@ Foam::tmp<Foam::labelField> Foam::cyclicAMIFvPatch::internalFieldTransfer
     const labelUList& iF
 ) const
 {
-    return interpolate(neighbFvPatch().patchInternalField(iF));
+    return neighbFvPatch().patchInternalField(iF);
 }
 
 

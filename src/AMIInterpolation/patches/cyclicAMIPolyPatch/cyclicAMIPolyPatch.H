@@ -57,9 +57,6 @@ private:
 
     // Private data
 
-        //- Dictionary used during construction
-        const dictionary dict_;
-
         //- Name of other half
         const word nbrPatchName_;
 
@@ -94,14 +91,8 @@ private:
         //- Projection surface
         autoPtr<searchableSurface> surfPtr_;
 
-        //- Projection surface type
-        word projectionSurfaceType_;
-
-        //- Flag to activate projection
-        bool projectPoints_;
-
-        //- Name of projection object (if read)
-        const word projectionName_;
+        //- Dictionary used during projection surface construction
+        const dictionary surfDict_;
 
 
     // Private Member Functions

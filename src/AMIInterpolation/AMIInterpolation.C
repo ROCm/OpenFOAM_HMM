@@ -361,17 +361,12 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcProcMap
         procBb[Pstream::myProcNo()] = treeBoundBoxList();
     }
 
+    // slightly increase size of bounding boxes to allow for cases where
+    // bounding boxes are perfectly alligned
     forAll(procBb[Pstream::myProcNo()], bbI)
     {
         treeBoundBox& bb = procBb[Pstream::myProcNo()][bbI];
-        for (direction dir = 0; dir < vector::nComponents; dir++)
-        {
-            if (mag(bb.max()[dir] - bb.max()[dir]) < SMALL)
-            {
-                bb.min()[dir] -= 1E-6;
-                bb.max()[dir] += 1E-6;
-            }
-        }
+        bb.inflate(0.01);
     }
 
     Pstream::gatherList(procBb);
@@ -1076,6 +1071,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     srcWeights_(),
     tgtAddress_(),
     tgtWeights_(),
+    tgtPatchSize_(tgtPatch.size()),
     startSeedI_(0),
     triMode_(triMode),
     projectPoints_(projectPoints),
@@ -1338,7 +1334,8 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
     (
         new Field<Type>
         (
-            tgtAddress_.size(),
+//            tgtAddress_.size(),
+            tgtPatchSize_,
             pTraits<Type>::zero
         )
     );

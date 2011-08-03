@@ -215,36 +215,39 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
         }
     }
 
-
-    // Calculate typical distance per face
-//    tols = calcFaceTol(matchTolerance(), pp1, pp1.points(), half1Ctrs);
+    if (debug)
+    {
+        Pout<< "patch: " << name() << nl
+            << "    forwardT = " << forwardT() << nl
+            << "    reverseT = " << reverseT() << nl
+            << "    separation = " << separation() << nl
+            << "    collocated = " << collocated() << nl << endl;
+    }
 }
 
 
 const Foam::searchableSurface& Foam::cyclicAMIPolyPatch::surf()
 {
-    if (projectionSurfaceType_ == "patch")
-    {
-        notImplemented("projectionSurfaceType_ == patch")
-    }
-    else
-    {
-        surfPtr_ =
-            searchableSurface::New
+    word surfType(surfDict_.lookup("type"));
+    word surfName(surfDict_.lookupOrDefault("name", name()));
+
+    const polyMesh& mesh = boundaryMesh().mesh();
+
+    surfPtr_ =
+        searchableSurface::New
+        (
+            surfType,
+            IOobject
             (
-                projectionSurfaceType_,
-                IOobject
-                (
-                    projectionName_,
-                    boundaryMesh().mesh().time().constant(),
-                    "triSurface",
-                    boundaryMesh().mesh(),
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                ),
-                dict_
-            );
-    }
+                surfName,
+                boundaryMesh().mesh().time().constant(),
+                "triSurface",
+                boundaryMesh().mesh(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            ),
+            surfDict_
+        );
 
     return surfPtr_();
 }
@@ -284,6 +287,8 @@ const Foam::AMIPatchToPatchInterpolation& Foam::cyclicAMIPolyPatch::AMI()
             meshTools::writeOBJ(osO, this->localFaces(), localPoints());
         }
 
+        bool projectPoints(readBool(surfDict_.lookup("projectPoints")));
+
         // Construct/apply AMI interpolation to determine addressing and weights
         AMIPtr_.reset
         (
@@ -293,7 +298,7 @@ const Foam::AMIPatchToPatchInterpolation& Foam::cyclicAMIPolyPatch::AMI()
                 nbrPatch0,
                 surf(),
                 faceAreaIntersect::tmMesh,
-                projectPoints_
+                projectPoints
             )
         );
     }
@@ -377,7 +382,6 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
 )
 :
     coupledPolyPatch(name, size, start, index, bm),
-    dict_(dictionary::null),
     nbrPatchName_(word::null),
     nbrPatchID_(-1),
     transform_(UNKNOWN),
@@ -386,9 +390,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     separationVector_(vector::zero),
     AMIPtr_(NULL),
     surfPtr_(NULL),
-    projectionSurfaceType_(word::null),
-    projectPoints_(false),
-    projectionName_(word::null)
+    surfDict_(dictionary::null)
 {
     // Neighbour patch might not be valid yet so no transformation
     // calculation possible
@@ -404,7 +406,6 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
 )
 :
     coupledPolyPatch(name, dict, index, bm),
-    dict_(dict),
     nbrPatchName_(dict.lookup("neighbourPatch")),
     nbrPatchID_(-1),
     transform_(UNKNOWN),
@@ -413,9 +414,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     separationVector_(vector::zero),
     AMIPtr_(NULL),
     surfPtr_(NULL),
-    projectionSurfaceType_(dict.lookup("projectionSurfaceType")),
-    projectPoints_(readBool(dict.lookup("projectPoints"))),
-    projectionName_(dict.lookupOrDefault("surfaceName", name))
+    surfDict_(dict.subDict("surface"))
 {
     if (nbrPatchName_ == name)
     {
@@ -489,7 +488,6 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
 )
 :
     coupledPolyPatch(pp, bm),
-    dict_(dictionary::null),
     nbrPatchName_(pp.nbrPatchName_),
     nbrPatchID_(-1),
     transform_(UNKNOWN),
@@ -498,9 +496,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     separationVector_(vector::zero),
     AMIPtr_(NULL),
     surfPtr_(NULL),
-    projectionSurfaceType_(word::null),
-    projectPoints_(false),
-    projectionName_(word::null)
+    surfDict_(dictionary::null)
 {
     // Neighbour patch might not be valid yet so no transformation
     // calculation possible
@@ -518,7 +514,6 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
 )
 :
     coupledPolyPatch(pp, bm, index, newSize, newStart),
-    dict_(dictionary::null),
     nbrPatchName_(nbrPatchName),
     nbrPatchID_(-1),
     transform_(UNKNOWN),
@@ -527,9 +522,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     separationVector_(vector::zero),
     AMIPtr_(NULL),
     surfPtr_(NULL),
-    projectionSurfaceType_(word::null),
-    projectPoints_(false),
-    projectionName_(word::null)
+    surfDict_(dictionary::null)
 {
     if (nbrPatchName_ == name())
     {
@@ -561,7 +554,6 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
 )
 :
     coupledPolyPatch(pp, bm, index, mapAddressing, newStart),
-    dict_(pp.dict_),
     nbrPatchName_(pp.nbrPatchName_),
     nbrPatchID_(-1),
     transform_(pp.transform_),
@@ -570,9 +562,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     separationVector_(pp.separationVector_),
     AMIPtr_(NULL),
     surfPtr_(NULL),
-    projectionSurfaceType_(pp.projectionSurfaceType_),
-    projectPoints_(pp.projectPoints_),
-    projectionName_(pp.projectionName_)
+    surfDict_(pp.surfDict_)
 {}
 
 
@@ -759,12 +749,6 @@ void Foam::cyclicAMIPolyPatch::write(Ostream& os) const
     coupledPolyPatch::write(os);
     os.writeKeyword("neighbourPatch") << nbrPatchName_
         << token::END_STATEMENT << nl;
-    os.writeKeyword("projectPoints") << projectPoints_
-        << token::END_STATEMENT << nl;
-    os.writeKeyword("projectionSurfaceType") << projectionSurfaceType_
-        << token::END_STATEMENT << nl;
-    os.writeKeyword("surfaceName") << projectionName_
-        << token::END_STATEMENT << nl;
     switch (transform_)
     {
         case ROTATIONAL:
@@ -796,6 +780,9 @@ void Foam::cyclicAMIPolyPatch::write(Ostream& os) const
             // no additional info to write
         }
     }
+
+    os.writeKeyword(surfDict_.dictName());
+    os  << surfDict_;
 }
 
 

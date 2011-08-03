@@ -145,29 +145,16 @@ Foam::cyclicAMIFvPatchField<Type>::patchNeighbourField() const
     const labelUList& nbrFaceCells =
         cyclicAMIPatch_.cyclicAMIPatch().nbrPatch().faceCells();
 
-    tmp<Field<Type> > tpnf(new Field<Type>(nbrFaceCells.size()));
-    Field<Type>& pnf = tpnf();
+    Field<Type> pnf(iField, nbrFaceCells);
 
+    tmp<Field<Type> > tpnf(new Field<Type>(cyclicAMIPatch_.interpolate(pnf)));
 
     if (doTransform())
     {
-        forAll(pnf, faceI)
-        {
-            pnf[faceI] = transform
-            (
-                forwardT()[0], iField[nbrFaceCells[faceI]]
-            );
-        }
-    }
-    else
-    {
-        forAll(pnf, faceI)
-        {
-            pnf[faceI] = iField[nbrFaceCells[faceI]];
-        }
+        tpnf() = transform(forwardT(), tpnf());
     }
 
-    return cyclicAMIPatch_.interpolate(pnf);
+    return tpnf;
 }
 
 
@@ -202,12 +189,7 @@ void Foam::cyclicAMIFvPatchField<Type>::updateInterfaceMatrix
     const labelUList& nbrFaceCells =
         cyclicAMIPatch_.cyclicAMIPatch().nbrPatch().faceCells();
 
-    scalarField pnf(nbrFaceCells.size());
-
-    forAll(pnf, faceI)
-    {
-        pnf[faceI] = psiInternal[nbrFaceCells[faceI]];
-    }
+    scalarField pnf(psiInternal, nbrFaceCells);
 
     pnf = cyclicAMIPatch_.interpolate(pnf);
 
