@@ -109,10 +109,6 @@ void Foam::LISA::atomizeParcel
     scalar rhoFuel = fuels.rho(1.0e+5, p.T(), p.X());
     scalar nuFuel = muFuel/rhoFuel;
 
-    vector uDir = p.U()/mag(p.U());
-
-    scalar uGas = mag(vel & uDir);
-
     // Might be the relative velocity between Liquid and Gas, but using the
     // absolute velocity of the parcel as suggested by the authors
     // scalar U = mag(p.Urel(vel));

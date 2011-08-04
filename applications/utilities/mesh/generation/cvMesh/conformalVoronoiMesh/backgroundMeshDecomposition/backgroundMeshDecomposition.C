@@ -1294,11 +1294,12 @@ Foam::labelList Foam::backgroundMeshDecomposition::processorPosition
                     "Foam::labelList"
                     "Foam::backgroundMeshDecomposition::processorPosition"
                     "("
-                        "const List<point>& pts"
+                        "const List<point>&"
                     ") const"
                 )
                     << "The position " << pts[pI]
-                    << " is not in any part of the background mesh.  "
+                    << " is not in any part of the background mesh "
+                    << globalBackgroundBounds_ << endl
                     << "A background mesh with a wider margin around "
                     << "the geometry may help."
                     << exit(FatalError);
@@ -1311,11 +1312,11 @@ Foam::labelList Foam::backgroundMeshDecomposition::processorPosition
                     "Foam::labelList"
                     "Foam::backgroundMeshDecomposition::processorPosition"
                     "("
-                        "const List<point>& pts"
+                        "const List<point>&"
                     ") const"
-                )
-                    << "The position " << pts[pI]
-                    << " was not found in the background mesh, finding nearest."
+                )   << "The position " << pts[pI]
+                    << " was not found in the background mesh "
+                    << globalBackgroundBounds_ << ", finding nearest."
                     << endl;
             }
 

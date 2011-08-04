@@ -263,6 +263,26 @@ checkLineLengthNonDirective()
 }
 
 
+#
+# check that OpenCFD copyright is currents
+#
+checkCopyright()
+{
+    year=$(date +%Y)
+    echo "$hookName: check copyright ..." 1>&2
+
+    for f in $fileList
+    do
+        sYear=`grep "Copyright.*OpenCFD" $f | sed 's/[^0-9]//g' | cut -c 5-9`
+        if [ "$year" != "" ] && [ "$year" != "$sYear" ]; then
+            echo "Updated copyright for: $f"
+            sed -i "s/$sYear OpenCFD/$year OpenCFD/g" $f
+        fi
+
+    done
+}
+
+
 #------------------------------------------------------------------------------
 # Main code : do all checks
 #
@@ -276,6 +296,7 @@ checkIllegalCode
 # ensure code conforms to 80 columns max
 checkLineLengthNonDirective
 
+checkCopyright
 
 exit 0
 #------------------------------------------------------------------------------

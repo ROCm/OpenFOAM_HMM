@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,8 +42,8 @@ namespace Foam
 template <class Container, class T>
 void Pstream::exchange
 (
-    const List<Container >& sendBufs,
-    List<Container >& recvBufs,
+    const List<Container>& sendBufs,
+    List<Container>& recvBufs,
     labelListList& sizes,
     const int tag,
     const bool block
@@ -77,14 +77,13 @@ void Pstream::exchange
         nsTransPs[procI] = sendBufs[procI].size();
     }
 
-    // Send sizes across.
-    int oldTag = UPstream::msgType();
-    UPstream::msgType() = tag;
-    combineReduce(sizes, UPstream::listEq());
-    UPstream::msgType() = oldTag;
+    // Send sizes across. Note: blocks.
+    combineReduce(sizes, UPstream::listEq(), tag);
 
     if (Pstream::parRun())
     {
+        label startOfRequests = Pstream::nRequests();
+
         // Set up receives
         // ~~~~~~~~~~~~~~~
 
@@ -142,7 +141,7 @@ void Pstream::exchange
 
         if (block)
         {
-            Pstream::waitRequests();
+            Pstream::waitRequests(startOfRequests);
         }
     }
 

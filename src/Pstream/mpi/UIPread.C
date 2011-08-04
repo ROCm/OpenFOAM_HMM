@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -145,6 +145,14 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
     {
         // Message is already received into externalBuf
         messageSize_ = buffers.recvBuf_[fromProcNo].size();
+
+        if (debug)
+        {
+            Pout<< "UIPstream::UIPstream PstreamBuffers :"
+                << " fromProcNo:" << fromProcNo
+                << " tag:" << tag_ << " receive buffer size:" << messageSize_
+                << Foam::endl;
+        }
     }
     else
     {

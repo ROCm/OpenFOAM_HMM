@@ -384,6 +384,23 @@ inline Foam::List<Foam::label> Foam::conformalVoronoiMesh::processorsAttached
 }
 
 
+inline bool Foam::conformalVoronoiMesh::isParallelDualEdge
+(
+    const Delaunay::Finite_facets_iterator& fit
+) const
+{
+    const Cell_handle c1(fit->first);
+    const int oppositeVertex = fit->second;
+
+    return
+    (
+            c1->vertex(vertex_triple_index(oppositeVertex, 0))->referred()
+         || c1->vertex(vertex_triple_index(oppositeVertex, 1))->referred()
+         || c1->vertex(vertex_triple_index(oppositeVertex, 2))->referred()
+    );
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 #ifdef CGAL_INEXACT

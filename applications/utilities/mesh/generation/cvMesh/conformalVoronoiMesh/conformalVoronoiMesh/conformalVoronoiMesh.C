@@ -30,6 +30,16 @@ License
 #include "backgroundMeshDecomposition.H"
 #include "meshSearch.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+defineTypeNameAndDebug(conformalVoronoiMesh, 0);
+
+}
+
+
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment

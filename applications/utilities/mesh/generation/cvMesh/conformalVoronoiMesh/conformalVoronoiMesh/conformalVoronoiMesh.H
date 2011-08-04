@@ -722,6 +722,13 @@ private:
             const Delaunay::Finite_facets_iterator& fit
         ) const;
 
+        //- Determines if the edge constructed from the face is on
+        //  a processor patch
+        inline bool isParallelDualEdge
+        (
+            const Delaunay::Finite_facets_iterator& fit
+        ) const;
+
         //- Merge vertices that are very close together
         void mergeCloseDualVertices
         (
@@ -771,7 +778,7 @@ private:
         ) const;
 
         //- Collapse a face to an edge, updating the point and point
-        // map.  Returns the collapse mode that was applied.
+        //  map. Returns the collapse mode that was applied.
         faceCollapseMode collapseFace
         (
             const face& f,
@@ -783,7 +790,7 @@ private:
             label maxFC
         ) const;
 
-        // Identify the index of the longest edge on the face
+        //- Identify the index of the longest edge on the face
         label longestEdge(const face& f, const pointField& pts) const;
 
         //- Identify the face labels of the deferred collapse faces
@@ -885,6 +892,10 @@ private:
 
 
 public:
+
+    //- Runtime type information
+    ClassName("conformalVoronoiMesh");
+
 
     // Constructors
 

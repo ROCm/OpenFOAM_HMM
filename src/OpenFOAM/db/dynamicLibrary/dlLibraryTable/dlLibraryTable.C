@@ -35,8 +35,6 @@ defineTypeNameAndDebug(Foam::dlLibraryTable, 0);
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::dlLibraryTable::dlLibraryTable()
-:
-    HashTable<fileName, void*, Hash<void*> >()
 {}
 
 
@@ -45,8 +43,6 @@ Foam::dlLibraryTable::dlLibraryTable
     const dictionary& dict,
     const word& libsEntry
 )
-:
-    HashTable<fileName, void*, Hash<void*> >()
 {
     open(dict, libsEntry);
 }
@@ -56,17 +52,18 @@ Foam::dlLibraryTable::dlLibraryTable
 
 Foam::dlLibraryTable::~dlLibraryTable()
 {
-    forAllConstIter(dlLibraryTable, *this, iter)
+    forAllReverse(libPtrs_, i)
     {
-        // bug in dlclose - does not call static destructors of
-        // loaded library when actually unloading the library.
-        // See https://bugzilla.novell.com/show_bug.cgi?id=680125 and 657627.
-        if (debug)
+        if (libPtrs_[i])
         {
-            Info<< "dlLibraryTable::~dlLibraryTable() : closing " << iter()
-                << " with handle " << long(iter.key()) << endl;
+            if (debug)
+            {
+                Info<< "dlLibraryTable::~dlLibraryTable() : closing "
+                    << libNames_[i]
+                    << " with handle " << long(libPtrs_[i]) << endl;
+            }
+            dlClose(libPtrs_[i]);
         }
-        dlClose(iter.key());
     }
 }
 
@@ -95,7 +92,7 @@ bool Foam::dlLibraryTable::open
             {
                 WarningIn
                 (
-                    "dlLibraryTable::open(const fileName&)"
+                    "dlLibraryTable::open(const fileName&, const bool)"
                 )   << "could not load " << functionLibName
                     << endl;
             }
@@ -104,7 +101,9 @@ bool Foam::dlLibraryTable::open
         }
         else
         {
-            return insert(functionLibPtr, functionLibName);
+            libPtrs_.append(functionLibPtr);
+            libNames_.append(functionLibName);
+            return true;
         }
     }
     else
@@ -120,18 +119,30 @@ bool Foam::dlLibraryTable::close
     const bool verbose
 )
 {
-    void* libPtr = findLibrary(functionLibName);
-    if (libPtr)
+    label index = -1;
+    forAllReverse(libNames_, i)
+    {
+        if (libNames_[i] == functionLibName)
+        {
+            index = i;
+            break;
+        }
+    }
+
+    if (index != -1)
     {
         if (debug)
         {
             Info<< "dlLibraryTable::close : closing " << functionLibName
-                << " with handle " << long(libPtr) << endl;
+                << " with handle " << long(libPtrs_[index]) << endl;
         }
 
-        erase(libPtr);
+        bool ok = dlClose(libPtrs_[index]);
 
-        if (!dlClose(libPtr))
+        libPtrs_[index] = NULL;
+        libNames_[index] = fileName::null;
+
+        if (!ok)
         {
             if (verbose)
             {
@@ -153,12 +164,19 @@ bool Foam::dlLibraryTable::close
 
 void* Foam::dlLibraryTable::findLibrary(const fileName& functionLibName)
 {
-    forAllConstIter(dlLibraryTable, *this, iter)
+    label index = -1;
+    forAllReverse(libNames_, i)
     {
-        if (iter() == functionLibName)
+        if (libNames_[i] == functionLibName)
         {
-            return iter.key();
+            index = i;
+            break;
         }
+    }
+
+    if (index != -1)
+    {
+        return libPtrs_[index];
     }
     return NULL;
 }
