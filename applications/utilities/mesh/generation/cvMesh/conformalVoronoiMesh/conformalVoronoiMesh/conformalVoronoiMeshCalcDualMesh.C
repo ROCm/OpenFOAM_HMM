@@ -129,11 +129,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     PackedBoolList boundaryPts(number_of_cells(), false);
 
-    indexDualVertices
-    (
-        points,
-        boundaryPts
-    );
+    indexDualVertices(points, boundaryPts);
 
     {
         // Ideally requires a no-risk face filtering to get rid of zero area
@@ -191,11 +187,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
                 // Reindexing the Delaunay cells and regenerating the
                 // points resets the mesh to the starting condition.
 
-                indexDualVertices
-                (
-                    points,
-                    boundaryPts
-                );
+                indexDualVertices(points, boundaryPts);
 
                 {
                     Info<< nl << "Merging close points" << endl;
@@ -642,10 +634,12 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
         Info<< "mergeCloseDualVertices:"
             << " coincident distance:" << coincidentDistanceSqr
             << " closenessTolerance:" << closenessTolerance << endl
-            << "    identical points : "
+            << "    zero-length edges         : "
             << returnReduce(nIdentical, sumOp<label>()) << endl
-            << "    processor edges  : "
+            << "    protected processor edges : "
             << returnReduce(nProcEdge, sumOp<label>()) << endl
+            << "    collapsed edges           : "
+            << returnReduce(nPtsMerged, sumOp<label>()) << endl
             << endl;
     }
 
