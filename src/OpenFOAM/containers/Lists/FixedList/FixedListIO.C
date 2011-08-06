@@ -56,7 +56,7 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& L)
         {
             L = dynamicCast<token::Compound<List<T> > >
             (
-                firstToken.transferCompoundToken()
+                firstToken.transferCompoundToken(is)
             );
         }
         else if (firstToken.isLabel())

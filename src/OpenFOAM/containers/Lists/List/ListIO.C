@@ -59,7 +59,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
         (
             dynamicCast<token::Compound<List<T> > >
             (
-                firstToken.transferCompoundToken()
+                firstToken.transferCompoundToken(is)
             )
         );
     }

@@ -351,7 +351,7 @@ public:
 
             inline bool isCompound() const;
             inline const compound& compoundToken() const;
-            compound& transferCompoundToken();
+            compound& transferCompoundToken(const Istream& is);
 
             inline label lineNumber() const;
             inline label& lineNumber();
