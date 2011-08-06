@@ -242,7 +242,8 @@ void Foam::processorPolyPatch::calcGeometry(PstreamBuffers& pBufs)
                     << "patch:" << name()
                     << " my area:" << magSf
                     << " neighbour area:" << nbrMagSf
-                    << " matching tolerance:" << matchTolerance()*sqr(tols[facei])
+                    << " matching tolerance:"
+                    << matchTolerance()*sqr(tols[facei])
                     << endl
                     << "Mesh face:" << start()+facei
                     << " vertices:"
