@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -92,8 +92,11 @@ Foam::token::compound& Foam::token::transferCompoundToken(const Istream& is)
     {
         if (compoundTokenPtr_->empty())
         {
-            FatalIOErrorIn("token::transferCompoundToken(const Istream& is)", is)
-                << "compound has already been transfered from token\n    "
+            FatalIOErrorIn
+            (
+                "token::transferCompoundToken(const Istream& is)",
+                is
+            )   << "compound has already been transfered from token\n    "
                 << info() << abort(FatalIOError);
         }
         else
