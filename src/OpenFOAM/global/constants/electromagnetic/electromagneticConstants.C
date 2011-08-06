@@ -44,7 +44,7 @@ const Foam::dimensionedScalar Foam::constant::electromagnetic::mu0
         dimensionedScalar
         (
             "mu0",
-            dimensionSet(1, 2, -1, 0, 0, -2, 0),
+            dimensionSet(1, 1, -2, 0, 0, -2, 0),
             4.0*constant::mathematical::pi*1e-07
         )
     )
