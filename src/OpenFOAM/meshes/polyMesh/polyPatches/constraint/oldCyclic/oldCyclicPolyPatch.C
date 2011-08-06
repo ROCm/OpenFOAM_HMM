@@ -444,7 +444,7 @@ void Foam::oldCyclicPolyPatch::getCentresAndAnchors
 
 
     // Calculate typical distance per face
-    tols = calcFaceTol(matchTolerance(), half1Faces, pp.points(), half1Ctrs);
+    tols = matchTolerance()*calcFaceTol(half1Faces, pp.points(), half1Ctrs);
 }
 
 

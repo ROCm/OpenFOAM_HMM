@@ -304,9 +304,9 @@ void Foam::cyclicPolyPatch::calcTransforms
         {
             scalarField half0Tols
             (
-                calcFaceTol
+                matchTolerance()
+               *calcFaceTol
                 (
-                    matchTolerance(),
                     half0,
                     half0.points(),
                     static_cast<const pointField&>(half0Ctrs)
@@ -562,7 +562,7 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
 
 
     // Calculate typical distance per face
-    tols = calcFaceTol(matchTolerance(), pp1, pp1.points(), half1Ctrs);
+    tols = matchTolerance()*calcFaceTol(pp1, pp1.points(), half1Ctrs);
 }
 
 
