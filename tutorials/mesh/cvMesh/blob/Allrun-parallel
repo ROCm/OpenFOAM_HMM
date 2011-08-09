@@ -8,17 +8,9 @@ cd ${0%/*} || exit 1    # run from this directory
 nProc=`grep numberOfSubdomains system/decomposeParDict \
      | sed s/"numberOfSubdomains *\(.*\);"/"\1"/`
 
-runApplication surfaceFeatureExtract constant/triSurface/flange.obj flange -includedAngle 155
-
-# Create tight-fitting background mesh
 runApplication blockMesh
-runApplication topoSet -dict system/topoSetDict-background
-mv log.topoSet log.topoSet.background
-runApplication subsetMesh background -patch walls -overwrite
-
 runApplication decomposePar
 
-# Backup initial background mesh on each processor
 for dir in processor*
 do
     if [[ -d $dir ]]
@@ -29,11 +21,14 @@ done
 
 runParallel cvMesh $nProc
 
-runApplication reconstructParMesh -constant -mergeTol 1e-6
-
-runApplication topoSet -dict system/topoSetDict-slices
-mv log.topoSet log.topoSet.slices
-runApplication writeCellCentres -constant
+runApplication reconstructParMesh -constant -mergeTol 1e-10
 runParallel checkMesh $nProc -constant -allGeometry -allTopology
+
+# To run from the same background mesh as before
+# for dir in processor*;
+# do
+#     rm -r $dir/constant/polyMesh
+#     cp -r $dir/constant/polyMesh_background $dir/constant/polyMesh
+# done
 
 # ----------------------------------------------------------------- end-of-file

@@ -1,15 +1,9 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
-set -x
 
-wmake blockMesh
-wmake extrude
-wmake extrude2DMesh
-wmake snappyHexMesh
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/CleanFunctions
 
-if [ -d "$CGAL_ARCH_PATH" ]
-then
-    cd cvMesh && ./Allwmake
-fi
+cleanCase
 
 # ----------------------------------------------------------------- end-of-file

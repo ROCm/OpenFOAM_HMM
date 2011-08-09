@@ -5,50 +5,30 @@
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
-    class           dictionary;
-    object          controlDict;
+    version     2.0;
+    format      binary;
+    class       polyBoundaryMesh;
+    location    "constant/polyMesh";
+    object      boundary;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-startFrom       latestTime;
-
-startTime       0;
-
-stopAt          endTime;
-
-endTime         0;  //80;
-
-deltaT          1;
-
-writeControl    timeStep;
-
-writeInterval   1000;   //10 to see the meshing steps
-
-purgeWrite      0;
-
-writeFormat     ascii;
-
-writePrecision  10;
-
-writeCompression uncompressed;
-
-timeFormat      general;
-
-timePrecision   6;
-
-runTimeModifiable yes;
-
+2
+(
+    blob.stl_patch1
+    {
+        type            wall;
+        nFaces          64564;
+        startFace       459986;
+    }
+    cvMesh_defaultPatch
+    {
+        type            wall;
+        nFaces          0;
+        startFace       524550;
+    }
+)
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
@@ -34,13 +34,13 @@ deltaT          1;
 
 writeControl    timeStep;
 
-writeInterval   1000;   //10 to see the meshing steps
+writeInterval   1000;
 
 purgeWrite      0;
 
-writeFormat     ascii;
+writeFormat     binary;//ascii;
 
-writePrecision  10;
+writePrecision  12;
 
 writeCompression uncompressed;
 
@@ -49,6 +49,5 @@ timeFormat      general;
 timePrecision   6;
 
 runTimeModifiable yes;
-
 
 // ************************************************************************* //

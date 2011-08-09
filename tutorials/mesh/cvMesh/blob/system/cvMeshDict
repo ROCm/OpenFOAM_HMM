@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
@@ -27,16 +27,54 @@ FoamFile
 
 geometry
 {
-    flange.obj
+    blob.stl
     {
         type triSurfaceMesh;
+    }
+
+    refinementBox
+    {
+        type searchableBox;
+        min (-0.2  -0.6 -0.2);
+        max ( 0.4   0.2  0.35);
+    }
+}
+
+
+backgroundMeshDecomposition
+{
+    minLevels 0;
+    sampleResolution 4;
+    spanScale 20;
+    maxCellWeightCoeff 20;
+}
+
+
+initialPoints
+{
+    minimumSurfaceDistanceCoeff 0.55;
+
+    initialPointsMethod     autoDensity;
+    // initialPointsMethod     pointFile;
+
+    autoDensityCoeffs
+    {
+        minLevels 0;
+        maxSizeRatio 5.0;
+        sampleResolution 5;
+        surfaceSampleResolution 5;
+    }
+
+    pointFileCoeffs
+    {
+        pointFile              "constant/internalDelaunayVertices";
     }
 }
 
 
 surfaceConformation
 {
-    locationInMesh (0 0 0);
+    locationInMesh (0.1 0.1 0.2);
 
     pointPairDistanceCoeff      0.1;
 
@@ -70,7 +108,8 @@ surfaceConformation
 
         maxIterations 15;
 
-        iterationToInitialHitRatioLimit 0.001;
+        iterationToIntialHitRatioLimit 0.01;
+        iterationToInitialHitRatioLimit 0.01;
     }
 
     fineConformationControls
@@ -89,69 +128,44 @@ surfaceConformation
 
         maxIterations 15;
 
-        iterationToInitialHitRatioLimit 0.001;
+        iterationToInitialHitRatioLimit 0.002;
+        iterationToIntialHitRatioLimit 0.002;
     }
 
     geometryToConformTo
     {
-        flange.obj
+        blob.stl
         {
-            featureMethod extendedFeatureEdgeMesh;
-            extendedFeatureEdgeMesh "flange.extendedFeatureEdgeMesh";
+            featureMethod       none;
         }
     }
 
-    additionalFeatures {}
-}
-
-
-initialPoints
-{
-    minimumSurfaceDistanceCoeff 0.55;
-
-    initialPointsMethod         autoDensity;
-    // initialPointsMethod         uniformGrid;
-    // initialPointsMethod         bodyCentredCubic;
-    // initialPointsMethod         pointFile;
-
-    autoDensityCoeffs
+    additionalFeatures
     {
-        minLevels 1;
-        maxSizeRatio 2.0;
-        sampleResolution 5;
-        surfaceSampleResolution 5;
-    }
-
-    uniformGridCoeffs
-    {
-        initialCellSize         0.0015;
-        randomiseInitialGrid    yes;
-        randomPerturbationCoeff 0.02;
-    }
-
-    bodyCentredCubicCoeffs
-    {
-        initialCellSize         0.0015;
-        randomiseInitialGrid    no;
-        randomPerturbationCoeff 0.1;
-    }
-
-    pointFileCoeffs
-    {
-        pointFile              "constant/internalDelaunayVertices";
     }
 }
 
 
 motionControl
 {
-    defaultCellSize     0.00075;
+    defaultCellSize     0.04;
 
     // Assign a priority to all requests for cell sizes, the highest overrules.
     defaultPriority     0;
 
     cellSizeControlGeometry
     {
+        blob.stl
+        {
+            priority            1;
+            mode                bothSides;
+            cellSizeFunction    uniformDistance;
+            uniformDistanceCoeffs
+            {
+                cellSize        0.02;
+                distance        0.1;
+            }
+        }
     }
 
     relaxationModel     adaptiveLinear;
@@ -164,13 +178,15 @@ motionControl
 
     objOutput                   no;
 
-    timeChecks                  yes;
+    timeChecks                  no;
 
-    alignmentSearchSpokes       36;
+    maxLoadUnbalance            0.05;
+
+    alignmentSearchSpokes       24;
 
     alignmentAcceptanceAngle    48;
 
-    sizeAndAlignmentRebuildFrequency 20;
+    sizeAndAlignmentRebuildFrequency 40;
 
     pointInsertionCriteria
     {
@@ -196,20 +212,18 @@ motionControl
 
 polyMeshFiltering
 {
-    // Write the underlying Delaunay tet mesh at output time
-    writeTetDualMesh                        true;
+    writeTetDualMesh                        false;
     filterSizeCoeff                         0.2;
-    mergeClosenessCoeff                     1e-4;
+    mergeClosenessCoeff                     1e-9;
     continueFilteringOnBadInitialPolyMesh   true;
     filterErrorReductionCoeff               0.5;
     filterCountSkipThreshold                4;
+    surfaceStepFaceAngle                    80;
     maxCollapseIterations                   25;
     maxConsecutiveEqualFaceSets             5;
-    surfaceStepFaceAngle                    80;
     edgeCollapseGuardFraction               0.3;
     maxCollapseFaceToPointSideLengthCoeff   0.35;
 }
-
 
 meshQualityControls
 {
@@ -217,15 +231,14 @@ meshQualityControls
     maxBoundarySkewness 50;
     maxInternalSkewness 10;
     maxConcave 80;
+    minVol 1e-20;
     minTetQuality 1e-30;
-    minVol 0;
     minArea -1;
-    minTwist 0.02;
+    minTwist 0.0;
     minDeterminant 0.001;
     minFaceWeight 0.02;
     minVolRatio 0.01;
     minTriangleTwist -1;
 }
-
 
 // ************************************************************************* //

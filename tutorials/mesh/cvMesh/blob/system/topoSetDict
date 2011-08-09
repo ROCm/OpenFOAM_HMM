@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
+|  \\    /   O peration     | Version:  1.6                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -24,7 +24,7 @@ actions
         source  boxToCell;
         sourceInfo
         {
-            box (-100 -100 -0.01)(100 100 100);
+            box (-100 -100 -0.2)(100 100 100);
         }
     }
 
@@ -61,42 +61,42 @@ actions
     // ~~~~~~~~~~~~~~~~ //
 
     {
-        name    y;
+        name    x;
         type    cellSet;
         action  new;
         source  boxToCell;
         sourceInfo
         {
-            box (-100 0 -100)(100 100 100);
+            box (-0.32 -100 -100)(100 100 100);
         }
     }
 
     {
-        name    yf;
+        name    xf;
         type    faceSet;
         action  new;
         source  cellToFace;
         sourceInfo
         {
-            set    y;
+            set    x;
             option all;
         }
     }
 
     {
-        name    y;
+        name    x;
         type    cellSet;
         action  invert;
     }
 
     {
-        name    yf;
+        name    xf;
         type    faceSet;
         action  subset;
         source  cellToFace;
         sourceInfo
         {
-            set    y;
+            set    x;
             option all;
         }
     }
@@ -104,42 +104,43 @@ actions
     // ~~~~~~~~~~~~~~~~ //
 
     {
-        name    x;
+        name    sp;
         type    cellSet;
         action  new;
-        source  boxToCell;
+        source  sphereToCell;
         sourceInfo
         {
-            box (0 -100 -100)(100 100 100);
+            centre (-0.3 -0.3 -0.3);
+            radius 0.4;
         }
     }
 
     {
-        name    xf;
+        name    spf;
         type    faceSet;
         action  new;
         source  cellToFace;
         sourceInfo
         {
-            set    x;
+            set    sp;
             option all;
         }
     }
 
     {
-        name    x;
+        name    sp;
         type    cellSet;
         action  invert;
     }
 
     {
-        name    xf;
+        name    spf;
         type    faceSet;
         action  subset;
         source  cellToFace;
         sourceInfo
         {
-            set    x;
+            set    sp;
             option all;
         }
     }

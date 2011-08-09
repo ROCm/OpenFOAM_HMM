@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
+|  \\    /   O peration     | Version:  1.6                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -15,6 +15,10 @@ FoamFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+zSlice  -0.009;
+ySlice  0.0;
+xSlice  0.0;
+
 actions
 (
     {
@@ -24,7 +28,7 @@ actions
         source  boxToCell;
         sourceInfo
         {
-            box (-100000 -100000 50)(100000 100000 100000);
+            box (-100 -100 $zSlice)(100 100 100);
         }
     }
 
@@ -67,7 +71,7 @@ actions
         source  boxToCell;
         sourceInfo
         {
-            box (-100000 0 -100000)(100000 100000 100000);
+            box (-100 $ySlice -100)(100 100 100);
         }
     }
 
@@ -110,7 +114,7 @@ actions
         source  boxToCell;
         sourceInfo
         {
-            box (0 -100000 -100000)(100000 100000 100000);
+            box ($xSlice -100 -100)(100 100 100);
         }
     }
 

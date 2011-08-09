@@ -34,6 +34,15 @@ geometry
 }
 
 
+backgroundMeshDecomposition
+{
+    minLevels 1;
+    sampleResolution 4;
+    spanScale 5;
+    maxCellWeightCoeff 10;
+}
+
+
 surfaceConformation
 {
     locationInMesh (0 0 0);
@@ -96,12 +105,14 @@ surfaceConformation
     {
         flange.obj
         {
-            featureMethod extendedFeatureEdgeMesh;
-            extendedFeatureEdgeMesh "flange.extendedFeatureEdgeMesh";
+            featureMethod    extendedFeatureEdgeMesh;
+            extendedFeatureEdgeMesh  "flange.extendedFeatureEdgeMesh";
         }
     }
 
-    additionalFeatures {}
+    additionalFeatures
+    {
+    }
 }
 
 
@@ -109,7 +120,16 @@ initialPoints
 {
     minimumSurfaceDistanceCoeff 0.55;
 
-    initialPointsMethod         pointFile;
+    initialPointsMethod         autoDensity;
+    // initialPointsMethod         pointFile;
+
+    autoDensityCoeffs
+    {
+        minLevels 1;
+        maxSizeRatio 3.0;
+        sampleResolution 4;
+        surfaceSampleResolution 5;
+    }
 
     pointFileCoeffs
     {
@@ -120,13 +140,25 @@ initialPoints
 
 motionControl
 {
-    defaultCellSize     0.00075;
+    defaultCellSize     0.001;
 
     // Assign a priority to all requests for cell sizes, the highest overrules.
     defaultPriority     0;
 
     cellSizeControlGeometry
     {
+        flange.obj
+        {
+            priority            1;
+            mode                bothSides;
+            cellSizeFunction    linearDistance;
+            linearDistanceCoeffs
+            {
+                surfaceCellSize     0.0005;
+                distanceCellSize    $defaultCellSize;
+                distance            0.004;
+            }
+        }
     }
 
     relaxationModel     adaptiveLinear;
@@ -139,9 +171,11 @@ motionControl
 
     objOutput                   no;
 
-    timeChecks                  yes;
+    timeChecks                  no;
 
-    alignmentSearchSpokes       36;
+    maxLoadUnbalance            0.05;
+
+    alignmentSearchSpokes       24;
 
     alignmentAcceptanceAngle    48;
 
@@ -171,11 +205,9 @@ motionControl
 
 polyMeshFiltering
 {
-    // Write the underlying Delaunay tet mesh at output time
-    writeTetDualMesh                        true;
-
+    writeTetDualMesh                        false;
     filterSizeCoeff                         0.2;
-    mergeClosenessCoeff                     1e-4;
+    mergeClosenessCoeff                     1e-9;
     continueFilteringOnBadInitialPolyMesh   true;
     filterErrorReductionCoeff               0.5;
     filterCountSkipThreshold                4;
@@ -196,7 +228,7 @@ meshQualityControls
     minTetQuality 1e-30;
     minVol 0;
     minArea -1;
-    minTwist 0.02;
+    minTwist 0.001;
     minDeterminant 0.001;
     minFaceWeight 0.02;
     minVolRatio 0.01;
