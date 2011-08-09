@@ -7,8 +7,12 @@ cd ${0%/*} || exit 1    # run from this directory
 # Set application name
 application=`getApplication`
 
+cp -r 0.org 0
+
 runApplication blockMesh
 runApplication setFields
-runApplication $application
+runApplication decomposePar
+runParallel $application 4
+runApplication reconstructPar
 
 # ----------------------------------------------------------------- end-of-file

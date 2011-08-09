@@ -4,20 +4,36 @@ cd ${0%/*} || exit 1    # run from this directory
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
-# Generate aligned points (in constant/internalDelaunayVertices) and a
-# mesh from that.
-cp system/controlDict-generatePoints system/controlDict
-cp system/cvMeshDict-generatePoints system/cvMeshDict
-runApplication surfaceFeatureExtract constant/triSurface/flange.obj flange -includedAngle 150
-runApplication cvMesh
+# Get the number of processors to run on from system/decomposeParDict
+nProc=`grep numberOfSubdomains system/decomposeParDict \
+     | sed s/"numberOfSubdomains *\(.*\);"/"\1"/`
 
-# Use pre-generated aligned points (constant/internalDelaunayVertices)
-# to generate a mesh
-# cp system/controlDict-usePoints system/controlDict
-# cp system/cvMeshDict-usePoints system/cvMeshDict
-# runApplication cvMesh
+runApplication surfaceFeatureExtract constant/triSurface/flange.obj flange -includedAngle 155
 
-# Generate some sets for a bit of mesh inspection
-runApplication topoSet
+# Create tight-fitting background mesh
+runApplication blockMesh
+runApplication topoSet -dict system/topoSetDict-background
+mv log.topoSet log.topoSet.background
+runApplication subsetMesh background -patch walls -overwrite
+
+runApplication decomposePar
+
+# Backup initial background mesh on each processor
+for dir in processor*
+do
+    if [[ -d $dir ]]
+    then
+        cp -r $dir/constant/polyMesh $dir/constant/polyMesh_background
+    fi
+done
+
+runParallel cvMesh $nProc
+
+runApplication reconstructParMesh -constant -mergeTol 1e-6
+
+runApplication topoSet -dict system/topoSetDict-slices
+mv log.topoSet log.topoSet.slices
+runApplication writeCellCentres -constant
+runParallel checkMesh $nProc -constant -allGeometry -allTopology
 
 # ----------------------------------------------------------------- end-of-file

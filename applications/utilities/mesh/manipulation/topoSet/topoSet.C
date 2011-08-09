@@ -105,19 +105,19 @@ int main(int argc, char *argv[])
         "file",
         "specify an alternative dictionary for the topoSet dictionary"
     );
-#   include "addRegionOption.H"
+    #include "addRegionOption.H"
     argList::addBoolOption
     (
         "noSync",
         "do not synchronise selection across coupled patches"
     );
 
-#   include "setRootCase.H"
-#   include "createTime.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
 
     instantList timeDirs = timeSelector::selectIfPresent(runTime, args);
 
-#   include "createNamedPolyMesh.H"
+    #include "createNamedPolyMesh.H"
 
     const bool noSync = args.optionFound("noSync");
 

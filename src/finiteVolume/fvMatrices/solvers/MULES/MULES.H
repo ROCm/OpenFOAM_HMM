@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2006-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,18 +45,27 @@ SourceFiles
 #include "volFields.H"
 #include "surfaceFieldsFwd.H"
 #include "primitiveFieldsFwd.H"
-#include "zero.H"
 #include "geometricOneField.H"
+#include "zero.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace MULES
+{
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace MULES
-{
+template<class RhoType, class SpType, class SuType>
+void explicitSolve
+(
+    const RhoType& rho,
+    volScalarField& psi,
+    const surfaceScalarField& phiPsi,
+    const SpType& Sp,
+    const SuType& Su
+);
 
 template<class RhoType, class SpType, class SuType>
 void explicitSolve
@@ -117,10 +126,29 @@ void limiter
     const label nLimiterIter
 );
 
-} // End namespace MULES
+template<class RhoType, class SpType, class SuType>
+void limit
+(
+    const RhoType& rho,
+    const volScalarField& psi,
+    const surfaceScalarField& phi,
+    surfaceScalarField& phiPsi,
+    const SpType& Sp,
+    const SuType& Su,
+    const scalar psiMax,
+    const scalar psiMin,
+    const label nLimiterIter,
+    const bool returnCorr
+);
+
+void limitSum(UPtrList<scalarField>& phiPsiCorrs);
+
+template<class SurfaceScalarFieldList>
+void limitSum(SurfaceScalarFieldList& phiPsiCorrs);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace MULES
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

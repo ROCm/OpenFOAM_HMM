@@ -384,6 +384,9 @@ polyMeshFiltering
     edgeCollapseGuardFraction               0.3;
     // Only collapse face to point if high aspect ratio
     maxCollapseFaceToPointSideLengthCoeff   0.35;
+
+    // Write the tet-dual mesh for post-processing
+    writeTetDualMesh                        yes;
 }
 
 
