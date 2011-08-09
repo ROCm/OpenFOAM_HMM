@@ -168,12 +168,7 @@ private:
 
         void calcAlphas();
 
-        void solveAlphas
-        (
-            const label nAlphaCorr,
-            const bool cycleAlpha,
-            const scalar cAlpha
-        );
+        void solveAlphas(const scalar cAlpha);
 
         tmp<surfaceVectorField> nHatfv
         (

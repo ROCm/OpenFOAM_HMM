@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2006-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,58 +43,14 @@ void Foam::MULES::explicitSolve
 (
     const RhoType& rho,
     volScalarField& psi,
-    const surfaceScalarField& phi,
-    surfaceScalarField& phiPsi,
+    const surfaceScalarField& phiPsi,
     const SpType& Sp,
-    const SuType& Su,
-    const scalar psiMax,
-    const scalar psiMin
+    const SuType& Su
 )
 {
     Info<< "MULES: Solving for " << psi.name() << endl;
 
     const fvMesh& mesh = psi.mesh();
-    psi.correctBoundaryConditions();
-
-    surfaceScalarField phiBD(upwind<scalar>(psi.mesh(), phi).flux(psi));
-
-    surfaceScalarField& phiCorr = phiPsi;
-    phiCorr -= phiBD;
-
-    scalarField allLambda(mesh.nFaces(), 1.0);
-
-    slicedSurfaceScalarField lambda
-    (
-        IOobject
-        (
-            "lambda",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        mesh,
-        dimless,
-        allLambda,
-        false   // Use slices for the couples
-    );
-
-    limiter
-    (
-        allLambda,
-        rho,
-        psi,
-        phiBD,
-        phiCorr,
-        Sp,
-        Su,
-        psiMax,
-        psiMin,
-        3
-    );
-
-    phiPsi = phiBD + lambda*phiCorr;
 
     scalarField& psiIf = psi;
     const scalarField& psi0 = psi.oldTime();
@@ -124,6 +80,25 @@ void Foam::MULES::explicitSolve
     }
 
     psi.correctBoundaryConditions();
+}
+
+
+template<class RhoType, class SpType, class SuType>
+void Foam::MULES::explicitSolve
+(
+    const RhoType& rho,
+    volScalarField& psi,
+    const surfaceScalarField& phi,
+    surfaceScalarField& phiPsi,
+    const SpType& Sp,
+    const SuType& Su,
+    const scalar psiMax,
+    const scalar psiMin
+)
+{
+    psi.correctBoundaryConditions();
+    limit(rho, psi, phi, phiPsi, Sp, Su, psiMax, psiMin, 3, false);
+    explicitSolve(rho, psi, phiPsi, Sp, Su);
 }
 
 
@@ -610,6 +585,102 @@ void Foam::MULES::limiter
         }
 
         syncTools::syncFaceList(mesh, allLambda, minEqOp<scalar>());
+    }
+}
+
+
+template<class RhoType, class SpType, class SuType>
+void Foam::MULES::limit
+(
+    const RhoType& rho,
+    const volScalarField& psi,
+    const surfaceScalarField& phi,
+    surfaceScalarField& phiPsi,
+    const SpType& Sp,
+    const SuType& Su,
+    const scalar psiMax,
+    const scalar psiMin,
+    const label nLimiterIter,
+    const bool returnCorr
+)
+{
+    const fvMesh& mesh = psi.mesh();
+
+    surfaceScalarField phiBD(upwind<scalar>(psi.mesh(), phi).flux(psi));
+
+    surfaceScalarField& phiCorr = phiPsi;
+    phiCorr -= phiBD;
+
+    scalarField allLambda(mesh.nFaces(), 1.0);
+
+    slicedSurfaceScalarField lambda
+    (
+        IOobject
+        (
+            "lambda",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        mesh,
+        dimless,
+        allLambda,
+        false   // Use slices for the couples
+    );
+
+    limiter
+    (
+        allLambda,
+        rho,
+        psi,
+        phiBD,
+        phiCorr,
+        Sp,
+        Su,
+        psiMax,
+        psiMin,
+        nLimiterIter
+    );
+
+    if (returnCorr)
+    {
+        phiCorr *= lambda;
+    }
+    else
+    {
+        phiPsi = phiBD + lambda*phiCorr;
+    }
+}
+
+
+template<class SurfaceScalarFieldList>
+void Foam::MULES::limitSum(SurfaceScalarFieldList& phiPsiCorrs)
+{
+    {
+        UPtrList<scalarField> phiPsiCorrsInternal(phiPsiCorrs.size());
+        forAll(phiPsiCorrs, phasei)
+        {
+            phiPsiCorrsInternal.set(phasei, &phiPsiCorrs[phasei]);
+        }
+
+        limitSum(phiPsiCorrsInternal);
+    }
+
+    forAll(phiPsiCorrs[0].boundaryField(), patchi)
+    {
+        UPtrList<scalarField> phiPsiCorrsPatch(phiPsiCorrs.size());
+        forAll(phiPsiCorrs, phasei)
+        {
+            phiPsiCorrsPatch.set
+            (
+                phasei,
+                &phiPsiCorrs[phasei].boundaryField()[patchi]
+            );
+        }
+
+        limitSum(phiPsiCorrsPatch);
     }
 }
 
