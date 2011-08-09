@@ -115,6 +115,13 @@ public:
 };
 
 
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+//- Data associated with the type are contiguous
+template<>
+inline bool contiguous<tetCell>() {return true;}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
