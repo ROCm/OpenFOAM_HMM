@@ -186,8 +186,16 @@ bool Foam::regIOobject::read()
                 << "reading object " << name()
                 << " from file " << endl;
         }
+
+        // Set flag for e.g. codeStream
+        bool oldFlag = regIOobject::masterOnlyReading;
+        regIOobject::masterOnlyReading = masterOnly;
+
+        // Read file
         ok = readData(readStream(type()));
         close();
+
+        regIOobject::masterOnlyReading = oldFlag;
     }
 
     if (masterOnly && Pstream::parRun())

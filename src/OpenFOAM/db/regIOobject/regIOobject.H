@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,6 +49,11 @@ SourceFiles
 namespace Foam
 {
 
+namespace functionEntries
+{
+    class codeStream;
+}
+
 /*---------------------------------------------------------------------------*\
                          Class regIOobject Declaration
 \*---------------------------------------------------------------------------*/
@@ -70,6 +75,12 @@ public:
     };
 
     static const NamedEnum<fileCheckTypes, 4> fileCheckTypesNames;
+
+
+protected:
+
+        //- To flag master-only reading of objects
+        static bool masterOnlyReading;
 
 
 private:
@@ -102,6 +113,11 @@ private:
 
 
 public:
+
+        //- Declare friendship with any classes that need access to
+        //  masterOnlyReading
+        friend class functionEntries::codeStream;
+
 
     // Static data
 

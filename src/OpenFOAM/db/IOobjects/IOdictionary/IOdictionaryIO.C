@@ -39,8 +39,16 @@ void Foam::IOdictionary::readFile(const bool masterOnly)
             Pout<< "IOdictionary : Reading " << objectPath()
                 << " from file " << endl;
         }
+
+        // Set flag for e.g. codeStream
+        bool oldFlag = regIOobject::masterOnlyReading;
+        regIOobject::masterOnlyReading = masterOnly;
+
+        // Read file
         readStream(typeName) >> *this;
         close();
+
+        regIOobject::masterOnlyReading = oldFlag;
 
         if (writeDictionaries && Pstream::master())
         {
