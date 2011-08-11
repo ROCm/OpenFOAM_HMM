@@ -98,7 +98,17 @@ fvsPatchField<Type>::fvsPatchField
     }
     else
     {
-        fvsPatchField<Type>::operator=(pTraits<Type>::zero);
+        FatalIOErrorIn
+        (
+            "fvsPatchField<Type>::fvsPatchField\n"
+            "(\n"
+            "    const fvPatch& p,\n"
+            "    const DimensionedField<Type, surfaceMesh>& iF,\n"
+            "    const dictionary& dict\n"
+            ")\n",
+            dict
+        )   << "essential value entry not provided"
+            << exit(FatalIOError);
     }
 }
 
@@ -177,6 +187,7 @@ template<class Type>
 void fvsPatchField<Type>::write(Ostream& os) const
 {
     os.writeKeyword("type") << type() << token::END_STATEMENT << nl;
+    this->writeEntry("value", os);
 }
 
 

@@ -101,16 +101,6 @@ coupledFvsPatchField<Type>::coupledFvsPatchField
 {}
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-void coupledFvsPatchField<Type>::write(Ostream& os) const
-{
-    fvsPatchField<Type>::write(os);
-    this->writeEntry("value", os);
-}
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

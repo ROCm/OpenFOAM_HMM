@@ -128,14 +128,6 @@ tmp<Field<Type> > fixedValueFvsPatchField<Type>::gradientBoundaryCoeffs() const
 }
 
 
-template<class Type>
-void fixedValueFvsPatchField<Type>::write(Ostream& os) const
-{
-    fvsPatchField<Type>::write(os);
-    this->writeEntry("value", os);
-}
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

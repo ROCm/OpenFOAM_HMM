@@ -159,16 +159,6 @@ slicedFvsPatchField<Type>::~slicedFvsPatchField<Type>()
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-void slicedFvsPatchField<Type>::write(Ostream& os) const
-{
-    fvsPatchField<Type>::write(os);
-    this->writeEntry("value", os);
-}
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

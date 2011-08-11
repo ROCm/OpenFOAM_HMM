@@ -128,17 +128,6 @@ tmp<fvsPatchField<Type> > fvsPatchField<Type>::NewCalculatedType
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-// Write
-template<class Type>
-void calculatedFvsPatchField<Type>::write(Ostream& os) const
-{
-    fvsPatchField<Type>::write(os);
-    this->writeEntry("value", os);
-}
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

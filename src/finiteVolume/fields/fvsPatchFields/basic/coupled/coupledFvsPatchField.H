@@ -126,10 +126,6 @@ public:
             {
                 return true;
             }
-
-
-        //- Write
-        virtual void write(Ostream&) const;
 };
 
 

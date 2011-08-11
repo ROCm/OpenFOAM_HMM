@@ -94,7 +94,7 @@ cyclicFvsPatchField<Type>::cyclicFvsPatchField
             "cyclicFvsPatchField<Type>::cyclicFvsPatchField\n"
             "(\n"
             "    const fvPatch& p,\n"
-            "    const Field<Type>& field,\n"
+            "    const DimensionedField<Type, surfaceMesh>& iF,\n"
             "    const dictionary& dict\n"
             ")\n",
             dict
