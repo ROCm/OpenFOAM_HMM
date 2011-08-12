@@ -269,7 +269,7 @@ public:
     ) const
     {
         // tetVertexGlobalIndices
-        tetCell tVGI(-1);
+        Foam::tetCell tVGI;
 
         for (int i = 0; i < 4; i++)
         {
