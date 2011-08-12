@@ -88,11 +88,6 @@ class faceAreaWeightModel;
 
 class backgroundMeshDecomposition;
 
-typedef FixedList<label, 4>globalTetIndices;
-
-typedef HashTable<label, globalTetIndices, Hash<globalTetIndices> >
-    HashTableGlobalTetIndices;
-
 /*---------------------------------------------------------------------------*\
                     Class conformalVoronoiMesh Declaration
 \*---------------------------------------------------------------------------*/
