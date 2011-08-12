@@ -107,13 +107,14 @@ do
         shift 2
         ;;
    --projectVersion)
-#        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-#        projectVersion="$2"
-#        # replace WM_PROJECT_VERSION=...
-#        _inlineSed \
-#            etc/bashrc \
-#            '/^[^#]/s@WM_PROJECT_VERSION=.*@WM_PROJECT_VERSION='"$projectVersion@" \
-#            "Replacing WM_PROJECT_VERSION setting by $projectVersion"
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        projectVersion="$2"
+        # replace WM_PROJECT_VERSION=...
+        # No checking since might already be set.
+        echo "Replacing WM_PROJECT_VERSION setting by $projectVersion"
+        sed -i \
+            '/^[^#]/s@WM_PROJECT_VERSION=.*@WM_PROJECT_VERSION='"$projectVersion@" \
+            etc/bashrc
         shift 2
         ;;
     -archOption | --archOption)
@@ -142,7 +143,7 @@ do
     esac
 done
 
-[ -n "$foamInstall" -o -n "$projectName" -o -n "$archOption"  -o -n "$paraviewInstall" ] || usage "Please specify at least one configure option"
+[ -n "$foamInstall" -o -n "$projectName" -o -n "$projectVersion" -o -n "$archOption" -o -n "$paraviewInstall" ] || usage "Please specify at least one configure option"
 
 #echo "Replacing WM_PROJECT setting by '$projectName'"
 #sed -i -e 's@WM_PROJECT=.*@WM_PROJECT='"$projectName@" etc/bashrc
