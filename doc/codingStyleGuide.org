@@ -1,9 +1,9 @@
 #                            -*- mode: org; -*-
 #
-#+TITLE:                 OpenFOAM C++ style guide
-#+AUTHOR:                      OpenCFD Ltd.
-#+DATE:                         Feb 2011
-#+LINK:                  http://www.OpenFOAM.com
+#+TITLE:               OpenFOAM C++ style guide
+#+AUTHOR:                      OpenFOAM Foundation
+#+DATE:                             Aug 2011
+#+LINK:                     http://www.OpenFOAM.org
 #+OPTIONS: author:nil ^:{}
 #+STARTUP: hidestars
 #+STARTUP: odd

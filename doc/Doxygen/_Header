@@ -13,18 +13,14 @@
 <!-- meta info -->
 <meta
     name="keywords"
-    content="computational fluid dynamics, CFD, OpenCFD, OpenFOAM, open source CFD, open source"
-    />
-<meta
-    name="description"
-    content="OpenCFD Ltd, leaders in open source Computational Fluid Dynamics (CFD), the developers and maintainers of OpenFOAM: the open source CFD toolbox. We supply support and contracted developments for OpenFOAM"
+    content="computational fluid dynamics, CFD, OpenFOAM, open source CFD, open source"
     />
 </head>
 <body>
 <div class="page-container">
   <div class="header">
     <div class="header-top">
-      <a class="sitelogo" href="http://www.openfoam.com" title="Home">
+      <a class="sitelogo" href="http://www.openfoam.org" title="Home">
         <img class=left src="../css/img/OpenFOAMlogo.png">
       </a>
       <div class="sitename">
@@ -33,7 +29,6 @@
              title="Source Guide">OpenFOAM C++ Documentation
           </a>
         </h1>
-        <img class=right src="../css/img/OpenCFDlogo.png">
       </div>
     </div>  <!-- header-top -->
   </div>  <!-- header -->

@@ -3,7 +3,7 @@
 # =========                 |                                               #
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox         #
 #  \\    /   O peration     | Version:  dev                                 #
-#   \\  /    A nd           | Web:      www.OpenFOAM.com                    #
+#   \\  /    A nd           | Web:      www.OpenFOAM.org                    #
 #    \\/     M anipulation  |                                               #
 #---------------------------------------------------------------------------#
 cd ${0%/*} || exit 1    # run from this directory

@@ -1,4 +1,4 @@
-/* OpenCFD layout styles */
+/* OpenFOAM layout styles */
 
 * {
     padding: 0;
@@ -92,7 +92,6 @@ p:after {
     position:absolute;
     z-index:1;
     margin:20px 0 0 15px;
-/*    background:url(img/OpenCFDlogo.png) no-repeat;*/
 }
 
 /**************************sitename ************************************************/
