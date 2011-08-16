@@ -130,6 +130,7 @@ void Foam::moleculeCloud::calculatePairForce()
     PstreamBuffers pBufs(Pstream::nonBlocking);
 
     // Start sending referred data
+    label startOfRequests = Pstream::nRequests();
     il_.sendReferredData(cellOccupancy(), pBufs);
 
     molecule* molI = NULL;
@@ -173,7 +174,7 @@ void Foam::moleculeCloud::calculatePairForce()
     }
 
     // Receive referred data
-    il_.receiveReferredData(pBufs);
+    il_.receiveReferredData(pBufs, startOfRequests);
 
     {
         // Real-Referred interactions
@@ -361,10 +362,12 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
     PstreamBuffers pBufs(Pstream::nonBlocking);
 
     // Start sending referred data
+    label startOfRequests = Pstream::nRequests();
+
     il_.sendReferredData(cellOccupancy(), pBufs);
 
         // Receive referred data
-    il_.receiveReferredData(pBufs);
+    il_.receiveReferredData(pBufs, startOfRequests);
 
     // Real-Referred interaction
 
@@ -451,10 +454,12 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
     buildCellOccupancy();
 
     // Start sending referred data
+    startOfRequests = Pstream::nRequests();
+
     il_.sendReferredData(cellOccupancy(), pBufs);
 
     // Receive referred data
-    il_.receiveReferredData(pBufs);
+    il_.receiveReferredData(pBufs, startOfRequests);
 
     label molsRemoved = initialSize - this->size();
 

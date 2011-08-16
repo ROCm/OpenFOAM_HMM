@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,11 +42,12 @@ void reduce
 (
     const List<UPstream::commsStruct>& comms,
     T& Value,
-    const BinaryOp& bop
+    const BinaryOp& bop,
+    const int tag
 )
 {
-    Pstream::gather(comms, Value, bop);
-    Pstream::scatter(comms, Value);
+    Pstream::gather(comms, Value, bop, tag);
+    Pstream::scatter(comms, Value, tag);
 }
 
 
@@ -55,16 +56,17 @@ template <class T, class BinaryOp>
 void reduce
 (
     T& Value,
-    const BinaryOp& bop
+    const BinaryOp& bop,
+    const int tag = Pstream::msgType()
 )
 {
     if (UPstream::nProcs() < UPstream::nProcsSimpleSum)
     {
-        reduce(UPstream::linearCommunication(), Value, bop);
+        reduce(UPstream::linearCommunication(), Value, bop, tag);
     }
     else
     {
-        reduce(UPstream::treeCommunication(), Value, bop);
+        reduce(UPstream::treeCommunication(), Value, bop, tag);
     }
 }
 
@@ -74,18 +76,19 @@ template <class T, class BinaryOp>
 T returnReduce
 (
     const T& Value,
-    const BinaryOp& bop
+    const BinaryOp& bop,
+    const int tag = Pstream::msgType()
 )
 {
     T WorkValue(Value);
 
     if (UPstream::nProcs() < UPstream::nProcsSimpleSum)
     {
-        reduce(UPstream::linearCommunication(), WorkValue, bop);
+        reduce(UPstream::linearCommunication(), WorkValue, bop, tag);
     }
     else
     {
-        reduce(UPstream::treeCommunication(), WorkValue, bop);
+        reduce(UPstream::treeCommunication(), WorkValue, bop, tag);
     }
 
     return WorkValue;
@@ -93,7 +96,12 @@ T returnReduce
 
 
 // Insist there is a specialisation for the reduction of a scalar
-void reduce(scalar& Value, const sumOp<scalar>& bop);
+void reduce
+(
+    scalar& Value,
+    const sumOp<scalar>& bop,
+    const int tag = Pstream::msgType()
+);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

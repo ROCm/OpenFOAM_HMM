@@ -38,9 +38,10 @@ Description
 
     \verbatim
     PstreamBuffers pBufs(Pstream::nonBlocking);
+    label startOfRequests = Pstream::nRequests();
     il_.sendReferredData(cellOccupancy_, pBufs);
     // Do other things
-    il_.receiveReferredData(pBufs);
+    il_.receiveReferredData(pBufs, startOfRequests);
     \endverbatim
 
     Requiring data:
@@ -237,7 +238,11 @@ public:
         );
 
         //- Receive referred data
-        void receiveReferredData(PstreamBuffers& pBufs);
+        void receiveReferredData
+        (
+            PstreamBuffers& pBufs,
+            const label startReq = 0
+        );
 
 
         // Access

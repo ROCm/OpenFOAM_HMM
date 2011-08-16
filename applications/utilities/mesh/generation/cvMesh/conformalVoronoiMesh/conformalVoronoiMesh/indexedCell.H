@@ -46,6 +46,7 @@ Description
 #include "Pstream.H"
 #include "Swap.H"
 #include "InfoProxy.H"
+#include "tetCell.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -208,7 +209,6 @@ public:
         );
     }
 
-
     //- Does the Dual vertex form part of a processor patch
     inline Foam::label dualVertexMasterProc() const
     {
@@ -263,13 +263,13 @@ public:
 
     // Using the globalIndex object, return a list of four (sorted) global
     // Delaunay vertex indices that uniquely identify this tet in parallel
-    inline Foam::FixedList<Foam::label, 4> vertexGlobalIndices
+    inline Foam::tetCell vertexGlobalIndices
     (
         const Foam::globalIndex& globalDelaunayVertexIndices
     ) const
     {
         // tetVertexGlobalIndices
-        Foam::FixedList<Foam::label, 4> tVGI(-1);
+        Foam::tetCell tVGI;
 
         for (int i = 0; i < 4; i++)
         {

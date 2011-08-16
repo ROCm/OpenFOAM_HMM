@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -130,6 +130,18 @@ public:
         const volVectorField& cellDisplacement() const
         {
             return cellDisplacement_;
+        }
+
+        //- Return const reference to the diffusivity
+        const motionDiffusivity& diffusivity() const
+        {
+            return diffusivityPtr_();
+        }
+
+        //- Return reference to the diffusivity
+        motionDiffusivity& diffusivity()
+        {
+            return diffusivityPtr_();
         }
 
         //- Return point location obtained from the current motion field

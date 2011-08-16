@@ -186,8 +186,16 @@ bool Foam::regIOobject::read()
                 << "reading object " << name()
                 << " from file " << endl;
         }
+
+        // Set flag for e.g. codeStream
+        bool oldFlag = regIOobject::masterOnlyReading;
+        regIOobject::masterOnlyReading = masterOnly;
+
+        // Read file
         ok = readData(readStream(type()));
         close();
+
+        regIOobject::masterOnlyReading = oldFlag;
     }
 
     if (masterOnly && Pstream::parRun())
@@ -203,8 +211,13 @@ bool Foam::regIOobject::read()
 
         // Master reads headerclassname from file. Make sure this gets
         // transfered as well as contents.
-        Pstream::scatter(comms, const_cast<word&>(headerClassName()));
-        Pstream::scatter(comms, note());
+        Pstream::scatter
+        (
+            comms,
+            const_cast<word&>(headerClassName()),
+            Pstream::msgType()
+        );
+        Pstream::scatter(comms, note(), Pstream::msgType());
 
 
         // Get my communication order
@@ -228,6 +241,7 @@ bool Foam::regIOobject::read()
                 Pstream::scheduled,
                 myComm.above(),
                 0,
+                Pstream::msgType(),
                 IOstream::ASCII
             );
             ok = readData(fromAbove);

@@ -541,29 +541,51 @@ int main(int argc, char *argv[])
         IOobjectList objects(mesh, runTime.timeName());
 
         HashSet<word> selectedFields;
-        args.optionReadIfPresent("fields", selectedFields);
+        bool specifiedFields = args.optionReadIfPresent
+        (
+            "fields",
+            selectedFields
+        );
 
         // Construct the vol fields (on the original mesh if subsetted)
 
         PtrList<volScalarField> vsf;
-        readFields(vMesh, vMesh.baseMesh(), objects, selectedFields, vsf);
-        print("    volScalarFields            :", Info, vsf);
-
         PtrList<volVectorField> vvf;
-        readFields(vMesh, vMesh.baseMesh(), objects, selectedFields, vvf);
-        print("    volVectorFields            :", Info, vvf);
-
         PtrList<volSphericalTensorField> vSpheretf;
-        readFields(vMesh, vMesh.baseMesh(), objects, selectedFields, vSpheretf);
-        print("    volSphericalTensorFields   :", Info, vSpheretf);
-
         PtrList<volSymmTensorField> vSymmtf;
-        readFields(vMesh, vMesh.baseMesh(), objects, selectedFields, vSymmtf);
-        print("    volSymmTensorFields        :", Info, vSymmtf);
-
         PtrList<volTensorField> vtf;
-        readFields(vMesh, vMesh.baseMesh(), objects, selectedFields, vtf);
-        print("    volTensorFields            :", Info, vtf);
+
+        if (!specifiedFields || selectedFields.size())
+        {
+            readFields(vMesh, vMesh.baseMesh(), objects, selectedFields, vsf);
+            print("    volScalarFields            :", Info, vsf);
+
+            readFields(vMesh, vMesh.baseMesh(), objects, selectedFields, vvf);
+            print("    volVectorFields            :", Info, vvf);
+
+            readFields
+            (
+                vMesh,
+                vMesh.baseMesh(),
+                objects,
+                selectedFields,
+                vSpheretf
+            );
+            print("    volSphericalTensorFields   :", Info, vSpheretf);
+
+            readFields
+            (
+                vMesh,
+                vMesh.baseMesh(),
+                objects,
+                selectedFields,
+                vSymmtf
+            );
+            print("    volSymmTensorFields        :", Info, vSymmtf);
+
+            readFields(vMesh, vMesh.baseMesh(), objects, selectedFields, vtf);
+            print("    volTensorFields            :", Info, vtf);
+        }
 
         label nVolFields =
                 vsf.size()
@@ -589,7 +611,7 @@ int main(int argc, char *argv[])
         PtrList<pointSymmTensorField> pSymmtf;
         PtrList<pointTensorField> ptf;
 
-        if (!noPointValues)
+        if (!noPointValues && !(specifiedFields && selectedFields.empty()))
         {
             readFields
             (

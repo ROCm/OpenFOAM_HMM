@@ -161,7 +161,6 @@ protected:
         //  from face centre to any of the face vertices.
         static scalarField calcFaceTol
         (
-            const scalar matchTol,
             const UList<face>& faces,
             const pointField& points,
             const pointField& faceCentres

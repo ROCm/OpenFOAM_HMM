@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,8 @@ void Pstream::gather
 (
     const List<UPstream::commsStruct>& comms,
     T& Value,
-    const BinaryOp& bop
+    const BinaryOp& bop,
+    const int tag
 )
 {
     if (UPstream::parRun())
@@ -67,12 +68,19 @@ void Pstream::gather
                     UPstream::scheduled,
                     myComm.below()[belowI],
                     reinterpret_cast<char*>(&value),
-                    sizeof(T)
+                    sizeof(T),
+                    tag
                 );
             }
             else
             {
-                IPstream fromBelow(UPstream::scheduled, myComm.below()[belowI]);
+                IPstream fromBelow
+                (
+                    UPstream::scheduled,
+                    myComm.below()[belowI],
+                    0,
+                    tag
+                );
                 fromBelow >> value;
             }
 
@@ -89,12 +97,13 @@ void Pstream::gather
                     UPstream::scheduled,
                     myComm.above(),
                     reinterpret_cast<const char*>(&Value),
-                    sizeof(T)
+                    sizeof(T),
+                    tag
                 );
             }
             else
             {
-                OPstream toAbove(UPstream::scheduled, myComm.above());
+                OPstream toAbove(UPstream::scheduled, myComm.above(), 0, tag);
                 toAbove << Value;
             }
         }
@@ -103,21 +112,26 @@ void Pstream::gather
 
 
 template <class T, class BinaryOp>
-void Pstream::gather(T& Value, const BinaryOp& bop)
+void Pstream::gather(T& Value, const BinaryOp& bop, const int tag)
 {
     if (UPstream::nProcs() < UPstream::nProcsSimpleSum)
     {
-        gather(UPstream::linearCommunication(), Value, bop);
+        gather(UPstream::linearCommunication(), Value, bop, tag);
     }
     else
     {
-        gather(UPstream::treeCommunication(), Value, bop);
+        gather(UPstream::treeCommunication(), Value, bop, tag);
     }
 }
 
 
 template <class T>
-void Pstream::scatter(const List<UPstream::commsStruct>& comms, T& Value)
+void Pstream::scatter
+(
+    const List<UPstream::commsStruct>& comms,
+    T& Value,
+    const int tag
+)
 {
     if (UPstream::parRun())
     {
@@ -134,12 +148,13 @@ void Pstream::scatter(const List<UPstream::commsStruct>& comms, T& Value)
                     UPstream::scheduled,
                     myComm.above(),
                     reinterpret_cast<char*>(&Value),
-                    sizeof(T)
+                    sizeof(T),
+                    tag
                 );
             }
             else
             {
-                IPstream fromAbove(UPstream::scheduled, myComm.above());
+                IPstream fromAbove(UPstream::scheduled, myComm.above(), 0, tag);
                 fromAbove >> Value;
             }
         }
@@ -154,12 +169,19 @@ void Pstream::scatter(const List<UPstream::commsStruct>& comms, T& Value)
                     UPstream::scheduled,
                     myComm.below()[belowI],
                     reinterpret_cast<const char*>(&Value),
-                    sizeof(T)
+                    sizeof(T),
+                    tag
                 );
             }
             else
             {
-                OPstream toBelow(UPstream::scheduled,myComm.below()[belowI]);
+                OPstream toBelow
+                (
+                    UPstream::scheduled,
+                    myComm.below()[belowI],
+                    0,
+                    tag
+                );
                 toBelow << Value;
             }
         }
@@ -168,15 +190,15 @@ void Pstream::scatter(const List<UPstream::commsStruct>& comms, T& Value)
 
 
 template <class T>
-void Pstream::scatter(T& Value)
+void Pstream::scatter(T& Value, const int tag)
 {
     if (UPstream::nProcs() < UPstream::nProcsSimpleSum)
     {
-        scatter(UPstream::linearCommunication(), Value);
+        scatter(UPstream::linearCommunication(), Value, tag);
     }
     else
     {
-        scatter(UPstream::treeCommunication(), Value);
+        scatter(UPstream::treeCommunication(), Value, tag);
     }
 }
 

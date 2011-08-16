@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,8 @@ template <class T>
 void Pstream::gatherList
 (
     const List<UPstream::commsStruct>& comms,
-    List<T>& Values
+    List<T>& Values,
+    const int tag
 )
 {
     if (UPstream::parRun())
@@ -83,7 +84,8 @@ void Pstream::gatherList
                     UPstream::scheduled,
                     belowID,
                     reinterpret_cast<char*>(receivedValues.begin()),
-                    receivedValues.byteSize()
+                    receivedValues.byteSize(),
+                    tag
                 );
 
                 Values[belowID] = receivedValues[0];
@@ -95,7 +97,7 @@ void Pstream::gatherList
             }
             else
             {
-                IPstream fromBelow(UPstream::scheduled, belowID);
+                IPstream fromBelow(UPstream::scheduled, belowID, 0, tag);
                 fromBelow >> Values[belowID];
 
                 if (debug & 2)
@@ -150,12 +152,13 @@ void Pstream::gatherList
                     UPstream::scheduled,
                     myComm.above(),
                     reinterpret_cast<const char*>(sendingValues.begin()),
-                    sendingValues.byteSize()
+                    sendingValues.byteSize(),
+                    tag
                 );
             }
             else
             {
-                OPstream toAbove(UPstream::scheduled, myComm.above());
+                OPstream toAbove(UPstream::scheduled, myComm.above(), 0, tag);
                 toAbove << Values[UPstream::myProcNo()];
 
                 forAll(belowLeaves, leafI)
@@ -177,15 +180,15 @@ void Pstream::gatherList
 
 
 template <class T>
-void Pstream::gatherList(List<T>& Values)
+void Pstream::gatherList(List<T>& Values, const int tag)
 {
     if (UPstream::nProcs() < UPstream::nProcsSimpleSum)
     {
-        gatherList(UPstream::linearCommunication(), Values);
+        gatherList(UPstream::linearCommunication(), Values, tag);
     }
     else
     {
-        gatherList(UPstream::treeCommunication(), Values);
+        gatherList(UPstream::treeCommunication(), Values, tag);
     }
 }
 
@@ -194,7 +197,8 @@ template <class T>
 void Pstream::scatterList
 (
     const List<UPstream::commsStruct>& comms,
-    List<T>& Values
+    List<T>& Values,
+    const int tag
 )
 {
     if (UPstream::parRun())
@@ -228,7 +232,8 @@ void Pstream::scatterList
                     UPstream::scheduled,
                     myComm.above(),
                     reinterpret_cast<char*>(receivedValues.begin()),
-                    receivedValues.byteSize()
+                    receivedValues.byteSize(),
+                    tag
                 );
 
                 forAll(notBelowLeaves, leafI)
@@ -238,7 +243,7 @@ void Pstream::scatterList
             }
             else
             {
-                IPstream fromAbove(UPstream::scheduled, myComm.above());
+                IPstream fromAbove(UPstream::scheduled, myComm.above(), 0, tag);
 
                 forAll(notBelowLeaves, leafI)
                 {
@@ -275,12 +280,13 @@ void Pstream::scatterList
                     UPstream::scheduled,
                     belowID,
                     reinterpret_cast<const char*>(sendingValues.begin()),
-                    sendingValues.byteSize()
+                    sendingValues.byteSize(),
+                    tag
                 );
             }
             else
             {
-                OPstream toBelow(UPstream::scheduled, belowID);
+                OPstream toBelow(UPstream::scheduled, belowID, 0, tag);
 
                 // Send data destined for all other processors below belowID
                 forAll(notBelowLeaves, leafI)
@@ -302,15 +308,15 @@ void Pstream::scatterList
 
 
 template <class T>
-void Pstream::scatterList(List<T>& Values)
+void Pstream::scatterList(List<T>& Values, const int tag)
 {
     if (UPstream::nProcs() < UPstream::nProcsSimpleSum)
     {
-        scatterList(UPstream::linearCommunication(), Values);
+        scatterList(UPstream::linearCommunication(), Values, tag);
     }
     else
     {
-        scatterList(UPstream::treeCommunication(), Values);
+        scatterList(UPstream::treeCommunication(), Values, tag);
     }
 }
 

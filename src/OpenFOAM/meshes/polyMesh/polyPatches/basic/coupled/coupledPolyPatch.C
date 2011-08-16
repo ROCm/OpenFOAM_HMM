@@ -145,7 +145,6 @@ Foam::pointField Foam::coupledPolyPatch::getAnchorPoints
 
 Foam::scalarField Foam::coupledPolyPatch::calcFaceTol
 (
-    const scalar matchTol,
     const UList<face>& faces,
     const pointField& points,
     const pointField& faceCentres
@@ -173,7 +172,7 @@ Foam::scalarField Foam::coupledPolyPatch::calcFaceTol
             maxLenSqr = max(maxLenSqr, magSqr(pt - cc));
             maxCmpt = max(maxCmpt, cmptMax(cmptMag(pt)));
         }
-        tols[faceI] = max(SMALL*maxCmpt, matchTol*Foam::sqrt(maxLenSqr));
+        tols[faceI] = max(SMALL*maxCmpt, Foam::sqrt(maxLenSqr));
     }
     return tols;
 }

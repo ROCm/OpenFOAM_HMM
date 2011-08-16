@@ -86,13 +86,10 @@ Foam::fanPressureFvPatchScalarField::fanPressureFvPatchScalarField
     const dictionary& dict
 )
 :
-    totalPressureFvPatchScalarField(p, iF),
+    totalPressureFvPatchScalarField(p, iF, dict),
     fanCurve_(dict),
     direction_(fanFlowDirectionNames_.read(dict.lookup("direction")))
-{
-    // Assign initial pressure by "value"
-    fvPatchField<scalar>::operator==(scalarField("value", dict, p.size()));
-}
+{}
 
 
 Foam::fanPressureFvPatchScalarField::fanPressureFvPatchScalarField

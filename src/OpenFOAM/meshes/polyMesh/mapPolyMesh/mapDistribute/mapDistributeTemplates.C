@@ -40,7 +40,8 @@ void Foam::mapDistribute::distribute
     const label constructSize,
     const labelListList& subMap,
     const labelListList& constructMap,
-    List<T>& field
+    List<T>& field,
+    const int tag
 )
 {
     if (!Pstream::parRun())
@@ -79,7 +80,7 @@ void Foam::mapDistribute::distribute
 
             if (domain != Pstream::myProcNo() && map.size())
             {
-                OPstream toNbr(Pstream::blocking, domain);
+                OPstream toNbr(Pstream::blocking, domain, 0, tag);
                 toNbr << UIndirectList<T>(field, map);
             }
         }
@@ -110,7 +111,7 @@ void Foam::mapDistribute::distribute
 
             if (domain != Pstream::myProcNo() && map.size())
             {
-                IPstream fromNbr(Pstream::blocking, domain);
+                IPstream fromNbr(Pstream::blocking, domain, 0, tag);
                 List<T> subField(fromNbr);
 
                 checkReceivedSize(domain, map.size(), subField.size());
@@ -154,11 +155,11 @@ void Foam::mapDistribute::distribute
             {
                 // I am send first, receive next
                 {
-                    OPstream toNbr(Pstream::scheduled, recvProc);
+                    OPstream toNbr(Pstream::scheduled, recvProc, 0, tag);
                     toNbr << UIndirectList<T>(field, subMap[recvProc]);
                 }
                 {
-                    IPstream fromNbr(Pstream::scheduled, recvProc);
+                    IPstream fromNbr(Pstream::scheduled, recvProc, 0, tag);
                     List<T> subField(fromNbr);
 
                     const labelList& map = constructMap[recvProc];
@@ -175,7 +176,7 @@ void Foam::mapDistribute::distribute
             {
                 // I am receive first, send next
                 {
-                    IPstream fromNbr(Pstream::scheduled, sendProc);
+                    IPstream fromNbr(Pstream::scheduled, sendProc, 0, tag);
                     List<T> subField(fromNbr);
 
                     const labelList& map = constructMap[sendProc];
@@ -188,7 +189,7 @@ void Foam::mapDistribute::distribute
                     }
                 }
                 {
-                    OPstream toNbr(Pstream::scheduled, sendProc);
+                    OPstream toNbr(Pstream::scheduled, sendProc, 0, tag);
                     toNbr << UIndirectList<T>(field, subMap[sendProc]);
                 }
             }
@@ -197,9 +198,11 @@ void Foam::mapDistribute::distribute
     }
     else if (commsType == Pstream::nonBlocking)
     {
+        label nOutstanding = Pstream::nRequests();
+
         if (!contiguous<T>())
         {
-            PstreamBuffers pBufs(Pstream::nonBlocking);
+            PstreamBuffers pBufs(Pstream::nonBlocking, tag);
 
             // Stream data into buffer
             for (label domain = 0; domain < Pstream::nProcs(); domain++)
@@ -214,8 +217,8 @@ void Foam::mapDistribute::distribute
                 }
             }
 
-            // Start receiving
-            pBufs.finishedSends();
+            // Start receiving. Do not block.
+            pBufs.finishedSends(false);
 
             {
                 // Set up 'send' to myself
@@ -237,6 +240,9 @@ void Foam::mapDistribute::distribute
                     }
                 }
             }
+
+            // Block ourselves, waiting only for the current comms
+            Pstream::waitRequests(nOutstanding);
 
             // Consume
             for (label domain = 0; domain < Pstream::nProcs(); domain++)
@@ -281,7 +287,8 @@ void Foam::mapDistribute::distribute
                         Pstream::nonBlocking,
                         domain,
                         reinterpret_cast<const char*>(subField.begin()),
-                        subField.byteSize()
+                        subField.byteSize(),
+                        tag
                     );
                 }
             }
@@ -302,7 +309,8 @@ void Foam::mapDistribute::distribute
                         Pstream::nonBlocking,
                         domain,
                         reinterpret_cast<char*>(recvFields[domain].begin()),
-                        recvFields[domain].byteSize()
+                        recvFields[domain].byteSize(),
+                        tag
                     );
                 }
             }
@@ -341,7 +349,8 @@ void Foam::mapDistribute::distribute
 
             // Wait for all to finish
 
-            Pstream::waitRequests();
+            Pstream::waitRequests(nOutstanding);
+
 
             // Collect neighbour fields
 
@@ -383,7 +392,8 @@ void Foam::mapDistribute::distribute
     const labelListList& constructMap,
     List<T>& field,
     const CombineOp& cop,
-    const T& nullValue
+    const T& nullValue,
+    const int tag
 )
 {
     if (!Pstream::parRun())
@@ -423,7 +433,7 @@ void Foam::mapDistribute::distribute
 
             if (domain != Pstream::myProcNo() && map.size())
             {
-                OPstream toNbr(Pstream::blocking, domain);
+                OPstream toNbr(Pstream::blocking, domain, 0, tag);
                 toNbr << UIndirectList<T>(field, map);
             }
         }
@@ -455,7 +465,7 @@ void Foam::mapDistribute::distribute
 
             if (domain != Pstream::myProcNo() && map.size())
             {
-                IPstream fromNbr(Pstream::blocking, domain);
+                IPstream fromNbr(Pstream::blocking, domain, 0, tag);
                 List<T> subField(fromNbr);
 
                 checkReceivedSize(domain, map.size(), subField.size());
@@ -499,11 +509,11 @@ void Foam::mapDistribute::distribute
             {
                 // I am send first, receive next
                 {
-                    OPstream toNbr(Pstream::scheduled, recvProc);
+                    OPstream toNbr(Pstream::scheduled, recvProc, 0, tag);
                     toNbr << UIndirectList<T>(field, subMap[recvProc]);
                 }
                 {
-                    IPstream fromNbr(Pstream::scheduled, recvProc);
+                    IPstream fromNbr(Pstream::scheduled, recvProc, 0, tag);
                     List<T> subField(fromNbr);
                     const labelList& map = constructMap[recvProc];
 
@@ -519,7 +529,7 @@ void Foam::mapDistribute::distribute
             {
                 // I am receive first, send next
                 {
-                    IPstream fromNbr(Pstream::scheduled, sendProc);
+                    IPstream fromNbr(Pstream::scheduled, sendProc, 0, tag);
                     List<T> subField(fromNbr);
                     const labelList& map = constructMap[sendProc];
 
@@ -531,7 +541,7 @@ void Foam::mapDistribute::distribute
                     }
                 }
                 {
-                    OPstream toNbr(Pstream::scheduled, sendProc);
+                    OPstream toNbr(Pstream::scheduled, sendProc, 0, tag);
                     toNbr << UIndirectList<T>(field, subMap[sendProc]);
                 }
             }
@@ -540,9 +550,11 @@ void Foam::mapDistribute::distribute
     }
     else if (commsType == Pstream::nonBlocking)
     {
+        label nOutstanding = Pstream::nRequests();
+
         if (!contiguous<T>())
         {
-            PstreamBuffers pBufs(Pstream::nonBlocking);
+            PstreamBuffers pBufs(Pstream::nonBlocking, tag);
 
             // Stream data into buffer
             for (label domain = 0; domain < Pstream::nProcs(); domain++)
@@ -557,8 +569,8 @@ void Foam::mapDistribute::distribute
                 }
             }
 
-            // Start receiving
-            pBufs.finishedSends();
+            // Start receiving. Do not block.
+            pBufs.finishedSends(false);
 
             {
                 // Set up 'send' to myself
@@ -577,9 +589,8 @@ void Foam::mapDistribute::distribute
                 }
             }
 
-
-            // Wait till all finished
-            UPstream::waitRequests();
+            // Block ourselves, waiting only for the current comms
+            Pstream::waitRequests(nOutstanding);
 
             // Consume
             for (label domain = 0; domain < Pstream::nProcs(); domain++)
@@ -624,7 +635,8 @@ void Foam::mapDistribute::distribute
                         Pstream::nonBlocking,
                         domain,
                         reinterpret_cast<const char*>(subField.begin()),
-                        subField.size()*sizeof(T)
+                        subField.size()*sizeof(T),
+                        tag
                     );
                 }
             }
@@ -645,7 +657,8 @@ void Foam::mapDistribute::distribute
                         Pstream::nonBlocking,
                         domain,
                         reinterpret_cast<char*>(recvFields[domain].begin()),
-                        recvFields[domain].size()*sizeof(T)
+                        recvFields[domain].size()*sizeof(T),
+                        tag
                     );
                 }
             }
@@ -683,7 +696,8 @@ void Foam::mapDistribute::distribute
 
             // Wait for all to finish
 
-            Pstream::waitRequests();
+            Pstream::waitRequests(nOutstanding);
+
 
             // Collect neighbour fields
 
@@ -878,7 +892,8 @@ template<class T>
 void Foam::mapDistribute::distribute
 (
     List<T>& fld,
-    const bool dummyTransform
+    const bool dummyTransform,
+    const int tag
 ) const
 {
     if (Pstream::defaultCommsType == Pstream::nonBlocking)
@@ -890,7 +905,8 @@ void Foam::mapDistribute::distribute
             constructSize_,
             subMap_,
             constructMap_,
-            fld
+            fld,
+            tag
         );
     }
     else if (Pstream::defaultCommsType == Pstream::scheduled)
@@ -902,7 +918,8 @@ void Foam::mapDistribute::distribute
             constructSize_,
             subMap_,
             constructMap_,
-            fld
+            fld,
+            tag
         );
     }
     else
@@ -914,7 +931,8 @@ void Foam::mapDistribute::distribute
             constructSize_,
             subMap_,
             constructMap_,
-            fld
+            fld,
+            tag
         );
     }
 
@@ -932,7 +950,8 @@ void Foam::mapDistribute::reverseDistribute
 (
     const label constructSize,
     List<T>& fld,
-    const bool dummyTransform
+    const bool dummyTransform,
+    const int tag
 ) const
 {
     if (dummyTransform)
@@ -949,7 +968,8 @@ void Foam::mapDistribute::reverseDistribute
             constructSize,
             constructMap_,
             subMap_,
-            fld
+            fld,
+            tag
         );
     }
     else if (Pstream::defaultCommsType == Pstream::scheduled)
@@ -961,7 +981,8 @@ void Foam::mapDistribute::reverseDistribute
             constructSize,
             constructMap_,
             subMap_,
-            fld
+            fld,
+            tag
         );
     }
     else
@@ -973,7 +994,8 @@ void Foam::mapDistribute::reverseDistribute
             constructSize,
             constructMap_,
             subMap_,
-            fld
+            fld,
+            tag
         );
     }
 }
@@ -988,7 +1010,8 @@ void Foam::mapDistribute::reverseDistribute
     const label constructSize,
     const T& nullValue,
     List<T>& fld,
-    const bool dummyTransform
+    const bool dummyTransform,
+    const int tag
 ) const
 {
     if (dummyTransform)
@@ -1007,7 +1030,8 @@ void Foam::mapDistribute::reverseDistribute
             subMap_,
             fld,
             eqOp<T>(),
-            nullValue
+            nullValue,
+            tag
         );
     }
     else if (Pstream::defaultCommsType == Pstream::scheduled)
@@ -1021,7 +1045,8 @@ void Foam::mapDistribute::reverseDistribute
             subMap_,
             fld,
             eqOp<T>(),
-            nullValue
+            nullValue,
+            tag
         );
     }
     else
@@ -1035,7 +1060,8 @@ void Foam::mapDistribute::reverseDistribute
             subMap_,
             fld,
             eqOp<T>(),
-            nullValue
+            nullValue,
+            tag
         );
     }
 }
@@ -1047,11 +1073,12 @@ void Foam::mapDistribute::distribute
 (
     const globalIndexAndTransform& git,
     List<T>& fld,
-    const TransformOp& top
+    const TransformOp& top,
+    const int tag
 ) const
 {
     // Distribute. Leave out dummy transforms since we're doing them ourselves
-    distribute(fld, false);
+    distribute(fld, false, tag);
     // Do transforms
     applyTransforms(git, fld, top);
 }
@@ -1063,7 +1090,8 @@ void Foam::mapDistribute::reverseDistribute
     const globalIndexAndTransform& git,
     const label constructSize,
     List<T>& fld,
-    const TransformOp& top
+    const TransformOp& top,
+    const int tag
 ) const
 {
     // Fill slots with reverse-transformed data. Note that it also copies
@@ -1072,7 +1100,7 @@ void Foam::mapDistribute::reverseDistribute
     applyInverseTransforms(git, fld, top);
 
     // And send back (the remote slots). Disable dummy transformations.
-    reverseDistribute(constructSize, fld, false);
+    reverseDistribute(constructSize, fld, false, tag);
 }
 
 
@@ -1083,7 +1111,8 @@ void Foam::mapDistribute::reverseDistribute
     const label constructSize,
     const T& nullValue,
     List<T>& fld,
-    const TransformOp& top
+    const TransformOp& top,
+    const int tag
 ) const
 {
     // Fill slots with reverse-transformed data Note that it also copies
@@ -1092,7 +1121,7 @@ void Foam::mapDistribute::reverseDistribute
     applyInverseTransforms(git, fld, top);   //, eqOp<T>());
 
     // And send back (the remote slots) Disable dummy transformations.
-    reverseDistribute(constructSize, nullValue, fld, false);
+    reverseDistribute(constructSize, nullValue, fld, false, tag);
 }
 
 

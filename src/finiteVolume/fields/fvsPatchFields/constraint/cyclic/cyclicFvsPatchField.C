@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -94,7 +94,7 @@ cyclicFvsPatchField<Type>::cyclicFvsPatchField
             "cyclicFvsPatchField<Type>::cyclicFvsPatchField\n"
             "(\n"
             "    const fvPatch& p,\n"
-            "    const Field<Type>& field,\n"
+            "    const DimensionedField<Type, surfaceMesh>& iF,\n"
             "    const dictionary& dict\n"
             ")\n",
             dict

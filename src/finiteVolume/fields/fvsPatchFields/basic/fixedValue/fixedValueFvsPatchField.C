@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -125,14 +125,6 @@ template<class Type>
 tmp<Field<Type> > fixedValueFvsPatchField<Type>::gradientBoundaryCoeffs() const
 {
     return this->patch().deltaCoeffs()*(*this);
-}
-
-
-template<class Type>
-void fixedValueFvsPatchField<Type>::write(Ostream& os) const
-{
-    fvsPatchField<Type>::write(os);
-    this->writeEntry("value", os);
 }
 
 

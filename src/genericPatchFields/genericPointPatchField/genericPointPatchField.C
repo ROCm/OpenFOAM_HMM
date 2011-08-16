@@ -129,7 +129,7 @@ genericPointPatchField<Type>::genericPointPatchField
                         (
                             dynamicCast<token::Compound<List<scalar> > >
                             (
-                                fieldToken.transferCompoundToken()
+                                fieldToken.transferCompoundToken(is)
                             )
                         );
 
@@ -167,7 +167,7 @@ genericPointPatchField<Type>::genericPointPatchField
                         (
                             dynamicCast<token::Compound<List<vector> > >
                             (
-                                fieldToken.transferCompoundToken()
+                                fieldToken.transferCompoundToken(is)
                             )
                         );
 
@@ -208,7 +208,7 @@ genericPointPatchField<Type>::genericPointPatchField
                                 token::Compound<List<sphericalTensor> >
                             >
                             (
-                                fieldToken.transferCompoundToken()
+                                fieldToken.transferCompoundToken(is)
                             )
                         );
 
@@ -249,7 +249,7 @@ genericPointPatchField<Type>::genericPointPatchField
                                 token::Compound<List<symmTensor> >
                             >
                             (
-                                fieldToken.transferCompoundToken()
+                                fieldToken.transferCompoundToken(is)
                             )
                         );
 
@@ -287,7 +287,7 @@ genericPointPatchField<Type>::genericPointPatchField
                         (
                             dynamicCast<token::Compound<List<tensor> > >
                             (
-                                fieldToken.transferCompoundToken()
+                                fieldToken.transferCompoundToken(is)
                             )
                         );
 

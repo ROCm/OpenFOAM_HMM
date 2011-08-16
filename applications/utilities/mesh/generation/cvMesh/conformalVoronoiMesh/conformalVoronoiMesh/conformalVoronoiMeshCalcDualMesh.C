@@ -129,11 +129,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     PackedBoolList boundaryPts(number_of_cells(), false);
 
-    indexDualVertices
-    (
-        points,
-        boundaryPts
-    );
+    indexDualVertices(points, boundaryPts);
 
     {
         // Ideally requires a no-risk face filtering to get rid of zero area
@@ -191,11 +187,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
                 // Reindexing the Delaunay cells and regenerating the
                 // points resets the mesh to the starting condition.
 
-                indexDualVertices
-                (
-                    points,
-                    boundaryPts
-                );
+                indexDualVertices(points, boundaryPts);
 
                 {
                     Info<< nl << "Merging close points" << endl;
@@ -543,7 +535,20 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
 {
     label nPtsMerged = 0;
 
+    label nIdentical = 0;
+    label nProcEdge = 0;
+
+    // Relative distance for points to be merged
     scalar closenessTolerance = cvMeshControls().mergeClosenessCoeff();
+
+    // Absolute distance for points to be considered coincident. Bit adhoc
+    // but points were seen with distSqr ~ 1E-30 which is SMALL^2. Add a few
+    // digits to account for truncation errors.
+    scalar coincidentDistanceSqr = sqr
+    (
+        SMALL*1E2*geometryToConformTo_.globalBounds().mag()
+    );
+
 
     for
     (
@@ -567,14 +572,14 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
             continue;
         }
 
-        if (!c1->farCell() && !c2->farCell() && (c1I != c2I))
+        if ((c1I != c2I) && !c1->farCell() && !c2->farCell())
         {
-            if
-            (
-                magSqr(pts[c1I] - pts[c2I])
-              < sqr(averageAnyCellSize(fit)*closenessTolerance)
-            )
+            scalar distSqr = magSqr(pts[c1I] - pts[c2I]);
+
+            if (pts[c1I] == pts[c2I] || distSqr < coincidentDistanceSqr)
             {
+                nIdentical++;
+
                 if (boundaryPts[c2I] == true)
                 {
                     // If c2I is a boundary point, then it is kept.
@@ -583,16 +588,59 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
 
                     dualPtIndexMap.insert(c1I, c2I);
                     dualPtIndexMap.insert(c2I, c2I);
+                    nPtsMerged++;
                 }
                 else
                 {
                     dualPtIndexMap.insert(c1I, c1I);
                     dualPtIndexMap.insert(c2I, c1I);
+                    nPtsMerged++;
                 }
 
-                nPtsMerged++;
+            }
+            else if (distSqr < sqr(averageAnyCellSize(fit)*closenessTolerance))
+            {
+                if (c1->parallelDualVertex() || c2->parallelDualVertex())
+                //if (isParallelDualEdge(fit))
+                {
+                    // Skip if face uses any edge that becomes a processor
+                    // dual face.
+                    // Note: the real test should be whether the Delaunay edge
+                    //  will form a processor patch.
+                    nProcEdge++;
+                }
+                else if (boundaryPts[c2I] == true)
+                {
+                    // If c2I is a boundary point, then it is kept.
+                    // If both are boundary points then c2I is chosen
+                    // arbitrarily to be kept.
+
+                    dualPtIndexMap.insert(c1I, c2I);
+                    dualPtIndexMap.insert(c2I, c2I);
+                    nPtsMerged++;
+                }
+                else
+                {
+                    dualPtIndexMap.insert(c1I, c1I);
+                    dualPtIndexMap.insert(c2I, c1I);
+                    nPtsMerged++;
+                }
             }
         }
+    }
+
+    if (debug)
+    {
+        Info<< "mergeCloseDualVertices:"
+            << " coincident distance:" << coincidentDistanceSqr
+            << " closenessTolerance:" << closenessTolerance << endl
+            << "    zero-length edges         : "
+            << returnReduce(nIdentical, sumOp<label>()) << endl
+            << "    protected processor edges : "
+            << returnReduce(nProcEdge, sumOp<label>()) << endl
+            << "    collapsed edges           : "
+            << returnReduce(nPtsMerged, sumOp<label>()) << endl
+            << endl;
     }
 
     return nPtsMerged;

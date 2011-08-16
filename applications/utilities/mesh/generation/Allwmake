@@ -3,13 +3,13 @@ cd ${0%/*} || exit 1    # run from this directory
 set -x
 
 wmake blockMesh
-wmake extrude
+wmake all extrude
 wmake extrude2DMesh
 wmake snappyHexMesh
 
 if [ -d "$CGAL_ARCH_PATH" ]
 then
-    wmake cvMesh
+    cd cvMesh && ./Allwmake
 fi
 
 # ----------------------------------------------------------------- end-of-file

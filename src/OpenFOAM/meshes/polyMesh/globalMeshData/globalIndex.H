@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -72,7 +72,7 @@ public:
     // Constructors
 
         //- Construct from local max size
-        globalIndex(const label localSize);
+        globalIndex(const label localSize, const int tag = Pstream::msgType());
 
         //- Construct from Istream
         globalIndex(Istream& is);
