@@ -53,7 +53,8 @@ Foam::fieldAverageItem::fieldAverageItem()
     fieldName_("unknown"),
     mean_(0),
     prime2Mean_(0),
-    base_(ITER)
+    base_(ITER),
+    window_(-1.0)
 {}
 
 
@@ -62,7 +63,8 @@ Foam::fieldAverageItem::fieldAverageItem(const fieldAverageItem& faItem)
     fieldName_(faItem.fieldName_),
     mean_(faItem.mean_),
     prime2Mean_(faItem.prime2Mean_),
-    base_(faItem.base_)
+    base_(faItem.base_),
+    window_(faItem.window_)
 {}
 
 
@@ -91,6 +93,7 @@ void Foam::fieldAverageItem::operator=(const fieldAverageItem& rhs)
     mean_ = rhs.mean_;
     prime2Mean_ = rhs.prime2Mean_;
     base_ = rhs.base_;
+    window_ = rhs.window_;
 }
 
 

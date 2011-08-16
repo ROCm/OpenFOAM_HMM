@@ -33,7 +33,9 @@ Foam::fieldAverageItem::fieldAverageItem(Istream& is)
 :
     fieldName_("unknown"),
     mean_(0),
-    prime2Mean_(0)
+    prime2Mean_(0),
+    base_(ITER),
+    window_(-1.0)
 {
     is.check("Foam::fieldAverageItem::fieldAverageItem(Foam::Istream&)");
 
@@ -43,6 +45,7 @@ Foam::fieldAverageItem::fieldAverageItem(Istream& is)
     entry.lookup("mean") >> mean_;
     entry.lookup("prime2Mean") >> prime2Mean_;
     base_ = baseTypeNames_[entry.lookup("base")];
+    window_ = entry.lookupOrDefault<scalar>("window", -1.0);
 }
 
 
@@ -62,6 +65,7 @@ Foam::Istream& Foam::operator>>(Istream& is, fieldAverageItem& faItem)
     entry.lookup("mean") >> faItem.mean_;
     entry.lookup("prime2Mean") >> faItem.prime2Mean_;
     faItem.base_ = faItem.baseTypeNames_[entry.lookup("base")];
+    faItem.window_ = entry.lookupOrDefault<scalar>("window", -1.0);
 
     return is;
 }
@@ -80,7 +84,15 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const fieldAverageItem& faItem)
     os.writeKeyword("prime2Mean") << faItem.mean_
         << token::END_STATEMENT << nl;
     os.writeKeyword("base") << faItem.baseTypeNames_[faItem.base_]
-        << token::END_STATEMENT << nl << token::END_BLOCK << nl;
+        << token::END_STATEMENT << nl;
+
+    if (faItem.window_ > 0)
+    {
+        os.writeKeyword("window") << faItem.window_
+            << token::END_STATEMENT << nl;
+    }
+
+    os  << token::END_BLOCK << nl;
 
     os.check
     (

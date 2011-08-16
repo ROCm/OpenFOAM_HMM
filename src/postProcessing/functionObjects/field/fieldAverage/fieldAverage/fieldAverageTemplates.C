@@ -149,7 +149,7 @@ const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
-    const scalar dt = obr_.time().deltaTValue();
+    scalar dt = obr_.time().deltaTValue();
 
     forAll(faItems_, i)
     {
@@ -163,17 +163,24 @@ const
                 obr_.lookupObject<fieldType>(meanFieldList[i])
             );
 
-            scalar alpha = 0.0;
-            scalar beta = 0.0;
-            if (faItems_[i].timeBase())
+            scalar Dt = totalTime_[i];
+            if (faItems_[i].iterBase())
             {
-                 alpha = (totalTime_[i] - dt)/totalTime_[i];
-                 beta = dt/totalTime_[i];
+                dt = 1.0;
+                Dt = scalar(totalIter_[i]);
             }
-            else
+
+            scalar alpha = (Dt - dt)/Dt;
+            scalar beta = dt/Dt;
+            if (faItems_[i].window() > 0)
             {
-                alpha = scalar(totalIter_[i] - 1)/scalar(totalIter_[i]);
-                beta = 1.0/scalar(totalIter_[i]);
+                const scalar w = faItems_[i].window();
+
+                if (Dt - dt >= w)
+                {
+                    alpha = (w - dt)/w;
+                    beta = dt/w;
+                }
             }
 
             meanField = alpha*meanField + beta*baseField;
@@ -192,7 +199,7 @@ void Foam::fieldAverage::calculatePrime2MeanFields
     typedef GeometricField<Type1, fvPatchField, volMesh> fieldType1;
     typedef GeometricField<Type2, fvPatchField, volMesh> fieldType2;
 
-    const scalar dt = obr_.time().deltaTValue();
+    scalar dt = obr_.time().deltaTValue();
 
     forAll(faItems_, i)
     {
@@ -213,17 +220,24 @@ void Foam::fieldAverage::calculatePrime2MeanFields
                 obr_.lookupObject<fieldType2>(prime2MeanFieldList[i])
             );
 
-            scalar alpha = 0.0;
-            scalar beta = 0.0;
-            if (faItems_[i].timeBase())
+            scalar Dt = totalTime_[i];
+            if (faItems_[i].iterBase())
             {
-                alpha = (totalTime_[i] - dt)/totalTime_[i];
-                beta = dt/totalTime_[i];
+                dt = 1.0;
+                Dt = scalar(totalIter_[i]);
             }
-            else
+
+            scalar alpha = (Dt - dt)/Dt;
+            scalar beta = dt/Dt;
+            if (faItems_[i].window() > 0)
             {
-                alpha = scalar(totalIter_[i] - 1)/scalar(totalIter_[i]);
-                beta = 1.0/scalar(totalIter_[i]);
+                const scalar w = faItems_[i].window();
+
+                if (Dt - dt >= w)
+                {
+                    alpha = (w - dt)/w;
+                    beta = dt/w;
+                }
             }
 
             prime2MeanField =
