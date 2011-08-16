@@ -52,7 +52,8 @@ bool Foam::fieldValues::faceSource::validField(const word& fieldName) const
 template<class Type>
 Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::getFieldValues
 (
-    const word& fieldName
+    const word& fieldName,
+    const bool mustGet
 ) const
 {
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> sf;
@@ -72,6 +73,20 @@ Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::getFieldValues
         {
             return filterField(obr_.lookupObject<vf>(fieldName), true);
         }
+    }
+
+    if (mustGet)
+    {
+        FatalErrorIn
+        (
+            "Foam::tmp<Foam::Field<Type> > "
+            "Foam::fieldValues::faceSource::getFieldValues"
+            "("
+                "const word&, "
+                "const bool"
+            ") const"
+        )   << "Field " << fieldName << " not found in database"
+            << abort(FatalError);
     }
 
     return tmp<Field<Type> >(new Field<Type>(0));
@@ -139,7 +154,13 @@ bool Foam::fieldValues::faceSource::writeValues(const word& fieldName)
     if (ok)
     {
         Field<Type> values(getFieldValues<Type>(fieldName));
-        scalarField weightField(getFieldValues<scalar>(weightFieldName_));
+        scalarField weightField;
+
+        if (operation_ == opWeightedAverage)
+        {
+            weightField = getFieldValues<scalar>(weightFieldName_, true);
+        }
+
         scalarField magSf;
 
         if (surfacePtr_.valid())

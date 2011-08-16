@@ -284,23 +284,7 @@ void Foam::fieldValues::faceSource::initialise(const dictionary& dict)
     if (operation_ == opWeightedAverage)
     {
         dict.lookup("weightField") >> weightFieldName_;
-        if
-        (
-            obr().foundObject<volScalarField>(weightFieldName_)
-         || obr().foundObject<surfaceScalarField>(weightFieldName_)
-        )
-        {
-            Info<< "    weight field = " << weightFieldName_;
-        }
-        else
-        {
-            FatalErrorIn("faceSource::initialise()")
-                << type() << " " << name_ << ": "
-                << sourceTypeNames_[source_] << "(" << sourceName_ << "):"
-                << nl << "    Weight field " << weightFieldName_
-                << " must be either a " << volScalarField::typeName << " or "
-                << surfaceScalarField::typeName << nl << exit(FatalError);
-        }
+        Info<< "    weight field = " << weightFieldName_;
     }
 
     Info<< nl << endl;

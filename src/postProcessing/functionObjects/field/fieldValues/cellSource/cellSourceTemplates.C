@@ -45,7 +45,8 @@ bool Foam::fieldValues::cellSource::validField(const word& fieldName) const
 template<class Type>
 Foam::tmp<Foam::Field<Type> > Foam::fieldValues::cellSource::setFieldValues
 (
-    const word& fieldName
+    const word& fieldName,
+    const bool mustGet
 ) const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> vf;
@@ -53,6 +54,20 @@ Foam::tmp<Foam::Field<Type> > Foam::fieldValues::cellSource::setFieldValues
     if (obr_.foundObject<vf>(fieldName))
     {
         return filterField(obr_.lookupObject<vf>(fieldName));
+    }
+
+    if (mustGet)
+    {
+        FatalErrorIn
+        (
+            "Foam::tmp<Foam::Field<Type> > "
+            "Foam::fieldValues::cellSource::setFieldValues"
+            "("
+                "const word&, "
+                "const bool"
+            ") const"
+        )   << "Field " << fieldName << " not found in database"
+            << abort(FatalError);
     }
 
     return tmp<Field<Type> >(new Field<Type>(0.0));
@@ -125,7 +140,13 @@ bool Foam::fieldValues::cellSource::writeValues(const word& fieldName)
         scalarField V(filterField(mesh().V()));
         combineFields(V);
 
-        scalarField weightField(setFieldValues<scalar>(weightFieldName_));
+        scalarField weightField;
+
+        if (operation_ == opWeightedAverage)
+        {
+            weightField = setFieldValues<scalar>(weightFieldName_, true);
+        }
+
         combineFields(weightField);
 
         if (Pstream::master())

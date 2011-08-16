@@ -157,7 +157,8 @@ protected:
         template<class Type>
         tmp<Field<Type> > setFieldValues
         (
-            const word& fieldName
+            const word& fieldName,
+            const bool mustGet = false
         ) const;
 
         //- Apply the 'operation' to the values
