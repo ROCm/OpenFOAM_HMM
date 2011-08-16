@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -25,30 +25,30 @@ boundaryField
         type            empty;
     }
 
-    inlet           
+    inlet
     {
         type            fixedValue;
         value           uniform (460 0 0);
     }
 
-    wall            
+    wall
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
 
-    atmosphere      
+    atmosphere
     {
         type            pressureInletOutletVelocity;
         value           uniform (0 0 0);
     }
 
-    front         
+    front
     {
         type            wedge;
     }
 
-    back         
+    back
     {
         type            wedge;
     }

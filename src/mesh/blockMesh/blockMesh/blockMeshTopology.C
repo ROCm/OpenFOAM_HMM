@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -576,7 +576,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology
         cellShapeList tmpBlockCells(blocks.size());
         createCellShapes(tmpBlockCells);
 
-        // Extract 
+        // Extract
 
         blockMeshPtr = new polyMesh
         (

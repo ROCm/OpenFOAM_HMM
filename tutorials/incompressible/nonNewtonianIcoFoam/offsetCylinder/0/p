@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -20,33 +20,33 @@ internalField   uniform 0;
 
 boundaryField
 {
-    left            
+    left
     {
         type            zeroGradient;
     }
 
-    right           
+    right
     {
         type            fixedValue;
         value           uniform 0;
     }
 
-    down            
+    down
     {
         type            zeroGradient;
     }
 
-    up              
+    up
     {
         type            zeroGradient;
     }
 
-    cylinder        
+    cylinder
     {
         type            zeroGradient;
     }
 
-    defaultFaces    
+    defaultFaces
     {
         type            empty;
     }

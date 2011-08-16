@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -16,7 +16,7 @@ FoamFile
 
 dimensions      [0 1 -1 0 0 0 0];
 
-internalField   nonuniform List<vector> 
+internalField   nonuniform List<vector>
 32385
 (
 (989.423319803825 460.556508967208 5.097439181284e-11)
@@ -32676,7 +32676,7 @@ boundaryField
 (0.103666873607679 0 -6.64100738660639e-16)
 )
 ;
-        valueFraction  nonuniform List<scalar> 
+        valueFraction  nonuniform List<scalar>
 255
 (
 0.00388739013936794
@@ -32936,7 +32936,7 @@ boundaryField
 0.0574277259987618
 )
 ;
-        value           nonuniform List<vector> 
+        value           nonuniform List<vector>
 255
 (
 (985.277612722112 459.442496220996 5.14101441685411e-11)

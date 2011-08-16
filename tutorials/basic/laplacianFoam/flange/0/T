@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -20,23 +20,23 @@ internalField   uniform 273;
 
 boundaryField
 {
-    patch1          
+    patch1
     {
         type            zeroGradient;
     }
 
-    patch2          
+    patch2
     {
         type            fixedValue;
         value           uniform 273;
     }
 
-    patch3          
+    patch3
     {
         type            zeroGradient;
     }
 
-    patch4          
+    patch4
     {
         type            fixedValue;
         value           uniform 573;

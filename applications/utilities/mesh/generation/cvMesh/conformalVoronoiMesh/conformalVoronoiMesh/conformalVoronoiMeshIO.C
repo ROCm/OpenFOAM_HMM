@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -310,15 +310,15 @@ void Foam::conformalVoronoiMesh::writeMesh
     {
         // Determine map from Delaunay vertex to Dual mesh
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        
+
         // From all Delaunay vertices to cell (positive index)
         // or patch face (negative index)
         labelList vertexToDualAddressing(number_of_vertices(), 0);
-        
+
         forAll(cellToDelaunayVertex, cellI)
         {
             label vertI = cellToDelaunayVertex[cellI];
-        
+
             if (vertexToDualAddressing[vertI] != 0)
             {
                 FatalErrorIn("conformalVoronoiMesh::writeMesh(..)")
@@ -330,14 +330,14 @@ void Foam::conformalVoronoiMesh::writeMesh
             }
             vertexToDualAddressing[vertI] = cellI+1;
         }
-        
+
         forAll(patchToDelaunayVertex, patchI)
         {
             const labelList& patchVertices = patchToDelaunayVertex[patchI];
             forAll(patchVertices, i)
             {
                 label vertI = patchVertices[i];
-        
+
                 if (vertexToDualAddressing[vertI] > 0)
                 {
                     FatalErrorIn("conformalVoronoiMesh::writeMesh(..)")
@@ -348,7 +348,7 @@ void Foam::conformalVoronoiMesh::writeMesh
                         << vertexToDualAddressing[vertI]-1
                         << exit(FatalError);
                 }
-        
+
                 // Vertex might be used by multiple faces. Which one to
                 // use? For now last one wins.
                 label dualFaceI = dualPatchStarts[patchI]+i;
@@ -389,7 +389,7 @@ void Foam::conformalVoronoiMesh::writeMesh
 
         // Calculate map from tet points to dual mesh cells/patch faces
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        
+
         labelIOList pointDualAddressing
         (
             IOobject
@@ -408,7 +408,7 @@ void Foam::conformalVoronoiMesh::writeMesh
                 pointToDelaunayVertex
             )()
         );
-        
+
         label pointI = findIndex(pointDualAddressing, -1);
         if (pointI != -1)
         {
@@ -422,13 +422,13 @@ void Foam::conformalVoronoiMesh::writeMesh
             )   << "Delaunay vertex " << pointI
                 << " does not have a corresponding dual cell." << endl;
         }
-        
+
         Info<< "Writing map from tetDualMesh points to Voronoi mesh to "
             << pointDualAddressing.objectPath() << endl;
         pointDualAddressing.write();
-        
-        
-        
+
+
+
         // Write tet points corresponding to the Voronoi cell/face centre
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         {
@@ -457,11 +457,11 @@ void Foam::conformalVoronoiMesh::writeMesh
                 ),
                 points
             );
-        
+
             forAll(pointDualAddressing, pointI)
             {
                 label index = pointDualAddressing[pointI];
-        
+
                 if (index > 0)
                 {
                     label cellI = index-1;
@@ -476,7 +476,7 @@ void Foam::conformalVoronoiMesh::writeMesh
                     }
                 }
             }
-        
+
             Info<< "Writing new tetDualMesh points mapped onto Voronoi mesh to "
                 << dualPoints.objectPath() << endl
                 << "Replace the polyMesh/points with these." << endl;

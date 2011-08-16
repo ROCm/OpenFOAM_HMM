@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1036,7 +1036,7 @@ void Foam::argList::printUsage() const
 
     Info<< nl
         <<"Using: OpenFOAM-" << Foam::FOAMversion
-        << " (see www.OpenFOAM.com)" << nl
+        << " (see www.OpenFOAM.org)" << nl
         <<"Build: " << Foam::FOAMbuild << nl
         << endl;
 }

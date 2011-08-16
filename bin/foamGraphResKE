@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -26,7 +26,7 @@
 #     foamGraphResKE
 #
 # Description
-#     
+#
 #------------------------------------------------------------------------------
 if (! -f "$1" ) then
     echo "No file: '$1'"
@@ -56,7 +56,7 @@ cat << EOF > residualKE.dat
 Solver Performance
 number of iterations
 residual
-0 0 
+0 0
 0 0
 $ngraphs
 EOF

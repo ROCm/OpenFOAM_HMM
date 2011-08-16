@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1303,7 +1303,7 @@ void Foam::removeFaces::setRefinement
             mesh_,
             nEdgesPerPoint,
             maxEqOp<label>(),
-            labelMin 
+            labelMin
         );
 
         forAll(nEdgesPerPoint, pointI)

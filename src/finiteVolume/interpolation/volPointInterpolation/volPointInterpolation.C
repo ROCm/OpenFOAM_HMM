@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -243,7 +243,7 @@ void volPointInterpolation::makeWeights()
     // Update addressing over all boundary faces
     calcBoundaryAddressing();
 
-    
+
     // Running sum of weights
     pointScalarField sumWeights
     (
@@ -299,7 +299,7 @@ void volPointInterpolation::makeWeights()
     // Normalise internal weights
     forAll(pointWeights_, pointI)
     {
-        scalarList& pw = pointWeights_[pointI];    
+        scalarList& pw = pointWeights_[pointI];
         // Note:pw only sized for !isPatchPoint
         forAll(pw, i)
         {

@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -20,19 +20,19 @@ internalField   uniform (0 0 0);
 
 boundaryField
 {
-    floor           
+    floor
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
 
-    ceiling         
+    ceiling
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
 
-    fixedWalls      
+    fixedWalls
     {
         type            fixedValue;
         value           uniform (0 0 0);

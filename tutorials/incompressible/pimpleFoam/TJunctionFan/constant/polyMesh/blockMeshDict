@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -32,7 +32,7 @@ FoamFile
 
 convertToMeters 1;
 
-vertices        
+vertices
 (
     (0.0  -0.01 0)   //0
     (0.2  -0.01 0)
@@ -65,7 +65,7 @@ vertices
 
 );
 
-blocks          
+blocks
 (
     // inlet block
     hex (0 1 2 3  10 11 12 13) (50 5 5) simpleGrading (1 1 1)
@@ -80,12 +80,12 @@ blocks
     hex (2 5 9 8  12 15 19 18) (5 50 5) simpleGrading (1 1 1)
 );
 
-edges           
+edges
 (
 );
 
 boundary
-(         
+(
     inlet
     {
         type patch;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -170,7 +170,7 @@ bool LESModel::read()
     // Bit of trickery : we are both IOdictionary ('RASProperties') and
     // an regIOobject (from the turbulenceModel). Problem is to distinguish
     // between the two - we only want to reread the IOdictionary.
-    
+
     bool ok = IOdictionary::readData
     (
         IOdictionary::readStream

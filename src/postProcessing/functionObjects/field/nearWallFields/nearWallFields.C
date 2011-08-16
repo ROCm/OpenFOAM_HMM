@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -92,7 +92,7 @@ void Foam::nearWallFields::read(const dictionary& dict)
         distance_ = readScalar(dict.lookup("distance"));
 
 
-        // Clear out any previously loaded fields 
+        // Clear out any previously loaded fields
         vsf_.clear();
         vvf_.clear();
         vSpheretf_.clear();

@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -20,32 +20,32 @@ internalField   uniform 300;
 
 boundaryField
 {
-    inlet           
+    inlet
     {
         type            fixedValue;
         value           uniform 300;
     }
 
-    outlet          
+    outlet
     {
         type            inletOutlet;
         inletValue      uniform 300;
         value           uniform 300;
     }
 
-    upperWall       
+    upperWall
     {
         type            fixedValue;
         value           uniform 300;
     }
 
-    lowerWall       
+    lowerWall
     {
         type            fixedValue;
         value           uniform 300;
     }
 
-    frontAndBack    
+    frontAndBack
     {
         type            empty;
     }

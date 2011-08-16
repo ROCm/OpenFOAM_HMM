@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,7 +55,7 @@ void Foam::mapDistribute::distribute
         {
             subField[i] = field[mySubMap[i]];
         }
-        
+
         // Receive sub field from myself (subField)
         const labelList& map = constructMap[Pstream::myProcNo()];
 
@@ -407,7 +407,7 @@ void Foam::mapDistribute::distribute
         {
             subField[i] = field[mySubMap[i]];
         }
-        
+
         // Receive sub field from myself (subField)
         const labelList& map = constructMap[Pstream::myProcNo()];
 

@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -16,7 +16,7 @@ FoamFile
 
 dimensions      [0 0 0 1 0 0 0];
 
-internalField   nonuniform List<scalar> 
+internalField   nonuniform List<scalar>
 32385
 (
 1404.43491535448
@@ -32415,7 +32415,7 @@ boundaryField
         accommodationCoeff 0.85;
         Twall           uniform 296.1;
         gamma           1.4;
-        value           nonuniform List<scalar> 
+        value           nonuniform List<scalar>
 255
 (
 1402.47638056061

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -107,7 +107,7 @@ maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
         if (dict.found("refValue") && dict.found("valueFraction"))
         {
             this->refValue() = vectorField("refValue", dict, p.size());
-            this->valueFraction() = 
+            this->valueFraction() =
                 scalarField("valueFraction", dict, p.size());
         }
         else

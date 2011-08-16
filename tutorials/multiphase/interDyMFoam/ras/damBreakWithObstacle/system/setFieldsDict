@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -26,7 +26,7 @@ regions
     boxToCell
     {
         box ( 0 0 0 ) ( 0.6 0.1875 0.75 );
-        fieldValues 
+        fieldValues
         (
             volScalarFieldValue alpha1 1
         );

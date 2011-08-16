@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -223,7 +223,7 @@ public:
         static tmp<fvsPatchField<Type> > New
         (
             const word&,
-            const word& actualPatchType, 
+            const word& actualPatchType,
             const fvPatch&,
             const DimensionedField<Type, surfaceMesh>&
         );

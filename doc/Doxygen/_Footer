@@ -2,10 +2,10 @@
   </div> <!-- main -->
   <div class="footer">
     <p>
-      Copyright&nbsp;&copy;&nbsp;2004-2011&nbsp;
-      <a href="http://www.openfoam.com/about">OpenCFD Limited</a>
+      Copyright&nbsp;&copy;&nbsp;2011&nbsp;
+      <a href="http://www.openfoam.org/about">OpenFOAM Foundation</a>
       |
-      OPENFOAM&reg; and OpenCFD&reg; are registered
+      OPENFOAM&reg; is a registered
       <a href="http://www.openfoam.com/legal/trademark-policy.php">trademarks
       </a> of OpenCFD Ltd.
     </p>

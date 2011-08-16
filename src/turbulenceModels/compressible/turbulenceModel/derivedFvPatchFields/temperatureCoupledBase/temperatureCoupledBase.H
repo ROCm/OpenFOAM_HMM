@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -111,13 +111,13 @@ public:
         {
             return KMethodTypeNames_[method_];
         }
-        
+
         //- Name of thermal conductivity field
         const word& KName() const
         {
             return KName_;
         }
-        
+
         //- Given patch temperature calculate corresponding K field
         tmp<scalarField> K(const scalarField& Tp) const;
 

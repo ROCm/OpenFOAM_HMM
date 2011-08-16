@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -90,7 +90,7 @@ void Foam::surfaceInterpolateFields::execute()
 {
     if (active_)
     {
-        // Clear out any previously loaded fields 
+        // Clear out any previously loaded fields
         ssf_.clear();
         svf_.clear();
         sSpheretf_.clear();

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -136,7 +136,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
 
     // Surface protrusion conformation is done in two steps.
-    // 1. the dual edges (of all internal vertices) can stretch to 
+    // 1. the dual edges (of all internal vertices) can stretch to
     //    'infinity' so any intersection would be badly behaved. So
     //    just find the nearest point on the geometry and insert point
     //    pairs.

@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -28,12 +28,12 @@ vertices
     (-0.5  5  0.5)
 );
 
-blocks          
+blocks
 (
     hex (0 1 2 3 4 5 6 7) (5 50 5) simpleGrading (1 1 1)
 );
 
-edges           
+edges
 (
 );
 

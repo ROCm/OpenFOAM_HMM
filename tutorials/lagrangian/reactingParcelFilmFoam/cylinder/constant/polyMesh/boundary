@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -38,7 +38,7 @@ FoamFile
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_wallFilmFaces;
         offsetMode      nonuniform;
-        offsets         
+        offsets
 1100
 (
 (-1.110223025e-16 0 -5.551115123e-17)

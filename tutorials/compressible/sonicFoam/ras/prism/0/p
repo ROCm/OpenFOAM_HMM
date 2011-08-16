@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -20,13 +20,13 @@ internalField   uniform 100000;
 
 boundaryField
 {
-    inlet           
+    inlet
     {
         type            fixedValue;
         value           uniform 100000;
     }
 
-    outlet          
+    outlet
     {
         type            waveTransmissive;
         field           p;
@@ -39,22 +39,22 @@ boundaryField
         value           uniform 100000;
     }
 
-    bottomWall      
+    bottomWall
     {
         type            zeroGradient;
     }
 
-    topWall         
+    topWall
     {
         type            zeroGradient;
     }
 
-    prismWall       
+    prismWall
     {
         type            zeroGradient;
     }
 
-    defaultFaces    
+    defaultFaces
     {
         type            empty;
     }

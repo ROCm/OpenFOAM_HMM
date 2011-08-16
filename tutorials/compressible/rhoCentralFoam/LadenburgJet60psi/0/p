@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -16,7 +16,7 @@ FoamFile
 
 dimensions      [1 -1 -2 0 0 0 0];
 
-internalField   nonuniform List<scalar> 
+internalField   nonuniform List<scalar>
 1200
 (
 269426.444889126
@@ -1239,7 +1239,7 @@ boundaryField
         gamma           1.4;
         fieldInf        101325;
         lInf            0.025;
-        value           nonuniform List<scalar> 
+        value           nonuniform List<scalar>
 20
 (
 36562.2300054432
@@ -1278,7 +1278,7 @@ boundaryField
         psi             psi;
         gamma           1.4;
         p0              uniform 101325;
-        value           nonuniform List<scalar> 
+        value           nonuniform List<scalar>
 60
 (
 100798.155459262

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,7 +70,7 @@ inline Stream& Foam::IOobject::writeBanner(Stream& os, bool noHint)
         "|  \\\\    /   O peration     |"
         " Version:  " << FOAMversion << spaces << "|\n"
         "|   \\\\  /    A nd           |"
-        " Web:      www.OpenFOAM.com                      |\n"
+        " Web:      www.OpenFOAM.org                      |\n"
         "|    \\\\/     M anipulation  |"
         "                                                 |\n"
         "\\*-----------------------------------------"

@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -264,7 +264,7 @@ checkLineLengthNonDirective()
 
 
 #
-# check that OpenCFD copyright is currents
+# check that OpenFOAM Foundation copyright is currents
 #
 checkCopyright()
 {
@@ -273,10 +273,10 @@ checkCopyright()
 
     for f in $fileList
     do
-        sYear=`grep "Copyright.*OpenCFD" $f | sed 's/[^0-9]//g' | cut -c 5-9`
+        sYear=`grep "Copyright.*OpenFOAM" $f | sed 's/[^0-9]//g' | cut -c 5-9`
         if [ "$year" != "" ] && [ "$year" != "$sYear" ]; then
             echo "Updated copyright for: $f"
-            sed -i "s/$sYear OpenCFD/$year OpenCFD/g" $f
+            sed -i "s/$sYear OpenFOAM/$year OpenFOAM/g" $f
         fi
 
     done

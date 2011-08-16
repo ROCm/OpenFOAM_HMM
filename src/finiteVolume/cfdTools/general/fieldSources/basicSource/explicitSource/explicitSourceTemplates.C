@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2011 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,7 +56,7 @@ void Foam::explicitSource::addSource
             pTraits<Type>::zero
         )
     );
-    UIndirectList<Type>(rhs, this->cells()) = data;    
+    UIndirectList<Type>(rhs, this->cells()) = data;
 
     Eqn -= rhs;
 }
