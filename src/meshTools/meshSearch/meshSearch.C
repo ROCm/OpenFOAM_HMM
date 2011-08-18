@@ -30,7 +30,6 @@ License
 #include "demandDrivenData.H"
 #include "treeDataCell.H"
 #include "treeDataFace.H"
-#include "treeDataPoint.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -508,6 +507,21 @@ Foam::meshSearch::meshSearch(const polyMesh& mesh, const bool faceDecomp)
 {}
 
 
+// Construct with a custom bounding box
+Foam::meshSearch::meshSearch
+(
+    const polyMesh& mesh,
+    const treeBoundBox& bb,
+    const bool faceDecomp
+)
+:
+    mesh_(mesh),
+    faceDecomp_(faceDecomp)
+{
+    overallBbPtr_.reset(new treeBoundBox(bb));
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::meshSearch::~meshSearch()
@@ -527,18 +541,27 @@ const Foam::indexedOctree<Foam::treeDataFace>& Foam::meshSearch::boundaryTree()
         // Construct tree
         //
 
+        if (!overallBbPtr_.valid())
+        {
+            Random rndGen(261782);
+            overallBbPtr_.reset
+            (
+                new treeBoundBox(mesh_.points())
+            );
+
+            treeBoundBox& overallBb = overallBbPtr_();
+            // Extend slightly and make 3D
+            overallBb = overallBb.extend(rndGen, 1E-4);
+            overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+            overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        }
+
         // all boundary faces (not just walls)
         labelList bndFaces(mesh_.nFaces()-mesh_.nInternalFaces());
         forAll(bndFaces, i)
         {
             bndFaces[i] = mesh_.nInternalFaces() + i;
         }
-
-        treeBoundBox overallBb(mesh_.points());
-        Random rndGen(123456);
-        overallBb = overallBb.extend(rndGen, 1E-4);
-        overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-        overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
         boundaryTreePtr_.reset
         (
@@ -550,7 +573,7 @@ const Foam::indexedOctree<Foam::treeDataFace>& Foam::meshSearch::boundaryTree()
                     mesh_,
                     bndFaces                    // boundary faces only
                 ),
-                overallBb,                      // overall search domain
+                overallBbPtr_(),                // overall search domain
                 8,                              // maxLevel
                 10,                             // leafsize
                 3.0                             // duplicity
@@ -567,13 +590,24 @@ const
 {
     if (!cellTreePtr_.valid())
     {
-        treeBoundBox overallBb(mesh_.points());
+        //
+        // Construct tree
+        //
 
-        Random rndGen(261782);
+        if (!overallBbPtr_.valid())
+        {
+            Random rndGen(261782);
+            overallBbPtr_.reset
+            (
+                new treeBoundBox(mesh_.points())
+            );
 
-        overallBb = overallBb.extend(rndGen, 1E-4);
-        overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-        overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+            treeBoundBox& overallBb = overallBbPtr_();
+            // Extend slightly and make 3D
+            overallBb = overallBb.extend(rndGen, 1E-4);
+            overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+            overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        }
 
         cellTreePtr_.reset
         (
@@ -584,10 +618,10 @@ const
                     false,  // not cache bb
                     mesh_
                 ),
-                overallBb,
+                overallBbPtr_(),
                 8,              // maxLevel
                 10,             // leafsize
-                3.0             // duplicity
+                6.0             // duplicity
             )
         );
     }
@@ -904,6 +938,7 @@ void Foam::meshSearch::clearOut()
 {
     boundaryTreePtr_.clear();
     cellTreePtr_.clear();
+    overallBbPtr_.clear();
 }
 
 

@@ -375,7 +375,7 @@ Foam::primitiveMesh::cellTree() const
                 overallBb,
                 8,              // maxLevel
                 10,             // leafsize
-                3.0             // duplicity
+                5.0             // duplicity
             );
     }
 

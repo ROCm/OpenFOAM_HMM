@@ -167,7 +167,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
         procBbRndExt,
         8,              // maxLevel,
         10,             // leafSize,
-        100.0
+        100.0           // duplicity
     );
 
     ril_.setSize(cellBbsToExchange.size());
@@ -386,7 +386,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
         procBbRndExt,
         8,              // maxLevel,
         10,             // leafSize,
-        100.0
+        100.0           // duplicity
     );
 
     rwfil_.setSize(wallFaceBbsToExchange.size());
