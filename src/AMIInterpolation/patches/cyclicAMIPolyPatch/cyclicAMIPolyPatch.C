@@ -240,9 +240,9 @@ const Foam::searchableSurface& Foam::cyclicAMIPolyPatch::surf()
             IOobject
             (
                 surfName,
-                boundaryMesh().mesh().time().constant(),
+                mesh.time().constant(),
                 "triSurface",
-                boundaryMesh().mesh(),
+                mesh,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE
             ),
@@ -414,7 +414,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     separationVector_(vector::zero),
     AMIPtr_(NULL),
     surfPtr_(NULL),
-    surfDict_(dict.subDict("surface"))
+    surfDict_(dict.subOrEmptyDict("surface"))
 {
     if (nbrPatchName_ == name)
     {

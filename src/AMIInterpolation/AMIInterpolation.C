@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "AMIInterpolation.H"
-#include "Random.H"
 #include "treeDataPrimitivePatch.H"
 #include "indexedOctree.H"
 #include "meshTools.H"
@@ -527,19 +526,18 @@ Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::findTargetFace
 {
     label targetFaceI = -1;
 
-    Random rndGen(123456);
-
     treeBoundBox bb(tgtPatch.points());
+    bb.inflate(0.01);
 
     typedef treeDataPrimitivePatch<face, SubList, const pointField&> treeType;
 
     indexedOctree<treeType> tree
     (
         treeType(false, tgtPatch),
-        bb.extend(rndGen, 1E-4),                // overall search domain
-        8,                                      // maxLevel
-        10,                                     // leafsize
-        3.0                                     // duplicity
+        bb,                         // overall search domain
+        8,                          // maxLevel
+        10,                         // leaf size
+        3.0                         // duplicity
     );
 
     const pointField& srcPts = srcPatch.points();
@@ -1153,6 +1151,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
                 addressing[addrI] = globalSrcFaces.toGlobal(addressing[addrI]);
             }
         }
+
         globalIndex globalTgtFaces(tgtAddress_.size());
         forAll(srcAddress_, i)
         {
@@ -1163,13 +1162,34 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             }
         }
 
-        if (debug)
-        {
-            writeWeights(srcWeights_, srcPatch, "VTK", "source");
-            writeWeights(tgtWeights_, newTgtPatch, "VTK", "target");
-        }
 
         // send maps
+/*
+        mapDistribute::distribute
+        (
+            Pstream::nonBlocking,
+            List<labelPair>(),
+            srcPatch.size(),
+            map.constructMap(),
+            map.subMap(),
+            srcAddress_,
+            ListPlusEqOp<label>(),
+            labelList()
+        );
+
+        mapDistribute::distribute
+        (
+            Pstream::nonBlocking,
+            List<labelPair>(),
+            srcPatch.size(),
+            map.constructMap(),
+            map.subMap(),
+            srcWeights_,
+            ListPlusEqOp<scalar>(),
+            scalarList()
+        );
+*/
+
         mapDistribute::distribute
         (
             Pstream::nonBlocking,
@@ -1194,15 +1214,27 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             scalarList()
         );
 
+        if (debug)
+        {
+            writeWeights(srcWeights_, srcPatch, "VTK", "source");
+            writeWeights(tgtWeights_, newTgtPatch, "VTK", "target");
+        }
+
+
         // weights normalisation
         normaliseWeights("source", srcAddress_, srcWeights_, true);
         normaliseWeights("target", tgtAddress_, tgtWeights_, true);
 
 
-        // cache maps
+        // cache maps and reset addresses
         List<Map<label> > cMap;
         srcMapPtr_.reset(new mapDistribute(globalSrcFaces, tgtAddress_, cMap));
         tgtMapPtr_.reset(new mapDistribute(globalTgtFaces, srcAddress_, cMap));
+
+        if (debug)
+        {
+            writeFaceConnectivity(srcPatch, newTgtPatch);
+        }
     }
     else
     {
@@ -1221,13 +1253,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
     }
 
     patchI++;
-}
-
-
-template<class SourcePatch, class TargetPatch>
-bool Foam::AMIInterpolation<SourcePatch, TargetPatch>::movePoints()
-{
-    return true;
 }
 
 
@@ -1264,10 +1289,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
     {
         const mapDistribute& map = tgtMapPtr_();
 
-        Field<Type> work(map.constructSize());
-
-        SubList<Type>(work, fld.size()).assign(fld);
-
+        Field<Type> work(fld);
         map.distribute(work);
 
         forAll(result, faceI)
@@ -1324,7 +1346,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
     {
         FatalErrorIn
         (
-            "AMIInterpolation::interpolateToSource(const Field<Type>) const"
+            "AMIInterpolation::interpolateToSource(const Field<Type>&) const"
         )   << "Supplied field size is not equal to source patch size. "
             << "Source patch = " << srcAddress_.size() << ", supplied field = "
             << fld.size() << abort(FatalError);
@@ -1346,10 +1368,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
     {
         const mapDistribute& map = srcMapPtr_();
 
-        Field<Type> work(map.constructSize());
-
-        SubList<Type>(work, fld.size()).assign(fld);
-
+        Field<Type> work(fld);
         map.distribute(work);
 
         forAll(result, faceI)
@@ -1401,7 +1420,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::writeFaceConnectivity
 )
 const
 {
-    OFstream os("faceConnectivity.obj");
+    OFstream os("faceConnectivity" + Foam::name(Pstream::myProcNo()) + ".obj");
 
     label ptI = 1;
 
@@ -1450,7 +1469,8 @@ const
     writer.write
     (
         folder,
-        prefix + '_' + Foam::name(i) + '_' + Foam::name(Pstream::myProcNo()),
+        prefix
+          + '_' + Foam::name(i) + "_proc" + Foam::name(Pstream::myProcNo()),
         patch.localPoints(),
         patch.localFaces(),
         "weights",
@@ -1477,7 +1497,8 @@ const
     writer.write
     (
         folder,
-        prefix + '_' + Foam::name(i) + '_' + Foam::name(Pstream::myProcNo()),
+        prefix
+          + '_' + Foam::name(i) + "_proc" + Foam::name(Pstream::myProcNo()),
         patch.localPoints(),
         patch.localFaces(),
         "AMIPatch",

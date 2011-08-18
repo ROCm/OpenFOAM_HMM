@@ -329,9 +329,6 @@ public:
                 const searchableSurface& surf
             );
 
-            //- Correct weighting factors for moving mesh
-            bool movePoints();
-
 
         // Evaluation
 
