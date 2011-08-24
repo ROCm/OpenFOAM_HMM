@@ -214,6 +214,21 @@ public:
         );
 
 
+        //- Construct from components
+        forces
+        (
+            const word& name,
+            const objectRegistry&,
+            const labelHashSet& patchSet,
+            const word& pName,
+            const word& UName,
+            const word& rhoName,
+            const scalar rhoInf,
+            const scalar pRef,
+            const coordinateSystem& coordSys
+        );
+
+
     //- Destructor
     virtual ~forces();
 

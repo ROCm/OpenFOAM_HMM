@@ -213,6 +213,36 @@ Foam::forces::forces
 }
 
 
+Foam::forces::forces
+(
+    const word& name,
+    const objectRegistry& obr,
+    const labelHashSet& patchSet,
+    const word& pName,
+    const word& UName,
+    const word& rhoName,
+    const scalar rhoInf,
+    const scalar pRef,
+    const coordinateSystem& coordSys
+)
+:
+    name_(name),
+    obr_(obr),
+    active_(true),
+    log_(false),
+    patchSet_(patchSet),
+    pName_(pName),
+    UName_(UName),
+    rhoName_(rhoName),
+    directForceDensity_(false),
+    fDName_(""),
+    rhoRef_(rhoInf),
+    pRef_(pRef),
+    coordSys_(coordSys),
+    forcesFilePtr_(NULL)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::forces::~forces()
