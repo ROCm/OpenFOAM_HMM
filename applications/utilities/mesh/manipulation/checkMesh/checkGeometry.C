@@ -262,6 +262,125 @@ bool Foam::checkWedges
 }
 
 
+bool Foam::checkCoupledPoints
+(
+    const polyMesh& mesh,
+    const bool report,
+    labelHashSet* setPtr
+)
+{
+    const pointField& p = mesh.points();
+    const faceList& fcs = mesh.faces();
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+    // Zero'th point on coupled faces
+    pointField nbrZeroPoint(fcs.size()-mesh.nInternalFaces(), vector::max);
+
+    // Exchange zero point
+    forAll(patches, patchI)
+    {
+        if (patches[patchI].coupled())
+        {
+            const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>
+            (
+                patches[patchI]
+            );
+
+            forAll(cpp, i)
+            {
+                label bFaceI = cpp.start()+i-mesh.nInternalFaces();
+                const point& p0 = p[cpp[i][0]];
+                nbrZeroPoint[bFaceI] = p0;
+            }
+        }
+    }
+    syncTools::swapBoundaryFacePositions(mesh, nbrZeroPoint);
+
+    // Compare to local ones. Use same tolerance as for matching
+    label nErrorFaces = 0;
+    scalar avgMismatch = 0;
+    label nCoupledFaces = 0;
+
+    forAll(patches, patchI)
+    {
+        if (patches[patchI].coupled())
+        {
+            const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>
+            (
+                patches[patchI]
+            );
+
+            if (cpp.owner())
+            {
+                scalarField smallDist
+                (
+                    cpp.calcFaceTol
+                    (
+                        cpp.matchTolerance(),
+                        cpp,
+                        cpp.points(),
+                        cpp.faceCentres()
+                    )
+                );
+
+                forAll(cpp, i)
+                {
+                    label bFaceI = cpp.start()+i-mesh.nInternalFaces();
+                    const point& p0 = p[cpp[i][0]];
+
+                    scalar d = mag(p0 - nbrZeroPoint[bFaceI]);
+
+                    if (d > smallDist[i])
+                    {
+                        if (setPtr)
+                        {
+                            setPtr->insert(cpp.start()+i);
+                        }
+                        nErrorFaces++;
+                    }
+                    avgMismatch += d;
+                    nCoupledFaces++;
+                }
+            }
+        }
+    }
+
+    reduce(nErrorFaces, sumOp<label>());
+    reduce(avgMismatch, maxOp<scalar>());
+    reduce(nCoupledFaces, sumOp<label>());
+
+    if (nCoupledFaces > 0)
+    {
+        avgMismatch /= nCoupledFaces;
+    }
+
+    if (nErrorFaces > 0)
+    {
+        if (report)
+        {
+            Info<< "  **Error in coupled point location: "
+                << nErrorFaces
+                << " faces have their 0th vertex not opposite"
+                << " their coupled equivalent. Average mismatch "
+                << avgMismatch << "."
+                << endl;
+        }
+
+        return true;
+    }
+    else
+    {
+        if (report)
+        {
+            Info<< "    Coupled point location match (average "
+                << avgMismatch << ") OK." << endl;
+        }
+
+        return false;
+    }
+}
+
+
 Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
 {
     label noFailedChecks = 0;
@@ -451,6 +570,25 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
         }
     }
 
+    {
+        faceSet faces(mesh, "coupledFaces", mesh.nFaces()/100 + 1);
+        if (checkCoupledPoints(mesh, true, &faces))
+        {
+            noFailedChecks++;
+
+            label nFaces = returnReduce(faces.size(), sumOp<label>());
+
+            if (nFaces > 0)
+            {
+                Info<< "  <<Writing " << nFaces
+                    << " faces with incorrectly matched 0th vertex to set "
+                    << faces.name() << endl;
+                faces.instance() = mesh.pointsInstance();
+                faces.write();
+            }
+        }
+    }
+
     if (allGeometry)
     {
         faceSet faces(mesh, "lowQualityTetFaces", mesh.nFaces()/100+1);
@@ -590,7 +728,6 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
             cells.write();
         }
     }
-
 
     return noFailedChecks;
 }
