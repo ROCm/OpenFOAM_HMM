@@ -82,7 +82,8 @@ class kineticTheoryModel
 
         autoPtr<kineticTheoryModels::radialModel> radialModel_;
 
-        autoPtr<kineticTheoryModels::granularPressureModel> granularPressureModel_;
+        autoPtr<kineticTheoryModels::granularPressureModel>
+            granularPressureModel_;
 
         autoPtr<kineticTheoryModels::frictionalStressModel>
             frictionalStressModel_;
