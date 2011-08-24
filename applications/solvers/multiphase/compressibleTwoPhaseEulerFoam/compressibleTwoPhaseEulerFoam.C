@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    compressibleTwoPhaseInterFoam
+    compressibleTwoPhaseEulerFoam
 
 Description
     Solver for a system of 2 compressible fluid phases with one phase
