@@ -221,11 +221,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::distributePatches
         if (domain != Pstream::myProcNo() && recvElems.size())
         {
             UIPstream str(domain, pBufs);
-            faceList localFaces(str);
-            pointField localPoints(str);
-
-            faces[domain] = localFaces;
-            points[domain] = localPoints;
+            str >> faces[domain] >> points[domain];
         }
     }
 }
