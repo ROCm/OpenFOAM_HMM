@@ -52,6 +52,7 @@ SourceFiles
 #include "faceAreaIntersect.H"
 #include "treeBoundBox.H"
 #include "treeBoundBoxList.H"
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -182,16 +183,20 @@ class AMIInterpolation
             (
                 const mapDistribute& map,
                 const primitivePatch& pp,
+                const globalIndex& gi,
                 List<faceList>& faces,
-                List<pointField>& points
+                List<pointField>& points,
+                List<labelList>& tgtFaceIDs
             );
 
             void distributeAndMergePatches
             (
                 const mapDistribute& map,
                 const primitivePatch& tgtPatch,
+                const globalIndex& gi,
                 faceList& tgtFaces,
-                pointField& tgtPoints
+                pointField& tgtPoints,
+                labelList& tgtFaceIDs
             );
 
             autoPtr<mapDistribute> calcProcMap
@@ -271,7 +276,8 @@ class AMIInterpolation
             //     numerical error!
             void normaliseWeights
             (
-                const word& patchType,
+                const primitivePatch& patch,
+                const word& patchName,
                 const labelListList& addr,
                 scalarListList& wght,
                 const bool output
