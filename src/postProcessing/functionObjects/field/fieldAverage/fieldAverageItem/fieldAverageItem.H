@@ -33,8 +33,12 @@ Description
             mean            on;
             prime2Mean      on;
             base            time; // iteration
+            window          200;  // optional averaging window
         }
     \endverbatim
+
+    The averaging window corresponds to the averaging interval (iters or time)
+    If not specified, the averaging is over 'all iters/time'
 
 SourceFiles
     fieldAverageItem.C
@@ -100,6 +104,9 @@ private:
         //- Averaging base type
         baseType base_;
 
+        //- Averaging window - defaults to -1 for 'all iters/time'
+        scalar window_;
+
 
 public:
 
@@ -148,7 +155,7 @@ public:
             }
 
             //- Return true if base is ITER
-            Switch ITERBase() const
+            Switch iterBase() const
             {
                 return base_ == ITER;
             }
@@ -157,6 +164,11 @@ public:
             Switch timeBase() const
             {
                 return base_ == TIME;
+            }
+
+            scalar window() const
+            {
+                return window_;
             }
 
 
@@ -177,7 +189,8 @@ public:
                 a.fieldName_ == b.fieldName_
              && a.mean_ == b.mean_
              && a.prime2Mean_ == b.prime2Mean_
-             && a.base_ == b.base_;
+             && a.base_ == b.base_
+             && a.window_ == b.window_;
         }
 
         friend bool operator!=

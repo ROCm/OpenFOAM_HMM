@@ -273,7 +273,7 @@ checkCopyright()
 
     for f in $fileList
     do
-        sYear=`grep "Copyright.*OpenFOAM" $f | sed 's/[^0-9]//g' | cut -c 5-9`
+        sYear=`grep "Copyright.*OpenFOAM" $f | sed 's/[^0-9]//g'`
         if [ "$year" != "" ] && [ "$year" != "$sYear" ]; then
             echo "Updated copyright for: $f"
             sed -i "s/$sYear OpenFOAM/$year OpenFOAM/g" $f

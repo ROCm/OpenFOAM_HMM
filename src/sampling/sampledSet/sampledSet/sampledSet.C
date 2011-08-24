@@ -28,6 +28,7 @@ License
 #include "primitiveMesh.H"
 #include "meshSearch.H"
 #include "writer.H"
+#include "particle.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -183,26 +184,58 @@ Foam::point Foam::sampledSet::pushIn
 ) const
 {
     label cellI = mesh().faceOwner()[faceI];
+    const point& cC = mesh().cellCentres()[cellI];
 
-    const point& cellCtr = mesh().cellCentres()[cellI];
+    point newPosition = facePt;
 
-    point newSample =
-        facePt + tol*(cellCtr - facePt);
+    // Taken from particle::initCellFacePt()
+    label tetFaceI;
+    label tetPtI;
+    mesh().findTetFacePt(cellI, facePt, tetFaceI, tetPtI);
 
-    if (!searchEngine().pointInCell(newSample, cellI))
+    if (tetFaceI == -1 || tetPtI == -1)
+    {
+        newPosition = facePt;
+
+        label trap(1.0/particle::trackingCorrectionTol + 1);
+
+        label iterNo = 0;
+
+        do
+        {
+            newPosition += particle::trackingCorrectionTol*(cC - facePt);
+
+            mesh().findTetFacePt
+            (
+                cellI,
+                newPosition,
+                tetFaceI,
+                tetPtI
+            );
+
+            iterNo++;
+
+        } while (tetFaceI < 0  && iterNo <= trap);
+    }
+
+    if (tetFaceI == -1)
     {
         FatalErrorIn
         (
             "sampledSet::pushIn(const point&, const label)"
-        )   << "After pushing " << facePt << " to " << newSample
-            << " it is still outside faceI " << faceI << endl
+        )   << "After pushing " << facePt << " to " << newPosition
+            << " it is still outside face " << faceI
+            << " at " << mesh().faceCentres()[faceI]
+            << " of cell " << cellI
+            << " at " << cC << endl
             << "Please change your starting point"
             << abort(FatalError);
     }
-    //Info<< "pushIn : moved " << facePt << " to " << newSample
+
+    //Info<< "pushIn : moved " << facePt << " to " << newPosition
     //    << endl;
 
-    return newSample;
+    return newPosition;
 }
 
 

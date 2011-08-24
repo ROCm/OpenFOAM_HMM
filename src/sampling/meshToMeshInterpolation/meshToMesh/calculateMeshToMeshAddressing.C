@@ -106,7 +106,7 @@ void Foam::meshToMesh::calcAddressing()
         shiftedBb,      // overall bounding box
         8,              // maxLevel
         10,             // leafsize
-        3.0             // duplicity
+        6.0             // duplicity
     );
 
     if (debug)

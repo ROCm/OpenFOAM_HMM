@@ -377,8 +377,7 @@ void Foam::fieldAverage::execute()
 
 
 void Foam::fieldAverage::end()
-{
-}
+{}
 
 
 void Foam::fieldAverage::write()

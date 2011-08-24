@@ -68,6 +68,7 @@ functions
                 mean        on;
                 prime2Mean  on;
                 base        time;
+                window      0.01; // optional averaging window
             }
 
             p
@@ -75,6 +76,7 @@ functions
                 mean        on;
                 prime2Mean  on;
                 base        time;
+                window      0.01; // optional averaging window
             }
         );
     }
