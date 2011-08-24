@@ -1,0 +1,78 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       polyBoundaryMesh;
+    location    "constant/polyMesh";
+    object      boundary;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+6
+(
+    rotor
+    {
+        type            wall;
+        nFaces          192;
+        startFace       5856;
+    }
+    stator
+    {
+        type            wall;
+        nFaces          192;
+        startFace       6048;
+    }
+    AMI1
+    {
+        type            cyclicAMI;
+        nFaces          96;
+        startFace       6240;
+        matchTolerance  0.0001;
+        neighbourPatch  AMI2;
+        transform       translational;
+        separationVector (0 0 0);
+        surface         
+        {
+            type            triSurfaceMesh;
+            name            projectionSurface.stl;
+            projectPoints   yes;
+        }
+    }
+    AMI2
+    {
+        type            cyclicAMI;
+        nFaces          96;
+        startFace       6336;
+        matchTolerance  0.0001;
+        neighbourPatch  AMI1;
+        transform       translational;
+        separationVector (0 0 0);
+        surface         
+        {
+            type            triSurfaceMesh;
+            name            projectionSurface.stl;
+            projectPoints   yes;
+        }
+    }
+    front
+    {
+        type            empty;
+        nFaces          3072;
+        startFace       6432;
+    }
+    back
+    {
+        type            empty;
+        nFaces          3072;
+        startFace       9504;
+    }
+)
+
+// ************************************************************************* //
