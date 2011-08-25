@@ -11,51 +11,30 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "system";
-    object      fvSchemes;
+    object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+/*
+preservePatches
+(
+    AMI1
+    AMI2
+);
+*/
+numberOfSubdomains 4;
 
-ddtSchemes
+method          simple;
+
+simpleCoeffs
 {
-    default         Euler;
+    n               ( 2 2 1 );
+    delta           0.001;
 }
 
-gradSchemes
-{
-    default         Gauss linear;
-    grad(p)         Gauss linear;
-    grad(U)         Gauss linear 1;
-}
 
-divSchemes
-{
-    default         none;
-    div(phi,U)      Gauss upwind;
-    div((nuEff*dev(T(grad(U))))) Gauss linear;
-}
+distributed     no;
 
-laplacianSchemes
-{
-    default         Gauss linear corrected;
-}
-
-interpolationSchemes
-{
-    default         linear;
-    interpolate(HbyA) linear;
-}
-
-snGradSchemes
-{
-    default         corrected;
-}
-
-fluxRequired
-{
-    default         no;
-    pcorr           ;
-    p               ;
-}
+roots           ( );
 
 
 // ************************************************************************* //
