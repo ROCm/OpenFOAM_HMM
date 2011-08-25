@@ -122,10 +122,6 @@ class AMIInterpolation
             //- Weights of wource faces per target face
             scalarListList tgtWeights_;
 
-            //- Cache local size of target patch
-            //  Note: size could be manipulated in parallel
-            label tgtPatchSize_;
-
 
         //- Starting face seed index
         label startSeedI_;

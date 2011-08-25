@@ -275,8 +275,6 @@ distributeAndMergePatches
 
     tgtFaces.setSize(nFaces);
     tgtPoints.setSize(nPoints);
-
-//reduce(nFaces, sumOp<label>());
     tgtFaceIDs.setSize(nFaces);
 
     nFaces = 0;
@@ -1052,9 +1050,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
     {
         scalar s = sum(wght[faceI]);
         wghtSum[faceI] = s;
-        
-        scalar t = 1; // s/patch[faceI].mag(patch.localPoints());
 
+        scalar t = s/patch[faceI].mag(patch.points());
         if (t < minBound)
         {
             minBound = t;
@@ -1096,7 +1093,6 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     srcWeights_(),
     tgtAddress_(),
     tgtWeights_(),
-    tgtPatchSize_(tgtPatch.size()),
     startSeedI_(0),
     triMode_(triMode),
     projectPoints_(projectPoints),
@@ -1146,8 +1142,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         globalIndex globalTgtFaces(tgtPatch.size());
 
         // Create processor map of overlapping faces. This map gets
-        // (possibly remote) faces from the tgtPatch such that they together
-        // cover all of the srcPatch.
+        // (possibly remote) faces from the tgtPatch such that they (together)
+        // cover all of the srcPatch
         autoPtr<mapDistribute> mapPtr = calcProcMap(srcPatch, tgtPatch);
         const mapDistribute& map = mapPtr();
 
@@ -1161,7 +1157,12 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         labelList tgtFaceIDs;
         distributeAndMergePatches
         (
-            map, tgtPatch, globalTgtFaces, newTgtFaces, newTgtPoints, tgtFaceIDs
+            map,
+            tgtPatch,
+            globalTgtFaces,
+            newTgtFaces,
+            newTgtPoints,
+            tgtFaceIDs
         );
 
         primitivePatch
@@ -1178,7 +1179,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         checkPatches(srcPatch, newTgtPatch);
 
 
-        // calculate AMI interpolation.
+        // calculate AMI interpolation
         calcAddressing(srcPatch, newTgtPatch, surf);
 
         // Now
@@ -1212,7 +1213,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         }
 
         // send data back to originating procs. Note that contributions
-        // from different processors get added (ListPlusEqOp).
+        // from different processors get added (ListPlusEqOp)
 
         mapDistribute::distribute
         (
@@ -1239,8 +1240,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         );
 
         // weights normalisation
-        normaliseWeights(srcPatch, "source", srcAddress_, srcWeights_, true);
-        normaliseWeights(tgtPatch, "target", tgtAddress_, tgtWeights_, true);
+        normaliseWeights(tgtPatch, "source", srcAddress_, srcWeights_, true);
+        normaliseWeights(srcPatch, "target", tgtAddress_, tgtWeights_, true);
 
         // cache maps and reset addresses
         List<Map<label> > cMap;
@@ -1267,8 +1268,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             writeWeights(tgtWeights_, tgtPatch, "VTK", "target");
         }
 
-        normaliseWeights(srcPatch, "source", srcAddress_, srcWeights_, true);
-        normaliseWeights(tgtPatch, "target", tgtAddress_, tgtWeights_, true);
+        normaliseWeights(tgtPatch, "source", srcAddress_, srcWeights_, true);
+        normaliseWeights(srcPatch, "target", tgtAddress_, tgtWeights_, true);
     }
 
     patchI++;
@@ -1283,13 +1284,13 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
     const Field<Type>& fld
 ) const
 {
-    if (fld.size() != tgtPatchSize_)
+    if (fld.size() != tgtAddress_.size())
     {
         FatalErrorIn
         (
             "AMIInterpolation::interpolateToSource(const Field<Type>) const"
         )   << "Supplied field size is not equal to target patch size. "
-            << "Target patch = " << tgtPatchSize_ << ", supplied field = "
+            << "Target patch = " << tgtAddress_.size() << ", supplied field = "
             << fld.size() << abort(FatalError);
     }
 
@@ -1375,7 +1376,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
     (
         new Field<Type>
         (
-            tgtPatchSize_,
+            tgtAddress_.size(),
             pTraits<Type>::zero
         )
     );
