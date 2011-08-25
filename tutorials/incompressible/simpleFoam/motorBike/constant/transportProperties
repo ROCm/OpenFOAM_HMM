@@ -16,15 +16,6 @@ FoamFile
 
 transportModel  Newtonian;
 
-method          hierarchical;
-
-hierarchicalCoeffs
-{
-    n           (2 1 1);
-    delta       0.001;
-    order       xyz;
-}
-
 nu              nu [0 2 -1 0 0 0 0] 1.5e-05;
 
 // ************************************************************************* //
