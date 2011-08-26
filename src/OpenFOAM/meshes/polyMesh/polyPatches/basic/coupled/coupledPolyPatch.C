@@ -244,10 +244,10 @@ void Foam::coupledPolyPatch::calcTransformTensors
 
     if (Cf.size() == 0)
     {
-        // Dummy geometry.
+        // Dummy geometry. Assume non-separated, parallel.
         separation_.setSize(0);
-        forwardT_ = I;
-        reverseT_ = I;
+        forwardT_.clear();
+        reverseT_.clear();
         collocated_.setSize(0);
     }
     else
