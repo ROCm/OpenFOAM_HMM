@@ -701,7 +701,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::setNextFaces
             {
                 if (!foundNextSeed)
                 {
-                    startSeedI_ = faceI + 1;
+                    startSeedI_ = faceI;
                     foundNextSeed = true;
                 }
 
