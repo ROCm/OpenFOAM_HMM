@@ -265,6 +265,17 @@ public:
             const dictionary&
         );
 
+        //- Print basic message and exit. Uses cerr if streams not constructed
+        //  yet (at startup). Use in startup parsing instead of FatalError.
+        static void SafeFatalIOError
+        (
+            const char* functionName,
+            const char* sourceFileName,
+            const int sourceFileLineNumber,
+            const IOstream&,
+            const string& msg
+        );
+
         //- Create and return a dictionary
         operator dictionary() const;
 
@@ -311,6 +322,16 @@ extern IOerror FatalIOError;
 */
 #define FatalIOErrorIn(fn, ios) \
     ::Foam::FatalIOError((fn), __FILE__, __LINE__, (ios))
+
+/**
+ * \def SafeFatalIOErrorIn(functionName, ios, msg)
+ * Report an error message using Foam::FatalIOError (or cerr if FatalIOError
+ * not yet constructed) for functionName in
+ * file __FILE__ at line __LINE__
+ * for a particular IOstream
+*/
+#define SafeFatalIOErrorIn(fn, ios, msg) \
+    ::Foam::IOerror::SafeFatalIOError((fn), __FILE__, __LINE__, (ios), (msg))
 
 /**
  * \def notImplemented(functionName)

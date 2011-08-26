@@ -29,6 +29,7 @@ License
 #include "dictionary.H"
 #include "JobInfo.H"
 #include "Pstream.H"
+#include "JobInfo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -110,6 +111,43 @@ Foam::OSstream& Foam::IOerror::operator()
         dict.startLineNumber(),
         dict.endLineNumber()
     );
+}
+
+
+void Foam::IOerror::SafeFatalIOError
+(
+    const char* functionName,
+    const char* sourceFileName,
+    const int sourceFileLineNumber,
+    const IOstream& ioStream,
+    const string& msg
+)
+{
+    if (JobInfo::constructed)
+    {
+        FatalIOErrorIn
+        (
+            "primitiveEntry::readEntry(const dictionary&, Istream&)",
+            ioStream
+        )   << msg << Foam::exit(FatalIOError);
+    }
+    else
+    {
+        std::cerr
+            << std::endl
+            << "--> FOAM FATAL IO ERROR:" << std::endl
+            << msg
+            << std::endl
+            << "file: " << ioStream.name()
+            << " at line " << ioStream.lineNumber() << '.'
+            << std::endl << std::endl
+            << "    From function " << functionName
+            << std::endl
+            << "    in file " << sourceFileName
+            << " at line " << sourceFileLineNumber << '.'
+            << std::endl;
+        ::exit(1);
+    }
 }
 
 
