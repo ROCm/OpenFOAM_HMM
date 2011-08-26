@@ -28,8 +28,8 @@ numberOfSubdomains  2;
 //  connected with a point, edge or face on the same processor.
 //  (just having face connected cells might not guarantee a balanced
 //  decomposition)
-// The processor can be explicitly provided or -1 to have
-// decompositionMethod choose.
+// The processor can be -1 (the decompositionMethod chooses the processor
+// for a good load balance) or explicitly provided (upsets balance).
 //singleProcessorFaceZones ((f0 -1));
 
 

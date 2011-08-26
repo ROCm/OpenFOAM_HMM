@@ -108,13 +108,11 @@ void Foam::domainDecomposition::distributeCells()
 
     // Specified processor for owner and neighbour of faces
     Map<label> specifiedProcessorFaces;
+    List<Tuple2<word, label> > zNameAndProcs;
 
     if (decompositionDict_.found("singleProcessorFaceZones"))
     {
-        List<Tuple2<word, label> > zNameAndProcs
-        (
-            decompositionDict_.lookup("singleProcessorFaceZones")
-        );
+        decompositionDict_.lookup("singleProcessorFaceZones") >> zNameAndProcs;
 
         const faceZoneMesh& fZones = faceZones();
 
@@ -332,23 +330,47 @@ void Foam::domainDecomposition::distributeCells()
         );
 
 
-        // For specifiedProcessorFaces rework the cellToProc. Note that
-        // this makes the decomposition unbalanced.
+        // For specifiedProcessorFaces rework the cellToProc to enforce
+        // all on one processor since we can't guarantee that the input
+        // to regionSplit was a single region.
+        // E.g. faceZone 'a' with the cells split into two regions
+        // by a notch formed by two walls
+        //
+        //          \   /
+        //           \ /
+        //    ---a----+-----a-----
+        //
+        // 
+        // Note that reworking the cellToProc might make the decomposition
+        // unbalanced.
         if (specifiedProcessorFaces.size())
         {
-            labelList procMap(identity(cellToProc_.size()));
+            const faceZoneMesh& fZones = faceZones();
 
-            forAllConstIter(Map<label>, specifiedProcessorFaces, iter)
+            forAll(zNameAndProcs, i)
             {
-                label faceI = iter.key();
-                label wantedProcI = iter();
+                label zoneI = fZones.findZoneID(zNameAndProcs[i].first());
+                const faceZone& fz = fZones[zoneI];
 
-                if (wantedProcI != -1)
+                if (fz.size())
                 {
-                    cellToProc_[faceOwner()[faceI]] = wantedProcI;
-                    if (isInternalFace(faceI))
+                    label procI = zNameAndProcs[i].second();
+                    if (procI == -1)
                     {
-                        cellToProc_[faceNeighbour()[faceI]] = wantedProcI;
+                        // If no processor specified use the one from the
+                        // 0th element
+                        procI = cellToProc_[faceOwner()[fz[0]]];
+                    }
+
+                    forAll(fz, fzI)
+                    {
+                        label faceI = fz[fzI];
+
+                        cellToProc_[faceOwner()[faceI]] = procI;
+                        if (isInternalFace(faceI))
+                        {
+                            cellToProc_[faceNeighbour()[faceI]] = procI;
+                        }
                     }
                 }
             }
