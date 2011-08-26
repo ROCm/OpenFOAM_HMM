@@ -176,7 +176,6 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
         }
         case TRANSLATIONAL:
         {
-            // Transform 0 points
             if (debug)
             {
                 Pout<< "cyclicAMIPolyPatch::calcTransforms :"
@@ -204,11 +203,7 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
 
             const_cast<tensorField&>(forwardT()).clear();
             const_cast<tensorField&>(reverseT()).clear();
-            const_cast<vectorField&>(separation()) = vectorField
-            (
-                1,
-                vector::zero
-            );
+            const_cast<vectorField&>(separation()).setSize(0);
             const_cast<boolList&>(collocated()) = boolList(1, true);
 
             break;
