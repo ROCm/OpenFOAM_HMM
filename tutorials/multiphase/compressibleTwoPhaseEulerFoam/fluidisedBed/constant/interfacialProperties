@@ -10,12 +10,19 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      transportProperties;
+    location    "constant";
+    object      interfacialProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-transportModel  Newtonian;
+dragModel1          GidaspowErgunWenYu;
+dragModel2          GidaspowErgunWenYu;
 
-nu              nu [0 2 -1 0 0 0 0] 1.5e-05;
+heatTransferModel1  RanzMarshall;
+heatTransferModel2  RanzMarshall;
+
+dispersedPhase      "1";
+
+minInterfaceAlpha   1e-2;
 
 // ************************************************************************* //

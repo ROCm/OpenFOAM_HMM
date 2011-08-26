@@ -9,13 +9,39 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      transportProperties;
+    class       volScalarField;
+    object      Theta;
 }
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// ************************************************************************* //
 
-transportModel  Newtonian;
+dimensions          [ 0 2 -2 0 0 0 0 ];
 
-nu              nu [0 2 -1 0 0 0 0] 1.5e-05;
+internalField       uniform 1.0e-4;
+
+referenceLevel      0;
+
+boundaryField
+{
+    inlet
+    {
+        type               fixedValue;
+        value              uniform 1.0e-4;
+    }
+
+    outlet
+    {
+        type               zeroGradient;
+    }
+
+    walls
+    {
+        type               zeroGradient;
+    }
+
+    frontAndBackPlanes
+    {
+        type               empty;
+    }
+}
 
 // ************************************************************************* //

@@ -10,12 +10,20 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      transportProperties;
+    location    "constant";
+    object      ppProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-transportModel  Newtonian;
+preAlphaExp     500;
 
-nu              nu [0 2 -1 0 0 0 0] 1.5e-05;
+expMax          1000;
+
+alphaMax        0.62;
+
+g0              g0 [ 1 -1 -2 0 0 0 0 ] 0;
+
+packingLimiter  no;
+
 
 // ************************************************************************* //

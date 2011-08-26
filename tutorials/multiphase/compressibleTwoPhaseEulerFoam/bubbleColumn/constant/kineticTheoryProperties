@@ -10,12 +10,43 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      transportProperties;
+    location    "constant";
+    object      kineticTheoryProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-transportModel  Newtonian;
+kineticTheory   off;
 
-nu              nu [0 2 -1 0 0 0 0] 1.5e-05;
+equilibrium     on;
+
+e               e [ 0 0 0 0 0 0 0 ] 0.9;
+
+alphaMax        alphaMax [ 0 0 0 0 0 0 0 ] 0.6;
+
+alphaMinFriction alphaMinFriction [ 0 0 0 0 0 0 0 ] 0.5;
+
+Fr              Fr [ 1 -1 -2 0 0 0 0 ] 0.05;
+
+eta             eta [ 0 0 0 0 0 0 0 ] 2;
+
+p               p [ 0 0 0 0 0 0 0 ] 5;
+
+phi             phi [ 0 0 0 0 0 0 0 ] 25;
+
+viscosityModel  Syamlal;
+
+conductivityModel HrenyaSinclair;
+
+granularPressureModel Lun;
+
+frictionalStressModel JohnsonJackson;
+
+radialModel     Gidaspow;
+
+HrenyaSinclairCoeffs
+{
+    L               L [ 0 1 0 0 0 0 0 ] 0.0005;
+}
+
 
 // ************************************************************************* //

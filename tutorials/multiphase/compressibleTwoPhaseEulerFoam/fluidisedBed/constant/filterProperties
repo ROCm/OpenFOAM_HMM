@@ -10,12 +10,18 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      transportProperties;
+    location    "constant";
+    object      filterProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-transportModel  Newtonian;
+filter          off;
 
-nu              nu [0 2 -1 0 0 0 0] 1.5e-05;
+filterNormal    ( 0 0 1 );
+
+filterPosition  filterPosition [ 0 1 0 0 0 ] ( 0 0 0.02 );
+
+filterThickness filterThickness [ 0 1 0 0 0 ] 1e-06;
+
 
 // ************************************************************************* //

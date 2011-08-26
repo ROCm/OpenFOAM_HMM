@@ -9,50 +9,57 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
-    location    "0";
-    object      Urel;
+    class       dictionary;
+    location    "constant";
+    object      transportProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [ 0 1 -1 0 0 0 0 ];
-
-internalField   uniform ( 0 0 0 );
-
-boundaryField
+phase1
 {
-    inlet
+    rho             2500;
+    rho0            2500;
+    R               1e10;
+    Cp              6000;
+
+    nu              1e-06;
+    kappa           0.613;
+
+    diameterModel constant;
+    constantCoeffs
     {
-        type            SRFVelocity;
-        inletValue      uniform ( 0 0 -10 );
-        relative        no;
-        value           uniform ( 0 0 0 );
-    }
-    outlet
-    {
-        type            zeroGradient;
-    }
-    innerWall
-    {
-        type            fixedValue;
-        value           uniform ( 0 0 0 );
-    }
-    outerWall
-    {
-        type            SRFVelocity;
-        inletValue      uniform ( 0 0 0 );
-        relative        no;
-        value           uniform ( 0 0 0 );
-    }
-    cyclic_half0
-    {
-        type            cyclic;
-    }
-    cyclic_half1
-    {
-        type            cyclic;
+        d               3e-4;
     }
 }
+
+phase2
+{
+    rho             1.2;
+    rho0            0;
+    R               287;
+    Cp              721;
+
+    nu              1.5e-05;
+    kappa           2.63e-2;
+
+    diameterModel constant;
+    constantCoeffs
+    {
+        d               1;
+    }
+}
+
+// Virtual-mass ceofficient
+Cvm             0;
+
+// Lift coefficient
+Cl              0;
+
+// Dispersed-phase turbulence coefficient
+Ct              0;
+
+// Minimum allowable pressure
+pMin            10000;
 
 
 // ************************************************************************* //
