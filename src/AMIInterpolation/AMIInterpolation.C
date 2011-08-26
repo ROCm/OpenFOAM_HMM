@@ -1240,8 +1240,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         );
 
         // weights normalisation
-        normaliseWeights(tgtPatch, "source", srcAddress_, srcWeights_, true);
-        normaliseWeights(srcPatch, "target", tgtAddress_, tgtWeights_, true);
+        normaliseWeights(srcPatch, "source", srcAddress_, srcWeights_, true);
+        normaliseWeights(tgtPatch, "target", tgtAddress_, tgtWeights_, true);
 
         // cache maps and reset addresses
         List<Map<label> > cMap;
@@ -1268,8 +1268,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             writeWeights(tgtWeights_, tgtPatch, "VTK", "target");
         }
 
-        normaliseWeights(tgtPatch, "source", srcAddress_, srcWeights_, true);
-        normaliseWeights(srcPatch, "target", tgtAddress_, tgtWeights_, true);
+        normaliseWeights(srcPatch, "source", srcAddress_, srcWeights_, true);
+        normaliseWeights(tgtPatch, "target", tgtAddress_, tgtWeights_, true);
     }
 
     patchI++;
