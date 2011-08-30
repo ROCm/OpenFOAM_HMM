@@ -316,7 +316,7 @@ bool Foam::checkCoupledPoints
                 (
                     cpp.calcFaceTol
                     (
-                        cpp.matchTolerance(),
+                        //cpp.matchTolerance(),
                         cpp,
                         cpp.points(),
                         cpp.faceCentres()
