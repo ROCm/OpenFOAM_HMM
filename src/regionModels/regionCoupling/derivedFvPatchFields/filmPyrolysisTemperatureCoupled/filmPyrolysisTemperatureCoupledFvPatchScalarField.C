@@ -117,6 +117,11 @@ void Foam::filmPyrolysisTemperatureCoupledFvPatchScalarField::updateCoeffs()
     typedef regionModels::surfaceFilmModels::surfaceFilmModel filmModelType;
     typedef regionModels::pyrolysisModels::pyrolysisModel pyrModelType;
 
+    // Since we're inside initEvaluate/evaluate there might be processor
+    // comms underway. Change the tag we use.
+    int oldTag = UPstream::msgType();
+    UPstream::msgType() = oldTag+1;
+
     bool filmOk =
         db().objectRegistry::foundObject<filmModelType>
         (
@@ -180,6 +185,9 @@ void Foam::filmPyrolysisTemperatureCoupledFvPatchScalarField::updateCoeffs()
             Tp[i] = TPyr[i];
         }
     }
+
+    // Restore tag
+    UPstream::msgType() = oldTag;
 
     fixedValueFvPatchScalarField::updateCoeffs();
 }

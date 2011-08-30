@@ -145,6 +145,11 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
         return;
     }
 
+    // Since we're inside initEvaluate/evaluate there might be processor
+    // comms underway. Change the tag we use.
+    int oldTag = UPstream::msgType();
+    UPstream::msgType() = oldTag+1;
+
     // Get the coupling information from the directMappedPatchBase
     const directMappedPatchBase& mpp = refCast<const directMappedPatchBase>
     (
@@ -212,7 +217,6 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
 
     mixedFvPatchScalarField::updateCoeffs();
 
-
     if (debug)
     {
         scalar Q = gSum(K(*this)*patch().magSf()*snGrad());
@@ -230,6 +234,9 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
             << " avg:" << gAverage(*this)
             << endl;
     }
+
+    // Restore tag
+    UPstream::msgType() = oldTag;
 }
 
 

@@ -166,6 +166,11 @@ void Foam::directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
         return;
     }
 
+    // Since we're inside initEvaluate/evaluate there might be processor
+    // comms underway. Change the tag we use.
+    int oldTag = UPstream::msgType();
+    UPstream::msgType() = oldTag+1;
+
     // Get the directMappedPatchBase
     const directMappedPatchBase& mpp = refCast<const directMappedPatchBase>
     (
@@ -244,6 +249,9 @@ void Foam::directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
 
     operator==(newUValues);
     phiField.boundaryField()[patch().index()] == newPhiValues;
+
+    // Restore tag
+    UPstream::msgType() = oldTag;
 
     fixedValueFvPatchVectorField::updateCoeffs();
 }

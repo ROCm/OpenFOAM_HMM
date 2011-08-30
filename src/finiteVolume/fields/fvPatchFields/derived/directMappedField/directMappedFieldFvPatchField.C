@@ -190,6 +190,11 @@ void directMappedFieldFvPatchField<Type>::updateCoeffs()
 
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
+    // Since we're inside initEvaluate/evaluate there might be processor
+    // comms underway. Change the tag we use.
+    int oldTag = UPstream::msgType();
+    UPstream::msgType() = oldTag+1;
+
     const fvMesh& nbrMesh = refCast<const fvMesh>(sampleMesh());
     const mapDistribute& distMap = directMappedPatchBase::map();
 
@@ -289,6 +294,9 @@ void directMappedFieldFvPatchField<Type>::updateCoeffs()
             << "  max:" << gMax(*this)
             << endl;
     }
+
+    // Restore tag
+    UPstream::msgType() = oldTag;
 
     fixedValueFvPatchField<Type>::updateCoeffs();
 }
