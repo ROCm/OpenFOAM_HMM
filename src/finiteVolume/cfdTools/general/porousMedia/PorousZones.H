@@ -129,6 +129,15 @@ public:
         void addResistance(fvVectorMatrix& UEqn) const;
 
         //- Add the viscous and inertial resistance force contribution
+        //  to the momentum equation using rho and mu provided
+        void addResistance
+        (
+            fvVectorMatrix& UEqn,
+            const volScalarField& rho,
+            const volScalarField& mu
+        ) const;
+
+        //- Add the viscous and inertial resistance force contribution
         //  to the tensorial diagonal
         void addResistance
         (

@@ -314,6 +314,51 @@ void Foam::porousZone::addResistance(fvVectorMatrix& UEqn) const
 
 void Foam::porousZone::addResistance
 (
+    fvVectorMatrix& UEqn,
+    const volScalarField& rho,
+    const volScalarField& mu
+) const
+{
+    if (cellZoneIds_.empty())
+    {
+        return;
+    }
+
+    const scalarField& V = mesh_.V();
+    scalarField& Udiag = UEqn.diag();
+    vectorField& Usource = UEqn.source();
+    const vectorField& U = UEqn.psi();
+
+    if (C0_ > VSMALL)
+    {
+        addPowerLawResistance
+        (
+            Udiag,
+            V,
+            rho,
+            U
+        );
+    }
+
+    const tensor& D = D_.value();
+    const tensor& F = F_.value();
+
+    if (magSqr(D) > VSMALL || magSqr(F) > VSMALL)
+    {
+        addViscousInertialResistance
+        (
+            Udiag,
+            Usource,
+            V,
+            rho,
+            mu,
+            U
+        );
+    }
+}
+
+void Foam::porousZone::addResistance
+(
     const fvVectorMatrix& UEqn,
     volTensorField& AU,
     bool correctAUprocBC
