@@ -78,7 +78,7 @@ ODESolidChemistryModel
 
         IOobject header
         (
-            Ys_[fieldI].name() + "_0",
+            Ys_[fieldI].name() + "0",
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ
@@ -94,7 +94,7 @@ ODESolidChemistryModel
                 (
                     IOobject
                     (
-                        Ys_[fieldI].name() + "_0",
+                        Ys_[fieldI].name() + "0",
                         mesh.time().timeName(),
                         mesh,
                         IOobject::MUST_READ,
@@ -126,7 +126,7 @@ ODESolidChemistryModel
                 (
                     IOobject
                     (
-                        Ys_[fieldI].name() + "_0",
+                        Ys_[fieldI].name() + "0",
                         mesh.time().timeName(),
                         mesh,
                         IOobject::NO_READ,
