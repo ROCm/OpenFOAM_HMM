@@ -221,36 +221,11 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
 }
 
 
-const Foam::searchableSurface& Foam::cyclicAMIPolyPatch::surf()
+void Foam::cyclicAMIPolyPatch::resetAMI()
 {
-    word surfType(surfDict_.lookup("type"));
-    word surfName(surfDict_.lookupOrDefault("name", name()));
+    AMIPtr_.clear();
 
-    const polyMesh& mesh = boundaryMesh().mesh();
-
-    surfPtr_ =
-        searchableSurface::New
-        (
-            surfType,
-            IOobject
-            (
-                surfName,
-                mesh.time().constant(),
-                "triSurface",
-                mesh,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
-            ),
-            surfDict_
-        );
-
-    return surfPtr_();
-}
-
-
-const Foam::AMIPatchToPatchInterpolation& Foam::cyclicAMIPolyPatch::AMI()
-{
-    if (!AMIPtr_.valid() && owner())
+    if (owner())
     {
         const polyPatch& nbr = nbrPatch();
         pointField nbrPoints = nbrPatch().localPoints();
@@ -282,8 +257,6 @@ const Foam::AMIPatchToPatchInterpolation& Foam::cyclicAMIPolyPatch::AMI()
             meshTools::writeOBJ(osO, this->localFaces(), localPoints());
         }
 
-        bool projectPoints(readBool(surfDict_.lookup("projectPoints")));
-
         // Construct/apply AMI interpolation to determine addressing and weights
         AMIPtr_.reset
         (
@@ -291,14 +264,11 @@ const Foam::AMIPatchToPatchInterpolation& Foam::cyclicAMIPolyPatch::AMI()
             (
                 *this,
                 nbrPatch0,
-                surf(),
-                faceAreaIntersect::tmMesh,
-                projectPoints
+                surfPtr_,
+                faceAreaIntersect::tmMesh
             )
         );
     }
-
-    return AMIPtr_();
 }
 
 
@@ -345,11 +315,7 @@ void Foam::cyclicAMIPolyPatch::movePoints
 
     calcTransforms();
 
-    if (owner())
-    {
-        AMIPtr_.clear();
-        AMI();
-    }
+    resetAMI();
 }
 
 
@@ -611,6 +577,59 @@ bool Foam::cyclicAMIPolyPatch::owner() const
 }
 
 
+const Foam::autoPtr<Foam::searchableSurface>&
+Foam::cyclicAMIPolyPatch::surfPtr()
+{
+    word surfType(surfDict_.lookup("type"));
+
+    if (!surfPtr_.valid() && owner() && surfType != "none")
+    {
+        word surfName(surfDict_.lookupOrDefault("name", name()));
+
+        const polyMesh& mesh = boundaryMesh().mesh();
+
+        surfPtr_ =
+            searchableSurface::New
+            (
+                surfType,
+                IOobject
+                (
+                    surfName,
+                    mesh.time().constant(),
+                    "triSurface",
+                    mesh,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                ),
+                surfDict_
+            );
+    }
+
+    return surfPtr_;
+}
+
+
+const Foam::AMIPatchToPatchInterpolation& Foam::cyclicAMIPolyPatch::AMI()
+{
+    if (!owner())
+    {
+        FatalErrorIn
+        (
+            "const AMIPatchToPatchInterpolation& cyclicAMIPolyPatch::AMI()"
+        )
+            << "AMI interpolator only available to owner patch"
+            << abort(FatalError);
+    }
+
+    if (!AMIPtr_.valid())
+    {
+        resetAMI();
+    }
+
+    return AMIPtr_();
+}
+
+
 void Foam::cyclicAMIPolyPatch::transformPosition(pointField& l) const
 {
     if (!parallel())
@@ -704,11 +723,7 @@ void Foam::cyclicAMIPolyPatch::calcGeometry
         nbrAreas
     );
 
-    if (owner())
-    {
-        AMIPtr_.clear();
-        AMI();
-    }
+    resetAMI();
 }
 
 

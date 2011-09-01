@@ -129,11 +129,10 @@ class AMIInterpolation
         //- Face triangulation mode
         const faceAreaIntersect::triangulationMode triMode_;
 
-        //- Flag to indicate whether or not to project points
-        const bool projectPoints_;
-
+        //- Source map pointer - parallel running only
         autoPtr<mapDistribute> srcMapPtr_;
 
+        //- Target map pointer - parallel running only
         autoPtr<mapDistribute> tgtMapPtr_;
 
 
@@ -260,7 +259,6 @@ class AMIInterpolation
             (
                 const primitivePatch& srcPatch,
                 const primitivePatch& tgtPatch,
-                const searchableSurface& surf,
                 label srcFaceI = -1,
                 label tgtFaceI = -1
             );
@@ -289,9 +287,8 @@ public:
         (
             const SourcePatch& srcPatch,
             const TargetPatch& tgtPatch,
-            const searchableSurface& surf,
-            const faceAreaIntersect::triangulationMode& triMode,
-            const bool projectPoints
+            const autoPtr<searchableSurface>& surf,
+            const faceAreaIntersect::triangulationMode& triMode
         );
 
 
@@ -327,8 +324,7 @@ public:
             void update
             (
                 const primitivePatch& srcPatch,
-                const primitivePatch& tgtPatch,
-                const searchableSurface& surf
+                const primitivePatch& tgtPatch
             );
 
 

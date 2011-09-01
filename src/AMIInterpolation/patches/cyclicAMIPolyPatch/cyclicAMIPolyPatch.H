@@ -109,6 +109,9 @@ private:
             const vectorField& half1Areas
         );
 
+        //- Reset the AMI interpolator
+        void resetAMI();
+
 
 protected:
 
@@ -264,7 +267,7 @@ public:
             inline const cyclicAMIPolyPatch& nbrPatch() const;
 
             //- Return a reference to the projection surface
-            const searchableSurface& surf();
+            const autoPtr<searchableSurface>& surfPtr();
 
             //- Return a reference to the AMI interpolator
             const AMIPatchToPatchInterpolation& AMI();

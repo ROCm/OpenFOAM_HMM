@@ -499,11 +499,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::projectPointsToSurface
     pointField& pts
 ) const
 {
-    if (!projectPoints_)
-    {
-        return;
-    }
-
     if (debug)
     {
         Info<< "AMI: projecting points to surface" << endl;
@@ -803,7 +798,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
 (
     const primitivePatch& srcPatch,
     const primitivePatch& tgtPatch,
-    const searchableSurface& surf,
     label srcFaceI,
     label tgtFaceI
 )
@@ -824,6 +818,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
     if (debug)
     {
         Info<< "AMI: calcAddressing" << endl;
+        writePatch(srcPatch, "VTK", "source");
+        writePatch(tgtPatch, "VTK", "target");
     }
 
     // temporary storage for addressing and weights
@@ -833,57 +829,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
     List<DynamicList<scalar> > tgtWght(tgtPatch.size());
 
 
-    // create new patches for source and target
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    pointField srcPoints = srcPatch.points();
-    primitivePatch srcPatch0
-    (
-        SubList<face>
-        (
-            srcPatch,
-            srcPatch.size(),
-            0
-        ),
-        srcPoints
-    );
-
-    if (debug)
-    {
-        OFstream os("amiSrcPoints.obj");
-        forAll(srcPoints, i)
-        {
-            meshTools::writeOBJ(os, srcPoints[i]);
-        }
-    }
-
-    pointField tgtPoints = tgtPatch.points();
-    primitivePatch tgtPatch0
-    (
-        SubList<face>
-        (
-            tgtPatch,
-            tgtPatch.size(),
-            0
-        ),
-        tgtPoints
-    );
-
-    if (debug)
-    {
-        OFstream os("amiTgtPoints.obj");
-        forAll(tgtPoints, i)
-        {
-            meshTools::writeOBJ(os, tgtPoints[i]);
-        }
-    }
-
-
-    // map source and target patches onto projection surface
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    projectPointsToSurface(surf, srcPoints);
-    projectPointsToSurface(surf, tgtPoints);
-
-
     // find initial face match using brute force/octree search
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if ((srcFaceI == -1) || (tgtFaceI == -1))
@@ -891,9 +836,9 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
         srcFaceI = 0;
         tgtFaceI = 0;
         bool foundFace = false;
-        forAll(srcPatch0, faceI)
+        forAll(srcPatch, faceI)
         {
-            tgtFaceI = findTargetFace(srcFaceI, srcPatch0, tgtPatch0);
+            tgtFaceI = findTargetFace(faceI, srcPatch, tgtPatch);
             if (tgtFaceI >= 0)
             {
                 srcFaceI = faceI;
@@ -911,7 +856,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
                 "("
                     "const primitivePatch&, "
                     "const primitivePatch&, "
-                    "const searchableSurface&, "
                     "label, "
                     "label"
                 ")"
@@ -927,7 +871,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
 
     // construct weights and addressing
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    label nFacesRemaining = srcPatch0.size();
+    label nFacesRemaining = srcPatch.size();
 
     // list of tgt face neighbour faces
     DynamicList<label> nbrFaces(10);
@@ -953,7 +897,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
 
         // append initial target face and neighbours
         nbrFaces.append(tgtFaceI);
-        appendNbrFaces(tgtFaceI, tgtPatch0, visitedFaces, nbrFaces);
+        appendNbrFaces(tgtFaceI, tgtPatch, visitedFaces, nbrFaces);
 
         bool faceProcessed = false;
 
@@ -962,7 +906,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
             // process new target face
             tgtFaceI = nbrFaces.remove();
             visitedFaces.append(tgtFaceI);
-            scalar area = interArea(srcFaceI, tgtFaceI, srcPatch0, tgtPatch0);
+            scalar area = interArea(srcFaceI, tgtFaceI, srcPatch, tgtPatch);
 
             // store when intersection area > 0
             if (area > 0)
@@ -973,7 +917,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
                 tgtAddr[tgtFaceI].append(srcFaceI);
                 tgtWght[tgtFaceI].append(area);
 
-                appendNbrFaces(tgtFaceI, tgtPatch0, visitedFaces, nbrFaces);
+                appendNbrFaces(tgtFaceI, tgtPatch, visitedFaces, nbrFaces);
 
                 faceProcessed = true;
             }
@@ -996,8 +940,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
             (
                 srcFaceI,
                 tgtFaceI,
-                srcPatch0,
-                tgtPatch0,
+                srcPatch,
+                tgtPatch,
                 mapFlag,
                 seedFaces,
                 visitedFaces
@@ -1084,9 +1028,8 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
 (
     const SourcePatch& srcPatch,
     const TargetPatch& tgtPatch,
-    const searchableSurface& surf,
-    const faceAreaIntersect::triangulationMode& triMode,
-    const bool projectPoints
+    const autoPtr<searchableSurface>& surfPtr,
+    const faceAreaIntersect::triangulationMode& triMode
 )
 :
     srcAddress_(),
@@ -1095,24 +1038,74 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     tgtWeights_(),
     startSeedI_(0),
     triMode_(triMode),
-    projectPoints_(projectPoints),
     srcMapPtr_(NULL),
     tgtMapPtr_(NULL)
 {
     label srcSize = returnReduce(srcPatch.size(), sumOp<label>());
     label tgtSize = returnReduce(tgtPatch.size(), sumOp<label>());
 
-    Info<< "AMI: Creating interpolation addressing and weights" << nl
-        << "    Source faces = " << srcSize << nl
-        << "    Target faces = " << tgtSize << endl;
+    Info<< "AMI: Creating addressing and weights between "
+        << srcSize << " source faces and " << tgtSize << " target faces"
+        << endl;
 
-    if (debug)
+    if (surfPtr.valid())
     {
-        writePatch(srcPatch, "VTK", "source");
-        writePatch(tgtPatch, "VTK", "target");
-    }
+        // create new patches for source and target
+        pointField srcPoints = srcPatch.points();
+        primitivePatch srcPatch0
+        (
+            SubList<face>
+            (
+                srcPatch,
+                srcPatch.size(),
+                0
+            ),
+            srcPoints
+        );
 
-    update(srcPatch, tgtPatch, surf);
+        if (debug)
+        {
+            OFstream os("amiSrcPoints.obj");
+            forAll(srcPoints, i)
+            {
+                meshTools::writeOBJ(os, srcPoints[i]);
+            }
+        }
+
+        pointField tgtPoints = tgtPatch.points();
+        primitivePatch tgtPatch0
+        (
+            SubList<face>
+            (
+                tgtPatch,
+                tgtPatch.size(),
+                0
+            ),
+            tgtPoints
+        );
+
+        if (debug)
+        {
+            OFstream os("amiTgtPoints.obj");
+            forAll(tgtPoints, i)
+            {
+                meshTools::writeOBJ(os, tgtPoints[i]);
+            }
+        }
+
+
+        // map source and target patches onto projection surface
+        projectPointsToSurface(surfPtr(), srcPoints);
+        projectPointsToSurface(surfPtr(), tgtPoints);
+
+
+        // calculate AMI interpolation
+        update(srcPatch0, tgtPatch0);
+    }
+    else
+    {
+        update(srcPatch, tgtPatch);
+    }
 }
 
 
@@ -1129,8 +1122,7 @@ template<class SourcePatch, class TargetPatch>
 void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
 (
     const primitivePatch& srcPatch,
-    const primitivePatch& tgtPatch,
-    const searchableSurface& surf
+    const primitivePatch& tgtPatch
 )
 {
     static label patchI = 0;
@@ -1180,7 +1172,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
 
 
         // calculate AMI interpolation
-        calcAddressing(srcPatch, newTgtPatch, surf);
+        calcAddressing(srcPatch, newTgtPatch);
 
         // Now
         // ~~~
@@ -1260,7 +1252,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
     {
         checkPatches(srcPatch, tgtPatch);
 
-        calcAddressing(srcPatch, tgtPatch, surf);
+        calcAddressing(srcPatch, tgtPatch);
 
         if (debug)
         {
