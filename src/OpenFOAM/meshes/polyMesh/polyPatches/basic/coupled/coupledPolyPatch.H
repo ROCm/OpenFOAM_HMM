@@ -156,15 +156,6 @@ protected:
             const pointField&
         );
 
-        //- Calculate typical tolerance per face. Is currently max distance
-        //  from face centre to any of the face vertices.
-        static scalarField calcFaceTol
-        (
-            const UList<face>& faces,
-            const pointField& points,
-            const pointField& faceCentres
-        );
-
         //- Get the number of vertices face f needs to be rotated such that
         //  its f[0] point aligns with given anchor (within tol).
         static label getRotation
@@ -331,6 +322,15 @@ public:
             labelList& faceMap,
             labelList& rotation
         ) const = 0;
+
+        //- Calculate typical tolerance per face. Is currently max distance
+        //  from face centre to any of the face vertices.
+        static scalarField calcFaceTol
+        (
+            const UList<face>& faces,
+            const pointField& points,
+            const pointField& faceCentres
+        );
 
         //- Write the polyPatch data as a dictionary
         virtual void write(Ostream&) const;

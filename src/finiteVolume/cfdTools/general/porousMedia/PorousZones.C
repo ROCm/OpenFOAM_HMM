@@ -138,6 +138,21 @@ void Foam::PorousZones<ZoneType>::addResistance(fvVectorMatrix& UEqn) const
 template<class ZoneType>
 void Foam::PorousZones<ZoneType>::addResistance
 (
+    fvVectorMatrix& UEqn,
+    const volScalarField& rho,
+    const volScalarField& mu
+) const
+{
+    forAll(*this, i)
+    {
+        this->operator[](i).addResistance(UEqn, rho, mu);
+    }
+}
+
+
+template<class ZoneType>
+void Foam::PorousZones<ZoneType>::addResistance
+(
     const fvVectorMatrix& UEqn,
     volTensorField& AU
 ) const

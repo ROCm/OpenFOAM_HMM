@@ -403,6 +403,7 @@ void Foam::decompositionMethod::calcCellCells
     forAll(cellCells, cellI)
     {
         nbrCells.clear();
+        nbrCells.insert(cellI);
 
         label& endIndex = cellCells.offsets()[cellI+1];
 

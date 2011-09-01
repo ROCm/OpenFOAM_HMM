@@ -159,6 +159,11 @@ void Foam::MarshakRadiationFvPatchScalarField::updateCoeffs()
         return;
     }
 
+    // Since we're inside initEvaluate/evaluate there might be processor
+    // comms underway. Change the tag we use.
+    int oldTag = UPstream::msgType();
+    UPstream::msgType() = oldTag+1;
+
     // Temperature field
     const scalarField& Tp =
         patch().lookupPatchField<volScalarField, scalar>(TName_);
@@ -174,6 +179,9 @@ void Foam::MarshakRadiationFvPatchScalarField::updateCoeffs()
 
     // Set value fraction
     valueFraction() = 1.0/(1.0 + gamma*patch().deltaCoeffs()/Ep);
+
+    // Restore tag
+    UPstream::msgType() = oldTag;
 
     mixedFvPatchScalarField::updateCoeffs();
 }

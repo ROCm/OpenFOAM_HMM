@@ -25,7 +25,7 @@ boundaryField
     {
         type            SRFVelocity;
         inletValue      uniform ( 0 0 -10 );
-        relative        yes;
+        relative        no;
         value           uniform ( 0 0 0 );
     }
     outlet
@@ -41,7 +41,7 @@ boundaryField
     {
         type            SRFVelocity;
         inletValue      uniform ( 0 0 0 );
-        relative        yes;
+        relative        no;
         value           uniform ( 0 0 0 );
     }
     cyclic_half0

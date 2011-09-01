@@ -9,6 +9,7 @@ namespace Foam
 
     label findOppositeWedge(const polyMesh&, const wedgePolyPatch&);
 
+    //- Check wedge orientation
     bool checkWedges
     (
         const polyMesh&,
@@ -16,6 +17,9 @@ namespace Foam
         const Vector<label>&,
         labelHashSet*
     );
+
+    //- Check 0th vertex on coupled faces
+    bool checkCoupledPoints(const polyMesh&, const bool report, labelHashSet*);
 
     label checkGeometry(const polyMesh& mesh, const bool allGeometry);
 }

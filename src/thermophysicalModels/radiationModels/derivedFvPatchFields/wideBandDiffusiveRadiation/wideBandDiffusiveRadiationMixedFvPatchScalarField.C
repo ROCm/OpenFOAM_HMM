@@ -155,6 +155,11 @@ updateCoeffs()
         return;
     }
 
+    // Since we're inside initEvaluate/evaluate there might be processor
+    // comms underway. Change the tag we use.
+    int oldTag = UPstream::msgType();
+    UPstream::msgType() = oldTag+1;
+
     const radiationModel& radiation =
         db().lookupObject<radiationModel>("radiationProperties");
 
@@ -229,6 +234,9 @@ updateCoeffs()
             refValue()[faceI] = 0.0; //not used
         }
     }
+
+    // Restore tag
+    UPstream::msgType() = oldTag;
 
     mixedFvPatchScalarField::updateCoeffs();
 }
