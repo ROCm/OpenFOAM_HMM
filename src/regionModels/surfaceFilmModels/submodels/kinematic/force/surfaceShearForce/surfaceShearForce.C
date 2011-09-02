@@ -110,7 +110,7 @@ tmp<fvVectorMatrix> surfaceShearForce::correct(volVectorField& U)
                 primaryReff.dimensions(),
                 symmTensor::zero
             ),
-            film.mappedPushedFieldPatchTypes<symmTensor>()
+            film.mappedFieldAndInternalPatchTypes<symmTensor>()
         );
 
         // map stress from primary region to film region
@@ -125,7 +125,7 @@ tmp<fvVectorMatrix> surfaceShearForce::correct(volVectorField& U)
         const volScalarField& rho = film.rho();
         tCs = Cf_*rho*mag(Up - U);
     }
-    
+
     dimensionedScalar d0("SMALL", delta.dimensions(), SMALL);
 
     // linear coeffs to apply to velocity
