@@ -170,7 +170,8 @@ public:
             //- Does the patch field perform the transformation
             virtual bool doTransform() const
             {
-                return !(cyclicAMIPatch_.parallel() || pTraits<Type>::rank == 0);
+                return
+                    !(cyclicAMIPatch_.parallel() || pTraits<Type>::rank == 0);
             }
 
             //- Return face transformation tensor
