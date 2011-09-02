@@ -194,7 +194,7 @@ updateCoeffs()
 
     ray.Qr().boundaryField()[patchI] += Iw*(n & ray.dAve());
 
-    scalarList temissivity = emissivity();
+    scalarField temissivity = emissivity();
 
     forAll(Iw, faceI)
     {
