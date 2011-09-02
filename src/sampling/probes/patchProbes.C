@@ -92,65 +92,60 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
         );
 
 
-        if (elementList_.empty())
+        forAll(probeLocations(), probeI)
         {
-            elementList_.setSize(probeLocations().size());
+            const point sample = probeLocations()[probeI];
 
-            forAll(probeLocations(), probeI)
+            scalar span = boundaryTree.bb().mag();
+
+            pointIndexHit info = boundaryTree.findNearest
+            (
+                sample,
+                Foam::sqr(span)
+            );
+
+            if (!info.hit())
             {
-                const point sample = probeLocations()[probeI];
-
-                scalar span = boundaryTree.bb().mag();
-
-                pointIndexHit info = boundaryTree.findNearest
+                info = boundaryTree.findNearest
                 (
                     sample,
-                    Foam::sqr(span)
+                    Foam::sqr(GREAT)
+                );
+            }
+
+            label faceI = boundaryTree.shapes().faceLabels()[info.index()];
+
+            const label patchi = bm.whichPatch(faceI);
+
+            if (isA<emptyPolyPatch>(bm[patchi]))
+            {
+                WarningIn
+                (
+                    " Foam::patchProbes::findElements(const fvMesh&)"
+                )
+                << " The sample point: " << sample
+                << " belongs to " << patchi
+                << " which is an empty patch. This is not permitted. "
+                << " This sample will not be included "
+                << endl;
+            }
+            else
+            {
+                const point& fc = mesh.faceCentres()[faceI];
+
+                directMappedPatchBase::nearInfo sampleInfo;
+
+                sampleInfo.first() = pointIndexHit
+                (
+                    true,
+                    fc,
+                    faceI
                 );
 
-                if (!info.hit())
-                {
-                    info = boundaryTree.findNearest
-                    (
-                        sample,
-                        Foam::sqr(GREAT)
-                    );
-                }
+                sampleInfo.second().first() = magSqr(fc-sample);
+                sampleInfo.second().second() = Pstream::myProcNo();
 
-                label faceI = boundaryTree.shapes().faceLabels()[info.index()];
-
-                const label patchi = bm.whichPatch(faceI);
-
-                if (isA<emptyPolyPatch>(bm[patchi]))
-                {
-                    WarningIn
-                    (
-                        " Foam::patchProbes::findElements(const fvMesh&)"
-                    )
-                    << " The sample point: " << sample
-                    << " belongs to " << patchi
-                    << " which is an empty patch. This is not permitted. "
-                    << " This sample will not be included "
-                    << endl;
-                }
-                else
-                {
-                    const point& fc = mesh.faceCentres()[faceI];
-
-                    directMappedPatchBase::nearInfo sampleInfo;
-
-                    sampleInfo.first() = pointIndexHit
-                    (
-                        true,
-                        fc,
-                        faceI
-                    );
-
-                    sampleInfo.second().first() = magSqr(fc-sample);
-                    sampleInfo.second().second() = Pstream::myProcNo();
-
-                    nearest[probeI]= sampleInfo;
-                }
+                nearest[probeI]= sampleInfo;
             }
         }
     }
@@ -171,25 +166,21 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
             Info<< "    " << sampleI << " coord:"<< operator[](sampleI)
                 << " found on processor:" << procI
                 << " in local cell/face:" << localI
-                << " with cc:" << nearest[sampleI].first().rawPoint() << endl;
+                << " with fc:" << nearest[sampleI].first().rawPoint() << endl;
         }
     }
 
-    // Check if all patchProbes have been found.
+
+    // Extract any local faces to sample
+    elementList_.setSize(nearest.size(), -1);
+
     forAll(nearest, sampleI)
     {
-        label localI = -1;
         if (nearest[sampleI].second().second() == Pstream::myProcNo())
         {
-            localI = nearest[sampleI].first().index();
+            // Store the face to sample
+            elementList_[sampleI] = nearest[sampleI].first().index();
         }
-
-        if (elementList_.empty())
-        {
-             elementList_.setSize(probeLocations().size());
-        }
-
-        elementList_[sampleI] = localI;
     }
 }
 
@@ -206,6 +197,12 @@ Foam::patchProbes::patchProbes
 :
     probes(name, obr, dict, loadFromFiles)
 {
+    // When constructing probes above it will have called the
+    // probes::findElements (since the virtual mechanism not yet operating).
+    // Not easy to workaround (apart from feeding through flag into constructor)
+    // so clear out any cells found for now.
+    elementList_.clear();
+
     read(dict);
 }
 
@@ -230,6 +227,7 @@ void Foam::patchProbes::write()
 
 void Foam::patchProbes::read(const dictionary& dict)
 {
+    dict.lookup("patchName") >> patchName_;
     probes::read(dict);
 }
 
