@@ -206,7 +206,7 @@ public:
         }
 
         //- Cells to be probed (obtained from the locations)
-        const labelList& elemets() const
+        const labelList& elements() const
         {
             return elementList_;
         }

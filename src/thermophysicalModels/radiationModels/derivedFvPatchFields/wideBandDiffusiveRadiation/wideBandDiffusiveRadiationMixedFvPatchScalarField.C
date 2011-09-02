@@ -194,7 +194,7 @@ updateCoeffs()
         dom.blackBody().bLambda(lambdaId).boundaryField()[patchI]
     );
 
-    scalarList temissivity = emissivity();
+    scalarField temissivity = emissivity();
 
     forAll(Iw, faceI)
     {
