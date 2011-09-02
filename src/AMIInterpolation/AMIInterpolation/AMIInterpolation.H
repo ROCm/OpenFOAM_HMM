@@ -287,6 +287,14 @@ public:
         (
             const SourcePatch& srcPatch,
             const TargetPatch& tgtPatch,
+            const faceAreaIntersect::triangulationMode& triMode
+        );
+
+        //- Construct from components, with projection surface
+        AMIInterpolation
+        (
+            const SourcePatch& srcPatch,
+            const TargetPatch& tgtPatch,
             const autoPtr<searchableSurface>& surf,
             const faceAreaIntersect::triangulationMode& triMode
         );

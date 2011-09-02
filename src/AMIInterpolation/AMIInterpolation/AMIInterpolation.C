@@ -1028,6 +1028,34 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
 (
     const SourcePatch& srcPatch,
     const TargetPatch& tgtPatch,
+    const faceAreaIntersect::triangulationMode& triMode
+)
+:
+    srcAddress_(),
+    srcWeights_(),
+    tgtAddress_(),
+    tgtWeights_(),
+    startSeedI_(0),
+    triMode_(triMode),
+    srcMapPtr_(NULL),
+    tgtMapPtr_(NULL)
+{
+    label srcSize = returnReduce(srcPatch.size(), sumOp<label>());
+    label tgtSize = returnReduce(tgtPatch.size(), sumOp<label>());
+
+    Info<< "AMI: Creating addressing and weights between "
+        << srcSize << " source faces and " << tgtSize << " target faces"
+        << endl;
+
+    update(srcPatch, tgtPatch);
+}
+
+
+template<class SourcePatch, class TargetPatch>
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
+(
+    const SourcePatch& srcPatch,
+    const TargetPatch& tgtPatch,
     const autoPtr<searchableSurface>& surfPtr,
     const faceAreaIntersect::triangulationMode& triMode
 )
