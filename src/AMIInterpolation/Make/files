@@ -1,13 +1,21 @@
 AMIInterpolationName.C
 faceAreaIntersect/faceAreaIntersect.C
 
-patches/cyclicAMILduInterfaceField/cyclicAMILduInterface.C
-patches/cyclicAMILduInterfaceField/cyclicAMILduInterfaceField.C
+CYCPATCHES=patches/cyclic
+$(CYCPATCHES)/cyclicAMILduInterfaceField/cyclicAMILduInterface.C
+$(CYCPATCHES)/cyclicAMILduInterfaceField/cyclicAMILduInterfaceField.C
+$(CYCPATCHES)/cyclicAMIPolyPatch/cyclicAMIPolyPatch.C
+$(CYCPATCHES)/cyclicAMIFvPatch/cyclicAMIFvPatch.C
+$(CYCPATCHES)/cyclicAMIFvPatchField/cyclicAMIFvPatchFields.C
+$(CYCPATCHES)/cyclicAMIFvsPatchField/cyclicAMIFvsPatchFields.C
+$(CYCPATCHES)/cyclicAMIPointPatch/cyclicAMIPointPatch.C
 
-patches/cyclicAMIPolyPatch/cyclicAMIPolyPatch.C
-patches/cyclicAMIFvPatch/cyclicAMIFvPatch.C
-patches/cyclicAMIFvPatchField/cyclicAMIFvPatchFields.C
-patches/cyclicAMIFvsPatchField/cyclicAMIFvsPatchFields.C
-patches/cyclicAMIPointPatch/cyclicAMIPointPatch.C
+MAPPATCHES=patches/mapped
+$(MAPPATCHES)/mappedPolyPatch/mappedPatchBase.C
+$(MAPPATCHES)/mappedPolyPatch/mappedPolyPatch.C
+$(MAPPATCHES)/mappedFvPatch/mappedFvPatch.C
+$(MAPPATCHES)/mappedFixedValue/mappedFixedValueFvPatchFields.C
+$(MAPPATCHES)/mappedFixedInternalValue/mappedFixedInternalValueFvPatchFields.C
+$(MAPPATCHES)/mappedFixedPushedInternalValue/mappedFixedPushedInternalValueFvPatchFields.C
 
 LIB = $(FOAM_USER_LIBBIN)/libAMIInterpolation
