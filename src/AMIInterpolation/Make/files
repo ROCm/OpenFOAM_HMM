@@ -1,4 +1,4 @@
-AMIInterpolationName.C
+AMIInterpolation/AMIInterpolationName.C
 faceAreaIntersect/faceAreaIntersect.C
 
 CYCPATCHES=patches/cyclic
