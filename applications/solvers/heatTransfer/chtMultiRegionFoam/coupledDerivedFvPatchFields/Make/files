@@ -1,3 +1,0 @@
-externalWallHeatFluxTemperature/externalWallHeatFluxTemperatureFvPatchScalarField.C
-
-LIB = $(FOAM_LIBBIN)/libcoupledDerivedFvPatchFields

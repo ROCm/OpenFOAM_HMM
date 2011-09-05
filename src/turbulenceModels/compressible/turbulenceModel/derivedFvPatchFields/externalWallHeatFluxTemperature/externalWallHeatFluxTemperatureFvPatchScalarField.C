@@ -202,17 +202,16 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
         return;
     }
 
+    scalarField q(size(), 0.0);
+    scalarField KDelta = K(*this)*patch().deltaCoeffs();
+
     if (oldMode_ == fixedHeatFlux)
     {
-        this->refGrad() = q_/K(*this);
-        this->refValue() = 0.0;
-        this->valueFraction() = 0.0;
+        q = q_;
     }
     else if(oldMode_ == fixedHeatTransferCoeff)
     {
-        this->refGrad() = (Ta_ - *this)*h_/K(*this);
-        this->refValue() = 0.0;
-        this->valueFraction() = 0.0;
+        q = (Ta_ - *this)*h_;
     }
     else
     {
@@ -222,6 +221,22 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
             "::updateCoeffs()"
         )   << "Illegal mode " << operationModeNames[oldMode_]
             << exit(FatalError);
+    }
+
+    forAll (*this, i)
+    {
+        if (q[i] > 0) //in
+        {
+            this->refGrad()[i] = q[i]/K(*this)()[i];
+            this->refValue()[i] = 0.0;
+            this->valueFraction()[i] = 0.0;
+        }
+        else //out
+        {
+            this->refGrad()[i] = 0.0;
+            this->refValue()[i] = KDelta[i]*q[i] + patchInternalField()()[i];
+            this->valueFraction()[i] = 1.0;
+        }
     }
 
     mixedFvPatchScalarField::updateCoeffs();
