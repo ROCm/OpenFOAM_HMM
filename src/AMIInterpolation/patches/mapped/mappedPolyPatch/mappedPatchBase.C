@@ -48,11 +48,12 @@ namespace Foam
     const char* Foam::NamedEnum
     <
         Foam::mappedPatchBase::sampleMode,
-        3
+        4
     >::names[] =
     {
         "nearestCell",
         "nearestPatchFace",
+        "nearestPatchFaceAMI",
         "nearestFace"
     };
 
@@ -70,7 +71,7 @@ namespace Foam
 }
 
 
-const Foam::NamedEnum<Foam::mappedPatchBase::sampleMode, 3>
+const Foam::NamedEnum<Foam::mappedPatchBase::sampleMode, 4>
     Foam::mappedPatchBase::sampleModeNames_;
 
 const Foam::NamedEnum<Foam::mappedPatchBase::offsetMode, 3>
@@ -432,7 +433,6 @@ void Foam::mappedPatchBase::calcMapping() const
     }
 
 
-
     // Get global list of all samples and the processor and face they come from.
     pointField samples;
     labelList patchFaceProcs;
@@ -572,7 +572,7 @@ void Foam::mappedPatchBase::calcMapping() const
 const Foam::autoPtr<Foam::searchableSurface>& Foam::mappedPatchBase::surfPtr()
 const
 {
-    word surfType(surfDict_.lookup("type"));
+    const word surfType(surfDict_.lookupOrDefault<word>("type", "none"));
 
     if (!surfPtr_.valid() && surfType != "none")
     {
@@ -610,9 +610,11 @@ void Foam::mappedPatchBase::calcAMI() const
     }
 
     AMIPtr_.clear();
-
+/*
     const polyPatch& nbr = samplePolyPatch();
-    pointField nbrPoints(samplePoints());
+
+//    pointField nbrPoints(samplePoints());
+    pointField nbrPoints(nbr.localPoints());
 
     if (debug)
     {
@@ -639,14 +641,14 @@ void Foam::mappedPatchBase::calcAMI() const
         OFstream osO(patch_.name() + "_ownerPatch.obj");
         meshTools::writeOBJ(osO, patch_.localFaces(), patch_.localPoints());
     }
-
+*/
     // Construct/apply AMI interpolation to determine addressing and weights
     AMIPtr_.reset
     (
         new AMIPatchToPatchInterpolation
         (
             patch_,
-            nbrPatch0,
+            samplePolyPatch(), // nbrPatch0,
             surfPtr(),
             faceAreaIntersect::tmMesh
         )

@@ -13,9 +13,15 @@ $(CYCPATCHES)/cyclicAMIPointPatch/cyclicAMIPointPatch.C
 MAPPATCHES=patches/mapped
 $(MAPPATCHES)/mappedPolyPatch/mappedPatchBase.C
 $(MAPPATCHES)/mappedPolyPatch/mappedPolyPatch.C
+$(MAPPATCHES)/mappedPolyPatch/mappedWallPolyPatch.C
+$(MAPPATCHES)/mappedPolyPatch/mappedVariableThicknessWallPolyPatch.C
+$(MAPPATCHES)/mappedPolyPatch/mappedWallPointPatch.C
 $(MAPPATCHES)/mappedFvPatch/mappedFvPatch.C
+$(MAPPATCHES)/mappedFvPatch/mappedWallFvPatch.C
 $(MAPPATCHES)/mappedFixedValue/mappedFixedValueFvPatchFields.C
 $(MAPPATCHES)/mappedFixedInternalValue/mappedFixedInternalValueFvPatchFields.C
 $(MAPPATCHES)/mappedFixedPushedInternalValue/mappedFixedPushedInternalValueFvPatchFields.C
+
+$(MAPPATCHES)/mappedField/mappedFieldFvPatchFields.C
 
 LIB = $(FOAM_USER_LIBBIN)/libAMIInterpolation

@@ -319,8 +319,10 @@ void mappedFixedValueFvPatchField<Type>::updateCoeffs()
             }
 
             const fieldType& nbrField = sampleField();
+            newValues = nbrField.boundaryField()[nbrPatchID];
 
-            newValues = mpp.AMI().interpolateToSource(nbrField);
+            newValues = mpp.AMI().interpolateToSource(newValues);
+
             break;
         }
         case mappedPatchBase::NEARESTFACE:

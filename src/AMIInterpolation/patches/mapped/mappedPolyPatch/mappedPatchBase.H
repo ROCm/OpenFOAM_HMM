@@ -95,10 +95,10 @@ public:
         //- Mesh items to sample
         enum sampleMode
         {
-            NEARESTCELL,        // nearest cell
-            NEARESTPATCHFACE,   // faces on selected patch
-            NEARESTFACE,        // nearest face
-            NEARESTPATCHFACEAMI // nearest patch face + AMI interpolation
+            NEARESTCELL,         // nearest cell
+            NEARESTPATCHFACE,    // faces on selected patch
+            NEARESTPATCHFACEAMI, // nearest patch face + AMI interpolation
+            NEARESTFACE          // nearest face
         };
 
         //- How to project face centres
@@ -143,7 +143,7 @@ private:
 
     // Private data
 
-        static const NamedEnum<sampleMode, 3> sampleModeNames_;
+        static const NamedEnum<sampleMode, 4> sampleModeNames_;
 
         static const NamedEnum<offsetMode, 3> offsetModeNames_;
 
@@ -316,6 +316,24 @@ public:
         {
             return offsets_;
         }
+
+        template<class Type>
+        void distribute(List<Type>& lst) const
+        {
+            switch (mode_)
+            {
+                case NEARESTPATCHFACEAMI:
+                {
+                    lst = AMI().interpolateToSource(Field<Type>(lst.xfer()));
+                    break;
+                }
+                default:
+                {
+                    map().distribute(lst);
+                }
+            }
+        }
+  
 
         //- Return reference to the parallel distribution map
         const mapDistribute& map() const
