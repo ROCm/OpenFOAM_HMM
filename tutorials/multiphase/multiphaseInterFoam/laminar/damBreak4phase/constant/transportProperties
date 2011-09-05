@@ -46,8 +46,6 @@ phases
      }
 );
 
-refPhase        air;
-
 sigmas
 (
     (air water) 0.07
