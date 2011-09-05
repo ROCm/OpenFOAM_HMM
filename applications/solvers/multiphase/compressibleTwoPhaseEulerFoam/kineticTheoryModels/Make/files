@@ -30,4 +30,4 @@ frictionalStressModel/frictionalStressModel/newFrictionalStressModel.C
 frictionalStressModel/JohnsonJackson/JohnsonJacksonFrictionalStress.C
 frictionalStressModel/Schaeffer/SchaefferFrictionalStress.C
 
-LIB = $(FOAM_USER_LIBBIN)/libcompressibleKineticTheoryModel
+LIB = $(FOAM_LIBBIN)/libcompressibleKineticTheoryModel

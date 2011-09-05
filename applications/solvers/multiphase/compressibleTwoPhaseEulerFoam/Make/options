@@ -8,7 +8,6 @@ EXE_INC = \
     -Iaveraging
 
 EXE_LIBS = \
-    -L$(FOAM_USER_LIBBIN) \
     -lincompressibleTransportModels \
     -lcompressiblePhaseModel \
     -lcompressibleEulerianInterfacialModels \
