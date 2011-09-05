@@ -136,10 +136,6 @@ private:
         //- Dictionary of phases
         PtrDictionary<phase> phases_;
 
-        //- The phase chosen as reference, the one which is derived from
-        //  the others such thatr they sum to 1
-        phase& refPhase_;
-
         const fvMesh& mesh_;
         const volVectorField& U_;
         const surfaceScalarField& phi_;
