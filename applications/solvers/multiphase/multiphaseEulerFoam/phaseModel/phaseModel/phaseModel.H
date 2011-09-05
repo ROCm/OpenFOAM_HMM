@@ -122,7 +122,10 @@ public:
             autoPtr<phaseModel> operator()(Istream& is) const
             {
                 dictionaryEntry ent(dictionary::null, is);
-                return autoPtr<phaseModel>(new phaseModel(ent.keyword(), ent, mesh_));
+                return autoPtr<phaseModel>
+                (
+                    new phaseModel(ent.keyword(), ent, mesh_)
+                );
             }
         };
 

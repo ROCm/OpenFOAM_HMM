@@ -88,8 +88,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given multiphaseFixedFluxPressureFvPatchScalarField onto
-        //  a new patch
+        //- Construct by mapping given
+        //  multiphaseFixedFluxPressureFvPatchScalarField onto a new patch
         multiphaseFixedFluxPressureFvPatchScalarField
         (
             const multiphaseFixedFluxPressureFvPatchScalarField&,

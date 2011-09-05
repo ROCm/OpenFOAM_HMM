@@ -96,7 +96,8 @@ void Foam::multiphaseSystem::solveAlphas()
             surfaceScalarField phir
             (
                 (phase1.phi() - phase2.phi())
-              + min(cAlpha(phase1, phase2)*phic, max(phic))*nHatf(phase1, phase2)
+              + min(cAlpha(phase1, phase2)*phic, max(phic))
+               *nHatf(phase1, phase2)
             );
 
             phiAlphaCorr += fvc::flux

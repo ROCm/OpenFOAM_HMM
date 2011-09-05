@@ -233,7 +233,11 @@ private:
             surfaceVectorField::GeometricBoundaryField& nHatb
         ) const;
 
-        tmp<volScalarField> K(const phaseModel& alpha1, const phaseModel& alpha2) const;
+        tmp<volScalarField> K
+        (
+            const phaseModel& alpha1,
+            const phaseModel& alpha2
+        ) const;
 
 
 public:

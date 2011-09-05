@@ -62,8 +62,10 @@
         mrfZones.relativeFlux(phase.phi());
         phase.phi() += rAlphaAUfs[phasei]*(g & mesh.Sf());
 
-        multiphaseSystem::dragModelTable::const_iterator dmIter = fluid.dragModels().begin();
-        multiphaseSystem::dragCoeffFields::const_iterator dcIter = dragCoeffs().begin();
+        multiphaseSystem::dragModelTable::const_iterator dmIter =
+            fluid.dragModels().begin();
+        multiphaseSystem::dragCoeffFields::const_iterator dcIter =
+            dragCoeffs().begin();
         for
         (
             ;
@@ -84,15 +86,23 @@
 
                     if
                     (
-                        (&phase == &dmIter()->phase1() && &phase2 == &dmIter()->phase2())
-                     || (&phase == &dmIter()->phase2() && &phase2 == &dmIter()->phase1())
+                        (
+                            &phase == &dmIter()->phase1()
+                         && &phase2 == &dmIter()->phase2()
+                        )
+                     || (
+                            &phase == &dmIter()->phase2()
+                         && &phase2 == &dmIter()->phase1()
+                        )
                     ) break;
 
                     phasej++;
                 }
 
                 phase.phi() +=
-                    fvc::interpolate((1.0/phase.rho())*rAUs[phasei]*(*dcIter()))*phi0s[phasej];
+                    fvc::interpolate
+                    ((1.0/phase.rho())*rAUs[phasei]*(*dcIter()))
+                   *phi0s[phasej];
             }
         }
 
@@ -182,8 +192,10 @@
                       + rAlphaAUfs[phasei]*mSfGradp/phase.rho()
                     );
 
-                multiphaseSystem::dragModelTable::const_iterator dmIter = fluid.dragModels().begin();
-                multiphaseSystem::dragCoeffFields::const_iterator dcIter = dragCoeffs().begin();
+                multiphaseSystem::dragModelTable::const_iterator dmIter =
+                    fluid.dragModels().begin();
+                multiphaseSystem::dragCoeffFields::const_iterator dcIter =
+                    dragCoeffs().begin();
                 for
                 (
                     ;
@@ -204,14 +216,22 @@
 
                             if
                             (
-                                (&phase == &dmIter()->phase1() && &phase2 == &dmIter()->phase2())
-                             || (&phase == &dmIter()->phase2() && &phase2 == &dmIter()->phase1())
+                                (
+                                    &phase == &dmIter()->phase1()
+                                 && &phase2 == &dmIter()->phase2()
+                                )
+                             || (
+                                    &phase == &dmIter()->phase2()
+                                 && &phase2 == &dmIter()->phase1()
+                                 )
                             ) break;
 
                             phasej++;
                         }
 
-                        phase.U() += (1.0/phase.rho())*rAUs[phasei]*(*dcIter())*U0s[phasej];
+                        phase.U() +=
+                            (1.0/phase.rho())
+                           *rAUs[phasei]*(*dcIter())*U0s[phasej];
                     }
                 }
 

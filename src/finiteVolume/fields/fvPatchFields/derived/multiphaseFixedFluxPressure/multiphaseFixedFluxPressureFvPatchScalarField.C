@@ -31,7 +31,8 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::multiphaseFixedFluxPressureFvPatchScalarField::multiphaseFixedFluxPressureFvPatchScalarField
+Foam::multiphaseFixedFluxPressureFvPatchScalarField::
+multiphaseFixedFluxPressureFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -44,7 +45,8 @@ Foam::multiphaseFixedFluxPressureFvPatchScalarField::multiphaseFixedFluxPressure
 {}
 
 
-Foam::multiphaseFixedFluxPressureFvPatchScalarField::multiphaseFixedFluxPressureFvPatchScalarField
+Foam::multiphaseFixedFluxPressureFvPatchScalarField::
+multiphaseFixedFluxPressureFvPatchScalarField
 (
     const multiphaseFixedFluxPressureFvPatchScalarField& ptf,
     const fvPatch& p,
@@ -59,7 +61,8 @@ Foam::multiphaseFixedFluxPressureFvPatchScalarField::multiphaseFixedFluxPressure
 {}
 
 
-Foam::multiphaseFixedFluxPressureFvPatchScalarField::multiphaseFixedFluxPressureFvPatchScalarField
+Foam::multiphaseFixedFluxPressureFvPatchScalarField::
+multiphaseFixedFluxPressureFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -85,7 +88,8 @@ Foam::multiphaseFixedFluxPressureFvPatchScalarField::multiphaseFixedFluxPressure
 }
 
 
-Foam::multiphaseFixedFluxPressureFvPatchScalarField::multiphaseFixedFluxPressureFvPatchScalarField
+Foam::multiphaseFixedFluxPressureFvPatchScalarField::
+multiphaseFixedFluxPressureFvPatchScalarField
 (
     const multiphaseFixedFluxPressureFvPatchScalarField& wbppsf
 )
@@ -97,7 +101,8 @@ Foam::multiphaseFixedFluxPressureFvPatchScalarField::multiphaseFixedFluxPressure
 {}
 
 
-Foam::multiphaseFixedFluxPressureFvPatchScalarField::multiphaseFixedFluxPressureFvPatchScalarField
+Foam::multiphaseFixedFluxPressureFvPatchScalarField::
+multiphaseFixedFluxPressureFvPatchScalarField
 (
     const multiphaseFixedFluxPressureFvPatchScalarField& wbppsf,
     const DimensionedField<scalar, volMesh>& iF
@@ -145,7 +150,10 @@ void Foam::multiphaseFixedFluxPressureFvPatchScalarField::updateCoeffs()
 }
 
 
-void Foam::multiphaseFixedFluxPressureFvPatchScalarField::write(Ostream& os) const
+void Foam::multiphaseFixedFluxPressureFvPatchScalarField::write
+(
+    Ostream& os
+) const
 {
     fvPatchScalarField::write(os);
     writeEntryIfDifferent<word>(os, "U", "U", UName_);
