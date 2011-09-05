@@ -199,7 +199,8 @@
                 for
                 (
                     ;
-                    dmIter != fluid.dragModels().end() && dcIter != dragCoeffs().end();
+                    dmIter != fluid.dragModels().end()
+                 && dcIter != dragCoeffs().end();
                     ++dmIter, ++dcIter
                 )
                 {
@@ -210,7 +211,12 @@
                     )
                     {
                         int phasej = 0;
-                        forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter2)
+                        forAllIter
+                        (
+                            PtrDictionary<phaseModel>,
+                            fluid.phases(),
+                            iter2
+                        )
                         {
                             phaseModel& phase2 = iter2();
 

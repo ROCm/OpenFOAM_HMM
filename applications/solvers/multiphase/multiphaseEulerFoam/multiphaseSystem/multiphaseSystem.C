@@ -195,7 +195,8 @@ Foam::dimensionedScalar Foam::multiphaseSystem::sigma
     {
         FatalErrorIn
         (
-            "multiphaseSystem::sigma(const phaseModel& phase1, const phaseModel& phase2) const"
+            "multiphaseSystem::sigma(const phaseModel& phase1,"
+            "const phaseModel& phase2) const"
         )   << "Cannot find interface " << interfacePair(phase1, phase2)
             << " in list of sigma values"
             << exit(FatalError);
@@ -220,7 +221,8 @@ Foam::scalar Foam::multiphaseSystem::cAlpha
     {
         FatalErrorIn
         (
-            "multiphaseSystem::cAlpha(const phaseModel& phase1, const phaseModel& phase2) const"
+            "multiphaseSystem::cAlpha"
+            "(const phaseModel& phase1, const phaseModel& phase2) const"
         )   << "Cannot find interface " << interfacePair(phase1, phase2)
             << " in list of cAlpha values"
             << exit(FatalError);
@@ -255,7 +257,8 @@ Foam::dimensionedScalar Foam::multiphaseSystem::Cvm
 
     FatalErrorIn
     (
-        "multiphaseSystem::sigma(const phaseModel& phase1, const phaseModel& phase2) const"
+        "multiphaseSystem::sigma"
+        "(const phaseModel& phase1, const phaseModel& phase2) const"
     )   << "Cannot find interface " << interfacePair(phase1, phase2)
         << " in list of sigma values"
         << exit(FatalError);
