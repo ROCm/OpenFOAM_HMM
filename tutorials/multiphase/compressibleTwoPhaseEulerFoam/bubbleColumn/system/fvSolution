@@ -94,7 +94,6 @@ PIMPLE
     nCorrectors     2;
     nNonOrthogonalCorrectors 0;
     nAlphaCorr      2;
-    correctAlpha    yes;
 }
 
 relaxationFactors
