@@ -148,7 +148,7 @@ void Foam::mappedFixedInternalValueFvPatchField<Type>::updateCoeffs()
         }
     }
 
-    // Assign (this) patch internal field to its neighbour values
+    // Assign to (this) patch internal field its neighbour values
     Field<Type>& intFld = const_cast<Field<Type>&>(this->internalField());
     UIndirectList<Type>(intFld, this->patch().faceCells()) = nbrIntFld;
 }

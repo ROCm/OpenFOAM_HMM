@@ -33,9 +33,12 @@ Description
         sampleRegion region0;
 
         // What to sample:
-        // - nearestCell : sample nearest cell
-        // - nearestPatchFace : nearest face on selected patch
-        // - nearestFace : nearest boundary face on any patch
+        // - nearestCell         : sample nearest cell
+        // - nearestPatchFace    : nearest face on selected patch
+        // - nearestPatchFaceAMI : nearest face on selected patch
+                                   - patches need not conform
+                                   - uses AMI interpolation
+        // - nearestFace         : nearest boundary face on any patch
         sampleMode nearestCell;
 
         // If sampleMod is nearestPatchFace : patch to find faces of
@@ -82,7 +85,7 @@ class polyMesh;
 class mapDistribute;
 
 /*---------------------------------------------------------------------------*\
-                    Class mappedPatchBase Declaration
+                       Class mappedPatchBase Declaration
 \*---------------------------------------------------------------------------*/
 
 class mappedPatchBase
@@ -317,6 +320,7 @@ public:
             return offsets_;
         }
 
+        //- Wrapper around map/interpolate data distribution
         template<class Type>
         void distribute(List<Type>& lst) const
         {
@@ -342,6 +346,7 @@ public:
             {
                 calcMapping();
             }
+
             return mapPtr_();
         }
 

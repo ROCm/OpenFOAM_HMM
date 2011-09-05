@@ -995,7 +995,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
         scalar s = sum(wght[faceI]);
         wghtSum[faceI] = s;
 
-        scalar t = s/patch[faceI].mag(patch.points());
+        scalar t = s/patch[faceI].mag(patch.localPoints());
         if (t < minBound)
         {
             minBound = t;
@@ -1309,9 +1309,11 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
         FatalErrorIn
         (
             "AMIInterpolation::interpolateToSource(const Field<Type>) const"
-        )   << "Supplied field size is not equal to target patch size. "
-            << "Target patch = " << tgtAddress_.size() << ", supplied field = "
-            << fld.size() << abort(FatalError);
+        )   << "Supplied field size is not equal to target patch size" << nl
+            << "    source patch   = " << srcAddress_.size() << nl
+            << "    target patch   = " << tgtAddress_.size() << nl
+            << "    supplied field = " << fld.size()
+            << abort(FatalError);
     }
 
     tmp<Field<Type> > tresult
@@ -1386,10 +1388,12 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
     {
         FatalErrorIn
         (
-            "AMIInterpolation::interpolateToSource(const Field<Type>&) const"
-        )   << "Supplied field size is not equal to source patch size. "
-            << "Source patch = " << srcAddress_.size() << ", supplied field = "
-            << fld.size() << abort(FatalError);
+            "AMIInterpolation::interpolateToTarget(const Field<Type>&) const"
+        )   << "Supplied field size is not equal to source patch size" << nl
+            << "    source patch   = " << srcAddress_.size() << nl
+            << "    target patch   = " << tgtAddress_.size() << nl
+            << "    supplied field = " << fld.size()
+            << abort(FatalError);
     }
 
     tmp<Field<Type> > tresult

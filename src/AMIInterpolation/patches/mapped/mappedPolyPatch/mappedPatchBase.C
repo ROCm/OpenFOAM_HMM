@@ -672,7 +672,10 @@ Foam::mappedPatchBase::mappedPatchBase
     offsets_(pp.size(), offset_),
     distance_(0),
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
-    mapPtr_(NULL)
+    mapPtr_(NULL),
+    AMIPtr_(NULL),
+    surfPtr_(NULL),
+    surfDict_(dictionary::null)
 {}
 
 
@@ -694,7 +697,10 @@ Foam::mappedPatchBase::mappedPatchBase
     offsets_(offsets),
     distance_(0),
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
-    mapPtr_(NULL)
+    mapPtr_(NULL),
+    AMIPtr_(NULL),
+    surfPtr_(NULL),
+    surfDict_(dictionary::null)
 {}
 
 
@@ -716,7 +722,10 @@ Foam::mappedPatchBase::mappedPatchBase
     offsets_(0),
     distance_(0),
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
-    mapPtr_(NULL)
+    mapPtr_(NULL),
+    AMIPtr_(NULL),
+    surfPtr_(NULL),
+    surfDict_(dictionary::null)
 {}
 
 
@@ -738,7 +747,10 @@ Foam::mappedPatchBase::mappedPatchBase
     offsets_(0),
     distance_(distance),
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
-    mapPtr_(NULL)
+    mapPtr_(NULL),
+    AMIPtr_(NULL),
+    surfPtr_(NULL),
+    surfDict_(dictionary::null)
 {}
 
 
@@ -810,8 +822,8 @@ Foam::mappedPatchBase::mappedPatchBase
         (
             "mappedPatchBase::mappedPatchBase\n"
             "(\n"
-            "    const polyPatch& pp,\n"
-            "    const dictionary& dict\n"
+            "    const polyPatch&,\n"
+            "    const dictionary&\n"
             ")\n",
             dict
         )   << "Please supply the offsetMode as one of "
@@ -899,7 +911,7 @@ const Foam::polyPatch& Foam::mappedPatchBase::samplePolyPatch() const
 
     if (patchI == -1)
     {
-        FatalErrorIn("mappedPatchBase::samplePolyPatch() ")
+        FatalErrorIn("mappedPatchBase::samplePolyPatch()")
             << "Cannot find patch " << samplePatch_
             << " in region " << sampleRegion_ << endl
             << "Valid patches are " << nbrMesh.boundaryMesh().names()
@@ -915,20 +927,18 @@ Foam::tmp<Foam::pointField> Foam::mappedPatchBase::samplePoints() const
     tmp<pointField> tfld(new pointField(patch_.faceCentres()));
     pointField& fld = tfld();
 
-    switch(offsetMode_)
+    switch (offsetMode_)
     {
         case UNIFORM:
         {
             fld += offset_;
+            break;
         }
-        break;
-
         case NONUNIFORM:
         {
             fld += offsets_;
+            break;
         }
-        break;
-
         case NORMAL:
         {
             // Get outwards pointing normal
@@ -936,8 +946,8 @@ Foam::tmp<Foam::pointField> Foam::mappedPatchBase::samplePoints() const
             n /= mag(n);
 
             fld += distance_*n;
+            break;
         }
-        break;
     }
 
     return tfld;
@@ -956,27 +966,25 @@ void Foam::mappedPatchBase::write(Ostream& os) const
     os.writeKeyword("offsetMode") << offsetModeNames_[offsetMode_]
         << token::END_STATEMENT << nl;
 
-    switch(offsetMode_)
+    switch (offsetMode_)
     {
         case UNIFORM:
         {
             os.writeKeyword("offset") << offset_ << token::END_STATEMENT << nl;
+            break;
         }
-        break;
-
         case NONUNIFORM:
         {
             os.writeKeyword("offsets") << offsets_ << token::END_STATEMENT
                 << nl;
+            break;
         }
-        break;
-
         case NORMAL:
         {
             os.writeKeyword("distance") << distance_ << token::END_STATEMENT
                 << nl;
+            break;
         }
-        break;
     }
 }
 
