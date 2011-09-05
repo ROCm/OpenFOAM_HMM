@@ -927,6 +927,7 @@ void Foam::fvMatrix<Type>::operator=(const fvMatrix<Type>& fvmv)
             << abort(FatalError);
     }
 
+    dimensions_ = fvmv.dimensions_;
     lduMatrix::operator=(fvmv);
     source_ = fvmv.source_;
     internalCoeffs_ = fvmv.internalCoeffs_;
