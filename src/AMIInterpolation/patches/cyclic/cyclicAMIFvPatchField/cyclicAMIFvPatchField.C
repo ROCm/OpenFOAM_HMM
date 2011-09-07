@@ -210,6 +210,7 @@ template<class Type>
 void Foam::cyclicAMIFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
+    this->writeEntry("value", os);
 }
 
 
