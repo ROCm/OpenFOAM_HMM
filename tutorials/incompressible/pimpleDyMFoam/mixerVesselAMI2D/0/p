@@ -43,11 +43,13 @@ boundaryField
     AMI1
     {
         type            cyclicAMI;
+        value           $internalField;
     }
 
     AMI2
     {
         type            cyclicAMI;
+        value           $internalField;
     }
 }
 

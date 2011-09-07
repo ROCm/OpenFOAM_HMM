@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
+|  \\    /   O peration     | Version:  dev.olesenm                           |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -36,12 +36,13 @@ FoamFile
         startFace       6240;
         matchTolerance  0.0001;
         neighbourPatch  AMI2;
-        transform       translational;
-        separationVector (0 0 0);
-        surface         
+        transform       noOrdering;
+        surface
         {
-            type            triSurfaceMesh;
-            name            projectionSurface.stl;
+            type            searchableCylinder; // none
+            point1          (0 0 -1);
+            point2          (0 0 1);
+            radius          0.5;
         }
     }
     AMI2
@@ -51,12 +52,13 @@ FoamFile
         startFace       6336;
         matchTolerance  0.0001;
         neighbourPatch  AMI1;
-        transform       translational;
-        separationVector (0 0 0);
-        surface         
+        transform       noOrdering;
+        surface
         {
-            type            triSurfaceMesh;
-            name            projectionSurface.stl;
+            type            searchableCylinder; // none
+            point1          (0 0 -1);
+            point2          (0 0 1);
+            radius          0.5;
         }
     }
     front
