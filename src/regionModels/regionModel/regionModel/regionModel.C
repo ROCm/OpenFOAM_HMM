@@ -26,7 +26,7 @@ License
 #include "regionModel.H"
 #include "fvMesh.H"
 #include "Time.H"
-#include "directMappedWallPolyPatch.H"
+#include "mappedWallPolyPatch.H"
 #include "zeroGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -99,11 +99,11 @@ void Foam::regionModels::regionModel::initialise()
     forAll(rbm, patchI)
     {
         const polyPatch& regionPatch = rbm[patchI];
-        if (isA<directMappedWallPolyPatch>(regionPatch))
+        if (isA<mappedWallPolyPatch>(regionPatch))
         {
             if (debug)
             {
-                Pout<< "found " << directMappedWallPolyPatch::typeName
+                Pout<< "found " << mappedWallPolyPatch::typeName
                     <<  " " << regionPatch.name() << endl;
             }
 
@@ -111,20 +111,20 @@ void Foam::regionModels::regionModel::initialise()
 
             nBoundaryFaces += regionPatch.faceCells().size();
 
-            const directMappedWallPolyPatch& dmp =
-                refCast<const directMappedWallPolyPatch>(regionPatch);
+            const mappedWallPolyPatch& mapPatch =
+                refCast<const mappedWallPolyPatch>(regionPatch);
 
-            const label primaryPatchI = dmp.samplePolyPatch().index();
+            const label primaryPatchI = mapPatch.samplePolyPatch().index();
             primaryPatchIDs.append(primaryPatchI);
 
             mappedPatches_.set
             (
                 patchI,
-                new directMappedPatchBase
+                new mappedPatchBase
                 (
                     pbm[primaryPatchI],
                     regionMesh().name(),
-                    directMappedPatchBase::NEARESTPATCHFACE,
+                    mapPatch.mode(),
                     regionPatch.name(),
                     vector::zero
                 )
@@ -134,13 +134,12 @@ void Foam::regionModels::regionModel::initialise()
 
     primaryPatchIDs_.transfer(primaryPatchIDs);
     intCoupledPatchIDs_.transfer(intCoupledPatchIDs);
-//    mappedPatches_.resize(nCoupledPatches);
 
     if (nBoundaryFaces == 0)
     {
         WarningIn("regionModel::initialise()")
-            << "Region model being applied without direct mapped boundary "
-            << "conditions" << endl;
+            << "Region model has no mapped boundary conditions - transfer "
+            << "between regions will not be possible" << endl;
     }
 }
 

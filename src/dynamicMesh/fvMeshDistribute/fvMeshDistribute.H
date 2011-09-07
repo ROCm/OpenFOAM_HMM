@@ -241,7 +241,7 @@ class fvMeshDistribute
             void addProcPatches
             (
                 const labelList&, // processor that neighbour is now on
-                const labelList&, // -1 or patch that face originated from 
+                const labelList&, // -1 or patch that face originated from
                 List<Map<label> >& procPatchID
             );
 

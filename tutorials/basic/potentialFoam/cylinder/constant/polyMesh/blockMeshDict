@@ -60,7 +60,7 @@ vertices #codeStream
 };
 
 
-blocks          
+blocks
 (
     hex (5 4 9 10 24 23 28 29) (10 10 1) simpleGrading (1 1 1)
     hex (0 1 4 5 19 20 23 24) (10 10 1) simpleGrading (1 1 1)
@@ -74,7 +74,7 @@ blocks
     hex (15 9 8 18 34 28 27 37) (10 20 1) simpleGrading (1 1 1)
 );
 
-edges           
+edges
 (
     arc 0 5 (0.469846 0.17101 -0.5)
     arc 5 10 (0.17101 0.469846 -0.5)

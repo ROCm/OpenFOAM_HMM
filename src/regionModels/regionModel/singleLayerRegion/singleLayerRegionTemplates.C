@@ -25,8 +25,8 @@ License
 
 #include "singleLayerRegion.H"
 #include "zeroGradientFvPatchFields.H"
-#include "directMappedFixedInternalValueFvPatchFields.H"
-#include "directMappedFixedPushedInternalValueFvPatchFields.H"
+#include "mappedFixedInternalValueFvPatchFields.H"
+#include "mappedFixedPushedInternalValueFvPatchFields.H"
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
@@ -41,8 +41,7 @@ Foam::regionModels::singleLayerRegion::mappedFieldAndInternalPatchTypes() const
     forAll(intCoupledPatchIDs_, i)
     {
         const label patchI = intCoupledPatchIDs_[i];
-        bTypes[patchI] =
-            directMappedFixedInternalValueFvPatchField<Type>::typeName;
+        bTypes[patchI] = mappedFixedInternalValueFvPatchField<Type>::typeName;
     }
 
     return bTypes;
@@ -61,7 +60,7 @@ Foam::regionModels::singleLayerRegion::mappedPushedFieldPatchTypes() const
     {
         const label patchI = intCoupledPatchIDs_[i];
         bTypes[patchI] =
-            directMappedFixedPushedInternalValueFvPatchField<Type>::typeName;
+            mappedFixedPushedInternalValueFvPatchField<Type>::typeName;
     }
 
     return bTypes;

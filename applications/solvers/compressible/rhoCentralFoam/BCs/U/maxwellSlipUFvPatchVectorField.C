@@ -107,7 +107,7 @@ maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
         if (dict.found("refValue") && dict.found("valueFraction"))
         {
             this->refValue() = vectorField("refValue", dict, p.size());
-            this->valueFraction() = 
+            this->valueFraction() =
                 scalarField("valueFraction", dict, p.size());
         }
         else

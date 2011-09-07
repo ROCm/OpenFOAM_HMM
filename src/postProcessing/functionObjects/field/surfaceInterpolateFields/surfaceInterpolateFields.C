@@ -90,7 +90,7 @@ void Foam::surfaceInterpolateFields::execute()
 {
     if (active_)
     {
-        // Clear out any previously loaded fields 
+        // Clear out any previously loaded fields
         ssf_.clear();
         svf_.clear();
         sSpheretf_.clear();

@@ -31,7 +31,7 @@ License
 #include "fvcReconstruct.H"
 #include "fvcVolumeIntegrate.H"
 #include "addToRunTimeSelectionTable.H"
-#include "directMappedWallPolyPatch.H"
+#include "mappedWallPolyPatch.H"
 #include "mapDistribute.H"
 
 #include "cachedRandom.H"
@@ -90,7 +90,7 @@ void kinematicSingleLayer::correctThermoFields()
             "void Foam::surfaceFilmModels::kinematicSingleLayer::"
             "correctThermo()"
         )   << "Kinematic surface film must use "
-            << thermoModelTypeNames_[thermoModel_] << "thermodynamics" << endl;
+            << thermoModelTypeNames_[tmConstant] << "thermodynamics" << endl;
     }
 }
 
@@ -115,6 +115,7 @@ void kinematicSingleLayer::transferPrimaryRegionThermoFields()
         Info<< "kinematicSingleLayer::"
             << "transferPrimaryRegionThermoFields()" << endl;
     }
+
     // Update fields from primary region via direct mapped
     // (coupled) boundary conditions
     UPrimary_.correctBoundaryConditions();
@@ -132,6 +133,18 @@ void kinematicSingleLayer::transferPrimaryRegionSourceFields()
             << "transferPrimaryRegionSourceFields()" << endl;
     }
 
+    // Convert accummulated source terms into per unit area per unit time
+    const scalar deltaT = time_.deltaTValue();
+    forAll(rhoSpPrimary_.boundaryField(), patchI)
+    {
+        const scalarField& priMagSf =
+            primaryMesh().magSf().boundaryField()[patchI];
+
+        rhoSpPrimary_.boundaryField()[patchI] /= priMagSf*deltaT;
+        USpPrimary_.boundaryField()[patchI] /= priMagSf*deltaT;
+        pSpPrimary_.boundaryField()[patchI] /= priMagSf*deltaT;
+    }
+
     // Retrieve the source fields from the primary region via direct mapped
     // (coupled) boundary conditions
     // - fields require transfer of values for both patch AND to push the
@@ -139,13 +152,6 @@ void kinematicSingleLayer::transferPrimaryRegionSourceFields()
     rhoSp_.correctBoundaryConditions();
     USp_.correctBoundaryConditions();
     pSp_.correctBoundaryConditions();
-
-    // Convert accummulated source terms into per unit area per unit time
-    // Note: boundary values will still have original (neat) values
-    const scalar deltaT = time_.deltaTValue();
-    rhoSp_.field() /= magSf()*deltaT;
-    USp_.field() /= magSf()*deltaT;
-    pSp_.field() /= magSf()*deltaT;
 }
 
 

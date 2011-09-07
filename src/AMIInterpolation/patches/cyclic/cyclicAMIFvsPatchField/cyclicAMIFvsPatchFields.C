@@ -21,74 +21,23 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::directMappedVariableThicknessWallFvPatch
-
-Description
-    Take thickness field and number of layers and returns deltaCoeffs
-    as 2.0/thickness/nLayers.
-    To be used with 1D thermo baffle.
-
-SourceFiles
-    directMappedVariableThicknessWallFvPatch.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef directMappedWallFvPatch_H
-#define directMappedWallFvPatch_H
-
-#include "wallFvPatch.H"
-#include "directMappedVariableThicknessWallPolyPatch.H"
+#include "cyclicAMIFvsPatchFields.H"
+#include "fvsPatchFields.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-/*---------------------------------------------------------------------------*\
-        Class directMappedVariableThicknessWallFvPatch Declaration
-\*---------------------------------------------------------------------------*/
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-class directMappedVariableThicknessWallFvPatch
-:
-    public wallFvPatch
-{
-
-protected:
-
-    // Protected Member Functions
-
-        //- Read neighbour cell distances from dictionary
-        void makeDeltaCoeffs(scalarField& dc) const;
-
-
-public:
-
-    //- Runtime type information
-    TypeName(directMappedVariableThicknessWallPolyPatch::typeName_());
-
-
-    // Constructors
-
-        //- Construct from components
-        directMappedVariableThicknessWallFvPatch
-        (
-            const polyPatch& patch,
-            const fvBoundaryMesh& bm
-        )
-        :
-            wallFvPatch(patch, bm)
-        {}
-
-};
-
+makeFvsPatchFields(cyclicAMI);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

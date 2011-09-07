@@ -687,7 +687,7 @@ void getInterfaceSizes
         }
     }
 
-    // Rework 
+    // Rework
 
     Pstream::scatter(regionsToSize);
 

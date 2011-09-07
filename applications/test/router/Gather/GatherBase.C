@@ -79,7 +79,7 @@ IndexType GatherBase::offset
             << "  indices:" << indices.size()
             << abort(FatalError);
     }
-    
+
 
     label sum = 0;
 

@@ -151,7 +151,7 @@ void Foam::filmPyrolysisTemperatureCoupledFvPatchScalarField::updateCoeffs()
 
     const label filmPatchI = filmModel.regionPatchID(patchI);
 
-    const mapDistribute& filmMap = filmModel.mappedPatches()[filmPatchI].map();
+    const mappedPatchBase& filmMap = filmModel.mappedPatches()[filmPatchI];
 
     scalarField deltaFilm = filmModel.delta().boundaryField()[filmPatchI];
     filmMap.distribute(deltaFilm);
@@ -166,7 +166,7 @@ void Foam::filmPyrolysisTemperatureCoupledFvPatchScalarField::updateCoeffs()
 
     const label pyrPatchI = pyrModel.regionPatchID(patchI);
 
-    const mapDistribute& pyrMap = pyrModel.mappedPatches()[pyrPatchI].map();
+    const mappedPatchBase& pyrMap = pyrModel.mappedPatches()[pyrPatchI];
 
     scalarField TPyr = pyrModel.T().boundaryField()[pyrPatchI];
     pyrMap.distribute(TPyr);

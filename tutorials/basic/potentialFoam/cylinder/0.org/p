@@ -20,33 +20,33 @@ internalField   uniform 0;
 
 boundaryField
 {
-    down            
+    down
     {
         type            symmetryPlane;
     }
 
-    right           
+    right
     {
         type            fixedValue;
         value           uniform 0;
     }
 
-    up              
+    up
     {
         type            symmetryPlane;
     }
 
-    left            
+    left
     {
         type            zeroGradient;
     }
 
-    cylinder        
+    cylinder
     {
         type            symmetryPlane;
     }
 
-    defaultFaces    
+    defaultFaces
     {
         type            empty;
     }

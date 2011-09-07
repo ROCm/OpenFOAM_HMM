@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class solidBodyMotionFvMesh Declaration
+                   Class solidBodyMotionFvMesh Declaration
 \*---------------------------------------------------------------------------*/
 
 class solidBodyMotionFvMesh
@@ -64,6 +64,9 @@ class solidBodyMotionFvMesh
 
         //- The reference points which are transformed
         pointIOField undisplacedPoints_;
+
+        //- Points to move when cell zone is supplied
+        labelList pointIDs_;
 
 
     // Private Member Functions

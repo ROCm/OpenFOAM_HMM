@@ -20,17 +20,17 @@ internalField   uniform 0;
 
 boundaryField
 {
-    lid      
+    lid
     {
         type            zeroGradient;
     }
 
-    fixedWalls      
+    fixedWalls
     {
         type            zeroGradient;
     }
 
-    frontAndBack    
+    frontAndBack
     {
         type            empty;
     }

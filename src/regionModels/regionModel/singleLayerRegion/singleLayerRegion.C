@@ -26,7 +26,6 @@ License
 #include "singleLayerRegion.H"
 #include "fvMesh.H"
 #include "Time.H"
-#include "directMappedWallPolyPatch.H"
 #include "zeroGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

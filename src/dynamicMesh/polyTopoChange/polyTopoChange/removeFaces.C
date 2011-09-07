@@ -1303,7 +1303,7 @@ void Foam::removeFaces::setRefinement
             mesh_,
             nEdgesPerPoint,
             maxEqOp<label>(),
-            labelMin 
+            labelMin
         );
 
         forAll(nEdgesPerPoint, pointI)

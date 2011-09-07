@@ -29,7 +29,7 @@ License
 #include "fvm.H"
 #include "addToRunTimeSelectionTable.H"
 #include "zeroGradientFvPatchFields.H"
-#include "directMappedFieldFvPatchField.H"
+#include "mappedFieldFvPatchField.H"
 #include "mapDistribute.H"
 
 // Sub-models
@@ -59,7 +59,7 @@ wordList thermoSingleLayer::hsBoundaryTypes()
     wordList bTypes(T_.boundaryField().types());
     forAll(bTypes, patchI)
     {
-        if (bTypes[patchI] == directMappedFieldFvPatchField<scalar>::typeName)
+        if (bTypes[patchI] == mappedFieldFvPatchField<scalar>::typeName)
         {
             bTypes[patchI] = fixedValueFvPatchField<scalar>::typeName;
         }
@@ -150,7 +150,7 @@ void thermoSingleLayer::correctHsForMappedT()
     forAll(T_.boundaryField(), patchI)
     {
         const fvPatchField<scalar>& Tp = T_.boundaryField()[patchI];
-        if (isA<directMappedFieldFvPatchField<scalar> >(Tp))
+        if (isA<mappedFieldFvPatchField<scalar> >(Tp))
         {
             hs_.boundaryField()[patchI] == hs(Tp, patchI);
         }
@@ -206,16 +206,21 @@ void thermoSingleLayer::transferPrimaryRegionSourceFields()
 
     kinematicSingleLayer::transferPrimaryRegionSourceFields();
 
+    // Convert accummulated source terms into per unit area per unit time
+    const scalar deltaT = time_.deltaTValue();
+    forAll(hsSpPrimary_.boundaryField(), patchI)
+    {
+        const scalarField& priMagSf =
+            primaryMesh().magSf().boundaryField()[patchI];
+
+        hsSpPrimary_.boundaryField()[patchI] /= priMagSf*deltaT;
+    }
+
     // Retrieve the source fields from the primary region via direct mapped
     // (coupled) boundary conditions
     // - fields require transfer of values for both patch AND to push the
     //   values into the first layer of internal cells
     hsSp_.correctBoundaryConditions();
-
-    // Convert accummulated source terms into per unit area per unit time
-    // Note: boundary values will still have original (neat) values
-    const scalar deltaT = time_.deltaTValue();
-    hsSp_.field() /= magSf()*deltaT;
 
     // Apply enthalpy source as difference between incoming and actual states
     hsSp_ -= rhoSp_*hs_;
@@ -700,11 +705,12 @@ tmp<DimensionedField<scalar, volMesh> > thermoSingleLayer::Srho() const
     forAll(intCoupledPatchIDs(), i)
     {
         const label filmPatchI = intCoupledPatchIDs()[i];
-        const mapDistribute& distMap = mappedPatches_[filmPatchI].map();
+        const mappedPatchBase& filmMap = mappedPatches_[filmPatchI];
 
         scalarField patchMass =
             primaryMassPCTrans_.boundaryField()[filmPatchI];
-        distMap.distribute(patchMass);
+
+        filmMap.distribute(patchMass);
 
         const label primaryPatchI = primaryPatchIDs()[i];
         const unallocLabelList& cells =
@@ -755,11 +761,12 @@ tmp<DimensionedField<scalar, volMesh> > thermoSingleLayer::Srho
         forAll(intCoupledPatchIDs_, i)
         {
             const label filmPatchI = intCoupledPatchIDs_[i];
-            const mapDistribute& distMap = mappedPatches_[filmPatchI].map();
+            const mappedPatchBase& filmMap = mappedPatches_[filmPatchI];
 
             scalarField patchMass =
                 primaryMassPCTrans_.boundaryField()[filmPatchI];
-            distMap.distribute(patchMass);
+
+            filmMap.distribute(patchMass);
 
             const label primaryPatchI = primaryPatchIDs()[i];
             const unallocLabelList& cells =
@@ -805,11 +812,12 @@ tmp<DimensionedField<scalar, volMesh> > thermoSingleLayer::Sh() const
     forAll(intCoupledPatchIDs_, i)
     {
         const label filmPatchI = intCoupledPatchIDs_[i];
-        const mapDistribute& distMap = mappedPatches_[filmPatchI].map();
+        const mappedPatchBase& filmMap = mappedPatches_[filmPatchI];
 
         scalarField patchEnergy =
             primaryEnergyPCTrans_.boundaryField()[filmPatchI];
-        distMap.distribute(patchEnergy);
+
+        filmMap.distribute(patchEnergy);
 
         const label primaryPatchI = primaryPatchIDs()[i];
         const unallocLabelList& cells =

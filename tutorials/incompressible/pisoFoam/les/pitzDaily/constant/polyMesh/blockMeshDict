@@ -16,7 +16,7 @@ FoamFile
 
 convertToMeters 0.001;
 
-vertices        
+vertices
 (
     (-20.6 0 -0.5)
     (-20.6 3 -0.5)
@@ -64,7 +64,7 @@ vertices
     (290 16.6 0.5)
 );
 
-blocks          
+blocks
 (
     hex (0 6 7 1 22 28 29 23) (18 7 1) simpleGrading (0.5 1.8 1)
     hex (1 7 8 2 23 29 30 24) (18 10 1) simpleGrading (0.5 4 1)
@@ -81,7 +81,7 @@ blocks
     hex (14 20 21 15 36 42 43 37) (25 13 1) simpleGrading (2.5 0.25 1)
 );
 
-edges           
+edges
 (
 );
 

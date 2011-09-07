@@ -25,8 +25,6 @@ License
 
 #include "reactingOneDim.H"
 #include "addToRunTimeSelectionTable.H"
-#include "directMappedPatchBase.H"
-#include "mapDistribute.H"
 #include "zeroGradientFvPatchFields.H"
 #include "surfaceInterpolate.H"
 #include "fvm.H"

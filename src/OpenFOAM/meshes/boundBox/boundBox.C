@@ -163,6 +163,15 @@ Foam::tmp<Foam::pointField> Foam::boundBox::points() const
 }
 
 
+void Foam::boundBox::inflate(const scalar s)
+{
+    vector ext = vector::one*s*mag();
+
+    min_ -= ext;
+    max_ += ext;
+}
+
+
 bool Foam::boundBox::contains(const UList<point>& points) const
 {
     if (points.empty())

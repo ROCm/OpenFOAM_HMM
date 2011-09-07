@@ -20,36 +20,36 @@ internalField   uniform (0 0 0);
 
 boundaryField
 {
-    left            
+    left
     {
         type            fixedValue;
         value           uniform (1 0 0);
     }
 
-    right           
+    right
     {
         type            zeroGradient;
     }
 
-    down            
+    down
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
 
-    up              
+    up
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
 
-    cylinder        
+    cylinder
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
 
-    defaultFaces    
+    defaultFaces
     {
         type            empty;
     }

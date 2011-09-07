@@ -576,13 +576,13 @@ void ensightPointField
 
 
     label ensightPatchI = eMesh.patchPartOffset();
- 
+
     forAll(allPatchNames, patchi)
     {
         const word& patchName = allPatchNames[patchi];
- 
+
         eMesh.barrier();
- 
+
         if (patchNames.empty() || patchNames.found(patchName))
         {
             const fvPatch& p = mesh.boundary()[patchi];
@@ -603,24 +603,24 @@ void ensightPointField
                     pointToGlobal,
                     uniqueMeshPointLabels
                 );
- 
+
                 if (Pstream::master())
                 {
                     ensightFile.writePartHeader(ensightPatchI);
                 }
- 
+
                 writeField
                 (
                     "coordinates",
                     Field<Type>(pf.internalField(), uniqueMeshPointLabels),
                     ensightFile
                 );
- 
+
                 ensightPatchI++;
             }
         }
     }
- 
+
     // write faceZones, if requested
     if (faceZoneNames.size())
     {

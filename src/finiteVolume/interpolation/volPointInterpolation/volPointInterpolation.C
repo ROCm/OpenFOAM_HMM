@@ -243,7 +243,7 @@ void volPointInterpolation::makeWeights()
     // Update addressing over all boundary faces
     calcBoundaryAddressing();
 
-    
+
     // Running sum of weights
     pointScalarField sumWeights
     (
@@ -299,7 +299,7 @@ void volPointInterpolation::makeWeights()
     // Normalise internal weights
     forAll(pointWeights_, pointI)
     {
-        scalarList& pw = pointWeights_[pointI];    
+        scalarList& pw = pointWeights_[pointI];
         // Note:pw only sized for !isPatchPoint
         forAll(pw, i)
         {
