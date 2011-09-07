@@ -74,18 +74,6 @@ bool Foam::NoInteraction<CloudType>::correct
     const tetIndices&
 )
 {
-    notImplemented
-    (
-        "bool Foam::NoInteraction<CloudType>::correct"
-        "("
-            "typename CloudType::parcelType& , "
-            "const polyPatch&, "
-            "bool&, "
-            "const scalarr, "
-            "vector&"
-        ") const"
-    );
-
     return false;
 }
 
