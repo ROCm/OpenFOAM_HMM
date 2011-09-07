@@ -29,7 +29,7 @@ License
 #include "RASModel.H"
 #include "addToRunTimeSelectionTable.H"
 #include "surfaceFilmModel.H"
-#include "directMappedWallPolyPatch.H"
+#include "mappedWallPolyPatch.H"
 #include "mapDistribute.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -70,11 +70,11 @@ tmp<scalarField> mutkFilmWallFunctionFvPatchScalarField::calcUTau
 
     const label filmPatchI = filmModel.regionPatchID(patchI);
 
-    const mapDistribute& distMap = filmModel.mappedPatches()[filmPatchI].map();
+    const mappedPatchBase& filmMap = filmModel.mappedPatches()[filmPatchI];
 
     tmp<volScalarField> mDotFilm(filmModel.primaryMassTrans());
     scalarField mDotFilmp = mDotFilm().boundaryField()[filmPatchI];
-    distMap.distribute(mDotFilmp);
+    filmMap.distribute(mDotFilmp);
 
 
     // Retrieve RAS turbulence model

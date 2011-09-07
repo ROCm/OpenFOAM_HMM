@@ -20,29 +20,29 @@ internalField   uniform 0;
 
 boundaryField
 {
-    leftWall        
+    leftWall
     {
         type            zeroGradient;
     }
 
-    rightWall       
+    rightWall
     {
         type            zeroGradient;
     }
 
-    lowerWall       
+    lowerWall
     {
         type            zeroGradient;
     }
 
-    atmosphere      
+    atmosphere
     {
         type            inletOutlet;
         inletValue      uniform 0;
         value           uniform 0;
     }
 
-    defaultFaces    
+    defaultFaces
     {
         type            empty;
     }

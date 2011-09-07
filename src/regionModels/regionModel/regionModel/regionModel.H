@@ -40,7 +40,7 @@ SourceFiles
 #include "Switch.H"
 #include "labelList.H"
 #include "volFields.H"
-#include "directMappedPatchBase.H"
+#include "mappedPatchBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -118,7 +118,7 @@ protected:
             labelList intCoupledPatchIDs_;
 
             //- List of patch map info
-            PtrList<directMappedPatchBase> mappedPatches_;
+            PtrList<mappedPatchBase> mappedPatches_;
 
 
     // Protected member functions
@@ -213,8 +213,7 @@ public:
                 inline const labelList& intCoupledPatchIDs() const;
 
                 //- Return the list of patch map info
-                inline const PtrList<directMappedPatchBase>&
-                    mappedPatches() const;
+                inline const PtrList<mappedPatchBase>& mappedPatches() const;
 
                 //- Return region ID corresponding to primaryPatchID
                 inline label regionPatchID(const label primaryPatchID) const;

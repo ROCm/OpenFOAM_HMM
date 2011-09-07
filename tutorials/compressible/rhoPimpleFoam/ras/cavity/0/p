@@ -20,17 +20,17 @@ internalField   uniform 100000;
 
 boundaryField
 {
-    movingWall      
+    movingWall
     {
         type            zeroGradient;
     }
 
-    fixedWalls      
+    fixedWalls
     {
         type            zeroGradient;
     }
 
-    frontAndBack    
+    frontAndBack
     {
         type            empty;
     }

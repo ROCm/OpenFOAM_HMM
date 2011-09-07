@@ -55,7 +55,7 @@ namespace regionModels
     }
 }
 
-class mapDistribute;
+class mappedPatchBase;
 
 /*---------------------------------------------------------------------------*\
                       Class SurfaceFilmModel Declaration
@@ -116,7 +116,7 @@ protected:
         (
             const label filmPatchI,
             const label primaryPatchI,
-            const mapDistribute& distMap,
+            const mappedPatchBase& mapPatch,
             const regionModels::surfaceFilmModels::surfaceFilmModel& filmModel
         );
 

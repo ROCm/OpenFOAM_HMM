@@ -111,13 +111,13 @@ public:
         {
             return KMethodTypeNames_[method_];
         }
-        
+
         //- Name of thermal conductivity field
         const word& KName() const
         {
             return KName_;
         }
-        
+
         //- Given patch temperature calculate corresponding K field
         tmp<scalarField> K(const scalarField& Tp) const;
 

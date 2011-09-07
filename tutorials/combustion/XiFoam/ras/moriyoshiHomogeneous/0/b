@@ -20,27 +20,27 @@ internalField   uniform 1;
 
 boundaryField
 {
-    left            
+    left
     {
         type            symmetryPlane;
     }
 
-    right           
+    right
     {
         type            symmetryPlane;
     }
 
-    top             
+    top
     {
         type            symmetryPlane;
     }
 
-    bottom          
+    bottom
     {
         type            symmetryPlane;
     }
 
-    frontAndBack    
+    frontAndBack
     {
         type            empty;
     }

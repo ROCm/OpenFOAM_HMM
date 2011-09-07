@@ -20,12 +20,12 @@ internalField   uniform 100000;
 
 boundaryField
 {
-    INLE1           
+    INLE1
     {
         type            zeroGradient;
     }
 
-    OUTL2           
+    OUTL2
     {
         type            waveTransmissive;
         field           p;
@@ -38,12 +38,12 @@ boundaryField
         value           uniform 100000;
     }
 
-    SYMP3           
+    SYMP3
     {
         type            empty;
     }
 
-    WALL10          
+    WALL10
     {
         type            zeroGradient;
     }

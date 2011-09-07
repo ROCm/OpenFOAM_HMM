@@ -20,19 +20,19 @@ internalField   uniform 300;
 
 boundaryField
 {
-    floor           
+    floor
     {
         type            fixedValue;
         value           uniform 300;
     }
 
-    ceiling         
+    ceiling
     {
         type            fixedValue;
         value           uniform 300;
     }
 
-    fixedWalls      
+    fixedWalls
     {
         type            zeroGradient;
     }

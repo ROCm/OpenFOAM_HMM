@@ -56,7 +56,7 @@ void Foam::explicitSource::addSource
             pTraits<Type>::zero
         )
     );
-    UIndirectList<Type>(rhs, this->cells()) = data;    
+    UIndirectList<Type>(rhs, this->cells()) = data;
 
     Eqn -= rhs;
 }

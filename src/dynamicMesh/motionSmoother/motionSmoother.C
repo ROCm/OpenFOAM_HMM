@@ -67,7 +67,7 @@ void Foam::motionSmoother::testSyncPositions
                 << " synchronised point:" << syncedFld[i]
                 << abort(FatalError);
         }
-    }    
+    }
 }
 
 

@@ -25,7 +25,7 @@ License
 
 #include "thermoBaffleModel.H"
 #include "fvMesh.H"
-#include "directMappedVariableThicknessWallPolyPatch.H"
+#include "mappedVariableThicknessWallPolyPatch.H"
 #include "wedgePolyPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -101,7 +101,7 @@ void thermoBaffleModel::init()
             const polyPatch& pp = rbm[patchI];
 
             if  (
-                    !isA<directMappedVariableThicknessWallPolyPatch>(pp)
+                    !isA<mappedVariableThicknessWallPolyPatch>(pp)
                  && oneD_
                  && !constantThickness_
                 )
@@ -115,13 +115,13 @@ void thermoBaffleModel::init()
                     ")"
                 )   << "\n    patch type '" << pp.type()
                     << "' not type '"
-                    << directMappedVariableThicknessWallPolyPatch::typeName
+                    << mappedVariableThicknessWallPolyPatch::typeName
                     << "'. This is necessary for 1D solution "
                     << " and variable thickness"
                     << "\n    for patch. " << pp.name()
                     << exit(FatalError);
             }
-            else if (!isA<directMappedWallPolyPatch>(pp))
+            else if (!isA<mappedWallPolyPatch>(pp))
             {
                 FatalErrorIn
                 (
@@ -132,7 +132,7 @@ void thermoBaffleModel::init()
                     ")"
                 )   << "\n    patch type '" << pp.type()
                     << "' not type '"
-                    << directMappedWallPolyPatch::typeName
+                    << mappedWallPolyPatch::typeName
                     << "'. This is necessary for 3D solution"
                     << "\n    for patch. " << pp.name()
                     << exit(FatalError);
@@ -143,10 +143,10 @@ void thermoBaffleModel::init()
         {
             const label patchI = intCoupledPatchIDs_[0];
             const polyPatch& pp = rbm[patchI];
-            const directMappedVariableThicknessWallPolyPatch& ppCoupled =
+            const mappedVariableThicknessWallPolyPatch& ppCoupled =
                 refCast
                 <
-                    const directMappedVariableThicknessWallPolyPatch
+                    const mappedVariableThicknessWallPolyPatch
                 >(pp);
 
             thickness_ = ppCoupled.thickness();

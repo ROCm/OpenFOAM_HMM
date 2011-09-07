@@ -136,7 +136,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
 
     // Surface protrusion conformation is done in two steps.
-    // 1. the dual edges (of all internal vertices) can stretch to 
+    // 1. the dual edges (of all internal vertices) can stretch to
     //    'infinity' so any intersection would be badly behaved. So
     //    just find the nearest point on the geometry and insert point
     //    pairs.

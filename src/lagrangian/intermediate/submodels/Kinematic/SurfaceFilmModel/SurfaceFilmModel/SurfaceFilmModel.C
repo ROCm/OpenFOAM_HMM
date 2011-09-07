@@ -26,7 +26,7 @@ License
 #include "SurfaceFilmModel.H"
 #include "surfaceFilmModel.H"
 #include "mathematicalConstants.H"
-#include "directMappedWallPolyPatch.H"
+#include "mappedPatchBase.H"
 
 using namespace Foam::constant;
 
@@ -156,13 +156,11 @@ void Foam::SurfaceFilmModel<CloudType>::inject(TrackData& td)
         const label filmPatchI = filmPatches[i];
         const label primaryPatchI = primaryPatches[i];
 
-        const directMappedPatchBase& mapPatch =
-            filmModel.mappedPatches()[filmPatchI];
-        const mapDistribute& distMap = mapPatch.map();
+        const mappedPatchBase& mapPatch = filmModel.mappedPatches()[filmPatchI];
 
         const labelList& injectorCellsPatch = pbm[primaryPatchI].faceCells();
 
-        cacheFilmFields(filmPatchI, primaryPatchI, distMap, filmModel);
+        cacheFilmFields(filmPatchI, primaryPatchI, mapPatch, filmModel);
 
         const vectorField& Cf = mesh.C().boundaryField()[primaryPatchI];
         const vectorField& Sf = mesh.Sf().boundaryField()[primaryPatchI];
@@ -229,26 +227,26 @@ void Foam::SurfaceFilmModel<CloudType>::cacheFilmFields
 (
     const label filmPatchI,
     const label primaryPatchI,
-    const mapDistribute& distMap,
+    const mappedPatchBase& mapPatch,
     const regionModels::surfaceFilmModels::surfaceFilmModel& filmModel
 )
 {
     massParcelPatch_ = filmModel.cloudMassTrans().boundaryField()[filmPatchI];
-    distMap.distribute(massParcelPatch_);
+    mapPatch.distribute(massParcelPatch_);
 
     diameterParcelPatch_ =
         filmModel.cloudDiameterTrans().boundaryField()[filmPatchI];
-    distMap.distribute(diameterParcelPatch_);
+    mapPatch.distribute(diameterParcelPatch_);
 
     UFilmPatch_ = filmModel.Us().boundaryField()[filmPatchI];
-    distMap.distribute(UFilmPatch_);
+    mapPatch.distribute(UFilmPatch_);
 
     rhoFilmPatch_ = filmModel.rho().boundaryField()[filmPatchI];
-    distMap.distribute(rhoFilmPatch_);
+    mapPatch.distribute(rhoFilmPatch_);
 
     deltaFilmPatch_[primaryPatchI] =
         filmModel.delta().boundaryField()[filmPatchI];
-    distMap.distribute(deltaFilmPatch_[primaryPatchI]);
+    mapPatch.distribute(deltaFilmPatch_[primaryPatchI]);
 }
 
 

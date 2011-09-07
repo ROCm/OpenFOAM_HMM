@@ -56,7 +56,7 @@ Description
     |
     |
     ------+B
-        
+
     But:
 
     + A

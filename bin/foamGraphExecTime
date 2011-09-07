@@ -26,7 +26,7 @@
 #     foamGraphExecTime
 #
 # Description
-#     
+#
 #------------------------------------------------------------------------------
 if (! -f "$1" ) then
     echo "No file: '$1'"
@@ -44,7 +44,7 @@ cat << EOF > executionTime.dat
 Solver Performance
 iterations
 time/iteration
-0 0 
+0 0
 0 0
 1
 EOF

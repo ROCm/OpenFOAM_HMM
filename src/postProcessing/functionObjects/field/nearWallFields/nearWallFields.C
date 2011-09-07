@@ -92,7 +92,7 @@ void Foam::nearWallFields::read(const dictionary& dict)
         distance_ = readScalar(dict.lookup("distance"));
 
 
-        // Clear out any previously loaded fields 
+        // Clear out any previously loaded fields
         vsf_.clear();
         vvf_.clear();
         vSpheretf_.clear();
