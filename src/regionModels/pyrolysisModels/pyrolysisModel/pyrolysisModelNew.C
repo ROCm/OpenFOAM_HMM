@@ -75,6 +75,33 @@ autoPtr<pyrolysisModel> pyrolysisModel::New(const fvMesh& mesh)
 }
 
 
+autoPtr<pyrolysisModel> pyrolysisModel::New
+(
+    const fvMesh& mesh,
+    const dictionary& dict
+)
+{
+
+    const word modelType = dict.lookup("pyrolysisModel");
+
+    Info<< "Selecting pyrolysisModel " << modelType << endl;
+
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(modelType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn("pyrolysisModel::New(const fvMesh&, const dictionary&)")
+            << "Unknown pyrolysisModel type " << modelType
+            << nl << nl << "Valid pyrolisisModel types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<pyrolysisModel>(cstrIter()(modelType, mesh, dict));
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace surfaceFilmModels

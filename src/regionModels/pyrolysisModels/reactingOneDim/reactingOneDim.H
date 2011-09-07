@@ -66,6 +66,9 @@ private:
         //- Disallow default bitwise assignment
         void operator=(const reactingOneDim&);
 
+        //- Read model controls
+        void readReactingOneDimControls();
+
 
 protected:
 
@@ -154,6 +157,9 @@ protected:
         //- Read control parameters from dictionary
         bool read();
 
+        //- Read control parameters from dict
+        bool read(const dictionary& dict);
+
         //- Update submodels
         void updateFields();
 
@@ -192,6 +198,16 @@ public:
 
         //- Construct from type name and mesh
         reactingOneDim(const word& modelType, const fvMesh& mesh);
+
+        //- Construct from type name, mesh and dictionary
+        reactingOneDim
+        (
+            const word& modelType,
+            const fvMesh& mesh,
+            const dictionary& dict
+        );
+
+
 
 
     //- Destructor
