@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "directMappedVariableThicknessWallFvPatch.H"
+#include "mappedVariableThicknessWallFvPatch.H"
 #include "addToRunTimeSelectionTable.H"
 #include "regionModel1D.H"
 
@@ -31,11 +31,11 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(directMappedVariableThicknessWallFvPatch, 0);
+    defineTypeNameAndDebug(mappedVariableThicknessWallFvPatch, 0);
     addToRunTimeSelectionTable
     (
         fvPatch,
-        directMappedVariableThicknessWallFvPatch,
+        mappedVariableThicknessWallFvPatch,
         polyPatch
     );
 }
@@ -43,19 +43,13 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::directMappedVariableThicknessWallFvPatch::
+void Foam::mappedVariableThicknessWallFvPatch::
 makeDeltaCoeffs(scalarField& dc) const
 {
-    const directMappedVariableThicknessWallPolyPatch& pp =
-        refCast<const directMappedVariableThicknessWallPolyPatch>
-        (
-            patch()
-        );
+    const mappedVariableThicknessWallPolyPatch& pp =
+        refCast<const mappedVariableThicknessWallPolyPatch>(patch());
 
-    const directMappedPatchBase& mpp = refCast<const directMappedPatchBase>
-    (
-        patch()
-    );
+    const mappedPatchBase& mpp = refCast<const mappedPatchBase>(patch());
 
     const polyMesh& nbrMesh = mpp.sampleMesh();
 

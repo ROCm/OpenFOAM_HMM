@@ -85,7 +85,7 @@ temperatureThermoBaffleFvPatchScalarField
     baffle_(),
     solidThermoType_()
 {
-    if (!isA<directMappedPatchBase>(patch().patch()))
+    if (!isA<mappedPatchBase>(patch().patch()))
     {
         FatalErrorIn
         (
@@ -97,7 +97,7 @@ temperatureThermoBaffleFvPatchScalarField
             "    const dictionary& dict\n"
             ")\n"
         )   << "\n    patch type '" << patch().type()
-            << "' not type '" << directMappedPatchBase::typeName << "'"
+            << "' not type '" << mappedPatchBase::typeName << "'"
             << "\n    for patch " << patch().name()
             << " of field " << dimensionedInternalField().name()
             << " in file " << dimensionedInternalField().objectPath()

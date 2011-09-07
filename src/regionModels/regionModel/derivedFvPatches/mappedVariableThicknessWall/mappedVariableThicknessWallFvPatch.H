@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::directMappedVariableThicknessWallFvPatch
+    Foam::mappedVariableThicknessWallFvPatch
 
 Description
     Take thickness field and number of layers and returns deltaCoeffs
@@ -30,15 +30,15 @@ Description
     To be used with 1D thermo baffle.
 
 SourceFiles
-    directMappedVariableThicknessWallFvPatch.C
+    mappedVariableThicknessWallFvPatch.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef directMappedWallFvPatch_H
-#define directMappedWallFvPatch_H
+#ifndef mappedWallFvPatch_H
+#define mappedWallFvPatch_H
 
 #include "wallFvPatch.H"
-#include "directMappedVariableThicknessWallPolyPatch.H"
+#include "mappedVariableThicknessWallPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,10 +46,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-        Class directMappedVariableThicknessWallFvPatch Declaration
+            Class mappedVariableThicknessWallFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
-class directMappedVariableThicknessWallFvPatch
+class mappedVariableThicknessWallFvPatch
 :
     public wallFvPatch
 {
@@ -65,13 +65,13 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName(directMappedVariableThicknessWallPolyPatch::typeName_());
+    TypeName(mappedVariableThicknessWallPolyPatch::typeName_());
 
 
     // Constructors
 
         //- Construct from components
-        directMappedVariableThicknessWallFvPatch
+        mappedVariableThicknessWallFvPatch
         (
             const polyPatch& patch,
             const fvBoundaryMesh& bm
@@ -79,7 +79,6 @@ public:
         :
             wallFvPatch(patch, bm)
         {}
-
 };
 
 

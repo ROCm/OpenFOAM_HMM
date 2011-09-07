@@ -25,7 +25,7 @@ License
 
 #include "pyrolysisModel.H"
 #include "fvMesh.H"
-#include "directMappedFieldFvPatchField.H"
+#include "mappedFieldFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,7 +70,7 @@ void pyrolysisModel::constructMeshObjects()
         forAll(filmDelta.boundaryField(), patchI)
         {
             const fvPatchField<scalar>& fvp = filmDelta.boundaryField()[patchI];
-            if (isA<directMappedFieldFvPatchField<scalar> >(fvp))
+            if (isA<mappedFieldFvPatchField<scalar> >(fvp))
             {
                 foundCoupledPatch = true;
                 break;
@@ -81,7 +81,7 @@ void pyrolysisModel::constructMeshObjects()
         {
             WarningIn("void pyrolysisModels::constructMeshObjects()")
                 << "filmCoupled flag set to true, but no "
-                << directMappedFieldFvPatchField<scalar>::typeName
+                << mappedFieldFvPatchField<scalar>::typeName
                 << " patches found on " << filmDelta.name() << " field"
                 << endl;
         }

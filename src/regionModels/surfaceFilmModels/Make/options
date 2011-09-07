@@ -1,5 +1,7 @@
 EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/sampling/lnInclude \
+    -I$(LIB_SRC)/AMIInterpolation/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \
@@ -11,15 +13,25 @@ EXE_INC = \
     -I$(LIB_SRC)/thermophysicalModels/SLGThermo/lnInclude \
     -I$(LIB_SRC)/lagrangian/distributionModels/lnInclude \
     -I$(LIB_SRC)/turbulenceModels \
-    -I$(LIB_SRC)/turbulenceModels/compressible/turbulenceModel \
+    -I$(LIB_SRC)/turbulenceModels/compressible/LES/lnInclude \
     -I$(LIB_SRC)/turbulenceModels/compressible/RAS/lnInclude \
     -I$(LIB_SRC)/regionModels/regionModel/lnInclude
 
 LIB_LIBS = \
-    -lregionModels \
-    -lSLGThermo \
     -lfiniteVolume \
+    -lsampling \
+    -lAMIInterpolation \
     -lmeshTools \
+    -lbasicThermophysicalModels \
+    -lspecie \
+    -lliquidProperties \
+    -lliquidMixtureProperties \
+    -lsolidProperties \
+    -lsolidMixtureProperties \
+    -lreactionThermophysicalModels \
+    -lSLGThermo \
     -ldistributionModels \
+    -lcompressibleTurbulenceModel \
     -lcompressibleRASModels \
-    -lcompressibleLESModels
+    -lcompressibleLESModels \
+    -lregionModels

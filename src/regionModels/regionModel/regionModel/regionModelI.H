@@ -132,7 +132,7 @@ Foam::regionModels::regionModel::intCoupledPatchIDs() const
 }
 
 
-inline const Foam::PtrList<Foam::directMappedPatchBase>&
+inline const Foam::PtrList<Foam::mappedPatchBase>&
 Foam::regionModels::regionModel::mappedPatches() const
 {
     return mappedPatches_;
