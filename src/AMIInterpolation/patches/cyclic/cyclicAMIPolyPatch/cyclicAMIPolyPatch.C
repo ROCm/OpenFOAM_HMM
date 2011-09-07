@@ -580,7 +580,7 @@ bool Foam::cyclicAMIPolyPatch::owner() const
 const Foam::autoPtr<Foam::searchableSurface>&
 Foam::cyclicAMIPolyPatch::surfPtr()
 {
-    word surfType(surfDict_.lookup("type"));
+    const word surfType(surfDict_.lookupOrDefault<word>("type", "none"));
 
     if (!surfPtr_.valid() && owner() && surfType != "none")
     {
