@@ -44,4 +44,6 @@ EXE_LIBS = \
     -llagrangianIntermediate \
     -lODE \
     -lsampling \
-    -lcombustionModels
+    -lcombustionModels \
+    -lAMIInterpolation
+

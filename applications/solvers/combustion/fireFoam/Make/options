@@ -50,4 +50,5 @@ EXE_LIBS = \
     -lpyrolysisModels \
     -llagrangianIntermediate \
     -lODE \
-    -lsampling
+    -lsampling \
+    -lAMIInterpolation

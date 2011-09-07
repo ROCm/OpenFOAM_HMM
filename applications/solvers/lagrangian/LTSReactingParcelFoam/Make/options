@@ -47,4 +47,6 @@ EXE_LIBS = \
     -lregionModels \
     -lsurfaceFilmModels \
     -lsampling \
-    -lcombustionModels
+    -lcombustionModels \
+    -lAMIInterpolation
+

@@ -29,4 +29,6 @@ EXE_LIBS = \
     -lmeshTools \
     -lregionModels \
     -lsurfaceFilmModels \
-    -lsampling
+    -lsampling \
+    -lAMIInterpolation
+

@@ -36,4 +36,6 @@ EXE_LIBS = \
     -ldynamicMesh \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
-    -lsampling
+    -lsampling \
+    -lAMIInterpolation
+

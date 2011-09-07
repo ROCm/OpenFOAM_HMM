@@ -50,4 +50,6 @@ EXE_LIBS = \
     -lsurfaceFilmModels \
     -lODE \
     -lsampling \
-    -lcombustionModels
+    -lcombustionModels \
+    -lAMIInterpolation
+

@@ -21,4 +21,5 @@ EXE_LIBS = \
     -lfiniteVolume \
     -lmeshTools \
     -lthermoBaffleModels \
-    -lregionModels
+    -lregionModels \
+    -lAMIInterpolation
