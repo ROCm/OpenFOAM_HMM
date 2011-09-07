@@ -24,4 +24,4 @@ $(MAPPATCHES)/mappedFixedPushedInternalValue/mappedFixedPushedInternalValueFvPat
 
 $(MAPPATCHES)/mappedField/mappedFieldFvPatchFields.C
 
-LIB = $(FOAM_USER_LIBBIN)/libAMIInterpolation
+LIB = $(FOAM_LIBBIN)/libAMIInterpolation
