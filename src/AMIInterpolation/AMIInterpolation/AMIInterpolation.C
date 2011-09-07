@@ -995,7 +995,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
         scalar s = sum(wght[faceI]);
         wghtSum[faceI] = s;
 
-        scalar t = s/patch[faceI].mag(patch.localPoints());
+        scalar t = s/patch[faceI].mag(patch.points());
         if (t < minBound)
         {
             minBound = t;
