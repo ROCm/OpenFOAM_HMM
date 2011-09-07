@@ -224,6 +224,11 @@ void mappedFixedValueFvPatchField<Type>::updateCoeffs()
 
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
+    // Since we're inside initEvaluate/evaluate there might be processor
+    // comms underway. Change the tag we use.
+    int oldTag = UPstream::msgType();
+    UPstream::msgType() = oldTag + 1;
+
     // Get the scheduling information from the mappedPatchBase
     const mappedPatchBase& mpp = refCast<const mappedPatchBase>
     (
@@ -388,6 +393,9 @@ void mappedFixedValueFvPatchField<Type>::updateCoeffs()
             << "  max:" << gMax(*this)
             << endl;
     }
+
+    // Restore tag
+    UPstream::msgType() = oldTag;
 
     fixedValueFvPatchField<Type>::updateCoeffs();
 }
