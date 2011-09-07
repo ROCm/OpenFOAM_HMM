@@ -11,27 +11,35 @@ FoamFile
     format      binary;
     class       dictionary;
     location    "constant";
-    object      pyrolysisProperties;
+    object      pyrolysisZones;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-active          true;
+1
+(
+    pyrolysis
+    {
+        active          true;
 
-pyrolysisModel  reactingOneDim;
+        pyrolysisModel  reactingOneDim;
 
-regionName      panelRegion;
+        regionName      panelRegion;
 
-reactingOneDimCoeffs
-{
-    filmCoupled     false;
+        reactingOneDimCoeffs
+        {
+            filmCoupled     false;
 
-    radFluxName     Qr;
+            radFluxName     Qr;
 
-    minimumDelta    1e-8;
+            minimumDelta    1e-8;
 
-    moveMesh        false;
-}
+            reactionDeltaMin 1e-8;
 
-infoOutput      true;
+            moveMesh        false;
+        }
+
+        infoOutput      true;
+    }
+)
 
 // ************************************************************************* //

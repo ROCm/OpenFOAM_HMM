@@ -35,7 +35,7 @@ Description
 #include "turbulenceModel.H"
 #include "basicReactingCloud.H"
 #include "surfaceFilmModel.H"
-#include "pyrolysisModel.H"
+#include "pyrolysisModelCollection.H"
 #include "radiationModel.H"
 #include "SLGThermo.H"
 #include "solidChemistryModel.H"
@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
 
         surfaceFilm.evolve();
 
-        pyrolysis->evolve();
+        pyrolysis.evolve();
 
         if (solvePrimaryRegion)
         {

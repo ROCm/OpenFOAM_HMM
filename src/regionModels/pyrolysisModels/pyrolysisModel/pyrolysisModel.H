@@ -70,6 +70,9 @@ private:
         //- Construct fields
         void constructMeshObjects();
 
+        //- Read pyrolysis controls
+        void readPyrolysisControls();
+
         //- Disallow default bitwise copy construct
         pyrolysisModel(const pyrolysisModel&);
 
@@ -93,8 +96,11 @@ protected:
 
     // Protected Member Functions
 
-        //- Read control parameters from dictionary
+        //- Read control parameters
         virtual bool read();
+
+        //- Read control parameters from dictionary
+        virtual bool read(const dictionary& dict);
 
 
 public:
@@ -105,17 +111,31 @@ public:
 
     // Declare runtime constructor selection table
 
-         declareRunTimeSelectionTable
-         (
-             autoPtr,
-             pyrolysisModel,
-             mesh,
-             (
-                const word& modelType,
-                const fvMesh& mesh
-             ),
-             (modelType, mesh)
-         );
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            pyrolysisModel,
+            mesh,
+            (
+            const word& modelType,
+            const fvMesh& mesh
+            ),
+            (modelType, mesh)
+        );
+
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            pyrolysisModel,
+            dictionary,
+            (
+            const word& modelType,
+            const fvMesh& mesh,
+            const dictionary& dict
+            ),
+            (modelType, mesh, dict)
+        );
+
 
     // Constructors
 
@@ -125,11 +145,57 @@ public:
         //- Construct from type name and mesh
         pyrolysisModel(const word& modelType, const fvMesh& mesh);
 
+        //- Construct from type name and mesh and dictionary
+        pyrolysisModel
+        (
+            const word& modelType,
+            const fvMesh& mesh,
+            const dictionary& dict
+        );
+
+        //- Return clone
+        autoPtr<pyrolysisModel> clone() const
+        {
+            notImplemented("autoPtr<pyrolysisModel> clone() const");
+            return autoPtr<pyrolysisModel>(NULL);
+        }
+
 
     // Selectors
 
-        //- Return a reference to the selected surface film model
+        //- Return a reference to the selected pyrolysis film model
         static autoPtr<pyrolysisModel> New(const fvMesh& mesh);
+
+        //- Return a reference to a named selected pyrolysis model
+        static autoPtr<pyrolysisModel> New
+        (
+            const fvMesh& mesh,
+            const dictionary& dict
+        );
+
+         //- Return pointer to new pyrolysis created on freestore from Istream
+        class iNew
+        {
+            const fvMesh& mesh_;
+
+        public:
+
+            iNew(const fvMesh& mesh)
+            :
+                mesh_(mesh)
+            {}
+
+            autoPtr<pyrolysisModel> operator()(Istream& is) const
+            {
+                keyType key(is);
+                dictionary dict(is);
+
+                return autoPtr<pyrolysisModel>
+                (
+                    pyrolysisModel::New(mesh_, dict)
+                );
+            }
+        };
 
 
     //- Destructor

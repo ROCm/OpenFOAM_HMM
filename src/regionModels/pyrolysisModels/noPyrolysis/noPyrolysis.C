@@ -40,6 +40,8 @@ namespace pyrolysisModels
 
 defineTypeNameAndDebug(noPyrolysis, 0);
 addToRunTimeSelectionTable(pyrolysisModel, noPyrolysis, mesh);
+addToRunTimeSelectionTable(pyrolysisModel, noPyrolysis, dictionary);
+
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -57,11 +59,39 @@ bool noPyrolysis::read()
 }
 
 
+bool noPyrolysis::read(const dictionary& dict)
+{
+    if (pyrolysisModel::read(dict))
+    {
+        // no additional info to read
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 noPyrolysis::noPyrolysis(const word& modelType, const fvMesh& mesh)
 :
-    pyrolysisModel(mesh)
+    pyrolysisModel(modelType, mesh),
+    solidChemistry_(solidChemistryModel::New(regionMesh())),
+    solidThermo_(solidChemistry_->solidThermo())
+{}
+
+
+noPyrolysis::noPyrolysis
+(
+    const word& modelType,
+    const fvMesh& mesh,
+    const dictionary& dict
+):
+    pyrolysisModel(modelType, mesh, dict),
+    solidChemistry_(solidChemistryModel::New(regionMesh())),
+    solidThermo_(solidChemistry_->solidThermo())
 {}
 
 
@@ -73,60 +103,44 @@ noPyrolysis::~noPyrolysis()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
+void noPyrolysis::preEvolveRegion()
+{
+    //Do nothing
+}
+
+
+void noPyrolysis::evolveRegion()
+{
+    //Do nothing
+}
+
 const volScalarField& noPyrolysis::rho() const
 {
-    FatalErrorIn("const volScalarField& noPyrolysis::rho() const")
-        << "rho field not available for " << type() << abort(FatalError);
-    return volScalarField::null();
+    return (solidThermo_.rho());
 }
 
 
 const volScalarField& noPyrolysis::T() const
 {
-    FatalErrorIn("const volScalarField& noPyrolysis::T() const")
-        << "T field not available for " << type() << abort(FatalError);
-    return volScalarField::null();
+    return (solidThermo_.T());
 }
 
 
 const tmp<volScalarField> noPyrolysis::Cp() const
 {
-    FatalErrorIn("const tmp<volScalarField>& noPyrolysis::Cp() const")
-        << "Cp field not available for " << type() << abort(FatalError);
-
-    return tmp<volScalarField>
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "noPyrolysis::Cp",
-                time().timeName(),
-                primaryMesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            primaryMesh(),
-            dimensionedScalar("zero", dimEnergy/dimVolume/dimTime, 0.0)
-        )
-    );
+    return (solidThermo_.Cp());
 }
 
 
 const volScalarField& noPyrolysis::kappa() const
 {
-    FatalErrorIn("const volScalarField& noPyrolysis::kappa() const")
-        << "kappa field not available for " << type() << abort(FatalError);
-    return volScalarField::null();
+    return (solidThermo_.kappa());
 }
 
 
 const volScalarField& noPyrolysis::K() const
 {
-    FatalErrorIn("const volScalarField& noPyrolysis::K() const")
-        << "K field not available for " << type() << abort(FatalError);
-    return volScalarField::null();
+    return (solidThermo_.K());
 }
 
 
@@ -140,7 +154,7 @@ const surfaceScalarField& noPyrolysis::phiGas() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace surfaceFilmModels
+} // End namespace pyrolysisFilmModels
 } // End namespace regionModels
 } // End namespace Foam
 
