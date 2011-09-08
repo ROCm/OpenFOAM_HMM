@@ -28,8 +28,7 @@ License
 #include "indexedOctree.H"
 #include "meshTools.H"
 #include "mergePoints.H"
-
-#include "vtkSurfaceWriter.H"
+#include "mapDistribute.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -240,7 +239,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::distributePatches
 
             str >> faces[domain]
                 >> points[domain]
-                >> faceIDs[domain]; 
+                >> faceIDs[domain];
         }
     }
 }
@@ -1213,7 +1212,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         // Rework newTgtPatch indices into globalIndices of tgtPatch
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    
+
         forAll(srcAddress_, i)
         {
             labelList& addressing = srcAddress_[i];
@@ -1498,6 +1497,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::writeWeights
 )
 const
 {
+/*
     static label i = 0;
 
     scalarField wghtSum(weights.size(), 0.0);
@@ -1523,6 +1523,7 @@ const
     );
 
     i++;
+*/
 }
 
 
@@ -1535,6 +1536,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::writePatch
 )
 const
 {
+/*
     static label i = 0;
 
     vtkSurfaceWriter writer;
@@ -1551,6 +1553,7 @@ const
     );
 
     i++;
+*/
 }
 
 

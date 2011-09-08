@@ -50,8 +50,6 @@ wmake $makeType conversion
 
 wmake $makeType sampling
 
-wmake $makeType AMIInterpolation
-
 wmake $makeType dynamicMesh
 wmake $makeType dynamicFvMesh
 wmake $makeType topoChangerFvMesh

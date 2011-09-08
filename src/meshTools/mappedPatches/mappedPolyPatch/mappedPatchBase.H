@@ -337,7 +337,7 @@ public:
                 }
             }
         }
-  
+
 
         //- Return reference to the parallel distribution map
         const mapDistribute& map() const

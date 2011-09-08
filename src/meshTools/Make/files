@@ -164,6 +164,20 @@ directMapped/directMappedPolyPatch/directMappedVariableThicknessWallPolyPatch.C
 directMapped/directMappedPointPatch/directMappedPointPatch.C
 directMapped/directMappedPointPatch/directMappedWallPointPatch.C
 
+AMI=AMIInterpolation
+$(AMI)/AMIInterpolation/AMIInterpolationName.C
+$(AMI)/faceAreaIntersect/faceAreaIntersect.C
+
+AMICycPatches=$(AMI)/patches/cyclic
+$(AMICycPatches)/cyclicAMILduInterfaceField/cyclicAMILduInterface.C
+$(AMICycPatches)/cyclicAMILduInterfaceField/cyclicAMILduInterfaceField.C
+$(AMICycPatches)/cyclicAMIPolyPatch/cyclicAMIPolyPatch.C
+
+mappedPatches/mappedPolyPatch/mappedPatchBase.C
+mappedPatches/mappedPolyPatch/mappedPolyPatch.C
+mappedPatches/mappedPolyPatch/mappedWallPolyPatch.C
+mappedPatches/mappedPolyPatch/mappedVariableThicknessWallPolyPatch.C
+mappedPatches/mappedPolyPatch/mappedWallPointPatch.C
 
 
 LIB = $(FOAM_LIBBIN)/libmeshTools
