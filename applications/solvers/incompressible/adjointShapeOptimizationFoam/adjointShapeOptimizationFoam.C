@@ -85,8 +85,6 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        p.storePrevIter();
-
         laminarTransport.lookup("lambda") >> lambda;
 
         //alpha +=
@@ -147,8 +145,6 @@ int main(int argc, char *argv[])
             U -= rAU*fvc::grad(p);
             U.correctBoundaryConditions();
         }
-
-        pa.storePrevIter();
 
         // Adjoint Pressure-velocity SIMPLE corrector
         {

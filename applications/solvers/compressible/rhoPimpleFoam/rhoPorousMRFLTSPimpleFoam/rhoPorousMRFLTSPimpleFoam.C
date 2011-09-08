@@ -79,12 +79,6 @@ int main(int argc, char *argv[])
         // --- Pressure-velocity PIMPLE corrector loop
         for (pimple.start(); pimple.loop(); pimple++)
         {
-            if (pimple.nOuterCorr() != 1)
-            {
-                p.storePrevIter();
-                rho.storePrevIter();
-            }
-
             turbulence->correct();
 
             #include "UEqn.H"
