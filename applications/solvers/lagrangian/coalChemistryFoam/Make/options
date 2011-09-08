@@ -1,7 +1,6 @@
 EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I${LIB_SRC}/meshTools/lnInclude \
-    -I${LIB_SRC}/AMIInterpolation/lnInclude \
     -I$(LIB_SRC)/turbulenceModels/compressible/turbulenceModel \
     -I$(LIB_SRC)/lagrangian/basic/lnInclude \
     -I$(LIB_SRC)/lagrangian/intermediate/lnInclude \
@@ -21,7 +20,6 @@ EXE_INC = \
     -I$(LIB_SRC)/regionModels/regionModel/lnInclude \
     -I$(LIB_SRC)/regionModels/surfaceFilmModels/lnInclude \
     -I$(LIB_SRC)/ODE/lnInclude \
-    -I$(LIB_SRC)/sampling/lnInclude \
     -I$(LIB_SRC)/combustionModels/lnInclude \
     -I$(FOAM_SOLVERS)/combustion/reactingFoam
 
@@ -49,7 +47,5 @@ EXE_LIBS = \
     -lregionModels \
     -lsurfaceFilmModels \
     -lODE \
-    -lsampling \
-    -lcombustionModels \
-    -lAMIInterpolation
+    -lcombustionModels
 

@@ -16,5 +16,4 @@ EXE_LIBS = \
     -lincompressibleTransportModels \
     -lincompressibleRASModels \
     -lincompressibleLESModels \
-    -lfiniteVolume \
-    -lAMIInterpolation
+    -lfiniteVolume
