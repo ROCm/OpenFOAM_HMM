@@ -190,6 +190,7 @@ $(basicFvsPatchFields)/sliced/slicedFvsPatchFields.C
 
 constraintFvsPatchFields = $(fvsPatchFields)/constraint
 $(constraintFvsPatchFields)/cyclic/cyclicFvsPatchFields.C
+$(constraintFvsPatchFields)/cyclicAMI/cyclicAMIFvsPatchFields.C
 $(constraintFvsPatchFields)/cyclicSlip/cyclicSlipFvsPatchFields.C
 $(constraintFvsPatchFields)/empty/emptyFvsPatchFields.C
 $(constraintFvsPatchFields)/nonuniformTransformCyclic/nonuniformTransformCyclicFvsPatchFields.C
