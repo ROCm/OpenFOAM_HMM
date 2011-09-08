@@ -102,6 +102,17 @@ Foam::label Foam::solutionControl::applyToField(const word& fieldName) const
 }
 
 
+void Foam::solutionControl::storePrevIterFields() const
+{
+//    storePrevIter<label>();
+    storePrevIter<scalar>();
+    storePrevIter<vector>();
+    storePrevIter<sphericalTensor>();
+    storePrevIter<symmTensor>();
+    storePrevIter<tensor>();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::solutionControl::solutionControl(fvMesh& mesh, const word& algorithmName)

@@ -56,10 +56,52 @@ void Foam::solution::read(const dictionary& dict)
 
     if (dict.found("relaxationFactors"))
     {
-        relaxationFactors_ = dict.subDict("relaxationFactors");
+        const dictionary& relaxDict(dict.subDict("relaxationFactors"));
+        if (relaxDict.found("variables"))
+        {
+            fieldRelaxDict_ = relaxDict.subDict("variables");
+            eqnRelaxDict_ = relaxDict.subDict("equations");
+        }
+        else
+        {
+            // backwards compatibility
+            const wordList entryNames(relaxDict.toc());
+            forAll(entryNames, i)
+            {
+                const word& e = entryNames[i];
+                scalar value = readScalar(relaxDict.lookup(e));
+
+                if (e(0, 1) == "p")
+                {
+                    fieldRelaxDict_.add(e, value);
+                }
+                else if (e.length() >= 3)
+                {
+                    if (e(0, 3) == "rho")
+                    {
+                        fieldRelaxDict_.add(e, value);
+                    }
+                }
+
+            }
+
+            eqnRelaxDict_ = relaxDict;
+        }
+
+        fieldRelaxDefault_ =
+            fieldRelaxDict_.lookupOrDefault<scalar>("default", 0.0);
+
+        eqnRelaxDefault_ =
+            eqnRelaxDict_.lookupOrDefault<scalar>("default", 0.0);
+
+        if (debug)
+        {
+            Info<< "relaxation factors:" << nl
+                << "fields: " << fieldRelaxDict_ << nl
+                << "equations: " << eqnRelaxDict_ << endl;
+        }
     }
 
-    relaxationFactors_.readIfPresent("default", defaultRelaxationFactor_);
 
     if (dict.found("solvers"))
     {
@@ -92,11 +134,13 @@ Foam::solution::solution
             IOobject::NO_WRITE
         )
     ),
-    cache_(ITstream("cache", tokenList())()),
+    cache_(dictionary::null),
     caching_(false),
-    relaxationFactors_(ITstream("relaxationFactors", tokenList())()),
-    defaultRelaxationFactor_(0),
-    solvers_(ITstream("solvers", tokenList())())
+    fieldRelaxDict_(dictionary::null),
+    eqnRelaxDict_(dictionary::null),
+    fieldRelaxDefault_(0),
+    eqnRelaxDefault_(0),
+    solvers_(dictionary::null)
 {
     if
     (
@@ -207,41 +251,80 @@ bool Foam::solution::cache(const word& name) const
 }
 
 
-bool Foam::solution::relax(const word& name) const
+bool Foam::solution::relaxField(const word& name) const
 {
     if (debug)
     {
-        Info<< "Find relax for " << name << endl;
+        Info<< "Find variable relaxation factor for " << name << endl;
     }
 
-    return
-        relaxationFactors_.found(name)
-     || relaxationFactors_.found("default");
+    return fieldRelaxDict_.found(name) || fieldRelaxDict_.found("default");
 }
 
 
-Foam::scalar Foam::solution::relaxationFactor(const word& name) const
+bool Foam::solution::relaxEquation(const word& name) const
 {
     if (debug)
     {
-        Info<< "Lookup relaxationFactor for " << name << endl;
+        Info<< "Find equation relaxation factor for " << name << endl;
     }
 
-    if (relaxationFactors_.found(name))
+    return eqnRelaxDict_.found(name) || eqnRelaxDict_.found("default");
+}
+
+
+Foam::scalar Foam::solution::fieldRelaxationFactor(const word& name) const
+{
+    if (debug)
     {
-        return readScalar(relaxationFactors_.lookup(name));
+        Info<< "Lookup variable relaxation factor for " << name << endl;
     }
-    else if (defaultRelaxationFactor_ > SMALL)
+
+    if (fieldRelaxDict_.found(name))
     {
-        return defaultRelaxationFactor_;
+        return readScalar(fieldRelaxDict_.lookup(name));
+    }
+    else if (fieldRelaxDefault_ > SMALL)
+    {
+        return fieldRelaxDefault_;
     }
     else
     {
         FatalIOErrorIn
         (
-            "Foam::solution::relaxationFactor(const word&)",
-            relaxationFactors_
-        )   << "Cannot find relaxationFactor for '" << name
+            "Foam::solution::fieldRelaxationFactor(const word&)",
+            fieldRelaxDict_
+        )   << "Cannot find variable relaxation factor for '" << name
+            << "' or a suitable default value."
+            << exit(FatalIOError);
+
+        return 0;
+    }
+}
+
+
+Foam::scalar Foam::solution::equationRelaxationFactor(const word& name) const
+{
+    if (debug)
+    {
+        Info<< "Lookup equation relaxation factor for " << name << endl;
+    }
+
+    if (eqnRelaxDict_.found(name))
+    {
+        return readScalar(eqnRelaxDict_.lookup(name));
+    }
+    else if (eqnRelaxDefault_ > SMALL)
+    {
+        return eqnRelaxDefault_;
+    }
+    else
+    {
+        FatalIOErrorIn
+        (
+            "Foam::solution::eqnRelaxationFactor(const word&)",
+            eqnRelaxDict_
+        )   << "Cannot find equation relaxation factor for '" << name
             << "' or a suitable default value."
             << exit(FatalIOError);
 

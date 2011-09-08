@@ -23,39 +23,35 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Time.H"
+#include "GeometricField.H"
+#include "volMesh.H"
+#include "fvPatchField.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline bool Foam::simpleControl::loop()
+template<class Type>
+void Foam::solutionControl::storePrevIter() const
 {
-    read();
+    typedef GeometricField<Type, fvPatchField, volMesh> GeoField;
 
-    Time& time = const_cast<Time&>(mesh_.time());
+    HashTable<const GeoField*>
+        flds(mesh_.objectRegistry::lookupClass<GeoField>());
 
-    if (initialised_)
+    forAllConstIter(typename HashTable<const GeoField*>, flds, iter)
     {
-        if (criteriaSatisfied())
-        {
-            Info<< nl << algorithmName_ << " solution converged in "
-                << time.timeName() << " iterations" << nl << endl;
+        GeoField& fld = const_cast<GeoField&>(*iter());
 
-            // Set to finalise calculation
-            time.writeAndEnd();
-        }
-        else
+        if (mesh_.relaxField(fld.name()))
         {
-            storePrevIterFields();
+            if (debug)
+            {
+                Info<< algorithmName_ << ": storing previous iter for "
+                    << fld.name() << endl;
+            }
+
+            fld.storePrevIter();
         }
     }
-    else
-    {
-        initialised_ = true;
-        storePrevIterFields();
-    }
-
-
-    return time.loop();
 }
 
 
