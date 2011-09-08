@@ -781,7 +781,11 @@ Foam::scalar Foam::AMIInterpolation<SourcePatch, TargetPatch>::interArea
     // crude resultant norm
     const vector n = 0.5*(tgt.normal(tgtPoints) - src.normal(srcPoints));
 
-    scalar area = inter.calc(src, tgt, n, triMode_);
+    scalar area = 0;
+    if (mag(n) > ROOTVSMALL)
+    {
+        area = inter.calc(src, tgt, n, triMode_);
+    }
 
     if ((debug > 1) && (area > 0))
     {
