@@ -37,11 +37,11 @@ FoamFile
         matchTolerance  0.0001;
         neighbourPatch  AMI2;
         transform       noOrdering;
-        surface
+        surface         
         {
-            type            searchableCylinder; // none
-            point1          (0 0 -1);
-            point2          (0 0 1);
+            type            searchableCylinder;
+            point1          ( 0 0 -1 );
+            point2          ( 0 0 1 );
             radius          0.5;
         }
     }
@@ -53,11 +53,11 @@ FoamFile
         matchTolerance  0.0001;
         neighbourPatch  AMI1;
         transform       noOrdering;
-        surface
+        surface         
         {
-            type            searchableCylinder; // none
-            point1          (0 0 -1);
-            point2          (0 0 1);
+            type            searchableCylinder;
+            point1          ( 0 0 -1 );
+            point2          ( 0 0 1 );
             radius          0.5;
         }
     }
