@@ -113,15 +113,13 @@ void Foam::SRFFreestreamVelocityFvPatchVectorField::updateCoeffs()
     scalar theta = time*mag(srf.omega().value());
 
     refValue() =
-        //cos(theta)*UInf_ + sin(theta)*(srf.axis() ^ UInf_)
-        UInf_
+        cos(theta)*UInf_ + sin(theta)*(srf.axis() ^ UInf_)
       - srf.velocity(patch().Cf());
 
     // Set the inlet-outlet choice based on the direction of the freestream
-    //valueFraction() = 1.0 - pos(refValue() & patch().Sf());
+    valueFraction() = 1.0 - pos(refValue() & patch().Sf());
 
-    //mixedFvPatchField<vector>::updateCoeffs();
-    inletOutletFvPatchVectorField::updateCoeffs();
+    mixedFvPatchField<vector>::updateCoeffs();
 }
 
 
