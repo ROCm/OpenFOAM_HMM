@@ -93,6 +93,13 @@ protected:
         //- Return true if all convergence checks are satified
         virtual bool criteriaSatisfied() = 0;
 
+        //- Store previous iteration fields
+        virtual void storePrevIterFields() const;
+
+        //- Store previous iteration field for vol<Type>Fields
+        template<class Type>
+        void storePrevIter() const;
+
         //- Disallow default bitwise copy construct
         solutionControl(const solutionControl&);
 
@@ -143,6 +150,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "solutionControlTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

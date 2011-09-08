@@ -43,11 +43,17 @@ inline bool Foam::simpleControl::loop()
             // Set to finalise calculation
             time.writeAndEnd();
         }
+        else
+        {
+            storePrevIterFields();
+        }
     }
     else
     {
         initialised_ = true;
+        storePrevIterFields();
     }
+
 
     return time.loop();
 }

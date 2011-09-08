@@ -919,9 +919,9 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::relax()
         name += "Final";
     }
 
-    if (this->mesh().relax(name))
+    if (this->mesh().relaxField(name))
     {
-        relax(this->mesh().relaxationFactor(name));
+        relax(this->mesh().fieldRelaxationFactor(name));
     }
 }
 

@@ -21,62 +21,37 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Application
-    buoyantBaffleSimpleFoam
-
-Description
-    Steady-state solver for buoyant, turbulent flow of compressible fluids
-    using thermal baffles
-
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-#include "basicPsiThermo.H"
-#include "RASModel.H"
-#include "fixedGradientFvPatchFields.H"
-#include "simpleControl.H"
-#include "thermoBaffleModel.H"
+#include "GeometricField.H"
+#include "volMesh.H"
+#include "fvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+template<class Type>
+void Foam::solutionControl::storePrevIter() const
 {
-    #include "setRootCase.H"
-    #include "createTime.H"
-    #include "createMesh.H"
-    #include "readGravitationalAcceleration.H"
-    #include "createFields.H"
-    #include "initContinuityErrs.H"
+    typedef GeometricField<Type, fvPatchField, volMesh> GeoField;
 
-    simpleControl simple(mesh);
+    HashTable<const GeoField*>
+        flds(mesh_.objectRegistry::lookupClass<GeoField>());
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    Info<< "\nStarting time loop\n" << endl;
-
-    while (simple.loop())
+    forAllConstIter(typename HashTable<const GeoField*>, flds, iter)
     {
-        Info<< "Time = " << runTime.timeName() << nl << endl;
+        GeoField& fld = const_cast<GeoField&>(*iter());
 
-        // Pressure-velocity SIMPLE corrector
+        if (mesh_.relaxField(fld.name()))
         {
-            #include "UEqn.H"
-            #include "hEqn.H"
-            #include "pEqn.H"
+            if (debug)
+            {
+                Info<< algorithmName_ << ": storing previous iter for "
+                    << fld.name() << endl;
+            }
+
+            fld.storePrevIter();
         }
-
-        turbulence->correct();
-
-        runTime.write();
-
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
     }
-
-    Info<< "End\n" << endl;
-
-    return 0;
 }
 
 

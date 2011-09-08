@@ -57,14 +57,6 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        p.storePrevIter();
-        rho.storePrevIter();
-
-        if (!simple.transonic())
-        {
-            rho.storePrevIter();
-        }
-
         // Velocity-pressure-enthalpy SIMPLEC corrector
         {
             #include "UEqn.H"
