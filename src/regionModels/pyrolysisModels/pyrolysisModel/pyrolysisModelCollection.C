@@ -142,30 +142,16 @@ scalar pyrolysisModelCollection::maxDiff() const
 
 scalar pyrolysisModelCollection::solidRegionDiffNo() const
 {
-    scalar regionDiNum = 0.0;
-    scalar totalDiNum = 0.0;
+    scalar totalDiNum = GREAT;
 
     forAll(*this, i)
     {
-        const pyrolysisModel& pyrolysis = this->operator[](i);
-
-        if (pyrolysis.regionMesh().nInternalFaces() > 0)
+        if
+        (
+            totalDiNum > this->operator[](i).solidRegionDiffNo()
+        )
         {
-            surfaceScalarField KrhoCpbyDelta
-            (
-                pyrolysis.regionMesh().surfaceInterpolation::deltaCoeffs()
-            * fvc::interpolate(pyrolysis.K())
-            / fvc::interpolate(pyrolysis.Cp()*pyrolysis.rho())
-            );
-
-            regionDiNum =
-                 max(KrhoCpbyDelta.internalField())
-                *pyrolysis.time().deltaTValue();
-        }
-
-        if (regionDiNum > totalDiNum)
-        {
-            totalDiNum = regionDiNum;
+            totalDiNum = this->operator[](i).solidRegionDiffNo();
         }
     }
 
