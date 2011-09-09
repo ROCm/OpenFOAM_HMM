@@ -66,10 +66,15 @@ SIMPLE
 
 relaxationFactors
 {
-    default         0;
-    p               0.3;
-    U               0.7;
-    nuTilda         0.7;
+    fields
+    {
+        p               0.3;
+    }
+    equations
+    {
+        U               0.7;
+        nuTilda         0.7;
+    }
 }
 
 

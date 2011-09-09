@@ -66,14 +66,20 @@ SIMPLE
 
 relaxationFactors
 {
-    rho             1.0;
-    p_rgh           0.7;
-    U               0.3;
-    h               0.7;
-    "(k|epsilon|omega)" 0.7;
-    G               0.7;
-    "ILambda.*"     0.7;
-    Qr              0.7;
+    fields
+    {
+        rho             1.0;
+        p_rgh           0.7;
+    }
+    equations
+    {
+        U               0.3;
+        h               0.7;
+        "(k|epsilon|omega)" 0.7;
+        G               0.7;
+        "ILambda.*"     0.7;
+        Qr              0.7;
+    }
 }
 
 // ************************************************************************* //

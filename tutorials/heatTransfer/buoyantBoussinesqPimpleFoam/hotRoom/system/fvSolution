@@ -58,8 +58,14 @@ PIMPLE
 
 relaxationFactors
 {
-    "(U|T|k|epsilon|R)" 1;
-    "(U|T|k|epsilon|R)Final" 1;
+    fields
+    {
+    }
+    equations
+    {
+        "(U|T|k|epsilon|R)" 1;
+        "(U|T|k|epsilon|R)Final" 1;
+    }
 }
 
 // ************************************************************************* //

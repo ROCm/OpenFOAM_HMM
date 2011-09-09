@@ -89,7 +89,14 @@ additional
 
 relaxationFactors
 {
-    ".*Final"       1;
+    fields
+    {
+        ".*Final"       1;
+    }
+    equations
+    {
+        ".*Final"       1;
+    }
 }
 
 // ************************************************************************* //

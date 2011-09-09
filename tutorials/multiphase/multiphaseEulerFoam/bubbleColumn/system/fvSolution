@@ -97,12 +97,18 @@ PIMPLE
 
 relaxationFactors
 {
-    "U.*"           1;
-    "T.*"           1;
-    "alpha.*"       1;
-    "Theta.*"       1;
-    "k.*"           1;
-    "epsilon.*"     1;
+    fields
+    {
+    }
+    equations
+    {
+        "U.*"           1;
+        "T.*"           1;
+        "alpha.*"       1;
+        "Theta.*"       1;
+        "k.*"           1;
+        "epsilon.*"     1;
+    }
 }
 
 

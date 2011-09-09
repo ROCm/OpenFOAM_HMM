@@ -53,10 +53,16 @@ SIMPLE
 
 relaxationFactors
 {
-    p_rgh           0.7;
-    U               0.3;
-    T               0.5;
-    "(k|epsilon|R)" 0.7;
+    fields
+    {
+        p_rgh           0.7;
+    }
+    equations
+    {
+        U               0.3;
+        T               0.5;
+        "(k|epsilon|R)" 0.7;
+    }
 }
 
 

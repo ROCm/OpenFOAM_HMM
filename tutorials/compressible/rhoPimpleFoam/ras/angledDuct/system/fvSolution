@@ -70,9 +70,15 @@ PIMPLE
 
 relaxationFactors
 {
-    "p.*"           0.3;
-    "rho.*"         1;
-    "(U|h|k|epsilon|omega).*" 0.7;
+    fields
+    {
+        "p.*"           0.3;
+        "rho.*"         1;
+    }
+    equations
+    {
+        "(U|h|k|epsilon|omega).*" 0.7;
+    }
 }
 
 

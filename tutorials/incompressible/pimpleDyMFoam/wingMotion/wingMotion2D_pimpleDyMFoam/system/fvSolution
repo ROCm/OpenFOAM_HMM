@@ -82,9 +82,15 @@ PIMPLE
 
 relaxationFactors
 {
-    p               0.3;
-    "(U|k|omega)"   0.7;
-    "(U|k|omega)Final" 1.0;
+    fields
+    {
+        p               0.3;
+    }
+    equations
+    {
+        "(U|k|omega)"   0.7;
+        "(U|k|omega)Final" 1.0;
+    }
 }
 
 cache

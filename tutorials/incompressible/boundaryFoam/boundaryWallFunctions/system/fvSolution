@@ -67,11 +67,17 @@ PISO
 
 relaxationFactors
 {
-    U               0.5;
-    k               0.7;
-    epsilon         0.7;
-    R               0.7;
-    nuTilda         0.7;
+    fields
+    {
+    }
+    equations
+    {
+        U               0.5;
+        k               0.7;
+        epsilon         0.7;
+        R               0.7;
+        nuTilda         0.7;
+    }
 }
 
 

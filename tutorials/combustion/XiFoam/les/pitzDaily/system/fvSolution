@@ -58,7 +58,13 @@ PIMPLE
 
 relaxationFactors
 {
-    "(Xi|Su)"       1;
+    fields
+    {
+    }
+    equations
+    {
+        "(Xi|Su)"       1;
+    }
 }
 
 
