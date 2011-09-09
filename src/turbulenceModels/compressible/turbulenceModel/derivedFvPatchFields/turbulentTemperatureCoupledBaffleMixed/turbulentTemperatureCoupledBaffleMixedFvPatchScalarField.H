@@ -46,7 +46,7 @@ Description
             value               uniform 300;
         }
 
-    Needs to be on underlying directMapped(Wall)FvPatch.
+    Needs to be on underlying mapped(Wall)FvPatch.
 
     Note: K : heat conduction at patch. Gets supplied how to lookup/calculate K:
     - 'lookup' : lookup volScalarField (or volSymmTensorField) with name
@@ -54,7 +54,7 @@ Description
     - 'solidThermo' : use basicSolidThermo K()
     - 'directionalSolidThermo' directionalK()
 
-    Note: runs in parallel with arbitrary decomposition. Uses directMapped
+    Note: runs in parallel with arbitrary decomposition. Uses mapped
     functionality to calculate exchange.
 
 SourceFiles

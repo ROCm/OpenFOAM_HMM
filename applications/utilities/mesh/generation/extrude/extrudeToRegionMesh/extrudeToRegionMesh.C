@@ -27,9 +27,9 @@ Description
     - used to e.g. extrude baffles (extrude internal faces) or create
     liquid film regions.
     - if extruding internal faces:
-        - create baffles in original mesh with directMappedWall patches
+        - create baffles in original mesh with mappedWall patches
     - if extruding boundary faces:
-        - convert boundary faces to directMappedWall patches
+        - convert boundary faces to mappedWall patches
     - extrude edges of faceZone as a \<zone\>_sidePatch
     - extrude edges inbetween different faceZones as a
       (nonuniformTransform)cyclic \<zoneA\>_\<zoneB\>
@@ -68,9 +68,9 @@ into the space of the neighbour:
     |             |
     +-------------+
 
-    BBB=directMapped between owner on original mesh and new extrusion.
+    BBB=mapped between owner on original mesh and new extrusion.
         (zero offset)
-    CCC=directMapped between neighbour on original mesh and new extrusion
+    CCC=mapped between neighbour on original mesh and new extrusion
         (offset due to the thickness of the extruded mesh)
 
 For the case of flipMap the extrusion is the other way around: from the
@@ -98,7 +98,7 @@ becomes
     |           |
     +-----------+
 
-    BBB=directMapped between original mesh and new extrusion
+    BBB=mapped between original mesh and new extrusion
     CCC=polypatch
 
 
@@ -126,7 +126,7 @@ Usage
 #include "patchPointEdgeCirculator.H"
 #include "OFstream.H"
 #include "meshTools.H"
-#include "directMappedWallPolyPatch.H"
+#include "mappedWallPolyPatch.H"
 #include "createShellMesh.H"
 #include "volFields.H"
 #include "surfaceFields.H"
@@ -1122,7 +1122,7 @@ int main(int argc, char *argv[])
 
     // Check whether the zone is internal or external faces to determine
     // what patch type to insert. Cannot be mixed
-    // since then how to couple? - directMapped only valid for a whole patch.
+    // since then how to couple? - mapped only valid for a whole patch.
     boolList isInternal(zoneIDs.size(), false);
     forAll(zoneIDs, i)
     {
@@ -1174,7 +1174,7 @@ int main(int argc, char *argv[])
 
         if (isInternal[i])
         {
-            interRegionTopPatch[i] = addPatch<directMappedWallPolyPatch>
+            interRegionTopPatch[i] = addPatch<mappedWallPolyPatch>
             (
                 mesh,
                 interName + "_top"
@@ -1185,7 +1185,7 @@ int main(int argc, char *argv[])
                 << '\t' << patches[interRegionTopPatch[i]].type()
                 << nl;
 
-            interRegionBottomPatch[i] = addPatch<directMappedWallPolyPatch>
+            interRegionBottomPatch[i] = addPatch<mappedWallPolyPatch>
             (
                 mesh,
                 interName + "_bottom"
@@ -1209,7 +1209,7 @@ int main(int argc, char *argv[])
                 << '\t' << patches[interRegionTopPatch[i]].type()
                 << nl;
 
-            interRegionBottomPatch[i] = addPatch<directMappedWallPolyPatch>
+            interRegionBottomPatch[i] = addPatch<mappedWallPolyPatch>
             (
                 mesh,
                 interName
@@ -1222,7 +1222,7 @@ int main(int argc, char *argv[])
         }
         else if (zoneShadowNames.size() > 0) //patch using shadow face zones.
         {
-            interRegionTopPatch[i] = addPatch<directMappedWallPolyPatch>
+            interRegionTopPatch[i] = addPatch<mappedWallPolyPatch>
             (
                 mesh,
                 zoneShadowNames[i] + "_top"
@@ -1233,7 +1233,7 @@ int main(int argc, char *argv[])
                 << '\t' << patches[interRegionTopPatch[i]].type()
                 << nl;
 
-            interRegionBottomPatch[i] = addPatch<directMappedWallPolyPatch>
+            interRegionBottomPatch[i] = addPatch<mappedWallPolyPatch>
             (
                 mesh,
                 interName
@@ -1661,7 +1661,7 @@ int main(int argc, char *argv[])
 
             if
             (
-                isA<directMappedWallPolyPatch>(pp)
+                isA<mappedWallPolyPatch>(pp)
              && (findIndex(interRegionTopPatch, patchI) != -1)
             )
             {
@@ -1669,14 +1669,14 @@ int main(int argc, char *argv[])
 
                 topOffsets[index] = calcOffset(extrudePatch, extruder, pp);
 
-                newPatches[patchI] = new directMappedWallPolyPatch
+                newPatches[patchI] = new mappedWallPolyPatch
                 (
                     pp.name(),
                     pp.size(),
                     pp.start(),
                     patchI,
                     regionName,                             // sampleRegion
-                    directMappedPatchBase::NEARESTPATCHFACE,// sampleMode
+                    mappedPatchBase::NEARESTPATCHFACE,// sampleMode
                     pp.name(),                              // samplePatch
                     topOffsets[index],                      // offset
                     patches
@@ -1684,7 +1684,7 @@ int main(int argc, char *argv[])
             }
             else if
             (
-                isA<directMappedWallPolyPatch>(pp)
+                isA<mappedWallPolyPatch>(pp)
              && (findIndex(interRegionBottomPatch, patchI) != -1)
             )
             {
@@ -1692,14 +1692,14 @@ int main(int argc, char *argv[])
 
                 bottomOffsets[index] = calcOffset(extrudePatch, extruder, pp);
 
-                newPatches[patchI] = new directMappedWallPolyPatch
+                newPatches[patchI] = new mappedWallPolyPatch
                 (
                     pp.name(),
                     pp.size(),
                     pp.start(),
                     patchI,
                     regionName,                             // sampleRegion
-                    directMappedPatchBase::NEARESTPATCHFACE,// sampleMode
+                    mappedPatchBase::NEARESTPATCHFACE,// sampleMode
                     pp.name(),                              // samplePatch
                     bottomOffsets[index],                   // offset
                     patches
@@ -1985,19 +1985,19 @@ int main(int argc, char *argv[])
 
             if
             (
-                isA<directMappedWallPolyPatch>(pp)
+                isA<mappedWallPolyPatch>(pp)
              && (findIndex(interRegionTopPatch, patchI) != -1)
             )
             {
                 label index = findIndex(interRegionTopPatch, patchI);
-                newPatches[patchI] = new directMappedWallPolyPatch
+                newPatches[patchI] = new mappedWallPolyPatch
                 (
                     pp.name(),
                     pp.size(),
                     pp.start(),
                     patchI,
                     shellRegionName,                        // sampleRegion
-                    directMappedPatchBase::NEARESTPATCHFACE,// sampleMode
+                    mappedPatchBase::NEARESTPATCHFACE,// sampleMode
                     pp.name(),                              // samplePatch
                     -topOffsets[index],                     // offset
                     patches
@@ -2005,20 +2005,20 @@ int main(int argc, char *argv[])
             }
             else if
             (
-                isA<directMappedWallPolyPatch>(pp)
+                isA<mappedWallPolyPatch>(pp)
              && (findIndex(interRegionBottomPatch, patchI) != -1)
             )
             {
                 label index = findIndex(interRegionBottomPatch, patchI);
 
-                newPatches[patchI] = new directMappedWallPolyPatch
+                newPatches[patchI] = new mappedWallPolyPatch
                 (
                     pp.name(),
                     pp.size(),
                     pp.start(),
                     patchI,
                     shellRegionName,                        // sampleRegion
-                    directMappedPatchBase::NEARESTPATCHFACE,// sampleMode
+                    mappedPatchBase::NEARESTPATCHFACE,// sampleMode
                     pp.name(),                              // samplePatch
                     -bottomOffsets[index],                  // offset
                     patches

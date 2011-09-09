@@ -50,7 +50,7 @@ boundaryField
 
     "(region0_to.*)"
     {
-        type            directMappedFlowRate;
+        type            mappedFlowRate;
         phi             phi;
         nbrPhi          phiGas;
         rho             rho;

@@ -41,7 +41,7 @@ SourceFiles
 #define sampledPatchInternalField_H
 
 #include "sampledPatch.H"
-#include "directMappedPatchBase.H"
+#include "mappedPatchBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,7 +59,7 @@ class sampledPatchInternalField
     // Private data
 
         //- Mapping engines
-        PtrList<directMappedPatchBase> mappers_;
+        PtrList<mappedPatchBase> mappers_;
 
 
     // Private Member Functions

@@ -30,8 +30,6 @@ derivedFvPatches = $(fvPatches)/derived
 $(derivedFvPatches)/wall/wallFvPatch.C
 $(derivedFvPatches)/mapped/mappedFvPatch.C
 $(derivedFvPatches)/mapped/mappedWallFvPatch.C
-$(derivedFvPatches)/directMapped/directMappedFvPatch.C
-$(derivedFvPatches)/directMapped/directMappedWallFvPatch.C
 
 wallDist = fvMesh/wallDist
 $(wallDist)/wallPointYPlus/wallPointYPlus.C
@@ -123,16 +121,13 @@ $(derivedFvPatchFields)/mappedField/mappedFieldFvPatchFields.C
 $(derivedFvPatchFields)/mappedFixedInternalValue/mappedFixedInternalValueFvPatchFields.C
 $(derivedFvPatchFields)/mappedFixedPushedInternalValue/mappedFixedPushedInternalValueFvPatchFields.C
 $(derivedFvPatchFields)/mappedFixedValue/mappedFixedValueFvPatchFields.C
-$(derivedFvPatchFields)/directMappedField/directMappedFieldFvPatchFields.C
-$(derivedFvPatchFields)/directMappedFixedInternalValue/directMappedFixedInternalValueFvPatchFields.C
-$(derivedFvPatchFields)/directMappedFixedPushedInternalValue/directMappedFixedPushedInternalValueFvPatchFields.C
-$(derivedFvPatchFields)/directMappedFixedValue/directMappedFixedValueFvPatchFields.C
-$(derivedFvPatchFields)/directMappedVelocityFluxFixedValue/directMappedVelocityFluxFixedValueFvPatchField.C
-$(derivedFvPatchFields)/directMappedFlowRate/directMappedFlowRateFvPatchVectorField.C
+$(derivedFvPatchFields)/mappedVelocityFluxFixedValue/mappedVelocityFluxFixedValueFvPatchField.C
+$(derivedFvPatchFields)/mappedFlowRate/mappedFlowRateFvPatchVectorField.C
 $(derivedFvPatchFields)/fan/fanFvPatchFields.C
 $(derivedFvPatchFields)/fanPressure/fanPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/buoyantPressure/buoyantPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/fixedFluxPressure/fixedFluxPressureFvPatchScalarField.C
+$(derivedFvPatchFields)/multiphaseFixedFluxPressure/multiphaseFixedFluxPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/fixedInternalValueFvPatchField/fixedInternalValueFvPatchFields.C
 $(derivedFvPatchFields)/fixedNormalSlip/fixedNormalSlipFvPatchFields.C
 $(derivedFvPatchFields)/fixedPressureCompressibleDensity/fixedPressureCompressibleDensityFvPatchScalarField.C
@@ -156,7 +151,7 @@ $(derivedFvPatchFields)/pressureInletUniformVelocity/pressureInletUniformVelocit
 $(derivedFvPatchFields)/pressureInletVelocity/pressureInletVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/rotatingPressureInletOutletVelocity/rotatingPressureInletOutletVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/rotatingTotalPressure/rotatingTotalPressureFvPatchScalarField.C
-$(derivedFvPatchFields)/selfContainedDirectMapped/selfContainedDirectMappedFixedValueFvPatchFields.C
+$(derivedFvPatchFields)/selfContainedMapped/selfContainedMappedFixedValueFvPatchFields.C
 $(derivedFvPatchFields)/slip/slipFvPatchFields.C
 $(derivedFvPatchFields)/supersonicFreestream/supersonicFreestreamFvPatchVectorField.C
 $(derivedFvPatchFields)/surfaceNormalFixedValue/surfaceNormalFixedValueFvPatchVectorField.C

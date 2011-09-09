@@ -157,13 +157,6 @@ triSurface/triSurfaceTools/geompack/geompack.C
 
 twoDPointCorrector/twoDPointCorrector.C
 
-directMapped/directMappedPolyPatch/directMappedPatchBase.C
-directMapped/directMappedPolyPatch/directMappedPolyPatch.C
-directMapped/directMappedPolyPatch/directMappedWallPolyPatch.C
-directMapped/directMappedPolyPatch/directMappedVariableThicknessWallPolyPatch.C
-directMapped/directMappedPointPatch/directMappedPointPatch.C
-directMapped/directMappedPointPatch/directMappedWallPointPatch.C
-
 AMI=AMIInterpolation
 $(AMI)/AMIInterpolation/AMIInterpolationName.C
 $(AMI)/faceAreaIntersect/faceAreaIntersect.C
@@ -178,7 +171,9 @@ mappedPatches/mappedPolyPatch/mappedPatchBase.C
 mappedPatches/mappedPolyPatch/mappedPolyPatch.C
 mappedPatches/mappedPolyPatch/mappedWallPolyPatch.C
 mappedPatches/mappedPolyPatch/mappedVariableThicknessWallPolyPatch.C
-mappedPatches/mappedPolyPatch/mappedWallPointPatch.C
+
+mappedPatches/mappedPointPatch/mappedPointPatch.C
+mappedPatches/mappedPointPatch/mappedWallPointPatch.C
 
 
 LIB = $(FOAM_LIBBIN)/libmeshTools

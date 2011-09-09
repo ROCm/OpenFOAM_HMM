@@ -33,7 +33,7 @@ forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
             + (alpha/phase.rho())*fluid.Svm(phase)
         )
     );
-    mrfZones.addCoriolis(alpha, UEqns[phasei]);
+    mrfZones.addCoriolis(UEqns[phasei]);
     UEqns[phasei].relax();
 
     phasei++;

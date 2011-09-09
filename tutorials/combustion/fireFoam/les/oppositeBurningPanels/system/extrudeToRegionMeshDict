@@ -28,7 +28,7 @@ nLayers         5;
 
 expansionRatio  1;
 
-adaptMesh       true; // directMapped for both
+adaptMesh       true; // mapped for both
 
 linearNormalCoeffs
 {

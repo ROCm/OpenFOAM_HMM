@@ -27,7 +27,7 @@ License
 #include "volFields.H"
 #include "basicSolidThermo.H"
 
-#include "directMappedPatchBase.H"
+#include "mappedPatchBase.H"
 #include "fvPatchFieldMapper.H"
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
@@ -79,7 +79,7 @@ Foam::radiationCoupledBase::radiationCoupledBase
     {
         case SOLIDTHERMO:
         {
-            if (!isA<directMappedPatchBase>(patch_.patch()))
+            if (!isA<mappedPatchBase>(patch_.patch()))
             {
                 FatalIOErrorIn
                 (
@@ -90,7 +90,7 @@ Foam::radiationCoupledBase::radiationCoupledBase
                     ")\n",
                     dict
                 )   << "\n    patch type '" << patch_.type()
-                    << "' not type '" << directMappedPatchBase::typeName << "'"
+                    << "' not type '" << mappedPatchBase::typeName << "'"
                     << "\n    for patch " << patch_.name()
                     << exit(FatalIOError);
             }
@@ -133,9 +133,9 @@ Foam::scalarField Foam::radiationCoupledBase::emissivity() const
     {
         case SOLIDTHERMO:
         {
-            // Get the coupling information from the directMappedPatchBase
-            const directMappedPatchBase& mpp =
-                refCast<const directMappedPatchBase>
+            // Get the coupling information from the mappedPatchBase
+            const mappedPatchBase& mpp =
+                refCast<const mappedPatchBase>
                 (
                     patch_.patch()
                 );

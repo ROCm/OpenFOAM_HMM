@@ -38,7 +38,7 @@ boundaryField
 
     region0_to_panelRegion_left_face
     {
-        type            directMappedField;
+        type            mappedField;
         sampleRegion    region0;
         sampleMode      nearestPatchFace;
         samplePatch     region0_to_panelRegion_left_face;
@@ -51,7 +51,7 @@ boundaryField
 
     region0_to_panelRegion_right_face
     {
-        type            directMappedField;
+        type            mappedField;
         sampleRegion    region0;
         sampleMode      nearestPatchFace;
         samplePatch     region0_to_panelRegion_right_face;

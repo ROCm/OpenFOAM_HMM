@@ -26,7 +26,7 @@ License
 #include "nearWallFields.H"
 #include "wordReList.H"
 //#include "volFields.H"
-//#include "selfContainedDirectMappedFixedValueFvPatchFields.H"
+//#include "selfContainedMappedFixedValueFvPatchFields.H"
 //#include "interpolationCellPoint.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -102,7 +102,7 @@ void Foam::nearWallFields::read(const dictionary& dict)
         reverseFieldMap_.clear();
 
 
-        // Generate fields with selfContainedDirectMapped bc.
+        // Generate fields with selfContainedMapped bc.
 
         // Convert field to map
         fieldMap_.resize(2*fieldSet_.size());

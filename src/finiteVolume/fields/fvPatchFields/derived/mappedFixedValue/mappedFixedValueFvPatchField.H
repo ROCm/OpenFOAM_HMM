@@ -42,7 +42,7 @@ Description
     boundary faces and both faces sample into the cell both faces will get
     the same value.
 
-    See directMappedPatchBase for options on sampling.
+    See mappedPatchBase for options on sampling.
 
     Optional 'fieldName' entry to supply a different filename
 

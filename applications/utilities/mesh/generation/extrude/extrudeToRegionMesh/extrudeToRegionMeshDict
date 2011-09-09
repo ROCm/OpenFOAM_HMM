@@ -23,13 +23,13 @@ faceZones (f0);
 // FaceZone shadow
 //faceZonesShadow (fBaffleShadow);
 
-// Adapt the original mesh to have directMapped patches at where the
+// Adapt the original mesh to have mapped patches at where the
 // faceZones are?
 // If true:
-// - extruding internal faces: become baffles on directMapped patches
-// - extruding boundary faces: repatched to be on directMapped patches
+// - extruding internal faces: become baffles on mapped patches
+// - extruding boundary faces: repatched to be on mapped patches
 // If false: leave original mesh intact. Extruded mesh will still have
-// directMapped patch which might need to be adapted.
+// mapped patch which might need to be adapted.
 adaptMesh true;
 
 // Extrude 1D-columns of cells?

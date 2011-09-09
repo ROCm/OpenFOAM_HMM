@@ -889,6 +889,8 @@ Foam::mappedPatchBase::~mappedPatchBase()
 void Foam::mappedPatchBase::clearOut()
 {
     mapPtr_.clear();
+    AMIPtr_.clear();
+    surfPtr_.clear();
 }
 
 
@@ -985,6 +987,12 @@ void Foam::mappedPatchBase::write(Ostream& os) const
                 << nl;
             break;
         }
+    }
+
+    if (mode_ == NEARESTPATCHFACEAMI)
+    {
+        os.writeKeyword(surfDict_.dictName());
+        os  << surfDict_;
     }
 }
 

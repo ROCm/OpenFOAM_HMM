@@ -3,8 +3,8 @@ cd ${0%/*} || exit 1    # run from this directory
 set -x
 
 wmake libso phaseModel
-wmake libso interfacialModels
 wmake libso multiphaseSystem
+wmake libso interfacialModels
 wmake libso kineticTheoryModels
 wmake
 
