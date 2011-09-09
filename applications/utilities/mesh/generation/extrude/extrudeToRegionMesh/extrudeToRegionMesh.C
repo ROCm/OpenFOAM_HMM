@@ -920,19 +920,24 @@ tmp<pointField> calcOffset
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::addNote
-    (
-        "Create region mesh by extruding a faceZone"
-    );
+    argList::addNote("Create region mesh by extruding a faceZone");
 
     #include "addRegionOption.H"
     #include "addOverwriteOption.H"
+    argList::addBoolOption("AMI", "apply mapped AMI boundary type");
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedMesh.H"
 
     const word oldInstance = mesh.pointsInstance();
     bool overwrite = args.optionFound("overwrite");
+
+    mappedPatchBase::sampleMode sampleMode = mappedPatchBase::NEARESTPATCHFACE;
+    if (args.optionFound("AMI"))
+    {
+        sampleMode = mappedPatchBase::NEARESTPATCHFACEAMI;
+    }
 
     IOdictionary dict
     (
@@ -1676,7 +1681,7 @@ int main(int argc, char *argv[])
                     pp.start(),
                     patchI,
                     regionName,                             // sampleRegion
-                    mappedPatchBase::NEARESTPATCHFACE,// sampleMode
+                    sampleMode,                             // sampleMode
                     pp.name(),                              // samplePatch
                     topOffsets[index],                      // offset
                     patches
@@ -1699,7 +1704,7 @@ int main(int argc, char *argv[])
                     pp.start(),
                     patchI,
                     regionName,                             // sampleRegion
-                    mappedPatchBase::NEARESTPATCHFACE,// sampleMode
+                    sampleMode,                             // sampleMode
                     pp.name(),                              // samplePatch
                     bottomOffsets[index],                   // offset
                     patches
@@ -1997,7 +2002,7 @@ int main(int argc, char *argv[])
                     pp.start(),
                     patchI,
                     shellRegionName,                        // sampleRegion
-                    mappedPatchBase::NEARESTPATCHFACE,// sampleMode
+                    sampleMode,                             // sampleMode
                     pp.name(),                              // samplePatch
                     -topOffsets[index],                     // offset
                     patches
@@ -2018,7 +2023,7 @@ int main(int argc, char *argv[])
                     pp.start(),
                     patchI,
                     shellRegionName,                        // sampleRegion
-                    mappedPatchBase::NEARESTPATCHFACE,// sampleMode
+                    sampleMode,                             // sampleMode
                     pp.name(),                              // samplePatch
                     -bottomOffsets[index],                  // offset
                     patches
