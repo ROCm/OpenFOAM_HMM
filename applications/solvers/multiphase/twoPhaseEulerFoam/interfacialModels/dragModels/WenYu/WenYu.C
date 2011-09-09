@@ -69,7 +69,6 @@ Foam::tmp<Foam::volScalarField> Foam::WenYu::K
 ) const
 {
     volScalarField beta(max(scalar(1) - alpha_, scalar(1.0e-6)));
-    volScalarField bp(pow(beta, -2.65));
 
     volScalarField Re(max(Ur*phasea_.d()/phaseb_.nu(), scalar(1.0e-3)));
     volScalarField Cds
@@ -78,7 +77,7 @@ Foam::tmp<Foam::volScalarField> Foam::WenYu::K
       + pos(Re - 1000)*0.44
     );
 
-    return 0.75*Cds*phaseb_.rho()*Ur*bp/phasea_.d();
+    return 0.75*Cds*phaseb_.rho()*Ur*pow(beta, -2.65)/phasea_.d();
 }
 
 
