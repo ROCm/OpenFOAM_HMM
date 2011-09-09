@@ -35,8 +35,9 @@ SourceFiles
 #ifndef mappedPointPatch_H
 #define mappedPointPatch_H
 
-#include "wallPointPatch.H"
-#include "mappedWallPolyPatch.H"
+#include "facePointPatch.H"
+#include "mappedPolyPatch.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,13 +50,13 @@ namespace Foam
 
 class mappedPointPatch
 :
-    public wallPointPatch
+    public facePointPatch
 {
 
 public:
 
     //- Runtime type information
-    TypeName(mappedWallPolyPatch::typeName_());
+    TypeName(mappedPolyPatch::typeName_());
 
 
     // Constructors
@@ -67,7 +68,7 @@ public:
             const pointBoundaryMesh& bm
         )
         :
-            wallPointPatch(patch, bm)
+            facePointPatch(patch, bm)
         {}
 };
 
