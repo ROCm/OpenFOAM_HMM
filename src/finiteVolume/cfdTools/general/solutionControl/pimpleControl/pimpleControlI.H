@@ -73,10 +73,6 @@ inline bool Foam::pimpleControl::loop()
             if (nOuterCorr_ != 1)
             {
                 Info<< algorithmName_ << ": iteration " << corr_ + 1 << endl;
-            }
-
-            if (corr_ != 0)
-            {
                 storePrevIterFields();
             }
 
