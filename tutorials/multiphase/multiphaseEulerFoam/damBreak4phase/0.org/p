@@ -22,25 +22,25 @@ boundaryField
 {
     leftWall
     {
-        type            buoyantPressure;
+        type            multiphaseFixedFluxPressure;
         value           uniform 0;
     }
 
     rightWall
     {
-        type            buoyantPressure;
+        type            multiphaseFixedFluxPressure;
         value           uniform 0;
     }
 
     lowerWall
     {
-        type            buoyantPressure;
+        type            multiphaseFixedFluxPressure;
         value           uniform 0;
     }
 
     atmosphere
     {
-        type            fixedValue; //totalPressure;
+        type            totalPressure;
         p0              uniform 0;
         U               Uair;
         phi             phiair;

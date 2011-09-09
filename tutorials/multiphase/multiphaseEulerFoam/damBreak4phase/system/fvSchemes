@@ -27,12 +27,12 @@ gradSchemes
 
 divSchemes
 {
-    div(phi,alpha)          Gauss vanLeer;
-    div(phirb,alpha)        Gauss vanLeer;
+    "div\(phi,alpha.*\)"    Gauss vanLeer;
+    "div\(phir,alpha.*,alpha.*\)"   Gauss vanLeer;
 
-    "div\(phiAlpha.*,U.*\)" Gauss upwind;
+    "div\(phiAlpha.*,U.*\)" Gauss limitedLinearV 1;
     div(Rc)                 Gauss linear;
-    "div\(phi.*,U.*\)"      Gauss upwind;
+    "div\(phi.*,U.*\)"      Gauss limitedLinearV 1;
 }
 
 laplacianSchemes

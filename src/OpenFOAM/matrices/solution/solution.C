@@ -57,9 +57,9 @@ void Foam::solution::read(const dictionary& dict)
     if (dict.found("relaxationFactors"))
     {
         const dictionary& relaxDict(dict.subDict("relaxationFactors"));
-        if (relaxDict.found("variables"))
+        if (relaxDict.found("fields"))
         {
-            fieldRelaxDict_ = relaxDict.subDict("variables");
+            fieldRelaxDict_ = relaxDict.subDict("fields");
             eqnRelaxDict_ = relaxDict.subDict("equations");
         }
         else

@@ -37,7 +37,7 @@ FoamFile
     }
     region0_to_wallFilmRegion_wallFilmFaces
     {
-        type            directMappedWall;
+        type            mappedWall;
         nFaces          43200;
         startFace       130020;
         sampleMode      nearestPatchFace;
