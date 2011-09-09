@@ -99,7 +99,10 @@ void Foam::multiphaseSystem::solveAlphas()
                *nHatf(phase1, phase2)
             );
 
-            word phirScheme("div(phir," + alpha2.name() + ',' + alpha1.name() + ')');
+            word phirScheme
+            (
+                "div(phir," + alpha2.name() + ',' + alpha1.name() + ')'
+            );
 
             phiAlphaCorr += fvc::flux
             (
