@@ -3,6 +3,7 @@ probes/patchProbes.C
 probes/probesGrouping.C
 probes/probesFunctionObject/probesFunctionObject.C
 
+sampledSet/circle/circleSet.C
 sampledSet/cloud/cloudSet.C
 sampledSet/coordSet/coordSet.C
 sampledSet/patchCloud/patchCloudSet.C
