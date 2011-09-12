@@ -29,8 +29,8 @@ divSchemes
 {
     default         none;
 
-    div(phi,alpha)          Gauss upwind; //limitedLinear01 1;
-    div(phirb,alpha)        Gauss upwind;
+    "div\(phi,alpha.*\)"    Gauss vanLeer;
+    "div\(phir,alpha.*,alpha.*\)"   Gauss vanLeer;
 
     "div\(phiAlpha.*,U.*\)" Gauss limitedLinearV 1;
     div(Rc)                 Gauss linear;
@@ -39,7 +39,7 @@ divSchemes
 
 laplacianSchemes
 {
-    default         Gauss linear uncorrected;
+    default         Gauss linear corrected;
 }
 
 interpolationSchemes
@@ -49,7 +49,7 @@ interpolationSchemes
 
 snGradSchemes
 {
-    default         uncorrected;
+    default         corrected;
 }
 
 fluxRequired
