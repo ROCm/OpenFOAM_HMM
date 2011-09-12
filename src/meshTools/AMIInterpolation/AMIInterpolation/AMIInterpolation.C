@@ -778,7 +778,7 @@ Foam::scalar Foam::AMIInterpolation<SourcePatch, TargetPatch>::interArea
     // create intersection object
     faceAreaIntersect inter(srcPoints, tgtPoints);
 
-    // crude resultant norm
+    // crude resultant norm - face normals should be opposite
     const vector n = 0.5*(tgt.normal(tgtPoints) - src.normal(srcPoints));
 
     scalar area = 0;
