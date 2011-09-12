@@ -56,9 +56,6 @@ void Foam::multiphaseSystem::calcAlphas()
 
 void Foam::multiphaseSystem::solveAlphas()
 {
-    word alphaScheme("div(phi,alpha)");
-    word alpharScheme("div(phirb,alpha)");
-
     surfaceScalarField phic(mag(phi_/mesh_.magSf()));
 
     PtrList<surfaceScalarField> phiAlphaCorrs(phases_.size());
@@ -67,6 +64,7 @@ void Foam::multiphaseSystem::solveAlphas()
     forAllIter(PtrDictionary<phaseModel>, phases_, iter)
     {
         phaseModel& phase1 = iter();
+        volScalarField& alpha1 = phase1;
 
         phase1.phiAlpha() =
             dimensionedScalar("0", dimensionSet(0, 3, -1, 0, 0), 0);
@@ -80,7 +78,7 @@ void Foam::multiphaseSystem::solveAlphas()
                 (
                     phi_,
                     phase1,
-                    alphaScheme
+                    "div(phi," + alpha1.name() + ')'
                 )
             )
         );
@@ -90,6 +88,7 @@ void Foam::multiphaseSystem::solveAlphas()
         forAllIter(PtrDictionary<phaseModel>, phases_, iter2)
         {
             phaseModel& phase2 = iter2();
+            volScalarField& alpha2 = phase2;
 
             if (&phase2 == &phase1) continue;
 
@@ -100,11 +99,16 @@ void Foam::multiphaseSystem::solveAlphas()
                *nHatf(phase1, phase2)
             );
 
+            word phirScheme
+            (
+                "div(phir," + alpha2.name() + ',' + alpha1.name() + ')'
+            );
+
             phiAlphaCorr += fvc::flux
             (
-                -fvc::flux(-phir, phase2, alpharScheme),
+                -fvc::flux(-phir, phase2, phirScheme),
                 phase1,
-                alpharScheme
+                phirScheme
             );
         }
 
