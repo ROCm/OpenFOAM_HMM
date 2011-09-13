@@ -206,6 +206,8 @@ surfaces
         //exposedPatchName fixedWalls;  // Optional: zone only
 
         // regularise      false;    // Optional: do not simplify
+        // mergeTol        1e-10;    // Optional: fraction of mesh bounding box
+                                     // to merge points (default=1e-6)
     }
     constantIso
     {
@@ -216,6 +218,8 @@ surfaces
         isoValue        0.5;
         interpolate     false;
         regularise      false;              // do not simplify
+        // mergeTol        1e-10;    // Optional: fraction of mesh bounding box
+                                     // to merge points (default=1e-6)
     }
 
     triangleCut
@@ -234,6 +238,8 @@ surfaces
         //exposedPatchName fixedWalls;  // Optional: zone only
 
         // regularise      false;    // Optional: do not simplify
+        // mergeTol        1e-10;    // Optional: fraction of mesh bounding box
+                                     // to merge points (default=1e-6)
     }
 
     distance
@@ -249,6 +255,8 @@ surfaces
         distance        0.0;
 
         interpolate     false;
+        // mergeTol        1e-10;    // Optional: fraction of mesh bounding box
+                                     // to merge points (default=1e-6)
     }
 
     triSurfaceSampling

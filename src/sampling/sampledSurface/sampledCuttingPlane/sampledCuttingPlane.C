@@ -229,7 +229,8 @@ void Foam::sampledCuttingPlane::createGeometry()
             cellDistance,
             pointDistance_,
             0.0,
-            regularise_
+            regularise_,
+            mergeTol_
         )
         //new isoSurfaceCell
         //(
@@ -237,7 +238,8 @@ void Foam::sampledCuttingPlane::createGeometry()
         //    cellDistance,
         //    pointDistance_,
         //    0.0,
-        //    regularise_
+        //    regularise_,
+        //    mergeTol_
         //)
     );
 
