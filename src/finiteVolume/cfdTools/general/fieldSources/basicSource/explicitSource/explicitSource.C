@@ -106,12 +106,13 @@ void Foam::explicitSource::setFieldData(const dictionary& dict)
 Foam::explicitSource::explicitSource
 (
     const word& name,
+    const word& modelType,
     const dictionary& dict,
     const fvMesh& mesh
 )
 :
-    basicSource(name, dict, mesh),
-    dict_(dict.subDict(typeName + "Coeffs")),
+    basicSource(name, modelType, dict, mesh),
+    dict_(dict.subDict(modelType + "Coeffs")),
     volumeMode_(volumeModeTypeNames_.read(dict_.lookup("volumeMode")))
 {
     setFieldData(dict_.subDict("fieldData"));

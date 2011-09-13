@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::actuationDiskSource
+    Foam::radialActuationDiskSource
 
 Description
     Actuation disk zone definition.
@@ -37,24 +37,24 @@ Description
           a: 1 - Cp/Ct
           U1: velocity at the disk
 
+
+    The thrust is distributed by a radial function:
+    thrust(r) = T*(C0 + C1*r^2 + C2*r^4)
+
+
 SourceFiles
-    actuationDiskSource.C
-    actuationDiskSourceTemplates.C
+    radialActuationDiskSource.C
+    radialActuationDiskSourceTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef actuationDiskSource_H
-#define actuationDiskSource_H
+#ifndef radialActuationDiskSource_H
+#define radialActuationDiskSource_H
 
-#include "IOdictionary.H"
-#include "coordinateSystem.H"
-#include "coordinateSystems.H"
-#include "wordList.H"
-#include "labelList.H"
 #include "DimensionedField.H"
 #include "volFieldsFwd.H"
-#include "fvMatricesFwd.H"
-#include "basicSource.H"
+#include "FixedList.H"
+#include "actuationDiskSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,44 +62,27 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class actuationDiskSource Declaration
+                     Class radialActuationDiskSource Declaration
 \*---------------------------------------------------------------------------*/
 
-class actuationDiskSource
+class radialActuationDiskSource
 :
-    public basicSource
+    public actuationDiskSource
 {
+    // Private data
 
-protected:
-
-    // Protected data
-
-        //- Sub dictionary with actuationDisk information
+        //- Sub dictionary with model information
         const dictionary& dict_;
 
-        //- Disk area normal
-        vector diskDir_;
+        //- Coeffcients for the radial distribution
+        FixedList<scalar, 3> coeffs_;
 
-        //- Power coefficient
-        scalar Cp_;
-
-        //- Thrust coefficient
-        scalar Ct_;
-
-        //- Disk area
-        scalar diskArea_;
-
-
-private:
 
     // Private Member Functions
 
-        //- Check data
-        void checkData() const;
-
         //- Add resistance to the UEqn
         template<class RhoFieldType>
-        void addActuationDiskAxialInertialResistance
+        void addRadialActuationDiskAxialInertialResistance
         (
             vectorField& Usource,
             const labelList& cells,
@@ -109,22 +92,22 @@ private:
         ) const;
 
         //- Disallow default bitwise copy construct
-        actuationDiskSource(const actuationDiskSource&);
+        radialActuationDiskSource(const radialActuationDiskSource&);
 
         //- Disallow default bitwise assignment
-        void operator=(const actuationDiskSource&);
+        void operator=(const radialActuationDiskSource&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("actuationDiskSource");
+    TypeName("radialActuationDiskSource");
 
 
     // Constructors
 
         //- Construct from components
-        actuationDiskSource
+        radialActuationDiskSource
         (
             const word& name,
             const word& modelType,
@@ -134,46 +117,14 @@ public:
 
 
     //- Destructor
-    virtual ~actuationDiskSource()
+    virtual ~radialActuationDiskSource()
     {}
-
-
-    // Member Functions
-
-        // Access
-
-            //- Return Cp
-            scalar Cp() const
-            {
-                return Cp_;
-            }
-
-            //- Return Ct
-            scalar Ct() const
-            {
-                return Ct_;
-            }
-
-            //- Normal disk direction
-            const vector& diskDir() const
-            {
-                return diskDir_;
-            }
-
-            //- Disk area
-            scalar diskArea() const
-            {
-                return diskArea_;
-            }
 
 
         // Public Functions
 
             //-Source term to fvMatrix<vector>
             virtual void addSu(fvMatrix<vector>& UEqn);
-
-            //-Source term to fvMatrix<scalar>
-            virtual void addSu(fvMatrix<scalar>& UEqn){}
 
 
         // I-O
@@ -193,7 +144,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "actuationDiskSourceTemplates.C"
+#   include "radialActuationDiskSourceTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -24,15 +24,17 @@ License
 
 \*----------------------------------------------------------------------------*/
 
-#include "actuationDiskSource.H"
+#include "radialActuationDiskSource.H"
 #include "volFields.H"
 #include "fvMatrix.H"
 #include "fvm.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * *  Member Functions * * * * * * * * * * * * * //
 
 template<class RhoFieldType>
-void Foam::actuationDiskSource::addActuationDiskAxialInertialResistance
+void Foam::radialActuationDiskSource::
+addRadialActuationDiskAxialInertialResistance
 (
     vectorField& Usource,
     const labelList& cells,
@@ -43,19 +45,48 @@ void Foam::actuationDiskSource::addActuationDiskAxialInertialResistance
 {
     scalar a = 1.0 - Cp_/Ct_;
     scalarField T(cells.size());
-    vector uniDiskDir = diskDir_/mag(diskDir_);
+    scalarField Tr(cells.size());
+    const vector uniDiskDir = diskDir_/mag(diskDir_);
+
+
     tensor E(tensor::zero);
     E.xx() = uniDiskDir.x();
     E.yy() = uniDiskDir.y();
     E.zz() = uniDiskDir.z();
     const vectorField U1((1.0 - a)*U);
+
+    const Field<vector> zoneCellCentres(mesh().cellCentres(), cells);
+    const Field<scalar> zoneCellVolumes(mesh().cellVolumes(), cells);
+
+    const vector avgCentre = gSum(zoneCellVolumes*zoneCellCentres)/V();
+    const scalar maxR = mag(max(zoneCellCentres - avgCentre));
+
+    scalar intCoeffs =
+        coeffs_[0]
+      + coeffs_[1]*sqr(maxR)/2.0
+      + coeffs_[2]*pow4(maxR)/3.0;
+
     forAll(cells, i)
     {
         T[i] = 2.0*rho[cells[i]]*diskArea_*mag(U1[cells[i]])*a/(1.0 - a);
+
+        scalar r = mag(mesh().cellCentres()[cells[i]] - avgCentre);
+
+        Tr[i] =
+            T[i]*(coeffs_[0] + coeffs_[1]*sqr(r) + coeffs_[2]*pow4(r))
+           /intCoeffs;
     }
+
     forAll(cells, i)
     {
-        Usource[cells[i]] += ((Vcells[cells[i]]/V())*T[i]*E) & U1[cells[i]];
+        Usource[cells[i]] += ((Vcells[cells[i]]/V())*Tr[i]*E) & U1[cells[i]];
+    }
+
+    if (debug)
+    {
+        Info<< "Source name: " << name() << nl
+            << "Average centre: " << avgCentre << nl
+            << "Maximum radius: " << maxR << endl;
     }
 }
 

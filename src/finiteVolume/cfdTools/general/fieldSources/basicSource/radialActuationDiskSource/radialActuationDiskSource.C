@@ -24,9 +24,7 @@ License
 
 \*----------------------------------------------------------------------------*/
 
-#include "actuationDiskSource.H"
-#include "fvMesh.H"
-#include "fvMatrices.H"
+#include "radialActuationDiskSource.H"
 #include "geometricOneField.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -34,39 +32,19 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(actuationDiskSource, 0);
-    addToRunTimeSelectionTable(basicSource, actuationDiskSource, dictionary);
-}
-
-
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::actuationDiskSource::checkData() const
-{
-    if (magSqr(diskArea_) <= VSMALL)
-    {
-        FatalErrorIn("Foam::actuationDiskSource::checkData()")
-           << "diskArea is approximately zero"
-           << exit(FatalIOError);
-    }
-    if (Cp_ <= VSMALL || Ct_ <= VSMALL)
-    {
-        FatalErrorIn("Foam::actuationDiskSource::checkData()")
-           << "Cp and Ct must be greater than zero"
-           << exit(FatalIOError);
-    }
-    if (mag(diskDir_) < VSMALL)
-    {
-        FatalErrorIn("Foam::actuationDiskSource::checkData()")
-           << "disk direction vector is approximately zero"
-           << exit(FatalIOError);
-    }
+    defineTypeNameAndDebug(radialActuationDiskSource, 0);
+    addToRunTimeSelectionTable
+    (
+        basicSource,
+        radialActuationDiskSource,
+        dictionary
+    );
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::actuationDiskSource::actuationDiskSource
+Foam::radialActuationDiskSource::radialActuationDiskSource
 (
     const word& name,
     const word& modelType,
@@ -74,23 +52,19 @@ Foam::actuationDiskSource::actuationDiskSource
     const fvMesh& mesh
 )
 :
-    basicSource(name, modelType, dict, mesh),
+    actuationDiskSource(name, modelType, dict, mesh),
     dict_(dict.subDict(modelType + "Coeffs")),
-    diskDir_(dict_.lookup("diskDir")),
-    Cp_(readScalar(dict_.lookup("Cp"))),
-    Ct_(readScalar(dict_.lookup("Ct"))),
-    diskArea_(readScalar(dict_.lookup("diskArea")))
+    coeffs_()
 {
-    Info<< "    - creating actuation disk zone: "
+    dict_.lookup("coeffs") >> coeffs_;
+    Info<< "    - creating radial actuation disk zone: "
         << this->name() << endl;
-
-    checkData();
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::actuationDiskSource::addSu(fvMatrix<vector>& UEqn)
+void Foam::radialActuationDiskSource::addSu(fvMatrix<vector>& UEqn)
 {
     bool compressible = false;
     if (UEqn.dimensions() == dimensionSet(1, 1, -2, 0, 0))
@@ -106,7 +80,7 @@ void Foam::actuationDiskSource::addSu(fvMatrix<vector>& UEqn)
     {
         if (compressible)
         {
-            addActuationDiskAxialInertialResistance
+            addRadialActuationDiskAxialInertialResistance
             (
                 Usource,
                 cells_,
@@ -117,7 +91,7 @@ void Foam::actuationDiskSource::addSu(fvMatrix<vector>& UEqn)
         }
         else
         {
-            addActuationDiskAxialInertialResistance
+            addRadialActuationDiskAxialInertialResistance
             (
                 Usource,
                 cells_,
@@ -130,26 +104,13 @@ void Foam::actuationDiskSource::addSu(fvMatrix<vector>& UEqn)
 }
 
 
-void Foam::actuationDiskSource::writeData(Ostream& os) const
+void Foam::radialActuationDiskSource::writeData(Ostream& os) const
 {
-    os  << indent << token::BEGIN_BLOCK << incrIndent << nl;
-    os.writeKeyword("name") << this->name() << token::END_STATEMENT << nl;
-
-    if (dict_.found("note"))
-    {
-        os.writeKeyword("note") << string(dict_.lookup("note"))
-            << token::END_STATEMENT << nl;
-    }
-
-    os << indent << "actuationDisk";
-
-    dict_.write(os);
-
-    os << decrIndent << indent << token::END_BLOCK << endl;
+    actuationDiskSource::writeData(os);
 }
 
 
-bool Foam::actuationDiskSource::read(const dictionary& dict)
+bool Foam::radialActuationDiskSource::read(const dictionary& dict)
 {
     if (basicSource::read(dict))
     {
@@ -160,9 +121,7 @@ bool Foam::actuationDiskSource::read(const dictionary& dict)
         subDictCoeffs.readIfPresent("Cp", Cp_);
         subDictCoeffs.readIfPresent("Ct", Ct_);
         subDictCoeffs.readIfPresent("diskArea", diskArea_);
-
-        checkData();
-
+        subDictCoeffs.lookup("coeffs") >> coeffs_;
         return true;
     }
     else
