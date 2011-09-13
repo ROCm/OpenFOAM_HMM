@@ -188,6 +188,7 @@ void Foam::basicSource::setCellSet()
 Foam::basicSource::basicSource
 (
     const word& name,
+    const word& modelType,
     const dictionary& dict,
     const fvMesh& mesh
 )
@@ -198,7 +199,10 @@ Foam::basicSource::basicSource
     active_(readBool(dict_.lookup("active"))),
     timeStart_(readScalar(dict_.lookup("timeStart"))),
     duration_(readScalar(dict_.lookup("duration"))),
-    selectionMode_(selectionModeTypeNames_.read(dict_.lookup("selectionMode"))),
+    selectionMode_
+    (
+        selectionModeTypeNames_.read(dict_.lookup("selectionMode"))
+    ),
     cellSetName_("none"),
     V_(0.0)
 {
@@ -237,7 +241,7 @@ Foam::autoPtr<Foam::basicSource> Foam::basicSource::New
             << exit(FatalError);
     }
 
-    return autoPtr<basicSource>(cstrIter()(name, dict, mesh));
+    return autoPtr<basicSource>(cstrIter()(name, modelType, dict, mesh));
 }
 
 

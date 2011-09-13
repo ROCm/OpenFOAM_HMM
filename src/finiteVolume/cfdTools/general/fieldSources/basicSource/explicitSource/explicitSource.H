@@ -135,6 +135,7 @@ public:
         explicitSource
         (
             const word& name,
+            const word& modelType,
             const dictionary& dict,
             const fvMesh& mesh
         );

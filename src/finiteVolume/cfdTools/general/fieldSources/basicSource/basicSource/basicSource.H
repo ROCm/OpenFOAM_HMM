@@ -180,10 +180,11 @@ public:
             dictionary,
             (
                 const word& name,
+                const word& modelType,
                 const dictionary& dict,
                 const fvMesh& mesh
             ),
-            (name, dict, mesh)
+            (name, modelType, dict, mesh)
         );
 
 
@@ -193,6 +194,7 @@ public:
         basicSource
         (
             const word& name,
+            const word& modelType,
             const dictionary& dict,
             const fvMesh& mesh
         );
